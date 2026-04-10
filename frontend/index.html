@@ -38,6 +38,26 @@
     .liquid-glass{background:linear-gradient(135deg,rgba(255,255,255,.05),rgba(255,255,255,.02) 40%,rgba(255,255,255,.08) 60%,rgba(255,255,255,.03));backdrop-filter:blur(24px) saturate(1.4);-webkit-backdrop-filter:blur(24px) saturate(1.4);border:1px solid rgba(255,255,255,.08);box-shadow:inset 0 1px 0 rgba(255,255,255,.06),inset 0 -1px 0 rgba(0,0,0,.1),0 8px 32px rgba(0,0,0,.3);position:relative;overflow:hidden}
     .liquid-glass::before{content:'';position:absolute;top:-50%;left:-50%;width:200%;height:200%;background:radial-gradient(ellipse at 30% 20%,rgba(255,255,255,.06),transparent 50%);pointer-events:none}
     .liquid-glass:hover{border-color:rgba(255,255,255,.12);box-shadow:inset 0 1px 0 rgba(255,255,255,.08),0 12px 40px rgba(0,0,0,.4),0 0 60px rgba(79,70,229,.08)}
+    /* Light theme */
+    html.light body{background:#f8fafc;color:#0f172a}
+    html.light .text-slate-400,html.light .text-slate-500{color:#64748b!important}
+    html.light .text-slate-300{color:#475569!important}
+    html.light .text-slate-600{color:#94a3b8!important}
+    html.light .nav-scrolled{background:rgba(248,250,252,.9)!important;border-color:rgba(0,0,0,.08)!important}
+    html.light .hero-grid{background-image:linear-gradient(rgba(79,70,229,.04) 1px,transparent 1px),linear-gradient(90deg,rgba(79,70,229,.04) 1px,transparent 1px)!important}
+    html.light .liquid-glass{background:rgba(255,255,255,.7)!important;border-color:rgba(0,0,0,.08)!important;box-shadow:0 4px 24px rgba(0,0,0,.06)!important}
+    html.light .liquid-glass::before{background:radial-gradient(ellipse at 30% 20%,rgba(79,70,229,.04),transparent 50%)}
+    html.light .ghost-btn{background:rgba(79,70,229,.06)!important;border-color:rgba(79,70,229,.15)!important}
+    html.light .card-hover:hover{border-color:rgba(79,70,229,.2)!important;box-shadow:0 8px 24px rgba(79,70,229,.08)!important}
+    html.light .bg-slate-800\/50,html.light .bg-slate-800\/30,html.light .bg-slate-900\/50{background:rgba(0,0,0,.03)!important}
+    html.light .border-slate-800\/50,html.light .border-slate-700{border-color:rgba(0,0,0,.08)!important}
+    html.light .price-popular{border-color:#4F46E5!important;box-shadow:0 0 30px rgba(79,70,229,.1)!important}
+    html.light .faq-item{background:rgba(255,255,255,.8)!important;border-color:rgba(0,0,0,.06)!important}
+    html.light .modal-bg>div{background:rgba(255,255,255,.95)!important;border-color:rgba(0,0,0,.1)!important}
+    html.light input{background:#f1f5f9!important;border-color:rgba(0,0,0,.1)!important;color:#0f172a!important}
+    html.light .stat-num{background:linear-gradient(135deg,#4F46E5,#06b6d4)!important;-webkit-background-clip:text!important}
+    html.light .hero-glow{opacity:.06!important}
+    html.light .font-bold,html.light h1,html.light h2,html.light h3{color:#0f172a}
   </style>
 </head>
 <body>
@@ -47,15 +67,16 @@
   <div class="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
     <a href="/" class="text-2xl font-black tracking-wider">CHM<span class="text-cyan-400">.</span></a>
     <div class="hidden md:flex items-center gap-8">
-      <a href="#features" class="text-sm text-slate-400 hover:text-white transition">Возможности</a>
-      <a href="#pricing" class="text-sm text-slate-400 hover:text-white transition">Тарифы</a>
-      <a href="#how" class="text-sm text-slate-400 hover:text-white transition">Как работает</a>
-      <a href="#faq" class="text-sm text-slate-400 hover:text-white transition">FAQ</a>
+      <a href="#features" class="text-sm text-slate-400 hover:text-white transition" data-t="nav-feat">Возможности</a>
+      <a href="#pricing" class="text-sm text-slate-400 hover:text-white transition" data-t="nav-price">Тарифы</a>
+      <a href="#how" class="text-sm text-slate-400 hover:text-white transition" data-t="nav-how">Как работает</a>
+      <a href="#faq" class="text-sm text-slate-400 hover:text-white transition" data-t="nav-faq">FAQ</a>
     </div>
     <div class="flex items-center gap-3">
       <button onclick="toggleLang()" class="text-xs text-slate-400 border border-slate-700 rounded-lg px-3 py-1.5 hover:text-white transition" id="langBtn">EN</button>
-      <a href="#" onclick="openModal('login');return false" class="text-sm text-slate-300 hover:text-white transition hidden sm:block">Войти</a>
-      <a href="#" onclick="openModal('register');return false" class="glow-btn text-sm font-semibold text-white px-5 py-2.5 rounded-xl transition-all">Начать</a>
+      <button onclick="toggleTheme()" class="text-xs text-slate-400 border border-slate-700 rounded-lg px-3 py-1.5 hover:text-white transition" id="themeBtn" title="Toggle theme">&#9790;</button>
+      <a href="#" onclick="openModal('login');return false" class="text-sm text-slate-300 hover:text-white transition hidden sm:block" data-t="nav-login">Войти</a>
+      <a href="#" onclick="openModal('register');return false" class="glow-btn text-sm font-semibold text-white px-5 py-2.5 rounded-xl transition-all" data-t="nav-start">Начать</a>
     </div>
   </div>
 </nav>
@@ -68,13 +89,13 @@
   <div class="max-w-7xl mx-auto px-6 relative z-10 grid lg:grid-cols-2 gap-12 items-center">
     <div>
       <div class="inline-flex items-center gap-2 glass rounded-full px-4 py-2 text-sm text-cyan-400 mb-6">
-        <span class="w-2 h-2 bg-green-400 rounded-full animate-pulse"></span> AI-Powered Крипто Платформа
+        <span class="w-2 h-2 bg-green-400 rounded-full animate-pulse"></span> <span data-t="hero-badge">AI-Powered Крипто Платформа</span>
       </div>
-      <h1 class="text-5xl lg:text-7xl font-black leading-[1.05] mb-6">Торгуй умнее.<br><span class="bg-gradient-to-r from-indigo-400 to-cyan-400 bg-clip-text text-transparent">Зарабатывай больше.</span></h1>
-      <p class="text-lg text-slate-400 max-w-lg mb-8">Автоматические торговые сигналы и боты для Bybit, Binance и BingX. Стратегии SMC, Герчика и скальпинг с AI-аналитикой.</p>
+      <h1 class="text-5xl lg:text-7xl font-black leading-[1.05] mb-6"><span data-t="hero-h1a">Торгуй умнее.</span><br><span class="bg-gradient-to-r from-indigo-400 to-cyan-400 bg-clip-text text-transparent" data-t="hero-h1b">Зарабатывай больше.</span></h1>
+      <p class="text-lg text-slate-400 max-w-lg mb-8" data-t="hero-sub">Автоматические торговые сигналы и боты для Bybit, Binance и BingX. Стратегии SMC, Герчика и скальпинг с AI-аналитикой.</p>
       <div class="flex flex-wrap gap-4">
-        <a href="#" onclick="openModal('register');return false" class="glow-btn text-white font-bold px-8 py-4 rounded-xl text-lg transition-all">Начать бесплатно</a>
-        <a href="#how" class="ghost-btn px-8 py-4 rounded-xl font-semibold transition-all">Как это работает</a>
+        <a href="#" onclick="openModal('register');return false" class="glow-btn text-white font-bold px-8 py-4 rounded-xl text-lg transition-all" data-t="hero-cta1">Начать бесплатно</a>
+        <a href="#how" class="ghost-btn px-8 py-4 rounded-xl font-semibold transition-all" data-t="hero-cta2">Как это работает</a>
       </div>
       <div class="grid grid-cols-2 sm:grid-cols-4 gap-6 mt-12">
         <div><div class="stat-num" data-target="10000">0</div><div class="text-xs text-slate-500 mt-1">Сигналов</div></div>
@@ -113,38 +134,38 @@
 <!-- FEATURES -->
 <section id="features" class="py-24">
   <div class="max-w-7xl mx-auto px-6">
-    <h2 class="text-4xl font-black text-center mb-4 fade-up">Всё для прибыльной торговли</h2>
-    <p class="text-slate-400 text-center mb-16 max-w-2xl mx-auto fade-up">Полный набор инструментов — от сигналов до автоматического исполнения сделок</p>
+    <h2 class="text-4xl font-black text-center mb-4 fade-up" data-t="feat-title">Всё для прибыльной торговли</h2>
+    <p class="text-slate-400 text-center mb-16 max-w-2xl mx-auto fade-up" data-t="feat-sub">Полный набор инструментов — от сигналов до автоматического исполнения сделок</p>
     <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
       <div class="liquid-glass rounded-2xl p-6 card-hover fade-up">
         <div class="w-12 h-12 rounded-xl bg-indigo-500/10 flex items-center justify-center mb-4"><svg class="w-6 h-6 text-indigo-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"/></svg></div>
-        <h3 class="text-lg font-bold mb-2">AI Сканер Сигналов</h3>
-        <p class="text-sm text-slate-400">3 стратегии: SMC, Герчик, Скальпинг. Анализ рынка в реальном времени с AI-фильтрацией.</p>
+        <h3 class="text-lg font-bold mb-2" data-t="f1t">AI Сканер Сигналов</h3>
+        <p class="text-sm text-slate-400" data-t="f1d">3 стратегии: SMC, Герчик, Скальпинг. Анализ рынка в реальном времени с AI-фильтрацией.</p>
       </div>
       <div class="liquid-glass rounded-2xl p-6 card-hover fade-up">
         <div class="w-12 h-12 rounded-xl bg-cyan-500/10 flex items-center justify-center mb-4"><svg class="w-6 h-6 text-cyan-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M13 10V3L4 14h7v7l9-11h-7z"/></svg></div>
-        <h3 class="text-lg font-bold mb-2">Авто-Торговля</h3>
-        <p class="text-sm text-slate-400">Автоматическое исполнение сделок с контролем рисков, trailing stops и partial TP.</p>
+        <h3 class="text-lg font-bold mb-2" data-t="f2t">Авто-Торговля</h3>
+        <p class="text-sm text-slate-400" data-t="f2d">Автоматическое исполнение сделок с контролем рисков, trailing stops и partial TP.</p>
       </div>
       <div class="liquid-glass rounded-2xl p-6 card-hover fade-up">
         <div class="w-12 h-12 rounded-xl bg-green-500/10 flex items-center justify-center mb-4"><svg class="w-6 h-6 text-green-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg></div>
-        <h3 class="text-lg font-bold mb-2">Риск-Менеджмент</h3>
-        <p class="text-sm text-slate-400">Circuit breaker, trailing stops, контроль просадки, максимальный дневной лимит потерь.</p>
+        <h3 class="text-lg font-bold mb-2" data-t="f3t">Риск-Менеджмент</h3>
+        <p class="text-sm text-slate-400" data-t="f3d">Circuit breaker, trailing stops, контроль просадки, максимальный дневной лимит потерь.</p>
       </div>
       <div class="liquid-glass rounded-2xl p-6 card-hover fade-up">
         <div class="w-12 h-12 rounded-xl bg-purple-500/10 flex items-center justify-center mb-4"><svg class="w-6 h-6 text-purple-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/></svg></div>
-        <h3 class="text-lg font-bold mb-2">Бэктестинг</h3>
-        <p class="text-sm text-slate-400">Тестируй стратегии на исторических данных. Sharpe Ratio, Max Drawdown, Profit Factor.</p>
+        <h3 class="text-lg font-bold mb-2" data-t="f4t">Бэктестинг</h3>
+        <p class="text-sm text-slate-400" data-t="f4d">Тестируй стратегии на исторических данных. Sharpe Ratio, Max Drawdown, Profit Factor.</p>
       </div>
       <div class="liquid-glass rounded-2xl p-6 card-hover fade-up">
         <div class="w-12 h-12 rounded-xl bg-orange-500/10 flex items-center justify-center mb-4"><svg class="w-6 h-6 text-orange-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg></div>
-        <h3 class="text-lg font-bold mb-2">Polymarket</h3>
-        <p class="text-sm text-slate-400">Предиктивные рынки с AI-аналитикой. Кастодиальный кошелёк Polygon.</p>
+        <h3 class="text-lg font-bold mb-2" data-t="f5t">Polymarket</h3>
+        <p class="text-sm text-slate-400" data-t="f5d">Предиктивные рынки с AI-аналитикой. Кастодиальный кошелёк Polygon.</p>
       </div>
       <div class="liquid-glass rounded-2xl p-6 card-hover fade-up">
         <div class="w-12 h-12 rounded-xl bg-pink-500/10 flex items-center justify-center mb-4"><svg class="w-6 h-6 text-pink-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"/></svg></div>
-        <h3 class="text-lg font-bold mb-2">Мульти-Биржа</h3>
-        <p class="text-sm text-slate-400">Bybit, Binance, BingX — торгуй на всех площадках из одного интерфейса.</p>
+        <h3 class="text-lg font-bold mb-2" data-t="f6t">Мульти-Биржа</h3>
+        <p class="text-sm text-slate-400" data-t="f6d">Bybit, Binance, BingX — торгуй на всех площадках из одного интерфейса.</p>
       </div>
     </div>
   </div>
@@ -391,7 +412,88 @@ document.getElementById('registerForm')?.addEventListener('submit',async e=>{
 
 // ── Lang toggle ──
 let lang='ru';
-function toggleLang(){lang=lang==='ru'?'en':'ru';document.getElementById('langBtn').textContent=lang==='ru'?'EN':'RU';I18n.setLang(lang)}
+const TR={
+  // Nav
+  'nav-feat':{ru:'Возможности',en:'Features'},
+  'nav-price':{ru:'Тарифы',en:'Pricing'},
+  'nav-how':{ru:'Как работает',en:'How It Works'},
+  'nav-faq':{ru:'FAQ',en:'FAQ'},
+  'nav-login':{ru:'Войти',en:'Login'},
+  'nav-start':{ru:'Начать',en:'Start'},
+  // Hero
+  'hero-badge':{ru:'AI-Powered Крипто Платформа',en:'AI-Powered Crypto Platform'},
+  'hero-h1a':{ru:'Торгуй умнее.',en:'Trade Smarter.'},
+  'hero-h1b':{ru:'Зарабатывай больше.',en:'Earn More.'},
+  'hero-sub':{ru:'Автоматические торговые сигналы и боты для Bybit, Binance и BingX. Стратегии SMC, Герчика и скальпинг с AI-аналитикой.',en:'Automated trading signals and bots for Bybit, Binance and BingX. SMC, Gerchik and scalping strategies with AI analytics.'},
+  'hero-cta1':{ru:'Начать бесплатно',en:'Start Free'},
+  'hero-cta2':{ru:'Как это работает',en:'How It Works'},
+  'stat-s':{ru:'Сигналов',en:'Signals'},'stat-a':{ru:'% Точность',en:'% Accuracy'},'stat-e':{ru:'Биржи',en:'Exchanges'},'stat-v':{ru:'$M+ Объём',en:'$M+ Volume'},
+  'ex-title':{ru:'Поддерживаемые биржи',en:'Supported Exchanges'},
+  // Features
+  'feat-title':{ru:'Всё для прибыльной торговли',en:'Everything for Profitable Trading'},
+  'feat-sub':{ru:'Полный набор инструментов — от сигналов до автоматического исполнения сделок',en:'Complete toolset — from signals to automated trade execution'},
+  'f1t':{ru:'AI Сканер Сигналов',en:'AI Signal Scanner'},'f1d':{ru:'3 стратегии: SMC, Герчик, Скальпинг. Анализ рынка в реальном времени с AI-фильтрацией.',en:'3 strategies: SMC, Gerchik, Scalping. Real-time market analysis with AI filtering.'},
+  'f2t':{ru:'Авто-Торговля',en:'Auto-Trading'},'f2d':{ru:'Автоматическое исполнение сделок с контролем рисков, trailing stops и partial TP.',en:'Automated trade execution with risk control, trailing stops and partial TP.'},
+  'f3t':{ru:'Риск-Менеджмент',en:'Risk Management'},'f3d':{ru:'Circuit breaker, trailing stops, контроль просадки, максимальный дневной лимит потерь.',en:'Circuit breaker, trailing stops, drawdown control, daily loss limit.'},
+  'f4t':{ru:'Бэктестинг',en:'Backtesting'},'f4d':{ru:'Тестируй стратегии на исторических данных. Sharpe Ratio, Max Drawdown, Profit Factor.',en:'Test strategies on historical data. Sharpe Ratio, Max Drawdown, Profit Factor.'},
+  'f5t':{ru:'Polymarket',en:'Polymarket'},'f5d':{ru:'Предиктивные рынки с AI-аналитикой. Кастодиальный кошелёк Polygon.',en:'Prediction markets with AI analytics. Custodial Polygon wallet.'},
+  'f6t':{ru:'Мульти-Биржа',en:'Multi-Exchange'},'f6d':{ru:'Bybit, Binance, BingX — торгуй на всех площадках из одного интерфейса.',en:'Bybit, Binance, BingX — trade on all platforms from one interface.'},
+  // How
+  'how-title':{ru:'Как это работает',en:'How It Works'},'how-sub':{ru:'Три простых шага до автоматической торговли',en:'Three simple steps to automated trading'},
+  'h1t':{ru:'Подключите биржу',en:'Connect Exchange'},'h1d':{ru:'Привяжите API ключи вашей биржи. Это занимает 2 минуты.',en:'Link your exchange API keys. Takes 2 minutes.'},
+  'h2t':{ru:'Выберите стратегию',en:'Choose Strategy'},'h2d':{ru:'SMC, Герчик или Скальпинг — выберите под свой стиль торговли.',en:'SMC, Gerchik or Scalping — pick your trading style.'},
+  'h3t':{ru:'Получайте прибыль',en:'Start Earning'},'h3d':{ru:'Бот торгует 24/7. Вы получаете сигналы и следите за результатами.',en:'Bot trades 24/7. You get signals and monitor results.'},
+  // Pricing
+  'pr-title':{ru:'Тарифные планы',en:'Pricing Plans'},'pr-sub':{ru:'Выберите план под ваши задачи',en:'Choose a plan for your needs'},
+  'pr-pop':{ru:'Популярный',en:'Popular'},
+  'pr-btn':{ru:'Выбрать',en:'Choose'},'pr-btn-start':{ru:'Начать',en:'Start'},
+  // FAQ
+  'faq-title':{ru:'Частые вопросы',en:'FAQ'},
+  'fq1':{ru:'Безопасно ли подключать биржу?',en:'Is it safe to connect an exchange?'},
+  'fa1':{ru:'Да. Мы используем только API ключи с правами на торговлю. Вывод средств через API невозможен. Ключи хранятся в зашифрованном виде (AES-256).',en:'Yes. We only use API keys with trading permissions. Withdrawal via API is impossible. Keys are stored encrypted (AES-256).'},
+  'fq2':{ru:'Какие биржи поддерживаются?',en:'Which exchanges are supported?'},
+  'fa2':{ru:'Bybit, Binance, BingX и OKX. Мы постоянно добавляем новые биржи.',en:'Bybit, Binance, BingX and OKX. We constantly add new exchanges.'},
+  'fq3':{ru:'Какие стратегии доступны?',en:'What strategies are available?'},
+  'fa3':{ru:'SMC (Smart Money Concepts) — торговля по институциональным паттернам. Герчик — уровневая стратегия. Скальпинг — быстрые сделки на малых таймфреймах.',en:'SMC (Smart Money Concepts) — institutional pattern trading. Gerchik — level-based strategy. Scalping — fast trades on small timeframes.'},
+  'fq4':{ru:'Можно ли потерять деньги?',en:'Can I lose money?'},
+  'fa4':{ru:'Торговля криптовалютами сопряжена с рисками. Мы используем строгий риск-менеджмент (стоп-лосс, circuit breaker, контроль просадки), но гарантировать прибыль невозможно.',en:'Crypto trading involves risks. We use strict risk management (stop-loss, circuit breaker, drawdown control), but profit cannot be guaranteed.'},
+  'fq5':{ru:'Как работает бэктестинг?',en:'How does backtesting work?'},
+  'fa5':{ru:'Вы выбираете стратегию, пару, таймфрейм и период. Система тестирует стратегию на исторических данных и показывает метрики: Win Rate, Sharpe Ratio, Max Drawdown и другие.',en:'You choose strategy, pair, timeframe and period. The system tests on historical data and shows metrics: Win Rate, Sharpe Ratio, Max Drawdown and more.'},
+  'fq6':{ru:'Есть ли бесплатный тариф?',en:'Is there a free plan?'},
+  'fa6':{ru:'Да! Бесплатный план включает 3 сигнала в день и 1 активного бота. Этого достаточно чтобы оценить платформу.',en:'Yes! Free plan includes 3 signals per day and 1 active bot. Enough to evaluate the platform.'},
+  // CTA
+  'cta-title':{ru:'Готов начать?',en:'Ready to start?'},
+  'cta-sub':{ru:'Присоединяйся к тысячам трейдеров, которые уже используют CHM Finance',en:'Join thousands of traders already using CHM Finance'},
+  'cta-btn':{ru:'Создать аккаунт бесплатно',en:'Create Free Account'},
+  // Footer
+  'ft-prod':{ru:'Продукт',en:'Product'},'ft-legal':{ru:'Правовая информация',en:'Legal'},'ft-contact':{ru:'Контакты',en:'Contacts'},
+  'ft-feat':{ru:'Возможности',en:'Features'},'ft-price':{ru:'Тарифы',en:'Pricing'},'ft-how':{ru:'Как работает',en:'How It Works'},
+  'ft-priv':{ru:'Политика конфиденциальности',en:'Privacy Policy'},'ft-terms':{ru:'Условия использования',en:'Terms of Service'},'ft-risk':{ru:'Предупреждение о рисках',en:'Risk Disclaimer'},
+  'ft-tag':{ru:'AI-powered крипто-торговая платформа',en:'AI-powered crypto trading platform'},
+  // Modals
+  'ml-title':{ru:'Войти',en:'Login'},'ml-btn':{ru:'Войти',en:'Login'},'ml-no':{ru:'Нет аккаунта?',en:'No account?'},'ml-reg':{ru:'Регистрация',en:'Sign Up'},
+  'mr-title':{ru:'Регистрация',en:'Sign Up'},'mr-btn':{ru:'Создать аккаунт',en:'Create Account'},'mr-has':{ru:'Уже есть аккаунт?',en:'Already have an account?'},'mr-login':{ru:'Войти',en:'Login'},
+  'ml-email':{ru:'Email',en:'Email'},'ml-pass':{ru:'Пароль',en:'Password'},'mr-pass2':{ru:'Повторите пароль',en:'Confirm Password'},
+  'mr-agree':{ru:'Я согласен с',en:'I agree to the'},'mr-terms':{ru:'условиями',en:'terms'},
+};
+function toggleLang(){
+  lang=lang==='ru'?'en':'ru';
+  document.getElementById('langBtn').textContent=lang==='ru'?'EN':'RU';
+  document.querySelectorAll('[data-t]').forEach(el=>{
+    const k=el.getAttribute('data-t');
+    if(TR[k]&&TR[k][lang])el.textContent=TR[k][lang];
+  });
+  I18n.setLang(lang);
+}
+
+// ── Theme toggle ──
+function toggleTheme(){
+  document.documentElement.classList.toggle('light');
+  const isLight=document.documentElement.classList.contains('light');
+  localStorage.setItem('chm_theme',isLight?'light':'dark');
+  document.getElementById('themeBtn').innerHTML=isLight?'&#9788;':'&#9790;';
+}
+(function(){const t=localStorage.getItem('chm_theme');if(t==='light'){document.documentElement.classList.add('light');const b=document.getElementById('themeBtn');if(b)b.innerHTML='&#9788;'}})();
 
 // ── Open login if URL param ──
 if(new URLSearchParams(location.search).get('login'))openModal('login');
