@@ -35,6 +35,9 @@
     .faq-answer{max-height:0;overflow:hidden;transition:max-height .3s ease}
     .faq-item.open .faq-answer{max-height:300px}
     .faq-item.open .faq-chevron{transform:rotate(180deg)}
+    .liquid-glass{background:linear-gradient(135deg,rgba(255,255,255,.05),rgba(255,255,255,.02) 40%,rgba(255,255,255,.08) 60%,rgba(255,255,255,.03));backdrop-filter:blur(24px) saturate(1.4);-webkit-backdrop-filter:blur(24px) saturate(1.4);border:1px solid rgba(255,255,255,.08);box-shadow:inset 0 1px 0 rgba(255,255,255,.06),inset 0 -1px 0 rgba(0,0,0,.1),0 8px 32px rgba(0,0,0,.3);position:relative;overflow:hidden}
+    .liquid-glass::before{content:'';position:absolute;top:-50%;left:-50%;width:200%;height:200%;background:radial-gradient(ellipse at 30% 20%,rgba(255,255,255,.06),transparent 50%);pointer-events:none}
+    .liquid-glass:hover{border-color:rgba(255,255,255,.12);box-shadow:inset 0 1px 0 rgba(255,255,255,.08),0 12px 40px rgba(0,0,0,.4),0 0 60px rgba(79,70,229,.08)}
   </style>
 </head>
 <body>
@@ -81,7 +84,7 @@
       </div>
     </div>
     <div class="hidden lg:block float">
-      <div class="glass rounded-2xl p-6">
+      <div class="liquid-glass rounded-2xl p-6">
         <div class="flex items-center gap-2 mb-4"><span class="w-3 h-3 bg-red-500 rounded-full"></span><span class="w-3 h-3 bg-yellow-500 rounded-full"></span><span class="w-3 h-3 bg-green-500 rounded-full"></span><span class="ml-3 text-xs text-slate-500">CHM Terminal</span></div>
         <div class="bg-slate-900/50 rounded-xl p-4 mb-4"><canvas id="heroChart" height="160"></canvas></div>
         <div class="grid grid-cols-3 gap-3">
@@ -113,32 +116,32 @@
     <h2 class="text-4xl font-black text-center mb-4 fade-up">Всё для прибыльной торговли</h2>
     <p class="text-slate-400 text-center mb-16 max-w-2xl mx-auto fade-up">Полный набор инструментов — от сигналов до автоматического исполнения сделок</p>
     <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-      <div class="glass rounded-2xl p-6 card-hover fade-up">
+      <div class="liquid-glass rounded-2xl p-6 card-hover fade-up">
         <div class="w-12 h-12 rounded-xl bg-indigo-500/10 flex items-center justify-center mb-4"><svg class="w-6 h-6 text-indigo-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"/></svg></div>
         <h3 class="text-lg font-bold mb-2">AI Сканер Сигналов</h3>
         <p class="text-sm text-slate-400">3 стратегии: SMC, Герчик, Скальпинг. Анализ рынка в реальном времени с AI-фильтрацией.</p>
       </div>
-      <div class="glass rounded-2xl p-6 card-hover fade-up">
+      <div class="liquid-glass rounded-2xl p-6 card-hover fade-up">
         <div class="w-12 h-12 rounded-xl bg-cyan-500/10 flex items-center justify-center mb-4"><svg class="w-6 h-6 text-cyan-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M13 10V3L4 14h7v7l9-11h-7z"/></svg></div>
         <h3 class="text-lg font-bold mb-2">Авто-Торговля</h3>
         <p class="text-sm text-slate-400">Автоматическое исполнение сделок с контролем рисков, trailing stops и partial TP.</p>
       </div>
-      <div class="glass rounded-2xl p-6 card-hover fade-up">
+      <div class="liquid-glass rounded-2xl p-6 card-hover fade-up">
         <div class="w-12 h-12 rounded-xl bg-green-500/10 flex items-center justify-center mb-4"><svg class="w-6 h-6 text-green-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg></div>
         <h3 class="text-lg font-bold mb-2">Риск-Менеджмент</h3>
         <p class="text-sm text-slate-400">Circuit breaker, trailing stops, контроль просадки, максимальный дневной лимит потерь.</p>
       </div>
-      <div class="glass rounded-2xl p-6 card-hover fade-up">
+      <div class="liquid-glass rounded-2xl p-6 card-hover fade-up">
         <div class="w-12 h-12 rounded-xl bg-purple-500/10 flex items-center justify-center mb-4"><svg class="w-6 h-6 text-purple-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/></svg></div>
         <h3 class="text-lg font-bold mb-2">Бэктестинг</h3>
         <p class="text-sm text-slate-400">Тестируй стратегии на исторических данных. Sharpe Ratio, Max Drawdown, Profit Factor.</p>
       </div>
-      <div class="glass rounded-2xl p-6 card-hover fade-up">
+      <div class="liquid-glass rounded-2xl p-6 card-hover fade-up">
         <div class="w-12 h-12 rounded-xl bg-orange-500/10 flex items-center justify-center mb-4"><svg class="w-6 h-6 text-orange-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg></div>
         <h3 class="text-lg font-bold mb-2">Polymarket</h3>
         <p class="text-sm text-slate-400">Предиктивные рынки с AI-аналитикой. Кастодиальный кошелёк Polygon.</p>
       </div>
-      <div class="glass rounded-2xl p-6 card-hover fade-up">
+      <div class="liquid-glass rounded-2xl p-6 card-hover fade-up">
         <div class="w-12 h-12 rounded-xl bg-pink-500/10 flex items-center justify-center mb-4"><svg class="w-6 h-6 text-pink-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"/></svg></div>
         <h3 class="text-lg font-bold mb-2">Мульти-Биржа</h3>
         <p class="text-sm text-slate-400">Bybit, Binance, BingX — торгуй на всех площадках из одного интерфейса.</p>
@@ -180,7 +183,7 @@
     <p class="text-slate-400 text-center mb-16 fade-up">Выберите план под ваши задачи</p>
     <div class="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
       <!-- Free -->
-      <div class="glass rounded-2xl p-6 card-hover fade-up flex flex-col">
+      <div class="liquid-glass rounded-2xl p-6 card-hover fade-up flex flex-col">
         <h3 class="text-lg font-bold mb-1">Free</h3>
         <div class="text-3xl font-black mb-4">$0<span class="text-sm font-normal text-slate-500">/мес</span></div>
         <ul class="text-sm text-slate-400 space-y-2 mb-8 flex-1">
@@ -193,7 +196,7 @@
         <a href="#" onclick="openModal('register');return false" class="block text-center ghost-btn py-3 rounded-xl font-semibold transition-all">Начать</a>
       </div>
       <!-- Starter -->
-      <div class="glass rounded-2xl p-6 card-hover fade-up flex flex-col">
+      <div class="liquid-glass rounded-2xl p-6 card-hover fade-up flex flex-col">
         <h3 class="text-lg font-bold mb-1">Starter</h3>
         <div class="text-3xl font-black mb-4">$29<span class="text-sm font-normal text-slate-500">/мес</span></div>
         <ul class="text-sm text-slate-400 space-y-2 mb-8 flex-1">
@@ -206,7 +209,7 @@
         <a href="#" onclick="openModal('register');return false" class="block text-center ghost-btn py-3 rounded-xl font-semibold transition-all">Выбрать</a>
       </div>
       <!-- Pro -->
-      <div class="glass rounded-2xl p-6 card-hover fade-up flex flex-col price-popular relative">
+      <div class="liquid-glass rounded-2xl p-6 card-hover fade-up flex flex-col price-popular relative">
         <div class="absolute -top-3 left-1/2 -translate-x-1/2 bg-indigo-500 text-white text-xs font-bold px-4 py-1 rounded-full">Популярный</div>
         <h3 class="text-lg font-bold mb-1">Pro</h3>
         <div class="text-3xl font-black mb-4">$79<span class="text-sm font-normal text-slate-500">/мес</span></div>
@@ -220,7 +223,7 @@
         <a href="#" onclick="openModal('register');return false" class="block text-center glow-btn text-white py-3 rounded-xl font-semibold transition-all">Выбрать</a>
       </div>
       <!-- Elite -->
-      <div class="glass rounded-2xl p-6 card-hover fade-up flex flex-col">
+      <div class="liquid-glass rounded-2xl p-6 card-hover fade-up flex flex-col">
         <h3 class="text-lg font-bold mb-1">Elite</h3>
         <div class="text-3xl font-black mb-4">$149<span class="text-sm font-normal text-slate-500">/мес</span></div>
         <ul class="text-sm text-slate-400 space-y-2 mb-8 flex-1">
@@ -272,7 +275,7 @@
 <!-- CTA -->
 <section class="py-24">
   <div class="max-w-4xl mx-auto px-6 text-center">
-    <div class="glass rounded-3xl p-12 relative overflow-hidden">
+    <div class="liquid-glass rounded-3xl p-12 relative overflow-hidden">
       <div class="hero-glow" style="width:300px;height:300px;top:-100px;right:-100px;background:#4F46E5"></div>
       <h2 class="text-4xl font-black mb-4 relative z-10">Готов начать?</h2>
       <p class="text-slate-400 mb-8 relative z-10">Присоединяйся к тысячам трейдеров, которые уже используют CHM Finance</p>
@@ -320,7 +323,7 @@
 
 <!-- LOGIN MODAL -->
 <div class="modal-bg" id="loginModal">
-  <div class="glass rounded-2xl p-8 w-full max-w-md mx-4 relative">
+  <div class="liquid-glass rounded-2xl p-8 w-full max-w-md mx-4 relative">
     <button onclick="closeModals()" class="absolute top-4 right-4 text-slate-400 hover:text-white text-xl">&times;</button>
     <h2 class="text-2xl font-bold mb-6">Войти</h2>
     <form id="loginForm" class="space-y-4">
@@ -334,7 +337,7 @@
 
 <!-- REGISTER MODAL -->
 <div class="modal-bg" id="registerModal">
-  <div class="glass rounded-2xl p-8 w-full max-w-md mx-4 relative">
+  <div class="liquid-glass rounded-2xl p-8 w-full max-w-md mx-4 relative">
     <button onclick="closeModals()" class="absolute top-4 right-4 text-slate-400 hover:text-white text-xl">&times;</button>
     <h2 class="text-2xl font-bold mb-6">Регистрация</h2>
     <form id="registerForm" class="space-y-4">
