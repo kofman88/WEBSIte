@@ -84,8 +84,10 @@
     .feature-icon::after{content:'';position:absolute;inset:-2px;border-radius:18px;background:inherit;filter:blur(12px);opacity:.4;z-index:-1}
 
     /* ── Pricing ── */
-    .price-popular{border:1px solid rgba(79,70,229,.5);background:linear-gradient(180deg,rgba(79,70,229,.08),rgba(17,24,41,.6))!important;box-shadow:0 0 0 1px rgba(79,70,229,.2),0 8px 40px rgba(79,70,229,.15),0 0 80px rgba(79,70,229,.05);transform:scale(1.03);z-index:1;position:relative}
+    .price-popular{border:1px solid rgba(79,70,229,.5);background:linear-gradient(180deg,rgba(79,70,229,.08),rgba(17,24,41,.6))!important;box-shadow:0 0 0 1px rgba(79,70,229,.2),0 8px 40px rgba(79,70,229,.15),0 0 80px rgba(79,70,229,.05);transform:scale(1.03);z-index:1;position:relative;overflow:visible!important}
     .price-popular .popular-badge{background:linear-gradient(135deg,#4F46E5,#7C3AED);box-shadow:0 2px 12px rgba(79,70,229,.4)}
+    .price-popular.liquid-glass{overflow:visible!important}
+    .price-popular.liquid-glass::before{border-radius:24px}
 
     /* ── Steps ── */
     .step-line{position:absolute;top:50px;left:16%;right:16%;height:2px;background:linear-gradient(90deg,transparent,#6366f1,#06b6d4,transparent);z-index:0;opacity:.3}
@@ -342,7 +344,7 @@
       </div>
       <!-- Pro -->
       <div class="liquid-glass rounded-2xl p-6 card-hover fade-up flex flex-col price-popular relative">
-        <div class="popular-badge absolute -top-3 left-1/2 -translate-x-1/2 text-white text-xs font-bold px-4 py-1.5 rounded-full" style="background:linear-gradient(135deg,#4F46E5,#7C3AED);box-shadow:0 2px 12px rgba(79,70,229,.4)" data-t="pr-pop">Популярный</div>
+        <div class="popular-badge absolute -top-4 left-1/2 -translate-x-1/2 text-white text-xs font-bold px-5 py-1.5 rounded-full whitespace-nowrap z-10" style="background:linear-gradient(135deg,#7c3aed,#2563eb);box-shadow:0 4px 16px rgba(124,58,237,.5)" data-t="pr-pop">Популярный</div>
         <h3 class="text-lg font-bold mb-1">Pro</h3>
         <div class="text-3xl font-extrabold mb-4">$79<span class="text-sm font-normal text-slate-500">/мес</span></div>
         <ul class="text-sm text-slate-400 space-y-2 mb-8 flex-1">
