@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Политика конфиденциальности — CHM GEL SIGNALS</title>
+<meta name="description" content="Политика конфиденциальности CHM GEL SIGNALS — как мы обрабатываем и защищаем ваши данные">
+<meta name="robots" content="noindex">
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Cpolyline points='3,26 8,17 13,21 20,9 27,13' fill='none' stroke='%23f5c842' stroke-width='5' stroke-linecap='round' stroke-linejoin='round'/%3E%3Ccircle cx='27' cy='13' r='3.5' fill='%23f5c842'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500&display=swap">
+<link rel="stylesheet" href="https://fonts.cdnfonts.com/css/gilroy-free">
+<script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js" defer></script>
+<style>
+:root {
+  --bg:#060810; --bg2:#0a0d14; --bg3:#0f1220; --bg4:#141826;
+  --glass:rgba(255,255,255,.03); --glass2:rgba(255,255,255,.06);
+  --border:rgba(255,255,255,.06); --border2:rgba(255,255,255,.12);
+  --gold:#f5c842; --gold2:#e8a800; --gold3:#ffe880;
+  --green:#00e676; --red:#ff4060; --blue:#4f8fff; --purple:#9b6dff;
+  --text:#e8eaf2; --text2:#8892a8; --text3:#4a5468;
+  --radius:16px; --nav-h:68px;
+}
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;font-size:16px;line-height:1.7;min-height:100vh;overflow-x:hidden}
+body::before{content:'';position:fixed;inset:0;z-index:0;pointer-events:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='56' height='100'%3E%3Cpath d='M28 66L0 50V16L28 0l28 16v34L28 66zm0-2.4L54 49.3V17.7L28 2.4 2 17.7v31.6L28 63.6z' fill='none' stroke='rgba(245%2C200%2C66%2C0.035)' stroke-width='1'/%3E%3C/svg%3E");background-size:56px 100px;opacity:1}
+h1,h2,h3,h4{font-family:'Gilroy','DM Sans',sans-serif;font-weight:800;line-height:1.2;letter-spacing:-.02em}
+a{color:var(--gold);text-decoration:none}
+a:hover{text-decoration:underline}
+::-webkit-scrollbar{width:6px}
+::-webkit-scrollbar-track{background:transparent}
+::-webkit-scrollbar-thumb{background:linear-gradient(180deg,var(--gold),var(--gold2));border-radius:99px}
+
+/* NAV */
+.nav{position:fixed;top:0;left:0;right:0;z-index:100;display:flex;align-items:center;justify-content:space-between;padding:0 clamp(16px,4vw,48px);height:var(--nav-h);background:rgba(6,8,16,.85);backdrop-filter:blur(16px);border-bottom:1px solid var(--border)}
+.nav-logo{display:flex;align-items:center;gap:10px;text-decoration:none;color:inherit}
+.nav-logo-text{font-family:'Gilroy','DM Sans',sans-serif;font-weight:900;font-size:17px;letter-spacing:.06em;color:var(--gold)}
+.nav-links{display:flex;align-items:center;gap:4px;list-style:none}
+.nav-links a{padding:6px 14px;border-radius:8px;font-size:14px;font-weight:500;color:var(--text2);transition:color .2s,background .2s;text-decoration:none}
+.nav-links a:hover{color:var(--text);background:rgba(255,255,255,.04)}
+.nav-cta{display:flex;align-items:center;gap:8px}
+.btn-nav{padding:8px 18px;border-radius:10px;font-family:'Gilroy','DM Sans',sans-serif;font-weight:700;font-size:13.5px;cursor:pointer;transition:all .2s;border:none;text-decoration:none;display:inline-flex;align-items:center;gap:6px}
+.btn-nav-ghost{background:transparent;border:1px solid var(--border2);color:var(--text2)}
+.btn-nav-ghost:hover{border-color:rgba(245,200,66,.3);color:var(--gold)}
+.btn-nav-gold{background:linear-gradient(135deg,var(--gold),var(--gold2));color:#080b10;box-shadow:0 4px 16px rgba(245,200,66,.25)}
+.btn-nav-gold:hover{box-shadow:0 6px 24px rgba(245,200,66,.45);transform:translateY(-1px)}
+.burger{display:none;flex-direction:column;gap:5px;cursor:pointer;padding:6px;border:none;background:transparent}
+.burger span{display:block;width:22px;height:2px;background:var(--text2);border-radius:2px;transition:all .3s}
+
+/* LEGAL PAGE LAYOUT */
+.legal-page{position:relative;z-index:1;max-width:860px;margin:0 auto;padding:calc(var(--nav-h) + 48px) clamp(16px,5vw,48px) 80px}
+.legal-hero{margin-bottom:48px;padding-bottom:32px;border-bottom:1px solid var(--border)}
+.legal-badge{display:inline-flex;align-items:center;gap:8px;background:rgba(245,200,66,.08);border:1px solid rgba(245,200,66,.2);border-radius:20px;padding:5px 14px;font-size:12px;font-weight:600;letter-spacing:.1em;color:var(--gold);text-transform:uppercase;margin-bottom:20px}
+.legal-hero h1{font-size:clamp(2rem,4vw,3.2rem);margin-bottom:12px}
+.legal-hero p{color:var(--text2);font-size:1rem}
+.legal-meta{display:flex;gap:20px;margin-top:16px;flex-wrap:wrap}
+.legal-meta span{font-size:13px;color:var(--text3);display:flex;align-items:center;gap:6px}
+.legal-meta i{width:14px;height:14px}
+
+/* CONTENT */
+.legal-body{display:flex;flex-direction:column;gap:0}
+.legal-section{padding:32px 0;border-bottom:1px solid var(--border)}
+.legal-section:last-child{border-bottom:none}
+.legal-section h2{font-size:1.25rem;margin-bottom:16px;display:flex;align-items:center;gap:10px}
+.legal-section h2 .num{width:28px;height:28px;border-radius:50%;background:rgba(245,200,66,.1);border:1px solid rgba(245,200,66,.25);display:flex;align-items:center;justify-content:center;font-size:12px;color:var(--gold);font-weight:800;flex-shrink:0}
+.legal-section p{color:var(--text2);margin-bottom:12px;font-size:15px;line-height:1.75}
+.legal-section p:last-child{margin-bottom:0}
+.legal-section ul{list-style:none;display:flex;flex-direction:column;gap:8px;color:var(--text2);font-size:15px}
+.legal-section ul li{display:flex;gap:10px;align-items:flex-start}
+.legal-section ul li::before{content:'→';color:var(--gold);flex-shrink:0;margin-top:2px}
+
+/* HIGHLIGHT BOXES */
+.info-box{background:rgba(79,143,255,.06);border:1px solid rgba(79,143,255,.2);border-radius:14px;padding:20px 24px;margin:20px 0;font-size:14px;color:var(--text2);line-height:1.65}
+.warn-box{background:rgba(255,64,96,.06);border:1px solid rgba(255,64,96,.2);border-radius:14px;padding:20px 24px;margin:20px 0;font-size:14px;color:var(--text2);line-height:1.65}
+.success-box{background:rgba(0,230,118,.05);border:1px solid rgba(0,230,118,.2);border-radius:14px;padding:20px 24px;margin:20px 0;font-size:14px;color:var(--text2);line-height:1.65}
+.box-title{font-weight:700;margin-bottom:8px;display:flex;align-items:center;gap:8px}
+.box-title i{width:16px;height:16px}
+
+/* BACK NAV */
+.back-nav{display:flex;align-items:center;gap:8px;font-size:14px;color:var(--text2);text-decoration:none;margin-bottom:32px;transition:color .2s}
+.back-nav:hover{color:var(--gold)}
+.back-nav i{width:16px;height:16px}
+
+/* FOOTER */
+.footer{border-top:1px solid var(--border);position:relative;z-index:1;padding:clamp(32px,5vw,64px) clamp(16px,5vw,80px) 28px}
+.footer-bottom{max-width:1200px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;font-size:12px;color:var(--text3);flex-wrap:wrap;gap:12px}
+.footer-bottom-links{display:flex;gap:20px}
+.footer-bottom-links a{color:var(--text3);text-decoration:none}
+.footer-bottom-links a:hover{color:var(--text2)}
+
+@media(max-width:768px){
+  .nav-links,.nav-cta{display:none}
+  .burger{display:flex}
+}
+</style>
+</head>
+<body>
+<nav class="nav" id="mainNav">
+  <a href="/" class="nav-logo">
+    <img src="/assets/img/chm-logo.jpg" alt="CHM" style="width:34px;height:34px;object-fit:contain;border-radius:6px;flex-shrink:0" onerror="this.style.display='none'">
+    <span class="nav-logo-text" style="margin-left:8px">CHM</span>
+  </a>
+  <ul class="nav-links">
+    <li><a href="/#services">Продукты</a></li>
+    <li><a href="/#how">Как работает</a></li>
+    <li><a href="/#pricing">Тарифы</a></li>
+    <li><a href="/academy/">Академия</a></li>
+  </ul>
+  <div class="nav-cta">
+    <a href="https://t.me/crypto_chm" target="_blank" class="btn-nav btn-nav-ghost">
+      <i data-lucide="send"></i> Telegram
+    </a>
+    <a href="/academy/" class="btn-nav btn-nav-gold">
+      <i data-lucide="book-open"></i> В Академию
+    </a>
+  </div>
+  <button class="burger" id="burger"><span></span><span></span><span></span></button>
+</nav>
+<main class="legal-page">
+  <a href="/" class="back-nav"><i data-lucide="arrow-left"></i> На главную</a>
+
+  <div class="legal-hero">
+    <div class="legal-badge"><i data-lucide="shield"></i> Конфиденциальность</div>
+    <h1>Политика конфиденциальности</h1>
+    <p>Мы серьёзно относимся к вашим персональным данным и обязуемся защищать вашу конфиденциальность.</p>
+    <div class="legal-meta">
+      <span><i data-lucide="calendar"></i> Последнее обновление: 7 апреля 2026</span>
+      <span><i data-lucide="globe"></i> GDPR / CCPA совместимо</span>
+    </div>
+  </div>
+
+  <div class="legal-body">
+    <div class="legal-section">
+      <h2><span class="num">1</span> Какие данные мы собираем</h2>
+      <ul>
+        <li><strong>Telegram ID и username</strong> — для идентификации и управления подпиской.</li>
+        <li><strong>API ключи бирж</strong> — зашифрованы (AES-256), используются исключительно для авто-трейдинга.</li>
+        <li><strong>Параметры настроек бота</strong> — стратегии, тайм-фреймы, риск-параметры.</li>
+        <li><strong>История торговых сигналов</strong> — для статистики и улучшения алгоритмов.</li>
+        <li><strong>Технические логи</strong> — ошибки, активность, latency.</li>
+      </ul>
+      <div class="info-box">
+        <div class="box-title"><i data-lucide="lock"></i> Что мы НЕ собираем</div>
+        Email-адреса, реальные имена, платёжные реквизиты карт, паспортные данные, геолокация. Мы не требуем KYC.
+      </div>
+    </div>
+
+    <div class="legal-section">
+      <h2><span class="num">2</span> Как мы используем данные</h2>
+      <ul>
+        <li>Предоставление и улучшение торговых сигналов и автоматизации.</li>
+        <li>Управление подпиской и доступом к Сервису.</li>
+        <li>Техническая поддержка и диагностика проблем.</li>
+        <li>Анализ агрегированной анонимной статистики для улучшения алгоритмов.</li>
+        <li>Уведомления о важных изменениях в Сервисе.</li>
+      </ul>
+    </div>
+
+    <div class="legal-section">
+      <h2><span class="num">3</span> Защита API ключей</h2>
+      <div class="success-box">
+        <div class="box-title"><i data-lucide="key"></i> Протокол безопасности API</div>
+        <ul style="margin-top:8px">
+          <li>Шифрование AES-256 при хранении</li>
+          <li>Передача только по HTTPS/TLS 1.3</li>
+          <li>Ключи никогда не отображаются в логах</li>
+          <li>Доступ только к: Read + Trade | Запрещён: Withdraw</li>
+          <li>Рекомендуем IP Whitelist на бирже</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="legal-section">
+      <h2><span class="num">4</span> Передача данных третьим лицам</h2>
+      <p>Мы <strong>не продаём и не передаём</strong> ваши персональные данные третьим лицам, кроме:</p>
+      <ul>
+        <li>API запросов к биржам (Bybit, Binance, BingX) — только с вашим ключом и от вашего имени.</li>
+        <li>Хостинг-провайдера — исключительно для хранения данных в зашифрованном виде.</li>
+        <li>Требований закона — только по официальному запросу компетентных органов.</li>
+      </ul>
+    </div>
+
+    <div class="legal-section">
+      <h2><span class="num">5</span> Хранение и удаление данных</h2>
+      <ul>
+        <li>Данные хранятся в течение действия подписки + 90 дней после её окончания.</li>
+        <li>Технические логи — 30 дней.</li>
+        <li>По запросу — полное удаление всех данных в течение 72 часов.</li>
+        <li>API ключи удаляются немедленно при отключении автотрейдинга.</li>
+      </ul>
+    </div>
+
+    <div class="legal-section">
+      <h2><span class="num">6</span> Ваши права (GDPR / CCPA)</h2>
+      <ul>
+        <li><strong>Право на доступ</strong> — запросить все данные, которые мы храним о вас.</li>
+        <li><strong>Право на исправление</strong> — обновить неточные данные.</li>
+        <li><strong>Право на удаление</strong> — запросить полное удаление ("право быть забытым").</li>
+        <li><strong>Право на переносимость</strong> — получить данные в машиночитаемом формате.</li>
+        <li><strong>Право на возражение</strong> — против обработки ваших данных.</li>
+      </ul>
+      <p style="margin-top:16px">Для реализации любого из прав — свяжитесь с нами в Telegram: <a href="https://t.me/crypto_chm">@crypto_chm</a></p>
+    </div>
+
+    <div class="legal-section">
+      <h2><span class="num">7</span> Cookie и трекинг</h2>
+      <p>Сайт chmup.top использует минимальный набор технических cookie для корректной работы. Мы не используем рекламные трекеры, пиксели Facebook, Google Analytics или аналогичные системы слежения.</p>
+    </div>
+
+    <div class="legal-section">
+      <h2><span class="num">8</span> Контакты DPO</h2>
+      <div class="info-box">
+        <div class="box-title"><i data-lucide="user-check"></i> Ответственный за данные</div>
+        По вопросам конфиденциальности и реализации ваших прав:<br>
+        Telegram: <a href="https://t.me/crypto_chm" target="_blank">@crypto_chm</a>
+      </div>
+    </div>
+  </div>
+</main>
+<footer class="footer">
+  <div class="footer-bottom">
+    <span>© 2024–2026 CHM GEL SIGNALS. All rights reserved.</span>
+    <div class="footer-bottom-links">
+      <a href="/terms.html">Условия</a>
+      <a href="/privacy.html">Конфиденциальность</a>
+      <a href="/risk.html">Риск-дисклеймер</a>
+    </div>
+  </div>
+</footer>
+<script>
+if (typeof lucide !== 'undefined') lucide.createIcons();
+// Burger
+const burger = document.getElementById('burger');
+const mobileMenu = document.getElementById('mobileMenu');
+if (burger && mobileMenu) {
+  burger.addEventListener('click', () => {
+    burger.classList.toggle('open');
+    mobileMenu.classList.toggle('open');
+  });
+}
+</script>
+</body>
+</html>

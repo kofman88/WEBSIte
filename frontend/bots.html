@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+  <title>CHM Finance — Боты</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet"/>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="styles.css"/>
+  <style>body{background:#070b14;color:#f1f5f9;font-family:'Inter',sans-serif}.toggle{position:relative;width:44px;height:24px;background:#1e293b;border-radius:12px;cursor:pointer;transition:.2s}.toggle.on{background:#10b981}.toggle::after{content:'';position:absolute;top:2px;left:2px;width:20px;height:20px;background:#fff;border-radius:50%;transition:.2s}.toggle.on::after{transform:translateX(20px)}</style>
+</head>
+<body>
+<!-- Same sidebar as dashboard - abbreviated for maintainability -->
+<aside class="sidebar" id="sidebar">
+  <div class="sidebar-logo">CHM<span>.</span></div>
+  <nav class="sidebar-nav">
+    <a href="dashboard.html" class="sidebar-link" data-page="dashboard"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>Дашборд</a>
+    <a href="bots.html" class="sidebar-link active" data-page="bots"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2a4 4 0 014 4v1h2a2 2 0 012 2v10a2 2 0 01-2 2H6a2 2 0 01-2-2V9a2 2 0 012-2h2V6a4 4 0 014-4z"/></svg>Боты</a>
+    <a href="signals.html" class="sidebar-link" data-page="signals"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>Сигналы</a>
+    <a href="backtests.html" class="sidebar-link" data-page="backtests"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6m6 0h10"/></svg>Бэктесты</a>
+    <a href="wallet.html" class="sidebar-link" data-page="wallet"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12V7H5a2 2 0 010-4h14v4M3 5v14a2 2 0 002 2h16v-5"/></svg>Кошелёк</a>
+    <a href="settings.html" class="sidebar-link" data-page="settings"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/></svg>Настройки</a>
+  </nav>
+  <div class="sidebar-footer"><button onclick="Auth.logout()" class="sidebar-link" style="color:#f87171"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4M16 17l5-5-5-5M21 12H9"/></svg>Выйти</button></div>
+</aside>
+<header class="topbar"><div class="flex items-center gap-4"><button id="sidebar-toggle" class="lg:hidden" style="background:none;border:none;color:#94a3b8;cursor:pointer"><svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 6h16M4 12h16M4 18h16"/></svg></button><h1 class="text-xl font-bold">Мои боты</h1></div><div class="topbar-actions"><div class="topbar-user"><div class="topbar-avatar">U</div></div></div></header>
+
+<main class="main-content">
+  <!-- Header -->
+  <div class="flex flex-wrap items-center justify-between gap-4 mb-6">
+    <div class="flex gap-4 text-sm">
+      <span class="text-slate-400">Всего: <strong class="text-white">4</strong></span>
+      <span class="text-slate-400">Активных: <strong class="text-green-400">3</strong></span>
+      <span class="text-slate-400">PnL: <strong class="text-green-400">+$1,240</strong></span>
+    </div>
+    <button onclick="document.getElementById('createModal').style.display='flex'" class="btn-primary px-5 py-2.5 rounded-xl text-sm font-semibold" style="background:linear-gradient(135deg,#4F46E5,#7C3AED);border:none;color:#fff;cursor:pointer;box-shadow:0 0 20px rgba(79,70,229,.3)">+ Создать бота</button>
+  </div>
+
+  <!-- Filter -->
+  <div class="flex flex-wrap gap-3 mb-6">
+    <select class="bg-slate-800/50 border border-slate-700 rounded-lg px-3 py-2 text-sm text-slate-300 outline-none"><option>Все биржи</option><option>Bybit</option><option>Binance</option><option>BingX</option></select>
+    <select class="bg-slate-800/50 border border-slate-700 rounded-lg px-3 py-2 text-sm text-slate-300 outline-none"><option>Все стратегии</option><option>SMC</option><option>Gerchik</option><option>Scalping</option></select>
+    <select class="bg-slate-800/50 border border-slate-700 rounded-lg px-3 py-2 text-sm text-slate-300 outline-none"><option>Все статусы</option><option>Активные</option><option>Остановлены</option></select>
+  </div>
+
+  <!-- Bot Cards -->
+  <div class="grid md:grid-cols-2 xl:grid-cols-3 gap-4" id="botGrid">
+
+    <div class="card card-glow">
+      <div class="flex items-center justify-between mb-3">
+        <div class="flex items-center gap-3"><div class="w-10 h-10 rounded-lg bg-indigo-500/10 flex items-center justify-center text-sm font-bold text-indigo-400">B1</div><div><div class="font-semibold">BTC Scalper</div><div class="text-xs text-slate-500">Bybit &middot; BTCUSDT</div></div></div>
+        <div class="toggle on" onclick="this.classList.toggle('on')"></div>
+      </div>
+      <div class="flex items-center gap-2 mb-3"><span class="text-xs px-2 py-0.5 rounded-full bg-cyan-500/15 text-cyan-400">Scalping</span><span class="text-xs px-2 py-0.5 rounded-full bg-green-500/15 text-green-400">Active</span></div>
+      <div class="grid grid-cols-3 gap-3 text-center text-sm mb-3">
+        <div><div class="text-xs text-slate-500">PnL</div><div class="text-green-400 font-semibold">+$450</div></div>
+        <div><div class="text-xs text-slate-500">Win Rate</div><div class="font-semibold">82%</div></div>
+        <div><div class="text-xs text-slate-500">Сделки</div><div class="font-semibold">24</div></div>
+      </div>
+      <div class="text-xs text-slate-500">Leverage: 10x &middot; Risk: 2% &middot; SL: 1.5%</div>
+    </div>
+
+    <div class="card card-glow">
+      <div class="flex items-center justify-between mb-3">
+        <div class="flex items-center gap-3"><div class="w-10 h-10 rounded-lg bg-purple-500/10 flex items-center justify-center text-sm font-bold text-purple-400">B2</div><div><div class="font-semibold">ETH SMC Bot</div><div class="text-xs text-slate-500">Binance &middot; ETHUSDT</div></div></div>
+        <div class="toggle on" onclick="this.classList.toggle('on')"></div>
+      </div>
+      <div class="flex items-center gap-2 mb-3"><span class="text-xs px-2 py-0.5 rounded-full bg-indigo-500/15 text-indigo-400">SMC</span><span class="text-xs px-2 py-0.5 rounded-full bg-green-500/15 text-green-400">Active</span></div>
+      <div class="grid grid-cols-3 gap-3 text-center text-sm mb-3">
+        <div><div class="text-xs text-slate-500">PnL</div><div class="text-green-400 font-semibold">+$320</div></div>
+        <div><div class="text-xs text-slate-500">Win Rate</div><div class="font-semibold">75%</div></div>
+        <div><div class="text-xs text-slate-500">Сделки</div><div class="font-semibold">16</div></div>
+      </div>
+      <div class="text-xs text-slate-500">Leverage: 5x &middot; Risk: 1.5% &middot; SL: 2%</div>
+    </div>
+
+    <div class="card card-glow">
+      <div class="flex items-center justify-between mb-3">
+        <div class="flex items-center gap-3"><div class="w-10 h-10 rounded-lg bg-green-500/10 flex items-center justify-center text-sm font-bold text-green-400">B3</div><div><div class="font-semibold">SOL Gerchik</div><div class="text-xs text-slate-500">BingX &middot; SOLUSDT</div></div></div>
+        <div class="toggle on" onclick="this.classList.toggle('on')"></div>
+      </div>
+      <div class="flex items-center gap-2 mb-3"><span class="text-xs px-2 py-0.5 rounded-full bg-orange-500/15 text-orange-400">Gerchik</span><span class="text-xs px-2 py-0.5 rounded-full bg-green-500/15 text-green-400">Active</span></div>
+      <div class="grid grid-cols-3 gap-3 text-center text-sm mb-3">
+        <div><div class="text-xs text-slate-500">PnL</div><div class="text-green-400 font-semibold">+$510</div></div>
+        <div><div class="text-xs text-slate-500">Win Rate</div><div class="font-semibold">88%</div></div>
+        <div><div class="text-xs text-slate-500">Сделки</div><div class="font-semibold">9</div></div>
+      </div>
+      <div class="text-xs text-slate-500">Leverage: 3x &middot; Risk: 2% &middot; SL: 1%</div>
+    </div>
+
+    <div class="card card-glow" style="opacity:.6">
+      <div class="flex items-center justify-between mb-3">
+        <div class="flex items-center gap-3"><div class="w-10 h-10 rounded-lg bg-slate-500/10 flex items-center justify-center text-sm font-bold text-slate-400">B4</div><div><div class="font-semibold">DOGE Test</div><div class="text-xs text-slate-500">Bybit &middot; DOGEUSDT</div></div></div>
+        <div class="toggle" onclick="this.classList.toggle('on')"></div>
+      </div>
+      <div class="flex items-center gap-2 mb-3"><span class="text-xs px-2 py-0.5 rounded-full bg-cyan-500/15 text-cyan-400">Scalping</span><span class="text-xs px-2 py-0.5 rounded-full bg-slate-500/15 text-slate-400">Stopped</span></div>
+      <div class="grid grid-cols-3 gap-3 text-center text-sm mb-3">
+        <div><div class="text-xs text-slate-500">PnL</div><div class="text-red-400 font-semibold">-$40</div></div>
+        <div><div class="text-xs text-slate-500">Win Rate</div><div class="font-semibold">45%</div></div>
+        <div><div class="text-xs text-slate-500">Сделки</div><div class="font-semibold">11</div></div>
+      </div>
+      <div class="text-xs text-slate-500">Leverage: 20x &middot; Risk: 5% &middot; SL: 0.5%</div>
+    </div>
+  </div>
+</main>
+
+<!-- CREATE BOT MODAL -->
+<div id="createModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.7);backdrop-filter:blur(8px);z-index:100;align-items:center;justify-content:center">
+  <div class="card" style="width:100%;max-width:500px;margin:16px;max-height:90vh;overflow-y:auto">
+    <div class="flex items-center justify-between mb-6"><h2 class="text-xl font-bold">Создать бота</h2><button onclick="document.getElementById('createModal').style.display='none'" class="text-slate-400 hover:text-white text-xl">&times;</button></div>
+    <form id="createBotForm" class="space-y-4">
+      <div><label class="text-sm text-slate-400 block mb-1">Имя бота</label><input name="name" required class="w-full bg-slate-800/50 border border-slate-700 rounded-xl px-4 py-3 text-white outline-none focus:border-indigo-500" placeholder="BTC Scalper"/></div>
+      <div><label class="text-sm text-slate-400 block mb-1">Биржа</label><select name="exchangeName" class="w-full bg-slate-800/50 border border-slate-700 rounded-xl px-4 py-3 text-white outline-none"><option value="bybit">Bybit</option><option value="binance">Binance</option><option value="bingx">BingX</option></select></div>
+      <div><label class="text-sm text-slate-400 block mb-1">Торговая пара</label><input name="symbol" required class="w-full bg-slate-800/50 border border-slate-700 rounded-xl px-4 py-3 text-white outline-none focus:border-indigo-500" placeholder="BTCUSDT"/></div>
+      <div><label class="text-sm text-slate-400 block mb-1">Стратегия</label><select name="strategyType" class="w-full bg-slate-800/50 border border-slate-700 rounded-xl px-4 py-3 text-white outline-none"><option value="scalping">Scalping</option><option value="smc">SMC</option><option value="gerchik">Gerchik</option></select></div>
+      <div class="grid grid-cols-2 gap-4">
+        <div><label class="text-sm text-slate-400 block mb-1">Leverage</label><input name="leverage" type="number" value="10" min="1" max="100" class="w-full bg-slate-800/50 border border-slate-700 rounded-xl px-4 py-3 text-white outline-none"/></div>
+        <div><label class="text-sm text-slate-400 block mb-1">Размер ($)</label><input name="positionSizeUsd" type="number" value="100" min="10" class="w-full bg-slate-800/50 border border-slate-700 rounded-xl px-4 py-3 text-white outline-none"/></div>
+      </div>
+      <div class="grid grid-cols-2 gap-4">
+        <div><label class="text-sm text-slate-400 block mb-1">Stop Loss %</label><input name="stopLossPct" type="number" step="0.1" value="1.5" class="w-full bg-slate-800/50 border border-slate-700 rounded-xl px-4 py-3 text-white outline-none"/></div>
+        <div><label class="text-sm text-slate-400 block mb-1">Take Profit %</label><input name="takeProfitPct" type="number" step="0.1" value="3" class="w-full bg-slate-800/50 border border-slate-700 rounded-xl px-4 py-3 text-white outline-none"/></div>
+      </div>
+      <button type="submit" class="w-full py-3 rounded-xl font-semibold text-white" style="background:linear-gradient(135deg,#4F46E5,#7C3AED)">Создать бота</button>
+    </form>
+  </div>
+</div>
+
+<script src="app.js"></script>
+<script>
+if(!Auth.isLoggedIn())window.location.href='/?login=1';
+Sidebar.init('bots');
+document.getElementById('createBotForm')?.addEventListener('submit',async e=>{
+  e.preventDefault();const fd=new FormData(e.target);const data=Object.fromEntries(fd.entries());
+  data.leverage=+data.leverage;data.positionSizeUsd=+data.positionSizeUsd;data.stopLossPct=+data.stopLossPct;data.takeProfitPct=+data.takeProfitPct;
+  try{await API.createBot(data);Toast.success('Бот создан!');document.getElementById('createModal').style.display='none'}catch(err){Toast.error(err.message)}
+});
+</script>
+</body>
+</html>

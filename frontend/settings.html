@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+  <title>CHM Finance — Настройки</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet"/>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="styles.css"/>
+  <style>body{background:#070b14;color:#f1f5f9;font-family:'Inter',sans-serif}.stab{padding:8px 16px;border-radius:8px;font-size:.875rem;font-weight:500;color:#94a3b8;background:transparent;border:none;cursor:pointer;transition:.2s}.stab.active{background:#4F46E5;color:#fff}.stab-content{display:none}.stab-content.active{display:block}.toggle{position:relative;width:44px;height:24px;background:#1e293b;border-radius:12px;cursor:pointer;transition:.2s}.toggle.on{background:#10b981}.toggle::after{content:'';position:absolute;top:2px;left:2px;width:20px;height:20px;background:#fff;border-radius:50%;transition:.2s}.toggle.on::after{transform:translateX(20px)}</style>
+</head>
+<body>
+<aside class="sidebar" id="sidebar">
+  <div class="sidebar-logo">CHM<span>.</span></div>
+  <nav class="sidebar-nav">
+    <a href="dashboard.html" class="sidebar-link" data-page="dashboard"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>Дашборд</a>
+    <a href="bots.html" class="sidebar-link" data-page="bots"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2a4 4 0 014 4v1h2a2 2 0 012 2v10a2 2 0 01-2 2H6a2 2 0 01-2-2V9a2 2 0 012-2h2V6a4 4 0 014-4z"/></svg>Боты</a>
+    <a href="signals.html" class="sidebar-link" data-page="signals"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>Сигналы</a>
+    <a href="backtests.html" class="sidebar-link" data-page="backtests"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6m6 0h10"/></svg>Бэктесты</a>
+    <a href="wallet.html" class="sidebar-link" data-page="wallet"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12V7H5a2 2 0 010-4h14v4M3 5v14a2 2 0 002 2h16v-5"/></svg>Кошелёк</a>
+    <a href="settings.html" class="sidebar-link active" data-page="settings"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/></svg>Настройки</a>
+  </nav>
+  <div class="sidebar-footer"><button onclick="Auth.logout()" class="sidebar-link" style="color:#f87171"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4M16 17l5-5-5-5M21 12H9"/></svg>Выйти</button></div>
+</aside>
+<header class="topbar"><div class="flex items-center gap-4"><button id="sidebar-toggle" class="lg:hidden" style="background:none;border:none;color:#94a3b8;cursor:pointer"><svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 6h16M4 12h16M4 18h16"/></svg></button><h1 class="text-xl font-bold">Настройки</h1></div><div class="topbar-actions"><div class="topbar-user"><div class="topbar-avatar">U</div></div></div></header>
+
+<main class="main-content">
+  <!-- Tabs -->
+  <div class="flex flex-wrap gap-1 p-1 bg-slate-800/30 rounded-xl border border-slate-700/50 mb-6 w-fit">
+    <button class="stab active" onclick="stab('profile')">Профиль</button>
+    <button class="stab" onclick="stab('subscription')">Подписка</button>
+    <button class="stab" onclick="stab('trading')">Торговля</button>
+    <button class="stab" onclick="stab('notifications')">Уведомления</button>
+    <button class="stab" onclick="stab('security')">Безопасность</button>
+  </div>
+
+  <!-- PROFILE -->
+  <div class="stab-content active" id="stab-profile">
+    <div class="card max-w-2xl">
+      <h3 class="font-bold mb-4">Профиль</h3>
+      <form class="space-y-4">
+        <div class="flex items-center gap-4 mb-4">
+          <div class="w-16 h-16 rounded-full flex items-center justify-center text-2xl font-bold" style="background:linear-gradient(135deg,#4F46E5,#7C3AED)">U</div>
+          <div><div class="font-semibold">user@example.com</div><div class="text-xs text-slate-500">Участник с января 2025</div></div>
+        </div>
+        <div><label class="text-sm text-slate-400 block mb-1">Email</label><input value="user@example.com" class="w-full bg-slate-800/50 border border-slate-700 rounded-xl px-4 py-3 text-white outline-none" readonly/></div>
+        <div><label class="text-sm text-slate-400 block mb-1">Telegram ID</label><input placeholder="@username" class="w-full bg-slate-800/50 border border-slate-700 rounded-xl px-4 py-3 text-white outline-none"/></div>
+        <div class="grid grid-cols-2 gap-4">
+          <div><label class="text-sm text-slate-400 block mb-1">Язык</label><select class="w-full bg-slate-800/50 border border-slate-700 rounded-xl px-4 py-3 text-white outline-none"><option>Русский</option><option>English</option></select></div>
+          <div><label class="text-sm text-slate-400 block mb-1">Часовой пояс</label><select class="w-full bg-slate-800/50 border border-slate-700 rounded-xl px-4 py-3 text-white outline-none"><option>UTC+3 (Moscow)</option><option>UTC+0 (London)</option><option>UTC-5 (New York)</option></select></div>
+        </div>
+        <button type="button" onclick="Toast.success('Профиль сохранён')" class="px-6 py-2.5 rounded-xl font-semibold text-white text-sm" style="background:linear-gradient(135deg,#4F46E5,#7C3AED)">Сохранить</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- SUBSCRIPTION -->
+  <div class="stab-content" id="stab-subscription">
+    <div class="card max-w-2xl mb-6">
+      <h3 class="font-bold mb-4">Текущий план</h3>
+      <div class="flex items-center gap-4 p-4 bg-indigo-500/10 border border-indigo-500/20 rounded-xl mb-4">
+        <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#818CF8" stroke-width="2"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+        <div><div class="font-bold text-indigo-300">Pro Plan — $79/мес</div><div class="text-xs text-slate-500">Активен до 10 мая 2026</div></div>
+      </div>
+      <div class="grid grid-cols-2 gap-4 text-sm mb-4">
+        <div class="p-3 bg-slate-800/30 rounded-lg"><span class="text-slate-500">Сигналы:</span> <span class="text-green-400">Безлимитно</span></div>
+        <div class="p-3 bg-slate-800/30 rounded-lg"><span class="text-slate-500">Боты:</span> <span>10 макс</span></div>
+        <div class="p-3 bg-slate-800/30 rounded-lg"><span class="text-slate-500">Авто-торговля:</span> <span class="text-green-400">Да</span></div>
+        <div class="p-3 bg-slate-800/30 rounded-lg"><span class="text-slate-500">Бэктесты:</span> <span class="text-green-400">Да</span></div>
+      </div>
+      <div class="flex gap-3"><button class="text-sm px-4 py-2 rounded-lg bg-indigo-500/10 border border-indigo-500/30 text-indigo-400">Upgrade to Elite</button></div>
+    </div>
+    <div class="card max-w-2xl mb-6">
+      <h3 class="font-bold mb-4">Промо-код</h3>
+      <div class="flex gap-3"><input placeholder="Введите промо-код" class="flex-1 bg-slate-800/50 border border-slate-700 rounded-xl px-4 py-3 text-white outline-none"/><button onclick="Toast.success('Промо-код применён!')" class="px-6 py-3 rounded-xl font-semibold text-white text-sm" style="background:linear-gradient(135deg,#4F46E5,#7C3AED)">Применить</button></div>
+    </div>
+    <div class="card max-w-2xl">
+      <h3 class="font-bold mb-4">Реферальная программа</h3>
+      <div class="bg-slate-800/30 rounded-xl p-4 mb-3"><div class="text-xs text-slate-500 mb-1">Ваша ссылка</div><div class="flex items-center gap-2"><code class="text-sm text-cyan-400">https://chmup.top/?ref=abc123</code><button onclick="Utils.copyToClipboard('https://chmup.top/?ref=abc123')" class="text-xs text-slate-500 hover:text-white">Copy</button></div></div>
+      <div class="grid grid-cols-3 gap-3 text-center text-sm">
+        <div class="p-3 bg-slate-800/30 rounded-lg"><div class="text-xs text-slate-500">Приглашено</div><div class="font-bold">5</div></div>
+        <div class="p-3 bg-slate-800/30 rounded-lg"><div class="text-xs text-slate-500">Комиссия</div><div class="font-bold text-green-400">10%</div></div>
+        <div class="p-3 bg-slate-800/30 rounded-lg"><div class="text-xs text-slate-500">Заработано</div><div class="font-bold text-green-400">$39.50</div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- TRADING -->
+  <div class="stab-content" id="stab-trading">
+    <div class="card max-w-2xl">
+      <h3 class="font-bold mb-4">Торговые настройки</h3>
+      <form class="space-y-4">
+        <div><label class="text-sm text-slate-400 block mb-1">Биржа по умолчанию</label><select class="w-full bg-slate-800/50 border border-slate-700 rounded-xl px-4 py-3 text-white outline-none"><option>Bybit</option><option>Binance</option><option>BingX</option></select></div>
+        <div><label class="text-sm text-slate-400 block mb-2">Leverage по умолчанию: <span id="levVal" class="text-indigo-400">10x</span></label><input type="range" min="1" max="100" value="10" class="w-full" oninput="document.getElementById('levVal').textContent=this.value+'x'"/></div>
+        <div><label class="text-sm text-slate-400 block mb-2">Риск на сделку: <span id="riskVal" class="text-indigo-400">2%</span></label><input type="range" min="0.5" max="10" step="0.5" value="2" class="w-full" oninput="document.getElementById('riskVal').textContent=this.value+'%'"/></div>
+        <div><label class="text-sm text-slate-400 block mb-1">Макс. одновременных сделок</label><input type="number" value="5" min="1" max="20" class="w-full bg-slate-800/50 border border-slate-700 rounded-xl px-4 py-3 text-white outline-none"/></div>
+        <div><label class="text-sm text-slate-400 block mb-1">Дневной лимит потерь (%)</label><input type="number" value="5" step="0.5" class="w-full bg-slate-800/50 border border-slate-700 rounded-xl px-4 py-3 text-white outline-none"/></div>
+        <div class="flex items-center justify-between p-3 bg-slate-800/30 rounded-xl"><span class="text-sm">Авто-торговля</span><div class="toggle on" onclick="this.classList.toggle('on')"></div></div>
+        <div class="flex items-center justify-between p-3 bg-slate-800/30 rounded-xl"><span class="text-sm">Подтверждение перед сделкой</span><div class="toggle" onclick="this.classList.toggle('on')"></div></div>
+        <div class="flex items-center justify-between p-3 bg-slate-800/30 rounded-xl"><span class="text-sm">Trailing Stop по умолчанию</span><div class="toggle on" onclick="this.classList.toggle('on')"></div></div>
+        <button type="button" onclick="Toast.success('Настройки сохранены')" class="px-6 py-2.5 rounded-xl font-semibold text-white text-sm" style="background:linear-gradient(135deg,#4F46E5,#7C3AED)">Сохранить</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- NOTIFICATIONS -->
+  <div class="stab-content" id="stab-notifications">
+    <div class="card max-w-2xl">
+      <h3 class="font-bold mb-4">Уведомления</h3>
+      <div class="space-y-3">
+        <div class="flex items-center justify-between p-3 bg-slate-800/30 rounded-xl"><span class="text-sm">Браузерные уведомления</span><div class="toggle on" onclick="this.classList.toggle('on')"></div></div>
+        <div class="flex items-center justify-between p-3 bg-slate-800/30 rounded-xl"><span class="text-sm">Telegram уведомления</span><div class="toggle on" onclick="this.classList.toggle('on')"></div></div>
+        <div class="flex items-center justify-between p-3 bg-slate-800/30 rounded-xl"><span class="text-sm">Email уведомления</span><div class="toggle" onclick="this.classList.toggle('on')"></div></div>
+        <div class="flex items-center justify-between p-3 bg-slate-800/30 rounded-xl"><span class="text-sm">Новые сигналы</span><div class="toggle on" onclick="this.classList.toggle('on')"></div></div>
+        <div class="flex items-center justify-between p-3 bg-slate-800/30 rounded-xl"><span class="text-sm">Исполнение сделок</span><div class="toggle on" onclick="this.classList.toggle('on')"></div></div>
+        <div class="flex items-center justify-between p-3 bg-slate-800/30 rounded-xl"><span class="text-sm">Ежедневный дайджест</span><div class="toggle" onclick="this.classList.toggle('on')"></div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SECURITY -->
+  <div class="stab-content" id="stab-security">
+    <div class="card max-w-2xl mb-6">
+      <h3 class="font-bold mb-4">Смена пароля</h3>
+      <form class="space-y-4">
+        <div><label class="text-sm text-slate-400 block mb-1">Текущий пароль</label><input type="password" class="w-full bg-slate-800/50 border border-slate-700 rounded-xl px-4 py-3 text-white outline-none"/></div>
+        <div><label class="text-sm text-slate-400 block mb-1">Новый пароль</label><input type="password" class="w-full bg-slate-800/50 border border-slate-700 rounded-xl px-4 py-3 text-white outline-none"/></div>
+        <div><label class="text-sm text-slate-400 block mb-1">Повторите новый пароль</label><input type="password" class="w-full bg-slate-800/50 border border-slate-700 rounded-xl px-4 py-3 text-white outline-none"/></div>
+        <button type="button" onclick="Toast.success('Пароль изменён')" class="px-6 py-2.5 rounded-xl font-semibold text-white text-sm" style="background:linear-gradient(135deg,#4F46E5,#7C3AED)">Сменить пароль</button>
+      </form>
+    </div>
+    <div class="card max-w-2xl">
+      <h3 class="font-bold mb-4 text-red-400">Опасная зона</h3>
+      <div class="flex gap-3">
+        <button class="text-sm px-4 py-2 rounded-lg bg-slate-800/50 border border-slate-700 text-slate-400">Экспорт данных</button>
+        <button class="text-sm px-4 py-2 rounded-lg bg-red-500/10 border border-red-500/20 text-red-400">Удалить аккаунт</button>
+      </div>
+    </div>
+  </div>
+</main>
+
+<script src="app.js"></script>
+<script>
+if(!Auth.isLoggedIn())window.location.href='/?login=1';
+Sidebar.init('settings');
+function stab(t){document.querySelectorAll('.stab').forEach(b=>b.classList.remove('active'));document.querySelectorAll('.stab-content').forEach(c=>c.classList.remove('active'));document.getElementById('stab-'+t).classList.add('active');event.target.classList.add('active')}
+</script>
+</body>
+</html>
