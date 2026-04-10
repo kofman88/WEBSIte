@@ -147,6 +147,9 @@
     html.light footer,html.light footer *{color:#64748b!important}
     html.light footer h4{color:#1e293b!important}
     html.light .glow-btn{color:#fff!important}
+    html.light .hero-glow,html.light [class*="hero-glow"]{opacity:0!important;display:none!important}
+    html.light .liquid-glass .hero-glow{display:none!important}
+    html.light .cta-glow{display:none!important}
   </style>
 </head>
 <body>
@@ -160,10 +163,11 @@
       <a href="#pricing" class="text-sm text-slate-400 hover:text-white transition" data-t="nav-price">Тарифы</a>
       <a href="#how" class="text-sm text-slate-400 hover:text-white transition" data-t="nav-how">Как работает</a>
       <a href="#faq" class="text-sm text-slate-400 hover:text-white transition" data-t="nav-faq">FAQ</a>
+      <a href="academy/" class="text-sm text-slate-400 hover:text-white transition" data-t="nav-academy">Академия</a>
     </div>
     <div class="flex items-center gap-3">
       <button onclick="toggleLang()" class="text-xs text-slate-400 border border-slate-700 rounded-lg px-3 py-1.5 hover:text-white transition" id="langBtn">EN</button>
-      <button onclick="toggleTheme()" class="text-xs text-slate-400 border border-slate-700 rounded-lg px-3 py-1.5 hover:text-white transition" id="themeBtn" title="Toggle theme">&#9790;</button>
+      <button onclick="toggleTheme()" class="text-sm border border-slate-700 rounded-lg w-8 h-8 flex items-center justify-center hover:text-white transition" id="themeBtn" title="Toggle theme">🌙</button>
       <a href="#" onclick="openModal('login');return false" class="text-sm text-slate-300 hover:text-white transition hidden sm:block" data-t="nav-login">Войти</a>
       <a href="#" onclick="openModal('register');return false" class="glow-btn text-sm font-semibold text-white px-5 py-2.5 rounded-xl transition-all" data-t="nav-start">Начать</a>
     </div>
@@ -408,7 +412,7 @@
 <section class="py-24">
   <div class="max-w-4xl mx-auto px-6 text-center">
     <div class="liquid-glass rounded-3xl p-12 relative overflow-hidden">
-      <div class="hero-glow" style="width:300px;height:300px;top:-100px;right:-100px;background:#4F46E5"></div>
+      <div class="cta-glow" style="position:absolute;width:300px;height:300px;top:-100px;right:-100px;background:rgba(124,58,237,.15);border-radius:50%;filter:blur(80px);pointer-events:none"></div>
       <h2 class="text-4xl font-extrabold mb-4 relative z-10">Готов начать?</h2>
       <p class="text-slate-400 mb-8 relative z-10">Присоединяйся к тысячам трейдеров, которые уже используют CHM Finance</p>
       <a href="#" onclick="openModal('register');return false" class="glow-btn text-white font-bold px-10 py-4 rounded-xl text-lg transition-all relative z-10 inline-block">Создать аккаунт бесплатно</a>
@@ -529,6 +533,7 @@ const TR={
   'nav-price':{ru:'Тарифы',en:'Pricing'},
   'nav-how':{ru:'Как работает',en:'How It Works'},
   'nav-faq':{ru:'FAQ',en:'FAQ'},
+  'nav-academy':{ru:'Академия',en:'Academy'},
   'nav-login':{ru:'Войти',en:'Login'},
   'nav-start':{ru:'Начать',en:'Start'},
   // Hero
@@ -602,9 +607,9 @@ function toggleTheme(){
   document.documentElement.classList.toggle('light');
   const isLight=document.documentElement.classList.contains('light');
   localStorage.setItem('chm_theme',isLight?'light':'dark');
-  document.getElementById('themeBtn').innerHTML=isLight?'&#9788;':'&#9790;';
+  document.getElementById('themeBtn').textContent=isLight?'☀️':'🌙';
 }
-(function(){const t=localStorage.getItem('chm_theme');if(t==='light'){document.documentElement.classList.add('light');const b=document.getElementById('themeBtn');if(b)b.innerHTML='&#9788;'}})();
+(function(){const t=localStorage.getItem('chm_theme');if(t==='light'){document.documentElement.classList.add('light');const b=document.getElementById('themeBtn');if(b)b.textContent='☀️'}})();
 
 // ── Open login if URL param ──
 if(new URLSearchParams(location.search).get('login'))openModal('login');
