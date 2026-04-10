@@ -12,32 +12,102 @@
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js"></script>
   <script>tailwind.config={theme:{extend:{colors:{brand:'#4F46E5',cyan2:'#06b6d4',dark:'#070b14',card:'#111829'},fontFamily:{sans:['Inter','sans-serif']}}}}</script>
   <style>
-    body{background:#070b14;color:#f1f5f9;font-family:'Inter',sans-serif;overflow-x:hidden}
-    .glass{background:rgba(17,24,41,.6);backdrop-filter:blur(16px);border:1px solid rgba(30,41,59,.5)}
-    .glow-btn{background:linear-gradient(135deg,#4F46E5,#7C3AED);box-shadow:0 0 20px rgba(79,70,229,.4)}
-    .glow-btn:hover{box-shadow:0 0 35px rgba(79,70,229,.6);transform:translateY(-2px)}
-    .ghost-btn{background:rgba(79,70,229,.1);border:1px solid rgba(79,70,229,.3);color:#818CF8}
-    .ghost-btn:hover{background:rgba(79,70,229,.2)}
-    @keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-10px)}}
+    *{margin:0;padding:0;box-sizing:border-box}
+    body{background:#050810;color:#e2e8f0;font-family:'Inter',sans-serif;overflow-x:hidden;-webkit-font-smoothing:antialiased}
+
+    /* ── Premium Gradients ── */
+    .glow-btn{background:linear-gradient(135deg,#6366f1,#8b5cf6,#a855f7);box-shadow:0 4px 24px rgba(99,102,241,.35);padding:14px 32px;border-radius:16px;font-weight:700;font-size:.95rem;color:#fff;border:none;cursor:pointer;transition:all .4s cubic-bezier(.25,.8,.25,1);letter-spacing:.01em}
+    .glow-btn:hover{box-shadow:0 8px 40px rgba(139,92,246,.5);transform:translateY(-3px) scale(1.02)}
+    .glow-btn:active{transform:translateY(0) scale(.98)}
+    .ghost-btn{background:rgba(99,102,241,.08);border:1px solid rgba(99,102,241,.2);color:#a5b4fc;padding:14px 32px;border-radius:16px;font-weight:600;cursor:pointer;transition:all .3s}
+    .ghost-btn:hover{background:rgba(99,102,241,.15);border-color:rgba(99,102,241,.4)}
+
+    /* ── Animated BG ── */
+    @keyframes gradShift{0%{background-position:0% 50%}50%{background-position:100% 50%}100%{background-position:0% 50%}}
+    @keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-12px)}}
+    @keyframes pulse-ring{0%{transform:scale(.95);opacity:.5}50%{transform:scale(1.05);opacity:.8}100%{transform:scale(.95);opacity:.5}}
+    @keyframes orbit{0%{transform:rotate(0deg) translateX(120px) rotate(0deg)}100%{transform:rotate(360deg) translateX(120px) rotate(-360deg)}}
     .float{animation:float 6s ease-in-out infinite}
-    .fade-up{opacity:0;transform:translateY(30px);transition:all .7s ease}
+    .fade-up{opacity:0;transform:translateY(40px);transition:all .9s cubic-bezier(.16,1,.3,1)}
     .fade-up.show{opacity:1;transform:translateY(0)}
-    .hero-grid{position:absolute;inset:0;background-image:linear-gradient(rgba(79,70,229,.07) 1px,transparent 1px),linear-gradient(90deg,rgba(79,70,229,.07) 1px,transparent 1px);background-size:60px 60px}
-    .hero-glow{position:absolute;border-radius:50%;filter:blur(120px);opacity:.15}
-    .nav-scrolled{background:rgba(7,11,20,.9)!important;border-bottom:1px solid rgba(30,41,59,.5)}
-    .stat-num{font-size:2rem;font-weight:800;background:linear-gradient(135deg,#818CF8,#06b6d4);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
-    .card-hover{transition:all .3s}
-    .card-hover:hover{transform:translateY(-4px);border-color:rgba(79,70,229,.4);box-shadow:0 0 30px rgba(79,70,229,.15)}
-    .price-popular{border:2px solid #4F46E5;box-shadow:0 0 40px rgba(79,70,229,.2)}
-    .step-line{position:absolute;top:50%;left:0;right:0;height:2px;background:linear-gradient(90deg,#4F46E5,#06b6d4);z-index:0}
-    .modal-bg{position:fixed;inset:0;background:rgba(0,0,0,.7);backdrop-filter:blur(8px);z-index:100;display:none;align-items:center;justify-content:center}
+
+    /* ── Hero ── */
+    .hero-bg{position:absolute;inset:0;overflow:hidden}
+    .hero-grid{position:absolute;inset:0;background-image:linear-gradient(rgba(99,102,241,.04) 1px,transparent 1px),linear-gradient(90deg,rgba(99,102,241,.04) 1px,transparent 1px);background-size:80px 80px;mask-image:radial-gradient(ellipse 80% 60% at 50% 40%,black 30%,transparent 70%)}
+    .hero-orb{position:absolute;border-radius:50%;filter:blur(100px);animation:pulse-ring 8s ease-in-out infinite}
+    .hero-orb-1{width:600px;height:600px;top:-15%;left:-5%;background:radial-gradient(circle,rgba(99,102,241,.2),transparent 70%)}
+    .hero-orb-2{width:500px;height:500px;bottom:-10%;right:-5%;background:radial-gradient(circle,rgba(6,182,212,.15),transparent 70%);animation-delay:4s}
+    .hero-orb-3{width:300px;height:300px;top:40%;left:50%;background:radial-gradient(circle,rgba(168,85,247,.1),transparent 70%);animation-delay:2s}
+    .hero-particle{position:absolute;width:4px;height:4px;background:rgba(165,180,252,.3);border-radius:50%;animation:orbit 20s linear infinite}
+    .hero-particle:nth-child(2){animation-duration:25s;width:3px;height:3px;background:rgba(6,182,212,.3)}
+    .hero-particle:nth-child(3){animation-duration:30s;width:2px;height:2px;background:rgba(168,85,247,.2)}
+
+    /* ── Nav ── */
+    .nav-scrolled{background:rgba(5,8,16,.85)!important;backdrop-filter:blur(20px);border-bottom:1px solid rgba(255,255,255,.04)}
+
+    /* ── Stat numbers ── */
+    .stat-num{font-size:2.5rem;font-weight:900;background:linear-gradient(135deg,#a5b4fc 0%,#06b6d4 50%,#a855f7 100%);background-size:200% auto;-webkit-background-clip:text;-webkit-text-fill-color:transparent;animation:gradShift 6s ease infinite;letter-spacing:-.02em}
+
+    /* ── Liquid Glass ── */
+    .liquid-glass{background:linear-gradient(135deg,rgba(255,255,255,.04) 0%,rgba(255,255,255,.01) 40%,rgba(255,255,255,.06) 60%,rgba(255,255,255,.02) 100%);backdrop-filter:blur(24px) saturate(1.5);-webkit-backdrop-filter:blur(24px) saturate(1.5);border:1px solid rgba(255,255,255,.06);border-radius:24px;box-shadow:inset 0 1px 0 rgba(255,255,255,.05),inset 0 -1px 0 rgba(0,0,0,.1),0 8px 40px rgba(0,0,0,.25);position:relative;overflow:hidden;transition:all .5s cubic-bezier(.25,.8,.25,1)}
+    .liquid-glass::before{content:'';position:absolute;top:-50%;left:-50%;width:200%;height:200%;background:radial-gradient(ellipse at 30% 20%,rgba(255,255,255,.04),transparent 50%);pointer-events:none}
+    .liquid-glass:hover{border-color:rgba(255,255,255,.1);box-shadow:inset 0 1px 0 rgba(255,255,255,.08),0 20px 60px rgba(0,0,0,.35),0 0 80px rgba(99,102,241,.06);transform:translateY(-2px)}
+
+    /* ── Cards ── */
+    .card-hover{transition:all .5s cubic-bezier(.25,.8,.25,1)}
+    .card-hover:hover{transform:translateY(-6px);border-color:rgba(99,102,241,.3);box-shadow:0 20px 60px rgba(0,0,0,.3),0 0 40px rgba(99,102,241,.08)}
+    .feature-icon{width:56px;height:56px;border-radius:16px;display:flex;align-items:center;justify-content:center;position:relative}
+    .feature-icon::after{content:'';position:absolute;inset:-2px;border-radius:18px;background:inherit;filter:blur(12px);opacity:.4;z-index:-1}
+
+    /* ── Pricing ── */
+    .price-popular{border:1.5px solid rgba(99,102,241,.5);box-shadow:0 0 60px rgba(99,102,241,.15),inset 0 1px 0 rgba(255,255,255,.05);position:relative}
+    .price-popular::before{content:'';position:absolute;inset:-1px;border-radius:24px;background:linear-gradient(135deg,rgba(99,102,241,.3),transparent 50%,rgba(168,85,247,.2));z-index:-1;filter:blur(1px)}
+
+    /* ── Steps ── */
+    .step-line{position:absolute;top:50px;left:16%;right:16%;height:2px;background:linear-gradient(90deg,transparent,#6366f1,#06b6d4,transparent);z-index:0;opacity:.3}
+    .step-num{width:80px;height:80px;border-radius:20px;display:flex;align-items:center;justify-content:center;font-size:1.75rem;font-weight:900;position:relative}
+    .step-num::before{content:'';position:absolute;inset:-3px;border-radius:23px;background:inherit;filter:blur(20px);opacity:.5;z-index:-1}
+
+    /* ── Modals ── */
+    .modal-bg{position:fixed;inset:0;background:rgba(0,0,0,.75);backdrop-filter:blur(12px);z-index:100;display:none;align-items:center;justify-content:center}
     .modal-bg.active{display:flex}
-    .faq-answer{max-height:0;overflow:hidden;transition:max-height .3s ease}
-    .faq-item.open .faq-answer{max-height:300px}
+
+    /* ── FAQ ── */
+    .faq-answer{max-height:0;overflow:hidden;transition:max-height .4s cubic-bezier(.25,.8,.25,1)}
+    .faq-item.open .faq-answer{max-height:400px}
     .faq-item.open .faq-chevron{transform:rotate(180deg)}
-    .liquid-glass{background:linear-gradient(135deg,rgba(255,255,255,.05),rgba(255,255,255,.02) 40%,rgba(255,255,255,.08) 60%,rgba(255,255,255,.03));backdrop-filter:blur(24px) saturate(1.4);-webkit-backdrop-filter:blur(24px) saturate(1.4);border:1px solid rgba(255,255,255,.08);box-shadow:inset 0 1px 0 rgba(255,255,255,.06),inset 0 -1px 0 rgba(0,0,0,.1),0 8px 32px rgba(0,0,0,.3);position:relative;overflow:hidden}
-    .liquid-glass::before{content:'';position:absolute;top:-50%;left:-50%;width:200%;height:200%;background:radial-gradient(ellipse at 30% 20%,rgba(255,255,255,.06),transparent 50%);pointer-events:none}
-    .liquid-glass:hover{border-color:rgba(255,255,255,.12);box-shadow:inset 0 1px 0 rgba(255,255,255,.08),0 12px 40px rgba(0,0,0,.4),0 0 60px rgba(79,70,229,.08)}
+
+    /* ── Section spacing — premium ── */
+    .section-premium{padding:120px 0}
+    .section-title{font-size:clamp(2rem,5vw,3.5rem);font-weight:900;letter-spacing:-.03em;line-height:1.1}
+    .section-subtitle{font-size:1.1rem;color:#64748b;max-width:600px;margin:16px auto 0;line-height:1.7}
+    .section-label{display:inline-flex;align-items:center;gap:8px;font-size:.75rem;font-weight:600;text-transform:uppercase;letter-spacing:.12em;color:#a5b4fc;margin-bottom:16px;padding:6px 16px;border-radius:100px;background:rgba(99,102,241,.08);border:1px solid rgba(99,102,241,.15)}
+
+    /* ── Divider ── */
+    .section-divider{height:1px;background:linear-gradient(90deg,transparent,rgba(255,255,255,.06),transparent);margin:0 auto;max-width:80%}
+
+    /* ── Light theme ── */
+    html.light body{background:#fafbfe;color:#0f172a}
+    html.light .text-slate-400,html.light .text-slate-500{color:#64748b!important}
+    html.light .text-slate-300{color:#475569!important}
+    html.light .nav-scrolled{background:rgba(250,251,254,.9)!important;border-color:rgba(0,0,0,.06)!important;backdrop-filter:blur(20px)}
+    html.light .hero-grid{opacity:.3!important}
+    html.light .hero-orb{opacity:.08!important}
+    html.light .liquid-glass{background:rgba(255,255,255,.6)!important;border-color:rgba(0,0,0,.06)!important;box-shadow:0 4px 24px rgba(0,0,0,.04)!important}
+    html.light .liquid-glass::before{background:radial-gradient(ellipse at 30% 20%,rgba(99,102,241,.03),transparent 50%)}
+    html.light .ghost-btn{background:rgba(99,102,241,.05)!important;border-color:rgba(99,102,241,.12)!important}
+    html.light .card-hover:hover{box-shadow:0 12px 40px rgba(99,102,241,.08)!important}
+    html.light .bg-slate-800\/50,html.light .bg-slate-800\/30,html.light .bg-slate-900\/50{background:rgba(0,0,0,.02)!important}
+    html.light .border-slate-800\/50,html.light .border-slate-700{border-color:rgba(0,0,0,.06)!important}
+    html.light .price-popular{border-color:rgba(99,102,241,.4)!important}
+    html.light .faq-item,.liquid-glass-faq{border-color:rgba(0,0,0,.04)!important}
+    html.light .modal-bg>div{background:rgba(255,255,255,.95)!important}
+    html.light input{background:#f1f5f9!important;border-color:rgba(0,0,0,.08)!important;color:#0f172a!important}
+    html.light .stat-num{background:linear-gradient(135deg,#6366f1,#06b6d4)!important;-webkit-background-clip:text!important}
+    html.light h1,html.light h2,html.light h3,html.light .font-bold{color:#0f172a}
+    html.light .section-label{background:rgba(99,102,241,.06);border-color:rgba(99,102,241,.1)}
+    html.light .section-subtitle{color:#94a3b8}
+  </style>
     /* Light theme */
     html.light body{background:#f8fafc;color:#0f172a}
     html.light .text-slate-400,html.light .text-slate-500{color:#64748b!important}
@@ -82,11 +152,17 @@
 </nav>
 
 <!-- HERO -->
-<section class="relative min-h-screen flex items-center pt-20 overflow-hidden">
-  <div class="hero-grid"></div>
-  <div class="hero-glow" style="width:500px;height:500px;top:-200px;left:-100px;background:#4F46E5"></div>
-  <div class="hero-glow" style="width:500px;height:500px;bottom:-200px;right:-100px;background:#06b6d4"></div>
-  <div class="max-w-7xl mx-auto px-6 relative z-10 grid lg:grid-cols-2 gap-12 items-center">
+<section class="relative min-h-screen flex items-center pt-24 pb-12 overflow-hidden">
+  <div class="hero-bg">
+    <div class="hero-grid"></div>
+    <div class="hero-orb hero-orb-1"></div>
+    <div class="hero-orb hero-orb-2"></div>
+    <div class="hero-orb hero-orb-3"></div>
+    <div class="hero-particle" style="top:20%;left:30%"></div>
+    <div class="hero-particle" style="top:60%;left:70%"></div>
+    <div class="hero-particle" style="top:40%;left:50%"></div>
+  </div>
+  <div class="max-w-7xl mx-auto px-6 relative z-10 grid lg:grid-cols-2 gap-16 items-center">
     <div>
       <div class="inline-flex items-center gap-2 glass rounded-full px-4 py-2 text-sm text-cyan-400 mb-6">
         <span class="w-2 h-2 bg-green-400 rounded-full animate-pulse"></span> <span data-t="hero-badge">AI-Powered Крипто Платформа</span>
@@ -132,10 +208,14 @@
 </section>
 
 <!-- FEATURES -->
-<section id="features" class="py-24">
+<div class="section-divider"></div>
+<section id="features" class="section-premium">
   <div class="max-w-7xl mx-auto px-6">
-    <h2 class="text-4xl font-black text-center mb-4 fade-up" data-t="feat-title">Всё для прибыльной торговли</h2>
-    <p class="text-slate-400 text-center mb-16 max-w-2xl mx-auto fade-up" data-t="feat-sub">Полный набор инструментов — от сигналов до автоматического исполнения сделок</p>
+    <div class="text-center mb-20">
+      <div class="section-label fade-up"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M13 10V3L4 14h7v7l9-11h-7z"/></svg> Features</div>
+      <h2 class="section-title fade-up" data-t="feat-title">Всё для прибыльной торговли</h2>
+      <p class="section-subtitle fade-up" data-t="feat-sub">Полный набор инструментов — от сигналов до автоматического исполнения сделок</p>
+    </div>
     <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
       <div class="liquid-glass rounded-2xl p-6 card-hover fade-up">
         <div class="w-12 h-12 rounded-xl bg-indigo-500/10 flex items-center justify-center mb-4"><svg class="w-6 h-6 text-indigo-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"/></svg></div>
@@ -172,36 +252,44 @@
 </section>
 
 <!-- HOW IT WORKS -->
-<section id="how" class="py-24 bg-gradient-to-b from-transparent to-slate-900/20">
+<div class="section-divider"></div>
+<section id="how" class="section-premium">
   <div class="max-w-7xl mx-auto px-6">
-    <h2 class="text-4xl font-black text-center mb-4 fade-up">Как это работает</h2>
-    <p class="text-slate-400 text-center mb-16 fade-up">Три простых шага до автоматической торговли</p>
-    <div class="relative grid md:grid-cols-3 gap-8">
-      <div class="hidden md:block step-line" style="top:40px;left:16%;right:16%"></div>
+    <div class="text-center mb-20">
+      <div class="section-label fade-up"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg> How It Works</div>
+      <h2 class="section-title fade-up" data-t="how-title">Как это работает</h2>
+      <p class="section-subtitle fade-up" data-t="how-sub">Три простых шага до автоматической торговли</p>
+    </div>
+    <div class="relative grid md:grid-cols-3 gap-10">
+      <div class="hidden md:block step-line"></div>
       <div class="text-center relative z-10 fade-up">
-        <div class="w-20 h-20 mx-auto rounded-2xl bg-indigo-500/10 border border-indigo-500/20 flex items-center justify-center mb-6"><span class="text-3xl font-black text-indigo-400">1</span></div>
-        <h3 class="text-xl font-bold mb-2">Подключите биржу</h3>
-        <p class="text-sm text-slate-400">Привяжите API ключи вашей биржи. Это занимает 2 минуты.</p>
+        <div class="step-num mx-auto mb-8 bg-indigo-500/10 border border-indigo-500/20 text-indigo-400">1</div>
+        <h3 class="text-xl font-bold mb-3" data-t="h1t">Подключите биржу</h3>
+        <p class="text-sm text-slate-400 leading-relaxed" data-t="h1d">Привяжите API ключи вашей биржи. Это занимает 2 минуты.</p>
       </div>
-      <div class="text-center relative z-10 fade-up">
-        <div class="w-20 h-20 mx-auto rounded-2xl bg-cyan-500/10 border border-cyan-500/20 flex items-center justify-center mb-6"><span class="text-3xl font-black text-cyan-400">2</span></div>
-        <h3 class="text-xl font-bold mb-2">Выберите стратегию</h3>
-        <p class="text-sm text-slate-400">SMC, Герчик или Скальпинг — выберите под свой стиль торговли.</p>
+      <div class="text-center relative z-10 fade-up" style="transition-delay:.15s">
+        <div class="step-num mx-auto mb-8 bg-cyan-500/10 border border-cyan-500/20 text-cyan-400">2</div>
+        <h3 class="text-xl font-bold mb-3" data-t="h2t">Выберите стратегию</h3>
+        <p class="text-sm text-slate-400 leading-relaxed" data-t="h2d">SMC, Герчик или Скальпинг — выберите под свой стиль торговли.</p>
       </div>
-      <div class="text-center relative z-10 fade-up">
-        <div class="w-20 h-20 mx-auto rounded-2xl bg-green-500/10 border border-green-500/20 flex items-center justify-center mb-6"><span class="text-3xl font-black text-green-400">3</span></div>
-        <h3 class="text-xl font-bold mb-2">Получайте прибыль</h3>
-        <p class="text-sm text-slate-400">Бот торгует 24/7. Вы получаете сигналы и следите за результатами.</p>
+      <div class="text-center relative z-10 fade-up" style="transition-delay:.3s">
+        <div class="step-num mx-auto mb-8 bg-emerald-500/10 border border-emerald-500/20 text-emerald-400">3</div>
+        <h3 class="text-xl font-bold mb-3" data-t="h3t">Получайте прибыль</h3>
+        <p class="text-sm text-slate-400 leading-relaxed" data-t="h3d">Бот торгует 24/7. Вы получаете сигналы и следите за результатами.</p>
       </div>
     </div>
   </div>
 </section>
 
 <!-- PRICING -->
-<section id="pricing" class="py-24">
+<div class="section-divider"></div>
+<section id="pricing" class="section-premium">
   <div class="max-w-7xl mx-auto px-6">
-    <h2 class="text-4xl font-black text-center mb-4 fade-up">Тарифные планы</h2>
-    <p class="text-slate-400 text-center mb-16 fade-up">Выберите план под ваши задачи</p>
+    <div class="text-center mb-20">
+      <div class="section-label fade-up"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 00-2-2h-4a2 2 0 00-2 2v2"/></svg> Pricing</div>
+      <h2 class="section-title fade-up" data-t="pr-title">Тарифные планы</h2>
+      <p class="section-subtitle fade-up" data-t="pr-sub">Выберите план под ваши задачи</p>
+    </div>
     <div class="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
       <!-- Free -->
       <div class="liquid-glass rounded-2xl p-6 card-hover fade-up flex flex-col">
@@ -261,9 +349,13 @@
 </section>
 
 <!-- FAQ -->
-<section id="faq" class="py-24 bg-gradient-to-b from-transparent to-slate-900/20">
+<div class="section-divider"></div>
+<section id="faq" class="section-premium">
   <div class="max-w-3xl mx-auto px-6">
-    <h2 class="text-4xl font-black text-center mb-16 fade-up">Частые вопросы</h2>
+    <div class="text-center mb-16">
+      <div class="section-label fade-up"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 015.83 1c0 2-3 3-3 3M12 17h.01"/></svg> FAQ</div>
+      <h2 class="section-title fade-up" data-t="faq-title">Частые вопросы</h2>
+    </div>
     <div class="space-y-4" id="faqList">
       <div class="faq-item glass rounded-xl cursor-pointer" onclick="this.classList.toggle('open')">
         <div class="flex items-center justify-between p-5"><span class="font-semibold">Безопасно ли подключать биржу?</span><svg class="faq-chevron w-5 h-5 text-slate-400 transition-transform" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M19 9l-7 7-7-7"/></svg></div>
