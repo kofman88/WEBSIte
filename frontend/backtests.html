@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+  <title>CHM Finance — Бэктесты</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet"/>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js"></script>
+  <link rel="stylesheet" href="styles.css"/>
+  <style>body{background:#070b14;color:#f1f5f9;font-family:'Inter',sans-serif}</style>
+</head>
+<body>
+<aside class="sidebar" id="sidebar">
+  <div class="sidebar-logo">CHM<span>.</span></div>
+  <nav class="sidebar-nav">
+    <a href="dashboard.html" class="sidebar-link" data-page="dashboard"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>Дашборд</a>
+    <a href="bots.html" class="sidebar-link" data-page="bots"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2a4 4 0 014 4v1h2a2 2 0 012 2v10a2 2 0 01-2 2H6a2 2 0 01-2-2V9a2 2 0 012-2h2V6a4 4 0 014-4z"/></svg>Боты</a>
+    <a href="signals.html" class="sidebar-link" data-page="signals"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>Сигналы</a>
+    <a href="backtests.html" class="sidebar-link active" data-page="backtests"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6m6 0h10"/></svg>Бэктесты</a>
+    <a href="wallet.html" class="sidebar-link" data-page="wallet"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12V7H5a2 2 0 010-4h14v4M3 5v14a2 2 0 002 2h16v-5"/></svg>Кошелёк</a>
+    <a href="settings.html" class="sidebar-link" data-page="settings"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/></svg>Настройки</a>
+  </nav>
+  <div class="sidebar-footer"><button onclick="Auth.logout()" class="sidebar-link" style="color:#f87171"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4M16 17l5-5-5-5M21 12H9"/></svg>Выйти</button></div>
+</aside>
+<header class="topbar"><div class="flex items-center gap-4"><button id="sidebar-toggle" class="lg:hidden" style="background:none;border:none;color:#94a3b8;cursor:pointer"><svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 6h16M4 12h16M4 18h16"/></svg></button><h1 class="text-xl font-bold">Бэктесты</h1></div><div class="topbar-actions"><div class="topbar-user"><div class="topbar-avatar">U</div></div></div></header>
+
+<main class="main-content">
+  <!-- Create Form -->
+  <div class="card mb-6">
+    <h2 class="font-bold mb-4">Новый бэктест</h2>
+    <form id="btForm" class="grid md:grid-cols-3 lg:grid-cols-6 gap-4">
+      <div><label class="text-xs text-slate-500 block mb-1">Пара</label><input name="symbol" value="BTCUSDT" class="w-full bg-slate-800/50 border border-slate-700 rounded-lg px-3 py-2 text-sm text-white outline-none"/></div>
+      <div><label class="text-xs text-slate-500 block mb-1">Стратегия</label><select name="strategy" class="w-full bg-slate-800/50 border border-slate-700 rounded-lg px-3 py-2 text-sm text-white outline-none"><option>scalping</option><option>smc</option><option>gerchik</option></select></div>
+      <div><label class="text-xs text-slate-500 block mb-1">Таймфрейм</label><select name="timeframe" class="w-full bg-slate-800/50 border border-slate-700 rounded-lg px-3 py-2 text-sm text-white outline-none"><option>15m</option><option>1h</option><option>4h</option><option>1d</option></select></div>
+      <div><label class="text-xs text-slate-500 block mb-1">Начало</label><input name="startDate" type="date" value="2025-01-01" class="w-full bg-slate-800/50 border border-slate-700 rounded-lg px-3 py-2 text-sm text-white outline-none"/></div>
+      <div><label class="text-xs text-slate-500 block mb-1">Конец</label><input name="endDate" type="date" value="2025-12-31" class="w-full bg-slate-800/50 border border-slate-700 rounded-lg px-3 py-2 text-sm text-white outline-none"/></div>
+      <div class="flex items-end"><button type="submit" class="w-full py-2 rounded-lg font-semibold text-white text-sm" style="background:linear-gradient(135deg,#4F46E5,#7C3AED)">Запустить</button></div>
+    </form>
+  </div>
+
+  <!-- Results Grid -->
+  <h2 class="font-bold mb-4">Результаты</h2>
+  <div class="grid md:grid-cols-2 gap-4 mb-6">
+
+    <div class="card card-glow">
+      <div class="flex items-center justify-between mb-3">
+        <div><div class="font-semibold">BTC Scalping 15m</div><div class="text-xs text-slate-500">Jan-Dec 2025 &middot; BTCUSDT</div></div>
+        <span class="text-xs px-2 py-0.5 rounded-full bg-green-500/15 text-green-400">Completed</span>
+      </div>
+      <div class="grid grid-cols-3 gap-3 text-center text-sm mb-4">
+        <div><div class="text-xs text-slate-500">PnL</div><div class="text-green-400 font-bold">+$4,520</div></div>
+        <div><div class="text-xs text-slate-500">Win Rate</div><div class="font-bold">73%</div></div>
+        <div><div class="text-xs text-slate-500">Sharpe</div><div class="font-bold">1.82</div></div>
+      </div>
+      <div class="grid grid-cols-3 gap-3 text-center text-sm">
+        <div><div class="text-xs text-slate-500">Max DD</div><div class="text-red-400">-12.3%</div></div>
+        <div><div class="text-xs text-slate-500">Profit Factor</div><div>2.14</div></div>
+        <div><div class="text-xs text-slate-500">Trades</div><div>156</div></div>
+      </div>
+      <div class="mt-4"><canvas id="btChart1" height="80"></canvas></div>
+    </div>
+
+    <div class="card card-glow">
+      <div class="flex items-center justify-between mb-3">
+        <div><div class="font-semibold">ETH SMC 4h</div><div class="text-xs text-slate-500">Jan-Dec 2025 &middot; ETHUSDT</div></div>
+        <span class="text-xs px-2 py-0.5 rounded-full bg-green-500/15 text-green-400">Completed</span>
+      </div>
+      <div class="grid grid-cols-3 gap-3 text-center text-sm mb-4">
+        <div><div class="text-xs text-slate-500">PnL</div><div class="text-green-400 font-bold">+$2,180</div></div>
+        <div><div class="text-xs text-slate-500">Win Rate</div><div class="font-bold">68%</div></div>
+        <div><div class="text-xs text-slate-500">Sharpe</div><div class="font-bold">1.45</div></div>
+      </div>
+      <div class="grid grid-cols-3 gap-3 text-center text-sm">
+        <div><div class="text-xs text-slate-500">Max DD</div><div class="text-red-400">-18.7%</div></div>
+        <div><div class="text-xs text-slate-500">Profit Factor</div><div>1.78</div></div>
+        <div><div class="text-xs text-slate-500">Trades</div><div>42</div></div>
+      </div>
+      <div class="mt-4"><canvas id="btChart2" height="80"></canvas></div>
+    </div>
+
+    <div class="card" style="opacity:.6">
+      <div class="flex items-center justify-between mb-3">
+        <div><div class="font-semibold">SOL Gerchik 1d</div><div class="text-xs text-slate-500">Jun-Dec 2025 &middot; SOLUSDT</div></div>
+        <span class="text-xs px-2 py-0.5 rounded-full bg-yellow-500/15 text-yellow-400">Running...</span>
+      </div>
+      <div class="w-full bg-slate-800 rounded-full h-2 mt-4"><div class="bg-indigo-500 h-2 rounded-full" style="width:65%"></div></div>
+      <div class="text-xs text-slate-500 mt-2">65% complete...</div>
+    </div>
+  </div>
+</main>
+
+<script src="app.js"></script>
+<script>
+if(!Auth.isLoggedIn())window.location.href='/?login=1';
+Sidebar.init('backtests');
+// Mini equity charts
+function miniChart(id,clr){const d=Utils.generateEquityData(60,10000);new Chart(document.getElementById(id),{type:'line',data:{labels:d.map(x=>x.date.slice(5)),datasets:[{data:d.map(x=>x.value),borderColor:clr,backgroundColor:'transparent',tension:.4,pointRadius:0,borderWidth:1.5}]},options:{responsive:true,plugins:{legend:{display:false}},scales:{x:{display:false},y:{display:false}}}})}
+miniChart('btChart1','#818CF8');miniChart('btChart2','#06b6d4');
+document.getElementById('btForm')?.addEventListener('submit',async e=>{e.preventDefault();Toast.success('Бэктест запущен!');});
+</script>
+</body>
+</html>
