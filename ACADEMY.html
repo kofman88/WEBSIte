@@ -9,13 +9,13 @@
 <polyline points='3,26 8,17 13,21 20,9 27,13' fill='none' stroke='%23f5c842' stroke-width='5' stroke-linecap='round' stroke-linejoin='round'/><circle cx='27' cy='13' r='3.5' fill='%23f5c842'/></svg>">
 
 
-<meta property="og:title" content="CHM GEL SIGNALS — Academy">
-<meta property="og:description" content="Полное руководство по торговому боту CHM GEL SIGNALS. Стратегии, автотрейдинг, бэктест, оптимизатор.">
+<meta property="og:title" content="CHM Finance — Academy">
+<meta property="og:description" content="Полное руководство по торговому боту CHM Finance. Стратегии, автотрейдинг, бэктест, оптимизатор.">
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://chmup.top/academy">
 <meta name="theme-color" content="#0a0d12">
-<meta name="description" content="Полное руководство по CHM GEL SIGNALS — четыре торговых стратегии, автотрейдинг на Bybit и BingX, бэктест и оптимизатор параметров.">
-<title>CHM GEL SIGNALS — Academy</title>
+<meta name="description" content="Полное руководство по CHM Finance — четыре торговых стратегии, автотрейдинг на Bybit и BingX, бэктест и оптимизатор параметров.">
+<title>CHM Finance — Academy</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js" defer>
 // ── Lightbox ──────────────────────────────────
@@ -37,29 +37,27 @@ document.addEventListener('keydown', (e) => {
 });
 
 </script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;1,9..40,300&display=swap" onload="this.onload=null;this.rel='stylesheet'">
-<noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500&display=swap"></noscript>
-<link rel="preload" as="style" href="https://fonts.cdnfonts.com/css/gilroy-free" onload="this.onload=null;this.rel='stylesheet'">
-<noscript><link rel="stylesheet" href="https://fonts.cdnfonts.com/css/gilroy-free"></noscript>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
 <style>
 :root {
-  --bg: #0a0d12;
-  --bg2: #0f1318;
-  --bg3: #141920;
+  --bg: #050810;
+  --bg2: #0a0f1a;
+  --bg3: #101828;
   --border: rgba(255,255,255,0.06);
-  --border2: rgba(255,255,255,0.12);
-  --gold: #f5c842;
-  --gold2: #e8a800;
-  --green: #22d47a;
-  --red: #ff4f6a;
-  --blue: #4f8fff;
-  --purple: #9b6dff;
-  --text: #e8eaf0;
-  --text2: #8892a4;
-  --text3: #525d6e;
+  --border2: rgba(255,255,255,0.1);
+  --gold: #a78bfa;
+  --gold2: #7c3aed;
+  --green: #10b981;
+  --red: #ef4444;
+  --blue: #3b82f6;
+  --purple: #7c3aed;
+  --text: #e2e8f0;
+  --text2: #94a3b8;
+  --text3: #64748b;
   --card: rgba(255,255,255,0.03);
-  --card-hover: rgba(255,255,255,0.05);
+  --card-hover: rgba(255,255,255,0.06);
 }
 
 * { margin:0; padding:0; box-sizing:border-box; }
@@ -69,7 +67,7 @@ html { scroll-behavior: smooth; }
 body {
   background: var(--bg);
   color: var(--text);
-  font-family: 'DM Sans', sans-serif;
+  font-family: 'Inter', sans-serif;
   font-size: 15px;
   line-height: 1.7;
   min-height: 100vh;
@@ -130,12 +128,12 @@ body::before {
 .logo-icon::before {
   content: '';
   position: absolute; inset: 0;
-  background: radial-gradient(ellipse at 70% 20%, rgba(245,200,66,0.12), transparent 60%);
+  background: radial-gradient(ellipse at 70% 20%, rgba(167,139,250,0.12), transparent 60%);
 }
 .logo-icon svg { width: 28px; height: 28px; position: relative; z-index: 1; }
 
 .logo-text {
-  font-family: 'Gilroy', 'DM Sans', sans-serif, sans-serif;
+  font-family: 'Gilroy', 'Inter', sans-serif, sans-serif;
   font-weight: 800;
   font-size: 14px;
   letter-spacing: 0.05em;
@@ -188,7 +186,7 @@ body::before {
 }
 
 .nav-item.active {
-  background: linear-gradient(135deg, rgba(245,200,66,0.12), rgba(245,200,66,0.05));
+  background: linear-gradient(135deg, rgba(167,139,250,0.12), rgba(245,200,66,0.05));
   color: var(--gold);
   border: 1px solid rgba(245,200,66,0.2);
 }
@@ -259,7 +257,7 @@ body::before {
 }
 
 .hero h1 {
-  font-family: 'Gilroy', 'DM Sans', sans-serif, sans-serif;
+  font-family: 'Gilroy', 'Inter', sans-serif, sans-serif;
   font-size: 48px;
   font-weight: 800;
   line-height: 1.1;
@@ -293,7 +291,7 @@ body::before {
 }
 
 .stat-num {
-  font-family: 'Gilroy', 'DM Sans', sans-serif, sans-serif;
+  font-family: 'Gilroy', 'Inter', sans-serif, sans-serif;
   font-size: 28px;
   font-weight: 700;
   color: var(--gold);
@@ -325,14 +323,14 @@ body::before {
 
 /* section-icon upgraded above */
 
-.icon-gold { background: rgba(245,200,66,0.12); border: 1px solid rgba(245,200,66,0.2); }
+.icon-gold { background: rgba(167,139,250,0.12); border: 1px solid rgba(245,200,66,0.2); }
 .icon-green { background: rgba(34,212,122,0.1); border: 1px solid rgba(34,212,122,0.2); }
 .icon-blue { background: rgba(79,143,255,0.1); border: 1px solid rgba(79,143,255,0.2); }
 .icon-purple { background: rgba(155,109,255,0.1); border: 1px solid rgba(155,109,255,0.2); }
 .icon-red { background: rgba(255,79,106,0.1); border: 1px solid rgba(255,79,106,0.2); }
 
 .section-title-group h2 {
-  font-family: 'Gilroy', 'DM Sans', sans-serif, sans-serif;
+  font-family: 'Gilroy', 'Inter', sans-serif, sans-serif;
   font-size: 30px;
   font-weight: 700;
   letter-spacing: -0.01em;
@@ -387,7 +385,7 @@ body::before {
 .badge-red { background: rgba(255,79,106,0.1); color: var(--red); border: 1px solid rgba(255,79,106,0.2); }
 
 .card h3 {
-  font-family: 'Gilroy', 'DM Sans', sans-serif, sans-serif;
+  font-family: 'Gilroy', 'Inter', sans-serif, sans-serif;
   font-size: 18px;
   font-weight: 700;
   margin-bottom: 8px;
@@ -449,7 +447,7 @@ body::before {
   background: linear-gradient(135deg, rgba(245,200,66,0.2), rgba(245,200,66,0.05));
   border: 2px solid rgba(245,200,66,0.4);
   display: flex; align-items: center; justify-content: center;
-  font-family: 'Gilroy', 'DM Sans', sans-serif, sans-serif;
+  font-family: 'Gilroy', 'Inter', sans-serif, sans-serif;
   font-weight: 800;
   font-size: 15px;
   color: var(--gold);
@@ -462,7 +460,7 @@ body::before {
 }
 
 .step-body h3 {
-  font-family: 'Gilroy', 'DM Sans', sans-serif, sans-serif;
+  font-family: 'Gilroy', 'Inter', sans-serif, sans-serif;
   font-size: 17px;
   font-weight: 700;
   margin-bottom: 8px;
@@ -617,7 +615,7 @@ body::before {
 .callout-icon { font-size: 18px; flex-shrink: 0; margin-top: 1px; }
 
 .callout-body h4 {
-  font-family: 'Gilroy', 'DM Sans', sans-serif, sans-serif;
+  font-family: 'Gilroy', 'Inter', sans-serif, sans-serif;
   font-size: 14px;
   font-weight: 700;
   margin-bottom: 4px;
@@ -740,7 +738,7 @@ body::before {
 }
 
 .anatomy-item .val {
-  font-family: 'Gilroy', 'DM Sans', sans-serif, sans-serif;
+  font-family: 'Gilroy', 'Inter', sans-serif, sans-serif;
   font-size: 15px;
   font-weight: 700;
   color: var(--text);
@@ -786,7 +784,7 @@ code {
   border: 1px solid var(--border);
   background: var(--card);
   color: var(--text2);
-  font-family: 'Gilroy', 'DM Sans', sans-serif, sans-serif;
+  font-family: 'Gilroy', 'Inter', sans-serif, sans-serif;
   font-size: 13px;
   font-weight: 700;
   cursor: pointer;
@@ -830,7 +828,7 @@ code {
   user-select: none;
 }
 .changelog-version {
-  font-family: 'Gilroy', 'DM Sans', sans-serif;
+  font-family: 'Gilroy', 'Inter', sans-serif;
   font-weight: 800;
   font-size: 17px;
   color: var(--gold);
@@ -855,7 +853,7 @@ code {
 }
 .badge-new { background: rgba(34,212,122,0.12); color: var(--green); border: 1px solid rgba(34,212,122,0.25); }
 .badge-fix { background: rgba(255,79,106,0.1); color: var(--red); border: 1px solid rgba(255,79,106,0.2); }
-.badge-major { background: rgba(245,200,66,0.12); color: var(--gold); border: 1px solid rgba(245,200,66,0.25); }
+.badge-major { background: rgba(167,139,250,0.12); color: var(--gold); border: 1px solid rgba(245,200,66,0.25); }
 
 .changelog-body {
   padding: 0 22px 20px;
@@ -903,7 +901,7 @@ code {
   width: 36px; height: 36px;
   border-radius: 50%;
   display: flex; align-items: center; justify-content: center;
-  font-family: 'Gilroy', 'DM Sans', sans-serif;
+  font-family: 'Gilroy', 'Inter', sans-serif;
   font-weight: 800;
   font-size: 14px;
   flex-shrink: 0;
@@ -913,7 +911,7 @@ code {
 
 .api-step-body { padding-bottom: 28px; flex: 1; }
 .api-step-body h4 {
-  font-family: 'Gilroy', 'DM Sans', sans-serif;
+  font-family: 'Gilroy', 'Inter', sans-serif;
   font-size: 15px; font-weight: 700;
   margin-bottom: 6px; padding-top: 6px;
   color: var(--text);
@@ -945,14 +943,14 @@ code {
   border: 1px solid var(--border);
   background: var(--card);
   color: var(--text2);
-  font-family: 'Gilroy', 'DM Sans', sans-serif;
+  font-family: 'Gilroy', 'Inter', sans-serif;
   font-size: 14px;
   font-weight: 700;
   cursor: pointer;
   transition: all 0.2s;
 }
 .api-tab:hover { background: var(--card-hover); color: var(--text); }
-.api-tab.active.bybit { background: rgba(245,200,66,0.12); color: var(--gold); border-color: rgba(245,200,66,0.35); }
+.api-tab.active.bybit { background: rgba(167,139,250,0.12); color: var(--gold); border-color: rgba(245,200,66,0.35); }
 .api-tab.active.bingx { background: rgba(79,143,255,0.1); color: var(--blue); border-color: rgba(79,143,255,0.3); }
 
 .api-panel { display: none; }
@@ -988,7 +986,7 @@ code {
   border: none;
   background: transparent;
   color: var(--text3);
-  font-family: 'Gilroy', 'DM Sans', sans-serif;
+  font-family: 'Gilroy', 'Inter', sans-serif;
   font-weight: 700;
   font-size: 13px;
   cursor: pointer;
@@ -1041,7 +1039,7 @@ body.lang-en [data-lang="en"].inline { display: inline; }
 .section-icon svg { width: 26px; height: 26px; position: relative; z-index: 1; }
 
 .icon-gold { background: rgba(245,200,66,0.1); border: 1px solid rgba(245,200,66,0.25); }
-.icon-gold svg { stroke: #f5c842; }
+.icon-gold svg { stroke: #a78bfa; }
 .icon-green { background: rgba(34,212,122,0.08); border: 1px solid rgba(34,212,122,0.2); }
 .icon-green svg { stroke: #22d47a; }
 .icon-blue { background: rgba(79,143,255,0.08); border: 1px solid rgba(79,143,255,0.2); }
@@ -1065,7 +1063,7 @@ body.lang-en [data-lang="en"].inline { display: inline; }
   background-image: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.03'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
 }
 .strat-banner-levels {
-  background: linear-gradient(135deg, rgba(245,200,66,0.12) 0%, rgba(245,200,66,0.04) 50%, rgba(10,13,18,0) 100%);
+  background: linear-gradient(135deg, rgba(167,139,250,0.12) 0%, rgba(245,200,66,0.04) 50%, rgba(10,13,18,0) 100%);
   border: 1px solid rgba(245,200,66,0.2);
 }
 .strat-banner-gerchik {
@@ -1090,8 +1088,8 @@ body.lang-en [data-lang="en"].inline { display: inline; }
   display: flex; align-items: center; justify-content: center;
 }
 .strat-banner-glyph svg { width: 34px; height: 34px; }
-.glyph-levels { background: rgba(245,200,66,0.12); border: 1px solid rgba(245,200,66,0.3); }
-.glyph-levels svg { stroke: #f5c842; }
+.glyph-levels { background: rgba(167,139,250,0.12); border: 1px solid rgba(245,200,66,0.3); }
+.glyph-levels svg { stroke: #a78bfa; }
 .glyph-gerchik { background: rgba(155,109,255,0.12); border: 1px solid rgba(155,109,255,0.3); }
 .glyph-gerchik svg { stroke: #9b6dff; }
 .glyph-smc { background: rgba(79,143,255,0.12); border: 1px solid rgba(79,143,255,0.3); }
@@ -1105,13 +1103,13 @@ body.lang-en [data-lang="en"].inline { display: inline; }
   font-size: 10px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase;
   padding: 3px 10px; border-radius: 20px; margin-bottom: 8px;
 }
-.badge-lv { background: rgba(245,200,66,0.15); color: #f5c842; }
+.badge-lv { background: rgba(245,200,66,0.15); color: #a78bfa; }
 .badge-gc { background: rgba(155,109,255,0.15); color: #9b6dff; }
 .badge-sm { background: rgba(79,143,255,0.15); color: #4f8fff; }
 .badge-sc { background: rgba(34,212,122,0.15); color: #22d47a; }
 
 .strat-banner h3 {
-  font-family: 'Gilroy', 'DM Sans', sans-serif;
+  font-family: 'Gilroy', 'Inter', sans-serif;
   font-size: 20px; font-weight: 800; margin-bottom: 6px; color: var(--text);
 }
 .strat-banner p { font-size: 13.5px; color: var(--text2); line-height: 1.6; margin-bottom: 14px; }
@@ -1145,7 +1143,7 @@ body.lang-en [data-lang="en"].inline { display: inline; }
 
 /* ── STEP NUM UPGRADE ── */
 .step-num {
-  font-family: 'Gilroy', 'DM Sans', sans-serif;
+  font-family: 'Gilroy', 'Inter', sans-serif;
   font-weight: 800; font-size: 14px;
   color: var(--gold);
   background: rgba(245,200,66,0.08);
@@ -1203,7 +1201,7 @@ body.lang-en [data-lang="en"].inline { display: inline; }
 }
 .logo-badge:hover .logo-icon {
   box-shadow:
-    0 0 0 1px rgba(245,200,66,0.12),
+    0 0 0 1px rgba(167,139,250,0.12),
     0 0 32px rgba(245,200,66,0.15),
     inset 0 1px 0 rgba(255,255,255,0.06);
   border-color: rgba(245,200,66,0.3);
@@ -1393,7 +1391,7 @@ body.lang-en [data-lang="en"].inline { display: inline; }
   border-radius: 9px;
   padding: 8px 12px 8px 34px;
   color: var(--text);
-  font-family: 'DM Sans', sans-serif;
+  font-family: 'Inter', sans-serif;
   font-size: 13px;
   outline: none;
   transition: border-color 0.2s, background 0.2s;
@@ -1609,7 +1607,7 @@ body.lang-en [data-lang="en"].inline { display: inline; }
   background: rgba(245,200,66,0.08) !important;
   border-color: rgba(245,200,66,0.35) !important;
   transform: translateY(-2px) !important;
-  box-shadow: 0 4px 20px rgba(245,200,66,0.12) !important;
+  box-shadow: 0 4px 20px rgba(167,139,250,0.12) !important;
 }
 .anatomy-item.anatomy-active .key {
   color: var(--gold) !important;
@@ -1946,7 +1944,7 @@ body.lang-en [data-lang="en"].inline { display: inline; }
   transition: all .2s;
   vertical-align: middle;
   letter-spacing: .02em;
-  font-family: 'DM Sans', sans-serif;
+  font-family: 'Inter', sans-serif;
   white-space: nowrap;
 }
 .cl-nav-btn:hover {
@@ -1970,11 +1968,11 @@ body.lang-en [data-lang="en"].inline { display: inline; }
   <div class="sidebar-logo">
     <div class="logo-badge">
 <div class="logo-icon">
-        <img src="data:image/webp;base64,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" alt="CHM GEL SIGNALS" width="40" height="40" style="border-radius:8px;display:block;">
+        <img src="data:image/webp;base64,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" alt="CHM Finance" width="40" height="40" style="border-radius:8px;display:block;">
       </div>
       <div>
-        <div class="logo-text">CHM GEL SIGNALS</div>
-        <div class="logo-sub">SIGNALS BOT</div>
+        <div class="logo-text">CHM Finance</div>
+        <div class="logo-sub">ACADEMY</div>
       </div>
     </div>
   </div>
@@ -2063,14 +2061,14 @@ body.lang-en [data-lang="en"].inline { display: inline; }
 
 <main class="main">
   <div class="breadcrumbs" id="breadcrumbs">
-    <span>CHM GEL SIGNALS</span>
+    <span>CHM Finance</span>
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
     <span class="breadcrumb-current" id="breadcrumb-section">Быстрый старт</span>
   </div>
   <div class="hero">
-    <div class="hero-badge"><svg viewBox="0 0 256 256" fill="none" stroke="currentColor" stroke-width="16" stroke-linecap="round" width="13" height="13"><path d="M40 48h112a8 8 0 0 1 8 8v144H40V48z"/><path d="M160 56l40 16v144l-40-16"/></svg> CHM GEL SIGNALS</div>
-    <h1>CHM GEL SIGNALS<br><span>Academy</span></h1>
-    <p class="hero-desc">Полное руководство по работе с CHM GEL SIGNALS. От первого сигнала до настройки адаптивного оптимизатора.</p>
+    <div class="hero-badge"><svg viewBox="0 0 256 256" fill="none" stroke="currentColor" stroke-width="16" stroke-linecap="round" width="13" height="13"><path d="M40 48h112a8 8 0 0 1 8 8v144H40V48z"/><path d="M160 56l40 16v144l-40-16"/></svg> CHM Finance</div>
+    <h1>CHM Finance<br><span>Academy</span></h1>
+    <p class="hero-desc">Полное руководство по работе с CHM Finance. От первого сигнала до настройки адаптивного оптимизатора.</p>
     <div class="hero-stats">
       <div class="stat"><div class="stat-num">4</div><div class="stat-label">Стратегии</div></div>
       <div class="stat"><div class="stat-num">2</div><div class="stat-label">Биржи</div></div>
@@ -2108,8 +2106,8 @@ const CONTENT = {
 <div style="margin-top:16px;display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;">
 <div style="background:rgba(34,212,122,0.06);border:1px solid rgba(34,212,122,0.25);border-radius:14px;padding:16px;text-align:center;">
   <div style="font-size:20px;margin-bottom:6px;">🟢</div>
-  <div style="font-family:'Gilroy','DM Sans',sans-serif;font-weight:800;font-size:15px;color:#22d47a;margin-bottom:2px;">Beginner</div>
-  <div style="font-family:'Gilroy','DM Sans',sans-serif;font-size:22px;font-weight:800;color:var(--text);margin:6px 0;">$49<span style="font-size:12px;font-weight:400;color:var(--text3);">/мес</span></div>
+  <div style="font-family:'Inter',sans-serif;font-weight:800;font-size:15px;color:#22d47a;margin-bottom:2px;">Beginner</div>
+  <div style="font-family:'Inter',sans-serif;font-size:22px;font-weight:800;color:var(--text);margin:6px 0;">$49<span style="font-size:12px;font-weight:400;color:var(--text3);">/мес</span></div>
   <div style="display:flex;flex-direction:column;gap:4px;font-size:11px;color:var(--text2);text-align:left;margin-top:8px;">
     <div>✅ LEVELS сканер</div>
     <div>✅ 3 анализа/день</div>
@@ -2121,8 +2119,8 @@ const CONTENT = {
 <div style="background:rgba(79,143,255,0.06);border:2px solid rgba(79,143,255,0.35);border-radius:14px;padding:16px;text-align:center;position:relative;">
   <div style="position:absolute;top:-10px;left:50%;transform:translateX(-50%);background:var(--blue);color:#fff;font-size:10px;font-weight:700;padding:2px 10px;border-radius:20px;white-space:nowrap;">ПОПУЛЯРНЫЙ</div>
   <div style="font-size:20px;margin-bottom:6px;margin-top:6px;">🔵</div>
-  <div style="font-family:'Gilroy','DM Sans',sans-serif;font-weight:800;font-size:15px;color:#4f8fff;margin-bottom:2px;">Pro</div>
-  <div style="font-family:'Gilroy','DM Sans',sans-serif;font-size:22px;font-weight:800;color:var(--text);margin:6px 0;">$79<span style="font-size:12px;font-weight:400;color:var(--text3);">/мес</span></div>
+  <div style="font-family:'Inter',sans-serif;font-weight:800;font-size:15px;color:#4f8fff;margin-bottom:2px;">Pro</div>
+  <div style="font-family:'Inter',sans-serif;font-size:22px;font-weight:800;color:var(--text);margin:6px 0;">$79<span style="font-size:12px;font-weight:400;color:var(--text3);">/мес</span></div>
   <div style="display:flex;flex-direction:column;gap:4px;font-size:11px;color:var(--text2);text-align:left;margin-top:8px;">
     <div>✅ LEVELS + <span class="term" data-tip="Smart Money Concepts — методология анализа рынка через отслеживание действий крупных институциональных игроков.">SMC</span></div>
     <div>✅ Авто-трейдинг</div>
@@ -2134,8 +2132,8 @@ const CONTENT = {
 </div>
 <div style="background:rgba(245,200,66,0.06);border:1px solid rgba(245,200,66,0.3);border-radius:14px;padding:16px;text-align:center;">
   <div style="font-size:20px;margin-bottom:6px;">🟡</div>
-  <div style="font-family:'Gilroy','DM Sans',sans-serif;font-weight:800;font-size:15px;color:#f5c842;margin-bottom:2px;">Elite</div>
-  <div style="font-family:'Gilroy','DM Sans',sans-serif;font-size:22px;font-weight:800;color:var(--text);margin:6px 0;">$109<span style="font-size:12px;font-weight:400;color:var(--text3);">/мес</span></div>
+  <div style="font-family:'Inter',sans-serif;font-weight:800;font-size:15px;color:#a78bfa;margin-bottom:2px;">Elite</div>
+  <div style="font-family:'Inter',sans-serif;font-size:22px;font-weight:800;color:var(--text);margin:6px 0;">$109<span style="font-size:12px;font-weight:400;color:var(--text3);">/мес</span></div>
   <div style="display:flex;flex-direction:column;gap:4px;font-size:11px;color:var(--text2);text-align:left;margin-top:8px;">
     <div>✅ Все 4 стратегии</div>
     <div>✅ Неограниченный бэктест</div>
@@ -2160,8 +2158,8 @@ const CONTENT = {
 <div style="margin-top:16px;display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;">
 <div style="background:rgba(34,212,122,0.06);border:1px solid rgba(34,212,122,0.25);border-radius:14px;padding:16px;text-align:center;">
   <div style="font-size:20px;margin-bottom:6px;">🟢</div>
-  <div style="font-family:'Gilroy','DM Sans',sans-serif;font-weight:800;font-size:15px;color:#22d47a;margin-bottom:2px;">Beginner</div>
-  <div style="font-family:'Gilroy','DM Sans',sans-serif;font-size:22px;font-weight:800;color:var(--text);margin:6px 0;">$49<span style="font-size:12px;font-weight:400;color:var(--text3);">/mo</span></div>
+  <div style="font-family:'Inter',sans-serif;font-weight:800;font-size:15px;color:#22d47a;margin-bottom:2px;">Beginner</div>
+  <div style="font-family:'Inter',sans-serif;font-size:22px;font-weight:800;color:var(--text);margin:6px 0;">$49<span style="font-size:12px;font-weight:400;color:var(--text3);">/mo</span></div>
   <div style="display:flex;flex-direction:column;gap:4px;font-size:11px;color:var(--text2);text-align:left;margin-top:8px;">
     <div>✅ LEVELS scanner</div>
     <div>✅ 3 analyses/day</div>
@@ -2173,8 +2171,8 @@ const CONTENT = {
 <div style="background:rgba(79,143,255,0.06);border:2px solid rgba(79,143,255,0.35);border-radius:14px;padding:16px;text-align:center;position:relative;">
   <div style="position:absolute;top:-10px;left:50%;transform:translateX(-50%);background:var(--blue);color:#fff;font-size:10px;font-weight:700;padding:2px 10px;border-radius:20px;white-space:nowrap;">POPULAR</div>
   <div style="font-size:20px;margin-bottom:6px;margin-top:6px;">🔵</div>
-  <div style="font-family:'Gilroy','DM Sans',sans-serif;font-weight:800;font-size:15px;color:#4f8fff;margin-bottom:2px;">Pro</div>
-  <div style="font-family:'Gilroy','DM Sans',sans-serif;font-size:22px;font-weight:800;color:var(--text);margin:6px 0;">$79<span style="font-size:12px;font-weight:400;color:var(--text3);">/mo</span></div>
+  <div style="font-family:'Inter',sans-serif;font-weight:800;font-size:15px;color:#4f8fff;margin-bottom:2px;">Pro</div>
+  <div style="font-family:'Inter',sans-serif;font-size:22px;font-weight:800;color:var(--text);margin:6px 0;">$79<span style="font-size:12px;font-weight:400;color:var(--text3);">/mo</span></div>
   <div style="display:flex;flex-direction:column;gap:4px;font-size:11px;color:var(--text2);text-align:left;margin-top:8px;">
     <div>✅ LEVELS + <span class="term" data-tip="Smart Money Concepts — методология анализа рынка через отслеживание действий крупных институциональных игроков.">SMC</span></div>
     <div>✅ Auto-trading</div>
@@ -2186,8 +2184,8 @@ const CONTENT = {
 </div>
 <div style="background:rgba(245,200,66,0.06);border:1px solid rgba(245,200,66,0.3);border-radius:14px;padding:16px;text-align:center;">
   <div style="font-size:20px;margin-bottom:6px;">🟡</div>
-  <div style="font-family:'Gilroy','DM Sans',sans-serif;font-weight:800;font-size:15px;color:#f5c842;margin-bottom:2px;">Elite</div>
-  <div style="font-family:'Gilroy','DM Sans',sans-serif;font-size:22px;font-weight:800;color:var(--text);margin:6px 0;">$109<span style="font-size:12px;font-weight:400;color:var(--text3);">/mo</span></div>
+  <div style="font-family:'Inter',sans-serif;font-weight:800;font-size:15px;color:#a78bfa;margin-bottom:2px;">Elite</div>
+  <div style="font-family:'Inter',sans-serif;font-size:22px;font-weight:800;color:var(--text);margin:6px 0;">$109<span style="font-size:12px;font-weight:400;color:var(--text3);">/mo</span></div>
   <div style="display:flex;flex-direction:column;gap:4px;font-size:11px;color:var(--text2);text-align:left;margin-top:8px;">
     <div>✅ All 4 strategies</div>
     <div>✅ Unlimited backtest</div>
@@ -2316,7 +2314,7 @@ const CONTENT = {
 <div class="callout callout-info" style="margin-top:24px;"><div class="callout-icon">💡</div><div class="callout-body"><h4>Главный принцип для всех стратегий</h4><p>Чем <strong>слабее</strong> настройки → больше сигналов, но менее точные. Чем <strong>строже</strong> → меньше, но точнее. Найди баланс через 🔬 Бэктест.</p></div></div>
 
 <div class="divider"></div>
-<h3 style="font-family:'Gilroy','DM Sans',sans-serif;font-size:20px;font-weight:700;margin-bottom:16px;">🎯 High WR Mode (v4.5)</h3>
+<h3 style="font-family:'Inter',sans-serif;font-size:20px;font-weight:700;margin-bottom:16px;">🎯 High WR Mode (v4.5)</h3>
 <div style="background:rgba(245,200,66,.05);border:1px solid rgba(245,200,66,.25);border-radius:16px;padding:20px;margin-bottom:8px;">
   <div style="display:flex;align-items:center;gap:10px;margin-bottom:16px;">
     <div style="background:rgba(245,200,66,.15);border:1px solid rgba(245,200,66,.3);border-radius:8px;padding:6px 14px;font-weight:700;color:var(--gold);font-size:13px;">🎯 Настройки → High WR Mode</div>
@@ -2456,7 +2454,7 @@ const CONTENT = {
 <div class="callout callout-info" style="margin-top:24px;"><div class="callout-icon">💡</div><div class="callout-body"><h4>Key principle for all strategies</h4><p>The <strong>weaker</strong> the settings → more signals, less accurate. The <strong>stricter</strong> → fewer, more accurate. Find balance via 🔬 Backtest.</p></div></div>
 
 <div class="divider"></div>
-<h3 style="font-family:'Gilroy','DM Sans',sans-serif;font-size:20px;font-weight:700;margin-bottom:16px;">🎯 High WR Mode (v4.5)</h3>
+<h3 style="font-family:'Inter',sans-serif;font-size:20px;font-weight:700;margin-bottom:16px;">🎯 High WR Mode (v4.5)</h3>
 <div style="background:rgba(245,200,66,.05);border:1px solid rgba(245,200,66,.25);border-radius:16px;padding:20px;margin-bottom:8px;">
   <div style="display:flex;align-items:center;gap:10px;margin-bottom:16px;">
     <div style="background:rgba(245,200,66,.15);border:1px solid rgba(245,200,66,.3);border-radius:8px;padding:6px 14px;font-weight:700;color:var(--gold);font-size:13px;">🎯 Settings → High WR Mode</div>
@@ -2485,7 +2483,7 @@ const CONTENT = {
 `
   },
   "signal": {
-    ru: `<div class="section-header"><div class="section-icon icon-green"><svg viewBox="0 0 256 256" fill="none" stroke="currentColor" stroke-width="16" stroke-linecap="round" stroke-linejoin="round"><path d="M40 48h112a8 8 0 0 1 8 8v144H40V48z"/><path d="M160 56l40 16v144l-40-16"/><line x1="40" y1="48" x2="40" y2="200"/><line x1="88" y1="80" x2="136" y2="80"/><line x1="88" y1="112" x2="136" y2="112"/></svg></div><div class="section-title-group"><h2>Как читать сигнал</h2><p>Разбор каждого блока реального сигнала CHM GEL SIGNALS</p></div></div>
+    ru: `<div class="section-header"><div class="section-icon icon-green"><svg viewBox="0 0 256 256" fill="none" stroke="currentColor" stroke-width="16" stroke-linecap="round" stroke-linejoin="round"><path d="M40 48h112a8 8 0 0 1 8 8v144H40V48z"/><path d="M160 56l40 16v144l-40-16"/><line x1="40" y1="48" x2="40" y2="200"/><line x1="88" y1="80" x2="136" y2="80"/><line x1="88" y1="112" x2="136" y2="112"/></svg></div><div class="section-title-group"><h2>Как читать сигнал</h2><p>Разбор каждого блока реального сигнала CHM Finance</p></div></div>
 <div class="signal-box"><div class="signal-box-header"><div class="signal-dot"></div><div class="signal-label">Реальный сигнал · LEVELS · LONG</div></div>
 <div class="signal-content"><span class="hl-green">🟢 LONG СИГНАЛ</span>
 
@@ -2528,7 +2526,7 @@ const CONTENT = {
 <div class="anatomy-item"><div class="key">🌡 Страх/Жадность</div><div class="val">0–100</div><div class="desc">0–25 😱 Экстремальный страх = покупать<br>75–100 🤑 Жадность = осторожно</div></div>
 <div class="anatomy-item"><div class="key">🔮 Корреляция</div><div class="val">BTC/ETH</div><div class="desc">"Движется самостоятельно" — монета идёт по своей логике, не зависит от BTC.</div></div>
 </div>`,
-    en: `<div class="section-header"><div class="section-icon icon-green"><svg viewBox="0 0 256 256" fill="none" stroke="currentColor" stroke-width="16" stroke-linecap="round" stroke-linejoin="round"><path d="M40 48h112a8 8 0 0 1 8 8v144H40V48z"/><path d="M160 56l40 16v144l-40-16"/><line x1="40" y1="48" x2="40" y2="200"/><line x1="88" y1="80" x2="136" y2="80"/><line x1="88" y1="112" x2="136" y2="112"/></svg></div><div class="section-title-group"><h2>How to Read a Signal</h2><p>Breaking down every block of a real CHM GEL SIGNALS alert</p></div></div>
+    en: `<div class="section-header"><div class="section-icon icon-green"><svg viewBox="0 0 256 256" fill="none" stroke="currentColor" stroke-width="16" stroke-linecap="round" stroke-linejoin="round"><path d="M40 48h112a8 8 0 0 1 8 8v144H40V48z"/><path d="M160 56l40 16v144l-40-16"/><line x1="40" y1="48" x2="40" y2="200"/><line x1="88" y1="80" x2="136" y2="80"/><line x1="88" y1="112" x2="136" y2="112"/></svg></div><div class="section-title-group"><h2>How to Read a Signal</h2><p>Breaking down every block of a real CHM Finance alert</p></div></div>
 <div class="signal-box"><div class="signal-box-header"><div class="signal-dot"></div><div class="signal-label">Real Signal · LEVELS · LONG</div></div>
 <div class="signal-content"><span class="hl-green">🟢 LONG SIGNAL</span>
 
@@ -2579,7 +2577,7 @@ Market Fundamentals:
 <div class="card"><div class="card-badge badge-green">Рекомендовано</div><h3>Bybit</h3><p>bybit.com → Аккаунт → API управление → Создать системный ключ</p><div style="margin-top:14px;font-size:13px;color:var(--text2);"><div style="margin-bottom:6px;">✅ Read-Write</div><div style="margin-bottom:6px;">✅ Contract-Trade</div><div style="color:var(--red);">⛔ Вывод средств — ВЫКЛЮЧИТЬ</div></div><div style="margin-top:14px;padding-top:14px;border-top:1px solid var(--border);font-size:12px;color:var(--text3);">Ниже комиссии · Выше ликвидность · <span class="term" data-tip="Разделение позиции на несколько частей для входа по разным ценам в зоне Order Block.">Split Entry</span> для <span class="term" data-tip="Smart Money Concepts — методология анализа рынка через отслеживание действий крупных институциональных игроков.">SMC</span></div></div>
 <div class="card"><div class="card-badge badge-blue">Альтернатива</div><h3>BingX</h3><p>bingx.com → Настройки → API управление → Создать</p><div style="margin-top:14px;font-size:13px;color:var(--text2);"><div style="margin-bottom:6px;">✅ Чтение</div><div style="margin-bottom:6px;">✅ Торговля фьючерсами</div><div style="color:var(--red);">⛔ Вывод — ВЫКЛЮЧИТЬ</div></div><div style="margin-top:14px;padding-top:14px;border-top:1px solid var(--border);font-size:12px;color:var(--text3);">Подходит если проблемы с верификацией Bybit</div></div>
 </div>
-<h3 style="font-family:'Gilroy','DM Sans',sans-serif;font-size:20px;font-weight:700;margin-bottom:20px;">Настройки авто-трейдинга</h3>
+<h3 style="font-family:'Inter',sans-serif;font-size:20px;font-weight:700;margin-bottom:20px;">Настройки авто-трейдинга</h3>
 <div class="table-scroll-hint">← свайп →</div><div class="params-wrap"><table class="params-table"><thead><tr><th>Параметр</th><th>Что делает</th><th>Рекомендация</th></tr></thead><tbody>
 <tr><td>Режим</td><td>Авто — сразу открывает. Подтверждение — сначала спрашивает.</td><td>Подтверждение ✅</td></tr>
 <tr><td>Риск %</td><td>Процент депозита на одну сделку</td><td>1–2%</td></tr>
@@ -2592,7 +2590,7 @@ Market Fundamentals:
 
 <div class="divider"></div>
 
-<h3 style="font-family:'Gilroy','DM Sans',sans-serif;font-size:20px;font-weight:700;margin-bottom:20px;">⚙️ Режимы расчёта позиции (v4.5)</h3>
+<h3 style="font-family:'Inter',sans-serif;font-size:20px;font-weight:700;margin-bottom:20px;">⚙️ Режимы расчёта позиции (v4.5)</h3>
 <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:14px;margin-bottom:28px;">
   <div style="background:rgba(245,200,66,.05);border:1px solid rgba(245,200,66,.2);border-radius:12px;padding:16px;">
     <div style="font-weight:700;color:var(--gold);margin-bottom:8px;">📊 Risk Mode (по умолчанию)</div>
@@ -2608,14 +2606,14 @@ Market Fundamentals:
   </div>
 </div>
 
-<h3 style="font-family:'Gilroy','DM Sans',sans-serif;font-size:20px;font-weight:700;margin-bottom:20px;">🏦 Bybit Demo (Prop / CFT)</h3>
+<h3 style="font-family:'Inter',sans-serif;font-size:20px;font-weight:700;margin-bottom:20px;">🏦 Bybit Demo (Prop / CFT)</h3>
 <div class="callout callout-info"><div class="callout-icon">🏦</div><div class="callout-body">
   <h4>Для проп-трейдеров</h4>
   <p>Полная поддержка <strong>api-demo.bybit.com</strong> — работай с CryptoFundTrader, FTMO и другими проп-фирмами. Включается в Авто-трейдинг → <code>○ 🏦 Bybit Demo (Prop/CFT)</code>.</p>
   <p style="margin-top:8px;font-size:13px;color:var(--text3);">Важно: demo и live API ключи хранятся раздельно — не пересекаются.</p>
 </div></div>
 
-<h3 style="font-family:'Gilroy','DM Sans',sans-serif;font-size:20px;font-weight:700;margin-top:28px;margin-bottom:20px;">🏆 Prop Autopilot</h3>
+<h3 style="font-family:'Inter',sans-serif;font-size:20px;font-weight:700;margin-top:28px;margin-bottom:20px;">🏆 Prop Autopilot</h3>
 <div style="background:var(--bg2);border:1px solid rgba(245,200,66,.2);border-radius:16px;padding:20px;margin-bottom:24px;">
   <p style="margin-bottom:16px;">Бот автоматически адаптирует риск на основе текущего состояния challenge проп-фирмы. Меню → Авто-трейдинг → 🏆 Prop Autopilot.</p>
   <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:10px;margin-bottom:16px;">
@@ -2651,7 +2649,7 @@ Market Fundamentals:
 <div class="card"><div class="card-badge badge-green">Recommended</div><h3>Bybit</h3><p>bybit.com → Account → API Management → Create system key</p><div style="margin-top:14px;font-size:13px;color:var(--text2);"><div style="margin-bottom:6px;">✅ Read-Write</div><div style="margin-bottom:6px;">✅ Contract-Trade</div><div style="color:var(--red);">⛔ Withdraw — DISABLE</div></div><div style="margin-top:14px;padding-top:14px;border-top:1px solid var(--border);font-size:12px;color:var(--text3);">Lower fees · Higher liquidity · <span class="term" data-tip="Разделение позиции на несколько частей для входа по разным ценам в зоне Order Block.">Split Entry</span> for <span class="term" data-tip="Smart Money Concepts — методология анализа рынка через отслеживание действий крупных институциональных игроков.">SMC</span></div></div>
 <div class="card"><div class="card-badge badge-blue">Alternative</div><h3>BingX</h3><p>bingx.com → Settings → API Management → Create</p><div style="margin-top:14px;font-size:13px;color:var(--text2);"><div style="margin-bottom:6px;">✅ Read</div><div style="margin-bottom:6px;">✅ Futures Trading</div><div style="color:var(--red);">⛔ Withdraw — DISABLE</div></div><div style="margin-top:14px;padding-top:14px;border-top:1px solid var(--border);font-size:12px;color:var(--text3);">Use if Bybit verification is a problem</div></div>
 </div>
-<h3 style="font-family:'Gilroy','DM Sans',sans-serif;font-size:20px;font-weight:700;margin-bottom:20px;">Auto-trading Settings</h3>
+<h3 style="font-family:'Inter',sans-serif;font-size:20px;font-weight:700;margin-bottom:20px;">Auto-trading Settings</h3>
 <div class="table-scroll-hint">← swipe →</div><div class="params-wrap"><table class="params-table"><thead><tr><th>Parameter</th><th>What it does</th><th>Recommendation</th></tr></thead><tbody>
 <tr><td>Mode</td><td>Auto — opens immediately. <span class="term" data-tip="Режим подтверждения — бот показывает сигнал и ждёт ручного нажатия перед открытием сделки.">Confirmation</span> — asks you first.</td><td><span class="term" data-tip="Режим подтверждения — бот показывает сигнал и ждёт ручного нажатия перед открытием сделки.">Confirmation</span> ✅</td></tr>
 <tr><td>Risk %</td><td>Deposit % per trade</td><td>1–2%</td></tr>
@@ -2664,7 +2662,7 @@ Market Fundamentals:
 
 <div class="divider"></div>
 
-<h3 style="font-family:'Gilroy','DM Sans',sans-serif;font-size:20px;font-weight:700;margin-bottom:20px;">⚙️ Position Sizing Modes (v4.5)</h3>
+<h3 style="font-family:'Inter',sans-serif;font-size:20px;font-weight:700;margin-bottom:20px;">⚙️ Position Sizing Modes (v4.5)</h3>
 <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:14px;margin-bottom:28px;">
   <div style="background:rgba(245,200,66,.05);border:1px solid rgba(245,200,66,.2);border-radius:12px;padding:16px;">
     <div style="font-weight:700;color:var(--gold);margin-bottom:8px;">📊 Risk Mode (default)</div>
@@ -2680,13 +2678,13 @@ Market Fundamentals:
   </div>
 </div>
 
-<h3 style="font-family:'Gilroy','DM Sans',sans-serif;font-size:20px;font-weight:700;margin-bottom:20px;">🏦 Bybit Demo (Prop / CFT)</h3>
+<h3 style="font-family:'Inter',sans-serif;font-size:20px;font-weight:700;margin-bottom:20px;">🏦 Bybit Demo (Prop / CFT)</h3>
 <div class="callout callout-info"><div class="callout-icon">🏦</div><div class="callout-body">
   <h4>For prop traders</h4>
   <p>Full support for <strong>api-demo.bybit.com</strong> — work with CryptoFundTrader, FTMO and other prop firms. Enable in Auto-trading → <code>○ 🏦 Bybit Demo (Prop/CFT)</code>.</p>
 </div></div>
 
-<h3 style="font-family:'Gilroy','DM Sans',sans-serif;font-size:20px;font-weight:700;margin-top:28px;margin-bottom:20px;">🏆 Prop Autopilot</h3>
+<h3 style="font-family:'Inter',sans-serif;font-size:20px;font-weight:700;margin-top:28px;margin-bottom:20px;">🏆 Prop Autopilot</h3>
 <div style="background:var(--bg2);border:1px solid rgba(245,200,66,.2);border-radius:16px;padding:20px;margin-bottom:24px;">
   <p style="margin-bottom:16px;">Bot automatically adapts risk based on current challenge state. Menu → Auto-trading → 🏆 Prop Autopilot.</p>
   <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:10px;margin-bottom:16px;">
@@ -2711,7 +2709,7 @@ Market Fundamentals:
   },
   "sessions": {
     ru: `<div class="section-header"><div class="section-icon icon-gold"><svg viewBox="0 0 256 256" fill="none" stroke="currentColor" stroke-width="16" stroke-linecap="round" stroke-linejoin="round"><circle cx="128" cy="128" r="96"/><ellipse cx="128" cy="128" rx="40" ry="96"/><line x1="32" y1="128" x2="224" y2="128"/><path d="M57 72c20 16 44 24 71 24s51-8 71-24"/><path d="M57 184c20-16 44-24 71-24s51 8 71 24"/></svg></div><div class="section-title-group"><h2>Сессии и фундаментал</h2><p>Когда торговать и как читать рыночный контекст</p></div></div>
-<h3 style="font-family:'Gilroy','DM Sans',sans-serif;font-size:20px;font-weight:700;margin-bottom:20px;">Торговые сессии (UTC)</h3>
+<h3 style="font-family:'Inter',sans-serif;font-size:20px;font-weight:700;margin-bottom:20px;">Торговые сессии (UTC)</h3>
 <div class="card-grid">
 <div class="card"><div class="card-badge badge-blue">00:00–08:00</div><h3>🌏 Азия</h3><p>Низкий объём, боковое движение. Уровни тестируются, но пробоев меньше. Хороша для скальпинга.</p></div>
 <div class="card"><div class="card-badge badge-gold">07:00–15:00</div><h3>🌍 Европа</h3><p>Средний объём, начало трендовых движений. Уровни начинают активироваться.</p></div>
@@ -2719,7 +2717,7 @@ Market Fundamentals:
 <div class="card" style="border-color:rgba(34,212,122,0.3);"><div class="card-badge badge-green">13:00–15:00 UTC</div><h3>⚡ Пересечение</h3><p><strong>Лучшее время для входов.</strong> Европа + США активны одновременно. Максимальная ликвидность.</p></div>
 </div>
 <div class="divider"></div>
-<h3 style="font-family:'Gilroy','DM Sans',sans-serif;font-size:20px;font-weight:700;margin-bottom:20px;">Индекс Страх/Жадность</h3>
+<h3 style="font-family:'Inter',sans-serif;font-size:20px;font-weight:700;margin-bottom:20px;">Индекс Страх/Жадность</h3>
 <div style="display:flex;flex-direction:column;gap:10px;margin-bottom:28px;">
 <div style="display:flex;align-items:center;gap:14px;background:rgba(255,79,106,0.06);border:1px solid rgba(255,79,106,0.15);border-radius:12px;padding:14px 18px;"><div style="font-size:22px;">😱</div><div><div style="font-weight:700;color:var(--red);font-size:14px;">0–25 — Экстремальный страх</div><div style="font-size:13px;color:var(--text2);">Рынок в панике. Исторически лучшая точка для покупок.</div></div><div style="margin-left:auto;font-size:18px;font-weight:800;color:var(--red);">0–25</div></div>
 <div style="display:flex;align-items:center;gap:14px;background:rgba(245,200,66,0.05);border:1px solid rgba(245,200,66,0.15);border-radius:12px;padding:14px 18px;"><div style="font-size:22px;">😨</div><div><div style="font-weight:700;color:var(--gold);font-size:14px;">25–45 — Страх</div><div style="font-size:13px;color:var(--text2);">Осторожность, но возможны хорошие входы.</div></div><div style="margin-left:auto;font-size:18px;font-weight:800;color:var(--gold);">25–45</div></div>
@@ -2727,7 +2725,7 @@ Market Fundamentals:
 <div style="display:flex;align-items:center;gap:14px;background:rgba(155,109,255,0.05);border:1px solid rgba(155,109,255,0.15);border-radius:12px;padding:14px 18px;"><div style="font-size:22px;">🤑</div><div><div style="font-weight:700;color:var(--purple);font-size:14px;">75–100 — Экстремальная жадность</div><div style="font-size:13px;color:var(--text2);">Рынок перегрет. Высокая вероятность коррекции.</div></div><div style="margin-left:auto;font-size:18px;font-weight:800;color:var(--purple);">75–100</div></div>
 </div>`,
     en: `<div class="section-header"><div class="section-icon icon-gold"><svg viewBox="0 0 256 256" fill="none" stroke="currentColor" stroke-width="16" stroke-linecap="round" stroke-linejoin="round"><circle cx="128" cy="128" r="96"/><ellipse cx="128" cy="128" rx="40" ry="96"/><line x1="32" y1="128" x2="224" y2="128"/><path d="M57 72c20 16 44 24 71 24s51-8 71-24"/><path d="M57 184c20-16 44-24 71-24s51 8 71 24"/></svg></div><div class="section-title-group"><h2>Sessions & Fundamentals</h2><p>When to trade and how to read market context</p></div></div>
-<h3 style="font-family:'Gilroy','DM Sans',sans-serif;font-size:20px;font-weight:700;margin-bottom:20px;">Trading Sessions (UTC)</h3>
+<h3 style="font-family:'Inter',sans-serif;font-size:20px;font-weight:700;margin-bottom:20px;">Trading Sessions (UTC)</h3>
 <div class="card-grid">
 <div class="card"><div class="card-badge badge-blue">00:00–08:00</div><h3>🌏 Asia</h3><p>Low volume, sideways movement. Levels are tested, but fewer breakouts. Good for scalping.</p></div>
 <div class="card"><div class="card-badge badge-gold">07:00–15:00</div><h3>🌍 Europe</h3><p>Medium volume, trend moves begin. Levels start activating.</p></div>
@@ -2735,7 +2733,7 @@ Market Fundamentals:
 <div class="card" style="border-color:rgba(34,212,122,0.3);"><div class="card-badge badge-green">13:00–15:00 UTC</div><h3>⚡ Overlap</h3><p><strong>Best time to enter.</strong> Europe + USA active simultaneously. Maximum liquidity.</p></div>
 </div>
 <div class="divider"></div>
-<h3 style="font-family:'Gilroy','DM Sans',sans-serif;font-size:20px;font-weight:700;margin-bottom:20px;">Fear & Greed Index</h3>
+<h3 style="font-family:'Inter',sans-serif;font-size:20px;font-weight:700;margin-bottom:20px;">Fear & Greed Index</h3>
 <div style="display:flex;flex-direction:column;gap:10px;margin-bottom:28px;">
 <div style="display:flex;align-items:center;gap:14px;background:rgba(255,79,106,0.06);border:1px solid rgba(255,79,106,0.15);border-radius:12px;padding:14px 18px;"><div style="font-size:22px;">😱</div><div><div style="font-weight:700;color:var(--red);font-size:14px;">0–25 — Extreme Fear</div><div style="font-size:13px;color:var(--text2);">Market in panic. Historically the best point to buy.</div></div><div style="margin-left:auto;font-size:18px;font-weight:800;color:var(--red);">0–25</div></div>
 <div style="display:flex;align-items:center;gap:14px;background:rgba(245,200,66,0.05);border:1px solid rgba(245,200,66,0.15);border-radius:12px;padding:14px 18px;"><div style="font-size:22px;">😨</div><div><div style="font-weight:700;color:var(--gold);font-size:14px;">25–45 — Fear</div><div style="font-size:13px;color:var(--text2);">Caution, but good entries are possible.</div></div><div style="margin-left:auto;font-size:18px;font-weight:800;color:var(--gold);">25–45</div></div>
@@ -2763,7 +2761,7 @@ Market Fundamentals:
 
 <div class="divider"></div>
 
-<h2 style="font-family:'Gilroy','DM Sans',sans-serif;font-size:24px;font-weight:800;margin-bottom:8px;">🧠 Последовательность оптимизации</h2>
+<h2 style="font-family:'Inter',sans-serif;font-size:24px;font-weight:800;margin-bottom:8px;">🧠 Последовательность оптимизации</h2>
 <p style="color:var(--text2);margin-bottom:28px;">Оптимизатор нельзя запустить один раз "на всё" — это делается в конкретном порядке, от фундамента к деталям.</p>
 
 <div class="api-steps">
@@ -2855,7 +2853,7 @@ Market Fundamentals:
 
 <div class="divider"></div>
 
-<h3 style="font-family:'Gilroy','DM Sans',sans-serif;font-size:20px;font-weight:700;margin-bottom:20px;">📅 Временная линия</h3>
+<h3 style="font-family:'Inter',sans-serif;font-size:20px;font-weight:700;margin-bottom:20px;">📅 Временная линия</h3>
 <div style="background:var(--bg2);border:1px solid var(--border);border-radius:14px;padding:20px;font-size:13px;font-family:monospace;color:var(--text2);line-height:1.9;">
   <div><span style="color:var(--gold);">День 1:</span>    Фаза 1 — Auto-Optimize ETH/BTC/SOL (6 мин)<br>
          &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Фаза 2 — Target WR 75% → 80% на ETH (5 мин)<br>
@@ -2867,7 +2865,7 @@ Market Fundamentals:
 
 <div class="divider"></div>
 
-<h3 style="font-family:'Gilroy','DM Sans',sans-serif;font-size:20px;font-weight:700;margin-bottom:16px;">🚫 Чего НЕ делать</h3>
+<h3 style="font-family:'Inter',sans-serif;font-size:20px;font-weight:700;margin-bottom:16px;">🚫 Чего НЕ делать</h3>
 <div style="display:flex;flex-direction:column;gap:10px;">
   <div style="background:rgba(255,79,106,0.06);border:1px solid rgba(255,79,106,0.15);border-radius:12px;padding:14px 16px;"><div style="font-weight:700;color:var(--red);margin-bottom:4px;">❌ Не оптимизируй на 10 монетах сразу</div><div style="font-size:13px;color:var(--text2);">Параметры станут "средними" и не будут хороши ни для одной.</div></div>
   <div style="background:rgba(255,79,106,0.06);border:1px solid rgba(255,79,106,0.15);border-radius:12px;padding:14px 16px;"><div style="font-weight:700;color:var(--red);margin-bottom:4px;">❌ Не ставь Target WR > 85%</div><div style="font-size:13px;color:var(--text2);">min_rr будет 0.5–0.8, и с учётом slippage + funding стратегия будет убыточной.</div></div>
@@ -2894,7 +2892,7 @@ Market Fundamentals:
 
 <div class="divider"></div>
 
-<h2 style="font-family:'Gilroy','DM Sans',sans-serif;font-size:24px;font-weight:800;margin-bottom:8px;">🧠 Optimization Sequence</h2>
+<h2 style="font-family:'Inter',sans-serif;font-size:24px;font-weight:800;margin-bottom:8px;">🧠 Optimization Sequence</h2>
 <p style="color:var(--text2);margin-bottom:28px;">The optimizer cannot be run once for everything — it follows a specific sequence, from foundation to details.</p>
 
 <div class="api-steps">
@@ -2986,7 +2984,7 @@ Market Fundamentals:
 
 <div class="divider"></div>
 
-<h3 style="font-family:'Gilroy','DM Sans',sans-serif;font-size:20px;font-weight:700;margin-bottom:20px;">📅 Timeline</h3>
+<h3 style="font-family:'Inter',sans-serif;font-size:20px;font-weight:700;margin-bottom:20px;">📅 Timeline</h3>
 <div style="background:var(--bg2);border:1px solid var(--border);border-radius:14px;padding:20px;font-size:13px;font-family:monospace;color:var(--text2);line-height:1.9;">
   <div><span style="color:var(--gold);">Day 1:</span>    Phase 1 — Auto-Optimize ETH/BTC/SOL (6 min)<br>
          &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Phase 2 — Target WR 75% → 80% on ETH (5 min)<br>
@@ -2998,7 +2996,7 @@ Market Fundamentals:
 
 <div class="divider"></div>
 
-<h3 style="font-family:'Gilroy','DM Sans',sans-serif;font-size:20px;font-weight:700;margin-bottom:16px;">🚫 What NOT to do</h3>
+<h3 style="font-family:'Inter',sans-serif;font-size:20px;font-weight:700;margin-bottom:16px;">🚫 What NOT to do</h3>
 <div style="display:flex;flex-direction:column;gap:10px;">
   <div style="background:rgba(255,79,106,0.06);border:1px solid rgba(255,79,106,0.15);border-radius:12px;padding:14px 16px;"><div style="font-weight:700;color:var(--red);margin-bottom:4px;">❌ Don't optimize on 10 coins at once</div><div style="font-size:13px;color:var(--text2);">Parameters become "average" and won't be good for any of them.</div></div>
   <div style="background:rgba(255,79,106,0.06);border:1px solid rgba(255,79,106,0.15);border-radius:12px;padding:14px 16px;"><div style="font-weight:700;color:var(--red);margin-bottom:4px;">❌ Don't set Target WR > 85%</div><div style="font-size:13px;color:var(--text2);">min_rr will be 0.5–0.8, and after slippage + funding the strategy will be unprofitable.</div></div>
@@ -3017,7 +3015,7 @@ Market Fundamentals:
 <div style="display:flex;gap:16px;align-items:flex-start;padding-bottom:20px;"><div style="width:36px;height:36px;border-radius:50%;background:rgba(155,109,255,0.15);border:2px solid rgba(155,109,255,0.3);display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0;">⚡</div><div style="flex:1;padding-top:6px;"><strong>Обновление настроек</strong><br><span style="font-size:13px;color:var(--text2);">Новые параметры применяются автоматически</span></div></div>
 <div style="display:flex;gap:16px;align-items:flex-start;"><div style="width:36px;height:36px;border-radius:50%;background:rgba(155,109,255,0.15);border:2px solid rgba(155,109,255,0.3);display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0;">🔄</div><div style="flex:1;padding-top:6px;"><strong>Повторяется каждые 24 часа</strong><br><span style="font-size:13px;color:var(--text2);">Бот постоянно адаптируется под текущий рынок</span></div></div>
 </div></div>
-<h3 style="font-family:'Gilroy','DM Sans',sans-serif;font-size:20px;font-weight:700;margin-bottom:20px;">Режимы рынка</h3>
+<h3 style="font-family:'Inter',sans-serif;font-size:20px;font-weight:700;margin-bottom:20px;">Режимы рынка</h3>
 <div class="table-scroll-hint">← свайп →</div><div class="params-wrap"><table class="params-table"><thead><tr><th>Режим</th><th>Значение</th><th>Действие бота</th></tr></thead><tbody>
 <tr><td>📈 Тренд вверх</td><td>BTC в росте, EMA направлена вверх</td><td>Агрессивные TP для лонгов</td></tr>
 <tr><td>📉 Тренд вниз</td><td>BTC падает, EMA направлена вниз</td><td>Агрессивные TP для шортов</td></tr>
@@ -3033,7 +3031,7 @@ Market Fundamentals:
 <div style="display:flex;gap:16px;align-items:flex-start;padding-bottom:20px;"><div style="width:36px;height:36px;border-radius:50%;background:rgba(155,109,255,0.15);border:2px solid rgba(155,109,255,0.3);display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0;">⚡</div><div style="flex:1;padding-top:6px;"><strong>Settings Update</strong><br><span style="font-size:13px;color:var(--text2);">New parameters are applied automatically</span></div></div>
 <div style="display:flex;gap:16px;align-items:flex-start;"><div style="width:36px;height:36px;border-radius:50%;background:rgba(155,109,255,0.15);border:2px solid rgba(155,109,255,0.3);display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0;">🔄</div><div style="flex:1;padding-top:6px;"><strong>Repeats every 24 hours</strong><br><span style="font-size:13px;color:var(--text2);">The bot continuously adapts to current market conditions</span></div></div>
 </div></div>
-<h3 style="font-family:'Gilroy','DM Sans',sans-serif;font-size:20px;font-weight:700;margin-bottom:20px;">Market Modes</h3>
+<h3 style="font-family:'Inter',sans-serif;font-size:20px;font-weight:700;margin-bottom:20px;">Market Modes</h3>
 <div class="table-scroll-hint">← swipe →</div><div class="params-wrap"><table class="params-table"><thead><tr><th>Mode</th><th>Meaning</th><th>Bot action</th></tr></thead><tbody>
 <tr><td>📈 Uptrend</td><td>BTC rising, EMA pointing up</td><td>Aggressive TP for longs</td></tr>
 <tr><td>📉 Downtrend</td><td>BTC falling, EMA pointing down</td><td>Aggressive TP for shorts</td></tr>
@@ -3050,7 +3048,7 @@ Market Fundamentals:
 <div class="card" style="border-color:rgba(34,212,122,0.2);"><div style="font-size:28px;margin-bottom:12px;">👁</div><h3>Начни без автотрейда</h3><p>Первые 2–4 недели торгуй вручную. Пойми логику прежде чем доверить деньги автоматике.</p></div>
 </div>
 <div class="divider"></div>
-<h3 style="font-family:'Gilroy','DM Sans',sans-serif;font-size:20px;font-weight:700;margin-bottom:20px;">Минимальный <span class="term" data-tip="Процент прибыльных сделок от общего числа. WR 50% + R:R 2.0 = стабильная прибыль.">Win Rate</span> для прибыли</h3>
+<h3 style="font-family:'Inter',sans-serif;font-size:20px;font-weight:700;margin-bottom:20px;">Минимальный <span class="term" data-tip="Процент прибыльных сделок от общего числа. WR 50% + R:R 2.0 = стабильная прибыль.">Win Rate</span> для прибыли</h3>
 <div class="table-scroll-hint">← свайп →</div><div class="params-wrap"><table class="wr-table"><thead><tr><th style="text-align:left;"><span class="term" data-tip="Процент прибыльных сделок от общего числа. WR 50% + R:R 2.0 = стабильная прибыль.">Win Rate</span></th><th>Нужен R:R ≥</th><th>Пример 10 сделок</th></tr></thead><tbody>
 <tr><td>60%</td><td>0.67</td><td>6×0.67R − 4×1R = +0.02R ✅</td></tr>
 <tr><td>50%</td><td>1.0</td><td>5×1R − 5×1R = 0R ➖</td></tr>
@@ -3061,7 +3059,7 @@ Market Fundamentals:
 <div class="callout callout-success"><div class="callout-icon">💡</div><div class="callout-body"><h4>Оптимальная комбинация</h4><p><span class="term" data-tip="Процент прибыльных сделок от общего числа. WR 50% + R:R 2.0 = стабильная прибыль.">Win Rate</span> 50% + R:R 2.0 = 10 сделок → 5×2R − 5×1R = <strong>+5R прибыли</strong></p></div></div>
 
 <div class="divider"></div>
-<h3 style="font-family:'Gilroy','DM Sans',sans-serif;font-size:20px;font-weight:700;margin-bottom:20px;">🛡 Защитные механизмы бота (v4.5)</h3>
+<h3 style="font-family:'Inter',sans-serif;font-size:20px;font-weight:700;margin-bottom:20px;">🛡 Защитные механизмы бота (v4.5)</h3>
 <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:14px;">
   <div style="background:rgba(255,79,106,.05);border:1px solid rgba(255,79,106,.2);border-radius:12px;padding:16px;">
     <div style="font-weight:700;color:var(--red);margin-bottom:8px;">🔴 Circuit Breaker</div>
@@ -3089,7 +3087,7 @@ Market Fundamentals:
 <div class="card" style="border-color:rgba(34,212,122,0.2);"><div style="font-size:28px;margin-bottom:12px;">👁</div><h3>Start Without Auto-trade</h3><p>For the first 2–4 weeks, trade manually. Understand the logic before trusting automation.</p></div>
 </div>
 <div class="divider"></div>
-<h3 style="font-family:'Gilroy','DM Sans',sans-serif;font-size:20px;font-weight:700;margin-bottom:20px;">Minimum <span class="term" data-tip="Процент прибыльных сделок от общего числа. WR 50% + R:R 2.0 = стабильная прибыль.">Win Rate</span> for Profitability</h3>
+<h3 style="font-family:'Inter',sans-serif;font-size:20px;font-weight:700;margin-bottom:20px;">Minimum <span class="term" data-tip="Процент прибыльных сделок от общего числа. WR 50% + R:R 2.0 = стабильная прибыль.">Win Rate</span> for Profitability</h3>
 <div class="table-scroll-hint">← swipe →</div><div class="params-wrap"><table class="wr-table"><thead><tr><th style="text-align:left;"><span class="term" data-tip="Процент прибыльных сделок от общего числа. WR 50% + R:R 2.0 = стабильная прибыль.">Win Rate</span></th><th>Need R:R ≥</th><th>Example 10 trades</th></tr></thead><tbody>
 <tr><td>60%</td><td>0.67</td><td>6×0.67R − 4×1R = +0.02R ✅</td></tr>
 <tr><td>50%</td><td>1.0</td><td>5×1R − 5×1R = 0R ➖</td></tr>
@@ -3100,7 +3098,7 @@ Market Fundamentals:
 <div class="callout callout-success"><div class="callout-icon">💡</div><div class="callout-body"><h4>Optimal combination</h4><p><span class="term" data-tip="Процент прибыльных сделок от общего числа. WR 50% + R:R 2.0 = стабильная прибыль.">Win Rate</span> 50% + R:R 2.0 = 10 trades → 5×2R − 5×1R = <strong>+5R profit</strong></p></div></div>
 
 <div class="divider"></div>
-<h3 style="font-family:'Gilroy','DM Sans',sans-serif;font-size:20px;font-weight:700;margin-bottom:20px;">🛡 Bot Protection Mechanisms (v4.5)</h3>
+<h3 style="font-family:'Inter',sans-serif;font-size:20px;font-weight:700;margin-bottom:20px;">🛡 Bot Protection Mechanisms (v4.5)</h3>
 <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:14px;">
   <div style="background:rgba(255,79,106,.05);border:1px solid rgba(255,79,106,.2);border-radius:12px;padding:16px;">
     <div style="font-weight:700;color:var(--red);margin-bottom:8px;">🔴 Circuit Breaker</div>
@@ -3125,10 +3123,10 @@ Market Fundamentals:
     ru: `<div class="section-header"><div class="section-icon icon-gold"><svg viewBox="0 0 256 256" fill="none" stroke="currentColor" stroke-width="16" stroke-linecap="round" stroke-linejoin="round"><circle cx="128" cy="128" r="96"/><path d="M96 96a32 32 0 0 1 56 21.3c0 18.7-24 29.3-24 42.7"/><circle cx="128" cy="180" r="8" fill="currentColor" stroke="none"/></svg></div><div class="section-title-group"><h2>FAQ</h2><p>Ответы на самые частые вопросы</p></div></div>
 <div class="faq-list"><div class="faq-item"><div class="faq-q" onclick="toggleFaq(this)">Почему бот не присылает сигналы?<span class="faq-arrow">▼</span></div><div class="faq-a"><div class="faq-a-inner"><ul><li>Подписка активна? (⚙️ → статус)</li><li>Сканер включён? (📈 Лонг или 📉 Шорт)</li><li>Включена конкретная монета (watch_coin)?</li><li>На таймфрейме 4h — сигналы раз в 2–5 дней, это нормально</li><li>Фильтры слишком строгие → запусти бэктест</li></ul></div></div></div><div class="faq-item"><div class="faq-q" onclick="toggleFaq(this)">Автотрейд не открыл сделку. Почему?<span class="faq-arrow">▼</span></div><div class="faq-a"><div class="faq-a-inner"><ul><li>По этой монете уже есть открытая сделка (дедупликация)</li><li>Достигнут лимит сделок (напр. 5/5)</li><li>Сегодня выключенный день недели</li><li>Биржа вернула ошибку: неверный API ключ, недостаточно средств</li></ul></div></div></div><div class="faq-item"><div class="faq-q" onclick="toggleFaq(this)">Что такое зависшая сделка?<span class="faq-arrow">▼</span></div><div class="faq-a"><div class="faq-a-inner"><p>Бот открыл сделку, но нет результата в статистике.</p><ul><li>Проверь биржу — позиция реальная? → закрой вручную</li><li>Напиши администратору — очистит зависшие записи</li></ul><br><strong style="color:var(--gold);">⚠️ Реальные позиции на бирже бот не трогает.</strong></div></div></div><div class="faq-item"><div class="faq-q" onclick="toggleFaq(this)">Бэктест показывает 0 сделок или WR 0%<span class="faq-arrow">▼</span></div><div class="faq-a"><div class="faq-a-inner"><ul><li>Период меньше 60 дней для 1h</li><li>Параметры слишком жёсткие: Мин. R:R > 3.0, Pivot > 10</li></ul><p style="margin-top:8px;">Решение: запусти с дефолтными параметрами сначала.</p></div></div></div><div class="faq-item"><div class="faq-q" onclick="toggleFaq(this)">Можно несколько стратегий одновременно?<span class="faq-arrow">▼</span></div><div class="faq-a"><div class="faq-a-inner"><p>Да. Все четыре работают параллельно. Дедупликация защищает от двойного входа.</p></div></div></div><div class="faq-item"><div class="faq-q" onclick="toggleFaq(this)">Что такое R и R:R?<span class="faq-arrow">▼</span></div><div class="faq-a"><div class="faq-a-inner"><p><strong>R = единица риска</strong> — сумма которую рискуешь в сделке.</p><ul><li>Вход 0.3941, стоп 0.388 → риск = <strong>1R</strong></li><li>Цель 1: +0.0122 = <strong>2.0R</strong> прибыли</li></ul></div></div></div><div class="faq-item"><div class="faq-q" onclick="toggleFaq(this)">Bybit или BingX — что выбрать?<span class="faq-arrow">▼</span></div><div class="faq-a"><div class="faq-a-inner"><p><strong>Bybit</strong> — рекомендуется: ниже комиссии, выше ликвидность, <span class="term" data-tip="Разделение позиции на несколько частей для входа по разным ценам в зоне Order Block.">Split Entry</span> для <span class="term" data-tip="Smart Money Concepts — методология анализа рынка через отслеживание действий крупных институциональных игроков.">SMC</span>.</p><p style="margin-top:8px;"><strong>BingX</strong> — если проблемы с верификацией Bybit.</p></div></div></div><div class="faq-item"><div class="faq-q" onclick="toggleFaq(this)">Оптимизатор включён, но параметры не меняются<span class="faq-arrow">▼</span></div><div class="faq-a"><div class="faq-a-inner"><p>Нужно минимум 15 реальных сделок + 24 часа после включения.</p></div></div></div></div>
 <div class="divider"></div>
-<div style="background:var(--bg2);border:1px solid rgba(79,143,255,0.2);border-radius:16px;padding:28px;text-align:center;"><div style="font-size:32px;margin-bottom:12px;">✈️</div><div style="font-family:'Gilroy','DM Sans',sans-serif;font-size:20px;font-weight:700;margin-bottom:8px;">Не нашёл ответ?</div><div style="color:var(--text2);font-size:14px;margin-bottom:20px;">Напиши администратору — ответ в течение 24 часов</div><a href="https://t.me/crypto_chm" target="_blank" style="display:inline-flex;align-items:center;gap:10px;background:rgba(79,143,255,0.15);border:1px solid rgba(79,143,255,0.3);border-radius:12px;padding:12px 24px;color:var(--blue);text-decoration:none;font-weight:600;font-size:15px;">✈️ @crypto_chm</a></div>
+<div style="background:var(--bg2);border:1px solid rgba(79,143,255,0.2);border-radius:16px;padding:28px;text-align:center;"><div style="font-size:32px;margin-bottom:12px;">✈️</div><div style="font-family:'Inter',sans-serif;font-size:20px;font-weight:700;margin-bottom:8px;">Не нашёл ответ?</div><div style="color:var(--text2);font-size:14px;margin-bottom:20px;">Напиши администратору — ответ в течение 24 часов</div><a href="https://t.me/crypto_chm" target="_blank" style="display:inline-flex;align-items:center;gap:10px;background:rgba(79,143,255,0.15);border:1px solid rgba(79,143,255,0.3);border-radius:12px;padding:12px 24px;color:var(--blue);text-decoration:none;font-weight:600;font-size:15px;">✈️ @crypto_chm</a></div>
 
 <div class="divider"></div>
-<h3 style="font-family:'Gilroy','DM Sans',sans-serif;font-size:20px;font-weight:700;margin-bottom:20px;">🆕 Новые возможности v4.5</h3>
+<h3 style="font-family:'Inter',sans-serif;font-size:20px;font-weight:700;margin-bottom:20px;">🆕 Новые возможности v4.5</h3>
 
 <div style="display:flex;flex-direction:column;gap:12px;">
   <details style="background:var(--bg2);border:1px solid var(--border);border-radius:12px;padding:16px;cursor:pointer;">
@@ -3178,10 +3176,10 @@ Market Fundamentals:
     en: `<div class="section-header"><div class="section-icon icon-gold"><svg viewBox="0 0 256 256" fill="none" stroke="currentColor" stroke-width="16" stroke-linecap="round" stroke-linejoin="round"><circle cx="128" cy="128" r="96"/><path d="M96 96a32 32 0 0 1 56 21.3c0 18.7-24 29.3-24 42.7"/><circle cx="128" cy="180" r="8" fill="currentColor" stroke="none"/></svg></div><div class="section-title-group"><h2>FAQ</h2><p>Answers to the most common questions</p></div></div>
 <div class="faq-list"><div class="faq-item"><div class="faq-q" onclick="toggleFaq(this)">Why isn't the bot sending signals?<span class="faq-arrow">▼</span></div><div class="faq-a"><div class="faq-a-inner"><ul><li>Subscription active? (⚙️ → status)</li><li>Scanner enabled? (📈 Long or 📉 Short)</li><li>Specific coin enabled (watch_coin)?</li><li>On 4h timeframe — signals every 2–5 days is normal</li><li>Filters too strict → run a backtest</li></ul></div></div></div><div class="faq-item"><div class="faq-q" onclick="toggleFaq(this)">Auto-trade didn't open a trade. Why?<span class="faq-arrow">▼</span></div><div class="faq-a"><div class="faq-a-inner"><ul><li>A trade for this coin is already open (deduplication)</li><li>Trade limit reached (e.g. 5/5)</li><li>Today is a disabled trading day</li><li>Exchange returned error: invalid <span class="term" data-tip="API Key — unique secret key connecting the trading bot to your exchange account. Never share it.">API key</span>, insufficient funds</li></ul></div></div></div><div class="faq-item"><div class="faq-q" onclick="toggleFaq(this)">What is a stuck trade?<span class="faq-arrow">▼</span></div><div class="faq-a"><div class="faq-a-inner"><p>Bot opened a trade but there's no result in statistics.</p><ul><li>Check the exchange — is the position real? → close it manually</li><li>Message the admin — they will clean up stuck records</li></ul><br><strong style="color:var(--gold);">⚠️ The bot does not touch real positions on the exchange.</strong></div></div></div><div class="faq-item"><div class="faq-q" onclick="toggleFaq(this)">Backtest shows 0 trades or WR 0%<span class="faq-arrow">▼</span></div><div class="faq-a"><div class="faq-a-inner"><ul><li>Period less than 60 days for 1h</li><li>Parameters too strict: Min R:R > 3.0, Pivot > 10</li></ul><p style="margin-top:8px;">Solution: run with default parameters first.</p></div></div></div><div class="faq-item"><div class="faq-q" onclick="toggleFaq(this)">Can I run multiple strategies simultaneously?<span class="faq-arrow">▼</span></div><div class="faq-a"><div class="faq-a-inner"><p>Yes. All four run in parallel. Deduplication prevents double entries.</p></div></div></div><div class="faq-item"><div class="faq-q" onclick="toggleFaq(this)">What is R and R:R?<span class="faq-arrow">▼</span></div><div class="faq-a"><div class="faq-a-inner"><p><strong>R = unit of risk</strong> — the amount you risk in a trade.</p><ul><li>Entry 0.3941, stop 0.388 → risk = <strong>1R</strong></li><li>Target 1: +0.0122 = <strong>2.0R</strong> profit</li></ul></div></div></div><div class="faq-item"><div class="faq-q" onclick="toggleFaq(this)">Bybit or BingX — which to choose?<span class="faq-arrow">▼</span></div><div class="faq-a"><div class="faq-a-inner"><p><strong>Bybit</strong> — recommended: lower fees, higher liquidity, <span class="term" data-tip="Разделение позиции на несколько частей для входа по разным ценам в зоне Order Block.">Split Entry</span> for <span class="term" data-tip="Smart Money Concepts — методология анализа рынка через отслеживание действий крупных институциональных игроков.">SMC</span>.</p><p style="margin-top:8px;"><strong>BingX</strong> — if Bybit verification is a problem.</p></div></div></div><div class="faq-item"><div class="faq-q" onclick="toggleFaq(this)">Optimizer is on but parameters don't change<span class="faq-arrow">▼</span></div><div class="faq-a"><div class="faq-a-inner"><p>You need at least 15 real trades + 24 hours after enabling.</p></div></div></div></div>
 <div class="divider"></div>
-<div style="background:var(--bg2);border:1px solid rgba(79,143,255,0.2);border-radius:16px;padding:28px;text-align:center;"><div style="font-size:32px;margin-bottom:12px;">✈️</div><div style="font-family:'Gilroy','DM Sans',sans-serif;font-size:20px;font-weight:700;margin-bottom:8px;">Didn't find the answer?</div><div style="color:var(--text2);font-size:14px;margin-bottom:20px;">Message the admin — reply within 24 hours</div><a href="https://t.me/crypto_chm" target="_blank" style="display:inline-flex;align-items:center;gap:10px;background:rgba(79,143,255,0.15);border:1px solid rgba(79,143,255,0.3);border-radius:12px;padding:12px 24px;color:var(--blue);text-decoration:none;font-weight:600;font-size:15px;">✈️ @crypto_chm</a></div>
+<div style="background:var(--bg2);border:1px solid rgba(79,143,255,0.2);border-radius:16px;padding:28px;text-align:center;"><div style="font-size:32px;margin-bottom:12px;">✈️</div><div style="font-family:'Inter',sans-serif;font-size:20px;font-weight:700;margin-bottom:8px;">Didn't find the answer?</div><div style="color:var(--text2);font-size:14px;margin-bottom:20px;">Message the admin — reply within 24 hours</div><a href="https://t.me/crypto_chm" target="_blank" style="display:inline-flex;align-items:center;gap:10px;background:rgba(79,143,255,0.15);border:1px solid rgba(79,143,255,0.3);border-radius:12px;padding:12px 24px;color:var(--blue);text-decoration:none;font-weight:600;font-size:15px;">✈️ @crypto_chm</a></div>
 
 <div class="divider"></div>
-<h3 style="font-family:'Gilroy','DM Sans',sans-serif;font-size:20px;font-weight:700;margin-bottom:20px;">🆕 New Features v4.5</h3>
+<h3 style="font-family:'Inter',sans-serif;font-size:20px;font-weight:700;margin-bottom:20px;">🆕 New Features v4.5</h3>
 
 <div style="display:flex;flex-direction:column;gap:12px;">
   <details style="background:var(--bg2);border:1px solid var(--border);border-radius:12px;padding:16px;cursor:pointer;">
@@ -3212,7 +3210,7 @@ Market Fundamentals:
 `
   },
   "changelog": {
-    ru: `<div class="section-header"><div class="section-icon icon-green"><svg viewBox="0 0 256 256" fill="none" stroke="currentColor" stroke-width="16" stroke-linecap="round" stroke-linejoin="round"><path d="M128 24l22 66h70l-56 42 21 66-57-42-57 42 21-66-56-42h70z"/></svg></div><div class="section-title-group"><h2>Обновления</h2><p>История изменений CHM GEL SIGNALS</p></div></div>
+    ru: `<div class="section-header"><div class="section-icon icon-green"><svg viewBox="0 0 256 256" fill="none" stroke="currentColor" stroke-width="16" stroke-linecap="round" stroke-linejoin="round"><path d="M128 24l22 66h70l-56 42 21 66-57-42-57 42 21-66-56-42h70z"/></svg></div><div class="section-title-group"><h2>Обновления</h2><p>История изменений CHM Finance</p></div></div>
 
 <div class="changelog-entry" style="border-left:3px solid var(--gold);margin-bottom:0;">
 <div class="changelog-header">
@@ -3344,7 +3342,7 @@ Market Fundamentals:
 <div class="cl-item"><div class="cl-icon">⚡</div><div class="cl-text"><strong>Статистика</strong> — BE виден, <span class="term" data-tip="Процент прибыльных сделок от общего числа. WR 50% + R:R 2.0 = стабильная прибыль.">Win Rate</span> всегда показывается, лучшая/худшая монета.</div></div>
 </div>
 </div></div>`,
-    en: `<div class="section-header"><div class="section-icon icon-green"><svg viewBox="0 0 256 256" fill="none" stroke="currentColor" stroke-width="16" stroke-linecap="round" stroke-linejoin="round"><path d="M128 24l22 66h70l-56 42 21 66-57-42-57 42 21-66-56-42h70z"/></svg></div><div class="section-title-group"><h2>Changelog</h2><p>CHM GEL SIGNALS update history</p></div></div>
+    en: `<div class="section-header"><div class="section-icon icon-green"><svg viewBox="0 0 256 256" fill="none" stroke="currentColor" stroke-width="16" stroke-linecap="round" stroke-linejoin="round"><path d="M128 24l22 66h70l-56 42 21 66-57-42-57 42 21-66-56-42h70z"/></svg></div><div class="section-title-group"><h2>Changelog</h2><p>CHM Finance update history</p></div></div>
 
 <div <div class="changelog-entry" style="border-left:3px solid var(--gold);margin-bottom:0;">
 <div class="changelog-header">
@@ -3588,7 +3586,7 @@ class="changelog-entry">
 
 <div class="divider"></div>
 
-<h3 style="font-family:'Gilroy','DM Sans',sans-serif;font-size:20px;font-weight:700;margin-bottom:20px;">📊 Стратегия</h3>
+<h3 style="font-family:'Inter',sans-serif;font-size:20px;font-weight:700;margin-bottom:20px;">📊 Стратегия</h3>
 <div style="background:var(--bg2);border:1px solid var(--border);border-radius:14px;padding:20px;margin-bottom:20px;">
   <p style="margin-bottom:12px;"><strong>Что это:</strong> Выбор метода анализа рынка. Это самая важная настройка.</p>
   <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
@@ -3615,7 +3613,7 @@ class="changelog-entry">
 
 <div class="divider"></div>
 
-<h3 style="font-family:'Gilroy','DM Sans',sans-serif;font-size:20px;font-weight:700;margin-bottom:20px;">📈 Лонг / 📉 Шорт</h3>
+<h3 style="font-family:'Inter',sans-serif;font-size:20px;font-weight:700;margin-bottom:20px;">📈 Лонг / 📉 Шорт</h3>
 <div style="background:var(--bg2);border:1px solid var(--border);border-radius:14px;padding:20px;margin-bottom:16px;">
   <p><strong>Что это:</strong> Включить или выключить поиск сигналов на покупку (лонг) и/или продажу (шорт). Если выключены оба — бот не присылает сигналы.</p>
   <div style="display:flex;flex-direction:column;gap:8px;margin-top:12px;">
@@ -3627,7 +3625,7 @@ class="changelog-entry">
 
 <div class="divider"></div>
 
-<h3 style="font-family:'Gilroy','DM Sans',sans-serif;font-size:20px;font-weight:700;margin-bottom:20px;">🕐 Таймфрейм</h3>
+<h3 style="font-family:'Inter',sans-serif;font-size:20px;font-weight:700;margin-bottom:20px;">🕐 Таймфрейм</h3>
 <div style="background:var(--bg2);border:1px solid var(--border);border-radius:14px;padding:20px;margin-bottom:16px;">
   <p><strong>Что это:</strong> Размер одной свечи на графике. Чем выше таймфрейм — тем реже и надёжнее сигналы.</p>
   <div class="table-scroll-hint">← свайп →</div>
@@ -3645,7 +3643,7 @@ class="changelog-entry">
 
 <div class="divider"></div>
 
-<h3 style="font-family:'Gilroy','DM Sans',sans-serif;font-size:20px;font-weight:700;margin-bottom:20px;">🔬 Параметры стратегии</h3>
+<h3 style="font-family:'Inter',sans-serif;font-size:20px;font-weight:700;margin-bottom:20px;">🔬 Параметры стратегии</h3>
 <div style="background:var(--bg2);border:1px solid var(--border);border-radius:14px;padding:20px;margin-bottom:16px;">
   <p style="margin-bottom:16px;">Тонкая настройка фильтров. Кнопки теперь показывают текущие значения сразу — например <code>📐 Пивоты (7)</code>. Вот что означает каждый параметр:</p>
   <div class="table-scroll-hint">← свайп →</div>
@@ -3670,7 +3668,7 @@ class="changelog-entry">
 
 <div class="divider"></div>
 
-<h3 style="font-family:'Gilroy','DM Sans',sans-serif;font-size:20px;font-weight:700;margin-bottom:20px;">💹 Авто-трейдинг</h3>
+<h3 style="font-family:'Inter',sans-serif;font-size:20px;font-weight:700;margin-bottom:20px;">💹 Авто-трейдинг</h3>
 <div style="background:var(--bg2);border:1px solid var(--border);border-radius:14px;padding:20px;margin-bottom:16px;">
   <p><strong>Что это:</strong> Если включён — бот сам открывает и закрывает сделки на бирже без твоего участия. Требует подключённого API ключа.</p>
   <div style="display:flex;flex-direction:column;gap:10px;margin-top:12px;">
@@ -3687,13 +3685,13 @@ class="changelog-entry">
 
 <div class="divider"></div>
 
-<h3 style="font-family:'Gilroy','DM Sans',sans-serif;font-size:20px;font-weight:700;margin-bottom:20px;">💳 Тарифные планы</h3>
+<h3 style="font-family:'Inter',sans-serif;font-size:20px;font-weight:700;margin-bottom:20px;">💳 Тарифные планы</h3>
 <div style="background:var(--bg2);border:1px solid rgba(245,200,66,0.2);border-radius:14px;padding:20px;margin-bottom:20px;">
   <p>Три плана на выбор. Подробные карточки с ценами и функциями — в разделе 🚀 Быстрый старт.</p>
   <div style="margin-top:12px;display:flex;gap:16px;flex-wrap:wrap;font-size:14px;">
     <span style="color:#22d47a;font-weight:700;">🟢 Beginner — $49/мес</span>
     <span style="color:#4f8fff;font-weight:700;">🔵 Pro — $79/мес</span>
-    <span style="color:#f5c842;font-weight:700;">🟡 Elite — $109/мес</span>
+    <span style="color:#a78bfa;font-weight:700;">🟡 Elite — $109/мес</span>
   </div>
   <p style="margin-top:10px;font-size:13px;color:var(--text2);">Переключиться: Главное меню → 💳 Мой план.</p>
 </div>
@@ -3706,7 +3704,7 @@ class="changelog-entry">
 
 <div class="divider"></div>
 
-<h3 style="font-family:'Gilroy','DM Sans',sans-serif;font-size:20px;font-weight:700;margin-bottom:20px;">📊 Strategy</h3>
+<h3 style="font-family:'Inter',sans-serif;font-size:20px;font-weight:700;margin-bottom:20px;">📊 Strategy</h3>
 <div style="background:var(--bg2);border:1px solid var(--border);border-radius:14px;padding:20px;margin-bottom:20px;">
   <p style="margin-bottom:12px;"><strong>What it is:</strong> Choose your market analysis method. This is the most important setting.</p>
   <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
@@ -3733,7 +3731,7 @@ class="changelog-entry">
 
 <div class="divider"></div>
 
-<h3 style="font-family:'Gilroy','DM Sans',sans-serif;font-size:20px;font-weight:700;margin-bottom:20px;">📈 Long / Short</h3>
+<h3 style="font-family:'Inter',sans-serif;font-size:20px;font-weight:700;margin-bottom:20px;">📈 Long / Short</h3>
 <div style="background:var(--bg2);border:1px solid var(--border);border-radius:14px;padding:20px;margin-bottom:16px;">
   <p><strong>What it is:</strong> Enable or disable signal search for buying (long) and/or selling (short). If both are off — the bot sends no signals.</p>
   <div style="display:flex;flex-direction:column;gap:8px;margin-top:12px;">
@@ -3745,7 +3743,7 @@ class="changelog-entry">
 
 <div class="divider"></div>
 
-<h3 style="font-family:'Gilroy','DM Sans',sans-serif;font-size:20px;font-weight:700;margin-bottom:20px;">🕐 Timeframe</h3>
+<h3 style="font-family:'Inter',sans-serif;font-size:20px;font-weight:700;margin-bottom:20px;">🕐 Timeframe</h3>
 <div style="background:var(--bg2);border:1px solid var(--border);border-radius:14px;padding:20px;margin-bottom:16px;">
   <p><strong>What it is:</strong> The size of one candle on the chart. Higher timeframe = fewer but more reliable signals.</p>
   <div class="table-scroll-hint">← swipe →</div>
@@ -3763,7 +3761,7 @@ class="changelog-entry">
 
 <div class="divider"></div>
 
-<h3 style="font-family:'Gilroy','DM Sans',sans-serif;font-size:20px;font-weight:700;margin-bottom:20px;">🔬 Strategy Parameters</h3>
+<h3 style="font-family:'Inter',sans-serif;font-size:20px;font-weight:700;margin-bottom:20px;">🔬 Strategy Parameters</h3>
 <div style="background:var(--bg2);border:1px solid var(--border);border-radius:14px;padding:20px;margin-bottom:16px;">
   <p style="margin-bottom:16px;">Fine-tuning filters. Buttons now show current values right away — e.g. <code>📐 Pivots (7)</code>. Here is what each parameter means:</p>
   <div class="table-scroll-hint">← swipe →</div>
@@ -3788,7 +3786,7 @@ class="changelog-entry">
 
 <div class="divider"></div>
 
-<h3 style="font-family:'Gilroy','DM Sans',sans-serif;font-size:20px;font-weight:700;margin-bottom:20px;">💹 Auto-Trading</h3>
+<h3 style="font-family:'Inter',sans-serif;font-size:20px;font-weight:700;margin-bottom:20px;">💹 Auto-Trading</h3>
 <div style="background:var(--bg2);border:1px solid var(--border);border-radius:14px;padding:20px;margin-bottom:16px;">
   <p><strong>What it is:</strong> When enabled — the bot opens and closes trades on the exchange automatically. Requires a connected <span class="term" data-tip="API Key — unique secret key connecting the trading bot to your exchange account. Never share it.">API key</span>.</p>
   <div style="display:flex;flex-direction:column;gap:10px;margin-top:12px;">
@@ -3805,13 +3803,13 @@ class="changelog-entry">
 
 <div class="divider"></div>
 
-<h3 style="font-family:'Gilroy','DM Sans',sans-serif;font-size:20px;font-weight:700;margin-bottom:20px;">💳 Subscription Plans</h3>
+<h3 style="font-family:'Inter',sans-serif;font-size:20px;font-weight:700;margin-bottom:20px;">💳 Subscription Plans</h3>
 <div style="background:var(--bg2);border:1px solid rgba(245,200,66,0.2);border-radius:14px;padding:20px;margin-bottom:20px;">
   <p>Three plans to choose from. Detailed cards with prices and features — in the 🚀 Quick Start section.</p>
   <div style="margin-top:12px;display:flex;gap:16px;flex-wrap:wrap;font-size:14px;">
     <span style="color:#22d47a;font-weight:700;">🟢 Beginner — $49/мес</span>
     <span style="color:#4f8fff;font-weight:700;">🔵 Pro — $79/мес</span>
-    <span style="color:#f5c842;font-weight:700;">🟡 Elite — $109/мес</span>
+    <span style="color:#a78bfa;font-weight:700;">🟡 Elite — $109/мес</span>
   </div>
   <p style="margin-top:10px;font-size:13px;color:var(--text2);">Switch: Main menu → 💳 My Plan.</p>
 </div>
@@ -3874,7 +3872,7 @@ function setLang(lang) {
 function updateStaticText(lang) {
   const ru = lang === 'ru';
   const heroDesc = document.querySelector('.hero-desc');
-  if (heroDesc) heroDesc.textContent = ru ? 'Полное руководство по работе с CHM GEL SIGNALS. От первого сигнала до настройки адаптивного оптимизатора.' : 'Complete guide to CHM GEL SIGNALS. From your first signal to configuring the adaptive optimizer.';
+  if (heroDesc) heroDesc.textContent = ru ? 'Полное руководство по работе с CHM Finance. От первого сигнала до настройки адаптивного оптимизатора.' : 'Complete guide to CHM Finance. From your first signal to configuring the adaptive optimizer.';
   const heroEye = document.querySelector('.hero-eyebrow');
   // hero badge is static — no update needed
   const statLabels = document.querySelectorAll('.stat-label');
@@ -3905,7 +3903,7 @@ function updateStaticText(lang) {
     const el = document.getElementById(id);
     if (el) el.textContent = text;
   });
-  document.title = ru ? 'CHM GEL SIGNALS — Академия' : 'CHM GEL SIGNALS — Academy';
+  document.title = ru ? 'CHM Finance — Академия' : 'CHM Finance — Academy';
   // Обновляем empty state на нужном языке
   const searchInput = document.getElementById('navSearch');
   if (searchInput && searchInput.value) filterNav(searchInput.value);
