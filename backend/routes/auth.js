@@ -27,12 +27,15 @@ router.post('/register', (req, res) => {
       return res.status(400).json({ error: 'Password must be at least 6 characters' });
     }
 
-    const result = authService.register(email.toLowerCase().trim(), password, referralCode);
+    const regResult = authService.register(email.toLowerCase().trim(), password, referralCode);
+
+    // Auto-login after registration: return JWT token
+    const loginResult = authService.login(email.toLowerCase().trim(), password);
 
     res.status(201).json({
       message: 'User registered successfully',
-      userId: result.userId,
-      email: result.email,
+      token: loginResult.token,
+      user: loginResult.user,
     });
   } catch (error) {
     console.error('Registration error:', error.message);
