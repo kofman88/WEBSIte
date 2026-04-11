@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32">
+  <rect width="32" height="32" rx="8" fill="#05060f"/>
+  <text x="4" y="23" font-family="Arial,sans-serif" font-weight="800" font-size="18" fill="#e2e8f0">CH</text>
+  <circle cx="27" cy="21" r="3" fill="#7c3aed"/>
+</svg>
