@@ -176,9 +176,9 @@ function fillStats(d){
     ['Ср. прибыль','+$'+Number(d.avgWin||0).toFixed(2)],['Ср. убыток','-$'+Number(d.avgLoss||0).toFixed(2)],
     ['Итоговый баланс','$'+Number(d.finalBalance||0).toFixed(2)]
   ].map(([k,v])=>{
-    let cls='';
-    if(v.startsWith('+'))cls='text-green-400';if(v.startsWith('-'))cls='text-red-400';
-    return `<div class="flex justify-between"><span class="text-slate-400">${k}</span><span class="mono ${cls}">${v}</span></div>`;
+    const s=String(v);let cls='';
+    if(s.startsWith('+'))cls='text-green-400';if(s.startsWith('-'))cls='text-red-400';
+    return `<div class="flex justify-between"><span class="text-slate-400">${k}</span><span class="mono ${cls}">${s}</span></div>`;
   }).join('');
 }
 
