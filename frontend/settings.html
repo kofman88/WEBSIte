@@ -17,7 +17,7 @@
     <a href="bots.html" class="sidebar-link" data-page="bots"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2a4 4 0 014 4v1h2a2 2 0 012 2v10a2 2 0 01-2 2H6a2 2 0 01-2-2V9a2 2 0 012-2h2V6a4 4 0 014-4z"/></svg>Боты</a>
     <a href="signals.html" class="sidebar-link" data-page="signals"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>Сигналы</a>
     <a href="backtests.html" class="sidebar-link" data-page="backtests"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6m6 0h10"/></svg>Бэктесты</a>
-    <a href="wallet.html" class="sidebar-link" data-page="wallet"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12V7H5a2 2 0 010-4h14v4M3 5v14a2 2 0 002 2h16v-5"/></svg>Кошелёк</a>
+    <a href="wallet.html" class="sidebar-link" data-page="wallet"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12V7H5a2 2 0 010-4h14v4M3 5v14a2 2 0 002 2h16v-5"/></svg>Биржи</a>
     <a href="settings.html" class="sidebar-link active" data-page="settings"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/></svg>Настройки</a>
   </nav>
   <div class="sidebar-footer"><button onclick="Auth.logout()" class="sidebar-link" style="color:#f87171"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4M16 17l5-5-5-5M21 12H9"/></svg>Выйти</button></div>
@@ -40,10 +40,10 @@
       <h3 class="font-bold mb-4">Профиль</h3>
       <form class="space-y-4">
         <div class="flex items-center gap-4 mb-4">
-          <div class="w-16 h-16 rounded-full flex items-center justify-center text-2xl font-bold" style="background:linear-gradient(135deg,#4F46E5,#7C3AED)">U</div>
-          <div><div class="font-semibold">user@example.com</div><div class="text-xs text-slate-500">Участник с января 2025</div></div>
+          <div class="w-16 h-16 rounded-full flex items-center justify-center text-2xl font-bold" style="background:linear-gradient(135deg,#4F46E5,#7C3AED)" id="sAvatar">U</div>
+          <div><div class="font-semibold" id="sEmail">—</div><div class="text-xs text-slate-500" id="sJoined">—</div></div>
         </div>
-        <div><label class="text-sm text-slate-400 block mb-1">Email</label><input value="user@example.com" class="w-full bg-slate-800/50 border border-slate-700 rounded-xl px-4 py-3 text-white outline-none" readonly/></div>
+        <div><label class="text-sm text-slate-400 block mb-1">Email</label><input id="sEmailInput" class="w-full bg-slate-800/50 border border-slate-700 rounded-xl px-4 py-3 text-white outline-none" readonly/></div>
         <div><label class="text-sm text-slate-400 block mb-1">Telegram ID</label><input placeholder="@username" class="w-full bg-slate-800/50 border border-slate-700 rounded-xl px-4 py-3 text-white outline-none"/></div>
         <div class="grid grid-cols-2 gap-4">
           <div><label class="text-sm text-slate-400 block mb-1">Язык</label><select class="w-full bg-slate-800/50 border border-slate-700 rounded-xl px-4 py-3 text-white outline-none"><option>Русский</option><option>English</option></select></div>
@@ -58,15 +58,12 @@
   <div class="stab-content" id="stab-subscription">
     <div class="card max-w-2xl mb-6">
       <h3 class="font-bold mb-4">Текущий план</h3>
-      <div class="flex items-center gap-4 p-4 bg-indigo-500/10 border border-indigo-500/20 rounded-xl mb-4">
+      <div class="flex items-center gap-4 p-4 bg-indigo-500/10 border border-indigo-500/20 rounded-xl mb-4" id="sPlanCard">
         <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#818CF8" stroke-width="2"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
-        <div><div class="font-bold text-indigo-300">Pro Plan — $79/мес</div><div class="text-xs text-slate-500">Активен до 10 мая 2026</div></div>
+        <div><div class="font-bold text-indigo-300" id="sPlanName">Загрузка...</div><div class="text-xs text-slate-500" id="sPlanExpiry">—</div></div>
       </div>
-      <div class="grid grid-cols-2 gap-4 text-sm mb-4">
-        <div class="p-3 bg-slate-800/30 rounded-lg"><span class="text-slate-500">Сигналы:</span> <span class="text-green-400">Безлимитно</span></div>
-        <div class="p-3 bg-slate-800/30 rounded-lg"><span class="text-slate-500">Боты:</span> <span>10 макс</span></div>
-        <div class="p-3 bg-slate-800/30 rounded-lg"><span class="text-slate-500">Авто-торговля:</span> <span class="text-green-400">Да</span></div>
-        <div class="p-3 bg-slate-800/30 rounded-lg"><span class="text-slate-500">Бэктесты:</span> <span class="text-green-400">Да</span></div>
+      <div class="grid grid-cols-2 gap-4 text-sm mb-4" id="sPlanFeatures">
+        <div class="p-3 bg-slate-800/30 rounded-lg text-slate-500">Загрузка...</div>
       </div>
       <div class="flex gap-3">
         <button onclick="openPayment('starter')" class="text-sm px-4 py-2 rounded-lg bg-slate-800/50 border border-slate-700 text-slate-300 hover:text-white">Starter — $29</button>
@@ -80,11 +77,11 @@
     </div>
     <div class="card max-w-2xl">
       <h3 class="font-bold mb-4">Реферальная программа</h3>
-      <div class="bg-slate-800/30 rounded-xl p-4 mb-3"><div class="text-xs text-slate-500 mb-1">Ваша ссылка</div><div class="flex items-center gap-2"><code class="text-sm text-cyan-400">https://chmup.top/?ref=abc123</code><button onclick="Utils.copyToClipboard('https://chmup.top/?ref=abc123')" class="text-xs text-slate-500 hover:text-white">Copy</button></div></div>
+      <div class="bg-slate-800/30 rounded-xl p-4 mb-3"><div class="text-xs text-slate-500 mb-1">Ваша ссылка</div><div class="flex items-center gap-2" id="sRefLink"><span class="text-sm text-slate-500">Загрузка...</span></div></div>
       <div class="grid grid-cols-3 gap-3 text-center text-sm">
-        <div class="p-3 bg-slate-800/30 rounded-lg"><div class="text-xs text-slate-500">Приглашено</div><div class="font-bold">5</div></div>
+        <div class="p-3 bg-slate-800/30 rounded-lg"><div class="text-xs text-slate-500">Приглашено</div><div class="font-bold" id="sRefCount">—</div></div>
         <div class="p-3 bg-slate-800/30 rounded-lg"><div class="text-xs text-slate-500">Комиссия</div><div class="font-bold text-green-400">10%</div></div>
-        <div class="p-3 bg-slate-800/30 rounded-lg"><div class="text-xs text-slate-500">Заработано</div><div class="font-bold text-green-400">$39.50</div></div>
+        <div class="p-3 bg-slate-800/30 rounded-lg"><div class="text-xs text-slate-500">Заработано</div><div class="font-bold text-green-400" id="sRefEarned">—</div></div>
       </div>
     </div>
   </div>
@@ -209,6 +206,46 @@ async function openPayment(plan){
 if(!Auth.isLoggedIn())window.location.href='/?login=1';
 Sidebar.init('settings');
 function stab(t){document.querySelectorAll('.stab').forEach(b=>b.classList.remove('active'));document.querySelectorAll('.stab-content').forEach(c=>c.classList.remove('active'));document.getElementById('stab-'+t).classList.add('active');event.target.classList.add('active')}
+
+// Load real profile data
+async function loadSettings(){
+  try{
+    const me=await API.getProfile();
+    const u=me.user||{};
+    const s=me.subscription||{};
+    // Profile
+    document.getElementById('sAvatar').textContent=(u.email||'U')[0].toUpperCase();
+    document.getElementById('sEmail').textContent=u.email||'—';
+    document.getElementById('sEmailInput').value=u.email||'';
+    document.getElementById('sJoined').textContent='Участник с '+(u.created_at?new Date(u.created_at).toLocaleDateString('ru',{month:'long',year:'numeric'}):'—');
+    // Subscription
+    const plan=s.plan||'free';
+    const prices={free:'Бесплатно',starter:'$29/мес',pro:'$79/мес',elite:'$149/мес'};
+    document.getElementById('sPlanName').textContent=plan.charAt(0).toUpperCase()+plan.slice(1)+' — '+(prices[plan]||'');
+    document.getElementById('sPlanExpiry').textContent=s.expiresAt?'Активен до '+new Date(s.expiresAt).toLocaleDateString('ru'):(plan==='free'?'Бессрочно':'—');
+    // Features
+    const features={free:{sig:'3/день',bots:'1',auto:'Нет',bt:'Нет'},starter:{sig:'Безлимитно',bots:'3',auto:'Нет',bt:'Нет'},pro:{sig:'Безлимитно',bots:'10',auto:'Да',bt:'Да'},elite:{sig:'Безлимитно',bots:'∞',auto:'Да',bt:'Да'}};
+    const f=features[plan]||features.free;
+    document.getElementById('sPlanFeatures').innerHTML=`<div class="p-3 bg-slate-800/30 rounded-lg"><span class="text-slate-500">Сигналы:</span> <span class="${f.sig==='Нет'?'':'text-green-400'}">${f.sig}</span></div><div class="p-3 bg-slate-800/30 rounded-lg"><span class="text-slate-500">Боты:</span> <span>${f.bots} макс</span></div><div class="p-3 bg-slate-800/30 rounded-lg"><span class="text-slate-500">Авто-торговля:</span> <span class="${f.auto==='Да'?'text-green-400':''}">${f.auto}</span></div><div class="p-3 bg-slate-800/30 rounded-lg"><span class="text-slate-500">Бэктесты:</span> <span class="${f.bt==='Да'?'text-green-400':''}">${f.bt}</span></div>`;
+    // Referral
+    const refCode=u.referral_code||'';
+    const refUrl='https://chmup.top/?ref='+refCode;
+    document.getElementById('sRefLink').innerHTML=`<code class="text-sm text-cyan-400">${refUrl}</code><button onclick="Utils.copyToClipboard('${refUrl}')" class="text-xs text-slate-500 hover:text-white">Copy</button>`;
+    document.getElementById('sRefCount').textContent='0';
+    document.getElementById('sRefEarned').textContent='$0';
+  }catch(e){console.error('Settings load:',e)}
+}
+loadSettings();
+
+// Change password — real API
+document.querySelector('#stab-security form')?.addEventListener('submit',async function(e){
+  e.preventDefault();
+  const inputs=this.querySelectorAll('input[type=password]');
+  const cur=inputs[0].value,nw=inputs[1].value,nw2=inputs[2].value;
+  if(!cur||!nw){Toast.error('Заполните все поля');return}
+  if(nw!==nw2){Toast.error('Пароли не совпадают');return}
+  try{await API.post('/auth/change-password',{currentPassword:cur,newPassword:nw});Toast.success('Пароль изменён');inputs.forEach(i=>i.value='')}catch(err){Toast.error(err.message)}
+})
 </script>
 </body>
 </html>
