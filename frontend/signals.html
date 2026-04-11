@@ -4,135 +4,36 @@
   <meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1.0"/>
   <title>CHM Finance — Сигналы</title>
   <link rel="icon" type="image/svg+xml" href="/favicon.svg"/>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet"/>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet"/>
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js"></script>
   <link rel="stylesheet" href="styles.css"/>
-  <style>body{background:#070b14;color:#f1f5f9;font-family:'Inter',sans-serif}@keyframes slideIn{from{opacity:0;transform:translateX(-20px)}to{opacity:1;transform:translateX(0)}}.signal-new{animation:slideIn .4s ease}.conf-bar{height:4px;border-radius:2px;background:#1e293b}.conf-fill{height:100%;border-radius:2px;transition:width .3s}</style>
+  <style>body{background:#070b14;color:#f1f5f9;font-family:'Inter',sans-serif}.mono{font-family:'JetBrains Mono',monospace}.conf-bar{height:4px;border-radius:2px;background:#1e293b}.conf-fill{height:100%;border-radius:2px}.skeleton{background:linear-gradient(90deg,rgba(30,41,59,.3) 25%,rgba(30,41,59,.5) 50%,rgba(30,41,59,.3) 75%);background-size:200% 100%;animation:shimmer 1.5s infinite;border-radius:6px}@keyframes shimmer{0%{background-position:200% 0}100%{background-position:-200% 0}}.filter-btn.active{background:rgba(79,70,229,.2)!important;color:#a5b4fc!important;border-color:rgba(79,70,229,.3)!important}</style>
 </head>
 <body>
-<aside class="sidebar" id="sidebar">
-  <div class="sidebar-logo">CHM<span>.</span></div>
-  <nav class="sidebar-nav">
-    <a href="dashboard.html" class="sidebar-link" data-page="dashboard"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>Дашборд</a>
-    <a href="bots.html" class="sidebar-link" data-page="bots"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2a4 4 0 014 4v1h2a2 2 0 012 2v10a2 2 0 01-2 2H6a2 2 0 01-2-2V9a2 2 0 012-2h2V6a4 4 0 014-4z"/></svg>Боты</a>
-    <a href="signals.html" class="sidebar-link active" data-page="signals"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>Сигналы</a>
-    <a href="backtests.html" class="sidebar-link" data-page="backtests"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6m6 0h10"/></svg>Бэктесты</a>
-    <a href="wallet.html" class="sidebar-link" data-page="wallet"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12V7H5a2 2 0 010-4h14v4M3 5v14a2 2 0 002 2h16v-5"/></svg>Кошелёк</a>
-    <a href="settings.html" class="sidebar-link" data-page="settings"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/></svg>Настройки</a>
-  </nav>
-  <div class="sidebar-footer"><button onclick="Auth.logout()" class="sidebar-link" style="color:#f87171"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4M16 17l5-5-5-5M21 12H9"/></svg>Выйти</button></div>
-</aside>
+<aside class="sidebar" id="sidebar"><div class="sidebar-logo">CHM<span>.</span></div><nav class="sidebar-nav"><a href="dashboard.html" class="sidebar-link" data-page="dashboard"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>Дашборд</a><a href="bots.html" class="sidebar-link" data-page="bots"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2a4 4 0 014 4v1h2a2 2 0 012 2v10a2 2 0 01-2 2H6a2 2 0 01-2-2V9a2 2 0 012-2h2V6a4 4 0 014-4z"/></svg>Боты</a><a href="signals.html" class="sidebar-link active" data-page="signals"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>Сигналы</a><a href="backtests.html" class="sidebar-link" data-page="backtests"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6m6 0h10"/></svg>Бэктесты</a><a href="wallet.html" class="sidebar-link" data-page="wallet"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12V7H5a2 2 0 010-4h14v4M3 5v14a2 2 0 002 2h16v-5"/></svg>Кошелёк</a><a href="settings.html" class="sidebar-link" data-page="settings"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/></svg>Настройки</a></nav><div class="sidebar-footer"><button onclick="Auth.logout()" class="sidebar-link" style="color:#f87171"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4M16 17l5-5-5-5M21 12H9"/></svg>Выйти</button></div></aside>
 <header class="topbar"><div class="flex items-center gap-4"><button id="sidebar-toggle" class="lg:hidden" style="background:none;border:none;color:#94a3b8;cursor:pointer"><svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 6h16M4 12h16M4 18h16"/></svg></button><h1 class="text-xl font-bold">Сигналы</h1><div class="flex items-center gap-2 ml-4"><span class="w-2 h-2 bg-green-400 rounded-full animate-pulse"></span><span class="text-xs text-green-400">Live</span></div></div><div class="topbar-actions"><div class="topbar-user"><div class="topbar-avatar">U</div></div></div></header>
 
 <main class="main-content">
-  <!-- Stats -->
   <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
-    <div class="stat-card"><div class="stat-card-label">Сигналов сегодня</div><div class="stat-card-value">12</div></div>
-    <div class="stat-card"><div class="stat-card-label">Win Rate</div><div class="stat-card-value text-green-400">78%</div></div>
-    <div class="stat-card"><div class="stat-card-label">Ср. Confidence</div><div class="stat-card-value text-cyan-400">85</div></div>
+    <div class="stat-card"><div class="stat-card-label">Сигналов</div><div class="stat-card-value mono" id="stTotal"><div class="skeleton" style="height:2rem;width:40px"></div></div></div>
+    <div class="stat-card"><div class="stat-card-label">Win Rate</div><div class="stat-card-value mono" id="stWR"><div class="skeleton" style="height:2rem;width:60px"></div></div></div>
+    <div class="stat-card"><div class="stat-card-label">Ср. Confidence</div><div class="stat-card-value mono" id="stConf"><div class="skeleton" style="height:2rem;width:50px"></div></div></div>
   </div>
-
-  <!-- Filters -->
-  <div class="flex flex-wrap gap-3 mb-6">
-    <button class="text-xs px-4 py-2 rounded-lg bg-indigo-500/20 text-indigo-300 border border-indigo-500/30">Все</button>
-    <button class="text-xs px-4 py-2 rounded-lg bg-slate-800/50 text-slate-400 border border-slate-700 hover:text-white">SMC</button>
-    <button class="text-xs px-4 py-2 rounded-lg bg-slate-800/50 text-slate-400 border border-slate-700 hover:text-white">Gerchik</button>
-    <button class="text-xs px-4 py-2 rounded-lg bg-slate-800/50 text-slate-400 border border-slate-700 hover:text-white">Scalping</button>
-    <span class="border-l border-slate-700 mx-2"></span>
-    <button class="text-xs px-4 py-2 rounded-lg bg-slate-800/50 text-slate-400 border border-slate-700 hover:text-white">LONG</button>
-    <button class="text-xs px-4 py-2 rounded-lg bg-slate-800/50 text-slate-400 border border-slate-700 hover:text-white">SHORT</button>
+  <div class="flex flex-wrap gap-2 mb-6" id="filters">
+    <button class="filter-btn active text-xs px-4 py-2 rounded-lg bg-slate-800/50 text-slate-400 border border-slate-700" data-f="all">Все</button>
+    <button class="filter-btn text-xs px-4 py-2 rounded-lg bg-slate-800/50 text-slate-400 border border-slate-700" data-f="levels">Levels</button>
+    <button class="filter-btn text-xs px-4 py-2 rounded-lg bg-slate-800/50 text-slate-400 border border-slate-700" data-f="smc">SMC</button>
+    <button class="filter-btn text-xs px-4 py-2 rounded-lg bg-slate-800/50 text-slate-400 border border-slate-700" data-f="scalping">Scalping</button>
+    <span class="border-l border-slate-700 mx-1"></span>
+    <button class="filter-btn text-xs px-4 py-2 rounded-lg bg-slate-800/50 text-slate-400 border border-slate-700" data-f="long">LONG</button>
+    <button class="filter-btn text-xs px-4 py-2 rounded-lg bg-slate-800/50 text-slate-400 border border-slate-700" data-f="short">SHORT</button>
   </div>
-
   <div class="grid lg:grid-cols-3 gap-6">
-    <!-- Signal Feed -->
-    <div class="lg:col-span-2 space-y-4" id="signalFeed">
-
-      <div class="card signal-new">
-        <div class="flex items-center justify-between mb-3">
-          <div class="flex items-center gap-3"><span class="text-lg font-bold">BTC/USDT</span><span class="text-xs px-2 py-0.5 rounded-full bg-green-500/15 text-green-400">LONG</span><span class="text-xs px-2 py-0.5 rounded-full bg-indigo-500/15 text-indigo-400">SMC</span></div>
-          <div class="flex items-center gap-2"><span class="text-xs px-2 py-0.5 rounded-full bg-green-500/15 text-green-400 animate-pulse">NEW</span><span class="text-xs text-slate-500">2m ago</span></div>
-        </div>
-        <div class="grid grid-cols-4 gap-3 text-sm mb-3">
-          <div><div class="text-xs text-slate-500">Entry</div><div class="font-mono">67,450</div></div>
-          <div><div class="text-xs text-slate-500">SL</div><div class="font-mono text-red-400">66,800</div></div>
-          <div><div class="text-xs text-slate-500">TP1</div><div class="font-mono text-green-400">68,100</div></div>
-          <div><div class="text-xs text-slate-500">TP2</div><div class="font-mono text-green-400">69,200</div></div>
-        </div>
-        <div class="flex items-center justify-between">
-          <div class="flex items-center gap-2 flex-1"><span class="text-xs text-slate-500">Confidence:</span><div class="conf-bar flex-1"><div class="conf-fill" style="width:92%;background:#10b981"></div></div><span class="text-xs text-green-400">92</span></div>
-          <span class="text-xs text-slate-500 ml-4">R:R 2.8</span>
-        </div>
-      </div>
-
-      <div class="card">
-        <div class="flex items-center justify-between mb-3">
-          <div class="flex items-center gap-3"><span class="text-lg font-bold">ETH/USDT</span><span class="text-xs px-2 py-0.5 rounded-full bg-red-500/15 text-red-400">SHORT</span><span class="text-xs px-2 py-0.5 rounded-full bg-orange-500/15 text-orange-400">Gerchik</span></div>
-          <div class="text-xs text-slate-500">15m ago</div>
-        </div>
-        <div class="grid grid-cols-4 gap-3 text-sm mb-3">
-          <div><div class="text-xs text-slate-500">Entry</div><div class="font-mono">3,245</div></div>
-          <div><div class="text-xs text-slate-500">SL</div><div class="font-mono text-red-400">3,310</div></div>
-          <div><div class="text-xs text-slate-500">TP1</div><div class="font-mono text-green-400">3,180</div></div>
-          <div><div class="text-xs text-slate-500">TP2</div><div class="font-mono text-green-400">3,100</div></div>
-        </div>
-        <div class="flex items-center justify-between">
-          <div class="flex items-center gap-2 flex-1"><span class="text-xs text-slate-500">Confidence:</span><div class="conf-bar flex-1"><div class="conf-fill" style="width:78%;background:#f59e0b"></div></div><span class="text-xs text-yellow-400">78</span></div>
-          <span class="text-xs text-slate-500 ml-4">R:R 2.2</span>
-        </div>
-      </div>
-
-      <div class="card">
-        <div class="flex items-center justify-between mb-3">
-          <div class="flex items-center gap-3"><span class="text-lg font-bold">SOL/USDT</span><span class="text-xs px-2 py-0.5 rounded-full bg-green-500/15 text-green-400">LONG</span><span class="text-xs px-2 py-0.5 rounded-full bg-cyan-500/15 text-cyan-400">Scalping</span></div>
-          <div class="flex items-center gap-2"><span class="text-xs px-2 py-0.5 rounded-full bg-green-500/15 text-green-400">HIT TP1</span><span class="text-xs text-slate-500">30m ago</span></div>
-        </div>
-        <div class="grid grid-cols-4 gap-3 text-sm mb-3">
-          <div><div class="text-xs text-slate-500">Entry</div><div class="font-mono">178.50</div></div>
-          <div><div class="text-xs text-slate-500">SL</div><div class="font-mono text-red-400">176.20</div></div>
-          <div><div class="text-xs text-slate-500">TP1</div><div class="font-mono text-green-400 line-through">180.00</div></div>
-          <div><div class="text-xs text-slate-500">TP2</div><div class="font-mono text-green-400">182.50</div></div>
-        </div>
-        <div class="flex items-center justify-between">
-          <div class="flex items-center gap-2 flex-1"><span class="text-xs text-slate-500">Confidence:</span><div class="conf-bar flex-1"><div class="conf-fill" style="width:85%;background:#10b981"></div></div><span class="text-xs text-green-400">85</span></div>
-          <span class="text-xs text-green-400 ml-4">+1.6%</span>
-        </div>
-      </div>
-
-      <div class="card" style="opacity:.5">
-        <div class="flex items-center justify-between mb-3">
-          <div class="flex items-center gap-3"><span class="text-lg font-bold">DOGE/USDT</span><span class="text-xs px-2 py-0.5 rounded-full bg-green-500/15 text-green-400">LONG</span><span class="text-xs px-2 py-0.5 rounded-full bg-indigo-500/15 text-indigo-400">SMC</span></div>
-          <div class="flex items-center gap-2"><span class="text-xs px-2 py-0.5 rounded-full bg-red-500/15 text-red-400">STOPPED</span><span class="text-xs text-slate-500">2h ago</span></div>
-        </div>
-        <div class="grid grid-cols-4 gap-3 text-sm mb-3">
-          <div><div class="text-xs text-slate-500">Entry</div><div class="font-mono">0.1825</div></div>
-          <div><div class="text-xs text-slate-500">SL</div><div class="font-mono text-red-400">0.1790</div></div>
-          <div><div class="text-xs text-slate-500">TP1</div><div class="font-mono">0.1880</div></div>
-          <div><div class="text-xs text-slate-500">TP2</div><div class="font-mono">0.1950</div></div>
-        </div>
-        <div class="flex items-center justify-between">
-          <div class="flex items-center gap-2 flex-1"><span class="text-xs text-slate-500">Confidence:</span><div class="conf-bar flex-1"><div class="conf-fill" style="width:65%;background:#f59e0b"></div></div><span class="text-xs text-yellow-400">65</span></div>
-          <span class="text-xs text-red-400 ml-4">-1.9%</span>
-        </div>
-      </div>
-    </div>
-
-    <!-- Performance Panel -->
+    <div class="lg:col-span-2 space-y-3" id="signalFeed"><div class="skeleton" style="height:120px"></div><div class="skeleton" style="height:120px"></div></div>
     <div class="space-y-4">
-      <div class="card">
-        <h3 class="font-bold mb-4">По стратегиям</h3>
-        <canvas id="stratChart" height="200"></canvas>
-      </div>
-      <div class="card">
-        <h3 class="font-bold mb-4">Топ символы</h3>
-        <div class="space-y-3">
-          <div class="flex items-center justify-between text-sm"><span>BTC/USDT</span><span class="text-green-400">+12.4%</span></div>
-          <div class="flex items-center justify-between text-sm"><span>ETH/USDT</span><span class="text-green-400">+8.7%</span></div>
-          <div class="flex items-center justify-between text-sm"><span>SOL/USDT</span><span class="text-green-400">+5.2%</span></div>
-          <div class="flex items-center justify-between text-sm"><span>ARB/USDT</span><span class="text-green-400">+3.1%</span></div>
-          <div class="flex items-center justify-between text-sm"><span>DOGE/USDT</span><span class="text-red-400">-1.2%</span></div>
-        </div>
-      </div>
+      <div class="card"><h3 class="font-bold mb-4">По стратегиям</h3><canvas id="stratChart" height="200"></canvas></div>
+      <div class="card"><h3 class="font-bold mb-4">Топ символы</h3><div id="topSymbols"><div class="skeleton" style="height:100px"></div></div></div>
     </div>
   </div>
 </main>
@@ -141,8 +42,41 @@
 <script>
 if(!Auth.isLoggedIn())window.location.href='/?login=1';
 Sidebar.init('signals');
-// Strategy donut
-new Chart(document.getElementById('stratChart'),{type:'doughnut',data:{labels:['SMC','Gerchik','Scalping'],datasets:[{data:[45,30,25],backgroundColor:['#818CF8','#f97316','#06b6d4'],borderWidth:0}]},options:{responsive:true,plugins:{legend:{position:'bottom',labels:{color:'#94a3b8',padding:12,font:{size:11}}}}}});
+let allSignals=[],activeFilter='all',sChart=null;
+
+document.getElementById('filters').addEventListener('click',e=>{const b=e.target.closest('.filter-btn');if(!b)return;document.querySelectorAll('.filter-btn').forEach(x=>x.classList.remove('active'));b.classList.add('active');activeFilter=b.dataset.f;renderSignals()});
+
+function renderSignals(){
+  const feed=document.getElementById('signalFeed');
+  let f=allSignals;
+  if(activeFilter!=='all'){if(activeFilter==='long'||activeFilter==='short')f=f.filter(s=>s.direction===activeFilter);else f=f.filter(s=>s.strategy===activeFilter)}
+  if(!f.length){feed.innerHTML='<div style="text-align:center;padding:48px;color:#64748b"><svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" style="margin:0 auto 12px;opacity:.3"><path d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>Сигналов пока нет<br><span style="font-size:.75rem">Сканер обновляется каждые 30 сек</span></div>';return}
+  feed.innerHTML=f.map(s=>{
+    const isL=s.direction==='long',c=s.confidence||0,cc=c>=80?'#10b981':c>=60?'#f59e0b':'#ef4444',p=s.pnl_pct;
+    return `<div class="card" ${s.result==='loss'?'style="opacity:.5"':''}>
+      <div class="flex items-center justify-between mb-3"><div class="flex items-center gap-2"><span class="text-lg font-bold">${s.symbol}</span><span class="text-xs px-2 py-0.5 rounded-full ${isL?'bg-green-500/15 text-green-400':'bg-red-500/15 text-red-400'}">${s.direction.toUpperCase()}</span><span class="text-xs px-2 py-0.5 rounded-full bg-indigo-500/15 text-indigo-300">${s.strategy}</span></div><div class="text-xs text-slate-500">${s.timeframe||''} &middot; ${Utils.timeAgo(s.created_at)}</div></div>
+      <div class="grid grid-cols-4 gap-3 text-sm mb-3"><div><div class="text-xs text-slate-500">Entry</div><div class="mono">${(+s.entry_price).toLocaleString('en',{maximumFractionDigits:6})}</div></div><div><div class="text-xs text-slate-500">SL</div><div class="mono text-red-400">${(+s.stop_loss).toLocaleString('en',{maximumFractionDigits:6})}</div></div><div><div class="text-xs text-slate-500">TP1</div><div class="mono text-green-400">${s.take_profit_1?(+s.take_profit_1).toLocaleString('en',{maximumFractionDigits:6}):'—'}</div></div><div><div class="text-xs text-slate-500">TP2</div><div class="mono text-green-400">${s.take_profit_2?(+s.take_profit_2).toLocaleString('en',{maximumFractionDigits:6}):'—'}</div></div></div>
+      <div class="flex items-center justify-between"><div class="flex items-center gap-2 flex-1"><span class="text-xs text-slate-500">Confidence:</span><div class="conf-bar flex-1"><div class="conf-fill" style="width:${c}%;background:${cc}"></div></div><span class="text-xs" style="color:${cc}">${c}</span></div>${p?`<span class="text-xs mono ml-4 ${p>0?'text-green-400':'text-red-400'}">${p>0?'+':''}${p}%</span>`:''}</div></div>`}).join('')}
+
+async function loadSignals(){
+  try{
+    const ss=await API.getSignalStats().catch(()=>({stats:{}}));const st=ss.stats||ss||{};
+    document.getElementById('stTotal').textContent=st.total||0;
+    document.getElementById('stWR').textContent=(st.winRate||0)+'%';
+    document.getElementById('stConf').textContent=Math.round(st.avgConfidence||0);
+    const sg=await API.getSignals({limit:50});allSignals=sg.signals||[];renderSignals();
+    // Chart
+    const by={};allSignals.forEach(s=>{by[s.strategy]=(by[s.strategy]||0)+1});
+    const cols={levels:'#f59e0b',smc:'#818CF8',gerchik:'#3b82f6',scalping:'#06b6d4'};
+    if(sChart)sChart.destroy();
+    if(Object.keys(by).length){sChart=new Chart(document.getElementById('stratChart'),{type:'doughnut',data:{labels:Object.keys(by),datasets:[{data:Object.values(by),backgroundColor:Object.keys(by).map(k=>cols[k]||'#64748b'),borderWidth:0}]},options:{responsive:true,plugins:{legend:{position:'bottom',labels:{color:'#94a3b8',padding:12,font:{size:11}}}}}})}
+    // Top symbols
+    const bs={};allSignals.forEach(s=>{if(!bs[s.symbol])bs[s.symbol]=0;bs[s.symbol]++});
+    const top=Object.entries(bs).sort((a,b)=>b[1]-a[1]).slice(0,5);
+    document.getElementById('topSymbols').innerHTML=top.length?top.map(([sym,cnt])=>`<div class="flex items-center justify-between text-sm mb-2"><span>${sym}</span><span class="mono text-slate-400">${cnt} sig</span></div>`).join(''):'<div style="text-align:center;padding:20px;color:#64748b;font-size:.8rem">Нет данных</div>';
+  }catch(e){document.getElementById('signalFeed').innerHTML='<div class="card" style="text-align:center;padding:32px;color:#ef4444">Ошибка: '+e.message+'</div>'}
+}
+loadSignals();setInterval(loadSignals,30000);
 </script>
 </body>
 </html>
