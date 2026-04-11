@@ -233,7 +233,12 @@ function strategySMC(candles) {
 }
 
 // ── Main Scanner Loop ──────────────────────────────────────────────────
-const SCAN_SYMBOLS = ['BTCUSDT', 'ETHUSDT', 'SOLUSDT', 'XRPUSDT', 'DOGEUSDT', 'BNBUSDT'];
+const SCAN_SYMBOLS = [
+  'BTCUSDT', 'ETHUSDT', 'SOLUSDT', 'XRPUSDT', 'DOGEUSDT', 'BNBUSDT',
+  'ADAUSDT', 'AVAXUSDT', 'DOTUSDT', 'MATICUSDT', 'LINKUSDT', 'UNIUSDT',
+  'ATOMUSDT', 'LTCUSDT', 'APTUSDT', 'ARBUSDT', 'OPUSDT', 'NEARUSDT',
+  'SUIUSDT', 'INJUSDT',
+];
 const SCAN_INTERVAL = 30000; // 30 seconds
 const DEDUP_TTL = 2 * 3600000; // 2 hours
 const sentSignals = new Map(); // symbol+direction → timestamp
