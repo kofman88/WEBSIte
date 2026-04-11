@@ -194,7 +194,7 @@ class BacktestService {
     const atr = atrCalc(candles);
 
     const trades = [];
-    let inTrade = false, entryPrice = 0, slPrice = 0, tpPrice = 0, direction = '';
+    let inTrade = false, entryPrice = 0, slPrice = 0, tpPrice = 0, direction = '', entryIdx = 0;
     let balance = capital, maxBal = capital, maxDD = 0;
 
     const startIdx = 30;
@@ -318,6 +318,7 @@ class BacktestService {
           direction = signal.dir;
           slPrice = signal.sl;
           tpPrice = signal.tp;
+          entryIdx = i;
         }
       } else {
         // Check SL/TP
@@ -333,7 +334,7 @@ class BacktestService {
           balance += pnl;
           maxBal = Math.max(maxBal, balance);
           maxDD = Math.max(maxDD, (maxBal - balance) / maxBal * 100);
-          trades.push({ dir: direction, entry: entryPrice, exit: exitPrice, pnl: +pnl.toFixed(2), pnlPct: +pnlPct.toFixed(2), result: hit_tp ? 'win' : 'loss' });
+          trades.push({ dir: direction, entry: entryPrice, exit: exitPrice, sl: slPrice, tp: tpPrice, pnl: +pnl.toFixed(2), pnlPct: +pnlPct.toFixed(2), result: hit_tp ? 'win' : 'loss', entryTime: candles[entryIdx]?.ts || 0, exitTime: candles[i]?.ts || 0 });
           inTrade = false;
         }
       }
@@ -359,6 +360,7 @@ class BacktestService {
       avgWin: wins.length ? +(grossProfit / wins.length).toFixed(2) : 0,
       avgLoss: losses.length ? +(grossLoss / losses.length).toFixed(2) : 0,
       finalBalance: +balance.toFixed(2),
+      trades: trades.slice(0, 100), // max 100 trades for response size
     };
   }
 
