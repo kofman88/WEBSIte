@@ -41,52 +41,8 @@
 
   <!-- Results Grid -->
   <h2 class="font-bold mb-4">Результаты</h2>
-  <div class="grid md:grid-cols-2 gap-4 mb-6">
-
-    <div class="card card-glow">
-      <div class="flex items-center justify-between mb-3">
-        <div><div class="font-semibold">BTC Scalping 15m</div><div class="text-xs text-slate-500">Jan-Dec 2025 &middot; BTCUSDT</div></div>
-        <span class="text-xs px-2 py-0.5 rounded-full bg-green-500/15 text-green-400">Completed</span>
-      </div>
-      <div class="grid grid-cols-3 gap-3 text-center text-sm mb-4">
-        <div><div class="text-xs text-slate-500">PnL</div><div class="text-green-400 font-bold">+$4,520</div></div>
-        <div><div class="text-xs text-slate-500">Win Rate</div><div class="font-bold">73%</div></div>
-        <div><div class="text-xs text-slate-500">Sharpe</div><div class="font-bold">1.82</div></div>
-      </div>
-      <div class="grid grid-cols-3 gap-3 text-center text-sm">
-        <div><div class="text-xs text-slate-500">Max DD</div><div class="text-red-400">-12.3%</div></div>
-        <div><div class="text-xs text-slate-500">Profit Factor</div><div>2.14</div></div>
-        <div><div class="text-xs text-slate-500">Trades</div><div>156</div></div>
-      </div>
-      <div class="mt-4"><canvas id="btChart1" height="80"></canvas></div>
-    </div>
-
-    <div class="card card-glow">
-      <div class="flex items-center justify-between mb-3">
-        <div><div class="font-semibold">ETH SMC 4h</div><div class="text-xs text-slate-500">Jan-Dec 2025 &middot; ETHUSDT</div></div>
-        <span class="text-xs px-2 py-0.5 rounded-full bg-green-500/15 text-green-400">Completed</span>
-      </div>
-      <div class="grid grid-cols-3 gap-3 text-center text-sm mb-4">
-        <div><div class="text-xs text-slate-500">PnL</div><div class="text-green-400 font-bold">+$2,180</div></div>
-        <div><div class="text-xs text-slate-500">Win Rate</div><div class="font-bold">68%</div></div>
-        <div><div class="text-xs text-slate-500">Sharpe</div><div class="font-bold">1.45</div></div>
-      </div>
-      <div class="grid grid-cols-3 gap-3 text-center text-sm">
-        <div><div class="text-xs text-slate-500">Max DD</div><div class="text-red-400">-18.7%</div></div>
-        <div><div class="text-xs text-slate-500">Profit Factor</div><div>1.78</div></div>
-        <div><div class="text-xs text-slate-500">Trades</div><div>42</div></div>
-      </div>
-      <div class="mt-4"><canvas id="btChart2" height="80"></canvas></div>
-    </div>
-
-    <div class="card" style="opacity:.6">
-      <div class="flex items-center justify-between mb-3">
-        <div><div class="font-semibold">SOL Gerchik 1d</div><div class="text-xs text-slate-500">Jun-Dec 2025 &middot; SOLUSDT</div></div>
-        <span class="text-xs px-2 py-0.5 rounded-full bg-yellow-500/15 text-yellow-400">Running...</span>
-      </div>
-      <div class="w-full bg-slate-800 rounded-full h-2 mt-4"><div class="bg-indigo-500 h-2 rounded-full" style="width:65%"></div></div>
-      <div class="text-xs text-slate-500 mt-2">65% complete...</div>
-    </div>
+  <div class="grid md:grid-cols-2 gap-4 mb-6" id="btResults">
+    <div style="text-align:center;padding:40px;color:#64748b;grid-column:1/-1">Загрузка...</div>
   </div>
 </main>
 
@@ -94,10 +50,48 @@
 <script>
 if(!Auth.isLoggedIn())window.location.href='/?login=1';
 Sidebar.init('backtests');
-// Mini equity charts
-function miniChart(id,clr){const d=Utils.generateEquityData(60,10000);new Chart(document.getElementById(id),{type:'line',data:{labels:d.map(x=>x.date.slice(5)),datasets:[{data:d.map(x=>x.value),borderColor:clr,backgroundColor:'transparent',tension:.4,pointRadius:0,borderWidth:1.5}]},options:{responsive:true,plugins:{legend:{display:false}},scales:{x:{display:false},y:{display:false}}}})}
-miniChart('btChart1','#818CF8');miniChart('btChart2','#06b6d4');
-document.getElementById('btForm')?.addEventListener('submit',async e=>{e.preventDefault();Toast.success('Бэктест запущен!');});
+
+async function loadBacktests(){
+  const grid=document.getElementById('btResults');
+  try{
+    const res=await API.getBacktests();
+    const bts=res.backtests||[];
+    if(!bts.length){
+      grid.innerHTML='<div style="text-align:center;padding:48px;color:#64748b;grid-column:1/-1"><svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" style="margin:0 auto 12px;opacity:.3"><path d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6m18-2V5a2 2 0 00-2-2h-2a2 2 0 00-2 2v14"/></svg>Бэктестов пока нет<br><span style="font-size:.8rem">Заполните форму выше и нажмите «Запустить»</span></div>';
+      return;
+    }
+    grid.innerHTML=bts.map(b=>{
+      const st=b.status;
+      const r=b.results?JSON.parse(b.results):{};
+      const isRunning=st==='running'||st==='pending';
+      return `<div class="card ${isRunning?'':'card-glow'}" ${isRunning?'style="opacity:.7"':''}>
+        <div class="flex items-center justify-between mb-3">
+          <div><div class="font-semibold">${b.name||b.symbol+' '+b.timeframe}</div><div class="text-xs text-slate-500">${b.start_date} — ${b.end_date} &middot; ${b.symbol}</div></div>
+          <span class="text-xs px-2 py-0.5 rounded-full ${st==='completed'?'bg-green-500/15 text-green-400':st==='failed'?'bg-red-500/15 text-red-400':'bg-yellow-500/15 text-yellow-400'}">${st}</span>
+        </div>
+        ${st==='completed'&&r?`<div class="grid grid-cols-3 gap-3 text-center text-sm mb-2">
+          <div><div class="text-xs text-slate-500">PnL</div><div class="font-bold ${(r.totalPnl||0)>=0?'text-green-400':'text-red-400'}">${(r.totalPnl||0)>=0?'+':''}$${Math.abs(r.totalPnl||0).toFixed(0)}</div></div>
+          <div><div class="text-xs text-slate-500">Win Rate</div><div class="font-bold">${(r.winRate||0).toFixed(0)}%</div></div>
+          <div><div class="text-xs text-slate-500">Sharpe</div><div class="font-bold">${(r.sharpeRatio||0).toFixed(2)}</div></div>
+        </div>
+        <div class="grid grid-cols-3 gap-3 text-center text-sm">
+          <div><div class="text-xs text-slate-500">Max DD</div><div class="text-red-400">${(r.maxDrawdown||0).toFixed(1)}%</div></div>
+          <div><div class="text-xs text-slate-500">PF</div><div>${(r.profitFactor||0).toFixed(2)}</div></div>
+          <div><div class="text-xs text-slate-500">Trades</div><div>${r.totalTrades||0}</div></div>
+        </div>`:isRunning?'<div class="w-full bg-slate-800 rounded-full h-2 mt-4"><div class="bg-indigo-500 h-2 rounded-full animate-pulse" style="width:50%"></div></div><div class="text-xs text-slate-500 mt-2">Выполняется...</div>':'<div class="text-xs text-red-400 mt-2">Ошибка выполнения</div>'}
+      </div>`}).join('');
+  }catch(e){
+    grid.innerHTML='<div style="text-align:center;padding:40px;color:#ef4444;grid-column:1/-1">Ошибка: '+e.message+'</div>';
+  }
+}
+loadBacktests();
+
+document.getElementById('btForm')?.addEventListener('submit',async e=>{
+  e.preventDefault();
+  const fd=new FormData(e.target);
+  const data={name:fd.get('symbol')+' '+fd.get('strategy'),symbol:fd.get('symbol'),exchangeName:'bybit',timeframe:fd.get('timeframe'),startDate:fd.get('startDate'),endDate:fd.get('endDate'),initialCapital:10000};
+  try{await API.createBacktest(data);Toast.success('Бэктест запущен!');loadBacktests()}catch(err){Toast.error(err.message)}
+});
 </script>
 </body>
 </html>
