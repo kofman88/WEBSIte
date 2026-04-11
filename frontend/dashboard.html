@@ -32,6 +32,10 @@
     .notif-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;margin-top:6px}
     .empty-state{text-align:center;padding:40px 20px;color:#64748b}
     .empty-state svg{margin:0 auto 12px;opacity:.3}
+    .tip-trigger{display:inline-flex;align-items:center;justify-content:center;width:14px;height:14px;border-radius:50%;background:rgba(100,116,139,.2);font-size:.55rem;color:#94a3b8;cursor:help;vertical-align:middle;margin-left:4px;position:relative;font-weight:700}
+    .tip-trigger:hover::after{content:attr(data-tip);position:absolute;bottom:calc(100% + 6px);left:50%;transform:translateX(-50%);background:rgba(15,23,42,.95);border:1px solid rgba(255,255,255,.1);color:#e2e8f0;padding:8px 12px;border-radius:8px;font-size:.7rem;font-weight:400;white-space:nowrap;z-index:50;pointer-events:none;box-shadow:0 4px 12px rgba(0,0,0,.3);max-width:260px;white-space:normal;line-height:1.4}
+    html.light .tip-trigger:hover::after{background:rgba(255,255,255,.98);color:#1e293b;border-color:rgba(0,0,0,.1);box-shadow:0 4px 12px rgba(0,0,0,.1)}
+    .session-timer{font-size:.65rem;color:#64748b;font-family:'JetBrains Mono',monospace}
   </style>
 </head>
 <body>
@@ -79,6 +83,7 @@
     </div>
     <button onclick="toggleDashTheme()" id="dThemeBtn" class="text-sm w-8 h-8 flex items-center justify-center rounded-lg border border-slate-700/50 hover:bg-white/[.03] transition">🌙</button>
     <button onclick="toggleDashLang()" id="dLangBtn" class="text-xs text-slate-400 border border-slate-700/50 rounded-lg px-2.5 py-1.5 hover:text-white transition">EN</button>
+    <span class="session-timer hidden sm:inline" id="sessionTimer">00:00</span>
     <div class="topbar-user"><div class="topbar-avatar" id="userAvatar">U</div><span class="topbar-username text-sm text-slate-300 hidden sm:block" id="userName">User</span></div>
   </div>
 </header>
@@ -101,24 +106,24 @@
 
   <!-- Stats -->
   <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-    <div class="stat-card">
+    <div class="stat-card" style="position:relative">
       <div class="stat-card-icon" style="background:rgba(79,70,229,.1)"><svg width="22" height="22" fill="none" stroke="#818CF8" stroke-width="2"><path d="M21 12V7H5a2 2 0 010-4h14v4M3 5v14a2 2 0 002 2h16v-5M18 12a2 2 0 100 4 2 2 0 000-4z"/></svg></div>
-      <div class="stat-card-label">Баланс портфеля</div>
+      <div class="stat-card-label">Баланс портфеля <span class="tip-trigger" data-tip="Суммарный PnL по всем ботам (реализованная + нереализованная прибыль)">?</span></div>
       <div class="stat-card-value mono" id="statBalance"><div class="skeleton"></div></div>
     </div>
-    <div class="stat-card">
+    <div class="stat-card" style="position:relative">
       <div class="stat-card-icon" style="background:rgba(6,182,212,.1)"><svg width="22" height="22" fill="none" stroke="#06b6d4" stroke-width="2"><path d="M12 2a4 4 0 014 4v1h2a2 2 0 012 2v10a2 2 0 01-2 2H6a2 2 0 01-2-2V9a2 2 0 012-2h2V6a4 4 0 014-4z"/></svg></div>
-      <div class="stat-card-label">Активные боты</div>
+      <div class="stat-card-label">Активные боты <span class="tip-trigger" data-tip="Количество работающих ботов / общее количество ботов">?</span></div>
       <div class="stat-card-value mono" id="statBots"><div class="skeleton"></div></div>
     </div>
-    <div class="stat-card">
+    <div class="stat-card" style="position:relative">
       <div class="stat-card-icon" style="background:rgba(16,185,129,.1)"><svg width="22" height="22" fill="none" stroke="#10b981" stroke-width="2"><path d="M13 10V3L4 14h7v7l9-11h-7z"/></svg></div>
-      <div class="stat-card-label">Сигналов сегодня</div>
+      <div class="stat-card-label">Сигналов сегодня <span class="tip-trigger" data-tip="Общее количество сигналов, сгенерированных сканером за сегодня">?</span></div>
       <div class="stat-card-value mono" id="statSignals"><div class="skeleton"></div></div>
     </div>
-    <div class="stat-card">
+    <div class="stat-card" style="position:relative">
       <div class="stat-card-icon" style="background:rgba(245,158,11,.1)"><svg width="22" height="22" fill="none" stroke="#f59e0b" stroke-width="2"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg></div>
-      <div class="stat-card-label">Win Rate</div>
+      <div class="stat-card-label">Win Rate <span class="tip-trigger" data-tip="Процент прибыльных сигналов из всех закрытых сигналов">?</span></div>
       <div class="stat-card-value mono" id="statWR"><div class="skeleton"></div></div>
     </div>
   </div>
@@ -135,7 +140,9 @@
           <option value="APTUSDT">APT/USDT</option><option value="DOTUSDT">DOT/USDT</option><option value="MATICUSDT">MATIC/USDT</option><option value="UNIUSDT">UNI/USDT</option>
           <option value="LTCUSDT">LTC/USDT</option><option value="ATOMUSDT">ATOM/USDT</option>
         </select>
+        <button onclick="toggleFav()" id="favStarBtn" class="text-lg" style="background:none;border:none;cursor:pointer;line-height:1" title="Добавить в избранное">&#9734;</button>
       </div>
+      <div class="flex items-center gap-1" id="favBar"></div>
     </div>
     <div id="tvChartWrap" style="height:500px"></div>
   </div>
@@ -148,6 +155,35 @@
         <div class="skeleton mb-3" style="height:48px;width:100%"></div>
         <div class="skeleton mb-3" style="height:48px;width:100%"></div>
         <div class="skeleton" style="height:48px;width:100%"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Risk Calculator -->
+  <div class="card mb-6">
+    <div class="flex items-center justify-between mb-4">
+      <h2 class="font-bold" data-dl="riskcalc"><svg class="inline w-5 h-5 mr-1 text-amber-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M9 7h6m-6 4h6m-3-8v1m0 16v1M4.22 4.22l.7.7m14.16 14.16l.7.7M1 12h1m20 0h1M4.22 19.78l.7-.7m14.16-14.16l.7-.7M12 17a5 5 0 100-10 5 5 0 000 10z"/></svg>Риск-калькулятор</h2>
+      <button onclick="document.getElementById('riskCalcBody').classList.toggle('hidden')" class="text-xs text-slate-500 hover:text-white transition">Свернуть</button>
+    </div>
+    <div id="riskCalcBody">
+      <div class="grid grid-cols-2 md:grid-cols-4 gap-3 mb-3">
+        <div><label class="text-xs text-slate-500 block mb-1">Баланс ($)</label><input id="rcBalance" type="number" value="1000" min="1" class="w-full bg-slate-800/50 border border-slate-700 rounded-lg px-3 py-2 text-sm text-white outline-none" oninput="calcRisk()"/></div>
+        <div><label class="text-xs text-slate-500 block mb-1">Риск (%)</label><input id="rcRisk" type="number" value="2" min="0.1" max="100" step="0.1" class="w-full bg-slate-800/50 border border-slate-700 rounded-lg px-3 py-2 text-sm text-white outline-none" oninput="calcRisk()"/></div>
+        <div><label class="text-xs text-slate-500 block mb-1">Цена входа ($)</label><input id="rcEntry" type="number" value="60000" min="0.0001" step="any" class="w-full bg-slate-800/50 border border-slate-700 rounded-lg px-3 py-2 text-sm text-white outline-none" oninput="calcRisk()"/></div>
+        <div><label class="text-xs text-slate-500 block mb-1">Стоп-лосс ($)</label><input id="rcSL" type="number" value="59000" min="0.0001" step="any" class="w-full bg-slate-800/50 border border-slate-700 rounded-lg px-3 py-2 text-sm text-white outline-none" oninput="calcRisk()"/></div>
+      </div>
+      <div class="grid grid-cols-2 md:grid-cols-4 gap-3 mb-3">
+        <div><label class="text-xs text-slate-500 block mb-1">Leverage</label><input id="rcLev" type="number" value="10" min="1" max="125" class="w-full bg-slate-800/50 border border-slate-700 rounded-lg px-3 py-2 text-sm text-white outline-none" oninput="calcRisk()"/></div>
+        <div><label class="text-xs text-slate-500 block mb-1">Take Profit ($)</label><input id="rcTP" type="number" value="62000" min="0.0001" step="any" class="w-full bg-slate-800/50 border border-slate-700 rounded-lg px-3 py-2 text-sm text-white outline-none" oninput="calcRisk()"/></div>
+        <div><label class="text-xs text-slate-500 block mb-1">Направление</label><select id="rcDir" class="w-full bg-slate-800/50 border border-slate-700 rounded-lg px-3 py-2 text-sm text-white outline-none" onchange="calcRisk()"><option value="long">Long</option><option value="short">Short</option></select></div>
+        <div class="flex items-end"><button onclick="calcRisk()" class="w-full py-2 rounded-lg text-sm font-semibold text-white" style="background:linear-gradient(135deg,#4F46E5,#7C3AED)">Рассчитать</button></div>
+      </div>
+      <div id="riskResult" class="grid grid-cols-2 md:grid-cols-5 gap-3 mt-2">
+        <div class="bg-slate-800/30 rounded-lg p-3 text-center"><div class="text-[.65rem] text-slate-500 mb-1">Размер позиции</div><div class="font-bold text-sm mono text-white" id="rcPosSize">$200.00</div></div>
+        <div class="bg-slate-800/30 rounded-lg p-3 text-center"><div class="text-[.65rem] text-slate-500 mb-1">Кол-во монет</div><div class="font-bold text-sm mono text-white" id="rcQty">0.0033</div></div>
+        <div class="bg-slate-800/30 rounded-lg p-3 text-center"><div class="text-[.65rem] text-slate-500 mb-1">Потери при SL</div><div class="font-bold text-sm mono text-red-400" id="rcLoss">-$20.00</div></div>
+        <div class="bg-slate-800/30 rounded-lg p-3 text-center"><div class="text-[.65rem] text-slate-500 mb-1">Прибыль при TP</div><div class="font-bold text-sm mono text-green-400" id="rcProfit">+$40.00</div></div>
+        <div class="bg-slate-800/30 rounded-lg p-3 text-center"><div class="text-[.65rem] text-slate-500 mb-1">R:R</div><div class="font-bold text-sm mono text-amber-400" id="rcRR">2.00</div></div>
       </div>
     </div>
   </div>
@@ -215,8 +251,19 @@ function applyDashLang(){
   // Headers with data-dl
   document.querySelectorAll('[data-dl]').forEach(el=>{
     const k=el.getAttribute('data-dl');
-    const map={chart:en?'Chart':'График',signals:en?'Recent Signals':'Последние сигналы',trades:en?'Recent Trades':'Последние сделки',notif:en?'Notifications':'Уведомления'};
-    if(map[k])el.textContent=map[k];
+    const map={chart:en?'Chart':'График',signals:en?'Recent Signals':'Последние сигналы',trades:en?'Recent Trades':'Последние сделки',notif:en?'Notifications':'Уведомления',riskcalc:en?'Risk Calculator':'Риск-калькулятор'};
+    if(map[k]){const svg=el.querySelector('svg');if(svg){el.innerHTML='';el.appendChild(svg);el.appendChild(document.createTextNode(map[k]))}else el.textContent=map[k]}
+  });
+  // Tooltip translations
+  const tipMap={
+    'Суммарный PnL по всем ботам (реализованная + нереализованная прибыль)':en?'Total PnL across all bots (realized + unrealized profit)':'Суммарный PnL по всем ботам (реализованная + нереализованная прибыль)',
+    'Количество работающих ботов / общее количество ботов':en?'Number of active bots / total bots':'Количество работающих ботов / общее количество ботов',
+    'Общее количество сигналов, сгенерированных сканером за сегодня':en?'Total signals generated by scanner today':'Общее количество сигналов, сгенерированных сканером за сегодня',
+    'Процент прибыльных сигналов из всех закрытых сигналов':en?'Percentage of profitable signals from all closed signals':'Процент прибыльных сигналов из всех закрытых сигналов'
+  };
+  document.querySelectorAll('.tip-trigger').forEach(t=>{
+    const orig=t.getAttribute('data-tip');
+    Object.entries(tipMap).forEach(([ru,tr])=>{if(orig===ru||orig===tr.split(':')[0])t.setAttribute('data-tip',en?tr:ru)});
   });
 }
 (function(){if(localStorage.getItem('chm_lang')==='en'){dashLang='en';const b=document.getElementById('dLangBtn');if(b)b.textContent='RU';setTimeout(applyDashLang,200)}})();
@@ -420,6 +467,63 @@ async function buildChart(days){
 }
 function updateChart(d){buildChart(d)}
 buildChart(7);
+
+// Risk Calculator
+function calcRisk(){
+  const bal=+document.getElementById('rcBalance').value||1000;
+  const riskPct=+document.getElementById('rcRisk').value||2;
+  const entry=+document.getElementById('rcEntry').value||60000;
+  const sl=+document.getElementById('rcSL').value||59000;
+  const tp=+document.getElementById('rcTP').value||62000;
+  const lev=+document.getElementById('rcLev').value||10;
+  const dir=document.getElementById('rcDir').value;
+  const riskAmt=bal*(riskPct/100);
+  const slDist=dir==='long'?Math.abs(entry-sl):Math.abs(sl-entry);
+  const tpDist=dir==='long'?Math.abs(tp-entry):Math.abs(entry-tp);
+  if(slDist<=0||entry<=0){return}
+  const qty=riskAmt/slDist;
+  const posSize=qty*entry/lev;
+  const profit=qty*tpDist;
+  const rr=slDist>0?(tpDist/slDist):0;
+  document.getElementById('rcPosSize').textContent='$'+posSize.toFixed(2);
+  document.getElementById('rcQty').textContent=qty.toFixed(qty<1?4:qty<100?3:2);
+  document.getElementById('rcLoss').textContent='-$'+riskAmt.toFixed(2);
+  document.getElementById('rcProfit').textContent='+$'+profit.toFixed(2);
+  document.getElementById('rcRR').textContent=rr.toFixed(2);
+}
+calcRisk();
+
+// Favorites / Watchlist
+function getFavs(){try{return JSON.parse(localStorage.getItem('chm_favcoins')||'[]')}catch{return[]}}
+function saveFavs(f){localStorage.setItem('chm_favcoins',JSON.stringify(f))}
+function toggleFav(){
+  const sym=document.getElementById('chartSymbol').value;
+  let favs=getFavs();
+  if(favs.includes(sym))favs=favs.filter(x=>x!==sym);else{favs.unshift(sym);if(favs.length>8)favs.pop()}
+  saveFavs(favs);renderFavs();
+}
+function renderFavs(){
+  const favs=getFavs();const bar=document.getElementById('favBar');const sym=document.getElementById('chartSymbol').value;
+  const star=document.getElementById('favStarBtn');
+  if(star)star.innerHTML=favs.includes(sym)?'&#9733;':'&#9734;';
+  if(star)star.style.color=favs.includes(sym)?'#f59e0b':'#64748b';
+  if(!bar)return;
+  bar.innerHTML=favs.map(f=>`<button onclick="document.getElementById('chartSymbol').value='${f}';loadTVChart();renderFavs()" class="text-[.6rem] px-2 py-1 rounded-md ${f===sym?'bg-violet-500/20 text-violet-300 border-violet-500/30':'bg-slate-800/50 text-slate-400 border-slate-700'} border transition hover:text-white" style="cursor:pointer">${f.replace('USDT','')}</button>`).join('');
+}
+renderFavs();
+
+// Session Timer
+(function initSessionTimer(){
+  const start=Date.now();
+  const el=document.getElementById('sessionTimer');
+  if(!el)return;
+  function tick(){
+    const s=Math.floor((Date.now()-start)/1000);
+    const m=Math.floor(s/60),h=Math.floor(m/60);
+    el.textContent=(h?String(h).padStart(2,'0')+':':'')+String(m%60).padStart(2,'0')+':'+String(s%60).padStart(2,'0');
+  }
+  tick();setInterval(tick,1000);
+})();
 </script>
 </body>
 </html>

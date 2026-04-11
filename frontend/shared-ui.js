@@ -46,6 +46,12 @@ function applyPageLang(){
       }
     });
   });
+  // Translate notification panel
+  const en=pageLang==='en';
+  document.querySelectorAll('#pageNotifPanel span[style*="font-weight:600"]').forEach(el=>{el.textContent=en?'Notifications':'Уведомления'});
+  document.querySelectorAll('#pageNotifPanel button[onclick*="clearPageNotifs"]').forEach(el=>{el.textContent=en?'Clear':'Очистить'});
+  const empty=document.querySelector('#pageNotifList > div[style*="text-align:center"]');
+  if(empty&&(empty.textContent.includes('Нет уведомлений')||empty.textContent.includes('No notifications')))empty.textContent=en?'No notifications':'Нет уведомлений';
 }
 
 (function initLang(){
@@ -133,3 +139,16 @@ document.addEventListener('click',e=>{
     document.getElementById('pageNotifPanel')?.classList.remove('open');
   }
 });
+
+// ═══ SESSION TIMER (all pages) ═══
+(function initSessionTimerShared(){
+  const el=document.getElementById('sessionTimer');
+  if(!el)return; // only if page has the element
+  const start=Date.now();
+  function tick(){
+    const s=Math.floor((Date.now()-start)/1000);
+    const m=Math.floor(s/60),h=Math.floor(m/60);
+    el.textContent=(h?String(h).padStart(2,'0')+':':'')+String(m%60).padStart(2,'0')+':'+String(s%60).padStart(2,'0');
+  }
+  tick();setInterval(tick,1000);
+})();
