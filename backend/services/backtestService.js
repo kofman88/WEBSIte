@@ -119,14 +119,15 @@ class BacktestService {
     const capital = config.initial_capital || 10000;
     const riskPct = 0.02;
 
-    // Detect strategy from strategy_config or name
+    // Parse strategy + custom params from strategy_config
     let strategy = 'levels';
+    let P = {}; // user params
     try {
       const sc = JSON.parse(config.strategy_config || '{}');
       if (sc.strategy) strategy = sc.strategy;
+      if (sc.params) P = sc.params;
     } catch (_) {}
     if (strategy === 'levels') {
-      // Fallback: parse from name
       const name = (config.name || '').toLowerCase();
       if (name.includes('scalp')) strategy = 'scalping';
       else if (name.includes('smc')) strategy = 'smc';
@@ -200,26 +201,35 @@ class BacktestService {
 
         // ── LEVELS: Pivot-based support/resistance ──
         if (strategy === 'levels') {
-          const pivotStr = 5;
+          const pivotStr = P.pivot || 7;
+          const rsiOS = P.rsiOS || 35;
+          const rsiOB = P.rsiOB || 65;
+          const emaF = P.emaFast || 50;
+          const maxDist = (P.maxDist || 1.5) / 100;
           let isSupport = true, isResist = true;
           for (let j = 1; j <= pivotStr && i - j >= 0 && i + j < candles.length; j++) {
             if (lows[i - j] <= lows[i] || lows[i + j] <= lows[i]) isSupport = false;
             if (highs[i - j] >= highs[i] || highs[i + j] >= highs[i]) isResist = false;
           }
-          if (rsi[i] < 35 && price < ema(closes, 50)[i]) {
-            signal = { dir: 'long', sl: price - atr[i-1] * 2, tp: price + atr[i-1] * 3 };
-          } else if (rsi[i] > 65 && price > ema(closes, 50)[i]) {
-            signal = { dir: 'short', sl: price + atr[i-1] * 2, tp: price - atr[i-1] * 3 };
+          const slMult = (P.stopLossPct || 1.5) / 100 * price / (atr[i-1] || 1);
+          const tpMult = (P.takeProfitPct || 3) / 100 * price / (atr[i-1] || 1);
+          if (rsi[i] < rsiOS && price < ema(closes, emaF)[i]) {
+            signal = { dir: 'long', sl: price - atr[i-1] * Math.max(slMult, 1.5), tp: price + atr[i-1] * Math.max(tpMult, 2) };
+          } else if (rsi[i] > rsiOB && price > ema(closes, emaF)[i]) {
+            signal = { dir: 'short', sl: price + atr[i-1] * Math.max(slMult, 1.5), tp: price - atr[i-1] * Math.max(tpMult, 2) };
           }
         }
 
         // ── SMC: Order Block + Liquidity Sweep ──
         else if (strategy === 'smc') {
-          // Look for large candle (OB) in recent bars
-          for (let j = i - 8; j < i - 2 && j >= startIdx; j++) {
+          const obMult = P.obMult || 1.8;
+          const obAge = P.obAge || 80;
+          const slBuf = (P.slBuffer || 0.5) / 100;
+          const lookback = Math.min(P.swingLB || 10, i - startIdx);
+          for (let j = i - lookback; j < i - 2 && j >= startIdx; j++) {
             const body = Math.abs(candles[j].close - candles[j].open);
             const avgBody = candles.slice(Math.max(0, j - 10), j).reduce((s, x) => s + Math.abs(x.close - x.open), 0) / 10;
-            if (body > avgBody * 1.8) {
+            if (body > avgBody * obMult) {
               const isBullOB = candles[j].close > candles[j].open;
               // Check if price returned to OB zone
               if (isBullOB && price <= candles[j].close && price >= candles[j].open && rsi[i] < 45) {
@@ -235,14 +245,17 @@ class BacktestService {
 
         // ── GERCHIK: Strong level bounce with confirmation ──
         else if (strategy === 'gerchik') {
-          // Find levels with 3+ touches in last 50 bars
-          const window = candles.slice(Math.max(0, i - 50), i);
+          const gLookback = P.lookback || 50;
+          const gPivot = P.pivot || 5;
+          const gMinRR = P.minRR || 2.5;
+          const window = candles.slice(Math.max(0, i - gLookback), i);
           const zones = {};
           window.forEach(bar => {
             const key = Math.round(bar.low / (atr[i-1] || 1)) * (atr[i-1] || 1);
             zones[key] = (zones[key] || 0) + 1;
           });
-          const strongLevels = Object.entries(zones).filter(([, cnt]) => cnt >= 3).map(([p]) => +p);
+          const minTouches = P.maxTests || 3;
+          const strongLevels = Object.entries(zones).filter(([, cnt]) => cnt >= minTouches).map(([p]) => +p);
 
           for (const level of strongLevels) {
             const dist = Math.abs(price - level) / price * 100;
@@ -262,14 +275,18 @@ class BacktestService {
 
         // ── SCALPING: MACD + RSI + Volume ──
         else if (strategy === 'scalping') {
+          const scRsiOB = P.rsiOB || 55;
+          const scRsiOS = P.rsiOS || 45;
+          const scVolMult = P.volMult || 0.9;
+          const scAtrMult = P.atrMult || 1.2;
           const m = macdCalc(closes);
           const prevHist = m.hist[i - 1], currHist = m.hist[i];
-          const volAbove = volumes[i] > volMA[i] * 0.9; // relaxed: 0.9x instead of 1.2x
+          const volAbove = volumes[i] > volMA[i] * scVolMult;
 
-          if (prevHist < 0 && currHist > 0 && rsi[i] < 50 && volAbove) {
-            signal = { dir: 'long', sl: price - atr[i-1] * 1.2, tp: price + atr[i-1] * 1.8 };
-          } else if (prevHist > 0 && currHist < 0 && rsi[i] > 50 && volAbove) {
-            signal = { dir: 'short', sl: price + atr[i-1] * 1.2, tp: price - atr[i-1] * 1.8 };
+          if (prevHist < 0 && currHist > 0 && rsi[i] < scRsiOS && volAbove) {
+            signal = { dir: 'long', sl: price - atr[i-1] * scAtrMult, tp: price + atr[i-1] * scAtrMult * 1.5 };
+          } else if (prevHist > 0 && currHist < 0 && rsi[i] > scRsiOB && volAbove) {
+            signal = { dir: 'short', sl: price + atr[i-1] * scAtrMult, tp: price - atr[i-1] * scAtrMult * 1.5 };
           }
         }
 
