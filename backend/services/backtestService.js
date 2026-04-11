@@ -142,11 +142,7 @@ class BacktestService {
       if (sc.trendFilter === false) useTrendFilter = false;
     } catch (_) {}
 
-    const ema200 = ema(closes, Math.min(200, closes.length - 1));
-
-    console.log(`[BACKTEST] Strategy: ${strategy}, Direction: ${directionFilter}, TrendFilter: ${useTrendFilter}, Symbol: ${config.symbol}, TF: ${config.timeframe}`);
-
-    // ── Indicators ──
+    // ── Indicators (must be declared before use) ──
     const ema = (data, period) => {
       const k = 2 / (period + 1), r = [data[0]];
       for (let i = 1; i < data.length; i++) r.push(data[i] * k + r[i - 1] * (1 - k));
@@ -184,6 +180,8 @@ class BacktestService {
     };
 
     const volMA = ema(volumes, 20);
+    const ema200 = ema(closes, Math.min(200, closes.length - 1));
+    console.log(`[BACKTEST] Strategy: ${strategy}, Direction: ${directionFilter}, TrendFilter: ${useTrendFilter}, Candles: ${candles.length}`);
     const rsi = rsiCalc(closes);
     const atr = atrCalc(candles);
 
