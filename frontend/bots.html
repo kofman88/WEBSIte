@@ -46,6 +46,19 @@
     <select class="bg-slate-800/50 border border-slate-700 rounded-lg px-3 py-2 text-sm text-slate-300 outline-none"><option>Все статусы</option><option>Активные</option><option>Остановлены</option></select>
   </div>
 
+  <!-- Quick Templates -->
+  <div class="mb-6" id="templateSection">
+    <div class="flex items-center justify-between mb-3"><h3 class="font-bold text-sm">Быстрые шаблоны</h3><button onclick="document.getElementById('templateCards').classList.toggle('hidden')" class="text-xs text-slate-500 hover:text-white transition">Свернуть</button></div>
+    <div class="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-6 gap-3" id="templateCards">
+      <div onclick="applyTemplate('BTCUSDT','levels','4H',10,1.5,3)" class="card p-3 cursor-pointer hover:border-amber-500/30 transition text-center" style="padding:12px"><div class="text-sm font-bold text-amber-400">BTC Levels</div><div class="text-[.6rem] text-slate-500 mt-1">4H &middot; Lev 10x</div><div class="text-[.55rem] text-slate-600 mt-1">SL 1.5% &middot; TP 3%</div></div>
+      <div onclick="applyTemplate('ETHUSDT','smc','1H',15,1.0,2.5)" class="card p-3 cursor-pointer hover:border-violet-500/30 transition text-center" style="padding:12px"><div class="text-sm font-bold text-violet-400">ETH SMC</div><div class="text-[.6rem] text-slate-500 mt-1">1H &middot; Lev 15x</div><div class="text-[.55rem] text-slate-600 mt-1">SL 1% &middot; TP 2.5%</div></div>
+      <div onclick="applyTemplate('SOLUSDT','scalping','5m',20,0.5,1.0)" class="card p-3 cursor-pointer hover:border-cyan-500/30 transition text-center" style="padding:12px"><div class="text-sm font-bold text-cyan-400">SOL Scalp</div><div class="text-[.6rem] text-slate-500 mt-1">5m &middot; Lev 20x</div><div class="text-[.55rem] text-slate-600 mt-1">SL 0.5% &middot; TP 1%</div></div>
+      <div onclick="applyTemplate('XRPUSDT','gerchik','15m',10,1.0,3.0)" class="card p-3 cursor-pointer hover:border-blue-500/30 transition text-center" style="padding:12px"><div class="text-sm font-bold text-blue-400">XRP Gerchik</div><div class="text-[.6rem] text-slate-500 mt-1">15m &middot; Lev 10x</div><div class="text-[.55rem] text-slate-600 mt-1">SL 1% &middot; TP 3%</div></div>
+      <div onclick="applyTemplate('DOGEUSDT','scalping','1m',25,0.3,0.8)" class="card p-3 cursor-pointer hover:border-cyan-500/30 transition text-center" style="padding:12px"><div class="text-sm font-bold text-cyan-400">DOGE Scalp</div><div class="text-[.6rem] text-slate-500 mt-1">1m &middot; Lev 25x</div><div class="text-[.55rem] text-slate-600 mt-1">SL 0.3% &middot; TP 0.8%</div></div>
+      <div onclick="applyTemplate('BNBUSDT','levels','1H',10,1.5,3.5)" class="card p-3 cursor-pointer hover:border-amber-500/30 transition text-center" style="padding:12px"><div class="text-sm font-bold text-amber-400">BNB Levels</div><div class="text-[.6rem] text-slate-500 mt-1">1H &middot; Lev 10x</div><div class="text-[.55rem] text-slate-600 mt-1">SL 1.5% &middot; TP 3.5%</div></div>
+    </div>
+  </div>
+
   <!-- Bot Summary Chart -->
   <div class="card mb-4" id="botSummaryCard" style="display:none">
     <div class="flex items-center justify-between mb-3"><h3 class="font-bold text-sm">Сравнение ботов</h3></div>
@@ -391,6 +404,20 @@ document.getElementById('createBotForm')?.addEventListener('submit',async e=>{
   const data={name:fd.get('name'),exchangeName:fd.get('exchangeName'),symbol:fd.get('symbol').toUpperCase(),strategyType:fd.get('strategyType'),leverage:+fd.get('leverage'),positionSizeUsd:+fd.get('positionSizeUsd'),stopLossPct:+fd.get('stopLossPct'),takeProfitPct:+fd.get('takeProfitPct'),trailingStop:fd.get('trailingStop')==='1'};
   try{await API.createBot(data);Toast.success('Бот создан!');document.getElementById('createModal').style.display='none';loadBots()}catch(err){Toast.error(err.message)}
 });
+
+// Quick template apply
+function applyTemplate(sym,strat,tf,lev,sl,tp){
+  document.getElementById('createModal').style.display='flex';
+  const form=document.getElementById('createBotForm');
+  form.querySelector('[name=symbol]').value=sym;
+  form.querySelector('[name=strategyType]').value=strat;
+  form.querySelector('[name=timeframe]').value=tf;
+  form.querySelector('[name=leverage]').value=lev;
+  form.querySelector('[name=stopLossPct]').value=sl;
+  form.querySelector('[name=takeProfitPct]').value=tp;
+  showStratParams();autoName();
+  Toast.success('Шаблон применён — настройте и создайте бота');
+}
 
 // Searchable coin dropdown
 const ALL_COINS=['BTCUSDT','ETHUSDT','SOLUSDT','XRPUSDT','DOGEUSDT','BNBUSDT','ADAUSDT','AVAXUSDT','LINKUSDT','NEARUSDT','SUIUSDT','INJUSDT','ARBUSDT','OPUSDT','APTUSDT','DOTUSDT','MATICUSDT','UNIUSDT','LTCUSDT','ATOMUSDT','FILUSDT','TRXUSDT','SHIBUSDT','PEPEUSDT','WIFUSDT','RUNEUSDT','FETUSDT','ONDOUSDT','RENDERUSDT','JUPUSDT'];

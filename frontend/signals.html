@@ -22,7 +22,10 @@
     <div class="stat-card"><div class="stat-card-label">Win Rate</div><div class="stat-card-value mono" id="stWR"><div class="skeleton" style="height:2rem;width:60px"></div></div></div>
     <div class="stat-card"><div class="stat-card-label">Ср. Confidence</div><div class="stat-card-value mono" id="stConf"><div class="skeleton" style="height:2rem;width:50px"></div></div></div>
   </div>
-  <div class="flex items-center gap-3 mb-4 text-xs text-slate-500"><span id="scannerStatus">Сканер: обновляется...</span><span id="lastUpdate"></span></div>
+  <div class="flex items-center justify-between mb-4">
+  <div class="flex items-center gap-3 text-xs text-slate-500"><span id="scannerStatus">Сканер: обновляется...</span><span id="lastUpdate"></span></div>
+  <button onclick="toggleSigSound()" id="sigSoundBtn" class="text-xs px-3 py-1.5 rounded-lg bg-slate-800/50 border border-slate-700 text-slate-400 hover:text-white transition flex items-center gap-1.5" title="Звук уведомлений"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M11 5L6 9H2v6h4l5 4V5z"/><path id="sigSoundWave" d="M15.54 8.46a5 5 0 010 7.07M19.07 4.93a10 10 0 010 14.14"/></svg><span id="sigSoundLabel">ON</span></button>
+</div>
   <div class="flex flex-wrap gap-2 mb-6" id="filters">
     <button class="filter-btn active text-xs px-4 py-2 rounded-lg bg-slate-800/50 text-slate-400 border border-slate-700" data-f="all">Все</button>
     <button class="filter-btn text-xs px-4 py-2 rounded-lg bg-slate-800/50 text-slate-400 border border-slate-700" data-f="levels">Levels</button>
@@ -62,7 +65,7 @@ function renderSignals(){
     return `<div class="card" ${s.result==='loss'?'style="opacity:.5"':''}>
       <div class="flex items-center justify-between mb-3"><div class="flex items-center gap-2"><span class="text-lg font-bold">${s.symbol}</span><span class="text-xs px-2 py-0.5 rounded-full ${isL?'bg-green-500/15 text-green-400':'bg-red-500/15 text-red-400'}">${s.direction.toUpperCase()}</span><span class="text-xs px-2 py-0.5 rounded-full bg-indigo-500/15 text-indigo-300">${s.strategy}</span></div><div class="flex items-center gap-2">${(Date.now()-new Date(s.created_at).getTime())<120000?'<span class="text-[.6rem] px-1.5 py-0.5 rounded-full bg-green-500/15 text-green-400 animate-pulse">NEW</span>':''}<span class="text-xs text-slate-500">${s.timeframe||''} &middot; ${Utils.timeAgo(s.created_at)}</span></div></div>
       <div class="grid grid-cols-4 gap-3 text-sm mb-3"><div><div class="text-xs text-slate-500">Entry</div><div class="mono">${(+s.entry_price).toLocaleString('en',{maximumFractionDigits:6})}</div></div><div><div class="text-xs text-slate-500">SL</div><div class="mono text-red-400">${(+s.stop_loss).toLocaleString('en',{maximumFractionDigits:6})}</div></div><div><div class="text-xs text-slate-500">TP1</div><div class="mono text-green-400">${s.take_profit_1?(+s.take_profit_1).toLocaleString('en',{maximumFractionDigits:6}):'—'}</div></div><div><div class="text-xs text-slate-500">TP2</div><div class="mono text-green-400">${s.take_profit_2?(+s.take_profit_2).toLocaleString('en',{maximumFractionDigits:6}):'—'}</div></div></div>
-      <div class="flex items-center justify-between"><div class="flex items-center gap-2 flex-1"><span class="text-xs text-slate-500">Confidence:</span><div class="conf-bar flex-1"><div class="conf-fill" style="width:${c}%;background:${cc}"></div></div><span class="text-xs" style="color:${cc}">${c}</span></div>${p?`<span class="text-xs mono ml-4 ${p>0?'text-green-400':'text-red-400'}">${p>0?'+':''}${p}%</span>`:''}</div></div>`}).join('')}
+      <div class="flex items-center justify-between"><div class="flex items-center gap-2 flex-1"><span class="text-xs text-slate-500">Confidence:</span><div class="conf-bar flex-1"><div class="conf-fill" style="width:${c}%;background:${cc}"></div></div><span class="text-xs" style="color:${cc}">${c}</span></div><button onclick="copySignal('${s.symbol}','${s.direction}','${s.entry_price}','${s.stop_loss}','${s.take_profit_1||''}','${s.take_profit_2||''}','${s.strategy}')" class="text-[.65rem] px-2 py-1 rounded-md bg-slate-800/50 border border-slate-700 text-slate-500 hover:text-white transition ml-2" title="Копировать сигнал">Copy</button>${p?`<span class="text-xs mono ml-2 ${p>0?'text-green-400':'text-red-400'}">${p>0?'+':''}${p}%</span>`:''}</div></div>`}).join('')}
 
 async function loadSignals(){
   try{
@@ -88,11 +91,31 @@ async function loadSignals(){
 let lastSignalCount=0;
 function checkNewSignals(count){
   if(lastSignalCount>0&&count>lastSignalCount){
-    // Play notification sound
-    try{const a=new AudioContext();const o=a.createOscillator();const g=a.createGain();o.connect(g);g.connect(a.destination);o.frequency.value=800;g.gain.value=0.1;o.start();o.stop(a.currentTime+0.15);setTimeout(()=>{o.frequency.value=1200;const o2=a.createOscillator();const g2=a.createGain();o2.connect(g2);g2.connect(a.destination);o2.frequency.value=1200;g2.gain.value=0.1;o2.start();o2.stop(a.currentTime+0.15)},200)}catch(_){}
+    if(sigSoundEnabled){try{const a=new AudioContext();const o=a.createOscillator();const g=a.createGain();o.connect(g);g.connect(a.destination);o.frequency.value=800;g.gain.value=0.1;o.start();o.stop(a.currentTime+0.15);setTimeout(()=>{const o2=a.createOscillator();const g2=a.createGain();o2.connect(g2);g2.connect(a.destination);o2.frequency.value=1200;g2.gain.value=0.1;o2.start();o2.stop(a.currentTime+0.15)},200)}catch(_){}}
     Toast.success('Новый сигнал!')}
   lastSignalCount=count;
 }
+// Copy signal to clipboard
+function copySignal(sym,dir,entry,sl,tp1,tp2,strat){
+  const text=`${sym} ${dir.toUpperCase()} (${strat})\nEntry: ${entry}\nSL: ${sl}${tp1?'\nTP1: '+tp1:''}${tp2?'\nTP2: '+tp2:''}`;
+  navigator.clipboard.writeText(text).then(()=>Toast.success('Сигнал скопирован!')).catch(()=>Toast.error('Не удалось скопировать'));
+}
+
+// Sound toggle
+let sigSoundEnabled=localStorage.getItem('chm_sig_sound')!=='off';
+function toggleSigSound(){
+  sigSoundEnabled=!sigSoundEnabled;
+  localStorage.setItem('chm_sig_sound',sigSoundEnabled?'on':'off');
+  updateSoundBtn();
+}
+function updateSoundBtn(){
+  const label=document.getElementById('sigSoundLabel');
+  const wave=document.getElementById('sigSoundWave');
+  if(label)label.textContent=sigSoundEnabled?'ON':'OFF';
+  if(wave)wave.style.opacity=sigSoundEnabled?'1':'0.3';
+}
+updateSoundBtn();
+
 loadSignals();setInterval(loadSignals,30000);
 </script>
 </body>

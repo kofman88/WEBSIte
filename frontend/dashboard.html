@@ -335,14 +335,14 @@ async function loadDashboard(){
     // Bot stats
     const bs=await API.getBotStats().catch(()=>({stats:{}}));
     const s=bs.stats||bs||{};
-    document.getElementById('statBalance').textContent='$'+(+(s.totalPnl||0)).toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2});
-    document.getElementById('statBots').textContent=(s.activeBots||0)+' / '+(s.totalBots||0);
+    animateValue('statBalance','$'+(+(s.totalPnl||0)).toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2}),+(s.totalPnl||0));
+    animateValue('statBots',(s.activeBots||0)+' / '+(s.totalBots||0));
 
     // Signal stats
     const ss=await API.getSignalStats().catch(()=>({stats:{}}));
     const st=ss.stats||ss||{};
-    document.getElementById('statSignals').textContent=st.totalToday||st.total||0;
-    document.getElementById('statWR').textContent=(st.winRate||0)+'%';
+    animateValue('statSignals',String(st.totalToday||st.total||0),+(st.totalToday||st.total||0));
+    animateValue('statWR',(st.winRate||0)+'%',+(st.winRate||0));
 
     // Recent signals
     const sg=await API.getSignals({limit:5}).catch(()=>({signals:[]}));
@@ -467,6 +467,25 @@ async function buildChart(days){
 }
 function updateChart(d){buildChart(d)}
 buildChart(7);
+
+// Animated counter for stat cards
+function animateValue(id,finalText,numVal){
+  const el=document.getElementById(id);
+  if(!el)return;
+  if(numVal===undefined||isNaN(numVal)){el.textContent=finalText;return}
+  const dur=600;const start=performance.now();const startVal=0;
+  function step(now){
+    const p=Math.min((now-start)/dur,1);
+    const eased=1-Math.pow(1-p,3); // easeOutCubic
+    const cur=startVal+(numVal-startVal)*eased;
+    if(finalText.startsWith('$'))el.textContent='$'+cur.toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2});
+    else if(finalText.endsWith('%'))el.textContent=cur.toFixed(0)+'%';
+    else el.textContent=Math.round(cur);
+    if(p<1)requestAnimationFrame(step);
+    else el.textContent=finalText;
+  }
+  requestAnimationFrame(step);
+}
 
 // Risk Calculator
 function calcRisk(){

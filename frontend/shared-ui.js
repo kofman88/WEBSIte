@@ -140,6 +140,35 @@ document.addEventListener('click',e=>{
   }
 });
 
+// ═══ SCROLL TO TOP ═══
+(function initScrollTop(){
+  const btn=document.createElement('button');
+  btn.id='scrollTopBtn';
+  btn.innerHTML='<svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M18 15l-6-6-6 6"/></svg>';
+  btn.style.cssText='position:fixed;bottom:24px;right:24px;width:40px;height:40px;border-radius:12px;background:rgba(79,70,229,.9);color:#fff;border:none;cursor:pointer;display:none;align-items:center;justify-content:center;z-index:90;box-shadow:0 4px 16px rgba(79,70,229,.3);transition:opacity .2s,transform .2s;backdrop-filter:blur(8px)';
+  btn.addEventListener('click',()=>window.scrollTo({top:0,behavior:'smooth'}));
+  document.body.appendChild(btn);
+  const main=document.querySelector('.main-content');
+  if(main){
+    main.addEventListener('scroll',()=>{btn.style.display=main.scrollTop>300?'flex':'none'});
+  }
+  window.addEventListener('scroll',()=>{btn.style.display=window.scrollY>300?'flex':'none'});
+})();
+
+// ═══ CONNECTION STATUS INDICATOR ═══
+(function initConnStatus(){
+  const dot=document.createElement('div');
+  dot.id='connDot';
+  dot.title='Server status';
+  dot.style.cssText='width:8px;height:8px;border-radius:50%;background:#64748b;flex-shrink:0;transition:background .3s';
+  const wrap=document.querySelector('.topbar-actions');
+  if(wrap)wrap.insertBefore(dot,wrap.firstChild);
+  function check(){
+    fetch('/api/health',{method:'GET'}).then(r=>{if(r.ok){dot.style.background='#10b981';dot.title='Server: online'}else throw 0}).catch(()=>{dot.style.background='#ef4444';dot.title='Server: offline'});
+  }
+  check();setInterval(check,30000);
+})();
+
 // ═══ SESSION TIMER (all pages) ═══
 (function initSessionTimerShared(){
   const el=document.getElementById('sessionTimer');
