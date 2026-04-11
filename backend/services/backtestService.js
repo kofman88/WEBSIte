@@ -132,7 +132,18 @@ class BacktestService {
       else if (name.includes('smc')) strategy = 'smc';
       else if (name.includes('gerchik')) strategy = 'gerchik';
     }
-    console.log(`[BACKTEST] Strategy: ${strategy}, Symbol: ${config.symbol}, TF: ${config.timeframe}`);
+    // Direction filter + trend filter from config
+    let directionFilter = 'both';
+    let useTrendFilter = true;
+    try {
+      const sc = JSON.parse(config.strategy_config || '{}');
+      if (sc.direction) directionFilter = sc.direction;
+      if (sc.trendFilter === false) useTrendFilter = false;
+    } catch (_) {}
+
+    const ema200 = ema(closes, Math.min(200, closes.length - 1));
+
+    console.log(`[BACKTEST] Strategy: ${strategy}, Direction: ${directionFilter}, TrendFilter: ${useTrendFilter}, Symbol: ${config.symbol}, TF: ${config.timeframe}`);
 
     // ── Indicators ──
     const ema = (data, period) => {
@@ -259,6 +270,18 @@ class BacktestService {
             signal = { dir: 'long', sl: price - atr[i-1] * 1.2, tp: price + atr[i-1] * 1.8 };
           } else if (prevHist > 0 && currHist < 0 && rsi[i] > 50 && volAbove) {
             signal = { dir: 'short', sl: price + atr[i-1] * 1.2, tp: price - atr[i-1] * 1.8 };
+          }
+        }
+
+        if (signal) {
+          // Direction filter
+          if (directionFilter === 'long' && signal.dir === 'short') signal = null;
+          if (directionFilter === 'short' && signal.dir === 'long') signal = null;
+
+          // Trend filter: EMA(200) — only trade with trend
+          if (signal && useTrendFilter && ema200[i]) {
+            if (signal.dir === 'long' && price < ema200[i]) signal = null; // no longs below EMA200
+            if (signal.dir === 'short' && price > ema200[i]) signal = null; // no shorts above EMA200
           }
         }
 

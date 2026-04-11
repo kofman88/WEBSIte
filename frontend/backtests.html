@@ -29,14 +29,18 @@
   <!-- Create Form -->
   <div class="card mb-6">
     <h2 class="font-bold mb-4">Новый бэктест</h2>
-    <form id="btForm" class="grid md:grid-cols-3 lg:grid-cols-6 gap-4">
+    <form id="btForm" class="grid md:grid-cols-3 lg:grid-cols-7 gap-4">
       <div><label class="text-xs text-slate-500 block mb-1">Пара</label><input name="symbol" value="BTCUSDT" class="w-full bg-slate-800/50 border border-slate-700 rounded-lg px-3 py-2 text-sm text-white outline-none"/></div>
       <div><label class="text-xs text-slate-500 block mb-1">Стратегия</label><select name="strategy" class="w-full bg-slate-800/50 border border-slate-700 rounded-lg px-3 py-2 text-sm text-white outline-none"><option>levels</option><option>scalping</option><option>smc</option><option>gerchik</option></select></div>
-      <div><label class="text-xs text-slate-500 block mb-1">Таймфрейм</label><select name="timeframe" class="w-full bg-slate-800/50 border border-slate-700 rounded-lg px-3 py-2 text-sm text-white outline-none"><option>15m</option><option>1h</option><option>4h</option><option>1d</option></select></div>
+      <div><label class="text-xs text-slate-500 block mb-1">Таймфрейм</label><select name="timeframe" class="w-full bg-slate-800/50 border border-slate-700 rounded-lg px-3 py-2 text-sm text-white outline-none"><option>15m</option><option>1H</option><option>4H</option><option>1D</option></select></div>
+      <div><label class="text-xs text-slate-500 block mb-1">Направление</label><select name="direction" class="w-full bg-slate-800/50 border border-slate-700 rounded-lg px-3 py-2 text-sm text-white outline-none"><option value="both">Long + Short</option><option value="long">Только Long</option><option value="short">Только Short</option></select></div>
       <div><label class="text-xs text-slate-500 block mb-1">Начало</label><input name="startDate" type="date" value="2025-01-01" class="w-full bg-slate-800/50 border border-slate-700 rounded-lg px-3 py-2 text-sm text-white outline-none"/></div>
       <div><label class="text-xs text-slate-500 block mb-1">Конец</label><input name="endDate" type="date" value="2025-12-31" class="w-full bg-slate-800/50 border border-slate-700 rounded-lg px-3 py-2 text-sm text-white outline-none"/></div>
       <div class="flex items-end"><button type="submit" class="w-full py-2 rounded-lg font-semibold text-white text-sm" style="background:linear-gradient(135deg,#4F46E5,#7C3AED)">Запустить</button></div>
     </form>
+    <div class="flex items-center gap-3 mt-3">
+      <label class="flex items-center gap-2 text-xs text-slate-400 cursor-pointer"><input type="checkbox" name="trendFilter" id="trendFilter" checked class="accent-violet-500"/> Фильтр тренда (EMA 200)</label>
+    </div>
   </div>
 
   <!-- Results Grid -->
@@ -90,7 +94,9 @@ document.getElementById('btForm')?.addEventListener('submit',async e=>{
   e.preventDefault();
   const fd=new FormData(e.target);
   const strat=fd.get('strategy');
-  const data={name:fd.get('symbol')+' '+strat,symbol:fd.get('symbol'),exchangeName:'bybit',timeframe:fd.get('timeframe'),startDate:fd.get('startDate'),endDate:fd.get('endDate'),initialCapital:10000,strategyConfig:JSON.stringify({strategy:strat})};
+  const dir=fd.get('direction');
+  const tf=document.getElementById('trendFilter').checked;
+  const data={name:fd.get('symbol')+' '+strat,symbol:fd.get('symbol'),exchangeName:'bybit',timeframe:fd.get('timeframe'),startDate:fd.get('startDate'),endDate:fd.get('endDate'),initialCapital:10000,strategyConfig:JSON.stringify({strategy:strat,direction:dir,trendFilter:tf})};
   try{await API.createBacktest(data);Toast.success('Бэктест запущен!');loadBacktests()}catch(err){Toast.error(err.message)}
 });
 </script>
