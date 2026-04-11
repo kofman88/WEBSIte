@@ -69,7 +69,7 @@
       </button>
       <div class="notif-panel" id="notifPanel">
         <div class="flex items-center justify-between p-4 border-b border-white/[.04]">
-          <span class="font-semibold text-sm">Уведомления</span>
+          <span class="font-semibold text-sm" data-dl="notif">Уведомления</span>
           <button onclick="clearNotifs()" class="text-xs text-slate-500 hover:text-white">Очистить</button>
         </div>
         <div id="notifList">
@@ -109,25 +109,27 @@
     </div>
   </div>
 
-  <!-- Live Chart + Signals -->
-  <div class="grid lg:grid-cols-3 gap-6 mb-6">
-    <div class="lg:col-span-2 card" style="padding:0;overflow:hidden;border-radius:16px">
-      <div class="flex items-center justify-between px-5 pt-4 pb-2">
-        <div class="flex items-center gap-3">
-          <h2 class="font-bold">График</h2>
-          <select id="chartSymbol" class="text-xs bg-slate-800/50 border border-slate-700 rounded-lg px-2 py-1 text-white outline-none" onchange="loadTVChart()">
-            <option value="BTCUSDT">BTC/USDT</option><option value="ETHUSDT">ETH/USDT</option><option value="SOLUSDT">SOL/USDT</option><option value="XRPUSDT">XRP/USDT</option><option value="DOGEUSDT">DOGE/USDT</option><option value="BNBUSDT">BNB/USDT</option>
-            <option value="ADAUSDT">ADA/USDT</option><option value="AVAXUSDT">AVAX/USDT</option><option value="LINKUSDT">LINK/USDT</option><option value="NEARUSDT">NEAR/USDT</option>
-            <option value="SUIUSDT">SUI/USDT</option><option value="INJUSDT">INJ/USDT</option><option value="ARBUSDT">ARB/USDT</option><option value="OPUSDT">OP/USDT</option>
-            <option value="APTUSDT">APT/USDT</option><option value="DOTUSDT">DOT/USDT</option><option value="MATICUSDT">MATIC/USDT</option><option value="UNIUSDT">UNI/USDT</option>
-            <option value="LTCUSDT">LTC/USDT</option><option value="ATOMUSDT">ATOM/USDT</option>
-          </select>
-        </div>
+  <!-- Live Chart — full width -->
+  <div class="card mb-6" style="padding:0;overflow:hidden;border-radius:16px">
+    <div class="flex items-center justify-between px-5 pt-4 pb-2">
+      <div class="flex items-center gap-3">
+        <h2 class="font-bold" data-dl="chart">График</h2>
+        <select id="chartSymbol" class="text-xs bg-slate-800/50 border border-slate-700 rounded-lg px-2 py-1 text-white outline-none" onchange="loadTVChart()">
+          <option value="BTCUSDT">BTC/USDT</option><option value="ETHUSDT">ETH/USDT</option><option value="SOLUSDT">SOL/USDT</option><option value="XRPUSDT">XRP/USDT</option><option value="DOGEUSDT">DOGE/USDT</option><option value="BNBUSDT">BNB/USDT</option>
+          <option value="ADAUSDT">ADA/USDT</option><option value="AVAXUSDT">AVAX/USDT</option><option value="LINKUSDT">LINK/USDT</option><option value="NEARUSDT">NEAR/USDT</option>
+          <option value="SUIUSDT">SUI/USDT</option><option value="INJUSDT">INJ/USDT</option><option value="ARBUSDT">ARB/USDT</option><option value="OPUSDT">OP/USDT</option>
+          <option value="APTUSDT">APT/USDT</option><option value="DOTUSDT">DOT/USDT</option><option value="MATICUSDT">MATIC/USDT</option><option value="UNIUSDT">UNI/USDT</option>
+          <option value="LTCUSDT">LTC/USDT</option><option value="ATOMUSDT">ATOM/USDT</option>
+        </select>
       </div>
-      <div id="tvChartWrap" style="height:400px"></div>
     </div>
+    <div id="tvChartWrap" style="height:500px"></div>
+  </div>
+
+  <!-- Signals + Stats -->
+  <div class="grid lg:grid-cols-3 gap-6 mb-6">
     <div class="card">
-      <div class="flex items-center justify-between mb-4"><h2 class="font-bold">Последние сигналы</h2><a href="signals.html" class="text-xs text-indigo-400 hover:underline">Все</a></div>
+      <div class="flex items-center justify-between mb-4"><h2 class="font-bold" data-dl="signals">Последние сигналы</h2><a href="signals.html" class="text-xs text-indigo-400 hover:underline">Все</a></div>
       <div id="recentSignals">
         <div class="skeleton mb-3" style="height:48px;width:100%"></div>
         <div class="skeleton mb-3" style="height:48px;width:100%"></div>
@@ -138,7 +140,7 @@
 
   <!-- Recent Trades -->
   <div class="card">
-    <div class="flex items-center justify-between mb-4"><h2 class="font-bold">Последние сделки</h2></div>
+    <div class="flex items-center justify-between mb-4"><h2 class="font-bold" data-dl="trades">Последние сделки</h2></div>
     <div id="recentTrades">
       <div class="skeleton mb-2" style="height:40px;width:100%"></div>
       <div class="skeleton mb-2" style="height:40px;width:100%"></div>
@@ -152,11 +154,45 @@
 function toggleDashTheme(){document.documentElement.classList.toggle('light');const l=document.documentElement.classList.contains('light');localStorage.setItem('chm_theme',l?'light':'dark');document.getElementById('dThemeBtn').textContent=l?'☀️':'🌙'}
 (function(){if(localStorage.getItem('chm_theme')==='light'){document.documentElement.classList.add('light');const b=document.getElementById('dThemeBtn');if(b)b.textContent='☀️'}})();
 
-// Lang
+// Lang — full dashboard translation
 let dashLang=localStorage.getItem('chm_lang')||'ru';
-function toggleDashLang(){dashLang=dashLang==='ru'?'en':'ru';localStorage.setItem('chm_lang',dashLang);document.getElementById('dLangBtn').textContent=dashLang==='ru'?'EN':'RU';applyDashLang()}
-function applyDashLang(){const en=dashLang==='en';document.querySelector('h1').textContent=en?'Dashboard':'Дашборд';document.querySelectorAll('.stat-card-label').forEach((el,i)=>{const labels=en?['Portfolio Balance','Active Bots','Signals Today','Win Rate']:['Баланс портфеля','Активные боты','Сигналов сегодня','Win Rate'];if(labels[i])el.textContent=labels[i]})}
-(function(){if(localStorage.getItem('chm_lang')==='en'){dashLang='en';const b=document.getElementById('dLangBtn');if(b)b.textContent='RU';setTimeout(applyDashLang,100)}})();
+const DL={
+  'Дашборд':'Dashboard','График':'Chart','Последние сигналы':'Recent Signals','Все':'All',
+  'Последние сделки':'Recent Trades','Баланс портфеля':'Portfolio Balance','Активные боты':'Active Bots',
+  'Сигналов сегодня':'Signals Today','Уведомления':'Notifications','Очистить':'Clear',
+  'Нет новых уведомлений':'No new notifications','Сигналов пока нет.':'No signals yet.',
+  'Сканер обновляется каждые 30 секунд.':'Scanner updates every 30 seconds.',
+  'Нет ботов.':'No bots.','Создать первого бота':'Create first bot',
+  'Сделок пока нет.':'No trades yet.','Создайте бота чтобы начать торговлю.':'Create a bot to start trading.',
+};
+function toggleDashLang(){
+  dashLang=dashLang==='ru'?'en':'ru';
+  localStorage.setItem('chm_lang',dashLang);
+  document.getElementById('dLangBtn').textContent=dashLang==='ru'?'EN':'RU';
+  applyDashLang();
+}
+function applyDashLang(){
+  const en=dashLang==='en';
+  // Stat labels
+  document.querySelectorAll('.stat-card-label').forEach((el,i)=>{
+    const ru=['Баланс портфеля','Активные боты','Сигналов сегодня','Win Rate'];
+    const enL=['Portfolio Balance','Active Bots','Signals Today','Win Rate'];
+    if(ru[i])el.textContent=en?enL[i]:ru[i];
+  });
+  // Sidebar
+  document.querySelectorAll('.sidebar-link').forEach(el=>{
+    const map=en?{'Дашборд':'Dashboard','Боты':'Bots','Сигналы':'Signals','Бэктесты':'Backtests','Биржи':'Exchanges','Настройки':'Settings','Академия':'Academy','Выйти':'Logout'}:{'Dashboard':'Дашборд','Bots':'Боты','Signals':'Сигналы','Backtests':'Бэктесты','Exchanges':'Биржи','Settings':'Настройки','Academy':'Академия','Logout':'Выйти'};
+    const txt=el.textContent.trim();
+    if(map[txt])el.childNodes[el.childNodes.length-1].textContent=map[txt];
+  });
+  // Headers with data-dl
+  document.querySelectorAll('[data-dl]').forEach(el=>{
+    const k=el.getAttribute('data-dl');
+    const map={chart:en?'Chart':'График',signals:en?'Recent Signals':'Последние сигналы',trades:en?'Recent Trades':'Последние сделки',notif:en?'Notifications':'Уведомления'};
+    if(map[k])el.textContent=map[k];
+  });
+}
+(function(){if(localStorage.getItem('chm_lang')==='en'){dashLang='en';const b=document.getElementById('dLangBtn');if(b)b.textContent='RU';setTimeout(applyDashLang,200)}})();
 
 if(!Auth.isLoggedIn())window.location.href='/?login=1';
 Sidebar.init('dashboard');
