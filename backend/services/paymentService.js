@@ -45,9 +45,9 @@ const PAYMENT_METHODS = {
   ton: {
     wallet: process.env.PAYMENT_WALLET || '',
     network: 'TON',
-    networkFull: 'The Open Network (TON)',
-    currency: 'TON',
-    note: 'Отправьте точную сумму в TON. В комментарий (memo) укажите Payment ID.',
+    networkFull: 'USDT на The Open Network (TON)',
+    currency: 'USDT',
+    note: 'Отправьте USDT в сети TON. Сумма точно в долларах. В комментарий (memo/comment) обязательно укажите Payment ID.',
   },
   usdt_trc20: {
     wallet: process.env.PAYMENT_WALLET_TRC20 || process.env.PAYMENT_WALLET || '',

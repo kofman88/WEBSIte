@@ -1,57 +1,89 @@
 /**
- * TON Payment Watcher — автоматическое подтверждение платежей.
+ * TON USDT Payment Watcher — автоматическое подтверждение USDT платежей в сети TON.
  *
- * Каждые 30 сек проверяет входящие транзакции на TON кошелёк через TON Center API.
- * Если находит транзакцию с memo = Payment ID и правильной суммой — активирует подписку.
+ * USDT на TON — это jetton (токен). Проверяем через TON Center API v3
+ * endpoint /jetton/transfers, который показывает входящие jetton-переводы.
  *
- * Бесплатно, без комиссий, полный контроль.
+ * Каждые 30 сек: проверяет входящие USDT → если memo = Payment ID → активирует подписку.
  */
 
 const https = require('https');
 const db = require('../models/database');
 
 const TON_WALLET = process.env.PAYMENT_WALLET || '';
-const TON_API = 'https://toncenter.com/api/v2';
-const CHECK_INTERVAL = 30000; // 30 секунд
+// USDT jetton master address на TON
+const USDT_JETTON = 'EQCxE6mUtQJKFnGfaROTKOt1lZbDiiX1kCixRv7Nw2Id_sDs';
+const CHECK_INTERVAL = 30000;
 
-// Курс TON/USD — обновляется каждые 5 минут
-let tonPriceUsd = 0;
-let lastPriceUpdate = 0;
+// Последний проверенный timestamp чтобы не обрабатывать старые tx
+let lastCheckedTimestamp = Math.floor(Date.now() / 1000) - 300; // 5 минут назад при старте
 
-async function fetchTonPrice() {
+/**
+ * Получить входящие USDT jetton переводы через TON Center API v3
+ */
+async function getJettonTransfers() {
   return new Promise((resolve) => {
-    https.get('https://api.coingecko.com/api/v3/simple/price?ids=the-open-network&vs_currencies=usd', {
-      headers: { 'User-Agent': 'CHM/2.0' }
-    }, (res) => {
+    if (!TON_WALLET) return resolve([]);
+
+    // TON Center v3 API для jetton transfers
+    const url = `https://toncenter.com/api/v3/jetton/transfers?address=${TON_WALLET}&direction=in&limit=20&jetton_master=${USDT_JETTON}`;
+
+    https.get(url, { headers: { 'User-Agent': 'CHM/2.0' } }, (res) => {
       let data = '';
       res.on('data', c => data += c);
       res.on('end', () => {
         try {
           const json = JSON.parse(data);
-          tonPriceUsd = json['the-open-network']?.usd || 0;
-          lastPriceUpdate = Date.now();
-          resolve(tonPriceUsd);
-        } catch (e) { resolve(tonPriceUsd); }
+          const transfers = json.jetton_transfers || json.result || [];
+
+          const txs = transfers.map(tx => {
+            // USDT на TON имеет 6 decimals
+            const amount = parseInt(tx.amount || '0') / 1e6;
+            // Forward payload может содержать memo (comment)
+            let memo = '';
+            if (tx.forward_payload) {
+              // Decode text comment from forward_payload
+              try {
+                if (typeof tx.forward_payload === 'string') {
+                  memo = tx.forward_payload;
+                } else if (tx.forward_payload.value && tx.forward_payload.value.value) {
+                  // Hex encoded text
+                  const hex = tx.forward_payload.value.value;
+                  memo = Buffer.from(hex, 'hex').toString('utf8').replace(/\0/g, '').trim();
+                }
+              } catch (_) {}
+            }
+            // Also check comment field
+            if (!memo && tx.comment) memo = tx.comment;
+
+            return {
+              hash: tx.transaction_hash || tx.trace_id || '',
+              from: tx.source?.address || tx.source || '',
+              amount,
+              memo,
+              timestamp: tx.transaction_now || tx.utime || 0,
+            };
+          }).filter(tx => tx.amount > 0);
+
+          resolve(txs);
+        } catch (e) {
+          // Fallback: try v2 API
+          getJettonTransfersV2().then(resolve);
+        }
       });
-    }).on('error', () => resolve(tonPriceUsd));
+    }).on('error', () => {
+      getJettonTransfersV2().then(resolve);
+    });
   });
 }
 
-async function getTonPrice() {
-  if (Date.now() - lastPriceUpdate > 300000 || !tonPriceUsd) { // 5 min cache
-    await fetchTonPrice();
-  }
-  return tonPriceUsd;
-}
-
 /**
- * Получить последние транзакции на наш кошелёк
+ * Fallback: проверяем через обычный getTransactions и ищем jetton transfers в out_msgs
  */
-async function getIncomingTransactions(limit = 20) {
+async function getJettonTransfersV2() {
   return new Promise((resolve) => {
-    if (!TON_WALLET) return resolve([]);
+    const url = `https://toncenter.com/api/v2/getTransactions?address=${TON_WALLET}&limit=30&archival=false`;
 
-    const url = `${TON_API}/getTransactions?address=${TON_WALLET}&limit=${limit}&archival=false`;
     https.get(url, { headers: { 'User-Agent': 'CHM/2.0' } }, (res) => {
       let data = '';
       res.on('data', c => data += c);
@@ -60,31 +92,38 @@ async function getIncomingTransactions(limit = 20) {
           const json = JSON.parse(data);
           if (!json.ok || !json.result) return resolve([]);
 
-          const txs = json.result
-            .filter(tx => tx.in_msg && tx.in_msg.value && parseInt(tx.in_msg.value) > 0)
-            .map(tx => ({
-              hash: tx.transaction_id?.hash || '',
-              from: tx.in_msg.source || '',
-              amount: parseInt(tx.in_msg.value) / 1e9, // nanoton → TON
-              memo: tx.in_msg.message || '',
-              timestamp: tx.utime || 0,
-            }));
+          const txs = [];
+          for (const tx of json.result) {
+            // Jetton transfers приходят как internal message с определённым op code
+            const inMsg = tx.in_msg;
+            if (!inMsg) continue;
 
+            // Проверяем все входящие сообщения
+            const value = parseInt(inMsg.value || '0');
+            const body = inMsg.message || inMsg.msg_data?.text || '';
+
+            if (body && body.length > 0) {
+              txs.push({
+                hash: tx.transaction_id?.hash || '',
+                from: inMsg.source || '',
+                amount: value / 1e6, // Пробуем как jetton (6 dec)
+                amountTon: value / 1e9, // Или как TON (9 dec)
+                memo: body.trim(),
+                timestamp: tx.utime || 0,
+              });
+            }
+          }
           resolve(txs);
         } catch (e) {
-          console.error('[TON-WATCHER] Parse error:', e.message);
           resolve([]);
         }
       });
-    }).on('error', (e) => {
-      console.error('[TON-WATCHER] Fetch error:', e.message);
-      resolve([]);
-    });
+    }).on('error', () => resolve([]));
   });
 }
 
 /**
- * Проверить pending платежи и подтвердить если нашли транзакцию
+ * Проверить pending платежи
  */
 async function checkPendingPayments() {
   if (!TON_WALLET) return;
@@ -95,42 +134,44 @@ async function checkPendingPayments() {
 
   if (!pending.length) return;
 
-  const tonPrice = await getTonPrice();
-  if (!tonPrice) {
-    console.log('[TON-WATCHER] Cannot get TON price, skipping...');
-    return;
-  }
-
-  const txs = await getIncomingTransactions(30);
+  const txs = await getJettonTransfers();
   if (!txs.length) return;
 
   for (const payment of pending) {
-    // Сколько TON нужно заплатить
-    const requiredTon = payment.amount_usd / tonPrice;
-    const minTon = requiredTon * 0.95; // 5% допуск на курс
+    const requiredAmount = payment.amount_usd; // USDT = 1:1 с USD
+    const minAmount = requiredAmount * 0.98; // 2% допуск
 
-    // Ищем транзакцию с нашим Payment ID в memo
-    const matchingTx = txs.find(tx => {
-      const memoMatch = tx.memo.trim().toUpperCase() === payment.payment_id.toUpperCase();
-      const amountMatch = tx.amount >= minTon;
-      // Только транзакции за последний час
-      const recentEnough = tx.timestamp > (Date.now() / 1000 - 3600);
-      return memoMatch && amountMatch && recentEnough;
+    // Ищем транзакцию с Payment ID в memo
+    const match = txs.find(tx => {
+      // Проверяем memo
+      const memoClean = (tx.memo || '').trim().toUpperCase();
+      const payIdClean = payment.payment_id.toUpperCase();
+      const memoMatch = memoClean === payIdClean || memoClean.includes(payIdClean);
+
+      // Проверяем сумму (USDT = $1)
+      const amountMatch = tx.amount >= minAmount;
+
+      // Только новые транзакции
+      const isNew = tx.timestamp > lastCheckedTimestamp - 60;
+
+      return memoMatch && amountMatch && isNew;
     });
 
-    if (matchingTx) {
-      console.log(`[TON-WATCHER] MATCH! Payment ${payment.payment_id}: ${matchingTx.amount} TON from ${matchingTx.from}`);
+    if (match) {
+      console.log(`[USDT-WATCHER] MATCH! ${payment.payment_id}: $${match.amount} USDT from ${match.from.slice(0, 12)}...`);
 
       try {
-        // Подтверждаем платёж
         const paymentService = require('./paymentService');
-        paymentService.confirmPayment(payment.payment_id, matchingTx.hash);
-        console.log(`[TON-WATCHER] Subscription activated: ${payment.plan} for user ${payment.user_id}`);
+        paymentService.confirmPayment(payment.payment_id, match.hash);
+        console.log(`[USDT-WATCHER] Subscription activated: ${payment.plan} for user ${payment.user_id}`);
       } catch (e) {
-        console.error(`[TON-WATCHER] Confirm error: ${e.message}`);
+        console.error(`[USDT-WATCHER] Confirm error: ${e.message}`);
       }
     }
   }
+
+  // Обновляем timestamp
+  lastCheckedTimestamp = Math.floor(Date.now() / 1000);
 
   // Закрываем просроченные
   db.prepare(
@@ -142,22 +183,21 @@ let watcherTimer = null;
 
 function startTonWatcher() {
   if (!TON_WALLET) {
-    console.log('[TON-WATCHER] No PAYMENT_WALLET configured, skipping...');
+    console.log('[USDT-WATCHER] No PAYMENT_WALLET configured, skipping...');
     return;
   }
-  console.log(`[TON-WATCHER] Started — watching ${TON_WALLET.slice(0, 8)}... every ${CHECK_INTERVAL / 1000}s`);
+  console.log(`[USDT-WATCHER] Started — watching USDT on TON at ${TON_WALLET.slice(0, 12)}... every ${CHECK_INTERVAL / 1000}s`);
 
-  // Первая проверка через 10 сек
-  setTimeout(() => checkPendingPayments().catch(e => console.error('[TON-WATCHER]', e.message)), 10000);
+  setTimeout(() => checkPendingPayments().catch(e => console.error('[USDT-WATCHER]', e.message)), 10000);
 
   watcherTimer = setInterval(() => {
-    checkPendingPayments().catch(e => console.error('[TON-WATCHER]', e.message));
+    checkPendingPayments().catch(e => console.error('[USDT-WATCHER]', e.message));
   }, CHECK_INTERVAL);
 }
 
 function stopTonWatcher() {
   if (watcherTimer) clearInterval(watcherTimer);
-  console.log('[TON-WATCHER] Stopped');
+  console.log('[USDT-WATCHER] Stopped');
 }
 
-module.exports = { startTonWatcher, stopTonWatcher, checkPendingPayments, getTonPrice };
+module.exports = { startTonWatcher, stopTonWatcher, checkPendingPayments };
