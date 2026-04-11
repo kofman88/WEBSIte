@@ -22,6 +22,7 @@
     <div class="stat-card"><div class="stat-card-label">Win Rate</div><div class="stat-card-value mono" id="stWR"><div class="skeleton" style="height:2rem;width:60px"></div></div></div>
     <div class="stat-card"><div class="stat-card-label">Ср. Confidence</div><div class="stat-card-value mono" id="stConf"><div class="skeleton" style="height:2rem;width:50px"></div></div></div>
   </div>
+  <div class="flex items-center gap-3 mb-4 text-xs text-slate-500"><span id="scannerStatus">Сканер: обновляется...</span><span id="lastUpdate"></span></div>
   <div class="flex flex-wrap gap-2 mb-6" id="filters">
     <button class="filter-btn active text-xs px-4 py-2 rounded-lg bg-slate-800/50 text-slate-400 border border-slate-700" data-f="all">Все</button>
     <button class="filter-btn text-xs px-4 py-2 rounded-lg bg-slate-800/50 text-slate-400 border border-slate-700" data-f="levels">Levels</button>
@@ -32,7 +33,10 @@
     <button class="filter-btn text-xs px-4 py-2 rounded-lg bg-slate-800/50 text-slate-400 border border-slate-700" data-f="short">SHORT</button>
   </div>
   <div class="grid lg:grid-cols-3 gap-6">
-    <div class="lg:col-span-2 space-y-3" id="signalFeed"><div class="skeleton" style="height:120px"></div><div class="skeleton" style="height:120px"></div></div>
+    <div class="lg:col-span-2">
+    <div class="space-y-3" id="signalFeed"><div class="skeleton" style="height:120px"></div><div class="skeleton" style="height:120px"></div></div>
+    <div class="flex justify-between items-center mt-3"><button onclick="sigPage=Math.max(1,sigPage-1);loadSignals()" class="text-xs px-3 py-1 rounded-lg bg-slate-800/50 text-slate-400 border border-slate-700">&larr; Назад</button><span class="text-xs text-slate-500">Стр. <span id="sigPageNum">1</span></span><button onclick="sigPage++;loadSignals()" class="text-xs px-3 py-1 rounded-lg bg-slate-800/50 text-slate-400 border border-slate-700">Далее &rarr;</button></div>
+    </div>
     <div class="space-y-4">
       <div class="card"><h3 class="font-bold mb-4">По стратегиям</h3><canvas id="stratChart" height="200"></canvas></div>
       <div class="card"><h3 class="font-bold mb-4">Топ символы</h3><div id="topSymbols"><div class="skeleton" style="height:100px"></div></div></div>
@@ -44,7 +48,7 @@
 <script>
 if(!Auth.isLoggedIn())window.location.href='/?login=1';
 Sidebar.init('signals');
-let allSignals=[],activeFilter='all',sChart=null;
+let allSignals=[],activeFilter='all',sChart=null,sigPage=1,sigTotal=0;
 
 document.getElementById('filters').addEventListener('click',e=>{const b=e.target.closest('.filter-btn');if(!b)return;document.querySelectorAll('.filter-btn').forEach(x=>x.classList.remove('active'));b.classList.add('active');activeFilter=b.dataset.f;renderSignals()});
 
@@ -64,9 +68,12 @@ async function loadSignals(){
   try{
     const ss=await API.getSignalStats().catch(()=>({stats:{}}));const st=ss.stats||ss||{};
     document.getElementById('stTotal').textContent=st.total||0;
+    document.getElementById('scannerStatus').textContent='Сканер: активен • 20 монет';
+    document.getElementById('lastUpdate').textContent='Обновлено: '+new Date().toLocaleTimeString('ru');
+    document.getElementById('sigPageNum').textContent=sigPage;
     document.getElementById('stWR').textContent=(st.winRate||0)+'%';
     document.getElementById('stConf').textContent=Math.round(st.avgConfidence||0);
-    const sg=await API.getSignals({limit:50});allSignals=sg.signals||[];renderSignals();checkNewSignals(allSignals.length);
+    const sg=await API.getSignals({limit:50,page:sigPage});allSignals=sg.signals||[];sigTotal=sg.pagination?.total||allSignals.length;renderSignals();checkNewSignals(allSignals.length);
     // Chart
     const by={};allSignals.forEach(s=>{by[s.strategy]=(by[s.strategy]||0)+1});
     const cols={levels:'#f59e0b',smc:'#818CF8',gerchik:'#3b82f6',scalping:'#06b6d4'};

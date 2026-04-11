@@ -117,7 +117,9 @@ html.light .text-slate-400,html.light .text-slate-500{color:#64748b!important}
 
   <!-- Tab: Trades table -->
   <div class="tp" id="tp-trades">
-    <div class="card"><div class="overflow-x-auto" id="trTbl"><div class="text-center py-8 text-slate-500 text-sm">Запустите бэктест чтобы увидеть сделки</div></div></div>
+    <div class="card">
+      <div class="flex justify-between items-center mb-3"><h3 class="font-bold text-sm">Сделки бэктеста</h3><button onclick="exportCSV()" class="text-xs px-3 py-1 rounded-lg bg-slate-800/50 text-slate-400 border border-slate-700 hover:text-white">Экспорт CSV</button></div>
+      <div class="overflow-x-auto" id="trTbl"><div class="text-center py-8 text-slate-500 text-sm">Запустите бэктест чтобы увидеть сделки</div></div></div>
   </div>
 
   <!-- Tab: Settings — full editable params -->
@@ -265,6 +267,16 @@ async function runBT(){
       }catch(pollErr){console.error('[BT] Poll error:',pollErr)}
     },2000);
   }catch(e){el.textContent='Ошибка: '+e.message;el.style.color='#ef4444'}
+}
+
+// Export trades to CSV
+function exportCSV(){
+  if(!btTrades.length){Toast.error('Нет сделок для экспорта');return}
+  const header='#,Тип,Вход,SL,TP,Выход,PnL,PnL%,Результат\n';
+  const rows=btTrades.map((t,i)=>[i+1,t.dir,t.entry.toFixed(2),t.sl.toFixed(2),t.tp.toFixed(2),t.exit.toFixed(2),t.pnl.toFixed(2),t.pnlPct.toFixed(2),t.result].join(',')).join('\n');
+  const blob=new Blob([header+rows],{type:'text/csv'});
+  const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=bot.symbol+'_'+bot.strategy_type+'_trades.csv';a.click();
+  Toast.success('CSV скачан');
 }
 
 // Run backtest from settings tab

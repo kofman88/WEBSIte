@@ -176,6 +176,7 @@ async function loadBots(){
         <div class="flex gap-2 mt-3">
           <a href="bot-detail.html?id=${b.id}" class="text-xs px-3 py-1.5 rounded-lg bg-indigo-500/10 border border-indigo-500/20 text-indigo-400 hover:text-indigo-300 transition">Открыть</a>
           <button onclick="editBot(${b.id})" class="text-xs px-3 py-1.5 rounded-lg bg-slate-800/50 border border-slate-700 text-slate-400 hover:text-white transition">Редактировать</button>
+          <button onclick="cloneBot(${b.id})" class="text-xs px-3 py-1.5 rounded-lg bg-slate-800/50 border border-slate-700 text-slate-400 hover:text-white transition">Копировать</button>
           <button onclick="deleteBot(${b.id},'${b.name}')" class="text-xs px-3 py-1.5 rounded-lg bg-red-500/5 border border-red-500/20 text-red-400 hover:text-red-300 transition">Удалить</button>
         </div>
       </div>`;
@@ -188,6 +189,15 @@ loadBots();
 
 async function toggleBotState(id,activate){
   try{await API.toggleBot(id,activate);Toast.success(activate?'Бот запущен':'Бот остановлен');loadBots()}catch(e){Toast.error(e.message)}
+}
+
+// Clone bot
+async function cloneBot(id){
+  try{
+    const r=await API.getBot(id);const b=r.bot||r;
+    await API.createBot({name:b.name+' (копия)',exchangeName:b.exchange_name,symbol:b.symbol,strategyType:b.strategy_type,leverage:b.leverage,positionSizeUsd:b.position_size_usd,stopLossPct:b.stop_loss_pct,takeProfitPct:b.take_profit_pct});
+    Toast.success('Бот скопирован');loadBots();
+  }catch(e){Toast.error(e.message)}
 }
 
 // Edit bot
