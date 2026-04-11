@@ -88,7 +88,11 @@ const PORT = config.port || 3000;
 
 // Start signal scanner
 const { startScanner } = require('./services/scannerEngine');
-setTimeout(() => startScanner(), 3000); // delay to let DB initialize
+setTimeout(() => startScanner(), 3000);
+
+// Start TON payment watcher
+const { startTonWatcher } = require('./services/tonWatcher');
+setTimeout(() => startTonWatcher(), 5000); // delay to let DB initialize
 
 if (typeof(PhusionPassenger) !== 'undefined') {
   app.listen('passenger', () => console.log('CHM Finance running via Passenger'));

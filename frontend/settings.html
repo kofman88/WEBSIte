@@ -73,7 +73,7 @@
     </div>
     <div class="card max-w-2xl mb-6">
       <h3 class="font-bold mb-4">Промо-код</h3>
-      <div class="flex gap-3"><input placeholder="Введите промо-код" class="flex-1 bg-slate-800/50 border border-slate-700 rounded-xl px-4 py-3 text-white outline-none"/><button onclick="Toast.success('Промо-код применён!')" class="px-6 py-3 rounded-xl font-semibold text-white text-sm" style="background:linear-gradient(135deg,#4F46E5,#7C3AED)">Применить</button></div>
+      <div class="flex gap-3"><input id="promoInput" placeholder="Введите промо-код" class="flex-1 bg-slate-800/50 border border-slate-700 rounded-xl px-4 py-3 text-white outline-none"/><button onclick="applyPromo()" class="px-6 py-3 rounded-xl font-semibold text-white text-sm" style="background:linear-gradient(135deg,#4F46E5,#7C3AED)">Применить</button></div>
     </div>
     <div class="card max-w-2xl">
       <h3 class="font-bold mb-4">Реферальная программа</h3>
@@ -236,6 +236,48 @@ async function loadSettings(){
   }catch(e){console.error('Settings load:',e)}
 }
 loadSettings();
+
+// Promo code — real API
+async function applyPromo(){
+  const code=document.getElementById('promoInput').value.trim();
+  if(!code){Toast.error('Введите промо-код');return}
+  try{await API.applyPromo(code);Toast.success('Промо-код активирован!');document.getElementById('promoInput').value='';loadSettings()}catch(e){Toast.error(e.message)}
+}
+
+// Payment with auto-check
+let paymentCheckTimer=null;
+async function openPayment(plan){
+  document.getElementById('payModal').style.display='flex';
+  const pc=document.getElementById('payContent');
+  pc.innerHTML='<div style="text-align:center;padding:24px;color:#64748b">Создаём платёж...</div>';
+  try{
+    const r=await API.post('/payments/create',{plan,method:'ton'});
+    const qrUrl='https://api.qrserver.com/v1/create-qr-code/?size=200x200&data='+encodeURIComponent(r.walletAddress);
+    pc.innerHTML=`
+      <div class="text-center mb-5"><div class="inline-block p-3 bg-white rounded-2xl mb-3"><img src="${qrUrl}" width="200" height="200" style="border-radius:8px"/></div></div>
+      <div class="space-y-3">
+        <div class="bg-slate-800/50 rounded-xl p-4"><div class="text-xs text-slate-500 mb-1">План</div><div class="font-bold text-lg">${plan.charAt(0).toUpperCase()+plan.slice(1)} — $${r.amount}</div></div>
+        <div class="bg-slate-800/50 rounded-xl p-4"><div class="text-xs text-slate-500 mb-1">Сеть</div><div class="font-bold text-violet-400">${r.networkFull||'TON'}</div><div class="text-xs text-amber-400 mt-1">Убедитесь что выбрали правильную сеть!</div></div>
+        <div class="bg-slate-800/50 rounded-xl p-4"><div class="text-xs text-slate-500 mb-1">Адрес</div><div class="flex items-center gap-2"><code class="text-xs text-cyan-400 break-all flex-1">${r.walletAddress}</code><button onclick="navigator.clipboard.writeText('${r.walletAddress}');Toast.success('Скопировано!')" class="text-xs px-2 py-1 rounded border border-slate-700 text-slate-400">Copy</button></div></div>
+        <div class="bg-slate-800/50 rounded-xl p-4"><div class="text-xs text-slate-500 mb-1">Комментарий (memo) — ОБЯЗАТЕЛЬНО</div><div class="flex items-center gap-2"><code class="font-bold text-amber-400">${r.paymentId}</code><button onclick="navigator.clipboard.writeText('${r.paymentId}');Toast.success('Скопировано!')" class="text-xs px-2 py-1 rounded border border-slate-700 text-slate-400">Copy</button></div></div>
+        <div class="bg-emerald-500/5 border border-emerald-500/15 rounded-xl p-4 text-xs text-emerald-300" id="payStatus"><span class="animate-pulse">Ожидание оплаты... Проверяем каждые 30 сек</span></div>
+      </div>`;
+    // Auto-check payment status
+    if(paymentCheckTimer)clearInterval(paymentCheckTimer);
+    paymentCheckTimer=setInterval(async()=>{
+      try{
+        const p=await API.get('/payments/'+r.paymentId);
+        if(p.status==='completed'){
+          clearInterval(paymentCheckTimer);
+          document.getElementById('payStatus').innerHTML='<strong>Оплата подтверждена!</strong> Подписка активирована.';
+          document.getElementById('payStatus').className='bg-emerald-500/10 border border-emerald-500/30 rounded-xl p-4 text-sm text-emerald-400 font-bold';
+          Toast.success('Подписка активирована!');
+          setTimeout(()=>{document.getElementById('payModal').style.display='none';loadSettings()},2000);
+        }
+      }catch(_){}
+    },15000);
+  }catch(e){pc.innerHTML='<div style="text-align:center;padding:24px;color:#ef4444">Ошибка: '+e.message+'</div>'}
+}
 
 // Change password — real API
 document.querySelector('#stab-security form')?.addEventListener('submit',async function(e){
