@@ -37,7 +37,7 @@ router.get('/stats', authMiddleware, (req, res) => {
  * Create a new backtest. Requires Pro tier or above.
  * Body: { name, symbol, exchangeName, timeframe, startDate, endDate, initialCapital, strategyConfig? }
  */
-router.post('/', authMiddleware, requireTier('pro'), (req, res) => {
+router.post('/', authMiddleware, (req, res) => {
   try {
     const backtestData = req.body;
 
