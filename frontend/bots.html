@@ -89,6 +89,10 @@
       </div>
 
       <div class="grid grid-cols-2 gap-3 mt-3">
+        <div><label class="text-xs text-slate-500 block mb-1">Начало бэктеста</label><input name="btStart" type="date" value="2025-01-01" class="w-full bg-slate-800/50 border border-slate-700 rounded-lg px-3 py-2 text-sm text-white outline-none"/></div>
+        <div><label class="text-xs text-slate-500 block mb-1">Конец бэктеста</label><input name="btEnd" type="date" value="2026-04-11" class="w-full bg-slate-800/50 border border-slate-700 rounded-lg px-3 py-2 text-sm text-white outline-none"/></div>
+      </div>
+      <div class="grid grid-cols-2 gap-3 mt-3">
         <button type="button" onclick="quickBacktest()" class="py-2.5 rounded-xl font-semibold text-sm border border-indigo-500/30 text-indigo-400 bg-indigo-500/5 hover:bg-indigo-500/10 transition">Прогнать бэктест</button>
         <button type="submit" class="py-2.5 rounded-xl font-semibold text-sm text-white" style="background:linear-gradient(135deg,#4F46E5,#7C3AED)">Создать бота</button>
       </div>
@@ -234,7 +238,7 @@ async function quickBacktest(){
   res.textContent='Запуск бэктеста...';
   const sp=collectStratParams();
   try{
-    const data={name:fd.get('symbol')+' '+fd.get('strategyType'),symbol:fd.get('symbol'),exchangeName:fd.get('exchangeName'),timeframe:fd.get('timeframe')||'1H',startDate:'2025-01-01',endDate:'2026-01-01',initialCapital:+fd.get('positionSizeUsd')*+fd.get('leverage'),strategyConfig:JSON.stringify({strategy:fd.get('strategyType'),direction:fd.get('direction')||'both',trendFilter:fd.get('trendFilter')==='1',params:sp})};
+    const data={name:fd.get('symbol')+' '+fd.get('strategyType'),symbol:fd.get('symbol'),exchangeName:fd.get('exchangeName'),timeframe:fd.get('timeframe')||'1H',startDate:fd.get('btStart')||'2025-01-01',endDate:fd.get('btEnd')||'2026-01-01',initialCapital:+fd.get('positionSizeUsd')*+fd.get('leverage'),strategyConfig:JSON.stringify({strategy:fd.get('strategyType'),direction:fd.get('direction')||'both',trendFilter:fd.get('trendFilter')==='1',params:sp})};
     const r=await API.createBacktest(data);
     const btId=r.backtest?.id||r.id;
     if(!btId){res.textContent='Бэктест создан — проверьте страницу Бэктесты';return}
