@@ -33,27 +33,8 @@
 
   <!-- EXCHANGES TAB -->
   <div class="tab-content active" id="tab-exchanges">
-    <div class="grid md:grid-cols-3 gap-4 mb-6">
-      <div class="card card-glow">
-        <div class="flex items-center gap-3 mb-4"><div class="w-10 h-10 rounded-lg bg-yellow-500/10 flex items-center justify-center text-lg font-bold text-yellow-400">B</div><div><div class="font-semibold">Bybit</div><div class="flex items-center gap-1"><span class="w-2 h-2 bg-green-400 rounded-full"></span><span class="text-xs text-green-400">Connected</span></div></div></div>
-        <div class="text-2xl font-bold mb-1">$5,420.50</div>
-        <div class="text-xs text-slate-500 mb-4">USDT Balance</div>
-        <div class="flex gap-2"><button class="text-xs px-3 py-1.5 rounded-lg bg-slate-800/50 border border-slate-700 text-slate-400 hover:text-white">Обновить</button><button class="text-xs px-3 py-1.5 rounded-lg bg-red-500/10 border border-red-500/20 text-red-400 hover:text-red-300">Отключить</button></div>
-      </div>
-      <div class="card card-glow">
-        <div class="flex items-center gap-3 mb-4"><div class="w-10 h-10 rounded-lg bg-orange-500/10 flex items-center justify-center text-lg font-bold text-orange-400">Bi</div><div><div class="font-semibold">Binance</div><div class="flex items-center gap-1"><span class="w-2 h-2 bg-green-400 rounded-full"></span><span class="text-xs text-green-400">Connected</span></div></div></div>
-        <div class="text-2xl font-bold mb-1">$3,180.20</div>
-        <div class="text-xs text-slate-500 mb-4">USDT Balance</div>
-        <div class="flex gap-2"><button class="text-xs px-3 py-1.5 rounded-lg bg-slate-800/50 border border-slate-700 text-slate-400 hover:text-white">Обновить</button><button class="text-xs px-3 py-1.5 rounded-lg bg-red-500/10 border border-red-500/20 text-red-400 hover:text-red-300">Отключить</button></div>
-      </div>
-      <div class="card" style="border-style:dashed">
-        <div class="flex flex-col items-center justify-center h-full py-8 text-center">
-          <div class="w-12 h-12 rounded-lg bg-slate-800/50 flex items-center justify-center text-2xl text-slate-500 mb-3">+</div>
-          <div class="font-semibold mb-1">Подключить биржу</div>
-          <div class="text-xs text-slate-500 mb-4">BingX, OKX и другие</div>
-          <button onclick="document.getElementById('exModal').style.display='flex'" class="text-xs px-4 py-2 rounded-lg text-indigo-400 border border-indigo-500/30 bg-indigo-500/10">Подключить</button>
-        </div>
-      </div>
+    <div class="grid md:grid-cols-3 gap-4 mb-6" id="exchangeGrid">
+      <div style="text-align:center;padding:40px;color:#64748b;grid-column:1/-1">Загрузка...</div>
     </div>
   </div>
 
@@ -62,36 +43,20 @@
     <div class="grid md:grid-cols-2 gap-6 mb-6">
       <div class="card">
         <h3 class="font-bold mb-4">Polygon Кошелёк</h3>
-        <div class="bg-slate-800/30 rounded-xl p-4 mb-4">
-          <div class="text-xs text-slate-500 mb-1">Адрес</div>
-          <div class="flex items-center gap-2"><code class="text-sm text-cyan-400 break-all">0x7f3a...b2c1</code><button onclick="Utils.copyToClipboard('0x7f3a...b2c1')" class="text-xs text-slate-500 hover:text-white">Copy</button></div>
-        </div>
-        <div class="grid grid-cols-2 gap-4">
-          <div class="bg-slate-800/30 rounded-xl p-4"><div class="text-xs text-slate-500">USDC</div><div class="text-xl font-bold">$1,250.00</div></div>
-          <div class="bg-slate-800/30 rounded-xl p-4"><div class="text-xs text-slate-500">MATIC</div><div class="text-xl font-bold">12.5</div></div>
-        </div>
+        <div id="walletInfo"><div style="text-align:center;padding:32px;color:#64748b">Загрузка...</div></div>
       </div>
       <div class="card">
         <h3 class="font-bold mb-4">Вывод средств</h3>
-        <form class="space-y-3">
-          <div><label class="text-xs text-slate-500 block mb-1">Адрес получателя</label><input placeholder="0x..." class="w-full bg-slate-800/50 border border-slate-700 rounded-lg px-3 py-2 text-sm text-white outline-none"/></div>
-          <div><label class="text-xs text-slate-500 block mb-1">Сумма USDC</label><input type="number" placeholder="100" class="w-full bg-slate-800/50 border border-slate-700 rounded-lg px-3 py-2 text-sm text-white outline-none"/></div>
-          <button type="button" onclick="Toast.success('Запрос на вывод отправлен')" class="w-full py-2 rounded-lg font-semibold text-white text-sm" style="background:linear-gradient(135deg,#4F46E5,#7C3AED)">Вывести</button>
+        <form id="withdrawForm" class="space-y-3">
+          <div><label class="text-xs text-slate-500 block mb-1">Адрес получателя</label><input name="address" placeholder="0x..." class="w-full bg-slate-800/50 border border-slate-700 rounded-lg px-3 py-2 text-sm text-white outline-none"/></div>
+          <div><label class="text-xs text-slate-500 block mb-1">Сумма USDC</label><input name="amount" type="number" placeholder="100" class="w-full bg-slate-800/50 border border-slate-700 rounded-lg px-3 py-2 text-sm text-white outline-none"/></div>
+          <button type="submit" class="w-full py-2 rounded-lg font-semibold text-white text-sm" style="background:linear-gradient(135deg,#4F46E5,#7C3AED)">Вывести</button>
         </form>
       </div>
     </div>
     <div class="card">
       <h3 class="font-bold mb-4">История транзакций</h3>
-      <div class="overflow-x-auto">
-        <table class="w-full text-sm">
-          <thead><tr class="text-xs text-slate-500 uppercase"><th class="text-left p-3">Дата</th><th class="text-left p-3">Тип</th><th class="text-left p-3">Сумма</th><th class="text-left p-3">Статус</th></tr></thead>
-          <tbody>
-            <tr class="border-t border-slate-800/50"><td class="p-3 text-slate-400">10 Apr</td><td class="p-3">Deposit</td><td class="p-3 text-green-400">+500 USDC</td><td class="p-3"><span class="text-xs px-2 py-0.5 rounded-full bg-green-500/15 text-green-400">Completed</span></td></tr>
-            <tr class="border-t border-slate-800/50"><td class="p-3 text-slate-400">08 Apr</td><td class="p-3">Withdrawal</td><td class="p-3 text-red-400">-200 USDC</td><td class="p-3"><span class="text-xs px-2 py-0.5 rounded-full bg-green-500/15 text-green-400">Completed</span></td></tr>
-            <tr class="border-t border-slate-800/50"><td class="p-3 text-slate-400">05 Apr</td><td class="p-3">Deposit</td><td class="p-3 text-green-400">+1000 USDC</td><td class="p-3"><span class="text-xs px-2 py-0.5 rounded-full bg-green-500/15 text-green-400">Completed</span></td></tr>
-          </tbody>
-        </table>
-      </div>
+      <div id="txHistory"><div style="text-align:center;padding:32px;color:#64748b">Загрузка...</div></div>
     </div>
   </div>
 </main>
@@ -115,6 +80,50 @@
 if(!Auth.isLoggedIn())window.location.href='/?login=1';
 Sidebar.init('wallet');
 function switchTab(t){document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));document.querySelectorAll('.tab-content').forEach(c=>c.classList.remove('active'));document.getElementById('tab-'+t).classList.add('active');event.target.classList.add('active')}
+
+// Exchanges — no fake data
+async function loadExchanges(){
+  const grid=document.getElementById('exchangeGrid');
+  grid.innerHTML='<div class="card" style="border-style:dashed"><div class="flex flex-col items-center justify-center h-full py-8 text-center"><div class="w-12 h-12 rounded-lg bg-slate-800/50 flex items-center justify-center text-2xl text-slate-500 mb-3">+</div><div class="font-semibold mb-1">Подключить биржу</div><div class="text-xs text-slate-500 mb-4">Bybit, Binance, BingX, OKX</div><button onclick="document.getElementById(\'exModal\').style.display=\'flex\'" class="text-xs px-4 py-2 rounded-lg text-indigo-400 border border-indigo-500/30 bg-indigo-500/10">Подключить</button></div></div>';
+}
+loadExchanges();
+
+// Wallet
+async function loadWallet(){
+  const wi=document.getElementById('walletInfo');
+  try{
+    const w=await API.getWalletBalance();
+    if(w&&w.balance!==undefined){
+      const addr=w.address||'—';
+      const short=addr.length>12?addr.slice(0,6)+'...'+addr.slice(-4):addr;
+      wi.innerHTML=`<div class="bg-slate-800/30 rounded-xl p-4 mb-4"><div class="text-xs text-slate-500 mb-1">Адрес</div><div class="flex items-center gap-2"><code class="text-sm text-cyan-400 break-all">${short}</code><button onclick="Utils.copyToClipboard('${addr}')" class="text-xs text-slate-500 hover:text-white">Copy</button></div></div><div class="grid grid-cols-2 gap-4"><div class="bg-slate-800/30 rounded-xl p-4"><div class="text-xs text-slate-500">Баланс</div><div class="text-xl font-bold">$${(w.balance||0).toFixed(2)}</div></div><div class="bg-slate-800/30 rounded-xl p-4"><div class="text-xs text-slate-500">Доступно</div><div class="text-xl font-bold">$${(w.availableBalance||0).toFixed(2)}</div></div></div>`;
+    }else{
+      wi.innerHTML='<div style="text-align:center;padding:24px;color:#64748b"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" style="margin:0 auto 8px;opacity:.3"><path d="M21 12V7H5a2 2 0 010-4h14v4M3 5v14a2 2 0 002 2h16v-5"/></svg>Кошелёк не создан<br><button onclick="createWallet()" class="text-indigo-400 hover:underline text-sm mt-2">Создать кошелёк</button></div>';
+    }
+  }catch(e){
+    wi.innerHTML='<div style="text-align:center;padding:24px;color:#64748b">Кошелёк не создан<br><button onclick="createWallet()" class="text-indigo-400 hover:underline text-sm mt-2">Создать кошелёк</button></div>';
+  }
+}
+async function createWallet(){try{await API.createWallet();Toast.success('Кошелёк создан!');loadWallet()}catch(e){Toast.error(e.message)}}
+loadWallet();
+
+// Transactions
+async function loadTx(){
+  const el=document.getElementById('txHistory');
+  try{
+    const r=await API.getTransactions();
+    const txs=r.transactions||[];
+    if(!txs.length){el.innerHTML='<div style="text-align:center;padding:24px;color:#64748b;font-size:.85rem">Транзакций пока нет</div>';return}
+    el.innerHTML='<div class="overflow-x-auto"><table class="w-full text-sm"><thead><tr class="text-xs text-slate-500 uppercase"><th class="text-left p-3">Дата</th><th class="text-left p-3">Тип</th><th class="text-left p-3">Сумма</th><th class="text-left p-3">Статус</th></tr></thead><tbody>'+txs.map(t=>`<tr class="border-t border-slate-800/50"><td class="p-3 text-slate-400 text-xs">${t.created_at||'—'}</td><td class="p-3">${t.type}</td><td class="p-3 ${t.type==='deposit'?'text-green-400':'text-red-400'}">${t.type==='deposit'?'+':'-'}${t.amount} USDC</td><td class="p-3"><span class="text-xs px-2 py-0.5 rounded-full ${t.status==='completed'?'bg-green-500/15 text-green-400':'bg-yellow-500/15 text-yellow-400'}">${t.status}</span></td></tr>`).join('')+'</tbody></table></div>';
+  }catch(e){el.innerHTML='<div style="text-align:center;padding:24px;color:#64748b;font-size:.85rem">Транзакций пока нет</div>'}
+}
+loadTx();
+
+// Withdraw
+document.getElementById('withdrawForm')?.addEventListener('submit',async e=>{
+  e.preventDefault();const fd=new FormData(e.target);
+  try{await API.withdraw({address:fd.get('address'),amount:+fd.get('amount')});Toast.success('Запрос на вывод создан');loadTx();loadWallet()}catch(err){Toast.error(err.message)}
+});
 </script>
 </body>
 </html>
