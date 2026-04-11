@@ -55,40 +55,40 @@
     <div class="flex items-center justify-between mb-6"><h2 class="text-xl font-bold">Создать бота</h2><button onclick="document.getElementById('createModal').style.display='none'" class="text-slate-400 hover:text-white text-xl">&times;</button></div>
     <form id="createBotForm" class="space-y-4">
       <!-- Основные -->
-      <div class="grid grid-cols-2 gap-4">
-        <div><label class="text-xs text-slate-500 block mb-1">Имя бота</label><input name="name" required class="w-full bg-slate-800/50 border border-slate-700 rounded-xl px-4 py-2.5 text-sm text-white outline-none" placeholder="BTC Scalper"/></div>
-        <div><label class="text-xs text-slate-500 block mb-1">Торговая пара</label><input name="symbol" required class="w-full bg-slate-800/50 border border-slate-700 rounded-xl px-4 py-2.5 text-sm text-white outline-none" placeholder="BTCUSDT"/></div>
+      <div class="grid grid-cols-2 gap-3">
+        <div><label class="text-xs text-slate-500 block mb-1">Имя</label><input name="name" required class="w-full bg-slate-800/50 border border-slate-700 rounded-lg px-3 py-2 text-sm text-white outline-none" placeholder="BTC Scalper"/></div>
+        <div><label class="text-xs text-slate-500 block mb-1">Пара</label><input name="symbol" required class="w-full bg-slate-800/50 border border-slate-700 rounded-lg px-3 py-2 text-sm text-white outline-none" placeholder="BTCUSDT"/></div>
       </div>
-      <div class="grid grid-cols-2 gap-4">
-        <div><label class="text-xs text-slate-500 block mb-1">Биржа</label><select name="exchangeName" class="w-full bg-slate-800/50 border border-slate-700 rounded-xl px-4 py-2.5 text-sm text-white outline-none"><option value="bybit">Bybit</option><option value="binance">Binance</option><option value="bingx">BingX</option><option value="okx">OKX</option></select></div>
-        <div><label class="text-xs text-slate-500 block mb-1">Стратегия</label><select name="strategyType" class="w-full bg-slate-800/50 border border-slate-700 rounded-xl px-4 py-2.5 text-sm text-white outline-none"><option value="levels">Levels</option><option value="scalping">Scalping</option><option value="smc">SMC</option><option value="gerchik">Gerchik</option></select></div>
-      </div>
-
-      <!-- Параметры -->
-      <div class="text-xs text-slate-500 font-semibold uppercase tracking-wider mt-2">Параметры</div>
       <div class="grid grid-cols-3 gap-3">
-        <div><label class="text-xs text-slate-500 block mb-1">Депозит ($)</label><input name="positionSizeUsd" type="number" value="100" min="10" class="w-full bg-slate-800/50 border border-slate-700 rounded-xl px-3 py-2.5 text-sm text-white outline-none"/></div>
-        <div><label class="text-xs text-slate-500 block mb-1">Leverage</label><input name="leverage" type="number" value="10" min="1" max="125" class="w-full bg-slate-800/50 border border-slate-700 rounded-xl px-3 py-2.5 text-sm text-white outline-none"/></div>
-        <div><label class="text-xs text-slate-500 block mb-1">Направление</label><select name="direction" class="w-full bg-slate-800/50 border border-slate-700 rounded-xl px-3 py-2.5 text-sm text-white outline-none"><option value="both">Long + Short</option><option value="long">Только Long</option><option value="short">Только Short</option></select></div>
+        <div><label class="text-xs text-slate-500 block mb-1">Биржа</label><select name="exchangeName" class="w-full bg-slate-800/50 border border-slate-700 rounded-lg px-3 py-2 text-sm text-white outline-none"><option value="bybit">Bybit</option><option value="binance">Binance</option><option value="bingx">BingX</option><option value="okx">OKX</option></select></div>
+        <div><label class="text-xs text-slate-500 block mb-1">Стратегия</label><select name="strategyType" id="stratSelect" class="w-full bg-slate-800/50 border border-slate-700 rounded-lg px-3 py-2 text-sm text-white outline-none" onchange="showStratParams()"><option value="levels">Levels</option><option value="smc">SMC</option><option value="gerchik">Gerchik</option><option value="scalping">Scalping</option></select></div>
+        <div><label class="text-xs text-slate-500 block mb-1">Таймфрейм</label><select name="timeframe" class="w-full bg-slate-800/50 border border-slate-700 rounded-lg px-3 py-2 text-sm text-white outline-none"><option>1H</option><option>15m</option><option>4H</option><option>1D</option></select></div>
       </div>
-
-      <!-- SL/TP -->
-      <div class="text-xs text-slate-500 font-semibold uppercase tracking-wider mt-2">Тейк-профит и стоп-лосс</div>
       <div class="grid grid-cols-3 gap-3">
-        <div><label class="text-xs text-slate-500 block mb-1">Stop Loss %</label><input name="stopLossPct" type="number" step="0.1" value="1.5" class="w-full bg-slate-800/50 border border-slate-700 rounded-xl px-3 py-2.5 text-sm text-white outline-none"/></div>
-        <div><label class="text-xs text-slate-500 block mb-1">Take Profit %</label><input name="takeProfitPct" type="number" step="0.1" value="3" class="w-full bg-slate-800/50 border border-slate-700 rounded-xl px-3 py-2.5 text-sm text-white outline-none"/></div>
-        <div><label class="text-xs text-slate-500 block mb-1">Trailing Stop</label><select name="trailingStop" class="w-full bg-slate-800/50 border border-slate-700 rounded-xl px-3 py-2.5 text-sm text-white outline-none"><option value="0">Выкл</option><option value="1">Вкл</option></select></div>
+        <div><label class="text-xs text-slate-500 block mb-1">Депозит ($)</label><input name="positionSizeUsd" type="number" value="100" min="10" class="w-full bg-slate-800/50 border border-slate-700 rounded-lg px-3 py-2 text-sm text-white outline-none"/></div>
+        <div><label class="text-xs text-slate-500 block mb-1">Leverage</label><input name="leverage" type="number" value="10" min="1" max="125" class="w-full bg-slate-800/50 border border-slate-700 rounded-lg px-3 py-2 text-sm text-white outline-none"/></div>
+        <div><label class="text-xs text-slate-500 block mb-1">Направление</label><select name="direction" class="w-full bg-slate-800/50 border border-slate-700 rounded-lg px-3 py-2 text-sm text-white outline-none"><option value="both">Long + Short</option><option value="long">Только Long</option><option value="short">Только Short</option></select></div>
       </div>
 
-      <!-- Доп. настройки -->
-      <div class="text-xs text-slate-500 font-semibold uppercase tracking-wider mt-2">Дополнительно</div>
-      <div class="grid grid-cols-3 gap-3">
-        <div><label class="text-xs text-slate-500 block mb-1">Макс. сделок</label><input name="maxTrades" type="number" value="5" min="1" max="50" class="w-full bg-slate-800/50 border border-slate-700 rounded-xl px-3 py-2.5 text-sm text-white outline-none"/></div>
-        <div><label class="text-xs text-slate-500 block mb-1">Лимит потерь/день %</label><input name="dailyLoss" type="number" step="0.5" value="5" class="w-full bg-slate-800/50 border border-slate-700 rounded-xl px-3 py-2.5 text-sm text-white outline-none"/></div>
-        <div><label class="text-xs text-slate-500 block mb-1">Режим</label><select name="mode" class="w-full bg-slate-800/50 border border-slate-700 rounded-xl px-3 py-2.5 text-sm text-white outline-none"><option value="auto">Авто</option><option value="confirm">С подтверждением</option></select></div>
+      <!-- Strategy-specific params -->
+      <div class="text-xs text-slate-500 font-semibold uppercase tracking-wider mt-3">Параметры стратегии</div>
+      <div id="stratParams"></div>
+
+      <!-- Risk Management -->
+      <div class="text-xs text-slate-500 font-semibold uppercase tracking-wider mt-3">Риск-менеджмент</div>
+      <div class="grid grid-cols-4 gap-3">
+        <div><label class="text-xs text-slate-500 block mb-1">Stop Loss %</label><input name="stopLossPct" type="number" step="0.1" value="1.5" class="w-full bg-slate-800/50 border border-slate-700 rounded-lg px-3 py-2 text-sm text-white outline-none"/></div>
+        <div><label class="text-xs text-slate-500 block mb-1">Take Profit %</label><input name="takeProfitPct" type="number" step="0.1" value="3" class="w-full bg-slate-800/50 border border-slate-700 rounded-lg px-3 py-2 text-sm text-white outline-none"/></div>
+        <div><label class="text-xs text-slate-500 block mb-1">Trailing Stop</label><select name="trailingStop" class="w-full bg-slate-800/50 border border-slate-700 rounded-lg px-3 py-2 text-sm text-white outline-none"><option value="0">Выкл</option><option value="1">Вкл</option></select></div>
+        <div><label class="text-xs text-slate-500 block mb-1">Макс. сделок</label><input name="maxTrades" type="number" value="5" min="1" max="50" class="w-full bg-slate-800/50 border border-slate-700 rounded-lg px-3 py-2 text-sm text-white outline-none"/></div>
+      </div>
+      <div class="grid grid-cols-3 gap-3 mt-2">
+        <div><label class="text-xs text-slate-500 block mb-1">Лимит потерь/день %</label><input name="dailyLoss" type="number" step="0.5" value="5" class="w-full bg-slate-800/50 border border-slate-700 rounded-lg px-3 py-2 text-sm text-white outline-none"/></div>
+        <div><label class="text-xs text-slate-500 block mb-1">Фильтр тренда</label><select name="trendFilter" class="w-full bg-slate-800/50 border border-slate-700 rounded-lg px-3 py-2 text-sm text-white outline-none"><option value="1">EMA 200 вкл</option><option value="0">Выкл</option></select></div>
+        <div><label class="text-xs text-slate-500 block mb-1">Режим</label><select name="mode" class="w-full bg-slate-800/50 border border-slate-700 rounded-lg px-3 py-2 text-sm text-white outline-none"><option value="auto">Авто</option><option value="confirm">С подтверждением</option></select></div>
       </div>
 
-      <div class="grid grid-cols-2 gap-3 mt-2">
+      <div class="grid grid-cols-2 gap-3 mt-3">
         <button type="button" onclick="quickBacktest()" class="py-2.5 rounded-xl font-semibold text-sm border border-indigo-500/30 text-indigo-400 bg-indigo-500/5 hover:bg-indigo-500/10 transition">Прогнать бэктест</button>
         <button type="submit" class="py-2.5 rounded-xl font-semibold text-sm text-white" style="background:linear-gradient(135deg,#4F46E5,#7C3AED)">Создать бота</button>
       </div>
@@ -147,6 +147,84 @@ async function toggleBotState(id,activate){
   try{await API.toggleBot(id,activate);Toast.success(activate?'Бот запущен':'Бот остановлен');loadBots()}catch(e){Toast.error(e.message)}
 }
 
+// Strategy-specific parameters
+const STRAT_PARAMS={
+  levels:`<div class="grid grid-cols-3 gap-3 mt-2">
+    <div><label class="text-xs text-slate-500 block mb-1">Pivot сила</label><input name="sp_pivot" type="number" value="7" min="3" max="15" class="w-full bg-slate-800/50 border border-slate-700 rounded-lg px-3 py-2 text-sm text-white outline-none"/></div>
+    <div><label class="text-xs text-slate-500 block mb-1">Мин. R:R</label><input name="sp_minRR" type="number" step="0.1" value="1.5" class="w-full bg-slate-800/50 border border-slate-700 rounded-lg px-3 py-2 text-sm text-white outline-none"/></div>
+    <div><label class="text-xs text-slate-500 block mb-1">Макс. дист. %</label><input name="sp_maxDist" type="number" step="0.1" value="1.5" class="w-full bg-slate-800/50 border border-slate-700 rounded-lg px-3 py-2 text-sm text-white outline-none"/></div>
+  </div><div class="grid grid-cols-3 gap-3 mt-2">
+    <div><label class="text-xs text-slate-500 block mb-1">Зона %</label><input name="sp_zone" type="number" step="0.1" value="0.7" class="w-full bg-slate-800/50 border border-slate-700 rounded-lg px-3 py-2 text-sm text-white outline-none"/></div>
+    <div><label class="text-xs text-slate-500 block mb-1">EMA быстрая</label><input name="sp_emaFast" type="number" value="50" class="w-full bg-slate-800/50 border border-slate-700 rounded-lg px-3 py-2 text-sm text-white outline-none"/></div>
+    <div><label class="text-xs text-slate-500 block mb-1">EMA медленная</label><input name="sp_emaSlow" type="number" value="200" class="w-full bg-slate-800/50 border border-slate-700 rounded-lg px-3 py-2 text-sm text-white outline-none"/></div>
+  </div><div class="grid grid-cols-4 gap-3 mt-2">
+    <div><label class="text-xs text-slate-500 block mb-1">RSI перекуп.</label><input name="sp_rsiOB" type="number" value="65" class="w-full bg-slate-800/50 border border-slate-700 rounded-lg px-3 py-2 text-sm text-white outline-none"/></div>
+    <div><label class="text-xs text-slate-500 block mb-1">RSI перепрод.</label><input name="sp_rsiOS" type="number" value="35" class="w-full bg-slate-800/50 border border-slate-700 rounded-lg px-3 py-2 text-sm text-white outline-none"/></div>
+    <div><label class="text-xs text-slate-500 block mb-1">Макс. тестов</label><input name="sp_maxTests" type="number" value="4" min="1" max="10" class="w-full bg-slate-800/50 border border-slate-700 rounded-lg px-3 py-2 text-sm text-white outline-none"/></div>
+    <div><label class="text-xs text-slate-500 block mb-1">HTF фильтр</label><select name="sp_htf" class="w-full bg-slate-800/50 border border-slate-700 rounded-lg px-3 py-2 text-sm text-white outline-none"><option value="0">Выкл</option><option value="1">Вкл</option></select></div>
+  </div><div class="flex flex-wrap gap-4 mt-2 text-xs">
+    <label class="flex items-center gap-1.5 text-slate-400"><input type="checkbox" name="sp_rsiFilter" checked class="accent-violet-500"/> RSI фильтр</label>
+    <label class="flex items-center gap-1.5 text-slate-400"><input type="checkbox" name="sp_volFilter" checked class="accent-violet-500"/> Объём фильтр</label>
+    <label class="flex items-center gap-1.5 text-slate-400"><input type="checkbox" name="sp_patternFilter" checked class="accent-violet-500"/> Паттерн фильтр</label>
+  </div>`,
+  smc:`<div class="grid grid-cols-3 gap-3 mt-2">
+    <div><label class="text-xs text-slate-500 block mb-1">Мин. подтверждений</label><input name="sp_minConf" type="number" value="2" min="1" max="5" class="w-full bg-slate-800/50 border border-slate-700 rounded-lg px-3 py-2 text-sm text-white outline-none"/></div>
+    <div><label class="text-xs text-slate-500 block mb-1">Мин. R:R</label><input name="sp_minRR" type="number" step="0.1" value="1.5" class="w-full bg-slate-800/50 border border-slate-700 rounded-lg px-3 py-2 text-sm text-white outline-none"/></div>
+    <div><label class="text-xs text-slate-500 block mb-1">Возраст OB (баров)</label><input name="sp_obAge" type="number" value="80" min="10" max="200" class="w-full bg-slate-800/50 border border-slate-700 rounded-lg px-3 py-2 text-sm text-white outline-none"/></div>
+  </div><div class="grid grid-cols-3 gap-3 mt-2">
+    <div><label class="text-xs text-slate-500 block mb-1">SL буфер %</label><input name="sp_slBuffer" type="number" step="0.1" value="0.5" class="w-full bg-slate-800/50 border border-slate-700 rounded-lg px-3 py-2 text-sm text-white outline-none"/></div>
+    <div><label class="text-xs text-slate-500 block mb-1">Swing Lookback</label><input name="sp_swingLB" type="number" value="10" min="5" max="30" class="w-full bg-slate-800/50 border border-slate-700 rounded-lg px-3 py-2 text-sm text-white outline-none"/></div>
+    <div><label class="text-xs text-slate-500 block mb-1">OB тело мульт.</label><input name="sp_obMult" type="number" step="0.1" value="1.8" class="w-full bg-slate-800/50 border border-slate-700 rounded-lg px-3 py-2 text-sm text-white outline-none"/></div>
+  </div><div class="flex flex-wrap gap-4 mt-2 text-xs">
+    <label class="flex items-center gap-1.5 text-slate-400"><input type="checkbox" name="sp_fvg" checked class="accent-violet-500"/> FVG (Fair Value Gap)</label>
+    <label class="flex items-center gap-1.5 text-slate-400"><input type="checkbox" name="sp_choch" checked class="accent-violet-500"/> CHoCH (смена структуры)</label>
+    <label class="flex items-center gap-1.5 text-slate-400"><input type="checkbox" name="sp_bos" checked class="accent-violet-500"/> BOS (пробой структуры)</label>
+  </div>`,
+  gerchik:`<div class="grid grid-cols-3 gap-3 mt-2">
+    <div><label class="text-xs text-slate-500 block mb-1">TP1 (R)</label><input name="sp_tp1r" type="number" step="0.5" value="3.0" class="w-full bg-slate-800/50 border border-slate-700 rounded-lg px-3 py-2 text-sm text-white outline-none"/></div>
+    <div><label class="text-xs text-slate-500 block mb-1">TP2 (R)</label><input name="sp_tp2r" type="number" step="0.5" value="4.0" class="w-full bg-slate-800/50 border border-slate-700 rounded-lg px-3 py-2 text-sm text-white outline-none"/></div>
+    <div><label class="text-xs text-slate-500 block mb-1">Мин. R:R</label><input name="sp_minRR" type="number" step="0.1" value="2.5" class="w-full bg-slate-800/50 border border-slate-700 rounded-lg px-3 py-2 text-sm text-white outline-none"/></div>
+  </div><div class="grid grid-cols-3 gap-3 mt-2">
+    <div><label class="text-xs text-slate-500 block mb-1">Pivot сила</label><input name="sp_pivot" type="number" value="5" min="3" max="15" class="w-full bg-slate-800/50 border border-slate-700 rounded-lg px-3 py-2 text-sm text-white outline-none"/></div>
+    <div><label class="text-xs text-slate-500 block mb-1">Lookback (баров)</label><input name="sp_lookback" type="number" value="50" min="20" max="200" class="w-full bg-slate-800/50 border border-slate-700 rounded-lg px-3 py-2 text-sm text-white outline-none"/></div>
+    <div><label class="text-xs text-slate-500 block mb-1">Люфт %</label><input name="sp_buffer" type="number" step="0.05" value="0.20" class="w-full bg-slate-800/50 border border-slate-700 rounded-lg px-3 py-2 text-sm text-white outline-none"/></div>
+  </div><div class="flex flex-wrap gap-4 mt-2 text-xs">
+    <label class="flex items-center gap-1.5 text-slate-400"><input type="checkbox" name="sp_bsu" checked class="accent-violet-500"/> БСУ паттерн</label>
+    <label class="flex items-center gap-1.5 text-slate-400"><input type="checkbox" name="sp_limitLevel" class="accent-violet-500"/> Limit Level детектор</label>
+  </div>`,
+  scalping:`<div class="grid grid-cols-4 gap-3 mt-2">
+    <div><label class="text-xs text-slate-500 block mb-1">MACD fast</label><input name="sp_macdFast" type="number" value="12" class="w-full bg-slate-800/50 border border-slate-700 rounded-lg px-3 py-2 text-sm text-white outline-none"/></div>
+    <div><label class="text-xs text-slate-500 block mb-1">MACD slow</label><input name="sp_macdSlow" type="number" value="26" class="w-full bg-slate-800/50 border border-slate-700 rounded-lg px-3 py-2 text-sm text-white outline-none"/></div>
+    <div><label class="text-xs text-slate-500 block mb-1">MACD signal</label><input name="sp_macdSig" type="number" value="9" class="w-full bg-slate-800/50 border border-slate-700 rounded-lg px-3 py-2 text-sm text-white outline-none"/></div>
+    <div><label class="text-xs text-slate-500 block mb-1">RSI период</label><input name="sp_rsiPeriod" type="number" value="14" class="w-full bg-slate-800/50 border border-slate-700 rounded-lg px-3 py-2 text-sm text-white outline-none"/></div>
+  </div><div class="grid grid-cols-4 gap-3 mt-2">
+    <div><label class="text-xs text-slate-500 block mb-1">RSI перекуп.</label><input name="sp_rsiOB" type="number" value="55" class="w-full bg-slate-800/50 border border-slate-700 rounded-lg px-3 py-2 text-sm text-white outline-none"/></div>
+    <div><label class="text-xs text-slate-500 block mb-1">RSI перепрод.</label><input name="sp_rsiOS" type="number" value="45" class="w-full bg-slate-800/50 border border-slate-700 rounded-lg px-3 py-2 text-sm text-white outline-none"/></div>
+    <div><label class="text-xs text-slate-500 block mb-1">Объём мульт.</label><input name="sp_volMult" type="number" step="0.1" value="0.9" class="w-full bg-slate-800/50 border border-slate-700 rounded-lg px-3 py-2 text-sm text-white outline-none"/></div>
+    <div><label class="text-xs text-slate-500 block mb-1">ATR мульт. SL</label><input name="sp_atrMult" type="number" step="0.1" value="1.2" class="w-full bg-slate-800/50 border border-slate-700 rounded-lg px-3 py-2 text-sm text-white outline-none"/></div>
+  </div><div class="flex flex-wrap gap-4 mt-2 text-xs">
+    <label class="flex items-center gap-1.5 text-slate-400"><input type="checkbox" name="sp_volFilter" checked class="accent-violet-500"/> Объём фильтр</label>
+    <label class="flex items-center gap-1.5 text-slate-400"><input type="checkbox" name="sp_macdCross" checked class="accent-violet-500"/> MACD пересечение</label>
+    <label class="flex items-center gap-1.5 text-slate-400"><input type="checkbox" name="sp_rsiFilter" checked class="accent-violet-500"/> RSI фильтр</label>
+  </div>`,
+};
+function showStratParams(){
+  const s=document.getElementById('stratSelect').value;
+  document.getElementById('stratParams').innerHTML=STRAT_PARAMS[s]||'';
+}
+showStratParams();
+
+// Collect all strategy params into JSON
+function collectStratParams(){
+  const form=document.getElementById('createBotForm');
+  const fd=new FormData(form);
+  const params={};
+  for(const[k,v] of fd.entries()){if(k.startsWith('sp_'))params[k.replace('sp_','')]=isNaN(v)?v:+v}
+  // Checkboxes (unchecked not in FormData)
+  form.querySelectorAll('input[type=checkbox][name^=sp_]').forEach(cb=>{params[cb.name.replace('sp_','')]=cb.checked});
+  return params;
+}
+
 // Quick backtest from bot form
 async function quickBacktest(){
   const form=document.getElementById('createBotForm');
@@ -155,7 +233,8 @@ async function quickBacktest(){
   res.className='mt-3 p-3 bg-slate-800/30 rounded-xl text-xs text-slate-300';
   res.textContent='Запуск бэктеста...';
   try{
-    const data={name:fd.get('symbol')+' '+fd.get('strategyType'),symbol:fd.get('symbol'),exchangeName:fd.get('exchangeName'),timeframe:'1H',startDate:'2025-01-01',endDate:'2026-01-01',initialCapital:+fd.get('positionSizeUsd')*+fd.get('leverage'),strategyConfig:JSON.stringify({strategy:fd.get('strategyType'),direction:fd.get('direction')||'both',trendFilter:true})};
+    const sp=collectStratParams();
+    const data={name:fd.get('symbol')+' '+fd.get('strategyType'),symbol:fd.get('symbol'),exchangeName:fd.get('exchangeName'),timeframe:fd.get('timeframe')||'1H',startDate:'2025-01-01',endDate:'2026-01-01',initialCapital:+fd.get('positionSizeUsd')*+fd.get('leverage'),strategyConfig:JSON.stringify({strategy:fd.get('strategyType'),direction:fd.get('direction')||'both',trendFilter:fd.get('trendFilter')==='1',params:sp})};
     const r=await API.createBacktest(data);
     // Poll for result
     let tries=0;
