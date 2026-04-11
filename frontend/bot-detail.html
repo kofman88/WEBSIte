@@ -52,6 +52,7 @@ html.light .text-slate-400,html.light .text-slate-500{color:#64748b!important}
   </div>
   <div class="topbar-actions">
     <button data-theme-toggle onclick="togglePageTheme(this)" style="font-size:.9rem;width:32px;height:32px;display:flex;align-items:center;justify-content:center;border-radius:8px;border:1px solid rgba(51,65,85,.5);background:none;cursor:pointer">🌙</button>
+    <button onclick="togglePageLang(this)" style="font-size:.7rem;color:#94a3b8;border:1px solid rgba(51,65,85,.5);border-radius:8px;padding:4px 10px;background:none;cursor:pointer">EN</button>
     <div class="topbar-user"><div class="topbar-avatar">U</div></div>
   </div>
 </header>
@@ -119,11 +120,32 @@ html.light .text-slate-400,html.light .text-slate-500{color:#64748b!important}
     <div class="card"><div class="overflow-x-auto" id="trTbl"><div class="text-center py-8 text-slate-500 text-sm">Запустите бэктест чтобы увидеть сделки</div></div></div>
   </div>
 
-  <!-- Tab: Settings -->
+  <!-- Tab: Settings — editable -->
   <div class="tp" id="tp-cfg">
     <div class="card max-w-2xl">
-      <h3 class="font-bold mb-3 text-sm">Параметры бота</h3>
-      <div class="space-y-2 text-sm" id="bCfg"><div class="text-slate-500">Загрузка...</div></div>
+      <h3 class="font-bold mb-4 text-sm">Параметры бота</h3>
+      <form id="botEditForm" class="space-y-3">
+        <div class="grid grid-cols-2 gap-3">
+          <div><label class="text-[.65rem] text-slate-500 block mb-1">Имя</label><input name="name" id="cfgName" class="w-full bg-slate-800/50 border border-slate-700 rounded-lg px-3 py-2 text-sm text-white outline-none"/></div>
+          <div><label class="text-[.65rem] text-slate-500 block mb-1">Стратегия</label><input id="cfgStrat" class="w-full bg-slate-800/50 border border-slate-700 rounded-lg px-3 py-2 text-sm text-slate-400 outline-none" readonly/></div>
+        </div>
+        <div class="grid grid-cols-3 gap-3">
+          <div><label class="text-[.65rem] text-slate-500 block mb-1">Leverage</label><input name="leverage" id="cfgLev" type="number" min="1" max="125" class="w-full bg-slate-800/50 border border-slate-700 rounded-lg px-3 py-2 text-sm text-white outline-none"/></div>
+          <div><label class="text-[.65rem] text-slate-500 block mb-1">Размер ($)</label><input name="positionSizeUsd" id="cfgSize" type="number" min="10" class="w-full bg-slate-800/50 border border-slate-700 rounded-lg px-3 py-2 text-sm text-white outline-none"/></div>
+          <div><label class="text-[.65rem] text-slate-500 block mb-1">Биржа</label><input id="cfgExch" class="w-full bg-slate-800/50 border border-slate-700 rounded-lg px-3 py-2 text-sm text-slate-400 outline-none" readonly/></div>
+        </div>
+        <div class="grid grid-cols-3 gap-3">
+          <div><label class="text-[.65rem] text-slate-500 block mb-1">Stop Loss %</label><input name="stopLossPct" id="cfgSL" type="number" step="0.1" class="w-full bg-slate-800/50 border border-slate-700 rounded-lg px-3 py-2 text-sm text-white outline-none"/></div>
+          <div><label class="text-[.65rem] text-slate-500 block mb-1">Take Profit %</label><input name="takeProfitPct" id="cfgTP" type="number" step="0.1" class="w-full bg-slate-800/50 border border-slate-700 rounded-lg px-3 py-2 text-sm text-white outline-none"/></div>
+          <div><label class="text-[.65rem] text-slate-500 block mb-1">Trailing Stop</label><select name="trailingStop" id="cfgTrail" class="w-full bg-slate-800/50 border border-slate-700 rounded-lg px-3 py-2 text-sm text-white outline-none"><option value="0">Выкл</option><option value="1">Вкл</option></select></div>
+        </div>
+        <div class="flex gap-3 mt-4">
+          <button type="submit" class="px-6 py-2.5 rounded-xl font-semibold text-sm text-white" style="background:linear-gradient(135deg,#4F46E5,#7C3AED)">Сохранить</button>
+          <button type="button" onclick="toggleBotActive()" id="cfgToggle" class="px-6 py-2.5 rounded-xl font-semibold text-sm border border-slate-700 text-slate-400">Запустить</button>
+          <button type="button" onclick="deleteThisBot()" class="px-6 py-2.5 rounded-xl font-semibold text-sm border border-red-500/20 text-red-400">Удалить</button>
+        </div>
+        <div class="text-xs text-slate-500 mt-2" id="cfgInfo"></div>
+      </form>
     </div>
   </div>
 </main>
@@ -148,13 +170,18 @@ async function loadBot(){
     document.getElementById('bStatus').className='text-xs px-2 py-0.5 rounded-full '+(bot.is_active?'bg-green-500/15 text-green-400':'bg-slate-500/15 text-slate-400');
     // Chart
     new TradingView.widget({container_id:'tvC',symbol:'BYBIT:'+bot.symbol+'.P',interval:'60',timezone:'Etc/UTC',theme:'dark',style:'1',locale:'ru',toolbar_bg:'#070b14',enable_publishing:false,save_image:false,allow_symbol_change:false,width:'100%',height:420,backgroundColor:'#070b14',studies:['MAExp@tv-basicstudies','RSI@tv-basicstudies']});
-    // Settings
-    document.getElementById('bCfg').innerHTML=[
-      ['Биржа',bot.exchange_name],['Символ',bot.symbol],['Стратегия',bot.strategy_type],
-      ['Leverage',bot.leverage+'x'],['Размер позиции','$'+bot.position_size_usd],
-      ['Stop Loss',bot.stop_loss_pct+'%'],['Take Profit',bot.take_profit_pct+'%'],
-      ['Trailing Stop',bot.trailing_stop?'Вкл':'Выкл'],['Создан',bot.created_at]
-    ].map(([k,v])=>`<div class="flex justify-between"><span class="text-slate-400">${k}</span><span class="mono">${v}</span></div>`).join('');
+    // Fill settings form
+    document.getElementById('cfgName').value=bot.name||'';
+    document.getElementById('cfgStrat').value=bot.strategy_type||'';
+    document.getElementById('cfgLev').value=bot.leverage||10;
+    document.getElementById('cfgSize').value=bot.position_size_usd||100;
+    document.getElementById('cfgExch').value=bot.exchange_name||'';
+    document.getElementById('cfgSL').value=bot.stop_loss_pct||1.5;
+    document.getElementById('cfgTP').value=bot.take_profit_pct||3;
+    document.getElementById('cfgTrail').value=bot.trailing_stop?'1':'0';
+    document.getElementById('cfgToggle').textContent=bot.is_active?'Остановить':'Запустить';
+    document.getElementById('cfgToggle').className='px-6 py-2.5 rounded-xl font-semibold text-sm border '+(bot.is_active?'border-red-500/20 text-red-400':'border-green-500/20 text-green-400');
+    document.getElementById('cfgInfo').textContent='Создан: '+bot.created_at+' • Символ: '+bot.symbol;
   }catch(e){document.getElementById('bName').textContent='Ошибка: '+e.message}
 }
 
@@ -184,22 +211,22 @@ function fillStats(d){
 
 function drawCharts(d){
   if(!d.trades||!d.trades.length)return;
-  // Cumulative PnL
+  // Cumulative PnL with tooltips
   let cum=0;const cumData=d.trades.map(t=>{cum+=t.pnl;return +cum.toFixed(2)});
-  new Chart(document.getElementById('cumChart'),{type:'line',data:{labels:cumData.map((_,i)=>i+1),datasets:[{data:cumData,borderColor:'#f59e0b',backgroundColor:'rgba(245,158,11,.1)',fill:true,tension:.3,pointRadius:0,borderWidth:2}]},options:{responsive:true,plugins:{legend:{display:false}},scales:{x:{display:false},y:{ticks:{color:'#475569',font:{size:10}},grid:{color:'rgba(30,41,59,.3)'}}}}});
-  // Win Rate donut
+  new Chart(document.getElementById('cumChart'),{type:'line',data:{labels:cumData.map((_,i)=>'#'+(i+1)),datasets:[{label:'PnL',data:cumData,borderColor:'#f59e0b',backgroundColor:'rgba(245,158,11,.1)',fill:true,tension:.3,pointRadius:2,pointHoverRadius:6,borderWidth:2}]},options:{responsive:true,interaction:{mode:'index',intersect:false},plugins:{legend:{display:false},tooltip:{backgroundColor:'rgba(15,23,42,.95)',titleColor:'#e2e8f0',bodyColor:'#e2e8f0',padding:10,cornerRadius:8,callbacks:{label:ctx=>'PnL: $'+ctx.parsed.y.toFixed(2)}}},scales:{x:{ticks:{color:'#475569',font:{size:9}},grid:{display:false}},y:{ticks:{color:'#475569',font:{size:10},callback:v=>'$'+v},grid:{color:'rgba(30,41,59,.3)'}}}}});
+  // Win Rate donut with center text
   const w=d.winningTrades||0,l=d.losingTrades||0;
-  new Chart(document.getElementById('wrChart'),{type:'doughnut',data:{labels:['Wins','Losses'],datasets:[{data:[w,l],backgroundColor:['#10b981','#ef4444'],borderWidth:0}]},options:{responsive:true,cutout:'70%',plugins:{legend:{display:false}}}});
-  // Trades bar (wins vs losses per chunk)
+  new Chart(document.getElementById('wrChart'),{type:'doughnut',data:{labels:['Прибыльные','Убыточные'],datasets:[{data:[w,l],backgroundColor:['#10b981','#ef4444'],borderWidth:0,hoverOffset:6}]},options:{responsive:true,cutout:'70%',plugins:{legend:{display:false},tooltip:{backgroundColor:'rgba(15,23,42,.95)',padding:10,cornerRadius:8,callbacks:{label:ctx=>ctx.label+': '+ctx.parsed+' ('+((ctx.parsed/(w+l))*100).toFixed(0)+'%)'}}}}});
+  // Trades bar with tooltips
   const chunkSize=Math.max(1,Math.ceil(d.trades.length/10));
   const wArr=[],lArr=[],labels=[];
   for(let i=0;i<d.trades.length;i+=chunkSize){
     const chunk=d.trades.slice(i,i+chunkSize);
     wArr.push(chunk.filter(t=>t.result==='win').length);
     lArr.push(chunk.filter(t=>t.result!=='win').length);
-    labels.push(i+1+'-'+(i+chunkSize));
+    labels.push('#'+(i+1)+'-'+(Math.min(i+chunkSize,d.trades.length)));
   }
-  new Chart(document.getElementById('barChart'),{type:'bar',data:{labels,datasets:[{label:'Win',data:wArr,backgroundColor:'#10b981'},{label:'Loss',data:lArr,backgroundColor:'#ef4444'}]},options:{responsive:true,plugins:{legend:{display:false}},scales:{x:{ticks:{color:'#475569',font:{size:9}},grid:{display:false}},y:{ticks:{color:'#475569'},grid:{color:'rgba(30,41,59,.3)'}}}}});
+  new Chart(document.getElementById('barChart'),{type:'bar',data:{labels,datasets:[{label:'Win',data:wArr,backgroundColor:'#10b981',borderRadius:4},{label:'Loss',data:lArr,backgroundColor:'#ef4444',borderRadius:4}]},options:{responsive:true,interaction:{mode:'index'},plugins:{legend:{labels:{color:'#94a3b8',font:{size:10},boxWidth:12}},tooltip:{backgroundColor:'rgba(15,23,42,.95)',padding:10,cornerRadius:8}},scales:{x:{ticks:{color:'#475569',font:{size:9}},grid:{display:false},stacked:true},y:{ticks:{color:'#475569'},grid:{color:'rgba(30,41,59,.3)'},stacked:true}}}});
 }
 
 function showTrades(trades){
@@ -229,6 +256,25 @@ async function runBT(){
       }catch(pollErr){console.error('[BT] Poll error:',pollErr)}
     },2000);
   }catch(e){el.textContent='Ошибка: '+e.message;el.style.color='#ef4444'}
+}
+
+// Save bot settings
+document.getElementById('botEditForm')?.addEventListener('submit',async e=>{
+  e.preventDefault();const fd=new FormData(e.target);
+  try{
+    await API.updateBot(bid,{name:fd.get('name'),leverage:+fd.get('leverage'),positionSizeUsd:+fd.get('positionSizeUsd'),stopLossPct:+fd.get('stopLossPct'),takeProfitPct:+fd.get('takeProfitPct'),trailingStop:fd.get('trailingStop')==='1'});
+    Toast.success('Настройки сохранены');loadBot();
+  }catch(err){Toast.error(err.message)}
+});
+
+async function toggleBotActive(){
+  if(!bot)return;
+  try{await API.toggleBot(bid,!bot.is_active);Toast.success(bot.is_active?'Бот остановлен':'Бот запущен');loadBot()}catch(e){Toast.error(e.message)}
+}
+
+async function deleteThisBot(){
+  if(!confirm('Удалить бота "'+bot.name+'"? Это нельзя отменить.'))return;
+  try{await API.deleteBot(bid);Toast.success('Бот удалён');location.href='bots.html'}catch(e){Toast.error(e.message)}
 }
 
 loadBot();
