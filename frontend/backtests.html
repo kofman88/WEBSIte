@@ -70,13 +70,13 @@ async function loadBacktests(){
           <span class="text-xs px-2 py-0.5 rounded-full ${st==='completed'?'bg-green-500/15 text-green-400':st==='failed'?'bg-red-500/15 text-red-400':'bg-yellow-500/15 text-yellow-400'}">${st}</span>
         </div>
         ${st==='completed'&&r?`<div class="grid grid-cols-3 gap-3 text-center text-sm mb-2">
-          <div><div class="text-xs text-slate-500">PnL</div><div class="font-bold ${(r.totalPnl||0)>=0?'text-green-400':'text-red-400'}">${(r.totalPnl||0)>=0?'+':''}$${Math.abs(r.totalPnl||0).toFixed(0)}</div></div>
-          <div><div class="text-xs text-slate-500">Win Rate</div><div class="font-bold">${(r.winRate||0).toFixed(0)}%</div></div>
-          <div><div class="text-xs text-slate-500">Sharpe</div><div class="font-bold">${(r.sharpeRatio||0).toFixed(2)}</div></div>
+          <div><div class="text-xs text-slate-500">PnL</div><div class="font-bold ${Number(r.totalPnl||0)>=0?'text-green-400':'text-red-400'}">${Number(r.totalPnl||0)>=0?'+':''}$${Math.absNumber(r.totalPnl||0).toFixed(0)}</div></div>
+          <div><div class="text-xs text-slate-500">Win Rate</div><div class="font-bold">${Number(r.winRate||0).toFixed(0)}%</div></div>
+          <div><div class="text-xs text-slate-500">Sharpe</div><div class="font-bold">${Number(r.sharpeRatio||0).toFixed(2)}</div></div>
         </div>
         <div class="grid grid-cols-3 gap-3 text-center text-sm">
-          <div><div class="text-xs text-slate-500">Max DD</div><div class="text-red-400">${(r.maxDrawdown||0).toFixed(1)}%</div></div>
-          <div><div class="text-xs text-slate-500">PF</div><div>${(r.profitFactor||0).toFixed(2)}</div></div>
+          <div><div class="text-xs text-slate-500">Max DD</div><div class="text-red-400">${Number(r.maxDrawdown||0).toFixed(1)}%</div></div>
+          <div><div class="text-xs text-slate-500">PF</div><div>${Number(r.profitFactor||0).toFixed(2)}</div></div>
           <div><div class="text-xs text-slate-500">Trades</div><div>${r.totalTrades||0}</div></div>
         </div>`:isRunning?'<div class="w-full bg-slate-800 rounded-full h-2 mt-4"><div class="bg-indigo-500 h-2 rounded-full animate-pulse" style="width:50%"></div></div><div class="text-xs text-slate-500 mt-2">Выполняется...</div>':'<div class="text-xs text-red-400 mt-2">Ошибка выполнения</div>'}
       </div>`}).join('');
