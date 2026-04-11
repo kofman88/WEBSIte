@@ -6,7 +6,7 @@
   <link rel="icon" type="image/svg+xml" href="/favicon.svg"/>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet"/>
   <script src="https://cdn.tailwindcss.com"></script>
-  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js"></script>
+  <script src="https://unpkg.com/lightweight-charts@4.1.3/dist/lightweight-charts.standalone.production.js"></script>
   <link rel="stylesheet" href="styles.css"/>
   <style>
     body{background:#070b14;color:#f1f5f9;font-family:'Inter',sans-serif}
@@ -94,18 +94,29 @@
     </div>
   </div>
 
-  <!-- Chart + Signals -->
+  <!-- Live Chart + Signals -->
   <div class="grid lg:grid-cols-3 gap-6 mb-6">
     <div class="lg:col-span-2 card">
       <div class="flex items-center justify-between mb-4">
-        <h2 class="font-bold">Кривая капитала</h2>
+        <div class="flex items-center gap-3">
+          <h2 class="font-bold">График</h2>
+          <select id="chartSymbol" class="text-xs bg-slate-800/50 border border-slate-700 rounded-lg px-2 py-1 text-white outline-none" onchange="loadLiveChart()">
+            <option value="BTCUSDT">BTC/USDT</option>
+            <option value="ETHUSDT">ETH/USDT</option>
+            <option value="SOLUSDT">SOL/USDT</option>
+            <option value="XRPUSDT">XRP/USDT</option>
+            <option value="DOGEUSDT">DOGE/USDT</option>
+            <option value="BNBUSDT">BNB/USDT</option>
+          </select>
+        </div>
         <div class="flex gap-1">
-          <button class="text-xs px-3 py-1 rounded-lg bg-indigo-500/20 text-indigo-300" onclick="updateChart(7)">1W</button>
-          <button class="text-xs px-3 py-1 rounded-lg hover:bg-slate-700/50 text-slate-400" onclick="updateChart(30)">1M</button>
-          <button class="text-xs px-3 py-1 rounded-lg hover:bg-slate-700/50 text-slate-400" onclick="updateChart(90)">3M</button>
+          <button class="chart-tf text-xs px-3 py-1 rounded-lg bg-slate-800/50 text-slate-400" onclick="changeTF('15m')">15m</button>
+          <button class="chart-tf text-xs px-3 py-1 rounded-lg bg-indigo-500/20 text-indigo-300" onclick="changeTF('1H')">1H</button>
+          <button class="chart-tf text-xs px-3 py-1 rounded-lg bg-slate-800/50 text-slate-400" onclick="changeTF('4H')">4H</button>
+          <button class="chart-tf text-xs px-3 py-1 rounded-lg bg-slate-800/50 text-slate-400" onclick="changeTF('1D')">1D</button>
         </div>
       </div>
-      <canvas id="equityChart" height="120"></canvas>
+      <div id="liveChart" style="height:350px"></div>
     </div>
     <div class="card">
       <div class="flex items-center justify-between mb-4"><h2 class="font-bold">Последние сигналы</h2><a href="signals.html" class="text-xs text-indigo-400 hover:underline">Все</a></div>
@@ -227,8 +238,31 @@ loadDashboard();
 // Refresh every 30 seconds
 setInterval(()=>{loadDashboard()},30000);
 
-// Equity Chart — real trade data or empty state
-let eChart;
+// Live Candlestick Chart — Lightweight Charts
+let liveChart=null,candleSeries=null,currentTF='1H';
+function changeTF(tf){currentTF=tf;document.querySelectorAll('.chart-tf').forEach(b=>{b.className='chart-tf text-xs px-3 py-1 rounded-lg bg-slate-800/50 text-slate-400'});event.target.className='chart-tf text-xs px-3 py-1 rounded-lg bg-indigo-500/20 text-indigo-300';loadLiveChart()}
+async function loadLiveChart(){
+  const container=document.getElementById('liveChart');
+  const symbol=document.getElementById('chartSymbol').value;
+  if(!liveChart){
+    liveChart=LightweightCharts.createChart(container,{width:container.clientWidth,height:350,layout:{background:{type:'Solid',color:'transparent'},textColor:'#94a3b8',fontSize:11},grid:{vertLines:{color:'rgba(30,41,59,.3)'},horzLines:{color:'rgba(30,41,59,.3)'}},crosshair:{mode:0},rightPriceScale:{borderColor:'rgba(30,41,59,.5)'},timeScale:{borderColor:'rgba(30,41,59,.5)',timeVisible:true}});
+    candleSeries=liveChart.addCandlestickSeries({upColor:'#10b981',downColor:'#ef4444',borderUpColor:'#10b981',borderDownColor:'#ef4444',wickUpColor:'#10b981',wickDownColor:'#ef4444'});
+    new ResizeObserver(()=>{liveChart.applyOptions({width:container.clientWidth})}).observe(container);
+  }
+  try{
+    const r=await API.get('/signals/candles?symbol='+symbol+'&timeframe='+currentTF+'&limit=200');
+    const candles=(r.candles||[]).map(c=>({time:Math.floor(c.ts/1000),open:c.open,high:c.high,low:c.low,close:c.close}));
+    if(candles.length){candleSeries.setData(candles);liveChart.timeScale().fitContent()}
+  }catch(e){console.log('Chart:',e.message)}
+  try{
+    const sg=await API.getSignals({limit:20});
+    const sigs=(sg.signals||[]).filter(s=>s.symbol===symbol);
+    if(sigs.length){candleSeries.setMarkers(sigs.map(s=>({time:Math.floor(new Date(s.created_at).getTime()/1000),position:s.direction==='long'?'belowBar':'aboveBar',color:s.direction==='long'?'#10b981':'#ef4444',shape:s.direction==='long'?'arrowUp':'arrowDown',text:s.strategy+' '+(s.direction==='long'?'L':'S')})).sort((a,b)=>a.time-b.time))}
+  }catch(_){}
+}
+loadLiveChart();
+setInterval(loadLiveChart,60000);
+// Legacy compat
 async function buildChart(days){
   const ctx=document.getElementById('equityChart');
   if(eChart)eChart.destroy();
