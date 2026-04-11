@@ -216,14 +216,15 @@ async function runBT(){
     const poll=setInterval(async()=>{
       tries++;if(tries>25){clearInterval(poll);el.innerHTML='<a href="backtests.html" class="text-indigo-400 underline">Проверьте бэктесты</a>';return}
       try{
-        const bt=await API.getBacktest(id);const st=bt.backtest?.status||bt.status;const res=bt.backtest?.results||bt.results;
+        const bt=await API.getBacktest(id);const bk=bt.backtest||bt;const st=bk.status;let res=bk.results;
         if(st==='completed'&&res){
           clearInterval(poll);
-          const d=typeof res==='string'?JSON.parse(res):res;
-          console.log('[BT] Results received:', d.totalTrades, 'trades, PnL:', d.totalPnl, 'has trades array:', d.trades?.length);
-          el.textContent='Готово! '+d.totalTrades+' сделок';el.style.color='#10b981';
+          if(typeof res==='string')try{res=JSON.parse(res)}catch(_){}
+          const d=res;
+          console.log('[BT] Got:',d.totalTrades,'trades array:',d.trades?.length,'keys:',Object.keys(d));
+          el.textContent='Готово! '+(d.totalTrades||0)+' сделок';el.style.color='#10b981';
           fillStats(d);drawCharts(d);
-          if(d.trades&&d.trades.length){btTrades=d.trades;showTrades(d.trades);console.log('[BT] Trades drawn:', d.trades.length)}
+          if(d.trades&&d.trades.length){btTrades=d.trades;showTrades(d.trades);console.log('[BT] Trades drawn:',d.trades.length)}
         }else if(st==='failed'){clearInterval(poll);el.textContent='Ошибка';el.style.color='#ef4444'}
       }catch(_){}
     },2000);
