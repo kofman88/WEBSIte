@@ -202,7 +202,7 @@ class BacktestService {
           const pivotStr = P.pivot || 7;
           const rsiOS = P.rsiOS || 35;
           const rsiOB = P.rsiOB || 65;
-          const emaF = P.emaFast || 50;
+          const emaFast = ema(closes, P.emaFast || 50);
           const maxDist = (P.maxDist || 1.5) / 100;
           let isSupport = true, isResist = true;
           for (let j = 1; j <= pivotStr && i - j >= 0 && i + j < candles.length; j++) {
@@ -211,9 +211,9 @@ class BacktestService {
           }
           const slMult = (P.stopLossPct || 1.5) / 100 * price / (atr[i-1] || 1);
           const tpMult = (P.takeProfitPct || 3) / 100 * price / (atr[i-1] || 1);
-          if (rsi[i] < rsiOS && price < ema(closes, emaF)[i]) {
+          if (rsi[i] < rsiOS && emaFast[i] && price < emaFast[i]) {
             signal = { dir: 'long', sl: price - atr[i-1] * Math.max(slMult, 1.5), tp: price + atr[i-1] * Math.max(tpMult, 2) };
-          } else if (rsi[i] > rsiOB && price > ema(closes, emaF)[i]) {
+          } else if (rsi[i] > rsiOB && emaFast[i] && price > emaFast[i]) {
             signal = { dir: 'short', sl: price + atr[i-1] * Math.max(slMult, 1.5), tp: price - atr[i-1] * Math.max(tpMult, 2) };
           }
         }
@@ -288,19 +288,19 @@ class BacktestService {
           }
         }
 
-        if (signal) {
+        if (signal && signal.dir) {
           // Direction filter
           if (directionFilter === 'long' && signal.dir === 'short') signal = null;
           if (directionFilter === 'short' && signal.dir === 'long') signal = null;
 
           // Trend filter: EMA(200) — only trade with trend
           if (signal && useTrendFilter && ema200[i]) {
-            if (signal.dir === 'long' && price < ema200[i]) signal = null; // no longs below EMA200
-            if (signal.dir === 'short' && price > ema200[i]) signal = null; // no shorts above EMA200
+            if (signal.dir === 'long' && price < ema200[i]) signal = null;
+            if (signal.dir === 'short' && price > ema200[i]) signal = null;
           }
         }
 
-        if (signal) {
+        if (signal && signal.dir && signal.sl && signal.tp) {
           inTrade = true;
           entryPrice = price;
           direction = signal.dir;
