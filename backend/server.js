@@ -14,6 +14,7 @@ const exchangesRoutes = require('./routes/exchanges');
 const subscriptionsRoutes = require('./routes/subscriptions');
 const signalsRoutes = require('./routes/signals');
 const walletRoutes = require('./routes/wallet');
+const paymentRoutes = require('./routes/payments');
 const websocketService = require('./services/websocketService');
 
 const app = express();
@@ -51,6 +52,7 @@ app.use('/api/exchanges', exchangesRoutes);
 app.use('/api/subscriptions', subscriptionsRoutes);
 app.use('/api/signals', signalsRoutes);
 app.use('/api/wallet', walletRoutes);
+app.use('/api/payments', paymentRoutes);
 
 app.get('/api/health', (_req, res) => {
   res.json({

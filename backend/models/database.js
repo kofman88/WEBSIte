@@ -24,6 +24,10 @@ db.exec(`
     password_hash TEXT NOT NULL,
     telegram_id TEXT,
     referral_code TEXT UNIQUE,
+    email_verified BOOLEAN DEFAULT 0,
+    email_verify_token TEXT,
+    reset_token TEXT,
+    reset_expires DATETIME,
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
     updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
     is_active BOOLEAN DEFAULT 1
@@ -270,6 +274,17 @@ db.exec(`
   CREATE INDEX IF NOT EXISTS idx_referrals_referrer ON referrals(referrer_id);
   CREATE INDEX IF NOT EXISTS idx_referrals_referred ON referrals(referred_id);
 `);
+
+// ── Migrations (safe for existing DBs) ────────────────────────────────
+const migrations = [
+  'ALTER TABLE users ADD COLUMN email_verified BOOLEAN DEFAULT 0',
+  'ALTER TABLE users ADD COLUMN email_verify_token TEXT',
+  'ALTER TABLE users ADD COLUMN reset_token TEXT',
+  'ALTER TABLE users ADD COLUMN reset_expires DATETIME',
+];
+for (const sql of migrations) {
+  try { db.exec(sql); } catch (_) { /* column already exists */ }
+}
 
 console.log('Database initialized:', config.databasePath);
 

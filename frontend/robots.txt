@@ -1,0 +1,11 @@
+User-agent: *
+Allow: /
+Disallow: /api/
+Disallow: /dashboard.html
+Disallow: /bots.html
+Disallow: /signals.html
+Disallow: /backtests.html
+Disallow: /wallet.html
+Disallow: /settings.html
+
+Sitemap: https://chmup.top/sitemap.xml
