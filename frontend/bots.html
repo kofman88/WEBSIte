@@ -101,6 +101,38 @@
   </div>
 </div>
 
+<!-- EDIT BOT MODAL -->
+<div id="editModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.7);backdrop-filter:blur(8px);z-index:100;align-items:center;justify-content:center">
+  <div class="card" style="width:100%;max-width:450px;margin:16px;max-height:90vh;overflow-y:auto">
+    <div class="flex items-center justify-between mb-4"><h2 class="text-lg font-bold">Редактировать бота</h2><button onclick="document.getElementById('editModal').style.display='none'" class="text-slate-400 hover:text-white text-xl">&times;</button></div>
+    <form id="editBotForm" class="space-y-3">
+      <input type="hidden" name="editId" id="editId"/>
+      <div><label class="text-xs text-slate-500 block mb-1">Имя</label><input name="name" id="editName" class="w-full bg-slate-800/50 border border-slate-700 rounded-lg px-3 py-2 text-sm text-white outline-none"/></div>
+      <div class="grid grid-cols-2 gap-3">
+        <div><label class="text-xs text-slate-500 block mb-1">Leverage</label><input name="leverage" id="editLev" type="number" min="1" max="125" class="w-full bg-slate-800/50 border border-slate-700 rounded-lg px-3 py-2 text-sm text-white outline-none"/></div>
+        <div><label class="text-xs text-slate-500 block mb-1">Размер ($)</label><input name="positionSizeUsd" id="editSize" type="number" min="10" class="w-full bg-slate-800/50 border border-slate-700 rounded-lg px-3 py-2 text-sm text-white outline-none"/></div>
+      </div>
+      <div class="grid grid-cols-2 gap-3">
+        <div><label class="text-xs text-slate-500 block mb-1">Stop Loss %</label><input name="stopLossPct" id="editSL" type="number" step="0.1" class="w-full bg-slate-800/50 border border-slate-700 rounded-lg px-3 py-2 text-sm text-white outline-none"/></div>
+        <div><label class="text-xs text-slate-500 block mb-1">Take Profit %</label><input name="takeProfitPct" id="editTP" type="number" step="0.1" class="w-full bg-slate-800/50 border border-slate-700 rounded-lg px-3 py-2 text-sm text-white outline-none"/></div>
+      </div>
+      <button type="submit" class="w-full py-2.5 rounded-xl font-semibold text-sm text-white" style="background:linear-gradient(135deg,#4F46E5,#7C3AED)">Сохранить</button>
+    </form>
+  </div>
+</div>
+
+<!-- DELETE CONFIRM MODAL -->
+<div id="deleteModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.7);backdrop-filter:blur(8px);z-index:100;align-items:center;justify-content:center">
+  <div class="card" style="width:100%;max-width:380px;margin:16px;text-align:center">
+    <h2 class="text-lg font-bold mb-2">Удалить бота?</h2>
+    <p class="text-sm text-slate-400 mb-4" id="deleteMsg">Это действие нельзя отменить.</p>
+    <div class="flex gap-3 justify-center">
+      <button onclick="document.getElementById('deleteModal').style.display='none'" class="px-5 py-2 rounded-lg text-sm border border-slate-700 text-slate-400">Отмена</button>
+      <button id="deleteConfirmBtn" class="px-5 py-2 rounded-lg text-sm bg-red-500 text-white font-semibold">Удалить</button>
+    </div>
+  </div>
+</div>
+
 <script src="app.js"></script>
 <script>
 if(!Auth.isLoggedIn())window.location.href='/?login=1';
@@ -138,7 +170,11 @@ async function loadBots(){
           <div class="toggle ${active?'on':''}" onclick="toggleBotState(${b.id},${!active})"></div>
         </div>
         <div class="flex items-center gap-2 mb-3"><span class="text-xs px-2 py-0.5 rounded-full bg-${sc}-500/15 text-${sc}-400">${b.strategy_type}</span><span class="text-xs px-2 py-0.5 rounded-full ${active?'bg-green-500/15 text-green-400':'bg-slate-500/15 text-slate-400'}">${active?'Active':'Stopped'}</span></div>
-        <div class="text-xs text-slate-500">Leverage: ${b.leverage||1}x &middot; Size: $${b.position_size_usd||0} &middot; SL: ${b.stop_loss_pct||0}%</div>
+        <div class="text-xs text-slate-500 mt-2">Leverage: ${b.leverage||1}x &middot; Size: $${b.position_size_usd||0} &middot; SL: ${b.stop_loss_pct||0}%</div>
+        <div class="flex gap-2 mt-3">
+          <button onclick="editBot(${b.id})" class="text-xs px-3 py-1.5 rounded-lg bg-slate-800/50 border border-slate-700 text-slate-400 hover:text-white transition">Редактировать</button>
+          <button onclick="deleteBot(${b.id},'${b.name}')" class="text-xs px-3 py-1.5 rounded-lg bg-red-500/5 border border-red-500/20 text-red-400 hover:text-red-300 transition">Удалить</button>
+        </div>
       </div>`;
     }).join('');
   }catch(e){
@@ -149,6 +185,41 @@ loadBots();
 
 async function toggleBotState(id,activate){
   try{await API.toggleBot(id,activate);Toast.success(activate?'Бот запущен':'Бот остановлен');loadBots()}catch(e){Toast.error(e.message)}
+}
+
+// Edit bot
+async function editBot(id){
+  try{
+    const r=await API.getBot(id);
+    const b=r.bot||r;
+    document.getElementById('editId').value=b.id;
+    document.getElementById('editName').value=b.name||'';
+    document.getElementById('editLev').value=b.leverage||10;
+    document.getElementById('editSize').value=b.position_size_usd||100;
+    document.getElementById('editSL').value=b.stop_loss_pct||1.5;
+    document.getElementById('editTP').value=b.take_profit_pct||3;
+    document.getElementById('editModal').style.display='flex';
+  }catch(e){Toast.error(e.message)}
+}
+document.getElementById('editBotForm')?.addEventListener('submit',async e=>{
+  e.preventDefault();
+  const id=document.getElementById('editId').value;
+  const fd=new FormData(e.target);
+  try{
+    await API.updateBot(id,{name:fd.get('name'),leverage:+fd.get('leverage'),positionSizeUsd:+fd.get('positionSizeUsd'),stopLossPct:+fd.get('stopLossPct'),takeProfitPct:+fd.get('takeProfitPct')});
+    Toast.success('Бот обновлён');
+    document.getElementById('editModal').style.display='none';
+    loadBots();
+  }catch(err){Toast.error(err.message)}
+});
+
+// Delete bot
+function deleteBot(id,name){
+  document.getElementById('deleteMsg').textContent=`Удалить бота "${name}"? Это действие нельзя отменить.`;
+  document.getElementById('deleteConfirmBtn').onclick=async()=>{
+    try{await API.deleteBot(id);Toast.success('Бот удалён');document.getElementById('deleteModal').style.display='none';loadBots()}catch(e){Toast.error(e.message)}
+  };
+  document.getElementById('deleteModal').style.display='flex';
 }
 
 // Strategy-specific parameters
