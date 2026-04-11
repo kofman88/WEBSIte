@@ -15,6 +15,7 @@ const subscriptionsRoutes = require('./routes/subscriptions');
 const signalsRoutes = require('./routes/signals');
 const walletRoutes = require('./routes/wallet');
 const paymentRoutes = require('./routes/payments');
+const tradeRoutes = require('./routes/trades');
 const websocketService = require('./services/websocketService');
 
 const app = express();
@@ -53,6 +54,7 @@ app.use('/api/subscriptions', subscriptionsRoutes);
 app.use('/api/signals', signalsRoutes);
 app.use('/api/wallet', walletRoutes);
 app.use('/api/payments', paymentRoutes);
+app.use('/api/trades', tradeRoutes);
 
 app.get('/api/health', (_req, res) => {
   res.json({
@@ -83,6 +85,10 @@ app.use((err, _req, res, _next) => {
 
 // ── Start: Passenger or standalone ──────────────────────────────────────
 const PORT = config.port || 3000;
+
+// Start signal scanner
+const { startScanner } = require('./services/scannerEngine');
+setTimeout(() => startScanner(), 3000); // delay to let DB initialize
 
 if (typeof(PhusionPassenger) !== 'undefined') {
   app.listen('passenger', () => console.log('CHM Finance running via Passenger'));
