@@ -220,9 +220,10 @@ async function runBT(){
         if(st==='completed'&&res){
           clearInterval(poll);
           const d=typeof res==='string'?JSON.parse(res):res;
-          el.textContent='Готово!';el.style.color='#10b981';
+          console.log('[BT] Results received:', d.totalTrades, 'trades, PnL:', d.totalPnl, 'has trades array:', d.trades?.length);
+          el.textContent='Готово! '+d.totalTrades+' сделок';el.style.color='#10b981';
           fillStats(d);drawCharts(d);
-          if(d.trades){btTrades=d.trades;showTrades(d.trades)}
+          if(d.trades&&d.trades.length){btTrades=d.trades;showTrades(d.trades);console.log('[BT] Trades drawn:', d.trades.length)}
         }else if(st==='failed'){clearInterval(poll);el.textContent='Ошибка';el.style.color='#ef4444'}
       }catch(_){}
     },2000);
