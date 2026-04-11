@@ -40,8 +40,9 @@ router.get('/me', authMiddleware, (req, res) => {
     let subscription = null;
     try {
       const subscriptionService = require('../services/subscriptionService');
-      subscription = subscriptionService.getUserSubscription(req.userId);
-    } catch (_) {}
+      const sub = subscriptionService.getUserSubscription(req.userId);
+      if (sub) subscription = { plan: sub.plan || 'free', status: sub.status || 'active', expiresAt: sub.expires_at || null };
+    } catch (e) { console.log('Sub fetch error:', e.message); }
 
     res.json({
       user,

@@ -159,6 +159,18 @@ router.post('/settings', authMiddleware, (req, res) => {
  * GET /api/signals/:id
  * Get a single signal by ID.
  */
+// GET /api/signals/candles — PUBLIC, no auth
+router.get('/candles', async (req, res) => {
+  try {
+    const { symbol, timeframe, limit } = req.query;
+    const { fetchCandles } = require('../services/scannerEngine');
+    const candles = await fetchCandles(symbol || 'BTCUSDT', timeframe || '1H', parseInt(limit) || 200);
+    res.json({ candles });
+  } catch (error) {
+    res.status(400).json({ error: error.message });
+  }
+});
+
 router.get('/:id', authMiddleware, (req, res) => {
   try {
     const signalId = parseInt(req.params.id, 10);
@@ -226,18 +238,6 @@ router.patch('/:id/close', authMiddleware, requireTier('elite'), (req, res) => {
     res.json({ message: 'Signal closed', signal });
   } catch (error) {
     console.error('Error closing signal:', error.message);
-    res.status(400).json({ error: error.message });
-  }
-});
-
-// GET /api/signals/candles — public candle data from OKX
-router.get('/candles', async (req, res) => {
-  try {
-    const { symbol, timeframe, limit } = req.query;
-    const { fetchCandles } = require('../services/scannerEngine');
-    const candles = await fetchCandles(symbol || 'BTCUSDT', timeframe || '1H', parseInt(limit) || 200);
-    res.json({ candles });
-  } catch (error) {
     res.status(400).json({ error: error.message });
   }
 });
