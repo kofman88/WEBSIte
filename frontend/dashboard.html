@@ -6,7 +6,7 @@
   <link rel="icon" type="image/svg+xml" href="/favicon.svg"/>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet"/>
   <script src="https://cdn.tailwindcss.com"></script>
-  <script src="https://unpkg.com/lightweight-charts@4.1.3/dist/lightweight-charts.standalone.production.js"></script>
+  <script type="text/javascript" src="https://s3.tradingview.com/tv.js"></script>
   <link rel="stylesheet" href="styles.css"/>
   <style>
     body{background:#070b14;color:#f1f5f9;font-family:'Inter',sans-serif}
@@ -96,41 +96,20 @@
 
   <!-- Live Chart + Signals -->
   <div class="grid lg:grid-cols-3 gap-6 mb-6">
-    <div class="lg:col-span-2 card">
-      <div class="flex items-center justify-between mb-4">
+    <div class="lg:col-span-2 card" style="padding:0;overflow:hidden;border-radius:16px">
+      <div class="flex items-center justify-between px-5 pt-4 pb-2">
         <div class="flex items-center gap-3">
           <h2 class="font-bold">График</h2>
-          <select id="chartSymbol" class="text-xs bg-slate-800/50 border border-slate-700 rounded-lg px-2 py-1 text-white outline-none" onchange="loadLiveChart()">
-            <option value="BTCUSDT">BTC/USDT</option>
-            <option value="ETHUSDT">ETH/USDT</option>
-            <option value="SOLUSDT">SOL/USDT</option>
-            <option value="XRPUSDT">XRP/USDT</option>
-            <option value="DOGEUSDT">DOGE/USDT</option>
-            <option value="BNBUSDT">BNB/USDT</option>
-            <option value="ADAUSDT">ADA/USDT</option>
-            <option value="AVAXUSDT">AVAX/USDT</option>
-            <option value="DOTUSDT">DOT/USDT</option>
-            <option value="MATICUSDT">MATIC/USDT</option>
-            <option value="LINKUSDT">LINK/USDT</option>
-            <option value="UNIUSDT">UNI/USDT</option>
-            <option value="ATOMUSDT">ATOM/USDT</option>
-            <option value="LTCUSDT">LTC/USDT</option>
-            <option value="APTUSDT">APT/USDT</option>
-            <option value="ARBUSDT">ARB/USDT</option>
-            <option value="OPUSDT">OP/USDT</option>
-            <option value="NEARUSDT">NEAR/USDT</option>
-            <option value="SUIUSDT">SUI/USDT</option>
-            <option value="INJUSDT">INJ/USDT</option>
+          <select id="chartSymbol" class="text-xs bg-slate-800/50 border border-slate-700 rounded-lg px-2 py-1 text-white outline-none" onchange="loadTVChart()">
+            <option value="BTCUSDT">BTC/USDT</option><option value="ETHUSDT">ETH/USDT</option><option value="SOLUSDT">SOL/USDT</option><option value="XRPUSDT">XRP/USDT</option><option value="DOGEUSDT">DOGE/USDT</option><option value="BNBUSDT">BNB/USDT</option>
+            <option value="ADAUSDT">ADA/USDT</option><option value="AVAXUSDT">AVAX/USDT</option><option value="LINKUSDT">LINK/USDT</option><option value="NEARUSDT">NEAR/USDT</option>
+            <option value="SUIUSDT">SUI/USDT</option><option value="INJUSDT">INJ/USDT</option><option value="ARBUSDT">ARB/USDT</option><option value="OPUSDT">OP/USDT</option>
+            <option value="APTUSDT">APT/USDT</option><option value="DOTUSDT">DOT/USDT</option><option value="MATICUSDT">MATIC/USDT</option><option value="UNIUSDT">UNI/USDT</option>
+            <option value="LTCUSDT">LTC/USDT</option><option value="ATOMUSDT">ATOM/USDT</option>
           </select>
         </div>
-        <div class="flex gap-1">
-          <button class="chart-tf text-xs px-3 py-1 rounded-lg bg-slate-800/50 text-slate-400" onclick="changeTF('15m')">15m</button>
-          <button class="chart-tf text-xs px-3 py-1 rounded-lg bg-indigo-500/20 text-indigo-300" onclick="changeTF('1H')">1H</button>
-          <button class="chart-tf text-xs px-3 py-1 rounded-lg bg-slate-800/50 text-slate-400" onclick="changeTF('4H')">4H</button>
-          <button class="chart-tf text-xs px-3 py-1 rounded-lg bg-slate-800/50 text-slate-400" onclick="changeTF('1D')">1D</button>
-        </div>
       </div>
-      <div id="liveChart" style="height:350px"></div>
+      <div id="tvChartWrap" style="height:400px"></div>
     </div>
     <div class="card">
       <div class="flex items-center justify-between mb-4"><h2 class="font-bold">Последние сигналы</h2><a href="signals.html" class="text-xs text-indigo-400 hover:underline">Все</a></div>
@@ -252,31 +231,33 @@ loadDashboard();
 // Refresh every 30 seconds
 setInterval(()=>{loadDashboard()},30000);
 
-// Live Candlestick Chart — Lightweight Charts
-let liveChart=null,candleSeries=null,currentTF='1H';
-function changeTF(tf){currentTF=tf;document.querySelectorAll('.chart-tf').forEach(b=>{b.className='chart-tf text-xs px-3 py-1 rounded-lg bg-slate-800/50 text-slate-400'});event.target.className='chart-tf text-xs px-3 py-1 rounded-lg bg-indigo-500/20 text-indigo-300';loadLiveChart()}
-async function loadLiveChart(){
-  const container=document.getElementById('liveChart');
+// TradingView Widget Chart — instant, real-time, free
+function loadTVChart(){
   const symbol=document.getElementById('chartSymbol').value;
-  if(!liveChart){
-    liveChart=LightweightCharts.createChart(container,{width:container.clientWidth,height:350,layout:{background:{type:'Solid',color:'transparent'},textColor:'#94a3b8',fontSize:11},grid:{vertLines:{color:'rgba(30,41,59,.3)'},horzLines:{color:'rgba(30,41,59,.3)'}},crosshair:{mode:0},rightPriceScale:{borderColor:'rgba(30,41,59,.5)'},timeScale:{borderColor:'rgba(30,41,59,.5)',timeVisible:true}});
-    candleSeries=liveChart.addCandlestickSeries({upColor:'#10b981',downColor:'#ef4444',borderUpColor:'#10b981',borderDownColor:'#ef4444',wickUpColor:'#10b981',wickDownColor:'#ef4444'});
-    new ResizeObserver(()=>{liveChart.applyOptions({width:container.clientWidth})}).observe(container);
-  }
-  try{
-    const r=await API.get('/signals/candles?symbol='+symbol+'&timeframe='+currentTF+'&limit=200');
-    const candles=(r.candles||[]).map(c=>({time:Math.floor(c.ts/1000),open:c.open,high:c.high,low:c.low,close:c.close}));
-    if(candles.length){candleSeries.setData(candles);liveChart.timeScale().fitContent()}
-  }catch(e){console.log('Chart:',e.message)}
-  try{
-    const sg=await API.getSignals({limit:20});
-    const sigs=(sg.signals||[]).filter(s=>s.symbol===symbol);
-    if(sigs.length){candleSeries.setMarkers(sigs.map(s=>({time:Math.floor(new Date(s.created_at).getTime()/1000),position:s.direction==='long'?'belowBar':'aboveBar',color:s.direction==='long'?'#10b981':'#ef4444',shape:s.direction==='long'?'arrowUp':'arrowDown',text:s.strategy+' '+(s.direction==='long'?'L':'S')})).sort((a,b)=>a.time-b.time))}
-  }catch(_){}
+  const container=document.getElementById('tvChartWrap');
+  container.innerHTML='';
+  new TradingView.widget({
+    container_id:'tvChartWrap',
+    symbol:'BYBIT:'+symbol+'.P',
+    interval:'60',
+    timezone:'Etc/UTC',
+    theme:'dark',
+    style:'1',
+    locale:'ru',
+    toolbar_bg:'#070b14',
+    enable_publishing:false,
+    hide_top_toolbar:false,
+    hide_legend:false,
+    save_image:false,
+    allow_symbol_change:true,
+    width:'100%',
+    height:400,
+    backgroundColor:'#070b14',
+    gridColor:'rgba(30,41,59,0.3)',
+    studies:['MAExp@tv-basicstudies','RSI@tv-basicstudies'],
+  });
 }
-loadLiveChart();
-setInterval(loadLiveChart,60000);
-// Legacy compat
+loadTVChart();
 async function buildChart(days){
   const ctx=document.getElementById('equityChart');
   if(eChart)eChart.destroy();
