@@ -4,11 +4,23 @@
   <meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1.0"/>
   <title>CHM Finance — Дашборд</title>
   <link rel="icon" type="image/svg+xml" href="/favicon.svg"/>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet"/>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet"/>
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js"></script>
   <link rel="stylesheet" href="styles.css"/>
-  <style>body{background:#070b14;color:#f1f5f9;font-family:'Inter',sans-serif}</style>
+  <style>
+    body{background:#070b14;color:#f1f5f9;font-family:'Inter',sans-serif}
+    .mono{font-family:'JetBrains Mono',monospace;font-variant-numeric:tabular-nums}
+    .skeleton{background:linear-gradient(90deg,rgba(30,41,59,.3) 25%,rgba(30,41,59,.5) 50%,rgba(30,41,59,.3) 75%);background-size:200% 100%;animation:shimmer 1.5s infinite;border-radius:6px;height:1.5em;width:60%}
+    @keyframes shimmer{0%{background-position:200% 0}100%{background-position:-200% 0}}
+    .notif-panel{position:absolute;top:100%;right:0;width:360px;max-height:400px;overflow-y:auto;background:rgba(15,23,42,.98);backdrop-filter:blur(20px);border:1px solid rgba(255,255,255,.06);border-radius:16px;box-shadow:0 12px 40px rgba(0,0,0,.5);display:none;z-index:60}
+    .notif-panel.open{display:block}
+    .notif-item{display:flex;gap:12px;padding:12px 16px;border-bottom:1px solid rgba(255,255,255,.04);transition:background .15s}
+    .notif-item:hover{background:rgba(255,255,255,.03)}
+    .notif-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;margin-top:6px}
+    .empty-state{text-align:center;padding:40px 20px;color:#64748b}
+    .empty-state svg{margin:0 auto 12px;opacity:.3}
+  </style>
 </head>
 <body>
 
@@ -16,85 +28,74 @@
 <aside class="sidebar" id="sidebar">
   <div class="sidebar-logo">CHM<span>.</span></div>
   <nav class="sidebar-nav">
-    <a href="dashboard.html" class="sidebar-link active" data-page="dashboard">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
-      Дашборд</a>
-    <a href="bots.html" class="sidebar-link" data-page="bots">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2a4 4 0 014 4v1h2a2 2 0 012 2v10a2 2 0 01-2 2H6a2 2 0 01-2-2V9a2 2 0 012-2h2V6a4 4 0 014-4z"/><circle cx="9" cy="13" r="1"/><circle cx="15" cy="13" r="1"/><path d="M10 17h4"/></svg>
-      Боты</a>
-    <a href="signals.html" class="sidebar-link" data-page="signals">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
-      Сигналы</a>
-    <a href="backtests.html" class="sidebar-link" data-page="backtests">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6m6 0h10M9 19a2 2 0 002 2h2a2 2 0 002-2M9 19V9a2 2 0 012-2h2a2 2 0 012 2v10m0 0a2 2 0 002 2h2a2 2 0 002-2V5a2 2 0 00-2-2h-2a2 2 0 00-2 2v14"/></svg>
-      Бэктесты</a>
-    <a href="wallet.html" class="sidebar-link" data-page="wallet">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12V7H5a2 2 0 010-4h14v4"/><path d="M3 5v14a2 2 0 002 2h16v-5"/><path d="M18 12a2 2 0 100 4 2 2 0 000-4z"/></svg>
-      Кошелёк</a>
-    <a href="settings.html" class="sidebar-link" data-page="settings">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 15a3 3 0 100-6 3 3 0 000 6z"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 01-2.83 2.83l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 012.83-2.83l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z"/></svg>
-      Настройки</a>
+    <a href="dashboard.html" class="sidebar-link active" data-page="dashboard"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>Дашборд</a>
+    <a href="bots.html" class="sidebar-link" data-page="bots"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2a4 4 0 014 4v1h2a2 2 0 012 2v10a2 2 0 01-2 2H6a2 2 0 01-2-2V9a2 2 0 012-2h2V6a4 4 0 014-4z"/></svg>Боты</a>
+    <a href="signals.html" class="sidebar-link" data-page="signals"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>Сигналы</a>
+    <a href="backtests.html" class="sidebar-link" data-page="backtests"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6m6 0h10"/></svg>Бэктесты</a>
+    <a href="wallet.html" class="sidebar-link" data-page="wallet"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12V7H5a2 2 0 010-4h14v4M3 5v14a2 2 0 002 2h16v-5"/></svg>Кошелёк</a>
+    <a href="settings.html" class="sidebar-link" data-page="settings"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/></svg>Настройки</a>
   </nav>
   <div class="sidebar-footer">
-    <div class="sidebar-sub-badge">
-      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
-      Pro Plan
-    </div>
-    <button onclick="Auth.logout()" class="sidebar-link mt-2 text-red-400 hover:text-red-300" style="color:#f87171">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4M16 17l5-5-5-5M21 12H9"/></svg>
-      Выйти</button>
+    <div class="sidebar-sub-badge" id="planBadge"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg><span id="planName">Free</span></div>
+    <button onclick="Auth.logout()" class="sidebar-link mt-2" style="color:#f87171"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4M16 17l5-5-5-5M21 12H9"/></svg>Выйти</button>
   </div>
 </aside>
 
 <!-- TOPBAR -->
 <header class="topbar">
   <div class="flex items-center gap-4">
-    <button id="sidebar-toggle" class="lg:hidden" style="background:none;border:none;color:#94a3b8;cursor:pointer">
-      <svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 6h16M4 12h16M4 18h16"/></svg>
-    </button>
-    <div class="topbar-search"><svg width="16" height="16" fill="none" stroke="#64748b" stroke-width="2"><circle cx="7" cy="7" r="4"/><path d="M14 14l-3-3"/></svg><input placeholder="Поиск..."/></div>
+    <button id="sidebar-toggle" class="lg:hidden" style="background:none;border:none;color:#94a3b8;cursor:pointer"><svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 6h16M4 12h16M4 18h16"/></svg></button>
+    <h1 class="text-lg font-bold hidden sm:block">Дашборд</h1>
   </div>
   <div class="topbar-actions">
-    <div class="topbar-notification"><svg width="20" height="20" fill="none" stroke="#94a3b8" stroke-width="2"><path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9M13.73 21a2 2 0 01-3.46 0"/></svg><div class="dot"></div></div>
-    <div class="topbar-user"><div class="topbar-avatar">U</div><span class="topbar-username text-sm text-slate-300 hidden sm:block">User</span></div>
+    <!-- Notifications -->
+    <div class="relative" id="notifWrap">
+      <button onclick="toggleNotif()" class="topbar-notification">
+        <svg width="20" height="20" fill="none" stroke="#94a3b8" stroke-width="2"><path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9M13.73 21a2 2 0 01-3.46 0"/></svg>
+        <div class="dot" id="notifDot" style="display:none"></div>
+      </button>
+      <div class="notif-panel" id="notifPanel">
+        <div class="flex items-center justify-between p-4 border-b border-white/[.04]">
+          <span class="font-semibold text-sm">Уведомления</span>
+          <button onclick="clearNotifs()" class="text-xs text-slate-500 hover:text-white">Очистить</button>
+        </div>
+        <div id="notifList">
+          <div class="empty-state"><svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9M13.73 21a2 2 0 01-3.46 0"/></svg>Нет новых уведомлений</div>
+        </div>
+      </div>
+    </div>
+    <div class="topbar-user"><div class="topbar-avatar" id="userAvatar">U</div><span class="topbar-username text-sm text-slate-300 hidden sm:block" id="userName">User</span></div>
   </div>
 </header>
 
 <!-- MAIN -->
 <main class="main-content">
-  <h1 class="text-2xl font-bold mb-6">Дашборд</h1>
-
   <!-- Stats -->
   <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-    <div class="stat-card liquid-glass">
+    <div class="stat-card">
       <div class="stat-card-icon" style="background:rgba(79,70,229,.1)"><svg width="22" height="22" fill="none" stroke="#818CF8" stroke-width="2"><path d="M21 12V7H5a2 2 0 010-4h14v4M3 5v14a2 2 0 002 2h16v-5M18 12a2 2 0 100 4 2 2 0 000-4z"/></svg></div>
       <div class="stat-card-label">Баланс портфеля</div>
-      <div class="stat-card-value" id="balanceVal">$12,450</div>
-      <div class="stat-card-trend up">+5.2% сегодня</div>
+      <div class="stat-card-value mono" id="statBalance"><div class="skeleton"></div></div>
     </div>
-    <div class="stat-card liquid-glass">
+    <div class="stat-card">
       <div class="stat-card-icon" style="background:rgba(6,182,212,.1)"><svg width="22" height="22" fill="none" stroke="#06b6d4" stroke-width="2"><path d="M12 2a4 4 0 014 4v1h2a2 2 0 012 2v10a2 2 0 01-2 2H6a2 2 0 01-2-2V9a2 2 0 012-2h2V6a4 4 0 014-4z"/></svg></div>
       <div class="stat-card-label">Активные боты</div>
-      <div class="stat-card-value">4 / 10</div>
-      <div class="stat-card-trend up">+1 за неделю</div>
+      <div class="stat-card-value mono" id="statBots"><div class="skeleton"></div></div>
     </div>
-    <div class="stat-card liquid-glass">
+    <div class="stat-card">
       <div class="stat-card-icon" style="background:rgba(16,185,129,.1)"><svg width="22" height="22" fill="none" stroke="#10b981" stroke-width="2"><path d="M13 10V3L4 14h7v7l9-11h-7z"/></svg></div>
       <div class="stat-card-label">Сигналов сегодня</div>
-      <div class="stat-card-value">12</div>
-      <div class="stat-card-trend up">8 прибыльных</div>
+      <div class="stat-card-value mono" id="statSignals"><div class="skeleton"></div></div>
     </div>
-    <div class="stat-card liquid-glass">
+    <div class="stat-card">
       <div class="stat-card-icon" style="background:rgba(245,158,11,.1)"><svg width="22" height="22" fill="none" stroke="#f59e0b" stroke-width="2"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg></div>
       <div class="stat-card-label">Win Rate</div>
-      <div class="stat-card-value">78.5%</div>
-      <div class="stat-card-trend up">+2.1% за месяц</div>
+      <div class="stat-card-value mono" id="statWR"><div class="skeleton"></div></div>
     </div>
   </div>
 
   <!-- Chart + Signals -->
   <div class="grid lg:grid-cols-3 gap-6 mb-6">
-    <!-- Equity Chart -->
     <div class="lg:col-span-2 card">
       <div class="flex items-center justify-between mb-4">
         <h2 class="font-bold">Кривая капитала</h2>
@@ -106,14 +107,12 @@
       </div>
       <canvas id="equityChart" height="120"></canvas>
     </div>
-    <!-- Recent Signals -->
     <div class="card">
       <div class="flex items-center justify-between mb-4"><h2 class="font-bold">Последние сигналы</h2><a href="signals.html" class="text-xs text-indigo-400 hover:underline">Все</a></div>
-      <div class="space-y-3" id="recentSignals">
-        <div class="flex items-center justify-between p-3 bg-slate-800/30 rounded-lg"><div><div class="font-semibold text-sm">BTC/USDT</div><div class="text-xs text-slate-500">SMC &middot; 2m</div></div><div class="text-right"><span class="text-xs px-2 py-0.5 rounded-full bg-green-500/15 text-green-400">LONG</span><div class="text-xs text-green-400 mt-1">+2.4%</div></div></div>
-        <div class="flex items-center justify-between p-3 bg-slate-800/30 rounded-lg"><div><div class="font-semibold text-sm">ETH/USDT</div><div class="text-xs text-slate-500">Gerchik &middot; 15m</div></div><div class="text-right"><span class="text-xs px-2 py-0.5 rounded-full bg-red-500/15 text-red-400">SHORT</span><div class="text-xs text-red-400 mt-1">-0.8%</div></div></div>
-        <div class="flex items-center justify-between p-3 bg-slate-800/30 rounded-lg"><div><div class="font-semibold text-sm">SOL/USDT</div><div class="text-xs text-slate-500">Scalping &middot; 30m</div></div><div class="text-right"><span class="text-xs px-2 py-0.5 rounded-full bg-green-500/15 text-green-400">LONG</span><div class="text-xs text-green-400 mt-1">+1.6%</div></div></div>
-        <div class="flex items-center justify-between p-3 bg-slate-800/30 rounded-lg"><div><div class="font-semibold text-sm">DOGE/USDT</div><div class="text-xs text-slate-500">SMC &middot; 1h</div></div><div class="text-right"><span class="text-xs px-2 py-0.5 rounded-full bg-green-500/15 text-green-400">LONG</span><div class="text-xs text-cyan-400 mt-1">Active</div></div></div>
+      <div id="recentSignals">
+        <div class="skeleton mb-3" style="height:48px;width:100%"></div>
+        <div class="skeleton mb-3" style="height:48px;width:100%"></div>
+        <div class="skeleton" style="height:48px;width:100%"></div>
       </div>
     </div>
   </div>
@@ -121,16 +120,9 @@
   <!-- Recent Trades -->
   <div class="card">
     <div class="flex items-center justify-between mb-4"><h2 class="font-bold">Последние сделки</h2></div>
-    <div class="overflow-x-auto">
-      <table class="w-full text-sm">
-        <thead><tr class="text-xs text-slate-500 uppercase"><th class="text-left p-3">Дата</th><th class="text-left p-3">Пара</th><th class="text-left p-3">Направление</th><th class="text-left p-3">Вход</th><th class="text-left p-3">Выход</th><th class="text-left p-3">PnL</th><th class="text-left p-3">R:R</th></tr></thead>
-        <tbody>
-          <tr class="border-t border-slate-800/50"><td class="p-3 text-slate-400">10 Apr 14:30</td><td class="p-3 font-medium">BTC/USDT</td><td class="p-3"><span class="text-xs px-2 py-0.5 rounded-full bg-green-500/15 text-green-400">LONG</span></td><td class="p-3">67,450</td><td class="p-3">68,920</td><td class="p-3 text-green-400">+$147.00</td><td class="p-3">2.1R</td></tr>
-          <tr class="border-t border-slate-800/50"><td class="p-3 text-slate-400">10 Apr 11:15</td><td class="p-3 font-medium">ETH/USDT</td><td class="p-3"><span class="text-xs px-2 py-0.5 rounded-full bg-red-500/15 text-red-400">SHORT</span></td><td class="p-3">3,245</td><td class="p-3">3,198</td><td class="p-3 text-green-400">+$47.00</td><td class="p-3">1.4R</td></tr>
-          <tr class="border-t border-slate-800/50"><td class="p-3 text-slate-400">09 Apr 22:00</td><td class="p-3 font-medium">SOL/USDT</td><td class="p-3"><span class="text-xs px-2 py-0.5 rounded-full bg-green-500/15 text-green-400">LONG</span></td><td class="p-3">178.5</td><td class="p-3">175.2</td><td class="p-3 text-red-400">-$33.00</td><td class="p-3">-1.0R</td></tr>
-          <tr class="border-t border-slate-800/50"><td class="p-3 text-slate-400">09 Apr 18:45</td><td class="p-3 font-medium">ARB/USDT</td><td class="p-3"><span class="text-xs px-2 py-0.5 rounded-full bg-green-500/15 text-green-400">LONG</span></td><td class="p-3">1.125</td><td class="p-3">1.158</td><td class="p-3 text-green-400">+$66.00</td><td class="p-3">2.9R</td></tr>
-        </tbody>
-      </table>
+    <div id="recentTrades">
+      <div class="skeleton mb-2" style="height:40px;width:100%"></div>
+      <div class="skeleton mb-2" style="height:40px;width:100%"></div>
     </div>
   </div>
 </main>
@@ -140,41 +132,107 @@
 if(!Auth.isLoggedIn())window.location.href='/?login=1';
 Sidebar.init('dashboard');
 
-// Load real data from API
+// Close notif panel on outside click
+document.addEventListener('click',e=>{if(!document.getElementById('notifWrap').contains(e.target))document.getElementById('notifPanel').classList.remove('open')});
+
+function toggleNotif(){document.getElementById('notifPanel').classList.toggle('open')}
+
+const notifications=[];
+function addNotif(type,text){
+  notifications.unshift({type,text,time:new Date()});
+  if(notifications.length>20)notifications.pop();
+  renderNotifs();
+}
+function clearNotifs(){notifications.length=0;renderNotifs();document.getElementById('notifDot').style.display='none'}
+function renderNotifs(){
+  const el=document.getElementById('notifList');
+  if(!notifications.length){el.innerHTML='<div class="empty-state"><svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9M13.73 21a2 2 0 01-3.46 0"/></svg>Нет новых уведомлений</div>';return}
+  const colors={signal:'#818CF8',trade:'#10b981',system:'#f59e0b',error:'#ef4444'};
+  el.innerHTML=notifications.map(n=>`<div class="notif-item"><div class="notif-dot" style="background:${colors[n.type]||'#64748b'}"></div><div class="flex-1"><div class="text-sm">${n.text}</div><div class="text-xs text-slate-500 mt-1">${Utils.timeAgo(n.time)}</div></div></div>`).join('');
+  document.getElementById('notifDot').style.display='';
+}
+
+// Load ALL real data
 async function loadDashboard(){
   try{
-    // Bot stats
-    const bs=await API.getBotStats();
-    if(bs){
-      document.getElementById('balanceVal').textContent='$'+(bs.totalPnl||0).toLocaleString('en',{minimumFractionDigits:2});
-      document.querySelectorAll('.stat-card-value')[1].textContent=(bs.activeBots||0)+' / '+(bs.totalBots||0);
+    // User profile + subscription
+    const me=await API.getProfile().catch(()=>null);
+    if(me&&me.user){
+      document.getElementById('userAvatar').textContent=(me.user.email||'U')[0].toUpperCase();
+      document.getElementById('userName').textContent=me.user.email||'User';
+      if(me.subscription){
+        document.getElementById('planName').textContent=(me.subscription.plan||'free').charAt(0).toUpperCase()+(me.subscription.plan||'free').slice(1)+' Plan';
+      }
     }
-    // Signals
+
+    // Bot stats
+    const bs=await API.getBotStats().catch(()=>({stats:{}}));
+    const s=bs.stats||bs||{};
+    document.getElementById('statBalance').textContent='$'+(+(s.totalPnl||0)).toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2});
+    document.getElementById('statBots').textContent=(s.activeBots||0)+' / '+(s.totalBots||0);
+
+    // Signal stats
+    const ss=await API.getSignalStats().catch(()=>({stats:{}}));
+    const st=ss.stats||ss||{};
+    document.getElementById('statSignals').textContent=st.totalToday||st.total||0;
+    document.getElementById('statWR').textContent=(st.winRate||0)+'%';
+
+    // Recent signals
     const sg=await API.getSignals({limit:5}).catch(()=>({signals:[]}));
     const sf=document.getElementById('recentSignals');
-    if(sf&&sg.signals&&sg.signals.length){
-      sf.innerHTML=sg.signals.map(s=>`<div class="flex items-center justify-between p-3 bg-slate-800/30 rounded-lg"><div><div class="font-semibold text-sm">${s.symbol||'—'}</div><div class="text-xs text-slate-500">${s.strategy||'—'}</div></div><div class="text-right"><span class="text-xs px-2 py-0.5 rounded-full ${s.direction==='long'?'bg-green-500/15 text-green-400':'bg-red-500/15 text-red-400'}">${(s.direction||'—').toUpperCase()}</span><div class="text-xs ${s.pnl_pct>0?'text-green-400':'text-red-400'} mt-1">${s.pnl_pct?((s.pnl_pct>0?'+':'')+s.pnl_pct+'%'):'Active'}</div></div></div>`).join('');
-    }else if(sf){
-      sf.innerHTML='<div class="text-center text-sm text-slate-500 py-8">Пока нет сигналов. Включите сканер в настройках.</div>';
+    if(sg.signals&&sg.signals.length){
+      sf.innerHTML=sg.signals.map(s=>{
+        const dir=s.direction||'long';
+        const isLong=dir==='long';
+        const pnl=s.pnl_pct;
+        return `<div class="flex items-center justify-between p-3 bg-slate-800/30 rounded-lg mb-2">
+          <div><div class="font-semibold text-sm">${s.symbol}</div><div class="text-xs text-slate-500">${s.strategy} &middot; ${s.timeframe||''}</div></div>
+          <div class="text-right"><span class="text-xs px-2 py-0.5 rounded-full ${isLong?'bg-green-500/15 text-green-400':'bg-red-500/15 text-red-400'}">${dir.toUpperCase()}</span>
+          <div class="text-xs mt-1 mono ${pnl>0?'text-green-400':pnl<0?'text-red-400':'text-cyan-400'}">${pnl?((pnl>0?'+':'')+pnl+'%'):'Active'}</div></div></div>`;
+      }).join('');
+      // Add notifications for new signals
+      sg.signals.slice(0,3).forEach(s=>addNotif('signal',`${s.symbol} ${(s.direction||'long').toUpperCase()} — ${s.strategy}`));
+    }else{
+      sf.innerHTML='<div class="empty-state"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>Сигналов пока нет.<br><span class="text-xs">Сканер обновляется каждые 30 секунд.</span></div>';
     }
-    // Signal stats
-    const ss=await API.getSignalStats().catch(()=>({}));
-    if(ss){
-      const sv=document.querySelectorAll('.stat-card-value');
-      if(sv[2])sv[2].textContent=ss.totalToday||0;
-      if(sv[3])sv[3].textContent=(ss.winRate||0)+'%';
+
+    // Recent trades (from bots)
+    const bots=await API.getBots().catch(()=>({bots:[]}));
+    const rt=document.getElementById('recentTrades');
+    if(bots.bots&&bots.bots.length){
+      let allTrades=[];
+      for(const bot of bots.bots.slice(0,5)){
+        try{
+          const t=await API.getBotTrades(bot.id);
+          if(t.trades)allTrades=allTrades.concat(t.trades.map(tr=>({...tr,botName:bot.name,symbol:bot.symbol})));
+        }catch(_){}
+      }
+      if(allTrades.length){
+        rt.innerHTML='<div class="overflow-x-auto"><table class="w-full text-sm"><thead><tr class="text-xs text-slate-500 uppercase"><th class="text-left p-3">Дата</th><th class="text-left p-3">Пара</th><th class="text-left p-3">Тип</th><th class="text-left p-3">Вход</th><th class="text-left p-3">PnL</th></tr></thead><tbody>'+allTrades.slice(0,10).map(t=>`<tr class="border-t border-slate-800/50"><td class="p-3 text-slate-400 text-xs">${t.opened_at||'—'}</td><td class="p-3 font-medium">${t.symbol||'—'}</td><td class="p-3"><span class="text-xs px-2 py-0.5 rounded-full ${t.trade_type==='long'?'bg-green-500/15 text-green-400':'bg-red-500/15 text-red-400'}">${(t.trade_type||'—').toUpperCase()}</span></td><td class="p-3 mono">${t.entry_price||'—'}</td><td class="p-3 mono ${(t.pnl||0)>=0?'text-green-400':'text-red-400'}">${t.pnl?'$'+t.pnl:'—'}</td></tr>`).join('')+'</tbody></table></div>';
+      }else{
+        rt.innerHTML='<div class="empty-state"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6m18-2V5a2 2 0 00-2-2h-2a2 2 0 00-2 2v14"/></svg>Сделок пока нет.<br><span class="text-xs">Создайте бота чтобы начать торговлю.</span></div>';
+      }
+    }else{
+      rt.innerHTML='<div class="empty-state"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 2a4 4 0 014 4v1h2a2 2 0 012 2v10a2 2 0 01-2 2H6a2 2 0 01-2-2V9a2 2 0 012-2h2V6a4 4 0 014-4z"/></svg>Нет ботов.<br><span class="text-xs"><a href="bots.html" class="text-indigo-400 hover:underline">Создать первого бота</a></span></div>';
     }
-  }catch(e){console.log('Dashboard load:',e)}
+
+    addNotif('system','Дашборд загружен');
+  }catch(e){
+    console.error('Dashboard load error:',e);
+    addNotif('error','Ошибка загрузки: '+e.message);
+  }
 }
 loadDashboard();
 
-// Equity Chart — real data or placeholder
+// Refresh every 30 seconds
+setInterval(()=>{loadDashboard()},30000);
+
+// Equity Chart
 let eChart;
 function buildChart(days){
   const data=Utils.generateEquityData(days,10000);
-  const cfg={type:'line',data:{labels:data.map(d=>d.date.slice(5)),datasets:[{data:data.map(d=>d.value),borderColor:'#818CF8',backgroundColor:function(ctx){const g=ctx.chart.ctx.createLinearGradient(0,0,0,300);g.addColorStop(0,'rgba(79,70,229,.3)');g.addColorStop(1,'rgba(79,70,229,0)');return g},fill:true,tension:.4,pointRadius:0,borderWidth:2}]},options:{responsive:true,plugins:{legend:{display:false}},scales:{x:{ticks:{color:'#475569',font:{size:10}},grid:{display:false}},y:{ticks:{color:'#475569',font:{size:10},callback:v=>'$'+v.toLocaleString()},grid:{color:'rgba(30,41,59,.3)'}}}}};
   if(eChart)eChart.destroy();
-  eChart=new Chart(document.getElementById('equityChart'),cfg);
+  eChart=new Chart(document.getElementById('equityChart'),{type:'line',data:{labels:data.map(d=>d.date.slice(5)),datasets:[{data:data.map(d=>d.value),borderColor:'#818CF8',backgroundColor:function(ctx){const g=ctx.chart.ctx.createLinearGradient(0,0,0,300);g.addColorStop(0,'rgba(79,70,229,.3)');g.addColorStop(1,'rgba(79,70,229,0)');return g},fill:true,tension:.4,pointRadius:0,borderWidth:2}]},options:{responsive:true,plugins:{legend:{display:false}},scales:{x:{ticks:{color:'#475569',font:{size:10}},grid:{display:false}},y:{ticks:{color:'#475569',font:{size:10},callback:v=>'$'+v.toLocaleString()},grid:{color:'rgba(30,41,59,.3)'}}}}});
 }
 function updateChart(d){buildChart(d)}
 buildChart(7);
