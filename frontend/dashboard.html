@@ -227,12 +227,51 @@ loadDashboard();
 // Refresh every 30 seconds
 setInterval(()=>{loadDashboard()},30000);
 
-// Equity Chart
+// Equity Chart — real trade data or empty state
 let eChart;
-function buildChart(days){
-  const data=Utils.generateEquityData(days,10000);
+async function buildChart(days){
+  const ctx=document.getElementById('equityChart');
   if(eChart)eChart.destroy();
-  eChart=new Chart(document.getElementById('equityChart'),{type:'line',data:{labels:data.map(d=>d.date.slice(5)),datasets:[{data:data.map(d=>d.value),borderColor:'#818CF8',backgroundColor:function(ctx){const g=ctx.chart.ctx.createLinearGradient(0,0,0,300);g.addColorStop(0,'rgba(79,70,229,.3)');g.addColorStop(1,'rgba(79,70,229,0)');return g},fill:true,tension:.4,pointRadius:0,borderWidth:2}]},options:{responsive:true,plugins:{legend:{display:false}},scales:{x:{ticks:{color:'#475569',font:{size:10}},grid:{display:false}},y:{ticks:{color:'#475569',font:{size:10},callback:v=>'$'+v.toLocaleString()},grid:{color:'rgba(30,41,59,.3)'}}}}});
+
+  // Try to load real trades
+  let trades=[];
+  try{
+    const bots=await API.getBots().catch(()=>({bots:[]}));
+    for(const bot of (bots.bots||[]).slice(0,10)){
+      try{
+        const t=await API.getBotTrades(bot.id);
+        if(t.trades)trades=trades.concat(t.trades);
+      }catch(_){}
+    }
+  }catch(_){}
+
+  // Build equity curve from real trades
+  if(trades.length>0){
+    trades.sort((a,b)=>new Date(a.closed_at||a.opened_at)-new Date(b.closed_at||b.opened_at));
+    const cutoff=new Date(Date.now()-days*86400000);
+    const filtered=trades.filter(t=>new Date(t.closed_at||t.opened_at)>=cutoff);
+    let balance=0;
+    const points=[{date:'Start',value:0}];
+    filtered.forEach(t=>{
+      balance+=(t.pnl||0);
+      const d=new Date(t.closed_at||t.opened_at);
+      points.push({date:(d.getMonth()+1)+'/'+d.getDate(),value:+balance.toFixed(2)});
+    });
+    eChart=new Chart(ctx,{type:'line',data:{labels:points.map(p=>p.date),datasets:[{data:points.map(p=>p.value),borderColor:'#818CF8',backgroundColor:function(c){const g=c.chart.ctx.createLinearGradient(0,0,0,300);g.addColorStop(0,'rgba(79,70,229,.3)');g.addColorStop(1,'rgba(79,70,229,0)');return g},fill:true,tension:.4,pointRadius:2,pointBackgroundColor:'#818CF8',borderWidth:2}]},options:{responsive:true,plugins:{legend:{display:false}},scales:{x:{ticks:{color:'#475569',font:{size:10}},grid:{display:false}},y:{ticks:{color:'#475569',font:{size:10},callback:v=>'$'+v.toLocaleString()},grid:{color:'rgba(30,41,59,.3)'}}}}});
+  }else{
+    // No trades — show empty chart with message
+    eChart=new Chart(ctx,{type:'line',data:{labels:[''],datasets:[{data:[0],borderColor:'rgba(129,140,248,.2)',borderWidth:1,pointRadius:0}]},options:{responsive:true,plugins:{legend:{display:false},tooltip:{enabled:false}},scales:{x:{display:false},y:{display:false}}}});
+    // Overlay text
+    const parent=ctx.parentElement;
+    if(!parent.querySelector('.chart-empty')){
+      const msg=document.createElement('div');
+      msg.className='chart-empty';
+      msg.style.cssText='position:absolute;inset:0;display:flex;align-items:center;justify-content:center;flex-direction:column;color:#64748b;font-size:.85rem;pointer-events:none';
+      msg.innerHTML='<svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" style="opacity:.3;margin-bottom:8px"><path d="M3 3v18h18"/><path d="M7 16l4-4 4 4 5-5"/></svg>Нет данных для графика<br><span style="font-size:.7rem;margin-top:4px">Создайте бота и начните торговать</span>';
+      parent.style.position='relative';
+      parent.appendChild(msg);
+    }
+  }
 }
 function updateChart(d){buildChart(d)}
 buildChart(7);
