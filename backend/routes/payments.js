@@ -4,12 +4,22 @@ const paymentService = require('../services/paymentService');
 
 const router = express.Router();
 
+// GET /api/payments/methods — available payment methods
+router.get('/methods', (_req, res) => {
+  try {
+    const methods = paymentService.getPaymentMethods();
+    res.json({ methods });
+  } catch (error) {
+    res.status(400).json({ error: error.message });
+  }
+});
+
 // POST /api/payments/create — create payment request
 router.post('/create', authMiddleware, (req, res) => {
   try {
-    const { plan, currency } = req.body;
+    const { plan, method } = req.body;
     if (!plan) return res.status(400).json({ error: 'Plan required (starter/pro/elite)' });
-    const payment = paymentService.createPayment(req.userId, plan, currency || 'USDT');
+    const payment = paymentService.createPayment(req.userId, plan, method || 'ton');
     res.json(payment);
   } catch (error) {
     res.status(400).json({ error: error.message });

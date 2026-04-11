@@ -68,7 +68,11 @@
         <div class="p-3 bg-slate-800/30 rounded-lg"><span class="text-slate-500">Авто-торговля:</span> <span class="text-green-400">Да</span></div>
         <div class="p-3 bg-slate-800/30 rounded-lg"><span class="text-slate-500">Бэктесты:</span> <span class="text-green-400">Да</span></div>
       </div>
-      <div class="flex gap-3"><button class="text-sm px-4 py-2 rounded-lg bg-indigo-500/10 border border-indigo-500/30 text-indigo-400">Upgrade to Elite</button></div>
+      <div class="flex gap-3">
+        <button onclick="openPayment('starter')" class="text-sm px-4 py-2 rounded-lg bg-slate-800/50 border border-slate-700 text-slate-300 hover:text-white">Starter — $29</button>
+        <button onclick="openPayment('pro')" class="text-sm px-4 py-2 rounded-lg bg-indigo-500/10 border border-indigo-500/30 text-indigo-400">Pro — $79</button>
+        <button onclick="openPayment('elite')" class="text-sm px-4 py-2 rounded-lg bg-amber-500/10 border border-amber-500/30 text-amber-400">Elite — $149</button>
+      </div>
     </div>
     <div class="card max-w-2xl mb-6">
       <h3 class="font-bold mb-4">Промо-код</h3>
@@ -139,7 +143,68 @@
   </div>
 </main>
 
+<!-- PAYMENT MODAL -->
+<div id="payModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.7);backdrop-filter:blur(8px);z-index:100;align-items:center;justify-content:center">
+  <div class="card" style="width:100%;max-width:480px;margin:16px;max-height:90vh;overflow-y:auto">
+    <div class="flex items-center justify-between mb-6">
+      <h2 class="text-xl font-bold">Оплата подписки</h2>
+      <button onclick="document.getElementById('payModal').style.display='none'" class="text-slate-400 hover:text-white text-xl">&times;</button>
+    </div>
+    <div id="payContent">
+      <div class="text-center py-8 text-slate-400">Загрузка...</div>
+    </div>
+  </div>
+</div>
+
 <script src="app.js"></script>
+<script>
+async function openPayment(plan){
+  document.getElementById('payModal').style.display='flex';
+  const pc=document.getElementById('payContent');
+  pc.innerHTML='<div class="text-center py-8 text-slate-400">Создаём платёж...</div>';
+  try{
+    const r=await API.post('/payments/create',{plan,method:'ton'});
+    const qrUrl='https://api.qrserver.com/v1/create-qr-code/?size=200x200&data='+encodeURIComponent(r.walletAddress);
+    pc.innerHTML=`
+      <div class="text-center mb-6">
+        <div class="inline-block p-3 bg-white rounded-2xl mb-4"><img src="${qrUrl}" width="200" height="200" alt="QR" style="border-radius:8px"/></div>
+        <div class="text-sm text-slate-400 mb-1">Сканируйте QR или скопируйте адрес</div>
+      </div>
+      <div class="space-y-3">
+        <div class="bg-slate-800/50 rounded-xl p-4">
+          <div class="text-xs text-slate-500 mb-1">План</div>
+          <div class="font-bold text-lg">${plan.charAt(0).toUpperCase()+plan.slice(1)} — $${r.amount}</div>
+        </div>
+        <div class="bg-slate-800/50 rounded-xl p-4">
+          <div class="text-xs text-slate-500 mb-1">Сеть</div>
+          <div class="font-bold text-violet-400">${r.networkFull||r.network||'TON'}</div>
+          <div class="text-xs text-amber-400 mt-1">⚠ Убедитесь что выбрали правильную сеть!</div>
+        </div>
+        <div class="bg-slate-800/50 rounded-xl p-4">
+          <div class="text-xs text-slate-500 mb-1">Адрес кошелька</div>
+          <div class="flex items-center gap-2">
+            <code class="text-xs text-cyan-400 break-all flex-1">${r.walletAddress}</code>
+            <button onclick="navigator.clipboard.writeText('${r.walletAddress}');Toast.success('Скопировано!')" class="text-xs text-slate-400 hover:text-white px-2 py-1 rounded border border-slate-700">Copy</button>
+          </div>
+        </div>
+        <div class="bg-slate-800/50 rounded-xl p-4">
+          <div class="text-xs text-slate-500 mb-1">Комментарий (memo) — ОБЯЗАТЕЛЬНО</div>
+          <div class="flex items-center gap-2">
+            <code class="text-sm font-bold text-amber-400">${r.paymentId}</code>
+            <button onclick="navigator.clipboard.writeText('${r.paymentId}');Toast.success('Скопировано!')" class="text-xs text-slate-400 hover:text-white px-2 py-1 rounded border border-slate-700">Copy</button>
+          </div>
+        </div>
+        <div class="bg-amber-500/5 border border-amber-500/20 rounded-xl p-4 text-xs text-amber-300 leading-relaxed">
+          <strong>Важно:</strong> ${r.note||'Укажите Payment ID в комментарии к переводу.'}<br>
+          Платёж действителен 1 час. После оплаты подписка активируется в течение 5-15 минут.
+        </div>
+      </div>
+    `;
+  }catch(e){
+    pc.innerHTML='<div class="text-center py-8 text-red-400">Ошибка: '+e.message+'</div>';
+  }
+}
+</script>
 <script>
 if(!Auth.isLoggedIn())window.location.href='/?login=1';
 Sidebar.init('settings');
