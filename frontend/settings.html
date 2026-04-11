@@ -31,6 +31,7 @@
     <button class="stab" onclick="stab('subscription')">Подписка</button>
     <button class="stab" onclick="stab('trading')">Торговля</button>
     <button class="stab" onclick="stab('notifications')">Уведомления</button>
+    <button class="stab" onclick="stab('webhook')">Webhook</button>
     <button class="stab" onclick="stab('security')">Безопасность</button>
   </div>
 
@@ -116,6 +117,38 @@
         <div class="flex items-center justify-between p-3 bg-slate-800/30 rounded-xl"><span class="text-sm">Исполнение сделок</span><div class="toggle on" onclick="this.classList.toggle('on')"></div></div>
         <div class="flex items-center justify-between p-3 bg-slate-800/30 rounded-xl"><span class="text-sm">Ежедневный дайджест</span><div class="toggle" onclick="this.classList.toggle('on')"></div></div>
       </div>
+    </div>
+  </div>
+
+  <!-- WEBHOOK -->
+  <div class="stab-content" id="stab-webhook">
+    <div class="card max-w-2xl mb-6">
+      <h3 class="font-bold mb-2">TradingView Webhook</h3>
+      <p class="text-sm text-slate-400 mb-4">Подключите TradingView алерты чтобы сигналы автоматически появлялись в дашборде и исполнялись как сделки.</p>
+      <div class="bg-slate-800/30 rounded-xl p-4 mb-4">
+        <div class="text-xs text-slate-500 mb-1">Webhook URL</div>
+        <div class="flex items-center gap-2"><code class="text-sm text-cyan-400 break-all">https://chmup.top/api/webhook/tradingview</code><button onclick="Utils.copyToClipboard('https://chmup.top/api/webhook/tradingview')" class="text-xs text-slate-400 hover:text-white px-2 py-1 rounded border border-slate-700">Copy</button></div>
+      </div>
+      <div id="webhookKeys"><div class="text-sm text-slate-500">Загрузка ключей...</div></div>
+      <button onclick="createWebhookKey()" class="mt-4 px-5 py-2.5 rounded-xl font-semibold text-white text-sm" style="background:linear-gradient(135deg,#4F46E5,#7C3AED)">+ Создать ключ</button>
+    </div>
+    <div class="card max-w-2xl">
+      <h3 class="font-bold mb-3">Как настроить в TradingView</h3>
+      <div class="space-y-3 text-sm text-slate-400">
+        <div class="flex gap-3"><span class="w-6 h-6 rounded-lg bg-violet-500/10 flex items-center justify-center text-xs font-bold text-violet-400 flex-shrink-0">1</span><span>Откройте график → нажмите "Alerts" → "Create Alert"</span></div>
+        <div class="flex gap-3"><span class="w-6 h-6 rounded-lg bg-violet-500/10 flex items-center justify-center text-xs font-bold text-violet-400 flex-shrink-0">2</span><span>Настройте условие (пересечение MA, RSI, или PineScript стратегия)</span></div>
+        <div class="flex gap-3"><span class="w-6 h-6 rounded-lg bg-violet-500/10 flex items-center justify-center text-xs font-bold text-violet-400 flex-shrink-0">3</span><span>В "Notifications" включите "Webhook URL" и вставьте URL выше</span></div>
+        <div class="flex gap-3"><span class="w-6 h-6 rounded-lg bg-violet-500/10 flex items-center justify-center text-xs font-bold text-violet-400 flex-shrink-0">4</span><span>В "Message" вставьте JSON (замените ВАШ_КЛЮЧ на ваш ключ):</span></div>
+      </div>
+      <div class="mt-3 bg-slate-900/50 rounded-xl p-4 text-xs font-mono text-slate-300 overflow-x-auto"><pre>{
+  "secret": "ВАШ_КЛЮЧ",
+  "symbol": "{{ticker}}",
+  "direction": "long",
+  "entry": "{{close}}",
+  "sl": "",
+  "tp": "",
+  "message": "{{strategy.order.comment}}"
+}</pre></div>
     </div>
   </div>
 
@@ -236,6 +269,23 @@ async function loadSettings(){
   }catch(e){console.error('Settings load:',e)}
 }
 loadSettings();
+
+// Webhook keys
+async function loadWebhookKeys(){
+  const el=document.getElementById('webhookKeys');
+  try{
+    const r=await API.get('/webhook/keys');
+    const keys=r.keys||[];
+    if(!keys.length){el.innerHTML='<div class="text-sm text-slate-500">Нет ключей. Создайте первый.</div>';return}
+    el.innerHTML=keys.map(k=>`<div class="flex items-center justify-between p-3 bg-slate-800/30 rounded-xl mb-2">
+      <div><div class="font-mono text-sm text-cyan-400">${k.key}</div><div class="text-xs text-slate-500 mt-1">${k.name} &middot; ${k.signals_count} сигналов${k.last_used?' &middot; Последний: '+new Date(k.last_used).toLocaleDateString('ru'):''}</div></div>
+      <div class="flex gap-2"><button onclick="Utils.copyToClipboard('${k.key}')" class="text-xs px-2 py-1 rounded border border-slate-700 text-slate-400">Copy</button><button onclick="deleteWebhookKey(${k.id})" class="text-xs px-2 py-1 rounded border border-red-500/20 text-red-400">Del</button></div>
+    </div>`).join('');
+  }catch(e){el.innerHTML='<div class="text-sm text-red-400">Ошибка загрузки</div>'}
+}
+async function createWebhookKey(){try{const r=await API.post('/webhook/keys',{name:'TradingView'});Toast.success('Ключ создан: '+r.key);loadWebhookKeys()}catch(e){Toast.error(e.message)}}
+async function deleteWebhookKey(id){try{await API.delete('/webhook/keys/'+id);Toast.success('Ключ удалён');loadWebhookKeys()}catch(e){Toast.error(e.message)}}
+loadWebhookKeys();
 
 // Promo code — real API
 async function applyPromo(){
