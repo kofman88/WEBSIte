@@ -28,10 +28,10 @@
 <main class="main-content">
   <!-- Header -->
   <div class="flex flex-wrap items-center justify-between gap-4 mb-6">
-    <div class="flex gap-4 text-sm">
-      <span class="text-slate-400">Всего: <strong class="text-white">4</strong></span>
-      <span class="text-slate-400">Активных: <strong class="text-green-400">3</strong></span>
-      <span class="text-slate-400">PnL: <strong class="text-green-400">+$1,240</strong></span>
+    <div class="flex gap-4 text-sm" id="botSummary">
+      <span class="text-slate-400">Всего: <strong class="text-white" id="sumTotal">—</strong></span>
+      <span class="text-slate-400">Активных: <strong class="text-green-400" id="sumActive">—</strong></span>
+      <span class="text-slate-400">PnL: <strong id="sumPnl" class="text-slate-400">—</strong></span>
     </div>
     <button onclick="document.getElementById('createModal').style.display='flex'" class="btn-primary px-5 py-2.5 rounded-xl text-sm font-semibold" style="background:linear-gradient(135deg,#4F46E5,#7C3AED);border:none;color:#fff;cursor:pointer;box-shadow:0 0 20px rgba(79,70,229,.3)">+ Создать бота</button>
   </div>
@@ -43,64 +43,9 @@
     <select class="bg-slate-800/50 border border-slate-700 rounded-lg px-3 py-2 text-sm text-slate-300 outline-none"><option>Все статусы</option><option>Активные</option><option>Остановлены</option></select>
   </div>
 
-  <!-- Bot Cards -->
+  <!-- Bot Cards — loaded from API -->
   <div class="grid md:grid-cols-2 xl:grid-cols-3 gap-4" id="botGrid">
-
-    <div class="card card-glow">
-      <div class="flex items-center justify-between mb-3">
-        <div class="flex items-center gap-3"><div class="w-10 h-10 rounded-lg bg-indigo-500/10 flex items-center justify-center text-sm font-bold text-indigo-400">B1</div><div><div class="font-semibold">BTC Scalper</div><div class="text-xs text-slate-500">Bybit &middot; BTCUSDT</div></div></div>
-        <div class="toggle on" onclick="this.classList.toggle('on')"></div>
-      </div>
-      <div class="flex items-center gap-2 mb-3"><span class="text-xs px-2 py-0.5 rounded-full bg-cyan-500/15 text-cyan-400">Scalping</span><span class="text-xs px-2 py-0.5 rounded-full bg-green-500/15 text-green-400">Active</span></div>
-      <div class="grid grid-cols-3 gap-3 text-center text-sm mb-3">
-        <div><div class="text-xs text-slate-500">PnL</div><div class="text-green-400 font-semibold">+$450</div></div>
-        <div><div class="text-xs text-slate-500">Win Rate</div><div class="font-semibold">82%</div></div>
-        <div><div class="text-xs text-slate-500">Сделки</div><div class="font-semibold">24</div></div>
-      </div>
-      <div class="text-xs text-slate-500">Leverage: 10x &middot; Risk: 2% &middot; SL: 1.5%</div>
-    </div>
-
-    <div class="card card-glow">
-      <div class="flex items-center justify-between mb-3">
-        <div class="flex items-center gap-3"><div class="w-10 h-10 rounded-lg bg-purple-500/10 flex items-center justify-center text-sm font-bold text-purple-400">B2</div><div><div class="font-semibold">ETH SMC Bot</div><div class="text-xs text-slate-500">Binance &middot; ETHUSDT</div></div></div>
-        <div class="toggle on" onclick="this.classList.toggle('on')"></div>
-      </div>
-      <div class="flex items-center gap-2 mb-3"><span class="text-xs px-2 py-0.5 rounded-full bg-indigo-500/15 text-indigo-400">SMC</span><span class="text-xs px-2 py-0.5 rounded-full bg-green-500/15 text-green-400">Active</span></div>
-      <div class="grid grid-cols-3 gap-3 text-center text-sm mb-3">
-        <div><div class="text-xs text-slate-500">PnL</div><div class="text-green-400 font-semibold">+$320</div></div>
-        <div><div class="text-xs text-slate-500">Win Rate</div><div class="font-semibold">75%</div></div>
-        <div><div class="text-xs text-slate-500">Сделки</div><div class="font-semibold">16</div></div>
-      </div>
-      <div class="text-xs text-slate-500">Leverage: 5x &middot; Risk: 1.5% &middot; SL: 2%</div>
-    </div>
-
-    <div class="card card-glow">
-      <div class="flex items-center justify-between mb-3">
-        <div class="flex items-center gap-3"><div class="w-10 h-10 rounded-lg bg-green-500/10 flex items-center justify-center text-sm font-bold text-green-400">B3</div><div><div class="font-semibold">SOL Gerchik</div><div class="text-xs text-slate-500">BingX &middot; SOLUSDT</div></div></div>
-        <div class="toggle on" onclick="this.classList.toggle('on')"></div>
-      </div>
-      <div class="flex items-center gap-2 mb-3"><span class="text-xs px-2 py-0.5 rounded-full bg-orange-500/15 text-orange-400">Gerchik</span><span class="text-xs px-2 py-0.5 rounded-full bg-green-500/15 text-green-400">Active</span></div>
-      <div class="grid grid-cols-3 gap-3 text-center text-sm mb-3">
-        <div><div class="text-xs text-slate-500">PnL</div><div class="text-green-400 font-semibold">+$510</div></div>
-        <div><div class="text-xs text-slate-500">Win Rate</div><div class="font-semibold">88%</div></div>
-        <div><div class="text-xs text-slate-500">Сделки</div><div class="font-semibold">9</div></div>
-      </div>
-      <div class="text-xs text-slate-500">Leverage: 3x &middot; Risk: 2% &middot; SL: 1%</div>
-    </div>
-
-    <div class="card card-glow" style="opacity:.6">
-      <div class="flex items-center justify-between mb-3">
-        <div class="flex items-center gap-3"><div class="w-10 h-10 rounded-lg bg-slate-500/10 flex items-center justify-center text-sm font-bold text-slate-400">B4</div><div><div class="font-semibold">DOGE Test</div><div class="text-xs text-slate-500">Bybit &middot; DOGEUSDT</div></div></div>
-        <div class="toggle" onclick="this.classList.toggle('on')"></div>
-      </div>
-      <div class="flex items-center gap-2 mb-3"><span class="text-xs px-2 py-0.5 rounded-full bg-cyan-500/15 text-cyan-400">Scalping</span><span class="text-xs px-2 py-0.5 rounded-full bg-slate-500/15 text-slate-400">Stopped</span></div>
-      <div class="grid grid-cols-3 gap-3 text-center text-sm mb-3">
-        <div><div class="text-xs text-slate-500">PnL</div><div class="text-red-400 font-semibold">-$40</div></div>
-        <div><div class="text-xs text-slate-500">Win Rate</div><div class="font-semibold">45%</div></div>
-        <div><div class="text-xs text-slate-500">Сделки</div><div class="font-semibold">11</div></div>
-      </div>
-      <div class="text-xs text-slate-500">Leverage: 20x &middot; Risk: 5% &middot; SL: 0.5%</div>
-    </div>
+    <div class="card" style="padding:40px;text-align:center;color:#64748b"><div style="margin-bottom:8px">Загрузка ботов...</div></div>
   </div>
 </main>
 
@@ -130,10 +75,56 @@
 <script>
 if(!Auth.isLoggedIn())window.location.href='/?login=1';
 Sidebar.init('bots');
+
+const stratColors={scalping:'cyan',smc:'indigo',gerchik:'orange',levels:'amber'};
+
+async function loadBots(){
+  const grid=document.getElementById('botGrid');
+  try{
+    const res=await API.getBots();
+    const bots=res.bots||[];
+    const stats=await API.getBotStats().catch(()=>({stats:{}}));
+    const s=stats.stats||stats||{};
+
+    // Summary
+    document.getElementById('sumTotal').textContent=s.totalBots||bots.length||0;
+    document.getElementById('sumActive').textContent=s.activeBots||0;
+    const pnl=+(s.totalPnl||0);
+    const pnlEl=document.getElementById('sumPnl');
+    pnlEl.textContent=(pnl>=0?'+':'')+('$'+Math.abs(pnl).toFixed(2));
+    pnlEl.className=pnl>=0?'text-green-400':'text-red-400';
+
+    if(!bots.length){
+      grid.innerHTML='<div class="card" style="padding:48px;text-align:center;color:#64748b;grid-column:1/-1"><svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" style="margin:0 auto 12px;opacity:.3"><path d="M12 2a4 4 0 014 4v1h2a2 2 0 012 2v10a2 2 0 01-2 2H6a2 2 0 01-2-2V9a2 2 0 012-2h2V6a4 4 0 014-4z"/></svg>У вас пока нет ботов<br><span style="font-size:.8rem;margin-top:8px;display:inline-block">Нажмите «Создать бота» чтобы начать</span></div>';
+      return;
+    }
+
+    grid.innerHTML=bots.map((b,i)=>{
+      const sc=stratColors[b.strategy_type]||'slate';
+      const active=b.is_active;
+      return `<div class="card card-glow" ${!active?'style="opacity:.6"':''}>
+        <div class="flex items-center justify-between mb-3">
+          <div class="flex items-center gap-3"><div class="w-10 h-10 rounded-lg bg-${sc}-500/10 flex items-center justify-center text-sm font-bold text-${sc}-400">B${i+1}</div><div><div class="font-semibold">${b.name}</div><div class="text-xs text-slate-500">${b.exchange_name} &middot; ${b.symbol}</div></div></div>
+          <div class="toggle ${active?'on':''}" onclick="toggleBotState(${b.id},${!active})"></div>
+        </div>
+        <div class="flex items-center gap-2 mb-3"><span class="text-xs px-2 py-0.5 rounded-full bg-${sc}-500/15 text-${sc}-400">${b.strategy_type}</span><span class="text-xs px-2 py-0.5 rounded-full ${active?'bg-green-500/15 text-green-400':'bg-slate-500/15 text-slate-400'}">${active?'Active':'Stopped'}</span></div>
+        <div class="text-xs text-slate-500">Leverage: ${b.leverage||1}x &middot; Size: $${b.position_size_usd||0} &middot; SL: ${b.stop_loss_pct||0}%</div>
+      </div>`;
+    }).join('');
+  }catch(e){
+    grid.innerHTML='<div class="card" style="padding:40px;text-align:center;color:#ef4444">Ошибка: '+e.message+'</div>';
+  }
+}
+loadBots();
+
+async function toggleBotState(id,activate){
+  try{await API.toggleBot(id,activate);Toast.success(activate?'Бот запущен':'Бот остановлен');loadBots()}catch(e){Toast.error(e.message)}
+}
+
 document.getElementById('createBotForm')?.addEventListener('submit',async e=>{
   e.preventDefault();const fd=new FormData(e.target);const data=Object.fromEntries(fd.entries());
   data.leverage=+data.leverage;data.positionSizeUsd=+data.positionSizeUsd;data.stopLossPct=+data.stopLossPct;data.takeProfitPct=+data.takeProfitPct;
-  try{await API.createBot(data);Toast.success('Бот создан!');document.getElementById('createModal').style.display='none'}catch(err){Toast.error(err.message)}
+  try{await API.createBot(data);Toast.success('Бот создан!');document.getElementById('createModal').style.display='none';loadBots()}catch(err){Toast.error(err.message)}
 });
 </script>
 </body>
