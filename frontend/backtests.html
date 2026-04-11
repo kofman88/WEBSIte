@@ -46,7 +46,7 @@
   </div>
 
   <!-- Results Grid -->
-  <h2 class="font-bold mb-4">Результаты</h2>
+  <div class="flex items-center justify-between mb-4"><h2 class="font-bold">Результаты</h2><button onclick="clearFailed()" class="text-xs text-slate-500 hover:text-red-400 transition">Удалить failed</button></div>
   <div class="grid md:grid-cols-2 gap-4 mb-6" id="btResults">
     <div style="text-align:center;padding:40px;color:#64748b;grid-column:1/-1">Загрузка...</div>
   </div>
@@ -92,6 +92,14 @@ async function loadBacktests(){
 }
 loadBacktests();
 
+async function clearFailed(){
+  try{
+    const res=await API.getBacktests();
+    const failed=(res.backtests||[]).filter(b=>b.status==='failed');
+    for(const b of failed){try{await API.deleteBacktest(b.id)}catch(_){}}
+    Toast.success(failed.length+' бэктестов удалено');loadBacktests();
+  }catch(e){Toast.error(e.message)}
+}
 document.getElementById('btForm')?.addEventListener('submit',async e=>{
   e.preventDefault();
   const fd=new FormData(e.target);

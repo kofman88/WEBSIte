@@ -162,6 +162,9 @@ function stab(t){document.querySelectorAll('.tab').forEach(b=>b.classList.remove
 
 let bot=null,btTrades=[];
 
+// Reset stats on load
+['sP','sD','sW','sT','sA','sPF'].forEach(id=>{const el=document.getElementById(id);if(el)el.textContent='—'});
+
 async function loadBot(){
   try{
     const r=await API.getBot(bid);bot=r.bot||r;

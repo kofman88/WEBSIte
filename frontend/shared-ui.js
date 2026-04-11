@@ -86,6 +86,20 @@ function renderPageNotifs(){
   if(dot)dot.style.display='';
 }
 
+// Mobile sidebar toggle
+document.addEventListener('DOMContentLoaded',()=>{
+  const toggle=document.getElementById('sidebar-toggle');
+  const sidebar=document.querySelector('.sidebar');
+  if(toggle&&sidebar){
+    toggle.addEventListener('click',()=>sidebar.classList.toggle('open'));
+    document.addEventListener('click',e=>{
+      if(window.innerWidth<=1024&&sidebar.classList.contains('open')&&!sidebar.contains(e.target)&&!toggle.contains(e.target)){
+        sidebar.classList.remove('open');
+      }
+    });
+  }
+});
+
 // Close notif on outside click
 document.addEventListener('click',e=>{
   const wrap=document.getElementById('pageNotifWrap');

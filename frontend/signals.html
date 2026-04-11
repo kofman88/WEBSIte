@@ -66,7 +66,7 @@ async function loadSignals(){
     document.getElementById('stTotal').textContent=st.total||0;
     document.getElementById('stWR').textContent=(st.winRate||0)+'%';
     document.getElementById('stConf').textContent=Math.round(st.avgConfidence||0);
-    const sg=await API.getSignals({limit:50});allSignals=sg.signals||[];renderSignals();
+    const sg=await API.getSignals({limit:50});allSignals=sg.signals||[];renderSignals();checkNewSignals(allSignals.length);
     // Chart
     const by={};allSignals.forEach(s=>{by[s.strategy]=(by[s.strategy]||0)+1});
     const cols={levels:'#f59e0b',smc:'#818CF8',gerchik:'#3b82f6',scalping:'#06b6d4'};
@@ -77,6 +77,14 @@ async function loadSignals(){
     const top=Object.entries(bs).sort((a,b)=>b[1]-a[1]).slice(0,5);
     document.getElementById('topSymbols').innerHTML=top.length?top.map(([sym,cnt])=>`<div class="flex items-center justify-between text-sm mb-2"><span>${sym}</span><span class="mono text-slate-400">${cnt} sig</span></div>`).join(''):'<div style="text-align:center;padding:20px;color:#64748b;font-size:.8rem">Нет данных</div>';
   }catch(e){document.getElementById('signalFeed').innerHTML='<div class="card" style="text-align:center;padding:32px;color:#ef4444">Ошибка: '+e.message+'</div>'}
+}
+let lastSignalCount=0;
+function checkNewSignals(count){
+  if(lastSignalCount>0&&count>lastSignalCount){
+    // Play notification sound
+    try{const a=new AudioContext();const o=a.createOscillator();const g=a.createGain();o.connect(g);g.connect(a.destination);o.frequency.value=800;g.gain.value=0.1;o.start();o.stop(a.currentTime+0.15);setTimeout(()=>{o.frequency.value=1200;const o2=a.createOscillator();const g2=a.createGain();o2.connect(g2);g2.connect(a.destination);o2.frequency.value=1200;g2.gain.value=0.1;o2.start();o2.stop(a.currentTime+0.15)},200)}catch(_){}
+    Toast.success('Новый сигнал!')}
+  lastSignalCount=count;
 }
 loadSignals();setInterval(loadSignals,30000);
 </script>

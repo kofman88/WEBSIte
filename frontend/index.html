@@ -6,6 +6,12 @@
 <title>CHM Finance — AI Крипто-торговля</title>
 <meta name="description" content="CHM Finance — AI-платформа для крипто-торговли"/>
 <link rel="icon" type="image/svg+xml" href="/favicon.svg"/>
+<meta property="og:title" content="CHM Finance — AI Крипто-торговля"/>
+<meta property="og:description" content="Автоматические торговые боты для Bybit, Binance, BingX, OKX. 4 стратегии, бэктестинг, 20+ монет."/>
+<meta property="og:type" content="website"/>
+<meta property="og:url" content="https://chmup.top/"/>
+<meta name="twitter:card" content="summary_large_image"/>
+<meta name="twitter:title" content="CHM Finance — AI Crypto Trading"/>
 <link rel="preconnect" href="https://fonts.googleapis.com"/>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet"/>
 <script src="https://cdn.tailwindcss.com"></script>
@@ -509,6 +515,8 @@ function toggleTheme(){document.documentElement.classList.toggle('light');const 
 (function(){if(localStorage.getItem('chm_theme')==='light'){document.documentElement.classList.add('light');const b=document.getElementById('themeBtn');if(b)b.textContent='☀️'}})();
 
 if(new URLSearchParams(location.search).get('login'))openModal('login');
+// Auto-redirect to dashboard if already logged in
+if(Auth.isLoggedIn()&&!location.search.includes('login'))location.href='dashboard.html';
 </script>
 </body>
 </html>
