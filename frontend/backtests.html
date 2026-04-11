@@ -89,7 +89,8 @@ loadBacktests();
 document.getElementById('btForm')?.addEventListener('submit',async e=>{
   e.preventDefault();
   const fd=new FormData(e.target);
-  const data={name:fd.get('symbol')+' '+fd.get('strategy'),symbol:fd.get('symbol'),exchangeName:'bybit',timeframe:fd.get('timeframe'),startDate:fd.get('startDate'),endDate:fd.get('endDate'),initialCapital:10000};
+  const strat=fd.get('strategy');
+  const data={name:fd.get('symbol')+' '+strat,symbol:fd.get('symbol'),exchangeName:'bybit',timeframe:fd.get('timeframe'),startDate:fd.get('startDate'),endDate:fd.get('endDate'),initialCapital:10000,strategyConfig:JSON.stringify({strategy:strat})};
   try{await API.createBacktest(data);Toast.success('Бэктест запущен!');loadBacktests()}catch(err){Toast.error(err.message)}
 });
 </script>

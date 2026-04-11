@@ -11,10 +11,11 @@ const https = require('https');
 const db = require('../models/database');
 
 // ── OKX Public API (no auth required) ──────────────────────────────────
-function fetchCandles(symbol, timeframe = '1H', limit = 100) {
+function fetchCandles(symbol, timeframe = '1H', limit = 100, before = '') {
   return new Promise((resolve, reject) => {
     const instId = symbol.replace('USDT', '-USDT-SWAP');
-    const url = `https://www.okx.com/api/v5/market/candles?instId=${instId}&bar=${timeframe}&limit=${limit}`;
+    let url = `https://www.okx.com/api/v5/market/candles?instId=${instId}&bar=${timeframe}&limit=${Math.min(limit, 300)}`;
+    if (before) url += `&before=${before}`;
     https.get(url, { headers: { 'User-Agent': 'CHM/2.0' } }, (res) => {
       let data = '';
       res.on('data', c => data += c);
@@ -22,7 +23,6 @@ function fetchCandles(symbol, timeframe = '1H', limit = 100) {
         try {
           const json = JSON.parse(data);
           if (!json.data || !json.data.length) return resolve([]);
-          // OKX format: [ts, o, h, l, c, vol, volCcy, volCcyQuote, confirm]
           const candles = json.data.reverse().map(c => ({
             ts: +c[0], open: +c[1], high: +c[2], low: +c[3], close: +c[4],
             volume: +c[5], confirmed: c[8] === '1'
@@ -32,6 +32,26 @@ function fetchCandles(symbol, timeframe = '1H', limit = 100) {
       });
     }).on('error', () => resolve([]));
   });
+}
+
+// Fetch multiple pages of candles for backtesting
+async function fetchCandlesMulti(symbol, timeframe, totalLimit = 500) {
+  let all = [];
+  let before = '';
+  const perPage = 300;
+  const pages = Math.ceil(totalLimit / perPage);
+  for (let p = 0; p < pages; p++) {
+    const batch = await fetchCandles(symbol, timeframe, perPage, before);
+    if (!batch.length) break;
+    all = all.concat(batch);
+    before = '' + batch[0].ts; // oldest timestamp for next page
+    if (batch.length < perPage) break;
+    await new Promise(r => setTimeout(r, 200));
+  }
+  // Sort by time ascending and deduplicate
+  all.sort((a, b) => a.ts - b.ts);
+  const seen = new Set();
+  return all.filter(c => { if (seen.has(c.ts)) return false; seen.add(c.ts); return true; });
 }
 
 function fetchTicker(symbol) {
@@ -336,4 +356,4 @@ function stopScanner() {
   console.log('[SCANNER] Stopped');
 }
 
-module.exports = { startScanner, stopScanner, scanOnce, fetchCandles, fetchTicker };
+module.exports = { startScanner, stopScanner, scanOnce, fetchCandles, fetchCandlesMulti, fetchTicker };

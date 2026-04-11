@@ -79,9 +79,9 @@ class BacktestService {
       const backtest = this.getBacktestById(backtestId, userId);
       if (!backtest) return;
 
-      // Fetch real candle data from OKX
-      const { fetchCandles } = require('./scannerEngine');
-      const candles = await fetchCandles(backtest.symbol, backtest.timeframe || '1H', 500);
+      // Fetch real candle data from OKX (multi-page for more data)
+      const { fetchCandlesMulti } = require('./scannerEngine');
+      const candles = await fetchCandlesMulti(backtest.symbol, backtest.timeframe || '1H', 800);
 
       if (!candles || candles.length < 30) {
         throw new Error('Not enough candle data for backtest');
@@ -119,12 +119,20 @@ class BacktestService {
     const capital = config.initial_capital || 10000;
     const riskPct = 0.02;
 
-    // Detect strategy from name
-    const name = (config.name || '').toLowerCase();
+    // Detect strategy from strategy_config or name
     let strategy = 'levels';
-    if (name.includes('smc')) strategy = 'smc';
-    else if (name.includes('gerchik')) strategy = 'gerchik';
-    else if (name.includes('scalping') || name.includes('scalp')) strategy = 'scalping';
+    try {
+      const sc = JSON.parse(config.strategy_config || '{}');
+      if (sc.strategy) strategy = sc.strategy;
+    } catch (_) {}
+    if (strategy === 'levels') {
+      // Fallback: parse from name
+      const name = (config.name || '').toLowerCase();
+      if (name.includes('scalp')) strategy = 'scalping';
+      else if (name.includes('smc')) strategy = 'smc';
+      else if (name.includes('gerchik')) strategy = 'gerchik';
+    }
+    console.log(`[BACKTEST] Strategy: ${strategy}, Symbol: ${config.symbol}, TF: ${config.timeframe}`);
 
     // ── Indicators ──
     const ema = (data, period) => {
