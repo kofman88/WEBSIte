@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>CHM Finance — Бот</title>
+<link rel="icon" type="image/svg+xml" href="/favicon.svg"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com"></script>
+<script type="text/javascript" src="https://s3.tradingview.com/tv.js"></script>
+<link rel="stylesheet" href="styles.css"/>
+<script>if(localStorage.getItem("chm_theme")==="light")document.documentElement.classList.add("light")</script>
+<style>
+body{background:#070b14;color:#f1f5f9;font-family:'Inter',sans-serif}
+.mono{font-family:'JetBrains Mono',monospace;font-variant-numeric:tabular-nums}
+.tab{padding:8px 20px;border-radius:10px;font-size:.85rem;font-weight:500;color:#94a3b8;background:transparent;border:none;cursor:pointer;transition:all .2s}
+.tab:hover{color:#e2e8f0}
+.tab.active{background:rgba(79,70,229,.15);color:#a5b4fc}
+.tab-content{display:none}.tab-content.active{display:block}
+.metric-card{background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.06);border-radius:12px;padding:16px;text-align:center}
+html.light body{background:#f8f9fc;color:#1e293b}
+html.light .sidebar{background:#f0f2f7;border-color:rgba(0,0,0,.06)}
+html.light .sidebar-link{color:#64748b}html.light .sidebar-link.active{color:#4f46e5;background:rgba(79,70,229,.06)}
+html.light .topbar{background:rgba(248,249,252,.85)!important}
+html.light .card,.light .metric-card{background:rgba(255,255,255,.5)!important;border-color:rgba(0,0,0,.06)!important}
+html.light h1,html.light h2,html.light h3,html.light .font-bold,html.light .font-semibold{color:#0f172a!important}
+html.light .text-white{color:#1e293b!important}
+html.light .text-slate-400,html.light .text-slate-500{color:#64748b!important}
+html.light .tab.active{background:rgba(79,70,229,.08)}
+</style>
+</head>
+<body>
+<aside class="sidebar" id="sidebar">
+  <div class="sidebar-logo">CHM<span>.</span></div>
+  <nav class="sidebar-nav">
+    <a href="dashboard.html" class="sidebar-link" data-page="dashboard"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>Дашборд</a>
+    <a href="bots.html" class="sidebar-link active" data-page="bots"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2a4 4 0 014 4v1h2a2 2 0 012 2v10a2 2 0 01-2 2H6a2 2 0 01-2-2V9a2 2 0 012-2h2V6a4 4 0 014-4z"/></svg>Боты</a>
+    <a href="signals.html" class="sidebar-link" data-page="signals"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>Сигналы</a>
+    <a href="backtests.html" class="sidebar-link" data-page="backtests"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6m6 0h10"/></svg>Бэктесты</a>
+    <a href="wallet.html" class="sidebar-link" data-page="wallet"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12V7H5a2 2 0 010-4h14v4M3 5v14a2 2 0 002 2h16v-5"/></svg>Биржи</a>
+    <a href="settings.html" class="sidebar-link" data-page="settings"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/></svg>Настройки</a>
+    <a href="academy/" class="sidebar-link" data-page="academy"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 3h6a4 4 0 014 4v14a3 3 0 00-3-3H2z"/><path d="M22 3h-6a4 4 0 00-4 4v14a3 3 0 013-3h7z"/></svg>Академия</a>
+  </nav>
+  <div class="sidebar-footer"><button onclick="Auth.logout()" class="sidebar-link" style="color:#f87171"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4M16 17l5-5-5-5M21 12H9"/></svg>Выйти</button></div>
+</aside>
+
+<header class="topbar">
+  <div class="flex items-center gap-4">
+    <button id="sidebar-toggle" class="lg:hidden" style="background:none;border:none;color:#94a3b8;cursor:pointer"><svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 6h16M4 12h16M4 18h16"/></svg></button>
+    <a href="bots.html" class="text-slate-500 hover:text-white text-sm transition">&larr; Боты</a>
+    <h1 class="text-lg font-bold" id="botTitle">Загрузка...</h1>
+    <span class="text-xs px-2 py-0.5 rounded-full bg-green-500/15 text-green-400" id="botStatus">—</span>
+  </div>
+  <div class="topbar-actions">
+    <button onclick="document.documentElement.classList.toggle('light');localStorage.setItem('chm_theme',document.documentElement.classList.contains('light')?'light':'dark');this.textContent=document.documentElement.classList.contains('light')?'☀️':'🌙')" class="text-sm w-8 h-8 flex items-center justify-center rounded-lg border border-slate-700/50 hover:bg-white/[.03]">🌙</button>
+    <div class="topbar-user"><div class="topbar-avatar">U</div></div>
+  </div>
+</header>
+
+<main class="main-content">
+  <!-- Bot Stats Row -->
+  <div class="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-6 gap-3 mb-4">
+    <div class="metric-card"><div class="text-xs text-slate-500">Прибыль</div><div class="mono text-lg font-bold" id="mPnl">—</div></div>
+    <div class="metric-card"><div class="text-xs text-slate-500">MDD</div><div class="mono text-lg font-bold" id="mDD">—</div></div>
+    <div class="metric-card"><div class="text-xs text-slate-500">Win Rate</div><div class="mono text-lg font-bold" id="mWR">—</div></div>
+    <div class="metric-card"><div class="text-xs text-slate-500">Сделки</div><div class="mono text-lg font-bold" id="mTrades">—</div></div>
+    <div class="metric-card"><div class="text-xs text-slate-500">Ср. сделка</div><div class="mono text-lg font-bold" id="mAvg">—</div></div>
+    <div class="metric-card"><div class="text-xs text-slate-500">Длительность</div><div class="mono text-lg font-bold" id="mDuration">—</div></div>
+  </div>
+
+  <!-- TradingView Chart — full width -->
+  <div class="card mb-4" style="padding:0;overflow:hidden;border-radius:12px">
+    <div id="tvChart" style="height:450px"></div>
+  </div>
+
+  <!-- Tabs -->
+  <div class="flex gap-1 p-1 bg-slate-800/30 rounded-xl border border-slate-700/50 mb-4 w-fit">
+    <button class="tab active" onclick="showTab('results')">Результаты</button>
+    <button class="tab" onclick="showTab('trades')">Сделки</button>
+    <button class="tab" onclick="showTab('settings')">Настройки</button>
+  </div>
+
+  <!-- Tab: Results -->
+  <div class="tab-content active" id="tab-results">
+    <div class="grid md:grid-cols-2 gap-4">
+      <div class="card">
+        <h3 class="font-bold mb-4">Детальная статистика</h3>
+        <div class="space-y-2 text-sm" id="detailStats">
+          <div class="flex justify-between"><span class="text-slate-400">Прибыльность в день</span><span class="mono" id="dsPnlDay">—</span></div>
+          <div class="flex justify-between"><span class="text-slate-400">Общий PnL</span><span class="mono" id="dsPnl">—</span></div>
+          <div class="flex justify-between"><span class="text-slate-400">Сделок всего</span><span class="mono" id="dsTrades">—</span></div>
+          <div class="flex justify-between"><span class="text-slate-400">Win Rate</span><span class="mono" id="dsWR">—</span></div>
+          <div class="flex justify-between"><span class="text-slate-400">Profit Factor</span><span class="mono" id="dsPF">—</span></div>
+          <div class="flex justify-between"><span class="text-slate-400">Sharpe Ratio</span><span class="mono" id="dsSharpe">—</span></div>
+          <div class="flex justify-between"><span class="text-slate-400">Max Drawdown</span><span class="mono text-red-400" id="dsDD">—</span></div>
+          <div class="flex justify-between"><span class="text-slate-400">Ср. прибыль</span><span class="mono text-green-400" id="dsAvgWin">—</span></div>
+          <div class="flex justify-between"><span class="text-slate-400">Ср. убыток</span><span class="mono text-red-400" id="dsAvgLoss">—</span></div>
+          <div class="flex justify-between"><span class="text-slate-400">Макс. серия побед</span><span class="mono" id="dsStreak">—</span></div>
+        </div>
+      </div>
+      <div class="card">
+        <h3 class="font-bold mb-4">Запустить бэктест</h3>
+        <div class="space-y-3">
+          <div class="grid grid-cols-2 gap-3">
+            <div><label class="text-xs text-slate-500 block mb-1">Начало</label><input type="date" id="bdStart" value="2025-01-01" class="w-full bg-slate-800/50 border border-slate-700 rounded-lg px-3 py-2 text-sm text-white outline-none"/></div>
+            <div><label class="text-xs text-slate-500 block mb-1">Конец</label><input type="date" id="bdEnd" value="2026-04-11" class="w-full bg-slate-800/50 border border-slate-700 rounded-lg px-3 py-2 text-sm text-white outline-none"/></div>
+          </div>
+          <button onclick="runBotBacktest()" class="w-full py-2.5 rounded-xl font-semibold text-sm text-white" style="background:linear-gradient(135deg,#4F46E5,#7C3AED)">Прогнать бэктест</button>
+          <div id="btResult" class="text-xs text-slate-400"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Tab: Trades -->
+  <div class="tab-content" id="tab-trades">
+    <div class="card">
+      <div class="overflow-x-auto" id="tradesTable">
+        <div class="text-center py-8 text-slate-500">Загрузка сделок...</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Tab: Settings -->
+  <div class="tab-content" id="tab-settings">
+    <div class="card max-w-2xl">
+      <h3 class="font-bold mb-4">Параметры бота</h3>
+      <div class="space-y-2 text-sm" id="botParams">
+        <div class="text-slate-500">Загрузка...</div>
+      </div>
+    </div>
+  </div>
+</main>
+
+<script src="app.js"></script>
+<script>
+if(!Auth.isLoggedIn())window.location.href='/?login=1';
+Sidebar.init('bots');
+
+const botId=new URLSearchParams(location.search).get('id');
+if(!botId){location.href='bots.html';throw'no id'}
+
+function showTab(t){document.querySelectorAll('.tab').forEach(b=>b.classList.remove('active'));document.querySelectorAll('.tab-content').forEach(c=>c.classList.remove('active'));document.getElementById('tab-'+t).classList.add('active');event.target.classList.add('active')}
+
+let botData=null;
+
+async function loadBot(){
+  try{
+    const r=await API.getBot(botId);
+    botData=r.bot||r;
+    document.getElementById('botTitle').textContent=botData.name+' — '+botData.symbol;
+    document.getElementById('botStatus').textContent=botData.is_active?'Active':'Stopped';
+    document.getElementById('botStatus').className='text-xs px-2 py-0.5 rounded-full '+(botData.is_active?'bg-green-500/15 text-green-400':'bg-slate-500/15 text-slate-400');
+
+    // Load chart
+    new TradingView.widget({container_id:'tvChart',symbol:'BYBIT:'+botData.symbol+'.P',interval:'60',timezone:'Etc/UTC',theme:'dark',style:'1',locale:'ru',toolbar_bg:'#070b14',enable_publishing:false,hide_top_toolbar:false,save_image:false,allow_symbol_change:false,width:'100%',height:450,backgroundColor:'#070b14',studies:['MAExp@tv-basicstudies','RSI@tv-basicstudies']});
+
+    // Settings tab
+    document.getElementById('botParams').innerHTML=`
+      <div class="flex justify-between"><span class="text-slate-400">Биржа</span><span>${botData.exchange_name}</span></div>
+      <div class="flex justify-between"><span class="text-slate-400">Символ</span><span class="mono">${botData.symbol}</span></div>
+      <div class="flex justify-between"><span class="text-slate-400">Стратегия</span><span>${botData.strategy_type}</span></div>
+      <div class="flex justify-between"><span class="text-slate-400">Leverage</span><span class="mono">${botData.leverage}x</span></div>
+      <div class="flex justify-between"><span class="text-slate-400">Размер позиции</span><span class="mono">$${botData.position_size_usd}</span></div>
+      <div class="flex justify-between"><span class="text-slate-400">Stop Loss</span><span class="mono">${botData.stop_loss_pct}%</span></div>
+      <div class="flex justify-between"><span class="text-slate-400">Take Profit</span><span class="mono">${botData.take_profit_pct}%</span></div>
+      <div class="flex justify-between"><span class="text-slate-400">Trailing Stop</span><span>${botData.trailing_stop?'Вкл':'Выкл'}</span></div>
+      <div class="flex justify-between"><span class="text-slate-400">Создан</span><span class="text-xs">${botData.created_at}</span></div>
+    `;
+
+    // Load trades
+    loadTrades();
+  }catch(e){document.getElementById('botTitle').textContent='Ошибка: '+e.message}
+}
+
+async function loadTrades(){
+  try{
+    const r=await API.getBotTrades(botId);
+    const trades=r.trades||[];
+    const tt=document.getElementById('tradesTable');
+
+    if(!trades.length){tt.innerHTML='<div class="text-center py-8 text-slate-500">Сделок пока нет</div>';return}
+
+    // Stats
+    const wins=trades.filter(t=>(t.pnl||0)>0);
+    const losses=trades.filter(t=>(t.pnl||0)<=0);
+    const totalPnl=trades.reduce((s,t)=>s+(t.pnl||0),0);
+    const wr=trades.length?(wins.length/trades.length*100):0;
+
+    document.getElementById('mPnl').textContent=(totalPnl>=0?'+':'')+('$'+Math.abs(totalPnl).toFixed(2));
+    document.getElementById('mPnl').className='mono text-lg font-bold '+(totalPnl>=0?'text-green-400':'text-red-400');
+    document.getElementById('mWR').textContent=wr.toFixed(0)+'%';
+    document.getElementById('mTrades').textContent=trades.length;
+    document.getElementById('mAvg').textContent='$'+(totalPnl/trades.length).toFixed(2);
+
+    // Detail stats
+    document.getElementById('dsPnl').textContent=(totalPnl>=0?'+':'')+('$'+Math.abs(totalPnl).toFixed(2));
+    document.getElementById('dsTrades').textContent=trades.length;
+    document.getElementById('dsWR').textContent=wr.toFixed(1)+'%';
+    document.getElementById('dsAvgWin').textContent=wins.length?'+$'+(wins.reduce((s,t)=>s+t.pnl,0)/wins.length).toFixed(2):'—';
+    document.getElementById('dsAvgLoss').textContent=losses.length?'-$'+(Math.abs(losses.reduce((s,t)=>s+t.pnl,0))/losses.length).toFixed(2):'—';
+
+    // Trades table
+    tt.innerHTML='<table class="w-full text-sm"><thead><tr class="text-xs text-slate-500 uppercase"><th class="text-left p-3">#</th><th class="text-left p-3">Тип</th><th class="text-left p-3">Вход</th><th class="text-left p-3">Выход</th><th class="text-left p-3">PnL</th><th class="text-left p-3">PnL %</th><th class="text-left p-3">Дата</th><th class="text-left p-3">Статус</th></tr></thead><tbody>'+trades.map((t,i)=>`<tr class="border-t border-slate-800/50"><td class="p-3 text-slate-500">${i+1}</td><td class="p-3"><span class="text-xs px-2 py-0.5 rounded-full ${t.trade_type==='long'?'bg-green-500/15 text-green-400':'bg-red-500/15 text-red-400'}">${(t.trade_type||'—').toUpperCase()}</span></td><td class="p-3 mono">${t.entry_price||'—'}</td><td class="p-3 mono">${t.exit_price||'—'}</td><td class="p-3 mono ${(t.pnl||0)>=0?'text-green-400':'text-red-400'}">${t.pnl?((t.pnl>=0?'+':'')+('$'+Math.abs(t.pnl).toFixed(2))):'—'}</td><td class="p-3 mono ${(t.pnl_pct||0)>=0?'text-green-400':'text-red-400'}">${t.pnl_pct?((t.pnl_pct>=0?'+':'')+t.pnl_pct.toFixed(2)+'%'):'—'}</td><td class="p-3 text-xs text-slate-400">${t.opened_at||'—'}</td><td class="p-3"><span class="text-xs px-2 py-0.5 rounded-full ${t.status==='closed'?'bg-slate-500/15 text-slate-400':'bg-green-500/15 text-green-400'}">${t.status||'open'}</span></td></tr>`).join('')+'</tbody></table>';
+  }catch(e){document.getElementById('tradesTable').innerHTML='<div class="text-center py-8 text-red-400">'+e.message+'</div>'}
+}
+
+async function runBotBacktest(){
+  if(!botData)return;
+  const res=document.getElementById('btResult');
+  res.textContent='Запуск бэктеста...';res.style.color='#94a3b8';
+  try{
+    const data={name:botData.symbol+' '+botData.strategy_type,symbol:botData.symbol,exchangeName:botData.exchange_name,timeframe:'1H',startDate:document.getElementById('bdStart').value,endDate:document.getElementById('bdEnd').value,initialCapital:(botData.position_size_usd||100)*(botData.leverage||10),strategyConfig:JSON.stringify({strategy:botData.strategy_type,direction:'both',trendFilter:false,params:{stopLossPct:botData.stop_loss_pct,takeProfitPct:botData.take_profit_pct}})};
+    const r=await API.createBacktest(data);
+    const btId=r.backtest?.id||r.id;
+    let tries=0;
+    const poll=setInterval(async()=>{
+      tries++;if(tries>20){clearInterval(poll);res.innerHTML='<a href="backtests.html" class="text-indigo-400 underline">Проверьте на странице Бэктесты</a>';return}
+      try{
+        const bt=await API.getBacktest(btId);
+        const st=bt.backtest?.status||bt.status;
+        const results=bt.backtest?.results||bt.results;
+        if(st==='completed'&&results){
+          clearInterval(poll);
+          const d=typeof results==='string'?JSON.parse(results):results;
+          res.innerHTML=`<div class="grid grid-cols-5 gap-2 text-center mt-2"><div><div class="text-slate-500">PnL</div><div class="mono font-bold ${Number(d.totalPnl||0)>=0?'text-green-400':'text-red-400'}">${Number(d.totalPnl||0)>=0?'+':''}$${Math.abs(Number(d.totalPnl||0)).toFixed(0)}</div></div><div><div class="text-slate-500">WR</div><div class="mono font-bold">${Number(d.winRate||0).toFixed(0)}%</div></div><div><div class="text-slate-500">Trades</div><div class="mono font-bold">${d.totalTrades||0}</div></div><div><div class="text-slate-500">DD</div><div class="mono font-bold text-red-400">${Number(d.maxDrawdown||0).toFixed(1)}%</div></div><div><div class="text-slate-500">Sharpe</div><div class="mono font-bold">${Number(d.sharpeRatio||0).toFixed(2)}</div></div></div>`;
+          // Update metrics
+          document.getElementById('dsPF').textContent=Number(d.profitFactor||0).toFixed(2);
+          document.getElementById('dsSharpe').textContent=Number(d.sharpeRatio||0).toFixed(2);
+          document.getElementById('dsDD').textContent=Number(d.maxDrawdown||0).toFixed(1)+'%';
+        }else if(st==='failed'){clearInterval(poll);res.textContent='Ошибка бэктеста';res.style.color='#ef4444'}
+      }catch(_){}
+    },2000);
+  }catch(e){res.textContent='Ошибка: '+e.message;res.style.color='#ef4444'}
+}
+
+loadBot();
+</script>
+</body>
+</html>
