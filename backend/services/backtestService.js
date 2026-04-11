@@ -208,7 +208,7 @@ class BacktestService {
           for (let j = i - 8; j < i - 2 && j >= startIdx; j++) {
             const body = Math.abs(candles[j].close - candles[j].open);
             const avgBody = candles.slice(Math.max(0, j - 10), j).reduce((s, x) => s + Math.abs(x.close - x.open), 0) / 10;
-            if (body > avgBody * 2.5) {
+            if (body > avgBody * 1.8) {
               const isBullOB = candles[j].close > candles[j].open;
               // Check if price returned to OB zone
               if (isBullOB && price <= candles[j].close && price >= candles[j].open && rsi[i] < 45) {
@@ -253,12 +253,12 @@ class BacktestService {
         else if (strategy === 'scalping') {
           const m = macdCalc(closes);
           const prevHist = m.hist[i - 1], currHist = m.hist[i];
-          const volSpike = volumes[i] > volMA[i] * 1.2;
+          const volAbove = volumes[i] > volMA[i] * 0.9; // relaxed: 0.9x instead of 1.2x
 
-          if (prevHist < 0 && currHist > 0 && rsi[i] < 45 && volSpike) {
-            signal = { dir: 'long', sl: price - atr[i-1] * 1.5, tp: price + atr[i-1] * 2 };
-          } else if (prevHist > 0 && currHist < 0 && rsi[i] > 55 && volSpike) {
-            signal = { dir: 'short', sl: price + atr[i-1] * 1.5, tp: price - atr[i-1] * 2 };
+          if (prevHist < 0 && currHist > 0 && rsi[i] < 50 && volAbove) {
+            signal = { dir: 'long', sl: price - atr[i-1] * 1.2, tp: price + atr[i-1] * 1.8 };
+          } else if (prevHist > 0 && currHist < 0 && rsi[i] > 50 && volAbove) {
+            signal = { dir: 'short', sl: price + atr[i-1] * 1.2, tp: price - atr[i-1] * 1.8 };
           }
         }
 
