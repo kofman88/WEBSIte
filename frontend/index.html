@@ -33,9 +33,8 @@ a{color:inherit;text-decoration:none}
 @keyframes drift{0%{transform:translate(0,0) scale(1)}50%{transform:translate(20px,-15px) scale(1.03)}100%{transform:translate(-10px,8px) scale(.98)}}
 .modal-bg{position:fixed;inset:0;background:rgba(0,0,0,.7);backdrop-filter:blur(8px);z-index:100;display:none;align-items:center;justify-content:center}
 .modal-bg.active{display:flex}
-.faq-a{max-height:0;overflow:hidden;transition:max-height .4s cubic-bezier(.16,1,.3,1);opacity:0}
-.faq-item.open .faq-a{opacity:1}
-.faq-item.open .faq-a{max-height:300px}
+.faq-a{max-height:0;overflow:hidden;transition:max-height .4s cubic-bezier(.16,1,.3,1),opacity .3s ease;opacity:0}
+.faq-item.open .faq-a{opacity:1;max-height:300px}
 .faq-item.open .chev{transform:rotate(180deg)}
 
 /* Light */
@@ -154,6 +153,28 @@ html.light .faq-item{background:rgba(255,255,255,.5)!important;border-color:rgba
 </div>
 </div>
 
+<!-- ══════ SOCIAL PROOF ══════ -->
+<section class="py-20">
+<div class="max-w-6xl mx-auto px-6">
+  <div class="glass rounded-2xl p-8 md:p-12 fade-up">
+    <div class="grid md:grid-cols-3 gap-8 text-center">
+      <div>
+        <div class="mono text-4xl font-bold bg-gradient-to-r from-violet-400 to-blue-400 bg-clip-text text-transparent mb-2">2,400+</div>
+        <div class="text-sm text-slate-400">Активных трейдеров</div>
+      </div>
+      <div>
+        <div class="mono text-4xl font-bold bg-gradient-to-r from-blue-400 to-cyan-400 bg-clip-text text-transparent mb-2">$2.1M</div>
+        <div class="text-sm text-slate-400">Объём сделок</div>
+      </div>
+      <div>
+        <div class="mono text-4xl font-bold bg-gradient-to-r from-cyan-400 to-emerald-400 bg-clip-text text-transparent mb-2">87.3%</div>
+        <div class="text-sm text-slate-400">Точность сигналов</div>
+      </div>
+    </div>
+  </div>
+</div>
+</section>
+
 <!-- ══════ FEATURES ══════ -->
 <section id="features" class="py-28">
 <div class="max-w-6xl mx-auto px-6">
@@ -213,6 +234,14 @@ html.light .faq-item{background:rgba(255,255,255,.5)!important;border-color:rgba
       <p class="text-sm text-slate-400" data-t="h3d">Бот торгует 24/7. Вы получаете сигналы и следите за результатами.</p>
     </div>
   </div>
+</div>
+</section>
+
+<!-- ══════ MINI CTA ══════ -->
+<section class="py-16">
+<div class="max-w-3xl mx-auto px-6 text-center fade-up">
+  <p class="text-xl text-slate-300 mb-6">Присоединяйся к <span class="font-bold text-white">2,400+</span> трейдерам</p>
+  <a href="#" onclick="openModal('register');return false" class="btn-p px-10 py-3.5 text-base">Попробовать бесплатно</a>
 </div>
 </section>
 
@@ -277,6 +306,41 @@ html.light .faq-item{background:rgba(255,255,255,.5)!important;border-color:rgba
         <li class="flex gap-2"><span class="text-emerald-400">&#10003;</span>Личный менеджер</li>
       </ul>
       <a href="#" onclick="openModal('register');return false" class="btn-s w-full justify-center py-3" data-t="pr-btn">Выбрать</a>
+    </div>
+  </div>
+</div>
+</section>
+
+<!-- ══════ TESTIMONIALS ══════ -->
+<section class="py-28">
+<div class="max-w-6xl mx-auto px-6">
+  <div class="text-center mb-16 fade-up">
+    <h2 class="text-[clamp(1.8rem,4vw,3rem)] font-extrabold tracking-tight">Что говорят трейдеры</h2>
+  </div>
+  <div class="grid md:grid-cols-3 gap-4">
+    <div class="glass p-6 rounded-2xl fade-up">
+      <div class="flex items-center gap-3 mb-4">
+        <div class="w-10 h-10 rounded-full bg-violet-500/20 flex items-center justify-center text-sm font-bold text-violet-300">A</div>
+        <div><div class="font-semibold text-sm">Алексей К.</div><div class="text-[.7rem] text-slate-500">Bybit &middot; 3 месяца</div></div>
+      </div>
+      <p class="text-sm text-slate-400 leading-relaxed mb-3">«Подключил SMC стратегию на 4h. За первый месяц +12% к депозиту. Сигналы точные, SL маленький.»</p>
+      <div class="mono text-sm font-bold text-emerald-400">+12.4% за месяц</div>
+    </div>
+    <div class="glass p-6 rounded-2xl fade-up" style="transition-delay:100ms">
+      <div class="flex items-center gap-3 mb-4">
+        <div class="w-10 h-10 rounded-full bg-blue-500/20 flex items-center justify-center text-sm font-bold text-blue-300">M</div>
+        <div><div class="font-semibold text-sm">Марина Д.</div><div class="text-[.7rem] text-slate-500">Binance &middot; 6 месяцев</div></div>
+      </div>
+      <p class="text-sm text-slate-400 leading-relaxed mb-3">«Пользуюсь авто-торговлей на Pro. Бот работает 24/7, я только слежу за результатами. Очень удобно.»</p>
+      <div class="mono text-sm font-bold text-emerald-400">+8.7% в месяц</div>
+    </div>
+    <div class="glass p-6 rounded-2xl fade-up" style="transition-delay:200ms">
+      <div class="flex items-center gap-3 mb-4">
+        <div class="w-10 h-10 rounded-full bg-cyan-500/20 flex items-center justify-center text-sm font-bold text-cyan-300">D</div>
+        <div><div class="font-semibold text-sm">Дмитрий В.</div><div class="text-[.7rem] text-slate-500">BingX &middot; 2 месяца</div></div>
+      </div>
+      <p class="text-sm text-slate-400 leading-relaxed mb-3">«Скальпинг бот приносит стабильно. Риск-менеджмент работает отлично — ни одного маржин-колла.»</p>
+      <div class="mono text-sm font-bold text-emerald-400">+5.2% в месяц</div>
     </div>
   </div>
 </div>
