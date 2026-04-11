@@ -193,9 +193,11 @@ class BacktestService {
 
     for (let i = startIdx; i < candles.length - 1; i++) {
       const c = candles[i], price = closes[i];
+      if (!atr[i-1] || !rsi[i] || !price) continue;
 
       if (!inTrade) {
         let signal = null;
+        try {
 
         // ── LEVELS: Pivot-based support/resistance ──
         if (strategy === 'levels') {
@@ -288,6 +290,8 @@ class BacktestService {
           }
         }
 
+        } catch(stratErr) { signal = null; } // strategy error — skip bar
+
         if (signal && signal.dir) {
           // Direction filter
           if (directionFilter === 'long' && signal.dir === 'short') signal = null;
@@ -296,7 +300,7 @@ class BacktestService {
           // Trend filter: EMA(200) — only trade with trend
           if (signal && useTrendFilter && ema200[i]) {
             if (signal.dir === 'long' && price < ema200[i]) signal = null;
-            if (signal.dir === 'short' && price > ema200[i]) signal = null;
+            else if (signal && signal.dir === 'short' && price > ema200[i]) signal = null;
           }
         }
 
