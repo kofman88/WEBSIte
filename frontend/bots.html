@@ -300,16 +300,25 @@ function collectStratParams(){
   return params;
 }
 
-// Quick backtest from bot form
+// Quick backtest from bot form — uses ALL parameters
 async function quickBacktest(){
+  const errs=validateBotForm();
+  if(errs.length){Toast.error(errs.join('. '));return}
   const form=document.getElementById('createBotForm');
   const fd=new FormData(form);
   const res=document.getElementById('quickBtResult');
   res.className='mt-3 p-3 bg-slate-800/30 rounded-xl text-xs text-slate-300';
-  res.textContent='Запуск бэктеста...';
+  res.textContent='Запуск бэктеста с текущими настройками...';
   const sp=collectStratParams();
+  // Add general params to strategy config
+  sp.stopLossPct=+fd.get('stopLossPct');
+  sp.takeProfitPct=+fd.get('takeProfitPct');
+  sp.leverage=+fd.get('leverage');
+  sp.trailingStop=fd.get('trailingStop')==='1';
+  sp.maxTrades=+fd.get('maxTrades')||5;
+  sp.dailyLoss=+fd.get('dailyLoss')||5;
   try{
-    const data={name:fd.get('symbol')+' '+fd.get('strategyType'),symbol:fd.get('symbol'),exchangeName:fd.get('exchangeName'),timeframe:fd.get('timeframe')||'1H',startDate:fd.get('btStart')||'2025-01-01',endDate:fd.get('btEnd')||'2026-01-01',initialCapital:+fd.get('positionSizeUsd')*+fd.get('leverage'),strategyConfig:JSON.stringify({strategy:fd.get('strategyType'),direction:fd.get('direction')||'both',trendFilter:fd.get('trendFilter')==='1',params:sp})};
+    const data={name:fd.get('symbol')+' '+fd.get('strategyType'),symbol:fd.get('symbol').toUpperCase(),exchangeName:fd.get('exchangeName'),timeframe:fd.get('timeframe')||'1H',startDate:fd.get('btStart')||'2025-01-01',endDate:fd.get('btEnd')||'2026-01-01',initialCapital:+fd.get('positionSizeUsd')*+fd.get('leverage'),strategyConfig:JSON.stringify({strategy:fd.get('strategyType'),direction:fd.get('direction')||'both',trendFilter:fd.get('trendFilter')==='1',params:sp})};
     const r=await API.createBacktest(data);
     const btId=r.backtest?.id||r.id;
     if(!btId){res.textContent='Бэктест создан — проверьте страницу Бэктесты';return}
@@ -334,9 +343,23 @@ async function quickBacktest(){
   }catch(e){res.textContent='Ошибка: '+e.message;res.style.color='#ef4444'}
 }
 
+function validateBotForm(){
+  const f=document.getElementById('createBotForm'),fd=new FormData(f),e=[];
+  if(!fd.get('name')||fd.get('name').trim().length<2)e.push('Имя: минимум 2 символа');
+  if(!fd.get('symbol')||fd.get('symbol').trim().length<3)e.push('Пара: укажите (напр. BTCUSDT)');
+  if(+fd.get('positionSizeUsd')<10)e.push('Депозит: минимум $10');
+  if(+fd.get('leverage')<1||+fd.get('leverage')>125)e.push('Leverage: от 1 до 125');
+  if(+fd.get('stopLossPct')<=0)e.push('Stop Loss: больше 0');
+  if(+fd.get('takeProfitPct')<=0)e.push('Take Profit: больше 0');
+  if(+fd.get('takeProfitPct')<=+fd.get('stopLossPct'))e.push('Take Profit должен быть > Stop Loss');
+  return e;
+}
 document.getElementById('createBotForm')?.addEventListener('submit',async e=>{
-  e.preventDefault();const fd=new FormData(e.target);const data=Object.fromEntries(fd.entries());
-  data.leverage=+data.leverage;data.positionSizeUsd=+data.positionSizeUsd;data.stopLossPct=+data.stopLossPct;data.takeProfitPct=+data.takeProfitPct;
+  e.preventDefault();
+  const errs=validateBotForm();
+  if(errs.length){Toast.error(errs.join('. '));return}
+  const fd=new FormData(e.target);
+  const data={name:fd.get('name'),exchangeName:fd.get('exchangeName'),symbol:fd.get('symbol').toUpperCase(),strategyType:fd.get('strategyType'),leverage:+fd.get('leverage'),positionSizeUsd:+fd.get('positionSizeUsd'),stopLossPct:+fd.get('stopLossPct'),takeProfitPct:+fd.get('takeProfitPct'),trailingStop:fd.get('trailingStop')==='1'};
   try{await API.createBot(data);Toast.success('Бот создан!');document.getElementById('createModal').style.display='none';loadBots()}catch(err){Toast.error(err.message)}
 });
 </script>
