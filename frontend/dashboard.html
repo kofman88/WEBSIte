@@ -85,10 +85,18 @@
 
 <!-- MAIN -->
 <main class="main-content">
+  <!-- Welcome -->
+  <div class="mb-4"><h1 class="text-xl font-bold" id="welcomeMsg">Добро пожаловать</h1><p class="text-xs text-slate-500" id="welcomeDate"></p></div>
+
   <!-- Email verification warning -->
   <div id="emailWarning" class="hidden mb-4 p-3 bg-amber-500/5 border border-amber-500/15 rounded-xl text-sm text-amber-300 flex items-center gap-3">
     <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 9v2m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
     <span>Подтвердите email для полного доступа к платформе</span>
+  </div>
+
+  <!-- Live Price Ticker -->
+  <div class="flex gap-3 mb-4 overflow-x-auto pb-2" id="priceTicker" style="scrollbar-width:none">
+    <div class="text-xs text-slate-500 flex-shrink-0 py-1">Загрузка цен...</div>
   </div>
 
   <!-- Stats -->
@@ -213,6 +221,21 @@ function applyDashLang(){
 }
 (function(){if(localStorage.getItem('chm_lang')==='en'){dashLang='en';const b=document.getElementById('dLangBtn');if(b)b.textContent='RU';setTimeout(applyDashLang,200)}})();
 
+// Live price ticker
+async function loadTicker(){
+  const coins=['BTCUSDT','ETHUSDT','SOLUSDT','XRPUSDT','BNBUSDT','DOGEUSDT'];
+  const el=document.getElementById('priceTicker');
+  try{
+    const prices=await Promise.all(coins.map(s=>fetch('https://api.binance.com/api/v3/ticker/24hr?symbol='+s).then(r=>r.json()).catch(()=>null)));
+    el.innerHTML=prices.filter(Boolean).map(p=>{
+      const change=parseFloat(p.priceChangePercent||0);
+      const sym=p.symbol.replace('USDT','');
+      return `<div class="flex-shrink-0 flex items-center gap-2 px-3 py-1.5 rounded-lg bg-slate-800/30 border border-slate-800/50 text-xs"><span class="font-semibold text-white">${sym}</span><span class="mono">\$${parseFloat(p.lastPrice).toLocaleString('en',{maximumFractionDigits:sym==='BTC'?0:2})}</span><span class="mono ${change>=0?'text-green-400':'text-red-400'}">${change>=0?'+':''}${change.toFixed(2)}%</span></div>`;
+    }).join('');
+  }catch(_){el.innerHTML='<div class="text-xs text-slate-600">Цены недоступны</div>'}
+}
+loadTicker();setInterval(loadTicker,30000);
+
 // Server status
 fetch('/api/health').then(r=>r.json()).then(d=>{const el=document.getElementById('serverStatus');if(el)el.textContent='Сервер: онлайн • '+d.version}).catch(()=>{const el=document.getElementById('serverStatus');if(el){el.textContent='Сервер: офлайн';el.style.color='#ef4444'}});
 
@@ -251,6 +274,13 @@ async function loadDashboard(){
         document.getElementById('planName').textContent=(me.subscription.plan||'free').charAt(0).toUpperCase()+(me.subscription.plan||'free').slice(1)+' Plan';
       }
     }
+
+    // Welcome message
+    const h=new Date().getHours();
+    const greet=h<6?'Доброй ночи':h<12?'Доброе утро':h<18?'Добрый день':'Добрый вечер';
+    const name=(me.user?.email||'').split('@')[0];
+    document.getElementById('welcomeMsg').textContent=greet+(name?', '+name:'')+'!';
+    document.getElementById('welcomeDate').textContent=new Date().toLocaleDateString('ru',{weekday:'long',day:'numeric',month:'long',year:'numeric'});
 
     // Email warning
     if(me.user&&!me.user.email_verified){document.getElementById('emailWarning').classList.remove('hidden')}

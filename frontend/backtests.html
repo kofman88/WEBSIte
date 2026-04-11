@@ -72,7 +72,7 @@ async function loadBacktests(){
       const isRunning=st==='running'||st==='pending';
       return `<div class="card ${isRunning?'':'card-glow'}" ${isRunning?'style="opacity:.7"':''}>
         <div class="flex items-center justify-between mb-3">
-          <div><div class="font-semibold">${b.name||b.symbol+' '+b.timeframe}</div><div class="text-xs text-slate-500">${b.start_date} — ${b.end_date} &middot; ${b.symbol}</div></div>
+          <div><div class="font-semibold">${b.name||b.symbol+' '+b.timeframe} <span class="text-[.6rem] px-1.5 py-0.5 rounded-full ${(b.name||'').includes('smc')?'bg-violet-500/15 text-violet-300':(b.name||'').includes('scalp')?'bg-cyan-500/15 text-cyan-300':(b.name||'').includes('gerchik')?'bg-blue-500/15 text-blue-300':'bg-amber-500/15 text-amber-300'}">${((b.name||'').split(' ')[1]||'levels').toUpperCase()}</span></div><div class="text-xs text-slate-500">${b.start_date} — ${b.end_date} &middot; ${b.symbol}</div></div>
           <div class="flex gap-2"><span class="text-xs px-2 py-0.5 rounded-full ${st==='completed'?'bg-green-500/15 text-green-400':st==='failed'?'bg-red-500/15 text-red-400':'bg-yellow-500/15 text-yellow-400'}">${st}</span><button onclick="delBT(${b.id})" class="text-slate-600 hover:text-red-400 text-sm">&times;</button></div>
         </div>
         ${st==='completed'&&r?`<div class="grid grid-cols-3 gap-3 text-center text-sm mb-2">

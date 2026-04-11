@@ -86,6 +86,24 @@ function renderPageNotifs(){
   if(dot)dot.style.display='';
 }
 
+// Keyboard shortcuts
+document.addEventListener('keydown',e=>{
+  if(e.target.tagName==='INPUT'||e.target.tagName==='TEXTAREA'||e.target.tagName==='SELECT')return;
+  const key=e.key.toLowerCase();
+  if(e.altKey){
+    if(key==='d')location.href='/dashboard.html';
+    if(key==='b')location.href='/bots.html';
+    if(key==='s')location.href='/signals.html';
+    if(key==='t')location.href='/backtests.html';
+    if(key==='e')location.href='/wallet.html';
+    if(key==='a')location.href='/academy/';
+  }
+  if(key==='escape'){
+    document.querySelectorAll('.modal-bg').forEach(m=>m.classList.remove('active'));
+    document.querySelectorAll('[style*="display:flex"][id*="Modal"],[style*="display: flex"][id*="Modal"]').forEach(m=>m.style.display='none');
+  }
+});
+
 // Mobile sidebar toggle
 document.addEventListener('DOMContentLoaded',()=>{
   const toggle=document.getElementById('sidebar-toggle');
@@ -99,6 +117,14 @@ document.addEventListener('DOMContentLoaded',()=>{
     });
   }
 });
+
+// Global loading indicator
+let loadingCount=0;
+const loadingBar=document.createElement('div');
+loadingBar.style.cssText='position:fixed;top:0;left:0;height:2px;background:linear-gradient(90deg,#7c3aed,#2563eb);z-index:9999;transition:width .3s;width:0';
+document.body.appendChild(loadingBar);
+window.showLoading=()=>{loadingCount++;loadingBar.style.width='70%'};
+window.hideLoading=()=>{loadingCount=Math.max(0,loadingCount-1);if(!loadingCount){loadingBar.style.width='100%';setTimeout(()=>{loadingBar.style.width='0'},300)}};
 
 // Close notif on outside click
 document.addEventListener('click',e=>{
