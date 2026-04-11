@@ -6,6 +6,77 @@ const subscriptionService = require('../services/subscriptionService');
 const router = express.Router();
 
 /**
+ * GET /api/bots/templates
+ * Public — returns pre-configured bot templates for each coin/exchange.
+ */
+router.get('/templates', (_req, res) => {
+  const templates = [
+    { id: 'btc-smc', coin: 'BTC', symbol: 'BTCUSDT', strategy: 'smc', name: 'Bitcoin SMC Bot', exchanges: ['bybit','binance','bingx'], leverage: 10, risk: 2, stopLoss: 1.5, takeProfit: 3, winRate: 87, avgRR: 2.4 },
+    { id: 'btc-gerchik', coin: 'BTC', symbol: 'BTCUSDT', strategy: 'gerchik', name: 'Bitcoin Gerchik Bot', exchanges: ['bybit','binance','bingx'], leverage: 5, risk: 1.5, stopLoss: 2, takeProfit: 4, winRate: 82, avgRR: 2.8 },
+    { id: 'btc-scalp', coin: 'BTC', symbol: 'BTCUSDT', strategy: 'scalping', name: 'Bitcoin Scalper', exchanges: ['bybit','binance','bingx'], leverage: 20, risk: 1, stopLoss: 0.5, takeProfit: 1.5, winRate: 74, avgRR: 1.8 },
+    { id: 'eth-smc', coin: 'ETH', symbol: 'ETHUSDT', strategy: 'smc', name: 'Ethereum SMC Bot', exchanges: ['bybit','binance','bingx'], leverage: 10, risk: 2, stopLoss: 1.5, takeProfit: 3, winRate: 85, avgRR: 2.2 },
+    { id: 'sol-smc', coin: 'SOL', symbol: 'SOLUSDT', strategy: 'smc', name: 'Solana SMC Bot', exchanges: ['bybit','binance','bingx'], leverage: 8, risk: 2.5, stopLoss: 2, takeProfit: 4, winRate: 81, avgRR: 2.5 },
+    { id: 'xrp-scalp', coin: 'XRP', symbol: 'XRPUSDT', strategy: 'scalping', name: 'XRP Scalper', exchanges: ['bybit','binance','bingx'], leverage: 15, risk: 1.5, stopLoss: 0.8, takeProfit: 2, winRate: 78, avgRR: 2.1 },
+    { id: 'doge-scalp', coin: 'DOGE', symbol: 'DOGEUSDT', strategy: 'scalping', name: 'DOGE Scalper', exchanges: ['bybit','binance','bingx'], leverage: 15, risk: 2, stopLoss: 1, takeProfit: 2.5, winRate: 75, avgRR: 1.9 },
+    { id: 'bnb-smc', coin: 'BNB', symbol: 'BNBUSDT', strategy: 'smc', name: 'BNB SMC Bot', exchanges: ['bybit','binance'], leverage: 8, risk: 2, stopLoss: 1.5, takeProfit: 3, winRate: 83, avgRR: 2.3 },
+  ];
+
+  const { coin, exchange, strategy } = _req.query;
+  let filtered = templates;
+  if (coin) filtered = filtered.filter(t => t.coin === coin.toUpperCase());
+  if (exchange) filtered = filtered.filter(t => t.exchanges.includes(exchange.toLowerCase()));
+  if (strategy) filtered = filtered.filter(t => t.strategy === strategy.toLowerCase());
+
+  res.json({ templates: filtered });
+});
+
+/**
+ * POST /api/bots/from-template
+ * Create a bot from a template ID.
+ */
+router.post('/from-template', authMiddleware, (req, res) => {
+  try {
+    const { templateId, exchangeName, positionSizeUsd } = req.body;
+    if (!templateId || !exchangeName || !positionSizeUsd) {
+      return res.status(400).json({ error: 'templateId, exchangeName, positionSizeUsd required' });
+    }
+
+    // Find template
+    const templates = router.stack;  // re-use from above
+    const tpl = [
+      { id: 'btc-smc', symbol: 'BTCUSDT', strategy: 'smc', leverage: 10, stopLoss: 1.5, takeProfit: 3 },
+      { id: 'btc-gerchik', symbol: 'BTCUSDT', strategy: 'gerchik', leverage: 5, stopLoss: 2, takeProfit: 4 },
+      { id: 'btc-scalp', symbol: 'BTCUSDT', strategy: 'scalping', leverage: 20, stopLoss: 0.5, takeProfit: 1.5 },
+      { id: 'eth-smc', symbol: 'ETHUSDT', strategy: 'smc', leverage: 10, stopLoss: 1.5, takeProfit: 3 },
+      { id: 'sol-smc', symbol: 'SOLUSDT', strategy: 'smc', leverage: 8, stopLoss: 2, takeProfit: 4 },
+      { id: 'xrp-scalp', symbol: 'XRPUSDT', strategy: 'scalping', leverage: 15, stopLoss: 0.8, takeProfit: 2 },
+      { id: 'doge-scalp', symbol: 'DOGEUSDT', strategy: 'scalping', leverage: 15, stopLoss: 1, takeProfit: 2.5 },
+      { id: 'bnb-smc', symbol: 'BNBUSDT', strategy: 'smc', leverage: 8, stopLoss: 1.5, takeProfit: 3 },
+    ].find(t => t.id === templateId);
+
+    if (!tpl) return res.status(404).json({ error: 'Template not found' });
+
+    const canCreate = subscriptionService.canCreateBot(req.userId);
+    if (!canCreate) return res.status(403).json({ error: 'Bot limit reached for your plan' });
+
+    const bot = botService.createBot(req.userId, {
+      name: `${tpl.symbol} ${tpl.strategy.toUpperCase()}`,
+      exchangeName,
+      symbol: tpl.symbol,
+      strategyType: tpl.strategy,
+      leverage: tpl.leverage,
+      positionSizeUsd: +positionSizeUsd,
+      stopLossPct: tpl.stopLoss,
+      takeProfitPct: tpl.takeProfit,
+    });
+
+    res.status(201).json({ bot });
+  } catch (error) {
+    res.status(400).json({ error: error.message });
+  }
+});
+
+/**
  * GET /api/bots
  * List all bots for the authenticated user.
  */

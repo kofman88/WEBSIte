@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="ru" class="scroll-smooth">
+<head>
+<meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>CHM Finance — DOGE Bot | Автоматическая торговля DOGE</title>
+<meta name="description" content="Автоматический торговый бот для DOGE. Стратегии SMC, Gerchik, Scalping на Bybit, Binance, BingX."/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com"></script>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+::selection{background:rgba(124,58,237,.3);color:#fff}
+body{background:#05060f;color:#e1.9f0;font-family:'Inter',sans-serif;overflow-x:hidden;-webkit-font-smoothing:antialiased}
+body::after{content:'';position:fixed;inset:0;z-index:0;pointer-events:none;opacity:.02;background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E")}
+body>*{position:relative;z-index:1}
+.mono{font-family:'JetBrains Mono',monospace}
+a{color:inherit;text-decoration:none}
+.btn-p{display:inline-flex;align-items:center;gap:8px;padding:14px 32px;border-radius:10px;font-weight:600;font-size:1rem;color:#fff;border:none;cursor:pointer;transition:all .25s cubic-bezier(.16,1,.3,1);background:linear-gradient(135deg,#7c3aed,#2563eb);box-shadow:0 2px 12px rgba(124,58,237,.3)}
+.btn-p:hover{transform:translateY(-2px);box-shadow:0 4px 20px rgba(124,58,237,.45)}
+.btn-s{display:inline-flex;align-items:center;gap:8px;padding:14px 32px;border-radius:10px;font-weight:600;color:#c4b5fd;border:1px solid rgba(124,58,237,.2);background:rgba(124,58,237,.06);cursor:pointer;transition:all .25s}
+.btn-s:hover{background:rgba(124,58,237,.12);border-color:rgba(124,58,237,.4)}
+.glass{background:rgba(255,255,255,.03);backdrop-filter:blur(20px);border:1px solid rgba(255,255,255,.06);border-radius:16px}
+.glass:hover{border-color:rgba(124,58,237,.15)}
+.nav-blur{background:rgba(5,6,15,.6);backdrop-filter:blur(20px);border-bottom:1px solid rgba(255,255,255,.04)}
+.fade-up{opacity:0;transform:translateY(30px);transition:all .7s cubic-bezier(.16,1,.3,1)}
+.fade-up.show{opacity:1;transform:translateY(0)}
+@keyframes drift{0%{transform:translate(0,0) scale(1)}50%{transform:translate(20px,-15px) scale(1.03)}100%{transform:translate(-10px,8px) scale(.98)}}
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav id="nav" class="fixed top-0 inset-x-0 z-50 transition-all duration-300">
+<div class="max-w-6xl mx-auto px-6 h-16 flex items-center justify-between">
+  <a href="/" class="text-xl font-extrabold tracking-wide">CHM<span class="text-violet-400">.</span></a>
+  <div class="hidden md:flex items-center gap-7 text-[.85rem] text-slate-400">
+    <a href="/" class="hover:text-white transition">Главная</a>
+    <a href="/#features" class="hover:text-white transition">Возможности</a>
+    <a href="/#pricing" class="hover:text-white transition">Тарифы</a>
+    <a href="/academy/" class="hover:text-white transition">Академия</a>
+  </div>
+  <div class="flex items-center gap-3">
+    <a href="/#" onclick="return false" class="btn-p text-sm px-5 py-2">Начать</a>
+  </div>
+</div>
+</nav>
+
+<!-- HERO -->
+<section class="relative pt-32 pb-24 overflow-hidden">
+  <div class="absolute inset-0">
+    <div class="absolute w-[600px] h-[600px] -top-[15%] -left-[5%] bg-amber-500/15 rounded-full blur-[160px]" style="animation:drift 18s ease-in-out infinite"></div>
+    <div class="absolute w-[400px] h-[400px] bottom-0 right-0 bg-violet-500/10 rounded-full blur-[140px]" style="animation:drift 22s ease-in-out infinite reverse"></div>
+  </div>
+  <div class="max-w-6xl mx-auto px-6 relative z-10">
+    <div class="flex items-center gap-3 mb-6">
+      <a href="/" class="text-sm text-slate-500 hover:text-slate-300 transition">Главная</a>
+      <span class="text-slate-600">/</span>
+      <a href="/" class="text-sm text-slate-500 hover:text-slate-300 transition">Боты</a>
+      <span class="text-slate-600">/</span>
+      <span class="text-sm text-violet-400">DOGE</span>
+    </div>
+    <div class="grid lg:grid-cols-2 gap-12 items-center">
+      <div>
+        <div class="flex items-center gap-3 mb-4">
+          <div class="w-14 h-14 rounded-2xl bg-amber-500/10 border border-amber-500/20 flex items-center justify-center text-2xl">&#8383;#8226;</div>
+          <div>
+            <div class="text-xs text-slate-500 uppercase tracking-widest">Торговый бот</div>
+            <h1 class="text-4xl lg:text-5xl font-extrabold tracking-tight">DOGE Bot</h1>
+          </div>
+        </div>
+        <p class="text-lg text-slate-400 leading-relaxed mb-8 max-w-lg">Автоматическая торговля DOGE/USDT на Bybit, Binance и BingX. Три стратегии: SMC, Gerchik, Scalping. Бот анализирует рынок 24/7 и открывает сделки по заданным параметрам.</p>
+        <div class="flex flex-wrap gap-4 mb-10">
+          <a href="/" class="btn-p">Создать DOGE Bot</a>
+          <a href="/academy/" class="btn-s">Документация</a>
+        </div>
+        <div class="grid grid-cols-3 gap-3">
+          <div class="glass text-center py-4 rounded-xl"><div class="mono text-xl font-bold text-white">87%</div><div class="text-[.7rem] text-slate-500 mt-1">Win Rate</div></div>
+          <div class="glass text-center py-4 rounded-xl"><div class="mono text-xl font-bold text-white">2.4R</div><div class="text-[.7rem] text-slate-500 mt-1">Avg R:R</div></div>
+          <div class="glass text-center py-4 rounded-xl"><div class="mono text-xl font-bold text-white">24/7</div><div class="text-[.7rem] text-slate-500 mt-1">Мониторинг</div></div>
+        </div>
+      </div>
+      <div class="hidden lg:block">
+        <div class="glass p-6 rounded-2xl">
+          <div class="flex items-center justify-between mb-4"><span class="font-bold">DOGE/USDT</span><span class="mono text-sm text-emerald-400">+8.4% сегодня</span></div>
+          <div class="space-y-3">
+            <div class="flex items-center justify-between p-3 bg-white/[.03] rounded-lg"><div><div class="text-xs text-slate-500">Стратегия</div><div class="text-sm font-semibold">SMC</div></div><div class="text-right"><span class="text-xs px-2 py-0.5 rounded-full bg-emerald-500/15 text-emerald-400">LONG</span></div></div>
+            <div class="flex items-center justify-between p-3 bg-white/[.03] rounded-lg"><div><div class="text-xs text-slate-500">Entry</div><div class="mono text-sm">0.182</div></div><div><div class="text-xs text-slate-500">TP1</div><div class="mono text-sm text-emerald-400">0.195</div></div></div>
+            <div class="flex items-center justify-between p-3 bg-white/[.03] rounded-lg"><div><div class="text-xs text-slate-500">Stop Loss</div><div class="mono text-sm text-red-400">0.176</div></div><div><div class="text-xs text-slate-500">R:R</div><div class="mono text-sm">1.9</div></div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- STRATEGIES -->
+<section class="py-20">
+<div class="max-w-6xl mx-auto px-6">
+  <h2 class="text-3xl font-extrabold tracking-tight mb-4 fade-up">Стратегии для DOGE</h2>
+  <p class="text-slate-400 mb-12 fade-up">Выберите подходящую стратегию или используйте все три одновременно</p>
+  <div class="grid md:grid-cols-3 gap-4">
+    <div class="glass p-6 rounded-2xl fade-up hover:-translate-y-1 transition-all duration-300">
+      <div class="w-10 h-10 rounded-xl bg-violet-500/10 flex items-center justify-center mb-4"><svg class="w-5 h-5 text-violet-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6m18-2V5a2 2 0 00-2-2h-2a2 2 0 00-2 2v14"/></svg></div>
+      <h3 class="font-bold mb-2">SMC Strategy</h3>
+      <p class="text-sm text-slate-400 mb-4">Smart Money Concepts. Торговля по институциональным паттернам: Order Blocks, Liquidity Sweeps, BOS/CHoCH.</p>
+      <div class="flex gap-2 text-[.7rem]"><span class="px-2 py-1 rounded-full bg-violet-500/10 text-violet-300">4H</span><span class="px-2 py-1 rounded-full bg-violet-500/10 text-violet-300">1D</span><span class="px-2 py-1 rounded-full bg-emerald-500/10 text-emerald-300">High WR</span></div>
+    </div>
+    <div class="glass p-6 rounded-2xl fade-up hover:-translate-y-1 transition-all duration-300" style="transition-delay:80ms">
+      <div class="w-10 h-10 rounded-xl bg-blue-500/10 flex items-center justify-center mb-4"><svg class="w-5 h-5 text-blue-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M13 10V3L4 14h7v7l9-11h-7z"/></svg></div>
+      <h3 class="font-bold mb-2">Gerchik Strategy</h3>
+      <p class="text-sm text-slate-400 mb-4">Уровневая стратегия Александра Герчика. Торговля от ключевых уровней поддержки/сопротивления.</p>
+      <div class="flex gap-2 text-[.7rem]"><span class="px-2 py-1 rounded-full bg-blue-500/10 text-blue-300">1D</span><span class="px-2 py-1 rounded-full bg-blue-500/10 text-blue-300">Levels</span><span class="px-2 py-1 rounded-full bg-emerald-500/10 text-emerald-300">Low Risk</span></div>
+    </div>
+    <div class="glass p-6 rounded-2xl fade-up hover:-translate-y-1 transition-all duration-300" style="transition-delay:160ms">
+      <div class="w-10 h-10 rounded-xl bg-cyan-500/10 flex items-center justify-center mb-4"><svg class="w-5 h-5 text-cyan-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M13 10V3L4 14h7v7l9-11h-7z"/></svg></div>
+      <h3 class="font-bold mb-2">Scalping</h3>
+      <p class="text-sm text-slate-400 mb-4">Быстрые сделки на малых таймфреймах. MACD + RSI + Volume. Для активных трейдеров.</p>
+      <div class="flex gap-2 text-[.7rem]"><span class="px-2 py-1 rounded-full bg-cyan-500/10 text-cyan-300">1m-15m</span><span class="px-2 py-1 rounded-full bg-cyan-500/10 text-cyan-300">Fast</span><span class="px-2 py-1 rounded-full bg-amber-500/10 text-amber-300">Active</span></div>
+    </div>
+  </div>
+</div>
+</section>
+
+<!-- HOW IT WORKS -->
+<section class="py-20">
+<div class="max-w-4xl mx-auto px-6">
+  <h2 class="text-3xl font-extrabold tracking-tight mb-12 text-center fade-up">Как запустить DOGE Bot</h2>
+  <div class="space-y-6">
+    <div class="glass p-6 rounded-2xl flex gap-5 items-start fade-up">
+      <div class="w-10 h-10 rounded-xl bg-violet-500/10 flex items-center justify-center flex-shrink-0"><span class="mono font-bold text-violet-400">1</span></div>
+      <div><h3 class="font-bold mb-1">Зарегистрируйтесь</h3><p class="text-sm text-slate-400">Создайте аккаунт на CHM Finance. Это бесплатно и займёт 30 секунд.</p></div>
+    </div>
+    <div class="glass p-6 rounded-2xl flex gap-5 items-start fade-up" style="transition-delay:80ms">
+      <div class="w-10 h-10 rounded-xl bg-blue-500/10 flex items-center justify-center flex-shrink-0"><span class="mono font-bold text-blue-400">2</span></div>
+      <div><h3 class="font-bold mb-1">Подключите биржу</h3><p class="text-sm text-slate-400">Добавьте API ключи вашей биржи (Bybit, Binance или BingX). Только торговые права, без вывода.</p></div>
+    </div>
+    <div class="glass p-6 rounded-2xl flex gap-5 items-start fade-up" style="transition-delay:160ms">
+      <div class="w-10 h-10 rounded-xl bg-emerald-500/10 flex items-center justify-center flex-shrink-0"><span class="mono font-bold text-emerald-400">3</span></div>
+      <div><h3 class="font-bold mb-1">Настройте бота</h3><p class="text-sm text-slate-400">Выберите стратегию (SMC/Gerchik/Scalping), установите leverage, risk % и stop-loss. Или используйте готовый пресет.</p></div>
+    </div>
+    <div class="glass p-6 rounded-2xl flex gap-5 items-start fade-up" style="transition-delay:240ms">
+      <div class="w-10 h-10 rounded-xl bg-amber-500/10 flex items-center justify-center flex-shrink-0"><span class="mono font-bold text-amber-400">4</span></div>
+      <div><h3 class="font-bold mb-1">Запустите и следите</h3><p class="text-sm text-slate-400">Бот начнёт сканировать DOGE/USDT и открывать сделки автоматически. Следите за результатами в дашборде.</p></div>
+    </div>
+  </div>
+</div>
+</section>
+
+<!-- CTA -->
+<section class="py-20">
+<div class="max-w-3xl mx-auto px-6 text-center fade-up">
+  <div class="glass rounded-3xl p-12 relative overflow-hidden">
+    <div class="absolute w-[300px] h-[300px] -top-[150px] -right-[150px] bg-amber-500/10 rounded-full blur-[100px] pointer-events-none"></div>
+    <h2 class="text-3xl font-extrabold mb-3 relative z-10">Запустите DOGE Bot сейчас</h2>
+    <p class="text-slate-400 mb-8 relative z-10">Бесплатный план включает 1 бота и 3 сигнала в день</p>
+    <a href="/" class="btn-p text-base px-10 py-4 relative z-10">Создать аккаунт бесплатно</a>
+  </div>
+</div>
+</section>
+
+<!-- FOOTER -->
+<footer class="border-t border-white/[.04] py-10">
+<div class="max-w-6xl mx-auto px-6 text-center text-xs text-slate-600">
+  <p class="mb-2">Торговля криптовалютами сопряжена с рисками. CHM Finance — программное обеспечение, не инвестиционная рекомендация.</p>
+  <p>&copy; 2024-2026 CHM Finance. <a href="/privacy.html" class="text-violet-400/60 hover:text-violet-400">Конфиденциальность</a> &middot; <a href="/terms.html" class="text-violet-400/60 hover:text-violet-400">Условия</a> &middot; <a href="/risk.html" class="text-violet-400/60 hover:text-violet-400">Риски</a></p>
+</div>
+</footer>
+
+<script>
+window.addEventListener('scroll',()=>{document.getElementById('nav').classList.toggle('nav-blur',scrollY>30)});
+const obs=new IntersectionObserver(es=>{es.forEach(e=>{if(e.isIntersecting){e.target.classList.add('show');obs.unobserve(e.target)}})},{threshold:.1});
+document.querySelectorAll('.fade-up').forEach(el=>obs.observe(el));
+</script>
+</body>
+</html>

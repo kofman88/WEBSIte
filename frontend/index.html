@@ -64,6 +64,36 @@ html.light .faq-item{background:rgba(255,255,255,.5)!important;border-color:rgba
 <div class="max-w-6xl mx-auto px-6 h-16 flex items-center justify-between">
   <a href="/" class="text-xl font-extrabold tracking-wide">CHM<span class="text-violet-400">.</span></a>
   <div class="hidden md:flex items-center gap-7 text-[.85rem] text-slate-400">
+    <!-- Bots dropdown -->
+    <div class="relative group">
+      <button class="hover:text-white transition flex items-center gap-1" data-t="nav-bots">Боты <svg class="w-3 h-3 transition-transform group-hover:rotate-180" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M19 9l-7 7-7-7"/></svg></button>
+      <div class="absolute top-full left-1/2 -translate-x-1/2 pt-3 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200" style="width:480px">
+        <div class="glass rounded-2xl p-5" style="background:rgba(10,13,24,.95);backdrop-filter:blur(24px);border:1px solid rgba(255,255,255,.08)">
+          <div class="grid grid-cols-2 gap-6">
+            <div>
+              <div class="text-[.6rem] uppercase tracking-[.15em] text-slate-500 mb-3">Боты по монетам</div>
+              <div class="space-y-1">
+                <a href="bots/bitcoin.html" class="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-white/[.04] transition"><span class="text-lg">&#8383;</span><span class="text-sm text-slate-300 hover:text-white">Bitcoin Bot</span></a>
+                <a href="bots/ethereum.html" class="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-white/[.04] transition"><span class="text-lg">&#9830;</span><span class="text-sm text-slate-300 hover:text-white">Ethereum Bot</span></a>
+                <a href="bots/solana.html" class="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-white/[.04] transition"><span class="text-lg">&#9673;</span><span class="text-sm text-slate-300 hover:text-white">Solana Bot</span></a>
+                <a href="bots/xrp.html" class="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-white/[.04] transition"><span class="text-lg">&#10005;</span><span class="text-sm text-slate-300 hover:text-white">XRP Bot</span></a>
+                <a href="bots/doge.html" class="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-white/[.04] transition"><span class="text-lg">&#8226;</span><span class="text-sm text-slate-300 hover:text-white">DOGE Bot</span></a>
+                <a href="bots/bnb.html" class="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-white/[.04] transition"><span class="text-lg">&#9670;</span><span class="text-sm text-slate-300 hover:text-white">BNB Bot</span></a>
+              </div>
+            </div>
+            <div>
+              <div class="text-[.6rem] uppercase tracking-[.15em] text-slate-500 mb-3">Боты по биржам</div>
+              <div class="space-y-1">
+                <a href="bots/bybit.html" class="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-white/[.04] transition"><span class="text-sm text-slate-300 hover:text-white">Bybit Bot</span></a>
+                <a href="bots/binance.html" class="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-white/[.04] transition"><span class="text-sm text-slate-300 hover:text-white">Binance Bot</span></a>
+                <a href="bots/bingx.html" class="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-white/[.04] transition"><span class="text-sm text-slate-300 hover:text-white">BingX Bot</span></a>
+                <a href="bots/okx.html" class="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-white/[.04] transition"><span class="text-sm text-slate-300 hover:text-white">OKX Bot</span></a>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
     <a href="#features" class="hover:text-white transition" data-t="nav-feat">Возможности</a>
     <a href="#pricing" class="hover:text-white transition" data-t="nav-price">Тарифы</a>
     <a href="#how" class="hover:text-white transition" data-t="nav-how">Как работает</a>
@@ -439,6 +469,7 @@ document.getElementById('registerForm')?.addEventListener('submit',async e=>{e.p
 // i18n
 let lang='ru';
 const TR={
+'nav-bots':{ru:'Боты',en:'Bots'},
 'nav-feat':{ru:'Возможности',en:'Features'},'nav-price':{ru:'Тарифы',en:'Pricing'},'nav-how':{ru:'Как работает',en:'How It Works'},'nav-faq':{ru:'FAQ',en:'FAQ'},'nav-academy':{ru:'Академия',en:'Academy'},'nav-login':{ru:'Войти',en:'Login'},'nav-start':{ru:'Начать',en:'Start'},
 'hero-badge':{ru:'AI-Powered Крипто Платформа',en:'AI-Powered Crypto Platform'},'hero-h1a':{ru:'Торгуй умнее.',en:'Trade Smarter.'},'hero-h1b':{ru:'Зарабатывай больше.',en:'Earn More.'},'hero-sub':{ru:'Автоматические торговые сигналы и боты для Bybit, Binance и BingX. Стратегии SMC, Герчика и скальпинг с AI-аналитикой.',en:'Automated trading signals and bots for Bybit, Binance and BingX. SMC, Gerchik and scalping strategies with AI analytics.'},
 'hero-cta1':{ru:'Начать бесплатно',en:'Start Free'},'hero-cta2':{ru:'Как это работает',en:'How It Works'},
