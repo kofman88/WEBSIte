@@ -34,24 +34,54 @@ function fetchCandles(symbol, timeframe = '1H', limit = 100, before = '') {
   });
 }
 
-// Fetch multiple pages of candles for backtesting
-async function fetchCandlesMulti(symbol, timeframe, totalLimit = 500) {
+// Fetch candles from Binance by date range (free, no auth)
+function fetchCandlesByDate(symbol, timeframe, startDate, endDate) {
+  return new Promise((resolve) => {
+    const tfMap = {'1m':'1m','5m':'5m','15m':'15m','1H':'1h','4H':'4h','1D':'1d','1h':'1h','4h':'4h','1d':'1d'};
+    const interval = tfMap[timeframe] || '1h';
+    const startMs = new Date(startDate).getTime();
+    const endMs = new Date(endDate).getTime();
+    const url = `https://api.binance.com/api/v3/klines?symbol=${symbol}&interval=${interval}&startTime=${startMs}&endTime=${endMs}&limit=1000`;
+
+    https.get(url, { headers: { 'User-Agent': 'CHM/2.0' } }, (res) => {
+      let data = '';
+      res.on('data', c => data += c);
+      res.on('end', () => {
+        try {
+          const arr = JSON.parse(data);
+          if (!Array.isArray(arr) || !arr.length) return resolve([]);
+          const candles = arr.map(c => ({
+            ts: +c[0], open: +c[1], high: +c[2], low: +c[3], close: +c[4],
+            volume: +c[5], confirmed: true
+          }));
+          resolve(candles);
+        } catch (e) { resolve([]); }
+      });
+    }).on('error', () => resolve([]));
+  });
+}
+
+// Multi-page Binance fetch for long date ranges (1000 candles per page)
+async function fetchCandlesByDateFull(symbol, timeframe, startDate, endDate) {
+  const tfMap = {'1m':'1m','5m':'5m','15m':'15m','1H':'1h','4H':'4h','1D':'1d','1h':'1h','4h':'4h','1d':'1d'};
+  const interval = tfMap[timeframe] || '1h';
+  const tfMs = {'1m':60000,'5m':300000,'15m':900000,'1h':3600000,'4h':14400000,'1d':86400000};
+  const barMs = tfMs[interval] || 3600000;
+  let startMs = new Date(startDate).getTime();
+  const endMs = new Date(endDate).getTime();
   let all = [];
-  let before = '';
-  const perPage = 300;
-  const pages = Math.ceil(totalLimit / perPage);
-  for (let p = 0; p < pages; p++) {
-    const batch = await fetchCandles(symbol, timeframe, perPage, before);
+  let pages = 0;
+
+  while (startMs < endMs && pages < 20) {
+    const batch = await fetchCandlesByDate(symbol, timeframe, new Date(startMs).toISOString(), new Date(Math.min(startMs + 1000 * barMs, endMs)).toISOString());
     if (!batch.length) break;
     all = all.concat(batch);
-    before = '' + batch[0].ts; // oldest timestamp for next page
-    if (batch.length < perPage) break;
+    startMs = batch[batch.length - 1].ts + barMs;
+    pages++;
+    if (batch.length < 1000) break;
     await new Promise(r => setTimeout(r, 200));
   }
-  // Sort by time ascending and deduplicate
-  all.sort((a, b) => a.ts - b.ts);
-  const seen = new Set();
-  return all.filter(c => { if (seen.has(c.ts)) return false; seen.add(c.ts); return true; });
+  return all;
 }
 
 function fetchTicker(symbol) {
@@ -356,4 +386,4 @@ function stopScanner() {
   console.log('[SCANNER] Stopped');
 }
 
-module.exports = { startScanner, stopScanner, scanOnce, fetchCandles, fetchCandlesMulti, fetchTicker };
+module.exports = { startScanner, stopScanner, scanOnce, fetchCandles, fetchCandlesByDate, fetchCandlesByDateFull, fetchTicker };

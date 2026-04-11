@@ -79,9 +79,17 @@ class BacktestService {
       const backtest = this.getBacktestById(backtestId, userId);
       if (!backtest) return;
 
-      // Fetch real candle data from OKX (single fast request)
-      const { fetchCandles } = require('./scannerEngine');
-      const candles = await fetchCandles(backtest.symbol, backtest.timeframe || '1H', 300);
+      // Fetch candle data — Binance by date range, fallback to OKX
+      const { fetchCandlesByDateFull, fetchCandles } = require('./scannerEngine');
+      let candles = [];
+      if (backtest.start_date && backtest.end_date) {
+        candles = await fetchCandlesByDateFull(backtest.symbol, backtest.timeframe || '1H', backtest.start_date, backtest.end_date);
+        console.log(`[BACKTEST] Binance ${backtest.start_date}→${backtest.end_date}: ${candles.length} candles`);
+      }
+      if (!candles.length) {
+        candles = await fetchCandles(backtest.symbol, backtest.timeframe || '1H', 300);
+        console.log(`[BACKTEST] OKX fallback: ${candles.length} candles`);
+      }
 
       if (!candles || candles.length < 30) {
         throw new Error('Not enough candle data for backtest');
