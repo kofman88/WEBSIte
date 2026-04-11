@@ -152,6 +152,59 @@ code{font-family:'JetBrains Mono',monospace;font-size:.85em;background:rgba(124,
 .mobile-toggle{display:none;position:fixed;top:12px;left:12px;z-index:60;width:40px;height:40px;border-radius:10px;background:var(--bg2);border:1px solid var(--border);color:var(--text);font-size:1.2rem;cursor:pointer;align-items:center;justify-content:center}
 .sidebar-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:40}
 
+/* Liquid glass */
+.lg{background:linear-gradient(135deg,rgba(255,255,255,.04),rgba(255,255,255,.01) 40%,rgba(255,255,255,.05) 60%,rgba(255,255,255,.02));backdrop-filter:blur(20px);border:1px solid rgba(255,255,255,.06);position:relative;overflow:hidden}
+.lg::before{content:'';position:absolute;top:-50%;left:-50%;width:200%;height:200%;background:radial-gradient(ellipse at 30% 20%,rgba(255,255,255,.04),transparent 50%);pointer-events:none}
+
+/* Light theme */
+html.light body{background:#f8f9fc;color:#1e293b}
+html.light .sidebar{background:#f0f2f7;border-color:rgba(0,0,0,.06)}
+html.light .nav-item{color:#64748b}
+html.light .nav-item:hover{color:#1e293b;background:rgba(0,0,0,.03)}
+html.light .nav-item.active{color:var(--accent2);background:rgba(124,58,237,.06);border-color:rgba(124,58,237,.1)}
+html.light .nav-group-title{color:#94a3b8}
+html.light .sidebar-head{border-color:rgba(0,0,0,.06)}
+html.light .sidebar-foot{border-color:rgba(0,0,0,.06)}
+html.light .sidebar-foot a{color:#64748b}
+html.light .sidebar-foot a:hover{color:#1e293b;background:rgba(0,0,0,.03)}
+html.light .hero{border-color:rgba(0,0,0,.04)}
+html.light .hero h1{color:#0f172a}
+html.light .hero-desc{color:#64748b}
+html.light .hero-stat{background:rgba(255,255,255,.5);border-color:rgba(0,0,0,.06)}
+html.light .breadcrumbs{color:#94a3b8}
+html.light .sec h2,html.light .sec h3,html.light .sec h4{color:#0f172a}
+html.light .sec p,html.light .sec li{color:#475569}
+html.light .sec strong{color:#1e293b}
+html.light code{background:rgba(124,58,237,.06);color:var(--accent2)}
+html.light .callout-warn{background:rgba(167,139,250,.04);border-color:rgba(167,139,250,.12)}
+html.light .callout-info{background:rgba(59,130,246,.04);border-color:rgba(59,130,246,.12)}
+html.light .callout-success{background:rgba(16,185,129,.04);border-color:rgba(16,185,129,.12)}
+html.light .callout-danger{background:rgba(239,68,68,.04);border-color:rgba(239,68,68,.12)}
+html.light .strat-tab{color:#94a3b8}
+html.light .strat-tab.active{background:rgba(124,58,237,.08)}
+html.light .strat-tabs{background:rgba(0,0,0,.02);border-color:rgba(0,0,0,.06)}
+html.light .params-table th{background:rgba(0,0,0,.02);border-color:rgba(0,0,0,.06);color:#64748b}
+html.light .params-table td{border-color:rgba(0,0,0,.04);color:#475569}
+html.light .step-num{background:rgba(124,58,237,.06);border-color:rgba(124,58,237,.1)}
+html.light .section-icon{border-color:rgba(0,0,0,.06)}
+html.light .icon-gold,.light .icon-violet{background:rgba(167,139,250,.06)}
+html.light .divider{background:linear-gradient(90deg,transparent,rgba(0,0,0,.06),transparent)}
+html.light .tooltip{background:#fff;border-color:rgba(0,0,0,.08);color:#475569;box-shadow:0 8px 32px rgba(0,0,0,.1)}
+html.light .lg{background:rgba(255,255,255,.5);border-color:rgba(0,0,0,.06)}
+html.light .mobile-toggle{background:#f0f2f7;border-color:rgba(0,0,0,.08);color:#1e293b}
+html.light .sidebar-head .badge{background:rgba(124,58,237,.06);border-color:rgba(124,58,237,.1)}
+html.light .sidebar-head .logo span{color:var(--accent2)}
+
+/* Controls in sidebar */
+.sidebar-controls{display:flex;gap:6px;padding:8px 16px;border-bottom:1px solid var(--border)}
+.sidebar-controls button{flex:1;padding:6px;border-radius:8px;font-size:.7rem;font-weight:600;border:1px solid var(--border);background:transparent;color:var(--text3);cursor:pointer;transition:all .2s}
+.sidebar-controls button:hover{color:var(--text);background:rgba(255,255,255,.03)}
+.sidebar-controls button.active{color:var(--accent);background:rgba(124,58,237,.08);border-color:rgba(124,58,237,.12)}
+html.light .sidebar-controls{border-color:rgba(0,0,0,.06)}
+html.light .sidebar-controls button{border-color:rgba(0,0,0,.06);color:#94a3b8}
+html.light .sidebar-controls button:hover{color:#1e293b;background:rgba(0,0,0,.03)}
+html.light .sidebar-controls button.active{color:var(--accent2);background:rgba(124,58,237,.06);border-color:rgba(124,58,237,.1)}
+
 @media(max-width:768px){
   .sidebar{transform:translateX(-100%);transition:transform .3s}
   .sidebar.open{transform:translateX(0)}
@@ -178,6 +231,10 @@ code{font-family:'JetBrains Mono',monospace;font-size:.85em;background:rgba(124,
   <div class="sidebar-head">
     <div><div class="logo">CHM<span>.</span></div></div>
     <div class="badge">Academy</div>
+  </div>
+  <div class="sidebar-controls">
+    <button onclick="toggleAcademyTheme()" id="acThemeBtn">🌙 Тема</button>
+    <button onclick="toggleAcademyLang()" id="acLangBtn">EN</button>
   </div>
   <nav class="sidebar-nav">
     <div class="nav-group">
@@ -226,10 +283,10 @@ code{font-family:'JetBrains Mono',monospace;font-size:.85em;background:rgba(124,
     <h1>CHM Finance<br><span>Academy</span></h1>
     <p class="hero-desc">Полное руководство по платформе. От первого сигнала до настройки адаптивного оптимизатора.</p>
     <div class="hero-stats">
-      <div class="hero-stat"><div class="hero-stat-num">3</div><div class="hero-stat-label">Стратегии</div></div>
-      <div class="hero-stat"><div class="hero-stat-num">4</div><div class="hero-stat-label">Биржи</div></div>
-      <div class="hero-stat"><div class="hero-stat-num">24/7</div><div class="hero-stat-label">Мониторинг</div></div>
-      <div class="hero-stat"><div class="hero-stat-num">AI</div><div class="hero-stat-label">Аналитика</div></div>
+      <div class="hero-stat lg"><div class="hero-stat-num">3</div><div class="hero-stat-label">Стратегии</div></div>
+      <div class="hero-stat lg"><div class="hero-stat-num">4</div><div class="hero-stat-label">Биржи</div></div>
+      <div class="hero-stat lg"><div class="hero-stat-num">24/7</div><div class="hero-stat-label">Мониторинг</div></div>
+      <div class="hero-stat lg"><div class="hero-stat-num">AI</div><div class="hero-stat-label">Аналитика</div></div>
     </div>
   </div>
 
@@ -250,6 +307,23 @@ code{font-family:'JetBrains Mono',monospace;font-size:.85em;background:rgba(124,
 <div class="tooltip" id="tooltip"></div>
 
 <script>
+// Theme toggle (syncs with main site)
+function toggleAcademyTheme(){
+  document.documentElement.classList.toggle('light');
+  const l=document.documentElement.classList.contains('light');
+  localStorage.setItem('chm_theme',l?'light':'dark');
+  document.getElementById('acThemeBtn').textContent=l?'☀️ Тема':'🌙 Тема';
+}
+(function(){if(localStorage.getItem('chm_theme')==='light'){document.documentElement.classList.add('light');const b=document.getElementById('acThemeBtn');if(b)b.textContent='☀️ Тема'}})();
+
+// Language toggle — calls setLang from ACADEMY JS
+function toggleAcademyLang(){
+  const newLang=(localStorage.getItem('chm_lang')||'ru')==='ru'?'en':'ru';
+  document.getElementById('acLangBtn').textContent=newLang==='ru'?'EN':'RU';
+  if(typeof setLang==='function')setLang(newLang);
+}
+(function(){if(localStorage.getItem('chm_lang')==='en'){const b=document.getElementById('acLangBtn');if(b)b.textContent='RU'}})();
+
 const CONTENT = {
   "start": {
     ru: `<div class="section-header"><div class="section-icon icon-gold"><svg viewBox="0 0 256 256" fill="none" stroke="currentColor" stroke-width="16" stroke-linecap="round" stroke-linejoin="round"><path d="M128,24c-36,0-72,72-72,152,0,0,28-24,72-24s72,24,72,24C200,96,164,24,128,24z"/><circle cx="128" cy="128" r="16"/><path d="M88,176c-16,24-16,40-16,40s24-8,40-32"/><path d="M168,176c16,24,16,40,16,40s-24-8-40-32"/></svg></div><div class="section-title-group"><h2>Быстрый старт</h2><p>От регистрации до первого сигнала за 10 минут</p></div></div>
@@ -2030,8 +2104,8 @@ function updateStaticText(lang) {
   const heroEye = document.querySelector('.hero-eyebrow');
   // hero badge is static — no update needed
   const statLabels = document.querySelectorAll('.stat-label');
-  const ruLabels = ['Стратегии','Биржи','Мониторинг','ML фильтр'];
-  const enLabels = ['Strategies','Exchanges','Monitoring','ML Filter'];
+  const ruLabels = ['Стратегии','Биржи','Мониторинг','Аналитика'];
+  const enLabels = ['Strategies','Exchanges','Monitoring','Analytics'];
   statLabels.forEach((el,i) => { if (ruLabels[i]) el.textContent = ru ? ruLabels[i] : enLabels[i]; });
   const footer = document.querySelector('.tg-badge span:last-child');
   if (footer) footer.textContent = ru ? '@crypto_chm — поддержка' : '@crypto_chm — support';
@@ -2078,7 +2152,7 @@ function openSidebar() {
 }
 
 function show(id) {
-  document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+  document.querySelectorAll('.sec').forEach(s => s.classList.remove('active'));
   document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
   const sec = document.getElementById('sec-' + id);
   if (sec) sec.classList.add('active');
