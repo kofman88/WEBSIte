@@ -232,27 +232,30 @@ async function quickBacktest(){
   const res=document.getElementById('quickBtResult');
   res.className='mt-3 p-3 bg-slate-800/30 rounded-xl text-xs text-slate-300';
   res.textContent='Запуск бэктеста...';
+  const sp=collectStratParams();
   try{
-    const sp=collectStratParams();
     const data={name:fd.get('symbol')+' '+fd.get('strategyType'),symbol:fd.get('symbol'),exchangeName:fd.get('exchangeName'),timeframe:fd.get('timeframe')||'1H',startDate:'2025-01-01',endDate:'2026-01-01',initialCapital:+fd.get('positionSizeUsd')*+fd.get('leverage'),strategyConfig:JSON.stringify({strategy:fd.get('strategyType'),direction:fd.get('direction')||'both',trendFilter:fd.get('trendFilter')==='1',params:sp})};
     const r=await API.createBacktest(data);
-    // Poll for result
+    const btId=r.backtest?.id||r.id;
+    if(!btId){res.textContent='Бэктест создан — проверьте страницу Бэктесты';return}
+    // Poll
     let tries=0;
     const poll=setInterval(async()=>{
       tries++;
-      if(tries>20){clearInterval(poll);res.textContent='Таймаут — проверьте на странице Бэктесты';return}
+      if(tries>15){clearInterval(poll);res.innerHTML='Бэктест выполняется — <a href="backtests.html" class="text-indigo-400 underline">проверьте на странице Бэктесты</a>';return}
       try{
-        const bt=await API.getBacktest(r.backtest?.id||r.id);
-        if(bt.status==='completed'){
+        const bt=await API.getBacktest(btId);
+        const st=bt.status||bt.backtest?.status;
+        const results=bt.results||bt.backtest?.results;
+        if(st==='completed'&&results){
           clearInterval(poll);
-          const d=JSON.parse(bt.results||'{}');
-          res.innerHTML=`<div class="grid grid-cols-4 gap-3 text-center"><div><div class="text-slate-500">PnL</div><div class="font-bold ${Number(d.totalPnl||0)>=0?'text-green-400':'text-red-400'}">${Number(d.totalPnl||0)>=0?'+':''}$${Math.abs(Number(d.totalPnl||0)).toFixed(0)}</div></div><div><div class="text-slate-500">WR</div><div class="font-bold">${Number(d.winRate||0).toFixed(0)}%</div></div><div><div class="text-slate-500">Trades</div><div class="font-bold">${d.totalTrades||0}</div></div><div><div class="text-slate-500">Max DD</div><div class="font-bold text-red-400">${Number(d.maxDrawdown||0).toFixed(1)}%</div></div></div>`;
-        }else if(bt.status==='failed'){
-          clearInterval(poll);
-          res.textContent='Ошибка бэктеста';res.style.color='#ef4444';
+          const d=typeof results==='string'?JSON.parse(results):results;
+          res.innerHTML=`<div class="grid grid-cols-5 gap-3 text-center"><div><div class="text-slate-500">PnL</div><div class="font-bold ${Number(d.totalPnl||0)>=0?'text-green-400':'text-red-400'}">${Number(d.totalPnl||0)>=0?'+':''}$${Math.abs(Number(d.totalPnl||0)).toFixed(0)}</div></div><div><div class="text-slate-500">WR</div><div class="font-bold">${Number(d.winRate||0).toFixed(0)}%</div></div><div><div class="text-slate-500">Trades</div><div class="font-bold">${d.totalTrades||0}</div></div><div><div class="text-slate-500">Max DD</div><div class="font-bold text-red-400">${Number(d.maxDrawdown||0).toFixed(1)}%</div></div><div><div class="text-slate-500">Sharpe</div><div class="font-bold">${Number(d.sharpeRatio||0).toFixed(2)}</div></div></div>`;
+        }else if(st==='failed'){
+          clearInterval(poll);res.textContent='Ошибка бэктеста';res.style.color='#ef4444';
         }
       }catch(_){}
-    },1500);
+    },2000);
   }catch(e){res.textContent='Ошибка: '+e.message;res.style.color='#ef4444'}
 }
 
