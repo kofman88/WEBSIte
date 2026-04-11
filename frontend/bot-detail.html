@@ -226,7 +226,7 @@ async function runBT(){
           fillStats(d);drawCharts(d);
           if(d.trades&&d.trades.length){btTrades=d.trades;showTrades(d.trades);console.log('[BT] Trades drawn:',d.trades.length)}
         }else if(st==='failed'){clearInterval(poll);el.textContent='Ошибка';el.style.color='#ef4444'}
-      }catch(_){}
+      }catch(pollErr){console.error('[BT] Poll error:',pollErr)}
     },2000);
   }catch(e){el.textContent='Ошибка: '+e.message;el.style.color='#ef4444'}
 }
