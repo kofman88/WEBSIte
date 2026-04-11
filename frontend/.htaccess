@@ -1,0 +1,5 @@
+PassengerAppRoot "/home/chmtop/chmup_backend"
+PassengerBaseURI "/"
+PassengerNodejs "/home/chmtop/nodevenv/chmup_backend/20/bin/node"
+PassengerAppType node
+PassengerStartupFile server.js
