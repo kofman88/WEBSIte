@@ -1434,6 +1434,174 @@ def format_leaderboard(data: list[dict]) -> str:
     return "\n".join(lines)
 
 
+# ═══════════════════════════════════════════════════════════════
+#  BACKGROUND ALERT LOOPS
+# ═══════════════════════════════════════════════════════════════
+
+_last_regime: str = ""
+_last_liq_alerts: dict[str, float] = {}  # symbol → last alert ts
+_last_funding_alerts: dict[str, float] = {}
+_last_arb_alerts: dict[str, float] = {}
+_last_whale_alert: float = 0.0
+_last_swarm_alerts: dict[str, float] = {}
+_ALERT_COOLDOWN = 3600  # 1 hour between same alerts
+
+
+async def background_alerts_loop(bot, um) -> None:
+    """Единый фоновый цикл для всех алертов. Каждые 60 сек."""
+    import html as _html
+    log.info("🔔 Background alerts loop started")
+    await asyncio.sleep(120)  # wait for bot init
+
+    while True:
+        try:
+            users = await um.all_users()
+            now = time.time()
+
+            # ── Liquidation Oracle alerts ──
+            liq_users = [u for u in users if getattr(u, "alert_liquidation", False)]
+            if liq_users:
+                try:
+                    liq_data = await fetch_liquidation_data()
+                    for d in liq_data:
+                        if d.get("alert") and now - _last_liq_alerts.get(d["symbol"], 0) > _ALERT_COOLDOWN:
+                            _last_liq_alerts[d["symbol"]] = now
+                            sym = d["symbol"].replace("USDT", "")
+                            text = (
+                                f"📊 <b>Liquidation Alert</b>\n\n"
+                                f"<b>{sym}</b>: {d['alert']}\n"
+                                f"Funding: {d['funding_pct']:+.3f}%  |  "
+                                f"L:{d['long_pct']:.0f}% S:{d['short_pct']:.0f}%"
+                            )
+                            for u in liq_users:
+                                try:
+                                    await bot.send_message(u.user_id, text, parse_mode="HTML")
+                                except Exception:
+                                    pass
+                except Exception as e:
+                    log.debug("liq alerts: %s", e)
+
+            # ── Funding Farm alerts ──
+            funding_users = [u for u in users if getattr(u, "alert_funding", False)]
+            if funding_users:
+                try:
+                    funding = await fetch_top_funding(limit=5)
+                    for d in funding:
+                        if abs(d["funding"]) > 0.001 and now - _last_funding_alerts.get(d["symbol"], 0) > _ALERT_COOLDOWN:
+                            _last_funding_alerts[d["symbol"]] = now
+                            sym = d["symbol"].replace("USDT", "")
+                            action = "SHORT" if d["funding"] > 0 else "LONG"
+                            text = (
+                                f"💰 <b>Funding Alert</b>\n\n"
+                                f"<b>{sym}</b>: FR {d['funding_pct']:+.4f}% "
+                                f"(~{abs(d['annual_pct']):.0f}%/год)\n"
+                                f"→ {action} = получать funding"
+                            )
+                            for u in funding_users:
+                                try:
+                                    await bot.send_message(u.user_id, text, parse_mode="HTML")
+                                except Exception:
+                                    pass
+                except Exception as e:
+                    log.debug("funding alerts: %s", e)
+
+            # ── Arbitrage alerts ──
+            arb_users = [u for u in users if getattr(u, "alert_arbitrage", False)]
+            if arb_users:
+                try:
+                    arb = await fetch_cross_exchange_prices()
+                    for d in arb:
+                        if d["spread_pct"] > 0.1 and now - _last_arb_alerts.get(d["symbol"], 0) > _ALERT_COOLDOWN:
+                            _last_arb_alerts[d["symbol"]] = now
+                            sym = d["symbol"].replace("USDT", "")
+                            text = (
+                                f"🔄 <b>Arbitrage Alert</b>\n\n"
+                                f"<b>{sym}</b>: спред <b>{d['spread_pct']:.3f}%</b>\n"
+                                f"Bybit: {d['bybit']:.4f}  |  Binance: {d['binance']:.4f}\n"
+                                f"→ Купить на {d['cheaper']}"
+                            )
+                            for u in arb_users:
+                                try:
+                                    await bot.send_message(u.user_id, text, parse_mode="HTML")
+                                except Exception:
+                                    pass
+                except Exception as e:
+                    log.debug("arb alerts: %s", e)
+
+            # ── Whale alerts ──
+            whale_users = [u for u in users if getattr(u, "alert_whales", False)]
+            if whale_users and now - _last_whale_alert > 300:  # check every 5 min
+                try:
+                    whales = await fetch_whale_transactions(min_btc=500)
+                    if whales:
+                        _last_whale_alert = now
+                        top = whales[0]
+                        text = (
+                            f"🐋 <b>Whale Alert</b>\n\n"
+                            f"<b>{top['btc']:.0f} BTC</b> (~${top['usd']/1e6:.1f}M)\n"
+                            f"tx: <code>{top['hash']}</code>"
+                        )
+                        for u in whale_users:
+                            try:
+                                await bot.send_message(u.user_id, text, parse_mode="HTML")
+                            except Exception:
+                                pass
+                except Exception as e:
+                    log.debug("whale alerts: %s", e)
+
+            # ── Regime change alerts ──
+            global _last_regime
+            regime_users = [u for u in users if getattr(u, "alert_regime", False)]
+            if regime_users:
+                try:
+                    import market_regime as _mr
+                    current = str(_mr.get_cached_regime() or "")
+                    if current and current != _last_regime and _last_regime:
+                        profile = REGIME_PROFILES.get(current, {})
+                        text = (
+                            f"🦎 <b>Regime Change</b>\n\n"
+                            f"Новый режим: <b>{profile.get('label', current)}</b>\n"
+                            f"{profile.get('description', '')}\n"
+                            f"Стратегии: {', '.join(profile.get('strategies', []))}"
+                        )
+                        for u in regime_users:
+                            try:
+                                await bot.send_message(u.user_id, text, parse_mode="HTML")
+                            except Exception:
+                                pass
+                    _last_regime = current
+                except Exception as e:
+                    log.debug("regime alerts: %s", e)
+
+            # ── Swarm Signal alerts ──
+            swarm_users = [u for u in users if getattr(u, "alert_swarm", False)]
+            if swarm_users:
+                consensus = get_swarm_consensus(min_votes=3)
+                for c in consensus[:3]:
+                    key = f"{c['symbol']}_{c['direction']}"
+                    if now - _last_swarm_alerts.get(key, 0) > _ALERT_COOLDOWN:
+                        _last_swarm_alerts[key] = now
+                        emoji = "🟢" if c["direction"] == "LONG" else "🔴"
+                        text = (
+                            f"🐝 <b>Swarm Signal</b>\n\n"
+                            f"{emoji} <b>{c['symbol']}</b> {c['direction']}\n"
+                            f"Голосов: {c['votes']}  |  ⭐ {c['avg_quality']:.1f}\n"
+                            f"Стратегии: {', '.join(c['strategies'])}"
+                        )
+                        for u in swarm_users:
+                            try:
+                                await bot.send_message(u.user_id, text, parse_mode="HTML")
+                            except Exception:
+                                pass
+
+        except asyncio.CancelledError:
+            raise
+        except Exception as e:
+            log.debug("background_alerts error: %s", e)
+
+        await asyncio.sleep(60)
+
+
 --- FILE: ./CHM_BREAKER_V4/watermark.py ---
 """
 Невидимый водяной знак в сигналах через zero-width Unicode символы.
@@ -2862,7 +3030,7 @@ log = logging.getLogger("CHM.ScalpingRunner")
 # ── Константы ─────────────────────────────────────────────────────────────
 
 SCAN_INTERVAL     = 60       # проверяем каждые 60 секунд
-SCAN_TF_DEFAULT   = "1m"     # таймфрейм по умолчанию
+SCAN_TF_DEFAULT   = "5m"     # 5m по умолчанию — 1m слишком шумный, стопы выбиваются
 TOP_COINS_LIMIT   = 30       # скалпируем топ-30 монет по объёму
 MIN_VOL_USDT      = 10_000_000  # минимальный суточный объём
 MAX_SIGNALS_CYCLE = 5        # максимум сигналов на пользователя за цикл
@@ -2899,22 +3067,28 @@ def _signal_text_scalp(sig: ScalpSignal, lang: str = "ru") -> str:
         header = _t("scalp_long_header", lang) if sig.direction == "LONG" else _t("scalp_short_header", lang)
         tp_pct  = abs(sig.tp  - sig.entry) / sig.entry * 100
         sl_pct  = abs(sig.sl  - sig.entry) / sig.entry * 100
-        sig_type = getattr(sig, "signal_type", "Scalp Momentum")
-        type_icon = "📈" if sig_type == "Scalp Momentum" else "🔀"
+        sig_type = getattr(sig, "signal_type", "Scalp")
+        type_icons = {"VWAP Bounce": "📊", "Liquidity Grab": "🎯", "Volume Spike": "🔥"}
+        type_icon = type_icons.get(sig_type, "⚡")
+        # SCALP-V3: trend + VWAP
+        trend = getattr(sig, "ema_trend", "")
+        trend_icon = "🟢" if trend == "BULL" else "🔴" if trend == "BEAR" else ""
+        vwap_line = f"📊 VWAP: <code>{_fp(sig.vwap)}</code>" + NL if getattr(sig, "vwap", 0) else ""
 
         return (
             header + NL +
             "<b>" + _html.escape(sig.symbol.replace("-USDT-SWAP", "")) + "/USDT</b>" + NL + NL +
-            f"{type_icon} Тип: <b>{sig_type}</b>" + NL +
-            _t("entry", lang) + ":  <code>" + _fp(sig.entry) + "</code>" + NL +
-            _t("stop_loss", lang) + ": <code>" + _fp(sig.sl) + "</code>"
-            "  (-" + f"{sl_pct:.2f}%" + ")" + NL +
-            "🎯 TP: <code>" + _fp(sig.tp) + "</code>"
-            "  (+" + f"{tp_pct:.2f}%" + ")" + NL +
-            "📐 R:R = 1:" + str(sig.rr) + NL +
-            "📊 RSI: " + str(sig.rsi) + NL +
-            "📦 " + _t("scalp_vol_label", lang) + ": ×" + str(sig.vol_ratio) + NL + NL +
-            "⚡ <i>CHM Laboratory — Scalping</i>" + NL + NL +
+            f"{type_icon} <b>{sig_type}</b>  {trend_icon} {trend}" + NL +
+            vwap_line +
+            NL +
+            _t("entry", lang) + f":  <code>{_fp(sig.entry)}</code>" + NL +
+            _t("stop_loss", lang) + f": <code>{_fp(sig.sl)}</code>"
+            f"  <i>(-{sl_pct:.2f}%)</i>" + NL +
+            f"🎯 TP: <code>{_fp(sig.tp)}</code>"
+            f"  <i>(+{tp_pct:.2f}%)</i>" + NL + NL +
+            f"📐 R:R = 1:{sig.rr}" + NL +
+            f"📊 RSI: {sig.rsi:.0f}  |  📦 Vol: ×{sig.vol_ratio:.1f}" + NL + NL +
+            "⚡ <i>CHM — Scalping V3</i>" + NL + NL +
             "#SCALPING"
         )
     except Exception as e:
@@ -3080,22 +3254,23 @@ async def _scan_user(
     """Сканирует монеты для одного пользователя."""
     uid      = user.user_id
     tf       = getattr(user, "scalping_tf", SCAN_TF_DEFAULT) or SCAN_TF_DEFAULT
-    tp_pct   = float(getattr(user, "scalping_tp_pct",  0.75) or 0.75)
-    sl_pct   = float(getattr(user, "scalping_sl_pct",  0.20) or 0.20)
     max_sig  = int(getattr(user, "scalping_max_trades", MAX_SIGNALS_CYCLE) or MAX_SIGNALS_CYCLE)
 
     cfg = ScalpConfig(
-        tp_pct=tp_pct,
-        sl_pct=sl_pct,
-        ema_period=int(getattr(user, "scalping_ema_period", 20) or 20),
-        min_rr=float(getattr(user, "scalping_min_rr", 2.2) or 2.2),  # AUDIT: BUG-024 match P1 ScalpConfig
-        rsi_long_min=float(getattr(user, "scalping_rsi_long_min", 40.0) or 40.0),
-        rsi_long_max=float(getattr(user, "scalping_rsi_long_max", 72.0) or 72.0),
-        rsi_short_min=float(getattr(user, "scalping_rsi_short_min", 28.0) or 28.0),
-        rsi_short_max=float(getattr(user, "scalping_rsi_short_max", 60.0) or 60.0),
-        vol_mult=float(getattr(user, "scalping_vol_mult", 1.3) or 1.3),  # balanced quality/quantity
-        atr_max_pct=float(getattr(user, "scalping_atr_max_pct", 0.04) or 0.04),
-        high_wr_mode=bool(getattr(user, "high_wr_mode", False)),  # HIGH-WR: from user DB
+        # Подходы (вкл/выкл)
+        vwap_bounce_enabled=True,
+        liquidity_grab_enabled=True,
+        vol_spike_enabled=True,
+        # Risk
+        sl_atr_mult=float(getattr(user, "scalping_sl_atr", 1.5) or 1.5),  # wider SL
+        tp_rr_min=float(getattr(user, "scalping_min_rr", 2.0) or 2.0),
+        fee_rt=0.11,
+        # Indicators
+        ema_trend_period=int(getattr(user, "scalping_ema_period", 50) or 50),
+        atr_max_pct=float(getattr(user, "scalping_atr_max_pct", 0.05) or 0.05),
+        # Session + HWR
+        session_filter=True,
+        high_wr_mode=bool(getattr(user, "high_wr_mode", False)),
     )
 
     # Язык пользователя
@@ -3177,6 +3352,9 @@ async def _scan_user(
             elif exchange == "binance":
                 api_key    = getattr(user, "binance_api_key",    "")
                 api_secret = getattr(user, "binance_api_secret", "")
+            elif exchange == "okx":
+                api_key    = getattr(user, "okx_api_key",    "")
+                api_secret = getattr(user, "okx_api_secret", "")
             else:
                 api_key    = getattr(user, "bybit_api_key",    "")
                 api_secret = getattr(user, "bybit_api_secret", "")
@@ -4036,7 +4214,10 @@ class UserSettings:
     # ── Авто-трейдинг Binance ─────────────────────
     binance_api_key:      str   = ""
     binance_api_secret:   str   = ""
-    trade_exchange:       str   = "bybit"     # "bybit" | "bingx" | "binance"
+    okx_api_key:          str   = ""
+    okx_api_secret:       str   = ""
+    okx_passphrase:       str   = ""
+    trade_exchange:       str   = "bybit"     # "bybit" | "bingx" | "binance" | "okx"
     bybit_demo:           bool  = False       # PROP-DEMO: True = api-demo.bybit.com
     high_wr_mode:         bool  = False       # HIGH-WR: strict quality/session/trend filters
     # ── Prop Autopilot ────────────────────────────
@@ -4056,6 +4237,14 @@ class UserSettings:
     prop_day_start_balance: float = 0.0
     prop_trading_days:    int   = 0
     prop_unlocked:        bool  = False       # разблокирован через промокод CFT
+    # ── Уведомления продвинутых инструментов ──────
+    alert_liquidation:    bool  = False
+    alert_funding:        bool  = False
+    alert_arbitrage:      bool  = False
+    alert_whales:         bool  = False
+    alert_regime:         bool  = False
+    alert_swarm:          bool  = False
+    paper_trading:        bool  = False       # Paper trading / Prop Simulator
     # ── Тарифная система ──────────────────────────
     sub_plan:             str   = "beginner"  # "beginner" | "pro" | "elite"
 
@@ -4280,7 +4469,9 @@ def _from_db(row: dict) -> UserSettings:
         "onboarding_done",
         "optimizer_enabled", "scalping_active",
         "bybit_demo", "math_levels_active", "partial_tp_enabled", "high_wr_mode",
-        "prop_mode", "prop_trailing_dd", "prop_consistency", "prop_unlocked",  # PROP-PILOT
+        "prop_mode", "prop_trailing_dd", "prop_consistency", "prop_unlocked",
+        "alert_liquidation", "alert_funding", "alert_arbitrage",
+        "alert_whales", "alert_regime", "alert_swarm", "paper_trading",
     }
     int_fields  = {"at_stats_period", "max_coins_count", "scalping_max_trades",
                    "prop_min_days", "prop_max_days", "prop_trading_days"}
@@ -4506,6 +4697,7 @@ _BYBIT_ERROR_MAP: dict[int, str] = {
     110014: "Превышен лимит позиций по данному инструменту.",
     110015: "Позиция уже закрыта или не существует.",
     110016: "Инструмент недоступен для торговли в данный момент.",
+    110074: "Эта монета не торгуется на Bybit. Контракт делистнут или ещё не запущен.",
     110017: "Ордер нарушает правило reduce-only (позиция уже меньше объёма ордера).",
     110025: "Режим позиции уже установлен и не требует изменений.",
     110040: "Превышен максимальный объём ордера для данного инструмента.",
@@ -4741,6 +4933,13 @@ def _round_price(price: float, tick_size: float) -> str:
 # После первого обнаружения 130125 кэшируем режим, чтобы не делать
 # лишний неудачный запрос при каждом новом ордере.
 _hedge_mode_cache: dict[str, bool] = {}
+# Runtime blacklist: монеты делистнутые/не запущенные на Bybit (ошибка 110074)
+_delisted_symbols: set[str] = set()
+
+
+def is_delisted(symbol: str) -> bool:
+    """Проверяет делистнута ли монета на Bybit."""
+    return symbol in _delisted_symbols
 
 
 def _initial_pos_idx(api_key: str, side: str) -> int:
@@ -4922,6 +5121,7 @@ def _get_wallet_balance_resp(session, api_key: str) -> dict:
 def _get_balance_sync(api_key: str, api_secret: str, demo: bool = False) -> float:
     """Синхронно возвращает доступный баланс USDT."""
     session = _get_session(api_key, api_secret, demo=demo)  # PROP-DEMO
+    log.debug("_get_balance_sync: endpoint=%s demo=%s key=%s...", getattr(session, "endpoint", "?"), demo, api_key[:8])
     resp = _get_wallet_balance_resp(session, api_key)
     if resp.get("retCode", -1) != 0:
         raise RuntimeError(resp.get("retMsg", "Balance error"))
@@ -4980,11 +5180,30 @@ async def get_last_price(api_key: str, api_secret: str, symbol: str) -> float:
 async def test_connection(api_key: str, api_secret: str, demo: bool = False) -> dict:
     """
     Проверяет API ключи и возвращает баланс.
-    {"ok": True, "balance": 123.45}  или  {"ok": False, "error": "..."}
-    Шаг 1: проверка доступности Bybit (без авторизации)
-    Шаг 2: принудительная синхронизация времени
-    Шаг 3: запрос баланса с авторизацией
+    {"ok": True, "balance": 123.45, "endpoint": "demo"|"live"}
+    Если ключ не подходит к выбранному endpoint — автоматически пробует другой.
     """
+    result = await _test_connection_single(api_key, api_secret, demo=demo)
+    if result.get("ok"):
+        result["endpoint"] = "demo" if demo else "live"
+        return result
+
+    # Auto-fallback: если demo не прошёл — пробуем live, и наоборот
+    alt_demo = not demo
+    alt_label = "demo" if alt_demo else "live"
+    log.info("test_connection: trying fallback endpoint (%s)...", alt_label)
+    result2 = await _test_connection_single(api_key, api_secret, demo=alt_demo)
+    if result2.get("ok"):
+        result2["endpoint"] = alt_label
+        result2["_switched"] = True  # флаг что переключились
+        return result2
+
+    # Оба не сработали
+    return result
+
+
+async def _test_connection_single(api_key: str, api_secret: str, demo: bool = False) -> dict:
+    """Проверка одного endpoint (demo или live)."""
     # Шаг 1: проверяем базовую сетевую доступность Bybit
     _test_base = "https://api-demo.bybit.com" if demo else "https://api.bybit.com"  # PROP-DEMO
     try:
@@ -5051,6 +5270,10 @@ async def test_connection(api_key: str, api_secret: str, demo: bool = False) -> 
 
             ret_code = body.get("retCode", -1)
             ret_msg  = body.get("retMsg", "")
+            log.info(
+                "test_connection [%s] acct=%s → HTTP %d retCode=%s retMsg=%s key=%s...",
+                "DEMO" if demo else "LIVE", acct_type, http_status, ret_code, ret_msg, api_key[:8],
+            )
 
             if ret_code == 0:
                 # Успешная авторизация — извлекаем баланс
@@ -5079,7 +5302,35 @@ async def test_connection(api_key: str, api_secret: str, demo: bool = False) -> 
             elif http_status == 401:
                 last_err = f"(ErrCode: 401) {ret_msg or 'Unauthorized'}"
 
-        # Оба типа не подошли
+        # Оба типа не подошли через прямой HTTP — пробуем через pybit
+        if demo:
+            log.info("test_connection: direct HTTP failed for demo, trying pybit fallback...")
+            try:
+                session = _get_session(api_key, api_secret, demo=True)
+                resp = session.get_wallet_balance(accountType="UNIFIED", coin="USDT")
+                if resp.get("retCode") == 0:
+                    coins = resp["result"]["list"][0]["coin"]
+                    balance = 0.0
+                    for c in coins:
+                        if c["coin"] == "USDT":
+                            balance = float(c.get("walletBalance") or c.get("availableBalance") or 0)
+                            break
+                    return {"ok": True, "balance": balance}
+                # Try CONTRACT
+                resp2 = session.get_wallet_balance(accountType="CONTRACT", coin="USDT")
+                if resp2.get("retCode") == 0:
+                    coins = resp2["result"]["list"][0]["coin"]
+                    balance = 0.0
+                    for c in coins:
+                        if c["coin"] == "USDT":
+                            balance = float(c.get("walletBalance") or c.get("availableBalance") or 0)
+                            break
+                    return {"ok": True, "balance": balance}
+                last_err = f"pybit: {resp.get('retMsg', '')} / {resp2.get('retMsg', '')}"
+            except Exception as pybit_err:
+                last_err = f"pybit fallback: {pybit_err}"
+                log.warning("test_connection pybit fallback failed: %s", pybit_err)
+
         log.warning(
             f"test_connection failed: both UNIFIED and CONTRACT failed, "
             f"last error: {last_err!r} key={api_key[:8]}..."
@@ -5224,7 +5475,11 @@ def _place_trade_sync(
     Возвращает {"ok": True/False, "tp_placed": bool, ...}
     """
     session    = _get_session(api_key, api_secret, demo=demo)  # PROP-DEMO
+    log.info("place_trade: endpoint=%s demo=%s sym=%s key=%s...", getattr(session, "endpoint", "?"), demo, symbol, api_key[:8])
     bb_symbol  = _to_bybit_symbol(symbol)
+    # Быстрая проверка: монета делистнута?
+    if bb_symbol in _delisted_symbols:
+        return {"ok": False, "error": f"{bb_symbol} делистнут на Bybit."}
     side       = "Buy" if direction == "LONG" else "Sell"
     lev        = min(max(1, leverage), MAX_LEVERAGE)
 
@@ -5251,7 +5506,7 @@ def _place_trade_sync(
         log.debug(f"set_leverage {bb_symbol}: {e}")
 
     # Получаем баланс (rate-limited внутри _get_wallet_balance_resp)
-    balance = _get_balance_sync(api_key, api_secret)
+    balance = _get_balance_sync(api_key, api_secret, demo=demo)
     if balance < 1.0:
         return {
             "ok": False,
@@ -5372,6 +5627,11 @@ def _place_trade_sync(
 
     try:
         resp = _do_place(start_idx)
+        # 110074 = contract is not live — монета делистнута
+        if resp.get("retCode") == 110074:
+            _delisted_symbols.add(bb_symbol)
+            log.warning(f"{bb_symbol}: delisted (110074), added to runtime blacklist")
+            return {"ok": False, "error": _humanize_bybit_error(str(resp.get("retMsg", "")))}
         # Bybit retCode 130125 = "position idx not match position mode"
         # Если кэш ещё не актуален — детектируем режим и повторяем с правильным idx.
         if resp.get("retCode") == 130125:
@@ -5522,7 +5782,7 @@ def _place_trade_split_sync(
     except Exception as e:
         log.debug(f"set_leverage {bb_symbol}: {e}")
 
-    balance = _get_balance_sync(api_key, api_secret)  # rate-limited внутри
+    balance = _get_balance_sync(api_key, api_secret, demo=demo)  # rate-limited внутри
     if balance < 1.0:
         return {
             "ok": False,
@@ -5779,6 +6039,7 @@ async def place_trade(
                         risk_pct, leverage,
                         tp2, tp3,
                         risk_mode=risk_mode,
+                        demo=demo,  # PROP-DEMO: прокидываем demo в sync
                     ),
                 )
                 last_exc = None
@@ -8504,6 +8765,19 @@ async def init_db(path: str) -> None:
             "ALTER TABLE users ADD COLUMN prop_day_start_balance REAL DEFAULT 0",
             "ALTER TABLE users ADD COLUMN prop_trading_days INTEGER DEFAULT 0",
             "ALTER TABLE users ADD COLUMN prop_unlocked INTEGER DEFAULT 0",
+            # ADVANCED: notification toggles for background alerts
+            "ALTER TABLE users ADD COLUMN alert_liquidation INTEGER DEFAULT 0",
+            "ALTER TABLE users ADD COLUMN alert_funding INTEGER DEFAULT 0",
+            "ALTER TABLE users ADD COLUMN alert_arbitrage INTEGER DEFAULT 0",
+            "ALTER TABLE users ADD COLUMN alert_whales INTEGER DEFAULT 0",
+            "ALTER TABLE users ADD COLUMN alert_regime INTEGER DEFAULT 0",
+            "ALTER TABLE users ADD COLUMN alert_swarm INTEGER DEFAULT 0",
+            # Paper trading / Prop Simulator
+            "ALTER TABLE users ADD COLUMN paper_trading INTEGER DEFAULT 0",
+            # OKX exchange support
+            "ALTER TABLE users ADD COLUMN okx_api_key TEXT DEFAULT ''",
+            "ALTER TABLE users ADD COLUMN okx_api_secret TEXT DEFAULT ''",
+            "ALTER TABLE users ADD COLUMN okx_passphrase TEXT DEFAULT ''",
         ]
         for sql in migrations:
             try:
@@ -8669,6 +8943,12 @@ _ALLOWED_USER_COLS = {
     "prop_min_days", "prop_max_days", "prop_trailing_dd", "prop_consistency",
     "prop_start_balance", "prop_start_date", "prop_day_start_balance", "prop_trading_days",
     "prop_unlocked",
+    # ADVANCED notification toggles
+    "alert_liquidation", "alert_funding", "alert_arbitrage",
+    "alert_whales", "alert_regime", "alert_swarm",
+    "paper_trading",
+    # OKX
+    "okx_api_key", "okx_api_secret", "okx_passphrase",
 }
 
 # FIX-AUDIT-11: Whitelist допустимых колонок таблицы trades.
@@ -8702,6 +8982,12 @@ async def db_upsert_user(data: dict) -> None:
         data["binance_api_key"]    = _encrypt_key(data["binance_api_key"] or "")
     if "binance_api_secret" in data:
         data["binance_api_secret"] = _encrypt_key(data["binance_api_secret"] or "")
+    if "okx_api_key" in data:
+        data["okx_api_key"] = _encrypt_key(data["okx_api_key"] or "")
+    if "okx_api_secret" in data:
+        data["okx_api_secret"] = _encrypt_key(data["okx_api_secret"] or "")
+    if "okx_passphrase" in data:
+        data["okx_passphrase"] = _encrypt_key(data["okx_passphrase"] or "")
     # Фильтруем только допустимые колонки во избежание SQL-инъекций
     data = {k: v for k, v in data.items() if k in _ALLOWED_USER_COLS}
     cols = list(data.keys())
@@ -8944,21 +9230,24 @@ async def db_update_trade_tp_placed(trade_id: str, value: int = 1) -> None:
 
 
 async def db_count_open_trades(user_id: int, exclude_trade_id: str = "") -> int:
-    """Количество открытых сделок (result=''), включая confirm-mode.
+    """Количество реально открытых сделок (result='' AND order_id!='').
 
-    exclude_trade_id — исключает текущую только-что-добавленную сделку
-    чтобы не считать её саму при проверке лимита.
+    Считает только сделки, которые действительно отправлены на биржу
+    (order_id != ''), а не все сигнальные записи.
+    exclude_trade_id — исключает текущую только-что-добавленную сделку.
     """
     async with _read_conn() as db:  # FIX-B12: используем пул соединений
         if exclude_trade_id:
             async with db.execute(
-                "SELECT COUNT(*) FROM trades WHERE user_id=? AND result='' AND trade_id!=?",
+                "SELECT COUNT(*) FROM trades WHERE user_id=? AND result='' "
+                "AND order_id!='' AND trade_id!=?",
                 (user_id, exclude_trade_id),
             ) as cur:
                 row = await cur.fetchone()
         else:
             async with db.execute(
-                "SELECT COUNT(*) FROM trades WHERE user_id=? AND result=''",
+                "SELECT COUNT(*) FROM trades WHERE user_id=? AND result='' "
+                "AND order_id!=''",
                 (user_id,),
             ) as cur:
                 row = await cur.fetchone()
@@ -11798,6 +12087,13 @@ class CHMIndicator:
         ZONE_PCT = cfg.ZONE_PCT
 
         # ══════════════════════════════════════════════════════════════════
+        # ФИЛЬТР ОБЪЁМА — блокируем сигналы при аномально низком объёме
+        # ══════════════════════════════════════════════════════════════════
+        if vol_ratio < cfg.VOL_MULT * 0.7:
+            log.debug(f"{symbol}: vol_ratio={vol_ratio:.2f} < {cfg.VOL_MULT * 0.7:.2f} (VOL_MULT×0.7) — skip")
+            return None
+
+        # ══════════════════════════════════════════════════════════════════
         # ПОИСК СИГНАЛА
         # ══════════════════════════════════════════════════════════════════
 
@@ -12392,7 +12688,8 @@ def kb_auto_trade(user: UserSettings) -> InlineKeyboardMarkup:
     has_bybit   = bool(getattr(user, "bybit_api_key", "")) and bool(getattr(user, "bybit_api_secret", ""))
     has_bingx   = bool(getattr(user, "bingx_api_key", "")) and bool(getattr(user, "bingx_api_secret", ""))
     has_binance = bool(getattr(user, "binance_api_key", "")) and bool(getattr(user, "binance_api_secret", ""))
-    has_any     = has_bybit or has_bingx or has_binance
+    has_okx     = bool(getattr(user, "okx_api_key", "")) and bool(getattr(user, "okx_api_secret", ""))
+    has_any     = has_bybit or has_bingx or has_binance or has_okx
 
     lang         = getattr(user, "lang", "ru")
     status_label = _t("status_on", lang) if at else _t("status_off", lang)
@@ -12460,6 +12757,7 @@ def kb_at_exchange(user: UserSettings) -> InlineKeyboardMarkup:
         _btn(("◉ " if exchange == "bybit"   else "○ ") + "Bybit Futures",   "set_at_exchange_bybit"),
         _btn(("◉ " if exchange == "bingx"   else "○ ") + "BingX Futures",   "set_at_exchange_bingx"),
         _btn(("◉ " if exchange == "binance" else "○ ") + "Binance Futures", "set_at_exchange_binance"),
+        _btn(("◉ " if exchange == "okx"     else "○ ") + "OKX Futures",     "set_at_exchange_okx"),
         _back("auto_trade_menu"),
     ]
     return InlineKeyboardMarkup(inline_keyboard=rows)
@@ -12535,7 +12833,8 @@ def kb_at_api(user: UserSettings) -> InlineKeyboardMarkup:
     has_bybit   = bool(getattr(user, "bybit_api_key", "")) and bool(getattr(user, "bybit_api_secret", ""))
     has_bingx   = bool(getattr(user, "bingx_api_key", "")) and bool(getattr(user, "bingx_api_secret", ""))
     has_binance = bool(getattr(user, "binance_api_key", "")) and bool(getattr(user, "binance_api_secret", ""))
-    has_any     = has_bybit or has_bingx or has_binance
+    has_okx     = bool(getattr(user, "okx_api_key", "")) and bool(getattr(user, "okx_api_secret", ""))
+    has_any     = has_bybit or has_bingx or has_binance or has_okx
 
     if exchange == "bybit":
         key_label = "🔑 Bybit API: ✅ подключены" if has_bybit else "🔑 Bybit API: ❌ не настроены"
@@ -12781,6 +13080,7 @@ def kb_more(user: UserSettings) -> InlineKeyboardMarkup:
          InlineKeyboardButton(text=_t("kb_help", lang),       callback_data="help_show")],
         _btn("🏪 Маркетплейс пресетов", "marketplace_menu"),
         _btn("🧠 Продвинутые инструменты", "advanced_menu"),
+        _btn("🔧 Smart Trading Tools", "smart_tools_menu"),
         _btn(
             "⚡ Скальпинг: " + ("✅ ON" if getattr(user, "scalping_active", False) else "❌ OFF"),
             "scalping_menu",
@@ -13806,8 +14106,8 @@ def kb_at_help() -> InlineKeyboardMarkup:
 
 # ── ОПТИМИЗАТОР ──────────────────────────────────────
 
-def kb_optimizer(user: UserSettings) -> InlineKeyboardMarkup:
-    """Меню оптимизатора."""
+def kb_optimizer(user: UserSettings, ml_stats: dict | None = None) -> InlineKeyboardMarkup:
+    """Меню оптимизатора с ML-статистикой."""
     enabled   = getattr(user, "optimizer_enabled", False)
     strategies = str(getattr(user, "optimizer_strategies", "LEVELS") or "LEVELS")
     status = "🟢 ВКЛ — нажать чтобы выключить" if enabled else "🔴 ВЫКЛ — нажать чтобы включить"
@@ -13823,66 +14123,57 @@ def kb_optimizer(user: UserSettings) -> InlineKeyboardMarkup:
             InlineKeyboardButton(text=("◉ " if "GERCHIK" in strategies else "○ ") + "Gerchik",
                                  callback_data="optim_strat_GERCHIK"),
         ],
-        _back("auto_trade_menu"),
     ]
+    # ML-фильтр статистика
+    if ml_stats and enabled:
+        samples  = ml_stats.get("train_samples", 0)
+        accuracy = ml_stats.get("accuracy", 0)
+        blocked  = ml_stats.get("blocked", 0)
+        passed   = ml_stats.get("passed", 0)
+        total    = blocked + passed
+        acc_str  = f"{accuracy*100:.1f}%" if accuracy > 0 else "—"
+        block_str = f"{blocked}/{total}" if total > 0 else "0/0"
+        rows.append(_noop(f"── 🧠 ML-фильтр ──────────────────────"))
+        rows.append(_noop(f"📊 Данных: {samples} | Точность: {acc_str}"))
+        rows.append(_noop(f"🛡 Заблокировано: {block_str}"))
+        if samples < 30:
+            need = 30 - samples
+            rows.append(_noop(f"⏳ Нужно ещё {need} сделок для обучения"))
+    rows.append(_btn("🔄 Переобучить ML сейчас", "ml_retrain_now"))
+    rows.append(_back("auto_trade_menu"))
     return InlineKeyboardMarkup(inline_keyboard=rows)
 
 
 # ── СКАЛЬПИНГ ─────────────────────────────────────────
 
 def kb_scalping_menu(user: UserSettings, back_cb: str = "auto_trade_menu") -> InlineKeyboardMarkup:
-    """Главное меню скальпинга.
-    back_cb — куда ведёт кнопка «Назад»:
-      'auto_trade_menu' — из меню авто-трейда (по умолчанию)
-      'back_main'       — из главного меню (когда стратегия == SCALPING)
-    """
+    """Главное меню скальпинга V2 — VWAP Bounce + Liquidity Grab + Volume Spike."""
     lang     = getattr(user, "lang", "ru")
     active   = getattr(user, "scalping_active",    False)
-    tf       = getattr(user, "scalping_tf",        "1m")
-    tp_pct   = getattr(user, "scalping_tp_pct",    0.75)
-    sl_pct   = getattr(user, "scalping_sl_pct",    0.20)
+    tf       = getattr(user, "scalping_tf",        "5m")
     max_tr   = getattr(user, "scalping_max_trades", 3)
     status   = _t("status_on", lang) if active else _t("status_off", lang)
-    # Живой расчёт R:R с учётом комиссий (Bybit taker 0.055% × 2 = 0.11% round-trip)
-    fee_rt = 0.11
-    net_reward = tp_pct - fee_rt
-    net_risk   = sl_pct + fee_rt
-    rr = round(net_reward / net_risk, 2) if net_risk > 0 else 0
-    rr_ok = "✅" if rr >= 1.3 else "⚠️"
-    rr_label = "R:R" if lang == "en" else "R:R"
     max_label = "Max" if lang == "en" else "Макс"
-    fee_label = "Fees & R:R guide" if lang == "en" else "Справка: комиссии и R:R"
-    ema      = getattr(user, "scalping_ema_period",    20)
-    min_rr   = getattr(user, "scalping_min_rr",        2.2)  # AUDIT-FIX-024
-    rsi_lmin = getattr(user, "scalping_rsi_long_min",  40.0)
-    rsi_lmax = getattr(user, "scalping_rsi_long_max",  72.0)
-    rsi_smin = getattr(user, "scalping_rsi_short_min", 28.0)
-    rsi_smax = getattr(user, "scalping_rsi_short_max", 60.0)
-    vol_m    = getattr(user, "scalping_vol_mult",      1.3)  # AUDIT-FIX-024
+    min_rr   = float(getattr(user, "scalping_min_rr", 2.0) or 2.0)
+
     return InlineKeyboardMarkup(inline_keyboard=[
-        _noop("── ⚡ Скальпинг ───────────────────────────────────"),
+        _noop("── ⚡ Скальпинг V2 ─────────────────────────"),
         _btn(status, "toggle_scalping"),
         [
             InlineKeyboardButton(text=f"⏱ TF: {tf} ▶",          callback_data="scalp_tf_menu"),
-            InlineKeyboardButton(text=f"🎯 TP: {tp_pct}% ▶",     callback_data="scalp_tp_menu"),
-        ],
-        [
-            InlineKeyboardButton(text=f"🛑 SL: {sl_pct}% ▶",     callback_data="scalp_sl_menu"),
             InlineKeyboardButton(text=f"🔢 {max_label}: {max_tr} ▶",    callback_data="scalp_max_menu"),
         ],
-        _noop(f"  {rr_ok} {rr_label} = 1:{rr}  (TP {tp_pct}% − fee {fee_rt}%) / (SL {sl_pct}% + fee {fee_rt}%)"),
-        _noop("── Параметры стратегии ─────────────────────────"),
         [
-            InlineKeyboardButton(text=f"📐 EMA: {ema} ▶",        callback_data="scalp_ema_menu"),
             InlineKeyboardButton(text=f"📊 Min R:R: {min_rr} ▶", callback_data="scalp_minrr_menu"),
+            InlineKeyboardButton(text=f"🌪 ATR макс: {getattr(user, 'scalping_atr_max_pct', 0.05)*100:.0f}% ▶", callback_data="scalp_atr_menu"),
         ],
-        [
-            InlineKeyboardButton(text=f"📈 RSI Long: {rsi_lmin}-{rsi_lmax} ▶",  callback_data="scalp_rsi_long_menu"),
-            InlineKeyboardButton(text=f"📉 RSI Short: {rsi_smin}-{rsi_smax} ▶", callback_data="scalp_rsi_short_menu"),
-        ],
-        _btn(f"📦 Объём множ.: ×{vol_m} ▶", "scalp_vol_menu"),
-        _btn(f"🌪 ATR макс: {getattr(user, 'scalping_atr_max_pct', 0.04)*100:.0f}% ▶", "scalp_atr_menu"),
-        _btn(f"❓ {fee_label}", "scalp_fee_help"),
+        _noop("── Подходы ─────────────────────────────────"),
+        _noop("📊 VWAP Bounce — вход от справедливой цены"),
+        _noop("🔄 Liquidity Grab — ложный вынос стопов"),
+        _noop("🔥 Volume Spike — пробой с объёмом"),
+        _noop(""),
+        _noop("SL: структурный (ATR × 1.0)"),
+        _noop("TP: автоматический (R:R × risk)"),
         # HIGH-WR: toggle with help button
         [InlineKeyboardButton(
             text=("◉ " if bool(getattr(user, "high_wr_mode", False)) else "○ ") + "🎯 High WR Mode",
@@ -13905,26 +14196,6 @@ def kb_scalping_tf(user: UserSettings) -> InlineKeyboardMarkup:
     return InlineKeyboardMarkup(inline_keyboard=rows)
 
 
-def kb_scalping_tp(user: UserSettings) -> InlineKeyboardMarkup:
-    cur = float(getattr(user, "scalping_tp_pct", 0.75) or 0.75)  # FIX-5: дефолт 0.30→0.75
-    rows = [_noop("── 🎯 TP скальпинга (% от входа) ───────────────")]
-    for val in (0.40, 0.50, 0.75, 1.00, 1.50, 2.00):             # FIX-5: убраны нерабочие 0.15/0.20/0.30 — они давали RR<1.3
-        mark = "◉ " if abs(cur - val) < 0.001 else "○ "
-        rows.append(_btn(f"{mark}{val}%", f"set_scalp_tp_{val}"))
-    rows.append(_back("scalping_menu"))
-    return InlineKeyboardMarkup(inline_keyboard=rows)
-
-
-def kb_scalping_sl(user: UserSettings) -> InlineKeyboardMarkup:
-    cur = float(getattr(user, "scalping_sl_pct", 0.20) or 0.20)  # FIX-5: дефолт 0.15→0.20
-    rows = [_noop("── 🛑 SL скальпинга (% от входа) ───────────────")]
-    for val in (0.10, 0.15, 0.20, 0.25, 0.30, 0.50):
-        mark = "◉ " if abs(cur - val) < 0.001 else "○ "
-        rows.append(_btn(f"{mark}{val}%", f"set_scalp_sl_{val}"))
-    rows.append(_back("scalping_menu"))
-    return InlineKeyboardMarkup(inline_keyboard=rows)
-
-
 def kb_scalping_max(user: UserSettings) -> InlineKeyboardMarkup:
     cur = int(getattr(user, "scalping_max_trades", 3) or 3)
     rows = [_noop("── 🔢 Макс. скальп-сигналов за цикл ────────────")]
@@ -13935,64 +14206,12 @@ def kb_scalping_max(user: UserSettings) -> InlineKeyboardMarkup:
     return InlineKeyboardMarkup(inline_keyboard=rows)
 
 
-def kb_scalping_ema(user: UserSettings) -> InlineKeyboardMarkup:
-    cur = int(getattr(user, "scalping_ema_period", 20) or 20)
-    rows = [_noop("── 📐 EMA период ──────────────────────────────────")]
-    for val in (10, 15, 20, 30, 50):
-        mark = "◉ " if cur == val else "○ "
-        rows.append(_btn(f"{mark}EMA {val}", f"set_scalp_ema_{val}"))
-    rows.append(_back("scalping_menu"))
-    return InlineKeyboardMarkup(inline_keyboard=rows)
-
-
 def kb_scalping_minrr(user: UserSettings) -> InlineKeyboardMarkup:
     cur = float(getattr(user, "scalping_min_rr", 2.2) or 2.2)  # AUDIT-FIX-024
     rows = [_noop("── 📊 Мин. R:R (после комиссий) ────────────────────")]
     for val in (1.5, 2.0, 2.2, 2.5, 3.0):  # AUDIT-FIX-024: updated options
         mark = "◉ " if abs(cur - val) < 0.001 else "○ "
         rows.append(_btn(f"{mark}{val}", f"set_scalp_minrr_{val}"))
-    rows.append(_back("scalping_menu"))
-    return InlineKeyboardMarkup(inline_keyboard=rows)
-
-
-def kb_scalping_rsi_long(user: UserSettings) -> InlineKeyboardMarkup:
-    cur_min = float(getattr(user, "scalping_rsi_long_min", 40.0) or 40.0)
-    cur_max = float(getattr(user, "scalping_rsi_long_max", 72.0) or 72.0)
-    rows = [_noop("── 📈 RSI фильтр LONG ─────────────────────────────")]
-    rows.append(_noop(f"Мин. RSI (сейчас: {cur_min})"))
-    for val in (30.0, 35.0, 40.0, 45.0, 50.0):
-        mark = "◉ " if abs(cur_min - val) < 0.1 else "○ "
-        rows.append(_btn(f"{mark}{val}", f"set_scalp_rsilmin_{val}"))
-    rows.append(_noop(f"Макс. RSI (сейчас: {cur_max})"))
-    for val in (65.0, 70.0, 72.0, 75.0, 80.0):
-        mark = "◉ " if abs(cur_max - val) < 0.1 else "○ "
-        rows.append(_btn(f"{mark}{val}", f"set_scalp_rsilmax_{val}"))
-    rows.append(_back("scalping_menu"))
-    return InlineKeyboardMarkup(inline_keyboard=rows)
-
-
-def kb_scalping_rsi_short(user: UserSettings) -> InlineKeyboardMarkup:
-    cur_min = float(getattr(user, "scalping_rsi_short_min", 28.0) or 28.0)
-    cur_max = float(getattr(user, "scalping_rsi_short_max", 60.0) or 60.0)
-    rows = [_noop("── 📉 RSI фильтр SHORT ────────────────────────────")]
-    rows.append(_noop(f"Мин. RSI (сейчас: {cur_min})"))
-    for val in (20.0, 25.0, 28.0, 30.0, 35.0):
-        mark = "◉ " if abs(cur_min - val) < 0.1 else "○ "
-        rows.append(_btn(f"{mark}{val}", f"set_scalp_rsismin_{val}"))
-    rows.append(_noop(f"Макс. RSI (сейчас: {cur_max})"))
-    for val in (55.0, 60.0, 65.0, 70.0):
-        mark = "◉ " if abs(cur_max - val) < 0.1 else "○ "
-        rows.append(_btn(f"{mark}{val}", f"set_scalp_rsismax_{val}"))
-    rows.append(_back("scalping_menu"))
-    return InlineKeyboardMarkup(inline_keyboard=rows)
-
-
-def kb_scalping_vol(user: UserSettings) -> InlineKeyboardMarkup:
-    cur = float(getattr(user, "scalping_vol_mult", 1.3) or 1.3)
-    rows = [_noop("── 📦 Множитель объёма ─────────────────────────────")]
-    for val in (1.0, 1.2, 1.3, 1.5, 2.0):
-        mark = "◉ " if abs(cur - val) < 0.001 else "○ "
-        rows.append(_btn(f"{mark}×{val}", f"set_scalp_vol_{val}"))
     rows.append(_back("scalping_menu"))
     return InlineKeyboardMarkup(inline_keyboard=rows)
 
@@ -16557,6 +16776,9 @@ class MidScanner:
         elif exchange == "binance":
             api_key    = getattr(user, "binance_api_key",    "")
             api_secret = getattr(user, "binance_api_secret", "")
+        elif exchange == "okx":
+            api_key    = getattr(user, "okx_api_key",    "")
+            api_secret = getattr(user, "okx_api_secret", "")
         else:
             api_key    = getattr(user, "bybit_api_key",    "")
             api_secret = getattr(user, "bybit_api_secret", "")
@@ -16934,12 +17156,12 @@ class MidScanner:
                 await self._cleanup_stale_trades()
             if self._stop_event:
                 try:
-                    await asyncio.wait_for(self._stop_event.wait(), timeout=60)
+                    await asyncio.wait_for(self._stop_event.wait(), timeout=30)  # faster TP/SL check
                     return  # stop requested
                 except asyncio.TimeoutError:
                     pass
             else:
-                await asyncio.sleep(60)
+                await asyncio.sleep(30)  # 30s cycle — faster TP/SL recovery
 
     async def _cleanup_stale_trades(self):
         """FIX-5: помечает SKIP сделки старше 72ч без закрытой позиции."""
@@ -17011,6 +17233,7 @@ class MidScanner:
             exchange    = getattr(user, "trade_exchange", "bybit")
             is_bingx    = (exchange == "bingx")
             is_binance  = (exchange == "binance")
+            is_okx      = (exchange == "okx")
             _bybit_demo = bool(getattr(user, "bybit_demo", False))  # PROP-DEMO
 
             if is_bingx:
@@ -17019,6 +17242,9 @@ class MidScanner:
             elif is_binance:
                 api_key    = getattr(user, "binance_api_key",    "")
                 api_secret = getattr(user, "binance_api_secret", "")
+            elif is_okx:
+                api_key    = getattr(user, "okx_api_key",    "")
+                api_secret = getattr(user, "okx_api_secret", "")
             else:
                 api_key    = getattr(user, "bybit_api_key",    "")
                 api_secret = getattr(user, "bybit_api_secret", "")
@@ -17580,28 +17806,41 @@ signal_filter.py — ML-фильтр сигналов на основе XGBoost.
 Если XGBoost не установлен или данных недостаточно — всегда возвращает True
 (фильтр прозрачен, не блокирует сигналы).
 
-Модели хранятся в памяти (per-user, per-strategy).
-При рестарте бота переобучаются автоматически при первом прогоне оптимизатора.
+Модели персистятся на диск (data/ml_models/) и загружаются при старте.
 """
 from __future__ import annotations
 
 import logging
+import os
 import pickle
 import threading
+import time
+from pathlib import Path
 from typing import Optional
 
 log = logging.getLogger("CHM.SignalFilter")
 
+# ── Конфигурация ──────────────────────────────────────────────────────────────
+
 # Минимальное число сделок для обучения модели
-_MIN_TRAIN_SAMPLES = 30
+MIN_TRAIN_SAMPLES = 30
 
 # Порог вероятности: сигнал проходит если prob >= threshold
 _DEFAULT_THRESHOLD = 0.52
+
+# Директория для сохранения моделей на диск
+_MODELS_DIR = Path("data/ml_models")
 
 # In-memory хранилище моделей: {(user_id, strategy): model}
 _models: dict[tuple, object] = {}
 # Защита от race condition при параллельном обучении через run_in_executor
 _models_lock = threading.Lock()
+
+# ── Статистика (per-user, per-strategy) ──────────────────────────────────────
+# {(user_id, strategy): {"blocked": int, "passed": int, "accuracy": float,
+#                         "train_samples": int, "last_train_ts": float}}
+_stats: dict[tuple, dict] = {}
+_stats_lock = threading.Lock()
 
 # Доступен ли XGBoost
 _XGBOOST_OK = False
@@ -17613,16 +17852,32 @@ except ImportError:
     log.debug("XGBoost не установлен — signal_filter работает в режиме pass-through")
 
 
+# ── Именование признаков ──────────────────────────────────────────────────────
+
+_FEATURE_NAMES = [
+    "rr",            # risk/reward ratio
+    "risk_pct",      # риск в % от цены (|entry-sl|/entry)
+    "tp_pct",        # расстояние до TP в %
+    "direction_enc", # 0=LONG, 1=SHORT
+    "quality",       # качество сигнала 1-5
+    "session_hour",  # час UTC (0-23) — торговая сессия
+    "regime_enc",    # режим рынка (0=ranging,1=trend_up,2=trend_down,3=high_vol)
+    "vol_ratio",     # volume / средний volume (показатель активности)
+    "atr_pct",       # ATR / цена — текущая волатильность
+]
+
+_REGIME_MAP = {
+    "ranging": 0, "trending_up": 1, "trending_down": 2, "high_vol": 3,
+}
+
+
 def _extract_features(signal_dict: dict) -> Optional[list]:
     """
     Извлекает числовые признаки из словаря сигнала.
 
-    Признаки:
-      - rr (risk/reward ratio)
-      - risk_pct (риск в % от цены)
-      - quality/score (качество сигнала 1-5)
-      - direction_enc (0=LONG, 1=SHORT)
-      - tp_pct (расстояние до tp1 в %)
+    9 признаков:
+      rr, risk_pct, tp_pct, direction_enc, quality,
+      session_hour, regime_enc, vol_ratio, atr_pct
     """
     try:
         entry = float(signal_dict.get("entry", 0) or 0)
@@ -17638,7 +17893,15 @@ def _extract_features(signal_dict: dict) -> Optional[list]:
         direction_enc = 0 if str(signal_dict.get("direction", "LONG")).upper() == "LONG" else 1
         quality = float(signal_dict.get("quality", signal_dict.get("score", 3)) or 3)
 
-        return [rr, risk, tp_pct, direction_enc, quality]
+        # Новые признаки (graceful defaults если не переданы)
+        session_hour = float(signal_dict.get("session_hour", 12))
+        regime_str   = str(signal_dict.get("regime", "ranging")).lower()
+        regime_enc   = float(_REGIME_MAP.get(regime_str, 0))
+        vol_ratio    = float(signal_dict.get("vol_ratio", 1.0) or 1.0)
+        atr_pct      = float(signal_dict.get("atr_pct", 0.02) or 0.02)
+
+        return [rr, risk, tp_pct, direction_enc, quality,
+                session_hour, regime_enc, vol_ratio, atr_pct]
     except Exception as e:
         log.debug("_extract_features: %s", e)
         return None
@@ -17647,18 +17910,33 @@ def _extract_features(signal_dict: dict) -> Optional[list]:
 def _feedback_to_xy(rows: list[dict]):
     """Преобразует список feedback-строк в матрицу X, вектор y."""
     try:
+        import json
         import numpy as np
         X, y = [], []
         for r in rows:
             result = r.get("result", "")
             if result not in ("WIN", "LOSS"):
                 continue
+
+            # Извлекаем доп. признаки из features JSON (если сохранены)
+            extra = {}
+            feat_json = r.get("features", "{}")
+            if feat_json and feat_json != "{}":
+                try:
+                    extra = json.loads(feat_json) if isinstance(feat_json, str) else feat_json
+                except Exception:
+                    pass
+
             feats = _extract_features({
-                "entry":     r.get("entry", 0),
-                "sl":        r.get("sl", 0),
-                "tp1":       r.get("tp1", 0),
-                "direction": r.get("direction", "LONG"),
-                "quality":   3,
+                "entry":        r.get("entry", 0),
+                "sl":           r.get("sl", 0),
+                "tp1":          r.get("tp1", 0),
+                "direction":    r.get("direction", "LONG"),
+                "quality":      extra.get("quality", r.get("quality", 3)),
+                "session_hour": extra.get("session_hour", 12),
+                "regime":       r.get("regime", extra.get("regime", "ranging")),
+                "vol_ratio":    extra.get("vol_ratio", 1.0),
+                "atr_pct":      extra.get("atr_pct", 0.02),
             })
             if feats is None:
                 continue
@@ -17672,10 +17950,78 @@ def _feedback_to_xy(rows: list[dict]):
         return None, None
 
 
+# ── Персистентность моделей ──────────────────────────────────────────────────
+
+def _model_path(user_id: int, strategy: str) -> Path:
+    """Путь к файлу модели на диске."""
+    return _MODELS_DIR / f"xgb_{user_id}_{strategy.upper()}.pkl"
+
+
+def _save_model_to_disk(user_id: int, strategy: str, model) -> bool:
+    """Сохраняет модель на диск (pickle). Вызывается из train_filter."""
+    try:
+        _MODELS_DIR.mkdir(parents=True, exist_ok=True)
+        path = _model_path(user_id, strategy)
+        with open(path, "wb") as f:
+            pickle.dump(model, f)
+        log.debug("model saved to disk: %s", path)
+        return True
+    except Exception as e:
+        log.warning("_save_model_to_disk uid=%s strat=%s: %s", user_id, strategy, e)
+        return False
+
+
+def _load_model_from_disk(user_id: int, strategy: str):
+    """Загружает модель с диска. Возвращает model или None."""
+    try:
+        path = _model_path(user_id, strategy)
+        if not path.exists():
+            return None
+        with open(path, "rb") as f:
+            model = pickle.load(f)
+        log.debug("model loaded from disk: %s", path)
+        return model
+    except Exception as e:
+        log.warning("_load_model_from_disk uid=%s strat=%s: %s", user_id, strategy, e)
+        return None
+
+
+def load_all_models_from_disk() -> int:
+    """
+    Загружает все сохранённые модели с диска в память при старте бота.
+    Возвращает количество загруженных моделей.
+    """
+    count = 0
+    try:
+        if not _MODELS_DIR.exists():
+            return 0
+        for path in _MODELS_DIR.glob("xgb_*_*.pkl"):
+            try:
+                parts = path.stem.split("_", 2)  # xgb, user_id, strategy
+                if len(parts) < 3:
+                    continue
+                user_id = int(parts[1])
+                strategy = parts[2].upper()
+                model = _load_model_from_disk(user_id, strategy)
+                if model is not None:
+                    with _models_lock:
+                        _models[(user_id, strategy)] = model
+                    count += 1
+            except Exception as e:
+                log.debug("load_all_models: skip %s: %s", path.name, e)
+    except Exception as e:
+        log.warning("load_all_models_from_disk: %s", e)
+    if count:
+        log.info("Loaded %d ML models from disk", count)
+    return count
+
+
+# ── Обучение и предсказание ──────────────────────────────────────────────────
+
 def train_filter(user_id: int, strategy: str, rows: list[dict]) -> bool:
     """
     Обучает XGBoost модель на feedback-данных.
-    Сохраняет модель в _models.
+    Сохраняет модель в _models + на диск.
     Возвращает True если обучение прошло успешно.
     """
     if not _XGBOOST_OK:
@@ -17685,7 +18031,7 @@ def train_filter(user_id: int, strategy: str, rows: list[dict]) -> bool:
         import numpy as np
 
         X, y = _feedback_to_xy(rows)
-        if X is None or len(X) < _MIN_TRAIN_SAMPLES:
+        if X is None or len(X) < MIN_TRAIN_SAMPLES:
             log.debug(
                 "train_filter uid=%s strat=%s: insufficient data (%s samples)",
                 user_id, strategy, len(X) if X is not None else 0,
@@ -17693,17 +18039,55 @@ def train_filter(user_id: int, strategy: str, rows: list[dict]) -> bool:
             return False
 
         model = xgb.XGBClassifier(
-            n_estimators=50,
-            max_depth=3,
-            learning_rate=0.1,
+            n_estimators=80,
+            max_depth=4,
+            learning_rate=0.08,
+            subsample=0.8,
+            colsample_bytree=0.8,
             use_label_encoder=False,
             eval_metric="logloss",
             verbosity=0,
         )
         model.fit(X, y)
+
+        # Accuracy estimation
+        accuracy = 0.0
+        try:
+            if len(X) >= 50:
+                try:
+                    from sklearn.model_selection import cross_val_score
+                    cv_scores = cross_val_score(model, X, y, cv=5, scoring="accuracy")
+                    accuracy = float(np.mean(cv_scores))
+                except ImportError:
+                    # sklearn не установлен — train accuracy
+                    preds = model.predict(X)
+                    accuracy = float(np.mean(preds == y))
+            else:
+                preds = model.predict(X)
+                accuracy = float(np.mean(preds == y))
+        except Exception:
+            pass
+
         with _models_lock:
             _models[(user_id, strategy)] = model
-        log.info("signal_filter trained uid=%s strat=%s samples=%d", user_id, strategy, len(X))
+
+        # Обновляем статистику
+        with _stats_lock:
+            key = (user_id, strategy)
+            if key not in _stats:
+                _stats[key] = {"blocked": 0, "passed": 0, "accuracy": 0.0,
+                               "train_samples": 0, "last_train_ts": 0.0}
+            _stats[key]["accuracy"] = round(accuracy, 4)
+            _stats[key]["train_samples"] = len(X)
+            _stats[key]["last_train_ts"] = time.time()
+
+        # Персистим на диск
+        _save_model_to_disk(user_id, strategy, model)
+
+        log.info(
+            "signal_filter trained uid=%s strat=%s samples=%d accuracy=%.1f%%",
+            user_id, strategy, len(X), accuracy * 100,
+        )
         return True
     except Exception as e:
         log.warning("train_filter uid=%s strat=%s: %s", user_id, strategy, e)
@@ -17728,7 +18112,13 @@ def predict_signal(
         with _models_lock:
             model = _models.get((user_id, strategy))
         if model is None:
-            return True  # модель не обучена — пропускаем
+            # Пробуем загрузить с диска
+            model = _load_model_from_disk(user_id, strategy)
+            if model is not None:
+                with _models_lock:
+                    _models[(user_id, strategy)] = model
+            else:
+                return True  # модель не обучена — пропускаем
 
         feats = _extract_features(signal_dict)
         if feats is None:
@@ -17737,6 +18127,18 @@ def predict_signal(
         import numpy as np
         prob = float(model.predict_proba(np.array([feats]))[0][1])
         result = prob >= threshold
+
+        # Обновляем счётчики
+        key = (user_id, strategy)
+        with _stats_lock:
+            if key not in _stats:
+                _stats[key] = {"blocked": 0, "passed": 0, "accuracy": 0.0,
+                               "train_samples": 0, "last_train_ts": 0.0}
+            if result:
+                _stats[key]["passed"] += 1
+            else:
+                _stats[key]["blocked"] += 1
+
         log.debug(
             "signal_filter uid=%s strat=%s prob=%.3f thresh=%.2f → %s",
             user_id, strategy, prob, threshold, "PASS" if result else "BLOCK",
@@ -17747,10 +18149,76 @@ def predict_signal(
         return True  # не блокируем при ошибке
 
 
+def predict_signal_prob(
+    user_id: int,
+    strategy: str,
+    signal_dict: dict,
+) -> Optional[float]:
+    """
+    Возвращает вероятность WIN для сигнала (0.0-1.0).
+    Возвращает None если модель не обучена.
+    """
+    if not _XGBOOST_OK:
+        return None
+    try:
+        with _models_lock:
+            model = _models.get((user_id, strategy))
+        if model is None:
+            model = _load_model_from_disk(user_id, strategy)
+            if model is None:
+                return None
+            with _models_lock:
+                _models[(user_id, strategy)] = model
+
+        feats = _extract_features(signal_dict)
+        if feats is None:
+            return None
+
+        import numpy as np
+        return float(model.predict_proba(np.array([feats]))[0][1])
+    except Exception:
+        return None
+
+
 def has_model(user_id: int, strategy: str) -> bool:
-    """Проверяет, есть ли обученная модель."""
+    """Проверяет, есть ли обученная модель (в памяти или на диске)."""
     with _models_lock:
-        return (user_id, strategy) in _models
+        if (user_id, strategy) in _models:
+            return True
+    return _model_path(user_id, strategy).exists()
+
+
+def get_stats(user_id: int, strategy: str = "") -> dict:
+    """
+    Возвращает статистику ML-фильтра для пользователя.
+    Если strategy="" — возвращает агрегат по всем стратегиям.
+    """
+    with _stats_lock:
+        if strategy:
+            return dict(_stats.get((user_id, strategy), {
+                "blocked": 0, "passed": 0, "accuracy": 0.0,
+                "train_samples": 0, "last_train_ts": 0.0,
+            }))
+        # Агрегат по всем стратегиям
+        agg = {"blocked": 0, "passed": 0, "accuracy": 0.0,
+               "train_samples": 0, "last_train_ts": 0.0, "strategies": []}
+        for (uid, strat), st in _stats.items():
+            if uid == user_id:
+                agg["blocked"] += st["blocked"]
+                agg["passed"] += st["passed"]
+                agg["train_samples"] = max(agg["train_samples"], st["train_samples"])
+                if st["accuracy"] > 0:
+                    agg["accuracy"] = max(agg["accuracy"], st["accuracy"])
+                if st["last_train_ts"] > agg["last_train_ts"]:
+                    agg["last_train_ts"] = st["last_train_ts"]
+                agg["strategies"].append(strat)
+        return agg
+
+
+def get_all_model_keys() -> list[tuple]:
+    """Возвращает список всех (user_id, strategy) пар с моделями."""
+    with _models_lock:
+        return list(_models.keys())
 
 
 def drop_model(user_id: int, strategy: str | None = None) -> None:
@@ -18075,6 +18543,567 @@ async def enqueue_backtest(
     except Exception as e:
         log.warning("enqueue_backtest uid=%s: %s", user_id, e)
         return 0
+
+
+--- FILE: ./CHM_BREAKER_V4/okx_trader.py ---
+"""
+okx_trader.py — OKX Perpetual Futures API v5
+Авто-трейдинг: открытие позиций, управление, дашборд.
+
+Endpoint: https://www.okx.com
+Подпись: HMAC-SHA256 + Base64, ISO timestamp, passphrase.
+Полностью async (aiohttp), не требует run_in_executor.
+"""
+from __future__ import annotations
+
+import asyncio
+import base64
+import hashlib
+import hmac
+import html
+import json
+import logging
+import math
+import time
+from datetime import datetime, timezone
+from typing import Optional
+from urllib.parse import urlencode
+
+import aiohttp
+
+import database as db
+
+log = logging.getLogger("CHM.OKX.Trader")
+
+BASE_URL      = "https://www.okx.com"
+MIN_NOTIONAL  = 5.0
+MAX_LEVERAGE  = 125
+TAKER_FEE     = 0.0005  # 0.05%
+MAKER_FEE     = 0.0002  # 0.02%
+
+# ── HTTP session ──────────────────────────────────────────────
+
+_http_session: Optional[aiohttp.ClientSession] = None
+
+
+async def _get_http_session() -> aiohttp.ClientSession:
+    global _http_session
+    if _http_session is None or _http_session.closed:
+        _http_session = aiohttp.ClientSession(timeout=aiohttp.ClientTimeout(total=15))
+    return _http_session
+
+
+async def close_http_session() -> None:
+    global _http_session
+    if _http_session and not _http_session.closed:
+        await _http_session.close()
+        _http_session = None
+
+
+# ── Подпись ───────────────────────────────────────────────────
+
+def _sign(timestamp: str, method: str, path: str, body: str, secret: str) -> str:
+    """OKX HMAC-SHA256 + Base64 подпись."""
+    msg = timestamp + method.upper() + path + body
+    mac = hmac.new(secret.encode(), msg.encode(), hashlib.sha256).digest()
+    return base64.b64encode(mac).decode()
+
+
+def _iso_timestamp() -> str:
+    return datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%S.") + \
+           f"{datetime.now(timezone.utc).microsecond // 1000:03d}Z"
+
+
+# ── Запрос ────────────────────────────────────────────────────
+
+async def _request(
+    method: str, path: str,
+    api_key: str, secret: str, passphrase: str,
+    params: dict | None = None,
+    body: dict | None = None,
+) -> dict:
+    """Выполняет подписанный запрос к OKX API v5."""
+    ts = _iso_timestamp()
+    url = BASE_URL + path
+
+    body_str = ""
+    if body:
+        body_str = json.dumps(body)
+
+    if method == "GET" and params:
+        qs = urlencode(params)
+        path_with_qs = path + "?" + qs
+        url = BASE_URL + path_with_qs
+    else:
+        path_with_qs = path
+
+    signature = _sign(ts, method, path_with_qs, body_str, secret)
+    headers = {
+        "OK-ACCESS-KEY": api_key,
+        "OK-ACCESS-SIGN": signature,
+        "OK-ACCESS-TIMESTAMP": ts,
+        "OK-ACCESS-PASSPHRASE": passphrase,
+        "Content-Type": "application/json",
+    }
+
+    try:
+        s = await _get_http_session()
+        if method == "GET":
+            async with s.get(url, headers=headers) as resp:
+                return await resp.json(content_type=None)
+        elif method == "POST":
+            async with s.post(url, headers=headers, data=body_str) as resp:
+                return await resp.json(content_type=None)
+    except asyncio.TimeoutError:
+        return {"code": "-1", "msg": "timeout"}
+    except Exception as e:
+        return {"code": "-1", "msg": str(e)}
+
+
+# ── Символы ───────────────────────────────────────────────────
+
+def to_okx_symbol(symbol: str) -> str:
+    """Наш формат уже OKX формат: BTC-USDT-SWAP."""
+    if symbol.endswith("-SWAP"):
+        return symbol
+    if symbol.endswith("USDT"):
+        base = symbol.replace("USDT", "")
+        return f"{base}-USDT-SWAP"
+    return symbol
+
+
+def okx_price_multiplier(symbol: str) -> float:
+    """OKX не имеет 1000x монет — multiplier всегда 1."""
+    return 1.0
+
+
+# ── Ошибки ────────────────────────────────────────────────────
+
+_OKX_ERROR_MAP: dict[str, str] = {
+    "50000": "Ошибка параметров запроса.",
+    "50001": "Не удалось идентифицировать пользователя.",
+    "50002": "Неверный API ключ.",
+    "50004": "Неверная подпись.",
+    "50005": "Неверный passphrase.",
+    "50011": "Превышен лимит запросов.",
+    "50013": "Системная ошибка OKX. Повторите позже.",
+    "51001": "Инструмент не найден.",
+    "51004": "Недостаточно средств.",
+    "51008": "Ордер уже размещён.",
+    "51010": "Объём ниже минимального.",
+    "51020": "Объём выше максимального.",
+    "51102": "Неверный размер позиции.",
+}
+
+
+def _humanize_okx_error(raw: str) -> str:
+    for code, msg in _OKX_ERROR_MAP.items():
+        if code in raw:
+            return msg
+    return raw[:300]
+
+
+# ── Instrument filters ────────────────────────────────────────
+
+_instrument_cache: dict[str, dict] = {}
+
+
+async def _get_instrument_filters(inst_id: str) -> tuple[float, float, bool, int]:
+    """Возвращает (lot_size, tick_size, found, max_leverage)."""
+    if inst_id in _instrument_cache:
+        c = _instrument_cache[inst_id]
+        return c["lot"], c["tick"], True, c["lev"]
+
+    try:
+        s = await _get_http_session()
+        async with s.get(
+            f"{BASE_URL}/api/v5/public/instruments",
+            params={"instType": "SWAP", "instId": inst_id},
+        ) as r:
+            data = await r.json(content_type=None)
+            instruments = data.get("data", [])
+            if instruments:
+                inst = instruments[0]
+                lot = float(inst.get("lotSz", 1))
+                tick = float(inst.get("tickSz", 0.01))
+                lev = int(float(inst.get("lever", 125)))
+                _instrument_cache[inst_id] = {"lot": lot, "tick": tick, "lev": lev}
+                return lot, tick, True, lev
+    except Exception:
+        pass
+    return 1.0, 0.01, False, 125
+
+
+def _round_qty(qty: float, step: float) -> str:
+    if step <= 0:
+        return str(int(qty))
+    precision = max(0, -int(math.floor(math.log10(step)))) if step < 1 else 0
+    rounded = math.floor(qty / step) * step
+    return f"{rounded:.{precision}f}"
+
+
+def _round_price(price: float, tick: float) -> str:
+    if tick <= 0:
+        return f"{price:.8f}"
+    precision = max(0, -int(math.floor(math.log10(tick)))) if tick < 1 else 0
+    rounded = round(round(price / tick) * tick, precision)
+    return f"{rounded:.{precision}f}"
+
+
+# ── Баланс ────────────────────────────────────────────────────
+
+async def get_balance(api_key: str, secret: str, passphrase: str = "") -> float:
+    """Возвращает доступный баланс USDT."""
+    data = await _request("GET", "/api/v5/account/balance", api_key, secret, passphrase,
+                          params={"ccy": "USDT"})
+    try:
+        details = data["data"][0]["details"]
+        for d in details:
+            if d["ccy"] == "USDT":
+                return float(d.get("availBal", 0) or 0)
+    except Exception:
+        pass
+    return 0.0
+
+
+# ── Последняя цена ───────────────────────────────────────────
+
+async def get_last_price(api_key: str, secret: str, symbol: str, passphrase: str = "") -> float:
+    """Возвращает последнюю цену (публичный endpoint)."""
+    inst_id = to_okx_symbol(symbol)
+    try:
+        s = await _get_http_session()
+        async with s.get(f"{BASE_URL}/api/v5/market/ticker", params={"instId": inst_id}) as r:
+            data = await r.json(content_type=None)
+            return float(data["data"][0]["last"])
+    except Exception:
+        return 0.0
+
+
+# ── Тест подключения ─────────────────────────────────────────
+
+async def test_connection(api_key: str, secret: str, passphrase: str = "") -> dict:
+    """Проверяет ключи и возвращает баланс."""
+    try:
+        balance = await get_balance(api_key, secret, passphrase)
+        if balance >= 0:
+            return {"ok": True, "balance": balance}
+        return {"ok": False, "error": "Не удалось получить баланс OKX."}
+    except Exception as e:
+        return {"ok": False, "error": _humanize_okx_error(str(e))}
+
+
+# ── Торговля ──────────────────────────────────────────────────
+
+async def place_trade(
+    api_key: str, secret: str,
+    symbol: str, direction: str,
+    entry: float, sl: float, tp1: float,
+    risk_pct: float, leverage: int,
+    tp2: float = 0.0, tp3: float = 0.0,
+    risk_mode: str = "risk",
+    passphrase: str = "",  # OKX-specific: 3rd auth credential
+) -> dict:
+    """Открывает позицию на OKX Futures."""
+    try:
+        inst_id = to_okx_symbol(symbol)
+        side = "buy" if direction.upper() in ("LONG", "BUY") else "sell"
+        pos_side = "long" if side == "buy" else "short"
+
+        qty_step, tick_size, found, max_lev = await _get_instrument_filters(inst_id)
+        if not found:
+            return {"ok": False, "order_id": "", "error": f"Инструмент {inst_id} не найден на OKX."}
+
+        # Баланс
+        equity = await get_balance(api_key, secret, passphrase)
+        if equity <= 0:
+            return {"ok": False, "order_id": "", "error": "Нулевой баланс OKX."}
+
+        # Плечо
+        lev = min(leverage, MAX_LEVERAGE, max_lev)
+        await _request("POST", "/api/v5/account/set-leverage", api_key, secret, passphrase,
+                       body={"instId": inst_id, "lever": str(lev), "mgnMode": "cross"})
+
+        # Расчёт размера
+        risk_usd = equity * (risk_pct / 100.0)
+        sl_dist = abs(entry - sl)
+        if sl_dist < 1e-10:
+            return {"ok": False, "order_id": "", "error": "SL совпадает с ценой входа."}
+
+        if risk_mode == "notional":
+            qty_raw = risk_usd / entry if entry > 0 else 0
+        elif risk_mode == "margin":
+            target = equity * (risk_pct / 100.0) * lev
+            qty_raw = target / entry if entry > 0 else 0
+        else:
+            qty_raw = risk_usd / sl_dist
+
+        qty_str = _round_qty(qty_raw, qty_step)
+        qty_float = float(qty_str)
+        if qty_float <= 0 and qty_step > 0:
+            qty_float = qty_step
+            qty_str = _round_qty(qty_step, qty_step)
+
+        notional = qty_float * entry
+        _min_pos = max(MIN_NOTIONAL, 10.0)
+        if notional < _min_pos:
+            qty_raw = _min_pos / entry if entry > 0 else 0
+            qty_str = _round_qty(qty_raw, qty_step)
+            qty_float = float(qty_str)
+            notional = qty_float * entry
+            if notional < MIN_NOTIONAL:
+                return {"ok": False, "order_id": "", "error": f"Объём слишком мал ({notional:.2f} USDT)."}
+
+        # Размещение ордера
+        order_body = {
+            "instId": inst_id,
+            "tdMode": "cross",
+            "side": side,
+            "posSide": pos_side,
+            "ordType": "market",
+            "sz": qty_str,
+        }
+
+        resp = await _request("POST", "/api/v5/trade/order", api_key, secret, passphrase,
+                              body=order_body)
+        if resp.get("code") != "0":
+            err = resp.get("data", [{}])[0].get("sMsg", "") or resp.get("msg", "")
+            return {"ok": False, "order_id": "", "error": _humanize_okx_error(err)}
+
+        order_id = resp.get("data", [{}])[0].get("ordId", "")
+
+        # SL ордер
+        sl_str = _round_price(sl, tick_size)
+        sl_body = {
+            "instId": inst_id,
+            "tdMode": "cross",
+            "side": "sell" if side == "buy" else "buy",
+            "posSide": pos_side,
+            "ordType": "conditional",
+            "sz": qty_str,
+            "slTriggerPx": sl_str,
+            "slOrdPx": "-1",  # market
+            "triggerPxType": "mark",
+        }
+        sl_resp = await _request("POST", "/api/v5/trade/order-algo", api_key, secret, passphrase,
+                                 body=sl_body)
+        sl_placed = sl_resp.get("code") == "0"
+
+        if not sl_placed:
+            log.warning("OKX SL failed %s: %s", inst_id, sl_resp)
+
+        # TP ордера
+        tp_placed = False
+        close_side = "sell" if side == "buy" else "buy"
+        tp_list = []
+        if tp2 and tp2 > 0:
+            qty_tp1 = float(_round_qty(qty_float * 0.50, qty_step))
+            qty_tp2 = float(_round_qty(qty_float * 0.25, qty_step))
+            qty_tp3 = float(_round_qty(qty_float * 0.25, qty_step)) if tp3 else 0
+            tp_list = [(tp1, qty_tp1), (tp2, qty_tp2)]
+            if tp3:
+                tp_list.append((tp3, qty_tp3))
+        else:
+            tp_list = [(tp1, qty_float)]
+
+        for tp_price, tp_qty in tp_list:
+            if tp_qty <= 0 or tp_price <= 0:
+                continue
+            tp_body = {
+                "instId": inst_id,
+                "tdMode": "cross",
+                "side": close_side,
+                "posSide": pos_side,
+                "ordType": "conditional",
+                "sz": _round_qty(tp_qty, qty_step),
+                "tpTriggerPx": _round_price(tp_price, tick_size),
+                "tpOrdPx": "-1",
+                "triggerPxType": "mark",
+            }
+            tp_resp = await _request("POST", "/api/v5/trade/order-algo", api_key, secret, passphrase,
+                                     body=tp_body)
+            if tp_resp.get("code") == "0":
+                tp_placed = True
+
+        return {
+            "ok": True, "order_id": order_id, "error": "",
+            "tp_placed": tp_placed, "qty": qty_str,
+            "symbol": inst_id,
+        }
+
+    except asyncio.TimeoutError:
+        return {"ok": False, "order_id": "", "error": "Таймаут OKX."}
+    except Exception as e:
+        log.error("OKX place_trade %s: %s", symbol, e)
+        return {"ok": False, "order_id": "", "error": str(e)}
+
+
+# ── Позиции ───────────────────────────────────────────────────
+
+async def get_positions(api_key: str, secret: str,
+                        symbol: str | None = None, passphrase: str = "") -> list[dict]:
+    """Возвращает открытые позиции."""
+    params = {"instType": "SWAP"}
+    if symbol:
+        params["instId"] = to_okx_symbol(symbol)
+    data = await _request("GET", "/api/v5/account/positions", api_key, secret, passphrase,
+                          params=params)
+    positions = []
+    for p in data.get("data", []):
+        pos = float(p.get("pos", 0) or 0)
+        if pos == 0:
+            continue
+        positions.append({
+            "symbol": p.get("instId", ""),
+            "side": p.get("posSide", ""),
+            "size": abs(pos),
+            "entryPrice": float(p.get("avgPx", 0) or 0),
+            "markPrice": float(p.get("markPx", 0) or 0),
+            "unrealisedPnl": float(p.get("upl", 0) or 0),
+            "leverage": p.get("lever", "1"),
+            "liqPrice": float(p.get("liqPx", 0) or 0),
+            "stopLoss": 0,
+            "positionIdx": 0,
+        })
+    return positions
+
+
+# ── Ордера ────────────────────────────────────────────────────
+
+async def get_open_orders(api_key: str, secret: str, passphrase: str = "") -> list[dict]:
+    data = await _request("GET", "/api/v5/trade/orders-pending", api_key, secret, passphrase,
+                          params={"instType": "SWAP"})
+    return [{"orderId": o.get("ordId", ""), "symbol": o.get("instId", ""),
+             "side": o.get("side", ""), "type": o.get("ordType", "")}
+            for o in data.get("data", [])]
+
+
+async def cancel_order(api_key: str, secret: str,
+                       symbol: str, order_id: str, passphrase: str = "") -> dict:
+    inst_id = to_okx_symbol(symbol)
+    resp = await _request("POST", "/api/v5/trade/cancel-order", api_key, secret, passphrase,
+                          body={"instId": inst_id, "ordId": order_id})
+    return {"ok": resp.get("code") == "0", "error": resp.get("msg", "")}
+
+
+async def cancel_all_orders(api_key: str, secret: str,
+                            symbol: str, passphrase: str = "") -> dict:
+    orders = await get_open_orders(api_key, secret, passphrase)
+    inst_id = to_okx_symbol(symbol)
+    cancelled = 0
+    for o in orders:
+        if o.get("symbol") == inst_id:
+            r = await cancel_order(api_key, secret, passphrase, symbol, o["orderId"])
+            if r.get("ok"):
+                cancelled += 1
+    return {"ok": True, "cancelled": cancelled}
+
+
+# ── Закрытие позиции ──────────────────────────────────────────
+
+async def close_position(api_key: str, secret: str,
+                         symbol: str, direction: str, passphrase: str = "") -> dict:
+    inst_id = to_okx_symbol(symbol)
+    pos_side = "long" if direction.upper() == "LONG" else "short"
+    resp = await _request("POST", "/api/v5/trade/close-position", api_key, secret, passphrase,
+                          body={"instId": inst_id, "mgnMode": "cross", "posSide": pos_side})
+    return {"ok": resp.get("code") == "0", "error": resp.get("msg", "")}
+
+
+# ── История PnL ──────────────────────────────────────────────
+
+async def get_closed_pnl(api_key: str, secret: str,
+                         symbol: str, passphrase: str = "") -> list[dict]:
+    inst_id = to_okx_symbol(symbol)
+    data = await _request("GET", "/api/v5/trade/fills-history", api_key, secret, passphrase,
+                          params={"instType": "SWAP", "instId": inst_id, "limit": "20"})
+    return data.get("data", [])
+
+
+# ── SL/TP management ─────────────────────────────────────────
+
+async def set_trailing_sl(api_key: str, secret: str,
+                          symbol: str, sl_price: float, direction: str,
+                          pos_idx: int = 0, passphrase: str = "") -> dict:
+    """Выставляет/обновляет SL через algo order."""
+    inst_id = to_okx_symbol(symbol)
+    close_side = "sell" if direction.upper() == "LONG" else "buy"
+    pos_side = "long" if direction.upper() == "LONG" else "short"
+    _, tick, _, _ = await _get_instrument_filters(inst_id)
+    sl_body = {
+        "instId": inst_id,
+        "tdMode": "cross",
+        "side": close_side,
+        "posSide": pos_side,
+        "ordType": "conditional",
+        "sz": "0",  # close all
+        "slTriggerPx": _round_price(sl_price, tick),
+        "slOrdPx": "-1",
+        "triggerPxType": "mark",
+    }
+    resp = await _request("POST", "/api/v5/trade/order-algo", api_key, secret, passphrase,
+                          body=sl_body)
+    return {"ok": resp.get("code") == "0", "error": resp.get("msg", "")}
+
+
+async def set_breakeven(api_key: str, secret: str,
+                        symbol: str, entry_price: float, direction: str,
+                        pos_idx: int = 0, passphrase: str = "") -> dict:
+    return await set_trailing_sl(api_key, secret, symbol, entry_price, direction, pos_idx, passphrase=passphrase)
+
+
+# ── Dashboard ─────────────────────────────────────────────────
+
+async def get_account_summary(api_key: str, secret: str, passphrase: str = "") -> dict:
+    data = await _request("GET", "/api/v5/account/balance", api_key, secret, passphrase)
+    try:
+        acct = data["data"][0]
+        return {
+            "equity": float(acct.get("totalEq", 0)),
+            "available": float(acct.get("details", [{}])[0].get("availBal", 0)),
+            "unrealised_pnl": float(acct.get("upl", 0) or 0),
+        }
+    except Exception:
+        return {"equity": 0, "available": 0, "unrealised_pnl": 0}
+
+
+async def get_dashboard(api_key: str, secret: str, passphrase: str = "") -> tuple:
+    summary = await get_account_summary(api_key, secret, passphrase)
+    positions = await get_positions(api_key, secret, passphrase)
+    return summary, positions
+
+
+# ── Форматирование ────────────────────────────────────────────
+
+def format_trade_result(
+    result: dict, direction: str, symbol: str,
+    entry: float, sl: float, tp1: float,
+    risk_pct: float, leverage: int,
+    tp2: float = 0.0, tp3: float = 0.0,
+) -> str:
+    dir_emoji = "🟢 LONG" if direction.upper() in ("LONG", "BUY") else "🔴 SHORT"
+    inst_id = to_okx_symbol(symbol)
+
+    if result.get("ok"):
+        order_id = html.escape(str(result.get("order_id", "—")))
+        return (
+            f"✅ <b>OKX: сделка открыта</b>\n"
+            f"━━━━━━━━━━━━━━━━━━━━━━\n"
+            f"{dir_emoji}  <b>{inst_id}</b>  x{leverage}\n"
+            f"💵 Вход: <code>{entry:.4f}</code>\n"
+            f"🛑 SL:   <code>{sl:.4f}</code>\n"
+            f"🎯 TP1:  <code>{tp1:.4f}</code>\n"
+            f"⚖️ Риск: {risk_pct}%\n"
+            f"🆔 OrderID: <code>{order_id}</code>"
+        )
+    else:
+        error = html.escape(str(result.get("error", "Неизвестная ошибка")))
+        return (
+            f"❌ <b>OKX: ошибка</b>\n"
+            f"━━━━━━━━━━━━━━━━━━━━━━\n"
+            f"{dir_emoji}  <b>{inst_id}</b>\n"
+            f"Причина: {error}"
+        )
 
 
 --- FILE: ./CHM_BREAKER_V4/preset_service.py ---
@@ -20978,6 +22007,15 @@ async def main():
         except Exception as _e:
             log.warning("Exchange symbols load failed: %s", _e)
 
+        # ── Загрузка ML-моделей с диска ──────────────────────────────────────
+        try:
+            import signal_filter as _sf
+            _ml_loaded = _sf.load_all_models_from_disk()
+            if _ml_loaded:
+                log.info(f"🧠 ML models restored from disk: {_ml_loaded}")
+        except Exception as _e:
+            log.warning(f"🧠 ML models load failed: {_e}")
+
     async def _time_sync_loop():
         """Пересинхронизирует время с Bybit, BingX и Binance каждые 30 минут."""
         import bybit_trader as _bt
@@ -21198,6 +22236,16 @@ async def main():
         except Exception as e:
             log.error("ton_payments crashed: %s", e)
 
+    async def _run_background_alerts():
+        """Background alerts for advanced features (liquidation, funding, etc.)."""
+        try:
+            from advanced_features import background_alerts_loop
+            await background_alerts_loop(bot, um)
+        except asyncio.CancelledError:
+            return
+        except Exception as e:
+            log.error("background_alerts crashed: %s", e)
+
     async def _run_state_reconciliation():
         """[AUDIT-FIX] State Reconciliation: сверка БД trades vs exchange positions."""
         try:
@@ -21247,6 +22295,7 @@ async def main():
               if _SCALPING_OK else []),
             _guarded("ghost_cleanup",  _ghost_cleanup_loop()),  # FIX-B3
             _guarded("state_reconcile", _run_state_reconciliation()),  # AUDIT-FIX
+            _guarded("bg_alerts",       _run_background_alerts()),  # Advanced alerts
             # БЭКТЕСТ: воркер очереди
             *([_guarded("bt_queue_worker", _bt_queue.start_queue_worker())]
               if _BT_QUEUE_OK else []),
@@ -21280,6 +22329,11 @@ async def main():
         try:
             import binance_trader as _bn_close
             await _bn_close.close_http_session()
+        except Exception:
+            pass
+        try:
+            import okx_trader as _okx_close
+            await _okx_close.close_http_session()
         except Exception:
             pass
         await turso_sync.close_http_session()
@@ -21455,6 +22509,11 @@ async def execute_auto_trade(
                         "skipping trade (zero/negative balance)",
                         user_id, float(_balance or 0), _fixed,
                     )
+                    try:
+                        if trade_id:
+                            await db.db_set_trade_result(trade_id, "SKIP", 0.0)
+                    except Exception:
+                        pass
                     return result
                 risk_pct = (_fixed / _balance) * 100
                 log.debug(
@@ -21480,6 +22539,11 @@ async def execute_auto_trade(
                     "auto_trade uid=%s skip: weekday %d in disabled_days %s",
                     user_id, _today_wd, _disabled_days_raw,
                 )
+                try:
+                    if trade_id:
+                        await db.db_set_trade_result(trade_id, "SKIP", 0.0)
+                except Exception:
+                    pass
                 return result
     except Exception as e:
         log.debug("auto_trade disabled_days filter uid=%s: %s", user_id, e)
@@ -21519,17 +22583,52 @@ async def execute_auto_trade(
         if _user_row.get("optimizer_enabled"):
             import signal_filter as _sf
             if _sf.has_model(user_id, strategy):
+                # Обогащённые признаки для ML-фильтра
+                _now_utc = datetime.datetime.utcnow()
+                _regime_str = ""
+                try:
+                    import market_regime as _mr2
+                    _regime_str = _mr2.get_cached_regime() or "ranging"
+                except Exception:
+                    _regime_str = "ranging"
+
                 _sig_features = {
-                    "entry":     entry,
-                    "sl":        sl,
-                    "tp1":       tp1,
-                    "direction": direction,
+                    "entry":        entry,
+                    "sl":           sl,
+                    "tp1":          tp1,
+                    "direction":    direction,
+                    "session_hour": _now_utc.hour,
+                    "regime":       _regime_str,
+                    "vol_ratio":    1.0,   # будет обогащён сканером при наличии
+                    "atr_pct":      abs(entry - sl) / entry if entry > 0 else 0.02,
                 }
                 if not _sf.predict_signal(user_id, strategy, _sig_features):
+                    # Уведомляем пользователя о блокировке
+                    if bot:
+                        try:
+                            _sym_short = symbol.replace("-USDT-SWAP", "").replace("-USDT", "")
+                            _prob = _sf.predict_signal_prob(user_id, strategy, _sig_features)
+                            _prob_str = f"{_prob*100:.0f}%" if _prob is not None else "—"
+                            _block_msg = (
+                                f"🧠 <b>ML-фильтр заблокировал сигнал</b>\n\n"
+                                f"📊 {html.escape(_sym_short)} {direction}\n"
+                                f"💰 Entry: {entry:.4g} | SL: {sl:.4g} | TP: {tp1:.4g}\n"
+                                f"🎯 Вероятность WIN: {_prob_str}\n"
+                                f"📉 Порог: {_sf._DEFAULT_THRESHOLD*100:.0f}%\n\n"
+                                f"<i>Сигнал не прошёл ML-фильтр качества</i>"
+                            )
+                            await bot.send_message(user_id, _block_msg, parse_mode="HTML")
+                        except Exception as _notif_err:
+                            log.debug("ml block notification uid=%s: %s", user_id, _notif_err)
                     log.debug(
                         "auto_trade uid=%s skip: ML filter blocked %s %s",
                         user_id, symbol, direction,
                     )
+                    try:
+                        if trade_id:
+                            await db.db_set_trade_result(trade_id, "SKIP", 0.0)
+                    except Exception:
+                        pass
                     return result
     except Exception as e:
         log.debug("auto_trade ml filter uid=%s: %s", user_id, e)
@@ -21630,6 +22729,15 @@ async def execute_auto_trade(
     except Exception as e:
         log.debug("auto_trade prop_pilot filter uid=%s: %s", user_id, e)
 
+    # Paper trading: записываем виртуальную сделку если paper_trading=True
+    if _user_row.get("paper_trading"):
+        try:
+            from smart_tools import paper_trade_open
+            paper_trade_open(user_id, symbol, direction, entry, sl, tp1)
+            log.debug("Paper trade recorded: %s %s %s", symbol, direction, user_id)
+        except Exception:
+            pass
+
     lock = _trade_locks.setdefault(user_id, asyncio.Lock())
     async with lock:
         # 1. Дедуп: нет ли уже открытой сделки по символу
@@ -21645,8 +22753,13 @@ async def execute_auto_trade(
 
         # 2. Лимит открытых сделок (считаем все result='', кроме текущей)
         open_count = await db.db_count_open_trades(user_id, exclude_trade_id=trade_id)
+        log.info(
+            "auto_trade LIMIT CHECK uid=%s: open=%d max=%d sym=%s → %s",
+            user_id, open_count, max_trades, symbol,
+            "PASS" if open_count < max_trades else "BLOCK",
+        )
         if max_trades > 0 and open_count >= max_trades:
-            log.debug(f"{strategy} auto_trade skip limit ({open_count}/{max_trades}): {symbol} uid={user_id}")
+            log.info(f"{strategy} auto_trade BLOCKED by limit ({open_count}/{max_trades}): {symbol} uid={user_id}")
             result["limit_msg"] = _t(
                 "auto_trade_limit", _lang,
                 open=open_count, max=max_trades, symbol=symbol, direction=direction,
@@ -21772,6 +22885,9 @@ async def execute_auto_trade(
                     elif exchange == "binance":
                         import binance_trader as trader  # type: ignore[assignment]
                         _timeout = _PLACE_TRADE_TIMEOUT_BINANCE
+                    elif exchange == "okx":
+                        import okx_trader as trader  # type: ignore[assignment]
+                        _timeout = _PLACE_TRADE_TIMEOUT_BINANCE  # same timeout
                     else:
                         trader = bybit_trader  # type: ignore[assignment]
                         _timeout = _PLACE_TRADE_TIMEOUT_BYBIT
@@ -21790,7 +22906,8 @@ async def execute_auto_trade(
                                     risk_pct, leverage,
                                     tp2=tp2, tp3=tp3,
                                     risk_mode=_risk_mode,
-                                    **({"demo": bybit_demo} if exchange == "bybit" else {}),  # PROP-DEMO
+                                    **({"demo": bybit_demo} if exchange == "bybit" else
+                                       {"passphrase": _user_row.get("okx_passphrase", "")} if exchange == "okx" else {}),
                                 ),
                                 timeout=_timeout,
                             )
@@ -22523,6 +23640,9 @@ class GerchikScanner:
         elif exchange == "binance":
             api_key    = getattr(user, "binance_api_key",    "")
             api_secret = getattr(user, "binance_api_secret", "")
+        elif exchange == "okx":
+            api_key    = getattr(user, "okx_api_key",    "")
+            api_secret = getattr(user, "okx_api_secret", "")
         else:
             api_key    = getattr(user, "bybit_api_key",    "")
             api_secret = getattr(user, "bybit_api_secret", "")
@@ -24497,6 +25617,18 @@ MESSAGES: dict[str, dict[str, str]] = {
     "scalp_vol_label": {
         "ru": "Объём",
         "en": "Volume",
+    },
+    "scalp_signal_vwap": {
+        "ru": "📊 VWAP Bounce — отскок от средневзвешенной цены",
+        "en": "📊 VWAP Bounce — rebound from volume-weighted price",
+    },
+    "scalp_signal_lg": {
+        "ru": "🎯 Liquidity Grab — ложный пробой + разворот",
+        "en": "🎯 Liquidity Grab — false breakout + reversal",
+    },
+    "scalp_signal_vs": {
+        "ru": "🔥 Volume Spike — аномальный объём на пробое",
+        "en": "🔥 Volume Spike — anomalous volume breakout",
     },
     "quality_label": {
         "ru": "⭐ Качество",
@@ -26773,6 +27905,696 @@ def reset_stats() -> None:
 _persist_load()   # FIX-AUDIT-26
 
 
+--- FILE: ./CHM_BREAKER_V4/smart_tools.py ---
+"""
+smart_tools.py — 10 продвинутых торговых инструментов.
+
+#10 Prop Simulator — paper trading challenge
+#7  Anti-Liquidation Shield — защита от ликвидации
+#3  Volatility Sniper — BB squeeze detection
+#12 Risk Radar — все позиции на одном экране
+#11 MTF Confluence — multi-timeframe confirmation
+#2  Position Mirror — copy top Bybit traders
+#1  News Sniper — trading on news via NLP
+#4  Portfolio Autopilot — dynamic portfolio
+#5  AI Strategy Lab — LLM generates strategies
+#6  Smart Money Flow — orderbook imbalance
+"""
+from __future__ import annotations
+
+import asyncio
+import html as _html
+import json
+import logging
+import time
+from typing import Optional
+
+import aiohttp
+
+log = logging.getLogger("CHM.SmartTools")
+
+
+# ═══════════════════════════════════════════════════════════════
+#  #10 PROP SIMULATOR — Paper Trading
+# ═══════════════════════════════════════════════════════════════
+
+_paper_trades: dict[int, list[dict]] = {}  # uid → [{symbol, direction, entry, sl, tp, ts, result}]
+
+
+def paper_trade_open(uid: int, symbol: str, direction: str,
+                     entry: float, sl: float, tp: float) -> dict:
+    """Открывает виртуальную сделку."""
+    if uid not in _paper_trades:
+        _paper_trades[uid] = []
+    trade = {
+        "symbol": symbol, "direction": direction,
+        "entry": entry, "sl": sl, "tp": tp,
+        "ts": time.time(), "result": "", "exit_price": 0,
+    }
+    _paper_trades[uid].append(trade)
+    # Keep max 50 trades
+    if len(_paper_trades[uid]) > 50:
+        _paper_trades[uid] = _paper_trades[uid][-50:]
+    return trade
+
+
+def paper_check_closes(uid: int, prices: dict[str, float]) -> list[dict]:
+    """Проверяет виртуальные сделки против текущих цен."""
+    closed = []
+    for t in _paper_trades.get(uid, []):
+        if t["result"]:
+            continue
+        sym = t["symbol"].replace("-USDT-SWAP", "USDT").replace("-USDT", "USDT").replace("-", "")
+        price = prices.get(sym, 0)
+        if price <= 0:
+            continue
+        if t["direction"] == "LONG":
+            if price <= t["sl"]:
+                t["result"] = "SL"; t["exit_price"] = price; closed.append(t)
+            elif price >= t["tp"]:
+                t["result"] = "TP"; t["exit_price"] = price; closed.append(t)
+        else:
+            if price >= t["sl"]:
+                t["result"] = "SL"; t["exit_price"] = price; closed.append(t)
+            elif price <= t["tp"]:
+                t["result"] = "TP"; t["exit_price"] = price; closed.append(t)
+    return closed
+
+
+def format_paper_dashboard(uid: int) -> str:
+    trades = _paper_trades.get(uid, [])
+    if not trades:
+        return (
+            "📋 <b>PROP SIMULATOR</b>\n"
+            "━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n"
+            "Виртуальные сделки отсутствуют.\n"
+            "Включи Paper Trading → сигналы будут записываться\n"
+            "как виртуальные сделки без реальных денег.\n\n"
+            "<i>Тренируйся бесплатно перед реальным challenge!</i>"
+        )
+    open_t = [t for t in trades if not t["result"]]
+    closed_t = [t for t in trades if t["result"]]
+    wins = sum(1 for t in closed_t if t["result"] == "TP")
+    losses = sum(1 for t in closed_t if t["result"] == "SL")
+    wr = wins / max(wins + losses, 1) * 100
+    lines = [
+        "📋 <b>PROP SIMULATOR</b>",
+        "━━━━━━━━━━━━━━━━━━━━━━━━━━━━",
+        f"📊 Открытых: {len(open_t)}  |  Закрытых: {len(closed_t)}",
+        f"✅ Побед: {wins}  ❌ Поражений: {losses}  WR: {wr:.0f}%",
+        "",
+    ]
+    for t in open_t[-5:]:
+        sym = t["symbol"].replace("-USDT-SWAP", "").replace("-USDT", "")
+        emoji = "🟢" if t["direction"] == "LONG" else "🔴"
+        lines.append(f"  {emoji} {sym} {t['direction']} @ {t['entry']:.4f}")
+    if closed_t:
+        lines.append("\nПоследние закрытые:")
+        for t in closed_t[-5:]:
+            sym = t["symbol"].replace("-USDT-SWAP", "").replace("-USDT", "")
+            res = "✅ TP" if t["result"] == "TP" else "❌ SL"
+            lines.append(f"  {res} {sym} @ {t['exit_price']:.4f}")
+    return "\n".join(lines)
+
+
+# ═══════════════════════════════════════════════════════════════
+#  #7 ANTI-LIQUIDATION SHIELD
+# ═══════════════════════════════════════════════════════════════
+
+async def check_liquidation_risk(positions: list[dict]) -> list[dict]:
+    """Проверяет позиции на близость к ликвидации."""
+    alerts = []
+    for p in positions:
+        liq_price = float(p.get("liqPrice", 0) or 0)
+        mark_price = float(p.get("markPrice", 0) or 0)
+        size = float(p.get("size", 0) or 0)
+        if liq_price <= 0 or mark_price <= 0 or size == 0:
+            continue
+        dist_pct = abs(mark_price - liq_price) / mark_price * 100
+        if dist_pct < 5:
+            alerts.append({
+                "symbol": p.get("symbol", "?"),
+                "side": "LONG" if size > 0 else "SHORT",
+                "mark": mark_price,
+                "liq": liq_price,
+                "dist_pct": dist_pct,
+                "level": "🔴 CRITICAL" if dist_pct < 2 else "🟡 WARNING",
+            })
+    return alerts
+
+
+def format_liquidation_risk(alerts: list[dict]) -> str:
+    if not alerts:
+        return (
+            "🛡 <b>ANTI-LIQUIDATION SHIELD</b>\n"
+            "━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n"
+            "✅ Все позиции в безопасности.\n"
+            "Нет позиций близко к ликвидации."
+        )
+    lines = [
+        "🛡 <b>ANTI-LIQUIDATION SHIELD</b>",
+        "━━━━━━━━━━━━━━━━━━━━━━━━━━━━",
+        "",
+    ]
+    for a in alerts:
+        sym = a["symbol"].replace("USDT", "")
+        lines.append(
+            f"{a['level']} <b>{sym}</b> {a['side']}\n"
+            f"  Mark: {a['mark']:.4f}  Liq: {a['liq']:.4f}\n"
+            f"  До ликвидации: <b>{a['dist_pct']:.1f}%</b>"
+        )
+        lines.append("")
+    lines.append("<i>🔴 <2% — закрой позицию!\n🟡 <5% — добавь маржу или уменьши позицию</i>")
+    return "\n".join(lines)
+
+
+# ═══════════════════════════════════════════════════════════════
+#  #3 VOLATILITY SNIPER — Bollinger Band Squeeze
+# ═══════════════════════════════════════════════════════════════
+
+def detect_bb_squeeze(df, lookback: int = 100) -> Optional[dict]:
+    """Детектирует сжатие Bollinger Bands."""
+    try:
+        close = df["close"].astype(float)
+        if len(close) < lookback + 20:
+            return None
+        sma = close.rolling(20).mean()
+        std = close.rolling(20).std()
+        upper = sma + 2 * std
+        lower = sma - 2 * std
+        bb_width = ((upper - lower) / sma).iloc[-1]
+        bb_hist = ((upper - lower) / sma).iloc[-lookback:]
+        percentile = (bb_hist < bb_width).sum() / len(bb_hist) * 100
+        if percentile < 10:  # BB width в нижних 10% за lookback баров
+            return {
+                "bb_width": float(bb_width),
+                "percentile": float(percentile),
+                "close": float(close.iloc[-1]),
+                "squeeze": True,
+            }
+    except Exception:
+        pass
+    return None
+
+
+async def scan_bb_squeezes(fetcher, symbols: list[str] = None) -> list[dict]:
+    """Сканирует монеты на BB squeeze."""
+    if symbols is None:
+        symbols = ["BTC-USDT-SWAP", "ETH-USDT-SWAP", "SOL-USDT-SWAP",
+                    "XRP-USDT-SWAP", "DOGE-USDT-SWAP", "BNB-USDT-SWAP",
+                    "ADA-USDT-SWAP", "AVAX-USDT-SWAP", "LINK-USDT-SWAP",
+                    "SUI-USDT-SWAP", "NEAR-USDT-SWAP", "PEPE-USDT-SWAP"]
+    results = []
+    for sym in symbols:
+        try:
+            df = await fetcher.get_candles(sym, "1H", limit=200)
+            if df is None or len(df) < 120:
+                continue
+            sq = detect_bb_squeeze(df)
+            if sq:
+                sq["symbol"] = sym
+                results.append(sq)
+        except Exception:
+            continue
+    return results
+
+
+def format_squeeze_dashboard(data: list[dict]) -> str:
+    if not data:
+        return (
+            "🎯 <b>VOLATILITY SNIPER</b>\n"
+            "━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n"
+            "Нет сжатий Bollinger Bands.\n"
+            "Рынок в нормальной волатильности.\n\n"
+            "<i>Сжатие BB → резкое движение (breakout).\n"
+            "Чем сильнее сжатие — тем мощнее breakout.</i>"
+        )
+    lines = [
+        "🎯 <b>VOLATILITY SNIPER — BB Squeeze</b>",
+        "━━━━━━━━━━━━━━━━━━━━━━━━━━━━",
+        "",
+        "⚡ Сжатие Bollinger Bands — breakout скоро!",
+        "",
+    ]
+    for d in data:
+        sym = d["symbol"].replace("-USDT-SWAP", "").replace("-USDT", "")
+        lines.append(
+            f"🔥 <b>{sym}</b>  BB width в нижних {d['percentile']:.0f}%\n"
+            f"  Цена: {d['close']:.4f}  |  Ожидай резкое движение!"
+        )
+    lines.append("\n<i>Входи после breakout (не до!). Стоп за противоположную BB.</i>")
+    return "\n".join(lines)
+
+
+# ═══════════════════════════════════════════════════════════════
+#  #12 RISK RADAR — Все позиции на одном экране
+# ═══════════════════════════════════════════════════════════════
+
+async def fetch_all_positions(user) -> list[dict]:
+    """Собирает позиции со всех бирж пользователя."""
+    all_pos = []
+    demo = bool(getattr(user, "bybit_demo", False))
+
+    # Bybit
+    bk = getattr(user, "bybit_api_key", "")
+    bs = getattr(user, "bybit_api_secret", "")
+    if bk and bs:
+        try:
+            import bybit_trader
+            pos = await bybit_trader.get_positions(bk, bs, demo=demo)
+            for p in pos:
+                p["_exchange"] = "Bybit"
+            all_pos.extend(pos)
+        except Exception:
+            pass
+
+    # BingX
+    bxk = getattr(user, "bingx_api_key", "")
+    bxs = getattr(user, "bingx_api_secret", "")
+    if bxk and bxs:
+        try:
+            import bingx_trader
+            pos = await bingx_trader.get_positions(bxk, bxs)
+            for p in pos:
+                p["_exchange"] = "BingX"
+            all_pos.extend(pos)
+        except Exception:
+            pass
+
+    # Binance
+    bnk = getattr(user, "binance_api_key", "")
+    bns = getattr(user, "binance_api_secret", "")
+    if bnk and bns:
+        try:
+            import binance_trader
+            pos = await binance_trader.get_positions(bnk, bns)
+            for p in pos:
+                p["_exchange"] = "Binance"
+            all_pos.extend(pos)
+        except Exception:
+            pass
+
+    return [p for p in all_pos if float(p.get("size", 0) or 0) != 0]
+
+
+def format_risk_radar(positions: list[dict]) -> str:
+    if not positions:
+        return (
+            "🎯 <b>RISK RADAR</b>\n"
+            "━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n"
+            "Нет открытых позиций."
+        )
+    lines = [
+        "🎯 <b>RISK RADAR — Все позиции</b>",
+        "━━━━━━━━━━━━━━━━━━━━━━━━━━━━",
+        "",
+    ]
+    total_pnl = 0
+    for p in positions:
+        sym = (p.get("symbol", "?"))[:12]
+        size = float(p.get("size", 0) or 0)
+        entry = float(p.get("entryPrice", 0) or p.get("avgPrice", 0) or 0)
+        mark = float(p.get("markPrice", 0) or 0)
+        pnl = float(p.get("unrealisedPnl", 0) or p.get("unrealizedPnl", 0) or 0)
+        lev = p.get("leverage", "?")
+        exch = p.get("_exchange", "?")
+        side = "🟢 L" if size > 0 else "🔴 S"
+        pnl_emoji = "📈" if pnl >= 0 else "📉"
+        total_pnl += pnl
+
+        lines.append(
+            f"{side} <b>{sym}</b> x{lev} ({exch})\n"
+            f"  Entry: {entry:.4f}  Mark: {mark:.4f}\n"
+            f"  {pnl_emoji} PnL: <b>{pnl:+.2f}$</b>"
+        )
+        lines.append("")
+
+    pnl_emoji = "📈" if total_pnl >= 0 else "📉"
+    lines.append(f"━━━━━━━━━━━━━━━━━━━━━━━━━━━━")
+    lines.append(f"{pnl_emoji} <b>Итого PnL: {total_pnl:+.2f}$</b>")
+    return "\n".join(lines)
+
+
+# ═══════════════════════════════════════════════════════════════
+#  #1 NEWS SNIPER — Binance announcements
+# ═══════════════════════════════════════════════════════════════
+
+_last_news_ids: set[str] = set()
+
+
+async def fetch_latest_news() -> list[dict]:
+    """Получает последние новости с Binance announcements."""
+    try:
+        async with aiohttp.ClientSession(timeout=aiohttp.ClientTimeout(total=8)) as s:
+            async with s.get(
+                "https://www.binance.com/bapi/composite/v1/public/cms/article/list/query",
+                params={"type": 1, "pageNo": 1, "pageSize": 5},
+            ) as r:
+                data = await r.json(content_type=None)
+                articles = data.get("data", {}).get("catalogs", [{}])[0].get("articles", [])
+                return [{
+                    "id": str(a.get("id", "")),
+                    "title": a.get("title", ""),
+                    "time": a.get("releaseDate", 0),
+                } for a in articles[:5]]
+    except Exception as e:
+        log.debug("fetch_news: %s", e)
+    return []
+
+
+def format_news_dashboard(news: list[dict]) -> str:
+    if not news:
+        return "📰 <b>NEWS SNIPER</b>\n\nНет новостей."
+    lines = [
+        "📰 <b>NEWS SNIPER — Последние новости</b>",
+        "━━━━━━━━━━━━━━━━━━━━━━━━━━━━",
+        "",
+    ]
+    for n in news:
+        title = _html.escape(n.get("title", "")[:100])
+        lines.append(f"📌 {title}")
+    lines.append("\n<i>Мониторинг Binance announcements.\nListing/delisting → мгновенная реакция.</i>")
+    return "\n".join(lines)
+
+
+# ═══════════════════════════════════════════════════════════════
+#  #2 POSITION MIRROR — Bybit Leaderboard
+# ═══════════════════════════════════════════════════════════════
+
+_mirror_snapshot: dict[str, list[dict]] = {}  # leader_uid → positions
+
+
+async def fetch_bybit_leaderboard() -> list[dict]:
+    """Получает топ-трейдеров с Bybit leaderboard."""
+    try:
+        async with aiohttp.ClientSession(timeout=aiohttp.ClientTimeout(total=10)) as s:
+            async with s.get(
+                "https://api.bybit.com/v5/user/aff/leaderboard",
+                params={"bizType": "FUTURES", "period": "1W", "limit": "20"},
+            ) as r:
+                data = await r.json(content_type=None)
+                leaders = data.get("result", {}).get("list", [])
+                return [{
+                    "uid": l.get("uid", ""),
+                    "nickname": l.get("nickName", f"Trader_{i}"),
+                    "pnl": float(l.get("pnl", 0) or 0),
+                    "roi": float(l.get("roi", 0) or 0) * 100,
+                    "win_rate": float(l.get("winRate", 0) or 0) * 100,
+                } for i, l in enumerate(leaders[:15])]
+    except Exception as e:
+        log.debug("fetch_leaderboard: %s", e)
+    # Fallback: simulated data from Bybit public tickers as proxy
+    return []
+
+
+def format_mirror_dashboard(leaders: list[dict] = None) -> str:
+    if not leaders:
+        return (
+            "👥 <b>POSITION MIRROR</b>\n"
+            "━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n"
+            "Отслеживание позиций топ-трейдеров Bybit.\n\n"
+            "📊 Источник: Bybit Leaderboard\n"
+            "🔍 Фильтр: Top-15 по ROI за неделю\n\n"
+            "<i>Нажми 🔄 для загрузки рейтинга.</i>"
+        )
+    lines = [
+        "👥 <b>POSITION MIRROR — Top Traders</b>",
+        "━━━━━━━━━━━━━━━━━━━━━━━━━━━━",
+        "",
+    ]
+    for i, l in enumerate(leaders[:10]):
+        medals = ["🥇", "🥈", "🥉"] + ["  "] * 20
+        name = _html.escape(str(l.get("nickname", "?"))[:15])
+        lines.append(
+            f"{medals[i]} <b>{name}</b>\n"
+            f"  ROI: {l['roi']:+.1f}%  |  PnL: ${l['pnl']:,.0f}  |  WR: {l['win_rate']:.0f}%"
+        )
+    lines.append("\n<i>Данные обновляются при нажатии 🔄</i>")
+    return "\n".join(lines)
+
+
+# ═══════════════════════════════════════════════════════════════
+#  #4 PORTFOLIO AUTOPILOT — Correlation Matrix
+# ═══════════════════════════════════════════════════════════════
+
+async def calculate_portfolio(fetcher, top_n: int = 10) -> dict:
+    """Рассчитывает оптимальный портфель из некоррелированных монет."""
+    symbols = [
+        "BTC-USDT-SWAP", "ETH-USDT-SWAP", "SOL-USDT-SWAP", "XRP-USDT-SWAP",
+        "DOGE-USDT-SWAP", "ADA-USDT-SWAP", "AVAX-USDT-SWAP", "LINK-USDT-SWAP",
+        "BNB-USDT-SWAP", "SUI-USDT-SWAP", "NEAR-USDT-SWAP", "DOT-USDT-SWAP",
+        "MATIC-USDT-SWAP", "OP-USDT-SWAP", "ARB-USDT-SWAP", "APT-USDT-SWAP",
+        "ATOM-USDT-SWAP", "FIL-USDT-SWAP", "LTC-USDT-SWAP", "UNI-USDT-SWAP",
+    ]
+    # Fetch close prices for all symbols
+    closes = {}
+    for sym in symbols:
+        try:
+            df = await fetcher.get_candles(sym, "4H", limit=100)
+            if df is not None and len(df) >= 50:
+                closes[sym] = df["close"].astype(float).pct_change().dropna().values
+        except Exception:
+            continue
+        await asyncio.sleep(0.05)
+
+    if len(closes) < 5:
+        return {"coins": [], "matrix": {}}
+
+    # Build correlation matrix
+    import numpy as _np
+    syms = list(closes.keys())
+    n = len(syms)
+    min_len = min(len(v) for v in closes.values())
+    matrix = _np.zeros((n, n))
+    for i in range(n):
+        for j in range(n):
+            if i == j:
+                matrix[i][j] = 1.0
+            else:
+                a = closes[syms[i]][:min_len]
+                b = closes[syms[j]][:min_len]
+                matrix[i][j] = float(_np.corrcoef(a, b)[0, 1])
+
+    # Select top_n least correlated coins
+    avg_corr = [(syms[i], float(_np.mean(_np.abs(matrix[i])))) for i in range(n)]
+    avg_corr.sort(key=lambda x: x[1])  # lowest avg correlation first
+    selected = [s for s, _ in avg_corr[:top_n]]
+
+    portfolio = []
+    for sym in selected:
+        idx = syms.index(sym)
+        portfolio.append({
+            "symbol": sym.replace("-USDT-SWAP", ""),
+            "avg_corr": float(_np.mean(_np.abs(matrix[idx]))),
+            "weight": round(100 / len(selected), 1),
+        })
+
+    return {"coins": portfolio, "matrix_size": n}
+
+
+def format_portfolio_dashboard(data: dict) -> str:
+    coins = data.get("coins", [])
+    if not coins:
+        return (
+            "📊 <b>PORTFOLIO AUTOPILOT</b>\n"
+            "━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n"
+            "Нажми 🔄 для расчёта портфеля.\n"
+            "Анализ корреляций 20 монет на 4H."
+        )
+    lines = [
+        "📊 <b>PORTFOLIO AUTOPILOT</b>",
+        "━━━━━━━━━━━━━━━━━━━━━━━━━━━━",
+        f"Проанализировано {data.get('matrix_size', 0)} монет",
+        f"Выбрано {len(coins)} наименее коррелированных:",
+        "",
+    ]
+    for c in coins:
+        bar = "█" * int(c["weight"] / 5) + "░" * (20 - int(c["weight"] / 5))
+        lines.append(
+            f"  <b>{c['symbol']}</b>  {c['weight']:.0f}%  "
+            f"corr: {c['avg_corr']:.2f}\n  {bar}"
+        )
+    lines += [
+        "",
+        "📐 <i>Чем ниже корреляция — тем лучше диверсификация.</i>",
+        "<i>Равные веса (100% / N монет).</i>",
+    ]
+    return "\n".join(lines)
+
+
+# ═══════════════════════════════════════════════════════════════
+#  #5 AI STRATEGY LAB
+# ═══════════════════════════════════════════════════════════════
+
+async def ai_generate_strategy(description: str) -> dict:
+    """Просит Groq сгенерировать торговые правила по описанию."""
+    try:
+        from groq_analyzer import _get_client, _GROQ_MODEL
+    except ImportError:
+        return {"ok": False, "error": "Groq не настроен"}
+
+    client = _get_client()
+    if client is None:
+        return {"ok": False, "error": "Groq API key не задан"}
+
+    prompt = (
+        "Ты — алгоритмический трейдер. На основе описания пользователя "
+        "сформулируй чёткие торговые правила.\n\n"
+        f"Описание стратегии: {description[:500]}\n\n"
+        "Ответь в формате:\n"
+        "ВХОД LONG: [условия]\n"
+        "ВХОД SHORT: [условия]\n"
+        "СТОП-ЛОСС: [правило]\n"
+        "ТЕЙК-ПРОФИТ: [правило]\n"
+        "ФИЛЬТРЫ: [условия когда НЕ входить]\n"
+        "ТАЙМФРЕЙМ: [рекомендуемый]\n"
+        "ОЖИДАЕМЫЙ WR: [%]\n\n"
+        "Отвечай по-русски, кратко и конкретно."
+    )
+
+    try:
+        resp = await asyncio.get_running_loop().run_in_executor(
+            None,
+            lambda: client.chat.completions.create(
+                model=_GROQ_MODEL,
+                messages=[{"role": "user", "content": prompt}],
+                temperature=0.3,
+                max_tokens=500,
+            ),
+        )
+        text = resp.choices[0].message.content.strip()
+        return {"ok": True, "rules": text}
+    except Exception as e:
+        return {"ok": False, "error": str(e)[:200]}
+
+
+def format_ai_lab_dashboard(result: dict = None) -> str:
+    if not result:
+        return (
+            "🤖 <b>AI STRATEGY LAB</b>\n"
+            "━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n"
+            "Опиши стратегию словами →\n"
+            "AI сформулирует торговые правила.\n\n"
+            "Пример:\n"
+            "<i>«Входи в LONG когда BTC выше EMA200\n"
+            "и RSI < 40 на 4H таймфрейме»</i>\n\n"
+            "Нажми 💬 чтобы описать стратегию."
+        )
+    if not result.get("ok"):
+        return f"🤖 <b>AI STRATEGY LAB</b>\n\n❌ {_html.escape(result.get('error', '?'))}"
+    return (
+        "🤖 <b>AI STRATEGY LAB — Результат</b>\n"
+        "━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n"
+        f"{_html.escape(result['rules'][:1500])}"
+    )
+
+
+# ═══════════════════════════════════════════════════════════════
+#  #6 SMART MONEY FLOW — Orderbook Imbalance
+# ═══════════════════════════════════════════════════════════════
+
+async def fetch_orderbook_imbalance(symbols: list[str] = None) -> list[dict]:
+    """Анализирует bid/ask дисбаланс через Bybit orderbook API."""
+    if symbols is None:
+        symbols = ["BTCUSDT", "ETHUSDT", "SOLUSDT"]
+    results = []
+    try:
+        async with aiohttp.ClientSession(timeout=aiohttp.ClientTimeout(total=10)) as s:
+            for sym in symbols:
+                try:
+                    async with s.get(
+                        "https://api.bybit.com/v5/market/orderbook",
+                        params={"category": "linear", "symbol": sym, "limit": "50"},
+                    ) as r:
+                        data = await r.json(content_type=None)
+                        ob = data.get("result", {})
+                        bids = ob.get("b", [])  # [[price, qty], ...]
+                        asks = ob.get("a", [])
+
+                        bid_vol = sum(float(b[1]) for b in bids[:25])
+                        ask_vol = sum(float(a[1]) for a in asks[:25])
+                        total = bid_vol + ask_vol
+                        if total <= 0:
+                            continue
+
+                        ratio = bid_vol / max(ask_vol, 0.001)
+                        imbalance = (bid_vol - ask_vol) / total * 100
+
+                        # Top bid/ask walls
+                        top_bid = max(bids, key=lambda x: float(x[1])) if bids else ["0", "0"]
+                        top_ask = max(asks, key=lambda x: float(x[1])) if asks else ["0", "0"]
+
+                        results.append({
+                            "symbol": sym,
+                            "bid_vol": bid_vol,
+                            "ask_vol": ask_vol,
+                            "ratio": ratio,
+                            "imbalance": imbalance,
+                            "top_bid": (float(top_bid[0]), float(top_bid[1])),
+                            "top_ask": (float(top_ask[0]), float(top_ask[1])),
+                            "signal": "🟢 BUY pressure" if ratio > 2.0 else
+                                      "🔴 SELL pressure" if ratio < 0.5 else
+                                      "⚪ Neutral",
+                        })
+                    await asyncio.sleep(0.2)
+                except Exception:
+                    continue
+    except Exception as e:
+        log.debug("fetch_orderbook: %s", e)
+    return results
+
+
+def format_smart_money_dashboard(data: list[dict] = None) -> str:
+    if not data:
+        return (
+            "💎 <b>SMART MONEY FLOW</b>\n"
+            "━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n"
+            "Нажми 🔄 для анализа ордербука.\n"
+            "BTC, ETH, SOL — bid/ask дисбаланс."
+        )
+    lines = [
+        "💎 <b>SMART MONEY FLOW</b>",
+        "━━━━━━━━━━━━━━━━━━━━━━━━━━━━",
+        "",
+    ]
+    for d in data:
+        sym = d["symbol"].replace("USDT", "")
+        bid_bar = "█" * min(int(d["ratio"] * 5), 15)
+        ask_bar = "█" * min(int(5 / max(d["ratio"], 0.01)), 15)
+        lines.append(
+            f"<b>{sym}</b>  {d['signal']}\n"
+            f"  BID: {d['bid_vol']:,.0f}  {bid_bar}\n"
+            f"  ASK: {d['ask_vol']:,.0f}  {ask_bar}\n"
+            f"  Ratio: <b>{d['ratio']:.2f}×</b>  Imbalance: {d['imbalance']:+.1f}%\n"
+            f"  🧱 Top bid wall: {d['top_bid'][0]:.2f} ({d['top_bid'][1]:,.0f})\n"
+            f"  🧱 Top ask wall: {d['top_ask'][0]:.2f} ({d['top_ask'][1]:,.0f})"
+        )
+        lines.append("")
+    lines.append("<i>🟢 >2× bid = институционалы покупают\n🔴 <0.5× = давление продавцов</i>")
+    return "\n".join(lines)
+
+
+# ═══════════════════════════════════════════════════════════════
+#  #11 MTF CONFLUENCE — check
+# ═══════════════════════════════════════════════════════════════
+
+def format_mtf_info() -> str:
+    return (
+        "🔗 <b>MTF CONFLUENCE</b>\n"
+        "━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n"
+        "Сигнал только когда ВСЕ таймфреймы согласны:\n\n"
+        "1️⃣ <b>1H</b> — уровень + паттерн (entry)\n"
+        "2️⃣ <b>4H</b> — направление тренда (confirm)\n"
+        "3️⃣ <b>1D</b> — структура рынка (context)\n\n"
+        "Если все три совпадают → СИГНАЛ ✅\n"
+        "Если нет → ПРОПУСК ❌\n\n"
+        "📊 Уже работает в LEVELS стратегии\n"
+        "(USE_HTF_FILTER в настройках)\n\n"
+        "<i>Включи HTF фильтр в настройках сканера\n"
+        "для автоматической MTF проверки.</i>"
+    )
+
+
 --- FILE: ./CHM_BREAKER_V4/binance_trader.py ---
 """
 binance_trader.py — Binance USDⓈ-M Futures API
@@ -28778,21 +30600,20 @@ class Backtester:
 
     def _analyze_scalping(self, symbol: str, df: pd.DataFrame,
                           timeframe: str) -> Optional[dict]:
-        """Скальпинг-стратегия для бэктеста."""
+        """Скальпинг-стратегия V3 для бэктеста."""
         try:
             from scalping_strategy import analyze_scalp, ScalpConfig
             p   = self.params
             cfg = ScalpConfig(
-                tp_pct        = float(p.get("tp_pct",        0.75)),
-                sl_pct        = float(p.get("sl_pct",        0.20)),
-                ema_period    = int(p.get("ema_period",      20)),
-                rsi_long_min  = float(p.get("rsi_long_min",  40.0)),
-                rsi_long_max  = float(p.get("rsi_long_max",  72.0)),
-                rsi_short_min = float(p.get("rsi_short_min", 28.0)),
-                rsi_short_max = float(p.get("rsi_short_max", 60.0)),
-                vol_mult      = float(p.get("vol_mult",      1.2)),
-                atr_max_pct   = float(p.get("atr_max_pct",  0.04)),  # 4% для бэктеста
-                min_rr        = float(p.get("min_rr",        1.3)),
+                # SCALP-V3: ATR-based SL, VWAP/Grab/Spike подходы
+                vwap_enabled=bool(p.get("vwap_enabled", True)),
+                liquidity_grab_enabled=bool(p.get("liquidity_grab_enabled", True)),
+                vol_spike_enabled=bool(p.get("vol_spike_enabled", True)),
+                ema_trend_period=int(p.get("ema_trend_period", 50)),
+                atr_max_pct=float(p.get("atr_max_pct", 0.05)),
+                sl_atr_mult=float(p.get("sl_atr_mult", 1.0)),
+                tp_rr_min=float(p.get("min_rr", 2.0)),
+                session_filter=False,  # SCALP-V3: бэктест без session filter
             )
             sig = analyze_scalp(symbol, df, cfg)
             if sig is None:
@@ -30647,20 +32468,30 @@ class OKXFetcher:
 
 --- FILE: ./CHM_BREAKER_V4/scalping_strategy.py ---
 """
-scalping_strategy.py — Скальпинг-стратегия CHM BREAKER.
+scalping_strategy.py — Скальпинг-стратегия CHM BREAKER V4.5
 
-Концепция: быстрые входы на 1m/5m по пробою EMA + объём + RSI.
-  - Смотрим на короткий таймфрейм (1m или 5m)
-  - Сигнал: цена пробивает EMA-20 снизу вверх (LONG) или сверху вниз (SHORT)
-  - Фильтры: RSI подтверждает направление, объём выше среднего
-  - TP/SL: фиксированный % от цены входа (из user-настроек)
-  - Не торгуем если ATR слишком высокий (высокая волатильность)
+Три подхода, проверенных в алго-скальпинге на крипто:
 
-Используется scalping_runner.py как фоновая задача бота.
+1. VWAP Bounce — вход от средневзвешенной цены по объёму.
+   Институциональный "якорь справедливой цены".
+
+2. Liquidity Grab — вход после ложного выноса хай/лоу (сбор стопов).
+   Smart Money паттерн.
+
+3. Volume Spike Momentum — вход по направлению аномального объёма.
+   Пробой уровня с подтверждением ликвидности.
+
+Ключевые принципы:
+  - SL ВСЕГДА структурный (ATR-based), НИКОГДА фиксированный %
+  - Вход ТОЛЬКО по закрытой свече (iloc[-2])
+  - R:R после комиссий >= 2.0
+  - Объём — ОБЯЗАТЕЛЬНОЕ подтверждение каждого входа
+  - EMA только для тренда, не для входа
 """
 from __future__ import annotations
 
 import logging
+import math
 from dataclasses import dataclass
 from typing import Optional
 
@@ -30670,83 +32501,340 @@ import pandas as pd
 log = logging.getLogger("CHM.Scalping")
 
 
+# ═══════════════════════════════════════════════════════════════
+#  CONFIG
+# ═══════════════════════════════════════════════════════════════
+
 @dataclass
 class ScalpConfig:
-    """Параметры скальпинг-стратегии.
+    """Параметры скальпинг-стратегии V2."""
 
-    [AUDIT-FIX] SL=0.30%, TP=1.00%, min_rr=2.2 (чистый после комиссий).
-    Заменён EMA-cross на Pullback+Momentum: цена откатилась к EMA и отскочила.
-    """
-    tp_pct:        float = 1.05   # [AUDIT-FIX] Take Profit, % от цены (обеспечивает RR≥2.2 net)
-    sl_pct:        float = 0.30   # [AUDIT-FIX] Stop Loss, % от цены (было 0.20)
-    fee_rt:        float = 0.11   # Комиссия биржи round-trip, % (Bybit taker ~0.11%)
-    ema_period:    int   = 20     # период EMA для пробоя
-    rsi_period:    int   = 14     # период RSI
-    rsi_long_min:  float = 40.0   # RSI мин. для лонга
-    rsi_long_max:  float = 72.0   # RSI макс. для лонга
-    rsi_short_min: float = 28.0   # RSI мин. для шорта
-    rsi_short_max: float = 60.0   # RSI макс. для шорта
-    vol_mult:      float = 1.3    # объём > 1.3 × средний (баланс кол-во/качество)
-    vol_period:    int   = 20     # период для среднего объёма
-    atr_period:    int   = 14     # период ATR
-    atr_max_pct:   float = 0.04   # ATR/цена > 4% → слишком волатильно
-    min_rr:        float = 2.2    # [AUDIT-FIX] мин. R:R ПОСЛЕ вычета комиссий (было 1.3)
-    high_wr_mode:  bool  = False  # [AUDIT-FIX] Режим высокого WR (активируется через БД)
+    # ── VWAP Bounce ───────────────────────────────
+    vwap_bounce_enabled:      bool  = True
+    vwap_touch_tolerance_pct: float = 0.15   # 0.15% = "цена коснулась VWAP"
+    vwap_bounce_min_vol_mult: float = 1.5    # объём на баре отскока > 1.5x avg
 
+    # ── Liquidity Grab ────────────────────────────
+    liquidity_grab_enabled:   bool  = True
+    lg_lookback:              int   = 20     # баров для определения хай/лоу
+    lg_wick_pct:              float = 0.55   # тень > 55% бара = grab
+    lg_min_vol_mult:          float = 1.3    # объём при grab
+
+    # ── Volume Spike Momentum ─────────────────────
+    vol_spike_enabled:        bool  = True
+    vol_spike_mult:           float = 2.0    # объём > 2x среднего
+    vol_spike_min_body_pct:   float = 0.55   # тело свечи > 55% (не дожи)
+
+    # ── Общие индикаторы ──────────────────────────
+    ema_trend_period:         int   = 50     # EMA для определения тренда
+    rsi_period:               int   = 14
+    rsi_overbought:           float = 75.0   # не входить в LONG если RSI > 75
+    rsi_oversold:             float = 25.0   # не входить в SHORT если RSI < 25
+    atr_period:               int   = 14
+    atr_max_pct:              float = 0.05   # ATR > 5% цены = пропуск
+    vol_period:               int   = 20     # период среднего объёма
+
+    # ── Risk Management ───────────────────────────
+    sl_atr_mult:              float = 1.5    # SL = 1.5 × ATR (шире — не выносит шумом)
+    tp_rr_min:                float = 2.0    # мин R:R после комиссий
+    fee_rt:                   float = 0.11   # round-trip комиссия %
+    max_sl_pct:               float = 1.0    # макс SL % от цены
+    min_sl_pct:               float = 0.25   # мин SL % (было 0.15 — слишком тесно для крипто)
+
+    # ── Session Filter ────────────────────────────
+    session_filter:           bool  = True
+    session_start_utc:        int   = 8
+    session_end_utc:          int   = 22
+
+    # ── High WR Mode ──────────────────────────────
+    high_wr_mode:             bool  = False
+
+
+# ═══════════════════════════════════════════════════════════════
+#  SIGNAL
+# ═══════════════════════════════════════════════════════════════
 
 @dataclass
 class ScalpSignal:
     """Результат скальп-анализа."""
-    symbol:      str
-    direction:   str    # "LONG" | "SHORT"
-    entry:       float
-    sl:          float
-    tp:          float
-    rr:          float
-    rsi:         float
-    vol_ratio:   float  # текущий объём / средний объём
-    signal_type: str = "Scalp Momentum"  # "Scalp Momentum" | "RSI Divergence"
+    symbol:      str   = ""
+    direction:   str   = ""       # "LONG" | "SHORT"
+    entry:       float = 0.0
+    sl:          float = 0.0
+    tp:          float = 0.0
+    rr:          float = 0.0      # чистый R:R после комиссий
+    signal_type: str   = ""       # "VWAP Bounce" | "Liquidity Grab" | "Volume Spike"
+    rsi:         float = 0.0
+    vol_ratio:   float = 0.0      # текущий объём / средний
+    vwap:        float = 0.0
+    atr:         float = 0.0
 
 
-def _find_rsi_divergence(
-    close: "pd.Series",
-    rsi: "pd.Series",
-    lookback: int = 30,
-) -> Optional[str]:
-    """
-    Детектирует RSI-дивергенцию за последние lookback закрытых баров.
+# ═══════════════════════════════════════════════════════════════
+#  ИНДИКАТОРЫ
+# ═══════════════════════════════════════════════════════════════
 
-    Бычья (LONG): цена у/около недавнего минимума, RSI выше, чем был
-      на том минимуме → «скрытая сила».
-    Медвежья (SHORT): цена у/около недавнего максимума, RSI ниже →
-      «скрытая слабость».
+def _calculate_vwap(df: pd.DataFrame) -> pd.Series:
+    """VWAP = cumulative(close × volume) / cumulative(volume) за сессию (24h)."""
+    tp = (df["high"] + df["low"] + df["close"]) / 3  # typical price
+    vol = df["volume"].replace(0, np.nan)
+    cumvol = vol.cumsum()
+    cumtp = (tp * vol).cumsum()
+    vwap = cumtp / cumvol
+    return (cumtp / cumvol).ffill()
 
-    Возвращает "LONG", "SHORT" или None.
-    """
-    if len(close) < lookback + 4:
+
+def _calculate_rsi(close: pd.Series, period: int = 14) -> pd.Series:
+    delta = close.diff()
+    gain = delta.clip(lower=0).ewm(span=period, adjust=False).mean()
+    loss = (-delta.clip(upper=0)).ewm(span=period, adjust=False).mean()
+    rs = gain / loss.replace(0, np.nan)
+    return 100 - 100 / (1 + rs)
+
+
+def _calculate_atr(high: pd.Series, low: pd.Series, close: pd.Series,
+                   period: int = 14) -> pd.Series:
+    prev_close = close.shift(1)
+    tr = pd.concat([
+        high - low,
+        (high - prev_close).abs(),
+        (low - prev_close).abs(),
+    ], axis=1).max(axis=1)
+    return tr.ewm(span=period, adjust=False).mean()
+
+
+# ═══════════════════════════════════════════════════════════════
+#  ПОДХОД 1: VWAP BOUNCE
+# ═══════════════════════════════════════════════════════════════
+
+def _check_vwap_bounce(
+    df: pd.DataFrame, vwap: pd.Series, ema: pd.Series,
+    rsi: pd.Series, atr: pd.Series, avg_vol: pd.Series,
+    cfg: ScalpConfig,
+) -> Optional[ScalpSignal]:
+    """Вход от VWAP при отскоке с подтверждением объёмом."""
+    c0 = float(df["close"].iloc[-2])
+    c1 = float(df["close"].iloc[-3])
+    h0 = float(df["high"].iloc[-2])
+    l0 = float(df["low"].iloc[-2])
+    v0 = float(df["volume"].iloc[-2])
+    vw = float(vwap.iloc[-2])
+    e0 = float(ema.iloc[-2])
+    r0 = float(rsi.iloc[-2])
+    a0 = float(atr.iloc[-2])
+    av = float(avg_vol.iloc[-2]) if avg_vol.iloc[-2] > 0 else 1.0
+
+    if vw <= 0 or a0 <= 0:
         return None
-    try:
-        # Последние закрытые бары (исключаем незакрытую свечу [-1])
-        c = close.iloc[-(lookback + 2):-2].values.astype(float)
-        r = rsi.iloc[-(lookback + 2):-2].values.astype(float)
-        c_cur = float(close.iloc[-2])
-        r_cur = float(rsi.iloc[-2])
 
-        # Бычья дивергенция: цена ≈ предыдущий минимум, RSI выше + в нейтральной/медвежьей зоне
-        min_idx = int(np.argmin(c))
-        c_low, r_low = c[min_idx], r[min_idx]
-        if c_cur <= c_low * 1.008 and r_cur > r_low + 3.0 and r_cur < 52:
-            return "LONG"
+    tolerance = vw * cfg.vwap_touch_tolerance_pct / 100
+    vol_ratio = v0 / av
 
-        # Медвежья дивергенция: цена ≈ предыдущий максимум, RSI ниже + в бычьей/перекупленной зоне
-        max_idx = int(np.argmax(c))
-        c_high, r_high = c[max_idx], r[max_idx]
-        if c_cur >= c_high * 0.992 and r_cur < r_high - 3.0 and r_cur > 48:
-            return "SHORT"
-    except Exception as e:
-        log.debug("_find_rsi_divergence: %s", e)
+    # LONG: цена коснулась VWAP снизу/у VWAP, закрылась выше, бычий тренд
+    if (l0 <= vw + tolerance and c0 > vw and c0 > e0  # отскок от VWAP вверх
+            and vol_ratio >= cfg.vwap_bounce_min_vol_mult    # объём подтверждает
+            and r0 < cfg.rsi_overbought):                     # не перекуплен
+        entry = c0
+        sl = vw - cfg.sl_atr_mult * a0
+        # Clamp SL
+        sl_pct = abs(entry - sl) / entry * 100
+        if sl_pct > cfg.max_sl_pct:
+            sl = entry * (1 - cfg.max_sl_pct / 100)
+        if sl_pct < cfg.min_sl_pct:
+            sl = entry * (1 - cfg.min_sl_pct / 100)
+        risk = abs(entry - sl)
+        tp = entry + risk * (cfg.tp_rr_min + 0.5)  # target немного выше min RR
+        return ScalpSignal(
+            direction="LONG", entry=entry, sl=sl, tp=tp,
+            signal_type="VWAP Bounce", rsi=round(r0, 1),
+            vol_ratio=round(vol_ratio, 2), vwap=round(vw, 6), atr=round(a0, 6),
+        )
+
+    # SHORT: цена коснулась VWAP сверху, закрылась ниже, медвежий тренд
+    if (h0 >= vw - tolerance and c0 < vw and c0 < e0
+            and vol_ratio >= cfg.vwap_bounce_min_vol_mult
+            and r0 > cfg.rsi_oversold):
+        entry = c0
+        sl = vw + cfg.sl_atr_mult * a0
+        sl_pct = abs(sl - entry) / entry * 100
+        if sl_pct > cfg.max_sl_pct:
+            sl = entry * (1 + cfg.max_sl_pct / 100)
+        if sl_pct < cfg.min_sl_pct:
+            sl = entry * (1 + cfg.min_sl_pct / 100)
+        risk = abs(sl - entry)
+        tp = entry - risk * (cfg.tp_rr_min + 0.5)
+        return ScalpSignal(
+            direction="SHORT", entry=entry, sl=sl, tp=tp,
+            signal_type="VWAP Bounce", rsi=round(r0, 1),
+            vol_ratio=round(vol_ratio, 2), vwap=round(vw, 6), atr=round(a0, 6),
+        )
+
     return None
 
+
+# ═══════════════════════════════════════════════════════════════
+#  ПОДХОД 2: LIQUIDITY GRAB
+# ═══════════════════════════════════════════════════════════════
+
+def _check_liquidity_grab(
+    df: pd.DataFrame, ema: pd.Series,
+    rsi: pd.Series, atr: pd.Series, avg_vol: pd.Series,
+    cfg: ScalpConfig,
+) -> Optional[ScalpSignal]:
+    """Вход после ложного выноса хай/лоу (сбор стопов)."""
+    i = -2  # последняя закрытая свеча
+    c0 = float(df["close"].iloc[i])
+    o0 = float(df["open"].iloc[i])
+    h0 = float(df["high"].iloc[i])
+    l0 = float(df["low"].iloc[i])
+    v0 = float(df["volume"].iloc[i])
+    e0 = float(ema.iloc[i])
+    r0 = float(rsi.iloc[i])
+    a0 = float(atr.iloc[i])
+    av = float(avg_vol.iloc[i]) if avg_vol.iloc[i] > 0 else 1.0
+
+    if a0 <= 0:
+        return None
+
+    bar_size = h0 - l0
+    if bar_size <= 0:
+        return None
+
+    vol_ratio = v0 / av
+
+    # Lookback high/low
+    lb = cfg.lg_lookback
+    if len(df) < lb + 5:
+        return None
+    recent_high = float(df["high"].iloc[-(lb + 2):-2].max())
+    recent_low = float(df["low"].iloc[-(lb + 2):-2].min())
+
+    # LONG: тень пробила лоу, закрытие обратно внутри range
+    lower_wick = min(o0, c0) - l0
+    if (l0 < recent_low                            # пробил лоу
+            and c0 > recent_low                     # закрылся обратно
+            and lower_wick / bar_size >= cfg.lg_wick_pct  # длинная нижняя тень
+            and vol_ratio >= cfg.lg_min_vol_mult    # объём подтверждает
+            and c0 > e0 - a0                        # не далеко от тренда
+            and r0 < cfg.rsi_overbought):
+        entry = c0
+        sl = l0 - a0 * 0.5  # за тень + buffer (0.5 ATR)
+        sl_pct = abs(entry - sl) / entry * 100
+        if sl_pct > cfg.max_sl_pct:
+            sl = entry * (1 - cfg.max_sl_pct / 100)
+        if sl_pct < cfg.min_sl_pct:
+            sl = entry * (1 - cfg.min_sl_pct / 100)
+        risk = abs(entry - sl)
+        tp = entry + risk * (cfg.tp_rr_min + 0.5)
+        return ScalpSignal(
+            direction="LONG", entry=entry, sl=sl, tp=tp,
+            signal_type="Liquidity Grab", rsi=round(r0, 1),
+            vol_ratio=round(vol_ratio, 2), atr=round(a0, 6),
+        )
+
+    # SHORT: тень пробила хай, закрытие обратно
+    upper_wick = h0 - max(o0, c0)
+    if (h0 > recent_high
+            and c0 < recent_high
+            and upper_wick / bar_size >= cfg.lg_wick_pct
+            and vol_ratio >= cfg.lg_min_vol_mult
+            and c0 < e0 + a0
+            and r0 > cfg.rsi_oversold):
+        entry = c0
+        sl = h0 + a0 * 0.5  # за тень + buffer (0.5 ATR)
+        sl_pct = abs(sl - entry) / entry * 100
+        if sl_pct > cfg.max_sl_pct:
+            sl = entry * (1 + cfg.max_sl_pct / 100)
+        if sl_pct < cfg.min_sl_pct:
+            sl = entry * (1 + cfg.min_sl_pct / 100)
+        risk = abs(sl - entry)
+        tp = entry - risk * (cfg.tp_rr_min + 0.5)
+        return ScalpSignal(
+            direction="SHORT", entry=entry, sl=sl, tp=tp,
+            signal_type="Liquidity Grab", rsi=round(r0, 1),
+            vol_ratio=round(vol_ratio, 2), atr=round(a0, 6),
+        )
+
+    return None
+
+
+# ═══════════════════════════════════════════════════════════════
+#  ПОДХОД 3: VOLUME SPIKE MOMENTUM
+# ═══════════════════════════════════════════════════════════════
+
+def _check_volume_spike(
+    df: pd.DataFrame, ema: pd.Series,
+    rsi: pd.Series, atr: pd.Series, avg_vol: pd.Series,
+    cfg: ScalpConfig,
+) -> Optional[ScalpSignal]:
+    """Вход по направлению аномального объёма на пробое."""
+    i = -2
+    c0 = float(df["close"].iloc[i])
+    o0 = float(df["open"].iloc[i])
+    h0 = float(df["high"].iloc[i])
+    l0 = float(df["low"].iloc[i])
+    v0 = float(df["volume"].iloc[i])
+    e0 = float(ema.iloc[i])
+    r0 = float(rsi.iloc[i])
+    a0 = float(atr.iloc[i])
+    av = float(avg_vol.iloc[i]) if avg_vol.iloc[i] > 0 else 1.0
+
+    if a0 <= 0:
+        return None
+
+    bar_size = h0 - l0
+    if bar_size <= 0:
+        return None
+
+    body = abs(c0 - o0)
+    body_pct = body / bar_size
+    vol_ratio = v0 / av
+    is_bullish = c0 > o0
+
+    # Volume spike + solid body
+    if vol_ratio < cfg.vol_spike_mult or body_pct < cfg.vol_spike_min_body_pct:
+        return None
+
+    # LONG: бычья свеча с volume spike, тренд бычий, RSI не экстремальный
+    if is_bullish and c0 > e0 and r0 < cfg.rsi_overbought:
+        entry = c0
+        sl = (o0 + l0) / 2  # середина нижней половины свечи
+        sl_pct = abs(entry - sl) / entry * 100
+        if sl_pct > cfg.max_sl_pct:
+            sl = entry * (1 - cfg.max_sl_pct / 100)
+        if sl_pct < cfg.min_sl_pct:
+            sl = entry * (1 - cfg.min_sl_pct / 100)
+        risk = abs(entry - sl)
+        tp = entry + max(body * 1.5, risk * 2.0)  # TP = max(1.5× тело, 2× risk)
+        return ScalpSignal(
+            direction="LONG", entry=entry, sl=sl, tp=tp,
+            signal_type="Volume Spike", rsi=round(r0, 1),
+            vol_ratio=round(vol_ratio, 2), atr=round(a0, 6),
+        )
+
+    # SHORT: медвежья свеча с volume spike
+    if not is_bullish and c0 < e0 and r0 > cfg.rsi_oversold:
+        entry = c0
+        sl = (o0 + h0) / 2
+        sl_pct = abs(sl - entry) / entry * 100
+        if sl_pct > cfg.max_sl_pct:
+            sl = entry * (1 + cfg.max_sl_pct / 100)
+        if sl_pct < cfg.min_sl_pct:
+            sl = entry * (1 + cfg.min_sl_pct / 100)
+        risk = abs(sl - entry)
+        tp = entry - max(body * 1.5, risk * 2.0)  # TP = max(1.5× тело, 2× risk)
+        return ScalpSignal(
+            direction="SHORT", entry=entry, sl=sl, tp=tp,
+            signal_type="Volume Spike", rsi=round(r0, 1),
+            vol_ratio=round(vol_ratio, 2), atr=round(a0, 6),
+        )
+
+    return None
+
+
+# ═══════════════════════════════════════════════════════════════
+#  ГЛАВНАЯ ФУНКЦИЯ
+# ═══════════════════════════════════════════════════════════════
 
 def analyze_scalp(
     symbol: str,
@@ -30755,228 +32843,91 @@ def analyze_scalp(
 ) -> Optional[ScalpSignal]:
     """
     Анализирует DataFrame (1m/5m) и возвращает скальп-сигнал или None.
-
-    Тип 1 — Scalp Momentum (EMA crossover):
-      1. Предыдущая свеча закрылась НИЖЕ EMA-20
-      2. Текущая свеча закрылась ВЫШЕ EMA-20 (пробой)
-      3. RSI в зоне [rsi_long_min, rsi_long_max]
-      4. Объём текущей свечи > vol_mult * средний объём
-      5. ATR/цена < atr_max_pct (не слишком волатильно)
-
-    Тип 2 — RSI Divergence:
-      Цена у экстремума, RSI расходится → разворот.
-
-    Критерии SHORT — зеркально для обоих типов.
+    Три подхода в порядке приоритета: VWAP Bounce → Liquidity Grab → Volume Spike.
     """
     try:
         if cfg is None:
             cfg = ScalpConfig()
 
-        if df is None or len(df) < max(cfg.ema_period, cfg.rsi_period, cfg.vol_period) + 5:
+        min_bars = max(cfg.ema_trend_period, cfg.vol_period, cfg.lg_lookback) + 10
+        if df is None or len(df) < min_bars:
             return None
 
-        close  = df["close"].astype(float)
+        close = df["close"].astype(float)
+        high = df["high"].astype(float)
+        low = df["low"].astype(float)
         volume = df["volume"].astype(float)
-        high   = df["high"].astype(float)
-        low    = df["low"].astype(float)
 
-        # EMA-20
-        ema = close.ewm(span=cfg.ema_period, adjust=False).mean()
-
-        # RSI
-        delta  = close.diff()
-        gain   = delta.clip(lower=0).ewm(span=cfg.rsi_period, adjust=False).mean()
-        loss   = (-delta.clip(upper=0)).ewm(span=cfg.rsi_period, adjust=False).mean()
-        rs     = gain / loss.replace(0, float("nan"))
-        rsi    = 100 - 100 / (1 + rs)
-
-        # ATR
-        prev_close = close.shift(1)
-        tr = pd.concat([
-            high - low,
-            (high - prev_close).abs(),
-            (low  - prev_close).abs(),
-        ], axis=1).max(axis=1)
-        atr = tr.ewm(span=cfg.atr_period, adjust=False).mean()
-
-        # Средний объём
+        # ── Индикаторы ───────────────────────────────────
+        vwap = _calculate_vwap(df)
+        ema = close.ewm(span=cfg.ema_trend_period, adjust=False).mean()
+        rsi = _calculate_rsi(close, cfg.rsi_period)
+        atr = _calculate_atr(high, low, close, cfg.atr_period)
         avg_vol = volume.rolling(cfg.vol_period).mean()
 
-        # Текущие и предыдущие значения
-        # FIX-B15: используем iloc[-2] (последняя ЗАКРЫТАЯ свеча) чтобы избежать
-        # ложных сигналов на незакрытой свече (flickering цены в реальном времени)
-        c0    = float(close.iloc[-2])
-        c1    = float(close.iloc[-3])
-        e0    = float(ema.iloc[-2])
-        e1    = float(ema.iloc[-3])
-        rsi0  = float(rsi.iloc[-2])
-        v0    = float(volume.iloc[-2])
-        av0   = float(avg_vol.iloc[-2])
-        atr0  = float(atr.iloc[-2])
+        # ── NaN guard ─────────────────────────────────────
+        c0 = float(close.iloc[-2])
+        a0 = float(atr.iloc[-2])
+        r0 = float(rsi.iloc[-2])
+        v0 = float(vwap.iloc[-2])
 
-        if c0 <= 0 or av0 <= 0:
+        if any(math.isnan(x) for x in (c0, a0, r0, v0)):
             return None
 
-        # AUDIT: BUG-022 — guard against NaN from insufficient data
-        import math
-        if any(math.isnan(x) for x in (c0, e0, rsi0, atr0)):
+        if c0 <= 0 or a0 <= 0:
             return None
 
-        atr_ratio = atr0 / c0
+        # ── ATR filter ────────────────────────────────────
+        atr_ratio = a0 / c0
         if atr_ratio > cfg.atr_max_pct:
             log.debug("%s scalp skip: ATR ratio %.3f > %.3f", symbol, atr_ratio, cfg.atr_max_pct)
             return None
 
-        vol_ratio = v0 / av0
-
-        # Абсолютная комиссия round-trip (в единицах цены)
-        fee_abs = c0 * cfg.fee_rt / 100
-
-        # [AUDIT-FIX] Сессионный фильтр 08-22 UTC (для high_wr_mode)
-        if cfg.high_wr_mode:
+        # ── Session filter ────────────────────────────────
+        if cfg.session_filter or cfg.high_wr_mode:
             try:
-                _last_ts = df.index[-1]
-                _hour = _last_ts.hour if hasattr(_last_ts, "hour") else 0
-                if _hour < 8 or _hour >= 22:
-                    log.debug("[AUDIT-FIX] %s scalp skip: outside 08-22 UTC (h=%d)", symbol, _hour)
+                _ts = df.index[-2]
+                _h = _ts.hour if hasattr(_ts, "hour") else 0
+                if _h < cfg.session_start_utc or _h >= cfg.session_end_utc:
                     return None
             except Exception:
                 pass
 
-        # ── Общие переменные для всех типов сигналов ─────────────────────
-        _low1 = float(low.iloc[-2])
-        _high1 = float(high.iloc[-2])
-        _low2 = float(low.iloc[-3])
-        _high2 = float(high.iloc[-3])
-        e_prev = float(ema.iloc[-4]) if len(ema) > 4 else e0  # EMA 2 бара назад для тренда
+        # ── Подход 1: VWAP Bounce ─────────────────────────
+        signal = None
+        if cfg.vwap_bounce_enabled:
+            signal = _check_vwap_bounce(df, vwap, ema, rsi, atr, avg_vol, cfg)
 
-        # Доп. качество: EMA растёт/падает (тренд подтверждён)
-        _ema_rising = e0 > e_prev
-        _ema_falling = e0 < e_prev
+        # ── Подход 2: Liquidity Grab ─────────────────────
+        if signal is None and cfg.liquidity_grab_enabled:
+            signal = _check_liquidity_grab(df, ema, rsi, atr, avg_vol, cfg)
 
-        # ── LONG — Pullback + Momentum ────────────────────────────────────
-        # Цена НАД EMA, low коснулся EMA (допуск 0.8%), свеча закрылась вверх
-        _touch_dist_long = abs(_low1 - e0) / e0 if e0 > 0 else 999
-        _pullback_long = (c0 > e0 and c1 > e0
-                          and _touch_dist_long < 0.008  # 0.8% допуск (было 0.3%)
-                          and _ema_rising)
-        if _pullback_long and vol_ratio >= cfg.vol_mult:
-            if cfg.rsi_long_min <= rsi0 <= cfg.rsi_long_max:
-                entry      = c0
-                sl         = entry * (1 - cfg.sl_pct / 100)
-                tp         = entry * (1 + cfg.tp_pct / 100)
-                net_reward = (tp - entry) - fee_abs
-                net_risk   = (entry - sl) + fee_abs
-                rr = net_reward / net_risk if net_risk > 0 else 0
-                if net_reward > 0 and rr >= cfg.min_rr:
-                    return ScalpSignal(
-                        symbol=symbol, direction="LONG",
-                        entry=entry, sl=sl, tp=tp,
-                        rr=round(rr, 2), rsi=round(rsi0, 1),
-                        vol_ratio=round(vol_ratio, 2),
-                        signal_type="Pullback Momentum",
-                    )
+        # ── Подход 3: Volume Spike Momentum ──────────────
+        if signal is None and cfg.vol_spike_enabled:
+            signal = _check_volume_spike(df, ema, rsi, atr, avg_vol, cfg)
 
-        # ── SHORT — Pullback + Momentum ───────────────────────────────────
-        _touch_dist_short = abs(_high1 - e0) / e0 if e0 > 0 else 999
-        _pullback_short = (c0 < e0 and c1 < e0
-                           and _touch_dist_short < 0.008
-                           and _ema_falling)
-        if _pullback_short and vol_ratio >= cfg.vol_mult:
-            if cfg.rsi_short_min <= rsi0 <= cfg.rsi_short_max:
-                entry      = c0
-                sl         = entry * (1 + cfg.sl_pct / 100)
-                tp         = entry * (1 - cfg.tp_pct / 100)
-                net_reward = (entry - tp) - fee_abs
-                net_risk   = (sl - entry) + fee_abs
-                rr = net_reward / net_risk if net_risk > 0 else 0
-                if net_reward > 0 and rr >= cfg.min_rr:
-                    return ScalpSignal(
-                        symbol=symbol, direction="SHORT",
-                        entry=entry, sl=sl, tp=tp,
-                        rr=round(rr, 2), rsi=round(rsi0, 1),
-                        vol_ratio=round(vol_ratio, 2),
-                        signal_type="Pullback Momentum",
-                    )
+        if signal is None:
+            return None
 
-        # ── LONG — EMA Bounce (касание EMA снизу + сильный отскок) ────────
-        # Предыдущая свеча: low пробил EMA, но close выше EMA (отскок)
-        # + текущая свеча подтверждает (close > high предыдущей)
-        _bounce_long = (
-            _low2 <= e1 * 1.002           # пред. свеча коснулась/пробила EMA
-            and c1 > e1                    # но закрылась выше (отскок)
-            and c0 > c1                    # текущая подтверждает рост
-            and _ema_rising                # EMA растёт (тренд)
-            and vol_ratio >= cfg.vol_mult * 0.85  # чуть мягче для bounce
-        )
-        if _bounce_long and cfg.rsi_long_min <= rsi0 <= cfg.rsi_long_max:
-            entry      = c0
-            sl         = entry * (1 - cfg.sl_pct / 100)
-            tp         = entry * (1 + cfg.tp_pct / 100)
-            net_reward = (tp - entry) - fee_abs
-            net_risk   = (entry - sl) + fee_abs
-            rr = net_reward / net_risk if net_risk > 0 else 0
-            if net_reward > 0 and rr >= cfg.min_rr:
-                return ScalpSignal(
-                    symbol=symbol, direction="LONG",
-                    entry=entry, sl=sl, tp=tp,
-                    rr=round(rr, 2), rsi=round(rsi0, 1),
-                    vol_ratio=round(vol_ratio, 2),
-                    signal_type="EMA Bounce",
-                )
+        # ── Финальная проверка R:R после комиссий ─────────
+        risk = abs(signal.entry - signal.sl)
+        reward = abs(signal.tp - signal.entry)
+        fee_abs = signal.entry * cfg.fee_rt / 100
+        net_reward = reward - fee_abs
+        net_risk = risk + fee_abs
 
-        # ── SHORT — EMA Bounce (касание EMA сверху + отскок вниз) ─────────
-        _bounce_short = (
-            _high2 >= e1 * 0.998
-            and c1 < e1
-            and c0 < c1
-            and _ema_falling
-            and vol_ratio >= cfg.vol_mult * 0.85
-        )
-        if _bounce_short and cfg.rsi_short_min <= rsi0 <= cfg.rsi_short_max:
-            entry      = c0
-            sl         = entry * (1 + cfg.sl_pct / 100)
-            tp         = entry * (1 - cfg.tp_pct / 100)
-            net_reward = (entry - tp) - fee_abs
-            net_risk   = (sl - entry) + fee_abs
-            rr = net_reward / net_risk if net_risk > 0 else 0
-            if net_reward > 0 and rr >= cfg.min_rr:
-                return ScalpSignal(
-                    symbol=symbol, direction="SHORT",
-                    entry=entry, sl=sl, tp=tp,
-                    rr=round(rr, 2), rsi=round(rsi0, 1),
-                    vol_ratio=round(vol_ratio, 2),
-                    signal_type="EMA Bounce",
-                )
+        if net_risk <= 0 or net_reward / net_risk < cfg.tp_rr_min:
+            log.debug("%s scalp skip: RR %.2f < %.1f after fees",
+                      symbol, net_reward / max(net_risk, 0.0001), cfg.tp_rr_min)
+            return None
 
-        # ── RSI Divergence (оба направления) ─────────────────────────────────
-        # Для RSI divergence — объём не обязателен (дивергенция сама по себе сильный сигнал)
-        div_dir = _find_rsi_divergence(close, rsi)
-        if div_dir is not None and atr_ratio <= cfg.atr_max_pct:
-            entry = c0
-            if div_dir == "LONG":
-                sl         = entry * (1 - cfg.sl_pct / 100)
-                tp         = entry * (1 + cfg.tp_pct / 100)
-                net_reward = (tp - entry) - fee_abs
-                net_risk   = (entry - sl) + fee_abs
-            else:
-                sl         = entry * (1 + cfg.sl_pct / 100)
-                tp         = entry * (1 - cfg.tp_pct / 100)
-                net_reward = (entry - tp) - fee_abs
-                net_risk   = (sl - entry) + fee_abs
-            rr = net_reward / net_risk if net_risk > 0 else 0
-            if net_reward > 0 and rr >= cfg.min_rr:
-                return ScalpSignal(
-                    symbol=symbol, direction=div_dir,
-                    entry=entry, sl=sl, tp=tp,
-                    rr=round(rr, 2), rsi=round(rsi0, 1),
-                    vol_ratio=round(vol_ratio, 2),
-                    signal_type="RSI Divergence",
-                )
+        signal.rr = round(net_reward / net_risk, 2)
+        signal.symbol = symbol
+        return signal
 
     except Exception as e:
         log.debug("analyze_scalp %s: %s", symbol, e)
-    return None
+        return None
 
 
 --- FILE: ./CHM_BREAKER_V4/ton_payment.py ---
