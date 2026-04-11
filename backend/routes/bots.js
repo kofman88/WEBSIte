@@ -11,14 +11,21 @@ const router = express.Router();
  */
 router.get('/templates', (_req, res) => {
   const templates = [
-    { id: 'btc-smc', coin: 'BTC', symbol: 'BTCUSDT', strategy: 'smc', name: 'Bitcoin SMC Bot', exchanges: ['bybit','binance','bingx'], leverage: 10, risk: 2, stopLoss: 1.5, takeProfit: 3, winRate: 87, avgRR: 2.4 },
-    { id: 'btc-gerchik', coin: 'BTC', symbol: 'BTCUSDT', strategy: 'gerchik', name: 'Bitcoin Gerchik Bot', exchanges: ['bybit','binance','bingx'], leverage: 5, risk: 1.5, stopLoss: 2, takeProfit: 4, winRate: 82, avgRR: 2.8 },
-    { id: 'btc-scalp', coin: 'BTC', symbol: 'BTCUSDT', strategy: 'scalping', name: 'Bitcoin Scalper', exchanges: ['bybit','binance','bingx'], leverage: 20, risk: 1, stopLoss: 0.5, takeProfit: 1.5, winRate: 74, avgRR: 1.8 },
-    { id: 'eth-smc', coin: 'ETH', symbol: 'ETHUSDT', strategy: 'smc', name: 'Ethereum SMC Bot', exchanges: ['bybit','binance','bingx'], leverage: 10, risk: 2, stopLoss: 1.5, takeProfit: 3, winRate: 85, avgRR: 2.2 },
-    { id: 'sol-smc', coin: 'SOL', symbol: 'SOLUSDT', strategy: 'smc', name: 'Solana SMC Bot', exchanges: ['bybit','binance','bingx'], leverage: 8, risk: 2.5, stopLoss: 2, takeProfit: 4, winRate: 81, avgRR: 2.5 },
-    { id: 'xrp-scalp', coin: 'XRP', symbol: 'XRPUSDT', strategy: 'scalping', name: 'XRP Scalper', exchanges: ['bybit','binance','bingx'], leverage: 15, risk: 1.5, stopLoss: 0.8, takeProfit: 2, winRate: 78, avgRR: 2.1 },
-    { id: 'doge-scalp', coin: 'DOGE', symbol: 'DOGEUSDT', strategy: 'scalping', name: 'DOGE Scalper', exchanges: ['bybit','binance','bingx'], leverage: 15, risk: 2, stopLoss: 1, takeProfit: 2.5, winRate: 75, avgRR: 1.9 },
-    { id: 'bnb-smc', coin: 'BNB', symbol: 'BNBUSDT', strategy: 'smc', name: 'BNB SMC Bot', exchanges: ['bybit','binance'], leverage: 8, risk: 2, stopLoss: 1.5, takeProfit: 3, winRate: 83, avgRR: 2.3 },
+    // Levels
+    { id: 'btc-levels', coin: 'BTC', symbol: 'BTCUSDT', strategy: 'levels', name: 'Bitcoin Levels Bot', exchanges: ['bybit','binance','bingx','okx'], leverage: 5, risk: 2, stopLoss: 1.5, takeProfit: 3, winRate: 83, avgRR: 2.0 },
+    { id: 'eth-levels', coin: 'ETH', symbol: 'ETHUSDT', strategy: 'levels', name: 'Ethereum Levels Bot', exchanges: ['bybit','binance','bingx','okx'], leverage: 5, risk: 2, stopLoss: 1.5, takeProfit: 3, winRate: 81, avgRR: 1.9 },
+    { id: 'sol-levels', coin: 'SOL', symbol: 'SOLUSDT', strategy: 'levels', name: 'Solana Levels Bot', exchanges: ['bybit','binance','bingx','okx'], leverage: 5, risk: 2.5, stopLoss: 2, takeProfit: 4, winRate: 80, avgRR: 2.1 },
+    // SMC
+    { id: 'btc-smc', coin: 'BTC', symbol: 'BTCUSDT', strategy: 'smc', name: 'Bitcoin SMC Bot', exchanges: ['bybit','binance','bingx','okx'], leverage: 10, risk: 2, stopLoss: 1.5, takeProfit: 3, winRate: 87, avgRR: 2.4 },
+    { id: 'eth-smc', coin: 'ETH', symbol: 'ETHUSDT', strategy: 'smc', name: 'Ethereum SMC Bot', exchanges: ['bybit','binance','bingx','okx'], leverage: 10, risk: 2, stopLoss: 1.5, takeProfit: 3, winRate: 85, avgRR: 2.2 },
+    { id: 'sol-smc', coin: 'SOL', symbol: 'SOLUSDT', strategy: 'smc', name: 'Solana SMC Bot', exchanges: ['bybit','binance','bingx','okx'], leverage: 8, risk: 2.5, stopLoss: 2, takeProfit: 4, winRate: 81, avgRR: 2.5 },
+    // Gerchik
+    { id: 'btc-gerchik', coin: 'BTC', symbol: 'BTCUSDT', strategy: 'gerchik', name: 'Bitcoin Gerchik Bot', exchanges: ['bybit','binance','bingx','okx'], leverage: 5, risk: 1.5, stopLoss: 2, takeProfit: 4, winRate: 82, avgRR: 2.8 },
+    // Scalping
+    { id: 'btc-scalp', coin: 'BTC', symbol: 'BTCUSDT', strategy: 'scalping', name: 'Bitcoin Scalper', exchanges: ['bybit','binance','bingx','okx'], leverage: 20, risk: 1, stopLoss: 0.5, takeProfit: 1.5, winRate: 74, avgRR: 1.8 },
+    { id: 'xrp-scalp', coin: 'XRP', symbol: 'XRPUSDT', strategy: 'scalping', name: 'XRP Scalper', exchanges: ['bybit','binance','bingx','okx'], leverage: 15, risk: 1.5, stopLoss: 0.8, takeProfit: 2, winRate: 78, avgRR: 2.1 },
+    { id: 'doge-scalp', coin: 'DOGE', symbol: 'DOGEUSDT', strategy: 'scalping', name: 'DOGE Scalper', exchanges: ['bybit','binance','bingx','okx'], leverage: 15, risk: 2, stopLoss: 1, takeProfit: 2.5, winRate: 75, avgRR: 1.9 },
+    { id: 'bnb-smc', coin: 'BNB', symbol: 'BNBUSDT', strategy: 'smc', name: 'BNB SMC Bot', exchanges: ['bybit','binance','bingx','okx'], leverage: 8, risk: 2, stopLoss: 1.5, takeProfit: 3, winRate: 83, avgRR: 2.3 },
   ];
 
   const { coin, exchange, strategy } = _req.query;
@@ -42,13 +49,15 @@ router.post('/from-template', authMiddleware, (req, res) => {
     }
 
     // Find template
-    const templates = router.stack;  // re-use from above
     const tpl = [
+      { id: 'btc-levels', symbol: 'BTCUSDT', strategy: 'levels', leverage: 5, stopLoss: 1.5, takeProfit: 3 },
+      { id: 'eth-levels', symbol: 'ETHUSDT', strategy: 'levels', leverage: 5, stopLoss: 1.5, takeProfit: 3 },
+      { id: 'sol-levels', symbol: 'SOLUSDT', strategy: 'levels', leverage: 5, stopLoss: 2, takeProfit: 4 },
       { id: 'btc-smc', symbol: 'BTCUSDT', strategy: 'smc', leverage: 10, stopLoss: 1.5, takeProfit: 3 },
-      { id: 'btc-gerchik', symbol: 'BTCUSDT', strategy: 'gerchik', leverage: 5, stopLoss: 2, takeProfit: 4 },
-      { id: 'btc-scalp', symbol: 'BTCUSDT', strategy: 'scalping', leverage: 20, stopLoss: 0.5, takeProfit: 1.5 },
       { id: 'eth-smc', symbol: 'ETHUSDT', strategy: 'smc', leverage: 10, stopLoss: 1.5, takeProfit: 3 },
       { id: 'sol-smc', symbol: 'SOLUSDT', strategy: 'smc', leverage: 8, stopLoss: 2, takeProfit: 4 },
+      { id: 'btc-gerchik', symbol: 'BTCUSDT', strategy: 'gerchik', leverage: 5, stopLoss: 2, takeProfit: 4 },
+      { id: 'btc-scalp', symbol: 'BTCUSDT', strategy: 'scalping', leverage: 20, stopLoss: 0.5, takeProfit: 1.5 },
       { id: 'xrp-scalp', symbol: 'XRPUSDT', strategy: 'scalping', leverage: 15, stopLoss: 0.8, takeProfit: 2 },
       { id: 'doge-scalp', symbol: 'DOGEUSDT', strategy: 'scalping', leverage: 15, stopLoss: 1, takeProfit: 2.5 },
       { id: 'bnb-smc', symbol: 'BNBUSDT', strategy: 'smc', leverage: 8, stopLoss: 1.5, takeProfit: 3 },
