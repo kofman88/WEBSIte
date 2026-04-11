@@ -139,7 +139,35 @@
 if(!Auth.isLoggedIn())window.location.href='/?login=1';
 Sidebar.init('dashboard');
 
-// Equity Chart
+// Load real data from API
+async function loadDashboard(){
+  try{
+    // Bot stats
+    const bs=await API.getBotStats();
+    if(bs){
+      document.getElementById('balanceVal').textContent='$'+(bs.totalPnl||0).toLocaleString('en',{minimumFractionDigits:2});
+      document.querySelectorAll('.stat-card-value')[1].textContent=(bs.activeBots||0)+' / '+(bs.totalBots||0);
+    }
+    // Signals
+    const sg=await API.getSignals({limit:5}).catch(()=>({signals:[]}));
+    const sf=document.getElementById('recentSignals');
+    if(sf&&sg.signals&&sg.signals.length){
+      sf.innerHTML=sg.signals.map(s=>`<div class="flex items-center justify-between p-3 bg-slate-800/30 rounded-lg"><div><div class="font-semibold text-sm">${s.symbol||'—'}</div><div class="text-xs text-slate-500">${s.strategy||'—'}</div></div><div class="text-right"><span class="text-xs px-2 py-0.5 rounded-full ${s.direction==='long'?'bg-green-500/15 text-green-400':'bg-red-500/15 text-red-400'}">${(s.direction||'—').toUpperCase()}</span><div class="text-xs ${s.pnl_pct>0?'text-green-400':'text-red-400'} mt-1">${s.pnl_pct?((s.pnl_pct>0?'+':'')+s.pnl_pct+'%'):'Active'}</div></div></div>`).join('');
+    }else if(sf){
+      sf.innerHTML='<div class="text-center text-sm text-slate-500 py-8">Пока нет сигналов. Включите сканер в настройках.</div>';
+    }
+    // Signal stats
+    const ss=await API.getSignalStats().catch(()=>({}));
+    if(ss){
+      const sv=document.querySelectorAll('.stat-card-value');
+      if(sv[2])sv[2].textContent=ss.totalToday||0;
+      if(sv[3])sv[3].textContent=(ss.winRate||0)+'%';
+    }
+  }catch(e){console.log('Dashboard load:',e)}
+}
+loadDashboard();
+
+// Equity Chart — real data or placeholder
 let eChart;
 function buildChart(days){
   const data=Utils.generateEquityData(days,10000);
