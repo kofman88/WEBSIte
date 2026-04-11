@@ -79,9 +79,9 @@ class BacktestService {
       const backtest = this.getBacktestById(backtestId, userId);
       if (!backtest) return;
 
-      // Fetch real candle data from OKX (multi-page for more data)
-      const { fetchCandlesMulti } = require('./scannerEngine');
-      const candles = await fetchCandlesMulti(backtest.symbol, backtest.timeframe || '1H', 800);
+      // Fetch real candle data from OKX (single fast request)
+      const { fetchCandles } = require('./scannerEngine');
+      const candles = await fetchCandles(backtest.symbol, backtest.timeframe || '1H', 300);
 
       if (!candles || candles.length < 30) {
         throw new Error('Not enough candle data for backtest');
