@@ -56,7 +56,7 @@
     <form id="createBotForm" class="space-y-4">
       <!-- Основные -->
       <div class="grid grid-cols-2 gap-3">
-        <div><label class="text-xs text-slate-500 block mb-1">Имя</label><input name="name" required class="w-full bg-slate-800/50 border border-slate-700 rounded-lg px-3 py-2 text-sm text-white outline-none" placeholder="BTC Scalper"/></div>
+        <div><label class="text-xs text-slate-500 block mb-1">Имя</label><input name="name" id="botNameInput" required class="w-full bg-slate-800/50 border border-slate-700 rounded-lg px-3 py-2 text-sm text-white outline-none" value="BTC Levels"/></div>
         <div><label class="text-xs text-slate-500 block mb-1">Пара</label><input name="symbol" required class="w-full bg-slate-800/50 border border-slate-700 rounded-lg px-3 py-2 text-sm text-white outline-none" placeholder="BTCUSDT"/></div>
       </div>
       <div class="grid grid-cols-3 gap-3">
@@ -283,6 +283,15 @@ const STRAT_PARAMS={
     <label class="flex items-center gap-1.5 text-slate-400"><input type="checkbox" name="sp_rsiFilter" checked class="accent-violet-500"/> RSI фильтр</label>
   </div>`,
 };
+// Auto-name bot
+function autoName(){
+  const sym=document.querySelector('[name=symbol]')?.value||'BTC';
+  const strat=document.getElementById('stratSelect')?.value||'levels';
+  document.getElementById('botNameInput').value=sym.replace('USDT','')+' '+strat.charAt(0).toUpperCase()+strat.slice(1);
+}
+document.querySelector('[name=symbol]')?.addEventListener('input',autoName);
+document.getElementById('stratSelect')?.addEventListener('change',()=>{autoName();showStratParams()});
+
 function showStratParams(){
   const s=document.getElementById('stratSelect').value;
   document.getElementById('stratParams').innerHTML=STRAT_PARAMS[s]||'';
