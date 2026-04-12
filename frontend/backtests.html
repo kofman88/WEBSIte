@@ -46,7 +46,13 @@
   </div>
 
   <!-- Results Grid -->
-  <div class="flex items-center justify-between mb-4"><h2 class="font-bold">Результаты</h2><button onclick="clearFailed()" class="text-xs text-slate-500 hover:text-red-400 transition">Удалить failed</button></div>
+  <div class="flex items-center justify-between mb-4">
+    <h2 class="font-bold">Результаты</h2>
+    <div class="flex gap-2">
+      <button onclick="clearFailed()" class="text-xs px-3 py-1.5 rounded-lg bg-slate-800/50 border border-slate-700 text-slate-400 hover:text-amber-400 hover:border-amber-500/30 transition">Удалить failed</button>
+      <button onclick="clearAll()" class="text-xs px-3 py-1.5 rounded-lg bg-red-500/5 border border-red-500/20 text-red-400 hover:bg-red-500/10 transition">Удалить все</button>
+    </div>
+  </div>
   <div class="grid md:grid-cols-2 gap-4 mb-6" id="btResults">
     <div style="text-align:center;padding:40px;color:#64748b;grid-column:1/-1">Загрузка...</div>
   </div>
@@ -68,23 +74,33 @@ async function loadBacktests(){
     }
     grid.innerHTML=bts.map(b=>{
       const st=b.status;
-      const r=b.results?JSON.parse(b.results):{};
+      let r={};try{r=b.results?JSON.parse(b.results):{}}catch(_){}
       const isRunning=st==='running'||st==='pending';
+      const stratName=((b.name||'').split(' ')[1]||'levels').toLowerCase();
+      const stratColors={smc:'violet',scalp:'cyan',gerchik:'blue',levels:'amber',scalping:'cyan'};
+      const sc=stratColors[stratName]||'amber';
+      const pnl=Number(r.totalPnl||0);
       return `<div class="card ${isRunning?'':'card-glow'}" ${isRunning?'style="opacity:.7"':''}>
         <div class="flex items-center justify-between mb-3">
-          <div><div class="font-semibold">${b.name||b.symbol+' '+b.timeframe} <span class="text-[.6rem] px-1.5 py-0.5 rounded-full ${(b.name||'').includes('smc')?'bg-violet-500/15 text-violet-300':(b.name||'').includes('scalp')?'bg-cyan-500/15 text-cyan-300':(b.name||'').includes('gerchik')?'bg-blue-500/15 text-blue-300':'bg-amber-500/15 text-amber-300'}">${((b.name||'').split(' ')[1]||'levels').toUpperCase()}</span></div><div class="text-xs text-slate-500">${b.start_date} — ${b.end_date} &middot; ${b.symbol}</div></div>
-          <div class="flex gap-2"><span class="text-xs px-2 py-0.5 rounded-full ${st==='completed'?'bg-green-500/15 text-green-400':st==='failed'?'bg-red-500/15 text-red-400':'bg-yellow-500/15 text-yellow-400'}">${st}</span><button onclick="delBT(${b.id})" class="text-slate-600 hover:text-red-400 text-sm">&times;</button></div>
+          <div><div class="font-semibold text-sm">${b.name||b.symbol+' '+b.timeframe} <span class="text-[.6rem] px-1.5 py-0.5 rounded-full bg-${sc}-500/15 text-${sc}-300 uppercase font-bold">${stratName}</span></div><div class="text-xs text-slate-500 mt-1">${b.start_date} — ${b.end_date} &middot; ${b.symbol}</div></div>
+          <div class="flex items-center gap-2">
+            <span class="text-[.65rem] px-2 py-0.5 rounded-full ${st==='completed'?'bg-green-500/15 text-green-400':st==='failed'?'bg-red-500/15 text-red-400':'bg-amber-500/15 text-amber-400'}">${st==='completed'?'Завершён':st==='failed'?'Ошибка':'Выполняется'}</span>
+          </div>
         </div>
-        ${st==='completed'&&r?`<div class="grid grid-cols-3 gap-3 text-center text-sm mb-2">
-          <div><div class="text-xs text-slate-500">PnL</div><div class="font-bold ${Number(r.totalPnl||0)>=0?'text-green-400':'text-red-400'}">${Number(r.totalPnl||0)>=0?'+':''}$${Math.abs(Number(r.totalPnl||0)).toFixed(0)}</div></div>
-          <div><div class="text-xs text-slate-500">Win Rate</div><div class="font-bold">${Number(r.winRate||0).toFixed(0)}%</div></div>
-          <div><div class="text-xs text-slate-500">Sharpe</div><div class="font-bold">${Number(r.sharpeRatio||0).toFixed(2)}</div></div>
+        ${st==='completed'&&r.totalPnl!==undefined?`<div class="grid grid-cols-3 gap-3 text-center text-sm mb-3">
+          <div class="bg-slate-800/30 rounded-lg p-2"><div class="text-[.65rem] text-slate-500 mb-0.5">PnL</div><div class="font-bold ${pnl>=0?'text-green-400':'text-red-400'}">${pnl>=0?'+':''}$${Math.abs(pnl).toFixed(0)}</div></div>
+          <div class="bg-slate-800/30 rounded-lg p-2"><div class="text-[.65rem] text-slate-500 mb-0.5">Win Rate</div><div class="font-bold">${Number(r.winRate||0).toFixed(0)}%</div></div>
+          <div class="bg-slate-800/30 rounded-lg p-2"><div class="text-[.65rem] text-slate-500 mb-0.5">Sharpe</div><div class="font-bold">${Number(r.sharpeRatio||0).toFixed(2)}</div></div>
         </div>
-        <div class="grid grid-cols-3 gap-3 text-center text-sm">
-          <div><div class="text-xs text-slate-500">Max DD</div><div class="text-red-400">${Number(r.maxDrawdown||0).toFixed(1)}%</div></div>
-          <div><div class="text-xs text-slate-500">PF</div><div>${Number(r.profitFactor||0).toFixed(2)}</div></div>
-          <div><div class="text-xs text-slate-500">Trades</div><div>${r.totalTrades||0}</div></div>
-        </div>`:isRunning?'<div class="w-full bg-slate-800 rounded-full h-2 mt-4"><div class="bg-indigo-500 h-2 rounded-full animate-pulse" style="width:50%"></div></div><div class="text-xs text-slate-500 mt-2">Выполняется...</div>':'<div class="text-xs text-red-400 mt-2">Ошибка выполнения</div>'}
+        <div class="grid grid-cols-3 gap-3 text-center text-sm mb-3">
+          <div class="bg-slate-800/30 rounded-lg p-2"><div class="text-[.65rem] text-slate-500 mb-0.5">Max DD</div><div class="text-red-400">${Number(r.maxDrawdown||0).toFixed(1)}%</div></div>
+          <div class="bg-slate-800/30 rounded-lg p-2"><div class="text-[.65rem] text-slate-500 mb-0.5">Profit Factor</div><div>${Number(r.profitFactor||0).toFixed(2)}</div></div>
+          <div class="bg-slate-800/30 rounded-lg p-2"><div class="text-[.65rem] text-slate-500 mb-0.5">Сделок</div><div>${r.totalTrades||0}</div></div>
+        </div>
+        <div class="flex gap-2">
+          <button onclick="delBT(${b.id})" class="text-[.7rem] px-3 py-1.5 rounded-lg bg-red-500/5 border border-red-500/20 text-red-400 hover:bg-red-500/10 transition flex-shrink-0">Удалить</button>
+        </div>
+        `:isRunning?'<div class="w-full bg-slate-800 rounded-full h-2 mt-4"><div class="bg-orange-500 h-2 rounded-full animate-pulse" style="width:60%"></div></div><div class="text-xs text-slate-500 mt-2">Выполняется...</div>':'<div class="text-xs text-red-400 mt-2 mb-2">Ошибка выполнения</div><button onclick="delBT('+b.id+')" class="text-[.7rem] px-3 py-1.5 rounded-lg bg-red-500/5 border border-red-500/20 text-red-400 hover:bg-red-500/10 transition">Удалить</button>'}
       </div>`}).join('');
   }catch(e){
     grid.innerHTML='<div style="text-align:center;padding:40px;color:#ef4444;grid-column:1/-1">Ошибка: '+e.message+'</div>';
@@ -93,6 +109,16 @@ async function loadBacktests(){
 loadBacktests();
 
 async function delBT(id){try{await API.deleteBacktest(id);Toast.success('Удалён');loadBacktests()}catch(e){Toast.error(e.message)}}
+async function clearAll(){
+  if(!confirm('Удалить ВСЕ бэктесты? Это действие нельзя отменить.'))return;
+  try{
+    const res=await API.getBacktests();
+    const all=(res.backtests||[]);
+    let count=0;
+    for(const b of all){try{await API.deleteBacktest(b.id);count++}catch(_){}}
+    Toast.success(count+' бэктестов удалено');loadBacktests();
+  }catch(e){Toast.error(e.message)}
+}
 async function clearFailed(){
   try{
     const res=await API.getBacktests();
