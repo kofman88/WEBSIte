@@ -609,7 +609,7 @@ html.light .faq-item{background:rgba(255,255,255,.5)!important;border-color:rgba
         <button type="button" onclick="togglePassVis(this)" class="absolute right-3 top-1/2 -translate-y-1/2 text-slate-500 hover:text-white" style="background:none;border:none;cursor:pointer"><svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg></button>
       </div>
     </div>
-    <div class="g-recaptcha" data-sitekey="6LeIxAcTAAAAAJcZVRqyHh71UMIEGNQ_MXjiZKhI" data-theme="dark" data-size="invisible"></div>
+    <div class="g-recaptcha" data-sitekey="6Ld2DbQsAAAAAMlkelGsaVr6K_eCLwb7WkEQzPdM" data-theme="dark" data-size="invisible"></div>
     <button type="submit" id="loginBtn" class="btn-p w-full py-3 text-base font-semibold">Войти</button>
   </form>
   <div class="text-center mt-3"><span class="text-[.6rem] text-slate-600">Защищено reCAPTCHA</span></div>
@@ -729,7 +729,9 @@ document.getElementById('loginForm')?.addEventListener('submit',async e=>{
   const btn=document.getElementById('loginBtn');
   btn.disabled=true;btn.textContent='Вход...';
   try{
-    await API.login(email,pass);
+    let captchaToken='';
+    try{if(typeof grecaptcha!=='undefined')captchaToken=await grecaptcha.execute()}catch(_){}
+    await API.login(email,pass,captchaToken);
     closeModals();Toast.success('Вход выполнен!');
     setTimeout(()=>location.href='dashboard.html',500);
   }catch(er){
@@ -751,7 +753,9 @@ document.getElementById('registerForm')?.addEventListener('submit',async e=>{
   const btn=document.getElementById('regBtn');
   btn.disabled=true;btn.textContent='Создание аккаунта...';
   try{
-    await API.register(email,pass);
+    let captchaToken='';
+    try{if(typeof grecaptcha!=='undefined')captchaToken=await grecaptcha.execute()}catch(_){}
+    await API.register(email,pass,captchaToken);
     closeModals();Toast.success('Аккаунт создан! Проверьте email для подтверждения.');
     setTimeout(()=>location.href='dashboard.html',800);
   }catch(er){

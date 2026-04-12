@@ -2,16 +2,30 @@ const express = require('express');
 const authService = require('../services/authService');
 const emailService = require('../services/emailService');
 const { authMiddleware } = require('../middleware/auth');
+const config = require('../config');
+
+async function verifyCaptcha(token) {
+  if (!config.recaptchaSecret || !token) return true; // skip if not configured
+  try {
+    const res = await fetch(`https://www.google.com/recaptcha/api/siteverify?secret=${config.recaptchaSecret}&response=${token}`, { method: 'POST' });
+    const data = await res.json();
+    return data.success === true;
+  } catch (e) { return true; } // don't block on network errors
+}
 
 const router = express.Router();
 
 // POST /api/auth/register
 router.post('/register', async (req, res) => {
   try {
-    const { email, password, referralCode } = req.body;
+    const { email, password, referralCode, captchaToken } = req.body;
     if (!email || !password) return res.status(400).json({ error: 'Email and password are required' });
     if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) return res.status(400).json({ error: 'Invalid email format' });
     if (password.length < 6) return res.status(400).json({ error: 'Password must be at least 6 characters' });
+
+    // Verify reCAPTCHA
+    const captchaOk = await verifyCaptcha(captchaToken);
+    if (!captchaOk) return res.status(400).json({ error: 'Проверка reCAPTCHA не пройдена. Попробуйте ещё раз.' });
 
     const registerResult = authService.register(email.toLowerCase().trim(), password, referralCode);
     const loginResult = authService.login(email.toLowerCase().trim(), password);

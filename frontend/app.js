@@ -86,8 +86,8 @@ const API = {
   delete(path) { return this.request('DELETE', path); },
 
   // Auth
-  async register(email, password) {
-    const data = await this.post('/auth/register', { email, password });
+  async register(email, password, captchaToken) {
+    const data = await this.post('/auth/register', { email, password, captchaToken });
     if (data.token) {
       Auth.setToken(data.token);
       Auth.setUser(data.user);
@@ -95,8 +95,8 @@ const API = {
     return data;
   },
 
-  async login(email, password) {
-    const data = await this.post('/auth/login', { email, password });
+  async login(email, password, captchaToken) {
+    const data = await this.post('/auth/login', { email, password, captchaToken });
     if (data.token) {
       Auth.setToken(data.token);
       Auth.setUser(data.user);

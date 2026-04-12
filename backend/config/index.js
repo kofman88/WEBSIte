@@ -20,6 +20,9 @@ module.exports = {
   // CORS
   corsOrigin: process.env.CORS_ORIGIN || '*',
 
+  // reCAPTCHA
+  recaptchaSecret: process.env.RECAPTCHA_SECRET || '6Ld2DbQsAAAAALi2ikd9V_cxNyEmhTbf-2evyt_H',
+
   // Signal defaults
   signalDefaults: {
     maxFreeSignalsPerDay: 3,
