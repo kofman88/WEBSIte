@@ -12,7 +12,7 @@ const db = require('../models/database');
 const log = require('../utils/logger')('Telegram');
 
 // Bot token — set via env or replace here
-const BOT_TOKEN = process.env.TELEGRAM_BOT_TOKEN || '';
+const BOT_TOKEN = process.env.TELEGRAM_BOT_TOKEN || '8727144116:AAHNyp6gob88_UlZ-9mfKVecFqKxVRZL5J0';
 const BOT_USERNAME = process.env.TELEGRAM_BOT_USERNAME || 'CHM_Finance_Bot';
 
 /**
