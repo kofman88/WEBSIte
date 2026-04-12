@@ -3,7 +3,7 @@
  */
 const express = require('express');
 const router = express.Router();
-const auth = require('../middleware/auth');
+const { authMiddleware: auth } = require('../middleware/auth');
 const marketRegime = require('../services/marketRegime');
 const signalFilter = require('../services/signalFilter');
 const tradingDefaults = require('../config/tradingDefaults');
