@@ -116,8 +116,8 @@ router.get('/stats', authMiddleware, (req, res) => {
 /**
  * POST /api/bots
  * Create a new trading bot.
- * Body: { name, exchangeName, symbol, strategyType, leverage?, positionSizeUsd,
- *          stopLossPct?, takeProfitPct?, trailingStop? }
+ * Any USDT pair is allowed — no coin quantity limitations.
+ * Plan-based strategy restrictions still apply.
  */
 router.post('/', authMiddleware, (req, res) => {
   try {
@@ -135,6 +135,14 @@ router.post('/', authMiddleware, (req, res) => {
     if (!botData.name || !botData.exchangeName || !botData.symbol || !botData.strategyType || !botData.positionSizeUsd) {
       return res.status(400).json({
         error: 'name, exchangeName, symbol, strategyType, and positionSizeUsd are required',
+      });
+    }
+
+    // Symbol must end with USDT (any pair allowed)
+    if (!botData.symbol.toUpperCase().endsWith('USDT')) {
+      return res.status(400).json({
+        error: 'Only USDT pairs are supported (e.g. BTCUSDT)',
+        code: 'INVALID_SYMBOL',
       });
     }
 
@@ -157,7 +165,7 @@ router.post('/', authMiddleware, (req, res) => {
 
 /**
  * GET /api/bots/:id
- * Get a specific bot.
+ * Get a specific bot with enriched data.
  */
 router.get('/:id', authMiddleware, (req, res) => {
   try {
@@ -227,6 +235,35 @@ router.get('/:id/trades', authMiddleware, (req, res) => {
     res.json({ trades });
   } catch (error) {
     console.error('Error fetching trades:', error.message);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+/**
+ * GET /api/bots/:id/signals
+ * Get signals matched to this bot's symbol + strategy.
+ */
+router.get('/:id/signals', authMiddleware, (req, res) => {
+  try {
+    const signals = botService.getBotSignals(parseInt(req.params.id, 10), req.userId);
+    res.json({ signals });
+  } catch (error) {
+    console.error('Error fetching bot signals:', error.message);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+/**
+ * GET /api/bots/:id/performance
+ * Detailed performance metrics: win rate, profit factor, avg trade duration,
+ * max drawdown, sharpe estimate, best/worst trade, etc.
+ */
+router.get('/:id/performance', authMiddleware, (req, res) => {
+  try {
+    const perf = botService.getBotPerformance(parseInt(req.params.id, 10), req.userId);
+    res.json({ performance: perf });
+  } catch (error) {
+    console.error('Error fetching bot performance:', error.message);
     res.status(500).json({ error: error.message });
   }
 });

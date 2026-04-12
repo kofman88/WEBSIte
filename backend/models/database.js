@@ -281,6 +281,26 @@ const migrations = [
   'ALTER TABLE users ADD COLUMN email_verify_token TEXT',
   'ALTER TABLE users ADD COLUMN reset_token TEXT',
   'ALTER TABLE users ADD COLUMN reset_expires DATETIME',
+
+  // Trading bots — enhanced columns
+  "ALTER TABLE trading_bots ADD COLUMN strategy_config TEXT DEFAULT '{}'",
+  'ALTER TABLE trading_bots ADD COLUMN total_signals INTEGER DEFAULT 0',
+  'ALTER TABLE trading_bots ADD COLUMN total_trades INTEGER DEFAULT 0',
+  'ALTER TABLE trading_bots ADD COLUMN total_pnl REAL DEFAULT 0',
+  'ALTER TABLE trading_bots ADD COLUMN win_rate REAL DEFAULT 0',
+  'ALTER TABLE trading_bots ADD COLUMN last_signal_at DATETIME',
+  "ALTER TABLE trading_bots ADD COLUMN timeframe TEXT DEFAULT '1H'",
+  "ALTER TABLE trading_bots ADD COLUMN direction TEXT DEFAULT 'both'",
+
+  // Bot trades — enhanced columns
+  'ALTER TABLE bot_trades ADD COLUMN signal_id INTEGER',
+  'ALTER TABLE bot_trades ADD COLUMN strategy TEXT',
+  'ALTER TABLE bot_trades ADD COLUMN timeframe TEXT',
+  'ALTER TABLE bot_trades ADD COLUMN stop_loss REAL',
+  'ALTER TABLE bot_trades ADD COLUMN take_profit REAL',
+  "ALTER TABLE bot_trades ADD COLUMN result TEXT DEFAULT ''",
+  'ALTER TABLE bot_trades ADD COLUMN duration_sec INTEGER',
+  'ALTER TABLE bot_trades ADD COLUMN rr_ratio REAL',
 ];
 for (const sql of migrations) {
   try { db.exec(sql); } catch (_) { /* column already exists */ }

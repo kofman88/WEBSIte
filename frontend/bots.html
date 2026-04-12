@@ -160,7 +160,23 @@
 if(!Auth.isLoggedIn())window.location.href='/?login=1';
 Sidebar.init('bots');
 
-const stratColors={scalping:'cyan',smc:'indigo',gerchik:'orange',levels:'amber'};
+const stratColors={scalping:'cyan',smc:'violet',gerchik:'blue',levels:'amber'};
+const dirLabels={both:'BOTH',long:'LONG',short:'SHORT'};
+const dirColors={both:'text-slate-300',long:'text-green-400',short:'text-red-400'};
+
+function timeAgo(dateStr){
+  if(!dateStr)return '---';
+  const diff=Date.now()-new Date(dateStr).getTime();
+  if(diff<0)return 'just now';
+  const sec=Math.floor(diff/1000);
+  if(sec<60)return sec+'s ago';
+  const min=Math.floor(sec/60);
+  if(min<60)return min+'m ago';
+  const hr=Math.floor(min/60);
+  if(hr<24)return hr+'h ago';
+  const d=Math.floor(hr/24);
+  return d+'d ago';
+}
 
 async function loadBots(){
   const grid=document.getElementById('botGrid');
@@ -186,16 +202,44 @@ async function loadBots(){
     grid.innerHTML=bots.map((b,i)=>{
       const sc=stratColors[b.strategy_type]||'slate';
       const active=b.is_active;
-      return `<div class="card card-glow" ${!active?'style="opacity:.6"':''}>
+      const wr=+(b.win_rate||0);
+      const tp=+(b.total_pnl||0);
+      const dir=b.direction||'both';
+      const lastSig=timeAgo(b.last_signal_at);
+      return `<div class="card card-glow" ${!active?'style="opacity:.65"':''}>
         <div class="flex items-center justify-between mb-3">
-          <div class="flex items-center gap-3"><div class="w-10 h-10 rounded-lg bg-${sc}-500/10 flex items-center justify-center text-sm font-bold text-${sc}-400">B${i+1}</div><div><div class="font-semibold">${b.name}</div><div class="text-xs text-slate-500">${b.exchange_name} &middot; ${b.symbol}</div></div></div>
+          <div class="flex items-center gap-3">
+            <div class="w-10 h-10 rounded-lg bg-${sc}-500/10 flex items-center justify-center text-sm font-bold text-${sc}-400">B${i+1}</div>
+            <div>
+              <div class="font-semibold">${b.name}</div>
+              <div class="text-xs text-slate-500">${b.exchange_name} &middot; ${b.symbol}</div>
+            </div>
+          </div>
           <div class="toggle ${active?'on':''}" onclick="toggleBotState(${b.id},${!active})"></div>
         </div>
-        <div class="flex items-center gap-2 mb-3"><span class="text-xs px-2 py-0.5 rounded-full bg-${sc}-500/15 text-${sc}-400">${b.strategy_type}</span><span class="text-xs px-2 py-0.5 rounded-full ${active?'bg-green-500/15 text-green-400':'bg-slate-500/15 text-slate-400'}">${active?'Active':'Stopped'}</span></div>
-        <div class="text-xs text-slate-500 mt-2">Leverage: ${b.leverage||1}x &middot; Size: $${b.position_size_usd||0} &middot; SL: ${b.stop_loss_pct||0}%</div>
-        <div class="flex gap-2 mt-3">
+        <div class="flex items-center gap-2 mb-3 flex-wrap">
+          <span class="text-xs px-2 py-0.5 rounded-full bg-${sc}-500/15 text-${sc}-400 font-semibold">${b.strategy_type}</span>
+          <span class="text-xs px-2 py-0.5 rounded-full bg-slate-700/30 ${dirColors[dir]} font-semibold">${dirLabels[dir]||'BOTH'}</span>
+          <span class="text-xs px-2 py-0.5 rounded-full ${active?'bg-green-500/15 text-green-400':'bg-slate-500/15 text-slate-400'}">${active?'Active':'Stopped'}</span>
+        </div>
+        <div class="grid grid-cols-4 gap-2 mb-3">
+          <div class="text-center"><div class="text-[.6rem] text-slate-500 uppercase">PnL</div><div class="text-xs font-bold ${tp>=0?'text-green-400':'text-red-400'}">${tp>=0?'+':''}$${Math.abs(tp).toFixed(2)}</div></div>
+          <div class="text-center"><div class="text-[.6rem] text-slate-500 uppercase">Win Rate</div><div class="text-xs font-bold">${wr.toFixed(0)}%</div></div>
+          <div class="text-center"><div class="text-[.6rem] text-slate-500 uppercase">Trades</div><div class="text-xs font-bold">${b.total_trades||0}</div></div>
+          <div class="text-center"><div class="text-[.6rem] text-slate-500 uppercase">Signals</div><div class="text-xs font-bold">${b.total_signals||0}</div></div>
+        </div>
+        <div class="flex items-center justify-between mb-2">
+          <div class="text-[.6rem] text-slate-500">Win Rate</div>
+          <div class="text-[.6rem] text-slate-400">${wr.toFixed(0)}%</div>
+        </div>
+        <div class="w-full h-1.5 bg-slate-800/50 rounded-full mb-2 overflow-hidden"><div class="h-full rounded-full ${wr>=60?'bg-green-500':wr>=40?'bg-amber-500':'bg-red-500'}" style="width:${Math.min(wr,100)}%;transition:width .3s"></div></div>
+        <div class="flex items-center justify-between text-[.6rem] text-slate-500 mb-3">
+          <span>Last signal: ${lastSig}</span>
+          <span>${b.timeframe||'1H'} &middot; Lev ${b.leverage||1}x</span>
+        </div>
+        <div class="flex gap-2 flex-wrap">
           <a href="bot-detail.html?id=${b.id}" class="text-xs px-3 py-1.5 rounded-lg bg-indigo-500/10 border border-indigo-500/20 text-indigo-400 hover:text-indigo-300 transition">Открыть</a>
-          <button onclick="editBot(${b.id})" class="text-xs px-3 py-1.5 rounded-lg bg-slate-800/50 border border-slate-700 text-slate-400 hover:text-white transition">Редактировать</button>
+          <button onclick="editBot(${b.id})" class="text-xs px-3 py-1.5 rounded-lg bg-slate-800/50 border border-slate-700 text-slate-400 hover:text-white transition">Изменить</button>
           <button onclick="cloneBot(${b.id})" class="text-xs px-3 py-1.5 rounded-lg bg-slate-800/50 border border-slate-700 text-slate-400 hover:text-white transition">Копировать</button>
           <button onclick="deleteBot(${b.id},'${b.name}')" class="text-xs px-3 py-1.5 rounded-lg bg-red-500/5 border border-red-500/20 text-red-400 hover:text-red-300 transition">Удалить</button>
         </div>
@@ -401,7 +445,8 @@ document.getElementById('createBotForm')?.addEventListener('submit',async e=>{
   const errs=validateBotForm();
   if(errs.length){Toast.error(errs.join('. '));return}
   const fd=new FormData(e.target);
-  const data={name:fd.get('name'),exchangeName:fd.get('exchangeName'),symbol:fd.get('symbol').toUpperCase(),strategyType:fd.get('strategyType'),leverage:+fd.get('leverage'),positionSizeUsd:+fd.get('positionSizeUsd'),stopLossPct:+fd.get('stopLossPct'),takeProfitPct:+fd.get('takeProfitPct'),trailingStop:fd.get('trailingStop')==='1'};
+  const sp=collectStratParams();
+  const data={name:fd.get('name'),exchangeName:fd.get('exchangeName'),symbol:fd.get('symbol').toUpperCase(),strategyType:fd.get('strategyType'),leverage:+fd.get('leverage'),positionSizeUsd:+fd.get('positionSizeUsd'),stopLossPct:+fd.get('stopLossPct'),takeProfitPct:+fd.get('takeProfitPct'),trailingStop:fd.get('trailingStop')==='1',timeframe:fd.get('timeframe')||'1H',direction:fd.get('direction')||'both',strategyConfig:JSON.stringify(sp)};
   try{await API.createBot(data);Toast.success('Бот создан!');document.getElementById('createModal').style.display='none';loadBots()}catch(err){Toast.error(err.message)}
 });
 

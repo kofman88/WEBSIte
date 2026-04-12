@@ -117,6 +117,8 @@ const API = {
   async deleteBot(id) { return this.delete(`/bots/${id}`); },
   async getBotTrades(id) { return this.get(`/bots/${id}/trades`); },
   async getBotStats() { return this.get('/bots/stats'); },
+  async getBotSignals(id) { return this.get(`/bots/${id}/signals`); },
+  async getBotPerformance(id) { return this.get(`/bots/${id}/performance`); },
 
   // Signals
   async getSignals(params = {}) {
