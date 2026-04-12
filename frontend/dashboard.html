@@ -380,12 +380,12 @@ async function loadDashboard(){
     // Welcome message
     const h=new Date().getHours();
     const greet=h<6?'Доброй ночи':h<12?'Доброе утро':h<18?'Добрый день':'Добрый вечер';
-    const name=(me.user?.email||'').split('@')[0];
+    const name=(me?.user?.email||'').split('@')[0];
     document.getElementById('welcomeMsg').textContent=greet+(name?', '+name:'')+'!';
     document.getElementById('welcomeDate').textContent=new Date().toLocaleDateString('ru',{weekday:'long',day:'numeric',month:'long',year:'numeric'});
 
     // Email warning
-    if(me.user&&!me.user.email_verified){document.getElementById('emailWarning').classList.remove('hidden')}
+    if(me?.user&&!me.user.email_verified){document.getElementById('emailWarning').classList.remove('hidden')}
 
     // Bot stats
     const bs=await API.getBotStats().catch(()=>({stats:{}}));

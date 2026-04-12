@@ -315,9 +315,9 @@ function stab(t){document.querySelectorAll('.stab').forEach(b=>b.classList.remov
 // Load real profile data
 async function loadSettings(){
   try{
-    const me=await API.getProfile();
-    const u=me.user||{};
-    const s=me.subscription||{};
+    const me=await API.getProfile().catch(()=>({}));
+    const u=me?.user||me||{};
+    const s=me?.subscription||{};
     // Profile
     document.getElementById('sAvatar').textContent=(u.email||'U')[0].toUpperCase();
     document.getElementById('sEmail').textContent=u.email||'—';
@@ -339,7 +339,7 @@ async function loadSettings(){
     document.getElementById('sRefCount').textContent='0';
     document.getElementById('sRefEarned').textContent='$0';
     // Email verification status
-    if(u.email_verified||u.emailVerified){
+    try{if(u.email_verified||u.emailVerified){
       document.getElementById('emailVerified').classList.remove('hidden');
       document.getElementById('emailNotVerified').classList.add('hidden');
       document.getElementById('resendEmailBtn').classList.add('hidden');
@@ -347,24 +347,24 @@ async function loadSettings(){
       document.getElementById('emailVerified').classList.add('hidden');
       document.getElementById('emailNotVerified').classList.remove('hidden');
       document.getElementById('resendEmailBtn').classList.remove('hidden');
-    }
+    }}catch(_){}
     // Telegram status
-    const tgId=u.telegram_id||u.telegramId;
-    if(tgId){
-      document.getElementById('tgNotConnected').classList.add('hidden');
-      document.getElementById('tgConnected').classList.remove('hidden');
-      document.getElementById('tgId').textContent=tgId;
-      document.getElementById('tgNotifToggle')?.classList.add('on');
-      const st=document.getElementById('tgNotifStatus');if(st)st.textContent='Подключён';
-    }else{
-      document.getElementById('tgNotConnected').classList.remove('hidden');
-      document.getElementById('tgConnected').classList.add('hidden');
-      // Generate connect link with user token
-      const token=Auth.getToken();
-      const link=document.getElementById('tgConnectLink');
-      if(link&&token)link.href='https://t.me/CHMUP_bot?start=web_'+btoa(String(u.id||'')).replace(/=/g,'');
-      const st=document.getElementById('tgNotifStatus');if(st){st.textContent='Не подключён';st.style.color='#FF8C00'}
-    }
+    try{
+      const tgId=u.telegram_id||u.telegramId;
+      if(tgId){
+        document.getElementById('tgNotConnected').classList.add('hidden');
+        document.getElementById('tgConnected').classList.remove('hidden');
+        document.getElementById('tgId').textContent=tgId;
+        document.getElementById('tgNotifToggle')?.classList.add('on');
+        const st=document.getElementById('tgNotifStatus');if(st)st.textContent='Подключён';
+      }else{
+        document.getElementById('tgNotConnected').classList.remove('hidden');
+        document.getElementById('tgConnected').classList.add('hidden');
+        const link=document.getElementById('tgConnectLink');
+        if(link&&u.id)link.href='https://t.me/CHMUP_bot?start=web_'+btoa(String(u.id)).replace(/=/g,'');
+        const st=document.getElementById('tgNotifStatus');if(st){st.textContent='Не подключён';st.style.color='#FF8C00'}
+      }
+    }catch(_){}
   }catch(e){console.error('Settings load:',e)}
 }
 loadSettings();
