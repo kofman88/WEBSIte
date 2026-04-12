@@ -18,6 +18,7 @@ const paymentRoutes = require('./routes/payments');
 const tradeRoutes = require('./routes/trades');
 const webhookRoutes = require('./routes/webhook');
 const marketRoutes = require('./routes/market');
+const telegramRoutes = require('./routes/telegram');
 const websocketService = require('./services/websocketService');
 
 const app = express();
@@ -59,6 +60,7 @@ app.use('/api/payments', paymentRoutes);
 app.use('/api/trades', tradeRoutes);
 app.use('/api/webhook', webhookRoutes);
 app.use('/api/market', marketRoutes);
+app.use('/api/telegram', telegramRoutes);
 
 app.get('/api/health', (_req, res) => {
   res.json({

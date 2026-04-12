@@ -129,4 +129,6 @@ function _getUserTgId(userId) {
   } catch { return null; }
 }
 
-module.exports = { sendMessage, notifySignal, notifyTrade, notify, linkTelegram, getBotUsername };
+function _getToken() { return BOT_TOKEN; }
+
+module.exports = { sendMessage, notifySignal, notifyTrade, notify, linkTelegram, getBotUsername, _getToken };
