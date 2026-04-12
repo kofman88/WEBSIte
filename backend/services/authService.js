@@ -8,7 +8,7 @@ class AuthService {
   register(email, password, referralCode) {
     const existingUser = db.prepare('SELECT id FROM users WHERE email = ?').get(email);
     if (existingUser) {
-      throw new Error('A user with this email already exists');
+      throw new Error('Пользователь с таким email уже существует');
     }
 
     const passwordHash = bcrypt.hashSync(password, 10);
@@ -44,10 +44,10 @@ class AuthService {
 
   login(email, password) {
     const user = db.prepare('SELECT * FROM users WHERE email = ? AND is_active = 1').get(email);
-    if (!user) throw new Error('Invalid email or password');
+    if (!user) throw new Error('Неверный email или пароль');
 
     const isValid = bcrypt.compareSync(password, user.password_hash);
-    if (!isValid) throw new Error('Invalid email or password');
+    if (!isValid) throw new Error('Неверный email или пароль');
 
     const token = jwt.sign(
       { userId: user.id, email: user.email },

@@ -613,8 +613,44 @@ const hc=document.getElementById('heroChart');
 if(hc){const p=[];let v=100;for(let i=0;i<50;i++){v+=Math.random()*5-2;p.push(v)}new Chart(hc,{type:'line',data:{labels:p.map((_,i)=>i),datasets:[{data:p,borderColor:'#818CF8',backgroundColor:'rgba(124,58,237,.08)',fill:true,tension:.4,pointRadius:0,borderWidth:2}]},options:{responsive:true,plugins:{legend:{display:false}},scales:{x:{display:false},y:{display:false}}}})}
 
 // Auth
-document.getElementById('loginForm')?.addEventListener('submit',async e=>{e.preventDefault();const f=new FormData(e.target);try{await API.login(f.get('email'),f.get('password'));closeModals();Toast.success('Вход выполнен!');setTimeout(()=>location.href='dashboard.html',500)}catch(er){Toast.error(er.message)}});
-document.getElementById('registerForm')?.addEventListener('submit',async e=>{e.preventDefault();const f=new FormData(e.target);if(f.get('password')!==f.get('password2')){Toast.error('Пароли не совпадают');return}try{await API.register(f.get('email'),f.get('password'));closeModals();Toast.success('Аккаунт создан!');setTimeout(()=>location.href='dashboard.html',500)}catch(er){Toast.error(er.message)}});
+document.getElementById('loginForm')?.addEventListener('submit',async e=>{
+  e.preventDefault();
+  const f=new FormData(e.target);
+  const email=f.get('email'),pass=f.get('password');
+  if(!email||!pass){Toast.error('Заполните все поля');return}
+  const btn=e.target.querySelector('button[type=submit]');
+  if(btn){btn.disabled=true;btn.textContent='Вход...'}
+  try{
+    await API.login(email,pass);
+    closeModals();
+    Toast.success('Вход выполнен!');
+    setTimeout(()=>location.href='dashboard.html',500);
+  }catch(er){
+    Toast.error(er.message||'Неверный email или пароль');
+  }finally{
+    if(btn){btn.disabled=false;btn.textContent='Войти'}
+  }
+});
+document.getElementById('registerForm')?.addEventListener('submit',async e=>{
+  e.preventDefault();
+  const f=new FormData(e.target);
+  const email=f.get('email'),pass=f.get('password'),pass2=f.get('password2');
+  if(!email||!pass){Toast.error('Заполните все поля');return}
+  if(pass!==pass2){Toast.error('Пароли не совпадают');return}
+  if(pass.length<6){Toast.error('Пароль: минимум 6 символов');return}
+  const btn=e.target.querySelector('button[type=submit]');
+  if(btn){btn.disabled=true;btn.textContent='Создание...'}
+  try{
+    await API.register(email,pass);
+    closeModals();
+    Toast.success('Аккаунт создан! Проверьте email для подтверждения.');
+    setTimeout(()=>location.href='dashboard.html',800);
+  }catch(er){
+    Toast.error(er.message||'Ошибка регистрации');
+  }finally{
+    if(btn){btn.disabled=false;btn.textContent='Создать аккаунт'}
+  }
+});
 
 // i18n
 let lang='ru';
