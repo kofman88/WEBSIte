@@ -424,17 +424,29 @@ const CONTENT = {
 <div class="step"><div class="step-num">1</div><div class="step-body"><h3>Get Access</h3>
 <p>Message the admin <code>@crypto_chm</code> with your Telegram ID. Find your ID by writing to <code>@userinfobot</code>. Access is activated manually.</p>
 <div style="margin-top:14px;font-size:13px;font-weight:700;color:var(--text3);letter-spacing:0.08em;text-transform:uppercase;margin-bottom:8px;">💳 Choose your plan</div>
-<div style="margin-top:16px;display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;">
+<div style="margin-top:16px;display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:10px;">
 <div style="background:rgba(34,212,122,0.06);border:1px solid rgba(34,212,122,0.25);border-radius:14px;padding:16px;text-align:center;">
   <div style="font-size:20px;margin-bottom:6px;">🟢</div>
-  <div style="font-family:'Inter',sans-serif;font-weight:800;font-size:15px;color:#22d47a;margin-bottom:2px;">Beginner</div>
-  <div style="font-family:'Inter',sans-serif;font-size:22px;font-weight:800;color:var(--text);margin:6px 0;">$49<span style="font-size:12px;font-weight:400;color:var(--text3);">/mo</span></div>
+  <div style="font-family:'Inter',sans-serif;font-weight:800;font-size:15px;color:#22d47a;margin-bottom:2px;">Free</div>
+  <div style="font-family:'Inter',sans-serif;font-size:22px;font-weight:800;color:var(--text);margin:6px 0;">$0<span style="font-size:12px;font-weight:400;color:var(--text3);">/mo</span></div>
   <div style="display:flex;flex-direction:column;gap:4px;font-size:11px;color:var(--text2);text-align:left;margin-top:8px;">
     <div>✅ LEVELS scanner</div>
-    <div>✅ 3 analyses/day</div>
-    <div>✅ View signals</div>
+    <div>✅ 3 signals/day</div>
+    <div>✅ 1 bot</div>
     <div style="color:var(--text3);">❌ Auto-trading</div>
     <div style="color:var(--text3);">❌ Backtest</div>
+  </div>
+</div>
+<div style="background:rgba(100,200,255,0.06);border:1px solid rgba(100,200,255,0.25);border-radius:14px;padding:16px;text-align:center;">
+  <div style="font-size:20px;margin-bottom:6px;">🔹</div>
+  <div style="font-family:'Inter',sans-serif;font-weight:800;font-size:15px;color:#64c8ff;margin-bottom:2px;">Starter</div>
+  <div style="font-family:'Inter',sans-serif;font-size:22px;font-weight:800;color:var(--text);margin:6px 0;">$29<span style="font-size:12px;font-weight:400;color:var(--text3);">/mo</span></div>
+  <div style="display:flex;flex-direction:column;gap:4px;font-size:11px;color:var(--text2);text-align:left;margin-top:8px;">
+    <div>✅ Unlimited signals</div>
+    <div>✅ 3 bots</div>
+    <div>✅ Levels + Scalping</div>
+    <div style="color:var(--text3);">❌ GERCHIK, SMC</div>
+    <div style="color:var(--text3);">❌ Optimizer</div>
   </div>
 </div>
 <div style="background:rgba(79,143,255,0.06);border:2px solid rgba(79,143,255,0.35);border-radius:14px;padding:16px;text-align:center;position:relative;">
@@ -443,18 +455,17 @@ const CONTENT = {
   <div style="font-family:'Inter',sans-serif;font-weight:800;font-size:15px;color:#4f8fff;margin-bottom:2px;">Pro</div>
   <div style="font-family:'Inter',sans-serif;font-size:22px;font-weight:800;color:var(--text);margin:6px 0;">$79<span style="font-size:12px;font-weight:400;color:var(--text3);">/mo</span></div>
   <div style="display:flex;flex-direction:column;gap:4px;font-size:11px;color:var(--text2);text-align:left;margin-top:8px;">
-    <div>✅ LEVELS + <span class="term" data-tip="Smart Money Concepts — методология анализа рынка через отслеживание действий крупных институциональных игроков.">SMC</span></div>
+    <div>✅ All 4 strategies</div>
     <div>✅ Auto-trading</div>
     <div>✅ 3 backtests/day</div>
     <div>✅ Market adaptation</div>
-    <div style="color:var(--text3);">❌ GERCHIK, SCALPING</div>
     <div style="color:var(--text3);">❌ Optimizer</div>
   </div>
 </div>
 <div style="background:rgba(245,200,66,0.06);border:1px solid rgba(245,200,66,0.3);border-radius:14px;padding:16px;text-align:center;">
   <div style="font-size:20px;margin-bottom:6px;">🟡</div>
   <div style="font-family:'Inter',sans-serif;font-weight:800;font-size:15px;color:#a78bfa;margin-bottom:2px;">Elite</div>
-  <div style="font-family:'Inter',sans-serif;font-size:22px;font-weight:800;color:var(--text);margin:6px 0;">$109<span style="font-size:12px;font-weight:400;color:var(--text3);">/mo</span></div>
+  <div style="font-family:'Inter',sans-serif;font-size:22px;font-weight:800;color:var(--text);margin:6px 0;">$149<span style="font-size:12px;font-weight:400;color:var(--text3);">/mo</span></div>
   <div style="display:flex;flex-direction:column;gap:4px;font-size:11px;color:var(--text2);text-align:left;margin-top:8px;">
     <div>✅ All 4 strategies</div>
     <div>✅ Unlimited backtest</div>
@@ -556,6 +567,7 @@ const CONTENT = {
 </div></div>
 <div class="table-scroll-hint">← свайп →</div><div class="params-wrap"><table class="params-table"><thead><tr><th>Параметр</th><th>Что делает</th><th>Рекомендация</th></tr></thead><tbody><tr><td>Мин. подтверждений</td><td>Сколько факторов должно совпасть</td><td>2–3</td></tr><tr><td>Мин. R:R</td><td>Минимальное соотношение прибыль/риск</td><td>1.5</td></tr><tr><td>Возраст OB</td><td>Как старый <span class="term" data-tip="Ценовая зона где крупный игрок сформировал позицию перед сильным движением. Чем свежее OB — тем надёжнее.">Order Block</span> ещё актуален (баров)</td><td>80–100</td></tr><tr><td>SL буфер %</td><td><span class="term" data-tip="Stop Loss размещается с небольшим буфером за границей Order Block, чтобы избежать случайного выноса.">Отступ стопа</span> от <span class="term" data-tip="Зона интереса, где крупный капитал набирал позицию перед сильным движением цены.">Order Block</span></td><td>0.5%</td></tr><tr><td><span class="term" data-tip="Fair Value Gap — ценовой разрыв (имбаланс), который рынок стремится перекрыть.">FVG</span> включён</td><td>Учитывать ценовые разрывы</td><td>Вкл</td></tr><tr><td>CHoCH включён</td><td>Учитывать смену структуры</td><td>Вкл</td></tr><tr><td><span class="term" data-tip="Глубина поиска структурных максимумов/минимумов (в барах) для определения BOS и CHoCH.">Swing Lookback</span></td><td>Глубина поиска структуры (баров)</td><td>10</td></tr></tbody></table></div>
 <div class="callout callout-info" style="margin-top:16px;"><div class="callout-icon">💡</div><div class="callout-body"><h4>Хэштеги <span class="term" data-tip="Smart Money Concepts — методология анализа рынка через отслеживание действий крупных институциональных игроков.">SMC</span> сигналов</h4><p>Все <span class="term" data-tip="Smart Money Concepts — методология анализа рынка через отслеживание действий крупных институциональных игроков.">SMC</span> сигналы помечены по типу структурного события:<br><br><code>#<span class="term" data-tip="Smart Money Concepts — методология анализа рынка через отслеживание действий крупных институциональных игроков.">SMC</span> #OB</code> — <span class="term" data-tip="Зона интереса, где крупный капитал набирал позицию перед сильным движением цены.">Order Block</span> · <code>#<span class="term" data-tip="Smart Money Concepts — методология анализа рынка через отслеживание действий крупных институциональных игроков.">SMC</span> #<span class="term" data-tip="Fair Value Gap — ценовой разрыв (имбаланс), который рынок стремится перекрыть.">FVG</span></code> — <span class="term" data-tip="Ценовой разрыв (имбаланс) между свечами, который рынок стремится перекрыть в будущем.">Fair Value Gap</span> · <code>#<span class="term" data-tip="Smart Money Concepts — методология анализа рынка через отслеживание действий крупных институциональных игроков.">SMC</span> #CHOCH</code> — <span class="term" data-tip="CHoCH — смена характера рынка: первый признак возможного разворота тренда.">Change of Character</span> · <code>#<span class="term" data-tip="Smart Money Concepts — методология анализа рынка через отслеживание действий крупных институциональных игроков.">SMC</span> #BOS</code> — <span class="term" data-tip="BOS — пробой ключевого структурного уровня, подтверждающий направление тренда.">Break of Structure</span><br><br>Используй хэштеги для фильтрации сигналов в Telegram канале.</p></div></div>
+<div class="callout callout-success" style="margin-top:16px;"><div class="callout-icon">🆕</div><div class="callout-body"><h4>V4 улучшения SMC</h4><ul style="margin-top:6px;font-size:13px;"><li><strong>OB max age 60 свечей (было 80)</strong> — более свежие Order Block для точных входов</li><li><strong>FVG min gap 0.08%</strong> — минимальный размер разрыва для фильтрации шума</li><li><strong>Mitigated OB = невалиден</strong> — отработанные Order Block автоматически исключаются</li></ul></div></div>
 </div>
 <div class="strat-panel" id="strat-scalping">
 <div class="strat-banner strat-banner-scalping">
@@ -581,6 +593,7 @@ const CONTENT = {
 <div style="background:var(--card);border:1px solid var(--border);border-radius:10px;padding:14px;"><div style="font-weight:700;color:var(--blue);margin-bottom:6px;">🔀 <span class="term" data-tip="Расхождение направления цены и RSI — сигнал возможного разворота тренда.">RSI Divergence</span></div><div style="font-size:13px;color:var(--text2);">Новый тип сигнала в дополнение к <span class="term" data-tip="Скальпинг по импульсу — вход на пробое EMA с подтверждением объёма и RSI.">Scalp Momentum</span>. В каждом сигнале теперь указан тип:<br><br><code>📈 Тип: <span class="term" data-tip="Скальпинг по импульсу — вход на пробое EMA с подтверждением объёма и RSI.">Scalp Momentum</span></code> — пробой <span class="term" data-tip="Exponential Moving Average с периодом 20 — ключевой динамический уровень для скальпинга.">EMA-20</span> с объёмом<br><code>🔀 Тип: <span class="term" data-tip="Расхождение направления цены и RSI — сигнал возможного разворота тренда.">RSI Divergence</span></code> — расхождение цены и <span class="term" data-tip="Relative Strength Index — индикатор импульса 0–100. >70 = перекупленность, <30 = перепроданность.">RSI</span><br><br>Все сигналы помечены <code>#SCALPING</code></div></div>
 <div style="background:var(--card);border:1px solid var(--border);border-radius:10px;padding:14px;"><div style="font-weight:700;color:var(--blue);margin-bottom:4px;">🛡 Фильтр спреда</div><div style="font-size:13px;color:var(--text2);">Если спред по инструменту > 0.1% — сигнал не отправляется. Защита от убыточных входов на неликвидных парах.</div></div>
 </div></div>
+<div class="callout callout-success" style="margin-top:16px;"><div class="callout-icon">🆕</div><div class="callout-body"><h4>V4 улучшения SCALPING</h4><ul style="margin-top:6px;font-size:13px;"><li><strong>VWAP rolling 24h</strong> — скользящий VWAP за 24 часа для точного определения справедливой цены</li><li><strong>Best R:R из 3 подходов</strong> — бот выбирает лучшее соотношение из трёх вариантов расчёта</li><li><strong>Кнопка Только по тренду</strong> — фильтрация сигналов строго по направлению тренда</li></ul></div></div>
 </div>
 <div class="callout callout-info" style="margin-top:24px;"><div class="callout-icon">💡</div><div class="callout-body"><h4>Главный принцип для всех стратегий</h4><p>Чем <strong>слабее</strong> настройки → больше сигналов, но менее точные. Чем <strong>строже</strong> → меньше, но точнее. Найди баланс через 🔬 Бэктест.</p></div></div>
 
@@ -911,6 +924,23 @@ Market Fundamentals:
   </div>
   <div style="background:rgba(255,79,106,.05);border:1px solid rgba(255,79,106,.2);border-radius:10px;padding:12px;font-size:13px;color:var(--text2);">
     🔒 <strong>Доступ по промокоду.</strong> Купи challenge на CryptoFundTrader по реферальной ссылке (скидка 5% по коду <code>platinum5</code>) → получи код активации у администратора.
+  </div>
+</div>
+
+<div class="divider"></div>
+<h3 style="font-family:'Inter',sans-serif;font-size:20px;font-weight:700;margin-bottom:20px;">🆕 V4 улучшения автотрейдинга</h3>
+<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:14px;">
+  <div style="background:rgba(34,212,122,.05);border:1px solid rgba(34,212,122,.2);border-radius:12px;padding:16px;">
+    <div style="font-weight:700;color:var(--green);margin-bottom:8px;">🎯 Entry Price Optimization</div>
+    <div style="font-size:13px;color:var(--text2);">Оптимизация цены входа: бот улучшает цену на ~0.05% через лимитный ордер вместо маркет-ордера. На 100 сделок — ощутимая экономия.</div>
+  </div>
+  <div style="background:rgba(79,143,255,.05);border:1px solid rgba(79,143,255,.2);border-radius:12px;padding:16px;">
+    <div style="font-weight:700;color:var(--blue);margin-bottom:8px;">📊 Partial TP без конфликтов</div>
+    <div style="font-size:13px;color:var(--text2);">Частичное закрытие позиции по TP1/TP2 без конфликтов с биржей. Ордера корректно обновляются при уменьшении позиции.</div>
+  </div>
+  <div style="background:rgba(245,200,66,.05);border:1px solid rgba(245,200,66,.2);border-radius:12px;padding:16px;">
+    <div style="font-weight:700;color:var(--gold);margin-bottom:8px;">🔀 Кросс-маржа автоматически</div>
+    <div style="font-size:13px;color:var(--text2);">Бот автоматически устанавливает режим кросс-маржи перед открытием позиции для оптимального использования депозита.</div>
   </div>
 </div>
 `,
@@ -1347,6 +1377,31 @@ Market Fundamentals:
   <div style="background:rgba(245,200,66,.05);border:1px solid rgba(245,200,66,.2);border-radius:12px;padding:16px;">
     <div style="font-weight:700;color:var(--gold);margin-bottom:8px;">📊 Staleness Check</div>
     <div style="font-size:13px;color:var(--text2);">Перед открытием проверяется актуальность цены: 4% допуск для Gerchik, 2% для остальных. При устаревшей цене — сделка пропускается с уведомлением.</div>
+  </div>
+</div>
+
+<div class="divider"></div>
+<h3 style="font-family:'Inter',sans-serif;font-size:20px;font-weight:700;margin-bottom:20px;">🆕 V4 Smart Filters</h3>
+<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:14px;">
+  <div style="background:rgba(155,109,255,.05);border:1px solid rgba(155,109,255,.2);border-radius:12px;padding:16px;">
+    <div style="font-weight:700;color:var(--purple);margin-bottom:8px;">💸 Funding Rate Gate</div>
+    <div style="font-size:13px;color:var(--text2);">Блокирует вход при экстремальном funding rate. Защита от входа в перегретый рынок с высокой стоимостью удержания позиции.</div>
+  </div>
+  <div style="background:rgba(79,143,255,.05);border:1px solid rgba(79,143,255,.2);border-radius:12px;padding:16px;">
+    <div style="font-weight:700;color:var(--blue);margin-bottom:8px;">📏 Spread Check</div>
+    <div style="font-size:13px;color:var(--text2);">Проверка спреда перед каждой сделкой. Если спред > порога — вход отклоняется для защиты от проскальзывания на неликвидных парах.</div>
+  </div>
+  <div style="background:rgba(255,79,106,.05);border:1px solid rgba(255,79,106,.2);border-radius:12px;padding:16px;">
+    <div style="font-weight:700;color:var(--red);margin-bottom:8px;">🔗 BTC Correlation Block</div>
+    <div style="font-size:13px;color:var(--text2);">При сильном движении BTC блокирует вход по альткоинам с высокой корреляцией. Предотвращает каскадные убытки.</div>
+  </div>
+  <div style="background:rgba(245,200,66,.05);border:1px solid rgba(245,200,66,.2);border-radius:12px;padding:16px;">
+    <div style="font-weight:700;color:var(--gold);margin-bottom:8px;">⏱ Staleness Check v2</div>
+    <div style="font-size:13px;color:var(--text2);">Расширенная проверка свежести данных: не только цена, но и объём и order book. Устаревшие данные = пропуск сделки.</div>
+  </div>
+  <div style="background:rgba(34,212,122,.05);border:1px solid rgba(34,212,122,.2);border-radius:12px;padding:16px;">
+    <div style="font-weight:700;color:var(--green);margin-bottom:8px;">🔄 Hybrid Trailing Stop</div>
+    <div style="font-size:13px;color:var(--text2);">Гибридный трейлинг-стоп: сочетает ATR-based и процентный подход. Автоматически подтягивает стоп за ценой, фиксируя прибыль.</div>
   </div>
 </div>
 `,
