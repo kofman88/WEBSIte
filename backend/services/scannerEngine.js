@@ -9,6 +9,8 @@
 
 const https = require('https');
 const signalFilter = require('./signalFilter');
+const { analyzeScalping } = require('./scalpingV3');
+const { analyzeGerchik } = require('./gerchikStrategy');
 const db = require('../models/database');
 
 // ── OKX Public API (no auth required) ──────────────────────────────────
@@ -340,6 +342,36 @@ async function scanOnce() {
           }
         }
       }
+
+      // Gerchik (15m) — V4: BSU → BPU-1 → BPU-2 confirmation
+      try {
+        const candles15mG = candles15m.length > 0 ? candles15m : await fetchCandles(symbol, '15m', 80);
+        if (candles15mG.length > 60) {
+          const sig = analyzeGerchik(candles15mG);
+          if (sig) {
+            const key = `${symbol}-gerchik-${sig.direction}`;
+            if (!sentSignals.has(key) || Date.now() - sentSignals.get(key) > DEDUP_TTL) {
+              newSignals.push({ symbol, strategy: 'gerchik', timeframe: '15m', ...sig });
+              sentSignals.set(key, Date.now());
+            }
+          }
+        }
+      } catch (e) { /* gerchik optional */ }
+
+      // Scalping V3 (5m) — VWAP Bounce, Liquidity Grab, Volume Spike
+      try {
+        const candles5m = await fetchCandles(symbol, '5m', 60);
+        if (candles5m.length > 55) {
+          const sig = analyzeScalping(candles5m);
+          if (sig) {
+            const key = `${symbol}-scalping-${sig.direction}-${sig.signalType}`;
+            if (!sentSignals.has(key) || Date.now() - sentSignals.get(key) > DEDUP_TTL) {
+              newSignals.push({ symbol, strategy: 'scalping', timeframe: '5m', ...sig });
+              sentSignals.set(key, Date.now());
+            }
+          }
+        }
+      } catch (e) { /* scalping V3 optional */ }
 
       // Rate limit: 200ms between symbols
       await new Promise(r => setTimeout(r, 200));
