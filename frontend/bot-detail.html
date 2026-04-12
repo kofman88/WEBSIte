@@ -11,7 +11,7 @@
 <link rel="stylesheet" href="styles.css"/>
 <script>if(localStorage.getItem("chm_theme")==="light")document.documentElement.classList.add("light")</script>
 <style>
-body{background:#070b14;color:#f1f5f9;font-family:'Inter',sans-serif}
+body{background:#0D0D0F;color:#f1f5f9;font-family:'Inter',sans-serif}
 .mono{font-family:'JetBrains Mono',monospace;font-variant-numeric:tabular-nums}
 .tab{padding:8px 20px;border-radius:10px;font-size:.8rem;font-weight:600;color:#64748b;background:transparent;border:none;cursor:pointer;transition:.2s}
 .tab:hover{color:#e2e8f0}.tab.active{background:rgba(79,70,229,.15);color:#a5b4fc}
@@ -51,8 +51,8 @@ html.light .text-slate-400,html.light .text-slate-500{color:#64748b!important}
     <span class="text-xs px-2 py-0.5 rounded-full" id="bStatus">—</span>
   </div>
   <div class="topbar-actions">
-    <button data-theme-toggle onclick="togglePageTheme(this)" style="font-size:.9rem;width:32px;height:32px;display:flex;align-items:center;justify-content:center;border-radius:8px;border:1px solid rgba(51,65,85,.5);background:none;cursor:pointer">🌙</button>
-    <button onclick="togglePageLang(this)" style="font-size:.7rem;color:#94a3b8;border:1px solid rgba(51,65,85,.5);border-radius:8px;padding:4px 10px;background:none;cursor:pointer">EN</button>
+    <button data-theme-toggle onclick="togglePageTheme(this)" class="topbar-btn-icon">🌙</button>
+    <button onclick="togglePageLang(this)" class="topbar-btn-lang">EN</button>
     <div class="topbar-user"><div class="topbar-avatar">U</div></div>
   </div>
 </header>
