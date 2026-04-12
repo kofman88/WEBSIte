@@ -153,6 +153,8 @@ const API = {
   async getMomentumStatus() { return this.get('/market/momentum'); },
   async calculateTrailingSL(pos) { return this.post('/market/trailing', pos); },
   async calculatePartialTP(trade) { return this.post('/market/partial-tp', trade); },
+  async getOptimized(strategy) { return this.get(`/market/optimize/${strategy}`); },
+  async getDefaults(strategy) { return this.get(`/market/defaults/${strategy}`); },
 
   // Wallet
   async createWallet() { return this.post('/wallet/create'); },

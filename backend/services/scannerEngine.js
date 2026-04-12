@@ -11,6 +11,7 @@ const https = require('https');
 const signalFilter = require('./signalFilter');
 const { analyzeScalping } = require('./scalpingV3');
 const { analyzeGerchik } = require('./gerchikStrategy');
+const momentum = require('./momentumDetector');
 const db = require('../models/database');
 
 // ── OKX Public API (no auth required) ──────────────────────────────────
@@ -155,6 +156,41 @@ function atr(candles, period = 14) {
 
 function volumeMA(candles, period = 20) {
   return ema(candles.map(c => c.volume), period);
+}
+
+// ── V4: Signal Quality Scoring (1-10) ────────────────────────────────────
+// Rule-based scoring that replaces ML filter for web platform
+function scoreSignal(sig) {
+  let score = 5; // base score
+
+  // R:R quality
+  const rr = sig.rr || 0;
+  if (rr >= 3.0) score += 2;
+  else if (rr >= 2.5) score += 1.5;
+  else if (rr >= 2.0) score += 1;
+  else if (rr < 1.5) score -= 2;
+
+  // Confidence from strategy
+  const conf = sig.confidence || 50;
+  if (conf >= 80) score += 1.5;
+  else if (conf >= 65) score += 1;
+  else if (conf < 40) score -= 1;
+
+  // Volume confirmation
+  if (sig.volRatio && sig.volRatio >= 2.0) score += 1;
+  else if (sig.volRatio && sig.volRatio >= 1.5) score += 0.5;
+
+  // Strategy bonus
+  if (sig.signalType === 'Liquidity Grab') score += 0.5; // institutional pattern
+  if (sig.isMirror) score += 1; // mirror level (Gerchik)
+
+  // Penalty for extreme RSI
+  if (sig.rsi) {
+    if (sig.direction === 'long' && sig.rsi > 70) score -= 1;
+    if (sig.direction === 'short' && sig.rsi < 30) score -= 1;
+  }
+
+  return Math.max(1, Math.min(10, Math.round(score)));
 }
 
 // ── Strategy: Levels (Support/Resistance) ──────────────────────────────
@@ -302,6 +338,20 @@ let scannerTimer = null;
 async function scanOnce() {
   const newSignals = [];
 
+  // V4: Feed BTC/ETH prices to momentum detector
+  try {
+    const btcTicker = await fetchTicker('BTCUSDT');
+    const ethTicker = await fetchTicker('ETHUSDT');
+    if (btcTicker && ethTicker) {
+      const mResult = momentum.checkMomentum(btcTicker, ethTicker);
+      if (mResult && mResult.triggered) {
+        console.log(`[MOMENTUM] ${mResult.asset} moved ${mResult.movePct}% ${mResult.direction} — Relaxed Mode ON`);
+      }
+    }
+  } catch (e) { /* momentum tracking optional */ }
+
+  const isRelaxed = momentum.isRelaxed();
+
   for (const symbol of SCAN_SYMBOLS) {
     try {
       // Levels (1H)
@@ -398,11 +448,14 @@ async function scanOnce() {
         }
       } catch (_) { /* async filters optional — don't block on network errors */ }
 
+      // V4: Score signal quality (1-10)
+      sig.quality = scoreSignal(sig);
+
       db.prepare(
         `INSERT INTO signal_history (symbol, direction, entry_price, stop_loss, take_profit_1, take_profit_2, strategy, timeframe, confidence, result)
          VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, 'pending')`
       ).run(sig.symbol, sig.direction, sig.entry, sig.sl, sig.tp1, sig.tp2, sig.strategy, sig.timeframe, Math.round(sig.confidence));
-      console.log(`[SIGNAL] ${sig.symbol} ${sig.direction.toUpperCase()} ${sig.strategy} conf:${Math.round(sig.confidence)}%`);
+      console.log(`[SIGNAL] ${sig.symbol} ${sig.direction.toUpperCase()} ${sig.strategy} Q:${sig.quality}/10 conf:${Math.round(sig.confidence)}% ${sig.signalType||''} ${isRelaxed?'[RELAXED]':''}`);
     } catch (e) {
       console.error('Signal save error:', e.message);
     }

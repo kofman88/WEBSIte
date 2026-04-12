@@ -10,6 +10,7 @@ const tradingDefaults = require('../config/tradingDefaults');
 const momentum = require('../services/momentumDetector');
 const { calculateTrailingSL } = require('../services/trailingStop');
 const { calculatePartialTP } = require('../services/partialTP');
+const optimizer = require('../services/optimizer');
 
 // GET /api/market/regime — current market regime
 router.get('/regime', auth, async (req, res) => {
@@ -110,6 +111,21 @@ router.post('/partial-tp', auth, (req, res) => {
   } catch (e) {
     res.status(400).json({ error: e.message });
   }
+});
+
+// GET /api/market/optimize/:strategy — get optimized params
+router.get('/optimize/:strategy', auth, async (req, res) => {
+  try {
+    const result = await optimizer.getOptimized(req.params.strategy, req.user?.id);
+    res.json(result);
+  } catch (e) {
+    res.status(500).json({ error: e.message });
+  }
+});
+
+// GET /api/market/defaults/:strategy — get default params
+router.get('/defaults/:strategy', auth, (req, res) => {
+  res.json({ params: optimizer.getDefaults(req.params.strategy) });
 });
 
 module.exports = router;
