@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html><head><title>Generate Bot Avatar</title></head>
+<body style="background:#333;display:flex;flex-direction:column;align-items:center;padding:40px;gap:20px">
+<h2 style="color:#fff">CHM Finance Bot Avatar</h2>
+<canvas id="c" width="512" height="512"></canvas>
+<a id="dl" download="chm-bot-avatar.png" style="color:#FF8C00;font-size:18px;cursor:pointer">Download PNG</a>
+<script>
+const c=document.getElementById('c'), ctx=c.getContext('2d');
+// Background
+const bg=ctx.createLinearGradient(0,0,512,512);
+bg.addColorStop(0,'#0D0D0F');bg.addColorStop(1,'#1A1A1E');
+ctx.beginPath();ctx.arc(256,256,256,0,Math.PI*2);ctx.fillStyle=bg;ctx.fill();
+// Outer ring
+ctx.beginPath();ctx.arc(256,256,240,0,Math.PI*2);ctx.lineWidth=4;
+const ring=ctx.createLinearGradient(0,0,512,512);
+ring.addColorStop(0,'rgba(200,80,192,0.3)');ring.addColorStop(1,'rgba(255,107,53,0.3)');
+ctx.strokeStyle=ring;ctx.stroke();
+// CHM text
+ctx.font='900 200px Arial,Helvetica,sans-serif';ctx.fillStyle='#FFFFFF';
+ctx.letterSpacing='-8px';
+ctx.fillText('CH',82,310);
+// Orange dot (brand)
+const dot=ctx.createLinearGradient(362,262,418,318);
+dot.addColorStop(0,'#C850C0');dot.addColorStop(1,'#FF6B35');
+ctx.beginPath();ctx.arc(390,290,28,0,Math.PI*2);ctx.fillStyle=dot;ctx.fill();
+// Glow
+ctx.beginPath();ctx.arc(390,290,60,0,Math.PI*2);ctx.fillStyle='rgba(255,140,0,0.08)';ctx.fill();
+// Bell icon
+ctx.save();ctx.translate(365,80);
+const bell=ctx.createLinearGradient(0,0,0,70);
+bell.addColorStop(0,'#FF8C00');bell.addColorStop(1,'#FF6B35');
+ctx.fillStyle=bell;ctx.globalAlpha=0.9;
+// Bell body
+ctx.beginPath();ctx.moveTo(10,54);ctx.lineTo(10,34);
+ctx.quadraticCurveTo(10,12,30,10);ctx.quadraticCurveTo(50,12,50,34);
+ctx.lineTo(50,54);ctx.lineTo(56,62);ctx.lineTo(4,62);ctx.closePath();ctx.fill();
+// Bell clapper
+ctx.beginPath();ctx.arc(30,68,7,0,Math.PI*2);ctx.fill();
+ctx.globalAlpha=1;
+// Green notification dot
+ctx.beginPath();ctx.arc(48,8,9,0,Math.PI*2);ctx.fillStyle='#00C853';ctx.fill();
+ctx.beginPath();ctx.arc(48,8,9,0,Math.PI*2);ctx.lineWidth=3;ctx.strokeStyle='#0D0D0F';ctx.stroke();
+ctx.restore();
+// Download link
+document.getElementById('dl').href=c.toDataURL('image/png');
+</script>
+</body></html>
