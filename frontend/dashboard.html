@@ -31,7 +31,7 @@
 
 <!-- SIDEBAR -->
 <aside class="sidebar" id="sidebar">
-  <div class="sidebar-logo">CHM<span>.</span></div>
+  <a href="/" class="sidebar-logo" style="text-decoration:none;display:block">CHM<span>.</span></a>
   <nav class="sidebar-nav">
     <a href="dashboard.html" class="sidebar-link active" data-page="dashboard"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>Дашборд</a>
     <a href="bots.html" class="sidebar-link" data-page="bots"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2a4 4 0 014 4v1h2a2 2 0 012 2v10a2 2 0 01-2 2H6a2 2 0 01-2-2V9a2 2 0 012-2h2V6a4 4 0 014-4z"/></svg>Боты</a>
@@ -73,7 +73,21 @@
     <button onclick="toggleDashTheme()" id="dThemeBtn" class="topbar-btn-icon">🌙</button>
     <button onclick="toggleDashLang()" id="dLangBtn" class="topbar-btn-lang">EN</button>
     <span class="session-timer hidden sm:inline" id="sessionTimer">00:00</span>
-    <div class="topbar-user"><div class="topbar-avatar" id="userAvatar">U</div><span class="topbar-username text-sm text-slate-300 hidden sm:block" id="userName">User</span></div>
+    <div class="topbar-user" id="profileWrap" style="position:relative;cursor:pointer" onclick="document.getElementById('profileDropdown').classList.toggle('hidden')">
+      <div class="topbar-avatar" id="userAvatar">U</div>
+      <span class="topbar-username text-sm text-slate-300 hidden sm:block" id="userName">User</span>
+      <div id="profileDropdown" class="hidden" style="position:absolute;top:100%;right:0;margin-top:8px;width:220px;background:var(--bg-card-solid,#1A1A1E);border:1px solid var(--border,#2C2C30);border-radius:12px;box-shadow:0 12px 40px rgba(0,0,0,.5);z-index:60;overflow:hidden">
+        <div style="padding:14px 16px;border-bottom:1px solid rgba(255,255,255,.04)">
+          <div class="text-sm font-semibold" id="profileEmail">user@email.com</div>
+          <div class="text-xs text-slate-500" id="profilePlan">Free Plan</div>
+        </div>
+        <a href="settings.html" style="display:flex;align-items:center;gap:10px;padding:10px 16px;font-size:.85rem;color:var(--text-secondary,#8E8E93);transition:background .15s" onmouseover="this.style.background='rgba(255,255,255,.04)'" onmouseout="this.style.background='none'"><svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 012.83-2.83l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z"/></svg>Настройки</a>
+        <a href="academy/" style="display:flex;align-items:center;gap:10px;padding:10px 16px;font-size:.85rem;color:var(--text-secondary,#8E8E93);transition:background .15s" onmouseover="this.style.background='rgba(255,255,255,.04)'" onmouseout="this.style.background='none'"><svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M2 3h6a4 4 0 014 4v14a3 3 0 00-3-3H2z"/><path d="M22 3h-6a4 4 0 00-4 4v14a3 3 0 013-3h7z"/></svg>Академия</a>
+        <div style="border-top:1px solid rgba(255,255,255,.04)">
+          <button onclick="Auth.logout()" style="display:flex;align-items:center;gap:10px;padding:10px 16px;font-size:.85rem;color:#FF3D3D;background:none;border:none;cursor:pointer;width:100%;text-align:left;transition:background .15s" onmouseover="this.style.background='rgba(255,61,61,.05)'" onmouseout="this.style.background='none'"><svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4M16 17l5-5-5-5M21 12H9"/></svg>Выйти</button>
+        </div>
+      </div>
+    </div>
   </div>
 </header>
 
@@ -322,8 +336,12 @@ fetch('/api/health').then(r=>r.json()).then(d=>{const el=document.getElementById
 if(!Auth.isLoggedIn())window.location.href='/?login=1';
 Sidebar.init('dashboard');
 
-// Close notif panel on outside click
-document.addEventListener('click',e=>{if(!document.getElementById('notifWrap').contains(e.target))document.getElementById('notifPanel').classList.remove('open')});
+// Close panels on outside click
+document.addEventListener('click',e=>{
+  if(!document.getElementById('notifWrap').contains(e.target))document.getElementById('notifPanel').classList.remove('open');
+  const pw=document.getElementById('profileWrap');
+  if(pw&&!pw.contains(e.target))document.getElementById('profileDropdown')?.classList.add('hidden');
+});
 
 function toggleNotif(){document.getElementById('notifPanel').classList.toggle('open')}
 
@@ -350,9 +368,13 @@ async function loadDashboard(){
     if(me&&me.user){
       document.getElementById('userAvatar').textContent=(me.user.email||'U')[0].toUpperCase();
       document.getElementById('userName').textContent=me.user.email||'User';
+      // Profile dropdown
+      const pe=document.getElementById('profileEmail');if(pe)pe.textContent=me.user.email||'';
+      const planStr=(me.subscription?.plan||'free').charAt(0).toUpperCase()+(me.subscription?.plan||'free').slice(1)+' Plan';
       if(me.subscription){
-        document.getElementById('planName').textContent=(me.subscription.plan||'free').charAt(0).toUpperCase()+(me.subscription.plan||'free').slice(1)+' Plan';
+        document.getElementById('planName').textContent=planStr;
       }
+      const pp=document.getElementById('profilePlan');if(pp)pp.textContent=planStr;
     }
 
     // Welcome message

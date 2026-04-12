@@ -160,7 +160,7 @@ document.addEventListener('click',e=>{
   const dot=document.createElement('div');
   dot.id='connDot';
   dot.title='Server status';
-  dot.style.cssText='width:8px;height:8px;border-radius:50%;background:#64748b;flex-shrink:0;transition:background .3s';
+  dot.style.cssText='width:8px;height:8px;border-radius:50%;background:#64748b;flex-shrink:0;transition:background .3s;cursor:help';
   const wrap=document.querySelector('.topbar-actions');
   if(wrap)wrap.insertBefore(dot,wrap.firstChild);
   function check(){
