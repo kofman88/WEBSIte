@@ -16,28 +16,47 @@ const SITE_URL = 'https://chmup.top';
  */
 function sendEmail(to, subject, htmlBody) {
   return new Promise((resolve, reject) => {
-    const boundary = 'CHM_' + Date.now().toString(36);
+    const boundary = 'CHM_' + Date.now().toString(36) + '_boundary';
+    const plainText = htmlBody
+      .replace(/<style[^>]*>[\s\S]*?<\/style>/gi, '')
+      .replace(/<br\s*\/?>/gi, '\n')
+      .replace(/<\/p>/gi, '\n\n')
+      .replace(/<\/div>/gi, '\n')
+      .replace(/<\/tr>/gi, '\n')
+      .replace(/<\/td>/gi, '  ')
+      .replace(/<[^>]+>/g, '')
+      .replace(/&nbsp;/g, ' ')
+      .replace(/&middot;/g, '·')
+      .replace(/&copy;/g, '©')
+      .replace(/\n{3,}/g, '\n\n')
+      .trim();
+
+    const htmlBase64 = Buffer.from(htmlBody, 'utf-8').toString('base64');
+    // Split base64 into 76-char lines (RFC 2045)
+    const htmlBase64Lines = htmlBase64.match(/.{1,76}/g).join('\n');
+
     const message = [
-      `From: ${FROM_NAME} <${FROM_EMAIL}>`,
+      `From: =?UTF-8?B?${Buffer.from(FROM_NAME).toString('base64')}?= <${FROM_EMAIL}>`,
       `To: ${to}`,
-      `Subject: ${subject}`,
+      `Subject: =?UTF-8?B?${Buffer.from(subject).toString('base64')}?=`,
       `MIME-Version: 1.0`,
       `Content-Type: multipart/alternative; boundary="${boundary}"`,
       `X-Mailer: CHM Finance Platform`,
       ``,
       `--${boundary}`,
       `Content-Type: text/plain; charset=UTF-8`,
+      `Content-Transfer-Encoding: base64`,
       ``,
-      htmlBody.replace(/<[^>]+>/g, '').replace(/&nbsp;/g, ' ').replace(/\n\s*\n/g, '\n'),
+      Buffer.from(plainText, 'utf-8').toString('base64').match(/.{1,76}/g).join('\n'),
       ``,
       `--${boundary}`,
       `Content-Type: text/html; charset=UTF-8`,
-      `Content-Transfer-Encoding: quoted-printable`,
+      `Content-Transfer-Encoding: base64`,
       ``,
-      htmlBody,
+      htmlBase64Lines,
       ``,
       `--${boundary}--`,
-    ].join('\n');
+    ].join('\r\n');
 
     const sendmail = execFile('/sbin/sendmail', ['-t', '-f', FROM_EMAIL], { timeout: 15000 }, (err) => {
       if (err) {
