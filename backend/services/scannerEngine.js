@@ -12,6 +12,7 @@ const signalFilter = require('./signalFilter');
 const { analyzeScalping } = require('./scalpingV3');
 const { analyzeGerchik } = require('./gerchikStrategy');
 const momentum = require('./momentumDetector');
+const autoTrader = require('./autoTrader');
 let telegramService;
 try { telegramService = require('./telegramService'); } catch(_) {}
 const db = require('../models/database');
@@ -228,22 +229,55 @@ function strategyLevels(candles) {
   const distToSupport = (last - nearestSupport) / last * 100;
   const distToResistance = (nearestResistance - last) / last * 100;
 
-  // Signal logic
+  // ATR for structural SL
+  const atrArr = atr(candles);
+  const lastAtr = atrArr[atrArr.length - 1] || last * 0.01;
+  // Volume confirmation
+  const volArr = volumeMA(candles);
+  const lastVol = candles[candles.length - 1].volume;
+  const avgVol = volArr[volArr.length - 1] || 1;
+  const volRatio = lastVol / avgVol;
+
+  // EMA200 trend filter
+  const ema200 = ema(closes, Math.min(200, closes.length - 1));
+  const lastEma200 = ema200[ema200.length - 1];
+
+  // Count level touches for quality scoring
+  const countTouches = (levelPrice, tol) => {
+    return candles.filter(c => Math.abs(c.low - levelPrice) < tol || Math.abs(c.high - levelPrice) < tol).length;
+  };
+
+  // LONG: near support + RSI oversold + volume confirmation
   if (distToSupport < 1.5 && lastRsi < 40) {
-    const sl = nearestSupport * 0.985;
-    const tp1 = last + (last - sl) * 1.5;
-    const tp2 = last + (last - sl) * 2.5;
-    const rr = (tp1 - last) / (last - sl);
-    if (rr < 1.5) return null;
-    return { direction: 'long', entry: last, sl, tp1, tp2, confidence: Math.min(90, 60 + (40 - lastRsi) + levels.length), rr: +rr.toFixed(1) };
+    const sl = nearestSupport - lastAtr * 1.5; // ATR-based structural SL
+    const risk = last - sl;
+    if (risk <= 0) return null;
+    const tp1 = last + risk * 2.0;
+    const tp2 = last + risk * 3.0;
+    const rr = risk > 0 ? (tp1 - last) / risk : 0;
+    if (rr < 2.0) return null; // Min R:R = 2.0
+    if (volRatio < 0.8) return null; // Volume must be decent
+    // Trend filter: prefer longs above EMA200
+    const trendBonus = last > lastEma200 ? 10 : -5;
+    const touches = countTouches(nearestSupport, lastAtr * 0.3);
+    const conf = Math.min(95, 55 + (40 - lastRsi) * 0.5 + Math.min(touches, 5) * 3 + trendBonus + (volRatio > 1.5 ? 5 : 0));
+    return { direction: 'long', entry: last, sl: +sl.toFixed(6), tp1: +tp1.toFixed(6), tp2: +tp2.toFixed(6), confidence: Math.round(conf), rr: +rr.toFixed(1), volRatio: +volRatio.toFixed(1) };
   }
+
+  // SHORT: near resistance + RSI overbought + volume confirmation
   if (distToResistance < 1.5 && lastRsi > 60) {
-    const sl = nearestResistance * 1.015;
-    const tp1 = last - (sl - last) * 1.5;
-    const tp2 = last - (sl - last) * 2.5;
-    const rr = (last - tp1) / (sl - last);
-    if (rr < 1.5) return null;
-    return { direction: 'short', entry: last, sl, tp1, tp2, confidence: Math.min(90, 60 + (lastRsi - 60) + levels.length), rr: +rr.toFixed(1) };
+    const sl = nearestResistance + lastAtr * 1.5;
+    const risk = sl - last;
+    if (risk <= 0) return null;
+    const tp1 = last - risk * 2.0;
+    const tp2 = last - risk * 3.0;
+    const rr = risk > 0 ? (last - tp1) / risk : 0;
+    if (rr < 2.0) return null;
+    if (volRatio < 0.8) return null;
+    const trendBonus = last < lastEma200 ? 10 : -5;
+    const touches = countTouches(nearestResistance, lastAtr * 0.3);
+    const conf = Math.min(95, 55 + (lastRsi - 60) * 0.5 + Math.min(touches, 5) * 3 + trendBonus + (volRatio > 1.5 ? 5 : 0));
+    return { direction: 'short', entry: last, sl: +sl.toFixed(6), tp1: +tp1.toFixed(6), tp2: +tp2.toFixed(6), confidence: Math.round(conf), rr: +rr.toFixed(1), volRatio: +volRatio.toFixed(1) };
   }
   return null;
 }
@@ -463,6 +497,13 @@ async function scanOnce() {
         const tgUsers=db.prepare('SELECT id FROM users WHERE telegram_id IS NOT NULL AND telegram_id != ""').all();
         for(const u of tgUsers){telegramService.notifySignal(u.id,sig).catch(()=>{})}
       }catch(_){}}
+
+      // AUTO-TRADE: find ALL active bots matching this signal and execute trades
+      try {
+        await autoTrader.processSignal(sig);
+      } catch (e) {
+        console.error(`[AUTO-TRADE] Error processing signal for bots: ${e.message}`);
+      }
     } catch (e) {
       console.error('Signal save error:', e.message);
     }
