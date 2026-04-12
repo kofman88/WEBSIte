@@ -48,7 +48,7 @@
 
   <!-- Quick Templates -->
   <div class="mb-6" id="templateSection">
-    <div class="flex items-center justify-between mb-3"><h3 class="font-bold text-sm">Быстрые шаблоны</h3><button onclick="document.getElementById('templateCards').classList.toggle('hidden')" class="text-xs text-slate-500 hover:text-white transition">Свернуть</button></div>
+    <div class="flex items-center justify-between mb-3"><h3 class="font-bold text-sm">Быстрые шаблоны <a href="academy/#help-templates" class="help-btn" data-help="Готовые настройки для быстрого старта. Нажмите на шаблон — параметры заполнятся автоматически. Можете изменить перед созданием.">?</a></h3><button onclick="document.getElementById('templateCards').classList.toggle('hidden')" class="text-xs text-slate-500 hover:text-white transition">Свернуть</button></div>
     <div class="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-6 gap-3" id="templateCards">
       <div onclick="applyTemplate('BTCUSDT','levels','4H',10,1.5,3)" class="card p-3 cursor-pointer hover:border-amber-500/30 transition text-center" style="padding:12px"><div class="text-sm font-bold text-amber-400">BTC Levels</div><div class="text-[.6rem] text-slate-500 mt-1">4H &middot; Lev 10x</div><div class="text-[.55rem] text-slate-600 mt-1">SL 1.5% &middot; TP 3%</div></div>
       <div onclick="applyTemplate('ETHUSDT','smc','1H',15,1.0,2.5)" class="card p-3 cursor-pointer hover:border-violet-500/30 transition text-center" style="padding:12px"><div class="text-sm font-bold text-violet-400">ETH SMC</div><div class="text-[.6rem] text-slate-500 mt-1">1H &middot; Lev 15x</div><div class="text-[.55rem] text-slate-600 mt-1">SL 1% &middot; TP 2.5%</div></div>
@@ -74,7 +74,7 @@
 <!-- CREATE BOT MODAL -->
 <div id="createModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.7);backdrop-filter:blur(8px);z-index:100;align-items:center;justify-content:center">
   <div class="card" style="width:100%;max-width:500px;margin:16px;max-height:90vh;overflow-y:auto">
-    <div class="flex items-center justify-between mb-6"><h2 class="text-xl font-bold">Создать бота</h2><button onclick="document.getElementById('createModal').style.display='none'" class="text-slate-400 hover:text-white text-xl">&times;</button></div>
+    <div class="flex items-center justify-between mb-6"><h2 class="text-xl font-bold">Создать бота <a href="academy/#help-create-bot" class="help-btn" data-help="Бот автоматически торгует по выбранной стратегии. Выберите пару, стратегию и настройте параметры. Бот будет входить в каждую сделку по сигналу.">?</a></h2><button onclick="document.getElementById('createModal').style.display='none'" class="text-slate-400 hover:text-white text-xl">&times;</button></div>
     <form id="createBotForm" class="space-y-4">
       <!-- Основные -->
       <div class="grid grid-cols-2 gap-3">
@@ -93,11 +93,11 @@
       </div>
 
       <!-- Strategy-specific params -->
-      <div class="text-xs text-slate-500 font-semibold uppercase tracking-wider mt-3">Параметры стратегии</div>
+      <div class="text-xs text-slate-500 font-semibold uppercase tracking-wider mt-3">Параметры стратегии <a href="academy/#help-strategy-params" class="help-btn" data-help="Тонкая настройка стратегии. Каждый параметр влияет на частоту и качество сигналов. Начните с дефолтных значений.">?</a></div>
       <div id="stratParams"></div>
 
       <!-- Risk Management -->
-      <div class="text-xs text-slate-500 font-semibold uppercase tracking-wider mt-3">Риск-менеджмент</div>
+      <div class="text-xs text-slate-500 font-semibold uppercase tracking-wider mt-3">Риск-менеджмент <a href="academy/#help-risk-mgmt" class="help-btn" data-help="Защита вашего капитала. Stop Loss — максимальный убыток. Take Profit — цель по прибыли. Trailing Stop — автоматическое подтягивание стопа.">?</a></div>
       <div class="grid grid-cols-4 gap-3">
         <div><label class="text-xs text-slate-500 block mb-1">Stop Loss %</label><input name="stopLossPct" type="number" step="0.1" value="1.5" class="w-full bg-slate-800/50 border border-slate-700 rounded-lg px-3 py-2 text-sm text-white outline-none"/></div>
         <div><label class="text-xs text-slate-500 block mb-1">Take Profit %</label><input name="takeProfitPct" type="number" step="0.1" value="3" class="w-full bg-slate-800/50 border border-slate-700 rounded-lg px-3 py-2 text-sm text-white outline-none"/></div>

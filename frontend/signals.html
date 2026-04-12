@@ -25,9 +25,9 @@
   </div>
 
   <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
-    <div class="stat-card"><div class="stat-card-label">Сигналов</div><div class="stat-card-value mono" id="stTotal"><div class="skeleton" style="height:2rem;width:40px"></div></div></div>
-    <div class="stat-card"><div class="stat-card-label">Win Rate</div><div class="stat-card-value mono" id="stWR"><div class="skeleton" style="height:2rem;width:60px"></div></div></div>
-    <div class="stat-card"><div class="stat-card-label">Ср. Confidence</div><div class="stat-card-value mono" id="stConf"><div class="skeleton" style="height:2rem;width:50px"></div></div></div>
+    <div class="stat-card"><div class="stat-card-label">Сигналов <a href="academy/#help-signals" class="help-btn" data-help="Общее количество сигналов. Сканер анализирует 20 монет каждые 30 сек по 4 стратегиям: Levels, SMC, Gerchik, Scalping.">?</a></div><div class="stat-card-value mono" id="stTotal"><div class="skeleton" style="height:2rem;width:40px"></div></div></div>
+    <div class="stat-card"><div class="stat-card-label">Win Rate <a href="academy/#help-winrate" class="help-btn" data-help="Процент прибыльных сигналов. Рассчитывается по закрытым сделкам где TP был достигнут.">?</a></div><div class="stat-card-value mono" id="stWR"><div class="skeleton" style="height:2rem;width:60px"></div></div></div>
+    <div class="stat-card"><div class="stat-card-label">Ср. Confidence <a href="academy/#help-confidence" class="help-btn" data-help="Средняя уверенность в сигнале (0-100%). Учитывает R:R, объём, RSI, тренд и тип паттерна. Чем выше — тем надёжнее.">?</a></div><div class="stat-card-value mono" id="stConf"><div class="skeleton" style="height:2rem;width:50px"></div></div></div>
   </div>
   <div class="flex items-center justify-between mb-4">
   <div class="flex items-center gap-3 text-xs text-slate-500"><span id="scannerStatus">Сканер: обновляется...</span><span id="lastUpdate"></span></div>

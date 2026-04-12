@@ -30,7 +30,7 @@
 <main class="main-content">
   <!-- Create Form -->
   <div class="card mb-6">
-    <h2 class="font-bold mb-4">Новый бэктест</h2>
+    <h2 class="font-bold mb-4">Новый бэктест <a href="academy/#help-backtest" class="help-btn" data-help="Бэктест тестирует стратегию на исторических данных. Выберите пару, стратегию, период — и увидите результат как если бы бот торговал в прошлом.">?</a></h2>
     <form id="btForm" class="grid md:grid-cols-3 lg:grid-cols-7 gap-4">
       <div style="position:relative"><label class="text-xs text-slate-500 block mb-1">Пара</label><input name="symbol" id="btSymbolInput" value="BTCUSDT" autocomplete="off" class="w-full bg-slate-800/50 border border-slate-700 rounded-lg px-3 py-2 text-sm text-white outline-none" onfocus="showBtCoins()" oninput="filterBtCoins()"/><div id="btCoinDD" style="display:none;position:absolute;top:100%;left:0;right:0;max-height:220px;overflow-y:auto;background:rgba(15,23,42,.98);border:1px solid rgba(255,255,255,.08);border-radius:10px;z-index:80;margin-top:4px;box-shadow:0 8px 30px rgba(0,0,0,.5)"></div></div>
       <div><label class="text-xs text-slate-500 block mb-1">Стратегия</label><select name="strategy" class="w-full bg-slate-800/50 border border-slate-700 rounded-lg px-3 py-2 text-sm text-white outline-none"><option>levels</option><option>scalping</option><option>smc</option><option>gerchik</option></select></div>

@@ -687,6 +687,70 @@ tr:hover td { background: rgba(255, 255, 255, 0.02); }
 .confidence-bar-fill.low { background: var(--accent-red); }
 
 /* ═══════════════════════════════════════════════════════════════════
+   CONTEXTUAL HELP TOOLTIPS — ? icons with Academy links
+   ═══════════════════════════════════════════════════════════════════ */
+.help-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: rgba(255, 140, 0, 0.1);
+  border: 1px solid rgba(255, 140, 0, 0.2);
+  color: var(--accent-orange);
+  font-size: 10px;
+  font-weight: 800;
+  cursor: help;
+  vertical-align: middle;
+  margin-left: 6px;
+  position: relative;
+  transition: all var(--transition-fast);
+  text-decoration: none;
+  flex-shrink: 0;
+  line-height: 1;
+}
+.help-btn:hover {
+  background: rgba(255, 140, 0, 0.2);
+  border-color: rgba(255, 140, 0, 0.4);
+  transform: scale(1.15);
+}
+.help-btn:hover::after {
+  content: attr(data-help);
+  position: absolute;
+  bottom: calc(100% + 8px);
+  left: 50%;
+  transform: translateX(-50%);
+  background: var(--bg-card-solid, #1A1A1E);
+  border: 1px solid var(--border, #2C2C30);
+  color: var(--text-secondary, #8E8E93);
+  padding: 10px 14px;
+  border-radius: 10px;
+  font-size: 11px;
+  font-weight: 400;
+  white-space: normal;
+  width: 260px;
+  z-index: 100;
+  pointer-events: none;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+  line-height: 1.5;
+}
+.help-btn:hover::before {
+  content: '';
+  position: absolute;
+  bottom: calc(100% + 2px);
+  left: 50%;
+  transform: translateX(-50%);
+  border: 5px solid transparent;
+  border-top-color: var(--border, #2C2C30);
+  z-index: 101;
+  pointer-events: none;
+}
+/* Light theme */
+html.light .help-btn { background: rgba(255, 140, 0, 0.06); border-color: rgba(255, 140, 0, 0.15); }
+html.light .help-btn:hover::after { background: #FFFFFF; border-color: #E0E0E4; color: #4A4A4E; box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1); }
+
+/* ═══════════════════════════════════════════════════════════════════
    LIGHT THEME — comprehensive overrides
    ═══════════════════════════════════════════════════════════════════ */
 html.light {

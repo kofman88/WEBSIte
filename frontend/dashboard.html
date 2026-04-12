@@ -110,7 +110,7 @@
   <!-- Market Regime + Momentum -->
   <div class="flex flex-wrap gap-3 mb-4" id="marketWidgets">
     <div class="flex items-center gap-2 px-3 py-2 rounded-lg bg-slate-800/30 border border-slate-800/50 text-xs">
-      <span class="text-slate-500">Режим:</span>
+      <span class="text-slate-500">Режим<a href="academy/#help-regime" class="help-btn" data-help="Режим рынка определяется автоматически по BTC. Тренд вверх/вниз — боты торгуют по тренду. Боковик — осторожнее. Высокая волатильность — расширяются стопы." style="width:14px;height:14px;font-size:8px;margin-left:3px">?</a>:</span>
       <span id="regimeLabel" class="font-semibold text-slate-400">—</span>
       <span id="regimeDot" class="w-2 h-2 rounded-full bg-slate-600"></span>
     </div>
@@ -129,22 +129,22 @@
   <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
     <div class="stat-card" style="position:relative">
       <div class="stat-card-icon" style="background:rgba(79,70,229,.1)"><svg width="22" height="22" fill="none" stroke="#818CF8" stroke-width="2"><path d="M21 12V7H5a2 2 0 010-4h14v4M3 5v14a2 2 0 002 2h16v-5M18 12a2 2 0 100 4 2 2 0 000-4z"/></svg></div>
-      <div class="stat-card-label">Баланс портфеля <span class="tip-trigger" data-tip="Суммарный PnL по всем ботам (реализованная + нереализованная прибыль)">?</span></div>
+      <div class="stat-card-label">Баланс портфеля <a href="academy/#help-balance" class="help-btn" data-help="Суммарный PnL по всем вашим ботам. Включает реализованную и нереализованную прибыль.">?</a></div>
       <div class="stat-card-value mono" id="statBalance"><div class="skeleton"></div></div>
     </div>
     <div class="stat-card" style="position:relative">
       <div class="stat-card-icon" style="background:rgba(6,182,212,.1)"><svg width="22" height="22" fill="none" stroke="#06b6d4" stroke-width="2"><path d="M12 2a4 4 0 014 4v1h2a2 2 0 012 2v10a2 2 0 01-2 2H6a2 2 0 01-2-2V9a2 2 0 012-2h2V6a4 4 0 014-4z"/></svg></div>
-      <div class="stat-card-label">Активные боты <span class="tip-trigger" data-tip="Количество работающих ботов / общее количество ботов">?</span></div>
+      <div class="stat-card-label">Активные боты <a href="academy/#help-bots" class="help-btn" data-help="Сколько ботов сейчас работают / всего создано. Активный бот автоматически входит в сделки по сигналам сканера.">?</a></div>
       <div class="stat-card-value mono" id="statBots"><div class="skeleton"></div></div>
     </div>
     <div class="stat-card" style="position:relative">
       <div class="stat-card-icon" style="background:rgba(16,185,129,.1)"><svg width="22" height="22" fill="none" stroke="#10b981" stroke-width="2"><path d="M13 10V3L4 14h7v7l9-11h-7z"/></svg></div>
-      <div class="stat-card-label">Сигналов сегодня <span class="tip-trigger" data-tip="Общее количество сигналов, сгенерированных сканером за сегодня">?</span></div>
+      <div class="stat-card-label">Сигналов сегодня <a href="academy/#help-signals" class="help-btn" data-help="Количество торговых сигналов за сегодня. Сканер проверяет 20 монет каждые 30 секунд по 4 стратегиям.">?</a></div>
       <div class="stat-card-value mono" id="statSignals"><div class="skeleton"></div></div>
     </div>
     <div class="stat-card" style="position:relative">
       <div class="stat-card-icon" style="background:rgba(245,158,11,.1)"><svg width="22" height="22" fill="none" stroke="#f59e0b" stroke-width="2"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg></div>
-      <div class="stat-card-label">Win Rate <span class="tip-trigger" data-tip="Процент прибыльных сигналов из всех закрытых сигналов">?</span></div>
+      <div class="stat-card-label">Win Rate <a href="academy/#help-winrate" class="help-btn" data-help="Процент прибыльных сделок. 60%+ считается хорошим показателем. Зависит от стратегии и настроек.">?</a></div>
       <div class="stat-card-value mono" id="statWR"><div class="skeleton"></div></div>
     </div>
   </div>
@@ -183,7 +183,7 @@
   <!-- Risk Calculator -->
   <div class="card mb-6">
     <div class="flex items-center justify-between mb-4">
-      <h2 class="font-bold" data-dl="riskcalc"><svg class="inline w-5 h-5 mr-1 text-amber-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M9 7h6m-6 4h6m-3-8v1m0 16v1M4.22 4.22l.7.7m14.16 14.16l.7.7M1 12h1m20 0h1M4.22 19.78l.7-.7m14.16-14.16l.7-.7M12 17a5 5 0 100-10 5 5 0 000 10z"/></svg>Риск-калькулятор</h2>
+      <h2 class="font-bold" data-dl="riskcalc"><svg class="inline w-5 h-5 mr-1 text-amber-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M9 7h6m-6 4h6m-3-8v1m0 16v1M4.22 4.22l.7.7m14.16 14.16l.7.7M1 12h1m20 0h1M4.22 19.78l.7-.7m14.16-14.16l.7-.7M12 17a5 5 0 100-10 5 5 0 000 10z"/></svg>Риск-калькулятор <a href="academy/#help-risk" class="help-btn" data-help="Рассчитайте размер позиции перед входом. Введите баланс, % риска, цену входа и стоп-лосс — калькулятор покажет оптимальный объём.">?</a></h2>
       <button onclick="document.getElementById('riskCalcBody').classList.toggle('hidden')" class="text-xs text-slate-500 hover:text-white transition">Свернуть</button>
     </div>
     <div id="riskCalcBody">
