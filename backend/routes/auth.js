@@ -96,6 +96,55 @@ router.get('/verify-email', (req, res) => {
   }
 });
 
+// POST /api/auth/resend-verification
+router.post('/resend-verification', authMiddleware, async (req, res) => {
+  try {
+    const db = require('../models/database');
+    const user = db.prepare('SELECT email, email_verified, email_verify_token FROM users WHERE id = ?').get(req.userId);
+    if (!user) return res.status(404).json({ error: 'Пользователь не найден' });
+    if (user.email_verified) return res.json({ message: 'Email уже подтверждён' });
+
+    let token = user.email_verify_token;
+    if (!token) {
+      const crypto = require('crypto');
+      token = crypto.randomBytes(32).toString('hex');
+      db.prepare('UPDATE users SET email_verify_token = ? WHERE id = ?').run(token, req.userId);
+    }
+
+    await emailService.sendVerificationEmail(user.email, token);
+    res.json({ message: 'Письмо отправлено' });
+  } catch (e) {
+    res.status(500).json({ error: e.message });
+  }
+});
+
+// POST /api/auth/link-telegram — link Telegram chat to web account
+router.post('/link-telegram', (req, res) => {
+  try {
+    const { userId, chatId, secret } = req.body;
+    // Simple secret validation to prevent abuse
+    if (secret !== (config.jwtSecret || '').slice(0, 8)) {
+      return res.status(403).json({ error: 'Invalid secret' });
+    }
+    const telegram = require('../services/telegramService');
+    telegram.linkTelegram(userId, chatId);
+    res.json({ message: 'Linked' });
+  } catch (e) {
+    res.status(500).json({ error: e.message });
+  }
+});
+
+// POST /api/auth/disconnect-telegram
+router.post('/disconnect-telegram', authMiddleware, (req, res) => {
+  try {
+    const db = require('../models/database');
+    db.prepare('UPDATE users SET telegram_id = NULL WHERE id = ?').run(req.userId);
+    res.json({ message: 'Telegram отключён' });
+  } catch (e) {
+    res.status(500).json({ error: e.message });
+  }
+});
+
 // POST /api/auth/forgot-password
 router.post('/forgot-password', async (req, res) => {
   try {

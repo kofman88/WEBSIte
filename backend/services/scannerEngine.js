@@ -12,6 +12,8 @@ const signalFilter = require('./signalFilter');
 const { analyzeScalping } = require('./scalpingV3');
 const { analyzeGerchik } = require('./gerchikStrategy');
 const momentum = require('./momentumDetector');
+let telegramService;
+try { telegramService = require('./telegramService'); } catch(_) {}
 const db = require('../models/database');
 
 // ── OKX Public API (no auth required) ──────────────────────────────────
@@ -456,6 +458,11 @@ async function scanOnce() {
          VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, 'pending')`
       ).run(sig.symbol, sig.direction, sig.entry, sig.sl, sig.tp1, sig.tp2, sig.strategy, sig.timeframe, Math.round(sig.confidence));
       console.log(`[SIGNAL] ${sig.symbol} ${sig.direction.toUpperCase()} ${sig.strategy} Q:${sig.quality}/10 conf:${Math.round(sig.confidence)}% ${sig.signalType||''} ${isRelaxed?'[RELAXED]':''}`);
+      // V4: Notify all Telegram-connected users
+      if(telegramService){try{
+        const tgUsers=db.prepare('SELECT id FROM users WHERE telegram_id IS NOT NULL AND telegram_id != ""').all();
+        for(const u of tgUsers){telegramService.notifySignal(u.id,sig).catch(()=>{})}
+      }catch(_){}}
     } catch (e) {
       console.error('Signal save error:', e.message);
     }
