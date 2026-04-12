@@ -8,7 +8,7 @@
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js"></script>
   <link rel="stylesheet" href="styles.css"/>
-  <style>body{background:#070b14;color:#f1f5f9;font-family:'Inter',sans-serif}.toggle{position:relative;width:44px;height:24px;background:#1e293b;border-radius:12px;cursor:pointer;transition:.2s}.toggle.on{background:#10b981}.toggle::after{content:'';position:absolute;top:2px;left:2px;width:20px;height:20px;background:#fff;border-radius:50%;transition:.2s}.toggle.on::after{transform:translateX(20px)}html.light body{background:#f8f9fc;color:#1e293b}html.light .sidebar{background:#f0f2f7;border-color:rgba(0,0,0,.06)}html.light .sidebar-link{color:#64748b}html.light .sidebar-link.active{color:#4f46e5;background:rgba(79,70,229,.06)}html.light .topbar{background:rgba(248,249,252,.85)!important}html.light .card,.light .stat-card{background:rgba(255,255,255,.5)!important;border-color:rgba(0,0,0,.06)!important}html.light h1,html.light h2,html.light .font-bold,html.light .font-semibold{color:#0f172a!important}html.light .text-white{color:#1e293b!important}html.light .text-slate-400,html.light .text-slate-500{color:#64748b!important}</style>
+  <style>body{background:#0D0D0F;color:#f1f5f9;font-family:'Inter',sans-serif}.toggle{position:relative;width:44px;height:24px;background:#1e293b;border-radius:12px;cursor:pointer;transition:.2s}.toggle.on{background:#10b981}.toggle::after{content:'';position:absolute;top:2px;left:2px;width:20px;height:20px;background:#fff;border-radius:50%;transition:.2s}.toggle.on::after{transform:translateX(20px)}html.light body{background:#f8f9fc;color:#1e293b}html.light .sidebar{background:#f0f2f7;border-color:rgba(0,0,0,.06)}html.light .sidebar-link{color:#64748b}html.light .sidebar-link.active{color:#FF8C00;background:rgba(255,140,0,.06)}html.light .topbar{background:rgba(248,249,252,.85)!important}html.light .card,.light .stat-card{background:rgba(255,255,255,.5)!important;border-color:rgba(0,0,0,.06)!important}html.light h1,html.light h2,html.light .font-bold,html.light .font-semibold{color:#0f172a!important}html.light .text-white{color:#1e293b!important}html.light .text-slate-400,html.light .text-slate-500{color:#64748b!important}</style>
 <script>if(localStorage.getItem("chm_theme")==="light")document.documentElement.classList.add("light")</script>
 </head>
 <body>
@@ -36,7 +36,7 @@
       <span class="text-slate-400">Активных: <strong class="text-green-400" id="sumActive">—</strong></span>
       <span class="text-slate-400">PnL: <strong id="sumPnl" class="text-slate-400">—</strong></span>
     </div>
-    <button onclick="document.getElementById('createModal').style.display='flex'" class="btn-primary px-5 py-2.5 rounded-xl text-sm font-semibold" style="background:linear-gradient(135deg,#4F46E5,#7C3AED);border:none;color:#fff;cursor:pointer;box-shadow:0 0 20px rgba(79,70,229,.3)">+ Создать бота</button>
+    <button onclick="document.getElementById('createModal').style.display='flex'" class="btn-primary px-5 py-2.5 rounded-xl text-sm font-semibold" style="background:linear-gradient(135deg,#C850C0,#FF6B35);border:none;color:#fff;cursor:pointer;box-shadow:0 0 20px rgba(79,70,229,.3)">+ Создать бота</button>
   </div>
 
   <!-- Filter -->
@@ -116,7 +116,7 @@
       </div>
       <div class="grid grid-cols-2 gap-3 mt-3">
         <button type="button" onclick="quickBacktest()" class="py-2.5 rounded-xl font-semibold text-sm border border-indigo-500/30 text-indigo-400 bg-indigo-500/5 hover:bg-indigo-500/10 transition">Прогнать бэктест</button>
-        <button type="submit" class="py-2.5 rounded-xl font-semibold text-sm text-white" style="background:linear-gradient(135deg,#4F46E5,#7C3AED)">Создать бота</button>
+        <button type="submit" class="py-2.5 rounded-xl font-semibold text-sm text-white" style="background:linear-gradient(135deg,#C850C0,#FF6B35)">Создать бота</button>
       </div>
       <div id="quickBtResult" class="hidden mt-3 p-3 bg-slate-800/30 rounded-xl text-xs text-slate-300"></div>
     </form>
@@ -138,7 +138,7 @@
         <div><label class="text-xs text-slate-500 block mb-1">Stop Loss %</label><input name="stopLossPct" id="editSL" type="number" step="0.1" class="w-full bg-slate-800/50 border border-slate-700 rounded-lg px-3 py-2 text-sm text-white outline-none"/></div>
         <div><label class="text-xs text-slate-500 block mb-1">Take Profit %</label><input name="takeProfitPct" id="editTP" type="number" step="0.1" class="w-full bg-slate-800/50 border border-slate-700 rounded-lg px-3 py-2 text-sm text-white outline-none"/></div>
       </div>
-      <button type="submit" class="w-full py-2.5 rounded-xl font-semibold text-sm text-white" style="background:linear-gradient(135deg,#4F46E5,#7C3AED)">Сохранить</button>
+      <button type="submit" class="w-full py-2.5 rounded-xl font-semibold text-sm text-white" style="background:linear-gradient(135deg,#C850C0,#FF6B35)">Сохранить</button>
     </form>
   </div>
 </div>

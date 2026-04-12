@@ -8,7 +8,7 @@
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js"></script>
   <link rel="stylesheet" href="styles.css"/>
-  <style>body{background:#070b14;color:#f1f5f9;font-family:'Inter',sans-serif}html.light body{background:#f8f9fc;color:#1e293b}html.light .sidebar{background:#f0f2f7;border-color:rgba(0,0,0,.06)}html.light .sidebar-link{color:#64748b}html.light .sidebar-link.active{color:#4f46e5;background:rgba(79,70,229,.06)}html.light .topbar{background:rgba(248,249,252,.85)!important}html.light .card,.light .stat-card{background:rgba(255,255,255,.5)!important;border-color:rgba(0,0,0,.06)!important}html.light h1,html.light h2,html.light .font-bold,html.light .font-semibold{color:#0f172a!important}html.light .text-white{color:#1e293b!important}html.light .text-slate-400,html.light .text-slate-500{color:#64748b!important}</style>
+  <style>body{background:#0D0D0F;color:#f1f5f9;font-family:'Inter',sans-serif}html.light body{background:#f8f9fc;color:#1e293b}html.light .sidebar{background:#f0f2f7;border-color:rgba(0,0,0,.06)}html.light .sidebar-link{color:#64748b}html.light .sidebar-link.active{color:#FF8C00;background:rgba(255,140,0,.06)}html.light .topbar{background:rgba(248,249,252,.85)!important}html.light .card,.light .stat-card{background:rgba(255,255,255,.5)!important;border-color:rgba(0,0,0,.06)!important}html.light h1,html.light h2,html.light .font-bold,html.light .font-semibold{color:#0f172a!important}html.light .text-white{color:#1e293b!important}html.light .text-slate-400,html.light .text-slate-500{color:#64748b!important}</style>
 <script>if(localStorage.getItem("chm_theme")==="light")document.documentElement.classList.add("light")</script>
 </head>
 <body>
@@ -38,7 +38,7 @@
       <div><label class="text-xs text-slate-500 block mb-1">Направление</label><select name="direction" class="w-full bg-slate-800/50 border border-slate-700 rounded-lg px-3 py-2 text-sm text-white outline-none"><option value="both">Long + Short</option><option value="long">Только Long</option><option value="short">Только Short</option></select></div>
       <div><label class="text-xs text-slate-500 block mb-1">Начало</label><input name="startDate" type="date" value="2025-01-01" class="w-full bg-slate-800/50 border border-slate-700 rounded-lg px-3 py-2 text-sm text-white outline-none"/></div>
       <div><label class="text-xs text-slate-500 block mb-1">Конец</label><input name="endDate" type="date" value="2025-12-31" class="w-full bg-slate-800/50 border border-slate-700 rounded-lg px-3 py-2 text-sm text-white outline-none"/></div>
-      <div class="flex items-end"><button type="submit" class="w-full py-2 rounded-lg font-semibold text-white text-sm" style="background:linear-gradient(135deg,#4F46E5,#7C3AED)">Запустить</button></div>
+      <div class="flex items-end"><button type="submit" class="w-full py-2 rounded-lg font-semibold text-white text-sm" style="background:linear-gradient(135deg,#C850C0,#FF6B35)">Запустить</button></div>
     </form>
     <div class="flex items-center gap-3 mt-3">
       <label class="flex items-center gap-2 text-xs text-slate-400 cursor-pointer"><input type="checkbox" name="trendFilter" id="trendFilter" checked class="accent-violet-500"/> Фильтр тренда (EMA 200)</label>

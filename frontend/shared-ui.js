@@ -127,7 +127,7 @@ document.addEventListener('DOMContentLoaded',()=>{
 // Global loading indicator
 let loadingCount=0;
 const loadingBar=document.createElement('div');
-loadingBar.style.cssText='position:fixed;top:0;left:0;height:2px;background:linear-gradient(90deg,#7c3aed,#2563eb);z-index:9999;transition:width .3s;width:0';
+loadingBar.style.cssText='position:fixed;top:0;left:0;height:2px;background:linear-gradient(90deg,#C850C0,#FF6B35);z-index:9999;transition:width .3s;width:0';
 document.body.appendChild(loadingBar);
 window.showLoading=()=>{loadingCount++;loadingBar.style.width='70%'};
 window.hideLoading=()=>{loadingCount=Math.max(0,loadingCount-1);if(!loadingCount){loadingBar.style.width='100%';setTimeout(()=>{loadingBar.style.width='0'},300)}};
@@ -145,7 +145,7 @@ document.addEventListener('click',e=>{
   const btn=document.createElement('button');
   btn.id='scrollTopBtn';
   btn.innerHTML='<svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M18 15l-6-6-6 6"/></svg>';
-  btn.style.cssText='position:fixed;bottom:24px;right:24px;width:40px;height:40px;border-radius:12px;background:rgba(79,70,229,.9);color:#fff;border:none;cursor:pointer;display:none;align-items:center;justify-content:center;z-index:90;box-shadow:0 4px 16px rgba(79,70,229,.3);transition:opacity .2s,transform .2s;backdrop-filter:blur(8px)';
+  btn.style.cssText='position:fixed;bottom:24px;right:24px;width:40px;height:40px;border-radius:12px;background:rgba(255,140,0,.9);color:#fff;border:none;cursor:pointer;display:none;align-items:center;justify-content:center;z-index:90;box-shadow:0 4px 16px rgba(255,140,0,.3);transition:opacity .2s,transform .2s;backdrop-filter:blur(8px)';
   btn.addEventListener('click',()=>window.scrollTo({top:0,behavior:'smooth'}));
   document.body.appendChild(btn);
   const main=document.querySelector('.main-content');

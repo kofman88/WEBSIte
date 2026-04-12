@@ -10,16 +10,16 @@
   <link rel="stylesheet" href="styles.css"/>
   <script>if(localStorage.getItem('chm_theme')==='light')document.documentElement.classList.add('light')</script>
   <style>
-    body{background:#070b14;color:#f1f5f9;font-family:'Inter',sans-serif}
+    body{background:#0D0D0F;color:#fff;font-family:'Inter',sans-serif}
     html.light body{background:#f8f9fc;color:#1e293b}
     html.light .sidebar{background:#f0f2f7;border-color:rgba(0,0,0,.06)}
-    html.light .sidebar-link{color:#64748b}html.light .sidebar-link.active{color:#4f46e5;background:rgba(79,70,229,.06)}
+    html.light .sidebar-link{color:#64748b}html.light .sidebar-link.active{color:#FF8C00;background:rgba(255,140,0,.06)}
     html.light .topbar{background:rgba(248,249,252,.85)!important;border-color:rgba(0,0,0,.06)!important}
     html.light .stat-card,.light .card{background:rgba(255,255,255,.5)!important;border-color:rgba(0,0,0,.06)!important}
     html.light h1,html.light h2,html.light .font-bold,html.light .font-semibold{color:#0f172a!important}
     html.light p,html.light .text-slate-400,html.light .text-slate-500,html.light .stat-card-label{color:#64748b!important}
     html.light .text-white{color:#1e293b!important}
-    html.light .sidebar-sub-badge{background:rgba(79,70,229,.06);border-color:rgba(79,70,229,.1)}
+    html.light .sidebar-sub-badge{background:rgba(255,140,0,.06);border-color:rgba(255,140,0,.1)}
     html.light .bg-slate-800\/30{background:rgba(0,0,0,.02)!important}
     html.light .notif-panel{background:rgba(255,255,255,.98)!important;border-color:rgba(0,0,0,.08)!important}
     .mono{font-family:'JetBrains Mono',monospace;font-variant-numeric:tabular-nums}
@@ -176,7 +176,7 @@
         <div><label class="text-xs text-slate-500 block mb-1">Leverage</label><input id="rcLev" type="number" value="10" min="1" max="125" class="w-full bg-slate-800/50 border border-slate-700 rounded-lg px-3 py-2 text-sm text-white outline-none" oninput="calcRisk()"/></div>
         <div><label class="text-xs text-slate-500 block mb-1">Take Profit ($)</label><input id="rcTP" type="number" value="62000" min="0.0001" step="any" class="w-full bg-slate-800/50 border border-slate-700 rounded-lg px-3 py-2 text-sm text-white outline-none" oninput="calcRisk()"/></div>
         <div><label class="text-xs text-slate-500 block mb-1">Направление</label><select id="rcDir" class="w-full bg-slate-800/50 border border-slate-700 rounded-lg px-3 py-2 text-sm text-white outline-none" onchange="calcRisk()"><option value="long">Long</option><option value="short">Short</option></select></div>
-        <div class="flex items-end"><button onclick="calcRisk()" class="w-full py-2 rounded-lg text-sm font-semibold text-white" style="background:linear-gradient(135deg,#4F46E5,#7C3AED)">Рассчитать</button></div>
+        <div class="flex items-end"><button onclick="calcRisk()" class="w-full py-2 rounded-lg text-sm font-semibold text-white" style="background:linear-gradient(135deg,#C850C0,#FF6B35)">Рассчитать</button></div>
       </div>
       <div id="riskResult" class="grid grid-cols-2 md:grid-cols-5 gap-3 mt-2">
         <div class="bg-slate-800/30 rounded-lg p-3 text-center"><div class="text-[.65rem] text-slate-500 mb-1">Размер позиции</div><div class="font-bold text-sm mono text-white" id="rcPosSize">$200.00</div></div>
