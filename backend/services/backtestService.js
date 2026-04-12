@@ -212,40 +212,81 @@ class BacktestService {
           const pivotStr = P.pivot || 7;
           const rsiOS = P.rsiOS || 35;
           const rsiOB = P.rsiOB || 65;
-          const emaFast = ema(closes, P.emaFast || 50);
+          const minRR = P.minRR || 2.0;
           const maxDist = (P.maxDist || 1.5) / 100;
-          let isSupport = true, isResist = true;
-          for (let j = 1; j <= pivotStr && i - j >= 0 && i + j < candles.length; j++) {
-            if (lows[i - j] <= lows[i] || lows[i + j] <= lows[i]) isSupport = false;
-            if (highs[i - j] >= highs[i] || highs[i + j] >= highs[i]) isResist = false;
-          }
-          const slMult = (P.stopLossPct || 1.5) / 100 * price / (atr[i-1] || 1);
-          const tpMult = (P.takeProfitPct || 3) / 100 * price / (atr[i-1] || 1);
-          if (rsi[i] < rsiOS && emaFast[i] && price < emaFast[i]) {
-            signal = { dir: 'long', sl: price - atr[i-1] * Math.max(slMult, 1.5), tp: price + atr[i-1] * Math.max(tpMult, 2) };
-          } else if (rsi[i] > rsiOB && emaFast[i] && price > emaFast[i]) {
-            signal = { dir: 'short', sl: price + atr[i-1] * Math.max(slMult, 1.5), tp: price - atr[i-1] * Math.max(tpMult, 2) };
+          const minQuality = P.minQuality || 4;
+          const cooldown = P.cooldown || 5;
+          const levelAge = P.levelAge || 100;
+          const tp1R = P.tp1 || 2.0;
+          const tp2R = P.tp2 || 3.0;
+          const atrPd = P.atrPeriod || 14;
+          const emaF = ema(closes, P.emaFast || 50);
+          const useRsi = P.rsiFilter !== false;
+          const useVol = P.volFilter !== false;
+          const usePattern = P.patternFilter !== false;
+
+          // Cooldown check
+          if (trades.length > 0 && (i - entryIdx) < cooldown) { /* skip */ }
+          else {
+            let isSupport = true, isResist = true;
+            for (let j = 1; j <= pivotStr && i - j >= 0 && i + j < candles.length; j++) {
+              if (lows[i - j] <= lows[i] || lows[i + j] <= lows[i]) isSupport = false;
+              if (highs[i - j] >= highs[i] || highs[i + j] >= highs[i]) isResist = false;
+            }
+            // Volume filter
+            const volOk = !useVol || volumes[i] > volMA[i] * 0.8;
+            // Pattern filter (simple: bullish/bearish candle body > 50% of bar)
+            const bodyPct = Math.abs(c.close - c.open) / (c.high - c.low || 1);
+            const patternOk = !usePattern || bodyPct > 0.4;
+
+            if (useRsi && rsi[i] < rsiOS && emaF[i] && price < emaF[i] && volOk && patternOk) {
+              const sl = price - atr[i-1] * 1.5;
+              const tp = price + atr[i-1] * tp1R;
+              const rr = (tp - price) / (price - sl);
+              if (rr >= minRR) signal = { dir: 'long', sl, tp };
+            } else if (useRsi && rsi[i] > rsiOB && emaF[i] && price > emaF[i] && volOk && patternOk) {
+              const sl = price + atr[i-1] * 1.5;
+              const tp = price - atr[i-1] * tp1R;
+              const rr = (price - tp) / (sl - price);
+              if (rr >= minRR) signal = { dir: 'short', sl, tp };
+            }
           }
         }
 
         // ── SMC: Order Block + Liquidity Sweep ──
         else if (strategy === 'smc') {
           const obMult = P.obMult || 1.8;
-          const obAge = P.obAge || 80;
+          const obAge = P.obAge || 60;
+          const obImpulse = (P.obImpulse || 0.15) / 100;
+          const fvgMinGap = (P.fvgMinGap || 0.08) / 100;
           const slBuf = (P.slBuffer || 0.5) / 100;
+          const minRR = P.minRR || 1.5;
+          const mitigatedInvalid = P.mitigatedInvalid !== false;
           const lookback = Math.min(P.swingLB || 10, i - startIdx);
+
           for (let j = i - lookback; j < i - 2 && j >= startIdx; j++) {
             const body = Math.abs(candles[j].close - candles[j].open);
             const avgBody = candles.slice(Math.max(0, j - 10), j).reduce((s, x) => s + Math.abs(x.close - x.open), 0) / 10;
-            if (body > avgBody * obMult) {
+            const impulse = body / (candles[j].close || 1);
+            if (body > avgBody * obMult && impulse >= obImpulse) {
               const isBullOB = candles[j].close > candles[j].open;
-              // Check if price returned to OB zone
+              // Mitigated check: price already passed through OB
+              if (mitigatedInvalid) {
+                let mitigated = false;
+                for (let k = j + 1; k < i; k++) {
+                  if (isBullOB && candles[k].low < candles[j].open) { mitigated = true; break; }
+                  if (!isBullOB && candles[k].high > candles[j].open) { mitigated = true; break; }
+                }
+                if (mitigated) continue;
+              }
               if (isBullOB && price <= candles[j].close && price >= candles[j].open && rsi[i] < 45) {
-                signal = { dir: 'long', sl: candles[j].low - atr[i-1] * 0.5, tp: price + (price - candles[j].low) * 2.5 };
-                break;
+                const sl = candles[j].low - atr[i-1] * 0.5;
+                const tp = price + (price - candles[j].low) * 2.5;
+                if ((tp - price) / (price - sl) >= minRR) { signal = { dir: 'long', sl, tp }; break; }
               } else if (!isBullOB && price >= candles[j].close && price <= candles[j].open && rsi[i] > 55) {
-                signal = { dir: 'short', sl: candles[j].high + atr[i-1] * 0.5, tp: price - (candles[j].high - price) * 2.5 };
-                break;
+                const sl = candles[j].high + atr[i-1] * 0.5;
+                const tp = price - (candles[j].high - price) * 2.5;
+                if ((price - tp) / (sl - price) >= minRR) { signal = { dir: 'short', sl, tp }; break; }
               }
             }
           }
@@ -256,45 +297,107 @@ class BacktestService {
           const gLookback = P.lookback || 50;
           const gPivot = P.pivot || 5;
           const gMinRR = P.minRR || 2.5;
-          const window = candles.slice(Math.max(0, i - gLookback), i);
-          const zones = {};
-          window.forEach(bar => {
-            const key = Math.round(bar.low / (atr[i-1] || 1)) * (atr[i-1] || 1);
-            zones[key] = (zones[key] || 0) + 1;
-          });
-          const minTouches = P.maxTests || 3;
-          const strongLevels = Object.entries(zones).filter(([, cnt]) => cnt >= minTouches).map(([p]) => +p);
+          const gCluster = (P.cluster || 0.3) / 100;
+          const gMirrorBonus = P.mirrorBonus || 3;
+          const gAtrFloor = (P.atrFloor || 0.3) / 100;
+          const gMaxDaily = P.maxDailyLoss || 3;
+          const gVolOnBPU = P.volumeOnBPU !== false;
+          const gSession = P.sessionFilter === true;
+          const tp1R = P.tp1r || 3.0;
+          const tp2R = P.tp2r || 4.0;
 
-          for (const level of strongLevels) {
-            const dist = Math.abs(price - level) / price * 100;
-            if (dist < 1.0) {
-              // Bounce confirmation: current candle has long wick
-              const wick = price > level ? (c.low < level ? c.close - c.low : 0) : (c.high > level ? c.high - c.close : 0);
-              if (wick > Math.abs(c.close - c.open) * 0.5) {
-                if (price > level && rsi[i] < 50) {
-                  signal = { dir: 'long', sl: level - atr[i-1], tp: price + atr[i-1] * 4 };
-                } else if (price < level && rsi[i] > 50) {
-                  signal = { dir: 'short', sl: level + atr[i-1], tp: price - atr[i-1] * 4 };
+          // Session filter (08-22 UTC)
+          if (gSession && candles[i].ts) {
+            const h = new Date(candles[i].ts).getUTCHours();
+            if (h < 8 || h >= 22) { /* skip */ }
+          }
+
+          // Daily loss limit
+          const todayLosses = trades.filter(t => t.pnl < 0 && t.exitIdx > i - 100).length;
+          if (todayLosses >= gMaxDaily) { /* skip */ }
+          else {
+            const window = candles.slice(Math.max(0, i - gLookback), i);
+            const zones = {};
+            window.forEach(bar => {
+              const key = Math.round(bar.low / (atr[i-1] * gCluster * 10 || 1)) * (atr[i-1] * gCluster * 10 || 1);
+              zones[key] = (zones[key] || 0) + 1;
+            });
+            const minTouches = 3;
+            const strongLevels = Object.entries(zones).filter(([, cnt]) => cnt >= minTouches).map(([p]) => +p);
+
+            for (const level of strongLevels) {
+              const dist = Math.abs(price - level) / price * 100;
+              if (dist < 1.0) {
+                const wick = price > level ? (c.low < level ? c.close - c.low : 0) : (c.high > level ? c.high - c.close : 0);
+                const volOk = !gVolOnBPU || volumes[i] > volMA[i] * 0.8;
+                if (wick > Math.abs(c.close - c.open) * 0.5 && volOk) {
+                  const slDist = Math.max(atr[i-1], price * gAtrFloor);
+                  if (price > level && rsi[i] < 50) {
+                    const sl = level - slDist;
+                    const tp = price + (price - sl) * tp1R;
+                    if ((tp - price) / (price - sl) >= gMinRR) signal = { dir: 'long', sl, tp };
+                  } else if (price < level && rsi[i] > 50) {
+                    const sl = level + slDist;
+                    const tp = price - (sl - price) * tp1R;
+                    if ((price - tp) / (sl - price) >= gMinRR) signal = { dir: 'short', sl, tp };
+                  }
                 }
               }
             }
           }
         }
 
-        // ── SCALPING: MACD + RSI + Volume ──
+        // ── SCALPING V3: VWAP Bounce / Liquidity Grab / Volume Spike ──
         else if (strategy === 'scalping') {
           const scRsiOB = P.rsiOB || 55;
           const scRsiOS = P.rsiOS || 45;
-          const scVolMult = P.volMult || 0.9;
+          const scVolSpike = P.volSpikeMult || 2.5;
           const scAtrMult = P.atrMult || 1.2;
+          const scMaxSL = (P.maxSL || 1.0) / 100;
+          const scMinSL = (P.minSL || 0.25) / 100;
+          const scBodyPct = P.bodyPct || 0.55;
+          const useVwap = P.vwapBounce !== false;
+          const useLG = P.liquidityGrab !== false;
+          const useVS = P.volSpike !== false;
+          const trendOnly = P.trendOnly === true;
           const m = macdCalc(closes);
           const prevHist = m.hist[i - 1], currHist = m.hist[i];
-          const volAbove = volumes[i] > volMA[i] * scVolMult;
+          const volRatio = volMA[i] > 0 ? volumes[i] / volMA[i] : 1;
 
-          if (prevHist < 0 && currHist > 0 && rsi[i] < scRsiOS && volAbove) {
-            signal = { dir: 'long', sl: price - atr[i-1] * scAtrMult, tp: price + atr[i-1] * scAtrMult * 1.5 };
-          } else if (prevHist > 0 && currHist < 0 && rsi[i] > scRsiOB && volAbove) {
-            signal = { dir: 'short', sl: price + atr[i-1] * scAtrMult, tp: price - atr[i-1] * scAtrMult * 1.5 };
+          // Trend filter
+          if (trendOnly && ema200[i]) {
+            if (price < ema200[i] && (prevHist < 0 && currHist > 0)) { /* skip long */ }
+            if (price > ema200[i] && (prevHist > 0 && currHist < 0)) { /* skip short */ }
+          }
+
+          // Volume Spike entry (primary)
+          if (useVS && volRatio >= scVolSpike) {
+            const body = Math.abs(c.close - c.open);
+            const bar = c.high - c.low;
+            if (bar > 0 && body / bar >= scBodyPct) {
+              if (c.close > c.open && rsi[i] < scRsiOB) {
+                let sl = (c.open + c.low) / 2;
+                let slPct = (price - sl) / price;
+                if (slPct > scMaxSL) sl = price * (1 - scMaxSL);
+                if (slPct < scMinSL) sl = price * (1 - scMinSL);
+                signal = { dir: 'long', sl, tp: price + Math.max(body * 1.5, (price - sl) * 2.0) };
+              } else if (c.close < c.open && rsi[i] > scRsiOS) {
+                let sl = (c.open + c.high) / 2;
+                let slPct = (sl - price) / price;
+                if (slPct > scMaxSL) sl = price * (1 + scMaxSL);
+                if (slPct < scMinSL) sl = price * (1 + scMinSL);
+                signal = { dir: 'short', sl, tp: price - Math.max(body * 1.5, (sl - price) * 2.0) };
+              }
+            }
+          }
+          // MACD cross (fallback if no Volume Spike signal)
+          if (!signal && P.macdCross !== false) {
+            const volAbove = volumes[i] > volMA[i] * (P.volMult || 0.9);
+            if (prevHist < 0 && currHist > 0 && rsi[i] < scRsiOS && volAbove) {
+              signal = { dir: 'long', sl: price - atr[i-1] * scAtrMult, tp: price + atr[i-1] * scAtrMult * 1.5 };
+            } else if (prevHist > 0 && currHist < 0 && rsi[i] > scRsiOB && volAbove) {
+              signal = { dir: 'short', sl: price + atr[i-1] * scAtrMult, tp: price - atr[i-1] * scAtrMult * 1.5 };
+            }
           }
         }
 
