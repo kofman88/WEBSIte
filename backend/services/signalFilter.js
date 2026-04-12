@@ -14,6 +14,7 @@
  */
 
 const config = require('../config/tradingDefaults');
+const { getJSON } = require('../utils/httpClient');
 const log = require('../utils/logger')('SignalFilter');
 
 // Cache for BTC trend / funding rates
@@ -153,9 +154,7 @@ async function getFundingRate(symbol) {
   if (cached && Date.now() - cached.ts < 300000) return cached.rate; // 5 min cache
 
   try {
-    const fetch = (await import('node-fetch')).default;
-    const res = await fetch(`https://fapi.binance.com/fapi/v1/premiumIndex?symbol=${symbol}`);
-    const data = await res.json();
+    const data = await getJSON(`https://fapi.binance.com/fapi/v1/premiumIndex?symbol=${symbol}`);
     const rate = parseFloat(data.lastFundingRate || 0);
     _fundingCache[symbol] = { rate, ts: Date.now() };
     return rate;
@@ -166,9 +165,7 @@ async function getFundingRate(symbol) {
 
 async function getSpread(symbol) {
   try {
-    const fetch = (await import('node-fetch')).default;
-    const res = await fetch(`https://fapi.binance.com/fapi/v1/ticker/bookTicker?symbol=${symbol}`);
-    const data = await res.json();
+    const data = await getJSON(`https://fapi.binance.com/fapi/v1/ticker/bookTicker?symbol=${symbol}`);
     const bid = parseFloat(data.bidPrice || 0);
     const ask = parseFloat(data.askPrice || 0);
     if (bid <= 0 || ask <= 0) return null;
@@ -182,9 +179,7 @@ async function getBTCTrend() {
   if (_btcTrend && Date.now() - _btcTrendTs < 900000) return _btcTrend; // 15 min cache
 
   try {
-    const fetch = (await import('node-fetch')).default;
-    const res = await fetch('https://fapi.binance.com/fapi/v1/klines?symbol=BTCUSDT&interval=1h&limit=55');
-    const klines = await res.json();
+    const klines = await getJSON('https://fapi.binance.com/fapi/v1/klines?symbol=BTCUSDT&interval=1h&limit=55');
     if (!Array.isArray(klines) || klines.length < 55) return 'ranging';
 
     const closes = klines.map(k => parseFloat(k[4]));

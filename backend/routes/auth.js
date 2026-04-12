@@ -5,12 +5,12 @@ const { authMiddleware } = require('../middleware/auth');
 const config = require('../config');
 
 async function verifyCaptcha(token) {
-  if (!config.recaptchaSecret || !token) return true; // skip if not configured
+  if (!config.recaptchaSecret || !token) return true;
   try {
-    const res = await fetch(`https://www.google.com/recaptcha/api/siteverify?secret=${config.recaptchaSecret}&response=${token}`, { method: 'POST' });
-    const data = await res.json();
+    const { postJSON } = require('../utils/httpClient');
+    const data = await postJSON(`https://www.google.com/recaptcha/api/siteverify`, { secret: config.recaptchaSecret, response: token });
     return data.success === true;
-  } catch (e) { return true; } // don't block on network errors
+  } catch (e) { return true; }
 }
 
 const router = express.Router();

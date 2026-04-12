@@ -37,40 +37,48 @@ router.post('/webhook', (req, res) => {
 });
 
 // GET /api/telegram/setup — one-time webhook registration
-router.get('/setup', async (req, res) => {
-  try {
-    const webhookUrl = 'https://chmup.top/api/telegram/webhook';
-    const fetch = (await import('node-fetch')).default;
-    const token = telegramService._getToken ? telegramService._getToken() : '8727144116:AAHNyp6gob88_UlZ-9mfKVecFqKxVRZL5J0';
+router.get('/setup', (req, res) => {
+  const webhookUrl = 'https://chmup.top/api/telegram/webhook';
+  const token = telegramService._getToken();
+  const https = require('https');
+  const payload = JSON.stringify({
+    url: webhookUrl,
+    allowed_updates: ['message', 'callback_query'],
+    drop_pending_updates: true,
+  });
 
-    const result = await fetch(`https://api.telegram.org/bot${token}/setWebhook`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        url: webhookUrl,
-        allowed_updates: ['message', 'callback_query'],
-        drop_pending_updates: true,
-      }),
+  const r = https.request({
+    hostname: 'api.telegram.org',
+    path: `/bot${token}/setWebhook`,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', 'Content-Length': Buffer.byteLength(payload) },
+  }, (resp) => {
+    let data = '';
+    resp.on('data', c => data += c);
+    resp.on('end', () => {
+      try {
+        const result = JSON.parse(data);
+        log.info('Webhook setup:', result);
+        res.json({ webhookUrl, result });
+      } catch { res.json({ webhookUrl, raw: data }); }
     });
-    const data = await result.json();
-    log.info('Webhook setup:', data);
-    res.json({ webhookUrl, result: data });
-  } catch (e) {
-    res.status(500).json({ error: e.message });
-  }
+  });
+  r.on('error', e => res.status(500).json({ error: e.message }));
+  r.write(payload);
+  r.end();
 });
 
 // GET /api/telegram/status — check webhook status
-router.get('/status', async (req, res) => {
-  try {
-    const fetch = (await import('node-fetch')).default;
-    const token = '8727144116:AAHNyp6gob88_UlZ-9mfKVecFqKxVRZL5J0';
-    const result = await fetch(`https://api.telegram.org/bot${token}/getWebhookInfo`);
-    const data = await result.json();
-    res.json(data);
-  } catch (e) {
-    res.status(500).json({ error: e.message });
-  }
+router.get('/status', (req, res) => {
+  const token = telegramService._getToken();
+  const https = require('https');
+  https.get(`https://api.telegram.org/bot${token}/getWebhookInfo`, (resp) => {
+    let data = '';
+    resp.on('data', c => data += c);
+    resp.on('end', () => {
+      try { res.json(JSON.parse(data)); } catch { res.json({ raw: data }); }
+    });
+  }).on('error', e => res.status(500).json({ error: e.message }));
 });
 
 // ── Message handler ──────────────────────────────────────────

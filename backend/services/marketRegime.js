@@ -8,6 +8,7 @@
  */
 
 const config = require('../config/tradingDefaults');
+const { getJSON } = require('../utils/httpClient');
 const log = require('../utils/logger')('MarketRegime');
 
 let _regime = 'ranging';
@@ -38,9 +39,7 @@ async function getRegime() {
  */
 async function detectRegime() {
   try {
-    const fetch = (await import('node-fetch')).default;
-    const res = await fetch('https://fapi.binance.com/fapi/v1/klines?symbol=BTCUSDT&interval=1h&limit=210');
-    const klines = await res.json();
+    const klines = await getJSON('https://fapi.binance.com/fapi/v1/klines?symbol=BTCUSDT&interval=1h&limit=210');
     if (!Array.isArray(klines) || klines.length < 200) {
       return { regime: REGIMES.RANGING, confidence: 0, btcPrice: 0 };
     }
