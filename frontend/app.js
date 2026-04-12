@@ -150,6 +150,9 @@ const API = {
   async filterSignal(signal) { return this.post('/market/filter', signal); },
   async getFundingRate(symbol) { return this.get(`/market/funding/${symbol}`); },
   async getBTCTrend() { return this.get('/market/btc-trend'); },
+  async getMomentumStatus() { return this.get('/market/momentum'); },
+  async calculateTrailingSL(pos) { return this.post('/market/trailing', pos); },
+  async calculatePartialTP(trade) { return this.post('/market/partial-tp', trade); },
 
   // Wallet
   async createWallet() { return this.post('/wallet/create'); },

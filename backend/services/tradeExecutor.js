@@ -1,9 +1,12 @@
 /**
  * Trade Executor — исполнение сделок через CCXT.
- * Автономный, работает без Telegram бота.
+ * V4: Entry optimization, cross-margin, partial TP, leverage validation.
  */
 
 const db = require('../models/database');
+const config = require('../config/tradingDefaults');
+const { calculatePartialTP } = require('./partialTP');
+const log = require('../utils/logger')('TradeExecutor');
 
 // CCXT loaded lazily
 let ccxt = null;
@@ -48,11 +51,20 @@ class TradeExecutor {
 
     const exchange = this.createExchange(exchangeName, keys.api_key, keys.api_secret_encrypted);
 
-    // Set leverage
+    // V4: Switch to cross-margin mode
     try {
-      await exchange.setLeverage(leverage, symbol);
+      await exchange.setMarginMode('cross', symbol);
+      log.info(`Margin mode set to cross for ${symbol}`);
     } catch (e) {
-      console.log(`Leverage set warning: ${e.message}`);
+      log.debug(`Margin mode switch: ${e.message}`);
+    }
+
+    // V4: Set leverage with validation
+    try {
+      const levResult = await exchange.setLeverage(leverage, symbol);
+      log.info(`Leverage set to ${leverage}x for ${symbol}`);
+    } catch (e) {
+      log.warn(`Leverage set failed for ${symbol}: ${e.message} — trading may use current leverage`);
     }
 
     // Calculate quantity
@@ -61,8 +73,23 @@ class TradeExecutor {
     const qty = positionSizeUsd * leverage / price;
     const side = direction === 'long' ? 'buy' : 'sell';
 
-    // Place market order
-    const order = await exchange.createOrder(symbol, 'market', side, qty);
+    // V4: Entry price optimization (limit order slightly better than market)
+    let order;
+    const entryCfg = config.ENTRY || {};
+    if (entryCfg.useLimitOrder && stopLoss) {
+      const offset = price * (entryCfg.optimizePct || 0.0005);
+      const limitPrice = direction === 'long' ? price - offset : price + offset;
+      try {
+        order = await exchange.createOrder(symbol, 'limit', side, qty, limitPrice);
+        log.info(`Limit entry at ${limitPrice.toFixed(6)} (${direction} ${symbol})`);
+      } catch (e) {
+        // Fallback to market order
+        log.debug(`Limit order failed, using market: ${e.message}`);
+        order = await exchange.createOrder(symbol, 'market', side, qty);
+      }
+    } else {
+      order = await exchange.createOrder(symbol, 'market', side, qty);
+    }
 
     // Place stop-loss
     if (stopLoss) {

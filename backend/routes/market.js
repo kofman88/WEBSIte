@@ -7,6 +7,9 @@ const auth = require('../middleware/auth');
 const marketRegime = require('../services/marketRegime');
 const signalFilter = require('../services/signalFilter');
 const tradingDefaults = require('../config/tradingDefaults');
+const momentum = require('../services/momentumDetector');
+const { calculateTrailingSL } = require('../services/trailingStop');
+const { calculatePartialTP } = require('../services/partialTP');
 
 // GET /api/market/regime — current market regime
 router.get('/regime', auth, async (req, res) => {
@@ -81,6 +84,31 @@ router.get('/btc-trend', auth, async (req, res) => {
     res.json({ trend });
   } catch (e) {
     res.status(500).json({ error: e.message });
+  }
+});
+
+// GET /api/market/momentum — momentum detector status
+router.get('/momentum', auth, (req, res) => {
+  res.json(momentum.getStatus());
+});
+
+// POST /api/market/trailing — calculate trailing SL for position
+router.post('/trailing', auth, (req, res) => {
+  try {
+    const result = calculateTrailingSL(req.body);
+    res.json(result);
+  } catch (e) {
+    res.status(400).json({ error: e.message });
+  }
+});
+
+// POST /api/market/partial-tp — calculate partial TP levels
+router.post('/partial-tp', auth, (req, res) => {
+  try {
+    const result = calculatePartialTP(req.body);
+    res.json(result || { enabled: false });
+  } catch (e) {
+    res.status(400).json({ error: e.message });
   }
 });
 

@@ -93,6 +93,24 @@
     <div class="text-xs text-slate-500 flex-shrink-0 py-1">Загрузка цен...</div>
   </div>
 
+  <!-- Market Regime + Momentum -->
+  <div class="flex flex-wrap gap-3 mb-4" id="marketWidgets">
+    <div class="flex items-center gap-2 px-3 py-2 rounded-lg bg-slate-800/30 border border-slate-800/50 text-xs">
+      <span class="text-slate-500">Режим:</span>
+      <span id="regimeLabel" class="font-semibold text-slate-400">—</span>
+      <span id="regimeDot" class="w-2 h-2 rounded-full bg-slate-600"></span>
+    </div>
+    <div class="flex items-center gap-2 px-3 py-2 rounded-lg bg-slate-800/30 border border-slate-800/50 text-xs">
+      <span class="text-slate-500">BTC тренд:</span>
+      <span id="btcTrendLabel" class="font-semibold text-slate-400">—</span>
+    </div>
+    <div class="flex items-center gap-2 px-3 py-2 rounded-lg bg-slate-800/30 border border-slate-800/50 text-xs" id="momentumWidget" style="display:none">
+      <span class="w-2 h-2 rounded-full bg-amber-400 animate-pulse"></span>
+      <span class="font-semibold text-amber-400">Relaxed Mode</span>
+      <span id="momentumTimer" class="mono text-amber-300">—</span>
+    </div>
+  </div>
+
   <!-- Stats -->
   <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
     <div class="stat-card" style="position:relative">
@@ -271,6 +289,31 @@ async function loadTicker(){
   }catch(_){el.innerHTML='<div class="text-xs text-slate-600">Цены недоступны</div>'}
 }
 loadTicker();setInterval(loadTicker,30000);
+
+// Market Regime + Momentum widgets
+async function loadMarketWidgets(){
+  try{
+    const regime=await API.getMarketRegime().catch(()=>null);
+    if(regime&&regime.regime){
+      const r=regime.regime;
+      const labels={trending_up:'Тренд вверх',trending_down:'Тренд вниз',ranging:'Боковик',high_vol:'Высокая волатильность'};
+      const colors={trending_up:'#00C853',trending_down:'#FF3D3D',ranging:'#FF8C00',high_vol:'#FFC107'};
+      document.getElementById('regimeLabel').textContent=labels[r.regime]||r.regime;
+      document.getElementById('regimeLabel').style.color=colors[r.regime]||'#8E8E93';
+      document.getElementById('regimeDot').style.background=colors[r.regime]||'#64748b';
+    }
+  }catch(_){}
+  try{
+    const trend=await API.getBTCTrend().catch(()=>null);
+    if(trend){
+      const el=document.getElementById('btcTrendLabel');
+      if(trend.trend==='up'){el.textContent='Бычий';el.style.color='#00C853'}
+      else if(trend.trend==='down'){el.textContent='Медвежий';el.style.color='#FF3D3D'}
+      else{el.textContent='Нейтральный';el.style.color='#FF8C00'}
+    }
+  }catch(_){}
+}
+loadMarketWidgets();setInterval(loadMarketWidgets,120000);
 
 // Server status
 fetch('/api/health').then(r=>r.json()).then(d=>{const el=document.getElementById('serverStatus');if(el)el.textContent='Сервер: онлайн • '+d.version}).catch(()=>{const el=document.getElementById('serverStatus');if(el){el.textContent='Сервер: офлайн';el.style.color='#ef4444'}});
