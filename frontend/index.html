@@ -655,7 +655,20 @@ function toggleTheme(){document.documentElement.classList.toggle('light');const 
 
 if(new URLSearchParams(location.search).get('login'))openModal('login');
 // Auto-redirect to dashboard if already logged in
-if(Auth.isLoggedIn()&&!location.search.includes('login'))location.href='dashboard.html';
+// Show dashboard button if logged in (instead of redirect)
+if(Auth.isLoggedIn()){
+  // Replace "Войти" + "Начать" with "Дашборд" button in nav
+  const navLogin=document.querySelector('[data-t="nav-login"]');
+  const navStart=document.querySelector('[data-t="nav-start"]');
+  if(navLogin)navLogin.style.display='none';
+  if(navStart){navStart.textContent='Дашборд';navStart.href='dashboard.html';navStart.onclick=null;navStart.style.display=''}
+  // Also update mobile menu
+  const mobileMenu=document.getElementById('mobileMenu');
+  if(mobileMenu){
+    const btns=mobileMenu.querySelector('.flex.gap-2');
+    if(btns)btns.innerHTML='<a href="dashboard.html" class="btn-p text-sm flex-1 justify-center py-2.5 text-center">Дашборд</a>';
+  }
+}
 
 // Cookie consent
 function acceptCookies(){document.getElementById('cookieBanner').style.display='none';localStorage.setItem('chm_cookies','1')}
