@@ -8,6 +8,7 @@
  */
 
 const https = require('https');
+const signalFilter = require('./signalFilter');
 const db = require('../models/database');
 
 // ── OKX Public API (no auth required) ──────────────────────────────────
@@ -347,9 +348,24 @@ async function scanOnce() {
     }
   }
 
-  // Save to DB
+  // Filter + Save to DB
   for (const sig of newSignals) {
     try {
+      // V4 Smart Filters — sync checks
+      const filterResult = signalFilter.filterSignal(sig);
+      if (!filterResult.pass) {
+        console.log(`[FILTER] ${sig.symbol} ${sig.direction.toUpperCase()} ${sig.strategy} BLOCKED: ${filterResult.reason}`);
+        continue;
+      }
+      // V4 Async filters (funding rate, spread, BTC correlation)
+      try {
+        const asyncFilter = await signalFilter.filterSignalAsync(sig);
+        if (!asyncFilter.pass) {
+          console.log(`[FILTER] ${sig.symbol} ${sig.direction.toUpperCase()} ${sig.strategy} BLOCKED: ${asyncFilter.reason}`);
+          continue;
+        }
+      } catch (_) { /* async filters optional — don't block on network errors */ }
+
       db.prepare(
         `INSERT INTO signal_history (symbol, direction, entry_price, stop_loss, take_profit_1, take_profit_2, strategy, timeframe, confidence, result)
          VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, 'pending')`

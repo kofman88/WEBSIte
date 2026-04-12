@@ -144,6 +144,13 @@ const API = {
   async activateSub(data) { return this.post('/subscriptions/activate', data); },
   async applyPromo(code) { return this.post('/subscriptions/promo', { code }); },
 
+  // Market (V4)
+  async getMarketRegime() { return this.get('/market/regime'); },
+  async getMarketConfig() { return this.get('/market/config'); },
+  async filterSignal(signal) { return this.post('/market/filter', signal); },
+  async getFundingRate(symbol) { return this.get(`/market/funding/${symbol}`); },
+  async getBTCTrend() { return this.get('/market/btc-trend'); },
+
   // Wallet
   async createWallet() { return this.post('/wallet/create'); },
   async getWalletBalance() { return this.get('/wallet/balance'); },

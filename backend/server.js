@@ -17,6 +17,7 @@ const walletRoutes = require('./routes/wallet');
 const paymentRoutes = require('./routes/payments');
 const tradeRoutes = require('./routes/trades');
 const webhookRoutes = require('./routes/webhook');
+const marketRoutes = require('./routes/market');
 const websocketService = require('./services/websocketService');
 
 const app = express();
@@ -57,6 +58,7 @@ app.use('/api/wallet', walletRoutes);
 app.use('/api/payments', paymentRoutes);
 app.use('/api/trades', tradeRoutes);
 app.use('/api/webhook', webhookRoutes);
+app.use('/api/market', marketRoutes);
 
 app.get('/api/health', (_req, res) => {
   res.json({
