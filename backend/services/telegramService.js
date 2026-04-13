@@ -45,7 +45,8 @@ function sendMessage(chatId, text, parseMode = 'HTML') {
         } catch { resolve(false); }
       });
     });
-    req.on('error', (e) => { log.warn(`TG error: ${e.message}`); resolve(false); });
+    req.on('error', (e) => { log.warn(`TG network error to ${chatId}: ${e.code || ''} ${e.message || 'unknown'}`); resolve(false); });
+    req.setTimeout(10000, () => { log.warn(`TG timeout to ${chatId}`); req.destroy(); resolve(false); });
     req.write(payload);
     req.end();
   });
