@@ -717,34 +717,26 @@ tr:hover td { background: rgba(255, 255, 255, 0.02); }
 }
 .help-btn:hover::after {
   content: attr(data-help);
-  position: absolute;
-  bottom: calc(100% + 8px);
+  position: fixed;
   left: 50%;
-  transform: translateX(-50%);
+  top: 50%;
+  transform: translate(-50%, -50%);
   background: var(--bg-card-solid, #1A1A1E);
   border: 1px solid var(--border, #2C2C30);
   color: var(--text-secondary, #8E8E93);
-  padding: 10px 14px;
-  border-radius: 10px;
-  font-size: 11px;
+  padding: 12px 16px;
+  border-radius: 12px;
+  font-size: 12px;
   font-weight: 400;
   white-space: normal;
-  width: 260px;
-  z-index: 100;
+  width: 280px;
+  z-index: 9999;
   pointer-events: none;
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
-  line-height: 1.5;
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.5);
+  line-height: 1.6;
 }
 .help-btn:hover::before {
-  content: '';
-  position: absolute;
-  bottom: calc(100% + 2px);
-  left: 50%;
-  transform: translateX(-50%);
-  border: 5px solid transparent;
-  border-top-color: var(--border, #2C2C30);
-  z-index: 101;
-  pointer-events: none;
+  display: none;
 }
 /* Light theme */
 html.light .help-btn { background: rgba(255, 140, 0, 0.06); border-color: rgba(255, 140, 0, 0.15); }
