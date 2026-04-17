@@ -157,13 +157,19 @@
     .step-num{width:72px;height:72px;border-radius:var(--radius-pill);display:flex;align-items:center;justify-content:center;font-family:'Playfair Display',serif;font-style:italic;font-size:28px;color:#fff;background:linear-gradient(180deg,rgba(255,255,255,.06),rgba(255,255,255,.01));box-shadow:inset 0 1px 1px rgba(255,255,255,.12),inset 0 -2px 6px rgba(0,0,0,.7),0 8px 24px -6px rgba(0,0,0,.8);position:relative;z-index:1;margin:0 auto 20px}
 
     /* ── Pricing ── */
-    .price-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:20px}
+    .price-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:24px;align-items:stretch}
     @media(max-width:1024px){.price-grid{grid-template-columns:repeat(2,1fr)}}
     @media(max-width:640px){.price-grid{grid-template-columns:1fr}}
-    .price-card .shell-inner{padding:28px 24px;display:flex;flex-direction:column;gap:16px;min-height:460px}
-    .price-popular{background:linear-gradient(180deg,rgba(29,78,216,.55) 0%,rgba(255,255,255,.04) 100%)}
-    .price-popular .shell-inner{background:linear-gradient(180deg,rgba(29,78,216,.14),rgba(10,10,10,.88) 80%)}
-    .popular-badge{position:absolute;top:-14px;left:50%;transform:translateX(-50%);z-index:2}
+    .price-card{position:relative;border-radius:24px;background:linear-gradient(180deg,rgba(255,255,255,.04),rgba(255,255,255,.015));border:1px solid rgba(255,255,255,.08);backdrop-filter:blur(24px) saturate(1.3);-webkit-backdrop-filter:blur(24px) saturate(1.3);box-shadow:0 1px 2px rgba(0,0,0,.4),0 20px 25px -5px rgba(0,0,0,.3),0 8px 10px -6px rgba(0,0,0,.3),inset 0 1px 1px rgba(255,255,255,.06);transition:transform .5s var(--ease),box-shadow .5s var(--ease),border-color .5s var(--ease)}
+    .price-card:hover{transform:translateY(-8px);border-color:rgba(255,255,255,.14);box-shadow:0 2px 4px rgba(0,0,0,.5),0 25px 50px -12px rgba(0,0,0,.6),0 30px 60px rgba(0,0,0,.4),inset 0 1px 1px rgba(255,255,255,.1)}
+    .price-card-body{padding:32px 26px 28px;display:flex;flex-direction:column;gap:18px;min-height:480px}
+    .price-card .price-head{display:flex;flex-direction:column;gap:10px}
+    .price-card .price-name{font-family:'Inter',sans-serif;font-weight:400;font-size:11px;line-height:16px;letter-spacing:.22em;text-transform:uppercase;color:rgba(255,255,255,.6)}
+    .price-card .price-amt{font-family:'Playfair Display',serif;font-style:italic;font-weight:400;font-size:56px;line-height:1;letter-spacing:-.02em;color:#fff}
+    .price-popular{border:1px solid rgba(92,128,227,.45);background:linear-gradient(180deg,rgba(29,78,216,.22) 0%,rgba(29,78,216,.04) 60%,rgba(10,10,10,.6) 100%);box-shadow:0 1px 2px rgba(0,0,0,.5),0 25px 50px -12px rgba(0,0,0,.7),0 30px 60px rgba(29,78,216,.2),inset 0 1px 1px rgba(255,255,255,.12);transform:translateY(-6px)}
+    .price-popular:hover{transform:translateY(-12px);border-color:rgba(92,128,227,.7);box-shadow:0 2px 4px rgba(0,0,0,.5),0 30px 60px -12px rgba(0,0,0,.7),0 40px 80px rgba(29,78,216,.3),inset 0 1px 1px rgba(255,255,255,.18)}
+    .price-popular .price-name{color:#93AAEC}
+    .popular-badge{position:absolute;top:-14px;left:50%;transform:translateX(-50%);display:inline-flex;align-items:center;white-space:nowrap;padding:6px 16px;border-radius:9999px;font-family:'Inter',sans-serif;font-weight:500;font-size:10px;line-height:14px;letter-spacing:.18em;text-transform:uppercase;color:#fff;background:linear-gradient(180deg,#2A5BE8 0%,#1D4ED8 50%,#143797 100%);box-shadow:inset 0 1px 1px rgba(255,255,255,.28),inset 0 -1px 3px rgba(0,0,0,.5),0 4px 12px rgba(29,78,216,.5),0 8px 20px -4px rgba(0,0,0,.6);z-index:3}
     .tick{display:inline-flex;align-items:center;justify-content:center;width:18px;height:18px;border-radius:50%;background:rgba(43,89,54,.5);color:#86efac;flex-shrink:0}
     .tick.off{background:rgba(82,37,37,.4);color:rgba(255,255,255,.28)}
 
@@ -235,10 +241,7 @@
   <div class="hero-halo c"></div>
   <div class="container-x hero-wrap">
     <div>
-      <div class="eyebrow-badge mb-8 fade-up">
-        <span class="dot"></span>
-        <span class="t-meta" style="color:rgba(255,255,255,.78)" data-t="hero-badge">AI-Powered Крипто Платформа</span>
-      </div>
+      <div class="eyebrow-badge mb-8 fade-up" style="display:none" aria-hidden="true"></div>
       <h1 class="t-h1 mb-6 fade-up">
         <span data-t="hero-h1a">Торгуй умнее.</span><br>
         <em data-t="hero-h1b">Зарабатывай больше.</em>
@@ -396,44 +399,48 @@
     </div>
     <div class="price-grid">
       <!-- Free -->
-      <div class="price-card shell fade-up"><div class="shell-inner">
-        <div>
-          <div class="t-eyebrow mb-3">Free</div>
-          <div class="flex items-baseline gap-1"><span class="t-h2" style="font-size:44px;line-height:1">$0</span><span class="t-meta">/мес</span></div>
-        </div>
-        <ul class="space-y-3 mt-2" style="flex:1">
-          <li class="flex items-center gap-3 t-body" style="color:rgba(255,255,255,.82);font-size:13px"><span class="tick"><iconify-icon icon="solar:check-circle-bold" style="font-size:14px"></iconify-icon></span> 3 сигнала/день</li>
-          <li class="flex items-center gap-3 t-body" style="color:rgba(255,255,255,.82);font-size:13px"><span class="tick"><iconify-icon icon="solar:check-circle-bold" style="font-size:14px"></iconify-icon></span> 1 активный бот</li>
-          <li class="flex items-center gap-3 t-body" style="color:rgba(255,255,255,.82);font-size:13px"><span class="tick"><iconify-icon icon="solar:check-circle-bold" style="font-size:14px"></iconify-icon></span> Скальпинг стратегия</li>
-          <li class="flex items-center gap-3 t-body"><span class="tick off"><iconify-icon icon="solar:close-circle-linear" style="font-size:14px"></iconify-icon></span> Авто-торговля</li>
-          <li class="flex items-center gap-3 t-body"><span class="tick off"><iconify-icon icon="solar:close-circle-linear" style="font-size:14px"></iconify-icon></span> Бэктестинг</li>
-        </ul>
-        <a href="#" onclick="openModal('register');return false" class="pill pill-ghost pill-md w-full" style="justify-content:center">Начать</a>
-      </div></div>
-      <!-- Starter -->
-      <div class="price-card shell fade-up"><div class="shell-inner">
-        <div>
-          <div class="t-eyebrow mb-3">Starter</div>
-          <div class="flex items-baseline gap-1"><span class="t-h2" style="font-size:44px;line-height:1">$29</span><span class="t-meta">/мес</span></div>
-        </div>
-        <ul class="space-y-3 mt-2" style="flex:1">
-          <li class="flex items-center gap-3 t-body" style="color:rgba(255,255,255,.82);font-size:13px"><span class="tick"><iconify-icon icon="solar:check-circle-bold" style="font-size:14px"></iconify-icon></span> Безлимитные сигналы</li>
-          <li class="flex items-center gap-3 t-body" style="color:rgba(255,255,255,.82);font-size:13px"><span class="tick"><iconify-icon icon="solar:check-circle-bold" style="font-size:14px"></iconify-icon></span> 3 активных бота</li>
-          <li class="flex items-center gap-3 t-body" style="color:rgba(255,255,255,.82);font-size:13px"><span class="tick"><iconify-icon icon="solar:check-circle-bold" style="font-size:14px"></iconify-icon></span> Scalping + SMC</li>
-          <li class="flex items-center gap-3 t-body"><span class="tick off"><iconify-icon icon="solar:close-circle-linear" style="font-size:14px"></iconify-icon></span> Авто-торговля</li>
-          <li class="flex items-center gap-3 t-body"><span class="tick off"><iconify-icon icon="solar:close-circle-linear" style="font-size:14px"></iconify-icon></span> Бэктестинг</li>
-        </ul>
-        <a href="#" onclick="openModal('register');return false" class="pill pill-ghost pill-md w-full" style="justify-content:center">Выбрать</a>
-      </div></div>
-      <!-- Pro (popular) -->
-      <div class="price-card shell price-popular fade-up" style="position:relative">
-        <div class="popular-badge"><div class="shell shell-pill"><div class="shell-inner" style="padding:4px 14px;background:linear-gradient(180deg,#2A5BE8,#143797)"><span class="t-meta" style="color:#fff;font-weight:500;letter-spacing:.14em;text-transform:uppercase;font-size:10px" data-t="pr-pop">Популярный</span></div></div></div>
-        <div class="shell-inner">
-          <div>
-            <div class="t-eyebrow mb-3" style="color:#93AAEC">Pro</div>
-            <div class="flex items-baseline gap-1"><span class="t-h2" style="font-size:44px;line-height:1">$79</span><span class="t-meta">/мес</span></div>
+      <div class="price-card fade-up">
+        <div class="price-card-body">
+          <div class="price-head">
+            <div class="price-name">Free</div>
+            <div class="flex items-baseline gap-2"><span class="price-amt">$0</span><span class="t-meta">/мес</span></div>
           </div>
-          <ul class="space-y-3 mt-2" style="flex:1">
+          <ul class="space-y-3" style="flex:1">
+            <li class="flex items-center gap-3 t-body" style="color:rgba(255,255,255,.82);font-size:13px"><span class="tick"><iconify-icon icon="solar:check-circle-bold" style="font-size:14px"></iconify-icon></span> 3 сигнала/день</li>
+            <li class="flex items-center gap-3 t-body" style="color:rgba(255,255,255,.82);font-size:13px"><span class="tick"><iconify-icon icon="solar:check-circle-bold" style="font-size:14px"></iconify-icon></span> 1 активный бот</li>
+            <li class="flex items-center gap-3 t-body" style="color:rgba(255,255,255,.82);font-size:13px"><span class="tick"><iconify-icon icon="solar:check-circle-bold" style="font-size:14px"></iconify-icon></span> Скальпинг стратегия</li>
+            <li class="flex items-center gap-3 t-body"><span class="tick off"><iconify-icon icon="solar:close-circle-linear" style="font-size:14px"></iconify-icon></span> Авто-торговля</li>
+            <li class="flex items-center gap-3 t-body"><span class="tick off"><iconify-icon icon="solar:close-circle-linear" style="font-size:14px"></iconify-icon></span> Бэктестинг</li>
+          </ul>
+          <a href="#" onclick="openModal('register');return false" class="pill pill-ghost pill-md w-full" style="justify-content:center">Начать</a>
+        </div>
+      </div>
+      <!-- Starter -->
+      <div class="price-card fade-up">
+        <div class="price-card-body">
+          <div class="price-head">
+            <div class="price-name">Starter</div>
+            <div class="flex items-baseline gap-2"><span class="price-amt">$29</span><span class="t-meta">/мес</span></div>
+          </div>
+          <ul class="space-y-3" style="flex:1">
+            <li class="flex items-center gap-3 t-body" style="color:rgba(255,255,255,.82);font-size:13px"><span class="tick"><iconify-icon icon="solar:check-circle-bold" style="font-size:14px"></iconify-icon></span> Безлимитные сигналы</li>
+            <li class="flex items-center gap-3 t-body" style="color:rgba(255,255,255,.82);font-size:13px"><span class="tick"><iconify-icon icon="solar:check-circle-bold" style="font-size:14px"></iconify-icon></span> 3 активных бота</li>
+            <li class="flex items-center gap-3 t-body" style="color:rgba(255,255,255,.82);font-size:13px"><span class="tick"><iconify-icon icon="solar:check-circle-bold" style="font-size:14px"></iconify-icon></span> Scalping + SMC</li>
+            <li class="flex items-center gap-3 t-body"><span class="tick off"><iconify-icon icon="solar:close-circle-linear" style="font-size:14px"></iconify-icon></span> Авто-торговля</li>
+            <li class="flex items-center gap-3 t-body"><span class="tick off"><iconify-icon icon="solar:close-circle-linear" style="font-size:14px"></iconify-icon></span> Бэктестинг</li>
+          </ul>
+          <a href="#" onclick="openModal('register');return false" class="pill pill-ghost pill-md w-full" style="justify-content:center">Выбрать</a>
+        </div>
+      </div>
+      <!-- Pro (popular) -->
+      <div class="price-card price-popular fade-up">
+        <div class="popular-badge" data-t="pr-pop">Популярный</div>
+        <div class="price-card-body">
+          <div class="price-head">
+            <div class="price-name">Pro</div>
+            <div class="flex items-baseline gap-2"><span class="price-amt">$79</span><span class="t-meta">/мес</span></div>
+          </div>
+          <ul class="space-y-3" style="flex:1">
             <li class="flex items-center gap-3 t-body" style="color:rgba(255,255,255,.82);font-size:13px"><span class="tick"><iconify-icon icon="solar:check-circle-bold" style="font-size:14px"></iconify-icon></span> Безлимитные сигналы</li>
             <li class="flex items-center gap-3 t-body" style="color:rgba(255,255,255,.82);font-size:13px"><span class="tick"><iconify-icon icon="solar:check-circle-bold" style="font-size:14px"></iconify-icon></span> 10 активных ботов</li>
             <li class="flex items-center gap-3 t-body" style="color:rgba(255,255,255,.82);font-size:13px"><span class="tick"><iconify-icon icon="solar:check-circle-bold" style="font-size:14px"></iconify-icon></span> Все 3 стратегии</li>
@@ -444,20 +451,22 @@
         </div>
       </div>
       <!-- Elite -->
-      <div class="price-card shell fade-up"><div class="shell-inner">
-        <div>
-          <div class="t-eyebrow mb-3">Elite</div>
-          <div class="flex items-baseline gap-1"><span class="t-h2" style="font-size:44px;line-height:1">$149</span><span class="t-meta">/мес</span></div>
+      <div class="price-card fade-up">
+        <div class="price-card-body">
+          <div class="price-head">
+            <div class="price-name">Elite</div>
+            <div class="flex items-baseline gap-2"><span class="price-amt">$149</span><span class="t-meta">/мес</span></div>
+          </div>
+          <ul class="space-y-3" style="flex:1">
+            <li class="flex items-center gap-3 t-body" style="color:rgba(255,255,255,.82);font-size:13px"><span class="tick"><iconify-icon icon="solar:check-circle-bold" style="font-size:14px"></iconify-icon></span> Всё из Pro</li>
+            <li class="flex items-center gap-3 t-body" style="color:rgba(255,255,255,.82);font-size:13px"><span class="tick"><iconify-icon icon="solar:check-circle-bold" style="font-size:14px"></iconify-icon></span> Безлимитные боты</li>
+            <li class="flex items-center gap-3 t-body" style="color:rgba(255,255,255,.82);font-size:13px"><span class="tick"><iconify-icon icon="solar:check-circle-bold" style="font-size:14px"></iconify-icon></span> Приоритетные сигналы</li>
+            <li class="flex items-center gap-3 t-body" style="color:rgba(255,255,255,.82);font-size:13px"><span class="tick"><iconify-icon icon="solar:check-circle-bold" style="font-size:14px"></iconify-icon></span> API доступ</li>
+            <li class="flex items-center gap-3 t-body" style="color:rgba(255,255,255,.82);font-size:13px"><span class="tick"><iconify-icon icon="solar:check-circle-bold" style="font-size:14px"></iconify-icon></span> Личный менеджер</li>
+          </ul>
+          <a href="#" onclick="openModal('register');return false" class="pill pill-ghost pill-md w-full" style="justify-content:center">Выбрать</a>
         </div>
-        <ul class="space-y-3 mt-2" style="flex:1">
-          <li class="flex items-center gap-3 t-body" style="color:rgba(255,255,255,.82);font-size:13px"><span class="tick"><iconify-icon icon="solar:check-circle-bold" style="font-size:14px"></iconify-icon></span> Всё из Pro</li>
-          <li class="flex items-center gap-3 t-body" style="color:rgba(255,255,255,.82);font-size:13px"><span class="tick"><iconify-icon icon="solar:check-circle-bold" style="font-size:14px"></iconify-icon></span> Безлимитные боты</li>
-          <li class="flex items-center gap-3 t-body" style="color:rgba(255,255,255,.82);font-size:13px"><span class="tick"><iconify-icon icon="solar:check-circle-bold" style="font-size:14px"></iconify-icon></span> Приоритетные сигналы</li>
-          <li class="flex items-center gap-3 t-body" style="color:rgba(255,255,255,.82);font-size:13px"><span class="tick"><iconify-icon icon="solar:check-circle-bold" style="font-size:14px"></iconify-icon></span> API доступ</li>
-          <li class="flex items-center gap-3 t-body" style="color:rgba(255,255,255,.82);font-size:13px"><span class="tick"><iconify-icon icon="solar:check-circle-bold" style="font-size:14px"></iconify-icon></span> Личный менеджер</li>
-        </ul>
-        <a href="#" onclick="openModal('register');return false" class="pill pill-ghost pill-md w-full" style="justify-content:center">Выбрать</a>
-      </div></div>
+      </div>
     </div>
   </div>
 </section>
