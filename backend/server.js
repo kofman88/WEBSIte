@@ -116,6 +116,7 @@ app.use((err, req, res, _next) => {
 
 // ── Start: Passenger or standalone ────────────────────────────────────
 const PORT = config.port || 3000;
+const IS_TEST = process.env.NODE_ENV === 'test' || process.env.VITEST === 'true';
 
 function shutdown(sig) {
   return () => {
@@ -126,7 +127,9 @@ function shutdown(sig) {
   };
 }
 
-if (typeof(PhusionPassenger) !== 'undefined') {
+if (IS_TEST) {
+  // Test env — do not start HTTP listener, just export the app for supertest
+} else if (typeof(PhusionPassenger) !== 'undefined') {
   app.listen('passenger', () => logger.info('CHM Finance running via Passenger'));
   process.on('SIGTERM', shutdown('SIGTERM'));
 } else {
