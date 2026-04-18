@@ -216,48 +216,87 @@
     /* ─── LIGHT THEME ─── */
     html.light{color-scheme:light}
     html.light body{background:#F6F7FB;color:#0A0A0A}
-    html.light #particle-canvas{opacity:.18;filter:invert(1)}
-    html.light .t-h1,html.light .t-h2,html.light .t-h3,html.light h1,html.light h2,html.light h3,html.light h4{color:#0A0A0A}
-    html.light .t-h1 em,html.light .t-h2 em{color:#1D4ED8}
-    html.light .t-body,html.light .t-body-lg,html.light .t-lead{color:rgba(10,10,10,.68)}
-    html.light .t-meta,html.light .t-eyebrow{color:rgba(10,10,10,.48)}
+    html.light #particle-canvas{opacity:.14;filter:invert(1)}
+
+    /* Inline white text overrides (attribute selectors beat inline styles) */
+    html.light [style*="color:rgba(255,255,255,.92)"],
+    html.light [style*="color:rgba(255,255,255,.82)"],
+    html.light [style*="color:rgba(255,255,255,.78)"],
+    html.light [style*="color:rgba(255,255,255,.72)"],
+    html.light [style*="color:rgba(255,255,255,.62)"],
+    html.light [style*="color:#fff"],
+    html.light [style*="color:#FFFFFF"]{color:rgba(10,10,10,.82)!important}
+
+    /* Headings + body text */
+    html.light .t-h1,html.light .t-h2,html.light .t-h3,
+    html.light h1,html.light h2,html.light h3,html.light h4,
+    html.light .logo-mark,html.light .stat-num,html.light .stat-card-value,
+    html.light .price-amt,html.light .promo-label{color:#0A0A0A!important}
+    html.light .t-h1 em,html.light .t-h2 em{color:#1D4ED8!important}
+    html.light .t-body,html.light .t-body-lg,html.light .t-lead{color:rgba(10,10,10,.68)!important}
+    html.light .t-meta,html.light .t-eyebrow,html.light .stat-label,
+    html.light .price-name,html.light .promo-meta{color:rgba(10,10,10,.52)!important}
+    html.light .faq-chevron{color:rgba(10,10,10,.5)!important}
+
+    /* Nav */
     html.light nav#navbar{background:transparent}
     html.light nav#navbar.nav-scrolled{background:rgba(246,247,251,.85);backdrop-filter:blur(24px) saturate(1.4);-webkit-backdrop-filter:blur(24px) saturate(1.4);border-bottom:1px solid rgba(0,0,0,.08)}
-    html.light .nav-link{color:rgba(10,10,10,.62)}
-    html.light .nav-link:hover{color:#0A0A0A}
+    html.light .nav-link{color:rgba(10,10,10,.62)!important}
+    html.light .nav-link:hover{color:#0A0A0A!important}
     html.light .nav-link::after{background:linear-gradient(90deg,transparent,rgba(0,0,0,.3),transparent)}
-    html.light .logo-mark{color:#0A0A0A}
+
+    /* Shells / cards */
     html.light .shell{background:linear-gradient(180deg,rgba(0,0,0,.12) 0%,rgba(0,0,0,.02) 100%)}
-    html.light .shell-inner{background:rgba(255,255,255,.92);box-shadow:inset 0 1px 1px rgba(255,255,255,.9),inset 0 -2px 6px rgba(0,0,0,.04),0 1px 2px rgba(0,0,0,.04),0 8px 24px rgba(0,0,0,.05)}
-    html.light .pill-ghost{background:linear-gradient(180deg,rgba(255,255,255,.95),rgba(255,255,255,.85));color:#0A0A0A;box-shadow:inset 0 1px 1px rgba(255,255,255,.95),inset 0 -1px 2px rgba(0,0,0,.06),0 1px 2px rgba(0,0,0,.08),0 0 0 1px rgba(0,0,0,.08)}
-    html.light .pill-ghost:hover{background:linear-gradient(180deg,#fff,rgba(255,255,255,.95))}
-    html.light .chip{background:linear-gradient(180deg,#fff,rgba(255,255,255,.92));color:#0A0A0A;box-shadow:inset 0 1px 1px rgba(255,255,255,.95),inset 0 -1px 2px rgba(0,0,0,.08),0 1px 2px rgba(0,0,0,.1),0 0 0 1px rgba(0,0,0,.08)}
+    html.light .shell-inner{background:rgba(255,255,255,.94);box-shadow:inset 0 1px 1px rgba(255,255,255,.9),inset 0 -2px 6px rgba(0,0,0,.04),0 1px 2px rgba(0,0,0,.04),0 8px 24px rgba(0,0,0,.05)}
+    html.light .feature-card .shell-inner,
+    html.light .price-card,
+    html.light .faq-item .shell-inner{background:rgba(255,255,255,.94)!important;border-color:rgba(0,0,0,.08)!important}
+    html.light .price-popular{background:linear-gradient(180deg,rgba(29,78,216,.1) 0%,rgba(255,255,255,.95) 60%)!important;border-color:rgba(29,78,216,.35)!important;box-shadow:0 2px 4px rgba(0,0,0,.06),0 25px 50px -12px rgba(29,78,216,.18),inset 0 1px 1px rgba(255,255,255,.9)}
+    html.light .price-popular .price-name{color:#1D4ED8!important}
+    html.light .price-popular .price-amt{color:#1D4ED8!important}
+    html.light .price-popular *{color:rgba(10,10,10,.86)!important}
+    html.light .price-popular .pill-primary{color:#fff!important}
+
+    /* Pills / buttons */
+    html.light .pill-ghost{background:linear-gradient(180deg,rgba(255,255,255,.95),rgba(255,255,255,.85))!important;color:#0A0A0A!important;box-shadow:inset 0 1px 1px rgba(255,255,255,.95),inset 0 -1px 2px rgba(0,0,0,.06),0 1px 2px rgba(0,0,0,.08),0 0 0 1px rgba(0,0,0,.08)}
+    html.light .pill-ghost:hover{background:linear-gradient(180deg,#fff,rgba(255,255,255,.95))!important}
+    html.light .pill-primary{color:#fff!important}
+    html.light .chip{background:linear-gradient(180deg,#fff,rgba(255,255,255,.92))!important;color:#0A0A0A!important;box-shadow:inset 0 1px 1px rgba(255,255,255,.95),inset 0 -1px 2px rgba(0,0,0,.08),0 1px 2px rgba(0,0,0,.1),0 0 0 1px rgba(0,0,0,.08)}
+
+    /* Exchange pills */
+    html.light .shell-pill .shell-inner{background:rgba(255,255,255,.94)!important}
+    html.light .shell-pill span{color:#0A0A0A!important}
+
+    /* Steps / badges / misc */
     html.light .rule{background:linear-gradient(90deg,transparent,rgba(0,0,0,.12),transparent)}
-    html.light .feature-card .shell-inner,html.light .price-card,html.light .faq-item .shell-inner{background:rgba(255,255,255,.92)}
-    html.light .price-popular{background:linear-gradient(180deg,rgba(29,78,216,.1) 0%,rgba(255,255,255,.95) 60%);border-color:rgba(29,78,216,.35)}
-    html.light .price-popular .price-name{color:#1D4ED8}
-    html.light .price-card,html.light .feature-card .shell-inner{border-color:rgba(0,0,0,.08)}
-    html.light .price-card:hover,html.light .feature-card .shell-inner:hover{border-color:rgba(0,0,0,.14);box-shadow:0 1px 2px rgba(0,0,0,.04),0 20px 40px -12px rgba(0,0,0,.1)}
-    html.light .modal-bg{background:rgba(230,234,245,.85);backdrop-filter:blur(18px)}
-    html.light .modal-input{background:rgba(0,0,0,.03);border-color:rgba(0,0,0,.1);color:#0A0A0A}
-    html.light .modal-input:focus{background:rgba(0,0,0,.05);border-color:var(--primary-400)}
-    html.light .promo-stage{background:rgba(0,0,0,.03)}
-    html.light .tick{background:rgba(43,89,54,.14);color:#2B5936}
-    html.light .tick.off{background:rgba(82,37,37,.14);color:rgba(10,10,10,.28)}
-    html.light .hero-halo{opacity:.4}
-    html.light .grid-bg,html.light .grid-lines{opacity:.4}
-    html.light footer{border-top-color:rgba(0,0,0,.08)}
-    html.light footer a{color:rgba(10,10,10,.48)}
-    html.light footer a:hover{color:#0A0A0A}
-    html.light .step-num{background:linear-gradient(180deg,rgba(255,255,255,.9),rgba(255,255,255,.75));color:#1D4ED8;box-shadow:inset 0 1px 1px rgba(255,255,255,.9),inset 0 -2px 6px rgba(0,0,0,.05),0 8px 24px -6px rgba(0,0,0,.15)}
+    html.light .step-num{background:linear-gradient(180deg,rgba(255,255,255,.95),rgba(255,255,255,.8))!important;color:#1D4ED8!important;box-shadow:inset 0 1px 1px rgba(255,255,255,.95),inset 0 -2px 6px rgba(0,0,0,.05),0 8px 24px -6px rgba(0,0,0,.15)}
     html.light .step-line{background:linear-gradient(90deg,transparent,rgba(29,78,216,.4),rgba(92,128,227,.2),transparent)}
     html.light .popular-badge{box-shadow:inset 0 1px 1px rgba(255,255,255,.35),inset 0 -1px 3px rgba(0,0,0,.4),0 4px 12px rgba(29,78,216,.4),0 6px 14px -4px rgba(0,0,0,.2)}
-    html.light .stat-num,html.light .stat-card-value{color:#0A0A0A}
-    html.light .stat-label{color:rgba(10,10,10,.48)}
-    html.light .faq-chevron{color:rgba(10,10,10,.48)}
-    html.light .faq-item.open .shell-inner{background:rgba(255,255,255,.98)}
-    html.light .exch-row .shell-pill .shell-inner,html.light .exchange-pill{background:rgba(255,255,255,.92)}
-    html.light .eyebrow-badge{background:rgba(255,255,255,.92);border-color:rgba(0,0,0,.08)}
+    html.light .eyebrow-badge{background:rgba(255,255,255,.92)!important;border-color:rgba(0,0,0,.08)!important}
+    html.light .tick{background:rgba(43,89,54,.14)!important;color:#2B5936!important}
+    html.light .tick.off{background:rgba(82,37,37,.14)!important;color:rgba(10,10,10,.28)!important}
+
+    /* Modals */
+    html.light .modal-bg{background:rgba(230,234,245,.85)!important;backdrop-filter:blur(18px)}
+    html.light .modal-input{background:rgba(0,0,0,.03)!important;border-color:rgba(0,0,0,.1)!important;color:#0A0A0A!important}
+    html.light .modal-input::placeholder{color:rgba(10,10,10,.3)!important}
+    html.light .modal-input:focus{background:rgba(0,0,0,.05)!important;border-color:var(--primary-400)!important}
+
+    /* Footer */
+    html.light footer{border-top-color:rgba(0,0,0,.08)!important}
+    html.light footer *{color:rgba(10,10,10,.48)!important}
+    html.light footer h4,html.light footer .logo-mark{color:#0A0A0A!important}
+    html.light footer a:hover{color:#0A0A0A!important}
+
+    /* Promo / community */
+    html.light .promo-stage{background:rgba(0,0,0,.04)!important}
+    html.light .promo-wrap .shell{background:linear-gradient(180deg,rgba(0,0,0,.14) 0%,rgba(0,0,0,.02) 100%)!important}
+    html.light .promo-label{color:#0A0A0A!important}
+    html.light .promo-meta{color:rgba(10,10,10,.48)!important}
+
+    /* CTA section glows dimmed */
+    html.light .hero-halo{opacity:.3}
+    html.light .grid-bg,html.light .grid-lines{opacity:.4}
 
     /* ── Utility ── */
     .divider-v{width:1px;height:24px;background:var(--border)}
