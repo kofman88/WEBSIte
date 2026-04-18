@@ -3,11 +3,10 @@
 <head>
   <meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1.0"/>
   <title>CHM Finance — Дашборд</title>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet"/>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet"/>
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js"></script>
   <link rel="stylesheet" href="styles.css"/>
-  <style>body{background:#070b14;color:#f1f5f9;font-family:'Inter',sans-serif}</style>
 </head>
 <body>
 
@@ -39,7 +38,7 @@
       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
       Pro Plan
     </div>
-    <button onclick="Auth.logout()" class="sidebar-link mt-2 text-red-400 hover:text-red-300" style="color:#f87171">
+    <button onclick="Auth.logout()" class="sidebar-link mt-2 text-red-400 hover:text-red-300" style="color:#C8B9B9">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4M16 17l5-5-5-5M21 12H9"/></svg>
       Выйти</button>
   </div>
@@ -48,7 +47,7 @@
 <!-- TOPBAR -->
 <header class="topbar">
   <div class="flex items-center gap-4">
-    <button id="sidebar-toggle" class="lg:hidden" style="background:none;border:none;color:#94a3b8;cursor:pointer">
+    <button id="sidebar-toggle" class="lg:hidden" style="background:none;border:none;color:rgba(255,255,255,.62);cursor:pointer">
       <svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 6h16M4 12h16M4 18h16"/></svg>
     </button>
     <div class="topbar-search"><svg width="16" height="16" fill="none" stroke="#64748b" stroke-width="2"><circle cx="7" cy="7" r="4"/><path d="M14 14l-3-3"/></svg><input placeholder="Поиск..."/></div>
@@ -66,13 +65,13 @@
   <!-- Stats -->
   <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
     <div class="stat-card liquid-glass">
-      <div class="stat-card-icon" style="background:rgba(79,70,229,.1)"><svg width="22" height="22" fill="none" stroke="#818CF8" stroke-width="2"><path d="M21 12V7H5a2 2 0 010-4h14v4M3 5v14a2 2 0 002 2h16v-5M18 12a2 2 0 100 4 2 2 0 000-4z"/></svg></div>
+      <div class="stat-card-icon" style="background:rgba(29,78,216,.4)"><svg width="22" height="22" fill="none" stroke="#5C80E3" stroke-width="2"><path d="M21 12V7H5a2 2 0 010-4h14v4M3 5v14a2 2 0 002 2h16v-5M18 12a2 2 0 100 4 2 2 0 000-4z"/></svg></div>
       <div class="stat-card-label">Баланс портфеля</div>
       <div class="stat-card-value" id="balanceVal">$12,450</div>
       <div class="stat-card-trend up">+5.2% сегодня</div>
     </div>
     <div class="stat-card liquid-glass">
-      <div class="stat-card-icon" style="background:rgba(6,182,212,.1)"><svg width="22" height="22" fill="none" stroke="#06b6d4" stroke-width="2"><path d="M12 2a4 4 0 014 4v1h2a2 2 0 012 2v10a2 2 0 01-2 2H6a2 2 0 01-2-2V9a2 2 0 012-2h2V6a4 4 0 014-4z"/></svg></div>
+      <div class="stat-card-icon" style="background:rgba(6,182,212,.1)"><svg width="22" height="22" fill="none" stroke="#5C80E3" stroke-width="2"><path d="M12 2a4 4 0 014 4v1h2a2 2 0 012 2v10a2 2 0 01-2 2H6a2 2 0 01-2-2V9a2 2 0 012-2h2V6a4 4 0 014-4z"/></svg></div>
       <div class="stat-card-label">Активные боты</div>
       <div class="stat-card-value">4 / 10</div>
       <div class="stat-card-trend up">+1 за неделю</div>
@@ -143,7 +142,7 @@ Sidebar.init('dashboard');
 let eChart;
 function buildChart(days){
   const data=Utils.generateEquityData(days,10000);
-  const cfg={type:'line',data:{labels:data.map(d=>d.date.slice(5)),datasets:[{data:data.map(d=>d.value),borderColor:'#818CF8',backgroundColor:function(ctx){const g=ctx.chart.ctx.createLinearGradient(0,0,0,300);g.addColorStop(0,'rgba(79,70,229,.3)');g.addColorStop(1,'rgba(79,70,229,0)');return g},fill:true,tension:.4,pointRadius:0,borderWidth:2}]},options:{responsive:true,plugins:{legend:{display:false}},scales:{x:{ticks:{color:'#475569',font:{size:10}},grid:{display:false}},y:{ticks:{color:'#475569',font:{size:10},callback:v=>'$'+v.toLocaleString()},grid:{color:'rgba(30,41,59,.3)'}}}}};
+  const cfg={type:'line',data:{labels:data.map(d=>d.date.slice(5)),datasets:[{data:data.map(d=>d.value),borderColor:'#93AAEC',backgroundColor:function(ctx){const g=ctx.chart.ctx.createLinearGradient(0,0,0,300);g.addColorStop(0,'rgba(29,78,216,.4)');g.addColorStop(1,'rgba(29,78,216,.4)');return g},fill:true,tension:.4,pointRadius:0,borderWidth:2}]},options:{responsive:true,plugins:{legend:{display:false}},scales:{x:{ticks:{color:'#475569',font:{size:10}},grid:{display:false}},y:{ticks:{color:'#475569',font:{size:10},callback:v=>'$'+v.toLocaleString()},grid:{color:'rgba(30,41,59,.3)'}}}}};
   if(eChart)eChart.destroy();
   eChart=new Chart(document.getElementById('equityChart'),cfg);
 }
