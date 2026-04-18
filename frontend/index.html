@@ -117,8 +117,10 @@
     .section-narrow{padding:clamp(60px,8vw,100px) 0}
     .container-x{max-width:1280px;margin:0 auto;padding:0 24px}
     .rule{height:1px;background:linear-gradient(90deg,transparent,rgba(255,255,255,.08),transparent);margin:0 auto;max-width:80%}
-    .promo-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:28px;max-width:1040px;margin:0 auto;align-items:start}
-    .promo-wrap{display:block;width:100%;max-width:420px;margin:0 auto;cursor:pointer;text-decoration:none;color:inherit;transition:transform .5s var(--ease),filter .5s var(--ease)}
+    .promo-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:28px;max-width:1240px;margin:0 auto;align-items:start}
+    @media(max-width:1024px){.promo-grid{grid-template-columns:repeat(2,minmax(0,1fr));max-width:840px}}
+    @media(max-width:640px){.promo-grid{grid-template-columns:1fr;max-width:420px;gap:24px}}
+    .promo-wrap{display:block;width:100%;margin:0 auto;cursor:pointer;text-decoration:none;color:inherit;transition:transform .5s var(--ease),filter .5s var(--ease)}
     .promo-wrap:hover{transform:translateY(-6px)}
     .promo-wrap .shell-inner{box-shadow:inset 0 1px 1px rgba(255,255,255,.08),inset 0 -2px 8px rgba(0,0,0,.6),0 1px 2px rgba(0,0,0,.5),0 25px 50px -12px rgba(0,0,0,.7),0 30px 60px rgba(29,78,216,.15)}
     .promo-caption{margin-top:14px;text-align:center}
@@ -772,11 +774,11 @@ const TR={
 // ── Promos (community section) ──
 // Добавляй новые промо сюда. Имена файлов: assets/promo/<file>_{lang}.html
 window.Promos=(function(){
+  // Слоты под 3 промо. Меняй file/label/meta когда зальёшь новые HTML-файлы.
   const ITEMS=[
-    {file:'chm_promo_sl', label:{ru:'Сигналы',   en:'Signals'},  meta:{ru:'ЕЖЕДНЕВНО', en:'DAILY'},    link:'https://t.me/chm_crypto'},
-    // Пример — раскомментируй и добавь файлы chm_promo_case_ru.html / chm_promo_case_en.html
-    // {file:'chm_promo_case', label:{ru:'Разборы',  en:'Case studies'}, meta:{ru:'АРХИВ',  en:'ARCHIVE'}, link:'https://t.me/chm_crypto'},
-    // {file:'chm_promo_anl',  label:{ru:'Аналитика',en:'Analytics'},    meta:{ru:'НЕДЕЛЯ', en:'WEEKLY'}, link:'https://t.me/chm_crypto'},
+    {file:'chm_promo_sl', label:{ru:'Сигналы',   en:'Signals'},     meta:{ru:'ЕЖЕДНЕВНО', en:'DAILY'},   link:'https://t.me/chm_crypto'},
+    {file:'chm_promo_sl', label:{ru:'Разборы',   en:'Case studies'}, meta:{ru:'АРХИВ',    en:'ARCHIVE'}, link:'https://t.me/chm_crypto'},
+    {file:'chm_promo_sl', label:{ru:'Аналитика', en:'Analytics'},    meta:{ru:'НЕДЕЛЯ',   en:'WEEKLY'},  link:'https://t.me/chm_crypto'},
   ];
   const grid=document.getElementById('promoGrid');
   if(!grid)return{apply(){}};
