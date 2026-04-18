@@ -1,10 +1,11 @@
 const http = require('http');
+const path = require('path');
+const { Worker } = require('worker_threads');
 const express = require('express');
 const helmet = require('helmet');
 const cors = require('cors');
 const compression = require('compression');
 const rateLimit = require('express-rate-limit');
-const path = require('path');
 const { z } = require('zod');
 const config = require('./config');
 const logger = require('./utils/logger');
@@ -118,11 +119,59 @@ app.use((err, req, res, _next) => {
 const PORT = config.port || 3000;
 const IS_TEST = process.env.NODE_ENV === 'test' || process.env.VITEST === 'true';
 
+// ── Scanner worker_thread (Phase 6) ──────────────────────────────────
+let scannerWorker = null;
+function startScannerWorker() {
+  if (IS_TEST || process.env.SCANNER_DISABLED === '1') return;
+  try {
+    scannerWorker = new Worker(path.join(__dirname, 'workers', 'signalScanner.js'), {
+      env: process.env,
+    });
+    scannerWorker.on('message', (msg) => {
+      if (!msg || !msg.type) return;
+      if (msg.type === 'signal' && msg.signal) {
+        try { websocketService.broadcastSignal(msg.signal); } catch (e) { /* */ }
+      } else if (msg.type === 'auto_trade_request') {
+        // Phase 10 will hook here
+        logger.debug('auto_trade_request received (not yet wired)', { botId: msg.botId });
+      } else if (msg.type === 'stopped') {
+        logger.info('scanner worker stopped cleanly');
+      }
+    });
+    scannerWorker.on('error', (err) => logger.error('scanner worker error', { err: err.message }));
+    scannerWorker.on('exit', (code) => {
+      logger.warn('scanner worker exited', { code });
+      scannerWorker = null;
+      if (code !== 0 && !scannerShutdownRequested) {
+        // Auto-restart with backoff
+        setTimeout(() => { if (!scannerShutdownRequested) startScannerWorker(); }, 5_000);
+      }
+    });
+    logger.info('scanner worker started');
+  } catch (err) {
+    logger.error('failed to start scanner worker', { err: err.message });
+  }
+}
+
+let scannerShutdownRequested = false;
+async function stopScannerWorker() {
+  scannerShutdownRequested = true;
+  if (!scannerWorker) return;
+  try {
+    scannerWorker.postMessage({ type: 'stop' });
+  } catch (_e) { /* */ }
+  // Give it 3s to stop gracefully then terminate
+  await new Promise((r) => setTimeout(r, 3000));
+  try { scannerWorker.terminate(); } catch (_e) { /* */ }
+  scannerWorker = null;
+}
+
 function shutdown(sig) {
-  return () => {
+  return async () => {
     logger.info('received ' + sig + ', shutting down');
-    try { websocketService.shutdown(); } catch (e) { /* ignore */ }
-    try { db.close(); } catch (e) { /* ignore */ }
+    try { await stopScannerWorker(); } catch (e) { /* */ }
+    try { websocketService.shutdown(); } catch (e) { /* */ }
+    try { db.close(); } catch (e) { /* */ }
     process.exit(0);
   };
 }
@@ -131,14 +180,16 @@ if (IS_TEST) {
   // Test env — do not start HTTP listener, just export the app for supertest
 } else if (typeof(PhusionPassenger) !== 'undefined') {
   app.listen('passenger', () => logger.info('CHM Finance running via Passenger'));
+  startScannerWorker();
   process.on('SIGTERM', shutdown('SIGTERM'));
 } else {
   const server = http.createServer(app);
   websocketService.init({ server });
   server.listen(PORT, () => logger.info('CHM Finance running on port ' + PORT));
+  startScannerWorker();
 
-  process.on('SIGTERM', () => { shutdown('SIGTERM')(); server.close(); });
-  process.on('SIGINT',  () => { shutdown('SIGINT')();  server.close(); });
+  process.on('SIGTERM', () => { shutdown('SIGTERM')().then(() => server.close()); });
+  process.on('SIGINT',  () => { shutdown('SIGINT')().then(() => server.close()); });
 }
 
 module.exports = app;
