@@ -238,9 +238,8 @@
     </div>
     <div class="flex items-center gap-3">
       <button onclick="toggleLang()" class="pill pill-ghost pill-sm" id="langBtn" aria-label="Toggle language">EN</button>
-      <button onclick="toggleTheme()" class="chip" id="themeBtn" title="Toggle theme" aria-label="Toggle theme"><iconify-icon icon="solar:moon-linear"></iconify-icon></button>
-      <a href="#" onclick="openModal('login');return false" class="nav-link hidden sm:inline-block" data-t="nav-login">Войти</a>
-      <a href="#" onclick="openModal('register');return false" class="pill pill-primary pill-sm" data-t="nav-start">Начать</a>
+      <a href="#" onclick="handleLogin(event)" class="nav-link hidden sm:inline-block" id="loginBtn" data-t="nav-login">Войти</a>
+      <a href="#" onclick="openModal('register');return false" class="pill pill-primary pill-sm" data-t="nav-start">Регистрация</a>
     </div>
   </div>
 </nav>
@@ -726,7 +725,7 @@ document.getElementById('registerForm')?.addEventListener('submit',async e=>{
 // ── i18n ──
 let lang=(localStorage.getItem('chm_lang')||'ru');
 const TR={
-  'nav-feat':{ru:'Возможности',en:'Features'},'nav-price':{ru:'Тарифы',en:'Pricing'},'nav-how':{ru:'Как работает',en:'How It Works'},'nav-community':{ru:'Сообщество',en:'Community'},'nav-faq':{ru:'FAQ',en:'FAQ'},'nav-academy':{ru:'Академия',en:'Academy'},'nav-login':{ru:'Войти',en:'Login'},'nav-start':{ru:'Начать',en:'Start'},
+  'nav-feat':{ru:'Возможности',en:'Features'},'nav-price':{ru:'Тарифы',en:'Pricing'},'nav-how':{ru:'Как работает',en:'How It Works'},'nav-community':{ru:'Сообщество',en:'Community'},'nav-faq':{ru:'FAQ',en:'FAQ'},'nav-academy':{ru:'Академия',en:'Academy'},'nav-login':{ru:'Войти',en:'Login'},'nav-start':{ru:'Регистрация',en:'Sign Up'},'nav-cabinet':{ru:'Кабинет',en:'Dashboard'},
   'hero-badge':{ru:'AI-Powered Крипто Платформа',en:'AI-Powered Crypto Platform'},
   'hero-h1a':{ru:'Торгуй умнее.',en:'Trade Smarter.'},'hero-h1b':{ru:'Зарабатывай больше.',en:'Earn More.'},
   'hero-sub':{ru:'Автоматические торговые сигналы и боты для Bybit, Binance, BingX и OKX. Стратегии SMC, Герчика и скальпинг с AI-аналитикой.',en:'Automated trading signals and bots for Bybit, Binance, BingX and OKX. SMC, Gerchik and scalping strategies with AI analytics.'},
@@ -855,14 +854,19 @@ function applyLang(){
 function toggleLang(){lang=lang==='ru'?'en':'ru';localStorage.setItem('chm_lang',lang);applyLang()}
 applyLang();
 
-// ── Theme toggle ──
-function toggleTheme(){
-  document.documentElement.classList.toggle('light');
-  const isLight=document.documentElement.classList.contains('light');
-  localStorage.setItem('chm_theme',isLight?'light':'dark');
-  const b=document.getElementById('themeBtn');if(b)b.innerHTML='<iconify-icon icon="solar:'+(isLight?'sun-linear':'moon-linear')+'"></iconify-icon>'
+// ── Login button: если залогинен — в дашборд, иначе модалка ──
+function handleLogin(e){
+  if(e&&e.preventDefault)e.preventDefault();
+  try{if(window.Auth&&Auth.isLoggedIn()){location.href='dashboard.html';return false}}catch(err){}
+  openModal('login');return false;
 }
-(function(){if(localStorage.getItem('chm_theme')==='light'){document.documentElement.classList.add('light');const b=document.getElementById('themeBtn');if(b)b.innerHTML='<iconify-icon icon="solar:sun-linear"></iconify-icon>'}})();
+// Если уже залогинен — заменим текст "Войти" на "Кабинет"
+(function(){try{
+  if(window.Auth&&Auth.isLoggedIn()){
+    const b=document.getElementById('loginBtn');
+    if(b){b.setAttribute('data-t','nav-cabinet');b.textContent=(lang==='ru'?'Кабинет':'Dashboard')}
+  }
+}catch(e){}})();
 
 // ── Open login via URL ?login ──
 if(new URLSearchParams(location.search).get('login'))openModal('login');
