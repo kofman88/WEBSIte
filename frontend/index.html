@@ -117,6 +117,9 @@
     .section-narrow{padding:clamp(60px,8vw,100px) 0}
     .container-x{max-width:1280px;margin:0 auto;padding:0 24px}
     .rule{height:1px;background:linear-gradient(90deg,transparent,rgba(255,255,255,.08),transparent);margin:0 auto;max-width:80%}
+    .promo-wrap{display:inline-block;width:100%;max-width:420px;margin:0 auto;cursor:pointer;transition:transform .5s var(--ease),filter .5s var(--ease)}
+    .promo-wrap:hover{transform:translateY(-6px)}
+    .promo-wrap .shell-inner{box-shadow:inset 0 1px 1px rgba(255,255,255,.08),inset 0 -2px 8px rgba(0,0,0,.6),0 1px 2px rgba(0,0,0,.5),0 25px 50px -12px rgba(0,0,0,.7),0 30px 60px rgba(29,78,216,.15)}
     .eyebrow-badge{display:inline-flex;align-items:center;gap:8px;padding:8px 18px;border-radius:var(--radius-pill);background:rgba(255,255,255,.03);border:1px solid var(--border);box-shadow:inset 0 1px 1px rgba(255,255,255,.04)}
     .eyebrow-badge .dot{width:6px;height:6px;border-radius:50%;background:#10b981;box-shadow:0 0 12px rgba(16,185,129,.7)}
 
@@ -220,6 +223,7 @@
       <a href="#features" class="nav-link" data-t="nav-feat">Возможности</a>
       <a href="#pricing" class="nav-link" data-t="nav-price">Тарифы</a>
       <a href="#how" class="nav-link" data-t="nav-how">Как работает</a>
+      <a href="#community" class="nav-link" data-t="nav-community">Сообщество</a>
       <a href="#faq" class="nav-link" data-t="nav-faq">FAQ</a>
       <a href="academy/" class="nav-link" data-t="nav-academy">Академия</a>
     </div>
@@ -471,9 +475,30 @@
   </div>
 </section>
 
-<!-- FAQ -->
+<!-- COMMUNITY / PROMO -->
 <div class="rule"></div>
-<section id="faq" class="section">
+<section id="community" class="section">
+  <div class="container-x" style="max-width:820px;text-align:center">
+    <div class="t-eyebrow fade-up" style="margin-bottom:14px" data-t="pm-eyebrow">COMMUNITY</div>
+    <h2 class="t-h2 fade-up" data-t="pm-title">Алгоритм вместо <em>интуиции</em></h2>
+    <p class="t-body-lg fade-up" style="margin:18px auto 40px;max-width:520px" data-t="pm-sub">Присоединяйся к CryptoХимия — ежедневная аналитика, сигналы и кейсы в Telegram</p>
+    <a href="https://t.me/chm_crypto" target="_blank" rel="noopener" class="promo-wrap fade-up">
+      <div class="shell">
+        <div class="shell-inner" style="padding:0;overflow:hidden;background:#0A0F1F">
+          <video id="promoVideo" autoplay muted loop playsinline preload="auto" style="display:block;width:100%;height:auto;border-radius:inherit">
+            <source id="promoSrc" src="assets/promo/promo-ru.mp4" type="video/mp4"/>
+            Ваш браузер не поддерживает видео.
+          </video>
+        </div>
+      </div>
+    </a>
+    <div class="fade-up" style="margin-top:32px">
+      <a href="https://t.me/chm_crypto" target="_blank" rel="noopener" class="pill pill-primary pill-md">
+        <iconify-icon icon="solar:chat-line-linear"></iconify-icon> t.me/chm_crypto
+      </a>
+    </div>
+  </div>
+</section>
   <div class="container-x" style="max-width:820px">
     <div class="text-center mb-16">
       <div class="eyebrow-badge fade-up" style="margin-bottom:22px">
@@ -701,7 +726,7 @@ document.getElementById('registerForm')?.addEventListener('submit',async e=>{
 // ── i18n ──
 let lang=(localStorage.getItem('chm_lang')||'ru');
 const TR={
-  'nav-feat':{ru:'Возможности',en:'Features'},'nav-price':{ru:'Тарифы',en:'Pricing'},'nav-how':{ru:'Как работает',en:'How It Works'},'nav-faq':{ru:'FAQ',en:'FAQ'},'nav-academy':{ru:'Академия',en:'Academy'},'nav-login':{ru:'Войти',en:'Login'},'nav-start':{ru:'Начать',en:'Start'},
+  'nav-feat':{ru:'Возможности',en:'Features'},'nav-price':{ru:'Тарифы',en:'Pricing'},'nav-how':{ru:'Как работает',en:'How It Works'},'nav-community':{ru:'Сообщество',en:'Community'},'nav-faq':{ru:'FAQ',en:'FAQ'},'nav-academy':{ru:'Академия',en:'Academy'},'nav-login':{ru:'Войти',en:'Login'},'nav-start':{ru:'Начать',en:'Start'},
   'hero-badge':{ru:'AI-Powered Крипто Платформа',en:'AI-Powered Crypto Platform'},
   'hero-h1a':{ru:'Торгуй умнее.',en:'Trade Smarter.'},'hero-h1b':{ru:'Зарабатывай больше.',en:'Earn More.'},
   'hero-sub':{ru:'Автоматические торговые сигналы и боты для Bybit, Binance, BingX и OKX. Стратегии SMC, Герчика и скальпинг с AI-аналитикой.',en:'Automated trading signals and bots for Bybit, Binance, BingX and OKX. SMC, Gerchik and scalping strategies with AI analytics.'},
@@ -734,6 +759,9 @@ const TR={
   'fa5':{ru:'Вы выбираете стратегию, пару, таймфрейм и период. Система тестирует стратегию на исторических данных и показывает метрики: Win Rate, Sharpe Ratio, Max Drawdown и другие.',en:'You choose strategy, pair, timeframe and period. The system tests on historical data and shows metrics: Win Rate, Sharpe Ratio, Max Drawdown and more.'},
   'fq6':{ru:'Есть ли бесплатный тариф?',en:'Is there a free plan?'},
   'fa6':{ru:'Да! Бесплатный план включает 3 сигнала в день и 1 активного бота. Этого достаточно чтобы оценить платформу.',en:'Yes! Free plan includes 3 signals per day and 1 active bot. Enough to evaluate the platform.'},
+  'pm-eyebrow':{ru:'СООБЩЕСТВО',en:'COMMUNITY'},
+  'pm-title':{ru:'Алгоритм вместо <em>интуиции</em>',en:'Algorithm over <em>intuition</em>'},
+  'pm-sub':{ru:'Присоединяйся к CryptoХимия — ежедневная аналитика, сигналы и кейсы в Telegram',en:'Join CryptoХимия — daily analytics, signals and case studies on Telegram'},
   'cta-title':{ru:'Готов <em>начать</em>?',en:'Ready to <em>begin</em>?'},
   'cta-sub':{ru:'Присоединяйся к тысячам трейдеров, которые уже используют CHM Finance',en:'Join thousands of traders already using CHM Finance'},
   'cta-btn':{ru:'Создать аккаунт бесплатно',en:'Create Free Account'},
@@ -750,6 +778,8 @@ function applyLang(){
   document.documentElement.lang=lang;
   document.getElementById('langBtn').textContent=lang==='ru'?'EN':'RU';
   document.querySelectorAll('[data-t]').forEach(el=>{const k=el.getAttribute('data-t');if(TR[k]&&TR[k][lang]!==undefined)el.innerHTML=TR[k][lang]});
+  const pv=document.getElementById('promoVideo'),ps=document.getElementById('promoSrc');
+  if(pv&&ps){const want='assets/promo/promo-'+lang+'.mp4';if(!ps.getAttribute('src').endsWith(want.split('/').pop())){ps.src=want;pv.load();pv.play().catch(()=>{})}}
   try{window.I18n&&I18n.setLang(lang)}catch(e){}
 }
 function toggleLang(){lang=lang==='ru'?'en':'ru';localStorage.setItem('chm_lang',lang);applyLang()}
