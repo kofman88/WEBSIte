@@ -124,7 +124,7 @@
     .promo-wrap .shell{padding:1px;border-radius:var(--radius-lg);background:linear-gradient(180deg,rgba(255,255,255,.18) 0%,rgba(255,255,255,.02) 100%);overflow:hidden}
     .promo-wrap .shell-inner{padding:0;overflow:hidden;border-radius:calc(var(--radius-lg) - 1px);box-shadow:inset 0 1px 1px rgba(255,255,255,.08),inset 0 -2px 8px rgba(0,0,0,.6),0 1px 2px rgba(0,0,0,.5),0 25px 50px -12px rgba(0,0,0,.7),0 30px 60px rgba(29,78,216,.12)}
     .promo-stage{position:relative;width:100%;aspect-ratio:800/1100;overflow:hidden;background:#0A0F1F;border-radius:inherit;isolation:isolate}
-    .promo-stage iframe{position:absolute;top:0;left:0;width:800px;height:1100px;border:0;background:transparent;pointer-events:none;transform-origin:top left;transform:scale(var(--scale,.5))}
+    .promo-stage iframe{position:absolute;top:0;left:0;width:800px;height:1100px;border:0;background:transparent;pointer-events:none;transform-origin:top left;will-change:transform}
     .promo-stage::after{content:'';position:absolute;inset:0;pointer-events:none;border-radius:inherit;box-shadow:inset 0 1px 1px rgba(255,255,255,.06),inset 0 -1px 2px rgba(0,0,0,.5)}
     .promo-caption{margin-top:18px;text-align:center}
     .promo-caption .promo-label{font-family:'Inter',sans-serif;font-weight:600;font-size:16px;line-height:22px;color:#fff;letter-spacing:-.025em}
@@ -785,11 +785,37 @@ window.Promos=(function(){
   if(!grid)return{apply(){}};
   function fitStage(stage){
     const f=stage.querySelector('iframe');if(!f)return;
-    let W=800,H=1100;
-    try{const d=f.contentDocument;if(d&&d.body){const body=d.body,html=d.documentElement;const w=Math.max(body.scrollWidth,html.scrollWidth,body.offsetWidth,html.offsetWidth);const h=Math.max(body.scrollHeight,html.scrollHeight,body.offsetHeight,html.offsetHeight);if(w>100)W=w;if(h>100)H=h}}catch(e){}
-    f.style.width=W+'px';f.style.height=H+'px';
+    let W=800,H=1100,bx=0,by=0,bodyW=800,bodyH=1100;
+    try{
+      const d=f.contentDocument;
+      if(d&&d.body){
+        const body=d.body,html=d.documentElement;
+        bodyW=Math.max(body.scrollWidth,html.scrollWidth,body.offsetWidth,800);
+        bodyH=Math.max(body.scrollHeight,html.scrollHeight,body.offsetHeight,1100);
+        W=bodyW;H=bodyH;
+        // Auto-detect mockup: largest visible element with rounded corners (≥200x300)
+        const view=d.defaultView||window;
+        const all=body.querySelectorAll('*');
+        let best=null,bestScore=0;
+        for(let i=0;i<all.length;i++){
+          const el=all[i];if(el===body||el===html)continue;
+          const r=el.getBoundingClientRect();
+          if(r.width<200||r.height<300)continue;
+          const st=view.getComputedStyle(el);
+          if(st.display==='none'||st.visibility==='hidden'||parseFloat(st.opacity)===0)continue;
+          const br=Math.max(parseFloat(st.borderTopLeftRadius)||0,parseFloat(st.borderRadius)||0);
+          const score=r.width*r.height+(br>12?400000:0)+(st.backgroundColor!=='rgba(0, 0, 0, 0)'&&st.backgroundColor!=='transparent'?50000:0);
+          if(score>bestScore){bestScore=score;best=el}
+        }
+        if(best){const r=best.getBoundingClientRect();W=r.width;H=r.height;bx=r.left;by=r.top}
+      }
+    }catch(e){}
+    f.style.width=bodyW+'px';f.style.height=bodyH+'px';
     stage.style.aspectRatio=W+' / '+H;
-    const sw=stage.clientWidth;if(sw>0)stage.style.setProperty('--scale',(sw/W).toString());
+    const sw=stage.clientWidth;
+    const scale=sw>0?sw/W:1;
+    f.style.transform='translate('+(-bx*scale)+'px,'+(-by*scale)+'px) scale('+scale+')';
+    stage.style.setProperty('--scale',scale.toString());
   }
   function resolveFile(it,lang){
     if(it.files&&typeof it.files==='object')return it.files[lang];
