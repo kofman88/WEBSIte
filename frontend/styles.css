@@ -732,6 +732,13 @@ tr:hover td { background: rgba(255, 255, 255, 0.02); }
 .confidence-bar-fill.medium { background: linear-gradient(90deg, #5C80E3, #1D4ED8); box-shadow: 0 0 10px rgba(29, 78, 216, 0.4); }
 .confidence-bar-fill.low    { background: linear-gradient(90deg, #826262, #522525); box-shadow: 0 0 10px rgba(82, 37, 37, 0.4); }
 
+/* --- Tailwind radii overrides (normalize to our system 12/16/24/9999) --- */
+.rounded-md  { border-radius: 12px !important; }
+.rounded-lg  { border-radius: 12px !important; }
+.rounded-xl  { border-radius: 16px !important; }
+.rounded-2xl { border-radius: 24px !important; }
+.rounded-3xl { border-radius: 24px !important; }
+
 /* --- Tailwind utility colour overrides (legacy slate/indigo → new palette) --- */
 .bg-slate-700, .bg-slate-700\/50, .bg-slate-800, .bg-slate-800\/30, .bg-slate-800\/50, .bg-slate-900, .bg-slate-900\/50 { background-color: rgba(255, 255, 255, 0.04) !important; }
 .border-slate-700, .border-slate-800, .border-slate-800\/50, .border-slate-900 { border-color: rgba(255, 255, 255, 0.08) !important; }
