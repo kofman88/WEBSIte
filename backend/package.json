@@ -1,32 +1,51 @@
 {
   "name": "chmup-backend",
-  "version": "2.0.0",
-  "description": "Backend for chmup.top - crypto trading bot platform with signals, subscriptions, and wallets",
+  "version": "3.0.0",
+  "description": "CHM Finance — crypto trading platform (signals, bots, backtests, auto-trade, payments)",
   "main": "server.js",
   "scripts": {
     "start": "node server.js",
-    "dev": "nodemon server.js"
+    "dev": "nodemon server.js",
+    "worker": "node workers/signalScanner.js",
+    "worker:dev": "nodemon workers/signalScanner.js",
+    "test": "vitest",
+    "test:run": "vitest run",
+    "test:e2e": "vitest run tests/e2e",
+    "lint": "eslint . --ext .js",
+    "db:reset": "node utils/db-reset.js",
+    "db:seed": "node utils/db-seed.js"
   },
-  "keywords": ["trading", "bot", "backtest", "crypto", "signals"],
-  "author": "",
-  "license": "MIT",
+  "engines": {
+    "node": ">=18.0.0"
+  },
   "dependencies": {
-    "express": "^4.18.2",
-    "cors": "^2.8.5",
-    "dotenv": "^16.3.1",
-    "better-sqlite3": "^9.2.2",
+    "better-sqlite3": "^11.8.0",
     "bcryptjs": "^2.4.3",
+    "ccxt": "^4.5.0",
+    "compression": "^1.7.5",
+    "cors": "^2.8.5",
+    "date-fns": "^4.1.0",
+    "decimal.js": "^10.4.3",
+    "dotenv": "^16.4.5",
+    "express": "^4.21.0",
+    "express-rate-limit": "^7.4.0",
+    "helmet": "^8.0.0",
     "jsonwebtoken": "^9.0.2",
-    "ccxt": "^4.2.1",
-    "axios": "^1.6.2",
-    "uuid": "^9.0.1",
-    "helmet": "^7.1.0",
-    "express-rate-limit": "^7.1.5",
-    "compression": "^1.7.4",
-    "ws": "^8.16.0",
-    "node-cron": "^3.0.3"
+    "node-cron": "^3.0.3",
+    "p-queue": "^8.0.1",
+    "stripe": "^17.5.0",
+    "uuid": "^10.0.0",
+    "winston": "^3.15.0",
+    "winston-daily-rotate-file": "^5.0.0",
+    "ws": "^8.18.0",
+    "zod": "^3.23.0"
   },
   "devDependencies": {
-    "nodemon": "^3.0.2"
+    "@vitest/ui": "^2.1.0",
+    "eslint": "^9.14.0",
+    "eslint-plugin-security": "^3.0.1",
+    "nodemon": "^3.1.7",
+    "supertest": "^7.0.0",
+    "vitest": "^2.1.0"
   }
 }
