@@ -123,9 +123,11 @@
     .promo-wrap{display:block;width:100%;margin:0 auto;cursor:pointer;text-decoration:none;color:inherit;transition:transform .5s var(--ease),filter .5s var(--ease)}
     .promo-wrap:hover{transform:translateY(-6px)}
     .promo-wrap .shell-inner{box-shadow:inset 0 1px 1px rgba(255,255,255,.08),inset 0 -2px 8px rgba(0,0,0,.6),0 1px 2px rgba(0,0,0,.5),0 25px 50px -12px rgba(0,0,0,.7),0 30px 60px rgba(29,78,216,.15)}
-    .promo-caption{margin-top:14px;text-align:center}
-    .promo-caption .promo-label{font-family:'Inter',sans-serif;font-weight:600;font-size:14px;line-height:20px;color:#fff;letter-spacing:-.025em}
-    .promo-caption .promo-meta{font-family:'Inter',sans-serif;font-weight:500;font-size:11px;line-height:16px;color:var(--text-mute,rgba(255,255,255,.38));letter-spacing:.14em;text-transform:uppercase;margin-top:4px}
+    .promo-stage{position:relative;width:100%;aspect-ratio:800/1100;overflow:hidden;background:#0A0F1F}
+    .promo-stage iframe{position:absolute;top:0;left:0;width:800px;height:1100px;border:0;background:transparent;pointer-events:none;transform-origin:top left;transform:scale(var(--scale,.44))}
+    .promo-caption{margin-top:16px;text-align:center}
+    .promo-caption .promo-label{font-family:'Inter',sans-serif;font-weight:600;font-size:15px;line-height:22px;color:#fff;letter-spacing:-.025em}
+    .promo-caption .promo-meta{font-family:'Inter',sans-serif;font-weight:500;font-size:10px;line-height:14px;color:var(--text-mute,rgba(255,255,255,.38));letter-spacing:.2em;text-transform:uppercase;margin-top:6px}
     .eyebrow-badge{display:inline-flex;align-items:center;gap:8px;padding:8px 18px;border-radius:var(--radius-pill);background:rgba(255,255,255,.03);border:1px solid var(--border);box-shadow:inset 0 1px 1px rgba(255,255,255,.04)}
     .eyebrow-badge .dot{width:6px;height:6px;border-radius:50%;background:#10b981;box-shadow:0 0 12px rgba(16,185,129,.7)}
 
@@ -774,26 +776,37 @@ const TR={
 // ── Promos (community section) ──
 // Добавляй новые промо сюда. Имена файлов: assets/promo/<file>_{lang}.html
 window.Promos=(function(){
-  // Слоты под 3 промо. Меняй file/label/meta когда зальёшь новые HTML-файлы.
   const ITEMS=[
-    {file:'chm_promo_sl', label:{ru:'Сигналы',   en:'Signals'},     meta:{ru:'ЕЖЕДНЕВНО', en:'DAILY'},   link:'https://t.me/chm_crypto'},
-    {file:'chm_promo_sl', label:{ru:'Разборы',   en:'Case studies'}, meta:{ru:'АРХИВ',    en:'ARCHIVE'}, link:'https://t.me/chm_crypto'},
-    {file:'chm_promo_sl', label:{ru:'Аналитика', en:'Analytics'},    meta:{ru:'НЕДЕЛЯ',   en:'WEEKLY'},  link:'https://t.me/chm_crypto'},
+    {file:'chm_promo_sl', label:{ru:'Сигналы', en:'Signals'}, meta:{ru:'ЕЖЕДНЕВНО', en:'DAILY'}, link:'https://t.me/chm_crypto'},
+    // {file:'chm_promo_case', label:{ru:'Разборы', en:'Case studies'}, meta:{ru:'АРХИВ', en:'ARCHIVE'}, link:'https://t.me/chm_crypto'},
+    // {file:'chm_promo_anl',  label:{ru:'Аналитика', en:'Analytics'},  meta:{ru:'НЕДЕЛЯ', en:'WEEKLY'},  link:'https://t.me/chm_crypto'},
   ];
   const grid=document.getElementById('promoGrid');
   if(!grid)return{apply(){}};
+  function fitStage(stage){
+    const f=stage.querySelector('iframe');if(!f)return;
+    let W=800,H=1100;
+    try{const d=f.contentDocument;if(d&&d.body){const body=d.body,html=d.documentElement;const w=Math.max(body.scrollWidth,html.scrollWidth,body.offsetWidth,html.offsetWidth);const h=Math.max(body.scrollHeight,html.scrollHeight,body.offsetHeight,html.offsetHeight);if(w>100)W=w;if(h>100)H=h}}catch(e){}
+    f.style.width=W+'px';f.style.height=H+'px';
+    stage.style.aspectRatio=W+' / '+H;
+    const sw=stage.clientWidth;if(sw>0)stage.style.setProperty('--scale',(sw/W).toString());
+  }
   function build(lang){
+    // Если всего 1 промо — центрируем и делаем карточку побольше
+    const singleStyle=ITEMS.length===1?'max-width:420px;grid-column:1/-1;justify-self:center':'';
+    grid.style.gridTemplateColumns=ITEMS.length===1?'1fr':'';
     grid.innerHTML=ITEMS.map((it,i)=>`
-      <a href="${it.link}" target="_blank" rel="noopener" class="promo-wrap" data-i="${i}">
-        <div class="shell"><div class="shell-inner" style="padding:0;overflow:hidden;background:#0A0F1F">
-          <iframe data-promo="${i}" src="assets/promo/${it.file}_${lang}.html" title="${it.label[lang]}" loading="lazy" referrerpolicy="no-referrer" sandbox="allow-scripts allow-same-origin" scrolling="no" style="display:block;width:100%;height:560px;border:0;background:transparent;pointer-events:none;transition:height .3s ease"></iframe>
+      <a href="${it.link}" target="_blank" rel="noopener" class="promo-wrap" data-i="${i}" style="${singleStyle}">
+        <div class="shell"><div class="shell-inner" style="padding:0;overflow:hidden">
+          <div class="promo-stage"><iframe data-promo="${i}" src="assets/promo/${it.file}_${lang}.html" title="${it.label[lang]}" loading="lazy" referrerpolicy="no-referrer" sandbox="allow-scripts allow-same-origin" scrolling="no"></iframe></div>
         </div></div>
         <div class="promo-caption"><div class="promo-label">${it.label[lang]}</div><div class="promo-meta">${it.meta[lang]}</div></div>
       </a>`).join('');
-    grid.querySelectorAll('iframe[data-promo]').forEach(f=>{
-      const fit=()=>{try{const d=f.contentDocument;if(!d||!d.body)return;const h=Math.max(d.body.scrollHeight,d.documentElement.scrollHeight);if(h>0)f.style.height=h+'px'}catch(e){}};
-      f.addEventListener('load',()=>{fit();setTimeout(fit,300);setTimeout(fit,1000)});
-      window.addEventListener('resize',fit);
+    grid.querySelectorAll('.promo-stage').forEach(stage=>{
+      const f=stage.querySelector('iframe');
+      const run=()=>fitStage(stage);
+      f.addEventListener('load',()=>{run();setTimeout(run,200);setTimeout(run,600);setTimeout(run,1500)});
+      if(window.ResizeObserver){new ResizeObserver(run).observe(stage)}else{window.addEventListener('resize',run)}
     });
   }
   let current=null;
