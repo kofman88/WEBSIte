@@ -485,10 +485,7 @@
     <a href="https://t.me/chm_crypto" target="_blank" rel="noopener" class="promo-wrap fade-up">
       <div class="shell">
         <div class="shell-inner" style="padding:0;overflow:hidden;background:#0A0F1F">
-          <video id="promoVideo" autoplay muted loop playsinline preload="auto" style="display:block;width:100%;height:auto;border-radius:inherit">
-            <source id="promoSrc" src="assets/promo/promo-ru.mp4" type="video/mp4"/>
-            Ваш браузер не поддерживает видео.
-          </video>
+          <iframe id="promoFrame" src="assets/promo/promo-ru.html" title="CryptoХимия" loading="lazy" referrerpolicy="no-referrer" sandbox="allow-scripts allow-same-origin" style="display:block;width:100%;aspect-ratio:800/1100;border:0;background:transparent;pointer-events:none"></iframe>
         </div>
       </div>
     </a>
@@ -778,8 +775,8 @@ function applyLang(){
   document.documentElement.lang=lang;
   document.getElementById('langBtn').textContent=lang==='ru'?'EN':'RU';
   document.querySelectorAll('[data-t]').forEach(el=>{const k=el.getAttribute('data-t');if(TR[k]&&TR[k][lang]!==undefined)el.innerHTML=TR[k][lang]});
-  const pv=document.getElementById('promoVideo'),ps=document.getElementById('promoSrc');
-  if(pv&&ps){const want='assets/promo/promo-'+lang+'.mp4';if(!ps.getAttribute('src').endsWith(want.split('/').pop())){ps.src=want;pv.load();pv.play().catch(()=>{})}}
+  const pf=document.getElementById('promoFrame');
+  if(pf){const want='assets/promo/promo-'+lang+'.html';if(!pf.getAttribute('src').endsWith(want.split('/').pop()))pf.src=want}
   try{window.I18n&&I18n.setLang(lang)}catch(e){}
 }
 function toggleLang(){lang=lang==='ru'?'en':'ru';localStorage.setItem('chm_lang',lang);applyLang()}
