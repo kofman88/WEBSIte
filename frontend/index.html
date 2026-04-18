@@ -117,9 +117,13 @@
     .section-narrow{padding:clamp(60px,8vw,100px) 0}
     .container-x{max-width:1280px;margin:0 auto;padding:0 24px}
     .rule{height:1px;background:linear-gradient(90deg,transparent,rgba(255,255,255,.08),transparent);margin:0 auto;max-width:80%}
-    .promo-wrap{display:inline-block;width:100%;max-width:420px;margin:0 auto;cursor:pointer;transition:transform .5s var(--ease),filter .5s var(--ease)}
+    .promo-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:28px;max-width:1040px;margin:0 auto;align-items:start}
+    .promo-wrap{display:block;width:100%;max-width:420px;margin:0 auto;cursor:pointer;text-decoration:none;color:inherit;transition:transform .5s var(--ease),filter .5s var(--ease)}
     .promo-wrap:hover{transform:translateY(-6px)}
     .promo-wrap .shell-inner{box-shadow:inset 0 1px 1px rgba(255,255,255,.08),inset 0 -2px 8px rgba(0,0,0,.6),0 1px 2px rgba(0,0,0,.5),0 25px 50px -12px rgba(0,0,0,.7),0 30px 60px rgba(29,78,216,.15)}
+    .promo-caption{margin-top:14px;text-align:center}
+    .promo-caption .promo-label{font-family:'Inter',sans-serif;font-weight:600;font-size:14px;line-height:20px;color:#fff;letter-spacing:-.025em}
+    .promo-caption .promo-meta{font-family:'Inter',sans-serif;font-weight:500;font-size:11px;line-height:16px;color:var(--text-mute,rgba(255,255,255,.38));letter-spacing:.14em;text-transform:uppercase;margin-top:4px}
     .eyebrow-badge{display:inline-flex;align-items:center;gap:8px;padding:8px 18px;border-radius:var(--radius-pill);background:rgba(255,255,255,.03);border:1px solid var(--border);box-shadow:inset 0 1px 1px rgba(255,255,255,.04)}
     .eyebrow-badge .dot{width:6px;height:6px;border-radius:50%;background:#10b981;box-shadow:0 0 12px rgba(16,185,129,.7)}
 
@@ -482,13 +486,7 @@
     <div class="t-eyebrow fade-up" style="margin-bottom:14px" data-t="pm-eyebrow">COMMUNITY</div>
     <h2 class="t-h2 fade-up" data-t="pm-title">Алгоритм вместо <em>интуиции</em></h2>
     <p class="t-body-lg fade-up" style="margin:18px auto 40px;max-width:520px" data-t="pm-sub">Присоединяйся к CryptoХимия — ежедневная аналитика, сигналы и кейсы в Telegram</p>
-    <a href="https://t.me/chm_crypto" target="_blank" rel="noopener" class="promo-wrap fade-up">
-      <div class="shell">
-        <div class="shell-inner" style="padding:0;overflow:hidden;background:#0A0F1F">
-          <iframe id="promoFrame" src="assets/promo/promo-ru.html" title="CryptoХимия" loading="lazy" referrerpolicy="no-referrer" sandbox="allow-scripts allow-same-origin" scrolling="no" style="display:block;width:100%;height:560px;border:0;background:transparent;pointer-events:none;transition:height .3s ease"></iframe>
-        </div>
-      </div>
-    </a>
+    <div class="promo-grid fade-up" id="promoGrid"></div>
     <div class="fade-up" style="margin-top:32px">
       <a href="https://t.me/chm_crypto" target="_blank" rel="noopener" class="pill pill-primary pill-md">
         <iconify-icon icon="solar:chat-line-linear"></iconify-icon> t.me/chm_crypto
@@ -771,17 +769,40 @@ const TR={
   'ml-email':{ru:'EMAIL',en:'EMAIL'},'ml-pass':{ru:'ПАРОЛЬ',en:'PASSWORD'},'mr-pass2':{ru:'ПОВТОРИТЕ ПАРОЛЬ',en:'CONFIRM PASSWORD'},
   'mr-agree':{ru:'Я согласен с',en:'I agree to the'},'mr-terms':{ru:'условиями',en:'terms'}
 };
+// ── Promos (community section) ──
+// Добавляй новые промо сюда. Имена файлов: assets/promo/<file>_{lang}.html
+window.Promos=(function(){
+  const ITEMS=[
+    {file:'chm_promo_sl', label:{ru:'Сигналы',   en:'Signals'},  meta:{ru:'ЕЖЕДНЕВНО', en:'DAILY'},    link:'https://t.me/chm_crypto'},
+    // Пример — раскомментируй и добавь файлы chm_promo_case_ru.html / chm_promo_case_en.html
+    // {file:'chm_promo_case', label:{ru:'Разборы',  en:'Case studies'}, meta:{ru:'АРХИВ',  en:'ARCHIVE'}, link:'https://t.me/chm_crypto'},
+    // {file:'chm_promo_anl',  label:{ru:'Аналитика',en:'Analytics'},    meta:{ru:'НЕДЕЛЯ', en:'WEEKLY'}, link:'https://t.me/chm_crypto'},
+  ];
+  const grid=document.getElementById('promoGrid');
+  if(!grid)return{apply(){}};
+  function build(lang){
+    grid.innerHTML=ITEMS.map((it,i)=>`
+      <a href="${it.link}" target="_blank" rel="noopener" class="promo-wrap" data-i="${i}">
+        <div class="shell"><div class="shell-inner" style="padding:0;overflow:hidden;background:#0A0F1F">
+          <iframe data-promo="${i}" src="assets/promo/${it.file}_${lang}.html" title="${it.label[lang]}" loading="lazy" referrerpolicy="no-referrer" sandbox="allow-scripts allow-same-origin" scrolling="no" style="display:block;width:100%;height:560px;border:0;background:transparent;pointer-events:none;transition:height .3s ease"></iframe>
+        </div></div>
+        <div class="promo-caption"><div class="promo-label">${it.label[lang]}</div><div class="promo-meta">${it.meta[lang]}</div></div>
+      </a>`).join('');
+    grid.querySelectorAll('iframe[data-promo]').forEach(f=>{
+      const fit=()=>{try{const d=f.contentDocument;if(!d||!d.body)return;const h=Math.max(d.body.scrollHeight,d.documentElement.scrollHeight);if(h>0)f.style.height=h+'px'}catch(e){}};
+      f.addEventListener('load',()=>{fit();setTimeout(fit,300);setTimeout(fit,1000)});
+      window.addEventListener('resize',fit);
+    });
+  }
+  let current=null;
+  return{apply(lang){if(lang!==current){current=lang;build(lang)}}};
+})();
+
 function applyLang(){
   document.documentElement.lang=lang;
   document.getElementById('langBtn').textContent=lang==='ru'?'EN':'RU';
   document.querySelectorAll('[data-t]').forEach(el=>{const k=el.getAttribute('data-t');if(TR[k]&&TR[k][lang]!==undefined)el.innerHTML=TR[k][lang]});
-  const pf=document.getElementById('promoFrame');
-  if(pf){const want='assets/promo/promo-'+lang+'.html';if(!pf.getAttribute('src').endsWith(want.split('/').pop()))pf.src=want}
-  if(pf&&!pf._fitBound){pf._fitBound=true;
-    const fit=()=>{try{const d=pf.contentDocument;if(!d||!d.body)return;const h=Math.max(d.body.scrollHeight,d.documentElement.scrollHeight);if(h>0)pf.style.height=h+'px'}catch(e){}};
-    pf.addEventListener('load',()=>{fit();setTimeout(fit,300);setTimeout(fit,1000)});
-    window.addEventListener('resize',fit);
-  }
+  if(window.Promos)Promos.apply(lang);
   try{window.I18n&&I18n.setLang(lang)}catch(e){}
 }
 function toggleLang(){lang=lang==='ru'?'en':'ru';localStorage.setItem('chm_lang',lang);applyLang()}
