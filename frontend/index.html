@@ -121,10 +121,11 @@
     @media(max-width:720px){.promo-grid{grid-template-columns:1fr;max-width:380px;gap:28px}}
     .promo-wrap{display:block;width:100%;max-width:420px;margin:0 auto;cursor:pointer;text-decoration:none;color:inherit;transition:transform .5s var(--ease),filter .5s var(--ease)}
     .promo-wrap:hover{transform:translateY(-6px)}
-    .promo-wrap .shell{padding:1px;background:linear-gradient(180deg,rgba(255,255,255,.16) 0%,rgba(255,255,255,.02) 100%)}
-    .promo-wrap .shell-inner{box-shadow:inset 0 1px 1px rgba(255,255,255,.08),inset 0 -2px 8px rgba(0,0,0,.6),0 1px 2px rgba(0,0,0,.5),0 25px 50px -12px rgba(0,0,0,.7),0 30px 60px rgba(29,78,216,.12)}
-    .promo-stage{position:relative;width:100%;aspect-ratio:800/1100;overflow:hidden;background:#0A0F1F;border-radius:inherit}
+    .promo-wrap .shell{padding:1px;border-radius:var(--radius-lg);background:linear-gradient(180deg,rgba(255,255,255,.18) 0%,rgba(255,255,255,.02) 100%);overflow:hidden}
+    .promo-wrap .shell-inner{padding:0;overflow:hidden;border-radius:calc(var(--radius-lg) - 1px);box-shadow:inset 0 1px 1px rgba(255,255,255,.08),inset 0 -2px 8px rgba(0,0,0,.6),0 1px 2px rgba(0,0,0,.5),0 25px 50px -12px rgba(0,0,0,.7),0 30px 60px rgba(29,78,216,.12)}
+    .promo-stage{position:relative;width:100%;aspect-ratio:800/1100;overflow:hidden;background:#0A0F1F;border-radius:inherit;isolation:isolate}
     .promo-stage iframe{position:absolute;top:0;left:0;width:800px;height:1100px;border:0;background:transparent;pointer-events:none;transform-origin:top left;transform:scale(var(--scale,.5))}
+    .promo-stage::after{content:'';position:absolute;inset:0;pointer-events:none;border-radius:inherit;box-shadow:inset 0 1px 1px rgba(255,255,255,.06),inset 0 -1px 2px rgba(0,0,0,.5)}
     .promo-caption{margin-top:18px;text-align:center}
     .promo-caption .promo-label{font-family:'Inter',sans-serif;font-weight:600;font-size:16px;line-height:22px;color:#fff;letter-spacing:-.025em}
     .promo-caption .promo-meta{font-family:'Inter',sans-serif;font-weight:500;font-size:10px;line-height:14px;color:var(--text-mute,rgba(255,255,255,.38));letter-spacing:.22em;text-transform:uppercase;margin-top:6px}
@@ -774,12 +775,11 @@ const TR={
   'mr-agree':{ru:'Я согласен с',en:'I agree to the'},'mr-terms':{ru:'условиями',en:'terms'}
 };
 // ── Promos (community section) ──
-// Добавляй новые промо сюда. Имена файлов: assets/promo/<file>_{lang}.html
+// files принимает либо строку с {lang} плейсхолдером, либо объект {ru:'...', en:'...'}
 window.Promos=(function(){
   const ITEMS=[
-    {file:'chm_promo_sl', label:{ru:'Сигналы', en:'Signals'}, meta:{ru:'ЕЖЕДНЕВНО', en:'DAILY'}, link:'https://t.me/chm_crypto'},
-    // {file:'chm_promo_case', label:{ru:'Разборы', en:'Case studies'}, meta:{ru:'АРХИВ', en:'ARCHIVE'}, link:'https://t.me/chm_crypto'},
-    // {file:'chm_promo_anl',  label:{ru:'Аналитика', en:'Analytics'},  meta:{ru:'НЕДЕЛЯ', en:'WEEKLY'},  link:'https://t.me/chm_crypto'},
+    {files:{ru:'chm_promo_sl_ru.html', en:'chm_promo_sl_en.html'}, label:{ru:'Сигналы',  en:'Signals'},      meta:{ru:'ЕЖЕДНЕВНО', en:'DAILY'},   link:'https://t.me/chm_crypto'},
+    {files:{ru:'promo-ru.html',        en:'promo-en.html'},        label:{ru:'Разборы',  en:'Case studies'}, meta:{ru:'АРХИВ',     en:'ARCHIVE'}, link:'https://t.me/chm_crypto'},
   ];
   const grid=document.getElementById('promoGrid');
   if(!grid)return{apply(){}};
@@ -791,17 +791,23 @@ window.Promos=(function(){
     stage.style.aspectRatio=W+' / '+H;
     const sw=stage.clientWidth;if(sw>0)stage.style.setProperty('--scale',(sw/W).toString());
   }
+  function resolveFile(it,lang){
+    if(it.files&&typeof it.files==='object')return it.files[lang];
+    if(typeof it.file==='string')return it.file.includes('{lang}')?it.file.replace('{lang}',lang):(it.file+'_'+lang+'.html');
+    return '';
+  }
   function build(lang){
-    // Если всего 1 промо — центрируем и делаем карточку побольше
-    const singleStyle=ITEMS.length===1?'max-width:420px;grid-column:1/-1;justify-self:center':'';
-    grid.style.gridTemplateColumns=ITEMS.length===1?'1fr':'';
-    grid.innerHTML=ITEMS.map((it,i)=>`
-      <a href="${it.link}" target="_blank" rel="noopener" class="promo-wrap" data-i="${i}" style="${singleStyle}">
-        <div class="shell"><div class="shell-inner" style="padding:0;overflow:hidden">
-          <div class="promo-stage"><iframe data-promo="${i}" src="assets/promo/${it.file}_${lang}.html" title="${it.label[lang]}" loading="lazy" referrerpolicy="no-referrer" sandbox="allow-scripts allow-same-origin" scrolling="no"></iframe></div>
+    const n=ITEMS.length;
+    grid.style.gridTemplateColumns = n===1?'1fr' : (n===2?'repeat(2,minmax(0,1fr))' : 'repeat(3,minmax(0,1fr))');
+    grid.innerHTML=ITEMS.map((it,i)=>{
+      const src='assets/promo/'+resolveFile(it,lang);
+      return `<a href="${it.link}" target="_blank" rel="noopener" class="promo-wrap" data-i="${i}">
+        <div class="shell"><div class="shell-inner">
+          <div class="promo-stage"><iframe data-promo="${i}" src="${src}" title="${it.label[lang]}" loading="lazy" referrerpolicy="no-referrer" sandbox="allow-scripts allow-same-origin" scrolling="no"></iframe></div>
         </div></div>
         <div class="promo-caption"><div class="promo-label">${it.label[lang]}</div><div class="promo-meta">${it.meta[lang]}</div></div>
-      </a>`).join('');
+      </a>`;
+    }).join('');
     grid.querySelectorAll('.promo-stage').forEach(stage=>{
       const f=stage.querySelector('iframe');
       const run=()=>fitStage(stage);
