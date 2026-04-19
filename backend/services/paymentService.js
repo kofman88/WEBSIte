@@ -246,6 +246,19 @@ function confirmPayment(paymentId, { metadata = null } = {}) {
   `).run(payment.user_id, paymentId,
     JSON.stringify({ plan: payment.plan, amount: payment.amount_usd, method: payment.method }));
 
+  // Notify any connected websocket of this user — best-effort, lazy-required
+  // to avoid a circular dep with websocketService (which doesn't import us).
+  try {
+    const ws = require('./websocketService');
+    if (ws && ws.broadcastToUser) {
+      ws.broadcastToUser(payment.user_id, {
+        type: 'payment_confirmed',
+        data: { paymentId, plan: payment.plan, method: payment.method },
+        ts: Date.now(),
+      });
+    }
+  } catch (_e) { /* ignore */ }
+
   return db.prepare('SELECT * FROM payments WHERE id = ?').get(paymentId);
 }
 

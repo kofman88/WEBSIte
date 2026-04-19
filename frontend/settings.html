@@ -67,11 +67,11 @@
         <div class="p-3 bg-slate-800/30 rounded-lg"><span class="text-slate-500">Авто-торговля:</span> <span class="text-green-400">Да</span></div>
         <div class="p-3 bg-slate-800/30 rounded-lg"><span class="text-slate-500">Бэктесты:</span> <span class="text-green-400">Да</span></div>
       </div>
-      <div class="flex gap-3"><button class="text-sm px-4 py-2 rounded-lg bg-indigo-500/10 border border-indigo-500/30 text-indigo-400">Upgrade to Elite</button></div>
+      <div class="flex gap-3"><button id="upgradeBtn" class="text-sm px-4 py-2 rounded-lg bg-indigo-500/10 border border-indigo-500/30 text-indigo-400 hover:bg-indigo-500/20">Сменить тариф</button></div>
     </div>
     <div class="card max-w-2xl mb-6">
       <h3 class="font-bold mb-4">Промо-код</h3>
-      <div class="flex gap-3"><input placeholder="Введите промо-код" class="flex-1 bg-slate-800/50 border border-slate-700 rounded-xl px-4 py-3 text-white outline-none"/><button onclick="Toast.success('Промо-код применён!')" class="px-6 py-3 rounded-xl font-semibold text-white text-sm" style="background:linear-gradient(180deg,#2A5BE8 0%,#1D4ED8 60%,#143797 100%);box-shadow:inset 0 1px 1px rgba(255,255,255,.28),inset 0 -1px 3px rgba(0,0,0,.6),0 4px 8px -2px rgba(0,0,0,.6),0 0 0 1px rgba(29,78,216,.35)">Применить</button></div>
+      <div class="flex gap-3"><input placeholder="Введите промо-код" class="flex-1 bg-slate-800/50 border border-slate-700 rounded-xl px-4 py-3 text-white outline-none"/><button type="button" class="px-6 py-3 rounded-xl font-semibold text-white text-sm" style="background:linear-gradient(180deg,#2A5BE8 0%,#1D4ED8 60%,#143797 100%);box-shadow:inset 0 1px 1px rgba(255,255,255,.28),inset 0 -1px 3px rgba(0,0,0,.6),0 4px 8px -2px rgba(0,0,0,.6),0 0 0 1px rgba(29,78,216,.35)">Применить</button></div>
     </div>
     <div class="card max-w-2xl">
       <h3 class="font-bold mb-4">Реферальная программа</h3>
@@ -142,6 +142,66 @@
     </div>
   </div>
 </main>
+
+<!-- CHECKOUT MODAL -->
+<div id="checkoutModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.7);backdrop-filter:blur(8px);z-index:100;align-items:center;justify-content:center">
+  <div class="card" style="width:100%;max-width:520px;margin:16px;max-height:92vh;overflow-y:auto">
+    <div class="flex items-center justify-between mb-4"><h2 class="text-xl font-bold">Оформление подписки</h2><button onclick="closeCheckout()" class="text-slate-400 hover:text-white text-xl">&times;</button></div>
+    <!-- Step 1: pick plan + cycle -->
+    <div id="coStep1">
+      <label class="text-sm text-slate-400 block mb-2">Тариф</label>
+      <div class="grid grid-cols-3 gap-2 mb-4">
+        <label class="co-card"><input type="radio" name="coPlan" value="starter" class="sr-only"/><div class="co-body"><div class="font-semibold text-white text-sm">Starter</div><div class="text-xs text-slate-400 mt-1">$29/мес</div></div></label>
+        <label class="co-card"><input type="radio" name="coPlan" value="pro" checked class="sr-only"/><div class="co-body"><div class="font-semibold text-indigo-400 text-sm">Pro</div><div class="text-xs text-slate-400 mt-1">$79/мес</div></div></label>
+        <label class="co-card"><input type="radio" name="coPlan" value="elite" class="sr-only"/><div class="co-body"><div class="font-semibold text-white text-sm">Elite</div><div class="text-xs text-slate-400 mt-1">$149/мес</div></div></label>
+      </div>
+      <label class="text-sm text-slate-400 block mb-2">Период</label>
+      <div class="grid grid-cols-2 gap-2 mb-5">
+        <label class="co-card"><input type="radio" name="coCycle" value="monthly" checked class="sr-only"/><div class="co-body"><div class="font-semibold text-white text-sm">Ежемесячно</div></div></label>
+        <label class="co-card"><input type="radio" name="coCycle" value="yearly" class="sr-only"/><div class="co-body"><div class="font-semibold text-green-400 text-sm">Год −20%</div></div></label>
+      </div>
+      <label class="text-sm text-slate-400 block mb-2">Способ оплаты</label>
+      <div class="space-y-2 mb-5">
+        <button type="button" data-method="stripe" class="co-method w-full flex items-center justify-between p-3 rounded-xl border border-slate-700 bg-slate-800/40 hover:border-indigo-500/50">
+          <div class="flex items-center gap-3"><div class="w-9 h-9 rounded-lg bg-indigo-500/15 flex items-center justify-center"><iconify-icon icon="solar:card-linear" style="color:#818cf8;font-size:18px"></iconify-icon></div><div class="text-left"><div class="text-sm font-medium text-white">Карта</div><div class="text-xs text-slate-500">Stripe Checkout</div></div></div>
+          <iconify-icon icon="solar:alt-arrow-right-linear" style="color:#64748b"></iconify-icon>
+        </button>
+        <button type="button" data-method="usdt_bep20" class="co-method w-full flex items-center justify-between p-3 rounded-xl border border-slate-700 bg-slate-800/40 hover:border-indigo-500/50">
+          <div class="flex items-center gap-3"><div class="w-9 h-9 rounded-lg bg-yellow-500/15 flex items-center justify-center"><iconify-icon icon="solar:wallet-money-linear" style="color:#facc15;font-size:18px"></iconify-icon></div><div class="text-left"><div class="text-sm font-medium text-white">USDT BEP20</div><div class="text-xs text-slate-500">Binance Smart Chain</div></div></div>
+          <iconify-icon icon="solar:alt-arrow-right-linear" style="color:#64748b"></iconify-icon>
+        </button>
+        <button type="button" data-method="usdt_trc20" class="co-method w-full flex items-center justify-between p-3 rounded-xl border border-slate-700 bg-slate-800/40 hover:border-indigo-500/50">
+          <div class="flex items-center gap-3"><div class="w-9 h-9 rounded-lg bg-red-500/15 flex items-center justify-center"><iconify-icon icon="solar:wallet-money-linear" style="color:#f87171;font-size:18px"></iconify-icon></div><div class="text-left"><div class="text-sm font-medium text-white">USDT TRC20</div><div class="text-xs text-slate-500">Tron Network</div></div></div>
+          <iconify-icon icon="solar:alt-arrow-right-linear" style="color:#64748b"></iconify-icon>
+        </button>
+      </div>
+    </div>
+    <!-- Step 2: crypto wait -->
+    <div id="coStep2" class="hidden">
+      <div class="text-center mb-4">
+        <div class="text-xs text-slate-500 uppercase tracking-wider mb-1">К оплате</div>
+        <div class="text-3xl font-bold text-white" id="coAmount">—</div>
+        <div class="text-xs text-slate-400 mt-1" id="coNetwork">—</div>
+      </div>
+      <div class="bg-slate-800/40 border border-slate-700 rounded-xl p-3 mb-4">
+        <div class="text-xs text-slate-500 mb-1">Адрес для перевода</div>
+        <div class="flex items-center gap-2"><code id="coAddr" class="text-xs text-cyan-400 break-all flex-1">—</code><button id="coCopy" class="text-xs text-slate-400 hover:text-white shrink-0">Копировать</button></div>
+      </div>
+      <div class="bg-yellow-500/10 border border-yellow-500/30 rounded-xl p-3 mb-4 text-xs text-yellow-200 leading-relaxed">
+        <strong>Важно:</strong> переведите <em>точную сумму до копейки</em> — система сопоставляет платежи по уникальной сумме. Подтверждение придёт автоматически в течение 1-15 минут после получения транзакции.
+      </div>
+      <div class="text-xs text-slate-500 text-center mb-4">Ожидание подтверждения... <span id="coExpire">—</span></div>
+      <button onclick="closeCheckout()" class="w-full py-2.5 rounded-xl bg-slate-800 text-slate-300 hover:bg-slate-700 font-medium text-sm">Закрыть</button>
+    </div>
+  </div>
+</div>
+
+<style>
+.co-card{cursor:pointer;display:block;border-radius:10px;background:rgba(30,41,59,.5);border:1px solid #334155;padding:10px;transition:all .15s}
+.co-card:hover{border-color:#475569}
+.co-card:has(input:checked){border-color:#6366f1;background:rgba(99,102,241,.1);box-shadow:0 0 0 1px rgba(99,102,241,.4)}
+.co-body{text-align:center}
+</style>
 
 <script src="app.js"></script>
 <script>
@@ -266,6 +326,46 @@ async function loadReferrals() {
     document.getElementById('refList').innerHTML = '<div class="text-xs text-red-400 text-center py-4">Ошибка: ' + String(err.message || err) + '</div>';
   }
 }
+
+// ── Checkout (upgrade) modal ──
+function openCheckout()  { document.getElementById('coStep1').classList.remove('hidden'); document.getElementById('coStep2').classList.add('hidden'); document.getElementById('checkoutModal').style.display = 'flex'; }
+function closeCheckout() { document.getElementById('checkoutModal').style.display = 'none'; }
+document.getElementById('upgradeBtn')?.addEventListener('click', openCheckout);
+document.getElementById('checkoutModal')?.addEventListener('click', (e) => { if (e.target.id === 'checkoutModal') closeCheckout(); });
+
+document.querySelectorAll('.co-method').forEach((btn) => {
+  btn.addEventListener('click', async () => {
+    const plan = document.querySelector('input[name="coPlan"]:checked')?.value || 'pro';
+    const billingCycle = document.querySelector('input[name="coCycle"]:checked')?.value || 'monthly';
+    const method = btn.getAttribute('data-method');
+    btn.disabled = true;
+    try {
+      if (method === 'stripe') {
+        const out = await API.stripeCheckout({ plan, billingCycle });
+        if (out && out.url) { location.href = out.url; return; }
+        throw new Error(out?.error || 'Stripe недоступен');
+      }
+      // crypto path
+      const network = method === 'usdt_bep20' ? 'bep20' : 'trc20';
+      const out = await API.createCryptoPayment({ plan, network, billingCycle });
+      document.getElementById('coAmount').textContent = Fmt.currency(out.amountUsdt) + ' USDT';
+      document.getElementById('coNetwork').textContent = network.toUpperCase() + ' · ' + plan.toUpperCase() + ' (' + billingCycle + ')';
+      document.getElementById('coAddr').textContent = out.address;
+      document.getElementById('coCopy').onclick = () => navigator.clipboard.writeText(out.address).then(() => Toast.success('Адрес скопирован'));
+      const exp = new Date(out.expiresAt).toLocaleString();
+      document.getElementById('coExpire').textContent = 'действует до ' + exp;
+      document.getElementById('coStep1').classList.add('hidden');
+      document.getElementById('coStep2').classList.remove('hidden');
+    } catch (err) {
+      const msg = err.message || 'Не удалось создать платёж';
+      if (err.statusCode === 503 || /stripe/i.test(msg)) Toast.warn('Stripe не настроен — выбери крипту');
+      else Toast.error(msg);
+    } finally { btn.disabled = false; }
+  });
+});
+
+// WS: payment confirmed → success + reload
+WS.on('payment_confirmed', () => { Toast.success('Платёж подтверждён, тариф активирован'); closeCheckout(); loadSubscription(); });
 
 loadProfile();
 loadSubscription();
