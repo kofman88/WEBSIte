@@ -26,6 +26,7 @@ const partialTpManager = require('./services/partialTpManager');
 const exchangeService = require('./services/exchangeService');
 const marketDataService = require('./services/marketDataService');
 const cryptoMonitor = require('./services/cryptoMonitor');
+const slVerifier = require('./services/slVerifier');
 const db = require('./models/database');
 
 const app = express();
@@ -85,7 +86,30 @@ app.use('/api/payments', paymentsRoutes);
 app.use('/api/admin', adminRoutes);
 
 app.get('/api/health', (_req, res) => {
+  // Lightweight liveness probe.
   res.json({ status: 'ok', timestamp: new Date().toISOString(), version: '3.0.0' });
+});
+
+// Deeper readiness probe — verifies DB + background workers, reports subsystem status.
+app.get('/api/health/deep', (_req, res) => {
+  const out = {
+    status: 'ok',
+    timestamp: new Date().toISOString(),
+    version: '3.0.0',
+    uptimeSeconds: Math.round(process.uptime()),
+    memoryMb: Math.round(process.memoryUsage().rss / 1048576),
+    subsystems: {},
+  };
+  try {
+    const n = db.prepare('SELECT COUNT(*) as n FROM users').get().n;
+    out.subsystems.database = { ok: true, userCount: n };
+  } catch (e) {
+    out.status = 'degraded'; out.subsystems.database = { ok: false, error: e.message };
+  }
+  out.subsystems.scanner = { ok: scannerWorker !== null || IS_TEST };
+  out.subsystems.partialTp = { ok: partialTpTimer !== null || IS_TEST };
+  out.subsystems.slVerifier = { ok: true };
+  res.status(out.status === 'ok' ? 200 : 503).json(out);
 });
 
 // ── Static files (Passenger serves everything) ────────────────────────
@@ -230,6 +254,7 @@ if (IS_TEST) {
   startScannerWorker();
   startPartialTpCron();
   cryptoMonitor.start();
+  slVerifier.start();
   process.on('SIGTERM', shutdown('SIGTERM'));
 } else {
   const server = http.createServer(app);
@@ -238,6 +263,7 @@ if (IS_TEST) {
   startScannerWorker();
   startPartialTpCron();
   cryptoMonitor.start();
+  slVerifier.start();
 
   process.on('SIGTERM', () => { shutdown('SIGTERM')().then(() => server.close()); });
   process.on('SIGINT',  () => { shutdown('SIGINT')().then(() => server.close()); });

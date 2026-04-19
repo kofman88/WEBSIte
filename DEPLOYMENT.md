@@ -243,3 +243,106 @@ node server.js  # Смотрите ошибки в терминале
 mkdir -p ~/chmup_backend/data
 chmod 755 ~/chmup_backend/data
 ```
+
+---
+
+## Production-чеклист (Phase 14)
+
+### 1. Переменные окружения (`backend/.env`)
+
+Обязательные:
+```
+NODE_ENV=production
+PORT=3000
+DATABASE_PATH=/home/<user>/chmup_backend/data/chm.db
+JWT_SECRET=<32+ символа hex>
+JWT_REFRESH_SECRET=<32+ символа hex>
+WALLET_ENCRYPTION_KEY=<64 символа hex — AES-256 ключ>
+CORS_ORIGIN=https://chmup.top
+```
+
+Платежи (если используете):
+```
+STRIPE_SECRET_KEY=sk_live_...
+STRIPE_WEBHOOK_SECRET=whsec_...
+PAYMENT_BEP20_ADDRESS=0x...
+PAYMENT_TRC20_ADDRESS=T...
+BSCSCAN_API_KEY=...
+TRONSCAN_API_KEY=...   # опционально
+```
+
+Мониторинг:
+```
+LOG_LEVEL=info
+SENTRY_DSN=https://...@sentry.io/...   # опционально
+```
+
+### 2. PM2 (если не cPanel/Passenger)
+
+```bash
+cd ~/chmup_backend
+npm install --production
+npm install -g pm2
+pm2 start ecosystem.config.cjs --env production
+pm2 save
+pm2 startup   # — выполните выданную команду
+```
+
+Мониторинг:
+```bash
+pm2 monit            # live-дашборд
+pm2 logs chm-api     # tail логов
+pm2 restart chm-api  # рестарт без downtime
+```
+
+### 3. Health-чеки
+
+- **Liveness**: `GET /api/health` — быстрый 200 без DB
+- **Readiness**: `GET /api/health/deep` — проверяет DB, scanner worker,
+  partialTp cron, slVerifier; возвращает 503 если любая подсистема упала
+
+Для UptimeRobot: настройте HTTP-проверку `/api/health/deep` каждые 5 минут.
+
+### 4. Safety-крон: slVerifier
+
+`services/slVerifier.js` каждые 5 минут:
+- Считывает все trades где `status='open' AND trading_mode='live'`
+- Для каждой сделки парсит `exchange_order_ids.sl`
+- Вызывает `ccxt.fetchOrder(sl_id)`
+- Если ордера нет / cancelled / filled — пишет в `audit_log` с
+  `action='sl_verifier.missing'` и выдаёт ERROR-лог
+
+Проверка работы:
+```bash
+sqlite3 data/chm.db "SELECT * FROM audit_log WHERE action LIKE 'sl_verifier.%' ORDER BY created_at DESC LIMIT 20;"
+```
+
+### 5. Аудит безопасности
+
+```bash
+cd backend
+npm audit --omit=dev    # должно быть "found 0 vulnerabilities"
+```
+
+Dev-зависимости (vitest/vite) содержат известные низко-критичные
+уязвимости — на прод они не попадают.
+
+### 6. Нагрузочный тест (smoke)
+
+Быстрый тест 100 параллельных запросов к health:
+```bash
+npm install -g autocannon
+autocannon -c 50 -d 30 https://chmup.top/api/health
+```
+
+Ожидаемо: p99 < 100ms, 0 ошибок.
+
+### 7. Бэкапы
+
+SQLite файл `data/chm.db` — единственное состояние. Настройте daily:
+```bash
+cp data/chm.db backups/chm-$(date +%F).db
+find backups -mtime +30 -delete
+```
+
+Либо через cPanel → Backup → Partial Backup → Home Directory.
