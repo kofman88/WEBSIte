@@ -38,13 +38,15 @@ const logger = require('../utils/logger');
 const config = require('../config');
 
 const levels = require('../strategies/levels');
+const smc = require('../strategies/smc');
+const scalping = require('../strategies/scalping');
 
-// Strategy registry — add new strategies here as they land (Phase 8).
+// Strategy registry — add new strategies here as they land.
 const STRATEGIES = {
-  levels: levels,
-  // smc:      require('../strategies/smc'),
-  // gerchik:  require('../strategies/gerchik'),
-  // scalping: require('../strategies/scalping'),
+  levels,
+  smc,
+  scalping,
+  // gerchik: require('../strategies/gerchik'),
 };
 
 const SCAN_INTERVAL_MS = parseInt(process.env.SCANNER_INTERVAL_MS, 10) || 60_000; // 60s default

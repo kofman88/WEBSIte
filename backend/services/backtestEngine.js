@@ -24,6 +24,8 @@ const logger = require('../utils/logger');
 // Strategy registry — keep in sync with signalScanner
 const STRATEGIES = {
   levels: require('../strategies/levels'),
+  smc: require('../strategies/smc'),
+  scalping: require('../strategies/scalping'),
 };
 
 // ── Default risk + fees ────────────────────────────────────────────────
