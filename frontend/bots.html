@@ -27,9 +27,9 @@
   <!-- Header -->
   <div class="flex flex-wrap items-center justify-between gap-4 mb-6">
     <div class="flex gap-4 text-sm">
-      <span class="text-slate-400">Всего: <strong class="text-white">4</strong></span>
-      <span class="text-slate-400">Активных: <strong class="text-green-400">3</strong></span>
-      <span class="text-slate-400">PnL: <strong class="text-green-400">+$1,240</strong></span>
+      <span class="text-slate-400">Всего: <strong class="text-white" id="hdrTotal">—</strong></span>
+      <span class="text-slate-400">Активных: <strong class="text-green-400" id="hdrActive">—</strong></span>
+      <span class="text-slate-400">PnL: <strong id="hdrPnl">—</strong></span>
     </div>
     <button onclick="openWizard()" class="btn-primary px-5 py-2.5 rounded-xl text-sm font-semibold" style="background:linear-gradient(180deg,#2A5BE8 0%,#1D4ED8 60%,#143797 100%);box-shadow:inset 0 1px 1px rgba(255,255,255,.28),inset 0 -1px 3px rgba(0,0,0,.6),0 4px 8px -2px rgba(0,0,0,.6),0 0 0 1px rgba(29,78,216,.35);border:none;color:#fff;cursor:pointer;box-shadow:0 0 20px rgba(29,78,216,.4)">+ Создать бота</button>
   </div>
@@ -41,64 +41,9 @@
     <select class="bg-slate-800/50 border border-slate-700 rounded-lg px-3 py-2 text-sm text-slate-300 outline-none"><option>Все статусы</option><option>Активные</option><option>Остановлены</option></select>
   </div>
 
-  <!-- Bot Cards -->
+  <!-- Bot Cards (filled by loadBots()) -->
   <div class="grid md:grid-cols-2 xl:grid-cols-3 gap-4" id="botGrid">
-
-    <div class="card card-glow">
-      <div class="flex items-center justify-between mb-3">
-        <div class="flex items-center gap-3"><div class="w-10 h-10 rounded-lg bg-indigo-500/10 flex items-center justify-center text-sm font-bold text-indigo-400">B1</div><div><div class="font-semibold">BTC Scalper</div><div class="text-xs text-slate-500">Bybit &middot; BTCUSDT</div></div></div>
-        <div class="toggle on" onclick="this.classList.toggle('on')"></div>
-      </div>
-      <div class="flex items-center gap-2 mb-3"><span class="text-xs px-2 py-0.5 rounded-full bg-cyan-500/15 text-cyan-400">Scalping</span><span class="text-xs px-2 py-0.5 rounded-full bg-green-500/15 text-green-400">Active</span></div>
-      <div class="grid grid-cols-3 gap-3 text-center text-sm mb-3">
-        <div><div class="text-xs text-slate-500">PnL</div><div class="text-green-400 font-semibold">+$450</div></div>
-        <div><div class="text-xs text-slate-500">Win Rate</div><div class="font-semibold">82%</div></div>
-        <div><div class="text-xs text-slate-500">Сделки</div><div class="font-semibold">24</div></div>
-      </div>
-      <div class="text-xs text-slate-500">Leverage: 10x &middot; Risk: 2% &middot; SL: 1.5%</div>
-    </div>
-
-    <div class="card card-glow">
-      <div class="flex items-center justify-between mb-3">
-        <div class="flex items-center gap-3"><div class="w-10 h-10 rounded-lg bg-purple-500/10 flex items-center justify-center text-sm font-bold text-purple-400">B2</div><div><div class="font-semibold">ETH SMC Bot</div><div class="text-xs text-slate-500">Binance &middot; ETHUSDT</div></div></div>
-        <div class="toggle on" onclick="this.classList.toggle('on')"></div>
-      </div>
-      <div class="flex items-center gap-2 mb-3"><span class="text-xs px-2 py-0.5 rounded-full bg-indigo-500/15 text-indigo-400">SMC</span><span class="text-xs px-2 py-0.5 rounded-full bg-green-500/15 text-green-400">Active</span></div>
-      <div class="grid grid-cols-3 gap-3 text-center text-sm mb-3">
-        <div><div class="text-xs text-slate-500">PnL</div><div class="text-green-400 font-semibold">+$320</div></div>
-        <div><div class="text-xs text-slate-500">Win Rate</div><div class="font-semibold">75%</div></div>
-        <div><div class="text-xs text-slate-500">Сделки</div><div class="font-semibold">16</div></div>
-      </div>
-      <div class="text-xs text-slate-500">Leverage: 5x &middot; Risk: 1.5% &middot; SL: 2%</div>
-    </div>
-
-    <div class="card card-glow">
-      <div class="flex items-center justify-between mb-3">
-        <div class="flex items-center gap-3"><div class="w-10 h-10 rounded-lg bg-green-500/10 flex items-center justify-center text-sm font-bold text-green-400">B3</div><div><div class="font-semibold">SOL Gerchik</div><div class="text-xs text-slate-500">BingX &middot; SOLUSDT</div></div></div>
-        <div class="toggle on" onclick="this.classList.toggle('on')"></div>
-      </div>
-      <div class="flex items-center gap-2 mb-3"><span class="text-xs px-2 py-0.5 rounded-full bg-orange-500/15 text-orange-400">Gerchik</span><span class="text-xs px-2 py-0.5 rounded-full bg-green-500/15 text-green-400">Active</span></div>
-      <div class="grid grid-cols-3 gap-3 text-center text-sm mb-3">
-        <div><div class="text-xs text-slate-500">PnL</div><div class="text-green-400 font-semibold">+$510</div></div>
-        <div><div class="text-xs text-slate-500">Win Rate</div><div class="font-semibold">88%</div></div>
-        <div><div class="text-xs text-slate-500">Сделки</div><div class="font-semibold">9</div></div>
-      </div>
-      <div class="text-xs text-slate-500">Leverage: 3x &middot; Risk: 2% &middot; SL: 1%</div>
-    </div>
-
-    <div class="card card-glow" style="opacity:.6">
-      <div class="flex items-center justify-between mb-3">
-        <div class="flex items-center gap-3"><div class="w-10 h-10 rounded-lg bg-slate-500/10 flex items-center justify-center text-sm font-bold text-slate-400">B4</div><div><div class="font-semibold">DOGE Test</div><div class="text-xs text-slate-500">Bybit &middot; DOGEUSDT</div></div></div>
-        <div class="toggle" onclick="this.classList.toggle('on')"></div>
-      </div>
-      <div class="flex items-center gap-2 mb-3"><span class="text-xs px-2 py-0.5 rounded-full bg-cyan-500/15 text-cyan-400">Scalping</span><span class="text-xs px-2 py-0.5 rounded-full bg-slate-500/15 text-slate-400">Stopped</span></div>
-      <div class="grid grid-cols-3 gap-3 text-center text-sm mb-3">
-        <div><div class="text-xs text-slate-500">PnL</div><div class="text-red-400 font-semibold">-$40</div></div>
-        <div><div class="text-xs text-slate-500">Win Rate</div><div class="font-semibold">45%</div></div>
-        <div><div class="text-xs text-slate-500">Сделки</div><div class="font-semibold">11</div></div>
-      </div>
-      <div class="text-xs text-slate-500">Leverage: 20x &middot; Risk: 5% &middot; SL: 0.5%</div>
-    </div>
+    <div class="col-span-full text-center py-12 text-slate-500 text-sm">Загрузка ботов…</div>
   </div>
 </main>
 
@@ -230,13 +175,20 @@ async function loadBots() {
   if (!grid) return;
   try {
     const data = await API.listBots();
+    let activeCount = 0, totalPnl = 0;
     grid.innerHTML = '';
     if (!data.bots.length) {
       grid.innerHTML = '<div class="col-span-full text-center py-12 text-slate-500">Пока нет ботов. Создай первого — кнопка вверху.</div>';
+      document.getElementById('hdrTotal').textContent = '0';
+      document.getElementById('hdrActive').textContent = '0';
+      const pnlEl = document.getElementById('hdrPnl');
+      pnlEl.textContent = Fmt.currency(0); pnlEl.className = 'text-slate-400';
       return;
     }
     for (const b of data.bots) {
       const stats = await API.botStats(b.id).catch(() => ({ totalPnl: 0, winRate: null, totalTrades: 0 }));
+      if (b.isActive) activeCount++;
+      totalPnl += Number(stats.totalPnl || 0);
       const card = document.createElement('div');
       card.className = 'card card-glow';
       const pnlClass = stats.totalPnl > 0 ? 'text-green-400' : stats.totalPnl < 0 ? 'text-red-400' : 'text-slate-400';
@@ -293,6 +245,12 @@ async function loadBots() {
         else switchMode(id, 'paper');
       });
     });
+    // Header stats
+    document.getElementById('hdrTotal').textContent = data.bots.length;
+    document.getElementById('hdrActive').textContent = activeCount;
+    const pnlEl = document.getElementById('hdrPnl');
+    pnlEl.textContent = Fmt.currency(totalPnl);
+    pnlEl.className = totalPnl > 0 ? 'text-green-400' : totalPnl < 0 ? 'text-red-400' : 'text-slate-400';
   } catch (err) {
     grid.innerHTML = '<div class="col-span-full text-center py-8 text-red-400">Ошибка: ' + escapeHtml(err.message) + '</div>';
   }
