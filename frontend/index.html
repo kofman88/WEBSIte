@@ -996,8 +996,16 @@ function toggleTheme(){
 }
 (function(){try{if(localStorage.getItem('chm_theme')==='light'){document.documentElement.classList.add('light');const b=document.getElementById('themeBtn');if(b)b.innerHTML='<iconify-icon icon="solar:sun-linear"></iconify-icon>'}}catch(e){}})();
 
-// ── Open login via URL ?login ──
-if(new URLSearchParams(location.search).get('login'))openModal('login');
+// ── URL params: ?login / ?checkout=cancel ──
+(function(){
+  const q=new URLSearchParams(location.search);
+  if(q.get('login'))openModal('login');
+  if(q.get('checkout')==='cancel'){
+    setTimeout(()=>{try{(window.Toast||{info:(m)=>alert(m)}).info('Оплата отменена')}catch(e){}},400);
+    const clean=location.pathname+(q.get('ref')?'?ref='+q.get('ref'):'');
+    history.replaceState({},'',clean);
+  }
+})();
 </script>
 </body>
 </html>

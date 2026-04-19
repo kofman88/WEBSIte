@@ -270,6 +270,18 @@ window.updateChart = (d) => buildChart(d);
 // ── WS live updates ──
 WS.on('signal', () => loadRecentSignals());
 WS.on('trade_opened', () => { loadSummary(); loadRecentTrades(); });
+WS.on('payment_confirmed', () => { Toast.success('Оплата подтверждена — тариф обновлён'); loadSummary(); });
+
+// Stripe success redirect — show confirmation + strip query so a refresh stays clean.
+(function(){
+  try {
+    const q = new URLSearchParams(location.search);
+    if (q.get('paid') === '1') {
+      Toast.success('Оплата получена — тариф активирован');
+      history.replaceState({}, '', location.pathname);
+    }
+  } catch (_e) {}
+})();
 
 // Boot
 loadSummary();
