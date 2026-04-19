@@ -40,13 +40,14 @@ const config = require('../config');
 const levels = require('../strategies/levels');
 const smc = require('../strategies/smc');
 const scalping = require('../strategies/scalping');
+const gerchik = require('../strategies/gerchik');
 
 // Strategy registry — add new strategies here as they land.
 const STRATEGIES = {
   levels,
   smc,
   scalping,
-  // gerchik: require('../strategies/gerchik'),
+  gerchik,
 };
 
 const SCAN_INTERVAL_MS = parseInt(process.env.SCANNER_INTERVAL_MS, 10) || 60_000; // 60s default
