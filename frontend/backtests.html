@@ -39,52 +39,8 @@
 
   <!-- Results Grid -->
   <h2 class="font-bold mb-4">Результаты</h2>
-  <div class="grid md:grid-cols-2 gap-4 mb-6">
-
-    <div class="card card-glow">
-      <div class="flex items-center justify-between mb-3">
-        <div><div class="font-semibold">BTC Scalping 15m</div><div class="text-xs text-slate-500">Jan-Dec 2025 &middot; BTCUSDT</div></div>
-        <span class="text-xs px-2 py-0.5 rounded-full bg-green-500/15 text-green-400">Completed</span>
-      </div>
-      <div class="grid grid-cols-3 gap-3 text-center text-sm mb-4">
-        <div><div class="text-xs text-slate-500">PnL</div><div class="text-green-400 font-bold">+$4,520</div></div>
-        <div><div class="text-xs text-slate-500">Win Rate</div><div class="font-bold">73%</div></div>
-        <div><div class="text-xs text-slate-500">Sharpe</div><div class="font-bold">1.82</div></div>
-      </div>
-      <div class="grid grid-cols-3 gap-3 text-center text-sm">
-        <div><div class="text-xs text-slate-500">Max DD</div><div class="text-red-400">-12.3%</div></div>
-        <div><div class="text-xs text-slate-500">Profit Factor</div><div>2.14</div></div>
-        <div><div class="text-xs text-slate-500">Trades</div><div>156</div></div>
-      </div>
-      <div class="mt-4"><canvas id="btChart1" height="80"></canvas></div>
-    </div>
-
-    <div class="card card-glow">
-      <div class="flex items-center justify-between mb-3">
-        <div><div class="font-semibold">ETH SMC 4h</div><div class="text-xs text-slate-500">Jan-Dec 2025 &middot; ETHUSDT</div></div>
-        <span class="text-xs px-2 py-0.5 rounded-full bg-green-500/15 text-green-400">Completed</span>
-      </div>
-      <div class="grid grid-cols-3 gap-3 text-center text-sm mb-4">
-        <div><div class="text-xs text-slate-500">PnL</div><div class="text-green-400 font-bold">+$2,180</div></div>
-        <div><div class="text-xs text-slate-500">Win Rate</div><div class="font-bold">68%</div></div>
-        <div><div class="text-xs text-slate-500">Sharpe</div><div class="font-bold">1.45</div></div>
-      </div>
-      <div class="grid grid-cols-3 gap-3 text-center text-sm">
-        <div><div class="text-xs text-slate-500">Max DD</div><div class="text-red-400">-18.7%</div></div>
-        <div><div class="text-xs text-slate-500">Profit Factor</div><div>1.78</div></div>
-        <div><div class="text-xs text-slate-500">Trades</div><div>42</div></div>
-      </div>
-      <div class="mt-4"><canvas id="btChart2" height="80"></canvas></div>
-    </div>
-
-    <div class="card" style="opacity:.6">
-      <div class="flex items-center justify-between mb-3">
-        <div><div class="font-semibold">SOL Gerchik 1d</div><div class="text-xs text-slate-500">Jun-Dec 2025 &middot; SOLUSDT</div></div>
-        <span class="text-xs px-2 py-0.5 rounded-full bg-yellow-500/15 text-yellow-400">Running...</span>
-      </div>
-      <div class="w-full bg-slate-800 rounded-full h-2 mt-4"><div class="bg-indigo-500 h-2 rounded-full" style="width:65%"></div></div>
-      <div class="text-xs text-slate-500 mt-2">65% complete...</div>
-    </div>
+  <div class="grid md:grid-cols-2 gap-4 mb-6" id="btResultsGrid">
+    <div class="col-span-full text-center py-12 text-slate-500 text-sm">Загрузка бэктестов…</div>
   </div>
 </main>
 
@@ -93,7 +49,7 @@
 if(!Auth.requireAuth()) throw new Error('noauth');
 document.querySelectorAll('.sidebar-link[data-page="backtests"]').forEach(a => a.classList.add('active'));
 
-const resultsGrid = document.querySelector('.grid.md\\:grid-cols-2.gap-4.mb-6');
+const resultsGrid = document.getElementById('btResultsGrid');
 
 function escapeHtml(s) {
   return String(s||'').replace(/[&<>"']/g, (c) => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'})[c]);
