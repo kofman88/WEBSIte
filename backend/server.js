@@ -9,6 +9,7 @@ const rateLimit = require('express-rate-limit');
 const { z } = require('zod');
 const config = require('./config');
 const logger = require('./utils/logger');
+const sentry = require('./utils/sentry');
 
 const authRoutes = require('./routes/auth');
 const botsRoutes = require('./routes/bots');
@@ -149,6 +150,7 @@ app.use((err, req, res, _next) => {
     err: err && err.message,
     stack: err && err.stack,
   });
+  sentry.captureException(err, { path: req.path, method: req.method, userId: req.userId });
   res.status(500).json({
     error: config.isProd ? 'Internal server error' : (err && err.message) || 'Internal server error',
     code: 'INTERNAL_ERROR',
@@ -158,6 +160,18 @@ app.use((err, req, res, _next) => {
 // ── Start: Passenger or standalone ────────────────────────────────────
 const PORT = config.port || 3000;
 const IS_TEST = process.env.NODE_ENV === 'test' || process.env.VITEST === 'true';
+
+// Capture unhandled rejections / uncaught exceptions in Sentry (no-op if disabled).
+if (!IS_TEST) {
+  process.on('unhandledRejection', (reason) => {
+    logger.error('unhandledRejection', { reason: reason && reason.message });
+    sentry.captureException(reason instanceof Error ? reason : new Error(String(reason)));
+  });
+  process.on('uncaughtException', (err) => {
+    logger.error('uncaughtException', { err: err.message, stack: err.stack });
+    sentry.captureException(err);
+  });
+}
 
 // ── Scanner worker_thread (Phase 6) ──────────────────────────────────
 let scannerWorker = null;

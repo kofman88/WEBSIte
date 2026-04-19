@@ -124,6 +124,35 @@
   </div>
 </div>
 
+<!-- PAPER → LIVE CONFIRM MODAL -->
+<div id="liveConfirmModal" class="fixed inset-0 bg-black/70 flex items-center justify-center hidden z-50" style="backdrop-filter:blur(8px)">
+  <div class="bg-slate-900 border border-red-500/30 rounded-2xl p-6 max-w-md w-full mx-4 shadow-2xl">
+    <div class="flex items-start gap-3 mb-4">
+      <div class="w-10 h-10 rounded-full bg-red-500/15 flex items-center justify-center shrink-0">
+        <iconify-icon icon="solar:danger-triangle-linear" style="color:#f87171;font-size:22px"></iconify-icon>
+      </div>
+      <div>
+        <h3 class="text-lg font-semibold text-white">Переключить в LIVE?</h3>
+        <p class="text-sm text-slate-400 mt-1">Бот начнёт исполнять ордера реальными средствами на бирже.</p>
+      </div>
+    </div>
+    <ul class="text-sm text-slate-300 space-y-2 mb-5 pl-2">
+      <li class="flex gap-2"><span class="text-red-400">•</span> Ордера отправятся на реальный счёт биржи</li>
+      <li class="flex gap-2"><span class="text-red-400">•</span> Стоп-лоссы ставятся автоматически, но 100% гарантии нет</li>
+      <li class="flex gap-2"><span class="text-red-400">•</span> Circuit breaker остановит бота при дневной просадке 10%</li>
+      <li class="flex gap-2"><span class="text-red-400">•</span> Вы подтверждаете, что понимаете риски криптоторговли</li>
+    </ul>
+    <label class="flex items-start gap-2 text-sm text-slate-300 mb-5 cursor-pointer">
+      <input type="checkbox" id="liveConfirmChk" class="mt-1" style="accent-color:#ef4444">
+      <span>Я понимаю риски и беру полную ответственность за результаты торговли</span>
+    </label>
+    <div class="flex gap-3">
+      <button type="button" id="liveCancelBtn" class="flex-1 py-2.5 rounded-xl bg-slate-800 text-slate-300 hover:bg-slate-700 font-medium">Отмена</button>
+      <button type="button" id="liveConfirmBtn" disabled class="flex-1 py-2.5 rounded-xl bg-red-500 text-white font-semibold disabled:opacity-40 disabled:cursor-not-allowed hover:bg-red-400">Включить LIVE</button>
+    </div>
+  </div>
+</div>
+
 <script src="app.js"></script>
 <script>
 if(!Auth.requireAuth()) throw new Error('noauth');
@@ -149,8 +178,8 @@ async function loadBots() {
       const pnlClass = stats.totalPnl > 0 ? 'text-green-400' : stats.totalPnl < 0 ? 'text-red-400' : 'text-slate-400';
       const syms = Array.isArray(b.symbols) ? b.symbols.slice(0, 3).join(', ') : '—';
       const modeBadge = b.tradingMode === 'live'
-        ? '<span class="text-xs px-2 py-0.5 rounded-full bg-red-500/15 text-red-400">LIVE</span>'
-        : '<span class="text-xs px-2 py-0.5 rounded-full bg-slate-500/15 text-slate-400">PAPER</span>';
+        ? '<span class="text-xs px-2 py-0.5 rounded-full bg-red-500/15 text-red-400 cursor-pointer" data-mode="'+b.id+'" data-current="live" title="Переключить режим">LIVE</span>'
+        : '<span class="text-xs px-2 py-0.5 rounded-full bg-slate-500/15 text-slate-400 cursor-pointer" data-mode="'+b.id+'" data-current="paper" title="Переключить в LIVE">PAPER</span>';
       card.innerHTML = `
         <div class="flex items-center justify-between mb-3">
           <div class="flex items-center gap-3">
@@ -189,6 +218,15 @@ async function loadBots() {
         const id = +b.getAttribute('data-delete');
         try { await API.deleteBot(id); Toast.success('Бот удалён'); loadBots(); }
         catch (err) { Toast.error(err.message); }
+      });
+    });
+    // Wire mode switchers (PAPER ↔ LIVE) — paper→live opens a warning modal
+    grid.querySelectorAll('[data-mode]').forEach(el => {
+      el.addEventListener('click', () => {
+        const id = +el.getAttribute('data-mode');
+        const current = el.getAttribute('data-current');
+        if (current === 'paper') openLiveConfirm(id);
+        else switchMode(id, 'paper');
       });
     });
   } catch (err) {
@@ -236,6 +274,45 @@ document.getElementById('createBotForm')?.addEventListener('submit', async (e) =
 
 // WS: new signal from your bot
 WS.on('trade_opened', () => loadBots());
+
+// ── PAPER ↔ LIVE mode switch ──
+let pendingLiveBotId = null;
+function openLiveConfirm(botId) {
+  pendingLiveBotId = botId;
+  const m = document.getElementById('liveConfirmModal');
+  const chk = document.getElementById('liveConfirmChk');
+  const btn = document.getElementById('liveConfirmBtn');
+  chk.checked = false;
+  btn.disabled = true;
+  m.classList.remove('hidden');
+}
+function closeLiveConfirm() {
+  pendingLiveBotId = null;
+  document.getElementById('liveConfirmModal').classList.add('hidden');
+}
+async function switchMode(botId, mode) {
+  try {
+    await API.updateBot(botId, { tradingMode: mode });
+    Toast.success(mode === 'live' ? 'Бот переключён в LIVE' : 'Бот переключён в PAPER');
+    loadBots();
+  } catch (err) {
+    if (err.code === 'UPGRADE_REQUIRED') Toast.warn('Live-режим доступен на Pro и выше');
+    else Toast.error(err.message || 'Не удалось сменить режим');
+  }
+}
+document.getElementById('liveConfirmChk')?.addEventListener('change', (e) => {
+  document.getElementById('liveConfirmBtn').disabled = !e.target.checked;
+});
+document.getElementById('liveCancelBtn')?.addEventListener('click', closeLiveConfirm);
+document.getElementById('liveConfirmBtn')?.addEventListener('click', async () => {
+  if (!pendingLiveBotId) return closeLiveConfirm();
+  const id = pendingLiveBotId;
+  closeLiveConfirm();
+  await switchMode(id, 'live');
+});
+document.getElementById('liveConfirmModal')?.addEventListener('click', (e) => {
+  if (e.target.id === 'liveConfirmModal') closeLiveConfirm();
+});
 
 loadBots();
 </script>
