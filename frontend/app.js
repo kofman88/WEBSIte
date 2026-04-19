@@ -170,6 +170,13 @@ const API = {
   listOptimizations: () => apiRequest('GET', '/optimizations'),
   createOptimization: (payload) => apiRequest('POST', '/optimizations', payload),
   getOptimization: (id) => apiRequest('GET', '/optimizations/' + id),
+
+  // Payments / referrals
+  listPayments: (opts = {}) => apiRequest('GET', '/payments?' + qs(opts)),
+  createCryptoPayment: (payload) => apiRequest('POST', '/payments/crypto/create', payload),
+  stripeCheckout: (payload) => apiRequest('POST', '/payments/stripe/checkout', payload),
+  refSummary: () => apiRequest('GET', '/payments/ref/summary'),
+  refRewards: (opts = {}) => apiRequest('GET', '/payments/ref/rewards?' + qs(opts)),
 };
 
 function saveAuthResp(data) {

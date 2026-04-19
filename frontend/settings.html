@@ -75,11 +75,16 @@
     </div>
     <div class="card max-w-2xl">
       <h3 class="font-bold mb-4">Реферальная программа</h3>
-      <div class="bg-slate-800/30 rounded-xl p-4 mb-3"><div class="text-xs text-slate-500 mb-1">Ваша ссылка</div><div class="flex items-center gap-2"><code class="text-sm text-cyan-400">https://chmup.top/?ref=abc123</code><button onclick="Utils.copyToClipboard('https://chmup.top/?ref=abc123')" class="text-xs text-slate-500 hover:text-white">Copy</button></div></div>
-      <div class="grid grid-cols-3 gap-3 text-center text-sm">
-        <div class="p-3 bg-slate-800/30 rounded-lg"><div class="text-xs text-slate-500">Приглашено</div><div class="font-bold">5</div></div>
-        <div class="p-3 bg-slate-800/30 rounded-lg"><div class="text-xs text-slate-500">Комиссия</div><div class="font-bold text-green-400">10%</div></div>
-        <div class="p-3 bg-slate-800/30 rounded-lg"><div class="text-xs text-slate-500">Заработано</div><div class="font-bold text-green-400">$39.50</div></div>
+      <div class="bg-slate-800/30 rounded-xl p-4 mb-3"><div class="text-xs text-slate-500 mb-1">Ваша ссылка</div><div class="flex items-center gap-2"><code class="text-sm text-cyan-400" id="refLink">—</code><button id="refCopyBtn" class="text-xs text-slate-500 hover:text-white">Copy</button></div></div>
+      <div class="grid grid-cols-4 gap-3 text-center text-sm mb-4">
+        <div class="p-3 bg-slate-800/30 rounded-lg"><div class="text-xs text-slate-500">Приглашено</div><div class="font-bold" id="refInvited">—</div></div>
+        <div class="p-3 bg-slate-800/30 rounded-lg"><div class="text-xs text-slate-500">Комиссия</div><div class="font-bold text-indigo-400">20%</div></div>
+        <div class="p-3 bg-slate-800/30 rounded-lg"><div class="text-xs text-slate-500">В ожидании</div><div class="font-bold text-yellow-400" id="refPending">—</div></div>
+        <div class="p-3 bg-slate-800/30 rounded-lg"><div class="text-xs text-slate-500">Выплачено</div><div class="font-bold text-green-400" id="refPaid">—</div></div>
+      </div>
+      <div>
+        <div class="flex items-center justify-between mb-2"><h4 class="text-sm font-semibold text-slate-300">История начислений</h4><span class="text-xs text-slate-500" id="refCount"></span></div>
+        <div id="refList" class="space-y-2 max-h-80 overflow-y-auto"><div class="text-xs text-slate-500 text-center py-4">Загрузка…</div></div>
       </div>
     </div>
   </div>
@@ -226,8 +231,45 @@ document.querySelectorAll('button').forEach(btn => {
   }
 });
 
+// ── Referral program ──
+async function loadReferrals() {
+  try {
+    const u = Auth.user || {};
+    const code = u.referralCode || u.referral_code || '';
+    const link = location.origin + '/?ref=' + (code || '—');
+    document.getElementById('refLink').textContent = link;
+    document.getElementById('refCopyBtn').onclick = () => {
+      navigator.clipboard.writeText(link).then(() => Toast.success('Ссылка скопирована'));
+    };
+    const [summary, rewards] = await Promise.all([
+      API.refSummary().catch(() => ({ referredCount: 0, pendingUsd: 0, paidUsd: 0, totalRewards: 0 })),
+      API.refRewards({ limit: 50 }).catch(() => ({ rewards: [] })),
+    ]);
+    document.getElementById('refInvited').textContent = summary.referredCount || 0;
+    document.getElementById('refPending').textContent = Fmt.currency(summary.pendingUsd || 0);
+    document.getElementById('refPaid').textContent = Fmt.currency(summary.paidUsd || 0);
+    document.getElementById('refCount').textContent = rewards.rewards.length + ' / ' + (summary.totalRewards || 0);
+    const list = document.getElementById('refList');
+    if (!rewards.rewards.length) {
+      list.innerHTML = '<div class="text-xs text-slate-500 text-center py-4">Пока нет начислений. Поделись ссылкой и получай 20% с каждого платежа.</div>';
+      return;
+    }
+    list.innerHTML = rewards.rewards.map((r) => {
+      const statusColor = r.status === 'paid' ? 'text-green-400' : r.status === 'cancelled' ? 'text-red-400' : 'text-yellow-400';
+      const statusLabel = r.status === 'paid' ? 'Выплачено' : r.status === 'cancelled' ? 'Отменено' : 'В ожидании';
+      return `<div class="flex items-center justify-between px-3 py-2 bg-slate-800/30 rounded-lg">
+        <div><div class="text-sm font-medium text-slate-300">${Fmt.currency(r.amountUsd)}</div><div class="text-xs text-slate-500">${Fmt.date(r.createdAt)}</div></div>
+        <span class="text-xs ${statusColor}">${statusLabel}</span>
+      </div>`;
+    }).join('');
+  } catch (err) {
+    document.getElementById('refList').innerHTML = '<div class="text-xs text-red-400 text-center py-4">Ошибка: ' + String(err.message || err) + '</div>';
+  }
+}
+
 loadProfile();
 loadSubscription();
+loadReferrals();
 </script>
 </body>
 </html>
