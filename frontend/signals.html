@@ -27,93 +27,24 @@
 <main class="main-content">
   <!-- Stats -->
   <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
-    <div class="stat-card"><div class="stat-card-label">Сигналов сегодня</div><div class="stat-card-value">12</div></div>
-    <div class="stat-card"><div class="stat-card-label">Win Rate</div><div class="stat-card-value text-green-400">78%</div></div>
-    <div class="stat-card"><div class="stat-card-label">Ср. Confidence</div><div class="stat-card-value text-cyan-400">85</div></div>
+    <div class="stat-card"><div class="stat-card-label">Сигналов сегодня</div><div class="stat-card-value">—</div></div>
+    <div class="stat-card"><div class="stat-card-label">Win Rate</div><div class="stat-card-value text-green-400">—</div></div>
+    <div class="stat-card"><div class="stat-card-label">Ср. Confidence</div><div class="stat-card-value text-cyan-400">—</div></div>
   </div>
 
   <!-- Filters -->
   <div class="flex flex-wrap gap-3 mb-6">
-    <button class="text-xs px-4 py-2 rounded-lg bg-indigo-500/20 text-indigo-300 border border-indigo-500/30">Все</button>
-    <button class="text-xs px-4 py-2 rounded-lg bg-slate-800/50 text-slate-400 border border-slate-700 hover:text-white">SMC</button>
-    <button class="text-xs px-4 py-2 rounded-lg bg-slate-800/50 text-slate-400 border border-slate-700 hover:text-white">Gerchik</button>
-    <button class="text-xs px-4 py-2 rounded-lg bg-slate-800/50 text-slate-400 border border-slate-700 hover:text-white">Scalping</button>
-    <span class="border-l border-slate-700 mx-2"></span>
-    <button class="text-xs px-4 py-2 rounded-lg bg-slate-800/50 text-slate-400 border border-slate-700 hover:text-white">LONG</button>
-    <button class="text-xs px-4 py-2 rounded-lg bg-slate-800/50 text-slate-400 border border-slate-700 hover:text-white">SHORT</button>
+    <button data-filter-strategy="all" class="filter-btn text-xs px-4 py-2 rounded-lg bg-indigo-500/20 text-indigo-300 border border-indigo-500/30 active">Все</button>
+    <button data-filter-strategy="smc" class="filter-btn text-xs px-4 py-2 rounded-lg bg-slate-800/50 text-slate-400 border border-slate-700 hover:text-white">SMC</button>
+    <button data-filter-strategy="gerchik" class="filter-btn text-xs px-4 py-2 rounded-lg bg-slate-800/50 text-slate-400 border border-slate-700 hover:text-white">Gerchik</button>
+    <button data-filter-strategy="scalping" class="filter-btn text-xs px-4 py-2 rounded-lg bg-slate-800/50 text-slate-400 border border-slate-700 hover:text-white">Scalping</button>
+    <button data-filter-strategy="levels" class="filter-btn text-xs px-4 py-2 rounded-lg bg-slate-800/50 text-slate-400 border border-slate-700 hover:text-white">Levels</button>
   </div>
 
   <div class="grid lg:grid-cols-3 gap-6">
-    <!-- Signal Feed -->
+    <!-- Signal Feed (filled by loadSignals()) -->
     <div class="lg:col-span-2 space-y-4" id="signalFeed">
-
-      <div class="card signal-new">
-        <div class="flex items-center justify-between mb-3">
-          <div class="flex items-center gap-3"><span class="text-lg font-bold">BTC/USDT</span><span class="text-xs px-2 py-0.5 rounded-full bg-green-500/15 text-green-400">LONG</span><span class="text-xs px-2 py-0.5 rounded-full bg-indigo-500/15 text-indigo-400">SMC</span></div>
-          <div class="flex items-center gap-2"><span class="text-xs px-2 py-0.5 rounded-full bg-green-500/15 text-green-400 animate-pulse">NEW</span><span class="text-xs text-slate-500">2m ago</span></div>
-        </div>
-        <div class="grid grid-cols-4 gap-3 text-sm mb-3">
-          <div><div class="text-xs text-slate-500">Entry</div><div class="font-mono">67,450</div></div>
-          <div><div class="text-xs text-slate-500">SL</div><div class="font-mono text-red-400">66,800</div></div>
-          <div><div class="text-xs text-slate-500">TP1</div><div class="font-mono text-green-400">68,100</div></div>
-          <div><div class="text-xs text-slate-500">TP2</div><div class="font-mono text-green-400">69,200</div></div>
-        </div>
-        <div class="flex items-center justify-between">
-          <div class="flex items-center gap-2 flex-1"><span class="text-xs text-slate-500">Confidence:</span><div class="conf-bar flex-1"><div class="conf-fill" style="width:92%;background:#66876E"></div></div><span class="text-xs text-green-400">92</span></div>
-          <span class="text-xs text-slate-500 ml-4">R:R 2.8</span>
-        </div>
-      </div>
-
-      <div class="card">
-        <div class="flex items-center justify-between mb-3">
-          <div class="flex items-center gap-3"><span class="text-lg font-bold">ETH/USDT</span><span class="text-xs px-2 py-0.5 rounded-full bg-red-500/15 text-red-400">SHORT</span><span class="text-xs px-2 py-0.5 rounded-full bg-orange-500/15 text-orange-400">Gerchik</span></div>
-          <div class="text-xs text-slate-500">15m ago</div>
-        </div>
-        <div class="grid grid-cols-4 gap-3 text-sm mb-3">
-          <div><div class="text-xs text-slate-500">Entry</div><div class="font-mono">3,245</div></div>
-          <div><div class="text-xs text-slate-500">SL</div><div class="font-mono text-red-400">3,310</div></div>
-          <div><div class="text-xs text-slate-500">TP1</div><div class="font-mono text-green-400">3,180</div></div>
-          <div><div class="text-xs text-slate-500">TP2</div><div class="font-mono text-green-400">3,100</div></div>
-        </div>
-        <div class="flex items-center justify-between">
-          <div class="flex items-center gap-2 flex-1"><span class="text-xs text-slate-500">Confidence:</span><div class="conf-bar flex-1"><div class="conf-fill" style="width:78%;background:#C8B9B9"></div></div><span class="text-xs text-yellow-400">78</span></div>
-          <span class="text-xs text-slate-500 ml-4">R:R 2.2</span>
-        </div>
-      </div>
-
-      <div class="card">
-        <div class="flex items-center justify-between mb-3">
-          <div class="flex items-center gap-3"><span class="text-lg font-bold">SOL/USDT</span><span class="text-xs px-2 py-0.5 rounded-full bg-green-500/15 text-green-400">LONG</span><span class="text-xs px-2 py-0.5 rounded-full bg-cyan-500/15 text-cyan-400">Scalping</span></div>
-          <div class="flex items-center gap-2"><span class="text-xs px-2 py-0.5 rounded-full bg-green-500/15 text-green-400">HIT TP1</span><span class="text-xs text-slate-500">30m ago</span></div>
-        </div>
-        <div class="grid grid-cols-4 gap-3 text-sm mb-3">
-          <div><div class="text-xs text-slate-500">Entry</div><div class="font-mono">178.50</div></div>
-          <div><div class="text-xs text-slate-500">SL</div><div class="font-mono text-red-400">176.20</div></div>
-          <div><div class="text-xs text-slate-500">TP1</div><div class="font-mono text-green-400 line-through">180.00</div></div>
-          <div><div class="text-xs text-slate-500">TP2</div><div class="font-mono text-green-400">182.50</div></div>
-        </div>
-        <div class="flex items-center justify-between">
-          <div class="flex items-center gap-2 flex-1"><span class="text-xs text-slate-500">Confidence:</span><div class="conf-bar flex-1"><div class="conf-fill" style="width:85%;background:#66876E"></div></div><span class="text-xs text-green-400">85</span></div>
-          <span class="text-xs text-green-400 ml-4">+1.6%</span>
-        </div>
-      </div>
-
-      <div class="card" style="opacity:.5">
-        <div class="flex items-center justify-between mb-3">
-          <div class="flex items-center gap-3"><span class="text-lg font-bold">DOGE/USDT</span><span class="text-xs px-2 py-0.5 rounded-full bg-green-500/15 text-green-400">LONG</span><span class="text-xs px-2 py-0.5 rounded-full bg-indigo-500/15 text-indigo-400">SMC</span></div>
-          <div class="flex items-center gap-2"><span class="text-xs px-2 py-0.5 rounded-full bg-red-500/15 text-red-400">STOPPED</span><span class="text-xs text-slate-500">2h ago</span></div>
-        </div>
-        <div class="grid grid-cols-4 gap-3 text-sm mb-3">
-          <div><div class="text-xs text-slate-500">Entry</div><div class="font-mono">0.1825</div></div>
-          <div><div class="text-xs text-slate-500">SL</div><div class="font-mono text-red-400">0.1790</div></div>
-          <div><div class="text-xs text-slate-500">TP1</div><div class="font-mono">0.1880</div></div>
-          <div><div class="text-xs text-slate-500">TP2</div><div class="font-mono">0.1950</div></div>
-        </div>
-        <div class="flex items-center justify-between">
-          <div class="flex items-center gap-2 flex-1"><span class="text-xs text-slate-500">Confidence:</span><div class="conf-bar flex-1"><div class="conf-fill" style="width:65%;background:#C8B9B9"></div></div><span class="text-xs text-yellow-400">65</span></div>
-          <span class="text-xs text-red-400 ml-4">-1.9%</span>
-        </div>
-      </div>
+      <div class="card text-center text-slate-500 py-8">Загрузка сигналов…</div>
     </div>
 
     <!-- Performance Panel -->
@@ -124,12 +55,8 @@
       </div>
       <div class="card">
         <h3 class="font-bold mb-4">Топ символы</h3>
-        <div class="space-y-3">
-          <div class="flex items-center justify-between text-sm"><span>BTC/USDT</span><span class="text-green-400">+12.4%</span></div>
-          <div class="flex items-center justify-between text-sm"><span>ETH/USDT</span><span class="text-green-400">+8.7%</span></div>
-          <div class="flex items-center justify-between text-sm"><span>SOL/USDT</span><span class="text-green-400">+5.2%</span></div>
-          <div class="flex items-center justify-between text-sm"><span>ARB/USDT</span><span class="text-green-400">+3.1%</span></div>
-          <div class="flex items-center justify-between text-sm"><span>DOGE/USDT</span><span class="text-red-400">-1.2%</span></div>
+        <div class="space-y-3" id="topSymbolsList">
+          <div class="text-xs text-slate-500 text-center py-2">—</div>
         </div>
       </div>
     </div>
@@ -161,9 +88,11 @@ async function loadSignals() {
     FEED.innerHTML = '';
     if (!data.signals.length) {
       FEED.innerHTML = '<div class="card text-center text-slate-500 py-8">Пока сигналов нет. Активируй бота.</div>';
+      renderTopSymbols([]);
       return;
     }
     for (const s of data.signals) FEED.appendChild(renderSignal(s));
+    renderTopSymbols(data.signals);
   } catch (err) {
     if (err.code === 'SIGNAL_LIMIT_REACHED') {
       FEED.innerHTML = '<div class="card text-center py-8"><div class="text-yellow-400 font-semibold mb-2">Дневной лимит сигналов</div><div class="text-sm text-slate-500">Free-тариф — 3 сигнала в день. <a href="#pricing" class="text-indigo-400 underline">Upgrade</a></div></div>';
@@ -210,14 +139,36 @@ function escapeHtml(s) {
   return String(s||'').replace(/[&<>"']/g, (c) => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'})[c]);
 }
 
-// Filter buttons
+// Filter buttons — visual toggle + reload
 document.querySelectorAll('[data-filter-strategy]').forEach(btn => {
   btn.addEventListener('click', () => {
+    document.querySelectorAll('[data-filter-strategy]').forEach((b) => {
+      b.classList.remove('bg-indigo-500/20','text-indigo-300','border-indigo-500/30','active');
+      b.classList.add('bg-slate-800/50','text-slate-400','border-slate-700');
+    });
+    btn.classList.add('bg-indigo-500/20','text-indigo-300','border-indigo-500/30','active');
+    btn.classList.remove('bg-slate-800/50','text-slate-400','border-slate-700');
     activeStrategy = btn.getAttribute('data-filter-strategy') || null;
     if (activeStrategy === 'all') activeStrategy = null;
     loadSignals();
   });
 });
+
+// ── Top symbols by signal count from current feed ──
+function renderTopSymbols(signals) {
+  const host = document.getElementById('topSymbolsList');
+  if (!host) return;
+  if (!signals.length) {
+    host.innerHTML = '<div class="text-xs text-slate-500 text-center py-2">Нет данных</div>';
+    return;
+  }
+  const counts = new Map();
+  for (const s of signals) counts.set(s.symbol, (counts.get(s.symbol) || 0) + 1);
+  const top = [...counts.entries()].sort((a, b) => b[1] - a[1]).slice(0, 5);
+  host.innerHTML = top.map(([sym, n]) =>
+    `<div class="flex items-center justify-between text-sm"><span>${sym}</span><span class="text-slate-400 text-xs">${n} сигн.</span></div>`,
+  ).join('');
+}
 
 // Strategy donut — use global stats
 (async () => {
