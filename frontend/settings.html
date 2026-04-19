@@ -140,9 +140,94 @@
 
 <script src="app.js"></script>
 <script>
-if(!Auth.isLoggedIn())window.location.href='/?login=1';
-Sidebar.init('settings');
-function stab(t){document.querySelectorAll('.stab').forEach(b=>b.classList.remove('active'));document.querySelectorAll('.stab-content').forEach(c=>c.classList.remove('active'));document.getElementById('stab-'+t).classList.add('active');event.target.classList.add('active')}
+if(!Auth.requireAuth()) throw new Error('noauth');
+document.querySelectorAll('.sidebar-link[data-page="settings"]').forEach(a => a.classList.add('active'));
+
+window.stab = function (t, ev) {
+  document.querySelectorAll('.stab').forEach(b => b.classList.remove('active'));
+  document.querySelectorAll('.stab-content').forEach(c => c.classList.remove('active'));
+  const tab = document.getElementById('stab-' + t);
+  if (tab) tab.classList.add('active');
+  if (ev && ev.target) ev.target.classList.add('active');
+};
+
+// Bind tab buttons to updated stab() that takes event
+document.querySelectorAll('.stab').forEach(btn => {
+  btn.addEventListener('click', (ev) => {
+    const onclick = btn.getAttribute('onclick') || '';
+    const m = /stab\('([^']+)'/.exec(onclick);
+    if (m) window.stab(m[1], ev);
+  }, { capture: true });
+});
+
+// ── Profile tab ──
+async function loadProfile() {
+  try {
+    const me = await API.me();
+    const u = me.user;
+    const emailInput = document.querySelector('input[value="user@example.com"]');
+    if (emailInput) emailInput.value = u.email;
+    // Update topbar avatar
+    const avatar = document.querySelector('.topbar-avatar');
+    if (avatar) avatar.textContent = u.email[0].toUpperCase();
+  } catch (_e) {}
+}
+
+// ── Subscription tab ──
+async function loadSubscription() {
+  try {
+    const me = await API.me();
+    const sub = me.user.subscription;
+    const planBlock = document.querySelector('#stab-subscription .card.max-w-2xl:first-child');
+    if (!planBlock) return;
+    const planTitle = planBlock.querySelector('.font-bold.text-indigo-300');
+    const planMeta = planBlock.querySelector('.text-xs.text-slate-500');
+    if (planTitle) planTitle.textContent = (sub.plan[0].toUpperCase() + sub.plan.slice(1)) + ' Plan';
+    if (planMeta) planMeta.textContent = sub.expiresAt ? ('Активен до ' + Fmt.date(sub.expiresAt)) : 'Бессрочный';
+  } catch (_e) {}
+}
+
+// ── Promo code ──
+document.querySelectorAll('button').forEach(btn => {
+  if ((btn.textContent || '').trim() === 'Применить') {
+    btn.addEventListener('click', async () => {
+      const input = btn.parentElement && btn.parentElement.querySelector('input');
+      const code = input ? input.value.trim() : '';
+      if (!code) return Toast.warn('Введи промо-код');
+      try { await API.redeemPromo(code); Toast.success('Промо применён!'); loadSubscription(); }
+      catch (err) { Toast.error(err.message || 'Неверный промо-код'); }
+    });
+  }
+});
+
+// ── Security: change password ──
+const pwForm = document.querySelector('#stab-security form, #stab-security .card');
+// Best-effort hook: find change-password button
+document.querySelectorAll('button').forEach(btn => {
+  if ((btn.textContent || '').trim() === 'Сменить пароль') {
+    btn.addEventListener('click', async () => {
+      const inputs = document.querySelectorAll('#stab-security input[type="password"]');
+      if (inputs.length < 2) return;
+      const currentPassword = inputs[0].value;
+      const newPassword = inputs[1].value;
+      if (!currentPassword || !newPassword) return Toast.warn('Заполни оба поля');
+      try {
+        await window.fetch(
+          (location.hostname === 'localhost' ? 'http://localhost:3000/api' : '/api') + '/auth/change-password',
+          { method: 'POST', headers: { 'Content-Type': 'application/json', Authorization: 'Bearer ' + Auth.accessToken },
+            body: JSON.stringify({ currentPassword, newPassword }) }
+        ).then(r => r.json().then(j => ({ ok: r.ok, j }))).then(({ ok, j }) => {
+          if (!ok) throw new Error(j.error || 'Ошибка');
+          Toast.success('Пароль изменён. Перелогинься.');
+          setTimeout(() => { Auth.logout(); }, 2000);
+        });
+      } catch (err) { Toast.error(err.message); }
+    });
+  }
+});
+
+loadProfile();
+loadSubscription();
 </script>
 </body>
 </html>

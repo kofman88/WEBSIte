@@ -138,10 +138,119 @@
 
 <script src="app.js"></script>
 <script>
-if(!Auth.isLoggedIn())window.location.href='/?login=1';
-Sidebar.init('signals');
-// Strategy donut
-new Chart(document.getElementById('stratChart'),{type:'doughnut',data:{labels:['SMC','Gerchik','Scalping'],datasets:[{data:[45,30,25],backgroundColor:['#93AAEC','#826262','#5C80E3'],borderWidth:0}]},options:{responsive:true,plugins:{legend:{position:'bottom',labels:{color:'rgba(255,255,255,.62)',padding:12,font:{size:11}}}}}});
+if(!Auth.requireAuth()) throw new Error('noauth');
+document.querySelectorAll('.sidebar-link[data-page="signals"]').forEach(a => a.classList.add('active'));
+
+const FEED = document.getElementById('signalFeed');
+let activeStrategy = null; // null = all
+
+async function loadStats() {
+  try {
+    const s = await API.mySignalStats();
+    const cards = document.querySelectorAll('.stat-card .stat-card-value');
+    if (cards[0]) cards[0].textContent = s.total;
+    if (cards[1]) cards[1].textContent = s.winRate !== null ? Fmt.percent(s.winRate * 100, { decimals: 0 }) : '—';
+    if (cards[2]) cards[2].textContent = s.avgConfidence ? Math.round(s.avgConfidence) : '—';
+  } catch (_e) {}
+}
+
+async function loadSignals() {
+  if (!FEED) return;
+  try {
+    const data = await API.listSignals({ limit: 30, strategy: activeStrategy || undefined });
+    FEED.innerHTML = '';
+    if (!data.signals.length) {
+      FEED.innerHTML = '<div class="card text-center text-slate-500 py-8">Пока сигналов нет. Активируй бота.</div>';
+      return;
+    }
+    for (const s of data.signals) FEED.appendChild(renderSignal(s));
+  } catch (err) {
+    if (err.code === 'SIGNAL_LIMIT_REACHED') {
+      FEED.innerHTML = '<div class="card text-center py-8"><div class="text-yellow-400 font-semibold mb-2">Дневной лимит сигналов</div><div class="text-sm text-slate-500">Free-тариф — 3 сигнала в день. <a href="#pricing" class="text-indigo-400 underline">Upgrade</a></div></div>';
+    } else {
+      FEED.innerHTML = '<div class="card text-red-400">' + (err.message||'Ошибка') + '</div>';
+    }
+  }
+}
+
+function renderSignal(s, isNew = false) {
+  const sideColor = s.side === 'long' ? 'bg-green-500/15 text-green-400' : 'bg-red-500/15 text-red-400';
+  const card = document.createElement('div');
+  card.className = 'card ' + (isNew ? 'signal-new' : '');
+  card.innerHTML = `
+    <div class="flex items-center justify-between mb-3">
+      <div class="flex items-center gap-3">
+        <span class="text-lg font-bold">${escapeHtml(s.symbol)}</span>
+        <span class="text-xs px-2 py-0.5 rounded-full ${sideColor}">${s.side.toUpperCase()}</span>
+        <span class="text-xs px-2 py-0.5 rounded-full bg-indigo-500/15 text-indigo-400">${escapeHtml((s.strategy||'').toUpperCase())}</span>
+      </div>
+      <div class="flex items-center gap-2">
+        ${isNew ? '<span class="text-xs px-2 py-0.5 rounded-full bg-green-500/15 text-green-400 animate-pulse">NEW</span>' : ''}
+        <span class="text-xs text-slate-500">${Fmt.timeAgo(s.createdAt)}</span>
+      </div>
+    </div>
+    <div class="grid grid-cols-4 gap-3 text-sm mb-3">
+      <div><div class="text-xs text-slate-500">Entry</div><div class="font-mono">${Fmt.price(s.entry)}</div></div>
+      <div><div class="text-xs text-slate-500">SL</div><div class="font-mono text-red-400">${Fmt.price(s.stopLoss)}</div></div>
+      <div><div class="text-xs text-slate-500">TP1</div><div class="font-mono text-green-400">${s.tp1 ? Fmt.price(s.tp1) : '—'}</div></div>
+      <div><div class="text-xs text-slate-500">TP2</div><div class="font-mono text-green-400">${s.tp2 ? Fmt.price(s.tp2) : '—'}</div></div>
+    </div>
+    <div class="flex items-center justify-between">
+      <div class="flex items-center gap-2 flex-1"><span class="text-xs text-slate-500">Confidence:</span>
+        <div class="conf-bar flex-1"><div class="conf-fill" style="width:${s.confidence||0}%;background:linear-gradient(90deg,#5C80E3,#1D4ED8)"></div></div>
+        <span class="text-xs text-green-400">${s.confidence || '—'}</span>
+      </div>
+      <span class="text-xs text-slate-500 ml-4">R:R ${s.riskReward||'—'}</span>
+    </div>
+    ${s.reason ? `<div class="text-xs text-slate-400 mt-2">${escapeHtml(s.reason)}</div>` : ''}`;
+  return card;
+}
+
+function escapeHtml(s) {
+  return String(s||'').replace(/[&<>"']/g, (c) => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'})[c]);
+}
+
+// Filter buttons
+document.querySelectorAll('[data-filter-strategy]').forEach(btn => {
+  btn.addEventListener('click', () => {
+    activeStrategy = btn.getAttribute('data-filter-strategy') || null;
+    if (activeStrategy === 'all') activeStrategy = null;
+    loadSignals();
+  });
+});
+
+// Strategy donut — use global stats
+(async () => {
+  try {
+    const gl = await API.globalSignalStats();
+    const canvas = document.getElementById('stratChart');
+    if (!canvas) return;
+    new Chart(canvas, {
+      type: 'doughnut',
+      data: {
+        labels: ['Signals'], datasets: [{
+          data: [gl.total || 1],
+          backgroundColor: ['#1D4ED8'], borderWidth: 0,
+        }],
+      },
+      options: { responsive: true, plugins: { legend: { position: 'bottom', labels: { color: 'rgba(255,255,255,.62)', padding: 12, font: { size: 11 } } } } },
+    });
+  } catch (_e) {}
+})();
+
+// WS live new signal
+WS.on('signal', (msg) => {
+  if (!msg.data) return;
+  if (activeStrategy && msg.data.strategy !== activeStrategy) return;
+  const node = renderSignal(msg.data, true);
+  if (FEED) FEED.insertBefore(node, FEED.firstChild);
+  Toast.info('Новый сигнал: ' + msg.data.symbol + ' ' + msg.data.side.toUpperCase());
+  loadStats();
+});
+
+loadStats();
+loadSignals();
+setInterval(loadStats, 60_000);
 </script>
 </body>
 </html>

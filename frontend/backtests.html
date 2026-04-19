@@ -90,12 +90,130 @@
 
 <script src="app.js"></script>
 <script>
-if(!Auth.isLoggedIn())window.location.href='/?login=1';
-Sidebar.init('backtests');
-// Mini equity charts
-function miniChart(id,clr){const d=Utils.generateEquityData(60,10000);new Chart(document.getElementById(id),{type:'line',data:{labels:d.map(x=>x.date.slice(5)),datasets:[{data:d.map(x=>x.value),borderColor:clr,backgroundColor:'transparent',tension:.4,pointRadius:0,borderWidth:1.5}]},options:{responsive:true,plugins:{legend:{display:false}},scales:{x:{display:false},y:{display:false}}}})}
-miniChart('btChart1','#93AAEC');miniChart('btChart2','#5C80E3');
-document.getElementById('btForm')?.addEventListener('submit',async e=>{e.preventDefault();Toast.success('Бэктест запущен!');});
+if(!Auth.requireAuth()) throw new Error('noauth');
+document.querySelectorAll('.sidebar-link[data-page="backtests"]').forEach(a => a.classList.add('active'));
+
+const resultsGrid = document.querySelector('.grid.md\\:grid-cols-2.gap-4.mb-6');
+
+function escapeHtml(s) {
+  return String(s||'').replace(/[&<>"']/g, (c) => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'})[c]);
+}
+
+function renderBacktest(bt) {
+  const card = document.createElement('div');
+  card.className = 'card card-glow';
+  card.dataset.btId = bt.id;
+  const pnl = bt.results?.totalPnlUsd;
+  const pnlClass = pnl > 0 ? 'text-green-400' : pnl < 0 ? 'text-red-400' : 'text-slate-400';
+  const statusBadge = bt.status === 'completed'
+    ? '<span class="text-xs px-2 py-0.5 rounded-full bg-green-500/15 text-green-400">Completed</span>'
+    : bt.status === 'running'
+    ? '<span class="text-xs px-2 py-0.5 rounded-full bg-yellow-500/15 text-yellow-400">Running</span>'
+    : bt.status === 'failed'
+    ? '<span class="text-xs px-2 py-0.5 rounded-full bg-red-500/15 text-red-400">Failed</span>'
+    : '<span class="text-xs px-2 py-0.5 rounded-full bg-slate-500/15 text-slate-400">Pending</span>';
+  const syms = Array.isArray(bt.symbols) ? bt.symbols.join(', ') : bt.symbols;
+
+  if (bt.status !== 'completed') {
+    card.innerHTML = `
+      <div class="flex items-center justify-between mb-3">
+        <div><div class="font-semibold">${escapeHtml(bt.name)}</div>
+        <div class="text-xs text-slate-500">${bt.startDate}–${bt.endDate} · ${escapeHtml(syms)}</div></div>
+        ${statusBadge}
+      </div>
+      <div class="w-full bg-slate-800 rounded-full h-2 mt-4"><div class="bg-indigo-500 h-2 rounded-full" style="width:${bt.progressPct||0}%"></div></div>
+      <div class="text-xs text-slate-500 mt-2">${bt.progressPct||0}% complete${bt.errorMessage?'<span class="text-red-400 ml-2">'+escapeHtml(bt.errorMessage)+'</span>':''}</div>`;
+    return card;
+  }
+
+  const r = bt.results;
+  card.innerHTML = `
+    <div class="flex items-center justify-between mb-3">
+      <div><div class="font-semibold">${escapeHtml(bt.name)}</div>
+      <div class="text-xs text-slate-500">${bt.startDate}–${bt.endDate} · ${escapeHtml(syms)}</div></div>
+      ${statusBadge}
+    </div>
+    <div class="grid grid-cols-3 gap-3 text-center text-sm mb-4">
+      <div><div class="text-xs text-slate-500">PnL</div><div class="${pnlClass} font-bold">${Fmt.currency(r.totalPnlUsd)}</div></div>
+      <div><div class="text-xs text-slate-500">Win Rate</div><div class="font-bold">${r.winRatePct}%</div></div>
+      <div><div class="text-xs text-slate-500">Sharpe</div><div class="font-bold">${r.sharpeRatio}</div></div>
+    </div>
+    <div class="grid grid-cols-3 gap-3 text-center text-sm">
+      <div><div class="text-xs text-slate-500">Max DD</div><div class="text-red-400">-${r.maxDrawdownPct}%</div></div>
+      <div><div class="text-xs text-slate-500">PF</div><div>${r.profitFactor || '—'}</div></div>
+      <div><div class="text-xs text-slate-500">Trades</div><div>${r.totalTrades}</div></div>
+    </div>
+    <div class="mt-4"><canvas id="btChart${bt.id}" height="80"></canvas></div>`;
+  setTimeout(() => drawEquityChart('btChart' + bt.id, r.equityCurve), 10);
+  return card;
+}
+
+function drawEquityChart(canvasId, curve) {
+  const el = document.getElementById(canvasId);
+  if (!el || !Array.isArray(curve) || !curve.length) return;
+  new Chart(el, {
+    type: 'line',
+    data: {
+      labels: curve.map(p => new Date(p[0]).toISOString().slice(5, 10)),
+      datasets: [{
+        data: curve.map(p => p[1]),
+        borderColor: '#93AAEC', backgroundColor: 'transparent',
+        tension: .4, pointRadius: 0, borderWidth: 1.5,
+      }],
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      plugins: { legend: { display: false } },
+      scales: { x: { display: false }, y: { display: false } },
+    },
+  });
+}
+
+async function loadBacktests() {
+  try {
+    const data = await API.listBacktests({ limit: 50 });
+    if (!resultsGrid) return;
+    resultsGrid.innerHTML = '';
+    if (!data.backtests.length) {
+      resultsGrid.innerHTML = '<div class="col-span-full text-center text-slate-500 py-8">Бэктестов пока нет. Запусти первый — форма выше.</div>';
+      return;
+    }
+    for (const bt of data.backtests) resultsGrid.appendChild(renderBacktest(bt));
+    // Poll running ones
+    const running = data.backtests.filter(b => b.status === 'pending' || b.status === 'running');
+    if (running.length) setTimeout(loadBacktests, 2000);
+  } catch (err) {
+    Toast.error('Ошибка загрузки бэктестов: ' + err.message);
+  }
+}
+
+document.getElementById('btForm')?.addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const fd = new FormData(e.target);
+  const raw = Object.fromEntries(fd.entries());
+  const symbol = (raw.symbol || '').toUpperCase().trim();
+  const payload = {
+    name: `${symbol} ${raw.strategy} ${raw.timeframe}`,
+    strategy: raw.strategy || 'levels',
+    exchange: 'bybit',
+    symbols: [symbol || 'BTCUSDT'],
+    timeframe: raw.timeframe || '1h',
+    startDate: raw.startDate,
+    endDate: raw.endDate,
+    initialCapital: 10000,
+  };
+  try {
+    await API.createBacktest(payload);
+    Toast.success('Бэктест запущен!');
+    loadBacktests();
+  } catch (err) {
+    if (err.code === 'BACKTEST_LIMIT_REACHED') Toast.warn(err.message);
+    else if (err.code === 'UPGRADE_REQUIRED') Toast.warn('Нужен план ' + (err.data?.requiredPlan || 'Pro'));
+    else Toast.error(err.message);
+  }
+});
+
+loadBacktests();
 </script>
 </body>
 </html>

@@ -135,19 +135,148 @@
 
 <script src="app.js"></script>
 <script>
-if(!Auth.isLoggedIn())window.location.href='/?login=1';
-Sidebar.init('dashboard');
+if(!Auth.requireAuth()) throw new Error('noauth');
 
-// Equity Chart
-let eChart;
-function buildChart(days){
-  const data=Utils.generateEquityData(days,10000);
-  const cfg={type:'line',data:{labels:data.map(d=>d.date.slice(5)),datasets:[{data:data.map(d=>d.value),borderColor:'#93AAEC',backgroundColor:function(ctx){const g=ctx.chart.ctx.createLinearGradient(0,0,0,300);g.addColorStop(0,'rgba(29,78,216,.4)');g.addColorStop(1,'rgba(29,78,216,.4)');return g},fill:true,tension:.4,pointRadius:0,borderWidth:2}]},options:{responsive:true,plugins:{legend:{display:false}},scales:{x:{ticks:{color:'#475569',font:{size:10}},grid:{display:false}},y:{ticks:{color:'#475569',font:{size:10},callback:v=>'$'+v.toLocaleString()},grid:{color:'rgba(30,41,59,.3)'}}}}};
-  if(eChart)eChart.destroy();
-  eChart=new Chart(document.getElementById('equityChart'),cfg);
+// Sidebar active state + user name
+document.querySelectorAll('.sidebar-link[data-page="dashboard"]').forEach(a => a.classList.add('active'));
+(Auth.user && Auth.user.displayName) && (document.querySelector('.topbar-username') && (document.querySelector('.topbar-username').textContent = Auth.user.displayName));
+(Auth.user && Auth.user.email) && (document.querySelector('.topbar-avatar') && (document.querySelector('.topbar-avatar').textContent = Auth.user.email[0].toUpperCase()));
+
+// ── Summary: total PnL, active bots, signals today, win rate ──
+async function loadSummary() {
+  try {
+    const [botSummary, sigStats] = await Promise.all([
+      API.botSummary().catch(() => ({ totalBots: 0, activeBots: 0, openTrades: 0, totalPnl: 0 })),
+      API.mySignalStats().catch(() => ({ total: 0, winRate: null })),
+    ]);
+    const balEl = document.getElementById('balanceVal');
+    if (balEl) balEl.textContent = Fmt.currency(botSummary.totalPnl);
+    // Populate stat cards by order (4 cards)
+    const cards = document.querySelectorAll('.stat-card .stat-card-value');
+    if (cards[0]) cards[0].textContent = Fmt.currency(botSummary.totalPnl);
+    if (cards[1]) cards[1].textContent = botSummary.activeBots + ' / ' + botSummary.totalBots;
+    if (cards[2]) cards[2].textContent = sigStats.total;
+    if (cards[3]) cards[3].textContent = sigStats.winRate !== null ? Fmt.percent(sigStats.winRate * 100, { decimals: 1 }) : '—';
+  } catch (err) {
+    Toast.error('Не удалось загрузить сводку: ' + err.message);
+  }
 }
-function updateChart(d){buildChart(d)}
+
+// ── Recent signals ──
+async function loadRecentSignals() {
+  const host = document.getElementById('recentSignals');
+  if (!host) return;
+  try {
+    const data = await API.listSignals({ limit: 5 });
+    host.innerHTML = '';
+    if (!data.signals.length) {
+      host.innerHTML = '<div class="text-sm text-slate-500 p-3">Пока нет сигналов. Создай бота для начала.</div>';
+      return;
+    }
+    for (const s of data.signals) {
+      const sideColor = s.side === 'long' ? 'text-green-400' : 'text-red-400';
+      const sideBg = s.side === 'long' ? 'bg-green-500/15' : 'bg-red-500/15';
+      const row = document.createElement('div');
+      row.className = 'flex items-center justify-between p-3 bg-slate-800/30 rounded-lg';
+      row.innerHTML = `
+        <div><div class="font-semibold text-sm">${s.symbol}</div>
+        <div class="text-xs text-slate-500">${s.strategy.toUpperCase()} · ${Fmt.timeAgo(s.createdAt)}</div></div>
+        <div class="text-right">
+          <span class="text-xs px-2 py-0.5 rounded-full ${sideBg} ${sideColor}">${s.side.toUpperCase()}</span>
+          <div class="text-xs text-slate-400 mt-1">Q ${s.quality || '—'}</div>
+        </div>`;
+      host.appendChild(row);
+    }
+  } catch (err) {
+    host.innerHTML = '<div class="text-sm text-red-400 p-3">Ошибка загрузки сигналов.</div>';
+  }
+}
+
+// ── Recent trades table ──
+async function loadRecentTrades() {
+  try {
+    const bots = await API.listBots();
+    if (!bots.bots.length) return;
+    // Fetch trades for each bot and merge
+    const tradeArrays = await Promise.all(bots.bots.map(b => API.botTrades(b.id, { limit: 10 }).catch(() => ({ trades: [] }))));
+    const trades = tradeArrays.flatMap(r => r.trades || []).sort((a, b) =>
+      new Date(b.opened_at).getTime() - new Date(a.opened_at).getTime()).slice(0, 10);
+    const tbody = document.querySelector('.card table tbody');
+    if (!tbody) return;
+    tbody.innerHTML = '';
+    if (!trades.length) {
+      tbody.innerHTML = '<tr><td colspan="7" class="p-4 text-center text-slate-500 text-sm">Сделок пока нет</td></tr>';
+      return;
+    }
+    for (const t of trades) {
+      const pnl = Number(t.realized_pnl || 0);
+      const pnlClass = pnl > 0 ? 'text-green-400' : pnl < 0 ? 'text-red-400' : 'text-slate-400';
+      const sideClass = t.side === 'long' ? 'bg-green-500/15 text-green-400' : 'bg-red-500/15 text-red-400';
+      const tr = document.createElement('tr');
+      tr.className = 'border-t border-slate-800/50';
+      tr.innerHTML = `
+        <td class="p-3 text-slate-400">${Fmt.date(t.opened_at)}</td>
+        <td class="p-3 font-medium">${t.symbol}</td>
+        <td class="p-3"><span class="text-xs px-2 py-0.5 rounded-full ${sideClass}">${t.side.toUpperCase()}</span></td>
+        <td class="p-3">${Fmt.price(t.entry_price)}</td>
+        <td class="p-3">${t.exit_price ? Fmt.price(t.exit_price) : '—'}</td>
+        <td class="p-3 ${pnlClass}">${pnl ? Fmt.currency(pnl, { decimals: 2 }) : '—'}</td>
+        <td class="p-3">${t.status === 'open' ? '<span class="text-xs text-cyan-400">OPEN</span>' : (t.realized_pnl_pct ? Fmt.percent(t.realized_pnl_pct, { decimals: 1, sign: true }) : '—')}</td>`;
+      tbody.appendChild(tr);
+    }
+  } catch (err) { /* silent */ }
+}
+
+// ── Equity chart (30-day PnL reconstruction from trades) ──
+let eChart;
+async function buildChart(days) {
+  try {
+    const since = Date.now() - days * 86_400_000;
+    const bots = await API.listBots();
+    const tradeArrays = await Promise.all(bots.bots.map(b => API.botTrades(b.id, { limit: 500, status: 'closed' }).catch(() => ({ trades: [] }))));
+    const trades = tradeArrays.flatMap(r => r.trades || [])
+      .filter(t => new Date(t.closed_at).getTime() >= since)
+      .sort((a, b) => new Date(a.closed_at).getTime() - new Date(b.closed_at).getTime());
+    let equity = 10000;
+    const points = [{ t: since, v: equity }];
+    for (const t of trades) { equity += Number(t.realized_pnl || 0); points.push({ t: new Date(t.closed_at).getTime(), v: equity }); }
+    const cfg = {
+      type: 'line',
+      data: {
+        labels: points.map(p => new Date(p.t).toISOString().slice(5, 10)),
+        datasets: [{
+          data: points.map(p => p.v),
+          borderColor: '#93AAEC',
+          backgroundColor: 'rgba(29,78,216,.2)',
+          fill: true, tension: .4, pointRadius: 0, borderWidth: 2,
+        }],
+      },
+      options: {
+        responsive: true, maintainAspectRatio: false,
+        plugins: { legend: { display: false } },
+        scales: {
+          x: { ticks: { color: '#64748b', font: { size: 10 } }, grid: { display: false } },
+          y: { ticks: { color: '#64748b', font: { size: 10 }, callback: v => Fmt.currency(v, { decimals: 0 }) }, grid: { color: 'rgba(30,41,59,.3)' } },
+        },
+      },
+    };
+    if (eChart) eChart.destroy();
+    const el = document.getElementById('equityChart');
+    if (el) eChart = new Chart(el, cfg);
+  } catch (err) { /* chart absent — ignore */ }
+}
+window.updateChart = (d) => buildChart(d);
+
+// ── WS live updates ──
+WS.on('signal', () => loadRecentSignals());
+WS.on('trade_opened', () => { loadSummary(); loadRecentTrades(); });
+
+// Boot
+loadSummary();
+loadRecentSignals();
+loadRecentTrades();
 buildChart(7);
+setInterval(loadSummary, 30_000);
 </script>
 </body>
 </html>

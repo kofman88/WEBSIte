@@ -126,13 +126,118 @@
 
 <script src="app.js"></script>
 <script>
-if(!Auth.isLoggedIn())window.location.href='/?login=1';
-Sidebar.init('bots');
-document.getElementById('createBotForm')?.addEventListener('submit',async e=>{
-  e.preventDefault();const fd=new FormData(e.target);const data=Object.fromEntries(fd.entries());
-  data.leverage=+data.leverage;data.positionSizeUsd=+data.positionSizeUsd;data.stopLossPct=+data.stopLossPct;data.takeProfitPct=+data.takeProfitPct;
-  try{await API.createBot(data);Toast.success('Бот создан!');document.getElementById('createModal').style.display='none'}catch(err){Toast.error(err.message)}
+if(!Auth.requireAuth()) throw new Error('noauth');
+document.querySelectorAll('.sidebar-link[data-page="bots"]').forEach(a => a.classList.add('active'));
+
+const STRATEGY_LABELS = { levels: 'Levels', smc: 'SMC', gerchik: 'Gerchik', scalping: 'Scalping' };
+const TF_OPTS = ['5m','15m','30m','1h','2h','4h','1d'];
+
+async function loadBots() {
+  const grid = document.getElementById('botGrid');
+  if (!grid) return;
+  try {
+    const data = await API.listBots();
+    grid.innerHTML = '';
+    if (!data.bots.length) {
+      grid.innerHTML = '<div class="col-span-full text-center py-12 text-slate-500">Пока нет ботов. Создай первого — кнопка вверху.</div>';
+      return;
+    }
+    for (const b of data.bots) {
+      const stats = await API.botStats(b.id).catch(() => ({ totalPnl: 0, winRate: null, totalTrades: 0 }));
+      const card = document.createElement('div');
+      card.className = 'card card-glow';
+      const pnlClass = stats.totalPnl > 0 ? 'text-green-400' : stats.totalPnl < 0 ? 'text-red-400' : 'text-slate-400';
+      const syms = Array.isArray(b.symbols) ? b.symbols.slice(0, 3).join(', ') : '—';
+      const modeBadge = b.tradingMode === 'live'
+        ? '<span class="text-xs px-2 py-0.5 rounded-full bg-red-500/15 text-red-400">LIVE</span>'
+        : '<span class="text-xs px-2 py-0.5 rounded-full bg-slate-500/15 text-slate-400">PAPER</span>';
+      card.innerHTML = `
+        <div class="flex items-center justify-between mb-3">
+          <div class="flex items-center gap-3">
+            <div class="w-10 h-10 rounded-lg bg-indigo-500/10 flex items-center justify-center text-sm font-bold text-indigo-400">${(b.name||'B')[0].toUpperCase()}</div>
+            <div><div class="font-semibold">${escapeHtml(b.name)}</div><div class="text-xs text-slate-500">${b.exchange} · ${syms}</div></div>
+          </div>
+          <div class="toggle ${b.isActive?'on':''}" data-bot="${b.id}" style="cursor:pointer"></div>
+        </div>
+        <div class="flex items-center gap-2 mb-3">
+          <span class="text-xs px-2 py-0.5 rounded-full bg-cyan-500/15 text-cyan-400">${STRATEGY_LABELS[b.strategy]||b.strategy}</span>
+          ${modeBadge}
+          <span class="text-xs px-2 py-0.5 rounded-full ${b.isActive?'bg-green-500/15 text-green-400':'bg-slate-500/15 text-slate-400'}">${b.isActive?'Active':'Paused'}</span>
+        </div>
+        <div class="grid grid-cols-3 gap-3 text-center text-sm mb-3">
+          <div><div class="text-xs text-slate-500">PnL</div><div class="${pnlClass} font-semibold">${Fmt.currency(stats.totalPnl)}</div></div>
+          <div><div class="text-xs text-slate-500">Win Rate</div><div class="font-semibold">${stats.winRate!==null?Fmt.percent(stats.winRate*100,{decimals:0}):'—'}</div></div>
+          <div><div class="text-xs text-slate-500">Trades</div><div class="font-semibold">${stats.totalTrades}</div></div>
+        </div>
+        <div class="text-xs text-slate-500 flex items-center justify-between">
+          <span>Lev ${b.leverage}x · Risk ${b.riskPct}% · Max ${b.maxOpenTrades}</span>
+          <button data-delete="${b.id}" class="text-red-400 hover:text-red-300 text-xs">Удалить</button>
+        </div>`;
+      grid.appendChild(card);
+    }
+    // Wire toggles
+    grid.querySelectorAll('.toggle[data-bot]').forEach(el => {
+      el.addEventListener('click', async () => {
+        const id = +el.getAttribute('data-bot');
+        try { await API.toggleBot(id); Toast.success('Статус изменён'); loadBots(); }
+        catch (err) { Toast.error(err.message); }
+      });
+    });
+    grid.querySelectorAll('button[data-delete]').forEach(b => {
+      b.addEventListener('click', async () => {
+        if (!confirm('Удалить бота?')) return;
+        const id = +b.getAttribute('data-delete');
+        try { await API.deleteBot(id); Toast.success('Бот удалён'); loadBots(); }
+        catch (err) { Toast.error(err.message); }
+      });
+    });
+  } catch (err) {
+    grid.innerHTML = '<div class="col-span-full text-center py-8 text-red-400">Ошибка: ' + escapeHtml(err.message) + '</div>';
+  }
+}
+
+function escapeHtml(s) {
+  return String(s||'').replace(/[&<>"']/g, (c) => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'})[c]);
+}
+
+// Create form — legacy form id, map to new API
+document.getElementById('createBotForm')?.addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const fd = new FormData(e.target);
+  const raw = Object.fromEntries(fd.entries());
+  // Map legacy field names
+  const symbolStr = (raw.symbol || '').trim().toUpperCase();
+  const payload = {
+    name: raw.name || 'Bot',
+    exchange: (raw.exchangeName || raw.exchange || 'bybit').toLowerCase(),
+    exchangeKeyId: raw.exchangeKeyId ? +raw.exchangeKeyId : null,
+    symbols: symbolStr ? [symbolStr] : ['BTCUSDT'],
+    strategy: (raw.strategyType || raw.strategy || 'levels').toLowerCase(),
+    timeframe: raw.timeframe || '1h',
+    direction: raw.direction || 'both',
+    leverage: raw.leverage ? +raw.leverage : 1,
+    riskPct: raw.riskPct ? +raw.riskPct : 1,
+    maxOpenTrades: raw.maxOpenTrades ? +raw.maxOpenTrades : 3,
+    autoTrade: !!raw.autoTrade,
+    tradingMode: raw.tradingMode || 'paper',
+  };
+  // Remove exchangeKeyId if null (schema requires int positive)
+  if (!payload.exchangeKeyId) delete payload.exchangeKeyId;
+  try {
+    await API.createBot(payload);
+    Toast.success('Бот создан!');
+    document.getElementById('createModal').style.display = 'none';
+    loadBots();
+  } catch (err) {
+    if (err.code === 'UPGRADE_REQUIRED') Toast.warn('Нужен план ' + (err.data?.requiredPlan || 'Pro'));
+    else Toast.error(err.message);
+  }
 });
+
+// WS: new signal from your bot
+WS.on('trade_opened', () => loadBots());
+
+loadBots();
 </script>
 </body>
 </html>

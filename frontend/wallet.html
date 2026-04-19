@@ -111,9 +111,118 @@
 
 <script src="app.js"></script>
 <script>
-if(!Auth.isLoggedIn())window.location.href='/?login=1';
-Sidebar.init('wallet');
-function switchTab(t){document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));document.querySelectorAll('.tab-content').forEach(c=>c.classList.remove('active'));document.getElementById('tab-'+t).classList.add('active');event.target.classList.add('active')}
+if(!Auth.requireAuth()) throw new Error('noauth');
+document.querySelectorAll('.sidebar-link[data-page="wallet"]').forEach(a => a.classList.add('active'));
+
+window.switchTab = function (t, ev) {
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+  const content = document.getElementById('tab-' + t);
+  if (content) content.classList.add('active');
+  if (ev && ev.target) ev.target.classList.add('active');
+};
+// Hook existing onclick="switchTab('x')" to pass event
+document.querySelectorAll('.tab-btn').forEach(btn => {
+  btn.addEventListener('click', (ev) => {
+    const m = /switchTab\('([^']+)'/.exec(btn.getAttribute('onclick') || '');
+    if (m) window.switchTab(m[1], ev);
+  }, { capture: true });
+});
+
+// ── Exchange keys: render masked list in place of mock cards ──
+async function loadKeys() {
+  try {
+    const data = await API.listKeys();
+    const host = document.querySelector('#tab-exchanges .grid');
+    if (!host) return;
+    host.innerHTML = '';
+    for (const k of data.keys) {
+      const bal = await API.getBalance(k.id).catch(() => null);
+      const usd = bal && bal.total && (bal.total.USDT || bal.total.USD) || 0;
+      const card = document.createElement('div');
+      card.className = 'card card-glow';
+      card.innerHTML = `
+        <div class="flex items-center gap-3 mb-4">
+          <div class="w-10 h-10 rounded-lg bg-indigo-500/10 flex items-center justify-center text-lg font-bold text-indigo-400">${k.exchange[0].toUpperCase()}</div>
+          <div>
+            <div class="font-semibold">${k.exchange[0].toUpperCase() + k.exchange.slice(1)}</div>
+            <div class="flex items-center gap-1">
+              <span class="w-2 h-2 ${k.lastError?'bg-red-400':'bg-green-400'} rounded-full"></span>
+              <span class="text-xs ${k.lastError?'text-red-400':'text-green-400'}">${k.lastError?'Error':'Connected'}</span>
+              ${k.isTestnet?'<span class="text-xs text-yellow-400 ml-1">testnet</span>':''}
+            </div>
+          </div>
+        </div>
+        <div class="text-2xl font-bold mb-1">${Fmt.currency(usd)}</div>
+        <div class="text-xs text-slate-500 mb-4">USDT Balance · ${k.apiKeyMasked}</div>
+        <div class="flex gap-2">
+          <button data-verify="${k.id}" class="text-xs px-3 py-1.5 rounded-lg bg-slate-800/50 border border-slate-700 text-slate-400 hover:text-white">Проверить</button>
+          <button data-delete="${k.id}" class="text-xs px-3 py-1.5 rounded-lg bg-red-500/10 border border-red-500/20 text-red-400">Отключить</button>
+        </div>`;
+      host.appendChild(card);
+    }
+    // Add-card placeholder preserved
+    const add = document.createElement('div');
+    add.className = 'card';
+    add.style.borderStyle = 'dashed';
+    add.innerHTML = `
+      <div class="flex flex-col items-center justify-center h-full py-8 text-center">
+        <div class="w-12 h-12 rounded-lg bg-slate-800/50 flex items-center justify-center text-2xl text-slate-500 mb-3">+</div>
+        <div class="font-semibold mb-1">Подключить биржу</div>
+        <div class="text-xs text-slate-500 mb-4">Bybit, Binance, BingX, OKX</div>
+        <button onclick="document.getElementById('exModal').style.display='flex'" class="text-xs px-4 py-2 rounded-lg text-indigo-400 border border-indigo-500/30 bg-indigo-500/10">Подключить</button>
+      </div>`;
+    host.appendChild(add);
+
+    host.querySelectorAll('[data-verify]').forEach(b => b.addEventListener('click', async () => {
+      const id = +b.getAttribute('data-verify');
+      try { await API.verifyKey(id); Toast.success('Ключ проверен'); loadKeys(); }
+      catch (err) { Toast.error(err.message); }
+    }));
+    host.querySelectorAll('[data-delete]').forEach(b => b.addEventListener('click', async () => {
+      if (!confirm('Удалить API ключ?')) return;
+      const id = +b.getAttribute('data-delete');
+      try { await API.deleteKey(id); Toast.success('Ключ удалён'); loadKeys(); }
+      catch (err) { Toast.error(err.message); }
+    }));
+  } catch (_e) {}
+}
+
+// Hook modal "Подключить" button to real addKey
+document.querySelectorAll('button').forEach(btn => {
+  if ((btn.textContent || '').trim() === 'Подключить' && btn.closest('#exModal')) {
+    // Replace the fake inline onclick with real handler
+    btn.replaceWith(btn.cloneNode(true));
+  }
+});
+const modal = document.getElementById('exModal');
+if (modal) {
+  const form = modal.querySelector('form');
+  const submitBtn = modal.querySelector('button[type=button]') || modal.querySelector('button:not([onclick*="display"])');
+  if (submitBtn) {
+    submitBtn.textContent = 'Подключить';
+    submitBtn.addEventListener('click', async (e) => {
+      e.preventDefault();
+      const inputs = form.querySelectorAll('select, input');
+      const exchangeSel = inputs[0];
+      const apiKey = inputs[1] && inputs[1].value.trim();
+      const apiSecret = inputs[2] && inputs[2].value.trim();
+      if (!apiKey || !apiSecret) return Toast.warn('Заполни ключи');
+      try {
+        await API.addKey({
+          exchange: exchangeSel.value.toLowerCase(),
+          apiKey, apiSecret, testnet: false,
+        });
+        Toast.success('Биржа подключена!');
+        modal.style.display = 'none';
+        inputs[1].value = ''; inputs[2].value = '';
+        loadKeys();
+      } catch (err) { Toast.error(err.message); }
+    });
+  }
+}
+
+loadKeys();
 </script>
 </body>
 </html>
