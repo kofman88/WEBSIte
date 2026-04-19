@@ -31,7 +31,7 @@
       <span class="text-slate-400">Активных: <strong class="text-green-400">3</strong></span>
       <span class="text-slate-400">PnL: <strong class="text-green-400">+$1,240</strong></span>
     </div>
-    <button onclick="document.getElementById('createModal').style.display='flex'" class="btn-primary px-5 py-2.5 rounded-xl text-sm font-semibold" style="background:linear-gradient(180deg,#2A5BE8 0%,#1D4ED8 60%,#143797 100%);box-shadow:inset 0 1px 1px rgba(255,255,255,.28),inset 0 -1px 3px rgba(0,0,0,.6),0 4px 8px -2px rgba(0,0,0,.6),0 0 0 1px rgba(29,78,216,.35);border:none;color:#fff;cursor:pointer;box-shadow:0 0 20px rgba(29,78,216,.4)">+ Создать бота</button>
+    <button onclick="openWizard()" class="btn-primary px-5 py-2.5 rounded-xl text-sm font-semibold" style="background:linear-gradient(180deg,#2A5BE8 0%,#1D4ED8 60%,#143797 100%);box-shadow:inset 0 1px 1px rgba(255,255,255,.28),inset 0 -1px 3px rgba(0,0,0,.6),0 4px 8px -2px rgba(0,0,0,.6),0 0 0 1px rgba(29,78,216,.35);border:none;color:#fff;cursor:pointer;box-shadow:0 0 20px rgba(29,78,216,.4)">+ Создать бота</button>
   </div>
 
   <!-- Filter -->
@@ -102,27 +102,91 @@
   </div>
 </main>
 
-<!-- CREATE BOT MODAL -->
+<!-- CREATE BOT WIZARD (4 steps) -->
 <div id="createModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.7);backdrop-filter:blur(8px);z-index:100;align-items:center;justify-content:center">
-  <div class="card" style="width:100%;max-width:500px;margin:16px;max-height:90vh;overflow-y:auto">
-    <div class="flex items-center justify-between mb-6"><h2 class="text-xl font-bold">Создать бота</h2><button onclick="document.getElementById('createModal').style.display='none'" class="text-slate-400 hover:text-white text-xl">&times;</button></div>
-    <form id="createBotForm" class="space-y-4">
-      <div><label class="text-sm text-slate-400 block mb-1">Имя бота</label><input name="name" required class="w-full bg-slate-800/50 border border-slate-700 rounded-xl px-4 py-3 text-white outline-none focus:border-indigo-500" placeholder="BTC Scalper"/></div>
-      <div><label class="text-sm text-slate-400 block mb-1">Биржа</label><select name="exchangeName" class="w-full bg-slate-800/50 border border-slate-700 rounded-xl px-4 py-3 text-white outline-none"><option value="bybit">Bybit</option><option value="binance">Binance</option><option value="bingx">BingX</option></select></div>
-      <div><label class="text-sm text-slate-400 block mb-1">Торговая пара</label><input name="symbol" required class="w-full bg-slate-800/50 border border-slate-700 rounded-xl px-4 py-3 text-white outline-none focus:border-indigo-500" placeholder="BTCUSDT"/></div>
-      <div><label class="text-sm text-slate-400 block mb-1">Стратегия</label><select name="strategyType" class="w-full bg-slate-800/50 border border-slate-700 rounded-xl px-4 py-3 text-white outline-none"><option value="scalping">Scalping</option><option value="smc">SMC</option><option value="gerchik">Gerchik</option></select></div>
-      <div class="grid grid-cols-2 gap-4">
-        <div><label class="text-sm text-slate-400 block mb-1">Leverage</label><input name="leverage" type="number" value="10" min="1" max="100" class="w-full bg-slate-800/50 border border-slate-700 rounded-xl px-4 py-3 text-white outline-none"/></div>
-        <div><label class="text-sm text-slate-400 block mb-1">Размер ($)</label><input name="positionSizeUsd" type="number" value="100" min="10" class="w-full bg-slate-800/50 border border-slate-700 rounded-xl px-4 py-3 text-white outline-none"/></div>
+  <div class="card" style="width:100%;max-width:560px;margin:16px;max-height:92vh;overflow-y:auto">
+    <div class="flex items-center justify-between mb-4">
+      <h2 class="text-xl font-bold">Создать бота</h2>
+      <button type="button" onclick="closeWizard()" class="text-slate-400 hover:text-white text-xl">&times;</button>
+    </div>
+    <!-- Step indicator -->
+    <div class="flex items-center gap-2 mb-6" id="wizSteps">
+      <div class="wiz-step active" data-step="1"><span class="wiz-num">1</span><span class="wiz-label">Основы</span></div>
+      <div class="wiz-line"></div>
+      <div class="wiz-step" data-step="2"><span class="wiz-num">2</span><span class="wiz-label">Стратегия</span></div>
+      <div class="wiz-line"></div>
+      <div class="wiz-step" data-step="3"><span class="wiz-num">3</span><span class="wiz-label">Риск</span></div>
+      <div class="wiz-line"></div>
+      <div class="wiz-step" data-step="4"><span class="wiz-num">4</span><span class="wiz-label">Режим</span></div>
+    </div>
+    <form id="createBotForm" class="space-y-4" novalidate>
+      <!-- Step 1: Basics -->
+      <div class="wiz-pane" data-pane="1">
+        <div><label class="text-sm text-slate-400 block mb-1">Имя бота</label><input name="name" required class="w-full bg-slate-800/50 border border-slate-700 rounded-xl px-4 py-3 text-white outline-none focus:border-indigo-500" placeholder="BTC Scalper"/></div>
+        <div class="mt-3"><label class="text-sm text-slate-400 block mb-1">Биржа</label><select name="exchangeName" class="w-full bg-slate-800/50 border border-slate-700 rounded-xl px-4 py-3 text-white outline-none"><option value="bybit">Bybit</option><option value="binance">Binance</option><option value="bingx">BingX</option><option value="okx">OKX</option></select></div>
+        <div class="mt-3"><label class="text-sm text-slate-400 block mb-1">Торговая пара</label><input name="symbol" required class="w-full bg-slate-800/50 border border-slate-700 rounded-xl px-4 py-3 text-white outline-none focus:border-indigo-500" placeholder="BTCUSDT"/></div>
+        <div class="mt-3"><label class="text-sm text-slate-400 block mb-1">Таймфрейм</label><select name="timeframe" class="w-full bg-slate-800/50 border border-slate-700 rounded-xl px-4 py-3 text-white outline-none"><option>5m</option><option>15m</option><option>30m</option><option selected>1h</option><option>2h</option><option>4h</option><option>1d</option></select></div>
       </div>
-      <div class="grid grid-cols-2 gap-4">
-        <div><label class="text-sm text-slate-400 block mb-1">Stop Loss %</label><input name="stopLossPct" type="number" step="0.1" value="1.5" class="w-full bg-slate-800/50 border border-slate-700 rounded-xl px-4 py-3 text-white outline-none"/></div>
-        <div><label class="text-sm text-slate-400 block mb-1">Take Profit %</label><input name="takeProfitPct" type="number" step="0.1" value="3" class="w-full bg-slate-800/50 border border-slate-700 rounded-xl px-4 py-3 text-white outline-none"/></div>
+      <!-- Step 2: Strategy -->
+      <div class="wiz-pane hidden" data-pane="2">
+        <label class="text-sm text-slate-400 block mb-2">Выбери стратегию</label>
+        <div class="grid grid-cols-2 gap-3">
+          <label class="wiz-card"><input type="radio" name="strategyType" value="scalping" checked class="sr-only"/><div class="wiz-card-body"><div class="font-semibold text-white">Scalping</div><div class="text-xs text-slate-400 mt-1">Быстрые сделки на малых ТФ</div></div></label>
+          <label class="wiz-card"><input type="radio" name="strategyType" value="smc" class="sr-only"/><div class="wiz-card-body"><div class="font-semibold text-white">SMC</div><div class="text-xs text-slate-400 mt-1">Smart Money Concepts</div></div></label>
+          <label class="wiz-card"><input type="radio" name="strategyType" value="gerchik" class="sr-only"/><div class="wiz-card-body"><div class="font-semibold text-white">Gerchik</div><div class="text-xs text-slate-400 mt-1">Уровни + абсорбция (KRP)</div></div></label>
+          <label class="wiz-card"><input type="radio" name="strategyType" value="levels" class="sr-only"/><div class="wiz-card-body"><div class="font-semibold text-white">Levels</div><div class="text-xs text-slate-400 mt-1">Классические S/R ретесты</div></div></label>
+        </div>
+        <div class="mt-4"><label class="text-sm text-slate-400 block mb-1">Направление</label><select name="direction" class="w-full bg-slate-800/50 border border-slate-700 rounded-xl px-4 py-3 text-white outline-none"><option value="both">Long + Short</option><option value="long">Только Long</option><option value="short">Только Short</option></select></div>
       </div>
-      <button type="submit" class="w-full py-3 rounded-xl font-semibold text-white" style="background:linear-gradient(180deg,#2A5BE8 0%,#1D4ED8 60%,#143797 100%);box-shadow:inset 0 1px 1px rgba(255,255,255,.28),inset 0 -1px 3px rgba(0,0,0,.6),0 4px 8px -2px rgba(0,0,0,.6),0 0 0 1px rgba(29,78,216,.35)">Создать бота</button>
+      <!-- Step 3: Risk -->
+      <div class="wiz-pane hidden" data-pane="3">
+        <div class="grid grid-cols-2 gap-4">
+          <div><label class="text-sm text-slate-400 block mb-1">Leverage</label><input name="leverage" type="number" value="10" min="1" max="100" class="w-full bg-slate-800/50 border border-slate-700 rounded-xl px-4 py-3 text-white outline-none"/></div>
+          <div><label class="text-sm text-slate-400 block mb-1">Риск / сделку (%)</label><input name="riskPct" type="number" step="0.1" value="1" min="0.1" max="10" class="w-full bg-slate-800/50 border border-slate-700 rounded-xl px-4 py-3 text-white outline-none"/></div>
+        </div>
+        <div class="grid grid-cols-2 gap-4 mt-3">
+          <div><label class="text-sm text-slate-400 block mb-1">Размер ($)</label><input name="positionSizeUsd" type="number" value="100" min="10" class="w-full bg-slate-800/50 border border-slate-700 rounded-xl px-4 py-3 text-white outline-none"/></div>
+          <div><label class="text-sm text-slate-400 block mb-1">Max открытых</label><input name="maxOpenTrades" type="number" value="3" min="1" max="20" class="w-full bg-slate-800/50 border border-slate-700 rounded-xl px-4 py-3 text-white outline-none"/></div>
+        </div>
+        <div class="mt-3 p-3 rounded-xl bg-slate-800/40 border border-slate-700 text-xs text-slate-400">SL и TP ставятся стратегией на основе ATR — фиксированные значения не нужны. Circuit breaker остановит бота при дневной просадке 10%.</div>
+      </div>
+      <!-- Step 4: Mode + review -->
+      <div class="wiz-pane hidden" data-pane="4">
+        <label class="text-sm text-slate-400 block mb-2">Режим торговли</label>
+        <div class="grid grid-cols-2 gap-3 mb-4">
+          <label class="wiz-card"><input type="radio" name="tradingMode" value="paper" checked class="sr-only"/><div class="wiz-card-body"><div class="font-semibold text-slate-300">PAPER</div><div class="text-xs text-slate-400 mt-1">Виртуальный баланс, безопасно</div></div></label>
+          <label class="wiz-card"><input type="radio" name="tradingMode" value="live" class="sr-only"/><div class="wiz-card-body"><div class="font-semibold text-red-400">LIVE</div><div class="text-xs text-slate-400 mt-1">Реальные деньги — Pro+</div></div></label>
+        </div>
+        <label class="flex items-center gap-2 text-sm text-slate-300 cursor-pointer mb-4"><input type="checkbox" name="autoTrade" style="accent-color:#6366f1"/> Авто-торговля (иначе — только сигналы)</label>
+        <div class="p-3 rounded-xl bg-slate-800/40 border border-slate-700 text-sm text-slate-300">
+          <div class="text-xs text-slate-400 mb-1">Сводка</div>
+          <div id="wizReview" class="font-mono text-xs text-slate-300 leading-relaxed"></div>
+        </div>
+      </div>
+      <!-- Nav -->
+      <div class="flex items-center justify-between gap-3 pt-2">
+        <button type="button" id="wizBack" class="py-2.5 px-5 rounded-xl bg-slate-800 text-slate-300 hover:bg-slate-700 font-medium hidden">← Назад</button>
+        <div class="text-xs text-slate-500" id="wizProgress">Шаг 1 из 4</div>
+        <button type="button" id="wizNext" class="py-2.5 px-5 rounded-xl font-semibold text-white" style="background:linear-gradient(180deg,#2A5BE8 0%,#1D4ED8 60%,#143797 100%)">Далее →</button>
+        <button type="submit" id="wizSubmit" class="py-2.5 px-5 rounded-xl font-semibold text-white hidden" style="background:linear-gradient(180deg,#2A5BE8 0%,#1D4ED8 60%,#143797 100%)">Создать бота</button>
+      </div>
     </form>
   </div>
 </div>
+
+<style>
+.wiz-step{display:flex;align-items:center;gap:6px;color:#64748b;font-size:12px;white-space:nowrap}
+.wiz-step.active .wiz-num,.wiz-step.done .wiz-num{background:#1d4ed8;color:#fff}
+.wiz-step.active .wiz-label,.wiz-step.done .wiz-label{color:#e2e8f0}
+.wiz-num{width:26px;height:26px;border-radius:50%;background:#1e293b;color:#94a3b8;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:600}
+.wiz-line{flex:1;height:2px;background:#1e293b;min-width:10px}
+.wiz-step.done ~ .wiz-line,.wiz-step.active ~ .wiz-line{background:#1e293b}
+.wiz-pane.hidden{display:none}
+.wiz-card{cursor:pointer;display:block;border-radius:12px;background:rgba(30,41,59,.5);border:1px solid #334155;padding:14px;transition:all .15s}
+.wiz-card:hover{border-color:#475569}
+.wiz-card:has(input:checked){border-color:#6366f1;background:rgba(99,102,241,.1);box-shadow:0 0 0 1px rgba(99,102,241,.4)}
+.wiz-card-body{text-align:center}
+</style>
 
 <!-- PAPER → LIVE CONFIRM MODAL -->
 <div id="liveConfirmModal" class="fixed inset-0 bg-black/70 flex items-center justify-center hidden z-50" style="backdrop-filter:blur(8px)">
@@ -241,6 +305,7 @@ function escapeHtml(s) {
 // Create form — legacy form id, map to new API
 document.getElementById('createBotForm')?.addEventListener('submit', async (e) => {
   e.preventDefault();
+  if (wizStep < 4) return nextStep();
   const fd = new FormData(e.target);
   const raw = Object.fromEntries(fd.entries());
   // Map legacy field names
@@ -264,13 +329,70 @@ document.getElementById('createBotForm')?.addEventListener('submit', async (e) =
   try {
     await API.createBot(payload);
     Toast.success('Бот создан!');
-    document.getElementById('createModal').style.display = 'none';
+    closeWizard();
     loadBots();
   } catch (err) {
     if (err.code === 'UPGRADE_REQUIRED') Toast.warn('Нужен план ' + (err.data?.requiredPlan || 'Pro'));
     else Toast.error(err.message);
   }
 });
+
+// ── Create-bot 4-step wizard controller ──
+let wizStep = 1;
+const WIZ_TOTAL = 4;
+function setStep(n) {
+  wizStep = Math.max(1, Math.min(WIZ_TOTAL, n));
+  document.querySelectorAll('.wiz-pane').forEach((p) => {
+    p.classList.toggle('hidden', +p.getAttribute('data-pane') !== wizStep);
+  });
+  document.querySelectorAll('.wiz-step').forEach((s) => {
+    const i = +s.getAttribute('data-step');
+    s.classList.toggle('active', i === wizStep);
+    s.classList.toggle('done', i < wizStep);
+  });
+  document.getElementById('wizBack').classList.toggle('hidden', wizStep === 1);
+  document.getElementById('wizNext').classList.toggle('hidden', wizStep === WIZ_TOTAL);
+  document.getElementById('wizSubmit').classList.toggle('hidden', wizStep !== WIZ_TOTAL);
+  document.getElementById('wizProgress').textContent = 'Шаг ' + wizStep + ' из ' + WIZ_TOTAL;
+  if (wizStep === WIZ_TOTAL) buildReview();
+}
+function validateStep(n) {
+  const form = document.getElementById('createBotForm');
+  if (n === 1) {
+    const name = form.name.value.trim();
+    const symbol = form.symbol.value.trim();
+    if (!name) { Toast.warn('Введи имя бота'); return false; }
+    if (!symbol) { Toast.warn('Введи торговую пару'); return false; }
+  }
+  return true;
+}
+function nextStep() { if (validateStep(wizStep)) setStep(wizStep + 1); }
+function prevStep() { setStep(wizStep - 1); }
+function openWizard() {
+  document.getElementById('createBotForm').reset();
+  setStep(1);
+  document.getElementById('createModal').style.display = 'flex';
+}
+function closeWizard() {
+  document.getElementById('createModal').style.display = 'none';
+  setStep(1);
+  document.getElementById('createBotForm').reset();
+}
+function buildReview() {
+  const form = document.getElementById('createBotForm');
+  const fd = new FormData(form);
+  const mode = fd.get('tradingMode') || 'paper';
+  const lines = [
+    'Имя: ' + (fd.get('name') || '—'),
+    'Биржа: ' + (fd.get('exchangeName') || '—') + ' · ' + (fd.get('symbol') || '—').toUpperCase() + ' · ' + (fd.get('timeframe') || '1h'),
+    'Стратегия: ' + (fd.get('strategyType') || '—') + ' · ' + (fd.get('direction') || 'both'),
+    'Lev ' + (fd.get('leverage') || 1) + 'x · Risk ' + (fd.get('riskPct') || 1) + '% · Max ' + (fd.get('maxOpenTrades') || 3),
+    'Режим: ' + mode.toUpperCase() + (fd.get('autoTrade') ? ' · авто-торговля' : ' · только сигналы'),
+  ];
+  document.getElementById('wizReview').innerHTML = lines.map((l) => '<div>' + l.replace(/[&<>]/g, (c) => ({'&':'&amp;','<':'&lt;','>':'&gt;'})[c]) + '</div>').join('');
+}
+document.getElementById('wizNext')?.addEventListener('click', nextStep);
+document.getElementById('wizBack')?.addEventListener('click', prevStep);
 
 // WS: new signal from your bot
 WS.on('trade_opened', () => loadBots());
