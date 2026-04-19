@@ -1,0 +1,177 @@
+const express = require('express');
+const { z } = require('zod');
+const { authMiddleware, requireAdmin } = require('../middleware/auth');
+const admin = require('../services/adminService');
+const refRewards = require('../services/refRewards');
+const validation = require('../utils/validation');
+
+const router = express.Router();
+
+// ALL routes require authed admin
+router.use(authMiddleware, requireAdmin);
+
+function handleErr(err, res, next) {
+  if (err instanceof z.ZodError) {
+    return res.status(400).json({
+      error: 'Validation failed', code: 'VALIDATION_ERROR',
+      issues: err.issues.map((i) => ({ path: i.path.join('.'), message: i.message })),
+    });
+  }
+  if (err && err.statusCode) {
+    return res.status(err.statusCode).json({ error: err.message, ...(err.code ? { code: err.code } : {}) });
+  }
+  return next(err);
+}
+
+// ── Users ──────────────────────────────────────────────────────────────
+router.get('/users', (req, res, next) => {
+  try {
+    const q = z.object({
+      search: z.string().max(100).optional(),
+      limit: z.coerce.number().int().min(1).max(500).default(50),
+      offset: z.coerce.number().int().min(0).default(0),
+    }).parse(req.query);
+    res.json(admin.listUsers(q));
+  } catch (err) { handleErr(err, res, next); }
+});
+
+router.get('/users/:id', (req, res, next) => {
+  try {
+    const id = z.coerce.number().int().positive().parse(req.params.id);
+    const user = admin.getUser(id);
+    if (!user) return res.status(404).json({ error: 'User not found' });
+    res.json(user);
+  } catch (err) { handleErr(err, res, next); }
+});
+
+router.patch('/users/:id/active', (req, res, next) => {
+  try {
+    const id = z.coerce.number().int().positive().parse(req.params.id);
+    const body = z.object({ isActive: z.boolean() }).parse(req.body);
+    res.json(admin.setUserActive(id, body.isActive, { adminId: req.userId }));
+  } catch (err) { handleErr(err, res, next); }
+});
+
+router.patch('/users/:id/plan', (req, res, next) => {
+  try {
+    const id = z.coerce.number().int().positive().parse(req.params.id);
+    const body = z.object({
+      plan: validation.plan,
+      durationDays: z.number().int().min(1).max(3650).default(30),
+    }).parse(req.body);
+    res.json(admin.setUserPlan(id, body.plan, { adminId: req.userId, durationDays: body.durationDays }));
+  } catch (err) { handleErr(err, res, next); }
+});
+
+// ── Payments ───────────────────────────────────────────────────────────
+router.get('/payments', (req, res, next) => {
+  try {
+    const q = z.object({
+      status: z.enum(['pending', 'confirmed', 'failed', 'refunded']).optional(),
+      method: z.enum(['stripe', 'usdt_bep20', 'usdt_trc20', 'promo']).optional(),
+      limit: z.coerce.number().int().min(1).max(500).default(100),
+      offset: z.coerce.number().int().min(0).default(0),
+    }).parse(req.query);
+    res.json(admin.listPayments(q));
+  } catch (err) { handleErr(err, res, next); }
+});
+
+router.post('/payments/:id/confirm', (req, res, next) => {
+  try {
+    const id = z.coerce.number().int().positive().parse(req.params.id);
+    const body = z.object({ note: z.string().max(500).optional() }).parse(req.body || {});
+    res.json(admin.manualConfirmPayment(id, { adminId: req.userId, note: body.note }));
+  } catch (err) { handleErr(err, res, next); }
+});
+
+router.post('/payments/:id/refund', (req, res, next) => {
+  try {
+    const id = z.coerce.number().int().positive().parse(req.params.id);
+    const body = z.object({ reason: z.string().max(500).optional() }).parse(req.body || {});
+    res.json(admin.refundPayment(id, { adminId: req.userId, reason: body.reason }));
+  } catch (err) { handleErr(err, res, next); }
+});
+
+// ── Promo codes ────────────────────────────────────────────────────────
+router.get('/promo-codes', (_req, res, next) => {
+  try { res.json({ codes: admin.listPromoCodes() }); }
+  catch (err) { handleErr(err, res, next); }
+});
+
+router.post('/promo-codes', (req, res, next) => {
+  try {
+    const body = z.object({
+      code: z.string().trim().regex(/^[A-Z0-9]{4,32}$/i),
+      plan: validation.plan.exclude(['free']),
+      durationDays: z.number().int().min(1).max(3650),
+      maxUses: z.number().int().min(0).max(100000),
+      discountPct: z.number().int().min(1).max(100).default(100),
+      expiresAt: z.string().datetime().optional(),
+    }).parse(req.body);
+    res.status(201).json(admin.createPromoCode(body, { adminId: req.userId }));
+  } catch (err) { handleErr(err, res, next); }
+});
+
+router.patch('/promo-codes/:id/active', (req, res, next) => {
+  try {
+    const id = z.coerce.number().int().positive().parse(req.params.id);
+    const body = z.object({ isActive: z.boolean() }).parse(req.body);
+    res.json(admin.setPromoActive(id, body.isActive, { adminId: req.userId }));
+  } catch (err) { handleErr(err, res, next); }
+});
+
+router.delete('/promo-codes/:id', (req, res, next) => {
+  try {
+    const id = z.coerce.number().int().positive().parse(req.params.id);
+    res.json(admin.deletePromo(id, { adminId: req.userId }));
+  } catch (err) { handleErr(err, res, next); }
+});
+
+// ── Ref rewards ────────────────────────────────────────────────────────
+router.get('/ref-rewards', (req, res, next) => {
+  try {
+    const q = z.object({
+      status: z.enum(['pending', 'paid', 'cancelled']).optional(),
+      limit: z.coerce.number().int().min(1).max(500).default(100),
+      offset: z.coerce.number().int().min(0).default(0),
+    }).parse(req.query);
+    res.json({ rewards: admin.listAllRewards(q) });
+  } catch (err) { handleErr(err, res, next); }
+});
+
+router.post('/ref-rewards/:id/pay', (req, res, next) => {
+  try {
+    const id = z.coerce.number().int().positive().parse(req.params.id);
+    res.json(refRewards.markPaid(id, { adminUserId: req.userId }));
+  } catch (err) { handleErr(err, res, next); }
+});
+
+router.post('/ref-rewards/:id/cancel', (req, res, next) => {
+  try {
+    const id = z.coerce.number().int().positive().parse(req.params.id);
+    const body = z.object({ reason: z.string().max(500).optional() }).parse(req.body || {});
+    refRewards.cancel(id, { adminUserId: req.userId, reason: body.reason });
+    res.json({ success: true });
+  } catch (err) { handleErr(err, res, next); }
+});
+
+// ── System ─────────────────────────────────────────────────────────────
+router.get('/stats', (_req, res, next) => {
+  try { res.json(admin.systemStats()); }
+  catch (err) { handleErr(err, res, next); }
+});
+
+router.get('/audit', (req, res, next) => {
+  try {
+    const q = z.object({
+      userId: z.coerce.number().int().positive().optional(),
+      action: z.string().max(64).optional(),
+      entityType: z.string().max(32).optional(),
+      limit: z.coerce.number().int().min(1).max(500).default(100),
+      offset: z.coerce.number().int().min(0).default(0),
+    }).parse(req.query);
+    res.json({ events: admin.auditLog(q) });
+  } catch (err) { handleErr(err, res, next); }
+});
+
+module.exports = router;

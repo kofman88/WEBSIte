@@ -19,6 +19,7 @@ const signalsRoutes = require('./routes/signals');
 const walletRoutes = require('./routes/wallet');
 const optimizationsRoutes = require('./routes/optimizations');
 const paymentsRoutes = require('./routes/payments');
+const adminRoutes = require('./routes/admin');
 const websocketService = require('./services/websocketService');
 const autoTradeService = require('./services/autoTradeService');
 const partialTpManager = require('./services/partialTpManager');
@@ -81,6 +82,7 @@ app.use('/api/signals', signalsRoutes);
 app.use('/api/wallet', walletRoutes);
 app.use('/api/optimizations', optimizationsRoutes);
 app.use('/api/payments', paymentsRoutes);
+app.use('/api/admin', adminRoutes);
 
 app.get('/api/health', (_req, res) => {
   res.json({ status: 'ok', timestamp: new Date().toISOString(), version: '3.0.0' });

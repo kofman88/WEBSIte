@@ -1,0 +1,384 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+  <title>CHM Finance — Admin</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet"/>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="styles.css"/>
+  <style>
+    .atab{padding:8px 18px;border-radius:9999px;font-family:'Inter',sans-serif;font-size:13px;line-height:18px;font-weight:500;color:rgba(255,255,255,.62);background:transparent;border:none;cursor:pointer;transition:color .15s ease,background .15s ease}
+    .atab:hover{color:#fff}
+    .atab.active{background:linear-gradient(180deg,#2A5BE8 0%,#1D4ED8 60%,#143797 100%);color:#fff;box-shadow:inset 0 1px 1px rgba(255,255,255,.25),inset 0 -1px 2px rgba(0,0,0,.4),0 4px 10px -2px rgba(29,78,216,.5)}
+    .atab-content{display:none}.atab-content.active{display:block}
+    .admin-badge{font-size:10px;letter-spacing:.18em;font-weight:600;color:#5C80E3;text-transform:uppercase}
+  </style>
+</head>
+<body>
+<aside class="sidebar" id="sidebar">
+  <div class="sidebar-logo">CHM<span>.</span> <span class="admin-badge ml-2">ADMIN</span></div>
+  <nav class="sidebar-nav">
+    <a href="dashboard.html" class="sidebar-link"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>Дашборд</a>
+    <a href="admin.html" class="sidebar-link active"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 15a3 3 0 100-6 3 3 0 000 6z"/><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>Админ</a>
+  </nav>
+  <div class="sidebar-footer">
+    <button onclick="Auth.logout()" class="sidebar-link mt-2" style="color:#C8B9B9"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4M16 17l5-5-5-5M21 12H9"/></svg>Выйти</button>
+  </div>
+</aside>
+<header class="topbar">
+  <div class="flex items-center gap-4"><h1 class="text-xl font-bold">Администрирование</h1></div>
+  <div class="topbar-actions"><div class="topbar-user"><div class="topbar-avatar">A</div></div></div>
+</header>
+
+<main class="main-content">
+  <div class="flex flex-wrap gap-1 p-1 rounded-xl border border-slate-700/50 mb-6 w-fit" style="background:rgba(255,255,255,.03)">
+    <button class="atab active" data-tab="stats">Статистика</button>
+    <button class="atab" data-tab="users">Пользователи</button>
+    <button class="atab" data-tab="payments">Платежи</button>
+    <button class="atab" data-tab="promo">Промо-коды</button>
+    <button class="atab" data-tab="rewards">Ref-награды</button>
+    <button class="atab" data-tab="audit">Audit log</button>
+  </div>
+
+  <!-- STATS -->
+  <div class="atab-content active" id="tab-stats">
+    <div class="grid md:grid-cols-4 gap-4 mb-6" id="statsGrid"></div>
+    <div class="grid md:grid-cols-2 gap-4">
+      <div class="card"><h3 class="font-bold mb-4">Подписки по планам</h3><div id="subsBreakdown" class="space-y-2"></div></div>
+      <div class="card"><h3 class="font-bold mb-4">Активность</h3><div id="activityBreakdown" class="space-y-2"></div></div>
+    </div>
+  </div>
+
+  <!-- USERS -->
+  <div class="atab-content" id="tab-users">
+    <div class="card">
+      <div class="flex items-center gap-3 mb-4">
+        <input id="userSearch" placeholder="Поиск по email, имени, реф-коду" class="flex-1 bg-slate-800/50 border border-slate-700 rounded-xl px-4 py-2 text-sm text-white outline-none"/>
+        <button id="userSearchBtn" class="px-4 py-2 rounded-lg font-semibold text-white text-sm" style="background:linear-gradient(180deg,#2A5BE8,#1D4ED8 60%,#143797);box-shadow:inset 0 1px 1px rgba(255,255,255,.28)">Найти</button>
+      </div>
+      <div class="overflow-x-auto">
+        <table class="w-full text-sm">
+          <thead><tr class="text-xs text-slate-500 uppercase"><th class="text-left p-3">Email</th><th class="text-left p-3">План</th><th class="text-left p-3">Боты</th><th class="text-left p-3">Сделки</th><th class="text-left p-3">Платежи</th><th class="text-left p-3">Статус</th><th class="text-left p-3">Действия</th></tr></thead>
+          <tbody id="usersTable"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- PAYMENTS -->
+  <div class="atab-content" id="tab-payments">
+    <div class="card">
+      <div class="flex items-center gap-3 mb-4">
+        <select id="paymentStatusFilter" class="bg-slate-800/50 border border-slate-700 rounded-lg px-3 py-2 text-sm text-white outline-none">
+          <option value="">Все статусы</option><option value="pending">Pending</option><option value="confirmed">Confirmed</option><option value="failed">Failed</option><option value="refunded">Refunded</option>
+        </select>
+        <select id="paymentMethodFilter" class="bg-slate-800/50 border border-slate-700 rounded-lg px-3 py-2 text-sm text-white outline-none">
+          <option value="">Все методы</option><option value="stripe">Stripe</option><option value="usdt_bep20">USDT BEP20</option><option value="usdt_trc20">USDT TRC20</option>
+        </select>
+        <button id="paymentSearchBtn" class="px-4 py-2 rounded-lg font-semibold text-white text-sm" style="background:linear-gradient(180deg,#2A5BE8,#1D4ED8 60%,#143797)">Применить</button>
+      </div>
+      <div class="overflow-x-auto">
+        <table class="w-full text-sm">
+          <thead><tr class="text-xs text-slate-500 uppercase"><th class="text-left p-3">ID</th><th class="text-left p-3">Дата</th><th class="text-left p-3">Email</th><th class="text-left p-3">Метод</th><th class="text-left p-3">Сумма</th><th class="text-left p-3">План</th><th class="text-left p-3">Статус</th><th class="text-left p-3">Действия</th></tr></thead>
+          <tbody id="paymentsTable"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- PROMO CODES -->
+  <div class="atab-content" id="tab-promo">
+    <div class="card">
+      <h3 class="font-bold mb-4">Создать промо-код</h3>
+      <form id="promoForm" class="grid md:grid-cols-5 gap-3 mb-6">
+        <input name="code" placeholder="WELCOME2026" class="bg-slate-800/50 border border-slate-700 rounded-lg px-3 py-2 text-sm text-white outline-none" required/>
+        <select name="plan" class="bg-slate-800/50 border border-slate-700 rounded-lg px-3 py-2 text-sm text-white outline-none">
+          <option value="starter">Starter</option><option value="pro" selected>Pro</option><option value="elite">Elite</option>
+        </select>
+        <input name="durationDays" type="number" value="30" placeholder="Дней" class="bg-slate-800/50 border border-slate-700 rounded-lg px-3 py-2 text-sm text-white outline-none"/>
+        <input name="maxUses" type="number" value="100" placeholder="Лимит" class="bg-slate-800/50 border border-slate-700 rounded-lg px-3 py-2 text-sm text-white outline-none"/>
+        <button type="submit" class="px-4 py-2 rounded-lg font-semibold text-white text-sm" style="background:linear-gradient(180deg,#2A5BE8,#1D4ED8 60%,#143797)">Создать</button>
+      </form>
+      <div class="overflow-x-auto">
+        <table class="w-full text-sm">
+          <thead><tr class="text-xs text-slate-500 uppercase"><th class="text-left p-3">Код</th><th class="text-left p-3">План</th><th class="text-left p-3">Дней</th><th class="text-left p-3">Использовано</th><th class="text-left p-3">Статус</th><th class="text-left p-3">Действия</th></tr></thead>
+          <tbody id="promoTable"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- REF REWARDS -->
+  <div class="atab-content" id="tab-rewards">
+    <div class="card">
+      <div class="flex items-center gap-3 mb-4">
+        <select id="rewardStatusFilter" class="bg-slate-800/50 border border-slate-700 rounded-lg px-3 py-2 text-sm text-white outline-none">
+          <option value="">Все</option><option value="pending" selected>Pending</option><option value="paid">Paid</option><option value="cancelled">Cancelled</option>
+        </select>
+        <button id="rewardSearchBtn" class="px-4 py-2 rounded-lg font-semibold text-white text-sm" style="background:linear-gradient(180deg,#2A5BE8,#1D4ED8 60%,#143797)">Фильтр</button>
+      </div>
+      <div class="overflow-x-auto">
+        <table class="w-full text-sm">
+          <thead><tr class="text-xs text-slate-500 uppercase"><th class="text-left p-3">ID</th><th class="text-left p-3">Дата</th><th class="text-left p-3">Referrer</th><th class="text-left p-3">Referred</th><th class="text-left p-3">Сумма</th><th class="text-left p-3">Payment</th><th class="text-left p-3">Статус</th><th class="text-left p-3">Действия</th></tr></thead>
+          <tbody id="rewardsTable"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- AUDIT LOG -->
+  <div class="atab-content" id="tab-audit">
+    <div class="card">
+      <div class="flex items-center gap-3 mb-4">
+        <input id="auditAction" placeholder="Filter by action (e.g. admin.user)" class="flex-1 bg-slate-800/50 border border-slate-700 rounded-lg px-3 py-2 text-sm text-white outline-none"/>
+        <button id="auditSearchBtn" class="px-4 py-2 rounded-lg font-semibold text-white text-sm" style="background:linear-gradient(180deg,#2A5BE8,#1D4ED8 60%,#143797)">Найти</button>
+      </div>
+      <div class="overflow-x-auto">
+        <table class="w-full text-sm">
+          <thead><tr class="text-xs text-slate-500 uppercase"><th class="text-left p-3">Дата</th><th class="text-left p-3">Пользователь</th><th class="text-left p-3">Действие</th><th class="text-left p-3">Entity</th><th class="text-left p-3">IP</th><th class="text-left p-3">Metadata</th></tr></thead>
+          <tbody id="auditTable"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</main>
+
+<script src="app.js"></script>
+<script>
+if (!Auth.requireAuth()) throw new Error('noauth');
+
+const ADMIN_BASE = (location.hostname === 'localhost' ? 'http://localhost:3000/api' : '/api') + '/admin';
+
+async function adminFetch(method, path, body) {
+  const opts = { method, headers: { 'Content-Type': 'application/json', Authorization: 'Bearer ' + Auth.accessToken } };
+  if (body) opts.body = JSON.stringify(body);
+  const res = await fetch(ADMIN_BASE + path, opts);
+  if (res.status === 403) {
+    Toast.error('Требуются права администратора');
+    setTimeout(() => location.href = 'dashboard.html', 1500);
+    throw new Error('forbidden');
+  }
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) throw new Error(data.error || 'HTTP ' + res.status);
+  return data;
+}
+
+function esc(s) {
+  return String(s||'').replace(/[&<>"']/g, (c) => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'})[c]);
+}
+
+// Tab switching
+document.querySelectorAll('.atab').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.atab').forEach(b => b.classList.remove('active'));
+    document.querySelectorAll('.atab-content').forEach(c => c.classList.remove('active'));
+    btn.classList.add('active');
+    const tab = btn.getAttribute('data-tab');
+    document.getElementById('tab-' + tab).classList.add('active');
+    loaders[tab] && loaders[tab]();
+  });
+});
+
+// ── Stats ──
+async function loadStats() {
+  try {
+    const s = await adminFetch('GET', '/stats');
+    const cards = [
+      ['Пользователи', s.users.total, `+${s.users.today} сегодня`],
+      ['Подписок', s.subscriptions.total, `${s.subscriptions.pro + s.subscriptions.elite} платных`],
+      ['Revenue', Fmt.currency(s.payments.revenue, {decimals:0}), `${s.payments.today} сегодня`],
+      ['Боты / Сигналы', `${s.bots.active}/${s.signals.today}`, `${s.bots.total} всего`],
+    ];
+    document.getElementById('statsGrid').innerHTML = cards.map(c => `
+      <div class="stat-card"><div class="stat-card-label">${c[0]}</div>
+      <div class="stat-card-value">${c[1]}</div>
+      <div class="stat-card-trend up">${c[2]}</div></div>`).join('');
+
+    document.getElementById('subsBreakdown').innerHTML = `
+      <div class="flex justify-between"><span>Free</span><span class="font-bold">${s.subscriptions.free}</span></div>
+      <div class="flex justify-between"><span>Starter $29</span><span class="font-bold">${s.subscriptions.starter}</span></div>
+      <div class="flex justify-between"><span>Pro $79</span><span class="font-bold text-indigo-400">${s.subscriptions.pro}</span></div>
+      <div class="flex justify-between"><span>Elite $149</span><span class="font-bold text-purple-400">${s.subscriptions.elite}</span></div>`;
+
+    document.getElementById('activityBreakdown').innerHTML = `
+      <div class="flex justify-between"><span>Активных ботов</span><span class="font-bold">${s.bots.active} / ${s.bots.total}</span></div>
+      <div class="flex justify-between"><span>Сигналов (today)</span><span class="font-bold">${s.signals.today}</span></div>
+      <div class="flex justify-between"><span>Бэктестов</span><span class="font-bold">${s.backtests.completed} / ${s.backtests.total}</span></div>
+      <div class="flex justify-between"><span>Активных юзеров</span><span class="font-bold">${s.users.active} / ${s.users.total}</span></div>`;
+  } catch (err) { Toast.error(err.message); }
+}
+
+// ── Users ──
+async function loadUsers(search = '') {
+  const data = await adminFetch('GET', '/users?search=' + encodeURIComponent(search) + '&limit=200');
+  const tbody = document.getElementById('usersTable');
+  tbody.innerHTML = data.users.map(u => `
+    <tr class="border-t border-slate-800/50">
+      <td class="p-3">${esc(u.email)}${u.isAdmin?' <span class="text-xs text-yellow-400">ADMIN</span>':''}</td>
+      <td class="p-3">${u.plan}${u.subExpiresAt?` <span class="text-xs text-slate-500">${Fmt.date(u.subExpiresAt)}</span>`:''}</td>
+      <td class="p-3">${u.botCount}</td>
+      <td class="p-3">${u.tradeCount}</td>
+      <td class="p-3">${u.paidCount}</td>
+      <td class="p-3"><span class="text-xs ${u.isActive?'text-green-400':'text-red-400'}">${u.isActive?'Active':'Disabled'}</span></td>
+      <td class="p-3"><button data-uid="${u.id}" data-active="${u.isActive?0:1}" class="act-user text-xs px-2 py-1 rounded bg-slate-800/50 hover:bg-slate-700">${u.isActive?'Заблокировать':'Разблокировать'}</button></td>
+    </tr>`).join('');
+  tbody.querySelectorAll('.act-user').forEach(b => b.addEventListener('click', async () => {
+    const id = +b.getAttribute('data-uid');
+    const active = b.getAttribute('data-active') === '1';
+    try {
+      await adminFetch('PATCH', '/users/' + id + '/active', { isActive: active });
+      Toast.success('Статус изменён');
+      loadUsers(document.getElementById('userSearch').value);
+    } catch (err) { Toast.error(err.message); }
+  }));
+}
+document.getElementById('userSearchBtn').addEventListener('click', () => loadUsers(document.getElementById('userSearch').value));
+
+// ── Payments ──
+async function loadPayments() {
+  const status = document.getElementById('paymentStatusFilter').value;
+  const method = document.getElementById('paymentMethodFilter').value;
+  const q = new URLSearchParams();
+  if (status) q.set('status', status);
+  if (method) q.set('method', method);
+  const data = await adminFetch('GET', '/payments?' + q);
+  const tbody = document.getElementById('paymentsTable');
+  tbody.innerHTML = data.payments.map(p => {
+    const statusBadge = p.status === 'confirmed' ? 'text-green-400' : p.status === 'pending' ? 'text-yellow-400' : 'text-red-400';
+    const canConfirm = p.status === 'pending';
+    const canRefund = p.status === 'confirmed';
+    return `<tr class="border-t border-slate-800/50">
+      <td class="p-3">${p.id}</td>
+      <td class="p-3 text-slate-400">${Fmt.date(p.createdAt)}</td>
+      <td class="p-3">${esc(p.userEmail||'—')}</td>
+      <td class="p-3"><span class="text-xs">${p.method}</span></td>
+      <td class="p-3">${Fmt.currency(p.amountUsd)}</td>
+      <td class="p-3">${p.plan||'—'}</td>
+      <td class="p-3 ${statusBadge} text-xs">${p.status}</td>
+      <td class="p-3">
+        ${canConfirm?`<button data-confirm="${p.id}" class="text-xs px-2 py-1 rounded bg-green-500/20 text-green-400 hover:bg-green-500/30 mr-1">Подтвердить</button>`:''}
+        ${canRefund?`<button data-refund="${p.id}" class="text-xs px-2 py-1 rounded bg-red-500/20 text-red-400 hover:bg-red-500/30">Refund</button>`:''}
+      </td>
+    </tr>`;
+  }).join('');
+  tbody.querySelectorAll('[data-confirm]').forEach(b => b.addEventListener('click', async () => {
+    const id = +b.getAttribute('data-confirm');
+    if (!confirm('Подтвердить платёж вручную?')) return;
+    try { await adminFetch('POST', '/payments/' + id + '/confirm', { note: 'manual' }); Toast.success('Подтверждено'); loadPayments(); }
+    catch (err) { Toast.error(err.message); }
+  }));
+  tbody.querySelectorAll('[data-refund]').forEach(b => b.addEventListener('click', async () => {
+    const id = +b.getAttribute('data-refund');
+    const reason = prompt('Причина refund:');
+    if (reason === null) return;
+    try { await adminFetch('POST', '/payments/' + id + '/refund', { reason }); Toast.success('Refund'); loadPayments(); }
+    catch (err) { Toast.error(err.message); }
+  }));
+}
+document.getElementById('paymentSearchBtn').addEventListener('click', loadPayments);
+
+// ── Promo codes ──
+async function loadPromo() {
+  const data = await adminFetch('GET', '/promo-codes');
+  const tbody = document.getElementById('promoTable');
+  tbody.innerHTML = data.codes.map(c => `<tr class="border-t border-slate-800/50">
+    <td class="p-3 font-mono">${esc(c.code)}</td>
+    <td class="p-3">${c.plan}</td>
+    <td class="p-3">${c.durationDays}</td>
+    <td class="p-3">${c.usesCount} / ${c.maxUses||'∞'}</td>
+    <td class="p-3 text-xs ${c.isActive?'text-green-400':'text-slate-500'}">${c.isActive?'Active':'Disabled'}</td>
+    <td class="p-3">
+      <button data-toggle="${c.id}" data-active="${c.isActive?0:1}" class="text-xs px-2 py-1 rounded bg-slate-800/50 hover:bg-slate-700 mr-1">${c.isActive?'Отключить':'Включить'}</button>
+      <button data-del="${c.id}" class="text-xs px-2 py-1 rounded bg-red-500/20 text-red-400">Удалить</button>
+    </td>
+  </tr>`).join('');
+  tbody.querySelectorAll('[data-toggle]').forEach(b => b.addEventListener('click', async () => {
+    const id = +b.getAttribute('data-toggle');
+    const active = b.getAttribute('data-active') === '1';
+    try { await adminFetch('PATCH', '/promo-codes/' + id + '/active', { isActive: active }); Toast.success('ОК'); loadPromo(); }
+    catch (err) { Toast.error(err.message); }
+  }));
+  tbody.querySelectorAll('[data-del]').forEach(b => b.addEventListener('click', async () => {
+    if (!confirm('Удалить промо?')) return;
+    const id = +b.getAttribute('data-del');
+    try { await adminFetch('DELETE', '/promo-codes/' + id); Toast.success('Удалён'); loadPromo(); }
+    catch (err) { Toast.error(err.message); }
+  }));
+}
+document.getElementById('promoForm').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const fd = new FormData(e.target);
+  const raw = Object.fromEntries(fd.entries());
+  try {
+    await adminFetch('POST', '/promo-codes', {
+      code: raw.code.toUpperCase(), plan: raw.plan,
+      durationDays: +raw.durationDays, maxUses: +raw.maxUses, discountPct: 100,
+    });
+    Toast.success('Промо создан!');
+    e.target.reset();
+    loadPromo();
+  } catch (err) { Toast.error(err.message); }
+});
+
+// ── Rewards ──
+async function loadRewards() {
+  const status = document.getElementById('rewardStatusFilter').value;
+  const q = new URLSearchParams();
+  if (status) q.set('status', status);
+  const data = await adminFetch('GET', '/ref-rewards?' + q);
+  const tbody = document.getElementById('rewardsTable');
+  tbody.innerHTML = data.rewards.map(r => `<tr class="border-t border-slate-800/50">
+    <td class="p-3">${r.id}</td>
+    <td class="p-3 text-slate-400">${Fmt.date(r.createdAt)}</td>
+    <td class="p-3">${esc(r.referrerEmail||'—')}</td>
+    <td class="p-3">${esc(r.referredEmail||'—')}</td>
+    <td class="p-3 text-green-400">${Fmt.currency(r.amountUsd)}</td>
+    <td class="p-3">#${r.paymentId}</td>
+    <td class="p-3 text-xs ${r.status==='pending'?'text-yellow-400':r.status==='paid'?'text-green-400':'text-slate-500'}">${r.status}</td>
+    <td class="p-3">${r.status==='pending' ? `
+      <button data-pay="${r.id}" class="text-xs px-2 py-1 rounded bg-green-500/20 text-green-400 mr-1">Выплатить</button>
+      <button data-cancel="${r.id}" class="text-xs px-2 py-1 rounded bg-slate-800/50">Отменить</button>
+    ` : ''}</td>
+  </tr>`).join('');
+  tbody.querySelectorAll('[data-pay]').forEach(b => b.addEventListener('click', async () => {
+    const id = +b.getAttribute('data-pay');
+    if (!confirm('Пометить как выплаченное?')) return;
+    try { await adminFetch('POST', '/ref-rewards/' + id + '/pay'); Toast.success('Выплачено'); loadRewards(); }
+    catch (err) { Toast.error(err.message); }
+  }));
+  tbody.querySelectorAll('[data-cancel]').forEach(b => b.addEventListener('click', async () => {
+    const reason = prompt('Причина:');
+    if (reason === null) return;
+    const id = +b.getAttribute('data-cancel');
+    try { await adminFetch('POST', '/ref-rewards/' + id + '/cancel', { reason }); Toast.success('Отменено'); loadRewards(); }
+    catch (err) { Toast.error(err.message); }
+  }));
+}
+document.getElementById('rewardSearchBtn').addEventListener('click', loadRewards);
+
+// ── Audit log ──
+async function loadAudit() {
+  const action = document.getElementById('auditAction').value;
+  const q = new URLSearchParams();
+  if (action) q.set('action', action);
+  q.set('limit', '200');
+  const data = await adminFetch('GET', '/audit?' + q);
+  const tbody = document.getElementById('auditTable');
+  tbody.innerHTML = data.events.map(e => `<tr class="border-t border-slate-800/50">
+    <td class="p-3 text-slate-400">${Fmt.date(e.createdAt)}</td>
+    <td class="p-3">${esc(e.userEmail||'—')}</td>
+    <td class="p-3 font-mono text-xs">${esc(e.action)}</td>
+    <td class="p-3 text-xs">${esc(e.entityType||'—')}${e.entityId?('#'+e.entityId):''}</td>
+    <td class="p-3 text-xs text-slate-500">${esc(e.ipAddress||'—')}</td>
+    <td class="p-3 text-xs text-slate-500"><code>${esc(JSON.stringify(e.metadata||{}).slice(0,80))}</code></td>
+  </tr>`).join('');
+}
+document.getElementById('auditSearchBtn').addEventListener('click', loadAudit);
+
+const loaders = { stats: loadStats, users: () => loadUsers(''), payments: loadPayments, promo: loadPromo, rewards: loadRewards, audit: loadAudit };
+
+// Boot
+loadStats();
+</script>
+</body>
+</html>
