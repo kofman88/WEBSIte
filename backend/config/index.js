@@ -26,8 +26,8 @@ const jwtRefreshSecret = requireEnv('JWT_REFRESH_SECRET', { minLength: 32 });
 const walletEncryptionKey = requireEnv('WALLET_ENCRYPTION_KEY', { exactHexLength: 64 });
 
 if (IS_PROD) {
-  requireEnv('STRIPE_SECRET_KEY', { prodOnly: true });
-  requireEnv('STRIPE_WEBHOOK_SECRET', { prodOnly: true });
+  // Stripe is optional — endpoints return 503 when keys are missing.
+  // Only CORS_ORIGIN is mandatory in prod (cross-site cookies / CSRF safety).
   requireEnv('CORS_ORIGIN', { prodOnly: true });
 }
 
