@@ -9,7 +9,10 @@ backend/.env
 # Database
 *.db
 *.db-journal
+*.db-wal
+*.db-shm
 backend/data/
+data/
 
 # Build
 dist/

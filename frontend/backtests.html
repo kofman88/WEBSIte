@@ -3,11 +3,10 @@
 <head>
   <meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1.0"/>
   <title>CHM Finance — Бэктесты</title>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet"/>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet"/>
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js"></script>
   <link rel="stylesheet" href="styles.css"/>
-  <style>body{background:#070b14;color:#f1f5f9;font-family:'Inter',sans-serif}</style>
 </head>
 <body>
 <aside class="sidebar" id="sidebar">
@@ -20,9 +19,9 @@
     <a href="wallet.html" class="sidebar-link" data-page="wallet"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12V7H5a2 2 0 010-4h14v4M3 5v14a2 2 0 002 2h16v-5"/></svg>Кошелёк</a>
     <a href="settings.html" class="sidebar-link" data-page="settings"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/></svg>Настройки</a>
   </nav>
-  <div class="sidebar-footer"><button onclick="Auth.logout()" class="sidebar-link" style="color:#f87171"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4M16 17l5-5-5-5M21 12H9"/></svg>Выйти</button></div>
+  <div class="sidebar-footer"><button onclick="Auth.logout()" class="sidebar-link" style="color:#C8B9B9"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4M16 17l5-5-5-5M21 12H9"/></svg>Выйти</button></div>
 </aside>
-<header class="topbar"><div class="flex items-center gap-4"><button id="sidebar-toggle" class="lg:hidden" style="background:none;border:none;color:#94a3b8;cursor:pointer"><svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 6h16M4 12h16M4 18h16"/></svg></button><h1 class="text-xl font-bold">Бэктесты</h1></div><div class="topbar-actions"><div class="topbar-user"><div class="topbar-avatar">U</div></div></div></header>
+<header class="topbar"><div class="flex items-center gap-4"><button id="sidebar-toggle" class="lg:hidden" style="background:none;border:none;color:rgba(255,255,255,.62);cursor:pointer"><svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 6h16M4 12h16M4 18h16"/></svg></button><h1 class="text-xl font-bold">Бэктесты</h1></div><div class="topbar-actions"><div class="topbar-user"><div class="topbar-avatar">U</div></div></div></header>
 
 <main class="main-content">
   <!-- Create Form -->
@@ -34,69 +33,143 @@
       <div><label class="text-xs text-slate-500 block mb-1">Таймфрейм</label><select name="timeframe" class="w-full bg-slate-800/50 border border-slate-700 rounded-lg px-3 py-2 text-sm text-white outline-none"><option>15m</option><option>1h</option><option>4h</option><option>1d</option></select></div>
       <div><label class="text-xs text-slate-500 block mb-1">Начало</label><input name="startDate" type="date" value="2025-01-01" class="w-full bg-slate-800/50 border border-slate-700 rounded-lg px-3 py-2 text-sm text-white outline-none"/></div>
       <div><label class="text-xs text-slate-500 block mb-1">Конец</label><input name="endDate" type="date" value="2025-12-31" class="w-full bg-slate-800/50 border border-slate-700 rounded-lg px-3 py-2 text-sm text-white outline-none"/></div>
-      <div class="flex items-end"><button type="submit" class="w-full py-2 rounded-lg font-semibold text-white text-sm" style="background:linear-gradient(135deg,#4F46E5,#7C3AED)">Запустить</button></div>
+      <div class="flex items-end"><button type="submit" class="w-full py-2 rounded-lg font-semibold text-white text-sm" style="background:linear-gradient(180deg,#2A5BE8 0%,#1D4ED8 60%,#143797 100%);box-shadow:inset 0 1px 1px rgba(255,255,255,.28),inset 0 -1px 3px rgba(0,0,0,.6),0 4px 8px -2px rgba(0,0,0,.6),0 0 0 1px rgba(29,78,216,.35)">Запустить</button></div>
     </form>
   </div>
 
   <!-- Results Grid -->
   <h2 class="font-bold mb-4">Результаты</h2>
-  <div class="grid md:grid-cols-2 gap-4 mb-6">
-
-    <div class="card card-glow">
-      <div class="flex items-center justify-between mb-3">
-        <div><div class="font-semibold">BTC Scalping 15m</div><div class="text-xs text-slate-500">Jan-Dec 2025 &middot; BTCUSDT</div></div>
-        <span class="text-xs px-2 py-0.5 rounded-full bg-green-500/15 text-green-400">Completed</span>
-      </div>
-      <div class="grid grid-cols-3 gap-3 text-center text-sm mb-4">
-        <div><div class="text-xs text-slate-500">PnL</div><div class="text-green-400 font-bold">+$4,520</div></div>
-        <div><div class="text-xs text-slate-500">Win Rate</div><div class="font-bold">73%</div></div>
-        <div><div class="text-xs text-slate-500">Sharpe</div><div class="font-bold">1.82</div></div>
-      </div>
-      <div class="grid grid-cols-3 gap-3 text-center text-sm">
-        <div><div class="text-xs text-slate-500">Max DD</div><div class="text-red-400">-12.3%</div></div>
-        <div><div class="text-xs text-slate-500">Profit Factor</div><div>2.14</div></div>
-        <div><div class="text-xs text-slate-500">Trades</div><div>156</div></div>
-      </div>
-      <div class="mt-4"><canvas id="btChart1" height="80"></canvas></div>
-    </div>
-
-    <div class="card card-glow">
-      <div class="flex items-center justify-between mb-3">
-        <div><div class="font-semibold">ETH SMC 4h</div><div class="text-xs text-slate-500">Jan-Dec 2025 &middot; ETHUSDT</div></div>
-        <span class="text-xs px-2 py-0.5 rounded-full bg-green-500/15 text-green-400">Completed</span>
-      </div>
-      <div class="grid grid-cols-3 gap-3 text-center text-sm mb-4">
-        <div><div class="text-xs text-slate-500">PnL</div><div class="text-green-400 font-bold">+$2,180</div></div>
-        <div><div class="text-xs text-slate-500">Win Rate</div><div class="font-bold">68%</div></div>
-        <div><div class="text-xs text-slate-500">Sharpe</div><div class="font-bold">1.45</div></div>
-      </div>
-      <div class="grid grid-cols-3 gap-3 text-center text-sm">
-        <div><div class="text-xs text-slate-500">Max DD</div><div class="text-red-400">-18.7%</div></div>
-        <div><div class="text-xs text-slate-500">Profit Factor</div><div>1.78</div></div>
-        <div><div class="text-xs text-slate-500">Trades</div><div>42</div></div>
-      </div>
-      <div class="mt-4"><canvas id="btChart2" height="80"></canvas></div>
-    </div>
-
-    <div class="card" style="opacity:.6">
-      <div class="flex items-center justify-between mb-3">
-        <div><div class="font-semibold">SOL Gerchik 1d</div><div class="text-xs text-slate-500">Jun-Dec 2025 &middot; SOLUSDT</div></div>
-        <span class="text-xs px-2 py-0.5 rounded-full bg-yellow-500/15 text-yellow-400">Running...</span>
-      </div>
-      <div class="w-full bg-slate-800 rounded-full h-2 mt-4"><div class="bg-indigo-500 h-2 rounded-full" style="width:65%"></div></div>
-      <div class="text-xs text-slate-500 mt-2">65% complete...</div>
-    </div>
+  <div class="grid md:grid-cols-2 gap-4 mb-6" id="btResultsGrid">
+    <div class="col-span-full text-center py-12 text-slate-500 text-sm">Загрузка бэктестов…</div>
   </div>
 </main>
 
 <script src="app.js"></script>
 <script>
-if(!Auth.isLoggedIn())window.location.href='/?login=1';
-Sidebar.init('backtests');
-// Mini equity charts
-function miniChart(id,clr){const d=Utils.generateEquityData(60,10000);new Chart(document.getElementById(id),{type:'line',data:{labels:d.map(x=>x.date.slice(5)),datasets:[{data:d.map(x=>x.value),borderColor:clr,backgroundColor:'transparent',tension:.4,pointRadius:0,borderWidth:1.5}]},options:{responsive:true,plugins:{legend:{display:false}},scales:{x:{display:false},y:{display:false}}}})}
-miniChart('btChart1','#818CF8');miniChart('btChart2','#06b6d4');
-document.getElementById('btForm')?.addEventListener('submit',async e=>{e.preventDefault();Toast.success('Бэктест запущен!');});
+if(!Auth.requireAuth()) throw new Error('noauth');
+document.querySelectorAll('.sidebar-link[data-page="backtests"]').forEach(a => a.classList.add('active'));
+
+const resultsGrid = document.getElementById('btResultsGrid');
+
+function escapeHtml(s) {
+  return String(s||'').replace(/[&<>"']/g, (c) => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'})[c]);
+}
+
+function renderBacktest(bt) {
+  const card = document.createElement('div');
+  card.className = 'card card-glow';
+  card.dataset.btId = bt.id;
+  const pnl = bt.results?.totalPnlUsd;
+  const pnlClass = pnl > 0 ? 'text-green-400' : pnl < 0 ? 'text-red-400' : 'text-slate-400';
+  const statusBadge = bt.status === 'completed'
+    ? '<span class="text-xs px-2 py-0.5 rounded-full bg-green-500/15 text-green-400">Completed</span>'
+    : bt.status === 'running'
+    ? '<span class="text-xs px-2 py-0.5 rounded-full bg-yellow-500/15 text-yellow-400">Running</span>'
+    : bt.status === 'failed'
+    ? '<span class="text-xs px-2 py-0.5 rounded-full bg-red-500/15 text-red-400">Failed</span>'
+    : '<span class="text-xs px-2 py-0.5 rounded-full bg-slate-500/15 text-slate-400">Pending</span>';
+  const syms = Array.isArray(bt.symbols) ? bt.symbols.join(', ') : bt.symbols;
+
+  if (bt.status !== 'completed') {
+    card.innerHTML = `
+      <div class="flex items-center justify-between mb-3">
+        <div><div class="font-semibold">${escapeHtml(bt.name)}</div>
+        <div class="text-xs text-slate-500">${bt.startDate}–${bt.endDate} · ${escapeHtml(syms)}</div></div>
+        ${statusBadge}
+      </div>
+      <div class="w-full bg-slate-800 rounded-full h-2 mt-4"><div class="bg-indigo-500 h-2 rounded-full" style="width:${bt.progressPct||0}%"></div></div>
+      <div class="text-xs text-slate-500 mt-2">${bt.progressPct||0}% complete${bt.errorMessage?'<span class="text-red-400 ml-2">'+escapeHtml(bt.errorMessage)+'</span>':''}</div>`;
+    return card;
+  }
+
+  const r = bt.results;
+  card.innerHTML = `
+    <div class="flex items-center justify-between mb-3">
+      <div><div class="font-semibold">${escapeHtml(bt.name)}</div>
+      <div class="text-xs text-slate-500">${bt.startDate}–${bt.endDate} · ${escapeHtml(syms)}</div></div>
+      ${statusBadge}
+    </div>
+    <div class="grid grid-cols-3 gap-3 text-center text-sm mb-4">
+      <div><div class="text-xs text-slate-500">PnL</div><div class="${pnlClass} font-bold">${Fmt.currency(r.totalPnlUsd)}</div></div>
+      <div><div class="text-xs text-slate-500">Win Rate</div><div class="font-bold">${r.winRatePct}%</div></div>
+      <div><div class="text-xs text-slate-500">Sharpe</div><div class="font-bold">${r.sharpeRatio}</div></div>
+    </div>
+    <div class="grid grid-cols-3 gap-3 text-center text-sm">
+      <div><div class="text-xs text-slate-500">Max DD</div><div class="text-red-400">-${r.maxDrawdownPct}%</div></div>
+      <div><div class="text-xs text-slate-500">PF</div><div>${r.profitFactor || '—'}</div></div>
+      <div><div class="text-xs text-slate-500">Trades</div><div>${r.totalTrades}</div></div>
+    </div>
+    <div class="mt-4"><canvas id="btChart${bt.id}" height="80"></canvas></div>`;
+  setTimeout(() => drawEquityChart('btChart' + bt.id, r.equityCurve), 10);
+  return card;
+}
+
+function drawEquityChart(canvasId, curve) {
+  const el = document.getElementById(canvasId);
+  if (!el || !Array.isArray(curve) || !curve.length) return;
+  new Chart(el, {
+    type: 'line',
+    data: {
+      labels: curve.map(p => new Date(p[0]).toISOString().slice(5, 10)),
+      datasets: [{
+        data: curve.map(p => p[1]),
+        borderColor: '#93AAEC', backgroundColor: 'transparent',
+        tension: .4, pointRadius: 0, borderWidth: 1.5,
+      }],
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      plugins: { legend: { display: false } },
+      scales: { x: { display: false }, y: { display: false } },
+    },
+  });
+}
+
+async function loadBacktests() {
+  try {
+    const data = await API.listBacktests({ limit: 50 });
+    if (!resultsGrid) return;
+    resultsGrid.innerHTML = '';
+    if (!data.backtests.length) {
+      resultsGrid.innerHTML = '<div class="col-span-full text-center text-slate-500 py-8">Бэктестов пока нет. Запусти первый — форма выше.</div>';
+      return;
+    }
+    for (const bt of data.backtests) resultsGrid.appendChild(renderBacktest(bt));
+    // Poll running ones
+    const running = data.backtests.filter(b => b.status === 'pending' || b.status === 'running');
+    if (running.length) setTimeout(loadBacktests, 2000);
+  } catch (err) {
+    Toast.error('Ошибка загрузки бэктестов: ' + err.message);
+  }
+}
+
+document.getElementById('btForm')?.addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const fd = new FormData(e.target);
+  const raw = Object.fromEntries(fd.entries());
+  const symbol = (raw.symbol || '').toUpperCase().trim();
+  const payload = {
+    name: `${symbol} ${raw.strategy} ${raw.timeframe}`,
+    strategy: raw.strategy || 'levels',
+    exchange: 'bybit',
+    symbols: [symbol || 'BTCUSDT'],
+    timeframe: raw.timeframe || '1h',
+    startDate: raw.startDate,
+    endDate: raw.endDate,
+    initialCapital: 10000,
+  };
+  try {
+    await API.createBacktest(payload);
+    Toast.success('Бэктест запущен!');
+    loadBacktests();
+  } catch (err) {
+    if (err.code === 'BACKTEST_LIMIT_REACHED') Toast.warn(err.message);
+    else if (err.code === 'UPGRADE_REQUIRED') Toast.warn('Нужен план ' + (err.data?.requiredPlan || 'Pro'));
+    else Toast.error(err.message);
+  }
+});
+
+loadBacktests();
 </script>
 </body>
 </html>

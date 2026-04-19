@@ -5,62 +5,136 @@
   <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
   <title>CHM Finance — AI Крипто-торговля</title>
   <meta name="description" content="CHM Finance — AI-платформа для автоматической крипто-торговли."/>
-  <meta name="theme-color" content="#070b14"/>
+  <meta name="theme-color" content="#0A0A0A"/>
   <link rel="preconnect" href="https://fonts.googleapis.com"/>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet"/>
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet"/>
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js"></script>
-  <script>tailwind.config={theme:{extend:{colors:{brand:'#4F46E5',cyan2:'#06b6d4',dark:'#070b14',card:'#111829'},fontFamily:{sans:['Inter','sans-serif']}}}}</script>
+  <script src="https://code.iconify.design/iconify-icon/2.1.0/iconify-icon.min.js"></script>
+  <script>tailwind.config={theme:{extend:{colors:{primary:{50:'#EDF1FC',100:'#DBE3F9',200:'#B7C6F3',300:'#93AAEC',400:'#5C80E3',500:'#1D4ED8',600:'#1943BA',700:'#143797',800:'#0F2970',900:'#0A1B49',950:'#06102B'},secondary:{500:'#522525',700:'#391A1A',900:'#1C0D0D'},tertiary:{500:'#2B5936',700:'#1E3E26',900:'#0F1E12'},neutral:{50:'#EBEBEB',100:'#D8D8D8',200:'#B1B1B1',300:'#898989',400:'#4F4F4F',500:'#0A0A0A',600:'#090909',700:'#070707',800:'#050505',900:'#030303'}},fontFamily:{sans:['Inter','sans-serif'],mono:['"JetBrains Mono"','monospace']}}}}</script>
   <style>
+    :root{
+      --bg:#0A0A0A;
+      --bg-2:#050505;
+      --surface:rgba(255,255,255,.03);
+      --surface-2:rgba(255,255,255,.05);
+      --border:rgba(255,255,255,.08);
+      --border-2:rgba(255,255,255,.12);
+      --text:#FFFFFF;
+      --text-dim:rgba(255,255,255,.62);
+      --text-mute:rgba(255,255,255,.38);
+      --primary:#1D4ED8;
+      --primary-400:#5C80E3;
+      --primary-600:#1943BA;
+      --secondary:#522525;
+      --tertiary:#2B5936;
+      --radius-pill:9999px;
+      --radius-lg:24px;
+      --radius-md:16px;
+      --radius-sm:12px;
+      --blur:40px;
+      --ease:cubic-bezier(.4,0,.2,1);
+    }
     *{margin:0;padding:0;box-sizing:border-box}
-    ::selection{background:rgba(124,58,237,.3);color:#fff}
-    ::-moz-selection{background:rgba(124,58,237,.3);color:#fff}
-    body{background:#050810;color:#e2e8f0;font-family:'Inter',sans-serif;overflow-x:hidden;-webkit-font-smoothing:antialiased}
+    html,body{background:#0A0A0A}
+    body{
+      font-family:'Inter',sans-serif;
+      font-weight:500;
+      color:var(--text);
+      font-size:14px;
+      line-height:1.5;
+      overflow-x:hidden;
+      -webkit-font-smoothing:antialiased;
+      text-rendering:optimizeLegibility;
+      letter-spacing:normal;
+    }
+    ::selection{background:rgba(29,78,216,.35);color:#fff}
     @media(prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:.01ms!important;transition-duration:.01ms!important}}
 
-    /* ── Selling Color Palette: warm violet→electric blue→emerald for trust+action ── */
-    .glow-btn{background:linear-gradient(135deg,#7c3aed,#2563eb,#0891b2);background-size:200% auto;animation:gradShift 4s ease infinite;box-shadow:0 1px 3px rgba(0,0,0,.3),0 4px 16px rgba(124,58,237,.3),0 8px 32px rgba(37,99,235,.15);padding:14px 32px;border-radius:12px;font-weight:700;font-size:1rem;color:#fff;border:none;cursor:pointer;transition:all .3s cubic-bezier(.4,0,.2,1);letter-spacing:.01em}
-    .glow-btn:hover{transform:translateY(-2px);box-shadow:0 2px 4px rgba(0,0,0,.3),0 8px 24px rgba(124,58,237,.4),0 20px 50px rgba(37,99,235,.2)}
-    .glow-btn:active{transform:translateY(0) scale(.98)}
-    .glow-btn:focus-visible{outline:2px solid #a78bfa;outline-offset:3px}
-    a:focus-visible,button:focus-visible{outline:2px solid rgba(124,58,237,.5);outline-offset:2px;border-radius:8px}
-    .ghost-btn{background:rgba(124,58,237,.08);border:1px solid rgba(124,58,237,.2);color:#c4b5fd;padding:14px 32px;border-radius:12px;font-weight:600;cursor:pointer;transition:all .3s}
-    .ghost-btn:hover{background:rgba(124,58,237,.15);border-color:rgba(124,58,237,.4)}
-
-    /* ── Animated BG ── */
-    @keyframes gradShift{0%{background-position:0% 50%}50%{background-position:100% 50%}100%{background-position:0% 50%}}
-    @keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-12px)}}
-    @keyframes pulse-ring{0%{transform:scale(.95);opacity:.5}50%{transform:scale(1.05);opacity:.8}100%{transform:scale(.95);opacity:.5}}
-    @keyframes orbit{0%{transform:rotate(0deg) translateX(120px) rotate(0deg)}100%{transform:rotate(360deg) translateX(120px) rotate(-360deg)}}
-    .float{animation:float 6s ease-in-out infinite}
-    .fade-up{opacity:0;transform:translateY(40px);transition:all .9s cubic-bezier(.16,1,.3,1)}
-    .fade-up.show{opacity:1;transform:translateY(0)}
-
-    /* ── Hero ── */
-    .hero-bg{position:absolute;inset:0;overflow:hidden}
-    .hero-grid{position:absolute;inset:0;background:radial-gradient(ellipse at 20% 50%,rgba(124,58,237,.08),transparent 50%),radial-gradient(ellipse at 80% 20%,rgba(6,182,212,.06),transparent 50%),radial-gradient(ellipse at 60% 80%,rgba(236,72,153,.04),transparent 50%),linear-gradient(rgba(99,102,241,.03) 1px,transparent 1px),linear-gradient(90deg,rgba(99,102,241,.03) 1px,transparent 1px);background-size:100% 100%,100% 100%,100% 100%,80px 80px,80px 80px;mask-image:radial-gradient(ellipse 80% 60% at 50% 40%,black 30%,transparent 70%)}
-    .hero-orb{position:absolute;border-radius:50%;filter:blur(140px);animation:pulse-ring 8s ease-in-out infinite,ambientDrift 20s ease-in-out infinite alternate}
-    .hero-orb-1{width:600px;height:600px;top:-15%;left:-5%;background:radial-gradient(circle,rgba(124,58,237,.25),transparent 70%)}
-    .hero-orb-2{width:500px;height:500px;bottom:-10%;right:-5%;background:radial-gradient(circle,rgba(6,182,212,.2),transparent 70%);animation-delay:4s}
-    .hero-orb-3{width:300px;height:300px;top:40%;left:50%;background:radial-gradient(circle,rgba(236,72,153,.12),transparent 70%);animation-delay:2s}
-    .hero-particle{position:absolute;width:4px;height:4px;background:rgba(165,180,252,.3);border-radius:50%;animation:orbit 20s linear infinite}
-    .hero-particle:nth-child(2){animation-duration:25s;width:3px;height:3px;background:rgba(6,182,212,.3)}
-    .hero-particle:nth-child(3){animation-duration:30s;width:2px;height:2px;background:rgba(168,85,247,.2)}
-
-    /* ── Nav ── */
-    .nav-scrolled{background:rgba(5,8,16,.85)!important;backdrop-filter:blur(20px);border-bottom:1px solid rgba(255,255,255,.04)}
-
-    /* ── Noise texture ── */
-    body::after{content:'';position:fixed;inset:0;z-index:0;pointer-events:none;opacity:.025;background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E")}
-    body>*{position:relative;z-index:1}
-
-    /* ── Monospace for numbers ── */
+    /* ── Typography per spec ── */
+    .t-h1{font-family:'Inter',sans-serif;font-weight:600;font-size:clamp(34px,5vw,48px);line-height:1.02;letter-spacing:-.025em}
+    .t-h1 em{font-style:normal;font-weight:600;color:var(--primary-400)}
+    .t-h2{font-family:'Inter',sans-serif;font-weight:600;font-size:clamp(24px,3.2vw,30px);line-height:1.2;letter-spacing:-.025em}
+    .t-h2 em{font-style:normal;font-weight:600;color:var(--primary-400)}
+    .t-h3{font-family:'Inter',sans-serif;font-weight:600;font-size:24px;line-height:32px;letter-spacing:-.025em}
+    .t-h3{font-family:'Inter',sans-serif;font-weight:500;font-size:20px;line-height:1.3;letter-spacing:-.015em}
+    .t-lead{font-family:'Inter',sans-serif;font-weight:500;font-size:14px;line-height:20px;letter-spacing:0;color:var(--text-dim)}
+    .t-body{font-family:'Inter',sans-serif;font-weight:500;font-size:12px;line-height:18px;color:var(--text-dim)}
+    .t-body-lg{font-family:'Inter',sans-serif;font-weight:500;font-size:14px;line-height:20px;color:var(--text-dim)}
+    .t-meta{font-family:'Inter',sans-serif;font-weight:500;font-size:11px;line-height:17.875px;letter-spacing:0;color:var(--text-mute)}
+    .t-eyebrow{font-family:'Inter',sans-serif;font-weight:500;font-size:10px;line-height:12.5px;letter-spacing:.22em;text-transform:uppercase;color:var(--text-mute)}
     .mono{font-family:'JetBrains Mono',monospace;font-variant-numeric:tabular-nums}
 
-    /* ── Stat numbers — solid white, no gradient ── */
-    .stat-num{font-family:'JetBrains Mono',monospace;font-size:2.5rem;font-weight:700;color:#fff;letter-spacing:-.02em}
+    /* ── Full-bleed background layers ── */
+    .bg-field{position:fixed;inset:0;z-index:0;pointer-events:none}
+    #particle-canvas{position:fixed;inset:0;z-index:0;pointer-events:none;opacity:.55}
+    .bg-grid{position:fixed;inset:0;z-index:0;pointer-events:none;background-image:linear-gradient(rgba(255,255,255,.025) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.025) 1px,transparent 1px);background-size:64px 64px;mask-image:radial-gradient(ellipse 90% 70% at 50% 40%,#000 30%,transparent 85%);-webkit-mask-image:radial-gradient(ellipse 90% 70% at 50% 40%,#000 30%,transparent 85%)}
+    .bg-vignette{position:fixed;inset:0;z-index:0;pointer-events:none;background:radial-gradient(ellipse at top,rgba(29,78,216,.08),transparent 55%),radial-gradient(ellipse at bottom right,rgba(82,37,37,.06),transparent 60%),radial-gradient(ellipse at bottom left,rgba(43,89,54,.05),transparent 60%)}
+    body>main,body>nav,body>footer,body>.modal-bg{position:relative;z-index:1}
 
-    /* ── Staggered grid animations ── */
+    /* ── Gradient shell (premium hairline) ── */
+    .shell{display:block;padding:1px;border-radius:var(--radius-lg);background:linear-gradient(180deg,rgba(255,255,255,.14) 0%,rgba(255,255,255,.02) 100%);transition:background .5s var(--ease)}
+    .shell:hover{background:linear-gradient(180deg,rgba(255,255,255,.22) 0%,rgba(255,255,255,.03) 100%)}
+    .shell-inner{border-radius:calc(var(--radius-lg) - 1px);background:rgba(10,10,10,.72);backdrop-filter:blur(var(--blur)) saturate(1.4);-webkit-backdrop-filter:blur(var(--blur)) saturate(1.4);box-shadow:inset 0 1px 1px rgba(255,255,255,.06),inset 0 -2px 6px rgba(0,0,0,.6);position:relative;overflow:hidden}
+    .shell-pill{border-radius:var(--radius-pill)}
+    .shell-pill .shell-inner{border-radius:var(--radius-pill)}
+    .shell-md{border-radius:var(--radius-md)}
+    .shell-md .shell-inner{border-radius:calc(var(--radius-md) - 1px)}
+    .shell-sm{border-radius:var(--radius-sm)}
+    .shell-sm .shell-inner{border-radius:calc(var(--radius-sm) - 1px)}
+
+    /* ── Pill buttons (premium embossed) ── */
+    .pill{display:inline-flex;align-items:center;justify-content:center;gap:8px;font-family:'Inter',sans-serif;font-weight:500;border-radius:var(--radius-pill);border:0;cursor:pointer;transition:transform .25s var(--ease),filter .25s var(--ease);color:#fff;white-space:nowrap}
+    .pill:focus-visible{outline:2px solid var(--primary-400);outline-offset:3px}
+    .pill-sm{font-size:12px;line-height:16px;padding:6px 20px}
+    .pill-md{font-size:14px;line-height:20px;padding:10px 22px}
+    .pill-lg{font-size:16px;line-height:24px;padding:16px 32px}
+    .pill-primary{background:linear-gradient(180deg,#2A5BE8 0%,#1D4ED8 60%,#143797 100%);box-shadow:inset 0 1px 1px rgba(255,255,255,.28),inset 0 -1px 3px rgba(0,0,0,.6),0 4px 8px -2px rgba(0,0,0,.6),0 12px 24px -6px rgba(0,0,0,.9),0 0 0 1px rgba(29,78,216,.35)}
+    .pill-primary:hover{transform:translateY(-1px);filter:brightness(1.08)}
+    .pill-primary:active{transform:translateY(0) scale(.98)}
+    .pill-ghost{background:linear-gradient(180deg,rgba(255,255,255,.06),rgba(255,255,255,.02));box-shadow:inset 0 1px 1px rgba(255,255,255,.1),inset 0 -1px 2px rgba(0,0,0,.4),0 1px 2px rgba(0,0,0,.4);color:rgba(255,255,255,.92)}
+    .pill-ghost:hover{background:linear-gradient(180deg,rgba(255,255,255,.1),rgba(255,255,255,.03));transform:translateY(-1px)}
+    .pill-dark{background:linear-gradient(180deg,#1e1e1e,#121212);box-shadow:inset 0 2px 2px rgba(255,255,255,.15),inset 0 -2px 8px rgba(0,0,0,.8),0 12px 24px -6px rgba(0,0,0,.9)}
+    .pill-dark:hover{filter:brightness(1.15);transform:translateY(-1px)}
+
+    /* ── Icon chip ── */
+    .chip{display:inline-flex;align-items:center;justify-content:center;width:40px;height:40px;border-radius:var(--radius-pill);background:linear-gradient(180deg,rgba(255,255,255,.06),rgba(255,255,255,.02));box-shadow:inset 0 1px 1px rgba(255,255,255,.08),inset 0 -1px 2px rgba(0,0,0,.5);color:rgba(255,255,255,.92)}
+    .chip iconify-icon{font-size:20px}
+
+    /* ── Nav ── */
+    nav#navbar{transition:backdrop-filter .3s ease,background .3s ease,border-color .3s ease;border-bottom:1px solid transparent}
+    nav#navbar.nav-scrolled{background:rgba(10,10,10,.7);backdrop-filter:blur(24px) saturate(1.4);-webkit-backdrop-filter:blur(24px) saturate(1.4);border-bottom:1px solid var(--border)}
+    .nav-link{font-family:'Inter',sans-serif;font-weight:500;font-size:14px;line-height:20px;color:var(--text-dim);transition:color .2s ease;position:relative}
+    .nav-link:hover{color:#fff}
+    .nav-link::after{content:'';position:absolute;left:0;right:0;bottom:-6px;height:1px;background:linear-gradient(90deg,transparent,rgba(255,255,255,.5),transparent);opacity:0;transition:opacity .25s ease}
+    .nav-link:hover::after{opacity:1}
+    .logo-mark{font-family:'Inter',sans-serif;font-weight:600;font-size:22px;letter-spacing:-.02em;color:#fff}
+    .logo-mark .dot{color:var(--primary-400)}
+
+    /* ── Section layout ── */
+    .section{padding:clamp(80px,12vw,160px) 0;position:relative}
+    .section-narrow{padding:clamp(60px,8vw,100px) 0}
+    .container-x{max-width:1280px;margin:0 auto;padding:0 24px}
+    .rule{height:1px;background:linear-gradient(90deg,transparent,rgba(255,255,255,.08),transparent);margin:0 auto;max-width:80%}
+    .promo-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:32px;max-width:900px;margin:0 auto;align-items:start;justify-content:center}
+    @media(max-width:720px){.promo-grid{grid-template-columns:1fr;max-width:380px;gap:28px}}
+    .promo-wrap{display:block;width:100%;max-width:420px;margin:0 auto;cursor:pointer;text-decoration:none;color:inherit;transition:transform .5s var(--ease),filter .5s var(--ease)}
+    .promo-wrap:hover{transform:translateY(-6px)}
+    .promo-wrap .shell{padding:1px;border-radius:var(--radius-lg);background:linear-gradient(180deg,rgba(255,255,255,.18) 0%,rgba(255,255,255,.02) 100%);overflow:hidden}
+    .promo-wrap .shell-inner{padding:0;overflow:hidden;border-radius:calc(var(--radius-lg) - 1px);box-shadow:inset 0 1px 1px rgba(255,255,255,.08),inset 0 -2px 8px rgba(0,0,0,.6),0 1px 2px rgba(0,0,0,.5),0 25px 50px -12px rgba(0,0,0,.7),0 30px 60px rgba(29,78,216,.12)}
+    .promo-stage{position:relative;width:100%;aspect-ratio:800/1100;overflow:hidden;background:#0A0F1F;border-radius:inherit;isolation:isolate}
+    .promo-stage iframe{position:absolute;top:0;left:0;width:800px;height:1100px;border:0;background:transparent;pointer-events:none;transform-origin:top left;will-change:transform}
+    .promo-stage::after{content:'';position:absolute;inset:0;pointer-events:none;border-radius:inherit;box-shadow:inset 0 1px 1px rgba(255,255,255,.06),inset 0 -1px 2px rgba(0,0,0,.5)}
+    .promo-caption{margin-top:18px;text-align:center}
+    .promo-caption .promo-label{font-family:'Inter',sans-serif;font-weight:600;font-size:16px;line-height:22px;color:#fff;letter-spacing:-.025em}
+    .promo-caption .promo-meta{font-family:'Inter',sans-serif;font-weight:500;font-size:10px;line-height:14px;color:var(--text-mute,rgba(255,255,255,.38));letter-spacing:.22em;text-transform:uppercase;margin-top:6px}
+    .eyebrow-badge{display:inline-flex;align-items:center;gap:8px;padding:8px 18px;border-radius:var(--radius-pill);background:rgba(255,255,255,.03);border:1px solid var(--border);box-shadow:inset 0 1px 1px rgba(255,255,255,.04)}
+    .eyebrow-badge .dot{width:6px;height:6px;border-radius:50%;background:#66876E;box-shadow:0 0 12px rgba(102,135,110,.7)}
+
+    /* ── Reveal on scroll ── */
+    .fade-up{opacity:0;transform:translateY(32px);transition:opacity .9s var(--ease),transform .9s var(--ease)}
+    .fade-up.show{opacity:1;transform:none}
     .grid .fade-up:nth-child(1){transition-delay:0ms}
     .grid .fade-up:nth-child(2){transition-delay:80ms}
     .grid .fade-up:nth-child(3){transition-delay:160ms}
@@ -68,159 +142,236 @@
     .grid .fade-up:nth-child(5){transition-delay:320ms}
     .grid .fade-up:nth-child(6){transition-delay:400ms}
 
-    /* ── Bento grid ── */
-    .bento{display:grid;grid-template-columns:repeat(3,1fr);gap:1.25rem}
+    /* ── Hero ── */
+    .hero{min-height:100vh;padding:140px 0 80px;display:flex;align-items:center;position:relative}
+    .hero-wrap{display:grid;grid-template-columns:1.05fr .95fr;gap:64px;align-items:center}
+    @media(max-width:1024px){.hero-wrap{grid-template-columns:1fr;gap:48px}}
+    .stat-num{font-family:'Inter',sans-serif;font-weight:600;font-size:30px;line-height:36px;letter-spacing:-.025em;color:#fff}
+    .stat-label{font-family:'Inter',sans-serif;font-weight:500;font-size:10px;line-height:12.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--text-mute);margin-top:10px}
+
+    /* ── Terminal (hero card) ── */
+    .term-dot{width:10px;height:10px;border-radius:50%;box-shadow:inset 0 1px 1px rgba(255,255,255,.3),inset 0 -1px 2px rgba(0,0,0,.4)}
+    .term-dot.r{background:#826262}.term-dot.y{background:#C8B9B9}.term-dot.g{background:#66876E}
+    .term-tile{padding:14px;border-radius:12px;background:linear-gradient(180deg,rgba(255,255,255,.04),rgba(255,255,255,.01));border:1px solid var(--border)}
+
+    /* ── Bento (features) ── */
+    .bento{display:grid;grid-template-columns:repeat(3,1fr);gap:20px}
     .bento>:nth-child(1){grid-column:span 2}
     .bento>:nth-child(4){grid-column:span 2}
-    @media(max-width:768px){.bento{grid-template-columns:1fr}.bento>:nth-child(1),.bento>:nth-child(4){grid-column:span 1}}
+    @media(max-width:880px){.bento{grid-template-columns:1fr}.bento>:nth-child(1),.bento>:nth-child(4){grid-column:span 1}}
+    .feature-card .shell-inner{padding:24px;min-height:180px;display:flex;flex-direction:column;gap:12px}
 
-    /* ── Ambient drift for orbs ── */
-    @keyframes ambientDrift{0%{transform:translate(0,0) scale(1)}50%{transform:translate(30px,-20px) scale(1.05)}100%{transform:translate(-20px,10px) scale(.98)}}
-
-    /* ── Liquid Glass ── */
-    .liquid-glass{background:linear-gradient(135deg,rgba(255,255,255,.04) 0%,rgba(255,255,255,.01) 40%,rgba(255,255,255,.06) 60%,rgba(255,255,255,.02) 100%);backdrop-filter:blur(24px) saturate(1.5);-webkit-backdrop-filter:blur(24px) saturate(1.5);border:1px solid rgba(255,255,255,.06);border-radius:24px;box-shadow:inset 0 1px 0 rgba(255,255,255,.05),inset 0 -1px 0 rgba(0,0,0,.1),0 8px 40px rgba(0,0,0,.25);position:relative;overflow:hidden;transition:all .5s cubic-bezier(.25,.8,.25,1)}
-    .liquid-glass::before{content:'';position:absolute;top:-50%;left:-50%;width:200%;height:200%;background:radial-gradient(ellipse at 30% 20%,rgba(255,255,255,.04),transparent 50%);pointer-events:none}
-    .liquid-glass:hover{border-color:rgba(255,255,255,.1);box-shadow:inset 0 1px 0 rgba(255,255,255,.08),0 20px 60px rgba(0,0,0,.35),0 0 80px rgba(99,102,241,.06);transform:translateY(-2px)}
-
-    /* ── Cards ── */
-    .card-hover{transition:all .5s cubic-bezier(.16,1,.3,1);cursor:pointer}
-    .card-hover:hover{transform:translateY(-6px) scale(1.01);border-color:rgba(124,58,237,.25);box-shadow:inset 0 1px 0 rgba(255,255,255,.06),0 20px 60px rgba(0,0,0,.35),0 0 40px rgba(124,58,237,.06)}
-    .feature-icon{width:56px;height:56px;border-radius:16px;display:flex;align-items:center;justify-content:center;position:relative}
-    .feature-icon::after{content:'';position:absolute;inset:-2px;border-radius:18px;background:inherit;filter:blur(12px);opacity:.4;z-index:-1}
+    /* ── How it works ── */
+    .steps-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:24px;position:relative}
+    @media(max-width:880px){.steps-grid{grid-template-columns:1fr}}
+    .step-line{position:absolute;top:36px;left:12%;right:12%;height:1px;background:linear-gradient(90deg,transparent,rgba(92,128,227,.6),rgba(92,128,227,.3),transparent);z-index:0}
+    @media(max-width:880px){.step-line{display:none}}
+    .step-num{width:72px;height:72px;border-radius:var(--radius-pill);display:flex;align-items:center;justify-content:center;font-family:'Inter',sans-serif;font-weight:600;font-size:26px;line-height:1;letter-spacing:-.025em;color:#fff;background:linear-gradient(180deg,rgba(255,255,255,.06),rgba(255,255,255,.01));box-shadow:inset 0 1px 1px rgba(255,255,255,.12),inset 0 -2px 6px rgba(0,0,0,.7),0 8px 24px -6px rgba(0,0,0,.8);position:relative;z-index:1;margin:0 auto 20px}
 
     /* ── Pricing ── */
-    .price-popular{border:1px solid rgba(79,70,229,.5);background:linear-gradient(180deg,rgba(79,70,229,.08),rgba(17,24,41,.6))!important;box-shadow:0 0 0 1px rgba(79,70,229,.2),0 8px 40px rgba(79,70,229,.15),0 0 80px rgba(79,70,229,.05);transform:scale(1.03);z-index:1;position:relative;overflow:visible!important}
-    .price-popular .popular-badge{background:linear-gradient(135deg,#4F46E5,#7C3AED);box-shadow:0 2px 12px rgba(79,70,229,.4)}
-    .price-popular.liquid-glass{overflow:visible!important}
-    .price-popular.liquid-glass::before{border-radius:24px}
-
-    /* ── Steps ── */
-    .step-line{position:absolute;top:50px;left:16%;right:16%;height:2px;background:linear-gradient(90deg,transparent,#6366f1,#06b6d4,transparent);z-index:0;opacity:.3}
-    .step-num{width:80px;height:80px;border-radius:20px;display:flex;align-items:center;justify-content:center;font-size:1.75rem;font-weight:900;position:relative}
-    .step-num::before{content:'';position:absolute;inset:-3px;border-radius:23px;background:inherit;filter:blur(20px);opacity:.5;z-index:-1}
-
-    /* ── Modals ── */
-    .modal-bg{position:fixed;inset:0;background:rgba(0,0,0,.75);backdrop-filter:blur(12px);z-index:100;display:none;align-items:center;justify-content:center}
-    .modal-bg.active{display:flex}
+    .price-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:24px;align-items:stretch}
+    @media(max-width:1024px){.price-grid{grid-template-columns:repeat(2,1fr)}}
+    @media(max-width:640px){.price-grid{grid-template-columns:1fr}}
+    .price-card{position:relative;border-radius:24px;background:linear-gradient(180deg,rgba(255,255,255,.04),rgba(255,255,255,.015));border:1px solid rgba(255,255,255,.08);backdrop-filter:blur(24px) saturate(1.3);-webkit-backdrop-filter:blur(24px) saturate(1.3);box-shadow:0 1px 2px rgba(0,0,0,.4),0 20px 25px -5px rgba(0,0,0,.3),0 8px 10px -6px rgba(0,0,0,.3),inset 0 1px 1px rgba(255,255,255,.06);transition:transform .5s var(--ease),box-shadow .5s var(--ease),border-color .5s var(--ease)}
+    .price-card:hover{transform:translateY(-8px);border-color:rgba(255,255,255,.14);box-shadow:0 2px 4px rgba(0,0,0,.5),0 25px 50px -12px rgba(0,0,0,.6),0 30px 60px rgba(0,0,0,.4),inset 0 1px 1px rgba(255,255,255,.1)}
+    .price-card-body{padding:32px 26px 28px;display:flex;flex-direction:column;gap:18px;min-height:480px}
+    .price-card .price-head{display:flex;flex-direction:column;gap:10px}
+    .price-card .price-name{font-family:'Inter',sans-serif;font-weight:500;font-size:10px;line-height:12.5px;letter-spacing:.22em;text-transform:uppercase;color:rgba(255,255,255,.6)}
+    .price-card .price-amt{font-family:'Inter',sans-serif;font-weight:600;font-size:48px;line-height:1;letter-spacing:-.025em;color:#fff}
+    .price-popular{border:1px solid rgba(92,128,227,.45);background:linear-gradient(180deg,rgba(29,78,216,.22) 0%,rgba(29,78,216,.04) 60%,rgba(10,10,10,.6) 100%);box-shadow:0 1px 2px rgba(0,0,0,.5),0 25px 50px -12px rgba(0,0,0,.7),0 30px 60px rgba(29,78,216,.2),inset 0 1px 1px rgba(255,255,255,.12);transform:translateY(-6px)}
+    .price-popular:hover{transform:translateY(-12px);border-color:rgba(92,128,227,.7);box-shadow:0 2px 4px rgba(0,0,0,.5),0 30px 60px -12px rgba(0,0,0,.7),0 40px 80px rgba(29,78,216,.3),inset 0 1px 1px rgba(255,255,255,.18)}
+    .price-popular .price-name{color:#93AAEC}
+    .popular-badge{position:absolute;top:-14px;left:50%;transform:translateX(-50%);display:inline-flex;align-items:center;white-space:nowrap;padding:6px 16px;border-radius:9999px;font-family:'Inter',sans-serif;font-weight:500;font-size:10px;line-height:14px;letter-spacing:.18em;text-transform:uppercase;color:#fff;background:linear-gradient(180deg,#2A5BE8 0%,#1D4ED8 50%,#143797 100%);box-shadow:inset 0 1px 1px rgba(255,255,255,.28),inset 0 -1px 3px rgba(0,0,0,.5),0 4px 12px rgba(29,78,216,.5),0 8px 20px -4px rgba(0,0,0,.6);z-index:3}
+    .tick{display:inline-flex;align-items:center;justify-content:center;width:18px;height:18px;border-radius:50%;background:rgba(43,89,54,.5);color:#86efac;flex-shrink:0}
+    .tick.off{background:rgba(82,37,37,.4);color:rgba(255,255,255,.28)}
 
     /* ── FAQ ── */
-    .faq-answer{max-height:0;overflow:hidden;transition:max-height .4s cubic-bezier(.16,1,.3,1)}
-    .faq-item{transition:all .3s ease}
-    .faq-item:hover{border-color:rgba(124,58,237,.15);background:rgba(124,58,237,.02)}
-    .faq-item.open .faq-answer{max-height:400px}
+    .faq-item{overflow:hidden;cursor:pointer;transition:background .3s ease}
+    .faq-item .shell-inner{padding:0}
+    .faq-head{display:flex;align-items:center;justify-content:space-between;gap:16px;padding:20px 22px}
+    .faq-ans{max-height:0;overflow:hidden;transition:max-height .45s var(--ease);padding:0 22px}
+    .faq-ans-inner{padding-bottom:20px}
+    .faq-item.open .faq-ans{max-height:400px}
     .faq-item.open .faq-chevron{transform:rotate(180deg)}
-    .faq-item.open{border-color:rgba(124,58,237,.2);background:rgba(124,58,237,.03)}
+    .faq-chevron{transition:transform .3s ease;color:var(--text-mute)}
 
-    /* ── Section spacing — premium ── */
-    .section-premium{padding:128px 0}
-    .section-title{font-size:clamp(2.2rem,5vw,3.8rem);font-weight:800;letter-spacing:-.035em;line-height:1.05}
-    .section-subtitle{font-size:1.1rem;color:#64748b;max-width:600px;margin:16px auto 0;line-height:1.7}
-    .section-label{display:inline-flex;align-items:center;gap:8px;font-size:.7rem;font-weight:600;text-transform:uppercase;letter-spacing:.14em;color:#c4b5fd;margin-bottom:20px;padding:8px 20px;border-radius:100px;background:linear-gradient(135deg,rgba(124,58,237,.1),rgba(59,130,246,.06));border:1px solid rgba(124,58,237,.15);backdrop-filter:blur(8px)}
+    /* ── Footer ── */
+    footer{border-top:1px solid var(--border);padding:64px 0 32px;position:relative}
+    footer a{color:var(--text-mute);transition:color .2s ease}
+    footer a:hover{color:#fff}
 
-    /* ── Divider ── */
-    .section-divider{height:1px;background:linear-gradient(90deg,transparent,rgba(255,255,255,.06),transparent);margin:0 auto;max-width:80%}
+    /* ── Modal ── */
+    .modal-bg{position:fixed;inset:0;background:rgba(0,0,0,.78);backdrop-filter:blur(18px);z-index:100;display:none;align-items:center;justify-content:center;padding:24px}
+    .modal-bg.active{display:flex}
+    .modal-input{width:100%;background:rgba(255,255,255,.04);border:1px solid var(--border);border-radius:12px;padding:14px 16px;color:#fff;font-family:'Inter',sans-serif;font-weight:500;font-size:14px;outline:none;transition:border-color .2s ease,background .2s ease}
+    .modal-input:focus{border-color:var(--primary-400);background:rgba(255,255,255,.06)}
 
-    /* ── Light theme — FULL override ── */
-    html.light body{background:#f8faff;color:#1e293b}
-    /* ALL white/light text must become dark */
-    html.light,html.light *:not(.glow-btn):not(.popular-badge):not([class*="bg-green"]):not([class*="bg-red"]):not([class*="bg-indigo"]):not([class*="bg-cyan"]):not([class*="bg-emerald"]){color:inherit}
-    html.light h1,html.light h2,html.light h3,html.light h4{color:#0f172a!important}
-    html.light p{color:#475569!important}
-    html.light .font-bold,html.light .font-semibold,html.light .font-extrabold{color:#1e293b!important}
-    html.light .text-white{color:#0f172a!important}
-    html.light [class*="text-slate-3"],html.light [class*="text-slate-4"],html.light [class*="text-slate-5"]{color:#64748b!important}
-    html.light .text-sm.text-slate-400,html.light .text-xs.text-slate-500{color:#94a3b8!important}
-    html.light .text-green-400{color:#059669!important}
-    html.light .text-red-400{color:#dc2626!important}
-    html.light .text-cyan-400{color:#0891b2!important}
-    html.light .text-indigo-400,html.light .text-indigo-300{color:#4f46e5!important}
-    /* Backgrounds */
-    html.light nav{color:#1e293b}
-    html.light .nav-scrolled{background:rgba(248,250,255,.92)!important;border-color:rgba(0,0,0,.06)!important;backdrop-filter:blur(20px)}
-    html.light .hero-bg *{opacity:.06!important}
-    html.light .liquid-glass{background:rgba(255,255,255,.7)!important;border-color:rgba(0,0,0,.06)!important;box-shadow:0 2px 16px rgba(0,0,0,.04)!important}
-    html.light .liquid-glass::before{background:radial-gradient(ellipse at 30% 20%,rgba(124,58,237,.03),transparent 50%)}
-    html.light .ghost-btn{background:rgba(124,58,237,.06)!important;border-color:rgba(124,58,237,.15)!important;color:#6d28d9!important}
-    html.light .card-hover:hover{box-shadow:0 12px 40px rgba(124,58,237,.08)!important}
-    html.light [style*="background:rgba(255,255,255,.03)"]{background:rgba(0,0,0,.02)!important}
-    html.light .bg-slate-800\/50,html.light .bg-slate-800\/30,html.light .bg-slate-900\/50{background:rgba(0,0,0,.02)!important}
-    html.light .border-slate-800\/50,html.light .border-slate-700,html.light [style*="border-color:rgba(255,255,255"]{border-color:rgba(0,0,0,.06)!important}
-    html.light .price-popular{border-color:rgba(124,58,237,.4)!important;background:linear-gradient(180deg,rgba(124,58,237,.06),rgba(255,255,255,.8))!important}
-    html.light .faq-item{border-color:rgba(0,0,0,.04)!important}
-    html.light .modal-bg>div{background:rgba(255,255,255,.96)!important;border-color:rgba(0,0,0,.08)!important}
-    html.light input,html.light select{background:#f1f5f9!important;border-color:rgba(0,0,0,.1)!important;color:#1e293b!important}
-    html.light .stat-num{color:#4f46e5!important;-webkit-text-fill-color:#4f46e5!important}
-    html.light .section-label{background:rgba(124,58,237,.06);border-color:rgba(124,58,237,.12);color:#7c3aed!important}
-    html.light .section-subtitle{color:#64748b!important}
-    html.light .section-divider{background:linear-gradient(90deg,transparent,rgba(0,0,0,.06),transparent)}
-    html.light .step-num{color:inherit!important}
-    html.light footer,html.light footer *{color:#64748b!important}
-    html.light footer h4{color:#1e293b!important}
-    html.light .glow-btn{color:#fff!important}
-    html.light .hero-glow,html.light [class*="hero-glow"]{opacity:0!important;display:none!important}
-    html.light .liquid-glass .hero-glow{display:none!important}
-    html.light .cta-glow{display:none!important}
+    /* ── Breathing hero halo ── */
+    .hero-halo{position:absolute;pointer-events:none;z-index:0;border-radius:50%;filter:blur(120px);animation:breathe 6s ease-in-out infinite}
+    .hero-halo.a{width:520px;height:520px;top:-120px;left:-120px;background:radial-gradient(circle,rgba(29,78,216,.3),transparent 70%)}
+    .hero-halo.b{width:420px;height:420px;bottom:-80px;right:-80px;background:radial-gradient(circle,rgba(82,37,37,.22),transparent 70%);animation-delay:3s}
+    .hero-halo.c{width:320px;height:320px;top:40%;left:45%;background:radial-gradient(circle,rgba(43,89,54,.18),transparent 70%);animation-delay:1.5s}
+    @keyframes breathe{0%,100%{transform:scale(1);opacity:.6}50%{transform:scale(1.08);opacity:1}}
+
+    /* ─── LIGHT THEME ─── */
+    html.light{color-scheme:light}
+    html.light body{background:#F6F7FB;color:#0A0A0A}
+    html.light #particle-canvas{opacity:.14;filter:invert(1)}
+
+    /* Inline white text overrides (attribute selectors beat inline styles) */
+    html.light [style*="color:rgba(255,255,255,.92)"],
+    html.light [style*="color:rgba(255,255,255,.82)"],
+    html.light [style*="color:rgba(255,255,255,.78)"],
+    html.light [style*="color:rgba(255,255,255,.72)"],
+    html.light [style*="color:rgba(255,255,255,.62)"],
+    html.light [style*="color:#fff"],
+    html.light [style*="color:#FFFFFF"]{color:rgba(10,10,10,.82)!important}
+
+    /* Headings + body text */
+    html.light .t-h1,html.light .t-h2,html.light .t-h3,
+    html.light h1,html.light h2,html.light h3,html.light h4,
+    html.light .logo-mark,html.light .stat-num,html.light .stat-card-value,
+    html.light .price-amt,html.light .promo-label{color:#0A0A0A!important}
+    html.light .t-h1 em,html.light .t-h2 em{color:#1D4ED8!important}
+    html.light .t-body,html.light .t-body-lg,html.light .t-lead{color:rgba(10,10,10,.68)!important}
+    html.light .t-meta,html.light .t-eyebrow,html.light .stat-label,
+    html.light .price-name,html.light .promo-meta{color:rgba(10,10,10,.52)!important}
+    html.light .faq-chevron{color:rgba(10,10,10,.5)!important}
+
+    /* Nav */
+    html.light nav#navbar{background:transparent}
+    html.light nav#navbar.nav-scrolled{background:rgba(246,247,251,.85);backdrop-filter:blur(24px) saturate(1.4);-webkit-backdrop-filter:blur(24px) saturate(1.4);border-bottom:1px solid rgba(0,0,0,.08)}
+    html.light .nav-link{color:rgba(10,10,10,.62)!important}
+    html.light .nav-link:hover{color:#0A0A0A!important}
+    html.light .nav-link::after{background:linear-gradient(90deg,transparent,rgba(0,0,0,.3),transparent)}
+
+    /* Shells / cards */
+    html.light .shell{background:linear-gradient(180deg,rgba(0,0,0,.12) 0%,rgba(0,0,0,.02) 100%)}
+    html.light .shell-inner{background:rgba(255,255,255,.94);box-shadow:inset 0 1px 1px rgba(255,255,255,.9),inset 0 -2px 6px rgba(0,0,0,.04),0 1px 2px rgba(0,0,0,.04),0 8px 24px rgba(0,0,0,.05)}
+    html.light .feature-card .shell-inner,
+    html.light .price-card,
+    html.light .faq-item .shell-inner{background:rgba(255,255,255,.94)!important;border-color:rgba(0,0,0,.08)!important}
+    html.light .price-popular{background:linear-gradient(180deg,rgba(29,78,216,.1) 0%,rgba(255,255,255,.95) 60%)!important;border-color:rgba(29,78,216,.35)!important;box-shadow:0 2px 4px rgba(0,0,0,.06),0 25px 50px -12px rgba(29,78,216,.18),inset 0 1px 1px rgba(255,255,255,.9)}
+    html.light .price-popular .price-name{color:#1D4ED8!important}
+    html.light .price-popular .price-amt{color:#1D4ED8!important}
+    html.light .price-popular *{color:rgba(10,10,10,.86)!important}
+    html.light .price-popular .pill-primary{color:#fff!important}
+
+    /* Pills / buttons */
+    html.light .pill-ghost{background:linear-gradient(180deg,rgba(255,255,255,.95),rgba(255,255,255,.85))!important;color:#0A0A0A!important;box-shadow:inset 0 1px 1px rgba(255,255,255,.95),inset 0 -1px 2px rgba(0,0,0,.06),0 1px 2px rgba(0,0,0,.08),0 0 0 1px rgba(0,0,0,.08)}
+    html.light .pill-ghost:hover{background:linear-gradient(180deg,#fff,rgba(255,255,255,.95))!important}
+    html.light .pill-primary{color:#fff!important}
+    html.light .chip{background:linear-gradient(180deg,#fff,rgba(255,255,255,.92))!important;color:#0A0A0A!important;box-shadow:inset 0 1px 1px rgba(255,255,255,.95),inset 0 -1px 2px rgba(0,0,0,.08),0 1px 2px rgba(0,0,0,.1),0 0 0 1px rgba(0,0,0,.08)}
+
+    /* Exchange pills */
+    html.light .shell-pill .shell-inner{background:rgba(255,255,255,.94)!important}
+    html.light .shell-pill span{color:#0A0A0A!important}
+
+    /* Steps / badges / misc */
+    html.light .rule{background:linear-gradient(90deg,transparent,rgba(0,0,0,.12),transparent)}
+    html.light .step-num{background:linear-gradient(180deg,rgba(255,255,255,.95),rgba(255,255,255,.8))!important;color:#1D4ED8!important;box-shadow:inset 0 1px 1px rgba(255,255,255,.95),inset 0 -2px 6px rgba(0,0,0,.05),0 8px 24px -6px rgba(0,0,0,.15)}
+    html.light .step-line{background:linear-gradient(90deg,transparent,rgba(29,78,216,.4),rgba(92,128,227,.2),transparent)}
+    html.light .popular-badge{box-shadow:inset 0 1px 1px rgba(255,255,255,.35),inset 0 -1px 3px rgba(0,0,0,.4),0 4px 12px rgba(29,78,216,.4),0 6px 14px -4px rgba(0,0,0,.2)}
+    html.light .eyebrow-badge{background:rgba(255,255,255,.92)!important;border-color:rgba(0,0,0,.08)!important}
+    html.light .tick{background:rgba(43,89,54,.14)!important;color:#2B5936!important}
+    html.light .tick.off{background:rgba(82,37,37,.14)!important;color:rgba(10,10,10,.28)!important}
+
+    /* Modals */
+    html.light .modal-bg{background:rgba(230,234,245,.85)!important;backdrop-filter:blur(18px)}
+    html.light .modal-input{background:rgba(0,0,0,.03)!important;border-color:rgba(0,0,0,.1)!important;color:#0A0A0A!important}
+    html.light .modal-input::placeholder{color:rgba(10,10,10,.3)!important}
+    html.light .modal-input:focus{background:rgba(0,0,0,.05)!important;border-color:var(--primary-400)!important}
+
+    /* Footer */
+    html.light footer{border-top-color:rgba(0,0,0,.08)!important}
+    html.light footer *{color:rgba(10,10,10,.48)!important}
+    html.light footer h4,html.light footer .logo-mark{color:#0A0A0A!important}
+    html.light footer a:hover{color:#0A0A0A!important}
+
+    /* Promo / community */
+    html.light .promo-stage{background:rgba(0,0,0,.04)!important}
+    html.light .promo-wrap .shell{background:linear-gradient(180deg,rgba(0,0,0,.14) 0%,rgba(0,0,0,.02) 100%)!important}
+    html.light .promo-label{color:#0A0A0A!important}
+    html.light .promo-meta{color:rgba(10,10,10,.48)!important}
+
+    /* CTA section glows dimmed */
+    html.light .hero-halo{opacity:.3}
+    html.light .grid-bg,html.light .grid-lines{opacity:.4}
+
+    /* ── Utility ── */
+    .divider-v{width:1px;height:24px;background:var(--border)}
   </style>
 </head>
 <body>
 
+<!-- Full-bleed WebGL-style background stack -->
+<canvas id="particle-canvas" aria-hidden="true"></canvas>
+<div class="bg-grid" aria-hidden="true"></div>
+<div class="bg-vignette" aria-hidden="true"></div>
+
 <!-- NAV -->
-<nav id="navbar" class="fixed top-0 left-0 right-0 z-50 transition-all duration-300" style="background:transparent">
-  <div class="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
-    <a href="/" class="text-2xl font-extrabold tracking-wider">CHM<span class="text-cyan-400">.</span></a>
+<nav id="navbar" class="fixed top-0 left-0 right-0 z-50">
+  <div class="container-x flex items-center justify-between" style="padding-top:18px;padding-bottom:18px">
+    <a href="/" class="logo-mark">CHM<span class="dot">.</span></a>
     <div class="hidden md:flex items-center gap-8">
-      <a href="#features" class="text-sm text-slate-400 hover:text-white transition" data-t="nav-feat">Возможности</a>
-      <a href="#pricing" class="text-sm text-slate-400 hover:text-white transition" data-t="nav-price">Тарифы</a>
-      <a href="#how" class="text-sm text-slate-400 hover:text-white transition" data-t="nav-how">Как работает</a>
-      <a href="#faq" class="text-sm text-slate-400 hover:text-white transition" data-t="nav-faq">FAQ</a>
-      <a href="academy/" class="text-sm text-slate-400 hover:text-white transition" data-t="nav-academy">Академия</a>
+      <a href="#features" class="nav-link" data-t="nav-feat">Возможности</a>
+      <a href="#pricing" class="nav-link" data-t="nav-price">Тарифы</a>
+      <a href="#how" class="nav-link" data-t="nav-how">Как работает</a>
+      <a href="#community" class="nav-link" data-t="nav-community">Сообщество</a>
+      <a href="#faq" class="nav-link" data-t="nav-faq">FAQ</a>
+      <a href="academy/" class="nav-link" data-t="nav-academy">Академия</a>
     </div>
     <div class="flex items-center gap-3">
-      <button onclick="toggleLang()" class="text-xs text-slate-400 border border-slate-700 rounded-lg px-3 py-1.5 hover:text-white transition" id="langBtn">EN</button>
-      <button onclick="toggleTheme()" class="text-sm border border-slate-700 rounded-lg w-8 h-8 flex items-center justify-center hover:text-white transition" id="themeBtn" title="Toggle theme">🌙</button>
-      <a href="#" onclick="openModal('login');return false" class="text-sm text-slate-300 hover:text-white transition hidden sm:block" data-t="nav-login">Войти</a>
-      <a href="#" onclick="openModal('register');return false" class="glow-btn text-sm font-semibold text-white px-5 py-2.5 rounded-xl transition-all" data-t="nav-start">Начать</a>
+      <button onclick="toggleLang()" class="pill pill-ghost pill-sm" id="langBtn" aria-label="Toggle language">EN</button>
+      <button onclick="toggleTheme()" class="chip" id="themeBtn" title="Toggle theme" aria-label="Toggle theme"><iconify-icon icon="solar:moon-linear"></iconify-icon></button>
+      <a href="#" onclick="handleLogin(event)" class="nav-link hidden sm:inline-block" id="loginBtn" data-t="nav-login">Войти</a>
+      <a href="#" onclick="handleRegister(event)" class="pill pill-primary pill-sm" data-t="nav-start">Регистрация</a>
     </div>
   </div>
 </nav>
 
+<main>
+
 <!-- HERO -->
-<section class="relative min-h-screen flex items-center pt-24 pb-12 overflow-hidden">
-  <div class="hero-bg">
-    <div class="hero-grid"></div>
-    <div class="hero-orb hero-orb-1"></div>
-    <div class="hero-orb hero-orb-2"></div>
-    <div class="hero-orb hero-orb-3"></div>
-    <div class="hero-particle" style="top:20%;left:30%"></div>
-    <div class="hero-particle" style="top:60%;left:70%"></div>
-    <div class="hero-particle" style="top:40%;left:50%"></div>
-  </div>
-  <div class="max-w-7xl mx-auto px-6 relative z-10 grid lg:grid-cols-2 gap-16 items-center">
+<section class="hero">
+  <div class="hero-halo a"></div>
+  <div class="hero-halo b"></div>
+  <div class="hero-halo c"></div>
+  <div class="container-x hero-wrap">
     <div>
-      <div class="inline-flex items-center gap-2 glass rounded-full px-4 py-2 text-sm text-cyan-400 mb-6">
-        <span class="w-2 h-2 bg-green-400 rounded-full animate-pulse"></span> <span data-t="hero-badge">AI-Powered Крипто Платформа</span>
+      <div class="eyebrow-badge mb-8 fade-up" style="display:none" aria-hidden="true"></div>
+      <h1 class="t-h1 mb-6 fade-up">
+        <span data-t="hero-h1a">Торгуй умнее.</span><br>
+        <em data-t="hero-h1b">Зарабатывай больше.</em>
+      </h1>
+      <p class="t-lead mb-10 fade-up" style="max-width:520px" data-t="hero-sub">Автоматические торговые сигналы и боты для Bybit, Binance, BingX и OKX. Стратегии SMC, Герчика и скальпинг с AI-аналитикой.</p>
+      <div class="flex flex-wrap gap-4 fade-up">
+        <a href="#" onclick="openModal('register');return false" class="pill pill-primary pill-lg" data-t="hero-cta1">Начать бесплатно <iconify-icon icon="solar:alt-arrow-right-linear"></iconify-icon></a>
+        <a href="#how" class="pill pill-ghost pill-lg" data-t="hero-cta2">Как это работает</a>
       </div>
-      <h1 class="text-5xl lg:text-7xl font-extrabold leading-[1.05] mb-6"><span data-t="hero-h1a">Торгуй умнее.</span><br><span class="bg-clip-text text-transparent" style="background:linear-gradient(135deg,#a78bfa,#3b82f6,#06b6d4);-webkit-background-clip:text" data-t="hero-h1b">Зарабатывай больше.</span></h1>
-      <p class="text-lg text-slate-400 max-w-lg mb-8" data-t="hero-sub">Автоматические торговые сигналы и боты для Bybit, Binance и BingX. Стратегии SMC, Герчика и скальпинг с AI-аналитикой.</p>
-      <div class="flex flex-wrap gap-4">
-        <a href="#" onclick="openModal('register');return false" class="glow-btn text-white font-bold px-8 py-4 rounded-xl text-lg transition-all" data-t="hero-cta1">Начать бесплатно</a>
-        <a href="#how" class="ghost-btn px-8 py-4 rounded-xl font-semibold transition-all" data-t="hero-cta2">Как это работает</a>
-      </div>
-      <div class="grid grid-cols-2 sm:grid-cols-4 gap-6 mt-12">
-        <div><div class="stat-num" data-target="10000">0</div><div class="text-xs text-slate-500 mt-1">Сигналов</div></div>
-        <div><div class="stat-num" data-target="87">0</div><div class="text-xs text-slate-500 mt-1">% Точность</div></div>
-        <div><div class="stat-num" data-target="3">0</div><div class="text-xs text-slate-500 mt-1">Биржи</div></div>
-        <div><div class="stat-num" data-target="2">0</div><div class="text-xs text-slate-500 mt-1">$M+ Объём</div></div>
+      <div class="grid grid-cols-2 sm:grid-cols-4 gap-6 mt-16 fade-up">
+        <div><div class="stat-num" data-target="10000">0</div><div class="stat-label" data-t="stat-s">Сигналов</div></div>
+        <div><div class="stat-num" data-target="87">0</div><div class="stat-label" data-t="stat-a">% Точность</div></div>
+        <div><div class="stat-num" data-target="3">0</div><div class="stat-label" data-t="stat-e">Биржи</div></div>
+        <div><div class="stat-num" data-target="2">0</div><div class="stat-label" data-t="stat-v">$M+ Объём</div></div>
       </div>
     </div>
-    <div class="hidden lg:block float">
-      <div class="liquid-glass rounded-2xl p-6">
-        <div class="flex items-center gap-2 mb-4"><span class="w-3 h-3 bg-red-500 rounded-full"></span><span class="w-3 h-3 bg-yellow-500 rounded-full"></span><span class="w-3 h-3 bg-green-500 rounded-full"></span><span class="ml-3 text-xs text-slate-500">CHM Terminal</span></div>
-        <div class="bg-slate-900/50 rounded-xl p-4 mb-4"><canvas id="heroChart" height="160"></canvas></div>
-        <div class="grid grid-cols-3 gap-3">
-          <div class="bg-slate-800/50 rounded-lg p-3"><div class="text-xs text-slate-500">BTC/USDT</div><div class="text-green-400 font-bold">+5.2%</div></div>
-          <div class="bg-slate-800/50 rounded-lg p-3"><div class="text-xs text-slate-500">Win Rate</div><div class="text-cyan-400 font-bold">87.3%</div></div>
-          <div class="bg-slate-800/50 rounded-lg p-3"><div class="text-xs text-slate-500">Сигнал</div><div class="text-indigo-400 font-bold">LONG</div></div>
+    <div class="hidden lg:block fade-up">
+      <div class="shell">
+        <div class="shell-inner" style="padding:22px">
+          <div class="flex items-center gap-2 mb-4">
+            <span class="term-dot r"></span><span class="term-dot y"></span><span class="term-dot g"></span>
+            <span class="t-meta ml-3">CHM Terminal</span>
+            <span class="ml-auto t-meta mono" style="color:rgba(255,255,255,.5)">BTC/USDT · 1H</span>
+          </div>
+          <div class="term-tile mb-4" style="padding:14px">
+            <canvas id="heroChart" height="180"></canvas>
+          </div>
+          <div class="grid grid-cols-3 gap-3">
+            <div class="term-tile"><div class="t-meta">BTC/USDT</div><div class="mono" style="font-size:15px;color:#86efac;margin-top:4px">+5.2%</div></div>
+            <div class="term-tile"><div class="t-meta">Win Rate</div><div class="mono" style="font-size:15px;color:#93AAEC;margin-top:4px">87.3%</div></div>
+            <div class="term-tile"><div class="t-meta">Сигнал</div><div class="mono" style="font-size:15px;color:#5C80E3;margin-top:4px">LONG</div></div>
+          </div>
         </div>
       </div>
     </div>
@@ -228,352 +379,494 @@
 </section>
 
 <!-- EXCHANGES -->
-<section class="py-16 border-t border-b" style="border-color:rgba(255,255,255,.03)">
-  <div class="max-w-7xl mx-auto px-6">
-    <p class="text-center text-xs text-slate-500 mb-8 uppercase tracking-widest" data-t="ex-title">Поддерживаемые биржи</p>
-    <div class="flex justify-center items-center gap-10 flex-wrap">
-      <div class="flex items-center gap-2 px-5 py-2.5 rounded-xl" style="background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.04)"><svg width="20" height="20" viewBox="0 0 24 24" fill="#F7A600"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg><span class="text-sm font-semibold text-slate-300">Bybit</span></div>
-      <div class="flex items-center gap-2 px-5 py-2.5 rounded-xl" style="background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.04)"><svg width="20" height="20" viewBox="0 0 24 24" fill="#F3BA2F"><path d="M12 2l3 3-5 5-3-3 5-5zm0 0l-3 3 5 5 3-3-5-5zM4 10l3 3-3 3-3-3 3-3zm16 0l3 3-3 3-3-3 3-3zM12 14l3 3-3 3-3-3 3-3z"/></svg><span class="text-sm font-semibold text-slate-300">Binance</span></div>
-      <div class="flex items-center gap-2 px-5 py-2.5 rounded-xl" style="background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.04)"><svg width="20" height="20" viewBox="0 0 24 24" fill="#2354E6"><circle cx="12" cy="12" r="10"/><path d="M7 12h10M12 7v10" stroke="#fff" stroke-width="2"/></svg><span class="text-sm font-semibold text-slate-300">BingX</span></div>
-      <div class="flex items-center gap-2 px-5 py-2.5 rounded-xl" style="background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.04)"><svg width="20" height="20" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="10" fill="#fff"/><path d="M8 8l4 4-4 4M12 8l4 4-4 4" fill="#000"/></svg><span class="text-sm font-semibold text-slate-300">OKX</span></div>
+<section class="section-narrow" style="border-top:1px solid var(--border);border-bottom:1px solid var(--border)">
+  <div class="container-x">
+    <p class="t-eyebrow text-center mb-8" data-t="ex-title">Поддерживаемые биржи</p>
+    <div class="flex justify-center items-center gap-4 md:gap-6 flex-wrap">
+      <div class="shell shell-pill"><div class="shell-inner flex items-center gap-3" style="padding:10px 22px">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="#F7A600" aria-hidden="true"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>
+        <span class="t-meta" style="color:rgba(255,255,255,.92);font-size:13px">Bybit</span>
+      </div></div>
+      <div class="shell shell-pill"><div class="shell-inner flex items-center gap-3" style="padding:10px 22px">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="#F3BA2F" aria-hidden="true"><path d="M12 2l3 3-5 5-3-3 5-5zm0 0l-3 3 5 5 3-3-5-5zM4 10l3 3-3 3-3-3 3-3zm16 0l3 3-3 3-3-3 3-3zM12 14l3 3-3 3-3-3 3-3z"/></svg>
+        <span class="t-meta" style="color:rgba(255,255,255,.92);font-size:13px">Binance</span>
+      </div></div>
+      <div class="shell shell-pill"><div class="shell-inner flex items-center gap-3" style="padding:10px 22px">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="#2354E6" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M7 12h10M12 7v10" stroke="#fff" stroke-width="2"/></svg>
+        <span class="t-meta" style="color:rgba(255,255,255,.92);font-size:13px">BingX</span>
+      </div></div>
+      <div class="shell shell-pill"><div class="shell-inner flex items-center gap-3" style="padding:10px 22px">
+        <svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="10" fill="#fff"/><path d="M8 8l4 4-4 4M12 8l4 4-4 4" fill="#000"/></svg>
+        <span class="t-meta" style="color:rgba(255,255,255,.92);font-size:13px">OKX</span>
+      </div></div>
     </div>
   </div>
 </section>
 
 <!-- FEATURES -->
-<div class="section-divider"></div>
-<section id="features" class="section-premium">
-  <div class="max-w-7xl mx-auto px-6">
-    <div class="text-center mb-20">
-      <div class="section-label fade-up"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M13 10V3L4 14h7v7l9-11h-7z"/></svg> Features</div>
-      <h2 class="section-title fade-up" data-t="feat-title">Всё для прибыльной торговли</h2>
-      <p class="section-subtitle fade-up" data-t="feat-sub">Полный набор инструментов — от сигналов до автоматического исполнения сделок</p>
+<div class="rule"></div>
+<section id="features" class="section">
+  <div class="container-x">
+    <div class="text-center mb-16" style="max-width:720px;margin:0 auto 64px">
+      <div class="eyebrow-badge fade-up" style="margin-bottom:22px">
+        <iconify-icon icon="solar:layers-linear" style="color:rgba(255,255,255,.72);font-size:14px"></iconify-icon>
+        <span class="t-meta" style="color:rgba(255,255,255,.72);letter-spacing:.18em;text-transform:uppercase;font-size:11px">Features</span>
+      </div>
+      <h2 class="t-h2 fade-up" data-t="feat-title">Всё для <em>прибыльной</em> торговли</h2>
+      <p class="t-body-lg fade-up" style="margin-top:18px" data-t="feat-sub">Полный набор инструментов — от сигналов до автоматического исполнения сделок</p>
     </div>
     <div class="bento">
-      <div class="liquid-glass rounded-2xl p-6 card-hover fade-up">
-        <div class="w-12 h-12 rounded-xl bg-indigo-500/10 flex items-center justify-center mb-4"><svg class="w-6 h-6 text-indigo-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"/></svg></div>
-        <h3 class="text-lg font-bold mb-2" data-t="f1t">AI Сканер Сигналов</h3>
-        <p class="text-sm text-slate-400" data-t="f1d">3 стратегии: SMC, Герчик, Скальпинг. Анализ рынка в реальном времени с AI-фильтрацией.</p>
-      </div>
-      <div class="liquid-glass rounded-2xl p-6 card-hover fade-up">
-        <div class="w-12 h-12 rounded-xl bg-cyan-500/10 flex items-center justify-center mb-4"><svg class="w-6 h-6 text-cyan-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M13 10V3L4 14h7v7l9-11h-7z"/></svg></div>
-        <h3 class="text-lg font-bold mb-2" data-t="f2t">Авто-Торговля</h3>
-        <p class="text-sm text-slate-400" data-t="f2d">Автоматическое исполнение сделок с контролем рисков, trailing stops и partial TP.</p>
-      </div>
-      <div class="liquid-glass rounded-2xl p-6 card-hover fade-up">
-        <div class="w-12 h-12 rounded-xl bg-green-500/10 flex items-center justify-center mb-4"><svg class="w-6 h-6 text-green-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg></div>
-        <h3 class="text-lg font-bold mb-2" data-t="f3t">Риск-Менеджмент</h3>
-        <p class="text-sm text-slate-400" data-t="f3d">Circuit breaker, trailing stops, контроль просадки, максимальный дневной лимит потерь.</p>
-      </div>
-      <div class="liquid-glass rounded-2xl p-6 card-hover fade-up">
-        <div class="w-12 h-12 rounded-xl bg-purple-500/10 flex items-center justify-center mb-4"><svg class="w-6 h-6 text-purple-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/></svg></div>
-        <h3 class="text-lg font-bold mb-2" data-t="f4t">Бэктестинг</h3>
-        <p class="text-sm text-slate-400" data-t="f4d">Тестируй стратегии на исторических данных. Sharpe Ratio, Max Drawdown, Profit Factor.</p>
-      </div>
-      <div class="liquid-glass rounded-2xl p-6 card-hover fade-up">
-        <div class="w-12 h-12 rounded-xl bg-orange-500/10 flex items-center justify-center mb-4"><svg class="w-6 h-6 text-orange-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg></div>
-        <h3 class="text-lg font-bold mb-2" data-t="f5t">Polymarket</h3>
-        <p class="text-sm text-slate-400" data-t="f5d">Предиктивные рынки с AI-аналитикой. Кастодиальный кошелёк Polygon.</p>
-      </div>
-      <div class="liquid-glass rounded-2xl p-6 card-hover fade-up">
-        <div class="w-12 h-12 rounded-xl bg-pink-500/10 flex items-center justify-center mb-4"><svg class="w-6 h-6 text-pink-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"/></svg></div>
-        <h3 class="text-lg font-bold mb-2" data-t="f6t">Мульти-Биржа</h3>
-        <p class="text-sm text-slate-400" data-t="f6d">Bybit, Binance, BingX — торгуй на всех площадках из одного интерфейса.</p>
-      </div>
+      <div class="feature-card shell fade-up"><div class="shell-inner">
+        <div class="chip" style="background:linear-gradient(180deg,rgba(29,78,216,.3),rgba(29,78,216,.08))"><iconify-icon icon="solar:bolt-linear" style="color:#93AAEC"></iconify-icon></div>
+        <h3 class="t-h3" data-t="f1t">AI Сканер Сигналов</h3>
+        <p class="t-body" data-t="f1d">3 стратегии: SMC, Герчик, Скальпинг. Анализ рынка в реальном времени с AI-фильтрацией.</p>
+      </div></div>
+      <div class="feature-card shell fade-up"><div class="shell-inner">
+        <div class="chip"><iconify-icon icon="solar:rocket-linear"></iconify-icon></div>
+        <h3 class="t-h3" data-t="f2t">Авто-Торговля</h3>
+        <p class="t-body" data-t="f2d">Автоматическое исполнение сделок с контролем рисков, trailing stops и partial TP.</p>
+      </div></div>
+      <div class="feature-card shell fade-up"><div class="shell-inner">
+        <div class="chip" style="background:linear-gradient(180deg,rgba(43,89,54,.4),rgba(43,89,54,.08))"><iconify-icon icon="solar:shield-check-linear" style="color:#86efac"></iconify-icon></div>
+        <h3 class="t-h3" data-t="f3t">Риск-Менеджмент</h3>
+        <p class="t-body" data-t="f3d">Circuit breaker, trailing stops, контроль просадки, максимальный дневной лимит потерь.</p>
+      </div></div>
+      <div class="feature-card shell fade-up"><div class="shell-inner">
+        <div class="chip"><iconify-icon icon="solar:chart-square-linear"></iconify-icon></div>
+        <h3 class="t-h3" data-t="f4t">Бэктестинг</h3>
+        <p class="t-body" data-t="f4d">Тестируй стратегии на исторических данных. Sharpe Ratio, Max Drawdown, Profit Factor.</p>
+      </div></div>
+      <div class="feature-card shell fade-up"><div class="shell-inner">
+        <div class="chip" style="background:linear-gradient(180deg,rgba(82,37,37,.5),rgba(82,37,37,.1))"><iconify-icon icon="solar:global-linear" style="color:#fca5a5"></iconify-icon></div>
+        <h3 class="t-h3" data-t="f5t">Polymarket</h3>
+        <p class="t-body" data-t="f5d">Предиктивные рынки с AI-аналитикой. Кастодиальный кошелёк Polygon.</p>
+      </div></div>
+      <div class="feature-card shell fade-up"><div class="shell-inner">
+        <div class="chip"><iconify-icon icon="solar:widget-2-linear"></iconify-icon></div>
+        <h3 class="t-h3" data-t="f6t">Мульти-Биржа</h3>
+        <p class="t-body" data-t="f6d">Bybit, Binance, BingX, OKX — торгуй на всех площадках из одного интерфейса.</p>
+      </div></div>
     </div>
   </div>
 </section>
 
 <!-- HOW IT WORKS -->
-<div class="section-divider"></div>
-<section id="how" class="section-premium">
-  <div class="max-w-7xl mx-auto px-6">
-    <div class="text-center mb-20">
-      <div class="section-label fade-up"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg> How It Works</div>
-      <h2 class="section-title fade-up" data-t="how-title">Как это работает</h2>
-      <p class="section-subtitle fade-up" data-t="how-sub">Три простых шага до автоматической торговли</p>
+<div class="rule"></div>
+<section id="how" class="section">
+  <div class="container-x">
+    <div class="text-center mb-20" style="max-width:720px;margin:0 auto 80px">
+      <div class="eyebrow-badge fade-up" style="margin-bottom:22px">
+        <iconify-icon icon="solar:stars-line-linear" style="color:rgba(255,255,255,.72);font-size:14px"></iconify-icon>
+        <span class="t-meta" style="color:rgba(255,255,255,.72);letter-spacing:.18em;text-transform:uppercase;font-size:11px">How It Works</span>
+      </div>
+      <h2 class="t-h2 fade-up" data-t="how-title">Как это работает</h2>
+      <p class="t-body-lg fade-up" style="margin-top:18px" data-t="how-sub">Три простых шага до автоматической торговли</p>
     </div>
-    <div class="relative grid md:grid-cols-3 gap-10">
-      <div class="hidden md:block step-line"></div>
+    <div class="steps-grid">
+      <div class="step-line"></div>
       <div class="text-center relative z-10 fade-up">
-        <div class="step-num mx-auto mb-8 bg-indigo-500/10 border border-indigo-500/20 text-indigo-400">1</div>
-        <h3 class="text-xl font-bold mb-3" data-t="h1t">Подключите биржу</h3>
-        <p class="text-sm text-slate-400 leading-relaxed" data-t="h1d">Привяжите API ключи вашей биржи. Это занимает 2 минуты.</p>
+        <div class="step-num">1</div>
+        <h3 class="t-h3 mb-3" data-t="h1t">Подключите биржу</h3>
+        <p class="t-body" style="max-width:280px;margin:0 auto" data-t="h1d">Привяжите API ключи вашей биржи. Это занимает 2 минуты.</p>
       </div>
-      <div class="text-center relative z-10 fade-up" style="transition-delay:.15s">
-        <div class="step-num mx-auto mb-8 bg-cyan-500/10 border border-cyan-500/20 text-cyan-400">2</div>
-        <h3 class="text-xl font-bold mb-3" data-t="h2t">Выберите стратегию</h3>
-        <p class="text-sm text-slate-400 leading-relaxed" data-t="h2d">SMC, Герчик или Скальпинг — выберите под свой стиль торговли.</p>
+      <div class="text-center relative z-10 fade-up">
+        <div class="step-num">2</div>
+        <h3 class="t-h3 mb-3" data-t="h2t">Выберите стратегию</h3>
+        <p class="t-body" style="max-width:280px;margin:0 auto" data-t="h2d">SMC, Герчик или Скальпинг — выберите под свой стиль торговли.</p>
       </div>
-      <div class="text-center relative z-10 fade-up" style="transition-delay:.3s">
-        <div class="step-num mx-auto mb-8 bg-emerald-500/10 border border-emerald-500/20 text-emerald-400">3</div>
-        <h3 class="text-xl font-bold mb-3" data-t="h3t">Получайте прибыль</h3>
-        <p class="text-sm text-slate-400 leading-relaxed" data-t="h3d">Бот торгует 24/7. Вы получаете сигналы и следите за результатами.</p>
+      <div class="text-center relative z-10 fade-up">
+        <div class="step-num">3</div>
+        <h3 class="t-h3 mb-3" data-t="h3t">Получайте прибыль</h3>
+        <p class="t-body" style="max-width:280px;margin:0 auto" data-t="h3d">Бот торгует 24/7. Вы получаете сигналы и следите за результатами.</p>
       </div>
     </div>
   </div>
 </section>
 
 <!-- PRICING -->
-<div class="section-divider"></div>
-<section id="pricing" class="section-premium">
-  <div class="max-w-7xl mx-auto px-6">
-    <div class="text-center mb-20">
-      <div class="section-label fade-up"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 00-2-2h-4a2 2 0 00-2 2v2"/></svg> Pricing</div>
-      <h2 class="section-title fade-up" data-t="pr-title">Тарифные планы</h2>
-      <p class="section-subtitle fade-up" data-t="pr-sub">Выберите план под ваши задачи</p>
+<div class="rule"></div>
+<section id="pricing" class="section">
+  <div class="container-x">
+    <div class="text-center mb-16" style="max-width:720px;margin:0 auto 64px">
+      <div class="eyebrow-badge fade-up" style="margin-bottom:22px">
+        <iconify-icon icon="solar:wallet-linear" style="color:rgba(255,255,255,.72);font-size:14px"></iconify-icon>
+        <span class="t-meta" style="color:rgba(255,255,255,.72);letter-spacing:.18em;text-transform:uppercase;font-size:11px">Pricing</span>
+      </div>
+      <h2 class="t-h2 fade-up" data-t="pr-title">Тарифные <em>планы</em></h2>
+      <p class="t-body-lg fade-up" style="margin-top:18px" data-t="pr-sub">Выберите план под ваши задачи</p>
     </div>
-    <div class="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
+    <div class="price-grid">
       <!-- Free -->
-      <div class="liquid-glass rounded-2xl p-6 card-hover fade-up flex flex-col">
-        <h3 class="text-lg font-bold mb-1">Free</h3>
-        <div class="text-3xl font-extrabold mb-4">$0<span class="text-sm font-normal text-slate-500">/мес</span></div>
-        <ul class="text-sm text-slate-400 space-y-2 mb-8 flex-1">
-          <li class="flex items-center gap-2"><span class="text-green-400">&#10003;</span> 3 сигнала/день</li>
-          <li class="flex items-center gap-2"><span class="text-green-400">&#10003;</span> 1 активный бот</li>
-          <li class="flex items-center gap-2"><span class="text-green-400">&#10003;</span> Скальпинг стратегия</li>
-          <li class="flex items-center gap-2"><span class="text-slate-600">&#10005;</span> Авто-торговля</li>
-          <li class="flex items-center gap-2"><span class="text-slate-600">&#10005;</span> Бэктестинг</li>
-        </ul>
-        <a href="#" onclick="openModal('register');return false" class="block text-center ghost-btn py-3 rounded-xl font-semibold transition-all">Начать</a>
+      <div class="price-card fade-up">
+        <div class="price-card-body">
+          <div class="price-head">
+            <div class="price-name">Free</div>
+            <div class="flex items-baseline gap-2"><span class="price-amt">$0</span><span class="t-meta">/мес</span></div>
+          </div>
+          <ul class="space-y-3" style="flex:1">
+            <li class="flex items-center gap-3 t-body" style="color:rgba(255,255,255,.82);font-size:13px"><span class="tick"><iconify-icon icon="solar:check-circle-bold" style="font-size:14px"></iconify-icon></span> 3 сигнала/день</li>
+            <li class="flex items-center gap-3 t-body" style="color:rgba(255,255,255,.82);font-size:13px"><span class="tick"><iconify-icon icon="solar:check-circle-bold" style="font-size:14px"></iconify-icon></span> 1 активный бот</li>
+            <li class="flex items-center gap-3 t-body" style="color:rgba(255,255,255,.82);font-size:13px"><span class="tick"><iconify-icon icon="solar:check-circle-bold" style="font-size:14px"></iconify-icon></span> Скальпинг стратегия</li>
+            <li class="flex items-center gap-3 t-body"><span class="tick off"><iconify-icon icon="solar:close-circle-linear" style="font-size:14px"></iconify-icon></span> Авто-торговля</li>
+            <li class="flex items-center gap-3 t-body"><span class="tick off"><iconify-icon icon="solar:close-circle-linear" style="font-size:14px"></iconify-icon></span> Бэктестинг</li>
+          </ul>
+          <a href="#" onclick="pickPlan('free');return false" class="pill pill-ghost pill-md w-full" style="justify-content:center">Начать</a>
+        </div>
       </div>
       <!-- Starter -->
-      <div class="liquid-glass rounded-2xl p-6 card-hover fade-up flex flex-col">
-        <h3 class="text-lg font-bold mb-1">Starter</h3>
-        <div class="text-3xl font-extrabold mb-4">$29<span class="text-sm font-normal text-slate-500">/мес</span></div>
-        <ul class="text-sm text-slate-400 space-y-2 mb-8 flex-1">
-          <li class="flex items-center gap-2"><span class="text-green-400">&#10003;</span> Безлимитные сигналы</li>
-          <li class="flex items-center gap-2"><span class="text-green-400">&#10003;</span> 3 активных бота</li>
-          <li class="flex items-center gap-2"><span class="text-green-400">&#10003;</span> Scalping + SMC</li>
-          <li class="flex items-center gap-2"><span class="text-slate-600">&#10005;</span> Авто-торговля</li>
-          <li class="flex items-center gap-2"><span class="text-slate-600">&#10005;</span> Бэктестинг</li>
-        </ul>
-        <a href="#" onclick="openModal('register');return false" class="block text-center ghost-btn py-3 rounded-xl font-semibold transition-all">Выбрать</a>
+      <div class="price-card fade-up">
+        <div class="price-card-body">
+          <div class="price-head">
+            <div class="price-name">Starter</div>
+            <div class="flex items-baseline gap-2"><span class="price-amt">$29</span><span class="t-meta">/мес</span></div>
+          </div>
+          <ul class="space-y-3" style="flex:1">
+            <li class="flex items-center gap-3 t-body" style="color:rgba(255,255,255,.82);font-size:13px"><span class="tick"><iconify-icon icon="solar:check-circle-bold" style="font-size:14px"></iconify-icon></span> Безлимитные сигналы</li>
+            <li class="flex items-center gap-3 t-body" style="color:rgba(255,255,255,.82);font-size:13px"><span class="tick"><iconify-icon icon="solar:check-circle-bold" style="font-size:14px"></iconify-icon></span> 3 активных бота</li>
+            <li class="flex items-center gap-3 t-body" style="color:rgba(255,255,255,.82);font-size:13px"><span class="tick"><iconify-icon icon="solar:check-circle-bold" style="font-size:14px"></iconify-icon></span> Scalping + SMC</li>
+            <li class="flex items-center gap-3 t-body"><span class="tick off"><iconify-icon icon="solar:close-circle-linear" style="font-size:14px"></iconify-icon></span> Авто-торговля</li>
+            <li class="flex items-center gap-3 t-body"><span class="tick off"><iconify-icon icon="solar:close-circle-linear" style="font-size:14px"></iconify-icon></span> Бэктестинг</li>
+          </ul>
+          <a href="#" onclick="pickPlan('starter');return false" class="pill pill-ghost pill-md w-full" style="justify-content:center">Выбрать</a>
+        </div>
       </div>
-      <!-- Pro -->
-      <div class="liquid-glass rounded-2xl p-6 card-hover fade-up flex flex-col price-popular relative">
-        <div class="popular-badge absolute -top-4 left-1/2 -translate-x-1/2 text-white text-xs font-bold px-5 py-1.5 rounded-full whitespace-nowrap z-10" style="background:linear-gradient(135deg,#7c3aed,#2563eb);box-shadow:0 4px 16px rgba(124,58,237,.5)" data-t="pr-pop">Популярный</div>
-        <h3 class="text-lg font-bold mb-1">Pro</h3>
-        <div class="text-3xl font-extrabold mb-4">$79<span class="text-sm font-normal text-slate-500">/мес</span></div>
-        <ul class="text-sm text-slate-400 space-y-2 mb-8 flex-1">
-          <li class="flex items-center gap-2"><span class="text-green-400">&#10003;</span> Безлимитные сигналы</li>
-          <li class="flex items-center gap-2"><span class="text-green-400">&#10003;</span> 10 активных ботов</li>
-          <li class="flex items-center gap-2"><span class="text-green-400">&#10003;</span> Все 3 стратегии</li>
-          <li class="flex items-center gap-2"><span class="text-green-400">&#10003;</span> Авто-торговля</li>
-          <li class="flex items-center gap-2"><span class="text-green-400">&#10003;</span> Бэктестинг</li>
-        </ul>
-        <a href="#" onclick="openModal('register');return false" class="block text-center glow-btn text-white py-3 rounded-xl font-semibold transition-all">Выбрать</a>
+      <!-- Pro (popular) -->
+      <div class="price-card price-popular fade-up">
+        <div class="popular-badge" data-t="pr-pop">Популярный</div>
+        <div class="price-card-body">
+          <div class="price-head">
+            <div class="price-name">Pro</div>
+            <div class="flex items-baseline gap-2"><span class="price-amt">$79</span><span class="t-meta">/мес</span></div>
+          </div>
+          <ul class="space-y-3" style="flex:1">
+            <li class="flex items-center gap-3 t-body" style="color:rgba(255,255,255,.82);font-size:13px"><span class="tick"><iconify-icon icon="solar:check-circle-bold" style="font-size:14px"></iconify-icon></span> Безлимитные сигналы</li>
+            <li class="flex items-center gap-3 t-body" style="color:rgba(255,255,255,.82);font-size:13px"><span class="tick"><iconify-icon icon="solar:check-circle-bold" style="font-size:14px"></iconify-icon></span> 10 активных ботов</li>
+            <li class="flex items-center gap-3 t-body" style="color:rgba(255,255,255,.82);font-size:13px"><span class="tick"><iconify-icon icon="solar:check-circle-bold" style="font-size:14px"></iconify-icon></span> Все 3 стратегии</li>
+            <li class="flex items-center gap-3 t-body" style="color:rgba(255,255,255,.82);font-size:13px"><span class="tick"><iconify-icon icon="solar:check-circle-bold" style="font-size:14px"></iconify-icon></span> Авто-торговля</li>
+            <li class="flex items-center gap-3 t-body" style="color:rgba(255,255,255,.82);font-size:13px"><span class="tick"><iconify-icon icon="solar:check-circle-bold" style="font-size:14px"></iconify-icon></span> Бэктестинг</li>
+          </ul>
+          <a href="#" onclick="pickPlan('pro');return false" class="pill pill-primary pill-md w-full" style="justify-content:center">Выбрать</a>
+        </div>
       </div>
       <!-- Elite -->
-      <div class="liquid-glass rounded-2xl p-6 card-hover fade-up flex flex-col">
-        <h3 class="text-lg font-bold mb-1">Elite</h3>
-        <div class="text-3xl font-extrabold mb-4">$149<span class="text-sm font-normal text-slate-500">/мес</span></div>
-        <ul class="text-sm text-slate-400 space-y-2 mb-8 flex-1">
-          <li class="flex items-center gap-2"><span class="text-green-400">&#10003;</span> Всё из Pro</li>
-          <li class="flex items-center gap-2"><span class="text-green-400">&#10003;</span> Безлимитные боты</li>
-          <li class="flex items-center gap-2"><span class="text-green-400">&#10003;</span> Приоритетные сигналы</li>
-          <li class="flex items-center gap-2"><span class="text-green-400">&#10003;</span> API доступ</li>
-          <li class="flex items-center gap-2"><span class="text-green-400">&#10003;</span> Личный менеджер</li>
-        </ul>
-        <a href="#" onclick="openModal('register');return false" class="block text-center ghost-btn py-3 rounded-xl font-semibold transition-all">Выбрать</a>
+      <div class="price-card fade-up">
+        <div class="price-card-body">
+          <div class="price-head">
+            <div class="price-name">Elite</div>
+            <div class="flex items-baseline gap-2"><span class="price-amt">$149</span><span class="t-meta">/мес</span></div>
+          </div>
+          <ul class="space-y-3" style="flex:1">
+            <li class="flex items-center gap-3 t-body" style="color:rgba(255,255,255,.82);font-size:13px"><span class="tick"><iconify-icon icon="solar:check-circle-bold" style="font-size:14px"></iconify-icon></span> Всё из Pro</li>
+            <li class="flex items-center gap-3 t-body" style="color:rgba(255,255,255,.82);font-size:13px"><span class="tick"><iconify-icon icon="solar:check-circle-bold" style="font-size:14px"></iconify-icon></span> Безлимитные боты</li>
+            <li class="flex items-center gap-3 t-body" style="color:rgba(255,255,255,.82);font-size:13px"><span class="tick"><iconify-icon icon="solar:check-circle-bold" style="font-size:14px"></iconify-icon></span> Приоритетные сигналы</li>
+            <li class="flex items-center gap-3 t-body" style="color:rgba(255,255,255,.82);font-size:13px"><span class="tick"><iconify-icon icon="solar:check-circle-bold" style="font-size:14px"></iconify-icon></span> API доступ</li>
+            <li class="flex items-center gap-3 t-body" style="color:rgba(255,255,255,.82);font-size:13px"><span class="tick"><iconify-icon icon="solar:check-circle-bold" style="font-size:14px"></iconify-icon></span> Личный менеджер</li>
+          </ul>
+          <a href="#" onclick="pickPlan('elite');return false" class="pill pill-ghost pill-md w-full" style="justify-content:center">Выбрать</a>
+        </div>
       </div>
+    </div>
+  </div>
+</section>
+
+<!-- COMMUNITY / PROMO -->
+<div class="rule"></div>
+<section id="community" class="section">
+  <div class="container-x" style="max-width:820px;text-align:center">
+    <div class="t-eyebrow fade-up" style="margin-bottom:14px" data-t="pm-eyebrow">COMMUNITY</div>
+    <h2 class="t-h2 fade-up" data-t="pm-title">Алгоритм вместо <em>интуиции</em></h2>
+    <p class="t-body-lg fade-up" style="margin:18px auto 40px;max-width:520px" data-t="pm-sub">Присоединяйся к CryptoХимия — ежедневная аналитика, сигналы и кейсы в Telegram</p>
+    <div class="promo-grid fade-up" id="promoGrid"></div>
+    <div class="fade-up" style="margin-top:32px">
+      <a href="https://t.me/chm_crypto" target="_blank" rel="noopener" class="pill pill-primary pill-md">
+        <iconify-icon icon="solar:chat-line-linear"></iconify-icon> t.me/chm_crypto
+      </a>
     </div>
   </div>
 </section>
 
 <!-- FAQ -->
-<div class="section-divider"></div>
-<section id="faq" class="section-premium">
-  <div class="max-w-3xl mx-auto px-6">
+<div class="rule"></div>
+<section id="faq" class="section">
+  <div class="container-x" style="max-width:820px">
     <div class="text-center mb-16">
-      <div class="section-label fade-up"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 015.83 1c0 2-3 3-3 3M12 17h.01"/></svg> FAQ</div>
-      <h2 class="section-title fade-up" data-t="faq-title">Частые вопросы</h2>
+      <div class="eyebrow-badge fade-up" style="margin-bottom:22px">
+        <iconify-icon icon="solar:chat-line-linear" style="color:rgba(255,255,255,.72);font-size:14px"></iconify-icon>
+        <span class="t-meta" style="color:rgba(255,255,255,.72);letter-spacing:.18em;text-transform:uppercase;font-size:11px">FAQ</span>
+      </div>
+      <h2 class="t-h2 fade-up" data-t="faq-title">Частые <em>вопросы</em></h2>
     </div>
-    <div class="space-y-4" id="faqList">
-      <div class="faq-item glass rounded-xl cursor-pointer" onclick="this.classList.toggle('open')">
-        <div class="flex items-center justify-between p-5"><span class="font-semibold">Безопасно ли подключать биржу?</span><svg class="faq-chevron w-5 h-5 text-slate-400 transition-transform" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M19 9l-7 7-7-7"/></svg></div>
-        <div class="faq-answer px-5 pb-5 text-sm text-slate-400">Да. Мы используем только API ключи с правами на торговлю. Вывод средств через API невозможен. Ключи хранятся в зашифрованном виде (AES-256).</div>
-      </div>
-      <div class="faq-item glass rounded-xl cursor-pointer" onclick="this.classList.toggle('open')">
-        <div class="flex items-center justify-between p-5"><span class="font-semibold">Какие биржи поддерживаются?</span><svg class="faq-chevron w-5 h-5 text-slate-400 transition-transform" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M19 9l-7 7-7-7"/></svg></div>
-        <div class="faq-answer px-5 pb-5 text-sm text-slate-400">Bybit, Binance, BingX и OKX. Мы постоянно добавляем новые биржи.</div>
-      </div>
-      <div class="faq-item glass rounded-xl cursor-pointer" onclick="this.classList.toggle('open')">
-        <div class="flex items-center justify-between p-5"><span class="font-semibold">Какие стратегии доступны?</span><svg class="faq-chevron w-5 h-5 text-slate-400 transition-transform" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M19 9l-7 7-7-7"/></svg></div>
-        <div class="faq-answer px-5 pb-5 text-sm text-slate-400">SMC (Smart Money Concepts) — торговля по институциональным паттернам. Герчик — уровневая стратегия. Скальпинг — быстрые сделки на малых таймфреймах.</div>
-      </div>
-      <div class="faq-item glass rounded-xl cursor-pointer" onclick="this.classList.toggle('open')">
-        <div class="flex items-center justify-between p-5"><span class="font-semibold">Можно ли потерять деньги?</span><svg class="faq-chevron w-5 h-5 text-slate-400 transition-transform" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M19 9l-7 7-7-7"/></svg></div>
-        <div class="faq-answer px-5 pb-5 text-sm text-slate-400">Торговля криптовалютами сопряжена с рисками. Мы используем строгий риск-менеджмент (стоп-лосс, circuit breaker, контроль просадки), но гарантировать прибыль невозможно.</div>
-      </div>
-      <div class="faq-item glass rounded-xl cursor-pointer" onclick="this.classList.toggle('open')">
-        <div class="flex items-center justify-between p-5"><span class="font-semibold">Как работает бэктестинг?</span><svg class="faq-chevron w-5 h-5 text-slate-400 transition-transform" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M19 9l-7 7-7-7"/></svg></div>
-        <div class="faq-answer px-5 pb-5 text-sm text-slate-400">Вы выбираете стратегию, пару, таймфрейм и период. Система тестирует стратегию на исторических данных и показывает метрики: Win Rate, Sharpe Ratio, Max Drawdown и другие.</div>
-      </div>
-      <div class="faq-item glass rounded-xl cursor-pointer" onclick="this.classList.toggle('open')">
-        <div class="flex items-center justify-between p-5"><span class="font-semibold">Есть ли бесплатный тариф?</span><svg class="faq-chevron w-5 h-5 text-slate-400 transition-transform" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M19 9l-7 7-7-7"/></svg></div>
-        <div class="faq-answer px-5 pb-5 text-sm text-slate-400">Да! Бесплатный план включает 3 сигнала в день и 1 активного бота. Этого достаточно чтобы оценить платформу.</div>
-      </div>
+    <div class="space-y-3" id="faqList">
+      <div class="faq-item shell fade-up" onclick="this.classList.toggle('open')"><div class="shell-inner">
+        <div class="faq-head"><span class="t-h3" style="font-size:14px;font-weight:600" data-t="fq1">Безопасно ли подключать биржу?</span><iconify-icon icon="solar:alt-arrow-down-linear" class="faq-chevron" style="font-size:18px"></iconify-icon></div>
+        <div class="faq-ans"><div class="faq-ans-inner t-body" data-t="fa1">Да. Мы используем только API ключи с правами на торговлю. Вывод средств через API невозможен. Ключи хранятся в зашифрованном виде (AES-256).</div></div>
+      </div></div>
+      <div class="faq-item shell fade-up" onclick="this.classList.toggle('open')"><div class="shell-inner">
+        <div class="faq-head"><span class="t-h3" style="font-size:14px;font-weight:600" data-t="fq2">Какие биржи поддерживаются?</span><iconify-icon icon="solar:alt-arrow-down-linear" class="faq-chevron" style="font-size:18px"></iconify-icon></div>
+        <div class="faq-ans"><div class="faq-ans-inner t-body" data-t="fa2">Bybit, Binance, BingX и OKX. Мы постоянно добавляем новые биржи.</div></div>
+      </div></div>
+      <div class="faq-item shell fade-up" onclick="this.classList.toggle('open')"><div class="shell-inner">
+        <div class="faq-head"><span class="t-h3" style="font-size:14px;font-weight:600" data-t="fq3">Какие стратегии доступны?</span><iconify-icon icon="solar:alt-arrow-down-linear" class="faq-chevron" style="font-size:18px"></iconify-icon></div>
+        <div class="faq-ans"><div class="faq-ans-inner t-body" data-t="fa3">SMC (Smart Money Concepts) — торговля по институциональным паттернам. Герчик — уровневая стратегия. Скальпинг — быстрые сделки на малых таймфреймах.</div></div>
+      </div></div>
+      <div class="faq-item shell fade-up" onclick="this.classList.toggle('open')"><div class="shell-inner">
+        <div class="faq-head"><span class="t-h3" style="font-size:14px;font-weight:600" data-t="fq4">Можно ли потерять деньги?</span><iconify-icon icon="solar:alt-arrow-down-linear" class="faq-chevron" style="font-size:18px"></iconify-icon></div>
+        <div class="faq-ans"><div class="faq-ans-inner t-body" data-t="fa4">Торговля криптовалютами сопряжена с рисками. Мы используем строгий риск-менеджмент (стоп-лосс, circuit breaker, контроль просадки), но гарантировать прибыль невозможно.</div></div>
+      </div></div>
+      <div class="faq-item shell fade-up" onclick="this.classList.toggle('open')"><div class="shell-inner">
+        <div class="faq-head"><span class="t-h3" style="font-size:14px;font-weight:600" data-t="fq5">Как работает бэктестинг?</span><iconify-icon icon="solar:alt-arrow-down-linear" class="faq-chevron" style="font-size:18px"></iconify-icon></div>
+        <div class="faq-ans"><div class="faq-ans-inner t-body" data-t="fa5">Вы выбираете стратегию, пару, таймфрейм и период. Система тестирует стратегию на исторических данных и показывает метрики: Win Rate, Sharpe Ratio, Max Drawdown и другие.</div></div>
+      </div></div>
+      <div class="faq-item shell fade-up" onclick="this.classList.toggle('open')"><div class="shell-inner">
+        <div class="faq-head"><span class="t-h3" style="font-size:14px;font-weight:600" data-t="fq6">Есть ли бесплатный тариф?</span><iconify-icon icon="solar:alt-arrow-down-linear" class="faq-chevron" style="font-size:18px"></iconify-icon></div>
+        <div class="faq-ans"><div class="faq-ans-inner t-body" data-t="fa6">Да! Бесплатный план включает 3 сигнала в день и 1 активного бота. Этого достаточно чтобы оценить платформу.</div></div>
+      </div></div>
     </div>
   </div>
 </section>
 
 <!-- CTA -->
-<section class="py-24">
-  <div class="max-w-4xl mx-auto px-6 text-center">
-    <div class="liquid-glass rounded-3xl p-12 relative overflow-hidden">
-      <div class="cta-glow" style="position:absolute;width:300px;height:300px;top:-100px;right:-100px;background:rgba(124,58,237,.15);border-radius:50%;filter:blur(80px);pointer-events:none"></div>
-      <h2 class="text-4xl font-extrabold mb-4 relative z-10">Готов начать?</h2>
-      <p class="text-slate-400 mb-8 relative z-10">Присоединяйся к тысячам трейдеров, которые уже используют CHM Finance</p>
-      <a href="#" onclick="openModal('register');return false" class="glow-btn text-white font-bold px-10 py-4 rounded-xl text-lg transition-all relative z-10 inline-block">Создать аккаунт бесплатно</a>
+<section class="section" style="padding-top:40px">
+  <div class="container-x" style="max-width:920px">
+    <div class="shell fade-up">
+      <div class="shell-inner" style="padding:clamp(56px,8vw,88px) 32px;text-align:center;position:relative;overflow:hidden">
+        <div aria-hidden="true" style="position:absolute;top:-30%;right:-15%;width:420px;height:420px;background:radial-gradient(circle at center,rgba(29,78,216,.22),transparent 60%);filter:blur(60px);pointer-events:none"></div>
+        <div aria-hidden="true" style="position:absolute;bottom:-30%;left:-15%;width:360px;height:360px;background:radial-gradient(circle at center,rgba(43,89,54,.16),transparent 60%);filter:blur(60px);pointer-events:none"></div>
+        <div class="t-eyebrow" style="margin-bottom:16px;position:relative">CHM FINANCE</div>
+        <h2 class="t-h2" style="position:relative" data-t="cta-title">Готов <em>начать</em>?</h2>
+        <p class="t-body-lg" style="margin:20px auto 32px;max-width:520px;position:relative" data-t="cta-sub">Присоединяйся к тысячам трейдеров, которые уже используют CHM Finance</p>
+        <a href="#" onclick="openModal('register');return false" class="pill pill-primary pill-lg" style="position:relative" data-t="cta-btn">Создать аккаунт бесплатно <iconify-icon icon="solar:alt-arrow-right-linear"></iconify-icon></a>
+      </div>
     </div>
   </div>
 </section>
 
+</main>
+
 <!-- FOOTER -->
-<footer class="border-t border-slate-800/50 py-12">
-  <div class="max-w-7xl mx-auto px-6">
-    <div class="grid md:grid-cols-4 gap-8 mb-8">
+<footer>
+  <div class="container-x">
+    <div class="grid gap-10" style="grid-template-columns:1.4fr 1fr 1fr 1fr">
       <div>
-        <div class="text-2xl font-extrabold mb-3">CHM<span class="text-cyan-400">.</span></div>
-        <p class="text-sm text-slate-500">AI-powered крипто-торговая платформа</p>
+        <a href="/" class="flex items-center gap-1" style="font-family:'Inter',sans-serif;font-weight:500;font-size:22px;letter-spacing:-.02em;color:#fff">CHM<span style="color:var(--primary-400)">.</span></a>
+        <p class="t-body" style="margin-top:14px;max-width:260px" data-t="ft-tag">AI-powered крипто-торговая платформа</p>
       </div>
       <div>
-        <h4 class="font-semibold mb-3 text-sm">Продукт</h4>
-        <div class="space-y-2 text-sm text-slate-500">
-          <a href="#features" class="block hover:text-white transition">Возможности</a>
-          <a href="#pricing" class="block hover:text-white transition">Тарифы</a>
-          <a href="#how" class="block hover:text-white transition">Как работает</a>
+        <h4 class="t-eyebrow" style="margin-bottom:16px;color:rgba(255,255,255,.82)" data-t="ft-prod">Продукт</h4>
+        <div class="flex flex-col gap-2" style="font-family:'Inter',sans-serif;font-weight:500;font-size:13px">
+          <a href="#features" data-t="ft-feat">Возможности</a>
+          <a href="#pricing" data-t="ft-price">Тарифы</a>
+          <a href="#how" data-t="ft-how">Как работает</a>
         </div>
       </div>
       <div>
-        <h4 class="font-semibold mb-3 text-sm">Правовая информация</h4>
-        <div class="space-y-2 text-sm text-slate-500">
-          <a href="privacy.html" class="block hover:text-white transition">Политика конфиденциальности</a>
-          <a href="terms.html" class="block hover:text-white transition">Условия использования</a>
-          <a href="risk.html" class="block hover:text-white transition">Предупреждение о рисках</a>
+        <h4 class="t-eyebrow" style="margin-bottom:16px;color:rgba(255,255,255,.82)" data-t="ft-legal">Правовая информация</h4>
+        <div class="flex flex-col gap-2" style="font-family:'Inter',sans-serif;font-weight:500;font-size:13px">
+          <a href="privacy.html" data-t="ft-priv">Политика конфиденциальности</a>
+          <a href="terms.html" data-t="ft-terms">Условия использования</a>
+          <a href="risk.html" data-t="ft-risk">Предупреждение о рисках</a>
         </div>
       </div>
       <div>
-        <h4 class="font-semibold mb-3 text-sm">Контакты</h4>
-        <div class="space-y-2 text-sm text-slate-500">
-          <a href="#" class="block hover:text-white transition">Telegram</a>
-          <a href="#" class="block hover:text-white transition">Twitter/X</a>
-          <a href="#" class="block hover:text-white transition">Discord</a>
+        <h4 class="t-eyebrow" style="margin-bottom:16px;color:rgba(255,255,255,.82)" data-t="ft-contact">Контакты</h4>
+        <div class="flex flex-col gap-2" style="font-family:'Inter',sans-serif;font-weight:500;font-size:13px">
+          <a href="#">Telegram</a>
+          <a href="#">Twitter/X</a>
+          <a href="#">Discord</a>
         </div>
       </div>
     </div>
-    <div class="border-t border-slate-800/50 pt-8 text-center text-xs text-slate-600">&copy; 2024-2026 CHM Finance. All rights reserved.</div>
+    <div style="margin-top:48px;padding-top:24px;border-top:1px solid var(--border);text-align:center;font-family:'Inter',sans-serif;font-weight:500;font-size:12px;color:var(--text-mute)">&copy; 2024-2026 CHM Finance. All rights reserved.</div>
   </div>
 </footer>
 
 <!-- LOGIN MODAL -->
-<div class="modal-bg" id="loginModal">
-  <div class="liquid-glass rounded-2xl p-8 w-full max-w-md mx-4 relative">
-    <button onclick="closeModals()" class="absolute top-4 right-4 text-slate-400 hover:text-white text-xl">&times;</button>
-    <h2 class="text-2xl font-bold mb-6">Войти</h2>
-    <form id="loginForm" class="space-y-4">
-      <div><label class="text-sm text-slate-400 block mb-1">Email</label><input type="email" name="email" required class="w-full bg-slate-800/50 border border-slate-700 rounded-xl px-4 py-3 text-white focus:border-indigo-500 outline-none"/></div>
-      <div><label class="text-sm text-slate-400 block mb-1">Пароль</label><input type="password" name="password" required class="w-full bg-slate-800/50 border border-slate-700 rounded-xl px-4 py-3 text-white focus:border-indigo-500 outline-none"/></div>
-      <button type="submit" class="glow-btn w-full text-white font-bold py-3 rounded-xl transition-all">Войти</button>
-    </form>
-    <p class="text-sm text-slate-500 mt-4 text-center">Нет аккаунта? <a href="#" onclick="openModal('register');return false" class="text-indigo-400 hover:underline">Регистрация</a></p>
+<div class="modal-bg" id="loginModal" role="dialog" aria-modal="true">
+  <div class="shell" style="width:100%;max-width:440px">
+    <div class="shell-inner" style="padding:32px;position:relative">
+      <button onclick="closeModals()" aria-label="Close" style="position:absolute;top:16px;right:16px;width:36px;height:36px;border-radius:50%;background:rgba(255,255,255,.04);border:1px solid var(--border);color:rgba(255,255,255,.7);display:flex;align-items:center;justify-content:center;cursor:pointer">
+        <iconify-icon icon="solar:close-circle-linear" style="font-size:18px"></iconify-icon>
+      </button>
+      <h2 class="t-h2" style="font-size:28px;margin-bottom:6px" data-t="ml-title">Войти</h2>
+      <p class="t-body" style="margin-bottom:24px">chm.finance</p>
+      <form id="loginForm" class="flex flex-col gap-4">
+        <div>
+          <label class="t-eyebrow" style="display:block;margin-bottom:8px;color:rgba(255,255,255,.72)" data-t="ml-email">EMAIL</label>
+          <input type="email" name="email" required class="modal-input" placeholder="you@chm.finance"/>
+        </div>
+        <div>
+          <label class="t-eyebrow" style="display:block;margin-bottom:8px;color:rgba(255,255,255,.72)" data-t="ml-pass">ПАРОЛЬ</label>
+          <input type="password" name="password" required class="modal-input" placeholder="••••••••"/>
+        </div>
+        <button type="submit" class="pill pill-primary pill-md" style="margin-top:8px;justify-content:center" data-t="ml-btn">Войти</button>
+      </form>
+      <p class="t-body" style="margin-top:20px;text-align:center;font-size:13px"><span data-t="ml-no">Нет аккаунта?</span> <a href="#" onclick="openModal('register');return false" style="color:var(--primary-400)" data-t="ml-reg">Регистрация</a></p>
+    </div>
   </div>
 </div>
 
 <!-- REGISTER MODAL -->
-<div class="modal-bg" id="registerModal">
-  <div class="liquid-glass rounded-2xl p-8 w-full max-w-md mx-4 relative">
-    <button onclick="closeModals()" class="absolute top-4 right-4 text-slate-400 hover:text-white text-xl">&times;</button>
-    <h2 class="text-2xl font-bold mb-6">Регистрация</h2>
-    <form id="registerForm" class="space-y-4">
-      <div><label class="text-sm text-slate-400 block mb-1">Email</label><input type="email" name="email" required class="w-full bg-slate-800/50 border border-slate-700 rounded-xl px-4 py-3 text-white focus:border-indigo-500 outline-none"/></div>
-      <div><label class="text-sm text-slate-400 block mb-1">Пароль</label><input type="password" name="password" required minlength="6" class="w-full bg-slate-800/50 border border-slate-700 rounded-xl px-4 py-3 text-white focus:border-indigo-500 outline-none"/></div>
-      <div><label class="text-sm text-slate-400 block mb-1">Повторите пароль</label><input type="password" name="password2" required class="w-full bg-slate-800/50 border border-slate-700 rounded-xl px-4 py-3 text-white focus:border-indigo-500 outline-none"/></div>
-      <label class="flex items-center gap-2 text-xs text-slate-500"><input type="checkbox" required class="rounded"/> Я согласен с <a href="terms.html" class="text-indigo-400 hover:underline">условиями</a></label>
-      <button type="submit" class="glow-btn w-full text-white font-bold py-3 rounded-xl transition-all">Создать аккаунт</button>
-    </form>
-    <p class="text-sm text-slate-500 mt-4 text-center">Уже есть аккаунт? <a href="#" onclick="openModal('login');return false" class="text-indigo-400 hover:underline">Войти</a></p>
+<div class="modal-bg" id="registerModal" role="dialog" aria-modal="true">
+  <div class="shell" style="width:100%;max-width:440px">
+    <div class="shell-inner" style="padding:32px;position:relative">
+      <button onclick="closeModals()" aria-label="Close" style="position:absolute;top:16px;right:16px;width:36px;height:36px;border-radius:50%;background:rgba(255,255,255,.04);border:1px solid var(--border);color:rgba(255,255,255,.7);display:flex;align-items:center;justify-content:center;cursor:pointer">
+        <iconify-icon icon="solar:close-circle-linear" style="font-size:18px"></iconify-icon>
+      </button>
+      <h2 class="t-h2" style="font-size:28px;margin-bottom:6px" data-t="mr-title">Регистрация</h2>
+      <p class="t-body" style="margin-bottom:24px">chm.finance</p>
+      <form id="registerForm" class="flex flex-col gap-4">
+        <div>
+          <label class="t-eyebrow" style="display:block;margin-bottom:8px;color:rgba(255,255,255,.72)" data-t="ml-email">EMAIL</label>
+          <input type="email" name="email" required class="modal-input" placeholder="you@chm.finance"/>
+        </div>
+        <div>
+          <label class="t-eyebrow" style="display:block;margin-bottom:8px;color:rgba(255,255,255,.72)" data-t="ml-pass">ПАРОЛЬ</label>
+          <input type="password" name="password" required minlength="6" class="modal-input" placeholder="••••••••"/>
+        </div>
+        <div>
+          <label class="t-eyebrow" style="display:block;margin-bottom:8px;color:rgba(255,255,255,.72)" data-t="mr-pass2">ПОВТОРИТЕ ПАРОЛЬ</label>
+          <input type="password" name="password2" required class="modal-input" placeholder="••••••••"/>
+        </div>
+        <label class="flex items-center gap-2 t-body" style="font-size:12px"><input type="checkbox" required style="accent-color:var(--primary)"/> <span><span data-t="mr-agree">Я согласен с</span> <a href="terms.html" style="color:var(--primary-400)" data-t="mr-terms">условиями</a></span></label>
+        <button type="submit" class="pill pill-primary pill-md" style="margin-top:4px;justify-content:center" data-t="mr-btn">Создать аккаунт</button>
+      </form>
+      <p class="t-body" style="margin-top:20px;text-align:center;font-size:13px"><span data-t="mr-has">Уже есть аккаунт?</span> <a href="#" onclick="openModal('login');return false" style="color:var(--primary-400)" data-t="mr-login">Войти</a></p>
+    </div>
   </div>
 </div>
 
 <script src="app.js"></script>
 <script>
-// ── Nav scroll effect ──
-window.addEventListener('scroll',()=>{document.getElementById('navbar').classList.toggle('nav-scrolled',window.scrollY>50)});
+// ── Nav scroll ──
+const _nav=document.getElementById('navbar');
+window.addEventListener('scroll',()=>{_nav.classList.toggle('nav-scrolled',window.scrollY>50)},{passive:true});
 
 // ── Modals ──
-function openModal(t){closeModals();document.getElementById(t+'Modal').classList.add('active')}
+function openModal(t){closeModals();const m=document.getElementById(t+'Modal');if(m)m.classList.add('active')}
 function closeModals(){document.querySelectorAll('.modal-bg').forEach(m=>m.classList.remove('active'))}
-document.querySelectorAll('.modal-bg').forEach(m=>{m.addEventListener('click',e=>{if(e.target===m)closeModals()})});
+document.querySelectorAll('.modal-bg').forEach(m=>m.addEventListener('click',e=>{if(e.target===m)closeModals()}));
+document.addEventListener('keydown',e=>{if(e.key==='Escape')closeModals()});
 
 // ── Fade-up on scroll ──
-const obs=new IntersectionObserver(es=>{es.forEach(e=>{if(e.isIntersecting)e.target.classList.add('show')})},{threshold:.15});
-document.querySelectorAll('.fade-up').forEach(el=>obs.observe(el));
+const _fo=new IntersectionObserver(es=>es.forEach(e=>{if(e.isIntersecting){e.target.classList.add('show');_fo.unobserve(e.target)}}),{threshold:.15});
+document.querySelectorAll('.fade-up').forEach(el=>_fo.observe(el));
 
 // ── Counter animation ──
-function animateCounters(){document.querySelectorAll('.stat-num[data-target]').forEach(el=>{const t=+el.dataset.target;let c=0;const step=Math.max(1,Math.floor(t/60));const timer=setInterval(()=>{c+=step;if(c>=t){c=t;clearInterval(timer)}el.textContent=c>=1000?(c/1000).toFixed(0)+'K+':c+(el.closest('div').querySelector('.text-xs')?.textContent.includes('%')?'%':'')},30)})}
-let counterDone=false;
-const cObs=new IntersectionObserver(es=>{if(!counterDone&&es[0].isIntersecting){counterDone=true;animateCounters()}},{threshold:.5});
-const statEl=document.querySelector('.stat-num');if(statEl)cObs.observe(statEl.closest('.grid'));
+function _fmt(el,v){const t=+el.dataset.target;if(t>=10000)return(v>=1000?Math.floor(v/1000)+'K+':v);if(t===87)return v+'%';return v}
+function _counters(){document.querySelectorAll('.stat-num[data-target]').forEach(el=>{const t=+el.dataset.target;let c=0;const step=Math.max(1,Math.floor(t/50));const iv=setInterval(()=>{c+=step;if(c>=t){c=t;clearInterval(iv)}el.textContent=_fmt(el,c)},28)})}
+let _cd=false;
+const _co=new IntersectionObserver(es=>{if(!_cd&&es[0].isIntersecting){_cd=true;_counters()}},{threshold:.4});
+const _s0=document.querySelector('.stat-num');if(_s0&&_s0.parentElement&&_s0.parentElement.parentElement)_co.observe(_s0.parentElement.parentElement);
 
 // ── Hero chart ──
-const hCtx=document.getElementById('heroChart');
-if(hCtx){
+const _hc=document.getElementById('heroChart');
+if(_hc&&window.Chart){
   const pts=[];let v=100;for(let i=0;i<50;i++){v+=Math.random()*6-2.5;pts.push(v)}
-  new Chart(hCtx,{type:'line',data:{labels:pts.map((_,i)=>i),datasets:[{data:pts,borderColor:'#818CF8',backgroundColor:'rgba(79,70,229,.1)',fill:true,tension:.4,pointRadius:0,borderWidth:2}]},options:{responsive:true,plugins:{legend:{display:false}},scales:{x:{display:false},y:{display:false}}}});
+  new Chart(_hc,{type:'line',data:{labels:pts.map((_,i)=>i),datasets:[{data:pts,borderColor:'#5C80E3',backgroundColor:'rgba(29,78,216,.12)',fill:true,tension:.4,pointRadius:0,borderWidth:2}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{enabled:false}},scales:{x:{display:false},y:{display:false}}}});
 }
 
-// ── Auth forms ──
+// ── Particle canvas (dot-matrix, breathing, pointer drift) ──
+(function(){
+  const c=document.getElementById('particle-canvas');if(!c)return;
+  const rm=matchMedia('(prefers-reduced-motion:reduce)').matches;
+  const ctx=c.getContext('2d');
+  let W=0,H=0,dpr=Math.min(2,window.devicePixelRatio||1),dots=[],mx=-9999,my=-9999,t0=performance.now();
+  const GAP=34,R=180;
+  function build(){
+    W=c.clientWidth;H=c.clientHeight;c.width=W*dpr;c.height=H*dpr;ctx.setTransform(dpr,0,0,dpr,0,0);
+    dots=[];const cols=Math.ceil(W/GAP)+1,rows=Math.ceil(H/GAP)+1;
+    const ox=(W-(cols-1)*GAP)/2,oy=(H-(rows-1)*GAP)/2;
+    for(let y=0;y<rows;y++)for(let x=0;x<cols;x++){const px=ox+x*GAP,py=oy+y*GAP;dots.push({x:px,y:py,bx:px,by:py,p:Math.random()*Math.PI*2})}
+  }
+  function frame(now){
+    const t=(now-t0)/1000;
+    ctx.clearRect(0,0,W,H);
+    const pulse=rm?.7:(.7+Math.sin(t/3)*.3);
+    for(let i=0;i<dots.length;i++){
+      const d=dots[i];let x=d.bx,y=d.by;
+      if(!rm){
+        const dx=mx-d.bx,dy=my-d.by,dist=Math.hypot(dx,dy);
+        if(dist<R){const f=(1-dist/R)*14;x=d.bx+(dx/dist||0)*f;y=d.by+(dy/dist||0)*f}
+      }
+      const dy2=(d.by-H/2)/H,depth=1-Math.min(1,Math.abs(dy2)*1.1);
+      const a=(.08+(rm?0:Math.sin(t/2+d.p)*.08))*pulse*(.35+depth*.65);
+      ctx.fillStyle='rgba(255,255,255,'+a.toFixed(3)+')';
+      ctx.beginPath();ctx.arc(x,y,1.3,0,6.283);ctx.fill();
+    }
+    requestAnimationFrame(frame);
+  }
+  window.addEventListener('resize',build);
+  window.addEventListener('mousemove',e=>{const r=c.getBoundingClientRect();mx=e.clientX-r.left;my=e.clientY-r.top},{passive:true});
+  window.addEventListener('mouseleave',()=>{mx=-9999;my=-9999});
+  build();requestAnimationFrame(frame);
+})();
+
+// ── Auth forms (resilient: fallback to alert/fetch if app.js didn't load) ──
+const _notify={
+  ok(m){try{if(typeof Toast!=='undefined')return Toast.success(m)}catch(e){}alert(m)},
+  err(m){try{if(typeof Toast!=='undefined')return Toast.error(m)}catch(e){}alert(m)}
+};
+const _apiBase=(location.hostname==='localhost'||location.hostname==='127.0.0.1')?'http://localhost:3000/api':'/api';
+async function _authCall(path,body){
+  if(typeof API!=='undefined'){return path==='/auth/login'?API.login(body.email,body.password):API.register(body.email,body.password,body.referralCode||undefined)}
+  const r=await fetch(_apiBase+path,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)});
+  let data={};try{data=await r.json()}catch(e){}
+  if(!r.ok)throw new Error(data.error||data.message||('HTTP '+r.status));
+  if(data.token)try{localStorage.setItem('chm_token',data.token)}catch(e){}
+  return data;
+}
+// Capture ?ref=CODE from URL or localStorage so registrations carry the referrer.
+function _refCode(){
+  let code='';
+  try{code=new URLSearchParams(location.search).get('ref')||''}catch(e){}
+  if(!code){try{code=localStorage.getItem('chm_ref_code')||''}catch(e){}}
+  if(code){try{localStorage.setItem('chm_ref_code',code)}catch(e){}}
+  return code.trim().toUpperCase();
+}
+// Post-auth destination: honor pending plan pick from pricing CTA, otherwise dashboard.
+function _nextUrl(){
+  let pending='';try{pending=localStorage.getItem('chm_pending_plan')||''}catch(e){}
+  if(pending){try{localStorage.removeItem('chm_pending_plan')}catch(e){}return 'settings.html?upgrade='+encodeURIComponent(pending)}
+  return 'dashboard.html';
+}
 document.getElementById('loginForm')?.addEventListener('submit',async e=>{
-  e.preventDefault();const fd=new FormData(e.target);
-  try{const r=await API.login(fd.get('email'),fd.get('password'));closeModals();Toast.success('Вход выполнен!');setTimeout(()=>window.location.href='dashboard.html',500)}catch(err){Toast.error(err.message)}
+  e.preventDefault();const fd=new FormData(e.target);const btn=e.target.querySelector('button[type=submit]');if(btn)btn.disabled=true;
+  try{await _authCall('/auth/login',{email:fd.get('email'),password:fd.get('password')});closeModals();_notify.ok('Вход выполнен!');setTimeout(()=>location.href=_nextUrl(),500)}
+  catch(err){_notify.err(err.message||'Ошибка входа. Проверьте подключение.')}
+  finally{if(btn)btn.disabled=false}
 });
 document.getElementById('registerForm')?.addEventListener('submit',async e=>{
   e.preventDefault();const fd=new FormData(e.target);
-  if(fd.get('password')!==fd.get('password2')){Toast.error('Пароли не совпадают');return}
-  try{const r=await API.register(fd.get('email'),fd.get('password'));closeModals();Toast.success('Аккаунт создан!');setTimeout(()=>window.location.href='dashboard.html',500)}catch(err){Toast.error(err.message)}
+  if(fd.get('password')!==fd.get('password2')){_notify.err('Пароли не совпадают');return}
+  const btn=e.target.querySelector('button[type=submit]');if(btn)btn.disabled=true;
+  try{await _authCall('/auth/register',{email:fd.get('email'),password:fd.get('password'),referralCode:_refCode()});try{localStorage.removeItem('chm_ref_code')}catch(e){}closeModals();_notify.ok('Аккаунт создан!');setTimeout(()=>location.href=_nextUrl(),500)}
+  catch(err){_notify.err(err.message||'Ошибка регистрации. Проверьте подключение.')}
+  finally{if(btn)btn.disabled=false}
 });
 
-// ── Lang toggle ──
-let lang='ru';
+// ── i18n ──
+let lang=(localStorage.getItem('chm_lang')||'ru');
 const TR={
-  // Nav
-  'nav-feat':{ru:'Возможности',en:'Features'},
-  'nav-price':{ru:'Тарифы',en:'Pricing'},
-  'nav-how':{ru:'Как работает',en:'How It Works'},
-  'nav-faq':{ru:'FAQ',en:'FAQ'},
-  'nav-academy':{ru:'Академия',en:'Academy'},
-  'nav-login':{ru:'Войти',en:'Login'},
-  'nav-start':{ru:'Начать',en:'Start'},
-  // Hero
+  'nav-feat':{ru:'Возможности',en:'Features'},'nav-price':{ru:'Тарифы',en:'Pricing'},'nav-how':{ru:'Как работает',en:'How It Works'},'nav-community':{ru:'Сообщество',en:'Community'},'nav-faq':{ru:'FAQ',en:'FAQ'},'nav-academy':{ru:'Академия',en:'Academy'},'nav-login':{ru:'Войти',en:'Login'},'nav-start':{ru:'Регистрация',en:'Sign Up'},'nav-cabinet':{ru:'Кабинет',en:'Dashboard'},
   'hero-badge':{ru:'AI-Powered Крипто Платформа',en:'AI-Powered Crypto Platform'},
-  'hero-h1a':{ru:'Торгуй умнее.',en:'Trade Smarter.'},
-  'hero-h1b':{ru:'Зарабатывай больше.',en:'Earn More.'},
-  'hero-sub':{ru:'Автоматические торговые сигналы и боты для Bybit, Binance и BingX. Стратегии SMC, Герчика и скальпинг с AI-аналитикой.',en:'Automated trading signals and bots for Bybit, Binance and BingX. SMC, Gerchik and scalping strategies with AI analytics.'},
-  'hero-cta1':{ru:'Начать бесплатно',en:'Start Free'},
-  'hero-cta2':{ru:'Как это работает',en:'How It Works'},
+  'hero-h1a':{ru:'Торгуй умнее.',en:'Trade Smarter.'},'hero-h1b':{ru:'Зарабатывай больше.',en:'Earn More.'},
+  'hero-sub':{ru:'Автоматические торговые сигналы и боты для Bybit, Binance, BingX и OKX. Стратегии SMC, Герчика и скальпинг с AI-аналитикой.',en:'Automated trading signals and bots for Bybit, Binance, BingX and OKX. SMC, Gerchik and scalping strategies with AI analytics.'},
+  'hero-cta1':{ru:'Начать бесплатно',en:'Start Free'},'hero-cta2':{ru:'Как это работает',en:'How It Works'},
   'stat-s':{ru:'Сигналов',en:'Signals'},'stat-a':{ru:'% Точность',en:'% Accuracy'},'stat-e':{ru:'Биржи',en:'Exchanges'},'stat-v':{ru:'$M+ Объём',en:'$M+ Volume'},
   'ex-title':{ru:'Поддерживаемые биржи',en:'Supported Exchanges'},
-  // Features
-  'feat-title':{ru:'Всё для прибыльной торговли',en:'Everything for Profitable Trading'},
+  'feat-title':{ru:'Всё для <em>прибыльной</em> торговли',en:'Everything for <em>profitable</em> trading'},
   'feat-sub':{ru:'Полный набор инструментов — от сигналов до автоматического исполнения сделок',en:'Complete toolset — from signals to automated trade execution'},
   'f1t':{ru:'AI Сканер Сигналов',en:'AI Signal Scanner'},'f1d':{ru:'3 стратегии: SMC, Герчик, Скальпинг. Анализ рынка в реальном времени с AI-фильтрацией.',en:'3 strategies: SMC, Gerchik, Scalping. Real-time market analysis with AI filtering.'},
   'f2t':{ru:'Авто-Торговля',en:'Auto-Trading'},'f2d':{ru:'Автоматическое исполнение сделок с контролем рисков, trailing stops и partial TP.',en:'Automated trade execution with risk control, trailing stops and partial TP.'},
   'f3t':{ru:'Риск-Менеджмент',en:'Risk Management'},'f3d':{ru:'Circuit breaker, trailing stops, контроль просадки, максимальный дневной лимит потерь.',en:'Circuit breaker, trailing stops, drawdown control, daily loss limit.'},
   'f4t':{ru:'Бэктестинг',en:'Backtesting'},'f4d':{ru:'Тестируй стратегии на исторических данных. Sharpe Ratio, Max Drawdown, Profit Factor.',en:'Test strategies on historical data. Sharpe Ratio, Max Drawdown, Profit Factor.'},
   'f5t':{ru:'Polymarket',en:'Polymarket'},'f5d':{ru:'Предиктивные рынки с AI-аналитикой. Кастодиальный кошелёк Polygon.',en:'Prediction markets with AI analytics. Custodial Polygon wallet.'},
-  'f6t':{ru:'Мульти-Биржа',en:'Multi-Exchange'},'f6d':{ru:'Bybit, Binance, BingX — торгуй на всех площадках из одного интерфейса.',en:'Bybit, Binance, BingX — trade on all platforms from one interface.'},
-  // How
+  'f6t':{ru:'Мульти-Биржа',en:'Multi-Exchange'},'f6d':{ru:'Bybit, Binance, BingX, OKX — торгуй на всех площадках из одного интерфейса.',en:'Bybit, Binance, BingX, OKX — trade on all platforms from one interface.'},
   'how-title':{ru:'Как это работает',en:'How It Works'},'how-sub':{ru:'Три простых шага до автоматической торговли',en:'Three simple steps to automated trading'},
   'h1t':{ru:'Подключите биржу',en:'Connect Exchange'},'h1d':{ru:'Привяжите API ключи вашей биржи. Это занимает 2 минуты.',en:'Link your exchange API keys. Takes 2 minutes.'},
   'h2t':{ru:'Выберите стратегию',en:'Choose Strategy'},'h2d':{ru:'SMC, Герчик или Скальпинг — выберите под свой стиль торговли.',en:'SMC, Gerchik or Scalping — pick your trading style.'},
   'h3t':{ru:'Получайте прибыль',en:'Start Earning'},'h3d':{ru:'Бот торгует 24/7. Вы получаете сигналы и следите за результатами.',en:'Bot trades 24/7. You get signals and monitor results.'},
-  // Pricing
-  'pr-title':{ru:'Тарифные планы',en:'Pricing Plans'},'pr-sub':{ru:'Выберите план под ваши задачи',en:'Choose a plan for your needs'},
-  'pr-pop':{ru:'Популярный',en:'Popular'},
-  'pr-btn':{ru:'Выбрать',en:'Choose'},'pr-btn-start':{ru:'Начать',en:'Start'},
-  // FAQ
+  'pr-title':{ru:'Тарифные <em>планы</em>',en:'Pricing <em>plans</em>'},'pr-sub':{ru:'Выберите план под ваши задачи',en:'Choose a plan for your needs'},'pr-pop':{ru:'Популярный',en:'Popular'},
   'faq-title':{ru:'Частые вопросы',en:'FAQ'},
   'fq1':{ru:'Безопасно ли подключать биржу?',en:'Is it safe to connect an exchange?'},
   'fa1':{ru:'Да. Мы используем только API ключи с правами на торговлю. Вывод средств через API невозможен. Ключи хранятся в зашифрованном виде (AES-256).',en:'Yes. We only use API keys with trading permissions. Withdrawal via API is impossible. Keys are stored encrypted (AES-256).'},
@@ -587,42 +880,143 @@ const TR={
   'fa5':{ru:'Вы выбираете стратегию, пару, таймфрейм и период. Система тестирует стратегию на исторических данных и показывает метрики: Win Rate, Sharpe Ratio, Max Drawdown и другие.',en:'You choose strategy, pair, timeframe and period. The system tests on historical data and shows metrics: Win Rate, Sharpe Ratio, Max Drawdown and more.'},
   'fq6':{ru:'Есть ли бесплатный тариф?',en:'Is there a free plan?'},
   'fa6':{ru:'Да! Бесплатный план включает 3 сигнала в день и 1 активного бота. Этого достаточно чтобы оценить платформу.',en:'Yes! Free plan includes 3 signals per day and 1 active bot. Enough to evaluate the platform.'},
-  // CTA
-  'cta-title':{ru:'Готов начать?',en:'Ready to start?'},
+  'pm-eyebrow':{ru:'СООБЩЕСТВО',en:'COMMUNITY'},
+  'pm-title':{ru:'Алгоритм вместо <em>интуиции</em>',en:'Algorithm over <em>intuition</em>'},
+  'pm-sub':{ru:'Присоединяйся к CryptoХимия — ежедневная аналитика, сигналы и кейсы в Telegram',en:'Join CryptoХимия — daily analytics, signals and case studies on Telegram'},
+  'cta-title':{ru:'Готов <em>начать</em>?',en:'Ready to <em>begin</em>?'},
   'cta-sub':{ru:'Присоединяйся к тысячам трейдеров, которые уже используют CHM Finance',en:'Join thousands of traders already using CHM Finance'},
   'cta-btn':{ru:'Создать аккаунт бесплатно',en:'Create Free Account'},
-  // Footer
   'ft-prod':{ru:'Продукт',en:'Product'},'ft-legal':{ru:'Правовая информация',en:'Legal'},'ft-contact':{ru:'Контакты',en:'Contacts'},
   'ft-feat':{ru:'Возможности',en:'Features'},'ft-price':{ru:'Тарифы',en:'Pricing'},'ft-how':{ru:'Как работает',en:'How It Works'},
   'ft-priv':{ru:'Политика конфиденциальности',en:'Privacy Policy'},'ft-terms':{ru:'Условия использования',en:'Terms of Service'},'ft-risk':{ru:'Предупреждение о рисках',en:'Risk Disclaimer'},
   'ft-tag':{ru:'AI-powered крипто-торговая платформа',en:'AI-powered crypto trading platform'},
-  // Modals
   'ml-title':{ru:'Войти',en:'Login'},'ml-btn':{ru:'Войти',en:'Login'},'ml-no':{ru:'Нет аккаунта?',en:'No account?'},'ml-reg':{ru:'Регистрация',en:'Sign Up'},
   'mr-title':{ru:'Регистрация',en:'Sign Up'},'mr-btn':{ru:'Создать аккаунт',en:'Create Account'},'mr-has':{ru:'Уже есть аккаунт?',en:'Already have an account?'},'mr-login':{ru:'Войти',en:'Login'},
-  'ml-email':{ru:'Email',en:'Email'},'ml-pass':{ru:'Пароль',en:'Password'},'mr-pass2':{ru:'Повторите пароль',en:'Confirm Password'},
-  'mr-agree':{ru:'Я согласен с',en:'I agree to the'},'mr-terms':{ru:'условиями',en:'terms'},
+  'ml-email':{ru:'EMAIL',en:'EMAIL'},'ml-pass':{ru:'ПАРОЛЬ',en:'PASSWORD'},'mr-pass2':{ru:'ПОВТОРИТЕ ПАРОЛЬ',en:'CONFIRM PASSWORD'},
+  'mr-agree':{ru:'Я согласен с',en:'I agree to the'},'mr-terms':{ru:'условиями',en:'terms'}
 };
-function toggleLang(){
-  lang=lang==='ru'?'en':'ru';
+// ── Promos (community section) ──
+// files принимает либо строку с {lang} плейсхолдером, либо объект {ru:'...', en:'...'}
+window.Promos=(function(){
+  const ITEMS=[
+    {files:{ru:'chm_promo_sl_ru.html', en:'chm_promo_sl_en.html'}, label:{ru:'Сигналы',  en:'Signals'},      meta:{ru:'ЕЖЕДНЕВНО', en:'DAILY'},   link:'https://t.me/chm_crypto'},
+    {files:{ru:'promo-ru.html',        en:'promo-en.html'},        label:{ru:'Разборы',  en:'Case studies'}, meta:{ru:'АРХИВ',     en:'ARCHIVE'}, link:'https://t.me/chm_crypto'},
+  ];
+  const grid=document.getElementById('promoGrid');
+  if(!grid)return{apply(){}};
+  function fitStage(stage){
+    const f=stage.querySelector('iframe');if(!f)return;
+    let W=800,H=1100,bx=0,by=0,bodyW=800,bodyH=1100;
+    try{
+      const d=f.contentDocument;
+      if(d&&d.body){
+        const body=d.body,html=d.documentElement;
+        bodyW=Math.max(body.scrollWidth,html.scrollWidth,body.offsetWidth,800);
+        bodyH=Math.max(body.scrollHeight,html.scrollHeight,body.offsetHeight,1100);
+        W=bodyW;H=bodyH;
+        // Auto-detect mockup: largest visible element with rounded corners (≥200x300)
+        const view=d.defaultView||window;
+        const all=body.querySelectorAll('*');
+        let best=null,bestScore=0;
+        for(let i=0;i<all.length;i++){
+          const el=all[i];if(el===body||el===html)continue;
+          const r=el.getBoundingClientRect();
+          if(r.width<200||r.height<300)continue;
+          const st=view.getComputedStyle(el);
+          if(st.display==='none'||st.visibility==='hidden'||parseFloat(st.opacity)===0)continue;
+          const br=Math.max(parseFloat(st.borderTopLeftRadius)||0,parseFloat(st.borderRadius)||0);
+          const score=r.width*r.height+(br>12?400000:0)+(st.backgroundColor!=='rgba(0, 0, 0, 0)'&&st.backgroundColor!=='transparent'?50000:0);
+          if(score>bestScore){bestScore=score;best=el}
+        }
+        if(best){const r=best.getBoundingClientRect();W=r.width;H=r.height;bx=r.left;by=r.top}
+      }
+    }catch(e){}
+    f.style.width=bodyW+'px';f.style.height=bodyH+'px';
+    stage.style.aspectRatio=W+' / '+H;
+    const sw=stage.clientWidth;
+    const scale=sw>0?sw/W:1;
+    f.style.transform='translate('+(-bx*scale)+'px,'+(-by*scale)+'px) scale('+scale+')';
+    stage.style.setProperty('--scale',scale.toString());
+  }
+  function resolveFile(it,lang){
+    if(it.files&&typeof it.files==='object')return it.files[lang];
+    if(typeof it.file==='string')return it.file.includes('{lang}')?it.file.replace('{lang}',lang):(it.file+'_'+lang+'.html');
+    return '';
+  }
+  function build(lang){
+    const n=ITEMS.length;
+    grid.style.gridTemplateColumns = n===1?'1fr' : (n===2?'repeat(2,minmax(0,1fr))' : 'repeat(3,minmax(0,1fr))');
+    grid.innerHTML=ITEMS.map((it,i)=>{
+      const src='assets/promo/'+resolveFile(it,lang);
+      return `<a href="${it.link}" target="_blank" rel="noopener" class="promo-wrap" data-i="${i}">
+        <div class="shell"><div class="shell-inner">
+          <div class="promo-stage"><iframe data-promo="${i}" src="${src}" title="${it.label[lang]}" loading="lazy" referrerpolicy="no-referrer" sandbox="allow-scripts allow-same-origin" scrolling="no"></iframe></div>
+        </div></div>
+        <div class="promo-caption"><div class="promo-label">${it.label[lang]}</div><div class="promo-meta">${it.meta[lang]}</div></div>
+      </a>`;
+    }).join('');
+    grid.querySelectorAll('.promo-stage').forEach(stage=>{
+      const f=stage.querySelector('iframe');
+      const run=()=>fitStage(stage);
+      f.addEventListener('load',()=>{run();setTimeout(run,200);setTimeout(run,600);setTimeout(run,1500)});
+      if(window.ResizeObserver){new ResizeObserver(run).observe(stage)}else{window.addEventListener('resize',run)}
+    });
+  }
+  let current=null;
+  return{apply(lang){if(lang!==current){current=lang;build(lang)}}};
+})();
+
+function applyLang(){
+  document.documentElement.lang=lang;
   document.getElementById('langBtn').textContent=lang==='ru'?'EN':'RU';
-  document.querySelectorAll('[data-t]').forEach(el=>{
-    const k=el.getAttribute('data-t');
-    if(TR[k]&&TR[k][lang])el.textContent=TR[k][lang];
-  });
-  I18n.setLang(lang);
+  document.querySelectorAll('[data-t]').forEach(el=>{const k=el.getAttribute('data-t');if(TR[k]&&TR[k][lang]!==undefined)el.innerHTML=TR[k][lang]});
+  if(window.Promos)Promos.apply(lang);
+  try{window.I18n&&I18n.setLang(lang)}catch(e){}
 }
+function toggleLang(){lang=lang==='ru'?'en':'ru';localStorage.setItem('chm_lang',lang);applyLang()}
+applyLang();
+
+// ── Login / Register buttons ──
+function _loggedIn(){try{return typeof Auth!=='undefined'&&Auth.isLoggedIn()}catch(e){return false}}
+function handleLogin(e){if(e&&e.preventDefault)e.preventDefault();if(_loggedIn()){location.href='dashboard.html';return false}openModal('login');return false}
+function handleRegister(e){if(e&&e.preventDefault)e.preventDefault();if(_loggedIn()){location.href='dashboard.html';return false}openModal('register');return false}
+// Unified pricing CTA — route logged-in users to settings checkout, otherwise
+// open register modal with plan remembered for the post-register redirect.
+function pickPlan(plan){
+  if(plan==='free'){
+    if(_loggedIn()){location.href='dashboard.html';return false}
+    openModal('register');return false;
+  }
+  if(_loggedIn()){location.href='settings.html?upgrade='+encodeURIComponent(plan);return false}
+  try{localStorage.setItem('chm_pending_plan',plan)}catch(e){}
+  openModal('register');return false;
+}
+(function(){try{if(_loggedIn()){const b=document.getElementById('loginBtn');if(b){b.setAttribute('data-t','nav-cabinet');b.textContent=(lang==='ru'?'Кабинет':'Dashboard')}}}catch(e){}})();
 
 // ── Theme toggle ──
 function toggleTheme(){
-  document.documentElement.classList.toggle('light');
-  const isLight=document.documentElement.classList.contains('light');
-  localStorage.setItem('chm_theme',isLight?'light':'dark');
-  document.getElementById('themeBtn').textContent=isLight?'☀️':'🌙';
+  const root=document.documentElement;
+  root.classList.toggle('light');
+  const isLight=root.classList.contains('light');
+  try{localStorage.setItem('chm_theme',isLight?'light':'dark')}catch(e){}
+  const b=document.getElementById('themeBtn');
+  if(b)b.innerHTML='<iconify-icon icon="solar:'+(isLight?'sun-linear':'moon-linear')+'"></iconify-icon>';
 }
-(function(){const t=localStorage.getItem('chm_theme');if(t==='light'){document.documentElement.classList.add('light');const b=document.getElementById('themeBtn');if(b)b.textContent='☀️'}})();
+(function(){try{if(localStorage.getItem('chm_theme')==='light'){document.documentElement.classList.add('light');const b=document.getElementById('themeBtn');if(b)b.innerHTML='<iconify-icon icon="solar:sun-linear"></iconify-icon>'}}catch(e){}})();
 
-// ── Open login if URL param ──
-if(new URLSearchParams(location.search).get('login'))openModal('login');
+// ── URL params: ?login / ?checkout=cancel / ?ref=XXX ──
+(function(){
+  const q=new URLSearchParams(location.search);
+  // Stash ?ref=XXX early so it survives across pageviews even if the
+  // visitor browses for a while before registering.
+  _refCode();
+  if(q.get('login'))openModal('login');
+  if(q.get('checkout')==='cancel'){
+    setTimeout(()=>{try{(window.Toast||{info:(m)=>alert(m)}).info('Оплата отменена')}catch(e){}},400);
+    const clean=location.pathname+(q.get('ref')?'?ref='+q.get('ref'):'');
+    history.replaceState({},'',clean);
+  }
+})();
 </script>
 </body>
 </html>

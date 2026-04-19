@@ -1,233 +1,96 @@
 const express = require('express');
-const { authMiddleware, requireTier } = require('../middleware/auth');
+const { z } = require('zod');
+const { authMiddleware } = require('../middleware/auth');
 const signalService = require('../services/signalService');
-const subscriptionService = require('../services/subscriptionService');
+const validation = require('../utils/validation');
+const plans = require('../config/plans');
 
 const router = express.Router();
 
-// ── Public / Metadata ────────────────────────────────────────────────────
+function handleErr(err, res, next) {
+  if (err instanceof z.ZodError) {
+    return res.status(400).json({
+      error: 'Validation failed', code: 'VALIDATION_ERROR',
+      issues: err.issues.map((i) => ({ path: i.path.join('.'), message: i.message })),
+    });
+  }
+  if (err && err.statusCode) {
+    return res.status(err.statusCode).json({ error: err.message, ...(err.code ? { code: err.code } : {}) });
+  }
+  return next(err);
+}
 
-/**
- * GET /api/signals/strategies
- * Return available strategies and timeframes.
- */
-router.get('/strategies', (_req, res) => {
-  res.json({
-    strategies: signalService.getStrategies(),
-    timeframes: signalService.getTimeframes(),
-  });
-});
-
-// ── Authenticated ────────────────────────────────────────────────────────
-
-/**
- * GET /api/signals
- * Fetch paginated, filtered signals.
- * Query params: page, limit, strategy, symbol, direction, minConfidence, status
- */
-router.get('/', authMiddleware, (req, res) => {
+router.get('/', authMiddleware, (req, res, next) => {
   try {
-    // Check signal view quota for free-tier users
-    const canView = subscriptionService.canViewSignal(req.userId);
-    if (!canView) {
+    const q = z.object({
+      limit: z.coerce.number().int().min(1).max(200).default(50),
+      offset: z.coerce.number().int().min(0).default(0),
+      strategy: validation.strategy.optional(),
+      symbol: z.string().toUpperCase().optional(),
+    }).parse(req.query);
+
+    if (signalService.freeDailyLimitHit(req.userId, req.userPlan)) {
+      const limit = plans.getLimits(req.userPlan).signalsPerDay;
       return res.status(403).json({
-        error: 'Daily signal limit reached. Upgrade your plan for unlimited signals.',
+        error: `Free plan limited to ${limit} signals per day. Upgrade for unlimited.`,
         code: 'SIGNAL_LIMIT_REACHED',
+        currentPlan: req.userPlan,
+        requiredPlan: 'starter',
       });
     }
 
-    const result = signalService.getFilteredSignalsForUser(req.userId, {
-      page: req.query.page,
-      limit: req.query.limit,
-      strategy: req.query.strategy,
-      symbol: req.query.symbol,
-      direction: req.query.direction,
-      minConfidence: req.query.minConfidence,
-      status: req.query.status,
-    });
-
-    // Record signal views for free-tier tracking
-    if (result.signals.length > 0) {
-      try {
-        subscriptionService.recordSignalView(req.userId, result.signals[0].id);
-      } catch (_) {
-        // Non-critical: don't fail the request if tracking fails
-      }
-    }
-
-    res.json(result);
-  } catch (error) {
-    console.error('Error fetching signals:', error.message);
-    res.status(500).json({ error: 'Failed to fetch signals' });
-  }
+    const list = signalService.listForUser(req.userId, q);
+    res.json({ count: list.length, signals: list });
+  } catch (err) { handleErr(err, res, next); }
 });
 
-/**
- * GET /api/signals/live
- * Server-Sent Events endpoint for real-time signal updates.
- * The client opens a long-lived connection; we push new signals as they arrive.
- */
-router.get('/live', authMiddleware, (req, res) => {
-  // SSE headers
-  res.writeHead(200, {
-    'Content-Type': 'text/event-stream',
-    'Cache-Control': 'no-cache',
-    Connection: 'keep-alive',
-    'X-Accel-Buffering': 'no', // Disable nginx buffering
-  });
-
-  res.write('event: connected\ndata: {"status":"connected"}\n\n');
-
-  let lastId = parseInt(req.query.lastId, 10) || 0;
-
-  // Poll every 3 seconds for new signals (lightweight with SQLite)
-  const interval = setInterval(() => {
-    try {
-      const newSignals = signalService.getSignalsSince(lastId);
-      for (const signal of newSignals) {
-        res.write(`event: signal\ndata: ${JSON.stringify(signal)}\n\n`);
-        lastId = signal.id;
-      }
-    } catch (err) {
-      console.error('SSE poll error:', err.message);
-    }
-  }, 3000);
-
-  // Send heartbeat every 30s to keep connection alive
-  const heartbeat = setInterval(() => {
-    res.write(': heartbeat\n\n');
-  }, 30000);
-
-  // Clean up on disconnect
-  req.on('close', () => {
-    clearInterval(interval);
-    clearInterval(heartbeat);
-  });
-});
-
-/**
- * GET /api/signals/stats
- * Aggregated signal performance stats.
- * Query params: strategy, days
- */
-router.get('/stats', authMiddleware, (req, res) => {
+router.get('/public', (req, res, next) => {
   try {
-    const stats = signalService.getStats({
-      strategy: req.query.strategy,
-      days: req.query.days,
-    });
-    res.json({ stats });
-  } catch (error) {
-    console.error('Error fetching signal stats:', error.message);
-    res.status(500).json({ error: 'Failed to fetch signal stats' });
-  }
+    const q = z.object({
+      limit: z.coerce.number().int().min(1).max(20).default(10),
+      strategy: validation.strategy.optional(),
+    }).parse(req.query);
+    const list = signalService.listPublic(q);
+    res.json({ count: list.length, signals: list });
+  } catch (err) { handleErr(err, res, next); }
 });
 
-/**
- * GET /api/signals/settings
- * Get the calling user's signal preferences.
- */
-router.get('/settings', authMiddleware, (req, res) => {
+router.get('/stats/me', authMiddleware, (req, res, next) => {
   try {
-    const config = signalService.getUserSignalConfig(req.userId);
-    res.json({ settings: config });
-  } catch (error) {
-    console.error('Error fetching signal settings:', error.message);
-    res.status(500).json({ error: 'Failed to fetch signal settings' });
-  }
+    res.json(signalService.stats(req.userId));
+  } catch (err) { handleErr(err, res, next); }
 });
 
-/**
- * POST /api/signals/settings
- * Update the calling user's signal preferences.
- * Body: { strategiesEnabled?, pairsFilter?, minConfidence?, notificationsEnabled? }
- */
-router.post('/settings', authMiddleware, (req, res) => {
+router.get('/stats/global', (_req, res, next) => {
   try {
-    const updated = signalService.updateUserSignalConfig(req.userId, req.body);
-    res.json({
-      message: 'Signal settings updated',
-      settings: updated,
-    });
-  } catch (error) {
-    console.error('Error updating signal settings:', error.message);
-    res.status(400).json({ error: error.message });
-  }
+    res.json(signalService.stats(null));
+  } catch (err) { handleErr(err, res, next); }
 });
 
-/**
- * GET /api/signals/:id
- * Get a single signal by ID.
- */
-router.get('/:id', authMiddleware, (req, res) => {
+router.get('/prefs/me', authMiddleware, (req, res, next) => {
   try {
-    const signalId = parseInt(req.params.id, 10);
-    if (isNaN(signalId)) {
-      return res.status(400).json({ error: 'Invalid signal ID' });
-    }
-
-    const signal = signalService.getSignalById(signalId);
-    if (!signal) {
-      return res.status(404).json({ error: 'Signal not found' });
-    }
-
-    // Record view for quota tracking
-    try {
-      subscriptionService.recordSignalView(req.userId, signalId);
-    } catch (_) {
-      // Non-critical
-    }
-
-    res.json({ signal });
-  } catch (error) {
-    console.error('Error fetching signal:', error.message);
-    res.status(500).json({ error: 'Failed to fetch signal' });
-  }
+    res.json(signalService.getPrefs(req.userId));
+  } catch (err) { handleErr(err, res, next); }
 });
 
-// ── Admin-only: create / close signals ───────────────────────────────────
-// In production these would be behind an admin middleware.
-// For now we gate them behind the elite tier.
-
-/**
- * POST /api/signals
- * Create a new signal (admin / system use).
- * Body: { symbol, direction, entryPrice, stopLoss, takeProfit1, takeProfit2, takeProfit3,
- *          strategy, timeframe, confidence, notes }
- */
-router.post('/', authMiddleware, requireTier('elite'), (req, res) => {
+router.patch('/prefs/me', authMiddleware, (req, res, next) => {
   try {
-    const signal = signalService.createSignal(req.body);
-    res.status(201).json({ message: 'Signal created', signal });
-  } catch (error) {
-    console.error('Error creating signal:', error.message);
-    res.status(400).json({ error: error.message });
-  }
+    const patch = validation.signalPrefsSchema.parse(req.body);
+    res.json(signalService.updatePrefs(req.userId, patch));
+  } catch (err) { handleErr(err, res, next); }
 });
 
-/**
- * PATCH /api/signals/:id/close
- * Close a signal with result.
- * Body: { result: 'win'|'loss'|'breakeven'|'cancelled', pnlPct? }
- */
-router.patch('/:id/close', authMiddleware, requireTier('elite'), (req, res) => {
+router.get('/:id', authMiddleware, (req, res, next) => {
   try {
-    const signalId = parseInt(req.params.id, 10);
-    if (isNaN(signalId)) {
-      return res.status(400).json({ error: 'Invalid signal ID' });
+    const id = z.coerce.number().int().positive().parse(req.params.id);
+    const sig = signalService.getById(id);
+    if (!sig) return res.status(404).json({ error: 'Signal not found' });
+    if (sig.userId && sig.userId !== req.userId) {
+      return res.status(403).json({ error: 'Not your signal' });
     }
-
-    const { result, pnlPct } = req.body;
-    if (!result) {
-      return res.status(400).json({ error: 'result is required (win, loss, breakeven, cancelled)' });
-    }
-
-    const signal = signalService.closeSignal(signalId, { result, pnlPct });
-    res.json({ message: 'Signal closed', signal });
-  } catch (error) {
-    console.error('Error closing signal:', error.message);
-    res.status(400).json({ error: error.message });
-  }
+    signalService.trackView(req.userId, id);
+    res.json(sig);
+  } catch (err) { handleErr(err, res, next); }
 });
 
 module.exports = router;

@@ -1,247 +1,139 @@
-const WebSocket = require('ws');
-const jwt = require('jsonwebtoken');
-const config = require('../config');
-const signalService = require('./signalService');
-
 /**
  * WebSocket service for real-time signal broadcasting.
  *
- * Clients connect via ws://host:WS_PORT and optionally authenticate
- * by sending { type: 'auth', token: 'Bearer ...' } as their first message.
+ * Connect: ws://host:WS_PORT (dev) or wss://chmup.top/ws (prod).
+ * Auth: first message `{ type: 'auth', token: 'Bearer <JWT>' }`.
  *
- * Unauthenticated clients receive basic heartbeats only.
- * Authenticated clients receive real-time signal events.
+ *   - Unauthenticated: receive public signals (user_id = NULL) + heartbeat
+ *   - Authenticated:   receive public + own bot signals
+ *
+ * Public API:
+ *   init({ server })        - attach to HTTP server or start standalone
+ *   broadcastPublic(payload)- send to ALL clients
+ *   broadcastToUser(uid, p) - send to all sockets owned by that user
+ *   shutdown()              - graceful close
  */
+
+const WebSocket = require('ws');
+const jwt = require('jsonwebtoken');
+const config = require('../config');
+const logger = require('../utils/logger');
+
 class WebSocketService {
   constructor() {
     this.wss = null;
-    this.clients = new Map(); // ws -> { userId, authenticated, alive }
-    this._pollInterval = null;
-    this._lastSignalId = 0;
+    this.clients = new Map(); // ws → { userId, authenticated, alive }
+    this._heartbeatInterval = null;
   }
 
-  /**
-   * Initialise the WebSocket server.
-   * Can attach to an existing HTTP server or listen on a standalone port.
-   *
-   * @param {object} options - { server } for attachment, or falls back to config.wsPort
-   */
   init(options = {}) {
+    if (this.wss) return;
     if (options.server) {
       this.wss = new WebSocket.Server({ server: options.server, path: '/ws' });
+      logger.info('WebSocket attached to HTTP server on /ws');
     } else {
       this.wss = new WebSocket.Server({ port: config.wsPort });
-      console.log(`WebSocket server listening on port ${config.wsPort}`);
+      logger.info('WebSocket standalone on port ' + config.wsPort);
     }
 
-    this.wss.on('connection', (ws, req) => {
-      this._handleConnection(ws, req);
-    });
+    this.wss.on('connection', (ws, req) => this._onConnect(ws, req));
+    this.wss.on('error', (err) => logger.error('wss error', { err: err.message }));
 
-    // Detect stale connections every 30s
-    this._heartbeatInterval = setInterval(() => {
-      this.wss.clients.forEach((ws) => {
-        const meta = this.clients.get(ws);
-        if (meta && !meta.alive) {
-          this.clients.delete(ws);
-          return ws.terminate();
-        }
-        if (meta) meta.alive = false;
-        try { ws.ping(); } catch (_) { /* noop */ }
-      });
-    }, 30000);
-
-    // Poll for new signals every 3s and broadcast
-    this._initializeLastSignalId();
-    this._pollInterval = setInterval(() => {
-      this._broadcastNewSignals();
-    }, 3000);
-
-    return this.wss;
+    // Heartbeat: kick sockets that don't respond to ping
+    this._heartbeatInterval = setInterval(() => this._heartbeat(), 30_000);
   }
 
-  /**
-   * Seed lastSignalId from the DB so we only broadcast truly new signals.
-   */
-  _initializeLastSignalId() {
-    try {
-      const db = require('../models/database');
-      const row = db.prepare('SELECT MAX(id) as maxId FROM signal_history').get();
-      this._lastSignalId = row?.maxId || 0;
-    } catch (_) {
-      this._lastSignalId = 0;
-    }
-  }
+  _onConnect(ws, req) {
+    const meta = { userId: null, authenticated: false, alive: true };
+    this.clients.set(ws, meta);
 
-  /**
-   * Handle a new WebSocket connection.
-   */
-  _handleConnection(ws, req) {
-    this.clients.set(ws, { userId: null, authenticated: false, alive: true });
+    ws.on('pong', () => { const m = this.clients.get(ws); if (m) m.alive = true; });
 
-    ws.on('pong', () => {
-      const meta = this.clients.get(ws);
-      if (meta) meta.alive = true;
-    });
-
-    ws.on('message', (data) => {
-      this._handleMessage(ws, data);
-    });
-
-    ws.on('close', () => {
-      this.clients.delete(ws);
-    });
-
-    ws.on('error', (err) => {
-      console.error('WebSocket client error:', err.message);
-      this.clients.delete(ws);
-    });
-
-    // Welcome
-    this._send(ws, {
-      type: 'welcome',
-      message: 'Connected to CHM Finance real-time feed',
-      timestamp: new Date().toISOString(),
-    });
-  }
-
-  /**
-   * Handle an incoming message from a client.
-   */
-  _handleMessage(ws, rawData) {
-    let msg;
-    try {
-      msg = JSON.parse(rawData.toString());
-    } catch (_) {
-      return this._send(ws, { type: 'error', message: 'Invalid JSON' });
-    }
-
-    switch (msg.type) {
-      case 'auth':
-        this._authenticateClient(ws, msg.token);
-        break;
-
-      case 'ping':
-        this._send(ws, { type: 'pong', timestamp: new Date().toISOString() });
-        break;
-
-      case 'subscribe':
-        // Future: topic-based subscriptions
-        this._send(ws, { type: 'subscribed', topic: msg.topic || 'signals' });
-        break;
-
-      default:
-        this._send(ws, { type: 'error', message: `Unknown message type: ${msg.type}` });
-    }
-  }
-
-  /**
-   * Authenticate a WebSocket client using a JWT token.
-   */
-  _authenticateClient(ws, token) {
-    if (!token) {
-      return this._send(ws, { type: 'auth_error', message: 'Token required' });
-    }
-
-    const cleanToken = token.startsWith('Bearer ') ? token.slice(7) : token;
-
-    try {
-      const decoded = jwt.verify(cleanToken, config.jwtSecret);
-      const meta = this.clients.get(ws);
-      if (meta) {
-        meta.userId = decoded.userId;
-        meta.authenticated = true;
-      }
-      this._send(ws, {
-        type: 'authenticated',
-        userId: decoded.userId,
-      });
-    } catch (err) {
-      this._send(ws, { type: 'auth_error', message: 'Invalid or expired token' });
-    }
-  }
-
-  /**
-   * Poll the database for new signals and broadcast to authenticated clients.
-   */
-  _broadcastNewSignals() {
-    try {
-      const newSignals = signalService.getSignalsSince(this._lastSignalId);
-      if (newSignals.length === 0) return;
-
-      for (const signal of newSignals) {
-        this.broadcast({
-          type: 'signal',
-          data: signal,
-        }, true); // only authenticated
-        this._lastSignalId = signal.id;
-      }
-    } catch (err) {
-      console.error('WebSocket broadcast error:', err.message);
-    }
-  }
-
-  /**
-   * Broadcast a message to all connected (optionally only authenticated) clients.
-   */
-  broadcast(message, authenticatedOnly = false) {
-    if (!this.wss) return;
-
-    this.wss.clients.forEach((ws) => {
-      if (ws.readyState !== WebSocket.OPEN) return;
-
-      const meta = this.clients.get(ws);
-      if (authenticatedOnly && (!meta || !meta.authenticated)) return;
-
-      this._send(ws, message);
-    });
-  }
-
-  /**
-   * Send a message object to a single client.
-   */
-  _send(ws, obj) {
-    try {
-      if (ws.readyState === WebSocket.OPEN) {
-        ws.send(JSON.stringify(obj));
-      }
-    } catch (err) {
-      console.error('WebSocket send error:', err.message);
-    }
-  }
-
-  /**
-   * Get connection stats.
-   */
-  getStats() {
-    let total = 0;
-    let authenticated = 0;
-
-    if (this.wss) {
-      this.wss.clients.forEach((ws) => {
-        total++;
-        const meta = this.clients.get(ws);
-        if (meta?.authenticated) authenticated++;
-      });
-    }
-
-    return { totalConnections: total, authenticatedConnections: authenticated };
-  }
-
-  /**
-   * Gracefully shut down the WebSocket server.
-   */
-  shutdown() {
-    if (this._pollInterval) clearInterval(this._pollInterval);
-    if (this._heartbeatInterval) clearInterval(this._heartbeatInterval);
-    if (this.wss) {
-      this.wss.clients.forEach((ws) => {
+    ws.on('message', (raw) => {
+      let msg;
+      try { msg = JSON.parse(raw.toString()); }
+      catch (_e) { return; }
+      if (msg.type === 'auth' && typeof msg.token === 'string') {
+        const token = msg.token.replace(/^Bearer\s+/i, '');
         try {
-          ws.close(1001, 'Server shutting down');
-        } catch (_) { /* noop */ }
-      });
-      this.wss.close();
+          const decoded = jwt.verify(token, config.jwtSecret, { algorithms: ['HS256'] });
+          if (decoded && decoded.uid) {
+            meta.userId = decoded.uid;
+            meta.authenticated = true;
+            this._send(ws, { type: 'auth_ok', userId: decoded.uid });
+            return;
+          }
+        } catch (_e) { /* fall through */ }
+        this._send(ws, { type: 'auth_fail' });
+      }
+    });
+
+    ws.on('close', () => this.clients.delete(ws));
+    ws.on('error', () => this.clients.delete(ws));
+
+    this._send(ws, { type: 'hello', version: '3.0.0', ts: Date.now() });
+  }
+
+  _heartbeat() {
+    for (const [ws, meta] of this.clients) {
+      if (!meta.alive) {
+        try { ws.terminate(); } catch (_e) {}
+        this.clients.delete(ws);
+        continue;
+      }
+      meta.alive = false;
+      try { ws.ping(); } catch (_e) {}
     }
+  }
+
+  _send(ws, payload) {
+    if (ws.readyState !== WebSocket.OPEN) return;
+    try { ws.send(JSON.stringify(payload)); } catch (_e) {}
+  }
+
+  broadcastPublic(payload) {
+    if (!this.wss) return;
+    for (const [ws] of this.clients) this._send(ws, payload);
+  }
+
+  broadcastToUser(userId, payload) {
+    if (!this.wss || !userId) return;
+    for (const [ws, meta] of this.clients) {
+      if (meta.userId === userId) this._send(ws, payload);
+    }
+  }
+
+  /**
+   * Signal-specific helper: public signals go to everyone, user-scoped go
+   * to that user's sockets (+ public if you pass broadcastPublic=true).
+   */
+  broadcastSignal(signal) {
+    if (!signal) return;
+    const payload = { type: 'signal', data: signal, ts: Date.now() };
+    if (signal.userId) {
+      this.broadcastToUser(signal.userId, payload);
+    } else {
+      this.broadcastPublic(payload);
+    }
+  }
+
+  shutdown() {
+    if (this._heartbeatInterval) {
+      clearInterval(this._heartbeatInterval);
+      this._heartbeatInterval = null;
+    }
+    if (!this.wss) return;
+    for (const [ws] of this.clients) {
+      try { ws.close(1001, 'server shutdown'); } catch (_e) {}
+    }
+    this.clients.clear();
+    try { this.wss.close(); } catch (_e) {}
+    this.wss = null;
+    logger.info('WebSocket shutdown complete');
+  }
+
+  get clientCount() {
+    return this.clients.size;
   }
 }
 

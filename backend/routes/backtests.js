@@ -1,114 +1,86 @@
 const express = require('express');
-const { authMiddleware, requireTier } = require('../middleware/auth');
+const { z } = require('zod');
+const { authMiddleware } = require('../middleware/auth');
 const backtestService = require('../services/backtestService');
+const validation = require('../utils/validation');
 
 const router = express.Router();
 
-/**
- * GET /api/backtests
- * List all backtests for the authenticated user.
- */
-router.get('/', authMiddleware, (req, res) => {
-  try {
-    const backtests = backtestService.getUserBacktests(req.userId);
-    res.json({ backtests });
-  } catch (error) {
-    console.error('Error fetching backtests:', error.message);
-    res.status(500).json({ error: error.message });
+function handleErr(err, res, next) {
+  if (err instanceof z.ZodError) {
+    return res.status(400).json({
+      error: 'Validation failed', code: 'VALIDATION_ERROR',
+      issues: err.issues.map((i) => ({ path: i.path.join('.'), message: i.message })),
+    });
   }
+  if (err && err.statusCode) {
+    return res.status(err.statusCode).json({
+      error: err.message,
+      ...(err.code ? { code: err.code } : {}),
+      ...(err.requiredPlan ? { requiredPlan: err.requiredPlan } : {}),
+    });
+  }
+  return next(err);
+}
+
+// POST /api/backtests — create + enqueue
+router.post('/', authMiddleware, (req, res, next) => {
+  try {
+    const input = validation.createBacktestSchema.parse(req.body);
+    const bt = backtestService.createBacktest(req.userId, input);
+    res.status(201).json(bt);
+  } catch (err) { handleErr(err, res, next); }
 });
 
-/**
- * GET /api/backtests/stats
- * Aggregated backtest statistics.
- */
-router.get('/stats', authMiddleware, (req, res) => {
+// GET /api/backtests — list
+router.get('/', authMiddleware, (req, res, next) => {
   try {
-    const stats = backtestService.getUserBacktestsStats(req.userId);
-    res.json({ stats });
-  } catch (error) {
-    console.error('Error fetching backtest stats:', error.message);
-    res.status(500).json({ error: error.message });
-  }
+    const q = z.object({
+      limit: z.coerce.number().int().min(1).max(200).default(50),
+      offset: z.coerce.number().int().min(0).default(0),
+    }).parse(req.query);
+    const list = backtestService.listForUser(req.userId, q);
+    res.json({ count: list.length, backtests: list });
+  } catch (err) { handleErr(err, res, next); }
 });
 
-/**
- * POST /api/backtests
- * Create a new backtest. Requires Pro tier or above.
- * Body: { name, symbol, exchangeName, timeframe, startDate, endDate, initialCapital, strategyConfig? }
- */
-router.post('/', authMiddleware, requireTier('pro'), (req, res) => {
+// GET /api/backtests/stats
+router.get('/stats', authMiddleware, (req, res, next) => {
   try {
-    const backtestData = req.body;
-
-    if (
-      !backtestData.name ||
-      !backtestData.symbol ||
-      !backtestData.exchangeName ||
-      !backtestData.timeframe ||
-      !backtestData.startDate ||
-      !backtestData.endDate ||
-      !backtestData.initialCapital
-    ) {
-      return res.status(400).json({
-        error: 'name, symbol, exchangeName, timeframe, startDate, endDate, and initialCapital are required',
-      });
-    }
-
-    if (backtestData.initialCapital <= 0) {
-      return res.status(400).json({ error: 'initialCapital must be greater than 0' });
-    }
-
-    const backtest = backtestService.createBacktest(req.userId, backtestData);
-    res.status(201).json({ message: 'Backtest created successfully', backtest });
-  } catch (error) {
-    console.error('Error creating backtest:', error.message);
-    res.status(500).json({ error: error.message });
-  }
+    res.json(backtestService.stats(req.userId));
+  } catch (err) { handleErr(err, res, next); }
 });
 
-/**
- * GET /api/backtests/:id
- * Get a specific backtest with results.
- */
-router.get('/:id', authMiddleware, (req, res) => {
+// GET /api/backtests/:id
+router.get('/:id', authMiddleware, (req, res, next) => {
   try {
-    const backtest = backtestService.getBacktestById(parseInt(req.params.id, 10), req.userId);
-    if (!backtest) {
-      return res.status(404).json({ error: 'Backtest not found' });
-    }
-
-    // Parse results JSON if present
-    if (backtest.results && typeof backtest.results === 'string') {
-      try {
-        backtest.results = JSON.parse(backtest.results);
-      } catch (_) {
-        // Leave as string if parsing fails
-      }
-    }
-
-    res.json({ backtest });
-  } catch (error) {
-    console.error('Error fetching backtest:', error.message);
-    res.status(500).json({ error: error.message });
-  }
+    const id = z.coerce.number().int().positive().parse(req.params.id);
+    const bt = backtestService.getBacktest(id, req.userId);
+    if (!bt) return res.status(404).json({ error: 'Backtest not found' });
+    res.json(bt);
+  } catch (err) { handleErr(err, res, next); }
 });
 
-/**
- * DELETE /api/backtests/:id
- * Delete a backtest.
- */
-router.delete('/:id', authMiddleware, (req, res) => {
+// GET /api/backtests/:id/trades — per-trade detail (paginated)
+router.get('/:id/trades', authMiddleware, (req, res, next) => {
   try {
-    const success = backtestService.deleteBacktest(parseInt(req.params.id, 10), req.userId);
-    if (!success) {
-      return res.status(404).json({ error: 'Backtest not found' });
-    }
-    res.json({ message: 'Backtest deleted successfully' });
-  } catch (error) {
-    console.error('Error deleting backtest:', error.message);
-    res.status(500).json({ error: error.message });
-  }
+    const id = z.coerce.number().int().positive().parse(req.params.id);
+    const q = z.object({
+      limit: z.coerce.number().int().min(1).max(2000).default(500),
+      offset: z.coerce.number().int().min(0).default(0),
+    }).parse(req.query);
+    const trades = backtestService.getTradesForBacktest(id, req.userId, q);
+    if (trades === null) return res.status(404).json({ error: 'Backtest not found' });
+    res.json({ count: trades.length, trades });
+  } catch (err) { handleErr(err, res, next); }
+});
+
+// DELETE /api/backtests/:id
+router.delete('/:id', authMiddleware, (req, res, next) => {
+  try {
+    const id = z.coerce.number().int().positive().parse(req.params.id);
+    res.json(backtestService.deleteBacktest(id, req.userId));
+  } catch (err) { handleErr(err, res, next); }
 });
 
 module.exports = router;

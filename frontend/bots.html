@@ -3,10 +3,9 @@
 <head>
   <meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1.0"/>
   <title>CHM Finance — Боты</title>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet"/>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet"/>
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="stylesheet" href="styles.css"/>
-  <style>body{background:#070b14;color:#f1f5f9;font-family:'Inter',sans-serif}.toggle{position:relative;width:44px;height:24px;background:#1e293b;border-radius:12px;cursor:pointer;transition:.2s}.toggle.on{background:#10b981}.toggle::after{content:'';position:absolute;top:2px;left:2px;width:20px;height:20px;background:#fff;border-radius:50%;transition:.2s}.toggle.on::after{transform:translateX(20px)}</style>
 </head>
 <body>
 <!-- Same sidebar as dashboard - abbreviated for maintainability -->
@@ -20,120 +19,423 @@
     <a href="wallet.html" class="sidebar-link" data-page="wallet"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12V7H5a2 2 0 010-4h14v4M3 5v14a2 2 0 002 2h16v-5"/></svg>Кошелёк</a>
     <a href="settings.html" class="sidebar-link" data-page="settings"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/></svg>Настройки</a>
   </nav>
-  <div class="sidebar-footer"><button onclick="Auth.logout()" class="sidebar-link" style="color:#f87171"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4M16 17l5-5-5-5M21 12H9"/></svg>Выйти</button></div>
+  <div class="sidebar-footer"><button onclick="Auth.logout()" class="sidebar-link" style="color:#C8B9B9"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4M16 17l5-5-5-5M21 12H9"/></svg>Выйти</button></div>
 </aside>
-<header class="topbar"><div class="flex items-center gap-4"><button id="sidebar-toggle" class="lg:hidden" style="background:none;border:none;color:#94a3b8;cursor:pointer"><svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 6h16M4 12h16M4 18h16"/></svg></button><h1 class="text-xl font-bold">Мои боты</h1></div><div class="topbar-actions"><div class="topbar-user"><div class="topbar-avatar">U</div></div></div></header>
+<header class="topbar"><div class="flex items-center gap-4"><button id="sidebar-toggle" class="lg:hidden" style="background:none;border:none;color:rgba(255,255,255,.62);cursor:pointer"><svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 6h16M4 12h16M4 18h16"/></svg></button><h1 class="text-xl font-bold">Мои боты</h1></div><div class="topbar-actions"><div class="topbar-user"><div class="topbar-avatar">U</div></div></div></header>
 
 <main class="main-content">
   <!-- Header -->
   <div class="flex flex-wrap items-center justify-between gap-4 mb-6">
     <div class="flex gap-4 text-sm">
-      <span class="text-slate-400">Всего: <strong class="text-white">4</strong></span>
-      <span class="text-slate-400">Активных: <strong class="text-green-400">3</strong></span>
-      <span class="text-slate-400">PnL: <strong class="text-green-400">+$1,240</strong></span>
+      <span class="text-slate-400">Всего: <strong class="text-white" id="hdrTotal">—</strong></span>
+      <span class="text-slate-400">Активных: <strong class="text-green-400" id="hdrActive">—</strong></span>
+      <span class="text-slate-400">PnL: <strong id="hdrPnl">—</strong></span>
     </div>
-    <button onclick="document.getElementById('createModal').style.display='flex'" class="btn-primary px-5 py-2.5 rounded-xl text-sm font-semibold" style="background:linear-gradient(135deg,#4F46E5,#7C3AED);border:none;color:#fff;cursor:pointer;box-shadow:0 0 20px rgba(79,70,229,.3)">+ Создать бота</button>
+    <button onclick="openWizard()" class="btn-primary px-5 py-2.5 rounded-xl text-sm font-semibold" style="background:linear-gradient(180deg,#2A5BE8 0%,#1D4ED8 60%,#143797 100%);box-shadow:inset 0 1px 1px rgba(255,255,255,.28),inset 0 -1px 3px rgba(0,0,0,.6),0 4px 8px -2px rgba(0,0,0,.6),0 0 0 1px rgba(29,78,216,.35);border:none;color:#fff;cursor:pointer;box-shadow:0 0 20px rgba(29,78,216,.4)">+ Создать бота</button>
   </div>
 
-  <!-- Filter -->
+  <!-- Filters -->
   <div class="flex flex-wrap gap-3 mb-6">
-    <select class="bg-slate-800/50 border border-slate-700 rounded-lg px-3 py-2 text-sm text-slate-300 outline-none"><option>Все биржи</option><option>Bybit</option><option>Binance</option><option>BingX</option></select>
-    <select class="bg-slate-800/50 border border-slate-700 rounded-lg px-3 py-2 text-sm text-slate-300 outline-none"><option>Все стратегии</option><option>SMC</option><option>Gerchik</option><option>Scalping</option></select>
-    <select class="bg-slate-800/50 border border-slate-700 rounded-lg px-3 py-2 text-sm text-slate-300 outline-none"><option>Все статусы</option><option>Активные</option><option>Остановлены</option></select>
+    <select id="fltExchange" class="bg-slate-800/50 border border-slate-700 rounded-lg px-3 py-2 text-sm text-slate-300 outline-none">
+      <option value="">Все биржи</option><option value="bybit">Bybit</option><option value="binance">Binance</option><option value="bingx">BingX</option><option value="okx">OKX</option>
+    </select>
+    <select id="fltStrategy" class="bg-slate-800/50 border border-slate-700 rounded-lg px-3 py-2 text-sm text-slate-300 outline-none">
+      <option value="">Все стратегии</option><option value="levels">Levels</option><option value="smc">SMC</option><option value="gerchik">Gerchik</option><option value="scalping">Scalping</option>
+    </select>
+    <select id="fltStatus" class="bg-slate-800/50 border border-slate-700 rounded-lg px-3 py-2 text-sm text-slate-300 outline-none">
+      <option value="">Все статусы</option><option value="active">Активные</option><option value="paused">Остановлены</option>
+    </select>
   </div>
 
-  <!-- Bot Cards -->
+  <!-- Bot Cards (filled by loadBots()) -->
   <div class="grid md:grid-cols-2 xl:grid-cols-3 gap-4" id="botGrid">
-
-    <div class="card card-glow">
-      <div class="flex items-center justify-between mb-3">
-        <div class="flex items-center gap-3"><div class="w-10 h-10 rounded-lg bg-indigo-500/10 flex items-center justify-center text-sm font-bold text-indigo-400">B1</div><div><div class="font-semibold">BTC Scalper</div><div class="text-xs text-slate-500">Bybit &middot; BTCUSDT</div></div></div>
-        <div class="toggle on" onclick="this.classList.toggle('on')"></div>
-      </div>
-      <div class="flex items-center gap-2 mb-3"><span class="text-xs px-2 py-0.5 rounded-full bg-cyan-500/15 text-cyan-400">Scalping</span><span class="text-xs px-2 py-0.5 rounded-full bg-green-500/15 text-green-400">Active</span></div>
-      <div class="grid grid-cols-3 gap-3 text-center text-sm mb-3">
-        <div><div class="text-xs text-slate-500">PnL</div><div class="text-green-400 font-semibold">+$450</div></div>
-        <div><div class="text-xs text-slate-500">Win Rate</div><div class="font-semibold">82%</div></div>
-        <div><div class="text-xs text-slate-500">Сделки</div><div class="font-semibold">24</div></div>
-      </div>
-      <div class="text-xs text-slate-500">Leverage: 10x &middot; Risk: 2% &middot; SL: 1.5%</div>
-    </div>
-
-    <div class="card card-glow">
-      <div class="flex items-center justify-between mb-3">
-        <div class="flex items-center gap-3"><div class="w-10 h-10 rounded-lg bg-purple-500/10 flex items-center justify-center text-sm font-bold text-purple-400">B2</div><div><div class="font-semibold">ETH SMC Bot</div><div class="text-xs text-slate-500">Binance &middot; ETHUSDT</div></div></div>
-        <div class="toggle on" onclick="this.classList.toggle('on')"></div>
-      </div>
-      <div class="flex items-center gap-2 mb-3"><span class="text-xs px-2 py-0.5 rounded-full bg-indigo-500/15 text-indigo-400">SMC</span><span class="text-xs px-2 py-0.5 rounded-full bg-green-500/15 text-green-400">Active</span></div>
-      <div class="grid grid-cols-3 gap-3 text-center text-sm mb-3">
-        <div><div class="text-xs text-slate-500">PnL</div><div class="text-green-400 font-semibold">+$320</div></div>
-        <div><div class="text-xs text-slate-500">Win Rate</div><div class="font-semibold">75%</div></div>
-        <div><div class="text-xs text-slate-500">Сделки</div><div class="font-semibold">16</div></div>
-      </div>
-      <div class="text-xs text-slate-500">Leverage: 5x &middot; Risk: 1.5% &middot; SL: 2%</div>
-    </div>
-
-    <div class="card card-glow">
-      <div class="flex items-center justify-between mb-3">
-        <div class="flex items-center gap-3"><div class="w-10 h-10 rounded-lg bg-green-500/10 flex items-center justify-center text-sm font-bold text-green-400">B3</div><div><div class="font-semibold">SOL Gerchik</div><div class="text-xs text-slate-500">BingX &middot; SOLUSDT</div></div></div>
-        <div class="toggle on" onclick="this.classList.toggle('on')"></div>
-      </div>
-      <div class="flex items-center gap-2 mb-3"><span class="text-xs px-2 py-0.5 rounded-full bg-orange-500/15 text-orange-400">Gerchik</span><span class="text-xs px-2 py-0.5 rounded-full bg-green-500/15 text-green-400">Active</span></div>
-      <div class="grid grid-cols-3 gap-3 text-center text-sm mb-3">
-        <div><div class="text-xs text-slate-500">PnL</div><div class="text-green-400 font-semibold">+$510</div></div>
-        <div><div class="text-xs text-slate-500">Win Rate</div><div class="font-semibold">88%</div></div>
-        <div><div class="text-xs text-slate-500">Сделки</div><div class="font-semibold">9</div></div>
-      </div>
-      <div class="text-xs text-slate-500">Leverage: 3x &middot; Risk: 2% &middot; SL: 1%</div>
-    </div>
-
-    <div class="card card-glow" style="opacity:.6">
-      <div class="flex items-center justify-between mb-3">
-        <div class="flex items-center gap-3"><div class="w-10 h-10 rounded-lg bg-slate-500/10 flex items-center justify-center text-sm font-bold text-slate-400">B4</div><div><div class="font-semibold">DOGE Test</div><div class="text-xs text-slate-500">Bybit &middot; DOGEUSDT</div></div></div>
-        <div class="toggle" onclick="this.classList.toggle('on')"></div>
-      </div>
-      <div class="flex items-center gap-2 mb-3"><span class="text-xs px-2 py-0.5 rounded-full bg-cyan-500/15 text-cyan-400">Scalping</span><span class="text-xs px-2 py-0.5 rounded-full bg-slate-500/15 text-slate-400">Stopped</span></div>
-      <div class="grid grid-cols-3 gap-3 text-center text-sm mb-3">
-        <div><div class="text-xs text-slate-500">PnL</div><div class="text-red-400 font-semibold">-$40</div></div>
-        <div><div class="text-xs text-slate-500">Win Rate</div><div class="font-semibold">45%</div></div>
-        <div><div class="text-xs text-slate-500">Сделки</div><div class="font-semibold">11</div></div>
-      </div>
-      <div class="text-xs text-slate-500">Leverage: 20x &middot; Risk: 5% &middot; SL: 0.5%</div>
-    </div>
+    <div class="col-span-full text-center py-12 text-slate-500 text-sm">Загрузка ботов…</div>
   </div>
 </main>
 
-<!-- CREATE BOT MODAL -->
+<!-- CREATE BOT WIZARD (4 steps) -->
 <div id="createModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.7);backdrop-filter:blur(8px);z-index:100;align-items:center;justify-content:center">
-  <div class="card" style="width:100%;max-width:500px;margin:16px;max-height:90vh;overflow-y:auto">
-    <div class="flex items-center justify-between mb-6"><h2 class="text-xl font-bold">Создать бота</h2><button onclick="document.getElementById('createModal').style.display='none'" class="text-slate-400 hover:text-white text-xl">&times;</button></div>
-    <form id="createBotForm" class="space-y-4">
-      <div><label class="text-sm text-slate-400 block mb-1">Имя бота</label><input name="name" required class="w-full bg-slate-800/50 border border-slate-700 rounded-xl px-4 py-3 text-white outline-none focus:border-indigo-500" placeholder="BTC Scalper"/></div>
-      <div><label class="text-sm text-slate-400 block mb-1">Биржа</label><select name="exchangeName" class="w-full bg-slate-800/50 border border-slate-700 rounded-xl px-4 py-3 text-white outline-none"><option value="bybit">Bybit</option><option value="binance">Binance</option><option value="bingx">BingX</option></select></div>
-      <div><label class="text-sm text-slate-400 block mb-1">Торговая пара</label><input name="symbol" required class="w-full bg-slate-800/50 border border-slate-700 rounded-xl px-4 py-3 text-white outline-none focus:border-indigo-500" placeholder="BTCUSDT"/></div>
-      <div><label class="text-sm text-slate-400 block mb-1">Стратегия</label><select name="strategyType" class="w-full bg-slate-800/50 border border-slate-700 rounded-xl px-4 py-3 text-white outline-none"><option value="scalping">Scalping</option><option value="smc">SMC</option><option value="gerchik">Gerchik</option></select></div>
-      <div class="grid grid-cols-2 gap-4">
-        <div><label class="text-sm text-slate-400 block mb-1">Leverage</label><input name="leverage" type="number" value="10" min="1" max="100" class="w-full bg-slate-800/50 border border-slate-700 rounded-xl px-4 py-3 text-white outline-none"/></div>
-        <div><label class="text-sm text-slate-400 block mb-1">Размер ($)</label><input name="positionSizeUsd" type="number" value="100" min="10" class="w-full bg-slate-800/50 border border-slate-700 rounded-xl px-4 py-3 text-white outline-none"/></div>
+  <div class="card" style="width:100%;max-width:560px;margin:16px;max-height:92vh;overflow-y:auto">
+    <div class="flex items-center justify-between mb-4">
+      <h2 class="text-xl font-bold">Создать бота</h2>
+      <button type="button" onclick="closeWizard()" class="text-slate-400 hover:text-white text-xl">&times;</button>
+    </div>
+    <!-- Step indicator -->
+    <div class="flex items-center gap-2 mb-6" id="wizSteps">
+      <div class="wiz-step active" data-step="1"><span class="wiz-num">1</span><span class="wiz-label">Основы</span></div>
+      <div class="wiz-line"></div>
+      <div class="wiz-step" data-step="2"><span class="wiz-num">2</span><span class="wiz-label">Стратегия</span></div>
+      <div class="wiz-line"></div>
+      <div class="wiz-step" data-step="3"><span class="wiz-num">3</span><span class="wiz-label">Риск</span></div>
+      <div class="wiz-line"></div>
+      <div class="wiz-step" data-step="4"><span class="wiz-num">4</span><span class="wiz-label">Режим</span></div>
+    </div>
+    <form id="createBotForm" class="space-y-4" novalidate>
+      <!-- Step 1: Basics -->
+      <div class="wiz-pane" data-pane="1">
+        <div><label class="text-sm text-slate-400 block mb-1">Имя бота</label><input name="name" required class="w-full bg-slate-800/50 border border-slate-700 rounded-xl px-4 py-3 text-white outline-none focus:border-indigo-500" placeholder="BTC Scalper"/></div>
+        <div class="mt-3"><label class="text-sm text-slate-400 block mb-1">Биржа</label><select name="exchangeName" class="w-full bg-slate-800/50 border border-slate-700 rounded-xl px-4 py-3 text-white outline-none"><option value="bybit">Bybit</option><option value="binance">Binance</option><option value="bingx">BingX</option><option value="okx">OKX</option></select></div>
+        <div class="mt-3"><label class="text-sm text-slate-400 block mb-1">Торговая пара</label><input name="symbol" required class="w-full bg-slate-800/50 border border-slate-700 rounded-xl px-4 py-3 text-white outline-none focus:border-indigo-500" placeholder="BTCUSDT"/></div>
+        <div class="mt-3"><label class="text-sm text-slate-400 block mb-1">Таймфрейм</label><select name="timeframe" class="w-full bg-slate-800/50 border border-slate-700 rounded-xl px-4 py-3 text-white outline-none"><option>5m</option><option>15m</option><option>30m</option><option selected>1h</option><option>2h</option><option>4h</option><option>1d</option></select></div>
       </div>
-      <div class="grid grid-cols-2 gap-4">
-        <div><label class="text-sm text-slate-400 block mb-1">Stop Loss %</label><input name="stopLossPct" type="number" step="0.1" value="1.5" class="w-full bg-slate-800/50 border border-slate-700 rounded-xl px-4 py-3 text-white outline-none"/></div>
-        <div><label class="text-sm text-slate-400 block mb-1">Take Profit %</label><input name="takeProfitPct" type="number" step="0.1" value="3" class="w-full bg-slate-800/50 border border-slate-700 rounded-xl px-4 py-3 text-white outline-none"/></div>
+      <!-- Step 2: Strategy -->
+      <div class="wiz-pane hidden" data-pane="2">
+        <label class="text-sm text-slate-400 block mb-2">Выбери стратегию</label>
+        <div class="grid grid-cols-2 gap-3">
+          <label class="wiz-card"><input type="radio" name="strategyType" value="scalping" checked class="sr-only"/><div class="wiz-card-body"><div class="font-semibold text-white">Scalping</div><div class="text-xs text-slate-400 mt-1">Быстрые сделки на малых ТФ</div></div></label>
+          <label class="wiz-card"><input type="radio" name="strategyType" value="smc" class="sr-only"/><div class="wiz-card-body"><div class="font-semibold text-white">SMC</div><div class="text-xs text-slate-400 mt-1">Smart Money Concepts</div></div></label>
+          <label class="wiz-card"><input type="radio" name="strategyType" value="gerchik" class="sr-only"/><div class="wiz-card-body"><div class="font-semibold text-white">Gerchik</div><div class="text-xs text-slate-400 mt-1">Уровни + абсорбция (KRP)</div></div></label>
+          <label class="wiz-card"><input type="radio" name="strategyType" value="levels" class="sr-only"/><div class="wiz-card-body"><div class="font-semibold text-white">Levels</div><div class="text-xs text-slate-400 mt-1">Классические S/R ретесты</div></div></label>
+        </div>
+        <div class="mt-4"><label class="text-sm text-slate-400 block mb-1">Направление</label><select name="direction" class="w-full bg-slate-800/50 border border-slate-700 rounded-xl px-4 py-3 text-white outline-none"><option value="both">Long + Short</option><option value="long">Только Long</option><option value="short">Только Short</option></select></div>
       </div>
-      <button type="submit" class="w-full py-3 rounded-xl font-semibold text-white" style="background:linear-gradient(135deg,#4F46E5,#7C3AED)">Создать бота</button>
+      <!-- Step 3: Risk -->
+      <div class="wiz-pane hidden" data-pane="3">
+        <div class="grid grid-cols-2 gap-4">
+          <div><label class="text-sm text-slate-400 block mb-1">Leverage</label><input name="leverage" type="number" value="10" min="1" max="100" class="w-full bg-slate-800/50 border border-slate-700 rounded-xl px-4 py-3 text-white outline-none"/></div>
+          <div><label class="text-sm text-slate-400 block mb-1">Риск / сделку (%)</label><input name="riskPct" type="number" step="0.1" value="1" min="0.1" max="10" class="w-full bg-slate-800/50 border border-slate-700 rounded-xl px-4 py-3 text-white outline-none"/></div>
+        </div>
+        <div class="grid grid-cols-2 gap-4 mt-3">
+          <div><label class="text-sm text-slate-400 block mb-1">Размер ($)</label><input name="positionSizeUsd" type="number" value="100" min="10" class="w-full bg-slate-800/50 border border-slate-700 rounded-xl px-4 py-3 text-white outline-none"/></div>
+          <div><label class="text-sm text-slate-400 block mb-1">Max открытых</label><input name="maxOpenTrades" type="number" value="3" min="1" max="20" class="w-full bg-slate-800/50 border border-slate-700 rounded-xl px-4 py-3 text-white outline-none"/></div>
+        </div>
+        <div class="mt-3 p-3 rounded-xl bg-slate-800/40 border border-slate-700 text-xs text-slate-400">SL и TP ставятся стратегией на основе ATR — фиксированные значения не нужны. Circuit breaker остановит бота при дневной просадке 10%.</div>
+      </div>
+      <!-- Step 4: Mode + review -->
+      <div class="wiz-pane hidden" data-pane="4">
+        <label class="text-sm text-slate-400 block mb-2">Режим торговли</label>
+        <div class="grid grid-cols-2 gap-3 mb-4">
+          <label class="wiz-card"><input type="radio" name="tradingMode" value="paper" checked class="sr-only"/><div class="wiz-card-body"><div class="font-semibold text-slate-300">PAPER</div><div class="text-xs text-slate-400 mt-1">Виртуальный баланс, безопасно</div></div></label>
+          <label class="wiz-card"><input type="radio" name="tradingMode" value="live" class="sr-only"/><div class="wiz-card-body"><div class="font-semibold text-red-400">LIVE</div><div class="text-xs text-slate-400 mt-1">Реальные деньги — Pro+</div></div></label>
+        </div>
+        <label class="flex items-center gap-2 text-sm text-slate-300 cursor-pointer mb-4"><input type="checkbox" name="autoTrade" style="accent-color:#6366f1"/> Авто-торговля (иначе — только сигналы)</label>
+        <div class="p-3 rounded-xl bg-slate-800/40 border border-slate-700 text-sm text-slate-300">
+          <div class="text-xs text-slate-400 mb-1">Сводка</div>
+          <div id="wizReview" class="font-mono text-xs text-slate-300 leading-relaxed"></div>
+        </div>
+      </div>
+      <!-- Nav -->
+      <div class="flex items-center justify-between gap-3 pt-2">
+        <button type="button" id="wizBack" class="py-2.5 px-5 rounded-xl bg-slate-800 text-slate-300 hover:bg-slate-700 font-medium hidden">← Назад</button>
+        <div class="text-xs text-slate-500" id="wizProgress">Шаг 1 из 4</div>
+        <button type="button" id="wizNext" class="py-2.5 px-5 rounded-xl font-semibold text-white" style="background:linear-gradient(180deg,#2A5BE8 0%,#1D4ED8 60%,#143797 100%)">Далее →</button>
+        <button type="submit" id="wizSubmit" class="py-2.5 px-5 rounded-xl font-semibold text-white hidden" style="background:linear-gradient(180deg,#2A5BE8 0%,#1D4ED8 60%,#143797 100%)">Создать бота</button>
+      </div>
     </form>
+  </div>
+</div>
+
+<style>
+.wiz-step{display:flex;align-items:center;gap:6px;color:#64748b;font-size:12px;white-space:nowrap}
+.wiz-step.active .wiz-num,.wiz-step.done .wiz-num{background:#1d4ed8;color:#fff}
+.wiz-step.active .wiz-label,.wiz-step.done .wiz-label{color:#e2e8f0}
+.wiz-num{width:26px;height:26px;border-radius:50%;background:#1e293b;color:#94a3b8;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:600}
+.wiz-line{flex:1;height:2px;background:#1e293b;min-width:10px}
+.wiz-step.done ~ .wiz-line,.wiz-step.active ~ .wiz-line{background:#1e293b}
+.wiz-pane.hidden{display:none}
+.wiz-card{cursor:pointer;display:block;border-radius:12px;background:rgba(30,41,59,.5);border:1px solid #334155;padding:14px;transition:all .15s}
+.wiz-card:hover{border-color:#475569}
+.wiz-card:has(input:checked){border-color:#6366f1;background:rgba(99,102,241,.1);box-shadow:0 0 0 1px rgba(99,102,241,.4)}
+.wiz-card-body{text-align:center}
+</style>
+
+<!-- PAPER → LIVE CONFIRM MODAL -->
+<div id="liveConfirmModal" class="fixed inset-0 bg-black/70 flex items-center justify-center hidden z-50" style="backdrop-filter:blur(8px)">
+  <div class="bg-slate-900 border border-red-500/30 rounded-2xl p-6 max-w-md w-full mx-4 shadow-2xl">
+    <div class="flex items-start gap-3 mb-4">
+      <div class="w-10 h-10 rounded-full bg-red-500/15 flex items-center justify-center shrink-0">
+        <iconify-icon icon="solar:danger-triangle-linear" style="color:#f87171;font-size:22px"></iconify-icon>
+      </div>
+      <div>
+        <h3 class="text-lg font-semibold text-white">Переключить в LIVE?</h3>
+        <p class="text-sm text-slate-400 mt-1">Бот начнёт исполнять ордера реальными средствами на бирже.</p>
+      </div>
+    </div>
+    <ul class="text-sm text-slate-300 space-y-2 mb-5 pl-2">
+      <li class="flex gap-2"><span class="text-red-400">•</span> Ордера отправятся на реальный счёт биржи</li>
+      <li class="flex gap-2"><span class="text-red-400">•</span> Стоп-лоссы ставятся автоматически, но 100% гарантии нет</li>
+      <li class="flex gap-2"><span class="text-red-400">•</span> Circuit breaker остановит бота при дневной просадке 10%</li>
+      <li class="flex gap-2"><span class="text-red-400">•</span> Вы подтверждаете, что понимаете риски криптоторговли</li>
+    </ul>
+    <label class="flex items-start gap-2 text-sm text-slate-300 mb-5 cursor-pointer">
+      <input type="checkbox" id="liveConfirmChk" class="mt-1" style="accent-color:#ef4444">
+      <span>Я понимаю риски и беру полную ответственность за результаты торговли</span>
+    </label>
+    <div class="flex gap-3">
+      <button type="button" id="liveCancelBtn" class="flex-1 py-2.5 rounded-xl bg-slate-800 text-slate-300 hover:bg-slate-700 font-medium">Отмена</button>
+      <button type="button" id="liveConfirmBtn" disabled class="flex-1 py-2.5 rounded-xl bg-red-500 text-white font-semibold disabled:opacity-40 disabled:cursor-not-allowed hover:bg-red-400">Включить LIVE</button>
+    </div>
   </div>
 </div>
 
 <script src="app.js"></script>
 <script>
-if(!Auth.isLoggedIn())window.location.href='/?login=1';
-Sidebar.init('bots');
-document.getElementById('createBotForm')?.addEventListener('submit',async e=>{
-  e.preventDefault();const fd=new FormData(e.target);const data=Object.fromEntries(fd.entries());
-  data.leverage=+data.leverage;data.positionSizeUsd=+data.positionSizeUsd;data.stopLossPct=+data.stopLossPct;data.takeProfitPct=+data.takeProfitPct;
-  try{await API.createBot(data);Toast.success('Бот создан!');document.getElementById('createModal').style.display='none'}catch(err){Toast.error(err.message)}
+if(!Auth.requireAuth()) throw new Error('noauth');
+document.querySelectorAll('.sidebar-link[data-page="bots"]').forEach(a => a.classList.add('active'));
+
+const STRATEGY_LABELS = { levels: 'Levels', smc: 'SMC', gerchik: 'Gerchik', scalping: 'Scalping' };
+const TF_OPTS = ['5m','15m','30m','1h','2h','4h','1d'];
+const FILTERS = { exchange: '', strategy: '', status: '' };
+
+function applyBotFilters(bots) {
+  return bots.filter((b) => {
+    if (FILTERS.exchange && (b.exchange || '').toLowerCase() !== FILTERS.exchange) return false;
+    if (FILTERS.strategy && (b.strategy || '').toLowerCase() !== FILTERS.strategy) return false;
+    if (FILTERS.status === 'active' && !b.isActive) return false;
+    if (FILTERS.status === 'paused' && b.isActive) return false;
+    return true;
+  });
+}
+
+// Rebind filter selects → reload
+['fltExchange','fltStrategy','fltStatus'].forEach((id) => {
+  const el = document.getElementById(id);
+  if (!el) return;
+  el.addEventListener('change', () => {
+    FILTERS.exchange = document.getElementById('fltExchange').value;
+    FILTERS.strategy = document.getElementById('fltStrategy').value;
+    FILTERS.status   = document.getElementById('fltStatus').value;
+    loadBots();
+  });
 });
+
+async function loadBots() {
+  const grid = document.getElementById('botGrid');
+  if (!grid) return;
+  try {
+    const data = await API.listBots();
+    // Header stats always reflect ALL bots; filters only affect the grid.
+    const all = data.bots || [];
+    const filtered = applyBotFilters(all);
+    let activeCount = 0, totalPnl = 0;
+    grid.innerHTML = '';
+    if (!all.length) {
+      grid.innerHTML = '<div class="col-span-full text-center py-12 text-slate-500">Пока нет ботов. Создай первого — кнопка вверху.</div>';
+      document.getElementById('hdrTotal').textContent = '0';
+      document.getElementById('hdrActive').textContent = '0';
+      const pnlEl = document.getElementById('hdrPnl');
+      pnlEl.textContent = Fmt.currency(0); pnlEl.className = 'text-slate-400';
+      return;
+    }
+    // Pre-fetch stats for ALL bots so header aggregates stay stable when filters change.
+    const statsById = new Map();
+    await Promise.all(all.map(async (b) => {
+      const s = await API.botStats(b.id).catch(() => ({ totalPnl: 0, winRate: null, totalTrades: 0 }));
+      statsById.set(b.id, s);
+      if (b.isActive) activeCount++;
+      totalPnl += Number(s.totalPnl || 0);
+    }));
+    if (!filtered.length) {
+      grid.innerHTML = '<div class="col-span-full text-center py-10 text-slate-500">Под выбранные фильтры ничего не подходит.</div>';
+    }
+    for (const b of filtered) {
+      const stats = statsById.get(b.id) || { totalPnl: 0, winRate: null, totalTrades: 0 };
+      const card = document.createElement('div');
+      card.className = 'card card-glow';
+      const pnlClass = stats.totalPnl > 0 ? 'text-green-400' : stats.totalPnl < 0 ? 'text-red-400' : 'text-slate-400';
+      const syms = Array.isArray(b.symbols) ? b.symbols.slice(0, 3).join(', ') : '—';
+      const modeBadge = b.tradingMode === 'live'
+        ? '<span class="text-xs px-2 py-0.5 rounded-full bg-red-500/15 text-red-400 cursor-pointer" data-mode="'+b.id+'" data-current="live" title="Переключить режим">LIVE</span>'
+        : '<span class="text-xs px-2 py-0.5 rounded-full bg-slate-500/15 text-slate-400 cursor-pointer" data-mode="'+b.id+'" data-current="paper" title="Переключить в LIVE">PAPER</span>';
+      card.innerHTML = `
+        <div class="flex items-center justify-between mb-3">
+          <div class="flex items-center gap-3">
+            <div class="w-10 h-10 rounded-lg bg-indigo-500/10 flex items-center justify-center text-sm font-bold text-indigo-400">${(b.name||'B')[0].toUpperCase()}</div>
+            <div><div class="font-semibold">${escapeHtml(b.name)}</div><div class="text-xs text-slate-500">${b.exchange} · ${syms}</div></div>
+          </div>
+          <div class="toggle ${b.isActive?'on':''}" data-bot="${b.id}" style="cursor:pointer"></div>
+        </div>
+        <div class="flex items-center gap-2 mb-3">
+          <span class="text-xs px-2 py-0.5 rounded-full bg-cyan-500/15 text-cyan-400">${STRATEGY_LABELS[b.strategy]||b.strategy}</span>
+          ${modeBadge}
+          <span class="text-xs px-2 py-0.5 rounded-full ${b.isActive?'bg-green-500/15 text-green-400':'bg-slate-500/15 text-slate-400'}">${b.isActive?'Active':'Paused'}</span>
+        </div>
+        <div class="grid grid-cols-3 gap-3 text-center text-sm mb-3">
+          <div><div class="text-xs text-slate-500">PnL</div><div class="${pnlClass} font-semibold">${Fmt.currency(stats.totalPnl)}</div></div>
+          <div><div class="text-xs text-slate-500">Win Rate</div><div class="font-semibold">${stats.winRate!==null?Fmt.percent(stats.winRate*100,{decimals:0}):'—'}</div></div>
+          <div><div class="text-xs text-slate-500">Trades</div><div class="font-semibold">${stats.totalTrades}</div></div>
+        </div>
+        <div class="text-xs text-slate-500 flex items-center justify-between">
+          <span>Lev ${b.leverage}x · Risk ${b.riskPct}% · Max ${b.maxOpenTrades}</span>
+          <button data-delete="${b.id}" class="text-red-400 hover:text-red-300 text-xs">Удалить</button>
+        </div>`;
+      grid.appendChild(card);
+    }
+    // Wire toggles
+    grid.querySelectorAll('.toggle[data-bot]').forEach(el => {
+      el.addEventListener('click', async () => {
+        const id = +el.getAttribute('data-bot');
+        try { await API.toggleBot(id); Toast.success('Статус изменён'); loadBots(); }
+        catch (err) { Toast.error(err.message); }
+      });
+    });
+    grid.querySelectorAll('button[data-delete]').forEach(b => {
+      b.addEventListener('click', async () => {
+        if (!confirm('Удалить бота?')) return;
+        const id = +b.getAttribute('data-delete');
+        try { await API.deleteBot(id); Toast.success('Бот удалён'); loadBots(); }
+        catch (err) { Toast.error(err.message); }
+      });
+    });
+    // Wire mode switchers (PAPER ↔ LIVE) — paper→live opens a warning modal
+    grid.querySelectorAll('[data-mode]').forEach(el => {
+      el.addEventListener('click', () => {
+        const id = +el.getAttribute('data-mode');
+        const current = el.getAttribute('data-current');
+        if (current === 'paper') openLiveConfirm(id);
+        else switchMode(id, 'paper');
+      });
+    });
+    // Header stats — reflect all bots, not the filtered subset.
+    document.getElementById('hdrTotal').textContent = all.length;
+    document.getElementById('hdrActive').textContent = activeCount;
+    const pnlEl = document.getElementById('hdrPnl');
+    pnlEl.textContent = Fmt.currency(totalPnl);
+    pnlEl.className = totalPnl > 0 ? 'text-green-400' : totalPnl < 0 ? 'text-red-400' : 'text-slate-400';
+  } catch (err) {
+    grid.innerHTML = '<div class="col-span-full text-center py-8 text-red-400">Ошибка: ' + escapeHtml(err.message) + '</div>';
+  }
+}
+
+function escapeHtml(s) {
+  return String(s||'').replace(/[&<>"']/g, (c) => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'})[c]);
+}
+
+// Create form — legacy form id, map to new API
+document.getElementById('createBotForm')?.addEventListener('submit', async (e) => {
+  e.preventDefault();
+  if (wizStep < 4) return nextStep();
+  const fd = new FormData(e.target);
+  const raw = Object.fromEntries(fd.entries());
+  // Map legacy field names
+  const symbolStr = (raw.symbol || '').trim().toUpperCase();
+  const payload = {
+    name: raw.name || 'Bot',
+    exchange: (raw.exchangeName || raw.exchange || 'bybit').toLowerCase(),
+    exchangeKeyId: raw.exchangeKeyId ? +raw.exchangeKeyId : null,
+    symbols: symbolStr ? [symbolStr] : ['BTCUSDT'],
+    strategy: (raw.strategyType || raw.strategy || 'levels').toLowerCase(),
+    timeframe: raw.timeframe || '1h',
+    direction: raw.direction || 'both',
+    leverage: raw.leverage ? +raw.leverage : 1,
+    riskPct: raw.riskPct ? +raw.riskPct : 1,
+    maxOpenTrades: raw.maxOpenTrades ? +raw.maxOpenTrades : 3,
+    autoTrade: !!raw.autoTrade,
+    tradingMode: raw.tradingMode || 'paper',
+  };
+  // Remove exchangeKeyId if null (schema requires int positive)
+  if (!payload.exchangeKeyId) delete payload.exchangeKeyId;
+  try {
+    await API.createBot(payload);
+    Toast.success('Бот создан!');
+    closeWizard();
+    loadBots();
+  } catch (err) {
+    if (err.code === 'UPGRADE_REQUIRED') Toast.warn('Нужен план ' + (err.data?.requiredPlan || 'Pro'));
+    else Toast.error(err.message);
+  }
+});
+
+// ── Create-bot 4-step wizard controller ──
+let wizStep = 1;
+const WIZ_TOTAL = 4;
+function setStep(n) {
+  wizStep = Math.max(1, Math.min(WIZ_TOTAL, n));
+  document.querySelectorAll('.wiz-pane').forEach((p) => {
+    p.classList.toggle('hidden', +p.getAttribute('data-pane') !== wizStep);
+  });
+  document.querySelectorAll('.wiz-step').forEach((s) => {
+    const i = +s.getAttribute('data-step');
+    s.classList.toggle('active', i === wizStep);
+    s.classList.toggle('done', i < wizStep);
+  });
+  document.getElementById('wizBack').classList.toggle('hidden', wizStep === 1);
+  document.getElementById('wizNext').classList.toggle('hidden', wizStep === WIZ_TOTAL);
+  document.getElementById('wizSubmit').classList.toggle('hidden', wizStep !== WIZ_TOTAL);
+  document.getElementById('wizProgress').textContent = 'Шаг ' + wizStep + ' из ' + WIZ_TOTAL;
+  if (wizStep === WIZ_TOTAL) buildReview();
+}
+function validateStep(n) {
+  const form = document.getElementById('createBotForm');
+  if (n === 1) {
+    const name = form.name.value.trim();
+    const symbol = form.symbol.value.trim();
+    if (!name) { Toast.warn('Введи имя бота'); return false; }
+    if (!symbol) { Toast.warn('Введи торговую пару'); return false; }
+  }
+  return true;
+}
+function nextStep() { if (validateStep(wizStep)) setStep(wizStep + 1); }
+function prevStep() { setStep(wizStep - 1); }
+function openWizard() {
+  document.getElementById('createBotForm').reset();
+  setStep(1);
+  document.getElementById('createModal').style.display = 'flex';
+}
+function closeWizard() {
+  document.getElementById('createModal').style.display = 'none';
+  setStep(1);
+  document.getElementById('createBotForm').reset();
+}
+function buildReview() {
+  const form = document.getElementById('createBotForm');
+  const fd = new FormData(form);
+  const mode = fd.get('tradingMode') || 'paper';
+  const lines = [
+    'Имя: ' + (fd.get('name') || '—'),
+    'Биржа: ' + (fd.get('exchangeName') || '—') + ' · ' + (fd.get('symbol') || '—').toUpperCase() + ' · ' + (fd.get('timeframe') || '1h'),
+    'Стратегия: ' + (fd.get('strategyType') || '—') + ' · ' + (fd.get('direction') || 'both'),
+    'Lev ' + (fd.get('leverage') || 1) + 'x · Risk ' + (fd.get('riskPct') || 1) + '% · Max ' + (fd.get('maxOpenTrades') || 3),
+    'Режим: ' + mode.toUpperCase() + (fd.get('autoTrade') ? ' · авто-торговля' : ' · только сигналы'),
+  ];
+  document.getElementById('wizReview').innerHTML = lines.map((l) => '<div>' + l.replace(/[&<>]/g, (c) => ({'&':'&amp;','<':'&lt;','>':'&gt;'})[c]) + '</div>').join('');
+}
+document.getElementById('wizNext')?.addEventListener('click', nextStep);
+document.getElementById('wizBack')?.addEventListener('click', prevStep);
+
+// WS: new signal from your bot
+WS.on('trade_opened', () => loadBots());
+
+// ── PAPER ↔ LIVE mode switch ──
+let pendingLiveBotId = null;
+function openLiveConfirm(botId) {
+  pendingLiveBotId = botId;
+  const m = document.getElementById('liveConfirmModal');
+  const chk = document.getElementById('liveConfirmChk');
+  const btn = document.getElementById('liveConfirmBtn');
+  chk.checked = false;
+  btn.disabled = true;
+  m.classList.remove('hidden');
+}
+function closeLiveConfirm() {
+  pendingLiveBotId = null;
+  document.getElementById('liveConfirmModal').classList.add('hidden');
+}
+async function switchMode(botId, mode) {
+  try {
+    await API.updateBot(botId, { tradingMode: mode });
+    Toast.success(mode === 'live' ? 'Бот переключён в LIVE' : 'Бот переключён в PAPER');
+    loadBots();
+  } catch (err) {
+    if (err.code === 'UPGRADE_REQUIRED') Toast.warn('Live-режим доступен на Pro и выше');
+    else Toast.error(err.message || 'Не удалось сменить режим');
+  }
+}
+document.getElementById('liveConfirmChk')?.addEventListener('change', (e) => {
+  document.getElementById('liveConfirmBtn').disabled = !e.target.checked;
+});
+document.getElementById('liveCancelBtn')?.addEventListener('click', closeLiveConfirm);
+document.getElementById('liveConfirmBtn')?.addEventListener('click', async () => {
+  if (!pendingLiveBotId) return closeLiveConfirm();
+  const id = pendingLiveBotId;
+  closeLiveConfirm();
+  await switchMode(id, 'live');
+});
+document.getElementById('liveConfirmModal')?.addEventListener('click', (e) => {
+  if (e.target.id === 'liveConfirmModal') closeLiveConfirm();
+});
+
+loadBots();
 </script>
 </body>
 </html>

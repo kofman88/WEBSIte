@@ -1,397 +1,250 @@
-const db = require('../models/database');
-
 /**
- * Supported strategy types and their display labels.
+ * Signal service — DB layer for signals.
+ *
+ * Uses the new `signals` table (per Phase 1 schema). Deprecates the legacy
+ * `signal_history` table from the pre-v3 codebase.
+ *
+ * All inserts enforce idempotency via signalRegistry fingerprint dedup.
  */
-const STRATEGIES = {
-  scalping: { id: 'scalping', name: 'Scalping', description: 'High-frequency short-term trades' },
-  smc: { id: 'smc', name: 'Smart Money Concepts', description: 'Order-block / liquidity sweep setups' },
-  gerchik: { id: 'gerchik', name: 'Gerchik Method', description: 'Level-based risk/reward approach' },
-};
 
-const VALID_TIMEFRAMES = ['1m', '5m', '15m', '30m', '1h', '4h', '1d'];
-const VALID_DIRECTIONS = ['long', 'short'];
+const db = require('../models/database');
+const registry = require('./signalRegistry');
+const logger = require('../utils/logger');
+const plans = require('../config/plans');
 
-class SignalService {
-  // ── Signal CRUD ────────────────────────────────────────────────────────
+function insert(sig) {
+  const fp = registry.fingerprint({
+    exchange: sig.exchange,
+    symbol: sig.symbol,
+    strategy: sig.strategy,
+    side: sig.side,
+    entry: sig.entry,
+    timeframe: sig.timeframe,
+  });
 
-  /**
-   * Create a new signal (admin / internal use).
-   */
-  createSignal(data) {
-    const {
-      symbol,
-      direction,
-      entryPrice,
-      stopLoss,
-      takeProfit1,
-      takeProfit2,
-      takeProfit3,
-      strategy,
-      timeframe,
-      confidence,
-      notes,
-    } = data;
-
-    // Validation
-    if (!symbol || !direction || entryPrice == null || stopLoss == null || !strategy || !timeframe || confidence == null) {
-      throw new Error('Missing required signal fields: symbol, direction, entryPrice, stopLoss, strategy, timeframe, confidence');
-    }
-
-    if (!VALID_DIRECTIONS.includes(direction)) {
-      throw new Error(`Invalid direction "${direction}". Must be one of: ${VALID_DIRECTIONS.join(', ')}`);
-    }
-    if (!STRATEGIES[strategy]) {
-      throw new Error(`Invalid strategy "${strategy}". Must be one of: ${Object.keys(STRATEGIES).join(', ')}`);
-    }
-    if (!VALID_TIMEFRAMES.includes(timeframe)) {
-      throw new Error(`Invalid timeframe "${timeframe}". Must be one of: ${VALID_TIMEFRAMES.join(', ')}`);
-    }
-    if (confidence < 0 || confidence > 100) {
-      throw new Error('Confidence must be between 0 and 100');
-    }
-
-    const stmt = db.prepare(`
-      INSERT INTO signal_history (
-        symbol, direction, entry_price, stop_loss,
-        take_profit_1, take_profit_2, take_profit_3,
-        strategy, timeframe, confidence, notes
-      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-    `);
-
-    const result = stmt.run(
-      symbol.toUpperCase(),
-      direction,
-      entryPrice,
-      stopLoss,
-      takeProfit1 || null,
-      takeProfit2 || null,
-      takeProfit3 || null,
-      strategy,
-      timeframe,
-      Math.round(confidence),
-      notes || null
-    );
-
-    return this.getSignalById(result.lastInsertRowid);
+  if (registry.isDuplicate(fp)) {
+    logger.debug('signal dup rejected', { fp, symbol: sig.symbol, strategy: sig.strategy });
+    return null;
   }
 
-  /**
-   * Get a single signal by ID.
-   */
-  getSignalById(signalId) {
-    return db.prepare('SELECT * FROM signal_history WHERE id = ?').get(signalId);
-  }
+  const result = db.prepare(`
+    INSERT INTO signals
+      (user_id, bot_id, exchange, symbol, strategy, timeframe, side,
+       entry_price, stop_loss, take_profit_1, take_profit_2, take_profit_3,
+       risk_reward, confidence, quality, reason, metadata, expires_at)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+  `).run(
+    sig.userId || null,
+    sig.botId || null,
+    sig.exchange,
+    sig.symbol,
+    sig.strategy,
+    sig.timeframe,
+    sig.side,
+    sig.entry,
+    sig.stopLoss,
+    sig.tp1 ?? null,
+    sig.tp2 ?? null,
+    sig.tp3 ?? null,
+    sig.riskReward ?? null,
+    sig.confidence ?? null,
+    sig.quality ?? null,
+    sig.reason ?? null,
+    sig.metadata ? JSON.stringify(sig.metadata) : null,
+    sig.expiresAt || null
+  );
 
-  /**
-   * Fetch signals with pagination, filtering, and ordering.
-   *
-   * Options: { page, limit, strategy, symbol, direction, minConfidence, status }
-   */
-  getSignals(options = {}) {
-    const {
-      page = 1,
-      limit = 20,
-      strategy,
-      symbol,
-      direction,
-      minConfidence,
-      status,
-    } = options;
-
-    const safeLimit = Math.min(Math.max(parseInt(limit, 10) || 20, 1), 100);
-    const safePage = Math.max(parseInt(page, 10) || 1, 1);
-    const offset = (safePage - 1) * safeLimit;
-
-    const conditions = [];
-    const params = [];
-
-    if (strategy) {
-      conditions.push('strategy = ?');
-      params.push(strategy);
-    }
-    if (symbol) {
-      conditions.push('symbol = ?');
-      params.push(symbol.toUpperCase());
-    }
-    if (direction) {
-      conditions.push('direction = ?');
-      params.push(direction);
-    }
-    if (minConfidence != null) {
-      conditions.push('confidence >= ?');
-      params.push(parseInt(minConfidence, 10));
-    }
-    if (status) {
-      conditions.push('result = ?');
-      params.push(status);
-    }
-
-    const where = conditions.length > 0 ? `WHERE ${conditions.join(' AND ')}` : '';
-
-    const countRow = db
-      .prepare(`SELECT COUNT(*) as total FROM signal_history ${where}`)
-      .get(...params);
-
-    const signals = db
-      .prepare(
-        `SELECT * FROM signal_history ${where}
-         ORDER BY created_at DESC
-         LIMIT ? OFFSET ?`
-      )
-      .all(...params, safeLimit, offset);
-
-    return {
-      signals,
-      pagination: {
-        page: safePage,
-        limit: safeLimit,
-        total: countRow.total,
-        totalPages: Math.ceil(countRow.total / safeLimit),
-      },
-    };
-  }
-
-  /**
-   * Get signals created after a certain ID (for real-time polling / SSE).
-   */
-  getSignalsSince(sinceId) {
-    return db
-      .prepare(
-        `SELECT * FROM signal_history
-         WHERE id > ?
-         ORDER BY created_at ASC`
-      )
-      .all(sinceId || 0);
-  }
-
-  /**
-   * Close a signal with a result.
-   */
-  closeSignal(signalId, { result, pnlPct }) {
-    if (!['win', 'loss', 'breakeven', 'cancelled'].includes(result)) {
-      throw new Error('result must be one of: win, loss, breakeven, cancelled');
-    }
-
-    db.prepare(
-      `UPDATE signal_history
-       SET result = ?, pnl_pct = ?, closed_at = CURRENT_TIMESTAMP
-       WHERE id = ?`
-    ).run(result, pnlPct ?? null, signalId);
-
-    return this.getSignalById(signalId);
-  }
-
-  // ── Performance stats ──────────────────────────────────────────────────
-
-  /**
-   * Aggregate signal performance statistics.
-   */
-  getStats(options = {}) {
-    const { strategy, days } = options;
-    const conditions = ["result != 'pending'"];
-    const params = [];
-
-    if (strategy) {
-      conditions.push('strategy = ?');
-      params.push(strategy);
-    }
-    if (days) {
-      conditions.push("created_at >= datetime('now', ? || ' days')");
-      params.push(-Math.abs(parseInt(days, 10)));
-    }
-
-    const where = conditions.length > 0 ? `WHERE ${conditions.join(' AND ')}` : '';
-
-    const total = db
-      .prepare(`SELECT COUNT(*) as cnt FROM signal_history ${where}`)
-      .get(...params).cnt;
-
-    const wins = db
-      .prepare(`SELECT COUNT(*) as cnt FROM signal_history ${where} AND result = 'win'`)
-      .get(...params).cnt;
-
-    const losses = db
-      .prepare(`SELECT COUNT(*) as cnt FROM signal_history ${where} AND result = 'loss'`)
-      .get(...params).cnt;
-
-    const avgPnl = db
-      .prepare(
-        `SELECT AVG(pnl_pct) as avg_pnl FROM signal_history ${where} AND pnl_pct IS NOT NULL`
-      )
-      .get(...params).avg_pnl;
-
-    const totalPnl = db
-      .prepare(
-        `SELECT SUM(pnl_pct) as total_pnl FROM signal_history ${where} AND pnl_pct IS NOT NULL`
-      )
-      .get(...params).total_pnl;
-
-    const avgConfidence = db
-      .prepare(`SELECT AVG(confidence) as avg_conf FROM signal_history ${where}`)
-      .get(...params).avg_conf;
-
-    // Per-strategy breakdown
-    const byStrategy = db
-      .prepare(
-        `SELECT strategy,
-                COUNT(*) as total,
-                SUM(CASE WHEN result = 'win' THEN 1 ELSE 0 END) as wins,
-                SUM(CASE WHEN result = 'loss' THEN 1 ELSE 0 END) as losses,
-                AVG(pnl_pct) as avg_pnl
-         FROM signal_history ${where}
-         GROUP BY strategy`
-      )
-      .all(...params);
-
-    return {
-      total,
-      wins,
-      losses,
-      breakeven: total - wins - losses,
-      winRate: total > 0 ? ((wins / total) * 100).toFixed(1) : '0.0',
-      avgPnlPct: avgPnl != null ? avgPnl.toFixed(2) : '0.00',
-      totalPnlPct: totalPnl != null ? totalPnl.toFixed(2) : '0.00',
-      avgConfidence: avgConfidence != null ? avgConfidence.toFixed(1) : '0.0',
-      byStrategy: byStrategy.map((s) => ({
-        strategy: s.strategy,
-        total: s.total,
-        wins: s.wins,
-        losses: s.losses,
-        winRate: s.total > 0 ? ((s.wins / s.total) * 100).toFixed(1) : '0.0',
-        avgPnlPct: s.avg_pnl != null ? s.avg_pnl.toFixed(2) : '0.00',
-      })),
-    };
-  }
-
-  // ── User signal preferences ────────────────────────────────────────────
-
-  /**
-   * Get or create a user's signal configuration.
-   */
-  getUserSignalConfig(userId) {
-    let cfg = db
-      .prepare('SELECT * FROM user_signals_config WHERE user_id = ?')
-      .get(userId);
-
-    if (!cfg) {
-      db.prepare(
-        `INSERT INTO user_signals_config (user_id) VALUES (?)`
-      ).run(userId);
-      cfg = db
-        .prepare('SELECT * FROM user_signals_config WHERE user_id = ?')
-        .get(userId);
-    }
-
-    return {
-      ...cfg,
-      strategies_enabled: JSON.parse(cfg.strategies_enabled || '[]'),
-      pairs_filter: JSON.parse(cfg.pairs_filter || '[]'),
-    };
-  }
-
-  /**
-   * Update a user's signal configuration.
-   */
-  updateUserSignalConfig(userId, updates) {
-    // Ensure row exists
-    this.getUserSignalConfig(userId);
-
-    const allowed = ['strategies_enabled', 'pairs_filter', 'min_confidence', 'notifications_enabled'];
-    const setClauses = [];
-    const values = [];
-
-    if (updates.strategiesEnabled !== undefined) {
-      if (!Array.isArray(updates.strategiesEnabled)) {
-        throw new Error('strategiesEnabled must be an array');
-      }
-      const invalid = updates.strategiesEnabled.filter((s) => !STRATEGIES[s]);
-      if (invalid.length > 0) {
-        throw new Error(`Invalid strategies: ${invalid.join(', ')}`);
-      }
-      setClauses.push('strategies_enabled = ?');
-      values.push(JSON.stringify(updates.strategiesEnabled));
-    }
-
-    if (updates.pairsFilter !== undefined) {
-      if (!Array.isArray(updates.pairsFilter)) {
-        throw new Error('pairsFilter must be an array');
-      }
-      setClauses.push('pairs_filter = ?');
-      values.push(JSON.stringify(updates.pairsFilter));
-    }
-
-    if (updates.minConfidence !== undefined) {
-      const mc = parseInt(updates.minConfidence, 10);
-      if (isNaN(mc) || mc < 0 || mc > 100) {
-        throw new Error('minConfidence must be between 0 and 100');
-      }
-      setClauses.push('min_confidence = ?');
-      values.push(mc);
-    }
-
-    if (updates.notificationsEnabled !== undefined) {
-      setClauses.push('notifications_enabled = ?');
-      values.push(updates.notificationsEnabled ? 1 : 0);
-    }
-
-    if (setClauses.length === 0) {
-      throw new Error('No valid fields to update');
-    }
-
-    values.push(userId);
-    db.prepare(
-      `UPDATE user_signals_config
-       SET ${setClauses.join(', ')}, updated_at = CURRENT_TIMESTAMP
-       WHERE user_id = ?`
-    ).run(...values);
-
-    return this.getUserSignalConfig(userId);
-  }
-
-  /**
-   * Get filtered signals for a specific user based on their config.
-   */
-  getFilteredSignalsForUser(userId, options = {}) {
-    const cfg = this.getUserSignalConfig(userId);
-
-    const mergedOptions = {
-      ...options,
-      minConfidence: options.minConfidence ?? cfg.min_confidence,
-    };
-
-    // Strategy filter
-    if (cfg.strategies_enabled && cfg.strategies_enabled.length > 0 && !options.strategy) {
-      // We'll filter in memory since SQLite IN clause is tricky with prepared statements
-      const result = this.getSignals(mergedOptions);
-      result.signals = result.signals.filter((s) =>
-        cfg.strategies_enabled.includes(s.strategy)
-      );
-      // Pair filter
-      if (cfg.pairs_filter && cfg.pairs_filter.length > 0) {
-        result.signals = result.signals.filter((s) =>
-          cfg.pairs_filter.includes(s.symbol)
-        );
-      }
-      return result;
-    }
-
-    return this.getSignals(mergedOptions);
-  }
-
-  /**
-   * Return available strategies metadata.
-   */
-  getStrategies() {
-    return Object.values(STRATEGIES);
-  }
-
-  /**
-   * Return valid timeframes.
-   */
-  getTimeframes() {
-    return VALID_TIMEFRAMES;
-  }
+  const signalId = result.lastInsertRowid;
+  registry.register(fp, signalId);
+  return getById(signalId);
 }
 
-module.exports = new SignalService();
+function getById(id) {
+  const row = db.prepare(`SELECT * FROM signals WHERE id = ?`).get(id);
+  return row ? hydrate(row) : null;
+}
+
+function listForUser(userId, { limit = 50, offset = 0, strategy = null, symbol = null } = {}) {
+  const parts = ['(user_id IS NULL OR user_id = ?)'];
+  const params = [userId];
+  if (strategy) { parts.push('strategy = ?'); params.push(strategy); }
+  if (symbol)   { parts.push('symbol = ?');   params.push(symbol); }
+  const where = parts.join(' AND ');
+  const rows = db.prepare(`
+    SELECT * FROM signals
+    WHERE ${where}
+    ORDER BY created_at DESC
+    LIMIT ? OFFSET ?
+  `).all(...params, limit, offset);
+  return rows.map(hydrate);
+}
+
+function listPublic({ limit = 20, strategy = null } = {}) {
+  const parts = ['user_id IS NULL'];
+  const params = [];
+  if (strategy) { parts.push('strategy = ?'); params.push(strategy); }
+  const where = parts.join(' AND ');
+  const rows = db.prepare(`
+    SELECT * FROM signals
+    WHERE ${where}
+    ORDER BY created_at DESC
+    LIMIT ?
+  `).all(...params, limit);
+  return rows.map(hydrate);
+}
+
+function stats(userId = null) {
+  const where = userId ? 'WHERE user_id = ? OR user_id IS NULL' : '';
+  const params = userId ? [userId] : [];
+  const totals = db.prepare(`
+    SELECT
+      COUNT(*) as total,
+      SUM(CASE WHEN result = 'win'       THEN 1 ELSE 0 END) as wins,
+      SUM(CASE WHEN result = 'loss'      THEN 1 ELSE 0 END) as losses,
+      SUM(CASE WHEN result = 'breakeven' THEN 1 ELSE 0 END) as breakevens,
+      SUM(CASE WHEN result = 'pending'   THEN 1 ELSE 0 END) as pending,
+      AVG(confidence) as avg_confidence,
+      AVG(quality) as avg_quality
+    FROM signals
+    ${where}
+  `).get(...params);
+  const closed = (totals.wins || 0) + (totals.losses || 0);
+  return {
+    total: totals.total || 0,
+    wins: totals.wins || 0,
+    losses: totals.losses || 0,
+    breakevens: totals.breakevens || 0,
+    pending: totals.pending || 0,
+    winRate: closed > 0 ? totals.wins / closed : null,
+    avgConfidence: totals.avg_confidence,
+    avgQuality: totals.avg_quality,
+  };
+}
+
+function recordResult(signalId, { result, resultPrice, resultPnlPct }) {
+  const info = db.prepare(`
+    UPDATE signals
+    SET result = ?, result_price = ?, result_pnl_pct = ?, closed_at = CURRENT_TIMESTAMP
+    WHERE id = ? AND result = 'pending'
+  `).run(result, resultPrice ?? null, resultPnlPct ?? null, signalId);
+  return info.changes > 0;
+}
+
+function getPrefs(userId) {
+  let row = db.prepare(`SELECT * FROM user_signal_prefs WHERE user_id = ?`).get(userId);
+  if (!row) {
+    db.prepare(`INSERT INTO user_signal_prefs (user_id) VALUES (?)`).run(userId);
+    row = db.prepare(`SELECT * FROM user_signal_prefs WHERE user_id = ?`).get(userId);
+  }
+  return {
+    userId: row.user_id,
+    enabledStrategies: safeJson(row.enabled_strategies, ['levels']),
+    watchedSymbols: safeJson(row.watched_symbols, []),
+    blacklistedSymbols: safeJson(row.blacklisted_symbols, []),
+    minConfidence: row.min_confidence,
+    minRr: row.min_rr,
+    timeframes: safeJson(row.timeframes, ['1h', '4h']),
+    directions: safeJson(row.directions, ['long', 'short']),
+    notificationsWeb: Boolean(row.notifications_web),
+    notificationsEmail: Boolean(row.notifications_email),
+    notificationsTelegram: Boolean(row.notifications_telegram),
+    telegramChatId: row.telegram_chat_id,
+  };
+}
+
+function updatePrefs(userId, patch) {
+  const current = getPrefs(userId);
+  const merged = { ...current, ...patch };
+  db.prepare(`
+    UPDATE user_signal_prefs SET
+      enabled_strategies = ?, watched_symbols = ?, blacklisted_symbols = ?,
+      min_confidence = ?, min_rr = ?,
+      timeframes = ?, directions = ?,
+      notifications_web = ?, notifications_email = ?, notifications_telegram = ?,
+      telegram_chat_id = ?,
+      updated_at = CURRENT_TIMESTAMP
+    WHERE user_id = ?
+  `).run(
+    JSON.stringify(merged.enabledStrategies),
+    JSON.stringify(merged.watchedSymbols),
+    JSON.stringify(merged.blacklistedSymbols),
+    merged.minConfidence,
+    merged.minRr,
+    JSON.stringify(merged.timeframes),
+    JSON.stringify(merged.directions),
+    merged.notificationsWeb ? 1 : 0,
+    merged.notificationsEmail ? 1 : 0,
+    merged.notificationsTelegram ? 1 : 0,
+    merged.telegramChatId || null,
+    userId
+  );
+  return getPrefs(userId);
+}
+
+function trackView(userId, signalId) {
+  db.prepare(`INSERT INTO signal_views (user_id, signal_id) VALUES (?, ?)`)
+    .run(userId, signalId);
+}
+
+function viewsToday(userId) {
+  const row = db.prepare(`
+    SELECT COUNT(*) as n FROM signal_views
+    WHERE user_id = ? AND DATE(viewed_at) = DATE('now')
+  `).get(userId);
+  return row.n || 0;
+}
+
+function freeDailyLimitHit(userId, plan) {
+  const limits = plans.getLimits(plan);
+  if (limits.signalsPerDay === Infinity) return false;
+  return viewsToday(userId) >= limits.signalsPerDay;
+}
+
+function hydrate(row) {
+  if (!row) return null;
+  return {
+    id: row.id,
+    userId: row.user_id,
+    botId: row.bot_id,
+    exchange: row.exchange,
+    symbol: row.symbol,
+    strategy: row.strategy,
+    timeframe: row.timeframe,
+    side: row.side,
+    entry: row.entry_price,
+    stopLoss: row.stop_loss,
+    tp1: row.take_profit_1,
+    tp2: row.take_profit_2,
+    tp3: row.take_profit_3,
+    riskReward: row.risk_reward,
+    confidence: row.confidence,
+    quality: row.quality,
+    reason: row.reason,
+    metadata: safeJson(row.metadata, null),
+    result: row.result,
+    resultPrice: row.result_price,
+    resultPnlPct: row.result_pnl_pct,
+    expiresAt: row.expires_at,
+    createdAt: row.created_at,
+    closedAt: row.closed_at,
+  };
+}
+
+function safeJson(str, fallback) {
+  if (!str) return fallback;
+  try { return JSON.parse(str); } catch (_e) { return fallback; }
+}
+
+module.exports = {
+  insert,
+  getById,
+  listForUser,
+  listPublic,
+  stats,
+  recordResult,
+  getPrefs,
+  updatePrefs,
+  trackView,
+  viewsToday,
+  freeDailyLimitHit,
+};

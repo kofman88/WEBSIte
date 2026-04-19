@@ -1,102 +1,161 @@
 const express = require('express');
+const { z } = require('zod');
 const authService = require('../services/authService');
-const { authMiddleware } = require('../middleware/auth');
+const {
+  authMiddleware,
+  loginLimiter,
+  registerLimiter,
+  passwordResetLimiter,
+} = require('../middleware/auth');
+const validation = require('../utils/validation');
 
 const router = express.Router();
 
-/**
- * POST /api/auth/register
- * Create a new user account.
- * Body: { email, password, referralCode? }
- */
-router.post('/register', (req, res) => {
-  try {
-    const { email, password, referralCode } = req.body;
+function getIp(req) { return req.ip || req.headers['x-forwarded-for'] || null; }
+function getUA(req) { return req.headers['user-agent'] || null; }
 
-    if (!email || !password) {
-      return res.status(400).json({ error: 'Email and password are required' });
-    }
+function handleZod(err, res) {
+  return res.status(400).json({
+    error: 'Validation failed',
+    code: 'VALIDATION_ERROR',
+    issues: err.issues.map((i) => ({ path: i.path.join('.'), message: i.message })),
+  });
+}
 
-    // Basic email format check
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailRegex.test(email)) {
-      return res.status(400).json({ error: 'Invalid email format' });
-    }
-
-    if (password.length < 6) {
-      return res.status(400).json({ error: 'Password must be at least 6 characters' });
-    }
-
-    const regResult = authService.register(email.toLowerCase().trim(), password, referralCode);
-
-    // Auto-login after registration: return JWT token
-    const loginResult = authService.login(email.toLowerCase().trim(), password);
-
-    res.status(201).json({
-      message: 'User registered successfully',
-      token: loginResult.token,
-      user: loginResult.user,
+function handleServiceError(err, res, next) {
+  if (err instanceof z.ZodError) return handleZod(err, res);
+  if (err && err.statusCode) {
+    return res.status(err.statusCode).json({
+      error: err.message,
+      ...(err.code ? { code: err.code } : {}),
     });
-  } catch (error) {
-    console.error('Registration error:', error.message);
-    res.status(400).json({ error: error.message });
   }
+  return next(err);
+}
+
+// POST /api/auth/register
+router.post('/register', registerLimiter, (req, res, next) => {
+  try {
+    const input = validation.registerSchema.parse(req.body);
+    const out = authService.register({
+      email: input.email,
+      password: input.password,
+      displayName: input.displayName,
+      referralCode: input.referralCode,
+      ipAddress: getIp(req),
+      userAgent: getUA(req),
+    });
+    res.status(201).json(out);
+  } catch (err) { handleServiceError(err, res, next); }
 });
 
-/**
- * POST /api/auth/login
- * Authenticate and receive a JWT.
- * Body: { email, password }
- */
-router.post('/login', (req, res) => {
+// POST /api/auth/login
+router.post('/login', loginLimiter, (req, res, next) => {
   try {
-    const { email, password } = req.body;
-
-    if (!email || !password) {
-      return res.status(400).json({ error: 'Email and password are required' });
-    }
-
-    const result = authService.login(email.toLowerCase().trim(), password);
-
-    res.json({
-      message: 'Login successful',
-      ...result,
+    const input = validation.loginSchema.parse(req.body);
+    const out = authService.login({
+      email: input.email,
+      password: input.password,
+      ipAddress: getIp(req),
+      userAgent: getUA(req),
     });
-  } catch (error) {
-    console.error('Login error:', error.message);
-    res.status(401).json({ error: error.message });
-  }
+    res.json(out);
+  } catch (err) { handleServiceError(err, res, next); }
 });
 
-/**
- * GET /api/auth/me
- * Return the currently authenticated user's profile.
- */
-router.get('/me', authMiddleware, (req, res) => {
+// POST /api/auth/refresh
+router.post('/refresh', (req, res, next) => {
   try {
-    const user = authService.getUserById(req.userId);
-
-    // Also fetch subscription info
-    let subscription = null;
-    try {
-      const subscriptionService = require('../services/subscriptionService');
-      subscription = subscriptionService.getUserSubscription(req.userId);
-    } catch (_) {
-      // Non-critical
-    }
-
-    res.json({
-      user,
-      subscription: subscription ? {
-        plan: subscription.plan,
-        status: subscription.status,
-        expiresAt: subscription.expires_at,
-      } : null,
+    const input = validation.refreshSchema.parse(req.body);
+    const out = authService.refresh({
+      refreshToken: input.refreshToken,
+      ipAddress: getIp(req),
+      userAgent: getUA(req),
     });
-  } catch (error) {
-    console.error('Get user error:', error.message);
-    res.status(401).json({ error: error.message });
-  }
+    res.json(out);
+  } catch (err) { handleServiceError(err, res, next); }
+});
+
+// POST /api/auth/logout
+router.post('/logout', (req, res, next) => {
+  try {
+    const input = validation.refreshSchema.parse(req.body);
+    authService.logout({
+      refreshToken: input.refreshToken,
+      ipAddress: getIp(req),
+      userAgent: getUA(req),
+    });
+    res.json({ success: true });
+  } catch (err) { handleServiceError(err, res, next); }
+});
+
+// POST /api/auth/logout-all (auth'd) — revoke all refresh tokens
+router.post('/logout-all', authMiddleware, (req, res, next) => {
+  try {
+    authService.logoutAll({
+      userId: req.userId,
+      ipAddress: getIp(req),
+      userAgent: getUA(req),
+    });
+    res.json({ success: true });
+  } catch (err) { handleServiceError(err, res, next); }
+});
+
+// GET /api/auth/me
+router.get('/me', authMiddleware, (req, res, next) => {
+  try {
+    const user = authService.getUserPublic(req.userId);
+    if (!user) return res.status(404).json({ error: 'User not found' });
+    res.json({ user });
+  } catch (err) { handleServiceError(err, res, next); }
+});
+
+// POST /api/auth/password-reset/request
+router.post('/password-reset/request', passwordResetLimiter, (req, res, next) => {
+  try {
+    const input = z.object({ email: validation.email }).parse(req.body);
+    const out = authService.requestPasswordReset({
+      email: input.email,
+      ipAddress: getIp(req),
+      userAgent: getUA(req),
+    });
+    res.json(out);
+  } catch (err) { handleServiceError(err, res, next); }
+});
+
+// POST /api/auth/password-reset/confirm
+router.post('/password-reset/confirm', (req, res, next) => {
+  try {
+    const input = z.object({
+      token: z.string().min(16).max(256),
+      newPassword: validation.password,
+    }).parse(req.body);
+    const out = authService.confirmPasswordReset({
+      token: input.token,
+      newPassword: input.newPassword,
+      ipAddress: getIp(req),
+      userAgent: getUA(req),
+    });
+    res.json(out);
+  } catch (err) { handleServiceError(err, res, next); }
+});
+
+// POST /api/auth/change-password (auth'd)
+router.post('/change-password', authMiddleware, (req, res, next) => {
+  try {
+    const input = z.object({
+      currentPassword: z.string().min(1).max(128),
+      newPassword: validation.password,
+    }).parse(req.body);
+    const out = authService.changePassword({
+      userId: req.userId,
+      currentPassword: input.currentPassword,
+      newPassword: input.newPassword,
+      ipAddress: getIp(req),
+      userAgent: getUA(req),
+    });
+    res.json(out);
+  } catch (err) { handleServiceError(err, res, next); }
 });
 
 module.exports = router;

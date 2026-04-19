@@ -3,10 +3,10 @@
 <head>
   <meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1.0"/>
   <title>CHM Finance — Настройки</title>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet"/>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet"/>
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="stylesheet" href="styles.css"/>
-  <style>body{background:#070b14;color:#f1f5f9;font-family:'Inter',sans-serif}.stab{padding:8px 16px;border-radius:8px;font-size:.875rem;font-weight:500;color:#94a3b8;background:transparent;border:none;cursor:pointer;transition:.2s}.stab.active{background:#4F46E5;color:#fff}.stab-content{display:none}.stab-content.active{display:block}.toggle{position:relative;width:44px;height:24px;background:#1e293b;border-radius:12px;cursor:pointer;transition:.2s}.toggle.on{background:#10b981}.toggle::after{content:'';position:absolute;top:2px;left:2px;width:20px;height:20px;background:#fff;border-radius:50%;transition:.2s}.toggle.on::after{transform:translateX(20px)}</style>
+  <style>.stab{padding:8px 18px;border-radius:9999px;font-family:'Inter',sans-serif;font-size:13px;line-height:18px;font-weight:500;color:rgba(255,255,255,.62);background:transparent;border:none;cursor:pointer;transition:color .15s ease,background .15s ease}.stab:hover{color:#fff}.stab.active{background:linear-gradient(180deg,#2A5BE8 0%,#1D4ED8 60%,#143797 100%);color:#fff;box-shadow:inset 0 1px 1px rgba(255,255,255,.25),inset 0 -1px 2px rgba(0,0,0,.4),0 4px 10px -2px rgba(29,78,216,.5)}.stab-content{display:none}.stab-content.active{display:block}</style>
 </head>
 <body>
 <aside class="sidebar" id="sidebar">
@@ -19,9 +19,9 @@
     <a href="wallet.html" class="sidebar-link" data-page="wallet"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12V7H5a2 2 0 010-4h14v4M3 5v14a2 2 0 002 2h16v-5"/></svg>Кошелёк</a>
     <a href="settings.html" class="sidebar-link active" data-page="settings"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/></svg>Настройки</a>
   </nav>
-  <div class="sidebar-footer"><button onclick="Auth.logout()" class="sidebar-link" style="color:#f87171"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4M16 17l5-5-5-5M21 12H9"/></svg>Выйти</button></div>
+  <div class="sidebar-footer"><button onclick="Auth.logout()" class="sidebar-link" style="color:#C8B9B9"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4M16 17l5-5-5-5M21 12H9"/></svg>Выйти</button></div>
 </aside>
-<header class="topbar"><div class="flex items-center gap-4"><button id="sidebar-toggle" class="lg:hidden" style="background:none;border:none;color:#94a3b8;cursor:pointer"><svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 6h16M4 12h16M4 18h16"/></svg></button><h1 class="text-xl font-bold">Настройки</h1></div><div class="topbar-actions"><div class="topbar-user"><div class="topbar-avatar">U</div></div></div></header>
+<header class="topbar"><div class="flex items-center gap-4"><button id="sidebar-toggle" class="lg:hidden" style="background:none;border:none;color:rgba(255,255,255,.62);cursor:pointer"><svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 6h16M4 12h16M4 18h16"/></svg></button><h1 class="text-xl font-bold">Настройки</h1></div><div class="topbar-actions"><div class="topbar-user"><div class="topbar-avatar">U</div></div></div></header>
 
 <main class="main-content">
   <!-- Tabs -->
@@ -39,7 +39,7 @@
       <h3 class="font-bold mb-4">Профиль</h3>
       <form class="space-y-4">
         <div class="flex items-center gap-4 mb-4">
-          <div class="w-16 h-16 rounded-full flex items-center justify-center text-2xl font-bold" style="background:linear-gradient(135deg,#4F46E5,#7C3AED)">U</div>
+          <div class="w-16 h-16 rounded-full flex items-center justify-center text-2xl font-bold" style="background:linear-gradient(180deg,#2A5BE8 0%,#1D4ED8 60%,#143797 100%);box-shadow:inset 0 1px 1px rgba(255,255,255,.28),inset 0 -1px 3px rgba(0,0,0,.6),0 4px 8px -2px rgba(0,0,0,.6),0 0 0 1px rgba(29,78,216,.35)">U</div>
           <div><div class="font-semibold">user@example.com</div><div class="text-xs text-slate-500">Участник с января 2025</div></div>
         </div>
         <div><label class="text-sm text-slate-400 block mb-1">Email</label><input value="user@example.com" class="w-full bg-slate-800/50 border border-slate-700 rounded-xl px-4 py-3 text-white outline-none" readonly/></div>
@@ -48,7 +48,7 @@
           <div><label class="text-sm text-slate-400 block mb-1">Язык</label><select class="w-full bg-slate-800/50 border border-slate-700 rounded-xl px-4 py-3 text-white outline-none"><option>Русский</option><option>English</option></select></div>
           <div><label class="text-sm text-slate-400 block mb-1">Часовой пояс</label><select class="w-full bg-slate-800/50 border border-slate-700 rounded-xl px-4 py-3 text-white outline-none"><option>UTC+3 (Moscow)</option><option>UTC+0 (London)</option><option>UTC-5 (New York)</option></select></div>
         </div>
-        <button type="button" onclick="Toast.success('Профиль сохранён')" class="px-6 py-2.5 rounded-xl font-semibold text-white text-sm" style="background:linear-gradient(135deg,#4F46E5,#7C3AED)">Сохранить</button>
+        <button type="button" onclick="Toast.success('Профиль сохранён')" class="px-6 py-2.5 rounded-xl font-semibold text-white text-sm" style="background:linear-gradient(180deg,#2A5BE8 0%,#1D4ED8 60%,#143797 100%);box-shadow:inset 0 1px 1px rgba(255,255,255,.28),inset 0 -1px 3px rgba(0,0,0,.6),0 4px 8px -2px rgba(0,0,0,.6),0 0 0 1px rgba(29,78,216,.35)">Сохранить</button>
       </form>
     </div>
   </div>
@@ -58,7 +58,7 @@
     <div class="card max-w-2xl mb-6">
       <h3 class="font-bold mb-4">Текущий план</h3>
       <div class="flex items-center gap-4 p-4 bg-indigo-500/10 border border-indigo-500/20 rounded-xl mb-4">
-        <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#818CF8" stroke-width="2"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+        <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#5C80E3" stroke-width="2"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
         <div><div class="font-bold text-indigo-300">Pro Plan — $79/мес</div><div class="text-xs text-slate-500">Активен до 10 мая 2026</div></div>
       </div>
       <div class="grid grid-cols-2 gap-4 text-sm mb-4">
@@ -67,19 +67,24 @@
         <div class="p-3 bg-slate-800/30 rounded-lg"><span class="text-slate-500">Авто-торговля:</span> <span class="text-green-400">Да</span></div>
         <div class="p-3 bg-slate-800/30 rounded-lg"><span class="text-slate-500">Бэктесты:</span> <span class="text-green-400">Да</span></div>
       </div>
-      <div class="flex gap-3"><button class="text-sm px-4 py-2 rounded-lg bg-indigo-500/10 border border-indigo-500/30 text-indigo-400">Upgrade to Elite</button></div>
+      <div class="flex gap-3"><button id="upgradeBtn" class="text-sm px-4 py-2 rounded-lg bg-indigo-500/10 border border-indigo-500/30 text-indigo-400 hover:bg-indigo-500/20">Сменить тариф</button></div>
     </div>
     <div class="card max-w-2xl mb-6">
       <h3 class="font-bold mb-4">Промо-код</h3>
-      <div class="flex gap-3"><input placeholder="Введите промо-код" class="flex-1 bg-slate-800/50 border border-slate-700 rounded-xl px-4 py-3 text-white outline-none"/><button onclick="Toast.success('Промо-код применён!')" class="px-6 py-3 rounded-xl font-semibold text-white text-sm" style="background:linear-gradient(135deg,#4F46E5,#7C3AED)">Применить</button></div>
+      <div class="flex gap-3"><input placeholder="Введите промо-код" class="flex-1 bg-slate-800/50 border border-slate-700 rounded-xl px-4 py-3 text-white outline-none"/><button type="button" class="px-6 py-3 rounded-xl font-semibold text-white text-sm" style="background:linear-gradient(180deg,#2A5BE8 0%,#1D4ED8 60%,#143797 100%);box-shadow:inset 0 1px 1px rgba(255,255,255,.28),inset 0 -1px 3px rgba(0,0,0,.6),0 4px 8px -2px rgba(0,0,0,.6),0 0 0 1px rgba(29,78,216,.35)">Применить</button></div>
     </div>
     <div class="card max-w-2xl">
       <h3 class="font-bold mb-4">Реферальная программа</h3>
-      <div class="bg-slate-800/30 rounded-xl p-4 mb-3"><div class="text-xs text-slate-500 mb-1">Ваша ссылка</div><div class="flex items-center gap-2"><code class="text-sm text-cyan-400">https://chmup.top/?ref=abc123</code><button onclick="Utils.copyToClipboard('https://chmup.top/?ref=abc123')" class="text-xs text-slate-500 hover:text-white">Copy</button></div></div>
-      <div class="grid grid-cols-3 gap-3 text-center text-sm">
-        <div class="p-3 bg-slate-800/30 rounded-lg"><div class="text-xs text-slate-500">Приглашено</div><div class="font-bold">5</div></div>
-        <div class="p-3 bg-slate-800/30 rounded-lg"><div class="text-xs text-slate-500">Комиссия</div><div class="font-bold text-green-400">10%</div></div>
-        <div class="p-3 bg-slate-800/30 rounded-lg"><div class="text-xs text-slate-500">Заработано</div><div class="font-bold text-green-400">$39.50</div></div>
+      <div class="bg-slate-800/30 rounded-xl p-4 mb-3"><div class="text-xs text-slate-500 mb-1">Ваша ссылка</div><div class="flex items-center gap-2"><code class="text-sm text-cyan-400" id="refLink">—</code><button id="refCopyBtn" class="text-xs text-slate-500 hover:text-white">Copy</button></div></div>
+      <div class="grid grid-cols-4 gap-3 text-center text-sm mb-4">
+        <div class="p-3 bg-slate-800/30 rounded-lg"><div class="text-xs text-slate-500">Приглашено</div><div class="font-bold" id="refInvited">—</div></div>
+        <div class="p-3 bg-slate-800/30 rounded-lg"><div class="text-xs text-slate-500">Комиссия</div><div class="font-bold text-indigo-400">20%</div></div>
+        <div class="p-3 bg-slate-800/30 rounded-lg"><div class="text-xs text-slate-500">В ожидании</div><div class="font-bold text-yellow-400" id="refPending">—</div></div>
+        <div class="p-3 bg-slate-800/30 rounded-lg"><div class="text-xs text-slate-500">Выплачено</div><div class="font-bold text-green-400" id="refPaid">—</div></div>
+      </div>
+      <div>
+        <div class="flex items-center justify-between mb-2"><h4 class="text-sm font-semibold text-slate-300">История начислений</h4><span class="text-xs text-slate-500" id="refCount"></span></div>
+        <div id="refList" class="space-y-2 max-h-80 overflow-y-auto"><div class="text-xs text-slate-500 text-center py-4">Загрузка…</div></div>
       </div>
     </div>
   </div>
@@ -97,7 +102,7 @@
         <div class="flex items-center justify-between p-3 bg-slate-800/30 rounded-xl"><span class="text-sm">Авто-торговля</span><div class="toggle on" onclick="this.classList.toggle('on')"></div></div>
         <div class="flex items-center justify-between p-3 bg-slate-800/30 rounded-xl"><span class="text-sm">Подтверждение перед сделкой</span><div class="toggle" onclick="this.classList.toggle('on')"></div></div>
         <div class="flex items-center justify-between p-3 bg-slate-800/30 rounded-xl"><span class="text-sm">Trailing Stop по умолчанию</span><div class="toggle on" onclick="this.classList.toggle('on')"></div></div>
-        <button type="button" onclick="Toast.success('Настройки сохранены')" class="px-6 py-2.5 rounded-xl font-semibold text-white text-sm" style="background:linear-gradient(135deg,#4F46E5,#7C3AED)">Сохранить</button>
+        <button type="button" onclick="Toast.success('Настройки сохранены')" class="px-6 py-2.5 rounded-xl font-semibold text-white text-sm" style="background:linear-gradient(180deg,#2A5BE8 0%,#1D4ED8 60%,#143797 100%);box-shadow:inset 0 1px 1px rgba(255,255,255,.28),inset 0 -1px 3px rgba(0,0,0,.6),0 4px 8px -2px rgba(0,0,0,.6),0 0 0 1px rgba(29,78,216,.35)">Сохранить</button>
       </form>
     </div>
   </div>
@@ -125,7 +130,7 @@
         <div><label class="text-sm text-slate-400 block mb-1">Текущий пароль</label><input type="password" class="w-full bg-slate-800/50 border border-slate-700 rounded-xl px-4 py-3 text-white outline-none"/></div>
         <div><label class="text-sm text-slate-400 block mb-1">Новый пароль</label><input type="password" class="w-full bg-slate-800/50 border border-slate-700 rounded-xl px-4 py-3 text-white outline-none"/></div>
         <div><label class="text-sm text-slate-400 block mb-1">Повторите новый пароль</label><input type="password" class="w-full bg-slate-800/50 border border-slate-700 rounded-xl px-4 py-3 text-white outline-none"/></div>
-        <button type="button" onclick="Toast.success('Пароль изменён')" class="px-6 py-2.5 rounded-xl font-semibold text-white text-sm" style="background:linear-gradient(135deg,#4F46E5,#7C3AED)">Сменить пароль</button>
+        <button type="button" onclick="Toast.success('Пароль изменён')" class="px-6 py-2.5 rounded-xl font-semibold text-white text-sm" style="background:linear-gradient(180deg,#2A5BE8 0%,#1D4ED8 60%,#143797 100%);box-shadow:inset 0 1px 1px rgba(255,255,255,.28),inset 0 -1px 3px rgba(0,0,0,.6),0 4px 8px -2px rgba(0,0,0,.6),0 0 0 1px rgba(29,78,216,.35)">Сменить пароль</button>
       </form>
     </div>
     <div class="card max-w-2xl">
@@ -138,11 +143,246 @@
   </div>
 </main>
 
+<!-- CHECKOUT MODAL -->
+<div id="checkoutModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.7);backdrop-filter:blur(8px);z-index:100;align-items:center;justify-content:center">
+  <div class="card" style="width:100%;max-width:520px;margin:16px;max-height:92vh;overflow-y:auto">
+    <div class="flex items-center justify-between mb-4"><h2 class="text-xl font-bold">Оформление подписки</h2><button onclick="closeCheckout()" class="text-slate-400 hover:text-white text-xl">&times;</button></div>
+    <!-- Step 1: pick plan + cycle -->
+    <div id="coStep1">
+      <label class="text-sm text-slate-400 block mb-2">Тариф</label>
+      <div class="grid grid-cols-3 gap-2 mb-4">
+        <label class="co-card"><input type="radio" name="coPlan" value="starter" class="sr-only"/><div class="co-body"><div class="font-semibold text-white text-sm">Starter</div><div class="text-xs text-slate-400 mt-1">$29/мес</div></div></label>
+        <label class="co-card"><input type="radio" name="coPlan" value="pro" checked class="sr-only"/><div class="co-body"><div class="font-semibold text-indigo-400 text-sm">Pro</div><div class="text-xs text-slate-400 mt-1">$79/мес</div></div></label>
+        <label class="co-card"><input type="radio" name="coPlan" value="elite" class="sr-only"/><div class="co-body"><div class="font-semibold text-white text-sm">Elite</div><div class="text-xs text-slate-400 mt-1">$149/мес</div></div></label>
+      </div>
+      <label class="text-sm text-slate-400 block mb-2">Период</label>
+      <div class="grid grid-cols-2 gap-2 mb-5">
+        <label class="co-card"><input type="radio" name="coCycle" value="monthly" checked class="sr-only"/><div class="co-body"><div class="font-semibold text-white text-sm">Ежемесячно</div></div></label>
+        <label class="co-card"><input type="radio" name="coCycle" value="yearly" class="sr-only"/><div class="co-body"><div class="font-semibold text-green-400 text-sm">Год −20%</div></div></label>
+      </div>
+      <label class="text-sm text-slate-400 block mb-2">Способ оплаты</label>
+      <div class="space-y-2 mb-5">
+        <button type="button" data-method="stripe" class="co-method w-full flex items-center justify-between p-3 rounded-xl border border-slate-700 bg-slate-800/40 hover:border-indigo-500/50">
+          <div class="flex items-center gap-3"><div class="w-9 h-9 rounded-lg bg-indigo-500/15 flex items-center justify-center"><iconify-icon icon="solar:card-linear" style="color:#818cf8;font-size:18px"></iconify-icon></div><div class="text-left"><div class="text-sm font-medium text-white">Карта</div><div class="text-xs text-slate-500">Stripe Checkout</div></div></div>
+          <iconify-icon icon="solar:alt-arrow-right-linear" style="color:#64748b"></iconify-icon>
+        </button>
+        <button type="button" data-method="usdt_bep20" class="co-method w-full flex items-center justify-between p-3 rounded-xl border border-slate-700 bg-slate-800/40 hover:border-indigo-500/50">
+          <div class="flex items-center gap-3"><div class="w-9 h-9 rounded-lg bg-yellow-500/15 flex items-center justify-center"><iconify-icon icon="solar:wallet-money-linear" style="color:#facc15;font-size:18px"></iconify-icon></div><div class="text-left"><div class="text-sm font-medium text-white">USDT BEP20</div><div class="text-xs text-slate-500">Binance Smart Chain</div></div></div>
+          <iconify-icon icon="solar:alt-arrow-right-linear" style="color:#64748b"></iconify-icon>
+        </button>
+        <button type="button" data-method="usdt_trc20" class="co-method w-full flex items-center justify-between p-3 rounded-xl border border-slate-700 bg-slate-800/40 hover:border-indigo-500/50">
+          <div class="flex items-center gap-3"><div class="w-9 h-9 rounded-lg bg-red-500/15 flex items-center justify-center"><iconify-icon icon="solar:wallet-money-linear" style="color:#f87171;font-size:18px"></iconify-icon></div><div class="text-left"><div class="text-sm font-medium text-white">USDT TRC20</div><div class="text-xs text-slate-500">Tron Network</div></div></div>
+          <iconify-icon icon="solar:alt-arrow-right-linear" style="color:#64748b"></iconify-icon>
+        </button>
+      </div>
+    </div>
+    <!-- Step 2: crypto wait -->
+    <div id="coStep2" class="hidden">
+      <div class="text-center mb-4">
+        <div class="text-xs text-slate-500 uppercase tracking-wider mb-1">К оплате</div>
+        <div class="text-3xl font-bold text-white" id="coAmount">—</div>
+        <div class="text-xs text-slate-400 mt-1" id="coNetwork">—</div>
+      </div>
+      <div class="bg-slate-800/40 border border-slate-700 rounded-xl p-3 mb-4">
+        <div class="text-xs text-slate-500 mb-1">Адрес для перевода</div>
+        <div class="flex items-center gap-2"><code id="coAddr" class="text-xs text-cyan-400 break-all flex-1">—</code><button id="coCopy" class="text-xs text-slate-400 hover:text-white shrink-0">Копировать</button></div>
+      </div>
+      <div class="bg-yellow-500/10 border border-yellow-500/30 rounded-xl p-3 mb-4 text-xs text-yellow-200 leading-relaxed">
+        <strong>Важно:</strong> переведите <em>точную сумму до копейки</em> — система сопоставляет платежи по уникальной сумме. Подтверждение придёт автоматически в течение 1-15 минут после получения транзакции.
+      </div>
+      <div class="text-xs text-slate-500 text-center mb-4">Ожидание подтверждения... <span id="coExpire">—</span></div>
+      <button onclick="closeCheckout()" class="w-full py-2.5 rounded-xl bg-slate-800 text-slate-300 hover:bg-slate-700 font-medium text-sm">Закрыть</button>
+    </div>
+  </div>
+</div>
+
+<style>
+.co-card{cursor:pointer;display:block;border-radius:10px;background:rgba(30,41,59,.5);border:1px solid #334155;padding:10px;transition:all .15s}
+.co-card:hover{border-color:#475569}
+.co-card:has(input:checked){border-color:#6366f1;background:rgba(99,102,241,.1);box-shadow:0 0 0 1px rgba(99,102,241,.4)}
+.co-body{text-align:center}
+</style>
+
 <script src="app.js"></script>
 <script>
-if(!Auth.isLoggedIn())window.location.href='/?login=1';
-Sidebar.init('settings');
-function stab(t){document.querySelectorAll('.stab').forEach(b=>b.classList.remove('active'));document.querySelectorAll('.stab-content').forEach(c=>c.classList.remove('active'));document.getElementById('stab-'+t).classList.add('active');event.target.classList.add('active')}
+if(!Auth.requireAuth()) throw new Error('noauth');
+document.querySelectorAll('.sidebar-link[data-page="settings"]').forEach(a => a.classList.add('active'));
+
+window.stab = function (t, ev) {
+  document.querySelectorAll('.stab').forEach(b => b.classList.remove('active'));
+  document.querySelectorAll('.stab-content').forEach(c => c.classList.remove('active'));
+  const tab = document.getElementById('stab-' + t);
+  if (tab) tab.classList.add('active');
+  if (ev && ev.target) ev.target.classList.add('active');
+};
+
+// Bind tab buttons to updated stab() that takes event
+document.querySelectorAll('.stab').forEach(btn => {
+  btn.addEventListener('click', (ev) => {
+    const onclick = btn.getAttribute('onclick') || '';
+    const m = /stab\('([^']+)'/.exec(onclick);
+    if (m) window.stab(m[1], ev);
+  }, { capture: true });
+});
+
+// ── Profile tab ──
+async function loadProfile() {
+  try {
+    const me = await API.me();
+    const u = me.user;
+    const emailInput = document.querySelector('input[value="user@example.com"]');
+    if (emailInput) emailInput.value = u.email;
+    // Update topbar avatar
+    const avatar = document.querySelector('.topbar-avatar');
+    if (avatar) avatar.textContent = u.email[0].toUpperCase();
+  } catch (_e) {}
+}
+
+// ── Subscription tab ──
+async function loadSubscription() {
+  try {
+    const me = await API.me();
+    const sub = me.user.subscription;
+    const planBlock = document.querySelector('#stab-subscription .card.max-w-2xl:first-child');
+    if (!planBlock) return;
+    const planTitle = planBlock.querySelector('.font-bold.text-indigo-300');
+    const planMeta = planBlock.querySelector('.text-xs.text-slate-500');
+    if (planTitle) planTitle.textContent = (sub.plan[0].toUpperCase() + sub.plan.slice(1)) + ' Plan';
+    if (planMeta) planMeta.textContent = sub.expiresAt ? ('Активен до ' + Fmt.date(sub.expiresAt)) : 'Бессрочный';
+  } catch (_e) {}
+}
+
+// ── Promo code ──
+document.querySelectorAll('button').forEach(btn => {
+  if ((btn.textContent || '').trim() === 'Применить') {
+    btn.addEventListener('click', async () => {
+      const input = btn.parentElement && btn.parentElement.querySelector('input');
+      const code = input ? input.value.trim() : '';
+      if (!code) return Toast.warn('Введи промо-код');
+      try { await API.redeemPromo(code); Toast.success('Промо применён!'); loadSubscription(); }
+      catch (err) { Toast.error(err.message || 'Неверный промо-код'); }
+    });
+  }
+});
+
+// ── Security: change password ──
+const pwForm = document.querySelector('#stab-security form, #stab-security .card');
+// Best-effort hook: find change-password button
+document.querySelectorAll('button').forEach(btn => {
+  if ((btn.textContent || '').trim() === 'Сменить пароль') {
+    btn.addEventListener('click', async () => {
+      const inputs = document.querySelectorAll('#stab-security input[type="password"]');
+      if (inputs.length < 2) return;
+      const currentPassword = inputs[0].value;
+      const newPassword = inputs[1].value;
+      if (!currentPassword || !newPassword) return Toast.warn('Заполни оба поля');
+      try {
+        await window.fetch(
+          (location.hostname === 'localhost' ? 'http://localhost:3000/api' : '/api') + '/auth/change-password',
+          { method: 'POST', headers: { 'Content-Type': 'application/json', Authorization: 'Bearer ' + Auth.accessToken },
+            body: JSON.stringify({ currentPassword, newPassword }) }
+        ).then(r => r.json().then(j => ({ ok: r.ok, j }))).then(({ ok, j }) => {
+          if (!ok) throw new Error(j.error || 'Ошибка');
+          Toast.success('Пароль изменён. Перелогинься.');
+          setTimeout(() => { Auth.logout(); }, 2000);
+        });
+      } catch (err) { Toast.error(err.message); }
+    });
+  }
+});
+
+// ── Referral program ──
+async function loadReferrals() {
+  try {
+    const u = Auth.user || {};
+    const code = u.referralCode || u.referral_code || '';
+    const link = location.origin + '/?ref=' + (code || '—');
+    document.getElementById('refLink').textContent = link;
+    document.getElementById('refCopyBtn').onclick = () => {
+      navigator.clipboard.writeText(link).then(() => Toast.success('Ссылка скопирована'));
+    };
+    const [summary, rewards] = await Promise.all([
+      API.refSummary().catch(() => ({ referredCount: 0, pendingUsd: 0, paidUsd: 0, totalRewards: 0 })),
+      API.refRewards({ limit: 50 }).catch(() => ({ rewards: [] })),
+    ]);
+    document.getElementById('refInvited').textContent = summary.referredCount || 0;
+    document.getElementById('refPending').textContent = Fmt.currency(summary.pendingUsd || 0);
+    document.getElementById('refPaid').textContent = Fmt.currency(summary.paidUsd || 0);
+    document.getElementById('refCount').textContent = rewards.rewards.length + ' / ' + (summary.totalRewards || 0);
+    const list = document.getElementById('refList');
+    if (!rewards.rewards.length) {
+      list.innerHTML = '<div class="text-xs text-slate-500 text-center py-4">Пока нет начислений. Поделись ссылкой и получай 20% с каждого платежа.</div>';
+      return;
+    }
+    list.innerHTML = rewards.rewards.map((r) => {
+      const statusColor = r.status === 'paid' ? 'text-green-400' : r.status === 'cancelled' ? 'text-red-400' : 'text-yellow-400';
+      const statusLabel = r.status === 'paid' ? 'Выплачено' : r.status === 'cancelled' ? 'Отменено' : 'В ожидании';
+      return `<div class="flex items-center justify-between px-3 py-2 bg-slate-800/30 rounded-lg">
+        <div><div class="text-sm font-medium text-slate-300">${Fmt.currency(r.amountUsd)}</div><div class="text-xs text-slate-500">${Fmt.date(r.createdAt)}</div></div>
+        <span class="text-xs ${statusColor}">${statusLabel}</span>
+      </div>`;
+    }).join('');
+  } catch (err) {
+    document.getElementById('refList').innerHTML = '<div class="text-xs text-red-400 text-center py-4">Ошибка: ' + String(err.message || err) + '</div>';
+  }
+}
+
+// ── Checkout (upgrade) modal ──
+function openCheckout()  { document.getElementById('coStep1').classList.remove('hidden'); document.getElementById('coStep2').classList.add('hidden'); document.getElementById('checkoutModal').style.display = 'flex'; }
+function closeCheckout() { document.getElementById('checkoutModal').style.display = 'none'; }
+document.getElementById('upgradeBtn')?.addEventListener('click', openCheckout);
+document.getElementById('checkoutModal')?.addEventListener('click', (e) => { if (e.target.id === 'checkoutModal') closeCheckout(); });
+
+document.querySelectorAll('.co-method').forEach((btn) => {
+  btn.addEventListener('click', async () => {
+    const plan = document.querySelector('input[name="coPlan"]:checked')?.value || 'pro';
+    const billingCycle = document.querySelector('input[name="coCycle"]:checked')?.value || 'monthly';
+    const method = btn.getAttribute('data-method');
+    btn.disabled = true;
+    try {
+      if (method === 'stripe') {
+        const out = await API.stripeCheckout({ plan, billingCycle });
+        if (out && out.url) { location.href = out.url; return; }
+        throw new Error(out?.error || 'Stripe недоступен');
+      }
+      // crypto path
+      const network = method === 'usdt_bep20' ? 'bep20' : 'trc20';
+      const out = await API.createCryptoPayment({ plan, network, billingCycle });
+      document.getElementById('coAmount').textContent = Fmt.currency(out.amountUsdt) + ' USDT';
+      document.getElementById('coNetwork').textContent = network.toUpperCase() + ' · ' + plan.toUpperCase() + ' (' + billingCycle + ')';
+      document.getElementById('coAddr').textContent = out.address;
+      document.getElementById('coCopy').onclick = () => navigator.clipboard.writeText(out.address).then(() => Toast.success('Адрес скопирован'));
+      const exp = new Date(out.expiresAt).toLocaleString();
+      document.getElementById('coExpire').textContent = 'действует до ' + exp;
+      document.getElementById('coStep1').classList.add('hidden');
+      document.getElementById('coStep2').classList.remove('hidden');
+    } catch (err) {
+      const msg = err.message || 'Не удалось создать платёж';
+      if (err.statusCode === 503 || /stripe/i.test(msg)) Toast.warn('Stripe не настроен — выбери крипту');
+      else Toast.error(msg);
+    } finally { btn.disabled = false; }
+  });
+});
+
+// WS: payment confirmed → success + reload
+WS.on('payment_confirmed', () => { Toast.success('Платёж подтверждён, тариф активирован'); closeCheckout(); loadSubscription(); });
+
+loadProfile();
+loadSubscription();
+loadReferrals();
+
+// ── Auto-open checkout if ?upgrade=<plan> came from landing pricing CTA ──
+(function autoUpgrade(){
+  try {
+    const p = new URLSearchParams(location.search).get('upgrade');
+    if (!p || !['starter','pro','elite'].includes(p)) return;
+    const radio = document.querySelector('input[name="coPlan"][value="'+p+'"]');
+    if (radio) radio.checked = true;
+    openCheckout();
+    // Clean the URL so a reload doesn't re-pop
+    history.replaceState({}, '', location.pathname);
+  } catch (_e) {}
+})();
 </script>
 </body>
 </html>

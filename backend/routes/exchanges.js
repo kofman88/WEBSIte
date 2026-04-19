@@ -1,68 +1,110 @@
 const express = require('express');
+const { z } = require('zod');
 const { authMiddleware } = require('../middleware/auth');
 const exchangeService = require('../services/exchangeService');
+const marketData = require('../services/marketDataService');
+const validation = require('../utils/validation');
 
 const router = express.Router();
 
-/**
- * GET /api/exchanges/exchanges
- * List supported exchanges. No auth required.
- */
-router.get('/exchanges', (_req, res) => {
-  try {
-    const exchanges = exchangeService.getSupportedExchanges();
-    res.json({ exchanges });
-  } catch (error) {
-    console.error('Error fetching exchanges:', error.message);
-    res.status(500).json({ error: error.message });
+function handleErr(err, res, next) {
+  if (err instanceof z.ZodError) {
+    return res.status(400).json({
+      error: 'Validation failed', code: 'VALIDATION_ERROR',
+      issues: err.issues.map((i) => ({ path: i.path.join('.'), message: i.message })),
+    });
   }
+  if (err && err.statusCode) {
+    return res.status(err.statusCode).json({ error: err.message, ...(err.code ? { code: err.code } : {}) });
+  }
+  return next(err);
+}
+
+// ── Public: list of supported exchanges ─────────────────────────────────
+router.get('/', (_req, res) => {
+  res.json({ exchanges: exchangeService.listSupported() });
 });
 
-/**
- * GET /api/exchanges/exchanges/:name/pairs
- * Get available trading pairs for an exchange. No auth required.
- */
-router.get('/exchanges/:name/pairs', async (req, res) => {
+// ── Public: trading symbols of an exchange ──────────────────────────────
+router.get('/:exchange/symbols', async (req, res, next) => {
   try {
-    const pairs = await exchangeService.getTradingPairs(req.params.name);
-    res.json({ pairs });
-  } catch (error) {
-    console.error('Error fetching trading pairs:', error.message);
-    res.status(500).json({ error: error.message });
-  }
+    const exchange = validation.exchange.parse(req.params.exchange);
+    const symbols = await marketData.fetchSymbols(exchange);
+    res.json({ exchange, count: symbols.length, symbols });
+  } catch (err) { handleErr(err, res, next); }
 });
 
-/**
- * GET /api/exchanges/exchanges/:name/price
- * Get the current price for a symbol. No auth required.
- * Query: ?symbol=BTC/USDT
- */
-router.get('/exchanges/:name/price', async (req, res) => {
+// ── Public: 24h ticker ──────────────────────────────────────────────────
+router.get('/:exchange/ticker/:symbol', async (req, res, next) => {
   try {
-    const { symbol } = req.query;
-    if (!symbol) {
-      return res.status(400).json({ error: 'symbol query parameter is required' });
-    }
-    const priceData = await exchangeService.getPrice(req.params.name, symbol);
-    res.json({ priceData });
-  } catch (error) {
-    console.error('Error fetching price:', error.message);
-    res.status(500).json({ error: error.message });
-  }
+    const exchange = validation.exchange.parse(req.params.exchange);
+    // Symbol may arrive URL-encoded with `/` — accept both BTC/USDT and BTCUSDT
+    const raw = decodeURIComponent(req.params.symbol);
+    const symbol = validation.symbol.parse(raw);
+    const t = await marketData.fetchTicker(exchange, symbol);
+    res.json(t);
+  } catch (err) { handleErr(err, res, next); }
 });
 
-/**
- * GET /api/exchanges/balance/:exchangeName
- * Get user's balance on an exchange. Requires auth.
- */
-router.get('/balance/:exchangeName', authMiddleware, async (req, res) => {
+// ── Public: candles (OHLCV) ─────────────────────────────────────────────
+router.get('/:exchange/candles/:symbol', async (req, res, next) => {
   try {
-    const balance = await exchangeService.getBalance(req.userId, req.params.exchangeName);
-    res.json({ balance });
-  } catch (error) {
-    console.error('Error fetching balance:', error.message);
-    res.status(500).json({ error: error.message });
-  }
+    const exchange = validation.exchange.parse(req.params.exchange);
+    const raw = decodeURIComponent(req.params.symbol);
+    const symbol = validation.symbol.parse(raw);
+    const q = z.object({
+      timeframe: validation.timeframe.default('1h'),
+      since: z.coerce.number().int().nonnegative().optional(),
+      limit: z.coerce.number().int().min(1).max(1000).default(500),
+    }).parse(req.query);
+    const candles = await marketData.fetchCandles(exchange, symbol, q.timeframe, {
+      since: q.since, limit: q.limit,
+    });
+    res.json({ exchange, symbol, timeframe: q.timeframe, count: candles.length, candles });
+  } catch (err) { handleErr(err, res, next); }
+});
+
+// ── Authed: list my keys ────────────────────────────────────────────────
+router.get('/keys', authMiddleware, (req, res, next) => {
+  try {
+    res.json({ keys: exchangeService.listKeys(req.userId) });
+  } catch (err) { handleErr(err, res, next); }
+});
+
+// ── Authed: add a new key (verifies before save) ────────────────────────
+router.post('/keys', authMiddleware, async (req, res, next) => {
+  try {
+    const input = validation.addKeySchema.parse(req.body);
+    const key = await exchangeService.addKey(req.userId, input);
+    res.status(201).json(key);
+  } catch (err) { handleErr(err, res, next); }
+});
+
+// ── Authed: delete a key ────────────────────────────────────────────────
+router.delete('/keys/:id', authMiddleware, (req, res, next) => {
+  try {
+    const id = z.coerce.number().int().positive().parse(req.params.id);
+    const out = exchangeService.deleteKey(id, req.userId);
+    res.json(out);
+  } catch (err) { handleErr(err, res, next); }
+});
+
+// ── Authed: re-verify a key ─────────────────────────────────────────────
+router.post('/keys/:id/verify', authMiddleware, async (req, res, next) => {
+  try {
+    const id = z.coerce.number().int().positive().parse(req.params.id);
+    const out = await exchangeService.verifyKey(id, req.userId);
+    res.json(out);
+  } catch (err) { handleErr(err, res, next); }
+});
+
+// ── Authed: balance for a key ───────────────────────────────────────────
+router.get('/keys/:id/balance', authMiddleware, async (req, res, next) => {
+  try {
+    const id = z.coerce.number().int().positive().parse(req.params.id);
+    const bal = await exchangeService.getBalance(id, req.userId);
+    res.json(bal);
+  } catch (err) { handleErr(err, res, next); }
 });
 
 module.exports = router;
