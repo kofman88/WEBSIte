@@ -808,12 +808,20 @@ const _notify={
 };
 const _apiBase=(location.hostname==='localhost'||location.hostname==='127.0.0.1')?'http://localhost:3000/api':'/api';
 async function _authCall(path,body){
-  if(typeof API!=='undefined'){return path==='/auth/login'?API.login(body.email,body.password):API.register(body.email,body.password)}
+  if(typeof API!=='undefined'){return path==='/auth/login'?API.login(body.email,body.password):API.register(body.email,body.password,body.referralCode||undefined)}
   const r=await fetch(_apiBase+path,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)});
   let data={};try{data=await r.json()}catch(e){}
   if(!r.ok)throw new Error(data.error||data.message||('HTTP '+r.status));
   if(data.token)try{localStorage.setItem('chm_token',data.token)}catch(e){}
   return data;
+}
+// Capture ?ref=CODE from URL or localStorage so registrations carry the referrer.
+function _refCode(){
+  let code='';
+  try{code=new URLSearchParams(location.search).get('ref')||''}catch(e){}
+  if(!code){try{code=localStorage.getItem('chm_ref_code')||''}catch(e){}}
+  if(code){try{localStorage.setItem('chm_ref_code',code)}catch(e){}}
+  return code.trim().toUpperCase();
 }
 // Post-auth destination: honor pending plan pick from pricing CTA, otherwise dashboard.
 function _nextUrl(){
@@ -831,7 +839,7 @@ document.getElementById('registerForm')?.addEventListener('submit',async e=>{
   e.preventDefault();const fd=new FormData(e.target);
   if(fd.get('password')!==fd.get('password2')){_notify.err('Пароли не совпадают');return}
   const btn=e.target.querySelector('button[type=submit]');if(btn)btn.disabled=true;
-  try{await _authCall('/auth/register',{email:fd.get('email'),password:fd.get('password')});closeModals();_notify.ok('Аккаунт создан!');setTimeout(()=>location.href=_nextUrl(),500)}
+  try{await _authCall('/auth/register',{email:fd.get('email'),password:fd.get('password'),referralCode:_refCode()});try{localStorage.removeItem('chm_ref_code')}catch(e){}closeModals();_notify.ok('Аккаунт создан!');setTimeout(()=>location.href=_nextUrl(),500)}
   catch(err){_notify.err(err.message||'Ошибка регистрации. Проверьте подключение.')}
   finally{if(btn)btn.disabled=false}
 });
@@ -996,9 +1004,12 @@ function toggleTheme(){
 }
 (function(){try{if(localStorage.getItem('chm_theme')==='light'){document.documentElement.classList.add('light');const b=document.getElementById('themeBtn');if(b)b.innerHTML='<iconify-icon icon="solar:sun-linear"></iconify-icon>'}}catch(e){}})();
 
-// ── URL params: ?login / ?checkout=cancel ──
+// ── URL params: ?login / ?checkout=cancel / ?ref=XXX ──
 (function(){
   const q=new URLSearchParams(location.search);
+  // Stash ?ref=XXX early so it survives across pageviews even if the
+  // visitor browses for a while before registering.
+  _refCode();
   if(q.get('login'))openModal('login');
   if(q.get('checkout')==='cancel'){
     setTimeout(()=>{try{(window.Toast||{info:(m)=>alert(m)}).info('Оплата отменена')}catch(e){}},400);
