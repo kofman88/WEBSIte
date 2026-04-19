@@ -62,31 +62,27 @@
 <main class="main-content">
   <h1 class="text-2xl font-bold mb-6">Дашборд</h1>
 
-  <!-- Stats -->
+  <!-- Stats (filled by loadSummary()) -->
   <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
     <div class="stat-card liquid-glass">
       <div class="stat-card-icon" style="background:rgba(29,78,216,.4)"><svg width="22" height="22" fill="none" stroke="#5C80E3" stroke-width="2"><path d="M21 12V7H5a2 2 0 010-4h14v4M3 5v14a2 2 0 002 2h16v-5M18 12a2 2 0 100 4 2 2 0 000-4z"/></svg></div>
-      <div class="stat-card-label">Баланс портфеля</div>
-      <div class="stat-card-value" id="balanceVal">$12,450</div>
-      <div class="stat-card-trend up">+5.2% сегодня</div>
+      <div class="stat-card-label">Total PnL</div>
+      <div class="stat-card-value" id="balanceVal">—</div>
     </div>
     <div class="stat-card liquid-glass">
       <div class="stat-card-icon" style="background:rgba(29,78,216,.18)"><svg width="22" height="22" fill="none" stroke="#5C80E3" stroke-width="2"><path d="M12 2a4 4 0 014 4v1h2a2 2 0 012 2v10a2 2 0 01-2 2H6a2 2 0 01-2-2V9a2 2 0 012-2h2V6a4 4 0 014-4z"/></svg></div>
       <div class="stat-card-label">Активные боты</div>
-      <div class="stat-card-value">4 / 10</div>
-      <div class="stat-card-trend up">+1 за неделю</div>
+      <div class="stat-card-value">—</div>
     </div>
     <div class="stat-card liquid-glass">
       <div class="stat-card-icon" style="background:rgba(43,89,54,.18)"><svg width="22" height="22" fill="none" stroke="#66876E" stroke-width="2"><path d="M13 10V3L4 14h7v7l9-11h-7z"/></svg></div>
-      <div class="stat-card-label">Сигналов сегодня</div>
-      <div class="stat-card-value">12</div>
-      <div class="stat-card-trend up">8 прибыльных</div>
+      <div class="stat-card-label">Сигналов всего</div>
+      <div class="stat-card-value">—</div>
     </div>
     <div class="stat-card liquid-glass">
       <div class="stat-card-icon" style="background:rgba(130,98,98,.18)"><svg width="22" height="22" fill="none" stroke="#C8B9B9" stroke-width="2"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg></div>
       <div class="stat-card-label">Win Rate</div>
-      <div class="stat-card-value">78.5%</div>
-      <div class="stat-card-trend up">+2.1% за месяц</div>
+      <div class="stat-card-value">—</div>
     </div>
   </div>
 
@@ -108,10 +104,7 @@
     <div class="card">
       <div class="flex items-center justify-between mb-4"><h2 class="font-bold">Последние сигналы</h2><a href="signals.html" class="text-xs text-indigo-400 hover:underline">Все</a></div>
       <div class="space-y-3" id="recentSignals">
-        <div class="flex items-center justify-between p-3 bg-slate-800/30 rounded-lg"><div><div class="font-semibold text-sm">BTC/USDT</div><div class="text-xs text-slate-500">SMC &middot; 2m</div></div><div class="text-right"><span class="text-xs px-2 py-0.5 rounded-full bg-green-500/15 text-green-400">LONG</span><div class="text-xs text-green-400 mt-1">+2.4%</div></div></div>
-        <div class="flex items-center justify-between p-3 bg-slate-800/30 rounded-lg"><div><div class="font-semibold text-sm">ETH/USDT</div><div class="text-xs text-slate-500">Gerchik &middot; 15m</div></div><div class="text-right"><span class="text-xs px-2 py-0.5 rounded-full bg-red-500/15 text-red-400">SHORT</span><div class="text-xs text-red-400 mt-1">-0.8%</div></div></div>
-        <div class="flex items-center justify-between p-3 bg-slate-800/30 rounded-lg"><div><div class="font-semibold text-sm">SOL/USDT</div><div class="text-xs text-slate-500">Scalping &middot; 30m</div></div><div class="text-right"><span class="text-xs px-2 py-0.5 rounded-full bg-green-500/15 text-green-400">LONG</span><div class="text-xs text-green-400 mt-1">+1.6%</div></div></div>
-        <div class="flex items-center justify-between p-3 bg-slate-800/30 rounded-lg"><div><div class="font-semibold text-sm">DOGE/USDT</div><div class="text-xs text-slate-500">SMC &middot; 1h</div></div><div class="text-right"><span class="text-xs px-2 py-0.5 rounded-full bg-green-500/15 text-green-400">LONG</span><div class="text-xs text-cyan-400 mt-1">Active</div></div></div>
+        <div class="text-xs text-slate-500 text-center py-4">Загрузка…</div>
       </div>
     </div>
   </div>
@@ -122,12 +115,7 @@
     <div class="overflow-x-auto">
       <table class="w-full text-sm">
         <thead><tr class="text-xs text-slate-500 uppercase"><th class="text-left p-3">Дата</th><th class="text-left p-3">Пара</th><th class="text-left p-3">Направление</th><th class="text-left p-3">Вход</th><th class="text-left p-3">Выход</th><th class="text-left p-3">PnL</th><th class="text-left p-3">R:R</th></tr></thead>
-        <tbody>
-          <tr class="border-t border-slate-800/50"><td class="p-3 text-slate-400">10 Apr 14:30</td><td class="p-3 font-medium">BTC/USDT</td><td class="p-3"><span class="text-xs px-2 py-0.5 rounded-full bg-green-500/15 text-green-400">LONG</span></td><td class="p-3">67,450</td><td class="p-3">68,920</td><td class="p-3 text-green-400">+$147.00</td><td class="p-3">2.1R</td></tr>
-          <tr class="border-t border-slate-800/50"><td class="p-3 text-slate-400">10 Apr 11:15</td><td class="p-3 font-medium">ETH/USDT</td><td class="p-3"><span class="text-xs px-2 py-0.5 rounded-full bg-red-500/15 text-red-400">SHORT</span></td><td class="p-3">3,245</td><td class="p-3">3,198</td><td class="p-3 text-green-400">+$47.00</td><td class="p-3">1.4R</td></tr>
-          <tr class="border-t border-slate-800/50"><td class="p-3 text-slate-400">09 Apr 22:00</td><td class="p-3 font-medium">SOL/USDT</td><td class="p-3"><span class="text-xs px-2 py-0.5 rounded-full bg-green-500/15 text-green-400">LONG</span></td><td class="p-3">178.5</td><td class="p-3">175.2</td><td class="p-3 text-red-400">-$33.00</td><td class="p-3">-1.0R</td></tr>
-          <tr class="border-t border-slate-800/50"><td class="p-3 text-slate-400">09 Apr 18:45</td><td class="p-3 font-medium">ARB/USDT</td><td class="p-3"><span class="text-xs px-2 py-0.5 rounded-full bg-green-500/15 text-green-400">LONG</span></td><td class="p-3">1.125</td><td class="p-3">1.158</td><td class="p-3 text-green-400">+$66.00</td><td class="p-3">2.9R</td></tr>
-        </tbody>
+        <tbody><tr><td colspan="7" class="p-4 text-center text-slate-500 text-sm">Загрузка сделок…</td></tr></tbody>
       </table>
     </div>
   </div>
@@ -194,15 +182,18 @@ async function loadRecentSignals() {
 
 // ── Recent trades table ──
 async function loadRecentTrades() {
+  const tbody = document.querySelector('.card table tbody');
+  if (!tbody) return;
   try {
     const bots = await API.listBots();
-    if (!bots.bots.length) return;
+    if (!bots.bots.length) {
+      tbody.innerHTML = '<tr><td colspan="7" class="p-4 text-center text-slate-500 text-sm">Сделок пока нет — создай бота, чтобы начать</td></tr>';
+      return;
+    }
     // Fetch trades for each bot and merge
     const tradeArrays = await Promise.all(bots.bots.map(b => API.botTrades(b.id, { limit: 10 }).catch(() => ({ trades: [] }))));
     const trades = tradeArrays.flatMap(r => r.trades || []).sort((a, b) =>
       new Date(b.opened_at).getTime() - new Date(a.opened_at).getTime()).slice(0, 10);
-    const tbody = document.querySelector('.card table tbody');
-    if (!tbody) return;
     tbody.innerHTML = '';
     if (!trades.length) {
       tbody.innerHTML = '<tr><td colspan="7" class="p-4 text-center text-slate-500 text-sm">Сделок пока нет</td></tr>';
