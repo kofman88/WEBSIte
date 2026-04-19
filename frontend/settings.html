@@ -370,6 +370,19 @@ WS.on('payment_confirmed', () => { Toast.success('Платёж подтверж�
 loadProfile();
 loadSubscription();
 loadReferrals();
+
+// ── Auto-open checkout if ?upgrade=<plan> came from landing pricing CTA ──
+(function autoUpgrade(){
+  try {
+    const p = new URLSearchParams(location.search).get('upgrade');
+    if (!p || !['starter','pro','elite'].includes(p)) return;
+    const radio = document.querySelector('input[name="coPlan"][value="'+p+'"]');
+    if (radio) radio.checked = true;
+    openCheckout();
+    // Clean the URL so a reload doesn't re-pop
+    history.replaceState({}, '', location.pathname);
+  } catch (_e) {}
+})();
 </script>
 </body>
 </html>

@@ -510,7 +510,7 @@
             <li class="flex items-center gap-3 t-body"><span class="tick off"><iconify-icon icon="solar:close-circle-linear" style="font-size:14px"></iconify-icon></span> Авто-торговля</li>
             <li class="flex items-center gap-3 t-body"><span class="tick off"><iconify-icon icon="solar:close-circle-linear" style="font-size:14px"></iconify-icon></span> Бэктестинг</li>
           </ul>
-          <a href="#" onclick="openModal('register');return false" class="pill pill-ghost pill-md w-full" style="justify-content:center">Начать</a>
+          <a href="#" onclick="pickPlan('free');return false" class="pill pill-ghost pill-md w-full" style="justify-content:center">Начать</a>
         </div>
       </div>
       <!-- Starter -->
@@ -527,7 +527,7 @@
             <li class="flex items-center gap-3 t-body"><span class="tick off"><iconify-icon icon="solar:close-circle-linear" style="font-size:14px"></iconify-icon></span> Авто-торговля</li>
             <li class="flex items-center gap-3 t-body"><span class="tick off"><iconify-icon icon="solar:close-circle-linear" style="font-size:14px"></iconify-icon></span> Бэктестинг</li>
           </ul>
-          <a href="#" onclick="openModal('register');return false" class="pill pill-ghost pill-md w-full" style="justify-content:center">Выбрать</a>
+          <a href="#" onclick="pickPlan('starter');return false" class="pill pill-ghost pill-md w-full" style="justify-content:center">Выбрать</a>
         </div>
       </div>
       <!-- Pro (popular) -->
@@ -545,7 +545,7 @@
             <li class="flex items-center gap-3 t-body" style="color:rgba(255,255,255,.82);font-size:13px"><span class="tick"><iconify-icon icon="solar:check-circle-bold" style="font-size:14px"></iconify-icon></span> Авто-торговля</li>
             <li class="flex items-center gap-3 t-body" style="color:rgba(255,255,255,.82);font-size:13px"><span class="tick"><iconify-icon icon="solar:check-circle-bold" style="font-size:14px"></iconify-icon></span> Бэктестинг</li>
           </ul>
-          <a href="#" onclick="openModal('register');return false" class="pill pill-primary pill-md w-full" style="justify-content:center">Выбрать</a>
+          <a href="#" onclick="pickPlan('pro');return false" class="pill pill-primary pill-md w-full" style="justify-content:center">Выбрать</a>
         </div>
       </div>
       <!-- Elite -->
@@ -562,7 +562,7 @@
             <li class="flex items-center gap-3 t-body" style="color:rgba(255,255,255,.82);font-size:13px"><span class="tick"><iconify-icon icon="solar:check-circle-bold" style="font-size:14px"></iconify-icon></span> API доступ</li>
             <li class="flex items-center gap-3 t-body" style="color:rgba(255,255,255,.82);font-size:13px"><span class="tick"><iconify-icon icon="solar:check-circle-bold" style="font-size:14px"></iconify-icon></span> Личный менеджер</li>
           </ul>
-          <a href="#" onclick="openModal('register');return false" class="pill pill-ghost pill-md w-full" style="justify-content:center">Выбрать</a>
+          <a href="#" onclick="pickPlan('elite');return false" class="pill pill-ghost pill-md w-full" style="justify-content:center">Выбрать</a>
         </div>
       </div>
     </div>
@@ -815,9 +815,15 @@ async function _authCall(path,body){
   if(data.token)try{localStorage.setItem('chm_token',data.token)}catch(e){}
   return data;
 }
+// Post-auth destination: honor pending plan pick from pricing CTA, otherwise dashboard.
+function _nextUrl(){
+  let pending='';try{pending=localStorage.getItem('chm_pending_plan')||''}catch(e){}
+  if(pending){try{localStorage.removeItem('chm_pending_plan')}catch(e){}return 'settings.html?upgrade='+encodeURIComponent(pending)}
+  return 'dashboard.html';
+}
 document.getElementById('loginForm')?.addEventListener('submit',async e=>{
   e.preventDefault();const fd=new FormData(e.target);const btn=e.target.querySelector('button[type=submit]');if(btn)btn.disabled=true;
-  try{await _authCall('/auth/login',{email:fd.get('email'),password:fd.get('password')});closeModals();_notify.ok('Вход выполнен!');setTimeout(()=>location.href='dashboard.html',500)}
+  try{await _authCall('/auth/login',{email:fd.get('email'),password:fd.get('password')});closeModals();_notify.ok('Вход выполнен!');setTimeout(()=>location.href=_nextUrl(),500)}
   catch(err){_notify.err(err.message||'Ошибка входа. Проверьте подключение.')}
   finally{if(btn)btn.disabled=false}
 });
@@ -825,7 +831,7 @@ document.getElementById('registerForm')?.addEventListener('submit',async e=>{
   e.preventDefault();const fd=new FormData(e.target);
   if(fd.get('password')!==fd.get('password2')){_notify.err('Пароли не совпадают');return}
   const btn=e.target.querySelector('button[type=submit]');if(btn)btn.disabled=true;
-  try{await _authCall('/auth/register',{email:fd.get('email'),password:fd.get('password')});closeModals();_notify.ok('Аккаунт создан!');setTimeout(()=>location.href='dashboard.html',500)}
+  try{await _authCall('/auth/register',{email:fd.get('email'),password:fd.get('password')});closeModals();_notify.ok('Аккаунт создан!');setTimeout(()=>location.href=_nextUrl(),500)}
   catch(err){_notify.err(err.message||'Ошибка регистрации. Проверьте подключение.')}
   finally{if(btn)btn.disabled=false}
 });
@@ -966,6 +972,17 @@ applyLang();
 function _loggedIn(){try{return typeof Auth!=='undefined'&&Auth.isLoggedIn()}catch(e){return false}}
 function handleLogin(e){if(e&&e.preventDefault)e.preventDefault();if(_loggedIn()){location.href='dashboard.html';return false}openModal('login');return false}
 function handleRegister(e){if(e&&e.preventDefault)e.preventDefault();if(_loggedIn()){location.href='dashboard.html';return false}openModal('register');return false}
+// Unified pricing CTA — route logged-in users to settings checkout, otherwise
+// open register modal with plan remembered for the post-register redirect.
+function pickPlan(plan){
+  if(plan==='free'){
+    if(_loggedIn()){location.href='dashboard.html';return false}
+    openModal('register');return false;
+  }
+  if(_loggedIn()){location.href='settings.html?upgrade='+encodeURIComponent(plan);return false}
+  try{localStorage.setItem('chm_pending_plan',plan)}catch(e){}
+  openModal('register');return false;
+}
 (function(){try{if(_loggedIn()){const b=document.getElementById('loginBtn');if(b){b.setAttribute('data-t','nav-cabinet');b.textContent=(lang==='ru'?'Кабинет':'Dashboard')}}}catch(e){}})();
 
 // ── Theme toggle ──
