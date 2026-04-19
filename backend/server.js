@@ -18,11 +18,13 @@ const subscriptionsRoutes = require('./routes/subscriptions');
 const signalsRoutes = require('./routes/signals');
 const walletRoutes = require('./routes/wallet');
 const optimizationsRoutes = require('./routes/optimizations');
+const paymentsRoutes = require('./routes/payments');
 const websocketService = require('./services/websocketService');
 const autoTradeService = require('./services/autoTradeService');
 const partialTpManager = require('./services/partialTpManager');
 const exchangeService = require('./services/exchangeService');
 const marketDataService = require('./services/marketDataService');
+const cryptoMonitor = require('./services/cryptoMonitor');
 const db = require('./models/database');
 
 const app = express();
@@ -53,6 +55,11 @@ if (process.env.NODE_ENV !== 'test' && process.env.VITEST !== 'true') {
   app.use('/api/', globalLimiter);
 }
 
+// Stripe webhook needs RAW body for signature verification — mount raw
+// parser ONLY for that specific path before the global JSON parser.
+app.use('/api/payments/webhooks/stripe', express.raw({ type: 'application/json', limit: '1mb' }),
+  (req, _res, next) => { req.rawBody = req.body; next(); });
+
 app.use(express.json({ limit: '1mb' }));
 app.use(express.urlencoded({ extended: true, limit: '1mb' }));
 
@@ -73,6 +80,7 @@ app.use('/api/subscriptions', subscriptionsRoutes);
 app.use('/api/signals', signalsRoutes);
 app.use('/api/wallet', walletRoutes);
 app.use('/api/optimizations', optimizationsRoutes);
+app.use('/api/payments', paymentsRoutes);
 
 app.get('/api/health', (_req, res) => {
   res.json({ status: 'ok', timestamp: new Date().toISOString(), version: '3.0.0' });
@@ -219,6 +227,7 @@ if (IS_TEST) {
   app.listen('passenger', () => logger.info('CHM Finance running via Passenger'));
   startScannerWorker();
   startPartialTpCron();
+  cryptoMonitor.start();
   process.on('SIGTERM', shutdown('SIGTERM'));
 } else {
   const server = http.createServer(app);
@@ -226,6 +235,7 @@ if (IS_TEST) {
   server.listen(PORT, () => logger.info('CHM Finance running on port ' + PORT));
   startScannerWorker();
   startPartialTpCron();
+  cryptoMonitor.start();
 
   process.on('SIGTERM', () => { shutdown('SIGTERM')().then(() => server.close()); });
   process.on('SIGINT',  () => { shutdown('SIGINT')().then(() => server.close()); });
