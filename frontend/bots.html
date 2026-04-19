@@ -34,11 +34,17 @@
     <button onclick="openWizard()" class="btn-primary px-5 py-2.5 rounded-xl text-sm font-semibold" style="background:linear-gradient(180deg,#2A5BE8 0%,#1D4ED8 60%,#143797 100%);box-shadow:inset 0 1px 1px rgba(255,255,255,.28),inset 0 -1px 3px rgba(0,0,0,.6),0 4px 8px -2px rgba(0,0,0,.6),0 0 0 1px rgba(29,78,216,.35);border:none;color:#fff;cursor:pointer;box-shadow:0 0 20px rgba(29,78,216,.4)">+ Создать бота</button>
   </div>
 
-  <!-- Filter -->
+  <!-- Filters -->
   <div class="flex flex-wrap gap-3 mb-6">
-    <select class="bg-slate-800/50 border border-slate-700 rounded-lg px-3 py-2 text-sm text-slate-300 outline-none"><option>Все биржи</option><option>Bybit</option><option>Binance</option><option>BingX</option></select>
-    <select class="bg-slate-800/50 border border-slate-700 rounded-lg px-3 py-2 text-sm text-slate-300 outline-none"><option>Все стратегии</option><option>SMC</option><option>Gerchik</option><option>Scalping</option></select>
-    <select class="bg-slate-800/50 border border-slate-700 rounded-lg px-3 py-2 text-sm text-slate-300 outline-none"><option>Все статусы</option><option>Активные</option><option>Остановлены</option></select>
+    <select id="fltExchange" class="bg-slate-800/50 border border-slate-700 rounded-lg px-3 py-2 text-sm text-slate-300 outline-none">
+      <option value="">Все биржи</option><option value="bybit">Bybit</option><option value="binance">Binance</option><option value="bingx">BingX</option><option value="okx">OKX</option>
+    </select>
+    <select id="fltStrategy" class="bg-slate-800/50 border border-slate-700 rounded-lg px-3 py-2 text-sm text-slate-300 outline-none">
+      <option value="">Все стратегии</option><option value="levels">Levels</option><option value="smc">SMC</option><option value="gerchik">Gerchik</option><option value="scalping">Scalping</option>
+    </select>
+    <select id="fltStatus" class="bg-slate-800/50 border border-slate-700 rounded-lg px-3 py-2 text-sm text-slate-300 outline-none">
+      <option value="">Все статусы</option><option value="active">Активные</option><option value="paused">Остановлены</option>
+    </select>
   </div>
 
   <!-- Bot Cards (filled by loadBots()) -->
@@ -169,15 +175,41 @@ document.querySelectorAll('.sidebar-link[data-page="bots"]').forEach(a => a.clas
 
 const STRATEGY_LABELS = { levels: 'Levels', smc: 'SMC', gerchik: 'Gerchik', scalping: 'Scalping' };
 const TF_OPTS = ['5m','15m','30m','1h','2h','4h','1d'];
+const FILTERS = { exchange: '', strategy: '', status: '' };
+
+function applyBotFilters(bots) {
+  return bots.filter((b) => {
+    if (FILTERS.exchange && (b.exchange || '').toLowerCase() !== FILTERS.exchange) return false;
+    if (FILTERS.strategy && (b.strategy || '').toLowerCase() !== FILTERS.strategy) return false;
+    if (FILTERS.status === 'active' && !b.isActive) return false;
+    if (FILTERS.status === 'paused' && b.isActive) return false;
+    return true;
+  });
+}
+
+// Rebind filter selects → reload
+['fltExchange','fltStrategy','fltStatus'].forEach((id) => {
+  const el = document.getElementById(id);
+  if (!el) return;
+  el.addEventListener('change', () => {
+    FILTERS.exchange = document.getElementById('fltExchange').value;
+    FILTERS.strategy = document.getElementById('fltStrategy').value;
+    FILTERS.status   = document.getElementById('fltStatus').value;
+    loadBots();
+  });
+});
 
 async function loadBots() {
   const grid = document.getElementById('botGrid');
   if (!grid) return;
   try {
     const data = await API.listBots();
+    // Header stats always reflect ALL bots; filters only affect the grid.
+    const all = data.bots || [];
+    const filtered = applyBotFilters(all);
     let activeCount = 0, totalPnl = 0;
     grid.innerHTML = '';
-    if (!data.bots.length) {
+    if (!all.length) {
       grid.innerHTML = '<div class="col-span-full text-center py-12 text-slate-500">Пока нет ботов. Создай первого — кнопка вверху.</div>';
       document.getElementById('hdrTotal').textContent = '0';
       document.getElementById('hdrActive').textContent = '0';
@@ -185,10 +217,19 @@ async function loadBots() {
       pnlEl.textContent = Fmt.currency(0); pnlEl.className = 'text-slate-400';
       return;
     }
-    for (const b of data.bots) {
-      const stats = await API.botStats(b.id).catch(() => ({ totalPnl: 0, winRate: null, totalTrades: 0 }));
+    // Pre-fetch stats for ALL bots so header aggregates stay stable when filters change.
+    const statsById = new Map();
+    await Promise.all(all.map(async (b) => {
+      const s = await API.botStats(b.id).catch(() => ({ totalPnl: 0, winRate: null, totalTrades: 0 }));
+      statsById.set(b.id, s);
       if (b.isActive) activeCount++;
-      totalPnl += Number(stats.totalPnl || 0);
+      totalPnl += Number(s.totalPnl || 0);
+    }));
+    if (!filtered.length) {
+      grid.innerHTML = '<div class="col-span-full text-center py-10 text-slate-500">Под выбранные фильтры ничего не подходит.</div>';
+    }
+    for (const b of filtered) {
+      const stats = statsById.get(b.id) || { totalPnl: 0, winRate: null, totalTrades: 0 };
       const card = document.createElement('div');
       card.className = 'card card-glow';
       const pnlClass = stats.totalPnl > 0 ? 'text-green-400' : stats.totalPnl < 0 ? 'text-red-400' : 'text-slate-400';
@@ -245,8 +286,8 @@ async function loadBots() {
         else switchMode(id, 'paper');
       });
     });
-    // Header stats
-    document.getElementById('hdrTotal').textContent = data.bots.length;
+    // Header stats — reflect all bots, not the filtered subset.
+    document.getElementById('hdrTotal').textContent = all.length;
     document.getElementById('hdrActive').textContent = activeCount;
     const pnlEl = document.getElementById('hdrPnl');
     pnlEl.textContent = Fmt.currency(totalPnl);
