@@ -947,24 +947,52 @@ window.Promos=(function(){
     if(typeof it.file==='string')return it.file.includes('{lang}')?it.file.replace('{lang}',lang):(it.file+'_'+lang+'.html');
     return '';
   }
+  // Render placeholders first; create real iframes only when user scrolls
+  // within 600px of the promo section. Each promo iframe is a self-contained
+  // HTML that pulls Tailwind+Chart+Iconify+Inter — ~1.5 MB per frame. Deferring
+  // cuts cold first-paint from 40+s to <5s for visitors who don't scroll here.
   function build(lang){
     const n=ITEMS.length;
     grid.style.gridTemplateColumns = n===1?'1fr' : (n===2?'repeat(2,minmax(0,1fr))' : 'repeat(3,minmax(0,1fr))');
     grid.innerHTML=ITEMS.map((it,i)=>{
-      const src='assets/promo/'+resolveFile(it,lang);
-      return `<a href="${it.link}" target="_blank" rel="noopener" class="promo-wrap" data-i="${i}">
+      return `<a href="${it.link}" target="_blank" rel="noopener" class="promo-wrap" data-i="${i}" data-src="assets/promo/${resolveFile(it,lang)}" data-title="${it.label[lang]}">
         <div class="shell"><div class="shell-inner">
-          <div class="promo-stage"><iframe data-promo="${i}" src="${src}" title="${it.label[lang]}" loading="lazy" referrerpolicy="no-referrer" sandbox="allow-scripts allow-same-origin" scrolling="no"></iframe></div>
+          <div class="promo-stage promo-placeholder" style="aspect-ratio:800/1100;display:flex;align-items:center;justify-content:center;background:linear-gradient(180deg,rgba(29,78,216,.08),rgba(29,78,216,.02));border-radius:inherit">
+            <div style="text-align:center;opacity:.5"><div style="font-size:28px;margin-bottom:6px">📱</div><div style="font-size:11px;letter-spacing:.2em;color:rgba(255,255,255,.6)">${it.label[lang].toUpperCase()}</div></div>
+          </div>
         </div></div>
         <div class="promo-caption"><div class="promo-label">${it.label[lang]}</div><div class="promo-meta">${it.meta[lang]}</div></div>
       </a>`;
     }).join('');
-    grid.querySelectorAll('.promo-stage').forEach(stage=>{
-      const f=stage.querySelector('iframe');
-      const run=()=>fitStage(stage);
-      f.addEventListener('load',()=>{run();setTimeout(run,200);setTimeout(run,600);setTimeout(run,1500)});
-      if(window.ResizeObserver){new ResizeObserver(run).observe(stage)}else{window.addEventListener('resize',run)}
-    });
+    // Lazy-mount: observe grid, inject iframes only when near viewport
+    let mounted=false;
+    function mountFrames(){
+      if(mounted)return;mounted=true;
+      grid.querySelectorAll('.promo-wrap').forEach((wrap)=>{
+        const src=wrap.getAttribute('data-src');
+        const title=wrap.getAttribute('data-title');
+        const stage=wrap.querySelector('.promo-stage');
+        const iframe=document.createElement('iframe');
+        iframe.src=src; iframe.title=title||'';
+        iframe.setAttribute('loading','lazy');
+        iframe.setAttribute('referrerpolicy','no-referrer');
+        iframe.setAttribute('sandbox','allow-scripts allow-same-origin');
+        iframe.setAttribute('scrolling','no');
+        stage.classList.remove('promo-placeholder');
+        stage.innerHTML=''; stage.appendChild(iframe);
+        const run=()=>fitStage(stage);
+        iframe.addEventListener('load',()=>{run();setTimeout(run,200);setTimeout(run,600);setTimeout(run,1500)});
+        if(window.ResizeObserver){new ResizeObserver(run).observe(stage)}else{window.addEventListener('resize',run)}
+      });
+    }
+    if(window.IntersectionObserver){
+      const io=new IntersectionObserver((es)=>{
+        if(es[0].isIntersecting){io.disconnect();mountFrames()}
+      },{rootMargin:'600px'});
+      io.observe(grid);
+    } else {
+      mountFrames(); // Fallback: ancient browser, eager-mount
+    }
   }
   let current=null;
   return{apply(lang){if(lang!==current){current=lang;build(lang)}}};
