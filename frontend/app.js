@@ -225,10 +225,30 @@ const API = {
   replyTicket: (id, body) => apiRequest('POST', '/support/tickets/' + id + '/reply', { body }),
   closeTicket: (id) => apiRequest('POST', '/support/tickets/' + id + '/close'),
   listAllTickets: (opts = {}) => apiRequest('GET', '/support/admin/tickets?' + qs(opts)),
-  // CSV download returns a URL (client navigates to it so Authorization
-  // can't go in header — we build a short-lived signed URL or use cookie.
-  // Simplest: open URL in new tab with token in query — acceptable since
-  // HTTPS and browser session is already authed. See analytics.html.
+
+  // Ops / back-office ------------------------------------------------------
+  opsDashboard: () => apiRequest('GET', '/admin/dashboard'),
+  adminListUsers: (opts = {}) => apiRequest('GET', '/admin/users?' + qs(opts)),
+  adminUserDetail: (id) => apiRequest('GET', '/admin/users/' + id + '/detail'),
+  adminSetUserActive: (id, isActive) => apiRequest('PATCH', '/admin/users/' + id + '/active', { isActive }),
+  adminSetUserPlan: (id, plan, durationDays = 30) => apiRequest('PATCH', '/admin/users/' + id + '/plan', { plan, durationDays }),
+  adminSetUserAdmin: (id, isAdmin) => apiRequest('PATCH', '/admin/users/' + id + '/admin', { isAdmin }),
+  adminNotifyUser: (id, payload) => apiRequest('POST', '/admin/users/' + id + '/notify', payload),
+  adminListBots: (opts = {}) => apiRequest('GET', '/admin/bots?' + qs(opts)),
+  adminListTrades: (opts = {}) => apiRequest('GET', '/admin/trades?' + qs(opts)),
+  adminListSignals: (opts = {}) => apiRequest('GET', '/admin/signals?' + qs(opts)),
+  adminSystem: () => apiRequest('GET', '/admin/system'),
+  adminListPayments: (opts = {}) => apiRequest('GET', '/admin/payments?' + qs(opts)),
+  adminConfirmPayment: (id, note) => apiRequest('POST', '/admin/payments/' + id + '/confirm', { note }),
+  adminRefundPayment: (id, reason) => apiRequest('POST', '/admin/payments/' + id + '/refund', { reason }),
+  adminListPromoCodes: () => apiRequest('GET', '/admin/promo-codes'),
+  adminCreatePromoCode: (body) => apiRequest('POST', '/admin/promo-codes', body),
+  adminTogglePromoCode: (id, isActive) => apiRequest('PATCH', '/admin/promo-codes/' + id + '/active', { isActive }),
+  adminDeletePromoCode: (id) => apiRequest('DELETE', '/admin/promo-codes/' + id),
+  adminListRewards: (opts = {}) => apiRequest('GET', '/admin/ref-rewards?' + qs(opts)),
+  adminPayReward: (id) => apiRequest('POST', '/admin/ref-rewards/' + id + '/pay'),
+  adminCancelReward: (id, reason) => apiRequest('POST', '/admin/ref-rewards/' + id + '/cancel', { reason }),
+  adminAuditLog: (opts = {}) => apiRequest('GET', '/admin/audit?' + qs(opts)),
 };
 
 function saveAuthResp(data) {

@@ -155,6 +155,99 @@ router.post('/ref-rewards/:id/cancel', (req, res, next) => {
   } catch (err) { handleErr(err, res, next); }
 });
 
+// ── Back-office dashboards & drill-downs ───────────────────────────────
+router.get('/dashboard', (_req, res, next) => {
+  try { res.json(admin.opsDashboard()); } catch (err) { handleErr(err, res, next); }
+});
+
+router.get('/users/:id/detail', (req, res, next) => {
+  try {
+    const id = z.coerce.number().int().positive().parse(req.params.id);
+    res.json(admin.userDetail(id));
+  } catch (err) { handleErr(err, res, next); }
+});
+
+router.get('/bots', (req, res, next) => {
+  try {
+    const q = z.object({
+      status: z.enum(['active', 'inactive']).optional(),
+      limit: z.coerce.number().int().min(1).max(500).default(100),
+      offset: z.coerce.number().int().min(0).default(0),
+    }).parse(req.query);
+    res.json({ bots: admin.listAllBots(q) });
+  } catch (err) { handleErr(err, res, next); }
+});
+
+router.get('/trades', (req, res, next) => {
+  try {
+    const q = z.object({
+      status: z.enum(['open', 'closed', 'cancelled']).optional(),
+      mode: z.enum(['paper', 'live']).optional(),
+      limit: z.coerce.number().int().min(1).max(500).default(100),
+      offset: z.coerce.number().int().min(0).default(0),
+    }).parse(req.query);
+    res.json({ trades: admin.listAllTrades(q) });
+  } catch (err) { handleErr(err, res, next); }
+});
+
+router.get('/signals', (req, res, next) => {
+  try {
+    const q = z.object({
+      strategy: z.string().max(32).optional(),
+      limit: z.coerce.number().int().min(1).max(500).default(100),
+      offset: z.coerce.number().int().min(0).default(0),
+    }).parse(req.query);
+    res.json({ signals: admin.listAllSignals(q) });
+  } catch (err) { handleErr(err, res, next); }
+});
+
+router.get('/system', (_req, res, next) => {
+  try { res.json(admin.systemInfo()); } catch (err) { handleErr(err, res, next); }
+});
+
+// Admin → dispatch a notification to a user (in-app + email + TG via notifier)
+router.post('/users/:id/notify', (req, res, next) => {
+  try {
+    const id = z.coerce.number().int().positive().parse(req.params.id);
+    const body = z.object({
+      type: z.enum(['security', 'payment', 'trade', 'referral', 'support', 'system']).default('system'),
+      title: z.string().min(1).max(200),
+      body: z.string().min(1).max(5000),
+      link: z.string().max(500).optional(),
+    }).parse(req.body);
+    const notifier = require('../services/notifier');
+    notifier.dispatch(id, body);
+    // Audit the outbound message for traceability.
+    require('../models/database').prepare(`
+      INSERT INTO audit_log (user_id, action, entity_type, entity_id, metadata)
+      VALUES (?, 'admin.user.notify', 'user', ?, ?)
+    `).run(req.userId, id, JSON.stringify({ type: body.type, title: body.title }));
+    res.json({ sent: true });
+  } catch (err) { handleErr(err, res, next); }
+});
+
+// Admin → promote/demote admin flag. Extremely audited. Cannot demote self
+// while you're the last admin — server computes that.
+router.patch('/users/:id/admin', (req, res, next) => {
+  try {
+    const id = z.coerce.number().int().positive().parse(req.params.id);
+    const body = z.object({ isAdmin: z.boolean() }).parse(req.body);
+    const db = require('../models/database');
+    if (!body.isAdmin) {
+      const adminCount = db.prepare(`SELECT COUNT(*) AS n FROM users WHERE is_admin = 1`).get().n;
+      if (adminCount <= 1) {
+        return res.status(400).json({ error: 'Cannot demote the last admin', code: 'LAST_ADMIN' });
+      }
+    }
+    db.prepare(`UPDATE users SET is_admin = ? WHERE id = ?`).run(body.isAdmin ? 1 : 0, id);
+    db.prepare(`
+      INSERT INTO audit_log (user_id, action, entity_type, entity_id, metadata)
+      VALUES (?, 'admin.user.grant_admin', 'user', ?, ?)
+    `).run(req.userId, id, JSON.stringify({ isAdmin: body.isAdmin }));
+    res.json({ id, isAdmin: body.isAdmin });
+  } catch (err) { handleErr(err, res, next); }
+});
+
 // ── System ─────────────────────────────────────────────────────────────
 router.get('/stats', (_req, res, next) => {
   try { res.json(admin.systemStats()); }
