@@ -24,6 +24,7 @@ const adminRoutes = require('./routes/admin');
 const notificationsRoutes = require('./routes/notifications');
 const telegramRoutes = require('./routes/telegram');
 const analyticsRoutes = require('./routes/analytics');
+const webhooksRoutes = require('./routes/webhooks');
 const websocketService = require('./services/websocketService');
 const autoTradeService = require('./services/autoTradeService');
 const partialTpManager = require('./services/partialTpManager');
@@ -91,6 +92,7 @@ app.use('/api/admin', adminRoutes);
 app.use('/api/notifications', notificationsRoutes);
 app.use('/api/telegram', telegramRoutes);
 app.use('/api/analytics', analyticsRoutes);
+app.use('/api/webhooks', webhooksRoutes);
 
 app.get('/api/health', (_req, res) => {
   // Lightweight liveness probe.

@@ -97,4 +97,46 @@ router.get('/:id/stats', authMiddleware, (req, res, next) => {
   } catch (err) { handleErr(err, res, next); }
 });
 
+// ── TradingView webhook management ─────────────────────────────────────
+const tvWebhook = require('../services/tvWebhookService');
+router.get('/:id/tv-webhook', authMiddleware, (req, res, next) => {
+  try {
+    const id = z.coerce.number().int().positive().parse(req.params.id);
+    const secret = tvWebhook.getSecret(id, req.userId);
+    res.json({ url: tvWebhook.buildUrl(id), secret });
+  } catch (err) { handleErr(err, res, next); }
+});
+
+router.post('/:id/tv-webhook/rotate', authMiddleware, (req, res, next) => {
+  try {
+    const id = z.coerce.number().int().positive().parse(req.params.id);
+    const secret = tvWebhook.rotateSecret(id, req.userId);
+    res.json({ url: tvWebhook.buildUrl(id), secret });
+  } catch (err) { handleErr(err, res, next); }
+});
+
+// ── Manual (smart) trade — creates a bot-less trade ────────────────────
+const manualTrade = require('../services/manualTradeService');
+router.post('/manual-trade', authMiddleware, (req, res, next) => {
+  try {
+    const input = z.object({
+      exchangeKeyId: z.coerce.number().int().positive().optional(),
+      exchange: z.string().max(32).optional(),
+      symbol: z.string().min(3).max(32),
+      side: z.enum(['long', 'short']),
+      quantity: z.coerce.number().positive(),
+      entryPrice: z.coerce.number().positive(),
+      stopLoss: z.coerce.number().positive(),
+      takeProfit1: z.coerce.number().positive().optional(),
+      takeProfit2: z.coerce.number().positive().optional(),
+      takeProfit3: z.coerce.number().positive().optional(),
+      leverage: z.coerce.number().int().min(1).max(125).default(1),
+      tradingMode: z.enum(['paper', 'live']).default('paper'),
+      note: z.string().max(2000).optional(),
+    }).parse(req.body);
+    const trade = manualTrade.create(req.userId, input);
+    res.status(201).json(trade);
+  } catch (err) { handleErr(err, res, next); }
+});
+
 module.exports = router;

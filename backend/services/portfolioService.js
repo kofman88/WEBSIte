@@ -33,8 +33,8 @@ async function getForUser(userId, { fresh = false } = {}) {
   }
 
   const keys = db.prepare(`
-    SELECT id, exchange, label, is_active FROM exchange_keys
-    WHERE user_id = ? AND is_active = 1
+    SELECT id, exchange, label FROM exchange_keys
+    WHERE user_id = ?
   `).all(userId);
 
   const perExchange = [];

@@ -208,6 +208,10 @@ const API = {
   equityCurve: (days = 90) => apiRequest('GET', '/analytics/equity-curve?days=' + days),
   listTrades: (opts = {}) => apiRequest('GET', '/analytics/trades?' + qs(opts)),
   setTradeNote: (id, note) => apiRequest('PATCH', '/analytics/trades/' + id + '/note', { note }),
+  // Manual (Smart) Trade + TV webhook management
+  manualTrade: (payload) => apiRequest('POST', '/bots/manual-trade', payload),
+  getTvWebhook: (botId) => apiRequest('GET', '/bots/' + botId + '/tv-webhook'),
+  rotateTvWebhook: (botId) => apiRequest('POST', '/bots/' + botId + '/tv-webhook/rotate'),
   // CSV download returns a URL (client navigates to it so Authorization
   // can't go in header — we build a short-lived signed URL or use cookie.
   // Simplest: open URL in new tab with token in query — acceptable since

@@ -73,6 +73,13 @@ db.exec(`
     if (!cols.includes('note')) db.exec("ALTER TABLE trades ADD COLUMN note TEXT");
   } catch(_){}
 })();
+// Phase D: TradingView webhook secret per-bot + manual-trade tag
+(function migrateBotsWebhook(){
+  try {
+    const cols = db.prepare("PRAGMA table_info('trading_bots')").all().map(c => c.name);
+    if (!cols.includes('tv_webhook_secret')) db.exec("ALTER TABLE trading_bots ADD COLUMN tv_webhook_secret TEXT");
+  } catch(_){}
+})();
 db.exec(`
   -- placeholder to keep the multi-statement block working
 
