@@ -257,6 +257,11 @@ const API = {
   setPublicProfile: (enabled) => apiRequest('PUT', '/support/profile/public', { enabled }),
   setPaperBalance: (amount) => apiRequest('PUT', '/support/profile/paper-balance', { amount }),
 
+  // Copy trading
+  copySubscribe: (leaderCode, opts = {}) => apiRequest('POST', '/copy/subscribe', { leaderCode, ...opts }),
+  copyUnsubscribe: (leaderId) => apiRequest('POST', '/copy/unsubscribe', { leaderId }),
+  copyListFollowing: () => apiRequest('GET', '/copy/following'),
+
   // Support tickets
   listTickets: (opts = {}) => apiRequest('GET', '/support/tickets?' + qs(opts)),
   createTicket: (subject, body) => apiRequest('POST', '/support/tickets', { subject, body }),

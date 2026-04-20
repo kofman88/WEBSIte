@@ -43,11 +43,31 @@ const MIGRATIONS = [
     name: 'ref_rewards_kind',
     up(db) {
       const cols = db.prepare("PRAGMA table_info('ref_rewards')").all().map((c) => c.name);
-      // 'commission' = existing 20%-of-payment row, 'signup_bonus' = new
-      // fixed-$ pay-per-signup row unlocked by this block.
       if (!cols.includes('kind')) {
         db.exec("ALTER TABLE ref_rewards ADD COLUMN kind TEXT NOT NULL DEFAULT 'commission'");
       }
+    },
+  },
+  {
+    version: 4,
+    name: 'copy_trading',
+    up(db) {
+      db.exec(`
+        CREATE TABLE IF NOT EXISTS copy_subscriptions (
+          id          INTEGER PRIMARY KEY AUTOINCREMENT,
+          follower_id INTEGER NOT NULL,
+          leader_id   INTEGER NOT NULL,
+          mode        TEXT NOT NULL DEFAULT 'paper' CHECK (mode IN ('paper','live')),
+          risk_mult   REAL NOT NULL DEFAULT 1.0,
+          is_active   INTEGER NOT NULL DEFAULT 1,
+          created_at  DATETIME DEFAULT CURRENT_TIMESTAMP,
+          UNIQUE(follower_id, leader_id),
+          FOREIGN KEY (follower_id) REFERENCES users(id) ON DELETE CASCADE,
+          FOREIGN KEY (leader_id)   REFERENCES users(id) ON DELETE CASCADE
+        );
+        CREATE INDEX IF NOT EXISTS idx_copy_sub_follower ON copy_subscriptions(follower_id);
+        CREATE INDEX IF NOT EXISTS idx_copy_sub_leader ON copy_subscriptions(leader_id, is_active);
+      `);
     },
   },
 ];

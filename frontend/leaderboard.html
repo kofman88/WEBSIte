@@ -57,6 +57,7 @@
             <th class="text-right p-3">ROI %</th>
             <th class="text-right p-3">Sharpe</th>
             <th class="text-right p-3">Сделок</th>
+            <th class="text-right p-3"></th>
           </tr>
         </thead>
         <tbody id="lboBody">
@@ -98,6 +99,7 @@ async function loadBoard() {
         <td class="p-3 text-right text-slate-300">${t.roi !== null ? t.roi.toFixed(1) + '%' : '—'}</td>
         <td class="p-3 text-right text-slate-300">${t.sharpe !== null ? t.sharpe.toFixed(2) : '—'}</td>
         <td class="p-3 text-right text-slate-400">${t.closedTrades}</td>
+        <td class="p-3 text-right"><button onclick="copyFollow('${escHtml(t.referralCode)}', '${escHtml(t.displayName).replace(/'/g,"\\'")}')" class="text-xs px-2 py-1 rounded bg-indigo-500/15 text-indigo-300 hover:bg-indigo-500/25">Copy</button></td>
       </tr>`;
     }).join('');
   } catch (err) {
@@ -122,6 +124,15 @@ document.getElementById('lboSort').addEventListener('change', (e) => {
   currentSort = e.target.value;
   loadBoard();
 });
+window.copyFollow = async function(code, name) {
+  if (typeof Auth === 'undefined' || !Auth.isLoggedIn()) { location.href = '/?login=1'; return; }
+  if (!confirm('Копировать сделки от ' + name + '? Сигналы будут отзеркалены в твой paper-аккаунт. Отписаться — в Настройках.')) return;
+  try {
+    const r = await API.copySubscribe(code, { mode: 'paper', riskMult: 1 });
+    (window.Toast || { success: alert }).success('Следишь за ' + r.leaderName);
+  } catch (e) { (window.Toast || { error: alert }).error(e.message || 'Ошибка'); }
+};
+
 loadBoard();
 </script>
 </body>
