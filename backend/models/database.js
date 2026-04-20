@@ -87,6 +87,17 @@ db.exec(`
     if (!cols.includes('public_profile')) db.exec("ALTER TABLE users ADD COLUMN public_profile INTEGER DEFAULT 0");
   } catch(_){}
 })();
+// Ops phase: admin sub-roles — superadmin / support / billing / viewer.
+// NULL = not an admin. Legacy is_admin=1 is treated as 'superadmin' by the
+// resolver until operators backfill explicit roles via /ops.
+(function migrateAdminRoles(){
+  try {
+    const cols = db.prepare("PRAGMA table_info('users')").all().map(c => c.name);
+    if (!cols.includes('admin_role')) db.exec("ALTER TABLE users ADD COLUMN admin_role TEXT");
+    // One-time backfill: any existing is_admin=1 without a role gets 'superadmin'
+    db.exec("UPDATE users SET admin_role = 'superadmin' WHERE is_admin = 1 AND (admin_role IS NULL OR admin_role = '')");
+  } catch(_){}
+})();
 // Phase F: support tickets
 db.exec(`
   CREATE TABLE IF NOT EXISTS support_tickets (
@@ -609,6 +620,7 @@ db.exec(`
   CREATE INDEX IF NOT EXISTS idx_audit_entity ON audit_log(entity_type, entity_id);
 
   CREATE INDEX IF NOT EXISTS idx_wallet_tx_user ON wallet_transactions(user_id, created_at DESC);
+  CREATE INDEX IF NOT EXISTS idx_users_admin_role ON users(admin_role) WHERE admin_role IS NOT NULL;
   CREATE INDEX IF NOT EXISTS idx_wallet_tx_status ON wallet_transactions(status, type);
   CREATE INDEX IF NOT EXISTS idx_wallets_user ON wallets(user_id);
   CREATE INDEX IF NOT EXISTS idx_stripe_webhooks_processed ON stripe_webhooks(processed_at);

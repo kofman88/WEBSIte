@@ -20,7 +20,7 @@ function authMiddleware(req, res, next) {
     }
     // Load basic user info (admin flag + plan) into req
     const row = db.prepare(`
-      SELECT u.id, u.email, u.is_admin, u.is_active, s.plan
+      SELECT u.id, u.email, u.is_admin, u.admin_role, u.is_active, s.plan
       FROM users u LEFT JOIN subscriptions s ON s.user_id = u.id
       WHERE u.id = ?
     `).get(decoded.uid);
@@ -31,6 +31,7 @@ function authMiddleware(req, res, next) {
     req.userEmail = row.email;
     req.userPlan = row.plan || 'free';
     req.isAdmin = Boolean(row.is_admin);
+    req.adminRole = row.is_admin ? (row.admin_role || 'superadmin') : null;
     req.user = row;
     // Impersonation: when an admin issued this token via /admin/users/:id/
     // impersonate, decoded.imp holds the original admin id. The target
@@ -149,6 +150,52 @@ const exchangeKeyLimiter = TESTING ? noop : rateLimit({
   keyGenerator: (req) => (req.userId ? 'u:' + req.userId : 'ip:' + req.ip),
 });
 
+// ── Admin sub-roles ─────────────────────────────────────────────────────
+// Each role is a bundle of capabilities. `superadmin` always has '*' and
+// implicitly grants everything. Add/remove roles by editing ADMIN_ROLES
+// only — all enforcement reads from this map.
+const ADMIN_ROLES = {
+  superadmin: ['*'], // root — can do anything, including grant admin
+  support: [
+    'ops.read', 'user.read', 'user.notify', 'user.plan_change', 'user.block',
+    'support.read', 'support.reply', 'support.close',
+    'bot.read', 'trade.read', 'signal.read', 'audit.read',
+    'impersonate',
+  ],
+  billing: [
+    'ops.read', 'user.read', 'user.plan_change',
+    'payment.read', 'payment.confirm', 'payment.refund',
+    'promo.read', 'promo.write',
+    'reward.read', 'reward.payout',
+    'audit.read',
+  ],
+  viewer: [
+    'ops.read', 'user.read',
+    'bot.read', 'trade.read', 'signal.read',
+    'payment.read', 'support.read', 'audit.read',
+  ],
+};
+function capsFor(role) {
+  if (!role) return new Set();
+  const caps = ADMIN_ROLES[role] || [];
+  return new Set(caps);
+}
+function hasCapability(req, cap) {
+  if (!req.isAdmin) return false;
+  const caps = capsFor(req.adminRole);
+  return caps.has('*') || caps.has(cap);
+}
+function requireCapability(cap) {
+  return (req, res, next) => {
+    if (!req.userId) return res.status(401).json({ error: 'Authentication required' });
+    if (!hasCapability(req, cap)) {
+      logger.warn('capability denied', { userId: req.userId, role: req.adminRole, cap });
+      return res.status(403).json({ error: 'Not permitted', code: 'FORBIDDEN', required: cap });
+    }
+    next();
+  };
+}
+
 // Per-plan rate limit. Usage: router.post('/heavy', authMiddleware,
 // tierLimiter({ free: 20, starter: 60, pro: 300, elite: 1200 }, '1m'), ...);
 // The window string accepts "1m" / "10s" / "1h".
@@ -179,6 +226,9 @@ module.exports = {
   requireTier,
   requireFeature,
   requireAdmin,
+  requireCapability,
+  hasCapability,
+  ADMIN_ROLES,
   loginLimiter,
   registerLimiter,
   passwordResetLimiter,

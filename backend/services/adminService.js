@@ -406,7 +406,8 @@ function userDetail(userId) {
     user: {
       id: u.id, email: u.email, displayName: u.display_name,
       referralCode: u.referral_code, referredBy: u.referred_by,
-      isAdmin: Boolean(u.is_admin), isActive: Boolean(u.is_active),
+      isAdmin: Boolean(u.is_admin), adminRole: u.is_admin ? (u.admin_role || 'superadmin') : null,
+      isActive: Boolean(u.is_active),
       emailVerified: Boolean(u.email_verified),
       publicProfile: Boolean(u.public_profile),
       telegramUsername: u.telegram_username,

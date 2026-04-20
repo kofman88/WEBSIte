@@ -358,7 +358,7 @@ function changePassword({ userId, currentPassword, newPassword, ipAddress, userA
 function getUserPublic(userId) {
   const row = db.prepare(`
     SELECT u.id, u.email, u.display_name, u.avatar_url, u.locale, u.timezone,
-           u.referral_code, u.email_verified, u.is_admin, u.last_login_at, u.created_at,
+           u.referral_code, u.email_verified, u.is_admin, u.admin_role, u.last_login_at, u.created_at,
            u.public_profile,
            s.plan, s.status as subscription_status, s.expires_at as subscription_expires_at
     FROM users u
@@ -378,6 +378,7 @@ function getUserPublic(userId) {
     publicProfile: Boolean(row.public_profile),
     emailVerified: Boolean(row.email_verified),
     isAdmin: Boolean(row.is_admin),
+    adminRole: row.is_admin ? (row.admin_role || 'superadmin') : null,
     lastLoginAt: row.last_login_at,
     createdAt: row.created_at,
     subscription: {
