@@ -391,10 +391,13 @@
       </div>
       <div class="grid grid-cols-2 sm:grid-cols-4 gap-6 mt-16 fade-up">
         <div><div class="stat-num" data-target="10000">0</div><div class="stat-label" data-t="stat-s">Сигналов</div></div>
-        <div><div class="stat-num" data-target="87">0</div><div class="stat-label" data-t="stat-a">% Точность</div></div>
+        <div><div class="stat-num" data-target="87">0</div><div class="stat-label" data-t="stat-a">% Точность<sup><a href="#disclaimer-1" class="text-white/40 hover:text-white/70 no-underline">¹</a></sup></div></div>
         <div><div class="stat-num" data-target="3">0</div><div class="stat-label" data-t="stat-e">Биржи</div></div>
         <div><div class="stat-num" data-target="2">0</div><div class="stat-label" data-t="stat-v">$M+ Объём</div></div>
       </div>
+      <p id="disclaimer-1" class="t-meta mt-4 fade-up" style="max-width:640px;color:rgba(255,255,255,.4);line-height:1.55" data-t="stat-disc">
+        ¹ Метрика точности рассчитана на исторических данных (backtest) за период 2023–2025 на парах BTC/USDT и ETH/USDT. Прошлые результаты не гарантируют будущей доходности. Торговля криптовалютами связана с высоким риском потери капитала — см. <a href="/risk.html" class="text-white/60 hover:text-white underline">Disclosure of Risk</a>.
+      </p>
     </div>
     <div class="hidden lg:block fade-up">
       <div class="shell">
@@ -751,7 +754,7 @@
         <h3 class="t-h3" style="font-size:22px;line-height:1.25;margin-bottom:14px" data-t="ml-aside-title">Алгоритм вместо интуиции</h3>
         <p class="t-body" style="color:rgba(255,255,255,.72);font-size:13px;margin-bottom:32px" data-t="ml-aside-sub">SMC, Gerchik, Scalping + AI-фильтр. 4 биржи в одном интерфейсе.</p>
         <div class="modal-stats">
-          <div><div class="modal-stat-num">87%</div><div class="t-meta" data-t="ml-a-s1">точность сигналов</div></div>
+          <div><div class="modal-stat-num">87%<sup style="font-size:12px;opacity:.5">*</sup></div><div class="t-meta" data-t="ml-a-s1">точность (backtest)</div></div>
           <div><div class="modal-stat-num">24/7</div><div class="t-meta" data-t="ml-a-s2">авто-торговля</div></div>
           <div><div class="modal-stat-num">4</div><div class="t-meta" data-t="ml-a-s3">биржи</div></div>
         </div>
@@ -874,6 +877,26 @@
     </div>
   </div>
 </div>
+
+<!-- Cookie consent banner (GDPR) — shown until user clicks Accept or Decline.
+     Stores result in localStorage. Site uses only functional cookies
+     (auth/session), so Decline just hides the banner. -->
+<div id="cookieBanner" style="display:none;position:fixed;bottom:20px;left:20px;right:20px;max-width:720px;margin:0 auto;background:rgba(20,20,24,.95);border:1px solid rgba(255,255,255,.1);backdrop-filter:blur(20px);border-radius:14px;padding:18px 22px;z-index:9990;box-shadow:0 20px 60px -10px rgba(0,0,0,.6)">
+  <div style="display:flex;gap:18px;align-items:flex-start;flex-wrap:wrap">
+    <div style="flex:1;min-width:240px">
+      <div style="font-weight:600;font-size:14px;color:#fff;margin-bottom:6px" data-t="cc-title">Cookies &amp; конфиденциальность</div>
+      <div style="font-size:12px;line-height:1.55;color:rgba(255,255,255,.62)" data-t="cc-body">Используем только функциональные cookies (авторизация, настройки) для работы сайта. Не трекаем рекламу и поведение. Подробнее — <a href="/privacy.html" style="color:#5C80E3">Privacy Policy</a>.</div>
+    </div>
+    <div style="display:flex;gap:10px;flex-shrink:0;align-items:center">
+      <button type="button" onclick="setCookieConsent('declined')" style="padding:8px 16px;border-radius:9999px;border:1px solid rgba(255,255,255,.12);background:transparent;color:rgba(255,255,255,.72);cursor:pointer;font-size:12px" data-t="cc-dec">Отклонить</button>
+      <button type="button" onclick="setCookieConsent('accepted')" style="padding:8px 20px;border-radius:9999px;border:none;background:linear-gradient(180deg,#2A5BE8,#1D4ED8 60%,#143797);color:#fff;cursor:pointer;font-size:12px;font-weight:600;box-shadow:inset 0 1px 1px rgba(255,255,255,.25),0 4px 10px -2px rgba(29,78,216,.5)" data-t="cc-acc">Принять</button>
+    </div>
+  </div>
+</div>
+<script>
+function setCookieConsent(v){try{localStorage.setItem('chm_cookie_consent',v);localStorage.setItem('chm_cookie_consent_at',new Date().toISOString())}catch(e){}document.getElementById('cookieBanner').style.display='none'}
+(function(){try{if(!localStorage.getItem('chm_cookie_consent')){setTimeout(()=>{const b=document.getElementById('cookieBanner');if(b)b.style.display='block'},700)}}catch(e){}})();
+</script>
 
 <script src="app.js"></script>
 <script>
@@ -1099,7 +1122,14 @@ const TR={
   'hero-h1a':{ru:'Торгуй умнее.',en:'Trade Smarter.'},'hero-h1b':{ru:'Зарабатывай больше.',en:'Earn More.'},
   'hero-sub':{ru:'Автоматические торговые сигналы и боты для Bybit, Binance, BingX и OKX. Стратегии SMC, Герчика и скальпинг с AI-аналитикой.',en:'Automated trading signals and bots for Bybit, Binance, BingX and OKX. SMC, Gerchik and scalping strategies with AI analytics.'},
   'hero-cta1':{ru:'Начать бесплатно',en:'Start Free'},'hero-cta2':{ru:'Как это работает',en:'How It Works'},
-  'stat-s':{ru:'Сигналов',en:'Signals'},'stat-a':{ru:'% Точность',en:'% Accuracy'},'stat-e':{ru:'Биржи',en:'Exchanges'},'stat-v':{ru:'$M+ Объём',en:'$M+ Volume'},
+  'stat-s':{ru:'Сигналов',en:'Signals'},
+  'stat-a':{ru:'% Точность<sup><a href="#disclaimer-1" class="text-white/40 hover:text-white/70 no-underline">¹</a></sup>',en:'% Accuracy<sup><a href="#disclaimer-1" class="text-white/40 hover:text-white/70 no-underline">¹</a></sup>'},
+  'stat-e':{ru:'Биржи',en:'Exchanges'},'stat-v':{ru:'$M+ Объём',en:'$M+ Volume'},
+  'stat-disc':{ru:'¹ Метрика точности рассчитана на исторических данных (backtest) за период 2023–2025 на парах BTC/USDT и ETH/USDT. Прошлые результаты не гарантируют будущей доходности. Торговля криптовалютами связана с высоким риском потери капитала — см. <a href="/risk.html" class="text-white/60 hover:text-white underline">Disclosure of Risk</a>.',en:'¹ Accuracy is calculated on historical backtests (2023–2025) on BTC/USDT and ETH/USDT pairs. Past performance is not indicative of future results. Crypto trading carries a high risk of capital loss — see <a href="/risk.html" class="text-white/60 hover:text-white underline">Disclosure of Risk</a>.'},
+  'cc-title':{ru:'Cookies &amp; конфиденциальность',en:'Cookies &amp; privacy'},
+  'cc-body':{ru:'Используем только функциональные cookies (авторизация, настройки) для работы сайта. Не трекаем рекламу и поведение. Подробнее — <a href="/privacy.html" style="color:#5C80E3">Privacy Policy</a>.',en:'We only use functional cookies (auth, settings) to run the site. No advertising or behavioural tracking. See <a href="/privacy.html" style="color:#5C80E3">Privacy Policy</a>.'},
+  'cc-dec':{ru:'Отклонить',en:'Decline'},
+  'cc-acc':{ru:'Принять',en:'Accept'},
   'ex-title':{ru:'Поддерживаемые биржи',en:'Supported Exchanges'},
   'feat-title':{ru:'Всё для <em>прибыльной</em> торговли',en:'Everything for <em>profitable</em> trading'},
   'feat-sub':{ru:'Полный набор инструментов — от сигналов до автоматического исполнения сделок',en:'Complete toolset — from signals to automated trade execution'},
