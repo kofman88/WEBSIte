@@ -9,6 +9,7 @@ const {
   passwordResetLimiter,
   twoFactorLimiter,
 } = require('../middleware/auth');
+const { geoBlock } = require('../middleware/geoBlock');
 const validation = require('../utils/validation');
 
 const router = express.Router();
@@ -36,7 +37,7 @@ function handleServiceError(err, res, next) {
 }
 
 // POST /api/auth/register
-router.post('/register', registerLimiter, (req, res, next) => {
+router.post('/register', geoBlock(), registerLimiter, (req, res, next) => {
   try {
     const input = validation.registerSchema.parse(req.body);
     const out = authService.register({

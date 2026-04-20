@@ -216,7 +216,13 @@ if (!IS_TEST) {
 }
 
 // ── Scanner worker_thread (Phase 6) ──────────────────────────────────
+// Restart budget: if the worker crashes more than MAX_RESTARTS times in
+// RESTART_WINDOW_MS, we stop auto-restarting and alert. Otherwise a broken
+// strategy could thrash the CPU in a restart loop indefinitely.
 let scannerWorker = null;
+const RESTART_WINDOW_MS = 5 * 60_000;
+const MAX_RESTARTS = 5;
+const restartTimestamps = [];
 function startScannerWorker() {
   if (IS_TEST || process.env.SCANNER_DISABLED === '1') return;
   try {
@@ -255,10 +261,23 @@ function startScannerWorker() {
     scannerWorker.on('exit', (code) => {
       logger.warn('scanner worker exited', { code });
       scannerWorker = null;
-      if (code !== 0 && !scannerShutdownRequested) {
-        // Auto-restart with backoff
-        setTimeout(() => { if (!scannerShutdownRequested) startScannerWorker(); }, 5_000);
+      if (code === 0 || scannerShutdownRequested) return;
+
+      const now = Date.now();
+      while (restartTimestamps.length && restartTimestamps[0] < now - RESTART_WINDOW_MS) {
+        restartTimestamps.shift();
       }
+      if (restartTimestamps.length >= MAX_RESTARTS) {
+        logger.error('scanner worker crashed too many times — auto-restart disabled', {
+          restarts: restartTimestamps.length, windowMs: RESTART_WINDOW_MS,
+        });
+        try { sentry.captureException(new Error('scanner worker restart budget exhausted')); } catch (_e) {}
+        return;
+      }
+      // Exponential-ish backoff: 5s, 10s, 20s, 40s, 80s
+      const delay = 5_000 * Math.pow(2, restartTimestamps.length);
+      restartTimestamps.push(now);
+      setTimeout(() => { if (!scannerShutdownRequested) startScannerWorker(); }, delay);
     });
     logger.info('scanner worker started');
   } catch (err) {
