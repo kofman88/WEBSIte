@@ -723,6 +723,44 @@
   }
   loaders.audit = loadAudit;
 
+  // ── Feature flags ─────────────────────────────────────────────────────
+  async function loadFlags() {
+    const pane = document.getElementById('pane-flags');
+    pane.innerHTML = '<div class="text-center py-12 text-slate-500 text-sm">Загрузка…</div>';
+    try {
+      const r = await API.adminListFlags();
+      pane.innerHTML = `
+        <div class="ops-card mb-4 text-xs" style="color:rgba(255,255,255,.55);line-height:1.6">
+          Флаги применяются в течение 30с без рестарта. Каждое изменение логируется в audit (<span class="mono">admin.flag.set</span>). Выключение <span class="mono">email_notifications</span> или <span class="mono">telegram_notifications</span> моментально глушит соответствующий канал для всей платформы.
+        </div>
+        <div class="ops-card" style="padding:0;overflow:auto">
+          <table class="ops-table">
+            <thead><tr><th>Key</th><th>State</th><th>Default</th><th>Description</th><th></th></tr></thead>
+            <tbody id="flTb">
+              ${(r.flags || []).map((f) => `<tr>
+                <td class="mono font-semibold">${esc(f.key)}</td>
+                <td>${f.value ? '<span class="badge badge-green">ON</span>' : '<span class="badge badge-gray">OFF</span>'}${f.overridden ? ' <span class="badge badge-yellow">override</span>' : ''}</td>
+                <td class="text-xs text-slate-500">${f.defaultValue ? 'on' : 'off'}</td>
+                <td class="text-xs">${esc(f.description)}</td>
+                <td><button class="ops-btn ${f.value ? 'ops-btn-danger' : 'ops-btn-primary'}" onclick="Ops.toggleFlag('${esc(f.key)}', ${!f.value})">${f.value ? 'Turn off' : 'Turn on'}</button></td>
+              </tr>`).join('')}
+            </tbody>
+          </table>
+        </div>
+      `;
+    } catch (e) {
+      pane.innerHTML = `<div class="text-center py-12 text-red-400 text-sm">${esc(e.message)}</div>`;
+    }
+  }
+  loaders.flags = loadFlags;
+  window.Ops.toggleFlag = async (key, value) => {
+    if (key === 'maintenance' && value) {
+      if (!confirm('ВКЛЮЧИТЬ maintenance-mode? API будет возвращать 503 всем кроме админов.')) return;
+    } else if (!confirm((value ? 'Включить ' : 'Выключить ') + key + '?')) return;
+    try { await API.adminSetFlag(key, value); Toast.success('Флаг применён'); loadFlags(); }
+    catch (e) { Toast.error(e.message); }
+  };
+
   // ── Boot ──────────────────────────────────────────────────────────────
   document.addEventListener('DOMContentLoaded', async () => {
     const ok = await gate();

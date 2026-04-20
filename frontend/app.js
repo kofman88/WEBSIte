@@ -249,6 +249,8 @@ const API = {
   adminPayReward: (id) => apiRequest('POST', '/admin/ref-rewards/' + id + '/pay'),
   adminCancelReward: (id, reason) => apiRequest('POST', '/admin/ref-rewards/' + id + '/cancel', { reason }),
   adminAuditLog: (opts = {}) => apiRequest('GET', '/admin/audit?' + qs(opts)),
+  adminListFlags: () => apiRequest('GET', '/admin/flags'),
+  adminSetFlag: (key, value) => apiRequest('PATCH', '/admin/flags/' + encodeURIComponent(key), { value }),
 };
 
 function saveAuthResp(data) {

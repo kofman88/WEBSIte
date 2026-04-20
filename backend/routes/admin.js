@@ -205,6 +205,20 @@ router.get('/system', (_req, res, next) => {
   try { res.json(admin.systemInfo()); } catch (err) { handleErr(err, res, next); }
 });
 
+// ── Feature flags ──────────────────────────────────────────────────────
+const featureFlags = require('../services/featureFlagsService');
+router.get('/flags', (_req, res, next) => {
+  try { res.json({ flags: featureFlags.all() }); }
+  catch (err) { handleErr(err, res, next); }
+});
+router.patch('/flags/:key', (req, res, next) => {
+  try {
+    const key = z.string().min(1).max(64).parse(req.params.key);
+    const body = z.object({ value: z.boolean() }).parse(req.body);
+    res.json(featureFlags.setFlag(key, body.value, { adminId: req.userId }));
+  } catch (err) { handleErr(err, res, next); }
+});
+
 // Admin → dispatch a notification to a user (in-app + email + TG via notifier)
 router.post('/users/:id/notify', (req, res, next) => {
   try {

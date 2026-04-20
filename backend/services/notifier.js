@@ -73,8 +73,15 @@ async function dispatch(userId, opts) {
   try { notifications.create(userId, { type, title, body, link }); }
   catch (err) { logger.warn('in-app notification failed', { userId, type, err: err.message }); }
 
-  // 2. Email (verified + not opted out)
-  if (user.email_verified && prefs.email[type] !== false) {
+  // Master switches from feature flags — lets ops kill a channel during
+  // an incident (spam wave / SMTP provider outage) without a code push.
+  let flags = null;
+  try { flags = require('./featureFlagsService'); } catch (_e) {}
+  const emailOn = !flags || flags.is('email_notifications');
+  const tgOn    = !flags || flags.is('telegram_notifications');
+
+  // 2. Email (verified + not opted out + master switch on)
+  if (emailOn && user.email_verified && prefs.email[type] !== false) {
     emailService.send({
       to: user.email,
       subject: title,
@@ -83,8 +90,8 @@ async function dispatch(userId, opts) {
     }).catch((err) => logger.warn('email dispatch failed', { userId, type, err: err.message }));
   }
 
-  // 3. Telegram (linked + not opted out)
-  if (prefs.telegram[type] !== false) {
+  // 3. Telegram (linked + not opted out + master switch on)
+  if (tgOn && prefs.telegram[type] !== false) {
     const text = tgText || `<b>${escapeHtml(title)}</b>${body ? '\n' + escapeHtml(body) : ''}`;
     telegramService.send(userId, text, { parseMode: 'HTML' })
       .catch((err) => logger.warn('telegram dispatch failed', { userId, type, err: err.message }));
