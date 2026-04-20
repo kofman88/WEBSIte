@@ -201,19 +201,31 @@ class SubscriptionService {
       throw new Error('You have already used this promo code');
     }
 
-    // Apply in a transaction
+    // Apply in a transaction. Re-read uses_count and guard inside the txn so
+    // parallel redemptions can't both pass the pre-check and push the counter
+    // above max_uses. The UPDATE also uses a WHERE clause with the expected
+    // count to turn it into a CAS operation.
     const apply = db.transaction(() => {
-      // Increment usage
-      db.prepare(
-        'UPDATE promo_codes SET uses_count = uses_count + 1 WHERE id = ?'
-      ).run(promo.id);
+      const fresh = db.prepare('SELECT uses_count, max_uses FROM promo_codes WHERE id = ?')
+        .get(promo.id);
+      if (fresh.max_uses > 0 && fresh.uses_count >= fresh.max_uses) {
+        const err = new Error('This promo code has reached its usage limit');
+        err.statusCode = 409; err.code = 'PROMO_EXHAUSTED';
+        throw err;
+      }
+      const upd = db.prepare(
+        'UPDATE promo_codes SET uses_count = uses_count + 1 WHERE id = ? AND uses_count = ?'
+      ).run(promo.id, fresh.uses_count);
+      if (upd.changes !== 1) {
+        const err = new Error('Promo code contention, please retry');
+        err.statusCode = 409; err.code = 'PROMO_CAS_FAILED';
+        throw err;
+      }
 
-      // Record redemption
       db.prepare(
         'INSERT INTO promo_redemptions (user_id, promo_id) VALUES (?, ?)'
       ).run(userId, promo.id);
 
-      // Activate subscription
       return this.activateSubscription(userId, {
         plan: promo.plan,
         paymentMethod: 'promo',

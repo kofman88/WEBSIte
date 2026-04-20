@@ -304,6 +304,27 @@ function extendSubscription(userId, plan, days) {
     `).run(userId, plan, newExpires);
   }
   logger.info('subscription extended', { userId, plan, until: newExpires });
+
+  // Downgrade safety: if the new plan has a lower maxBots than currently
+  // active, deactivate the oldest-created excess bots. Otherwise a user who
+  // went Pro→Free after a refund would keep trading with 5 active bots.
+  try {
+    const plans = require('../config/plans');
+    const limits = plans.getLimits(plan);
+    if (limits && limits.maxBots !== Infinity && limits.maxBots >= 0) {
+      const excess = db.prepare(`
+        SELECT id FROM trading_bots
+        WHERE user_id = ? AND is_active = 1
+        ORDER BY created_at DESC
+        LIMIT -1 OFFSET ?
+      `).all(userId, limits.maxBots);
+      if (excess.length) {
+        const stmt = db.prepare('UPDATE trading_bots SET is_active = 0, updated_at = CURRENT_TIMESTAMP WHERE id = ?');
+        for (const b of excess) stmt.run(b.id);
+        logger.warn('deactivated excess bots on plan change', { userId, plan, count: excess.length });
+      }
+    }
+  } catch (e) { logger.error('downgrade cleanup failed', { userId, err: e.message }); }
 }
 
 function getUserPayments(userId, { limit = 50, offset = 0 } = {}) {
