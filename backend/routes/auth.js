@@ -113,6 +113,23 @@ router.get('/me', authMiddleware, (req, res, next) => {
   } catch (err) { handleServiceError(err, res, next); }
 });
 
+// GET /api/auth/me/export — GDPR subject-access export.
+router.get('/me/export', authMiddleware, (req, res, next) => {
+  try {
+    const dataExport = require('../services/dataExportService');
+    const data = dataExport.build(req.userId);
+    const ts = new Date().toISOString().replace(/[:.]/g, '-');
+    const db = require('../models/database');
+    db.prepare(`
+      INSERT INTO audit_log (user_id, action, entity_type, entity_id, ip_address, user_agent)
+      VALUES (?, 'user.data_export', 'user', ?, ?, ?)
+    `).run(req.userId, req.userId, req.ip, req.get('user-agent'));
+    res.setHeader('Content-Type', 'application/json; charset=utf-8');
+    res.setHeader('Content-Disposition', 'attachment; filename="chm-data-export-' + ts + '.json"');
+    res.send(JSON.stringify(data, null, 2));
+  } catch (err) { handleServiceError(err, res, next); }
+});
+
 // POST /api/auth/password-reset/request
 router.post('/password-reset/request', passwordResetLimiter, (req, res, next) => {
   try {

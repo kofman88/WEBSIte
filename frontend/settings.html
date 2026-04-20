@@ -229,7 +229,7 @@
     <div class="card max-w-2xl">
       <h3 class="font-bold mb-4 text-red-400">Опасная зона</h3>
       <div class="flex gap-3">
-        <button class="text-sm px-4 py-2 rounded-lg bg-slate-800/50 border border-slate-700 text-slate-400">Экспорт данных</button>
+        <button type="button" id="exportDataBtn" class="text-sm px-4 py-2 rounded-lg bg-slate-800/50 border border-slate-700 text-slate-300 hover:text-white">⬇ Экспорт данных (JSON)</button>
         <button class="text-sm px-4 py-2 rounded-lg bg-red-500/10 border border-red-500/20 text-red-400">Удалить аккаунт</button>
       </div>
     </div>
@@ -889,6 +889,26 @@ async function openTicket(id){
 function closeTicketDetail(){ document.getElementById('ticketDetailModal').style.display='none'; _currentTicketId=null; loadTickets(); }
 
 document.addEventListener('DOMContentLoaded', () => {
+  const eb = document.getElementById('exportDataBtn');
+  if (eb) eb.addEventListener('click', async () => {
+    if (!confirm('Скачать ZIP / JSON со всеми вашими данными (профиль, сделки, платежи, логины, тикеты)? Это может занять до 30 секунд.')) return;
+    try {
+      eb.disabled = true; eb.textContent = 'Готовим экспорт…';
+      const res = await fetch('/api/auth/me/export', {
+        headers: { Authorization: 'Bearer ' + Auth.accessToken },
+      });
+      if (!res.ok) throw new Error('HTTP ' + res.status);
+      const blob = await res.blob();
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'chm-data-export.json';
+      document.body.appendChild(a); a.click(); a.remove();
+      setTimeout(() => URL.revokeObjectURL(url), 1000);
+      Toast.success('Файл скачан');
+    } catch (err) { Toast.error(err.message || 'Ошибка'); }
+    finally { eb.disabled = false; eb.textContent = '⬇ Экспорт данных (JSON)'; }
+  });
   const nb = document.getElementById('newTicketBtn'); if(nb) nb.addEventListener('click', openTicketModal);
   const tf = document.getElementById('ticketForm');
   if(tf) tf.addEventListener('submit', async (e) => {
