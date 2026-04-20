@@ -111,9 +111,16 @@ function register({ email, password, displayName, referralCode, ipAddress, userA
 
   let referrerId = null;
   if (referralCode) {
-    const referrer = db.prepare('SELECT id FROM users WHERE referral_code = ? AND is_active = 1')
+    const referrer = db.prepare('SELECT id, email FROM users WHERE referral_code = ? AND is_active = 1')
       .get(referralCode.toUpperCase());
-    if (referrer) referrerId = referrer.id;
+    // Anti-self-referral: reject if the referrer's email matches the new
+    // registration email (the obvious "use my own code" case). Multi-account
+    // self-referral via different emails still needs device/IP + payment
+    // verification in refRewards — see issueReward().
+    if (referrer && referrer.email !== email) referrerId = referrer.id;
+    if (referrer && referrer.email === email) {
+      logger.warn('self-referral attempt blocked at register', { email, refCode: referralCode });
+    }
   }
 
   const passwordHash = bcrypt.hashSync(password, BCRYPT_COST);

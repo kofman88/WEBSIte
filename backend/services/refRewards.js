@@ -28,6 +28,20 @@ function issueReward(paymentId) {
   `).get(payment.user_id);
   if (!ref) return null;
 
+  // Defence-in-depth: block self-referral on the payout path. Register-time
+  // blocks email match; here we catch same-id + same-email cases that could
+  // sneak in through admin inserts or migrated data.
+  if (ref.referrer_id === ref.referred_id) {
+    logger.warn('self-referral blocked at payout (same id)', { userId: payment.user_id });
+    return null;
+  }
+  const pair = db.prepare('SELECT r.email AS re, f.email AS fe FROM users r, users f WHERE r.id = ? AND f.id = ?')
+    .get(ref.referrer_id, ref.referred_id);
+  if (pair && pair.re && pair.fe && pair.re.toLowerCase() === pair.fe.toLowerCase()) {
+    logger.warn('self-referral blocked at payout (same email)', { pair });
+    return null;
+  }
+
   // Prevent duplicate reward for same payment
   const existing = db.prepare(`
     SELECT id FROM ref_rewards WHERE payment_id = ?

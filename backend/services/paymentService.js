@@ -62,6 +62,9 @@ async function createStripeCheckout(userId, { plan, billingCycle = 'monthly', su
   if (!user) throw new Error('User not found');
 
   const origin = successUrl ? new URL(successUrl).origin : '';
+  // Idempotency key: same user + plan + cycle in a single minute will not
+  // create duplicate Stripe sessions if the network retries our create call.
+  const idemKey = 'chk_' + userId + '_' + plan + '_' + billingCycle + '_' + Math.floor(Date.now() / 60000);
   const session = await s.checkout.sessions.create({
     mode: 'subscription',
     payment_method_types: ['card'],
@@ -81,7 +84,7 @@ async function createStripeCheckout(userId, { plan, billingCycle = 'monthly', su
     success_url: successUrl || (origin + '/dashboard.html?paid=1'),
     cancel_url: cancelUrl || (origin + '/?checkout=cancel'),
     metadata: { userId: String(userId), plan, billingCycle },
-  });
+  }, { idempotencyKey: idemKey });
 
   // Record pending payment
   const info = db.prepare(`
@@ -102,15 +105,25 @@ async function handleStripeWebhook(rawBody, signature) {
   const s = stripe();
   if (!s) { const err = new Error('Stripe not configured'); err.statusCode = 503; throw err; }
 
+  // Webhook MUST be signature-verified in prod. Unsigned passthrough is only
+  // allowed in dev/test when an operator is explicitly replaying captured
+  // events. In prod a missing secret is a 503 — better than accepting forged
+  // checkout.session.completed events from an attacker.
   let event;
-  try {
-    if (config.stripeWebhookSecret) {
-      event = s.webhooks.constructEvent(rawBody, signature, config.stripeWebhookSecret);
-    } else {
-      event = typeof rawBody === 'string' ? JSON.parse(rawBody) : rawBody;
+  if (!config.stripeWebhookSecret) {
+    if (config.isProd) {
+      const e = new Error('Stripe webhook secret not configured'); e.statusCode = 503; e.code = 'WEBHOOK_SECRET_MISSING';
+      logger.error('stripe webhook rejected: STRIPE_WEBHOOK_SECRET not set in prod');
+      throw e;
     }
-  } catch (err) {
-    const e = new Error('Webhook signature failed'); e.statusCode = 400; e.code = 'BAD_SIGNATURE'; throw e;
+    logger.warn('stripe webhook: running without signature verification (dev/test only)');
+    event = typeof rawBody === 'string' ? JSON.parse(rawBody) : rawBody;
+  } else {
+    try {
+      event = s.webhooks.constructEvent(rawBody, signature, config.stripeWebhookSecret);
+    } catch (err) {
+      const e = new Error('Webhook signature failed'); e.statusCode = 400; e.code = 'BAD_SIGNATURE'; throw e;
+    }
   }
 
   logger.info('stripe webhook', { type: event.type });
