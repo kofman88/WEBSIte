@@ -34,6 +34,7 @@ const exchangeService = require('./services/exchangeService');
 const marketDataService = require('./services/marketDataService');
 const cryptoMonitor = require('./services/cryptoMonitor');
 const slVerifier = require('./services/slVerifier');
+const maintenanceService = require('./services/maintenanceService');
 const db = require('./models/database');
 
 const app = express();
@@ -310,6 +311,7 @@ if (IS_TEST) {
   startPartialTpCron();
   cryptoMonitor.start();
   slVerifier.start();
+  maintenanceService.start();
   process.on('SIGTERM', shutdown('SIGTERM'));
 } else {
   const server = http.createServer(app);
@@ -319,6 +321,7 @@ if (IS_TEST) {
   startPartialTpCron();
   cryptoMonitor.start();
   slVerifier.start();
+  maintenanceService.start();
 
   process.on('SIGTERM', () => { shutdown('SIGTERM')().then(() => server.close()); });
   process.on('SIGINT',  () => { shutdown('SIGINT')().then(() => server.close()); });
