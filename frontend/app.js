@@ -251,6 +251,7 @@ const API = {
   adminAuditLog: (opts = {}) => apiRequest('GET', '/admin/audit?' + qs(opts)),
   adminListFlags: () => apiRequest('GET', '/admin/flags'),
   adminSetFlag: (key, value) => apiRequest('PATCH', '/admin/flags/' + encodeURIComponent(key), { value }),
+  adminRevenueSeries: (days = 30) => apiRequest('GET', '/admin/revenue-timeseries?days=' + days),
 };
 
 function saveAuthResp(data) {

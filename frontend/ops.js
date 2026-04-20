@@ -86,13 +86,79 @@
           </div>
         </div>
 
+        <div class="ops-card mb-4">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
+            <div class="kpi-label">Revenue · Новые юзеры · Платежи</div>
+            <div style="display:flex;gap:4px">
+              <button class="ops-btn revSeg" data-days="7">7d</button>
+              <button class="ops-btn revSeg" data-days="30">30d</button>
+              <button class="ops-btn revSeg" data-days="90">90d</button>
+            </div>
+          </div>
+          <div style="position:relative;height:260px;overflow:hidden">
+            <canvas id="revChart" style="display:block;max-width:100%;max-height:100%"></canvas>
+          </div>
+        </div>
+
         <div class="text-xs text-slate-500 text-center mt-4">Обновлено ${fmtDate(new Date())}</div>
       `;
+      document.querySelectorAll('.revSeg').forEach((btn) => btn.addEventListener('click', () => loadRevenueChart(+btn.dataset.days)));
+      loadRevenueChart(30);
     } catch (e) {
       pane.innerHTML = `<div class="text-center py-12 text-red-400 text-sm">${esc(e.message || 'Ошибка')}</div>`;
     }
   }
   loaders.dash = loadDashboard;
+
+  let _revChart = null;
+  async function loadRevenueChart(days) {
+    try {
+      const r = await API.adminRevenueSeries(days);
+      const ctx = document.getElementById('revChart');
+      if (!ctx) return;
+      if (_revChart) _revChart.destroy();
+      const labels = r.points.map((p) => p.day.slice(5));
+      _revChart = new Chart(ctx, {
+        type: 'line',
+        data: {
+          labels,
+          datasets: [
+            {
+              label: 'Revenue, $', data: r.points.map((p) => p.revenue),
+              borderColor: '#4ade80', backgroundColor: 'rgba(34,197,94,.15)',
+              fill: true, tension: .35, borderWidth: 2, pointRadius: 0, yAxisID: 'y',
+            },
+            {
+              label: 'Новые юзеры', data: r.points.map((p) => p.newUsers),
+              borderColor: '#93c5fd', backgroundColor: 'transparent',
+              borderWidth: 1.5, tension: .35, pointRadius: 0, yAxisID: 'y1',
+            },
+            {
+              label: 'Платежей', data: r.points.map((p) => p.payments),
+              borderColor: '#fde047', backgroundColor: 'transparent',
+              borderDash: [4, 4], borderWidth: 1.5, tension: .35, pointRadius: 0, yAxisID: 'y1',
+            },
+          ],
+        },
+        options: {
+          responsive: true, maintainAspectRatio: false, resizeDelay: 150, animation: false,
+          interaction: { mode: 'index', intersect: false },
+          plugins: {
+            legend: { labels: { color: 'rgba(255,255,255,.6)', font: { size: 11 }, usePointStyle: true } },
+            tooltip: {
+              backgroundColor: 'rgba(0,0,0,.85)', borderColor: 'rgba(255,255,255,.1)', borderWidth: 1,
+              callbacks: { label: (ctx) => ctx.dataset.label + ': ' + (ctx.dataset.yAxisID === 'y' ? money(ctx.parsed.y) : ctx.parsed.y) },
+            },
+          },
+          scales: {
+            x: { ticks: { color: 'rgba(255,255,255,.35)', font: { size: 10 }, maxTicksLimit: 8 }, grid: { display: false } },
+            y: { position: 'left',  ticks: { color: 'rgba(255,255,255,.35)', font: { size: 10 }, callback: (v) => '$' + v }, grid: { color: 'rgba(255,255,255,.04)' } },
+            y1: { position: 'right', ticks: { color: 'rgba(255,255,255,.35)', font: { size: 10 } }, grid: { display: false } },
+          },
+        },
+      });
+    } catch (_e) { /* silent — KPI card still shows */ }
+  }
 
   // ── Users ─────────────────────────────────────────────────────────────
   let _usersSearch = '';

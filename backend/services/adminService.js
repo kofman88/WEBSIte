@@ -575,6 +575,43 @@ function opsDashboard() {
   };
 }
 
+/** Daily revenue + new-user time series for Dashboard chart. */
+function revenueTimeseries({ days = 30 } = {}) {
+  const since = new Date(Date.now() - days * 86_400_000).toISOString();
+  const rows = db.prepare(`
+    SELECT DATE(created_at) AS day,
+           COALESCE(SUM(amount_usd), 0) AS revenue,
+           COUNT(*) AS payments
+    FROM payments
+    WHERE status = 'confirmed' AND created_at >= ?
+    GROUP BY DATE(created_at)
+    ORDER BY DATE(created_at)
+  `).all(since);
+  const userRows = db.prepare(`
+    SELECT DATE(created_at) AS day, COUNT(*) AS users
+    FROM users WHERE created_at >= ?
+    GROUP BY DATE(created_at)
+    ORDER BY DATE(created_at)
+  `).all(since);
+
+  // Fill missing days with zeros so the chart line is continuous.
+  const byDay = {};
+  for (const r of rows) byDay[r.day] = { revenue: Number(r.revenue), payments: r.payments, users: 0 };
+  for (const r of userRows) {
+    if (!byDay[r.day]) byDay[r.day] = { revenue: 0, payments: 0, users: r.users };
+    else byDay[r.day].users = r.users;
+  }
+  const out = [];
+  const now = new Date();
+  for (let i = days - 1; i >= 0; i -= 1) {
+    const d = new Date(now.getTime() - i * 86_400_000);
+    const key = d.toISOString().slice(0, 10);
+    const v = byDay[key] || { revenue: 0, payments: 0, users: 0 };
+    out.push({ day: key, revenue: v.revenue, payments: v.payments, newUsers: v.users });
+  }
+  return out;
+}
+
 /** System health, DB size, worker state. */
 function systemInfo() {
   const out = { process: {}, db: {}, backups: {}, subsystems: {} };
@@ -632,5 +669,5 @@ module.exports = {
   listAllRewards,
   systemStats, auditLog,
   userDetail, listAllBots, listAllTrades, listAllSignals,
-  opsDashboard, systemInfo,
+  opsDashboard, systemInfo, revenueTimeseries,
 };

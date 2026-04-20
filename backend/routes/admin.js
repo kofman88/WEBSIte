@@ -160,6 +160,13 @@ router.get('/dashboard', (_req, res, next) => {
   try { res.json(admin.opsDashboard()); } catch (err) { handleErr(err, res, next); }
 });
 
+router.get('/revenue-timeseries', (req, res, next) => {
+  try {
+    const q = z.object({ days: z.coerce.number().int().min(1).max(365).default(30) }).parse(req.query);
+    res.json({ days: q.days, points: admin.revenueTimeseries(q) });
+  } catch (err) { handleErr(err, res, next); }
+});
+
 router.get('/users/:id/detail', (req, res, next) => {
   try {
     const id = z.coerce.number().int().positive().parse(req.params.id);
