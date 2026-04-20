@@ -45,10 +45,43 @@ db.exec(`
     is_admin         INTEGER DEFAULT 0,
     is_active        INTEGER DEFAULT 1,
     last_login_at    DATETIME,
+    telegram_chat_id    TEXT,
+    telegram_username   TEXT,
+    telegram_linked_at  DATETIME,
+    notification_prefs  TEXT DEFAULT '{}',
     created_at       DATETIME DEFAULT CURRENT_TIMESTAMP,
     updated_at       DATETIME DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (referred_by) REFERENCES users(id) ON DELETE SET NULL
   );
+
+  -- Idempotent column adds for upgrades from earlier schemas (ignore errors)
+`);
+(function migrateUsersColumns(){
+  const cols = db.prepare("PRAGMA table_info('users')").all().map(c => c.name);
+  const adds = [
+    ["telegram_chat_id",    "ALTER TABLE users ADD COLUMN telegram_chat_id TEXT"],
+    ["telegram_username",   "ALTER TABLE users ADD COLUMN telegram_username TEXT"],
+    ["telegram_linked_at",  "ALTER TABLE users ADD COLUMN telegram_linked_at DATETIME"],
+    ["notification_prefs",  "ALTER TABLE users ADD COLUMN notification_prefs TEXT DEFAULT '{}'"],
+  ];
+  for (const [col, sql] of adds) if (!cols.includes(col)) { try { db.exec(sql); } catch(_){} }
+})();
+// Phase C: trade journal — add `note` column to trades (idempotent)
+(function migrateTradesNote(){
+  try {
+    const cols = db.prepare("PRAGMA table_info('trades')").all().map(c => c.name);
+    if (!cols.includes('note')) db.exec("ALTER TABLE trades ADD COLUMN note TEXT");
+  } catch(_){}
+})();
+// Phase D: TradingView webhook secret per-bot + manual-trade tag
+(function migrateBotsWebhook(){
+  try {
+    const cols = db.prepare("PRAGMA table_info('trading_bots')").all().map(c => c.name);
+    if (!cols.includes('tv_webhook_secret')) db.exec("ALTER TABLE trading_bots ADD COLUMN tv_webhook_secret TEXT");
+  } catch(_){}
+})();
+db.exec(`
+  -- placeholder to keep the multi-statement block working
 
   CREATE TABLE IF NOT EXISTS refresh_tokens (
     id         INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -398,6 +431,61 @@ db.exec(`
     value       TEXT,
     updated_at  DATETIME DEFAULT CURRENT_TIMESTAMP
   );
+
+  -- ── Security / Account (Phase A) ────────────────────────────────────
+  CREATE TABLE IF NOT EXISTS email_verifications (
+    id           INTEGER PRIMARY KEY AUTOINCREMENT,
+    user_id      INTEGER NOT NULL,
+    token_hash   TEXT UNIQUE NOT NULL,
+    expires_at   DATETIME NOT NULL,
+    verified_at  DATETIME,
+    created_at   DATETIME DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+  );
+
+  CREATE TABLE IF NOT EXISTS password_resets (
+    id           INTEGER PRIMARY KEY AUTOINCREMENT,
+    user_id      INTEGER NOT NULL,
+    token_hash   TEXT UNIQUE NOT NULL,
+    expires_at   DATETIME NOT NULL,
+    used_at      DATETIME,
+    ip_address   TEXT,
+    created_at   DATETIME DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+  );
+
+  CREATE TABLE IF NOT EXISTS two_factor_secrets (
+    user_id               INTEGER PRIMARY KEY,
+    secret_encrypted      TEXT NOT NULL,
+    enabled               INTEGER DEFAULT 0,
+    recovery_codes_hash   TEXT,
+    enabled_at            DATETIME,
+    created_at            DATETIME DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+  );
+
+  CREATE TABLE IF NOT EXISTS login_history (
+    id           INTEGER PRIMARY KEY AUTOINCREMENT,
+    user_id      INTEGER NOT NULL,
+    ip_address   TEXT,
+    user_agent   TEXT,
+    success      INTEGER DEFAULT 1,
+    failure_code TEXT,
+    created_at   DATETIME DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+  );
+
+  CREATE TABLE IF NOT EXISTS notifications (
+    id           INTEGER PRIMARY KEY AUTOINCREMENT,
+    user_id      INTEGER NOT NULL,
+    type         TEXT NOT NULL,
+    title        TEXT NOT NULL,
+    body         TEXT,
+    link         TEXT,
+    read_at      DATETIME,
+    created_at   DATETIME DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+  );
 `);
 
 // ── INDEXES ──────────────────────────────────────────────────────────────
@@ -423,6 +511,11 @@ db.exec(`
   CREATE INDEX IF NOT EXISTS idx_signals_strategy ON signals(strategy, created_at DESC);
   CREATE INDEX IF NOT EXISTS idx_signals_symbol ON signals(symbol, created_at DESC);
   CREATE INDEX IF NOT EXISTS idx_signals_pending ON signals(result, expires_at);
+
+  CREATE INDEX IF NOT EXISTS idx_email_verif_user ON email_verifications(user_id, verified_at);
+  CREATE INDEX IF NOT EXISTS idx_password_reset_user ON password_resets(user_id, used_at);
+  CREATE INDEX IF NOT EXISTS idx_login_history_user ON login_history(user_id, created_at DESC);
+  CREATE INDEX IF NOT EXISTS idx_notifications_user ON notifications(user_id, read_at, created_at DESC);
   CREATE INDEX IF NOT EXISTS idx_signal_registry_fp ON signal_registry(fingerprint);
   CREATE INDEX IF NOT EXISTS idx_signal_registry_expires ON signal_registry(expires_at);
   CREATE INDEX IF NOT EXISTS idx_signal_views_user ON signal_views(user_id, viewed_at DESC);

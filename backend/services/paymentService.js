@@ -256,6 +256,15 @@ function confirmPayment(paymentId, { metadata = null } = {}) {
         data: { paymentId, plan: payment.plan, method: payment.method },
         ts: Date.now(),
       });
+      try {
+        const notifier = require('./notifier');
+        notifier.dispatch(payment.user_id, {
+          type: 'payment',
+          title: 'Оплата получена',
+          body: 'Тариф ' + payment.plan.toUpperCase() + ' активирован · ' + payment.method,
+          link: '/settings.html',
+        });
+      } catch (_e) {}
     }
   } catch (_e) { /* ignore */ }
 

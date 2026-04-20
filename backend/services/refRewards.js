@@ -57,6 +57,15 @@ function issueReward(paymentId) {
     rewardId: info.lastInsertRowid, referrer: ref.referrer_id,
     referred: payment.user_id, amount: commissionUsd,
   });
+  try {
+    const notifier = require('./notifier');
+    notifier.dispatch(ref.referrer_id, {
+      type: 'referral',
+      title: `💰 Реферальное вознаграждение · $${commissionUsd.toFixed(2)}`,
+      body: `Ваш приглашённый пользователь оплатил подписку. 20% комиссия начислена в ожидание выплаты.`,
+      link: '/settings.html',
+    });
+  } catch (_e) {}
   return info.lastInsertRowid;
 }
 

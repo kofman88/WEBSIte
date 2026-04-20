@@ -230,6 +230,33 @@ function userSummary(userId) {
   };
 }
 
+function hydrate(r) {
+  if (!r) return null;
+  const parseJson = (s, fb) => { if (!s) return fb; try { return JSON.parse(s); } catch { return fb; } };
+  return {
+    id: r.id,
+    userId: r.user_id,
+    name: r.name,
+    exchange: r.exchange,
+    exchangeKeyId: r.exchange_key_id,
+    symbols: parseJson(r.symbols, []),
+    strategy: r.strategy,
+    timeframe: r.timeframe,
+    direction: r.direction,
+    leverage: r.leverage,
+    riskPct: r.risk_pct,
+    maxOpenTrades: r.max_open_trades,
+    autoTrade: Boolean(r.auto_trade),
+    tradingMode: r.trading_mode,
+    strategyConfig: parseJson(r.strategy_config, null),
+    riskConfig: parseJson(r.risk_config, null),
+    isActive: Boolean(r.is_active),
+    lastRunAt: r.last_run_at,
+    createdAt: r.created_at,
+    updatedAt: r.updated_at,
+  };
+}
+
 module.exports = {
   createBot,
   updateBot,

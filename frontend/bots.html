@@ -1,10 +1,16 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
+  
+  <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="preconnect" href="https://api.iconify.design" crossorigin>
   <meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1.0"/>
   <title>CHM Finance — Боты</title>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet"/>
-  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet"/>
+  
+  <link rel="stylesheet" href="tailwind.css"/>
   <link rel="stylesheet" href="styles.css"/>
 </head>
 <body>
@@ -15,6 +21,7 @@
     <a href="dashboard.html" class="sidebar-link" data-page="dashboard"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>Дашборд</a>
     <a href="bots.html" class="sidebar-link active" data-page="bots"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2a4 4 0 014 4v1h2a2 2 0 012 2v10a2 2 0 01-2 2H6a2 2 0 01-2-2V9a2 2 0 012-2h2V6a4 4 0 014-4z"/></svg>Боты</a>
     <a href="signals.html" class="sidebar-link" data-page="signals"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>Сигналы</a>
+    <a href="analytics.html" class="sidebar-link" data-page="analytics"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 3v18h18"/><path d="M7 14l4-4 4 4 5-5"/></svg>Аналитика</a>
     <a href="backtests.html" class="sidebar-link" data-page="backtests"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6m6 0h10"/></svg>Бэктесты</a>
     <a href="wallet.html" class="sidebar-link" data-page="wallet"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12V7H5a2 2 0 010-4h14v4M3 5v14a2 2 0 002 2h16v-5"/></svg>Кошелёк</a>
     <a href="settings.html" class="sidebar-link" data-page="settings"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/></svg>Настройки</a>
@@ -31,7 +38,10 @@
       <span class="text-slate-400">Активных: <strong class="text-green-400" id="hdrActive">—</strong></span>
       <span class="text-slate-400">PnL: <strong id="hdrPnl">—</strong></span>
     </div>
-    <button onclick="openWizard()" class="btn-primary px-5 py-2.5 rounded-xl text-sm font-semibold" style="background:linear-gradient(180deg,#2A5BE8 0%,#1D4ED8 60%,#143797 100%);box-shadow:inset 0 1px 1px rgba(255,255,255,.28),inset 0 -1px 3px rgba(0,0,0,.6),0 4px 8px -2px rgba(0,0,0,.6),0 0 0 1px rgba(29,78,216,.35);border:none;color:#fff;cursor:pointer;box-shadow:0 0 20px rgba(29,78,216,.4)">+ Создать бота</button>
+    <div class="flex gap-2">
+      <button onclick="openSmartTrade()" class="px-4 py-2.5 rounded-xl text-sm font-semibold bg-slate-800/50 border border-slate-700 text-slate-300 hover:text-white hover:border-slate-500">⚡ Smart Trade</button>
+      <button onclick="openWizard()" class="btn-primary px-5 py-2.5 rounded-xl text-sm font-semibold" style="background:linear-gradient(180deg,#2A5BE8 0%,#1D4ED8 60%,#143797 100%);box-shadow:inset 0 1px 1px rgba(255,255,255,.28),inset 0 -1px 3px rgba(0,0,0,.6),0 4px 8px -2px rgba(0,0,0,.6),0 0 0 1px rgba(29,78,216,.35);border:none;color:#fff;cursor:pointer">+ Создать бота</button>
+    </div>
   </div>
 
   <!-- Filters -->
@@ -40,7 +50,7 @@
       <option value="">Все биржи</option><option value="bybit">Bybit</option><option value="binance">Binance</option><option value="bingx">BingX</option><option value="okx">OKX</option>
     </select>
     <select id="fltStrategy" class="bg-slate-800/50 border border-slate-700 rounded-lg px-3 py-2 text-sm text-slate-300 outline-none">
-      <option value="">Все стратегии</option><option value="levels">Levels</option><option value="smc">SMC</option><option value="gerchik">Gerchik</option><option value="scalping">Scalping</option>
+      <option value="">Все стратегии</option><option value="levels">Levels</option><option value="smc">SMC</option><option value="gerchik">Gerchik</option><option value="scalping">Scalping</option><option value="dca">DCA</option><option value="grid">Grid</option>
     </select>
     <select id="fltStatus" class="bg-slate-800/50 border border-slate-700 rounded-lg px-3 py-2 text-sm text-slate-300 outline-none">
       <option value="">Все статусы</option><option value="active">Активные</option><option value="paused">Остановлены</option>
@@ -86,6 +96,8 @@
           <label class="wiz-card"><input type="radio" name="strategyType" value="smc" class="sr-only"/><div class="wiz-card-body"><div class="font-semibold text-white">SMC</div><div class="text-xs text-slate-400 mt-1">Smart Money Concepts</div></div></label>
           <label class="wiz-card"><input type="radio" name="strategyType" value="gerchik" class="sr-only"/><div class="wiz-card-body"><div class="font-semibold text-white">Gerchik</div><div class="text-xs text-slate-400 mt-1">Уровни + абсорбция (KRP)</div></div></label>
           <label class="wiz-card"><input type="radio" name="strategyType" value="levels" class="sr-only"/><div class="wiz-card-body"><div class="font-semibold text-white">Levels</div><div class="text-xs text-slate-400 mt-1">Классические S/R ретесты</div></div></label>
+          <label class="wiz-card"><input type="radio" name="strategyType" value="dca" class="sr-only"/><div class="wiz-card-body"><div class="font-semibold text-white">DCA</div><div class="text-xs text-slate-400 mt-1">Усреднение на просадках</div></div></label>
+          <label class="wiz-card"><input type="radio" name="strategyType" value="grid" class="sr-only"/><div class="wiz-card-body"><div class="font-semibold text-white">Grid</div><div class="text-xs text-slate-400 mt-1">Сетка в боковике</div></div></label>
         </div>
         <div class="mt-4"><label class="text-sm text-slate-400 block mb-1">Направление</label><select name="direction" class="w-full bg-slate-800/50 border border-slate-700 rounded-xl px-4 py-3 text-white outline-none"><option value="both">Long + Short</option><option value="long">Только Long</option><option value="short">Только Short</option></select></div>
       </div>
@@ -168,12 +180,98 @@
   </div>
 </div>
 
+<!-- SMART TRADE MODAL -->
+<div id="smartTradeModal" class="fixed inset-0 bg-black/70 flex items-center justify-center hidden z-50" style="backdrop-filter:blur(8px)">
+  <div class="bg-slate-900 border border-slate-700/50 rounded-2xl p-6 max-w-lg w-full mx-4 shadow-2xl max-h-[92vh] overflow-y-auto">
+    <div class="flex items-center justify-between mb-4">
+      <div class="flex items-center gap-2"><span class="text-xl">⚡</span><h3 class="text-lg font-bold">Smart Trade</h3></div>
+      <button type="button" onclick="closeSmartTrade()" class="text-slate-400 hover:text-white text-xl">&times;</button>
+    </div>
+    <p class="text-xs text-slate-400 mb-4">Разовая сделка с автоматическим SL/TP — без бота. Paper-режим работает сразу.</p>
+    <form id="smartTradeForm" class="space-y-3">
+      <div class="grid grid-cols-2 gap-3">
+        <div><label class="text-xs text-slate-400 block mb-1">Биржа</label><select name="exchange" class="w-full bg-slate-800/50 border border-slate-700 rounded-xl px-3 py-2.5 text-white text-sm outline-none"><option value="bybit">Bybit</option><option value="binance">Binance</option><option value="bingx">BingX</option><option value="okx">OKX</option></select></div>
+        <div><label class="text-xs text-slate-400 block mb-1">Пара</label><input name="symbol" required class="w-full bg-slate-800/50 border border-slate-700 rounded-xl px-3 py-2.5 text-white text-sm outline-none" placeholder="BTC/USDT" value="BTC/USDT"/></div>
+      </div>
+      <div class="grid grid-cols-2 gap-3">
+        <div><label class="text-xs text-slate-400 block mb-1">Направление</label>
+          <div class="grid grid-cols-2 gap-2">
+            <label class="st-side"><input type="radio" name="side" value="long" checked class="sr-only"/><div class="st-body text-green-400">LONG</div></label>
+            <label class="st-side"><input type="radio" name="side" value="short" class="sr-only"/><div class="st-body text-red-400">SHORT</div></label>
+          </div>
+        </div>
+        <div><label class="text-xs text-slate-400 block mb-1">Режим</label>
+          <div class="grid grid-cols-2 gap-2">
+            <label class="st-side"><input type="radio" name="tradingMode" value="paper" checked class="sr-only"/><div class="st-body text-slate-300">PAPER</div></label>
+            <label class="st-side"><input type="radio" name="tradingMode" value="live" class="sr-only"/><div class="st-body text-red-400">LIVE</div></label>
+          </div>
+        </div>
+      </div>
+      <div class="grid grid-cols-2 gap-3">
+        <div><label class="text-xs text-slate-400 block mb-1">Количество</label><input name="quantity" type="number" step="0.0001" required class="w-full bg-slate-800/50 border border-slate-700 rounded-xl px-3 py-2.5 text-white text-sm outline-none" placeholder="0.01"/></div>
+        <div><label class="text-xs text-slate-400 block mb-1">Leverage</label><input name="leverage" type="number" value="1" min="1" max="125" class="w-full bg-slate-800/50 border border-slate-700 rounded-xl px-3 py-2.5 text-white text-sm outline-none"/></div>
+      </div>
+      <div>
+        <label class="text-xs text-slate-400 block mb-1">Цена входа</label>
+        <input name="entryPrice" type="number" step="0.00000001" required class="w-full bg-slate-800/50 border border-slate-700 rounded-xl px-3 py-2.5 text-white text-sm outline-none" placeholder="50000"/>
+      </div>
+      <div class="grid grid-cols-4 gap-2">
+        <div><label class="text-xs text-slate-400 block mb-1">Stop Loss <span class="text-red-400">*</span></label><input name="stopLoss" type="number" step="0.00000001" required class="w-full bg-slate-800/50 border border-slate-700 rounded-xl px-2 py-2 text-white text-sm outline-none" placeholder="49000"/></div>
+        <div><label class="text-xs text-slate-400 block mb-1">TP1</label><input name="takeProfit1" type="number" step="0.00000001" class="w-full bg-slate-800/50 border border-slate-700 rounded-xl px-2 py-2 text-white text-sm outline-none" placeholder="51000"/></div>
+        <div><label class="text-xs text-slate-400 block mb-1">TP2</label><input name="takeProfit2" type="number" step="0.00000001" class="w-full bg-slate-800/50 border border-slate-700 rounded-xl px-2 py-2 text-white text-sm outline-none"/></div>
+        <div><label class="text-xs text-slate-400 block mb-1">TP3</label><input name="takeProfit3" type="number" step="0.00000001" class="w-full bg-slate-800/50 border border-slate-700 rounded-xl px-2 py-2 text-white text-sm outline-none"/></div>
+      </div>
+      <div><label class="text-xs text-slate-400 block mb-1">Заметка (опционально)</label><textarea name="note" rows="2" class="w-full bg-slate-800/50 border border-slate-700 rounded-xl px-3 py-2 text-white text-sm outline-none" placeholder="Почему вошли?"></textarea></div>
+      <button type="submit" class="w-full py-2.5 rounded-xl font-semibold text-white text-sm" style="background:linear-gradient(180deg,#2A5BE8 0%,#1D4ED8 60%,#143797 100%)">Открыть сделку</button>
+    </form>
+  </div>
+</div>
+
+<!-- TRADINGVIEW WEBHOOK MODAL -->
+<div id="tvWebhookModal" class="fixed inset-0 bg-black/70 flex items-center justify-center hidden z-50" style="backdrop-filter:blur(8px)">
+  <div class="bg-slate-900 border border-slate-700/50 rounded-2xl p-6 max-w-xl w-full mx-4 shadow-2xl">
+    <div class="flex items-center justify-between mb-4">
+      <div class="flex items-center gap-2"><span class="text-xl">📡</span><h3 class="text-lg font-bold">TradingView Webhook</h3></div>
+      <button type="button" onclick="closeTvWebhook()" class="text-slate-400 hover:text-white text-xl">&times;</button>
+    </div>
+    <p class="text-xs text-slate-400 mb-4">Настрой TradingView alert → Notifications → Webhook URL — и бот будет исполнять сигналы из TV автоматически.</p>
+    <div class="space-y-3">
+      <div>
+        <label class="text-xs text-slate-400 block mb-1">URL</label>
+        <div class="flex items-center gap-2 p-3 bg-slate-800/40 border border-slate-700 rounded-xl">
+          <code id="tvUrl" class="text-xs text-indigo-400 break-all flex-1">—</code>
+          <button id="tvCopyUrl" class="text-xs text-slate-400 hover:text-white shrink-0">Копировать</button>
+        </div>
+      </div>
+      <div>
+        <label class="text-xs text-slate-400 block mb-1">Secret</label>
+        <div class="flex items-center gap-2 p-3 bg-slate-800/40 border border-slate-700 rounded-xl">
+          <code id="tvSecret" class="text-xs text-cyan-400 break-all flex-1">—</code>
+          <button id="tvCopySecret" class="text-xs text-slate-400 hover:text-white shrink-0">Копировать</button>
+        </div>
+      </div>
+      <div class="bg-slate-800/30 rounded-xl p-3">
+        <div class="text-xs text-slate-400 mb-2">Пример message payload для TradingView:</div>
+        <pre id="tvPayload" class="text-xs text-slate-300 font-mono leading-relaxed overflow-x-auto">—</pre>
+      </div>
+      <button id="tvRotateBtn" class="w-full py-2.5 rounded-xl bg-red-500/10 border border-red-500/30 text-red-400 text-sm hover:bg-red-500/20">Перегенерировать secret</button>
+    </div>
+  </div>
+</div>
+
+<style>
+.st-side{cursor:pointer;display:block;border-radius:10px;background:rgba(30,41,59,.5);border:1px solid #334155;padding:8px;transition:all .15s}
+.st-side:hover{border-color:#475569}
+.st-side:has(input:checked){border-color:#6366f1;background:rgba(99,102,241,.1);box-shadow:0 0 0 1px rgba(99,102,241,.4)}
+.st-body{text-align:center;font-weight:600;font-size:12px;letter-spacing:.1em}
+</style>
+
 <script src="app.js"></script>
 <script>
 if(!Auth.requireAuth()) throw new Error('noauth');
 document.querySelectorAll('.sidebar-link[data-page="bots"]').forEach(a => a.classList.add('active'));
 
-const STRATEGY_LABELS = { levels: 'Levels', smc: 'SMC', gerchik: 'Gerchik', scalping: 'Scalping' };
+const STRATEGY_LABELS = { levels: 'Levels', smc: 'SMC', gerchik: 'Gerchik', scalping: 'Scalping', dca: 'DCA', grid: 'Grid' };
 const TF_OPTS = ['5m','15m','30m','1h','2h','4h','1d'];
 const FILTERS = { exchange: '', strategy: '', status: '' };
 
@@ -255,9 +353,12 @@ async function loadBots() {
           <div><div class="text-xs text-slate-500">Win Rate</div><div class="font-semibold">${stats.winRate!==null?Fmt.percent(stats.winRate*100,{decimals:0}):'—'}</div></div>
           <div><div class="text-xs text-slate-500">Trades</div><div class="font-semibold">${stats.totalTrades}</div></div>
         </div>
-        <div class="text-xs text-slate-500 flex items-center justify-between">
+        <div class="text-xs text-slate-500 flex items-center justify-between flex-wrap gap-1">
           <span>Lev ${b.leverage}x · Risk ${b.riskPct}% · Max ${b.maxOpenTrades}</span>
-          <button data-delete="${b.id}" class="text-red-400 hover:text-red-300 text-xs">Удалить</button>
+          <div class="flex items-center gap-3">
+            <button data-tv="${b.id}" class="text-indigo-400 hover:text-indigo-300 text-xs" title="TradingView webhook">📡 TV</button>
+            <button data-delete="${b.id}" class="text-red-400 hover:text-red-300 text-xs">Удалить</button>
+          </div>
         </div>`;
       grid.appendChild(card);
     }
@@ -285,6 +386,10 @@ async function loadBots() {
         if (current === 'paper') openLiveConfirm(id);
         else switchMode(id, 'paper');
       });
+    });
+    // TV webhook button per bot
+    grid.querySelectorAll('[data-tv]').forEach(el => {
+      el.addEventListener('click', () => openTvWebhook(+el.getAttribute('data-tv')));
     });
     // Header stats — reflect all bots, not the filtered subset.
     document.getElementById('hdrTotal').textContent = all.length;
@@ -433,6 +538,91 @@ document.getElementById('liveConfirmBtn')?.addEventListener('click', async () =>
 });
 document.getElementById('liveConfirmModal')?.addEventListener('click', (e) => {
   if (e.target.id === 'liveConfirmModal') closeLiveConfirm();
+});
+
+// ── Smart Trade (manual one-shot trade) ──
+function openSmartTrade() {
+  document.getElementById('smartTradeForm').reset();
+  document.getElementById('smartTradeModal').classList.remove('hidden');
+}
+function closeSmartTrade() {
+  document.getElementById('smartTradeModal').classList.add('hidden');
+}
+document.getElementById('smartTradeModal')?.addEventListener('click', (e) => {
+  if (e.target.id === 'smartTradeModal') closeSmartTrade();
+});
+document.getElementById('smartTradeForm')?.addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const fd = new FormData(e.target);
+  const payload = {
+    exchange: fd.get('exchange'),
+    symbol: String(fd.get('symbol')).toUpperCase(),
+    side: fd.get('side'),
+    quantity: +fd.get('quantity'),
+    entryPrice: +fd.get('entryPrice'),
+    stopLoss: +fd.get('stopLoss'),
+    takeProfit1: fd.get('takeProfit1') ? +fd.get('takeProfit1') : undefined,
+    takeProfit2: fd.get('takeProfit2') ? +fd.get('takeProfit2') : undefined,
+    takeProfit3: fd.get('takeProfit3') ? +fd.get('takeProfit3') : undefined,
+    leverage: +fd.get('leverage') || 1,
+    tradingMode: fd.get('tradingMode') || 'paper',
+    note: fd.get('note') || undefined,
+  };
+  try {
+    await API.manualTrade(payload);
+    Toast.success('Сделка открыта · PAPER');
+    closeSmartTrade();
+  } catch (err) {
+    if (err.code === 'LIVE_MANUAL_NOT_ENABLED') Toast.warn('LIVE пока недоступно. Работаем в paper.');
+    else Toast.error(err.message);
+  }
+});
+
+// ── TradingView webhook manager ──
+let tvCurrentBotId = null;
+async function openTvWebhook(botId) {
+  tvCurrentBotId = botId;
+  const m = document.getElementById('tvWebhookModal');
+  m.classList.remove('hidden');
+  try {
+    const r = await API.getTvWebhook(botId);
+    renderTv(r);
+  } catch (err) { Toast.error(err.message); closeTvWebhook(); }
+}
+function closeTvWebhook() {
+  tvCurrentBotId = null;
+  document.getElementById('tvWebhookModal').classList.add('hidden');
+}
+function renderTv(r) {
+  document.getElementById('tvUrl').textContent = r.url;
+  document.getElementById('tvSecret').textContent = r.secret || '(не настроен — жми «Перегенерировать»)';
+  const payload = JSON.stringify({
+    secret: r.secret || '<SECRET>',
+    symbol: '{{ticker}}',
+    side: '{{strategy.order.action}}',
+    price: '{{close}}',
+    stopLoss: '<optional>',
+    tp1: '<optional>',
+  }, null, 2);
+  document.getElementById('tvPayload').textContent = payload;
+}
+document.getElementById('tvCopyUrl')?.addEventListener('click', () => {
+  navigator.clipboard.writeText(document.getElementById('tvUrl').textContent).then(() => Toast.success('URL скопирован'));
+});
+document.getElementById('tvCopySecret')?.addEventListener('click', () => {
+  navigator.clipboard.writeText(document.getElementById('tvSecret').textContent).then(() => Toast.success('Secret скопирован'));
+});
+document.getElementById('tvRotateBtn')?.addEventListener('click', async () => {
+  if (!tvCurrentBotId) return;
+  if (!confirm('Старый secret перестанет работать. Продолжить?')) return;
+  try {
+    const r = await API.rotateTvWebhook(tvCurrentBotId);
+    renderTv(r);
+    Toast.success('Secret обновлён');
+  } catch (err) { Toast.error(err.message); }
+});
+document.getElementById('tvWebhookModal')?.addEventListener('click', (e) => {
+  if (e.target.id === 'tvWebhookModal') closeTvWebhook();
 });
 
 loadBots();

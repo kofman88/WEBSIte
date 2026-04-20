@@ -159,6 +159,15 @@ function _openPaper(signal, bot, qty, leverage) {
   logger.info('paper trade opened', {
     tradeId, botId: bot.id, side: signal.side, qty: round(qty), entry: round(signal.entry),
   });
+  try {
+    const notifier = require('./notifier');
+    notifier.dispatch(bot.user_id, {
+      type: 'trade_opened',
+      title: `${signal.symbol || ''} · ${signal.side.toUpperCase()}`,
+      body: `Бот «${bot.name}» открыл paper-сделку @ ${round(signal.entry)}, SL ${round(signal.stopLoss)}`,
+      link: '/dashboard.html',
+    });
+  } catch (_e) {}
   return _getTrade(tradeId);
 }
 
@@ -245,6 +254,15 @@ async function _openLive(signal, bot, qty, leverage, { exchangeService }) {
   logger.info('live trade opened', {
     tradeId, botId: bot.id, side, symbol, qty: round(qty), entry: round(actualEntry),
   });
+  try {
+    const notifier = require('./notifier');
+    notifier.dispatch(bot.user_id, {
+      type: 'trade_opened',
+      title: `🔴 LIVE · ${symbol} · ${side.toUpperCase()}`,
+      body: `Бот «${bot.name}» открыл live-сделку @ ${round(actualEntry)}, SL ${round(signal.stopLoss)}`,
+      link: '/dashboard.html',
+    });
+  } catch (_e) {}
   return _getTrade(tradeId);
 }
 

@@ -21,6 +21,10 @@ const walletRoutes = require('./routes/wallet');
 const optimizationsRoutes = require('./routes/optimizations');
 const paymentsRoutes = require('./routes/payments');
 const adminRoutes = require('./routes/admin');
+const notificationsRoutes = require('./routes/notifications');
+const telegramRoutes = require('./routes/telegram');
+const analyticsRoutes = require('./routes/analytics');
+const webhooksRoutes = require('./routes/webhooks');
 const websocketService = require('./services/websocketService');
 const autoTradeService = require('./services/autoTradeService');
 const partialTpManager = require('./services/partialTpManager');
@@ -85,6 +89,10 @@ app.use('/api/wallet', walletRoutes);
 app.use('/api/optimizations', optimizationsRoutes);
 app.use('/api/payments', paymentsRoutes);
 app.use('/api/admin', adminRoutes);
+app.use('/api/notifications', notificationsRoutes);
+app.use('/api/telegram', telegramRoutes);
+app.use('/api/analytics', analyticsRoutes);
+app.use('/api/webhooks', webhooksRoutes);
 
 app.get('/api/health', (_req, res) => {
   // Lightweight liveness probe.
@@ -115,11 +123,23 @@ app.get('/api/health/deep', (_req, res) => {
 
 // ── Static files (Passenger serves everything) ────────────────────────
 const publicPath = path.join(require('os').homedir(), 'public_html');
-app.use(express.static(publicPath));
+app.use(express.static(publicPath, {
+  // Long-cache .css / .js / fonts / images; short-cache HTML so the SPA
+  // shell can update without ctrl+F5. Static assets are ~instant on
+  // repeat visits (30d cache), HTML re-fetches every 5 minutes.
+  setHeaders(res, filePath) {
+    if (/\.(css|js|woff2?|ttf|eot|png|jpe?g|webp|svg|ico)$/i.test(filePath)) {
+      res.setHeader('Cache-Control', 'public, max-age=2592000, immutable');
+    } else if (/\.html?$/i.test(filePath)) {
+      res.setHeader('Cache-Control', 'public, max-age=300, must-revalidate');
+    }
+  },
+}));
 
-// SPA fallback — non-API routes serve index.html
+// SPA fallback — non-API routes serve index.html (also gets short cache)
 app.get('*', (req, res) => {
   if (!req.path.startsWith('/api/')) {
+    res.setHeader('Cache-Control', 'public, max-age=300, must-revalidate');
     res.sendFile(path.join(publicPath, 'index.html'));
   } else {
     res.status(404).json({ error: 'Route not found', code: 'NOT_FOUND' });

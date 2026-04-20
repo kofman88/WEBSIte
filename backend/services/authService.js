@@ -167,14 +167,52 @@ function login({ email, password, ipAddress, userAgent }) {
     throw err;
   }
 
-  if (!bcrypt.compareSync(password, row.password_hash)) return genericFail();
+  if (!bcrypt.compareSync(password, row.password_hash)) {
+    try {
+      db.prepare('INSERT INTO login_history (user_id, ip_address, user_agent, success, failure_code) VALUES (?, ?, ?, 0, ?)')
+        .run(row.id, ipAddress || null, userAgent || null, 'WRONG_PASSWORD');
+    } catch (_e) {}
+    return genericFail();
+  }
+
+  // Is 2FA enabled for this user? If so, short-circuit with a pending token.
+  try {
+    const twoFA = require('./twoFactorService');
+    if (twoFA.isEnabled(row.id)) {
+      audit(row.id, 'auth.login.2fa_required', null, ipAddress, userAgent);
+      return { twoFactorRequired: true, pendingToken: _signPending(row.id) };
+    }
+  } catch (_e) { /* 2FA service missing → proceed without */ }
 
   db.prepare('UPDATE users SET last_login_at = CURRENT_TIMESTAMP WHERE id = ?').run(row.id);
   audit(row.id, 'auth.login', null, ipAddress, userAgent);
+  try {
+    db.prepare('INSERT INTO login_history (user_id, ip_address, user_agent, success) VALUES (?, ?, ?, 1)')
+      .run(row.id, ipAddress || null, userAgent || null);
+  } catch (_e) {}
 
   const user = getUserPublic(row.id);
   const accessToken = signAccessToken(row.id);
   const refresh = issueRefreshToken(row.id, { userAgent, ipAddress });
+  return { user, accessToken, refreshToken: refresh.token, refreshExpiresAt: refresh.expiresAt };
+}
+
+// Finalize login after 2FA code verification. Called from POST /auth/2fa/verify-login.
+function finalizeLoginAfter2FA({ pendingToken, code, ipAddress, userAgent }) {
+  const userId = verifyPending(pendingToken);
+  const twoFA = require('./twoFactorService');
+  if (!twoFA.verifyCode(userId, code)) {
+    const err = new Error('Invalid 2FA code'); err.statusCode = 400; err.code = 'INVALID_2FA'; throw err;
+  }
+  db.prepare('UPDATE users SET last_login_at = CURRENT_TIMESTAMP WHERE id = ?').run(userId);
+  try {
+    db.prepare('INSERT INTO login_history (user_id, ip_address, user_agent, success) VALUES (?, ?, ?, 1)')
+      .run(userId, ipAddress || null, userAgent || null);
+  } catch (_e) {}
+  audit(userId, 'auth.login.2fa_ok', null, ipAddress, userAgent);
+  const user = getUserPublic(userId);
+  const accessToken = signAccessToken(userId);
+  const refresh = issueRefreshToken(userId, { userAgent, ipAddress });
   return { user, accessToken, refreshToken: refresh.token, refreshExpiresAt: refresh.expiresAt };
 }
 
@@ -240,54 +278,56 @@ function logoutAll({ userId, ipAddress, userAgent }) {
 
 function requestPasswordReset({ email, ipAddress, userAgent }) {
   const row = db.prepare('SELECT id FROM users WHERE email = ? AND is_active = 1').get(email);
+  // Always return {sent:true} so attackers can't enumerate registered emails.
   if (!row) {
     logger.info('password reset requested for unknown email', { email });
     return { sent: true };
   }
-  const token = crypto.randomBytes(32).toString('base64url');
+  const emailService = require('./emailService');
+  const token = emailService.randomToken();
+  const tokenHash = emailService.hashToken(token);
   const expiresAt = new Date(Date.now() + RESET_TTL_SEC * 1000).toISOString();
-  const value = JSON.stringify({ userId: row.id, expiresAt });
-  db.prepare(`
-    INSERT OR REPLACE INTO system_kv (key, value, updated_at)
-    VALUES (?, ?, CURRENT_TIMESTAMP)
-  `).run('reset:' + sha256(token), value);
-  audit(row.id, 'auth.password_reset_request', null, ipAddress, userAgent);
 
-  const resetUrl = `/reset?token=${token}`;
-  if (!config.isProd) {
-    logger.info('[DEV] password reset link', { email, resetUrl });
-  } else {
-    logger.warn('[prod] email delivery not wired — reset link only in logs', { email, resetUrl });
-  }
+  db.prepare(`
+    INSERT INTO password_resets (user_id, token_hash, expires_at, ip_address)
+    VALUES (?, ?, ?, ?)
+  `).run(row.id, tokenHash, expiresAt, ipAddress || null);
+
+  audit(row.id, 'auth.password_reset_request', null, ipAddress, userAgent);
+  // Fire-and-forget — don't block the response on SMTP
+  emailService.sendPasswordReset(email, token).catch((err) =>
+    logger.warn('sendPasswordReset failed', { err: err.message }),
+  );
   return { sent: true };
 }
 
 function confirmPasswordReset({ token, newPassword, ipAddress, userAgent }) {
-  const key = 'reset:' + sha256(token);
-  const kv = db.prepare('SELECT value FROM system_kv WHERE key = ?').get(key);
-  if (!kv) {
-    const err = new Error('Invalid or expired reset token');
-    err.statusCode = 400;
-    err.code = 'INVALID_RESET_TOKEN';
-    throw err;
+  const emailService = require('./emailService');
+  const tokenHash = emailService.hashToken(token);
+  const row = db.prepare(`
+    SELECT id, user_id, expires_at, used_at FROM password_resets WHERE token_hash = ?
+  `).get(tokenHash);
+  if (!row) {
+    const err = new Error('Invalid reset token');
+    err.statusCode = 400; err.code = 'INVALID_RESET_TOKEN'; throw err;
   }
-  const { userId, expiresAt } = JSON.parse(kv.value);
-  if (new Date(expiresAt) < new Date()) {
-    db.prepare('DELETE FROM system_kv WHERE key = ?').run(key);
+  if (row.used_at) {
+    const err = new Error('Reset token already used');
+    err.statusCode = 400; err.code = 'RESET_TOKEN_USED'; throw err;
+  }
+  if (new Date(row.expires_at) < new Date()) {
     const err = new Error('Reset token expired');
-    err.statusCode = 400;
-    err.code = 'RESET_TOKEN_EXPIRED';
-    throw err;
+    err.statusCode = 400; err.code = 'RESET_TOKEN_EXPIRED'; throw err;
   }
 
   const passwordHash = bcrypt.hashSync(newPassword, BCRYPT_COST);
   db.transaction(() => {
     db.prepare('UPDATE users SET password_hash = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?')
-      .run(passwordHash, userId);
-    revokeAllForUser(userId);
-    db.prepare('DELETE FROM system_kv WHERE key = ?').run(key);
+      .run(passwordHash, row.user_id);
+    db.prepare('UPDATE password_resets SET used_at = CURRENT_TIMESTAMP WHERE id = ?').run(row.id);
+    revokeAllForUser(row.user_id);
   })();
-  audit(userId, 'auth.password_reset_confirmed', null, ipAddress, userAgent);
+  audit(row.user_id, 'auth.password_reset_confirmed', null, ipAddress, userAgent);
   return { success: true };
 }
 
@@ -348,6 +388,105 @@ function getUserPublic(userId) {
   };
 }
 
+// ── Email verification (Phase A) ───────────────────────────────────────
+function requestEmailVerification({ userId, email, ipAddress, userAgent }) {
+  const row = db.prepare('SELECT email, email_verified FROM users WHERE id = ? AND is_active = 1').get(userId);
+  if (!row) { const e = new Error('User not found'); e.statusCode = 404; throw e; }
+  if (row.email_verified) return { alreadyVerified: true };
+  const emailService = require('./emailService');
+  const token = emailService.randomToken();
+  const tokenHash = emailService.hashToken(token);
+  const expiresAt = new Date(Date.now() + 24 * 3600 * 1000).toISOString();
+  // Invalidate previous unused tokens for this user
+  db.prepare('DELETE FROM email_verifications WHERE user_id = ? AND verified_at IS NULL').run(userId);
+  db.prepare(`
+    INSERT INTO email_verifications (user_id, token_hash, expires_at) VALUES (?, ?, ?)
+  `).run(userId, tokenHash, expiresAt);
+  audit(userId, 'auth.email_verification.request', null, ipAddress, userAgent);
+  emailService.sendVerification(email || row.email, token).catch((err) =>
+    logger.warn('sendVerification failed', { err: err.message }),
+  );
+  return { sent: true };
+}
+
+function verifyEmail({ token, ipAddress, userAgent }) {
+  const emailService = require('./emailService');
+  const tokenHash = emailService.hashToken(token);
+  const row = db.prepare(`
+    SELECT id, user_id, expires_at, verified_at FROM email_verifications WHERE token_hash = ?
+  `).get(tokenHash);
+  if (!row) { const e = new Error('Invalid verification token'); e.statusCode = 400; e.code = 'INVALID_VERIFY_TOKEN'; throw e; }
+  if (row.verified_at) return { alreadyVerified: true };
+  if (new Date(row.expires_at) < new Date()) {
+    const e = new Error('Verification token expired'); e.statusCode = 400; e.code = 'VERIFY_TOKEN_EXPIRED'; throw e;
+  }
+  db.transaction(() => {
+    db.prepare('UPDATE email_verifications SET verified_at = CURRENT_TIMESTAMP WHERE id = ?').run(row.id);
+    db.prepare('UPDATE users SET email_verified = 1, updated_at = CURRENT_TIMESTAMP WHERE id = ?').run(row.user_id);
+  })();
+  audit(row.user_id, 'auth.email_verified', null, ipAddress, userAgent);
+  return { verified: true, userId: row.user_id };
+}
+
+// ── Sessions (active refresh tokens, manual revoke) ────────────────────
+function listSessions(userId) {
+  return db.prepare(`
+    SELECT id, user_agent, ip_address, created_at, expires_at
+    FROM refresh_tokens
+    WHERE user_id = ? AND revoked_at IS NULL AND expires_at > CURRENT_TIMESTAMP
+    ORDER BY created_at DESC
+  `).all(userId).map((r) => ({
+    id: r.id, userAgent: r.user_agent, ipAddress: r.ip_address,
+    createdAt: r.created_at, expiresAt: r.expires_at,
+  }));
+}
+
+function revokeSession({ userId, sessionId, ipAddress, userAgent }) {
+  const info = db.prepare(`
+    UPDATE refresh_tokens SET revoked_at = CURRENT_TIMESTAMP
+    WHERE id = ? AND user_id = ? AND revoked_at IS NULL
+  `).run(sessionId, userId);
+  if (info.changes === 0) {
+    const e = new Error('Session not found or already revoked'); e.statusCode = 404; throw e;
+  }
+  audit(userId, 'auth.session_revoked', { sessionId }, ipAddress, userAgent);
+  return { revoked: true };
+}
+
+// ── Login history (last N) ─────────────────────────────────────────────
+function recordLoginAttempt({ userId, ipAddress, userAgent, success = true, failureCode = null }) {
+  try {
+    db.prepare(`
+      INSERT INTO login_history (user_id, ip_address, user_agent, success, failure_code)
+      VALUES (?, ?, ?, ?, ?)
+    `).run(userId, ipAddress || null, userAgent || null, success ? 1 : 0, failureCode);
+  } catch (err) { logger.warn('recordLoginAttempt failed', { err: err.message }); }
+}
+function listLoginHistory(userId, { limit = 20 } = {}) {
+  return db.prepare(`
+    SELECT ip_address, user_agent, success, failure_code, created_at
+    FROM login_history WHERE user_id = ?
+    ORDER BY created_at DESC LIMIT ?
+  `).all(userId, limit).map((r) => ({
+    ipAddress: r.ip_address, userAgent: r.user_agent,
+    success: Boolean(r.success), failureCode: r.failure_code, createdAt: r.created_at,
+  }));
+}
+
+// ── 2FA-aware login step 2 ─────────────────────────────────────────────
+// When user logs in and 2FA is enabled, we return a short-lived pending token.
+// Client collects the TOTP code and POSTs { pendingToken, code } to finalize.
+function _signPending(userId) {
+  return jwt.sign({ uid: userId, kind: '2fa_pending' }, config.jwtSecret, {
+    expiresIn: '5m', algorithm: 'HS256',
+  });
+}
+function verifyPending(token) {
+  const d = jwt.verify(token, config.jwtSecret, { algorithms: ['HS256'] });
+  if (d.kind !== '2fa_pending' || !d.uid) throw new Error('Invalid pending token');
+  return d.uid;
+}
+
 module.exports = {
   register,
   login,
@@ -357,7 +496,16 @@ module.exports = {
   requestPasswordReset,
   confirmPasswordReset,
   changePassword,
+  requestEmailVerification,
+  verifyEmail,
+  listSessions,
+  revokeSession,
+  recordLoginAttempt,
+  listLoginHistory,
+  verifyPending,
+  finalizeLoginAfter2FA,
   verifyAccessToken,
   getUserPublic,
   _signAccessToken: signAccessToken,
+  _signPending: _signPending,
 };

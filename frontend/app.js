@@ -177,6 +177,45 @@ const API = {
   stripeCheckout: (payload) => apiRequest('POST', '/payments/stripe/checkout', payload),
   refSummary: () => apiRequest('GET', '/payments/ref/summary'),
   refRewards: (opts = {}) => apiRequest('GET', '/payments/ref/rewards?' + qs(opts)),
+
+  // Security / account
+  requestEmailVerify: () => apiRequest('POST', '/auth/verify-email/request'),
+  confirmEmailVerify: (token) => apiRequest('POST', '/auth/verify-email/confirm', { token }, { skipAuth: true }),
+  requestPasswordReset: (email) => apiRequest('POST', '/auth/password-reset/request', { email }, { skipAuth: true }),
+  confirmPasswordReset: (token, newPassword) => apiRequest('POST', '/auth/password-reset/confirm', { token, newPassword }, { skipAuth: true }),
+  twoFAStatus: () => apiRequest('GET', '/auth/2fa/status'),
+  twoFASetup: () => apiRequest('POST', '/auth/2fa/setup'),
+  twoFAConfirm: (code) => apiRequest('POST', '/auth/2fa/confirm', { code }),
+  twoFADisable: (password) => apiRequest('POST', '/auth/2fa/disable', { password }),
+  twoFAVerifyLogin: (pendingToken, code) => apiRequest('POST', '/auth/2fa/verify-login', { pendingToken, code }, { skipAuth: true }),
+  listSessions: () => apiRequest('GET', '/auth/sessions'),
+  revokeSession: (id) => apiRequest('DELETE', '/auth/sessions/' + id),
+  loginHistory: (limit = 20) => apiRequest('GET', '/auth/login-history?limit=' + limit),
+
+  // Notifications
+  listNotifications: (opts = {}) => apiRequest('GET', '/notifications?' + qs(opts)),
+  unreadNotifications: () => apiRequest('GET', '/notifications/unread-count'),
+  markNotificationRead: (id) => apiRequest('POST', '/notifications/' + id + '/read'),
+  markAllNotificationsRead: () => apiRequest('POST', '/notifications/read-all'),
+  removeNotification: (id) => apiRequest('DELETE', '/notifications/' + id),
+
+  // Analytics / portfolio / trade journal
+  portfolio: (fresh = false) => apiRequest('GET', '/analytics/portfolio' + (fresh ? '?fresh=1' : '')),
+  analyticsSummary: (opts = {}) => apiRequest('GET', '/analytics/summary?' + qs(opts)),
+  analyticsBySymbol: (opts = {}) => apiRequest('GET', '/analytics/by-symbol?' + qs(opts)),
+  analyticsByStrategy: (opts = {}) => apiRequest('GET', '/analytics/by-strategy?' + qs(opts)),
+  analyticsByMonth: (opts = {}) => apiRequest('GET', '/analytics/by-month?' + qs(opts)),
+  equityCurve: (days = 90) => apiRequest('GET', '/analytics/equity-curve?days=' + days),
+  listTrades: (opts = {}) => apiRequest('GET', '/analytics/trades?' + qs(opts)),
+  setTradeNote: (id, note) => apiRequest('PATCH', '/analytics/trades/' + id + '/note', { note }),
+  // Manual (Smart) Trade + TV webhook management
+  manualTrade: (payload) => apiRequest('POST', '/bots/manual-trade', payload),
+  getTvWebhook: (botId) => apiRequest('GET', '/bots/' + botId + '/tv-webhook'),
+  rotateTvWebhook: (botId) => apiRequest('POST', '/bots/' + botId + '/tv-webhook/rotate'),
+  // CSV download returns a URL (client navigates to it so Authorization
+  // can't go in header — we build a short-lived signed URL or use cookie.
+  // Simplest: open URL in new tab with token in query — acceptable since
+  // HTTPS and browser session is already authed. See analytics.html.
 };
 
 function saveAuthResp(data) {
@@ -339,6 +378,106 @@ window.API = API;
 window.Toast = Toast;
 window.WS = WS;
 window.Fmt = Fmt;
+
+// ── Notifications bell widget (auto-initializes on any page with .topbar-notification) ──
+const Notifications = (function () {
+  let host = null, panel = null, unread = 0, open = false;
+
+  function init() {
+    if (typeof document === 'undefined') return;
+    host = document.querySelector('.topbar-notification');
+    if (!host) return;
+    host.style.cursor = 'pointer';
+    host.addEventListener('click', togglePanel);
+    document.addEventListener('click', (e) => {
+      if (open && panel && !panel.contains(e.target) && !host.contains(e.target)) closePanel();
+    });
+    refreshCount();
+    setInterval(refreshCount, 45000);
+    try {
+      if (typeof WS !== 'undefined' && WS.on) {
+        WS.on('notification', (msg) => { unread += 1; render(); if (open) buildPanel(); });
+      }
+    } catch (_e) {}
+  }
+
+  async function refreshCount() {
+    try { const r = await API.unreadNotifications(); unread = r.count || 0; render(); }
+    catch (_e) {}
+  }
+
+  function render() {
+    if (!host) return;
+    let dot = host.querySelector('.dot');
+    if (unread > 0 && !dot) {
+      dot = document.createElement('div'); dot.className = 'dot';
+      dot.style.cssText = 'position:absolute;top:8px;right:8px;min-width:16px;height:16px;padding:0 4px;border-radius:9999px;background:#ef4444;color:#fff;font-size:10px;font-weight:600;display:flex;align-items:center;justify-content:center;line-height:1';
+      host.style.position = 'relative';
+      host.appendChild(dot);
+    }
+    if (dot) dot.textContent = unread > 99 ? '99+' : unread > 0 ? String(unread) : '';
+    if (dot && unread === 0) dot.remove();
+  }
+
+  function togglePanel() { open ? closePanel() : openPanel(); }
+  async function openPanel() {
+    if (!panel) {
+      panel = document.createElement('div');
+      panel.id = 'notif-panel';
+      panel.style.cssText = 'position:absolute;top:calc(100% + 8px);right:0;width:360px;max-height:480px;overflow-y:auto;background:#121626;border:1px solid #1f2937;border-radius:14px;box-shadow:0 24px 60px -12px rgba(0,0,0,.6);z-index:200';
+      host.appendChild(panel);
+    }
+    open = true; panel.style.display = 'block';
+    await buildPanel();
+  }
+  function closePanel() { open = false; if (panel) panel.style.display = 'none'; }
+
+  async function buildPanel() {
+    try {
+      const r = await API.listNotifications({ limit: 30 });
+      unread = r.unreadCount || 0; render();
+      const head = `<div style="display:flex;align-items:center;justify-content:space-between;padding:12px 16px;border-bottom:1px solid #1f2937">
+        <div style="font-weight:600;font-size:14px">Уведомления</div>
+        ${r.notifications.length ? '<button id="notif-read-all" style="background:none;border:none;color:#93AAEC;font-size:12px;cursor:pointer">Отметить все</button>' : ''}
+      </div>`;
+      const body = r.notifications.length
+        ? r.notifications.map(renderItem).join('')
+        : '<div style="padding:32px 16px;text-align:center;color:rgba(255,255,255,.4);font-size:13px">Нет уведомлений</div>';
+      panel.innerHTML = head + body;
+      panel.querySelector('#notif-read-all')?.addEventListener('click', async (e) => {
+        e.stopPropagation();
+        await API.markAllNotificationsRead().catch(() => {});
+        await buildPanel();
+      });
+      panel.querySelectorAll('[data-notif-id]').forEach((el) => {
+        el.addEventListener('click', async () => {
+          const id = +el.getAttribute('data-notif-id');
+          const link = el.getAttribute('data-link');
+          await API.markNotificationRead(id).catch(() => {});
+          if (link) location.href = link;
+        });
+      });
+    } catch (err) {
+      panel.innerHTML = '<div style="padding:24px;color:#f87171;font-size:13px">' + err.message + '</div>';
+    }
+  }
+
+  function renderItem(n) {
+    const unreadDot = n.readAt ? '' : '<span style="width:8px;height:8px;border-radius:50%;background:#5C80E3;display:inline-block;margin-right:8px;flex-shrink:0"></span>';
+    return `<div data-notif-id="${n.id}" data-link="${n.link || ''}" style="padding:12px 16px;border-bottom:1px solid rgba(31,41,55,.5);cursor:pointer;font-size:13px;${n.readAt ? 'opacity:.6' : ''}" onmouseover="this.style.background='rgba(255,255,255,.02)'" onmouseout="this.style.background='transparent'">
+      <div style="display:flex;align-items:start">${unreadDot}<div style="flex:1"><div style="font-weight:500;color:#e5e5e5;margin-bottom:2px">${escHtml(n.title)}</div>
+      ${n.body ? `<div style="color:rgba(255,255,255,.6);font-size:12px">${escHtml(n.body)}</div>` : ''}
+      <div style="color:rgba(255,255,255,.4);font-size:11px;margin-top:4px">${Fmt.timeAgo(n.createdAt)}</div></div></div>
+    </div>`;
+  }
+  function escHtml(s) { return String(s || '').replace(/[&<>"']/g, (c) => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+
+  if (typeof document !== 'undefined' && document.readyState !== 'loading') init();
+  else if (typeof document !== 'undefined') document.addEventListener('DOMContentLoaded', init);
+
+  return { refreshCount, init };
+})();
+window.Notifications = Notifications;
 window.I18n = I18n;
 
 // Auto-connect WS on auth'd pages
