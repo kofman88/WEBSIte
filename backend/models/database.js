@@ -523,6 +523,42 @@ db.exec(`
     created_at   DATETIME DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
   );
+
+  CREATE TABLE IF NOT EXISTS wallets (
+    id                     INTEGER PRIMARY KEY AUTOINCREMENT,
+    user_id                INTEGER NOT NULL UNIQUE,
+    address                TEXT NOT NULL,
+    encrypted_private_key  TEXT NOT NULL,
+    balance                REAL NOT NULL DEFAULT 0,
+    created_at             DATETIME DEFAULT CURRENT_TIMESTAMP,
+    updated_at             DATETIME DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+  );
+
+  CREATE TABLE IF NOT EXISTS wallet_transactions (
+    id                   INTEGER PRIMARY KEY AUTOINCREMENT,
+    user_id              INTEGER NOT NULL,
+    wallet_id            INTEGER NOT NULL,
+    type                 TEXT NOT NULL CHECK (type IN ('deposit','withdrawal')),
+    amount               REAL NOT NULL,
+    tx_hash              TEXT UNIQUE,
+    destination_address  TEXT,
+    status               TEXT NOT NULL DEFAULT 'pending'
+                           CHECK (status IN ('pending','processing','completed','cancelled','failed')),
+    notes                TEXT,
+    created_at           DATETIME DEFAULT CURRENT_TIMESTAMP,
+    updated_at           DATETIME DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (user_id)   REFERENCES users(id)   ON DELETE CASCADE,
+    FOREIGN KEY (wallet_id) REFERENCES wallets(id) ON DELETE CASCADE
+  );
+
+  -- Stripe webhook idempotency — dedupe retries so a repeated
+  -- checkout.session.completed can't trigger confirmPayment twice.
+  CREATE TABLE IF NOT EXISTS stripe_webhooks (
+    event_id    TEXT PRIMARY KEY,
+    event_type  TEXT,
+    processed_at DATETIME DEFAULT CURRENT_TIMESTAMP
+  );
 `);
 
 // ── INDEXES ──────────────────────────────────────────────────────────────
@@ -541,6 +577,7 @@ db.exec(`
   CREATE INDEX IF NOT EXISTS idx_trading_bots_user ON trading_bots(user_id);
   CREATE INDEX IF NOT EXISTS idx_trading_bots_active ON trading_bots(is_active, last_run_at);
   CREATE INDEX IF NOT EXISTS idx_trades_user ON trades(user_id, opened_at DESC);
+  CREATE INDEX IF NOT EXISTS idx_trades_user_status_closed ON trades(user_id, status, closed_at DESC);
   CREATE INDEX IF NOT EXISTS idx_trades_bot ON trades(bot_id);
   CREATE INDEX IF NOT EXISTS idx_trades_status ON trades(status, opened_at DESC);
   CREATE INDEX IF NOT EXISTS idx_trade_fills_trade ON trade_fills(trade_id);
@@ -570,6 +607,11 @@ db.exec(`
   CREATE INDEX IF NOT EXISTS idx_audit_user ON audit_log(user_id, created_at DESC);
   CREATE INDEX IF NOT EXISTS idx_audit_action ON audit_log(action, created_at DESC);
   CREATE INDEX IF NOT EXISTS idx_audit_entity ON audit_log(entity_type, entity_id);
+
+  CREATE INDEX IF NOT EXISTS idx_wallet_tx_user ON wallet_transactions(user_id, created_at DESC);
+  CREATE INDEX IF NOT EXISTS idx_wallet_tx_status ON wallet_transactions(status, type);
+  CREATE INDEX IF NOT EXISTS idx_wallets_user ON wallets(user_id);
+  CREATE INDEX IF NOT EXISTS idx_stripe_webhooks_processed ON stripe_webhooks(processed_at);
 `);
 
 // Graceful shutdown — make sure WAL is merged back

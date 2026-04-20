@@ -73,8 +73,13 @@ function confirm(userId, code) {
   if (!authenticator.check(code.replace(/\s/g, ''), secret)) {
     const e = new Error('Invalid 2FA code'); e.statusCode = 400; e.code = 'INVALID_2FA'; throw e;
   }
-  db.prepare('UPDATE two_factor_secrets SET enabled = 1, enabled_at = CURRENT_TIMESTAMP WHERE user_id = ?').run(userId);
-  logger.info('2FA enabled', { userId });
+  // Enable 2FA + revoke any other active sessions so anyone still logged
+  // in elsewhere has to re-auth (and this time must pass the 2FA gate).
+  db.transaction(() => {
+    db.prepare('UPDATE two_factor_secrets SET enabled = 1, enabled_at = CURRENT_TIMESTAMP WHERE user_id = ?').run(userId);
+    db.prepare('UPDATE refresh_tokens SET revoked_at = CURRENT_TIMESTAMP WHERE user_id = ? AND revoked_at IS NULL').run(userId);
+  })();
+  logger.info('2FA enabled + sessions revoked', { userId });
   return { enabled: true };
 }
 
