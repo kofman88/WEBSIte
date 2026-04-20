@@ -107,7 +107,7 @@ function renderBacktest(bt) {
       <div><div class="text-xs text-slate-500">PF</div><div>${r.profitFactor || '—'}</div></div>
       <div><div class="text-xs text-slate-500">Trades</div><div>${r.totalTrades}</div></div>
     </div>
-    <div class="mt-4"><canvas id="btChart${bt.id}" height="80"></canvas></div>`;
+    <div class="mt-4" style="position:relative;height:140px"><canvas id="btChart${bt.id}"></canvas></div>`;
   setTimeout(() => drawEquityChart('btChart' + bt.id, r.equityCurve), 10);
   return card;
 }
