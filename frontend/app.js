@@ -17,9 +17,47 @@ const API_BASE = (location.hostname === 'localhost' || location.hostname === '12
 const WS_URL = (location.protocol === 'https:' ? 'wss://' : 'ws://') + location.host + '/ws';
 
 // ── Auth — token storage + refresh rotation ────────────────────────────
+// Impersonation mode: if the URL has #imp=<token>, we're a fresh tab opened
+// by an admin via ops. Store the token in sessionStorage only (this tab),
+// strip the hash, show a warning banner, and make Auth.accessToken prefer
+// sessionStorage over localStorage for this tab. Admin's own localStorage
+// session stays untouched in other tabs.
+(function bootImpersonation() {
+  try {
+    const m = /[#&]imp=([^&]+)/.exec(location.hash || '');
+    if (!m) return;
+    const token = decodeURIComponent(m[1]);
+    const em = /[#&]email=([^&]+)/.exec(location.hash || '');
+    const email = em ? decodeURIComponent(em[1]) : '';
+    sessionStorage.setItem('chm_imp_access', token);
+    if (email) sessionStorage.setItem('chm_imp_email', email);
+    history.replaceState({}, '', location.pathname + location.search);
+    // Inject a persistent banner. Fires as early as possible so the UI
+    // never renders without the warning.
+    document.addEventListener('DOMContentLoaded', () => {
+      const bar = document.createElement('div');
+      bar.style.cssText = 'position:fixed;top:0;left:0;right:0;z-index:9999;background:linear-gradient(90deg,#7f1d1d,#991b1b,#7f1d1d);color:#fee2e2;padding:8px 16px;font-size:12px;font-weight:600;text-align:center;letter-spacing:.05em;text-transform:uppercase;box-shadow:0 2px 12px rgba(0,0,0,.4)';
+      bar.textContent = '⚠️ IMPERSONATING ' + (email || 'user') + ' · end in 30m · all actions are audited';
+      document.body.prepend(bar);
+      document.body.style.paddingTop = '32px';
+    });
+  } catch (_e) {}
+})();
+
 const Auth = {
-  get accessToken() { try { return localStorage.getItem('chm_access'); } catch { return null; } },
-  get refreshToken() { try { return localStorage.getItem('chm_refresh'); } catch { return null; } },
+  get accessToken() {
+    try { return sessionStorage.getItem('chm_imp_access') || localStorage.getItem('chm_access'); }
+    catch { return null; }
+  },
+  get refreshToken() {
+    // Impersonation tokens don't get a refresh — once they expire (30m)
+    // the tab just falls out of auth, which is what we want.
+    if (sessionStorage.getItem('chm_imp_access')) return null;
+    try { return localStorage.getItem('chm_refresh'); } catch { return null; }
+  },
+  get isImpersonating() {
+    try { return Boolean(sessionStorage.getItem('chm_imp_access')); } catch { return false; }
+  },
   setTokens({ accessToken, refreshToken }) {
     try {
       if (accessToken) localStorage.setItem('chm_access', accessToken);
@@ -252,6 +290,7 @@ const API = {
   adminListFlags: () => apiRequest('GET', '/admin/flags'),
   adminSetFlag: (key, value) => apiRequest('PATCH', '/admin/flags/' + encodeURIComponent(key), { value }),
   adminRevenueSeries: (days = 30) => apiRequest('GET', '/admin/revenue-timeseries?days=' + days),
+  adminImpersonate: (id, reason) => apiRequest('POST', '/admin/users/' + id + '/impersonate', { reason }),
 };
 
 function saveAuthResp(data) {

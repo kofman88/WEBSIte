@@ -247,6 +247,34 @@ router.post('/users/:id/notify', (req, res, next) => {
   } catch (err) { handleErr(err, res, next); }
 });
 
+// Admin → impersonate user. Returns a short-lived access token (30 min, no
+// refresh) that carries { uid: <target>, imp: <adminId> } — middleware sees
+// the target userId as normal, but downstream code + audit entries can read
+// req.impersonatedBy to flag the trail. The admin's own session is
+// unchanged — they keep it in a parallel tab / localStorage entry.
+const jwt = require('jsonwebtoken');
+const config = require('../config');
+router.post('/users/:id/impersonate', (req, res, next) => {
+  try {
+    const id = z.coerce.number().int().positive().parse(req.params.id);
+    const body = z.object({ reason: z.string().min(3).max(500) }).parse(req.body);
+    const db = require('../models/database');
+    const target = db.prepare(`SELECT id, email, is_active FROM users WHERE id = ?`).get(id);
+    if (!target)           return res.status(404).json({ error: 'User not found' });
+    if (target.is_admin)   return res.status(403).json({ error: 'Cannot impersonate another admin' });
+    const token = jwt.sign(
+      { uid: target.id, imp: req.userId },
+      config.jwtSecret,
+      { expiresIn: '30m', algorithm: 'HS256' },
+    );
+    db.prepare(`
+      INSERT INTO audit_log (user_id, action, entity_type, entity_id, metadata, ip_address, user_agent)
+      VALUES (?, 'admin.user.impersonate', 'user', ?, ?, ?, ?)
+    `).run(req.userId, target.id, JSON.stringify({ reason: body.reason }), req.ip, req.get('user-agent'));
+    res.json({ accessToken: token, expiresIn: 1800, targetEmail: target.email, reason: body.reason });
+  } catch (err) { handleErr(err, res, next); }
+});
+
 // Admin → promote/demote admin flag. Extremely audited. Cannot demote self
 // while you're the last admin — server computes that.
 router.patch('/users/:id/admin', (req, res, next) => {

@@ -230,6 +230,7 @@
             </div>
             <div style="display:flex;gap:6px;flex-wrap:wrap">
               <button class="ops-btn" onclick="Ops.notifyUser(${u.id})">📨 Notify</button>
+              <button class="ops-btn" onclick="Ops.impersonate(${u.id}, '${esc(u.email)}')">🎭 Impersonate</button>
               <button class="ops-btn" onclick="Ops.changePlan(${u.id})">Plan…</button>
               <button class="ops-btn ${u.isActive ? 'ops-btn-danger' : ''}" onclick="Ops.toggleActive(${u.id}, ${!u.isActive})">${u.isActive ? '🔒 Block' : '🔓 Unblock'}</button>
               <button class="ops-btn ${u.isAdmin ? 'ops-btn-danger' : 'ops-btn-primary'}" onclick="Ops.toggleAdminFlag(${u.id}, ${!u.isAdmin})">${u.isAdmin ? 'Revoke admin' : 'Grant admin'}</button>
@@ -325,6 +326,23 @@
     try { await API.adminSetUserPlan(id, plan.trim().toLowerCase(), days); Toast.success('План обновлён'); openUser(id); loadUsers(); }
     catch (e) { Toast.error(e.message); }
   };
+  window.Ops.impersonate = async (id, email) => {
+    const reason = prompt(
+      'Причина входа под ' + email + '?\n\nЗапишется в audit_log с тобой как actor. Откроется новая вкладка с 30-минутной сессией target-юзера — твоя admin-сессия в этой вкладке не трогается.',
+    );
+    if (!reason || reason.length < 3) return;
+    try {
+      const r = await API.adminImpersonate(id, reason);
+      // Open dashboard in a new tab with the impersonation token in the
+      // URL hash. app.js picks it up into sessionStorage (scoped to that
+      // tab only) so our own admin session in localStorage is never
+      // touched. The hash is stripped from the URL on first render.
+      const url = '/dashboard.html#imp=' + encodeURIComponent(r.accessToken) + '&email=' + encodeURIComponent(email);
+      window.open(url, '_blank', 'noopener');
+      Toast.success('Impersonating ' + email + ' · opened in new tab');
+    } catch (e) { Toast.error(e.message || 'Ошибка'); }
+  };
+
   window.Ops.notifyUser = async (id) => {
     const title = prompt('Заголовок сообщения?');
     if (!title) return;

@@ -32,6 +32,11 @@ function authMiddleware(req, res, next) {
     req.userPlan = row.plan || 'free';
     req.isAdmin = Boolean(row.is_admin);
     req.user = row;
+    // Impersonation: when an admin issued this token via /admin/users/:id/
+    // impersonate, decoded.imp holds the original admin id. The target
+    // user is still used for authz (req.userId = target.id), but any
+    // audited action can log who was actually behind the keyboard.
+    if (decoded.imp) req.impersonatedBy = Number(decoded.imp);
     next();
   } catch (err) {
     const code = err.name === 'TokenExpiredError' ? 'TOKEN_EXPIRED' : 'INVALID_TOKEN';
