@@ -1,40 +1,37 @@
 const crypto = require('crypto');
 const db = require('../models/database');
 const config = require('../config');
-
-const ALGORITHM = 'aes-256-cbc';
+const cryptoUtil = require('../utils/crypto');
 
 class WalletService {
-  // ── Encryption helpers ─────────────────────────────────────────────────
+  // ── Encryption helpers (AES-256-GCM via crypto.js, with CBC legacy read) ─
 
   /**
-   * Encrypt a plaintext string using AES-256-CBC.
-   * Returns a hex-encoded string of iv:encrypted.
+   * Encrypt a plaintext string using AES-256-GCM — authenticated encryption,
+   * protects against ciphertext tampering. New format: "iv:ct:tag" (base64).
    */
   _encrypt(plaintext) {
-    const key = Buffer.from(config.walletEncryptionKey, 'utf8').slice(0, 32);
-    const iv = crypto.randomBytes(16);
-    const cipher = crypto.createCipheriv(ALGORITHM, key, iv);
-    let encrypted = cipher.update(plaintext, 'utf8', 'hex');
-    encrypted += cipher.final('hex');
-    return iv.toString('hex') + ':' + encrypted;
+    return cryptoUtil.encrypt(plaintext, config.walletEncryptionKey);
   }
 
   /**
-   * Decrypt a hex-encoded iv:encrypted string.
+   * Decrypt a previously encrypted payload.
+   * Prefers new AES-GCM 3-part format; falls back to legacy AES-CBC 2-part
+   * format for wallets created before the swap (read-only compat).
    */
   _decrypt(encryptedPayload) {
-    const key = Buffer.from(config.walletEncryptionKey, 'utf8').slice(0, 32);
-    const parts = encryptedPayload.split(':');
-    if (parts.length !== 2) {
-      throw new Error('Invalid encrypted payload format');
+    const parts = String(encryptedPayload || '').split(':');
+    if (parts.length === 3) {
+      return cryptoUtil.decrypt(encryptedPayload, config.walletEncryptionKey);
     }
-    const iv = Buffer.from(parts[0], 'hex');
-    const encrypted = parts[1];
-    const decipher = crypto.createDecipheriv(ALGORITHM, key, iv);
-    let decrypted = decipher.update(encrypted, 'hex', 'utf8');
-    decrypted += decipher.final('utf8');
-    return decrypted;
+    if (parts.length === 2) {
+      // Legacy AES-CBC: key is raw UTF-8 truncated to 32 bytes (old code path).
+      const key = Buffer.from(config.walletEncryptionKey, 'utf8').slice(0, 32);
+      const iv = Buffer.from(parts[0], 'hex');
+      const decipher = crypto.createDecipheriv('aes-256-cbc', key, iv);
+      return decipher.update(parts[1], 'hex', 'utf8') + decipher.final('utf8');
+    }
+    throw new Error('Invalid encrypted payload format');
   }
 
   /**

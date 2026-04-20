@@ -41,7 +41,24 @@ const app = express();
 // Trust proxy for correct req.ip behind Passenger / reverse proxy
 app.set('trust proxy', 1);
 
-app.use(helmet({ contentSecurityPolicy: false }));
+// CSP: strict in prod; disabled in dev/tests where inline bits + HMR fight it.
+// Iconify / jsdelivr are CDN deps already used by /frontend.
+const cspDirectives = {
+  defaultSrc: ["'self'"],
+  scriptSrc: ["'self'", "'unsafe-inline'", 'https://cdn.jsdelivr.net', 'https://code.iconify.design', 'https://api.iconify.design'],
+  styleSrc: ["'self'", "'unsafe-inline'", 'https://fonts.googleapis.com'],
+  imgSrc: ["'self'", 'data:', 'https:'],
+  fontSrc: ["'self'", 'https://fonts.gstatic.com', 'data:'],
+  connectSrc: ["'self'", 'https://api.iconify.design', 'wss:', 'https:'],
+  frameAncestors: ["'none'"],
+  objectSrc: ["'none'"],
+  baseUri: ["'self'"],
+};
+app.use(helmet({
+  contentSecurityPolicy: config.isProd ? { directives: cspDirectives } : false,
+  frameguard: { action: 'deny' },
+  hsts: config.isProd ? { maxAge: 31536000, includeSubDomains: true, preload: true } : false,
+}));
 
 app.use(cors({
   origin: config.corsOrigin,
