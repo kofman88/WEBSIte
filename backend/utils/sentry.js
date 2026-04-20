@@ -33,16 +33,42 @@ let enabled = false;
       release: '3.0.0',
       tracesSampleRate: 0.05,
       beforeSend(event) {
-        // Scrub sensitive headers + body fields defensively.
-        if (event.request && event.request.headers) {
-          delete event.request.headers.authorization;
-          delete event.request.headers.cookie;
+        // Scrub sensitive headers + body + query fields. Defence-in-depth:
+        // we still never pass plaintext secrets into log.info / error with
+        // these keys, but this makes PII leakage through stack traces +
+        // captured request state much harder.
+        const REDACT_KEYS = new Set([
+          'password', 'password2', 'currentPassword', 'newPassword',
+          'apiKey', 'apiSecret', 'exchangeSecret', 'exchangePassphrase',
+          'token', 'refreshToken', 'accessToken', 'pendingToken',
+          'jwt', 'secret', 'tvSecret', 'privateKey',
+          'totpSecret', 'code', 'recoveryCode',
+          'email', 'phone', // PII
+        ]);
+        const scrub = (o) => {
+          if (!o || typeof o !== 'object') return;
+          for (const k of Object.keys(o)) {
+            if (REDACT_KEYS.has(k)) { o[k] = '[REDACTED]'; continue; }
+            if (typeof o[k] === 'object') scrub(o[k]);
+          }
+        };
+        if (event.request) {
+          if (event.request.headers) {
+            delete event.request.headers.authorization;
+            delete event.request.headers.cookie;
+            delete event.request.headers['x-forwarded-for'];
+          }
+          scrub(event.request.data);
+          scrub(event.request.query_string);
+          scrub(event.request.env);
         }
-        if (event.request && event.request.data) {
-          const d = event.request.data;
-          if (d && typeof d === 'object') {
-            for (const k of ['password', 'password2', 'apiKey', 'apiSecret', 'token', 'refreshToken']) {
-              if (k in d) d[k] = '[REDACTED]';
+        // Redact file paths in stack frames (leak less about server layout)
+        if (event.exception && event.exception.values) {
+          for (const ex of event.exception.values) {
+            if (!ex.stacktrace || !ex.stacktrace.frames) continue;
+            for (const f of ex.stacktrace.frames) {
+              if (f.filename) f.filename = f.filename.replace(/^\/home\/[^/]+/, '~');
+              if (f.abs_path) f.abs_path = f.abs_path.replace(/^\/home\/[^/]+/, '~');
             }
           }
         }
@@ -68,7 +94,8 @@ function captureMessage(msg, level = 'info', context = {}) {
 
 function setUser(user) {
   if (!enabled) return;
-  try { Sentry.setUser(user ? { id: user.id, email: user.email } : null); } catch (_e) {}
+  // Only user.id — don't send email / IP to Sentry (PII).
+  try { Sentry.setUser(user ? { id: user.id } : null); } catch (_e) {}
 }
 
 function requestHandler() {

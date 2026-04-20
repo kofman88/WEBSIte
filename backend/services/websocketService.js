@@ -23,7 +23,27 @@ class WebSocketService {
   constructor() {
     this.wss = null;
     this.clients = new Map(); // ws → { userId, authenticated, alive }
+    this.userIndex = new Map(); // userId → Set<ws>  (O(1) fan-out)
     this._heartbeatInterval = null;
+  }
+
+  _indexAdd(userId, ws) {
+    if (!userId) return;
+    let set = this.userIndex.get(userId);
+    if (!set) { set = new Set(); this.userIndex.set(userId, set); }
+    set.add(ws);
+  }
+  _indexRemove(userId, ws) {
+    if (!userId) return;
+    const set = this.userIndex.get(userId);
+    if (!set) return;
+    set.delete(ws);
+    if (set.size === 0) this.userIndex.delete(userId);
+  }
+  _forgetClient(ws) {
+    const meta = this.clients.get(ws);
+    if (meta) this._indexRemove(meta.userId, ws);
+    this.clients.delete(ws);
   }
 
   init(options = {}) {
@@ -58,8 +78,10 @@ class WebSocketService {
         try {
           const decoded = jwt.verify(token, config.jwtSecret, { algorithms: ['HS256'] });
           if (decoded && decoded.uid) {
+            this._indexRemove(meta.userId, ws); // in case of re-auth
             meta.userId = decoded.uid;
             meta.authenticated = true;
+            this._indexAdd(meta.userId, ws);
             this._send(ws, { type: 'auth_ok', userId: decoded.uid });
             return;
           }
@@ -68,8 +90,8 @@ class WebSocketService {
       }
     });
 
-    ws.on('close', () => this.clients.delete(ws));
-    ws.on('error', () => this.clients.delete(ws));
+    ws.on('close', () => this._forgetClient(ws));
+    ws.on('error', () => this._forgetClient(ws));
 
     this._send(ws, { type: 'hello', version: '3.0.0', ts: Date.now() });
   }
@@ -78,7 +100,7 @@ class WebSocketService {
     for (const [ws, meta] of this.clients) {
       if (!meta.alive) {
         try { ws.terminate(); } catch (_e) {}
-        this.clients.delete(ws);
+        this._forgetClient(ws);
         continue;
       }
       meta.alive = false;
@@ -98,9 +120,9 @@ class WebSocketService {
 
   broadcastToUser(userId, payload) {
     if (!this.wss || !userId) return;
-    for (const [ws, meta] of this.clients) {
-      if (meta.userId === userId) this._send(ws, payload);
-    }
+    const set = this.userIndex.get(userId);
+    if (!set) return;
+    for (const ws of set) this._send(ws, payload);
   }
 
   /**
@@ -127,6 +149,7 @@ class WebSocketService {
       try { ws.close(1001, 'server shutdown'); } catch (_e) {}
     }
     this.clients.clear();
+    this.userIndex.clear();
     try { this.wss.close(); } catch (_e) {}
     this.wss = null;
     logger.info('WebSocket shutdown complete');
