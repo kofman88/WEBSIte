@@ -419,6 +419,310 @@
   }
   loaders.signals = loadSignals;
 
+  // ── Payments ──────────────────────────────────────────────────────────
+  let _payFilters = { status: '', method: '' };
+  async function loadPayments() {
+    const pane = document.getElementById('pane-payments');
+    pane.innerHTML = `
+      <div class="ops-card mb-4" style="display:flex;gap:10px;align-items:center;flex-wrap:wrap">
+        <select id="pSt" class="ops-input">
+          <option value="">Все</option>
+          <option value="pending" ${_payFilters.status === 'pending' ? 'selected' : ''}>Pending</option>
+          <option value="confirmed" ${_payFilters.status === 'confirmed' ? 'selected' : ''}>Confirmed</option>
+          <option value="failed" ${_payFilters.status === 'failed' ? 'selected' : ''}>Failed</option>
+          <option value="refunded" ${_payFilters.status === 'refunded' ? 'selected' : ''}>Refunded</option>
+        </select>
+        <select id="pMt" class="ops-input">
+          <option value="">Все</option>
+          <option value="stripe" ${_payFilters.method === 'stripe' ? 'selected' : ''}>Stripe</option>
+          <option value="usdt_bep20" ${_payFilters.method === 'usdt_bep20' ? 'selected' : ''}>USDT BEP20</option>
+          <option value="usdt_trc20" ${_payFilters.method === 'usdt_trc20' ? 'selected' : ''}>USDT TRC20</option>
+          <option value="promo" ${_payFilters.method === 'promo' ? 'selected' : ''}>Promo</option>
+        </select>
+        <button class="ops-btn" id="pR">Обновить</button>
+      </div>
+      <div class="ops-card" style="padding:0;overflow:auto">
+        <table class="ops-table">
+          <thead><tr><th>ID</th><th>Date</th><th>User</th><th>Method</th><th>Amount</th><th>Plan</th><th>Status</th><th></th></tr></thead>
+          <tbody id="pTb"><tr><td colspan="8" class="text-center py-8 text-slate-500">Загрузка…</td></tr></tbody>
+        </table>
+      </div>
+    `;
+    document.getElementById('pSt').addEventListener('change', (e) => { _payFilters.status = e.target.value; loadPayments(); });
+    document.getElementById('pMt').addEventListener('change', (e) => { _payFilters.method = e.target.value; loadPayments(); });
+    document.getElementById('pR').addEventListener('click', loadPayments);
+    try {
+      const data = await API.adminListPayments({ status: _payFilters.status || undefined, method: _payFilters.method || undefined, limit: 300 });
+      document.getElementById('pTb').innerHTML = (data.payments || []).map((p) => {
+        const badge = p.status === 'confirmed' ? 'badge-green' : p.status === 'pending' ? 'badge-yellow' : p.status === 'refunded' ? 'badge-gray' : 'badge-red';
+        return `<tr>
+          <td class="mono">${p.id}</td>
+          <td class="mono text-xs text-slate-500">${fmtDate(p.createdAt)}</td>
+          <td class="mono text-xs">${esc(p.userEmail || '—')}</td>
+          <td>${esc(p.method)}</td>
+          <td class="mono">${money(p.amountUsd)}</td>
+          <td>${esc(p.plan || '—')}</td>
+          <td><span class="badge ${badge}">${p.status}</span></td>
+          <td style="display:flex;gap:6px">
+            ${p.status === 'pending' ? `<button class="ops-btn" onclick="Ops.confirmPay(${p.id})">Confirm</button>` : ''}
+            ${p.status === 'confirmed' ? `<button class="ops-btn ops-btn-danger" onclick="Ops.refundPay(${p.id})">Refund</button>` : ''}
+          </td>
+        </tr>`;
+      }).join('') || '<tr><td colspan="8" class="text-center py-8 text-slate-500">Нет платежей</td></tr>';
+    } catch (e) {
+      document.getElementById('pTb').innerHTML = `<tr><td colspan="8" class="text-center py-8 text-red-400">${esc(e.message)}</td></tr>`;
+    }
+  }
+  loaders.payments = loadPayments;
+  window.Ops.confirmPay = async (id) => {
+    if (!confirm('Подтвердить платёж вручную? Будет активирована подписка + начислена реф-комиссия.')) return;
+    try { await API.adminConfirmPayment(id, 'manual'); Toast.success('Подтверждено'); loadPayments(); }
+    catch (e) { Toast.error(e.message); }
+  };
+  window.Ops.refundPay = async (id) => {
+    const reason = prompt('Причина возврата?');
+    if (reason === null) return;
+    try { await API.adminRefundPayment(id, reason); Toast.success('Refund · юзер переведён на free если нет другого платежа'); loadPayments(); }
+    catch (e) { Toast.error(e.message); }
+  };
+
+  // ── Promo codes ───────────────────────────────────────────────────────
+  async function loadPromo() {
+    const pane = document.getElementById('pane-promo');
+    pane.innerHTML = `
+      <div class="ops-card mb-4">
+        <form id="promoForm" style="display:grid;grid-template-columns:repeat(5,1fr) auto;gap:10px;align-items:end">
+          <div><label class="kpi-label block mb-1">Code</label><input name="code" required class="ops-input" style="width:100%" placeholder="FRIEND2026"/></div>
+          <div><label class="kpi-label block mb-1">Plan</label><select name="plan" class="ops-input" style="width:100%"><option>starter</option><option selected>pro</option><option>elite</option></select></div>
+          <div><label class="kpi-label block mb-1">Days</label><input name="durationDays" type="number" min="1" max="3650" value="30" class="ops-input" style="width:100%"/></div>
+          <div><label class="kpi-label block mb-1">Max uses</label><input name="maxUses" type="number" min="0" value="1" class="ops-input" style="width:100%"/></div>
+          <div><label class="kpi-label block mb-1">Discount %</label><input name="discountPct" type="number" min="0" max="100" value="100" class="ops-input" style="width:100%"/></div>
+          <button type="submit" class="ops-btn ops-btn-primary">Создать</button>
+        </form>
+      </div>
+      <div class="ops-card" style="padding:0;overflow:auto">
+        <table class="ops-table">
+          <thead><tr><th>Code</th><th>Plan</th><th>Days</th><th>Uses</th><th>Status</th><th>Created</th><th></th></tr></thead>
+          <tbody id="prTb"><tr><td colspan="7" class="text-center py-8 text-slate-500">Загрузка…</td></tr></tbody>
+        </table>
+      </div>
+    `;
+    document.getElementById('promoForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const fd = Object.fromEntries(new FormData(e.target).entries());
+      try {
+        await API.adminCreatePromoCode({
+          code: fd.code.toUpperCase(),
+          plan: fd.plan,
+          durationDays: +fd.durationDays,
+          maxUses: +fd.maxUses,
+          discountPct: +fd.discountPct,
+        });
+        Toast.success('Промо создан'); e.target.reset(); loadPromo();
+      } catch (err) { Toast.error(err.message); }
+    });
+    try {
+      const data = await API.adminListPromoCodes();
+      document.getElementById('prTb').innerHTML = (data.codes || []).map((c) => `<tr>
+        <td class="mono font-semibold">${esc(c.code)}</td>
+        <td>${esc(c.plan)}</td>
+        <td class="mono">${c.durationDays}</td>
+        <td class="mono">${c.usesCount}${c.maxUses ? ' / ' + c.maxUses : ''}</td>
+        <td>${c.isActive ? '<span class="badge badge-green">active</span>' : '<span class="badge badge-gray">off</span>'}</td>
+        <td class="text-xs text-slate-500">${fmtDateShort(c.createdAt)}</td>
+        <td style="display:flex;gap:6px">
+          <button class="ops-btn" onclick="Ops.togglePromo(${c.id}, ${!c.isActive})">${c.isActive ? 'Disable' : 'Enable'}</button>
+          <button class="ops-btn ops-btn-danger" onclick="Ops.deletePromo(${c.id})">Delete</button>
+        </td>
+      </tr>`).join('') || '<tr><td colspan="7" class="text-center py-8 text-slate-500">Нет промо-кодов</td></tr>';
+    } catch (e) {
+      document.getElementById('prTb').innerHTML = `<tr><td colspan="7" class="text-center py-8 text-red-400">${esc(e.message)}</td></tr>`;
+    }
+  }
+  loaders.promo = loadPromo;
+  window.Ops.togglePromo = async (id, isActive) => {
+    try { await API.adminTogglePromoCode(id, isActive); Toast.success('OK'); loadPromo(); }
+    catch (e) { Toast.error(e.message); }
+  };
+  window.Ops.deletePromo = async (id) => {
+    if (!confirm('Удалить промо-код? Отменит будущие активации. История редемпций останется.')) return;
+    try { await API.adminDeletePromoCode(id); Toast.success('Удалён'); loadPromo(); }
+    catch (e) { Toast.error(e.message); }
+  };
+
+  // ── Referral rewards ──────────────────────────────────────────────────
+  let _rewStatus = 'pending';
+  async function loadRewards() {
+    const pane = document.getElementById('pane-rewards');
+    pane.innerHTML = `
+      <div class="ops-card mb-4" style="display:flex;gap:10px;align-items:center;flex-wrap:wrap">
+        <select id="rwS" class="ops-input">
+          <option value="">Все</option>
+          <option value="pending" ${_rewStatus === 'pending' ? 'selected' : ''}>Pending</option>
+          <option value="paid" ${_rewStatus === 'paid' ? 'selected' : ''}>Paid</option>
+          <option value="cancelled" ${_rewStatus === 'cancelled' ? 'selected' : ''}>Cancelled</option>
+        </select>
+        <button class="ops-btn" id="rwR">Обновить</button>
+      </div>
+      <div class="ops-card" style="padding:0;overflow:auto">
+        <table class="ops-table">
+          <thead><tr><th>Date</th><th>Referrer</th><th>Referred</th><th>Payment</th><th>Amount</th><th>Status</th><th></th></tr></thead>
+          <tbody id="rwTb"><tr><td colspan="7" class="text-center py-8 text-slate-500">Загрузка…</td></tr></tbody>
+        </table>
+      </div>
+    `;
+    document.getElementById('rwS').addEventListener('change', (e) => { _rewStatus = e.target.value; loadRewards(); });
+    document.getElementById('rwR').addEventListener('click', loadRewards);
+    try {
+      const data = await API.adminListRewards({ status: _rewStatus || undefined, limit: 300 });
+      document.getElementById('rwTb').innerHTML = (data.rewards || []).map((r) => {
+        const badge = r.status === 'paid' ? 'badge-green' : r.status === 'pending' ? 'badge-yellow' : 'badge-gray';
+        return `<tr>
+          <td class="mono text-xs text-slate-500">${fmtDateShort(r.createdAt)}</td>
+          <td class="mono text-xs">${esc(r.referrerEmail || '—')}</td>
+          <td class="mono text-xs">${esc(r.referredEmail || '—')}</td>
+          <td class="mono">#${r.paymentId}</td>
+          <td class="mono text-green-400">${money(r.amountUsd)}</td>
+          <td><span class="badge ${badge}">${r.status}</span></td>
+          <td style="display:flex;gap:6px">
+            ${r.status === 'pending' ? `<button class="ops-btn ops-btn-primary" onclick="Ops.payReward(${r.id})">Pay</button><button class="ops-btn" onclick="Ops.cancelReward(${r.id})">Cancel</button>` : ''}
+          </td>
+        </tr>`;
+      }).join('') || '<tr><td colspan="7" class="text-center py-8 text-slate-500">Нет выплат</td></tr>';
+    } catch (e) {
+      document.getElementById('rwTb').innerHTML = `<tr><td colspan="7" class="text-center py-8 text-red-400">${esc(e.message)}</td></tr>`;
+    }
+  }
+  loaders.rewards = loadRewards;
+  window.Ops.payReward = async (id) => {
+    if (!confirm('Пометить как выплаченное?')) return;
+    try { await API.adminPayReward(id); Toast.success('Выплачено'); loadRewards(); }
+    catch (e) { Toast.error(e.message); }
+  };
+  window.Ops.cancelReward = async (id) => {
+    const reason = prompt('Причина отмены?');
+    if (reason === null) return;
+    try { await API.adminCancelReward(id, reason); Toast.success('Отменено'); loadRewards(); }
+    catch (e) { Toast.error(e.message); }
+  };
+
+  // ── Support ───────────────────────────────────────────────────────────
+  async function loadSupport() {
+    const pane = document.getElementById('pane-support');
+    pane.innerHTML = `
+      <div class="ops-card" style="padding:0;overflow:auto">
+        <table class="ops-table">
+          <thead><tr><th>#</th><th>User</th><th>Subject</th><th>Status</th><th>Msgs</th><th>Updated</th></tr></thead>
+          <tbody id="suTb"><tr><td colspan="6" class="text-center py-8 text-slate-500">Загрузка…</td></tr></tbody>
+        </table>
+      </div>
+    `;
+    try {
+      const data = await API.listAllTickets({ limit: 200 });
+      document.getElementById('suTb').innerHTML = (data.tickets || []).map((t) => {
+        const badge = t.status === 'open' ? 'badge-green' : t.status === 'pending' ? 'badge-yellow' : 'badge-gray';
+        return `<tr>
+          <td class="mono">#${t.id}</td>
+          <td class="mono text-xs">${esc(t.userEmail || '—')}</td>
+          <td>${esc(t.subject)}</td>
+          <td><span class="badge ${badge}">${t.status}</span></td>
+          <td class="mono">${t.messageCount || 0}</td>
+          <td class="mono text-xs text-slate-500">${fmtDate(t.updatedAt || t.createdAt)}</td>
+        </tr>`;
+      }).join('') || '<tr><td colspan="6" class="text-center py-8 text-slate-500">Нет тикетов</td></tr>';
+    } catch (e) {
+      document.getElementById('suTb').innerHTML = `<tr><td colspan="6" class="text-center py-8 text-red-400">${esc(e.message)}</td></tr>`;
+    }
+  }
+  loaders.support = loadSupport;
+
+  // ── System ────────────────────────────────────────────────────────────
+  async function loadSystem() {
+    const pane = document.getElementById('pane-system');
+    pane.innerHTML = '<div class="text-center py-12 text-slate-500 text-sm">Загрузка…</div>';
+    try {
+      const s = await API.adminSystem();
+      const counts = s.db.rowCounts || {};
+      pane.innerHTML = `
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-3 mb-4">
+          <div class="ops-card">
+            <div class="kpi-label mb-3">Process</div>
+            <div class="dl-pair"><span class="k">Node</span><span class="v">${esc(s.process.node || '—')}</span></div>
+            <div class="dl-pair"><span class="k">PID</span><span class="v">${s.process.pid}</span></div>
+            <div class="dl-pair"><span class="k">Env</span><span class="v">${esc(s.process.nodeEnv)}</span></div>
+            <div class="dl-pair"><span class="k">Uptime</span><span class="v">${duration(s.process.uptimeSeconds)}</span></div>
+            <div class="dl-pair"><span class="k">RSS</span><span class="v">${s.process.memoryMb} MB</span></div>
+            <div class="dl-pair"><span class="k">Heap</span><span class="v">${s.process.heapMb} MB</span></div>
+          </div>
+          <div class="ops-card">
+            <div class="kpi-label mb-3">Database</div>
+            <div class="dl-pair"><span class="k">Size</span><span class="v">${s.db.sizeMb || '—'} MB</span></div>
+            <div class="dl-pair"><span class="k">WAL mode</span><span class="v">${s.db.walMode ? 'yes' : 'no'}</span></div>
+            <div class="dl-pair"><span class="k">Tables</span><span class="v">${(s.db.tables || []).length}</span></div>
+          </div>
+          <div class="ops-card">
+            <div class="kpi-label mb-3">Backups</div>
+            <div class="dl-pair"><span class="k">Count</span><span class="v">${s.backups.count}</span></div>
+            <div class="dl-pair"><span class="k">Latest</span><span class="v">${s.backups.latest ? esc(s.backups.latest.name) : 'нет'}</span></div>
+            <div class="dl-pair"><span class="k">Size</span><span class="v">${s.backups.latest ? s.backups.latest.sizeMb + ' MB' : '—'}</span></div>
+            <div class="dl-pair"><span class="k">Created</span><span class="v">${s.backups.latest ? fmtDate(s.backups.latest.mtime) : '—'}</span></div>
+          </div>
+        </div>
+
+        <div class="ops-card">
+          <div class="kpi-label mb-3">Row counts</div>
+          <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:10px">
+            ${Object.keys(counts).map((t) => `<div style="padding:8px 12px;background:rgba(255,255,255,.02);border-radius:8px"><div class="text-xs text-slate-500">${esc(t)}</div><div class="mono font-semibold">${counts[t].toLocaleString()}</div></div>`).join('')}
+          </div>
+        </div>
+
+        <div class="ops-card mt-4">
+          <div class="kpi-label mb-3">Latest backups</div>
+          ${s.backups.files && s.backups.files.length ? `<table class="ops-table"><thead><tr><th>File</th><th>Size</th><th>Created</th></tr></thead><tbody>
+            ${s.backups.files.map((f) => `<tr><td class="mono">${esc(f.name)}</td><td class="mono">${f.sizeMb} MB</td><td class="text-xs text-slate-500">${fmtDate(f.mtime)}</td></tr>`).join('')}
+          </tbody></table>` : '<div class="text-xs text-slate-600">Нет бэкапов</div>'}
+        </div>
+      `;
+    } catch (e) {
+      pane.innerHTML = `<div class="text-center py-12 text-red-400 text-sm">${esc(e.message)}</div>`;
+    }
+  }
+  loaders.system = loadSystem;
+
+  // ── Audit log ─────────────────────────────────────────────────────────
+  let _auditFilter = '';
+  async function loadAudit() {
+    const pane = document.getElementById('pane-audit');
+    pane.innerHTML = `
+      <div class="ops-card mb-4" style="display:flex;gap:10px;align-items:center;flex-wrap:wrap">
+        <input id="auF" class="ops-input" placeholder="Фильтр по действию (admin.user.plan, payment.refund, …)" value="${esc(_auditFilter)}" style="flex:1;min-width:240px"/>
+        <button class="ops-btn" id="auR">Обновить</button>
+      </div>
+      <div class="ops-card" style="padding:0;overflow:auto">
+        <table class="ops-table">
+          <thead><tr><th>Time</th><th>Actor</th><th>Action</th><th>Entity</th><th>IP</th><th>Meta</th></tr></thead>
+          <tbody id="auTb"><tr><td colspan="6" class="text-center py-8 text-slate-500">Загрузка…</td></tr></tbody>
+        </table>
+      </div>
+    `;
+    document.getElementById('auF').addEventListener('change', (e) => { _auditFilter = e.target.value.trim(); loadAudit(); });
+    document.getElementById('auR').addEventListener('click', loadAudit);
+    try {
+      const data = await API.adminAuditLog({ action: _auditFilter || undefined, limit: 300 });
+      document.getElementById('auTb').innerHTML = (data.events || []).map((a) => `<tr>
+        <td class="mono text-xs text-slate-500">${fmtDate(a.createdAt)}</td>
+        <td class="mono text-xs">${esc(a.userEmail || '—')}</td>
+        <td class="mono text-xs">${esc(a.action)}</td>
+        <td class="text-xs">${esc(a.entityType || '—')}${a.entityId ? ' #' + a.entityId : ''}</td>
+        <td class="mono text-xs text-slate-500">${esc(a.ipAddress || '—')}</td>
+        <td class="mono text-xs text-slate-500" style="max-width:320px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(JSON.stringify(a.metadata || {}))}</td>
+      </tr>`).join('') || '<tr><td colspan="6" class="text-center py-8 text-slate-500">Нет событий</td></tr>';
+    } catch (e) {
+      document.getElementById('auTb').innerHTML = `<tr><td colspan="6" class="text-center py-8 text-red-400">${esc(e.message)}</td></tr>`;
+    }
+  }
+  loaders.audit = loadAudit;
+
   // ── Boot ──────────────────────────────────────────────────────────────
   document.addEventListener('DOMContentLoaded', async () => {
     const ok = await gate();

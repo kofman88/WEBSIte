@@ -1,0 +1,7 @@
+User-agent: *
+Disallow: /ops
+Disallow: /ops.html
+Disallow: /admin.html
+Disallow: /api/
+
+Sitemap: https://chmup.top/sitemap.xml
