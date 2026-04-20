@@ -38,6 +38,18 @@ const MIGRATIONS = [
       }
     },
   },
+  {
+    version: 3,
+    name: 'ref_rewards_kind',
+    up(db) {
+      const cols = db.prepare("PRAGMA table_info('ref_rewards')").all().map((c) => c.name);
+      // 'commission' = existing 20%-of-payment row, 'signup_bonus' = new
+      // fixed-$ pay-per-signup row unlocked by this block.
+      if (!cols.includes('kind')) {
+        db.exec("ALTER TABLE ref_rewards ADD COLUMN kind TEXT NOT NULL DEFAULT 'commission'");
+      }
+    },
+  },
 ];
 
 function ensureTable(db) {

@@ -83,6 +83,66 @@ function issueReward(paymentId) {
   return info.lastInsertRowid;
 }
 
+/**
+ * Pay-per-signup bonus — fires the first time a referred user makes a
+ * confirmed payment. Unlike issueReward (which runs every payment and
+ * gives 20%), this is a one-shot fixed-$ amount to reward the referrer
+ * for bringing a *paying* user regardless of plan size.
+ *
+ * Amount is controlled by REF_SIGNUP_BONUS_USD env var (default $10).
+ * Set to 0 to disable. Idempotent: checks for an existing kind=signup_bonus
+ * row for the same referred_id before issuing.
+ */
+function issueSignupBonus(paymentId) {
+  // Disabled by default — operators opt in with REF_SIGNUP_BONUS_USD=10 (or any amount).
+  const amount = Number(process.env.REF_SIGNUP_BONUS_USD || 0);
+  if (amount <= 0) return null;
+  const payment = db.prepare('SELECT * FROM payments WHERE id = ?').get(paymentId);
+  if (!payment || payment.status !== 'confirmed') return null;
+  const ref = db.prepare('SELECT * FROM referrals WHERE referred_id = ?').get(payment.user_id);
+  if (!ref) return null;
+  if (ref.referrer_id === ref.referred_id) return null; // same anti-self-ref check
+
+  // Already paid a signup bonus for this referred user?
+  const existing = db.prepare(`
+    SELECT id FROM ref_rewards WHERE referred_id = ? AND kind = 'signup_bonus'
+  `).get(payment.user_id);
+  if (existing) return null;
+
+  // Only fire on the FIRST confirmed payment (otherwise bonus triggers on
+  // every plan renewal, which is double-dipping).
+  const firstPaid = db.prepare(`
+    SELECT id FROM payments WHERE user_id = ? AND status = 'confirmed'
+    ORDER BY created_at ASC LIMIT 1
+  `).get(payment.user_id);
+  if (!firstPaid || firstPaid.id !== paymentId) return null;
+
+  const info = db.prepare(`
+    INSERT INTO ref_rewards (referrer_id, referred_id, payment_id, amount_usd, status, kind)
+    VALUES (?, ?, ?, ?, 'pending', 'signup_bonus')
+  `).run(ref.referrer_id, payment.user_id, paymentId, amount);
+
+  db.prepare(`
+    INSERT INTO audit_log (user_id, action, entity_type, entity_id, metadata)
+    VALUES (?, 'ref_reward.signup_bonus', 'ref_reward', ?, ?)
+  `).run(ref.referrer_id, info.lastInsertRowid, JSON.stringify({ paymentId, amount }));
+
+  logger.info('ref_reward signup_bonus issued', {
+    rewardId: info.lastInsertRowid, referrer: ref.referrer_id,
+    referred: payment.user_id, amount,
+  });
+  try {
+    const notifier = require('./notifier');
+    notifier.dispatch(ref.referrer_id, {
+      type: 'referral',
+      title: `🎁 Бонус за платного реферала · $${amount.toFixed(2)}`,
+      body: 'Ваш приглашённый сделал первую оплату. Фиксированный бонус начислен в ожидание.',
+      link: '/settings.html',
+    });
+  } catch (_e) {}
+  return info.lastInsertRowid;
+}
+
 function listForUser(userId, { status = null, limit = 50, offset = 0 } = {}) {
   const parts = ['referrer_id = ?'];
   const params = [userId];
@@ -161,6 +221,7 @@ function hydrate(row) {
 
 module.exports = {
   issueReward,
+  issueSignupBonus,
   listForUser,
   summaryForUser,
   markPaid,

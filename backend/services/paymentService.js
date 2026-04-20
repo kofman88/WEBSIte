@@ -163,6 +163,7 @@ async function handleStripeWebhook(rawBody, signature) {
           JSON.stringify({ recurring: true }));
         extendSubscription(userId, (inv.metadata && inv.metadata.plan) || 'pro', 30);
         refRewards.issueReward(info.lastInsertRowid);
+        refRewards.issueSignupBonus(info.lastInsertRowid);
       }
       break;
     }
@@ -275,6 +276,9 @@ function confirmPayment(paymentId, { metadata = null } = {}) {
   // Issue ref reward (silently ignores if no referrer)
   try { refRewards.issueReward(paymentId); }
   catch (err) { logger.warn('ref_reward failed', { paymentId, err: err.message }); }
+  // Plus one-shot signup bonus on the FIRST confirmed payment
+  try { refRewards.issueSignupBonus(paymentId); }
+  catch (err) { logger.warn('ref_signup_bonus failed', { paymentId, err: err.message }); }
 
   db.prepare(`
     INSERT INTO audit_log (user_id, action, entity_type, entity_id, metadata)
