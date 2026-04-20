@@ -66,6 +66,13 @@ db.exec(`
   ];
   for (const [col, sql] of adds) if (!cols.includes(col)) { try { db.exec(sql); } catch(_){} }
 })();
+// Phase C: trade journal — add `note` column to trades (idempotent)
+(function migrateTradesNote(){
+  try {
+    const cols = db.prepare("PRAGMA table_info('trades')").all().map(c => c.name);
+    if (!cols.includes('note')) db.exec("ALTER TABLE trades ADD COLUMN note TEXT");
+  } catch(_){}
+})();
 db.exec(`
   -- placeholder to keep the multi-statement block working
 
