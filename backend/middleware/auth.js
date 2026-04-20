@@ -118,6 +118,32 @@ const passwordResetLimiter = TESTING ? noop : rateLimit({
   legacyHeaders: false,
 });
 
+// 2FA verify — prevent brute-forcing 6-digit TOTP (1M combos otherwise
+// testable in seconds without a limit). Keyed by IP + login-token so the
+// attacker can't just rotate IPs against one target.
+const twoFactorLimiter = TESTING ? noop : rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 10,
+  message: { error: 'Too many 2FA attempts. Try again in 15 minutes.', code: 'RATE_LIMITED' },
+  standardHeaders: true,
+  legacyHeaders: false,
+  keyGenerator: (req) => {
+    const tok = (req.body && req.body.pendingToken) || '';
+    return req.ip + ':' + String(tok).slice(0, 16);
+  },
+});
+
+// Exchange API key operations — brute-forcing credential validation is
+// expensive on upstream (429 from Bybit/Binance) and leaks info. Tight cap.
+const exchangeKeyLimiter = TESTING ? noop : rateLimit({
+  windowMs: 60 * 60 * 1000,
+  max: 10,
+  message: { error: 'Too many exchange key operations. Try again later.', code: 'RATE_LIMITED' },
+  standardHeaders: true,
+  legacyHeaders: false,
+  keyGenerator: (req) => (req.userId ? 'u:' + req.userId : 'ip:' + req.ip),
+});
+
 module.exports = {
   authMiddleware,
   requireTier,
@@ -126,4 +152,6 @@ module.exports = {
   loginLimiter,
   registerLimiter,
   passwordResetLimiter,
+  twoFactorLimiter,
+  exchangeKeyLimiter,
 };

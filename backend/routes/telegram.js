@@ -6,10 +6,19 @@ const logger = require('../utils/logger');
 
 const router = express.Router();
 
-// POST /api/telegram/webhook — Telegram posts updates here. Open endpoint
-// (Telegram signs via setWebhook secret if you set secret_token, but MVP
-// without — we don't expose anything dangerous here).
+// POST /api/telegram/webhook — Telegram posts updates here. If
+// TELEGRAM_WEBHOOK_SECRET is set in env, we require the matching
+// X-Telegram-Bot-Api-Secret-Token header so attackers can't forge updates.
+// When setting the webhook, pass this same secret to Bot API setWebhook.
 router.post('/webhook', (req, res) => {
+  const expected = process.env.TELEGRAM_WEBHOOK_SECRET;
+  if (expected) {
+    const got = req.get('X-Telegram-Bot-Api-Secret-Token') || '';
+    if (got !== expected) {
+      logger.warn('tg webhook: secret mismatch', { ip: req.ip });
+      return res.status(401).json({ ok: false });
+    }
+  }
   telegramService.handleUpdate(req.body)
     .then(() => res.json({ ok: true }))
     .catch((err) => { logger.warn('tg webhook error', { err: err.message }); res.json({ ok: true }); });

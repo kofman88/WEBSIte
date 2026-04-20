@@ -56,12 +56,23 @@ function buildUrl(botId) {
  * Вызывается из routes/webhooks.js.
  * Проверяет secret + создаёт signal, маршрутизирует в autoTradeService.
  */
-async function handleAlert(botId, payload, { exchangeService, marketData } = {}) {
+async function handleAlert(botId, payload, { exchangeService, marketData, signatureHeader, rawBody } = {}) {
   const bot = db.prepare('SELECT * FROM trading_bots WHERE id = ?').get(botId);
   if (!bot) { const e = new Error('Bot not found'); e.statusCode = 404; throw e; }
   if (!bot.tv_webhook_secret) { const e = new Error('Webhook not configured — rotate secret in bot settings'); e.statusCode = 400; throw e; }
-  if (!payload || payload.secret !== bot.tv_webhook_secret) {
-    const e = new Error('Invalid webhook secret'); e.statusCode = 401; e.code = 'INVALID_SIGNATURE'; throw e;
+
+  // Prefer HMAC header signature (constant-time compare). Fall back to the
+  // payload-embedded `secret` for TV alerts that can't compute HMAC.
+  const hdrSig = (signatureHeader || '').replace(/^sha256=/, '').trim();
+  if (hdrSig) {
+    const expected = crypto.createHmac('sha256', bot.tv_webhook_secret).update(String(rawBody || '')).digest('hex');
+    const ok = hdrSig.length === expected.length
+      && crypto.timingSafeEqual(Buffer.from(hdrSig, 'hex'), Buffer.from(expected, 'hex'));
+    if (!ok) { const e = new Error('Invalid HMAC signature'); e.statusCode = 401; e.code = 'INVALID_SIGNATURE'; throw e; }
+  } else {
+    if (!payload || payload.secret !== bot.tv_webhook_secret) {
+      const e = new Error('Invalid webhook secret'); e.statusCode = 401; e.code = 'INVALID_SIGNATURE'; throw e;
+    }
   }
   if (!bot.is_active) {
     logger.info('tv webhook ignored — bot inactive', { botId });

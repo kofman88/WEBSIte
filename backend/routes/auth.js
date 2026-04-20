@@ -7,6 +7,7 @@ const {
   loginLimiter,
   registerLimiter,
   passwordResetLimiter,
+  twoFactorLimiter,
 } = require('../middleware/auth');
 const validation = require('../utils/validation');
 
@@ -203,7 +204,7 @@ router.post('/2fa/setup', authMiddleware, (req, res, next) => {
   } catch (err) { handleServiceError(err, res, next); }
 });
 
-router.post('/2fa/confirm', authMiddleware, (req, res, next) => {
+router.post('/2fa/confirm', authMiddleware, twoFactorLimiter, (req, res, next) => {
   try {
     const input = z.object({ code: z.string().min(6).max(16) }).parse(req.body);
     res.json(twoFactorService.confirm(req.userId, input.code));
@@ -225,7 +226,7 @@ router.post('/2fa/disable', authMiddleware, (req, res, next) => {
 });
 
 // Login completion when 2FA is enabled
-router.post('/2fa/verify-login', (req, res, next) => {
+router.post('/2fa/verify-login', twoFactorLimiter, (req, res, next) => {
   try {
     const input = z.object({
       pendingToken: z.string().min(10),
