@@ -176,23 +176,49 @@ function renderTopSymbols(signals) {
   ).join('');
 }
 
-// Strategy donut — use global stats
+// Strategy donut — breakdown by strategy when we actually have signals.
+// Empty state shows a placeholder instead of a misleading solid blue ring.
 (async () => {
+  const canvas = document.getElementById('stratChart');
+  if (!canvas) return;
+  const host = canvas.parentElement;
   try {
     const gl = await API.globalSignalStats();
-    const canvas = document.getElementById('stratChart');
-    if (!canvas) return;
+    const byStrategy = gl.byStrategy || {};
+    const labels = Object.keys(byStrategy);
+    const values = labels.map((k) => byStrategy[k]);
+    const total = values.reduce((a, b) => a + b, 0);
+    if (!total) {
+      canvas.remove();
+      const empty = document.createElement('div');
+      empty.className = 'text-xs text-slate-500 text-center py-8';
+      empty.textContent = 'Нет данных';
+      host.appendChild(empty);
+      return;
+    }
+    const palette = { levels:'#5C80E3', smc:'#93AAEC', gerchik:'#66876E', scalping:'#C8B9B9' };
     new Chart(canvas, {
       type: 'doughnut',
       data: {
-        labels: ['Signals'], datasets: [{
-          data: [gl.total || 1],
-          backgroundColor: ['#1D4ED8'], borderWidth: 0,
+        labels: labels.map((k) => k[0].toUpperCase() + k.slice(1)),
+        datasets: [{
+          data: values,
+          backgroundColor: labels.map((k) => palette[k] || '#1D4ED8'),
+          borderWidth: 0,
         }],
       },
-      options: { responsive: true, plugins: { legend: { position: 'bottom', labels: { color: 'rgba(255,255,255,.62)', padding: 12, font: { size: 11 } } } } },
+      options: {
+        responsive: true, maintainAspectRatio: true, cutout: '62%',
+        plugins: { legend: { position: 'bottom', labels: { color: 'rgba(255,255,255,.62)', padding: 12, font: { size: 11 }, boxWidth: 10 } } },
+      },
     });
-  } catch (_e) {}
+  } catch (_e) {
+    canvas.remove();
+    const err = document.createElement('div');
+    err.className = 'text-xs text-slate-500 text-center py-8';
+    err.textContent = 'Нет данных';
+    host.appendChild(err);
+  }
 })();
 
 // WS live new signal
