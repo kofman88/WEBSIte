@@ -654,6 +654,20 @@ db.exec(`
   CREATE INDEX IF NOT EXISTS idx_email_bounces_email ON email_bounces(email, suppressed);
 `);
 
+// Run versioned migrations AFTER the idempotent legacy schema has been
+// applied. This way the migrations table only tracks changes authored
+// since the framework was introduced; the legacy blocks stay as the
+// baseline and remain safe on re-run.
+try {
+  const migrations = require('./migrations');
+  migrations.run(db);
+} catch (e) {
+  // Loud failure — we don't want the app to come up with a half-migrated DB.
+  // eslint-disable-next-line no-console
+  console.error('[FATAL] migration failure:', e.message);
+  throw e;
+}
+
 // Graceful shutdown — make sure WAL is merged back
 function close() {
   try {
