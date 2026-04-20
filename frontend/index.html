@@ -206,6 +206,10 @@
     footer a:hover{color:#fff}
 
     /* ── Modal ── */
+    /* ── Auth-state nav toggle ── */
+    body.is-authed .auth-guest{display:none!important}
+    body.is-authed .auth-user{display:inline-flex!important}
+
     /* ── Premium modal (Stripe/Linear-style 2-column) ── */
     .modal-bg{position:fixed;inset:0;background:rgba(4,6,14,.78);-webkit-backdrop-filter:blur(20px) saturate(1.2);backdrop-filter:blur(20px) saturate(1.2);z-index:100;display:none;align-items:center;justify-content:center;padding:24px;opacity:0;transition:opacity .28s cubic-bezier(.16,1,.3,1)}
     .modal-bg.active{display:flex;opacity:1}
@@ -356,8 +360,12 @@
     <div class="flex items-center gap-3">
       <button onclick="toggleLang()" class="pill pill-ghost pill-sm" id="langBtn" aria-label="Toggle language">EN</button>
       <button onclick="toggleTheme()" class="chip" id="themeBtn" title="Toggle theme" aria-label="Toggle theme"><iconify-icon icon="solar:moon-linear"></iconify-icon></button>
-      <button type="button" data-open-modal="login" class="nav-link hidden sm:inline-block" id="loginBtn" data-t="nav-login" style="background:none;border:none;cursor:pointer;font:inherit">Войти</button>
-      <button type="button" data-open-modal="register" class="pill pill-primary pill-sm" data-t="nav-start">Регистрация</button>
+      <button type="button" data-open-modal="login" class="nav-link hidden sm:inline-block auth-guest" id="loginBtn" data-t="nav-login" style="background:none;border:none;cursor:pointer;font:inherit">Войти</button>
+      <button type="button" data-open-modal="register" class="pill pill-primary pill-sm auth-guest" data-t="nav-start">Регистрация</button>
+      <a href="dashboard.html" class="pill pill-primary pill-sm auth-user" data-t="nav-cabinet" style="display:none;align-items:center;gap:6px">
+        <iconify-icon icon="solar:widget-2-linear" style="font-size:14px"></iconify-icon>
+        Дашборд
+      </a>
     </div>
   </div>
 </nav>
@@ -959,7 +967,7 @@ document.getElementById('registerForm')?.addEventListener('submit',async e=>{
 // ── i18n ──
 let lang=(localStorage.getItem('chm_lang')||'ru');
 const TR={
-  'nav-feat':{ru:'Возможности',en:'Features'},'nav-price':{ru:'Тарифы',en:'Pricing'},'nav-how':{ru:'Как работает',en:'How It Works'},'nav-community':{ru:'Сообщество',en:'Community'},'nav-faq':{ru:'FAQ',en:'FAQ'},'nav-academy':{ru:'Академия',en:'Academy'},'nav-login':{ru:'Войти',en:'Login'},'nav-start':{ru:'Регистрация',en:'Sign Up'},'nav-cabinet':{ru:'Кабинет',en:'Dashboard'},
+  'nav-feat':{ru:'Возможности',en:'Features'},'nav-price':{ru:'Тарифы',en:'Pricing'},'nav-how':{ru:'Как работает',en:'How It Works'},'nav-community':{ru:'Сообщество',en:'Community'},'nav-faq':{ru:'FAQ',en:'FAQ'},'nav-academy':{ru:'Академия',en:'Academy'},'nav-login':{ru:'Войти',en:'Login'},'nav-start':{ru:'Регистрация',en:'Sign Up'},'nav-cabinet':{ru:'Дашборд',en:'Dashboard'},
   'hero-badge':{ru:'AI-Powered Крипто Платформа',en:'AI-Powered Crypto Platform'},
   'hero-h1a':{ru:'Торгуй умнее.',en:'Trade Smarter.'},'hero-h1b':{ru:'Зарабатывай больше.',en:'Earn More.'},
   'hero-sub':{ru:'Автоматические торговые сигналы и боты для Bybit, Binance, BingX и OKX. Стратегии SMC, Герчика и скальпинг с AI-аналитикой.',en:'Automated trading signals and bots for Bybit, Binance, BingX and OKX. SMC, Gerchik and scalping strategies with AI analytics.'},
@@ -1128,7 +1136,9 @@ function pickPlan(plan){
   try{localStorage.setItem('chm_pending_plan',plan)}catch(e){}
   openModal('register');return false;
 }
-(function(){try{if(_loggedIn()){const b=document.getElementById('loginBtn');if(b){b.setAttribute('data-t','nav-cabinet');b.textContent=(lang==='ru'?'Кабинет':'Dashboard')}}}catch(e){}})();
+// Toggle nav: hide "Войти / Регистрация" and show single "Дашборд" pill when authed.
+// CSS class on <body> drives the swap via .auth-guest / .auth-user rules.
+(function(){try{document.body.classList.toggle('is-authed',_loggedIn())}catch(_){}})();
 
 // ── Theme toggle ──
 function toggleTheme(){
