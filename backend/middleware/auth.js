@@ -149,6 +149,31 @@ const exchangeKeyLimiter = TESTING ? noop : rateLimit({
   keyGenerator: (req) => (req.userId ? 'u:' + req.userId : 'ip:' + req.ip),
 });
 
+// Per-plan rate limit. Usage: router.post('/heavy', authMiddleware,
+// tierLimiter({ free: 20, starter: 60, pro: 300, elite: 1200 }, '1m'), ...);
+// The window string accepts "1m" / "10s" / "1h".
+function tierLimiter(caps, windowStr = '1m') {
+  if (TESTING) return noop;
+  const m = /^(\d+)([smh])$/.exec(String(windowStr));
+  const windowMs = m ? Number(m[1]) * ({ s: 1000, m: 60_000, h: 3_600_000 }[m[2]]) : 60_000;
+  const limiters = {};
+  for (const plan of Object.keys(caps)) {
+    limiters[plan] = rateLimit({
+      windowMs, max: caps[plan],
+      message: { error: `Rate limit for plan "${plan}" hit — upgrade or wait`, code: 'RATE_LIMITED_TIER', plan },
+      standardHeaders: true, legacyHeaders: false,
+      keyGenerator: (req) => (req.userId ? 'u:' + req.userId : 'ip:' + req.ip),
+      skip: (req) => Boolean(req.isAdmin), // admins bypass product limits
+    });
+  }
+  return (req, res, next) => {
+    const plan = req.userPlan || 'free';
+    const lim = limiters[plan] || limiters.free;
+    if (!lim) return next();
+    return lim(req, res, next);
+  };
+}
+
 module.exports = {
   authMiddleware,
   requireTier,
@@ -159,4 +184,5 @@ module.exports = {
   passwordResetLimiter,
   twoFactorLimiter,
   exchangeKeyLimiter,
+  tierLimiter,
 };
