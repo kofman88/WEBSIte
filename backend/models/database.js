@@ -570,6 +570,21 @@ db.exec(`
     event_type  TEXT,
     processed_at DATETIME DEFAULT CURRENT_TIMESTAMP
   );
+
+  -- Web Push subscriptions (VAPID). One user can have many subscriptions,
+  -- one per browser-profile / device. endpoint is the unique key because
+  -- it's what the push service uses.
+  CREATE TABLE IF NOT EXISTS push_subscriptions (
+    id          INTEGER PRIMARY KEY AUTOINCREMENT,
+    user_id     INTEGER NOT NULL,
+    endpoint    TEXT NOT NULL UNIQUE,
+    p256dh      TEXT NOT NULL,
+    auth        TEXT NOT NULL,
+    user_agent  TEXT,
+    created_at  DATETIME DEFAULT CURRENT_TIMESTAMP,
+    last_used_at DATETIME,
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+  );
 `);
 
 // ── INDEXES ──────────────────────────────────────────────────────────────
@@ -624,6 +639,7 @@ db.exec(`
   CREATE INDEX IF NOT EXISTS idx_wallet_tx_status ON wallet_transactions(status, type);
   CREATE INDEX IF NOT EXISTS idx_wallets_user ON wallets(user_id);
   CREATE INDEX IF NOT EXISTS idx_stripe_webhooks_processed ON stripe_webhooks(processed_at);
+  CREATE INDEX IF NOT EXISTS idx_push_subs_user ON push_subscriptions(user_id);
 `);
 
 // Graceful shutdown — make sure WAL is merged back

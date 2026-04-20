@@ -27,6 +27,7 @@ const analyticsRoutes = require('./routes/analytics');
 const webhooksRoutes = require('./routes/webhooks');
 const publicRoutes = require('./routes/public');
 const supportRoutes = require('./routes/support');
+const pushRoutes = require('./routes/push');
 const websocketService = require('./services/websocketService');
 const autoTradeService = require('./services/autoTradeService');
 const partialTpManager = require('./services/partialTpManager');
@@ -116,6 +117,7 @@ app.use('/api/analytics', analyticsRoutes);
 app.use('/api/webhooks', webhooksRoutes);
 app.use('/api/public', publicRoutes);
 app.use('/api/support', supportRoutes);
+app.use('/api/push', pushRoutes);
 
 app.get('/api/health', (_req, res) => {
   // Lightweight liveness probe.

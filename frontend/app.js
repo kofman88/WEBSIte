@@ -293,6 +293,11 @@ const API = {
   adminImpersonate: (id, reason) => apiRequest('POST', '/admin/users/' + id + '/impersonate', { reason }),
   adminListRoles: () => apiRequest('GET', '/admin/roles'),
   adminSetUserRole: (id, role) => apiRequest('PATCH', '/admin/users/' + id + '/admin-role', { role }),
+
+  pushVapidKey: () => apiRequest('GET', '/push/vapid-key', null, { skipAuth: true }),
+  pushSubscribe: (subscription) => apiRequest('POST', '/push/subscribe', { subscription }),
+  pushUnsubscribe: (endpoint) => apiRequest('POST', '/push/unsubscribe', { endpoint }),
+  pushTest: () => apiRequest('POST', '/push/test'),
 };
 
 function saveAuthResp(data) {

@@ -106,6 +106,15 @@ async function dispatch(userId, opts) {
       .catch((err) => logger.warn('telegram dispatch failed', { userId, type, err: err.message }));
   }
 
+  // 4. Web Push (best-effort; silently no-op if VAPID isn't configured)
+  try {
+    const push = require('./pushService');
+    if (push.isEnabled()) {
+      push.sendToUser(userId, { title, body: body || '', url: link || '/dashboard.html', tag: type })
+        .catch((err) => logger.warn('push dispatch failed', { userId, type, err: err.message }));
+    }
+  } catch (_e) { /* web-push not installed */ }
+
   return { dispatched: true };
 }
 

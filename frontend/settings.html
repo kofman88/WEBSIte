@@ -157,6 +157,20 @@
       </div>
       <button id="savePrefsBtn" class="mt-4 px-5 py-2 rounded-xl font-semibold text-white text-sm" style="background:linear-gradient(180deg,#2A5BE8 0%,#1D4ED8 60%,#143797 100%)">Сохранить</button>
     </div>
+
+    <div class="card max-w-2xl mt-6">
+      <div class="flex items-start gap-3 mb-2">
+        <div class="w-10 h-10 rounded-lg bg-indigo-500/10 flex items-center justify-center shrink-0">
+          <iconify-icon icon="solar:bell-bing-linear" style="color:#5C80E3;font-size:20px"></iconify-icon>
+        </div>
+        <div class="flex-1">
+          <h3 class="font-bold mb-1">Push-уведомления</h3>
+          <div id="pushStatus" class="text-sm text-slate-400">Проверяем поддержку…</div>
+        </div>
+        <button id="pushToggleBtn" class="text-sm px-4 py-2 rounded-lg bg-indigo-500/10 border border-indigo-500/30 text-indigo-400 hover:bg-indigo-500/20 shrink-0 hidden">Включить</button>
+      </div>
+      <button id="pushTestBtn" class="text-xs text-slate-500 hover:text-white hidden mt-2">Отправить тестовое уведомление</button>
+    </div>
   </div>
 
   <!-- SECURITY -->
@@ -888,7 +902,103 @@ async function openTicket(id){
 }
 function closeTicketDetail(){ document.getElementById('ticketDetailModal').style.display='none'; _currentTicketId=null; loadTickets(); }
 
+// ── Web Push ──────────────────────────────────────────────────────────
+const Push = (() => {
+  const $status = () => document.getElementById('pushStatus');
+  const $btn = () => document.getElementById('pushToggleBtn');
+  const $test = () => document.getElementById('pushTestBtn');
+
+  function supported() {
+    return 'serviceWorker' in navigator && 'PushManager' in window && 'Notification' in window;
+  }
+  function urlB64ToUint8Array(base64) {
+    const padding = '='.repeat((4 - base64.length % 4) % 4);
+    const b64 = (base64 + padding).replace(/-/g, '+').replace(/_/g, '/');
+    const raw = atob(b64);
+    const out = new Uint8Array(raw.length);
+    for (let i = 0; i < raw.length; i++) out[i] = raw.charCodeAt(i);
+    return out;
+  }
+
+  async function status() {
+    if (!supported()) {
+      $status().textContent = 'Браузер не поддерживает push-уведомления';
+      return;
+    }
+    try {
+      const reg = await navigator.serviceWorker.getRegistration();
+      const sub = reg ? await reg.pushManager.getSubscription() : null;
+      const perm = Notification.permission;
+      if (perm === 'denied') {
+        $status().innerHTML = 'Заблокировано в настройках браузера. <a href="https://support.google.com/chrome/answer/3220216" target="_blank" class="text-indigo-400">Как разрешить</a>.';
+        $btn().classList.add('hidden');
+        return;
+      }
+      if (sub) {
+        $status().textContent = 'Включены · ' + (navigator.userAgent.slice(0, 60)) + '…';
+        $btn().textContent = 'Выключить';
+        $btn().classList.remove('hidden');
+        $test().classList.remove('hidden');
+      } else {
+        $status().textContent = 'Выключены. Включи, чтобы получать уведомления о сделках / сигналах / безопасности.';
+        $btn().textContent = 'Включить';
+        $btn().classList.remove('hidden');
+        $test().classList.add('hidden');
+      }
+    } catch (e) { $status().textContent = 'Ошибка: ' + e.message; }
+  }
+
+  async function enable() {
+    if (!supported()) return Toast.error('Не поддерживается браузером');
+    try {
+      const vapid = await API.pushVapidKey();
+      if (!vapid.publicKey) { Toast.error('Push не настроен на сервере'); return; }
+      const perm = await Notification.requestPermission();
+      if (perm !== 'granted') { Toast.warn('Разрешение не получено'); return status(); }
+      const reg = await navigator.serviceWorker.register('/sw.js');
+      await navigator.serviceWorker.ready;
+      const sub = await reg.pushManager.subscribe({
+        userVisibleOnly: true,
+        applicationServerKey: urlB64ToUint8Array(vapid.publicKey),
+      });
+      await API.pushSubscribe(sub.toJSON());
+      Toast.success('Push включён');
+      status();
+    } catch (e) { Toast.error(e.message || 'Ошибка'); }
+  }
+
+  async function disable() {
+    try {
+      const reg = await navigator.serviceWorker.getRegistration();
+      const sub = reg ? await reg.pushManager.getSubscription() : null;
+      if (sub) {
+        await API.pushUnsubscribe(sub.endpoint).catch(() => {});
+        await sub.unsubscribe();
+      }
+      Toast.success('Push выключен');
+      status();
+    } catch (e) { Toast.error(e.message || 'Ошибка'); }
+  }
+
+  async function test() {
+    try { await API.pushTest(); Toast.success('Отправлено — проверь уведомления'); }
+    catch (e) { Toast.error(e.message || 'Ошибка'); }
+  }
+
+  return { status, enable, disable, test, supported };
+})();
+
 document.addEventListener('DOMContentLoaded', () => {
+  Push.status();
+  const pb = document.getElementById('pushToggleBtn');
+  if (pb) pb.addEventListener('click', () => {
+    if (pb.textContent.trim().startsWith('В')) {
+      if (pb.textContent.trim() === 'Включить') Push.enable(); else Push.disable();
+    }
+  });
+  const pt = document.getElementById('pushTestBtn');
+  if (pt) pt.addEventListener('click', () => Push.test());
+
   const eb = document.getElementById('exportDataBtn');
   if (eb) eb.addEventListener('click', async () => {
     if (!confirm('Скачать ZIP / JSON со всеми вашими данными (профиль, сделки, платежи, логины, тикеты)? Это может занять до 30 секунд.')) return;
