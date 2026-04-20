@@ -82,11 +82,20 @@ async function dispatch(userId, opts) {
 
   // 2. Email (verified + not opted out + master switch on)
   if (emailOn && user.email_verified && prefs.email[type] !== false) {
+    // Caller may override with a fully-rendered template via opts.template.
+    // Otherwise fall back to the generic branded shell.
+    let emailPayload;
+    if (opts.template) {
+      emailPayload = opts.template;
+    } else {
+      const tpl = require('./emailTemplates');
+      emailPayload = tpl.generic({ title, body, link });
+    }
     emailService.send({
       to: user.email,
-      subject: title,
-      text: body || title,
-      html: emailHtml || fallbackEmailHtml(title, body, link),
+      subject: emailPayload.subject || title,
+      text: emailPayload.text || body || title,
+      html: emailHtml || emailPayload.html || fallbackEmailHtml(title, body, link),
     }).catch((err) => logger.warn('email dispatch failed', { userId, type, err: err.message }));
   }
 

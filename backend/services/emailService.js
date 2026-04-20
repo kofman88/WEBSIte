@@ -83,26 +83,22 @@ function baseHtml(title, body, cta) {
 }
 function escape(s){return String(s).replace(/[&<>"']/g,c=>({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'})[c])}
 
-function sendVerification(to, token) {
-  const url = `${appUrl()}/verify-email.html?token=${encodeURIComponent(token)}`;
-  return send({
-    to, subject: 'Подтвердите email — CHM Finance',
-    text: `Подтвердите email: ${url}\n\nСсылка действует 24 часа.`,
-    html: baseHtml('Подтвердите email',
-      'Нажмите кнопку, чтобы подтвердить регистрацию на CHM Finance. Ссылка действительна 24 часа.',
-      { url, label: 'Подтвердить email' }),
+function sendVerification(to, token, { displayName } = {}) {
+  const templates = require('./emailTemplates');
+  const t = templates.emailVerify({
+    displayName,
+    verifyUrl: `${appUrl()}/verify-email.html?token=${encodeURIComponent(token)}`,
   });
+  return send({ to, subject: t.subject, text: t.text, html: t.html });
 }
 
-function sendPasswordReset(to, token) {
-  const url = `${appUrl()}/?reset=${encodeURIComponent(token)}`;
-  return send({
-    to, subject: 'Восстановление пароля — CHM Finance',
-    text: `Ссылка для сброса пароля: ${url}\n\nДействует 1 час. Если вы не запрашивали — проигнорируйте.`,
-    html: baseHtml('Восстановление пароля',
-      'Вы запросили сброс пароля. Ссылка действует 1 час. Если это были не вы — просто проигнорируйте письмо.',
-      { url, label: 'Установить новый пароль' }),
+function sendPasswordReset(to, token, { displayName, ipAddress } = {}) {
+  const templates = require('./emailTemplates');
+  const t = templates.passwordReset({
+    displayName, ipAddress,
+    resetUrl: `${appUrl()}/?reset=${encodeURIComponent(token)}`,
   });
+  return send({ to, subject: t.subject, text: t.text, html: t.html });
 }
 
 function sendTradeAlert(to, { symbol, side, pnl, status }) {
