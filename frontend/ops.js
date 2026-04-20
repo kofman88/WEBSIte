@@ -826,6 +826,11 @@
   async function loadAudit() {
     const pane = document.getElementById('pane-audit');
     pane.innerHTML = `
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-3 mb-4">
+        <div class="ops-card"><div class="kpi-label mb-2">Activity · last 14d</div><div style="position:relative;height:160px"><canvas id="auChartDay"></canvas></div></div>
+        <div class="ops-card"><div class="kpi-label mb-2">By category</div><div id="auByCat" style="font-size:12px"></div></div>
+        <div class="ops-card"><div class="kpi-label mb-2">Top admins</div><div id="auByActor" style="font-size:12px"></div></div>
+      </div>
       <div class="ops-card mb-4" style="display:flex;gap:10px;align-items:center;flex-wrap:wrap">
         <input id="auF" class="ops-input" placeholder="Фильтр по действию (admin.user.plan, payment.refund, …)" value="${esc(_auditFilter)}" style="flex:1;min-width:240px"/>
         <button class="ops-btn" id="auR">Обновить</button>
@@ -839,6 +844,24 @@
     `;
     document.getElementById('auF').addEventListener('change', (e) => { _auditFilter = e.target.value.trim(); loadAudit(); });
     document.getElementById('auR').addEventListener('click', loadAudit);
+    // Background-render the three analytics tiles; don't block the table.
+    API.adminAuditAnalytics(14).then((ana) => {
+      const catBox = document.getElementById('auByCat');
+      if (catBox) catBox.innerHTML = (ana.byCategory || []).map((c) => `<div class="dl-pair"><span class="k">${esc(c.category || '—')}</span><span class="v">${c.n}</span></div>`).join('') || '<div class="text-xs text-slate-600">—</div>';
+      const actBox = document.getElementById('auByActor');
+      if (actBox) actBox.innerHTML = (ana.byActor || []).map((a) => `<div class="dl-pair"><span class="k mono text-xs" style="max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;display:inline-block">${esc(a.email)}</span><span class="v">${a.n}</span></div>`).join('') || '<div class="text-xs text-slate-600">—</div>';
+      const cv = document.getElementById('auChartDay');
+      if (cv && window.Chart) {
+        new Chart(cv, {
+          type: 'bar',
+          data: {
+            labels: (ana.byDay || []).map((d) => d.day.slice(5)),
+            datasets: [{ data: (ana.byDay || []).map((d) => d.n), backgroundColor: 'rgba(147,197,253,.55)', borderColor: '#60a5fa', borderWidth: 1, borderRadius: 4 }],
+          },
+          options: { responsive: true, maintainAspectRatio: false, animation: false, plugins: { legend: { display: false } }, scales: { x: { ticks: { color: 'rgba(255,255,255,.4)', font: { size: 10 } }, grid: { display: false } }, y: { ticks: { color: 'rgba(255,255,255,.4)', font: { size: 10 } }, grid: { color: 'rgba(255,255,255,.04)' } } } },
+        });
+      }
+    }).catch(() => {});
     try {
       const data = await API.adminAuditLog({ action: _auditFilter || undefined, limit: 300 });
       document.getElementById('auTb').innerHTML = (data.events || []).map((a) => `<tr>

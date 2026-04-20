@@ -714,6 +714,37 @@ function billingAnalytics() {
   };
 }
 
+/** Audit activity breakdown for the last N days. */
+function auditAnalytics({ days = 14 } = {}) {
+  const since = new Date(Date.now() - days * 86_400_000).toISOString();
+  // Per-day total
+  const byDay = db.prepare(`
+    SELECT DATE(created_at) AS day, COUNT(*) AS n
+    FROM audit_log WHERE created_at >= ?
+    GROUP BY DATE(created_at) ORDER BY DATE(created_at)
+  `).all(since);
+  // Per-action counts (top 20)
+  const byAction = db.prepare(`
+    SELECT action, COUNT(*) AS n FROM audit_log
+    WHERE created_at >= ?
+    GROUP BY action ORDER BY n DESC LIMIT 20
+  `).all(since);
+  // Per-actor counts (admins only; for daily staff activity)
+  const byActor = db.prepare(`
+    SELECT COALESCE(u.email, '(system)') AS email, COUNT(*) AS n
+    FROM audit_log a LEFT JOIN users u ON u.id = a.user_id
+    WHERE a.created_at >= ? AND a.action LIKE 'admin.%'
+    GROUP BY a.user_id ORDER BY n DESC LIMIT 20
+  `).all(since);
+  // Breakdown by action category (prefix before the first dot)
+  const byCategory = db.prepare(`
+    SELECT substr(action, 1, instr(action || '.', '.') - 1) AS category, COUNT(*) AS n
+    FROM audit_log WHERE created_at >= ?
+    GROUP BY category ORDER BY n DESC
+  `).all(since);
+  return { days, byDay, byAction, byActor, byCategory };
+}
+
 /** System health, DB size, worker state. */
 function systemInfo() {
   const out = { process: {}, db: {}, backups: {}, subsystems: {} };
@@ -771,5 +802,5 @@ module.exports = {
   listAllRewards,
   systemStats, auditLog,
   userDetail, listAllBots, listAllTrades, listAllSignals,
-  opsDashboard, systemInfo, revenueTimeseries, billingAnalytics,
+  opsDashboard, systemInfo, revenueTimeseries, billingAnalytics, auditAnalytics,
 };
