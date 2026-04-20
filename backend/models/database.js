@@ -574,6 +574,17 @@ db.exec(`
   -- Web Push subscriptions (VAPID). One user can have many subscriptions,
   -- one per browser-profile / device. endpoint is the unique key because
   -- it's what the push service uses.
+  -- Email bounce log for deliverability monitoring + suppression list.
+  CREATE TABLE IF NOT EXISTS email_bounces (
+    id           INTEGER PRIMARY KEY AUTOINCREMENT,
+    email        TEXT NOT NULL,
+    kind         TEXT NOT NULL CHECK (kind IN ('hard','soft','complaint')),
+    smtp_code    TEXT,
+    reason       TEXT,
+    suppressed   INTEGER NOT NULL DEFAULT 0,
+    created_at   DATETIME DEFAULT CURRENT_TIMESTAMP
+  );
+
   CREATE TABLE IF NOT EXISTS push_subscriptions (
     id          INTEGER PRIMARY KEY AUTOINCREMENT,
     user_id     INTEGER NOT NULL,
@@ -640,6 +651,7 @@ db.exec(`
   CREATE INDEX IF NOT EXISTS idx_wallets_user ON wallets(user_id);
   CREATE INDEX IF NOT EXISTS idx_stripe_webhooks_processed ON stripe_webhooks(processed_at);
   CREATE INDEX IF NOT EXISTS idx_push_subs_user ON push_subscriptions(user_id);
+  CREATE INDEX IF NOT EXISTS idx_email_bounces_email ON email_bounces(email, suppressed);
 `);
 
 // Graceful shutdown — make sure WAL is merged back
