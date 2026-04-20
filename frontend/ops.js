@@ -558,6 +558,54 @@
     }
   }
   loaders.payments = loadPayments;
+
+  // ── Billing analytics ─────────────────────────────────────────────────
+  async function loadBilling() {
+    const pane = document.getElementById('pane-billing');
+    pane.innerHTML = '<div class="text-center py-12 text-slate-500 text-sm">Загрузка…</div>';
+    try {
+      const d = await API.adminBillingAnalytics();
+      const churnPct = (d.churn.monthlyRate * 100).toFixed(2) + '%';
+      pane.innerHTML = `
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-3 mb-6">
+          <div class="ops-card kpi"><div class="kpi-label">LTV</div><div class="kpi-value mono">${money(d.ltv)}</div><div class="kpi-sub">Mature cohorts (≥6mo)</div></div>
+          <div class="ops-card kpi"><div class="kpi-label">ARPPU</div><div class="kpi-value mono">${money(d.arppu)}</div><div class="kpi-sub">Avg revenue per paying</div></div>
+          <div class="ops-card kpi"><div class="kpi-label">Paying users</div><div class="kpi-value mono">${d.payingUsers}</div></div>
+          <div class="ops-card kpi"><div class="kpi-label">Churn · 30d</div><div class="kpi-value mono">${churnPct}</div><div class="kpi-sub">${d.churn.churnedLast30d} lost</div></div>
+        </div>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+          <div class="ops-card">
+            <div class="kpi-label mb-3">Plan distribution</div>
+            ${d.planDistribution.map((p) => `<div class="dl-pair"><span class="k">${esc(p.plan)}</span><span class="v">${p.n}</span></div>`).join('')}
+          </div>
+          <div class="ops-card">
+            <div class="kpi-label mb-3">Churn detail</div>
+            <div class="dl-pair"><span class="k">Active now</span><span class="v">${d.churn.activeNow}</span></div>
+            <div class="dl-pair"><span class="k">Active 30d ago</span><span class="v">${d.churn.activeThirtyDaysAgo}</span></div>
+            <div class="dl-pair"><span class="k">Lost · 30d</span><span class="v">${d.churn.churnedLast30d}</span></div>
+            <div class="dl-pair"><span class="k">Monthly churn</span><span class="v">${churnPct}</span></div>
+          </div>
+        </div>
+        <div class="ops-card" style="padding:0;overflow:auto">
+          <table class="ops-table">
+            <thead><tr><th>Cohort</th><th>Members</th><th>Active MRR</th><th>Lifetime revenue</th><th>Avg / user</th></tr></thead>
+            <tbody>
+              ${d.cohorts.map((c) => `<tr>
+                <td class="mono">${esc(c.cohort)}</td>
+                <td class="mono">${c.members}</td>
+                <td class="mono text-green-400">${money(c.activeMrr)}</td>
+                <td class="mono">${money(c.lifetimeRev)}</td>
+                <td class="mono text-xs text-slate-500">${money(c.members ? c.lifetimeRev / c.members : 0)}</td>
+              </tr>`).join('') || '<tr><td colspan="5" class="text-center py-8 text-slate-500">Нет платящих пользователей</td></tr>'}
+            </tbody>
+          </table>
+        </div>
+      `;
+    } catch (e) {
+      pane.innerHTML = `<div class="text-center py-12 text-red-400 text-sm">${esc(e.message)}</div>`;
+    }
+  }
+  loaders.billing = loadBilling;
   window.Ops.confirmPay = async (id) => {
     if (!confirm('Подтвердить платёж вручную? Будет активирована подписка + начислена реф-комиссия.')) return;
     try { await API.adminConfirmPayment(id, 'manual'); Toast.success('Подтверждено'); loadPayments(); }

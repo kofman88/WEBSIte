@@ -160,6 +160,10 @@ router.get('/dashboard', (_req, res, next) => {
   try { res.json(admin.opsDashboard()); } catch (err) { handleErr(err, res, next); }
 });
 
+router.get('/billing-analytics', (_req, res, next) => {
+  try { res.json(admin.billingAnalytics()); } catch (err) { handleErr(err, res, next); }
+});
+
 router.get('/revenue-timeseries', (req, res, next) => {
   try {
     const q = z.object({ days: z.coerce.number().int().min(1).max(365).default(30) }).parse(req.query);

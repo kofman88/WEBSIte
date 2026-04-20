@@ -613,6 +613,107 @@ function revenueTimeseries({ days = 30 } = {}) {
   return out;
 }
 
+/**
+ * Billing analytics — cohort MRR, churn, LTV, ARPPU.
+ *
+ * Cohort: users bucketed by the month they first confirmed a payment.
+ * For each cohort, we report members + MRR (current month-over-month
+ * subscription worth of that cohort still active).
+ *
+ * Churn (monthly): subscriptions that went from active → free/expired
+ * in the last 30 days, divided by subscriptions active 30 days ago.
+ *
+ * LTV: mean lifetime revenue per paid user who has churned OR is > 6m old.
+ */
+function billingAnalytics() {
+  const PRICE = { free: 0, starter: 29, pro: 79, elite: 149 };
+  // Paid cohorts by first payment month
+  const cohorts = db.prepare(`
+    SELECT strftime('%Y-%m', MIN(created_at)) AS cohort, user_id
+    FROM payments WHERE status = 'confirmed'
+    GROUP BY user_id
+  `).all();
+  const byCohort = {};
+  for (const r of cohorts) {
+    const c = r.cohort;
+    if (!byCohort[c]) byCohort[c] = { cohort: c, users: [], members: 0, activeMrr: 0, lifetimeRev: 0 };
+    byCohort[c].users.push(r.user_id); byCohort[c].members += 1;
+  }
+  for (const c of Object.keys(byCohort)) {
+    const ids = byCohort[c].users;
+    if (!ids.length) continue;
+    const q = '(' + ids.map(() => '?').join(',') + ')';
+    const plans = db.prepare(`
+      SELECT s.plan FROM subscriptions s
+      WHERE s.user_id IN ${q} AND s.status = 'active'
+        AND (s.expires_at IS NULL OR s.expires_at > CURRENT_TIMESTAMP)
+    `).all(...ids);
+    byCohort[c].activeMrr = plans.reduce((sum, p) => sum + (PRICE[p.plan] || 0), 0);
+    const rev = db.prepare(`
+      SELECT COALESCE(SUM(amount_usd), 0) AS t FROM payments
+      WHERE status = 'confirmed' AND user_id IN ${q}
+    `).get(...ids).t;
+    byCohort[c].lifetimeRev = Number(rev) || 0;
+    delete byCohort[c].users;
+  }
+  const cohortList = Object.values(byCohort).sort((a, b) => a.cohort.localeCompare(b.cohort));
+
+  // Churn (monthly): subscriptions that rolled off paid in the last 30d
+  const thirtyAgo = new Date(Date.now() - 30 * 86_400_000).toISOString();
+  const activeNow = db.prepare(`
+    SELECT COUNT(*) AS n FROM subscriptions
+    WHERE status = 'active' AND plan != 'free'
+      AND (expires_at IS NULL OR expires_at > CURRENT_TIMESTAMP)
+  `).get().n;
+  // Approximation: "active 30d ago" = confirmed payments > 30d ago + still had paid plan
+  const activeThirtyAgo = db.prepare(`
+    SELECT COUNT(DISTINCT user_id) AS n FROM payments
+    WHERE status = 'confirmed' AND created_at <= ?
+  `).get(thirtyAgo).n;
+  const churned = db.prepare(`
+    SELECT COUNT(*) AS n FROM subscriptions
+    WHERE (status = 'expired' OR status = 'refunded' OR (plan = 'free' AND updated_at >= ?))
+      AND updated_at >= ?
+  `).get(thirtyAgo, thirtyAgo).n;
+  const churnRate = activeThirtyAgo > 0 ? churned / activeThirtyAgo : 0;
+
+  // LTV: mean lifetime revenue over "mature" cohorts (>=6 months old)
+  const cutoff = new Date(Date.now() - 180 * 86_400_000).toISOString();
+  const mature = db.prepare(`
+    SELECT user_id, COALESCE(SUM(amount_usd), 0) AS total
+    FROM payments
+    WHERE status = 'confirmed' AND user_id IN (
+      SELECT user_id FROM payments WHERE status = 'confirmed'
+      GROUP BY user_id HAVING MIN(created_at) <= ?
+    )
+    GROUP BY user_id
+  `).all(cutoff);
+  const ltv = mature.length ? mature.reduce((s, r) => s + Number(r.total), 0) / mature.length : 0;
+
+  // ARPPU: average revenue per paying user (lifetime)
+  const allPaid = db.prepare(`
+    SELECT user_id, COALESCE(SUM(amount_usd), 0) AS total
+    FROM payments WHERE status = 'confirmed' GROUP BY user_id
+  `).all();
+  const arppu = allPaid.length ? allPaid.reduce((s, r) => s + Number(r.total), 0) / allPaid.length : 0;
+
+  // Plan distribution across currently active subs
+  const planRows = db.prepare(`
+    SELECT plan, COUNT(*) AS n FROM subscriptions
+    WHERE status = 'active' AND (expires_at IS NULL OR expires_at > CURRENT_TIMESTAMP)
+    GROUP BY plan
+  `).all();
+
+  return {
+    cohorts: cohortList,
+    churn: { monthlyRate: Math.round(churnRate * 10000) / 10000, churnedLast30d: churned, activeNow, activeThirtyDaysAgo: activeThirtyAgo },
+    ltv: Math.round(ltv * 100) / 100,
+    arppu: Math.round(arppu * 100) / 100,
+    payingUsers: allPaid.length,
+    planDistribution: planRows,
+  };
+}
+
 /** System health, DB size, worker state. */
 function systemInfo() {
   const out = { process: {}, db: {}, backups: {}, subsystems: {} };
@@ -670,5 +771,5 @@ module.exports = {
   listAllRewards,
   systemStats, auditLog,
   userDetail, listAllBots, listAllTrades, listAllSignals,
-  opsDashboard, systemInfo, revenueTimeseries,
+  opsDashboard, systemInfo, revenueTimeseries, billingAnalytics,
 };
