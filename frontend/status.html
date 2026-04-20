@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+  <title>CHM Finance — Статус системы</title>
+  <meta name="description" content="Статус систем CHM Finance: API, БД, сканер сигналов, воркеры."/>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet"/>
+  <link rel="stylesheet" href="tailwind.css"/>
+  <link rel="stylesheet" href="styles.css"/>
+</head>
+<body style="background:#0A0A0A;color:#E5E5E5;font-family:'Inter',sans-serif;min-height:100vh">
+
+<header style="border-bottom:1px solid rgba(255,255,255,.06);padding:18px 24px">
+  <div style="max-width:1000px;margin:0 auto;display:flex;align-items:center;justify-content:space-between">
+    <a href="/" style="font-weight:600;font-size:22px;letter-spacing:-.02em;color:#fff;text-decoration:none">CHM<span style="color:#5C80E3">.</span></a>
+    <div class="flex items-center gap-3 text-sm">
+      <a href="/" class="text-slate-400 hover:text-white">Главная</a>
+      <a href="/leaderboard.html" class="text-slate-400 hover:text-white">Leaderboard</a>
+      <a href="/api-docs.html" class="text-slate-400 hover:text-white">API</a>
+    </div>
+  </div>
+</header>
+
+<main style="max-width:1000px;margin:0 auto;padding:48px 24px">
+  <div class="text-center mb-10">
+    <h1 class="text-3xl font-bold mb-2">Статус системы</h1>
+    <p class="text-slate-400 text-sm">Real-time состояние сервисов CHM Finance. Обновляется каждые 30 секунд.</p>
+  </div>
+
+  <div id="overall" class="card mb-6 text-center">
+    <div class="text-5xl mb-3" id="overallIcon">⋯</div>
+    <div class="text-xl font-semibold" id="overallText">Проверяем…</div>
+    <div class="text-xs text-slate-500 mt-1" id="overallMeta">—</div>
+  </div>
+
+  <div class="card mb-6">
+    <h2 class="text-sm font-semibold mb-4 text-slate-300 uppercase tracking-wider">Подсистемы</h2>
+    <div id="subs" class="space-y-3"></div>
+  </div>
+
+  <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+    <div class="card"><div class="text-xs text-slate-500">Версия</div><div class="text-lg font-mono mt-1" id="sVer">—</div></div>
+    <div class="card"><div class="text-xs text-slate-500">Uptime</div><div class="text-lg font-mono mt-1" id="sUp">—</div></div>
+    <div class="card"><div class="text-xs text-slate-500">Память RSS</div><div class="text-lg font-mono mt-1" id="sMem">—</div></div>
+    <div class="card"><div class="text-xs text-slate-500">Пользователей</div><div class="text-lg font-mono mt-1" id="sUsers">—</div></div>
+  </div>
+
+  <div class="text-center text-xs text-slate-500">
+    Последнее обновление: <span id="lastCheck">—</span> · <a href="/api/health/deep" class="text-indigo-400 hover:underline" target="_blank">RAW JSON</a>
+  </div>
+</main>
+
+<script src="app.js"></script>
+<script>
+function fmtUptime(s){
+  if(!s) return '0s';
+  const d=Math.floor(s/86400), h=Math.floor((s%86400)/3600), m=Math.floor((s%3600)/60);
+  if(d>0) return d+'d '+h+'h';
+  if(h>0) return h+'h '+m+'m';
+  return m+'m '+(s%60)+'s';
+}
+function escHtml(s){return String(s||'').replace(/[&<>"']/g,(c)=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
+
+async function check(){
+  try{
+    const r = await fetch('/api/health/deep');
+    const d = await r.json();
+    renderOverall(d.status);
+    document.getElementById('sVer').textContent = d.version || '—';
+    document.getElementById('sUp').textContent = fmtUptime(d.uptimeSeconds || 0);
+    document.getElementById('sMem').textContent = (d.memoryMb || 0) + ' MB';
+    document.getElementById('sUsers').textContent = (d.subsystems && d.subsystems.database && d.subsystems.database.userCount) || '—';
+    const subs = d.subsystems || {};
+    const labels = { database:'База данных', scanner:'Сканер сигналов', partialTp:'Partial TP менеджер', slVerifier:'SL Verifier' };
+    document.getElementById('subs').innerHTML = Object.keys(subs).map((k)=>{
+      const s=subs[k]; const ok=s && s.ok;
+      return `<div class="flex items-center justify-between py-2 border-b border-slate-800/50 last:border-0">
+        <div class="flex items-center gap-3">
+          <div class="w-2 h-2 rounded-full ${ok?'bg-green-400 animate-pulse':'bg-red-500'}"></div>
+          <span class="text-slate-300 font-medium">${escHtml(labels[k]||k)}</span>
+        </div>
+        <span class="text-xs font-mono ${ok?'text-green-400':'text-red-400'}">${ok?'Operational':'Degraded'}</span>
+      </div>`;
+    }).join('');
+  } catch(e){
+    renderOverall('down');
+    document.getElementById('subs').innerHTML = '<div class="text-center text-red-400 py-4">Не удалось получить статус (API недоступен)</div>';
+  }
+  document.getElementById('lastCheck').textContent = new Date().toLocaleTimeString('ru-RU');
+}
+
+function renderOverall(status){
+  const ic=document.getElementById('overallIcon'), tx=document.getElementById('overallText'), meta=document.getElementById('overallMeta');
+  if(status==='ok'){ ic.textContent='✓'; ic.className='text-5xl mb-3 text-green-400'; tx.textContent='Все системы работают'; meta.textContent='All systems operational'; }
+  else if(status==='degraded'){ ic.textContent='⚠'; ic.className='text-5xl mb-3 text-yellow-400'; tx.textContent='Частичные сбои'; meta.textContent='Degraded performance'; }
+  else { ic.textContent='✕'; ic.className='text-5xl mb-3 text-red-400'; tx.textContent='Сбой системы'; meta.textContent='Service unavailable'; }
+}
+
+check();
+setInterval(check, 30000);
+</script>
+</body>
+</html>

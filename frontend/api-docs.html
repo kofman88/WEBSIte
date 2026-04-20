@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+  <title>CHM Finance — API Documentation</title>
+  <meta name="description" content="Публичная API-документация CHM Finance: endpoints для рейтинга, публичных профилей, статуса."/>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&family=JetBrains+Mono:wght@500&display=swap" rel="stylesheet"/>
+  <link rel="stylesheet" href="tailwind.css"/>
+  <link rel="stylesheet" href="styles.css"/>
+  <style>
+    .mono{font-family:'JetBrains Mono',monospace}
+    .method{display:inline-block;min-width:60px;text-align:center;font-size:11px;font-weight:600;padding:3px 8px;border-radius:4px;letter-spacing:.05em}
+    .m-get{background:rgba(34,197,94,.15);color:#4ade80}
+    .m-post{background:rgba(59,130,246,.15);color:#60a5fa}
+    .m-put{background:rgba(234,179,8,.15);color:#facc15}
+    .m-del{background:rgba(239,68,68,.15);color:#f87171}
+    pre{background:rgba(0,0,0,.4);border:1px solid rgba(255,255,255,.06);border-radius:8px;padding:12px 14px;overflow-x:auto;font-size:12px;line-height:1.55}
+    pre code{color:#cbd5e1}
+    .endpoint{padding:18px;border:1px solid rgba(255,255,255,.06);border-radius:12px;background:rgba(255,255,255,.02);margin-bottom:14px}
+    .endpoint h3{font-size:14px;font-weight:600;color:#fff;margin-bottom:6px}
+    .endpoint p.desc{font-size:13px;color:#94a3b8;margin-bottom:12px}
+    .param-name{color:#facc15}.param-req{color:#f87171;font-size:10px;margin-left:4px}
+    .toc a{display:block;padding:4px 0;color:#94a3b8;font-size:13px}.toc a:hover{color:#fff}
+  </style>
+</head>
+<body style="background:#0A0A0A;color:#E5E5E5;font-family:'Inter',sans-serif;min-height:100vh">
+
+<header style="border-bottom:1px solid rgba(255,255,255,.06);padding:18px 24px">
+  <div style="max-width:1100px;margin:0 auto;display:flex;align-items:center;justify-content:space-between">
+    <a href="/" style="font-weight:600;font-size:22px;letter-spacing:-.02em;color:#fff;text-decoration:none">CHM<span style="color:#5C80E3">.</span></a>
+    <div class="flex items-center gap-3 text-sm">
+      <a href="/" class="text-slate-400 hover:text-white">Главная</a>
+      <a href="/leaderboard.html" class="text-slate-400 hover:text-white">Leaderboard</a>
+      <a href="/status.html" class="text-slate-400 hover:text-white">Статус</a>
+    </div>
+  </div>
+</header>
+
+<main style="max-width:1100px;margin:0 auto;padding:48px 24px">
+  <div class="text-center mb-10">
+    <h1 class="text-3xl font-bold mb-2">API Documentation</h1>
+    <p class="text-slate-400 text-sm" style="max-width:600px;margin:0 auto">Публичные endpoint'ы CHM Finance. Все ответы в JSON. Rate-limit: 300 запросов / 15 минут на IP.</p>
+  </div>
+
+  <div class="grid md:grid-cols-[200px_1fr] gap-8">
+    <aside class="toc" style="position:sticky;top:20px;align-self:start">
+      <div class="text-xs text-slate-500 uppercase tracking-wider mb-2">Разделы</div>
+      <a href="#base">Базовый URL</a>
+      <a href="#auth">Авторизация</a>
+      <a href="#health">Health checks</a>
+      <a href="#public">Публичные endpoints</a>
+      <a href="#leaderboard">Leaderboard</a>
+      <a href="#profile">Public profile</a>
+      <a href="#errors">Ошибки</a>
+      <a href="#ratelimits">Rate limits</a>
+    </aside>
+
+    <section>
+      <div class="card mb-6" id="base">
+        <h2 class="text-lg font-semibold mb-2">Базовый URL</h2>
+        <pre><code>https://chmup.top/api</code></pre>
+        <p class="text-xs text-slate-500 mt-3">Все запросы должны использовать HTTPS. HTTP запросы получают 301-редирект.</p>
+      </div>
+
+      <div class="card mb-6" id="auth">
+        <h2 class="text-lg font-semibold mb-2">Авторизация</h2>
+        <p class="text-sm text-slate-400 mb-3">Публичные endpoints (<span class="mono text-indigo-300">/api/public/*</span>, <span class="mono text-indigo-300">/api/health*</span>) не требуют токена.</p>
+        <p class="text-sm text-slate-400 mb-3">Приватные endpoints ожидают JWT в заголовке:</p>
+        <pre><code>Authorization: Bearer &lt;access_token&gt;</code></pre>
+        <p class="text-xs text-slate-500 mt-3">Access-токен получается через <span class="mono">/api/auth/login</span> и живёт 15 минут. Обновляется через <span class="mono">/api/auth/refresh</span>.</p>
+      </div>
+
+      <div class="card mb-6" id="health">
+        <h2 class="text-lg font-semibold mb-4">Health checks</h2>
+        <div class="endpoint">
+          <h3><span class="method m-get">GET</span> <span class="mono">/api/health</span></h3>
+          <p class="desc">Liveness probe. Возвращает 200 пока процесс жив.</p>
+          <pre><code>{
+  "status": "ok",
+  "timestamp": "2026-04-20T10:00:00.000Z",
+  "version": "3.0.0"
+}</code></pre>
+        </div>
+        <div class="endpoint">
+          <h3><span class="method m-get">GET</span> <span class="mono">/api/health/deep</span></h3>
+          <p class="desc">Readiness probe. Проверяет БД, воркеры. Возвращает 503 при деградации.</p>
+          <pre><code>{
+  "status": "ok",
+  "version": "3.0.0",
+  "uptimeSeconds": 86400,
+  "memoryMb": 128,
+  "subsystems": {
+    "database":   { "ok": true, "userCount": 42 },
+    "scanner":    { "ok": true },
+    "partialTp":  { "ok": true },
+    "slVerifier": { "ok": true }
+  }
+}</code></pre>
+        </div>
+      </div>
+
+      <div class="card mb-6" id="public">
+        <h2 class="text-lg font-semibold mb-4" id="leaderboard">Публичный Leaderboard</h2>
+        <div class="endpoint">
+          <h3><span class="method m-get">GET</span> <span class="mono">/api/public/leaderboard</span></h3>
+          <p class="desc">Топ трейдеров по закрытым сделкам. Только opted-in пользователи (<span class="mono">users.public_profile=1</span>).</p>
+          <p class="text-xs text-slate-400 mb-2 font-semibold">Query-параметры:</p>
+          <ul class="text-xs text-slate-400 mb-3 pl-4">
+            <li>• <span class="param-name mono">period</span> — <span class="mono">7d | 30d | 90d | 1y | all</span> (default: <span class="mono">30d</span>)</li>
+            <li>• <span class="param-name mono">sort</span> — <span class="mono">pnl | roi | winrate | sharpe</span> (default: <span class="mono">pnl</span>)</li>
+            <li>• <span class="param-name mono">limit</span> — 1..200 (default: <span class="mono">50</span>)</li>
+          </ul>
+          <p class="text-xs text-slate-400 mb-2 font-semibold">Пример:</p>
+          <pre><code>curl https://chmup.top/api/public/leaderboard?period=30d&sort=pnl&limit=10</code></pre>
+          <p class="text-xs text-slate-400 mt-3 mb-2 font-semibold">Ответ:</p>
+          <pre><code>{
+  "period": "30d",
+  "sort": "pnl",
+  "traders": [{
+    "rank": 1,
+    "displayName": "Trader#A1B2",
+    "referralCode": "A1B2C3D4",
+    "closedTrades": 47,
+    "wins": 34,
+    "losses": 13,
+    "winRate": 0.7234,
+    "totalPnl": 3180.50,
+    "roi": 12.45,
+    "sharpe": null
+  }]
+}</code></pre>
+          <p class="text-xs text-slate-500 mt-2">Примечания: <span class="mono">winrate</span> / <span class="mono">sharpe</span> сортировки требуют минимум 10 закрытых сделок.</p>
+        </div>
+
+        <h2 class="text-lg font-semibold mb-4 mt-6" id="profile">Публичный профиль</h2>
+        <div class="endpoint">
+          <h3><span class="method m-get">GET</span> <span class="mono">/api/public/u/:code</span></h3>
+          <p class="desc">Публичная статистика трейдера по его referral-коду. Возвращает 404 для приватных профилей.</p>
+          <p class="text-xs text-slate-400 mb-2 font-semibold">Путь-параметры:</p>
+          <ul class="text-xs text-slate-400 mb-3 pl-4">
+            <li>• <span class="param-name mono">code</span> — referral-код (4–12 символов, A-Z0-9), case-insensitive<span class="param-req">required</span></li>
+          </ul>
+          <p class="text-xs text-slate-400 mb-2 font-semibold">Пример:</p>
+          <pre><code>curl https://chmup.top/api/public/u/A1B2C3D4</code></pre>
+          <p class="text-xs text-slate-400 mt-3 mb-2 font-semibold">Ответ:</p>
+          <pre><code>{
+  "displayName": "Алексей К.",
+  "referralCode": "A1B2C3D4",
+  "joinedAt": "2025-11-01T12:00:00.000Z",
+  "stats": {
+    "closedTrades": 47,
+    "wins": 34,
+    "losses": 13,
+    "winRate": 0.7234,
+    "totalPnl": 3180.50,
+    "meanPnlPct": 2.1
+  },
+  "byStrategy": [
+    { "strategy": "smc", "trades": 30, "pnl": 2500, "winRate": 0.8 }
+  ],
+  "recent": [
+    { "symbol": "BTC/USDT", "side": "long", "strategy": "smc", "pnlPct": 3.4, "closedAt": "..." }
+  ]
+}</code></pre>
+        </div>
+      </div>
+
+      <div class="card mb-6" id="errors">
+        <h2 class="text-lg font-semibold mb-4">Ошибки</h2>
+        <p class="text-sm text-slate-400 mb-3">Все ошибки следуют единому формату:</p>
+        <pre><code>{
+  "error": "Validation failed",
+  "code": "VALIDATION_ERROR",
+  "issues": [{ "path": "email", "message": "Invalid email" }]
+}</code></pre>
+        <table class="w-full text-sm mt-4">
+          <thead><tr class="text-xs text-slate-500 uppercase"><th class="text-left py-2">HTTP</th><th class="text-left py-2">Код</th><th class="text-left py-2">Значение</th></tr></thead>
+          <tbody class="text-xs">
+            <tr class="border-t border-slate-800/50"><td class="py-2 mono">400</td><td class="py-2 mono text-yellow-400">VALIDATION_ERROR</td><td class="py-2 text-slate-400">Неверные параметры запроса</td></tr>
+            <tr class="border-t border-slate-800/50"><td class="py-2 mono">401</td><td class="py-2 mono text-yellow-400">UNAUTHORIZED</td><td class="py-2 text-slate-400">Отсутствует / невалидный токен</td></tr>
+            <tr class="border-t border-slate-800/50"><td class="py-2 mono">403</td><td class="py-2 mono text-yellow-400">FORBIDDEN</td><td class="py-2 text-slate-400">Нет доступа к ресурсу</td></tr>
+            <tr class="border-t border-slate-800/50"><td class="py-2 mono">404</td><td class="py-2 mono text-yellow-400">NOT_FOUND</td><td class="py-2 text-slate-400">Ресурс не найден</td></tr>
+            <tr class="border-t border-slate-800/50"><td class="py-2 mono">429</td><td class="py-2 mono text-yellow-400">RATE_LIMITED</td><td class="py-2 text-slate-400">Превышен лимит запросов</td></tr>
+            <tr class="border-t border-slate-800/50"><td class="py-2 mono">500</td><td class="py-2 mono text-yellow-400">INTERNAL_ERROR</td><td class="py-2 text-slate-400">Внутренняя ошибка сервера</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="card mb-6" id="ratelimits">
+        <h2 class="text-lg font-semibold mb-2">Rate limits</h2>
+        <p class="text-sm text-slate-400 mb-3">Глобально: <span class="mono text-yellow-400">300 запросов / 15 мин</span> на IP на всё <span class="mono">/api/*</span>.</p>
+        <p class="text-sm text-slate-400 mb-3">При превышении — 429 с заголовками <span class="mono">RateLimit-Limit</span>, <span class="mono">RateLimit-Remaining</span>, <span class="mono">RateLimit-Reset</span>.</p>
+        <p class="text-xs text-slate-500">Для high-volume интеграций — напишите в <a href="mailto:support@chmup.top" class="text-indigo-400 hover:underline">support@chmup.top</a>.</p>
+      </div>
+
+      <div class="text-center text-xs text-slate-500 mt-8">
+        Вопросы? <a href="mailto:support@chmup.top" class="text-indigo-400 hover:underline">support@chmup.top</a> · Версия API: <span class="mono">v3</span>
+      </div>
+    </section>
+  </div>
+</main>
+
+</body>
+</html>

@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+  <title>CHM Finance — Публичный профиль</title>
+  <meta name="description" content="Публичный профиль трейдера CHM Finance: статистика, стратегии, последние сделки."/>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet"/>
+  <link rel="stylesheet" href="tailwind.css"/>
+  <link rel="stylesheet" href="styles.css"/>
+</head>
+<body style="background:#0A0A0A;color:#E5E5E5;font-family:'Inter',sans-serif;min-height:100vh">
+
+<header style="border-bottom:1px solid rgba(255,255,255,.06);padding:18px 24px">
+  <div style="max-width:1100px;margin:0 auto;display:flex;align-items:center;justify-content:space-between">
+    <a href="/" style="font-weight:600;font-size:22px;letter-spacing:-.02em;color:#fff;text-decoration:none">CHM<span style="color:#5C80E3">.</span></a>
+    <div class="flex items-center gap-3 text-sm">
+      <a href="/" class="text-slate-400 hover:text-white">Главная</a>
+      <a href="/leaderboard.html" class="text-slate-400 hover:text-white">Leaderboard</a>
+      <a href="/dashboard.html" class="text-slate-400 hover:text-white">Дашборд</a>
+    </div>
+  </div>
+</header>
+
+<main style="max-width:1100px;margin:0 auto;padding:48px 24px">
+  <div id="uError" class="hidden p-8 text-center">
+    <div class="text-5xl mb-4">🔒</div>
+    <h1 class="text-2xl font-bold mb-2">Профиль не найден</h1>
+    <p class="text-slate-400 text-sm mb-6">Трейдер не открывал публичный профиль, либо ссылка неверна.</p>
+    <a href="/leaderboard.html" class="inline-block bg-indigo-500/20 text-indigo-300 border border-indigo-500/30 px-4 py-2 rounded-lg text-sm hover:bg-indigo-500/30">К Leaderboard</a>
+  </div>
+
+  <div id="uLoading" class="p-8 text-center text-slate-500">Загрузка профиля…</div>
+
+  <div id="uContent" class="hidden">
+    <div class="card mb-6">
+      <div class="flex flex-wrap items-center justify-between gap-4">
+        <div>
+          <h1 class="text-2xl font-bold" id="uName">—</h1>
+          <p class="text-xs text-slate-500 mt-1">CHM Finance Trader · с <span id="uJoined">—</span></p>
+        </div>
+        <div class="text-right">
+          <div class="text-xs text-slate-500 uppercase tracking-wider">Total PnL</div>
+          <div class="text-3xl font-mono font-bold" id="uPnl">—</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+      <div class="card"><div class="text-xs text-slate-500">Сделок</div><div class="text-xl font-mono font-semibold mt-1" id="uTrades">—</div></div>
+      <div class="card"><div class="text-xs text-slate-500">Win Rate</div><div class="text-xl font-mono font-semibold mt-1" id="uWin">—</div></div>
+      <div class="card"><div class="text-xs text-slate-500">Побед / Потерь</div><div class="text-xl font-mono font-semibold mt-1" id="uWL">—</div></div>
+      <div class="card"><div class="text-xs text-slate-500">Средний PnL %</div><div class="text-xl font-mono font-semibold mt-1" id="uAvg">—</div></div>
+    </div>
+
+    <div class="grid md:grid-cols-2 gap-6">
+      <div class="card">
+        <h2 class="text-sm font-semibold mb-3 text-slate-300">По стратегиям</h2>
+        <table class="w-full text-sm">
+          <thead>
+            <tr class="text-xs text-slate-500 uppercase tracking-wider">
+              <th class="text-left py-2">Стратегия</th>
+              <th class="text-right py-2">Сделок</th>
+              <th class="text-right py-2">WR</th>
+              <th class="text-right py-2">PnL</th>
+            </tr>
+          </thead>
+          <tbody id="uByStrat"></tbody>
+        </table>
+      </div>
+
+      <div class="card">
+        <h2 class="text-sm font-semibold mb-3 text-slate-300">Последние сделки</h2>
+        <div id="uRecent" class="space-y-2 max-h-96 overflow-y-auto"></div>
+      </div>
+    </div>
+
+    <div class="text-center mt-8 text-xs text-slate-500">
+      Публичная статистика. Приватные данные (API-ключи, точные объёмы, цены входа) скрыты.
+    </div>
+  </div>
+</main>
+
+<script src="app.js"></script>
+<script>
+const params = new URLSearchParams(location.search);
+const code = params.get('code');
+
+function escHtml(s){return String(s||'').replace(/[&<>"']/g,(c)=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
+function fmtDate(s){try{return new Date(s).toLocaleDateString('ru-RU')}catch(e){return s||'—'}}
+
+async function load(){
+  const $e=document.getElementById('uError'), $l=document.getElementById('uLoading'), $c=document.getElementById('uContent');
+  if(!code){ $l.classList.add('hidden'); $e.classList.remove('hidden'); return; }
+  try{
+    const p = await API.publicProfile(code);
+    $l.classList.add('hidden');
+    $c.classList.remove('hidden');
+    document.title = 'CHM Finance — ' + p.displayName;
+    document.getElementById('uName').textContent = p.displayName;
+    document.getElementById('uJoined').textContent = fmtDate(p.joinedAt);
+    const pnl = p.stats.totalPnl;
+    const pnlEl = document.getElementById('uPnl');
+    pnlEl.textContent = Fmt.currency(pnl);
+    pnlEl.className = 'text-3xl font-mono font-bold ' + (pnl>0?'text-green-400':pnl<0?'text-red-400':'text-slate-400');
+    document.getElementById('uTrades').textContent = p.stats.closedTrades;
+    document.getElementById('uWin').textContent = p.stats.winRate!==null ? Fmt.percent(p.stats.winRate*100,{decimals:1}) : '—';
+    document.getElementById('uWL').textContent = p.stats.wins + ' / ' + p.stats.losses;
+    document.getElementById('uAvg').textContent = p.stats.meanPnlPct.toFixed(2) + '%';
+
+    document.getElementById('uByStrat').innerHTML = p.byStrategy.length
+      ? p.byStrategy.map((s)=>`<tr class="border-t border-slate-800/50">
+          <td class="py-2 text-slate-300">${escHtml(s.strategy)}</td>
+          <td class="py-2 text-right text-slate-400">${s.trades}</td>
+          <td class="py-2 text-right text-slate-400">${s.winRate!==null?Fmt.percent(s.winRate*100,{decimals:0}):'—'}</td>
+          <td class="py-2 text-right font-mono ${s.pnl>0?'text-green-400':s.pnl<0?'text-red-400':'text-slate-400'}">${Fmt.currency(s.pnl)}</td>
+        </tr>`).join('')
+      : '<tr><td colspan="4" class="py-4 text-center text-slate-500 text-xs">Нет данных</td></tr>';
+
+    document.getElementById('uRecent').innerHTML = p.recent.length
+      ? p.recent.map((r)=>`<div class="flex items-center justify-between text-xs p-2 rounded bg-slate-800/30">
+          <div>
+            <span class="font-semibold text-slate-300">${escHtml(r.symbol)}</span>
+            <span class="ml-2 px-1.5 py-0.5 rounded text-[10px] ${r.side==='long'?'bg-green-500/20 text-green-400':'bg-red-500/20 text-red-400'}">${r.side}</span>
+            <span class="ml-2 text-slate-500">${escHtml(r.strategy||'—')}</span>
+          </div>
+          <div class="font-mono ${r.pnlPct>0?'text-green-400':r.pnlPct<0?'text-red-400':'text-slate-400'}">${r.pnlPct.toFixed(2)}%</div>
+        </div>`).join('')
+      : '<div class="text-center text-xs text-slate-500 py-4">Нет сделок</div>';
+  } catch(err){
+    $l.classList.add('hidden');
+    $e.classList.remove('hidden');
+  }
+}
+load();
+</script>
+</body>
+</html>

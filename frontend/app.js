@@ -212,6 +212,19 @@ const API = {
   manualTrade: (payload) => apiRequest('POST', '/bots/manual-trade', payload),
   getTvWebhook: (botId) => apiRequest('GET', '/bots/' + botId + '/tv-webhook'),
   rotateTvWebhook: (botId) => apiRequest('POST', '/bots/' + botId + '/tv-webhook/rotate'),
+
+  // Community / public
+  leaderboard: (opts = {}) => apiRequest('GET', '/public/leaderboard?' + qs(opts), null, { skipAuth: true }),
+  publicProfile: (code) => apiRequest('GET', '/public/u/' + code, null, { skipAuth: true }),
+  setPublicProfile: (enabled) => apiRequest('PUT', '/support/profile/public', { enabled }),
+
+  // Support tickets
+  listTickets: (opts = {}) => apiRequest('GET', '/support/tickets?' + qs(opts)),
+  createTicket: (subject, body) => apiRequest('POST', '/support/tickets', { subject, body }),
+  getTicket: (id) => apiRequest('GET', '/support/tickets/' + id),
+  replyTicket: (id, body) => apiRequest('POST', '/support/tickets/' + id + '/reply', { body }),
+  closeTicket: (id) => apiRequest('POST', '/support/tickets/' + id + '/close'),
+  listAllTickets: (opts = {}) => apiRequest('GET', '/support/admin/tickets?' + qs(opts)),
   // CSV download returns a URL (client navigates to it so Authorization
   // can't go in header — we build a short-lived signed URL or use cookie.
   // Simplest: open URL in new tab with token in query — acceptable since
