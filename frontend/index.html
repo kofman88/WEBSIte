@@ -740,6 +740,7 @@
           <input type="password" name="password" required class="modal-input" placeholder="••••••••" autocomplete="current-password"/>
         </div>
         <button type="submit" class="pill pill-primary pill-md" style="margin-top:10px;justify-content:center" data-t="ml-btn">Войти</button>
+        <div style="text-align:right;margin-top:-2px"><button type="button" class="modal-link" data-open-modal="forgot" data-t="ml-forgot" style="font-size:12px">Забыли пароль?</button></div>
       </form>
       <p class="t-body" style="margin-top:22px;text-align:center;font-size:13px"><span data-t="ml-no">Нет аккаунта?</span> <button type="button" class="modal-link" data-open-modal="register" data-t="ml-reg">Регистрация</button></p>
     </div>
@@ -801,6 +802,76 @@
         </ul>
       </div>
     </aside>
+  </div>
+</div>
+
+<!-- FORGOT PASSWORD MODAL -->
+<div class="modal-bg" id="forgotModal" role="dialog" aria-modal="true">
+  <div class="modal-card" role="document" style="max-width:440px;grid-template-columns:1fr;min-height:auto">
+    <button type="button" class="modal-close" data-close-modal aria-label="Close">
+      <iconify-icon icon="solar:close-circle-linear" style="font-size:20px"></iconify-icon>
+    </button>
+    <div class="modal-form">
+      <a href="/" class="logo-mark" style="font-size:20px;margin-bottom:22px;display:inline-block">CHM<span class="dot">.</span></a>
+      <h2 class="t-h2" style="font-size:26px;margin-bottom:8px" data-t="fp-title">Восстановление пароля</h2>
+      <p class="t-body" style="margin-bottom:24px;color:rgba(255,255,255,.62)" data-t="fp-sub">Введите email — пришлём ссылку для сброса. Действует 1 час.</p>
+      <form id="forgotForm" class="flex flex-col gap-4">
+        <div>
+          <label class="t-eyebrow" style="display:block;margin-bottom:8px;color:rgba(255,255,255,.72)" data-t="ml-email">EMAIL</label>
+          <input type="email" name="email" required class="modal-input" placeholder="you@chm.finance" autocomplete="email"/>
+        </div>
+        <button type="submit" class="pill pill-primary pill-md" style="margin-top:4px;justify-content:center" data-t="fp-btn">Отправить ссылку</button>
+      </form>
+      <p class="t-body" style="margin-top:22px;text-align:center;font-size:13px"><button type="button" class="modal-link" data-open-modal="login" data-t="fp-back">← Назад ко входу</button></p>
+    </div>
+  </div>
+</div>
+
+<!-- RESET PASSWORD MODAL (opens when ?reset=TOKEN in URL) -->
+<div class="modal-bg" id="resetModal" role="dialog" aria-modal="true">
+  <div class="modal-card" role="document" style="max-width:440px;grid-template-columns:1fr;min-height:auto">
+    <button type="button" class="modal-close" data-close-modal aria-label="Close">
+      <iconify-icon icon="solar:close-circle-linear" style="font-size:20px"></iconify-icon>
+    </button>
+    <div class="modal-form">
+      <a href="/" class="logo-mark" style="font-size:20px;margin-bottom:22px;display:inline-block">CHM<span class="dot">.</span></a>
+      <h2 class="t-h2" style="font-size:26px;margin-bottom:8px" data-t="rp-title">Новый пароль</h2>
+      <p class="t-body" style="margin-bottom:24px;color:rgba(255,255,255,.62)" data-t="rp-sub">Придумайте новый пароль. Минимум 6 символов.</p>
+      <form id="resetForm" class="flex flex-col gap-4">
+        <input type="hidden" name="token"/>
+        <div>
+          <label class="t-eyebrow" style="display:block;margin-bottom:8px;color:rgba(255,255,255,.72)" data-t="rp-new">НОВЫЙ ПАРОЛЬ</label>
+          <input type="password" name="newPassword" required minlength="6" class="modal-input" placeholder="минимум 6 символов" autocomplete="new-password"/>
+        </div>
+        <div>
+          <label class="t-eyebrow" style="display:block;margin-bottom:8px;color:rgba(255,255,255,.72)" data-t="rp-confirm">ПОВТОРИТЕ</label>
+          <input type="password" name="newPassword2" required class="modal-input" placeholder="••••••••" autocomplete="new-password"/>
+        </div>
+        <button type="submit" class="pill pill-primary pill-md" style="margin-top:4px;justify-content:center" data-t="rp-btn">Сохранить пароль</button>
+      </form>
+    </div>
+  </div>
+</div>
+
+<!-- 2FA CHALLENGE MODAL (when login returns twoFactorRequired) -->
+<div class="modal-bg" id="tfaChallengeModal" role="dialog" aria-modal="true">
+  <div class="modal-card" role="document" style="max-width:440px;grid-template-columns:1fr;min-height:auto">
+    <button type="button" class="modal-close" data-close-modal aria-label="Close">
+      <iconify-icon icon="solar:close-circle-linear" style="font-size:20px"></iconify-icon>
+    </button>
+    <div class="modal-form">
+      <a href="/" class="logo-mark" style="font-size:20px;margin-bottom:22px;display:inline-block">CHM<span class="dot">.</span></a>
+      <h2 class="t-h2" style="font-size:26px;margin-bottom:8px" data-t="tfa-title">Двухфакторная проверка</h2>
+      <p class="t-body" style="margin-bottom:24px;color:rgba(255,255,255,.62)" data-t="tfa-sub">Введите 6-значный код из Google Authenticator / Authy — или восстановительный.</p>
+      <form id="tfaForm" class="flex flex-col gap-4">
+        <input type="hidden" name="pendingToken"/>
+        <div>
+          <label class="t-eyebrow" style="display:block;margin-bottom:8px;color:rgba(255,255,255,.72)" data-t="tfa-code">КОД</label>
+          <input type="text" name="code" required inputmode="numeric" maxlength="10" class="modal-input" placeholder="000000" style="font-family:'JetBrains Mono',monospace;letter-spacing:.4em;text-align:center;font-size:20px"/>
+        </div>
+        <button type="submit" class="pill pill-primary pill-md" style="margin-top:4px;justify-content:center" data-t="tfa-btn">Подтвердить</button>
+      </form>
+    </div>
   </div>
 </div>
 
@@ -951,8 +1022,64 @@ function _nextUrl(){
 }
 document.getElementById('loginForm')?.addEventListener('submit',async e=>{
   e.preventDefault();const fd=new FormData(e.target);const btn=e.target.querySelector('button[type=submit]');if(btn)btn.disabled=true;
-  try{await _authCall('/auth/login',{email:fd.get('email'),password:fd.get('password')});closeModals();_notify.ok('Вход выполнен!');setTimeout(()=>location.href=_nextUrl(),500)}
+  try{
+    const res=await _authCall('/auth/login',{email:fd.get('email'),password:fd.get('password')});
+    if(res&&res.twoFactorRequired){
+      // 2FA enabled — show challenge modal instead of completing
+      const tform=document.getElementById('tfaForm');
+      if(tform)tform.querySelector('input[name=pendingToken]').value=res.pendingToken;
+      openModal('tfaChallenge');
+      setTimeout(()=>tform?.querySelector('input[name=code]')?.focus(),150);
+      return;
+    }
+    closeModals();_notify.ok('Вход выполнен!');setTimeout(()=>location.href=_nextUrl(),500);
+  }
   catch(err){_notify.err(err.message||'Ошибка входа. Проверьте подключение.')}
+  finally{if(btn)btn.disabled=false}
+});
+
+// 2FA challenge
+document.getElementById('tfaForm')?.addEventListener('submit',async e=>{
+  e.preventDefault();const fd=new FormData(e.target);const btn=e.target.querySelector('button[type=submit]');if(btn)btn.disabled=true;
+  try{
+    const base=(location.hostname==='localhost'||location.hostname==='127.0.0.1')?'http://localhost:3000/api':'/api';
+    const r=await fetch(base+'/auth/2fa/verify-login',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({pendingToken:fd.get('pendingToken'),code:fd.get('code')})});
+    let data={};try{data=await r.json()}catch(_){}
+    if(!r.ok)throw new Error(data.error||'Неверный код');
+    if(typeof Auth!=='undefined'){Auth.setTokens({accessToken:data.accessToken,refreshToken:data.refreshToken});Auth.setUser(data.user)}
+    closeModals();_notify.ok('Вход выполнен!');setTimeout(()=>location.href=_nextUrl(),500);
+  }catch(err){_notify.err(err.message||'Неверный код')}
+  finally{if(btn)btn.disabled=false}
+});
+
+// Forgot password
+document.getElementById('forgotForm')?.addEventListener('submit',async e=>{
+  e.preventDefault();const fd=new FormData(e.target);const btn=e.target.querySelector('button[type=submit]');if(btn)btn.disabled=true;
+  try{
+    const base=(location.hostname==='localhost'||location.hostname==='127.0.0.1')?'http://localhost:3000/api':'/api';
+    const r=await fetch(base+'/auth/password-reset/request',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({email:fd.get('email')})});
+    await r.json();
+    closeModals();
+    _notify.ok('Если email зарегистрирован — ссылка отправлена. Проверьте почту (или логи сервера в dev-режиме).');
+  }catch(err){_notify.err(err.message||'Ошибка')}
+  finally{if(btn)btn.disabled=false}
+});
+
+// Reset password (opens automatically from ?reset=TOKEN)
+document.getElementById('resetForm')?.addEventListener('submit',async e=>{
+  e.preventDefault();const fd=new FormData(e.target);
+  if(fd.get('newPassword')!==fd.get('newPassword2')){_notify.err('Пароли не совпадают');return}
+  const btn=e.target.querySelector('button[type=submit]');if(btn)btn.disabled=true;
+  try{
+    const base=(location.hostname==='localhost'||location.hostname==='127.0.0.1')?'http://localhost:3000/api':'/api';
+    const r=await fetch(base+'/auth/password-reset/confirm',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({token:fd.get('token'),newPassword:fd.get('newPassword')})});
+    const data=await r.json();
+    if(!r.ok)throw new Error(data.error||'Ошибка');
+    closeModals();
+    history.replaceState({},'',location.pathname);
+    _notify.ok('Пароль изменён. Войдите с новым паролем.');
+    setTimeout(()=>openModal('login'),400);
+  }catch(err){_notify.err(err.message||'Неверный или просроченный токен')}
   finally{if(btn)btn.disabled=false}
 });
 document.getElementById('registerForm')?.addEventListener('submit',async e=>{
@@ -1024,7 +1151,14 @@ const TR={
   'mr-a-f3':{ru:'Бэктест на исторических данных',en:'Backtest on historical data'},
   'mr-a-f4':{ru:'Free-тариф без карты',en:'Free tier, no card'},
   'ml-email':{ru:'EMAIL',en:'EMAIL'},'ml-pass':{ru:'ПАРОЛЬ',en:'PASSWORD'},'mr-pass2':{ru:'ПОВТОРИТЕ ПАРОЛЬ',en:'CONFIRM PASSWORD'},
-  'mr-agree':{ru:'Я согласен с',en:'I agree to the'},'mr-terms':{ru:'условиями',en:'terms'}
+  'mr-agree':{ru:'Я согласен с',en:'I agree to the'},'mr-terms':{ru:'условиями',en:'terms'},
+  'ml-forgot':{ru:'Забыли пароль?',en:'Forgot password?'},
+  'fp-title':{ru:'Восстановление пароля',en:'Reset password'},'fp-sub':{ru:'Введите email — пришлём ссылку. Действует 1 час.',en:'Enter your email — we\'ll send a reset link. Valid 1 hour.'},
+  'fp-btn':{ru:'Отправить ссылку',en:'Send link'},'fp-back':{ru:'← Назад ко входу',en:'← Back to login'},
+  'rp-title':{ru:'Новый пароль',en:'New password'},'rp-sub':{ru:'Придумайте новый пароль. Минимум 6 символов.',en:'Pick a new password — 6 characters minimum.'},
+  'rp-new':{ru:'НОВЫЙ ПАРОЛЬ',en:'NEW PASSWORD'},'rp-confirm':{ru:'ПОВТОРИТЕ',en:'CONFIRM'},'rp-btn':{ru:'Сохранить пароль',en:'Save password'},
+  'tfa-title':{ru:'Двухфакторная проверка',en:'Two-factor check'},'tfa-sub':{ru:'Введите 6-значный код из Google Authenticator / Authy — или восстановительный.',en:'Enter the 6-digit code from Google Authenticator / Authy — or a recovery code.'},
+  'tfa-code':{ru:'КОД',en:'CODE'},'tfa-btn':{ru:'Подтвердить',en:'Verify'}
 };
 // ── Promos (community section) — iframe mockups, lazy-mounted ──
 window.Promos=(function(){
@@ -1151,17 +1285,29 @@ function toggleTheme(){
 }
 (function(){try{if(localStorage.getItem('chm_theme')==='light'){document.documentElement.classList.add('light');const b=document.getElementById('themeBtn');if(b)b.innerHTML='<iconify-icon icon="solar:sun-linear"></iconify-icon>'}}catch(e){}})();
 
-// ── URL params: ?login / ?checkout=cancel / ?ref=XXX ──
+// ── URL params: ?login / ?checkout=cancel / ?ref=XXX / ?reset=TOKEN / ?verified=X ──
 (function(){
   const q=new URLSearchParams(location.search);
-  // Stash ?ref=XXX early so it survives across pageviews even if the
-  // visitor browses for a while before registering.
   _refCode();
   if(q.get('login'))openModal('login');
   if(q.get('checkout')==='cancel'){
     setTimeout(()=>{try{(window.Toast||{info:(m)=>alert(m)}).info('Оплата отменена')}catch(e){}},400);
     const clean=location.pathname+(q.get('ref')?'?ref='+q.get('ref'):'');
     history.replaceState({},'',clean);
+  }
+  const resetTok=q.get('reset');
+  if(resetTok){
+    const f=document.getElementById('resetForm');
+    if(f)f.querySelector('input[name=token]').value=resetTok;
+    openModal('reset');
+  }
+  const verified=q.get('verified');
+  if(verified==='1'){
+    setTimeout(()=>_notify.ok('Email подтверждён'),400);
+    history.replaceState({},'',location.pathname);
+  } else if(verified==='0'){
+    setTimeout(()=>_notify.err('Ссылка недействительна или просрочена'),400);
+    history.replaceState({},'',location.pathname);
   }
 })();
 </script>

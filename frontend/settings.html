@@ -130,15 +130,71 @@
 
   <!-- SECURITY -->
   <div class="stab-content" id="stab-security">
+    <!-- Email verification status -->
+    <div class="card max-w-2xl mb-6" id="emailVerifyCard" style="display:none">
+      <div class="flex items-start gap-3">
+        <div class="w-10 h-10 rounded-lg bg-yellow-500/10 flex items-center justify-center shrink-0">
+          <iconify-icon icon="solar:letter-unread-linear" style="color:#facc15;font-size:20px"></iconify-icon>
+        </div>
+        <div class="flex-1">
+          <div class="font-semibold mb-1">Email не подтверждён</div>
+          <div class="text-sm text-slate-400 mb-3">Мы отправим вам ссылку для подтверждения, чтобы защитить аккаунт и восстанавливать пароль.</div>
+          <button id="emailVerifyBtn" class="text-sm px-4 py-2 rounded-lg bg-indigo-500/10 border border-indigo-500/30 text-indigo-400 hover:bg-indigo-500/20">Отправить письмо</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- 2FA -->
+    <div class="card max-w-2xl mb-6" id="tfaCard">
+      <div class="flex items-start justify-between mb-4">
+        <div>
+          <h3 class="font-bold mb-1">Двухфакторная аутентификация</h3>
+          <div class="text-sm text-slate-400" id="tfaStatus">Загрузка статуса…</div>
+        </div>
+        <button id="tfaBtn" class="text-sm px-4 py-2 rounded-lg bg-indigo-500/10 border border-indigo-500/30 text-indigo-400 hover:bg-indigo-500/20">Включить</button>
+      </div>
+      <!-- Setup steps (hidden by default) -->
+      <div id="tfaSetupBox" class="hidden">
+        <div class="text-sm text-slate-300 mb-3">1. Отсканируй QR-код в Google Authenticator / Authy:</div>
+        <div class="flex flex-col sm:flex-row gap-4 mb-4">
+          <img id="tfaQr" width="200" height="200" alt="QR" class="rounded-lg bg-white p-2 self-start"/>
+          <div class="text-xs text-slate-500 font-mono break-all flex-1"><span class="text-slate-400">Или ключ вручную:</span><div id="tfaSecret" class="mt-1"></div></div>
+        </div>
+        <div class="text-sm text-slate-300 mb-2">2. Введи 6-значный код из приложения:</div>
+        <div class="flex gap-2 mb-4">
+          <input id="tfaCode" type="text" inputmode="numeric" maxlength="6" placeholder="000000" class="w-32 bg-slate-800/50 border border-slate-700 rounded-xl px-4 py-3 text-white outline-none font-mono tracking-widest text-center"/>
+          <button id="tfaConfirmBtn" class="px-6 py-3 rounded-xl font-semibold text-white text-sm" style="background:linear-gradient(180deg,#2A5BE8 0%,#1D4ED8 60%,#143797 100%)">Подтвердить</button>
+        </div>
+        <div id="tfaRecoveryBox" class="hidden bg-yellow-500/10 border border-yellow-500/30 rounded-xl p-3 text-xs text-yellow-200 leading-relaxed">
+          <strong>Сохрани восстановительные коды</strong> — они дадут доступ если потеряешь телефон. Каждый можно использовать один раз.
+          <div id="tfaRecoveryList" class="mt-2 grid grid-cols-2 sm:grid-cols-4 gap-2 font-mono text-sm text-white"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Change password -->
     <div class="card max-w-2xl mb-6">
       <h3 class="font-bold mb-4">Смена пароля</h3>
-      <form class="space-y-4">
-        <div><label class="text-sm text-slate-400 block mb-1">Текущий пароль</label><input type="password" class="w-full bg-slate-800/50 border border-slate-700 rounded-xl px-4 py-3 text-white outline-none"/></div>
-        <div><label class="text-sm text-slate-400 block mb-1">Новый пароль</label><input type="password" class="w-full bg-slate-800/50 border border-slate-700 rounded-xl px-4 py-3 text-white outline-none"/></div>
-        <div><label class="text-sm text-slate-400 block mb-1">Повторите новый пароль</label><input type="password" class="w-full bg-slate-800/50 border border-slate-700 rounded-xl px-4 py-3 text-white outline-none"/></div>
-        <button type="button" onclick="Toast.success('Пароль изменён')" class="px-6 py-2.5 rounded-xl font-semibold text-white text-sm" style="background:linear-gradient(180deg,#2A5BE8 0%,#1D4ED8 60%,#143797 100%);box-shadow:inset 0 1px 1px rgba(255,255,255,.28),inset 0 -1px 3px rgba(0,0,0,.6),0 4px 8px -2px rgba(0,0,0,.6),0 0 0 1px rgba(29,78,216,.35)">Сменить пароль</button>
+      <form id="changePassForm" class="space-y-4">
+        <div><label class="text-sm text-slate-400 block mb-1">Текущий пароль</label><input type="password" name="currentPassword" required class="w-full bg-slate-800/50 border border-slate-700 rounded-xl px-4 py-3 text-white outline-none"/></div>
+        <div><label class="text-sm text-slate-400 block mb-1">Новый пароль</label><input type="password" name="newPassword" required minlength="6" class="w-full bg-slate-800/50 border border-slate-700 rounded-xl px-4 py-3 text-white outline-none"/></div>
+        <div><label class="text-sm text-slate-400 block mb-1">Повторите новый пароль</label><input type="password" name="newPassword2" required minlength="6" class="w-full bg-slate-800/50 border border-slate-700 rounded-xl px-4 py-3 text-white outline-none"/></div>
+        <button type="submit" class="px-6 py-2.5 rounded-xl font-semibold text-white text-sm" style="background:linear-gradient(180deg,#2A5BE8 0%,#1D4ED8 60%,#143797 100%);box-shadow:inset 0 1px 1px rgba(255,255,255,.28),inset 0 -1px 3px rgba(0,0,0,.6),0 4px 8px -2px rgba(0,0,0,.6),0 0 0 1px rgba(29,78,216,.35)">Сменить пароль</button>
       </form>
     </div>
+
+    <!-- Active sessions -->
+    <div class="card max-w-2xl mb-6">
+      <h3 class="font-bold mb-4">Активные сессии</h3>
+      <div id="sessionsList" class="space-y-2"><div class="text-xs text-slate-500">Загрузка…</div></div>
+    </div>
+
+    <!-- Login history -->
+    <div class="card max-w-2xl mb-6">
+      <h3 class="font-bold mb-4">История входов</h3>
+      <div id="loginHistory" class="space-y-2"><div class="text-xs text-slate-500">Загрузка…</div></div>
+    </div>
+
     <div class="card max-w-2xl">
       <h3 class="font-bold mb-4 text-red-400">Опасная зона</h3>
       <div class="flex gap-3">
@@ -373,9 +429,136 @@ document.querySelectorAll('.co-method').forEach((btn) => {
 // WS: payment confirmed → success + reload
 WS.on('payment_confirmed', () => { Toast.success('Платёж подтверждён, тариф активирован'); closeCheckout(); loadSubscription(); });
 
+// ── Security tab ──
+async function loadSecurity() {
+  // Email verification banner
+  try {
+    const me = await API.me();
+    const verifyCard = document.getElementById('emailVerifyCard');
+    if (me && !me.emailVerified) verifyCard.style.display = 'block';
+  } catch (_e) {}
+  document.getElementById('emailVerifyBtn')?.addEventListener('click', async () => {
+    try { await API.requestEmailVerify(); Toast.success('Письмо отправлено (проверь логи или входящие)'); }
+    catch (err) { Toast.error(err.message); }
+  });
+
+  // 2FA state
+  await refresh2FA();
+
+  // Sessions
+  await loadSessions();
+
+  // Login history
+  await loadLoginHist();
+}
+
+async function refresh2FA() {
+  const box = document.getElementById('tfaSetupBox');
+  const btn = document.getElementById('tfaBtn');
+  const st = document.getElementById('tfaStatus');
+  try {
+    const s = await API.twoFAStatus();
+    if (s.enabled) {
+      st.textContent = 'Включена · ' + (s.recoveryCodesLeft || 0) + ' восстановительных кодов осталось';
+      st.className = 'text-sm text-green-400';
+      btn.textContent = 'Отключить';
+      btn.onclick = async () => {
+        const pw = prompt('Введите пароль для отключения 2FA:');
+        if (!pw) return;
+        try { await API.twoFADisable(pw); Toast.success('2FA отключена'); refresh2FA(); }
+        catch (err) { Toast.error(err.message); }
+      };
+      box.classList.add('hidden');
+    } else {
+      st.textContent = 'Выключена — защитите аккаунт Google Authenticator / Authy';
+      st.className = 'text-sm text-slate-400';
+      btn.textContent = 'Включить';
+      btn.onclick = start2FASetup;
+    }
+  } catch (_e) {}
+}
+
+async function start2FASetup() {
+  try {
+    const r = await API.twoFASetup();
+    document.getElementById('tfaQr').src = r.qrUrl;
+    document.getElementById('tfaSecret').textContent = (r.otpauth.match(/secret=([A-Z2-7]+)/i) || [])[1] || '';
+    const list = document.getElementById('tfaRecoveryList');
+    list.innerHTML = r.recoveryCodes.map((c) => '<div class="bg-slate-900/60 rounded px-2 py-1 text-center">' + c + '</div>').join('');
+    document.getElementById('tfaRecoveryBox').classList.remove('hidden');
+    document.getElementById('tfaSetupBox').classList.remove('hidden');
+    document.getElementById('tfaCode').focus();
+  } catch (err) { Toast.error(err.message); }
+}
+
+document.getElementById('tfaConfirmBtn')?.addEventListener('click', async () => {
+  const code = document.getElementById('tfaCode').value.trim();
+  if (!code || code.length < 6) return Toast.warn('Введите 6-значный код');
+  try {
+    await API.twoFAConfirm(code);
+    Toast.success('2FA включена');
+    refresh2FA();
+  } catch (err) { Toast.error(err.message); }
+});
+
+async function loadSessions() {
+  const host = document.getElementById('sessionsList');
+  try {
+    const r = await API.listSessions();
+    if (!r.sessions.length) { host.innerHTML = '<div class="text-xs text-slate-500">Нет активных сессий</div>'; return; }
+    host.innerHTML = r.sessions.map((s) => `
+      <div class="flex items-center justify-between p-3 bg-slate-800/30 rounded-lg text-sm">
+        <div>
+          <div class="text-slate-300 text-xs truncate" style="max-width:420px">${(s.userAgent || 'Unknown device').replace(/[<>]/g,'')}</div>
+          <div class="text-xs text-slate-500 mt-0.5">${s.ipAddress || '—'} · с ${Fmt.date(s.createdAt)}</div>
+        </div>
+        <button data-revoke="${s.id}" class="text-xs text-red-400 hover:text-red-300">Выйти</button>
+      </div>`).join('');
+    host.querySelectorAll('[data-revoke]').forEach((b) => b.addEventListener('click', async () => {
+      if (!confirm('Выйти из этой сессии?')) return;
+      try { await API.revokeSession(+b.getAttribute('data-revoke')); Toast.success('Сессия завершена'); loadSessions(); }
+      catch (err) { Toast.error(err.message); }
+    }));
+  } catch (err) { host.innerHTML = '<div class="text-xs text-red-400">' + err.message + '</div>'; }
+}
+
+async function loadLoginHist() {
+  const host = document.getElementById('loginHistory');
+  try {
+    const r = await API.loginHistory(20);
+    if (!r.history.length) { host.innerHTML = '<div class="text-xs text-slate-500">История пуста</div>'; return; }
+    host.innerHTML = r.history.map((h) => `
+      <div class="flex items-center justify-between p-2 bg-slate-800/20 rounded text-sm">
+        <div>
+          <span class="text-xs ${h.success ? 'text-green-400' : 'text-red-400'}">${h.success ? '✓ Успешно' : '✗ ' + (h.failureCode || 'Ошибка')}</span>
+          <span class="text-xs text-slate-500 ml-2">${h.ipAddress || '—'}</span>
+        </div>
+        <div class="text-xs text-slate-500">${Fmt.date(h.createdAt)}</div>
+      </div>`).join('');
+  } catch (err) { host.innerHTML = '<div class="text-xs text-red-400">' + err.message + '</div>'; }
+}
+
+document.getElementById('changePassForm')?.addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const fd = new FormData(e.target);
+  if (fd.get('newPassword') !== fd.get('newPassword2')) return Toast.error('Пароли не совпадают');
+  try {
+    const res = await fetch(
+      (location.hostname === 'localhost' ? 'http://localhost:3000/api' : '/api') + '/auth/change-password',
+      { method: 'POST', headers: { 'Content-Type': 'application/json', Authorization: 'Bearer ' + Auth.accessToken },
+        body: JSON.stringify({ currentPassword: fd.get('currentPassword'), newPassword: fd.get('newPassword') }) },
+    );
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error || 'Ошибка');
+    Toast.success('Пароль изменён. Выполни логин заново.');
+    setTimeout(() => Auth.logout(), 1500);
+  } catch (err) { Toast.error(err.message); }
+});
+
 loadProfile();
 loadSubscription();
 loadReferrals();
+loadSecurity();
 
 // ── Auto-open checkout if ?upgrade=<plan> came from landing pricing CTA ──
 (function autoUpgrade(){
