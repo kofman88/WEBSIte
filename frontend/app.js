@@ -262,6 +262,14 @@ const API = {
   copyUnsubscribe: (leaderId) => apiRequest('POST', '/copy/unsubscribe', { leaderId }),
   copyListFollowing: () => apiRequest('GET', '/copy/following'),
 
+  // Strategy marketplace
+  marketList: (opts = {}) => apiRequest('GET', '/strategies?' + qs(opts), null, { skipAuth: true }),
+  marketGet: (slug) => apiRequest('GET', '/strategies/' + encodeURIComponent(slug), null, { skipAuth: true }),
+  marketPublish: (body) => apiRequest('POST', '/strategies', body),
+  marketInstall: (slug, body = {}) => apiRequest('POST', '/strategies/' + encodeURIComponent(slug) + '/install', body),
+  marketRate: (slug, stars) => apiRequest('POST', '/strategies/' + encodeURIComponent(slug) + '/rate', { stars }),
+  marketUnpublish: (slug) => apiRequest('DELETE', '/strategies/' + encodeURIComponent(slug)),
+
   // Support tickets
   listTickets: (opts = {}) => apiRequest('GET', '/support/tickets?' + qs(opts)),
   createTicket: (subject, body) => apiRequest('POST', '/support/tickets', { subject, body }),

@@ -70,6 +70,47 @@ const MIGRATIONS = [
       `);
     },
   },
+  {
+    version: 5,
+    name: 'strategy_marketplace',
+    up(db) {
+      db.exec(`
+        CREATE TABLE IF NOT EXISTS published_strategies (
+          id          INTEGER PRIMARY KEY AUTOINCREMENT,
+          author_id   INTEGER NOT NULL,
+          slug        TEXT NOT NULL UNIQUE,
+          title       TEXT NOT NULL,
+          description TEXT,
+          strategy    TEXT NOT NULL,
+          timeframe   TEXT NOT NULL DEFAULT '1h',
+          direction   TEXT NOT NULL DEFAULT 'both',
+          config_json TEXT NOT NULL DEFAULT '{}',
+          risk_json   TEXT NOT NULL DEFAULT '{}',
+          installs    INTEGER NOT NULL DEFAULT 0,
+          rating_sum  INTEGER NOT NULL DEFAULT 0,
+          rating_cnt  INTEGER NOT NULL DEFAULT 0,
+          is_public   INTEGER NOT NULL DEFAULT 1,
+          created_at  DATETIME DEFAULT CURRENT_TIMESTAMP,
+          updated_at  DATETIME DEFAULT CURRENT_TIMESTAMP,
+          FOREIGN KEY (author_id) REFERENCES users(id) ON DELETE CASCADE
+        );
+        CREATE INDEX IF NOT EXISTS idx_strategies_author ON published_strategies(author_id);
+        CREATE INDEX IF NOT EXISTS idx_strategies_public ON published_strategies(is_public, installs DESC);
+
+        CREATE TABLE IF NOT EXISTS strategy_installs (
+          id            INTEGER PRIMARY KEY AUTOINCREMENT,
+          user_id       INTEGER NOT NULL,
+          strategy_id   INTEGER NOT NULL,
+          bot_id        INTEGER,
+          rating        INTEGER,
+          created_at    DATETIME DEFAULT CURRENT_TIMESTAMP,
+          UNIQUE(user_id, strategy_id),
+          FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+          FOREIGN KEY (strategy_id) REFERENCES published_strategies(id) ON DELETE CASCADE
+        );
+      `);
+    },
+  },
 ];
 
 function ensureTable(db) {
