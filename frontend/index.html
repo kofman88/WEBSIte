@@ -918,100 +918,38 @@ const TR={
   'ml-email':{ru:'EMAIL',en:'EMAIL'},'ml-pass':{ru:'ПАРОЛЬ',en:'PASSWORD'},'mr-pass2':{ru:'ПОВТОРИТЕ ПАРОЛЬ',en:'CONFIRM PASSWORD'},
   'mr-agree':{ru:'Я согласен с',en:'I agree to the'},'mr-terms':{ru:'условиями',en:'terms'}
 };
-// ── Promos (community section) ──
-// files принимает либо строку с {lang} плейсхолдером, либо объект {ru:'...', en:'...'}
+// ── Promos (community section) — static cards, no iframes ──
 window.Promos=(function(){
   const ITEMS=[
-    {files:{ru:'chm_promo_sl_ru.html', en:'chm_promo_sl_en.html'}, label:{ru:'Сигналы',  en:'Signals'},      meta:{ru:'ЕЖЕДНЕВНО', en:'DAILY'},   link:'https://t.me/chm_crypto'},
-    {files:{ru:'promo-ru.html',        en:'promo-en.html'},        label:{ru:'Разборы',  en:'Case studies'}, meta:{ru:'АРХИВ',     en:'ARCHIVE'}, link:'https://t.me/chm_crypto'},
+    {label:{ru:'Сигналы',  en:'Signals'},      meta:{ru:'ЕЖЕДНЕВНО', en:'DAILY'},   link:'https://t.me/chm_crypto', icon:'solar:bolt-linear',       tint:'rgba(29,78,216'},
+    {label:{ru:'Разборы',  en:'Case studies'}, meta:{ru:'АРХИВ',     en:'ARCHIVE'}, link:'https://t.me/chm_crypto', icon:'solar:chart-square-linear', tint:'rgba(43,89,54'},
   ];
   const grid=document.getElementById('promoGrid');
   if(!grid)return{apply(){}};
-  function fitStage(stage){
-    const f=stage.querySelector('iframe');if(!f)return;
-    let W=800,H=1100,bx=0,by=0,bodyW=800,bodyH=1100;
-    try{
-      const d=f.contentDocument;
-      if(d&&d.body){
-        const body=d.body,html=d.documentElement;
-        bodyW=Math.max(body.scrollWidth,html.scrollWidth,body.offsetWidth,800);
-        bodyH=Math.max(body.scrollHeight,html.scrollHeight,body.offsetHeight,1100);
-        W=bodyW;H=bodyH;
-        // Auto-detect mockup: largest visible element with rounded corners (≥200x300)
-        const view=d.defaultView||window;
-        const all=body.querySelectorAll('*');
-        let best=null,bestScore=0;
-        for(let i=0;i<all.length;i++){
-          const el=all[i];if(el===body||el===html)continue;
-          const r=el.getBoundingClientRect();
-          if(r.width<200||r.height<300)continue;
-          const st=view.getComputedStyle(el);
-          if(st.display==='none'||st.visibility==='hidden'||parseFloat(st.opacity)===0)continue;
-          const br=Math.max(parseFloat(st.borderTopLeftRadius)||0,parseFloat(st.borderRadius)||0);
-          const score=r.width*r.height+(br>12?400000:0)+(st.backgroundColor!=='rgba(0, 0, 0, 0)'&&st.backgroundColor!=='transparent'?50000:0);
-          if(score>bestScore){bestScore=score;best=el}
-        }
-        if(best){const r=best.getBoundingClientRect();W=r.width;H=r.height;bx=r.left;by=r.top}
-      }
-    }catch(e){}
-    f.style.width=bodyW+'px';f.style.height=bodyH+'px';
-    stage.style.aspectRatio=W+' / '+H;
-    const sw=stage.clientWidth;
-    const scale=sw>0?sw/W:1;
-    f.style.transform='translate('+(-bx*scale)+'px,'+(-by*scale)+'px) scale('+scale+')';
-    stage.style.setProperty('--scale',scale.toString());
-  }
-  function resolveFile(it,lang){
-    if(it.files&&typeof it.files==='object')return it.files[lang];
-    if(typeof it.file==='string')return it.file.includes('{lang}')?it.file.replace('{lang}',lang):(it.file+'_'+lang+'.html');
-    return '';
-  }
-  // Render placeholders first; create real iframes only when user scrolls
-  // within 600px of the promo section. Each promo iframe is a self-contained
-  // HTML that pulls Tailwind+Chart+Iconify+Inter — ~1.5 MB per frame. Deferring
-  // cuts cold first-paint from 40+s to <5s for visitors who don't scroll here.
   function build(lang){
     const n=ITEMS.length;
     grid.style.gridTemplateColumns = n===1?'1fr' : (n===2?'repeat(2,minmax(0,1fr))' : 'repeat(3,minmax(0,1fr))');
-    grid.innerHTML=ITEMS.map((it,i)=>{
-      return `<a href="${it.link}" target="_blank" rel="noopener" class="promo-wrap" data-i="${i}" data-src="assets/promo/${resolveFile(it,lang)}" data-title="${it.label[lang]}">
+    grid.innerHTML=ITEMS.map((it)=>{
+      return `<a href="${it.link}" target="_blank" rel="noopener" class="promo-wrap">
         <div class="shell"><div class="shell-inner">
-          <div class="promo-stage promo-placeholder" style="aspect-ratio:800/1100;display:flex;align-items:center;justify-content:center;background:linear-gradient(180deg,rgba(29,78,216,.08),rgba(29,78,216,.02));border-radius:inherit">
-            <div style="text-align:center;opacity:.5"><div style="font-size:28px;margin-bottom:6px">📱</div><div style="font-size:11px;letter-spacing:.2em;color:rgba(255,255,255,.6)">${it.label[lang].toUpperCase()}</div></div>
+          <div class="promo-stage" style="aspect-ratio:800/1100;display:flex;align-items:center;justify-content:center;position:relative;overflow:hidden;border-radius:inherit;background:linear-gradient(180deg,${it.tint},.18) 0%,${it.tint},.04) 50%,rgba(10,10,10,.6) 100%)">
+            <div aria-hidden="true" style="position:absolute;inset:0;background:radial-gradient(circle at 50% 30%,${it.tint},.24) 0%,transparent 60%);pointer-events:none"></div>
+            <div style="position:relative;text-align:center">
+              <div style="width:84px;height:84px;margin:0 auto 18px;border-radius:50%;background:rgba(255,255,255,.08);backdrop-filter:blur(8px);display:flex;align-items:center;justify-content:center;box-shadow:inset 0 1px 1px rgba(255,255,255,.15),0 8px 24px rgba(0,0,0,.3)">
+                <iconify-icon icon="${it.icon}" style="font-size:38px;color:rgba(255,255,255,.92)"></iconify-icon>
+              </div>
+              <div style="font-family:'Inter',sans-serif;font-weight:600;font-size:18px;color:rgba(255,255,255,.92);margin-bottom:4px">${it.label[lang]}</div>
+              <div style="font-family:'Inter',sans-serif;font-size:11px;letter-spacing:.2em;color:rgba(255,255,255,.5)">${it.meta[lang]}</div>
+              <div style="margin-top:22px;display:inline-flex;align-items:center;gap:6px;padding:6px 14px;border-radius:9999px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);font-size:11px;color:rgba(255,255,255,.72)">
+                <iconify-icon icon="solar:chat-line-linear" style="font-size:13px"></iconify-icon>
+                t.me/chm_crypto
+              </div>
+            </div>
           </div>
         </div></div>
         <div class="promo-caption"><div class="promo-label">${it.label[lang]}</div><div class="promo-meta">${it.meta[lang]}</div></div>
       </a>`;
     }).join('');
-    // Lazy-mount: observe grid, inject iframes only when near viewport
-    let mounted=false;
-    function mountFrames(){
-      if(mounted)return;mounted=true;
-      grid.querySelectorAll('.promo-wrap').forEach((wrap)=>{
-        const src=wrap.getAttribute('data-src');
-        const title=wrap.getAttribute('data-title');
-        const stage=wrap.querySelector('.promo-stage');
-        const iframe=document.createElement('iframe');
-        iframe.src=src; iframe.title=title||'';
-        iframe.setAttribute('loading','lazy');
-        iframe.setAttribute('referrerpolicy','no-referrer');
-        iframe.setAttribute('sandbox','allow-scripts allow-same-origin');
-        iframe.setAttribute('scrolling','no');
-        stage.classList.remove('promo-placeholder');
-        stage.innerHTML=''; stage.appendChild(iframe);
-        const run=()=>fitStage(stage);
-        iframe.addEventListener('load',()=>{run();setTimeout(run,200);setTimeout(run,600);setTimeout(run,1500)});
-        if(window.ResizeObserver){new ResizeObserver(run).observe(stage)}else{window.addEventListener('resize',run)}
-      });
-    }
-    if(window.IntersectionObserver){
-      const io=new IntersectionObserver((es)=>{
-        if(es[0].isIntersecting){io.disconnect();mountFrames()}
-      },{rootMargin:'600px'});
-      io.observe(grid);
-    } else {
-      mountFrames(); // Fallback: ancient browser, eager-mount
-    }
   }
   let current=null;
   return{apply(lang){if(lang!==current){current=lang;build(lang)}}};
