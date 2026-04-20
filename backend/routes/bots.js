@@ -1,6 +1,10 @@
 const express = require('express');
 const { z } = require('zod');
-const { authMiddleware } = require('../middleware/auth');
+const { authMiddleware, tierLimiter } = require('../middleware/auth');
+
+// Smart Trade & bot-toggle touch exchange APIs — keep tight per-plan caps
+// so a runaway client loop doesn't drain the user's exchange rate budget.
+const writeCap = tierLimiter({ free: 10, starter: 30, pro: 120, elite: 600 }, '1m');
 const botService = require('../services/botService');
 const validation = require('../utils/validation');
 
@@ -60,7 +64,7 @@ router.patch('/:id', authMiddleware, (req, res, next) => {
   } catch (err) { handleErr(err, res, next); }
 });
 
-router.post('/:id/toggle', authMiddleware, (req, res, next) => {
+router.post('/:id/toggle', authMiddleware, writeCap, (req, res, next) => {
   try {
     const id = z.coerce.number().int().positive().parse(req.params.id);
     res.json(botService.toggleActive(id, req.userId));
@@ -117,7 +121,7 @@ router.post('/:id/tv-webhook/rotate', authMiddleware, (req, res, next) => {
 
 // ── Manual (smart) trade — creates a bot-less trade ────────────────────
 const manualTrade = require('../services/manualTradeService');
-router.post('/manual-trade', authMiddleware, (req, res, next) => {
+router.post('/manual-trade', authMiddleware, writeCap, (req, res, next) => {
   try {
     const input = z.object({
       exchangeKeyId: z.coerce.number().int().positive().optional(),

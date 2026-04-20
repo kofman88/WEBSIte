@@ -7,7 +7,9 @@ const {
   loginLimiter,
   registerLimiter,
   passwordResetLimiter,
+  twoFactorLimiter,
 } = require('../middleware/auth');
+const { geoBlock } = require('../middleware/geoBlock');
 const validation = require('../utils/validation');
 
 const router = express.Router();
@@ -35,7 +37,7 @@ function handleServiceError(err, res, next) {
 }
 
 // POST /api/auth/register
-router.post('/register', registerLimiter, (req, res, next) => {
+router.post('/register', geoBlock(), registerLimiter, (req, res, next) => {
   try {
     const input = validation.registerSchema.parse(req.body);
     const out = authService.register({
@@ -108,6 +110,23 @@ router.get('/me', authMiddleware, (req, res, next) => {
     const user = authService.getUserPublic(req.userId);
     if (!user) return res.status(404).json({ error: 'User not found' });
     res.json({ user });
+  } catch (err) { handleServiceError(err, res, next); }
+});
+
+// GET /api/auth/me/export — GDPR subject-access export.
+router.get('/me/export', authMiddleware, (req, res, next) => {
+  try {
+    const dataExport = require('../services/dataExportService');
+    const data = dataExport.build(req.userId);
+    const ts = new Date().toISOString().replace(/[:.]/g, '-');
+    const db = require('../models/database');
+    db.prepare(`
+      INSERT INTO audit_log (user_id, action, entity_type, entity_id, ip_address, user_agent)
+      VALUES (?, 'user.data_export', 'user', ?, ?, ?)
+    `).run(req.userId, req.userId, req.ip, req.get('user-agent'));
+    res.setHeader('Content-Type', 'application/json; charset=utf-8');
+    res.setHeader('Content-Disposition', 'attachment; filename="chm-data-export-' + ts + '.json"');
+    res.send(JSON.stringify(data, null, 2));
   } catch (err) { handleServiceError(err, res, next); }
 });
 
@@ -203,7 +222,7 @@ router.post('/2fa/setup', authMiddleware, (req, res, next) => {
   } catch (err) { handleServiceError(err, res, next); }
 });
 
-router.post('/2fa/confirm', authMiddleware, (req, res, next) => {
+router.post('/2fa/confirm', authMiddleware, twoFactorLimiter, (req, res, next) => {
   try {
     const input = z.object({ code: z.string().min(6).max(16) }).parse(req.body);
     res.json(twoFactorService.confirm(req.userId, input.code));
@@ -225,7 +244,7 @@ router.post('/2fa/disable', authMiddleware, (req, res, next) => {
 });
 
 // Login completion when 2FA is enabled
-router.post('/2fa/verify-login', (req, res, next) => {
+router.post('/2fa/verify-login', twoFactorLimiter, (req, res, next) => {
   try {
     const input = z.object({
       pendingToken: z.string().min(10),

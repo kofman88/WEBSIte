@@ -17,9 +17,47 @@ const API_BASE = (location.hostname === 'localhost' || location.hostname === '12
 const WS_URL = (location.protocol === 'https:' ? 'wss://' : 'ws://') + location.host + '/ws';
 
 // ── Auth — token storage + refresh rotation ────────────────────────────
+// Impersonation mode: if the URL has #imp=<token>, we're a fresh tab opened
+// by an admin via ops. Store the token in sessionStorage only (this tab),
+// strip the hash, show a warning banner, and make Auth.accessToken prefer
+// sessionStorage over localStorage for this tab. Admin's own localStorage
+// session stays untouched in other tabs.
+(function bootImpersonation() {
+  try {
+    const m = /[#&]imp=([^&]+)/.exec(location.hash || '');
+    if (!m) return;
+    const token = decodeURIComponent(m[1]);
+    const em = /[#&]email=([^&]+)/.exec(location.hash || '');
+    const email = em ? decodeURIComponent(em[1]) : '';
+    sessionStorage.setItem('chm_imp_access', token);
+    if (email) sessionStorage.setItem('chm_imp_email', email);
+    history.replaceState({}, '', location.pathname + location.search);
+    // Inject a persistent banner. Fires as early as possible so the UI
+    // never renders without the warning.
+    document.addEventListener('DOMContentLoaded', () => {
+      const bar = document.createElement('div');
+      bar.style.cssText = 'position:fixed;top:0;left:0;right:0;z-index:9999;background:linear-gradient(90deg,#7f1d1d,#991b1b,#7f1d1d);color:#fee2e2;padding:8px 16px;font-size:12px;font-weight:600;text-align:center;letter-spacing:.05em;text-transform:uppercase;box-shadow:0 2px 12px rgba(0,0,0,.4)';
+      bar.textContent = '⚠️ IMPERSONATING ' + (email || 'user') + ' · end in 30m · all actions are audited';
+      document.body.prepend(bar);
+      document.body.style.paddingTop = '32px';
+    });
+  } catch (_e) {}
+})();
+
 const Auth = {
-  get accessToken() { try { return localStorage.getItem('chm_access'); } catch { return null; } },
-  get refreshToken() { try { return localStorage.getItem('chm_refresh'); } catch { return null; } },
+  get accessToken() {
+    try { return sessionStorage.getItem('chm_imp_access') || localStorage.getItem('chm_access'); }
+    catch { return null; }
+  },
+  get refreshToken() {
+    // Impersonation tokens don't get a refresh — once they expire (30m)
+    // the tab just falls out of auth, which is what we want.
+    if (sessionStorage.getItem('chm_imp_access')) return null;
+    try { return localStorage.getItem('chm_refresh'); } catch { return null; }
+  },
+  get isImpersonating() {
+    try { return Boolean(sessionStorage.getItem('chm_imp_access')); } catch { return false; }
+  },
   setTokens({ accessToken, refreshToken }) {
     try {
       if (accessToken) localStorage.setItem('chm_access', accessToken);
@@ -212,10 +250,70 @@ const API = {
   manualTrade: (payload) => apiRequest('POST', '/bots/manual-trade', payload),
   getTvWebhook: (botId) => apiRequest('GET', '/bots/' + botId + '/tv-webhook'),
   rotateTvWebhook: (botId) => apiRequest('POST', '/bots/' + botId + '/tv-webhook/rotate'),
-  // CSV download returns a URL (client navigates to it so Authorization
-  // can't go in header — we build a short-lived signed URL or use cookie.
-  // Simplest: open URL in new tab with token in query — acceptable since
-  // HTTPS and browser session is already authed. See analytics.html.
+
+  // Community / public
+  leaderboard: (opts = {}) => apiRequest('GET', '/public/leaderboard?' + qs(opts), null, { skipAuth: true }),
+  publicProfile: (code) => apiRequest('GET', '/public/u/' + code, null, { skipAuth: true }),
+  setPublicProfile: (enabled) => apiRequest('PUT', '/support/profile/public', { enabled }),
+  setPaperBalance: (amount) => apiRequest('PUT', '/support/profile/paper-balance', { amount }),
+
+  // Copy trading
+  copySubscribe: (leaderCode, opts = {}) => apiRequest('POST', '/copy/subscribe', { leaderCode, ...opts }),
+  copyUnsubscribe: (leaderId) => apiRequest('POST', '/copy/unsubscribe', { leaderId }),
+  copyListFollowing: () => apiRequest('GET', '/copy/following'),
+
+  // Strategy marketplace
+  marketList: (opts = {}) => apiRequest('GET', '/strategies?' + qs(opts), null, { skipAuth: true }),
+  marketGet: (slug) => apiRequest('GET', '/strategies/' + encodeURIComponent(slug), null, { skipAuth: true }),
+  marketPublish: (body) => apiRequest('POST', '/strategies', body),
+  marketInstall: (slug, body = {}) => apiRequest('POST', '/strategies/' + encodeURIComponent(slug) + '/install', body),
+  marketRate: (slug, stars) => apiRequest('POST', '/strategies/' + encodeURIComponent(slug) + '/rate', { stars }),
+  marketUnpublish: (slug) => apiRequest('DELETE', '/strategies/' + encodeURIComponent(slug)),
+
+  // Support tickets
+  listTickets: (opts = {}) => apiRequest('GET', '/support/tickets?' + qs(opts)),
+  createTicket: (subject, body) => apiRequest('POST', '/support/tickets', { subject, body }),
+  getTicket: (id) => apiRequest('GET', '/support/tickets/' + id),
+  replyTicket: (id, body) => apiRequest('POST', '/support/tickets/' + id + '/reply', { body }),
+  closeTicket: (id) => apiRequest('POST', '/support/tickets/' + id + '/close'),
+  listAllTickets: (opts = {}) => apiRequest('GET', '/support/admin/tickets?' + qs(opts)),
+
+  // Ops / back-office ------------------------------------------------------
+  opsDashboard: () => apiRequest('GET', '/admin/dashboard'),
+  adminListUsers: (opts = {}) => apiRequest('GET', '/admin/users?' + qs(opts)),
+  adminUserDetail: (id) => apiRequest('GET', '/admin/users/' + id + '/detail'),
+  adminSetUserActive: (id, isActive) => apiRequest('PATCH', '/admin/users/' + id + '/active', { isActive }),
+  adminSetUserPlan: (id, plan, durationDays = 30) => apiRequest('PATCH', '/admin/users/' + id + '/plan', { plan, durationDays }),
+  adminSetUserAdmin: (id, isAdmin) => apiRequest('PATCH', '/admin/users/' + id + '/admin', { isAdmin }),
+  adminNotifyUser: (id, payload) => apiRequest('POST', '/admin/users/' + id + '/notify', payload),
+  adminListBots: (opts = {}) => apiRequest('GET', '/admin/bots?' + qs(opts)),
+  adminListTrades: (opts = {}) => apiRequest('GET', '/admin/trades?' + qs(opts)),
+  adminListSignals: (opts = {}) => apiRequest('GET', '/admin/signals?' + qs(opts)),
+  adminSystem: () => apiRequest('GET', '/admin/system'),
+  adminListPayments: (opts = {}) => apiRequest('GET', '/admin/payments?' + qs(opts)),
+  adminConfirmPayment: (id, note) => apiRequest('POST', '/admin/payments/' + id + '/confirm', { note }),
+  adminRefundPayment: (id, reason) => apiRequest('POST', '/admin/payments/' + id + '/refund', { reason }),
+  adminListPromoCodes: () => apiRequest('GET', '/admin/promo-codes'),
+  adminCreatePromoCode: (body) => apiRequest('POST', '/admin/promo-codes', body),
+  adminTogglePromoCode: (id, isActive) => apiRequest('PATCH', '/admin/promo-codes/' + id + '/active', { isActive }),
+  adminDeletePromoCode: (id) => apiRequest('DELETE', '/admin/promo-codes/' + id),
+  adminListRewards: (opts = {}) => apiRequest('GET', '/admin/ref-rewards?' + qs(opts)),
+  adminPayReward: (id) => apiRequest('POST', '/admin/ref-rewards/' + id + '/pay'),
+  adminCancelReward: (id, reason) => apiRequest('POST', '/admin/ref-rewards/' + id + '/cancel', { reason }),
+  adminAuditLog: (opts = {}) => apiRequest('GET', '/admin/audit?' + qs(opts)),
+  adminListFlags: () => apiRequest('GET', '/admin/flags'),
+  adminSetFlag: (key, value) => apiRequest('PATCH', '/admin/flags/' + encodeURIComponent(key), { value }),
+  adminRevenueSeries: (days = 30) => apiRequest('GET', '/admin/revenue-timeseries?days=' + days),
+  adminBillingAnalytics: () => apiRequest('GET', '/admin/billing-analytics'),
+  adminAuditAnalytics: (days = 14) => apiRequest('GET', '/admin/audit-analytics?days=' + days),
+  adminImpersonate: (id, reason) => apiRequest('POST', '/admin/users/' + id + '/impersonate', { reason }),
+  adminListRoles: () => apiRequest('GET', '/admin/roles'),
+  adminSetUserRole: (id, role) => apiRequest('PATCH', '/admin/users/' + id + '/admin-role', { role }),
+
+  pushVapidKey: () => apiRequest('GET', '/push/vapid-key', null, { skipAuth: true }),
+  pushSubscribe: (subscription) => apiRequest('POST', '/push/subscribe', { subscription }),
+  pushUnsubscribe: (endpoint) => apiRequest('POST', '/push/unsubscribe', { endpoint }),
+  pushTest: () => apiRequest('POST', '/push/test'),
 };
 
 function saveAuthResp(data) {

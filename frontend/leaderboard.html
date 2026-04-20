@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="preconnect" href="https://api.iconify.design" crossorigin>
+  <meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+  <title>CHM Finance — Leaderboard</title>
+  <meta name="description" content="Топ трейдеров CHM Finance. Публичный рейтинг по P&L, win rate, Sharpe."/>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet"/>
+  <link rel="stylesheet" href="tailwind.css"/>
+  <link rel="stylesheet" href="styles.css"/>
+</head>
+<body style="background:#0A0A0A;color:#E5E5E5;font-family:'Inter',sans-serif;min-height:100vh">
+
+<header style="border-bottom:1px solid rgba(255,255,255,.06);padding:18px 24px">
+  <div style="max-width:1100px;margin:0 auto;display:flex;align-items:center;justify-content:space-between">
+    <a href="/" style="font-weight:600;font-size:22px;letter-spacing:-.02em;color:#fff;text-decoration:none">CHM<span style="color:#5C80E3">.</span></a>
+    <div class="flex items-center gap-3 text-sm">
+      <a href="/" class="text-slate-400 hover:text-white">Главная</a>
+      <a href="/dashboard.html" class="text-slate-400 hover:text-white">Дашборд</a>
+      <a href="/status.html" class="text-slate-400 hover:text-white">Статус</a>
+    </div>
+  </div>
+</header>
+
+<main style="max-width:1100px;margin:0 auto;padding:48px 24px">
+  <div class="text-center mb-10">
+    <h1 class="text-3xl font-bold mb-2">Leaderboard</h1>
+    <p class="text-slate-400 text-sm" style="max-width:520px;margin:0 auto">Лучшие трейдеры CHM Finance по закрытым paper/live-сделкам. В список попадают только участники, открывшие публичный профиль в настройках.</p>
+  </div>
+
+  <div class="flex flex-wrap items-center justify-between gap-4 mb-6">
+    <div class="flex gap-2 flex-wrap">
+      <button class="lbo-period text-xs px-3 py-1.5 rounded-lg bg-indigo-500/20 text-indigo-300 border border-indigo-500/30" data-period="30d">30 дней</button>
+      <button class="lbo-period text-xs px-3 py-1.5 rounded-lg bg-slate-800/50 text-slate-400 border border-slate-700 hover:text-white" data-period="90d">90 дней</button>
+      <button class="lbo-period text-xs px-3 py-1.5 rounded-lg bg-slate-800/50 text-slate-400 border border-slate-700 hover:text-white" data-period="1y">1 год</button>
+      <button class="lbo-period text-xs px-3 py-1.5 rounded-lg bg-slate-800/50 text-slate-400 border border-slate-700 hover:text-white" data-period="all">Всё время</button>
+    </div>
+    <select id="lboSort" class="bg-slate-800/50 border border-slate-700 rounded-lg px-3 py-2 text-sm text-slate-300 outline-none">
+      <option value="pnl">По PnL</option>
+      <option value="roi">По ROI %</option>
+      <option value="winrate">По Win Rate (10+ сделок)</option>
+      <option value="sharpe">По Sharpe (10+ сделок)</option>
+    </select>
+  </div>
+
+  <div class="card">
+    <div class="overflow-x-auto">
+      <table class="w-full text-sm">
+        <thead>
+          <tr class="text-xs text-slate-500 uppercase tracking-wider">
+            <th class="text-left p-3">#</th>
+            <th class="text-left p-3">Трейдер</th>
+            <th class="text-right p-3">Total PnL</th>
+            <th class="text-right p-3">Win Rate</th>
+            <th class="text-right p-3">ROI %</th>
+            <th class="text-right p-3">Sharpe</th>
+            <th class="text-right p-3">Сделок</th>
+            <th class="text-right p-3"></th>
+          </tr>
+        </thead>
+        <tbody id="lboBody">
+          <tr><td colspan="7" class="p-8 text-center text-slate-500">Загрузка…</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="text-center mt-8 text-xs text-slate-500" style="max-width:520px;margin-left:auto;margin-right:auto">
+    Хочешь попасть в рейтинг? Зайди в <a href="/settings.html" class="text-indigo-400 hover:underline">Настройки → Профиль</a> и включи «Публичный профиль».
+  </div>
+</main>
+
+<script src="app.js"></script>
+<script>
+let currentPeriod = '30d';
+let currentSort = 'pnl';
+
+async function loadBoard() {
+  const body = document.getElementById('lboBody');
+  body.innerHTML = '<tr><td colspan="7" class="p-8 text-center text-slate-500">Загрузка…</td></tr>';
+  try {
+    const r = await API.leaderboard({ period: currentPeriod, sort: currentSort, limit: 100 });
+    if (!r.traders.length) {
+      body.innerHTML = '<tr><td colspan="7" class="p-8 text-center text-slate-500">Пока нет данных. Открой публичный профиль первым — <a href="/settings.html" class="text-indigo-400">в настройках</a>.</td></tr>';
+      return;
+    }
+    body.innerHTML = r.traders.map((t) => {
+      const pnlClass = t.totalPnl > 0 ? 'text-green-400' : t.totalPnl < 0 ? 'text-red-400' : 'text-slate-400';
+      const medal = t.rank === 1 ? '🥇' : t.rank === 2 ? '🥈' : t.rank === 3 ? '🥉' : t.rank;
+      return `<tr class="border-t border-slate-800/50 hover:bg-slate-800/20">
+        <td class="p-3 text-slate-300 font-semibold">${medal}</td>
+        <td class="p-3">
+          <a href="/u.html?code=${encodeURIComponent(t.referralCode)}" class="text-indigo-300 hover:text-indigo-200 hover:underline">${escHtml(t.displayName)}</a>
+        </td>
+        <td class="p-3 text-right font-mono ${pnlClass}">${Fmt.currency(t.totalPnl)}</td>
+        <td class="p-3 text-right">${t.closedTrades >= 10 ? Fmt.percent(t.winRate * 100, { decimals: 1 }) : '—'}</td>
+        <td class="p-3 text-right text-slate-300">${t.roi !== null ? t.roi.toFixed(1) + '%' : '—'}</td>
+        <td class="p-3 text-right text-slate-300">${t.sharpe !== null ? t.sharpe.toFixed(2) : '—'}</td>
+        <td class="p-3 text-right text-slate-400">${t.closedTrades}</td>
+        <td class="p-3 text-right"><button onclick="copyFollow('${escHtml(t.referralCode)}', '${escHtml(t.displayName).replace(/'/g,"\\'")}')" class="text-xs px-2 py-1 rounded bg-indigo-500/15 text-indigo-300 hover:bg-indigo-500/25">Copy</button></td>
+      </tr>`;
+    }).join('');
+  } catch (err) {
+    body.innerHTML = `<tr><td colspan="7" class="p-8 text-center text-red-400">${escHtml(err.message || 'Ошибка')}</td></tr>`;
+  }
+}
+function escHtml(s) { return String(s || '').replace(/[&<>"']/g, (c) => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+
+document.querySelectorAll('.lbo-period').forEach((btn) => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.lbo-period').forEach((b) => {
+      b.classList.remove('bg-indigo-500/20','text-indigo-300','border-indigo-500/30');
+      b.classList.add('bg-slate-800/50','text-slate-400','border-slate-700');
+    });
+    btn.classList.add('bg-indigo-500/20','text-indigo-300','border-indigo-500/30');
+    btn.classList.remove('bg-slate-800/50','text-slate-400','border-slate-700');
+    currentPeriod = btn.getAttribute('data-period');
+    loadBoard();
+  });
+});
+document.getElementById('lboSort').addEventListener('change', (e) => {
+  currentSort = e.target.value;
+  loadBoard();
+});
+window.copyFollow = async function(code, name) {
+  if (typeof Auth === 'undefined' || !Auth.isLoggedIn()) { location.href = '/?login=1'; return; }
+  if (!confirm('Копировать сделки от ' + name + '? Сигналы будут отзеркалены в твой paper-аккаунт. Отписаться — в Настройках.')) return;
+  try {
+    const r = await API.copySubscribe(code, { mode: 'paper', riskMult: 1 });
+    (window.Toast || { success: alert }).success('Следишь за ' + r.leaderName);
+  } catch (e) { (window.Toast || { error: alert }).error(e.message || 'Ошибка'); }
+};
+
+loadBoard();
+</script>
+</body>
+</html>

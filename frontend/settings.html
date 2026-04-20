@@ -24,6 +24,7 @@
     <a href="analytics.html" class="sidebar-link" data-page="analytics"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 3v18h18"/><path d="M7 14l4-4 4 4 5-5"/></svg>Аналитика</a>
     <a href="backtests.html" class="sidebar-link" data-page="backtests"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6m6 0h10"/></svg>Бэктесты</a>
     <a href="wallet.html" class="sidebar-link" data-page="wallet"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12V7H5a2 2 0 010-4h14v4M3 5v14a2 2 0 002 2h16v-5"/></svg>Кошелёк</a>
+    <a href="leaderboard.html" class="sidebar-link" data-page="leaderboard"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>Leaderboard</a>
     <a href="settings.html" class="sidebar-link active" data-page="settings"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/></svg>Настройки</a>
   </nav>
   <div class="sidebar-footer"><button onclick="Auth.logout()" class="sidebar-link" style="color:#C8B9B9"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4M16 17l5-5-5-5M21 12H9"/></svg>Выйти</button></div>
@@ -38,6 +39,8 @@
     <button class="stab" onclick="stab('trading')">Торговля</button>
     <button class="stab" onclick="stab('notifications')">Уведомления</button>
     <button class="stab" onclick="stab('security')">Безопасность</button>
+    <button class="stab" onclick="stab('community')">Сообщество</button>
+    <button class="stab" onclick="stab('support')">Поддержка</button>
   </div>
 
   <!-- PROFILE -->
@@ -56,6 +59,7 @@
           <div><label class="text-sm text-slate-400 block mb-1">Часовой пояс</label><select class="w-full bg-slate-800/50 border border-slate-700 rounded-xl px-4 py-3 text-white outline-none"><option>UTC+3 (Moscow)</option><option>UTC+0 (London)</option><option>UTC-5 (New York)</option></select></div>
         </div>
         <button type="button" onclick="Toast.success('Профиль сохранён')" class="px-6 py-2.5 rounded-xl font-semibold text-white text-sm" style="background:linear-gradient(180deg,#2A5BE8 0%,#1D4ED8 60%,#143797 100%);box-shadow:inset 0 1px 1px rgba(255,255,255,.28),inset 0 -1px 3px rgba(0,0,0,.6),0 4px 8px -2px rgba(0,0,0,.6),0 0 0 1px rgba(29,78,216,.35)">Сохранить</button>
+        <button type="button" onclick="location.href='/dashboard.html?tour=1'" class="ml-2 text-xs text-slate-400 hover:text-white underline">Показать обзорный тур</button>
       </form>
     </div>
   </div>
@@ -104,6 +108,7 @@
         <div><label class="text-sm text-slate-400 block mb-1">Биржа по умолчанию</label><select class="w-full bg-slate-800/50 border border-slate-700 rounded-xl px-4 py-3 text-white outline-none"><option>Bybit</option><option>Binance</option><option>BingX</option></select></div>
         <div><label class="text-sm text-slate-400 block mb-2">Leverage по умолчанию: <span id="levVal" class="text-indigo-400">10x</span></label><input type="range" min="1" max="100" value="10" class="w-full" oninput="document.getElementById('levVal').textContent=this.value+'x'"/></div>
         <div><label class="text-sm text-slate-400 block mb-2">Риск на сделку: <span id="riskVal" class="text-indigo-400">2%</span></label><input type="range" min="0.5" max="10" step="0.5" value="2" class="w-full" oninput="document.getElementById('riskVal').textContent=this.value+'%'"/></div>
+        <div><label class="text-sm text-slate-400 block mb-1">Стартовый баланс (paper)</label><div class="flex gap-2"><input id="paperBalanceInput" type="number" value="10000" min="100" max="10000000" step="100" class="flex-1 bg-slate-800/50 border border-slate-700 rounded-xl px-4 py-3 text-white outline-none"/><button type="button" id="paperBalanceSave" class="px-4 py-3 rounded-xl text-sm font-semibold text-white" style="background:linear-gradient(180deg,#2A5BE8,#1D4ED8 60%,#143797)">Применить</button></div><div class="text-xs text-slate-500 mt-1">Виртуальный баланс для бумажной торговли и Equity-кривой. От $100 до $10 000 000.</div></div>
         <div><label class="text-sm text-slate-400 block mb-1">Макс. одновременных сделок</label><input type="number" value="5" min="1" max="20" class="w-full bg-slate-800/50 border border-slate-700 rounded-xl px-4 py-3 text-white outline-none"/></div>
         <div><label class="text-sm text-slate-400 block mb-1">Дневной лимит потерь (%)</label><input type="number" value="5" step="0.5" class="w-full bg-slate-800/50 border border-slate-700 rounded-xl px-4 py-3 text-white outline-none"/></div>
         <div class="flex items-center justify-between p-3 bg-slate-800/30 rounded-xl"><span class="text-sm">Авто-торговля</span><div class="toggle on" onclick="this.classList.toggle('on')"></div></div>
@@ -152,6 +157,20 @@
         </table>
       </div>
       <button id="savePrefsBtn" class="mt-4 px-5 py-2 rounded-xl font-semibold text-white text-sm" style="background:linear-gradient(180deg,#2A5BE8 0%,#1D4ED8 60%,#143797 100%)">Сохранить</button>
+    </div>
+
+    <div class="card max-w-2xl mt-6">
+      <div class="flex items-start gap-3 mb-2">
+        <div class="w-10 h-10 rounded-lg bg-indigo-500/10 flex items-center justify-center shrink-0">
+          <iconify-icon icon="solar:bell-bing-linear" style="color:#5C80E3;font-size:20px"></iconify-icon>
+        </div>
+        <div class="flex-1">
+          <h3 class="font-bold mb-1">Push-уведомления</h3>
+          <div id="pushStatus" class="text-sm text-slate-400">Проверяем поддержку…</div>
+        </div>
+        <button id="pushToggleBtn" class="text-sm px-4 py-2 rounded-lg bg-indigo-500/10 border border-indigo-500/30 text-indigo-400 hover:bg-indigo-500/20 shrink-0 hidden">Включить</button>
+      </div>
+      <button id="pushTestBtn" class="text-xs text-slate-500 hover:text-white hidden mt-2">Отправить тестовое уведомление</button>
     </div>
   </div>
 
@@ -225,9 +244,97 @@
     <div class="card max-w-2xl">
       <h3 class="font-bold mb-4 text-red-400">Опасная зона</h3>
       <div class="flex gap-3">
-        <button class="text-sm px-4 py-2 rounded-lg bg-slate-800/50 border border-slate-700 text-slate-400">Экспорт данных</button>
+        <button type="button" id="exportDataBtn" class="text-sm px-4 py-2 rounded-lg bg-slate-800/50 border border-slate-700 text-slate-300 hover:text-white">⬇ Экспорт данных (JSON)</button>
         <button class="text-sm px-4 py-2 rounded-lg bg-red-500/10 border border-red-500/20 text-red-400">Удалить аккаунт</button>
       </div>
+    </div>
+  </div>
+
+  <!-- COMMUNITY -->
+  <div class="stab-content" id="stab-community">
+    <div class="card max-w-2xl mb-6">
+      <div class="flex items-start gap-3 mb-4">
+        <div class="w-10 h-10 rounded-lg bg-indigo-500/10 flex items-center justify-center shrink-0">
+          <iconify-icon icon="solar:users-group-rounded-linear" style="color:#5C80E3;font-size:20px"></iconify-icon>
+        </div>
+        <div class="flex-1">
+          <h3 class="font-bold mb-1">Публичный профиль</h3>
+          <div class="text-sm text-slate-400">Включи, чтобы твои обезличенные результаты (PnL, win rate, стратегии) появились в публичном <a href="/leaderboard.html" class="text-indigo-400 hover:underline">Leaderboard</a>.</div>
+        </div>
+        <div id="pubToggle" class="toggle shrink-0" onclick="togglePublic()" role="switch" aria-checked="false"></div>
+      </div>
+      <div id="pubProfileLink" class="hidden p-3 bg-slate-800/40 rounded-xl border border-slate-700">
+        <div class="text-xs text-slate-500 mb-1">Твой публичный профиль:</div>
+        <a id="pubProfileUrl" href="#" target="_blank" rel="noopener" class="text-indigo-400 hover:text-indigo-300 text-sm font-mono break-all"></a>
+      </div>
+      <div class="text-xs text-slate-500 mt-3">
+        Видимы: display name (или <span class="mono">Trader#XXXX</span>), суммарный PnL, win rate, последние 30 сделок (символ + % PnL). Email и точные объёмы всегда скрыты.
+      </div>
+    </div>
+
+    <div class="card max-w-2xl">
+      <h3 class="font-bold mb-1">Leaderboard</h3>
+      <div class="text-sm text-slate-400 mb-3">Соревнуйся с другими трейдерами CHM Finance.</div>
+      <a href="/leaderboard.html" class="inline-block text-sm px-4 py-2 rounded-lg bg-indigo-500/10 border border-indigo-500/30 text-indigo-400 hover:bg-indigo-500/20">Открыть Leaderboard →</a>
+    </div>
+  </div>
+
+  <!-- SUPPORT -->
+  <div class="stab-content" id="stab-support">
+    <div class="card max-w-2xl mb-6">
+      <div class="flex items-start justify-between mb-4">
+        <div>
+          <h3 class="font-bold mb-1">Тикеты в поддержку</h3>
+          <div class="text-sm text-slate-400">Задай вопрос или сообщи о проблеме — мы ответим в течение 24 часов.</div>
+        </div>
+        <button id="newTicketBtn" class="text-sm px-4 py-2 rounded-lg font-semibold text-white shrink-0" style="background:linear-gradient(180deg,#2A5BE8 0%,#1D4ED8 60%,#143797 100%)">Новый тикет</button>
+      </div>
+      <div id="ticketsList" class="space-y-2"><div class="text-xs text-slate-500 text-center py-4">Загрузка…</div></div>
+    </div>
+
+    <div class="card max-w-2xl">
+      <h3 class="font-bold mb-2">Быстрые ответы</h3>
+      <div class="text-sm text-slate-400 space-y-2">
+        <div>• <a href="/faq.html" class="text-indigo-400 hover:underline">FAQ</a> — частые вопросы</div>
+        <div>• <a href="/api-docs.html" class="text-indigo-400 hover:underline">API Documentation</a> — для разработчиков</div>
+        <div>• <a href="/status.html" class="text-indigo-400 hover:underline">Статус системы</a> — проверить работоспособность</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- NEW TICKET MODAL -->
+  <div id="newTicketModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.7);backdrop-filter:blur(8px);z-index:100;align-items:center;justify-content:center">
+    <div class="card" style="width:100%;max-width:560px;margin:16px">
+      <div class="flex items-center justify-between mb-4">
+        <h3 class="font-bold text-lg">Новый тикет</h3>
+        <button onclick="closeTicketModal()" class="text-slate-400 hover:text-white" style="background:none;border:none;cursor:pointer"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 6l12 12M6 18L18 6"/></svg></button>
+      </div>
+      <form id="ticketForm" class="space-y-4">
+        <div><label class="text-sm text-slate-400 block mb-1">Тема</label><input name="subject" required minlength="3" maxlength="200" class="w-full bg-slate-800/50 border border-slate-700 rounded-xl px-4 py-3 text-white outline-none" placeholder="Кратко опишите проблему"/></div>
+        <div><label class="text-sm text-slate-400 block mb-1">Описание</label><textarea name="body" required minlength="10" maxlength="10000" rows="6" class="w-full bg-slate-800/50 border border-slate-700 rounded-xl px-4 py-3 text-white outline-none" placeholder="Что случилось, что вы ожидали, когда произошло. Чем детальнее — тем быстрее ответ."></textarea></div>
+        <button type="submit" class="w-full px-6 py-3 rounded-xl font-semibold text-white text-sm" style="background:linear-gradient(180deg,#2A5BE8 0%,#1D4ED8 60%,#143797 100%)">Создать тикет</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- TICKET DETAIL MODAL -->
+  <div id="ticketDetailModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.7);backdrop-filter:blur(8px);z-index:100;align-items:center;justify-content:center">
+    <div class="card" style="width:100%;max-width:640px;margin:16px;max-height:92vh;display:flex;flex-direction:column">
+      <div class="flex items-center justify-between mb-4">
+        <div>
+          <h3 class="font-bold text-lg" id="tdSubject">—</h3>
+          <div class="text-xs text-slate-500 mt-1" id="tdMeta">—</div>
+        </div>
+        <button onclick="closeTicketDetail()" class="text-slate-400 hover:text-white" style="background:none;border:none;cursor:pointer"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 6l12 12M6 18L18 6"/></svg></button>
+      </div>
+      <div id="tdMessages" class="flex-1 overflow-y-auto space-y-3 mb-4" style="min-height:200px;max-height:400px"></div>
+      <form id="tdReplyForm" class="space-y-3" style="border-top:1px solid rgba(255,255,255,.06);padding-top:12px">
+        <textarea name="body" required minlength="1" maxlength="10000" rows="3" class="w-full bg-slate-800/50 border border-slate-700 rounded-xl px-4 py-3 text-white outline-none" placeholder="Ваш ответ…"></textarea>
+        <div class="flex gap-3">
+          <button type="submit" class="flex-1 px-5 py-2.5 rounded-xl font-semibold text-white text-sm" style="background:linear-gradient(180deg,#2A5BE8 0%,#1D4ED8 60%,#143797 100%)">Отправить</button>
+          <button type="button" id="tdCloseBtn" class="text-sm px-4 py-2.5 rounded-xl bg-slate-800/50 border border-slate-700 text-slate-400 hover:text-white">Закрыть тикет</button>
+        </div>
+      </form>
     </div>
   </div>
 </main>
@@ -704,6 +811,274 @@ loadPrefs();
     history.replaceState({}, '', location.pathname);
   } catch (_e) {}
 })();
+
+// ── Community tab: public profile toggle ──
+let _pubState = false;
+function escTk(s){return String(s||'').replace(/[&<>"']/g,(c)=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
+async function loadPublicState(){
+  try{
+    const r = await API.me();
+    const me = r.user || r;
+    _pubState = Boolean(me.publicProfile);
+    const t = document.getElementById('pubToggle');
+    if(t){ t.classList.toggle('on', _pubState); t.setAttribute('aria-checked', _pubState); }
+    const link = document.getElementById('pubProfileLink');
+    const url = document.getElementById('pubProfileUrl');
+    if(_pubState && me.referralCode){
+      const full = location.origin + '/u.html?code=' + encodeURIComponent(me.referralCode);
+      url.textContent = full; url.href = full;
+      link.classList.remove('hidden');
+    } else if(link){ link.classList.add('hidden'); }
+  } catch(_){}
+}
+async function togglePublic(){
+  const t = document.getElementById('pubToggle');
+  const next = !_pubState;
+  t.classList.toggle('on', next);
+  try{
+    await API.setPublicProfile(next);
+    _pubState = next;
+    Toast.success(next ? 'Профиль публичный' : 'Профиль скрыт');
+    loadPublicState();
+  } catch(e){
+    t.classList.toggle('on', _pubState);
+    Toast.error(e.message || 'Ошибка');
+  }
+}
+
+// ── Support tab: tickets list + create + detail ──
+let _currentTicketId = null;
+async function loadTickets(){
+  const box = document.getElementById('ticketsList');
+  if(!box) return;
+  try{
+    const r = await API.listTickets();
+    const ts = r.tickets || [];
+    if(!ts.length){
+      box.innerHTML = '<div class="text-xs text-slate-500 text-center py-4">У вас пока нет тикетов</div>';
+      return;
+    }
+    box.innerHTML = ts.map((t)=>{
+      const st = t.status || 'open';
+      const stColor = st==='open'?'bg-green-500/15 text-green-400':st==='pending'?'bg-yellow-500/15 text-yellow-400':'bg-slate-700/30 text-slate-500';
+      const date = new Date(t.updatedAt||t.createdAt||Date.now()).toLocaleString('ru-RU');
+      return `<button class="w-full text-left p-3 rounded-xl bg-slate-800/30 hover:bg-slate-800/50 transition" onclick="openTicket(${t.id})">
+        <div class="flex items-center justify-between mb-1">
+          <span class="font-semibold text-sm text-slate-200">${escTk(t.subject)}</span>
+          <span class="text-[10px] px-2 py-0.5 rounded ${stColor} uppercase tracking-wider">${st}</span>
+        </div>
+        <div class="text-xs text-slate-500">#${t.id} · ${date}</div>
+      </button>`;
+    }).join('');
+  } catch(e){
+    box.innerHTML = '<div class="text-xs text-red-400 text-center py-4">'+escTk(e.message||'Ошибка')+'</div>';
+  }
+}
+function openTicketModal(){ const m=document.getElementById('newTicketModal'); if(m) m.style.display='flex'; }
+function closeTicketModal(){ const m=document.getElementById('newTicketModal'); if(m) m.style.display='none'; const f=document.getElementById('ticketForm'); if(f) f.reset(); }
+async function openTicket(id){
+  _currentTicketId = id;
+  const modal = document.getElementById('ticketDetailModal');
+  modal.style.display='flex';
+  document.getElementById('tdSubject').textContent = '#'+id;
+  document.getElementById('tdMessages').innerHTML = '<div class="text-center text-slate-500 text-xs py-4">Загрузка…</div>';
+  try{
+    const t = await API.getTicket(id);
+    document.getElementById('tdSubject').textContent = t.subject;
+    document.getElementById('tdMeta').textContent = 'Статус: '+t.status+' · #'+t.id;
+    const closed = t.status === 'closed';
+    document.getElementById('tdCloseBtn').style.display = closed ? 'none' : '';
+    document.getElementById('tdMessages').innerHTML = (t.messages||[]).map((m)=>{
+      const isAdmin = m.isAdmin;
+      return `<div class="p-3 rounded-lg ${isAdmin?'bg-indigo-500/10 border border-indigo-500/20':'bg-slate-800/40'}">
+        <div class="text-[10px] uppercase tracking-wider mb-1 ${isAdmin?'text-indigo-400':'text-slate-500'}">${isAdmin?'Поддержка':'Вы'} · ${new Date(m.createdAt).toLocaleString('ru-RU')}</div>
+        <div class="text-sm text-slate-200 whitespace-pre-wrap">${escTk(m.body)}</div>
+      </div>`;
+    }).join('');
+    const box = document.getElementById('tdMessages');
+    box.scrollTop = box.scrollHeight;
+  } catch(e){
+    document.getElementById('tdMessages').innerHTML = '<div class="text-center text-red-400 text-xs py-4">'+escTk(e.message||'Ошибка')+'</div>';
+  }
+}
+function closeTicketDetail(){ document.getElementById('ticketDetailModal').style.display='none'; _currentTicketId=null; loadTickets(); }
+
+// ── Web Push ──────────────────────────────────────────────────────────
+const Push = (() => {
+  const $status = () => document.getElementById('pushStatus');
+  const $btn = () => document.getElementById('pushToggleBtn');
+  const $test = () => document.getElementById('pushTestBtn');
+
+  function supported() {
+    return 'serviceWorker' in navigator && 'PushManager' in window && 'Notification' in window;
+  }
+  function urlB64ToUint8Array(base64) {
+    const padding = '='.repeat((4 - base64.length % 4) % 4);
+    const b64 = (base64 + padding).replace(/-/g, '+').replace(/_/g, '/');
+    const raw = atob(b64);
+    const out = new Uint8Array(raw.length);
+    for (let i = 0; i < raw.length; i++) out[i] = raw.charCodeAt(i);
+    return out;
+  }
+
+  async function status() {
+    if (!supported()) {
+      $status().textContent = 'Браузер не поддерживает push-уведомления';
+      return;
+    }
+    try {
+      const reg = await navigator.serviceWorker.getRegistration();
+      const sub = reg ? await reg.pushManager.getSubscription() : null;
+      const perm = Notification.permission;
+      if (perm === 'denied') {
+        $status().innerHTML = 'Заблокировано в настройках браузера. <a href="https://support.google.com/chrome/answer/3220216" target="_blank" class="text-indigo-400">Как разрешить</a>.';
+        $btn().classList.add('hidden');
+        return;
+      }
+      if (sub) {
+        $status().textContent = 'Включены · ' + (navigator.userAgent.slice(0, 60)) + '…';
+        $btn().textContent = 'Выключить';
+        $btn().classList.remove('hidden');
+        $test().classList.remove('hidden');
+      } else {
+        $status().textContent = 'Выключены. Включи, чтобы получать уведомления о сделках / сигналах / безопасности.';
+        $btn().textContent = 'Включить';
+        $btn().classList.remove('hidden');
+        $test().classList.add('hidden');
+      }
+    } catch (e) { $status().textContent = 'Ошибка: ' + e.message; }
+  }
+
+  async function enable() {
+    if (!supported()) return Toast.error('Не поддерживается браузером');
+    try {
+      const vapid = await API.pushVapidKey();
+      if (!vapid.publicKey) { Toast.error('Push не настроен на сервере'); return; }
+      const perm = await Notification.requestPermission();
+      if (perm !== 'granted') { Toast.warn('Разрешение не получено'); return status(); }
+      const reg = await navigator.serviceWorker.register('/sw.js');
+      await navigator.serviceWorker.ready;
+      const sub = await reg.pushManager.subscribe({
+        userVisibleOnly: true,
+        applicationServerKey: urlB64ToUint8Array(vapid.publicKey),
+      });
+      await API.pushSubscribe(sub.toJSON());
+      Toast.success('Push включён');
+      status();
+    } catch (e) { Toast.error(e.message || 'Ошибка'); }
+  }
+
+  async function disable() {
+    try {
+      const reg = await navigator.serviceWorker.getRegistration();
+      const sub = reg ? await reg.pushManager.getSubscription() : null;
+      if (sub) {
+        await API.pushUnsubscribe(sub.endpoint).catch(() => {});
+        await sub.unsubscribe();
+      }
+      Toast.success('Push выключен');
+      status();
+    } catch (e) { Toast.error(e.message || 'Ошибка'); }
+  }
+
+  async function test() {
+    try { await API.pushTest(); Toast.success('Отправлено — проверь уведомления'); }
+    catch (e) { Toast.error(e.message || 'Ошибка'); }
+  }
+
+  return { status, enable, disable, test, supported };
+})();
+
+document.addEventListener('DOMContentLoaded', () => {
+  Push.status();
+  const pb = document.getElementById('pushToggleBtn');
+  if (pb) pb.addEventListener('click', () => {
+    if (pb.textContent.trim().startsWith('В')) {
+      if (pb.textContent.trim() === 'Включить') Push.enable(); else Push.disable();
+    }
+  });
+  const pt = document.getElementById('pushTestBtn');
+  if (pt) pt.addEventListener('click', () => Push.test());
+
+  // Paper starting balance — fetch current value + wire save button
+  (async () => {
+    const inp = document.getElementById('paperBalanceInput');
+    const btn = document.getElementById('paperBalanceSave');
+    if (!inp || !btn) return;
+    try {
+      const me = await API.me();
+      const u = me.user || me;
+      if (u && Number(u.paperStartingBalance) > 0) inp.value = u.paperStartingBalance;
+    } catch (_e) {}
+    btn.addEventListener('click', async () => {
+      const amount = parseFloat(inp.value);
+      if (!(amount >= 100 && amount <= 10_000_000)) { Toast.error('От $100 до $10M'); return; }
+      try { await API.setPaperBalance(amount); Toast.success('Сохранено · обнови дашборд'); }
+      catch (e) { Toast.error(e.message || 'Ошибка'); }
+    });
+  })();
+
+  const eb = document.getElementById('exportDataBtn');
+  if (eb) eb.addEventListener('click', async () => {
+    if (!confirm('Скачать ZIP / JSON со всеми вашими данными (профиль, сделки, платежи, логины, тикеты)? Это может занять до 30 секунд.')) return;
+    try {
+      eb.disabled = true; eb.textContent = 'Готовим экспорт…';
+      const res = await fetch('/api/auth/me/export', {
+        headers: { Authorization: 'Bearer ' + Auth.accessToken },
+      });
+      if (!res.ok) throw new Error('HTTP ' + res.status);
+      const blob = await res.blob();
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'chm-data-export.json';
+      document.body.appendChild(a); a.click(); a.remove();
+      setTimeout(() => URL.revokeObjectURL(url), 1000);
+      Toast.success('Файл скачан');
+    } catch (err) { Toast.error(err.message || 'Ошибка'); }
+    finally { eb.disabled = false; eb.textContent = '⬇ Экспорт данных (JSON)'; }
+  });
+  const nb = document.getElementById('newTicketBtn'); if(nb) nb.addEventListener('click', openTicketModal);
+  const tf = document.getElementById('ticketForm');
+  if(tf) tf.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const fd = new FormData(tf);
+    try{
+      await API.createTicket(fd.get('subject'), fd.get('body'));
+      Toast.success('Тикет создан');
+      closeTicketModal();
+      loadTickets();
+    } catch(err){ Toast.error(err.message || 'Ошибка'); }
+  });
+  const rf = document.getElementById('tdReplyForm');
+  if(rf) rf.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    if(!_currentTicketId) return;
+    const fd = new FormData(rf);
+    try{
+      await API.replyTicket(_currentTicketId, fd.get('body'));
+      rf.reset();
+      openTicket(_currentTicketId);
+    } catch(err){ Toast.error(err.message || 'Ошибка'); }
+  });
+  const cb = document.getElementById('tdCloseBtn');
+  if(cb) cb.addEventListener('click', async () => {
+    if(!_currentTicketId) return;
+    if(!confirm('Закрыть тикет?')) return;
+    try{
+      await API.closeTicket(_currentTicketId);
+      Toast.success('Тикет закрыт');
+      closeTicketDetail();
+    } catch(err){ Toast.error(err.message || 'Ошибка'); }
+  });
+  // Hooks: when user clicks the new tabs, lazily fetch data
+  const origStab = window.stab;
+  window.stab = function(t, ev){
+    origStab && origStab(t, ev);
+    if(t==='community') loadPublicState();
+    if(t==='support') loadTickets();
+  };
+});
 </script>
 </body>
 </html>

@@ -71,10 +71,11 @@ const addKeySchema = z.object({
 });
 
 // ── Bots ────────────────────────────────────────────────────────────────
-const createBotSchema = z.object({
+const botBaseShape = z.object({
   name: z.string().trim().min(1).max(64),
   exchange,
-  exchangeKeyId: z.number().int().positive(),
+  // Exchange key only required for live trading — paper bots don't need it.
+  exchangeKeyId: z.number().int().positive().optional(),
   symbols: z.array(symbol).min(1).max(50),
   strategy,
   timeframe,
@@ -87,8 +88,10 @@ const createBotSchema = z.object({
   strategyConfig: z.record(z.any()).optional(),
   riskConfig: z.record(z.any()).optional(),
 });
-
-const updateBotSchema = createBotSchema.partial();
+const liveKeyRefine = (b) => b.tradingMode !== 'live' || (typeof b.exchangeKeyId === 'number' && b.exchangeKeyId > 0);
+const liveKeyIssue = { message: 'exchangeKeyId is required for live mode', path: ['exchangeKeyId'] };
+const createBotSchema = botBaseShape.refine(liveKeyRefine, liveKeyIssue);
+const updateBotSchema = botBaseShape.partial().refine(liveKeyRefine, liveKeyIssue);
 
 // ── Backtests ───────────────────────────────────────────────────────────
 const createBacktestSchema = z.object({

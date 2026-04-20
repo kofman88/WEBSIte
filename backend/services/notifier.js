@@ -73,22 +73,47 @@ async function dispatch(userId, opts) {
   try { notifications.create(userId, { type, title, body, link }); }
   catch (err) { logger.warn('in-app notification failed', { userId, type, err: err.message }); }
 
-  // 2. Email (verified + not opted out)
-  if (user.email_verified && prefs.email[type] !== false) {
+  // Master switches from feature flags — lets ops kill a channel during
+  // an incident (spam wave / SMTP provider outage) without a code push.
+  let flags = null;
+  try { flags = require('./featureFlagsService'); } catch (_e) {}
+  const emailOn = !flags || flags.is('email_notifications');
+  const tgOn    = !flags || flags.is('telegram_notifications');
+
+  // 2. Email (verified + not opted out + master switch on)
+  if (emailOn && user.email_verified && prefs.email[type] !== false) {
+    // Caller may override with a fully-rendered template via opts.template.
+    // Otherwise fall back to the generic branded shell.
+    let emailPayload;
+    if (opts.template) {
+      emailPayload = opts.template;
+    } else {
+      const tpl = require('./emailTemplates');
+      emailPayload = tpl.generic({ title, body, link });
+    }
     emailService.send({
       to: user.email,
-      subject: title,
-      text: body || title,
-      html: emailHtml || fallbackEmailHtml(title, body, link),
+      subject: emailPayload.subject || title,
+      text: emailPayload.text || body || title,
+      html: emailHtml || emailPayload.html || fallbackEmailHtml(title, body, link),
     }).catch((err) => logger.warn('email dispatch failed', { userId, type, err: err.message }));
   }
 
-  // 3. Telegram (linked + not opted out)
-  if (prefs.telegram[type] !== false) {
+  // 3. Telegram (linked + not opted out + master switch on)
+  if (tgOn && prefs.telegram[type] !== false) {
     const text = tgText || `<b>${escapeHtml(title)}</b>${body ? '\n' + escapeHtml(body) : ''}`;
     telegramService.send(userId, text, { parseMode: 'HTML' })
       .catch((err) => logger.warn('telegram dispatch failed', { userId, type, err: err.message }));
   }
+
+  // 4. Web Push (best-effort; silently no-op if VAPID isn't configured)
+  try {
+    const push = require('./pushService');
+    if (push.isEnabled()) {
+      push.sendToUser(userId, { title, body: body || '', url: link || '/dashboard.html', tag: type })
+        .catch((err) => logger.warn('push dispatch failed', { userId, type, err: err.message }));
+    }
+  } catch (_e) { /* web-push not installed */ }
 
   return { dispatched: true };
 }

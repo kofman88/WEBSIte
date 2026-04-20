@@ -15,7 +15,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&family=JetBrains+Mono:wght@500&display=swap" rel="stylesheet"/>
   <link rel="stylesheet" href="tailwind.css"/>
 
-  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js"></script>
+  <script src="assets/vendor/chart.umd.min.js"></script>
   <script src="https://code.iconify.design/iconify-icon/2.1.0/iconify-icon.min.js"></script>
   
   <style>
@@ -391,10 +391,13 @@
       </div>
       <div class="grid grid-cols-2 sm:grid-cols-4 gap-6 mt-16 fade-up">
         <div><div class="stat-num" data-target="10000">0</div><div class="stat-label" data-t="stat-s">Сигналов</div></div>
-        <div><div class="stat-num" data-target="87">0</div><div class="stat-label" data-t="stat-a">% Точность</div></div>
+        <div><div class="stat-num" data-target="87">0</div><div class="stat-label" data-t="stat-a">% Точность<sup><a href="#disclaimer-1" class="text-white/40 hover:text-white/70 no-underline">¹</a></sup></div></div>
         <div><div class="stat-num" data-target="3">0</div><div class="stat-label" data-t="stat-e">Биржи</div></div>
         <div><div class="stat-num" data-target="2">0</div><div class="stat-label" data-t="stat-v">$M+ Объём</div></div>
       </div>
+      <p id="disclaimer-1" class="t-meta mt-4 fade-up" style="max-width:640px;color:rgba(255,255,255,.4);line-height:1.55" data-t="stat-disc">
+        ¹ Метрика точности рассчитана на исторических данных (backtest) за период 2023–2025 на парах BTC/USDT и ETH/USDT. Прошлые результаты не гарантируют будущей доходности. Торговля криптовалютами связана с высоким риском потери капитала — см. <a href="/risk.html" class="text-white/60 hover:text-white underline">Disclosure of Risk</a>.
+      </p>
     </div>
     <div class="hidden lg:block fade-up">
       <div class="shell">
@@ -404,8 +407,8 @@
             <span class="t-meta ml-3">CHM Terminal</span>
             <span class="ml-auto t-meta mono" style="color:rgba(255,255,255,.5)">BTC/USDT · 1H</span>
           </div>
-          <div class="term-tile mb-4" style="padding:14px">
-            <canvas id="heroChart" height="180"></canvas>
+          <div class="term-tile mb-4" style="padding:14px;position:relative;height:200px">
+            <canvas id="heroChart"></canvas>
           </div>
           <div class="grid grid-cols-3 gap-3">
             <div class="term-tile"><div class="t-meta">BTC/USDT</div><div class="mono" style="font-size:15px;color:#86efac;margin-top:4px">+5.2%</div></div>
@@ -697,6 +700,9 @@
           <a href="#features" data-t="ft-feat">Возможности</a>
           <a href="#pricing" data-t="ft-price">Тарифы</a>
           <a href="#how" data-t="ft-how">Как работает</a>
+          <a href="about.html" data-t="ft-about">О компании</a>
+          <a href="status.html" data-t="ft-status">Статус</a>
+          <a href="api-docs.html" data-t="ft-api">API</a>
         </div>
       </div>
       <div>
@@ -705,6 +711,7 @@
           <a href="privacy.html" data-t="ft-priv">Политика конфиденциальности</a>
           <a href="terms.html" data-t="ft-terms">Условия использования</a>
           <a href="risk.html" data-t="ft-risk">Предупреждение о рисках</a>
+          <a href="about.html#jurisdictions" data-t="ft-geo">Юрисдикции</a>
         </div>
       </div>
       <div>
@@ -751,7 +758,7 @@
         <h3 class="t-h3" style="font-size:22px;line-height:1.25;margin-bottom:14px" data-t="ml-aside-title">Алгоритм вместо интуиции</h3>
         <p class="t-body" style="color:rgba(255,255,255,.72);font-size:13px;margin-bottom:32px" data-t="ml-aside-sub">SMC, Gerchik, Scalping + AI-фильтр. 4 биржи в одном интерфейсе.</p>
         <div class="modal-stats">
-          <div><div class="modal-stat-num">87%</div><div class="t-meta" data-t="ml-a-s1">точность сигналов</div></div>
+          <div><div class="modal-stat-num">87%<sup style="font-size:12px;opacity:.5">*</sup></div><div class="t-meta" data-t="ml-a-s1">точность (backtest)</div></div>
           <div><div class="modal-stat-num">24/7</div><div class="t-meta" data-t="ml-a-s2">авто-торговля</div></div>
           <div><div class="modal-stat-num">4</div><div class="t-meta" data-t="ml-a-s3">биржи</div></div>
         </div>
@@ -874,6 +881,26 @@
     </div>
   </div>
 </div>
+
+<!-- Cookie consent banner (GDPR) — shown until user clicks Accept or Decline.
+     Stores result in localStorage. Site uses only functional cookies
+     (auth/session), so Decline just hides the banner. -->
+<div id="cookieBanner" style="display:none;position:fixed;bottom:20px;left:20px;right:20px;max-width:720px;margin:0 auto;background:rgba(20,20,24,.95);border:1px solid rgba(255,255,255,.1);backdrop-filter:blur(20px);border-radius:14px;padding:18px 22px;z-index:9990;box-shadow:0 20px 60px -10px rgba(0,0,0,.6)">
+  <div style="display:flex;gap:18px;align-items:flex-start;flex-wrap:wrap">
+    <div style="flex:1;min-width:240px">
+      <div style="font-weight:600;font-size:14px;color:#fff;margin-bottom:6px" data-t="cc-title">Cookies &amp; конфиденциальность</div>
+      <div style="font-size:12px;line-height:1.55;color:rgba(255,255,255,.62)" data-t="cc-body">Используем только функциональные cookies (авторизация, настройки) для работы сайта. Не трекаем рекламу и поведение. Подробнее — <a href="/privacy.html" style="color:#5C80E3">Privacy Policy</a>.</div>
+    </div>
+    <div style="display:flex;gap:10px;flex-shrink:0;align-items:center">
+      <button type="button" onclick="setCookieConsent('declined')" style="padding:8px 16px;border-radius:9999px;border:1px solid rgba(255,255,255,.12);background:transparent;color:rgba(255,255,255,.72);cursor:pointer;font-size:12px" data-t="cc-dec">Отклонить</button>
+      <button type="button" onclick="setCookieConsent('accepted')" style="padding:8px 20px;border-radius:9999px;border:none;background:linear-gradient(180deg,#2A5BE8,#1D4ED8 60%,#143797);color:#fff;cursor:pointer;font-size:12px;font-weight:600;box-shadow:inset 0 1px 1px rgba(255,255,255,.25),0 4px 10px -2px rgba(29,78,216,.5)" data-t="cc-acc">Принять</button>
+    </div>
+  </div>
+</div>
+<script>
+function setCookieConsent(v){try{localStorage.setItem('chm_cookie_consent',v);localStorage.setItem('chm_cookie_consent_at',new Date().toISOString())}catch(e){}document.getElementById('cookieBanner').style.display='none'}
+(function(){try{if(!localStorage.getItem('chm_cookie_consent')){setTimeout(()=>{const b=document.getElementById('cookieBanner');if(b)b.style.display='block'},700)}}catch(e){}})();
+</script>
 
 <script src="app.js"></script>
 <script>
@@ -1094,12 +1121,29 @@ document.getElementById('registerForm')?.addEventListener('submit',async e=>{
 // ── i18n ──
 let lang=(localStorage.getItem('chm_lang')||'ru');
 const TR={
-  'nav-feat':{ru:'Возможности',en:'Features'},'nav-price':{ru:'Тарифы',en:'Pricing'},'nav-how':{ru:'Как работает',en:'How It Works'},'nav-community':{ru:'Сообщество',en:'Community'},'nav-faq':{ru:'FAQ',en:'FAQ'},'nav-academy':{ru:'Академия',en:'Academy'},'nav-login':{ru:'Войти',en:'Login'},'nav-start':{ru:'Регистрация',en:'Sign Up'},'nav-cabinet':{ru:'Дашборд',en:'Dashboard'},
-  'hero-badge':{ru:'AI-Powered Крипто Платформа',en:'AI-Powered Crypto Platform'},
-  'hero-h1a':{ru:'Торгуй умнее.',en:'Trade Smarter.'},'hero-h1b':{ru:'Зарабатывай больше.',en:'Earn More.'},
-  'hero-sub':{ru:'Автоматические торговые сигналы и боты для Bybit, Binance, BingX и OKX. Стратегии SMC, Герчика и скальпинг с AI-аналитикой.',en:'Automated trading signals and bots for Bybit, Binance, BingX and OKX. SMC, Gerchik and scalping strategies with AI analytics.'},
-  'hero-cta1':{ru:'Начать бесплатно',en:'Start Free'},'hero-cta2':{ru:'Как это работает',en:'How It Works'},
-  'stat-s':{ru:'Сигналов',en:'Signals'},'stat-a':{ru:'% Точность',en:'% Accuracy'},'stat-e':{ru:'Биржи',en:'Exchanges'},'stat-v':{ru:'$M+ Объём',en:'$M+ Volume'},
+  'nav-feat':{ru:'Возможности',en:'Features',es:'Funciones',tr:'Özellikler',id:'Fitur'},
+  'nav-price':{ru:'Тарифы',en:'Pricing',es:'Precios',tr:'Fiyatlar',id:'Harga'},
+  'nav-how':{ru:'Как работает',en:'How It Works',es:'Cómo funciona',tr:'Nasıl çalışır',id:'Cara kerja'},
+  'nav-community':{ru:'Сообщество',en:'Community',es:'Comunidad',tr:'Topluluk',id:'Komunitas'},
+  'nav-faq':{ru:'FAQ',en:'FAQ',es:'FAQ',tr:'SSS',id:'FAQ'},
+  'nav-academy':{ru:'Академия',en:'Academy',es:'Academia',tr:'Akademi',id:'Akademi'},
+  'nav-login':{ru:'Войти',en:'Login',es:'Entrar',tr:'Giriş',id:'Masuk'},
+  'nav-start':{ru:'Регистрация',en:'Sign Up',es:'Registrarse',tr:'Kayıt ol',id:'Daftar'},
+  'nav-cabinet':{ru:'Дашборд',en:'Dashboard',es:'Panel',tr:'Panel',id:'Dasbor'},
+  'hero-badge':{ru:'AI-Powered Крипто Платформа',en:'AI-Powered Crypto Platform',es:'Plataforma Cripto con IA',tr:'AI Destekli Kripto Platformu',id:'Platform Kripto Bertenaga AI'},
+  'hero-h1a':{ru:'Торгуй умнее.',en:'Trade Smarter.',es:'Opera más inteligente.',tr:'Daha akıllı işlem yap.',id:'Trading lebih cerdas.'},
+  'hero-h1b':{ru:'Зарабатывай больше.',en:'Earn More.',es:'Gana más.',tr:'Daha çok kazan.',id:'Hasilkan lebih banyak.'},
+  'hero-sub':{ru:'Автоматические торговые сигналы и боты для Bybit, Binance, BingX и OKX. Стратегии SMC, Герчика и скальпинг с AI-аналитикой.',en:'Automated trading signals and bots for Bybit, Binance, BingX and OKX. SMC, Gerchik and scalping strategies with AI analytics.',es:'Señales y bots automáticos para Bybit, Binance, BingX y OKX. Estrategias SMC, Gerchik y scalping con análisis IA.',tr:'Bybit, Binance, BingX ve OKX için otomatik sinyaller ve botlar. SMC, Gerchik ve scalping stratejileri, AI analitiği.',id:'Sinyal trading & bot otomatis untuk Bybit, Binance, BingX, dan OKX. Strategi SMC, Gerchik & scalping dengan analitik AI.'},
+  'hero-cta1':{ru:'Начать бесплатно',en:'Start Free',es:'Empezar gratis',tr:'Ücretsiz başla',id:'Mulai gratis'},
+  'hero-cta2':{ru:'Как это работает',en:'How It Works',es:'Cómo funciona',tr:'Nasıl çalışır',id:'Cara kerja'},
+  'stat-s':{ru:'Сигналов',en:'Signals'},
+  'stat-a':{ru:'% Точность<sup><a href="#disclaimer-1" class="text-white/40 hover:text-white/70 no-underline">¹</a></sup>',en:'% Accuracy<sup><a href="#disclaimer-1" class="text-white/40 hover:text-white/70 no-underline">¹</a></sup>'},
+  'stat-e':{ru:'Биржи',en:'Exchanges'},'stat-v':{ru:'$M+ Объём',en:'$M+ Volume'},
+  'stat-disc':{ru:'¹ Метрика точности рассчитана на исторических данных (backtest) за период 2023–2025 на парах BTC/USDT и ETH/USDT. Прошлые результаты не гарантируют будущей доходности. Торговля криптовалютами связана с высоким риском потери капитала — см. <a href="/risk.html" class="text-white/60 hover:text-white underline">Disclosure of Risk</a>.',en:'¹ Accuracy is calculated on historical backtests (2023–2025) on BTC/USDT and ETH/USDT pairs. Past performance is not indicative of future results. Crypto trading carries a high risk of capital loss — see <a href="/risk.html" class="text-white/60 hover:text-white underline">Disclosure of Risk</a>.'},
+  'cc-title':{ru:'Cookies &amp; конфиденциальность',en:'Cookies &amp; privacy',es:'Cookies y privacidad',tr:'Çerezler ve gizlilik',id:'Cookies &amp; privasi'},
+  'cc-body':{ru:'Используем только функциональные cookies (авторизация, настройки) для работы сайта. Не трекаем рекламу и поведение. Подробнее — <a href="/privacy.html" style="color:#5C80E3">Privacy Policy</a>.',en:'We only use functional cookies (auth, settings) to run the site. No advertising or behavioural tracking. See <a href="/privacy.html" style="color:#5C80E3">Privacy Policy</a>.'},
+  'cc-dec':{ru:'Отклонить',en:'Decline'},
+  'cc-acc':{ru:'Принять',en:'Accept'},
   'ex-title':{ru:'Поддерживаемые биржи',en:'Supported Exchanges'},
   'feat-title':{ru:'Всё для <em>прибыльной</em> торговли',en:'Everything for <em>profitable</em> trading'},
   'feat-sub':{ru:'Полный набор инструментов — от сигналов до автоматического исполнения сделок',en:'Complete toolset — from signals to automated trade execution'},
@@ -1130,13 +1174,14 @@ const TR={
   'pm-eyebrow':{ru:'СООБЩЕСТВО',en:'COMMUNITY'},
   'pm-title':{ru:'Алгоритм вместо <em>интуиции</em>',en:'Algorithm over <em>intuition</em>'},
   'pm-sub':{ru:'Присоединяйся к CryptoХимия — ежедневная аналитика, сигналы и кейсы в Telegram',en:'Join CryptoХимия — daily analytics, signals and case studies on Telegram'},
-  'cta-title':{ru:'Готов <em>начать</em>?',en:'Ready to <em>begin</em>?'},
+  'cta-title':{ru:'Готов <em>начать</em>?',en:'Ready to <em>begin</em>?',es:'¿Listo para <em>empezar</em>?',tr:'<em>Başlamaya</em> hazır mısın?',id:'Siap <em>memulai</em>?'},
   'cta-sub':{ru:'Присоединяйся к тысячам трейдеров, которые уже используют CHM Finance',en:'Join thousands of traders already using CHM Finance'},
-  'cta-btn':{ru:'Создать аккаунт бесплатно',en:'Create Free Account'},
+  'cta-btn':{ru:'Создать аккаунт бесплатно',en:'Create Free Account',es:'Crear cuenta gratis',tr:'Ücretsiz hesap oluştur',id:'Buat akun gratis'},
   'ft-prod':{ru:'Продукт',en:'Product'},'ft-legal':{ru:'Правовая информация',en:'Legal'},'ft-contact':{ru:'Контакты',en:'Contacts'},
   'ft-feat':{ru:'Возможности',en:'Features'},'ft-price':{ru:'Тарифы',en:'Pricing'},'ft-how':{ru:'Как работает',en:'How It Works'},
+  'ft-about':{ru:'О компании',en:'About'},'ft-status':{ru:'Статус',en:'Status'},'ft-api':{ru:'API',en:'API'},'ft-geo':{ru:'Юрисдикции',en:'Jurisdictions'},
   'ft-priv':{ru:'Политика конфиденциальности',en:'Privacy Policy'},'ft-terms':{ru:'Условия использования',en:'Terms of Service'},'ft-risk':{ru:'Предупреждение о рисках',en:'Risk Disclaimer'},
-  'ft-tag':{ru:'AI-powered крипто-торговая платформа',en:'AI-powered crypto trading platform'},
+  'ft-tag':{ru:'AI-powered крипто-торговая платформа',en:'AI-powered crypto trading platform',es:'Plataforma de trading cripto con IA',tr:'AI destekli kripto işlem platformu',id:'Platform trading kripto bertenaga AI'},
   'ml-title':{ru:'Войти',en:'Welcome back'},'ml-sub':{ru:'Рад видеть снова — продолжим торговать',en:'Glad to see you — let\'s keep trading'},
   'ml-btn':{ru:'Войти',en:'Log in'},'ml-no':{ru:'Нет аккаунта?',en:'No account?'},'ml-reg':{ru:'Регистрация',en:'Sign up'},
   'ml-aside-title':{ru:'Алгоритм вместо интуиции',en:'Algorithm over intuition'},
@@ -1245,14 +1290,20 @@ window.Promos=(function(){
   return{apply(lang){if(lang!==current){current=lang;build(lang)}}};
 })();
 
+// Supported languages cycle. "en" serves as the fallback for any key not
+// translated in the target language — so partial translations don't break.
+const LANGS=['ru','en','es','tr','id'];
+const LANG_LABEL={ru:'RU',en:'EN',es:'ES',tr:'TR',id:'ID'};
+function _nextLang(cur){const i=LANGS.indexOf(cur);return LANGS[(i+1)%LANGS.length]}
+function tr(key){if(!TR[key])return '';const v=TR[key];return v[lang]!==undefined?v[lang]:(v.en!==undefined?v.en:v.ru)}
 function applyLang(){
   document.documentElement.lang=lang;
-  document.getElementById('langBtn').textContent=lang==='ru'?'EN':'RU';
-  document.querySelectorAll('[data-t]').forEach(el=>{const k=el.getAttribute('data-t');if(TR[k]&&TR[k][lang]!==undefined)el.innerHTML=TR[k][lang]});
+  document.getElementById('langBtn').textContent=LANG_LABEL[_nextLang(lang)]||'EN';
+  document.querySelectorAll('[data-t]').forEach(el=>{const k=el.getAttribute('data-t');const val=tr(k);if(val)el.innerHTML=val});
   if(window.Promos)Promos.apply(lang);
   try{window.I18n&&I18n.setLang(lang)}catch(e){}
 }
-function toggleLang(){lang=lang==='ru'?'en':'ru';localStorage.setItem('chm_lang',lang);applyLang()}
+function toggleLang(){lang=_nextLang(lang);localStorage.setItem('chm_lang',lang);applyLang()}
 applyLang();
 
 // ── Login / Register buttons ──

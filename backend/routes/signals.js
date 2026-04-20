@@ -1,6 +1,10 @@
 const express = require('express');
 const { z } = require('zod');
-const { authMiddleware } = require('../middleware/auth');
+const { authMiddleware, tierLimiter } = require('../middleware/auth');
+
+// Signal lookups are hot — protect backend from a single user spamming
+// /api/signals. Free users get 30/min, scaling up to unlimited for elite.
+const signalReadCap = tierLimiter({ free: 30, starter: 120, pro: 600, elite: 3000 }, '1m');
 const signalService = require('../services/signalService');
 const validation = require('../utils/validation');
 const plans = require('../config/plans');
@@ -20,7 +24,7 @@ function handleErr(err, res, next) {
   return next(err);
 }
 
-router.get('/', authMiddleware, (req, res, next) => {
+router.get('/', authMiddleware, signalReadCap, (req, res, next) => {
   try {
     const q = z.object({
       limit: z.coerce.number().int().min(1).max(200).default(50),

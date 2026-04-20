@@ -73,10 +73,18 @@ async function executeSignal(signal, bot, { exchangeService = null, marketData =
   }
 
   // 6. Open position
-  if (bot.trading_mode === 'live') {
-    return _openLive(signal, bot, qty, leverage, { exchangeService });
-  }
-  return _openPaper(signal, bot, qty, leverage);
+  const trade = bot.trading_mode === 'live'
+    ? await _openLive(signal, bot, qty, leverage, { exchangeService })
+    : _openPaper(signal, bot, qty, leverage);
+
+  // 7. Copy-trading: mirror the signal to all followers of this user (best-
+  //    effort; never breaks the leader's own trade)
+  try {
+    const copy = require('./copyTradingService');
+    copy.mirrorLeaderSignal(bot.user_id, signal);
+  } catch (_e) { /* silent */ }
+
+  return trade;
 }
 
 function _getUserPlan(userId) {

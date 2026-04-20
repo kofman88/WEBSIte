@@ -25,6 +25,11 @@ const notificationsRoutes = require('./routes/notifications');
 const telegramRoutes = require('./routes/telegram');
 const analyticsRoutes = require('./routes/analytics');
 const webhooksRoutes = require('./routes/webhooks');
+const publicRoutes = require('./routes/public');
+const supportRoutes = require('./routes/support');
+const pushRoutes = require('./routes/push');
+const copyRoutes = require('./routes/copy');
+const strategyMarketRoutes = require('./routes/strategyMarket');
 const websocketService = require('./services/websocketService');
 const autoTradeService = require('./services/autoTradeService');
 const partialTpManager = require('./services/partialTpManager');
@@ -32,6 +37,8 @@ const exchangeService = require('./services/exchangeService');
 const marketDataService = require('./services/marketDataService');
 const cryptoMonitor = require('./services/cryptoMonitor');
 const slVerifier = require('./services/slVerifier');
+const maintenanceService = require('./services/maintenanceService');
+const securityMonitor = require('./services/securityMonitor');
 const db = require('./models/database');
 
 const app = express();
@@ -39,7 +46,24 @@ const app = express();
 // Trust proxy for correct req.ip behind Passenger / reverse proxy
 app.set('trust proxy', 1);
 
-app.use(helmet({ contentSecurityPolicy: false }));
+// CSP: strict in prod; disabled in dev/tests where inline bits + HMR fight it.
+// Iconify / jsdelivr are CDN deps already used by /frontend.
+const cspDirectives = {
+  defaultSrc: ["'self'"],
+  scriptSrc: ["'self'", "'unsafe-inline'", 'https://cdn.jsdelivr.net', 'https://code.iconify.design', 'https://api.iconify.design'],
+  styleSrc: ["'self'", "'unsafe-inline'", 'https://fonts.googleapis.com'],
+  imgSrc: ["'self'", 'data:', 'https:'],
+  fontSrc: ["'self'", 'https://fonts.gstatic.com', 'data:'],
+  connectSrc: ["'self'", 'https://api.iconify.design', 'wss:', 'https:'],
+  frameAncestors: ["'none'"],
+  objectSrc: ["'none'"],
+  baseUri: ["'self'"],
+};
+app.use(helmet({
+  contentSecurityPolicy: config.isProd ? { directives: cspDirectives } : false,
+  frameguard: { action: 'deny' },
+  hsts: config.isProd ? { maxAge: 31536000, includeSubDomains: true, preload: true } : false,
+}));
 
 app.use(cors({
   origin: config.corsOrigin,
@@ -93,6 +117,11 @@ app.use('/api/notifications', notificationsRoutes);
 app.use('/api/telegram', telegramRoutes);
 app.use('/api/analytics', analyticsRoutes);
 app.use('/api/webhooks', webhooksRoutes);
+app.use('/api/public', publicRoutes);
+app.use('/api/support', supportRoutes);
+app.use('/api/push', pushRoutes);
+app.use('/api/copy', copyRoutes);
+app.use('/api/strategies', strategyMarketRoutes);
 
 app.get('/api/health', (_req, res) => {
   // Lightweight liveness probe.
@@ -194,7 +223,13 @@ if (!IS_TEST) {
 }
 
 // ── Scanner worker_thread (Phase 6) ──────────────────────────────────
+// Restart budget: if the worker crashes more than MAX_RESTARTS times in
+// RESTART_WINDOW_MS, we stop auto-restarting and alert. Otherwise a broken
+// strategy could thrash the CPU in a restart loop indefinitely.
 let scannerWorker = null;
+const RESTART_WINDOW_MS = 5 * 60_000;
+const MAX_RESTARTS = 5;
+const restartTimestamps = [];
 function startScannerWorker() {
   if (IS_TEST || process.env.SCANNER_DISABLED === '1') return;
   try {
@@ -233,10 +268,23 @@ function startScannerWorker() {
     scannerWorker.on('exit', (code) => {
       logger.warn('scanner worker exited', { code });
       scannerWorker = null;
-      if (code !== 0 && !scannerShutdownRequested) {
-        // Auto-restart with backoff
-        setTimeout(() => { if (!scannerShutdownRequested) startScannerWorker(); }, 5_000);
+      if (code === 0 || scannerShutdownRequested) return;
+
+      const now = Date.now();
+      while (restartTimestamps.length && restartTimestamps[0] < now - RESTART_WINDOW_MS) {
+        restartTimestamps.shift();
       }
+      if (restartTimestamps.length >= MAX_RESTARTS) {
+        logger.error('scanner worker crashed too many times — auto-restart disabled', {
+          restarts: restartTimestamps.length, windowMs: RESTART_WINDOW_MS,
+        });
+        try { sentry.captureException(new Error('scanner worker restart budget exhausted')); } catch (_e) {}
+        return;
+      }
+      // Exponential-ish backoff: 5s, 10s, 20s, 40s, 80s
+      const delay = 5_000 * Math.pow(2, restartTimestamps.length);
+      restartTimestamps.push(now);
+      setTimeout(() => { if (!scannerShutdownRequested) startScannerWorker(); }, delay);
     });
     logger.info('scanner worker started');
   } catch (err) {
@@ -289,6 +337,8 @@ if (IS_TEST) {
   startPartialTpCron();
   cryptoMonitor.start();
   slVerifier.start();
+  maintenanceService.start();
+  securityMonitor.start();
   process.on('SIGTERM', shutdown('SIGTERM'));
 } else {
   const server = http.createServer(app);
@@ -298,6 +348,8 @@ if (IS_TEST) {
   startPartialTpCron();
   cryptoMonitor.start();
   slVerifier.start();
+  maintenanceService.start();
+  securityMonitor.start();
 
   process.on('SIGTERM', () => { shutdown('SIGTERM')().then(() => server.close()); });
   process.on('SIGINT',  () => { shutdown('SIGINT')().then(() => server.close()); });

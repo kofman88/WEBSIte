@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+  <meta name="robots" content="noindex,nofollow,noarchive,nosnippet"/>
+  <meta name="googlebot" content="noindex,nofollow"/>
+  <title>Ops · CHM Internal</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@500&display=swap" rel="stylesheet"/>
+  <link rel="stylesheet" href="tailwind.css"/>
+  <link rel="stylesheet" href="styles.css"/>
+  <script src="assets/vendor/chart.umd.min.js"></script>
+  <style>
+    body{background:#06060a;font-family:'Inter',sans-serif;color:#E5E5E5;min-height:100vh}
+    .mono{font-family:'JetBrains Mono',monospace;font-variant-numeric:tabular-nums}
+    .staff-banner{background:linear-gradient(90deg,#7f1d1d 0%,#991b1b 50%,#7f1d1d 100%);border-bottom:1px solid rgba(239,68,68,.3);padding:6px 18px;font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:#fecaca;text-align:center;font-weight:600}
+    .ops-top{background:rgba(15,15,20,.95);border-bottom:1px solid rgba(255,255,255,.06);backdrop-filter:blur(20px);padding:14px 24px;position:sticky;top:0;z-index:40}
+    .ops-tab{padding:8px 14px;border-radius:9999px;font-size:12px;font-weight:500;color:rgba(255,255,255,.55);background:transparent;border:1px solid transparent;cursor:pointer;white-space:nowrap;transition:all .15s}
+    .ops-tab:hover{color:#fff;background:rgba(255,255,255,.04)}
+    .ops-tab.active{background:rgba(239,68,68,.1);color:#fca5a5;border-color:rgba(239,68,68,.25)}
+    .ops-pane{display:none}.ops-pane.active{display:block}
+    .ops-card{background:rgba(255,255,255,.02);border:1px solid rgba(255,255,255,.06);border-radius:12px;padding:18px}
+    .kpi{display:flex;flex-direction:column;gap:4px}
+    .kpi-label{font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:rgba(255,255,255,.4)}
+    .kpi-value{font-size:24px;font-weight:600;color:#fff;letter-spacing:-.02em}
+    .kpi-sub{font-size:11px;color:rgba(255,255,255,.5)}
+    .ops-table{width:100%;font-size:13px;border-collapse:separate;border-spacing:0}
+    .ops-table thead th{font-size:10px;text-transform:uppercase;letter-spacing:.1em;color:rgba(255,255,255,.4);font-weight:500;padding:8px 10px;text-align:left;border-bottom:1px solid rgba(255,255,255,.06)}
+    .ops-table tbody td{padding:10px;border-bottom:1px solid rgba(255,255,255,.04)}
+    .ops-table tbody tr:hover{background:rgba(255,255,255,.015)}
+    .badge{display:inline-block;padding:2px 8px;border-radius:4px;font-size:10px;font-weight:600;letter-spacing:.04em;text-transform:uppercase}
+    .badge-red{background:rgba(239,68,68,.15);color:#fca5a5;border:1px solid rgba(239,68,68,.25)}
+    .badge-green{background:rgba(34,197,94,.12);color:#86efac;border:1px solid rgba(34,197,94,.2)}
+    .badge-yellow{background:rgba(234,179,8,.12);color:#fde047;border:1px solid rgba(234,179,8,.2)}
+    .badge-blue{background:rgba(59,130,246,.12);color:#93c5fd;border:1px solid rgba(59,130,246,.2)}
+    .badge-gray{background:rgba(100,116,139,.15);color:#cbd5e1;border:1px solid rgba(100,116,139,.2)}
+    .ops-btn{padding:6px 12px;border-radius:8px;font-size:12px;font-weight:500;border:1px solid rgba(255,255,255,.08);background:rgba(255,255,255,.03);color:rgba(255,255,255,.85);cursor:pointer;transition:all .15s}
+    .ops-btn:hover{background:rgba(255,255,255,.08);color:#fff}
+    .ops-btn-danger{border-color:rgba(239,68,68,.3);background:rgba(239,68,68,.08);color:#fca5a5}
+    .ops-btn-danger:hover{background:rgba(239,68,68,.2);color:#fee2e2}
+    .ops-btn-primary{border-color:rgba(59,130,246,.3);background:rgba(59,130,246,.1);color:#93c5fd}
+    .ops-btn-primary:hover{background:rgba(59,130,246,.2);color:#dbeafe}
+    .ops-input{padding:8px 12px;border-radius:8px;border:1px solid rgba(255,255,255,.08);background:rgba(0,0,0,.3);color:#fff;font-size:13px;outline:none}
+    .ops-input:focus{border-color:rgba(239,68,68,.4)}
+    .drawer-bg{position:fixed;inset:0;background:rgba(0,0,0,.6);backdrop-filter:blur(6px);z-index:100;display:none}
+    .drawer-bg.open{display:block}
+    .drawer{position:fixed;top:0;right:0;height:100vh;width:min(720px,95vw);background:#0a0a0f;border-left:1px solid rgba(255,255,255,.08);overflow-y:auto;z-index:101;transform:translateX(100%);transition:transform .25s}
+    .drawer.open{transform:translateX(0)}
+    .drawer-section{border-bottom:1px solid rgba(255,255,255,.05);padding:18px 22px}
+    .dl-pair{display:flex;justify-content:space-between;gap:16px;padding:4px 0;font-size:12px}
+    .dl-pair .k{color:rgba(255,255,255,.45)}
+    .dl-pair .v{color:#e5e5e5;text-align:right;font-family:'JetBrains Mono',monospace}
+  </style>
+</head>
+<body>
+
+<div class="staff-banner">⚠️ Staff-only · Все действия логируются · <span id="opsAdminEmail" class="mono"></span></div>
+
+<div id="opsGate" style="display:flex;align-items:center;justify-content:center;min-height:calc(100vh - 30px);font-size:14px;color:rgba(255,255,255,.5)">
+  <div class="text-center">
+    <div class="mb-3 text-4xl">🔒</div>
+    <div>Проверяем доступ…</div>
+  </div>
+</div>
+
+<div id="opsApp" style="display:none">
+
+<div class="ops-top">
+  <div style="max-width:1400px;margin:0 auto;display:flex;align-items:center;gap:16px;flex-wrap:wrap">
+    <div style="font-weight:600;font-size:15px;color:#fff;letter-spacing:-.01em">CHM <span style="color:#fca5a5">· ops</span></div>
+    <div style="flex:1;display:flex;gap:4px;overflow-x:auto">
+      <button class="ops-tab active" data-tab="dash">Dashboard</button>
+      <button class="ops-tab" data-tab="users">Users</button>
+      <button class="ops-tab" data-tab="bots">Bots</button>
+      <button class="ops-tab" data-tab="trades">Trades</button>
+      <button class="ops-tab" data-tab="signals">Signals</button>
+      <button class="ops-tab" data-tab="payments">Payments</button>
+      <button class="ops-tab" data-tab="billing">Billing</button>
+      <button class="ops-tab" data-tab="promo">Promo</button>
+      <button class="ops-tab" data-tab="rewards">Referrals</button>
+      <button class="ops-tab" data-tab="support">Support</button>
+      <button class="ops-tab" data-tab="system">System</button>
+      <button class="ops-tab" data-tab="flags">Flags</button>
+      <button class="ops-tab" data-tab="audit">Audit</button>
+    </div>
+    <a href="/dashboard.html" style="font-size:12px;color:rgba(255,255,255,.45)">← App</a>
+  </div>
+</div>
+
+<main style="max-width:1400px;margin:0 auto;padding:28px 24px">
+  <div class="ops-pane active" id="pane-dash"><div class="text-center py-12 text-slate-500 text-sm">Загрузка…</div></div>
+  <div class="ops-pane" id="pane-users"></div>
+  <div class="ops-pane" id="pane-bots"></div>
+  <div class="ops-pane" id="pane-trades"></div>
+  <div class="ops-pane" id="pane-signals"></div>
+  <div class="ops-pane" id="pane-payments"></div>
+  <div class="ops-pane" id="pane-billing"></div>
+  <div class="ops-pane" id="pane-promo"></div>
+  <div class="ops-pane" id="pane-rewards"></div>
+  <div class="ops-pane" id="pane-support"></div>
+  <div class="ops-pane" id="pane-system"></div>
+  <div class="ops-pane" id="pane-flags"></div>
+  <div class="ops-pane" id="pane-audit"></div>
+</main>
+
+<!-- User detail drawer -->
+<div class="drawer-bg" id="drawerBg" onclick="closeDrawer()"></div>
+<div class="drawer" id="drawer">
+  <div style="display:flex;justify-content:space-between;align-items:center;padding:16px 22px;border-bottom:1px solid rgba(255,255,255,.08);position:sticky;top:0;background:#0a0a0f;z-index:2">
+    <div style="font-size:13px;color:rgba(255,255,255,.5)">User detail</div>
+    <button onclick="closeDrawer()" class="ops-btn">✕</button>
+  </div>
+  <div id="drawerBody"><div class="p-8 text-center text-slate-500 text-sm">Загрузка…</div></div>
+</div>
+
+</div>
+
+<script src="app.js"></script>
+<script src="ops.js"></script>
+</body>
+</html>

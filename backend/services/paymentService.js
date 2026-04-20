@@ -62,6 +62,9 @@ async function createStripeCheckout(userId, { plan, billingCycle = 'monthly', su
   if (!user) throw new Error('User not found');
 
   const origin = successUrl ? new URL(successUrl).origin : '';
+  // Idempotency key: same user + plan + cycle in a single minute will not
+  // create duplicate Stripe sessions if the network retries our create call.
+  const idemKey = 'chk_' + userId + '_' + plan + '_' + billingCycle + '_' + Math.floor(Date.now() / 60000);
   const session = await s.checkout.sessions.create({
     mode: 'subscription',
     payment_method_types: ['card'],
@@ -81,7 +84,7 @@ async function createStripeCheckout(userId, { plan, billingCycle = 'monthly', su
     success_url: successUrl || (origin + '/dashboard.html?paid=1'),
     cancel_url: cancelUrl || (origin + '/?checkout=cancel'),
     metadata: { userId: String(userId), plan, billingCycle },
-  });
+  }, { idempotencyKey: idemKey });
 
   // Record pending payment
   const info = db.prepare(`
@@ -102,18 +105,39 @@ async function handleStripeWebhook(rawBody, signature) {
   const s = stripe();
   if (!s) { const err = new Error('Stripe not configured'); err.statusCode = 503; throw err; }
 
+  // Webhook MUST be signature-verified in prod. Unsigned passthrough is only
+  // allowed in dev/test when an operator is explicitly replaying captured
+  // events. In prod a missing secret is a 503 — better than accepting forged
+  // checkout.session.completed events from an attacker.
   let event;
-  try {
-    if (config.stripeWebhookSecret) {
-      event = s.webhooks.constructEvent(rawBody, signature, config.stripeWebhookSecret);
-    } else {
-      event = typeof rawBody === 'string' ? JSON.parse(rawBody) : rawBody;
+  if (!config.stripeWebhookSecret) {
+    if (config.isProd) {
+      const e = new Error('Stripe webhook secret not configured'); e.statusCode = 503; e.code = 'WEBHOOK_SECRET_MISSING';
+      logger.error('stripe webhook rejected: STRIPE_WEBHOOK_SECRET not set in prod');
+      throw e;
     }
-  } catch (err) {
-    const e = new Error('Webhook signature failed'); e.statusCode = 400; e.code = 'BAD_SIGNATURE'; throw e;
+    logger.warn('stripe webhook: running without signature verification (dev/test only)');
+    event = typeof rawBody === 'string' ? JSON.parse(rawBody) : rawBody;
+  } else {
+    try {
+      event = s.webhooks.constructEvent(rawBody, signature, config.stripeWebhookSecret);
+    } catch (err) {
+      const e = new Error('Webhook signature failed'); e.statusCode = 400; e.code = 'BAD_SIGNATURE'; throw e;
+    }
   }
 
-  logger.info('stripe webhook', { type: event.type });
+  logger.info('stripe webhook', { type: event.type, id: event.id });
+
+  // Idempotency: Stripe retries on transient failures — record event.id
+  // and bail out on duplicates. INSERT OR IGNORE keeps this race-safe.
+  if (event.id) {
+    const ins = db.prepare('INSERT OR IGNORE INTO stripe_webhooks (event_id, event_type) VALUES (?, ?)')
+      .run(event.id, event.type);
+    if (ins.changes === 0) {
+      logger.info('stripe webhook duplicate ignored', { id: event.id });
+      return { received: true, duplicate: true };
+    }
+  }
 
   switch (event.type) {
     case 'checkout.session.completed': {
@@ -139,6 +163,7 @@ async function handleStripeWebhook(rawBody, signature) {
           JSON.stringify({ recurring: true }));
         extendSubscription(userId, (inv.metadata && inv.metadata.plan) || 'pro', 30);
         refRewards.issueReward(info.lastInsertRowid);
+        refRewards.issueSignupBonus(info.lastInsertRowid);
       }
       break;
     }
@@ -210,8 +235,20 @@ function createCryptoPayment(userId, { plan, network, billingCycle = 'monthly' }
 function confirmCryptoPayment(paymentId, { txHash, fromAddress, amountUsdt }) {
   const payment = db.prepare('SELECT * FROM payments WHERE id = ? AND status = ?').get(paymentId, 'pending');
   if (!payment) { const err = new Error('Payment not found or already processed'); err.statusCode = 404; throw err; }
-  if (amountUsdt && Math.abs(amountUsdt - Number(payment.amount_usd)) > 0.01) {
-    const err = new Error('Amount mismatch'); err.statusCode = 400; throw err;
+  // Accept ±1% tolerance (network fee absorption on underside, rounding
+  // on overside). Outside that window — reject with a specific code so
+  // the frontend can route the user to support for manual handling.
+  if (typeof amountUsdt === 'number' && Number.isFinite(amountUsdt)) {
+    const invoiced = Number(payment.amount_usd);
+    const pct = (amountUsdt - invoiced) / invoiced;
+    if (pct < -0.01) {
+      const err = new Error('Amount mismatch (underpaid): expected ' + invoiced + ' USDT, got ' + amountUsdt);
+      err.statusCode = 400; err.code = 'UNDERPAID'; throw err;
+    }
+    if (pct > 0.01) {
+      const err = new Error('Amount mismatch (overpaid): expected ' + invoiced + ' USDT, got ' + amountUsdt + ' — contact support for credit/refund');
+      err.statusCode = 400; err.code = 'OVERPAID'; throw err;
+    }
   }
   // Attach tx metadata but LEAVE status='pending' so confirmPayment can transition it.
   const existingMeta = (() => { try { return JSON.parse(payment.metadata || '{}'); } catch { return {}; } })();
@@ -239,6 +276,9 @@ function confirmPayment(paymentId, { metadata = null } = {}) {
   // Issue ref reward (silently ignores if no referrer)
   try { refRewards.issueReward(paymentId); }
   catch (err) { logger.warn('ref_reward failed', { paymentId, err: err.message }); }
+  // Plus one-shot signup bonus on the FIRST confirmed payment
+  try { refRewards.issueSignupBonus(paymentId); }
+  catch (err) { logger.warn('ref_signup_bonus failed', { paymentId, err: err.message }); }
 
   db.prepare(`
     INSERT INTO audit_log (user_id, action, entity_type, entity_id, metadata)
@@ -291,6 +331,27 @@ function extendSubscription(userId, plan, days) {
     `).run(userId, plan, newExpires);
   }
   logger.info('subscription extended', { userId, plan, until: newExpires });
+
+  // Downgrade safety: if the new plan has a lower maxBots than currently
+  // active, deactivate the oldest-created excess bots. Otherwise a user who
+  // went Pro→Free after a refund would keep trading with 5 active bots.
+  try {
+    const plans = require('../config/plans');
+    const limits = plans.getLimits(plan);
+    if (limits && limits.maxBots !== Infinity && limits.maxBots >= 0) {
+      const excess = db.prepare(`
+        SELECT id FROM trading_bots
+        WHERE user_id = ? AND is_active = 1
+        ORDER BY created_at DESC
+        LIMIT -1 OFFSET ?
+      `).all(userId, limits.maxBots);
+      if (excess.length) {
+        const stmt = db.prepare('UPDATE trading_bots SET is_active = 0, updated_at = CURRENT_TIMESTAMP WHERE id = ?');
+        for (const b of excess) stmt.run(b.id);
+        logger.warn('deactivated excess bots on plan change', { userId, plan, count: excess.length });
+      }
+    }
+  } catch (e) { logger.error('downgrade cleanup failed', { userId, err: e.message }); }
 }
 
 function getUserPayments(userId, { limit = 50, offset = 0 } = {}) {

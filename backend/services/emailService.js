@@ -48,6 +48,17 @@ function transport() {
 function appUrl() { return (process.env.APP_URL || 'https://chmup.top').replace(/\/$/, ''); }
 
 async function send({ to, subject, html, text }) {
+  // Suppression check — don't bother SMTP for addresses that already
+  // hard-bounced. Saves reputation + avoids Gmail blocklisting.
+  try {
+    const db = require('../models/database');
+    const row = db.prepare(`SELECT 1 FROM email_bounces WHERE email = ? AND suppressed = 1 LIMIT 1`).get(to);
+    if (row) {
+      logger.info('email suppressed — prior bounce', { to, subject });
+      return { delivered: false, suppressed: true };
+    }
+  } catch (_e) { /* table may not exist yet in early tests */ }
+
   const from = process.env.SMTP_FROM || 'CHM Finance <no-reply@chmup.top>';
   const t = transport();
   if (!t) {
@@ -60,6 +71,15 @@ async function send({ to, subject, html, text }) {
     return { delivered: true, messageId: info.messageId };
   } catch (err) {
     logger.error('email send failed', { to, subject, err: err.message });
+    // Hard bounces look like 5xx SMTP codes; soft like 4xx.
+    try {
+      const code = (err.responseCode || err.code || '').toString();
+      const kind = /^5/.test(code) ? 'hard' : /^4/.test(code) ? 'soft' : null;
+      if (kind) {
+        const db = require('../models/database');
+        module.exports.logBounce({ email: to, kind, smtpCode: code, reason: err.message });
+      }
+    } catch (_e) {}
     return { delivered: false, error: err.message };
   }
 }
@@ -83,26 +103,22 @@ function baseHtml(title, body, cta) {
 }
 function escape(s){return String(s).replace(/[&<>"']/g,c=>({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'})[c])}
 
-function sendVerification(to, token) {
-  const url = `${appUrl()}/verify-email.html?token=${encodeURIComponent(token)}`;
-  return send({
-    to, subject: 'Подтвердите email — CHM Finance',
-    text: `Подтвердите email: ${url}\n\nСсылка действует 24 часа.`,
-    html: baseHtml('Подтвердите email',
-      'Нажмите кнопку, чтобы подтвердить регистрацию на CHM Finance. Ссылка действительна 24 часа.',
-      { url, label: 'Подтвердить email' }),
+function sendVerification(to, token, { displayName } = {}) {
+  const templates = require('./emailTemplates');
+  const t = templates.emailVerify({
+    displayName,
+    verifyUrl: `${appUrl()}/verify-email.html?token=${encodeURIComponent(token)}`,
   });
+  return send({ to, subject: t.subject, text: t.text, html: t.html });
 }
 
-function sendPasswordReset(to, token) {
-  const url = `${appUrl()}/?reset=${encodeURIComponent(token)}`;
-  return send({
-    to, subject: 'Восстановление пароля — CHM Finance',
-    text: `Ссылка для сброса пароля: ${url}\n\nДействует 1 час. Если вы не запрашивали — проигнорируйте.`,
-    html: baseHtml('Восстановление пароля',
-      'Вы запросили сброс пароля. Ссылка действует 1 час. Если это были не вы — просто проигнорируйте письмо.',
-      { url, label: 'Установить новый пароль' }),
+function sendPasswordReset(to, token, { displayName, ipAddress } = {}) {
+  const templates = require('./emailTemplates');
+  const t = templates.passwordReset({
+    displayName, ipAddress,
+    resetUrl: `${appUrl()}/?reset=${encodeURIComponent(token)}`,
   });
+  return send({ to, subject: t.subject, text: t.text, html: t.html });
 }
 
 function sendTradeAlert(to, { symbol, side, pnl, status }) {
@@ -119,8 +135,36 @@ function sendTradeAlert(to, { symbol, side, pnl, status }) {
 function randomToken(bytes = 32) { return crypto.randomBytes(bytes).toString('base64url'); }
 function hashToken(tok) { return crypto.createHash('sha256').update(tok).digest('hex'); }
 
+// ── Bounce / suppression list ────────────────────────────────────────────
+// Called from nodemailer callback or inbox-parser cron when we detect a
+// bounce. Hard bounces suppress the address permanently; soft bounces
+// are only suppressed after 3 in 72h (handled in shouldSuppress logic).
+function logBounce({ email, kind = 'soft', smtpCode = null, reason = null }) {
+  if (!email) return;
+  const db = require('../models/database');
+  let suppress = 0;
+  if (kind === 'hard' || kind === 'complaint') suppress = 1;
+  else {
+    const recent = db.prepare(`
+      SELECT COUNT(*) AS n FROM email_bounces
+      WHERE email = ? AND kind = 'soft' AND created_at >= datetime('now','-3 day')
+    `).get(email).n;
+    if (recent >= 3) suppress = 1;
+  }
+  db.prepare(`
+    INSERT INTO email_bounces (email, kind, smtp_code, reason, suppressed)
+    VALUES (?, ?, ?, ?, ?)
+  `).run(email, kind, smtpCode, reason, suppress);
+}
+function isSuppressed(email) {
+  if (!email) return false;
+  const db = require('../models/database');
+  return Boolean(db.prepare(`SELECT 1 FROM email_bounces WHERE email = ? AND suppressed = 1 LIMIT 1`).get(email));
+}
+
 module.exports = {
   send, sendVerification, sendPasswordReset, sendTradeAlert,
   randomToken, hashToken, appUrl,
+  logBounce, isSuppressed,
   _transport: () => transport(),
 };

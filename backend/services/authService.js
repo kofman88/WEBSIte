@@ -111,9 +111,16 @@ function register({ email, password, displayName, referralCode, ipAddress, userA
 
   let referrerId = null;
   if (referralCode) {
-    const referrer = db.prepare('SELECT id FROM users WHERE referral_code = ? AND is_active = 1')
+    const referrer = db.prepare('SELECT id, email FROM users WHERE referral_code = ? AND is_active = 1')
       .get(referralCode.toUpperCase());
-    if (referrer) referrerId = referrer.id;
+    // Anti-self-referral: reject if the referrer's email matches the new
+    // registration email (the obvious "use my own code" case). Multi-account
+    // self-referral via different emails still needs device/IP + payment
+    // verification in refRewards — see issueReward().
+    if (referrer && referrer.email !== email) referrerId = referrer.id;
+    if (referrer && referrer.email === email) {
+      logger.warn('self-referral attempt blocked at register', { email, refCode: referralCode });
+    }
   }
 
   const passwordHash = bcrypt.hashSync(password, BCRYPT_COST);
@@ -351,7 +358,8 @@ function changePassword({ userId, currentPassword, newPassword, ipAddress, userA
 function getUserPublic(userId) {
   const row = db.prepare(`
     SELECT u.id, u.email, u.display_name, u.avatar_url, u.locale, u.timezone,
-           u.referral_code, u.email_verified, u.is_admin, u.last_login_at, u.created_at,
+           u.referral_code, u.email_verified, u.is_admin, u.admin_role, u.last_login_at, u.created_at,
+           u.public_profile, u.paper_starting_balance,
            s.plan, s.status as subscription_status, s.expires_at as subscription_expires_at
     FROM users u
     LEFT JOIN subscriptions s ON s.user_id = u.id
@@ -367,8 +375,11 @@ function getUserPublic(userId) {
     locale: row.locale,
     timezone: row.timezone,
     referralCode: row.referral_code,
+    publicProfile: Boolean(row.public_profile),
+    paperStartingBalance: Number(row.paper_starting_balance) || 10000,
     emailVerified: Boolean(row.email_verified),
     isAdmin: Boolean(row.is_admin),
+    adminRole: row.is_admin ? (row.admin_role || 'superadmin') : null,
     lastLoginAt: row.last_login_at,
     createdAt: row.created_at,
     subscription: {

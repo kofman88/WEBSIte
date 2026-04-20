@@ -22,10 +22,39 @@ const https = require('https');
 const crypto = require('crypto');
 const db = require('../models/database');
 const logger = require('../utils/logger');
+const cryptoUtil = require('../utils/crypto');
+const config = require('../config');
 
 const LINK_TTL_SEC = 10 * 60; // 10 minutes
+const KV_TG_TOKEN = 'tg_bot_token_enc';
 
-function botToken() { return process.env.TELEGRAM_BOT_TOKEN || ''; }
+let _cachedToken = null;
+
+// Token resolution: prefer encrypted copy in system_kv (set via
+// setBotToken from an admin console); fall back to env for self-hosted /
+// dev. Caching once per process — call resetBotTokenCache() after rotate.
+function botToken() {
+  if (_cachedToken !== null) return _cachedToken;
+  try {
+    const row = db.prepare('SELECT value FROM system_kv WHERE key = ?').get(KV_TG_TOKEN);
+    if (row && row.value) {
+      _cachedToken = cryptoUtil.decrypt(row.value, config.walletEncryptionKey);
+      return _cachedToken;
+    }
+  } catch (e) {
+    logger.error('tg token decrypt failed', { err: e.message });
+  }
+  _cachedToken = process.env.TELEGRAM_BOT_TOKEN || '';
+  return _cachedToken;
+}
+function setBotToken(token) {
+  if (typeof token !== 'string' || token.length < 10) throw new Error('invalid bot token');
+  const enc = cryptoUtil.encrypt(token, config.walletEncryptionKey);
+  db.prepare(`INSERT INTO system_kv (key, value) VALUES (?, ?)
+              ON CONFLICT(key) DO UPDATE SET value = excluded.value`).run(KV_TG_TOKEN, enc);
+  _cachedToken = token;
+}
+function resetBotTokenCache() { _cachedToken = null; }
 function botUsername() { return process.env.TELEGRAM_BOT_USERNAME || ''; }
 function isConfigured() { return Boolean(botToken() && botUsername()); }
 
@@ -159,4 +188,5 @@ module.exports = {
   isConfigured, botUsername,
   createLinkToken, resolveLinkToken, linkUser, unlinkUser,
   send, handleUpdate, setupWebhook,
+  setBotToken, resetBotTokenCache,
 };

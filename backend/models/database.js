@@ -80,6 +80,54 @@ db.exec(`
     if (!cols.includes('tv_webhook_secret')) db.exec("ALTER TABLE trading_bots ADD COLUMN tv_webhook_secret TEXT");
   } catch(_){}
 })();
+// Phase E: public profile opt-in
+(function migrateUsersPublic(){
+  try {
+    const cols = db.prepare("PRAGMA table_info('users')").all().map(c => c.name);
+    if (!cols.includes('public_profile')) db.exec("ALTER TABLE users ADD COLUMN public_profile INTEGER DEFAULT 0");
+  } catch(_){}
+})();
+// Ops phase: admin sub-roles — superadmin / support / billing / viewer.
+// NULL = not an admin. Legacy is_admin=1 is treated as 'superadmin' by the
+// resolver until operators backfill explicit roles via /ops.
+(function migrateAdminRoles(){
+  try {
+    const cols = db.prepare("PRAGMA table_info('users')").all().map(c => c.name);
+    if (!cols.includes('admin_role')) db.exec("ALTER TABLE users ADD COLUMN admin_role TEXT");
+    // One-time backfill: any existing is_admin=1 without a role gets 'superadmin'
+    db.exec("UPDATE users SET admin_role = 'superadmin' WHERE is_admin = 1 AND (admin_role IS NULL OR admin_role = '')");
+  } catch(_){}
+})();
+// Phase F: support tickets
+db.exec(`
+  CREATE TABLE IF NOT EXISTS support_tickets (
+    id           INTEGER PRIMARY KEY AUTOINCREMENT,
+    user_id      INTEGER NOT NULL,
+    subject      TEXT NOT NULL,
+    body         TEXT NOT NULL,
+    status       TEXT NOT NULL DEFAULT 'open',
+    priority     TEXT DEFAULT 'normal',
+    assigned_to  INTEGER,
+    created_at   DATETIME DEFAULT CURRENT_TIMESTAMP,
+    updated_at   DATETIME DEFAULT CURRENT_TIMESTAMP,
+    closed_at    DATETIME,
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+    FOREIGN KEY (assigned_to) REFERENCES users(id) ON DELETE SET NULL
+  );
+  CREATE TABLE IF NOT EXISTS support_messages (
+    id           INTEGER PRIMARY KEY AUTOINCREMENT,
+    ticket_id    INTEGER NOT NULL,
+    author_id    INTEGER NOT NULL,
+    is_admin     INTEGER DEFAULT 0,
+    body         TEXT NOT NULL,
+    created_at   DATETIME DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (ticket_id) REFERENCES support_tickets(id) ON DELETE CASCADE,
+    FOREIGN KEY (author_id) REFERENCES users(id) ON DELETE CASCADE
+  );
+  CREATE INDEX IF NOT EXISTS idx_tickets_user ON support_tickets(user_id, created_at DESC);
+  CREATE INDEX IF NOT EXISTS idx_tickets_status ON support_tickets(status, updated_at DESC);
+  CREATE INDEX IF NOT EXISTS idx_ticket_messages_ticket ON support_messages(ticket_id, created_at);
+`);
 db.exec(`
   -- placeholder to keep the multi-statement block working
 
@@ -486,6 +534,68 @@ db.exec(`
     created_at   DATETIME DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
   );
+
+  CREATE TABLE IF NOT EXISTS wallets (
+    id                     INTEGER PRIMARY KEY AUTOINCREMENT,
+    user_id                INTEGER NOT NULL UNIQUE,
+    address                TEXT NOT NULL,
+    encrypted_private_key  TEXT NOT NULL,
+    balance                REAL NOT NULL DEFAULT 0,
+    created_at             DATETIME DEFAULT CURRENT_TIMESTAMP,
+    updated_at             DATETIME DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+  );
+
+  CREATE TABLE IF NOT EXISTS wallet_transactions (
+    id                   INTEGER PRIMARY KEY AUTOINCREMENT,
+    user_id              INTEGER NOT NULL,
+    wallet_id            INTEGER NOT NULL,
+    type                 TEXT NOT NULL CHECK (type IN ('deposit','withdrawal')),
+    amount               REAL NOT NULL,
+    tx_hash              TEXT UNIQUE,
+    destination_address  TEXT,
+    status               TEXT NOT NULL DEFAULT 'pending'
+                           CHECK (status IN ('pending','processing','completed','cancelled','failed')),
+    notes                TEXT,
+    created_at           DATETIME DEFAULT CURRENT_TIMESTAMP,
+    updated_at           DATETIME DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (user_id)   REFERENCES users(id)   ON DELETE CASCADE,
+    FOREIGN KEY (wallet_id) REFERENCES wallets(id) ON DELETE CASCADE
+  );
+
+  -- Stripe webhook idempotency — dedupe retries so a repeated
+  -- checkout.session.completed can't trigger confirmPayment twice.
+  CREATE TABLE IF NOT EXISTS stripe_webhooks (
+    event_id    TEXT PRIMARY KEY,
+    event_type  TEXT,
+    processed_at DATETIME DEFAULT CURRENT_TIMESTAMP
+  );
+
+  -- Web Push subscriptions (VAPID). One user can have many subscriptions,
+  -- one per browser-profile / device. endpoint is the unique key because
+  -- it's what the push service uses.
+  -- Email bounce log for deliverability monitoring + suppression list.
+  CREATE TABLE IF NOT EXISTS email_bounces (
+    id           INTEGER PRIMARY KEY AUTOINCREMENT,
+    email        TEXT NOT NULL,
+    kind         TEXT NOT NULL CHECK (kind IN ('hard','soft','complaint')),
+    smtp_code    TEXT,
+    reason       TEXT,
+    suppressed   INTEGER NOT NULL DEFAULT 0,
+    created_at   DATETIME DEFAULT CURRENT_TIMESTAMP
+  );
+
+  CREATE TABLE IF NOT EXISTS push_subscriptions (
+    id          INTEGER PRIMARY KEY AUTOINCREMENT,
+    user_id     INTEGER NOT NULL,
+    endpoint    TEXT NOT NULL UNIQUE,
+    p256dh      TEXT NOT NULL,
+    auth        TEXT NOT NULL,
+    user_agent  TEXT,
+    created_at  DATETIME DEFAULT CURRENT_TIMESTAMP,
+    last_used_at DATETIME,
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+  );
 `);
 
 // ── INDEXES ──────────────────────────────────────────────────────────────
@@ -504,6 +614,7 @@ db.exec(`
   CREATE INDEX IF NOT EXISTS idx_trading_bots_user ON trading_bots(user_id);
   CREATE INDEX IF NOT EXISTS idx_trading_bots_active ON trading_bots(is_active, last_run_at);
   CREATE INDEX IF NOT EXISTS idx_trades_user ON trades(user_id, opened_at DESC);
+  CREATE INDEX IF NOT EXISTS idx_trades_user_status_closed ON trades(user_id, status, closed_at DESC);
   CREATE INDEX IF NOT EXISTS idx_trades_bot ON trades(bot_id);
   CREATE INDEX IF NOT EXISTS idx_trades_status ON trades(status, opened_at DESC);
   CREATE INDEX IF NOT EXISTS idx_trade_fills_trade ON trade_fills(trade_id);
@@ -533,7 +644,29 @@ db.exec(`
   CREATE INDEX IF NOT EXISTS idx_audit_user ON audit_log(user_id, created_at DESC);
   CREATE INDEX IF NOT EXISTS idx_audit_action ON audit_log(action, created_at DESC);
   CREATE INDEX IF NOT EXISTS idx_audit_entity ON audit_log(entity_type, entity_id);
+
+  CREATE INDEX IF NOT EXISTS idx_wallet_tx_user ON wallet_transactions(user_id, created_at DESC);
+  CREATE INDEX IF NOT EXISTS idx_users_admin_role ON users(admin_role) WHERE admin_role IS NOT NULL;
+  CREATE INDEX IF NOT EXISTS idx_wallet_tx_status ON wallet_transactions(status, type);
+  CREATE INDEX IF NOT EXISTS idx_wallets_user ON wallets(user_id);
+  CREATE INDEX IF NOT EXISTS idx_stripe_webhooks_processed ON stripe_webhooks(processed_at);
+  CREATE INDEX IF NOT EXISTS idx_push_subs_user ON push_subscriptions(user_id);
+  CREATE INDEX IF NOT EXISTS idx_email_bounces_email ON email_bounces(email, suppressed);
 `);
+
+// Run versioned migrations AFTER the idempotent legacy schema has been
+// applied. This way the migrations table only tracks changes authored
+// since the framework was introduced; the legacy blocks stay as the
+// baseline and remain safe on re-run.
+try {
+  const migrations = require('./migrations');
+  migrations.run(db);
+} catch (e) {
+  // Loud failure — we don't want the app to come up with a half-migrated DB.
+  // eslint-disable-next-line no-console
+  console.error('[FATAL] migration failure:', e.message);
+  throw e;
+}
 
 // Graceful shutdown — make sure WAL is merged back
 function close() {

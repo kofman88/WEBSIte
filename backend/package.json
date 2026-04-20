@@ -13,7 +13,9 @@
     "test:e2e": "vitest run tests/e2e",
     "lint": "eslint . --ext .js",
     "db:reset": "node utils/db-reset.js",
-    "db:seed": "node utils/db-seed.js"
+    "db:seed": "node utils/db-seed.js",
+    "smoke": "node ../scripts/smoke.js",
+    "smoke:prod": "SMOKE_URL=https://chmup.top node ../scripts/smoke.js"
   },
   "engines": {
     "node": ">=18.0.0"
@@ -29,6 +31,7 @@
     "dotenv": "^16.4.5",
     "express": "^4.21.0",
     "express-rate-limit": "^7.4.0",
+    "geoip-lite": "^1.4.10",
     "helmet": "^8.0.0",
     "jsonwebtoken": "^9.0.2",
     "node-cron": "^3.0.3",
@@ -48,5 +51,10 @@
     "nodemon": "^3.1.7",
     "supertest": "^7.0.0",
     "vitest": "^2.1.0"
+  },
+  "optionalDependencies": {
+    "@sentry/node": "^8.47.0",
+    "nodemailer": "^6.9.16",
+    "web-push": "^3.6.7"
   }
 }

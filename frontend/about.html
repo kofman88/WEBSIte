@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+  <title>CHM Finance — О компании</title>
+  <meta name="description" content="CHM Finance — команда, юридическая информация, лицензии, контакты."/>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet"/>
+  <link rel="stylesheet" href="tailwind.css"/>
+  <link rel="stylesheet" href="styles.css"/>
+  <style>
+    .member-card{padding:22px;border:1px solid rgba(255,255,255,.08);border-radius:14px;background:rgba(255,255,255,.02);transition:border-color .2s}
+    .member-card:hover{border-color:rgba(255,255,255,.18)}
+    .avatar{width:56px;height:56px;border-radius:50%;background:linear-gradient(180deg,#2A5BE8 0%,#1D4ED8 60%,#143797 100%);display:flex;align-items:center;justify-content:center;font-weight:600;color:#fff;font-size:22px;box-shadow:inset 0 1px 1px rgba(255,255,255,.28),inset 0 -1px 3px rgba(0,0,0,.6),0 4px 8px -2px rgba(0,0,0,.6)}
+    dl{display:grid;grid-template-columns:180px 1fr;gap:10px 24px;margin-top:8px}
+    dl dt{color:rgba(255,255,255,.5);font-size:13px}
+    dl dd{color:rgba(255,255,255,.85);font-size:13px;font-family:'Inter',sans-serif}
+    .badge{display:inline-block;padding:4px 10px;border-radius:9999px;font-size:11px;font-weight:500;letter-spacing:.03em;text-transform:uppercase}
+    .badge-blue{background:rgba(29,78,216,.15);color:#93AAEC;border:1px solid rgba(29,78,216,.3)}
+    .badge-green{background:rgba(34,197,94,.12);color:#4ade80;border:1px solid rgba(34,197,94,.25)}
+    @media(max-width:640px){dl{grid-template-columns:1fr}}
+  </style>
+</head>
+<body style="background:#0A0A0A;color:#E5E5E5;font-family:'Inter',sans-serif;min-height:100vh">
+
+<header style="border-bottom:1px solid rgba(255,255,255,.06);padding:18px 24px">
+  <div style="max-width:1100px;margin:0 auto;display:flex;align-items:center;justify-content:space-between">
+    <a href="/" style="font-weight:600;font-size:22px;letter-spacing:-.02em;color:#fff;text-decoration:none">CHM<span style="color:#5C80E3">.</span></a>
+    <div class="flex items-center gap-3 text-sm">
+      <a href="/" class="text-slate-400 hover:text-white">Главная</a>
+      <a href="/leaderboard.html" class="text-slate-400 hover:text-white">Leaderboard</a>
+      <a href="/status.html" class="text-slate-400 hover:text-white">Статус</a>
+      <a href="/api-docs.html" class="text-slate-400 hover:text-white">API</a>
+    </div>
+  </div>
+</header>
+
+<main style="max-width:1000px;margin:0 auto;padding:64px 24px">
+
+  <section class="text-center mb-14">
+    <div class="text-xs text-slate-500 uppercase tracking-widest mb-3">О компании</div>
+    <h1 class="text-4xl font-bold mb-4">CHM Finance</h1>
+    <p class="text-slate-400 text-lg" style="max-width:620px;margin:0 auto;line-height:1.6">
+      Платформа для алгоритмической торговли криптовалютой. Сигналы, авто-трейдинг, аналитика — для розничных трейдеров, которым нужна дисциплина системы вместо эмоций рынка.
+    </p>
+  </section>
+
+  <section class="card mb-10" style="padding:28px">
+    <h2 class="text-lg font-semibold mb-3">Миссия</h2>
+    <p class="text-slate-300 text-sm" style="line-height:1.7">
+      Устранить главный риск розничной торговли — эмоциональные решения. Даём инструменты, которыми пользуются prop-desks: бэктест, risk-менеджмент, авто-исполнение, мониторинг портфеля. Принцип простой: алгоритм вместо интуиции.
+    </p>
+  </section>
+
+  <section class="mb-12">
+    <h2 class="text-xl font-semibold mb-6">Команда</h2>
+    <div class="grid md:grid-cols-2 gap-4">
+      <div class="member-card">
+        <div class="flex items-center gap-4 mb-3">
+          <div class="avatar">K</div>
+          <div>
+            <div class="font-semibold">[Имя Фамилия]</div>
+            <div class="text-xs text-slate-500">Основатель · CEO</div>
+          </div>
+        </div>
+        <p class="text-xs text-slate-400" style="line-height:1.6">
+          [Кратко: опыт в трейдинге / разработке финтех-продуктов. Например: «10 лет в квант-торговле, ex-Tinkoff Algo Desk, MSc Applied Math».]
+        </p>
+      </div>
+
+      <div class="member-card">
+        <div class="flex items-center gap-4 mb-3">
+          <div class="avatar" style="background:linear-gradient(180deg,#7A3F3F,#522525 60%,#3A1818)">A</div>
+          <div>
+            <div class="font-semibold">[Имя Фамилия]</div>
+            <div class="text-xs text-slate-500">CTO · Инфраструктура</div>
+          </div>
+        </div>
+        <p class="text-xs text-slate-400" style="line-height:1.6">
+          [Кратко: senior backend / security. Например: «8 лет в распределённых системах, ex-Yandex, специализация — отказоустойчивость и секьюрити».]
+        </p>
+      </div>
+
+      <div class="member-card">
+        <div class="flex items-center gap-4 mb-3">
+          <div class="avatar" style="background:linear-gradient(180deg,#3F7A4A,#2B5936 60%,#1A3823)">M</div>
+          <div>
+            <div class="font-semibold">[Имя Фамилия]</div>
+            <div class="text-xs text-slate-500">Head of Quant Research</div>
+          </div>
+        </div>
+        <p class="text-xs text-slate-400" style="line-height:1.6">
+          [Кратко: квант-исследования, стратегии. Например: «PhD Financial Engineering, публикации по SMC / market microstructure».]
+        </p>
+      </div>
+
+      <div class="member-card">
+        <div class="flex items-center gap-4 mb-3">
+          <div class="avatar" style="background:linear-gradient(180deg,#5C80E3,#3B5AB5 60%,#233C7D)">S</div>
+          <div>
+            <div class="font-semibold">[Имя Фамилия]</div>
+            <div class="text-xs text-slate-500">Head of Support</div>
+          </div>
+        </div>
+        <p class="text-xs text-slate-400" style="line-height:1.6">
+          [Кратко: поддержка клиентов, онбординг. Например: «5 лет в customer success для финтех-продуктов».]
+        </p>
+      </div>
+    </div>
+    <p class="text-xs text-slate-500 mt-4 text-center">
+      Команда пока анонимна для публики — это защита от социальной инженерии против ключевых сотрудников. Полные CV предоставляются институциональным партнёрам под NDA.
+    </p>
+  </section>
+
+  <section class="card mb-10" style="padding:28px" id="legal">
+    <h2 class="text-lg font-semibold mb-4">Юридическая информация</h2>
+    <dl>
+      <dt>Юридическое лицо</dt>
+      <dd>[Наименование ООО / Ltd]</dd>
+      <dt>Регистрационный номер</dt>
+      <dd class="mono">[XXXXXXXXXX]</dd>
+      <dt>Юрисдикция</dt>
+      <dd>[Страна регистрации — напр. Seychelles / BVI / Cyprus]</dd>
+      <dt>Адрес</dt>
+      <dd>[Юридический адрес офиса]</dd>
+      <dt>VAT / Tax ID</dt>
+      <dd class="mono">[XXX-XXXXXXXXX]</dd>
+      <dt>Год основания</dt>
+      <dd>2024</dd>
+    </dl>
+    <p class="text-xs text-slate-500 mt-5" style="line-height:1.6">
+      CHM Finance <span class="badge badge-blue">Сигнал-провайдер</span> — публикует алгоритмические торговые сигналы и предоставляет инфраструктуру для авто-исполнения на биржах пользователя. Мы <strong>не являемся брокером</strong>, не принимаем средства клиентов на торговые счета и не выступаем инвестиционным консультантом. Все торговые операции совершаются напрямую на бирже пользователя через его собственные API-ключи.
+    </p>
+  </section>
+
+  <section class="card mb-10" style="padding:28px">
+    <h2 class="text-lg font-semibold mb-4">Безопасность и соответствие</h2>
+    <div class="grid md:grid-cols-2 gap-4 text-sm">
+      <div>
+        <div class="flex items-center gap-2 mb-1"><span class="badge badge-green">Активно</span> <span class="font-semibold">AES-256-GCM шифрование</span></div>
+        <p class="text-xs text-slate-400" style="line-height:1.6">API-ключи бирж хранятся в зашифрованном виде с authenticated encryption. Расшифровка возможна только на момент исполнения ордера.</p>
+      </div>
+      <div>
+        <div class="flex items-center gap-2 mb-1"><span class="badge badge-green">Активно</span> <span class="font-semibold">2FA (TOTP)</span></div>
+        <p class="text-xs text-slate-400" style="line-height:1.6">Поддержка Google Authenticator / Authy. Рекомендуется для всех аккаунтов.</p>
+      </div>
+      <div>
+        <div class="flex items-center gap-2 mb-1"><span class="badge badge-green">Активно</span> <span class="font-semibold">Read-only + Trade</span></div>
+        <p class="text-xs text-slate-400" style="line-height:1.6">При создании API-ключа биржи запрашиваем только Read + Trade. Withdraw-разрешение нам не нужно — не включайте его.</p>
+      </div>
+      <div>
+        <div class="flex items-center gap-2 mb-1"><span class="badge badge-green">Активно</span> <span class="font-semibold">GDPR-совместимость</span></div>
+        <p class="text-xs text-slate-400" style="line-height:1.6">Право доступа, исправления, удаления, переносимости данных. Без трекинг-cookies, без Facebook Pixel / Google Analytics.</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="card mb-10" style="padding:28px" id="jurisdictions">
+    <h2 class="text-lg font-semibold mb-3">Юрисдикционные ограничения</h2>
+    <p class="text-sm text-slate-300 mb-3" style="line-height:1.6">
+      Сервис недоступен резидентам следующих юрисдикций (OFAC / Treasury sanctions и пробелы в лицензировании):
+    </p>
+    <ul class="text-sm text-slate-400 space-y-1" style="line-height:1.6">
+      <li>• США — требуется брокерская лицензия SEC / CFTC, в разработке</li>
+      <li>• Иран, Северная Корея, Куба, Сирия — санкционные ограничения</li>
+      <li>• Великобритания (retail) — FCA требует pre-authorization для crypto derivatives</li>
+    </ul>
+    <p class="text-xs text-slate-500 mt-4">
+      Регистрация из этих юрисдикций автоматически отклоняется. Если вы получили блок по ошибке (VPN / неверный geo-IP), напишите в <a href="mailto:support@chmup.top" class="text-indigo-400">support</a>.
+    </p>
+  </section>
+
+  <section class="card mb-10" style="padding:28px" id="contact">
+    <h2 class="text-lg font-semibold mb-4">Контакты</h2>
+    <dl>
+      <dt>Поддержка</dt>
+      <dd><a href="mailto:support@chmup.top" class="text-indigo-400 hover:underline">support@chmup.top</a></dd>
+      <dt>Безопасность</dt>
+      <dd><a href="mailto:security@chmup.top" class="text-indigo-400 hover:underline">security@chmup.top</a> · для отчётов об уязвимостях</dd>
+      <dt>Пресса / партнёрства</dt>
+      <dd><a href="mailto:press@chmup.top" class="text-indigo-400 hover:underline">press@chmup.top</a></dd>
+      <dt>DPO (GDPR)</dt>
+      <dd><a href="mailto:privacy@chmup.top" class="text-indigo-400 hover:underline">privacy@chmup.top</a> · запросы по персональным данным</dd>
+      <dt>Telegram-канал</dt>
+      <dd><a href="https://t.me/CHMUP_bot" class="text-indigo-400 hover:underline" target="_blank" rel="noopener">@CHMUP_bot</a></dd>
+    </dl>
+  </section>
+
+  <div class="text-center text-xs text-slate-500 mt-12">
+    <a href="/terms.html" class="hover:text-slate-300">Условия использования</a> ·
+    <a href="/privacy.html" class="hover:text-slate-300">Политика конфиденциальности</a> ·
+    <a href="/risk.html" class="hover:text-slate-300">Предупреждение о рисках</a>
+  </div>
+
+</main>
+
+</body>
+</html>

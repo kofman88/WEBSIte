@@ -117,6 +117,31 @@ function toggleActive(botId, userId) {
   const existing = getBot(botId, userId);
   if (!existing) { const err = new Error('Bot not found'); err.statusCode = 404; throw err; }
   const newVal = existing.isActive ? 0 : 1;
+
+  // When turning a bot ON, enforce plan entitlements: valid subscription +
+  // active-bot limit. This closes the gap where users could keep trading
+  // after downgrade / expiry by toggling bots back on.
+  if (newVal === 1) {
+    const plans = require('../config/plans');
+    const sub = db.prepare('SELECT plan, expires_at FROM subscriptions WHERE user_id = ?').get(userId);
+    const plan = (sub && sub.plan) || 'free';
+    if (sub && sub.expires_at && new Date(sub.expires_at).getTime() < Date.now() && plan !== 'free') {
+      const err = new Error('Subscription expired — renew to enable bots');
+      err.statusCode = 402; err.code = 'SUBSCRIPTION_EXPIRED';
+      throw err;
+    }
+    const limits = plans.getLimits(plan);
+    if (limits.maxBots !== Infinity) {
+      const activeCount = db.prepare('SELECT COUNT(*) as n FROM trading_bots WHERE user_id = ? AND is_active = 1')
+        .get(userId).n;
+      if (activeCount >= limits.maxBots) {
+        const err = new Error('Active-bot limit reached for current plan (' + plan + ')');
+        err.statusCode = 403; err.code = 'BOT_LIMIT';
+        throw err;
+      }
+    }
+  }
+
   db.prepare('UPDATE trading_bots SET is_active = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ? AND user_id = ?')
     .run(newVal, botId, userId);
 
