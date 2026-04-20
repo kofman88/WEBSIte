@@ -115,11 +115,23 @@ app.get('/api/health/deep', (_req, res) => {
 
 // ── Static files (Passenger serves everything) ────────────────────────
 const publicPath = path.join(require('os').homedir(), 'public_html');
-app.use(express.static(publicPath));
+app.use(express.static(publicPath, {
+  // Long-cache .css / .js / fonts / images; short-cache HTML so the SPA
+  // shell can update without ctrl+F5. Static assets are ~instant on
+  // repeat visits (30d cache), HTML re-fetches every 5 minutes.
+  setHeaders(res, filePath) {
+    if (/\.(css|js|woff2?|ttf|eot|png|jpe?g|webp|svg|ico)$/i.test(filePath)) {
+      res.setHeader('Cache-Control', 'public, max-age=2592000, immutable');
+    } else if (/\.html?$/i.test(filePath)) {
+      res.setHeader('Cache-Control', 'public, max-age=300, must-revalidate');
+    }
+  },
+}));
 
-// SPA fallback — non-API routes serve index.html
+// SPA fallback — non-API routes serve index.html (also gets short cache)
 app.get('*', (req, res) => {
   if (!req.path.startsWith('/api/')) {
+    res.setHeader('Cache-Control', 'public, max-age=300, must-revalidate');
     res.sendFile(path.join(publicPath, 'index.html'));
   } else {
     res.status(404).json({ error: 'Route not found', code: 'NOT_FOUND' });
