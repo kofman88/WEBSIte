@@ -181,10 +181,12 @@ describe('Password reset flow', () => {
     const reg = await request(app).post('/api/auth/register').send({ email: 'reset@example.com', password: goodPass });
     const oldRefresh = reg.body.refreshToken;
 
-    // Trigger reset — token lands in system_kv
+    // Trigger reset — token lands in password_resets
     await request(app).post('/api/auth/password-reset/request').send({ email: 'reset@example.com' });
-    const kv = db.prepare("SELECT key, value FROM system_kv WHERE key LIKE 'reset:%'").get();
-    expect(kv).toBeTruthy();
+    const row = db.prepare('SELECT * FROM password_resets ORDER BY id DESC LIMIT 1').get();
+    expect(row).toBeTruthy();
+    expect(row.token_hash).toBeTruthy();
+    expect(row.used_at).toBeNull();
     // We cannot read the plain token from DB (stored hashed), so we have to grab it from logs
     // — instead, test the confirm endpoint negatively then positively with a hand-made flow.
     const res1 = await request(app).post('/api/auth/password-reset/confirm').send({

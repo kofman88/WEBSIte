@@ -1,6 +1,7 @@
 const express = require('express');
 const { z } = require('zod');
 const authService = require('../services/authService');
+const twoFactorService = require('../services/twoFactorService');
 const {
   authMiddleware,
   loginLimiter,
@@ -155,6 +156,109 @@ router.post('/change-password', authMiddleware, (req, res, next) => {
       userAgent: getUA(req),
     });
     res.json(out);
+  } catch (err) { handleServiceError(err, res, next); }
+});
+
+// ── Email verification ────────────────────────────────────────────────
+router.post('/verify-email/request', authMiddleware, (req, res, next) => {
+  try {
+    const out = authService.requestEmailVerification({
+      userId: req.userId, email: req.userEmail,
+      ipAddress: getIp(req), userAgent: getUA(req),
+    });
+    res.json(out);
+  } catch (err) { handleServiceError(err, res, next); }
+});
+
+// GET or POST — click from email
+router.get('/verify-email/:token', (req, res, next) => {
+  try {
+    const token = z.string().min(16).max(256).parse(req.params.token);
+    authService.verifyEmail({ token, ipAddress: getIp(req), userAgent: getUA(req) });
+    // Redirect to frontend confirmation page instead of JSON
+    res.redirect('/?verified=1');
+  } catch (err) {
+    if (err && err.statusCode) return res.redirect('/?verified=0&code=' + encodeURIComponent(err.code || 'ERR'));
+    return handleServiceError(err, res, next);
+  }
+});
+router.post('/verify-email/confirm', (req, res, next) => {
+  try {
+    const input = z.object({ token: z.string().min(16).max(256) }).parse(req.body);
+    const out = authService.verifyEmail({ token: input.token, ipAddress: getIp(req), userAgent: getUA(req) });
+    res.json(out);
+  } catch (err) { handleServiceError(err, res, next); }
+});
+
+// ── 2FA management ───────────────────────────────────────────────────
+router.get('/2fa/status', authMiddleware, (req, res, next) => {
+  try { res.json(twoFactorService.status(req.userId)); }
+  catch (err) { handleServiceError(err, res, next); }
+});
+
+router.post('/2fa/setup', authMiddleware, (req, res, next) => {
+  try {
+    const out = twoFactorService.setup(req.userId, req.userEmail);
+    res.json(out);
+  } catch (err) { handleServiceError(err, res, next); }
+});
+
+router.post('/2fa/confirm', authMiddleware, (req, res, next) => {
+  try {
+    const input = z.object({ code: z.string().min(6).max(16) }).parse(req.body);
+    res.json(twoFactorService.confirm(req.userId, input.code));
+  } catch (err) { handleServiceError(err, res, next); }
+});
+
+router.post('/2fa/disable', authMiddleware, (req, res, next) => {
+  try {
+    const input = z.object({ password: z.string().min(1) }).parse(req.body);
+    // Re-authenticate with password first
+    const bcrypt = require('bcryptjs');
+    const db = require('../models/database');
+    const row = db.prepare('SELECT password_hash FROM users WHERE id = ?').get(req.userId);
+    if (!row || !bcrypt.compareSync(input.password, row.password_hash)) {
+      return res.status(401).json({ error: 'Wrong password', code: 'WRONG_PASSWORD' });
+    }
+    res.json(twoFactorService.disable(req.userId));
+  } catch (err) { handleServiceError(err, res, next); }
+});
+
+// Login completion when 2FA is enabled
+router.post('/2fa/verify-login', (req, res, next) => {
+  try {
+    const input = z.object({
+      pendingToken: z.string().min(10),
+      code: z.string().min(6).max(16),
+    }).parse(req.body);
+    const out = authService.finalizeLoginAfter2FA({
+      pendingToken: input.pendingToken, code: input.code,
+      ipAddress: getIp(req), userAgent: getUA(req),
+    });
+    res.json(out);
+  } catch (err) { handleServiceError(err, res, next); }
+});
+
+// ── Sessions / history ──────────────────────────────────────────────
+router.get('/sessions', authMiddleware, (req, res, next) => {
+  try { res.json({ sessions: authService.listSessions(req.userId) }); }
+  catch (err) { handleServiceError(err, res, next); }
+});
+
+router.delete('/sessions/:id', authMiddleware, (req, res, next) => {
+  try {
+    const id = z.coerce.number().int().positive().parse(req.params.id);
+    res.json(authService.revokeSession({
+      userId: req.userId, sessionId: id,
+      ipAddress: getIp(req), userAgent: getUA(req),
+    }));
+  } catch (err) { handleServiceError(err, res, next); }
+});
+
+router.get('/login-history', authMiddleware, (req, res, next) => {
+  try {
+    const q = z.object({ limit: z.coerce.number().int().min(1).max(100).default(20) }).parse(req.query);
+    res.json({ history: authService.listLoginHistory(req.userId, q) });
   } catch (err) { handleServiceError(err, res, next); }
 });
 
