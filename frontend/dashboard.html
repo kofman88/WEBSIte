@@ -110,8 +110,8 @@
           <button class="text-xs px-3 py-1 rounded-lg hover:bg-slate-700/50 text-slate-400" onclick="updateChart(90)">3M</button>
         </div>
       </div>
-      <div style="position:relative;height:280px">
-        <canvas id="equityChart"></canvas>
+      <div style="position:relative;height:280px;overflow:hidden">
+        <canvas id="equityChart" style="display:block;max-width:100%;max-height:100%"></canvas>
       </div>
     </div>
     <!-- Recent Signals -->
@@ -258,6 +258,8 @@ async function buildChart(days) {
       },
       options: {
         responsive: true, maintainAspectRatio: false,
+        resizeDelay: 150,
+        animation: false,
         plugins: { legend: { display: false } },
         scales: {
           x: { ticks: { color: '#64748b', font: { size: 10 } }, grid: { display: false } },

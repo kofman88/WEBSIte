@@ -69,8 +69,8 @@
           <button class="eq-btn text-xs px-3 py-1 rounded-lg hover:bg-slate-700/50 text-slate-400" data-days="365">1г</button>
         </div>
       </div>
-      <div style="position:relative;height:320px">
-        <canvas id="equityChart"></canvas>
+      <div style="position:relative;height:320px;overflow:hidden">
+        <canvas id="equityChart" style="display:block;max-width:100%;max-height:100%"></canvas>
       </div>
     </div>
     <div class="card">
@@ -83,8 +83,8 @@
   <div class="grid lg:grid-cols-2 gap-6 mb-6">
     <div class="card">
       <h2 class="font-bold mb-4">По месяцам</h2>
-      <div style="position:relative;height:260px">
-        <canvas id="monthChart"></canvas>
+      <div style="position:relative;height:260px;overflow:hidden">
+        <canvas id="monthChart" style="display:block;max-width:100%;max-height:100%"></canvas>
       </div>
     </div>
     <div class="card">
@@ -197,7 +197,7 @@ async function loadEquityChart(days) {
   equityChart = new Chart(ctx, {
     type: 'line',
     data: { labels, datasets: [{ data, borderColor: '#5C80E3', backgroundColor: 'rgba(29,78,216,.12)', fill: true, tension: .3, pointRadius: 0, borderWidth: 2 }] },
-    options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { x: { ticks: { color: 'rgba(255,255,255,.5)', maxTicksLimit: 6 }, grid: { color: 'rgba(255,255,255,.04)' } }, y: { ticks: { color: 'rgba(255,255,255,.5)', callback: (v) => Fmt.currency(v) }, grid: { color: 'rgba(255,255,255,.04)' } } } },
+    options: { responsive: true, maintainAspectRatio: false, resizeDelay: 150, animation: false, plugins: { legend: { display: false } }, scales: { x: { ticks: { color: 'rgba(255,255,255,.5)', maxTicksLimit: 6 }, grid: { color: 'rgba(255,255,255,.04)' } }, y: { ticks: { color: 'rgba(255,255,255,.5)', callback: (v) => Fmt.currency(v) }, grid: { color: 'rgba(255,255,255,.04)' } } } },
   });
 }
 
@@ -211,7 +211,7 @@ async function loadMonthChart() {
   monthChart = new Chart(ctx, {
     type: 'bar',
     data: { labels, datasets: [{ data, backgroundColor: colors, borderRadius: 6 }] },
-    options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { x: { ticks: { color: 'rgba(255,255,255,.5)' }, grid: { display: false } }, y: { ticks: { color: 'rgba(255,255,255,.5)', callback: (v) => Fmt.currency(v) }, grid: { color: 'rgba(255,255,255,.04)' } } } },
+    options: { responsive: true, maintainAspectRatio: false, resizeDelay: 150, animation: false, plugins: { legend: { display: false } }, scales: { x: { ticks: { color: 'rgba(255,255,255,.5)' }, grid: { display: false } }, y: { ticks: { color: 'rgba(255,255,255,.5)', callback: (v) => Fmt.currency(v) }, grid: { color: 'rgba(255,255,255,.04)' } } } },
   });
 }
 
