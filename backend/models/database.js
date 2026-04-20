@@ -45,10 +45,29 @@ db.exec(`
     is_admin         INTEGER DEFAULT 0,
     is_active        INTEGER DEFAULT 1,
     last_login_at    DATETIME,
+    telegram_chat_id    TEXT,
+    telegram_username   TEXT,
+    telegram_linked_at  DATETIME,
+    notification_prefs  TEXT DEFAULT '{}',
     created_at       DATETIME DEFAULT CURRENT_TIMESTAMP,
     updated_at       DATETIME DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (referred_by) REFERENCES users(id) ON DELETE SET NULL
   );
+
+  -- Idempotent column adds for upgrades from earlier schemas (ignore errors)
+`);
+(function migrateUsersColumns(){
+  const cols = db.prepare("PRAGMA table_info('users')").all().map(c => c.name);
+  const adds = [
+    ["telegram_chat_id",    "ALTER TABLE users ADD COLUMN telegram_chat_id TEXT"],
+    ["telegram_username",   "ALTER TABLE users ADD COLUMN telegram_username TEXT"],
+    ["telegram_linked_at",  "ALTER TABLE users ADD COLUMN telegram_linked_at DATETIME"],
+    ["notification_prefs",  "ALTER TABLE users ADD COLUMN notification_prefs TEXT DEFAULT '{}'"],
+  ];
+  for (const [col, sql] of adds) if (!cols.includes(col)) { try { db.exec(sql); } catch(_){} }
+})();
+db.exec(`
+  -- placeholder to keep the multi-statement block working
 
   CREATE TABLE IF NOT EXISTS refresh_tokens (
     id         INTEGER PRIMARY KEY AUTOINCREMENT,

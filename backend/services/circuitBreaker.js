@@ -71,6 +71,15 @@ function trip(userId, { dailyPnl, threshold, reason }) {
   `).run(userId, JSON.stringify({ ...payload, botsPaused: pauseInfo.changes }));
 
   logger.warn('circuit breaker tripped', { userId, dailyPnl, botsPaused: pauseInfo.changes });
+  try {
+    const notifier = require('./notifier');
+    notifier.dispatch(userId, {
+      type: 'security',
+      title: '⚠️ Circuit breaker — все боты остановлены',
+      body: `Дневная просадка ${dailyPnl.toFixed(2)} превысила лимит. ${pauseInfo.changes} ботов поставлены на паузу на 24 часа.`,
+      link: '/bots.html',
+    });
+  } catch (_e) {}
   return { tripped: true, botsPaused: pauseInfo.changes, ...payload };
 }
 

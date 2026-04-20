@@ -222,6 +222,17 @@ function _closeTrade(trade, price, reason, ts) {
   logger.info('trade closed', {
     tradeId: trade.id, reason, exitPrice: round(price), pnl: round(totalPnl),
   });
+  try {
+    const notifier = require('./notifier');
+    const emoji = totalPnl > 0 ? '🟢' : totalPnl < 0 ? '🔴' : '⚪';
+    const reasonLabel = reason === 'stop_loss' ? 'SL' : reason === 'take_profit' ? 'TP' : reason;
+    notifier.dispatch(trade.user_id, {
+      type: 'trade_closed',
+      title: `${emoji} ${trade.symbol} · ${reasonLabel} · ${totalPnl >= 0 ? '+' : ''}${round(totalPnl)} USD`,
+      body: `Сделка закрыта @ ${round(price)} (${(pnlPct).toFixed(2)}%)`,
+      link: '/dashboard.html',
+    });
+  } catch (_e) {}
 }
 
 function _finalizeIfExits(trade, remaining) {

@@ -2,6 +2,7 @@ const express = require('express');
 const { z } = require('zod');
 const { authMiddleware } = require('../middleware/auth');
 const notifications = require('../services/notificationsService');
+const notifier = require('../services/notifier');
 
 const router = express.Router();
 router.use(authMiddleware);
@@ -49,6 +50,14 @@ router.delete('/:id', (req, res, next) => {
     const id = z.coerce.number().int().positive().parse(req.params.id);
     res.json(notifications.remove(req.userId, id));
   } catch (err) { handleErr(err, res, next); }
+});
+
+// Notification preferences (email/telegram opt-in/out per type)
+router.get('/prefs', (req, res) => {
+  res.json({ prefs: notifier.getPrefs(req.userId), defaults: notifier.defaults() });
+});
+router.put('/prefs', (req, res) => {
+  res.json({ prefs: notifier.savePrefs(req.userId, req.body || {}) });
 });
 
 module.exports = router;

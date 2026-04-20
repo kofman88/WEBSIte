@@ -257,9 +257,9 @@ function confirmPayment(paymentId, { metadata = null } = {}) {
         ts: Date.now(),
       });
       try {
-        const notifs = require('./notificationsService');
-        notifs.create(payment.user_id, {
-          type: 'payment_confirmed',
+        const notifier = require('./notifier');
+        notifier.dispatch(payment.user_id, {
+          type: 'payment',
           title: 'Оплата получена',
           body: 'Тариф ' + payment.plan.toUpperCase() + ' активирован · ' + payment.method,
           link: '/settings.html',

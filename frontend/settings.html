@@ -115,16 +115,42 @@
 
   <!-- NOTIFICATIONS -->
   <div class="stab-content" id="stab-notifications">
-    <div class="card max-w-2xl">
-      <h3 class="font-bold mb-4">Уведомления</h3>
-      <div class="space-y-3">
-        <div class="flex items-center justify-between p-3 bg-slate-800/30 rounded-xl"><span class="text-sm">Браузерные уведомления</span><div class="toggle on" onclick="this.classList.toggle('on')"></div></div>
-        <div class="flex items-center justify-between p-3 bg-slate-800/30 rounded-xl"><span class="text-sm">Telegram уведомления</span><div class="toggle on" onclick="this.classList.toggle('on')"></div></div>
-        <div class="flex items-center justify-between p-3 bg-slate-800/30 rounded-xl"><span class="text-sm">Email уведомления</span><div class="toggle" onclick="this.classList.toggle('on')"></div></div>
-        <div class="flex items-center justify-between p-3 bg-slate-800/30 rounded-xl"><span class="text-sm">Новые сигналы</span><div class="toggle on" onclick="this.classList.toggle('on')"></div></div>
-        <div class="flex items-center justify-between p-3 bg-slate-800/30 rounded-xl"><span class="text-sm">Исполнение сделок</span><div class="toggle on" onclick="this.classList.toggle('on')"></div></div>
-        <div class="flex items-center justify-between p-3 bg-slate-800/30 rounded-xl"><span class="text-sm">Ежедневный дайджест</span><div class="toggle" onclick="this.classList.toggle('on')"></div></div>
+    <!-- Telegram binding -->
+    <div class="card max-w-2xl mb-6">
+      <div class="flex items-start gap-3 mb-4">
+        <div class="w-10 h-10 rounded-lg bg-cyan-500/10 flex items-center justify-center shrink-0">
+          <iconify-icon icon="solar:chat-line-linear" style="color:#22d3ee;font-size:20px"></iconify-icon>
+        </div>
+        <div class="flex-1">
+          <h3 class="font-bold mb-1">Telegram-бот</h3>
+          <div id="tgStatus" class="text-sm text-slate-400">Загрузка…</div>
+        </div>
+        <button id="tgLinkBtn" class="text-sm px-4 py-2 rounded-lg bg-indigo-500/10 border border-indigo-500/30 text-indigo-400 hover:bg-indigo-500/20 shrink-0">—</button>
       </div>
+      <div id="tgLinkBox" class="hidden p-3 bg-slate-800/40 rounded-xl border border-slate-700">
+        <div class="text-sm text-slate-300 mb-2">Откройте эту ссылку и нажмите «Start» в Telegram:</div>
+        <a id="tgLinkUrl" href="#" target="_blank" rel="noopener" class="text-indigo-400 hover:text-indigo-300 text-sm font-mono break-all"></a>
+        <div class="text-xs text-slate-500 mt-2">Ссылка действует 10 минут</div>
+      </div>
+    </div>
+
+    <!-- Notification matrix -->
+    <div class="card max-w-2xl">
+      <h3 class="font-bold mb-1">Каналы и события</h3>
+      <div class="text-xs text-slate-500 mb-4">Отметьте — куда присылать каждый тип. In-app-уведомления (колокольчик) всегда включены.</div>
+      <div class="overflow-x-auto">
+        <table class="w-full text-sm" id="prefsTable">
+          <thead>
+            <tr class="text-xs text-slate-500 uppercase">
+              <th class="text-left py-2">Событие</th>
+              <th class="text-center py-2 px-3">Email</th>
+              <th class="text-center py-2 px-3">Telegram</th>
+            </tr>
+          </thead>
+          <tbody id="prefsBody"><tr><td colspan="3" class="py-4 text-center text-slate-500 text-xs">Загрузка…</td></tr></tbody>
+        </table>
+      </div>
+      <button id="savePrefsBtn" class="mt-4 px-5 py-2 rounded-xl font-semibold text-white text-sm" style="background:linear-gradient(180deg,#2A5BE8 0%,#1D4ED8 60%,#143797 100%)">Сохранить</button>
     </div>
   </div>
 
@@ -555,10 +581,115 @@ document.getElementById('changePassForm')?.addEventListener('submit', async (e) 
   } catch (err) { Toast.error(err.message); }
 });
 
+// ── Notifications tab: Telegram linking + preferences ──
+const EVENT_LABELS = {
+  trade_opened: 'Сделка открыта',
+  trade_closed: 'Сделка закрыта',
+  signal: 'Новый сигнал',
+  payment: 'Оплата',
+  referral: 'Реферальное вознаграждение',
+  security: 'Безопасность / circuit breaker',
+  weekly_digest: 'Еженедельная сводка',
+};
+
+async function loadTg() {
+  try {
+    const s = await apiRequest('GET', '/telegram/status');
+    const st = document.getElementById('tgStatus');
+    const btn = document.getElementById('tgLinkBtn');
+    const box = document.getElementById('tgLinkBox');
+    if (!s.configured) {
+      st.textContent = 'Бот не настроен на сервере';
+      st.className = 'text-sm text-yellow-400';
+      btn.textContent = 'Недоступно';
+      btn.disabled = true;
+      box.classList.add('hidden');
+      return;
+    }
+    if (s.linked) {
+      st.textContent = 'Привязан' + (s.username ? ' · @' + s.username : '');
+      st.className = 'text-sm text-green-400';
+      btn.textContent = 'Отвязать';
+      btn.onclick = async () => {
+        if (!confirm('Отвязать Telegram?')) return;
+        await apiRequest('POST', '/telegram/unlink');
+        Toast.success('Telegram отвязан');
+        loadTg();
+      };
+      box.classList.add('hidden');
+    } else {
+      st.textContent = 'Не привязан — подключите для уведомлений в Telegram';
+      st.className = 'text-sm text-slate-400';
+      btn.textContent = 'Привязать';
+      btn.onclick = async () => {
+        const r = await apiRequest('POST', '/telegram/link');
+        document.getElementById('tgLinkUrl').href = r.url;
+        document.getElementById('tgLinkUrl').textContent = r.url;
+        box.classList.remove('hidden');
+        window.open(r.url, '_blank');
+        // Poll for linked status every 3s
+        const iv = setInterval(async () => {
+          const st2 = await apiRequest('GET', '/telegram/status').catch(() => null);
+          if (st2 && st2.linked) { clearInterval(iv); Toast.success('Telegram привязан'); loadTg(); }
+        }, 3000);
+        setTimeout(() => clearInterval(iv), 15 * 60 * 1000);
+      };
+    }
+  } catch (err) {
+    document.getElementById('tgStatus').textContent = 'Ошибка: ' + err.message;
+  }
+}
+
+// apiRequest shim — app.js exposes it via closure, so we expose it manually
+function apiRequest(method, path, body) {
+  const base = (location.hostname === 'localhost' || location.hostname === '127.0.0.1') ? 'http://localhost:3000/api' : '/api';
+  return fetch(base + path, {
+    method, headers: {
+      'Content-Type': 'application/json',
+      ...(Auth.accessToken ? { Authorization: 'Bearer ' + Auth.accessToken } : {}),
+    },
+    body: body ? JSON.stringify(body) : undefined,
+  }).then(async (r) => { const j = await r.json().catch(() => ({})); if (!r.ok) throw new Error(j.error || 'Ошибка'); return j; });
+}
+
+async function loadPrefs() {
+  const body = document.getElementById('prefsBody');
+  try {
+    const r = await apiRequest('GET', '/notifications/prefs');
+    const p = r.prefs || {};
+    const keys = Object.keys(EVENT_LABELS);
+    body.innerHTML = keys.map((k) => {
+      const emailOn = p.email && p.email[k] !== false;
+      const tgOn = p.telegram && p.telegram[k] !== false;
+      const tgSupport = k !== 'weekly_digest'; // digest via email only
+      return `<tr class="border-t border-slate-800/50">
+        <td class="py-3 text-slate-300">${EVENT_LABELS[k]}</td>
+        <td class="py-3 text-center"><input type="checkbox" data-ch="email" data-ev="${k}" ${emailOn ? 'checked' : ''} style="accent-color:#6366f1"></td>
+        <td class="py-3 text-center">${tgSupport ? `<input type="checkbox" data-ch="telegram" data-ev="${k}" ${tgOn ? 'checked' : ''} style="accent-color:#6366f1">` : '<span class="text-slate-600">—</span>'}</td>
+      </tr>`;
+    }).join('');
+  } catch (err) {
+    body.innerHTML = '<tr><td colspan="3" class="py-4 text-red-400 text-center text-xs">' + err.message + '</td></tr>';
+  }
+}
+
+document.getElementById('savePrefsBtn')?.addEventListener('click', async () => {
+  const prefs = { email: {}, telegram: {} };
+  document.querySelectorAll('#prefsBody input[type=checkbox]').forEach((ch) => {
+    prefs[ch.getAttribute('data-ch')][ch.getAttribute('data-ev')] = ch.checked;
+  });
+  try {
+    await apiRequest('PUT', '/notifications/prefs', prefs);
+    Toast.success('Настройки сохранены');
+  } catch (err) { Toast.error(err.message); }
+});
+
 loadProfile();
 loadSubscription();
 loadReferrals();
 loadSecurity();
+loadTg();
+loadPrefs();
 
 // ── Auto-open checkout if ?upgrade=<plan> came from landing pricing CTA ──
 (function autoUpgrade(){
