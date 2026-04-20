@@ -1,0 +1,355 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="preconnect" href="https://api.iconify.design" crossorigin>
+  <meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+  <title>CHM Finance — Аналитика</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet"/>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js"></script>
+  <link rel="stylesheet" href="tailwind.css"/>
+  <link rel="stylesheet" href="styles.css"/>
+</head>
+<body>
+<aside class="sidebar" id="sidebar">
+  <div class="sidebar-logo">CHM<span>.</span></div>
+  <nav class="sidebar-nav">
+    <a href="dashboard.html" class="sidebar-link" data-page="dashboard"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>Дашборд</a>
+    <a href="bots.html" class="sidebar-link" data-page="bots"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2a4 4 0 014 4v1h2a2 2 0 012 2v10a2 2 0 01-2 2H6a2 2 0 01-2-2V9a2 2 0 012-2h2V6a4 4 0 014-4z"/></svg>Боты</a>
+    <a href="signals.html" class="sidebar-link" data-page="signals"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>Сигналы</a>
+    <a href="analytics.html" class="sidebar-link active" data-page="analytics"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 3v18h18"/><path d="M7 14l4-4 4 4 5-5"/></svg>Аналитика</a>
+    <a href="backtests.html" class="sidebar-link" data-page="backtests"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6m6 0h10"/></svg>Бэктесты</a>
+    <a href="wallet.html" class="sidebar-link" data-page="wallet"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12V7H5a2 2 0 010-4h14v4M3 5v14a2 2 0 002 2h16v-5"/></svg>Кошелёк</a>
+    <a href="settings.html" class="sidebar-link" data-page="settings"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/></svg>Настройки</a>
+  </nav>
+  <div class="sidebar-footer"><button onclick="Auth.logout()" class="sidebar-link" style="color:#C8B9B9"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4M16 17l5-5-5-5M21 12H9"/></svg>Выйти</button></div>
+</aside>
+<header class="topbar">
+  <div class="flex items-center gap-4"><h1 class="text-xl font-bold">Аналитика</h1></div>
+  <div class="topbar-actions">
+    <div class="topbar-notification"><svg width="20" height="20" fill="none" stroke="#94a3b8" stroke-width="2"><path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9M13.73 21a2 2 0 01-3.46 0"/></svg></div>
+    <div class="topbar-user"><div class="topbar-avatar">U</div></div>
+  </div>
+</header>
+
+<main class="main-content">
+  <!-- Totals -->
+  <div class="grid grid-cols-2 lg:grid-cols-5 gap-4 mb-6" id="totalsBar">
+    <div class="stat-card"><div class="stat-card-label">Total PnL</div><div class="stat-card-value" id="totPnl">—</div></div>
+    <div class="stat-card"><div class="stat-card-label">Win Rate</div><div class="stat-card-value" id="totWinrate">—</div></div>
+    <div class="stat-card"><div class="stat-card-label">Profit Factor</div><div class="stat-card-value" id="totPf">—</div></div>
+    <div class="stat-card"><div class="stat-card-label">Сделок</div><div class="stat-card-value" id="totTrades">—</div></div>
+    <div class="stat-card"><div class="stat-card-label">Открыто</div><div class="stat-card-value" id="totOpen">—</div></div>
+  </div>
+
+  <!-- Portfolio -->
+  <div class="card mb-6">
+    <div class="flex items-center justify-between mb-4">
+      <div>
+        <h2 class="font-bold">Портфолио</h2>
+        <div class="text-xs text-slate-500" id="portfolioMeta">—</div>
+      </div>
+      <button id="portfolioRefresh" class="text-xs px-3 py-1.5 rounded-lg bg-slate-800/50 border border-slate-700 text-slate-300 hover:text-white">Обновить</button>
+    </div>
+    <div class="text-3xl font-bold mb-4" id="portfolioTotal">—</div>
+    <div id="portfolioList" class="space-y-3"><div class="text-sm text-slate-500">Загрузка…</div></div>
+  </div>
+
+  <!-- Equity chart + breakdown -->
+  <div class="grid lg:grid-cols-3 gap-6 mb-6">
+    <div class="lg:col-span-2 card">
+      <div class="flex items-center justify-between mb-4">
+        <h2 class="font-bold">Equity curve</h2>
+        <div class="flex gap-1">
+          <button class="eq-btn text-xs px-3 py-1 rounded-lg bg-indigo-500/20 text-indigo-300" data-days="30">30д</button>
+          <button class="eq-btn text-xs px-3 py-1 rounded-lg hover:bg-slate-700/50 text-slate-400" data-days="90">90д</button>
+          <button class="eq-btn text-xs px-3 py-1 rounded-lg hover:bg-slate-700/50 text-slate-400" data-days="365">1г</button>
+        </div>
+      </div>
+      <canvas id="equityChart" height="140"></canvas>
+    </div>
+    <div class="card">
+      <h2 class="font-bold mb-4">По стратегиям</h2>
+      <div id="byStrategyList" class="space-y-2"><div class="text-xs text-slate-500">Загрузка…</div></div>
+    </div>
+  </div>
+
+  <!-- Month + Symbol breakdowns -->
+  <div class="grid lg:grid-cols-2 gap-6 mb-6">
+    <div class="card">
+      <h2 class="font-bold mb-4">По месяцам</h2>
+      <canvas id="monthChart" height="200"></canvas>
+    </div>
+    <div class="card">
+      <h2 class="font-bold mb-4">Топ символы</h2>
+      <div id="bySymbolList" class="space-y-2"><div class="text-xs text-slate-500">Загрузка…</div></div>
+    </div>
+  </div>
+
+  <!-- Trades with journal -->
+  <div class="card">
+    <div class="flex items-center justify-between mb-4 flex-wrap gap-3">
+      <h2 class="font-bold">История сделок</h2>
+      <div class="flex gap-2 flex-wrap">
+        <select id="fltStatus" class="bg-slate-800/50 border border-slate-700 rounded-lg px-3 py-2 text-sm text-slate-300 outline-none">
+          <option value="">Все статусы</option><option value="open">Open</option><option value="closed">Closed</option>
+        </select>
+        <select id="fltSide" class="bg-slate-800/50 border border-slate-700 rounded-lg px-3 py-2 text-sm text-slate-300 outline-none">
+          <option value="">Long + Short</option><option value="long">Long</option><option value="short">Short</option>
+        </select>
+        <input id="fltSymbol" placeholder="BTC/USDT" class="bg-slate-800/50 border border-slate-700 rounded-lg px-3 py-2 text-sm text-slate-300 outline-none w-32">
+        <button id="exportBtn" class="text-sm px-4 py-2 rounded-lg bg-indigo-500/10 border border-indigo-500/30 text-indigo-400 hover:bg-indigo-500/20">Экспорт CSV</button>
+      </div>
+    </div>
+    <div class="overflow-x-auto">
+      <table class="w-full text-sm">
+        <thead><tr class="text-xs text-slate-500 uppercase">
+          <th class="text-left p-2">Дата</th><th class="text-left p-2">Пара</th>
+          <th class="text-left p-2">Side</th><th class="text-left p-2">Стратегия</th>
+          <th class="text-right p-2">Вход</th><th class="text-right p-2">Выход</th>
+          <th class="text-right p-2">PnL</th><th class="text-left p-2">Статус</th><th></th>
+        </tr></thead>
+        <tbody id="tradesBody"><tr><td colspan="9" class="p-4 text-center text-slate-500 text-sm">Загрузка…</td></tr></tbody>
+      </table>
+    </div>
+  </div>
+</main>
+
+<!-- Trade journal drawer -->
+<div id="journalDrawer" style="position:fixed;inset:0;background:rgba(0,0,0,.6);backdrop-filter:blur(8px);z-index:90;display:none;align-items:center;justify-content:flex-end">
+  <div class="card" style="width:100%;max-width:520px;height:100vh;margin:0;border-radius:0;overflow-y:auto">
+    <div class="flex items-center justify-between mb-4">
+      <h2 class="text-lg font-bold" id="jTitle">Сделка</h2>
+      <button onclick="closeJournal()" class="text-slate-400 hover:text-white text-xl">&times;</button>
+    </div>
+    <div id="jSummary" class="grid grid-cols-2 gap-3 text-sm mb-4"></div>
+    <label class="text-sm text-slate-400 block mb-2">Заметка</label>
+    <textarea id="jNote" rows="8" class="w-full bg-slate-800/50 border border-slate-700 rounded-xl px-4 py-3 text-white outline-none" placeholder="Что пошло так/не так, что изменить в следующий раз…"></textarea>
+    <div class="flex gap-3 mt-4">
+      <button onclick="saveJournalNote()" class="px-6 py-2 rounded-xl font-semibold text-white text-sm" style="background:linear-gradient(180deg,#2A5BE8 0%,#1D4ED8 60%,#143797 100%)">Сохранить</button>
+      <button onclick="closeJournal()" class="px-6 py-2 rounded-xl bg-slate-800 text-slate-300 hover:bg-slate-700 text-sm">Закрыть</button>
+    </div>
+  </div>
+</div>
+
+<script src="app.js"></script>
+<script>
+if(!Auth.requireAuth()) throw new Error('noauth');
+
+let equityChart = null, monthChart = null;
+let currentTradeId = null;
+
+async function loadTotals() {
+  try {
+    const r = await API.analyticsSummary();
+    const t = r.totals;
+    const pnl = document.getElementById('totPnl');
+    pnl.textContent = Fmt.currency(t.totalPnl);
+    pnl.className = 'stat-card-value ' + (t.totalPnl > 0 ? 'text-green-400' : t.totalPnl < 0 ? 'text-red-400' : '');
+    document.getElementById('totWinrate').textContent = t.winRate !== null ? Fmt.percent(t.winRate * 100, { decimals: 1 }) : '—';
+    document.getElementById('totPf').textContent = !isFinite(t.profitFactor) ? '∞' : (t.profitFactor ? t.profitFactor.toFixed(2) : '—');
+    document.getElementById('totTrades').textContent = t.totalTrades;
+    document.getElementById('totOpen').textContent = t.openTrades;
+    renderByStrategy(r.byStrategy);
+  } catch (err) { Toast.error(err.message); }
+}
+
+function renderByStrategy(rows) {
+  const host = document.getElementById('byStrategyList');
+  if (!rows.length) { host.innerHTML = '<div class="text-xs text-slate-500">Нет данных</div>'; return; }
+  host.innerHTML = rows.map((s) => {
+    const pnlClass = s.pnl > 0 ? 'text-green-400' : s.pnl < 0 ? 'text-red-400' : 'text-slate-400';
+    return `<div class="flex items-center justify-between text-sm">
+      <div><div class="text-slate-300">${s.strategy}</div><div class="text-xs text-slate-500">${s.trades} сделок · WR ${s.winRate !== null ? Fmt.percent(s.winRate * 100, { decimals: 0 }) : '—'}</div></div>
+      <div class="${pnlClass} font-mono">${Fmt.currency(s.pnl)}</div>
+    </div>`;
+  }).join('');
+}
+
+async function loadBySymbol() {
+  const host = document.getElementById('bySymbolList');
+  try {
+    const r = await API.analyticsBySymbol();
+    if (!r.symbols.length) { host.innerHTML = '<div class="text-xs text-slate-500">Нет данных</div>'; return; }
+    host.innerHTML = r.symbols.slice(0, 10).map((s) => {
+      const pnlClass = s.pnl > 0 ? 'text-green-400' : s.pnl < 0 ? 'text-red-400' : 'text-slate-400';
+      return `<div class="flex items-center justify-between text-sm">
+        <div><div class="text-slate-300">${s.symbol}</div><div class="text-xs text-slate-500">${s.trades} сделок</div></div>
+        <div class="${pnlClass} font-mono">${Fmt.currency(s.pnl)}</div>
+      </div>`;
+    }).join('');
+  } catch (_e) {}
+}
+
+async function loadEquityChart(days) {
+  const r = await API.equityCurve(days);
+  const ctx = document.getElementById('equityChart');
+  if (equityChart) equityChart.destroy();
+  const labels = r.points.map((p) => p.day);
+  const data = r.points.map((p) => p.equity);
+  equityChart = new Chart(ctx, {
+    type: 'line',
+    data: { labels, datasets: [{ data, borderColor: '#5C80E3', backgroundColor: 'rgba(29,78,216,.12)', fill: true, tension: .3, pointRadius: 0, borderWidth: 2 }] },
+    options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { x: { ticks: { color: 'rgba(255,255,255,.5)', maxTicksLimit: 6 }, grid: { color: 'rgba(255,255,255,.04)' } }, y: { ticks: { color: 'rgba(255,255,255,.5)', callback: (v) => Fmt.currency(v) }, grid: { color: 'rgba(255,255,255,.04)' } } } },
+  });
+}
+
+async function loadMonthChart() {
+  const r = await API.analyticsByMonth();
+  const ctx = document.getElementById('monthChart');
+  if (monthChart) monthChart.destroy();
+  const labels = r.months.map((m) => m.month);
+  const data = r.months.map((m) => m.pnl);
+  const colors = data.map((v) => v > 0 ? 'rgba(34,197,94,.7)' : v < 0 ? 'rgba(239,68,68,.7)' : 'rgba(148,163,184,.5)');
+  monthChart = new Chart(ctx, {
+    type: 'bar',
+    data: { labels, datasets: [{ data, backgroundColor: colors, borderRadius: 6 }] },
+    options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { x: { ticks: { color: 'rgba(255,255,255,.5)' }, grid: { display: false } }, y: { ticks: { color: 'rgba(255,255,255,.5)', callback: (v) => Fmt.currency(v) }, grid: { color: 'rgba(255,255,255,.04)' } } } },
+  });
+}
+
+async function loadPortfolio(fresh = false) {
+  const host = document.getElementById('portfolioList');
+  const total = document.getElementById('portfolioTotal');
+  const meta = document.getElementById('portfolioMeta');
+  host.innerHTML = '<div class="text-sm text-slate-500">Загрузка…</div>';
+  try {
+    const r = await API.portfolio(fresh);
+    total.textContent = Fmt.currency(r.totalUsdt);
+    meta.textContent = (r.cached ? 'из кеша · ' : 'свежие · ') + Fmt.date(r.fetchedAt);
+    if (!r.exchanges.length) {
+      host.innerHTML = '<div class="text-sm text-slate-500">Нет подключённых бирж — иди в раздел Кошелёк</div>';
+      return;
+    }
+    host.innerHTML = r.exchanges.map((e) => {
+      const coinsHtml = e.coins.slice(0, 8).map((c) => `<span class="text-xs text-slate-400">${c.symbol}: <span class="text-slate-200">${Number(c.total).toFixed(4)}</span></span>`).join(' · ');
+      return `<div class="p-3 bg-slate-800/30 rounded-lg">
+        <div class="flex items-center justify-between mb-1">
+          <div class="font-semibold">${e.label || e.exchange} ${e.error ? '<span class="text-xs text-red-400 ml-2">✗ ' + e.error.replace(/[<>]/g,'') + '</span>' : ''}</div>
+          <div class="text-sm font-mono">${Fmt.currency(e.totalUsdt)}</div>
+        </div>
+        <div class="text-xs text-slate-500">${coinsHtml || '(пусто)'}</div>
+      </div>`;
+    }).join('');
+  } catch (err) { host.innerHTML = '<div class="text-sm text-red-400">' + err.message + '</div>'; }
+}
+
+async function loadTrades() {
+  const body = document.getElementById('tradesBody');
+  const q = {
+    status: document.getElementById('fltStatus').value || undefined,
+    side:   document.getElementById('fltSide').value   || undefined,
+    symbol: document.getElementById('fltSymbol').value || undefined,
+    limit: 100,
+  };
+  try {
+    const r = await API.listTrades(q);
+    if (!r.trades.length) { body.innerHTML = '<tr><td colspan="9" class="p-4 text-center text-slate-500 text-sm">Сделок не найдено</td></tr>'; return; }
+    body.innerHTML = r.trades.map((t) => {
+      const pnlClass = t.realizedPnl > 0 ? 'text-green-400' : t.realizedPnl < 0 ? 'text-red-400' : 'text-slate-400';
+      const sideClass = t.side === 'long' ? 'bg-green-500/15 text-green-400' : 'bg-red-500/15 text-red-400';
+      const statusClass = t.status === 'open' ? 'text-cyan-400' : t.status === 'closed' ? 'text-slate-400' : 'text-red-400';
+      return `<tr class="border-t border-slate-800/50 hover:bg-slate-800/20 cursor-pointer" data-id="${t.id}">
+        <td class="p-2 text-xs text-slate-400">${Fmt.date(t.openedAt)}</td>
+        <td class="p-2 font-medium">${t.symbol}</td>
+        <td class="p-2"><span class="text-xs px-2 py-0.5 rounded-full ${sideClass}">${t.side.toUpperCase()}</span></td>
+        <td class="p-2 text-xs text-slate-400">${t.strategy || '—'}</td>
+        <td class="p-2 text-right font-mono text-xs">${Fmt.price(t.entryPrice)}</td>
+        <td class="p-2 text-right font-mono text-xs">${t.exitPrice ? Fmt.price(t.exitPrice) : '—'}</td>
+        <td class="p-2 text-right font-mono ${pnlClass}">${t.realizedPnl ? Fmt.currency(t.realizedPnl) : '—'}</td>
+        <td class="p-2 text-xs ${statusClass}">${t.status.toUpperCase()}</td>
+        <td class="p-2 text-xs ${t.note ? 'text-indigo-400' : 'text-slate-600'}">${t.note ? '📝' : '○'}</td>
+      </tr>`;
+    }).join('');
+    body.querySelectorAll('tr[data-id]').forEach((tr) => {
+      tr.addEventListener('click', () => openJournal(+tr.getAttribute('data-id')));
+    });
+  } catch (err) { body.innerHTML = '<tr><td colspan="9" class="p-4 text-red-400 text-sm">' + err.message + '</td></tr>'; }
+}
+
+async function openJournal(id) {
+  currentTradeId = id;
+  const r = await API.listTrades({ limit: 1, offset: 0 });
+  // Find trade in current batch (simpler: fetch just this one)
+  const all = await API.listTrades({ limit: 500 });
+  const t = all.trades.find((x) => x.id === id);
+  if (!t) return Toast.error('Сделка не найдена');
+  document.getElementById('jTitle').textContent = `${t.symbol} · ${t.side.toUpperCase()} · ${t.status.toUpperCase()}`;
+  const pnlClass = t.realizedPnl > 0 ? 'text-green-400' : t.realizedPnl < 0 ? 'text-red-400' : 'text-slate-400';
+  document.getElementById('jSummary').innerHTML = `
+    <div><div class="text-xs text-slate-500">Дата</div><div>${Fmt.date(t.openedAt)}</div></div>
+    <div><div class="text-xs text-slate-500">Стратегия</div><div>${t.strategy || '—'}</div></div>
+    <div><div class="text-xs text-slate-500">Вход</div><div class="font-mono">${Fmt.price(t.entryPrice)}</div></div>
+    <div><div class="text-xs text-slate-500">Выход</div><div class="font-mono">${t.exitPrice ? Fmt.price(t.exitPrice) : '—'}</div></div>
+    <div><div class="text-xs text-slate-500">SL</div><div class="font-mono">${t.stopLoss ? Fmt.price(t.stopLoss) : '—'}</div></div>
+    <div><div class="text-xs text-slate-500">PnL</div><div class="font-mono ${pnlClass}">${t.realizedPnl ? Fmt.currency(t.realizedPnl) : '—'}</div></div>`;
+  document.getElementById('jNote').value = t.note || '';
+  document.getElementById('journalDrawer').style.display = 'flex';
+}
+function closeJournal() {
+  document.getElementById('journalDrawer').style.display = 'none';
+  currentTradeId = null;
+}
+async function saveJournalNote() {
+  if (!currentTradeId) return;
+  try {
+    await API.setTradeNote(currentTradeId, document.getElementById('jNote').value);
+    Toast.success('Заметка сохранена');
+    closeJournal();
+    loadTrades();
+  } catch (err) { Toast.error(err.message); }
+}
+
+// CSV export — navigate with ?access=TOKEN so server reads it (temp shim)
+// Better path: signed URL. For now use a fetch + blob download trick.
+document.getElementById('exportBtn').addEventListener('click', async () => {
+  try {
+    const q = {
+      status: document.getElementById('fltStatus').value,
+      side:   document.getElementById('fltSide').value,
+      symbol: document.getElementById('fltSymbol').value,
+    };
+    const qs = Object.entries(q).filter(([,v]) => v).map(([k,v]) => k+'='+encodeURIComponent(v)).join('&');
+    const base = (location.hostname === 'localhost' ? 'http://localhost:3000/api' : '/api');
+    const res = await fetch(base + '/analytics/trades/export.csv' + (qs ? '?' + qs : ''), {
+      headers: { Authorization: 'Bearer ' + Auth.accessToken },
+    });
+    if (!res.ok) throw new Error('HTTP ' + res.status);
+    const blob = await res.blob();
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url; a.download = 'trades-' + new Date().toISOString().slice(0,10) + '.csv';
+    document.body.appendChild(a); a.click(); a.remove();
+    URL.revokeObjectURL(url);
+  } catch (err) { Toast.error(err.message); }
+});
+
+// Equity timeframe switcher
+document.querySelectorAll('.eq-btn').forEach((btn) => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.eq-btn').forEach((b) => {
+      b.classList.remove('bg-indigo-500/20', 'text-indigo-300');
+      b.classList.add('hover:bg-slate-700/50', 'text-slate-400');
+    });
+    btn.classList.add('bg-indigo-500/20', 'text-indigo-300');
+    btn.classList.remove('hover:bg-slate-700/50', 'text-slate-400');
+    loadEquityChart(+btn.getAttribute('data-days'));
+  });
+});
+document.getElementById('portfolioRefresh').addEventListener('click', () => loadPortfolio(true));
+document.getElementById('fltStatus').addEventListener('change', loadTrades);
+document.getElementById('fltSide').addEventListener('change', loadTrades);
+document.getElementById('fltSymbol').addEventListener('change', loadTrades);
+
+// Boot
+loadTotals();
+loadPortfolio();
+loadEquityChart(30);
+loadMonthChart();
+loadBySymbol();
+loadTrades();
+</script>
+</body>
+</html>

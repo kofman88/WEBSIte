@@ -198,6 +198,20 @@ const API = {
   markNotificationRead: (id) => apiRequest('POST', '/notifications/' + id + '/read'),
   markAllNotificationsRead: () => apiRequest('POST', '/notifications/read-all'),
   removeNotification: (id) => apiRequest('DELETE', '/notifications/' + id),
+
+  // Analytics / portfolio / trade journal
+  portfolio: (fresh = false) => apiRequest('GET', '/analytics/portfolio' + (fresh ? '?fresh=1' : '')),
+  analyticsSummary: (opts = {}) => apiRequest('GET', '/analytics/summary?' + qs(opts)),
+  analyticsBySymbol: (opts = {}) => apiRequest('GET', '/analytics/by-symbol?' + qs(opts)),
+  analyticsByStrategy: (opts = {}) => apiRequest('GET', '/analytics/by-strategy?' + qs(opts)),
+  analyticsByMonth: (opts = {}) => apiRequest('GET', '/analytics/by-month?' + qs(opts)),
+  equityCurve: (days = 90) => apiRequest('GET', '/analytics/equity-curve?days=' + days),
+  listTrades: (opts = {}) => apiRequest('GET', '/analytics/trades?' + qs(opts)),
+  setTradeNote: (id, note) => apiRequest('PATCH', '/analytics/trades/' + id + '/note', { note }),
+  // CSV download returns a URL (client navigates to it so Authorization
+  // can't go in header — we build a short-lived signed URL or use cookie.
+  // Simplest: open URL in new tab with token in query — acceptable since
+  // HTTPS and browser session is already authed. See analytics.html.
 };
 
 function saveAuthResp(data) {
