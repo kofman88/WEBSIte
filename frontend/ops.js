@@ -268,6 +268,157 @@
     catch (e) { Toast.error(e.message); }
   };
 
+  // ── Bots (global) ─────────────────────────────────────────────────────
+  let _botsFilter = '';
+  async function loadBots() {
+    const pane = document.getElementById('pane-bots');
+    pane.innerHTML = `
+      <div class="ops-card mb-4" style="display:flex;gap:10px;align-items:center;flex-wrap:wrap">
+        <select id="botsF" class="ops-input">
+          <option value="">Все</option>
+          <option value="active" ${_botsFilter === 'active' ? 'selected' : ''}>Active</option>
+          <option value="inactive" ${_botsFilter === 'inactive' ? 'selected' : ''}>Inactive</option>
+        </select>
+        <button class="ops-btn" id="botsR">Обновить</button>
+      </div>
+      <div class="ops-card" style="padding:0;overflow:auto">
+        <table class="ops-table">
+          <thead><tr>
+            <th>User</th><th>Name</th><th>Exchange</th><th>Symbols</th><th>Strategy</th><th>TF</th><th>Mode</th><th>Status</th><th>Trades</th><th>PnL</th><th>Last run</th>
+          </tr></thead>
+          <tbody id="botsTb"><tr><td colspan="11" class="text-center py-8 text-slate-500">Загрузка…</td></tr></tbody>
+        </table>
+      </div>
+    `;
+    document.getElementById('botsF').addEventListener('change', (e) => { _botsFilter = e.target.value; loadBots(); });
+    document.getElementById('botsR').addEventListener('click', loadBots);
+    try {
+      const data = await API.adminListBots({ status: _botsFilter || undefined, limit: 300 });
+      document.getElementById('botsTb').innerHTML = (data.bots || []).map((b) => {
+        const pnl = Number(b.total_pnl) || 0;
+        const pnlCls = pnl > 0 ? 'text-green-400' : pnl < 0 ? 'text-red-400' : 'text-slate-400';
+        return `<tr style="cursor:pointer" onclick="Ops.openUser(${b.user_id})">
+          <td class="mono text-xs">${esc(b.user_email)}</td>
+          <td>${esc(b.name)}</td>
+          <td>${esc(b.exchange)}</td>
+          <td class="text-xs">${esc(b.symbols)}</td>
+          <td>${esc(b.strategy)}</td>
+          <td>${esc(b.timeframe)}</td>
+          <td>${b.trading_mode === 'live' ? '<span class="badge badge-red">live</span>' : '<span class="badge badge-gray">paper</span>'}</td>
+          <td>${b.is_active ? '<span class="badge badge-green">on</span>' : '<span class="badge badge-gray">off</span>'}${b.auto_trade ? ' <span class="badge badge-blue">auto</span>' : ''}</td>
+          <td class="mono">${b.trade_count || 0}</td>
+          <td class="mono ${pnlCls}">${money(pnl)}</td>
+          <td class="mono text-xs text-slate-500">${b.last_run_at ? fmtDateShort(b.last_run_at) : '—'}</td>
+        </tr>`;
+      }).join('') || '<tr><td colspan="11" class="text-center py-8 text-slate-500">Нет ботов</td></tr>';
+    } catch (e) {
+      document.getElementById('botsTb').innerHTML = `<tr><td colspan="11" class="text-center py-8 text-red-400">${esc(e.message)}</td></tr>`;
+    }
+  }
+  loaders.bots = loadBots;
+
+  // ── Trades (global) ───────────────────────────────────────────────────
+  let _tradesFilters = { status: '', mode: '' };
+  async function loadTrades() {
+    const pane = document.getElementById('pane-trades');
+    pane.innerHTML = `
+      <div class="ops-card mb-4" style="display:flex;gap:10px;align-items:center;flex-wrap:wrap">
+        <select id="trStatus" class="ops-input">
+          <option value="">Все статусы</option>
+          <option value="open" ${_tradesFilters.status === 'open' ? 'selected' : ''}>Open</option>
+          <option value="closed" ${_tradesFilters.status === 'closed' ? 'selected' : ''}>Closed</option>
+          <option value="cancelled" ${_tradesFilters.status === 'cancelled' ? 'selected' : ''}>Cancelled</option>
+        </select>
+        <select id="trMode" class="ops-input">
+          <option value="">Все режимы</option>
+          <option value="paper" ${_tradesFilters.mode === 'paper' ? 'selected' : ''}>Paper</option>
+          <option value="live" ${_tradesFilters.mode === 'live' ? 'selected' : ''}>Live</option>
+        </select>
+        <button class="ops-btn" id="trR">Обновить</button>
+      </div>
+      <div class="ops-card" style="padding:0;overflow:auto">
+        <table class="ops-table">
+          <thead><tr>
+            <th>Opened</th><th>User</th><th>Symbol</th><th>Side</th><th>Entry</th><th>Exit</th><th>PnL</th><th>%</th><th>Status</th><th>Mode</th>
+          </tr></thead>
+          <tbody id="trTb"><tr><td colspan="10" class="text-center py-8 text-slate-500">Загрузка…</td></tr></tbody>
+        </table>
+      </div>
+    `;
+    document.getElementById('trStatus').addEventListener('change', (e) => { _tradesFilters.status = e.target.value; loadTrades(); });
+    document.getElementById('trMode').addEventListener('change', (e) => { _tradesFilters.mode = e.target.value; loadTrades(); });
+    document.getElementById('trR').addEventListener('click', loadTrades);
+    try {
+      const data = await API.adminListTrades({
+        status: _tradesFilters.status || undefined,
+        mode: _tradesFilters.mode || undefined,
+        limit: 300,
+      });
+      document.getElementById('trTb').innerHTML = (data.trades || []).map((t) => {
+        const pnl = Number(t.realized_pnl) || 0;
+        const pct = Number(t.realized_pnl_pct) || 0;
+        const cls = pnl > 0 ? 'text-green-400' : pnl < 0 ? 'text-red-400' : 'text-slate-400';
+        return `<tr style="cursor:pointer" onclick="Ops.openUser(${t.user_id})">
+          <td class="mono text-xs text-slate-500">${fmtDateShort(t.opened_at)}</td>
+          <td class="mono text-xs">${esc(t.user_email)}</td>
+          <td>${esc(t.symbol)}</td>
+          <td><span class="badge ${t.side === 'long' ? 'badge-green' : 'badge-red'}">${t.side}</span></td>
+          <td class="mono text-xs">${esc(t.entry_price || '—')}</td>
+          <td class="mono text-xs">${esc(t.exit_price || '—')}</td>
+          <td class="mono ${cls}">${t.realized_pnl !== null ? money(pnl) : '—'}</td>
+          <td class="mono ${cls}">${t.realized_pnl_pct !== null ? pct.toFixed(2) + '%' : '—'}</td>
+          <td><span class="badge ${t.status === 'open' ? 'badge-yellow' : t.status === 'closed' ? 'badge-gray' : 'badge-red'}">${t.status}</span></td>
+          <td>${t.trading_mode === 'live' ? '<span class="badge badge-red">live</span>' : '<span class="badge badge-gray">paper</span>'}</td>
+        </tr>`;
+      }).join('') || '<tr><td colspan="10" class="text-center py-8 text-slate-500">Нет сделок</td></tr>';
+    } catch (e) {
+      document.getElementById('trTb').innerHTML = `<tr><td colspan="10" class="text-center py-8 text-red-400">${esc(e.message)}</td></tr>`;
+    }
+  }
+  loaders.trades = loadTrades;
+
+  // ── Signals (global) ──────────────────────────────────────────────────
+  let _signalsFilter = '';
+  async function loadSignals() {
+    const pane = document.getElementById('pane-signals');
+    pane.innerHTML = `
+      <div class="ops-card mb-4" style="display:flex;gap:10px;align-items:center;flex-wrap:wrap">
+        <input id="sigF" class="ops-input" placeholder="Стратегия (smc, dca, grid, tradingview…)" value="${esc(_signalsFilter)}"/>
+        <button class="ops-btn" id="sigR">Обновить</button>
+      </div>
+      <div class="ops-card" style="padding:0;overflow:auto">
+        <table class="ops-table">
+          <thead><tr>
+            <th>Created</th><th>User</th><th>Symbol</th><th>Side</th><th>Strategy</th><th>Entry</th><th>TP</th><th>SL</th><th>Result</th>
+          </tr></thead>
+          <tbody id="sigTb"><tr><td colspan="9" class="text-center py-8 text-slate-500">Загрузка…</td></tr></tbody>
+        </table>
+      </div>
+    `;
+    document.getElementById('sigF').addEventListener('change', (e) => { _signalsFilter = e.target.value.trim(); loadSignals(); });
+    document.getElementById('sigR').addEventListener('click', loadSignals);
+    try {
+      const data = await API.adminListSignals({ strategy: _signalsFilter || undefined, limit: 300 });
+      document.getElementById('sigTb').innerHTML = (data.signals || []).map((s) => {
+        const resultBadge = s.result === 'tp' ? 'badge-green' : s.result === 'sl' ? 'badge-red' : s.result === 'expired' ? 'badge-gray' : 'badge-yellow';
+        return `<tr ${s.user_id ? 'style="cursor:pointer" onclick="Ops.openUser(' + s.user_id + ')"' : ''}>
+          <td class="mono text-xs text-slate-500">${fmtDate(s.created_at)}</td>
+          <td class="mono text-xs">${s.user_email ? esc(s.user_email) : '<span class="text-slate-600">public</span>'}</td>
+          <td>${esc(s.symbol)}</td>
+          <td><span class="badge ${s.side === 'long' ? 'badge-green' : 'badge-red'}">${s.side}</span></td>
+          <td>${esc(s.strategy)}</td>
+          <td class="mono text-xs">${esc(s.entry || '—')}</td>
+          <td class="mono text-xs">${esc(s.tp || '—')}</td>
+          <td class="mono text-xs">${esc(s.sl || '—')}</td>
+          <td><span class="badge ${resultBadge}">${s.result || 'pending'}</span></td>
+        </tr>`;
+      }).join('') || '<tr><td colspan="9" class="text-center py-8 text-slate-500">Нет сигналов</td></tr>';
+    } catch (e) {
+      document.getElementById('sigTb').innerHTML = `<tr><td colspan="9" class="text-center py-8 text-red-400">${esc(e.message)}</td></tr>`;
+    }
+  }
+  loaders.signals = loadSignals;
+
   // ── Boot ──────────────────────────────────────────────────────────────
   document.addEventListener('DOMContentLoaded', async () => {
     const ok = await gate();
