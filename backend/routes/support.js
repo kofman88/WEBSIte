@@ -80,4 +80,17 @@ router.put('/profile/public', (req, res, next) => {
   } catch (err) { handleErr(err, res, next); }
 });
 
+// ── Paper-trading starting balance ───────────────────────────────────────
+// Users configure their own "virtual account" — used for equity-curve
+// baseline on the dashboard + analytics page. $100 min, $10M max to
+// keep P&L% math reasonable.
+router.put('/profile/paper-balance', (req, res, next) => {
+  try {
+    const body = z.object({ amount: z.number().min(100).max(10_000_000) }).parse(req.body);
+    const db = require('../models/database');
+    db.prepare(`UPDATE users SET paper_starting_balance = ? WHERE id = ?`).run(body.amount, req.userId);
+    res.json({ paperStartingBalance: body.amount });
+  } catch (err) { handleErr(err, res, next); }
+});
+
 module.exports = router;

@@ -359,7 +359,7 @@ function getUserPublic(userId) {
   const row = db.prepare(`
     SELECT u.id, u.email, u.display_name, u.avatar_url, u.locale, u.timezone,
            u.referral_code, u.email_verified, u.is_admin, u.admin_role, u.last_login_at, u.created_at,
-           u.public_profile,
+           u.public_profile, u.paper_starting_balance,
            s.plan, s.status as subscription_status, s.expires_at as subscription_expires_at
     FROM users u
     LEFT JOIN subscriptions s ON s.user_id = u.id
@@ -376,6 +376,7 @@ function getUserPublic(userId) {
     timezone: row.timezone,
     referralCode: row.referral_code,
     publicProfile: Boolean(row.public_profile),
+    paperStartingBalance: Number(row.paper_starting_balance) || 10000,
     emailVerified: Boolean(row.email_verified),
     isAdmin: Boolean(row.is_admin),
     adminRole: row.is_admin ? (row.admin_role || 'superadmin') : null,

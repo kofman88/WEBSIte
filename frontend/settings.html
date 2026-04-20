@@ -108,6 +108,7 @@
         <div><label class="text-sm text-slate-400 block mb-1">Биржа по умолчанию</label><select class="w-full bg-slate-800/50 border border-slate-700 rounded-xl px-4 py-3 text-white outline-none"><option>Bybit</option><option>Binance</option><option>BingX</option></select></div>
         <div><label class="text-sm text-slate-400 block mb-2">Leverage по умолчанию: <span id="levVal" class="text-indigo-400">10x</span></label><input type="range" min="1" max="100" value="10" class="w-full" oninput="document.getElementById('levVal').textContent=this.value+'x'"/></div>
         <div><label class="text-sm text-slate-400 block mb-2">Риск на сделку: <span id="riskVal" class="text-indigo-400">2%</span></label><input type="range" min="0.5" max="10" step="0.5" value="2" class="w-full" oninput="document.getElementById('riskVal').textContent=this.value+'%'"/></div>
+        <div><label class="text-sm text-slate-400 block mb-1">Стартовый баланс (paper)</label><div class="flex gap-2"><input id="paperBalanceInput" type="number" value="10000" min="100" max="10000000" step="100" class="flex-1 bg-slate-800/50 border border-slate-700 rounded-xl px-4 py-3 text-white outline-none"/><button type="button" id="paperBalanceSave" class="px-4 py-3 rounded-xl text-sm font-semibold text-white" style="background:linear-gradient(180deg,#2A5BE8,#1D4ED8 60%,#143797)">Применить</button></div><div class="text-xs text-slate-500 mt-1">Виртуальный баланс для бумажной торговли и Equity-кривой. От $100 до $10 000 000.</div></div>
         <div><label class="text-sm text-slate-400 block mb-1">Макс. одновременных сделок</label><input type="number" value="5" min="1" max="20" class="w-full bg-slate-800/50 border border-slate-700 rounded-xl px-4 py-3 text-white outline-none"/></div>
         <div><label class="text-sm text-slate-400 block mb-1">Дневной лимит потерь (%)</label><input type="number" value="5" step="0.5" class="w-full bg-slate-800/50 border border-slate-700 rounded-xl px-4 py-3 text-white outline-none"/></div>
         <div class="flex items-center justify-between p-3 bg-slate-800/30 rounded-xl"><span class="text-sm">Авто-торговля</span><div class="toggle on" onclick="this.classList.toggle('on')"></div></div>
@@ -998,6 +999,24 @@ document.addEventListener('DOMContentLoaded', () => {
   });
   const pt = document.getElementById('pushTestBtn');
   if (pt) pt.addEventListener('click', () => Push.test());
+
+  // Paper starting balance — fetch current value + wire save button
+  (async () => {
+    const inp = document.getElementById('paperBalanceInput');
+    const btn = document.getElementById('paperBalanceSave');
+    if (!inp || !btn) return;
+    try {
+      const me = await API.me();
+      const u = me.user || me;
+      if (u && Number(u.paperStartingBalance) > 0) inp.value = u.paperStartingBalance;
+    } catch (_e) {}
+    btn.addEventListener('click', async () => {
+      const amount = parseFloat(inp.value);
+      if (!(amount >= 100 && amount <= 10_000_000)) { Toast.error('От $100 до $10M'); return; }
+      try { await API.setPaperBalance(amount); Toast.success('Сохранено · обнови дашборд'); }
+      catch (e) { Toast.error(e.message || 'Ошибка'); }
+    });
+  })();
 
   const eb = document.getElementById('exportDataBtn');
   if (eb) eb.addEventListener('click', async () => {

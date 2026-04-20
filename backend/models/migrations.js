@@ -28,15 +28,16 @@ const MIGRATIONS = [
     // record version 1 on first boot without running anything.
     up(db) { /* intentionally empty */ },
   },
-  // Example for operators:
-  // {
-  //   version: 2,
-  //   name: '2026_04_20_add_user_preferred_language',
-  //   up(db) {
-  //     db.exec("ALTER TABLE users ADD COLUMN preferred_lang TEXT DEFAULT 'en'");
-  //     db.exec("CREATE INDEX IF NOT EXISTS idx_users_lang ON users(preferred_lang)");
-  //   },
-  // },
+  {
+    version: 2,
+    name: 'users_paper_starting_balance',
+    up(db) {
+      const cols = db.prepare("PRAGMA table_info('users')").all().map((c) => c.name);
+      if (!cols.includes('paper_starting_balance')) {
+        db.exec("ALTER TABLE users ADD COLUMN paper_starting_balance REAL NOT NULL DEFAULT 10000");
+      }
+    },
+  },
 ];
 
 function ensureTable(db) {

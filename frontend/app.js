@@ -255,6 +255,7 @@ const API = {
   leaderboard: (opts = {}) => apiRequest('GET', '/public/leaderboard?' + qs(opts), null, { skipAuth: true }),
   publicProfile: (code) => apiRequest('GET', '/public/u/' + code, null, { skipAuth: true }),
   setPublicProfile: (enabled) => apiRequest('PUT', '/support/profile/public', { enabled }),
+  setPaperBalance: (amount) => apiRequest('PUT', '/support/profile/paper-balance', { amount }),
 
   // Support tickets
   listTickets: (opts = {}) => apiRequest('GET', '/support/tickets?' + qs(opts)),

@@ -243,7 +243,15 @@ async function buildChart(days) {
     const trades = tradeArrays.flatMap(r => r.trades || [])
       .filter(t => new Date(t.closed_at).getTime() >= since)
       .sort((a, b) => new Date(a.closed_at).getTime() - new Date(b.closed_at).getTime());
-    let equity = 10000;
+    // Starting balance pulled from the authenticated user profile (settings
+    // → trading). Falls back to 10 000 for users on old snapshots.
+    let startingBalance = 10000;
+    try {
+      const me = await API.me();
+      const u = me.user || me;
+      if (u && Number(u.paperStartingBalance) > 0) startingBalance = Number(u.paperStartingBalance);
+    } catch (_e) {}
+    let equity = startingBalance;
     const points = [{ t: since, v: equity }];
     for (const t of trades) { equity += Number(t.realized_pnl || 0); points.push({ t: new Date(t.closed_at).getTime(), v: equity }); }
     const cfg = {
