@@ -13,7 +13,9 @@
     "test:e2e": "vitest run tests/e2e",
     "lint": "eslint . --ext .js",
     "db:reset": "node utils/db-reset.js",
-    "db:seed": "node utils/db-seed.js"
+    "db:seed": "node utils/db-seed.js",
+    "smoke": "node ../scripts/smoke.js",
+    "smoke:prod": "SMOKE_URL=https://chmup.top node ../scripts/smoke.js"
   },
   "engines": {
     "node": ">=18.0.0"
