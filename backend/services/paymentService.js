@@ -126,7 +126,18 @@ async function handleStripeWebhook(rawBody, signature) {
     }
   }
 
-  logger.info('stripe webhook', { type: event.type });
+  logger.info('stripe webhook', { type: event.type, id: event.id });
+
+  // Idempotency: Stripe retries on transient failures — record event.id
+  // and bail out on duplicates. INSERT OR IGNORE keeps this race-safe.
+  if (event.id) {
+    const ins = db.prepare('INSERT OR IGNORE INTO stripe_webhooks (event_id, event_type) VALUES (?, ?)')
+      .run(event.id, event.type);
+    if (ins.changes === 0) {
+      logger.info('stripe webhook duplicate ignored', { id: event.id });
+      return { received: true, duplicate: true };
+    }
+  }
 
   switch (event.type) {
     case 'checkout.session.completed': {
@@ -223,8 +234,20 @@ function createCryptoPayment(userId, { plan, network, billingCycle = 'monthly' }
 function confirmCryptoPayment(paymentId, { txHash, fromAddress, amountUsdt }) {
   const payment = db.prepare('SELECT * FROM payments WHERE id = ? AND status = ?').get(paymentId, 'pending');
   if (!payment) { const err = new Error('Payment not found or already processed'); err.statusCode = 404; throw err; }
-  if (amountUsdt && Math.abs(amountUsdt - Number(payment.amount_usd)) > 0.01) {
-    const err = new Error('Amount mismatch'); err.statusCode = 400; throw err;
+  // Accept ±1% tolerance (network fee absorption on underside, rounding
+  // on overside). Outside that window — reject with a specific code so
+  // the frontend can route the user to support for manual handling.
+  if (typeof amountUsdt === 'number' && Number.isFinite(amountUsdt)) {
+    const invoiced = Number(payment.amount_usd);
+    const pct = (amountUsdt - invoiced) / invoiced;
+    if (pct < -0.01) {
+      const err = new Error('Amount mismatch (underpaid): expected ' + invoiced + ' USDT, got ' + amountUsdt);
+      err.statusCode = 400; err.code = 'UNDERPAID'; throw err;
+    }
+    if (pct > 0.01) {
+      const err = new Error('Amount mismatch (overpaid): expected ' + invoiced + ' USDT, got ' + amountUsdt + ' — contact support for credit/refund');
+      err.statusCode = 400; err.code = 'OVERPAID'; throw err;
+    }
   }
   // Attach tx metadata but LEAVE status='pending' so confirmPayment can transition it.
   const existingMeta = (() => { try { return JSON.parse(payment.metadata || '{}'); } catch { return {}; } })();

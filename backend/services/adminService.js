@@ -130,6 +130,30 @@ function refundPayment(paymentId, { adminId, reason = null } = {}) {
     refRewards.cancel(reward.id, { adminUserId: adminId, reason: 'payment_refunded' });
   }
 
+  // If this refund leaves the user with no later confirmed payment, drop
+  // them back to the free plan. extendSubscription() will then cascade
+  // and deactivate any bots above the free-plan cap.
+  try {
+    const laterConfirmed = db.prepare(`
+      SELECT COUNT(*) AS n FROM payments
+      WHERE user_id = ? AND status = 'confirmed' AND id <> ? AND created_at > ?
+    `).get(payment.user_id, paymentId, payment.created_at).n;
+    if (laterConfirmed === 0) {
+      const sub = db.prepare('SELECT plan FROM subscriptions WHERE user_id = ?').get(payment.user_id);
+      if (sub && sub.plan !== 'free') {
+        // Put them on the free plan, wipe the expiry so they can't keep
+        // the old tier until expires_at. 0 days means "no extension" —
+        // extendSubscription still runs the bot-cleanup pass.
+        const paymentService = require('./paymentService');
+        paymentService.extendSubscription(payment.user_id, 'free', 0);
+        db.prepare(`UPDATE subscriptions SET expires_at = NULL, status = 'refunded', updated_at = CURRENT_TIMESTAMP WHERE user_id = ?`)
+          .run(payment.user_id);
+      }
+    }
+  } catch (e) {
+    require('../utils/logger').error('refund downgrade failed', { userId: payment.user_id, err: e.message });
+  }
+
   db.prepare(`
     INSERT INTO audit_log (user_id, action, entity_type, entity_id, metadata)
     VALUES (?, 'admin.payment.refund', 'payment', ?, ?)
