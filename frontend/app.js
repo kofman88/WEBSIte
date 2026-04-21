@@ -270,6 +270,12 @@ const API = {
   marketRate: (slug, stars) => apiRequest('POST', '/strategies/' + encodeURIComponent(slug) + '/rate', { stars }),
   marketUnpublish: (slug) => apiRequest('DELETE', '/strategies/' + encodeURIComponent(slug)),
 
+  // Bot wizard — strategy schemas + inline backtest preview
+  strategySchemas:    () => apiRequest('GET', '/bots/strategy-schemas'),
+  strategySchema:     (key) => apiRequest('GET', '/bots/strategy-schema/' + encodeURIComponent(key)),
+  quickBacktest:      (body) => apiRequest('POST', '/bots/quick-backtest', body),
+  getBacktest:        (id) => apiRequest('GET', '/backtests/' + id),
+
   // Support tickets
   listTickets: (opts = {}) => apiRequest('GET', '/support/tickets?' + qs(opts)),
   createTicket: (subject, body) => apiRequest('POST', '/support/tickets', { subject, body }),
