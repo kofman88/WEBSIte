@@ -30,8 +30,11 @@ let enabled = false;
     Sentry.init({
       dsn: config.sentryDsn,
       environment: config.isProd ? 'production' : (process.env.NODE_ENV || 'development'),
-      release: '3.0.0',
-      tracesSampleRate: 0.05,
+      release: process.env.BUILD_SHA || process.env.GIT_SHA || require('../../package.json').version || '3.0.0',
+      // 100% of ERRORS are always captured (sampleRate). Only performance
+      // traces are sampled — 10% in prod, 100% in dev.
+      sampleRate: 1.0,
+      tracesSampleRate: config.isProd ? 0.1 : 1.0,
       beforeSend(event) {
         // Scrub sensitive headers + body + query fields. Defence-in-depth:
         // we still never pass plaintext secrets into log.info / error with
