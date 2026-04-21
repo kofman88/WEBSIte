@@ -75,6 +75,31 @@
   var root = document.getElementById('aura-bg');
   var grid = document.getElementById('aura-grid');
   var orb  = document.getElementById('aura-orb');
+
+  // Defensive: force the container out of flow + body transparent even if a
+  // stylesheet (tailwind, legacy styles.css, inline body bg) managed to
+  // override. This runs BEFORE animation init so content never renders
+  // on top of (or pushed by) a mis-positioned aura-bg div.
+  if (root) {
+    root.style.setProperty('position', 'fixed', 'important');
+    root.style.setProperty('top', '0', 'important');
+    root.style.setProperty('left', '0', 'important');
+    root.style.setProperty('right', '0', 'important');
+    root.style.setProperty('bottom', '0', 'important');
+    root.style.setProperty('width', '100vw', 'important');
+    root.style.setProperty('height', '100vh', 'important');
+    root.style.setProperty('z-index', '-1', 'important');
+    root.style.setProperty('pointer-events', 'none', 'important');
+    root.style.setProperty('margin', '0', 'important');
+    root.style.setProperty('padding', '0', 'important');
+    root.style.setProperty('overflow', 'hidden', 'important');
+    // Relocate to be a direct body child if something wrapped it
+    if (root.parentElement && root.parentElement !== document.body) {
+      document.body.insertBefore(root, document.body.firstChild);
+    }
+    // Body must not have an opaque background layered on top of the canvas
+    document.body.style.setProperty('background', 'transparent', 'important');
+  }
   if (!root || !grid) {
     console.warn('[aura-bg] не найдены #aura-bg / #aura-grid. Фон не инициализирован.');
     return;
