@@ -566,6 +566,125 @@ html.light .shell-tick-price, html.light .shell-fng-value { color: #0A0A0A !impo
 
 /* Hide market block on narrow screens so topbar stays usable */
 @media (max-width: 900px) { .shell-market { display: none; } }
+
+/* ── Dashboard action bar: status pill + Quick Trade + Pause all ── */
+.chm-status {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  height: 36px;
+  padding: 0 14px;
+  background: linear-gradient(180deg, rgba(255,255,255,.05), rgba(255,255,255,.015));
+  border: 1px solid rgba(255,255,255,.08);
+  border-radius: var(--radius-pill);
+  box-shadow: inset 0 1px 1px rgba(255,255,255,.05), inset 0 -1px 2px rgba(0,0,0,.35);
+  font-family: 'Inter', sans-serif;
+  font-size: 12px;
+  font-weight: 500;
+  color: rgba(226,232,240,.85);
+  white-space: nowrap;
+  transition: border-color .2s ease;
+}
+.chm-status:hover { border-color: rgba(255,255,255,.16); }
+.chm-status-dot {
+  width: 8px; height: 8px;
+  border-radius: 50%;
+  background: #94a3b8;
+  box-shadow: 0 0 6px rgba(148,163,184,.6);
+  flex-shrink: 0;
+  animation: chmPulse 2.4s ease-in-out infinite;
+}
+@keyframes chmPulse {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50%      { opacity: .5; transform: scale(.85); }
+}
+.chm-status[data-state="ok"]      { border-color: rgba(74,222,128,.28); color: #bbf7d0; }
+.chm-status[data-state="ok"]      .chm-status-dot { background: #4ade80; box-shadow: 0 0 8px rgba(74,222,128,.7); }
+.chm-status[data-state="warn"]    { border-color: rgba(245,158,11,.32); color: #fde68a; }
+.chm-status[data-state="warn"]    .chm-status-dot { background: #f59e0b; box-shadow: 0 0 8px rgba(245,158,11,.7); }
+.chm-status[data-state="down"]    { border-color: rgba(239,68,68,.35); color: #fecaca; }
+.chm-status[data-state="down"]    .chm-status-dot { background: #ef4444; box-shadow: 0 0 8px rgba(239,68,68,.7); }
+.chm-status[data-state="loading"] .chm-status-dot { background: #64748b; box-shadow: 0 0 4px rgba(100,116,139,.5); }
+
+/* Action pills — primary (Quick Trade) and danger (Pause all) */
+.chm-action {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  height: 36px;
+  padding: 0 18px;
+  border: 0;
+  border-radius: var(--radius-pill);
+  font-family: 'Inter', sans-serif;
+  font-weight: 600;
+  font-size: 12.5px;
+  letter-spacing: 0.005em;
+  color: #fff;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: transform .18s cubic-bezier(.4,0,.2,1), filter .18s ease, box-shadow .18s ease;
+  line-height: 1;
+  position: relative;
+  isolation: isolate;
+}
+.chm-action svg { flex-shrink: 0; }
+.chm-action:active { transform: translateY(0) scale(.97); }
+.chm-action:focus-visible { outline: 2px solid rgba(255,255,255,.4); outline-offset: 3px; }
+
+/* Primary — blue gradient with inset highlight + double outer shadow */
+.chm-action-primary {
+  background: linear-gradient(180deg, #3E6BEF 0%, #1D4ED8 55%, #143797 100%);
+  box-shadow:
+    inset 0 1px 1px rgba(255,255,255,.32),
+    inset 0 -1px 2px rgba(0,0,0,.45),
+    0 2px 4px rgba(29,78,216,.25),
+    0 8px 20px -6px rgba(29,78,216,.55),
+    0 0 0 1px rgba(29,78,216,.35);
+}
+.chm-action-primary:hover {
+  transform: translateY(-1px);
+  filter: brightness(1.08) saturate(1.1);
+  box-shadow:
+    inset 0 1px 1px rgba(255,255,255,.38),
+    inset 0 -1px 2px rgba(0,0,0,.4),
+    0 4px 8px rgba(29,78,216,.35),
+    0 12px 28px -4px rgba(29,78,216,.7),
+    0 0 0 1px rgba(92,128,227,.5);
+}
+.chm-action-primary svg { color: #FFD700; filter: drop-shadow(0 1px 2px rgba(0,0,0,.4)); }
+
+/* Danger — warm red gradient */
+.chm-action-danger {
+  background: linear-gradient(180deg, #EF5A5A 0%, #C03030 55%, #7A1F1F 100%);
+  box-shadow:
+    inset 0 1px 1px rgba(255,255,255,.28),
+    inset 0 -1px 2px rgba(0,0,0,.5),
+    0 2px 4px rgba(192,48,48,.25),
+    0 8px 20px -6px rgba(192,48,48,.55),
+    0 0 0 1px rgba(192,48,48,.4);
+}
+.chm-action-danger:hover {
+  transform: translateY(-1px);
+  filter: brightness(1.08) saturate(1.12);
+  box-shadow:
+    inset 0 1px 1px rgba(255,255,255,.32),
+    inset 0 -1px 2px rgba(0,0,0,.45),
+    0 4px 8px rgba(192,48,48,.35),
+    0 12px 28px -4px rgba(239,90,90,.65),
+    0 0 0 1px rgba(239,90,90,.5);
+}
+.chm-action-danger svg { filter: drop-shadow(0 1px 2px rgba(0,0,0,.4)); }
+
+/* Light mode overrides */
+html.light .chm-status {
+  background: linear-gradient(180deg, rgba(0,0,0,.03), rgba(0,0,0,.01)) !important;
+  border-color: rgba(0,0,0,.1) !important;
+  color: rgba(10,10,10,.75) !important;
+  box-shadow: 0 1px 2px rgba(0,0,0,.04), inset 0 1px 1px rgba(255,255,255,.6) !important;
+}
+html.light .chm-status[data-state="ok"]   { border-color: rgba(22,163,74,.35) !important; color: #166534 !important; }
+html.light .chm-status[data-state="warn"] { border-color: rgba(202,138,4,.35) !important; color: #854d0e !important; }
+html.light .chm-status[data-state="down"] { border-color: rgba(220,38,38,.35) !important; color: #991b1b !important; }
 html.light .shell-topbar-btn { background: linear-gradient(180deg, rgba(0,0,0,.03), rgba(0,0,0,.01)) !important; border-color: rgba(0,0,0,.14) !important; color: rgba(10,10,10,.88) !important; box-shadow: inset 0 1px 1px rgba(255,255,255,.6), 0 1px 1px rgba(0,0,0,.04) !important; }
 html.light .shell-topbar-btn:hover { background: linear-gradient(180deg, rgba(0,0,0,.06), rgba(0,0,0,.02)) !important; border-color: rgba(0,0,0,.22) !important; }
 .topbar-notification {

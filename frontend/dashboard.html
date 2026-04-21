@@ -74,13 +74,19 @@
 <main class="main-content">
   <div class="flex items-center justify-between mb-6 flex-wrap gap-3">
     <h1 class="text-2xl font-bold" data-t="d-title">Дашборд</h1>
-    <div class="flex items-center gap-2 flex-wrap">
-      <div id="sysHealth" class="flex items-center gap-2 text-xs px-3 py-1.5 rounded-lg bg-slate-800/40 border border-slate-700/50">
-        <span id="sysDot" class="w-1.5 h-1.5 rounded-full bg-slate-500"></span>
-        <span id="sysText" class="text-slate-400">Проверяем систему…</span>
+    <div class="flex items-center gap-2.5 flex-wrap">
+      <div id="sysHealth" class="chm-status" data-state="loading">
+        <span id="sysDot" class="chm-status-dot"></span>
+        <span id="sysText">Проверяем систему…</span>
       </div>
-      <button onclick="location.href='bots.html'" class="text-xs px-3 py-1.5 rounded-lg bg-indigo-500/15 border border-indigo-500/30 text-indigo-300 hover:bg-indigo-500/25">⚡ Quick Trade</button>
-      <button id="pauseAllBtn" class="text-xs px-3 py-1.5 rounded-lg bg-red-500/10 border border-red-500/30 text-red-300 hover:bg-red-500/25" title="Мгновенно остановить всех активных ботов">🛑 Pause all</button>
+      <button onclick="location.href='bots.html'" class="chm-action chm-action-primary" title="Быстрая торговля — перейти к ботам">
+        <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" width="14" height="14"><path d="M13 2 3 14h7l-1 8 10-12h-7l1-8z"/></svg>
+        <span>Quick Trade</span>
+      </button>
+      <button id="pauseAllBtn" class="chm-action chm-action-danger" title="Мгновенно остановить всех активных ботов">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" width="14" height="14"><rect x="6" y="6" width="12" height="12" rx="2"/></svg>
+        <span>Pause all</span>
+      </button>
     </div>
   </div>
 
@@ -496,10 +502,15 @@ function renderBotLeaderboard(bots) {
 async function loadSystemHealth() {
   try {
     const r = await fetch('/api/health/deep').then((x) => x.json()).catch(() => null);
-    const dot = document.getElementById('sysDot'); const txt = document.getElementById('sysText');
-    if (!r) { if (dot) dot.className = 'w-1.5 h-1.5 rounded-full bg-red-400'; if (txt) txt.textContent = 'Система недоступна'; return; }
+    const badge = document.getElementById('sysHealth');
+    const txt = document.getElementById('sysText');
+    if (!r) {
+      if (badge) badge.dataset.state = 'down';
+      if (txt) txt.textContent = 'Система недоступна';
+      return;
+    }
     const ok = r.status === 'ok';
-    if (dot) dot.className = 'w-1.5 h-1.5 rounded-full ' + (ok ? 'bg-green-400 animate-pulse' : 'bg-yellow-400');
+    if (badge) badge.dataset.state = ok ? 'ok' : 'warn';
     if (txt) txt.textContent = ok ? 'Все системы работают' : 'Частичные сбои · Scanner/DB';
   } catch (_e) {}
 }
