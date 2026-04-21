@@ -22,28 +22,28 @@
   <nav class="sidebar-nav">
     <a href="dashboard.html" class="sidebar-link active" data-page="dashboard">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
-      Дашборд</a>
+      <span data-t="sb-dashboard">Дашборд</span></a>
     <a href="bots.html" class="sidebar-link" data-page="bots" data-tour="bots">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2a4 4 0 014 4v1h2a2 2 0 012 2v10a2 2 0 01-2 2H6a2 2 0 01-2-2V9a2 2 0 012-2h2V6a4 4 0 014-4z"/><circle cx="9" cy="13" r="1"/><circle cx="15" cy="13" r="1"/><path d="M10 17h4"/></svg>
-      Боты</a>
+      <span data-t="sb-bots">Боты</span></a>
     <a href="signals.html" class="sidebar-link" data-page="signals">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
-      Сигналы</a>
+      <span data-t="sb-signals">Сигналы</span></a>
     <a href="analytics.html" class="sidebar-link" data-page="analytics" data-tour="analytics">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 3v18h18"/><path d="M7 14l4-4 4 4 5-5"/></svg>
-      Аналитика</a>
+      <span data-t="sb-analytics">Аналитика</span></a>
     <a href="backtests.html" class="sidebar-link" data-page="backtests">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6m6 0h10M9 19a2 2 0 002 2h2a2 2 0 002-2M9 19V9a2 2 0 012-2h2a2 2 0 012 2v10m0 0a2 2 0 002 2h2a2 2 0 002-2V5a2 2 0 00-2-2h-2a2 2 0 00-2 2v14"/></svg>
-      Бэктесты</a>
+      <span data-t="sb-backtests">Бэктесты</span></a>
     <a href="wallet.html" class="sidebar-link" data-page="wallet" data-tour="wallet">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12V7H5a2 2 0 010-4h14v4"/><path d="M3 5v14a2 2 0 002 2h16v-5"/><path d="M18 12a2 2 0 100 4 2 2 0 000-4z"/></svg>
-      Кошелёк</a>
+      <span data-t="sb-wallet">Кошелёк</span></a>
     <a href="leaderboard.html" class="sidebar-link" data-page="leaderboard">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
-      Leaderboard</a>
+      <span data-t="sb-leaderboard">Leaderboard</span></a>
     <a href="settings.html" class="sidebar-link" data-page="settings" data-tour="settings">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 15a3 3 0 100-6 3 3 0 000 6z"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 01-2.83 2.83l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 012.83-2.83l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z"/></svg>
-      Настройки</a>
+      <span data-t="sb-settings">Настройки</span></a>
   </nav>
   <div class="sidebar-footer">
     <div class="sidebar-sub-badge">
@@ -52,7 +52,7 @@
     </div>
     <button onclick="Auth.logout()" class="sidebar-link mt-2 text-red-400 hover:text-red-300" style="color:#C8B9B9">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4M16 17l5-5-5-5M21 12H9"/></svg>
-      Выйти</button>
+      <span data-t="sb-logout">Выйти</span></button>
   </div>
 </aside>
 
@@ -72,70 +72,178 @@
 
 <!-- MAIN -->
 <main class="main-content">
-  <h1 class="text-2xl font-bold mb-6">Дашборд</h1>
+  <div class="flex items-center justify-between mb-6 flex-wrap gap-3">
+    <h1 class="text-2xl font-bold" data-t="d-title">Дашборд</h1>
+    <div class="flex items-center gap-2 flex-wrap">
+      <div id="sysHealth" class="flex items-center gap-2 text-xs px-3 py-1.5 rounded-lg bg-slate-800/40 border border-slate-700/50">
+        <span id="sysDot" class="w-1.5 h-1.5 rounded-full bg-slate-500"></span>
+        <span id="sysText" class="text-slate-400">Проверяем систему…</span>
+      </div>
+      <button onclick="location.href='bots.html'" class="text-xs px-3 py-1.5 rounded-lg bg-indigo-500/15 border border-indigo-500/30 text-indigo-300 hover:bg-indigo-500/25">⚡ Quick Trade</button>
+      <button id="pauseAllBtn" class="text-xs px-3 py-1.5 rounded-lg bg-red-500/10 border border-red-500/30 text-red-300 hover:bg-red-500/25" title="Мгновенно остановить всех активных ботов">🛑 Pause all</button>
+    </div>
+  </div>
 
-  <!-- Stats (filled by loadSummary()) -->
-  <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+  <!-- Row 1 — 4 primary KPIs -->
+  <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-4">
     <div class="stat-card liquid-glass">
       <div class="stat-card-icon" style="background:rgba(29,78,216,.4)"><svg width="22" height="22" fill="none" stroke="#5C80E3" stroke-width="2"><path d="M21 12V7H5a2 2 0 010-4h14v4M3 5v14a2 2 0 002 2h16v-5M18 12a2 2 0 100 4 2 2 0 000-4z"/></svg></div>
       <div class="stat-card-label">Total PnL</div>
       <div class="stat-card-value" id="balanceVal">—</div>
+      <div class="text-[10px] text-slate-500 mt-1">30д: <span id="pnl30">—</span></div>
     </div>
     <div class="stat-card liquid-glass">
       <div class="stat-card-icon" style="background:rgba(29,78,216,.18)"><svg width="22" height="22" fill="none" stroke="#5C80E3" stroke-width="2"><path d="M12 2a4 4 0 014 4v1h2a2 2 0 012 2v10a2 2 0 01-2 2H6a2 2 0 01-2-2V9a2 2 0 012-2h2V6a4 4 0 014-4z"/></svg></div>
       <div class="stat-card-label">Активные боты</div>
-      <div class="stat-card-value">—</div>
+      <div class="stat-card-value" id="botsActive">—</div>
+      <div class="text-[10px] text-slate-500 mt-1" id="botsSubline">—</div>
     </div>
     <div class="stat-card liquid-glass">
       <div class="stat-card-icon" style="background:rgba(43,89,54,.18)"><svg width="22" height="22" fill="none" stroke="#66876E" stroke-width="2"><path d="M13 10V3L4 14h7v7l9-11h-7z"/></svg></div>
       <div class="stat-card-label">Сигналов всего</div>
-      <div class="stat-card-value">—</div>
+      <div class="stat-card-value" id="signalsTotal">—</div>
+      <div class="text-[10px] text-slate-500 mt-1">Сегодня: <span id="signalsToday">—</span></div>
     </div>
     <div class="stat-card liquid-glass">
       <div class="stat-card-icon" style="background:rgba(130,98,98,.18)"><svg width="22" height="22" fill="none" stroke="#C8B9B9" stroke-width="2"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg></div>
       <div class="stat-card-label">Win Rate</div>
-      <div class="stat-card-value">—</div>
+      <div class="stat-card-value" id="winRateVal">—</div>
+      <div class="text-[10px] text-slate-500 mt-1"><span id="winLossRatio">—</span> побед/потерь</div>
     </div>
   </div>
 
-  <!-- Chart + Signals -->
+  <!-- Row 2 — 4 pro metrics -->
+  <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+    <div class="stat-card"><div class="stat-card-label">Max Drawdown</div><div class="stat-card-value" id="maxDdVal">—</div><div class="text-[10px] text-slate-500 mt-1" id="maxDdSub">Пик-к-впадине</div></div>
+    <div class="stat-card"><div class="stat-card-label">Sharpe ratio</div><div class="stat-card-value" id="sharpeVal">—</div><div class="text-[10px] text-slate-500 mt-1">&gt;1.5 — хорошо, &gt;2 — отлично</div></div>
+    <div class="stat-card"><div class="stat-card-label">Profit Factor</div><div class="stat-card-value" id="pfVal">—</div><div class="text-[10px] text-slate-500 mt-1">Gross wins / losses</div></div>
+    <div class="stat-card"><div class="stat-card-label" id="streakLabel">Серия</div><div class="stat-card-value" id="streakVal">—</div><div class="text-[10px] text-slate-500 mt-1">Подряд</div></div>
+  </div>
+
+  <!-- Row 3 — Risk budget + percentile + open positions count + best/worst -->
+  <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+    <div class="card" style="padding:16px">
+      <div class="text-xs text-slate-500 uppercase tracking-wider mb-2">Risk in play</div>
+      <div class="text-lg font-mono font-bold" id="riskPlay">—</div>
+      <div class="text-[10px] text-slate-500 mt-1" id="riskPlaySub">В открытых позициях</div>
+    </div>
+    <div class="card" style="padding:16px">
+      <div class="text-xs text-slate-500 uppercase tracking-wider mb-2">Percentile (30d)</div>
+      <div class="text-lg font-mono font-bold" id="percentileVal">—</div>
+      <div class="text-[10px] text-slate-500 mt-1">Позиция в Leaderboard</div>
+    </div>
+    <div class="card" style="padding:16px">
+      <div class="text-xs text-slate-500 uppercase tracking-wider mb-2">Лучшая сделка</div>
+      <div class="text-lg font-mono font-bold text-green-400" id="bestTradeVal">—</div>
+      <div class="text-[10px] text-slate-500 mt-1" id="bestTradeSub">—</div>
+    </div>
+    <div class="card" style="padding:16px">
+      <div class="text-xs text-slate-500 uppercase tracking-wider mb-2">Худшая сделка</div>
+      <div class="text-lg font-mono font-bold text-red-400" id="worstTradeVal">—</div>
+      <div class="text-[10px] text-slate-500 mt-1" id="worstTradeSub">—</div>
+    </div>
+  </div>
+
+  <!-- Row 4 — Equity curve + Open positions -->
   <div class="grid lg:grid-cols-3 gap-6 mb-6">
-    <!-- Equity Chart -->
     <div class="lg:col-span-2 card" data-tour="equity">
       <div class="flex items-center justify-between mb-4">
         <h2 class="font-bold">Кривая капитала</h2>
         <div class="flex gap-1">
-          <button class="text-xs px-3 py-1 rounded-lg bg-indigo-500/20 text-indigo-300" onclick="updateChart(7)">1W</button>
-          <button class="text-xs px-3 py-1 rounded-lg hover:bg-slate-700/50 text-slate-400" onclick="updateChart(30)">1M</button>
-          <button class="text-xs px-3 py-1 rounded-lg hover:bg-slate-700/50 text-slate-400" onclick="updateChart(90)">3M</button>
+          <button class="eqBtn text-xs px-3 py-1 rounded-lg bg-indigo-500/20 text-indigo-300" data-days="7">1W</button>
+          <button class="eqBtn text-xs px-3 py-1 rounded-lg hover:bg-slate-700/50 text-slate-400" data-days="30">1M</button>
+          <button class="eqBtn text-xs px-3 py-1 rounded-lg hover:bg-slate-700/50 text-slate-400" data-days="90">3M</button>
+          <button class="eqBtn text-xs px-3 py-1 rounded-lg hover:bg-slate-700/50 text-slate-400" data-days="365">1Y</button>
+          <label class="flex items-center gap-1 ml-2 text-xs text-slate-400 cursor-pointer">
+            <input type="checkbox" id="showBench" style="accent-color:#f59e0b"/>
+            BTC
+          </label>
         </div>
       </div>
       <div style="position:relative;height:280px;overflow:hidden">
         <canvas id="equityChart" style="display:block;max-width:100%;max-height:100%"></canvas>
       </div>
     </div>
-    <!-- Recent Signals -->
     <div class="card">
-      <div class="flex items-center justify-between mb-4"><h2 class="font-bold">Последние сигналы</h2><a href="signals.html" class="text-xs text-indigo-400 hover:underline">Все</a></div>
-      <div class="space-y-3" id="recentSignals">
-        <div class="text-xs text-slate-500 text-center py-4">Загрузка…</div>
+      <div class="flex items-center justify-between mb-3">
+        <h2 class="font-bold">Открытые позиции</h2>
+        <span id="openPosCount" class="text-xs text-slate-500">—</span>
+      </div>
+      <div id="openPosList" class="space-y-2" style="max-height:280px;overflow-y:auto">
+        <div class="text-xs text-slate-500 text-center py-6">Нет открытых позиций</div>
       </div>
     </div>
   </div>
 
-  <!-- Recent Trades -->
-  <div class="card">
-    <div class="flex items-center justify-between mb-4"><h2 class="font-bold">Последние сделки</h2></div>
-    <div class="overflow-x-auto">
-      <table class="w-full text-sm">
-        <thead><tr class="text-xs text-slate-500 uppercase"><th class="text-left p-3">Дата</th><th class="text-left p-3">Пара</th><th class="text-left p-3">Направление</th><th class="text-left p-3">Вход</th><th class="text-left p-3">Выход</th><th class="text-left p-3">PnL</th><th class="text-left p-3">R:R</th></tr></thead>
-        <tbody><tr><td colspan="7" class="p-4 text-center text-slate-500 text-sm">Загрузка сделок…</td></tr></tbody>
-      </table>
+  <!-- Row 5 — PnL breakdowns + R-multiple + Bot leaderboard -->
+  <div class="grid lg:grid-cols-3 gap-6 mb-6">
+    <div class="card">
+      <h2 class="font-bold mb-3">R-multiple distribution</h2>
+      <div style="position:relative;height:200px;overflow:hidden">
+        <canvas id="rMultChart" style="display:block;max-width:100%;max-height:100%"></canvas>
+      </div>
+      <div class="text-[10px] text-slate-500 mt-2">Сколько сделок на какой R. Правый хвост жирнее = есть edge.</div>
+    </div>
+    <div class="card">
+      <h2 class="font-bold mb-3">PnL по стратегиям</h2>
+      <div style="position:relative;height:200px;overflow:hidden">
+        <canvas id="stratDonut" style="display:block;max-width:100%;max-height:100%"></canvas>
+      </div>
+      <div id="stratLegend" class="text-[11px] mt-2 space-y-1"></div>
+    </div>
+    <div class="card">
+      <h2 class="font-bold mb-3">Топ ботов (30д)</h2>
+      <div id="botLeaderboard" class="space-y-2 text-xs">
+        <div class="text-slate-500 text-center py-3">Загрузка…</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Row 5b — Heatmaps: calendar P&L + hours of day -->
+  <div class="grid lg:grid-cols-2 gap-6 mb-6">
+    <div class="card">
+      <div class="flex items-center justify-between mb-3">
+        <h2 class="font-bold">Календарь P&amp;L (180 дней)</h2>
+        <span class="text-[10px] text-slate-500">Клетка = день. Зелёный = прибыль, красный = убыток</span>
+      </div>
+      <div id="calHeat" class="overflow-x-auto" style="min-height:130px"></div>
+    </div>
+    <div class="card">
+      <div class="flex items-center justify-between mb-3">
+        <h2 class="font-bold">По часам (90 дней)</h2>
+        <span class="text-[10px] text-slate-500">UTC · в какие часы торгуется лучше</span>
+      </div>
+      <div style="position:relative;height:180px;overflow:hidden">
+        <canvas id="hourChart" style="display:block;max-width:100%;max-height:100%"></canvas>
+      </div>
+    </div>
+  </div>
+
+  <!-- Row 6 — Recent signals + Recent trades -->
+  <div class="grid lg:grid-cols-3 gap-6 mb-6">
+    <div class="card">
+      <div class="flex items-center justify-between mb-4"><h2 class="font-bold">Последние сигналы</h2><a href="signals.html" class="text-xs text-indigo-400 hover:underline">Все</a></div>
+      <div class="space-y-3" id="recentSignals" style="max-height:360px;overflow-y:auto">
+        <div class="text-xs text-slate-500 text-center py-4">Загрузка…</div>
+      </div>
+    </div>
+    <div class="lg:col-span-2 card">
+      <div class="flex items-center justify-between mb-4">
+        <h2 class="font-bold">Последние сделки</h2>
+        <a href="analytics.html" class="text-xs text-indigo-400 hover:underline">Вся история →</a>
+      </div>
+      <div class="overflow-x-auto">
+        <table class="w-full text-sm">
+          <thead><tr class="text-xs text-slate-500 uppercase"><th class="text-left p-3">Дата</th><th class="text-left p-3">Пара</th><th class="text-left p-3">Сторона</th><th class="text-right p-3">Вход</th><th class="text-right p-3">Выход</th><th class="text-right p-3">PnL</th><th class="text-right p-3">%</th></tr></thead>
+          <tbody id="recentTrades"><tr><td colspan="7" class="p-4 text-center text-slate-500 text-sm">Загрузка сделок…</td></tr></tbody>
+        </table>
+      </div>
     </div>
   </div>
 </main>
 
 <script src="app.js"></script>
+<script src="shell.js?v=2" defer></script>
 <script src="onboarding.js" defer></script>
 <script>
 if(!Auth.requireAuth()) throw new Error('noauth');
@@ -145,25 +253,282 @@ document.querySelectorAll('.sidebar-link[data-page="dashboard"]').forEach(a => a
 (Auth.user && Auth.user.displayName) && (document.querySelector('.topbar-username') && (document.querySelector('.topbar-username').textContent = Auth.user.displayName));
 (Auth.user && Auth.user.email) && (document.querySelector('.topbar-avatar') && (document.querySelector('.topbar-avatar').textContent = Auth.user.email[0].toUpperCase()));
 
-// ── Summary: total PnL, active bots, signals today, win rate ──
+// ── Primary summary (row 1) — bot counts + signals + win rate ──
 async function loadSummary() {
   try {
     const [botSummary, sigStats] = await Promise.all([
       API.botSummary().catch(() => ({ totalBots: 0, activeBots: 0, openTrades: 0, totalPnl: 0 })),
       API.mySignalStats().catch(() => ({ total: 0, winRate: null })),
     ]);
+    const set = (id, v) => { const el = document.getElementById(id); if (el) el.textContent = v; };
+    const pnl = Number(botSummary.totalPnl) || 0;
     const balEl = document.getElementById('balanceVal');
-    if (balEl) balEl.textContent = Fmt.currency(botSummary.totalPnl);
-    // Populate stat cards by order (4 cards)
-    const cards = document.querySelectorAll('.stat-card .stat-card-value');
-    if (cards[0]) cards[0].textContent = Fmt.currency(botSummary.totalPnl);
-    if (cards[1]) cards[1].textContent = botSummary.activeBots + ' / ' + botSummary.totalBots;
-    if (cards[2]) cards[2].textContent = sigStats.total;
-    if (cards[3]) cards[3].textContent = sigStats.winRate !== null ? Fmt.percent(sigStats.winRate * 100, { decimals: 1 }) : '—';
-  } catch (err) {
-    Toast.error('Не удалось загрузить сводку: ' + err.message);
-  }
+    if (balEl) {
+      balEl.textContent = Fmt.currency(pnl);
+      balEl.className = 'stat-card-value ' + (pnl > 0 ? 'text-green-400' : pnl < 0 ? 'text-red-400' : '');
+    }
+    set('botsActive', (botSummary.activeBots || 0) + ' / ' + (botSummary.totalBots || 0));
+    set('botsSubline', (botSummary.openTrades || 0) + ' открытых позиций');
+    set('signalsTotal', sigStats.total || 0);
+    set('signalsToday', sigStats.today || 0);
+    set('winRateVal', sigStats.winRate !== null && sigStats.winRate !== undefined
+      ? Fmt.percent(sigStats.winRate * 100, { decimals: 1 }) : '—');
+    set('winLossRatio', (sigStats.wins || 0) + '/' + (sigStats.losses || 0));
+  } catch (_e) {}
 }
+
+// ── Advanced metrics (rows 2-3) + widgets (rows 4-5) via /dashboard-v2 ──
+async function loadAdvanced() {
+  try {
+    const d = await API.dashboardV2();
+    const set = (id, v) => { const el = document.getElementById(id); if (el) el.textContent = v; };
+    const setHtml = (id, v) => { const el = document.getElementById(id); if (el) el.innerHTML = v; };
+
+    // Row 2 — Max DD / Sharpe / PF / Streak
+    const m = d.metrics || {};
+    set('maxDdVal', m.maxDdUsd ? (Fmt.currency(m.maxDdUsd) + ' · ' + (m.maxDdPct || 0).toFixed(1) + '%') : '—');
+    const ddEl = document.getElementById('maxDdVal');
+    if (ddEl && m.maxDdUsd > 0) ddEl.className = 'stat-card-value text-red-400';
+
+    const sh = m.sharpe;
+    set('sharpeVal', sh === null ? '—' : sh);
+    const shEl = document.getElementById('sharpeVal');
+    if (shEl && sh !== null) shEl.className = 'stat-card-value ' + (sh > 1.5 ? 'text-green-400' : sh > 0 ? 'text-yellow-400' : 'text-red-400');
+
+    const pf = m.profitFactor;
+    set('pfVal', pf === Infinity ? '∞' : (pf === 0 ? '—' : pf));
+    const pfEl = document.getElementById('pfVal');
+    if (pfEl && pf && pf !== Infinity) pfEl.className = 'stat-card-value ' + (pf > 1.5 ? 'text-green-400' : pf > 1 ? 'text-yellow-400' : 'text-red-400');
+
+    set('pnl30', Fmt.currency(m.last30Pnl || 0));
+
+    const st = d.streak || { streak: 0, type: 'none' };
+    set('streakVal', st.streak || 0);
+    set('streakLabel', st.type === 'win' ? 'Побед подряд' : st.type === 'loss' ? 'Потерь подряд' : 'Серия');
+    const stEl = document.getElementById('streakVal');
+    if (stEl) stEl.className = 'stat-card-value ' + (st.type === 'win' ? 'text-green-400' : st.type === 'loss' ? 'text-red-400' : '');
+
+    // Row 3 — Risk in play / Best / Worst (percentile loaded separately)
+    set('riskPlay', Fmt.currency(d.riskExposure || 0));
+    set('riskPlaySub', (d.openPositions || []).length + ' позиций');
+
+    const bw = d.bestWorst || {};
+    if (bw.best) {
+      set('bestTradeVal', (bw.best.pnlUsd > 0 ? '+' : '') + Fmt.currency(bw.best.pnlUsd));
+      set('bestTradeSub', bw.best.symbol + ' · ' + (bw.best.pnlPct ? bw.best.pnlPct.toFixed(2) + '%' : ''));
+    }
+    if (bw.worst) {
+      set('worstTradeVal', Fmt.currency(bw.worst.pnlUsd));
+      set('worstTradeSub', bw.worst.symbol + ' · ' + (bw.worst.pnlPct ? bw.worst.pnlPct.toFixed(2) + '%' : ''));
+    }
+
+    // Row 4 — Open positions
+    renderOpenPositions(d.openPositions || []);
+
+    // Row 5 — R-multiples + bot leaderboard
+    renderRMult(d.rMultiples || {});
+    renderBotLeaderboard(d.botLeaderboard || []);
+
+    // Async: percentile (might return null if too few users)
+    API.myPercentile('30d').then((r) => {
+      if (r && r.percentile !== null) {
+        set('percentileVal', 'Top ' + (100 - r.percentile) + '%');
+        const el = document.getElementById('percentileVal');
+        if (el) el.className = 'text-lg font-mono font-bold ' + (r.percentile >= 75 ? 'text-green-400' : r.percentile >= 50 ? 'text-yellow-400' : 'text-slate-300');
+      } else set('percentileVal', '—');
+    }).catch(() => set('percentileVal', '—'));
+
+    // Strategy donut from analytics summary
+    API.analyticsByStrategy && API.analyticsByStrategy().then(renderStratDonut).catch(() => {});
+
+    // Heatmaps
+    API.calendarPnl(180).then((r) => renderCalHeat(r.points || [])).catch(() => {});
+    API.hourlyPnl(90).then((r) => renderHourChart(r.hours || [])).catch(() => {});
+  } catch (_e) { /* silent */ }
+}
+
+function escHtml(s) { return String(s || '').replace(/[&<>"']/g, (c) => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+
+function renderOpenPositions(list) {
+  const box = document.getElementById('openPosList');
+  document.getElementById('openPosCount').textContent = list.length || 0;
+  if (!box) return;
+  if (!list.length) { box.innerHTML = '<div class="text-xs text-slate-500 text-center py-6">Нет открытых позиций</div>'; return; }
+  box.innerHTML = list.map((p) => `
+    <div class="flex items-center justify-between text-xs p-2 rounded bg-slate-800/30">
+      <div>
+        <span class="font-semibold text-slate-200">${escHtml(p.symbol)}</span>
+        <span class="ml-1 px-1.5 py-0.5 rounded text-[10px] ${p.side==='long'?'bg-green-500/20 text-green-400':'bg-red-500/20 text-red-400'}">${p.side}</span>
+        <span class="ml-2 text-slate-500">${escHtml(p.botName || p.strategy || '—')}</span>
+      </div>
+      <div class="text-right">
+        <div class="font-mono text-slate-300">${p.entryPrice}</div>
+        <div class="text-[10px] text-slate-500">${p.riskUsd ? 'Risk: ' + Fmt.currency(p.riskUsd) : p.tradingMode}</div>
+      </div>
+    </div>
+  `).join('');
+}
+
+function renderRMult(buckets) {
+  const cv = document.getElementById('rMultChart');
+  if (!cv || !window.Chart) return;
+  const labels = ['-3R+', '-2R', '-1R', '0R', '+1R', '+2R', '+3R', '+3R+'];
+  const values = labels.map((k) => buckets[k] || 0);
+  const colors = ['#ef4444', '#f97316', '#f59e0b', '#6b7280', '#10b981', '#22c55e', '#14b8a6', '#0ea5e9'];
+  if (window._rMultChart) window._rMultChart.destroy();
+  window._rMultChart = new Chart(cv, {
+    type: 'bar',
+    data: { labels, datasets: [{ data: values, backgroundColor: colors, borderRadius: 4 }] },
+    options: {
+      responsive: true, maintainAspectRatio: false, animation: false,
+      plugins: { legend: { display: false } },
+      scales: {
+        x: { ticks: { color: 'rgba(255,255,255,.5)', font: { size: 10 } }, grid: { display: false } },
+        y: { ticks: { color: 'rgba(255,255,255,.4)', font: { size: 10 }, precision: 0 }, grid: { color: 'rgba(255,255,255,.04)' } },
+      },
+    },
+  });
+}
+
+function renderStratDonut(rows) {
+  const box = document.getElementById('stratDonut');
+  const leg = document.getElementById('stratLegend');
+  if (!box || !window.Chart) return;
+  const arr = Array.isArray(rows) ? rows : (rows && rows.rows) || [];
+  if (!arr.length) {
+    box.style.display = 'none';
+    if (leg) leg.innerHTML = '<div class="text-slate-500 text-center py-4">Нет данных по стратегиям</div>';
+    return;
+  }
+  box.style.display = 'block';
+  const colors = ['#5C80E3', '#66876E', '#C8B9B9', '#fde047', '#f87171', '#a78bfa'];
+  const labels = arr.map((r) => r.strategy || 'unknown');
+  const data = arr.map((r) => Math.abs(Number(r.pnl) || 0));
+  if (window._stratDonut) window._stratDonut.destroy();
+  window._stratDonut = new Chart(box, {
+    type: 'doughnut',
+    data: { labels, datasets: [{ data, backgroundColor: colors, borderColor: '#0a0a0a', borderWidth: 2 }] },
+    options: { responsive: true, maintainAspectRatio: false, animation: false, plugins: { legend: { display: false } }, cutout: '62%' },
+  });
+  if (leg) leg.innerHTML = arr.map((r, i) => `
+    <div class="flex items-center justify-between">
+      <div class="flex items-center gap-2"><span style="width:8px;height:8px;border-radius:2px;background:${colors[i%colors.length]}"></span>${escHtml(r.strategy || '—')}</div>
+      <span class="font-mono ${(r.pnl||0) > 0 ? 'text-green-400' : (r.pnl||0) < 0 ? 'text-red-400' : 'text-slate-400'}">${Fmt.currency(r.pnl || 0)}</span>
+    </div>
+  `).join('');
+}
+
+function renderCalHeat(days) {
+  const box = document.getElementById('calHeat');
+  if (!box) return;
+  if (!days.length) { box.innerHTML = '<div class="text-xs text-slate-500 text-center py-8">Нет закрытых сделок</div>'; return; }
+  // Colour scale: max absolute P&L over 180d determines intensity
+  const absMax = Math.max(1, ...days.map((d) => Math.abs(d.pnl)));
+  function cell(d) {
+    const intensity = Math.min(1, Math.abs(d.pnl) / absMax);
+    const bg = d.pnl > 0
+      ? `rgba(34,197,94,${0.2 + intensity * 0.7})`
+      : d.pnl < 0
+      ? `rgba(239,68,68,${0.2 + intensity * 0.7})`
+      : 'rgba(255,255,255,.04)';
+    const label = d.day + ' · ' + (d.pnl ? (d.pnl > 0 ? '+' : '') + d.pnl.toFixed(2) + '$' : 'нет сделок') + (d.trades ? ' · ' + d.trades + ' сделок' : '');
+    return `<div style="width:11px;height:11px;border-radius:2px;background:${bg}" title="${label}"></div>`;
+  }
+  // 26 columns × 7 rows, newest day is bottom-right
+  const cols = Math.ceil(days.length / 7);
+  let html = `<div style="display:grid;grid-auto-flow:column;grid-template-rows:repeat(7,11px);gap:3px">`;
+  for (let i = 0; i < days.length; i += 1) html += cell(days[i]);
+  html += '</div>';
+  box.innerHTML = html;
+}
+
+function renderHourChart(hours) {
+  const cv = document.getElementById('hourChart');
+  if (!cv || !window.Chart) return;
+  const labels = hours.map((h) => String(h.hour).padStart(2, '0'));
+  const data = hours.map((h) => h.pnl);
+  const colors = hours.map((h) => h.pnl > 0 ? 'rgba(34,197,94,.7)' : h.pnl < 0 ? 'rgba(239,68,68,.7)' : 'rgba(100,116,139,.35)');
+  if (window._hourChart) window._hourChart.destroy();
+  window._hourChart = new Chart(cv, {
+    type: 'bar',
+    data: { labels, datasets: [{ data, backgroundColor: colors, borderRadius: 2 }] },
+    options: {
+      responsive: true, maintainAspectRatio: false, animation: false,
+      plugins: {
+        legend: { display: false },
+        tooltip: {
+          callbacks: {
+            label: (ctx) => {
+              const h = hours[ctx.dataIndex];
+              return ['PnL: ' + Fmt.currency(h.pnl || 0), 'Сделок: ' + (h.trades || 0), 'WR: ' + (h.winRate != null ? (h.winRate * 100).toFixed(0) + '%' : '—')];
+            },
+          },
+        },
+      },
+      scales: {
+        x: { ticks: { color: 'rgba(255,255,255,.4)', font: { size: 9 }, maxTicksLimit: 12 }, grid: { display: false } },
+        y: { ticks: { color: 'rgba(255,255,255,.4)', font: { size: 10 } }, grid: { color: 'rgba(255,255,255,.04)' } },
+      },
+    },
+  });
+}
+
+function renderBotLeaderboard(bots) {
+  const host = document.getElementById('botLeaderboard');
+  if (!host) return;
+  if (!bots.length) { host.innerHTML = '<div class="text-slate-500 text-center py-3">Нет ботов. Создай первого →</div>'; return; }
+  host.innerHTML = bots.slice(0, 5).map((b, i) => `
+    <div class="flex items-center justify-between p-2 rounded bg-slate-800/30">
+      <div class="flex items-center gap-2 min-w-0">
+        <span class="text-slate-500 font-mono text-xs">#${i + 1}</span>
+        <span class="font-semibold text-slate-200 truncate">${escHtml(b.name)}</span>
+        ${b.isActive ? '<span class="text-[9px] text-green-400">ON</span>' : '<span class="text-[9px] text-slate-500">off</span>'}
+      </div>
+      <div class="text-right">
+        <div class="font-mono ${b.pnl > 0 ? 'text-green-400' : b.pnl < 0 ? 'text-red-400' : 'text-slate-400'}">${Fmt.currency(b.pnl)}</div>
+        <div class="text-[10px] text-slate-500">${b.trades} сделок</div>
+      </div>
+    </div>
+  `).join('');
+}
+
+// ── System health badge ────────────────────────────────────────────────
+async function loadSystemHealth() {
+  try {
+    const r = await fetch('/api/health/deep').then((x) => x.json()).catch(() => null);
+    const dot = document.getElementById('sysDot'); const txt = document.getElementById('sysText');
+    if (!r) { if (dot) dot.className = 'w-1.5 h-1.5 rounded-full bg-red-400'; if (txt) txt.textContent = 'Система недоступна'; return; }
+    const ok = r.status === 'ok';
+    if (dot) dot.className = 'w-1.5 h-1.5 rounded-full ' + (ok ? 'bg-green-400 animate-pulse' : 'bg-yellow-400');
+    if (txt) txt.textContent = ok ? 'Все системы работают' : 'Частичные сбои · Scanner/DB';
+  } catch (_e) {}
+}
+
+// ── Emergency pause all bots ──────────────────────────────────────────
+document.getElementById('pauseAllBtn')?.addEventListener('click', async () => {
+  if (!confirm('Остановить всех активных ботов? Открытые сделки продолжат идти к TP/SL, но новые не откроются.')) return;
+  try {
+    const bots = await API.listBots();
+    const active = (bots.bots || []).filter((b) => b.isActive);
+    if (!active.length) { Toast.info('Нет активных ботов'); return; }
+    for (const b of active) { try { await API.toggleBot(b.id); } catch (_e) {} }
+    Toast.success('Остановлено: ' + active.length);
+    loadSummary();
+  } catch (e) { Toast.error(e.message || 'Ошибка'); }
+});
+
+// Equity period buttons
+document.querySelectorAll('.eqBtn').forEach((b) => {
+  b.addEventListener('click', () => {
+    document.querySelectorAll('.eqBtn').forEach((x) => { x.classList.remove('bg-indigo-500/20', 'text-indigo-300'); x.classList.add('hover:bg-slate-700/50', 'text-slate-400'); });
+    b.classList.remove('hover:bg-slate-700/50', 'text-slate-400');
+    b.classList.add('bg-indigo-500/20', 'text-indigo-300');
+    buildChart(+b.dataset.days);
+  });
+});
+document.getElementById('showBench')?.addEventListener('change', () => {
+  const act = document.querySelector('.eqBtn.bg-indigo-500\\/20'); buildChart(+(act?.dataset.days || 30));
+});
 
 // ── Recent signals ──
 async function loadRecentSignals() {
@@ -243,9 +608,11 @@ async function buildChart(days) {
     const trades = tradeArrays.flatMap(r => r.trades || [])
       .filter(t => new Date(t.closed_at).getTime() >= since)
       .sort((a, b) => new Date(a.closed_at).getTime() - new Date(b.closed_at).getTime());
-    // Starting balance pulled from the authenticated user profile (settings
-    // → trading). Falls back to 10 000 for users on old snapshots.
-    let startingBalance = 10000;
+    // Starting balance = user's configured paper balance (Settings → Trading)
+    // or 0 if not set. That way a fresh account shows a flat line at zero,
+    // and users who set a realistic 10 000 virtual balance see their P&L
+    // anchored to it. Y-axis autoscales on top of this.
+    let startingBalance = 0;
     try {
       const me = await API.me();
       const u = me.user || me;
@@ -254,25 +621,64 @@ async function buildChart(days) {
     let equity = startingBalance;
     const points = [{ t: since, v: equity }];
     for (const t of trades) { equity += Number(t.realized_pnl || 0); points.push({ t: new Date(t.closed_at).getTime(), v: equity }); }
+    // If starting balance is 0 and no trades — add a terminal point so the
+    // line renders (single-point chart is invisible) and autoscale has room.
+    if (points.length === 1) points.push({ t: Date.now(), v: equity });
+
+    const values = points.map(p => p.v);
+    const dataMin = Math.min(...values);
+    const dataMax = Math.max(...values);
+    const range = Math.max(Math.abs(dataMax - dataMin), Math.max(Math.abs(dataMin), Math.abs(dataMax)) * 0.05, 10);
+    // pad 20% on each side so the line isn't glued to borders
+    const yPadding = range * 0.2;
+
+    const datasets = [{
+      label: 'Equity',
+      data: values,
+      borderColor: '#93AAEC',
+      backgroundColor: 'rgba(29,78,216,.2)',
+      fill: true, tension: .4, pointRadius: 0, borderWidth: 2,
+    }];
+
+    // Optional BTC buy-and-hold benchmark overlay (same starting balance,
+    // scaled to BTC price change so operator can see if their bots beat
+    // "just buy and hold").
+    if (document.getElementById('showBench')?.checked && startingBalance > 0) {
+      try {
+        const bench = await API.btcBenchmark(days);
+        if (bench.points?.length) {
+          const first = bench.points[0].close;
+          const benchSeries = bench.points.map((p) => startingBalance * (p.close / first));
+          // Align lengths roughly — pad benchmark to match points count
+          const stride = Math.max(1, Math.floor(benchSeries.length / values.length));
+          const aligned = values.map((_, i) => benchSeries[Math.min(i * stride, benchSeries.length - 1)]);
+          datasets.push({
+            label: 'BTC buy & hold',
+            data: aligned,
+            borderColor: '#f59e0b',
+            backgroundColor: 'rgba(245,158,11,.05)',
+            borderDash: [5, 5], fill: false, tension: .35, pointRadius: 0, borderWidth: 1.5,
+          });
+        }
+      } catch (_e) {}
+    }
+
     const cfg = {
       type: 'line',
-      data: {
-        labels: points.map(p => new Date(p.t).toISOString().slice(5, 10)),
-        datasets: [{
-          data: points.map(p => p.v),
-          borderColor: '#93AAEC',
-          backgroundColor: 'rgba(29,78,216,.2)',
-          fill: true, tension: .4, pointRadius: 0, borderWidth: 2,
-        }],
-      },
+      data: { labels: points.map(p => new Date(p.t).toISOString().slice(5, 10)), datasets },
       options: {
         responsive: true, maintainAspectRatio: false,
         resizeDelay: 150,
         animation: false,
-        plugins: { legend: { display: false } },
+        plugins: { legend: { display: datasets.length > 1, labels: { color: 'rgba(255,255,255,.6)', font: { size: 10 } } } },
         scales: {
           x: { ticks: { color: '#64748b', font: { size: 10 } }, grid: { display: false } },
-          y: { ticks: { color: '#64748b', font: { size: 10 }, callback: v => Fmt.currency(v, { decimals: 0 }) }, grid: { color: 'rgba(30,41,59,.3)' } },
+          y: {
+            suggestedMin: dataMin - yPadding,
+            suggestedMax: dataMax + yPadding,
+            ticks: { color: '#64748b', font: { size: 10 }, callback: v => Fmt.currency(v, { decimals: 0 }) },
+            grid: { color: 'rgba(30,41,59,.3)' },
+          },
         },
       },
     };
@@ -301,10 +707,14 @@ WS.on('payment_confirmed', () => { Toast.success('Оплата подтверж�
 
 // Boot
 loadSummary();
+loadAdvanced();
+loadSystemHealth();
 loadRecentSignals();
 loadRecentTrades();
 buildChart(7);
 setInterval(loadSummary, 30_000);
+setInterval(loadAdvanced, 45_000);
+setInterval(loadSystemHealth, 60_000);
 </script>
 </body>
 </html>

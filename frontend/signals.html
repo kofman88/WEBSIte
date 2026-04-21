@@ -72,6 +72,7 @@
 </main>
 
 <script src="app.js"></script>
+<script src="shell.js?v=2" defer></script>
 <script>
 if(!Auth.requireAuth()) throw new Error('noauth');
 document.querySelectorAll('.sidebar-link[data-page="signals"]').forEach(a => a.classList.add('active'));

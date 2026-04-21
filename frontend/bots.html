@@ -72,14 +72,18 @@
       <button type="button" onclick="closeWizard()" class="text-slate-400 hover:text-white text-xl">&times;</button>
     </div>
     <!-- Step indicator -->
-    <div class="flex items-center gap-2 mb-6" id="wizSteps">
+    <div class="flex items-center gap-2 mb-6 flex-wrap" id="wizSteps">
       <div class="wiz-step active" data-step="1"><span class="wiz-num">1</span><span class="wiz-label">Основы</span></div>
       <div class="wiz-line"></div>
       <div class="wiz-step" data-step="2"><span class="wiz-num">2</span><span class="wiz-label">Стратегия</span></div>
       <div class="wiz-line"></div>
-      <div class="wiz-step" data-step="3"><span class="wiz-num">3</span><span class="wiz-label">Риск</span></div>
+      <div class="wiz-step" data-step="3"><span class="wiz-num">3</span><span class="wiz-label">Параметры</span></div>
       <div class="wiz-line"></div>
-      <div class="wiz-step" data-step="4"><span class="wiz-num">4</span><span class="wiz-label">Режим</span></div>
+      <div class="wiz-step" data-step="4"><span class="wiz-num">4</span><span class="wiz-label">Риск</span></div>
+      <div class="wiz-line"></div>
+      <div class="wiz-step" data-step="5"><span class="wiz-num">5</span><span class="wiz-label">Бэктест</span></div>
+      <div class="wiz-line"></div>
+      <div class="wiz-step" data-step="6"><span class="wiz-num">6</span><span class="wiz-label">Режим</span></div>
     </div>
     <form id="createBotForm" class="space-y-4" novalidate>
       <!-- Step 1: Basics -->
@@ -102,8 +106,19 @@
         </div>
         <div class="mt-4"><label class="text-sm text-slate-400 block mb-1">Направление</label><select name="direction" class="w-full bg-slate-800/50 border border-slate-700 rounded-xl px-4 py-3 text-white outline-none"><option value="both">Long + Short</option><option value="long">Только Long</option><option value="short">Только Short</option></select></div>
       </div>
-      <!-- Step 3: Risk -->
+      <!-- Step 3: Strategy config (dynamic form) -->
       <div class="wiz-pane hidden" data-pane="3">
+        <div class="flex items-center justify-between mb-3">
+          <div>
+            <div class="text-sm text-slate-300 font-semibold" id="cfgTitle">—</div>
+            <div class="text-xs text-slate-500 mt-0.5" id="cfgDesc">—</div>
+          </div>
+          <button type="button" id="cfgReset" class="text-xs px-3 py-1.5 rounded-lg bg-slate-800/50 border border-slate-700 text-slate-400 hover:text-white">Сбросить</button>
+        </div>
+        <div id="cfgGroups" style="max-height:60vh;overflow-y:auto;padding-right:6px"></div>
+      </div>
+      <!-- Step 4: Risk -->
+      <div class="wiz-pane hidden" data-pane="4">
         <div class="grid grid-cols-2 gap-4">
           <div><label class="text-sm text-slate-400 block mb-1">Leverage</label><input name="leverage" type="number" value="10" min="1" max="100" class="w-full bg-slate-800/50 border border-slate-700 rounded-xl px-4 py-3 text-white outline-none"/></div>
           <div><label class="text-sm text-slate-400 block mb-1">Риск / сделку (%)</label><input name="riskPct" type="number" step="0.1" value="1" min="0.1" max="10" class="w-full bg-slate-800/50 border border-slate-700 rounded-xl px-4 py-3 text-white outline-none"/></div>
@@ -114,8 +129,37 @@
         </div>
         <div class="mt-3 p-3 rounded-xl bg-slate-800/40 border border-slate-700 text-xs text-slate-400">SL и TP ставятся стратегией на основе ATR — фиксированные значения не нужны. Circuit breaker остановит бота при дневной просадке 10%.</div>
       </div>
-      <!-- Step 4: Mode + review -->
-      <div class="wiz-pane hidden" data-pane="4">
+      <!-- Step 5: Backtest preview -->
+      <div class="wiz-pane hidden" data-pane="5">
+        <div class="flex items-center justify-between mb-3">
+          <div>
+            <div class="text-sm text-slate-300 font-semibold">Бэктест на исторических данных</div>
+            <div class="text-xs text-slate-500 mt-0.5">Прогоним точно такую конфигурацию на последних N днях. Рекомендуем запустить перед созданием бота.</div>
+          </div>
+        </div>
+        <div class="flex items-center gap-2 mb-4">
+          <label class="text-xs text-slate-400">Период:</label>
+          <select id="btDays" class="bg-slate-800/50 border border-slate-700 rounded-lg px-3 py-1.5 text-sm text-white outline-none">
+            <option value="14">14 дней</option>
+            <option value="30" selected>30 дней</option>
+            <option value="60">60 дней</option>
+            <option value="90">90 дней</option>
+          </select>
+          <button type="button" id="btRun" class="px-4 py-1.5 rounded-lg text-sm font-semibold text-white" style="background:linear-gradient(180deg,#2A5BE8,#1D4ED8 60%,#143797)">▶ Запустить бэктест</button>
+        </div>
+        <div id="btStatus" class="text-xs text-slate-500 mb-3">Ещё не запускали — можно создать бота сразу или сначала проверить на истории.</div>
+        <div id="btResults" class="hidden">
+          <div class="grid grid-cols-2 md:grid-cols-4 gap-3 mb-3">
+            <div class="p-3 bg-slate-800/40 rounded-lg"><div class="text-[10px] text-slate-500 uppercase tracking-wider">Total PnL</div><div id="btPnl" class="text-lg font-mono font-semibold">—</div></div>
+            <div class="p-3 bg-slate-800/40 rounded-lg"><div class="text-[10px] text-slate-500 uppercase tracking-wider">Win rate</div><div id="btWr" class="text-lg font-mono font-semibold">—</div></div>
+            <div class="p-3 bg-slate-800/40 rounded-lg"><div class="text-[10px] text-slate-500 uppercase tracking-wider">Сделок</div><div id="btTrades" class="text-lg font-mono font-semibold">—</div></div>
+            <div class="p-3 bg-slate-800/40 rounded-lg"><div class="text-[10px] text-slate-500 uppercase tracking-wider">Max DD</div><div id="btDd" class="text-lg font-mono font-semibold">—</div></div>
+          </div>
+          <div id="btVerdict" class="p-3 rounded-lg border text-xs"></div>
+        </div>
+      </div>
+      <!-- Step 6: Mode + review -->
+      <div class="wiz-pane hidden" data-pane="6">
         <label class="text-sm text-slate-400 block mb-2">Режим торговли</label>
         <div class="grid grid-cols-2 gap-3 mb-4">
           <label class="wiz-card"><input type="radio" name="tradingMode" value="paper" checked class="sr-only"/><div class="wiz-card-body"><div class="font-semibold text-slate-300">PAPER</div><div class="text-xs text-slate-400 mt-1">Виртуальный баланс, безопасно</div></div></label>
@@ -268,6 +312,7 @@
 </style>
 
 <script src="app.js"></script>
+<script src="shell.js?v=2" defer></script>
 <script>
 if(!Auth.requireAuth()) throw new Error('noauth');
 document.querySelectorAll('.sidebar-link[data-page="bots"]').forEach(a => a.classList.add('active'));
@@ -407,10 +452,139 @@ function escapeHtml(s) {
   return String(s||'').replace(/[&<>"']/g, (c) => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'})[c]);
 }
 
+// ── Strategy config (populated via /api/bots/strategy-schema/:key) ──
+let currentSchema = null;          // last-loaded schema
+let strategyConfig = {};           // user overrides from the wizard form
+
+function cfgBuild(schema) {
+  const box = document.getElementById('cfgGroups');
+  document.getElementById('cfgTitle').textContent = schema.title;
+  document.getElementById('cfgDesc').textContent  = schema.description;
+  strategyConfig = {};
+  // Start with defaults so a user who skips config still gets reasonable values
+  for (const g of schema.groups) for (const f of g.fields) strategyConfig[f.key] = f.default;
+  box.innerHTML = schema.groups.map((g) => `
+    <div class="mb-4">
+      <div class="text-xs uppercase tracking-wider text-slate-500 mb-2">${escapeHtml(g.title)}</div>
+      <div class="grid grid-cols-2 gap-3">
+        ${g.fields.map((f) => `
+          <div>
+            <label class="text-xs text-slate-400 block mb-1" title="${escapeHtml(f.desc || '')}">${escapeHtml(f.label || f.key)}</label>
+            ${f.type === 'bool'
+              ? `<label class="flex items-center gap-2 mt-1"><input type="checkbox" data-cfg="${escapeHtml(f.key)}" ${f.default ? 'checked' : ''} style="accent-color:#5C80E3"/><span class="text-xs text-slate-500">${f.default ? 'вкл' : 'выкл'}</span></label>`
+              : `<input type="number" data-cfg="${escapeHtml(f.key)}" value="${f.default}" min="${f.min ?? ''}" max="${f.max ?? ''}" step="${f.step ?? 'any'}" class="w-full bg-slate-800/50 border border-slate-700 rounded-lg px-3 py-1.5 text-sm text-white outline-none"/>`}
+            ${f.desc ? `<div class="text-[11px] text-slate-600 mt-1">${escapeHtml(f.desc)}</div>` : ''}
+          </div>
+        `).join('')}
+      </div>
+    </div>
+  `).join('');
+  box.querySelectorAll('[data-cfg]').forEach((inp) => {
+    inp.addEventListener('change', () => {
+      const key = inp.getAttribute('data-cfg');
+      strategyConfig[key] = inp.type === 'checkbox' ? inp.checked : Number(inp.value);
+    });
+  });
+  currentSchema = schema;
+}
+
+async function cfgLoadForStrategy(key) {
+  try {
+    const schema = await API.strategySchema(key);
+    cfgBuild(schema);
+  } catch (e) {
+    document.getElementById('cfgGroups').innerHTML = '<div class="text-xs text-red-400">Не удалось загрузить параметры стратегии</div>';
+  }
+}
+
+document.getElementById('cfgReset')?.addEventListener('click', () => {
+  if (currentSchema) cfgBuild(currentSchema);
+});
+
+// ── Inline backtest preview ─────────────────────────────────────────────
+let btPollInterval = null;
+async function runQuickBacktest() {
+  const fd = new FormData(document.getElementById('createBotForm'));
+  const raw = Object.fromEntries(fd.entries());
+  const statusEl = document.getElementById('btStatus');
+  const resultsEl = document.getElementById('btResults');
+  const runBtn = document.getElementById('btRun');
+  statusEl.textContent = 'Запускаем… (это займёт 10-30 секунд)';
+  statusEl.className = 'text-xs text-slate-400 mb-3';
+  resultsEl.classList.add('hidden');
+  runBtn.disabled = true;
+  try {
+    const days = +document.getElementById('btDays').value || 30;
+    const bt = await API.quickBacktest({
+      symbol: (raw.symbol || 'BTCUSDT').toUpperCase(),
+      strategy: (raw.strategyType || 'scalping').toLowerCase(),
+      timeframe: raw.timeframe || '1h',
+      exchange: (raw.exchangeName || 'bybit').toLowerCase(),
+      direction: raw.direction || 'both',
+      leverage: raw.leverage ? +raw.leverage : 10,
+      riskPct: raw.riskPct ? +raw.riskPct : 1,
+      strategyConfig,
+      days,
+    });
+    statusEl.textContent = 'Бэктест #' + bt.id + ' запущен — ждём результаты…';
+    // Poll every 2s
+    if (btPollInterval) clearInterval(btPollInterval);
+    btPollInterval = setInterval(async () => {
+      try {
+        const full = await API.getBacktest(bt.id);
+        if (full.progressPct) statusEl.textContent = 'Прогресс: ' + full.progressPct + '%';
+        if (full.status === 'completed') {
+          clearInterval(btPollInterval); btPollInterval = null; runBtn.disabled = false;
+          renderBacktestResults(full);
+        } else if (full.status === 'failed') {
+          clearInterval(btPollInterval); btPollInterval = null; runBtn.disabled = false;
+          statusEl.textContent = 'Ошибка: ' + (full.errorMessage || 'unknown');
+          statusEl.className = 'text-xs text-red-400 mb-3';
+        }
+      } catch (_e) {}
+    }, 2000);
+  } catch (e) {
+    statusEl.textContent = 'Ошибка: ' + (e.message || 'не запустился');
+    statusEl.className = 'text-xs text-red-400 mb-3';
+    runBtn.disabled = false;
+  }
+}
+
+function renderBacktestResults(bt) {
+  const r = bt.results || {};
+  const pnl = Number(r.totalPnlUsd ?? r.totalPnl ?? 0);
+  const wr = (r.winRate !== undefined ? r.winRate : (r.winrate || 0));
+  const trades = r.totalTrades ?? r.trades ?? 0;
+  const dd = Number(r.maxDrawdownPct ?? r.maxDrawdown ?? 0);
+
+  document.getElementById('btStatus').textContent = 'Готово · период ' + bt.startDate + ' — ' + bt.endDate;
+  document.getElementById('btStatus').className = 'text-xs text-green-400 mb-3';
+  document.getElementById('btResults').classList.remove('hidden');
+
+  const pnlEl = document.getElementById('btPnl');
+  pnlEl.textContent = (pnl >= 0 ? '+' : '') + '$' + pnl.toFixed(2);
+  pnlEl.className = 'text-lg font-mono font-semibold ' + (pnl > 0 ? 'text-green-400' : pnl < 0 ? 'text-red-400' : 'text-slate-400');
+
+  document.getElementById('btWr').textContent = wr ? (wr * 100).toFixed(1) + '%' : '—';
+  document.getElementById('btTrades').textContent = trades;
+  document.getElementById('btDd').textContent = dd ? dd.toFixed(1) + '%' : '—';
+
+  const verdictEl = document.getElementById('btVerdict');
+  let verdict, cls;
+  if (trades === 0) { verdict = '⚠ Сделок не было — стратегия слишком строгая для этого периода. Смягчите пороги или попробуйте другой символ/TF.'; cls = 'border-yellow-500/30 bg-yellow-500/5 text-yellow-200'; }
+  else if (pnl > 0 && wr >= 0.5) { verdict = '✓ Профитная конфигурация — можно создавать бота.'; cls = 'border-green-500/30 bg-green-500/5 text-green-200'; }
+  else if (pnl > 0) { verdict = '~ Профит есть, но win rate низкий — рассмотрите ужесточение входа.'; cls = 'border-blue-500/30 bg-blue-500/5 text-blue-200'; }
+  else { verdict = '✕ Конфигурация убыточная на этом периоде. Скорректируйте параметры или попробуйте другой TF.'; cls = 'border-red-500/30 bg-red-500/5 text-red-200'; }
+  verdictEl.textContent = verdict;
+  verdictEl.className = 'p-3 rounded-lg border text-xs ' + cls;
+}
+
+document.getElementById('btRun')?.addEventListener('click', runQuickBacktest);
+
 // Create form — legacy form id, map to new API
 document.getElementById('createBotForm')?.addEventListener('submit', async (e) => {
   e.preventDefault();
-  if (wizStep < 4) return nextStep();
+  if (wizStep < WIZ_TOTAL) return nextStep();
   const fd = new FormData(e.target);
   const raw = Object.fromEntries(fd.entries());
   // Map legacy field names
@@ -428,6 +602,7 @@ document.getElementById('createBotForm')?.addEventListener('submit', async (e) =
     maxOpenTrades: raw.maxOpenTrades ? +raw.maxOpenTrades : 3,
     autoTrade: !!raw.autoTrade,
     tradingMode: raw.tradingMode || 'paper',
+    strategyConfig: strategyConfig && Object.keys(strategyConfig).length ? strategyConfig : undefined,
   };
   // Remove exchangeKeyId if null (schema requires int positive)
   if (!payload.exchangeKeyId) delete payload.exchangeKeyId;
@@ -442,11 +617,18 @@ document.getElementById('createBotForm')?.addEventListener('submit', async (e) =
   }
 });
 
-// ── Create-bot 4-step wizard controller ──
+// ── Create-bot wizard controller (now 6 steps) ──
 let wizStep = 1;
-const WIZ_TOTAL = 4;
+const WIZ_TOTAL = 6;
 function setStep(n) {
   wizStep = Math.max(1, Math.min(WIZ_TOTAL, n));
+  // Lazy-load strategy schema when operator first lands on the config step.
+  if (wizStep === 3) {
+    const strategy = (new FormData(document.getElementById('createBotForm')).get('strategyType') || 'scalping').toString().toLowerCase();
+    if (!currentSchema || currentSchema._key !== strategy) {
+      cfgLoadForStrategy(strategy).then(() => { if (currentSchema) currentSchema._key = strategy; });
+    }
+  }
   document.querySelectorAll('.wiz-pane').forEach((p) => {
     p.classList.toggle('hidden', +p.getAttribute('data-pane') !== wizStep);
   });

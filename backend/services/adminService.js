@@ -354,53 +354,58 @@ function userDetail(userId) {
   `).get(userId);
   if (!u) { const e = new Error('User not found'); e.statusCode = 404; throw e; }
 
-  const keys = db.prepare(`SELECT id, exchange, label, verified_at, created_at FROM exchange_keys WHERE user_id = ? ORDER BY created_at DESC`).all(userId);
-  const bots = db.prepare(`
+  // Every drill-down query is wrapped in safe() so a single schema mismatch
+  // (e.g. column renamed / table not yet migrated on legacy DBs) returns the
+  // fallback shape instead of 500'ing the whole drawer.
+  const safe = (fn, fb) => { try { return fn(); } catch (e) { logger.warn('userDetail subquery failed', { err: e.message }); return fb; } };
+
+  const keys = safe(() => db.prepare(`SELECT id, exchange, label, last_verified_at AS verified_at, created_at FROM exchange_keys WHERE user_id = ? ORDER BY created_at DESC`).all(userId), []);
+  const bots = safe(() => db.prepare(`
     SELECT id, name, exchange, symbols, strategy, timeframe, is_active, auto_trade, trading_mode, created_at
     FROM trading_bots WHERE user_id = ? ORDER BY created_at DESC LIMIT 50
-  `).all(userId);
-  const payments = db.prepare(`
+  `).all(userId), []);
+  const payments = safe(() => db.prepare(`
     SELECT id, amount_usd, method, plan, status, created_at, confirmed_at
     FROM payments WHERE user_id = ? ORDER BY created_at DESC LIMIT 50
-  `).all(userId);
-  const trades = db.prepare(`
+  `).all(userId), []);
+  const trades = safe(() => db.prepare(`
     SELECT id, bot_id, symbol, side, status, trading_mode, entry_price, exit_price,
            realized_pnl, realized_pnl_pct, opened_at, closed_at
     FROM trades WHERE user_id = ? ORDER BY opened_at DESC LIMIT 100
-  `).all(userId);
-  const pnl = db.prepare(`
+  `).all(userId), []);
+  const pnl = safe(() => db.prepare(`
     SELECT COUNT(*) AS n,
            COALESCE(SUM(realized_pnl), 0) AS total,
            SUM(CASE WHEN realized_pnl > 0 THEN 1 ELSE 0 END) AS wins,
            SUM(CASE WHEN realized_pnl < 0 THEN 1 ELSE 0 END) AS losses
     FROM trades WHERE user_id = ? AND status = 'closed' AND realized_pnl IS NOT NULL
-  `).get(userId);
-  const sessions = db.prepare(`
+  `).get(userId), { n: 0, total: 0, wins: 0, losses: 0 });
+  const sessions = safe(() => db.prepare(`
     SELECT id, created_at, expires_at, revoked_at, ip_address, user_agent
     FROM refresh_tokens WHERE user_id = ? ORDER BY created_at DESC LIMIT 20
-  `).all(userId);
-  const logins = db.prepare(`
-    SELECT success, ip_address, user_agent, code, created_at
+  `).all(userId), []);
+  const logins = safe(() => db.prepare(`
+    SELECT success, ip_address, user_agent, failure_code AS code, created_at
     FROM login_history WHERE user_id = ? ORDER BY created_at DESC LIMIT 30
-  `).all(userId);
-  const tickets = db.prepare(`
+  `).all(userId), []);
+  const tickets = safe(() => db.prepare(`
     SELECT id, subject, status, priority, created_at, updated_at
     FROM support_tickets WHERE user_id = ? ORDER BY updated_at DESC LIMIT 20
-  `).all(userId);
-  const notifications = db.prepare(`
+  `).all(userId), []);
+  const notifications = safe(() => db.prepare(`
     SELECT id, type, title, created_at, read_at
     FROM notifications WHERE user_id = ? ORDER BY created_at DESC LIMIT 30
-  `).all(userId);
-  const audits = db.prepare(`
+  `).all(userId), []);
+  const audits = safe(() => db.prepare(`
     SELECT action, entity_type, entity_id, ip_address, metadata, created_at
     FROM audit_log WHERE user_id = ? ORDER BY created_at DESC LIMIT 50
-  `).all(userId);
-  const referrals = db.prepare(`
+  `).all(userId), []);
+  const referrals = safe(() => db.prepare(`
     SELECT r.referred_id, u.email AS referred_email, r.created_at, r.total_earned_usd
     FROM referrals r LEFT JOIN users u ON u.id = r.referred_id
     WHERE r.referrer_id = ? ORDER BY r.created_at DESC LIMIT 50
-  `).all(userId);
-  const tfa = db.prepare(`SELECT enabled, enabled_at FROM two_factor_secrets WHERE user_id = ?`).get(userId);
+  `).all(userId), []);
+  const tfa = safe(() => db.prepare(`SELECT enabled, enabled_at FROM two_factor_secrets WHERE user_id = ?`).get(userId), null);
 
   return {
     user: {
@@ -485,7 +490,8 @@ function listAllSignals({ strategy = null, limit = 100, offset = 0 } = {}) {
   const where = parts.length ? 'WHERE ' + parts.join(' AND ') : '';
   return db.prepare(`
     SELECT s.id, s.user_id, u.email AS user_email, s.symbol, s.side, s.strategy,
-           s.entry, s.tp, s.sl, s.result, s.created_at, s.expires_at
+           s.entry_price AS entry, s.take_profit_1 AS tp, s.stop_loss AS sl,
+           s.result, s.created_at, s.expires_at
     FROM signals s LEFT JOIN users u ON u.id = s.user_id
     ${where}
     ORDER BY s.created_at DESC

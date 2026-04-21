@@ -14,6 +14,87 @@
   --text-primary: #FFFFFF;
   --text-secondary: rgba(255, 255, 255, 0.62);
   --text-muted: rgba(255, 255, 255, 0.38);
+}
+
+/* Light theme overrides — triggered by <html class="light"> from shell.js.
+ * Using !important across the board because many dashboard pages hardcode
+ * dark colors inline (bg-slate-800/50, linear-gradient, etc) and we want
+ * the theme flip to win unconditionally. */
+html.light {
+  --bg-primary: #F5F6F8;
+  --bg-secondary: #EDEEF2;
+  --bg-card: rgba(0, 0, 0, 0.04);
+  --bg-card-solid: #FFFFFF;
+  --bg-input: rgba(0, 0, 0, 0.04);
+  --border: rgba(0, 0, 0, 0.1);
+  --border-light: rgba(0, 0, 0, 0.18);
+  --text-primary: #0A0A0A;
+  --text-secondary: rgba(0, 0, 0, 0.7);
+  --text-muted: rgba(0, 0, 0, 0.5);
+  color-scheme: light;
+}
+html.light body { color: #0A0A0A !important; background: #F5F6F8 !important; }
+
+/* Sidebar + topbar — they hardcode #0A0A0A gradients, override hard */
+html.light .sidebar {
+  background: linear-gradient(180deg, #FFFFFF 0%, #F5F6F8 100%) !important;
+  border-right-color: rgba(0, 0, 0, 0.08) !important;
+}
+html.light .sidebar-logo,
+html.light .sidebar-logo a { color: #0A0A0A !important; }
+html.light .sidebar-link { color: rgba(0, 0, 0, 0.65) !important; }
+html.light .sidebar-link:hover { color: #0A0A0A !important; background: rgba(0, 0, 0, 0.05) !important; }
+html.light .sidebar-link.active { color: #0A0A0A !important; background: rgba(29, 78, 216, 0.1) !important; }
+html.light .sidebar-sub-badge { background: rgba(29, 78, 216, 0.08) !important; color: #1D4ED8 !important; border-color: rgba(29, 78, 216, 0.2) !important; }
+
+html.light .topbar {
+  background: rgba(255, 255, 255, 0.85) !important;
+  border-bottom-color: rgba(0, 0, 0, 0.08) !important;
+  backdrop-filter: blur(20px);
+}
+html.light .topbar-search input,
+html.light .topbar-search { background: rgba(0, 0, 0, 0.04) !important; color: #0A0A0A !important; }
+html.light .topbar-username { color: rgba(0, 0, 0, 0.8) !important; }
+
+/* Cards + stats */
+html.light .card,
+html.light .stat-card {
+  background: #FFFFFF !important;
+  border-color: rgba(0, 0, 0, 0.08) !important;
+  color: #0A0A0A !important;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04), 0 10px 20px -10px rgba(0, 0, 0, 0.08) !important;
+}
+html.light .stat-card-label { color: rgba(0, 0, 0, 0.55) !important; }
+html.light .stat-card-value { color: #0A0A0A !important; }
+
+/* Utility text colors */
+html.light .text-white { color: #0A0A0A !important; }
+html.light .text-slate-300 { color: rgba(0, 0, 0, 0.75) !important; }
+html.light .text-slate-400 { color: rgba(0, 0, 0, 0.55) !important; }
+html.light .text-slate-500 { color: rgba(0, 0, 0, 0.45) !important; }
+html.light .text-slate-600 { color: rgba(0, 0, 0, 0.35) !important; }
+
+/* Utility bg-slate-*/*, bg-indigo-500/10, etc — normalise dashboard cards */
+html.light [class*="bg-slate-800"] { background: rgba(0, 0, 0, 0.04) !important; }
+html.light [class*="bg-slate-900"] { background: rgba(0, 0, 0, 0.06) !important; }
+html.light [class*="border-slate-700"],
+html.light [class*="border-slate-800"] { border-color: rgba(0, 0, 0, 0.1) !important; }
+
+/* Inputs */
+html.light input,
+html.light select,
+html.light textarea {
+  background: #FFFFFF !important;
+  color: #0A0A0A !important;
+  border-color: rgba(0, 0, 0, 0.12) !important;
+}
+html.light input::placeholder,
+html.light textarea::placeholder { color: rgba(0, 0, 0, 0.4) !important; }
+
+/* Headings */
+html.light h1, html.light h2, html.light h3, html.light h4 { color: #0A0A0A !important; }
+
+:root {
   --accent-blue: #1D4ED8;
   --accent-blue-light: #5C80E3;
   --accent-cyan: #5C80E3;
