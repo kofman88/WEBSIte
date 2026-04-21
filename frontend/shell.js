@@ -163,10 +163,53 @@
     actions.insertBefore(lang,  actions.firstChild);
   }
 
+  // ── Market tickers + Fear & Greed (topbar, public data) ───────────────
+  async function wireMarketTickers() {
+    const top = document.querySelector('.topbar > div:first-child') || document.querySelector('.topbar');
+    if (!top || !window.API || !API.marketContext) return;
+    if (document.getElementById('shellMarket')) return;
+    const wrap = document.createElement('div');
+    wrap.id = 'shellMarket';
+    wrap.style.cssText = 'display:flex;align-items:center;gap:10px;margin-left:16px;font-size:12px;flex-wrap:wrap';
+    wrap.innerHTML = `
+      <span id="tickBtc"  class="flex items-center gap-1.5 text-slate-400">BTC <span class="mono">—</span></span>
+      <span id="tickEth"  class="flex items-center gap-1.5 text-slate-400">ETH <span class="mono">—</span></span>
+      <span id="fngBadge" class="flex items-center gap-1.5 text-slate-500 border-l border-slate-700 pl-3 ml-1" title="Crypto Fear & Greed">F&amp;G: <span class="mono">—</span></span>
+    `;
+    top.appendChild(wrap);
+    const refresh = async () => {
+      try {
+        const r = await API.marketContext();
+        if (r && r.tickers) {
+          const fmt = (t) => {
+            if (!t) return '—';
+            const col = t.change24h > 0 ? '#4ade80' : t.change24h < 0 ? '#f87171' : '#94a3b8';
+            const arrow = t.change24h > 0 ? '▲' : t.change24h < 0 ? '▼' : '–';
+            return `<span class="mono" style="color:${col}">$${Math.round(t.price).toLocaleString()} ${arrow}${Math.abs(t.change24h).toFixed(1)}%</span>`;
+          };
+          const btcEl = document.getElementById('tickBtc');
+          const ethEl = document.getElementById('tickEth');
+          if (btcEl) btcEl.innerHTML = 'BTC ' + fmt(r.tickers.btc);
+          if (ethEl) ethEl.innerHTML = 'ETH ' + fmt(r.tickers.eth);
+        }
+        if (r && r.fearGreed) {
+          const fng = r.fearGreed;
+          const v = Number(fng.value);
+          const col = v < 25 ? '#f87171' : v < 45 ? '#f59e0b' : v < 55 ? '#94a3b8' : v < 75 ? '#4ade80' : '#10b981';
+          const el = document.getElementById('fngBadge');
+          if (el) el.innerHTML = 'F&G: <span class="mono" style="color:' + col + '">' + v + ' · ' + (fng.classification || '').slice(0, 10) + '</span>';
+        }
+      } catch (_e) {}
+    };
+    refresh();
+    setInterval(refresh, 60_000);
+  }
+
   function boot() {
     applyTheme(); // before anything paints so no flash
     wireLogo();
     wireTopbar();
+    wireMarketTickers();
     applyLang();
     wirePlanBadge();
   }

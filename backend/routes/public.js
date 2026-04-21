@@ -19,6 +19,13 @@ router.get('/leaderboard', (req, res, next) => {
   }
 });
 
+// Public market context — BTC/ETH spot + fear & greed + funding
+const marketContext = require('../services/marketContextService');
+router.get('/market-context', async (_req, res) => {
+  try { res.json(await marketContext.summary()); }
+  catch (_e) { res.json({ tickers: null, fearGreed: null, funding: null }); }
+});
+
 router.get('/u/:code', (req, res, next) => {
   try {
     const code = z.string().trim().regex(/^[A-Z0-9]{4,12}$/i).parse(req.params.code);

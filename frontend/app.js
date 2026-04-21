@@ -278,6 +278,7 @@ const API = {
   botLeaderboard:     (days = 30) => apiRequest('GET', '/analytics/bot-leaderboard?days=' + days),
   btcBenchmark:       (days = 90) => apiRequest('GET', '/analytics/btc-benchmark?days=' + days),
   myPercentile:       (period = '30d') => apiRequest('GET', '/analytics/percentile?period=' + period),
+  marketContext:      () => apiRequest('GET', '/public/market-context', null, { skipAuth: true }),
   analyticsByStrategy:() => apiRequest('GET', '/analytics/by-strategy'),
   analyticsBySymbol:  () => apiRequest('GET', '/analytics/by-symbol'),
   toggleBot:          (id) => apiRequest('POST', '/bots/' + id + '/toggle'),
