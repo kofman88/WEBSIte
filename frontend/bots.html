@@ -88,23 +88,38 @@
     <form id="createBotForm" class="space-y-4" novalidate>
       <!-- Step 1: Basics -->
       <div class="wiz-pane" data-pane="1">
-        <div><label class="text-sm text-slate-400 block mb-1">Имя бота</label><input name="name" required class="w-full bg-slate-800/50 border border-slate-700 rounded-xl px-4 py-3 text-white outline-none focus:border-indigo-500" placeholder="BTC Scalper"/></div>
-        <div class="mt-3"><label class="text-sm text-slate-400 block mb-1">Биржа</label><select name="exchangeName" class="w-full bg-slate-800/50 border border-slate-700 rounded-xl px-4 py-3 text-white outline-none"><option value="bybit">Bybit</option><option value="binance">Binance</option><option value="bingx">BingX</option><option value="okx">OKX</option></select></div>
-        <div class="mt-3"><label class="text-sm text-slate-400 block mb-1">Торговая пара</label><input name="symbol" required class="w-full bg-slate-800/50 border border-slate-700 rounded-xl px-4 py-3 text-white outline-none focus:border-indigo-500" placeholder="BTCUSDT"/></div>
-        <div class="mt-3"><label class="text-sm text-slate-400 block mb-1">Таймфрейм</label><select name="timeframe" class="w-full bg-slate-800/50 border border-slate-700 rounded-xl px-4 py-3 text-white outline-none"><option>5m</option><option>15m</option><option>30m</option><option selected>1h</option><option>2h</option><option>4h</option><option>1d</option></select></div>
+        <div>
+          <div class="field-label">Имя бота<span class="help-dot" tabindex="0" data-help="Просто название — можно любое. Пригодится, чтобы узнавать бота в списке. Например «BTC скальпер» или «ETH консерватор»">i</span></div>
+          <input name="name" required class="w-full bg-slate-800/50 border border-slate-700 rounded-xl px-4 py-3 text-white outline-none focus:border-indigo-500" placeholder="BTC Scalper"/>
+        </div>
+        <div class="mt-3">
+          <div class="field-label">Биржа<span class="help-dot" tabindex="0" data-help="Где бот будет торговать. Выбирай ту, на которой у тебя уже есть аккаунт и созданы API-ключи (настроить можно в разделе «Кошелёк»).">i</span></div>
+          <select name="exchangeName" class="w-full bg-slate-800/50 border border-slate-700 rounded-xl px-4 py-3 text-white outline-none"><option value="bybit">Bybit</option><option value="binance">Binance</option><option value="bingx">BingX</option><option value="okx">OKX</option></select>
+        </div>
+        <div class="mt-3">
+          <div class="field-label">Торговая пара<span class="help-dot" tabindex="0" data-help="Какую монету торговать против USDT. BTCUSDT = Биткоин за доллары, ETHUSDT = Эфир, SOLUSDT = Солана. Новичкам советуем BTCUSDT или ETHUSDT — самые ликвидные.">i</span></div>
+          <input name="symbol" required class="w-full bg-slate-800/50 border border-slate-700 rounded-xl px-4 py-3 text-white outline-none focus:border-indigo-500" placeholder="BTCUSDT"/>
+        </div>
+        <div class="mt-3">
+          <div class="field-label">Таймфрейм<span class="help-dot" tabindex="0" data-help="На каких свечах анализировать рынок. 5m/15m — быстрая торговля, много сделок и шума. 1h/4h — спокойнее, сигналов меньше, но качественнее. Новичкам: начни с 1h.">i</span></div>
+          <select name="timeframe" class="w-full bg-slate-800/50 border border-slate-700 rounded-xl px-4 py-3 text-white outline-none"><option>5m</option><option>15m</option><option>30m</option><option selected>1h</option><option>2h</option><option>4h</option><option>1d</option></select>
+        </div>
       </div>
       <!-- Step 2: Strategy -->
       <div class="wiz-pane hidden" data-pane="2">
-        <label class="text-sm text-slate-400 block mb-2">Выбери стратегию</label>
+        <div class="field-label mb-2">Выбери стратегию<span class="help-dot" tabindex="0" data-help="Логика, по которой бот находит точки входа. У каждой стратегии свой подход: одни ждут пробой уровня, другие — откат после импульса, третьи усредняют на просадке. Наведи «i» на каждую карточку ниже — там краткое описание.">i</span></div>
         <div class="grid grid-cols-2 gap-3">
-          <label class="wiz-card"><input type="radio" name="strategyType" value="scalping" checked class="sr-only"/><div class="wiz-card-body"><div class="font-semibold text-white">Scalping</div><div class="text-xs text-slate-400 mt-1">Быстрые сделки на малых ТФ</div></div></label>
-          <label class="wiz-card"><input type="radio" name="strategyType" value="smc" class="sr-only"/><div class="wiz-card-body"><div class="font-semibold text-white">SMC</div><div class="text-xs text-slate-400 mt-1">Smart Money Concepts</div></div></label>
-          <label class="wiz-card"><input type="radio" name="strategyType" value="gerchik" class="sr-only"/><div class="wiz-card-body"><div class="font-semibold text-white">Gerchik</div><div class="text-xs text-slate-400 mt-1">Уровни + абсорбция (KRP)</div></div></label>
-          <label class="wiz-card"><input type="radio" name="strategyType" value="levels" class="sr-only"/><div class="wiz-card-body"><div class="font-semibold text-white">Levels</div><div class="text-xs text-slate-400 mt-1">Классические S/R ретесты</div></div></label>
-          <label class="wiz-card"><input type="radio" name="strategyType" value="dca" class="sr-only"/><div class="wiz-card-body"><div class="font-semibold text-white">DCA</div><div class="text-xs text-slate-400 mt-1">Усреднение на просадках</div></div></label>
-          <label class="wiz-card"><input type="radio" name="strategyType" value="grid" class="sr-only"/><div class="wiz-card-body"><div class="font-semibold text-white">Grid</div><div class="text-xs text-slate-400 mt-1">Сетка в боковике</div></div></label>
+          <label class="wiz-card" title="Множество коротких сделок внутри дня. Ловим импульсы на 5m/15m свечах. Много сделок → выше комиссии. Подходит для активных ТФ и высокой ликвидности."><input type="radio" name="strategyType" value="scalping" checked class="sr-only"/><div class="wiz-card-body"><div class="font-semibold text-white">Scalping</div><div class="text-xs text-slate-400 mt-1">Быстрые сделки на малых ТФ</div></div></label>
+          <label class="wiz-card" title="Smart Money Concepts — торгуем по следам «умных денег» (институциональных игроков). Ищем BOS/CHoCH, order blocks, FVG. Сложнее в понимании, но качество сигналов высокое."><input type="radio" name="strategyType" value="smc" class="sr-only"/><div class="wiz-card-body"><div class="font-semibold text-white">SMC</div><div class="text-xs text-slate-400 mt-1">Smart Money Concepts</div></div></label>
+          <label class="wiz-card" title="Стратегия Александра Герчика: ложные пробои уровней (KRP — крупный ретрейсмент профиля), абсорбция крупных заявок. Работает лучше всего на спокойных трендовых инструментах."><input type="radio" name="strategyType" value="gerchik" class="sr-only"/><div class="wiz-card-body"><div class="font-semibold text-white">Gerchik</div><div class="text-xs text-slate-400 mt-1">Уровни + абсорбция (KRP)</div></div></label>
+          <label class="wiz-card" title="Классическая торговля от уровней поддержки и сопротивления. Ждём касание уровня, подтверждение (свечной паттерн, объём) и входим в сторону отбоя."><input type="radio" name="strategyType" value="levels" class="sr-only"/><div class="wiz-card-body"><div class="font-semibold text-white">Levels</div><div class="text-xs text-slate-400 mt-1">Классические S/R ретесты</div></div></label>
+          <label class="wiz-card" title="Dollar Cost Averaging — усреднение. На просадках докупаем по чуть более низкой цене, снижая среднюю. Хорошо на растущих рынках, ОПАСНО в затяжных падениях — можно набрать слишком много."><input type="radio" name="strategyType" value="dca" class="sr-only"/><div class="wiz-card-body"><div class="font-semibold text-white">DCA</div><div class="text-xs text-slate-400 mt-1">Усреднение на просадках</div></div></label>
+          <label class="wiz-card" title="Выставляем сетку ордеров по заданной амплитуде. Цена ходит вверх-вниз в диапазоне — ловим прибыль с каждого движения. Идеально в боковике, но убыточно в сильных трендах."><input type="radio" name="strategyType" value="grid" class="sr-only"/><div class="wiz-card-body"><div class="font-semibold text-white">Grid</div><div class="text-xs text-slate-400 mt-1">Сетка в боковике</div></div></label>
         </div>
-        <div class="mt-4"><label class="text-sm text-slate-400 block mb-1">Направление</label><select name="direction" class="w-full bg-slate-800/50 border border-slate-700 rounded-xl px-4 py-3 text-white outline-none"><option value="both">Long + Short</option><option value="long">Только Long</option><option value="short">Только Short</option></select></div>
+        <div class="mt-4">
+          <div class="field-label">Направление<span class="help-dot" tabindex="0" data-help="Long (лонг) — бот играет на росте, покупает и ждёт роста цены. Short (шорт) — играет на падении. Long+Short — работает в обе стороны, в любом тренде. Если не знаешь — выбирай Long+Short.">i</span></div>
+          <select name="direction" class="w-full bg-slate-800/50 border border-slate-700 rounded-xl px-4 py-3 text-white outline-none"><option value="both">Long + Short</option><option value="long">Только Long</option><option value="short">Только Short</option></select>
+        </div>
       </div>
       <!-- Step 3: Strategy config (dynamic form) -->
       <div class="wiz-pane hidden" data-pane="3">
@@ -120,12 +135,24 @@
       <!-- Step 4: Risk -->
       <div class="wiz-pane hidden" data-pane="4">
         <div class="grid grid-cols-2 gap-4">
-          <div><label class="text-sm text-slate-400 block mb-1">Leverage</label><input name="leverage" type="number" value="10" min="1" max="100" class="w-full bg-slate-800/50 border border-slate-700 rounded-xl px-4 py-3 text-white outline-none"/></div>
-          <div><label class="text-sm text-slate-400 block mb-1">Риск / сделку (%)</label><input name="riskPct" type="number" step="0.1" value="1" min="0.1" max="10" class="w-full bg-slate-800/50 border border-slate-700 rounded-xl px-4 py-3 text-white outline-none"/></div>
+          <div>
+            <div class="field-label">Leverage (плечо)<span class="help-dot" tabindex="0" data-help="Во сколько раз увеличивается размер позиции. x1 — торгуешь на свои, без кредита. x10 — позиция в 10 раз больше твоего залога: и прибыль x10, и потенциальный убыток x10. Новичкам: x3–x5 достаточно.">i</span></div>
+            <input name="leverage" type="number" value="10" min="1" max="100" class="w-full bg-slate-800/50 border border-slate-700 rounded-xl px-4 py-3 text-white outline-none"/>
+          </div>
+          <div>
+            <div class="field-label">Риск / сделку (%)<span class="help-dot up" tabindex="0" data-help="Сколько % депозита ты готов потерять в одной сделке, если сработает стоп-лосс. 1% — стандарт опытных трейдеров. Больше 2% уже агрессивно, больше 5% — опасно. Бот сам посчитает размер позиции так, чтобы при стопе потеря = этой сумме.">i</span></div>
+            <input name="riskPct" type="number" step="0.1" value="1" min="0.1" max="10" class="w-full bg-slate-800/50 border border-slate-700 rounded-xl px-4 py-3 text-white outline-none"/>
+          </div>
         </div>
         <div class="grid grid-cols-2 gap-4 mt-3">
-          <div><label class="text-sm text-slate-400 block mb-1">Размер ($)</label><input name="positionSizeUsd" type="number" value="100" min="10" class="w-full bg-slate-800/50 border border-slate-700 rounded-xl px-4 py-3 text-white outline-none"/></div>
-          <div><label class="text-sm text-slate-400 block mb-1">Max открытых</label><input name="maxOpenTrades" type="number" value="3" min="1" max="20" class="w-full bg-slate-800/50 border border-slate-700 rounded-xl px-4 py-3 text-white outline-none"/></div>
+          <div>
+            <div class="field-label">Размер ($)<span class="help-dot" tabindex="0" data-help="Базовый размер позиции в долларах (маржа, без учёта плеча). Используется если стратегии не нужен ATR-расчёт. Для большинства стратегий это «подсказка» — реальный размер бот подберёт под «Риск/сделку».">i</span></div>
+            <input name="positionSizeUsd" type="number" value="100" min="10" class="w-full bg-slate-800/50 border border-slate-700 rounded-xl px-4 py-3 text-white outline-none"/>
+          </div>
+          <div>
+            <div class="field-label">Max открытых<span class="help-dot" tabindex="0" data-help="Максимум одновременных сделок у этого бота. Если лимит = 3, бот не откроет 4-ю, пока одна из трёх не закроется. Защита от переконцентрации и чрезмерного риска на одном инструменте.">i</span></div>
+            <input name="maxOpenTrades" type="number" value="3" min="1" max="20" class="w-full bg-slate-800/50 border border-slate-700 rounded-xl px-4 py-3 text-white outline-none"/>
+          </div>
         </div>
         <div class="mt-3 p-3 rounded-xl bg-slate-800/40 border border-slate-700 text-xs text-slate-400">SL и TP ставятся стратегией на основе ATR — фиксированные значения не нужны. Circuit breaker остановит бота при дневной просадке 10%.</div>
       </div>
@@ -138,7 +165,7 @@
           </div>
         </div>
         <div class="flex items-center gap-2 mb-4">
-          <label class="text-xs text-slate-400">Период:</label>
+          <label class="text-xs text-slate-400 flex items-center">Период:<span class="help-dot" tabindex="0" data-help="Сколько последних дней истории использовать. 14 дней — быстро, но статистика слабая. 90 дней — надёжнее, но может не учитывать текущую фазу рынка. Новичкам — 30 дней (баланс скорости и качества).">i</span></label>
           <select id="btDays" class="bg-slate-800/50 border border-slate-700 rounded-lg px-3 py-1.5 text-sm text-white outline-none">
             <option value="14">14 дней</option>
             <option value="30" selected>30 дней</option>
@@ -160,12 +187,12 @@
       </div>
       <!-- Step 6: Mode + review -->
       <div class="wiz-pane hidden" data-pane="6">
-        <label class="text-sm text-slate-400 block mb-2">Режим торговли</label>
+        <div class="field-label mb-2">Режим торговли<span class="help-dot up" tabindex="0" data-help="PAPER — бот торгует на виртуальном балансе, безопасно. Идеально для проверки стратегии. LIVE — реальные ордера на бирже настоящими деньгами (Pro+ тариф). Совет: сначала месяц PAPER, потом LIVE.">i</span></div>
         <div class="grid grid-cols-2 gap-3 mb-4">
           <label class="wiz-card"><input type="radio" name="tradingMode" value="paper" checked class="sr-only"/><div class="wiz-card-body"><div class="font-semibold text-slate-300">PAPER</div><div class="text-xs text-slate-400 mt-1">Виртуальный баланс, безопасно</div></div></label>
           <label class="wiz-card"><input type="radio" name="tradingMode" value="live" class="sr-only"/><div class="wiz-card-body"><div class="font-semibold text-red-400">LIVE</div><div class="text-xs text-slate-400 mt-1">Реальные деньги — Pro+</div></div></label>
         </div>
-        <label class="flex items-center gap-2 text-sm text-slate-300 cursor-pointer mb-4"><input type="checkbox" name="autoTrade" style="accent-color:#6366f1"/> Авто-торговля (иначе — только сигналы)</label>
+        <label class="flex items-center gap-2 text-sm text-slate-300 cursor-pointer mb-4"><input type="checkbox" name="autoTrade" style="accent-color:#6366f1"/> Авто-торговля<span class="help-dot up" tabindex="0" data-help="Включено — бот сам открывает и закрывает сделки. Выключено — бот только ищет сигналы и присылает уведомления, а решение о входе принимаешь ты вручную.">i</span><span class="text-xs text-slate-500 ml-1">(иначе — только сигналы)</span></label>
         <div class="p-3 rounded-xl bg-slate-800/40 border border-slate-700 text-sm text-slate-300">
           <div class="text-xs text-slate-400 mb-1">Сводка</div>
           <div id="wizReview" class="font-mono text-xs text-slate-300 leading-relaxed"></div>
@@ -197,6 +224,53 @@
 .wiz-card:hover{border-color:#475569}
 .wiz-card:has(input:checked){border-color:#6366f1;background:rgba(99,102,241,.1);box-shadow:0 0 0 1px rgba(99,102,241,.4)}
 .wiz-card-body{text-align:center}
+/* ── Info tooltip for beginners (pure CSS, no JS) ── */
+.help-dot{
+  display:inline-flex;align-items:center;justify-content:center;
+  width:16px;height:16px;border-radius:50%;
+  background:rgba(92,128,227,.15);
+  border:1px solid rgba(92,128,227,.4);
+  color:#93c5fd;font-size:10px;font-weight:700;font-style:italic;
+  font-family:Georgia,'Times New Roman',serif;
+  cursor:help;margin-left:6px;vertical-align:middle;
+  position:relative;user-select:none;flex-shrink:0;
+  transition:background .15s,color .15s,border-color .15s;
+}
+.help-dot:hover,.help-dot:focus-visible{
+  background:rgba(92,128,227,.35);color:#fff;border-color:#5C80E3;outline:none;
+}
+.help-dot::after{
+  content:attr(data-help);
+  position:absolute;top:calc(100% + 10px);left:50%;transform:translateX(-50%);
+  background:rgba(15,23,42,.98);
+  border:1px solid rgba(92,128,227,.4);
+  border-radius:10px;padding:10px 12px;
+  font-size:11px;line-height:1.55;
+  color:rgba(226,232,240,.95);font-weight:400;font-style:normal;
+  font-family:'Inter',sans-serif;
+  width:max-content;max-width:260px;white-space:normal;text-align:left;
+  z-index:1000;opacity:0;pointer-events:none;
+  transition:opacity .15s;
+  box-shadow:0 8px 24px rgba(0,0,0,.55),0 0 0 1px rgba(0,0,0,.4);
+}
+.help-dot::before{
+  content:'';position:absolute;top:calc(100% + 4px);left:50%;transform:translateX(-50%);
+  border:5px solid transparent;border-bottom-color:rgba(15,23,42,.98);
+  opacity:0;pointer-events:none;z-index:1001;transition:opacity .15s;
+}
+.help-dot:hover::after,.help-dot:focus-visible::after,
+.help-dot:hover::before,.help-dot:focus-visible::before{opacity:1}
+/* Flip tooltip upward when near the bottom of the form */
+.help-dot.up::after{top:auto;bottom:calc(100% + 10px)}
+.help-dot.up::before{top:auto;bottom:calc(100% + 4px);border-bottom-color:transparent;border-top-color:rgba(15,23,42,.98)}
+/* Label row — keeps label text + help-dot inline */
+.field-label{display:flex;align-items:center;font-size:13px;color:#94a3b8;margin-bottom:6px;line-height:1.2}
+/* Light mode */
+html.light .help-dot{background:rgba(29,78,216,.08);border-color:rgba(29,78,216,.3);color:#1D4ED8}
+html.light .help-dot:hover{background:#1D4ED8;color:#fff}
+html.light .help-dot::after{background:#fff;border-color:rgba(0,0,0,.12);color:#0A0A0A;box-shadow:0 8px 24px rgba(0,0,0,.12)}
+html.light .help-dot::before{border-bottom-color:#fff}
+html.light .help-dot.up::before{border-bottom-color:transparent;border-top-color:#fff}
 </style>
 
 <!-- PAPER → LIVE CONFIRM MODAL -->
@@ -472,11 +546,13 @@ function cfgBuild(schema) {
       <div class="grid grid-cols-2 gap-3">
         ${g.fields.map((f) => `
           <div>
-            <label class="text-xs text-slate-400 block mb-1" title="${escapeHtml(f.desc || '')}">${escapeHtml(f.label || f.key)}</label>
+            <div class="field-label" style="font-size:12px">
+              ${escapeHtml(f.label || f.key)}
+              ${f.desc ? `<span class="help-dot" tabindex="0" data-help="${escapeHtml(f.desc)}">i</span>` : ''}
+            </div>
             ${f.type === 'bool'
-              ? `<label class="flex items-center gap-2 mt-1"><input type="checkbox" data-cfg="${escapeHtml(f.key)}" ${f.default ? 'checked' : ''} style="accent-color:#5C80E3"/><span class="text-xs text-slate-500">${f.default ? 'вкл' : 'выкл'}</span></label>`
+              ? `<label class="flex items-center gap-2"><input type="checkbox" data-cfg="${escapeHtml(f.key)}" ${f.default ? 'checked' : ''} style="accent-color:#5C80E3"/><span class="text-xs text-slate-500">${f.default ? 'вкл' : 'выкл'}</span></label>`
               : `<input type="number" data-cfg="${escapeHtml(f.key)}" value="${f.default}" min="${f.min ?? ''}" max="${f.max ?? ''}" step="${f.step ?? 'any'}" class="w-full bg-slate-800/50 border border-slate-700 rounded-lg px-3 py-1.5 text-sm text-white outline-none"/>`}
-            ${f.desc ? `<div class="text-[11px] text-slate-600 mt-1">${escapeHtml(f.desc)}</div>` : ''}
           </div>
         `).join('')}
       </div>
