@@ -1,5 +1,5 @@
 # INVENTORY — frontend HTML
-Generated 2026-04-21T18:52:19.055Z
+Generated 2026-04-21T18:56:58.083Z
 
 
 ## about.html
@@ -345,8 +345,8 @@ let currentSchema = null;          // last-lo`
 
 ## index.html
 
-- size: 107380 bytes
-- sha256: 4b787dff7be29090
+- size: 107540 bytes
+- sha256: c8a2e583a82cbb91
 
 ### forms (5)
 - id=`loginForm` action=`` method=`get` inputs=5
@@ -444,7 +444,7 @@ let currentSchema = null;          // last-lo`
 - external: `https://code.iconify.design/iconify-icon/2.1.0/iconify-icon.min.js`
 - external: `app.js`
 - inline: sha256=aaded92f9603ae68 bytes=402
-- inline: sha256=7554e916d1df0241 bytes=34082
+- inline: sha256=04d3d1943d20f61a bytes=34082
 
 ### api-ish urls (3)
 - `fetch if app.js didn`
