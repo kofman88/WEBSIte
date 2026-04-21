@@ -21,11 +21,14 @@ const db = require('../models/database');
 const marketData = require('./marketDataService');
 const logger = require('../utils/logger');
 
-// Strategy registry — keep in sync with signalScanner
+// Strategy registry — keep in sync with signalScanner AND strategySchemas
 const STRATEGIES = {
-  levels: require('../strategies/levels'),
-  smc: require('../strategies/smc'),
+  levels:   require('../strategies/levels'),
+  smc:      require('../strategies/smc'),
   scalping: require('../strategies/scalping'),
+  gerchik:  require('../strategies/gerchik'),
+  dca:      require('../strategies/dca'),
+  grid:     require('../strategies/grid'),
 };
 
 // ── Default risk + fees ────────────────────────────────────────────────
