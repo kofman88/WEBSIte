@@ -1,6 +1,6 @@
 const express = require('express');
 const { z } = require('zod');
-const { authMiddleware } = require('../middleware/auth');
+const { authMiddleware, requireVerifiedEmail } = require('../middleware/auth');
 const paymentService = require('../services/paymentService');
 const refRewards = require('../services/refRewards');
 const validation = require('../utils/validation');
@@ -24,7 +24,7 @@ function handleErr(err, res, next) {
 }
 
 // POST /api/payments/stripe/checkout — create Stripe Checkout session
-router.post('/stripe/checkout', authMiddleware, async (req, res, next) => {
+router.post('/stripe/checkout', authMiddleware, requireVerifiedEmail, async (req, res, next) => {
   try {
     const input = validation.stripeCheckoutSchema.parse(req.body);
     const origin = req.get('origin') || ('https://' + req.get('host'));
@@ -39,7 +39,7 @@ router.post('/stripe/checkout', authMiddleware, async (req, res, next) => {
 });
 
 // POST /api/payments/crypto/create — generate unique payment ticket
-router.post('/crypto/create', authMiddleware, (req, res, next) => {
+router.post('/crypto/create', authMiddleware, requireVerifiedEmail, (req, res, next) => {
   try {
     const input = validation.cryptoPaymentSchema.parse(req.body);
     const out = paymentService.createCryptoPayment(req.userId, input);

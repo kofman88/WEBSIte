@@ -910,6 +910,27 @@
   </div>
 </div>
 
+<!-- EMAIL VERIFICATION GATE — shown when requireAuth() detects an unverified
+     session trying to access the dashboard. User can resend the email or logout. -->
+<div class="modal-bg" id="verifyEmailModal" role="dialog" aria-modal="true" aria-labelledby="verifyEmailTitle">
+  <div class="modal-card" role="document" style="max-width:460px;grid-template-columns:1fr;min-height:auto">
+    <button type="button" class="modal-close" data-close-modal aria-label="Close">
+      <iconify-icon icon="solar:close-circle-linear" style="font-size:20px"></iconify-icon>
+    </button>
+    <div class="modal-form">
+      <a href="/" class="logo-mark" style="font-size:20px;margin-bottom:22px;display:inline-block">CHM<span class="dot">.</span></a>
+      <div style="display:inline-flex;align-items:center;justify-content:center;width:56px;height:56px;border-radius:50%;background:rgba(255,90,31,.12);border:1px solid rgba(255,90,31,.32);margin-bottom:18px">
+        <iconify-icon icon="solar:letter-linear" style="font-size:26px;color:var(--primary-400)"></iconify-icon>
+      </div>
+      <h2 class="t-h2" id="verifyEmailTitle" style="font-size:24px;margin-bottom:10px" data-t="ve-title">Подтвердите email</h2>
+      <p class="t-body" style="margin-bottom:18px;color:rgba(255,255,255,.72);font-size:13px;line-height:1.55" data-t="ve-sub">Мы отправили ссылку-подтверждение на ваш адрес. Перейдите по ней — и доступ к дашборду откроется сразу.</p>
+      <p class="t-body" style="margin-bottom:22px;color:rgba(255,255,255,.52);font-size:12px;line-height:1.55" data-t="ve-hint">Не пришло? Проверьте папку «Спам». Ссылка действует 24 часа.</p>
+      <button type="button" id="verifyResendBtn" class="pill pill-primary pill-md" style="justify-content:center;width:100%;margin-bottom:10px" data-t="ve-resend">Отправить письмо заново</button>
+      <button type="button" onclick="Auth.logout()" class="modal-link" style="display:block;margin:10px auto 0;font-size:12px" data-t="ve-logout">Выйти из аккаунта</button>
+    </div>
+  </div>
+</div>
+
 <!-- Cookie consent banner (GDPR) — shown until user clicks Accept or Decline.
      Stores result in localStorage. Site uses only functional cookies
      (auth/session), so Decline just hides the banner. -->
@@ -1235,7 +1256,12 @@ const TR={
   'rp-title':{ru:'Новый пароль',en:'New password'},'rp-sub':{ru:'Придумайте новый пароль. Минимум 6 символов.',en:'Pick a new password — 6 characters minimum.'},
   'rp-new':{ru:'НОВЫЙ ПАРОЛЬ',en:'NEW PASSWORD'},'rp-confirm':{ru:'ПОВТОРИТЕ',en:'CONFIRM'},'rp-btn':{ru:'Сохранить пароль',en:'Save password'},
   'tfa-title':{ru:'Двухфакторная проверка',en:'Two-factor check'},'tfa-sub':{ru:'Введите 6-значный код из Google Authenticator / Authy — или восстановительный.',en:'Enter the 6-digit code from Google Authenticator / Authy — or a recovery code.'},
-  'tfa-code':{ru:'КОД',en:'CODE'},'tfa-btn':{ru:'Подтвердить',en:'Verify'}
+  'tfa-code':{ru:'КОД',en:'CODE'},'tfa-btn':{ru:'Подтвердить',en:'Verify'},
+  've-title':{ru:'Подтвердите email',en:'Confirm your email',es:'Confirma tu email',tr:'E-postanı doğrula',id:'Konfirmasi email'},
+  've-sub':{ru:'Мы отправили ссылку-подтверждение на ваш адрес. Перейдите по ней — и доступ к дашборду откроется сразу.',en:"We've sent a confirmation link to your email. Click it to unlock the dashboard.",es:'Enviamos un enlace de confirmación. Haz clic para desbloquear el panel.',tr:'Onay bağlantısı gönderildi. Panel için tıkla.',id:'Kami kirim tautan konfirmasi. Klik untuk buka dashboard.'},
+  've-hint':{ru:'Не пришло? Проверьте папку «Спам». Ссылка действует 24 часа.',en:"Didn't arrive? Check spam. Link valid for 24h."},
+  've-resend':{ru:'Отправить письмо заново',en:'Resend email',es:'Reenviar email',tr:'E-postayı yeniden gönder',id:'Kirim ulang email'},
+  've-logout':{ru:'Выйти из аккаунта',en:'Sign out',es:'Salir',tr:'Çıkış',id:'Keluar'}
 };
 // ── Promos (community section) — iframe mockups, lazy-mounted ──
 window.Promos=(function(){
@@ -1392,7 +1418,28 @@ function toggleTheme(){
     setTimeout(()=>_notify.err('Ссылка недействительна или просрочена'),400);
     history.replaceState({},'',location.pathname);
   }
+  // Access to dashboard is gated on email verification — requireAuth()
+  // redirects here with ?verify_email=1 when the current user isn't verified.
+  if(q.get('verify_email')==='1'){
+    setTimeout(()=>{openModal('verifyEmail')},400);
+    history.replaceState({},'',location.pathname);
+  }
 })();
+
+// Resend verification email handler
+document.getElementById('verifyResendBtn')?.addEventListener('click',async e=>{
+  const btn=e.currentTarget;btn.disabled=true;const orig=btn.textContent;btn.textContent='…';
+  try{
+    if(typeof API!=='undefined'&&API.requestEmailVerify)await API.requestEmailVerify();
+    else{
+      const base=(location.hostname==='localhost'||location.hostname==='127.0.0.1')?'http://localhost:3000/api':'/api';
+      const tok=(typeof Auth!=='undefined'&&Auth.accessToken)?Auth.accessToken:null;
+      await fetch(base+'/auth/verify-email/request',{method:'POST',headers:tok?{'Authorization':'Bearer '+tok}:{}});
+    }
+    _notify.ok('Письмо отправлено — проверьте почту');
+  }catch(err){_notify.err(err.message||'Не удалось отправить письмо')}
+  finally{btn.disabled=false;btn.textContent=orig;}
+});
 </script>
 <!-- Aura animated background: enable orb sphere, orange palette -->
 <script>window.AURA_CFG = { orb: true };</script>

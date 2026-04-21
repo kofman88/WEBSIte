@@ -1,6 +1,6 @@
 const express = require('express');
 const { z } = require('zod');
-const { authMiddleware, tierLimiter } = require('../middleware/auth');
+const { authMiddleware, tierLimiter, requireVerifiedEmail } = require('../middleware/auth');
 
 // Smart Trade & bot-toggle touch exchange APIs — keep tight per-plan caps
 // so a runaway client loop doesn't drain the user's exchange rate budget.
@@ -39,7 +39,7 @@ router.get('/summary', authMiddleware, (req, res, next) => {
   } catch (err) { handleErr(err, res, next); }
 });
 
-router.post('/', authMiddleware, (req, res, next) => {
+router.post('/', authMiddleware, requireVerifiedEmail, (req, res, next) => {
   try {
     const input = validation.createBotSchema.parse(req.body);
     const bot = botService.createBot(req.userId, input);

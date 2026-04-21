@@ -128,6 +128,14 @@ const Auth = {
       location.href = '/?login=1';
       return false;
     }
+    // Email verification gate — block dashboard access until confirmed.
+    // /auth/me returns emailVerified; Auth.user mirrors it. Impersonated
+    // sessions bypass (admin needs to inspect unverified accounts).
+    const u = this.user;
+    if (u && u.emailVerified === false && !this.isImpersonating) {
+      location.href = '/?verify_email=1';
+      return false;
+    }
     return true;
   },
 };
@@ -158,6 +166,14 @@ async function apiRequest(method, path, body, { retried = false, skipAuth = fals
   }
 
   if (!res.ok) {
+    // Hard gate — if backend says email not verified, kick user to the
+    // verification modal on the homepage instead of letting the error
+    // bubble as a generic 403 toast.
+    if (res.status === 403 && data && data.code === 'EMAIL_NOT_VERIFIED') {
+      if (location.pathname !== '/' && location.pathname !== '/index.html') {
+        location.href = '/?verify_email=1';
+      }
+    }
     const err = new Error(data.error || data.message || ('HTTP ' + res.status));
     err.status = res.status;
     err.code = data.code;

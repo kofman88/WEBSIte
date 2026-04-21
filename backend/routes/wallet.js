@@ -1,6 +1,6 @@
 const express = require('express');
 const { z } = require('zod');
-const { authMiddleware } = require('../middleware/auth');
+const { authMiddleware, requireVerifiedEmail } = require('../middleware/auth');
 const walletService = require('../services/walletService');
 const logger = require('../utils/logger');
 
@@ -61,7 +61,7 @@ router.get('/balance', authMiddleware, (req, res, next) => {
   }
 });
 
-router.post('/withdraw', authMiddleware, (req, res, next) => {
+router.post('/withdraw', authMiddleware, requireVerifiedEmail, (req, res, next) => {
   try {
     const input = withdrawSchema.parse(req.body);
     const transaction = walletService.requestWithdrawal(req.userId, input);
