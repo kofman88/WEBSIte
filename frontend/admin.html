@@ -17,9 +17,9 @@
   <style>
     .atab{padding:8px 18px;border-radius:9999px;font-family:'Inter',sans-serif;font-size:13px;line-height:18px;font-weight:500;color:rgba(255,255,255,.62);background:transparent;border:none;cursor:pointer;transition:color .15s ease,background .15s ease}
     .atab:hover{color:#fff}
-    .atab.active{background:linear-gradient(180deg,#2A5BE8 0%,#1D4ED8 60%,#143797 100%);color:#fff;box-shadow:inset 0 1px 1px rgba(255,255,255,.25),inset 0 -1px 2px rgba(0,0,0,.4),0 4px 10px -2px rgba(29,78,216,.5)}
+    .atab.active{background:linear-gradient(180deg,#FF7840 0%,#FF5A1F 60%,#C44610 100%);color:#fff;box-shadow:inset 0 1px 1px rgba(255,255,255,.25),inset 0 -1px 2px rgba(0,0,0,.4),0 4px 10px -2px rgba(255,90,31,.5)}
     .atab-content{display:none}.atab-content.active{display:block}
-    .admin-badge{font-size:10px;letter-spacing:.18em;font-weight:600;color:#5C80E3;text-transform:uppercase}
+    .admin-badge{font-size:10px;letter-spacing:.18em;font-weight:600;color:#FF8C5A;text-transform:uppercase}
   </style>
 </head>
 <body>
@@ -63,7 +63,7 @@
     <div class="card">
       <div class="flex items-center gap-3 mb-4">
         <input id="userSearch" placeholder="Поиск по email, имени, реф-коду" class="flex-1 bg-slate-800/50 border border-slate-700 rounded-xl px-4 py-2 text-sm text-white outline-none"/>
-        <button id="userSearchBtn" class="px-4 py-2 rounded-lg font-semibold text-white text-sm" style="background:linear-gradient(180deg,#2A5BE8,#1D4ED8 60%,#143797);box-shadow:inset 0 1px 1px rgba(255,255,255,.28)">Найти</button>
+        <button id="userSearchBtn" class="px-4 py-2 rounded-lg font-semibold text-white text-sm" style="background:linear-gradient(180deg,#FF7840,#FF5A1F 60%,#C44610);box-shadow:inset 0 1px 1px rgba(255,255,255,.28)">Найти</button>
       </div>
       <div class="overflow-x-auto">
         <table class="w-full text-sm">
@@ -84,7 +84,7 @@
         <select id="paymentMethodFilter" class="bg-slate-800/50 border border-slate-700 rounded-lg px-3 py-2 text-sm text-white outline-none">
           <option value="">Все методы</option><option value="stripe">Stripe</option><option value="usdt_bep20">USDT BEP20</option><option value="usdt_trc20">USDT TRC20</option>
         </select>
-        <button id="paymentSearchBtn" class="px-4 py-2 rounded-lg font-semibold text-white text-sm" style="background:linear-gradient(180deg,#2A5BE8,#1D4ED8 60%,#143797)">Применить</button>
+        <button id="paymentSearchBtn" class="px-4 py-2 rounded-lg font-semibold text-white text-sm" style="background:linear-gradient(180deg,#FF7840,#FF5A1F 60%,#C44610)">Применить</button>
       </div>
       <div class="overflow-x-auto">
         <table class="w-full text-sm">
@@ -106,7 +106,7 @@
         </select>
         <input name="durationDays" type="number" value="30" placeholder="Дней" class="bg-slate-800/50 border border-slate-700 rounded-lg px-3 py-2 text-sm text-white outline-none"/>
         <input name="maxUses" type="number" value="100" placeholder="Лимит" class="bg-slate-800/50 border border-slate-700 rounded-lg px-3 py-2 text-sm text-white outline-none"/>
-        <button type="submit" class="px-4 py-2 rounded-lg font-semibold text-white text-sm" style="background:linear-gradient(180deg,#2A5BE8,#1D4ED8 60%,#143797)">Создать</button>
+        <button type="submit" class="px-4 py-2 rounded-lg font-semibold text-white text-sm" style="background:linear-gradient(180deg,#FF7840,#FF5A1F 60%,#C44610)">Создать</button>
       </form>
       <div class="overflow-x-auto">
         <table class="w-full text-sm">
@@ -124,7 +124,7 @@
         <select id="rewardStatusFilter" class="bg-slate-800/50 border border-slate-700 rounded-lg px-3 py-2 text-sm text-white outline-none">
           <option value="">Все</option><option value="pending" selected>Pending</option><option value="paid">Paid</option><option value="cancelled">Cancelled</option>
         </select>
-        <button id="rewardSearchBtn" class="px-4 py-2 rounded-lg font-semibold text-white text-sm" style="background:linear-gradient(180deg,#2A5BE8,#1D4ED8 60%,#143797)">Фильтр</button>
+        <button id="rewardSearchBtn" class="px-4 py-2 rounded-lg font-semibold text-white text-sm" style="background:linear-gradient(180deg,#FF7840,#FF5A1F 60%,#C44610)">Фильтр</button>
       </div>
       <div class="overflow-x-auto">
         <table class="w-full text-sm">
@@ -145,7 +145,7 @@
           <option value="pending">Pending</option>
           <option value="closed">Closed</option>
         </select>
-        <button id="ticketReloadBtn" class="px-4 py-2 rounded-lg font-semibold text-white text-sm" style="background:linear-gradient(180deg,#2A5BE8,#1D4ED8 60%,#143797)">Обновить</button>
+        <button id="ticketReloadBtn" class="px-4 py-2 rounded-lg font-semibold text-white text-sm" style="background:linear-gradient(180deg,#FF7840,#FF5A1F 60%,#C44610)">Обновить</button>
       </div>
       <div class="overflow-x-auto">
         <table class="w-full text-sm">
@@ -178,7 +178,7 @@
       <form id="admTdReplyForm" class="space-y-3" style="border-top:1px solid rgba(255,255,255,.06);padding-top:12px">
         <textarea name="body" required minlength="1" maxlength="10000" rows="3" class="w-full bg-slate-800/50 border border-slate-700 rounded-xl px-4 py-3 text-white outline-none" placeholder="Ответ от поддержки…"></textarea>
         <div class="flex gap-3">
-          <button type="submit" class="flex-1 px-5 py-2.5 rounded-xl font-semibold text-white text-sm" style="background:linear-gradient(180deg,#2A5BE8 0%,#1D4ED8 60%,#143797 100%)">Отправить</button>
+          <button type="submit" class="flex-1 px-5 py-2.5 rounded-xl font-semibold text-white text-sm" style="background:linear-gradient(180deg,#FF7840 0%,#FF5A1F 60%,#C44610 100%)">Отправить</button>
           <button type="button" id="admTdCloseBtn" class="text-sm px-4 py-2.5 rounded-xl bg-slate-800/50 border border-slate-700 text-slate-400 hover:text-white">Закрыть тикет</button>
         </div>
       </form>
@@ -190,7 +190,7 @@
     <div class="card">
       <div class="flex items-center gap-3 mb-4">
         <input id="auditAction" placeholder="Filter by action (e.g. admin.user)" class="flex-1 bg-slate-800/50 border border-slate-700 rounded-lg px-3 py-2 text-sm text-white outline-none"/>
-        <button id="auditSearchBtn" class="px-4 py-2 rounded-lg font-semibold text-white text-sm" style="background:linear-gradient(180deg,#2A5BE8,#1D4ED8 60%,#143797)">Найти</button>
+        <button id="auditSearchBtn" class="px-4 py-2 rounded-lg font-semibold text-white text-sm" style="background:linear-gradient(180deg,#FF7840,#FF5A1F 60%,#C44610)">Найти</button>
       </div>
       <div class="overflow-x-auto">
         <table class="w-full text-sm">

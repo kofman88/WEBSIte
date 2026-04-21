@@ -133,7 +133,7 @@
     <label class="text-sm text-slate-400 block mb-2">Заметка</label>
     <textarea id="jNote" rows="8" class="w-full bg-slate-800/50 border border-slate-700 rounded-xl px-4 py-3 text-white outline-none" placeholder="Что пошло так/не так, что изменить в следующий раз…"></textarea>
     <div class="flex gap-3 mt-4">
-      <button onclick="saveJournalNote()" class="px-6 py-2 rounded-xl font-semibold text-white text-sm" style="background:linear-gradient(180deg,#2A5BE8 0%,#1D4ED8 60%,#143797 100%)">Сохранить</button>
+      <button onclick="saveJournalNote()" class="px-6 py-2 rounded-xl font-semibold text-white text-sm" style="background:linear-gradient(180deg,#FF7840 0%,#FF5A1F 60%,#C44610 100%)">Сохранить</button>
       <button onclick="closeJournal()" class="px-6 py-2 rounded-xl bg-slate-800 text-slate-300 hover:bg-slate-700 text-sm">Закрыть</button>
     </div>
   </div>
@@ -197,7 +197,7 @@ async function loadEquityChart(days) {
   const data = r.points.map((p) => p.equity);
   equityChart = new Chart(ctx, {
     type: 'line',
-    data: { labels, datasets: [{ data, borderColor: '#5C80E3', backgroundColor: 'rgba(29,78,216,.12)', fill: true, tension: .3, pointRadius: 0, borderWidth: 2 }] },
+    data: { labels, datasets: [{ data, borderColor: '#FF8C5A', backgroundColor: 'rgba(255,90,31,.12)', fill: true, tension: .3, pointRadius: 0, borderWidth: 2 }] },
     options: { responsive: true, maintainAspectRatio: false, resizeDelay: 150, animation: false, plugins: { legend: { display: false } }, scales: { x: { ticks: { color: 'rgba(255,255,255,.5)', maxTicksLimit: 6 }, grid: { color: 'rgba(255,255,255,.04)' } }, y: { ticks: { color: 'rgba(255,255,255,.5)', callback: (v) => Fmt.currency(v) }, grid: { color: 'rgba(255,255,255,.04)' } } } },
   });
 }

@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="ru" class="scroll-smooth">
+<html lang="ru" class="scroll-smooth aura-page">
 <head>
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
@@ -12,8 +12,9 @@
   <link rel="preconnect" href="https://api.iconify.design" crossorigin/>
   <link rel="preconnect" href="https://fonts.googleapis.com"/>
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&family=JetBrains+Mono:wght@500&display=swap" rel="stylesheet"/>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet"/>
   <link rel="stylesheet" href="tailwind.css"/>
+  <link rel="stylesheet" href="aura-theme.css"/>
 
   <script src="assets/vendor/chart.umd.min.js"></script>
   <script src="https://code.iconify.design/iconify-icon/2.1.0/iconify-icon.min.js"></script>
@@ -29,11 +30,12 @@
       --text:#FFFFFF;
       --text-dim:rgba(255,255,255,.62);
       --text-mute:rgba(255,255,255,.38);
-      --primary:#1D4ED8;
-      --primary-400:#5C80E3;
-      --primary-600:#1943BA;
+      /* Aura palette — orange accent replaces former deep-blue */
+      --primary:#FF5A1F;
+      --primary-400:#FF8C5A;
+      --primary-600:#C44610;
       --secondary:#522525;
-      --tertiary:#2B5936;
+      --tertiary:#10B981;
       --radius-pill:9999px;
       --radius-lg:24px;
       --radius-md:16px;
@@ -54,7 +56,7 @@
       text-rendering:optimizeLegibility;
       letter-spacing:normal;
     }
-    ::selection{background:rgba(29,78,216,.35);color:#fff}
+    ::selection{background:rgba(255,90,31,.35);color:#fff}
     @media(prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:.01ms!important;transition-duration:.01ms!important}}
 
     /* ── Typography per spec ── */
@@ -75,7 +77,7 @@
     .bg-field{position:fixed;inset:0;z-index:0;pointer-events:none}
     #particle-canvas{position:fixed;inset:0;z-index:0;pointer-events:none;opacity:.55}
     .bg-grid{position:fixed;inset:0;z-index:0;pointer-events:none;background-image:linear-gradient(rgba(255,255,255,.025) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.025) 1px,transparent 1px);background-size:64px 64px;mask-image:radial-gradient(ellipse 90% 70% at 50% 40%,#000 30%,transparent 85%);-webkit-mask-image:radial-gradient(ellipse 90% 70% at 50% 40%,#000 30%,transparent 85%)}
-    .bg-vignette{position:fixed;inset:0;z-index:0;pointer-events:none;background:radial-gradient(ellipse at top,rgba(29,78,216,.08),transparent 55%),radial-gradient(ellipse at bottom right,rgba(82,37,37,.06),transparent 60%),radial-gradient(ellipse at bottom left,rgba(43,89,54,.05),transparent 60%)}
+    .bg-vignette{position:fixed;inset:0;z-index:0;pointer-events:none;background:radial-gradient(ellipse at top,rgba(255,90,31,.08),transparent 55%),radial-gradient(ellipse at bottom right,rgba(82,37,37,.06),transparent 60%),radial-gradient(ellipse at bottom left,rgba(43,89,54,.05),transparent 60%)}
     body>main,body>nav,body>footer{position:relative;z-index:1}
 
     /* ── Gradient shell (premium hairline) ── */
@@ -95,7 +97,7 @@
     .pill-sm{font-size:12px;line-height:16px;padding:6px 20px}
     .pill-md{font-size:14px;line-height:20px;padding:10px 22px}
     .pill-lg{font-size:16px;line-height:24px;padding:16px 32px}
-    .pill-primary{background:linear-gradient(180deg,#2A5BE8 0%,#1D4ED8 60%,#143797 100%);box-shadow:inset 0 1px 1px rgba(255,255,255,.28),inset 0 -1px 3px rgba(0,0,0,.6),0 4px 8px -2px rgba(0,0,0,.6),0 12px 24px -6px rgba(0,0,0,.9),0 0 0 1px rgba(29,78,216,.35)}
+    .pill-primary{background:linear-gradient(180deg,#FF7840 0%,#FF5A1F 55%,#C44610 100%);box-shadow:inset 0 1px 1px rgba(255,255,255,.28),inset 0 -1px 3px rgba(0,0,0,.45),0 4px 8px -2px rgba(0,0,0,.4),0 12px 24px -6px rgba(255,90,31,.45),0 0 0 1px rgba(255,90,31,.4)}
     .pill-primary:hover{transform:translateY(-1px);filter:brightness(1.08)}
     .pill-primary:active{transform:translateY(0) scale(.98)}
     .pill-ghost{background:linear-gradient(180deg,rgba(255,255,255,.06),rgba(255,255,255,.02));box-shadow:inset 0 1px 1px rgba(255,255,255,.1),inset 0 -1px 2px rgba(0,0,0,.4),0 1px 2px rgba(0,0,0,.4);color:rgba(255,255,255,.92)}
@@ -127,7 +129,7 @@
     .promo-wrap{display:block;width:100%;max-width:420px;margin:0 auto;cursor:pointer;text-decoration:none;color:inherit;transition:transform .5s var(--ease),filter .5s var(--ease)}
     .promo-wrap:hover{transform:translateY(-6px)}
     .promo-wrap .shell{padding:1px;border-radius:var(--radius-lg);background:linear-gradient(180deg,rgba(255,255,255,.18) 0%,rgba(255,255,255,.02) 100%);overflow:hidden}
-    .promo-wrap .shell-inner{padding:0;overflow:hidden;border-radius:calc(var(--radius-lg) - 1px);box-shadow:inset 0 1px 1px rgba(255,255,255,.08),inset 0 -2px 8px rgba(0,0,0,.6),0 1px 2px rgba(0,0,0,.5),0 25px 50px -12px rgba(0,0,0,.7),0 30px 60px rgba(29,78,216,.12)}
+    .promo-wrap .shell-inner{padding:0;overflow:hidden;border-radius:calc(var(--radius-lg) - 1px);box-shadow:inset 0 1px 1px rgba(255,255,255,.08),inset 0 -2px 8px rgba(0,0,0,.6),0 1px 2px rgba(0,0,0,.5),0 25px 50px -12px rgba(0,0,0,.7),0 30px 60px rgba(255,90,31,.12)}
     .promo-stage{position:relative;width:100%;aspect-ratio:800/1100;overflow:hidden;background:#0A0F1F;border-radius:inherit;isolation:isolate}
     .promo-stage iframe{position:absolute;top:0;left:0;width:800px;height:1100px;border:0;background:transparent;pointer-events:none;transform-origin:top left;will-change:transform}
     .promo-stage::after{content:'';position:absolute;inset:0;pointer-events:none;border-radius:inherit;box-shadow:inset 0 1px 1px rgba(255,255,255,.06),inset 0 -1px 2px rgba(0,0,0,.5)}
@@ -169,7 +171,7 @@
     /* ── How it works ── */
     .steps-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:24px;position:relative}
     @media(max-width:880px){.steps-grid{grid-template-columns:1fr}}
-    .step-line{position:absolute;top:36px;left:12%;right:12%;height:1px;background:linear-gradient(90deg,transparent,rgba(92,128,227,.6),rgba(92,128,227,.3),transparent);z-index:0}
+    .step-line{position:absolute;top:36px;left:12%;right:12%;height:1px;background:linear-gradient(90deg,transparent,rgba(255,140,90,.6),rgba(255,140,90,.3),transparent);z-index:0}
     @media(max-width:880px){.step-line{display:none}}
     .step-num{width:72px;height:72px;border-radius:var(--radius-pill);display:flex;align-items:center;justify-content:center;font-family:'Inter',sans-serif;font-weight:600;font-size:26px;line-height:1;letter-spacing:-.025em;color:#fff;background:linear-gradient(180deg,rgba(255,255,255,.06),rgba(255,255,255,.01));box-shadow:inset 0 1px 1px rgba(255,255,255,.12),inset 0 -2px 6px rgba(0,0,0,.7),0 8px 24px -6px rgba(0,0,0,.8);position:relative;z-index:1;margin:0 auto 20px}
 
@@ -183,10 +185,10 @@
     .price-card .price-head{display:flex;flex-direction:column;gap:10px}
     .price-card .price-name{font-family:'Inter',sans-serif;font-weight:500;font-size:10px;line-height:12.5px;letter-spacing:.22em;text-transform:uppercase;color:rgba(255,255,255,.6)}
     .price-card .price-amt{font-family:'Inter',sans-serif;font-weight:600;font-size:48px;line-height:1;letter-spacing:-.025em;color:#fff}
-    .price-popular{border:1px solid rgba(92,128,227,.45);background:linear-gradient(180deg,rgba(29,78,216,.22) 0%,rgba(29,78,216,.04) 60%,rgba(10,10,10,.6) 100%);box-shadow:0 1px 2px rgba(0,0,0,.5),0 25px 50px -12px rgba(0,0,0,.7),0 30px 60px rgba(29,78,216,.2),inset 0 1px 1px rgba(255,255,255,.12);transform:translateY(-6px)}
-    .price-popular:hover{transform:translateY(-12px);border-color:rgba(92,128,227,.7);box-shadow:0 2px 4px rgba(0,0,0,.5),0 30px 60px -12px rgba(0,0,0,.7),0 40px 80px rgba(29,78,216,.3),inset 0 1px 1px rgba(255,255,255,.18)}
-    .price-popular .price-name{color:#93AAEC}
-    .popular-badge{position:absolute;top:-14px;left:50%;transform:translateX(-50%);display:inline-flex;align-items:center;white-space:nowrap;padding:6px 16px;border-radius:9999px;font-family:'Inter',sans-serif;font-weight:500;font-size:10px;line-height:14px;letter-spacing:.18em;text-transform:uppercase;color:#fff;background:linear-gradient(180deg,#2A5BE8 0%,#1D4ED8 50%,#143797 100%);box-shadow:inset 0 1px 1px rgba(255,255,255,.28),inset 0 -1px 3px rgba(0,0,0,.5),0 4px 12px rgba(29,78,216,.5),0 8px 20px -4px rgba(0,0,0,.6);z-index:3}
+    .price-popular{border:1px solid rgba(255,140,90,.45);background:linear-gradient(180deg,rgba(255,90,31,.22) 0%,rgba(255,90,31,.04) 60%,rgba(10,10,10,.6) 100%);box-shadow:0 1px 2px rgba(0,0,0,.5),0 25px 50px -12px rgba(0,0,0,.7),0 30px 60px rgba(255,90,31,.2),inset 0 1px 1px rgba(255,255,255,.12);transform:translateY(-6px)}
+    .price-popular:hover{transform:translateY(-12px);border-color:rgba(255,140,90,.7);box-shadow:0 2px 4px rgba(0,0,0,.5),0 30px 60px -12px rgba(0,0,0,.7),0 40px 80px rgba(255,90,31,.3),inset 0 1px 1px rgba(255,255,255,.18)}
+    .price-popular .price-name{color:#FF8C5A}
+    .popular-badge{position:absolute;top:-14px;left:50%;transform:translateX(-50%);display:inline-flex;align-items:center;white-space:nowrap;padding:6px 16px;border-radius:9999px;font-family:'JetBrains Mono','Inter',monospace;font-weight:500;font-size:10px;line-height:14px;letter-spacing:.18em;text-transform:uppercase;color:#000;background:linear-gradient(180deg,#FF7840 0%,#FF5A1F 50%,#C44610 100%);box-shadow:inset 0 1px 1px rgba(255,255,255,.35),inset 0 -1px 3px rgba(0,0,0,.35),0 4px 12px rgba(255,90,31,.55),0 8px 20px -4px rgba(0,0,0,.5);z-index:3}
     .tick{display:inline-flex;align-items:center;justify-content:center;width:18px;height:18px;border-radius:50%;background:rgba(43,89,54,.5);color:#86efac;flex-shrink:0}
     .tick.off{background:rgba(82,37,37,.4);color:rgba(255,255,255,.28)}
 
@@ -217,9 +219,9 @@
     .modal-bg.active .modal-card{transform:translateY(0) scale(1);opacity:1}
     @media(max-width:720px){.modal-card{grid-template-columns:1fr;min-height:auto;max-width:480px}.modal-aside{display:none}}
     .modal-form{padding:clamp(28px,4vw,44px)}
-    .modal-aside{position:relative;overflow:hidden;background:linear-gradient(160deg,#0F2970 0%,#143797 45%,#0A1B49 100%)}
+    .modal-aside{position:relative;overflow:hidden;background:linear-gradient(160deg,#3D1A0A 0%,#7A2A10 45%,#1A0906 100%)}
     .modal-aside-bg{position:absolute;inset:0;background:
-      radial-gradient(circle at 20% 10%,rgba(92,128,227,.4) 0%,transparent 50%),
+      radial-gradient(circle at 20% 10%,rgba(255,140,90,.4) 0%,transparent 50%),
       radial-gradient(circle at 80% 80%,rgba(43,89,54,.25) 0%,transparent 50%),
       linear-gradient(transparent 0,transparent calc(100% - 1px),rgba(255,255,255,.04) 100%) 0 0/24px 24px,
       linear-gradient(90deg,transparent 0,transparent calc(100% - 1px),rgba(255,255,255,.04) 100%) 0 0/24px 24px;
@@ -234,14 +236,14 @@
     .modal-close:hover{background:rgba(255,255,255,.12);color:#fff;transform:rotate(90deg)}
     .modal-input{width:100%;background:rgba(255,255,255,.04);border:1px solid var(--border);border-radius:12px;padding:14px 16px;color:#fff;font-family:'Inter',sans-serif;font-weight:500;font-size:14px;outline:none;transition:border-color .2s ease,background .2s ease,box-shadow .2s ease}
     .modal-input::placeholder{color:rgba(255,255,255,.32)}
-    .modal-input:focus{border-color:var(--primary-400);background:rgba(255,255,255,.06);box-shadow:0 0 0 3px rgba(29,78,216,.18)}
+    .modal-input:focus{border-color:var(--primary-400);background:rgba(255,255,255,.06);box-shadow:0 0 0 3px rgba(255,90,31,.18)}
     .modal-link{background:none;border:none;color:var(--primary-400);font-family:'Inter',sans-serif;font-weight:500;font-size:13px;cursor:pointer;padding:0;text-decoration:none;transition:color .15s ease}
-    .modal-link:hover{color:#93AAEC;text-decoration:underline}
+    .modal-link:hover{color:#FF8C5A;text-decoration:underline}
     /* Custom checkbox — "Remember me" */
     .chm-check{display:inline-flex;align-items:center;gap:8px;cursor:pointer;user-select:none;font-size:12px;color:rgba(255,255,255,.72);font-family:'Inter',sans-serif;font-weight:500}
     .chm-check input{position:absolute;opacity:0;pointer-events:none}
     .chm-check .chm-check-box{width:16px;height:16px;border-radius:5px;border:1.5px solid rgba(255,255,255,.22);background:rgba(255,255,255,.04);display:inline-flex;align-items:center;justify-content:center;color:transparent;transition:all .18s var(--ease);flex-shrink:0}
-    .chm-check input:checked ~ .chm-check-box{background:linear-gradient(180deg,#2A5BE8,#1D4ED8 60%,#143797);border-color:#1D4ED8;color:#fff;box-shadow:inset 0 1px 1px rgba(255,255,255,.25),0 2px 6px -1px rgba(29,78,216,.55)}
+    .chm-check input:checked ~ .chm-check-box{background:linear-gradient(180deg,#FF7840,#FF5A1F 60%,#C44610);border-color:#FF5A1F;color:#000;box-shadow:inset 0 1px 1px rgba(255,255,255,.3),0 2px 6px -1px rgba(255,90,31,.55)}
     .chm-check:hover .chm-check-box{border-color:rgba(255,255,255,.36)}
     .chm-check input:focus-visible ~ .chm-check-box{outline:2px solid var(--primary-400);outline-offset:2px}
     .chm-check:hover .chm-check-label{color:#fff}
@@ -255,7 +257,7 @@
 
     /* ── Breathing hero halo ── */
     .hero-halo{position:absolute;pointer-events:none;z-index:0;border-radius:50%;filter:blur(120px);animation:breathe 6s ease-in-out infinite}
-    .hero-halo.a{width:520px;height:520px;top:-120px;left:-120px;background:radial-gradient(circle,rgba(29,78,216,.3),transparent 70%)}
+    .hero-halo.a{width:520px;height:520px;top:-120px;left:-120px;background:radial-gradient(circle,rgba(255,90,31,.3),transparent 70%)}
     .hero-halo.b{width:420px;height:420px;bottom:-80px;right:-80px;background:radial-gradient(circle,rgba(82,37,37,.22),transparent 70%);animation-delay:3s}
     .hero-halo.c{width:320px;height:320px;top:40%;left:45%;background:radial-gradient(circle,rgba(43,89,54,.18),transparent 70%);animation-delay:1.5s}
     @keyframes breathe{0%,100%{transform:scale(1);opacity:.6}50%{transform:scale(1.08);opacity:1}}
@@ -279,7 +281,7 @@
     html.light h1,html.light h2,html.light h3,html.light h4,
     html.light .logo-mark,html.light .stat-num,html.light .stat-card-value,
     html.light .price-amt,html.light .promo-label{color:#0A0A0A!important}
-    html.light .t-h1 em,html.light .t-h2 em{color:#1D4ED8!important}
+    html.light .t-h1 em,html.light .t-h2 em{color:#FF5A1F!important}
     html.light .t-body,html.light .t-body-lg,html.light .t-lead{color:rgba(10,10,10,.68)!important}
     html.light .t-meta,html.light .t-eyebrow,html.light .stat-label,
     html.light .price-name,html.light .promo-meta{color:rgba(10,10,10,.52)!important}
@@ -298,9 +300,9 @@
     html.light .feature-card .shell-inner,
     html.light .price-card,
     html.light .faq-item .shell-inner{background:rgba(255,255,255,.94)!important;border-color:rgba(0,0,0,.08)!important}
-    html.light .price-popular{background:linear-gradient(180deg,rgba(29,78,216,.1) 0%,rgba(255,255,255,.95) 60%)!important;border-color:rgba(29,78,216,.35)!important;box-shadow:0 2px 4px rgba(0,0,0,.06),0 25px 50px -12px rgba(29,78,216,.18),inset 0 1px 1px rgba(255,255,255,.9)}
-    html.light .price-popular .price-name{color:#1D4ED8!important}
-    html.light .price-popular .price-amt{color:#1D4ED8!important}
+    html.light .price-popular{background:linear-gradient(180deg,rgba(255,90,31,.1) 0%,rgba(255,255,255,.95) 60%)!important;border-color:rgba(255,90,31,.35)!important;box-shadow:0 2px 4px rgba(0,0,0,.06),0 25px 50px -12px rgba(255,90,31,.18),inset 0 1px 1px rgba(255,255,255,.9)}
+    html.light .price-popular .price-name{color:#FF5A1F!important}
+    html.light .price-popular .price-amt{color:#FF5A1F!important}
     html.light .price-popular *{color:rgba(10,10,10,.86)!important}
     html.light .price-popular .pill-primary{color:#fff!important}
 
@@ -316,9 +318,9 @@
 
     /* Steps / badges / misc */
     html.light .rule{background:linear-gradient(90deg,transparent,rgba(0,0,0,.12),transparent)}
-    html.light .step-num{background:linear-gradient(180deg,rgba(255,255,255,.95),rgba(255,255,255,.8))!important;color:#1D4ED8!important;box-shadow:inset 0 1px 1px rgba(255,255,255,.95),inset 0 -2px 6px rgba(0,0,0,.05),0 8px 24px -6px rgba(0,0,0,.15)}
-    html.light .step-line{background:linear-gradient(90deg,transparent,rgba(29,78,216,.4),rgba(92,128,227,.2),transparent)}
-    html.light .popular-badge{box-shadow:inset 0 1px 1px rgba(255,255,255,.35),inset 0 -1px 3px rgba(0,0,0,.4),0 4px 12px rgba(29,78,216,.4),0 6px 14px -4px rgba(0,0,0,.2)}
+    html.light .step-num{background:linear-gradient(180deg,rgba(255,255,255,.95),rgba(255,255,255,.8))!important;color:#FF5A1F!important;box-shadow:inset 0 1px 1px rgba(255,255,255,.95),inset 0 -2px 6px rgba(0,0,0,.05),0 8px 24px -6px rgba(0,0,0,.15)}
+    html.light .step-line{background:linear-gradient(90deg,transparent,rgba(255,90,31,.4),rgba(255,140,90,.2),transparent)}
+    html.light .popular-badge{box-shadow:inset 0 1px 1px rgba(255,255,255,.35),inset 0 -1px 3px rgba(0,0,0,.4),0 4px 12px rgba(255,90,31,.4),0 6px 14px -4px rgba(0,0,0,.2)}
     html.light .eyebrow-badge{background:rgba(255,255,255,.92)!important;border-color:rgba(0,0,0,.08)!important}
     html.light .tick{background:rgba(43,89,54,.14)!important;color:#2B5936!important}
     html.light .tick.off{background:rgba(82,37,37,.14)!important;color:rgba(10,10,10,.28)!important}
@@ -423,8 +425,8 @@
           </div>
           <div class="grid grid-cols-3 gap-3">
             <div class="term-tile"><div class="t-meta">BTC/USDT</div><div class="mono" style="font-size:15px;color:#86efac;margin-top:4px">+5.2%</div></div>
-            <div class="term-tile"><div class="t-meta">Win Rate</div><div class="mono" style="font-size:15px;color:#93AAEC;margin-top:4px">87.3%</div></div>
-            <div class="term-tile"><div class="t-meta">Сигнал</div><div class="mono" style="font-size:15px;color:#5C80E3;margin-top:4px">LONG</div></div>
+            <div class="term-tile"><div class="t-meta">Win Rate</div><div class="mono" style="font-size:15px;color:#FF8C5A;margin-top:4px">87.3%</div></div>
+            <div class="term-tile"><div class="t-meta">Сигнал</div><div class="mono" style="font-size:15px;color:#FF8C5A;margin-top:4px">LONG</div></div>
           </div>
         </div>
       </div>
@@ -471,7 +473,7 @@
     </div>
     <div class="bento">
       <div class="feature-card shell fade-up"><div class="shell-inner">
-        <div class="chip" style="background:linear-gradient(180deg,rgba(29,78,216,.3),rgba(29,78,216,.08))"><iconify-icon icon="solar:bolt-linear" style="color:#93AAEC"></iconify-icon></div>
+        <div class="chip" style="background:linear-gradient(180deg,rgba(255,90,31,.3),rgba(255,90,31,.08))"><iconify-icon icon="solar:bolt-linear" style="color:#FF8C5A"></iconify-icon></div>
         <h3 class="t-h3" data-t="f1t">AI Сканер Сигналов</h3>
         <p class="t-body" data-t="f1d">3 стратегии: SMC, Герчик, Скальпинг. Анализ рынка в реальном времени с AI-фильтрацией.</p>
       </div></div>
@@ -684,7 +686,7 @@
   <div class="container-x" style="max-width:920px">
     <div class="shell fade-up">
       <div class="shell-inner" style="padding:clamp(56px,8vw,88px) 32px;text-align:center;position:relative;overflow:hidden">
-        <div aria-hidden="true" style="position:absolute;top:-30%;right:-15%;width:420px;height:420px;background:radial-gradient(circle at center,rgba(29,78,216,.22),transparent 60%);filter:blur(60px);pointer-events:none"></div>
+        <div aria-hidden="true" style="position:absolute;top:-30%;right:-15%;width:420px;height:420px;background:radial-gradient(circle at center,rgba(255,90,31,.22),transparent 60%);filter:blur(60px);pointer-events:none"></div>
         <div aria-hidden="true" style="position:absolute;bottom:-30%;left:-15%;width:360px;height:360px;background:radial-gradient(circle at center,rgba(43,89,54,.16),transparent 60%);filter:blur(60px);pointer-events:none"></div>
         <div class="t-eyebrow" style="margin-bottom:16px;position:relative">CHM FINANCE</div>
         <h2 class="t-h2" style="position:relative" data-t="cta-title">Готов <em>начать</em>?</h2>
@@ -821,9 +823,9 @@
         <p class="t-body" style="color:rgba(255,255,255,.72);font-size:13px;margin-bottom:28px" data-t="mr-aside-sub">Подключи биржу, выбери стратегию, получай сигналы.</p>
         <ul class="modal-feats">
           <li><iconify-icon icon="solar:shield-check-bold" style="color:#66876E;font-size:18px"></iconify-icon><span data-t="mr-a-f1">API-ключи в AES-256 шифровании</span></li>
-          <li><iconify-icon icon="solar:bolt-bold" style="color:#93AAEC;font-size:18px"></iconify-icon><span data-t="mr-a-f2">Авто-торговля с trailing stop</span></li>
+          <li><iconify-icon icon="solar:bolt-bold" style="color:#FF8C5A;font-size:18px"></iconify-icon><span data-t="mr-a-f2">Авто-торговля с trailing stop</span></li>
           <li><iconify-icon icon="solar:chart-square-bold" style="color:#C8B9B9;font-size:18px"></iconify-icon><span data-t="mr-a-f3">Бэктест на исторических данных</span></li>
-          <li><iconify-icon icon="solar:wallet-bold" style="color:#5C80E3;font-size:18px"></iconify-icon><span data-t="mr-a-f4">Free-тариф без карты</span></li>
+          <li><iconify-icon icon="solar:wallet-bold" style="color:#FF8C5A;font-size:18px"></iconify-icon><span data-t="mr-a-f4">Free-тариф без карты</span></li>
         </ul>
       </div>
     </aside>
@@ -907,11 +909,11 @@
   <div style="display:flex;gap:18px;align-items:flex-start;flex-wrap:wrap">
     <div style="flex:1;min-width:240px">
       <div style="font-weight:600;font-size:14px;color:#fff;margin-bottom:6px" data-t="cc-title">Cookies &amp; конфиденциальность</div>
-      <div style="font-size:12px;line-height:1.55;color:rgba(255,255,255,.62)" data-t="cc-body">Используем только функциональные cookies (авторизация, настройки) для работы сайта. Не трекаем рекламу и поведение. Подробнее — <a href="/privacy.html" style="color:#5C80E3">Privacy Policy</a>.</div>
+      <div style="font-size:12px;line-height:1.55;color:rgba(255,255,255,.62)" data-t="cc-body">Используем только функциональные cookies (авторизация, настройки) для работы сайта. Не трекаем рекламу и поведение. Подробнее — <a href="/privacy.html" style="color:#FF8C5A">Privacy Policy</a>.</div>
     </div>
     <div style="display:flex;gap:10px;flex-shrink:0;align-items:center">
       <button type="button" onclick="setCookieConsent('declined')" style="padding:8px 16px;border-radius:9999px;border:1px solid rgba(255,255,255,.12);background:transparent;color:rgba(255,255,255,.72);cursor:pointer;font-size:12px" data-t="cc-dec">Отклонить</button>
-      <button type="button" onclick="setCookieConsent('accepted')" style="padding:8px 20px;border-radius:9999px;border:none;background:linear-gradient(180deg,#2A5BE8,#1D4ED8 60%,#143797);color:#fff;cursor:pointer;font-size:12px;font-weight:600;box-shadow:inset 0 1px 1px rgba(255,255,255,.25),0 4px 10px -2px rgba(29,78,216,.5)" data-t="cc-acc">Принять</button>
+      <button type="button" onclick="setCookieConsent('accepted')" style="padding:8px 20px;border-radius:9999px;border:none;background:linear-gradient(180deg,#FF7840,#FF5A1F 60%,#C44610);color:#fff;cursor:pointer;font-size:12px;font-weight:600;box-shadow:inset 0 1px 1px rgba(255,255,255,.25),0 4px 10px -2px rgba(255,90,31,.5)" data-t="cc-acc">Принять</button>
     </div>
   </div>
 </div>
@@ -980,7 +982,7 @@ const _s0=document.querySelector('.stat-num');if(_s0&&_s0.parentElement&&_s0.par
 const _hc=document.getElementById('heroChart');
 if(_hc&&window.Chart){
   const pts=[];let v=100;for(let i=0;i<50;i++){v+=Math.random()*6-2.5;pts.push(v)}
-  new Chart(_hc,{type:'line',data:{labels:pts.map((_,i)=>i),datasets:[{data:pts,borderColor:'#5C80E3',backgroundColor:'rgba(29,78,216,.12)',fill:true,tension:.4,pointRadius:0,borderWidth:2}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{enabled:false}},scales:{x:{display:false},y:{display:false}}}});
+  new Chart(_hc,{type:'line',data:{labels:pts.map((_,i)=>i),datasets:[{data:pts,borderColor:'#FF8C5A',backgroundColor:'rgba(255,90,31,.12)',fill:true,tension:.4,pointRadius:0,borderWidth:2}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{enabled:false}},scales:{x:{display:false},y:{display:false}}}});
 }
 
 // ── Particle canvas (dot-matrix, breathing, pointer drift) ──
@@ -1162,7 +1164,7 @@ const TR={
   'stat-e':{ru:'Биржи',en:'Exchanges'},'stat-v':{ru:'$M+ Объём',en:'$M+ Volume'},
   'stat-disc':{ru:'¹ Метрика точности рассчитана на исторических данных (backtest) за период 2023–2025 на парах BTC/USDT и ETH/USDT. Прошлые результаты не гарантируют будущей доходности. Торговля криптовалютами связана с высоким риском потери капитала — см. <a href="/risk.html" class="text-white/60 hover:text-white underline">Disclosure of Risk</a>.',en:'¹ Accuracy is calculated on historical backtests (2023–2025) on BTC/USDT and ETH/USDT pairs. Past performance is not indicative of future results. Crypto trading carries a high risk of capital loss — see <a href="/risk.html" class="text-white/60 hover:text-white underline">Disclosure of Risk</a>.'},
   'cc-title':{ru:'Cookies &amp; конфиденциальность',en:'Cookies &amp; privacy',es:'Cookies y privacidad',tr:'Çerezler ve gizlilik',id:'Cookies &amp; privasi'},
-  'cc-body':{ru:'Используем только функциональные cookies (авторизация, настройки) для работы сайта. Не трекаем рекламу и поведение. Подробнее — <a href="/privacy.html" style="color:#5C80E3">Privacy Policy</a>.',en:'We only use functional cookies (auth, settings) to run the site. No advertising or behavioural tracking. See <a href="/privacy.html" style="color:#5C80E3">Privacy Policy</a>.'},
+  'cc-body':{ru:'Используем только функциональные cookies (авторизация, настройки) для работы сайта. Не трекаем рекламу и поведение. Подробнее — <a href="/privacy.html" style="color:#FF8C5A">Privacy Policy</a>.',en:'We only use functional cookies (auth, settings) to run the site. No advertising or behavioural tracking. See <a href="/privacy.html" style="color:#FF8C5A">Privacy Policy</a>.'},
   'cc-dec':{ru:'Отклонить',en:'Decline'},
   'cc-acc':{ru:'Принять',en:'Accept'},
   'ex-title':{ru:'Поддерживаемые биржи',en:'Supported Exchanges'},
@@ -1277,7 +1279,7 @@ window.Promos=(function(){
     grid.innerHTML=ITEMS.map((it)=>{
       return `<a href="${it.link}" target="_blank" rel="noopener" class="promo-wrap" data-src="assets/promo/${resolveFile(it,lang)}" data-title="${it.label[lang]}">
         <div class="shell"><div class="shell-inner">
-          <div class="promo-stage" style="aspect-ratio:800/1100;display:flex;align-items:center;justify-content:center;background:linear-gradient(180deg,rgba(29,78,216,.08),rgba(29,78,216,.02));border-radius:inherit">
+          <div class="promo-stage" style="aspect-ratio:800/1100;display:flex;align-items:center;justify-content:center;background:linear-gradient(180deg,rgba(255,90,31,.08),rgba(255,90,31,.02));border-radius:inherit">
             <div style="text-align:center;opacity:.5"><div style="font-size:28px;margin-bottom:6px">📱</div><div style="font-size:11px;letter-spacing:.2em;color:rgba(255,255,255,.6)">${it.label[lang].toUpperCase()}</div></div>
           </div>
         </div></div>
