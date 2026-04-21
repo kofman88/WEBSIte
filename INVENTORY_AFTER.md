@@ -1,5 +1,5 @@
 # INVENTORY — frontend HTML
-Generated 2026-04-21T19:33:21.923Z
+Generated 2026-04-21T19:49:08.797Z
 
 
 ## about.html
@@ -132,8 +132,8 @@ document.getElementById(`
 
 ## api-docs.html
 
-- size: 11808 bytes
-- sha256: f18652187cfecd55
+- size: 12077 bytes
+- sha256: 7f87df43eb9d6b15
 
 ### links (14)
 - href=`/` id=`` target=`` 
@@ -348,8 +348,8 @@ let currentSchema = null;          // last-lo`
 
 ## index.html
 
-- size: 107983 bytes
-- sha256: 56928296e6a2a3c2
+- size: 112613 bytes
+- sha256: ea83c84998bda6a9
 
 ### forms (5)
 - id=`loginForm` action=`` method=`get` inputs=5
@@ -377,7 +377,7 @@ let currentSchema = null;          // last-lo`
   - input name=`code` type=`text` id=`` req=``
   - button name=`` type=`submit` id=`` req=``
 
-### buttons with id/onclick/data-* (21)
+### buttons with id/onclick/data-* (23)
 - id=`langBtn` onclick=`toggleLang()` type=`` 
 - id=`themeBtn` onclick=`toggleTheme()` type=`` 
 - id=`loginBtn` onclick=`` type=`button` data-open-modal=login data-t=nav-login
@@ -397,10 +397,12 @@ let currentSchema = null;          // last-lo`
 - id=`` onclick=`` type=`button` data-open-modal=login data-t=fp-back
 - id=`` onclick=`` type=`submit` data-t=rp-btn
 - id=`` onclick=`` type=`submit` data-t=tfa-btn
+- id=`verifyResendBtn` onclick=`` type=`button` data-t=ve-resend
+- id=`` onclick=`Auth.logout()` type=`button` data-t=ve-logout
 - id=`` onclick=`setCookieConsent('declined')` type=`button` data-t=cc-dec
 - id=`` onclick=`setCookieConsent('accepted')` type=`button` data-t=cc-acc
 
-### links (40)
+### links (41)
 - href=`/` id=`` target=`` 
 - href=`#features` id=`` target=`` data-t=nav-feat
 - href=`#pricing` id=`` target=`` data-t=nav-price
@@ -433,6 +435,7 @@ let currentSchema = null;          // last-lo`
 - href=`/` id=`` target=`` 
 - href=`/` id=`` target=`` 
 - href=`/` id=`` target=`` 
+- href=`/` id=`` target=`` 
 - href=`/privacy.html` id=`` target=`` 
 - href=`#disclaimer-1` id=`` target=`` 
 - href=`#disclaimer-1` id=`` target=`` 
@@ -448,7 +451,7 @@ let currentSchema = null;          // last-lo`
 - external: `app.js`
 - external: `aura-bg.js`
 - inline: sha256=aaded92f9603ae68 bytes=402
-- inline: sha256=85a98d16980661dc bytes=34080
+- inline: sha256=550d2fa591a8150b bytes=36087
 - inline: sha256=58f58c2879c91dec bytes=32
 
 ### api-ish urls (3)
@@ -541,8 +544,8 @@ let currentSchema = null;          // last-lo`
 
 ## privacy.html
 
-- size: 14646 bytes
-- sha256: ce516efd09b01b9d
+- size: 14911 bytes
+- sha256: 79f2351fc106ae1d
 
 ### buttons with id/onclick/data-* (1)
 - id=`burger` onclick=`` type=`` 
@@ -569,8 +572,8 @@ let currentSchema = null;          // last-lo`
 
 ## risk.html
 
-- size: 15433 bytes
-- sha256: 562216ae35b43a2d
+- size: 15698 bytes
+- sha256: 0086509d0e00265e
 
 ### buttons with id/onclick/data-* (1)
 - id=`burger` onclick=`` type=`` 
@@ -739,8 +742,8 @@ let currentSchema = null;          // last-lo`
 
 ## status.html
 
-- size: 5884 bytes
-- sha256: c94a9b1865864f46
+- size: 6153 bytes
+- sha256: e2a4fb3bca79dcca
 
 ### links (5)
 - href=`/` id=`` target=`` 
@@ -760,8 +763,8 @@ let currentSchema = null;          // last-lo`
 
 ## terms.html
 
-- size: 14738 bytes
-- sha256: 5e9dc8b9ffea7161
+- size: 15003 bytes
+- sha256: fef776dd66276966
 
 ### buttons with id/onclick/data-* (1)
 - id=`burger` onclick=`` type=`` 
