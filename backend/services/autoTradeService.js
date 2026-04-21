@@ -189,7 +189,13 @@ function _openPaper(signal, bot, qty, leverage) {
       body: `Бот «${bot.name}» открыл paper-сделку @ ${round(signal.entry)}, SL ${round(signal.stopLoss)}`,
       link: '/dashboard.html',
     });
-  } catch (_e) {}
+  } catch (e) {
+    // Notifier failures must not break trade execution, but we need to
+    // know they happen (e.g. email DNS issue → investigate).
+    logger.warn('trade notifier dispatch failed', {
+      userId: bot.user_id, tradeId, err: e.message,
+    });
+  }
   return _getTrade(tradeId);
 }
 
@@ -284,7 +290,11 @@ async function _openLive(signal, bot, qty, leverage, { exchangeService }) {
       body: `Бот «${bot.name}» открыл live-сделку @ ${round(actualEntry)}, SL ${round(signal.stopLoss)}`,
       link: '/dashboard.html',
     });
-  } catch (_e) {}
+  } catch (e) {
+    logger.warn('live trade notifier dispatch failed', {
+      userId: bot.user_id, tradeId, err: e.message,
+    });
+  }
   return _getTrade(tradeId);
 }
 

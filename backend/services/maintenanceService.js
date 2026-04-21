@@ -23,7 +23,8 @@ const logger = require('../utils/logger');
 const BACKUP_DIR = path.join(path.dirname(config.databasePath || './data/chmup.db'), 'backups');
 const BACKUP_RETENTION_DAYS = 30;
 const DATA_RETENTION = {
-  audit_log: 90,
+  // audit_log is append-only (enforced by DB triggers). If archival to
+  // cold storage (S3/Glacier) is needed, add a separate archive job.
   signals: 60,
   notifications: 60,
   login_history: 180,
