@@ -1,5 +1,5 @@
 # INVENTORY — frontend HTML
-Generated 2026-04-21T19:27:55.934Z
+Generated 2026-04-21T19:33:21.923Z
 
 
 ## about.html
@@ -348,8 +348,8 @@ let currentSchema = null;          // last-lo`
 
 ## index.html
 
-- size: 107538 bytes
-- sha256: 2defd7d6af0d0bbf
+- size: 107983 bytes
+- sha256: 56928296e6a2a3c2
 
 ### forms (5)
 - id=`loginForm` action=`` method=`get` inputs=5
@@ -442,12 +442,14 @@ let currentSchema = null;          // last-lo`
 - href=`/privacy.html` id=`` target=`` 
 - href=`${it.link}` id=`` target=`_blank` data-src=assets/promo/${resolveFile(it,lang)} data-title=${it.label[lang]}
 
-### scripts (5)
+### scripts (7)
 - external: `assets/vendor/chart.umd.min.js`
 - external: `https://code.iconify.design/iconify-icon/2.1.0/iconify-icon.min.js`
 - external: `app.js`
+- external: `aura-bg.js`
 - inline: sha256=aaded92f9603ae68 bytes=402
 - inline: sha256=85a98d16980661dc bytes=34080
+- inline: sha256=58f58c2879c91dec bytes=32
 
 ### api-ish urls (3)
 - `fetch if app.js didn`

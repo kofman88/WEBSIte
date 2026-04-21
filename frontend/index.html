@@ -353,8 +353,16 @@
 </head>
 <body>
 
-<!-- Full-bleed WebGL-style background stack -->
-<canvas id="particle-canvas" aria-hidden="true"></canvas>
+<!-- Aura animated background — dot-matrix grid + orange orb sphere. -->
+<div id="aura-bg" aria-hidden="true">
+  <canvas id="aura-grid"></canvas>
+  <canvas id="aura-orb"></canvas>
+</div>
+
+<!-- Legacy full-bleed background stack — grid mask + vignette kept; native
+     particle-canvas removed (aura-bg is the replacement; its inline
+     init JS does `if(!c)return` so removal is safe). -->
+
 <div class="bg-grid" aria-hidden="true"></div>
 <div class="bg-vignette" aria-hidden="true"></div>
 
@@ -1386,5 +1394,8 @@ function toggleTheme(){
   }
 })();
 </script>
+<!-- Aura animated background: enable orb sphere, orange palette -->
+<script>window.AURA_CFG = { orb: true };</script>
+<script src="aura-bg.js" defer></script>
 </body>
 </html>
