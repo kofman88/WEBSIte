@@ -45,23 +45,47 @@ const WS_URL = (location.protocol === 'https:' ? 'wss://' : 'ws://') + location.
 })();
 
 const Auth = {
+  // "Remember me" picks the storage: localStorage (default, persists across
+  // browser restarts) vs sessionStorage (clears when the tab closes).
+  _store() {
+    try {
+      if (sessionStorage.getItem('chm_session_only') === '1') return sessionStorage;
+    } catch (_e) {}
+    return localStorage;
+  },
+  setRemember(persist) {
+    try {
+      if (persist) sessionStorage.removeItem('chm_session_only');
+      else sessionStorage.setItem('chm_session_only', '1');
+    } catch (_e) {}
+  },
   get accessToken() {
-    try { return sessionStorage.getItem('chm_imp_access') || localStorage.getItem('chm_access'); }
-    catch { return null; }
+    try {
+      return sessionStorage.getItem('chm_imp_access')
+        || localStorage.getItem('chm_access')
+        || sessionStorage.getItem('chm_access');
+    } catch { return null; }
   },
   get refreshToken() {
     // Impersonation tokens don't get a refresh — once they expire (30m)
     // the tab just falls out of auth, which is what we want.
     if (sessionStorage.getItem('chm_imp_access')) return null;
-    try { return localStorage.getItem('chm_refresh'); } catch { return null; }
+    try { return localStorage.getItem('chm_refresh') || sessionStorage.getItem('chm_refresh'); }
+    catch { return null; }
   },
   get isImpersonating() {
     try { return Boolean(sessionStorage.getItem('chm_imp_access')); } catch { return false; }
   },
   setTokens({ accessToken, refreshToken }) {
+    const store = this._store();
+    const other = store === localStorage ? sessionStorage : localStorage;
     try {
-      if (accessToken) localStorage.setItem('chm_access', accessToken);
-      if (refreshToken) localStorage.setItem('chm_refresh', refreshToken);
+      other.removeItem('chm_access');
+      other.removeItem('chm_refresh');
+    } catch (_e) {}
+    try {
+      if (accessToken) store.setItem('chm_access', accessToken);
+      if (refreshToken) store.setItem('chm_refresh', refreshToken);
     } catch (_e) {}
   },
   clear() {
@@ -69,6 +93,10 @@ const Auth = {
       localStorage.removeItem('chm_access');
       localStorage.removeItem('chm_refresh');
       localStorage.removeItem('chm_user');
+      sessionStorage.removeItem('chm_access');
+      sessionStorage.removeItem('chm_refresh');
+      sessionStorage.removeItem('chm_session_only');
+      sessionStorage.removeItem('chm_user');
     } catch (_e) {}
   },
   isLoggedIn() {
@@ -84,11 +112,16 @@ const Auth = {
     location.href = '/';
   },
   get user() {
-    try { return JSON.parse(localStorage.getItem('chm_user') || 'null'); }
-    catch { return null; }
+    try {
+      const raw = localStorage.getItem('chm_user') || sessionStorage.getItem('chm_user');
+      return raw ? JSON.parse(raw) : null;
+    } catch { return null; }
   },
   setUser(u) {
-    try { localStorage.setItem('chm_user', JSON.stringify(u)); } catch (_e) {}
+    const store = this._store();
+    const other = store === localStorage ? sessionStorage : localStorage;
+    try { other.removeItem('chm_user'); } catch (_e) {}
+    try { store.setItem('chm_user', JSON.stringify(u)); } catch (_e) {}
   },
   requireAuth() {
     if (!this.isLoggedIn()) {
