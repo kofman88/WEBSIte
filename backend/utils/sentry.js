@@ -30,7 +30,7 @@ let enabled = false;
     Sentry.init({
       dsn: config.sentryDsn,
       environment: config.isProd ? 'production' : (process.env.NODE_ENV || 'development'),
-      release: process.env.BUILD_SHA || process.env.GIT_SHA || require('../../package.json').version || '3.0.0',
+      release: process.env.BUILD_SHA || process.env.GIT_SHA || require('../package.json').version || '3.0.0',
       // 100% of ERRORS are always captured (sampleRate). Only performance
       // traces are sampled — 10% in prod, 100% in dev.
       sampleRate: 1.0,

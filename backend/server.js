@@ -152,7 +152,7 @@ app.use('/api/strategies', strategyMarketRoutes);
 // BUILD_SHA / BUILD_TIME env vars (set by CI). Fall back to package.json
 // version if not set.
 const BUILD_INFO = Object.freeze({
-  version: require('../package.json').version || '3.0.0',
+  version: require('./package.json').version || '3.0.0',
   gitSha: process.env.BUILD_SHA || process.env.GIT_SHA || 'dev',
   buildTime: process.env.BUILD_TIME || null,
   node: process.version,
