@@ -380,7 +380,7 @@ function userDetail(userId) {
     FROM refresh_tokens WHERE user_id = ? ORDER BY created_at DESC LIMIT 20
   `).all(userId);
   const logins = db.prepare(`
-    SELECT success, ip_address, user_agent, code, created_at
+    SELECT success, ip_address, user_agent, created_at
     FROM login_history WHERE user_id = ? ORDER BY created_at DESC LIMIT 30
   `).all(userId);
   const tickets = db.prepare(`
