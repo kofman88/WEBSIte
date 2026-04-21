@@ -12,7 +12,7 @@
   
   <link rel="stylesheet" href="tailwind.css"/>
   <link rel="stylesheet" href="styles.css"/>
-  <style>.tab-btn{padding:8px 18px;border-radius:9999px;font-family:'Inter',sans-serif;font-size:13px;line-height:18px;font-weight:500;color:rgba(255,255,255,.62);background:transparent;border:none;cursor:pointer;transition:color .15s ease,background .15s ease}.tab-btn:hover{color:#fff}.tab-btn.active{background:linear-gradient(180deg,#2A5BE8 0%,#1D4ED8 60%,#143797 100%);color:#fff;box-shadow:inset 0 1px 1px rgba(255,255,255,.25),inset 0 -1px 2px rgba(0,0,0,.4),0 4px 10px -2px rgba(29,78,216,.5)}.tab-content{display:none}.tab-content.active{display:block}</style>
+  <style>.tab-btn{padding:8px 18px;border-radius:9999px;font-family:'Inter',sans-serif;font-size:13px;line-height:18px;font-weight:500;color:rgba(255,255,255,.62);background:transparent;border:none;cursor:pointer;transition:color .15s ease,background .15s ease}.tab-btn:hover{color:#fff}.tab-btn.active{background:linear-gradient(180deg,#FF7840 0%,#FF5A1F 60%,#C44610 100%);color:#fff;box-shadow:inset 0 1px 1px rgba(255,255,255,.25),inset 0 -1px 2px rgba(0,0,0,.4),0 4px 10px -2px rgba(255,90,31,.5)}.tab-content{display:none}.tab-content.active{display:block}</style>
 </head>
 <body>
 <aside class="sidebar" id="sidebar">
@@ -76,7 +76,7 @@
       </p>
       <div class="flex items-center justify-center gap-3">
         <button onclick="switchTab('exchanges')" class="text-sm px-5 py-2.5 rounded-xl bg-indigo-500/10 border border-indigo-500/30 text-indigo-400 hover:bg-indigo-500/20">Подключить биржу</button>
-        <a href="settings.html?upgrade=pro" class="text-sm px-5 py-2.5 rounded-xl font-semibold text-white" style="background:linear-gradient(180deg,#2A5BE8 0%,#1D4ED8 60%,#143797 100%)">Оформить Pro</a>
+        <a href="settings.html?upgrade=pro" class="text-sm px-5 py-2.5 rounded-xl font-semibold text-white" style="background:linear-gradient(180deg,#FF7840 0%,#FF5A1F 60%,#C44610 100%)">Оформить Pro</a>
       </div>
     </div>
   </div>
@@ -91,7 +91,7 @@
       <div><label class="text-xs text-slate-500 block mb-1">API Key</label><input placeholder="Ваш API ключ" class="w-full bg-slate-800/50 border border-slate-700 rounded-xl px-4 py-3 text-white outline-none"/></div>
       <div><label class="text-xs text-slate-500 block mb-1">API Secret</label><input type="password" placeholder="Ваш API секрет" class="w-full bg-slate-800/50 border border-slate-700 rounded-xl px-4 py-3 text-white outline-none"/></div>
       <div class="p-3 bg-yellow-500/5 border border-yellow-500/20 rounded-xl text-xs text-yellow-400">Используйте ключи только для чтения + торговли. Не давайте права на вывод средств.</div>
-      <button type="button" onclick="Toast.success('Биржа подключена!');document.getElementById('exModal').style.display='none'" class="w-full py-3 rounded-xl font-semibold text-white" style="background:linear-gradient(180deg,#2A5BE8 0%,#1D4ED8 60%,#143797 100%);box-shadow:inset 0 1px 1px rgba(255,255,255,.28),inset 0 -1px 3px rgba(0,0,0,.6),0 4px 8px -2px rgba(0,0,0,.6),0 0 0 1px rgba(29,78,216,.35)">Подключить</button>
+      <button type="button" onclick="Toast.success('Биржа подключена!');document.getElementById('exModal').style.display='none'" class="w-full py-3 rounded-xl font-semibold text-white" style="background:linear-gradient(180deg,#FF7840 0%,#FF5A1F 60%,#C44610 100%);box-shadow:inset 0 1px 1px rgba(255,255,255,.28),inset 0 -1px 3px rgba(0,0,0,.6),0 4px 8px -2px rgba(0,0,0,.6),0 0 0 1px rgba(255,90,31,.35)">Подключить</button>
     </form>
   </div>
 </div>

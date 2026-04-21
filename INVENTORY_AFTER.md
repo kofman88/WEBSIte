@@ -1,5 +1,5 @@
 # INVENTORY — frontend HTML
-Generated 2026-04-21T18:58:55.887Z
+Generated 2026-04-21T19:00:10.071Z
 
 
 ## about.html
@@ -32,7 +32,7 @@ Generated 2026-04-21T18:58:55.887Z
 ## admin.html
 
 - size: 29940 bytes
-- sha256: 3dc67af6c7ffa140
+- sha256: 1ed4fc147de2738f
 
 ### forms (2)
 - id=`promoForm` action=`` method=`get` inputs=5
@@ -88,7 +88,7 @@ Generated 2026-04-21T18:58:55.887Z
 ## analytics.html
 
 - size: 21898 bytes
-- sha256: 0b6662843e2044f5
+- sha256: 24e280d8a1eff3a4
 
 ### buttons with id/onclick/data-* (11)
 - id=`` onclick=`Auth.logout()` type=`` 
@@ -117,7 +117,7 @@ Generated 2026-04-21T18:58:55.887Z
 - external: `assets/vendor/chart.umd.min.js`
 - external: `app.js`
 - external: `shell.js?v=6`
-- inline: sha256=ca27326ad993622e bytes=11790
+- inline: sha256=a5315e6f788446c5 bytes=11790
 
 ### api-ish urls (4)
 - `fetch + blob download trick.
@@ -178,7 +178,7 @@ document.getElementById(`
 ## backtests.html
 
 - size: 11782 bytes
-- sha256: b2c5dd7e2cf242e5
+- sha256: 1dfa0011196d7237
 
 ### forms (1)
 - id=`btForm` action=`` method=`get` inputs=6
@@ -209,12 +209,12 @@ document.getElementById(`
 - external: `assets/vendor/chart.umd.min.js`
 - external: `app.js`
 - external: `shell.js?v=6`
-- inline: sha256=b61c0934f1018b16 bytes=5523
+- inline: sha256=d3ca365b83779ac9 bytes=5523
 
 ## bots.html
 
 - size: 66253 bytes
-- sha256: e4b8a752f9b4b777
+- sha256: cd68910b2b955b71
 
 ### forms (2)
 - id=`createBotForm` action=`` method=`get` inputs=24
@@ -295,7 +295,7 @@ document.getElementById(`
 ### scripts (3)
 - external: `app.js`
 - external: `shell.js?v=6`
-- inline: sha256=26c6f56885c0380d bytes=27171
+- inline: sha256=6c7ea39f0cc2bade bytes=27171
 
 ### api-ish urls (2)
 - `/api/bots/strategy-schema/:key) ──
@@ -306,7 +306,7 @@ let currentSchema = null;          // last-lo`
 ## dashboard.html
 
 - size: 39962 bytes
-- sha256: 47c2fd1884807bb1
+- sha256: 58071d4ba5ed2fae
 
 ### buttons with id/onclick/data-* (10)
 - id=`` onclick=`Auth.logout()` type=`` 
@@ -337,7 +337,7 @@ let currentSchema = null;          // last-lo`
 - external: `app.js`
 - external: `shell.js?v=6`
 - external: `onboarding.js`
-- inline: sha256=ec89af3badc3486b bytes=22758
+- inline: sha256=cc06b50591492e29 bytes=22758
 
 ### api-ish urls (2)
 - `/api/health/deep`
@@ -454,7 +454,7 @@ let currentSchema = null;          // last-lo`
 ## leaderboard.html
 
 - size: 7649 bytes
-- sha256: 7c4e490adc6fd6db
+- sha256: 24ce75c5b3a4d549
 
 ### buttons with id/onclick/data-* (5)
 - id=`` onclick=`` type=`` data-period=30d
@@ -479,7 +479,7 @@ let currentSchema = null;          // last-lo`
 ## market.html
 
 - size: 8194 bytes
-- sha256: 774285eaef593644
+- sha256: 8a6996a0d30d9cbe
 
 ### forms (1)
 - id=`mkPubForm` action=`` method=`get` inputs=6
@@ -589,7 +589,7 @@ let currentSchema = null;          // last-lo`
 ## settings.html
 
 - size: 66064 bytes
-- sha256: 0a01fad25e93520f
+- sha256: e58667d5a0369a3c
 
 ### forms (5)
 - id=`` action=`` method=`get` inputs=2
@@ -700,7 +700,7 @@ let currentSchema = null;          // last-lo`
 ## signals.html
 
 - size: 14258 bytes
-- sha256: 238bb31f33c60212
+- sha256: 17aa4d113679b484
 
 ### buttons with id/onclick/data-* (9)
 - id=`` onclick=`Auth.logout()` type=`` 
@@ -728,7 +728,7 @@ let currentSchema = null;          // last-lo`
 - external: `assets/vendor/chart.umd.min.js`
 - external: `app.js`
 - external: `shell.js?v=6`
-- inline: sha256=c0cdb6168bb3847b bytes=7428
+- inline: sha256=28a447cc48510e2c bytes=7428
 
 ## status.html
 
@@ -780,7 +780,7 @@ let currentSchema = null;          // last-lo`
 ## u.html
 
 - size: 7346 bytes
-- sha256: 237bb445b23eb0e0
+- sha256: f178cdc61650e9e7
 
 ### links (5)
 - href=`/` id=`` target=`` 
@@ -796,7 +796,7 @@ let currentSchema = null;          // last-lo`
 ## wallet.html
 
 - size: 16245 bytes
-- sha256: 13d1630e54d86d27
+- sha256: 2c46b20e9d2146f2
 
 ### forms (1)
 - id=`` action=`` method=`get` inputs=2
