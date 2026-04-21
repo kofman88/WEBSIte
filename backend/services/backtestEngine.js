@@ -79,6 +79,37 @@ async function runBacktest(backtestId) {
 
     const perSymbol = {};
 
+    // Batch-persist fills to DB every N to keep heap bounded on long runs
+    // (365d × 10 symbols of a high-freq strategy can produce 50k+ trades).
+    const FLUSH_EVERY = 500;
+    let totalTradesFlushed = 0;
+    // Clear any prior rows for this backtest upfront so batch INSERTs are additive
+    db.prepare('DELETE FROM backtest_trades WHERE backtest_id = ?').run(backtestId);
+    const insTrade = db.prepare(`
+      INSERT INTO backtest_trades
+        (backtest_id, symbol, side, entry_time, entry_price, exit_time, exit_price,
+         quantity, stop_loss, take_profit_1, take_profit_2, take_profit_3,
+         pnl_pct, pnl_usd, close_reason, equity_after)
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+    `);
+    const flushTrades = () => {
+      if (!allTrades.length) return;
+      const batch = allTrades.splice(0, allTrades.length);
+      const tx = db.transaction(() => {
+        for (const t of batch) {
+          insTrade.run(
+            backtestId, t.symbol, t.side,
+            new Date(t.entryTime).toISOString(), t.entryPrice,
+            new Date(t.exitTime).toISOString(), t.exitPrice,
+            t.quantity, t.stopLoss, t.tp1, t.tp2, t.tp3,
+            t.pnlPct, t.pnl, t.closeReason, t.equityAfter,
+          );
+        }
+      });
+      tx();
+      totalTradesFlushed += batch.length;
+    };
+
     for (let si = 0; si < symbols.length; si++) {
       const symbol = symbols[si];
       logger.info('bt run: symbol', { id: backtestId, symbol });
@@ -112,6 +143,7 @@ async function runBacktest(backtestId) {
           for (const fill of result.fills) {
             equity += fill.pnl;
             allTrades.push(fill);
+            if (allTrades.length >= FLUSH_EVERY) flushTrades();
             perSymbol[symbol] = perSymbol[symbol] || { trades: 0, wins: 0, pnl: 0 };
             perSymbol[symbol].trades++;
             if (fill.pnl > 0) perSymbol[symbol].wins++;
@@ -175,6 +207,7 @@ async function runBacktest(backtestId) {
         const fill = _closePosition(pos, lastBar[4], 'timeout', lastBar[0], riskCfg);
         equity += fill.pnl;
         allTrades.push(fill);
+        if (allTrades.length >= FLUSH_EVERY) flushTrades();
         perSymbol[symbol] = perSymbol[symbol] || { trades: 0, wins: 0, pnl: 0 };
         perSymbol[symbol].trades++;
         if (fill.pnl > 0) perSymbol[symbol].wins++;
@@ -183,40 +216,40 @@ async function runBacktest(backtestId) {
       equityCurve.push([lastBar[0], equity]);
     }
 
+    // Final flush of any remaining in-memory trades (< FLUSH_EVERY batch size)
+    flushTrades();
+
+    // Read back full trade list for metrics — keeps heap bounded even for
+    // very long runs (we never held more than FLUSH_EVERY trades in RAM).
+    const tradesForMetrics = db.prepare(`
+      SELECT symbol, side, entry_time, entry_price, exit_time, exit_price,
+             quantity, stop_loss, take_profit_1 as tp1, take_profit_2 as tp2,
+             take_profit_3 as tp3, pnl_pct as pnlPct, pnl_usd as pnl,
+             close_reason as closeReason, equity_after as equityAfter
+      FROM backtest_trades WHERE backtest_id = ?
+      ORDER BY entry_time ASC
+    `).all(backtestId).map((r) => ({
+      ...r,
+      entryTime: new Date(r.entry_time).getTime(),
+      exitTime: new Date(r.exit_time).getTime(),
+      entryPrice: r.entry_price,
+      exitPrice: r.exit_price,
+      stopLoss: r.stop_loss,
+    }));
+
     // ── Build metrics ──
     const metrics = _buildMetrics({
-      capital, equity, equityCurve, allTrades, perSymbol,
+      capital, equity, equityCurve, allTrades: tradesForMetrics, perSymbol,
       maxDrawdownPct, maxDrawdownUsd,
     });
 
-    // Persist results + backtest_trades
-    const tx = db.transaction(() => {
-      db.prepare('DELETE FROM backtest_trades WHERE backtest_id = ?').run(backtestId);
-      const ins = db.prepare(`
-        INSERT INTO backtest_trades
-          (backtest_id, symbol, side, entry_time, entry_price, exit_time, exit_price,
-           quantity, stop_loss, take_profit_1, take_profit_2, take_profit_3,
-           pnl_pct, pnl_usd, close_reason, equity_after)
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-      `);
-      for (const t of allTrades) {
-        ins.run(
-          backtestId, t.symbol, t.side,
-          new Date(t.entryTime).toISOString(), t.entryPrice,
-          new Date(t.exitTime).toISOString(), t.exitPrice,
-          t.quantity, t.stopLoss, t.tp1, t.tp2, t.tp3,
-          t.pnlPct, t.pnl, t.closeReason, t.equityAfter,
-        );
-      }
-      db.prepare(`
-        UPDATE backtests
-        SET status='completed', progress_pct=100, results=?, duration_ms=?, completed_at=CURRENT_TIMESTAMP
-        WHERE id=?
-      `).run(JSON.stringify(metrics), Date.now() - startTime, backtestId);
-    });
-    tx();
+    db.prepare(`
+      UPDATE backtests
+      SET status='completed', progress_pct=100, results=?, duration_ms=?, completed_at=CURRENT_TIMESTAMP
+      WHERE id=?
+    `).run(JSON.stringify(metrics), Date.now() - startTime, backtestId);
 
-    logger.info('bt done', { id: backtestId, trades: allTrades.length, pnl: metrics.totalPnlUsd });
+    logger.info('bt done', { id: backtestId, trades: totalTradesFlushed, pnl: metrics.totalPnlUsd });
     return metrics;
   } catch (err) {
     logger.error('bt failed', { id: backtestId, err: err.message, stack: err.stack });

@@ -645,6 +645,18 @@ db.exec(`
   CREATE INDEX IF NOT EXISTS idx_audit_action ON audit_log(action, created_at DESC);
   CREATE INDEX IF NOT EXISTS idx_audit_entity ON audit_log(entity_type, entity_id);
 
+  -- Audit log is append-only: compliance + forensics require that entries
+  -- never change after creation. These triggers block UPDATE and DELETE at
+  -- the engine level. Maintenance-driven retention (runRetention) runs with
+  -- PRAGMA defer_foreign_keys=0 and must DROP+recreate the table if archival
+  -- requires deletion — otherwise use a separate archival table.
+  CREATE TRIGGER IF NOT EXISTS trg_audit_log_no_update
+    BEFORE UPDATE ON audit_log
+    BEGIN SELECT RAISE(FAIL, 'audit_log is append-only'); END;
+  CREATE TRIGGER IF NOT EXISTS trg_audit_log_no_delete
+    BEFORE DELETE ON audit_log
+    BEGIN SELECT RAISE(FAIL, 'audit_log is append-only'); END;
+
   CREATE INDEX IF NOT EXISTS idx_wallet_tx_user ON wallet_transactions(user_id, created_at DESC);
   CREATE INDEX IF NOT EXISTS idx_users_admin_role ON users(admin_role) WHERE admin_role IS NOT NULL;
   CREATE INDEX IF NOT EXISTS idx_wallet_tx_status ON wallet_transactions(status, type);

@@ -61,18 +61,24 @@ async function handleAlert(botId, payload, { exchangeService, marketData, signat
   if (!bot) { const e = new Error('Bot not found'); e.statusCode = 404; throw e; }
   if (!bot.tv_webhook_secret) { const e = new Error('Webhook not configured — rotate secret in bot settings'); e.statusCode = 400; throw e; }
 
-  // Prefer HMAC header signature (constant-time compare). Fall back to the
-  // payload-embedded `secret` for TV alerts that can't compute HMAC.
+  // Prefer HMAC header signature (constant-time compare). Legacy body-secret
+  // path is accepted only if explicitly opted-in via TV_ALLOW_BODY_SECRET=1,
+  // because the secret then shows up in request logs, proxy access logs,
+  // and Sentry breadcrumbs — a real leak risk.
   const hdrSig = (signatureHeader || '').replace(/^sha256=/, '').trim();
   if (hdrSig) {
     const expected = crypto.createHmac('sha256', bot.tv_webhook_secret).update(String(rawBody || '')).digest('hex');
     const ok = hdrSig.length === expected.length
       && crypto.timingSafeEqual(Buffer.from(hdrSig, 'hex'), Buffer.from(expected, 'hex'));
     if (!ok) { const e = new Error('Invalid HMAC signature'); e.statusCode = 401; e.code = 'INVALID_SIGNATURE'; throw e; }
-  } else {
+  } else if (process.env.TV_ALLOW_BODY_SECRET === '1') {
+    logger.warn('tv webhook: legacy body-secret used — migrate to X-CHM-Signature', { botId });
     if (!payload || payload.secret !== bot.tv_webhook_secret) {
       const e = new Error('Invalid webhook secret'); e.statusCode = 401; e.code = 'INVALID_SIGNATURE'; throw e;
     }
+  } else {
+    const e = new Error('Missing X-CHM-Signature header (legacy body-secret auth disabled)');
+    e.statusCode = 401; e.code = 'SIGNATURE_REQUIRED'; throw e;
   }
   if (!bot.is_active) {
     logger.info('tv webhook ignored — bot inactive', { botId });

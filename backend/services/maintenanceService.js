@@ -23,7 +23,8 @@ const logger = require('../utils/logger');
 const BACKUP_DIR = path.join(path.dirname(config.databasePath || './data/chmup.db'), 'backups');
 const BACKUP_RETENTION_DAYS = 30;
 const DATA_RETENTION = {
-  audit_log: 90,
+  // audit_log is append-only (enforced by DB triggers). If archival to
+  // cold storage (S3/Glacier) is needed, add a separate archive job.
   signals: 60,
   notifications: 60,
   login_history: 180,
@@ -33,6 +34,7 @@ const DATA_RETENTION = {
 
 let _backupTimer = null;
 let _retentionTimer = null;
+let _registryTimer = null;
 
 function _ensureDir() {
   try { fs.mkdirSync(BACKUP_DIR, { recursive: true }); } catch (_e) {}
@@ -93,12 +95,22 @@ function start() {
   setTimeout(() => { runBackup().catch(() => {}); runRetention(); }, 60_000);
   _backupTimer = setInterval(() => { runBackup().catch(() => {}); }, 24 * 60 * 60 * 1000);
   _retentionTimer = setInterval(runRetention, 24 * 60 * 60 * 1000);
+  // Signal-registry dedup cleanup — hourly. Scanner does this per-cycle too,
+  // but if the scanner bottlenecks or crashes the table grows unbounded.
+  _registryTimer = setInterval(() => {
+    try {
+      const registry = require('./signalRegistry');
+      const n = registry.cleanupExpired();
+      if (n > 0) logger.debug('registry hourly cleanup', { removed: n });
+    } catch (e) { logger.warn('registry hourly cleanup failed', { err: e.message }); }
+  }, 60 * 60 * 1000);
   logger.info('maintenance started', { backupDir: BACKUP_DIR });
 }
 
 function stop() {
   if (_backupTimer) { clearInterval(_backupTimer); _backupTimer = null; }
   if (_retentionTimer) { clearInterval(_retentionTimer); _retentionTimer = null; }
+  if (_registryTimer) { clearInterval(_registryTimer); _registryTimer = null; }
 }
 
 module.exports = { start, stop, runBackup, runRetention };

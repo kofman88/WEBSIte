@@ -1,0 +1,72 @@
+name: CI
+
+on:
+  push:
+    branches: [main, 'claude/**']
+  pull_request:
+    branches: [main]
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  lint-and-test:
+    name: Lint + test
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    defaults:
+      run:
+        working-directory: backend
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+          cache-dependency-path: backend/package-lock.json
+
+      - name: Install deps
+        run: npm ci --prefer-offline --no-audit
+
+      - name: Lint
+        # ESLint reports but does not fail the build while the codebase is
+        # migrating. Flip to `run: npm run lint` when warnings are cleared.
+        run: npm run lint || echo "lint warnings — not blocking yet"
+
+      - name: Test
+        env:
+          NODE_ENV: test
+          JWT_SECRET: ci_test_jwt_secret_that_is_at_least_32_chars
+          JWT_REFRESH_SECRET: ci_test_refresh_secret_that_is_at_least_32_chars
+          WALLET_ENCRYPTION_KEY: 00112233445566778899aabbccddeeff00112233445566778899aabbccddeeff
+        run: npm run test:run -- --reporter=verbose
+
+      - name: Upload test output
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-output
+          path: |
+            backend/coverage/
+            backend/logs/
+          retention-days: 3
+          if-no-files-found: ignore
+
+  smoke:
+    name: Smoke test (optional)
+    runs-on: ubuntu-latest
+    needs: lint-and-test
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - name: Probe production
+        env:
+          SMOKE_URL: https://chmup.top
+        run: node scripts/smoke.js || echo "smoke failed — inspect logs"

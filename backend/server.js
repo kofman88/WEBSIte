@@ -94,10 +94,35 @@ app.use('/api/payments/webhooks/stripe', express.raw({ type: 'application/json',
 app.use(express.json({ limit: '1mb' }));
 app.use(express.urlencoded({ extended: true, limit: '1mb' }));
 
+// Request correlation ID — attaches req.id + req.log child logger,
+// echoes X-Request-ID back to the client. Must run BEFORE any handler
+// that might log, so trace context is always present.
+const { requestIdMiddleware } = require('./middleware/requestId');
+app.use(requestIdMiddleware);
+
+// HTTP metrics — latency histogram + request counter, labelled by method
+// and route pattern (not full path, to avoid cardinality explosions).
+const metrics = require('./utils/metrics');
+const httpLatency = metrics.histogram('chm_http_request_duration_ms',
+  'HTTP request latency (ms)',
+  { buckets: [5, 25, 50, 100, 250, 500, 1000, 2500, 5000, 10000], labelNames: ['method', 'route', 'status'] });
+const httpRequests = metrics.counter('chm_http_requests_total',
+  'Total HTTP requests', ['method', 'route', 'status']);
+app.use((req, res, next) => {
+  const start = Date.now();
+  res.on('finish', () => {
+    const route = (req.route && req.route.path) ? req.baseUrl + req.route.path : req.path.split('?')[0];
+    const labels = { method: req.method, route, status: String(res.statusCode) };
+    httpLatency.observe(labels, Date.now() - start);
+    httpRequests.inc(labels);
+  });
+  next();
+});
+
 // Request logging (skip static/health)
 app.use((req, _res, next) => {
   if (req.path.startsWith('/api/') && req.path !== '/api/health') {
-    logger.debug('→ ' + req.method + ' ' + req.path);
+    (req.log || logger).debug('→ ' + req.method + ' ' + req.path);
   }
   next();
 });
@@ -123,9 +148,59 @@ app.use('/api/push', pushRoutes);
 app.use('/api/copy', copyRoutes);
 app.use('/api/strategies', strategyMarketRoutes);
 
+// Build info — resolved once at boot. Git SHA + build time come from
+// BUILD_SHA / BUILD_TIME env vars (set by CI). Fall back to package.json
+// version if not set.
+const BUILD_INFO = Object.freeze({
+  version: require('../package.json').version || '3.0.0',
+  gitSha: process.env.BUILD_SHA || process.env.GIT_SHA || 'dev',
+  buildTime: process.env.BUILD_TIME || null,
+  node: process.version,
+  startedAt: new Date().toISOString(),
+});
+
 app.get('/api/health', (_req, res) => {
   // Lightweight liveness probe.
-  res.json({ status: 'ok', timestamp: new Date().toISOString(), version: '3.0.0' });
+  res.json({ status: 'ok', timestamp: new Date().toISOString(), version: BUILD_INFO.version });
+});
+
+// Version / build info — machine-parseable. Useful for canary detection,
+// Datadog deploy markers, monitoring dashboards.
+app.get('/api/version', (_req, res) => {
+  res.json(BUILD_INFO);
+});
+
+// Gauges refreshed from DB on each /metrics scrape. Scanner runs in a
+// worker thread (separate V8 isolate), so we can't share counters
+// directly — we read from the DB instead, which is the source of truth.
+const gActiveBots    = metrics.gauge('chm_active_bots', 'Currently active bots');
+const gOpenTrades    = metrics.gauge('chm_open_trades', 'Open (unclosed) trades');
+const gSignals24h    = metrics.gauge('chm_signals_last_24h', 'Signals produced in the last 24h');
+const gTrades24h     = metrics.gauge('chm_trades_closed_last_24h', 'Trades closed in the last 24h');
+const gUsers         = metrics.gauge('chm_users_total', 'Total registered users');
+const gPaidUsers     = metrics.gauge('chm_users_paid', 'Users on a paid plan');
+const gScannerAlive  = metrics.gauge('chm_scanner_alive', 'Scanner worker alive (1/0)');
+function refreshGauges() {
+  try {
+    gActiveBots.set(db.prepare("SELECT COUNT(*) n FROM trading_bots WHERE is_active=1").get().n);
+    gOpenTrades.set(db.prepare("SELECT COUNT(*) n FROM trades WHERE status='open'").get().n);
+    gSignals24h.set(db.prepare("SELECT COUNT(*) n FROM signals WHERE created_at >= datetime('now','-1 day')").get().n);
+    gTrades24h.set(db.prepare("SELECT COUNT(*) n FROM trades WHERE closed_at >= datetime('now','-1 day')").get().n);
+    gUsers.set(db.prepare("SELECT COUNT(*) n FROM users").get().n);
+    gPaidUsers.set(db.prepare("SELECT COUNT(*) n FROM subscriptions WHERE plan != 'free' AND status='active'").get().n);
+    gScannerAlive.set(scannerWorker ? 1 : 0);
+  } catch (_e) { /* metrics best-effort */ }
+}
+
+// Prometheus-format metrics endpoint. No auth by default; gate with
+// METRICS_TOKEN env var or put behind a private network ACL in prod.
+app.get('/metrics', (req, res) => {
+  const tok = process.env.METRICS_TOKEN;
+  if (tok && req.header('Authorization') !== 'Bearer ' + tok) {
+    return res.status(401).type('text/plain').send('unauthorized');
+  }
+  refreshGauges();
+  res.type('text/plain; version=0.0.4').send(metrics.render());
 });
 
 // Deeper readiness probe — verifies DB + background workers, reports subsystem status.
@@ -133,20 +208,30 @@ app.get('/api/health/deep', (_req, res) => {
   const out = {
     status: 'ok',
     timestamp: new Date().toISOString(),
-    version: '3.0.0',
+    version: BUILD_INFO.version,
+    gitSha: BUILD_INFO.gitSha,
     uptimeSeconds: Math.round(process.uptime()),
     memoryMb: Math.round(process.memoryUsage().rss / 1048576),
     subsystems: {},
   };
+  // DB probe — measures latency as a signal for lock contention
+  const t0 = Date.now();
   try {
     const n = db.prepare('SELECT COUNT(*) as n FROM users').get().n;
-    out.subsystems.database = { ok: true, userCount: n };
+    out.subsystems.database = { ok: true, userCount: n, latencyMs: Date.now() - t0 };
   } catch (e) {
     out.status = 'degraded'; out.subsystems.database = { ok: false, error: e.message };
   }
   out.subsystems.scanner = { ok: scannerWorker !== null || IS_TEST };
   out.subsystems.partialTp = { ok: partialTpTimer !== null || IS_TEST };
   out.subsystems.slVerifier = { ok: true };
+  // Memory health — warn if RSS > 500MB
+  if (out.memoryMb > 500) {
+    out.status = out.status === 'ok' ? 'degraded' : out.status;
+    out.subsystems.memory = { ok: false, rssMb: out.memoryMb, threshold: 500 };
+  } else {
+    out.subsystems.memory = { ok: true, rssMb: out.memoryMb };
+  }
   res.status(out.status === 'ok' ? 200 : 503).json(out);
 });
 
