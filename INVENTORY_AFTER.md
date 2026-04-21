@@ -1,11 +1,11 @@
 # INVENTORY — frontend HTML
-Generated 2026-04-21T19:07:55.367Z
+Generated 2026-04-21T19:17:39.777Z
 
 
 ## about.html
 
-- size: 16550 bytes
-- sha256: c0ba4a689ae8689e
+- size: 16739 bytes
+- sha256: cbecc0bf247d9e1e
 
 ### links (20)
 - href=`/` id=`` target=`` 
@@ -28,6 +28,9 @@ Generated 2026-04-21T19:07:55.367Z
 - href=`/terms.html` id=`` target=`` 
 - href=`/privacy.html` id=`` target=`` 
 - href=`/risk.html` id=`` target=`` 
+
+### scripts (1)
+- external: `aura-bg.js`
 
 ## admin.html
 
@@ -132,8 +135,8 @@ document.getElementById(`
 
 ## api-docs.html
 
-- size: 11619 bytes
-- sha256: 729db57cd1fe53ff
+- size: 11808 bytes
+- sha256: f18652187cfecd55
 
 ### links (14)
 - href=`/` id=`` target=`` 
@@ -150,6 +153,9 @@ document.getElementById(`
 - href=`#ratelimits` id=`` target=`` 
 - href=`mailto:support@chmup.top` id=`` target=`` 
 - href=`mailto:support@chmup.top` id=`` target=`` 
+
+### scripts (1)
+- external: `aura-bg.js`
 
 ### api-ish urls (11)
 - `/api/*</span>.</p>
@@ -345,8 +351,8 @@ let currentSchema = null;          // last-lo`
 
 ## index.html
 
-- size: 107540 bytes
-- sha256: c8a2e583a82cbb91
+- size: 107727 bytes
+- sha256: 907520d55e2cd129
 
 ### forms (5)
 - id=`loginForm` action=`` method=`get` inputs=5
@@ -439,12 +445,13 @@ let currentSchema = null;          // last-lo`
 - href=`/privacy.html` id=`` target=`` 
 - href=`${it.link}` id=`` target=`_blank` data-src=assets/promo/${resolveFile(it,lang)} data-title=${it.label[lang]}
 
-### scripts (5)
+### scripts (6)
 - external: `assets/vendor/chart.umd.min.js`
 - external: `https://code.iconify.design/iconify-icon/2.1.0/iconify-icon.min.js`
 - external: `app.js`
+- external: `aura-bg.js`
 - inline: sha256=aaded92f9603ae68 bytes=402
-- inline: sha256=04d3d1943d20f61a bytes=34082
+- inline: sha256=85a98d16980661dc bytes=34080
 
 ### api-ish urls (3)
 - `fetch if app.js didn`
@@ -536,8 +543,8 @@ let currentSchema = null;          // last-lo`
 
 ## privacy.html
 
-- size: 14457 bytes
-- sha256: 4bfd069920e64d3d
+- size: 14646 bytes
+- sha256: ce516efd09b01b9d
 
 ### buttons with id/onclick/data-* (1)
 - id=`burger` onclick=`` type=`` 
@@ -557,14 +564,15 @@ let currentSchema = null;          // last-lo`
 - href=`/privacy.html` id=`` target=`` 
 - href=`/risk.html` id=`` target=`` 
 
-### scripts (2)
+### scripts (3)
 - external: `https://unpkg.com/lucide@latest/dist/umd/lucide.min.js`
+- external: `aura-bg.js`
 - inline: sha256=1e559e961494e866 bytes=333
 
 ## risk.html
 
-- size: 15244 bytes
-- sha256: 0836011050d97a58
+- size: 15433 bytes
+- sha256: 562216ae35b43a2d
 
 ### buttons with id/onclick/data-* (1)
 - id=`burger` onclick=`` type=`` 
@@ -582,8 +590,9 @@ let currentSchema = null;          // last-lo`
 - href=`/privacy.html` id=`` target=`` 
 - href=`/risk.html` id=`` target=`` 
 
-### scripts (2)
+### scripts (3)
 - external: `https://unpkg.com/lucide@latest/dist/umd/lucide.min.js`
+- external: `aura-bg.js`
 - inline: sha256=1e559e961494e866 bytes=333
 
 ## settings.html
@@ -732,8 +741,8 @@ let currentSchema = null;          // last-lo`
 
 ## status.html
 
-- size: 5695 bytes
-- sha256: 38f665a3c5790c83
+- size: 5884 bytes
+- sha256: c94a9b1865864f46
 
 ### links (5)
 - href=`/` id=`` target=`` 
@@ -742,8 +751,9 @@ let currentSchema = null;          // last-lo`
 - href=`/api-docs.html` id=`` target=`` 
 - href=`/api/health/deep` id=`` target=`_blank` 
 
-### scripts (2)
+### scripts (3)
 - external: `app.js`
+- external: `aura-bg.js`
 - inline: sha256=8abb8271d61f02e2 bytes=2635
 
 ### api-ish urls (2)
@@ -752,8 +762,8 @@ let currentSchema = null;          // last-lo`
 
 ## terms.html
 
-- size: 14549 bytes
-- sha256: 53616d27fa0621f7
+- size: 14738 bytes
+- sha256: 5e9dc8b9ffea7161
 
 ### buttons with id/onclick/data-* (1)
 - id=`burger` onclick=`` type=`` 
@@ -773,8 +783,9 @@ let currentSchema = null;          // last-lo`
 - href=`/privacy.html` id=`` target=`` 
 - href=`/risk.html` id=`` target=`` 
 
-### scripts (2)
+### scripts (3)
 - external: `https://unpkg.com/lucide@latest/dist/umd/lucide.min.js`
+- external: `aura-bg.js`
 - inline: sha256=1e559e961494e866 bytes=333
 
 ## u.html

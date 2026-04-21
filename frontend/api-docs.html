@@ -27,6 +27,11 @@
   </style>
 </head>
 <body style="background:#0A0A0A;color:#E5E5E5;font-family:'Inter',sans-serif;min-height:100vh">
+<!-- Aura animated background -->
+<div id="aura-bg" aria-hidden="true">
+  <canvas id="aura-grid"></canvas>
+  <canvas id="aura-orb"></canvas>
+</div>
 
 <header style="border-bottom:1px solid rgba(255,255,255,.06);padding:18px 24px">
   <div style="max-width:1100px;margin:0 auto;display:flex;align-items:center;justify-content:space-between">
@@ -203,5 +208,6 @@
   </div>
 </main>
 
+<script src="aura-bg.js" defer></script>
 </body>
 </html>

@@ -102,6 +102,11 @@ a:hover{text-decoration:underline}
 </style>
 </head>
 <body>
+<!-- Aura animated background -->
+<div id="aura-bg" aria-hidden="true">
+  <canvas id="aura-grid"></canvas>
+  <canvas id="aura-orb"></canvas>
+</div>
 <nav class="nav" id="mainNav">
   <a href="/" class="nav-logo">
     <img src="/assets/img/chm-logo.jpg" alt="CHM" style="width:34px;height:34px;object-fit:contain;border-radius:6px;flex-shrink:0" onerror="this.style.display='none'">
@@ -247,5 +252,6 @@ if (burger && mobileMenu) {
   });
 }
 </script>
+<script src="aura-bg.js" defer></script>
 </body>
 </html>

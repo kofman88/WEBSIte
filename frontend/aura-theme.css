@@ -1,3 +1,31 @@
+/* ============================================
+   AURA BACKGROUND — анимированный фон (canvas)
+   Используется aura-bg.js. Не удалять правило.
+   ============================================ */
+#aura-bg {
+  position: fixed;
+  inset: 0;
+  width: 100vw;
+  height: 100vh;
+  z-index: -1;
+  pointer-events: none;
+  background: #000;
+  overflow: hidden;
+}
+#aura-bg canvas {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+#aura-bg[hidden] { display: none; }
+/* When #aura-bg is present on the page, keep body transparent so
+   the canvas is visible underneath. Any opaque body background is
+   already covered by #aura-bg's own fill. */
+body:has(> #aura-bg) { background: transparent !important; }
+/* ============================================ */
+
 /**
  * ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
  *   AURA THEME  —  CHM Finance
