@@ -1,6 +1,6 @@
 const express = require('express');
 const { z } = require('zod');
-const { authMiddleware, exchangeKeyLimiter } = require('../middleware/auth');
+const { authMiddleware, exchangeKeyLimiter, requireVerifiedEmail } = require('../middleware/auth');
 const exchangeService = require('../services/exchangeService');
 const marketData = require('../services/marketDataService');
 const validation = require('../utils/validation');
@@ -72,7 +72,7 @@ router.get('/keys', authMiddleware, (req, res, next) => {
 });
 
 // ── Authed: add a new key (verifies before save) ────────────────────────
-router.post('/keys', authMiddleware, exchangeKeyLimiter, async (req, res, next) => {
+router.post('/keys', authMiddleware, exchangeKeyLimiter, requireVerifiedEmail, async (req, res, next) => {
   try {
     const input = validation.addKeySchema.parse(req.body);
     const key = await exchangeService.addKey(req.userId, input);

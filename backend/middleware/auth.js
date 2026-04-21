@@ -91,6 +91,30 @@ function requireAdmin(req, res, next) {
   next();
 }
 
+// Block sensitive actions until the user has confirmed their email.
+// Apply AFTER authMiddleware on routes that interact with money / trading
+// (bot creation, exchange keys, payments, live trading). Admins and
+// impersonators bypass to allow support work.
+function requireVerifiedEmail(req, res, next) {
+  if (!req.userId) return res.status(401).json({ error: 'Authentication required' });
+  if (req.isAdmin || req.isImpersonating) return next();
+  const db = require('../models/database');
+  try {
+    const row = db.prepare('SELECT email_verified FROM users WHERE id = ?').get(req.userId);
+    if (!row || !row.email_verified) {
+      return res.status(403).json({
+        error: 'Email confirmation required',
+        code: 'EMAIL_NOT_VERIFIED',
+        hint: 'Подтвердите email — проверьте почту или запросите письмо заново.',
+      });
+    }
+  } catch (_e) {
+    // DB hiccup — fail-open rather than lock everyone out, but log it
+    logger.warn('requireVerifiedEmail DB lookup failed', { userId: req.userId });
+  }
+  next();
+}
+
 // ── Rate limiters ────────────────────────────────────────────────────────
 // Skip rate limiting in test env so supertest can hammer endpoints freely.
 const TESTING = process.env.NODE_ENV === 'test' || process.env.VITEST === 'true';
@@ -226,6 +250,7 @@ module.exports = {
   requireTier,
   requireFeature,
   requireAdmin,
+  requireVerifiedEmail,
   requireCapability,
   hasCapability,
   ADMIN_ROLES,
