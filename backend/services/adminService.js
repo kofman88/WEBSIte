@@ -354,7 +354,7 @@ function userDetail(userId) {
   `).get(userId);
   if (!u) { const e = new Error('User not found'); e.statusCode = 404; throw e; }
 
-  const keys = db.prepare(`SELECT id, exchange, label, verified_at, created_at FROM exchange_keys WHERE user_id = ? ORDER BY created_at DESC`).all(userId);
+  const keys = db.prepare(`SELECT id, exchange, label, last_verified_at AS verified_at, created_at FROM exchange_keys WHERE user_id = ? ORDER BY created_at DESC`).all(userId);
   const bots = db.prepare(`
     SELECT id, name, exchange, symbols, strategy, timeframe, is_active, auto_trade, trading_mode, created_at
     FROM trading_bots WHERE user_id = ? ORDER BY created_at DESC LIMIT 50
@@ -485,7 +485,8 @@ function listAllSignals({ strategy = null, limit = 100, offset = 0 } = {}) {
   const where = parts.length ? 'WHERE ' + parts.join(' AND ') : '';
   return db.prepare(`
     SELECT s.id, s.user_id, u.email AS user_email, s.symbol, s.side, s.strategy,
-           s.entry, s.tp, s.sl, s.result, s.created_at, s.expires_at
+           s.entry_price AS entry, s.take_profit_1 AS tp, s.stop_loss AS sl,
+           s.result, s.created_at, s.expires_at
     FROM signals s LEFT JOIN users u ON u.id = s.user_id
     ${where}
     ORDER BY s.created_at DESC
