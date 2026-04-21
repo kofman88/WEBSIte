@@ -49,7 +49,8 @@
     gridDepthFade:   0.35,         // затемнение к краям (0 = нет)
 
     // ---- сфера из частиц ----
-    orb: true,                     // показывать сферу? (false = только сетка)
+    orb: false,                    // по умолчанию ВЫКЛ — центр страницы не перегружается
+                                   // включить: <script>window.AURA_CFG = { orb: true };</script> перед aura-bg.js
     orbParticles:    900,          // сколько точек на сфере
     orbRadiusRatio:  0.32,         // доля от min(width, height) — размер сферы
     orbRotSpeed:     0.15,         // скорость вращения по Y
