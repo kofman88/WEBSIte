@@ -1,5 +1,5 @@
 # INVENTORY — frontend HTML
-Generated 2026-04-21T19:00:39.046Z
+Generated 2026-04-21T19:07:55.367Z
 
 
 ## about.html
@@ -31,8 +31,8 @@ Generated 2026-04-21T19:00:39.046Z
 
 ## admin.html
 
-- size: 29940 bytes
-- sha256: 1ed4fc147de2738f
+- size: 30007 bytes
+- sha256: 1fd6539a17b93b8f
 
 ### forms (2)
 - id=`promoForm` action=`` method=`get` inputs=5
@@ -87,8 +87,8 @@ Generated 2026-04-21T19:00:39.046Z
 
 ## analytics.html
 
-- size: 21898 bytes
-- sha256: 24e280d8a1eff3a4
+- size: 21965 bytes
+- sha256: a1374d89704ef03e
 
 ### buttons with id/onclick/data-* (11)
 - id=`` onclick=`Auth.logout()` type=`` 
@@ -177,8 +177,8 @@ document.getElementById(`
 
 ## backtests.html
 
-- size: 11782 bytes
-- sha256: 1dfa0011196d7237
+- size: 11849 bytes
+- sha256: b4bb702cf32435b3
 
 ### forms (1)
 - id=`btForm` action=`` method=`get` inputs=6
@@ -213,8 +213,8 @@ document.getElementById(`
 
 ## bots.html
 
-- size: 66253 bytes
-- sha256: cd68910b2b955b71
+- size: 66320 bytes
+- sha256: eee66bb2e7730eab
 
 ### forms (2)
 - id=`createBotForm` action=`` method=`get` inputs=24
@@ -305,8 +305,8 @@ let currentSchema = null;          // last-lo`
 
 ## dashboard.html
 
-- size: 39962 bytes
-- sha256: 58071d4ba5ed2fae
+- size: 40029 bytes
+- sha256: f81a299bad3037cd
 
 ### buttons with id/onclick/data-* (10)
 - id=`` onclick=`Auth.logout()` type=`` 
@@ -453,8 +453,8 @@ let currentSchema = null;          // last-lo`
 
 ## leaderboard.html
 
-- size: 7649 bytes
-- sha256: 24ce75c5b3a4d549
+- size: 7716 bytes
+- sha256: b73f36827c445d3d
 
 ### buttons with id/onclick/data-* (5)
 - id=`` onclick=`` type=`` data-period=30d
@@ -478,8 +478,8 @@ let currentSchema = null;          // last-lo`
 
 ## market.html
 
-- size: 8194 bytes
-- sha256: 8a6996a0d30d9cbe
+- size: 8261 bytes
+- sha256: b9e59d352cee4073
 
 ### forms (1)
 - id=`mkPubForm` action=`` method=`get` inputs=6
@@ -507,8 +507,8 @@ let currentSchema = null;          // last-lo`
 
 ## ops.html
 
-- size: 8002 bytes
-- sha256: 8ed9811cd5137b70
+- size: 8069 bytes
+- sha256: 820db15dd80a875c
 
 ### buttons with id/onclick/data-* (14)
 - id=`` onclick=`` type=`` data-tab=dash
@@ -588,8 +588,8 @@ let currentSchema = null;          // last-lo`
 
 ## settings.html
 
-- size: 66064 bytes
-- sha256: e58667d5a0369a3c
+- size: 66131 bytes
+- sha256: 5f2c0fd835ea0454
 
 ### forms (5)
 - id=`` action=`` method=`get` inputs=2
@@ -699,8 +699,8 @@ let currentSchema = null;          // last-lo`
 
 ## signals.html
 
-- size: 14258 bytes
-- sha256: 17aa4d113679b484
+- size: 14325 bytes
+- sha256: 3c6af4a4c92df140
 
 ### buttons with id/onclick/data-* (9)
 - id=`` onclick=`Auth.logout()` type=`` 
@@ -779,8 +779,8 @@ let currentSchema = null;          // last-lo`
 
 ## u.html
 
-- size: 7346 bytes
-- sha256: f178cdc61650e9e7
+- size: 7413 bytes
+- sha256: 9e677a6aae359c71
 
 ### links (5)
 - href=`/` id=`` target=`` 
@@ -795,8 +795,8 @@ let currentSchema = null;          // last-lo`
 
 ## wallet.html
 
-- size: 16245 bytes
-- sha256: 2c46b20e9d2146f2
+- size: 16312 bytes
+- sha256: bac7b0fcc290234f
 
 ### forms (1)
 - id=`` action=`` method=`get` inputs=2
