@@ -270,6 +270,15 @@ const API = {
   marketRate: (slug, stars) => apiRequest('POST', '/strategies/' + encodeURIComponent(slug) + '/rate', { stars }),
   marketUnpublish: (slug) => apiRequest('DELETE', '/strategies/' + encodeURIComponent(slug)),
 
+  // Dashboard v2 — advanced analytics
+  dashboardV2:        () => apiRequest('GET', '/analytics/dashboard-v2'),
+  openPositions:      () => apiRequest('GET', '/analytics/open-positions'),
+  calendarPnl:        (days = 180) => apiRequest('GET', '/analytics/calendar-pnl?days=' + days),
+  hourlyPnl:          (days = 90) => apiRequest('GET', '/analytics/hourly-pnl?days=' + days),
+  botLeaderboard:     (days = 30) => apiRequest('GET', '/analytics/bot-leaderboard?days=' + days),
+  btcBenchmark:       (days = 90) => apiRequest('GET', '/analytics/btc-benchmark?days=' + days),
+  myPercentile:       (period = '30d') => apiRequest('GET', '/analytics/percentile?period=' + period),
+
   // Bot wizard — strategy schemas + inline backtest preview
   strategySchemas:    () => apiRequest('GET', '/bots/strategy-schemas'),
   strategySchema:     (key) => apiRequest('GET', '/bots/strategy-schema/' + encodeURIComponent(key)),

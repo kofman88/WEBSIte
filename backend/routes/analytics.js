@@ -127,6 +127,54 @@ router.get('/trades', (req, res, next) => {
   } catch (err) { handleErr(err, res, next); }
 });
 
+// ── Dashboard v2 — advanced metrics aggregate ─────────────────────────
+const adv = require('../services/advancedAnalytics');
+
+router.get('/dashboard-v2', (req, res, next) => {
+  try { res.json(adv.dashboardStats(req.userId)); }
+  catch (err) { handleErr(err, res, next); }
+});
+
+router.get('/open-positions', (req, res, next) => {
+  try { res.json({ positions: adv.openPositions(req.userId), riskExposure: adv.riskExposure(req.userId) }); }
+  catch (err) { handleErr(err, res, next); }
+});
+
+router.get('/calendar-pnl', (req, res, next) => {
+  try {
+    const q = z.object({ days: z.coerce.number().int().min(7).max(365).default(180) }).parse(req.query);
+    res.json({ days: q.days, points: adv.calendarPnl(req.userId, q) });
+  } catch (err) { handleErr(err, res, next); }
+});
+
+router.get('/hourly-pnl', (req, res, next) => {
+  try {
+    const q = z.object({ days: z.coerce.number().int().min(7).max(365).default(90) }).parse(req.query);
+    res.json({ days: q.days, hours: adv.hourlyPnl(req.userId, q) });
+  } catch (err) { handleErr(err, res, next); }
+});
+
+router.get('/bot-leaderboard', (req, res, next) => {
+  try {
+    const q = z.object({ days: z.coerce.number().int().min(1).max(365).default(30) }).parse(req.query);
+    res.json({ bots: adv.botLeaderboard(req.userId, q) });
+  } catch (err) { handleErr(err, res, next); }
+});
+
+router.get('/btc-benchmark', (req, res, next) => {
+  try {
+    const q = z.object({ days: z.coerce.number().int().min(7).max(365).default(90) }).parse(req.query);
+    res.json({ points: adv.btcBenchmark(q) });
+  } catch (err) { handleErr(err, res, next); }
+});
+
+router.get('/percentile', (req, res, next) => {
+  try {
+    const q = z.object({ period: z.enum(['7d', '30d', '90d', '1y']).default('30d') }).parse(req.query);
+    res.json({ percentile: adv.leaderboardPercentile(req.userId, q) });
+  } catch (err) { handleErr(err, res, next); }
+});
+
 // ── Trade journal note ─────────────────────────────────────────────────
 router.patch('/trades/:id/note', (req, res, next) => {
   try {
