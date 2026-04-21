@@ -199,6 +199,26 @@
     </div>
   </div>
 
+  <!-- Row 5b — Heatmaps: calendar P&L + hours of day -->
+  <div class="grid lg:grid-cols-2 gap-6 mb-6">
+    <div class="card">
+      <div class="flex items-center justify-between mb-3">
+        <h2 class="font-bold">Календарь P&amp;L (180 дней)</h2>
+        <span class="text-[10px] text-slate-500">Клетка = день. Зелёный = прибыль, красный = убыток</span>
+      </div>
+      <div id="calHeat" class="overflow-x-auto" style="min-height:130px"></div>
+    </div>
+    <div class="card">
+      <div class="flex items-center justify-between mb-3">
+        <h2 class="font-bold">По часам (90 дней)</h2>
+        <span class="text-[10px] text-slate-500">UTC · в какие часы торгуется лучше</span>
+      </div>
+      <div style="position:relative;height:180px;overflow:hidden">
+        <canvas id="hourChart" style="display:block;max-width:100%;max-height:100%"></canvas>
+      </div>
+    </div>
+  </div>
+
   <!-- Row 6 — Recent signals + Recent trades -->
   <div class="grid lg:grid-cols-3 gap-6 mb-6">
     <div class="card">
@@ -320,6 +340,10 @@ async function loadAdvanced() {
 
     // Strategy donut from analytics summary
     API.analyticsByStrategy && API.analyticsByStrategy().then(renderStratDonut).catch(() => {});
+
+    // Heatmaps
+    API.calendarPnl(180).then((r) => renderCalHeat(r.points || [])).catch(() => {});
+    API.hourlyPnl(90).then((r) => renderHourChart(r.hours || [])).catch(() => {});
   } catch (_e) { /* silent */ }
 }
 
@@ -392,6 +416,61 @@ function renderStratDonut(rows) {
       <span class="font-mono ${(r.pnl||0) > 0 ? 'text-green-400' : (r.pnl||0) < 0 ? 'text-red-400' : 'text-slate-400'}">${Fmt.currency(r.pnl || 0)}</span>
     </div>
   `).join('');
+}
+
+function renderCalHeat(days) {
+  const box = document.getElementById('calHeat');
+  if (!box) return;
+  if (!days.length) { box.innerHTML = '<div class="text-xs text-slate-500 text-center py-8">Нет закрытых сделок</div>'; return; }
+  // Colour scale: max absolute P&L over 180d determines intensity
+  const absMax = Math.max(1, ...days.map((d) => Math.abs(d.pnl)));
+  function cell(d) {
+    const intensity = Math.min(1, Math.abs(d.pnl) / absMax);
+    const bg = d.pnl > 0
+      ? `rgba(34,197,94,${0.2 + intensity * 0.7})`
+      : d.pnl < 0
+      ? `rgba(239,68,68,${0.2 + intensity * 0.7})`
+      : 'rgba(255,255,255,.04)';
+    const label = d.day + ' · ' + (d.pnl ? (d.pnl > 0 ? '+' : '') + d.pnl.toFixed(2) + '$' : 'нет сделок') + (d.trades ? ' · ' + d.trades + ' сделок' : '');
+    return `<div style="width:11px;height:11px;border-radius:2px;background:${bg}" title="${label}"></div>`;
+  }
+  // 26 columns × 7 rows, newest day is bottom-right
+  const cols = Math.ceil(days.length / 7);
+  let html = `<div style="display:grid;grid-auto-flow:column;grid-template-rows:repeat(7,11px);gap:3px">`;
+  for (let i = 0; i < days.length; i += 1) html += cell(days[i]);
+  html += '</div>';
+  box.innerHTML = html;
+}
+
+function renderHourChart(hours) {
+  const cv = document.getElementById('hourChart');
+  if (!cv || !window.Chart) return;
+  const labels = hours.map((h) => String(h.hour).padStart(2, '0'));
+  const data = hours.map((h) => h.pnl);
+  const colors = hours.map((h) => h.pnl > 0 ? 'rgba(34,197,94,.7)' : h.pnl < 0 ? 'rgba(239,68,68,.7)' : 'rgba(100,116,139,.35)');
+  if (window._hourChart) window._hourChart.destroy();
+  window._hourChart = new Chart(cv, {
+    type: 'bar',
+    data: { labels, datasets: [{ data, backgroundColor: colors, borderRadius: 2 }] },
+    options: {
+      responsive: true, maintainAspectRatio: false, animation: false,
+      plugins: {
+        legend: { display: false },
+        tooltip: {
+          callbacks: {
+            label: (ctx) => {
+              const h = hours[ctx.dataIndex];
+              return ['PnL: ' + Fmt.currency(h.pnl || 0), 'Сделок: ' + (h.trades || 0), 'WR: ' + (h.winRate != null ? (h.winRate * 100).toFixed(0) + '%' : '—')];
+            },
+          },
+        },
+      },
+      scales: {
+        x: { ticks: { color: 'rgba(255,255,255,.4)', font: { size: 9 }, maxTicksLimit: 12 }, grid: { display: false } },
+        y: { ticks: { color: 'rgba(255,255,255,.4)', font: { size: 10 } }, grid: { color: 'rgba(255,255,255,.04)' } },
+      },
+    },
+  });
 }
 
 function renderBotLeaderboard(bots) {
