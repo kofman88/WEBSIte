@@ -181,34 +181,55 @@
     if (document.getElementById('shellMarket')) return;
     const wrap = document.createElement('div');
     wrap.id = 'shellMarket';
-    wrap.style.cssText = 'display:flex;align-items:center;gap:10px;margin-left:16px;font-size:12px;flex-wrap:wrap';
-    wrap.innerHTML = `
-      <span id="tickBtc"  class="flex items-center gap-1.5 text-slate-400">BTC <span class="mono">—</span></span>
-      <span id="tickEth"  class="flex items-center gap-1.5 text-slate-400">ETH <span class="mono">—</span></span>
-      <span id="fngBadge" class="flex items-center gap-1.5 text-slate-500 border-l border-slate-700 pl-3 ml-1" title="Crypto Fear & Greed">F&amp;G: <span class="mono">—</span></span>
-    `;
+    wrap.className = 'shell-market';
+    // Build pill per ticker: glyph + code + price + delta chip. Skeleton
+    // state uses "—" placeholders until the fetch resolves.
+    const tickerSkel = (id, code, color) => `
+      <div id="${id}" class="shell-tick" data-state="loading">
+        <span class="shell-tick-glyph" style="background:${color}"><span>${code[0]}</span></span>
+        <span class="shell-tick-body">
+          <span class="shell-tick-code">${code}</span>
+          <span class="shell-tick-price mono">—</span>
+        </span>
+        <span class="shell-tick-delta mono">—</span>
+      </div>`;
+    wrap.innerHTML =
+      tickerSkel('tickBtc', 'BTC', 'linear-gradient(135deg,#F7931A,#E07D10)') +
+      tickerSkel('tickEth', 'ETH', 'linear-gradient(135deg,#627EEA,#3C58B8)') +
+      `<div id="fngBadge" class="shell-fng" title="Crypto Fear & Greed — 0=extreme fear, 100=extreme greed">
+         <span class="shell-fng-label">F&amp;G</span>
+         <span class="shell-fng-value mono">—</span>
+         <span class="shell-fng-dot"></span>
+       </div>`;
     top.appendChild(wrap);
+
+    const paintTick = (id, t) => {
+      const el = document.getElementById(id); if (!el) return;
+      if (!t) { el.dataset.state = 'empty'; return; }
+      const up = t.change24h > 0, down = t.change24h < 0;
+      const trend = up ? 'up' : down ? 'down' : 'flat';
+      el.dataset.state = 'ready';
+      el.dataset.trend = trend;
+      el.querySelector('.shell-tick-price').textContent =
+        '$' + Math.round(t.price).toLocaleString('en-US');
+      const d = el.querySelector('.shell-tick-delta');
+      const arrow = up ? '▲' : down ? '▼' : '·';
+      d.textContent = `${arrow} ${Math.abs(t.change24h).toFixed(1)}%`;
+    };
+
     const refresh = async () => {
       try {
-        const r = await API.marketContext();
-        if (r && r.tickers) {
-          const fmt = (t) => {
-            if (!t) return '—';
-            const col = t.change24h > 0 ? '#4ade80' : t.change24h < 0 ? '#f87171' : '#94a3b8';
-            const arrow = t.change24h > 0 ? '▲' : t.change24h < 0 ? '▼' : '–';
-            return `<span class="mono" style="color:${col}">$${Math.round(t.price).toLocaleString()} ${arrow}${Math.abs(t.change24h).toFixed(1)}%</span>`;
-          };
-          const btcEl = document.getElementById('tickBtc');
-          const ethEl = document.getElementById('tickEth');
-          if (btcEl) btcEl.innerHTML = 'BTC ' + fmt(r.tickers.btc);
-          if (ethEl) ethEl.innerHTML = 'ETH ' + fmt(r.tickers.eth);
-        }
-        if (r && r.fearGreed) {
-          const fng = r.fearGreed;
-          const v = Number(fng.value);
-          const col = v < 25 ? '#f87171' : v < 45 ? '#f59e0b' : v < 55 ? '#94a3b8' : v < 75 ? '#4ade80' : '#10b981';
+        const r = await API.marketContext(); if (!r) return;
+        if (r.tickers) { paintTick('tickBtc', r.tickers.btc); paintTick('tickEth', r.tickers.eth); }
+        if (r.fearGreed) {
+          const fng = r.fearGreed, v = Number(fng.value);
+          const level = v < 25 ? 'extreme-fear' : v < 45 ? 'fear' : v < 55 ? 'neutral' : v < 75 ? 'greed' : 'extreme-greed';
           const el = document.getElementById('fngBadge');
-          if (el) el.innerHTML = 'F&G: <span class="mono" style="color:' + col + '">' + v + ' · ' + (fng.classification || '').slice(0, 10) + '</span>';
+          if (el) {
+            el.dataset.level = level;
+            el.querySelector('.shell-fng-value').textContent = v;
+            el.title = `Crypto Fear & Greed: ${v} — ${fng.classification || ''}`;
+          }
         }
       } catch (_e) {}
     };
