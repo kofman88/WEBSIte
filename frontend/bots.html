@@ -241,25 +241,34 @@
 }
 .help-dot::after{
   content:attr(data-help);
-  position:absolute;top:calc(100% + 10px);left:50%;transform:translateX(-50%);
+  position:absolute;top:calc(100% + 10px);
+  /* Anchor LEFT-of-dot by default (extends rightward).
+     The card has overflow-y:auto which forces overflow-x:auto too
+     (per CSS spec), so a centered translateX(-50%) tooltip clips off
+     the left edge for fields near the left of the form. */
+  left:-4px;
   background:rgba(15,23,42,.98);
   border:1px solid rgba(92,128,227,.4);
   border-radius:10px;padding:10px 12px;
   font-size:11px;line-height:1.55;
   color:rgba(226,232,240,.95);font-weight:400;font-style:normal;
   font-family:'Inter',sans-serif;
-  width:max-content;max-width:260px;white-space:normal;text-align:left;
+  width:max-content;max-width:280px;white-space:normal;text-align:left;
   z-index:1000;opacity:0;pointer-events:none;
   transition:opacity .15s;
   box-shadow:0 8px 24px rgba(0,0,0,.55),0 0 0 1px rgba(0,0,0,.4);
 }
 .help-dot::before{
-  content:'';position:absolute;top:calc(100% + 4px);left:50%;transform:translateX(-50%);
+  content:'';position:absolute;top:calc(100% + 4px);left:6px;
   border:5px solid transparent;border-bottom-color:rgba(15,23,42,.98);
   opacity:0;pointer-events:none;z-index:1001;transition:opacity .15s;
 }
 .help-dot:hover::after,.help-dot:focus-visible::after,
 .help-dot:hover::before,.help-dot:focus-visible::before{opacity:1}
+/* For dots near the RIGHT edge of the form — flip horizontally so the
+   tooltip extends leftward instead. Add class="help-dot right" in HTML. */
+.help-dot.right::after{left:auto;right:-4px}
+.help-dot.right::before{left:auto;right:6px}
 /* Flip tooltip upward when near the bottom of the form */
 .help-dot.up::after{top:auto;bottom:calc(100% + 10px)}
 .help-dot.up::before{top:auto;bottom:calc(100% + 4px);border-bottom-color:transparent;border-top-color:rgba(15,23,42,.98)}
