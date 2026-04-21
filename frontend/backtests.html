@@ -53,6 +53,7 @@
 </main>
 
 <script src="app.js"></script>
+<script src="shell.js" defer></script>
 <script>
 if(!Auth.requireAuth()) throw new Error('noauth');
 document.querySelectorAll('.sidebar-link[data-page="backtests"]').forEach(a => a.classList.add('active'));

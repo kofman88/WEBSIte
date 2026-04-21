@@ -14,6 +14,39 @@
   --text-primary: #FFFFFF;
   --text-secondary: rgba(255, 255, 255, 0.62);
   --text-muted: rgba(255, 255, 255, 0.38);
+}
+
+/* Light theme overrides — triggered by <html class="light"> from shell.js */
+html.light {
+  --bg-primary: #F5F6F8;
+  --bg-secondary: #EDEEF2;
+  --bg-card: rgba(0, 0, 0, 0.04);
+  --bg-card-solid: #FFFFFF;
+  --bg-input: rgba(0, 0, 0, 0.04);
+  --border: rgba(0, 0, 0, 0.1);
+  --border-light: rgba(0, 0, 0, 0.18);
+  --text-primary: #0A0A0A;
+  --text-secondary: rgba(0, 0, 0, 0.7);
+  --text-muted: rgba(0, 0, 0, 0.5);
+}
+html.light body { color: #0A0A0A; background: #F5F6F8; }
+html.light .sidebar,
+html.light .topbar { background: rgba(255,255,255,.7); border-color: rgba(0,0,0,.08); backdrop-filter: blur(20px); }
+html.light .sidebar-link { color: rgba(0,0,0,.7); }
+html.light .sidebar-link:hover,
+html.light .sidebar-link.active { color: #0A0A0A; background: rgba(0,0,0,.05); }
+html.light .stat-card,
+html.light .card { background: #fff; border-color: rgba(0,0,0,.08); color: #0A0A0A; }
+html.light .stat-card-label,
+html.light .text-slate-400 { color: rgba(0,0,0,.6) !important; }
+html.light .text-slate-500 { color: rgba(0,0,0,.5) !important; }
+html.light .text-white { color: #0A0A0A !important; }
+html.light input, html.light select, html.light textarea { background: #fff !important; color: #0A0A0A !important; border-color: rgba(0,0,0,.12) !important; }
+html.light .topbar-user .topbar-username,
+html.light .stat-card-value,
+html.light h1, html.light h2, html.light h3 { color: #0A0A0A; }
+
+:root {
   --accent-blue: #1D4ED8;
   --accent-blue-light: #5C80E3;
   --accent-cyan: #5C80E3;
