@@ -237,6 +237,19 @@
     setInterval(refresh, 60_000);
   }
 
+  // A11y: mark the current sidebar link with aria-current="page" for SR users
+  // and set a proper aria-label on the sidebar nav so assistive tech can
+  // announce it.
+  function wireA11y() {
+    const nav = document.querySelector('.sidebar-nav');
+    if (nav && !nav.getAttribute('aria-label')) nav.setAttribute('aria-label', 'Main navigation');
+    const active = document.querySelector('.sidebar-link.active');
+    if (active) active.setAttribute('aria-current', 'page');
+    // Main content region for screen readers
+    const main = document.querySelector('main.main-content');
+    if (main && !main.getAttribute('role')) main.setAttribute('role', 'main');
+  }
+
   function boot() {
     applyTheme(); // apply <html class="light"> first so no flash
     wireLogo();
@@ -245,6 +258,7 @@
     applyLang();       // translates all data-t + refreshes lang button
     wireMarketTickers();
     wirePlanBadge();
+    wireA11y();
   }
 
   if (document.readyState === 'loading') {
