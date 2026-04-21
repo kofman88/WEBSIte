@@ -64,7 +64,7 @@
     </button>
     <div class="topbar-search"><svg width="16" height="16" fill="none" stroke="#64748b" stroke-width="2"><circle cx="7" cy="7" r="4"/><path d="M14 14l-3-3"/></svg><input placeholder="Поиск..."/></div>
   </div>
-  <div class="topbar-actions">
+  <div class="topbar-actions"><button id="shellLang" type="button" class="shell-topbar-btn" title="Language">EN</button><button id="shellTheme" type="button" class="shell-topbar-btn" title="Toggle theme" aria-label="Toggle theme"></button>
     <div class="topbar-notification"><svg width="20" height="20" fill="none" stroke="#94a3b8" stroke-width="2"><path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9M13.73 21a2 2 0 01-3.46 0"/></svg><div class="dot"></div></div>
     <div class="topbar-user"><div class="topbar-avatar">U</div><span class="topbar-username text-sm text-slate-300 hidden sm:block">User</span></div>
   </div>
@@ -243,7 +243,7 @@
 </main>
 
 <script src="app.js"></script>
-<script src="shell.js?v=3" defer></script>
+<script src="shell.js?v=4" defer></script>
 <script src="onboarding.js" defer></script>
 <script>
 if(!Auth.requireAuth()) throw new Error('noauth');
