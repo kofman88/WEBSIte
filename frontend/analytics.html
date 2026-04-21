@@ -29,7 +29,7 @@
 </aside>
 <header class="topbar">
   <div class="flex items-center gap-4"><h1 class="text-xl font-bold">Аналитика</h1></div>
-  <div class="topbar-actions">
+  <div class="topbar-actions"><button id="shellLang" type="button" class="shell-topbar-btn" title="Language">EN</button><button id="shellTheme" type="button" class="shell-topbar-btn" title="Toggle theme" aria-label="Toggle theme"></button>
     <div class="topbar-notification"><svg width="20" height="20" fill="none" stroke="#94a3b8" stroke-width="2"><path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9M13.73 21a2 2 0 01-3.46 0"/></svg></div>
     <div class="topbar-user"><div class="topbar-avatar">U</div></div>
   </div>
@@ -140,7 +140,7 @@
 </div>
 
 <script src="app.js"></script>
-<script src="shell.js?v=3" defer></script>
+<script src="shell.js?v=4" defer></script>
 <script>
 if(!Auth.requireAuth()) throw new Error('noauth');
 

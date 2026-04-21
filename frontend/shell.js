@@ -136,41 +136,42 @@
   }
 
   // ── 3 & 4. Topbar toggles ──────────────────────────────────────────────
+  // Strategy: buttons are HARDCODED in each page's HTML (tag #shellLang /
+  // #shellTheme). Shell.js only wires click handlers + keeps labels fresh.
+  // Fallback: if a page hasn't been updated yet, inject them dynamically so
+  // the UI never breaks.
   function wireTopbar() {
-    const actions = document.querySelector('.topbar-actions');
-    if (!actions) return;
-    if (document.getElementById('shellLang')) return; // already wired
+    let lang = document.getElementById('shellLang');
+    let theme = document.getElementById('shellTheme');
 
-    // Prominent pill — outline + hover highlight, min-width so it's never a
-    // flat dot if innerHTML is momentarily empty.
-    const btnStyle = 'background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.14);border-radius:9999px;padding:7px 14px;color:rgba(255,255,255,.9);cursor:pointer;font-size:12px;font-weight:600;line-height:1;min-width:40px;height:32px;display:inline-flex;align-items:center;justify-content:center;gap:6px;transition:background .15s,border-color .15s,color .15s';
+    if (!lang || !theme) {
+      const actions = document.querySelector('.topbar-actions');
+      if (!actions) return;
+      if (!lang) {
+        lang = document.createElement('button');
+        lang.id = 'shellLang'; lang.type = 'button';
+        lang.className = 'shell-topbar-btn'; lang.title = 'Language';
+        actions.insertBefore(lang, actions.firstChild);
+      }
+      if (!theme) {
+        theme = document.createElement('button');
+        theme.id = 'shellTheme'; theme.type = 'button';
+        theme.className = 'shell-topbar-btn'; theme.title = 'Toggle theme';
+        if (lang.nextSibling) actions.insertBefore(theme, lang.nextSibling);
+        else actions.appendChild(theme);
+      }
+    }
 
-    const lang = document.createElement('button');
-    lang.id = 'shellLang';
-    lang.type = 'button';
-    lang.title = 'Language';
-    lang.setAttribute('aria-label', 'Toggle language');
-    lang.style.cssText = btnStyle;
-    lang.textContent = LANG_LABEL[_nextLang(getLang())];
-    lang.addEventListener('mouseenter', () => { lang.style.background = 'rgba(255,255,255,.08)'; lang.style.borderColor = 'rgba(255,255,255,.24)'; });
-    lang.addEventListener('mouseleave', () => { lang.style.background = 'rgba(255,255,255,.04)'; lang.style.borderColor = 'rgba(255,255,255,.14)'; });
-    lang.addEventListener('click', () => { setLang(_nextLang(getLang())); applyLang(); });
-
-    const theme = document.createElement('button');
-    theme.id = 'shellTheme';
-    theme.type = 'button';
-    theme.title = 'Toggle theme';
-    theme.setAttribute('aria-label', 'Toggle theme');
-    theme.style.cssText = btnStyle;
-    // Populate icon immediately (no more waiting for applyTheme race)
-    theme.innerHTML = getTheme() === 'light' ? _sunIcon() : _moonIcon();
-    theme.addEventListener('mouseenter', () => { theme.style.background = 'rgba(255,255,255,.08)'; theme.style.borderColor = 'rgba(255,255,255,.24)'; });
-    theme.addEventListener('mouseleave', () => { theme.style.background = 'rgba(255,255,255,.04)'; theme.style.borderColor = 'rgba(255,255,255,.14)'; });
-    theme.addEventListener('click', () => { setTheme(getTheme() === 'dark' ? 'light' : 'dark'); applyTheme(); });
-
-    // Place before notification/avatar
-    actions.insertBefore(theme, actions.firstChild);
-    actions.insertBefore(lang,  actions.firstChild);
+    if (!lang.dataset.shellWired) {
+      lang.textContent = LANG_LABEL[_nextLang(getLang())];
+      lang.addEventListener('click', () => { setLang(_nextLang(getLang())); applyLang(); });
+      lang.dataset.shellWired = '1';
+    }
+    if (!theme.dataset.shellWired) {
+      theme.innerHTML = getTheme() === 'light' ? _sunIcon() : _moonIcon();
+      theme.addEventListener('click', () => { setTheme(getTheme() === 'dark' ? 'light' : 'dark'); applyTheme(); });
+      theme.dataset.shellWired = '1';
+    }
   }
 
   // ── Market tickers + Fear & Greed (topbar, public data) ───────────────
