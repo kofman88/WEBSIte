@@ -1,193 +1,257 @@
 <!DOCTYPE html>
-<html lang="ru">
+<html lang="ru" class="aura-page">
 <head>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1.0"/>
   <title>CHM Finance — О проекте</title>
   <meta name="description" content="CHM Finance — команда, юридическая информация, безопасность, контакты."/>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet"/>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet"/>
   <link rel="stylesheet" href="tailwind.css"/>
   <link rel="stylesheet" href="styles.css"/>
+  <link rel="stylesheet" href="aura-theme.css"/>
   <style>
-    .member-card{padding:22px;border:1px solid rgba(255,255,255,.08);border-radius:14px;background:rgba(255,255,255,.02);transition:border-color .2s}
-    .member-card:hover{border-color:rgba(255,255,255,.18)}
-    .avatar{width:56px;height:56px;border-radius:50%;background:linear-gradient(180deg,#2A5BE8 0%,#1D4ED8 60%,#143797 100%);display:flex;align-items:center;justify-content:center;font-weight:600;color:#fff;font-size:22px;box-shadow:inset 0 1px 1px rgba(255,255,255,.28),inset 0 -1px 3px rgba(0,0,0,.6),0 4px 8px -2px rgba(0,0,0,.6)}
-    dl{display:grid;grid-template-columns:180px 1fr;gap:10px 24px;margin-top:8px}
-    dl dt{color:rgba(255,255,255,.5);font-size:13px}
-    dl dd{color:rgba(255,255,255,.85);font-size:13px}
-    .badge{display:inline-block;padding:4px 10px;border-radius:9999px;font-size:11px;font-weight:500;letter-spacing:.03em;text-transform:uppercase}
-    .badge-blue{background:rgba(29,78,216,.15);color:#93AAEC;border:1px solid rgba(29,78,216,.3)}
-    .badge-green{background:rgba(34,197,94,.12);color:#4ade80;border:1px solid rgba(34,197,94,.25)}
-    .badge-amber{background:rgba(234,179,8,.1);color:#fcd34d;border:1px solid rgba(234,179,8,.25)}
-    @media(max-width:640px){dl{grid-template-columns:1fr}}
+    /* Local tweaks — override Tailwind/styles.css defaults where Aura
+       needs to win. All semantic classes below are .aura-* plus a couple
+       of legacy ones that map to Aura tokens. */
+    .aura-page body { background: var(--aura-bg); color: var(--aura-text-primary); font-family: var(--aura-font-sans); font-weight: 300; min-height: 100vh; }
+    .aura-page a   { color: inherit; }
+    .aura-member {
+      display: flex; flex-direction: column; gap: 14px;
+    }
+    .aura-member-head { display: flex; align-items: center; gap: 14px; }
+    .aura-avatar {
+      width: 48px; height: 48px;
+      border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-family: var(--aura-font-mono);
+      font-weight: 500;
+      font-size: 18px;
+      color: #000;
+      background: var(--aura-accent);
+      box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, 0.3),
+        0 0 0 1px rgba(255, 90, 31, 0.4),
+        0 4px 12px rgba(255, 90, 31, 0.25);
+    }
+    .aura-avatar-green {
+      background: var(--aura-secondary); color: #000;
+      box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, 0.3),
+        0 0 0 1px rgba(16, 185, 129, 0.4),
+        0 4px 12px rgba(16, 185, 129, 0.25);
+    }
+    .aura-meta {
+      display: grid; grid-template-columns: 180px 1fr;
+      gap: 10px 24px; margin-top: 8px;
+      font-family: var(--aura-font-sans);
+    }
+    .aura-meta dt { color: var(--aura-text-muted); font-size: 12px; font-family: var(--aura-font-mono); text-transform: uppercase; letter-spacing: 0.08em; }
+    .aura-meta dd { color: var(--aura-text-secondary); font-size: 14px; font-weight: 300; }
+    .aura-meta dd a { color: var(--aura-accent); text-decoration: none; }
+    .aura-meta dd a:hover { text-decoration: underline; }
+    @media (max-width: 640px) { .aura-meta { grid-template-columns: 1fr; gap: 4px; } }
+    .aura-foot-links { text-align: center; margin-top: 56px; padding-top: 32px; border-top: 1px solid var(--aura-border); }
+    .aura-foot-links a { color: var(--aura-text-muted); font-family: var(--aura-font-mono); font-size: 11px; text-transform: uppercase; letter-spacing: 0.1em; text-decoration: none; padding: 0 12px; }
+    .aura-foot-links a:hover { color: var(--aura-text-primary); }
   </style>
 </head>
-<body style="background:#0A0A0A;color:#E5E5E5;font-family:'Inter',sans-serif;min-height:100vh">
+<body>
 
-<header style="border-bottom:1px solid rgba(255,255,255,.06);padding:18px 24px">
-  <div style="max-width:1000px;margin:0 auto;display:flex;align-items:center;justify-content:space-between">
-    <a href="/" style="font-weight:600;font-size:22px;letter-spacing:-.02em;color:#fff;text-decoration:none">CHM<span style="color:#5C80E3">.</span></a>
-    <div class="flex items-center gap-3 text-sm">
-      <a href="/" class="text-slate-400 hover:text-white">Главная</a>
-      <a href="/leaderboard.html" class="text-slate-400 hover:text-white">Leaderboard</a>
-      <a href="/status.html" class="text-slate-400 hover:text-white">Статус</a>
-      <a href="/api-docs.html" class="text-slate-400 hover:text-white">API</a>
+<div class="aura-grid-bg"></div>
+<div class="aura-vignette"></div>
+
+<header class="aura-relative" style="border-bottom:1px solid var(--aura-border);padding:20px 24px">
+  <div style="max-width:1000px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;gap:24px">
+    <a href="/" style="font-weight:500;font-size:22px;letter-spacing:-.02em;color:var(--aura-text-primary);text-decoration:none;font-family:var(--aura-font-sans)">CHM<span style="color:var(--aura-accent)">.</span></a>
+    <div style="display:flex;align-items:center;gap:28px">
+      <a href="/" class="aura-link-mono">Главная</a>
+      <a href="/leaderboard.html" class="aura-link-mono">Leaderboard</a>
+      <a href="/status.html" class="aura-link-mono">Статус</a>
+      <a href="/api-docs.html" class="aura-link-mono">API</a>
     </div>
   </div>
 </header>
 
-<main style="max-width:1000px;margin:0 auto;padding:64px 24px">
+<main class="aura-relative" style="max-width:1000px;margin:0 auto;padding:80px 24px">
 
-  <section class="text-center mb-14">
-    <div class="text-xs text-slate-500 uppercase tracking-widest mb-3">О проекте</div>
-    <h1 class="text-4xl font-bold mb-4">CHM Finance</h1>
-    <p class="text-slate-400 text-lg" style="max-width:620px;margin:0 auto;line-height:1.6">
+  <section style="text-align:center;margin-bottom:64px">
+    <span class="aura-label">О проекте</span>
+    <h1 class="aura-h1" style="margin-top:18px;margin-bottom:18px">CHM <em>Finance</em></h1>
+    <p class="aura-body" style="max-width:620px;margin:0 auto;font-size:16px">
       Платформа для алгоритмической торговли криптовалютой. Сигналы, авто-трейдинг, аналитика — для розничных трейдеров, которым нужна дисциплина системы вместо эмоций рынка.
     </p>
-    <div class="mt-5"><span class="badge badge-amber">Public beta · 2024–2026</span></div>
+    <div style="margin-top:24px"><span class="aura-chip aura-chip-accent">Public beta · 2024–2026</span></div>
   </section>
 
-  <section class="card mb-10" style="padding:28px">
-    <h2 class="text-lg font-semibold mb-3">Миссия</h2>
-    <p class="text-slate-300 text-sm" style="line-height:1.7">
-      Устранить главный риск розничной торговли — эмоциональные решения. Даём инструменты, которыми пользуются prop-desks: бэктест, risk-менеджмент, авто-исполнение, мониторинг портфеля. Принцип простой: алгоритм вместо интуиции.
-    </p>
+  <section class="aura-shell" style="margin-bottom:24px">
+    <div class="aura-card" style="padding:32px">
+      <span class="aura-label-sm">01 — Mission</span>
+      <h2 class="aura-h2" style="margin-top:12px;margin-bottom:14px">Миссия</h2>
+      <p class="aura-body">
+        Устранить главный риск розничной торговли — эмоциональные решения. Даём инструменты, которыми пользуются prop-desks: бэктест, risk-менеджмент, авто-исполнение, мониторинг портфеля. Принцип простой: алгоритм вместо интуиции.
+      </p>
+    </div>
   </section>
 
-  <section class="card mb-10" style="padding:28px">
-    <h2 class="text-lg font-semibold mb-3">Почему мы не скрываем того, чего нет</h2>
-    <p class="text-slate-300 text-sm mb-3" style="line-height:1.7">
-      CHM Finance — это <strong>небольшой независимый проект</strong>, запущенный трейдером и разработчиком для собственного использования и постепенно открытый сообществу. Мы не VC-стартап с отделом PR, не регулированный брокер и не фонд.
-    </p>
-    <p class="text-slate-400 text-sm" style="line-height:1.7">
-      Это значит: никаких громких обещаний, цифр «гарантированной доходности» и «экспертов с 30-летним стажем». Есть работающий продукт, открытый код принципов торговли (<a href="/risk.html" class="text-indigo-400 hover:underline">disclosure of risk</a>), прозрачные комиссии и публичный <a href="/leaderboard.html" class="text-indigo-400 hover:underline">Leaderboard</a>, где каждый может сравнить свою торговлю с другими участниками.
-    </p>
+  <section class="aura-shell" style="margin-bottom:24px">
+    <div class="aura-card" style="padding:32px">
+      <span class="aura-label-sm">02 — Transparency</span>
+      <h2 class="aura-h2" style="margin-top:12px;margin-bottom:14px">Почему мы не скрываем того, <em>чего нет</em></h2>
+      <p class="aura-body" style="margin-bottom:12px">
+        CHM Finance — это <strong style="color:var(--aura-text-primary);font-weight:500">небольшой независимый проект</strong>, запущенный трейдером и разработчиком для собственного использования и постепенно открытый сообществу. Мы не VC-стартап с отделом PR, не регулированный брокер и не фонд.
+      </p>
+      <p class="aura-body">
+        Это значит: никаких громких обещаний, цифр «гарантированной доходности» и «экспертов с 30-летним стажем». Есть работающий продукт, открытый код принципов торговли (<a href="/risk.html" style="color:var(--aura-accent);text-decoration:none;border-bottom:1px solid rgba(255,90,31,.3)">disclosure of risk</a>), прозрачные комиссии и публичный <a href="/leaderboard.html" style="color:var(--aura-accent);text-decoration:none;border-bottom:1px solid rgba(255,90,31,.3)">Leaderboard</a>, где каждый может сравнить свою торговлю с другими участниками.
+      </p>
+    </div>
   </section>
 
-  <section class="mb-12">
-    <h2 class="text-xl font-semibold mb-3">Команда</h2>
-    <p class="text-slate-400 text-sm mb-6" style="line-height:1.6;max-width:720px">
+  <section style="margin-bottom:48px;margin-top:64px">
+    <span class="aura-label-sm">03 — Team</span>
+    <h2 class="aura-h2" style="margin-top:12px;margin-bottom:14px">Команда</h2>
+    <p class="aura-body" style="margin-bottom:28px;max-width:720px">
       Команда работает анонимно — это защита от социальной инженерии и таргетированных атак на операторов платформы, имеющих доступ к инфраструктуре. Институциональным партнёрам и регуляторам идентификация предоставляется под NDA.
     </p>
-    <div class="grid md:grid-cols-2 gap-4">
-      <div class="member-card">
-        <div class="flex items-center gap-4 mb-3">
-          <div class="avatar">F</div>
-          <div>
-            <div class="font-semibold">Founder · Lead Engineer</div>
-            <div class="text-xs text-slate-500">Strategy · Backend · Trading infra</div>
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:16px">
+      <div class="aura-shell">
+        <div class="aura-card" style="padding:22px">
+          <div class="aura-member">
+            <div class="aura-member-head">
+              <div class="aura-avatar">F</div>
+              <div>
+                <div style="font-weight:500;color:var(--aura-text-primary);font-size:15px">Founder · Lead Engineer</div>
+                <div class="aura-label-sm" style="margin-top:4px">Strategy · Backend · Trading infra</div>
+              </div>
+            </div>
+            <p class="aura-body-sm">
+              10+ лет в алгоритмической торговле и построении торговых систем. Фокус: execution, risk, backtesting, auto-trade. Автор SMC / Gerchik / scalping-стратегий в каталоге.
+            </p>
           </div>
         </div>
-        <p class="text-xs text-slate-400" style="line-height:1.6">
-          10+ лет в алгоритмической торговле и построении торговых систем. Фокус: execution, risk, backtesting, auto-trade. Автор SMC / Gerchik / scalping-стратегий в каталоге.
-        </p>
       </div>
 
-      <div class="member-card">
-        <div class="flex items-center gap-4 mb-3">
-          <div class="avatar" style="background:linear-gradient(180deg,#3F7A4A,#2B5936 60%,#1A3823)">S</div>
-          <div>
-            <div class="font-semibold">Security &amp; Ops</div>
-            <div class="text-xs text-slate-500">Infrastructure · Incident response</div>
+      <div class="aura-shell">
+        <div class="aura-card" style="padding:22px">
+          <div class="aura-member">
+            <div class="aura-member-head">
+              <div class="aura-avatar aura-avatar-green">S</div>
+              <div>
+                <div style="font-weight:500;color:var(--aura-text-primary);font-size:15px">Security &amp; Ops</div>
+                <div class="aura-label-sm" style="margin-top:4px">Infrastructure · Incident response</div>
+              </div>
+            </div>
+            <p class="aura-body-sm">
+              Отвечает за безопасность хранения API-ключей (AES-256-GCM), 2FA, мониторинг (brute-force / credential stuffing), аудит-трейл всех действий администраторов.
+            </p>
           </div>
         </div>
-        <p class="text-xs text-slate-400" style="line-height:1.6">
-          Отвечает за безопасность хранения API-ключей (AES-256-GCM), 2FA, мониторинг (brute-force / credential stuffing), аудит-трейл всех действий администраторов.
-        </p>
       </div>
     </div>
   </section>
 
-  <section class="card mb-10" style="padding:28px" id="legal">
-    <h2 class="text-lg font-semibold mb-4">Юридический статус</h2>
-    <p class="text-slate-300 text-sm mb-4" style="line-height:1.7">
-      Платформа находится на этапе <strong>public beta</strong>. Юридическое лицо в процессе формирования — оно будет зарегистрировано в юрисдикции, подходящей для крипто-проектов (рассматриваются ОАЭ, Сейшелы, BVI), с публикацией всех реквизитов сразу после завершения процедуры.
-    </p>
-    <dl>
-      <dt>Статус</dt>
-      <dd><span class="badge badge-amber">Beta · операционный период</span></dd>
-      <dt>Год запуска</dt>
-      <dd>2024</dd>
-      <dt>Операционный контакт</dt>
-      <dd><a href="mailto:support@chmup.top" class="text-indigo-400 hover:underline">support@chmup.top</a></dd>
-      <dt>Юр. запросы</dt>
-      <dd><a href="mailto:legal@chmup.top" class="text-indigo-400 hover:underline">legal@chmup.top</a></dd>
-      <dt>DPO (GDPR)</dt>
-      <dd><a href="mailto:privacy@chmup.top" class="text-indigo-400 hover:underline">privacy@chmup.top</a></dd>
-    </dl>
-    <p class="text-xs text-slate-500 mt-5" style="line-height:1.6">
-      <span class="badge badge-blue">Сигнал-провайдер</span> CHM Finance <strong>не является брокером</strong>, не принимает средства клиентов на торговые счета и не выступает инвестиционным консультантом. Все торговые операции совершаются <strong>напрямую на бирже пользователя</strong> через его собственные API-ключи с разрешениями <em>Read + Trade</em>. Withdraw-разрешение нам не нужно — и никогда не должно быть включено.
-    </p>
+  <section class="aura-shell" style="margin-bottom:24px" id="legal">
+    <div class="aura-card" style="padding:32px">
+      <span class="aura-label-sm">04 — Legal</span>
+      <h2 class="aura-h2" style="margin-top:12px;margin-bottom:14px">Юридический статус</h2>
+      <p class="aura-body" style="margin-bottom:20px">
+        Платформа находится на этапе <strong style="color:var(--aura-text-primary);font-weight:500">public beta</strong>. Юридическое лицо в процессе формирования — оно будет зарегистрировано в юрисдикции, подходящей для крипто-проектов (рассматриваются ОАЭ, Сейшелы, BVI), с публикацией всех реквизитов сразу после завершения процедуры.
+      </p>
+      <dl class="aura-meta">
+        <dt>Статус</dt>
+        <dd><span class="aura-chip aura-chip-accent">Beta · операционный период</span></dd>
+        <dt>Год запуска</dt>
+        <dd>2024</dd>
+        <dt>Операционный контакт</dt>
+        <dd><a href="mailto:support@chmup.top">support@chmup.top</a></dd>
+        <dt>Юр. запросы</dt>
+        <dd><a href="mailto:legal@chmup.top">legal@chmup.top</a></dd>
+        <dt>DPO (GDPR)</dt>
+        <dd><a href="mailto:privacy@chmup.top">privacy@chmup.top</a></dd>
+      </dl>
+      <p class="aura-body-sm" style="margin-top:24px;padding-top:20px;border-top:1px solid var(--aura-border)">
+        <span class="aura-chip" style="margin-right:8px">Сигнал-провайдер</span>
+        CHM Finance <strong style="color:var(--aura-text-primary);font-weight:500">не является брокером</strong>, не принимает средства клиентов на торговые счета и не выступает инвестиционным консультантом. Все торговые операции совершаются <strong style="color:var(--aura-text-primary);font-weight:500">напрямую на бирже пользователя</strong> через его собственные API-ключи с разрешениями <em style="color:var(--aura-accent);font-style:normal">Read + Trade</em>. Withdraw-разрешение нам не нужно — и никогда не должно быть включено.
+      </p>
+    </div>
   </section>
 
-  <section class="card mb-10" style="padding:28px">
-    <h2 class="text-lg font-semibold mb-4">Безопасность и соответствие</h2>
-    <div class="grid md:grid-cols-2 gap-4 text-sm">
-      <div>
-        <div class="flex items-center gap-2 mb-1"><span class="badge badge-green">Активно</span> <span class="font-semibold">AES-256-GCM шифрование</span></div>
-        <p class="text-xs text-slate-400" style="line-height:1.6">API-ключи бирж хранятся в зашифрованном виде с authenticated encryption. Расшифровка возможна только на момент исполнения ордера. Приватные ключи кошельков — тем же алгоритмом.</p>
-      </div>
-      <div>
-        <div class="flex items-center gap-2 mb-1"><span class="badge badge-green">Активно</span> <span class="font-semibold">2FA (TOTP)</span></div>
-        <p class="text-xs text-slate-400" style="line-height:1.6">Поддержка Google Authenticator / Authy, recovery-коды. Рекомендуется для всех аккаунтов с live-торговлей.</p>
-      </div>
-      <div>
-        <div class="flex items-center gap-2 mb-1"><span class="badge badge-green">Активно</span> <span class="font-semibold">Read-only + Trade ключи</span></div>
-        <p class="text-xs text-slate-400" style="line-height:1.6">При создании API-ключа биржи запрашиваем только чтение + торговлю. Withdraw-разрешение нам не нужно — никогда не включайте его.</p>
-      </div>
-      <div>
-        <div class="flex items-center gap-2 mb-1"><span class="badge badge-green">Активно</span> <span class="font-semibold">GDPR-совместимость</span></div>
-        <p class="text-xs text-slate-400" style="line-height:1.6">Право доступа, исправления, удаления, переносимости данных. Экспорт всех ваших данных — в Настройках одним кликом. Без трекинг-cookies, без Facebook Pixel / Google Analytics.</p>
-      </div>
-      <div>
-        <div class="flex items-center gap-2 mb-1"><span class="badge badge-green">Активно</span> <span class="font-semibold">Audit trail</span></div>
-        <p class="text-xs text-slate-400" style="line-height:1.6">Все действия администраторов, платежи, входы, изменения плана — записываются в аудит-лог. Доступен пользователю в экспорте данных.</p>
-      </div>
-      <div>
-        <div class="flex items-center gap-2 mb-1"><span class="badge badge-green">Активно</span> <span class="font-semibold">Мониторинг безопасности</span></div>
-        <p class="text-xs text-slate-400" style="line-height:1.6">Автоматическое обнаружение brute-force, credential stuffing, подозрительных действий. Ежедневный digest операторам.</p>
+  <section class="aura-shell" style="margin-bottom:24px">
+    <div class="aura-card" style="padding:32px">
+      <span class="aura-label-sm">05 — Security</span>
+      <h2 class="aura-h2" style="margin-top:12px;margin-bottom:20px">Безопасность и соответствие</h2>
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:20px">
+        <div>
+          <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px"><span class="aura-chip aura-chip-success">Активно</span> <span style="font-weight:500;color:var(--aura-text-primary);font-size:14px">AES-256-GCM</span></div>
+          <p class="aura-body-sm">API-ключи бирж хранятся в зашифрованном виде с authenticated encryption. Расшифровка возможна только на момент исполнения ордера. Приватные ключи кошельков — тем же алгоритмом.</p>
+        </div>
+        <div>
+          <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px"><span class="aura-chip aura-chip-success">Активно</span> <span style="font-weight:500;color:var(--aura-text-primary);font-size:14px">2FA (TOTP)</span></div>
+          <p class="aura-body-sm">Поддержка Google Authenticator / Authy, recovery-коды. Рекомендуется для всех аккаунтов с live-торговлей.</p>
+        </div>
+        <div>
+          <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px"><span class="aura-chip aura-chip-success">Активно</span> <span style="font-weight:500;color:var(--aura-text-primary);font-size:14px">Read + Trade only</span></div>
+          <p class="aura-body-sm">При создании API-ключа биржи запрашиваем только чтение + торговлю. Withdraw-разрешение нам не нужно — никогда не включайте его.</p>
+        </div>
+        <div>
+          <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px"><span class="aura-chip aura-chip-success">Активно</span> <span style="font-weight:500;color:var(--aura-text-primary);font-size:14px">GDPR compliance</span></div>
+          <p class="aura-body-sm">Право доступа, исправления, удаления, переносимости данных. Экспорт всех ваших данных — в Настройках одним кликом. Без трекинг-cookies, без Facebook Pixel / Google Analytics.</p>
+        </div>
+        <div>
+          <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px"><span class="aura-chip aura-chip-success">Активно</span> <span style="font-weight:500;color:var(--aura-text-primary);font-size:14px">Audit trail</span></div>
+          <p class="aura-body-sm">Все действия администраторов, платежи, входы, изменения плана — записываются в аудит-лог. Доступен пользователю в экспорте данных.</p>
+        </div>
+        <div>
+          <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px"><span class="aura-chip aura-chip-success">Активно</span> <span style="font-weight:500;color:var(--aura-text-primary);font-size:14px">Security monitor</span></div>
+          <p class="aura-body-sm">Автоматическое обнаружение brute-force, credential stuffing, подозрительных действий. Ежедневный digest операторам.</p>
+        </div>
       </div>
     </div>
   </section>
 
-  <section class="card mb-10" style="padding:28px" id="jurisdictions">
-    <h2 class="text-lg font-semibold mb-3">Юрисдикционные ограничения</h2>
-    <p class="text-sm text-slate-300 mb-3" style="line-height:1.6">
-      Сервис недоступен резидентам следующих юрисдикций (OFAC / Treasury sanctions + пробелы в лицензировании):
-    </p>
-    <ul class="text-sm text-slate-400 space-y-1" style="line-height:1.6">
-      <li>• США — требуется брокерская лицензия SEC / CFTC, в процессе оценки</li>
-      <li>• Иран, Северная Корея, Куба, Сирия — международные санкционные ограничения</li>
-      <li>• Великобритания (retail) — FCA требует pre-authorization для crypto derivatives</li>
-    </ul>
-    <p class="text-xs text-slate-500 mt-4">
-      Регистрация из этих юрисдикций автоматически отклоняется. Если вы получили блок по ошибке (VPN / неверный geo-IP), напишите в <a href="mailto:support@chmup.top" class="text-indigo-400">support</a> — разблокируем после подтверждения резидентства.
-    </p>
+  <section class="aura-shell" style="margin-bottom:24px" id="jurisdictions">
+    <div class="aura-card" style="padding:32px">
+      <span class="aura-label-sm">06 — Restrictions</span>
+      <h2 class="aura-h2" style="margin-top:12px;margin-bottom:14px">Юрисдикционные ограничения</h2>
+      <p class="aura-body" style="margin-bottom:14px">
+        Сервис недоступен резидентам следующих юрисдикций (OFAC / Treasury sanctions + пробелы в лицензировании):
+      </p>
+      <ul class="aura-body" style="list-style:none;padding:0;margin:0">
+        <li style="padding:8px 0;border-bottom:1px solid var(--aura-border)"><span class="aura-mono" style="color:var(--aura-text-muted);margin-right:10px">—</span> США — требуется брокерская лицензия SEC / CFTC, в процессе оценки</li>
+        <li style="padding:8px 0;border-bottom:1px solid var(--aura-border)"><span class="aura-mono" style="color:var(--aura-text-muted);margin-right:10px">—</span> Иран, Северная Корея, Куба, Сирия — международные санкционные ограничения</li>
+        <li style="padding:8px 0"><span class="aura-mono" style="color:var(--aura-text-muted);margin-right:10px">—</span> Великобритания (retail) — FCA требует pre-authorization для crypto derivatives</li>
+      </ul>
+      <p class="aura-body-sm" style="margin-top:18px;color:var(--aura-text-muted)">
+        Регистрация из этих юрисдикций автоматически отклоняется. Если вы получили блок по ошибке (VPN / неверный geo-IP), напишите в <a href="mailto:support@chmup.top" style="color:var(--aura-accent);text-decoration:none">support</a> — разблокируем после подтверждения резидентства.
+      </p>
+    </div>
   </section>
 
-  <section class="card mb-10" style="padding:28px" id="contact">
-    <h2 class="text-lg font-semibold mb-4">Контакты</h2>
-    <dl>
-      <dt>Поддержка</dt>
-      <dd><a href="mailto:support@chmup.top" class="text-indigo-400 hover:underline">support@chmup.top</a> · ответ в течение 24 часов</dd>
-      <dt>Безопасность</dt>
-      <dd><a href="mailto:security@chmup.top" class="text-indigo-400 hover:underline">security@chmup.top</a> · для отчётов об уязвимостях (PGP по запросу)</dd>
-      <dt>Юридические запросы</dt>
-      <dd><a href="mailto:legal@chmup.top" class="text-indigo-400 hover:underline">legal@chmup.top</a></dd>
-      <dt>Пресса / партнёрства</dt>
-      <dd><a href="mailto:press@chmup.top" class="text-indigo-400 hover:underline">press@chmup.top</a></dd>
-      <dt>DPO (GDPR)</dt>
-      <dd><a href="mailto:privacy@chmup.top" class="text-indigo-400 hover:underline">privacy@chmup.top</a> · запросы по персональным данным</dd>
-      <dt>Telegram-бот</dt>
-      <dd><a href="https://t.me/CHMUP_bot" class="text-indigo-400 hover:underline" target="_blank" rel="noopener">@CHMUP_bot</a> · уведомления о сделках и подтверждениях</dd>
-    </dl>
+  <section class="aura-shell" style="margin-bottom:24px" id="contact">
+    <div class="aura-card" style="padding:32px">
+      <span class="aura-label-sm">07 — Contact</span>
+      <h2 class="aura-h2" style="margin-top:12px;margin-bottom:20px">Контакты</h2>
+      <dl class="aura-meta">
+        <dt>Поддержка</dt>
+        <dd><a href="mailto:support@chmup.top">support@chmup.top</a> · ответ в течение 24 часов</dd>
+        <dt>Безопасность</dt>
+        <dd><a href="mailto:security@chmup.top">security@chmup.top</a> · для отчётов об уязвимостях (PGP по запросу)</dd>
+        <dt>Юридические запросы</dt>
+        <dd><a href="mailto:legal@chmup.top">legal@chmup.top</a></dd>
+        <dt>Пресса / партнёрства</dt>
+        <dd><a href="mailto:press@chmup.top">press@chmup.top</a></dd>
+        <dt>DPO (GDPR)</dt>
+        <dd><a href="mailto:privacy@chmup.top">privacy@chmup.top</a> · запросы по персональным данным</dd>
+        <dt>Telegram-бот</dt>
+        <dd><a href="https://t.me/CHMUP_bot" target="_blank" rel="noopener">@CHMUP_bot</a> · уведомления о сделках и подтверждениях</dd>
+      </dl>
+    </div>
   </section>
 
-  <div class="text-center text-xs text-slate-500 mt-12">
-    <a href="/terms.html" class="hover:text-slate-300">Условия использования</a> ·
-    <a href="/privacy.html" class="hover:text-slate-300">Политика конфиденциальности</a> ·
-    <a href="/risk.html" class="hover:text-slate-300">Предупреждение о рисках</a>
+  <div class="aura-foot-links">
+    <a href="/terms.html">Условия использования</a>
+    <a href="/privacy.html">Политика конфиденциальности</a>
+    <a href="/risk.html">Предупреждение о рисках</a>
   </div>
 
 </main>

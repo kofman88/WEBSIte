@@ -1,0 +1,487 @@
+/**
+ * ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+ *   AURA THEME  —  CHM Finance
+ *   Retro-futuristic, techy, dark, monospace-accented, glass surfaces.
+ *   Inspired by neuform.ai/page/aura-superintelligence-for-biology
+ * ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+ *
+ * Loaded AFTER existing styles so it can override. Use .aura-* classes
+ * to opt pages/blocks into the theme incrementally. No existing class
+ * is shadowed implicitly — things only change when .aura-* is added.
+ */
+
+:root {
+  /* ═══ Palette ═══ */
+  --aura-bg: #000000;
+  --aura-surface: #0A0A0A;
+  --aura-surface-elevated: #18181B;
+
+  --aura-text-primary: #FFFFFF;
+  --aura-text-secondary: #A1A1AA;
+  --aura-text-muted: #71717A;
+
+  --aura-border: rgba(255, 255, 255, 0.1);
+  --aura-border-strong: rgba(255, 255, 255, 0.2);
+
+  /* Accents */
+  --aura-accent: #FF5A1F;
+  --aura-accent-glow: rgba(255, 90, 31, 0.6);
+  --aura-secondary: #10B981;
+  --aura-tertiary: #FFF729;
+
+  /* ═══ Typography ═══ */
+  --aura-font-sans: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  --aura-font-mono: 'JetBrains Mono', 'SF Mono', Consolas, Menlo, monospace;
+
+  /* ═══ Radii ═══ */
+  --aura-radius-sm: 4px;
+  --aura-radius-md: 8px;
+  --aura-radius-lg: 12px;
+  --aura-radius-xl: 24px;
+  --aura-radius-full: 9999px;
+
+  /* ═══ Shadows ═══ */
+  --aura-shadow-inset: rgba(255, 255, 255, 0.05) 0 1px 0 0 inset;
+  --aura-shadow-glow: 0 0 10px 0 var(--aura-accent-glow);
+  --aura-shadow-card:
+    0 2px 4px 0 rgba(0, 0, 0, 0.5),
+    inset 0 1px 0 0 rgba(255, 255, 255, 0.05);
+  --aura-shadow-lifted:
+    0 8px 24px -4px rgba(0, 0, 0, 0.7),
+    0 2px 4px 0 rgba(0, 0, 0, 0.5),
+    inset 0 1px 0 0 rgba(255, 255, 255, 0.06);
+
+  /* ═══ Motion ═══ */
+  --aura-ease: cubic-bezier(0.4, 0, 0.2, 1);
+  --aura-duration-fast: 150ms;
+  --aura-duration-normal: 300ms;
+  --aura-duration-slow: 600ms;
+}
+
+/* ═══ Global page atom — only applied when .aura-page is on <body> or
+ *     the outer wrapper. Doesn't cascade into existing styled pages. ═══ */
+.aura-page,
+.aura-page html,
+.aura-page body {
+  background: var(--aura-bg);
+  color: var(--aura-text-primary);
+  font-family: var(--aura-font-sans);
+  font-weight: 300;
+  letter-spacing: -0.01em;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+.aura-page ::selection { background: var(--aura-accent); color: #000; }
+
+/* ═══════════════════════════════════════════════════════════════════
+ *  TYPOGRAPHY
+ * ═══════════════════════════════════════════════════════════════════ */
+
+.aura-h1 {
+  font-family: var(--aura-font-sans);
+  font-size: clamp(40px, 6vw, 72px);
+  font-weight: 300;
+  line-height: 1;
+  letter-spacing: -0.025em;
+  color: var(--aura-text-primary);
+}
+
+.aura-h2 {
+  font-family: var(--aura-font-sans);
+  font-size: clamp(24px, 3vw, 30px);
+  font-weight: 300;
+  line-height: 1.2;
+  letter-spacing: -0.025em;
+  color: var(--aura-text-primary);
+}
+
+.aura-h3 {
+  font-family: var(--aura-font-sans);
+  font-size: clamp(18px, 2vw, 22px);
+  font-weight: 400;
+  line-height: 1.3;
+  letter-spacing: -0.02em;
+  color: var(--aura-text-primary);
+}
+
+.aura-body {
+  font-family: var(--aura-font-sans);
+  font-size: 15px;
+  line-height: 1.6;
+  font-weight: 300;
+  color: var(--aura-text-secondary);
+}
+
+.aura-body-sm {
+  font-family: var(--aura-font-sans);
+  font-size: 13px;
+  line-height: 1.55;
+  font-weight: 300;
+  color: var(--aura-text-secondary);
+}
+
+/* Monospace eyebrow labels — "ARCHITECTURE", "INITIALIZE", etc. */
+.aura-label {
+  font-family: var(--aura-font-mono);
+  font-size: 12px;
+  font-weight: 400;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--aura-text-muted);
+  line-height: 1.4;
+}
+
+.aura-label-sm {
+  font-family: var(--aura-font-mono);
+  font-size: 10px;
+  font-weight: 400;
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
+  color: var(--aura-text-muted);
+  line-height: 1.4;
+}
+
+.aura-mono {
+  font-family: var(--aura-font-mono);
+  font-variant-numeric: tabular-nums;
+}
+
+/* Accent highlight for keywords in headings (e.g. <em>intuition</em>) */
+.aura-h1 .accent,
+.aura-h2 .accent,
+.aura-h3 .accent,
+.aura-h1 em,
+.aura-h2 em,
+.aura-h3 em {
+  color: var(--aura-accent);
+  font-style: normal;
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+ *  LAYOUT
+ * ═══════════════════════════════════════════════════════════════════ */
+
+.aura-section {
+  padding: 112px 24px;
+  position: relative;
+}
+
+.aura-section-sm { padding: 64px 24px; }
+
+@media (max-width: 768px) {
+  .aura-section    { padding: 64px 16px; }
+  .aura-section-sm { padding: 40px 16px; }
+}
+
+.aura-container {
+  max-width: 1280px;
+  margin: 0 auto;
+  width: 100%;
+}
+
+.aura-container-narrow {
+  max-width: 720px;
+  margin: 0 auto;
+  width: 100%;
+}
+
+.aura-divider {
+  height: 1px;
+  background: linear-gradient(90deg, transparent, var(--aura-border), transparent);
+  border: 0;
+  margin: 0;
+}
+
+/* Optional grid background layer (decorative) */
+.aura-grid-bg {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  background-image:
+    linear-gradient(var(--aura-border) 1px, transparent 1px),
+    linear-gradient(90deg, var(--aura-border) 1px, transparent 1px);
+  background-size: 64px 64px;
+  mask-image: radial-gradient(ellipse 90% 70% at 50% 35%, #000 20%, transparent 80%);
+  -webkit-mask-image: radial-gradient(ellipse 90% 70% at 50% 35%, #000 20%, transparent 80%);
+  opacity: 0.6;
+}
+
+.aura-vignette {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  background:
+    radial-gradient(ellipse at top,         rgba(255, 90, 31, 0.06), transparent 50%),
+    radial-gradient(ellipse at bottom left, rgba(16, 185, 129, 0.04), transparent 55%);
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+ *  SHELL (gradient hairline border) + CARD
+ * ═══════════════════════════════════════════════════════════════════ */
+
+.aura-shell {
+  display: block;
+  padding: 1px;
+  border-radius: var(--aura-radius-lg);
+  background: linear-gradient(
+    180deg,
+    rgba(255, 255, 255, 0.14) 0%,
+    rgba(255, 255, 255, 0.02) 100%
+  );
+  transition: background var(--aura-duration-slow) var(--aura-ease);
+}
+
+.aura-shell:hover {
+  background: linear-gradient(
+    180deg,
+    rgba(255, 255, 255, 0.22) 0%,
+    rgba(255, 255, 255, 0.04) 100%
+  );
+}
+
+.aura-card {
+  padding: 24px;
+  background: rgba(10, 10, 10, 0.72);
+  border-radius: calc(var(--aura-radius-lg) - 1px);
+  backdrop-filter: blur(24px) saturate(1.3);
+  -webkit-backdrop-filter: blur(24px) saturate(1.3);
+  box-shadow: var(--aura-shadow-card);
+  position: relative;
+  overflow: hidden;
+}
+
+.aura-card-tight   { padding: 16px; }
+.aura-card-loose   { padding: 40px; }
+
+/* ═══════════════════════════════════════════════════════════════════
+ *  BUTTONS
+ * ═══════════════════════════════════════════════════════════════════ */
+
+.aura-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 12px 24px;
+  font-family: var(--aura-font-sans);
+  font-size: 14px;
+  font-weight: 500;
+  line-height: 20px;
+  letter-spacing: 0;
+  border-radius: var(--aura-radius-sm);
+  border: 1px solid var(--aura-border);
+  background: var(--aura-surface-elevated);
+  color: var(--aura-text-primary);
+  cursor: pointer;
+  text-decoration: none;
+  box-shadow:
+    var(--aura-shadow-inset),
+    0 4px 12px 0 rgba(0, 0, 0, 0.5);
+  transition:
+    background var(--aura-duration-fast) var(--aura-ease),
+    border-color var(--aura-duration-fast) var(--aura-ease),
+    box-shadow var(--aura-duration-fast) var(--aura-ease),
+    transform var(--aura-duration-fast) var(--aura-ease);
+  white-space: nowrap;
+}
+
+.aura-btn:hover {
+  background: #27272A;
+  border-color: var(--aura-border-strong);
+  box-shadow:
+    var(--aura-shadow-inset),
+    0 4px 12px 0 rgba(0, 0, 0, 0.5),
+    var(--aura-shadow-glow);
+}
+
+.aura-btn:active  { transform: translateY(1px); }
+.aura-btn:focus-visible { outline: 2px solid var(--aura-accent); outline-offset: 3px; }
+
+.aura-btn-lg { padding: 16px 32px; font-size: 15px; }
+.aura-btn-sm { padding: 8px 16px;  font-size: 13px; }
+
+/* Primary — accent orange glow on default state */
+.aura-btn-primary {
+  background: var(--aura-accent);
+  border-color: var(--aura-accent);
+  color: #000;
+  font-weight: 500;
+  box-shadow:
+    inset 0 1px 0 0 rgba(255, 255, 255, 0.25),
+    0 0 0 1px rgba(255, 90, 31, 0.4),
+    0 4px 12px 0 rgba(255, 90, 31, 0.3);
+}
+
+.aura-btn-primary:hover {
+  background: #FF6B35;
+  border-color: #FF6B35;
+  box-shadow:
+    inset 0 1px 0 0 rgba(255, 255, 255, 0.3),
+    0 0 0 1px rgba(255, 90, 31, 0.5),
+    0 6px 20px 0 rgba(255, 90, 31, 0.55),
+    var(--aura-shadow-glow);
+}
+
+/* Ghost — just border, for secondary actions */
+.aura-btn-ghost {
+  background: transparent;
+  border-color: var(--aura-border);
+}
+
+.aura-btn-ghost:hover {
+  background: rgba(255, 255, 255, 0.04);
+  border-color: var(--aura-border-strong);
+}
+
+/* Monospace inline link — "MANIFESTO", "DOCS", etc. */
+.aura-link-mono {
+  font-family: var(--aura-font-mono);
+  font-size: 12px;
+  font-weight: 400;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--aura-text-muted);
+  text-decoration: none;
+  padding: 4px 0;
+  border-bottom: 1px solid transparent;
+  transition:
+    color var(--aura-duration-fast) var(--aura-ease),
+    border-color var(--aura-duration-fast) var(--aura-ease);
+}
+
+.aura-link-mono:hover {
+  color: var(--aura-text-primary);
+  border-bottom-color: var(--aura-border-strong);
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+ *  FORM INPUTS
+ * ═══════════════════════════════════════════════════════════════════ */
+
+.aura-input {
+  width: 100%;
+  padding: 12px 14px;
+  background: var(--aura-surface);
+  border: 1px solid var(--aura-border);
+  border-radius: var(--aura-radius-sm);
+  color: var(--aura-text-primary);
+  font-family: var(--aura-font-sans);
+  font-size: 14px;
+  font-weight: 400;
+  line-height: 1.4;
+  outline: none;
+  transition:
+    border-color var(--aura-duration-fast) var(--aura-ease),
+    box-shadow var(--aura-duration-fast) var(--aura-ease),
+    background var(--aura-duration-fast) var(--aura-ease);
+}
+
+.aura-input::placeholder { color: var(--aura-text-muted); }
+
+.aura-input:focus {
+  border-color: var(--aura-accent);
+  background: var(--aura-surface-elevated);
+  box-shadow: 0 0 0 3px rgba(255, 90, 31, 0.18);
+}
+
+.aura-field-label {
+  display: block;
+  margin-bottom: 8px;
+  font-family: var(--aura-font-mono);
+  font-size: 10px;
+  font-weight: 400;
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
+  color: var(--aura-text-muted);
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+ *  BADGES / CHIPS
+ * ═══════════════════════════════════════════════════════════════════ */
+
+.aura-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  background: var(--aura-surface-elevated);
+  border: 1px solid var(--aura-border);
+  border-radius: var(--aura-radius-full);
+  font-family: var(--aura-font-mono);
+  font-size: 11px;
+  font-weight: 400;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--aura-text-secondary);
+  line-height: 1;
+}
+
+.aura-chip-accent {
+  background: rgba(255, 90, 31, 0.1);
+  border-color: rgba(255, 90, 31, 0.3);
+  color: var(--aura-accent);
+}
+
+.aura-chip-success {
+  background: rgba(16, 185, 129, 0.1);
+  border-color: rgba(16, 185, 129, 0.3);
+  color: var(--aura-secondary);
+}
+
+/* Dot indicator (status) */
+.aura-dot {
+  display: inline-block;
+  width: 6px; height: 6px;
+  border-radius: 50%;
+  background: currentColor;
+  box-shadow: 0 0 8px currentColor;
+  animation: aura-pulse 2.4s ease-in-out infinite;
+}
+
+@keyframes aura-pulse {
+  0%, 100% { opacity: 1;  transform: scale(1); }
+  50%      { opacity: 0.5; transform: scale(0.85); }
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+ *  NAV
+ * ═══════════════════════════════════════════════════════════════════ */
+
+.aura-nav {
+  position: fixed;
+  top: 0; left: 0; right: 0;
+  z-index: 50;
+  padding: 16px 24px;
+  background: rgba(0, 0, 0, 0);
+  transition:
+    background var(--aura-duration-normal) var(--aura-ease),
+    backdrop-filter var(--aura-duration-normal) var(--aura-ease),
+    border-color var(--aura-duration-normal) var(--aura-ease);
+  border-bottom: 1px solid transparent;
+}
+
+.aura-nav.scrolled {
+  background: rgba(0, 0, 0, 0.7);
+  backdrop-filter: blur(18px) saturate(1.4);
+  -webkit-backdrop-filter: blur(18px) saturate(1.4);
+  border-bottom-color: var(--aura-border);
+}
+
+.aura-nav-inner {
+  max-width: 1280px;
+  margin: 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+ *  UTILITIES — z-index helpers
+ * ═══════════════════════════════════════════════════════════════════ */
+
+.aura-relative { position: relative; z-index: 1; }
+.aura-fixed    { position: fixed; }
