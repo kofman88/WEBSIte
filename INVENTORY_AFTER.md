@@ -1,11 +1,11 @@
 # INVENTORY — frontend HTML
-Generated 2026-04-21T19:17:39.777Z
+Generated 2026-04-21T19:27:55.934Z
 
 
 ## about.html
 
-- size: 16739 bytes
-- sha256: cbecc0bf247d9e1e
+- size: 16550 bytes
+- sha256: c0ba4a689ae8689e
 
 ### links (20)
 - href=`/` id=`` target=`` 
@@ -28,9 +28,6 @@ Generated 2026-04-21T19:17:39.777Z
 - href=`/terms.html` id=`` target=`` 
 - href=`/privacy.html` id=`` target=`` 
 - href=`/risk.html` id=`` target=`` 
-
-### scripts (1)
-- external: `aura-bg.js`
 
 ## admin.html
 
@@ -351,8 +348,8 @@ let currentSchema = null;          // last-lo`
 
 ## index.html
 
-- size: 107727 bytes
-- sha256: 907520d55e2cd129
+- size: 107538 bytes
+- sha256: 2defd7d6af0d0bbf
 
 ### forms (5)
 - id=`loginForm` action=`` method=`get` inputs=5
@@ -445,11 +442,10 @@ let currentSchema = null;          // last-lo`
 - href=`/privacy.html` id=`` target=`` 
 - href=`${it.link}` id=`` target=`_blank` data-src=assets/promo/${resolveFile(it,lang)} data-title=${it.label[lang]}
 
-### scripts (6)
+### scripts (5)
 - external: `assets/vendor/chart.umd.min.js`
 - external: `https://code.iconify.design/iconify-icon/2.1.0/iconify-icon.min.js`
 - external: `app.js`
-- external: `aura-bg.js`
 - inline: sha256=aaded92f9603ae68 bytes=402
 - inline: sha256=85a98d16980661dc bytes=34080
 
