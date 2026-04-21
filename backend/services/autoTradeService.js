@@ -87,9 +87,23 @@ async function executeSignal(signal, bot, { exchangeService = null, marketData =
   return trade;
 }
 
+// Plan lookups get hit once per signal → once per trade. On a busy cycle
+// that's 1000+ SELECTs against subscriptions. Cache with a 30s TTL (plans
+// change rarely, and billing events invalidate via clearPlanCache()).
+const _planCache = new Map(); // userId → { plan, at }
+const PLAN_TTL_MS = 30_000;
 function _getUserPlan(userId) {
+  const hit = _planCache.get(userId);
+  const now = Date.now();
+  if (hit && now - hit.at < PLAN_TTL_MS) return hit.plan;
   const row = db.prepare('SELECT plan FROM subscriptions WHERE user_id = ?').get(userId);
-  return (row && row.plan) || 'free';
+  const plan = (row && row.plan) || 'free';
+  _planCache.set(userId, { plan, at: now });
+  return plan;
+}
+function clearPlanCache(userId) {
+  if (userId == null) _planCache.clear();
+  else _planCache.delete(userId);
 }
 
 async function _getEquityForSizing(bot, { exchangeService }) {
@@ -294,5 +308,6 @@ function round(x, d = 8) {
 module.exports = {
   executeSignal,
   _computeQty,
+  clearPlanCache,
   PARTIAL_FRACTIONS,
 };

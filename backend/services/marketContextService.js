@@ -28,13 +28,26 @@ function fetchJson(url, timeoutMs = 4000) {
   });
 }
 
+// Stale-while-revalidate cache:
+//   • Fresh hit → return immediately (no fetch)
+//   • Stale hit → return stale value NOW, refresh in the background
+//   • Miss (cold path) → must wait for fetch
+// Keeps the dashboard snappy — no request waits on a slow upstream once warm.
+const _refreshing = new Set();
 function cached(key, fn) {
   const hit = cache.get(key);
-  if (hit && Date.now() - hit.at < CACHE_TTL_MS) return Promise.resolve(hit.data);
+  const now = Date.now();
+  if (hit && now - hit.at < CACHE_TTL_MS) return Promise.resolve(hit.data);
+  if (hit && !_refreshing.has(key)) {
+    _refreshing.add(key);
+    fn().then((data) => { cache.set(key, { at: Date.now(), data }); })
+      .catch((err) => logger.warn('marketContext bg refresh failed', { key, err: err.message }))
+      .finally(() => _refreshing.delete(key));
+    return Promise.resolve(hit.data);
+  }
   return fn().then((data) => { cache.set(key, { at: Date.now(), data }); return data; })
     .catch((err) => {
       logger.warn('marketContext fetch failed', { key, err: err.message });
-      // Return last stale value if present, otherwise null
       return hit ? hit.data : null;
     });
 }
