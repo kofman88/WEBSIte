@@ -1,5 +1,5 @@
 # INVENTORY — frontend HTML
-Generated 2026-04-21T18:56:58.083Z
+Generated 2026-04-21T18:58:55.887Z
 
 
 ## about.html
@@ -132,8 +132,8 @@ document.getElementById(`
 
 ## api-docs.html
 
-- size: 11554 bytes
-- sha256: f3b4b9381b66ac5f
+- size: 11619 bytes
+- sha256: 729db57cd1fe53ff
 
 ### links (14)
 - href=`/` id=`` target=`` 
@@ -536,8 +536,8 @@ let currentSchema = null;          // last-lo`
 
 ## privacy.html
 
-- size: 14392 bytes
-- sha256: 3760443fc93e3040
+- size: 14457 bytes
+- sha256: 4bfd069920e64d3d
 
 ### buttons with id/onclick/data-* (1)
 - id=`burger` onclick=`` type=`` 
@@ -563,8 +563,8 @@ let currentSchema = null;          // last-lo`
 
 ## risk.html
 
-- size: 15179 bytes
-- sha256: 3767d15e3ab1280b
+- size: 15244 bytes
+- sha256: 0836011050d97a58
 
 ### buttons with id/onclick/data-* (1)
 - id=`burger` onclick=`` type=`` 
@@ -732,8 +732,8 @@ let currentSchema = null;          // last-lo`
 
 ## status.html
 
-- size: 5628 bytes
-- sha256: 9112dfc04ef69c0e
+- size: 5695 bytes
+- sha256: 38f665a3c5790c83
 
 ### links (5)
 - href=`/` id=`` target=`` 
@@ -752,8 +752,8 @@ let currentSchema = null;          // last-lo`
 
 ## terms.html
 
-- size: 14484 bytes
-- sha256: c3475896ea62288e
+- size: 14549 bytes
+- sha256: 53616d27fa0621f7
 
 ### buttons with id/onclick/data-* (1)
 - id=`burger` onclick=`` type=`` 
