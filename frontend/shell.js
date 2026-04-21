@@ -141,21 +141,31 @@
     if (!actions) return;
     if (document.getElementById('shellLang')) return; // already wired
 
-    const btnStyle = 'background:none;border:1px solid rgba(255,255,255,.08);border-radius:9999px;padding:6px 12px;color:rgba(255,255,255,.75);cursor:pointer;font-size:12px;display:inline-flex;align-items:center;gap:6px;transition:all .15s';
+    // Prominent pill — outline + hover highlight, min-width so it's never a
+    // flat dot if innerHTML is momentarily empty.
+    const btnStyle = 'background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.14);border-radius:9999px;padding:7px 14px;color:rgba(255,255,255,.9);cursor:pointer;font-size:12px;font-weight:600;line-height:1;min-width:40px;height:32px;display:inline-flex;align-items:center;justify-content:center;gap:6px;transition:background .15s,border-color .15s,color .15s';
 
     const lang = document.createElement('button');
     lang.id = 'shellLang';
     lang.type = 'button';
     lang.title = 'Language';
+    lang.setAttribute('aria-label', 'Toggle language');
     lang.style.cssText = btnStyle;
     lang.textContent = LANG_LABEL[_nextLang(getLang())];
+    lang.addEventListener('mouseenter', () => { lang.style.background = 'rgba(255,255,255,.08)'; lang.style.borderColor = 'rgba(255,255,255,.24)'; });
+    lang.addEventListener('mouseleave', () => { lang.style.background = 'rgba(255,255,255,.04)'; lang.style.borderColor = 'rgba(255,255,255,.14)'; });
     lang.addEventListener('click', () => { setLang(_nextLang(getLang())); applyLang(); });
 
     const theme = document.createElement('button');
     theme.id = 'shellTheme';
     theme.type = 'button';
-    theme.title = 'Theme';
+    theme.title = 'Toggle theme';
+    theme.setAttribute('aria-label', 'Toggle theme');
     theme.style.cssText = btnStyle;
+    // Populate icon immediately (no more waiting for applyTheme race)
+    theme.innerHTML = getTheme() === 'light' ? _sunIcon() : _moonIcon();
+    theme.addEventListener('mouseenter', () => { theme.style.background = 'rgba(255,255,255,.08)'; theme.style.borderColor = 'rgba(255,255,255,.24)'; });
+    theme.addEventListener('mouseleave', () => { theme.style.background = 'rgba(255,255,255,.04)'; theme.style.borderColor = 'rgba(255,255,255,.14)'; });
     theme.addEventListener('click', () => { setTheme(getTheme() === 'dark' ? 'light' : 'dark'); applyTheme(); });
 
     // Place before notification/avatar
@@ -206,11 +216,12 @@
   }
 
   function boot() {
-    applyTheme(); // before anything paints so no flash
+    applyTheme(); // apply <html class="light"> first so no flash
     wireLogo();
-    wireTopbar();
+    wireTopbar();      // creates #shellLang + #shellTheme
+    applyTheme();      // now safely sets the theme-btn icon
+    applyLang();       // translates all data-t + refreshes lang button
     wireMarketTickers();
-    applyLang();
     wirePlanBadge();
   }
 
