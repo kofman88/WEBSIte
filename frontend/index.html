@@ -352,6 +352,11 @@
   </style>
 </head>
 <body>
+<!-- Aura animated background -->
+<div id="aura-bg" aria-hidden="true">
+  <canvas id="aura-grid"></canvas>
+  <canvas id="aura-orb"></canvas>
+</div>
 
 <!-- Full-bleed WebGL-style background stack -->
 <canvas id="particle-canvas" aria-hidden="true"></canvas>
@@ -1346,7 +1351,7 @@ function pickPlan(plan){
   openModal('register');return false;
 }
 // Toggle nav: hide "Войти / Регистрация" and show single "Дашборд" pill when authed.
-// CSS class on <body> drives the swap via .auth-guest / .auth-user rules.
+// CSS class on body drives the swap via .auth-guest / .auth-user rules.
 (function(){try{document.body.classList.toggle('is-authed',_loggedIn())}catch(_){}})();
 
 // ── Theme toggle ──
@@ -1386,5 +1391,6 @@ function toggleTheme(){
   }
 })();
 </script>
+<script src="aura-bg.js" defer></script>
 </body>
 </html>
