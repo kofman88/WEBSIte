@@ -253,6 +253,30 @@
     html.light .chm-check{color:rgba(10,10,10,.6)}
     html.light .chm-check .chm-check-box{background:rgba(0,0,0,.04);border-color:rgba(0,0,0,.18)}
     html.light .chm-check:hover .chm-check-label{color:#0A0A0A}
+
+    /* ── OAuth separator + provider grid ── */
+    .oauth-sep{display:flex;align-items:center;gap:14px;margin:24px 0 16px;color:rgba(255,255,255,.38);font-family:'JetBrains Mono','Inter',monospace;font-size:10px;font-weight:500;letter-spacing:.18em;text-transform:uppercase}
+    .oauth-sep::before,.oauth-sep::after{content:'';flex:1;height:1px;background:rgba(255,255,255,.1)}
+    .oauth-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+    .oauth-btn{
+      display:flex;align-items:center;justify-content:center;gap:8px;
+      min-height:44px;padding:10px 12px;border-radius:10px;
+      background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.1);
+      color:rgba(255,255,255,.82);
+      font-family:'Inter',sans-serif;font-size:13px;font-weight:500;
+      cursor:pointer;transition:all .15s cubic-bezier(.4,0,.2,1);
+      text-decoration:none;
+    }
+    .oauth-btn:hover{border-color:rgba(255,255,255,.22);background:rgba(255,255,255,.07);transform:translateY(-1px);color:#fff}
+    .oauth-btn[disabled],.oauth-btn.disabled{opacity:.4;cursor:not-allowed;pointer-events:none}
+    .oauth-btn .oauth-ic{width:18px;height:18px;flex-shrink:0}
+    .oauth-btn svg{display:block}
+    /* Telegram Widget container — blue Telegram CTA rendered by TG itself */
+    .oauth-tg-wrap{display:flex;justify-content:center;min-height:44px;align-items:center}
+    html.light .oauth-btn{background:rgba(0,0,0,.03);border-color:rgba(0,0,0,.1);color:rgba(10,10,10,.75)}
+    html.light .oauth-btn:hover{background:rgba(0,0,0,.06);border-color:rgba(0,0,0,.22);color:#0A0A0A}
+    html.light .oauth-sep{color:rgba(10,10,10,.45)}
+    html.light .oauth-sep::before,html.light .oauth-sep::after{background:rgba(0,0,0,.1)}
     html.light .modal-bg{background:rgba(230,234,245,.78)}
     html.light .modal-card{background:linear-gradient(180deg,#fff 0%,#F6F7FB 100%);box-shadow:0 32px 80px -12px rgba(0,0,0,.15),0 0 0 1px rgba(0,0,0,.06)}
     html.light .modal-close{background:rgba(0,0,0,.04);border-color:rgba(0,0,0,.08);color:rgba(10,10,10,.7)}
@@ -782,6 +806,11 @@
         </div>
         <button type="submit" class="pill pill-primary pill-md" style="margin-top:4px;justify-content:center" data-t="ml-btn">Войти</button>
       </form>
+
+      <!-- Alternative entry methods — OAuth providers -->
+      <div class="oauth-sep"><span data-t="oa-alt">АЛЬТЕРНАТИВНЫЕ СПОСОБЫ ВХОДА</span></div>
+      <div class="oauth-grid" data-oauth-grid></div>
+
       <p class="t-body" style="margin-top:22px;text-align:center;font-size:13px"><span data-t="ml-no">Нет аккаунта?</span> <button type="button" class="modal-link" data-open-modal="register" data-t="ml-reg">Регистрация</button></p>
     </div>
     <aside class="modal-aside">
@@ -811,6 +840,16 @@
       <h2 class="t-h2" id="registerTitle" style="font-size:32px;margin-bottom:8px" data-t="mr-title">Регистрация</h2>
       <p class="t-body" style="margin-bottom:28px;color:rgba(255,255,255,.62)" data-t="mr-sub">Бесплатный старт — 3 сигнала в день без карты</p>
       <form id="registerForm" class="flex flex-col gap-4">
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="t-eyebrow" style="display:block;margin-bottom:8px;color:rgba(255,255,255,.72)" data-t="mr-given">ИМЯ</label>
+            <input type="text" name="givenName" class="modal-input" placeholder="Алекс" autocomplete="given-name"/>
+          </div>
+          <div>
+            <label class="t-eyebrow" style="display:block;margin-bottom:8px;color:rgba(255,255,255,.72)" data-t="mr-family">ФАМИЛИЯ</label>
+            <input type="text" name="familyName" class="modal-input" placeholder="Смит" autocomplete="family-name"/>
+          </div>
+        </div>
         <div>
           <label class="t-eyebrow" style="display:block;margin-bottom:8px;color:rgba(255,255,255,.72)" data-t="ml-email">EMAIL</label>
           <input type="email" name="email" required class="modal-input" placeholder="you@chm.finance" autocomplete="email"/>
@@ -826,6 +865,11 @@
         <label class="flex items-start gap-2 t-body" style="font-size:12px;margin-top:4px;color:rgba(255,255,255,.72)"><input type="checkbox" required style="accent-color:var(--primary);margin-top:2px"/> <span><span data-t="mr-agree">Я согласен с</span> <a href="terms.html" style="color:var(--primary-400)" data-t="mr-terms">условиями</a></span></label>
         <button type="submit" class="pill pill-primary pill-md" style="margin-top:6px;justify-content:center" data-t="mr-btn">Создать аккаунт</button>
       </form>
+
+      <!-- Alternative entry methods — OAuth providers -->
+      <div class="oauth-sep"><span data-t="oa-alt">АЛЬТЕРНАТИВНЫЕ СПОСОБЫ ВХОДА</span></div>
+      <div class="oauth-grid" data-oauth-grid></div>
+
       <p class="t-body" style="margin-top:22px;text-align:center;font-size:13px"><span data-t="mr-has">Уже есть аккаунт?</span> <button type="button" class="modal-link" data-open-modal="login" data-t="mr-login">Войти</button></p>
     </div>
     <aside class="modal-aside">
@@ -1272,7 +1316,7 @@ document.getElementById('registerForm')?.addEventListener('submit',async e=>{
   e.preventDefault();const fd=new FormData(e.target);
   if(fd.get('password')!==fd.get('password2')){_notify.err('Пароли не совпадают');return}
   const btn=e.target.querySelector('button[type=submit]');if(btn)btn.disabled=true;
-  try{await _authCall('/auth/register',{email:fd.get('email'),password:fd.get('password'),referralCode:_refCode()});try{localStorage.removeItem('chm_ref_code')}catch(e){}closeModals();_notify.ok('Аккаунт создан!');setTimeout(()=>location.href=_nextUrl(),500)}
+  try{await _authCall('/auth/register',{email:fd.get('email'),password:fd.get('password'),referralCode:_refCode(),givenName:fd.get('givenName')||undefined,familyName:fd.get('familyName')||undefined});try{localStorage.removeItem('chm_ref_code')}catch(e){}closeModals();_notify.ok('Аккаунт создан!');setTimeout(()=>location.href=_nextUrl(),500)}
   catch(err){_notify.err(err.message||'Ошибка регистрации. Проверьте подключение.')}
   finally{if(btn)btn.disabled=false}
 });
@@ -1534,6 +1578,85 @@ function toggleTheme(){
     setTimeout(()=>{openModal('verifyEmail')},400);
     history.replaceState({},'',location.pathname);
   }
+  // OAuth error surfacing — /auth/oauth/google/callback redirects here with
+  // ?oauth_error=<code> if anything failed in the flow.
+  if(q.get('oauth_error')){
+    setTimeout(()=>_notify.err('Не удалось войти через OAuth: '+q.get('oauth_error')),400);
+    history.replaceState({},'',location.pathname);
+  }
+})();
+
+// OAuth callback (Google) — tokens arrive in URL fragment for security
+(function handleOAuthFragment(){
+  if(!location.hash||location.hash.length<3)return;
+  const h=new URLSearchParams(location.hash.slice(1));
+  const at=h.get('access_token');const rt=h.get('refresh_token');const prov=h.get('provider');
+  if(!at||!rt)return;
+  try{
+    if(typeof Auth!=='undefined'){
+      Auth.setTokens({accessToken:at,refreshToken:rt});
+      // Purge fragment from URL before any further processing
+      history.replaceState({},'',location.pathname);
+      _notify.ok('Вход через '+(prov||'OAuth')+' выполнен!');
+      setTimeout(()=>location.href='dashboard.html',500);
+    }
+  }catch(e){_notify.err('Ошибка OAuth: '+e.message)}
+})();
+
+// OAuth provider grid — fetches enabled providers and injects buttons
+// into all [data-oauth-grid] containers. Re-renders on each modal open.
+(async function initOAuthProviders(){
+  let providers={};
+  try{
+    const base=(location.hostname==='localhost'||location.hostname==='127.0.0.1')?'http://localhost:3000/api':'/api';
+    const r=await fetch(base+'/auth/oauth/providers');
+    if(r.ok)providers=await r.json();
+  }catch(e){console.warn('oauth providers fetch failed',e)}
+
+  const SVG_GOOGLE='<svg class="oauth-ic" viewBox="0 0 24 24"><path fill="#4285F4" d="M22.5 12.2c0-.7-.1-1.4-.2-2H12v3.8h5.9a5 5 0 0 1-2.2 3.3v2.7h3.5c2-1.9 3.3-4.7 3.3-7.8z"/><path fill="#34A853" d="M12 23c3 0 5.5-1 7.3-2.7l-3.5-2.7a7 7 0 0 1-10.4-3.7H1.8v2.8A11 11 0 0 0 12 23z"/><path fill="#FBBC05" d="M5.3 13.8a7 7 0 0 1 0-3.6V7.4H1.8a11 11 0 0 0 0 9.2l3.5-2.8z"/><path fill="#EA4335" d="M12 5.4a6 6 0 0 1 4.3 1.7l3.2-3.2A11 11 0 0 0 12 1 11 11 0 0 0 1.8 7.4l3.5 2.8A7 7 0 0 1 12 5.4z"/></svg>';
+  const SVG_APPLE='<svg class="oauth-ic" viewBox="0 0 24 24" fill="currentColor"><path d="M17.6 12.6c0-2.7 2.2-4 2.3-4-1.2-1.8-3.2-2-3.9-2-1.6-.2-3.2 1-4 1s-2.1-1-3.5-1c-1.8 0-3.5 1-4.4 2.7-1.9 3.3-.5 8.1 1.4 10.8.9 1.3 2 2.8 3.4 2.7 1.4-.1 1.9-.9 3.5-.9s2.1.9 3.5.9c1.5 0 2.4-1.3 3.3-2.6 1-1.4 1.5-2.9 1.5-3 0 0-2.9-1.1-3-4.4l-.1-.2zM15 4.5c.7-.9 1.2-2.1 1.1-3.3-1 0-2.3.7-3.1 1.5-.7.8-1.2 2-1.1 3.2 1.1.1 2.3-.6 3.1-1.4z"/></svg>';
+  const SVG_TG='<svg class="oauth-ic" viewBox="0 0 24 24" fill="currentColor"><path d="M23.3 2.7 2.4 10.8c-1.4.6-1.4 1.4-.2 1.8l5.3 1.7 2.1 6.3c.3.7.1 1 .9 1 .6 0 .9-.3 1.2-.6l2.6-2.5 5.3 4c1 .5 1.7.2 2-.9L22.9 4c.3-1.5-.5-2-1.6-1.3zM8.3 15.2 17 9.6c.4-.3.8-.1.5.2l-7 6.3-.3 3.6-1.9-4.5z"/></svg>';
+
+  const label={google:'Google',telegram:'Telegram',apple:'Apple'};
+  document.querySelectorAll('[data-oauth-grid]').forEach((grid)=>{
+    grid.innerHTML='';
+    // Google
+    const g=document.createElement('a');
+    g.href='/api/auth/oauth/google/start';
+    g.className='oauth-btn';
+    g.innerHTML=SVG_GOOGLE+'<span>'+label.google+'</span>';
+    if(!providers.google||!providers.google.enabled){g.classList.add('disabled');g.title='Скоро будет доступно';g.addEventListener('click',(e)=>{e.preventDefault();_notify.err('Google login ещё не настроен')});}
+    grid.appendChild(g);
+    // Telegram
+    const tg=document.createElement('button');
+    tg.type='button';tg.className='oauth-btn';
+    tg.innerHTML=SVG_TG+'<span>'+label.telegram+'</span>';
+    if(providers.telegram&&providers.telegram.enabled){
+      tg.addEventListener('click',()=>openTelegramLogin(providers.telegram.username));
+    }else{
+      tg.classList.add('disabled');tg.title='Скоро будет доступно';
+    }
+    grid.appendChild(tg);
+    // Apple placeholder (always disabled until paid developer cert)
+    const ap=document.createElement('button');
+    ap.type='button';ap.className='oauth-btn disabled';ap.title='Apple Sign In скоро';
+    ap.innerHTML=SVG_APPLE+'<span>'+label.apple+'</span>';
+    grid.appendChild(ap);
+  });
+
+  // Telegram login — opens official widget in a popup, widget POSTs
+  // the signed payload back to our /api/auth/oauth/telegram endpoint.
+  window.openTelegramLogin=function(botUsername){
+    const w=550,h=470;
+    const left=(screen.width-w)/2,top=(screen.height-h)/2;
+    const url='https://oauth.telegram.org/auth?bot_id='+encodeURIComponent(botUsername)+'&origin='+encodeURIComponent(location.origin)+'&return_to='+encodeURIComponent(location.origin+'/')+'&request_access=write';
+    // NOTE: the cleanest UX is to render TG's official <script> widget
+    // inline; we use the popup here as a fallback that works without
+    // injecting third-party script tags. Tokens come back via our /telegram
+    // endpoint after the user confirms in the popup.
+    window.open(url,'tg_login','width='+w+',height='+h+',left='+left+',top='+top);
+    _notify.info('Открываем окно Telegram…');
+  };
 })();
 
 // Resend verification email handler

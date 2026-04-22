@@ -100,7 +100,7 @@ function audit(userId, action, meta = null, ip = null, ua = null) {
   }
 }
 
-function register({ email, password, displayName, referralCode, ipAddress, userAgent }) {
+function register({ email, password, displayName, givenName, familyName, referralCode, ipAddress, userAgent }) {
   const existing = db.prepare('SELECT id FROM users WHERE email = ?').get(email);
   if (existing) {
     const err = new Error('Email already registered');
@@ -127,10 +127,17 @@ function register({ email, password, displayName, referralCode, ipAddress, userA
   const refCode = ensureUniqueRefCode();
 
   const userId = db.transaction(() => {
+    // Compose display_name from given+family if caller passed a name split;
+    // otherwise use the legacy `displayName` field verbatim.
+    const composedName = displayName
+      || [givenName, familyName].filter(Boolean).join(' ').trim()
+      || null;
     const ins = db.prepare(`
-      INSERT INTO users (email, password_hash, display_name, referral_code, referred_by, email_verified, is_active)
-      VALUES (?, ?, ?, ?, ?, 0, 1)
-    `).run(email, passwordHash, displayName || null, refCode, referrerId);
+      INSERT INTO users
+        (email, password_hash, display_name, given_name, family_name,
+         referral_code, referred_by, email_verified, is_active, oauth_provider)
+      VALUES (?, ?, ?, ?, ?, ?, ?, 0, 1, 'password')
+    `).run(email, passwordHash, composedName, givenName || null, familyName || null, refCode, referrerId);
     const id = ins.lastInsertRowid;
 
     db.prepare(`INSERT INTO subscriptions (user_id, plan, status) VALUES (?, 'free', 'active')`).run(id);

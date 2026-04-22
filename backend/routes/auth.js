@@ -44,6 +44,8 @@ router.post('/register', geoBlock(), registerLimiter, (req, res, next) => {
       email: input.email,
       password: input.password,
       displayName: input.displayName,
+      givenName: input.givenName,
+      familyName: input.familyName,
       referralCode: input.referralCode,
       ipAddress: getIp(req),
       userAgent: getUA(req),
