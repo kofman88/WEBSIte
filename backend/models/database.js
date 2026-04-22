@@ -78,6 +78,13 @@ db.exec(`
   try {
     const cols = db.prepare("PRAGMA table_info('trading_bots')").all().map(c => c.name);
     if (!cols.includes('tv_webhook_secret')) db.exec("ALTER TABLE trading_bots ADD COLUMN tv_webhook_secret TEXT");
+    // Market Scanner (Elite-only feature):
+    //   scope            'pair' (existing) | 'market' (scan entire universe)
+    //   market_exchanges JSON array, e.g. ["bybit","binance"] — for scope='market'
+    //   strategies_multi JSON array — Elite combo, e.g. ["smc","levels"]; null = use single `strategy`
+    if (!cols.includes('scope'))            db.exec("ALTER TABLE trading_bots ADD COLUMN scope TEXT DEFAULT 'pair'");
+    if (!cols.includes('market_exchanges')) db.exec("ALTER TABLE trading_bots ADD COLUMN market_exchanges TEXT");
+    if (!cols.includes('strategies_multi')) db.exec("ALTER TABLE trading_bots ADD COLUMN strategies_multi TEXT");
   } catch(_){}
 })();
 // Phase E: public profile opt-in
