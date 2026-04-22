@@ -1521,6 +1521,9 @@ function toggleTheme(){
   if(verified==='1'){
     setTimeout(()=>_notify.ok('Email подтверждён'),400);
     history.replaceState({},'',location.pathname);
+    // Patch Auth.user so the next dashboard visit doesn't trigger the
+    // email-verify modal from stale localStorage cache.
+    try{if(typeof Auth!=='undefined'&&Auth.accessToken&&Auth.refreshUserAndMaybeRedirect)Auth.refreshUserAndMaybeRedirect()}catch(_){}
   } else if(verified==='0'){
     setTimeout(()=>_notify.err('Ссылка недействительна или просрочена'),400);
     history.replaceState({},'',location.pathname);

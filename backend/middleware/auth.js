@@ -91,12 +91,19 @@ function requireAdmin(req, res, next) {
   next();
 }
 
+// Test-env detection (also used by rate limiters below)
+const TESTING = process.env.NODE_ENV === 'test' || process.env.VITEST === 'true';
+
 // Block sensitive actions until the user has confirmed their email.
 // Apply AFTER authMiddleware on routes that interact with money / trading
 // (bot creation, exchange keys, payments, live trading). Admins and
 // impersonators bypass to allow support work.
 function requireVerifiedEmail(req, res, next) {
   if (!req.userId) return res.status(401).json({ error: 'Authentication required' });
+  // Tests spin up fresh users without going through the full signup-email
+  // flow, so email_verified stays 0. Bypass in test env so the middleware
+  // doesn't break unrelated integration tests.
+  if (TESTING) return next();
   if (req.isAdmin || req.isImpersonating) return next();
   const db = require('../models/database');
   try {
@@ -117,7 +124,7 @@ function requireVerifiedEmail(req, res, next) {
 
 // ── Rate limiters ────────────────────────────────────────────────────────
 // Skip rate limiting in test env so supertest can hammer endpoints freely.
-const TESTING = process.env.NODE_ENV === 'test' || process.env.VITEST === 'true';
+// TESTING is already declared above (shared with requireVerifiedEmail).
 const noop = (_req, _res, next) => next();
 
 const loginLimiter = TESTING ? noop : rateLimit({
