@@ -498,6 +498,22 @@ function verifyPending(token) {
   return d.uid;
 }
 
+// Convenience wrapper used by OAuth flows — mirror what login() returns
+// for password users. No password check, no 2FA branch (OAuth already
+// gives us a trusted identity).
+function issueSessionForUser(userId, { ipAddress = null, userAgent = null } = {}) {
+  const user = getUserPublic(userId);
+  if (!user) { const e = new Error('User not found'); e.statusCode = 404; throw e; }
+  try {
+    db.prepare('UPDATE users SET last_login_at = CURRENT_TIMESTAMP WHERE id = ?').run(userId);
+    db.prepare('INSERT INTO login_history (user_id, ip_address, user_agent, success) VALUES (?, ?, ?, 1)')
+      .run(userId, ipAddress || null, userAgent || null);
+  } catch (_e) {}
+  const accessToken = signAccessToken(userId);
+  const refresh = issueRefreshToken(userId, { userAgent, ipAddress });
+  return { user, accessToken, refreshToken: refresh.token, refreshExpiresAt: refresh.expiresAt };
+}
+
 module.exports = {
   register,
   login,
@@ -517,6 +533,7 @@ module.exports = {
   finalizeLoginAfter2FA,
   verifyAccessToken,
   getUserPublic,
+  issueSessionForUser,
   _signAccessToken: signAccessToken,
   _signPending: _signPending,
 };
