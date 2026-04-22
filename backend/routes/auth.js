@@ -281,4 +281,109 @@ router.get('/login-history', authMiddleware, (req, res, next) => {
   } catch (err) { handleServiceError(err, res, next); }
 });
 
+// ── OAuth / Social login (Google + Telegram) ─────────────────────────
+const oauth = require('../services/oauthService');
+
+// Tiny cookie parser — avoids adding cookie-parser as a runtime dep.
+// Returns the value of the named cookie or '' if absent / malformed.
+function readCookie(req, name) {
+  const raw = req.headers && req.headers.cookie;
+  if (!raw) return '';
+  for (const part of raw.split(';')) {
+    const idx = part.indexOf('=');
+    if (idx === -1) continue;
+    const k = part.slice(0, idx).trim();
+    if (k === name) {
+      try { return decodeURIComponent(part.slice(idx + 1).trim()); } catch (_e) { return ''; }
+    }
+  }
+  return '';
+}
+
+// Feature-flag endpoint — frontend reads this to know which buttons to render.
+router.get('/oauth/providers', (_req, res) => {
+  try { res.json(oauth.providers()); } catch (_e) { res.json({}); }
+});
+
+// Google: step 1 — redirect the browser to the Google consent screen.
+router.get('/oauth/google/start', (req, res) => {
+  try {
+    const state = oauth.issueState();
+    // Remember where to send the user back to (passed as ?redirect=/dashboard.html)
+    const returnTo = typeof req.query.redirect === 'string' && req.query.redirect.startsWith('/')
+      ? req.query.redirect : '/dashboard.html';
+    res.cookie('oauth_state', state, { httpOnly: true, sameSite: 'lax', maxAge: 10 * 60 * 1000, secure: process.env.NODE_ENV === 'production' });
+    res.cookie('oauth_return', returnTo, { httpOnly: true, sameSite: 'lax', maxAge: 10 * 60 * 1000, secure: process.env.NODE_ENV === 'production' });
+    res.redirect(oauth.googleAuthUrl(state));
+  } catch (err) {
+    if (err.statusCode === 503) return res.redirect('/?oauth_error=disabled&provider=google');
+    res.redirect('/?oauth_error=start_failed');
+  }
+});
+
+// Google: step 2 — callback with ?code=...&state=...
+router.get('/oauth/google/callback', async (req, res) => {
+  try {
+    const code = String(req.query.code || '');
+    const state = String(req.query.state || '');
+    const cookieState = readCookie(req, 'oauth_state');
+    if (!code) return res.redirect('/?oauth_error=no_code');
+    if (!state || state !== cookieState || !oauth.verifyState(state)) {
+      return res.redirect('/?oauth_error=bad_state');
+    }
+    const tok = await oauth.googleExchangeCode(code);
+    const profile = await oauth.googleFetchProfile(tok.access_token);
+    const user = oauth.upsertOAuthUser({
+      provider: 'google',
+      providerId: profile.sub,
+      email: profile.email,
+      emailVerified: profile.emailVerified,
+      givenName: profile.givenName,
+      familyName: profile.familyName,
+      avatarUrl: profile.picture,
+    });
+    const session = authService.issueSessionForUser(user.id, { ipAddress: getIp(req), userAgent: getUA(req) });
+    const returnTo = readCookie(req, 'oauth_return') || '/dashboard.html';
+    res.clearCookie('oauth_state'); res.clearCookie('oauth_return');
+    // URL fragment — tokens never hit server logs / referrer headers
+    const frag = new URLSearchParams({
+      access_token: session.accessToken,
+      refresh_token: session.refreshToken,
+      provider: 'google',
+    }).toString();
+    res.redirect(returnTo + '#' + frag);
+  } catch (err) {
+    const code = err && err.code ? err.code : 'ERR';
+    res.redirect('/?oauth_error=' + encodeURIComponent(code));
+  }
+});
+
+// Telegram: POST with the Login Widget payload {id, first_name, username, photo_url, auth_date, hash}
+router.post('/oauth/telegram', (req, res, next) => {
+  try {
+    const payload = z.object({
+      id: z.union([z.string(), z.number()]).transform(String),
+      first_name: z.string().optional(),
+      last_name: z.string().optional(),
+      username: z.string().optional(),
+      photo_url: z.string().optional(),
+      auth_date: z.union([z.string(), z.number()]).transform(Number),
+      hash: z.string().min(32),
+    }).parse(req.body);
+    const tg = oauth.verifyTelegram(payload);
+    const user = oauth.upsertOAuthUser({
+      provider: 'telegram',
+      providerId: tg.tgId,
+      email: null,
+      emailVerified: false,
+      givenName: tg.firstName,
+      familyName: tg.lastName,
+      avatarUrl: tg.photoUrl,
+      tgUsername: tg.username,
+    });
+    const session = authService.issueSessionForUser(user.id, { ipAddress: getIp(req), userAgent: getUA(req) });
+    res.json(session);
+  } catch (err) { handleServiceError(err, res, next); }
+});
+
 module.exports = router;
