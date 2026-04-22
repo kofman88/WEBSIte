@@ -117,11 +117,11 @@
         <!-- Market-scope fields (visible when scope='market') -->
         <div id="marketFields" class="hidden mt-3">
           <div class="field-label">Биржи для сканирования<span class="help-dot" tabindex="0" data-help="Выбери одну или несколько бирж — бот обойдёт все USDT-пары каждой из них. Чем больше бирж, тем больше пар проверяется за цикл.">i</span></div>
-          <div class="grid grid-cols-2 gap-2">
-            <label class="flex items-center gap-2 p-3 rounded-xl bg-slate-800/40 border border-slate-700 cursor-pointer"><input type="checkbox" name="marketExchanges" value="bybit" class="accent-orange-500"/> <span>Bybit</span></label>
-            <label class="flex items-center gap-2 p-3 rounded-xl bg-slate-800/40 border border-slate-700 cursor-pointer"><input type="checkbox" name="marketExchanges" value="binance" class="accent-orange-500"/> <span>Binance</span></label>
-            <label class="flex items-center gap-2 p-3 rounded-xl bg-slate-800/40 border border-slate-700 cursor-pointer"><input type="checkbox" name="marketExchanges" value="bingx" class="accent-orange-500"/> <span>BingX</span></label>
-            <label class="flex items-center gap-2 p-3 rounded-xl bg-slate-800/40 border border-slate-700 cursor-pointer"><input type="checkbox" name="marketExchanges" value="okx" class="accent-orange-500"/> <span>OKX</span></label>
+          <div class="grid grid-cols-2 gap-2.5" id="exchangesGrid">
+            <label class="aura-chip-check"><input type="checkbox" name="marketExchanges" value="bybit"/><span class="aura-chip-box"><svg width="11" height="11" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M2.5 6.5L5 9l4.5-5.5"/></svg></span><span class="aura-chip-label">Bybit</span></label>
+            <label class="aura-chip-check"><input type="checkbox" name="marketExchanges" value="binance"/><span class="aura-chip-box"><svg width="11" height="11" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M2.5 6.5L5 9l4.5-5.5"/></svg></span><span class="aura-chip-label">Binance</span></label>
+            <label class="aura-chip-check"><input type="checkbox" name="marketExchanges" value="bingx"/><span class="aura-chip-box"><svg width="11" height="11" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M2.5 6.5L5 9l4.5-5.5"/></svg></span><span class="aura-chip-label">BingX</span></label>
+            <label class="aura-chip-check"><input type="checkbox" name="marketExchanges" value="okx"/><span class="aura-chip-box"><svg width="11" height="11" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M2.5 6.5L5 9l4.5-5.5"/></svg></span><span class="aura-chip-label">OKX</span></label>
           </div>
         </div>
 
@@ -305,6 +305,65 @@ html.light .help-dot:hover{background:#FF5A1F;color:#fff}
 html.light .help-dot::after{background:#fff;border-color:rgba(0,0,0,.12);color:#0A0A0A;box-shadow:0 8px 24px rgba(0,0,0,.12)}
 html.light .help-dot::before{border-bottom-color:#fff}
 html.light .help-dot.up::before{border-bottom-color:transparent;border-top-color:#fff}
+
+/* ── Aura multi-select checkbox chip (Market Scanner exchanges) ── */
+.aura-chip-check {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  padding: 13px 16px;
+  background: linear-gradient(180deg, rgba(255,255,255,.035) 0%, rgba(255,255,255,.01) 100%);
+  border: 1px solid rgba(255,255,255,.1);
+  border-radius: 12px;
+  cursor: pointer;
+  font-family: 'Inter', sans-serif;
+  font-size: 14px;
+  font-weight: 500;
+  color: rgba(255,255,255,.75);
+  transition: all .16s cubic-bezier(.4,0,.2,1);
+  user-select: none;
+}
+.aura-chip-check:hover {
+  border-color: rgba(255,140,90,.35);
+  background: linear-gradient(180deg, rgba(255,140,90,.08) 0%, rgba(255,90,31,.02) 100%);
+  color: #fff;
+  transform: translateY(-1px);
+}
+.aura-chip-check input {
+  position: absolute;
+  opacity: 0;
+  pointer-events: none;
+}
+.aura-chip-box {
+  width: 18px; height: 18px;
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 5px;
+  border: 1.5px solid rgba(255,255,255,.22);
+  background: rgba(255,255,255,.03);
+  color: transparent;
+  transition: all .16s cubic-bezier(.4,0,.2,1);
+}
+.aura-chip-check input:checked ~ .aura-chip-box {
+  background: linear-gradient(180deg, #FF7840, #FF5A1F 60%, #C44610);
+  border-color: #FF5A1F;
+  color: #fff;
+  box-shadow: inset 0 1px 1px rgba(255,255,255,.28), 0 2px 6px -1px rgba(255,90,31,.5);
+}
+.aura-chip-check:has(input:checked) {
+  border-color: #FF5A1F;
+  background: linear-gradient(180deg, rgba(255,90,31,.14) 0%, rgba(255,90,31,.04) 100%);
+  color: #fff;
+  box-shadow: 0 0 0 1px rgba(255,90,31,.35), 0 4px 12px -2px rgba(255,90,31,.28);
+}
+.aura-chip-check input:focus-visible ~ .aura-chip-box { outline: 2px solid #FF5A1F; outline-offset: 2px; }
+html.light .aura-chip-check { background: rgba(0,0,0,.03); border-color: rgba(0,0,0,.1); color: rgba(10,10,10,.72); }
+html.light .aura-chip-check:hover { background: rgba(255,90,31,.08); border-color: rgba(255,90,31,.35); color: #0A0A0A; }
+html.light .aura-chip-box { background: rgba(0,0,0,.04); border-color: rgba(0,0,0,.22); }
+html.light .aura-chip-check:has(input:checked) { background: rgba(255,90,31,.1); color: #0A0A0A; }
 
 /* ── Custom dropdown — replaces browser-native <select> ── */
 .chm-select{position:relative;width:100%}
@@ -817,9 +876,15 @@ function validateStep(n) {
   const form = document.getElementById('createBotForm');
   if (n === 1) {
     const name = form.name.value.trim();
-    const symbol = form.symbol.value.trim();
+    const scope = (new FormData(form).get('scope') || 'pair').toString();
     if (!name) { Toast.warn('Введи имя бота'); return false; }
-    if (!symbol) { Toast.warn('Введи торговую пару'); return false; }
+    if (scope === 'market') {
+      const exs = new FormData(form).getAll('marketExchanges').filter(Boolean);
+      if (!exs.length) { Toast.warn('Выбери хотя бы одну биржу для сканирования'); return false; }
+    } else {
+      const symbol = (form.symbol && form.symbol.value || '').trim();
+      if (!symbol) { Toast.warn('Введи торговую пару'); return false; }
+    }
   }
   return true;
 }
