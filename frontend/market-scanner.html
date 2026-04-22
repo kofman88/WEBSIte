@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="ru" class="aura-page">
+<head>
+  <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+  <title>CHM Finance — Market Scanner</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet"/>
+  <script src="assets/vendor/chart.umd.min.js"></script>
+  <link rel="stylesheet" href="tailwind.css"/>
+  <link rel="stylesheet" href="styles.css"/>
+  <link rel="stylesheet" href="aura-theme.css"/>
+</head>
+<body>
+<aside class="sidebar" id="sidebar">
+  <div class="sidebar-logo">CHM<span>.</span></div>
+  <nav class="sidebar-nav">
+    <a href="dashboard.html" class="sidebar-link" data-page="dashboard"><svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>Дашборд</a>
+    <a href="bots.html" class="sidebar-link" data-page="bots"><svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2a4 4 0 014 4v1h2a2 2 0 012 2v10a2 2 0 01-2 2H6a2 2 0 01-2-2V9a2 2 0 012-2h2V6a4 4 0 014-4z"/></svg>Боты</a>
+    <a href="signals.html" class="sidebar-link" data-page="signals"><svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>Сигналы</a>
+    <a href="market-scanner.html" class="sidebar-link active" data-page="market-scanner"><svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.35-4.35"/></svg>Market Scanner</a>
+    <a href="analytics.html" class="sidebar-link" data-page="analytics"><svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 3v18h18"/><path d="M7 14l4-4 4 4 5-5"/></svg>Аналитика</a>
+    <a href="backtests.html" class="sidebar-link" data-page="backtests"><svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6m6 0h10"/></svg>Бэктесты</a>
+    <a href="wallet.html" class="sidebar-link" data-page="wallet"><svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12V7H5a2 2 0 010-4h14v4M3 5v14a2 2 0 002 2h16v-5"/></svg>Кошелёк</a>
+    <a href="leaderboard.html" class="sidebar-link" data-page="leaderboard"><svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>Leaderboard</a>
+    <a href="settings.html" class="sidebar-link" data-page="settings"><svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/></svg>Настройки</a>
+  </nav>
+  <div class="sidebar-footer"><button onclick="Auth.logout()" class="sidebar-link" style="color:#C8B9B9"><svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4M16 17l5-5-5-5M21 12H9"/></svg>Выйти</button></div>
+</aside>
+<header class="topbar">
+  <div class="flex items-center gap-4">
+    <button id="sidebar-toggle" class="lg:hidden" aria-label="Toggle menu" style="background:none;border:none;color:rgba(255,255,255,.62);cursor:pointer">
+      <svg aria-hidden="true" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 6h16M4 12h16M4 18h16"/></svg>
+    </button>
+    <h1 class="text-xl font-bold">Market Scanner</h1>
+    <span class="text-xs ml-3 px-2 py-1 rounded" style="background:rgba(255,90,31,.15);color:#FF8C5A;letter-spacing:.04em">ELITE</span>
+    <div class="flex items-center gap-2 ml-4"><span class="w-2 h-2 bg-green-400 rounded-full animate-pulse"></span><span class="text-xs text-green-400">Live</span></div>
+  </div>
+  <div class="topbar-actions">
+    <button id="shellLang" type="button" class="shell-topbar-btn" title="Language">EN</button>
+    <button id="shellTheme" type="button" class="shell-topbar-btn" title="Toggle theme" aria-label="Toggle theme"></button>
+    <div class="topbar-user"><div class="topbar-avatar">U</div></div>
+  </div>
+</header>
+
+<main class="main-content">
+  <!-- Elite-gate banner (shown if non-Elite lands here by direct URL) -->
+  <div id="eliteGate" class="hidden card mb-6" style="border:1px solid rgba(255,90,31,.3);background:rgba(255,90,31,.06)">
+    <div class="flex items-start gap-4">
+      <div style="width:48px;height:48px;border-radius:50%;background:rgba(255,90,31,.15);display:flex;align-items:center;justify-content:center;color:#FF8C5A;font-size:24px">✦</div>
+      <div class="flex-1">
+        <h3 class="font-semibold text-lg" style="color:#FF8C5A">Market Scanner — функция Elite-тарифа</h3>
+        <p class="text-sm text-slate-300 mt-1">Сканер всего рынка просматривает сотни USDT-пар по нескольким биржам и ищет сигналы по нескольким стратегиям одновременно. Доступно на Elite.</p>
+        <a href="settings.html?upgrade=elite" class="inline-flex items-center gap-2 mt-4 px-5 py-2.5 rounded-xl font-semibold text-white" style="background:linear-gradient(180deg,#FF7840,#FF5A1F 60%,#C44610);box-shadow:0 4px 10px -2px rgba(255,90,31,.5)">Перейти на Elite →</a>
+      </div>
+    </div>
+  </div>
+
+  <!-- Elite users see the scanner UI -->
+  <div id="scannerUI" class="hidden">
+    <!-- Summary cards -->
+    <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+      <div class="stat-card"><div class="stat-card-label">Market-ботов</div><div class="stat-card-value" id="mbCount">—</div></div>
+      <div class="stat-card"><div class="stat-card-label">Сигналов сегодня</div><div class="stat-card-value" id="mbSignals">—</div></div>
+      <div class="stat-card"><div class="stat-card-label">Открытых сделок</div><div class="stat-card-value" id="mbOpen">—</div></div>
+      <div class="stat-card"><div class="stat-card-label">PnL 24h</div><div class="stat-card-value" id="mbPnl">—</div></div>
+    </div>
+
+    <!-- Active market bots -->
+    <div class="card mb-6">
+      <div class="flex items-center justify-between mb-4">
+        <h2 class="font-bold">Твои market-боты</h2>
+        <a href="bots.html" class="text-xs text-orange-400 hover:text-orange-300">+ Создать нового</a>
+      </div>
+      <div id="marketBotsList" class="space-y-3">
+        <div class="text-center text-slate-500 py-6 text-sm">Загрузка…</div>
+      </div>
+    </div>
+
+    <!-- Live signal feed from market bots only -->
+    <div class="card">
+      <div class="flex items-center justify-between mb-4">
+        <h2 class="font-bold">Последние сигналы с рынка</h2>
+        <span class="text-xs text-slate-500" id="feedMeta">—</span>
+      </div>
+      <div id="marketSignalFeed" class="space-y-3">
+        <div class="text-center text-slate-500 py-6 text-sm">Загрузка…</div>
+      </div>
+    </div>
+  </div>
+</main>
+
+<script src="app.js"></script>
+<script src="shell.js?v=7" defer></script>
+<script>
+if (!Auth.requireAuth()) throw new Error('noauth');
+
+(async function init() {
+  let plan = 'free';
+  try {
+    const me = await API.me();
+    const u = me.user || me;
+    plan = (u && (u.plan || (u.subscription && u.subscription.plan))) || 'free';
+  } catch (_e) {}
+
+  if (plan !== 'elite') {
+    document.getElementById('eliteGate').classList.remove('hidden');
+    return; // don't fetch data for non-Elite — the page is gated
+  }
+  document.getElementById('scannerUI').classList.remove('hidden');
+
+  await Promise.all([loadBots(), loadSignals()]);
+})();
+
+async function loadBots() {
+  try {
+    const r = await API.listBots();
+    const bots = (r.bots || []).filter((b) => b.scope === 'market');
+    document.getElementById('mbCount').textContent = bots.length;
+    const list = document.getElementById('marketBotsList');
+    if (!bots.length) {
+      list.innerHTML = '<div class="text-center text-slate-500 py-8 text-sm">Пока нет market-ботов. <a href="bots.html" class="text-orange-400">Создать →</a></div>';
+      return;
+    }
+    list.innerHTML = bots.map((b) => `
+      <div class="flex items-center justify-between p-4 rounded-xl bg-slate-800/40 border border-slate-700">
+        <div>
+          <div class="font-semibold">${escapeHtml(b.name || 'Market Bot')}</div>
+          <div class="text-xs text-slate-500 mt-1">
+            ${escapeHtml((b.marketExchanges||[]).join(' · '))} · ${escapeHtml((b.strategiesMulti||[b.strategy]).join('+'))} · ${escapeHtml(b.timeframe||'1h')}
+          </div>
+        </div>
+        <div class="flex items-center gap-2">
+          <span class="text-xs px-2 py-1 rounded-full ${b.isActive?'bg-green-500/15 text-green-400':'bg-slate-700 text-slate-400'}">${b.isActive?'Active':'Paused'}</span>
+          <a href="bots.html" class="text-xs text-slate-400 hover:text-white">Настроить</a>
+        </div>
+      </div>`).join('');
+  } catch (e) { console.warn('market bots load failed', e); }
+}
+
+async function loadSignals() {
+  try {
+    const r = await API.listSignals({ limit: 50 });
+    const all = r.signals || [];
+    // Feed is best-effort; backend doesn't yet filter by scope=market, so we
+    // narrow client-side: signals whose botId belongs to a market bot.
+    const feed = document.getElementById('marketSignalFeed');
+    if (!all.length) {
+      feed.innerHTML = '<div class="text-center text-slate-500 py-8 text-sm">Сигналов пока нет.</div>';
+      return;
+    }
+    feed.innerHTML = all.slice(0, 30).map((s) => {
+      const col = s.side === 'long' ? 'text-green-400' : 'text-red-400';
+      return `<div class="flex items-center justify-between p-3 rounded-lg bg-slate-800/30 border border-slate-700/60">
+        <div class="flex items-center gap-3">
+          <span class="text-xs px-2 py-0.5 rounded ${col}">${escapeHtml((s.side||'').toUpperCase())}</span>
+          <span class="font-mono font-semibold">${escapeHtml(s.symbol||'')}</span>
+          <span class="text-xs text-slate-500">${escapeHtml(s.strategy||'')}</span>
+        </div>
+        <div class="text-xs text-slate-400 font-mono">conf ${s.confidence || '—'} · R:R ${s.riskReward||'—'}</div>
+      </div>`;
+    }).join('');
+    document.getElementById('feedMeta').textContent = all.length + ' сигналов';
+  } catch (e) { console.warn('signals load failed', e); }
+}
+
+function escapeHtml(s){return String(s||'').replace(/[&<>"']/g,(c)=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
+</script>
+</body>
+</html>

@@ -89,18 +89,42 @@
     <form id="createBotForm" class="space-y-4" novalidate>
       <!-- Step 1: Basics -->
       <div class="wiz-pane" data-pane="1">
+        <!-- Scope selector — 'pair' (default) vs 'market' (Elite-only).
+             JS toggles relevant fields below based on the selection. -->
+        <div class="field-label mb-2">Режим сканирования<span class="help-dot" tabindex="0" data-help="Конкретная пара — бот работает только по одной выбранной монете. Весь рынок — бот сканирует все USDT-пары бирж из списка и ищет сигналы по всему рынку (только для плана Elite).">i</span></div>
+        <div class="grid grid-cols-2 gap-3 mb-4" id="scopeChooser">
+          <label class="wiz-card" data-scope="pair"><input type="radio" name="scope" value="pair" checked class="sr-only"/><div class="wiz-card-body"><div class="font-semibold text-white">Конкретная пара</div><div class="text-xs text-slate-400 mt-1">Одна монета — BTC/ETH/SOL и т.д.</div></div></label>
+          <label class="wiz-card" data-scope="market" data-elite-only="1"><input type="radio" name="scope" value="market" class="sr-only"/><div class="wiz-card-body"><div class="font-semibold text-white">Весь рынок <span class="text-xs ml-1 px-1.5 py-0.5 rounded" style="background:rgba(255,90,31,.15);color:#FF8C5A;letter-spacing:.04em">ELITE</span></div><div class="text-xs text-slate-400 mt-1">Все USDT-пары, мультибиржа</div></div></label>
+        </div>
+
         <div>
           <div class="field-label">Имя бота<span class="help-dot" tabindex="0" data-help="Просто название — можно любое. Пригодится, чтобы узнавать бота в списке. Например «BTC скальпер» или «ETH консерватор»">i</span></div>
           <input name="name" required class="w-full bg-slate-800/50 border border-slate-700 rounded-xl px-4 py-3 text-white outline-none focus:border-indigo-500" placeholder="BTC Scalper"/>
         </div>
-        <div class="mt-3">
-          <div class="field-label">Биржа<span class="help-dot" tabindex="0" data-help="Где бот будет торговать. Выбирай ту, на которой у тебя уже есть аккаунт и созданы API-ключи (настроить можно в разделе «Кошелёк»).">i</span></div>
-          <select name="exchangeName" class="w-full bg-slate-800/50 border border-slate-700 rounded-xl px-4 py-3 text-white outline-none"><option value="bybit">Bybit</option><option value="binance">Binance</option><option value="bingx">BingX</option><option value="okx">OKX</option></select>
+
+        <!-- Pair-scope fields (visible when scope='pair') -->
+        <div id="pairFields">
+          <div class="mt-3">
+            <div class="field-label">Биржа<span class="help-dot" tabindex="0" data-help="Где бот будет торговать. Выбирай ту, на которой у тебя уже есть аккаунт и созданы API-ключи (настроить можно в разделе «Кошелёк»).">i</span></div>
+            <select name="exchangeName" class="w-full bg-slate-800/50 border border-slate-700 rounded-xl px-4 py-3 text-white outline-none"><option value="bybit">Bybit</option><option value="binance">Binance</option><option value="bingx">BingX</option><option value="okx">OKX</option></select>
+          </div>
+          <div class="mt-3">
+            <div class="field-label">Торговая пара<span class="help-dot" tabindex="0" data-help="Какую монету торговать против USDT. BTCUSDT = Биткоин за доллары, ETHUSDT = Эфир, SOLUSDT = Солана. Новичкам советуем BTCUSDT или ETHUSDT — самые ликвидные.">i</span></div>
+            <input name="symbol" class="w-full bg-slate-800/50 border border-slate-700 rounded-xl px-4 py-3 text-white outline-none focus:border-indigo-500" placeholder="BTCUSDT"/>
+          </div>
         </div>
-        <div class="mt-3">
-          <div class="field-label">Торговая пара<span class="help-dot" tabindex="0" data-help="Какую монету торговать против USDT. BTCUSDT = Биткоин за доллары, ETHUSDT = Эфир, SOLUSDT = Солана. Новичкам советуем BTCUSDT или ETHUSDT — самые ликвидные.">i</span></div>
-          <input name="symbol" required class="w-full bg-slate-800/50 border border-slate-700 rounded-xl px-4 py-3 text-white outline-none focus:border-indigo-500" placeholder="BTCUSDT"/>
+
+        <!-- Market-scope fields (visible when scope='market') -->
+        <div id="marketFields" class="hidden mt-3">
+          <div class="field-label">Биржи для сканирования<span class="help-dot" tabindex="0" data-help="Выбери одну или несколько бирж — бот обойдёт все USDT-пары каждой из них. Чем больше бирж, тем больше пар проверяется за цикл.">i</span></div>
+          <div class="grid grid-cols-2 gap-2">
+            <label class="flex items-center gap-2 p-3 rounded-xl bg-slate-800/40 border border-slate-700 cursor-pointer"><input type="checkbox" name="marketExchanges" value="bybit" class="accent-orange-500"/> <span>Bybit</span></label>
+            <label class="flex items-center gap-2 p-3 rounded-xl bg-slate-800/40 border border-slate-700 cursor-pointer"><input type="checkbox" name="marketExchanges" value="binance" class="accent-orange-500"/> <span>Binance</span></label>
+            <label class="flex items-center gap-2 p-3 rounded-xl bg-slate-800/40 border border-slate-700 cursor-pointer"><input type="checkbox" name="marketExchanges" value="bingx" class="accent-orange-500"/> <span>BingX</span></label>
+            <label class="flex items-center gap-2 p-3 rounded-xl bg-slate-800/40 border border-slate-700 cursor-pointer"><input type="checkbox" name="marketExchanges" value="okx" class="accent-orange-500"/> <span>OKX</span></label>
+          </div>
         </div>
+
         <div class="mt-3">
           <div class="field-label">Таймфрейм<span class="help-dot" tabindex="0" data-help="На каких свечах анализировать рынок. 5m/15m — быстрая торговля, много сделок и шума. 1h/4h — спокойнее, сигналов меньше, но качественнее. Новичкам: начни с 1h.">i</span></div>
           <select name="timeframe" class="w-full bg-slate-800/50 border border-slate-700 rounded-xl px-4 py-3 text-white outline-none"><option>5m</option><option>15m</option><option>30m</option><option selected>1h</option><option>2h</option><option>4h</option><option>1d</option></select>
@@ -445,7 +469,7 @@ html.light .chm-select-option.selected{background:rgba(255,90,31,.12);color:#FF5
 </style>
 
 <script src="app.js"></script>
-<script src="shell.js?v=6" defer></script>
+<script src="shell.js?v=7" defer></script>
 <script>
 if(!Auth.requireAuth()) throw new Error('noauth');
 document.querySelectorAll('.sidebar-link[data-page="bots"]').forEach(a => a.classList.add('active'));
@@ -724,11 +748,19 @@ document.getElementById('createBotForm')?.addEventListener('submit', async (e) =
   const raw = Object.fromEntries(fd.entries());
   // Map legacy field names
   const symbolStr = (raw.symbol || '').trim().toUpperCase();
+
+  // Scope: 'pair' (default) or 'market' (Elite-only)
+  const scope = raw.scope === 'market' ? 'market' : 'pair';
+  // Multi-exchange checkboxes use the same name "marketExchanges" — read via getAll
+  const marketExchanges = scope === 'market' ? fd.getAll('marketExchanges').filter(Boolean) : null;
+  // Multi-strategy checkboxes (Elite) — "strategiesMulti"
+  const strategiesMulti = fd.getAll('strategiesMulti').filter(Boolean);
+
   const payload = {
     name: raw.name || 'Bot',
     exchange: (raw.exchangeName || raw.exchange || 'bybit').toLowerCase(),
     exchangeKeyId: raw.exchangeKeyId ? +raw.exchangeKeyId : null,
-    symbols: symbolStr ? [symbolStr] : ['BTCUSDT'],
+    symbols: scope === 'market' ? [] : (symbolStr ? [symbolStr] : ['BTCUSDT']),
     strategy: (raw.strategyType || raw.strategy || 'levels').toLowerCase(),
     timeframe: raw.timeframe || '1h',
     direction: raw.direction || 'both',
@@ -738,6 +770,9 @@ document.getElementById('createBotForm')?.addEventListener('submit', async (e) =
     autoTrade: !!raw.autoTrade,
     tradingMode: raw.tradingMode || 'paper',
     strategyConfig: strategyConfig && Object.keys(strategyConfig).length ? strategyConfig : undefined,
+    scope,
+    ...(scope === 'market' ? { marketExchanges } : {}),
+    ...(strategiesMulti.length > 0 ? { strategiesMulti } : {}),
   };
   // Remove exchangeKeyId if null (schema requires int positive)
   if (!payload.exchangeKeyId) delete payload.exchangeKeyId;
@@ -1021,6 +1056,44 @@ document.getElementById('tvWebhookModal')?.addEventListener('click', (e) => {
 });
 
 loadBots();
+
+// ── Market Scanner / Elite gate ─────────────────────────────────────
+// Reads user plan from /auth/me once. If not Elite:
+//   • disables the "Весь рынок" scope card (click → upgrade toast)
+//   • hides Elite-only UI hints
+// Scope radio also toggles pair/market field visibility.
+(async function wireMarketScope() {
+  // Step A: find out the user's plan (cached in Auth.user if shell.js populated it)
+  let plan = 'free';
+  try {
+    const me = (Auth && Auth.user) || (await API.me()).user || await API.me();
+    plan = (me && (me.plan || (me.subscription && me.subscription.plan))) || 'free';
+  } catch (_e) {}
+  const isElite = plan === 'elite';
+
+  const eliteCards = document.querySelectorAll('[data-elite-only="1"]');
+  if (!isElite) {
+    eliteCards.forEach((el) => {
+      el.style.opacity = '.5';
+      el.style.cursor = 'not-allowed';
+      el.style.pointerEvents = 'none';
+      el.title = 'Доступно на тарифе Elite — обнови план, чтобы использовать';
+    });
+  }
+
+  // Toggle pair/market fields on radio change
+  const pairFields = document.getElementById('pairFields');
+  const marketFields = document.getElementById('marketFields');
+  document.querySelectorAll('input[name="scope"]').forEach((r) => {
+    r.addEventListener('change', () => {
+      const isMarket = r.value === 'market' && r.checked;
+      if (pairFields)   pairFields.classList.toggle('hidden', isMarket);
+      if (marketFields) marketFields.classList.toggle('hidden', !isMarket);
+      const sym = document.querySelector('input[name="symbol"]');
+      if (sym) sym.required = !isMarket;
+    });
+  });
+})();
 </script>
 </body>
 </html>
