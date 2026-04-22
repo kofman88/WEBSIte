@@ -107,7 +107,9 @@ function sendVerification(to, token, { displayName } = {}) {
   const templates = require('./emailTemplates');
   const t = templates.emailVerify({
     displayName,
-    verifyUrl: `${appUrl()}/verify-email.html?token=${encodeURIComponent(token)}`,
+    // GET /api/auth/verify-email/:token → auto-redirects to /?verified=1
+    // (previously pointed to /verify-email.html which doesn't exist)
+    verifyUrl: `${appUrl()}/api/auth/verify-email/${encodeURIComponent(token)}`,
   });
   return send({ to, subject: t.subject, text: t.text, html: t.html });
 }
