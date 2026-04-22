@@ -63,8 +63,27 @@ db.exec(`
     ["telegram_username",   "ALTER TABLE users ADD COLUMN telegram_username TEXT"],
     ["telegram_linked_at",  "ALTER TABLE users ADD COLUMN telegram_linked_at DATETIME"],
     ["notification_prefs",  "ALTER TABLE users ADD COLUMN notification_prefs TEXT DEFAULT '{}'"],
+    // ── OAuth / Social login (Google + Telegram Login Widget) ──
+    //   google_id       Google subject (sub) — stable across sessions
+    //   tg_id           Telegram user.id from Login Widget (separate from
+    //                   telegram_chat_id which is for bot DMs)
+    //   oauth_provider  Primary signup method: 'password' | 'google' | 'telegram'
+    //   given_name      First name (from Google profile or register form)
+    //   family_name     Last name (from Google profile or register form)
+    //   avatar_url      Profile photo URL from the OAuth provider
+    ["google_id",     "ALTER TABLE users ADD COLUMN google_id TEXT"],
+    ["tg_id",         "ALTER TABLE users ADD COLUMN tg_id TEXT"],
+    ["oauth_provider","ALTER TABLE users ADD COLUMN oauth_provider TEXT DEFAULT 'password'"],
+    ["given_name",    "ALTER TABLE users ADD COLUMN given_name TEXT"],
+    ["family_name",   "ALTER TABLE users ADD COLUMN family_name TEXT"],
+    ["avatar_url",    "ALTER TABLE users ADD COLUMN avatar_url TEXT"],
   ];
   for (const [col, sql] of adds) if (!cols.includes(col)) { try { db.exec(sql); } catch(_){} }
+  // Unique indexes on OAuth IDs — prevent two users from linking the same
+  // Google/Telegram account. Partial index (WHERE col IS NOT NULL) so
+  // password-only users don't clash on NULL.
+  try { db.exec("CREATE UNIQUE INDEX IF NOT EXISTS idx_users_google_id ON users(google_id) WHERE google_id IS NOT NULL"); } catch(_){}
+  try { db.exec("CREATE UNIQUE INDEX IF NOT EXISTS idx_users_tg_id     ON users(tg_id)     WHERE tg_id     IS NOT NULL"); } catch(_){}
 })();
 // Phase C: trade journal — add `note` column to trades (idempotent)
 (function migrateTradesNote(){

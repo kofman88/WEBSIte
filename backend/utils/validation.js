@@ -44,10 +44,17 @@ const pctNumber = z.number().min(0).max(100);
 const dateString = z.string().regex(/^\d{4}-\d{2}-\d{2}$/, 'Date must be YYYY-MM-DD');
 
 // ── Auth ────────────────────────────────────────────────────────────────
+// Given / family name as two optional fields (e.g. from the split
+// register form). Backend composes display_name from them if displayName
+// itself was not provided.
+const personName = z.string().trim().min(1).max(64).optional();
+
 const registerSchema = z.object({
   email,
   password,
   displayName,
+  givenName: personName,
+  familyName: personName,
   referralCode,
 });
 

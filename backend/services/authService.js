@@ -100,7 +100,7 @@ function audit(userId, action, meta = null, ip = null, ua = null) {
   }
 }
 
-function register({ email, password, displayName, referralCode, ipAddress, userAgent }) {
+function register({ email, password, displayName, givenName, familyName, referralCode, ipAddress, userAgent }) {
   const existing = db.prepare('SELECT id FROM users WHERE email = ?').get(email);
   if (existing) {
     const err = new Error('Email already registered');
@@ -127,10 +127,17 @@ function register({ email, password, displayName, referralCode, ipAddress, userA
   const refCode = ensureUniqueRefCode();
 
   const userId = db.transaction(() => {
+    // Compose display_name from given+family if caller passed a name split;
+    // otherwise use the legacy `displayName` field verbatim.
+    const composedName = displayName
+      || [givenName, familyName].filter(Boolean).join(' ').trim()
+      || null;
     const ins = db.prepare(`
-      INSERT INTO users (email, password_hash, display_name, referral_code, referred_by, email_verified, is_active)
-      VALUES (?, ?, ?, ?, ?, 0, 1)
-    `).run(email, passwordHash, displayName || null, refCode, referrerId);
+      INSERT INTO users
+        (email, password_hash, display_name, given_name, family_name,
+         referral_code, referred_by, email_verified, is_active, oauth_provider)
+      VALUES (?, ?, ?, ?, ?, ?, ?, 0, 1, 'password')
+    `).run(email, passwordHash, composedName, givenName || null, familyName || null, refCode, referrerId);
     const id = ins.lastInsertRowid;
 
     db.prepare(`INSERT INTO subscriptions (user_id, plan, status) VALUES (?, 'free', 'active')`).run(id);
@@ -498,6 +505,22 @@ function verifyPending(token) {
   return d.uid;
 }
 
+// Convenience wrapper used by OAuth flows — mirror what login() returns
+// for password users. No password check, no 2FA branch (OAuth already
+// gives us a trusted identity).
+function issueSessionForUser(userId, { ipAddress = null, userAgent = null } = {}) {
+  const user = getUserPublic(userId);
+  if (!user) { const e = new Error('User not found'); e.statusCode = 404; throw e; }
+  try {
+    db.prepare('UPDATE users SET last_login_at = CURRENT_TIMESTAMP WHERE id = ?').run(userId);
+    db.prepare('INSERT INTO login_history (user_id, ip_address, user_agent, success) VALUES (?, ?, ?, 1)')
+      .run(userId, ipAddress || null, userAgent || null);
+  } catch (_e) {}
+  const accessToken = signAccessToken(userId);
+  const refresh = issueRefreshToken(userId, { userAgent, ipAddress });
+  return { user, accessToken, refreshToken: refresh.token, refreshExpiresAt: refresh.expiresAt };
+}
+
 module.exports = {
   register,
   login,
@@ -517,6 +540,7 @@ module.exports = {
   finalizeLoginAfter2FA,
   verifyAccessToken,
   getUserPublic,
+  issueSessionForUser,
   _signAccessToken: signAccessToken,
   _signPending: _signPending,
 };
