@@ -414,30 +414,135 @@ img { max-width: 100%; display: block; }
 .topbar-search:focus-within { border-color: var(--accent-blue-light); background: rgba(255, 255, 255, 0.06); }
 .topbar-search input { border: none; background: transparent; padding: 0; font-size: 13px; font-weight: 500; box-shadow: none; }
 .topbar-search input:focus { box-shadow: none; background: transparent; }
-.topbar-actions { display: flex; align-items: center; gap: 12px; }
-.shell-topbar-btn {
-  height: 36px;
-  min-width: 44px;
-  padding: 0 14px;
-  background: linear-gradient(180deg, rgba(255,255,255,.08), rgba(255,255,255,.02));
-  border: 1px solid rgba(255,255,255,.16);
-  border-radius: var(--radius-pill);
-  color: rgba(255, 255, 255, 0.95);
-  font-family: 'Inter', sans-serif;
-  font-weight: 600;
-  font-size: 12px;
-  line-height: 1;
+.topbar-actions { display: flex; align-items: center; gap: 10px; }
+
+/* ═══════════════════════════════════════════════════════════════════
+ * TOPBAR BUTTONS — unified Aura-pill system
+ *   • Lang toggle (EN/RU/…)
+ *   • Theme toggle (moon/sun)
+ *   • Notification bell
+ *   • User avatar
+ * All 4 use the same 40×40 circle + glass shell + orange hover glow.
+ * ═══════════════════════════════════════════════════════════════════ */
+.shell-topbar-btn,
+.topbar-notification,
+.topbar-avatar {
+  position: relative;
+  width: 40px; height: 40px;
+  padding: 0;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: 6px;
+  font-family: 'Inter', sans-serif;
+  font-weight: 600;
+  font-size: 12.5px;
+  line-height: 1;
+  color: rgba(255, 255, 255, 0.95);
+  background: linear-gradient(180deg, rgba(255,255,255,.06) 0%, rgba(255,255,255,.015) 100%);
+  border: 1px solid rgba(255,255,255,.12);
+  border-radius: 50%;
+  box-shadow:
+    inset 0 1px 1px rgba(255,255,255,.08),
+    inset 0 -1px 2px rgba(0,0,0,.4),
+    0 2px 6px -1px rgba(0,0,0,.45);
   cursor: pointer;
-  transition: background .15s ease, border-color .15s ease, color .15s ease, transform .15s ease;
-  box-shadow: inset 0 1px 1px rgba(255,255,255,.06), inset 0 -1px 2px rgba(0,0,0,.4);
+  transition:
+    background .18s cubic-bezier(.4,0,.2,1),
+    border-color .18s cubic-bezier(.4,0,.2,1),
+    box-shadow .18s cubic-bezier(.4,0,.2,1),
+    transform .18s cubic-bezier(.4,0,.2,1);
 }
-.shell-topbar-btn:hover { background: linear-gradient(180deg, rgba(255,255,255,.14), rgba(255,255,255,.04)); border-color: rgba(255,255,255,.28); transform: translateY(-1px); }
-.shell-topbar-btn:active { transform: translateY(0); }
-.shell-topbar-btn svg { width: 16px; height: 16px; }
+.shell-topbar-btn:hover,
+.topbar-notification:hover,
+.topbar-avatar:hover {
+  background: linear-gradient(180deg, rgba(255,140,90,.15) 0%, rgba(255,90,31,.04) 100%);
+  border-color: rgba(255,140,90,.38);
+  box-shadow:
+    inset 0 1px 1px rgba(255,255,255,.12),
+    0 4px 14px -2px rgba(255,90,31,.35),
+    0 0 0 1px rgba(255,140,90,.25);
+  transform: translateY(-1px);
+}
+.shell-topbar-btn:active,
+.topbar-notification:active,
+.topbar-avatar:active { transform: translateY(0) scale(.97); }
+.shell-topbar-btn:focus-visible,
+.topbar-notification:focus-visible,
+.topbar-avatar:focus-visible {
+  outline: 2px solid var(--aura-accent, #FF5A1F);
+  outline-offset: 3px;
+}
+.shell-topbar-btn svg,
+.topbar-notification svg { width: 18px; height: 18px; stroke-width: 1.8; }
+
+/* Language button — override min-width since the circle is already 40px */
+.shell-topbar-btn { min-width: 40px; letter-spacing: .02em; }
+
+/* Notification bell — badge (dot → count) */
+.topbar-notification .dot {
+  position: absolute;
+  top: 5px; right: 5px;
+  min-width: 16px; height: 16px; padding: 0 4px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(180deg, #FF7840, #FF5A1F 60%, #C44610);
+  color: #fff;
+  font-size: 9px;
+  font-weight: 700;
+  font-family: 'Inter', sans-serif;
+  font-variant-numeric: tabular-nums;
+  border-radius: 9999px;
+  border: 2px solid #0A0A0A;
+  box-shadow: 0 0 10px rgba(255,90,31,.55);
+  animation: pulseBadge 2.4s ease-in-out infinite;
+}
+@keyframes pulseBadge {
+  0%, 100% { transform: scale(1); }
+  50%      { transform: scale(1.08); }
+}
+
+/* User avatar — orange gradient replaces old blue (Aura brand) */
+.topbar-avatar {
+  background: linear-gradient(180deg, #FF7840 0%, #FF5A1F 55%, #C44610 100%);
+  color: #fff;
+  font-family: 'Inter', sans-serif;
+  font-weight: 700;
+  font-size: 14px;
+  letter-spacing: .01em;
+  text-transform: uppercase;
+  text-shadow: 0 1px 1px rgba(0,0,0,.3);
+  border-color: rgba(255,140,90,.5);
+  box-shadow:
+    inset 0 1px 1px rgba(255,255,255,.32),
+    inset 0 -1px 2px rgba(0,0,0,.35),
+    0 0 0 1px rgba(255,90,31,.4),
+    0 4px 12px -2px rgba(255,90,31,.38);
+}
+.topbar-avatar:hover {
+  filter: brightness(1.08) saturate(1.05);
+  background: linear-gradient(180deg, #FF8750 0%, #FF6530 55%, #D04A15 100%);
+  border-color: rgba(255,140,90,.65);
+  box-shadow:
+    inset 0 1px 1px rgba(255,255,255,.4),
+    0 6px 18px -2px rgba(255,90,31,.55),
+    0 0 0 1px rgba(255,140,90,.55);
+}
+
+/* Light-mode overrides */
+html.light .shell-topbar-btn,
+html.light .topbar-notification {
+  background: linear-gradient(180deg, rgba(0,0,0,.04), rgba(0,0,0,.01)) !important;
+  border-color: rgba(0,0,0,.12) !important;
+  color: rgba(10,10,10,.88) !important;
+  box-shadow: inset 0 1px 1px rgba(255,255,255,.6), 0 1px 2px rgba(0,0,0,.05) !important;
+}
+html.light .shell-topbar-btn:hover,
+html.light .topbar-notification:hover {
+  background: linear-gradient(180deg, rgba(255,90,31,.12), rgba(255,90,31,.02)) !important;
+  border-color: rgba(255,90,31,.4) !important;
+}
+html.light .topbar-notification .dot { border-color: #F6F7FB; }
 
 /* ── Market tickers (topbar) ── */
 .shell-market {
@@ -685,28 +790,9 @@ html.light .chm-status {
 html.light .chm-status[data-state="ok"]   { border-color: rgba(22,163,74,.35) !important; color: #166534 !important; }
 html.light .chm-status[data-state="warn"] { border-color: rgba(202,138,4,.35) !important; color: #854d0e !important; }
 html.light .chm-status[data-state="down"] { border-color: rgba(220,38,38,.35) !important; color: #991b1b !important; }
-html.light .shell-topbar-btn { background: linear-gradient(180deg, rgba(0,0,0,.03), rgba(0,0,0,.01)) !important; border-color: rgba(0,0,0,.14) !important; color: rgba(10,10,10,.88) !important; box-shadow: inset 0 1px 1px rgba(255,255,255,.6), 0 1px 1px rgba(0,0,0,.04) !important; }
-html.light .shell-topbar-btn:hover { background: linear-gradient(180deg, rgba(0,0,0,.06), rgba(0,0,0,.02)) !important; border-color: rgba(0,0,0,.22) !important; }
-.topbar-notification {
-  position: relative;
-  width: 40px; height: 40px;
-  display: flex; align-items: center; justify-content: center;
-  border-radius: var(--radius-pill);
-  background: linear-gradient(180deg, rgba(255,255,255,.06), rgba(255,255,255,.02));
-  box-shadow: inset 0 1px 1px rgba(255,255,255,.08), inset 0 -1px 2px rgba(0,0,0,.5);
-  color: rgba(255, 255, 255, 0.92);
-  cursor: pointer;
-  transition: background var(--transition-fast), filter var(--transition-fast);
-}
-.topbar-notification:hover { filter: brightness(1.15); }
-.topbar-notification .dot {
-  position: absolute;
-  top: 8px; right: 8px;
-  width: 8px; height: 8px;
-  background: #FF8C5A;
-  box-shadow: 0 0 8px rgba(255,140,90, 0.6);
-  border-radius: 50%;
-}
+/* Older .topbar-notification / .topbar-avatar / .shell-topbar-btn light-mode
+   rules removed — the unified block above (lines ~417-545) now handles all
+   four topbar buttons consistently. */
 .topbar-user {
   display: flex;
   align-items: center;
@@ -719,16 +805,6 @@ html.light .shell-topbar-btn:hover { background: linear-gradient(180deg, rgba(0,
   transition: background var(--transition-fast), border-color var(--transition-fast);
 }
 .topbar-user:hover { background: rgba(255,255,255,0.06); border-color: var(--border-light); }
-.topbar-avatar {
-  width: 34px; height: 34px;
-  border-radius: 50%;
-  background: var(--gradient-primary);
-  display: flex; align-items: center; justify-content: center;
-  font-family: var(--font-sans);
-  font-weight: 600; font-size: 13px;
-  color: #fff;
-  box-shadow: inset 0 1px 1px rgba(255,255,255,.25), inset 0 -1px 2px rgba(0,0,0,.4);
-}
 .topbar-username { font-size: 13px; font-weight: 500; color: rgba(255, 255, 255, 0.92); }
 
 /* --- Main Content Area (Dashboard pages) --- */
