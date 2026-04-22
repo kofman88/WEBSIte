@@ -128,15 +128,38 @@ const Auth = {
       location.href = '/?login=1';
       return false;
     }
-    // Email verification gate — block dashboard access until confirmed.
-    // /auth/me returns emailVerified; Auth.user mirrors it. Impersonated
-    // sessions bypass (admin needs to inspect unverified accounts).
+    // Email verification gate — block dashboard until confirmed. BUT the
+    // emailVerified flag in localStorage can go stale (user confirms via
+    // email link in another tab → DB is updated, cache here isn't).
+    // Fix: optimistically allow the page to render, then verify with the
+    // server in the background; redirect only if the server ALSO says
+    // unverified. Admin / impersonated sessions bypass entirely.
     const u = this.user;
     if (u && u.emailVerified === false && !this.isImpersonating) {
-      location.href = '/?verify_email=1';
-      return false;
+      this.refreshUserAndMaybeRedirect();
+      return true; // optimistic — page renders while we check the server
     }
     return true;
+  },
+  // Background refresh — pulls fresh /auth/me, patches localStorage, and
+  // redirects to /?verify_email=1 only if the server ALSO confirms the
+  // email is not verified. Prevents stale-cache redirect loops.
+  refreshUserAndMaybeRedirect() {
+    if (this._refreshingUser) return; this._refreshingUser = true;
+    const tok = this.accessToken;
+    if (!tok) { this._refreshingUser = false; return; }
+    fetch(API_BASE + '/auth/me', { headers: { Authorization: 'Bearer ' + tok } })
+      .then((r) => (r.ok ? r.json() : null))
+      .then((data) => {
+        const fresh = data && (data.user || data);
+        if (!fresh) return;
+        this.setUser(fresh);
+        if (fresh.emailVerified === false && !this.isImpersonating) {
+          location.href = '/?verify_email=1';
+        }
+      })
+      .catch(() => { /* network hiccup — don't log out, try again next page */ })
+      .finally(() => { this._refreshingUser = false; });
   },
 };
 
