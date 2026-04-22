@@ -9,6 +9,33 @@ const logger = require('../utils/logger');
 
 function _safeJson(s, fb) { if (!s) return fb; try { return JSON.parse(s); } catch { return fb; } }
 
+// ── Market Scanner gate (Elite-only) ─────────────────────────────────
+// Market-wide scan + multi-strategy combo are Elite features. A single
+// helper keeps the rule in one place so create/update can both use it.
+function _validateEliteFeatures(plan, bot) {
+  const scope = bot.scope || 'pair';
+  const multi = Array.isArray(bot.strategiesMulti) ? bot.strategiesMulti.filter(Boolean) : null;
+
+  if (scope === 'market' && plan !== 'elite') {
+    const err = new Error('Market scanner is available on Elite plan only.');
+    err.statusCode = 403; err.code = 'UPGRADE_REQUIRED'; err.requiredPlan = 'elite';
+    throw err;
+  }
+  if (multi && multi.length > 1 && plan !== 'elite') {
+    const err = new Error('Multi-strategy combo is available on Elite plan only.');
+    err.statusCode = 403; err.code = 'UPGRADE_REQUIRED'; err.requiredPlan = 'elite';
+    throw err;
+  }
+  if (scope === 'market') {
+    const exs = Array.isArray(bot.marketExchanges) ? bot.marketExchanges.filter(Boolean) : [];
+    if (!exs.length) {
+      const err = new Error('Market bot requires at least one exchange in marketExchanges.');
+      err.statusCode = 400; err.code = 'VALIDATION_ERROR';
+      throw err;
+    }
+  }
+}
+
 function createBot(userId, bot) {
   const planRow = db.prepare('SELECT plan FROM subscriptions WHERE user_id = ?').get(userId);
   const plan = (planRow && planRow.plan) || 'free';
@@ -20,6 +47,8 @@ function createBot(userId, bot) {
     err.statusCode = 403; err.code = 'BOT_LIMIT_REACHED';
     throw err;
   }
+
+  _validateEliteFeatures(plan, bot);
 
   if (!plans.canUseStrategy(plan, bot.strategy)) {
     const err = new Error(`Strategy "${bot.strategy}" requires a higher plan.`);
@@ -39,25 +68,36 @@ function createBot(userId, bot) {
     ? 'paper'
     : (bot.tradingMode || 'paper');
 
+  const scope = bot.scope === 'market' ? 'market' : 'pair';
+  const marketExchanges = scope === 'market' ? JSON.stringify(bot.marketExchanges || []) : null;
+  const strategiesMulti = Array.isArray(bot.strategiesMulti) && bot.strategiesMulti.length > 0
+    ? JSON.stringify(bot.strategiesMulti)
+    : null;
+
   const info = db.prepare(`
     INSERT INTO trading_bots
       (user_id, name, exchange, exchange_key_id, symbols, strategy, timeframe,
        direction, leverage, risk_pct, max_open_trades, auto_trade, trading_mode,
-       strategy_config, risk_config, is_active)
-    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 0)
+       strategy_config, risk_config, is_active,
+       scope, market_exchanges, strategies_multi)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 0, ?, ?, ?)
   `).run(
     userId, bot.name, bot.exchange, bot.exchangeKeyId || null,
     JSON.stringify(bot.symbols || []), bot.strategy, bot.timeframe,
     bot.direction || 'both', leverage, bot.riskPct || 1,
     bot.maxOpenTrades || 3, bot.autoTrade ? 1 : 0, tradingMode,
     JSON.stringify(bot.strategyConfig || {}),
-    JSON.stringify(bot.riskConfig || {})
+    JSON.stringify(bot.riskConfig || {}),
+    scope, marketExchanges, strategiesMulti
   );
 
   db.prepare(`
     INSERT INTO audit_log (user_id, action, entity_type, entity_id, metadata)
     VALUES (?, 'bot.create', 'bot', ?, ?)
-  `).run(userId, info.lastInsertRowid, JSON.stringify({ strategy: bot.strategy, tradingMode }));
+  `).run(userId, info.lastInsertRowid, JSON.stringify({
+    strategy: bot.strategy, tradingMode, scope,
+    ...(scope === 'market' ? { marketExchanges: bot.marketExchanges, strategiesMulti: bot.strategiesMulti || null } : {}),
+  }));
 
   return getBot(info.lastInsertRowid, userId);
 }
@@ -81,6 +121,15 @@ function updateBot(botId, userId, patch) {
     throw err;
   }
 
+  // Elite-only feature gate on updates (scope/strategies_multi changes)
+  if (patch.scope !== undefined || patch.strategiesMulti !== undefined || patch.marketExchanges !== undefined) {
+    _validateEliteFeatures(plan, {
+      scope:           patch.scope           !== undefined ? patch.scope           : existing.scope,
+      strategiesMulti: patch.strategiesMulti !== undefined ? patch.strategiesMulti : existing.strategiesMulti,
+      marketExchanges: patch.marketExchanges !== undefined ? patch.marketExchanges : existing.marketExchanges,
+    });
+  }
+
   const fields = [];
   const values = [];
   const mapping = {
@@ -88,6 +137,7 @@ function updateBot(botId, userId, patch) {
     strategy: 'strategy', timeframe: 'timeframe', direction: 'direction',
     leverage: 'leverage', riskPct: 'risk_pct', maxOpenTrades: 'max_open_trades',
     autoTrade: 'auto_trade', tradingMode: 'trading_mode',
+    scope: 'scope',
   };
   for (const [k, col] of Object.entries(mapping)) {
     if (patch[k] !== undefined) {
@@ -97,6 +147,11 @@ function updateBot(botId, userId, patch) {
   }
   if (patch.symbols !== undefined)         { fields.push('symbols = ?');         values.push(JSON.stringify(patch.symbols)); }
   if (patch.strategyConfig !== undefined)  { fields.push('strategy_config = ?'); values.push(JSON.stringify(patch.strategyConfig)); }
+  if (patch.marketExchanges !== undefined) { fields.push('market_exchanges = ?'); values.push(JSON.stringify(patch.marketExchanges || [])); }
+  if (patch.strategiesMulti !== undefined) {
+    fields.push('strategies_multi = ?');
+    values.push(Array.isArray(patch.strategiesMulti) && patch.strategiesMulti.length > 0 ? JSON.stringify(patch.strategiesMulti) : null);
+  }
   if (patch.riskConfig !== undefined)      { fields.push('risk_config = ?');     values.push(JSON.stringify(patch.riskConfig)); }
 
   if (!fields.length) return existing;
@@ -275,6 +330,9 @@ function hydrate(r) {
     tradingMode: r.trading_mode,
     strategyConfig: parseJson(r.strategy_config, null),
     riskConfig: parseJson(r.risk_config, null),
+    scope: r.scope || 'pair',
+    marketExchanges: parseJson(r.market_exchanges, null),
+    strategiesMulti: parseJson(r.strategies_multi, null),
     isActive: Boolean(r.is_active),
     lastRunAt: r.last_run_at,
     createdAt: r.created_at,
@@ -292,4 +350,5 @@ module.exports = {
   getBotTrades,
   getBotStats,
   userSummary,
+  _validateEliteFeatures, // exposed for tests
 };

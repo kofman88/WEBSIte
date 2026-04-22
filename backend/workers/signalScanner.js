@@ -85,43 +85,54 @@ async function runCycle() {
     logger.debug('scanner cycle', { bots: bots.length });
     let signalsProduced = 0;
 
-    for (const bot of bots) {
-      const strat = STRATEGIES[bot.strategy];
-      if (!strat) {
-        logger.warn('unknown strategy', { botId: bot.id, strategy: bot.strategy });
-        continue;
+    // Market-scope universe cache — per exchange, refreshed from marketDataService
+    // which already has a 60-minute symbols cache, so calling this every cycle
+    // is cheap (one in-memory read per exchange per cycle).
+    const marketUniverseCache = new Map(); // exchange → [symbol…]
+    async function getMarketUniverse(exchange) {
+      if (marketUniverseCache.has(exchange)) return marketUniverseCache.get(exchange);
+      try {
+        const all = await marketData.fetchSymbols(exchange);
+        // USDT-quoted, linear (perps), active — the trade-worthy universe
+        const usdt = all
+          .filter((m) => m.quote === 'USDT' && m.linear !== false && m.type !== 'option')
+          .map((m) => m.symbol);
+        marketUniverseCache.set(exchange, usdt);
+        return usdt;
+      } catch (e) {
+        logger.warn('market universe fetch failed', { exchange, err: e.message });
+        marketUniverseCache.set(exchange, []);
+        return [];
       }
+    }
 
-      let symbols;
-      try { symbols = JSON.parse(bot.symbols || '[]'); } catch { symbols = []; }
-      if (!Array.isArray(symbols) || !symbols.length) continue;
+    // Single signal-processing job — factored out so pair-scope and market-scope
+    // can share it. Applies strategy, directional filter, persists + dedups,
+    // and triggers WS broadcast + auto-trade hook.
+    function enqueueScan({ exchange, symbol, strategies, cfg, bot }) {
+      const q = getQueue(exchange);
+      q.add(async () => {
+        try {
+          const candles = await marketData.fetchCandles(
+            exchange, symbol, bot.timeframe, { limit: 300 }
+          );
+          if (!candles || candles.length < 50) return;
 
-      const cfg = bot.strategy_config ? safeJson(bot.strategy_config, {}) : {};
-
-      for (const symbol of symbols) {
-        const q = getQueue(bot.exchange);
-        q.add(async () => {
-          try {
-            const candles = await marketData.fetchCandles(
-              bot.exchange, symbol, bot.timeframe, { limit: 300 }
-            );
-            if (!candles || candles.length < 50) return;
-
+          for (const stratName of strategies) {
+            const strat = STRATEGIES[stratName];
+            if (!strat) continue;
             const sig = strat.scan(candles, cfg);
-            if (!sig) return;
+            if (!sig) continue;
 
             // Directional filter
-            if (bot.direction && bot.direction !== 'both' && sig.side !== bot.direction) {
-              return;
-            }
+            if (bot.direction && bot.direction !== 'both' && sig.side !== bot.direction) continue;
 
-            // Persist + dedup
             const saved = signalService.insert({
               userId: bot.user_id,
               botId: bot.id,
-              exchange: bot.exchange,
+              exchange,
               symbol,
-              strategy: sig.strategy,
+              strategy: sig.strategy || stratName,
               timeframe: bot.timeframe,
               side: sig.side,
               entry: sig.entry,
@@ -137,31 +148,75 @@ async function runCycle() {
               expiresAt: new Date(Date.now() + 24 * 3600 * 1000).toISOString(),
             });
 
-            if (!saved) return; // dup
+            if (!saved) continue; // dup across strategies / cycles
             signalsProduced++;
 
             logger.info('signal produced', {
               id: saved.id, bot: bot.id, strategy: saved.strategy,
               symbol: saved.symbol, side: saved.side, quality: saved.quality,
+              scope: bot.scope || 'pair',
             });
 
-            // Notify parent thread for WebSocket broadcast
             if (parentPort) {
               parentPort.postMessage({ type: 'signal', signal: saved, botId: bot.id });
-            }
-
-            // Auto-trade hook — Phase 10 will plug here
-            if (bot.auto_trade) {
-              if (parentPort) {
+              if (bot.auto_trade) {
                 parentPort.postMessage({ type: 'auto_trade_request', signal: saved, botId: bot.id });
               }
             }
-          } catch (err) {
-            logger.warn('scan error', {
-              botId: bot.id, symbol, err: err.message,
-            });
           }
+        } catch (err) {
+          logger.warn('scan error', { botId: bot.id, symbol, err: err.message });
+        }
+      });
+    }
+
+    for (const bot of bots) {
+      const cfg = bot.strategy_config ? safeJson(bot.strategy_config, {}) : {};
+
+      // Resolve which strategies to run — Elite multi-strategy combo wins
+      // over the single `strategy` column if set.
+      let strategies;
+      const multi = safeJson(bot.strategies_multi, null);
+      if (Array.isArray(multi) && multi.length > 0) {
+        strategies = multi.filter((s) => STRATEGIES[s]);
+      } else if (bot.strategy && STRATEGIES[bot.strategy]) {
+        strategies = [bot.strategy];
+      } else {
+        logger.warn('bot has no valid strategy', { botId: bot.id, strategy: bot.strategy, multi });
+        continue;
+      }
+
+      if ((bot.scope || 'pair') === 'market') {
+        // ── MARKET SCANNER ────────────────────────────────────────
+        // Universe = USDT-linear pairs across every exchange selected.
+        // Every pair × every strategy is enqueued; max_open_trades +
+        // circuit breaker in autoTradeService cap the blast radius.
+        const exchanges = safeJson(bot.market_exchanges, []);
+        if (!Array.isArray(exchanges) || exchanges.length === 0) {
+          logger.warn('market bot has no exchanges configured', { botId: bot.id });
+          continue;
+        }
+        let pairCount = 0;
+        for (const exchange of exchanges) {
+          const universe = await getMarketUniverse(exchange);
+          pairCount += universe.length;
+          for (const symbol of universe) {
+            enqueueScan({ exchange, symbol, strategies, cfg, bot });
+          }
+        }
+        logger.info('market bot enqueued', {
+          botId: bot.id, exchanges: exchanges.length,
+          pairs: pairCount, strategies: strategies.length,
         });
+      } else {
+        // ── PAIR SCOPE (existing behavior) ────────────────────────
+        let symbols;
+        try { symbols = JSON.parse(bot.symbols || '[]'); } catch { symbols = []; }
+        if (!Array.isArray(symbols) || !symbols.length) continue;
+
+        for (const symbol of symbols) {
+          enqueueScan({ exchange: bot.exchange, symbol, strategies, cfg, bot });
+        }
       }
 
       db.prepare('UPDATE trading_bots SET last_run_at = CURRENT_TIMESTAMP WHERE id = ?').run(bot.id);

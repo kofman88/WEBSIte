@@ -121,6 +121,22 @@ class SubscriptionService {
       ).run(userId);
       sub.plan = 'free';
       sub.status = 'expired';
+      // Elite-only features must not keep running after downgrade.
+      // Pause any market-scope bots so they don't burn through pairs
+      // on a non-Elite subscription. User can unfreeze on upgrade.
+      try {
+        const paused = db.prepare(`
+          UPDATE trading_bots
+          SET is_active = 0, updated_at = CURRENT_TIMESTAMP
+          WHERE user_id = ? AND scope = 'market' AND is_active = 1
+        `).run(userId);
+        if (paused.changes > 0) {
+          db.prepare(`
+            INSERT INTO audit_log (user_id, action, entity_type, entity_id, metadata)
+            VALUES (?, 'bot.auto_pause_downgrade', 'user', ?, ?)
+          `).run(userId, userId, JSON.stringify({ bots: paused.changes, reason: 'plan_expired' }));
+        }
+      } catch (_e) { /* best-effort */ }
     }
 
     const planDef = PLANS[sub.plan] || PLANS.free;

@@ -132,7 +132,22 @@
         const un = document.querySelector('.topbar-username');
         if (un && u.email) un.textContent = u.email.split('@')[0];
       }
+      // Elite-only: inject Market Scanner sidebar link right after Сигналы
+      if (plan === 'elite') injectMarketScannerLink();
     } catch (_e) { text.textContent = 'Free Plan'; }
+  }
+
+  // Market Scanner sidebar link — shown only to Elite. Idempotent.
+  function injectMarketScannerLink() {
+    if (document.querySelector('.sidebar-link[data-page="market-scanner"]')) return;
+    const signals = document.querySelector('.sidebar-link[data-page="signals"]');
+    if (!signals) return;
+    const link = document.createElement('a');
+    link.href = 'market-scanner.html';
+    link.className = 'sidebar-link';
+    link.setAttribute('data-page', 'market-scanner');
+    link.innerHTML = '<svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.35-4.35"/></svg>Market Scanner';
+    signals.parentNode.insertBefore(link, signals.nextSibling);
   }
 
   // ── 3 & 4. Topbar toggles ──────────────────────────────────────────────
