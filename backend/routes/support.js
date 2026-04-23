@@ -14,6 +14,22 @@ function handleErr(err, res, next) {
   return next(err);
 }
 
+// ── Guest (unauthenticated) — MUST be declared BEFORE `router.use(authMiddleware)` ──
+// Support widget's fallback for anonymous visitors. One-shot message;
+// reply happens out-of-band via email. Rate-limited by IP in the route
+// stack (express-rate-limit middleware applied at app level to /api/*).
+router.post('/contact', (req, res, next) => {
+  try {
+    const body = z.object({
+      email: z.string().trim().toLowerCase().email().max(254),
+      body:  z.string().min(5).max(10000),
+    }).parse(req.body);
+    const ip = (req.headers['x-forwarded-for'] || req.ip || '').toString().split(',')[0].trim().slice(0, 64);
+    const ua = (req.headers['user-agent'] || '').toString().slice(0, 256);
+    res.status(201).json(support.guestContact({ ...body, ip, userAgent: ua }));
+  } catch (err) { handleErr(err, res, next); }
+});
+
 // ── User-facing ───────────────────────────────────────────────────────
 router.use(authMiddleware);
 
