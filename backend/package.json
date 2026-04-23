@@ -15,7 +15,11 @@
     "db:reset": "node utils/db-reset.js",
     "db:seed": "node utils/db-seed.js",
     "smoke": "node ../scripts/smoke.js",
-    "smoke:prod": "SMOKE_URL=https://chmup.top node ../scripts/smoke.js"
+    "smoke:prod": "SMOKE_URL=https://chmup.top node ../scripts/smoke.js",
+    "deploy": "bash ../scripts/deploy-quick.sh",
+    "deploy:backend": "bash ../scripts/deploy-quick.sh --backend",
+    "deploy:frontend": "bash ../scripts/deploy-quick.sh --frontend",
+    "deploy:dry": "bash ../scripts/deploy-quick.sh --dry-run"
   },
   "engines": {
     "node": ">=18.0.0"
