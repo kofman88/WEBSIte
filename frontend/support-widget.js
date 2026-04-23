@@ -127,15 +127,16 @@
 
   /* Tabs (bottom nav, 3Commas-style) */
   .chm-sup-tabs{
-    display:grid;grid-template-columns:repeat(3,1fr);gap:0;
+    display:grid;grid-template-columns:repeat(4,1fr);gap:0;
     border-top:1px solid rgba(255,255,255,.08);
     background:rgba(10,13,22,.4);
   }
   .chm-sup-tab{
-    padding:12px 6px;background:transparent;border:0;cursor:pointer;
+    padding:11px 4px;background:transparent;border:0;cursor:pointer;
     display:flex;flex-direction:column;align-items:center;gap:3px;
     color:rgba(255,255,255,.55);font-family:'Inter',sans-serif;
-    font-size:11px;font-weight:500;transition:color .15s
+    font-size:10.5px;font-weight:500;transition:color .15s;
+    min-width:0;white-space:nowrap
   }
   .chm-sup-tab.active{color:#FF5A1F}
   .chm-sup-tab svg{width:20px;height:20px}
@@ -157,9 +158,9 @@
     display:flex;align-items:center;justify-content:center
   }
   .chm-sup-home-card .chm-sup-icn svg{width:18px;height:18px}
-  .chm-sup-home-card .chm-sup-meta{flex:1;min-width:0}
-  .chm-sup-home-card .chm-sup-meta .t{font-size:13px;font-weight:600;color:#fff;line-height:1.2;margin-bottom:2px}
-  .chm-sup-home-card .chm-sup-meta .s{font-size:11px;color:rgba(255,255,255,.55);line-height:1.3}
+  .chm-sup-home-card .chm-sup-meta{flex:1;min-width:0;display:flex;flex-direction:column;gap:3px}
+  .chm-sup-home-card .chm-sup-meta .t{display:block;font-size:13px;font-weight:600;color:#fff;line-height:1.3}
+  .chm-sup-home-card .chm-sup-meta .s{display:block;font-size:11px;color:rgba(255,255,255,.55);line-height:1.4}
   .chm-sup-home-card .chm-sup-chev{color:rgba(255,255,255,.35);flex-shrink:0}
 
   .chm-sup-status-dot{
