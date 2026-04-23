@@ -188,7 +188,7 @@
           valEl.textContent = '$' + (base + total).toLocaleString('en-US', { maximumFractionDigits: 0 });
           if (modeEl) {
             const hasLive = Number(s.activeBots) > 0 && Number(s.livePnl) !== 0;
-            const mode = hasLive ? 'LIVE' : 'PAPER';
+            const mode = hasLive ? 'LIVE' : 'DEMO';
             modeEl.textContent = mode; modeEl.setAttribute('data-mode', mode.toLowerCase());
           }
         }).catch(() => {});
@@ -288,7 +288,7 @@
     pill.href = 'wallet.html';
     pill.title = 'Твой аккаунт — перейти в Кошелёк';
     pill.innerHTML =
-      '<span class="shell-acct-mode" id="shellAcctMode">PAPER</span>'
+      '<span class="shell-acct-mode" id="shellAcctMode">DEMO</span>'
       + '<span class="shell-acct-val" id="shellAcctVal">—</span>'
       + '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>';
     // Insert before the ticker if present, else before the lang button
@@ -305,7 +305,7 @@
         const s = await (window.API && API.botSummary ? API.botSummary() : Promise.resolve(null));
         if (!s) return;
         const hasLive = Number(s.activeBots) > 0 && Number(s.livePnl) !== 0;
-        const mode = hasLive ? 'LIVE' : 'PAPER';
+        const mode = hasLive ? 'LIVE' : 'DEMO';
         const total = Number(s.totalPnl || 0);
         const paperBase = Number((user && user.paperStartingBalance) || 10000);
         const equity = paperBase + total;
@@ -453,6 +453,44 @@
       theme.addEventListener('click', () => { setTheme(getTheme() === 'dark' ? 'light' : 'dark'); applyTheme(); });
       theme.dataset.shellWired = '1';
     }
+
+    injectSidebarCollapseBtn();
+  }
+
+  // Desktop sidebar collapse — slim-icon mode (64px) toggled via a panel
+  // icon in the topbar-left. Persists in localStorage. On mobile the
+  // existing #sidebar-toggle hamburger handles open/close independently.
+  function injectSidebarCollapseBtn() {
+    if (document.getElementById('shellSideToggle')) return;
+    const leftGroup = document.querySelector('.topbar > div:first-child') || document.querySelector('.topbar');
+    if (!leftGroup) return;
+    const btn = document.createElement('button');
+    btn.id = 'shellSideToggle';
+    btn.type = 'button';
+    btn.className = 'shell-side-toggle';
+    btn.setAttribute('aria-label', 'Скрыть / показать боковую панель');
+    btn.setAttribute('title', 'Скрыть / показать боковую панель');
+    btn.innerHTML =
+      '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">'
+      + '<rect x="3" y="4" width="18" height="16" rx="2"/>'
+      + '<line x1="9" y1="4" x2="9" y2="20"/>'
+      + '</svg>';
+    // Insert as the FIRST child of the left group so it sits before the
+    // mobile hamburger and any search pill.
+    leftGroup.insertBefore(btn, leftGroup.firstChild);
+
+    // Restore persisted state
+    try {
+      if (localStorage.getItem('chm_sidebar_collapsed') === '1') {
+        document.body.classList.add('sidebar-collapsed');
+      }
+    } catch (_) {}
+
+    btn.addEventListener('click', () => {
+      const next = !document.body.classList.contains('sidebar-collapsed');
+      document.body.classList.toggle('sidebar-collapsed', next);
+      try { localStorage.setItem('chm_sidebar_collapsed', next ? '1' : '0'); } catch (_) {}
+    });
   }
 
   // ── Market tickers + Fear & Greed (topbar, public data) ───────────────
@@ -475,8 +513,8 @@
         <span class="shell-tick-delta mono">—</span>
       </div>`;
     wrap.innerHTML =
-      tickerSkel('tickBtc', 'BTC', 'linear-gradient(135deg,#F7931A,#E07D10)') +
-      tickerSkel('tickEth', 'ETH', 'linear-gradient(135deg,#627EEA,#3C58B8)') +
+      tickerSkel('tickBtc', 'BTC/USDT', 'linear-gradient(135deg,#F7931A,#E07D10)') +
+      tickerSkel('tickEth', 'ETH/USDT', 'linear-gradient(135deg,#627EEA,#3C58B8)') +
       `<div id="fngBadge" class="shell-fng" title="Crypto Fear & Greed — 0=extreme fear, 100=extreme greed">
          <span class="shell-fng-label">F&amp;G</span>
          <span class="shell-fng-value mono">—</span>
@@ -491,11 +529,14 @@
       const trend = up ? 'up' : down ? 'down' : 'flat';
       el.dataset.state = 'ready';
       el.dataset.trend = trend;
-      el.querySelector('.shell-tick-price').textContent =
-        '$' + Math.round(t.price).toLocaleString('en-US');
+      // Show 2 decimals on prices < $100, round on > $1000
+      const price = t.price < 100 ? t.price.toFixed(2)
+                  : t.price < 1000 ? t.price.toFixed(1)
+                  : Math.round(t.price).toLocaleString('en-US');
+      el.querySelector('.shell-tick-price').textContent = '$' + price;
       const d = el.querySelector('.shell-tick-delta');
       const arrow = up ? '▲' : down ? '▼' : '·';
-      d.textContent = `${arrow} ${Math.abs(t.change24h).toFixed(1)}%`;
+      d.textContent = `${arrow} ${Math.abs(t.change24h).toFixed(2)}%`;
     };
 
     const refresh = async () => {
@@ -516,16 +557,75 @@
     };
     refresh();
     setInterval(refresh, 60_000);
+
+    // Real-time stream: Binance public WebSocket pushes ticker updates ~1/s.
+    // Runs entirely client-side (browser → Binance), no server load, no
+    // auth, no rate limits. On drop we reconnect with exponential backoff.
+    // If WS is unavailable (old browser / blocked), the 60s REST refresh
+    // above keeps prices updating anyway — graceful degradation.
+    (function openBinanceWS() {
+      if (typeof WebSocket === 'undefined') return;
+      let ws = null;
+      let delay = 1000;
+      let reconnectTimer = null;
+      let closedByUs = false;
+      function connect() {
+        try {
+          ws = new WebSocket('wss://stream.binance.com:9443/stream?streams=btcusdt@ticker/ethusdt@ticker');
+        } catch (e) { scheduleReconnect(); return; }
+        ws.onopen = () => { delay = 1000; };
+        ws.onmessage = (ev) => {
+          try {
+            const msg = JSON.parse(ev.data);
+            const d = msg && msg.data;
+            if (!d || d.e !== '24hrTicker') return;
+            const t = { price: Number(d.c), change24h: Number(d.P) };
+            if (d.s === 'BTCUSDT') paintTick('tickBtc', t);
+            else if (d.s === 'ETHUSDT') paintTick('tickEth', t);
+          } catch (_) {}
+        };
+        ws.onerror = () => { try { ws && ws.close(); } catch (_) {} };
+        ws.onclose = () => { if (!closedByUs) scheduleReconnect(); };
+      }
+      function scheduleReconnect() {
+        clearTimeout(reconnectTimer);
+        reconnectTimer = setTimeout(() => {
+          delay = Math.min(30_000, delay * 2);
+          connect();
+        }, delay);
+      }
+      // Pause when tab hidden to save Binance's resources and our bandwidth
+      document.addEventListener('visibilitychange', () => {
+        if (document.hidden) {
+          closedByUs = true;
+          try { ws && ws.close(); } catch (_) {}
+          clearTimeout(reconnectTimer);
+        } else {
+          closedByUs = false;
+          connect();
+        }
+      });
+      connect();
+    })();
   }
 
   // A11y: mark the current sidebar link with aria-current="page" for SR users
   // and set a proper aria-label on the sidebar nav so assistive tech can
-  // announce it.
+  // announce it. Also populates `title=` on every sidebar-link so that
+  // when the sidebar is collapsed (labels hidden) the browser's native
+  // tooltip shows the destination on hover.
   function wireA11y() {
     const nav = document.querySelector('.sidebar-nav');
     if (nav && !nav.getAttribute('aria-label')) nav.setAttribute('aria-label', 'Main navigation');
     const active = document.querySelector('.sidebar-link.active');
     if (active) active.setAttribute('aria-current', 'page');
+    // Tooltip for collapsed state
+    document.querySelectorAll('.sidebar-link').forEach((link) => {
+      if (link.getAttribute('title')) return;
+      const span = link.querySelector('span');
+      const label = span && span.textContent.trim();
+      if (label) link.setAttribute('title', label);
+    });
     // Main content region for screen readers
     const main = document.querySelector('main.main-content');
     if (main && !main.getAttribute('role')) main.setAttribute('role', 'main');
