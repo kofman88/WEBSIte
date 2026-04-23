@@ -893,8 +893,9 @@ html.light .topbar-notification .dot { border-color: #F6F7FB; }
   display: flex;
   align-items: center;
   gap: 8px;
-  margin-left: 18px;
-  flex-wrap: wrap;
+  margin: 0 12px 0 0;      /* was margin-left:18px when it sat in left group */
+  flex-wrap: nowrap;       /* never break into two rows — unified topbar */
+  flex-shrink: 0;
 }
 .shell-tick {
   display: inline-flex;
@@ -1014,7 +1015,11 @@ html.light .shell-tick-code, html.light .shell-fng-label { color: rgba(10,10,10,
 html.light .shell-tick-price, html.light .shell-fng-value { color: #0A0A0A !important; }
 
 /* Hide market block on narrow screens so topbar stays usable */
-@media (max-width: 900px) { .shell-market { display: none; } }
+/* Progressive shrink as topbar gets narrower — hide F&G first (least
+   critical), then ETH ticker, then the entire bar. BTC stays longest. */
+@media (max-width: 1200px) { .shell-fng { display: none; } }
+@media (max-width: 1024px) { #tickEth { display: none; } }
+@media (max-width: 900px)  { .shell-market { display: none; } }
 
 /* ── Dashboard action bar: status pill + Quick Trade + Pause all ── */
 .chm-status {

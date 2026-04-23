@@ -506,8 +506,13 @@
 
   // ── Market tickers + Fear & Greed (topbar, public data) ───────────────
   async function wireMarketTickers() {
-    const top = document.querySelector('.topbar > div:first-child') || document.querySelector('.topbar');
-    if (!top || !window.API || !API.marketContext) return;
+    // Place on the RIGHT side of the topbar (inside .topbar-actions) so
+    // the layout is identical on every page regardless of whether the
+    // left group has a search pill, sidebar-toggle, or page title. Goes
+    // before the account pill so the reading order is always:
+    // [tickers] [ACCOUNT] [+ BOT] [Upgrade] [EN] [🌙] [🔔] [avatar].
+    const actions = document.querySelector('.topbar-actions');
+    if (!actions || !window.API || !API.marketContext) return;
     if (document.getElementById('shellMarket')) return;
     const wrap = document.createElement('div');
     wrap.id = 'shellMarket';
@@ -531,7 +536,10 @@
          <span class="shell-fng-value mono">—</span>
          <span class="shell-fng-dot"></span>
        </div>`;
-    top.appendChild(wrap);
+    // Insert BEFORE the account pill if already present, else at the start
+    const acctEl = document.getElementById('shellAcct');
+    if (acctEl) actions.insertBefore(wrap, acctEl);
+    else actions.insertBefore(wrap, actions.firstChild);
 
     // Ticker cache — survives page navigations so the bars never flash "—"
     // on a fresh load. Every update writes to localStorage; on boot we
