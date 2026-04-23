@@ -393,46 +393,78 @@ img { max-width: 100%; display: block; }
 }
 html.light .sidebar-beta { background: rgba(255,90,31,.15); color: #C44610; }
 
-/* Sidebar footer extras — Chat/Email/Ideas row + community icons + app badges */
+/* Sidebar footer extras — Chat/Email/Ideas row + community icons + app badges.
+   Every flex container uses `display: flex !important` to defeat any
+   tailwind preflight or cascade rule that could flip children to block. */
 .sidebar-footer-extras {
-  display: flex;
+  display: flex !important;
   flex-direction: column;
-  gap: 14px;
+  gap: 16px;
   padding: 14px 16px 16px;
   border-bottom: 1px solid var(--border);
   font-size: 11px;
 }
-.sbf-row { display: flex; gap: 14px; flex-wrap: wrap; }
+.sbf-row {
+  display: flex !important;
+  flex-direction: row;
+  align-items: center;
+  gap: 16px;
+  flex-wrap: nowrap;
+}
 .sbf-link {
-  background: none; border: 0; padding: 0;
+  display: inline-block;
+  background: none;
+  border: 0;
+  padding: 0;
+  margin: 0;
   font-size: 12px;
   color: rgba(255,255,255,.6);
   text-decoration: none;
   cursor: pointer;
   transition: color .15s;
   font-family: inherit;
+  line-height: 1;
+  white-space: nowrap;
 }
 .sbf-link:hover { color: #FF8C5A; }
 html.light .sbf-link { color: rgba(10,10,10,.6); }
 html.light .sbf-link:hover { color: #C44610; }
 
-.sbf-community, .sbf-apps { display: flex; flex-direction: column; gap: 6px; }
-.sbf-community-label, .sbf-apps-label {
+.sbf-community,
+.sbf-apps {
+  display: flex !important;
+  flex-direction: column;
+  gap: 8px;
+}
+.sbf-community-label,
+.sbf-apps-label {
+  display: block;
   font-size: 10px;
   letter-spacing: .08em;
   text-transform: uppercase;
   color: rgba(255,255,255,.4);
   font-weight: 500;
+  line-height: 1;
 }
-html.light .sbf-community-label, html.light .sbf-apps-label { color: rgba(10,10,10,.45); }
-.sbf-community-icons { display: flex; gap: 6px; }
+html.light .sbf-community-label,
+html.light .sbf-apps-label { color: rgba(10,10,10,.45); }
+
+.sbf-community-icons {
+  display: flex !important;
+  flex-direction: row;
+  gap: 8px;
+}
 .sbf-community-icons a {
-  width: 28px; height: 28px;
-  display: inline-flex; align-items: center; justify-content: center;
+  width: 32px;
+  height: 32px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   border-radius: 8px;
   background: rgba(255,255,255,.05);
   color: rgba(255,255,255,.75);
   transition: background .15s, color .15s, transform .15s;
+  flex-shrink: 0;
 }
 .sbf-community-icons a:hover {
   background: rgba(255,90,31,.15);
@@ -442,29 +474,40 @@ html.light .sbf-community-label, html.light .sbf-apps-label { color: rgba(10,10,
 html.light .sbf-community-icons a { background: rgba(0,0,0,.05); color: rgba(10,10,10,.7); }
 html.light .sbf-community-icons a:hover { background: rgba(255,90,31,.12); color: #C44610; }
 
-.sbf-apps-badges { display: flex; gap: 6px; }
+.sbf-apps-badges {
+  display: flex !important;
+  flex-direction: row;
+  gap: 8px;
+}
 .sbf-app-badge {
-  flex: 1;
+  flex: 1 1 0;
+  min-width: 0;
   display: inline-flex;
   align-items: center;
-  gap: 4px;
-  padding: 6px 8px;
+  justify-content: center;
+  gap: 6px;
+  padding: 8px 6px;
   border-radius: 8px;
   background: rgba(255,255,255,.04);
   border: 1px solid rgba(255,255,255,.08);
-  color: rgba(255,255,255,.7);
+  color: rgba(255,255,255,.72);
   text-decoration: none;
   font-size: 10px;
   font-weight: 500;
-  transition: background .15s, border-color .15s;
+  line-height: 1;
+  transition: background .15s, border-color .15s, color .15s;
 }
-.sbf-app-badge:hover { background: rgba(255,255,255,.07); border-color: rgba(255,140,90,.3); }
-html.light .sbf-app-badge { background: rgba(0,0,0,.03); border-color: rgba(0,0,0,.08); color: rgba(10,10,10,.65); }
-html.light .sbf-app-badge:hover { background: rgba(0,0,0,.05); border-color: rgba(255,90,31,.3); }
+.sbf-app-badge svg { flex-shrink: 0; }
+.sbf-app-badge span { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.sbf-app-badge:hover { background: rgba(255,255,255,.07); border-color: rgba(255,140,90,.3); color: #fff; }
+html.light .sbf-app-badge { background: rgba(0,0,0,.03); border-color: rgba(0,0,0,.08); color: rgba(10,10,10,.7); }
+html.light .sbf-app-badge:hover { background: rgba(0,0,0,.05); border-color: rgba(255,90,31,.3); color: #0A0A0A; }
 
 .sbf-legal {
-  display: flex;
+  display: flex !important;
+  flex-direction: row;
   gap: 6px;
+  align-items: center;
   font-size: 10px;
   color: rgba(255,255,255,.35);
 }

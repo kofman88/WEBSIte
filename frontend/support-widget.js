@@ -308,6 +308,22 @@
   document.addEventListener('keydown', function (e) { if (e.key === 'Escape') panel.classList.remove('open'); });
 
   var currentTab = 'home';
+
+  // Public helper — lets any code (sidebar AI entry, URL handler, etc.) open
+  // the widget directly on a specific tab. MUST be registered at init time,
+  // not inside a per-tab render fn, otherwise external callers see it as
+  // undefined until the tab has been visited at least once.
+  window.ChmSupport = {
+    open: function (tab) {
+      panel.classList.add('open');
+      var t = tab || 'home';
+      tabs.forEach(function (x) { x.classList.toggle('active', x.getAttribute('data-tab') === t); });
+      currentTab = t;
+      renderTab(t);
+    },
+    close: function () { panel.classList.remove('open'); },
+  };
+
   tabs.forEach(function (t) {
     t.addEventListener('click', function () {
       tabs.forEach(function (x) { x.classList.remove('active'); });
@@ -647,18 +663,5 @@
     });
     textarea.focus();
   }
-
-  // Helper: allow external callers (e.g. sidebar AI entry) to open the
-  // widget directly on the AI tab.
-  window.ChmSupport = {
-    open: function (tab) {
-      panel.classList.add('open');
-      var t = tab || 'home';
-      tabs.forEach(function (x) { x.classList.toggle('active', x.getAttribute('data-tab') === t); });
-      currentTab = t;
-      renderTab(t);
-    },
-    close: function () { panel.classList.remove('open'); },
-  };
 
 })();
