@@ -47,8 +47,12 @@ router.get('/tickets', (req, res, next) => {
 router.post('/tickets', (req, res, next) => {
   try {
     const body = z.object({
-      subject: z.string().min(3).max(200),
-      body: z.string().min(10).max(10000),
+      // Widget auto-derives subject from the first 60 chars of body, so we
+      // can't demand a longer subject than body. Keep 2 chars min on both
+      // to allow short chat-style first messages like "привет", "где
+      // кнопка?" while still rejecting empty / accidental sends.
+      subject: z.string().min(2).max(200),
+      body: z.string().min(2).max(10000),
     }).parse(req.body);
     res.status(201).json(support.create(req.userId, body));
   } catch (err) { handleErr(err, res, next); }

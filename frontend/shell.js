@@ -291,15 +291,27 @@
       '<span class="shell-acct-mode" id="shellAcctMode">DEMO</span>'
       + '<span class="shell-acct-val" id="shellAcctVal">—</span>'
       + '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>';
-    // Insert before the ticker if present, else before the lang button
-    if (ticker && ticker.parentElement) {
-      ticker.parentElement.insertBefore(pill, ticker);
-    } else {
-      actions.insertBefore(pill, actions.firstChild);
-    }
+    // Place in topbar-actions (RIGHT side), before the "+ Создать бота"
+    // / Upgrade pills so the order reads: ACCOUNT · [+ BOT] · [UPGRADE] ·
+    // LANG · THEME · 🔔 · AVATAR. Previously lived between collapse-btn
+    // and BTC/ETH tickers on the left, which made the left group wrap
+    // when ticker labels grew to "BTC/USDT" / "ETH/USDT".
+    const quick = document.getElementById('shellQuick');
+    if (quick) actions.insertBefore(pill, quick);
+    else actions.insertBefore(pill, actions.firstChild);
 
-    // Best-effort equity fetch — uses bot summary + paper starting balance.
-    // Failures silent (the pill still renders with "—").
+    // Paint from cache immediately (survives page nav), then refresh.
+    const ACCT_CACHE = 'chm_acct_cache';
+    const modeEl = document.getElementById('shellAcctMode');
+    const valEl = document.getElementById('shellAcctVal');
+    try {
+      const cached = JSON.parse(localStorage.getItem(ACCT_CACHE) || 'null');
+      if (cached && (Date.now() - (cached.at || 0) < 10 * 60 * 1000)) {
+        if (modeEl) { modeEl.textContent = cached.mode; modeEl.setAttribute('data-mode', cached.mode.toLowerCase()); }
+        if (valEl) valEl.textContent = '$' + cached.equity.toLocaleString('en-US', { maximumFractionDigits: 0 });
+      }
+    } catch (_) {}
+
     (async () => {
       try {
         const s = await (window.API && API.botSummary ? API.botSummary() : Promise.resolve(null));
@@ -309,10 +321,9 @@
         const total = Number(s.totalPnl || 0);
         const paperBase = Number((user && user.paperStartingBalance) || 10000);
         const equity = paperBase + total;
-        const modeEl = document.getElementById('shellAcctMode');
-        const valEl = document.getElementById('shellAcctVal');
         if (modeEl) { modeEl.textContent = mode; modeEl.setAttribute('data-mode', mode.toLowerCase()); }
         if (valEl) valEl.textContent = '$' + equity.toLocaleString('en-US', { maximumFractionDigits: 0 });
+        try { localStorage.setItem(ACCT_CACHE, JSON.stringify({ mode, equity, at: Date.now() })); } catch (_) {}
       } catch (_) {}
     })();
   }
@@ -522,7 +533,24 @@
        </div>`;
     top.appendChild(wrap);
 
-    const paintTick = (id, t) => {
+    // Ticker cache — survives page navigations so the bars never flash "—"
+    // on a fresh load. Every update writes to localStorage; on boot we
+    // paint the cached value immediately, and WS/REST deliver the fresh
+    // data on top. Makes the shell feel persistent across SPA-less nav.
+    const CACHE_KEY = 'chm_ticker_cache';
+    const loadCache = () => {
+      try { return JSON.parse(localStorage.getItem(CACHE_KEY) || '{}') || {}; }
+      catch { return {}; }
+    };
+    const saveCache = (id, t) => {
+      try {
+        const c = loadCache();
+        c[id] = { price: t.price, change24h: t.change24h, at: Date.now() };
+        localStorage.setItem(CACHE_KEY, JSON.stringify(c));
+      } catch (_) {}
+    };
+
+    const paintTick = (id, t, opts) => {
       const el = document.getElementById(id); if (!el) return;
       if (!t) { el.dataset.state = 'empty'; return; }
       const up = t.change24h > 0, down = t.change24h < 0;
@@ -537,7 +565,21 @@
       const d = el.querySelector('.shell-tick-delta');
       const arrow = up ? '▲' : down ? '▼' : '·';
       d.textContent = `${arrow} ${Math.abs(t.change24h).toFixed(2)}%`;
+      if (!opts || opts.cache !== false) saveCache(id, t);
     };
+
+    // Paint from cache INSTANTLY so the bar never renders empty on a
+    // fresh page load. Stale data is OK — WS/REST below overwrite it
+    // within 100–300ms. Ignore entries older than 10 minutes to avoid
+    // showing 2-day-old BTC price if user's been offline.
+    const cache = loadCache();
+    const STALE_MS = 10 * 60 * 1000;
+    ['tickBtc', 'tickEth'].forEach((id) => {
+      const hit = cache[id];
+      if (hit && (Date.now() - (hit.at || 0) < STALE_MS)) {
+        paintTick(id, hit, { cache: false });
+      }
+    });
 
     const refresh = async () => {
       try {
@@ -545,16 +587,24 @@
         if (r.tickers) { paintTick('tickBtc', r.tickers.btc); paintTick('tickEth', r.tickers.eth); }
         if (r.fearGreed) {
           const fng = r.fearGreed, v = Number(fng.value);
-          const level = v < 25 ? 'extreme-fear' : v < 45 ? 'fear' : v < 55 ? 'neutral' : v < 75 ? 'greed' : 'extreme-greed';
-          const el = document.getElementById('fngBadge');
-          if (el) {
-            el.dataset.level = level;
-            el.querySelector('.shell-fng-value').textContent = v;
-            el.title = `Crypto Fear & Greed: ${v} — ${fng.classification || ''}`;
-          }
+          paintFng(v, fng.classification);
+          try { localStorage.setItem('chm_fng_cache', JSON.stringify({ v, c: fng.classification, at: Date.now() })); } catch (_) {}
         }
       } catch (_e) {}
     };
+    function paintFng(v, classification) {
+      const level = v < 25 ? 'extreme-fear' : v < 45 ? 'fear' : v < 55 ? 'neutral' : v < 75 ? 'greed' : 'extreme-greed';
+      const el = document.getElementById('fngBadge');
+      if (!el) return;
+      el.dataset.level = level;
+      el.querySelector('.shell-fng-value').textContent = v;
+      el.title = `Crypto Fear & Greed: ${v} — ${classification || ''}`;
+    }
+    // Paint cached F&G instantly
+    try {
+      const cached = JSON.parse(localStorage.getItem('chm_fng_cache') || 'null');
+      if (cached && (Date.now() - (cached.at || 0) < 60 * 60 * 1000)) paintFng(cached.v, cached.c);
+    } catch (_) {}
     refresh();
     setInterval(refresh, 60_000);
 
