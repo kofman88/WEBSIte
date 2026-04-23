@@ -375,6 +375,12 @@ const API = {
   replyTicket: (id, body) => apiRequest('POST', '/support/tickets/' + id + '/reply', { body }),
   closeTicket: (id) => apiRequest('POST', '/support/tickets/' + id + '/close'),
   listAllTickets: (opts = {}) => apiRequest('GET', '/support/admin/tickets?' + qs(opts)),
+  adminTicketGet: (id) => apiRequest('GET', '/support/admin/tickets/' + id),
+  adminTicketReply: (id, body) => apiRequest('POST', '/support/admin/tickets/' + id + '/reply', { body }),
+  adminTicketMarkRead: (id) => apiRequest('POST', '/support/admin/tickets/' + id + '/mark-read', {}),
+  adminTicketClose: (id) => apiRequest('POST', '/support/tickets/' + id + '/close', {}),
+  // User-side support helpers
+  supportMarkRead: (id) => apiRequest('POST', '/support/tickets/' + id + '/mark-read', {}),
 
   // Ops / back-office ------------------------------------------------------
   opsDashboard: () => apiRequest('GET', '/admin/dashboard'),

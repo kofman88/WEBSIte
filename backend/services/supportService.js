@@ -15,7 +15,7 @@ function create(userId, { subject, body }) {
     INSERT INTO support_tickets (user_id, subject, body, status, priority)
     VALUES (?, ?, ?, 'open', 'normal')
   `).run(userId, String(subject).slice(0, 200), String(body).slice(0, 10000));
-  db.prepare(`
+  const msgInfo = db.prepare(`
     INSERT INTO support_messages (ticket_id, author_id, is_admin, body)
     VALUES (?, ?, 0, ?)
   `).run(info.lastInsertRowid, userId, String(body).slice(0, 10000));
@@ -26,7 +26,9 @@ function create(userId, { subject, body }) {
   `).run(userId, info.lastInsertRowid, JSON.stringify({ subject }));
 
   logger.info('support ticket created', { userId, ticketId: info.lastInsertRowid });
-  return getForUser(info.lastInsertRowid, userId);
+  const ticket = getForUser(info.lastInsertRowid, userId);
+  _broadcastNew(ticket, { userId, isAdmin: false, messageId: msgInfo.lastInsertRowid });
+  return ticket;
 }
 
 function reply(ticketId, { userId, body, isAdmin = false }) {
@@ -38,7 +40,7 @@ function reply(ticketId, { userId, body, isAdmin = false }) {
     const e = new Error('Not your ticket'); e.statusCode = 403; throw e;
   }
 
-  db.prepare(`
+  const msgInfo = db.prepare(`
     INSERT INTO support_messages (ticket_id, author_id, is_admin, body)
     VALUES (?, ?, ?, ?)
   `).run(ticketId, userId, isAdmin ? 1 : 0, String(body).slice(0, 10000));
@@ -48,11 +50,10 @@ function reply(ticketId, { userId, body, isAdmin = false }) {
   db.prepare('UPDATE support_tickets SET status = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?')
     .run(newStatus, ticketId);
 
-  // Notify the other party
+  // Notify the other party via in-app + email (existing behavior)
   try {
     const notifier = require('./notifier');
     if (isAdmin) {
-      // Admin wrote → notify user
       notifier.dispatch(ticket.user_id, {
         type: 'security',
         title: '💬 Ответ на ваш тикет #' + ticketId,
@@ -62,7 +63,66 @@ function reply(ticketId, { userId, body, isAdmin = false }) {
     }
   } catch (_e) {}
 
+  // Real-time WS push — user widget + ops inbox get the message live
+  _broadcastMessage(ticketId, {
+    id: msgInfo.lastInsertRowid,
+    authorId: userId,
+    isAdmin: Boolean(isAdmin),
+    body: String(body).slice(0, 10000),
+    userId: ticket.user_id,
+  });
+
   return getForUser(ticketId, userId, isAdmin);
+}
+
+// ── WebSocket broadcast helpers ──────────────────────────────────────────
+// Deliver live updates so user widget + ops inbox refresh without a page
+// reload. Each event targets the ticket owner (always) and every admin
+// whose socket is connected (discovered via users.is_admin=1).
+function _allAdminIds() {
+  try {
+    return db.prepare('SELECT id FROM users WHERE is_admin = 1').all().map((r) => r.id);
+  } catch { return []; }
+}
+function _broadcastMessage(ticketId, msg) {
+  try {
+    const ws = require('./websocketService');
+    const payload = {
+      type: 'support.message_added',
+      data: { ticketId, message: msg },
+      ts: Date.now(),
+    };
+    if (msg.userId) ws.broadcastToUser(msg.userId, payload);
+    for (const adminId of _allAdminIds()) {
+      if (adminId !== msg.userId) ws.broadcastToUser(adminId, payload);
+    }
+  } catch (e) { logger.warn('support WS broadcast failed', { err: e.message }); }
+}
+function _broadcastNew(ticket, ctx) {
+  try {
+    const ws = require('./websocketService');
+    const payload = {
+      type: 'support.ticket_created',
+      data: { ticket, from: ctx },
+      ts: Date.now(),
+    };
+    for (const adminId of _allAdminIds()) ws.broadcastToUser(adminId, payload);
+  } catch (e) { logger.warn('support WS ticket broadcast failed', { err: e.message }); }
+}
+
+// Mark-read: records a timestamp on support_tickets so inbox can compute
+// unread counts. User marks read by opening the thread; admin marks read
+// by opening the drawer in ops.
+function markReadByUser(ticketId, userId) {
+  const ticket = db.prepare('SELECT user_id FROM support_tickets WHERE id = ?').get(ticketId);
+  if (!ticket) { const e = new Error('Ticket not found'); e.statusCode = 404; throw e; }
+  if (ticket.user_id !== userId) { const e = new Error('Not your ticket'); e.statusCode = 403; throw e; }
+  db.prepare('UPDATE support_tickets SET user_read_at = CURRENT_TIMESTAMP WHERE id = ?').run(ticketId);
+  return { ok: true };
+}
+function markReadByAdmin(ticketId) {
+  db.prepare('UPDATE support_tickets SET admin_read_at = CURRENT_TIMESTAMP WHERE id = ?').run(ticketId);
+  return { ok: true };
 }
 
 function listForUser(userId, { status = null, limit = 50, offset = 0 } = {}) {
@@ -71,12 +131,16 @@ function listForUser(userId, { status = null, limit = 50, offset = 0 } = {}) {
   if (status) { where.push('status = ?'); params.push(status); }
   const rows = db.prepare(`
     SELECT t.*,
-      (SELECT COUNT(*) FROM support_messages m WHERE m.ticket_id = t.id) AS msg_count
+      (SELECT COUNT(*) FROM support_messages m WHERE m.ticket_id = t.id) AS msg_count,
+      (SELECT COUNT(*) FROM support_messages m
+        WHERE m.ticket_id = t.id
+          AND m.is_admin = 1
+          AND (t.user_read_at IS NULL OR m.created_at > t.user_read_at)) AS unread_count
     FROM support_tickets t
     WHERE ${where.join(' AND ')}
     ORDER BY updated_at DESC LIMIT ? OFFSET ?
   `).all(...params, limit, offset);
-  return rows.map(hydrateList);
+  return rows.map((r) => ({ ...hydrateList(r), unreadCount: r.unread_count || 0 }));
 }
 
 function getForUser(ticketId, userId, isAdmin = false) {
@@ -118,16 +182,31 @@ function listAll({ status = null, limit = 100, offset = 0 } = {}) {
   const params = [];
   if (status) { where.push('t.status = ?'); params.push(status); }
   const clause = where.length ? 'WHERE ' + where.join(' AND ') : '';
+  // unread_count = user messages posted after the admin last read (or
+  // ever, if never read). Admin-authored messages never count as unread
+  // for admins.
   return db.prepare(`
     SELECT t.*, u.email AS user_email,
-      (SELECT COUNT(*) FROM support_messages m WHERE m.ticket_id = t.id) AS msg_count
+      (SELECT COUNT(*) FROM support_messages m WHERE m.ticket_id = t.id) AS msg_count,
+      (SELECT COUNT(*) FROM support_messages m
+        WHERE m.ticket_id = t.id
+          AND m.is_admin = 0
+          AND (t.admin_read_at IS NULL OR m.created_at > t.admin_read_at)) AS unread_count,
+      (SELECT body FROM support_messages m WHERE m.ticket_id = t.id ORDER BY m.created_at DESC LIMIT 1) AS last_body,
+      (SELECT is_admin FROM support_messages m WHERE m.ticket_id = t.id ORDER BY m.created_at DESC LIMIT 1) AS last_is_admin
     FROM support_tickets t JOIN users u ON u.id = t.user_id
     ${clause}
     ORDER BY
       CASE t.status WHEN 'open' THEN 0 WHEN 'pending' THEN 1 ELSE 2 END,
       updated_at DESC
     LIMIT ? OFFSET ?
-  `).all(...params, limit, offset).map((r) => ({ ...hydrateList(r), userEmail: r.user_email }));
+  `).all(...params, limit, offset).map((r) => ({
+    ...hydrateList(r),
+    userEmail: r.user_email,
+    unreadCount: r.unread_count || 0,
+    lastBody: r.last_body || '',
+    lastFromAdmin: Boolean(r.last_is_admin),
+  }));
 }
 
 function hydrate(r) {
@@ -161,5 +240,5 @@ function guestContact({ email, body, ip = null, userAgent = null }) {
 
 module.exports = {
   create, reply, listForUser, getForUser, closeTicket, listAll,
-  guestContact,
+  guestContact, markReadByUser, markReadByAdmin,
 };

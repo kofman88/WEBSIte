@@ -154,7 +154,20 @@ db.exec(`
   CREATE INDEX IF NOT EXISTS idx_tickets_status ON support_tickets(status, updated_at DESC);
   CREATE INDEX IF NOT EXISTS idx_ticket_messages_ticket ON support_messages(ticket_id, created_at);
 
-  -- Per-user risk limits. One row per user, inserted lazily by
+  -- Per-user risk limits.
+`);
+// Idempotent: add read-tracking columns to support_tickets for unread
+// counts in the widget + ops inbox. user_read_at bumps when the user
+// opens the thread, admin_read_at bumps when support opens the drawer.
+(function migrateSupportReadAt(){
+  try {
+    const cols = db.prepare("PRAGMA table_info('support_tickets')").all().map((c) => c.name);
+    if (!cols.includes('user_read_at'))  db.exec("ALTER TABLE support_tickets ADD COLUMN user_read_at DATETIME");
+    if (!cols.includes('admin_read_at')) db.exec("ALTER TABLE support_tickets ADD COLUMN admin_read_at DATETIME");
+  } catch (_) {}
+})();
+db.exec(`
+  -- Per-user risk limits (resume). One row per user, inserted lazily by
   -- riskLimitsService.get() with defaults. Read on every auto-trade
   -- execution to block runaway losses across all bots.
   CREATE TABLE IF NOT EXISTS user_risk_limits (
