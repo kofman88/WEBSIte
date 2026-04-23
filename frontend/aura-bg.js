@@ -34,7 +34,11 @@
 
   var CFG = {
     // ---- общее ----
-    color: [255, 90, 31],          // RGB: бренд CHM (оранжевый)
+    color:      [255, 90, 31],     // RGB: бренд CHM (оранжевый) — dark theme
+    colorLight: [204, 64, 16],     // darker orange for light mode (better contrast on white)
+    bgDark:     '#0A0A0A',
+    bgLight:    '#F5F6F8',
+    lightAlphaMult: 0.55,          // reduce overall alpha in light mode (dots on white read too strong)
     // color: [16, 185, 129],      // альтернатива: зелёный
     // color: [255, 255, 255],     // альтернатива: белый
 
@@ -97,8 +101,24 @@
     if (root.parentElement && root.parentElement !== document.body) {
       document.body.insertBefore(root, document.body.firstChild);
     }
-    // Body must not have an opaque background layered on top of the canvas
+    // Body stays transparent so canvas shows through — the aura-bg
+    // container itself paints the theme-aware base color behind the dots.
     document.body.style.setProperty('background', 'transparent', 'important');
+  }
+
+  // Reactive theme: reads html.light, paints the container bg, and
+  // swaps the dot color. Re-runs whenever the class mutates.
+  function isLight() { return document.documentElement.classList.contains('light'); }
+  function applyTheme() {
+    if (!root) return;
+    var light = isLight();
+    root.style.setProperty('background', light ? CFG.bgLight : CFG.bgDark, 'important');
+  }
+  applyTheme();
+  if (window.MutationObserver) {
+    new MutationObserver(applyTheme).observe(document.documentElement, {
+      attributes: true, attributeFilter: ['class']
+    });
   }
   if (!root || !grid) {
     console.warn('[aura-bg] не найдены #aura-bg / #aura-grid. Фон не инициализирован.');
@@ -194,12 +214,15 @@
     var cx = w / 2, cy = h / 2;
     var maxR = Math.sqrt(cx * cx + cy * cy);
     var globalPulse = 0.5 + 0.5 * Math.sin(t * 0.4);
-    var cR = CFG.color[0], cG = CFG.color[1], cB = CFG.color[2];
+    var light = isLight();
+    var col = light ? CFG.colorLight : CFG.color;
+    var cR = col[0], cG = col[1], cB = col[2];
+    var alphaMult = light ? CFG.lightAlphaMult : 1;
 
     for (var i = 0; i < dots.length; i++) {
       var d = dots[i];
       var local = 0.5 + 0.5 * Math.sin(t * 0.6 + d.phase);
-      var alpha = CFG.gridBaseAlpha + CFG.gridBreathAmp * local + CFG.gridPulseAmp * globalPulse;
+      var alpha = (CFG.gridBaseAlpha + CFG.gridBreathAmp * local + CFG.gridPulseAmp * globalPulse) * alphaMult;
 
       if (mouse.active) {
         var dx = d.x - mouse.x, dy = d.y - mouse.y;
@@ -248,14 +271,17 @@
     }
     rendered.sort(function (a, b) { return a.z - b.z; });
 
-    var cR = CFG.color[0], cG = CFG.color[1], cB = CFG.color[2];
+    var lightS = isLight();
+    var colS = lightS ? CFG.colorLight : CFG.color;
+    var cR = colS[0], cG = colS[1], cB = colS[2];
+    var alphaMultS = lightS ? CFG.lightAlphaMult : 1;
     for (var j = 0; j < rendered.length; j++) {
       var r = rendered[j];
       var depth = (r.z + 1) / 2;
       var px = cx + r.x * radius * pulse;
       var py = cy + r.y * radius * pulse;
       var size = 0.8 + depth * 1.8;
-      var alpha = 0.15 + depth * 0.75;
+      var alpha = (0.15 + depth * 0.75) * alphaMultS;
       oCtx.fillStyle = 'rgba(' + cR + ',' + cG + ',' + cB + ',' + alpha.toFixed(3) + ')';
       oCtx.beginPath();
       oCtx.arc(px, py, size, 0, Math.PI * 2);
