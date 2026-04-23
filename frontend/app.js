@@ -405,6 +405,12 @@ const API = {
   adminBillingAnalytics: () => apiRequest('GET', '/admin/billing-analytics'),
   adminAuditAnalytics: (days = 14) => apiRequest('GET', '/admin/audit-analytics?days=' + days),
   adminImpersonate: (id, reason) => apiRequest('POST', '/admin/users/' + id + '/impersonate', { reason }),
+  adminMarketplace: (opts = {}) => apiRequest('GET', '/admin/marketplace?' + qs(opts)),
+  adminSetStrategyPublic: (id, isPublic) => apiRequest('PATCH', '/admin/marketplace/' + id + '/public', { isPublic }),
+  adminCopyList: (opts = {}) => apiRequest('GET', '/admin/copy?' + qs(opts)),
+  adminCopyDisable: (leaderId, followerId) => apiRequest('POST', '/admin/copy/disable', { leaderId, followerId }),
+  adminCopyBanLeader: (leaderId) => apiRequest('POST', '/admin/copy/leader/' + leaderId + '/ban', {}),
+  adminAIUsage: () => apiRequest('GET', '/admin/ai/usage'),
   adminListRoles: () => apiRequest('GET', '/admin/roles'),
   adminSetUserRole: (id, role) => apiRequest('PATCH', '/admin/users/' + id + '/admin-role', { role }),
 
