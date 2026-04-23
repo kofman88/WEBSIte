@@ -197,15 +197,16 @@
   }
 
   // AI-assistant sidebar item (BETA) — sits at the top above Dashboard.
-  // Clicking opens the support chat widget (the AI backend is not wired
-  // yet; we reuse existing infra so the entry point is already useful).
+  // Now navigates to the dedicated /ai.html page (full-screen chat).
+  // The widget in the corner still has its AI tab as a quick-access
+  // fallback, so users get two ways in: big page + corner bubble.
   function injectAIAssistantLink() {
     if (document.querySelector('.sidebar-link[data-page="ai"]')) return;
     const nav = document.querySelector('.sidebar-nav');
     const dash = document.querySelector('.sidebar-link[data-page="dashboard"]');
     if (!nav || !dash) return;
-    const link = document.createElement('button');
-    link.type = 'button';
+    const link = document.createElement('a');
+    link.href = 'ai.html';
     link.className = 'sidebar-link sidebar-link-ai';
     link.setAttribute('data-page', 'ai');
     link.setAttribute('aria-label', 'AI-ассистент (бета)');
@@ -215,17 +216,6 @@
       + '</svg>'
       + '<span>AI-ассистент</span>'
       + '<span class="sidebar-beta">BETA</span>';
-    link.addEventListener('click', () => {
-      // Opens the support widget directly on the AI tab. If the widget
-      // hasn't loaded yet (defer script still running), click the floating
-      // bubble as a fallback — user gets the widget, just on Home tab.
-      if (window.ChmSupport && typeof window.ChmSupport.open === 'function') {
-        window.ChmSupport.open('ai');
-      } else {
-        const btn = document.querySelector('.chm-sup-btn');
-        if (btn) btn.click();
-      }
-    });
     nav.insertBefore(link, dash);
   }
 
