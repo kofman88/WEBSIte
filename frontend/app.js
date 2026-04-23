@@ -390,6 +390,8 @@ const API = {
   adminTemplateUpdate: (id, patch) => apiRequest('PATCH', '/support/admin/templates/' + id, patch),
   adminTemplateRemove: (id) => apiRequest('DELETE', '/support/admin/templates/' + id),
   adminTemplateUse: (id) => apiRequest('POST', '/support/admin/templates/' + id + '/use', {}),
+  planUsage: () => apiRequest('GET', '/subscriptions/usage'),
+  listPlans: () => apiRequest('GET', '/subscriptions/plans'),
   adminPresencePing: () => apiRequest('POST', '/support/admin/presence/ping', {}),
   adminPresenceOnline: () => apiRequest('GET', '/support/admin/presence/online'),
   // User-side support helpers

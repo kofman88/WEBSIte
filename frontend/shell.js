@@ -122,6 +122,7 @@
     injectSidebarFooterExtras();
     injectTopbarQuickActions(plan);
     injectAccountPill(user);
+    injectPlanPill(plan);
   }
 
   // Updates the plan-dependent pieces: the sidebar sub-badge text (if the
@@ -384,6 +385,166 @@
         + '<div class="sidebar-promo-arrow">→</div>';
     if (footer) sidebar.insertBefore(promo, footer);
     else sidebar.appendChild(promo);
+  }
+
+  // Topbar plan pill + dropdown — our take on 3Commas "Free тариф ▾" but
+  // designed around progress bars, plan-ladder visualisation, and an
+  // inline "what unlocks next" teaser rather than a plain counter list.
+  // Single /api/subscriptions/usage fetch powers everything.
+  function injectPlanPill(plan) {
+    const actions = document.querySelector('.topbar-actions');
+    if (!actions || document.getElementById('shellPlanPill')) return;
+    const PLAN_COLORS = {
+      free:    { bg: 'rgba(148,163,184,.15)', fg: '#cbd5e1', ring: 'rgba(148,163,184,.3)' },
+      starter: { bg: 'rgba(59,130,246,.15)',  fg: '#93c5fd', ring: 'rgba(59,130,246,.3)' },
+      pro:     { bg: 'rgba(255,140,90,.18)',  fg: '#FF8C5A', ring: 'rgba(255,140,90,.35)' },
+      elite:   { bg: 'rgba(250,204,21,.15)',  fg: '#fde047', ring: 'rgba(250,204,21,.3)' },
+    };
+    const meta = PLAN_COLORS[plan] || PLAN_COLORS.free;
+    const btn = document.createElement('button');
+    btn.type = 'button';
+    btn.id = 'shellPlanPill';
+    btn.className = 'shell-plan-pill';
+    btn.setAttribute('aria-haspopup', 'true');
+    btn.setAttribute('aria-expanded', 'false');
+    btn.style.background = meta.bg;
+    btn.style.color = meta.fg;
+    btn.style.borderColor = meta.ring;
+    btn.innerHTML =
+      '<span class="shell-plan-pill-name">' + (plan[0].toUpperCase() + plan.slice(1)) + '</span>'
+      + '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>';
+
+    // Insert AFTER shell-acct but BEFORE shell-quick (so reading order
+    // stays logical: tickers → account → plan → actions → avatar).
+    const quick = document.getElementById('shellQuick');
+    const acct = document.getElementById('shellAcct');
+    if (quick) actions.insertBefore(btn, quick);
+    else if (acct && acct.nextSibling) actions.insertBefore(btn, acct.nextSibling);
+    else actions.insertBefore(btn, actions.firstChild);
+
+    // Dropdown element — appended to body so it escapes topbar overflow
+    const dd = document.createElement('div');
+    dd.id = 'shellPlanDropdown';
+    dd.className = 'shell-plan-dd';
+    dd.setAttribute('role', 'menu');
+    document.body.appendChild(dd);
+
+    let loaded = false;
+    let outsideHandler = null;
+
+    function close() {
+      dd.classList.remove('open');
+      btn.setAttribute('aria-expanded', 'false');
+      if (outsideHandler) {
+        document.removeEventListener('click', outsideHandler, true);
+        outsideHandler = null;
+      }
+    }
+    function positionDd() {
+      const r = btn.getBoundingClientRect();
+      // Align right edge of dropdown with right edge of button; 8px below
+      dd.style.top = (r.bottom + 8) + 'px';
+      dd.style.right = (window.innerWidth - r.right) + 'px';
+    }
+    function open() {
+      positionDd();
+      dd.classList.add('open');
+      btn.setAttribute('aria-expanded', 'true');
+      outsideHandler = (e) => {
+        if (dd.contains(e.target) || btn.contains(e.target)) return;
+        close();
+      };
+      setTimeout(() => document.addEventListener('click', outsideHandler, true), 0);
+      window.addEventListener('resize', positionDd);
+      if (!loaded) {
+        loaded = true;
+        renderDropdown(dd, '<div style="padding:24px;text-align:center;color:rgba(255,255,255,.5);font-size:12px">Загрузка…</div>');
+        fetchAndRender(dd);
+      }
+    }
+    btn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      if (dd.classList.contains('open')) close();
+      else open();
+    });
+    document.addEventListener('keydown', (e) => { if (e.key === 'Escape') close(); });
+  }
+
+  function renderDropdown(dd, html) { dd.innerHTML = html; }
+
+  async function fetchAndRender(dd) {
+    let data = null;
+    try { data = await (window.API && API.planUsage ? API.planUsage() : null); }
+    catch { data = null; }
+    if (!data) {
+      renderDropdown(dd, '<div style="padding:24px;text-align:center;color:#C8A0A0;font-size:12px">Не удалось загрузить</div>');
+      return;
+    }
+    const escHtml = (s) => String(s == null ? '' : s).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+    const PLAN_ORDER = ['free', 'starter', 'pro', 'elite'];
+    const curIdx = PLAN_ORDER.indexOf(data.plan.id);
+
+    // Ladder — horizontal pills with current highlighted
+    const ladder = PLAN_ORDER.map((id, i) => {
+      const active = i === curIdx;
+      const done = i < curIdx;
+      const cls = active ? 'shell-plan-ladder-pill active' : (done ? 'shell-plan-ladder-pill done' : 'shell-plan-ladder-pill');
+      return '<span class="' + cls + '">' + id.charAt(0).toUpperCase() + id.slice(1) + '</span>';
+    }).join('<span class="shell-plan-ladder-sep">›</span>');
+
+    // Progress bars
+    const bar = (label, icon, used, limit) => {
+      const unlim = limit === null || limit === undefined;
+      const pct = unlim ? 0 : Math.min(100, Math.round((used / Math.max(1, limit)) * 100));
+      const pctColor = pct >= 90 ? '#ef4444' : pct >= 70 ? '#FF8C5A' : '#4ade80';
+      const valueText = unlim ? used + ' <span style="opacity:.45">/ ∞</span>' : used + ' <span style="opacity:.45">/ ' + limit + '</span>';
+      return '<div class="shell-plan-metric">' +
+        '<div class="shell-plan-metric-head">' +
+          '<span class="shell-plan-metric-label">' + icon + ' ' + escHtml(label) + '</span>' +
+          '<span class="shell-plan-metric-value mono">' + valueText + '</span>' +
+        '</div>' +
+        '<div class="shell-plan-metric-bar">' +
+          (unlim
+            ? '<div class="shell-plan-metric-bar-unlim"></div>'
+            : '<div class="shell-plan-metric-bar-fill" style="width:' + pct + '%;background:' + pctColor + '"></div>') +
+        '</div>' +
+      '</div>';
+    };
+
+    const expiry = data.expiresAt
+      ? ' · до <span class="mono">' + new Date(data.expiresAt).toLocaleDateString('ru-RU', { day: '2-digit', month: 'short', year: 'numeric' }) + '</span>'
+      : (data.plan.id === 'free' ? ' · навсегда бесплатно' : '');
+
+    const nextHtml = data.next ? (
+      '<div class="shell-plan-next">' +
+        '<div class="shell-plan-next-head">🚀 На ' + escHtml(data.next.name) + ' откроется</div>' +
+        '<ul class="shell-plan-next-list">' +
+          data.next.unlocks.map((u) => '<li>' + escHtml(u) + '</li>').join('') +
+        '</ul>' +
+        '<a href="settings.html?upgrade=' + escHtml(data.next.id) + '" class="shell-plan-cta">' +
+          'Апгрейд на ' + escHtml(data.next.name) + ' · <span class="mono">$' + data.next.priceUsd + '/мес</span>' +
+        '</a>' +
+      '</div>'
+    ) : (
+      '<div class="shell-plan-max">' +
+        '<div style="font-size:20px;text-align:center;margin-bottom:4px">👑</div>' +
+        '<div style="text-align:center;font-size:12px;color:rgba(255,255,255,.7)">Ты на максимальном плане. Спасибо!</div>' +
+      '</div>'
+    );
+
+    renderDropdown(dd,
+      '<div class="shell-plan-dd-head">' +
+        '<div class="shell-plan-dd-title">Подписка' + expiry + '</div>' +
+      '</div>' +
+      '<div class="shell-plan-ladder">' + ladder + '</div>' +
+      '<div class="shell-plan-metrics">' +
+        bar('Активные боты',      '<span style="color:#FF8C5A">▦</span>', data.usage.bots.used,      data.usage.bots.limit) +
+        bar('Сигналов сегодня',    '<span style="color:#FF8C5A">⚡</span>', data.usage.signals.used,   data.usage.signals.limit) +
+        bar('API-ключи бирж',      '<span style="color:#FF8C5A">🔑</span>', data.usage.keys.used,      data.usage.keys.limit) +
+        bar('Бэктесты в месяце',   '<span style="color:#FF8C5A">🎯</span>', data.usage.backtests.used, data.usage.backtests.limit) +
+      '</div>' +
+      nextHtml
+    );
   }
 
   // Market Scanner sidebar link — shown only to Elite. Idempotent.
