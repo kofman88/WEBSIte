@@ -133,6 +133,7 @@
         if (un && u.email) un.textContent = u.email.split('@')[0];
       }
       // Elite-only: inject Market Scanner sidebar link right after Сигналы
+      injectTerminalLink();
       if (plan === 'elite') injectMarketScannerLink();
     } catch (_e) { text.textContent = 'Free Plan'; }
   }
@@ -148,6 +149,19 @@
     link.setAttribute('data-page', 'market-scanner');
     link.innerHTML = '<svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.35-4.35"/></svg>Market Scanner';
     signals.parentNode.insertBefore(link, signals.nextSibling);
+  }
+
+  // SmartTrade Terminal sidebar link — shown to every authed user. Idempotent.
+  function injectTerminalLink() {
+    if (document.querySelector('.sidebar-link[data-page="terminal"]')) return;
+    const bots = document.querySelector('.sidebar-link[data-page="bots"]');
+    if (!bots) return;
+    const link = document.createElement('a');
+    link.href = 'terminal.html';
+    link.className = 'sidebar-link';
+    link.setAttribute('data-page', 'terminal');
+    link.innerHTML = '<svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 3h18v18H3z"/><path d="M7 8l3 3-3 3M12 15h5"/></svg>Terminal';
+    bots.parentNode.insertBefore(link, bots.nextSibling);
   }
 
   // ── 3 & 4. Topbar toggles ──────────────────────────────────────────────
