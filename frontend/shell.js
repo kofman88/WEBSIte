@@ -106,49 +106,63 @@
     pro:     { label: 'Pro',     class: 'plan-pro' },
     elite:   { label: 'Elite',   class: 'plan-elite' },
   };
+  // Runs injectors that should appear on EVERY authed page (sidebar items,
+  // promo card, footer extras, topbar pills). Separated from wirePlanBadge
+  // so pages without a .sidebar-sub-badge anchor still get the chrome.
+  // `plan` defaults to 'free' when user lookup fails or feature-gating
+  // isn't needed; `user` is passed through to injectAccountPill so it can
+  // display the real paperStartingBalance if available.
+  function applyChrome(plan, user) {
+    plan = plan || 'free';
+    injectAIAssistantLink();
+    injectTerminalLink();
+    injectCopyLink();
+    if (plan === 'elite') injectMarketScannerLink();
+    injectSidebarPromo(plan);
+    injectSidebarFooterExtras();
+    injectTopbarQuickActions(plan);
+    injectAccountPill(user);
+  }
+
+  // Updates the plan-dependent pieces: the sidebar sub-badge text (if the
+  // page has one, e.g. dashboard) and the avatar/username in topbar. Runs
+  // the shared injectors via applyChrome either way.
   async function wirePlanBadge() {
     const badge = document.querySelector('.sidebar-sub-badge');
-    if (!badge) return;
-    // Remove any hardcoded "Pro Plan" text leaving only the star icon; we'll
-    // append a new text node with the real plan.
-    const svg = badge.querySelector('svg');
-    badge.innerHTML = '';
-    if (svg) badge.appendChild(svg);
-    const text = document.createElement('span');
-    text.textContent = '…';
-    text.style.marginLeft = '8px';
-    badge.appendChild(text);
+    let text = null;
+    if (badge) {
+      const svg = badge.querySelector('svg');
+      badge.innerHTML = '';
+      if (svg) badge.appendChild(svg);
+      text = document.createElement('span');
+      text.textContent = '…';
+      text.style.marginLeft = '8px';
+      badge.appendChild(text);
+    }
+
+    let plan = 'free';
+    let user = null;
     try {
       const r = await (window.API && API.me ? API.me() : null);
       const u = r && (r.user || r);
-      const plan = (u && u.subscription && u.subscription.plan) || 'free';
-      const meta = PLAN_LABEL[plan] || PLAN_LABEL.free;
-      text.textContent = meta.label + ' Plan';
-      badge.classList.add(meta.class);
-      // Update avatar + username in topbar
+      user = u;
+      plan = (u && u.subscription && u.subscription.plan) || 'free';
+      if (badge && text) {
+        const meta = PLAN_LABEL[plan] || PLAN_LABEL.free;
+        text.textContent = meta.label + ' Plan';
+        badge.classList.add(meta.class);
+      }
       if (u) {
         const av = document.querySelector('.topbar-avatar');
         if (av && u.email) av.textContent = u.email[0].toUpperCase();
         const un = document.querySelector('.topbar-username');
         if (un && u.email) un.textContent = u.email.split('@')[0];
       }
-      // Elite-only: inject Market Scanner sidebar link right after Сигналы
-      injectAIAssistantLink();
-      injectTerminalLink();
-      injectCopyLink();
-      if (plan === 'elite') injectMarketScannerLink();
-      injectSidebarPromo(plan);
-      injectSidebarFooterExtras();
-      injectTopbarQuickActions(plan);
-      injectAccountPill(u);
     } catch (_e) {
-      text.textContent = 'Free Plan';
-      injectAIAssistantLink();
-      injectSidebarPromo('free');
-      injectSidebarFooterExtras();
-      injectTopbarQuickActions('free');
-      injectAccountPill(null);
+      if (text) text.textContent = 'Free Plan';
     }
+    // Chrome injection always runs — independent of badge presence.
+    applyChrome(plan, user);
   }
 
   // AI-assistant sidebar item (BETA) — sits at the top above Dashboard.
