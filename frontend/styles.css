@@ -733,13 +733,29 @@ html.light .shell-plan-ladder-pill { color: rgba(10,10,10,.4); }
 html.light .shell-plan-ladder-pill.done  { color: rgba(196,70,16,.65); }
 html.light .shell-plan-ladder-sep { color: rgba(10,10,10,.2); }
 
-.shell-plan-metrics { display: flex; flex-direction: column; gap: 10px; }
-.shell-plan-metric { display: flex; flex-direction: column; gap: 5px; }
-.shell-plan-metric-head { display: flex; justify-content: space-between; align-items: baseline; font-size: 12px; }
-.shell-plan-metric-label { color: rgba(255,255,255,.75); font-weight: 500; }
-html.light .shell-plan-metric-label { color: rgba(10,10,10,.75); }
-.shell-plan-metric-value { color: #fff; font-size: 12px; font-variant-numeric: tabular-nums; }
+.shell-plan-metrics { display: flex; flex-direction: column; gap: 12px; }
+.shell-plan-metric { display: flex; flex-direction: column; gap: 6px; }
+.shell-plan-metric-head { display: flex; justify-content: space-between; align-items: center; font-size: 12.5px; gap: 8px; }
+.shell-plan-metric-label { color: rgba(255,255,255,.82); font-weight: 500; display: inline-flex; align-items: center; gap: 9px; }
+html.light .shell-plan-metric-label { color: rgba(10,10,10,.8); }
+.shell-plan-metric-value { color: #fff; font-size: 12px; font-variant-numeric: tabular-nums; flex-shrink: 0; }
 html.light .shell-plan-metric-value { color: #0A0A0A; }
+
+/* Icon chip — soft orange gradient square with 16px SVG inside. */
+.shell-plan-metric-ic-wrap {
+  width: 26px; height: 26px;
+  border-radius: 7px;
+  background: linear-gradient(135deg, rgba(255,140,90,.18) 0%, rgba(255,90,31,.08) 100%);
+  border: 1px solid rgba(255,140,90,.22);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: #FF8C5A;
+  flex-shrink: 0;
+  box-shadow: inset 0 1px 1px rgba(255,255,255,.06);
+}
+.shell-plan-metric-ic { width: 14px; height: 14px; }
+html.light .shell-plan-metric-ic-wrap { background: linear-gradient(135deg, rgba(255,140,90,.14), rgba(255,90,31,.04)); border-color: rgba(255,140,90,.3); color: #C44610; }
 .shell-plan-metric-bar {
   height: 5px;
   background: rgba(255,255,255,.05);
@@ -758,26 +774,54 @@ html.light .shell-plan-metric-bar { background: rgba(0,0,0,.06); }
 @keyframes shellPlanShimmer { from { background-position: 200% 0; } to { background-position: -200% 0; } }
 
 .shell-plan-next {
-  padding: 14px;
+  padding: 16px;
   background: linear-gradient(135deg, rgba(255,90,31,.14), rgba(255,140,90,.04));
   border: 1px solid rgba(255,140,90,.25);
   border-radius: 12px;
 }
-.shell-plan-next-head { font-size: 12px; font-weight: 600; color: #fff; margin-bottom: 8px; }
-html.light .shell-plan-next-head { color: #0A0A0A; }
-.shell-plan-next-list { list-style: none; padding: 0; margin: 0 0 12px; display: flex; flex-direction: column; gap: 4px; }
-.shell-plan-next-list li {
-  font-size: 11.5px;
-  color: rgba(255,255,255,.72);
-  line-height: 1.45;
-  padding-left: 16px;
-  position: relative;
+.shell-plan-next-head {
+  font-size: 12.5px;
+  font-weight: 600;
+  color: #fff;
+  margin-bottom: 10px;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
 }
-.shell-plan-next-list li::before { content: '✓'; position: absolute; left: 0; color: #8FBF95; font-weight: 700; }
-html.light .shell-plan-next-list li { color: rgba(10,10,10,.75); }
+.shell-plan-next-ic-wrap {
+  width: 26px; height: 26px;
+  border-radius: 7px;
+  background: linear-gradient(135deg, #FF7840, #FF5A1F);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+  box-shadow: 0 2px 8px rgba(255,90,31,.4), inset 0 1px 1px rgba(255,255,255,.2);
+}
+.shell-plan-next-ic-wrap .shell-plan-metric-ic { width: 14px; height: 14px; }
+html.light .shell-plan-next-head { color: #0A0A0A; }
+
+.shell-plan-next-list { list-style: none; padding: 0; margin: 0 0 14px; display: flex; flex-direction: column; gap: 6px; }
+.shell-plan-next-list li {
+  font-size: 12px;
+  color: rgba(255,255,255,.78);
+  line-height: 1.5;
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+}
+.shell-plan-next-list li .shell-plan-metric-ic {
+  width: 14px; height: 14px;
+  color: #8FBF95;
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+html.light .shell-plan-next-list li { color: rgba(10,10,10,.78); }
+html.light .shell-plan-next-list li .shell-plan-metric-ic { color: #2B5936; }
+
 .shell-plan-cta {
   display: flex; align-items: center; justify-content: center; gap: 6px;
-  padding: 10px 14px;
+  padding: 11px 14px;
   border-radius: 10px;
   background: linear-gradient(180deg, #FF7840 0%, #FF5A1F 60%, #C44610 100%);
   color: #fff !important;
@@ -788,12 +832,26 @@ html.light .shell-plan-next-list li { color: rgba(10,10,10,.75); }
   transition: transform .15s, filter .15s;
 }
 .shell-plan-cta:hover { transform: translateY(-1px); filter: brightness(1.06); }
+
 .shell-plan-max {
-  padding: 14px;
+  padding: 18px 16px;
   background: linear-gradient(135deg, rgba(250,204,21,.1), rgba(250,204,21,.02));
   border: 1px solid rgba(250,204,21,.25);
   border-radius: 12px;
+  text-align: center;
 }
+.shell-plan-max-ic-wrap {
+  width: 46px; height: 46px;
+  margin: 0 auto;
+  border-radius: 12px;
+  background: linear-gradient(135deg, #FDE047, #EAB308);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: #0A0A0A;
+  box-shadow: 0 4px 14px rgba(250,204,21,.35), inset 0 1px 1px rgba(255,255,255,.4);
+}
+.shell-plan-max-ic-wrap .shell-plan-metric-ic { width: 22px; height: 22px; stroke-width: 2; }
 
 /* Topbar quick actions — "+ Создать бота" + "Upgrade" pills.
    Injected by shell.js.injectTopbarQuickActions(). Sits before the
