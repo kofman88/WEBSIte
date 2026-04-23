@@ -322,6 +322,9 @@ const API = {
   manualTrade: (payload) => apiRequest('POST', '/bots/manual-trade', payload),
   getTvWebhook: (botId) => apiRequest('GET', '/bots/' + botId + '/tv-webhook'),
   rotateTvWebhook: (botId) => apiRequest('POST', '/bots/' + botId + '/tv-webhook/rotate'),
+  // Risk Manager
+  getRiskLimits: () => apiRequest('GET', '/risk/limits'),
+  setRiskLimits: (patch) => apiRequest('PATCH', '/risk/limits', patch),
 
   // Community / public
   leaderboard: (opts = {}) => apiRequest('GET', '/public/leaderboard?' + qs(opts), null, { skipAuth: true }),
