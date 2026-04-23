@@ -137,7 +137,37 @@
       injectCopyLink();
       if (plan === 'elite') injectMarketScannerLink();
       injectSidebarPromo(plan);
-    } catch (_e) { text.textContent = 'Free Plan'; injectSidebarPromo('free'); }
+      injectTopbarQuickActions(plan);
+    } catch (_e) { text.textContent = 'Free Plan'; injectSidebarPromo('free'); injectTopbarQuickActions('free'); }
+  }
+
+  // Topbar quick actions — 3Commas-style pills. Inserts BEFORE the existing
+  // lang/theme/avatar stack. Skipped on the bots / terminal pages where the
+  // action is primary content already.
+  function injectTopbarQuickActions(plan) {
+    const actions = document.querySelector('.topbar-actions');
+    if (!actions || document.getElementById('shellQuick')) return;
+    const path = (location.pathname || '').split('/').pop();
+    const suppressCreateOn = new Set(['bots.html', 'terminal.html']);
+    const wrap = document.createElement('div');
+    wrap.id = 'shellQuick';
+    wrap.className = 'shell-quick';
+    let html = '';
+    if (!suppressCreateOn.has(path)) {
+      html += '<a href="bots.html" class="shell-pill-create" title="Создать нового бота">'
+        +   '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M12 5v14M5 12h14"/></svg>'
+        +   '<span>Создать бота</span>'
+        + '</a>';
+    }
+    if (plan !== 'elite') {
+      html += '<a href="settings.html?upgrade=elite" class="shell-pill-upgrade" title="Перейти на Elite">'
+        +   '<svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>'
+        +   '<span>Upgrade</span>'
+        + '</a>';
+    }
+    if (!html) return;
+    wrap.innerHTML = html;
+    actions.insertBefore(wrap, actions.firstChild);
   }
 
   // Sidebar promo card at the bottom (3Commas-style "Лист ожидания" block).

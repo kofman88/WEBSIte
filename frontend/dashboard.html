@@ -91,6 +91,104 @@
     </div>
   </div>
 
+  <!-- Dashboard tab switcher: Главная (default) / Новичкам (guide) -->
+  <div class="dash-tabs" role="tablist" aria-label="Разделы дашборда">
+    <button role="tab" class="dash-tab active" data-tab="main" aria-selected="true">Главная</button>
+    <button role="tab" class="dash-tab" data-tab="guide" aria-selected="false">Новичкам</button>
+  </div>
+  <style>
+    .dash-tabs{display:flex;gap:4px;border-bottom:1px solid rgba(255,255,255,.08);margin-bottom:20px}
+    html.light .dash-tabs{border-bottom-color:rgba(0,0,0,.08)}
+    .dash-tab{
+      background:none;border:0;color:rgba(255,255,255,.55);cursor:pointer;
+      padding:12px 2px;margin-right:24px;font-size:14px;font-weight:500;
+      position:relative;transition:color .15s
+    }
+    .dash-tab:hover{color:rgba(255,255,255,.85)}
+    html.light .dash-tab{color:rgba(10,10,10,.55)}
+    html.light .dash-tab:hover{color:#0A0A0A}
+    .dash-tab.active{color:#fff}
+    html.light .dash-tab.active{color:#0A0A0A}
+    .dash-tab.active::after{
+      content:'';position:absolute;left:0;right:0;bottom:-1px;height:2px;
+      background:linear-gradient(90deg,#FF7840,#FF5A1F);border-radius:2px
+    }
+    .dash-pane[data-tab="main"]{display:block}
+    .dash-pane[data-tab="guide"]{display:none}
+    body[data-dash-tab="guide"] .dash-pane[data-tab="main"]{display:none}
+    body[data-dash-tab="guide"] .dash-pane[data-tab="guide"]{display:block}
+
+    /* Guide pane — 5 step cards laid out as 2-col magazine layout */
+    .guide-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:16px;margin-top:10px}
+    @media(max-width:860px){.guide-grid{grid-template-columns:1fr}}
+    .guide-card{
+      background:rgba(10,10,10,.4);border:1px solid rgba(255,255,255,.06);
+      border-radius:14px;padding:20px;display:flex;gap:16px;align-items:flex-start
+    }
+    html.light .guide-card{background:#fff;border-color:rgba(0,0,0,.08)}
+    .guide-num{
+      width:34px;height:34px;flex-shrink:0;border-radius:50%;
+      background:linear-gradient(135deg,rgba(255,140,90,.25),rgba(255,90,31,.15));
+      color:#FF8C5A;font-weight:700;font-size:14px;
+      display:inline-flex;align-items:center;justify-content:center
+    }
+    .guide-body h4{font-size:15px;font-weight:600;color:#fff;margin-bottom:6px}
+    html.light .guide-body h4{color:#0A0A0A}
+    .guide-body p{font-size:13px;line-height:1.6;color:rgba(255,255,255,.62)}
+    html.light .guide-body p{color:rgba(10,10,10,.68)}
+    .guide-body a{color:#FF8C5A;text-decoration:none;font-weight:500}
+    .guide-body a:hover{text-decoration:underline}
+  </style>
+
+  <div class="dash-pane" data-tab="guide">
+    <div class="guide-grid">
+      <div class="guide-card">
+        <div class="guide-num">1</div>
+        <div class="guide-body">
+          <h4>Что такое бот?</h4>
+          <p>Бот — это алгоритм, который торгует за тебя по заранее заданной стратегии. Он смотрит на свечи, индикаторы и уровни — и открывает/закрывает сделки автоматически. Ты задаёшь правила, он исполняет 24/7 без сна и эмоций.</p>
+        </div>
+      </div>
+      <div class="guide-card">
+        <div class="guide-num">2</div>
+        <div class="guide-body">
+          <h4>Как выбрать стратегию</h4>
+          <p>Шесть стратегий из коробки: <strong>SMC</strong> (smart money), <strong>Gerchik</strong> (уровни), <strong>Scalping</strong> (VWAP+объёмы), <strong>Levels</strong>, <strong>DCA</strong> (усреднение), <strong>Grid</strong> (сетка). Для начала — DCA или Grid на BTCUSDT 1h: они прощают ошибки и работают в боковике. <a href="academy/index.html">Разбор в Академии →</a></p>
+        </div>
+      </div>
+      <div class="guide-card">
+        <div class="guide-num">3</div>
+        <div class="guide-body">
+          <h4>Стоп-лосс и тейк-профиты</h4>
+          <p>Стоп-лосс (<strong>SL</strong>) — цена, на которой сделка закроется в минус, если рынок пошёл против. Обязателен всегда. Тейки (<strong>TP1/TP2/TP3</strong>) — уровни фиксации прибыли, обычно по 33% позиции на каждый. Соотношение риск/награда (R:R) ≥ 2 — базовая дисциплина.</p>
+        </div>
+      </div>
+      <div class="guide-card">
+        <div class="guide-num">4</div>
+        <div class="guide-body">
+          <h4>Paper vs Live</h4>
+          <p>Paper — симуляция, виртуальные $10k, никаких денег не теряешь. Идеально для первых 2 недель — проверить что стратегия работает на твоём таймфрейме. Live — реальная торговля с твоего API-ключа биржи; доступен после подтверждения email и добавления ключа с правами trade. Любой бот можно переключать между режимами.</p>
+        </div>
+      </div>
+      <div class="guide-card">
+        <div class="guide-num">5</div>
+        <div class="guide-body">
+          <h4>Где смотреть результаты</h4>
+          <p><a href="signals.html">Сигналы</a> — что сгенерили стратегии. <a href="bots.html">Боты</a> — статусы + последние trades каждого. <a href="analytics.html">Аналитика</a> — кривая капитала + Sharpe + Profit Factor по периодам. <a href="wallet.html">Кошелёк</a> — балансы подключённых бирж. Copy Trading — кто тебя копирует и кого копируешь ты.</p>
+        </div>
+      </div>
+      <div class="guide-card" style="background:linear-gradient(135deg,rgba(255,90,31,.12),rgba(255,140,90,.04));border-color:rgba(255,90,31,.22)">
+        <div class="guide-num" style="background:linear-gradient(135deg,#FF7840,#FF5A1F);color:#fff">✦</div>
+        <div class="guide-body">
+          <h4>Готов создать первого бота?</h4>
+          <p>Иди на <a href="bots.html"><strong>/bots</strong></a> → кнопка «+ Создать бота» в правом верхнем углу. Первый шаг — выбрать стратегию и таймфрейм, остальное подставится дефолтами. Вернись сюда — увидишь его в «Активные боты».</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="dash-pane" data-tab="main">
+
   <!-- ── Onboarding checklist (4 steps, 3Commas-style) ────────────────────
        Shows until all 4 steps are done OR user dismisses it. Each card has
        an icon (completed state = ✓ in green pill, pending = outline icon),
@@ -340,6 +438,68 @@
       </div>
     </div>
   </div>
+
+  <!-- ── Top strategies from marketplace (3Commas "Лучшие стратегии") ── -->
+  <section class="ts-accordion">
+    <button class="ts-head" id="tsHead" aria-expanded="false" type="button">
+      <span class="ts-head-left">
+        <span class="ts-icon">⭐</span>
+        <span>Топ стратегий маркетплейса</span>
+        <span class="ts-sub" id="tsCount">загрузка…</span>
+      </span>
+      <svg class="ts-chev" id="tsChev" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
+    </button>
+    <div class="ts-body" id="tsBody" hidden>
+      <div id="tsList" class="ts-list"><div class="text-sm" style="color:rgba(255,255,255,.5);padding:14px">Загружаем…</div></div>
+      <a href="market.html" class="ts-more">Смотреть все стратегии →</a>
+    </div>
+  </section>
+  <style>
+    .ts-accordion{margin-top:24px;border:1px solid rgba(255,255,255,.08);border-radius:14px;overflow:hidden;background:rgba(10,10,10,.4)}
+    html.light .ts-accordion{background:#fff;border-color:rgba(0,0,0,.08)}
+    .ts-head{
+      width:100%;display:flex;align-items:center;justify-content:space-between;
+      padding:18px 22px;background:none;border:0;cursor:pointer;color:#fff;
+      font-size:15px;font-weight:600;transition:background .15s
+    }
+    .ts-head:hover{background:rgba(255,255,255,.03)}
+    html.light .ts-head{color:#0A0A0A}
+    html.light .ts-head:hover{background:rgba(0,0,0,.03)}
+    .ts-head-left{display:inline-flex;align-items:center;gap:12px}
+    .ts-icon{font-size:18px}
+    .ts-sub{font-size:11px;font-weight:500;color:rgba(255,255,255,.45);letter-spacing:.05em;margin-left:6px}
+    html.light .ts-sub{color:rgba(10,10,10,.45)}
+    .ts-chev{color:rgba(255,255,255,.5);transition:transform .2s}
+    .ts-accordion[data-open="1"] .ts-chev{transform:rotate(180deg)}
+    .ts-body{padding:0 22px 20px;border-top:1px solid rgba(255,255,255,.06)}
+    html.light .ts-body{border-top-color:rgba(0,0,0,.06)}
+    .ts-list{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:12px;padding-top:14px}
+    .ts-item{
+      padding:14px;border:1px solid rgba(255,255,255,.08);border-radius:12px;
+      background:rgba(255,255,255,.02);transition:border-color .15s,transform .15s;
+      text-decoration:none;color:inherit;display:flex;flex-direction:column
+    }
+    .ts-item:hover{border-color:rgba(255,90,31,.3);transform:translateY(-1px)}
+    html.light .ts-item{background:rgba(0,0,0,.02);border-color:rgba(0,0,0,.08)}
+    html.light .ts-item:hover{border-color:rgba(255,90,31,.4)}
+    .ts-item-head{display:flex;justify-content:space-between;align-items:flex-start;gap:8px;margin-bottom:6px}
+    .ts-item-title{font-weight:600;font-size:13px;color:#fff;line-height:1.3}
+    html.light .ts-item-title{color:#0A0A0A}
+    .ts-item-price{font-size:10px;font-weight:600;padding:2px 7px;border-radius:5px;white-space:nowrap}
+    .ts-item-price.free{background:rgba(102,135,110,.15);color:#8FBF95}
+    .ts-item-price.paid{background:rgba(255,90,31,.15);color:#FF8C5A}
+    .ts-item-meta{display:flex;justify-content:space-between;font-size:11px;color:rgba(255,255,255,.5);margin-top:auto;padding-top:10px;border-top:1px solid rgba(255,255,255,.05)}
+    html.light .ts-item-meta{color:rgba(10,10,10,.5);border-top-color:rgba(0,0,0,.05)}
+    .ts-item-tag{display:inline-block;padding:2px 6px;font-size:10px;text-transform:uppercase;letter-spacing:.1em;background:rgba(255,255,255,.05);border-radius:4px;color:rgba(255,255,255,.62)}
+    html.light .ts-item-tag{background:rgba(0,0,0,.05);color:rgba(10,10,10,.6)}
+    .ts-more{
+      display:inline-block;margin-top:14px;font-size:12px;color:#FF8C5A;
+      text-decoration:none;font-weight:500
+    }
+    .ts-more:hover{text-decoration:underline}
+  </style>
+
+  </div><!-- /.dash-pane[data-tab="main"] -->
 </main>
 
 <script src="app.js"></script>
@@ -347,6 +507,81 @@
 <script src="onboarding.js" defer></script>
 <script>
 if(!Auth.requireAuth()) throw new Error('noauth');
+
+// ── Top strategies accordion — lazy-loads /api/strategies on first open ──
+(function initTopStrategies() {
+  const head = document.getElementById('tsHead');
+  const body = document.getElementById('tsBody');
+  const list = document.getElementById('tsList');
+  const count = document.getElementById('tsCount');
+  if (!head || !body || !list) return;
+  let loaded = false;
+  const esc = (s) => String(s == null ? '' : s).replace(/[&<>"']/g, (c) => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+
+  async function load() {
+    try {
+      const r = await API.marketList({ limit: 6 });
+      const items = (r && r.strategies) || [];
+      count.textContent = items.length ? items.length + ' топ' : '';
+      if (!items.length) {
+        list.innerHTML = '<div class="text-sm" style="color:rgba(255,255,255,.5);padding:14px">Пока нет опубликованных стратегий. <a href="market.html" style="color:#FF8C5A">Стать первым →</a></div>';
+        return;
+      }
+      list.innerHTML = items.map((s) => {
+        const price = Number(s.priceUsd) > 0
+          ? '<span class="ts-item-price paid">$' + Number(s.priceUsd).toFixed(0) + '</span>'
+          : '<span class="ts-item-price free">FREE</span>';
+        const rating = s.rating ? '★ ' + s.rating.toFixed(1) : 'new';
+        return '<a class="ts-item" href="market.html#' + esc(s.slug) + '">' +
+          '<div class="ts-item-head">' +
+            '<div class="ts-item-title">' + esc(s.title) + '</div>' + price +
+          '</div>' +
+          '<span class="ts-item-tag">' + esc(s.strategy) + ' · ' + esc(s.timeframe) + '</span>' +
+          '<div class="ts-item-meta">' +
+            '<span>' + s.installs + ' installs</span>' +
+            '<span style="color:#FFC857">' + rating + '</span>' +
+          '</div>' +
+        '</a>';
+      }).join('');
+    } catch (e) {
+      list.innerHTML = '<div class="text-sm" style="color:#C8A0A0;padding:14px">Не удалось загрузить.</div>';
+    }
+  }
+
+  head.addEventListener('click', () => {
+    const open = head.getAttribute('aria-expanded') === 'true';
+    head.setAttribute('aria-expanded', open ? 'false' : 'true');
+    document.querySelector('.ts-accordion').setAttribute('data-open', open ? '0' : '1');
+    body.hidden = open;
+    if (!open && !loaded) { loaded = true; load(); }
+  });
+  // Pre-fetch count so the eyebrow shows a number before expansion
+  API.marketList({ limit: 1 })
+    .then((r) => { count.textContent = (r && r.strategies) ? 'Всего ' + (r.strategies.length ? '6+' : '0') : ''; })
+    .catch(() => { count.textContent = ''; });
+})();
+
+// ── Dashboard tabs: Главная / Новичкам (URL ?tab=guide preserves state) ──
+(function initDashTabs() {
+  const tabs = document.querySelectorAll('.dash-tab');
+  if (!tabs.length) return;
+  const setTab = (name) => {
+    document.body.setAttribute('data-dash-tab', name);
+    tabs.forEach((t) => {
+      const on = t.getAttribute('data-tab') === name;
+      t.classList.toggle('active', on);
+      t.setAttribute('aria-selected', on ? 'true' : 'false');
+    });
+    try {
+      const url = new URL(location.href);
+      if (name === 'main') url.searchParams.delete('tab'); else url.searchParams.set('tab', name);
+      history.replaceState({}, '', url.pathname + url.search);
+    } catch (_) {}
+  };
+  tabs.forEach((t) => t.addEventListener('click', () => setTab(t.getAttribute('data-tab'))));
+  const initial = new URLSearchParams(location.search).get('tab') === 'guide' ? 'guide' : 'main';
+  setTab(initial);
+})();
 
 // ── Onboarding checklist — resolves 4 steps + shows/hides hero ─────────
 //   register  → always true if we reached this page

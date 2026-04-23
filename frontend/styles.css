@@ -369,6 +369,45 @@ img { max-width: 100%; display: block; }
 }
 /* Sidebar promo — 3Commas-style teaser card above the footer.
    Upsell (non-Elite) or Academy link (Elite). Injected by shell.js. */
+/* Topbar quick actions — "+ Создать бота" + "Upgrade" pills.
+   Injected by shell.js.injectTopbarQuickActions(). Sits before the
+   lang/theme/avatar stack inside .topbar-actions. */
+.shell-quick { display: inline-flex; align-items: center; gap: 8px; }
+.shell-quick a {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 7px 14px;
+  border-radius: 9999px;
+  font-size: 12px;
+  font-weight: 500;
+  letter-spacing: -0.005em;
+  line-height: 1;
+  text-decoration: none;
+  white-space: nowrap;
+  transition: transform .15s ease, filter .15s ease, background .15s ease, border-color .15s ease;
+}
+.shell-pill-create {
+  color: rgba(255,255,255,.92);
+  background: linear-gradient(180deg, rgba(255,255,255,.06), rgba(255,255,255,.02));
+  border: 1px solid rgba(255,255,255,.12);
+  box-shadow: inset 0 1px 1px rgba(255,255,255,.08);
+}
+.shell-pill-create:hover { background: linear-gradient(180deg, rgba(255,255,255,.1), rgba(255,255,255,.03)); transform: translateY(-1px); }
+.shell-pill-upgrade {
+  color: #fff;
+  background: linear-gradient(180deg, #FF7840 0%, #FF5A1F 60%, #C44610 100%);
+  border: 1px solid rgba(255,90,31,.45);
+  box-shadow: inset 0 1px 1px rgba(255,255,255,.28), inset 0 -1px 2px rgba(0,0,0,.22), 0 4px 10px -2px rgba(255,90,31,.35);
+}
+.shell-pill-upgrade:hover { filter: brightness(1.08); transform: translateY(-1px); }
+html.light .shell-pill-create { color: #0A0A0A; background: #fff; border-color: rgba(0,0,0,.1); box-shadow: 0 1px 2px rgba(0,0,0,.06); }
+html.light .shell-pill-create:hover { background: #F6F7FB; }
+@media (max-width: 640px) {
+  .shell-pill-create span, .shell-pill-upgrade span { display: none; }
+  .shell-quick a { padding: 8px; }
+}
+
 .sidebar-promo {
   display: flex;
   align-items: flex-start;
