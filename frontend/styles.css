@@ -1073,6 +1073,8 @@ tr:hover td { background: rgba(255, 255, 255, 0.02); }
   .topbar-search { display: none; }
   .main-content { padding: 18px; }
   .card { padding: 18px; }
+  .toast-container { top: 72px; left: 12px; right: 12px; }
+  .toast { min-width: 0; width: 100%; }
 }
 
 /* --- Toasts / Notifications --- */
