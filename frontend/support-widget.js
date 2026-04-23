@@ -31,7 +31,10 @@
   function authHeaders() {
     var h = { 'Content-Type': 'application/json' };
     try {
-      var tok = Auth && Auth.getAccessToken && Auth.getAccessToken();
+      // Auth.accessToken is a GETTER property on app.js Auth — not a method.
+      // Calling it as a function (Auth.getAccessToken()) would throw, so we
+      // just read it directly.
+      var tok = (typeof Auth !== 'undefined' && Auth.accessToken) || null;
       if (tok) h.Authorization = 'Bearer ' + tok;
     } catch (e) {}
     return h;
