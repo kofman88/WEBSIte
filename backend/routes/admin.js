@@ -364,4 +364,151 @@ router.get('/audit', (req, res, next) => {
   } catch (err) { handleErr(err, res, next); }
 });
 
+// ── Marketplace moderation ──────────────────────────────────────────────
+// Admin view — includes unpublished items too (users only see is_public=1).
+router.get('/marketplace', (req, res, next) => {
+  try {
+    const db = require('../models/database');
+    const q = z.object({
+      search: z.string().max(100).optional(),
+      includeHidden: z.coerce.boolean().optional().default(true),
+      limit: z.coerce.number().int().min(1).max(200).default(100),
+      offset: z.coerce.number().int().min(0).default(0),
+    }).parse(req.query);
+
+    const where = [];
+    const params = [];
+    if (!q.includeHidden) { where.push('s.is_public = 1'); }
+    if (q.search) { where.push('(s.title LIKE ? OR u.email LIKE ?)'); params.push('%'+q.search+'%', '%'+q.search+'%'); }
+    const clause = where.length ? 'WHERE ' + where.join(' AND ') : '';
+    const rows = db.prepare(`
+      SELECT s.id, s.slug, s.title, s.strategy, s.timeframe, s.installs,
+             s.price_usd, s.platform_fee_pct, s.is_public, s.created_at,
+             u.id AS author_id, u.email AS author_email,
+             (SELECT COUNT(*) FROM strategy_earnings e WHERE e.strategy_id = s.id) AS earnings_count,
+             COALESCE((SELECT SUM(amount_usd) FROM strategy_earnings e WHERE e.strategy_id = s.id AND e.status='pending'), 0) AS pending_usd,
+             COALESCE((SELECT SUM(amount_usd) FROM strategy_earnings e WHERE e.strategy_id = s.id AND e.status='paid'), 0) AS paid_usd
+      FROM published_strategies s JOIN users u ON u.id = s.author_id
+      ${clause}
+      ORDER BY s.is_public DESC, s.installs DESC, s.created_at DESC
+      LIMIT ? OFFSET ?
+    `).all(...params, q.limit, q.offset);
+    res.json({ strategies: rows });
+  } catch (err) { handleErr(err, res, next); }
+});
+
+router.patch('/marketplace/:id/public', requireCapability('user.block'), (req, res, next) => {
+  try {
+    const id = z.coerce.number().int().positive().parse(req.params.id);
+    const body = z.object({ isPublic: z.boolean() }).parse(req.body);
+    const db = require('../models/database');
+    const info = db.prepare('UPDATE published_strategies SET is_public = ? WHERE id = ?')
+      .run(body.isPublic ? 1 : 0, id);
+    if (!info.changes) return res.status(404).json({ error: 'Strategy not found' });
+    db.prepare(`
+      INSERT INTO audit_log (user_id, action, entity_type, entity_id, metadata)
+      VALUES (?, 'admin.marketplace.visibility', 'strategy', ?, ?)
+    `).run(req.userId, id, JSON.stringify({ isPublic: body.isPublic }));
+    res.json({ ok: true, isPublic: body.isPublic });
+  } catch (err) { handleErr(err, res, next); }
+});
+
+// ── Copy Trading moderation ─────────────────────────────────────────────
+router.get('/copy', (req, res, next) => {
+  try {
+    const db = require('../models/database');
+    const q = z.object({
+      activeOnly: z.coerce.boolean().optional().default(false),
+      leaderId: z.coerce.number().int().positive().optional(),
+      limit: z.coerce.number().int().min(1).max(500).default(200),
+      offset: z.coerce.number().int().min(0).default(0),
+    }).parse(req.query);
+
+    const where = [];
+    const params = [];
+    if (q.activeOnly) where.push('cs.is_active = 1');
+    if (q.leaderId) { where.push('cs.leader_id = ?'); params.push(q.leaderId); }
+    const clause = where.length ? 'WHERE ' + where.join(' AND ') : '';
+    const rows = db.prepare(`
+      SELECT cs.leader_id, cs.follower_id, cs.mode, cs.risk_mult, cs.is_active, cs.created_at,
+             l.email AS leader_email, l.referral_code AS leader_code,
+             f.email AS follower_email,
+             (SELECT COUNT(*) FROM trades t WHERE t.user_id = cs.leader_id AND t.status = 'closed') AS leader_closed_trades,
+             (SELECT COALESCE(SUM(realized_pnl),0) FROM trades t WHERE t.user_id = cs.leader_id AND t.status = 'closed') AS leader_total_pnl
+      FROM copy_subscriptions cs
+        JOIN users l ON l.id = cs.leader_id
+        JOIN users f ON f.id = cs.follower_id
+      ${clause}
+      ORDER BY cs.created_at DESC
+      LIMIT ? OFFSET ?
+    `).all(...params, q.limit, q.offset);
+    res.json({ subscriptions: rows });
+  } catch (err) { handleErr(err, res, next); }
+});
+
+router.post('/copy/disable', requireCapability('user.block'), (req, res, next) => {
+  try {
+    const body = z.object({
+      leaderId: z.number().int().positive(),
+      followerId: z.number().int().positive(),
+    }).parse(req.body);
+    const db = require('../models/database');
+    const info = db.prepare('UPDATE copy_subscriptions SET is_active = 0 WHERE leader_id = ? AND follower_id = ?')
+      .run(body.leaderId, body.followerId);
+    db.prepare(`
+      INSERT INTO audit_log (user_id, action, entity_type, entity_id, metadata)
+      VALUES (?, 'admin.copy.disable', 'copy_subscription', ?, ?)
+    `).run(req.userId, body.followerId, JSON.stringify(body));
+    res.json({ disabled: info.changes });
+  } catch (err) { handleErr(err, res, next); }
+});
+
+router.post('/copy/leader/:leaderId/ban', requireCapability('user.block'), (req, res, next) => {
+  try {
+    const leaderId = z.coerce.number().int().positive().parse(req.params.leaderId);
+    const db = require('../models/database');
+    // Disable all subscriptions + revoke leader's public profile so no one
+    // can subscribe again. Stops the fan-out but leaves the leader alive.
+    const tx = db.transaction(() => {
+      const disabled = db.prepare('UPDATE copy_subscriptions SET is_active = 0 WHERE leader_id = ?').run(leaderId).changes;
+      db.prepare('UPDATE users SET public_profile = 0 WHERE id = ?').run(leaderId);
+      db.prepare(`
+        INSERT INTO audit_log (user_id, action, entity_type, entity_id, metadata)
+        VALUES (?, 'admin.copy.leader_banned', 'user', ?, ?)
+      `).run(req.userId, leaderId, JSON.stringify({ disabled }));
+      return disabled;
+    });
+    res.json({ disabled: tx() });
+  } catch (err) { handleErr(err, res, next); }
+});
+
+// ── AI usage stats (Gemini) ─────────────────────────────────────────────
+// Pulls from the audit_log rows that aiService writes via logger — but we
+// actually track the usage counter in-memory only. Expose it via the
+// service's internal getCount if available; otherwise show an empty table.
+router.get('/ai/usage', (req, res, next) => {
+  try {
+    const ai = (() => { try { return require('../services/aiService'); } catch { return null; } })();
+    const enabled = !!process.env.GEMINI_API_KEY;
+    if (!ai) return res.json({ enabled, users: [] });
+    const db = require('../models/database');
+    // The in-memory counter is per-process; we can't iterate it from here.
+    // Instead, show users whose last_login suggests activity + render their
+    // current count by probing ai.getCount(userId). For a DB-backed view
+    // you'd need an 'ai_usage_log' table — not present yet.
+    const users = db.prepare(`
+      SELECT id, email, (SELECT plan FROM subscriptions WHERE user_id = users.id) AS plan
+      FROM users WHERE is_active = 1 ORDER BY last_login_at DESC LIMIT 50
+    `).all();
+    const rows = users.map((u) => ({
+      userId: u.id,
+      email: u.email,
+      plan: u.plan || 'free',
+      requestsToday: ai.getCount(u.id),
+      limit: ai.limitForPlan(u.plan || 'free'),
+    })).filter((r) => r.requestsToday > 0);
+    res.json({ enabled, users: rows });
+  } catch (err) { handleErr(err, res, next); }
+});
+
 module.exports = router;

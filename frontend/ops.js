@@ -878,6 +878,168 @@
   }
   loaders.audit = loadAudit;
 
+  // ── Marketplace moderation ────────────────────────────────────────────
+  async function loadMarketplace() {
+    const pane = document.getElementById('pane-marketplace');
+    pane.innerHTML = '<div class="text-center py-12 text-slate-500 text-sm">Загрузка…</div>';
+    try {
+      const r = await API.adminMarketplace();
+      const list = r.strategies || [];
+      pane.innerHTML =
+        '<div class="ops-card mb-4">' +
+        '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">' +
+          '<div style="font-weight:600">Опубликованные стратегии</div>' +
+          '<div class="text-xs" style="color:rgba(255,255,255,.45)">' + list.length + ' items · hidden inclusive</div>' +
+        '</div>' +
+        '<table class="ops-table"><thead><tr>' +
+          '<th>Title / Slug</th><th>Author</th><th>Strategy</th><th>Price</th>' +
+          '<th>Installs</th><th>Earnings</th><th>Status</th><th></th>' +
+        '</tr></thead><tbody>' +
+        (list.length ? list.map(function (s) {
+          var priceTxt = (s.price_usd > 0) ? '$' + s.price_usd.toFixed(0) : 'free';
+          var earnTxt = (s.earnings_count > 0)
+            ? '<span class="mono">$' + (s.pending_usd + s.paid_usd).toFixed(2) + '</span>' +
+              '<span class="text-xs" style="color:rgba(255,255,255,.5);margin-left:6px">' + s.earnings_count + '</span>'
+            : '<span class="text-slate-600">—</span>';
+          var badge = s.is_public
+            ? '<span class="badge badge-green">public</span>'
+            : '<span class="badge badge-gray">hidden</span>';
+          var btnLabel = s.is_public ? 'Unpublish' : 'Republish';
+          var btnCls = s.is_public ? 'ops-btn ops-btn-danger' : 'ops-btn';
+          return '<tr>' +
+            '<td><div style="font-weight:500">' + esc(s.title) + '</div>' +
+              '<div class="text-xs mono" style="color:rgba(255,255,255,.4)">' + esc(s.slug) + '</div></td>' +
+            '<td class="text-xs">' + esc(s.author_email) + '</td>' +
+            '<td><span class="badge badge-blue">' + esc(s.strategy) + '</span> <span class="text-xs text-slate-500">' + esc(s.timeframe) + '</span></td>' +
+            '<td>' + priceTxt + '</td>' +
+            '<td>' + s.installs + '</td>' +
+            '<td>' + earnTxt + '</td>' +
+            '<td>' + badge + '</td>' +
+            '<td><button class="' + btnCls + '" data-mkt-toggle="' + s.id + '" data-next="' + (!s.is_public) + '">' + btnLabel + '</button></td>' +
+          '</tr>';
+        }).join('') : '<tr><td colspan="8" class="text-center py-8" style="color:rgba(255,255,255,.45)">Пока ничего не опубликовано</td></tr>') +
+        '</tbody></table></div>';
+
+      pane.querySelectorAll('[data-mkt-toggle]').forEach(function (btn) {
+        btn.addEventListener('click', async function () {
+          var id = btn.getAttribute('data-mkt-toggle');
+          var next = btn.getAttribute('data-next') === 'true';
+          btn.disabled = true; btn.textContent = '…';
+          try {
+            await API.adminSetStrategyPublic(id, next);
+            loadMarketplace();
+          } catch (e) { btn.disabled = false; alert(e.message || 'Ошибка'); btn.textContent = next ? 'Republish' : 'Unpublish'; }
+        });
+      });
+    } catch (e) {
+      pane.innerHTML = '<div class="text-center py-12 text-red-400 text-sm">' + esc(e.message) + '</div>';
+    }
+  }
+  loaders.marketplace = loadMarketplace;
+
+  // ── Copy Trading moderation ───────────────────────────────────────────
+  async function loadCopy() {
+    const pane = document.getElementById('pane-copy');
+    pane.innerHTML = '<div class="text-center py-12 text-slate-500 text-sm">Загрузка…</div>';
+    try {
+      const r = await API.adminCopyList({ activeOnly: false });
+      const subs = r.subscriptions || [];
+      pane.innerHTML =
+        '<div class="ops-card">' +
+        '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">' +
+          '<div style="font-weight:600">Copy subscriptions</div>' +
+          '<div class="text-xs" style="color:rgba(255,255,255,.45)">' + subs.length + ' total · ' + subs.filter(function(x){return x.is_active}).length + ' active</div>' +
+        '</div>' +
+        '<table class="ops-table"><thead><tr>' +
+          '<th>Leader</th><th>Follower</th><th>Mode</th><th>Risk×</th>' +
+          '<th>Leader PnL</th><th>Leader trades</th><th>Status</th><th></th>' +
+        '</tr></thead><tbody>' +
+        (subs.length ? subs.map(function (s) {
+          var status = s.is_active
+            ? '<span class="badge badge-green">active</span>'
+            : '<span class="badge badge-gray">off</span>';
+          var pnlCls = s.leader_total_pnl >= 0 ? 'text-green-400' : 'text-red-400';
+          return '<tr>' +
+            '<td><div class="text-xs">' + esc(s.leader_email) + '</div>' +
+              '<div class="mono text-xs" style="color:rgba(255,255,255,.4)">#' + esc(s.leader_code) + '</div></td>' +
+            '<td class="text-xs">' + esc(s.follower_email) + '</td>' +
+            '<td><span class="badge ' + (s.mode === 'live' ? 'badge-green' : 'badge-yellow') + '">' + esc(s.mode) + '</span></td>' +
+            '<td class="mono">' + Number(s.risk_mult).toFixed(1) + '</td>' +
+            '<td class="mono ' + pnlCls + '">' + (Number(s.leader_total_pnl) >= 0 ? '+' : '') + Number(s.leader_total_pnl).toFixed(2) + '</td>' +
+            '<td class="text-xs">' + s.leader_closed_trades + '</td>' +
+            '<td>' + status + '</td>' +
+            '<td>' +
+              (s.is_active ? '<button class="ops-btn ops-btn-danger" data-cp-disable="' + s.leader_id + '-' + s.follower_id + '">Disable</button>' : '') +
+              '<button class="ops-btn ops-btn-danger" style="margin-left:4px" data-cp-ban="' + s.leader_id + '" title="Disable all subs + revoke public profile">Ban leader</button>' +
+            '</td>' +
+          '</tr>';
+        }).join('') : '<tr><td colspan="8" class="text-center py-8" style="color:rgba(255,255,255,.45)">Ни одной подписки</td></tr>') +
+        '</tbody></table></div>';
+
+      pane.querySelectorAll('[data-cp-disable]').forEach(function (btn) {
+        btn.addEventListener('click', async function () {
+          var parts = btn.getAttribute('data-cp-disable').split('-');
+          btn.disabled = true; btn.textContent = '…';
+          try {
+            await API.adminCopyDisable(Number(parts[0]), Number(parts[1]));
+            loadCopy();
+          } catch (e) { btn.disabled = false; btn.textContent = 'Disable'; alert(e.message || 'Ошибка'); }
+        });
+      });
+      pane.querySelectorAll('[data-cp-ban]').forEach(function (btn) {
+        btn.addEventListener('click', async function () {
+          if (!confirm('Заблокировать лидера? Все активные подписки отключатся + публичный профиль закроется.')) return;
+          var lid = btn.getAttribute('data-cp-ban');
+          btn.disabled = true; btn.textContent = '…';
+          try { await API.adminCopyBanLeader(lid); loadCopy(); }
+          catch (e) { btn.disabled = false; btn.textContent = 'Ban leader'; alert(e.message || 'Ошибка'); }
+        });
+      });
+    } catch (e) {
+      pane.innerHTML = '<div class="text-center py-12 text-red-400 text-sm">' + esc(e.message) + '</div>';
+    }
+  }
+  loaders.copy = loadCopy;
+
+  // ── AI usage (Gemini) ─────────────────────────────────────────────────
+  async function loadAI() {
+    const pane = document.getElementById('pane-ai');
+    pane.innerHTML = '<div class="text-center py-12 text-slate-500 text-sm">Загрузка…</div>';
+    try {
+      const r = await API.adminAIUsage();
+      var enabled = r.enabled ? '<span class="badge badge-green">enabled</span>' : '<span class="badge badge-red">disabled</span>';
+      var rows = r.users || [];
+      pane.innerHTML =
+        '<div class="ops-card">' +
+        '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">' +
+          '<div style="font-weight:600">Gemini AI usage · сегодня · in-memory</div>' +
+          enabled +
+        '</div>' +
+        '<div class="text-xs" style="color:rgba(255,255,255,.5);margin-bottom:12px">' +
+          'Счётчик хранится в памяти процесса — сбрасывается после рестарта Passenger. ' +
+          'Ниже только юзеры с запросами > 0 в текущем процессе.' +
+        '</div>' +
+        '<table class="ops-table"><thead><tr>' +
+          '<th>User</th><th>Plan</th><th>Today</th><th>Limit</th><th>% of limit</th>' +
+        '</tr></thead><tbody>' +
+        (rows.length ? rows.map(function (u) {
+          var pct = u.limit ? Math.round(u.requestsToday / u.limit * 100) : 0;
+          var pctCls = pct >= 90 ? 'badge-red' : pct >= 60 ? 'badge-yellow' : 'badge-gray';
+          return '<tr>' +
+            '<td class="text-xs">' + esc(u.email) + '</td>' +
+            '<td><span class="badge badge-blue">' + esc(u.plan) + '</span></td>' +
+            '<td class="mono">' + u.requestsToday + '</td>' +
+            '<td class="mono" style="color:rgba(255,255,255,.5)">' + u.limit + '</td>' +
+            '<td><span class="badge ' + pctCls + '">' + pct + '%</span></td>' +
+          '</tr>';
+        }).join('') : '<tr><td colspan="5" class="text-center py-8" style="color:rgba(255,255,255,.45)">Никто ещё не пользовался AI в этом процессе</td></tr>') +
+        '</tbody></table></div>';
+    } catch (e) {
+      pane.innerHTML = '<div class="text-center py-12 text-red-400 text-sm">' + esc(e.message) + '</div>';
+    }
+  }
+  loaders.ai = loadAI;
+
   // ── Feature flags ─────────────────────────────────────────────────────
   async function loadFlags() {
     const pane = document.getElementById('pane-flags');
