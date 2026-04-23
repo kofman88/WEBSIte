@@ -668,4 +668,80 @@
     textarea.focus();
   }
 
+  // ── Live WS updates: admin replies appear in-flight ──────────────────
+  // When the global WS object is available (app.js WS client, loaded on
+  // every authed page), subscribe to `support.message_added`. If the
+  // widget panel is open on the Chat tab with a matching ticketId we
+  // append the bubble live. Otherwise we bump the floating-button
+  // badge and toast if the page permits.
+  function wireLiveUpdates() {
+    if (!window.WS || !WS.on) { setTimeout(wireLiveUpdates, 500); return; }
+    // Ensure WS is connecting (app.js does this lazily on first use)
+    try { WS.connect && WS.connect(); } catch (_) {}
+    WS.on('support.message_added', function (ev) {
+      try {
+        var d = ev && ev.data;
+        if (!d || !d.message) return;
+        // Skip messages authored by this user (echo). Admin replies only.
+        if (!d.message.isAdmin) return;
+        var panelOpen = panel.classList.contains('open');
+        var threadOpen = panelOpen && currentTab === 'chat' && activeTicketId === d.ticketId;
+        if (threadOpen) {
+          // Append bubble live, scroll + mark read
+          var msgsEl = document.querySelector('.chm-sup-msgs');
+          if (msgsEl) {
+            var b = document.createElement('div');
+            b.className = 'chm-sup-msg';
+            b.innerHTML = esc(d.message.body) + '<div class="chm-sup-ts">только что</div>';
+            msgsEl.appendChild(b);
+            msgsEl.scrollTop = msgsEl.scrollHeight;
+          }
+          // Tell server we've read it
+          try {
+            fetch(API_BASE + '/support/tickets/' + d.ticketId + '/mark-read', {
+              method: 'POST', headers: authHeaders(), body: '{}',
+            });
+          } catch (_) {}
+        } else {
+          // Bump the floating-button badge so user notices
+          bumpBadge();
+          // Small "ping" audio cue could go here (skipped for MVP)
+        }
+      } catch (_) {}
+    });
+  }
+
+  var _unreadCount = 0;
+  function bumpBadge() {
+    _unreadCount += 1;
+    var badge = document.querySelector('.chm-sup-btn .chm-sup-badge');
+    if (badge) { badge.textContent = _unreadCount; badge.classList.add('show'); }
+  }
+  function clearBadge() {
+    _unreadCount = 0;
+    var badge = document.querySelector('.chm-sup-btn .chm-sup-badge');
+    if (badge) { badge.textContent = ''; badge.classList.remove('show'); }
+  }
+
+  // Clear badge when widget opens (user is looking at it)
+  btn.addEventListener('click', clearBadge);
+
+  // On page boot, check if there are unread admin replies and paint badge.
+  // Silent failure if user isn't logged in.
+  if (isLoggedIn()) {
+    fetchJson(API_BASE + '/support/tickets?limit=20', { headers: authHeaders() })
+      .then(function (r) {
+        if (!r.ok) return;
+        var tickets = (r.body && r.body.tickets) || [];
+        var unread = tickets.reduce(function (a, t) { return a + (t.unreadCount || 0); }, 0);
+        if (unread > 0) {
+          _unreadCount = unread;
+          var badge = document.querySelector('.chm-sup-btn .chm-sup-badge');
+          if (badge) { badge.textContent = unread; badge.classList.add('show'); }
+        }
+      })
+      .catch(function () {});
+    wireLiveUpdates();
+  }
+
 })();

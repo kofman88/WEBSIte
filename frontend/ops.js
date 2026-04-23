@@ -738,35 +738,219 @@
     catch (e) { Toast.error(e.message); }
   };
 
-  // ── Support ───────────────────────────────────────────────────────────
+  // ── Support Inbox (Intercom-style) ────────────────────────────────────
+  // List of tickets with unread badge + status badge + last message
+  // preview. Click row → opens drawer with full thread + textarea reply.
+  // WebSocket subscription below (wireSupportWs) keeps list + open drawer
+  // live without page reloads.
+  let _supOpenTicketId = null;
   async function loadSupport() {
     const pane = document.getElementById('pane-support');
-    pane.innerHTML = `
-      <div class="ops-card" style="padding:0;overflow:auto">
-        <table class="ops-table">
-          <thead><tr><th>#</th><th>User</th><th>Subject</th><th>Status</th><th>Msgs</th><th>Updated</th></tr></thead>
-          <tbody id="suTb"><tr><td colspan="6" class="text-center py-8 text-slate-500">Загрузка…</td></tr></tbody>
-        </table>
-      </div>
-    `;
+    pane.innerHTML =
+      '<div class="ops-card" style="padding:0;overflow:hidden">' +
+      '<div style="display:flex;align-items:center;justify-content:space-between;padding:14px 18px;border-bottom:1px solid rgba(255,255,255,.06)">' +
+        '<div style="font-weight:600;font-size:14px">Support Inbox <span id="suUnread" class="badge badge-red" style="display:none;margin-left:8px">0</span></div>' +
+        '<div style="display:flex;gap:8px">' +
+          '<select id="suFilter" class="ops-input" style="padding:6px 10px;font-size:12px">' +
+            '<option value="">Все статусы</option>' +
+            '<option value="open" selected>Open</option>' +
+            '<option value="pending">Pending</option>' +
+            '<option value="closed">Closed</option>' +
+          '</select>' +
+          '<button id="suReload" class="ops-btn" type="button">↻</button>' +
+        '</div>' +
+      '</div>' +
+      '<div id="suList" style="max-height:70vh;overflow-y:auto">' +
+        '<div class="text-center py-8 text-slate-500 text-sm">Загрузка…</div>' +
+      '</div>' +
+      '</div>';
+    document.getElementById('suFilter').addEventListener('change', renderSupportList);
+    document.getElementById('suReload').addEventListener('click', renderSupportList);
+    renderSupportList();
+  }
+  async function renderSupportList() {
+    const list = document.getElementById('suList');
+    if (!list) return;
+    const status = document.getElementById('suFilter').value || undefined;
     try {
-      const data = await API.listAllTickets({ limit: 200 });
-      document.getElementById('suTb').innerHTML = (data.tickets || []).map((t) => {
-        const badge = t.status === 'open' ? 'badge-green' : t.status === 'pending' ? 'badge-yellow' : 'badge-gray';
-        return `<tr>
-          <td class="mono">#${t.id}</td>
-          <td class="mono text-xs">${esc(t.userEmail || '—')}</td>
-          <td>${esc(t.subject)}</td>
-          <td><span class="badge ${badge}">${t.status}</span></td>
-          <td class="mono">${t.messageCount || 0}</td>
-          <td class="mono text-xs text-slate-500">${fmtDate(t.updatedAt || t.createdAt)}</td>
-        </tr>`;
-      }).join('') || '<tr><td colspan="6" class="text-center py-8 text-slate-500">Нет тикетов</td></tr>';
+      const data = await API.listAllTickets({ status, limit: 200 });
+      const tickets = data.tickets || [];
+      // Aggregate unread for the top-of-pane counter
+      const totalUnread = tickets.reduce(function (a, t) { return a + (t.unreadCount || 0); }, 0);
+      const badge = document.getElementById('suUnread');
+      if (badge) {
+        badge.style.display = totalUnread > 0 ? 'inline-block' : 'none';
+        badge.textContent = totalUnread;
+      }
+      if (!tickets.length) {
+        list.innerHTML = '<div class="text-center py-10 text-sm" style="color:rgba(255,255,255,.5)">Пусто — все тикеты закрыты ✓</div>';
+        return;
+      }
+      list.innerHTML = tickets.map(function (t) {
+        const statusCls = t.status === 'open' ? 'badge-green' : t.status === 'pending' ? 'badge-yellow' : 'badge-gray';
+        const preview = t.lastBody ? (t.lastFromAdmin ? '↳ ' : '') + esc(t.lastBody.slice(0, 100)) : '';
+        const unread = t.unreadCount > 0
+          ? '<span class="badge badge-red" style="margin-left:6px">' + t.unreadCount + '</span>'
+          : '';
+        const rowBg = t.unreadCount > 0 ? 'background:rgba(239,68,68,.04)' : '';
+        return '<div class="su-row" data-tid="' + t.id + '" style="padding:12px 18px;border-bottom:1px solid rgba(255,255,255,.04);cursor:pointer;display:flex;gap:12px;align-items:flex-start;' + rowBg + '">' +
+          '<div style="flex:0 0 auto;width:32px;height:32px;border-radius:50%;background:rgba(255,90,31,.15);color:#FF8C5A;display:flex;align-items:center;justify-content:center;font-weight:600;font-size:12px">' +
+            esc((t.userEmail || '?')[0].toUpperCase()) +
+          '</div>' +
+          '<div style="flex:1;min-width:0">' +
+            '<div style="display:flex;justify-content:space-between;gap:8px">' +
+              '<div class="mono text-xs" style="color:rgba(255,255,255,.65)">' + esc(t.userEmail || '—') + unread + '</div>' +
+              '<div style="display:flex;gap:6px;align-items:center">' +
+                '<span class="badge ' + statusCls + '">' + esc(t.status) + '</span>' +
+                '<span class="mono text-xs" style="color:rgba(255,255,255,.4)">#' + t.id + '</span>' +
+              '</div>' +
+            '</div>' +
+            '<div style="font-weight:500;margin-top:2px;font-size:13px">' + esc(t.subject || 'Без темы') + '</div>' +
+            '<div style="margin-top:3px;font-size:12px;color:rgba(255,255,255,.5);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">' + preview + '</div>' +
+          '</div>' +
+        '</div>';
+      }).join('');
+      list.querySelectorAll('.su-row').forEach(function (row) {
+        row.addEventListener('click', function () { openSupportDrawer(Number(row.getAttribute('data-tid'))); });
+      });
     } catch (e) {
-      document.getElementById('suTb').innerHTML = `<tr><td colspan="6" class="text-center py-8 text-red-400">${esc(e.message)}</td></tr>`;
+      list.innerHTML = '<div class="text-center py-10 text-sm text-red-400">' + esc(e.message) + '</div>';
     }
   }
-  loaders.support = loadSupport;
+
+  async function openSupportDrawer(ticketId) {
+    _supOpenTicketId = ticketId;
+    openDrawer();
+    const body = document.getElementById('drawerBody');
+    body.innerHTML = '<div class="p-8 text-center text-slate-500 text-sm">Загрузка тикета…</div>';
+    try {
+      const t = await API.adminTicketGet(ticketId);
+      const msgs = t.messages || [];
+      body.innerHTML =
+        '<div class="drawer-section" style="border-bottom:1px solid rgba(255,255,255,.05)">' +
+          '<div style="display:flex;justify-content:space-between;align-items:flex-start;gap:8px">' +
+            '<div>' +
+              '<div style="font-weight:600;font-size:15px">' + esc(t.subject || 'Без темы') + '</div>' +
+              '<div class="mono text-xs" style="color:rgba(255,255,255,.5);margin-top:4px">#' + t.id + ' · статус <strong>' + esc(t.status) + '</strong> · ' + msgs.length + ' сообщ.</div>' +
+            '</div>' +
+            '<div style="display:flex;gap:6px">' +
+              (t.status !== 'closed'
+                ? '<button id="suClose" class="ops-btn ops-btn-danger" type="button">Закрыть</button>'
+                : '') +
+            '</div>' +
+          '</div>' +
+        '</div>' +
+        '<div id="suThread" style="padding:18px 22px;display:flex;flex-direction:column;gap:10px;max-height:56vh;overflow-y:auto">' +
+          msgs.map(renderOpsBubble).join('') +
+        '</div>' +
+        '<div class="drawer-section" style="border-top:1px solid rgba(255,255,255,.06);position:sticky;bottom:0;background:#0a0a0f;padding:14px 18px">' +
+          '<textarea id="suReplyInput" placeholder="Ответ пользователю…" rows="3" style="width:100%;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.1);border-radius:10px;padding:10px 12px;color:#fff;font-family:inherit;font-size:13px;resize:vertical;outline:none"></textarea>' +
+          '<div style="display:flex;justify-content:space-between;align-items:center;margin-top:8px;font-size:11px;color:rgba(255,255,255,.4)">' +
+            '<span>Ctrl/Cmd + Enter — отправить</span>' +
+            '<button id="suReplyBtn" class="ops-btn ops-btn-primary" type="button">Ответить →</button>' +
+          '</div>' +
+        '</div>';
+
+      // Mark read on open — the backend stamps admin_read_at so unread
+      // count drops. The list reloads after the drawer closes.
+      try { await API.adminTicketMarkRead(ticketId); } catch (_) {}
+
+      const thread = document.getElementById('suThread');
+      thread.scrollTop = thread.scrollHeight;
+
+      const replyBtn = document.getElementById('suReplyBtn');
+      const replyInput = document.getElementById('suReplyInput');
+      async function send() {
+        const txt = (replyInput.value || '').trim();
+        if (txt.length < 1) return;
+        replyBtn.disabled = true; replyBtn.textContent = '…';
+        try {
+          await API.adminTicketReply(ticketId, txt);
+          replyInput.value = '';
+          // WS push will append bubble automatically — we don't manually
+          // insert here to avoid duplicates on the admin's own screen.
+        } catch (e) {
+          alert(e.message || 'Не отправилось');
+        } finally {
+          replyBtn.disabled = false; replyBtn.textContent = 'Ответить →';
+          replyInput.focus();
+        }
+      }
+      replyBtn.addEventListener('click', send);
+      replyInput.addEventListener('keydown', function (e) {
+        if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') { e.preventDefault(); send(); }
+      });
+      replyInput.focus();
+
+      const closeBtn = document.getElementById('suClose');
+      if (closeBtn) closeBtn.addEventListener('click', async function () {
+        if (!confirm('Закрыть тикет?')) return;
+        try { await API.adminTicketClose(ticketId); closeDrawer(); renderSupportList(); }
+        catch (e) { alert(e.message || 'Ошибка'); }
+      });
+    } catch (e) {
+      body.innerHTML = '<div class="p-8 text-center text-red-400">' + esc(e.message) + '</div>';
+    }
+  }
+
+  // When drawer closes, clear open-ticket ID and reload the list to
+  // refresh unread counts that may have changed while it was open.
+  const _origCloseDrawer = window.closeDrawer;
+  window.closeDrawer = function () {
+    _supOpenTicketId = null;
+    if (typeof _origCloseDrawer === 'function') _origCloseDrawer();
+    else document.getElementById('drawerBg').classList.remove('open'), document.getElementById('drawer').classList.remove('open');
+    // If the Support pane is visible, refresh to pick up any admin_read_at changes
+    if (document.getElementById('pane-support').classList.contains('active')) {
+      renderSupportList();
+    }
+  };
+
+  function renderOpsBubble(m) {
+    const mine = m.isAdmin;
+    const bg = mine ? 'linear-gradient(180deg,#FF7840,#FF5A1F)' : 'rgba(255,255,255,.04)';
+    const color = mine ? '#fff' : 'rgba(255,255,255,.92)';
+    const border = mine ? 'transparent' : 'rgba(255,255,255,.08)';
+    const radius = mine ? 'border-bottom-right-radius:4px' : 'border-bottom-left-radius:4px';
+    const align = mine ? 'margin-left:auto;text-align:left' : 'margin-right:auto';
+    return '<div style="max-width:82%;' + align + '">' +
+      '<div style="padding:10px 14px;background:' + bg + ';border:1px solid ' + border + ';border-radius:14px;' + radius + ';color:' + color + ';font-size:13px;line-height:1.5;white-space:pre-wrap;word-wrap:break-word">' +
+        esc(m.body) +
+      '</div>' +
+      '<div class="mono text-xs" style="color:rgba(255,255,255,.35);margin-top:3px;' + (mine ? 'text-align:right' : '') + '">' +
+        (mine ? 'Вы (agent)' : 'Пользователь') + ' · ' + fmtDate(m.createdAt) +
+      '</div>' +
+    '</div>';
+  }
+
+  // ── WS subscription for live updates ──────────────────────────────────
+  function wireSupportWs() {
+    if (window._opsSupportWsWired || !window.WS) return;
+    window._opsSupportWsWired = true;
+    WS.on('support.message_added', function (ev) {
+      const d = ev && ev.data;
+      if (!d) return;
+      // If the drawer is open on this ticket, append the new bubble live
+      if (_supOpenTicketId === d.ticketId) {
+        const thread = document.getElementById('suThread');
+        if (thread) {
+          thread.insertAdjacentHTML('beforeend', renderOpsBubble({
+            isAdmin: d.message.isAdmin, body: d.message.body,
+            createdAt: new Date().toISOString(),
+          }));
+          thread.scrollTop = thread.scrollHeight;
+        }
+      }
+      // Also refresh the list to update unread + preview + updatedAt
+      if (document.getElementById('pane-support').classList.contains('active')) {
+        renderSupportList();
+      }
+    });
+    WS.on('support.ticket_created', function () {
+      if (document.getElementById('pane-support').classList.contains('active')) renderSupportList();
+    });
+  }
+  loaders.support = function () { loadSupport(); wireSupportWs(); };
 
   // ── System ────────────────────────────────────────────────────────────
   async function loadSystem() {

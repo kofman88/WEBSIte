@@ -80,6 +80,15 @@ router.post('/tickets/:id/close', (req, res, next) => {
   } catch (err) { handleErr(err, res, next); }
 });
 
+// Mark thread as read from the user's side — widget calls this when
+// opening the chat tab so unread badge clears.
+router.post('/tickets/:id/mark-read', (req, res, next) => {
+  try {
+    const id = z.coerce.number().int().positive().parse(req.params.id);
+    res.json(support.markReadByUser(id, req.userId));
+  } catch (err) { handleErr(err, res, next); }
+});
+
 // ── Admin ─────────────────────────────────────────────────────────────
 router.get('/admin/tickets', requireAdmin, (req, res, next) => {
   try {
@@ -89,6 +98,32 @@ router.get('/admin/tickets', requireAdmin, (req, res, next) => {
       offset: z.coerce.number().int().min(0).default(0),
     }).parse(req.query);
     res.json({ tickets: support.listAll(q) });
+  } catch (err) { handleErr(err, res, next); }
+});
+
+// Admin view of full thread — same route as user /tickets/:id but
+// guarded differently (admin can see anyone's ticket).
+router.get('/admin/tickets/:id', requireAdmin, (req, res, next) => {
+  try {
+    const id = z.coerce.number().int().positive().parse(req.params.id);
+    res.json(support.getForUser(id, req.userId, true));
+  } catch (err) { handleErr(err, res, next); }
+});
+
+// Admin posts a reply — flows through the same reply() path so the WS
+// broadcast + notifier dispatch fire for the user automatically.
+router.post('/admin/tickets/:id/reply', requireAdmin, (req, res, next) => {
+  try {
+    const id = z.coerce.number().int().positive().parse(req.params.id);
+    const body = z.object({ body: z.string().min(1).max(10000) }).parse(req.body);
+    res.json(support.reply(id, { userId: req.userId, body: body.body, isAdmin: true }));
+  } catch (err) { handleErr(err, res, next); }
+});
+
+router.post('/admin/tickets/:id/mark-read', requireAdmin, (req, res, next) => {
+  try {
+    const id = z.coerce.number().int().positive().parse(req.params.id);
+    res.json(support.markReadByAdmin(id));
   } catch (err) { handleErr(err, res, next); }
 });
 
