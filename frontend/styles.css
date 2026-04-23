@@ -616,6 +616,148 @@ html.light .shell-acct { background: rgba(0,0,0,.03); border-color: rgba(0,0,0,.
 html.light .shell-acct:hover { background: rgba(0,0,0,.05); border-color: rgba(255,90,31,.3); }
 @media (max-width: 760px) { .shell-acct-val { display: none; } }
 
+/* ── Topbar plan-pill + dropdown ("Pro ▾" inspired-by-3Commas-but-better) */
+.shell-plan-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  border-radius: 9999px;
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: .01em;
+  line-height: 1;
+  border: 1px solid rgba(255,255,255,.1);
+  cursor: pointer;
+  transition: transform .15s ease, filter .15s ease, background .15s;
+  margin-right: 8px;
+  flex-shrink: 0;
+}
+.shell-plan-pill:hover { transform: translateY(-1px); filter: brightness(1.08); }
+.shell-plan-pill[aria-expanded="true"] { filter: brightness(1.12); }
+.shell-plan-pill svg { opacity: .7; transition: transform .18s; }
+.shell-plan-pill[aria-expanded="true"] svg { transform: rotate(180deg); }
+
+.shell-plan-dd {
+  position: fixed;
+  z-index: 9999;
+  width: 360px;
+  max-width: calc(100vw - 24px);
+  background: linear-gradient(180deg, #14141c 0%, #0e0e14 100%);
+  border: 1px solid rgba(255,255,255,.08);
+  border-radius: 14px;
+  box-shadow: 0 20px 60px -10px rgba(0,0,0,.7), 0 0 0 1px rgba(255,140,90,.06);
+  padding: 16px;
+  display: none;
+  flex-direction: column;
+  gap: 14px;
+  opacity: 0;
+  transform: translateY(-4px);
+  transition: opacity .14s ease, transform .14s ease;
+}
+.shell-plan-dd.open { display: flex; opacity: 1; transform: translateY(0); }
+html.light .shell-plan-dd { background: linear-gradient(180deg, #fff 0%, #F6F7FB 100%); border-color: rgba(0,0,0,.1); box-shadow: 0 20px 60px -10px rgba(0,0,0,.18); }
+
+.shell-plan-dd-head { padding-bottom: 10px; border-bottom: 1px solid rgba(255,255,255,.06); }
+html.light .shell-plan-dd-head { border-bottom-color: rgba(0,0,0,.06); }
+.shell-plan-dd-title { font-size: 11px; letter-spacing: .1em; text-transform: uppercase; color: rgba(255,255,255,.5); font-weight: 500; }
+html.light .shell-plan-dd-title { color: rgba(10,10,10,.5); }
+
+.shell-plan-ladder {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 2px;
+  padding: 8px 4px;
+  background: rgba(255,255,255,.02);
+  border: 1px solid rgba(255,255,255,.05);
+  border-radius: 10px;
+}
+html.light .shell-plan-ladder { background: rgba(0,0,0,.02); border-color: rgba(0,0,0,.06); }
+.shell-plan-ladder-pill {
+  flex: 1;
+  text-align: center;
+  font-size: 11px;
+  font-weight: 500;
+  color: rgba(255,255,255,.4);
+  padding: 5px 4px;
+  border-radius: 6px;
+  transition: all .15s;
+}
+.shell-plan-ladder-pill.done  { color: rgba(255,140,90,.5); }
+.shell-plan-ladder-pill.active {
+  background: linear-gradient(135deg, #FF8C5A, #FF5A1F);
+  color: #0A0A0A;
+  font-weight: 700;
+  box-shadow: 0 2px 8px rgba(255,90,31,.35);
+}
+.shell-plan-ladder-sep { color: rgba(255,255,255,.2); font-size: 12px; margin: 0 -2px; }
+html.light .shell-plan-ladder-pill { color: rgba(10,10,10,.4); }
+html.light .shell-plan-ladder-pill.done  { color: rgba(196,70,16,.65); }
+html.light .shell-plan-ladder-sep { color: rgba(10,10,10,.2); }
+
+.shell-plan-metrics { display: flex; flex-direction: column; gap: 10px; }
+.shell-plan-metric { display: flex; flex-direction: column; gap: 5px; }
+.shell-plan-metric-head { display: flex; justify-content: space-between; align-items: baseline; font-size: 12px; }
+.shell-plan-metric-label { color: rgba(255,255,255,.75); font-weight: 500; }
+html.light .shell-plan-metric-label { color: rgba(10,10,10,.75); }
+.shell-plan-metric-value { color: #fff; font-size: 12px; font-variant-numeric: tabular-nums; }
+html.light .shell-plan-metric-value { color: #0A0A0A; }
+.shell-plan-metric-bar {
+  height: 5px;
+  background: rgba(255,255,255,.05);
+  border-radius: 3px;
+  overflow: hidden;
+}
+html.light .shell-plan-metric-bar { background: rgba(0,0,0,.06); }
+.shell-plan-metric-bar-fill { height: 100%; transition: width .3s ease; border-radius: 3px; }
+.shell-plan-metric-bar-unlim {
+  height: 100%;
+  background: linear-gradient(90deg, #4ade80 0%, #4ade80 30%, transparent 50%, #4ade80 70%, #4ade80 100%);
+  background-size: 200% 100%;
+  animation: shellPlanShimmer 2.4s linear infinite;
+  opacity: .5;
+}
+@keyframes shellPlanShimmer { from { background-position: 200% 0; } to { background-position: -200% 0; } }
+
+.shell-plan-next {
+  padding: 14px;
+  background: linear-gradient(135deg, rgba(255,90,31,.14), rgba(255,140,90,.04));
+  border: 1px solid rgba(255,140,90,.25);
+  border-radius: 12px;
+}
+.shell-plan-next-head { font-size: 12px; font-weight: 600; color: #fff; margin-bottom: 8px; }
+html.light .shell-plan-next-head { color: #0A0A0A; }
+.shell-plan-next-list { list-style: none; padding: 0; margin: 0 0 12px; display: flex; flex-direction: column; gap: 4px; }
+.shell-plan-next-list li {
+  font-size: 11.5px;
+  color: rgba(255,255,255,.72);
+  line-height: 1.45;
+  padding-left: 16px;
+  position: relative;
+}
+.shell-plan-next-list li::before { content: '✓'; position: absolute; left: 0; color: #8FBF95; font-weight: 700; }
+html.light .shell-plan-next-list li { color: rgba(10,10,10,.75); }
+.shell-plan-cta {
+  display: flex; align-items: center; justify-content: center; gap: 6px;
+  padding: 10px 14px;
+  border-radius: 10px;
+  background: linear-gradient(180deg, #FF7840 0%, #FF5A1F 60%, #C44610 100%);
+  color: #fff !important;
+  font-size: 12.5px;
+  font-weight: 600;
+  text-decoration: none;
+  box-shadow: inset 0 1px 1px rgba(255,255,255,.25), 0 4px 10px -2px rgba(255,90,31,.4);
+  transition: transform .15s, filter .15s;
+}
+.shell-plan-cta:hover { transform: translateY(-1px); filter: brightness(1.06); }
+.shell-plan-max {
+  padding: 14px;
+  background: linear-gradient(135deg, rgba(250,204,21,.1), rgba(250,204,21,.02));
+  border: 1px solid rgba(250,204,21,.25);
+  border-radius: 12px;
+}
+
 /* Topbar quick actions — "+ Создать бота" + "Upgrade" pills.
    Injected by shell.js.injectTopbarQuickActions(). Sits before the
    lang/theme/avatar stack inside .topbar-actions. */
