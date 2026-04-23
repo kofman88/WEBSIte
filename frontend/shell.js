@@ -161,8 +161,39 @@
     } catch (_e) {
       if (text) text.textContent = 'Free Plan';
     }
-    // Chrome injection always runs — independent of badge presence.
-    applyChrome(plan, user);
+    // Refine plan-dependent items. Chrome was already injected synchronously
+    // in boot() with 'free' defaults; here we add Elite-only pieces and
+    // strip items that shouldn't be there on Elite.
+    if (plan === 'elite') {
+      injectMarketScannerLink();
+      // Elite users don't need the "Upgrade" pill
+      const up = document.querySelector('.shell-pill-upgrade');
+      if (up) up.remove();
+      // Swap the promo to "Academy" (was "Elite upsell" on default)
+      const promo = document.querySelector('.sidebar-promo');
+      if (promo && !promo.getAttribute('href').includes('academy')) {
+        promo.remove();
+        injectSidebarPromo('elite');
+      }
+    }
+    // Account pill equity — re-fetched now that we have the real user
+    if (user) {
+      const modeEl = document.getElementById('shellAcctMode');
+      const valEl = document.getElementById('shellAcctVal');
+      if (valEl && (window.API && API.botSummary)) {
+        API.botSummary().then((s) => {
+          if (!s) return;
+          const total = Number(s.totalPnl || 0);
+          const base = Number(user.paperStartingBalance || 10000);
+          valEl.textContent = '$' + (base + total).toLocaleString('en-US', { maximumFractionDigits: 0 });
+          if (modeEl) {
+            const hasLive = Number(s.activeBots) > 0 && Number(s.livePnl) !== 0;
+            const mode = hasLive ? 'LIVE' : 'PAPER';
+            modeEl.textContent = mode; modeEl.setAttribute('data-mode', mode.toLowerCase());
+          }
+        }).catch(() => {});
+      }
+    }
   }
 
   // AI-assistant sidebar item (BETA) — sits at the top above Dashboard.
@@ -517,6 +548,19 @@
     applyTheme();      // now safely sets the theme-btn icon
     applyLang();       // translates all data-t + refreshes lang button
     wireMarketTickers();
+
+    // Inject chrome SYNCHRONOUSLY with pessimistic defaults ('free', no
+    // user). This paints the full sidebar/topbar immediately instead of
+    // waiting on /auth/me (which added ~200ms of "old UI" flash).
+    //   After DOM is populated we flip data-chrome-ready=1 which the
+    //   CSS uses to fade in the sidebar/topbar-actions as one piece,
+    //   killing any visible reshuffle.
+    applyChrome('free', null);
+    document.documentElement.setAttribute('data-chrome-ready', '1');
+
+    // Async refinement: pulls real plan + user, updates plan-dependent
+    // bits (Market Scanner link for Elite, promo card variant, Upgrade
+    // pill removal for Elite, account pill equity).
     wirePlanBadge();
     wireA11y();
   }

@@ -393,6 +393,24 @@ img { max-width: 100%; display: block; }
 }
 html.light .sidebar-beta { background: rgba(255,90,31,.15); color: #C44610; }
 
+/* Anti-flash: hide nav + topbar-actions + sidebar-footer until shell.js
+   has injected its chrome. shell.js sets <html data-chrome-ready="1"> at
+   end of boot(). Container (sidebar, topbar) stays visible so there's no
+   layout shift, only the contents fade in over 140ms. Tight enough that
+   users perceive it as "instant" but hides the old-items → new-items
+   reshuffle. */
+html:not([data-chrome-ready]) .sidebar-nav,
+html:not([data-chrome-ready]) .sidebar-footer,
+html:not([data-chrome-ready]) .topbar-actions {
+  opacity: 0;
+}
+html[data-chrome-ready] .sidebar-nav,
+html[data-chrome-ready] .sidebar-footer,
+html[data-chrome-ready] .topbar-actions {
+  opacity: 1;
+  transition: opacity .14s ease-out;
+}
+
 /* Sidebar footer extras — Chat/Email/Ideas row + community icons + app badges.
    Every flex container uses `display: flex !important` to defeat any
    tailwind preflight or cascade rule that could flip children to block. */
