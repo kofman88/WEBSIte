@@ -111,6 +111,38 @@ const MIGRATIONS = [
       `);
     },
   },
+  {
+    version: 6,
+    name: 'strategy_marketplace_monetization',
+    up(db) {
+      // Paid marketplace scaffolding — column ALTERs are idempotent via
+      // try/catch since SQLite has no ADD COLUMN IF NOT EXISTS.
+      const addCol = (sql) => { try { db.exec(sql); } catch (_) { /* already exists */ } };
+      addCol("ALTER TABLE published_strategies ADD COLUMN price_usd REAL NOT NULL DEFAULT 0");
+      addCol("ALTER TABLE published_strategies ADD COLUMN platform_fee_pct REAL NOT NULL DEFAULT 20");
+      addCol("ALTER TABLE strategy_installs ADD COLUMN price_paid_usd REAL NOT NULL DEFAULT 0");
+      addCol("ALTER TABLE strategy_installs ADD COLUMN stripe_session_id TEXT");
+      // Ledger for author payouts. Written on every successful paid install;
+      // admin pays out periodically via a separate flow (not wired yet).
+      db.exec(`
+        CREATE TABLE IF NOT EXISTS strategy_earnings (
+          id            INTEGER PRIMARY KEY AUTOINCREMENT,
+          author_id     INTEGER NOT NULL,
+          strategy_id   INTEGER NOT NULL,
+          install_id    INTEGER,
+          amount_usd    REAL NOT NULL,
+          platform_fee_usd REAL NOT NULL,
+          status        TEXT NOT NULL DEFAULT 'pending',  -- pending | paid | refunded
+          paid_at       DATETIME,
+          created_at    DATETIME DEFAULT CURRENT_TIMESTAMP,
+          FOREIGN KEY (author_id) REFERENCES users(id) ON DELETE CASCADE,
+          FOREIGN KEY (strategy_id) REFERENCES published_strategies(id) ON DELETE CASCADE
+        );
+        CREATE INDEX IF NOT EXISTS idx_earnings_author ON strategy_earnings(author_id, created_at DESC);
+        CREATE INDEX IF NOT EXISTS idx_earnings_status ON strategy_earnings(status);
+      `);
+    },
+  },
 ];
 
 function ensureTable(db) {

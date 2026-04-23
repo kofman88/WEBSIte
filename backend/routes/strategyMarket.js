@@ -44,8 +44,18 @@ router.post('/', (req, res, next) => {
       direction: z.enum(['long', 'short', 'both']).default('both'),
       config: z.record(z.any()).optional().default({}),
       risk: z.record(z.any()).optional().default({}),
+      priceUsd: z.number().min(0).max(500).optional().default(0),
     }).parse(req.body);
     res.status(201).json(market.publish(req.userId, body));
+  } catch (err) { handleErr(err, res, next); }
+});
+
+// Author's earnings dashboard — per-strategy + totals (pending / paid).
+// Stripe payout flow not yet wired; pending rows accumulate for future
+// settlement. Shown on marketplace.html → "Мои стратегии" tab.
+router.get('/my/earnings', (req, res, next) => {
+  try {
+    res.json(market.earnings(req.userId));
   } catch (err) { handleErr(err, res, next); }
 });
 
