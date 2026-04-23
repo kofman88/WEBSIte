@@ -325,6 +325,10 @@ const API = {
   // Risk Manager
   getRiskLimits: () => apiRequest('GET', '/risk/limits'),
   setRiskLimits: (patch) => apiRequest('PATCH', '/risk/limits', patch),
+  // Copy Trading
+  copyListFollowing: () => apiRequest('GET', '/copy/following'),
+  copySubscribe: (payload) => apiRequest('POST', '/copy/subscribe', payload),
+  copyUnsubscribe: (leaderId) => apiRequest('POST', '/copy/unsubscribe', { leaderId }),
 
   // Community / public
   leaderboard: (opts = {}) => apiRequest('GET', '/public/leaderboard?' + qs(opts), null, { skipAuth: true }),

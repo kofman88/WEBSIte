@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html lang="ru" class="aura-page">
+<head>
+  <meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+  <title>CHM Finance — Copy Trading</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&family=JetBrains+Mono:wght@500&display=swap" rel="stylesheet"/>
+  <link rel="stylesheet" href="tailwind.css"/>
+  <link rel="stylesheet" href="styles.css"/>
+  <link rel="stylesheet" href="aura-theme.css"/>
+  <style>
+    .cp-hero{
+      padding:28px 32px;border-radius:22px;
+      background:linear-gradient(135deg,rgba(255,90,31,.14) 0%,rgba(255,140,90,.06) 55%,rgba(255,255,255,.02) 100%);
+      border:1px solid rgba(255,90,31,.22);
+      box-shadow:inset 0 1px 0 rgba(255,255,255,.04);
+      position:relative;overflow:hidden
+    }
+    .cp-hero::after{content:'';position:absolute;top:-40%;right:-10%;width:420px;height:420px;border-radius:50%;background:radial-gradient(circle,rgba(255,90,31,.16),transparent 70%);pointer-events:none}
+    html.light .cp-hero{background:linear-gradient(135deg,rgba(255,90,31,.1),rgba(255,255,255,.5));border-color:rgba(255,90,31,.25)}
+
+    .cp-form{display:flex;gap:10px;align-items:flex-end;flex-wrap:wrap;margin-top:18px}
+    .cp-input{flex:1;min-width:180px;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.12);border-radius:10px;padding:12px 14px;color:#fff;font-family:'JetBrains Mono',monospace;font-size:14px;outline:none;transition:border-color .15s}
+    .cp-input:focus{border-color:#FF5A1F;background:rgba(255,255,255,.08)}
+    html.light .cp-input{background:rgba(255,255,255,.9);border-color:rgba(0,0,0,.12);color:#0A0A0A}
+
+    .cp-label{display:block;font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:rgba(255,255,255,.55);margin-bottom:6px}
+    html.light .cp-label{color:rgba(10,10,10,.55)}
+
+    .cp-slider{width:100%;margin:4px 0}
+    .cp-slider-val{font-family:'JetBrains Mono',monospace;font-variant-numeric:tabular-nums;color:#FF8C5A;font-weight:600}
+
+    .cp-cta{
+      background:linear-gradient(180deg,#FF7840 0%,#FF5A1F 60%,#C44610 100%);
+      color:#fff;border:0;padding:12px 22px;border-radius:10px;font-weight:600;font-size:14px;cursor:pointer;
+      box-shadow:inset 0 1px 1px rgba(255,255,255,.28),inset 0 -1px 2px rgba(0,0,0,.25),0 4px 10px -2px rgba(255,90,31,.4)
+    }
+    .cp-cta:hover:not(:disabled){filter:brightness(1.08);transform:translateY(-1px)}
+    .cp-cta:disabled{opacity:.45;cursor:not-allowed}
+
+    .cp-follow-row{
+      display:grid;grid-template-columns:1.5fr 1fr 1fr 1fr auto;gap:14px;align-items:center;
+      padding:14px 18px;border-radius:14px;
+      background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.08);
+      margin-bottom:10px;transition:background .15s
+    }
+    .cp-follow-row:hover{background:rgba(255,255,255,.05)}
+    html.light .cp-follow-row{background:rgba(0,0,0,.03);border-color:rgba(0,0,0,.08)}
+    html.light .cp-follow-row:hover{background:rgba(0,0,0,.05)}
+    @media(max-width:760px){
+      .cp-follow-row{grid-template-columns:1fr 1fr;gap:8px 14px;padding:14px}
+      .cp-follow-row .cp-ubtn{grid-column:1 / -1;justify-self:end}
+    }
+    .cp-avatar{
+      width:44px;height:44px;border-radius:50%;
+      background:linear-gradient(135deg,#FF8C5A,#FF5A1F);
+      color:#fff;display:inline-flex;align-items:center;justify-content:center;font-weight:600;font-size:15px;margin-right:12px
+    }
+    .cp-ubtn{
+      padding:7px 14px;border-radius:8px;border:1px solid rgba(255,90,31,.28);
+      background:rgba(255,90,31,.1);color:#FF8C5A;font-size:12px;font-weight:500;cursor:pointer;
+      transition:background .15s
+    }
+    .cp-ubtn:hover{background:rgba(255,90,31,.2);color:#fff}
+
+    .cp-mode-badge{display:inline-block;padding:3px 9px;border-radius:6px;font-size:10px;letter-spacing:.08em;text-transform:uppercase;font-weight:600}
+    .cp-mode-badge.paper{background:rgba(255,90,31,.12);color:#FF8C5A}
+    .cp-mode-badge.live{background:rgba(102,135,110,.18);color:#8FBF95}
+
+    .cp-pnl-pos{color:#8FBF95;font-family:'JetBrains Mono',monospace;font-weight:600}
+    .cp-pnl-neg{color:#C8A0A0;font-family:'JetBrains Mono',monospace;font-weight:600}
+  </style>
+</head>
+<body>
+<aside class="sidebar" id="sidebar">
+  <div class="sidebar-logo">CHM<span>.</span></div>
+  <nav class="sidebar-nav">
+    <a href="dashboard.html" class="sidebar-link" data-page="dashboard"><svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>Дашборд</a>
+    <a href="bots.html" class="sidebar-link" data-page="bots"><svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2a4 4 0 014 4v1h2a2 2 0 012 2v10a2 2 0 01-2 2H6a2 2 0 01-2-2V9a2 2 0 012-2h2V6a4 4 0 014-4z"/></svg>Боты</a>
+    <a href="terminal.html" class="sidebar-link" data-page="terminal"><svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 3h18v18H3z"/><path d="M7 8l3 3-3 3M12 15h5"/></svg>Terminal</a>
+    <a href="copy.html" class="sidebar-link active" data-page="copy"><svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 14.66V20a2 2 0 01-2 2H4a2 2 0 01-2-2V6a2 2 0 012-2h5.34"/><polygon points="18 2 22 6 12 16 8 16 8 12 18 2"/></svg>Copy Trading</a>
+    <a href="signals.html" class="sidebar-link" data-page="signals"><svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>Сигналы</a>
+    <a href="analytics.html" class="sidebar-link" data-page="analytics"><svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 3v18h18"/><path d="M7 14l4-4 4 4 5-5"/></svg>Аналитика</a>
+    <a href="backtests.html" class="sidebar-link" data-page="backtests"><svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6m6 0h10"/></svg>Бэктесты</a>
+    <a href="wallet.html" class="sidebar-link" data-page="wallet"><svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12V7H5a2 2 0 010-4h14v4M3 5v14a2 2 0 002 2h16v-5"/></svg>Кошелёк</a>
+    <a href="leaderboard.html" class="sidebar-link" data-page="leaderboard"><svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>Leaderboard</a>
+    <a href="settings.html" class="sidebar-link" data-page="settings"><svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/></svg>Настройки</a>
+  </nav>
+  <div class="sidebar-footer"><button onclick="Auth.logout()" class="sidebar-link" style="color:#C8B9B9"><svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4M16 17l5-5-5-5M21 12H9"/></svg>Выйти</button></div>
+</aside>
+<header class="topbar">
+  <div class="flex items-center gap-4">
+    <button id="sidebar-toggle" class="lg:hidden" aria-label="Toggle menu" style="background:none;border:none;color:rgba(255,255,255,.62);cursor:pointer">
+      <svg aria-hidden="true" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 6h16M4 12h16M4 18h16"/></svg>
+    </button>
+    <h1 class="text-xl font-bold">Copy Trading</h1>
+    <span class="text-xs ml-3 px-2 py-1 rounded" style="background:rgba(255,140,90,.15);color:#FF8C5A;letter-spacing:.04em">BETA</span>
+  </div>
+  <div class="topbar-actions">
+    <button id="shellLang" type="button" class="shell-topbar-btn" title="Language">EN</button>
+    <button id="shellTheme" type="button" class="shell-topbar-btn" title="Toggle theme" aria-label="Toggle theme"></button>
+    <div class="topbar-user"><div class="topbar-avatar">U</div></div>
+  </div>
+</header>
+
+<main class="main-content">
+  <!-- HERO / подписка -->
+  <div class="cp-hero mb-6">
+    <div style="position:relative;z-index:1">
+      <div class="t-eyebrow" style="color:#FF8C5A">АВТО-КОПИРОВАНИЕ · PAPER</div>
+      <h2 class="text-2xl font-bold mt-2 mb-1">Копируй лучших трейдеров CHM</h2>
+      <p class="text-sm" style="color:rgba(255,255,255,.72);max-width:620px">
+        Укажи реферальный код трейдера из <a href="leaderboard.html" style="color:#FF8C5A;text-decoration:underline">Leaderboard</a>
+        — и все его новые сделки будут автоматически зеркалиться в твой paper-аккаунт. Мультипликатор риска настраивается
+        отдельно для каждого лидера.
+      </p>
+      <form class="cp-form" id="cpSubForm" novalidate>
+        <div style="flex:2;min-width:220px">
+          <label class="cp-label" for="cpCode">Код трейдера</label>
+          <input id="cpCode" class="cp-input" type="text" placeholder="ABCD1234" maxlength="12" required autocomplete="off" style="text-transform:uppercase"/>
+        </div>
+        <div style="flex:1;min-width:180px">
+          <label class="cp-label">Риск × <span class="cp-slider-val" id="cpRiskVal">1.0</span></label>
+          <input id="cpRisk" class="cp-slider" type="range" min="0.1" max="3" step="0.1" value="1"/>
+        </div>
+        <button type="submit" class="cp-cta" id="cpSubBtn">Подписаться</button>
+      </form>
+      <div class="text-xs mt-2" style="color:rgba(255,255,255,.5)">
+        Риск × 0.1 = 10% от ставок лидера · 1.0 = как у лидера · 3.0 = тройной риск.
+        Live-копирование скоро, пока только paper.
+      </div>
+    </div>
+  </div>
+
+  <!-- Stats -->
+  <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-6">
+    <div class="stat-card"><div class="stat-card-label">Лидеров в подписках</div><div class="stat-card-value" id="cpStFollowing">—</div></div>
+    <div class="stat-card"><div class="stat-card-label">Зеркалированных сделок</div><div class="stat-card-value" id="cpStMirrored">—</div></div>
+    <div class="stat-card"><div class="stat-card-label">Paper PnL (копии)</div><div class="stat-card-value" id="cpStPnl">—</div></div>
+    <div class="stat-card"><div class="stat-card-label">Режим</div><div class="stat-card-value" style="color:#FF8C5A">Paper</div></div>
+  </div>
+
+  <!-- My follows list -->
+  <div class="card">
+    <div class="flex justify-between items-center mb-4">
+      <h2 class="font-bold">Подписки</h2>
+      <a href="leaderboard.html" class="text-xs px-3 py-1.5 rounded-lg" style="background:rgba(255,255,255,.05);color:rgba(255,255,255,.7);text-decoration:none">Найти трейдеров →</a>
+    </div>
+    <div id="cpFollowList"><div class="text-center py-6 text-sm" style="color:rgba(255,255,255,.5)">Загрузка…</div></div>
+  </div>
+
+  <!-- How it works -->
+  <div class="card mt-6">
+    <h3 class="font-bold mb-3">Как это работает</h3>
+    <ol class="space-y-2 text-sm" style="color:rgba(255,255,255,.68);padding-left:18px;list-style:decimal">
+      <li>Трейдер открывает paper или live-сделку через бота или SmartTrade Terminal.</li>
+      <li>Если он подключил публичный профиль в <a href="settings.html" style="color:#FF8C5A">Настройки → Сообщество</a>, его ref-код виден в <a href="leaderboard.html" style="color:#FF8C5A">Leaderboard</a>.</li>
+      <li>Ты подписываешься по коду. Все следующие сделки этого трейдера автоматически открывают паро-копии у тебя.</li>
+      <li>Копии появляются в твоём <a href="dashboard.html" style="color:#FF8C5A">дашборде</a> и <a href="analytics.html" style="color:#FF8C5A">аналитике</a> как сделки отдельного «copy-бота».</li>
+      <li>Отписка в любой момент — открытые копии продолжат жить своей жизнью, но новые сделки останавливаются.</li>
+    </ol>
+  </div>
+</main>
+
+<script src="app.js"></script>
+<script src="shell.js"></script>
+<script src="support-widget.js" defer></script>
+<script>
+(function () {
+  'use strict';
+  if (!Auth.isLoggedIn()) { location.href = 'index.html?login'; return; }
+
+  var codeIn  = document.getElementById('cpCode');
+  var riskIn  = document.getElementById('cpRisk');
+  var riskVal = document.getElementById('cpRiskVal');
+  var form    = document.getElementById('cpSubForm');
+  var subBtn  = document.getElementById('cpSubBtn');
+
+  function esc(s){return String(s==null?'':s).replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]})}
+
+  // ── Slider sync
+  riskIn.addEventListener('input', function () {
+    riskVal.textContent = Number(riskIn.value).toFixed(1);
+  });
+
+  // ── Subscribe
+  form.addEventListener('submit', function (e) {
+    e.preventDefault();
+    var code = (codeIn.value || '').trim().toUpperCase();
+    if (!/^[A-Z0-9]{4,12}$/.test(code)) return Toast.error('Код должен быть 4–12 символов A-Z / 0-9');
+    subBtn.disabled = true;
+    subBtn.textContent = 'Подписываемся…';
+    API.copySubscribe({ leaderCode: code, mode: 'paper', riskMult: Number(riskIn.value) })
+      .then(function (r) {
+        Toast.success('Подписка активирована: ' + (r.leaderName || code));
+        codeIn.value = '';
+        loadFollowing();
+      })
+      .catch(function (err) { Toast.error(err.message || 'Не удалось подписаться'); })
+      .finally(function () { subBtn.disabled = false; subBtn.textContent = 'Подписаться'; });
+  });
+
+  // ── Load following list
+  function loadFollowing() {
+    var box = document.getElementById('cpFollowList');
+    box.innerHTML = '<div class="text-center py-6 text-sm" style="color:rgba(255,255,255,.5)">Загрузка…</div>';
+    API.copyListFollowing().then(function (r) {
+      var list = (r && r.following) || [];
+      document.getElementById('cpStFollowing').textContent = list.filter(function (f) { return f.isActive; }).length;
+      var totalPnl = list.reduce(function (acc, f) { return acc + (f.totalPnl || 0); }, 0);
+      document.getElementById('cpStPnl').textContent = (totalPnl >= 0 ? '+' : '') + totalPnl.toFixed(2) + ' USDT';
+      document.getElementById('cpStMirrored').textContent = list.reduce(function (acc, f) { return acc + (f.closedTrades || 0); }, 0);
+
+      if (list.length === 0) {
+        box.innerHTML =
+          '<div class="text-center py-10 text-sm" style="color:rgba(255,255,255,.5)">' +
+          'Ты ещё ни на кого не подписан.<br/>' +
+          'Открой <a href="leaderboard.html" style="color:#FF8C5A">Leaderboard</a> и найди трейдера.' +
+          '</div>';
+        return;
+      }
+
+      box.innerHTML = list.map(function (f) {
+        var initials = (f.leaderName || 'T').slice(0,2).toUpperCase();
+        var pnlCls = (f.totalPnl || 0) >= 0 ? 'cp-pnl-pos' : 'cp-pnl-neg';
+        var pnlStr = ((f.totalPnl || 0) >= 0 ? '+' : '') + (f.totalPnl || 0).toFixed(2) + ' USDT';
+        return '<div class="cp-follow-row">' +
+          '<div style="display:flex;align-items:center">' +
+            '<span class="cp-avatar">' + esc(initials) + '</span>' +
+            '<div>' +
+              '<div style="font-weight:600;color:#fff">' + esc(f.leaderName) + '</div>' +
+              '<div style="font-size:11px;color:rgba(255,255,255,.5);font-family:\'JetBrains Mono\',monospace">#' + esc(f.leaderCode) + '</div>' +
+            '</div>' +
+          '</div>' +
+          '<div>' +
+            '<div class="cp-mode-badge ' + esc(f.mode) + '">' + esc((f.mode || '').toUpperCase()) + '</div>' +
+            (f.isActive ? '' : '<div style="font-size:10px;color:rgba(255,140,90,.9);margin-top:4px">⏸ отключена</div>') +
+          '</div>' +
+          '<div><span style="font-size:11px;color:rgba(255,255,255,.5)">Риск ×</span> <span style="font-family:\'JetBrains Mono\',monospace;font-weight:600;color:#FF8C5A">' + (f.riskMult || 1).toFixed(1) + '</span></div>' +
+          '<div><span style="font-size:11px;color:rgba(255,255,255,.5)">PnL:</span> <span class="' + pnlCls + '">' + pnlStr + '</span> <span style="font-size:11px;color:rgba(255,255,255,.5);margin-left:8px">(' + (f.closedTrades || 0) + ')</span></div>' +
+          '<button class="cp-ubtn" data-unsub="' + f.leaderId + '">Отписаться</button>' +
+        '</div>';
+      }).join('');
+
+      box.querySelectorAll('[data-unsub]').forEach(function (btn) {
+        btn.addEventListener('click', function () {
+          var lid = Number(btn.getAttribute('data-unsub'));
+          if (!confirm('Отписаться от этого трейдера? Новые сделки копироваться не будут.')) return;
+          btn.disabled = true;
+          API.copyUnsubscribe(lid).then(function () {
+            Toast.success('Отписка оформлена');
+            loadFollowing();
+          }).catch(function (e) {
+            btn.disabled = false;
+            Toast.error(e.message || 'Не удалось отписаться');
+          });
+        });
+      });
+    }).catch(function (err) {
+      box.innerHTML = '<div class="text-center py-8 text-sm" style="color:#C8A0A0">Ошибка: ' + esc(err.message) + '</div>';
+    });
+  }
+  loadFollowing();
+})();
+</script>
+</body>
+</html>

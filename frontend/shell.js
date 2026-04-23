@@ -134,6 +134,7 @@
       }
       // Elite-only: inject Market Scanner sidebar link right after Сигналы
       injectTerminalLink();
+      injectCopyLink();
       if (plan === 'elite') injectMarketScannerLink();
     } catch (_e) { text.textContent = 'Free Plan'; }
   }
@@ -162,6 +163,21 @@
     link.setAttribute('data-page', 'terminal');
     link.innerHTML = '<svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 3h18v18H3z"/><path d="M7 8l3 3-3 3M12 15h5"/></svg>Terminal';
     bots.parentNode.insertBefore(link, bots.nextSibling);
+  }
+
+  // Copy Trading sidebar link — shown to every authed user. Idempotent.
+  // Sits right after Terminal (if present), else after Bots.
+  function injectCopyLink() {
+    if (document.querySelector('.sidebar-link[data-page="copy"]')) return;
+    const anchor = document.querySelector('.sidebar-link[data-page="terminal"]')
+      || document.querySelector('.sidebar-link[data-page="bots"]');
+    if (!anchor) return;
+    const link = document.createElement('a');
+    link.href = 'copy.html';
+    link.className = 'sidebar-link';
+    link.setAttribute('data-page', 'copy');
+    link.innerHTML = '<svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 14.66V20a2 2 0 01-2 2H4a2 2 0 01-2-2V6a2 2 0 012-2h5.34"/><polygon points="18 2 22 6 12 16 8 16 8 12 18 2"/></svg>Copy';
+    anchor.parentNode.insertBefore(link, anchor.nextSibling);
   }
 
   // ── 3 & 4. Topbar toggles ──────────────────────────────────────────────
