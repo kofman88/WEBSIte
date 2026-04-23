@@ -17,11 +17,16 @@ Get the AI-assistant tab inside the support widget working. Bootstraps in
 | Model                      | RPM | Daily limit |
 |----------------------------|-----|-------------|
 | `gemini-2.5-flash-lite`    | 15  | 1000        |
-| `gemini-2.0-flash` (default) | 15 | 1500        |
+| `gemini-2.5-flash-lite` (default) | 15 | 1000  |
+| `gemini-2.0-flash`         | 15  | 1500 *free\* |
 | `gemini-2.5-flash`         | 10  | 250         |
 
-The app uses `gemini-2.0-flash` by default — best balance of quality and
-quota. Override with `GEMINI_MODEL=gemini-2.5-flash-lite` for cheapest.
+The app defaults to **`gemini-2.5-flash-lite`** — Google gives 1000 req/day
+free on every project. `gemini-2.0-flash` looks more attractive on paper
+(1500/day, nominally higher quality) but Google hands out `quota=0` on
+free tier for many new projects / regions, producing 429 errors from day
+one. Switch to it via `GEMINI_MODEL=gemini-2.0-flash` once you've either
+enabled billing or confirmed your project has non-zero quota.
 
 **Privacy caveat**: Google uses free-tier traffic to train models. We
 therefore block PII-looking content (api keys, wallet addresses, long
@@ -42,8 +47,9 @@ Append:
 
 ```
 GEMINI_API_KEY=AIza...<your key>
-# Optional override (default is gemini-2.0-flash):
-# GEMINI_MODEL=gemini-2.5-flash-lite
+# Optional override (default is gemini-2.5-flash-lite — 1000/day free):
+# GEMINI_MODEL=gemini-2.5-flash    # 250/day, slightly higher quality
+# GEMINI_MODEL=gemini-2.0-flash    # 1500/day IF your project has quota (not all do)
 ```
 
 Save (`Ctrl+O` → Enter → `Ctrl+X`), restart Passenger:
@@ -112,6 +118,7 @@ Passenger lifetime.
 |---|---|
 | `"AI assistant is not configured"` | `GEMINI_API_KEY` not set in `.env`, or Passenger not restarted |
 | `"AI временно недоступен"` | Google API returned 5xx or timed out (30s). Check logs: `tail ~/chmup_backend/logs/error-*.log` |
+| HTTP 429 `"Quota exceeded ... limit: 0, model: gemini-2.0-flash"` | Your project has 0 free-tier quota on that specific model. Switch: `GEMINI_MODEL=gemini-2.5-flash-lite` in `.env` + restart. Known quirk of Google's free tier for new projects. |
 | Rate-limited at unexpectedly low counts | Per-minute (RPM) limit of 15 — not the daily. Add `setTimeout(..., 4000)` between retries |
 | Replies in English when RU expected | System prompt says "respond in user's language"; make sure the user writes in Russian (the model mirrors) |
 | "Похоже, ты пытаешься передать приватные данные" | PII detector triggered. Falsely-positive sometimes on long symbol names or hashes — that's by design; re-word the question |

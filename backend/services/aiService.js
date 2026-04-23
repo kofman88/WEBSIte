@@ -29,7 +29,12 @@ const https = require('https');
 const logger = require('../utils/logger');
 
 const GEMINI_API_KEY = process.env.GEMINI_API_KEY || '';
-const GEMINI_MODEL = process.env.GEMINI_MODEL || 'gemini-2.0-flash';
+// Default to gemini-2.5-flash-lite — 1000 req/day free for every project.
+// gemini-2.0-flash is tempting for quality but Google hands out quota=0
+// on free tier to some new projects/regions (observed 429 in prod from
+// day one), so it's not a reliable default. Override via GEMINI_MODEL=
+// env var once billing is enabled.
+const GEMINI_MODEL = process.env.GEMINI_MODEL || 'gemini-2.5-flash-lite';
 const GEMINI_ENDPOINT = 'https://generativelanguage.googleapis.com/v1beta/models/'
   + GEMINI_MODEL + ':generateContent';
 
