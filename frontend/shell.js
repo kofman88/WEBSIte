@@ -394,25 +394,32 @@
   function injectPlanPill(plan) {
     const actions = document.querySelector('.topbar-actions');
     if (!actions || document.getElementById('shellPlanPill')) return;
-    const PLAN_COLORS = {
-      free:    { bg: 'rgba(148,163,184,.15)', fg: '#cbd5e1', ring: 'rgba(148,163,184,.3)' },
-      starter: { bg: 'rgba(59,130,246,.15)',  fg: '#93c5fd', ring: 'rgba(59,130,246,.3)' },
-      pro:     { bg: 'rgba(255,140,90,.18)',  fg: '#FF8C5A', ring: 'rgba(255,140,90,.35)' },
-      elite:   { bg: 'rgba(250,204,21,.15)',  fg: '#fde047', ring: 'rgba(250,204,21,.3)' },
+    // Visual language per plan — Free gets a subtle muted look (not
+    // emphasised, it's the default); Starter/Pro/Elite get progressively
+    // more saturated accents. Pill always shows a small dot-icon so the
+    // chip looks finished even with a short label like "Free".
+    const PLAN_META = {
+      free:    { label: 'Free',    bg: 'rgba(148,163,184,.12)', fg: '#CBD5E1', ring: 'rgba(148,163,184,.22)', dot: '#94A3B8' },
+      starter: { label: 'Starter', bg: 'rgba(59,130,246,.15)',  fg: '#93C5FD', ring: 'rgba(59,130,246,.3)',   dot: '#60A5FA' },
+      pro:     { label: 'Pro',     bg: 'rgba(255,140,90,.18)',  fg: '#FF8C5A', ring: 'rgba(255,140,90,.35)',  dot: '#FF5A1F' },
+      elite:   { label: 'Elite',   bg: 'rgba(250,204,21,.15)',  fg: '#FDE047', ring: 'rgba(250,204,21,.32)',  dot: '#FDE047' },
     };
-    const meta = PLAN_COLORS[plan] || PLAN_COLORS.free;
+    const meta = PLAN_META[plan] || PLAN_META.free;
     const btn = document.createElement('button');
     btn.type = 'button';
     btn.id = 'shellPlanPill';
-    btn.className = 'shell-plan-pill';
+    btn.className = 'shell-plan-pill shell-plan-pill-' + plan;
     btn.setAttribute('aria-haspopup', 'true');
     btn.setAttribute('aria-expanded', 'false');
-    btn.style.background = meta.bg;
-    btn.style.color = meta.fg;
-    btn.style.borderColor = meta.ring;
+    btn.setAttribute('title', 'Подписка · ' + meta.label);
+    btn.style.setProperty('--plan-bg', meta.bg);
+    btn.style.setProperty('--plan-fg', meta.fg);
+    btn.style.setProperty('--plan-ring', meta.ring);
+    btn.style.setProperty('--plan-dot', meta.dot);
     btn.innerHTML =
-      '<span class="shell-plan-pill-name">' + (plan[0].toUpperCase() + plan.slice(1)) + '</span>'
-      + '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>';
+      '<span class="shell-plan-pill-dot" aria-hidden="true"></span>'
+      + '<span class="shell-plan-pill-name">' + meta.label + '</span>'
+      + '<svg class="shell-plan-pill-chev" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>';
 
     // Insert AFTER shell-acct but BEFORE shell-quick (so reading order
     // stays logical: tickers → account → plan → actions → avatar).

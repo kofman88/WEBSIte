@@ -621,22 +621,59 @@ html.light .shell-acct:hover { background: rgba(0,0,0,.05); border-color: rgba(2
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  padding: 6px 12px;
+  padding: 6px 10px 6px 8px;
+  height: 30px;
   border-radius: 9999px;
   font-size: 12px;
   font-weight: 600;
   letter-spacing: .01em;
   line-height: 1;
-  border: 1px solid rgba(255,255,255,.1);
+  white-space: nowrap;
+  background: var(--plan-bg, rgba(148,163,184,.12));
+  color: var(--plan-fg, #CBD5E1);
+  border: 1px solid var(--plan-ring, rgba(148,163,184,.22));
   cursor: pointer;
-  transition: transform .15s ease, filter .15s ease, background .15s;
+  transition: transform .15s ease, filter .15s ease, background .15s, border-color .15s;
   margin-right: 8px;
   flex-shrink: 0;
+  font-family: inherit;
 }
-.shell-plan-pill:hover { transform: translateY(-1px); filter: brightness(1.08); }
-.shell-plan-pill[aria-expanded="true"] { filter: brightness(1.12); }
-.shell-plan-pill svg { opacity: .7; transition: transform .18s; }
-.shell-plan-pill[aria-expanded="true"] svg { transform: rotate(180deg); }
+.shell-plan-pill:hover { transform: translateY(-1px); filter: brightness(1.12); }
+.shell-plan-pill[aria-expanded="true"] { filter: brightness(1.18); }
+
+.shell-plan-pill-dot {
+  width: 8px; height: 8px; border-radius: 50%;
+  background: var(--plan-dot, #94A3B8);
+  box-shadow: 0 0 6px var(--plan-dot, #94A3B8), inset 0 1px 1px rgba(255,255,255,.3);
+  flex-shrink: 0;
+}
+.shell-plan-pill-name { line-height: 1; }
+.shell-plan-pill-chev { opacity: .72; transition: transform .18s; flex-shrink: 0; }
+.shell-plan-pill[aria-expanded="true"] .shell-plan-pill-chev { transform: rotate(180deg); }
+
+/* Free is the default state — give it a gentle "Upgrade" hint glow on
+   hover so users see it's clickable but not screaming at them. */
+.shell-plan-pill-free:hover {
+  background: rgba(255,140,90,.12);
+  border-color: rgba(255,140,90,.3);
+  color: #FF8C5A;
+}
+.shell-plan-pill-free:hover .shell-plan-pill-dot {
+  background: #FF8C5A;
+  box-shadow: 0 0 8px rgba(255,140,90,.5), inset 0 1px 1px rgba(255,255,255,.3);
+}
+/* Elite pill — pulsing gold ring to make premium users feel special */
+.shell-plan-pill-elite .shell-plan-pill-dot {
+  animation: shellPlanGoldPulse 2s ease-in-out infinite;
+}
+@keyframes shellPlanGoldPulse {
+  0%, 100% { box-shadow: 0 0 6px rgba(253,224,71,.6), inset 0 1px 1px rgba(255,255,255,.3); }
+  50%      { box-shadow: 0 0 14px rgba(253,224,71,.9), inset 0 1px 1px rgba(255,255,255,.4); }
+}
+@media (max-width: 640px) {
+  .shell-plan-pill-name { display: none; }
+  .shell-plan-pill { padding: 6px; }
+}
 
 .shell-plan-dd {
   position: fixed;
