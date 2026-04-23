@@ -1,0 +1,641 @@
+<!DOCTYPE html>
+<html lang="ru" class="aura-page">
+<head>
+  <meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+  <title>CHM Finance — Подписка</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@500&display=swap" rel="stylesheet"/>
+  <link rel="stylesheet" href="tailwind.css"/>
+  <link rel="stylesheet" href="styles.css"/>
+  <link rel="stylesheet" href="aura-theme.css"/>
+  <style>
+    .sub-tabs{display:inline-flex;gap:4px;border-bottom:1px solid rgba(255,255,255,.08);margin-bottom:24px}
+    html.light .sub-tabs{border-bottom-color:rgba(0,0,0,.08)}
+    .sub-tab{background:none;border:0;color:rgba(255,255,255,.55);cursor:pointer;padding:12px 0;margin-right:28px;font-size:14px;font-weight:500;position:relative;font-family:inherit}
+    .sub-tab:hover{color:rgba(255,255,255,.85)}
+    html.light .sub-tab{color:rgba(10,10,10,.55)}
+    html.light .sub-tab:hover{color:#0A0A0A}
+    .sub-tab.active{color:#fff}
+    html.light .sub-tab.active{color:#0A0A0A}
+    .sub-tab.active::after{content:'';position:absolute;left:0;right:0;bottom:-1px;height:2px;background:linear-gradient(90deg,#FF7840,#FF5A1F);border-radius:2px}
+    .sub-pane{display:none}
+    .sub-pane.active{display:block}
+
+    /* Billing cycle toggle */
+    .sub-cycle{
+      display:inline-flex;align-items:center;padding:4px;border-radius:9999px;
+      background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);
+      margin:8px auto 32px;position:relative
+    }
+    html.light .sub-cycle{background:rgba(0,0,0,.03);border-color:rgba(0,0,0,.08)}
+    .sub-cycle-wrap{display:flex;justify-content:center}
+    .sub-cycle-btn{
+      background:none;border:0;cursor:pointer;padding:8px 18px;border-radius:9999px;
+      color:rgba(255,255,255,.6);font-size:13px;font-weight:500;font-family:inherit;
+      transition:all .18s ease
+    }
+    .sub-cycle-btn.active{
+      background:linear-gradient(180deg,#FF7840 0%,#FF5A1F 60%,#C44610 100%);
+      color:#fff;
+      box-shadow:inset 0 1px 1px rgba(255,255,255,.25),inset 0 -1px 2px rgba(0,0,0,.22),0 4px 10px -2px rgba(255,90,31,.4)
+    }
+    html.light .sub-cycle-btn{color:rgba(10,10,10,.55)}
+    .sub-cycle-badge{
+      display:inline-block;margin-left:6px;padding:2px 8px;font-size:10px;
+      font-weight:700;letter-spacing:.05em;border-radius:9999px;
+      background:rgba(43,89,54,.25);color:#8FBF95
+    }
+
+    /* Plan grid — 4 cards, Elite highlighted with orange gradient border */
+    .sub-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:40px}
+    @media(max-width:1200px){.sub-grid{grid-template-columns:repeat(2,1fr)}}
+    @media(max-width:700px){.sub-grid{grid-template-columns:1fr}}
+    .sub-card{
+      position:relative;padding:24px;border-radius:16px;
+      background:rgba(255,255,255,.02);border:1px solid rgba(255,255,255,.06);
+      display:flex;flex-direction:column;gap:14px;transition:border-color .2s
+    }
+    html.light .sub-card{background:#fff;border-color:rgba(0,0,0,.08);box-shadow:0 2px 8px -2px rgba(0,0,0,.04)}
+    .sub-card:hover{border-color:rgba(255,140,90,.25)}
+    .sub-card.current{border-color:rgba(59,130,246,.35);background:rgba(59,130,246,.04)}
+    .sub-card.featured{
+      background:linear-gradient(180deg,rgba(255,90,31,.1) 0%,rgba(255,90,31,.02) 60%);
+      border-color:rgba(255,140,90,.4);
+      box-shadow:0 2px 4px rgba(0,0,0,.2),0 20px 50px -20px rgba(255,90,31,.25),inset 0 1px 1px rgba(255,255,255,.04)
+    }
+    html.light .sub-card.featured{background:linear-gradient(180deg,rgba(255,90,31,.06) 0%,#fff 60%);box-shadow:0 2px 4px rgba(0,0,0,.06),0 20px 50px -20px rgba(255,90,31,.3)}
+    .sub-card-badge{
+      position:absolute;top:-10px;right:16px;
+      padding:4px 10px;border-radius:9999px;font-size:10px;font-weight:700;
+      letter-spacing:.08em;text-transform:uppercase
+    }
+    .sub-card-badge.current{background:linear-gradient(135deg,#3b82f6,#2563eb);color:#fff}
+    .sub-card-badge.popular{background:linear-gradient(135deg,#FF7840,#FF5A1F);color:#fff;box-shadow:0 4px 12px rgba(255,90,31,.4)}
+    .sub-card-name{font-size:20px;font-weight:700;color:#fff;letter-spacing:-.02em}
+    html.light .sub-card-name{color:#0A0A0A}
+    .sub-card-desc{font-size:12px;color:rgba(255,255,255,.55);line-height:1.5;min-height:34px}
+    html.light .sub-card-desc{color:rgba(10,10,10,.6)}
+    .sub-card-price{display:flex;align-items:baseline;gap:8px;margin:4px 0 10px}
+    .sub-card-price-main{font-size:36px;font-weight:700;color:#fff;letter-spacing:-.03em;line-height:1}
+    html.light .sub-card-price-main{color:#0A0A0A}
+    .sub-card-price-old{font-size:16px;color:rgba(255,255,255,.3);text-decoration:line-through;font-weight:500}
+    .sub-card-price-suffix{font-size:12px;color:rgba(255,255,255,.5);letter-spacing:-.01em}
+    html.light .sub-card-price-suffix{color:rgba(10,10,10,.5)}
+    .sub-card-cta{
+      display:flex;align-items:center;justify-content:center;gap:6px;
+      padding:12px 16px;border-radius:10px;font-weight:600;font-size:13px;
+      cursor:pointer;border:0;font-family:inherit;text-decoration:none;
+      background:linear-gradient(180deg,#FF7840 0%,#FF5A1F 60%,#C44610 100%);
+      color:#fff;
+      box-shadow:inset 0 1px 1px rgba(255,255,255,.28),inset 0 -1px 2px rgba(0,0,0,.22),0 4px 10px -2px rgba(255,90,31,.35);
+      transition:transform .15s,filter .15s
+    }
+    .sub-card-cta:hover{transform:translateY(-1px);filter:brightness(1.06)}
+    .sub-card-cta-ghost{
+      background:rgba(255,255,255,.05);color:rgba(255,255,255,.85);
+      border:1px solid rgba(255,255,255,.1);box-shadow:none
+    }
+    html.light .sub-card-cta-ghost{background:rgba(0,0,0,.04);color:#0A0A0A;border-color:rgba(0,0,0,.1)}
+    .sub-card-cta-current{
+      background:rgba(59,130,246,.12);color:#93c5fd;
+      border:1px solid rgba(59,130,246,.3);box-shadow:none;cursor:default
+    }
+    .sub-card-payalt{
+      text-align:center;font-size:11px;color:rgba(255,255,255,.5);margin-top:-4px
+    }
+    .sub-card-payalt a{color:#FF8C5A;text-decoration:underline;cursor:pointer}
+    html.light .sub-card-payalt{color:rgba(10,10,10,.55)}
+
+    .sub-card-divider{height:1px;background:rgba(255,255,255,.06);margin:6px 0}
+    html.light .sub-card-divider{background:rgba(0,0,0,.06)}
+
+    .sub-card-feat{
+      display:flex;align-items:flex-start;gap:10px;font-size:12.5px;
+      color:rgba(255,255,255,.82);line-height:1.45
+    }
+    html.light .sub-card-feat{color:rgba(10,10,10,.82)}
+    .sub-card-feat-ic{
+      flex:0 0 18px;width:18px;height:18px;margin-top:1px;color:#FF8C5A
+    }
+    html.light .sub-card-feat-ic{color:#C44610}
+    .sub-card-feat-muted{color:rgba(255,255,255,.3)}
+    .sub-card-feat-muted .sub-card-feat-ic{color:rgba(255,255,255,.2)}
+    html.light .sub-card-feat-muted{color:rgba(10,10,10,.3)}
+    .sub-card-feat-new{
+      margin-left:auto;padding:2px 7px;font-size:9px;font-weight:700;letter-spacing:.06em;
+      text-transform:uppercase;border-radius:4px;
+      background:linear-gradient(135deg,#60A5FA,#3B82F6);color:#fff
+    }
+    .sub-card-feat-count{
+      font-family:'JetBrains Mono',monospace;font-variant-numeric:tabular-nums;
+      font-weight:600;color:#FF8C5A;min-width:32px;display:inline-block
+    }
+    html.light .sub-card-feat-count{color:#C44610}
+
+    /* Shared-features strip */
+    .sub-shared{
+      padding:28px 32px;border-radius:16px;
+      background:rgba(255,255,255,.02);border:1px solid rgba(255,255,255,.06);
+      display:grid;grid-template-columns:1fr 2fr;gap:24px;margin-bottom:32px
+    }
+    @media(max-width:860px){.sub-shared{grid-template-columns:1fr}}
+    html.light .sub-shared{background:#fff;border-color:rgba(0,0,0,.08)}
+    .sub-shared-title{font-size:22px;font-weight:700;letter-spacing:-.02em;color:#fff}
+    html.light .sub-shared-title{color:#0A0A0A}
+    .sub-shared-list{display:grid;grid-template-columns:repeat(2,1fr);gap:14px}
+    @media(max-width:640px){.sub-shared-list{grid-template-columns:1fr}}
+    .sub-shared-item{display:flex;gap:10px;font-size:13px;color:rgba(255,255,255,.82);line-height:1.5}
+    html.light .sub-shared-item{color:rgba(10,10,10,.82)}
+    .sub-shared-ic{flex:0 0 22px;width:22px;height:22px;color:#8FBF95}
+    html.light .sub-shared-ic{color:#2B5936}
+
+    /* Payment methods */
+    .sub-pay-label{
+      text-align:center;font-size:10px;letter-spacing:.2em;text-transform:uppercase;
+      color:rgba(255,255,255,.4);margin-bottom:20px
+    }
+    html.light .sub-pay-label{color:rgba(10,10,10,.4)}
+    .sub-pay-row{
+      display:flex;flex-wrap:wrap;justify-content:center;align-items:center;
+      gap:28px;margin-bottom:48px
+    }
+    .sub-pay-row .sub-pay-logo{
+      height:28px;display:inline-flex;align-items:center;
+      color:rgba(255,255,255,.6);font-weight:700;font-size:13px;letter-spacing:.02em
+    }
+    html.light .sub-pay-row .sub-pay-logo{color:rgba(10,10,10,.5)}
+
+    /* Compare table */
+    .sub-compare-title{font-size:24px;font-weight:700;margin-bottom:24px;letter-spacing:-.02em}
+    .sub-compare-wrap{overflow-x:auto;border:1px solid rgba(255,255,255,.06);border-radius:14px;margin-bottom:40px}
+    html.light .sub-compare-wrap{border-color:rgba(0,0,0,.08)}
+    .sub-compare{width:100%;border-collapse:collapse;font-size:13px;min-width:720px}
+    .sub-compare thead th{
+      padding:18px 16px;font-weight:600;color:#fff;background:rgba(255,255,255,.02);
+      border-bottom:1px solid rgba(255,255,255,.06);text-align:center
+    }
+    html.light .sub-compare thead th{color:#0A0A0A;background:rgba(0,0,0,.02);border-bottom-color:rgba(0,0,0,.08)}
+    .sub-compare thead th:first-child{text-align:left}
+    .sub-compare thead th.featured{background:linear-gradient(180deg,rgba(255,90,31,.12),rgba(255,90,31,.04))}
+    .sub-compare tbody tr.section td{
+      padding:14px 16px;font-size:10px;letter-spacing:.2em;text-transform:uppercase;
+      color:#FF8C5A;background:rgba(255,140,90,.06);font-weight:600
+    }
+    .sub-compare tbody td{
+      padding:13px 16px;border-bottom:1px solid rgba(255,255,255,.04);text-align:center;
+      color:rgba(255,255,255,.82)
+    }
+    html.light .sub-compare tbody td{color:rgba(10,10,10,.82);border-bottom-color:rgba(0,0,0,.04)}
+    .sub-compare tbody td:first-child{text-align:left;font-weight:500}
+    .sub-compare tbody td.featured{background:rgba(255,90,31,.04)}
+    .sub-compare-yes{color:#8FBF95;font-weight:600}
+    .sub-compare-no{color:rgba(255,255,255,.2)}
+
+    /* FAQ */
+    .sub-faq{max-width:820px;margin:0 auto 40px}
+    .sub-faq-title{font-size:28px;font-weight:700;letter-spacing:-.025em;margin-bottom:24px}
+    .sub-faq-item{border-bottom:1px solid rgba(255,255,255,.06)}
+    html.light .sub-faq-item{border-bottom-color:rgba(0,0,0,.08)}
+    .sub-faq-q{
+      width:100%;background:none;border:0;padding:18px 0;cursor:pointer;font-family:inherit;
+      display:flex;justify-content:space-between;align-items:center;gap:16px;
+      font-size:15px;font-weight:500;color:#fff;text-align:left
+    }
+    html.light .sub-faq-q{color:#0A0A0A}
+    .sub-faq-q:hover{color:#FF8C5A}
+    .sub-faq-q svg{color:rgba(255,255,255,.4);transition:transform .2s;flex-shrink:0}
+    .sub-faq-item[open] .sub-faq-q svg{transform:rotate(180deg)}
+    .sub-faq-a{padding:0 0 18px;font-size:13.5px;color:rgba(255,255,255,.68);line-height:1.65;display:none}
+    html.light .sub-faq-a{color:rgba(10,10,10,.7)}
+    .sub-faq-item[open] .sub-faq-a{display:block}
+
+    /* Promo tab */
+    .sub-promo{max-width:520px;margin:40px auto}
+    .sub-promo-box{padding:28px;border-radius:16px;background:rgba(255,255,255,.02);border:1px solid rgba(255,255,255,.06)}
+    html.light .sub-promo-box{background:#fff;border-color:rgba(0,0,0,.08)}
+    .sub-promo-input{
+      width:100%;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.12);
+      border-radius:12px;padding:14px 16px;color:#fff;font-family:'JetBrains Mono',monospace;
+      font-size:14px;letter-spacing:.1em;text-transform:uppercase;outline:none;margin-bottom:10px
+    }
+    html.light .sub-promo-input{background:rgba(0,0,0,.03);border-color:rgba(0,0,0,.12);color:#0A0A0A}
+    .sub-promo-input:focus{border-color:#FF5A1F}
+    .sub-promo-msg{padding:10px 14px;border-radius:10px;font-size:12px;margin-top:12px;display:none}
+    .sub-promo-msg.show{display:block}
+    .sub-promo-msg.ok{background:rgba(43,89,54,.18);color:#8FBF95;border:1px solid rgba(43,89,54,.35)}
+    .sub-promo-msg.err{background:rgba(130,98,98,.22);color:#C8A0A0;border:1px solid rgba(130,98,98,.4)}
+  </style>
+</head>
+<body>
+
+<aside class="sidebar" id="sidebar">
+  <div class="sidebar-logo">CHM<span>.</span></div>
+  <nav class="sidebar-nav">
+    <a href="dashboard.html" class="sidebar-link" data-page="dashboard"><svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg><span data-t="sb-dashboard">Дашборд</span></a>
+    <a href="bots.html" class="sidebar-link" data-page="bots"><svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2a4 4 0 014 4v1h2a2 2 0 012 2v10a2 2 0 01-2 2H6a2 2 0 01-2-2V9a2 2 0 012-2h2V6a4 4 0 014-4z"/></svg><span data-t="sb-bots">Боты</span></a>
+    <a href="signals.html" class="sidebar-link" data-page="signals"><svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M13 10V3L4 14h7v7l9-11h-7z"/></svg><span data-t="sb-signals">Сигналы</span></a>
+    <a href="analytics.html" class="sidebar-link" data-page="analytics"><svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 3v18h18"/><path d="M7 14l4-4 4 4 5-5"/></svg><span data-t="sb-analytics">Аналитика</span></a>
+    <a href="backtests.html" class="sidebar-link" data-page="backtests"><svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6m6 0h10"/></svg><span data-t="sb-backtests">Бэктесты</span></a>
+    <a href="wallet.html" class="sidebar-link" data-page="wallet"><svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12V7H5a2 2 0 010-4h14v4M3 5v14a2 2 0 002 2h16v-5"/></svg><span data-t="sb-wallet">Кошелёк</span></a>
+    <a href="leaderboard.html" class="sidebar-link" data-page="leaderboard"><svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg><span data-t="sb-leaderboard">Leaderboard</span></a>
+    <a href="subscriptions.html" class="sidebar-link active" data-page="subscriptions"><svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg><span>Подписки</span></a>
+    <a href="settings.html" class="sidebar-link" data-page="settings"><svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/></svg><span data-t="sb-settings">Настройки</span></a>
+  </nav>
+  <div class="sidebar-footer">
+    <button onclick="Auth.logout()" class="sidebar-link" style="color:#C8B9B9"><svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4M16 17l5-5-5-5M21 12H9"/></svg><span data-t="sb-logout">Выйти</span></button>
+  </div>
+</aside>
+
+<header class="topbar">
+  <div class="flex items-center gap-4">
+    <button id="sidebar-toggle" class="lg:hidden" aria-label="Toggle menu" style="background:none;border:none;color:rgba(255,255,255,.62);cursor:pointer"><svg aria-hidden="true" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 6h16M4 12h16M4 18h16"/></svg></button>
+    <h1 class="text-xl font-bold">Подписка</h1>
+  </div>
+  <div class="topbar-actions">
+    <button id="shellLang" type="button" class="shell-topbar-btn" title="Language">EN</button>
+    <button id="shellTheme" type="button" class="shell-topbar-btn" title="Toggle theme" aria-label="Toggle theme"></button>
+    <div class="topbar-user"><div class="topbar-avatar">U</div></div>
+  </div>
+</header>
+
+<main class="main-content">
+  <div class="sub-tabs" role="tablist">
+    <button role="tab" class="sub-tab active" data-sub-tab="plans" aria-selected="true">Подписки</button>
+    <button role="tab" class="sub-tab" data-sub-tab="promo" aria-selected="false">Промокод</button>
+  </div>
+
+  <!-- ─────────── PLANS TAB ─────────── -->
+  <section class="sub-pane active" data-sub-tab="plans">
+    <div class="sub-cycle-wrap">
+      <div class="sub-cycle" role="tablist" aria-label="Billing cycle">
+        <button class="sub-cycle-btn active" data-cycle="monthly">Месячная</button>
+        <button class="sub-cycle-btn" data-cycle="yearly">Годовая<span class="sub-cycle-badge">−20%</span></button>
+      </div>
+    </div>
+
+    <!-- PLAN CARDS GRID — rendered by JS from /api/subscriptions/plans -->
+    <div class="sub-grid" id="subGrid"></div>
+
+    <!-- Shared — all paid plans include -->
+    <div class="sub-shared">
+      <h2 class="sub-shared-title">Все платные планы включают</h2>
+      <div class="sub-shared-list">
+        <div class="sub-shared-item">
+          <svg class="sub-shared-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="9 12 11 14 15 10"/></svg>
+          <div><strong>Paper + Live режим</strong><br/><span style="color:rgba(255,255,255,.55);font-size:12px">Симуляция на $10K перед реальной торговлей</span></div>
+        </div>
+        <div class="sub-shared-item">
+          <svg class="sub-shared-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="9 12 11 14 15 10"/></svg>
+          <div><strong>8 бирж</strong><br/><span style="color:rgba(255,255,255,.55);font-size:12px">Bybit, Binance, BingX, OKX, Bitget, HTX, Gate, BitMEX</span></div>
+        </div>
+        <div class="sub-shared-item">
+          <svg class="sub-shared-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="9 12 11 14 15 10"/></svg>
+          <div><strong>TradingView вебхуки</strong><br/><span style="color:rgba(255,255,255,.55);font-size:12px">Свои алерты → автоматическая торговля</span></div>
+        </div>
+        <div class="sub-shared-item">
+          <svg class="sub-shared-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="9 12 11 14 15 10"/></svg>
+          <div><strong>SmartTrade Terminal</strong><br/><span style="color:rgba(255,255,255,.55);font-size:12px">Ручные сделки с TP1/TP2/TP3 + trailing</span></div>
+        </div>
+        <div class="sub-shared-item">
+          <svg class="sub-shared-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="9 12 11 14 15 10"/></svg>
+          <div><strong>Copy Trading</strong><br/><span style="color:rgba(255,255,255,.55);font-size:12px">Автокопирование лучших трейдеров</span></div>
+        </div>
+        <div class="sub-shared-item">
+          <svg class="sub-shared-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="9 12 11 14 15 10"/></svg>
+          <div><strong>AI-ассистент</strong><br/><span style="color:rgba(255,255,255,.55);font-size:12px">Gemini помогает с вопросами про стратегии</span></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Payment methods -->
+    <div class="sub-pay-label">Доступные способы оплаты</div>
+    <div class="sub-pay-row">
+      <span class="sub-pay-logo" title="Visa">VISA</span>
+      <span class="sub-pay-logo" title="Mastercard">MC</span>
+      <span class="sub-pay-logo" title="Apple Pay"> Pay</span>
+      <span class="sub-pay-logo" title="Google Pay">G Pay</span>
+      <span class="sub-pay-logo" title="USDT BEP20">USDT</span>
+      <span class="sub-pay-logo" title="USDT TRC20">USDT (TRC20)</span>
+      <span class="sub-pay-logo" title="Bitcoin">BTC</span>
+    </div>
+
+    <!-- Compare table -->
+    <h2 class="sub-compare-title">Сравните функции по планам</h2>
+    <div class="sub-compare-wrap">
+      <table class="sub-compare">
+        <thead>
+          <tr>
+            <th></th>
+            <th>Free</th>
+            <th>Starter</th>
+            <th>Pro</th>
+            <th class="featured">Elite</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr class="section"><td colspan="5">Лимиты</td></tr>
+          <tr><td>Активных ботов</td><td>1</td><td>2</td><td>5</td><td class="featured">∞</td></tr>
+          <tr><td>Сигналов / день</td><td>3</td><td>∞</td><td>∞</td><td class="featured">∞</td></tr>
+          <tr><td>Бэктестов / день</td><td class="sub-compare-no">—</td><td class="sub-compare-no">—</td><td>10</td><td class="featured">∞</td></tr>
+          <tr><td>Максимальное плечо</td><td>5×</td><td>10×</td><td>25×</td><td class="featured">100×</td></tr>
+
+          <tr class="section"><td colspan="5">Стратегии</td></tr>
+          <tr><td>Levels</td><td class="sub-compare-yes">✓</td><td class="sub-compare-yes">✓</td><td class="sub-compare-yes">✓</td><td class="featured sub-compare-yes">✓</td></tr>
+          <tr><td>SMC</td><td class="sub-compare-no">—</td><td class="sub-compare-yes">✓</td><td class="sub-compare-yes">✓</td><td class="featured sub-compare-yes">✓</td></tr>
+          <tr><td>Gerchik</td><td class="sub-compare-no">—</td><td class="sub-compare-no">—</td><td class="sub-compare-yes">✓</td><td class="featured sub-compare-yes">✓</td></tr>
+          <tr><td>DCA + Grid</td><td class="sub-compare-no">—</td><td class="sub-compare-no">—</td><td class="sub-compare-yes">✓</td><td class="featured sub-compare-yes">✓</td></tr>
+          <tr><td>Scalping</td><td class="sub-compare-no">—</td><td class="sub-compare-no">—</td><td class="sub-compare-no">—</td><td class="featured sub-compare-yes">✓</td></tr>
+          <tr><td>Мульти-стратегия на бота</td><td class="sub-compare-no">—</td><td class="sub-compare-no">—</td><td class="sub-compare-no">—</td><td class="featured sub-compare-yes">✓</td></tr>
+
+          <tr class="section"><td colspan="5">Продвинутые фичи</td></tr>
+          <tr><td>Paper-режим</td><td class="sub-compare-yes">✓</td><td class="sub-compare-yes">✓</td><td class="sub-compare-yes">✓</td><td class="featured sub-compare-yes">✓</td></tr>
+          <tr><td>Live-торговля (реальные деньги)</td><td class="sub-compare-no">—</td><td class="sub-compare-no">—</td><td class="sub-compare-yes">✓</td><td class="featured sub-compare-yes">✓</td></tr>
+          <tr><td>Авто-трейдинг сигналов</td><td class="sub-compare-no">—</td><td class="sub-compare-no">—</td><td class="sub-compare-yes">✓</td><td class="featured sub-compare-yes">✓</td></tr>
+          <tr><td>Оптимизатор параметров</td><td class="sub-compare-no">—</td><td class="sub-compare-no">—</td><td class="sub-compare-no">—</td><td class="featured sub-compare-yes">✓</td></tr>
+          <tr><td>Market Scanner (весь рынок)</td><td class="sub-compare-no">—</td><td class="sub-compare-no">—</td><td class="sub-compare-no">—</td><td class="featured sub-compare-yes">✓</td></tr>
+          <tr><td>REST API для скриптов</td><td class="sub-compare-no">—</td><td class="sub-compare-no">—</td><td class="sub-compare-no">—</td><td class="featured sub-compare-yes">✓</td></tr>
+
+          <tr class="section"><td colspan="5">Поддержка</td></tr>
+          <tr><td>Канал поддержки</td><td>Community</td><td>Email</td><td>Priority email</td><td class="featured">Dedicated manager</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- FAQ -->
+    <div class="sub-faq">
+      <h2 class="sub-faq-title">FAQ</h2>
+      <details class="sub-faq-item">
+        <summary class="sub-faq-q">Можно ли повысить тариф после оплаты?<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg></summary>
+        <div class="sub-faq-a">Да, апгрейд доступен в любой момент. При переходе на старший план мы пересчитываем разницу пропорционально оставшемуся времени текущего тарифа — вы платите только за разницу.</div>
+      </details>
+      <details class="sub-faq-item">
+        <summary class="sub-faq-q">Что такое 7-дневный trial?<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg></summary>
+        <div class="sub-faq-a">Первые 7 дней — полный доступ к выбранному плану без списания средств. Если в течение недели отменить — не платите ничего. Карта/крипто нужны только для активации, деньги снимаются на 8-й день.</div>
+      </details>
+      <details class="sub-faq-item">
+        <summary class="sub-faq-q">Могу ли я оплатить криптой?<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg></summary>
+        <div class="sub-faq-a">Да — принимаем USDT (TRC20, BEP20) и BTC. Комиссия сети минимальная, подтверждение обычно за 5-10 минут. При крипто-оплате trial-период не применяется — доступ активируется сразу после подтверждения сети.</div>
+      </details>
+      <details class="sub-faq-item">
+        <summary class="sub-faq-q">Что будет с моими ботами, если подписка закончится?<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg></summary>
+        <div class="sub-faq-a">Все боты автоматически ставятся на паузу (открытые сделки не закрываются — ждут TP/SL). Данные, конфиги, история — сохраняются. Продлите план — боты можно запустить в один клик. Elite-боты (Market Scanner / мульти-стратегия) при даунгрейде остаются в паузе до апгрейда обратно.</div>
+      </details>
+      <details class="sub-faq-item">
+        <summary class="sub-faq-q">Как отменить подписку?<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg></summary>
+        <div class="sub-faq-a">Настройки → Подписка → Отменить. Доступ сохраняется до конца оплаченного периода; автосписание отключается. Возврат за неиспользованные дни — по запросу в поддержку в течение 14 дней.</div>
+      </details>
+      <details class="sub-faq-item">
+        <summary class="sub-faq-q">Годовая подписка — какая выгода?<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg></summary>
+        <div class="sub-faq-a">20% скидка относительно месячной (12 × −20% = ~10 месяцев вместо 12). Pro за $79/мес = $948/год, годовой = $759 (экономия $189). Elite годовой = $1,430 вместо $1,788.</div>
+      </details>
+      <details class="sub-faq-item">
+        <summary class="sub-faq-q">Есть ли реферальная программа?<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg></summary>
+        <div class="sub-faq-a">Да — 20% от оплат приведённых пользователей. Реферальный код и статистика в <a href="settings.html" style="color:#FF8C5A">Настройках</a>. Выплаты в USDT раз в месяц.</div>
+      </details>
+    </div>
+  </section>
+
+  <!-- ─────────── PROMO TAB ─────────── -->
+  <section class="sub-pane" data-sub-tab="promo">
+    <div class="sub-promo">
+      <div class="sub-promo-box">
+        <h3 style="font-size:18px;font-weight:700;margin-bottom:6px">Промокод</h3>
+        <p style="font-size:13px;color:rgba(255,255,255,.6);margin-bottom:20px;line-height:1.5">Введи код — активирую план на указанный срок. Работает для запусков продукта, инфлюенсер-скидок, сезонных акций.</p>
+        <input id="promoCode" class="sub-promo-input" placeholder="CHMBLACK2026" autocomplete="off"/>
+        <button id="promoBtn" class="sub-card-cta" style="width:100%">Применить код</button>
+        <div id="promoMsg" class="sub-promo-msg"></div>
+      </div>
+    </div>
+  </section>
+</main>
+
+<script src="app.js"></script>
+<script src="shell.js?v=7" defer></script>
+<script src="support-widget.js" defer></script>
+<script>
+(function () {
+  'use strict';
+  if (!Auth.requireAuth()) throw new Error('noauth');
+
+  var CHECK_SVG = '<svg class="sub-card-feat-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>';
+  var DASH_SVG  = '<svg class="sub-card-feat-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/></svg>';
+
+  // Feature matrix — what shows as a bullet under each plan. Keep it
+  // concrete (numbers + strategy names) so users decide fast. Value is
+  // one of: string (shown as plain), {count, label}, or false (muted/dash).
+  var PLAN_FEATURES = {
+    free: [
+      { t: 'Только paper-режим' },
+      { t: 'Активных ботов', count: 1 },
+      { t: 'Сигналов в день', count: 3 },
+      { t: 'Стратегия: Levels' },
+      { t: 'Плечо до 5×' },
+      { t: 'Community-поддержка' },
+      { t: 'Автотрейдинг',     muted: true },
+      { t: 'Backtest',         muted: true },
+    ],
+    starter: [
+      { t: 'Только paper-режим' },
+      { t: 'Активных ботов', count: 2 },
+      { t: 'Сигналов в день', count: '∞' },
+      { t: 'Стратегии: Levels + SMC' },
+      { t: 'Плечо до 10×' },
+      { t: 'Email-поддержка' },
+      { t: 'AI-ассистент',   neu: true },
+      { t: 'Автотрейдинг',   muted: true },
+    ],
+    pro: [
+      { t: 'Paper + Live режим' },
+      { t: 'Активных ботов', count: 5 },
+      { t: 'Сигналов в день', count: '∞' },
+      { t: 'Стратегии: +Gerchik, DCA, Grid' },
+      { t: 'Автотрейдинг с биржи' },
+      { t: 'Backtest', count: '10/день' },
+      { t: 'Плечо до 25×' },
+      { t: 'Priority email-поддержка' },
+    ],
+    elite: [
+      { t: 'Paper + Live режим' },
+      { t: 'Активных ботов', count: '∞' },
+      { t: 'Все 6 стратегий (+Scalping)' },
+      { t: 'Market Scanner по всему рынку' },
+      { t: 'Мульти-стратегия на одного бота' },
+      { t: 'Оптимизатор параметров' },
+      { t: 'REST API для своих скриптов' },
+      { t: 'Плечо до 100× · Personal manager' },
+    ],
+  };
+
+  var PLAN_DESC = {
+    free:    'Познакомься с платформой — песочница без лимитов по времени',
+    starter: 'Первые шаги в спот-торговле и фильтр сигналов SMC',
+    pro:     'Полный набор стратегий + авто-торговля с реальной биржей',
+    elite:   'Неограниченно всё + Market Scanner и мульти-стратегия',
+  };
+
+  var currentCycle = 'monthly';
+  var currentPlan = 'free';
+  var plansData = null;
+
+  function esc(s) { return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) { return ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]; }); }
+
+  // Tab switcher
+  document.querySelectorAll('.sub-tab').forEach(function (t) {
+    t.addEventListener('click', function () {
+      var name = t.getAttribute('data-sub-tab');
+      document.querySelectorAll('.sub-tab').forEach(function (x) {
+        var on = x === t;
+        x.classList.toggle('active', on);
+        x.setAttribute('aria-selected', on ? 'true' : 'false');
+      });
+      document.querySelectorAll('.sub-pane').forEach(function (p) {
+        p.classList.toggle('active', p.getAttribute('data-sub-tab') === name);
+      });
+    });
+  });
+
+  // Billing cycle toggle
+  document.querySelectorAll('.sub-cycle-btn').forEach(function (b) {
+    b.addEventListener('click', function () {
+      currentCycle = b.getAttribute('data-cycle');
+      document.querySelectorAll('.sub-cycle-btn').forEach(function (x) {
+        x.classList.toggle('active', x === b);
+      });
+      renderCards();
+    });
+  });
+
+  function renderCards() {
+    var grid = document.getElementById('subGrid');
+    if (!grid || !plansData) return;
+    grid.innerHTML = plansData.map(function (p) {
+      var isCur = p.id === currentPlan;
+      var isFeat = p.id === 'elite';
+      var monthly = Number(p.priceUsd) || 0;
+      var yearly = Math.round(monthly * 12 * 0.8); // 20% discount
+      var displayPrice = currentCycle === 'yearly' ? yearly : monthly;
+      var oldPrice = currentCycle === 'yearly' && monthly > 0 ? (monthly * 12) : null;
+      var suffix = currentCycle === 'yearly' ? '/год' : '/мес';
+
+      var badge = '';
+      if (isCur) badge = '<div class="sub-card-badge current">Текущий план</div>';
+      else if (isFeat) badge = '<div class="sub-card-badge popular">Популярный</div>';
+
+      var priceBlock = monthly === 0
+        ? '<div class="sub-card-price"><span class="sub-card-price-main">Бесплатно</span></div>'
+        : '<div class="sub-card-price">'
+          + '<span class="sub-card-price-main">$' + displayPrice + '</span>'
+          + (oldPrice ? '<span class="sub-card-price-old">$' + oldPrice + '</span>' : '')
+          + '<span class="sub-card-price-suffix">' + suffix + '</span>'
+        + '</div>';
+
+      var ctaBlock;
+      if (isCur) {
+        ctaBlock = '<button class="sub-card-cta sub-card-cta-current" disabled>Ваш план</button>';
+      } else if (p.id === 'free') {
+        ctaBlock = '<button class="sub-card-cta sub-card-cta-ghost" data-plan="free">Продолжить Free</button>';
+      } else {
+        ctaBlock =
+          '<button class="sub-card-cta" data-plan="' + esc(p.id) + '" data-trial="1">Бесплатно на 7 дней</button>'
+          + '<div class="sub-card-payalt">или <a data-plan="' + esc(p.id) + '" data-now="1">оплатить сейчас</a></div>';
+      }
+
+      var feats = (PLAN_FEATURES[p.id] || []).map(function (f) {
+        var muted = f.muted ? ' sub-card-feat-muted' : '';
+        var ic = f.muted ? DASH_SVG : CHECK_SVG;
+        var extra = '';
+        if (f.count != null) extra = '<span class="sub-card-feat-count">' + esc(f.count) + '</span>';
+        if (f.neu) extra += '<span class="sub-card-feat-new">NEW</span>';
+        return '<div class="sub-card-feat' + muted + '">' + ic + '<span style="flex:1">' + esc(f.t) + '</span>' + extra + '</div>';
+      }).join('');
+
+      return '<div class="sub-card' + (isCur ? ' current' : '') + (isFeat && !isCur ? ' featured' : '') + '">'
+        + badge
+        + '<div class="sub-card-name">' + esc(p.name) + '</div>'
+        + '<div class="sub-card-desc">' + esc(PLAN_DESC[p.id] || '') + '</div>'
+        + priceBlock
+        + ctaBlock
+        + '<div class="sub-card-divider"></div>'
+        + feats
+      + '</div>';
+    }).join('');
+
+    // Wire CTAs
+    grid.querySelectorAll('[data-plan]').forEach(function (el) {
+      el.addEventListener('click', function () {
+        var plan = el.getAttribute('data-plan');
+        var pay = el.getAttribute('data-now') === '1';
+        startCheckout(plan, pay);
+      });
+    });
+  }
+
+  function startCheckout(plan, payNow) {
+    if (plan === 'free') { Toast.info('Ты уже на плане Free или можешь скачать его без оплаты.'); return; }
+    // Redirect to settings.html checkout modal — it already has Stripe +
+    // crypto flow wired. We pass plan + cycle as query params.
+    var url = 'settings.html?upgrade=' + encodeURIComponent(plan)
+      + '&cycle=' + encodeURIComponent(currentCycle)
+      + (payNow ? '&trial=0' : '&trial=1');
+    location.href = url;
+  }
+
+  // Promo tab
+  var promoBtn = document.getElementById('promoBtn');
+  var promoInput = document.getElementById('promoCode');
+  var promoMsg = document.getElementById('promoMsg');
+  if (promoBtn) promoBtn.addEventListener('click', function () {
+    var code = (promoInput.value || '').trim().toUpperCase();
+    if (code.length < 3) { showPromoMsg('err', 'Введи корректный код (мин 3 символа)'); return; }
+    promoBtn.disabled = true;
+    promoBtn.textContent = 'Проверяем…';
+    apiRequestCompat('POST', '/subscriptions/promo', { code: code })
+      .then(function (r) {
+        showPromoMsg('ok', 'Активировано: ' + (r.plan || '—') + (r.durationDays ? ' на ' + r.durationDays + ' дн.' : ''));
+        promoInput.value = '';
+        setTimeout(function () { location.reload(); }, 1200);
+      })
+      .catch(function (e) { showPromoMsg('err', e.message || 'Код не подошёл'); })
+      .finally(function () { promoBtn.disabled = false; promoBtn.textContent = 'Применить код'; });
+  });
+  function showPromoMsg(type, text) {
+    if (!promoMsg) return;
+    promoMsg.className = 'sub-promo-msg show ' + type;
+    promoMsg.textContent = text;
+  }
+  function apiRequestCompat(method, path, body) {
+    // Fall back to direct fetch since promo endpoint isn't in API.* yet
+    return fetch((location.hostname === 'localhost' ? 'http://localhost:3000/api' : '/api') + path, {
+      method: method,
+      headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + Auth.accessToken },
+      body: JSON.stringify(body || {}),
+    }).then(function (r) { return r.json().then(function (j) { if (!r.ok) throw new Error(j.error || 'HTTP ' + r.status); return j; }); });
+  }
+
+  // Boot — fetch plans + current subscription in parallel
+  Promise.all([
+    API.listPlans().catch(function () { return { plans: [] }; }),
+    apiRequestCompat('GET', '/subscriptions/status', null).catch(function () { return null; }),
+  ]).then(function (out) {
+    plansData = (out[0] && out[0].plans) || [];
+    var status = out[1] || {};
+    currentPlan = (status.plan) || (Auth.user && Auth.user.subscription && Auth.user.subscription.plan) || 'free';
+    renderCards();
+    // Preselect plan from URL ?plan=pro
+    var wanted = new URLSearchParams(location.search).get('plan');
+    if (wanted && wanted !== currentPlan) {
+      setTimeout(function () {
+        var card = document.querySelector('[data-plan="' + wanted + '"]');
+        if (card && card.scrollIntoView) card.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }, 300);
+    }
+    // Switch tab if ?tab=promo
+    if (new URLSearchParams(location.search).get('tab') === 'promo') {
+      document.querySelector('.sub-tab[data-sub-tab="promo"]').click();
+    }
+  });
+})();
+</script>
+</body>
+</html>
