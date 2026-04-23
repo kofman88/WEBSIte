@@ -237,6 +237,7 @@
   html.light .chm-ai-note{background:linear-gradient(135deg,rgba(255,90,31,.08),rgba(255,140,90,.03));color:#0A0A0A;border-color:rgba(255,90,31,.25)}
   .chm-ai-thread{min-height:180px;max-height:calc(100% - 180px)}
   .chm-sup-msg.chm-ai-typing{opacity:.6;animation:chmAiPulse 1.2s ease-in-out infinite}
+  .chm-sup-typing-dot{display:inline-block;width:5px;height:5px;border-radius:50%;background:rgba(255,255,255,.55);animation:chmAiPulse 1.1s ease-in-out infinite;margin:0 1px}
   @keyframes chmAiPulse{0%,100%{opacity:.45}50%{opacity:.9}}
   .chm-sup-btn-primary{
     display:inline-block;padding:10px 18px;border-radius:9999px;
@@ -383,6 +384,7 @@
 
   // ── CHAT TAB ────────────────────────────────────────────────────────
   var activeTicketId = null;
+  var _pendingAttach = [];  // pending image attachments [{ name, type, dataUrl }]
 
   function renderChat() {
     body.innerHTML = '<div class="chm-sup-empty">Загрузка…</div>';
@@ -403,39 +405,94 @@
     }
   }
 
+  function _renderMsgBubble(m) {
+    var mine = !m.is_admin && !m.isAdmin;
+    var atts = m.attachments || null;
+    var attHtml = (atts && atts.length)
+      ? '<div style="display:flex;gap:4px;margin-top:6px;flex-wrap:wrap">' +
+          atts.map(function (a) {
+            return '<a href="' + a.dataUrl + '" target="_blank"><img src="' + a.dataUrl + '" style="max-width:140px;max-height:100px;border-radius:6px;display:block"/></a>';
+          }).join('') +
+        '</div>'
+      : '';
+    return '<div class="chm-sup-msg ' + (mine ? 'me' : 'them') + '">' +
+      esc(m.body) + attHtml +
+      '<div class="chm-sup-ts">' + relTime(m.created_at || m.createdAt) + '</div>' +
+    '</div>';
+  }
+
   function loadThread(ticketId) {
+    _pendingAttach = [];
     return fetchJson(API_BASE + '/support/tickets/' + ticketId, { headers: authHeaders() })
       .then(function (r) {
         if (!r.ok) return renderNewMessageForm();
         var t = r.body;
         var msgs = (t.messages || []);
-        // Open-ticket body becomes the first user message
         var firstMsg = '<div class="chm-sup-msg me">' + esc(t.body) +
           '<div class="chm-sup-ts">' + relTime(t.created_at || t.createdAt) + '</div></div>';
-        var rest = msgs.map(function (m) {
-          var mine = !m.is_admin && !m.isAdmin;
-          return '<div class="chm-sup-msg ' + (mine ? 'me' : 'them') + '">' +
-            esc(m.body) +
-            '<div class="chm-sup-ts">' + relTime(m.created_at || m.createdAt) + '</div></div>';
-        }).join('');
+        var rest = msgs.map(_renderMsgBubble).join('');
         body.innerHTML =
           '<div class="chm-sup-msgs">' +
             '<div class="chm-sup-empty" style="padding:8px 0;font-size:11px">Тикет #' + t.id +
               ' · ' + (t.subject ? esc(t.subject) : 'Без темы') + '</div>' +
             firstMsg + rest +
+            '<div id="chmSupAgentTyping" class="chm-sup-msg them" style="display:none;opacity:.6">' +
+              '<span style="display:inline-flex;gap:2px">' +
+                '<span class="chm-sup-typing-dot"></span><span class="chm-sup-typing-dot" style="animation-delay:.15s"></span><span class="chm-sup-typing-dot" style="animation-delay:.3s"></span>' +
+              '</span>' +
+              ' агент печатает…' +
+            '</div>' +
           '</div>' +
           '<div class="chm-sup-compose">' +
+            '<div id="chmSupAttachPreview" style="display:flex;gap:4px;margin-bottom:6px;flex-wrap:wrap"></div>' +
             '<div class="chm-sup-compose-row">' +
               '<textarea id="chmSupInput" placeholder="Ответить…" rows="2"></textarea>' +
               '<button class="chm-sup-send" id="chmSupSend" aria-label="Отправить">' + SVG.send + '</button>' +
             '</div>' +
+            '<div style="display:flex;justify-content:space-between;margin-top:4px;font-size:10px;color:rgba(255,255,255,.45)">' +
+              '<label style="cursor:pointer;color:#FF8C5A">📎 <input id="chmSupAttachInput" type="file" accept="image/*" multiple style="display:none"/>Скрин</label>' +
+              '<span>Ctrl/Cmd+Enter</span>' +
+            '</div>' +
           '</div>';
+        wireAttachments();
         wireSend(function (txt) {
           return fetchJson(API_BASE + '/support/tickets/' + ticketId + '/reply', {
-            method: 'POST', headers: authHeaders(), body: JSON.stringify({ body: txt }),
-          });
+            method: 'POST', headers: authHeaders(),
+            body: JSON.stringify({ body: txt || '(вложение)', attachments: _pendingAttach.length ? _pendingAttach : undefined }),
+          }).then(function (r) { _pendingAttach = []; renderAttachPreview(); return r; });
         });
       });
+  }
+
+  function wireAttachments() {
+    var inp = document.getElementById('chmSupAttachInput');
+    if (!inp) return;
+    inp.addEventListener('change', function (ev) {
+      var files = Array.from(ev.target.files || []);
+      files.slice(0, 3 - _pendingAttach.length).forEach(function (f) {
+        if (f.size > 500_000) { alert('Файл слишком большой (max 500 KB)'); return; }
+        var r = new FileReader();
+        r.onload = function () { _pendingAttach.push({ name: f.name, type: f.type, dataUrl: r.result }); renderAttachPreview(); };
+        r.readAsDataURL(f);
+      });
+      inp.value = '';
+    });
+  }
+  function renderAttachPreview() {
+    var box = document.getElementById('chmSupAttachPreview');
+    if (!box) return;
+    box.innerHTML = _pendingAttach.map(function (a, i) {
+      return '<div style="position:relative;width:48px;height:48px;border-radius:6px;overflow:hidden;border:1px solid rgba(255,255,255,.15)">' +
+        '<img src="' + a.dataUrl + '" style="width:100%;height:100%;object-fit:cover"/>' +
+        '<button data-rm="' + i + '" style="position:absolute;top:1px;right:1px;width:14px;height:14px;border-radius:50%;border:0;background:rgba(0,0,0,.75);color:#fff;font-size:9px;cursor:pointer;line-height:1">×</button>' +
+      '</div>';
+    }).join('');
+    box.querySelectorAll('[data-rm]').forEach(function (b) {
+      b.addEventListener('click', function () {
+        _pendingAttach.splice(Number(b.getAttribute('data-rm')), 1);
+        renderAttachPreview();
+      });
+    });
   }
 
   function renderNewMessageForm() {
@@ -506,16 +563,27 @@
     opts = opts || {};
     var input = document.getElementById('chmSupInput');
     var sendBtn = document.getElementById('chmSupSend');
-    function validate() { sendBtn.disabled = (input.value || '').trim().length < 2; }
+    function validate() { sendBtn.disabled = (input.value || '').trim().length < 2 && _pendingAttach.length === 0; }
     validate();
-    input.addEventListener('input', validate);
+    // Typing emit — start on input, auto-stop after 3s idle or on send
+    var typingTimer = null;
+    input.addEventListener('input', function () {
+      validate();
+      if (!activeTicketId || !window.WS) return;
+      try { WS._send && WS._send({ type: 'support.typing', ticketId: activeTicketId, state: 'start' }); } catch (_) {}
+      clearTimeout(typingTimer);
+      typingTimer = setTimeout(() => {
+        try { WS._send && WS._send({ type: 'support.typing', ticketId: activeTicketId, state: 'stop' }); } catch (_) {}
+      }, 3000);
+    });
     input.addEventListener('keydown', function (e) {
       if ((e.ctrlKey || e.metaKey) && e.key === 'Enter' && !sendBtn.disabled) sendBtn.click();
     });
     sendBtn.addEventListener('click', function () {
       var txt = (input.value || '').trim();
-      if (txt.length < 2) return;
+      if (txt.length < 2 && _pendingAttach.length === 0) return;
       sendBtn.disabled = true;
+      try { WS._send && activeTicketId && WS._send({ type: 'support.typing', ticketId: activeTicketId, state: 'stop' }); } catch (_) {}
       submitFn(txt).then(function (r) {
         if (r && r.ok) {
           input.value = '';
@@ -682,30 +750,50 @@
       try {
         var d = ev && ev.data;
         if (!d || !d.message) return;
-        // Skip messages authored by this user (echo). Admin replies only.
+        // Internal notes never reach the user (server already filters),
+        // but belt-and-suspenders in case admin+user share a tab.
+        if (d.message.isInternal) return;
         if (!d.message.isAdmin) return;
         var panelOpen = panel.classList.contains('open');
         var threadOpen = panelOpen && currentTab === 'chat' && activeTicketId === d.ticketId;
         if (threadOpen) {
-          // Append bubble live, scroll + mark read
           var msgsEl = document.querySelector('.chm-sup-msgs');
           if (msgsEl) {
-            var b = document.createElement('div');
-            b.className = 'chm-sup-msg';
-            b.innerHTML = esc(d.message.body) + '<div class="chm-sup-ts">только что</div>';
-            msgsEl.appendChild(b);
+            // Insert before the typing indicator (last child) if present
+            var typingEl = document.getElementById('chmSupAgentTyping');
+            var html = _renderMsgBubble({
+              isAdmin: true, body: d.message.body,
+              attachments: d.message.attachments,
+              created_at: new Date().toISOString(),
+            });
+            if (typingEl) typingEl.insertAdjacentHTML('beforebegin', html);
+            else msgsEl.insertAdjacentHTML('beforeend', html);
             msgsEl.scrollTop = msgsEl.scrollHeight;
           }
-          // Tell server we've read it
           try {
             fetch(API_BASE + '/support/tickets/' + d.ticketId + '/mark-read', {
               method: 'POST', headers: authHeaders(), body: '{}',
             });
           } catch (_) {}
         } else {
-          // Bump the floating-button badge so user notices
           bumpBadge();
-          // Small "ping" audio cue could go here (skipped for MVP)
+        }
+      } catch (_) {}
+    });
+    // Agent typing indicator
+    WS.on('support.typing', function (ev) {
+      try {
+        var d = ev && ev.data;
+        if (!d || activeTicketId !== d.ticketId) return;
+        if (!d.isAdmin) return;  // We only show when the AGENT is typing
+        var el = document.getElementById('chmSupAgentTyping');
+        if (!el) return;
+        el.style.display = d.state === 'stop' ? 'none' : 'block';
+        var msgsEl = document.querySelector('.chm-sup-msgs');
+        if (msgsEl) msgsEl.scrollTop = msgsEl.scrollHeight;
+        clearTimeout(window._chmSupTypingTimer);
+        if (d.state !== 'stop') {
+          window._chmSupTypingTimer = setTimeout(function () { el.style.display = 'none'; }, 5000);
         }
       } catch (_) {}
     });

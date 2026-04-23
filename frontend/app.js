@@ -376,11 +376,27 @@ const API = {
   closeTicket: (id) => apiRequest('POST', '/support/tickets/' + id + '/close'),
   listAllTickets: (opts = {}) => apiRequest('GET', '/support/admin/tickets?' + qs(opts)),
   adminTicketGet: (id) => apiRequest('GET', '/support/admin/tickets/' + id),
-  adminTicketReply: (id, body) => apiRequest('POST', '/support/admin/tickets/' + id + '/reply', { body }),
+  // adminTicketReply accepts either a plain string (legacy) or an object
+  // with { body, isInternal, attachments } for Phase B features.
+  adminTicketReply: (id, payload) =>
+    apiRequest('POST', '/support/admin/tickets/' + id + '/reply',
+      typeof payload === 'string' ? { body: payload } : payload),
   adminTicketMarkRead: (id) => apiRequest('POST', '/support/admin/tickets/' + id + '/mark-read', {}),
   adminTicketClose: (id) => apiRequest('POST', '/support/tickets/' + id + '/close', {}),
+  adminTicketAssign: (id, targetAdminId) => apiRequest('POST', '/support/admin/tickets/' + id + '/assign', targetAdminId ? { targetAdminId } : {}),
+  adminTicketUnassign: (id) => apiRequest('POST', '/support/admin/tickets/' + id + '/unassign', {}),
+  adminTemplatesList: () => apiRequest('GET', '/support/admin/templates'),
+  adminTemplateCreate: (payload) => apiRequest('POST', '/support/admin/templates', payload),
+  adminTemplateUpdate: (id, patch) => apiRequest('PATCH', '/support/admin/templates/' + id, patch),
+  adminTemplateRemove: (id) => apiRequest('DELETE', '/support/admin/templates/' + id),
+  adminTemplateUse: (id) => apiRequest('POST', '/support/admin/templates/' + id + '/use', {}),
+  adminPresencePing: () => apiRequest('POST', '/support/admin/presence/ping', {}),
+  adminPresenceOnline: () => apiRequest('GET', '/support/admin/presence/online'),
   // User-side support helpers
   supportMarkRead: (id) => apiRequest('POST', '/support/tickets/' + id + '/mark-read', {}),
+  supportReply: (id, payload) =>
+    apiRequest('POST', '/support/tickets/' + id + '/reply',
+      typeof payload === 'string' ? { body: payload } : payload),
 
   // Ops / back-office ------------------------------------------------------
   opsDashboard: () => apiRequest('GET', '/admin/dashboard'),

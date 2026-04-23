@@ -33,6 +33,20 @@ class WebSocketService {
     if (!set) { set = new Set(); this.userIndex.set(userId, set); }
     set.add(ws);
   }
+  // Cached admin-flag lookup; refreshed every 60s. Avoids a DB hit on
+  // every typing event which fires several times per keystroke session.
+  _isAdmin(userId) {
+    if (!userId) return false;
+    if (!this._adminCache) this._adminCache = { at: 0, set: new Set() };
+    if (Date.now() - this._adminCache.at > 60_000) {
+      try {
+        const db = require('../models/database');
+        const rows = db.prepare('SELECT id FROM users WHERE is_admin = 1').all();
+        this._adminCache = { at: Date.now(), set: new Set(rows.map((r) => r.id)) };
+      } catch (_) {}
+    }
+    return this._adminCache.set.has(userId);
+  }
   _indexRemove(userId, ws) {
     if (!userId) return;
     const set = this.userIndex.get(userId);
@@ -87,6 +101,37 @@ class WebSocketService {
           }
         } catch (_e) { /* fall through */ }
         this._send(ws, { type: 'auth_fail' });
+      }
+      // Typing indicator fan-out — transient (no DB). Routed to the
+      // other party of the ticket: user → all admins, admin → ticket
+      // owner. Sender is trusted to supply ticketId; worst case a fake
+      // ticketId triggers a harmless no-op event on the recipient side.
+      if (msg.type === 'support.typing' && meta.authenticated && msg.ticketId) {
+        try {
+          const support = require('./supportService');
+          const db = require('../models/database');
+          const ticket = db.prepare('SELECT user_id FROM support_tickets WHERE id = ?').get(msg.ticketId);
+          if (!ticket) return;
+          const fromAdmin = this._isAdmin(meta.userId);
+          const payload = {
+            type: 'support.typing',
+            data: {
+              ticketId: msg.ticketId,
+              fromUserId: meta.userId,
+              isAdmin: fromAdmin,
+              state: msg.state === 'stop' ? 'stop' : 'start',
+            },
+            ts: Date.now(),
+          };
+          if (fromAdmin) {
+            // Admin typing → notify ticket owner
+            this.broadcastToUser(ticket.user_id, payload);
+          } else if (meta.userId === ticket.user_id) {
+            // User typing → notify admins
+            const adminIds = db.prepare('SELECT id FROM users WHERE is_admin = 1').all().map((r) => r.id);
+            for (const aid of adminIds) this.broadcastToUser(aid, payload);
+          }
+        } catch (_) {}
       }
     });
 
