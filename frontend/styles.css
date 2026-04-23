@@ -369,6 +369,180 @@ img { max-width: 100%; display: block; }
 }
 /* Sidebar promo — 3Commas-style teaser card above the footer.
    Upsell (non-Elite) or Academy link (Elite). Injected by shell.js. */
+
+/* Sidebar AI-assistant entry — sits at TOP of .sidebar-nav, above Dashboard.
+   <button> not <a>: the action is "open chat widget", not navigate. */
+.sidebar-link-ai {
+  width: 100%;
+  text-align: left;
+  background: none;
+  border: 0;
+  cursor: pointer;
+  font-family: inherit;
+}
+.sidebar-link-ai svg { color: #FF8C5A; }
+.sidebar-beta {
+  margin-left: auto;
+  font-size: 9px;
+  letter-spacing: .1em;
+  padding: 2px 6px;
+  border-radius: 4px;
+  background: rgba(255,90,31,.18);
+  color: #FF8C5A;
+  font-weight: 700;
+}
+html.light .sidebar-beta { background: rgba(255,90,31,.15); color: #C44610; }
+
+/* Sidebar footer extras — Chat/Email/Ideas row + community icons + app badges */
+.sidebar-footer-extras {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  padding: 14px 16px 16px;
+  border-bottom: 1px solid var(--border);
+  font-size: 11px;
+}
+.sbf-row { display: flex; gap: 14px; flex-wrap: wrap; }
+.sbf-link {
+  background: none; border: 0; padding: 0;
+  font-size: 12px;
+  color: rgba(255,255,255,.6);
+  text-decoration: none;
+  cursor: pointer;
+  transition: color .15s;
+  font-family: inherit;
+}
+.sbf-link:hover { color: #FF8C5A; }
+html.light .sbf-link { color: rgba(10,10,10,.6); }
+html.light .sbf-link:hover { color: #C44610; }
+
+.sbf-community, .sbf-apps { display: flex; flex-direction: column; gap: 6px; }
+.sbf-community-label, .sbf-apps-label {
+  font-size: 10px;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+  color: rgba(255,255,255,.4);
+  font-weight: 500;
+}
+html.light .sbf-community-label, html.light .sbf-apps-label { color: rgba(10,10,10,.45); }
+.sbf-community-icons { display: flex; gap: 6px; }
+.sbf-community-icons a {
+  width: 28px; height: 28px;
+  display: inline-flex; align-items: center; justify-content: center;
+  border-radius: 8px;
+  background: rgba(255,255,255,.05);
+  color: rgba(255,255,255,.75);
+  transition: background .15s, color .15s, transform .15s;
+}
+.sbf-community-icons a:hover {
+  background: rgba(255,90,31,.15);
+  color: #FF8C5A;
+  transform: translateY(-1px);
+}
+html.light .sbf-community-icons a { background: rgba(0,0,0,.05); color: rgba(10,10,10,.7); }
+html.light .sbf-community-icons a:hover { background: rgba(255,90,31,.12); color: #C44610; }
+
+.sbf-apps-badges { display: flex; gap: 6px; }
+.sbf-app-badge {
+  flex: 1;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 6px 8px;
+  border-radius: 8px;
+  background: rgba(255,255,255,.04);
+  border: 1px solid rgba(255,255,255,.08);
+  color: rgba(255,255,255,.7);
+  text-decoration: none;
+  font-size: 10px;
+  font-weight: 500;
+  transition: background .15s, border-color .15s;
+}
+.sbf-app-badge:hover { background: rgba(255,255,255,.07); border-color: rgba(255,140,90,.3); }
+html.light .sbf-app-badge { background: rgba(0,0,0,.03); border-color: rgba(0,0,0,.08); color: rgba(10,10,10,.65); }
+html.light .sbf-app-badge:hover { background: rgba(0,0,0,.05); border-color: rgba(255,90,31,.3); }
+
+.sbf-legal {
+  display: flex;
+  gap: 6px;
+  font-size: 10px;
+  color: rgba(255,255,255,.35);
+}
+.sbf-legal a { color: inherit; text-decoration: none; }
+.sbf-legal a:hover { color: #FF8C5A; }
+html.light .sbf-legal { color: rgba(10,10,10,.4); }
+
+/* Topbar account pill — "РЕАЛЬНЫЙ АККАУНТ ▾" equivalent */
+.shell-acct {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 12px;
+  border-radius: 9999px;
+  background: rgba(255,255,255,.04);
+  border: 1px solid rgba(255,255,255,.1);
+  color: rgba(255,255,255,.85);
+  text-decoration: none;
+  font-size: 12px;
+  font-weight: 500;
+  transition: background .15s, border-color .15s;
+  margin-right: 8px;
+}
+.shell-acct:hover { background: rgba(255,255,255,.07); border-color: rgba(255,140,90,.3); }
+.shell-acct-mode {
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: .1em;
+  padding: 2px 7px;
+  border-radius: 5px;
+  background: rgba(255,140,90,.15);
+  color: #FF8C5A;
+}
+.shell-acct-mode[data-mode="live"] { background: rgba(102,135,110,.2); color: #8FBF95; }
+.shell-acct-val { font-family: var(--font-mono); font-variant-numeric: tabular-nums; }
+html.light .shell-acct { background: rgba(0,0,0,.03); border-color: rgba(0,0,0,.1); color: #0A0A0A; }
+html.light .shell-acct:hover { background: rgba(0,0,0,.05); border-color: rgba(255,90,31,.3); }
+@media (max-width: 760px) { .shell-acct-val { display: none; } }
+
+/* Topbar quick actions — "+ Создать бота" + "Upgrade" pills.
+   Injected by shell.js.injectTopbarQuickActions(). Sits before the
+   lang/theme/avatar stack inside .topbar-actions. */
+.shell-quick { display: inline-flex; align-items: center; gap: 8px; }
+.shell-quick a {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 7px 14px;
+  border-radius: 9999px;
+  font-size: 12px;
+  font-weight: 500;
+  letter-spacing: -0.005em;
+  line-height: 1;
+  text-decoration: none;
+  white-space: nowrap;
+  transition: transform .15s ease, filter .15s ease, background .15s ease, border-color .15s ease;
+}
+.shell-pill-create {
+  color: rgba(255,255,255,.92);
+  background: linear-gradient(180deg, rgba(255,255,255,.06), rgba(255,255,255,.02));
+  border: 1px solid rgba(255,255,255,.12);
+  box-shadow: inset 0 1px 1px rgba(255,255,255,.08);
+}
+.shell-pill-create:hover { background: linear-gradient(180deg, rgba(255,255,255,.1), rgba(255,255,255,.03)); transform: translateY(-1px); }
+.shell-pill-upgrade {
+  color: #fff;
+  background: linear-gradient(180deg, #FF7840 0%, #FF5A1F 60%, #C44610 100%);
+  border: 1px solid rgba(255,90,31,.45);
+  box-shadow: inset 0 1px 1px rgba(255,255,255,.28), inset 0 -1px 2px rgba(0,0,0,.22), 0 4px 10px -2px rgba(255,90,31,.35);
+}
+.shell-pill-upgrade:hover { filter: brightness(1.08); transform: translateY(-1px); }
+html.light .shell-pill-create { color: #0A0A0A; background: #fff; border-color: rgba(0,0,0,.1); box-shadow: 0 1px 2px rgba(0,0,0,.06); }
+html.light .shell-pill-create:hover { background: #F6F7FB; }
+@media (max-width: 640px) {
+  .shell-pill-create span, .shell-pill-upgrade span { display: none; }
+  .shell-quick a { padding: 8px; }
+}
+
 .sidebar-promo {
   display: flex;
   align-items: flex-start;

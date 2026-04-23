@@ -133,11 +133,182 @@
         if (un && u.email) un.textContent = u.email.split('@')[0];
       }
       // Elite-only: inject Market Scanner sidebar link right after Сигналы
+      injectAIAssistantLink();
       injectTerminalLink();
       injectCopyLink();
       if (plan === 'elite') injectMarketScannerLink();
       injectSidebarPromo(plan);
-    } catch (_e) { text.textContent = 'Free Plan'; injectSidebarPromo('free'); }
+      injectSidebarFooterExtras();
+      injectTopbarQuickActions(plan);
+      injectAccountPill(u);
+    } catch (_e) {
+      text.textContent = 'Free Plan';
+      injectAIAssistantLink();
+      injectSidebarPromo('free');
+      injectSidebarFooterExtras();
+      injectTopbarQuickActions('free');
+      injectAccountPill(null);
+    }
+  }
+
+  // AI-assistant sidebar item (BETA) — sits at the top above Dashboard.
+  // Clicking opens the support chat widget (the AI backend is not wired
+  // yet; we reuse existing infra so the entry point is already useful).
+  function injectAIAssistantLink() {
+    if (document.querySelector('.sidebar-link[data-page="ai"]')) return;
+    const nav = document.querySelector('.sidebar-nav');
+    const dash = document.querySelector('.sidebar-link[data-page="dashboard"]');
+    if (!nav || !dash) return;
+    const link = document.createElement('button');
+    link.type = 'button';
+    link.className = 'sidebar-link sidebar-link-ai';
+    link.setAttribute('data-page', 'ai');
+    link.setAttribute('aria-label', 'AI-ассистент (бета)');
+    link.innerHTML = '<svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">'
+      + '<path d="M12 2l1.5 4.5L18 8l-4.5 1.5L12 14l-1.5-4.5L6 8l4.5-1.5L12 2z"/>'
+      + '<path d="M19 14l.75 2.25L22 17l-2.25.75L19 20l-.75-2.25L16 17l2.25-.75L19 14z"/>'
+      + '</svg>'
+      + '<span>AI-ассистент</span>'
+      + '<span class="sidebar-beta">BETA</span>';
+    link.addEventListener('click', () => {
+      // Opens the support widget directly on the AI tab. If the widget
+      // hasn't loaded yet (defer script still running), click the floating
+      // bubble as a fallback — user gets the widget, just on Home tab.
+      if (window.ChmSupport && typeof window.ChmSupport.open === 'function') {
+        window.ChmSupport.open('ai');
+      } else {
+        const btn = document.querySelector('.chm-sup-btn');
+        if (btn) btn.click();
+      }
+    });
+    nav.insertBefore(link, dash);
+  }
+
+  // Extended sidebar footer — community icons + Chat/Email/Request links
+  // + mobile-app badges. Injected once above the logout button on every
+  // authed page. All links open new tabs for external resources.
+  function injectSidebarFooterExtras() {
+    const footer = document.querySelector('.sidebar-footer');
+    if (!footer || footer.querySelector('.sidebar-footer-extras')) return;
+    const wrap = document.createElement('div');
+    wrap.className = 'sidebar-footer-extras';
+    wrap.innerHTML =
+      // Chat / Email / Request row
+      '<div class="sbf-row">'
+      +  '<button type="button" class="sbf-link" data-sbf="chat">Чат</button>'
+      +  '<a class="sbf-link" href="mailto:support@chmup.top">Email</a>'
+      +  '<a class="sbf-link" href="https://t.me/CHMUP_bot" target="_blank" rel="noopener">Идеи</a>'
+      + '</div>'
+      // Community icons
+      + '<div class="sbf-community">'
+      +  '<span class="sbf-community-label">Комьюнити</span>'
+      +  '<div class="sbf-community-icons">'
+      +    '<a href="https://t.me/chmfinance" target="_blank" rel="noopener" aria-label="Telegram" title="Telegram"><svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M23.3 2.7 2.4 10.8c-1.4.6-1.4 1.4-.2 1.8l5.3 1.7 2.1 6.3c.3.7.1 1 .9 1 .6 0 .9-.3 1.2-.6l2.6-2.5 5.3 4c1 .5 1.7.2 2-.9L22.9 4c.3-1.5-.5-2-1.6-1.3zM8.3 15.2 17 9.6c.4-.3.8-.1.5.2l-7 6.3-.3 3.6-1.9-4.5z"/></svg></a>'
+      +    '<a href="https://discord.gg/chmfinance" target="_blank" rel="noopener" aria-label="Discord" title="Discord"><svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M20.3 4.4a17 17 0 00-4.2-1.3.1.1 0 00-.1 0 11 11 0 00-.6 1.2 16 16 0 00-4.8 0A9 9 0 008 3.1h-.1a17 17 0 00-4.2 1.3h-.1A17.8 17.8 0 00.6 16.5a.1.1 0 00.1.1 17 17 0 005.2 2.6h.1c.4-.5.7-1 1-1.6v-.1a11 11 0 01-1.7-.8v-.1l.3-.3c3.3 1.5 6.8 1.5 10 0l.3.3v.1l-1.7.8v.1c.3.6.6 1.1 1 1.6h.1a17 17 0 005.2-2.6.1.1 0 00.1-.1 17.6 17.6 0 00-3-12.1zM8 14.3c-1 0-1.9-.9-1.9-2.1 0-1.1.9-2.1 1.9-2.1s1.9 1 1.9 2.1c0 1.2-.9 2.1-1.9 2.1zm8 0c-1 0-1.9-.9-1.9-2.1 0-1.1.9-2.1 1.9-2.1s1.9 1 1.9 2.1c0 1.2-.9 2.1-1.9 2.1z"/></svg></a>'
+      +    '<a href="https://x.com/chmfinance" target="_blank" rel="noopener" aria-label="X (Twitter)" title="X"><svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M18.9 2h3.4l-7.4 8.5L23.7 22h-6.8l-5.3-7L5.5 22H2l7.9-9L1.4 2h7l4.8 6.4L18.9 2zm-1.2 17.9h1.9L6.3 4H4.3l13.4 15.9z"/></svg></a>'
+      +  '</div>'
+      + '</div>'
+      // Mobile apps (actual links updated when we publish)
+      + '<div class="sbf-apps">'
+      +  '<span class="sbf-apps-label">Приложение</span>'
+      +  '<div class="sbf-apps-badges">'
+      +    '<a href="#coming-soon" class="sbf-app-badge sbf-app-ios"   aria-label="App Store"><svg width="12" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M17.6 12.6c0-2.7 2.2-4 2.3-4-1.2-1.8-3.2-2-3.9-2-1.6-.2-3.2 1-4 1s-2.1-1-3.5-1c-1.8 0-3.5 1-4.4 2.7-1.9 3.3-.5 8.1 1.4 10.8.9 1.3 2 2.8 3.4 2.7 1.4-.1 1.9-.9 3.5-.9s2.1.9 3.5.9c1.5 0 2.4-1.3 3.3-2.6 1-1.4 1.5-2.9 1.5-3 0 0-2.9-1.1-3-4.4zM15 4.5c.7-.9 1.2-2.1 1.1-3.3-1 0-2.3.7-3.1 1.5-.7.8-1.2 2-1.1 3.2 1.1.1 2.3-.6 3.1-1.4z"/></svg><span>App Store</span></a>'
+      +    '<a href="#coming-soon" class="sbf-app-badge sbf-app-android" aria-label="Google Play"><svg width="12" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M3 20.7V3.3c0-.5.2-.9.6-1.2l10.2 10.1L3.6 22.3c-.4-.3-.6-.9-.6-1.6zm13.2-7.5 3.3 1.9c.9.5.9 1.8 0 2.3l-3.6 2.1-3.6-3.6 3.9-2.7zm-2.6-2.4L5 2.2l11.2 6.4-2.6 2.2zm0 2.4 2.6 2.2-11.2 6.5 8.6-8.7z"/></svg><span>Google Play</span></a>'
+      +  '</div>'
+      + '</div>'
+      + '<div class="sbf-legal">'
+      +  '<a href="terms.html">Условия</a>'
+      +  '<span>·</span>'
+      +  '<a href="privacy.html">Политика</a>'
+      + '</div>';
+
+    // Hook up "Чат" button to the support widget
+    const chatBtn = wrap.querySelector('[data-sbf="chat"]');
+    if (chatBtn) chatBtn.addEventListener('click', () => {
+      const btn = document.querySelector('.chm-sup-btn');
+      if (btn) btn.click();
+    });
+
+    // Intercept "coming soon" app badges so they don't navigate
+    wrap.querySelectorAll('.sbf-app-badge[href="#coming-soon"]').forEach((a) => {
+      a.addEventListener('click', (e) => {
+        e.preventDefault();
+        if (window.Toast && Toast.info) Toast.info('Мобильное приложение в beta — скоро в сторах');
+      });
+    });
+
+    footer.insertBefore(wrap, footer.firstChild);
+  }
+
+  // Topbar account pill — 3Commas "РЕАЛЬНЫЙ АККАУНТ ▾" equivalent.
+  // Shows mode (Live / Paper) + aggregated equity. Clicking drills into
+  // /wallet (which holds the real account switcher + balance detail).
+  function injectAccountPill(user) {
+    const ticker = document.getElementById('shellMarket');
+    const actions = document.querySelector('.topbar-actions');
+    if (!actions || document.getElementById('shellAcct')) return;
+    const pill = document.createElement('a');
+    pill.id = 'shellAcct';
+    pill.className = 'shell-acct';
+    pill.href = 'wallet.html';
+    pill.title = 'Твой аккаунт — перейти в Кошелёк';
+    pill.innerHTML =
+      '<span class="shell-acct-mode" id="shellAcctMode">PAPER</span>'
+      + '<span class="shell-acct-val" id="shellAcctVal">—</span>'
+      + '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>';
+    // Insert before the ticker if present, else before the lang button
+    if (ticker && ticker.parentElement) {
+      ticker.parentElement.insertBefore(pill, ticker);
+    } else {
+      actions.insertBefore(pill, actions.firstChild);
+    }
+
+    // Best-effort equity fetch — uses bot summary + paper starting balance.
+    // Failures silent (the pill still renders with "—").
+    (async () => {
+      try {
+        const s = await (window.API && API.botSummary ? API.botSummary() : Promise.resolve(null));
+        if (!s) return;
+        const hasLive = Number(s.activeBots) > 0 && Number(s.livePnl) !== 0;
+        const mode = hasLive ? 'LIVE' : 'PAPER';
+        const total = Number(s.totalPnl || 0);
+        const paperBase = Number((user && user.paperStartingBalance) || 10000);
+        const equity = paperBase + total;
+        const modeEl = document.getElementById('shellAcctMode');
+        const valEl = document.getElementById('shellAcctVal');
+        if (modeEl) { modeEl.textContent = mode; modeEl.setAttribute('data-mode', mode.toLowerCase()); }
+        if (valEl) valEl.textContent = '$' + equity.toLocaleString('en-US', { maximumFractionDigits: 0 });
+      } catch (_) {}
+    })();
+  }
+
+  // Topbar quick actions — 3Commas-style pills. Inserts BEFORE the existing
+  // lang/theme/avatar stack. Skipped on the bots / terminal pages where the
+  // action is primary content already.
+  function injectTopbarQuickActions(plan) {
+    const actions = document.querySelector('.topbar-actions');
+    if (!actions || document.getElementById('shellQuick')) return;
+    const path = (location.pathname || '').split('/').pop();
+    const suppressCreateOn = new Set(['bots.html', 'terminal.html']);
+    const wrap = document.createElement('div');
+    wrap.id = 'shellQuick';
+    wrap.className = 'shell-quick';
+    let html = '';
+    if (!suppressCreateOn.has(path)) {
+      html += '<a href="bots.html" class="shell-pill-create" title="Создать нового бота">'
+        +   '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M12 5v14M5 12h14"/></svg>'
+        +   '<span>Создать бота</span>'
+        + '</a>';
+    }
+    if (plan !== 'elite') {
+      html += '<a href="settings.html?upgrade=elite" class="shell-pill-upgrade" title="Перейти на Elite">'
+        +   '<svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>'
+        +   '<span>Upgrade</span>'
+        + '</a>';
+    }
+    if (!html) return;
+    wrap.innerHTML = html;
+    actions.insertBefore(wrap, actions.firstChild);
   }
 
   // Sidebar promo card at the bottom (3Commas-style "Лист ожидания" block).
