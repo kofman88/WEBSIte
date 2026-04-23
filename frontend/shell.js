@@ -171,9 +171,11 @@
       + '<span>AI-ассистент</span>'
       + '<span class="sidebar-beta">BETA</span>';
     link.addEventListener('click', () => {
-      // Defer to support widget; fall back to /?support=1 if not loaded yet.
+      // Opens the support widget directly on the AI tab. If the widget
+      // hasn't loaded yet (defer script still running), click the floating
+      // bubble as a fallback — user gets the widget, just on Home tab.
       if (window.ChmSupport && typeof window.ChmSupport.open === 'function') {
-        window.ChmSupport.open();
+        window.ChmSupport.open('ai');
       } else {
         const btn = document.querySelector('.chm-sup-btn');
         if (btn) btn.click();

@@ -220,6 +220,28 @@
 
   .chm-sup-hint{font-size:11px;color:rgba(255,255,255,.45);line-height:1.4}
 
+  /* AI tab extras — note block above the thread + pulsing "typing" bubble */
+  .chm-ai-note{
+    padding:10px 14px;margin:8px 0 4px;border-radius:10px;
+    background:linear-gradient(135deg,rgba(255,90,31,.14),rgba(255,140,90,.05));
+    border:1px solid rgba(255,90,31,.25);
+    font-size:11px;color:rgba(255,255,255,.82);line-height:1.5
+  }
+  .chm-ai-note #chmAiUsage{
+    font-family:'JetBrains Mono',monospace;color:#FF8C5A;font-weight:600
+  }
+  html.light .chm-ai-note{background:linear-gradient(135deg,rgba(255,90,31,.08),rgba(255,140,90,.03));color:#0A0A0A;border-color:rgba(255,90,31,.25)}
+  .chm-ai-thread{min-height:180px;max-height:calc(100% - 180px)}
+  .chm-sup-msg.chm-ai-typing{opacity:.6;animation:chmAiPulse 1.2s ease-in-out infinite}
+  @keyframes chmAiPulse{0%,100%{opacity:.45}50%{opacity:.9}}
+  .chm-sup-btn-primary{
+    display:inline-block;padding:10px 18px;border-radius:9999px;
+    background:linear-gradient(180deg,#FF7840 0%,#FF5A1F 60%,#C44610 100%);
+    color:#fff !important;font-weight:600;font-size:13px;
+    box-shadow:inset 0 1px 1px rgba(255,255,255,.25),0 4px 12px -2px rgba(255,90,31,.45)
+  }
+  .chm-sup-btn-primary:hover{filter:brightness(1.08)}
+
   /* Light theme */
   html.light .chm-sup-panel{background:rgba(255,255,255,.98);color:#0A0A0A;border-color:rgba(0,0,0,.1)}
   html.light .chm-sup-home-card{background:rgba(0,0,0,.03);border-color:rgba(0,0,0,.08)}
@@ -249,6 +271,7 @@
     chev:   '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"/></svg>',
     status: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><path d="m9 11 3 3L22 4"/></svg>',
     community:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>',
+    ai:       '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2l1.5 4.5L18 8l-4.5 1.5L12 14l-1.5-4.5L6 8l4.5-1.5L12 2z"/><path d="M19 14l.75 2.25L22 17l-2.25.75L19 20l-.75-2.25L16 17l2.25-.75L19 14z"/></svg>',
   };
 
   var root = document.createElement('div');
@@ -268,6 +291,7 @@
       '<div class="chm-sup-tabs">' +
         '<button class="chm-sup-tab active" data-tab="home">' + SVG.home + '<span>Главная</span></button>' +
         '<button class="chm-sup-tab" data-tab="chat">' + SVG.chat + '<span>Чат</span></button>' +
+        '<button class="chm-sup-tab" data-tab="ai">'   + SVG.ai   + '<span>AI</span></button>' +
         '<button class="chm-sup-tab" data-tab="help">' + SVG.help + '<span>Помощь</span></button>' +
       '</div>' +
     '</div>';
@@ -296,6 +320,7 @@
   function renderTab(tab) {
     if (tab === 'home')     renderHome();
     else if (tab === 'chat') renderChat();
+    else if (tab === 'ai')   renderAI();
     else if (tab === 'help') renderHelp();
   }
 
@@ -515,5 +540,125 @@
       });
     });
   }
+
+  // ── AI chat tab (Gemini-backed, free tier). Guest users see a prompt
+  // to log in — Gemini traffic requires an authed user so we can
+  // rate-limit per plan.
+  var _aiHistory = [];   // [{role:'user'|'assistant', content}]
+  function renderAI() {
+    if (!isLoggedIn()) {
+      body.innerHTML =
+        '<div class="chm-sup-home-card" style="flex-direction:column;align-items:flex-start;gap:10px">' +
+          '<span class="chm-sup-icn">' + SVG.ai + '</span>' +
+          '<div><strong style="display:block;margin-bottom:4px;color:#fff">AI-ассистент</strong>' +
+            '<span style="font-size:12px;color:rgba(255,255,255,.6)">Доступен залогиненным пользователям. Задавай вопросы про стратегии, термины, интерфейс — отвечает Gemini 2.0 Flash.</span></div>' +
+          '<a class="chm-sup-btn-primary" href="index.html?login=1" style="text-decoration:none;text-align:center">Войти →</a>' +
+        '</div>';
+      return;
+    }
+    body.innerHTML =
+      '<div class="chm-ai-note">' +
+        'AI ассистент (beta) · Gemini · <span id="chmAiUsage">— / —</span>' +
+        '<br><span style="opacity:.65">Стратегии, термины, интерфейс — на русском. Не даёт financial advice. Не пересылай приватные данные в beta.</span>' +
+      '</div>' +
+      '<div class="chm-sup-msgs chm-ai-thread" id="chmAiThread"></div>' +
+      '<div class="chm-sup-compose">' +
+        '<div class="chm-sup-compose-row">' +
+          '<textarea id="chmAiText" placeholder="Что такое trailing stop?"></textarea>' +
+          '<button id="chmAiSend" class="chm-sup-send" aria-label="Отправить">' + SVG.send + '</button>' +
+        '</div>' +
+        '<div class="chm-sup-hint">⌘/Ctrl + Enter — отправить · ответ 2–5 сек</div>' +
+      '</div>';
+    var thread = document.getElementById('chmAiThread');
+    var textarea = document.getElementById('chmAiText');
+    var sendBtn = document.getElementById('chmAiSend');
+    var usageEl = document.getElementById('chmAiUsage');
+
+    // Render any existing in-memory history (persists within the session)
+    _aiHistory.forEach(function (m) { appendMsg(m.role, m.content); });
+    if (!_aiHistory.length) appendMsg('assistant',
+      'Привет! Я помогу разобраться с CHM Finance — стратегиями, сигналами, настройкой ботов. Что интересует?');
+
+    // Fetch usage once to show X / Y
+    fetch(API_BASE + '/ai/usage', { headers: authHeaders() })
+      .then(function (r) { return r.ok ? r.json() : null; })
+      .then(function (d) {
+        if (!d) return;
+        if (!d.enabled) {
+          usageEl.textContent = 'ключ не настроен';
+          sendBtn.disabled = true;
+          textarea.disabled = true;
+          textarea.placeholder = 'AI-ассистент не подключён. Свяжись с админом.';
+        } else {
+          usageEl.textContent = d.requestsToday + ' / ' + d.requestsLimit;
+        }
+      })
+      .catch(function () { usageEl.textContent = ''; });
+
+    function appendMsg(role, text) {
+      var el = document.createElement('div');
+      // Reuse existing .chm-sup-msg styles (me = orange bubble right,
+      // default = grey bubble left), just flip the semantics for AI:
+      // "me" = the user's message, "them" (no class) = AI reply.
+      el.className = 'chm-sup-msg' + (role === 'user' ? ' me' : '');
+      el.textContent = text;
+      thread.appendChild(el);
+      thread.scrollTop = thread.scrollHeight;
+      return el;
+    }
+
+    function send() {
+      var msg = (textarea.value || '').trim();
+      if (msg.length < 2) return;
+      textarea.value = '';
+      sendBtn.disabled = true;
+      appendMsg('user', msg);
+      _aiHistory.push({ role: 'user', content: msg });
+      var typingEl = appendMsg('assistant', '…');
+      typingEl.classList.add('chm-ai-typing');
+
+      fetch(API_BASE + '/ai/chat', {
+        method: 'POST',
+        headers: Object.assign({ 'Content-Type': 'application/json' }, authHeaders()),
+        body: JSON.stringify({ message: msg, history: _aiHistory.slice(-10) }),
+      }).then(function (r) {
+        return r.json().then(function (data) {
+          if (!r.ok) throw new Error(data && data.error || 'HTTP ' + r.status);
+          return data;
+        });
+      }).then(function (data) {
+        typingEl.classList.remove('chm-ai-typing');
+        typingEl.textContent = data.reply || '—';
+        _aiHistory.push({ role: 'assistant', content: data.reply });
+        if (data.usage) usageEl.textContent = data.usage.requestsToday + ' / ' + data.usage.requestsLimit;
+      }).catch(function (err) {
+        typingEl.classList.remove('chm-ai-typing');
+        typingEl.textContent = '⚠ ' + (err.message || 'Ошибка AI');
+        typingEl.style.color = '#C8A0A0';
+      }).finally(function () {
+        sendBtn.disabled = false;
+        textarea.focus();
+      });
+    }
+
+    sendBtn.addEventListener('click', send);
+    textarea.addEventListener('keydown', function (e) {
+      if ((e.metaKey || e.ctrlKey) && e.key === 'Enter') send();
+    });
+    textarea.focus();
+  }
+
+  // Helper: allow external callers (e.g. sidebar AI entry) to open the
+  // widget directly on the AI tab.
+  window.ChmSupport = {
+    open: function (tab) {
+      panel.classList.add('open');
+      var t = tab || 'home';
+      tabs.forEach(function (x) { x.classList.toggle('active', x.getAttribute('data-tab') === t); });
+      currentTab = t;
+      renderTab(t);
+    },
+    close: function () { panel.classList.remove('open'); },
+  };
 
 })();
