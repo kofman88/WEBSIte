@@ -393,6 +393,57 @@ img { max-width: 100%; display: block; }
 }
 html.light .sidebar-beta { background: rgba(255,90,31,.15); color: #C44610; }
 
+/* Topbar left-side sidebar collapse toggle. Desktop-only; mobile uses
+   the existing .lg:hidden #sidebar-toggle hamburger. */
+.shell-side-toggle {
+  width: 36px; height: 36px;
+  border-radius: 9px;
+  background: rgba(255,255,255,.04);
+  border: 1px solid rgba(255,255,255,.1);
+  color: rgba(255,255,255,.72);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: background .15s, color .15s, border-color .15s;
+  margin-right: 8px;
+  flex-shrink: 0;
+}
+.shell-side-toggle:hover {
+  background: rgba(255,140,90,.12);
+  border-color: rgba(255,90,31,.3);
+  color: #FF8C5A;
+}
+html.light .shell-side-toggle { background: rgba(0,0,0,.04); border-color: rgba(0,0,0,.1); color: rgba(10,10,10,.7); }
+html.light .shell-side-toggle:hover { background: rgba(255,90,31,.08); border-color: rgba(255,90,31,.3); color: #C44610; }
+@media (max-width: 1024px) {
+  /* Mobile: hide desktop toggle. The hamburger (#sidebar-toggle) already handles mobile open/close. */
+  .shell-side-toggle { display: none; }
+}
+
+/* Sidebar collapsed state — slim 64px icon rail. Text labels, promo,
+   footer extras, sub-badge collapse out. Topbar + main-content shift
+   to match the narrower sidebar. */
+.sidebar,
+.topbar,
+.main-content { transition: width .2s ease, left .2s ease, margin-left .2s ease, padding .2s ease; }
+
+body.sidebar-collapsed .sidebar { width: 64px; overflow: hidden; }
+body.sidebar-collapsed .sidebar-nav { padding: 8px 0; }
+body.sidebar-collapsed .sidebar-link { justify-content: center; padding: 12px 0; }
+body.sidebar-collapsed .sidebar-link > span,
+body.sidebar-collapsed .sidebar-beta,
+body.sidebar-collapsed .sidebar-promo,
+body.sidebar-collapsed .sidebar-footer-extras,
+body.sidebar-collapsed .sidebar-sub-badge,
+body.sidebar-collapsed .sidebar-logo { display: none !important; }
+body.sidebar-collapsed .sidebar-footer { padding: 10px 0; }
+body.sidebar-collapsed .sidebar-footer .sidebar-link { display: flex; }
+body.sidebar-collapsed .topbar { left: 64px; }
+body.sidebar-collapsed .main-content { margin-left: 64px; }
+/* Tooltips via title= attribute show the label on hover when collapsed */
+body.sidebar-collapsed .sidebar-link { position: relative; }
+
 /* Anti-flash: hide nav + topbar-actions + sidebar-footer until shell.js
    has injected its chrome. shell.js sets <html data-chrome-ready="1"> at
    end of boot(). Container (sidebar, topbar) stays visible so there's no
