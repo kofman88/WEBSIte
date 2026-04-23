@@ -34,13 +34,17 @@ function _hydrate(r) {
     rating: r.rating_cnt ? Math.round((r.rating_sum / r.rating_cnt) * 100) / 100 : null,
     ratingCount: r.rating_cnt || 0,
     isPublic: Boolean(r.is_public),
+    priceUsd: Number(r.price_usd) || 0,
+    platformFeePct: Number(r.platform_fee_pct) || 20,
     createdAt: r.created_at, updatedAt: r.updated_at,
   };
 }
 
-function publish(authorId, { title, description = '', strategy, timeframe = '1h', direction = 'both', config = {}, risk = {} } = {}) {
+function publish(authorId, { title, description = '', strategy, timeframe = '1h', direction = 'both', config = {}, risk = {}, priceUsd = 0 } = {}) {
   if (!title || title.length < 3) { const e = new Error('title ≥3'); e.statusCode = 400; throw e; }
   if (!strategy) { const e = new Error('strategy is required'); e.statusCode = 400; throw e; }
+  // Clamp price to sane range — prevents typos like $99999 in the UI.
+  const price = Math.max(0, Math.min(500, Number(priceUsd) || 0));
   // Plan gate: only paid users can publish (prevents spam)
   const plan = db.prepare(`SELECT plan FROM subscriptions WHERE user_id = ?`).get(authorId);
   if (!plan || plan.plan === 'free') {
@@ -53,10 +57,10 @@ function publish(authorId, { title, description = '', strategy, timeframe = '1h'
   }
   const info = db.prepare(`
     INSERT INTO published_strategies
-      (author_id, slug, title, description, strategy, timeframe, direction, config_json, risk_json)
-    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+      (author_id, slug, title, description, strategy, timeframe, direction, config_json, risk_json, price_usd)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
   `).run(authorId, slug, title, description, strategy, timeframe, direction,
-    JSON.stringify(config), JSON.stringify(risk));
+    JSON.stringify(config), JSON.stringify(risk), price);
   db.prepare(`
     INSERT INTO audit_log (user_id, action, entity_type, entity_id, metadata)
     VALUES (?, 'strategy.publish', 'strategy', ?, ?)
@@ -92,6 +96,19 @@ function install(userId, slug, { name = null, symbols = ['BTCUSDT'], tradingMode
   const st = db.prepare(`SELECT * FROM published_strategies WHERE slug = ? AND is_public = 1`).get(slug);
   if (!st) { const e = new Error('Strategy not found'); e.statusCode = 404; throw e; }
   if (st.author_id === userId) { const e = new Error('Cannot install your own strategy'); e.statusCode = 400; throw e; }
+
+  // Paid strategies require Stripe checkout. Wiring is not yet in place —
+  // return a 402 with code PAYMENT_REQUIRED so the frontend can show a
+  // "покупка скоро" hint. Free (price=0) installs flow through unchanged.
+  if (Number(st.price_usd || 0) > 0) {
+    const alreadyOwn = db.prepare(`
+      SELECT 1 FROM strategy_installs WHERE user_id = ? AND strategy_id = ? AND price_paid_usd > 0
+    `).get(userId, st.id);
+    if (!alreadyOwn) {
+      const e = new Error('Paid strategies are in private beta — purchase coming soon');
+      e.statusCode = 402; e.code = 'PAYMENT_REQUIRED'; throw e;
+    }
+  }
 
   const botName = name || st.title.slice(0, 48);
   const tx = db.transaction(() => {
@@ -146,4 +163,24 @@ function unpublish(userId, slug, { isAdmin = false } = {}) {
   return { unpublished: true };
 }
 
-module.exports = { publish, list, get, install, rate, unpublish };
+// Author earnings summary — used by Publisher dashboard (my-strategies tab).
+// Returns per-strategy earned + pending + paid totals so authors can see
+// what they're owed before the first Stripe payout flow lands.
+function earnings(authorId) {
+  const rows = db.prepare(`
+    SELECT s.id, s.slug, s.title, s.price_usd, s.installs,
+      COALESCE((SELECT SUM(amount_usd)       FROM strategy_earnings e WHERE e.strategy_id = s.id AND e.status = 'pending'), 0) AS pending_usd,
+      COALESCE((SELECT SUM(amount_usd)       FROM strategy_earnings e WHERE e.strategy_id = s.id AND e.status = 'paid'),    0) AS paid_usd,
+      COALESCE((SELECT SUM(platform_fee_usd) FROM strategy_earnings e WHERE e.strategy_id = s.id), 0) AS platform_fees_usd
+    FROM published_strategies s
+    WHERE s.author_id = ?
+    ORDER BY s.created_at DESC
+  `).all(authorId);
+  const totals = rows.reduce((acc, r) => {
+    acc.pending += r.pending_usd; acc.paid += r.paid_usd; acc.installs += r.installs;
+    return acc;
+  }, { pending: 0, paid: 0, installs: 0 });
+  return { strategies: rows, totals };
+}
+
+module.exports = { publish, list, get, install, rate, unpublish, earnings };

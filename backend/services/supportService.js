@@ -141,6 +141,25 @@ function hydrateList(r) {
   return { ...hydrate(r), messageCount: r.msg_count || 0 };
 }
 
+// ── Guest (unauthenticated) one-shot messages from the support widget.
+// Reply is out-of-band (email), not back through the widget.
+function guestContact({ email, body, ip = null, userAgent = null }) {
+  const e = String(email || '').trim().toLowerCase();
+  const b = String(body || '').trim();
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(e) || e.length > 254) {
+    const err = new Error('Valid email required'); err.statusCode = 400; throw err;
+  }
+  if (b.length < 5 || b.length > 10000) {
+    const err = new Error('Message must be 5–10 000 chars'); err.statusCode = 400; throw err;
+  }
+  const info = db.prepare(`
+    INSERT INTO support_guest_messages (email, body, ip, user_agent) VALUES (?, ?, ?, ?)
+  `).run(e, b, ip, userAgent);
+  logger.info('support guest message', { id: info.lastInsertRowid, email: e });
+  return { id: info.lastInsertRowid, status: 'received' };
+}
+
 module.exports = {
   create, reply, listForUser, getForUser, closeTicket, listAll,
+  guestContact,
 };

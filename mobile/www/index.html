@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"/>
+  <meta name="theme-color" content="#0A0A0A"/>
+  <title>CHM Finance</title>
+  <style>
+    html,body{margin:0;padding:0;background:#0A0A0A;color:#fff;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;height:100%;display:flex;align-items:center;justify-content:center;overflow:hidden}
+    .logo{font-size:44px;font-weight:600;letter-spacing:-0.025em;color:#fff}
+    .logo span{color:#FF5A1F}
+    .hint{margin-top:24px;font-size:13px;color:rgba(255,255,255,.5)}
+    .spinner{margin-top:18px;width:22px;height:22px;border-radius:50%;border:2px solid rgba(255,90,31,.2);border-top-color:#FF5A1F;animation:sp 0.9s linear infinite}
+    @keyframes sp{to{transform:rotate(360deg)}}
+  </style>
+</head>
+<body>
+  <div style="text-align:center">
+    <div class="logo">CHM<span>.</span></div>
+    <div class="spinner" style="margin:18px auto 0"></div>
+    <div class="hint">Загрузка CHM Finance…</div>
+  </div>
+  <script>
+    // Bundle-mode fallback: if Capacitor hasn't redirected us (WebView
+    // server.url mode should take over), kick the user to prod.
+    setTimeout(function () { location.href = 'https://chmup.top/'; }, 900);
+  </script>
+</body>
+</html>

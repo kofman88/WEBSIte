@@ -153,6 +153,35 @@ db.exec(`
   CREATE INDEX IF NOT EXISTS idx_tickets_user ON support_tickets(user_id, created_at DESC);
   CREATE INDEX IF NOT EXISTS idx_tickets_status ON support_tickets(status, updated_at DESC);
   CREATE INDEX IF NOT EXISTS idx_ticket_messages_ticket ON support_messages(ticket_id, created_at);
+
+  -- Per-user risk limits. One row per user, inserted lazily by
+  -- riskLimitsService.get() with defaults. Read on every auto-trade
+  -- execution to block runaway losses across all bots.
+  CREATE TABLE IF NOT EXISTS user_risk_limits (
+    user_id                INTEGER PRIMARY KEY,
+    kill_switch_enabled    INTEGER NOT NULL DEFAULT 0,  -- emergency stop: blocks ALL auto-trade
+    max_open_positions     INTEGER NOT NULL DEFAULT 20, -- global cap across all bots
+    max_daily_loss_pct     REAL    NOT NULL DEFAULT 5,  -- stop new entries if today realised loss ≥ X% of equity
+    blacklisted_symbols    TEXT    NOT NULL DEFAULT '[]', -- JSON array, exact symbol match
+    updated_at             DATETIME DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+  );
+
+  -- Guest (unauthenticated) support inquiries — one-shot messages from the
+  -- widget when no one is logged in. Reply goes to the provided email, not
+  -- back through the widget. Separate table to keep the FK-backed tickets
+  -- table clean (user_id is NOT NULL there).
+  CREATE TABLE IF NOT EXISTS support_guest_messages (
+    id           INTEGER PRIMARY KEY AUTOINCREMENT,
+    email        TEXT NOT NULL,
+    body         TEXT NOT NULL,
+    ip           TEXT,
+    user_agent   TEXT,
+    handled_at   DATETIME,
+    created_at   DATETIME DEFAULT CURRENT_TIMESTAMP
+  );
+  CREATE INDEX IF NOT EXISTS idx_guest_msgs_created ON support_guest_messages(created_at DESC);
+  CREATE INDEX IF NOT EXISTS idx_guest_msgs_unhandled ON support_guest_messages(handled_at) WHERE handled_at IS NULL;
 `);
 db.exec(`
   -- placeholder to keep the multi-statement block working

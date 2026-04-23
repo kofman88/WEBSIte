@@ -47,7 +47,19 @@ async function executeSignal(signal, bot, { exchangeService = null, marketData =
     return null;
   }
 
-  // 3. Max open trades check
+  // 2b. User-level risk limits — kill-switch / max-open-positions-global /
+  //     daily-loss / blacklisted-symbol. Guards runaway losses across all
+  //     bots an account owns.
+  try {
+    const riskLimits = require('./riskLimitsService');
+    const guard = riskLimits.canOpenTrade(bot.user_id, { symbol: signal.symbol });
+    if (!guard.allow) {
+      logger.warn('auto_trade blocked: risk limit', { userId: bot.user_id, botId: bot.id, ...guard });
+      return null;
+    }
+  } catch (e) { /* never break trading on a risk-check bug */ logger.warn('risk check error', { err: e.message }); }
+
+  // 3. Max open trades check (per-bot)
   const openCount = db.prepare(`
     SELECT COUNT(*) as n FROM trades WHERE bot_id = ? AND status = 'open'
   `).get(bot.id).n;

@@ -1,0 +1,405 @@
+<!DOCTYPE html>
+<html lang="ru" class="aura-page">
+<head>
+  <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+  <title>CHM Finance — SmartTrade Terminal</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&family=JetBrains+Mono:wght@500&display=swap" rel="stylesheet"/>
+  <link rel="stylesheet" href="tailwind.css"/>
+  <link rel="stylesheet" href="styles.css"/>
+  <link rel="stylesheet" href="aura-theme.css"/>
+  <style>
+    .term-grid{display:grid;grid-template-columns:1.2fr .9fr;gap:20px;align-items:start}
+    @media(max-width:960px){.term-grid{grid-template-columns:1fr}}
+    .term-label{display:block;font-family:'Inter',sans-serif;font-weight:500;font-size:11px;line-height:14px;letter-spacing:.12em;text-transform:uppercase;color:rgba(255,255,255,.48);margin-bottom:6px}
+    html.light .term-label{color:rgba(10,10,10,.48)}
+    .term-input{width:100%;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);border-radius:10px;padding:12px 14px;color:#fff;font-family:'Inter',sans-serif;font-weight:500;font-size:14px;outline:none;transition:border-color .15s,background .15s}
+    .term-input:focus{border-color:#FF5A1F;background:rgba(255,255,255,.07)}
+    html.light .term-input{background:rgba(0,0,0,.04);border-color:rgba(0,0,0,.1);color:#0A0A0A}
+    html.light .term-input:focus{background:rgba(0,0,0,.06);border-color:#FF5A1F}
+    .term-input.mono{font-family:'JetBrains Mono',monospace;font-variant-numeric:tabular-nums}
+    .term-group{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px}
+    @media(max-width:480px){.term-group{grid-template-columns:1fr 1fr}}
+
+    .side-toggle{display:grid;grid-template-columns:1fr 1fr;gap:0;border-radius:12px;overflow:hidden;border:1px solid rgba(255,255,255,.08)}
+    .side-btn{padding:14px;border:0;cursor:pointer;background:rgba(255,255,255,.02);color:rgba(255,255,255,.6);font-family:'Inter',sans-serif;font-weight:600;font-size:14px;letter-spacing:.04em;transition:all .15s}
+    .side-btn:hover{background:rgba(255,255,255,.06);color:#fff}
+    .side-btn.active.long{background:linear-gradient(180deg,rgba(102,135,110,.28),rgba(43,89,54,.2));color:#8FBF95;box-shadow:inset 0 -2px 0 #66876E}
+    .side-btn.active.short{background:linear-gradient(180deg,rgba(130,98,98,.28),rgba(82,37,37,.2));color:#C8A0A0;box-shadow:inset 0 -2px 0 #826262}
+    html.light .side-btn{background:rgba(0,0,0,.02);color:rgba(0,0,0,.55)}
+    html.light .side-btn:hover{background:rgba(0,0,0,.05);color:#0A0A0A}
+
+    .mode-toggle{display:inline-flex;gap:6px;padding:4px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);border-radius:10px}
+    .mode-btn{padding:6px 14px;border:0;background:transparent;cursor:pointer;color:rgba(255,255,255,.6);font-size:12px;font-weight:600;letter-spacing:.02em;border-radius:7px;transition:all .15s}
+    .mode-btn.active{background:rgba(255,90,31,.18);color:#FF8C5A}
+    .mode-btn:not(.active):hover{color:#fff}
+    html.light .mode-toggle{background:rgba(0,0,0,.04);border-color:rgba(0,0,0,.1)}
+    html.light .mode-btn{color:rgba(0,0,0,.55)}
+    html.light .mode-btn:not(.active):hover{color:#0A0A0A}
+
+    .preview-card{
+      padding:18px;border-radius:14px;
+      background:linear-gradient(180deg,rgba(255,90,31,.06),rgba(255,255,255,.02));
+      border:1px solid rgba(255,90,31,.18);
+      box-shadow:inset 0 1px 0 rgba(255,255,255,.04)
+    }
+    html.light .preview-card{background:linear-gradient(180deg,rgba(255,90,31,.06),rgba(0,0,0,.02));border-color:rgba(255,90,31,.25)}
+    .preview-row{display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px dashed rgba(255,255,255,.08);font-size:13px}
+    .preview-row:last-child{border-bottom:0}
+    html.light .preview-row{border-bottom-color:rgba(0,0,0,.08)}
+    .preview-row .k{color:rgba(255,255,255,.55);font-size:12px;letter-spacing:.04em}
+    html.light .preview-row .k{color:rgba(0,0,0,.55)}
+    .preview-row .v{font-family:'JetBrains Mono',monospace;font-variant-numeric:tabular-nums;font-weight:600}
+    .preview-row .v.pos{color:#8FBF95}
+    .preview-row .v.neg{color:#C8A0A0}
+
+    .submit-btn{
+      width:100%;padding:16px;border:0;cursor:pointer;
+      background:linear-gradient(180deg,#FF7840 0%,#FF5A1F 60%,#C44610 100%);
+      color:#fff;font-family:'Inter',sans-serif;font-weight:600;font-size:15px;letter-spacing:.02em;
+      border-radius:12px;
+      box-shadow:inset 0 1px 1px rgba(255,255,255,.28),inset 0 -1px 3px rgba(0,0,0,.3),0 4px 10px -2px rgba(255,90,31,.45);
+      transition:transform .15s,filter .15s
+    }
+    .submit-btn:hover:not(:disabled){transform:translateY(-1px);filter:brightness(1.08)}
+    .submit-btn:disabled{opacity:.45;cursor:not-allowed;filter:grayscale(.3)}
+
+    .help-hint{font-size:11px;color:rgba(255,255,255,.42);line-height:1.5;margin-top:6px}
+    html.light .help-hint{color:rgba(0,0,0,.5)}
+
+    .sym-chip{display:inline-block;padding:5px 10px;border-radius:999px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);color:rgba(255,255,255,.7);font-family:'JetBrains Mono',monospace;font-size:11px;cursor:pointer;margin:3px;transition:all .15s}
+    .sym-chip:hover{background:rgba(255,90,31,.15);border-color:rgba(255,90,31,.4);color:#FF8C5A}
+    html.light .sym-chip{background:rgba(0,0,0,.04);border-color:rgba(0,0,0,.1);color:rgba(0,0,0,.7)}
+    html.light .sym-chip:hover{background:rgba(255,90,31,.1);color:#FF5A1F}
+  </style>
+</head>
+<body>
+<aside class="sidebar" id="sidebar">
+  <div class="sidebar-logo">CHM<span>.</span></div>
+  <nav class="sidebar-nav">
+    <a href="dashboard.html" class="sidebar-link" data-page="dashboard"><svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>Дашборд</a>
+    <a href="bots.html" class="sidebar-link" data-page="bots"><svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2a4 4 0 014 4v1h2a2 2 0 012 2v10a2 2 0 01-2 2H6a2 2 0 01-2-2V9a2 2 0 012-2h2V6a4 4 0 014-4z"/></svg>Боты</a>
+    <a href="terminal.html" class="sidebar-link active" data-page="terminal"><svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 3h18v18H3z"/><path d="M7 8l3 3-3 3M12 15h5"/></svg>Terminal</a>
+    <a href="signals.html" class="sidebar-link" data-page="signals"><svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>Сигналы</a>
+    <a href="analytics.html" class="sidebar-link" data-page="analytics"><svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 3v18h18"/><path d="M7 14l4-4 4 4 5-5"/></svg>Аналитика</a>
+    <a href="backtests.html" class="sidebar-link" data-page="backtests"><svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6m6 0h10"/></svg>Бэктесты</a>
+    <a href="wallet.html" class="sidebar-link" data-page="wallet"><svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12V7H5a2 2 0 010-4h14v4M3 5v14a2 2 0 002 2h16v-5"/></svg>Кошелёк</a>
+    <a href="leaderboard.html" class="sidebar-link" data-page="leaderboard"><svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>Leaderboard</a>
+    <a href="settings.html" class="sidebar-link" data-page="settings"><svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/></svg>Настройки</a>
+  </nav>
+  <div class="sidebar-footer"><button onclick="Auth.logout()" class="sidebar-link" style="color:#C8B9B9"><svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4M16 17l5-5-5-5M21 12H9"/></svg>Выйти</button></div>
+</aside>
+<header class="topbar">
+  <div class="flex items-center gap-4">
+    <button id="sidebar-toggle" class="lg:hidden" aria-label="Toggle menu" style="background:none;border:none;color:rgba(255,255,255,.62);cursor:pointer">
+      <svg aria-hidden="true" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 6h16M4 12h16M4 18h16"/></svg>
+    </button>
+    <h1 class="text-xl font-bold">SmartTrade Terminal</h1>
+    <span class="text-xs ml-3 px-2 py-1 rounded" id="termModeBadge" style="background:rgba(255,90,31,.15);color:#FF8C5A;letter-spacing:.04em">PAPER</span>
+  </div>
+  <div class="topbar-actions">
+    <button id="shellLang" type="button" class="shell-topbar-btn" title="Language">EN</button>
+    <button id="shellTheme" type="button" class="shell-topbar-btn" title="Toggle theme" aria-label="Toggle theme"></button>
+    <div class="topbar-user"><div class="topbar-avatar">U</div></div>
+  </div>
+</header>
+
+<main class="main-content">
+  <div style="margin-bottom:18px">
+    <p class="text-sm" style="color:rgba(255,255,255,.68);max-width:720px">
+      Ручной вход в сделку с автоматическим сопровождением: SL обязателен, TP1-TP3 необязательны.
+      Paper-режим пишет сделку локально (без касания биржи). Live — отправит ордер на указанную биржу (скоро).
+    </p>
+  </div>
+
+  <div class="term-grid">
+    <!-- LEFT — form -->
+    <div class="card">
+      <form id="termForm" novalidate>
+        <!-- Mode + exchange -->
+        <div class="flex items-center justify-between mb-5" style="gap:14px;flex-wrap:wrap">
+          <div class="mode-toggle" role="radiogroup" aria-label="Режим">
+            <button type="button" class="mode-btn active" data-mode="paper">Paper</button>
+            <button type="button" class="mode-btn" data-mode="live" title="Скоро">Live</button>
+          </div>
+          <div style="flex:1;min-width:240px">
+            <label class="term-label" for="termExchange">Биржа</label>
+            <select class="term-input" id="termExchange" required>
+              <option value="">— Выберите —</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Symbol -->
+        <div class="mb-4">
+          <label class="term-label" for="termSymbol">Инструмент</label>
+          <input class="term-input mono" id="termSymbol" type="text" placeholder="BTC/USDT" autocomplete="off" required/>
+          <div id="termSymbolChips" style="margin-top:6px">
+            <span class="sym-chip" data-sym="BTC/USDT">BTC/USDT</span>
+            <span class="sym-chip" data-sym="ETH/USDT">ETH/USDT</span>
+            <span class="sym-chip" data-sym="SOL/USDT">SOL/USDT</span>
+            <span class="sym-chip" data-sym="BNB/USDT">BNB/USDT</span>
+            <span class="sym-chip" data-sym="XRP/USDT">XRP/USDT</span>
+          </div>
+        </div>
+
+        <!-- Side -->
+        <div class="mb-4">
+          <label class="term-label">Направление</label>
+          <div class="side-toggle">
+            <button type="button" class="side-btn active long" data-side="long">LONG</button>
+            <button type="button" class="side-btn short" data-side="short">SHORT</button>
+          </div>
+        </div>
+
+        <!-- Entry / Quantity / Leverage -->
+        <div class="term-group mb-4">
+          <div>
+            <label class="term-label" for="termEntry">Entry</label>
+            <input class="term-input mono" id="termEntry" type="number" step="0.00000001" required placeholder="50000"/>
+          </div>
+          <div>
+            <label class="term-label" for="termQty">Объём</label>
+            <input class="term-input mono" id="termQty" type="number" step="0.00001" required placeholder="0.01"/>
+          </div>
+          <div>
+            <label class="term-label" for="termLev">Плечо ×</label>
+            <input class="term-input mono" id="termLev" type="number" min="1" max="125" value="1"/>
+          </div>
+        </div>
+
+        <!-- SL / TPs -->
+        <div class="mb-4">
+          <label class="term-label">Stop Loss <span style="color:#C8A0A0">*</span> — обязательно</label>
+          <input class="term-input mono" id="termSl" type="number" step="0.00000001" required placeholder="49000"/>
+        </div>
+
+        <div class="term-group mb-4">
+          <div>
+            <label class="term-label" for="termTp1">TP1</label>
+            <input class="term-input mono" id="termTp1" type="number" step="0.00000001" placeholder="51000"/>
+          </div>
+          <div>
+            <label class="term-label" for="termTp2">TP2</label>
+            <input class="term-input mono" id="termTp2" type="number" step="0.00000001" placeholder="52000"/>
+          </div>
+          <div>
+            <label class="term-label" for="termTp3">TP3</label>
+            <input class="term-input mono" id="termTp3" type="number" step="0.00000001" placeholder="53000"/>
+          </div>
+        </div>
+
+        <div class="mb-5">
+          <label class="term-label" for="termNote">Комментарий (опционально)</label>
+          <input class="term-input" id="termNote" maxlength="2000" placeholder="Причина входа, тейк-план…"/>
+        </div>
+
+        <button type="submit" class="submit-btn" id="termSubmit">Открыть сделку</button>
+        <div class="help-hint">
+          ⚠️ Сейчас Live-режим в разработке — все сделки пишутся как paper. Автоматическое закрытие по SL/TP работает через PartialTP-сервис.
+        </div>
+      </form>
+    </div>
+
+    <!-- RIGHT — preview -->
+    <div class="card preview-card">
+      <div class="t-eyebrow mb-3" style="color:#FF8C5A">Превью сделки</div>
+      <div class="preview-row"><span class="k">Направление</span><span class="v" id="pvSide">—</span></div>
+      <div class="preview-row"><span class="k">Размер позиции</span><span class="v" id="pvSize">—</span></div>
+      <div class="preview-row"><span class="k">Риск (SL)</span><span class="v neg" id="pvRisk">—</span></div>
+      <div class="preview-row"><span class="k">TP1 потенциал</span><span class="v pos" id="pvTp1">—</span></div>
+      <div class="preview-row"><span class="k">TP2 потенциал</span><span class="v pos" id="pvTp2">—</span></div>
+      <div class="preview-row"><span class="k">TP3 потенциал</span><span class="v pos" id="pvTp3">—</span></div>
+      <div class="preview-row"><span class="k">R:R (best)</span><span class="v" id="pvRr">—</span></div>
+      <div class="preview-row"><span class="k">Режим</span><span class="v" id="pvMode">PAPER</span></div>
+      <div style="margin-top:14px;padding:12px;background:rgba(0,0,0,.22);border-radius:10px;font-size:11px;color:rgba(255,255,255,.55);line-height:1.55">
+        Превью рассчитано по введённым ценам. Реальная сделка исполняется по рынку — проскальзывание возможно.
+      </div>
+    </div>
+  </div>
+</main>
+
+<script src="app.js"></script>
+<script src="shell.js"></script>
+<script>
+(function () {
+  'use strict';
+  if (!Auth.isLoggedIn()) { location.href = 'index.html?login'; return; }
+
+  // ── State ──────────────────────────────────────────────────────────
+  var state = {
+    mode: 'paper',
+    side: 'long',
+    exchangeKeyId: null,
+    exchange: null,
+    symbol: '',
+    entry: 0, qty: 0, lev: 1,
+    sl: 0, tp1: 0, tp2: 0, tp3: 0,
+  };
+
+  // ── Wire DOM ───────────────────────────────────────────────────────
+  var form    = document.getElementById('termForm');
+  var exSel   = document.getElementById('termExchange');
+  var symIn   = document.getElementById('termSymbol');
+  var entryIn = document.getElementById('termEntry');
+  var qtyIn   = document.getElementById('termQty');
+  var levIn   = document.getElementById('termLev');
+  var slIn    = document.getElementById('termSl');
+  var tp1In   = document.getElementById('termTp1');
+  var tp2In   = document.getElementById('termTp2');
+  var tp3In   = document.getElementById('termTp3');
+  var noteIn  = document.getElementById('termNote');
+  var submitBtn = document.getElementById('termSubmit');
+
+  document.querySelectorAll('.mode-btn').forEach(function (b) {
+    b.addEventListener('click', function () {
+      if (b.getAttribute('data-mode') === 'live') {
+        Toast.info('Live-режим в разработке — использую paper');
+        return;
+      }
+      document.querySelectorAll('.mode-btn').forEach(function (x) { x.classList.remove('active'); });
+      b.classList.add('active');
+      state.mode = b.getAttribute('data-mode');
+      document.getElementById('termModeBadge').textContent = state.mode.toUpperCase();
+      document.getElementById('pvMode').textContent = state.mode.toUpperCase();
+    });
+  });
+  document.querySelectorAll('.side-btn').forEach(function (b) {
+    b.addEventListener('click', function () {
+      document.querySelectorAll('.side-btn').forEach(function (x) { x.classList.remove('active'); });
+      b.classList.add('active');
+      state.side = b.getAttribute('data-side');
+      refresh();
+    });
+  });
+  document.querySelectorAll('.sym-chip').forEach(function (c) {
+    c.addEventListener('click', function () {
+      symIn.value = c.getAttribute('data-sym');
+      symIn.dispatchEvent(new Event('input'));
+    });
+  });
+
+  [symIn, entryIn, qtyIn, levIn, slIn, tp1In, tp2In, tp3In].forEach(function (el) {
+    el.addEventListener('input', refresh);
+  });
+  exSel.addEventListener('change', function () {
+    var opt = exSel.options[exSel.selectedIndex];
+    state.exchangeKeyId = opt && opt.dataset.keyid ? Number(opt.dataset.keyid) : null;
+    state.exchange = opt && opt.value || null;
+    refresh();
+  });
+
+  // ── Load user exchange keys ─────────────────────────────────────────
+  API.listKeys().then(function (res) {
+    var keys = (res && res.keys) || [];
+    if (keys.length === 0) {
+      exSel.innerHTML = '<option value="">— Нет подключенных бирж —</option>';
+      var opt = document.createElement('option');
+      opt.value = 'bybit'; opt.textContent = 'Bybit (paper only)';
+      exSel.appendChild(opt);
+      exSel.selectedIndex = 1;
+      state.exchange = 'bybit';
+    } else {
+      exSel.innerHTML = '<option value="">— Выберите биржу —</option>' + keys.map(function (k) {
+        return '<option value="' + k.exchange + '" data-keyid="' + k.id + '">' +
+          k.exchange.toUpperCase() + (k.label ? ' · ' + k.label : '') +
+          (k.testnet ? ' (testnet)' : '') + '</option>';
+      }).join('');
+    }
+  }).catch(function () {
+    exSel.innerHTML = '<option value="bybit">Bybit (paper only)</option>';
+    state.exchange = 'bybit';
+  });
+
+  // ── Preview calc ───────────────────────────────────────────────────
+  function fmt(n, d) {
+    if (!Number.isFinite(n)) return '—';
+    return Number(n.toFixed(d != null ? d : 2)).toLocaleString('ru-RU');
+  }
+
+  function refresh() {
+    state.symbol = (symIn.value || '').trim().toUpperCase();
+    state.entry = parseFloat(entryIn.value) || 0;
+    state.qty   = parseFloat(qtyIn.value) || 0;
+    state.lev   = Math.max(1, parseInt(levIn.value, 10) || 1);
+    state.sl    = parseFloat(slIn.value) || 0;
+    state.tp1   = parseFloat(tp1In.value) || 0;
+    state.tp2   = parseFloat(tp2In.value) || 0;
+    state.tp3   = parseFloat(tp3In.value) || 0;
+
+    var dir = state.side === 'long' ? 1 : -1;
+    var e = state.entry, q = state.qty;
+    var notional = e * q;
+
+    document.getElementById('pvSide').textContent = state.side.toUpperCase();
+    document.getElementById('pvSide').className = 'v ' + (state.side === 'long' ? 'pos' : 'neg');
+    document.getElementById('pvSize').textContent = e && q ? (fmt(notional, 2) + ' USDT · ' + fmt(q, 6) + ' ' + (state.symbol.split(/[/-]/)[0] || '')) : '—';
+
+    var risk = (e && state.sl) ? Math.abs(e - state.sl) * q : 0;
+    document.getElementById('pvRisk').textContent = risk ? ('-' + fmt(risk, 2) + ' USDT') : '—';
+
+    function tpPnl(tp) {
+      if (!e || !tp || !q) return null;
+      return (tp - e) * dir * q;
+    }
+    var t1 = tpPnl(state.tp1), t2 = tpPnl(state.tp2), t3 = tpPnl(state.tp3);
+    document.getElementById('pvTp1').textContent = t1 != null ? ('+' + fmt(t1, 2) + ' USDT') : '—';
+    document.getElementById('pvTp2').textContent = t2 != null ? ('+' + fmt(t2, 2) + ' USDT') : '—';
+    document.getElementById('pvTp3').textContent = t3 != null ? ('+' + fmt(t3, 2) + ' USDT') : '—';
+
+    var bestTp = Math.max(state.tp1 || 0, state.tp2 || 0, state.tp3 || 0);
+    var reward = bestTp ? Math.abs(bestTp - e) : 0;
+    var loss = state.sl ? Math.abs(e - state.sl) : 0;
+    var rr = loss > 0 ? (reward / loss) : 0;
+    var rrEl = document.getElementById('pvRr');
+    rrEl.textContent = rr ? rr.toFixed(2) + ' R' : '—';
+    rrEl.className = 'v ' + (rr >= 2 ? 'pos' : rr >= 1 ? '' : 'neg');
+
+    // Enable submit when valid
+    var valid =
+      state.symbol.length >= 3 &&
+      state.entry > 0 && state.qty > 0 && state.sl > 0 &&
+      (state.side === 'long' ? state.sl < state.entry : state.sl > state.entry);
+    submitBtn.disabled = !valid;
+  }
+  refresh();
+
+  // ── Submit ─────────────────────────────────────────────────────────
+  form.addEventListener('submit', function (e) {
+    e.preventDefault();
+    if (submitBtn.disabled) return;
+
+    var payload = {
+      exchange: state.exchange || 'bybit',
+      symbol: state.symbol,
+      side: state.side,
+      quantity: state.qty,
+      entryPrice: state.entry,
+      stopLoss: state.sl,
+      leverage: state.lev,
+      tradingMode: state.mode,
+    };
+    if (state.exchangeKeyId) payload.exchangeKeyId = state.exchangeKeyId;
+    if (state.tp1) payload.takeProfit1 = state.tp1;
+    if (state.tp2) payload.takeProfit2 = state.tp2;
+    if (state.tp3) payload.takeProfit3 = state.tp3;
+    if ((noteIn.value || '').trim()) payload.note = noteIn.value.trim();
+
+    submitBtn.disabled = true;
+    submitBtn.textContent = 'Открываем…';
+    API.manualTrade(payload).then(function (r) {
+      Toast.success('Сделка открыта #' + r.id + ' (' + state.mode + ')');
+      setTimeout(function () { location.href = 'dashboard.html?trade=' + r.id; }, 900);
+    }).catch(function (err) {
+      submitBtn.disabled = false;
+      submitBtn.textContent = 'Открыть сделку';
+      Toast.error(err.message || 'Ошибка при открытии сделки');
+    });
+  });
+})();
+</script>
+<script src="support-widget.js" defer></script>
+</body>
+</html>

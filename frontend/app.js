@@ -322,6 +322,13 @@ const API = {
   manualTrade: (payload) => apiRequest('POST', '/bots/manual-trade', payload),
   getTvWebhook: (botId) => apiRequest('GET', '/bots/' + botId + '/tv-webhook'),
   rotateTvWebhook: (botId) => apiRequest('POST', '/bots/' + botId + '/tv-webhook/rotate'),
+  // Risk Manager
+  getRiskLimits: () => apiRequest('GET', '/risk/limits'),
+  setRiskLimits: (patch) => apiRequest('PATCH', '/risk/limits', patch),
+  // Copy Trading
+  copyListFollowing: () => apiRequest('GET', '/copy/following'),
+  copySubscribe: (payload) => apiRequest('POST', '/copy/subscribe', payload),
+  copyUnsubscribe: (leaderId) => apiRequest('POST', '/copy/unsubscribe', { leaderId }),
 
   // Community / public
   leaderboard: (opts = {}) => apiRequest('GET', '/public/leaderboard?' + qs(opts), null, { skipAuth: true }),

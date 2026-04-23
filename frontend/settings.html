@@ -38,6 +38,7 @@
     <button class="stab active" onclick="stab('profile')">Профиль</button>
     <button class="stab" onclick="stab('subscription')">Подписка</button>
     <button class="stab" onclick="stab('trading')">Торговля</button>
+    <button class="stab" onclick="stab('risk')">Риск</button>
     <button class="stab" onclick="stab('notifications')">Уведомления</button>
     <button class="stab" onclick="stab('security')">Безопасность</button>
     <button class="stab" onclick="stab('community')">Сообщество</button>
@@ -117,6 +118,52 @@
         <div class="flex items-center justify-between p-3 bg-slate-800/30 rounded-xl"><span class="text-sm">Trailing Stop по умолчанию</span><div class="toggle on" onclick="this.classList.toggle('on')"></div></div>
         <button type="button" onclick="Toast.success('Настройки сохранены')" class="px-6 py-2.5 rounded-xl font-semibold text-white text-sm" style="background:linear-gradient(180deg,#FF7840 0%,#FF5A1F 60%,#C44610 100%);box-shadow:inset 0 1px 1px rgba(255,255,255,.28),inset 0 -1px 3px rgba(0,0,0,.6),0 4px 8px -2px rgba(0,0,0,.6),0 0 0 1px rgba(255,90,31,.35)">Сохранить</button>
       </form>
+    </div>
+  </div>
+
+  <!-- RISK MANAGER -->
+  <div class="stab-content" id="stab-risk">
+    <div class="card max-w-2xl mb-6">
+      <div class="flex items-start justify-between mb-4">
+        <div>
+          <h3 class="font-bold mb-1">Kill Switch</h3>
+          <div class="text-sm text-slate-400">Аварийная кнопка: блокирует всю авто-торговлю по всем ботам. Открытые позиции не закрываются — новые не открываются.</div>
+        </div>
+        <div class="toggle" id="rkKill" onclick="this.classList.toggle('on');rkDirty()"></div>
+      </div>
+      <div id="rkKillState" class="text-xs px-3 py-2 rounded-lg" style="background:rgba(255,140,90,.08);color:#FF8C5A;display:none">⚠️ Авто-торговля отключена пользователем</div>
+    </div>
+
+    <div class="card max-w-2xl mb-6">
+      <h3 class="font-bold mb-4">Лимиты</h3>
+      <form class="space-y-4" onsubmit="return false">
+        <div>
+          <label class="text-sm text-slate-400 block mb-1">Максимум открытых позиций (глобально)</label>
+          <input id="rkMaxOpen" type="number" min="1" max="500" value="20" class="w-full bg-slate-800/50 border border-slate-700 rounded-xl px-4 py-3 text-white outline-none" oninput="rkDirty()"/>
+          <div class="text-xs text-slate-500 mt-1">Общий лимит по всем ботам сразу — чтобы сигнал-бомба не открыла 200 сделок одновременно.</div>
+        </div>
+        <div>
+          <label class="text-sm text-slate-400 block mb-1">Дневной лимит убытка, %</label>
+          <input id="rkMaxLoss" type="number" min="0.1" max="50" step="0.1" value="5" class="w-full bg-slate-800/50 border border-slate-700 rounded-xl px-4 py-3 text-white outline-none" oninput="rkDirty()"/>
+          <div class="text-xs text-slate-500 mt-1">Сумма % PnL по закрытым за 24ч сделкам. При достижении новые сделки блокируются до следующего дня.</div>
+        </div>
+        <div>
+          <label class="text-sm text-slate-400 block mb-1">Чёрный список символов (через запятую)</label>
+          <input id="rkBlacklist" type="text" placeholder="DOGEUSDT, PEPEUSDT" class="w-full bg-slate-800/50 border border-slate-700 rounded-xl px-4 py-3 text-white outline-none" oninput="rkDirty()"/>
+          <div class="text-xs text-slate-500 mt-1">Точное совпадение — бот не откроет сделку на этих парах, даже если сигнал есть.</div>
+        </div>
+        <button type="button" id="rkSaveBtn" class="px-6 py-2.5 rounded-xl font-semibold text-white text-sm" style="background:linear-gradient(180deg,#FF7840 0%,#FF5A1F 60%,#C44610 100%);box-shadow:inset 0 1px 1px rgba(255,255,255,.28),inset 0 -1px 3px rgba(0,0,0,.6),0 4px 8px -2px rgba(0,0,0,.6),0 0 0 1px rgba(255,90,31,.35)">Сохранить</button>
+      </form>
+    </div>
+
+    <div class="card max-w-2xl">
+      <h3 class="font-bold mb-2">Как это работает</h3>
+      <ul class="text-sm text-slate-400 space-y-2 list-disc list-inside">
+        <li>Проверка выполняется перед каждым новым auto-trade (до отправки ордера на биржу).</li>
+        <li>Закрытие позиций по SL/TP не затрагивается — только блокируется открытие новых.</li>
+        <li>Ручные сделки через SmartTrade Terminal под лимиты НЕ подпадают.</li>
+        <li>Если хочешь временно снять лимит — отключи, сохрани, через полдня можно вернуть.</li>
+      </ul>
     </div>
   </div>
 
@@ -1079,8 +1126,46 @@ document.addEventListener('DOMContentLoaded', () => {
     origStab && origStab(t, ev);
     if(t==='community') loadPublicState();
     if(t==='support') loadTickets();
+    if(t==='risk') loadRisk();
   };
 });
+
+// ── Risk Manager ────────────────────────────────────────────────────
+let _rkLoaded = false;
+function rkDirty(){
+  const b = document.getElementById('rkSaveBtn'); if (b) b.classList.add('dirty');
+}
+async function loadRisk(){
+  if (_rkLoaded) return;
+  try {
+    const r = await API.getRiskLimits();
+    document.getElementById('rkKill').classList.toggle('on', !!r.killSwitchEnabled);
+    document.getElementById('rkKillState').style.display = r.killSwitchEnabled ? 'block' : 'none';
+    document.getElementById('rkMaxOpen').value = r.maxOpenPositions;
+    document.getElementById('rkMaxLoss').value = r.maxDailyLossPct;
+    document.getElementById('rkBlacklist').value = (r.blacklistedSymbols || []).join(', ');
+    _rkLoaded = true;
+  } catch (e) { Toast.error('Не удалось загрузить риск-лимиты: ' + e.message); }
+}
+document.getElementById('rkKill')?.addEventListener('click', () => {
+  const on = document.getElementById('rkKill').classList.contains('on');
+  document.getElementById('rkKillState').style.display = on ? 'block' : 'none';
+});
+document.getElementById('rkSaveBtn')?.addEventListener('click', async () => {
+  const on = document.getElementById('rkKill').classList.contains('on');
+  const maxOpen = parseInt(document.getElementById('rkMaxOpen').value, 10);
+  const maxLoss = parseFloat(document.getElementById('rkMaxLoss').value);
+  const bl = (document.getElementById('rkBlacklist').value || '')
+    .split(',').map(s => s.trim().toUpperCase()).filter(Boolean);
+  if (!Number.isFinite(maxOpen) || maxOpen < 1 || maxOpen > 500) return Toast.error('Max open: 1–500');
+  if (!Number.isFinite(maxLoss) || maxLoss < 0.1 || maxLoss > 50)  return Toast.error('Max loss: 0.1–50%');
+  try {
+    await API.setRiskLimits({ killSwitchEnabled: on, maxOpenPositions: maxOpen, maxDailyLossPct: maxLoss, blacklistedSymbols: bl });
+    Toast.success('Лимиты сохранены');
+    document.getElementById('rkSaveBtn').classList.remove('dirty');
+  } catch (e) { Toast.error(e.message); }
+});
 </script>
+<script src="support-widget.js" defer></script>
 </body>
 </html>
