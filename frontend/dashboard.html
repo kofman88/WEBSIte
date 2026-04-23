@@ -91,6 +91,99 @@
     </div>
   </div>
 
+  <!-- ── Onboarding checklist (4 steps, 3Commas-style) ────────────────────
+       Shows until all 4 steps are done OR user dismisses it. Each card has
+       an icon (completed state = ✓ in green pill, pending = outline icon),
+       title, 1-2 line description, CTA button. Keyboard-accessible. -->
+  <section id="obHero" class="ob-hero" hidden>
+    <div class="ob-head">
+      <div>
+        <div class="ob-eyebrow">НАЧАЛО РАБОТЫ · <span id="obProgress">0 из 4</span></div>
+        <h2 class="ob-title">Первые шаги в CHM Finance</h2>
+      </div>
+      <button class="ob-dismiss" id="obDismissBtn" title="Скрыть" aria-label="Скрыть шаги" type="button">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6L6 18M6 6l12 12"/></svg>
+      </button>
+    </div>
+    <div class="ob-grid">
+      <div class="ob-card" data-ob-step="register">
+        <div class="ob-ic ob-ic-done"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg></div>
+        <div class="ob-card-title">Регистрация</div>
+        <div class="ob-card-desc">Аккаунт создан — добро пожаловать.</div>
+        <div class="ob-card-status ob-done">Готово</div>
+      </div>
+      <div class="ob-card" data-ob-step="email">
+        <div class="ob-ic"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg></div>
+        <div class="ob-card-title">Подтверди email</div>
+        <div class="ob-card-desc">Защита аккаунта + доступ к payouts и торговле реальными деньгами.</div>
+        <button class="ob-cta" onclick="location.href='settings.html'" type="button">Перейти к подтверждению →</button>
+      </div>
+      <div class="ob-card" data-ob-step="exchange">
+        <div class="ob-ic"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10 13a5 5 0 007.54.54l3-3a5 5 0 00-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 00-7.54-.54l-3 3a5 5 0 007.07 7.07l1.71-1.71"/></svg></div>
+        <div class="ob-card-title">Подключи биржу</div>
+        <div class="ob-card-desc">API-ключ с read-only + trade permission. 8 бирж: Bybit, Binance, OKX и другие.</div>
+        <button class="ob-cta" onclick="location.href='wallet.html'" type="button">Добавить ключ →</button>
+      </div>
+      <div class="ob-card" data-ob-step="bot">
+        <div class="ob-ic"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2a4 4 0 014 4v1h2a2 2 0 012 2v10a2 2 0 01-2 2H6a2 2 0 01-2-2V9a2 2 0 012-2h2V6a4 4 0 014-4z"/></svg></div>
+        <div class="ob-card-title">Создай первого бота</div>
+        <div class="ob-card-desc">Paper-режим для безопасного старта. Шаблоны стратегий в маркетплейсе.</div>
+        <button class="ob-cta" onclick="location.href='bots.html'" type="button">Создать бота →</button>
+      </div>
+    </div>
+  </section>
+
+  <style>
+    .ob-hero{
+      background:linear-gradient(135deg,rgba(255,90,31,.08) 0%,rgba(255,140,90,.04) 55%,rgba(255,255,255,.02) 100%);
+      border:1px solid rgba(255,90,31,.18);
+      border-radius:18px;padding:22px 24px 24px;margin-bottom:24px;
+      position:relative;overflow:hidden
+    }
+    .ob-hero::after{content:'';position:absolute;top:-60%;right:-10%;width:380px;height:380px;border-radius:50%;background:radial-gradient(circle,rgba(255,90,31,.12),transparent 70%);pointer-events:none}
+    html.light .ob-hero{background:linear-gradient(135deg,rgba(255,90,31,.08),rgba(255,255,255,.6));border-color:rgba(255,90,31,.25)}
+    .ob-head{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:18px;position:relative;z-index:1}
+    .ob-eyebrow{font-size:10px;letter-spacing:.2em;text-transform:uppercase;color:#FF8C5A;font-weight:600}
+    .ob-title{font-size:18px;font-weight:600;margin-top:4px;color:#fff}
+    html.light .ob-title{color:#0A0A0A}
+    .ob-dismiss{background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);color:rgba(255,255,255,.5);border-radius:8px;width:32px;height:32px;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;transition:all .15s}
+    .ob-dismiss:hover{background:rgba(255,255,255,.1);color:#fff}
+    html.light .ob-dismiss{background:rgba(0,0,0,.04);border-color:rgba(0,0,0,.1);color:rgba(10,10,10,.55)}
+    .ob-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;position:relative;z-index:1}
+    @media(max-width:960px){.ob-grid{grid-template-columns:repeat(2,1fr)}}
+    @media(max-width:500px){.ob-grid{grid-template-columns:1fr}}
+    .ob-card{
+      background:rgba(10,10,10,.4);border:1px solid rgba(255,255,255,.06);
+      border-radius:14px;padding:18px;display:flex;flex-direction:column;
+      transition:border-color .18s,background .18s
+    }
+    .ob-card:hover{border-color:rgba(255,90,31,.3);background:rgba(10,10,10,.55)}
+    html.light .ob-card{background:rgba(255,255,255,.85);border-color:rgba(0,0,0,.08)}
+    html.light .ob-card:hover{border-color:rgba(255,90,31,.4);background:#fff}
+    .ob-ic{
+      width:42px;height:42px;border-radius:12px;
+      background:rgba(255,255,255,.06);color:rgba(255,255,255,.7);
+      display:inline-flex;align-items:center;justify-content:center;margin-bottom:12px
+    }
+    .ob-ic-done{background:rgba(43,89,54,.25);color:#8FBF95}
+    html.light .ob-ic{background:rgba(0,0,0,.05);color:rgba(10,10,10,.55)}
+    html.light .ob-ic-done{background:rgba(43,89,54,.18);color:#2B5936}
+    .ob-card-title{font-weight:600;font-size:14px;color:#fff;margin-bottom:6px}
+    html.light .ob-card-title{color:#0A0A0A}
+    .ob-card-desc{font-size:12px;color:rgba(255,255,255,.55);line-height:1.5;flex:1;margin-bottom:14px}
+    html.light .ob-card-desc{color:rgba(10,10,10,.6)}
+    .ob-cta{
+      align-self:flex-start;padding:7px 14px;font-size:12px;font-weight:500;cursor:pointer;
+      background:linear-gradient(180deg,#FF7840 0%,#FF5A1F 60%,#C44610 100%);color:#fff;border:0;border-radius:8px;
+      box-shadow:inset 0 1px 1px rgba(255,255,255,.28),inset 0 -1px 2px rgba(0,0,0,.22),0 4px 10px -2px rgba(255,90,31,.35);
+      transition:transform .12s,filter .12s
+    }
+    .ob-cta:hover{filter:brightness(1.08);transform:translateY(-1px)}
+    .ob-card-status{font-size:11px;font-weight:600;align-self:flex-start;padding:5px 10px;border-radius:6px;letter-spacing:.04em}
+    .ob-card-status.ob-done{background:rgba(43,89,54,.2);color:#8FBF95}
+    html.light .ob-card-status.ob-done{background:rgba(43,89,54,.15);color:#2B5936}
+  </style>
+
   <!-- Row 1 — 4 primary KPIs -->
   <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-4">
     <div class="stat-card liquid-glass">
@@ -254,6 +347,67 @@
 <script src="onboarding.js" defer></script>
 <script>
 if(!Auth.requireAuth()) throw new Error('noauth');
+
+// ── Onboarding checklist — resolves 4 steps + shows/hides hero ─────────
+//   register  → always true if we reached this page
+//   email     → Auth.user.emailVerified
+//   exchange  → /api/exchanges/keys length ≥ 1
+//   bot       → /api/bots has ≥ 1 bot (from botSummary totalBots)
+// Hero hides automatically when all 4 done OR user dismissed it in LS.
+(async function initOnboarding() {
+  const hero = document.getElementById('obHero');
+  if (!hero) return;
+  try { if (localStorage.getItem('chm_onboarding_dismissed') === '1') return; } catch (_) {}
+
+  const setDone = (step, done) => {
+    const card = hero.querySelector('[data-ob-step="' + step + '"]');
+    if (!card || !done) return;
+    const ic = card.querySelector('.ob-ic');
+    if (ic) {
+      ic.classList.add('ob-ic-done');
+      ic.innerHTML = '<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>';
+    }
+    const cta = card.querySelector('.ob-cta');
+    if (cta) cta.remove();
+    if (!card.querySelector('.ob-card-status')) {
+      const s = document.createElement('div');
+      s.className = 'ob-card-status ob-done'; s.textContent = 'Готово';
+      card.appendChild(s);
+    }
+  };
+
+  // Step 1 — register is always done
+  const u = Auth.user || {};
+  // Step 2 — email verified
+  const emailDone = !!u.emailVerified;
+  // Step 3+4 — need fresh data
+  let exchangeDone = false, botDone = false;
+  try {
+    const keys = await API.listKeys().catch(() => ({ keys: [] }));
+    exchangeDone = Array.isArray(keys.keys) && keys.keys.length > 0;
+  } catch (_) {}
+  try {
+    const s = await API.botSummary().catch(() => ({ totalBots: 0 }));
+    botDone = Number(s.totalBots) > 0;
+  } catch (_) {}
+
+  setDone('email', emailDone);
+  setDone('exchange', exchangeDone);
+  setDone('bot', botDone);
+
+  const doneCount = 1 + (emailDone ? 1 : 0) + (exchangeDone ? 1 : 0) + (botDone ? 1 : 0);
+  const progEl = document.getElementById('obProgress');
+  if (progEl) progEl.textContent = doneCount + ' из 4';
+
+  // Auto-hide when all 4 done. Otherwise render the hero.
+  if (doneCount < 4) hero.hidden = false;
+
+  const dismissBtn = document.getElementById('obDismissBtn');
+  if (dismissBtn) dismissBtn.addEventListener('click', () => {
+    hero.hidden = true;
+    try { localStorage.setItem('chm_onboarding_dismissed', '1'); } catch (_) {}
+  });
+})();
 
 // Sidebar active state + user name
 document.querySelectorAll('.sidebar-link[data-page="dashboard"]').forEach(a => a.classList.add('active'));

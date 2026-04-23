@@ -136,7 +136,37 @@
       injectTerminalLink();
       injectCopyLink();
       if (plan === 'elite') injectMarketScannerLink();
-    } catch (_e) { text.textContent = 'Free Plan'; }
+      injectSidebarPromo(plan);
+    } catch (_e) { text.textContent = 'Free Plan'; injectSidebarPromo('free'); }
+  }
+
+  // Sidebar promo card at the bottom (3Commas-style "Лист ожидания" block).
+  // For non-Elite: upsell Market Scanner + multi-strategy combo.
+  // For Elite:     promote Academy to drive engagement.
+  function injectSidebarPromo(plan) {
+    if (document.querySelector('.sidebar-promo')) return;
+    const sidebar = document.getElementById('sidebar') || document.querySelector('.sidebar');
+    if (!sidebar) return;
+    const footer = sidebar.querySelector('.sidebar-footer');
+    const isElite = plan === 'elite';
+    const promo = document.createElement('a');
+    promo.className = 'sidebar-promo';
+    promo.href = isElite ? 'academy/index.html' : 'settings.html?upgrade=elite';
+    promo.innerHTML = isElite
+      ? '<div class="sidebar-promo-ic">📚</div>'
+        + '<div class="sidebar-promo-body">'
+        +   '<div class="sidebar-promo-title">Академия CHM</div>'
+        +   '<div class="sidebar-promo-sub">Разборы стратегий SMC, Gerchik, DCA — бесплатно.</div>'
+        + '</div>'
+        + '<div class="sidebar-promo-arrow">→</div>'
+      : '<div class="sidebar-promo-ic">★</div>'
+        + '<div class="sidebar-promo-body">'
+        +   '<div class="sidebar-promo-title">Elite · Market Scanner</div>'
+        +   '<div class="sidebar-promo-sub">Сканирует весь рынок × мульти-стратегии. 7 дней бесплатно.</div>'
+        + '</div>'
+        + '<div class="sidebar-promo-arrow">→</div>';
+    if (footer) sidebar.insertBefore(promo, footer);
+    else sidebar.appendChild(promo);
   }
 
   // Market Scanner sidebar link — shown only to Elite. Idempotent.
