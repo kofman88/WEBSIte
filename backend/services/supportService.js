@@ -31,29 +31,38 @@ function create(userId, { subject, body }) {
   return ticket;
 }
 
-function reply(ticketId, { userId, body, isAdmin = false }) {
+function reply(ticketId, { userId, body, isAdmin = false, isInternal = false, attachments = null }) {
   if (!body) { const e = new Error('body required'); e.statusCode = 400; throw e; }
+  // Internal notes are an admin-only concept — silently ignore the flag
+  // from non-admin callers so a user can't leak admin-only messages.
+  const internal = Boolean(isAdmin && isInternal);
   const ticket = db.prepare('SELECT * FROM support_tickets WHERE id = ?').get(ticketId);
   if (!ticket) { const e = new Error('Ticket not found'); e.statusCode = 404; throw e; }
-  // If not admin, must own the ticket
   if (!isAdmin && ticket.user_id !== userId) {
     const e = new Error('Not your ticket'); e.statusCode = 403; throw e;
   }
 
   const msgInfo = db.prepare(`
-    INSERT INTO support_messages (ticket_id, author_id, is_admin, body)
-    VALUES (?, ?, ?, ?)
-  `).run(ticketId, userId, isAdmin ? 1 : 0, String(body).slice(0, 10000));
+    INSERT INTO support_messages (ticket_id, author_id, is_admin, is_internal, body, attachments)
+    VALUES (?, ?, ?, ?, ?, ?)
+  `).run(
+    ticketId, userId, isAdmin ? 1 : 0, internal ? 1 : 0,
+    String(body).slice(0, 10000),
+    attachments ? JSON.stringify(attachments).slice(0, 4000) : null,
+  );
 
-  // Reopen the ticket if a new message came in and it was closed
-  const newStatus = ticket.status === 'closed' ? 'open' : ticket.status;
-  db.prepare('UPDATE support_tickets SET status = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?')
-    .run(newStatus, ticketId);
+  // Internal notes don't reopen the ticket and don't bump updated_at —
+  // user doesn't see them, shouldn't change "last activity" for them.
+  if (!internal) {
+    const newStatus = ticket.status === 'closed' ? 'open' : ticket.status;
+    db.prepare('UPDATE support_tickets SET status = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?')
+      .run(newStatus, ticketId);
+  }
 
-  // Notify the other party via in-app + email (existing behavior)
+  // Notify the user only for non-internal admin replies
   try {
     const notifier = require('./notifier');
-    if (isAdmin) {
+    if (isAdmin && !internal) {
       notifier.dispatch(ticket.user_id, {
         type: 'security',
         title: '💬 Ответ на ваш тикет #' + ticketId,
@@ -63,12 +72,14 @@ function reply(ticketId, { userId, body, isAdmin = false }) {
     }
   } catch (_e) {}
 
-  // Real-time WS push — user widget + ops inbox get the message live
+  // WS push — internal notes go only to admins, public messages to both sides
   _broadcastMessage(ticketId, {
     id: msgInfo.lastInsertRowid,
     authorId: userId,
     isAdmin: Boolean(isAdmin),
+    isInternal: internal,
     body: String(body).slice(0, 10000),
+    attachments: attachments || null,
     userId: ticket.user_id,
   });
 
@@ -92,7 +103,8 @@ function _broadcastMessage(ticketId, msg) {
       data: { ticketId, message: msg },
       ts: Date.now(),
     };
-    if (msg.userId) ws.broadcastToUser(msg.userId, payload);
+    // Internal notes — admins only. Public messages — both sides.
+    if (!msg.isInternal && msg.userId) ws.broadcastToUser(msg.userId, payload);
     for (const adminId of _allAdminIds()) {
       if (adminId !== msg.userId) ws.broadcastToUser(adminId, payload);
     }
@@ -125,6 +137,45 @@ function markReadByAdmin(ticketId) {
   return { ok: true };
 }
 
+// ── Assignment ────────────────────────────────────────────────────────
+// When an agent "takes" a ticket, we stamp assigned_to + broadcast so
+// other agents see it's claimed in their inbox.
+function assign(ticketId, adminId, { targetAdminId = null } = {}) {
+  const ticket = db.prepare('SELECT * FROM support_tickets WHERE id = ?').get(ticketId);
+  if (!ticket) { const e = new Error('Ticket not found'); e.statusCode = 404; throw e; }
+  const assignee = targetAdminId || adminId;
+  db.prepare('UPDATE support_tickets SET assigned_to = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?')
+    .run(assignee, ticketId);
+  db.prepare(`
+    INSERT INTO audit_log (user_id, action, entity_type, entity_id, metadata)
+    VALUES (?, 'support.assign', 'support_ticket', ?, ?)
+  `).run(adminId, ticketId, JSON.stringify({ assignedTo: assignee }));
+  _broadcastAssign(ticketId, assignee);
+  return { assignedTo: assignee };
+}
+function unassign(ticketId, adminId) {
+  const ticket = db.prepare('SELECT * FROM support_tickets WHERE id = ?').get(ticketId);
+  if (!ticket) { const e = new Error('Ticket not found'); e.statusCode = 404; throw e; }
+  db.prepare('UPDATE support_tickets SET assigned_to = NULL, updated_at = CURRENT_TIMESTAMP WHERE id = ?').run(ticketId);
+  db.prepare(`
+    INSERT INTO audit_log (user_id, action, entity_type, entity_id, metadata)
+    VALUES (?, 'support.unassign', 'support_ticket', ?, '{}')
+  `).run(adminId, ticketId);
+  _broadcastAssign(ticketId, null);
+  return { assignedTo: null };
+}
+function _broadcastAssign(ticketId, assignedTo) {
+  try {
+    const ws = require('./websocketService');
+    const payload = {
+      type: 'support.assignment_changed',
+      data: { ticketId, assignedTo },
+      ts: Date.now(),
+    };
+    for (const adminId of _allAdminIds()) ws.broadcastToUser(adminId, payload);
+  } catch (_) {}
+}
+
 function listForUser(userId, { status = null, limit = 50, offset = 0 } = {}) {
   const where = ['user_id = ?'];
   const params = [userId];
@@ -149,16 +200,31 @@ function getForUser(ticketId, userId, isAdmin = false) {
   if (!isAdmin && ticket.user_id !== userId) {
     const e = new Error('Not your ticket'); e.statusCode = 403; throw e;
   }
+  // Non-admins never see is_internal=1 rows (agent-to-agent notes).
+  const internalClause = isAdmin ? '' : ' AND is_internal = 0';
   const messages = db.prepare(`
-    SELECT id, author_id, is_admin, body, created_at
-    FROM support_messages WHERE ticket_id = ?
+    SELECT id, author_id, is_admin, is_internal, body, attachments, created_at
+    FROM support_messages WHERE ticket_id = ? ${internalClause}
     ORDER BY created_at ASC
   `).all(ticketId);
+  // Enrich with assignee info for the ops drawer
+  let assignedToEmail = null;
+  if (ticket.assigned_to) {
+    try {
+      const a = db.prepare('SELECT email FROM users WHERE id = ?').get(ticket.assigned_to);
+      if (a) assignedToEmail = a.email;
+    } catch (_) {}
+  }
   return {
     ...hydrate(ticket),
+    assignedToEmail,
     messages: messages.map((m) => ({
-      id: m.id, authorId: m.author_id, isAdmin: Boolean(m.is_admin),
-      body: m.body, createdAt: m.created_at,
+      id: m.id, authorId: m.author_id,
+      isAdmin: Boolean(m.is_admin),
+      isInternal: Boolean(m.is_internal),
+      body: m.body,
+      attachments: (() => { try { return m.attachments ? JSON.parse(m.attachments) : null; } catch { return null; } })(),
+      createdAt: m.created_at,
     })),
   };
 }
@@ -182,31 +248,55 @@ function listAll({ status = null, limit = 100, offset = 0 } = {}) {
   const params = [];
   if (status) { where.push('t.status = ?'); params.push(status); }
   const clause = where.length ? 'WHERE ' + where.join(' AND ') : '';
-  // unread_count = user messages posted after the admin last read (or
-  // ever, if never read). Admin-authored messages never count as unread
-  // for admins.
-  return db.prepare(`
+  const rows = db.prepare(`
     SELECT t.*, u.email AS user_email,
+      asg.email AS assigned_to_email,
       (SELECT COUNT(*) FROM support_messages m WHERE m.ticket_id = t.id) AS msg_count,
       (SELECT COUNT(*) FROM support_messages m
         WHERE m.ticket_id = t.id
           AND m.is_admin = 0
           AND (t.admin_read_at IS NULL OR m.created_at > t.admin_read_at)) AS unread_count,
-      (SELECT body FROM support_messages m WHERE m.ticket_id = t.id ORDER BY m.created_at DESC LIMIT 1) AS last_body,
-      (SELECT is_admin FROM support_messages m WHERE m.ticket_id = t.id ORDER BY m.created_at DESC LIMIT 1) AS last_is_admin
-    FROM support_tickets t JOIN users u ON u.id = t.user_id
+      (SELECT body FROM support_messages m
+        WHERE m.ticket_id = t.id AND m.is_internal = 0
+        ORDER BY m.created_at DESC LIMIT 1) AS last_body,
+      (SELECT is_admin FROM support_messages m
+        WHERE m.ticket_id = t.id AND m.is_internal = 0
+        ORDER BY m.created_at DESC LIMIT 1) AS last_is_admin,
+      (SELECT created_at FROM support_messages m
+        WHERE m.ticket_id = t.id AND m.is_admin = 0 AND m.is_internal = 0
+        ORDER BY m.created_at DESC LIMIT 1) AS last_user_at
+    FROM support_tickets t
+      JOIN users u ON u.id = t.user_id
+      LEFT JOIN users asg ON asg.id = t.assigned_to
     ${clause}
     ORDER BY
       CASE t.status WHEN 'open' THEN 0 WHEN 'pending' THEN 1 ELSE 2 END,
       updated_at DESC
     LIMIT ? OFFSET ?
-  `).all(...params, limit, offset).map((r) => ({
-    ...hydrateList(r),
-    userEmail: r.user_email,
-    unreadCount: r.unread_count || 0,
-    lastBody: r.last_body || '',
-    lastFromAdmin: Boolean(r.last_is_admin),
-  }));
+  `).all(...params, limit, offset);
+  const now = Date.now();
+  return rows.map((r) => {
+    // SLA level based on how long the last UNANSWERED user message has
+    // been sitting. If the last activity on the ticket was admin's,
+    // SLA is "idle" (waiting on user). Level 0=fresh, 1=warn >3min,
+    // 2=urgent >15min, 3=overdue >60min.
+    let slaLevel = 0;
+    if (r.last_user_at && r.last_is_admin === 0) {
+      const ageMs = now - new Date(r.last_user_at).getTime();
+      if (ageMs > 60 * 60_000) slaLevel = 3;
+      else if (ageMs > 15 * 60_000) slaLevel = 2;
+      else if (ageMs > 3 * 60_000) slaLevel = 1;
+    }
+    return {
+      ...hydrateList(r),
+      userEmail: r.user_email,
+      assignedToEmail: r.assigned_to_email || null,
+      unreadCount: r.unread_count || 0,
+      lastBody: r.last_body || '',
+      lastFromAdmin: Boolean(r.last_is_admin),
+      slaLevel,
+    };
+  });
 }
 
 function hydrate(r) {
@@ -241,4 +331,5 @@ function guestContact({ email, body, ip = null, userAgent = null }) {
 module.exports = {
   create, reply, listForUser, getForUser, closeTicket, listAll,
   guestContact, markReadByUser, markReadByAdmin,
+  assign, unassign,
 };

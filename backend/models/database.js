@@ -166,6 +166,43 @@ db.exec(`
     if (!cols.includes('admin_read_at')) db.exec("ALTER TABLE support_tickets ADD COLUMN admin_read_at DATETIME");
   } catch (_) {}
 })();
+// Phase B of support: internal notes + canned-response templates +
+// attachments for file uploads. All idempotent.
+(function migrateSupportPhaseB(){
+  try {
+    const cols = db.prepare("PRAGMA table_info('support_messages')").all().map((c) => c.name);
+    if (!cols.includes('is_internal')) db.exec("ALTER TABLE support_messages ADD COLUMN is_internal INTEGER NOT NULL DEFAULT 0");
+    if (!cols.includes('attachments')) db.exec("ALTER TABLE support_messages ADD COLUMN attachments TEXT");
+  } catch (_) {}
+  try {
+    db.exec(`
+      CREATE TABLE IF NOT EXISTS support_templates (
+        id          INTEGER PRIMARY KEY AUTOINCREMENT,
+        slug        TEXT NOT NULL UNIQUE,
+        title       TEXT NOT NULL,
+        body        TEXT NOT NULL,
+        use_count   INTEGER NOT NULL DEFAULT 0,
+        created_by  INTEGER,
+        created_at  DATETIME DEFAULT CURRENT_TIMESTAMP,
+        updated_at  DATETIME DEFAULT CURRENT_TIMESTAMP,
+        FOREIGN KEY (created_by) REFERENCES users(id) ON DELETE SET NULL
+      );
+      CREATE INDEX IF NOT EXISTS idx_templates_slug ON support_templates(slug);
+    `);
+    // Seed a handful of default templates on first install — idempotent
+    // via INSERT OR IGNORE on the unique slug column.
+    const seeds = [
+      ['welcome',       'Приветствие',        'Здравствуйте! Спасибо за обращение в CHM Finance. Сейчас разберусь с вашим вопросом.'],
+      ['email-verify',  'Подтверждение email','Пожалуйста, подтвердите email — ссылка уже ушла на ваш адрес. Проверьте в том числе папку «Спам». Без подтверждения недоступна live-торговля и выплаты.'],
+      ['exchange-key',  'Ключ биржи',         'Для подключения биржи: Настройки → Кошелёк → Добавить ключ. Нужен API-ключ с правом чтения + trading (без withdraw!). Подробная инструкция в Академии.'],
+      ['paper-only',    'Почему paper',       'Для старта рекомендуем paper-режим — симуляция с виртуальными $10,000. Безопасный способ проверить стратегию перед переходом на live.'],
+      ['refund',        'Возврат подписки',   'Оформим возврат в течение 3 рабочих дней. Средства придут тем же способом, которым вы оплачивали. Причину возврата, пожалуйста, опишите — нам это помогает улучшать продукт.'],
+      ['closed',        'Закрытие тикета',    'Если вопрос решён — отлично! Закрываю тикет. При необходимости просто ответьте в эту беседу и я снова вернусь на связь.'],
+    ];
+    const ins = db.prepare(`INSERT OR IGNORE INTO support_templates (slug, title, body) VALUES (?, ?, ?)`);
+    for (const s of seeds) ins.run(...s);
+  } catch (_) {}
+})();
 db.exec(`
   -- Per-user risk limits (resume). One row per user, inserted lazily by
   -- riskLimitsService.get() with defaults. Read on every auto-trade

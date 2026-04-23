@@ -748,25 +748,97 @@
     const pane = document.getElementById('pane-support');
     pane.innerHTML =
       '<div class="ops-card" style="padding:0;overflow:hidden">' +
-      '<div style="display:flex;align-items:center;justify-content:space-between;padding:14px 18px;border-bottom:1px solid rgba(255,255,255,.06)">' +
-        '<div style="font-weight:600;font-size:14px">Support Inbox <span id="suUnread" class="badge badge-red" style="display:none;margin-left:8px">0</span></div>' +
-        '<div style="display:flex;gap:8px">' +
-          '<select id="suFilter" class="ops-input" style="padding:6px 10px;font-size:12px">' +
-            '<option value="">Все статусы</option>' +
-            '<option value="open" selected>Open</option>' +
-            '<option value="pending">Pending</option>' +
-            '<option value="closed">Closed</option>' +
-          '</select>' +
-          '<button id="suReload" class="ops-btn" type="button">↻</button>' +
+      '<div style="padding:14px 18px;border-bottom:1px solid rgba(255,255,255,.06)">' +
+        '<div style="display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap">' +
+          '<div style="font-weight:600;font-size:14px">Support Inbox <span id="suUnread" class="badge badge-red" style="display:none;margin-left:8px">0</span></div>' +
+          '<div style="display:flex;gap:8px;align-items:center">' +
+            '<button id="suTemplatesBtn" class="ops-btn" type="button" title="Управление шаблонами">Шаблоны</button>' +
+            '<select id="suFilter" class="ops-input" style="padding:6px 10px;font-size:12px">' +
+              '<option value="">Все статусы</option>' +
+              '<option value="open" selected>Open</option>' +
+              '<option value="pending">Pending</option>' +
+              '<option value="closed">Closed</option>' +
+            '</select>' +
+            '<button id="suReload" class="ops-btn" type="button">↻</button>' +
+          '</div>' +
         '</div>' +
+        '<div id="suOnlineBar" style="margin-top:10px;display:flex;gap:4px;flex-wrap:wrap;min-height:22px"></div>' +
       '</div>' +
-      '<div id="suList" style="max-height:70vh;overflow-y:auto">' +
+      '<div id="suList" style="max-height:68vh;overflow-y:auto">' +
         '<div class="text-center py-8 text-slate-500 text-sm">Загрузка…</div>' +
       '</div>' +
+      '</div>' +
+      // Templates manager modal (hidden by default)
+      '<div id="suTmplModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.6);backdrop-filter:blur(6px);z-index:200;align-items:center;justify-content:center;padding:20px">' +
+        '<div class="ops-card" style="max-width:640px;width:100%;max-height:80vh;overflow-y:auto">' +
+          '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">' +
+            '<div style="font-weight:600;font-size:15px">Шаблоны ответов</div>' +
+            '<button id="suTmplClose" class="ops-btn" type="button">✕</button>' +
+          '</div>' +
+          '<div id="suTmplList" class="text-sm"><div class="text-center py-6 text-slate-500">Загрузка…</div></div>' +
+          '<details style="margin-top:14px"><summary style="cursor:pointer;color:#FF8C5A;font-size:12px">+ Добавить новый шаблон</summary>' +
+            '<div style="display:flex;flex-direction:column;gap:8px;margin-top:10px">' +
+              '<input id="suTmplSlug" class="ops-input" placeholder="slug (latin, lowercase)" maxlength="32" style="font-size:12px"/>' +
+              '<input id="suTmplTitle" class="ops-input" placeholder="Название (для админа)" maxlength="100" style="font-size:12px"/>' +
+              '<textarea id="suTmplBody" class="ops-input" placeholder="Текст ответа…" rows="4" style="font-size:13px;resize:vertical"></textarea>' +
+              '<button id="suTmplAdd" class="ops-btn ops-btn-primary" type="button" style="align-self:flex-start">Создать</button>' +
+            '</div>' +
+          '</details>' +
+        '</div>' +
       '</div>';
     document.getElementById('suFilter').addEventListener('change', renderSupportList);
     document.getElementById('suReload').addEventListener('click', renderSupportList);
+    document.getElementById('suTemplatesBtn').addEventListener('click', openTemplatesModal);
+    document.getElementById('suTmplClose').addEventListener('click', closeTemplatesModal);
+    document.getElementById('suTmplAdd').addEventListener('click', async function () {
+      const slug = document.getElementById('suTmplSlug').value.trim();
+      const title = document.getElementById('suTmplTitle').value.trim();
+      const body = document.getElementById('suTmplBody').value.trim();
+      if (!slug || !title || !body) return alert('Заполни все поля');
+      try {
+        await API.adminTemplateCreate({ slug, title, body });
+        _templatesCache = null;
+        document.getElementById('suTmplSlug').value = '';
+        document.getElementById('suTmplTitle').value = '';
+        document.getElementById('suTmplBody').value = '';
+        renderTemplatesList();
+      } catch (e) { alert(e.message || 'Ошибка'); }
+    });
     renderSupportList();
+  }
+  function openTemplatesModal() {
+    document.getElementById('suTmplModal').style.display = 'flex';
+    renderTemplatesList();
+  }
+  function closeTemplatesModal() {
+    document.getElementById('suTmplModal').style.display = 'none';
+  }
+  async function renderTemplatesList() {
+    const box = document.getElementById('suTmplList');
+    if (!box) return;
+    box.innerHTML = '<div class="text-center py-4 text-slate-500">Загрузка…</div>';
+    try {
+      const r = await API.adminTemplatesList();
+      _templatesCache = r.templates || [];
+      if (!_templatesCache.length) {
+        box.innerHTML = '<div class="text-center py-4 text-slate-500">Пусто</div>';
+        return;
+      }
+      box.innerHTML = _templatesCache.map((t) =>
+        '<div style="padding:10px 12px;border:1px solid rgba(255,255,255,.06);border-radius:10px;margin-bottom:6px">' +
+          '<div style="display:flex;justify-content:space-between;gap:8px;align-items:center">' +
+            '<div><strong>' + esc(t.title) + '</strong> <span class="mono text-xs" style="color:rgba(255,255,255,.4)">/' + esc(t.slug) + '</span> <span class="mono text-xs" style="color:rgba(255,255,255,.35);margin-left:6px">×' + t.use_count + '</span></div>' +
+            '<button class="ops-btn ops-btn-danger" data-tmpl-del="' + t.id + '" type="button">Удалить</button>' +
+          '</div>' +
+          '<div style="margin-top:6px;font-size:12px;color:rgba(255,255,255,.68);white-space:pre-wrap">' + esc(t.body) + '</div>' +
+        '</div>'
+      ).join('');
+      box.querySelectorAll('[data-tmpl-del]').forEach((b) => b.addEventListener('click', async function () {
+        if (!confirm('Удалить шаблон?')) return;
+        try { await API.adminTemplateRemove(Number(b.getAttribute('data-tmpl-del'))); _templatesCache = null; renderTemplatesList(); }
+        catch (e) { alert(e.message || 'Ошибка'); }
+      }));
+    } catch (e) { box.innerHTML = '<div class="text-center py-4 text-red-400">' + esc(e.message) + '</div>'; }
   }
   async function renderSupportList() {
     const list = document.getElementById('suList');
@@ -792,15 +864,23 @@
         const unread = t.unreadCount > 0
           ? '<span class="badge badge-red" style="margin-left:6px">' + t.unreadCount + '</span>'
           : '';
-        const rowBg = t.unreadCount > 0 ? 'background:rgba(239,68,68,.04)' : '';
-        return '<div class="su-row" data-tid="' + t.id + '" style="padding:12px 18px;border-bottom:1px solid rgba(255,255,255,.04);cursor:pointer;display:flex;gap:12px;align-items:flex-start;' + rowBg + '">' +
+        // SLA color-code left border: green=fresh, yellow=>3min, orange=>15min, red=>60min
+        const slaColors = ['transparent', '#fde047', '#FF8C5A', '#ef4444'];
+        const slaBar = 'border-left:3px solid ' + slaColors[t.slaLevel || 0] + ';';
+        const slaLabel = ['', '≥3 мин', '≥15 мин', '≥1 час'][t.slaLevel || 0];
+        const rowBg = t.unreadCount > 0 ? 'background:rgba(239,68,68,.04);' : '';
+        const assigneeBadge = t.assignedToEmail
+          ? '<span class="badge badge-blue" style="margin-left:4px">→ ' + esc(t.assignedToEmail.split('@')[0]) + '</span>'
+          : '';
+        return '<div class="su-row" data-tid="' + t.id + '" style="padding:12px 18px;border-bottom:1px solid rgba(255,255,255,.04);cursor:pointer;display:flex;gap:12px;align-items:flex-start;' + rowBg + slaBar + '">' +
           '<div style="flex:0 0 auto;width:32px;height:32px;border-radius:50%;background:rgba(255,90,31,.15);color:#FF8C5A;display:flex;align-items:center;justify-content:center;font-weight:600;font-size:12px">' +
             esc((t.userEmail || '?')[0].toUpperCase()) +
           '</div>' +
           '<div style="flex:1;min-width:0">' +
             '<div style="display:flex;justify-content:space-between;gap:8px">' +
-              '<div class="mono text-xs" style="color:rgba(255,255,255,.65)">' + esc(t.userEmail || '—') + unread + '</div>' +
+              '<div class="mono text-xs" style="color:rgba(255,255,255,.65)">' + esc(t.userEmail || '—') + unread + assigneeBadge + '</div>' +
               '<div style="display:flex;gap:6px;align-items:center">' +
+                (slaLabel ? '<span class="mono text-xs" style="color:' + slaColors[t.slaLevel] + '">⏱ ' + slaLabel + '</span>' : '') +
                 '<span class="badge ' + statusCls + '">' + esc(t.status) + '</span>' +
                 '<span class="mono text-xs" style="color:rgba(255,255,255,.4)">#' + t.id + '</span>' +
               '</div>' +
@@ -810,6 +890,18 @@
           '</div>' +
         '</div>';
       }).join('');
+      // Fetch + render online-agents pill row above the list
+      try {
+        const op = await API.adminPresenceOnline();
+        const agents = op.agents || [];
+        const onlineBar = document.getElementById('suOnlineBar');
+        if (onlineBar) {
+          onlineBar.innerHTML = agents.length
+            ? '<span style="font-size:11px;color:rgba(255,255,255,.5);margin-right:6px">Онлайн:</span>' +
+              agents.map((a) => '<span style="display:inline-flex;align-items:center;gap:4px;padding:3px 8px;background:rgba(34,197,94,.1);border:1px solid rgba(34,197,94,.25);border-radius:9999px;font-size:10px;color:#86efac"><span style="width:6px;height:6px;border-radius:50%;background:#4ade80"></span>' + esc(a.email.split('@')[0]) + '</span>').join(' ')
+            : '<span style="font-size:11px;color:rgba(255,255,255,.35)">Нет агентов онлайн</span>';
+        }
+      } catch (_) {}
       list.querySelectorAll('.su-row').forEach(function (row) {
         row.addEventListener('click', function () { openSupportDrawer(Number(row.getAttribute('data-tid'))); });
       });
@@ -818,41 +910,71 @@
     }
   }
 
+  let _templatesCache = null;
+  async function _loadTemplates() {
+    if (_templatesCache) return _templatesCache;
+    try { const r = await API.adminTemplatesList(); _templatesCache = r.templates || []; }
+    catch { _templatesCache = []; }
+    return _templatesCache;
+  }
   async function openSupportDrawer(ticketId) {
     _supOpenTicketId = ticketId;
     openDrawer();
-    const body = document.getElementById('drawerBody');
-    body.innerHTML = '<div class="p-8 text-center text-slate-500 text-sm">Загрузка тикета…</div>';
+    const bodyEl = document.getElementById('drawerBody');
+    bodyEl.innerHTML = '<div class="p-8 text-center text-slate-500 text-sm">Загрузка тикета…</div>';
     try {
-      const t = await API.adminTicketGet(ticketId);
+      const [t, templates] = await Promise.all([API.adminTicketGet(ticketId), _loadTemplates()]);
       const msgs = t.messages || [];
-      body.innerHTML =
+      const assignedBadge = t.assignedToEmail
+        ? '<span class="badge badge-blue" style="margin-left:6px">→ ' + esc(t.assignedToEmail) + '</span>'
+        : '<span class="badge badge-gray" style="margin-left:6px">не назначен</span>';
+      bodyEl.innerHTML =
         '<div class="drawer-section" style="border-bottom:1px solid rgba(255,255,255,.05)">' +
-          '<div style="display:flex;justify-content:space-between;align-items:flex-start;gap:8px">' +
-            '<div>' +
+          '<div style="display:flex;justify-content:space-between;align-items:flex-start;gap:8px;flex-wrap:wrap">' +
+            '<div style="flex:1;min-width:0">' +
               '<div style="font-weight:600;font-size:15px">' + esc(t.subject || 'Без темы') + '</div>' +
-              '<div class="mono text-xs" style="color:rgba(255,255,255,.5);margin-top:4px">#' + t.id + ' · статус <strong>' + esc(t.status) + '</strong> · ' + msgs.length + ' сообщ.</div>' +
+              '<div class="mono text-xs" style="color:rgba(255,255,255,.5);margin-top:4px">#' + t.id + ' · статус <strong>' + esc(t.status) + '</strong> · ' + msgs.length + ' сообщ.' + assignedBadge + '</div>' +
             '</div>' +
-            '<div style="display:flex;gap:6px">' +
+            '<div style="display:flex;gap:6px;flex-wrap:wrap">' +
+              (t.assignedTo
+                ? '<button id="suUnassign" class="ops-btn" type="button">Снять</button>'
+                : '<button id="suAssignSelf" class="ops-btn ops-btn-primary" type="button">Взять</button>') +
               (t.status !== 'closed'
                 ? '<button id="suClose" class="ops-btn ops-btn-danger" type="button">Закрыть</button>'
                 : '') +
             '</div>' +
           '</div>' +
         '</div>' +
-        '<div id="suThread" style="padding:18px 22px;display:flex;flex-direction:column;gap:10px;max-height:56vh;overflow-y:auto">' +
+        '<div id="suThread" style="padding:18px 22px;display:flex;flex-direction:column;gap:10px;max-height:50vh;overflow-y:auto">' +
           msgs.map(renderOpsBubble).join('') +
+          '<div id="suTyping" style="display:none;align-self:flex-start;padding:8px 14px;background:rgba(255,255,255,.04);border-radius:14px;font-size:12px;color:rgba(255,255,255,.6)">' +
+            '<span style="display:inline-flex;gap:2px;align-items:center;margin-right:6px">' +
+              '<span class="typing-dot"></span><span class="typing-dot" style="animation-delay:.15s"></span><span class="typing-dot" style="animation-delay:.3s"></span>' +
+            '</span>' +
+            'Пользователь печатает…' +
+          '</div>' +
         '</div>' +
         '<div class="drawer-section" style="border-top:1px solid rgba(255,255,255,.06);position:sticky;bottom:0;background:#0a0a0f;padding:14px 18px">' +
+          '<div style="display:flex;gap:6px;margin-bottom:8px;flex-wrap:wrap;align-items:center">' +
+            '<label style="display:inline-flex;align-items:center;gap:6px;font-size:11px;color:rgba(255,255,255,.7);cursor:pointer">' +
+              '<input type="checkbox" id="suInternal" style="accent-color:#FF5A1F"/> <span>Внутренняя заметка</span>' +
+            '</label>' +
+            (templates.length
+              ? '<select id="suTemplateSel" class="ops-input" style="padding:4px 8px;font-size:11px;margin-left:auto">' +
+                  '<option value="">↓ Шаблоны</option>' +
+                  templates.map((tpl) => '<option value="' + tpl.id + '">/' + esc(tpl.slug) + ' — ' + esc(tpl.title) + '</option>').join('') +
+                '</select>'
+              : '') +
+          '</div>' +
           '<textarea id="suReplyInput" placeholder="Ответ пользователю…" rows="3" style="width:100%;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.1);border-radius:10px;padding:10px 12px;color:#fff;font-family:inherit;font-size:13px;resize:vertical;outline:none"></textarea>' +
-          '<div style="display:flex;justify-content:space-between;align-items:center;margin-top:8px;font-size:11px;color:rgba(255,255,255,.4)">' +
-            '<span>Ctrl/Cmd + Enter — отправить</span>' +
+          '<div id="suAttachPreview" style="display:flex;gap:6px;margin-top:6px;flex-wrap:wrap"></div>' +
+          '<div style="display:flex;justify-content:space-between;align-items:center;margin-top:8px;font-size:11px;color:rgba(255,255,255,.4);gap:6px;flex-wrap:wrap">' +
+            '<label style="cursor:pointer;display:inline-flex;align-items:center;gap:4px;color:rgba(255,140,90,.8)">📎 <input id="suAttachInput" type="file" accept="image/*" multiple style="display:none"/><span>Скрин</span></label>' +
+            '<span style="flex:1;text-align:center">Ctrl/Cmd + Enter — отправить</span>' +
             '<button id="suReplyBtn" class="ops-btn ops-btn-primary" type="button">Ответить →</button>' +
           '</div>' +
         '</div>';
 
-      // Mark read on open — the backend stamps admin_read_at so unread
-      // count drops. The list reloads after the drawer closes.
       try { await API.adminTicketMarkRead(ticketId); } catch (_) {}
 
       const thread = document.getElementById('suThread');
@@ -860,15 +982,77 @@
 
       const replyBtn = document.getElementById('suReplyBtn');
       const replyInput = document.getElementById('suReplyInput');
+      const internalCheck = document.getElementById('suInternal');
+      const tplSel = document.getElementById('suTemplateSel');
+      const attachInput = document.getElementById('suAttachInput');
+      const attachPreview = document.getElementById('suAttachPreview');
+      let pendingAttachments = [];
+
+      // Template selector — inserts body into textarea (admin can edit)
+      if (tplSel) tplSel.addEventListener('change', async function () {
+        const id = Number(tplSel.value);
+        if (!id) return;
+        const tpl = (_templatesCache || []).find((x) => x.id === id);
+        if (tpl) {
+          replyInput.value = tpl.body;
+          replyInput.focus();
+          try { API.adminTemplateUse(id); } catch (_) {}
+        }
+        tplSel.value = '';
+      });
+
+      // Attachments: small (<500KB each) images as base64 data URLs
+      if (attachInput) attachInput.addEventListener('change', function (ev) {
+        const files = Array.from(ev.target.files || []);
+        files.slice(0, 3 - pendingAttachments.length).forEach((f) => {
+          if (f.size > 500_000) { alert('Файл слишком большой (max 500 KB): ' + f.name); return; }
+          const r = new FileReader();
+          r.onload = () => {
+            pendingAttachments.push({ name: f.name, type: f.type, dataUrl: r.result });
+            renderAttachPreview();
+          };
+          r.readAsDataURL(f);
+        });
+        attachInput.value = '';
+      });
+      function renderAttachPreview() {
+        attachPreview.innerHTML = pendingAttachments.map((a, i) =>
+          '<div style="position:relative;width:64px;height:64px;border-radius:8px;overflow:hidden;border:1px solid rgba(255,255,255,.1)">' +
+            '<img src="' + a.dataUrl + '" style="width:100%;height:100%;object-fit:cover"/>' +
+            '<button data-rm-att="' + i + '" style="position:absolute;top:2px;right:2px;width:18px;height:18px;border-radius:50%;border:0;background:rgba(0,0,0,.7);color:#fff;font-size:11px;cursor:pointer;line-height:1">×</button>' +
+          '</div>'
+        ).join('');
+        attachPreview.querySelectorAll('[data-rm-att]').forEach((b) => b.addEventListener('click', () => {
+          pendingAttachments.splice(Number(b.getAttribute('data-rm-att')), 1);
+          renderAttachPreview();
+        }));
+      }
+
+      // Typing indicator — emit start on keystroke, stop on idle
+      let typingTimer = null;
+      replyInput.addEventListener('input', function () {
+        try { window.WS && WS._send && WS._send({ type: 'support.typing', ticketId, state: 'start' }); } catch (_) {}
+        clearTimeout(typingTimer);
+        typingTimer = setTimeout(() => {
+          try { window.WS && WS._send && WS._send({ type: 'support.typing', ticketId, state: 'stop' }); } catch (_) {}
+        }, 3000);
+      });
+
       async function send() {
         const txt = (replyInput.value || '').trim();
-        if (txt.length < 1) return;
+        if (txt.length < 1 && pendingAttachments.length === 0) return;
         replyBtn.disabled = true; replyBtn.textContent = '…';
         try {
-          await API.adminTicketReply(ticketId, txt);
+          await API.adminTicketReply(ticketId, {
+            body: txt || '(вложение)',
+            isInternal: !!internalCheck.checked,
+            attachments: pendingAttachments.length ? pendingAttachments : undefined,
+          });
           replyInput.value = '';
-          // WS push will append bubble automatically — we don't manually
-          // insert here to avoid duplicates on the admin's own screen.
+          pendingAttachments = [];
+          renderAttachPreview();
+          internalCheck.checked = false;
+          try { WS._send && WS._send({ type: 'support.typing', ticketId, state: 'stop' }); } catch (_) {}
         } catch (e) {
           alert(e.message || 'Не отправилось');
         } finally {
@@ -888,8 +1072,18 @@
         try { await API.adminTicketClose(ticketId); closeDrawer(); renderSupportList(); }
         catch (e) { alert(e.message || 'Ошибка'); }
       });
+      const assignBtn = document.getElementById('suAssignSelf');
+      if (assignBtn) assignBtn.addEventListener('click', async function () {
+        try { await API.adminTicketAssign(ticketId); openSupportDrawer(ticketId); }
+        catch (e) { alert(e.message || 'Ошибка'); }
+      });
+      const unassignBtn = document.getElementById('suUnassign');
+      if (unassignBtn) unassignBtn.addEventListener('click', async function () {
+        try { await API.adminTicketUnassign(ticketId); openSupportDrawer(ticketId); }
+        catch (e) { alert(e.message || 'Ошибка'); }
+      });
     } catch (e) {
-      body.innerHTML = '<div class="p-8 text-center text-red-400">' + esc(e.message) + '</div>';
+      bodyEl.innerHTML = '<div class="p-8 text-center text-red-400">' + esc(e.message) + '</div>';
     }
   }
 
@@ -908,16 +1102,31 @@
 
   function renderOpsBubble(m) {
     const mine = m.isAdmin;
-    const bg = mine ? 'linear-gradient(180deg,#FF7840,#FF5A1F)' : 'rgba(255,255,255,.04)';
-    const color = mine ? '#fff' : 'rgba(255,255,255,.92)';
-    const border = mine ? 'transparent' : 'rgba(255,255,255,.08)';
+    const internal = m.isInternal;
+    // Internal notes — yellow dashed border so agents can't miss them
+    const bg = internal
+      ? 'rgba(234,179,8,.08)'
+      : (mine ? 'linear-gradient(180deg,#FF7840,#FF5A1F)' : 'rgba(255,255,255,.04)');
+    const color = internal ? '#fde047' : (mine ? '#fff' : 'rgba(255,255,255,.92)');
+    const border = internal
+      ? '1px dashed rgba(234,179,8,.45)'
+      : '1px solid ' + (mine ? 'transparent' : 'rgba(255,255,255,.08)');
     const radius = mine ? 'border-bottom-right-radius:4px' : 'border-bottom-left-radius:4px';
     const align = mine ? 'margin-left:auto;text-align:left' : 'margin-right:auto';
+    const attachHtml = (m.attachments && m.attachments.length)
+      ? '<div style="display:flex;gap:4px;margin-top:6px;flex-wrap:wrap">' +
+          m.attachments.map((a) => '<a href="' + a.dataUrl + '" target="_blank" style="display:inline-block"><img src="' + a.dataUrl + '" title="' + esc(a.name) + '" style="max-width:120px;max-height:90px;border-radius:6px;border:1px solid rgba(255,255,255,.15)"/></a>').join('') +
+        '</div>'
+      : '';
+    const internalTag = internal ? '<span class="badge badge-yellow" style="margin-right:4px">internal</span>' : '';
     return '<div style="max-width:82%;' + align + '">' +
-      '<div style="padding:10px 14px;background:' + bg + ';border:1px solid ' + border + ';border-radius:14px;' + radius + ';color:' + color + ';font-size:13px;line-height:1.5;white-space:pre-wrap;word-wrap:break-word">' +
+      '<div style="padding:10px 14px;background:' + bg + ';border:' + border + ';border-radius:14px;' + radius + ';color:' + color + ';font-size:13px;line-height:1.5;white-space:pre-wrap;word-wrap:break-word">' +
+        internalTag +
         esc(m.body) +
+        attachHtml +
       '</div>' +
       '<div class="mono text-xs" style="color:rgba(255,255,255,.35);margin-top:3px;' + (mine ? 'text-align:right' : '') + '">' +
+        (internal ? '🔒 Заметка · ' : '') +
         (mine ? 'Вы (agent)' : 'Пользователь') + ' · ' + fmtDate(m.createdAt) +
       '</div>' +
     '</div>';
@@ -930,27 +1139,60 @@
     WS.on('support.message_added', function (ev) {
       const d = ev && ev.data;
       if (!d) return;
-      // If the drawer is open on this ticket, append the new bubble live
       if (_supOpenTicketId === d.ticketId) {
         const thread = document.getElementById('suThread');
         if (thread) {
-          thread.insertAdjacentHTML('beforeend', renderOpsBubble({
-            isAdmin: d.message.isAdmin, body: d.message.body,
+          // Insert before the typing indicator (last child)
+          const typingEl = document.getElementById('suTyping');
+          const html = renderOpsBubble({
+            isAdmin: d.message.isAdmin,
+            isInternal: d.message.isInternal,
+            body: d.message.body,
+            attachments: d.message.attachments,
             createdAt: new Date().toISOString(),
-          }));
+          });
+          if (typingEl) typingEl.insertAdjacentHTML('beforebegin', html);
+          else thread.insertAdjacentHTML('beforeend', html);
           thread.scrollTop = thread.scrollHeight;
         }
       }
-      // Also refresh the list to update unread + preview + updatedAt
-      if (document.getElementById('pane-support').classList.contains('active')) {
-        renderSupportList();
-      }
+      if (document.getElementById('pane-support').classList.contains('active')) renderSupportList();
     });
     WS.on('support.ticket_created', function () {
       if (document.getElementById('pane-support').classList.contains('active')) renderSupportList();
     });
+    WS.on('support.assignment_changed', function () {
+      if (document.getElementById('pane-support').classList.contains('active')) renderSupportList();
+    });
+    // Typing indicator — show ellipsis in open drawer
+    WS.on('support.typing', function (ev) {
+      const d = ev && ev.data;
+      if (!d || _supOpenTicketId !== d.ticketId) return;
+      // We only care about USER typing (admin typing is ourselves)
+      if (d.isAdmin) return;
+      const el = document.getElementById('suTyping');
+      if (!el) return;
+      el.style.display = d.state === 'stop' ? 'none' : 'block';
+      // Auto-hide after 5s if we miss a stop event
+      clearTimeout(window._suTypingTimer);
+      if (d.state !== 'stop') {
+        window._suTypingTimer = setTimeout(() => { el.style.display = 'none'; }, 5000);
+      }
+    });
   }
-  loaders.support = function () { loadSupport(); wireSupportWs(); };
+
+  // Presence ping — runs every 30s while Support tab is active so agents
+  // appear "online" to others. Uses visibilitychange to pause when tab
+  // hidden (browser throttles setInterval anyway, but explicit is nice).
+  let _presenceTimer = null;
+  function startPresencePing() {
+    const send = () => { try { API.adminPresencePing(); } catch (_) {} };
+    send();
+    clearInterval(_presenceTimer);
+    _presenceTimer = setInterval(() => { if (!document.hidden) send(); }, 30_000);
+  }
+
+  loaders.support = function () { loadSupport(); wireSupportWs(); startPresencePing(); };
 
   // ── System ────────────────────────────────────────────────────────────
   async function loadSystem() {

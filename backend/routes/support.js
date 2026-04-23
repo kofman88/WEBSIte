@@ -68,8 +68,19 @@ router.get('/tickets/:id', (req, res, next) => {
 router.post('/tickets/:id/reply', (req, res, next) => {
   try {
     const id = z.coerce.number().int().positive().parse(req.params.id);
-    const body = z.object({ body: z.string().min(1).max(10000) }).parse(req.body);
-    res.json(support.reply(id, { userId: req.userId, body: body.body, isAdmin: Boolean(req.isAdmin) }));
+    const body = z.object({
+      body: z.string().min(1).max(10000),
+      attachments: z.array(z.object({
+        name: z.string().max(120),
+        type: z.string().max(40),
+        dataUrl: z.string().max(800_000),
+      })).max(3).optional(),
+    }).parse(req.body);
+    res.json(support.reply(id, {
+      userId: req.userId, body: body.body,
+      isAdmin: Boolean(req.isAdmin),
+      attachments: body.attachments || null,
+    }));
   } catch (err) { handleErr(err, res, next); }
 });
 
@@ -115,8 +126,22 @@ router.get('/admin/tickets/:id', requireAdmin, (req, res, next) => {
 router.post('/admin/tickets/:id/reply', requireAdmin, (req, res, next) => {
   try {
     const id = z.coerce.number().int().positive().parse(req.params.id);
-    const body = z.object({ body: z.string().min(1).max(10000) }).parse(req.body);
-    res.json(support.reply(id, { userId: req.userId, body: body.body, isAdmin: true }));
+    const body = z.object({
+      body: z.string().min(1).max(10000),
+      isInternal: z.boolean().optional().default(false),
+      attachments: z.array(z.object({
+        name: z.string().max(120),
+        type: z.string().max(40),
+        dataUrl: z.string().max(800_000),  // ~600KB base64 → ~450KB original
+      })).max(3).optional(),
+    }).parse(req.body);
+    res.json(support.reply(id, {
+      userId: req.userId,
+      body: body.body,
+      isAdmin: true,
+      isInternal: body.isInternal,
+      attachments: body.attachments || null,
+    }));
   } catch (err) { handleErr(err, res, next); }
 });
 
@@ -125,6 +150,72 @@ router.post('/admin/tickets/:id/mark-read', requireAdmin, (req, res, next) => {
     const id = z.coerce.number().int().positive().parse(req.params.id);
     res.json(support.markReadByAdmin(id));
   } catch (err) { handleErr(err, res, next); }
+});
+
+// Assign ticket. Body may contain `targetAdminId` to assign to someone
+// else; omitted = assign to self.
+router.post('/admin/tickets/:id/assign', requireAdmin, (req, res, next) => {
+  try {
+    const id = z.coerce.number().int().positive().parse(req.params.id);
+    const body = z.object({ targetAdminId: z.number().int().positive().optional() }).parse(req.body || {});
+    res.json(support.assign(id, req.userId, body));
+  } catch (err) { handleErr(err, res, next); }
+});
+router.post('/admin/tickets/:id/unassign', requireAdmin, (req, res, next) => {
+  try {
+    const id = z.coerce.number().int().positive().parse(req.params.id);
+    res.json(support.unassign(id, req.userId));
+  } catch (err) { handleErr(err, res, next); }
+});
+
+// ── Canned-response templates (admin only) ──────────────────────────────
+const templates = require('../services/supportTemplatesService');
+router.get('/admin/templates', requireAdmin, (_req, res, next) => {
+  try { res.json({ templates: templates.list() }); }
+  catch (err) { handleErr(err, res, next); }
+});
+router.post('/admin/templates', requireAdmin, (req, res, next) => {
+  try {
+    const body = z.object({
+      slug: z.string().trim().min(1).max(32),
+      title: z.string().trim().min(1).max(100),
+      body: z.string().trim().min(1).max(4000),
+    }).parse(req.body);
+    res.status(201).json(templates.create({ ...body, createdBy: req.userId }));
+  } catch (err) { handleErr(err, res, next); }
+});
+router.patch('/admin/templates/:id', requireAdmin, (req, res, next) => {
+  try {
+    const id = z.coerce.number().int().positive().parse(req.params.id);
+    const body = z.object({
+      title: z.string().trim().min(1).max(100).optional(),
+      body: z.string().trim().min(1).max(4000).optional(),
+    }).parse(req.body);
+    res.json(templates.update(id, body));
+  } catch (err) { handleErr(err, res, next); }
+});
+router.delete('/admin/templates/:id', requireAdmin, (req, res, next) => {
+  try {
+    const id = z.coerce.number().int().positive().parse(req.params.id);
+    res.json(templates.remove(id));
+  } catch (err) { handleErr(err, res, next); }
+});
+router.post('/admin/templates/:id/use', requireAdmin, (req, res, next) => {
+  try {
+    const id = z.coerce.number().int().positive().parse(req.params.id);
+    templates.bumpUseCount(id);
+    res.json({ ok: true });
+  } catch (err) { handleErr(err, res, next); }
+});
+
+// ── Agent presence — 30s ping from ops panel ───────────────────────────
+const presence = require('../services/supportPresenceService');
+router.post('/admin/presence/ping', requireAdmin, (req, res) => {
+  presence.ping(req.userId);
+  res.json({ ok: true });
+});
+router.get('/admin/presence/online', requireAdmin, (_req, res) => {
+  res.json({ agents: presence.listOnlineAgents() });
 });
 
 // ── Profile privacy toggle (lives here to keep all "community" endpoints together) ──
