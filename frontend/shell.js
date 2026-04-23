@@ -117,6 +117,7 @@
     injectAIAssistantLink();
     injectTerminalLink();
     injectCopyLink();
+    injectSubscriptionsLink();
     if (plan === 'elite') injectMarketScannerLink();
     injectSidebarPromo(plan);
     injectSidebarFooterExtras();
@@ -348,7 +349,7 @@
         + '</a>';
     }
     if (plan !== 'elite') {
-      html += '<a href="settings.html?upgrade=elite" class="shell-pill-upgrade" title="Перейти на Elite">'
+      html += '<a href="subscriptions.html?plan=elite" class="shell-pill-upgrade" title="Перейти на Elite">'
         +   '<svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>'
         +   '<span>Upgrade</span>'
         + '</a>';
@@ -369,7 +370,7 @@
     const isElite = plan === 'elite';
     const promo = document.createElement('a');
     promo.className = 'sidebar-promo';
-    promo.href = isElite ? 'academy/index.html' : 'settings.html?upgrade=elite';
+    promo.href = isElite ? 'academy/index.html' : 'subscriptions.html?plan=elite';
     // Clean line SVG icons — no emoji
     const eliteIcon = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>';
     const academyIcon = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>';
@@ -555,7 +556,7 @@
         '<ul class="shell-plan-next-list">' +
           data.next.unlocks.map((u) => '<li>' + ICON.check + '<span>' + escHtml(u) + '</span></li>').join('') +
         '</ul>' +
-        '<a href="settings.html?upgrade=' + escHtml(data.next.id) + '" class="shell-plan-cta">' +
+        '<a href="subscriptions.html?plan=' + escHtml(data.next.id) + '" class="shell-plan-cta">' +
           'Апгрейд на ' + escHtml(data.next.name) + ' · <span class="mono">$' + data.next.priceUsd + '/мес</span>' +
         '</a>' +
       '</div>'
@@ -621,6 +622,21 @@
     link.setAttribute('data-page', 'copy');
     link.innerHTML = '<svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 14.66V20a2 2 0 01-2 2H4a2 2 0 01-2-2V6a2 2 0 012-2h5.34"/><polygon points="18 2 22 6 12 16 8 16 8 12 18 2"/></svg>Copy';
     anchor.parentNode.insertBefore(link, anchor.nextSibling);
+  }
+
+  // Subscriptions sidebar link — always present for authed users.
+  // Inserted between Leaderboard and Настройки (or before Настройки if
+  // Leaderboard is missing). Idempotent.
+  function injectSubscriptionsLink() {
+    if (document.querySelector('.sidebar-link[data-page="subscriptions"]')) return;
+    const settings = document.querySelector('.sidebar-link[data-page="settings"]');
+    if (!settings) return;
+    const link = document.createElement('a');
+    link.href = 'subscriptions.html';
+    link.className = 'sidebar-link';
+    link.setAttribute('data-page', 'subscriptions');
+    link.innerHTML = '<svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg>Подписки';
+    settings.parentNode.insertBefore(link, settings);
   }
 
   // ── 3 & 4. Topbar toggles ──────────────────────────────────────────────
