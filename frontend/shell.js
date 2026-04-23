@@ -370,14 +370,17 @@
     const promo = document.createElement('a');
     promo.className = 'sidebar-promo';
     promo.href = isElite ? 'academy/index.html' : 'settings.html?upgrade=elite';
+    // Clean line SVG icons — no emoji
+    const eliteIcon = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>';
+    const academyIcon = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>';
     promo.innerHTML = isElite
-      ? '<div class="sidebar-promo-ic">📚</div>'
+      ? '<div class="sidebar-promo-ic">' + academyIcon + '</div>'
         + '<div class="sidebar-promo-body">'
         +   '<div class="sidebar-promo-title">Академия CHM</div>'
         +   '<div class="sidebar-promo-sub">Разборы стратегий SMC, Gerchik, DCA — бесплатно.</div>'
         + '</div>'
         + '<div class="sidebar-promo-arrow">→</div>'
-      : '<div class="sidebar-promo-ic">★</div>'
+      : '<div class="sidebar-promo-ic">' + eliteIcon + '</div>'
         + '<div class="sidebar-promo-body">'
         +   '<div class="sidebar-promo-title">Elite · Market Scanner</div>'
         +   '<div class="sidebar-promo-sub">Сканирует весь рынок × мульти-стратегии. 7 дней бесплатно.</div>'
@@ -487,6 +490,27 @@
       renderDropdown(dd, '<div style="padding:24px;text-align:center;color:#C8A0A0;font-size:12px">Не удалось загрузить</div>');
       return;
     }
+    // Premium inline SVG icons — no emoji. 16×16, 1.8 stroke, Aura orange.
+    const ICON = (() => {
+      const mk = (path) => '<svg class="shell-plan-metric-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' + path + '</svg>';
+      return {
+        // Bot head with antenna
+        bot:       mk('<rect x="4" y="8" width="16" height="12" rx="3"/><path d="M12 8V4"/><circle cx="12" cy="3" r="1"/><circle cx="9" cy="13" r="1" fill="currentColor"/><circle cx="15" cy="13" r="1" fill="currentColor"/><path d="M9 17h6"/>'),
+        // Lightning bolt
+        signal:    mk('<path d="M13 2 3 14h7l-1 8 10-12h-7l1-8z"/>'),
+        // Key
+        key:       mk('<circle cx="8" cy="15" r="4"/><path d="m10.9 12.1 9.4-9.4"/><path d="m18 5 3 3"/><path d="m15 8 3 3"/>'),
+        // Chart / backtest (bars + trend line)
+        chart:     mk('<path d="M3 3v18h18"/><rect x="7"  y="13" width="3" height="5"/><rect x="12" y="9"  width="3" height="9"/><rect x="17" y="6"  width="3" height="12"/>'),
+        // Rocket for "what unlocks next"
+        rocket:    mk('<path d="M4.5 16.5c-1.5 1.26-2 5-2 5s3.74-.5 5-2c.71-.84.7-2.13-.09-2.91a2.18 2.18 0 0 0-2.91-.09z"/><path d="m12 15-3-3a22 22 0 0 1 2-3.95A12.88 12.88 0 0 1 22 2c0 2.72-.78 7.5-6 11a22.35 22.35 0 0 1-4 2z"/><path d="M9 12H4s.55-3.03 2-4c1.62-1.08 5 0 5 0"/><path d="M12 15v5s3.03-.55 4-2c1.08-1.62 0-5 0-5"/>'),
+        // Crown for max-plan state
+        crown:     mk('<path d="M2 10 5 4l5 5 2-5 2 5 5-5 3 6-3 9H5L2 10z"/><path d="M5 19h14"/>'),
+        // Check for unlock bullets
+        check:     mk('<polyline points="20 6 9 17 4 12"/>'),
+      };
+    })();
+
     const escHtml = (s) => String(s == null ? '' : s).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
     const PLAN_ORDER = ['free', 'starter', 'pro', 'elite'];
     const curIdx = PLAN_ORDER.indexOf(data.plan.id);
@@ -499,15 +523,15 @@
       return '<span class="' + cls + '">' + id.charAt(0).toUpperCase() + id.slice(1) + '</span>';
     }).join('<span class="shell-plan-ladder-sep">›</span>');
 
-    // Progress bars
-    const bar = (label, icon, used, limit) => {
+    // Progress bars with SVG icons in a rounded chip
+    const bar = (label, iconSvg, used, limit) => {
       const unlim = limit === null || limit === undefined;
       const pct = unlim ? 0 : Math.min(100, Math.round((used / Math.max(1, limit)) * 100));
       const pctColor = pct >= 90 ? '#ef4444' : pct >= 70 ? '#FF8C5A' : '#4ade80';
       const valueText = unlim ? used + ' <span style="opacity:.45">/ ∞</span>' : used + ' <span style="opacity:.45">/ ' + limit + '</span>';
       return '<div class="shell-plan-metric">' +
         '<div class="shell-plan-metric-head">' +
-          '<span class="shell-plan-metric-label">' + icon + ' ' + escHtml(label) + '</span>' +
+          '<span class="shell-plan-metric-label"><span class="shell-plan-metric-ic-wrap">' + iconSvg + '</span>' + escHtml(label) + '</span>' +
           '<span class="shell-plan-metric-value mono">' + valueText + '</span>' +
         '</div>' +
         '<div class="shell-plan-metric-bar">' +
@@ -524,9 +548,12 @@
 
     const nextHtml = data.next ? (
       '<div class="shell-plan-next">' +
-        '<div class="shell-plan-next-head">🚀 На ' + escHtml(data.next.name) + ' откроется</div>' +
+        '<div class="shell-plan-next-head">' +
+          '<span class="shell-plan-next-ic-wrap">' + ICON.rocket + '</span>' +
+          'На ' + escHtml(data.next.name) + ' откроется' +
+        '</div>' +
         '<ul class="shell-plan-next-list">' +
-          data.next.unlocks.map((u) => '<li>' + escHtml(u) + '</li>').join('') +
+          data.next.unlocks.map((u) => '<li>' + ICON.check + '<span>' + escHtml(u) + '</span></li>').join('') +
         '</ul>' +
         '<a href="settings.html?upgrade=' + escHtml(data.next.id) + '" class="shell-plan-cta">' +
           'Апгрейд на ' + escHtml(data.next.name) + ' · <span class="mono">$' + data.next.priceUsd + '/мес</span>' +
@@ -534,8 +561,9 @@
       '</div>'
     ) : (
       '<div class="shell-plan-max">' +
-        '<div style="font-size:20px;text-align:center;margin-bottom:4px">👑</div>' +
-        '<div style="text-align:center;font-size:12px;color:rgba(255,255,255,.7)">Ты на максимальном плане. Спасибо!</div>' +
+        '<div class="shell-plan-max-ic-wrap">' + ICON.crown + '</div>' +
+        '<div style="text-align:center;font-size:12.5px;font-weight:600;color:#FDE047;margin-top:6px">Ты на максимальном плане</div>' +
+        '<div style="text-align:center;font-size:11px;color:rgba(255,255,255,.5);margin-top:2px">Все фичи CHM Finance доступны</div>' +
       '</div>'
     );
 
@@ -545,10 +573,10 @@
       '</div>' +
       '<div class="shell-plan-ladder">' + ladder + '</div>' +
       '<div class="shell-plan-metrics">' +
-        bar('Активные боты',      '<span style="color:#FF8C5A">▦</span>', data.usage.bots.used,      data.usage.bots.limit) +
-        bar('Сигналов сегодня',    '<span style="color:#FF8C5A">⚡</span>', data.usage.signals.used,   data.usage.signals.limit) +
-        bar('API-ключи бирж',      '<span style="color:#FF8C5A">🔑</span>', data.usage.keys.used,      data.usage.keys.limit) +
-        bar('Бэктесты в месяце',   '<span style="color:#FF8C5A">🎯</span>', data.usage.backtests.used, data.usage.backtests.limit) +
+        bar('Активные боты',     ICON.bot,    data.usage.bots.used,      data.usage.bots.limit) +
+        bar('Сигналов сегодня',  ICON.signal, data.usage.signals.used,   data.usage.signals.limit) +
+        bar('API-ключи бирж',    ICON.key,    data.usage.keys.used,      data.usage.keys.limit) +
+        bar('Бэктесты в месяце', ICON.chart,  data.usage.backtests.used, data.usage.backtests.limit) +
       '</div>' +
       nextHtml
     );
