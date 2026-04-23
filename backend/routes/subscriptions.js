@@ -120,9 +120,11 @@ router.get('/usage', authMiddleware, (req, res) => {
   try {
     const db = require('../models/database');
     const plans = require('../config/plans');
-    const sub = db.prepare(
-      'SELECT plan, status, expires_at, trial_ends_at FROM subscriptions WHERE user_id = ?'
-    ).get(req.userId) || { plan: 'free' };
+    // Route through subscriptionService.getUserSubscription — it handles
+    // expired-sub auto-downgrade + auto-pauses Elite-only market bots.
+    // A raw SELECT here would silently keep showing "Pro" to an expired
+    // user until some other endpoint triggered the downgrade.
+    const sub = subscriptionService.getUserSubscription(req.userId);
     const plan = plans.getPlan(sub.plan) || plans.getPlan('free');
     const order = plans.PLAN_ORDER;
     const idx = order.indexOf(plan.id);
