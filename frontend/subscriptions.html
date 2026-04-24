@@ -160,11 +160,22 @@
       display:flex;flex-wrap:wrap;justify-content:center;align-items:center;
       gap:28px;margin-bottom:48px
     }
-    .sub-pay-row .sub-pay-logo{
-      height:28px;display:inline-flex;align-items:center;
-      color:rgba(255,255,255,.6);font-weight:700;font-size:13px;letter-spacing:.02em
+    .sub-pay-logo{
+      display:inline-flex;align-items:center;gap:6px;
+      height:30px;color:rgba(255,255,255,.65);
+      transition:color .2s,transform .2s,filter .2s;
+      cursor:default
     }
-    html.light .sub-pay-row .sub-pay-logo{color:rgba(10,10,10,.5)}
+    .sub-pay-logo:hover{color:#fff;transform:translateY(-1px);filter:brightness(1.08)}
+    html.light .sub-pay-logo{color:rgba(10,10,10,.65)}
+    html.light .sub-pay-logo:hover{color:#0A0A0A}
+    .sub-pay-logo svg{height:28px;width:auto;display:block}
+    .sub-pay-logo-sub{
+      font-size:9px;font-weight:700;letter-spacing:.08em;
+      padding:2px 6px;border-radius:4px;
+      background:rgba(255,255,255,.06);color:rgba(255,255,255,.7)
+    }
+    html.light .sub-pay-logo-sub{background:rgba(0,0,0,.05);color:rgba(10,10,10,.7)}
 
     /* Compare table */
     .sub-compare-title{font-size:24px;font-weight:700;margin-bottom:24px;letter-spacing:-.02em}
@@ -308,16 +319,52 @@
       </div>
     </div>
 
-    <!-- Payment methods -->
+    <!-- Payment methods — inline brand SVGs, mono-tinted for dark/light harmony -->
     <div class="sub-pay-label">Доступные способы оплаты</div>
     <div class="sub-pay-row">
-      <span class="sub-pay-logo" title="Visa">VISA</span>
-      <span class="sub-pay-logo" title="Mastercard">MC</span>
-      <span class="sub-pay-logo" title="Apple Pay"> Pay</span>
-      <span class="sub-pay-logo" title="Google Pay">G Pay</span>
-      <span class="sub-pay-logo" title="USDT BEP20">USDT</span>
-      <span class="sub-pay-logo" title="USDT TRC20">USDT (TRC20)</span>
-      <span class="sub-pay-logo" title="Bitcoin">BTC</span>
+      <span class="sub-pay-logo" title="Visa">
+        <svg viewBox="0 0 48 16" xmlns="http://www.w3.org/2000/svg" aria-label="Visa">
+          <path fill="currentColor" d="M18.7 15.3 21.4.7h4.3l-2.7 14.6h-4.3zm20-14.2c-.85-.33-2.19-.7-3.87-.7-4.27 0-7.27 2.28-7.3 5.55-.02 2.41 2.15 3.76 3.8 4.56 1.7.82 2.27 1.34 2.26 2.08-.01 1.12-1.34 1.63-2.58 1.63-1.72 0-2.64-.25-4.05-.87l-.55-.26-.6 3.73c1 .46 2.85.86 4.77.88 4.55 0 7.5-2.25 7.53-5.74.02-1.91-1.14-3.37-3.65-4.56-1.52-.77-2.45-1.28-2.44-2.06 0-.69.78-1.43 2.48-1.43 1.41-.02 2.44.3 3.24.64l.39.19.58-3.63zM45 .7h-3.3c-1.03 0-1.8.3-2.25 1.38L32.5 15.3h4.54s.74-2.06.91-2.5l5.55 0c.13.58.52 2.5.52 2.5H48L45 .7zM39.2 9.3c.36-.96 1.73-4.68 1.73-4.68-.02.04.36-.98.58-1.61l.29 1.45s.83 4 1 4.84H39.2zM14.05.7 9.82 10.67l-.45-2.32c-.79-2.67-3.23-5.56-5.97-7L7.26 15.3h4.58L18.62.7h-4.57z"/>
+          <path fill="currentColor" opacity=".6" d="M5.85.7H.55L.5 1.05c4.12 1.05 6.85 3.58 7.98 6.62L7.33 2.09C7.13 1.05 6.38.72 5.85.7z"/>
+        </svg>
+      </span>
+
+      <span class="sub-pay-logo" title="Mastercard">
+        <svg viewBox="0 0 36 22" xmlns="http://www.w3.org/2000/svg" aria-label="Mastercard">
+          <circle cx="12" cy="11" r="9" fill="#EB001B"/>
+          <circle cx="24" cy="11" r="9" fill="#F79E1B"/>
+          <path d="M18 4.5a9 9 0 010 13 9 9 0 010-13z" fill="#FF5F00"/>
+        </svg>
+      </span>
+
+      <span class="sub-pay-logo" title="Google Pay">
+        <svg viewBox="0 0 56 22" xmlns="http://www.w3.org/2000/svg" aria-label="Google Pay">
+          <path fill="#4285F4" d="M9.5 10.7h3.8c-.16 1.9-1.77 3.2-3.8 3.2-2.3 0-4.1-1.85-4.1-4.15S7.2 5.6 9.5 5.6c1.1 0 2.05.38 2.8 1.13l1.47-1.47A5.5 5.5 0 0 0 9.5 3.7 6.15 6.15 0 0 0 3.35 9.75 6.15 6.15 0 0 0 9.5 15.9a5.6 5.6 0 0 0 5.78-5.82c0-.4-.04-.68-.1-1H9.5v1.62z"/>
+          <path fill="currentColor" d="M20 8.3c-1.62 0-2.92.75-3.5 1.8l1.55.66c.33-.67 1-.95 1.85-.95 1.15 0 1.92.62 1.92 1.65v.13c-.35-.2-1.1-.5-1.92-.5-1.75 0-3.4 1-3.4 2.8 0 1.65 1.45 2.7 3 2.7 1.1 0 1.8-.5 2.3-1.2v1h1.95V11.4c0-2.1-1.55-3.1-3.75-3.1zm-.12 5.8c-.7 0-1.55-.34-1.55-1.2 0-1.03 1.1-1.4 2.07-1.4.85 0 1.26.18 1.77.44-.15 1.15-1.15 2.16-2.3 2.16zM29.4 8.5l-2.25 5.68L24.86 8.5h-2.15l3.4 7.72-1.93 4.3h2.1l5.22-12.02H29.4zM36.6 3.9h-3.7V16h2.06v-4.3h1.64c1.95 0 3.54-1.4 3.54-3.4 0-2-1.6-3.4-3.54-3.4zm.06 4.87h-1.7V5.83h1.7c1.04 0 1.63.88 1.63 1.47s-.6 1.47-1.63 1.47zM46.1 8.3c-1.63 0-2.93.75-3.5 1.8l1.54.66c.33-.67 1-.95 1.86-.95 1.15 0 1.92.62 1.92 1.65v.13c-.35-.2-1.1-.5-1.92-.5-1.75 0-3.4 1-3.4 2.8 0 1.65 1.45 2.7 3 2.7 1.1 0 1.8-.5 2.3-1.2v1h1.96V11.4c0-2.1-1.55-3.1-3.76-3.1zm-.12 5.8c-.7 0-1.55-.34-1.55-1.2 0-1.03 1.1-1.4 2.07-1.4.85 0 1.26.18 1.77.44-.15 1.15-1.15 2.16-2.3 2.16z"/>
+        </svg>
+      </span>
+
+      <span class="sub-pay-logo" title="USDT (BEP20 / ERC20)">
+        <svg viewBox="0 0 28 28" xmlns="http://www.w3.org/2000/svg" aria-label="USDT">
+          <circle cx="14" cy="14" r="14" fill="#26A17B"/>
+          <path fill="#fff" d="M15.7 15.2v-.01c-.09.01-.56.04-1.6.04-.83 0-1.43-.03-1.63-.04v.01c-3.15-.14-5.5-.69-5.5-1.35 0-.65 2.35-1.2 5.5-1.35v2.14c.21.02.82.06 1.65.06 1 0 1.5-.04 1.58-.05v-2.15c3.14.15 5.48.7 5.48 1.35 0 .66-2.34 1.21-5.48 1.35m0-2.92v-1.92h4.4V7.43H7.63v2.93h4.4v1.92c-3.58.17-6.27.87-6.27 1.73 0 .85 2.69 1.56 6.27 1.73v6.16h3.67V15.74c3.57-.17 6.26-.88 6.26-1.73 0-.86-2.69-1.56-6.26-1.73"/>
+        </svg>
+      </span>
+
+      <span class="sub-pay-logo" title="USDT (TRC20)">
+        <svg viewBox="0 0 28 28" xmlns="http://www.w3.org/2000/svg" aria-label="USDT TRC20">
+          <circle cx="14" cy="14" r="14" fill="#26A17B"/>
+          <path fill="#fff" d="M15.7 15.2v-.01c-.09.01-.56.04-1.6.04-.83 0-1.43-.03-1.63-.04v.01c-3.15-.14-5.5-.69-5.5-1.35 0-.65 2.35-1.2 5.5-1.35v2.14c.21.02.82.06 1.65.06 1 0 1.5-.04 1.58-.05v-2.15c3.14.15 5.48.7 5.48 1.35 0 .66-2.34 1.21-5.48 1.35m0-2.92v-1.92h4.4V7.43H7.63v2.93h4.4v1.92c-3.58.17-6.27.87-6.27 1.73 0 .85 2.69 1.56 6.27 1.73v6.16h3.67V15.74c3.57-.17 6.26-.88 6.26-1.73 0-.86-2.69-1.56-6.26-1.73"/>
+        </svg>
+        <span class="sub-pay-logo-sub">TRC20</span>
+      </span>
+
+      <span class="sub-pay-logo" title="Bitcoin">
+        <svg viewBox="0 0 28 28" xmlns="http://www.w3.org/2000/svg" aria-label="Bitcoin">
+          <circle cx="14" cy="14" r="14" fill="#F7931A"/>
+          <path fill="#fff" d="M19.56 12.43c.28-1.87-1.15-2.88-3.1-3.55l.64-2.54-1.54-.38-.62 2.47c-.41-.1-.83-.2-1.24-.29l.62-2.48-1.54-.38-.63 2.54c-.34-.08-.67-.15-.99-.23v-.01l-2.13-.53-.41 1.64s1.14.26 1.12.28c.62.15.74.57.72.9l-.72 2.9c.04 0 .1.03.16.06l-.17-.04-1.01 4.06c-.08.2-.28.48-.71.38.02.02-1.12-.28-1.12-.28l-.76 1.76 2 .5.82.22-.65 2.57 1.54.38.63-2.54c.42.12.83.22 1.23.32l-.63 2.53 1.54.38.64-2.56c2.64.5 4.62.3 5.45-2.08.67-1.91-.03-3.02-1.42-3.74 1-.24 1.77-.9 1.98-2.26zm-3.54 4.95c-.48 1.9-3.7.88-4.74.62l.85-3.4c1.04.26 4.4.78 3.89 2.78zm.48-4.97c-.44 1.73-3.11.85-3.98.64l.77-3.09c.87.22 3.66.63 3.2 2.45z"/>
+        </svg>
+      </span>
     </div>
 
     <!-- Compare table -->
