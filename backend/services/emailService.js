@@ -103,24 +103,25 @@ function baseHtml(title, body, cta) {
 }
 function escape(s){return String(s).replace(/[&<>"']/g,c=>({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'})[c])}
 
-function sendVerification(to, token, { displayName } = {}) {
+// Verification + reset go through the durable outbox — losing one of these
+// to a transient SMTP error would lock the user out of the account flow.
+// Wrapped in Promise.resolve so legacy callers can still .catch() it.
+async function sendVerification(to, token, { displayName } = {}) {
   const templates = require('./emailTemplates');
   const t = templates.emailVerify({
     displayName,
-    // GET /api/auth/verify-email/:token → auto-redirects to /?verified=1
-    // (previously pointed to /verify-email.html which doesn't exist)
     verifyUrl: `${appUrl()}/api/auth/verify-email/${encodeURIComponent(token)}`,
   });
-  return send({ to, subject: t.subject, text: t.text, html: t.html });
+  return sendDurable({ to, subject: t.subject, text: t.text, html: t.html });
 }
 
-function sendPasswordReset(to, token, { displayName, ipAddress } = {}) {
+async function sendPasswordReset(to, token, { displayName, ipAddress } = {}) {
   const templates = require('./emailTemplates');
   const t = templates.passwordReset({
     displayName, ipAddress,
     resetUrl: `${appUrl()}/?reset=${encodeURIComponent(token)}`,
   });
-  return send({ to, subject: t.subject, text: t.text, html: t.html });
+  return sendDurable({ to, subject: t.subject, text: t.text, html: t.html });
 }
 
 function sendTradeAlert(to, { symbol, side, pnl, status }) {
@@ -164,9 +165,112 @@ function isSuppressed(email) {
   return Boolean(db.prepare(`SELECT 1 FROM email_bounces WHERE email = ? AND suppressed = 1 LIMIT 1`).get(email));
 }
 
+// ── Durable outbox ─────────────────────────────────────────────────────
+// For payment-critical emails (receipts, verification, reset) we don't
+// want a transient SMTP blip to silently lose the message. sendDurable()
+// inserts a row into email_outbox and returns immediately; a tick worker
+// (started below in non-test envs) drains the table with exponential
+// backoff. After max_attempts, the row stays as status='failed' so it
+// can be inspected/replayed by an admin.
+function sendDurable({ to, subject, html, text, maxAttempts = 5 }) {
+  if (!to || !subject) throw new Error('sendDurable: to + subject required');
+  // Suppression check up-front — saves a row + a doomed retry loop.
+  try {
+    const db = require('../models/database');
+    const supp = db.prepare('SELECT 1 FROM email_bounces WHERE email = ? AND suppressed = 1 LIMIT 1').get(to);
+    if (supp) {
+      logger.info('email suppressed (durable) — prior bounce', { to, subject });
+      return { queued: false, suppressed: true };
+    }
+    const info = db.prepare(`
+      INSERT INTO email_outbox (to_addr, subject, html, text, max_attempts)
+      VALUES (?, ?, ?, ?, ?)
+    `).run(to, subject, html || null, text || null, maxAttempts);
+    return { queued: true, id: info.lastInsertRowid };
+  } catch (err) {
+    // Table may not exist on a brand-new test DB before migrations run —
+    // fall back to fire-and-forget so we never lose a pre-migration email.
+    logger.warn('email outbox unavailable, falling back to direct send', { err: err.message });
+    send({ to, subject, html, text }).catch(() => {});
+    return { queued: false, fallbackSent: true };
+  }
+}
+
+const TICK_INTERVAL_MS = Number(process.env.EMAIL_TICK_MS) || 30_000;
+const BATCH_SIZE = 25;
+const BACKOFF_MIN = [1, 2, 4, 8, 16]; // minutes per attempt
+
+let _tickStarted = false;
+function startOutboxTick() {
+  if (_tickStarted) return;
+  _tickStarted = true;
+  const fire = async () => {
+    let due = [];
+    try {
+      const db = require('../models/database');
+      due = db.prepare(`
+        SELECT id, to_addr, subject, html, text, attempts, max_attempts
+          FROM email_outbox
+         WHERE status = 'pending' AND next_attempt_at <= CURRENT_TIMESTAMP
+         ORDER BY id ASC LIMIT ?
+      `).all(BATCH_SIZE);
+    } catch (err) {
+      logger.warn('outbox tick: query failed', { err: err.message });
+      return;
+    }
+    for (const row of due) {
+      // eslint-disable-next-line no-await-in-loop
+      const r = await send({ to: row.to_addr, subject: row.subject, html: row.html, text: row.text });
+      const db = require('../models/database');
+      if (r.delivered || r.dryRun || r.suppressed) {
+        db.prepare(`UPDATE email_outbox SET status = 'sent', sent_at = CURRENT_TIMESTAMP WHERE id = ?`).run(row.id);
+      } else {
+        const attempts = row.attempts + 1;
+        if (attempts >= row.max_attempts) {
+          db.prepare(`UPDATE email_outbox SET status = 'failed', attempts = ?, last_error = ? WHERE id = ?`)
+            .run(attempts, (r.error || 'unknown').slice(0, 500), row.id);
+          logger.warn('email outbox: dead-lettered', { id: row.id, to: row.to_addr });
+        } else {
+          const mins = BACKOFF_MIN[Math.min(attempts - 1, BACKOFF_MIN.length - 1)];
+          db.prepare(`
+            UPDATE email_outbox
+               SET attempts = ?, last_error = ?,
+                   next_attempt_at = datetime(CURRENT_TIMESTAMP, '+' || ? || ' minutes')
+             WHERE id = ?
+          `).run(attempts, (r.error || 'unknown').slice(0, 500), mins, row.id);
+        }
+      }
+    }
+  };
+  // Fire once at startup (after a small delay so DB is ready), then on interval
+  setTimeout(() => { fire().catch(() => {}); }, 5_000);
+  const handle = setInterval(() => { fire().catch(() => {}); }, TICK_INTERVAL_MS);
+  if (handle && handle.unref) handle.unref(); // don't keep the process alive on shutdown
+}
+if (process.env.NODE_ENV !== 'test' && process.env.VITEST !== 'true') startOutboxTick();
+
 module.exports = {
-  send, sendVerification, sendPasswordReset, sendTradeAlert,
+  send, sendDurable, sendVerification, sendPasswordReset, sendTradeAlert,
   randomToken, hashToken, appUrl,
   logBounce, isSuppressed,
   _transport: () => transport(),
+  _tickOnce: async () => { /* test hook: drain once */
+    _tickStarted = true;
+    const db = require('../models/database');
+    const due = db.prepare(`SELECT id, to_addr, subject, html, text, attempts, max_attempts FROM email_outbox WHERE status='pending' AND next_attempt_at <= CURRENT_TIMESTAMP ORDER BY id ASC LIMIT 100`).all();
+    for (const row of due) {
+      // eslint-disable-next-line no-await-in-loop
+      const r = await send({ to: row.to_addr, subject: row.subject, html: row.html, text: row.text });
+      if (r.delivered || r.dryRun || r.suppressed) {
+        db.prepare(`UPDATE email_outbox SET status='sent', sent_at=CURRENT_TIMESTAMP WHERE id=?`).run(row.id);
+      } else {
+        const attempts = row.attempts + 1;
+        if (attempts >= row.max_attempts) {
+          db.prepare(`UPDATE email_outbox SET status='failed', attempts=?, last_error=? WHERE id=?`).run(attempts, (r.error || '').slice(0, 500), row.id);
+        } else {
+          db.prepare(`UPDATE email_outbox SET attempts=?, last_error=?, next_attempt_at=datetime(CURRENT_TIMESTAMP,'+1 minutes') WHERE id=?`).run(attempts, (r.error || '').slice(0, 500), row.id);
+        }
+      }
+    }
+  },
 };

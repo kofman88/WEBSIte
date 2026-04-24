@@ -143,6 +143,36 @@ const MIGRATIONS = [
       `);
     },
   },
+  {
+    version: 7,
+    name: 'email_outbox',
+    up(db) {
+      // Durable retry queue for high-importance emails (payment receipts,
+      // verification, password reset). Fire-and-forget sends still use
+      // emailService.send() directly; durable callers go through
+      // emailService.sendDurable() which inserts here and returns
+      // immediately. A worker tick (in emailService) drains the table
+      // with exponential backoff: 1m, 2m, 4m, 8m, 16m, then DLQ.
+      db.exec(`
+        CREATE TABLE IF NOT EXISTS email_outbox (
+          id              INTEGER PRIMARY KEY AUTOINCREMENT,
+          to_addr         TEXT    NOT NULL,
+          subject         TEXT    NOT NULL,
+          html            TEXT,
+          text            TEXT,
+          attempts        INTEGER NOT NULL DEFAULT 0,
+          max_attempts    INTEGER NOT NULL DEFAULT 5,
+          status          TEXT    NOT NULL DEFAULT 'pending',
+          last_error      TEXT,
+          next_attempt_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+          created_at      DATETIME DEFAULT CURRENT_TIMESTAMP,
+          sent_at         DATETIME
+        );
+        CREATE INDEX IF NOT EXISTS idx_outbox_due
+          ON email_outbox(status, next_attempt_at);
+      `);
+    },
+  },
 ];
 
 function ensureTable(db) {

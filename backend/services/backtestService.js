@@ -1,8 +1,14 @@
 /**
  * Backtest service — CRUD + queuing.
  *
- * Uses backtestEngine.runBacktest() behind an async p-queue (concurrency 2
- * server-wide to prevent CPU saturation). Per-user caps enforced here.
+ * Uses backtestEngine.runBacktest() behind an async p-queue (concurrency
+ * tunable via BACKTEST_CONCURRENCY env, default 2). Per-user caps enforced
+ * here: daily cap by plan + max in-flight (running+pending) so one user
+ * can't monopolise the queue.
+ *
+ * On startup we recover from a hard restart by:
+ *   - marking any leftover status='running' as 'failed' (interrupted)
+ *   - re-enqueueing leftover status='pending' so jobs aren't lost forever
  */
 
 const PQueue = require('p-queue').default;
@@ -11,8 +17,46 @@ const engine = require('./backtestEngine');
 const plans = require('../config/plans');
 const logger = require('../utils/logger');
 
-const GLOBAL_CONCURRENCY = 2;
+const GLOBAL_CONCURRENCY = Number(process.env.BACKTEST_CONCURRENCY) || 2;
+// Cap per-user queue depth — a user with a high daily limit could otherwise
+// stuff dozens of jobs in front of everyone else's. Counts both 'running'
+// and 'pending' so a slow run still leaves capacity for others.
+const PER_USER_INFLIGHT_CAP = Number(process.env.BACKTEST_PER_USER_INFLIGHT) || 3;
 const runQueue = new PQueue({ concurrency: GLOBAL_CONCURRENCY });
+
+function _enqueue(id) {
+  runQueue.add(async () => {
+    try {
+      await engine.runBacktest(id);
+    } catch (err) {
+      logger.warn('bt queue runner: failure', { id, err: err.message });
+      // runBacktest already persists status='failed'
+    }
+  });
+}
+
+// Run once at module-load (server start). Fires synchronously so by the time
+// /api/backtests handlers are ready, recovery has already updated the DB.
+function _recoverOnStartup() {
+  try {
+    const stuck = db.prepare(`
+      UPDATE backtests
+         SET status = 'failed',
+             error_message = 'Interrupted by server restart',
+             completed_at = CURRENT_TIMESTAMP
+       WHERE status = 'running'
+    `).run();
+    if (stuck.changes) logger.info('bt: marked interrupted runs as failed', { count: stuck.changes });
+
+    const pending = db.prepare(`SELECT id FROM backtests WHERE status = 'pending' ORDER BY id ASC`).all();
+    for (const row of pending) _enqueue(row.id);
+    if (pending.length) logger.info('bt: re-enqueued pending runs', { count: pending.length });
+  } catch (err) {
+    logger.warn('bt: startup recovery failed', { err: err.message });
+  }
+}
+// Skip recovery in test env so tests don't pick up rows from a previous run.
+if (process.env.NODE_ENV !== 'test' && process.env.VITEST !== 'true') _recoverOnStartup();
 
 function createBacktest(userId, cfg) {
   // Plan gating — daily cap
@@ -33,6 +77,20 @@ function createBacktest(userId, cfg) {
       err.requiredPlan = limits.backtestsPerDay === 0 ? 'pro' : 'elite';
       throw err;
     }
+  }
+
+  // In-flight cap — protects shared queue from one greedy user
+  const inflight = db.prepare(`
+    SELECT COUNT(*) as n FROM backtests
+    WHERE user_id = ? AND status IN ('pending', 'running')
+  `).get(userId).n;
+  if (inflight >= PER_USER_INFLIGHT_CAP) {
+    const err = new Error(
+      `You already have ${inflight} backtests running or pending. Wait for them to finish.`,
+    );
+    err.statusCode = 429;
+    err.code = 'BACKTEST_INFLIGHT_LIMIT';
+    throw err;
   }
 
   // Strategy gating
@@ -66,14 +124,7 @@ function createBacktest(userId, cfg) {
   const id = result.lastInsertRowid;
 
   // Enqueue async run (fire-and-forget; the engine persists status itself)
-  runQueue.add(async () => {
-    try {
-      await engine.runBacktest(id);
-    } catch (err) {
-      logger.warn('bt queue runner: failure', { id, err: err.message });
-      // runBacktest already persists status='failed'
-    }
-  });
+  _enqueue(id);
 
   return getBacktest(id, userId);
 }
