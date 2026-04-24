@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html lang="ru" class="aura-page">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+  <title>Как настроить торгового бота на Bybit за 10 минут — CHM Finance</title>
+  <meta name="description" content="Пошаговая инструкция: как подключить Bybit к торговому боту, безопасно создать API-ключи, запустить первую стратегию. Чек-лист + разбор частых ошибок."/>
+  <meta name="keywords" content="как настроить бота на Bybit, бот Bybit инструкция, Bybit API ключи, автоторговля Bybit, торговый бот Bybit безопасность"/>
+  <meta name="robots" content="index,follow,max-image-preview:large"/>
+  <meta name="theme-color" content="#0A0A0A"/>
+  <link rel="canonical" href="https://chmup.top/blog/kak-nastroit-bota-na-bybit/"/>
+  <meta property="og:type" content="article"/>
+  <meta property="og:site_name" content="CHM Finance"/>
+  <meta property="og:title" content="Как настроить торгового бота на Bybit за 10 минут"/>
+  <meta property="og:description" content="От регистрации API-ключа до первой сделки. Безопасные настройки + чек-лист."/>
+  <meta property="og:url" content="https://chmup.top/blog/kak-nastroit-bota-na-bybit/"/>
+  <meta property="og:image" content="https://chmup.top/og-cover.png"/>
+  <meta property="og:locale" content="ru_RU"/>
+  <meta property="article:published_time" content="2026-04-24"/>
+  <meta property="article:author" content="CHM Finance"/>
+  <meta property="article:section" content="Trading Bots"/>
+  <meta property="article:tag" content="Bybit"/>
+  <meta property="article:tag" content="Trading Bot"/>
+  <meta property="article:tag" content="API"/>
+  <meta name="twitter:card" content="summary_large_image"/>
+  <meta name="twitter:title" content="Как настроить бота на Bybit за 10 минут"/>
+  <meta name="twitter:description" content="Пошаговая инструкция: от API-ключа до первой сделки."/>
+  <meta name="twitter:image" content="https://chmup.top/og-cover.png"/>
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg"/>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet"/>
+
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "Article",
+    "headline": "Как настроить торгового бота на Bybit за 10 минут",
+    "description": "Пошаговая инструкция: как подключить Bybit к торговому боту, безопасно создать API-ключи, запустить первую стратегию.",
+    "author": { "@type": "Organization", "name": "CHM Finance", "url": "https://chmup.top/" },
+    "publisher": {
+      "@type": "Organization",
+      "name": "CHM Finance",
+      "logo": { "@type": "ImageObject", "url": "https://chmup.top/logo.png" }
+    },
+    "datePublished": "2026-04-24",
+    "dateModified": "2026-04-24",
+    "mainEntityOfPage": {
+      "@type": "WebPage",
+      "@id": "https://chmup.top/blog/kak-nastroit-bota-na-bybit/"
+    },
+    "image": "https://chmup.top/og-cover.png",
+    "inLanguage": "ru-RU",
+    "wordCount": 1800
+  }
+  </script>
+
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    "itemListElement": [
+      {"@type":"ListItem","position":1,"name":"Главная","item":"https://chmup.top/"},
+      {"@type":"ListItem","position":2,"name":"Блог","item":"https://chmup.top/blog/"},
+      {"@type":"ListItem","position":3,"name":"Как настроить бота на Bybit","item":"https://chmup.top/blog/kak-nastroit-bota-na-bybit/"}
+    ]
+  }
+  </script>
+
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "HowTo",
+    "name": "Как подключить Bybit к торговому боту CHM Finance",
+    "totalTime": "PT10M",
+    "step": [
+      {"@type":"HowToStep","position":1,"name":"Зарегистрируйся в CHM Finance","text":"Создай аккаунт на chmup.top и подтверди email."},
+      {"@type":"HowToStep","position":2,"name":"Создай API-ключ на Bybit","text":"В разделе API Management создай ключ с правом Trade, без Withdraw. Добавь IP-рестрикцию."},
+      {"@type":"HowToStep","position":3,"name":"Добавь ключ в CHM Finance","text":"В разделе Wallet вставь API Key и Secret. Система автоматически проверит ключ на testnet."},
+      {"@type":"HowToStep","position":4,"name":"Создай бота через мастер","text":"Выбери пару, стратегию, таймфрейм, риск на сделку. Прогони бэктест на 60 днях."},
+      {"@type":"HowToStep","position":5,"name":"Запусти в paper-режиме","text":"Минимум неделя в paper — потом, если результат устраивает, переключай на live."}
+    ]
+  }
+  </script>
+
+  <style>
+    body{background:#0A0A0A;color:#E5E5E5;font-family:'Inter',sans-serif;margin:0;line-height:1.7}
+    .container{max-width:720px;margin:0 auto;padding:60px 24px}
+    nav{padding:20px 24px;border-bottom:1px solid rgba(255,255,255,.06)}
+    nav a{color:rgba(255,255,255,.7);text-decoration:none;font-weight:500;font-size:14px;margin-right:20px}
+    nav a:hover{color:#fff}
+    .brand{font-weight:700;font-size:18px;letter-spacing:-.02em;color:#fff}
+    .brand span{color:#FF5A1F}
+    .breadcrumb{font-size:12px;color:rgba(255,255,255,.4);margin-bottom:16px}
+    .breadcrumb a{color:rgba(255,255,255,.55);text-decoration:none}
+    .breadcrumb a:hover{color:#FF8C5A}
+    h1{font-size:clamp(28px,4.5vw,40px);font-weight:700;letter-spacing:-.025em;margin:0 0 16px;line-height:1.15}
+    .meta{color:rgba(255,255,255,.45);font-size:13px;margin-bottom:40px;display:flex;gap:16px}
+    .meta span::after{content:'·';margin-left:16px;opacity:.5}
+    .meta span:last-child::after{content:''}
+    h2{font-size:24px;font-weight:600;letter-spacing:-.015em;margin:44px 0 16px;color:#fff}
+    h3{font-size:18px;font-weight:600;margin:32px 0 12px;color:#fff}
+    p{color:rgba(255,255,255,.78);margin:0 0 16px;font-size:16px}
+    ul,ol{color:rgba(255,255,255,.78);padding-left:24px;margin:0 0 20px}
+    li{margin-bottom:8px}
+    code{background:rgba(255,90,31,.12);color:#FF8C5A;padding:2px 6px;border-radius:4px;font-family:'JetBrains Mono',monospace;font-size:13px}
+    .note{padding:16px 20px;border-radius:12px;background:rgba(255,90,31,.08);border:1px solid rgba(255,90,31,.2);margin:24px 0}
+    .note-title{font-weight:600;color:#FF8C5A;font-size:13px;text-transform:uppercase;letter-spacing:.1em;margin:0 0 8px}
+    .cta{display:block;padding:24px;border-radius:16px;background:linear-gradient(135deg,rgba(255,140,90,.12),rgba(255,90,31,.06));border:1px solid rgba(255,140,90,.3);text-decoration:none;color:inherit;margin:40px 0;transition:transform .2s}
+    .cta:hover{transform:translateY(-1px)}
+    .cta-title{font-weight:600;color:#fff;margin:0 0 6px;font-size:17px}
+    .cta-desc{color:rgba(255,255,255,.7);font-size:14px;margin:0}
+    .cta-btn{display:inline-block;margin-top:12px;padding:8px 16px;background:linear-gradient(180deg,#FF8C5A,#FF5A1F);color:#fff;border-radius:999px;font-size:13px;font-weight:600}
+    a.inline{color:#FF8C5A;text-decoration:none}
+    a.inline:hover{text-decoration:underline}
+  </style>
+</head>
+<body>
+  <nav>
+    <div style="max-width:960px;margin:0 auto;display:flex;justify-content:space-between;align-items:center">
+      <a href="/" class="brand">CHM<span>.</span></a>
+      <div>
+        <a href="/">Главная</a>
+        <a href="/subscriptions.html">Тарифы</a>
+        <a href="/blog/">Блог</a>
+      </div>
+    </div>
+  </nav>
+
+  <main class="container">
+    <div class="breadcrumb"><a href="/">Главная</a> / <a href="/blog/">Блог</a> / Как настроить бота на Bybit</div>
+
+    <h1>Как настроить торгового бота на Bybit за 10 минут</h1>
+    <div class="meta"><span>Гайд для новичков</span><span>8 мин чтения</span><span>Обновлено 24 апреля 2026</span></div>
+
+    <p>Если ты торговал на Bybit вручную и хочешь попробовать автоматизацию — эта статья для тебя. Пройдём от нуля до первой сделки бота за 10 минут, по шагам. Без теории про «AI, нейросети и криптомагию» — только то, что реально нужно сделать.</p>
+
+    <p>В конце — чек-лист безопасности и разбор 5 самых частых ошибок, из-за которых новички теряют деньги на первом же боте.</p>
+
+    <div class="note">
+      <p class="note-title">Кому подойдёт</p>
+      <p style="margin:0">Есть аккаунт на Bybit, понимаешь что такое long/short, умеешь ставить стоп-лосс руками. Если это не про тебя — сначала <a class="inline" href="/blog/chto-takoe-dca-strategia/">почитай что такое DCA стратегия</a>, потом возвращайся.</p>
+    </div>
+
+    <h2>Что тебе нужно</h2>
+    <ul>
+      <li>Аккаунт на <a class="inline" href="https://bybit.com" rel="nofollow">Bybit</a> (5 минут, регистрация бесплатна)</li>
+      <li>Аккаунт на <a class="inline" href="/">CHM Finance</a> (2 минуты — или любая другая платформа с ботами)</li>
+      <li>Немного USDT на Derivatives-кошельке Bybit (рекомендуем $100-500 для старта)</li>
+      <li>Готовность начать с <strong>DEMO-режима</strong>, а не сразу лить реальные деньги</li>
+    </ul>
+
+    <h2>Шаг 1. Создаём API-ключ на Bybit (3 минуты)</h2>
+
+    <p>Это самый важный шаг. От того, какие права ты дашь ключу, зависит — спокойно ли ты будешь спать ночью.</p>
+
+    <ol>
+      <li>На Bybit зайди в <strong>профиль → API</strong></li>
+      <li>Нажми <strong>Create New Key</strong> → <strong>System-generated API Keys</strong></li>
+      <li>Тип API-ключа: <strong>API Transaction</strong></li>
+      <li>Permissions (это критично):
+        <ul>
+          <li>✅ <strong>Contract: Orders, Positions</strong> — разрешить</li>
+          <li>✅ <strong>Unified Trading: Trade</strong> — разрешить</li>
+          <li>❌ <strong>Withdraw</strong> — <strong>НЕ</strong> разрешать. Никогда.</li>
+          <li>❌ <strong>Transfer</strong> — <strong>НЕ</strong> разрешать</li>
+        </ul>
+      </li>
+      <li>IP Restriction: если твой домашний IP статичный — добавь его. Если нет (мобильный интернет, VPN) — оставь пустым, но следи за логом использования ключа.</li>
+      <li>Жми <strong>Submit</strong>, получи пару <code>API Key</code> и <code>Secret</code></li>
+    </ol>
+
+    <div class="note">
+      <p class="note-title">⚠️ Важно</p>
+      <p style="margin:0"><strong>Secret показывается только один раз.</strong> Скопируй его в менеджер паролей (1Password, Bitwarden) — если потеряешь, придётся создавать новый ключ.</p>
+    </div>
+
+    <h2>Шаг 2. Подключаем ключ к CHM Finance (2 минуты)</h2>
+
+    <ol>
+      <li>Войди в <a class="inline" href="/dashboard.html">dashboard</a>, перейди в <strong>Wallet → API Keys</strong></li>
+      <li>Нажми <strong>Add New Key</strong></li>
+      <li>Биржа: <strong>Bybit</strong></li>
+      <li>Вставь свои API Key и Secret</li>
+      <li>Label: что-то осмысленное, например «Bybit Unified — USDT фьючерсы»</li>
+      <li>Нажми <strong>Save</strong> — система автоматически проверит ключ через тестовый запрос (получит баланс), если ключ валидный — статус <strong>Verified ✓</strong></li>
+    </ol>
+
+    <p>На CHM Finance ключи шифруются AES-256-GCM с индивидуальным IV. Расшифровка происходит только когда бот фактически открывает ордер. В базе данных ключ в открытом виде не хранится ни секунды.</p>
+
+    <h2>Шаг 3. Создаём первого бота через мастер (3 минуты)</h2>
+
+    <p>Идём в раздел <strong>Bots → Create Bot</strong>. Мастер состоит из 6 шагов, они подскажут правильные значения:</p>
+
+    <h3>3.1 Основы</h3>
+    <ul>
+      <li><strong>Режим сканирования</strong>: «Конкретная пара» (для начала не лезь в market-scanner)</li>
+      <li><strong>Имя бота</strong>: например, «BTC SMC 1h»</li>
+      <li><strong>Биржа</strong>: Bybit</li>
+      <li><strong>Пара</strong>: BTCUSDT (самая ликвидная, минимум проскальзывания)</li>
+      <li><strong>Таймфрейм</strong>: 1h — для новичков идеально, сигналов немного, но они качественные</li>
+    </ul>
+
+    <h3>3.2 Стратегия</h3>
+    <p>Для первого бота советую <strong>SMC (Smart Money Concepts)</strong> или <strong>Levels</strong>. Они просты для понимания и дают умеренное количество сделок (2-5 в неделю на 1h таймфрейме BTC). Скальпинг — когда захочешь активности и готов платить комиссию. DCA — только если понимаешь философию усреднения.</p>
+
+    <h3>3.3 Параметры стратегии</h3>
+    <p>Мастер подгрузит настройки по умолчанию — их менять не нужно, они протестированы командой. Если хочешь потюнить — возвращайся после первого месяца торговли со своей статистикой.</p>
+
+    <h3>3.4 Риск</h3>
+    <ul>
+      <li><strong>Leverage</strong>: 3-5x максимум для новичка. 10x+ — это не трейдинг, это казино.</li>
+      <li><strong>Risk per trade</strong>: <strong>1%</strong>. Больше — слишком быстро сгоришь при серии лоссов.</li>
+      <li><strong>Max open trades</strong>: 2-3. Не раскидывай капитал.</li>
+    </ul>
+
+    <div class="note">
+      <p class="note-title">Математика риска</p>
+      <p style="margin:0">При риске 1% на сделку и серии из 10 убыточных подряд ты потеряешь ~9.5% депозита. При риске 5% на сделку — ~40%. Вот почему опытные трейдеры не превышают 1-2%.</p>
+    </div>
+
+    <h3>3.5 Бэктест</h3>
+    <p>Критичный шаг — не пропускай. Кликни «Запустить бэктест», система прогонит твои настройки на последних 60 днях свечей Bybit. Смотри на метрики:</p>
+    <ul>
+      <li><strong>Win Rate</strong>: &gt; 45% — норма для 1R, &gt; 35% — норма для 2R профит-тейка</li>
+      <li><strong>Sharpe Ratio</strong>: &gt; 1.0 хорошо, &gt; 1.5 отлично</li>
+      <li><strong>Max Drawdown</strong>: не &gt; 20%. Если больше — снижай риск на сделку</li>
+      <li><strong>Profit Factor</strong>: &gt; 1.3 — стратегия рабочая</li>
+    </ul>
+
+    <h3>3.6 Режим торговли</h3>
+    <p><strong>DEMO</strong> — всегда начинай с него. Минимум неделя. Это бесплатно, бот работает на виртуальных деньгах, но сигналы и исполнение — реальные (по актуальным свечам Bybit).</p>
+
+    <a href="/bots.html" class="cta">
+      <h3 class="cta-title">🚀 Создай первого бота бесплатно</h3>
+      <p class="cta-desc">Free-план включает 1 активного бота в DEMO-режиме. Подключение Bybit — без ограничений тарифа.</p>
+      <span class="cta-btn">Начать — бесплатно →</span>
+    </a>
+
+    <h2>Шаг 4. Первая неделя — что делать</h2>
+    <p>Теперь бот работает. Твоя задача <strong>не лезть в него</strong>. Серьёзно. Вот что важно в первую неделю:</p>
+
+    <ul>
+      <li><strong>Ежедневно проверяй</strong>: детальный drawer бота → KPI → PnL, количество сделок</li>
+      <li><strong>НЕ отключай бота после первого лосса.</strong> 5 подряд лоссов — статистически норма</li>
+      <li><strong>Записывай впечатления</strong>: где бот «купил/продал странно», какие сигналы кажутся сомнительными</li>
+      <li>Через неделю — <a class="inline" href="/analytics.html">analytics</a> → сравни реальный результат с бэктестом. Если сильно расходится — обычно из-за спреда/проскальзывания на малых таймфреймах</li>
+    </ul>
+
+    <h2>Топ-5 ошибок новичков</h2>
+    <ol>
+      <li><strong>Даёт API-ключу право Withdraw.</strong> Это катастрофа. Если ключ украдут — уведут все деньги. На CHM Finance мы физически не можем выводить средства, нам это право не нужно.</li>
+      <li><strong>Плечо 20x+.</strong> Одно движение против на 5% → ликвидация. Начинающие трейдеры этот урок учат дорого.</li>
+      <li><strong>«Улучшает» настройки стратегии без понимания.</strong> Например, крутит ATR-множитель стопа. Результат — стратегия перестаёт работать, а причину непонятно.</li>
+      <li><strong>Запускает 5 ботов одновременно на первой неделе.</strong> Потом не может понять, какой из них убыточный. Начинай с 1.</li>
+      <li><strong>Льёт реальные деньги без DEMO-периода.</strong> Экономит неделю — теряет месяц жизни на восстановление психики.</li>
+    </ol>
+
+    <h2>Чек-лист перед запуском на LIVE</h2>
+    <ul>
+      <li>☐ Бот отработал минимум 7 дней в DEMO и показал profitability</li>
+      <li>☐ Результаты DEMO в пределах ±15% от бэктеста (если хуже — пересоздай)</li>
+      <li>☐ API-ключ БЕЗ права Withdraw (проверь второй раз)</li>
+      <li>☐ На Bybit в балансе только та сумма, которую готов потерять</li>
+      <li>☐ Ты понимаешь, какой стратегией торгует бот и почему она может слить</li>
+      <li>☐ Настроены уведомления о сделках (Email или Telegram)</li>
+      <li>☐ <a class="inline" href="/risk.html">Прочитал риск-дисклеймер</a></li>
+    </ul>
+
+    <a href="/subscriptions.html" class="cta">
+      <h3 class="cta-title">Готов к LIVE-трейдингу?</h3>
+      <p class="cta-desc">Pro-план ($79/мес) включает LIVE-исполнение на Bybit, 10 одновременных ботов, 50 бэктестов в день. Free-плана достаточно, чтобы протестировать платформу.</p>
+      <span class="cta-btn">Сравнить тарифы →</span>
+    </a>
+
+    <h2>Дальше читай</h2>
+    <ul>
+      <li><a class="inline" href="/blog/chto-takoe-dca-strategia/">Что такое DCA стратегия и когда она работает</a></li>
+      <li><a class="inline" href="/blog/">Все статьи блога →</a></li>
+    </ul>
+  </main>
+</body>
+</html>

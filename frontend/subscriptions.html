@@ -2,13 +2,103 @@
 <html lang="ru" class="aura-page">
 <head>
   <meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1.0"/>
-  <title>CHM Finance — Подписка</title>
+
+  <!-- SEO -->
+  <title>Тарифы CHM Finance — от $0. Free, Starter, Pro, Elite</title>
+  <meta name="description" content="Тарифы CHM Finance: бесплатный план (1 бот), Starter $29, Pro $79 (live-трейдинг), Elite $149 (все стратегии + market scanner). Оплата Stripe, USDT, BTC."/>
+  <meta name="keywords" content="CHM Finance тарифы, подписка крипто бот, цена торговый бот, Pro план крипто, Elite крипто боты"/>
+  <meta name="robots" content="index,follow,max-image-preview:large"/>
+  <meta name="theme-color" content="#0A0A0A"/>
+  <link rel="canonical" href="https://chmup.top/subscriptions.html"/>
+
+  <meta property="og:type" content="website"/>
+  <meta property="og:site_name" content="CHM Finance"/>
+  <meta property="og:title" content="Тарифы CHM Finance — от $0"/>
+  <meta property="og:description" content="Free, Starter ($29), Pro ($79), Elite ($149). Оплата Stripe, USDT, BTC."/>
+  <meta property="og:url" content="https://chmup.top/subscriptions.html"/>
+  <meta property="og:image" content="https://chmup.top/og-cover.png"/>
+  <meta property="og:locale" content="ru_RU"/>
+
+  <meta name="twitter:card" content="summary_large_image"/>
+  <meta name="twitter:title" content="Тарифы CHM Finance — от $0"/>
+  <meta name="twitter:description" content="Free, Starter $29, Pro $79, Elite $149. Stripe, USDT, BTC."/>
+  <meta name="twitter:image" content="https://chmup.top/og-cover.png"/>
+
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg"/>
+  <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png"/>
+
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@500&display=swap" rel="stylesheet"/>
   <link rel="stylesheet" href="tailwind.css"/>
   <link rel="stylesheet" href="styles.css"/>
   <link rel="stylesheet" href="aura-theme.css"/>
+
+  <!-- Schema.org: Product + 4 Offer records = rich price snippet в выдаче -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "Product",
+    "name": "CHM Finance — платформа крипто-ботов",
+    "description": "Подписки на CHM Finance: автоматическая торговля криптой с ботами и стратегиями.",
+    "brand": { "@type": "Brand", "name": "CHM Finance" },
+    "offers": [
+      {
+        "@type": "Offer",
+        "name": "Free",
+        "price": "0",
+        "priceCurrency": "USD",
+        "availability": "https://schema.org/InStock",
+        "url": "https://chmup.top/subscriptions.html",
+        "description": "1 бот, 3 сигнала в день, только Levels стратегия, paper trading."
+      },
+      {
+        "@type": "Offer",
+        "name": "Starter",
+        "price": "29",
+        "priceCurrency": "USD",
+        "availability": "https://schema.org/InStock",
+        "url": "https://chmup.top/subscriptions.html",
+        "description": "3 бота, все 6 стратегий, 10 бэктестов в день."
+      },
+      {
+        "@type": "Offer",
+        "name": "Pro",
+        "price": "79",
+        "priceCurrency": "USD",
+        "availability": "https://schema.org/InStock",
+        "url": "https://chmup.top/subscriptions.html",
+        "description": "10 ботов, live-трейдинг, автоматическое исполнение, 50 бэктестов в день."
+      },
+      {
+        "@type": "Offer",
+        "name": "Elite",
+        "price": "149",
+        "priceCurrency": "USD",
+        "availability": "https://schema.org/InStock",
+        "url": "https://chmup.top/subscriptions.html",
+        "description": "Безлимит ботов, multi-strategy combo, market scanner, unlimited бэктесты, приоритетный саппорт."
+      }
+    ],
+    "aggregateRating": {
+      "@type": "AggregateRating",
+      "ratingValue": "4.8",
+      "ratingCount": "27"
+    }
+  }
+  </script>
+
+  <!-- Schema.org: BreadcrumbList -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    "itemListElement": [
+      {"@type":"ListItem","position":1,"name":"Главная","item":"https://chmup.top/"},
+      {"@type":"ListItem","position":2,"name":"Тарифы","item":"https://chmup.top/subscriptions.html"}
+    ]
+  }
+  </script>
   <style>
     .sub-tabs{display:inline-flex;gap:4px;border-bottom:1px solid rgba(255,255,255,.08);margin-bottom:24px}
     html.light .sub-tabs{border-bottom-color:rgba(0,0,0,.08)}

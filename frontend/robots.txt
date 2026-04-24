@@ -1,7 +1,45 @@
 User-agent: *
+# Public marketing & content pages — crawl + index these
+Allow: /
+Allow: /index.html
+Allow: /subscriptions.html
+Allow: /about.html
+Allow: /privacy.html
+Allow: /terms.html
+Allow: /risk.html
+Allow: /leaderboard.html
+Allow: /blog/
+Allow: /api-docs.html
+
+# Block authenticated app pages — no SEO value + pollutes crawl budget
+Disallow: /dashboard.html
+Disallow: /bots.html
+Disallow: /terminal.html
+Disallow: /analytics.html
+Disallow: /backtests.html
+Disallow: /signals.html
+Disallow: /market.html
+Disallow: /market-scanner.html
+Disallow: /copy.html
+Disallow: /ai.html
+Disallow: /settings.html
+Disallow: /status.html
+
+# Private / admin
 Disallow: /ops
 Disallow: /ops.html
 Disallow: /admin.html
 Disallow: /api/
+
+# Slow down aggressive SEO-tools crawlers so they don't hammer the box.
+# Google / Yandex / Bing run at full speed.
+User-agent: AhrefsBot
+Crawl-delay: 10
+
+User-agent: SemrushBot
+Crawl-delay: 10
+
+User-agent: MJ12bot
+Disallow: /
 
 Sitemap: https://chmup.top/sitemap.xml
