@@ -229,6 +229,59 @@ app.get('/api/health/deep', (_req, res) => {
   out.subsystems.scanner = { ok: scannerWorker !== null || IS_TEST };
   out.subsystems.partialTp = { ok: partialTpTimer !== null || IS_TEST };
   out.subsystems.slVerifier = { ok: true };
+  // Migration version — proves all schema changes applied at boot.
+  try {
+    const migrations = require('./models/migrations');
+    out.subsystems.migrations = { ok: true, version: migrations.currentVersion(db) };
+  } catch (e) {
+    out.status = 'degraded';
+    out.subsystems.migrations = { ok: false, error: e.message };
+  }
+  // Backtest queue depth — pending/running from the DB (fresh data, not
+  // in-memory since restarts re-enqueue from the same DB state).
+  try {
+    const bq = db.prepare(
+      `SELECT status, COUNT(*) AS n FROM backtests WHERE status IN ('pending','running','failed') GROUP BY status`,
+    ).all();
+    const by = { pending: 0, running: 0, failed24h: 0 };
+    for (const r of bq) { if (r.status !== 'failed') by[r.status] = r.n; }
+    by.failed24h = db.prepare(
+      `SELECT COUNT(*) AS n FROM backtests WHERE status='failed' AND created_at >= datetime('now','-1 day')`,
+    ).get().n;
+    // Warn if >50 queued — suggests a stuck worker or runaway client.
+    out.subsystems.backtestQueue = { ok: by.pending < 50, ...by };
+    if (by.pending >= 50) out.status = out.status === 'ok' ? 'degraded' : out.status;
+  } catch (e) {
+    out.subsystems.backtestQueue = { ok: false, error: e.message };
+  }
+  // Email outbox health — warns if old pending rows suggest SMTP is down.
+  try {
+    const ob = db.prepare(
+      `SELECT status, COUNT(*) AS n FROM email_outbox GROUP BY status`,
+    ).all();
+    const box = { pending: 0, sent: 0, failed: 0 };
+    for (const r of ob) box[r.status] = r.n;
+    // Oldest unsent — if this is hours old, something's wrong
+    const oldest = db.prepare(
+      `SELECT MIN(created_at) AS t FROM email_outbox WHERE status = 'pending'`,
+    ).get().t;
+    const stuckMinutes = oldest ? Math.round((Date.now() - new Date(oldest + 'Z').getTime()) / 60000) : 0;
+    out.subsystems.emailOutbox = {
+      ok: box.pending < 100 && stuckMinutes < 60,
+      ...box, oldestPendingMinutes: stuckMinutes,
+    };
+    if (box.pending >= 100 || stuckMinutes >= 60) out.status = out.status === 'ok' ? 'degraded' : out.status;
+  } catch (e) {
+    // Outbox table may not exist on pre-v7 DBs — not fatal, just report.
+    out.subsystems.emailOutbox = { ok: false, error: e.message };
+  }
+  // SMTP configuration — surfaces whether durable emails can actually leave
+  // the outbox. A "true" here requires both SMTP_HOST and SMTP_USER.
+  out.subsystems.smtp = {
+    ok: Boolean(process.env.SMTP_HOST && process.env.SMTP_USER),
+    configured: Boolean(process.env.SMTP_HOST && process.env.SMTP_USER),
+    host: process.env.SMTP_HOST ? process.env.SMTP_HOST.replace(/^.+@/, '…@') : null,
+  };
   // Memory health — warn if RSS > 500MB
   if (out.memoryMb > 500) {
     out.status = out.status === 'ok' ? 'degraded' : out.status;
