@@ -82,7 +82,6 @@
       </div>
       <div class="flex gap-3 flex-wrap" id="billing">
         <button id="upgradeBtn" class="text-sm px-4 py-2 rounded-lg bg-indigo-500/10 border border-indigo-500/30 text-indigo-400 hover:bg-indigo-500/20">Сменить тариф</button>
-        <button id="billingPortalBtn" class="text-sm px-4 py-2 rounded-lg bg-slate-800/50 border border-slate-700 text-slate-200 hover:bg-slate-800">Управление оплатой</button>
         <button id="cancelSubBtn" class="text-sm px-4 py-2 rounded-lg bg-red-500/10 border border-red-500/25 text-red-300 hover:bg-red-500/20 ml-auto hidden">Отменить подписку</button>
       </div>
     </div>
@@ -410,10 +409,6 @@
       </div>
       <label class="text-sm text-slate-400 block mb-2">Способ оплаты</label>
       <div class="space-y-2 mb-5">
-        <button type="button" data-method="stripe" class="co-method w-full flex items-center justify-between p-3 rounded-xl border border-slate-700 bg-slate-800/40 hover:border-indigo-500/50">
-          <div class="flex items-center gap-3"><div class="w-9 h-9 rounded-lg bg-indigo-500/15 flex items-center justify-center"><iconify-icon icon="solar:card-linear" style="color:#818cf8;font-size:18px"></iconify-icon></div><div class="text-left"><div class="text-sm font-medium text-white">Карта</div><div class="text-xs text-slate-500">Stripe Checkout</div></div></div>
-          <iconify-icon icon="solar:alt-arrow-right-linear" style="color:#64748b"></iconify-icon>
-        </button>
         <button type="button" data-method="usdt_bep20" class="co-method w-full flex items-center justify-between p-3 rounded-xl border border-slate-700 bg-slate-800/40 hover:border-indigo-500/50">
           <div class="flex items-center gap-3"><div class="w-9 h-9 rounded-lg bg-yellow-500/15 flex items-center justify-center"><iconify-icon icon="solar:wallet-money-linear" style="color:#facc15;font-size:18px"></iconify-icon></div><div class="text-left"><div class="text-sm font-medium text-white">USDT BEP20</div><div class="text-xs text-slate-500">Binance Smart Chain</div></div></div>
           <iconify-icon icon="solar:alt-arrow-right-linear" style="color:#64748b"></iconify-icon>
@@ -515,23 +510,6 @@ async function loadSubscription() {
     // leave the button visible — it'll toast an error with the real reason.
   } catch (_e) {}
 }
-
-// ── Billing portal (Stripe-hosted self-serve) ──
-document.getElementById('billingPortalBtn')?.addEventListener('click', async () => {
-  try {
-    const out = await apiRequest('POST', '/payments/stripe/portal', {});
-    if (out && out.url) window.location.href = out.url;
-    else Toast.warn('Портал недоступен');
-  } catch (err) {
-    if (err && err.code === 'NO_STRIPE_CUSTOMER') {
-      Toast.warn('Портал доступен только при оплате картой через Stripe');
-    } else if (err && err.code === 'STRIPE_DISABLED') {
-      Toast.error('Stripe не настроен на бэкенде');
-    } else {
-      Toast.error(err.message || 'Ошибка');
-    }
-  }
-});
 
 // ── Cancel subscription (at_period_end) ──
 document.getElementById('cancelSubBtn')?.addEventListener('click', async () => {
@@ -637,12 +615,9 @@ document.querySelectorAll('.co-method').forEach((btn) => {
     const method = btn.getAttribute('data-method');
     btn.disabled = true;
     try {
-      if (method === 'stripe') {
-        const out = await API.stripeCheckout({ plan, billingCycle });
-        if (out && out.url) { location.href = out.url; return; }
-        throw new Error(out?.error || 'Stripe недоступен');
-      }
-      // crypto path
+      // Crypto-only checkout (Stripe disabled until a supported-country
+      // legal entity is set up). USDT BEP20 / TRC20 go through
+      // /payments/crypto/create.
       const network = method === 'usdt_bep20' ? 'bep20' : 'trc20';
       const out = await API.createCryptoPayment({ plan, network, billingCycle });
       document.getElementById('coAmount').textContent = Fmt.currency(out.amountUsdt) + ' USDT';
