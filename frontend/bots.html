@@ -212,9 +212,9 @@
       </div>
       <!-- Step 6: Mode + review -->
       <div class="wiz-pane hidden" data-pane="6">
-        <div class="field-label mb-2">Режим торговли<span class="help-dot up" tabindex="0" data-help="PAPER — бот торгует на виртуальном балансе, безопасно. Идеально для проверки стратегии. LIVE — реальные ордера на бирже настоящими деньгами (Pro+ тариф). Совет: сначала месяц PAPER, потом LIVE.">i</span></div>
+        <div class="field-label mb-2">Режим торговли<span class="help-dot up" tabindex="0" data-help="DEMO — бот торгует на виртуальном балансе, безопасно. Идеально для проверки стратегии. LIVE — реальные ордера на бирже (Pro+ тариф). Совет: сначала месяц DEMO, потом LIVE.">i</span></div>
         <div class="grid grid-cols-2 gap-3 mb-4">
-          <label class="wiz-card"><input type="radio" name="tradingMode" value="paper" checked class="sr-only"/><div class="wiz-card-body"><div class="font-semibold text-slate-300">PAPER</div><div class="text-xs text-slate-400 mt-1">Виртуальный баланс, безопасно</div></div></label>
+          <label class="wiz-card"><input type="radio" name="tradingMode" value="paper" checked class="sr-only"/><div class="wiz-card-body"><div class="font-semibold text-slate-300">DEMO</div><div class="text-xs text-slate-400 mt-1">Виртуальный баланс, безопасно</div></div></label>
           <label class="wiz-card"><input type="radio" name="tradingMode" value="live" class="sr-only"/><div class="wiz-card-body"><div class="font-semibold text-red-400">LIVE</div><div class="text-xs text-slate-400 mt-1">Реальные деньги — Pro+</div></div></label>
         </div>
         <label class="flex items-center gap-2 text-sm text-slate-300 cursor-pointer mb-4"><input type="checkbox" name="autoTrade" style="accent-color:#6366f1"/> Авто-торговля<span class="help-dot up" tabindex="0" data-help="Включено — бот сам открывает и закрывает сделки. Выключено — бот только ищет сигналы и присылает уведомления, а решение о входе принимаешь ты вручную.">i</span><span class="text-xs text-slate-500 ml-1">(иначе — только сигналы)</span></label>
@@ -448,7 +448,7 @@ html.light .chm-select-option.selected{background:rgba(255,90,31,.12);color:#FF5
       <div class="flex items-center gap-2"><span class="text-xl">⚡</span><h3 class="text-lg font-bold">Smart Trade</h3></div>
       <button type="button" onclick="closeSmartTrade()" class="text-slate-400 hover:text-white text-xl">&times;</button>
     </div>
-    <p class="text-xs text-slate-400 mb-4">Разовая сделка с автоматическим SL/TP — без бота. Paper-режим работает сразу.</p>
+    <p class="text-xs text-slate-400 mb-4">Разовая сделка с автоматическим SL/TP — без бота. Demo-режим работает сразу.</p>
     <form id="smartTradeForm" class="space-y-3">
       <div class="grid grid-cols-2 gap-3">
         <div><label class="text-xs text-slate-400 block mb-1">Биржа</label><select name="exchange" class="w-full bg-slate-800/50 border border-slate-700 rounded-xl px-3 py-2.5 text-white text-sm outline-none"><option value="bybit">Bybit</option><option value="binance">Binance</option><option value="bingx">BingX</option><option value="okx">OKX</option></select></div>
@@ -463,7 +463,7 @@ html.light .chm-select-option.selected{background:rgba(255,90,31,.12);color:#FF5
         </div>
         <div><label class="text-xs text-slate-400 block mb-1">Режим</label>
           <div class="grid grid-cols-2 gap-2">
-            <label class="st-side"><input type="radio" name="tradingMode" value="paper" checked class="sr-only"/><div class="st-body text-slate-300">PAPER</div></label>
+            <label class="st-side"><input type="radio" name="tradingMode" value="paper" checked class="sr-only"/><div class="st-body text-slate-300">DEMO</div></label>
             <label class="st-side"><input type="radio" name="tradingMode" value="live" class="sr-only"/><div class="st-body text-red-400">LIVE</div></label>
           </div>
         </div>
@@ -596,7 +596,7 @@ async function loadBots() {
       const syms = Array.isArray(b.symbols) ? b.symbols.slice(0, 3).join(', ') : '—';
       const modeBadge = b.tradingMode === 'live'
         ? '<span class="text-xs px-2 py-0.5 rounded-full bg-red-500/15 text-red-400 cursor-pointer" data-mode="'+b.id+'" data-current="live" title="Переключить режим">LIVE</span>'
-        : '<span class="text-xs px-2 py-0.5 rounded-full bg-slate-500/15 text-slate-400 cursor-pointer" data-mode="'+b.id+'" data-current="paper" title="Переключить в LIVE">PAPER</span>';
+        : '<span class="text-xs px-2 py-0.5 rounded-full bg-slate-500/15 text-slate-400 cursor-pointer" data-mode="'+b.id+'" data-current="paper" title="Переключить в LIVE">DEMO</span>';
       card.innerHTML = `
         <div class="flex items-center justify-between mb-3">
           <div class="flex items-center gap-3">
@@ -1014,7 +1014,7 @@ function closeLiveConfirm() {
 async function switchMode(botId, mode) {
   try {
     await API.updateBot(botId, { tradingMode: mode });
-    Toast.success(mode === 'live' ? 'Бот переключён в LIVE' : 'Бот переключён в PAPER');
+    Toast.success(mode === 'live' ? 'Бот переключён в LIVE' : 'Бот переключён в DEMO');
     loadBots();
   } catch (err) {
     if (err.code === 'UPGRADE_REQUIRED') Toast.warn('Live-режим доступен на Pro и выше');
@@ -1065,7 +1065,7 @@ document.getElementById('smartTradeForm')?.addEventListener('submit', async (e) 
   };
   try {
     await API.manualTrade(payload);
-    Toast.success('Сделка открыта · PAPER');
+    Toast.success('Сделка открыта · DEMO');
     closeSmartTrade();
   } catch (err) {
     if (err.code === 'LIVE_MANUAL_NOT_ENABLED') Toast.warn('LIVE пока недоступно. Работаем в paper.');
