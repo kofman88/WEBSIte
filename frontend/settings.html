@@ -80,7 +80,11 @@
         <div class="p-3 bg-slate-800/30 rounded-lg"><span class="text-slate-500">Авто-торговля:</span> <span class="text-green-400">Да</span></div>
         <div class="p-3 bg-slate-800/30 rounded-lg"><span class="text-slate-500">Бэктесты:</span> <span class="text-green-400">Да</span></div>
       </div>
-      <div class="flex gap-3"><button id="upgradeBtn" class="text-sm px-4 py-2 rounded-lg bg-indigo-500/10 border border-indigo-500/30 text-indigo-400 hover:bg-indigo-500/20">Сменить тариф</button></div>
+      <div class="flex gap-3 flex-wrap" id="billing">
+        <button id="upgradeBtn" class="text-sm px-4 py-2 rounded-lg bg-indigo-500/10 border border-indigo-500/30 text-indigo-400 hover:bg-indigo-500/20">Сменить тариф</button>
+        <button id="billingPortalBtn" class="text-sm px-4 py-2 rounded-lg bg-slate-800/50 border border-slate-700 text-slate-200 hover:bg-slate-800">Управление оплатой</button>
+        <button id="cancelSubBtn" class="text-sm px-4 py-2 rounded-lg bg-red-500/10 border border-red-500/25 text-red-300 hover:bg-red-500/20 ml-auto hidden">Отменить подписку</button>
+      </div>
     </div>
     <div class="card max-w-2xl mb-6">
       <h3 class="font-bold mb-4">Промо-код</h3>
@@ -493,9 +497,57 @@ async function loadSubscription() {
     const planTitle = planBlock.querySelector('.font-bold.text-indigo-300');
     const planMeta = planBlock.querySelector('.text-xs.text-slate-500');
     if (planTitle) planTitle.textContent = (sub.plan[0].toUpperCase() + sub.plan.slice(1)) + ' Plan';
-    if (planMeta) planMeta.textContent = sub.expiresAt ? ('Активен до ' + Fmt.date(sub.expiresAt)) : 'Бессрочный';
+    if (planMeta) {
+      // Surface the cancelling state explicitly so users know the downgrade date
+      const cancelling = sub.status === 'cancelling';
+      planMeta.textContent = cancelling
+        ? ('Отменяется · доступ до ' + Fmt.date(sub.expiresAt))
+        : (sub.expiresAt ? ('Активен до ' + Fmt.date(sub.expiresAt)) : 'Бессрочный');
+    }
+    // Cancel button only makes sense on a paid, active plan
+    const cancelBtn = document.getElementById('cancelSubBtn');
+    if (cancelBtn) {
+      const paid = sub.plan !== 'free' && sub.status !== 'cancelling' && sub.status !== 'cancelled';
+      cancelBtn.classList.toggle('hidden', !paid);
+    }
+    // Billing-portal button only works for Stripe-paid users; backend returns
+    // 404 NO_STRIPE_CUSTOMER if the latest paid method wasn't card, so we
+    // leave the button visible — it'll toast an error with the real reason.
   } catch (_e) {}
 }
+
+// ── Billing portal (Stripe-hosted self-serve) ──
+document.getElementById('billingPortalBtn')?.addEventListener('click', async () => {
+  try {
+    const out = await apiRequest('POST', '/payments/stripe/portal', {});
+    if (out && out.url) window.location.href = out.url;
+    else Toast.warn('Портал недоступен');
+  } catch (err) {
+    if (err && err.code === 'NO_STRIPE_CUSTOMER') {
+      Toast.warn('Портал доступен только при оплате картой через Stripe');
+    } else if (err && err.code === 'STRIPE_DISABLED') {
+      Toast.error('Stripe не настроен на бэкенде');
+    } else {
+      Toast.error(err.message || 'Ошибка');
+    }
+  }
+});
+
+// ── Cancel subscription (at_period_end) ──
+document.getElementById('cancelSubBtn')?.addEventListener('click', async () => {
+  // Two-step confirm: text-match requirement, prevents accidental clicks.
+  const typed = prompt('Отменить подписку?\n\nДоступ сохранится до конца оплаченного периода, после — аккаунт перейдёт на бесплатный план.\n\nВведи "CANCEL" для подтверждения:');
+  if (typed !== 'CANCEL') return;
+  try {
+    const out = await apiRequest('POST', '/subscriptions/cancel', { atPeriodEnd: true });
+    Toast.success(out.accessUntil
+      ? ('Отменено. Доступ до ' + Fmt.date(out.accessUntil))
+      : 'Подписка отменена');
+    loadSubscription();
+  } catch (err) {
+    Toast.error(err.message || 'Не удалось отменить');
+  }
+});
 
 // ── Promo code ──
 document.querySelectorAll('button').forEach(btn => {

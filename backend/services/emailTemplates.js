@@ -177,9 +177,40 @@ function generic({ title, body, link }) {
   return { subject, html, text: toPlaintext(html) };
 }
 
+// Dunning — sent from webhook handler when Stripe reports invoice.payment_failed.
+// Tells the user the charge failed and gives a one-click link to the Stripe
+// billing portal where they can update their card before the next retry.
+function paymentFailed({ displayName, plan, amountUsd, billingPortalUrl, attemptCount = 1, nextAttemptAt }) {
+  const subject = '⚠️ Платёж не прошёл · ' + plan.toUpperCase();
+  const html = shell(subject, `
+    <h2 style="margin:0 0 14px;font-size:20px;font-weight:600;color:#fff;letter-spacing:-.015em">Не удалось списать оплату</h2>
+    <p style="margin:0 0 16px">Привет${displayName ? ', ' + escHtml(displayName) : ''}. Мы не смогли провести платёж <strong>$${Number(amountUsd).toFixed(2)}</strong> за подписку <strong style="color:#FF8C5A">${escHtml(plan.toUpperCase())}</strong>.</p>
+    <p style="margin:0 0 16px;color:#cbd5e1;font-size:14px">Самые частые причины: недостаточно средств на карте, истёк срок действия, банк заблокировал международный платёж.</p>
+    ${nextAttemptAt ? `<p style="margin:0 0 16px;padding:12px 14px;background:#0d0d11;border-left:3px solid #FF8C5A;border-radius:4px;font-size:13px;color:#cbd5e1">Мы автоматически повторим попытку <strong>${escHtml(new Date(nextAttemptAt).toLocaleDateString('ru-RU'))}</strong>. Это попытка №${attemptCount}.</p>` : ''}
+    ${cta('Обновить карту →', billingPortalUrl || (APP_URL() + '/settings.html#billing'))}
+    ${mutedP('Если не обновить способ оплаты до последней попытки — подписка будет отменена и аккаунт переведён на бесплатный план. Live-боты остановятся.')}
+  `, { preheader: 'Обновите карту — платёж не прошёл' });
+  return { subject, html, text: toPlaintext(html) };
+}
+
+// Cancellation confirmation — sent immediately after the user cancels via
+// self-serve. Confirms that access remains until the paid period ends.
+function subscriptionCancelled({ displayName, plan, expiresAt, atPeriodEnd = true }) {
+  const subject = 'Подписка отменена · CHM Finance';
+  const html = shell(subject, `
+    <h2 style="margin:0 0 14px;font-size:20px;font-weight:600;color:#fff;letter-spacing:-.015em">${atPeriodEnd ? 'Подписка будет отменена' : 'Подписка отменена'}</h2>
+    <p style="margin:0 0 16px">Привет${displayName ? ', ' + escHtml(displayName) : ''}. Мы получили запрос на отмену подписки <strong>${escHtml(plan.toUpperCase())}</strong>.</p>
+    ${atPeriodEnd && expiresAt ? `<p style="margin:0 0 16px;padding:12px 14px;background:#0d0d11;border-left:3px solid #22c55e;border-radius:4px;font-size:13px;color:#cbd5e1">Доступ ко всем функциям <strong>${escHtml(plan.toUpperCase())}</strong> сохраняется до <strong>${escHtml(new Date(expiresAt).toLocaleDateString('ru-RU'))}</strong>. После этого аккаунт будет переведён на бесплатный план.</p>` : '<p style="margin:0 0 16px;color:#cbd5e1">Аккаунт немедленно переведён на бесплатный план. Live-боты остановлены. Исторические данные сохранены.</p>'}
+    <p style="margin:0 0 16px;font-size:14px;color:#cbd5e1">Если отмена произошла по ошибке — возобновить подписку можно одним кликом:</p>
+    ${cta('Продлить подписку →', APP_URL() + '/subscriptions.html')}
+    ${mutedP('Будем благодарны за короткий отзыв — что не подошло? Ответьте на это письмо, мы читаем каждое.')}
+  `, { preheader: 'Подписка ' + plan.toUpperCase() + (atPeriodEnd ? ' — отмена в конце периода' : ' отменена') });
+  return { subject, html, text: toPlaintext(html) };
+}
+
 module.exports = {
   emailVerify, passwordReset,
-  paymentConfirmed, paymentRefunded,
+  paymentConfirmed, paymentRefunded, paymentFailed, subscriptionCancelled,
   securityAlert, tradeClosed, signalFired,
   generic,
   _toPlaintext: toPlaintext, _shell: shell,

@@ -173,6 +173,43 @@ async function handleStripeWebhook(rawBody, signature) {
       if (userId) {
         db.prepare(`UPDATE subscriptions SET status='past_due', updated_at=CURRENT_TIMESTAMP WHERE user_id = ?`)
           .run(userId);
+
+        // Dunning email — Stripe retries the charge automatically (default
+        // 3-4 attempts over 2 weeks, configurable in Stripe dashboard). We
+        // email the user immediately on each failed attempt with a direct
+        // link to update their card via the Billing Portal. Without this,
+        // users silently churn — 5% of MRR typically lost to failed cards.
+        try {
+          const emailService = require('./emailService');
+          const user = db.prepare('SELECT email, display_name FROM users WHERE id = ?').get(userId);
+          if (user && user.email) {
+            let portalUrl = null;
+            try {
+              const portal = await createBillingPortalSession(userId, { returnUrl: (config.appUrl || 'https://chmup.top') + '/settings.html#billing' });
+              portalUrl = portal.url;
+            } catch (_e) { /* fall back to settings page */ }
+            const tpl = require('./emailTemplates').paymentFailed({
+              displayName: user.display_name,
+              plan: (inv.metadata && inv.metadata.plan) || 'pro',
+              amountUsd: (inv.amount_due || inv.amount_paid || 0) / 100,
+              billingPortalUrl: portalUrl,
+              attemptCount: inv.attempt_count || 1,
+              nextAttemptAt: inv.next_payment_attempt ? new Date(inv.next_payment_attempt * 1000).toISOString() : null,
+            });
+            emailService.sendDurable({ to: user.email, subject: tpl.subject, html: tpl.html, text: tpl.text });
+          }
+        } catch (err) { logger.warn('dunning email failed', { userId, err: err.message }); }
+
+        // In-app notification mirrors the email so users see it on next login
+        try {
+          const notifier = require('./notifier');
+          notifier.dispatch(userId, {
+            type: 'payment',
+            title: 'Платёж не прошёл',
+            body: 'Обновите карту до следующей попытки списания — иначе подписка будет отменена.',
+            link: '/settings.html#billing',
+          });
+        } catch (_e) {}
       }
       break;
     }
@@ -308,6 +345,23 @@ function confirmPayment(paymentId, { metadata = null } = {}) {
     }
   } catch (_e) { /* ignore */ }
 
+  // Email receipt — durable outbox so a transient SMTP blip doesn't
+  // lose it. B2B users expect a chargeable receipt for bookkeeping.
+  try {
+    const emailService = require('./emailService');
+    const user = db.prepare('SELECT email, display_name FROM users WHERE id = ?').get(payment.user_id);
+    const sub = db.prepare('SELECT expires_at FROM subscriptions WHERE user_id = ?').get(payment.user_id);
+    if (user && user.email) {
+      const tpl = require('./emailTemplates').paymentConfirmed({
+        displayName: user.display_name,
+        plan: payment.plan,
+        amountUsd: Number(payment.amount_usd) || 0,
+        expiresAt: sub ? sub.expires_at : null,
+      });
+      emailService.sendDurable({ to: user.email, subject: tpl.subject, html: tpl.html, text: tpl.text });
+    }
+  } catch (err) { logger.warn('receipt email failed', { paymentId, err: err.message }); }
+
   return db.prepare('SELECT * FROM payments WHERE id = ?').get(paymentId);
 }
 
@@ -379,8 +433,117 @@ function hydrate(p) {
   };
 }
 
+// ── Stripe Billing Portal ──────────────────────────────────────────────
+// Self-serve subscription management: change card, download invoices,
+// cancel subscription. Redirects to Stripe's hosted portal — big-SaaS
+// standard (Slack/Figma/GitHub all use this). We look up the Stripe
+// customer id from the most recent confirmed subscription payment.
+async function createBillingPortalSession(userId, { returnUrl } = {}) {
+  const s = stripe();
+  if (!s) { const e = new Error('Stripe not configured'); e.statusCode = 503; e.code = 'STRIPE_DISABLED'; throw e; }
+
+  // Find the Stripe customer id from the latest confirmed Stripe payment.
+  // `metadata` on a confirmed payment contains the checkout session id;
+  // we retrieve that session to get the customer. Cached per-user would be
+  // cleaner but this lookup happens rarely (only when user clicks "Manage billing").
+  const row = db.prepare(`
+    SELECT provider_tx_id FROM payments
+    WHERE user_id = ? AND method = 'stripe' AND status = 'confirmed'
+    ORDER BY confirmed_at DESC LIMIT 1
+  `).get(userId);
+  if (!row) { const e = new Error('No Stripe payments found'); e.statusCode = 404; e.code = 'NO_STRIPE_CUSTOMER'; throw e; }
+
+  let customerId;
+  try {
+    const session = await s.checkout.sessions.retrieve(row.provider_tx_id);
+    customerId = session.customer;
+  } catch (err) {
+    logger.warn('billing portal: could not resolve customer from session', { userId, err: err.message });
+    const e = new Error('Could not resolve Stripe customer'); e.statusCode = 404; e.code = 'NO_STRIPE_CUSTOMER'; throw e;
+  }
+  if (!customerId) { const e = new Error('No Stripe customer'); e.statusCode = 404; e.code = 'NO_STRIPE_CUSTOMER'; throw e; }
+
+  const portal = await s.billingPortal.sessions.create({
+    customer: customerId,
+    return_url: returnUrl || (config.appUrl || 'https://chmup.top') + '/settings.html',
+  });
+  return { url: portal.url };
+}
+
+// ── Self-serve cancellation ────────────────────────────────────────────
+// `atPeriodEnd: true` (default) = keep access until paid-through date,
+// then auto-downgrade to free. Stripe stops charging on the next cycle.
+// `atPeriodEnd: false` = cancel immediately; paid days are not refunded
+// automatically (user can request refund via support if within 14 days).
+async function cancelSubscription(userId, { atPeriodEnd = true } = {}) {
+  const sub = db.prepare('SELECT * FROM subscriptions WHERE user_id = ?').get(userId);
+  if (!sub || sub.plan === 'free') {
+    const e = new Error('No active subscription to cancel'); e.statusCode = 400; e.code = 'NO_SUBSCRIPTION'; throw e;
+  }
+
+  // If Stripe-managed, cancel at the Stripe level too. We look up the
+  // Stripe subscription via the most recent confirmed payment's session.
+  const s = stripe();
+  const row = db.prepare(`
+    SELECT provider_tx_id FROM payments
+    WHERE user_id = ? AND method = 'stripe' AND status = 'confirmed'
+    ORDER BY confirmed_at DESC LIMIT 1
+  `).get(userId);
+  if (s && row) {
+    try {
+      const session = await s.checkout.sessions.retrieve(row.provider_tx_id);
+      if (session.subscription) {
+        if (atPeriodEnd) {
+          await s.subscriptions.update(session.subscription, { cancel_at_period_end: true });
+        } else {
+          await s.subscriptions.cancel(session.subscription);
+        }
+      }
+    } catch (err) {
+      // Non-fatal: local state still reflects the cancel; Stripe may already be cancelled
+      logger.warn('stripe cancel did not apply', { userId, err: err.message });
+    }
+  }
+
+  // Local state
+  if (atPeriodEnd) {
+    db.prepare(`UPDATE subscriptions SET auto_renew = 0, status = 'cancelling', updated_at = CURRENT_TIMESTAMP WHERE user_id = ?`).run(userId);
+  } else {
+    db.prepare(`UPDATE subscriptions SET plan = 'free', status = 'cancelled', auto_renew = 0, expires_at = NULL, updated_at = CURRENT_TIMESTAMP WHERE user_id = ?`).run(userId);
+    // Downgrade cleanup — same cascade as in extendSubscription
+    try {
+      const plans = require('../config/plans');
+      const limits = plans.getLimits('free');
+      const excess = db.prepare(`SELECT id FROM trading_bots WHERE user_id = ? AND is_active = 1 ORDER BY created_at DESC LIMIT -1 OFFSET ?`).all(userId, limits.maxBots);
+      const stmt = db.prepare('UPDATE trading_bots SET is_active = 0 WHERE id = ?');
+      for (const b of excess) stmt.run(b.id);
+    } catch (_e) {}
+  }
+
+  db.prepare(`
+    INSERT INTO audit_log (user_id, action, entity_type, entity_id, metadata)
+    VALUES (?, 'subscription.cancel', 'subscription', ?, ?)
+  `).run(userId, sub.id || null, JSON.stringify({ atPeriodEnd }));
+
+  // Confirmation email — durable outbox so it's not lost to SMTP hiccup.
+  try {
+    const emailService = require('./emailService');
+    const user = db.prepare('SELECT email, display_name FROM users WHERE id = ?').get(userId);
+    if (user && user.email) {
+      const tpl = require('./emailTemplates').subscriptionCancelled({
+        displayName: user.display_name, plan: sub.plan, expiresAt: sub.expires_at, atPeriodEnd,
+      });
+      emailService.sendDurable({ to: user.email, subject: tpl.subject, html: tpl.html, text: tpl.text });
+    }
+  } catch (err) { logger.warn('cancel email failed', { userId, err: err.message }); }
+
+  return { cancelled: true, atPeriodEnd, accessUntil: atPeriodEnd ? sub.expires_at : null };
+}
+
 module.exports = {
   createStripeCheckout,
+  createBillingPortalSession,
+  cancelSubscription,
   handleStripeWebhook,
   createCryptoPayment,
   confirmCryptoPayment,
