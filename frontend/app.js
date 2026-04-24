@@ -254,6 +254,8 @@ const API = {
   botTrades: (id, opts = {}) => apiRequest('GET', '/bots/' + id + '/trades?' + qs(opts)),
   botStats: (id) => apiRequest('GET', '/bots/' + id + '/stats'),
   botEquity: (id) => apiRequest('GET', '/bots/' + id + '/equity'),
+  quickBacktest: (cfg) => apiRequest('POST', '/bots/quick-backtest', cfg),
+  getBacktest: (id) => apiRequest('GET', '/backtests/' + id),
 
   // Signals
   listSignals: (opts = {}) => apiRequest('GET', '/signals?' + qs(opts)),

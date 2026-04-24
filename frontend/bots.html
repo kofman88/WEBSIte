@@ -65,7 +65,7 @@
   </div>
 </main>
 
-<!-- CREATE BOT WIZARD (4 steps) -->
+<!-- CREATE BOT WIZARD (6 steps) -->
 <div id="createModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.7);backdrop-filter:blur(8px);z-index:100;align-items:center;justify-content:center">
   <div class="card" style="width:100%;max-width:780px;margin:16px;max-height:92vh;overflow-y:auto">
     <div class="flex items-center justify-between mb-4">
@@ -226,7 +226,7 @@
       <!-- Nav -->
       <div class="flex items-center justify-between gap-3 pt-2">
         <button type="button" id="wizBack" class="py-2.5 px-5 rounded-xl bg-slate-800 text-slate-300 hover:bg-slate-700 font-medium hidden">← Назад</button>
-        <div class="text-xs text-slate-500" id="wizProgress">Шаг 1 из 4</div>
+        <div class="text-xs text-slate-500" id="wizProgress">Шаг 1 из 6</div>
         <button type="button" id="wizNext" class="py-2.5 px-5 rounded-xl font-semibold text-white" style="background:linear-gradient(180deg,#FF7840 0%,#FF5A1F 60%,#C44610 100%)">Далее →</button>
         <button type="submit" id="wizSubmit" class="py-2.5 px-5 rounded-xl font-semibold text-white hidden" style="background:linear-gradient(180deg,#FF7840 0%,#FF5A1F 60%,#C44610 100%)">Создать бота</button>
       </div>
@@ -236,15 +236,20 @@
 
 <style>
 #wizSteps{flex-wrap:nowrap}
-.wiz-step{display:flex;align-items:center;gap:6px;color:#64748b;font-size:12px;white-space:nowrap;flex-shrink:0}
-.wiz-step.active .wiz-num,.wiz-step.done .wiz-num{background:#1d4ed8;color:#fff}
+.wiz-step{display:flex;align-items:center;gap:6px;color:#64748b;font-size:12px;white-space:nowrap;flex-shrink:0;transition:color .25s}
+.wiz-step.done .wiz-num{background:#2B5936;color:#fff}
+.wiz-step.active .wiz-num{background:linear-gradient(135deg,#FF8C5A,#FF5A1F);color:#fff;box-shadow:0 0 0 4px rgba(255,90,31,.18)}
 .wiz-step.active .wiz-label,.wiz-step.done .wiz-label{color:#e2e8f0}
-.wiz-num{width:26px;height:26px;border-radius:50%;background:#1e293b;color:#94a3b8;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:600;flex-shrink:0}
-.wiz-line{flex:1 1 auto;height:2px;background:#1e293b;min-width:8px}
-.wiz-step.done ~ .wiz-line,.wiz-step.active ~ .wiz-line{background:#1e293b}
+.wiz-num{width:26px;height:26px;border-radius:50%;background:#1e293b;color:#94a3b8;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:600;flex-shrink:0;transition:background .25s, box-shadow .25s, color .25s}
+.wiz-line{flex:1 1 auto;height:2px;background:#1e293b;min-width:8px;transition:background .35s}
+/* The bar between two steps fills when the LEFT step is "done" */
+.wiz-step.done + .wiz-line{background:linear-gradient(90deg,#2B5936,#FF5A1F)}
 /* On narrow screens (<640px) hide step labels so numbers+lines still fit */
 @media (max-width:640px){.wiz-label{display:none}.wiz-step{gap:0}}
 .wiz-pane.hidden{display:none}
+/* Smooth fade-up when a pane becomes active */
+.wiz-pane:not(.hidden){animation:wizPaneIn .28s cubic-bezier(.16,1,.3,1)}
+@keyframes wizPaneIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
 .wiz-card{cursor:pointer;display:block;border-radius:12px;background:rgba(30,41,59,.5);border:1px solid #334155;padding:14px;transition:all .15s}
 .wiz-card:hover{border-color:#475569}
 .wiz-card:has(input:checked){border-color:#6366f1;background:rgba(99,102,241,.1);box-shadow:0 0 0 1px rgba(99,102,241,.4)}
@@ -509,6 +514,32 @@ html.light .chm-select-option.selected{background:rgba(255,90,31,.12);color:#FF5
 
   <section class="bd-kpis" id="bdKpis"></section>
 
+  <!-- Inline settings (Phase 2: edit risk / leverage / mode without leaving the drawer) -->
+  <section class="bd-section">
+    <div class="bd-section-head">
+      <h3>Настройки</h3>
+      <span class="bd-section-meta" id="bdSettingsMeta">изменения сохраняются в один клик</span>
+    </div>
+    <form id="bdSettingsForm" class="bd-settings" onsubmit="return false">
+      <label class="bd-field"><span>Имя</span><input name="name" type="text" maxlength="64"/></label>
+      <label class="bd-field"><span>Risk % за сделку</span><input name="riskPct" type="number" min="0.1" max="10" step="0.1"/></label>
+      <label class="bd-field"><span>Плечо</span><input name="leverage" type="number" min="1" max="100" step="1"/></label>
+      <label class="bd-field"><span>Макс открытых сделок</span><input name="maxOpenTrades" type="number" min="1" max="20" step="1"/></label>
+      <label class="bd-field"><span>Направление</span>
+        <select name="direction"><option value="both">Long + Short</option><option value="long">Long only</option><option value="short">Short only</option></select>
+      </label>
+      <label class="bd-field bd-field-toggle">
+        <span>Авто-исполнение</span>
+        <input name="autoTrade" type="checkbox"/>
+      </label>
+      <div class="bd-settings-actions">
+        <button type="button" class="bd-btn bd-btn-primary" id="bdSettingsSave">Сохранить</button>
+        <button type="button" class="bd-btn" id="bdSettingsReset">Сбросить</button>
+        <span class="bd-settings-status" id="bdSettingsStatus"></span>
+      </div>
+    </form>
+  </section>
+
   <section class="bd-section">
     <div class="bd-section-head">
       <h3>Кривая капитала</h3>
@@ -517,6 +548,28 @@ html.light .chm-select-option.selected{background:rgba(255,90,31,.12);color:#FF5
     <div class="bd-chart-wrap">
       <canvas id="bdEquityChart" height="220"></canvas>
     </div>
+  </section>
+
+  <!-- Phase 2: backtest the current bot config without leaving the drawer -->
+  <section class="bd-section">
+    <div class="bd-section-head">
+      <h3>Бэктест</h3>
+      <span class="bd-section-meta">прогоняет текущий конфиг на исторических свечах</span>
+    </div>
+    <div class="bd-bt">
+      <label class="bd-field"><span>Период (дней)</span>
+        <select id="bdBtDays">
+          <option value="14">14</option>
+          <option value="30">30</option>
+          <option value="60" selected>60</option>
+          <option value="90">90</option>
+          <option value="180">180</option>
+        </select>
+      </label>
+      <button type="button" class="bd-btn bd-btn-primary" id="bdBtRun">Прогнать</button>
+      <span class="bd-settings-status" id="bdBtStatus"></span>
+    </div>
+    <div id="bdBtResults" class="bd-bt-results" hidden></div>
   </section>
 
   <section class="bd-section">
@@ -595,6 +648,51 @@ html.light .chm-select-option.selected{background:rgba(255,90,31,.12);color:#FF5
   /* Sparkline on bot cards */
   .bot-spark{width:100%;position:relative}
   .bot-spark svg{width:100%;height:100%;display:block}
+
+  /* Inline settings + backtest panel inside the drawer (Phase 2) */
+  .bd-settings{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:12px}
+  .bd-field{display:flex;flex-direction:column;gap:4px;font-size:11px;color:rgba(255,255,255,.55)}
+  html.light .bd-field{color:rgba(10,10,10,.55)}
+  .bd-field span{font-weight:500;letter-spacing:.04em;text-transform:uppercase;font-size:10px}
+  .bd-field input[type="text"],.bd-field input[type="number"],.bd-field select{
+    background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);border-radius:8px;
+    color:#e2e8f0;padding:9px 11px;font-size:13px;font-family:inherit;font-variant-numeric:tabular-nums;
+    transition:border-color .15s, background .15s;
+  }
+  .bd-field input:focus,.bd-field select:focus{outline:none;border-color:rgba(255,140,90,.55);background:rgba(255,255,255,.06)}
+  html.light .bd-field input,html.light .bd-field select{background:#fff;border-color:rgba(0,0,0,.08);color:#0A0A0A}
+  html.light .bd-field input:focus,html.light .bd-field select:focus{border-color:#FF5A1F;background:#fff}
+  .bd-field-toggle{flex-direction:row;align-items:center;gap:10px}
+  .bd-field-toggle span{order:2;text-transform:none;letter-spacing:0;font-size:12px;color:rgba(255,255,255,.78)}
+  html.light .bd-field-toggle span{color:rgba(10,10,10,.78)}
+  .bd-field-toggle input[type="checkbox"]{order:1;width:36px;height:20px;-webkit-appearance:none;appearance:none;background:rgba(255,255,255,.08);border-radius:9999px;position:relative;cursor:pointer;transition:background .15s;border:0}
+  .bd-field-toggle input[type="checkbox"]::after{content:"";position:absolute;top:2px;left:2px;width:16px;height:16px;border-radius:50%;background:#fff;transition:transform .15s}
+  .bd-field-toggle input[type="checkbox"]:checked{background:#FF5A1F}
+  .bd-field-toggle input[type="checkbox"]:checked::after{transform:translateX(16px)}
+
+  .bd-settings-actions{grid-column:1/-1;display:flex;align-items:center;gap:10px;margin-top:6px}
+  .bd-btn{padding:9px 18px;border:1px solid rgba(255,255,255,.1);background:rgba(255,255,255,.04);color:#e2e8f0;border-radius:9px;font-size:12.5px;font-weight:500;font-family:inherit;cursor:pointer;transition:background .15s, border-color .15s}
+  .bd-btn:hover{background:rgba(255,255,255,.08)}
+  .bd-btn:disabled{opacity:.5;cursor:not-allowed}
+  .bd-btn-primary{background:linear-gradient(180deg,#FF8C5A,#FF5A1F);border-color:rgba(255,140,90,.4);color:#fff;font-weight:600}
+  .bd-btn-primary:hover{filter:brightness(1.08)}
+  html.light .bd-btn{background:rgba(0,0,0,.04);border-color:rgba(0,0,0,.1);color:#0A0A0A}
+  html.light .bd-btn:hover{background:rgba(0,0,0,.08)}
+  .bd-settings-status{font-size:11.5px;color:rgba(255,255,255,.55)}
+  html.light .bd-settings-status{color:rgba(10,10,10,.55)}
+  .bd-settings-status.ok{color:#4ade80}
+  .bd-settings-status.err{color:#f87171}
+
+  .bd-bt{display:flex;align-items:flex-end;gap:12px;flex-wrap:wrap}
+  .bd-bt .bd-field{min-width:140px}
+  .bd-bt-results{margin-top:14px;display:grid;grid-template-columns:repeat(auto-fill,minmax(120px,1fr));gap:10px}
+  .bd-bt-results.show{}
+  .bd-bt-tile{padding:12px;border-radius:10px;background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.06)}
+  html.light .bd-bt-tile{background:#fff;border-color:rgba(0,0,0,.06)}
+  .bd-bt-tile-l{font-size:9.5px;letter-spacing:.16em;text-transform:uppercase;color:rgba(255,255,255,.45);font-weight:500}
+  html.light .bd-bt-tile-l{color:rgba(10,10,10,.5)}
+  .bd-bt-tile-v{font-size:18px;font-weight:700;font-family:'JetBrains Mono',monospace;font-variant-numeric:tabular-nums;margin-top:4px;letter-spacing:-.01em}
+  .bd-bt-tile-v.pos{color:#4ade80}.bd-bt-tile-v.neg{color:#f87171}
 </style>
 
 <!-- TRADINGVIEW WEBHOOK MODAL -->
@@ -1350,8 +1448,10 @@ async function openBotDrawer(botId) {
     ]);
     _bdRenderHeader(bot);
     _bdRenderKpis(bot, stats);
+    _bdRenderSettings(bot);
     _bdRenderEquity(equity);
     _bdRenderTv(bot);
+    _bdWireBacktest(bot);
     _bdRenderTrades(trades.trades || trades);
   } catch (err) {
     document.getElementById('bdKpis').innerHTML = '<div class="bd-empty" style="grid-column:1/-1;color:#f87171">Ошибка: ' + escapeHtml(err.message) + '</div>';
@@ -1488,6 +1588,122 @@ function _bdRenderTrades(trades) {
         '<td>' + escapeHtml(t.status || '—') + '</td>' +
       '</tr>';
     }).join('') + '</tbody></table>';
+}
+
+// ── Phase 2: inline settings editor inside the drawer ──────────────────
+let _bdOriginal = null;
+function _bdRenderSettings(bot) {
+  _bdOriginal = bot;
+  const f = document.getElementById('bdSettingsForm');
+  f.elements.name.value = bot.name || '';
+  f.elements.riskPct.value = bot.riskPct ?? bot.risk_pct ?? 1;
+  f.elements.leverage.value = bot.leverage ?? 1;
+  f.elements.maxOpenTrades.value = bot.maxOpenTrades ?? bot.max_open_trades ?? 3;
+  f.elements.direction.value = bot.direction || 'both';
+  f.elements.autoTrade.checked = Boolean(bot.autoTrade ?? bot.auto_trade);
+  const status = document.getElementById('bdSettingsStatus');
+  status.className = 'bd-settings-status'; status.textContent = '';
+
+  document.getElementById('bdSettingsReset').onclick = () => _bdRenderSettings(_bdOriginal);
+  document.getElementById('bdSettingsSave').onclick = async () => {
+    const patch = {
+      name: f.elements.name.value.trim(),
+      riskPct: Number(f.elements.riskPct.value),
+      leverage: Number(f.elements.leverage.value),
+      maxOpenTrades: Number(f.elements.maxOpenTrades.value),
+      direction: f.elements.direction.value,
+      autoTrade: f.elements.autoTrade.checked,
+    };
+    status.className = 'bd-settings-status'; status.textContent = 'Сохраняем…';
+    try {
+      const updated = await API.updateBot(bot.id, patch);
+      _bdOriginal = updated;
+      _bdRenderHeader(updated);
+      status.className = 'bd-settings-status ok'; status.textContent = 'Сохранено';
+      setTimeout(() => { status.textContent = ''; }, 2500);
+    } catch (err) {
+      status.className = 'bd-settings-status err'; status.textContent = err.message || 'Ошибка';
+    }
+  };
+}
+
+// ── Phase 2: run a backtest of the current bot config from the drawer ──
+function _bdWireBacktest(bot) {
+  const btn = document.getElementById('bdBtRun');
+  const status = document.getElementById('bdBtStatus');
+  const out = document.getElementById('bdBtResults');
+  out.hidden = true; out.innerHTML = '';
+  status.className = 'bd-settings-status'; status.textContent = '';
+
+  btn.onclick = async () => {
+    const days = Number(document.getElementById('bdBtDays').value) || 60;
+    const symbol = Array.isArray(bot.symbols) ? bot.symbols[0] : (typeof bot.symbols === 'string' ? bot.symbols.split(',')[0].trim() : null);
+    if (!symbol) { status.className = 'bd-settings-status err'; status.textContent = 'У бота нет символа'; return; }
+    btn.disabled = true; status.className = 'bd-settings-status'; status.textContent = 'Запускаем…';
+    out.hidden = true; out.innerHTML = '';
+    try {
+      const bt = await API.quickBacktest({
+        symbol, strategy: bot.strategy, timeframe: bot.timeframe || '1h',
+        exchange: bot.exchange || 'bybit', days, direction: bot.direction || 'both',
+        strategyConfig: bot.strategyConfig || {},
+        leverage: bot.leverage || 1, riskPct: bot.riskPct || 1,
+      });
+      // Backtest is async (status='pending'/'running' until engine drains the queue).
+      // Poll /api/backtests/:id every 2s until completed/failed (cap ~90s).
+      status.textContent = 'Прогон в очереди (id ' + bt.id + ')…';
+      const final = await _bdPollBacktest(bt.id, 45);
+      if (!final) { status.className = 'bd-settings-status err'; status.textContent = 'Тайм-аут'; return; }
+      if (final.status === 'failed') {
+        status.className = 'bd-settings-status err';
+        status.textContent = final.errorMessage ? ('Не удалось: ' + final.errorMessage) : 'Не удалось';
+        return;
+      }
+      status.className = 'bd-settings-status ok';
+      status.textContent = 'Готово · ' + (final.durationMs ? (final.durationMs / 1000).toFixed(1) + 's' : '');
+      _bdRenderBtResults(final.results || {}, out);
+    } catch (err) {
+      status.className = 'bd-settings-status err'; status.textContent = err.message || 'Ошибка';
+    } finally {
+      btn.disabled = false;
+    }
+  };
+}
+
+async function _bdPollBacktest(id, maxTries) {
+  for (let i = 0; i < maxTries; i++) {
+    // eslint-disable-next-line no-await-in-loop
+    await new Promise((r) => setTimeout(r, 2000));
+    try {
+      // eslint-disable-next-line no-await-in-loop
+      const bt = await API.getBacktest(id);
+      if (bt.status === 'completed' || bt.status === 'failed') return bt;
+    } catch (_e) { /* keep polling */ }
+  }
+  return null;
+}
+
+function _bdRenderBtResults(r, container) {
+  const fmtPct = (v) => v == null ? '—' : (Number(v) * 100).toFixed(2) + '%';
+  const fmtNum = (v) => v == null ? '—' : Number(v).toFixed(2);
+  const ret = r.totalReturnPct ?? r.totalReturn ?? null;
+  const wr = r.winRate ?? null;
+  const trades = r.totalTrades ?? r.tradesCount ?? null;
+  const dd = r.maxDrawdownPct ?? r.maxDrawdown ?? null;
+  const pf = r.profitFactor ?? null;
+  const sharpe = r.sharpe ?? null;
+  const tiles = [
+    { l: 'Доходность', v: ret == null ? '—' : (Number(ret) > 0 ? '+' : '') + fmtPct(ret), cls: ret > 0 ? 'pos' : ret < 0 ? 'neg' : '' },
+    { l: 'Win Rate',  v: wr == null ? '—' : fmtPct(wr), cls: '' },
+    { l: 'Сделок',    v: trades ?? '—', cls: '' },
+    { l: 'Profit Factor', v: fmtNum(pf), cls: pf >= 1 ? 'pos' : pf > 0 ? 'neg' : '' },
+    { l: 'Max DD',    v: dd == null ? '—' : '−' + fmtPct(Math.abs(dd)), cls: 'neg' },
+    { l: 'Sharpe',    v: fmtNum(sharpe), cls: sharpe > 1 ? 'pos' : '' },
+  ];
+  container.innerHTML = tiles.map((t) =>
+    '<div class="bd-bt-tile"><div class="bd-bt-tile-l">' + escapeHtml(t.l) + '</div>' +
+    '<div class="bd-bt-tile-v ' + t.cls + '">' + escapeHtml(String(t.v)) + '</div></div>',
+  ).join('');
+  container.hidden = false;
 }
 
 window.openBotDrawer = openBotDrawer;
