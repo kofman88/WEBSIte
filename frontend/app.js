@@ -253,6 +253,7 @@ const API = {
   deleteBot: (id) => apiRequest('DELETE', '/bots/' + id),
   botTrades: (id, opts = {}) => apiRequest('GET', '/bots/' + id + '/trades?' + qs(opts)),
   botStats: (id) => apiRequest('GET', '/bots/' + id + '/stats'),
+  botEquity: (id) => apiRequest('GET', '/bots/' + id + '/equity'),
 
   // Signals
   listSignals: (opts = {}) => apiRequest('GET', '/signals?' + qs(opts)),

@@ -212,9 +212,9 @@
       </div>
       <!-- Step 6: Mode + review -->
       <div class="wiz-pane hidden" data-pane="6">
-        <div class="field-label mb-2">Режим торговли<span class="help-dot up" tabindex="0" data-help="PAPER — бот торгует на виртуальном балансе, безопасно. Идеально для проверки стратегии. LIVE — реальные ордера на бирже настоящими деньгами (Pro+ тариф). Совет: сначала месяц PAPER, потом LIVE.">i</span></div>
+        <div class="field-label mb-2">Режим торговли<span class="help-dot up" tabindex="0" data-help="DEMO — бот торгует на виртуальном балансе, безопасно. Идеально для проверки стратегии. LIVE — реальные ордера на бирже (Pro+ тариф). Совет: сначала месяц DEMO, потом LIVE.">i</span></div>
         <div class="grid grid-cols-2 gap-3 mb-4">
-          <label class="wiz-card"><input type="radio" name="tradingMode" value="paper" checked class="sr-only"/><div class="wiz-card-body"><div class="font-semibold text-slate-300">PAPER</div><div class="text-xs text-slate-400 mt-1">Виртуальный баланс, безопасно</div></div></label>
+          <label class="wiz-card"><input type="radio" name="tradingMode" value="paper" checked class="sr-only"/><div class="wiz-card-body"><div class="font-semibold text-slate-300">DEMO</div><div class="text-xs text-slate-400 mt-1">Виртуальный баланс, безопасно</div></div></label>
           <label class="wiz-card"><input type="radio" name="tradingMode" value="live" class="sr-only"/><div class="wiz-card-body"><div class="font-semibold text-red-400">LIVE</div><div class="text-xs text-slate-400 mt-1">Реальные деньги — Pro+</div></div></label>
         </div>
         <label class="flex items-center gap-2 text-sm text-slate-300 cursor-pointer mb-4"><input type="checkbox" name="autoTrade" style="accent-color:#6366f1"/> Авто-торговля<span class="help-dot up" tabindex="0" data-help="Включено — бот сам открывает и закрывает сделки. Выключено — бот только ищет сигналы и присылает уведомления, а решение о входе принимаешь ты вручную.">i</span><span class="text-xs text-slate-500 ml-1">(иначе — только сигналы)</span></label>
@@ -448,7 +448,7 @@ html.light .chm-select-option.selected{background:rgba(255,90,31,.12);color:#FF5
       <div class="flex items-center gap-2"><span class="text-xl">⚡</span><h3 class="text-lg font-bold">Smart Trade</h3></div>
       <button type="button" onclick="closeSmartTrade()" class="text-slate-400 hover:text-white text-xl">&times;</button>
     </div>
-    <p class="text-xs text-slate-400 mb-4">Разовая сделка с автоматическим SL/TP — без бота. Paper-режим работает сразу.</p>
+    <p class="text-xs text-slate-400 mb-4">Разовая сделка с автоматическим SL/TP — без бота. Demo-режим работает сразу.</p>
     <form id="smartTradeForm" class="space-y-3">
       <div class="grid grid-cols-2 gap-3">
         <div><label class="text-xs text-slate-400 block mb-1">Биржа</label><select name="exchange" class="w-full bg-slate-800/50 border border-slate-700 rounded-xl px-3 py-2.5 text-white text-sm outline-none"><option value="bybit">Bybit</option><option value="binance">Binance</option><option value="bingx">BingX</option><option value="okx">OKX</option></select></div>
@@ -463,7 +463,7 @@ html.light .chm-select-option.selected{background:rgba(255,90,31,.12);color:#FF5
         </div>
         <div><label class="text-xs text-slate-400 block mb-1">Режим</label>
           <div class="grid grid-cols-2 gap-2">
-            <label class="st-side"><input type="radio" name="tradingMode" value="paper" checked class="sr-only"/><div class="st-body text-slate-300">PAPER</div></label>
+            <label class="st-side"><input type="radio" name="tradingMode" value="paper" checked class="sr-only"/><div class="st-body text-slate-300">DEMO</div></label>
             <label class="st-side"><input type="radio" name="tradingMode" value="live" class="sr-only"/><div class="st-body text-red-400">LIVE</div></label>
           </div>
         </div>
@@ -487,6 +487,115 @@ html.light .chm-select-option.selected{background:rgba(255,90,31,.12);color:#FF5
     </form>
   </div>
 </div>
+
+<!-- BOT DETAIL DRAWER (right-slide, 70% width) — Veles/3Commas-style -->
+<div id="botDrawerBg" class="bd-bg" onclick="closeBotDrawer()"></div>
+<aside id="botDrawer" class="bd" role="dialog" aria-label="Детали бота">
+  <header class="bd-head">
+    <div class="bd-head-left">
+      <div class="bd-avatar" id="bdAvatar">B</div>
+      <div>
+        <div class="bd-title" id="bdTitle">—</div>
+        <div class="bd-sub" id="bdSub">—</div>
+      </div>
+    </div>
+    <div class="bd-head-right">
+      <button class="bd-act" id="bdPause" title="Пауза / запуск">—</button>
+      <button class="bd-act" id="bdTv" title="TradingView webhook">TV</button>
+      <button class="bd-act bd-act-danger" id="bdDelete" title="Удалить">Удалить</button>
+      <button class="bd-close" onclick="closeBotDrawer()" aria-label="Закрыть">✕</button>
+    </div>
+  </header>
+
+  <section class="bd-kpis" id="bdKpis"></section>
+
+  <section class="bd-section">
+    <div class="bd-section-head">
+      <h3>Кривая капитала</h3>
+      <span class="bd-section-meta" id="bdEquityMeta">—</span>
+    </div>
+    <div class="bd-chart-wrap">
+      <canvas id="bdEquityChart" height="220"></canvas>
+    </div>
+  </section>
+
+  <section class="bd-section">
+    <div class="bd-section-head">
+      <h3>Рынок</h3>
+      <span class="bd-section-meta" id="bdTvMeta">—</span>
+    </div>
+    <div id="bdTvChart" class="bd-tv-wrap"></div>
+  </section>
+
+  <section class="bd-section">
+    <div class="bd-section-head">
+      <h3>Последние сделки</h3>
+      <a href="#" id="bdTradesAll" class="bd-section-meta" style="color:#FF8C5A;text-decoration:underline">все</a>
+    </div>
+    <div id="bdTrades" class="bd-trades-wrap"><div class="bd-empty">Загрузка…</div></div>
+  </section>
+</aside>
+<style>
+  .bd-bg{position:fixed;inset:0;background:rgba(0,0,0,.6);backdrop-filter:blur(6px);z-index:120;display:none}
+  .bd-bg.open{display:block}
+  .bd{position:fixed;top:0;right:0;height:100vh;width:min(900px,85vw);background:linear-gradient(180deg,#0c0f16 0%,#080a10 100%);border-left:1px solid rgba(255,255,255,.08);overflow-y:auto;z-index:121;transform:translateX(100%);transition:transform .28s cubic-bezier(.16,1,.3,1);color:#e2e8f0;font-family:'Inter',sans-serif}
+  .bd.open{transform:translateX(0)}
+  html.light .bd{background:linear-gradient(180deg,#fff 0%,#F6F7FB 100%);color:#0A0A0A;border-left-color:rgba(0,0,0,.08)}
+
+  .bd-head{position:sticky;top:0;background:inherit;z-index:2;padding:18px 24px;border-bottom:1px solid rgba(255,255,255,.06);display:flex;justify-content:space-between;align-items:center;gap:16px;flex-wrap:wrap}
+  html.light .bd-head{border-bottom-color:rgba(0,0,0,.06)}
+  .bd-head-left{display:flex;align-items:center;gap:14px;min-width:0}
+  .bd-head-right{display:flex;align-items:center;gap:8px}
+  .bd-avatar{width:44px;height:44px;border-radius:12px;background:linear-gradient(135deg,#FF8C5A,#FF5A1F);color:#fff;font-weight:700;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0}
+  .bd-title{font-size:18px;font-weight:700;letter-spacing:-.02em}
+  .bd-sub{font-size:12px;color:rgba(255,255,255,.55);margin-top:2px}
+  html.light .bd-sub{color:rgba(10,10,10,.55)}
+  .bd-act{padding:7px 12px;border-radius:8px;border:1px solid rgba(255,255,255,.1);background:rgba(255,255,255,.04);color:rgba(255,255,255,.85);cursor:pointer;font-size:12px;font-weight:500;font-family:inherit;transition:background .15s}
+  .bd-act:hover{background:rgba(255,255,255,.08)}
+  .bd-act-danger{border-color:rgba(239,68,68,.3);background:rgba(239,68,68,.08);color:#fca5a5}
+  .bd-act-danger:hover{background:rgba(239,68,68,.16)}
+  html.light .bd-act{background:rgba(0,0,0,.04);border-color:rgba(0,0,0,.1);color:#0A0A0A}
+  html.light .bd-act:hover{background:rgba(0,0,0,.08)}
+  .bd-close{width:34px;height:34px;border-radius:50%;border:0;background:rgba(255,255,255,.06);color:rgba(255,255,255,.75);cursor:pointer;font-size:16px;line-height:1}
+  .bd-close:hover{background:rgba(255,255,255,.12)}
+  html.light .bd-close{background:rgba(0,0,0,.05);color:rgba(10,10,10,.7)}
+
+  .bd-kpis{padding:20px 24px;display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:12px;border-bottom:1px solid rgba(255,255,255,.04)}
+  html.light .bd-kpis{border-bottom-color:rgba(0,0,0,.05)}
+  .bd-kpi{padding:14px;border-radius:12px;background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.06)}
+  html.light .bd-kpi{background:#fff;border-color:rgba(0,0,0,.06);box-shadow:0 1px 2px rgba(0,0,0,.03)}
+  .bd-kpi-label{font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:rgba(255,255,255,.45);font-weight:500;margin-bottom:6px}
+  html.light .bd-kpi-label{color:rgba(10,10,10,.5)}
+  .bd-kpi-value{font-size:20px;font-weight:700;letter-spacing:-.02em;font-family:'JetBrains Mono',monospace;font-variant-numeric:tabular-nums}
+  .bd-kpi-sub{font-size:11px;color:rgba(255,255,255,.45);margin-top:3px}
+  html.light .bd-kpi-sub{color:rgba(10,10,10,.5)}
+  .bd-kpi-pos{color:#4ade80}.bd-kpi-neg{color:#f87171}.bd-kpi-neu{color:#FF8C5A}
+
+  .bd-section{padding:20px 24px;border-bottom:1px solid rgba(255,255,255,.04)}
+  html.light .bd-section{border-bottom-color:rgba(0,0,0,.05)}
+  .bd-section-head{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:14px}
+  .bd-section-head h3{font-size:14px;font-weight:600;letter-spacing:-.01em}
+  .bd-section-meta{font-size:11px;color:rgba(255,255,255,.45)}
+  html.light .bd-section-meta{color:rgba(10,10,10,.5)}
+  .bd-chart-wrap{background:rgba(255,255,255,.02);border-radius:12px;padding:14px;height:260px;position:relative}
+  html.light .bd-chart-wrap{background:rgba(0,0,0,.02)}
+  .bd-tv-wrap{height:420px;border-radius:12px;overflow:hidden;background:#0d1017;border:1px solid rgba(255,255,255,.04)}
+  html.light .bd-tv-wrap{background:#F6F7FB;border-color:rgba(0,0,0,.06)}
+  .bd-tv-wrap iframe{width:100%;height:100%;border:0;display:block}
+
+  .bd-trades-wrap{border-radius:12px;overflow:hidden;border:1px solid rgba(255,255,255,.05)}
+  html.light .bd-trades-wrap{border-color:rgba(0,0,0,.06)}
+  .bd-trades{width:100%;font-size:12.5px;border-collapse:collapse}
+  .bd-trades thead th{padding:10px 12px;text-align:left;font-size:10px;text-transform:uppercase;letter-spacing:.1em;color:rgba(255,255,255,.45);background:rgba(255,255,255,.02);font-weight:500}
+  html.light .bd-trades thead th{background:rgba(0,0,0,.03);color:rgba(10,10,10,.5)}
+  .bd-trades tbody td{padding:10px 12px;border-top:1px solid rgba(255,255,255,.04)}
+  html.light .bd-trades tbody td{border-top-color:rgba(0,0,0,.05)}
+  .bd-empty{padding:30px;text-align:center;color:rgba(255,255,255,.4);font-size:12.5px}
+
+  /* Sparkline on bot cards */
+  .bot-spark{width:100%;position:relative}
+  .bot-spark svg{width:100%;height:100%;display:block}
+</style>
 
 <!-- TRADINGVIEW WEBHOOK MODAL -->
 <div id="tvWebhookModal" class="fixed inset-0 bg-black/70 flex items-center justify-center hidden z-50" style="backdrop-filter:blur(8px)">
@@ -596,20 +705,24 @@ async function loadBots() {
       const syms = Array.isArray(b.symbols) ? b.symbols.slice(0, 3).join(', ') : '—';
       const modeBadge = b.tradingMode === 'live'
         ? '<span class="text-xs px-2 py-0.5 rounded-full bg-red-500/15 text-red-400 cursor-pointer" data-mode="'+b.id+'" data-current="live" title="Переключить режим">LIVE</span>'
-        : '<span class="text-xs px-2 py-0.5 rounded-full bg-slate-500/15 text-slate-400 cursor-pointer" data-mode="'+b.id+'" data-current="paper" title="Переключить в LIVE">PAPER</span>';
+        : '<span class="text-xs px-2 py-0.5 rounded-full bg-slate-500/15 text-slate-400 cursor-pointer" data-mode="'+b.id+'" data-current="paper" title="Переключить в LIVE">DEMO</span>';
+      card.classList.add('bot-card-click');
+      card.setAttribute('data-bot-open', b.id);
+      card.style.cursor = 'pointer';
       card.innerHTML = `
         <div class="flex items-center justify-between mb-3">
           <div class="flex items-center gap-3">
             <div class="w-10 h-10 rounded-lg bg-indigo-500/10 flex items-center justify-center text-sm font-bold text-indigo-400">${(b.name||'B')[0].toUpperCase()}</div>
             <div><div class="font-semibold">${escapeHtml(b.name)}</div><div class="text-xs text-slate-500">${b.exchange} · ${syms}</div></div>
           </div>
-          <div class="toggle ${b.isActive?'on':''}" data-bot="${b.id}" style="cursor:pointer"></div>
+          <div class="toggle ${b.isActive?'on':''}" data-bot="${b.id}" data-stop-open="1" style="cursor:pointer"></div>
         </div>
         <div class="flex items-center gap-2 mb-3">
           <span class="text-xs px-2 py-0.5 rounded-full bg-cyan-500/15 text-cyan-400">${STRATEGY_LABELS[b.strategy]||b.strategy}</span>
           ${modeBadge}
           <span class="text-xs px-2 py-0.5 rounded-full ${b.isActive?'bg-green-500/15 text-green-400':'bg-slate-500/15 text-slate-400'}">${b.isActive?'Active':'Paused'}</span>
         </div>
+        <div class="bot-spark" id="bspark${b.id}" style="height:48px;margin:-4px 0 10px"></div>
         <div class="grid grid-cols-3 gap-3 text-center text-sm mb-3">
           <div><div class="text-xs text-slate-500">PnL</div><div class="${pnlClass} font-semibold">${Fmt.currency(stats.totalPnl)}</div></div>
           <div><div class="text-xs text-slate-500">Win Rate</div><div class="font-semibold">${stats.winRate!==null?Fmt.percent(stats.winRate*100,{decimals:0}):'—'}</div></div>
@@ -618,8 +731,8 @@ async function loadBots() {
         <div class="text-xs text-slate-500 flex items-center justify-between flex-wrap gap-1">
           <span>Lev ${b.leverage}x · Risk ${b.riskPct}% · Max ${b.maxOpenTrades}</span>
           <div class="flex items-center gap-3">
-            <button data-tv="${b.id}" class="text-indigo-400 hover:text-indigo-300 text-xs" title="TradingView webhook">📡 TV</button>
-            <button data-delete="${b.id}" class="text-red-400 hover:text-red-300 text-xs">Удалить</button>
+            <button data-tv="${b.id}" data-stop-open="1" class="text-indigo-400 hover:text-indigo-300 text-xs" title="TradingView webhook">TV</button>
+            <button data-delete="${b.id}" data-stop-open="1" class="text-red-400 hover:text-red-300 text-xs">Удалить</button>
           </div>
         </div>`;
       grid.appendChild(card);
@@ -652,6 +765,20 @@ async function loadBots() {
     // TV webhook button per bot
     grid.querySelectorAll('[data-tv]').forEach(el => {
       el.addEventListener('click', () => openTvWebhook(+el.getAttribute('data-tv')));
+    });
+    // Inner buttons should not trigger the "open detail" behavior on the
+    // surrounding card. Stop propagation on anything marked data-stop-open.
+    grid.querySelectorAll('[data-stop-open]').forEach((el) => {
+      el.addEventListener('click', (e) => e.stopPropagation());
+    });
+    // Card click → open detail drawer
+    grid.querySelectorAll('.bot-card-click').forEach((card) => {
+      card.addEventListener('click', () => openBotDrawer(+card.getAttribute('data-bot-open')));
+    });
+    // Fetch + draw sparkline per card (parallel, best-effort)
+    grid.querySelectorAll('[id^="bspark"]').forEach((el) => {
+      const id = Number(el.id.slice(6));
+      drawSparkline(el, id);
     });
     // Header stats — reflect all bots, not the filtered subset.
     document.getElementById('hdrTotal').textContent = all.length;
@@ -1014,7 +1141,7 @@ function closeLiveConfirm() {
 async function switchMode(botId, mode) {
   try {
     await API.updateBot(botId, { tradingMode: mode });
-    Toast.success(mode === 'live' ? 'Бот переключён в LIVE' : 'Бот переключён в PAPER');
+    Toast.success(mode === 'live' ? 'Бот переключён в LIVE' : 'Бот переключён в DEMO');
     loadBots();
   } catch (err) {
     if (err.code === 'UPGRADE_REQUIRED') Toast.warn('Live-режим доступен на Pro и выше');
@@ -1065,7 +1192,7 @@ document.getElementById('smartTradeForm')?.addEventListener('submit', async (e) 
   };
   try {
     await API.manualTrade(payload);
-    Toast.success('Сделка открыта · PAPER');
+    Toast.success('Сделка открыта · DEMO');
     closeSmartTrade();
   } catch (err) {
     if (err.code === 'LIVE_MANUAL_NOT_ENABLED') Toast.warn('LIVE пока недоступно. Работаем в paper.');
@@ -1159,6 +1286,212 @@ loadBots();
     });
   });
 })();
+
+// ── Sparkline per bot card ──────────────────────────────────────────────
+// Minimal inline SVG path from PnL series. No axes, no animation — just
+// a visual hint of the curve. Color by sign of final PnL.
+async function drawSparkline(container, botId) {
+  try {
+    const r = await API.botEquity(botId);
+    const pts = (r && r.points) || [];
+    if (pts.length < 2) {
+      container.innerHTML = '<div style="font-size:10px;color:rgba(255,255,255,.3);text-align:center;padding-top:14px">Недостаточно данных для графика</div>';
+      return;
+    }
+    const pnls = pts.map(p => p.pnl);
+    const min = Math.min(0, ...pnls);
+    const max = Math.max(0, ...pnls);
+    const range = (max - min) || 1;
+    const w = 280, h = 48, pad = 3;
+    const dx = (w - pad * 2) / (pts.length - 1);
+    const y = v => h - pad - ((v - min) / range) * (h - pad * 2);
+    let path = '';
+    pts.forEach((p, i) => {
+      const xi = pad + i * dx;
+      path += (i === 0 ? 'M' : 'L') + xi.toFixed(1) + ',' + y(p.pnl).toFixed(1) + ' ';
+    });
+    const last = pnls[pnls.length - 1];
+    const color = last > 0 ? '#4ade80' : last < 0 ? '#f87171' : '#FF8C5A';
+    const areaPath = path + 'L' + (pad + (pts.length - 1) * dx).toFixed(1) + ',' + (h - pad) + ' L' + pad + ',' + (h - pad) + ' Z';
+    container.innerHTML =
+      '<svg viewBox="0 0 ' + w + ' ' + h + '" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">' +
+        '<defs><linearGradient id="spg' + botId + '" x1="0" y1="0" x2="0" y2="1">' +
+          '<stop offset="0" stop-color="' + color + '" stop-opacity=".28"/>' +
+          '<stop offset="1" stop-color="' + color + '" stop-opacity="0"/>' +
+        '</linearGradient></defs>' +
+        '<path d="' + areaPath + '" fill="url(#spg' + botId + ')"/>' +
+        '<path d="' + path + '" fill="none" stroke="' + color + '" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>' +
+      '</svg>';
+  } catch (_) {
+    container.innerHTML = '';
+  }
+}
+
+// ── Bot detail drawer ───────────────────────────────────────────────────
+let _bdCurrentId = null;
+let _bdEquityChart = null;
+async function openBotDrawer(botId) {
+  _bdCurrentId = botId;
+  const bg = document.getElementById('botDrawerBg');
+  const dd = document.getElementById('botDrawer');
+  bg.classList.add('open');
+  dd.classList.add('open');
+  document.body.style.overflow = 'hidden';
+  // Reset loading states
+  document.getElementById('bdKpis').innerHTML = '<div class="bd-empty" style="grid-column:1/-1">Загрузка…</div>';
+  document.getElementById('bdTrades').innerHTML = '<div class="bd-empty">Загрузка…</div>';
+  document.getElementById('bdTvChart').innerHTML = '';
+  try {
+    const [bot, stats, equity, trades] = await Promise.all([
+      API.getBot(botId),
+      API.botStats(botId).catch(() => null),
+      API.botEquity(botId).catch(() => ({ points: [] })),
+      API.botTrades(botId, { limit: 20 }).catch(() => ({ trades: [] })),
+    ]);
+    _bdRenderHeader(bot);
+    _bdRenderKpis(bot, stats);
+    _bdRenderEquity(equity);
+    _bdRenderTv(bot);
+    _bdRenderTrades(trades.trades || trades);
+  } catch (err) {
+    document.getElementById('bdKpis').innerHTML = '<div class="bd-empty" style="grid-column:1/-1;color:#f87171">Ошибка: ' + escapeHtml(err.message) + '</div>';
+  }
+}
+function closeBotDrawer() {
+  document.getElementById('botDrawerBg').classList.remove('open');
+  document.getElementById('botDrawer').classList.remove('open');
+  document.body.style.overflow = '';
+  _bdCurrentId = null;
+  if (_bdEquityChart) { _bdEquityChart.destroy(); _bdEquityChart = null; }
+}
+document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && _bdCurrentId) closeBotDrawer(); });
+
+function _bdRenderHeader(bot) {
+  const syms = Array.isArray(bot.symbols) ? bot.symbols.join(', ') : (bot.symbols || '—');
+  document.getElementById('bdAvatar').textContent = (bot.name || 'B')[0].toUpperCase();
+  document.getElementById('bdTitle').textContent = bot.name || ('Бот #' + bot.id);
+  document.getElementById('bdSub').textContent =
+    bot.exchange + ' · ' + syms + ' · ' + (STRATEGY_LABELS[bot.strategy] || bot.strategy) + ' · ' + (bot.timeframe || '—') + ' · ' + (bot.tradingMode === 'live' ? 'LIVE' : 'DEMO');
+
+  const pauseBtn = document.getElementById('bdPause');
+  pauseBtn.textContent = bot.isActive ? '⏸ Пауза' : '▶ Запустить';
+  pauseBtn.onclick = async () => {
+    try { await API.toggleBot(bot.id); Toast.success('Статус изменён'); closeBotDrawer(); loadBots(); }
+    catch (e) { Toast.error(e.message); }
+  };
+  document.getElementById('bdTv').onclick = () => { closeBotDrawer(); openTvWebhook(bot.id); };
+  document.getElementById('bdDelete').onclick = async () => {
+    if (!confirm('Удалить бота?')) return;
+    try { await API.deleteBot(bot.id); Toast.success('Удалён'); closeBotDrawer(); loadBots(); }
+    catch (e) { Toast.error(e.message); }
+  };
+}
+
+function _bdRenderKpis(bot, stats) {
+  const s = stats || {};
+  const pnl = Number(s.totalPnl) || 0;
+  const pnlCls = pnl > 0 ? 'bd-kpi-pos' : pnl < 0 ? 'bd-kpi-neg' : 'bd-kpi-neu';
+  const roi = s.roiPct != null ? s.roiPct.toFixed(2) + '%' : '—';
+  const roiCls = (s.roiPct || 0) > 0 ? 'bd-kpi-pos' : (s.roiPct || 0) < 0 ? 'bd-kpi-neg' : 'bd-kpi-neu';
+  const wr = s.winRate != null ? Math.round(s.winRate * 100) + '%' : '—';
+  const sharpe = s.sharpe != null ? s.sharpe.toFixed(2) : '—';
+  const pf = s.profitFactor != null ? s.profitFactor.toFixed(2) : '—';
+  const dd = s.maxDrawdown != null ? Fmt.currency(-s.maxDrawdown) : '—';
+  const kpis = [
+    { label: 'PnL', value: Fmt.currency(pnl), sub: s.totalTrades + ' сделок', cls: pnlCls },
+    { label: 'ROI', value: roi, sub: 'от $10K base', cls: roiCls },
+    { label: 'Win Rate', value: wr, sub: (s.wins || 0) + ' / ' + (s.losses || 0), cls: '' },
+    { label: 'Sharpe', value: sharpe, sub: 'годовой', cls: '' },
+    { label: 'Profit Factor', value: pf, sub: 'gross win / loss', cls: '' },
+    { label: 'Max DD', value: dd, sub: 'макс просадка', cls: 'bd-kpi-neg' },
+  ];
+  document.getElementById('bdKpis').innerHTML = kpis.map((k) =>
+    '<div class="bd-kpi">' +
+      '<div class="bd-kpi-label">' + k.label + '</div>' +
+      '<div class="bd-kpi-value ' + k.cls + '">' + k.value + '</div>' +
+      '<div class="bd-kpi-sub">' + k.sub + '</div>' +
+    '</div>'
+  ).join('');
+}
+
+function _bdRenderEquity(equity) {
+  const pts = (equity && equity.points) || [];
+  document.getElementById('bdEquityMeta').textContent = pts.length + ' точек';
+  const canvas = document.getElementById('bdEquityChart');
+  if (_bdEquityChart) { _bdEquityChart.destroy(); _bdEquityChart = null; }
+  if (!pts.length) {
+    canvas.parentElement.innerHTML = '<div class="bd-empty">Пока нет закрытых сделок</div>';
+    return;
+  }
+  const labels = pts.map((p) => new Date(p.at).toLocaleDateString('ru-RU', { day: '2-digit', month: 'short' }));
+  const data = pts.map((p) => p.pnl);
+  const last = data[data.length - 1];
+  const col = last > 0 ? '#4ade80' : last < 0 ? '#f87171' : '#FF8C5A';
+  _bdEquityChart = new Chart(canvas, {
+    type: 'line',
+    data: { labels, datasets: [{
+      data, borderColor: col, backgroundColor: col + '22',
+      fill: true, tension: 0.25, pointRadius: 0, borderWidth: 2,
+    }] },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      plugins: { legend: { display: false }, tooltip: { mode: 'index', intersect: false } },
+      scales: {
+        x: { grid: { display: false }, ticks: { color: 'rgba(255,255,255,.4)', maxTicksLimit: 6, font: { size: 10 } } },
+        y: { grid: { color: 'rgba(255,255,255,.04)' }, ticks: { color: 'rgba(255,255,255,.4)', font: { size: 10 }, callback: (v) => '$' + v.toFixed(0) } },
+      },
+    },
+  });
+}
+
+function _bdRenderTv(bot) {
+  const sym = Array.isArray(bot.symbols) ? bot.symbols[0] : (bot.symbols || 'BTCUSDT');
+  // Map our symbol (BTCUSDT) to a TradingView exchange:pair. Our exchanges
+  // are all Bybit/Binance-style spot pairs; use BYBIT as default since
+  // most bots here run on Bybit.
+  const tvExchange = (bot.exchange || 'bybit').toUpperCase();
+  const clean = String(sym).replace(/[/\-]/g, '').toUpperCase();
+  const theme = document.documentElement.classList.contains('light') ? 'light' : 'dark';
+  const interval = ({ '1m': '1', '3m': '3', '5m': '5', '15m': '15', '30m': '30', '1h': '60', '2h': '120', '4h': '240', '12h': '720', '1d': 'D' })[bot.timeframe] || '60';
+  const url = 'https://s.tradingview.com/widgetembed/'
+    + '?frameElementId=tradingview_' + bot.id
+    + '&symbol=' + encodeURIComponent(tvExchange + ':' + clean)
+    + '&interval=' + interval
+    + '&theme=' + theme
+    + '&style=1&locale=ru&toolbarbg=rgba(0,0,0,0)&hide_top_toolbar=0&hide_side_toolbar=1&allow_symbol_change=0&save_image=0&studies=%5B%5D';
+  document.getElementById('bdTvMeta').textContent = tvExchange + ':' + clean + ' · ' + (bot.timeframe || '1h');
+  document.getElementById('bdTvChart').innerHTML = '<iframe src="' + url + '" allowtransparency="true" frameborder="0" scrolling="no"></iframe>';
+}
+
+function _bdRenderTrades(trades) {
+  const list = Array.isArray(trades) ? trades : [];
+  if (!list.length) {
+    document.getElementById('bdTrades').innerHTML = '<div class="bd-empty">Сделок пока нет</div>';
+    return;
+  }
+  document.getElementById('bdTrades').innerHTML =
+    '<table class="bd-trades"><thead><tr>' +
+      '<th>Дата</th><th>Пара</th><th>Сторона</th><th>Вход</th><th>Выход</th><th>PnL</th><th>Статус</th>' +
+    '</tr></thead><tbody>' +
+    list.slice(0, 20).map((t) => {
+      const pnl = Number(t.realizedPnl || t.realized_pnl || 0);
+      const pnlCls = pnl > 0 ? 'bd-kpi-pos' : pnl < 0 ? 'bd-kpi-neg' : '';
+      const when = t.openedAt || t.opened_at || t.createdAt || t.created_at;
+      const dt = when ? new Date(when).toLocaleString('ru-RU', { day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' }) : '—';
+      return '<tr>' +
+        '<td style="white-space:nowrap">' + escapeHtml(dt) + '</td>' +
+        '<td>' + escapeHtml(t.symbol || '—') + '</td>' +
+        '<td style="color:' + (t.side === 'long' ? '#4ade80' : '#f87171') + '">' + escapeHtml((t.side || '').toUpperCase()) + '</td>' +
+        '<td style="font-family:\'JetBrains Mono\',monospace">' + (t.entryPrice || t.entry_price || '—') + '</td>' +
+        '<td style="font-family:\'JetBrains Mono\',monospace">' + (t.exitPrice || t.exit_price || '—') + '</td>' +
+        '<td class="' + pnlCls + '" style="font-family:\'JetBrains Mono\',monospace">' + Fmt.currency(pnl) + '</td>' +
+        '<td>' + escapeHtml(t.status || '—') + '</td>' +
+      '</tr>';
+    }).join('') + '</tbody></table>';
+}
+
+window.openBotDrawer = openBotDrawer;
+window.closeBotDrawer = closeBotDrawer;
 </script>
 <script src="support-widget.js" defer></script>
 </body>
