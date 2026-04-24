@@ -153,6 +153,30 @@ function register({ email, password, displayName, givenName, familyName, referra
 
   audit(userId, 'auth.register', { referralCode: referralCode || null, referrerId }, ipAddress, userAgent);
 
+  // Auto-send verification email — without this registration is a dead end
+  // (user has no way to discover they need to hit /verify-email/request).
+  // Lazy-require emailService to match the pattern used elsewhere in this
+  // file and avoid the circular-dep risk. Best-effort: if anything fails
+  // here we don't block registration — user can still request manually.
+  try {
+    const emailService = require('./emailService');
+    const token = emailService.randomToken();
+    const tokenHash = emailService.hashToken(token);
+    const expiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString();
+    db.prepare(`
+      INSERT INTO email_verifications (user_id, token_hash, expires_at)
+      VALUES (?, ?, ?)
+    `).run(userId, tokenHash, expiresAt);
+    const composedName = displayName
+      || [givenName, familyName].filter(Boolean).join(' ').trim()
+      || null;
+    emailService.sendVerification(email, token, { displayName: composedName }).catch((err) =>
+      logger.warn('auto-sendVerification failed', { userId, err: err.message }),
+    );
+  } catch (err) {
+    logger.warn('auto verification scheduling failed', { userId, err: err.message });
+  }
+
   const user = getUserPublic(userId);
   const accessToken = signAccessToken(userId);
   const refresh = issueRefreshToken(userId, { userAgent, ipAddress });
