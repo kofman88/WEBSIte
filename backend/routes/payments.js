@@ -32,6 +32,22 @@ router.post('/crypto/create', authMiddleware, requireVerifiedEmail, (req, res, n
   } catch (err) { handleErr(err, res, next); }
 });
 
+// POST /api/payments/stripe/portal — self-serve billing portal
+// Returns a short-lived URL to Stripe's hosted billing portal where the
+// user can update their card, download invoices, and cancel their
+// subscription. This is the big-SaaS standard — Slack, Figma, GitHub all
+// use this flow rather than building custom billing UIs.
+router.post('/stripe/portal', authMiddleware, async (req, res, next) => {
+  try {
+    const body = z.object({ returnUrl: z.string().url().optional() }).parse(req.body || {});
+    const origin = req.get('origin') || ('https://' + req.get('host'));
+    const out = await paymentService.createBillingPortalSession(req.userId, {
+      returnUrl: body.returnUrl || (origin + '/settings.html#billing'),
+    });
+    res.json(out);
+  } catch (err) { handleErr(err, res, next); }
+});
+
 // POST /api/webhooks/stripe — Stripe sends events here
 // Requires raw body for signature verification (handled in server.js middleware)
 router.post('/webhooks/stripe', async (req, res, next) => {

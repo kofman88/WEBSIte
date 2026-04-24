@@ -181,4 +181,28 @@ router.get('/usage', authMiddleware, (req, res) => {
   }
 });
 
+/**
+ * POST /api/subscriptions/cancel
+ * Self-serve cancellation. Body: { atPeriodEnd?: boolean = true }.
+ *
+ * - atPeriodEnd=true (default, Big-SaaS standard): user keeps paid-plan
+ *   access until expires_at, then auto-downgrades to free. Stripe stops
+ *   recurring charges on the next cycle. This is what users usually want.
+ * - atPeriodEnd=false: immediate cancel + downgrade. Excess bots are
+ *   deactivated. No refund (user can request one via support within 14 days,
+ *   handled by admin.refundPayment).
+ */
+router.post('/cancel', authMiddleware, async (req, res, next) => {
+  try {
+    const { z } = require('zod');
+    const body = z.object({ atPeriodEnd: z.boolean().optional().default(true) }).parse(req.body || {});
+    const paymentService = require('../services/paymentService');
+    const out = await paymentService.cancelSubscription(req.userId, { atPeriodEnd: body.atPeriodEnd });
+    res.json(out);
+  } catch (err) {
+    const handleErr = require('../middleware/handleErr');
+    handleErr(err, res, next);
+  }
+});
+
 module.exports = router;
