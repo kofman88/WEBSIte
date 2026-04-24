@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html lang="ru" class="aura-page">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+  <title>SMC стратегия для крипто-трейдинга: гайд с примерами — CHM Finance</title>
+  <meta name="description" content="SMC (Smart Money Concepts) простыми словами: BOS, CHoCH, order blocks, FVG, liquidity sweep. Как торговать по институциональному ордерфлоу. Разбор на реальных графиках BTC."/>
+  <meta name="keywords" content="SMC стратегия криптовалюты, Smart Money Concepts, order block крипта, BOS CHoCH трейдинг, FVG стратегия, liquidity sweep крипто"/>
+  <meta name="robots" content="index,follow,max-image-preview:large"/>
+  <meta name="theme-color" content="#0A0A0A"/>
+  <link rel="canonical" href="https://chmup.top/blog/smc-strategia-kripty/"/>
+  <meta property="og:type" content="article"/>
+  <meta property="og:site_name" content="CHM Finance"/>
+  <meta property="og:title" content="SMC стратегия для крипто-трейдинга — гайд"/>
+  <meta property="og:description" content="BOS, CHoCH, order blocks, FVG, liquidity sweep. Как торговать по институциональному ордерфлоу."/>
+  <meta property="og:url" content="https://chmup.top/blog/smc-strategia-kripty/"/>
+  <meta property="og:image" content="https://chmup.top/og-cover.png"/>
+  <meta property="og:locale" content="ru_RU"/>
+  <meta property="article:published_time" content="2026-04-24"/>
+  <meta property="article:author" content="CHM Finance"/>
+  <meta property="article:section" content="Trading Strategies"/>
+  <meta property="article:tag" content="SMC"/>
+  <meta property="article:tag" content="Smart Money"/>
+  <meta name="twitter:card" content="summary_large_image"/>
+  <meta name="twitter:title" content="SMC стратегия для крипты"/>
+  <meta name="twitter:description" content="BOS, CHoCH, order blocks простыми словами."/>
+  <meta name="twitter:image" content="https://chmup.top/og-cover.png"/>
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg"/>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet"/>
+
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "Article",
+    "headline": "SMC стратегия для крипто-трейдинга: полный гайд",
+    "description": "Smart Money Concepts: BOS, CHoCH, order blocks, FVG, liquidity. Как торговать по институциональному ордерфлоу.",
+    "author": { "@type": "Organization", "name": "CHM Finance", "url": "https://chmup.top/" },
+    "publisher": {
+      "@type": "Organization",
+      "name": "CHM Finance",
+      "logo": { "@type": "ImageObject", "url": "https://chmup.top/logo.png" }
+    },
+    "datePublished": "2026-04-24",
+    "dateModified": "2026-04-24",
+    "mainEntityOfPage": {
+      "@type": "WebPage",
+      "@id": "https://chmup.top/blog/smc-strategia-kripty/"
+    },
+    "image": "https://chmup.top/og-cover.png",
+    "inLanguage": "ru-RU"
+  }
+  </script>
+
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    "itemListElement": [
+      {"@type":"ListItem","position":1,"name":"Главная","item":"https://chmup.top/"},
+      {"@type":"ListItem","position":2,"name":"Блог","item":"https://chmup.top/blog/"},
+      {"@type":"ListItem","position":3,"name":"SMC стратегия для крипты","item":"https://chmup.top/blog/smc-strategia-kripty/"}
+    ]
+  }
+  </script>
+
+  <style>
+    body{background:#0A0A0A;color:#E5E5E5;font-family:'Inter',sans-serif;margin:0;line-height:1.7}
+    .container{max-width:720px;margin:0 auto;padding:60px 24px}
+    nav{padding:20px 24px;border-bottom:1px solid rgba(255,255,255,.06)}
+    nav a{color:rgba(255,255,255,.7);text-decoration:none;font-weight:500;font-size:14px;margin-right:20px}
+    nav a:hover{color:#fff}
+    .brand{font-weight:700;font-size:18px;letter-spacing:-.02em;color:#fff}
+    .brand span{color:#FF5A1F}
+    .breadcrumb{font-size:12px;color:rgba(255,255,255,.4);margin-bottom:16px}
+    .breadcrumb a{color:rgba(255,255,255,.55);text-decoration:none}
+    .breadcrumb a:hover{color:#FF8C5A}
+    h1{font-size:clamp(28px,4.5vw,40px);font-weight:700;letter-spacing:-.025em;margin:0 0 16px;line-height:1.15}
+    .meta{color:rgba(255,255,255,.45);font-size:13px;margin-bottom:40px;display:flex;gap:16px;flex-wrap:wrap}
+    .meta span::after{content:'·';margin-left:16px;opacity:.5}
+    .meta span:last-child::after{content:''}
+    h2{font-size:24px;font-weight:600;letter-spacing:-.015em;margin:44px 0 16px;color:#fff}
+    h3{font-size:18px;font-weight:600;margin:32px 0 12px;color:#fff}
+    p{color:rgba(255,255,255,.78);margin:0 0 16px;font-size:16px}
+    ul,ol{color:rgba(255,255,255,.78);padding-left:24px;margin:0 0 20px}
+    li{margin-bottom:8px}
+    code{background:rgba(255,90,31,.12);color:#FF8C5A;padding:2px 6px;border-radius:4px;font-family:'JetBrains Mono',monospace;font-size:13px}
+    .note{padding:16px 20px;border-radius:12px;background:rgba(255,90,31,.08);border:1px solid rgba(255,90,31,.2);margin:24px 0}
+    .note-title{font-weight:600;color:#FF8C5A;font-size:13px;text-transform:uppercase;letter-spacing:.1em;margin:0 0 8px}
+    .cta{display:block;padding:24px;border-radius:16px;background:linear-gradient(135deg,rgba(255,140,90,.12),rgba(255,90,31,.06));border:1px solid rgba(255,140,90,.3);text-decoration:none;color:inherit;margin:40px 0;transition:transform .2s}
+    .cta:hover{transform:translateY(-1px)}
+    .cta-title{font-weight:600;color:#fff;margin:0 0 6px;font-size:17px}
+    .cta-desc{color:rgba(255,255,255,.7);font-size:14px;margin:0}
+    .cta-btn{display:inline-block;margin-top:12px;padding:8px 16px;background:linear-gradient(180deg,#FF8C5A,#FF5A1F);color:#fff;border-radius:999px;font-size:13px;font-weight:600}
+    a.inline{color:#FF8C5A;text-decoration:none}
+    a.inline:hover{text-decoration:underline}
+    table{width:100%;border-collapse:collapse;margin:20px 0;font-size:14px}
+    th,td{padding:10px 12px;text-align:left;border-bottom:1px solid rgba(255,255,255,.08)}
+    th{color:rgba(255,255,255,.5);font-size:11px;text-transform:uppercase;letter-spacing:.1em;font-weight:500}
+    td{color:rgba(255,255,255,.85)}
+  </style>
+</head>
+<body>
+  <nav>
+    <div style="max-width:960px;margin:0 auto;display:flex;justify-content:space-between;align-items:center">
+      <a href="/" class="brand">CHM<span>.</span></a>
+      <div>
+        <a href="/">Главная</a>
+        <a href="/subscriptions.html">Тарифы</a>
+        <a href="/blog/">Блог</a>
+      </div>
+    </div>
+  </nav>
+
+  <main class="container">
+    <div class="breadcrumb"><a href="/">Главная</a> / <a href="/blog/">Блог</a> / SMC стратегия для крипты</div>
+
+    <h1>SMC стратегия для крипто-трейдинга: полный гайд</h1>
+    <div class="meta"><span>Разбор стратегии</span><span>14 мин чтения</span><span>Обновлено 24 апреля 2026</span></div>
+
+    <p>SMC (<strong>Smart Money Concepts</strong>) — пожалуй, самая популярная стратегия последних лет среди крипто-трейдеров. Идея в одной фразе: <strong>торгуй туда, куда двигаются институциональные игроки, а не против них</strong>. В этом гайде разберём все ключевые понятия (BOS, CHoCH, order blocks, FVG, liquidity), покажем на графиках BTC, разберём плюсы/минусы и научимся отличать рабочие SMC-сетапы от надуманных.</p>
+
+    <h2>Откуда взялось SMC и почему это работает</h2>
+
+    <p>Концепция пришла из форекс-сообществ начала 2010-х (основоположник — трейдер Inner Circle Trader, «ICT»). Суть: крупные игроки (банки, хедж-фонды, маркет-мейкеры) не могут открыть позицию на $100M одним ордером — это сдвинет цену против них. Им приходится <strong>накапливать позицию на важных уровнях</strong>, часто специально создавая видимость движения в противоположную сторону, чтобы собрать ликвидность.</p>
+
+    <p>Если научиться видеть следы этих действий на графике — можно входить в сделку вместе с ними, а не против.</p>
+
+    <div class="note">
+      <p class="note-title">Важный нюанс</p>
+      <p style="margin:0">Крипто-рынок частично отличается от форекса: меньше регулируемых маркет-мейкеров, больше розничных игроков. Но SMC-концепции всё равно работают, потому что крупные держатели (киты, фонды типа Galaxy / Alameda, биржевые ММ) ведут себя похоже. На BTC и ETH — особенно.</p>
+    </div>
+
+    <h2>Ключевые концепции SMC</h2>
+
+    <h3>1. BOS (Break of Structure) — пробой структуры</h3>
+
+    <p>Рынок двигается в двух режимах: <strong>тренд</strong> (higher highs + higher lows для ап-тренда) и <strong>range</strong> (флэт). BOS — момент, когда цена пробивает предыдущий значимый high (в ап-тренде) или low (в даун-тренде), <strong>подтверждая продолжение тренда</strong>.</p>
+
+    <p>Пример: BTC в ап-тренде сделал локальный хай $70,000 → откатился к $68,000 → пошёл вверх и закрылся выше $70,000. Это BOS вверх. Следующая цель — следующий значимый хай.</p>
+
+    <h3>2. CHoCH (Change of Character) — смена характера</h3>
+
+    <p>Противоположность BOS. Это момент, когда цена впервые за долгое время пробивает противоположную структуру — сигнал возможной смены тренда.</p>
+
+    <p>Пример: BTC делал серию higher highs / higher lows (ап-тренд), последний low был $68,000. Если цена пробивает $68,000 вниз — это CHoCH. Ап-тренд <em>может</em> закончиться, пора искать шорты или как минимум фиксить лонги.</p>
+
+    <p><strong>CHoCH ≠ 100% разворот.</strong> Это сигнал повышенного внимания. Ждём подтверждения — формирования новой структуры в обратную сторону.</p>
+
+    <h3>3. Order Block (OB) — ордерный блок</h3>
+
+    <p>Самая важная концепция. Order block — последняя свеча перед сильным импульсным движением. Логика: крупный игрок открыл здесь большую позицию и толкнул цену — если цена вернётся к этому уровню, он может защищать позицию (докупать), что создаёт поддержку/сопротивление.</p>
+
+    <p>Как идентифицировать:</p>
+    <ul>
+      <li><strong>Bullish OB</strong>: последняя медвежья (красная) свеча перед мощным ап-движением. Тело этой свечи — зона поддержки.</li>
+      <li><strong>Bearish OB</strong>: последняя бычья (зелёная) свеча перед мощным даун-движением. Тело — зона сопротивления.</li>
+    </ul>
+
+    <p>На BTC 1h order blocks работают отлично — часто цена возвращается к OB для ретеста и отскакивает. На 5m таймфреймах — много шума.</p>
+
+    <h3>4. FVG (Fair Value Gap) — гэп справедливой цены</h3>
+
+    <p>Ситуация, когда 3 последовательные свечи формируют «дыру» — high предыдущей не пересекается с low следующей. Институционалы часто «возвращают» цену к этим гэпам, чтобы заполнить их (отсюда термин «закрытие гэпа»).</p>
+
+    <p>FVG — одна из самых надёжных зон для входа в SMC, особенно в сочетании с order block.</p>
+
+    <h3>5. Liquidity Sweep — снятие ликвидности</h3>
+
+    <p>Термин про то, как крупные игроки специально двигают цену в сторону, где сосредоточены стоп-ордера розничных трейдеров, чтобы «собрать ликвидность» (выбить стопы) и потом развернуть.</p>
+
+    <p>Классический сценарий:</p>
+    <ol>
+      <li>BTC в range $65,000-$70,000 несколько дней</li>
+      <li>Многие трейдеры поставили стопы чуть выше $70,000 (для шортов) и чуть ниже $65,000 (для лонгов)</li>
+      <li>Цена резко вылетает до $70,500, выбивает шорт-стопы, сразу разворачивается и падает до $64,500, выбивает лонг-стопы, потом возвращается в range</li>
+      <li>И шортисты, и лонгисты в убытке. Крупный игрок забрал всю ликвидность</li>
+    </ol>
+
+    <p>Если ты видишь резкий выход за границу range с последующим быстрым возвратом — это liquidity sweep. После него обычно идёт нормальное движение в противоположную сторону.</p>
+
+    <h2>Типичный SMC-сетап</h2>
+
+    <p>Классический бычий SMC-трейд:</p>
+    <ol>
+      <li>На 4h видим ап-тренд с BOS вверх (подтверждение тренда)</li>
+      <li>Спускаемся на 1h — ищем bullish order block ниже текущей цены</li>
+      <li>Рядом с OB отмечаем FVG (если есть) — это усиливает зону</li>
+      <li>Ждём отката цены к зоне OB+FVG</li>
+      <li>На 15m ловим вход: желательно liquidity sweep вниз (стоп-ханк) + начало бычьего импульса</li>
+      <li>Стоп — под OB. Тейк — 2-3R до следующего уровня сопротивления</li>
+    </ol>
+
+    <a href="/bots.html" class="cta">
+      <h3 class="cta-title">Бот SMC на CHM Finance</h3>
+      <p class="cta-desc">Автоматически находит BOS, CHoCH, order blocks и FVG. Подключи Bybit, выбери пару — бот сам даёт сигналы и может исполнять сделки. Paper-режим бесплатный.</p>
+      <span class="cta-btn">Создать SMC-бота →</span>
+    </a>
+
+    <h2>Плюсы и минусы SMC</h2>
+
+    <table>
+      <tr><th>Плюсы</th><th>Минусы</th></tr>
+      <tr><td>Высокий risk/reward (часто 3:1+)</td><td>Требует опыта — много субъективности</td></tr>
+      <tr><td>Работает на любой ликвидной паре (BTC/ETH/SOL)</td><td>На альт-коинах со слабой ликвидностью — шум</td></tr>
+      <tr><td>Чёткие стопы под OB — понятный риск</td><td>Долгое ожидание сетапа (иногда день-два)</td></tr>
+      <tr><td>Отлично на 1h-4h таймфреймах</td><td>На 5m-15m — много ложных сигналов</td></tr>
+      <tr><td>Естественно сочетается с trend following</td><td>Новичку трудно отличить «хороший» OB от «плохого»</td></tr>
+    </table>
+
+    <h2>Главная ошибка новичков в SMC</h2>
+
+    <div class="note">
+      <p class="note-title">⚠️ Типичный fail</p>
+      <p style="margin:0">Вижу order block на графике → сразу вход → цена пробивает OB → стоп. Проблема: <strong>OB без confluence — это просто свеча</strong>. Нужно минимум 2 подтверждения: OB + тренд на старшем TF, OB + FVG, OB + liquidity sweep, OB + важный уровень (EMA200, S/R).</p>
+    </div>
+
+    <p>Если ты видишь только OB без подтверждения — не входи. Рынок часто пробивает OB и идёт дальше.</p>
+
+    <h2>Как автоматизировать SMC</h2>
+
+    <p>Ручной SMC-трейдинг требует 2-4 часов в день у монитора и постоянной концентрации. Ошибки, особенно в субъективном определении «какой OB валидный», бьют по результатам.</p>
+
+    <p>На CHM Finance стратегия SMC полностью автоматизирована:</p>
+    <ul>
+      <li>Бот сам идентифицирует BOS/CHoCH на выбранном таймфрейме</li>
+      <li>Находит order blocks по алгоритму: последняя противоположная свеча перед импульсом ≥ 1.5 ATR</li>
+      <li>Фильтрует «сломанные» OB (те, что уже отработали / пробиты)</li>
+      <li>Ждёт confluence (OB + тренд на старшем TF) перед входом</li>
+      <li>Ставит стоп по алгоритму (под свечу формирования OB + буфер)</li>
+      <li>Тейки по ATR: TP1 = 1R, TP2 = 2R, TP3 = 3R с частичным закрытием</li>
+    </ul>
+
+    <p>Минимум субъективности, железная дисциплина, работает 24/7.</p>
+
+    <h2>Чек-лист SMC-сделки</h2>
+    <ul>
+      <li>☐ Определил тренд на старшем TF (4h для 1h-торговли)</li>
+      <li>☐ Нашёл order block в зоне, согласованной с трендом</li>
+      <li>☐ Есть минимум одно дополнительное подтверждение (FVG, liquidity sweep, уровень)</li>
+      <li>☐ Risk/Reward ≥ 2.0 (в идеале 3.0)</li>
+      <li>☐ Стоп под OB + буфер (не вплотную — маркет-мейкеры любят выбивать)</li>
+      <li>☐ Не входишь против мажорного движения (перед FOMC, CPI — стоп-торговля)</li>
+      <li>☐ Не более 1-2 SMC сделок одновременно (концентрация риска)</li>
+    </ul>
+
+    <a href="/subscriptions.html" class="cta">
+      <h3 class="cta-title">SMC + автоматизация</h3>
+      <p class="cta-desc">Starter-план ($29) открывает SMC и все 5 других стратегий. Pro ($79) — live-торговля с автоматическим исполнением. Elite ($149) — мульти-стратегия (SMC+Grid одновременно).</p>
+      <span class="cta-btn">Сравнить тарифы →</span>
+    </a>
+
+    <h2>Дальше читай</h2>
+    <ul>
+      <li><a class="inline" href="/blog/kak-nastroit-bota-na-bybit/">Как настроить торгового бота на Bybit за 10 минут</a></li>
+      <li><a class="inline" href="/blog/chto-takoe-dca-strategia/">Что такое DCA стратегия и когда она работает</a></li>
+      <li><a class="inline" href="/blog/">Все статьи блога →</a></li>
+    </ul>
+  </main>
+</body>
+</html>
