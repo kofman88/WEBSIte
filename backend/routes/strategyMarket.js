@@ -2,14 +2,9 @@ const express = require('express');
 const { z } = require('zod');
 const { authMiddleware } = require('../middleware/auth');
 const market = require('../services/strategyMarketService');
+const handleErr = require('../middleware/handleErr');
 
 const router = express.Router();
-
-function handleErr(err, res, next) {
-  if (err instanceof z.ZodError) return res.status(400).json({ error: 'Validation failed', issues: err.issues });
-  if (err && err.statusCode) return res.status(err.statusCode).json({ error: err.message, ...(err.code ? { code: err.code } : {}) });
-  return next(err);
-}
 
 // Public listing — browse without auth.
 router.get('/', (req, res, next) => {

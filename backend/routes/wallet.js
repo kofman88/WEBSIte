@@ -2,7 +2,7 @@ const express = require('express');
 const { z } = require('zod');
 const { authMiddleware, requireVerifiedEmail } = require('../middleware/auth');
 const walletService = require('../services/walletService');
-const logger = require('../utils/logger');
+const handleErr = require('../middleware/handleErr');
 
 const router = express.Router();
 
@@ -15,15 +15,6 @@ const withdrawSchema = z.object({
   amount: z.number().positive().max(10_000_000),
   destinationAddress: z.string().trim().min(20).max(128).regex(ADDRESS_REGEX, 'Invalid crypto address format'),
 });
-
-function handleErr(err, res, next) {
-  if (err instanceof z.ZodError) {
-    return res.status(400).json({ error: 'Validation failed', issues: err.issues });
-  }
-  if (err && err.statusCode) return res.status(err.statusCode).json({ error: err.message });
-  logger.error('wallet route error', { err: err && err.message, stack: err && err.stack });
-  return next(err);
-}
 
 router.post('/create', authMiddleware, (req, res, next) => {
   try {

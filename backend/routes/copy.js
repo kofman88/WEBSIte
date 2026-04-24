@@ -2,15 +2,10 @@ const express = require('express');
 const { z } = require('zod');
 const { authMiddleware } = require('../middleware/auth');
 const copy = require('../services/copyTradingService');
+const handleErr = require('../middleware/handleErr');
 
 const router = express.Router();
 router.use(authMiddleware);
-
-function handleErr(err, res, next) {
-  if (err instanceof z.ZodError) return res.status(400).json({ error: 'Validation failed', issues: err.issues });
-  if (err && err.statusCode) return res.status(err.statusCode).json({ error: err.message });
-  return next(err);
-}
 
 router.post('/subscribe', (req, res, next) => {
   try {

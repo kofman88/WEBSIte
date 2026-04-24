@@ -4,24 +4,9 @@ const { authMiddleware, requireVerifiedEmail } = require('../middleware/auth');
 const paymentService = require('../services/paymentService');
 const refRewards = require('../services/refRewards');
 const validation = require('../utils/validation');
+const handleErr = require('../middleware/handleErr');
 
 const router = express.Router();
-
-function handleErr(err, res, next) {
-  if (err instanceof z.ZodError) {
-    return res.status(400).json({
-      error: 'Validation failed', code: 'VALIDATION_ERROR',
-      issues: err.issues.map((i) => ({ path: i.path.join('.'), message: i.message })),
-    });
-  }
-  if (err && err.statusCode) {
-    return res.status(err.statusCode).json({
-      error: err.message,
-      ...(err.code ? { code: err.code } : {}),
-    });
-  }
-  return next(err);
-}
 
 // POST /api/payments/stripe/checkout — create Stripe Checkout session
 router.post('/stripe/checkout', authMiddleware, requireVerifiedEmail, async (req, res, next) => {

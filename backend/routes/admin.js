@@ -4,24 +4,12 @@ const { authMiddleware, requireAdmin, requireCapability, ADMIN_ROLES } = require
 const admin = require('../services/adminService');
 const refRewards = require('../services/refRewards');
 const validation = require('../utils/validation');
+const handleErr = require('../middleware/handleErr');
 
 const router = express.Router();
 
 // ALL routes require authed admin
 router.use(authMiddleware, requireAdmin);
-
-function handleErr(err, res, next) {
-  if (err instanceof z.ZodError) {
-    return res.status(400).json({
-      error: 'Validation failed', code: 'VALIDATION_ERROR',
-      issues: err.issues.map((i) => ({ path: i.path.join('.'), message: i.message })),
-    });
-  }
-  if (err && err.statusCode) {
-    return res.status(err.statusCode).json({ error: err.message, ...(err.code ? { code: err.code } : {}) });
-  }
-  return next(err);
-}
 
 // ── Users ──────────────────────────────────────────────────────────────
 router.get('/users', (req, res, next) => {

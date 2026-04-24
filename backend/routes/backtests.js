@@ -3,25 +3,9 @@ const { z } = require('zod');
 const { authMiddleware } = require('../middleware/auth');
 const backtestService = require('../services/backtestService');
 const validation = require('../utils/validation');
+const handleErr = require('../middleware/handleErr');
 
 const router = express.Router();
-
-function handleErr(err, res, next) {
-  if (err instanceof z.ZodError) {
-    return res.status(400).json({
-      error: 'Validation failed', code: 'VALIDATION_ERROR',
-      issues: err.issues.map((i) => ({ path: i.path.join('.'), message: i.message })),
-    });
-  }
-  if (err && err.statusCode) {
-    return res.status(err.statusCode).json({
-      error: err.message,
-      ...(err.code ? { code: err.code } : {}),
-      ...(err.requiredPlan ? { requiredPlan: err.requiredPlan } : {}),
-    });
-  }
-  return next(err);
-}
 
 // POST /api/backtests — create + enqueue
 router.post('/', authMiddleware, (req, res, next) => {

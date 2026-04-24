@@ -4,21 +4,9 @@ const { authMiddleware, exchangeKeyLimiter, requireVerifiedEmail } = require('..
 const exchangeService = require('../services/exchangeService');
 const marketData = require('../services/marketDataService');
 const validation = require('../utils/validation');
+const handleErr = require('../middleware/handleErr');
 
 const router = express.Router();
-
-function handleErr(err, res, next) {
-  if (err instanceof z.ZodError) {
-    return res.status(400).json({
-      error: 'Validation failed', code: 'VALIDATION_ERROR',
-      issues: err.issues.map((i) => ({ path: i.path.join('.'), message: i.message })),
-    });
-  }
-  if (err && err.statusCode) {
-    return res.status(err.statusCode).json({ error: err.message, ...(err.code ? { code: err.code } : {}) });
-  }
-  return next(err);
-}
 
 // ── Public: list of supported exchanges ─────────────────────────────────
 router.get('/', (_req, res) => {

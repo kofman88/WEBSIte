@@ -2,16 +2,9 @@ const express = require('express');
 const { z } = require('zod');
 const { authMiddleware } = require('../middleware/auth');
 const riskLimits = require('../services/riskLimitsService');
+const handleErr = require('../middleware/handleErr');
 
 const router = express.Router();
-
-function handleErr(err, res, next) {
-  if (err instanceof z.ZodError) {
-    return res.status(400).json({ error: 'Validation failed', issues: err.issues });
-  }
-  if (err && err.statusCode) return res.status(err.statusCode).json({ error: err.message });
-  return next(err);
-}
 
 router.use(authMiddleware);
 
