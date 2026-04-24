@@ -269,10 +269,39 @@ function getBotStats(botId, userId) {
       SUM(CASE WHEN status = 'closed' AND realized_pnl > 0 THEN 1 ELSE 0 END) as wins,
       SUM(CASE WHEN status = 'closed' AND realized_pnl < 0 THEN 1 ELSE 0 END) as losses,
       COALESCE(SUM(realized_pnl), 0) as total_pnl,
-      COALESCE(AVG(realized_pnl_pct), 0) as avg_pnl_pct
+      COALESCE(AVG(realized_pnl_pct), 0) as avg_pnl_pct,
+      COALESCE(SUM(CASE WHEN realized_pnl > 0 THEN realized_pnl ELSE 0 END), 0) as gross_profit,
+      COALESCE(SUM(CASE WHEN realized_pnl < 0 THEN -realized_pnl ELSE 0 END), 0) as gross_loss
     FROM trades WHERE bot_id = ?
   `).get(botId);
   const closed = (s.wins || 0) + (s.losses || 0);
+  const profitFactor = s.gross_loss > 0 ? s.gross_profit / s.gross_loss : null;
+
+  // Sharpe-ish ratio + max drawdown from the equity curve below.
+  const eq = _equitySeries(botId);
+  const pnlSeries = eq.map((p) => p.pnl);
+  let sharpe = null;
+  if (pnlSeries.length >= 2) {
+    const n = pnlSeries.length;
+    // Returns = diff of cumulative pnl
+    const rets = [];
+    for (let i = 1; i < n; i++) rets.push(pnlSeries[i] - pnlSeries[i - 1]);
+    const mean = rets.reduce((a, v) => a + v, 0) / rets.length;
+    const variance = rets.reduce((a, v) => a + (v - mean) ** 2, 0) / rets.length;
+    const std = Math.sqrt(variance);
+    sharpe = std > 0 ? (mean / std) * Math.sqrt(252) : null;   // annualised (252 trade-days)
+  }
+  let maxDd = 0;
+  let peak = 0;
+  for (const p of pnlSeries) {
+    if (p > peak) peak = p;
+    const dd = peak - p;
+    if (dd > maxDd) maxDd = dd;
+  }
+
+  const paperStart = 10_000;
+  const roiPct = (s.total_pnl / paperStart) * 100;
+
   return {
     botId,
     totalTrades: s.total || 0,
@@ -282,7 +311,40 @@ function getBotStats(botId, userId) {
     winRate: closed > 0 ? (s.wins / closed) : null,
     totalPnl: s.total_pnl || 0,
     avgPnlPct: s.avg_pnl_pct || 0,
+    profitFactor,
+    sharpe,
+    maxDrawdown: maxDd,
+    roiPct,
   };
+}
+
+// Build a cumulative-PnL time series from closed trades for a bot. Used
+// for card sparkline + detail-drawer equity chart. Downsamples to at
+// most `maxPoints` data points by sampling evenly.
+function getBotEquity(botId, userId, { maxPoints = 120 } = {}) {
+  const bot = getBot(botId, userId);
+  if (!bot) return null;
+  const full = _equitySeries(botId);
+  if (full.length <= maxPoints) return { botId, points: full };
+  const step = Math.ceil(full.length / maxPoints);
+  const sampled = full.filter((_p, i) => i % step === 0 || i === full.length - 1);
+  return { botId, points: sampled };
+}
+
+function _equitySeries(botId) {
+  const trades = db.prepare(`
+    SELECT closed_at, realized_pnl
+    FROM trades
+    WHERE bot_id = ? AND status = 'closed' AND closed_at IS NOT NULL
+    ORDER BY closed_at ASC
+  `).all(botId);
+  const out = [];
+  let cum = 0;
+  for (const t of trades) {
+    cum += Number(t.realized_pnl) || 0;
+    out.push({ at: t.closed_at, pnl: cum });
+  }
+  return out;
 }
 
 function userSummary(userId) {
@@ -349,6 +411,7 @@ module.exports = {
   listForUser,
   getBotTrades,
   getBotStats,
+  getBotEquity,
   userSummary,
   _validateEliteFeatures, // exposed for tests
 };

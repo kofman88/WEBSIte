@@ -101,6 +101,19 @@ router.get('/:id/stats', authMiddleware, (req, res, next) => {
   } catch (err) { handleErr(err, res, next); }
 });
 
+// Cumulative-PnL timeseries — powers the sparkline on bot cards and the
+// big equity curve in the detail drawer. Returns up to 120 downsampled
+// points so the transport stays small even for active bots with
+// thousands of trades.
+router.get('/:id/equity', authMiddleware, (req, res, next) => {
+  try {
+    const id = z.coerce.number().int().positive().parse(req.params.id);
+    const eq = botService.getBotEquity(id, req.userId);
+    if (!eq) return res.status(404).json({ error: 'Bot not found' });
+    res.json(eq);
+  } catch (err) { handleErr(err, res, next); }
+});
+
 // ── TradingView webhook management ─────────────────────────────────────
 const tvWebhook = require('../services/tvWebhookService');
 router.get('/:id/tv-webhook', authMiddleware, (req, res, next) => {
