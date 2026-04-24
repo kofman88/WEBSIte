@@ -6,15 +6,10 @@ const express = require('express');
 const { z } = require('zod');
 const { authMiddleware } = require('../middleware/auth');
 const ai = require('../services/aiService');
+const handleErr = require('../middleware/handleErr');
 
 const router = express.Router();
 router.use(authMiddleware);
-
-function handleErr(err, res, next) {
-  if (err instanceof z.ZodError) return res.status(400).json({ error: 'Validation failed', issues: err.issues });
-  if (err && err.statusCode) return res.status(err.statusCode).json({ error: err.message, ...(err.code ? { code: err.code } : {}) });
-  return next(err);
-}
 
 router.post('/chat', async (req, res, next) => {
   try {

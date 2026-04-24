@@ -7,25 +7,9 @@ const { authMiddleware, tierLimiter, requireVerifiedEmail } = require('../middle
 const writeCap = tierLimiter({ free: 10, starter: 30, pro: 120, elite: 600 }, '1m');
 const botService = require('../services/botService');
 const validation = require('../utils/validation');
+const handleErr = require('../middleware/handleErr');
 
 const router = express.Router();
-
-function handleErr(err, res, next) {
-  if (err instanceof z.ZodError) {
-    return res.status(400).json({
-      error: 'Validation failed', code: 'VALIDATION_ERROR',
-      issues: err.issues.map((i) => ({ path: i.path.join('.'), message: i.message })),
-    });
-  }
-  if (err && err.statusCode) {
-    return res.status(err.statusCode).json({
-      error: err.message,
-      ...(err.code ? { code: err.code } : {}),
-      ...(err.requiredPlan ? { requiredPlan: err.requiredPlan } : {}),
-    });
-  }
-  return next(err);
-}
 
 router.get('/', authMiddleware, (req, res, next) => {
   try {

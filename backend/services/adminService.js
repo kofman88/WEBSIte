@@ -11,6 +11,11 @@ const paymentService = require('./paymentService');
 const refRewards = require('./refRewards');
 
 // ── Users ──────────────────────────────────────────────────────────────
+// Batched-aggregate version: previously each row had 3 correlated subqueries
+// (bot_count, trade_count, paid_count). At LIMIT=50 that meant 150 indexed
+// row scans; at search-driven LIMIT=200 it stalls the admin UI.
+// Now we run the main query, then 3 batched COUNT(*)…GROUP BY queries
+// scoped to the user_ids on this page, and stitch counts into the rows.
 function listUsers({ search = null, limit = 50, offset = 0 } = {}) {
   const parts = [];
   const params = [];
@@ -24,10 +29,7 @@ function listUsers({ search = null, limit = 50, offset = 0 } = {}) {
   const rows = db.prepare(`
     SELECT u.id, u.email, u.display_name, u.referral_code, u.email_verified,
            u.is_admin, u.is_active, u.last_login_at, u.created_at,
-           s.plan, s.status as sub_status, s.expires_at as sub_expires_at,
-           (SELECT COUNT(*) FROM trading_bots b WHERE b.user_id = u.id) as bot_count,
-           (SELECT COUNT(*) FROM trades t WHERE t.user_id = u.id) as trade_count,
-           (SELECT COUNT(*) FROM payments p WHERE p.user_id = u.id AND p.status = 'confirmed') as paid_count
+           s.plan, s.status as sub_status, s.expires_at as sub_expires_at
     FROM users u
     LEFT JOIN subscriptions s ON s.user_id = u.id
     ${where}
@@ -36,6 +38,28 @@ function listUsers({ search = null, limit = 50, offset = 0 } = {}) {
   `).all(...params, limit, offset);
 
   const total = db.prepare(`SELECT COUNT(*) as n FROM users ${where}`).get(...params).n;
+
+  // Batch-load aggregates only for the page we're returning.
+  const ids = rows.map((r) => r.id);
+  const counts = { bot: new Map(), trade: new Map(), paid: new Map() };
+  if (ids.length) {
+    const ph = ids.map(() => '?').join(',');
+    for (const r of db.prepare(
+      `SELECT user_id, COUNT(*) as n FROM trading_bots WHERE user_id IN (${ph}) GROUP BY user_id`,
+    ).all(...ids)) counts.bot.set(r.user_id, r.n);
+    for (const r of db.prepare(
+      `SELECT user_id, COUNT(*) as n FROM trades WHERE user_id IN (${ph}) GROUP BY user_id`,
+    ).all(...ids)) counts.trade.set(r.user_id, r.n);
+    for (const r of db.prepare(
+      `SELECT user_id, COUNT(*) as n FROM payments WHERE user_id IN (${ph}) AND status = 'confirmed' GROUP BY user_id`,
+    ).all(...ids)) counts.paid.set(r.user_id, r.n);
+  }
+  for (const r of rows) {
+    r.bot_count = counts.bot.get(r.id) || 0;
+    r.trade_count = counts.trade.get(r.id) || 0;
+    r.paid_count = counts.paid.get(r.id) || 0;
+  }
+
   return { total, users: rows.map(hydrateUser) };
 }
 

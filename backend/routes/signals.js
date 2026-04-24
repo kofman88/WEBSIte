@@ -8,21 +8,9 @@ const signalReadCap = tierLimiter({ free: 30, starter: 120, pro: 600, elite: 300
 const signalService = require('../services/signalService');
 const validation = require('../utils/validation');
 const plans = require('../config/plans');
+const handleErr = require('../middleware/handleErr');
 
 const router = express.Router();
-
-function handleErr(err, res, next) {
-  if (err instanceof z.ZodError) {
-    return res.status(400).json({
-      error: 'Validation failed', code: 'VALIDATION_ERROR',
-      issues: err.issues.map((i) => ({ path: i.path.join('.'), message: i.message })),
-    });
-  }
-  if (err && err.statusCode) {
-    return res.status(err.statusCode).json({ error: err.message, ...(err.code ? { code: err.code } : {}) });
-  }
-  return next(err);
-}
 
 router.get('/', authMiddleware, signalReadCap, (req, res, next) => {
   try {

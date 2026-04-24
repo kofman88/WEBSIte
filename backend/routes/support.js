@@ -3,16 +3,9 @@ const { z } = require('zod');
 const { authMiddleware, requireAdmin } = require('../middleware/auth');
 const support = require('../services/supportService');
 const leaderboard = require('../services/leaderboardService');
+const handleErr = require('../middleware/handleErr');
 
 const router = express.Router();
-
-function handleErr(err, res, next) {
-  if (err instanceof z.ZodError) {
-    return res.status(400).json({ error: 'Validation failed', issues: err.issues });
-  }
-  if (err && err.statusCode) return res.status(err.statusCode).json({ error: err.message });
-  return next(err);
-}
 
 // ── Guest (unauthenticated) — MUST be declared BEFORE `router.use(authMiddleware)` ──
 // Support widget's fallback for anonymous visitors. One-shot message;

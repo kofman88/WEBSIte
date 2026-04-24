@@ -13,15 +13,7 @@ const dateRangeSchema = z.object({
   to: z.string().datetime().or(z.string().regex(/^\d{4}-\d{2}-\d{2}/)).optional(),
 });
 
-function handleErr(err, res, next) {
-  if (err instanceof z.ZodError) {
-    return res.status(400).json({ error: 'Validation failed', code: 'VALIDATION_ERROR', issues: err.issues });
-  }
-  if (err && err.statusCode) {
-    return res.status(err.statusCode).json({ error: err.message, ...(err.code ? { code: err.code } : {}) });
-  }
-  return next(err);
-}
+const handleErr = require('../middleware/handleErr');
 
 // ── Portfolio ──────────────────────────────────────────────────────────
 router.get('/portfolio', async (req, res, next) => {
