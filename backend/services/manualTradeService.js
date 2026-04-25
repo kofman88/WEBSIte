@@ -37,6 +37,30 @@ function create(userId, input) {
     const err = new Error('Short SL must be above entry'); err.statusCode = 400; throw err;
   }
 
+  // TP geometry — for long every TP must be strictly above entry and
+  // ordered tp1<tp2<tp3; for short the opposite. Without these checks
+  // partialTpManager fills TPs in declared order and can mark the trade
+  // 'won' on a TP that's actually below the entry (e.g. user fat-fingered
+  // tp1=99 on a long entered at 100).
+  const tps = [takeProfit1, takeProfit2, takeProfit3].filter((p) => Number.isFinite(p) && p > 0);
+  for (const tp of tps) {
+    if (side === 'long' && tp <= entryPrice) {
+      const err = new Error('Long TPs must be above entry'); err.statusCode = 400; throw err;
+    }
+    if (side === 'short' && tp >= entryPrice) {
+      const err = new Error('Short TPs must be below entry'); err.statusCode = 400; throw err;
+    }
+  }
+  if (tps.length >= 2) {
+    const sorted = side === 'long'
+      ? tps.every((p, i, a) => i === 0 || p > a[i - 1])
+      : tps.every((p, i, a) => i === 0 || p < a[i - 1]);
+    if (!sorted) {
+      const err = new Error('TPs must be ordered: tp1<tp2<tp3 for long, tp1>tp2>tp3 for short');
+      err.statusCode = 400; throw err;
+    }
+  }
+
   if (tradingMode === 'live') {
     const err = new Error('Live manual trades require a testnet-validated exchange key. Coming in next update.');
     err.statusCode = 503; err.code = 'LIVE_MANUAL_NOT_ENABLED'; throw err;

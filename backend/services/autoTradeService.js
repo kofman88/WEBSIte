@@ -329,10 +329,48 @@ async function _openLive(signal, bot, qty, leverage, { exchangeService }) {
       }
     }
   } catch (err) {
+    // Differentiate CCXT error classes — without this, every error from
+    // any exchange API just bubbles up the same way and the bot keeps
+    // taking signals against a broken connection. We also need to
+    // pause the bot for 401 / InsufficientFunds so the user gets a
+    // clear "fix your key / top up margin" prompt instead of a silent
+    // stream of failed trades in audit_log.
+    let ccxt = null; try { ccxt = require('ccxt'); } catch (_e) {}
+    let action = 'auto_trade.live.error';
+    let pauseBot = false;
+    let alertTitle = null;
+    if (ccxt && err) {
+      if (ccxt.AuthenticationError && err instanceof ccxt.AuthenticationError) {
+        action = 'auto_trade.live.auth_error'; pauseBot = true;
+        alertTitle = '🔑 Биржа отклонила ключ';
+      } else if (ccxt.InsufficientFunds && err instanceof ccxt.InsufficientFunds) {
+        action = 'auto_trade.live.insufficient_funds'; pauseBot = true;
+        alertTitle = '💸 Недостаточно маржи на бирже';
+      } else if (ccxt.RateLimitExceeded && err instanceof ccxt.RateLimitExceeded) {
+        action = 'auto_trade.live.rate_limited';
+      } else if (ccxt.InvalidOrder && err instanceof ccxt.InvalidOrder) {
+        action = 'auto_trade.live.invalid_order';
+        alertTitle = '⚠️ Биржа отклонила параметры ордера';
+      }
+    }
     db.prepare(`
       INSERT INTO audit_log (user_id, action, entity_type, metadata)
-      VALUES (?, 'auto_trade.live.error', 'bot', ?)
-    `).run(bot.user_id, _json({ botId: bot.id, err: err.message, orderIds }));
+      VALUES (?, ?, 'bot', ?)
+    `).run(bot.user_id, action, _json({ botId: bot.id, err: err.message, orderIds }));
+    // Pause the bot for fatal-class errors so we don't fire 100 more
+    // identical-failing requests against the exchange in the next minute.
+    if (pauseBot) {
+      try {
+        db.prepare('UPDATE trading_bots SET is_active = 0 WHERE id = ?').run(bot.id);
+        const notifier = require('./notifier');
+        notifier.dispatch(bot.user_id, {
+          type: 'security',
+          title: alertTitle || '⚠️ Бот остановлен',
+          body: `Бот «${bot.name}» автоматически остановлен: ${err.message}. Зайдите в Settings и проверьте API-ключ / баланс на бирже.`,
+          link: '/settings.html',
+        });
+      } catch (_e) { /* best-effort */ }
+    }
     throw err;
   }
 
