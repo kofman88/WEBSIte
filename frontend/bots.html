@@ -615,6 +615,13 @@ html.light .chm-select-option.selected{background:rgba(255,90,31,.12);color:#FF5
 
   .bd-kpis{padding:20px 24px;display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:12px;border-bottom:1px solid rgba(255,255,255,.04)}
   html.light .bd-kpis{border-bottom-color:rgba(0,0,0,.05)}
+  /* On phones the drawer is ~85vw (~306px on iPhone SE). Tighter min-width
+     keeps 2 KPI tiles per row instead of overflowing to horizontal scroll. */
+  @media (max-width:480px){
+    .bd-kpis{padding:16px;grid-template-columns:repeat(auto-fill,minmax(110px,1fr));gap:8px}
+    .bd-kpi{padding:10px}
+    .bd-kpi-value{font-size:17px}
+  }
   .bd-kpi{padding:14px;border-radius:12px;background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.06)}
   html.light .bd-kpi{background:#fff;border-color:rgba(0,0,0,.06);box-shadow:0 1px 2px rgba(0,0,0,.03)}
   .bd-kpi-label{font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:rgba(255,255,255,.45);font-weight:500;margin-bottom:6px}

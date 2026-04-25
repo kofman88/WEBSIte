@@ -208,7 +208,16 @@ app.get('/metrics', (req, res) => {
 });
 
 // Deeper readiness probe — verifies DB + background workers, reports subsystem status.
+// Some cron-style monitors poll this every 10-30 seconds, so we cache the
+// expensive bits (COUNT(*) FROM users full table scan, outbox/queue group-bys)
+// for HEALTH_CACHE_MS so the probe stays cheap. Cache is per-process and
+// cleared on restart, which is fine.
+const HEALTH_CACHE_MS = 30_000;
+let _healthCache = null;
 app.get('/api/health/deep', (_req, res) => {
+  if (_healthCache && Date.now() - _healthCache.at < HEALTH_CACHE_MS) {
+    return res.status(_healthCache.statusCode).json(_healthCache.body);
+  }
   const out = {
     status: 'ok',
     timestamp: new Date().toISOString(),
@@ -289,7 +298,9 @@ app.get('/api/health/deep', (_req, res) => {
   } else {
     out.subsystems.memory = { ok: true, rssMb: out.memoryMb };
   }
-  res.status(out.status === 'ok' ? 200 : 503).json(out);
+  const statusCode = out.status === 'ok' ? 200 : 503;
+  _healthCache = { at: Date.now(), statusCode, body: out };
+  res.status(statusCode).json(out);
 });
 
 // ── Static files (Passenger serves everything) ────────────────────────

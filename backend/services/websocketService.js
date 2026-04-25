@@ -47,6 +47,17 @@ class WebSocketService {
     }
     return this._adminCache.set.has(userId);
   }
+  // Returns the cached admin id Set. Refreshes the cache via _isAdmin(0)
+  // (a no-op lookup that triggers the 60s TTL refresh path) so callers
+  // that need to broadcast to all admins don't have to duplicate the
+  // freshness logic. Used by support typing-event broadcast — without
+  // this cache we hit `SELECT id FROM users WHERE is_admin = 1` on
+  // every keystroke, producing 500ms WAL contention with 10 admins
+  // and 100 active support sessions.
+  _adminIds() {
+    this._isAdmin(0);
+    return this._adminCache ? this._adminCache.set : new Set();
+  }
   _indexRemove(userId, ws) {
     if (!userId) return;
     const set = this.userIndex.get(userId);
@@ -127,9 +138,9 @@ class WebSocketService {
             // Admin typing → notify ticket owner
             this.broadcastToUser(ticket.user_id, payload);
           } else if (meta.userId === ticket.user_id) {
-            // User typing → notify admins
-            const adminIds = db.prepare('SELECT id FROM users WHERE is_admin = 1').all().map((r) => r.id);
-            for (const aid of adminIds) this.broadcastToUser(aid, payload);
+            // User typing → notify admins (uses 60s-cached admin set,
+            // see _adminIds — was a SELECT per keystroke before).
+            for (const aid of this._adminIds()) this.broadcastToUser(aid, payload);
           }
         } catch (_) {}
       }

@@ -326,6 +326,15 @@ function requestPasswordReset({ email, ipAddress, userAgent }) {
   const tokenHash = emailService.hashToken(token);
   const expiresAt = new Date(Date.now() + RESET_TTL_SEC * 1000).toISOString();
 
+  // Invalidate any outstanding reset tokens for this user before issuing a
+  // new one. Without this, a leaked token from a previous request stays
+  // valid until natural TTL expiry (1h) — even if the user just clicked
+  // "forgot password" again, which usually means they don't trust the old
+  // link / it landed in spam. Marking used_at = now makes them rejected by
+  // confirmPasswordReset's "row.used_at" check below.
+  db.prepare(`UPDATE password_resets SET used_at = CURRENT_TIMESTAMP
+              WHERE user_id = ? AND used_at IS NULL`).run(row.id);
+
   db.prepare(`
     INSERT INTO password_resets (user_id, token_hash, expires_at, ip_address)
     VALUES (?, ?, ?, ?)
