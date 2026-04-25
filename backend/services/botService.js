@@ -334,8 +334,25 @@ function getBotStats(botId, userId) {
     if (dd > maxDd) maxDd = dd;
   }
 
-  const paperStart = 10_000;
-  const roiPct = (s.total_pnl / paperStart) * 100;
+  // ROI denominator — use the per-bot paper-equity baseline (or the user's
+  // own paper_starting_balance) instead of a hardcoded $10K. Without this
+  // a user who chose a $1K starting balance would see ROI = 1/10 of reality
+  // and a user on $50K would see 5x the real value, which makes the bot
+  // card stats fiction.
+  let baseline = 10_000;
+  try {
+    const eqRow = db.prepare('SELECT value FROM system_kv WHERE key = ?').get('paper_equity:bot:' + botId);
+    if (eqRow) {
+      // paper_equity stores current equity. Reconstruct the starting baseline
+      // by removing the realized PnL accumulated so far.
+      const current = parseFloat(eqRow.value);
+      if (Number.isFinite(current)) baseline = Math.max(1, current - (s.total_pnl || 0));
+    } else {
+      const userRow = db.prepare('SELECT paper_starting_balance FROM users WHERE id = ?').get(userId);
+      if (userRow && userRow.paper_starting_balance > 0) baseline = userRow.paper_starting_balance;
+    }
+  } catch (_e) { /* fall back to 10_000 */ }
+  const roiPct = baseline > 0 ? (s.total_pnl / baseline) * 100 : 0;
 
   return {
     botId,
