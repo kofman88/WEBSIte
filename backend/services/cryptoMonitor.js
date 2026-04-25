@@ -41,11 +41,28 @@ async function runOnce() {
     const trcTransfers = config.paymentTrc20Address && config.tronscanApiKey
       ? await _fetchTrc20Transfers().catch(() => []) : [];
 
+    // Track txHashes already claimed in this cycle so two pending payments
+    // with the same amount don't both match the same on-chain transfer.
+    // Also pre-load txHashes already credited in DB so a re-scan after
+    // a restart doesn't double-credit. Without these guards, two users
+    // who each bought a $79 Pro plan on the same day would both confirm
+    // against whichever single deposit was on-chain, and the platform
+    // would silently lose one user's payment until manually fixed.
+    const usedTxHashes = new Set(
+      db.prepare(`SELECT provider_tx_id FROM payments WHERE provider_tx_id IS NOT NULL`)
+        .all().map((r) => r.provider_tx_id),
+    );
+
+    // Match oldest-pending first (FIFO) so a fresh same-amount deposit
+    // can't leapfrog a payment that has been waiting longer.
+    pending.sort((a, b) => new Date(a.created_at) - new Date(b.created_at));
+
     for (const p of pending) {
       const transfers = p.method === 'usdt_bep20' ? bepTransfers : trcTransfers;
       const match = transfers.find((t) =>
+        !usedTxHashes.has(t.txHash) &&
         Math.abs(t.amount - Number(p.amount_usd)) < 0.01 &&
-        _isRecent(t.timestamp, p.created_at)
+        _isRecent(t.timestamp, p.created_at),
       );
       if (match) {
         try {
@@ -54,6 +71,7 @@ async function runOnce() {
             fromAddress: match.from,
             amountUsdt: match.amount,
           });
+          usedTxHashes.add(match.txHash);
           matched++;
           logger.info('crypto payment matched', { paymentId: p.id, tx: match.txHash });
         } catch (err) {
