@@ -135,54 +135,66 @@ class WalletService {
 
   /**
    * Request a withdrawal.
+   *
+   * Wrapped in a single db.transaction so the balance check and the pending
+   * INSERT are atomic — without that, two concurrent requests can both pass
+   * the `amount > available` guard and double-spend a single balance.
    */
   requestWithdrawal(userId, { amount, destinationAddress }) {
     if (!amount || amount <= 0) {
       throw new Error('Withdrawal amount must be greater than 0');
+    }
+    // Min withdrawal: USDT network fees alone are ~$0.5–2 on TRC20 / BEP20
+    // and $5+ on ERC20. Anything below makes no economic sense for the user.
+    if (amount < (this.MIN_WITHDRAWAL_USDT || 10)) {
+      throw new Error(`Minimum withdrawal is ${this.MIN_WITHDRAWAL_USDT || 10} USDT`);
     }
 
     if (!destinationAddress || typeof destinationAddress !== 'string' || destinationAddress.length < 10) {
       throw new Error('A valid destination address is required');
     }
 
-    const wallet = db
-      .prepare('SELECT * FROM wallets WHERE user_id = ?')
-      .get(userId);
-
-    if (!wallet) {
-      throw new Error('No wallet found. Create one first.');
-    }
-
-    // Check pending withdrawals
-    const pendingWithdrawals = db
-      .prepare(
-        `SELECT COALESCE(SUM(amount), 0) as total
-         FROM wallet_transactions
-         WHERE user_id = ? AND type = 'withdrawal' AND status IN ('pending', 'processing')`
-      )
-      .get(userId).total;
-
-    const available = wallet.balance - pendingWithdrawals;
-    if (amount > available) {
-      throw new Error(`Insufficient balance. Available: ${available.toFixed(2)}, requested: ${amount.toFixed(2)}`);
-    }
-
     const txHash = 'tx_' + crypto.randomBytes(16).toString('hex');
 
-    db.prepare(
-      `INSERT INTO wallet_transactions (user_id, wallet_id, type, amount, tx_hash, destination_address, status)
-       VALUES (?, ?, 'withdrawal', ?, ?, ?, 'pending')`
-    ).run(userId, wallet.id, amount, txHash, destinationAddress);
+    const tx = db.transaction(() => {
+      const wallet = db
+        .prepare('SELECT * FROM wallets WHERE user_id = ?')
+        .get(userId);
 
-    const tx = db
-      .prepare('SELECT * FROM wallet_transactions WHERE tx_hash = ?')
-      .get(txHash);
+      if (!wallet) {
+        throw new Error('No wallet found. Create one first.');
+      }
 
-    return tx;
+      const pendingWithdrawals = db
+        .prepare(
+          `SELECT COALESCE(SUM(amount), 0) as total
+           FROM wallet_transactions
+           WHERE user_id = ? AND type = 'withdrawal' AND status IN ('pending', 'processing')`,
+        )
+        .get(userId).total;
+
+      const available = wallet.balance - pendingWithdrawals;
+      if (amount > available) {
+        throw new Error(`Insufficient balance. Available: ${available.toFixed(2)}, requested: ${amount.toFixed(2)}`);
+      }
+
+      db.prepare(
+        `INSERT INTO wallet_transactions (user_id, wallet_id, type, amount, tx_hash, destination_address, status)
+         VALUES (?, ?, 'withdrawal', ?, ?, ?, 'pending')`,
+      ).run(userId, wallet.id, amount, txHash, destinationAddress);
+    });
+    tx();
+
+    return db.prepare('SELECT * FROM wallet_transactions WHERE tx_hash = ?').get(txHash);
   }
 
   /**
    * Process a deposit (admin / internal use).
+   *
+   * Idempotent on `txHash` — if the same on-chain hash arrives twice (e.g.
+   * blockchain monitor restart and re-scan), the second call short-circuits
+   * to the existing balance instead of double-crediting. Without this, a
+   * monitor crash + restart could pay every confirmed tx twice.
    */
   processDeposit(userId, { amount, txHash, notes }) {
     if (!amount || amount <= 0) {
@@ -197,14 +209,25 @@ class WalletService {
       throw new Error('No wallet found for this user');
     }
 
+    // Idempotency check: if a real on-chain tx_hash was supplied and we've
+    // already seen it as a completed deposit, return the current balance
+    // without modifying state.
+    if (txHash) {
+      const existing = db.prepare(
+        `SELECT id FROM wallet_transactions
+         WHERE tx_hash = ? AND type = 'deposit' AND status = 'completed' LIMIT 1`,
+      ).get(txHash);
+      if (existing) return this.getBalance(userId);
+    }
+
     const depositTx = db.transaction(() => {
       db.prepare(
         `INSERT INTO wallet_transactions (user_id, wallet_id, type, amount, tx_hash, status, notes)
-         VALUES (?, ?, 'deposit', ?, ?, 'completed', ?)`
+         VALUES (?, ?, 'deposit', ?, ?, 'completed', ?)`,
       ).run(userId, wallet.id, amount, txHash || 'int_' + crypto.randomBytes(8).toString('hex'), notes || null);
 
       db.prepare(
-        `UPDATE wallets SET balance = balance + ?, updated_at = CURRENT_TIMESTAMP WHERE user_id = ?`
+        `UPDATE wallets SET balance = balance + ?, updated_at = CURRENT_TIMESTAMP WHERE user_id = ?`,
       ).run(amount, userId);
     });
 
