@@ -147,6 +147,10 @@ async function runBacktest(backtestId) {
             perSymbol[symbol] = perSymbol[symbol] || { trades: 0, wins: 0, pnl: 0 };
             perSymbol[symbol].trades++;
             if (fill.pnl > 0) perSymbol[symbol].wins++;
+            // Sample equity at every trade close — without this, Sharpe and
+            // max-drawdown miss intra-50-bar swings, especially on stop-outs
+            // that hit and recover within a single sampling window.
+            equityCurve.push([bar[0], equity]);
             perSymbol[symbol].pnl += fill.pnl;
           }
           if (result.closed) openPositions.splice(pi, 1);

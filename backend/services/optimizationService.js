@@ -60,8 +60,19 @@ async function run(optId) {
 
   db.prepare(`UPDATE optimizations SET status = 'running' WHERE id = ?`).run(optId);
 
-  const baseConfig = JSON.parse(row.backtest_config);
-  const paramSpace = JSON.parse(row.param_space);
+  // backtest_config / param_space are stored as JSON strings. They were
+  // validated when the row was inserted (see optimizationsRoute), so a
+  // parse error here means DB corruption. Mark the run as failed with a
+  // useful error instead of crashing the whole service worker.
+  let baseConfig; let paramSpace;
+  try {
+    baseConfig = JSON.parse(row.backtest_config);
+    paramSpace = JSON.parse(row.param_space);
+  } catch (err) {
+    db.prepare(`UPDATE optimizations SET status='failed', error=? WHERE id=?`)
+      .run('Corrupt config JSON: ' + err.message, optId);
+    throw new Error('Optimization config invalid: ' + err.message);
+  }
   const objective = row.objective;
   const nTrials = row.n_trials;
   const method = Object.keys(paramSpace).length > 0 && Object.values(paramSpace).some((p) => p.type === 'choice' || p.step) ? 'grid' : 'random';
