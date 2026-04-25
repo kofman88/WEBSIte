@@ -121,6 +121,28 @@ function updateBot(botId, userId, patch) {
     throw err;
   }
 
+  // Apply plan leverage cap on every update — createBot already does this,
+  // but updateBot used to accept any leverage 1..100 from validation,
+  // letting a Free user PATCH leverage=100 even though their plan is
+  // capped at 5x. We clamp to the plan max here so the cap is enforced
+  // both at create and update time.
+  if (patch.leverage !== undefined) {
+    const limits = plans.getLimits(plan);
+    const maxLev = (limits && limits.maxLeverage) || 5;
+    if (patch.leverage > maxLev) {
+      patch.leverage = maxLev; // silently clamp + log
+      logger.info('bot leverage clamped to plan max', { botId, userId, plan, requested: patch.leverage, applied: maxLev });
+    }
+  }
+
+  // Strategy change → drop the old strategy_config so the scanner
+  // doesn't try to feed e.g. SMC's `minConfirmations` into Levels.
+  // Caller can supply a fresh strategyConfig in the same PATCH; if
+  // not, we set it to {} so strategy defaults take over on next scan.
+  if (patch.strategy && patch.strategy !== existing.strategy && patch.strategyConfig === undefined) {
+    patch.strategyConfig = {};
+  }
+
   // Elite-only feature gate on updates (scope/strategies_multi changes)
   if (patch.scope !== undefined || patch.strategiesMulti !== undefined || patch.marketExchanges !== undefined) {
     _validateEliteFeatures(plan, {
@@ -218,6 +240,19 @@ function deleteBot(botId, userId) {
     err.statusCode = 400; err.code = 'BOT_HAS_OPEN_TRADES';
     throw err;
   }
+
+  // Auto-close any still-open paper trades on this bot at their last
+  // known mid-price (entry, since paper has no exit yet) with a
+  // close_reason='bot_deleted' marker. Without this, the FK
+  // ON DELETE SET NULL leaves orphan rows with bot_id=NULL — analytics
+  // can't attribute their PnL to anything and the rows look fraudulent
+  // (a paper trade with no parent bot).
+  db.prepare(`
+    UPDATE trades SET status = 'closed', close_reason = 'bot_deleted',
+      exit_price = entry_price, realized_pnl = 0, realized_pnl_pct = 0,
+      closed_at = CURRENT_TIMESTAMP
+    WHERE bot_id = ? AND status = 'open' AND trading_mode = 'paper'
+  `).run(botId);
 
   const info = db.prepare('DELETE FROM trading_bots WHERE id = ? AND user_id = ?').run(botId, userId);
   if (info.changes === 0) {

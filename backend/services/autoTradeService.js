@@ -270,10 +270,50 @@ async function _openLive(signal, bot, qty, leverage, { exchangeService }) {
       });
       orderIds.sl = slOrder.id;
     } catch (slErr) {
-      // CRITICAL: couldn't set SL → close entry immediately
+      // CRITICAL: couldn't set SL → close entry immediately. Track every
+      // outcome in audit_log + DB so a naked position is never silent.
       logger.error('SL placement failed — closing entry', { err: slErr.message, botId: bot.id });
-      try { await client.createMarketOrder(symbol, oppositeSide, qty, undefined, { reduceOnly: true }); }
-      catch (_e) { logger.error('emergency close also failed', { err: _e.message }); }
+      let emergencyClosed = false;
+      try {
+        await client.createMarketOrder(symbol, oppositeSide, qty, undefined, { reduceOnly: true });
+        emergencyClosed = true;
+      } catch (e2) {
+        logger.error('emergency close also failed — NAKED POSITION', { err: e2.message, botId: bot.id });
+      }
+      if (!emergencyClosed) {
+        // Naked position on the exchange. Insert a tracking row so
+        // slVerifier + admin dashboard see it and the user gets alerted,
+        // instead of throwing and losing the only record of this trade.
+        try {
+          db.prepare(`
+            INSERT INTO trades
+              (user_id, bot_id, signal_id, exchange, symbol, side, strategy, timeframe,
+               entry_price, quantity, leverage, margin_used,
+               stop_loss, status, trading_mode, exchange_order_ids, note)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'open', 'live', ?, ?)
+          `).run(
+            bot.user_id, bot.id, signal.id || null,
+            bot.exchange, symbol, side,
+            signal.strategy || bot.strategy, bot.timeframe,
+            Number(entryOrder.average || entryOrder.price || signal.entry),
+            qty, leverage, (Number(entryOrder.average || signal.entry) * qty) / Math.max(1, leverage),
+            signal.stopLoss, _json(orderIds),
+            'NAKED_POSITION: SL placement and emergency close both failed — manual intervention required',
+          );
+        } catch (dbErr) {
+          logger.error('failed to insert naked-position tracking row', { err: dbErr.message, botId: bot.id });
+        }
+        // Loud alert to user so they don't discover this from a margin call
+        try {
+          const notifier = require('./notifier');
+          notifier.dispatch(bot.user_id, {
+            type: 'security',
+            title: '🚨 Открытая позиция без SL — закройте вручную',
+            body: `${symbol} ${side.toUpperCase()} qty=${qty}: не удалось поставить SL и закрыть позицию автоматически. Зайдите на ${bot.exchange} и закройте вручную.`,
+            link: '/dashboard.html',
+          });
+        } catch (_n) {}
+      }
       throw slErr;
     }
 

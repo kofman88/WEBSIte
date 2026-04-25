@@ -253,10 +253,32 @@ function getCcxtClient(keyId, userId = null) {
   const row = db.prepare(sql).get(...params);
   if (!row) { const err = new Error('Key not found'); err.statusCode = 404; throw err; }
 
+  // decField → AES-GCM decrypt. Throws on tampered ciphertext, bad
+  // WALLET_ENCRYPTION_KEY rotation, or DB corruption. Surface as a
+  // typed error instead of letting the trade-flow crash with a
+  // cryptic "invalid ciphertext" — the bot pause flow upstream
+  // checks .code so we set DECRYPT_FAILED.
+  let apiKey; let apiSecret; let passphrase;
+  try {
+    apiKey = decField(row.api_key_encrypted);
+    apiSecret = decField(row.api_secret_encrypted);
+    passphrase = decField(row.passphrase_encrypted);
+  } catch (err) {
+    const e = new Error('Failed to decrypt exchange key — re-add the key in Settings');
+    e.statusCode = 503; e.code = 'DECRYPT_FAILED';
+    throw e;
+  }
+  // Reject keys saved with empty/null fields. CCXT would happily
+  // create a client with apiKey=null, then the exchange answers 401
+  // and we'd open a "live" trade with no actual order placed.
+  if (!apiKey || !apiSecret) {
+    const e = new Error('Exchange key is missing apiKey or apiSecret');
+    e.statusCode = 503; e.code = 'INVALID_EXCHANGE_KEY';
+    throw e;
+  }
+
   const client = makeCcxt(row.exchange, {
-    apiKey: decField(row.api_key_encrypted),
-    apiSecret: decField(row.api_secret_encrypted),
-    passphrase: decField(row.passphrase_encrypted),
+    apiKey, apiSecret, passphrase,
     testnet: Boolean(row.is_testnet),
   });
   cacheSet(keyId, client);

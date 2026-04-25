@@ -164,19 +164,11 @@ async function _processLive(trade) {
   // exchange_order_ids, and on any `filled` status → insert trade_fills
   // + possibly adjust SL order via client.editOrder.
   //
-  // For Phase 10 MVP: poll is best-effort; if a TP fired we record it,
-  // but we do NOT edit the on-exchange SL here (that's slVerifier's job).
-  try {
-    const client = exchangeServiceRef.getCcxtClient(null, trade.user_id);
-    // CCXT fetchOrder requires symbol + id. We skip if client.fetchOrder missing.
-    if (!client.fetchOrder) return false;
-    // Stub — returning false to avoid accidentally double-counting without
-    // a proper reconciliation algorithm. Full logic deferred to Phase 14.
-    return false;
-  } catch (err) {
-    logger.debug('live partialTp check failed', { tradeId: trade.id, err: err.message });
-    return false;
-  }
+  // Phase 10 MVP: stub returning false to avoid double-counting before a
+  // proper reconciliation algorithm. Full logic deferred to Phase 14
+  // (TP/SL fill polling against exchange_order_ids). slVerifier handles
+  // SL drift detection in the meantime.
+  return false;
 }
 
 function _recordFill(trade, eventType, price, qty, ts) {
