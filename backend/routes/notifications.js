@@ -27,16 +27,19 @@ router.get('/unread-count', (req, res, next) => {
   catch (err) { handleErr(err, res, next); }
 });
 
+// Static path /read-all MUST be declared before /:id/read — Express matches
+// routes in registration order, and the dynamic :id pattern would otherwise
+// swallow "read-all" as the id parameter and 400 on zod coerce.number().
+router.post('/read-all', (req, res, next) => {
+  try { res.json(notifications.markAllRead(req.userId)); }
+  catch (err) { handleErr(err, res, next); }
+});
+
 router.post('/:id/read', (req, res, next) => {
   try {
     const id = z.coerce.number().int().positive().parse(req.params.id);
     res.json(notifications.markRead(req.userId, id));
   } catch (err) { handleErr(err, res, next); }
-});
-
-router.post('/read-all', (req, res, next) => {
-  try { res.json(notifications.markAllRead(req.userId)); }
-  catch (err) { handleErr(err, res, next); }
 });
 
 router.delete('/:id', (req, res, next) => {

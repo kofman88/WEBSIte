@@ -3,8 +3,10 @@
  *
  * If a user's realized PnL in the last 24h drops below -threshold (default 10%
  * of nominal starting balance), ALL their active bots are auto-paused and
- * they receive an alert event. The breaker is "tripped" for the remainder
- * of the day; it resets at UTC midnight.
+ * they receive an alert event. The breaker is "tripped" and stays tripped
+ * for 24 hours from the trip moment (sliding window — timezone-independent),
+ * after which it auto-resets. A manual reset via settings or admin is also
+ * supported.
  *
  * A manual override (admin or user through settings) can reset the flag.
  *

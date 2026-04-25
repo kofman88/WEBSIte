@@ -255,7 +255,8 @@ const API = {
   botStats: (id) => apiRequest('GET', '/bots/' + id + '/stats'),
   botEquity: (id) => apiRequest('GET', '/bots/' + id + '/equity'),
   quickBacktest: (cfg) => apiRequest('POST', '/bots/quick-backtest', cfg),
-  getBacktest: (id) => apiRequest('GET', '/backtests/' + id),
+  // getBacktest is defined in the Backtests section below — used by both
+  // bot drawer (poll quick-backtest result) and the standalone backtests page.
 
   // Signals
   listSignals: (opts = {}) => apiRequest('GET', '/signals?' + qs(opts)),
@@ -339,10 +340,10 @@ const API = {
   setPublicProfile: (enabled) => apiRequest('PUT', '/support/profile/public', { enabled }),
   setPaperBalance: (amount) => apiRequest('PUT', '/support/profile/paper-balance', { amount }),
 
-  // Copy trading
-  copySubscribe: (leaderCode, opts = {}) => apiRequest('POST', '/copy/subscribe', { leaderCode, ...opts }),
-  copyUnsubscribe: (leaderId) => apiRequest('POST', '/copy/unsubscribe', { leaderId }),
-  copyListFollowing: () => apiRequest('GET', '/copy/following'),
+  // Copy trading — copySubscribe / copyUnsubscribe / copyListFollowing are
+  // defined earlier in this object. Removed duplicate stubs that used to
+  // overwrite them with a different signature (leaderCode, opts) and broke
+  // callers that passed a single payload object.
 
   // Strategy marketplace
   marketList: (opts = {}) => apiRequest('GET', '/strategies?' + qs(opts), null, { skipAuth: true }),
@@ -361,15 +362,13 @@ const API = {
   btcBenchmark:       (days = 90) => apiRequest('GET', '/analytics/btc-benchmark?days=' + days),
   myPercentile:       (period = '30d') => apiRequest('GET', '/analytics/percentile?period=' + period),
   marketContext:      () => apiRequest('GET', '/public/market-context', null, { skipAuth: true }),
-  analyticsByStrategy:() => apiRequest('GET', '/analytics/by-strategy'),
-  analyticsBySymbol:  () => apiRequest('GET', '/analytics/by-symbol'),
-  toggleBot:          (id) => apiRequest('POST', '/bots/' + id + '/toggle'),
+  // analyticsByStrategy / analyticsBySymbol / toggleBot / quickBacktest /
+  // getBacktest are defined earlier in this object — duplicate stubs
+  // here used to overwrite them and lose their `opts` parameter. Removed.
 
-  // Bot wizard — strategy schemas + inline backtest preview
+  // Bot wizard — strategy schemas
   strategySchemas:    () => apiRequest('GET', '/bots/strategy-schemas'),
   strategySchema:     (key) => apiRequest('GET', '/bots/strategy-schema/' + encodeURIComponent(key)),
-  quickBacktest:      (body) => apiRequest('POST', '/bots/quick-backtest', body),
-  getBacktest:        (id) => apiRequest('GET', '/backtests/' + id),
 
   // Support tickets
   listTickets: (opts = {}) => apiRequest('GET', '/support/tickets?' + qs(opts)),
@@ -394,7 +393,8 @@ const API = {
   adminTemplateRemove: (id) => apiRequest('DELETE', '/support/admin/templates/' + id),
   adminTemplateUse: (id) => apiRequest('POST', '/support/admin/templates/' + id + '/use', {}),
   planUsage: () => apiRequest('GET', '/subscriptions/usage'),
-  listPlans: () => apiRequest('GET', '/subscriptions/plans'),
+  // listPlans is defined earlier with skipAuth:true so the public landing
+  // page can show pricing without being logged in. Don't redefine here.
   adminPresencePing: () => apiRequest('POST', '/support/admin/presence/ping', {}),
   adminPresenceOnline: () => apiRequest('GET', '/support/admin/presence/online'),
   // User-side support helpers

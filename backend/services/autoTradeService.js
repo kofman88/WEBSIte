@@ -26,12 +26,33 @@ const PARTIAL_FRACTIONS = { tp1: 0.33, tp2: 0.33, tp3: 0.34 };
 function _json(v) { try { return JSON.stringify(v); } catch { return null; } }
 function _safeJson(s, fb) { if (!s) return fb; try { return JSON.parse(s); } catch { return fb; } }
 
+// Per-bot serialiser — guards the open-trade flow so that two signals
+// arriving within ms (e.g. multi-strategy combo on Elite, or scanner
+// double-firing during a cycle) cannot both pass the max_open_trades
+// check while one is still mid-await on exchange.balance / createOrder.
+// Without this, on live mode a bot with max_open_trades=3 could end up
+// with 4-5 simultaneous positions and break the user's risk plan.
+const _botLocks = new Map();
+function _withBotLock(botId, fn) {
+  const prev = _botLocks.get(botId) || Promise.resolve();
+  const next = prev.then(fn, fn).finally(() => {
+    if (_botLocks.get(botId) === next) _botLocks.delete(botId);
+  });
+  _botLocks.set(botId, next);
+  return next;
+}
+
 /**
  * Main entry. Called by server bridge when worker emits auto_trade_request.
  * @returns {Trade|null}
  */
-async function executeSignal(signal, bot, { exchangeService = null, marketData = null } = {}) {
+async function executeSignal(signal, bot, opts = {}) {
   if (!signal || !bot) return null;
+  // Serialise per-bot — see _withBotLock comment above.
+  return _withBotLock(bot.id, () => _executeSignalInner(signal, bot, opts));
+}
+
+async function _executeSignalInner(signal, bot, { exchangeService = null, marketData = null } = {}) {
 
   // 1. Plan gating — does the user's plan allow auto-trade?
   const plan = _getUserPlan(bot.user_id);
@@ -81,6 +102,18 @@ async function executeSignal(signal, bot, { exchangeService = null, marketData =
   const qty = _computeQty(equity, signal.entry, signal.stopLoss, bot.risk_pct || 1, leverage);
   if (qty <= 0) {
     logger.warn('auto_trade skip: qty=0', { botId: bot.id, signal });
+    return null;
+  }
+
+  // 5b. Re-check max_open_trades after the equity-fetch await — _withBotLock
+  // serialises calls per bot so this should always equal the earlier read,
+  // but be defensive in case an out-of-band trade was inserted (e.g. manual
+  // trade through /api/bots/manual-trade attributed to this bot_id).
+  const recheckOpen = db.prepare(
+    `SELECT COUNT(*) as n FROM trades WHERE bot_id = ? AND status = 'open'`,
+  ).get(bot.id).n;
+  if (recheckOpen >= (bot.max_open_trades || 3)) {
+    logger.debug('auto_trade skip: max_open_trades reached on recheck', { botId: bot.id, recheckOpen });
     return null;
   }
 
