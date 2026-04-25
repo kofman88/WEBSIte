@@ -1560,7 +1560,14 @@ function _bdRenderTv(bot) {
     + '&theme=' + theme
     + '&style=1&locale=ru&toolbarbg=rgba(0,0,0,0)&hide_top_toolbar=0&hide_side_toolbar=1&allow_symbol_change=0&save_image=0&studies=%5B%5D';
   document.getElementById('bdTvMeta').textContent = tvExchange + ':' + clean + ' · ' + (bot.timeframe || '1h');
-  document.getElementById('bdTvChart').innerHTML = '<iframe src="' + url + '" allowtransparency="true" frameborder="0" scrolling="no"></iframe>';
+  // sandbox limits the embedded TradingView widget to its own document —
+  // it can run JS and talk to its own origin, but cannot escape into our
+  // page (no top navigation, no parent.* access, no popups). referrerpolicy
+  // strips the URL we're on so TV doesn't see the user's bot id.
+  document.getElementById('bdTvChart').innerHTML =
+    '<iframe src="' + url + '" allowtransparency="true" frameborder="0" scrolling="no" ' +
+    'sandbox="allow-scripts allow-same-origin allow-popups-to-escape-sandbox" ' +
+    'referrerpolicy="no-referrer" loading="lazy"></iframe>';
 }
 
 function _bdRenderTrades(trades) {

@@ -451,6 +451,9 @@ function shutdown(sig) {
   return async () => {
     logger.info('received ' + sig + ', shutting down');
     try { await stopScannerWorker(); } catch (e) { /* */ }
+    // Clear all timers so the event loop drains and process can exit cleanly.
+    // Without these, graceful shutdown hangs until process.exit() force-kills.
+    if (partialTpTimer) { clearInterval(partialTpTimer); partialTpTimer = null; }
     try { websocketService.shutdown(); } catch (e) { /* */ }
     try { db.close(); } catch (e) { /* */ }
     process.exit(0);

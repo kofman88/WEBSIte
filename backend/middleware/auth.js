@@ -104,7 +104,11 @@ function requireVerifiedEmail(req, res, next) {
   // flow, so email_verified stays 0. Bypass in test env so the middleware
   // doesn't break unrelated integration tests.
   if (TESTING) return next();
-  if (req.isAdmin || req.isImpersonating) return next();
+  // req.impersonatedBy is set by authMiddleware when an admin issued a
+  // token via /admin/users/:id/impersonate. Earlier versions of this
+  // file referenced a non-existent req.isImpersonating which silently
+  // never bypassed — admins doing support work hit EMAIL_NOT_VERIFIED.
+  if (req.isAdmin || req.impersonatedBy) return next();
   const db = require('../models/database');
   try {
     const row = db.prepare('SELECT email_verified FROM users WHERE id = ?').get(req.userId);
