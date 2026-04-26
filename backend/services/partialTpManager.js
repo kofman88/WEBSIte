@@ -22,10 +22,17 @@ const PARTIAL_FRACTIONS = { tp1: 0.33, tp2: 0.33, tp3: 0.34 };
 
 let marketDataRef = null;
 let exchangeServiceRef = null;
+// onCloseHook lets a worker_thread runner forward trade_closed events
+// back to the parent process so the parent's WebSocket server can
+// broadcast to the user's open dashboard tabs. In-process mode leaves
+// the hook null and the in-line require('./websocketService') path
+// runs (kept for tests + small deployments).
+let onCloseHook = null;
 
-function init({ marketData, exchangeService } = {}) {
+function init({ marketData, exchangeService, onClose } = {}) {
   marketDataRef = marketData || null;
   exchangeServiceRef = exchangeService || null;
+  if (typeof onClose === 'function') onCloseHook = onClose;
 }
 
 async function tickOpen() {
@@ -233,24 +240,33 @@ function _closeTrade(trade, price, reason, ts) {
       link: '/dashboard.html',
     });
   } catch (_e) {}
-  // Real-time push to the user's open dashboard tabs so the trade
-  // disappears from "open positions" immediately, instead of waiting
-  // up to 30s for the next API poll. Lazy-required to avoid the
-  // websocketService → partialTpManager circular at boot.
-  try {
-    const ws = require('./websocketService');
-    if (ws && ws.broadcastToUser) {
-      ws.broadcastToUser(trade.user_id, {
-        type: 'trade_closed',
-        data: {
-          tradeId: trade.id, botId: trade.bot_id, symbol: trade.symbol,
-          side: trade.side, exitPrice: price, reason,
-          pnl: totalPnl, pnlPct,
-        },
-        ts: Date.now(),
-      });
-    }
-  } catch (_e) { /* ws unavailable — non-fatal */ }
+  // Real-time push to the user's open dashboard tabs. Two paths:
+  // - Worker mode: partialTpWorker installs onCloseHook to forward via
+  //   parentPort.postMessage; parent broadcasts via its own WS server.
+  // - In-process mode: lazy-require ./websocketService and broadcast
+  //   directly. Kept for tests and dev runs.
+  const closeEvent = {
+    userId: trade.user_id,
+    type: 'trade_closed',
+    data: {
+      tradeId: trade.id, botId: trade.bot_id, symbol: trade.symbol,
+      side: trade.side, exitPrice: price, reason,
+      pnl: totalPnl, pnlPct,
+    },
+    ts: Date.now(),
+  };
+  if (onCloseHook) {
+    try { onCloseHook(closeEvent); } catch (_e) { /* hook failure non-fatal */ }
+  } else {
+    try {
+      const ws = require('./websocketService');
+      if (ws && ws.broadcastToUser) {
+        ws.broadcastToUser(trade.user_id, {
+          type: closeEvent.type, data: closeEvent.data, ts: closeEvent.ts,
+        });
+      }
+    } catch (_e) { /* ws unavailable — non-fatal */ }
+  }
 }
 
 function _finalizeIfExits(trade, remaining) {
