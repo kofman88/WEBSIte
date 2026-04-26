@@ -37,10 +37,10 @@ function handleServiceError(err, res, next) {
 }
 
 // POST /api/auth/register
-router.post('/register', geoBlock(), registerLimiter, (req, res, next) => {
+router.post('/register', geoBlock(), registerLimiter, async (req, res, next) => {
   try {
     const input = validation.registerSchema.parse(req.body);
-    const out = authService.register({
+    const out = await authService.register({
       email: input.email,
       password: input.password,
       displayName: input.displayName,
@@ -146,13 +146,13 @@ router.post('/password-reset/request', passwordResetLimiter, (req, res, next) =>
 });
 
 // POST /api/auth/password-reset/confirm
-router.post('/password-reset/confirm', (req, res, next) => {
+router.post('/password-reset/confirm', async (req, res, next) => {
   try {
     const input = z.object({
       token: z.string().min(16).max(256),
       newPassword: validation.password,
     }).parse(req.body);
-    const out = authService.confirmPasswordReset({
+    const out = await authService.confirmPasswordReset({
       token: input.token,
       newPassword: input.newPassword,
       ipAddress: getIp(req),
@@ -163,13 +163,13 @@ router.post('/password-reset/confirm', (req, res, next) => {
 });
 
 // POST /api/auth/change-password (auth'd)
-router.post('/change-password', authMiddleware, (req, res, next) => {
+router.post('/change-password', authMiddleware, async (req, res, next) => {
   try {
     const input = z.object({
       currentPassword: z.string().min(1).max(128),
       newPassword: validation.password,
     }).parse(req.body);
-    const out = authService.changePassword({
+    const out = await authService.changePassword({
       userId: req.userId,
       currentPassword: input.currentPassword,
       newPassword: input.newPassword,

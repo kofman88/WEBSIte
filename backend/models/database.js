@@ -27,7 +27,12 @@ const db = new Database(config.databasePath);
 db.pragma('journal_mode = WAL');
 db.pragma('synchronous = NORMAL');
 db.pragma('foreign_keys = ON');
-db.pragma('busy_timeout = 5000');
+// 5s wasn't enough under maintenance backup — VACUUM INTO holds an
+// exclusive lock for the duration of the copy and the scanner worker
+// timed out with "database is locked" every time backup ran (twice in
+// the last 5 hours of prod logs). 15s gives backup + any slow query
+// breathing room without hiding a genuine hang for too long.
+db.pragma('busy_timeout = 15000');
 
 // ── CORE ─────────────────────────────────────────────────────────────────
 db.exec(`

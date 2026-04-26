@@ -100,7 +100,12 @@ function audit(userId, action, meta = null, ip = null, ua = null) {
   }
 }
 
-function register({ email, password, displayName, givenName, familyName, referralCode, ipAddress, userAgent }) {
+// register is async because bcrypt.hash is async — at COST=12 hashing
+// blocks the event loop ~250ms per call. With sync hashing, a burst of
+// 50 concurrent registrations would freeze the API for ~12 seconds for
+// every other user. async hash uses bcrypt's threadpool so concurrent
+// hashing happens in parallel off the main thread.
+async function register({ email, password, displayName, givenName, familyName, referralCode, ipAddress, userAgent }) {
   const existing = db.prepare('SELECT id FROM users WHERE email = ?').get(email);
   if (existing) {
     const err = new Error('Email already registered');
@@ -123,7 +128,7 @@ function register({ email, password, displayName, givenName, familyName, referra
     }
   }
 
-  const passwordHash = bcrypt.hashSync(password, BCRYPT_COST);
+  const passwordHash = await bcrypt.hash(password, BCRYPT_COST);
   const refCode = ensureUniqueRefCode();
 
   const userId = db.transaction(() => {
@@ -348,7 +353,7 @@ function requestPasswordReset({ email, ipAddress, userAgent }) {
   return { sent: true };
 }
 
-function confirmPasswordReset({ token, newPassword, ipAddress, userAgent }) {
+async function confirmPasswordReset({ token, newPassword, ipAddress, userAgent }) {
   const emailService = require('./emailService');
   const tokenHash = emailService.hashToken(token);
   const row = db.prepare(`
@@ -367,7 +372,8 @@ function confirmPasswordReset({ token, newPassword, ipAddress, userAgent }) {
     err.statusCode = 400; err.code = 'RESET_TOKEN_EXPIRED'; throw err;
   }
 
-  const passwordHash = bcrypt.hashSync(newPassword, BCRYPT_COST);
+  // bcrypt.hash off-loads to threadpool — see register() comment.
+  const passwordHash = await bcrypt.hash(newPassword, BCRYPT_COST);
   db.transaction(() => {
     db.prepare('UPDATE users SET password_hash = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?')
       .run(passwordHash, row.user_id);
@@ -378,14 +384,14 @@ function confirmPasswordReset({ token, newPassword, ipAddress, userAgent }) {
   return { success: true };
 }
 
-function changePassword({ userId, currentPassword, newPassword, ipAddress, userAgent }) {
+async function changePassword({ userId, currentPassword, newPassword, ipAddress, userAgent }) {
   const row = db.prepare('SELECT password_hash FROM users WHERE id = ? AND is_active = 1').get(userId);
   if (!row) { const err = new Error('User not found'); err.statusCode = 404; throw err; }
   if (!bcrypt.compareSync(currentPassword, row.password_hash)) {
     const err = new Error('Current password is incorrect');
     err.statusCode = 401; err.code = 'WRONG_PASSWORD'; throw err;
   }
-  const passwordHash = bcrypt.hashSync(newPassword, BCRYPT_COST);
+  const passwordHash = await bcrypt.hash(newPassword, BCRYPT_COST);
   db.transaction(() => {
     db.prepare('UPDATE users SET password_hash = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?')
       .run(passwordHash, userId);
