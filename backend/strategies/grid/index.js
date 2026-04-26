@@ -33,7 +33,6 @@ const DEFAULT_CONFIG = Object.freeze({
 function scan(candlesRaw, userConfig = {}) {
   const cfg = { ...DEFAULT_CONFIG, ...userConfig };
   if (!Array.isArray(candlesRaw) || candlesRaw.length < cfg.lookback + 5) return null;
-
   const window = candlesRaw.slice(-cfg.lookback);
   const highs = window.map((c) => c[2]);
   const lows = window.map((c) => c[3]);
@@ -60,22 +59,41 @@ function scan(candlesRaw, userConfig = {}) {
     levels.push(rangeLow + i * step);
   }
 
-  // Which grid level is price crossing? We're looking for upward-cross
-  // from below a grid line into the one above — classic "bounce off support"
+  // Which grid level is price crossing? Find the HIGHEST grid line we
+  // crossed (price gapped past it on this bar). Without taking the
+  // highest, on volatile bars we'd pick `levels[1]` while closeNow is
+  // already past `levels[3]`, so tp1=levels[2] would land BELOW entry
+  // and the signal would be rejected by signalService's geometry guard
+  // ("Long TP must be above entry"). Net effect: Grid bot produces zero
+  // actionable signals on anything but the slowest crawl through a
+  // single level per bar.
   let crossedAt = -1;
   for (let i = 1; i < levels.length - 1; i++) {
     const lvl = levels[i];
-    if (closePrev < lvl && closeNow >= lvl) { crossedAt = i; break; }
+    if (closePrev < lvl && closeNow >= lvl) crossedAt = i; // keep updating, find highest
   }
   if (crossedAt < 0) return null;
   // Only take signals in the lower half (i < gridCount/2) — buy dips not tops
   if (crossedAt > Math.floor(cfg.gridCount / 2)) return null;
 
+  // If closeNow has overshot past `levels[crossedAt + 1]` already (the
+  // would-be tp1), bump the tp ladder up to the first level still
+  // strictly above closeNow. Guarantees tp1 > entry for the long signal.
+  let tpStartIdx = crossedAt + 1;
+  while (tpStartIdx < levels.length && levels[tpStartIdx] <= closeNow) tpStartIdx += 1;
+  if (tpStartIdx >= levels.length) return null; // no room above
+
   const entry = closeNow;
   const stopLoss = levels[Math.max(0, crossedAt - 1)] - step * 0.3;
-  const tp1 = levels[crossedAt + 1];                      // next level up
-  const tp2 = levels[Math.min(levels.length - 1, crossedAt + 2)];
-  const tp3 = levels[Math.min(levels.length - 1, crossedAt + 3)];
+  const tp1 = levels[tpStartIdx];                         // first level above closeNow
+  const tp2 = levels[Math.min(levels.length - 1, tpStartIdx + 1)];
+  const tp3 = levels[Math.min(levels.length - 1, tpStartIdx + 2)];
+  // Defensive: if grid is so tight that tp2/tp3 collapse onto tp1
+  // (rare but possible at the upper edge after overshoot), drop them.
+  const validTp1 = tp1 > entry;
+  const validTp2 = tp2 > tp1;
+  const validTp3 = tp3 > tp2;
+  if (!validTp1) return null;
 
   const slDist = Math.abs(entry - stopLoss);
   const tpDist = Math.abs(tp1 - entry);
@@ -92,7 +110,9 @@ function scan(candlesRaw, userConfig = {}) {
     side: 'long',
     entry: round(entry),
     stopLoss: round(stopLoss),
-    tp1: round(tp1), tp2: round(tp2), tp3: round(tp3),
+    tp1: round(tp1),
+    tp2: validTp2 ? round(tp2) : null,
+    tp3: validTp3 ? round(tp3) : null,
     riskReward,
     quality: Math.round((1 - posInRange) * 8) + 2,
     confidence,
