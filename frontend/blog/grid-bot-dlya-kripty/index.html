@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="ru" class="aura-page">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+  <title>Grid бот для крипты: как работает сетка ордеров — CHM Finance</title>
+  <meta name="description" content="Grid-бот простыми словами: как работает сетка ордеров, когда даёт прибыль на боковике, когда ломается на тренде. Настройка диапазона, шага, защита от пробоя. Примеры на BTC."/>
+  <meta name="keywords" content="grid бот для крипты, grid стратегия, сетка ордеров крипта, что такое grid trading, grid бот настройка"/>
+  <meta name="robots" content="index,follow,max-image-preview:large"/>
+  <meta name="theme-color" content="#0A0A0A"/>
+  <link rel="canonical" href="https://chmup.top/blog/grid-bot-dlya-kripty/"/>
+  <meta property="og:type" content="article"/>
+  <meta property="og:site_name" content="CHM Finance"/>
+  <meta property="og:title" content="Grid бот для крипты — как работает сетка"/>
+  <meta property="og:description" content="Когда grid даёт прибыль, когда ломается. Настройка диапазона + защита от пробоя."/>
+  <meta property="og:url" content="https://chmup.top/blog/grid-bot-dlya-kripty/"/>
+  <meta property="og:image" content="https://chmup.top/og-cover.png"/>
+  <meta property="og:locale" content="ru_RU"/>
+  <meta property="article:published_time" content="2026-04-26"/>
+  <meta property="article:author" content="CHM Finance"/>
+  <meta property="article:tag" content="Grid"/>
+  <meta name="twitter:card" content="summary_large_image"/>
+  <meta name="twitter:title" content="Grid бот для крипты"/>
+  <meta name="twitter:image" content="https://chmup.top/og-cover.png"/>
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg"/>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet"/>
+
+  <script type="application/ld+json">
+  {
+    "@context":"https://schema.org","@type":"Article",
+    "headline":"Grid бот для крипты: как работает сетка ордеров",
+    "description":"Grid-бот: когда работает, когда ломается. Настройка диапазона, шага, защита от пробоя.",
+    "author":{"@type":"Organization","name":"CHM Finance"},
+    "publisher":{"@type":"Organization","name":"CHM Finance","logo":{"@type":"ImageObject","url":"https://chmup.top/logo.png"}},
+    "datePublished":"2026-04-26","dateModified":"2026-04-26",
+    "mainEntityOfPage":{"@type":"WebPage","@id":"https://chmup.top/blog/grid-bot-dlya-kripty/"},
+    "image":"https://chmup.top/og-cover.png","inLanguage":"ru-RU"
+  }
+  </script>
+  <script type="application/ld+json">
+  {
+    "@context":"https://schema.org","@type":"BreadcrumbList",
+    "itemListElement":[
+      {"@type":"ListItem","position":1,"name":"Главная","item":"https://chmup.top/"},
+      {"@type":"ListItem","position":2,"name":"Блог","item":"https://chmup.top/blog/"},
+      {"@type":"ListItem","position":3,"name":"Grid бот для крипты","item":"https://chmup.top/blog/grid-bot-dlya-kripty/"}
+    ]
+  }
+  </script>
+
+  <style>
+    body{background:#0A0A0A;color:#E5E5E5;font-family:'Inter',sans-serif;margin:0;line-height:1.7}
+    .container{max-width:720px;margin:0 auto;padding:60px 24px}
+    nav{padding:20px 24px;border-bottom:1px solid rgba(255,255,255,.06)}
+    nav a{color:rgba(255,255,255,.7);text-decoration:none;font-weight:500;font-size:14px;margin-right:20px}
+    nav a:hover{color:#fff}
+    .brand{font-weight:700;font-size:18px;letter-spacing:-.02em;color:#fff}
+    .brand span{color:#FF5A1F}
+    .breadcrumb{font-size:12px;color:rgba(255,255,255,.4);margin-bottom:16px}
+    .breadcrumb a{color:rgba(255,255,255,.55);text-decoration:none}
+    h1{font-size:clamp(28px,4.5vw,40px);font-weight:700;letter-spacing:-.025em;margin:0 0 16px;line-height:1.15}
+    .meta{color:rgba(255,255,255,.45);font-size:13px;margin-bottom:40px;display:flex;gap:16px;flex-wrap:wrap}
+    .meta span::after{content:'·';margin-left:16px;opacity:.5}
+    .meta span:last-child::after{content:''}
+    h2{font-size:24px;font-weight:600;letter-spacing:-.015em;margin:44px 0 16px;color:#fff}
+    h3{font-size:18px;font-weight:600;margin:32px 0 12px;color:#fff}
+    p{color:rgba(255,255,255,.78);margin:0 0 16px;font-size:16px}
+    ul,ol{color:rgba(255,255,255,.78);padding-left:24px;margin:0 0 20px}
+    li{margin-bottom:8px}
+    code{background:rgba(255,90,31,.12);color:#FF8C5A;padding:2px 6px;border-radius:4px;font-family:'JetBrains Mono',monospace;font-size:13px}
+    .note{padding:16px 20px;border-radius:12px;background:rgba(255,90,31,.08);border:1px solid rgba(255,90,31,.2);margin:24px 0}
+    .note.red{background:rgba(239,68,68,.08);border-color:rgba(239,68,68,.25)}
+    .note.red .note-title{color:#fca5a5}
+    .note-title{font-weight:600;color:#FF8C5A;font-size:13px;text-transform:uppercase;letter-spacing:.1em;margin:0 0 8px}
+    .cta{display:block;padding:24px;border-radius:16px;background:linear-gradient(135deg,rgba(255,140,90,.12),rgba(255,90,31,.06));border:1px solid rgba(255,140,90,.3);text-decoration:none;color:inherit;margin:40px 0}
+    .cta-title{font-weight:600;color:#fff;margin:0 0 6px;font-size:17px}
+    .cta-desc{color:rgba(255,255,255,.7);font-size:14px;margin:0}
+    .cta-btn{display:inline-block;margin-top:12px;padding:8px 16px;background:linear-gradient(180deg,#FF8C5A,#FF5A1F);color:#fff;border-radius:999px;font-size:13px;font-weight:600}
+    a.inline{color:#FF8C5A;text-decoration:none}
+    a.inline:hover{text-decoration:underline}
+    table{width:100%;border-collapse:collapse;margin:20px 0;font-size:14px}
+    th,td{padding:10px 12px;text-align:left;border-bottom:1px solid rgba(255,255,255,.08)}
+    th{color:rgba(255,255,255,.5);font-size:11px;text-transform:uppercase;letter-spacing:.1em;font-weight:500}
+    td{color:rgba(255,255,255,.85)}
+    td.mono{font-family:'JetBrains Mono',monospace;font-variant-numeric:tabular-nums}
+  </style>
+</head>
+<body>
+  <nav>
+    <div style="max-width:960px;margin:0 auto;display:flex;justify-content:space-between;align-items:center">
+      <a href="/" class="brand">CHM<span>.</span></a>
+      <div><a href="/">Главная</a><a href="/subscriptions.html">Тарифы</a><a href="/blog/">Блог</a></div>
+    </div>
+  </nav>
+
+  <main class="container">
+    <div class="breadcrumb"><a href="/">Главная</a> / <a href="/blog/">Блог</a> / Grid бот для крипты</div>
+
+    <h1>Grid бот для крипты: как работает сетка ордеров</h1>
+    <div class="meta"><span>Разбор стратегии</span><span>10 мин чтения</span><span>26 апреля 2026</span></div>
+
+    <p><strong>Grid-бот</strong> (или «сеточный») — алгоритм, который размещает рой лимитных ордеров в заранее заданном диапазоне цен и зарабатывает на каждом колебании внутри этого диапазона. Это идеальный инструмент для бокового рынка и худший выбор для трендового. В этой статье разберём как именно работает сетка, когда она даёт прибыль, когда сливает депозит, и как настроить grid-бота с защитой от пробоя.</p>
+
+    <h2>Как работает сетка</h2>
+
+    <p>Представь BTC, который последние 30 дней колеблется в диапазоне $58,000 — $62,000. Цена не идёт ни вверх, ни вниз — болтается между этими границами. Trend-following стратегия здесь бесполезна (нет тренда). А grid-бот — в раю.</p>
+
+    <p>Алгоритм:</p>
+    <ol>
+      <li><strong>Определяет диапазон</strong>: low = $58,000, high = $62,000</li>
+      <li><strong>Делит на N уровней</strong> (например, 10 шагов): уровни на $58,000, $58,400, $58,800, …, $62,000</li>
+      <li><strong>На каждом уровне ставит buy-ордер чуть ниже + sell-ордер чуть выше</strong></li>
+      <li>Когда цена падает к buy-уровню → купили. Когда поднимается к sell-уровню → продали с прибылью $400 (один шаг сетки)</li>
+      <li>Цикл повторяется снова и снова, пока цена остаётся в диапазоне</li>
+    </ol>
+
+    <p>За день в волатильном боковике цена может пройти диапазон 5-10 раз. Каждое прохождение = десяток мелких сделок с прибылью $50-400 каждая. Суммарно — стабильный доход без угадывания направления.</p>
+
+    <h2>Когда Grid даёт прибыль</h2>
+
+    <ul>
+      <li><strong>Чёткий боковик</strong> — цена несколько недель колеблется в зоне ±5-10%, не пробивая ни вверх, ни вниз</li>
+      <li><strong>Стабильные альты в диапазоне накопления</strong> — например, ETH часто торгуется в коридорах по 2-4 недели перед движением</li>
+      <li><strong>Высокая волатильность внутри диапазона</strong> — чем больше движений между границами, тем больше срабатываний сетки</li>
+      <li><strong>Стейблкоин-пары</strong> (USDC/USDT, DAI/USDT) — почти идеальный боковик, но крошечная амплитуда → нужны большие плечи</li>
+    </ul>
+
+    <h2>Когда Grid убивает депозит</h2>
+
+    <div class="note red">
+      <p class="note-title">⚠️ Главный враг grid-бота</p>
+      <p style="margin:0">Сильный <strong>трендовый</strong> рынок. Если цена пробивает нижнюю границу диапазона и идёт вниз без возврата — все buy-ордера сетки последовательно срабатывают, набирая позицию против движения. Получается «лестница вниз» — каждый шаг покупки ниже предыдущего, средняя цена опускается, но цена идёт ещё ниже. Без жёсткого SL это сценарий полного слива.</p>
+    </div>
+
+    <p>Классические примеры катастрофы:</p>
+    <ul>
+      <li><strong>LUNA, май 2022</strong>: цена $80 → $0.0001 за 3 дня. Grid-боты на LUNA выкупали каждый шаг вниз. Депозиты обнулились.</li>
+      <li><strong>BTC, март 2020 (ковидный краш)</strong>: $9,000 → $3,800 за неделю. Grid в диапазоне $8,000-$10,000 потерял 60%+ депозита, потому что цена ушла за нижнюю границу с ускорением.</li>
+      <li><strong>Любой альт после взлома проекта</strong> — фундаментал сломан, цена не возвращается.</li>
+    </ul>
+
+    <h2>Параметры grid-бота</h2>
+
+    <table>
+      <tr><th>Параметр</th><th>Что это</th><th>Рекомендация</th></tr>
+      <tr><td><strong>lookback</strong></td><td>Сколько свечей анализируем для определения диапазона</td><td>100 на 1h = ~4 дня</td></tr>
+      <tr><td><strong>gridCount</strong></td><td>Количество уровней в сетке</td><td>10 для широкого боковика, 20 для узкого</td></tr>
+      <tr><td><strong>minRangePct</strong></td><td>Минимальная ширина диапазона в %</td><td>3% — иначе спред съедает прибыль</td></tr>
+      <tr><td><strong>SL</strong></td><td>Стоп на всю позицию при пробое нижней границы</td><td>−5..−7% от средней цены входа</td></tr>
+      <tr><td><strong>Leverage</strong></td><td>Кредитное плечо</td><td>Не более 2-3× — сетка любит схлопываться</td></tr>
+    </table>
+
+    <a href="/bots.html" class="cta">
+      <h3 class="cta-title">Запусти Grid-бота за 2 минуты</h3>
+      <p class="cta-desc">На CHM Finance Grid-стратегия включена в Starter ($29/мес) и выше. Бот сам определяет диапазон, разбивает на сетку, выставляет ордера. Начни в DEMO-режиме без риска.</p>
+      <span class="cta-btn">Создать Grid-бота →</span>
+    </a>
+
+    <h2>Как защитить депозит от пробоя</h2>
+
+    <ol>
+      <li><strong>Жёсткий SL на всю позицию</strong>: если цена ушла за нижнюю границу диапазона на 1-2%, бот закрывает все позиции и ждёт нового диапазона. Без этого правила Grid рано или поздно встретит свой ковид-краш.</li>
+      <li><strong>Trend-filter</strong>: бот не открывает новый цикл, если MA200 на старшем таймфрейме (4h) идёт вниз. Простое правило, спасает от попадания в нисходящий тренд.</li>
+      <li><strong>Только ликвидные пары</strong>: BTC, ETH, SOL, BNB. Никаких альтов с капитализацией &lt; $500M — там фундаментал может сломаться за день.</li>
+      <li><strong>Макс плечо 2-3×</strong>: каждая доливка увеличивает экспозицию. На плече 10× серия из 5 доливок выжигает маржу полностью.</li>
+      <li><strong>Лимит на размер сетки</strong>: total капитал в одной grid-сделке не более 20-30% депозита. Остальное — кеш для ребалансировки.</li>
+    </ol>
+
+    <h2>Grid vs DCA — в чём разница</h2>
+
+    <p>Часто путают, но это разные подходы:</p>
+
+    <table>
+      <tr><th></th><th>Grid</th><th>DCA</th></tr>
+      <tr><td>Логика</td><td>Покупает на дне, продаёт на верхушке шага</td><td>Усредняет позицию на просадке</td></tr>
+      <tr><td>Лучшее время</td><td>Чёткий боковик</td><td>Плавный bull с коррекциями</td></tr>
+      <tr><td>Профит на сделку</td><td>Маленький (один шаг сетки)</td><td>Большой (после возврата к среднему)</td></tr>
+      <tr><td>Активность</td><td>Очень высокая (десятки сделок/день)</td><td>Низкая (1-3 сделки/неделю)</td></tr>
+      <tr><td>Чем убивает</td><td>Сильный тренд (пробой диапазона)</td><td>Long-bear без отскока</td></tr>
+    </table>
+
+    <p>Подробнее о DCA — в отдельной статье <a class="inline" href="/blog/chto-takoe-dca-strategia/">«Что такое DCA стратегия и когда она работает»</a>.</p>
+
+    <h2>Чек-лист перед запуском</h2>
+    <ul>
+      <li>☐ Открой график на 1D — есть ли явный боковик минимум 2 недели?</li>
+      <li>☐ Ширина диапазона ≥ 3% (иначе спред и комиссии съедят профит)</li>
+      <li>☐ MA200 на 4h не идёт круто вниз (нет даун-тренда)</li>
+      <li>☐ Пара ликвидная (BTC/ETH/SOL/BNB), не шиткоин</li>
+      <li>☐ Плечо ≤ 3×</li>
+      <li>☐ Hard SL установлен на −5..−7% от средней позиции</li>
+      <li>☐ Размер позиции ≤ 30% от депозита</li>
+      <li>☐ Прогнал <a class="inline" href="/blog/kak-sdelat-backtest-strategii/">бэктест</a> на последних 30-60 днях, profit factor ≥ 1.3</li>
+      <li>☐ Запустил в paper-режиме на неделю перед live</li>
+    </ul>
+
+    <a href="/subscriptions.html" class="cta">
+      <h3 class="cta-title">Trend-filter и unlimited бэктесты</h3>
+      <p class="cta-desc">На Pro ($79/мес) Grid-бот получает trend-filter для защиты от тренда. На Elite ($149) — мульти-стратегия, можно одновременно Grid + SMC, чтобы первая зарабатывала в боковике, вторая — на пробоях.</p>
+      <span class="cta-btn">Сравнить тарифы →</span>
+    </a>
+
+    <h2>Дальше читай</h2>
+    <ul>
+      <li><a class="inline" href="/blog/chto-takoe-dca-strategia/">DCA стратегия: когда работает и когда убивает</a></li>
+      <li><a class="inline" href="/blog/smc-strategia-kripty/">SMC — Smart Money Concepts для крипты</a></li>
+      <li><a class="inline" href="/blog/kak-nastroit-bota-na-bybit/">Как настроить торгового бота на Bybit</a></li>
+      <li><a class="inline" href="/blog/">Все статьи блога →</a></li>
+    </ul>
+  </main>
+</body>
+</html>
