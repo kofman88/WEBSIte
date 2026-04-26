@@ -179,6 +179,14 @@ async function runCycle() {
       const multi = safeJson(bot.strategies_multi, null);
       if (Array.isArray(multi) && multi.length > 0) {
         strategies = multi.filter((s) => STRATEGIES[s]);
+        // Multi was set but none resolved → bot wouldn't produce signals at
+        // all without a clear log. Surface it instead of silently skipping.
+        if (strategies.length === 0) {
+          logger.warn('multi-strategy contains no valid entries', {
+            botId: bot.id, configured: multi, available: Object.keys(STRATEGIES),
+          });
+          continue;
+        }
       } else if (bot.strategy && STRATEGIES[bot.strategy]) {
         strategies = [bot.strategy];
       } else {

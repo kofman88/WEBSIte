@@ -164,19 +164,11 @@ async function _processLive(trade) {
   // exchange_order_ids, and on any `filled` status → insert trade_fills
   // + possibly adjust SL order via client.editOrder.
   //
-  // For Phase 10 MVP: poll is best-effort; if a TP fired we record it,
-  // but we do NOT edit the on-exchange SL here (that's slVerifier's job).
-  try {
-    const client = exchangeServiceRef.getCcxtClient(null, trade.user_id);
-    // CCXT fetchOrder requires symbol + id. We skip if client.fetchOrder missing.
-    if (!client.fetchOrder) return false;
-    // Stub — returning false to avoid accidentally double-counting without
-    // a proper reconciliation algorithm. Full logic deferred to Phase 14.
-    return false;
-  } catch (err) {
-    logger.debug('live partialTp check failed', { tradeId: trade.id, err: err.message });
-    return false;
-  }
+  // Phase 10 MVP: stub returning false to avoid double-counting before a
+  // proper reconciliation algorithm. Full logic deferred to Phase 14
+  // (TP/SL fill polling against exchange_order_ids). slVerifier handles
+  // SL drift detection in the meantime.
+  return false;
 }
 
 function _recordFill(trade, eventType, price, qty, ts) {
@@ -197,12 +189,20 @@ function _closeTrade(trade, price, reason, ts) {
   const fills = db.prepare(`SELECT pnl FROM trade_fills WHERE trade_id = ? AND event_type != 'entry'`).all(trade.id);
   const totalPnl = fills.reduce((s, f) => s + (Number(f.pnl) || 0), 0);
   const pnlPct = trade.entry_price > 0 ? (totalPnl / (trade.entry_price * trade.quantity)) * 100 : 0;
-  db.prepare(`
+  // Idempotent UPDATE — only the first close-call wins. Without the
+  // status='open' guard, a duplicate tickOpen() (network retry, double
+  // cron, or two scanner cycles racing on the same row before WAL
+  // commit) could re-fire this function and credit paper_equity twice.
+  const info = db.prepare(`
     UPDATE trades
     SET status = 'closed', exit_price = ?, close_reason = ?,
         realized_pnl = ?, realized_pnl_pct = ?, closed_at = ?
-    WHERE id = ?
+    WHERE id = ? AND status = 'open'
   `).run(price, reason, totalPnl, pnlPct, new Date(ts).toISOString(), trade.id);
+  if (info.changes === 0) {
+    // Already closed by an earlier call — skip equity / notification side-effects.
+    return;
+  }
 
   // Update paper equity for the bot
   if (trade.trading_mode === 'paper' && trade.bot_id) {
@@ -233,16 +233,53 @@ function _closeTrade(trade, price, reason, ts) {
       link: '/dashboard.html',
     });
   } catch (_e) {}
+  // Real-time push to the user's open dashboard tabs so the trade
+  // disappears from "open positions" immediately, instead of waiting
+  // up to 30s for the next API poll. Lazy-required to avoid the
+  // websocketService → partialTpManager circular at boot.
+  try {
+    const ws = require('./websocketService');
+    if (ws && ws.broadcastToUser) {
+      ws.broadcastToUser(trade.user_id, {
+        type: 'trade_closed',
+        data: {
+          tradeId: trade.id, botId: trade.bot_id, symbol: trade.symbol,
+          side: trade.side, exitPrice: price, reason,
+          pnl: totalPnl, pnlPct,
+        },
+        ts: Date.now(),
+      });
+    }
+  } catch (_e) { /* ws unavailable — non-fatal */ }
 }
 
 function _finalizeIfExits(trade, remaining) {
   if (remaining > 1e-10) return;
-  const fills = db.prepare(`SELECT pnl FROM trade_fills WHERE trade_id = ? AND event_type != 'entry'`).all(trade.id);
-  const totalPnl = fills.reduce((s, f) => s + (Number(f.pnl) || 0), 0);
+  const fills = db.prepare(`
+    SELECT event_type, price, pnl FROM trade_fills WHERE trade_id = ? AND event_type != 'entry'
+    ORDER BY id DESC LIMIT 1
+  `).all(trade.id);
+  const last = fills[0];
+  const allFills = db.prepare(`SELECT pnl FROM trade_fills WHERE trade_id = ? AND event_type != 'entry'`).all(trade.id);
+  const totalPnl = allFills.reduce((s, f) => s + (Number(f.pnl) || 0), 0);
+  const pnlPct = trade.entry_price > 0 ? (totalPnl / (trade.entry_price * trade.quantity)) * 100 : 0;
+  // Use the last fill's price/event as the trade's official exit_price /
+  // close_reason — without these, analytics queries that filter on
+  // close_reason or exit_price treat the row as half-baked even though
+  // remaining is zero. Only update if we still own status='open' so a
+  // racing _closeTrade doesn't get clobbered.
   db.prepare(`
-    UPDATE trades SET status = 'closed', realized_pnl = ?, closed_at = CURRENT_TIMESTAMP
+    UPDATE trades SET status = 'closed', realized_pnl = ?, realized_pnl_pct = ?,
+                       exit_price = COALESCE(exit_price, ?),
+                       close_reason = COALESCE(close_reason, ?),
+                       closed_at = CURRENT_TIMESTAMP
     WHERE id = ? AND status = 'open'
-  `).run(totalPnl, trade.id);
+  `).run(
+    totalPnl, pnlPct,
+    last ? Number(last.price) : trade.entry_price,
+    last ? last.event_type : 'finalize',
+    trade.id,
+  );
 }
 
 function round(x, d = 8) { if (!Number.isFinite(x)) return x; const p = Math.pow(10, d); return Math.round(x * p) / p; }

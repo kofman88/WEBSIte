@@ -13,6 +13,33 @@ const logger = require('../utils/logger');
 const plans = require('../config/plans');
 
 function insert(sig) {
+  // Geometry sanity — strategies should already enforce this but a buggy
+  // strategy or a malformed TradingView webhook could push a sig where
+  // long has SL above entry or TPs in the wrong direction. Without this
+  // guard, autoTradeService's qty=Math.abs(entry-sl) could collapse to
+  // tiny values or open trades that immediately hit SL.
+  if (Number.isFinite(sig.entry) && Number.isFinite(sig.stopLoss) && sig.stopLoss > 0) {
+    if (sig.side === 'long' && sig.stopLoss >= sig.entry) {
+      logger.warn('signal rejected: long SL >= entry', { symbol: sig.symbol, strategy: sig.strategy, entry: sig.entry, sl: sig.stopLoss });
+      return null;
+    }
+    if (sig.side === 'short' && sig.stopLoss <= sig.entry) {
+      logger.warn('signal rejected: short SL <= entry', { symbol: sig.symbol, strategy: sig.strategy, entry: sig.entry, sl: sig.stopLoss });
+      return null;
+    }
+  }
+  for (const tp of [sig.tp1, sig.tp2, sig.tp3]) {
+    if (!Number.isFinite(tp) || tp <= 0) continue;
+    if (sig.side === 'long' && tp <= sig.entry) {
+      logger.warn('signal rejected: long TP <= entry', { symbol: sig.symbol, strategy: sig.strategy, entry: sig.entry, tp });
+      return null;
+    }
+    if (sig.side === 'short' && tp >= sig.entry) {
+      logger.warn('signal rejected: short TP >= entry', { symbol: sig.symbol, strategy: sig.strategy, entry: sig.entry, tp });
+      return null;
+    }
+  }
+
   const fp = registry.fingerprint({
     exchange: sig.exchange,
     symbol: sig.symbol,

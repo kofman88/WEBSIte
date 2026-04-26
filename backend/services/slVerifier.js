@@ -63,8 +63,24 @@ async function verifyOpenTrades({ clientResolver = defaultClientResolver } = {})
     try {
       const order = await client.fetchOrder(slId, t.symbol);
       const status = order && order.status;
-      // A healthy SL has status 'open' (ccxt normalised) or similar.
-      if (!order || status === 'canceled' || status === 'closed' || status === 'expired' || status === 'rejected') {
+      // CCXT normalises filled stop-orders to status='closed' with
+      // filled > 0. That means the SL fired and the position is closed
+      // on-exchange — completely different from "the SL got cancelled
+      // and the position is naked". The audit log + downstream alerts
+      // need to know the difference.
+      const filled = Number(order && order.filled) || 0;
+      const isFilled = (status === 'closed' && filled > 0);
+      const isMissing = !order || status === 'canceled' || status === 'expired' || status === 'rejected'
+        || (status === 'closed' && filled === 0);
+
+      if (isFilled) {
+        // Position closed by SL on the exchange — record as a
+        // distinct event so analytics can update + the user sees a
+        // proper "SL fired, position closed" notification rather
+        // than a scary "SL missing" alert.
+        _flagMissing(t, 'sl_filled', slId);
+        report.ok++; report.tradeIds.ok.push(t.id);
+      } else if (isMissing) {
         report.missing++; report.tradeIds.missing.push(t.id);
         _flagMissing(t, 'sl_' + (status || 'not_found'), slId);
       } else {

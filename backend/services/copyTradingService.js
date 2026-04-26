@@ -101,15 +101,21 @@ function mirrorLeaderSignal(leaderId, signal) {
         `).run(f.follower_id, 'copy:' + leaderId);
         bot = { id: info.lastInsertRowid };
       }
+      // The trades table uses take_profit_1 / 2 / 3 (multi-tier TP) —
+      // there is no `take_profit` column. The previous INSERT named a
+      // non-existent column, SQLite threw "no such column", and the
+      // outer try/catch silently swallowed the error → copy-trading
+      // looked configured but produced zero mirror trades.
       db.prepare(`
         INSERT INTO trades (user_id, bot_id, exchange, symbol, side, strategy,
-          entry_price, quantity, stop_loss, take_profit, status, trading_mode,
+          entry_price, quantity, stop_loss, take_profit_1, status, trading_mode,
           opened_at, note)
         VALUES (?, ?, 'copy', ?, ?, ?, ?, ?, ?, ?, 'open', 'paper', CURRENT_TIMESTAMP, ?)
       `).run(
         f.follower_id, bot.id, signal.symbol, signal.side, signal.strategy || 'copy',
         signal.entry, f.risk_mult * 0.01,
-        signal.sl || null, signal.tp || null,
+        signal.sl || signal.stopLoss || null,
+        signal.tp || signal.tp1 || null,
         'copy-from-leader-' + leaderId,
       );
       ok += 1;

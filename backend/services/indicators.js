@@ -201,11 +201,28 @@ function stochastic(candles, kPeriod = 14, dPeriod = 3) {
       if (low[i - j] < lo) lo = low[i - j];
     }
     const range = hi - lo;
-    kRaw[i] = range === 0 ? 0 : ((close[i] - lo) / range) * 100;
+    // Flat-market guard: when high==low across the whole window there's
+    // no oscillation to report, so %K is genuinely undefined. Returning 0
+    // would mislead strategies into seeing a permanent "oversold" reading
+    // and emitting false BUY signals on dead/illiquid pairs.
+    kRaw[i] = range === 0 ? NaN : ((close[i] - lo) / range) * 100;
   }
-  // %D = SMA of %K over dPeriod
-  const kForD = kRaw.slice();
-  const dLine = sma(kForD.map((v) => isValidNumber(v) ? v : 0), dPeriod);
+  // %D = SMA of %K over dPeriod. Skip NaN slots (flat-market gaps) by
+  // computing only over valid points so %D stays NaN until enough %K
+  // values exist — instead of being dragged toward 0 by the gaps.
+  const kForD = kRaw.map((v) => (isValidNumber(v) ? v : NaN));
+  const dLine = (function smaSkipNaN(vals, period) {
+    const o = filled(vals.length);
+    for (let i = period - 1; i < vals.length; i++) {
+      let sum = 0; let n = 0;
+      for (let j = 0; j < period; j++) {
+        const v = vals[i - j];
+        if (isValidNumber(v)) { sum += v; n += 1; }
+      }
+      if (n === period) o[i] = sum / period;
+    }
+    return o;
+  })(kForD, dPeriod);
 
   for (let i = 0; i < candles.length; i++) {
     if (isValidNumber(kRaw[i])) out[i].k = kRaw[i];

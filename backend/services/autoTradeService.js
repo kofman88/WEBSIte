@@ -270,10 +270,50 @@ async function _openLive(signal, bot, qty, leverage, { exchangeService }) {
       });
       orderIds.sl = slOrder.id;
     } catch (slErr) {
-      // CRITICAL: couldn't set SL → close entry immediately
+      // CRITICAL: couldn't set SL → close entry immediately. Track every
+      // outcome in audit_log + DB so a naked position is never silent.
       logger.error('SL placement failed — closing entry', { err: slErr.message, botId: bot.id });
-      try { await client.createMarketOrder(symbol, oppositeSide, qty, undefined, { reduceOnly: true }); }
-      catch (_e) { logger.error('emergency close also failed', { err: _e.message }); }
+      let emergencyClosed = false;
+      try {
+        await client.createMarketOrder(symbol, oppositeSide, qty, undefined, { reduceOnly: true });
+        emergencyClosed = true;
+      } catch (e2) {
+        logger.error('emergency close also failed — NAKED POSITION', { err: e2.message, botId: bot.id });
+      }
+      if (!emergencyClosed) {
+        // Naked position on the exchange. Insert a tracking row so
+        // slVerifier + admin dashboard see it and the user gets alerted,
+        // instead of throwing and losing the only record of this trade.
+        try {
+          db.prepare(`
+            INSERT INTO trades
+              (user_id, bot_id, signal_id, exchange, symbol, side, strategy, timeframe,
+               entry_price, quantity, leverage, margin_used,
+               stop_loss, status, trading_mode, exchange_order_ids, note)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'open', 'live', ?, ?)
+          `).run(
+            bot.user_id, bot.id, signal.id || null,
+            bot.exchange, symbol, side,
+            signal.strategy || bot.strategy, bot.timeframe,
+            Number(entryOrder.average || entryOrder.price || signal.entry),
+            qty, leverage, (Number(entryOrder.average || signal.entry) * qty) / Math.max(1, leverage),
+            signal.stopLoss, _json(orderIds),
+            'NAKED_POSITION: SL placement and emergency close both failed — manual intervention required',
+          );
+        } catch (dbErr) {
+          logger.error('failed to insert naked-position tracking row', { err: dbErr.message, botId: bot.id });
+        }
+        // Loud alert to user so they don't discover this from a margin call
+        try {
+          const notifier = require('./notifier');
+          notifier.dispatch(bot.user_id, {
+            type: 'security',
+            title: '🚨 Открытая позиция без SL — закройте вручную',
+            body: `${symbol} ${side.toUpperCase()} qty=${qty}: не удалось поставить SL и закрыть позицию автоматически. Зайдите на ${bot.exchange} и закройте вручную.`,
+            link: '/dashboard.html',
+          });
+        } catch (_n) {}
+      }
       throw slErr;
     }
 
@@ -289,10 +329,48 @@ async function _openLive(signal, bot, qty, leverage, { exchangeService }) {
       }
     }
   } catch (err) {
+    // Differentiate CCXT error classes — without this, every error from
+    // any exchange API just bubbles up the same way and the bot keeps
+    // taking signals against a broken connection. We also need to
+    // pause the bot for 401 / InsufficientFunds so the user gets a
+    // clear "fix your key / top up margin" prompt instead of a silent
+    // stream of failed trades in audit_log.
+    let ccxt = null; try { ccxt = require('ccxt'); } catch (_e) {}
+    let action = 'auto_trade.live.error';
+    let pauseBot = false;
+    let alertTitle = null;
+    if (ccxt && err) {
+      if (ccxt.AuthenticationError && err instanceof ccxt.AuthenticationError) {
+        action = 'auto_trade.live.auth_error'; pauseBot = true;
+        alertTitle = '🔑 Биржа отклонила ключ';
+      } else if (ccxt.InsufficientFunds && err instanceof ccxt.InsufficientFunds) {
+        action = 'auto_trade.live.insufficient_funds'; pauseBot = true;
+        alertTitle = '💸 Недостаточно маржи на бирже';
+      } else if (ccxt.RateLimitExceeded && err instanceof ccxt.RateLimitExceeded) {
+        action = 'auto_trade.live.rate_limited';
+      } else if (ccxt.InvalidOrder && err instanceof ccxt.InvalidOrder) {
+        action = 'auto_trade.live.invalid_order';
+        alertTitle = '⚠️ Биржа отклонила параметры ордера';
+      }
+    }
     db.prepare(`
       INSERT INTO audit_log (user_id, action, entity_type, metadata)
-      VALUES (?, 'auto_trade.live.error', 'bot', ?)
-    `).run(bot.user_id, _json({ botId: bot.id, err: err.message, orderIds }));
+      VALUES (?, ?, 'bot', ?)
+    `).run(bot.user_id, action, _json({ botId: bot.id, err: err.message, orderIds }));
+    // Pause the bot for fatal-class errors so we don't fire 100 more
+    // identical-failing requests against the exchange in the next minute.
+    if (pauseBot) {
+      try {
+        db.prepare('UPDATE trading_bots SET is_active = 0 WHERE id = ?').run(bot.id);
+        const notifier = require('./notifier');
+        notifier.dispatch(bot.user_id, {
+          type: 'security',
+          title: alertTitle || '⚠️ Бот остановлен',
+          body: `Бот «${bot.name}» автоматически остановлен: ${err.message}. Зайдите в Settings и проверьте API-ключ / баланс на бирже.`,
+          link: '/settings.html',
+        });
+      } catch (_e) { /* best-effort */ }
+    }
     throw err;
   }
 
