@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="ru" class="aura-page">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+  <title>Как не слить депозит на крипто-ботах: 10 правил выживания — CHM Finance</title>
+  <meta name="description" content="10 правил выживания для трейдера на крипто-ботах: правило 1% риска, плечо ≤ 5×, hard SL, бэктест, paper-режим. Реальные кейсы слива и как их избежать. Чек-лист перед live."/>
+  <meta name="keywords" content="как не слить депозит на ботах, ошибки крипто бота, риск менеджмент крипта, как сохранить депозит трейдинг, правило 1 процента"/>
+  <meta name="robots" content="index,follow,max-image-preview:large"/>
+  <meta name="theme-color" content="#0A0A0A"/>
+  <link rel="canonical" href="https://chmup.top/blog/kak-ne-slit-depozit-na-botah/"/>
+  <meta property="og:type" content="article"/>
+  <meta property="og:site_name" content="CHM Finance"/>
+  <meta property="og:title" content="Как не слить депозит на крипто-ботах"/>
+  <meta property="og:description" content="10 правил выживания. Реальные кейсы слива. Чек-лист перед live."/>
+  <meta property="og:url" content="https://chmup.top/blog/kak-ne-slit-depozit-na-botah/"/>
+  <meta property="og:image" content="https://chmup.top/og-cover.png"/>
+  <meta property="og:locale" content="ru_RU"/>
+  <meta property="article:published_time" content="2026-04-26"/>
+  <meta property="article:author" content="CHM Finance"/>
+  <meta name="twitter:card" content="summary_large_image"/>
+  <meta name="twitter:title" content="Как не слить депозит на крипто-ботах"/>
+  <meta name="twitter:image" content="https://chmup.top/og-cover.png"/>
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg"/>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet"/>
+
+  <script type="application/ld+json">
+  {"@context":"https://schema.org","@type":"Article",
+    "headline":"Как не слить депозит на крипто-ботах: 10 правил выживания",
+    "description":"Главные правила риск-менеджмента для трейдера на крипто-ботах с разбором реальных кейсов слива.",
+    "author":{"@type":"Organization","name":"CHM Finance"},
+    "publisher":{"@type":"Organization","name":"CHM Finance","logo":{"@type":"ImageObject","url":"https://chmup.top/logo.png"}},
+    "datePublished":"2026-04-26","dateModified":"2026-04-26",
+    "mainEntityOfPage":{"@type":"WebPage","@id":"https://chmup.top/blog/kak-ne-slit-depozit-na-botah/"},
+    "image":"https://chmup.top/og-cover.png","inLanguage":"ru-RU"}
+  </script>
+  <script type="application/ld+json">
+  {"@context":"https://schema.org","@type":"BreadcrumbList",
+    "itemListElement":[
+      {"@type":"ListItem","position":1,"name":"Главная","item":"https://chmup.top/"},
+      {"@type":"ListItem","position":2,"name":"Блог","item":"https://chmup.top/blog/"},
+      {"@type":"ListItem","position":3,"name":"Как не слить депозит","item":"https://chmup.top/blog/kak-ne-slit-depozit-na-botah/"}
+    ]}
+  </script>
+
+  <style>
+    body{background:#0A0A0A;color:#E5E5E5;font-family:'Inter',sans-serif;margin:0;line-height:1.7}
+    .container{max-width:720px;margin:0 auto;padding:60px 24px}
+    nav{padding:20px 24px;border-bottom:1px solid rgba(255,255,255,.06)}
+    nav a{color:rgba(255,255,255,.7);text-decoration:none;font-weight:500;font-size:14px;margin-right:20px}
+    .brand{font-weight:700;font-size:18px;letter-spacing:-.02em;color:#fff}
+    .brand span{color:#FF5A1F}
+    .breadcrumb{font-size:12px;color:rgba(255,255,255,.4);margin-bottom:16px}
+    .breadcrumb a{color:rgba(255,255,255,.55);text-decoration:none}
+    h1{font-size:clamp(28px,4.5vw,40px);font-weight:700;letter-spacing:-.025em;margin:0 0 16px;line-height:1.15}
+    .meta{color:rgba(255,255,255,.45);font-size:13px;margin-bottom:40px;display:flex;gap:16px;flex-wrap:wrap}
+    .meta span::after{content:'·';margin-left:16px;opacity:.5}
+    .meta span:last-child::after{content:''}
+    .lead{font-size:18px;color:rgba(255,255,255,.85);margin-bottom:32px;line-height:1.6}
+    h2{font-size:22px;font-weight:600;letter-spacing:-.015em;margin:44px 0 14px;color:#fff;display:flex;align-items:baseline;gap:12px}
+    h2 .num{font-family:'JetBrains Mono',monospace;color:#FF5A1F;font-weight:700;font-size:18px;flex-shrink:0}
+    h3{font-size:18px;font-weight:600;margin:28px 0 12px;color:#fff}
+    p{color:rgba(255,255,255,.78);margin:0 0 16px;font-size:16px}
+    ul,ol{color:rgba(255,255,255,.78);padding-left:24px;margin:0 0 20px}
+    li{margin-bottom:8px}
+    code{background:rgba(255,90,31,.12);color:#FF8C5A;padding:2px 6px;border-radius:4px;font-family:'JetBrains Mono',monospace;font-size:13px}
+    .note{padding:16px 20px;border-radius:12px;background:rgba(255,90,31,.08);border:1px solid rgba(255,90,31,.2);margin:24px 0}
+    .note.red{background:rgba(239,68,68,.08);border-color:rgba(239,68,68,.25)}
+    .note.red .note-title{color:#fca5a5}
+    .note.green{background:rgba(34,197,94,.08);border-color:rgba(74,222,128,.25)}
+    .note.green .note-title{color:#86efac}
+    .note-title{font-weight:600;color:#FF8C5A;font-size:13px;text-transform:uppercase;letter-spacing:.1em;margin:0 0 8px}
+    .cta{display:block;padding:24px;border-radius:16px;background:linear-gradient(135deg,rgba(255,140,90,.12),rgba(255,90,31,.06));border:1px solid rgba(255,140,90,.3);text-decoration:none;color:inherit;margin:40px 0}
+    .cta-title{font-weight:600;color:#fff;margin:0 0 6px;font-size:17px}
+    .cta-desc{color:rgba(255,255,255,.7);font-size:14px;margin:0}
+    .cta-btn{display:inline-block;margin-top:12px;padding:8px 16px;background:linear-gradient(180deg,#FF8C5A,#FF5A1F);color:#fff;border-radius:999px;font-size:13px;font-weight:600}
+    a.inline{color:#FF8C5A;text-decoration:none}
+    a.inline:hover{text-decoration:underline}
+    table{width:100%;border-collapse:collapse;margin:20px 0;font-size:14px}
+    th,td{padding:10px 12px;text-align:left;border-bottom:1px solid rgba(255,255,255,.08)}
+    th{color:rgba(255,255,255,.5);font-size:11px;text-transform:uppercase;letter-spacing:.1em;font-weight:500}
+    td{color:rgba(255,255,255,.85)}
+    td.mono{font-family:'JetBrains Mono',monospace;font-variant-numeric:tabular-nums}
+  </style>
+</head>
+<body>
+  <nav>
+    <div style="max-width:960px;margin:0 auto;display:flex;justify-content:space-between;align-items:center">
+      <a href="/" class="brand">CHM<span>.</span></a>
+      <div><a href="/">Главная</a><a href="/subscriptions.html">Тарифы</a><a href="/blog/">Блог</a></div>
+    </div>
+  </nav>
+
+  <main class="container">
+    <div class="breadcrumb"><a href="/">Главная</a> / <a href="/blog/">Блог</a> / Как не слить депозит</div>
+
+    <h1>Как не слить депозит на крипто-ботах: 10 правил выживания</h1>
+    <div class="meta"><span>Риск-менеджмент</span><span>13 мин чтения</span><span>26 апреля 2026</span></div>
+
+    <p class="lead">90% трейдеров сливают депозит за первые 6 месяцев. Боты не меняют этой статистики, если ты не понимаешь риск. В этом гайде — 10 правил, которые соблюдают выжившие профи. Никакой эзотерики, только то, что отделяет долгий профит от быстрой нулёвки.</p>
+
+    <h2><span class="num">1.</span>Правило 1% на сделку</h2>
+
+    <p>Никогда не рискуй больше 1% депозита в одной сделке. Это не «1% от позиции», это «потеряю 1% от всего, если SL сработает». Для депозита $10,000 максимальный убыток на сделку = $100.</p>
+
+    <p>Математика жестокая:</p>
+
+    <table>
+      <tr><th>Серия лоссов</th><th>Депозит при 1% риске</th><th>Депозит при 5% риске</th></tr>
+      <tr><td>5 подряд</td><td class="mono">$9,510 (−4.9%)</td><td class="mono">$7,738 (−22.6%)</td></tr>
+      <tr><td>10 подряд</td><td class="mono">$9,044 (−9.6%)</td><td class="mono">$5,987 (−40.1%)</td></tr>
+      <tr><td>20 подряд</td><td class="mono">$8,179 (−18.2%)</td><td class="mono">$3,585 (−64.2%)</td></tr>
+    </table>
+
+    <p>Серия из 10-15 лоссов подряд — статистически нормальное явление, даже у хорошей стратегии. При 5% риске такая серия выбьет тебя психологически. При 1% — даже не заметишь.</p>
+
+    <h2><span class="num">2.</span>Плечо ≤ 5× для новичков, 10× — потолок</h2>
+
+    <p>Кредитное плечо удваивает / утраивает потенциал, но в обе стороны. Большинство «слил всё» истории — это плечо 25-100×, которое одно неудачное движение в 1-3% превращает в ликвидацию.</p>
+
+    <div class="note red">
+      <p class="note-title">⚠️ Ликвидация при плече</p>
+      <p style="margin:0">При плече 100× движение цены против тебя на 1% = полная ликвидация позиции (вся маржа сгорает). При плече 10× — нужно 10% движения. При 3× — 33%. Чем меньше плечо, тем больше пространства для ошибки.</p>
+    </div>
+
+    <p>Совет: до первой прибыли в $1,000+ live торгуй на плече ≤ 3×. Это не про доходность, это про выживание.</p>
+
+    <h2><span class="num">3.</span>Stop-loss — обязательно, всегда, на каждой сделке</h2>
+
+    <p>Самая частая ошибка: «выйду когда вернётся». Цена не возвращается. Она идёт ещё ниже. И ещё. И ещё. Пока маржа не закончится.</p>
+
+    <p>SL — единственная защита от психологического захода в позу «надежда». Поставь его сразу при открытии сделки. Не двигай SL дальше от цены, только ближе (trailing). Если хочешь дать сделке больше пространства — лучше уменьши размер позиции, не двигай стоп.</p>
+
+    <h2><span class="num">4.</span>Бэктест на минимум 6 месяцев перед live</h2>
+
+    <p>Стратегия которая давала +30% за последний месяц на бычьем рынке может слить −50% за месяц медвежки. Бэктест должен покрывать <strong>разные режимы рынка</strong>: bull, bear, флэт. Минимум 6 месяцев истории, оптимально — год.</p>
+
+    <p>Что смотреть в результатах:</p>
+    <ul>
+      <li><strong>Sharpe ratio</strong> ≥ 1.0 — <a class="inline" href="/blog/chto-takoe-sharpe-ratio/">подробнее о Sharpe</a></li>
+      <li><strong>Max Drawdown</strong> ≤ 20% — иначе психологически не выдержишь</li>
+      <li><strong>Profit Factor</strong> ≥ 1.3 — соотношение прибыльных к убыточным</li>
+      <li><strong>Win rate</strong> адекватен R:R: 50%+ для R:R 1:1, 35%+ для 1:2</li>
+    </ul>
+
+    <p>Подробный гайд по правильному бэктесту: <a class="inline" href="/blog/kak-sdelat-backtest-strategii/">«Как сделать бэктест стратегии правильно»</a>.</p>
+
+    <a href="/bots.html" class="cta">
+      <h3 class="cta-title">Бэктест за 30 секунд</h3>
+      <p class="cta-desc">CHM Finance прогоняет стратегию на 60-365 днях истории Bybit/Binance, выдаёт 15+ метрик включая Sharpe, MaxDD, Profit Factor. Без оплаты — на Free-плане.</p>
+      <span class="cta-btn">Запустить бэктест →</span>
+    </a>
+
+    <h2><span class="num">5.</span>Минимум 2 недели в paper-режиме до live</h2>
+
+    <p>Paper-режим (он же DEMO) — бот торгует на виртуальных деньгах по реальным ценам. Бэктест показывает «как было бы на истории». Paper показывает «как сейчас». Разница огромная: проскальзывание, спреды, латентность сигнала, эмоции от наблюдения за живой ценой.</p>
+
+    <p>Если paper-результат отличается от бэктеста более чем на 20% — стратегия нестабильна, не катись в live.</p>
+
+    <h2><span class="num">6.</span>Не более 3 ботов одновременно на старте</h2>
+
+    <p>Соблазн: создать 10 ботов на разных парах, авось один даст профит. Реальность: 10 ботов на одной фазе рынка часто двигаются синхронно (крипта коррелирована на ~0.8). Если одна сделка лосс — 10 сделок лоссы.</p>
+
+    <p>Начинай с 1-3 ботов на разных стратегиях:</p>
+    <ul>
+      <li>1 trend-following (<a class="inline" href="/blog/smc-strategia-kripty/">SMC</a> или Levels)</li>
+      <li>1 mean-reversion (<a class="inline" href="/blog/grid-bot-dlya-kripty/">Grid</a> или DCA)</li>
+      <li>1 для понимания механики</li>
+    </ul>
+
+    <p>Когда поймёшь как работает каждая — расширяйся постепенно.</p>
+
+    <h2><span class="num">7.</span>Circuit breaker на дневной убыток</h2>
+
+    <p>Установи правило: если за день убыток превысил X% депозита (обычно 5-10%) — все боты автоматически на паузу до следующего дня. Это спасает от «лосс ⇒ месть-торговля ⇒ ещё больший лосс» — самой опасной психологической ловушки.</p>
+
+    <p>На CHM Finance circuit breaker встроен и работает по умолчанию: при просадке −10% за 24 часа боты ставятся на паузу автоматически.</p>
+
+    <h2><span class="num">8.</span>Защити API-ключи</h2>
+
+    <p>Самые катастрофические сливы — не от плохой стратегии, а от компрометации ключа.</p>
+
+    <div class="note red">
+      <p class="note-title">⚠️ Правила безопасности ключей</p>
+      <ul style="margin:8px 0 0">
+        <li><strong>Withdraw permission — НИКОГДА</strong>. Только Trade.</li>
+        <li><strong>IP whitelist</strong> — если есть статичный IP, добавь его</li>
+        <li><strong>Не используй ключ на нескольких платформах</strong> — каждая своя</li>
+        <li><strong>Ротируй раз в 3 месяца</strong> — старые ключи могут утечь через bugs / phishing</li>
+        <li><strong>2FA на бирже</strong> — обязательно</li>
+        <li><strong>Не делись ключом ни с кем</strong> — даже «я тебе настрою бота за 50%». Это всегда мошенник.</li>
+      </ul>
+    </div>
+
+    <h2><span class="num">9.</span>Не торгуй то, что не понимаешь</h2>
+
+    <p>Если ты не можешь объяснить за 30 секунд:</p>
+    <ul>
+      <li>Что делает твой бот при бычьем рынке</li>
+      <li>Что при медвежьем</li>
+      <li>Что при флэте</li>
+      <li>Какой максимальный убыток за день возможен</li>
+    </ul>
+    <p>...то ты не торгуешь — ты гадаешь. Изучи стратегию (<a class="inline" href="/blog/smc-strategia-kripty/">SMC</a>, <a class="inline" href="/blog/chto-takoe-dca-strategia/">DCA</a>, <a class="inline" href="/blog/grid-bot-dlya-kripty/">Grid</a>) до запуска.</p>
+
+    <h2><span class="num">10.</span>Снимай прибыль регулярно</h2>
+
+    <p>Самая обидная история: бот заработал 200% за 6 месяцев, потом за 1 неделю слил 80%. Если бы 50% профита было выведено — потеря не была бы катастрофой.</p>
+
+    <p>Правило 50/50: каждый месяц выводи половину прибыли. Депозит остаётся компаундиться, кэш на руках копится. Через год у тебя реальные деньги, а не циферки на бирже.</p>
+
+    <div class="note green">
+      <p class="note-title">✓ Если соблюдаешь 10 правил</p>
+      <p style="margin:0">Шанс «слить всё за 6 месяцев» падает с 90% до ~20%. Это не гарантия, но это разница между «ещё одна потерянная сумма» и «10-15% годовых стабильно». В крипте 10-15% годовых при низком риске — отличный результат.</p>
+    </div>
+
+    <h2>Чек-лист для каждого нового бота</h2>
+    <ul>
+      <li>☐ Стратегия выбрана осознанно, я знаю как она работает</li>
+      <li>☐ Риск на сделку = 1% депозита</li>
+      <li>☐ Плечо ≤ 5× (3× для новичка)</li>
+      <li>☐ Hard SL установлен, не «плавает» дальше от цены</li>
+      <li>☐ Бэктест ≥ 6 месяцев, Sharpe ≥ 1.0, MaxDD ≤ 20%</li>
+      <li>☐ Paper-режим минимум 14 дней с результатом ±15% от бэктеста</li>
+      <li>☐ Только 1-3 бота одновременно</li>
+      <li>☐ Circuit breaker на −10% дневной включён</li>
+      <li>☐ API-ключ без Withdraw, 2FA включена на бирже</li>
+      <li>☐ План вывода прибыли (50% каждый месяц)</li>
+    </ul>
+
+    <a href="/subscriptions.html" class="cta">
+      <h3 class="cta-title">Защищённая среда для старта</h3>
+      <p class="cta-desc">Free-план CHM Finance — 1 бот в DEMO-режиме, бэктесты, Levels стратегия. Без риска. Когда поймёшь механику — переходи на Pro для live-торговли.</p>
+      <span class="cta-btn">Начать бесплатно →</span>
+    </a>
+
+    <h2>Дальше читай</h2>
+    <ul>
+      <li><a class="inline" href="/blog/kak-sdelat-backtest-strategii/">Как сделать бэктест стратегии правильно</a></li>
+      <li><a class="inline" href="/blog/chto-takoe-sharpe-ratio/">Sharpe ratio — как интерпретировать</a></li>
+      <li><a class="inline" href="/blog/kak-nastroit-bota-na-bybit/">Как настроить бота на Bybit</a></li>
+      <li><a class="inline" href="/blog/">Все статьи блога →</a></li>
+    </ul>
+  </main>
+</body>
+</html>
