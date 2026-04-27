@@ -236,7 +236,7 @@ app.get('/api/health/deep', (_req, res) => {
     out.status = 'degraded'; out.subsystems.database = { ok: false, error: e.message };
   }
   out.subsystems.scanner = { ok: scannerWorker !== null || IS_TEST };
-  out.subsystems.partialTp = { ok: partialTpTimer !== null || IS_TEST };
+  out.subsystems.partialTp = { ok: partialTpWorker !== null || partialTpTimer !== null || IS_TEST };
   out.subsystems.slVerifier = { ok: true };
   // Migration version — proves all schema changes applied at boot.
   try {
@@ -465,24 +465,56 @@ function shutdown(sig) {
     // Clear all timers so the event loop drains and process can exit cleanly.
     // Without these, graceful shutdown hangs until process.exit() force-kills.
     if (partialTpTimer) { clearInterval(partialTpTimer); partialTpTimer = null; }
+    try { await stopPartialTpWorker(); } catch (_e) { /* */ }
     try { websocketService.shutdown(); } catch (e) { /* */ }
     try { db.close(); } catch (e) { /* */ }
     process.exit(0);
   };
 }
 
-// Init partialTpManager with service refs
-partialTpManager.init({ marketData: marketDataService, exchangeService });
+// partialTpManager runs in its own worker_thread so its tickOpen
+// loop (DB writes + candle fetches per open trade) doesn't pin the
+// main event loop on accounts with many concurrent positions. The
+// worker forwards trade_closed events back here for WebSocket
+// broadcast — the parent process owns the WS clients.
+let partialTpWorker = null;
+let partialTpTimer = null; // legacy cron handle, kept null when worker mode is active
+function startPartialTpWorker() {
+  if (IS_TEST || process.env.PARTIAL_TP_DISABLED === '1') return;
+  if (partialTpWorker) return;
+  try {
+    partialTpWorker = new Worker(path.join(__dirname, 'workers', 'partialTpWorker.js'), {
+      env: process.env,
+    });
+    partialTpWorker.on('message', (msg) => {
+      if (!msg || !msg.type) return;
+      if (msg.type === 'trade_closed' && msg.userId) {
+        try {
+          websocketService.broadcastToUser(msg.userId, {
+            type: msg.type, data: msg.data, ts: msg.ts,
+          });
+        } catch (_e) { /* */ }
+      } else if (msg.type === 'tick' && msg.closed > 0) {
+        logger.debug('partialTp tick', { closed: msg.closed, processed: msg.processed });
+      }
+    });
+    partialTpWorker.on('error', (err) => logger.error('partialTp worker error', { err: err.message }));
+    partialTpWorker.on('exit', (code) => {
+      logger.warn('partialTp worker exited', { code });
+      partialTpWorker = null;
+    });
+    logger.info('partialTp worker started');
+  } catch (err) {
+    logger.error('failed to start partialTp worker', { err: err.message });
+  }
+}
 
-// Cron: every 60s process open trades (paper TP/SL simulation)
-let partialTpTimer = null;
-function startPartialTpCron() {
-  if (partialTpTimer) return;
-  partialTpTimer = setInterval(() => {
-    partialTpManager.tickOpen()
-      .then((r) => { if (r.closed > 0) logger.debug('partialTp tick', r); })
-      .catch((err) => logger.warn('partialTp tick error', { err: err.message }));
-  }, 60_000);
+async function stopPartialTpWorker() {
+  if (!partialTpWorker) return;
+  try { partialTpWorker.postMessage({ type: 'stop' }); } catch (_e) { /* */ }
+  await new Promise((r) => setTimeout(r, 1500));
+  try { partialTpWorker.terminate(); } catch (_e) { /* */ }
+  partialTpWorker = null;
 }
 
 if (IS_TEST) {
@@ -490,7 +522,7 @@ if (IS_TEST) {
 } else if (typeof(PhusionPassenger) !== 'undefined') {
   app.listen('passenger', () => logger.info('CHM Finance running via Passenger'));
   startScannerWorker();
-  startPartialTpCron();
+  startPartialTpWorker();
   cryptoMonitor.start();
   slVerifier.start();
   maintenanceService.start();
@@ -501,7 +533,7 @@ if (IS_TEST) {
   websocketService.init({ server });
   server.listen(PORT, () => logger.info('CHM Finance running on port ' + PORT));
   startScannerWorker();
-  startPartialTpCron();
+  startPartialTpWorker();
   cryptoMonitor.start();
   slVerifier.start();
   maintenanceService.start();

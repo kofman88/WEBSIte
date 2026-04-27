@@ -257,4 +257,77 @@ function defaultConfig(strategy) {
   return out;
 }
 
-module.exports = { SCHEMAS, listStrategies, getSchema, defaultConfig };
+// Validate a user-supplied strategy config against the strategy's schema.
+// Returns a sanitised object (only known keys, coerced to declared type,
+// clamped to declared min/max). Throws { code: 'VALIDATION_ERROR', issues }
+// with concrete paths so the bot wizard can highlight bad fields.
+//
+// Without this, a frontend bug or malicious actor could send
+// strategyConfig: { minConfirmations: 'abc' } / { lookback: 999999 } and
+// scanner would NaN out or memory-spike on first run. Used by createBot
+// and updateBot before INSERT/UPDATE.
+function validateConfig(strategy, config) {
+  const schema = SCHEMAS[strategy];
+  if (!schema) {
+    const e = new Error('Unknown strategy: ' + strategy);
+    e.code = 'VALIDATION_ERROR';
+    e.issues = [{ path: 'strategy', message: 'Unknown strategy: ' + strategy }];
+    throw e;
+  }
+  if (!config || typeof config !== 'object' || Array.isArray(config)) return {};
+
+  const allowed = new Map();
+  for (const g of schema.groups) for (const f of g.fields) allowed.set(f.key, f);
+
+  const issues = [];
+  const out = {};
+  for (const [key, raw] of Object.entries(config)) {
+    const f = allowed.get(key);
+    if (!f) continue; // silently drop unknown — matches Zod's default object stripping
+
+    if (f.type === 'int' || f.type === 'float') {
+      const n = Number(raw);
+      if (!Number.isFinite(n)) {
+        issues.push({ path: `strategyConfig.${key}`, message: `${key} must be a number, got ${typeof raw}` });
+        continue;
+      }
+      if (f.type === 'int' && !Number.isInteger(n)) {
+        issues.push({ path: `strategyConfig.${key}`, message: `${key} must be an integer` });
+        continue;
+      }
+      if (typeof f.min === 'number' && n < f.min) {
+        issues.push({ path: `strategyConfig.${key}`, message: `${key} must be >= ${f.min}` });
+        continue;
+      }
+      if (typeof f.max === 'number' && n > f.max) {
+        issues.push({ path: `strategyConfig.${key}`, message: `${key} must be <= ${f.max}` });
+        continue;
+      }
+      out[key] = n;
+    } else if (f.type === 'bool' || f.type === 'boolean') {
+      out[key] = Boolean(raw);
+    } else if (f.type === 'choice' || f.type === 'select') {
+      const opts = Array.isArray(f.options) ? f.options.map((o) => (typeof o === 'object' ? o.value : o)) : null;
+      if (opts && !opts.includes(raw)) {
+        issues.push({ path: `strategyConfig.${key}`, message: `${key} must be one of: ${opts.join(', ')}` });
+        continue;
+      }
+      out[key] = raw;
+    } else {
+      // Unknown field type — accept as-is to avoid blocking strategies
+      // that haven't been schema-typed yet.
+      out[key] = raw;
+    }
+  }
+
+  if (issues.length) {
+    const e = new Error('Strategy config validation failed');
+    e.statusCode = 400;
+    e.code = 'VALIDATION_ERROR';
+    e.issues = issues;
+    throw e;
+  }
+  return out;
+}
+
+module.exports = { SCHEMAS, listStrategies, getSchema, defaultConfig, validateConfig };

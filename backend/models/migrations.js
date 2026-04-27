@@ -173,6 +173,39 @@ const MIGRATIONS = [
       `);
     },
   },
+  {
+    version: 8,
+    name: 'impersonation_tokens',
+    up(db) {
+      // Per-token revocation registry for admin impersonation.
+      // JWT itself is stateless (signed, can't be cancelled), so we
+      // gate it server-side: every issued impersonation token gets a
+      // unique jti, stored here. authMiddleware joins on jti and
+      // rejects if revoked_at is set or the row is missing entirely.
+      // This lets an admin be cut off mid-session — required for
+      // support workflows where compromise is detected or the admin
+      // is demoted while logged in elsewhere.
+      db.exec(`
+        CREATE TABLE IF NOT EXISTS impersonation_tokens (
+          jti          TEXT PRIMARY KEY,
+          admin_id     INTEGER NOT NULL,
+          target_id    INTEGER NOT NULL,
+          reason       TEXT,
+          ip_address   TEXT,
+          user_agent   TEXT,
+          issued_at    DATETIME DEFAULT CURRENT_TIMESTAMP,
+          expires_at   DATETIME NOT NULL,
+          revoked_at   DATETIME,
+          revoked_by   INTEGER,
+          FOREIGN KEY (admin_id)  REFERENCES users(id) ON DELETE CASCADE,
+          FOREIGN KEY (target_id) REFERENCES users(id) ON DELETE CASCADE
+        );
+        CREATE INDEX IF NOT EXISTS idx_imp_admin ON impersonation_tokens(admin_id, revoked_at);
+        CREATE INDEX IF NOT EXISTS idx_imp_target ON impersonation_tokens(target_id, revoked_at);
+        CREATE INDEX IF NOT EXISTS idx_imp_expiry ON impersonation_tokens(expires_at);
+      `);
+    },
+  },
 ];
 
 function ensureTable(db) {

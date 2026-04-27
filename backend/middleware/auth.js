@@ -37,7 +37,25 @@ function authMiddleware(req, res, next) {
     // impersonate, decoded.imp holds the original admin id. The target
     // user is still used for authz (req.userId = target.id), but any
     // audited action can log who was actually behind the keyboard.
-    if (decoded.imp) req.impersonatedBy = Number(decoded.imp);
+    if (decoded.imp) {
+      // Verify the token hasn't been revoked. Tokens issued before the
+      // jti migration won't have decoded.jti — accept them so we don't
+      // break existing in-flight impersonation sessions on deploy. New
+      // tokens always carry jti and MUST resolve to an active row.
+      if (decoded.jti) {
+        const imp = db.prepare(`
+          SELECT revoked_at FROM impersonation_tokens
+          WHERE jti = ?
+        `).get(decoded.jti);
+        if (!imp) {
+          return res.status(401).json({ error: 'Impersonation token not registered', code: 'IMP_NOT_FOUND' });
+        }
+        if (imp.revoked_at) {
+          return res.status(401).json({ error: 'Impersonation token revoked', code: 'IMP_REVOKED' });
+        }
+      }
+      req.impersonatedBy = Number(decoded.imp);
+    }
     next();
   } catch (err) {
     const code = err.name === 'TokenExpiredError' ? 'TOKEN_EXPIRED' : 'INVALID_TOKEN';

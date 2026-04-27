@@ -261,16 +261,72 @@ router.post('/users/:id/impersonate', requireCapability('impersonate'), (req, re
     const target = db.prepare(`SELECT id, email, is_active FROM users WHERE id = ?`).get(id);
     if (!target)           return res.status(404).json({ error: 'User not found' });
     if (target.is_admin)   return res.status(403).json({ error: 'Cannot impersonate another admin' });
+    // jti = unique token id stored in impersonation_tokens for revocation.
+    // Without it, a compromised/leaked impersonation JWT stays valid for
+    // its full 30 minutes even after the admin logs out or gets demoted.
+    const jti = require('crypto').randomBytes(16).toString('base64url');
+    const expiresInSec = 30 * 60;
+    const expiresAt = new Date(Date.now() + expiresInSec * 1000).toISOString();
+    db.prepare(`
+      INSERT INTO impersonation_tokens (jti, admin_id, target_id, reason, ip_address, user_agent, expires_at)
+      VALUES (?, ?, ?, ?, ?, ?, ?)
+    `).run(jti, req.userId, target.id, body.reason, req.ip, req.get('user-agent'), expiresAt);
     const token = jwt.sign(
-      { uid: target.id, imp: req.userId },
+      { uid: target.id, imp: req.userId, jti },
       config.jwtSecret,
-      { expiresIn: '30m', algorithm: 'HS256' },
+      { expiresIn: expiresInSec, algorithm: 'HS256' },
     );
     db.prepare(`
       INSERT INTO audit_log (user_id, action, entity_type, entity_id, metadata, ip_address, user_agent)
       VALUES (?, 'admin.user.impersonate', 'user', ?, ?, ?, ?)
-    `).run(req.userId, target.id, JSON.stringify({ reason: body.reason }), req.ip, req.get('user-agent'));
-    res.json({ accessToken: token, expiresIn: 1800, targetEmail: target.email, reason: body.reason });
+    `).run(req.userId, target.id, JSON.stringify({ reason: body.reason, jti }), req.ip, req.get('user-agent'));
+    res.json({ accessToken: token, expiresIn: expiresInSec, targetEmail: target.email, reason: body.reason, jti });
+  } catch (err) { handleErr(err, res, next); }
+});
+
+// List active impersonation sessions for the admin dashboard.
+router.get('/impersonations', requireCapability('impersonate'), (req, res, next) => {
+  try {
+    const q = z.object({
+      active: z.coerce.boolean().default(true),
+      limit: z.coerce.number().int().min(1).max(200).default(50),
+    }).parse(req.query);
+    const db = require('../models/database');
+    const where = q.active
+      ? "revoked_at IS NULL AND expires_at > CURRENT_TIMESTAMP"
+      : "1=1";
+    const rows = db.prepare(`
+      SELECT it.jti, it.admin_id, it.target_id, it.reason, it.ip_address,
+             it.issued_at, it.expires_at, it.revoked_at, it.revoked_by,
+             a.email as admin_email, t.email as target_email
+      FROM impersonation_tokens it
+      LEFT JOIN users a ON a.id = it.admin_id
+      LEFT JOIN users t ON t.id = it.target_id
+      WHERE ${where}
+      ORDER BY it.issued_at DESC
+      LIMIT ?
+    `).all(q.limit);
+    res.json({ sessions: rows });
+  } catch (err) { handleErr(err, res, next); }
+});
+
+// Revoke a specific impersonation token immediately.
+router.post('/impersonations/:jti/revoke', requireCapability('impersonate'), (req, res, next) => {
+  try {
+    const jti = z.string().min(8).max(64).parse(req.params.jti);
+    const db = require('../models/database');
+    const info = db.prepare(`
+      UPDATE impersonation_tokens SET revoked_at = CURRENT_TIMESTAMP, revoked_by = ?
+      WHERE jti = ? AND revoked_at IS NULL
+    `).run(req.userId, jti);
+    if (info.changes === 0) {
+      return res.status(404).json({ error: 'Token not found or already revoked' });
+    }
+    db.prepare(`
+      INSERT INTO audit_log (user_id, action, entity_type, entity_id, metadata)
+      VALUES (?, 'admin.impersonation.revoke', 'impersonation', NULL, ?)
+    `).run(req.userId, JSON.stringify({ jti }));
+    res.json({ revoked: true, jti });
   } catch (err) { handleErr(err, res, next); }
 });
 

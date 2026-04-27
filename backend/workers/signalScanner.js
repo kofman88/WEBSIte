@@ -227,7 +227,16 @@ async function runCycle() {
         }
       }
 
-      db.prepare('UPDATE trading_bots SET last_run_at = CURRENT_TIMESTAMP WHERE id = ?').run(bot.id);
+      // last_run_at is informational (admin dashboard / diagnostics);
+      // not worth crashing the entire scanner cycle if we briefly
+      // can't write it during a maintenance window. Swallow lock
+      // errors and retry next cycle.
+      try {
+        db.prepare('UPDATE trading_bots SET last_run_at = CURRENT_TIMESTAMP WHERE id = ?').run(bot.id);
+      } catch (err) {
+        if (!/locked|busy/i.test(err.message)) throw err;
+        logger.debug('last_run_at update skipped (db busy)', { botId: bot.id });
+      }
     }
 
     // Wait for all queues to drain (but cap wait to SCAN_INTERVAL)

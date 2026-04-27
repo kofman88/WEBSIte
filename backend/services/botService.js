@@ -6,6 +6,7 @@
 const db = require('../models/database');
 const plans = require('../config/plans');
 const logger = require('../utils/logger');
+const { validateConfig: validateStrategyConfig } = require('./strategySchemas');
 
 function _safeJson(s, fb) { if (!s) return fb; try { return JSON.parse(s); } catch { return fb; } }
 
@@ -63,6 +64,15 @@ function createBot(userId, bot) {
     throw err;
   }
 
+  // Per-strategy config validation — coerces types, enforces min/max,
+  // strips unknown keys. Throws VALIDATION_ERROR with concrete paths
+  // if the client (or a buggy frontend build) tried to send e.g.
+  // { minConfirmations: 'abc' } or { lookback: 999999 }. Without this
+  // the scanner would NaN/crash on first run with a useless error.
+  const sanitizedStrategyConfig = bot.strategyConfig
+    ? validateStrategyConfig(bot.strategy, bot.strategyConfig)
+    : {};
+
   const leverage = Math.min(bot.leverage || 1, limits.maxLeverage || 5);
   const tradingMode = plans.canUseFeature(plan, 'paperTradingOnly')
     ? 'paper'
@@ -86,7 +96,7 @@ function createBot(userId, bot) {
     JSON.stringify(bot.symbols || []), bot.strategy, bot.timeframe,
     bot.direction || 'both', leverage, bot.riskPct || 1,
     bot.maxOpenTrades || 3, bot.autoTrade ? 1 : 0, tradingMode,
-    JSON.stringify(bot.strategyConfig || {}),
+    JSON.stringify(sanitizedStrategyConfig),
     JSON.stringify(bot.riskConfig || {}),
     scope, marketExchanges, strategiesMulti
   );
@@ -141,6 +151,15 @@ function updateBot(botId, userId, patch) {
   // not, we set it to {} so strategy defaults take over on next scan.
   if (patch.strategy && patch.strategy !== existing.strategy && patch.strategyConfig === undefined) {
     patch.strategyConfig = {};
+  }
+
+  // Validate any strategyConfig in the patch against the (possibly new)
+  // strategy's schema. Same path-based VALIDATION_ERROR as createBot so
+  // the wizard can highlight bad fields. Mutate patch in place so the
+  // INSERT below uses the sanitised value.
+  if (patch.strategyConfig !== undefined) {
+    const strategyForValidation = patch.strategy || existing.strategy;
+    patch.strategyConfig = validateStrategyConfig(strategyForValidation, patch.strategyConfig);
   }
 
   // Elite-only feature gate on updates (scope/strategies_multi changes)
