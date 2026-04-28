@@ -422,7 +422,8 @@ function userSummary(userId) {
   const row = db.prepare(`
     SELECT
       COUNT(*) as total_bots,
-      SUM(CASE WHEN is_active = 1 THEN 1 ELSE 0 END) as active_bots
+      SUM(CASE WHEN is_active = 1 THEN 1 ELSE 0 END) as active_bots,
+      SUM(CASE WHEN is_active = 1 AND trading_mode = 'live' THEN 1 ELSE 0 END) as live_bots
     FROM trading_bots WHERE user_id = ?
   `).get(userId);
 
@@ -437,6 +438,7 @@ function userSummary(userId) {
   return {
     totalBots: row.total_bots || 0,
     activeBots: row.active_bots || 0,
+    liveBots: row.live_bots || 0,
     totalTrades: trades.total_trades || 0,
     openTrades: trades.open_trades || 0,
     totalPnl: trades.total_pnl || 0,

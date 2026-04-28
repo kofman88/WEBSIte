@@ -189,7 +189,10 @@
           const base = Number(user.paperStartingBalance || 10000);
           valEl.textContent = '$' + (base + total).toLocaleString('en-US', { maximumFractionDigits: 0 });
           if (modeEl) {
-            const hasLive = Number(s.activeBots) > 0 && Number(s.livePnl) !== 0;
+            // LIVE only when the user has at least one active bot in
+            // live trading_mode. DEMO covers Free plan, paper-only bots,
+            // and users without any active live bot.
+            const hasLive = Number(s.liveBots) > 0;
             const mode = hasLive ? 'LIVE' : 'DEMO';
             modeEl.textContent = mode; modeEl.setAttribute('data-mode', mode.toLowerCase());
           }
@@ -303,7 +306,11 @@
     else actions.insertBefore(pill, actions.firstChild);
 
     // Paint from cache immediately (survives page nav), then refresh.
-    const ACCT_CACHE = 'chm_acct_cache';
+    // v2: bumped cache key after the LIVE/DEMO heuristic was fixed —
+    // forces a one-time refresh so users still showing a stale "LIVE"
+    // pill from the broken NaN-check don't keep seeing it for 10 min.
+    const ACCT_CACHE = 'chm_acct_cache_v2';
+    try { localStorage.removeItem('chm_acct_cache'); } catch (_) {}
     const modeEl = document.getElementById('shellAcctMode');
     const valEl = document.getElementById('shellAcctVal');
     try {
@@ -318,7 +325,7 @@
       try {
         const s = await (window.API && API.botSummary ? API.botSummary() : Promise.resolve(null));
         if (!s) return;
-        const hasLive = Number(s.activeBots) > 0 && Number(s.livePnl) !== 0;
+        const hasLive = Number(s.liveBots) > 0;
         const mode = hasLive ? 'LIVE' : 'DEMO';
         const total = Number(s.totalPnl || 0);
         const paperBase = Number((user && user.paperStartingBalance) || 10000);
