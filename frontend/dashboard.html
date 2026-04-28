@@ -118,26 +118,73 @@
     body[data-dash-tab="guide"] .dash-pane[data-tab="main"]{display:none}
     body[data-dash-tab="guide"] .dash-pane[data-tab="guide"]{display:block}
 
-    /* Guide pane — 5 step cards laid out as 2-col magazine layout */
-    .guide-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:16px;margin-top:10px}
+    /* Guide pane — 6 step cards laid out as 2-col magazine layout */
+    .guide-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:18px;margin-top:12px}
     @media(max-width:860px){.guide-grid{grid-template-columns:1fr}}
     .guide-card{
       background:rgba(10,10,10,.4);border:1px solid rgba(255,255,255,.06);
-      border-radius:14px;padding:20px;display:flex;gap:16px;align-items:flex-start
+      border-radius:16px;padding:24px;display:flex;gap:18px;align-items:flex-start;
+      transition:border-color .18s ease,background .18s ease,transform .18s ease
     }
+    .guide-card:hover{border-color:rgba(255,255,255,.12);background:rgba(10,10,10,.55)}
     html.light .guide-card{background:#fff;border-color:rgba(0,0,0,.08)}
+    html.light .guide-card:hover{border-color:rgba(0,0,0,.14);background:#fff}
     .guide-num{
-      width:34px;height:34px;flex-shrink:0;border-radius:50%;
+      width:36px;height:36px;flex-shrink:0;border-radius:50%;
       background:linear-gradient(135deg,rgba(255,140,90,.25),rgba(255,90,31,.15));
       color:#FF8C5A;font-weight:700;font-size:14px;
       display:inline-flex;align-items:center;justify-content:center
     }
-    .guide-body h4{font-size:15px;font-weight:600;color:#fff;margin-bottom:6px}
+    .guide-body{min-width:0;flex:1}
+    .guide-body h4{font-size:15px;font-weight:600;color:#fff;margin-bottom:8px;letter-spacing:-.005em}
     html.light .guide-body h4{color:#0A0A0A}
-    .guide-body p{font-size:13px;line-height:1.6;color:rgba(255,255,255,.62)}
+    .guide-body p{font-size:13px;line-height:1.65;color:rgba(255,255,255,.62)}
     html.light .guide-body p{color:rgba(10,10,10,.68)}
     .guide-body a{color:#FF8C5A;text-decoration:none;font-weight:500}
     .guide-body a:hover{text-decoration:underline}
+
+    /* Premium CTA card — last in grid, accent gradient + inline button */
+    .guide-card-cta{
+      background:
+        radial-gradient(120% 140% at 100% 0%,rgba(255,90,31,.18) 0%,transparent 55%),
+        linear-gradient(135deg,rgba(255,90,31,.10) 0%,rgba(255,140,90,.04) 60%,rgba(10,10,10,.4) 100%);
+      border-color:rgba(255,90,31,.28);
+      box-shadow:0 1px 0 rgba(255,255,255,.04) inset,0 12px 32px -16px rgba(255,90,31,.35)
+    }
+    .guide-card-cta:hover{border-color:rgba(255,90,31,.45);transform:translateY(-1px)}
+    html.light .guide-card-cta{
+      background:
+        radial-gradient(120% 140% at 100% 0%,rgba(255,90,31,.14) 0%,transparent 55%),
+        linear-gradient(135deg,rgba(255,90,31,.08),#fff 70%);
+      border-color:rgba(255,90,31,.32)
+    }
+    .guide-num-cta{
+      background:linear-gradient(135deg,#FF7840,#FF5A1F)!important;
+      color:#fff!important;
+      box-shadow:0 4px 12px -2px rgba(255,90,31,.5),inset 0 1px 0 rgba(255,255,255,.3)
+    }
+    .guide-eyebrow{
+      font-size:10px;letter-spacing:.18em;text-transform:uppercase;
+      color:#FF8C5A;font-weight:600;margin-bottom:6px
+    }
+    .guide-link{
+      color:#FF8C5A;text-decoration:none;font-weight:600;
+      border-bottom:1px dashed rgba(255,140,90,.4);padding-bottom:1px
+    }
+    .guide-link:hover{border-bottom-color:#FF8C5A;text-decoration:none!important}
+    .guide-cta{
+      display:inline-flex;align-items:center;gap:8px;
+      margin-top:14px;padding:8px 16px;
+      background:linear-gradient(180deg,#FF7840,#FF5A1F);
+      color:#fff!important;font-size:13px;font-weight:600;
+      border-radius:999px;text-decoration:none!important;
+      box-shadow:inset 0 1px 0 rgba(255,255,255,.28),inset 0 -1px 1px rgba(0,0,0,.3),
+        0 2px 6px rgba(255,90,31,.3),0 6px 16px -4px rgba(255,90,31,.45);
+      transition:transform .15s ease,filter .15s ease
+    }
+    .guide-cta:hover{transform:translateY(-1px);filter:brightness(1.08)}
+    .guide-cta span{transition:transform .15s ease}
+    .guide-cta:hover span{transform:translateX(2px)}
   </style>
 
   <div class="dash-pane" data-tab="guide">
@@ -177,11 +224,13 @@
           <p><a href="signals.html">Сигналы</a> — что сгенерили стратегии. <a href="bots.html">Боты</a> — статусы + последние trades каждого. <a href="analytics.html">Аналитика</a> — кривая капитала + Sharpe + Profit Factor по периодам. <a href="wallet.html">Кошелёк</a> — балансы подключённых бирж. Copy Trading — кто тебя копирует и кого копируешь ты.</p>
         </div>
       </div>
-      <div class="guide-card" style="background:linear-gradient(135deg,rgba(255,90,31,.12),rgba(255,140,90,.04));border-color:rgba(255,90,31,.22)">
-        <div class="guide-num" style="background:linear-gradient(135deg,#FF7840,#FF5A1F);color:#fff">✦</div>
+      <div class="guide-card guide-card-cta">
+        <div class="guide-num guide-num-cta">✦</div>
         <div class="guide-body">
-          <h4>Готов создать первого бота?</h4>
-          <p>Иди на <a href="bots.html"><strong>/bots</strong></a> → кнопка «+ Создать бота» в правом верхнем углу. Первый шаг — выбрать стратегию и таймфрейм, остальное подставится дефолтами. Вернись сюда — увидишь его в «Активные боты».</p>
+          <div class="guide-eyebrow">Финальный шаг</div>
+          <h4>Запустить первого бота</h4>
+          <p>Откройте раздел <a href="bots.html" class="guide-link">Боты</a> и нажмите «+ Создать бота». Выберите стратегию и таймфрейм — остальные параметры подставятся по умолчанию. Через минуту он появится в списке активных и начнёт работать в Demo-режиме.</p>
+          <a href="bots.html" class="guide-cta">Перейти к ботам<span aria-hidden="true">→</span></a>
         </div>
       </div>
     </div>

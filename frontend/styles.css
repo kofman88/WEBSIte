@@ -429,6 +429,12 @@ html.light .shell-side-toggle:hover { background: rgba(255,90,31,.08); border-co
 .main-content { transition: width .2s ease, left .2s ease, margin-left .2s ease, padding .2s ease; }
 
 body.sidebar-collapsed .sidebar { width: 64px; overflow: hidden; }
+/* Hard-clip everything inside the collapsed rail so wide children
+   (badges, promos, sub-text, multi-line tooltips) can't bleed out
+   to the right of the 64-px column while sidebar.js animates. */
+body.sidebar-collapsed .sidebar > *,
+body.sidebar-collapsed .sidebar-nav > *,
+body.sidebar-collapsed .sidebar-footer > * { max-width: 64px; overflow: hidden; }
 body.sidebar-collapsed .sidebar-nav { padding: 8px 0; }
 body.sidebar-collapsed .sidebar-link { justify-content: center; padding: 12px 0; }
 body.sidebar-collapsed .sidebar-link > span,
@@ -1262,9 +1268,9 @@ html.light .shell-tick-price, html.light .shell-fng-value { color: #0A0A0A !impo
 .chm-status {
   display: inline-flex;
   align-items: center;
-  gap: 8px;
-  height: 36px;
-  padding: 0 14px;
+  gap: 10px;
+  height: 38px;
+  padding: 0 18px;
   background: linear-gradient(180deg, rgba(255,255,255,.05), rgba(255,255,255,.015));
   border: 1px solid rgba(255,255,255,.08);
   border-radius: var(--radius-pill);
@@ -1301,9 +1307,9 @@ html.light .shell-tick-price, html.light .shell-fng-value { color: #0A0A0A !impo
 .chm-action {
   display: inline-flex;
   align-items: center;
-  gap: 8px;
-  height: 36px;
-  padding: 0 18px;
+  gap: 9px;
+  height: 38px;
+  padding: 0 22px;
   border: 0;
   border-radius: var(--radius-pill);
   font-family: 'Inter', sans-serif;
