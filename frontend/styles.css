@@ -1271,18 +1271,29 @@ html.light .shell-tick-price, html.light .shell-fng-value { color: #0A0A0A !impo
   gap: 10px;
   height: 38px;
   padding: 0 18px;
-  background: linear-gradient(180deg, rgba(255,255,255,.05), rgba(255,255,255,.015));
+  background:
+    linear-gradient(180deg, rgba(255,255,255,.06), rgba(255,255,255,.015));
   border: 1px solid rgba(255,255,255,.08);
   border-radius: var(--radius-pill);
-  box-shadow: inset 0 1px 1px rgba(255,255,255,.05), inset 0 -1px 2px rgba(0,0,0,.35);
+  box-shadow:
+    inset 0 1px 1px rgba(255,255,255,.06),
+    inset 0 -1px 2px rgba(0,0,0,.35),
+    0 1px 3px rgba(0,0,0,.18);
   font-family: 'Inter', sans-serif;
-  font-size: 12px;
+  font-size: 12.5px;
   font-weight: 500;
-  color: rgba(226,232,240,.85);
+  letter-spacing: 0.005em;
+  color: rgba(226,232,240,.88);
   white-space: nowrap;
-  transition: border-color .2s ease;
+  transition: border-color .2s ease, box-shadow .2s ease;
 }
-.chm-status:hover { border-color: rgba(255,255,255,.16); }
+.chm-status:hover {
+  border-color: rgba(255,255,255,.18);
+  box-shadow:
+    inset 0 1px 1px rgba(255,255,255,.08),
+    inset 0 -1px 2px rgba(0,0,0,.32),
+    0 2px 6px rgba(0,0,0,.22);
+}
 .chm-status-dot {
   width: 8px; height: 8px;
   border-radius: 50%;
@@ -1315,7 +1326,7 @@ html.light .shell-tick-price, html.light .shell-fng-value { color: #0A0A0A !impo
   font-family: 'Inter', sans-serif;
   font-weight: 600;
   font-size: 12.5px;
-  letter-spacing: 0.005em;
+  letter-spacing: 0.015em;
   color: #fff;
   cursor: pointer;
   white-space: nowrap;
@@ -1323,54 +1334,59 @@ html.light .shell-tick-price, html.light .shell-fng-value { color: #0A0A0A !impo
   line-height: 1;
   position: relative;
   isolation: isolate;
+  text-shadow: 0 1px 1px rgba(0,0,0,.25);
 }
 .chm-action svg { flex-shrink: 0; }
 .chm-action:active { transform: translateY(0) scale(.97); }
 .chm-action:focus-visible { outline: 2px solid rgba(255,255,255,.4); outline-offset: 3px; }
 
-/* Primary — blue gradient with inset highlight + double outer shadow */
+/* Primary — clean amber→orange gradient with inset highlight + glow */
 .chm-action-primary {
-  background: linear-gradient(180deg, #3E6BEF 0%, #FF5A1F 55%, #C44610 100%);
+  background:
+    linear-gradient(180deg, rgba(255,255,255,.18) 0%, rgba(255,255,255,0) 45%),
+    linear-gradient(180deg, #FFA340 0%, #FF7A30 50%, #E04A12 100%);
   box-shadow:
-    inset 0 1px 1px rgba(255,255,255,.32),
-    inset 0 -1px 2px rgba(0,0,0,.45),
+    inset 0 1px 1px rgba(255,255,255,.45),
+    inset 0 -1px 2px rgba(120,30,0,.45),
     0 2px 4px rgba(255,90,31,.25),
-    0 8px 20px -6px rgba(255,90,31,.55),
-    0 0 0 1px rgba(255,90,31,.35);
+    0 10px 24px -6px rgba(255,90,31,.55),
+    0 0 0 1px rgba(255,140,60,.4);
 }
 .chm-action-primary:hover {
   transform: translateY(-1px);
-  filter: brightness(1.08) saturate(1.1);
+  filter: brightness(1.06) saturate(1.08);
+  box-shadow:
+    inset 0 1px 1px rgba(255,255,255,.55),
+    inset 0 -1px 2px rgba(120,30,0,.4),
+    0 4px 10px rgba(255,90,31,.4),
+    0 14px 32px -4px rgba(255,90,31,.7),
+    0 0 0 1px rgba(255,170,80,.55);
+}
+.chm-action-primary svg { color: #FFE680; filter: drop-shadow(0 1px 2px rgba(80,20,0,.55)); }
+
+/* Danger — warm crimson gradient */
+.chm-action-danger {
+  background:
+    linear-gradient(180deg, rgba(255,255,255,.16) 0%, rgba(255,255,255,0) 45%),
+    linear-gradient(180deg, #F26A6A 0%, #C53030 55%, #7A1A1A 100%);
   box-shadow:
     inset 0 1px 1px rgba(255,255,255,.38),
-    inset 0 -1px 2px rgba(0,0,0,.4),
-    0 4px 8px rgba(255,90,31,.35),
-    0 12px 28px -4px rgba(255,90,31,.7),
-    0 0 0 1px rgba(255,140,90,.5);
-}
-.chm-action-primary svg { color: #FFD700; filter: drop-shadow(0 1px 2px rgba(0,0,0,.4)); }
-
-/* Danger — warm red gradient */
-.chm-action-danger {
-  background: linear-gradient(180deg, #EF5A5A 0%, #C03030 55%, #7A1F1F 100%);
-  box-shadow:
-    inset 0 1px 1px rgba(255,255,255,.28),
-    inset 0 -1px 2px rgba(0,0,0,.5),
+    inset 0 -1px 2px rgba(60,0,0,.5),
     0 2px 4px rgba(192,48,48,.25),
-    0 8px 20px -6px rgba(192,48,48,.55),
-    0 0 0 1px rgba(192,48,48,.4);
+    0 10px 24px -6px rgba(192,48,48,.55),
+    0 0 0 1px rgba(220,80,80,.4);
 }
 .chm-action-danger:hover {
   transform: translateY(-1px);
-  filter: brightness(1.08) saturate(1.12);
+  filter: brightness(1.06) saturate(1.1);
   box-shadow:
-    inset 0 1px 1px rgba(255,255,255,.32),
-    inset 0 -1px 2px rgba(0,0,0,.45),
-    0 4px 8px rgba(192,48,48,.35),
-    0 12px 28px -4px rgba(239,90,90,.65),
-    0 0 0 1px rgba(239,90,90,.5);
+    inset 0 1px 1px rgba(255,255,255,.45),
+    inset 0 -1px 2px rgba(60,0,0,.45),
+    0 4px 10px rgba(192,48,48,.4),
+    0 14px 32px -4px rgba(239,90,90,.7),
+    0 0 0 1px rgba(255,120,120,.55);
 }
-.chm-action-danger svg { filter: drop-shadow(0 1px 2px rgba(0,0,0,.4)); }
+.chm-action-danger svg { filter: drop-shadow(0 1px 2px rgba(60,0,0,.5)); }
 
 /* Light mode overrides */
 html.light .chm-status {
