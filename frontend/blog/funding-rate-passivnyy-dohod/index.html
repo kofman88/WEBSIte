@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="ru" class="aura-page">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+  <title>Funding rate: как заработать на нём пассивно — CHM Finance</title>
+  <meta name="description" content="Funding rate в крипто-фьючерсах простыми словами: как формируется, как на нём зарабатывать через delta-neutral арбитраж между спотом и фьючерсом. Реалистичная доходность и риски."/>
+  <meta name="keywords" content="funding rate крипта, как заработать на funding rate, фандинг binance bybit, delta neutral арбитраж, фандинг ставка фьючерсы"/>
+  <meta name="robots" content="index,follow,max-image-preview:large"/>
+  <meta name="theme-color" content="#0A0A0A"/>
+  <link rel="canonical" href="https://chmup.top/blog/funding-rate-passivnyy-dohod/"/>
+  <meta property="og:type" content="article"/>
+  <meta property="og:site_name" content="CHM Finance"/>
+  <meta property="og:title" content="Funding rate: как заработать на нём пассивно"/>
+  <meta property="og:description" content="Delta-neutral арбитраж между спотом и фьючерсом — рабочая стратегия 8-30% годовых."/>
+  <meta property="og:url" content="https://chmup.top/blog/funding-rate-passivnyy-dohod/"/>
+  <meta property="og:image" content="https://chmup.top/og-cover.png"/>
+  <meta property="og:locale" content="ru_RU"/>
+  <meta property="article:published_time" content="2026-04-28"/>
+  <meta property="article:author" content="CHM Finance"/>
+  <meta property="article:tag" content="Funding"/>
+  <meta name="twitter:card" content="summary_large_image"/>
+  <meta name="twitter:title" content="Funding rate: пассивный доход"/>
+  <meta name="twitter:image" content="https://chmup.top/og-cover.png"/>
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg"/>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet"/>
+
+  <script type="application/ld+json">
+  {
+    "@context":"https://schema.org","@type":"Article",
+    "headline":"Funding rate: как заработать на нём пассивно",
+    "description":"Funding rate в крипто-фьючерсах: как формируется, как зарабатывать через delta-neutral арбитраж.",
+    "author":{"@type":"Organization","name":"CHM Finance"},
+    "publisher":{"@type":"Organization","name":"CHM Finance","logo":{"@type":"ImageObject","url":"https://chmup.top/logo.png"}},
+    "datePublished":"2026-04-28","dateModified":"2026-04-28",
+    "mainEntityOfPage":{"@type":"WebPage","@id":"https://chmup.top/blog/funding-rate-passivnyy-dohod/"},
+    "image":"https://chmup.top/og-cover.png","inLanguage":"ru-RU"
+  }
+  </script>
+  <script type="application/ld+json">
+  {
+    "@context":"https://schema.org","@type":"BreadcrumbList",
+    "itemListElement":[
+      {"@type":"ListItem","position":1,"name":"Главная","item":"https://chmup.top/"},
+      {"@type":"ListItem","position":2,"name":"Блог","item":"https://chmup.top/blog/"},
+      {"@type":"ListItem","position":3,"name":"Funding rate","item":"https://chmup.top/blog/funding-rate-passivnyy-dohod/"}
+    ]
+  }
+  </script>
+
+  <style>
+    body{background:#0A0A0A;color:#E5E5E5;font-family:'Inter',sans-serif;margin:0;line-height:1.7}
+    .container{max-width:720px;margin:0 auto;padding:60px 24px}
+    nav{padding:20px 24px;border-bottom:1px solid rgba(255,255,255,.06)}
+    nav a{color:rgba(255,255,255,.7);text-decoration:none;font-weight:500;font-size:14px;margin-right:20px}
+    nav a:hover{color:#fff}
+    .brand{font-weight:700;font-size:18px;letter-spacing:-.02em;color:#fff}
+    .brand span{color:#FF5A1F}
+    .breadcrumb{font-size:12px;color:rgba(255,255,255,.4);margin-bottom:16px}
+    .breadcrumb a{color:rgba(255,255,255,.55);text-decoration:none}
+    h1{font-size:clamp(28px,4.5vw,40px);font-weight:700;letter-spacing:-.025em;margin:0 0 16px;line-height:1.15}
+    .meta{color:rgba(255,255,255,.45);font-size:13px;margin-bottom:40px;display:flex;gap:16px;flex-wrap:wrap}
+    .meta span::after{content:'·';margin-left:16px;opacity:.5}
+    .meta span:last-child::after{content:''}
+    h2{font-size:24px;font-weight:600;letter-spacing:-.015em;margin:44px 0 16px;color:#fff}
+    h3{font-size:18px;font-weight:600;margin:32px 0 12px;color:#fff}
+    p{color:rgba(255,255,255,.78);margin:0 0 16px;font-size:16px}
+    ul,ol{color:rgba(255,255,255,.78);padding-left:24px;margin:0 0 20px}
+    li{margin-bottom:8px}
+    code{background:rgba(255,90,31,.12);color:#FF8C5A;padding:2px 6px;border-radius:4px;font-family:'JetBrains Mono',monospace;font-size:13px}
+    .note{padding:16px 20px;border-radius:12px;background:rgba(255,90,31,.08);border:1px solid rgba(255,90,31,.2);margin:24px 0}
+    .note.red{background:rgba(239,68,68,.08);border-color:rgba(239,68,68,.25)}
+    .note.red .note-title{color:#fca5a5}
+    .note-title{font-weight:600;color:#FF8C5A;font-size:13px;text-transform:uppercase;letter-spacing:.1em;margin:0 0 8px}
+    .cta{display:block;padding:24px;border-radius:16px;background:linear-gradient(135deg,rgba(255,140,90,.12),rgba(255,90,31,.06));border:1px solid rgba(255,140,90,.3);text-decoration:none;color:inherit;margin:40px 0}
+    .cta-title{font-weight:600;color:#fff;margin:0 0 6px;font-size:17px}
+    .cta-desc{color:rgba(255,255,255,.7);font-size:14px;margin:0}
+    .cta-btn{display:inline-block;margin-top:12px;padding:8px 16px;background:linear-gradient(180deg,#FF8C5A,#FF5A1F);color:#fff;border-radius:999px;font-size:13px;font-weight:600}
+    a.inline{color:#FF8C5A;text-decoration:none}
+    a.inline:hover{text-decoration:underline}
+    table{width:100%;border-collapse:collapse;margin:20px 0;font-size:14px}
+    th,td{padding:10px 12px;text-align:left;border-bottom:1px solid rgba(255,255,255,.08)}
+    th{color:rgba(255,255,255,.5);font-size:11px;text-transform:uppercase;letter-spacing:.1em;font-weight:500}
+    td{color:rgba(255,255,255,.85)}
+    td.mono{font-family:'JetBrains Mono',monospace;font-variant-numeric:tabular-nums}
+  </style>
+</head>
+<body>
+  <nav>
+    <div style="max-width:960px;margin:0 auto;display:flex;justify-content:space-between;align-items:center">
+      <a href="/" class="brand">CHM<span>.</span></a>
+      <div><a href="/">Главная</a><a href="/subscriptions.html">Тарифы</a><a href="/blog/">Блог</a></div>
+    </div>
+  </nav>
+
+  <main class="container">
+    <div class="breadcrumb"><a href="/">Главная</a> / <a href="/blog/">Блог</a> / Funding rate</div>
+
+    <h1>Funding rate: как заработать на нём пассивно</h1>
+    <div class="meta"><span>Стратегия</span><span>9 мин чтения</span><span>28 апреля 2026</span></div>
+
+    <p><strong>Funding rate</strong> — комиссия, которую держатели лонгов и шортов на бессрочных фьючерсах платят друг другу каждые 8 часов. На крупных биржах (Binance, Bybit, OKX) средний funding по BTC за год — 8-12% в годовых. Этот доход реально получить пассивно через <strong>delta-neutral арбитраж</strong>: ты одновременно держишь спот-лонг и фьючерс-шорт, цена не имеет значения, а funding капает на счёт. В этой статье — как именно это работает, реалистичная доходность и риски.</p>
+
+    <h2>Что такое funding rate</h2>
+
+    <p>Бессрочный фьючерс (perpetual futures) — это контракт без даты экспирации. Чтобы цена контракта не уезжала далеко от споту, биржа использует механизм funding:</p>
+
+    <ul>
+      <li>Если фьючерсная цена &gt; спот → лонгов больше, чем шортов → лонги <strong>платят</strong> шортам</li>
+      <li>Если фьючерсная цена &lt; спот → шортов больше, чем лонгов → шорты <strong>платят</strong> лонгам</li>
+    </ul>
+
+    <p>Размер платежа = funding rate × notional position size. На большинстве монет funding rate колеблется в пределах ±0.01% / 8 часов, что даёт ±10.95% годовых. На альтах в моменты сильной перекупленности — до 0.5% / 8 часов (это уже 547% годовых, но такие периоды редкие и опасные).</p>
+
+    <h2>Почему funding обычно положительный</h2>
+
+    <p>В крипте психология сильно перекошена в сторону «ракеты». Большинство трейдеров покупают плечом и держат лонги в надежде на рост. Это создаёт <strong>хронический перекос фьючерсной цены вверх</strong> относительно спот → funding положительный → лонги платят шортам.</p>
+
+    <p>Это и есть основа стратегии: если в среднем funding положительный, то в среднем шорт-сторона зарабатывает. Но просто открыть шорт нельзя — цена пойдёт вверх и съест весь funding-профит и больше. Решение — <strong>delta-neutral хедж</strong>.</p>
+
+    <h2>Как работает delta-neutral funding-арбитраж</h2>
+
+    <p>Идея простая: занять лонг на споте + равный шорт на фьючерсе. Что бы ни делала цена — твоя суммарная позиция не меняется в долларах. А funding в это время начисляется тебе как держателю шорта.</p>
+
+    <ol>
+      <li>На споте покупаешь 1 BTC за $60,000</li>
+      <li>На фьючерсе шортишь 1 BTC по $60,000 (контракт BTCUSDT-perp)</li>
+      <li>Цена идёт вверх до $62,000: спот +$2,000, фьючерс −$2,000 → суммарно 0</li>
+      <li>Цена идёт вниз до $58,000: спот −$2,000, фьючерс +$2,000 → суммарно 0</li>
+      <li>Каждые 8 часов получаешь funding по фьючерсной позиции (если ставка положительная)</li>
+    </ol>
+
+    <p>Капитал занят полностью (на споте + на фьючерсе как margin), но направление цены не имеет значения. Чистый профит = funding rate × N часов − комиссии за вход/выход.</p>
+
+    <h2>Реалистичная доходность</h2>
+
+    <table>
+      <tr><th>Период</th><th>Средний funding BTC (3 биржи)</th><th>Годовая доходность delta-neutral</th></tr>
+      <tr><td>2023</td><td>0.0085% / 8h</td><td>~9.3%</td></tr>
+      <tr><td>2024 (bull-год)</td><td>0.014% / 8h</td><td>~15.3%</td></tr>
+      <tr><td>2025 H1</td><td>0.011% / 8h</td><td>~12.0%</td></tr>
+      <tr><td>2025 H2 (sideways)</td><td>0.005% / 8h</td><td>~5.5%</td></tr>
+    </table>
+
+    <p>В среднем за 2.5 года: <strong>10-12% годовых</strong> в чистой прибыли. Звучит скромно, но это <strong>при нулевом риске направления</strong> — ты буквально равнодушен к цене. Это лучше, чем staking ETH (3-4%), и сравнимо с лучшими DeFi-фермами без impermanent loss.</p>
+
+    <h2>Где подвох</h2>
+
+    <div class="note red">
+      <p class="note-title">⚠️ Риски, которые часто недооценивают</p>
+      <ol style="margin:0">
+        <li><strong>Funding может стать отрицательным</strong>. В bear-рынке (или когда альт сильно падает) шорты доминируют, funding идёт против тебя. Тогда стратегия превращается из «получаешь 12%» в «платишь 5-8%». Решение: фильтр — заходишь только когда funding ≥ 0.005% за 8h.</li>
+        <li><strong>Liquidation risk на фьючерсе</strong>. Шорт-нога может ликвидироваться при резком памп. Решение: держать достаточный margin (≥ 50% от номинала) и не использовать высокое плечо. Delta-neutral стратегия НЕ совмещается с 10× плечом.</li>
+        <li><strong>Spot-биржа и futures-биржа разные</strong>. Если шортишь на Bybit, а спот купил на Binance — между ними цены могут разъезжаться (basis risk). Решение: одна биржа для обоих ног.</li>
+        <li><strong>Withdrawal halt / regulatory event</strong>. Биржу могут заморозить (FTX, например), и хедж сломается. Решение: диверсификация по 2-3 биржам, не более 50% капитала на одной.</li>
+        <li><strong>Stablecoin de-peg</strong>. Если USDT теряет привязку к 1$ (как было в марте 2023), вся стратегия в USDT-номинированных контрактах ломается.</li>
+      </ol>
+    </div>
+
+    <h2>Технические тонкости</h2>
+
+    <ul>
+      <li><strong>Размер позиции</strong>: спот и фьючерс должны быть равны по нотiональной стоимости в долларах, не по количеству монет (если контракт коин-маржинальный — пересчёт сложнее).</li>
+      <li><strong>Cross vs Isolated margin</strong>: для delta-neutral используется isolated — не хочешь чтобы убыток на одной паре утянул маржу с других.</li>
+      <li><strong>Открытие/закрытие</strong>: используй limit-ордера со стороны maker, не market. Спред + комиссии takerа за 1 цикл могут съесть месяц funding-профита.</li>
+      <li><strong>Когда выходить</strong>: funding падает ниже 0 на 2-3 цикла подряд → закрывай позицию. Восстановится — войдёшь снова.</li>
+    </ul>
+
+    <h2>Когда это интересно</h2>
+
+    <p>Funding-арбитраж выгоден если:</p>
+    <ul>
+      <li>У тебя капитал ≥ $10,000 (на меньше комиссии съедают edge)</li>
+      <li>Ты согласен на 8-15% годовых при минимальном риске направления</li>
+      <li>Готов мониторить funding 1 раз в день</li>
+      <li>Тебя устраивает «скучная» стратегия — никаких иксов, но и никакого слива</li>
+    </ul>
+
+    <p>Невыгодно если ищешь высокую доходность (50%+ годовых) — для этого нужен направленный трейдинг с риском.</p>
+
+    <a href="/bots.html" class="cta">
+      <h3 class="cta-title">Direction-based стратегии CHM Finance</h3>
+      <p class="cta-desc">CHM Finance специализируется на direction-based стратегиях (DCA, Grid, SMC, Scalping). Funding-арбитраж требует кросс-биржевого исполнения и не входит в стандартный набор. Если хочешь зарабатывать на тренде с риск-контролем — наши стратегии для тебя.</p>
+      <span class="cta-btn">Посмотреть стратегии →</span>
+    </a>
+
+    <h2>Дальше читай</h2>
+    <ul>
+      <li><a class="inline" href="/blog/dca-vs-grid-strategiya/">DCA vs Grid — какая стратегия выгоднее</a></li>
+      <li><a class="inline" href="/blog/chto-takoe-sharpe-ratio/">Sharpe ratio — как сравнивать стратегии</a></li>
+      <li><a class="inline" href="/blog/kak-ne-slit-depozit-na-botah/">10 правил риск-менеджмента</a></li>
+      <li><a class="inline" href="/blog/">Все статьи блога →</a></li>
+    </ul>
+  </main>
+</body>
+</html>
