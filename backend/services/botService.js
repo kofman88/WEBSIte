@@ -58,8 +58,13 @@ function createBot(userId, bot) {
     throw err;
   }
 
-  if (bot.autoTrade && !plans.canUseFeature(plan, 'autoTrade')) {
-    const err = new Error('Auto-trade requires Pro plan.');
+  // Auto-trade plan gate: live only. Paper (Demo) is free for everyone —
+  // that's the "first 2 weeks for free" promise on the landing page. The
+  // user can still wire up auto-execution against the paper book on a Free
+  // plan; live mode requires Pro+ because it touches a real exchange key.
+  const requestedMode = (bot.tradingMode === 'live') ? 'live' : 'paper';
+  if (bot.autoTrade && requestedMode === 'live' && !plans.canUseFeature(plan, 'autoTrade')) {
+    const err = new Error('Live auto-trade requires Pro plan. Paper (Demo) auto-trade is free.');
     err.statusCode = 403; err.code = 'UPGRADE_REQUIRED'; err.requiredPlan = 'pro';
     throw err;
   }
@@ -125,10 +130,20 @@ function updateBot(botId, userId, patch) {
     err.requiredPlan = plans.requiredPlanForStrategy(patch.strategy);
     throw err;
   }
-  if (patch.autoTrade && !plans.canUseFeature(plan, 'autoTrade')) {
-    const err = new Error('Auto-trade requires Pro plan.');
-    err.statusCode = 403; err.code = 'UPGRADE_REQUIRED'; err.requiredPlan = 'pro';
-    throw err;
+  // Same rule as createBot — paper (Demo) is plan-free, live is Pro+.
+  // We need to know the *effective* trading_mode after this patch, so
+  // read existing if not in the patch.
+  if (patch.autoTrade) {
+    let effectiveMode = patch.tradingMode;
+    if (!effectiveMode) {
+      const cur = db.prepare('SELECT trading_mode FROM trading_bots WHERE id = ?').get(botId);
+      effectiveMode = cur && cur.trading_mode;
+    }
+    if (effectiveMode === 'live' && !plans.canUseFeature(plan, 'autoTrade')) {
+      const err = new Error('Live auto-trade requires Pro plan. Paper (Demo) auto-trade is free.');
+      err.statusCode = 403; err.code = 'UPGRADE_REQUIRED'; err.requiredPlan = 'pro';
+      throw err;
+    }
   }
 
   // Apply plan leverage cap on every update — createBot already does this,

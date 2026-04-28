@@ -101,9 +101,17 @@ describe('autoTradeService: paper mode', () => {
     expect(fills[0].event_type).toBe('entry');
   });
 
-  it('rejects when plan lacks autoTrade', async () => {
+  it('paper auto-trade is allowed on sub-Pro plans (Demo is free)', async () => {
     const uid = makeUser('starter');
-    const bot = makeBot(uid);
+    const bot = makeBot(uid); // default trading_mode = 'paper'
+    const trade = await autoTrade.default.executeSignal(mockSignal(), bot);
+    expect(trade).not.toBeNull();
+    expect(trade.trading_mode).toBe('paper');
+  });
+
+  it('live auto-trade is rejected when plan lacks autoTrade', async () => {
+    const uid = makeUser('starter');
+    const bot = makeBot(uid, { trading_mode: 'live' });
     const trade = await autoTrade.default.executeSignal(mockSignal(), bot);
     expect(trade).toBeNull();
   });

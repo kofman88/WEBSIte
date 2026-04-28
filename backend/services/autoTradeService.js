@@ -54,10 +54,14 @@ async function executeSignal(signal, bot, opts = {}) {
 
 async function _executeSignalInner(signal, bot, { exchangeService = null, marketData = null } = {}) {
 
-  // 1. Plan gating — does the user's plan allow auto-trade?
+  // 1. Plan gating — only blocks LIVE auto-trade. Paper (Demo) is free
+  //    on every plan so users can validate strategies on virtual $10k
+  //    before paying for Pro. Mirrors the rule in botService.createBot /
+  //    updateBot, which already prevents toggling live + autoTrade on
+  //    sub-Pro plans.
   const plan = _getUserPlan(bot.user_id);
-  if (!plans.canUseFeature(plan, 'autoTrade')) {
-    logger.warn('auto_trade rejected: plan lacks autoTrade', { userId: bot.user_id, plan, botId: bot.id });
+  if (bot.trading_mode === 'live' && !plans.canUseFeature(plan, 'autoTrade')) {
+    logger.warn('auto_trade rejected: live mode requires Pro plan', { userId: bot.user_id, plan, botId: bot.id });
     return null;
   }
 
