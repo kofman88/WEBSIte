@@ -47,14 +47,14 @@
   </div>
 
   <!-- Filters -->
-  <div class="flex flex-wrap gap-3 mb-6">
-    <select id="fltExchange" class="bg-slate-800/50 border border-slate-700 rounded-lg px-3 py-2 text-sm text-slate-300 outline-none">
+  <div class="bp-filters">
+    <select id="fltExchange" class="bp-filter">
       <option value="">Все биржи</option><option value="bybit">Bybit</option><option value="binance">Binance</option><option value="bingx">BingX</option><option value="okx">OKX</option>
     </select>
-    <select id="fltStrategy" class="bg-slate-800/50 border border-slate-700 rounded-lg px-3 py-2 text-sm text-slate-300 outline-none">
+    <select id="fltStrategy" class="bp-filter">
       <option value="">Все стратегии</option><option value="levels">Levels</option><option value="smc">SMC</option><option value="gerchik">Gerchik</option><option value="scalping">Scalping</option><option value="dca">DCA</option><option value="grid">Grid</option>
     </select>
-    <select id="fltStatus" class="bg-slate-800/50 border border-slate-700 rounded-lg px-3 py-2 text-sm text-slate-300 outline-none">
+    <select id="fltStatus" class="bp-filter">
       <option value="">Все статусы</option><option value="active">Активные</option><option value="paused">Остановлены</option>
     </select>
   </div>
@@ -739,6 +739,163 @@ html.light .chm-select-option.selected{background:rgba(255,90,31,.12);color:#FF5
 .st-side:hover{border-color:#475569}
 .st-side:has(input:checked){border-color:#6366f1;background:rgba(99,102,241,.1);box-shadow:0 0 0 1px rgba(99,102,241,.4)}
 .st-body{text-align:center;font-weight:600;font-size:12px;letter-spacing:.1em}
+
+/* ── Premium bot-card (3Commas/Veles inspired) ───────────────────────── */
+.bot-card-pro{
+  position:relative;overflow:hidden;
+  background:
+    radial-gradient(140% 100% at 100% 0%,rgba(255,90,31,.07) 0%,transparent 55%),
+    linear-gradient(180deg,rgba(255,255,255,.04) 0%,rgba(255,255,255,.012) 100%);
+  border:1px solid rgba(255,255,255,.07);
+  border-radius:18px;
+  padding:22px;
+  box-shadow:
+    0 1px 0 rgba(255,255,255,.04) inset,
+    0 8px 28px -12px rgba(0,0,0,.55);
+  cursor:pointer;
+  transition:transform .2s cubic-bezier(.4,0,.2,1),border-color .2s,box-shadow .2s;
+}
+.bot-card-pro:hover{
+  transform:translateY(-2px);
+  border-color:rgba(255,140,90,.28);
+  box-shadow:
+    0 1px 0 rgba(255,255,255,.06) inset,
+    0 14px 40px -10px rgba(0,0,0,.65),
+    0 0 0 1px rgba(255,140,90,.12);
+}
+html.light .bot-card-pro{
+  background:linear-gradient(180deg,#fff 0%,rgba(255,255,255,.7) 100%);
+  border-color:rgba(0,0,0,.08);
+  box-shadow:0 1px 2px rgba(0,0,0,.04),0 4px 16px -8px rgba(0,0,0,.12)
+}
+html.light .bot-card-pro:hover{border-color:rgba(255,90,31,.28)}
+
+.bot-card-pro .bp-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;gap:12px}
+.bot-card-pro .bp-id{display:flex;align-items:center;gap:12px;min-width:0;flex:1}
+.bot-card-pro .bp-avatar{
+  width:42px;height:42px;flex-shrink:0;border-radius:12px;
+  background:linear-gradient(135deg,#FF7840 0%,#FF5A1F 60%,#C44610 100%);
+  display:inline-flex;align-items:center;justify-content:center;
+  color:#fff;font-weight:700;font-size:16px;letter-spacing:-.02em;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.3),inset 0 -1px 1px rgba(0,0,0,.3),0 4px 10px -2px rgba(255,90,31,.4)
+}
+.bot-card-pro .bp-name{font-weight:600;font-size:15px;color:#fff;letter-spacing:-.01em;line-height:1.2;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+html.light .bot-card-pro .bp-name{color:#0A0A0A}
+.bot-card-pro .bp-sub{font-size:12px;color:rgba(255,255,255,.5);margin-top:3px;font-variant-numeric:tabular-nums}
+html.light .bot-card-pro .bp-sub{color:rgba(10,10,10,.55)}
+.bot-card-pro .bp-sub strong{color:rgba(255,255,255,.78);font-weight:500}
+html.light .bot-card-pro .bp-sub strong{color:rgba(10,10,10,.78)}
+
+.bp-toggle{
+  position:relative;width:44px;height:24px;border-radius:999px;
+  background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.1);
+  cursor:pointer;flex-shrink:0;transition:background .2s,border-color .2s
+}
+.bp-toggle::after{
+  content:'';position:absolute;top:2px;left:2px;
+  width:18px;height:18px;border-radius:50%;
+  background:rgba(255,255,255,.65);
+  transition:transform .2s cubic-bezier(.4,0,.2,1),background .2s
+}
+.bp-toggle.on{
+  background:linear-gradient(180deg,#FF7840 0%,#FF5A1F 60%,#C44610 100%);
+  border-color:rgba(255,90,31,.45);
+  box-shadow:0 0 0 1px rgba(255,140,90,.3),0 2px 8px rgba(255,90,31,.35)
+}
+.bp-toggle.on::after{transform:translateX(20px);background:#fff}
+html.light .bp-toggle{background:rgba(0,0,0,.06);border-color:rgba(0,0,0,.1)}
+html.light .bp-toggle::after{background:rgba(0,0,0,.4)}
+html.light .bp-toggle.on::after{background:#fff}
+
+.bp-chips{display:flex;align-items:center;gap:6px;margin-bottom:14px;flex-wrap:wrap}
+.bp-chip{
+  display:inline-flex;align-items:center;gap:5px;
+  padding:4px 10px;border-radius:999px;
+  font-size:11px;font-weight:600;letter-spacing:.02em;
+  border:1px solid transparent;line-height:1
+}
+.bp-chip.bp-strategy{background:rgba(99,102,241,.12);color:#a5b4fc;border-color:rgba(99,102,241,.25)}
+.bp-chip.bp-mode-demo{background:rgba(148,163,184,.1);color:rgba(226,232,240,.75);border-color:rgba(148,163,184,.18);cursor:pointer}
+.bp-chip.bp-mode-live{background:linear-gradient(180deg,rgba(239,68,68,.18),rgba(220,38,38,.1));color:#fca5a5;border-color:rgba(239,68,68,.32);cursor:pointer}
+.bp-chip.bp-status-on{background:rgba(74,222,128,.12);color:#86efac;border-color:rgba(74,222,128,.25)}
+.bp-chip.bp-status-off{background:rgba(148,163,184,.08);color:rgba(148,163,184,.85);border-color:rgba(148,163,184,.18)}
+.bp-chip.bp-status-on::before{content:'';width:6px;height:6px;border-radius:50%;background:#4ade80;box-shadow:0 0 6px rgba(74,222,128,.7);animation:bpPulse 2.4s ease-in-out infinite}
+@keyframes bpPulse{0%,100%{opacity:1}50%{opacity:.45}}
+html.light .bp-chip.bp-strategy{background:rgba(99,102,241,.12);color:#4338ca}
+html.light .bp-chip.bp-mode-demo{background:rgba(0,0,0,.04);color:rgba(10,10,10,.6);border-color:rgba(0,0,0,.08)}
+html.light .bp-chip.bp-status-on{color:#15803d}
+html.light .bp-chip.bp-status-off{background:rgba(0,0,0,.04);color:rgba(10,10,10,.55);border-color:rgba(0,0,0,.08)}
+
+.bp-spark{height:54px;margin:6px -2px 14px;position:relative}
+.bp-spark-empty{
+  height:54px;display:flex;align-items:center;justify-content:center;
+  font-size:11px;color:rgba(255,255,255,.32);
+  background:linear-gradient(180deg,rgba(255,255,255,.02),transparent);
+  border-radius:8px;border:1px dashed rgba(255,255,255,.06)
+}
+html.light .bp-spark-empty{color:rgba(10,10,10,.4);border-color:rgba(0,0,0,.08)}
+
+.bp-stats{
+  display:grid;grid-template-columns:repeat(3,1fr);
+  gap:1px;margin-bottom:14px;
+  background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.05);border-radius:12px;
+  overflow:hidden
+}
+html.light .bp-stats{background:rgba(0,0,0,.04);border-color:rgba(0,0,0,.06)}
+.bp-stat{
+  background:rgba(10,10,10,.32);padding:11px 8px;text-align:center
+}
+html.light .bp-stat{background:#fff}
+.bp-stat-label{font-size:10px;color:rgba(255,255,255,.45);text-transform:uppercase;letter-spacing:.12em;font-weight:500;margin-bottom:4px}
+html.light .bp-stat-label{color:rgba(10,10,10,.5)}
+.bp-stat-val{font-size:15px;font-weight:600;letter-spacing:-.01em;font-variant-numeric:tabular-nums;color:rgba(255,255,255,.92)}
+.bp-stat-val.up{color:#4ade80}
+.bp-stat-val.down{color:#f87171}
+html.light .bp-stat-val{color:#0A0A0A}
+html.light .bp-stat-val.up{color:#15803d}
+html.light .bp-stat-val.down{color:#b91c1c}
+
+.bp-foot{
+  display:flex;align-items:center;justify-content:space-between;gap:10px;
+  padding-top:12px;border-top:1px solid rgba(255,255,255,.04)
+}
+html.light .bp-foot{border-top-color:rgba(0,0,0,.06)}
+.bp-meta{font-size:11px;color:rgba(255,255,255,.45);font-variant-numeric:tabular-nums;letter-spacing:.01em}
+html.light .bp-meta{color:rgba(10,10,10,.55)}
+.bp-meta b{color:rgba(255,255,255,.7);font-weight:500}
+html.light .bp-meta b{color:rgba(10,10,10,.78)}
+.bp-actions{display:flex;align-items:center;gap:4px}
+.bp-icon-btn{
+  width:30px;height:30px;border-radius:8px;
+  background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.06);
+  color:rgba(255,255,255,.55);
+  display:inline-flex;align-items:center;justify-content:center;
+  cursor:pointer;transition:all .15s;padding:0
+}
+.bp-icon-btn:hover{background:rgba(255,255,255,.08);border-color:rgba(255,255,255,.14);color:#fff}
+.bp-icon-btn.bp-icon-danger:hover{background:rgba(239,68,68,.12);border-color:rgba(239,68,68,.3);color:#fca5a5}
+.bp-icon-btn svg{width:14px;height:14px}
+html.light .bp-icon-btn{background:rgba(0,0,0,.03);border-color:rgba(0,0,0,.08);color:rgba(10,10,10,.55)}
+html.light .bp-icon-btn:hover{background:rgba(0,0,0,.06);color:#0A0A0A}
+
+/* Premium filter pills replacing the old <select> trio */
+.bp-filters{display:flex;flex-wrap:wrap;gap:10px;margin-bottom:22px}
+.bp-filter{
+  display:inline-flex;align-items:center;gap:8px;
+  padding:9px 14px 9px 12px;
+  background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.08);
+  border-radius:10px;color:rgba(255,255,255,.85);font-size:13px;font-weight:500;
+  outline:none;cursor:pointer;transition:border-color .15s,background .15s;
+  appearance:none;-webkit-appearance:none;-moz-appearance:none;
+  background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='10' height='10' viewBox='0 0 12 12'><path d='M2 4l4 4 4-4' fill='none' stroke='%2394a3b8' stroke-width='1.6' stroke-linecap='round' stroke-linejoin='round'/></svg>");
+  background-repeat:no-repeat;background-position:right 12px center;
+  padding-right:32px
+}
+.bp-filter:hover{border-color:rgba(255,255,255,.18);background:rgba(255,255,255,.05)}
+.bp-filter:focus{border-color:rgba(255,140,90,.35);box-shadow:0 0 0 3px rgba(255,90,31,.12)}
+html.light .bp-filter{background:#fff;border-color:rgba(0,0,0,.1);color:#0A0A0A}
+html.light .bp-filter:hover{border-color:rgba(0,0,0,.18)}
+.bp-filter option{background:#0A0A0A;color:#E5E5E5}
 </style>
 
 <script src="assets/vendor/chart.umd.min.js"></script>
@@ -806,45 +963,51 @@ async function loadBots() {
     for (const b of filtered) {
       const stats = statsById.get(b.id) || { totalPnl: 0, winRate: null, totalTrades: 0 };
       const card = document.createElement('div');
-      card.className = 'card card-glow';
-      const pnlClass = stats.totalPnl > 0 ? 'text-green-400' : stats.totalPnl < 0 ? 'text-red-400' : 'text-slate-400';
-      const syms = Array.isArray(b.symbols) ? b.symbols.slice(0, 3).join(', ') : '—';
-      const modeBadge = b.tradingMode === 'live'
-        ? '<span class="text-xs px-2 py-0.5 rounded-full bg-red-500/15 text-red-400 cursor-pointer" data-mode="'+b.id+'" data-current="live" title="Переключить режим">LIVE</span>'
-        : '<span class="text-xs px-2 py-0.5 rounded-full bg-slate-500/15 text-slate-400 cursor-pointer" data-mode="'+b.id+'" data-current="paper" title="Переключить в LIVE">DEMO</span>';
-      card.classList.add('bot-card-click');
+      card.className = 'bot-card-pro bot-card-click';
+      const pnlClass = stats.totalPnl > 0 ? 'up' : stats.totalPnl < 0 ? 'down' : '';
+      const syms = Array.isArray(b.symbols) ? b.symbols.slice(0, 3).join(' · ') : '—';
+      const modeChipClass = b.tradingMode === 'live' ? 'bp-mode-live' : 'bp-mode-demo';
+      const modeChipLabel = b.tradingMode === 'live' ? 'LIVE' : 'DEMO';
+      const statusChipClass = b.isActive ? 'bp-status-on' : 'bp-status-off';
+      const statusChipLabel = b.isActive ? 'Active' : 'Paused';
       card.setAttribute('data-bot-open', b.id);
-      card.style.cursor = 'pointer';
       card.innerHTML = `
-        <div class="flex items-center justify-between mb-3">
-          <div class="flex items-center gap-3">
-            <div class="w-10 h-10 rounded-lg bg-indigo-500/10 flex items-center justify-center text-sm font-bold text-indigo-400">${(b.name||'B')[0].toUpperCase()}</div>
-            <div><div class="font-semibold">${escapeHtml(b.name)}</div><div class="text-xs text-slate-500">${b.exchange} · ${syms}</div></div>
+        <div class="bp-head">
+          <div class="bp-id">
+            <div class="bp-avatar">${(b.name||'B')[0].toUpperCase()}</div>
+            <div style="min-width:0;flex:1">
+              <div class="bp-name">${escapeHtml(b.name)}</div>
+              <div class="bp-sub"><strong>${escapeHtml(b.exchange)}</strong> · ${escapeHtml(syms)}</div>
+            </div>
           </div>
-          <div class="toggle ${b.isActive?'on':''}" data-bot="${b.id}" data-stop-open="1" style="cursor:pointer"></div>
+          <div class="bp-toggle ${b.isActive?'on':''}" data-bot="${b.id}" data-stop-open="1" title="${b.isActive?'Остановить':'Запустить'}"></div>
         </div>
-        <div class="flex items-center gap-2 mb-3">
-          <span class="text-xs px-2 py-0.5 rounded-full bg-cyan-500/15 text-cyan-400">${STRATEGY_LABELS[b.strategy]||b.strategy}</span>
-          ${modeBadge}
-          <span class="text-xs px-2 py-0.5 rounded-full ${b.isActive?'bg-green-500/15 text-green-400':'bg-slate-500/15 text-slate-400'}">${b.isActive?'Active':'Paused'}</span>
+        <div class="bp-chips">
+          <span class="bp-chip bp-strategy">${STRATEGY_LABELS[b.strategy]||b.strategy}</span>
+          <span class="bp-chip ${modeChipClass}" data-mode="${b.id}" data-current="${b.tradingMode==='live'?'live':'paper'}" data-stop-open="1" title="Переключить режим">${modeChipLabel}</span>
+          <span class="bp-chip ${statusChipClass}">${statusChipLabel}</span>
         </div>
-        <div class="bot-spark" id="bspark${b.id}" style="height:48px;margin:-4px 0 10px"></div>
-        <div class="grid grid-cols-3 gap-3 text-center text-sm mb-3">
-          <div><div class="text-xs text-slate-500">PnL</div><div class="${pnlClass} font-semibold">${Fmt.currency(stats.totalPnl)}</div></div>
-          <div><div class="text-xs text-slate-500">Win Rate</div><div class="font-semibold">${stats.winRate!==null?Fmt.percent(stats.winRate*100,{decimals:0}):'—'}</div></div>
-          <div><div class="text-xs text-slate-500">Trades</div><div class="font-semibold">${stats.totalTrades}</div></div>
+        <div class="bp-spark" id="bspark${b.id}"></div>
+        <div class="bp-stats">
+          <div class="bp-stat"><div class="bp-stat-label">PnL</div><div class="bp-stat-val ${pnlClass}">${Fmt.currency(stats.totalPnl)}</div></div>
+          <div class="bp-stat"><div class="bp-stat-label">Win rate</div><div class="bp-stat-val">${stats.winRate!==null?Fmt.percent(stats.winRate*100,{decimals:0}):'—'}</div></div>
+          <div class="bp-stat"><div class="bp-stat-label">Trades</div><div class="bp-stat-val">${stats.totalTrades}</div></div>
         </div>
-        <div class="text-xs text-slate-500 flex items-center justify-between flex-wrap gap-1">
-          <span>Lev ${b.leverage}x · Risk ${b.riskPct}% · Max ${b.maxOpenTrades}</span>
-          <div class="flex items-center gap-3">
-            <button data-tv="${b.id}" data-stop-open="1" class="text-indigo-400 hover:text-indigo-300 text-xs" title="TradingView webhook">TV</button>
-            <button data-delete="${b.id}" data-stop-open="1" class="text-red-400 hover:text-red-300 text-xs">Удалить</button>
+        <div class="bp-foot">
+          <div class="bp-meta"><b>${b.leverage}×</b> · Risk <b>${b.riskPct}%</b> · Max <b>${b.maxOpenTrades}</b></div>
+          <div class="bp-actions">
+            <button data-tv="${b.id}" data-stop-open="1" class="bp-icon-btn" title="TradingView webhook" aria-label="TV webhook">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 17 9 11 13 15 21 7"/><polyline points="14 7 21 7 21 14"/></svg>
+            </button>
+            <button data-delete="${b.id}" data-stop-open="1" class="bp-icon-btn bp-icon-danger" title="Удалить бота" aria-label="Удалить">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg>
+            </button>
           </div>
         </div>`;
       grid.appendChild(card);
     }
     // Wire toggles
-    grid.querySelectorAll('.toggle[data-bot]').forEach(el => {
+    grid.querySelectorAll('.bp-toggle[data-bot], .toggle[data-bot]').forEach(el => {
       el.addEventListener('click', async () => {
         const id = +el.getAttribute('data-bot');
         try { await API.toggleBot(id); Toast.success('Статус изменён'); loadBots(); }
@@ -1401,14 +1564,14 @@ async function drawSparkline(container, botId) {
     const r = await API.botEquity(botId);
     const pts = (r && r.points) || [];
     if (pts.length < 2) {
-      container.innerHTML = '<div style="font-size:10px;color:rgba(255,255,255,.3);text-align:center;padding-top:14px">Недостаточно данных для графика</div>';
+      container.innerHTML = '<div class="bp-spark-empty">Накопим данные после первых сделок</div>';
       return;
     }
     const pnls = pts.map(p => p.pnl);
     const min = Math.min(0, ...pnls);
     const max = Math.max(0, ...pnls);
     const range = (max - min) || 1;
-    const w = 280, h = 48, pad = 3;
+    const w = 320, h = 54, pad = 4;
     const dx = (w - pad * 2) / (pts.length - 1);
     const y = v => h - pad - ((v - min) / range) * (h - pad * 2);
     let path = '';
@@ -1419,14 +1582,23 @@ async function drawSparkline(container, botId) {
     const last = pnls[pnls.length - 1];
     const color = last > 0 ? '#4ade80' : last < 0 ? '#f87171' : '#FF8C5A';
     const areaPath = path + 'L' + (pad + (pts.length - 1) * dx).toFixed(1) + ',' + (h - pad) + ' L' + pad + ',' + (h - pad) + ' Z';
+    // Last point as a glowing endpoint dot — common in 3Commas/Veles cards.
+    const lastX = (pad + (pts.length - 1) * dx).toFixed(1);
+    const lastY = y(last).toFixed(1);
     container.innerHTML =
-      '<svg viewBox="0 0 ' + w + ' ' + h + '" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">' +
-        '<defs><linearGradient id="spg' + botId + '" x1="0" y1="0" x2="0" y2="1">' +
-          '<stop offset="0" stop-color="' + color + '" stop-opacity=".28"/>' +
-          '<stop offset="1" stop-color="' + color + '" stop-opacity="0"/>' +
-        '</linearGradient></defs>' +
+      '<svg width="100%" height="100%" viewBox="0 0 ' + w + ' ' + h + '" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg" style="display:block;overflow:visible">' +
+        '<defs>' +
+          '<linearGradient id="spg' + botId + '" x1="0" y1="0" x2="0" y2="1">' +
+            '<stop offset="0" stop-color="' + color + '" stop-opacity=".35"/>' +
+            '<stop offset="1" stop-color="' + color + '" stop-opacity="0"/>' +
+          '</linearGradient>' +
+          '<filter id="spgl' + botId + '"><feGaussianBlur stdDeviation="1.4"/></filter>' +
+        '</defs>' +
         '<path d="' + areaPath + '" fill="url(#spg' + botId + ')"/>' +
-        '<path d="' + path + '" fill="none" stroke="' + color + '" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>' +
+        '<path d="' + path + '" fill="none" stroke="' + color + '" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" filter="url(#spgl' + botId + ')" opacity=".35"/>' +
+        '<path d="' + path + '" fill="none" stroke="' + color + '" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>' +
+        '<circle cx="' + lastX + '" cy="' + lastY + '" r="3" fill="' + color + '"/>' +
+        '<circle cx="' + lastX + '" cy="' + lastY + '" r="6" fill="' + color + '" opacity=".25"/>' +
       '</svg>';
   } catch (_) {
     container.innerHTML = '';
