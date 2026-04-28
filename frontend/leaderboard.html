@@ -67,11 +67,11 @@
           <tr class="text-xs text-slate-500 uppercase tracking-wider">
             <th class="text-left p-3">#</th>
             <th class="text-left p-3">Трейдер</th>
-            <th class="text-right p-3">Total PnL</th>
-            <th class="text-right p-3">Win Rate</th>
-            <th class="text-right p-3">ROI %</th>
-            <th class="text-right p-3">Sharpe</th>
-            <th class="text-right p-3">Сделок</th>
+            <th class="text-right p-3"><span data-help="total-pnl">Total PnL</span></th>
+            <th class="text-right p-3"><span data-help="win-rate">Win Rate</span></th>
+            <th class="text-right p-3"><span data-help-text="ROI (Return On Investment) — процентная доходность от вложенного капитала. ROI 25% значит депозит вырос на четверть.">ROI %</span></th>
+            <th class="text-right p-3"><span data-help="sharpe">Sharpe</span></th>
+            <th class="text-right p-3"><span data-help="trades">Сделок</span></th>
             <th class="text-right p-3"></th>
           </tr>
         </thead>
@@ -89,6 +89,7 @@
 
 <script src="app.js"></script>
 <script src="shell.js?v=7" defer></script>
+<script src="help-tips.js" defer></script>
 <script>
 let currentPeriod = '30d';
 let currentSort = 'pnl';

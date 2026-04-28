@@ -293,8 +293,8 @@
     pill.href = 'wallet.html';
     pill.title = 'Твой аккаунт — перейти в Кошелёк';
     pill.innerHTML =
-      '<span class="shell-acct-mode" id="shellAcctMode">DEMO</span>'
-      + '<span class="shell-acct-val" id="shellAcctVal">—</span>'
+      '<span class="shell-acct-mode" id="shellAcctMode" data-help="demo">DEMO</span>'
+      + '<span class="shell-acct-val" id="shellAcctVal" data-help="equity">—</span>'
       + '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>';
     // Place in topbar-actions (RIGHT side), before the "+ Создать бота"
     // / Upgrade pills so the order reads: ACCOUNT · [+ BOT] · [UPGRADE] ·
@@ -423,6 +423,7 @@
     btn.setAttribute('aria-haspopup', 'true');
     btn.setAttribute('aria-expanded', 'false');
     btn.setAttribute('title', 'Подписка · ' + meta.label);
+    btn.setAttribute('data-help', 'plan');
     btn.style.setProperty('--plan-bg', meta.bg);
     btn.style.setProperty('--plan-fg', meta.fg);
     btn.style.setProperty('--plan-ring', meta.ring);

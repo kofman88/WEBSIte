@@ -88,9 +88,9 @@
   <div class="card" style="width:100%;max-width:450px;margin:16px">
     <div class="flex items-center justify-between mb-6"><h2 class="text-xl font-bold">Подключить биржу</h2><button onclick="document.getElementById('exModal').style.display='none'" class="text-slate-400 hover:text-white text-xl">&times;</button></div>
     <form class="space-y-4">
-      <div><label class="text-xs text-slate-500 block mb-1">Биржа</label><select class="w-full bg-slate-800/50 border border-slate-700 rounded-xl px-4 py-3 text-white outline-none"><option>BingX</option><option>OKX</option><option>Bybit</option><option>Binance</option></select></div>
-      <div><label class="text-xs text-slate-500 block mb-1">API Key</label><input placeholder="Ваш API ключ" class="w-full bg-slate-800/50 border border-slate-700 rounded-xl px-4 py-3 text-white outline-none"/></div>
-      <div><label class="text-xs text-slate-500 block mb-1">API Secret</label><input type="password" placeholder="Ваш API секрет" class="w-full bg-slate-800/50 border border-slate-700 rounded-xl px-4 py-3 text-white outline-none"/></div>
+      <div><label class="text-xs text-slate-500 block mb-1" data-help="exchange">Биржа</label><select class="w-full bg-slate-800/50 border border-slate-700 rounded-xl px-4 py-3 text-white outline-none"><option>BingX</option><option>OKX</option><option>Bybit</option><option>Binance</option></select></div>
+      <div><label class="text-xs text-slate-500 block mb-1" data-help="api-key">API Key</label><input placeholder="Ваш API ключ" class="w-full bg-slate-800/50 border border-slate-700 rounded-xl px-4 py-3 text-white outline-none"/></div>
+      <div><label class="text-xs text-slate-500 block mb-1" data-help-text="API Secret — секретная часть пары ключей. Хранится зашифрованной (AES-256-GCM) и никогда не покидает наш сервер. Никогда не показывай никому.">API Secret</label><input type="password" placeholder="Ваш API секрет" class="w-full bg-slate-800/50 border border-slate-700 rounded-xl px-4 py-3 text-white outline-none"/></div>
       <div class="p-3 bg-yellow-500/5 border border-yellow-500/20 rounded-xl text-xs text-yellow-400">Используйте ключи только для чтения + торговли. Не давайте права на вывод средств.</div>
       <button type="button" onclick="Toast.success('Биржа подключена!');document.getElementById('exModal').style.display='none'" class="w-full py-3 rounded-xl font-semibold text-white" style="background:linear-gradient(180deg,#FF7840 0%,#FF5A1F 60%,#C44610 100%);box-shadow:inset 0 1px 1px rgba(255,255,255,.28),inset 0 -1px 3px rgba(0,0,0,.6),0 4px 8px -2px rgba(0,0,0,.6),0 0 0 1px rgba(255,90,31,.35)">Подключить</button>
     </form>
@@ -99,6 +99,7 @@
 
 <script src="app.js"></script>
 <script src="shell.js?v=7" defer></script>
+<script src="help-tips.js" defer></script>
 <script>
 if(!Auth.requireAuth()) throw new Error('noauth');
 document.querySelectorAll('.sidebar-link[data-page="wallet"]').forEach(a => a.classList.add('active'));

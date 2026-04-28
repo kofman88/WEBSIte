@@ -39,11 +39,11 @@
 <main class="main-content">
   <!-- Totals -->
   <div class="grid grid-cols-2 lg:grid-cols-5 gap-4 mb-6" id="totalsBar">
-    <div class="stat-card"><div class="stat-card-label">Total PnL</div><div class="stat-card-value" id="totPnl">—</div></div>
-    <div class="stat-card"><div class="stat-card-label">Win Rate</div><div class="stat-card-value" id="totWinrate">—</div></div>
-    <div class="stat-card"><div class="stat-card-label">Profit Factor</div><div class="stat-card-value" id="totPf">—</div></div>
-    <div class="stat-card"><div class="stat-card-label">Сделок</div><div class="stat-card-value" id="totTrades">—</div></div>
-    <div class="stat-card"><div class="stat-card-label">Открыто</div><div class="stat-card-value" id="totOpen">—</div></div>
+    <div class="stat-card"><div class="stat-card-label" data-help="total-pnl">Total PnL</div><div class="stat-card-value" id="totPnl">—</div></div>
+    <div class="stat-card"><div class="stat-card-label" data-help="win-rate">Win Rate</div><div class="stat-card-value" id="totWinrate">—</div></div>
+    <div class="stat-card"><div class="stat-card-label" data-help="profit-factor">Profit Factor</div><div class="stat-card-value" id="totPf">—</div></div>
+    <div class="stat-card"><div class="stat-card-label" data-help="trades">Сделок</div><div class="stat-card-value" id="totTrades">—</div></div>
+    <div class="stat-card"><div class="stat-card-label" data-help="open-trades">Открыто</div><div class="stat-card-value" id="totOpen">—</div></div>
   </div>
 
   <!-- Portfolio -->
@@ -142,6 +142,7 @@
 
 <script src="app.js"></script>
 <script src="shell.js?v=7" defer></script>
+<script src="help-tips.js" defer></script>
 <script>
 if(!Auth.requireAuth()) throw new Error('noauth');
 

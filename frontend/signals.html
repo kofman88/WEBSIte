@@ -36,9 +36,9 @@
 <main class="main-content">
   <!-- Stats -->
   <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
-    <div class="stat-card"><div class="stat-card-label">Сигналов сегодня</div><div class="stat-card-value">—</div></div>
-    <div class="stat-card"><div class="stat-card-label">Win Rate</div><div class="stat-card-value text-green-400">—</div></div>
-    <div class="stat-card"><div class="stat-card-label">Ср. Confidence</div><div class="stat-card-value text-cyan-400">—</div></div>
+    <div class="stat-card"><div class="stat-card-label" data-help="signal">Сигналов сегодня</div><div class="stat-card-value">—</div></div>
+    <div class="stat-card"><div class="stat-card-label" data-help="win-rate">Win Rate</div><div class="stat-card-value text-green-400">—</div></div>
+    <div class="stat-card"><div class="stat-card-label" data-help="confidence">Ср. Confidence</div><div class="stat-card-value text-cyan-400">—</div></div>
   </div>
 
   <!-- Filters (all 6 strategies in Aura pill style) -->
@@ -118,6 +118,7 @@
 
 <script src="app.js"></script>
 <script src="shell.js?v=7" defer></script>
+<script src="help-tips.js" defer></script>
 <script>
 if(!Auth.requireAuth()) throw new Error('noauth');
 document.querySelectorAll('.sidebar-link[data-page="signals"]').forEach(a => a.classList.add('active'));

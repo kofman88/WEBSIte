@@ -335,25 +335,25 @@
   <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-4">
     <div class="stat-card liquid-glass">
       <div class="stat-card-icon" style="background:rgba(255,90,31,.4)"><svg aria-hidden="true" width="22" height="22" fill="none" stroke="#FF8C5A" stroke-width="2"><path d="M21 12V7H5a2 2 0 010-4h14v4M3 5v14a2 2 0 002 2h16v-5M18 12a2 2 0 100 4 2 2 0 000-4z"/></svg></div>
-      <div class="stat-card-label">Total PnL</div>
+      <div class="stat-card-label" data-help="total-pnl">Total PnL</div>
       <div class="stat-card-value" id="balanceVal">—</div>
       <div class="text-[10px] text-slate-500 mt-1">30д: <span id="pnl30">—</span></div>
     </div>
     <div class="stat-card liquid-glass">
       <div class="stat-card-icon" style="background:rgba(255,90,31,.18)"><svg aria-hidden="true" width="22" height="22" fill="none" stroke="#FF8C5A" stroke-width="2"><path d="M12 2a4 4 0 014 4v1h2a2 2 0 012 2v10a2 2 0 01-2 2H6a2 2 0 01-2-2V9a2 2 0 012-2h2V6a4 4 0 014-4z"/></svg></div>
-      <div class="stat-card-label">Активные боты</div>
+      <div class="stat-card-label" data-help-text="Активные боты — сколько твоих ботов сейчас в работе и ищут сигналы. Через дробь — общее количество созданных ботов.">Активные боты</div>
       <div class="stat-card-value" id="botsActive">—</div>
       <div class="text-[10px] text-slate-500 mt-1" id="botsSubline">—</div>
     </div>
     <div class="stat-card liquid-glass">
       <div class="stat-card-icon" style="background:rgba(43,89,54,.18)"><svg aria-hidden="true" width="22" height="22" fill="none" stroke="#66876E" stroke-width="2"><path d="M13 10V3L4 14h7v7l9-11h-7z"/></svg></div>
-      <div class="stat-card-label">Сигналов всего</div>
+      <div class="stat-card-label" data-help="signal">Сигналов всего</div>
       <div class="stat-card-value" id="signalsTotal">—</div>
       <div class="text-[10px] text-slate-500 mt-1">Сегодня: <span id="signalsToday">—</span></div>
     </div>
     <div class="stat-card liquid-glass">
       <div class="stat-card-icon" style="background:rgba(130,98,98,.18)"><svg aria-hidden="true" width="22" height="22" fill="none" stroke="#C8B9B9" stroke-width="2"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg></div>
-      <div class="stat-card-label">Win Rate</div>
+      <div class="stat-card-label" data-help="win-rate">Win Rate</div>
       <div class="stat-card-value" id="winRateVal">—</div>
       <div class="text-[10px] text-slate-500 mt-1"><span id="winLossRatio">—</span> побед/потерь</div>
     </div>
@@ -361,10 +361,10 @@
 
   <!-- Row 2 — 4 pro metrics -->
   <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-    <div class="stat-card"><div class="stat-card-label">Max Drawdown</div><div class="stat-card-value" id="maxDdVal">—</div><div class="text-[10px] text-slate-500 mt-1" id="maxDdSub">Пик-к-впадине</div></div>
-    <div class="stat-card"><div class="stat-card-label">Sharpe ratio</div><div class="stat-card-value" id="sharpeVal">—</div><div class="text-[10px] text-slate-500 mt-1">&gt;1.5 — хорошо, &gt;2 — отлично</div></div>
-    <div class="stat-card"><div class="stat-card-label">Profit Factor</div><div class="stat-card-value" id="pfVal">—</div><div class="text-[10px] text-slate-500 mt-1">Gross wins / losses</div></div>
-    <div class="stat-card"><div class="stat-card-label" id="streakLabel">Серия</div><div class="stat-card-value" id="streakVal">—</div><div class="text-[10px] text-slate-500 mt-1">Подряд</div></div>
+    <div class="stat-card"><div class="stat-card-label" data-help="max-drawdown">Max Drawdown</div><div class="stat-card-value" id="maxDdVal">—</div><div class="text-[10px] text-slate-500 mt-1" id="maxDdSub">Пик-к-впадине</div></div>
+    <div class="stat-card"><div class="stat-card-label" data-help="sharpe">Sharpe ratio</div><div class="stat-card-value" id="sharpeVal">—</div><div class="text-[10px] text-slate-500 mt-1">&gt;1.5 — хорошо, &gt;2 — отлично</div></div>
+    <div class="stat-card"><div class="stat-card-label" data-help="profit-factor">Profit Factor</div><div class="stat-card-value" id="pfVal">—</div><div class="text-[10px] text-slate-500 mt-1">Gross wins / losses</div></div>
+    <div class="stat-card"><div class="stat-card-label" id="streakLabel" data-help-text="Серия — сколько прибыльных или убыточных сделок подряд закрыл бот. Длинная win-стрик — стратегия в потоке. Длинная loss-стрик — повод включить kill-switch.">Серия</div><div class="stat-card-value" id="streakVal">—</div><div class="text-[10px] text-slate-500 mt-1">Подряд</div></div>
   </div>
 
   <!-- Row 3 — Risk budget + percentile + open positions count + best/worst -->
@@ -553,6 +553,7 @@
 
 <script src="app.js"></script>
 <script src="shell.js?v=7" defer></script>
+<script src="help-tips.js" defer></script>
 <script src="onboarding.js" defer></script>
 <script>
 if(!Auth.requireAuth()) throw new Error('noauth');

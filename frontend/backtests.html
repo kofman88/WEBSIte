@@ -38,7 +38,7 @@
     <h2 class="font-bold mb-4">Новый бэктест</h2>
     <form id="btForm" class="grid md:grid-cols-3 lg:grid-cols-6 gap-4">
       <div><label class="text-xs text-slate-500 block mb-1">Пара</label><input name="symbol" value="BTCUSDT" class="w-full bg-slate-800/50 border border-slate-700 rounded-lg px-3 py-2 text-sm text-white outline-none"/></div>
-      <div><label class="text-xs text-slate-500 block mb-1">Стратегия</label><select name="strategy" class="w-full bg-slate-800/50 border border-slate-700 rounded-lg px-3 py-2 text-sm text-white outline-none"><option>scalping</option><option>smc</option><option>gerchik</option></select></div>
+      <div><label class="text-xs text-slate-500 block mb-1" data-help="strategy">Стратегия</label><select name="strategy" class="w-full bg-slate-800/50 border border-slate-700 rounded-lg px-3 py-2 text-sm text-white outline-none"><option>scalping</option><option>smc</option><option>gerchik</option></select></div>
       <div><label class="text-xs text-slate-500 block mb-1">Таймфрейм</label><select name="timeframe" class="w-full bg-slate-800/50 border border-slate-700 rounded-lg px-3 py-2 text-sm text-white outline-none"><option>15m</option><option>1h</option><option>4h</option><option>1d</option></select></div>
       <div><label class="text-xs text-slate-500 block mb-1">Начало</label><input name="startDate" type="date" value="2025-01-01" class="w-full bg-slate-800/50 border border-slate-700 rounded-lg px-3 py-2 text-sm text-white outline-none"/></div>
       <div><label class="text-xs text-slate-500 block mb-1">Конец</label><input name="endDate" type="date" value="2025-12-31" class="w-full bg-slate-800/50 border border-slate-700 rounded-lg px-3 py-2 text-sm text-white outline-none"/></div>
@@ -55,6 +55,7 @@
 
 <script src="app.js"></script>
 <script src="shell.js?v=7" defer></script>
+<script src="help-tips.js" defer></script>
 <script>
 if(!Auth.requireAuth()) throw new Error('noauth');
 document.querySelectorAll('.sidebar-link[data-page="backtests"]').forEach(a => a.classList.add('active'));
@@ -100,14 +101,14 @@ function renderBacktest(bt) {
       ${statusBadge}
     </div>
     <div class="grid grid-cols-3 gap-3 text-center text-sm mb-4">
-      <div><div class="text-xs text-slate-500">PnL</div><div class="${pnlClass} font-bold">${Fmt.currency(r.totalPnlUsd)}</div></div>
-      <div><div class="text-xs text-slate-500">Win Rate</div><div class="font-bold">${r.winRatePct}%</div></div>
-      <div><div class="text-xs text-slate-500">Sharpe</div><div class="font-bold">${r.sharpeRatio}</div></div>
+      <div><div class="text-xs text-slate-500" data-help="pnl">PnL</div><div class="${pnlClass} font-bold">${Fmt.currency(r.totalPnlUsd)}</div></div>
+      <div><div class="text-xs text-slate-500" data-help="win-rate">Win Rate</div><div class="font-bold">${r.winRatePct}%</div></div>
+      <div><div class="text-xs text-slate-500" data-help="sharpe">Sharpe</div><div class="font-bold">${r.sharpeRatio}</div></div>
     </div>
     <div class="grid grid-cols-3 gap-3 text-center text-sm">
-      <div><div class="text-xs text-slate-500">Max DD</div><div class="text-red-400">-${r.maxDrawdownPct}%</div></div>
-      <div><div class="text-xs text-slate-500">PF</div><div>${r.profitFactor || '—'}</div></div>
-      <div><div class="text-xs text-slate-500">Trades</div><div>${r.totalTrades}</div></div>
+      <div><div class="text-xs text-slate-500" data-help="max-drawdown">Max DD</div><div class="text-red-400">-${r.maxDrawdownPct}%</div></div>
+      <div><div class="text-xs text-slate-500" data-help="profit-factor">PF</div><div>${r.profitFactor || '—'}</div></div>
+      <div><div class="text-xs text-slate-500" data-help="trades">Trades</div><div>${r.totalTrades}</div></div>
     </div>
     <div class="mt-4" style="position:relative;height:140px"><canvas id="btChart${bt.id}"></canvas></div>`;
   setTimeout(() => drawEquityChart('btChart' + bt.id, r.equityCurve), 10);
