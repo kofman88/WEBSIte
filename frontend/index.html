@@ -1239,7 +1239,10 @@
     border: 1px solid rgba(255, 255, 255, .14);
     border-radius: 14px;
     padding: 20px 22px;
-    z-index: 9990;
+    /* z-index must beat the support-widget bubble (9998) — on mobile the
+       banner stretches edge-to-edge and the bubble (right:22px bottom:22px)
+       sat on top of the "Принять" button, swallowing taps. */
+    z-index: 10001;
     box-shadow:
       0 20px 60px -10px rgba(0, 0, 0, .8),
       0 0 0 1px rgba(0, 0, 0, .4),

@@ -280,6 +280,7 @@
   };
 
   var root = document.createElement('div');
+  root.id = 'chmSupRoot';
   root.innerHTML =
     '<style>' + css + '</style>' +
     '<button class="chm-sup-btn" id="chmSupBtn" aria-label="Поддержка">' +
@@ -301,6 +302,25 @@
       '</div>' +
     '</div>';
   document.body.appendChild(root);
+
+  // Hide the floating bubble while the cookie consent banner is up — the
+  // bubble (right:22 bottom:22) sits exactly on top of the banner's
+  // "Принять" button on mobile and was eating taps. Re-show as soon as
+  // the user accepts/declines (or the banner element disappears).
+  var supRoot = document.getElementById('chmSupRoot');
+  function _refreshSupVisibility(){
+    var banner = document.getElementById('cookieBanner');
+    var bannerVisible = banner && banner.style.display && banner.style.display !== 'none';
+    if (supRoot) supRoot.style.display = bannerVisible ? 'none' : '';
+  }
+  _refreshSupVisibility();
+  // Observe the banner so we re-check when the inline `display` flips.
+  try {
+    var bannerEl = document.getElementById('cookieBanner');
+    if (bannerEl && window.MutationObserver) {
+      new MutationObserver(_refreshSupVisibility).observe(bannerEl, { attributes: true, attributeFilter: ['style'] });
+    }
+  } catch (_) {}
 
   var btn = document.getElementById('chmSupBtn');
   var panel = document.getElementById('chmSupPanel');
