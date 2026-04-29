@@ -124,6 +124,123 @@
     injectTopbarQuickActions(plan);
     injectAccountPill(user);
     injectPlanPill(plan);
+    injectAvatarMenu(user);
+  }
+
+  // ── Avatar dropdown menu ─────────────────────────────────────────────
+  // Consolidates lang / theme / notifications / settings / logout into
+  // one click-target — the avatar circle. Reduces the right-side rail
+  // from a 4-chip strip to a single chip + popup, matching how 3Commas /
+  // Bybit handle their account dropdowns.
+  function injectAvatarMenu(user) {
+    const avatar = document.querySelector('.topbar-avatar');
+    if (!avatar || avatar.dataset.menuWired === '1') return;
+    avatar.dataset.menuWired = '1';
+    avatar.style.cursor = 'pointer';
+    avatar.setAttribute('role', 'button');
+    avatar.setAttribute('aria-haspopup', 'menu');
+    avatar.setAttribute('aria-expanded', 'false');
+    avatar.setAttribute('tabindex', '0');
+    document.body.classList.add('shell-avatar-menu');
+
+    const email = (user && user.email) || '';
+    const name = email.split('@')[0] || 'User';
+
+    const menu = document.createElement('div');
+    menu.className = 'avatar-menu';
+    menu.setAttribute('role', 'menu');
+    menu.setAttribute('aria-hidden', 'true');
+    menu.innerHTML =
+      '<div class="avatar-menu-head">'
+      +   '<div class="avatar-menu-avatar">' + (name[0] || 'U').toUpperCase() + '</div>'
+      +   '<div class="avatar-menu-id">'
+      +     '<div class="avatar-menu-name">' + escapeHtml(name) + '</div>'
+      +     '<div class="avatar-menu-email">' + escapeHtml(email) + '</div>'
+      +   '</div>'
+      + '</div>'
+      + '<div class="avatar-menu-row" data-action="lang">'
+      +   '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M2 12h20M12 2a15.3 15.3 0 010 20M12 2a15.3 15.3 0 000 20"/></svg>'
+      +   '<span class="avatar-menu-label">' + (getLang() === 'ru' ? 'Язык' : 'Language') + '</span>'
+      +   '<span class="avatar-menu-value" id="avMenuLang">' + (LANG_LABEL[getLang()] || 'RU') + '</span>'
+      + '</div>'
+      + '<div class="avatar-menu-row" data-action="theme">'
+      +   '<svg id="avMenuThemeIcon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">' + (getTheme() === 'light' ? '<circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/>' : '<path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z"/>') + '</svg>'
+      +   '<span class="avatar-menu-label">' + (getLang() === 'ru' ? 'Тема' : 'Theme') + '</span>'
+      +   '<span class="avatar-menu-value" id="avMenuTheme">' + (getTheme() === 'light' ? '☀️' : '🌙') + '</span>'
+      + '</div>'
+      + '<a class="avatar-menu-row" href="settings.html" data-action="notifications">'
+      +   '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9M13.73 21a2 2 0 01-3.46 0"/></svg>'
+      +   '<span class="avatar-menu-label">' + (getLang() === 'ru' ? 'Уведомления' : 'Notifications') + '</span>'
+      +   '<span class="avatar-menu-badge" id="avMenuNotifyBadge"></span>'
+      + '</a>'
+      + '<a class="avatar-menu-row" href="settings.html">'
+      +   '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 01-2.83 2.83l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 008 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83-2.83l.06-.06a1.65 1.65 0 00.33-1.82 1.65 1.65 0 00-1.51-1H2a2 2 0 010-4h.09A1.65 1.65 0 004.6 8a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 012.83-2.83l.06.06a1.65 1.65 0 001.82.33H9a1.65 1.65 0 001-1.51V2a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 2.83l-.06.06a1.65 1.65 0 00-.33 1.82V9a1.65 1.65 0 001.51 1H22a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z"/></svg>'
+      +   '<span class="avatar-menu-label">' + (getLang() === 'ru' ? 'Настройки' : 'Settings') + '</span>'
+      + '</a>'
+      + '<div class="avatar-menu-divider"></div>'
+      + '<button type="button" class="avatar-menu-row avatar-menu-logout" data-action="logout">'
+      +   '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4M16 17l5-5-5-5M21 12H9"/></svg>'
+      +   '<span class="avatar-menu-label">' + (getLang() === 'ru' ? 'Выйти' : 'Sign out') + '</span>'
+      + '</button>';
+    document.body.appendChild(menu);
+
+    let open = false;
+    function position() {
+      const r = avatar.getBoundingClientRect();
+      const mr = menu.getBoundingClientRect();
+      menu.style.top = (r.bottom + window.scrollY + 8) + 'px';
+      menu.style.left = Math.max(8, r.right + window.scrollX - mr.width) + 'px';
+    }
+    function show() {
+      open = true;
+      menu.classList.add('show');
+      menu.setAttribute('aria-hidden', 'false');
+      avatar.setAttribute('aria-expanded', 'true');
+      requestAnimationFrame(position);
+    }
+    function hide() {
+      open = false;
+      menu.classList.remove('show');
+      menu.setAttribute('aria-hidden', 'true');
+      avatar.setAttribute('aria-expanded', 'false');
+    }
+    function toggle() { open ? hide() : show(); }
+
+    avatar.addEventListener('click', (e) => { e.preventDefault(); e.stopPropagation(); toggle(); });
+    avatar.addEventListener('keydown', (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); toggle(); } });
+    document.addEventListener('click', (e) => { if (open && !menu.contains(e.target) && e.target !== avatar) hide(); });
+    document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && open) hide(); });
+    window.addEventListener('resize', () => { if (open) position(); });
+    window.addEventListener('scroll', () => { if (open) hide(); }, { passive: true });
+
+    // Action handlers
+    menu.addEventListener('click', (e) => {
+      const row = e.target.closest('[data-action]');
+      if (!row) return;
+      const a = row.getAttribute('data-action');
+      if (a === 'lang') {
+        e.preventDefault();
+        setLang(_nextLang(getLang()));
+        applyLang();
+        const lv = document.getElementById('avMenuLang');
+        if (lv) lv.textContent = LANG_LABEL[getLang()] || 'RU';
+      } else if (a === 'theme') {
+        e.preventDefault();
+        setTheme(getTheme() === 'light' ? 'dark' : 'light');
+        applyTheme();
+        const tv = document.getElementById('avMenuTheme');
+        if (tv) tv.textContent = getTheme() === 'light' ? '☀️' : '🌙';
+        const ti = document.getElementById('avMenuThemeIcon');
+        if (ti) ti.innerHTML = getTheme() === 'light' ? '<circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/>' : '<path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z"/>';
+      } else if (a === 'logout') {
+        e.preventDefault();
+        try { window.Auth && Auth.logout(); } catch (_) { location.href = '/'; }
+      }
+    });
+  }
+
+  function escapeHtml(s) {
+    return String(s || '').replace(/[&<>"']/g, (c) => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'})[c]);
   }
 
   // Updates the plan-dependent pieces: the sidebar sub-badge text (if the

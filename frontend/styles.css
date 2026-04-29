@@ -2004,3 +2004,107 @@ html.light .help-tip-pop {
     0 0 0 1px rgba(255,90,31,.1);
 }
 html.light .help-tip-pop strong { color: #0A0A0A; }
+
+/* ── Avatar dropdown menu (premium consolidated nav) ──────────────────
+   Replaces standalone EN / theme / bell topbar buttons with a single
+   menu that drops from the avatar circle. Body marker
+   `.shell-avatar-menu` (set by shell.js when injected) hides the
+   redundant standalone buttons. */
+body.shell-avatar-menu #shellLang,
+body.shell-avatar-menu #shellTheme,
+body.shell-avatar-menu .topbar-notification {
+  display: none !important;
+}
+.avatar-menu {
+  position: absolute;
+  z-index: 9999;
+  min-width: 260px;
+  padding: 8px;
+  background: linear-gradient(180deg, #161618 0%, #0e0e10 100%);
+  border: 1px solid rgba(255,255,255,.08);
+  border-radius: 14px;
+  box-shadow:
+    0 1px 0 rgba(255,255,255,.05) inset,
+    0 24px 48px -12px rgba(0,0,0,.7),
+    0 0 0 1px rgba(255,140,90,.06);
+  font-family: 'Inter', sans-serif;
+  opacity: 0;
+  transform: translateY(-6px) scale(.98);
+  pointer-events: none;
+  transition: opacity .18s cubic-bezier(.4,0,.2,1), transform .18s cubic-bezier(.4,0,.2,1);
+}
+.avatar-menu.show { opacity: 1; transform: translateY(0) scale(1); pointer-events: auto; }
+html.light .avatar-menu {
+  background: #fff;
+  border-color: rgba(0,0,0,.08);
+  box-shadow: 0 24px 48px -12px rgba(0,0,0,.18), 0 0 0 1px rgba(0,0,0,.04);
+}
+
+.avatar-menu-head {
+  display: flex; align-items: center; gap: 12px;
+  padding: 10px 12px 14px;
+  border-bottom: 1px solid rgba(255,255,255,.06);
+  margin-bottom: 6px;
+}
+html.light .avatar-menu-head { border-bottom-color: rgba(0,0,0,.06); }
+.avatar-menu-avatar {
+  width: 38px; height: 38px; border-radius: 50%;
+  background: linear-gradient(135deg, #FF7840, #FF5A1F 60%, #C44610);
+  color: #fff; font-weight: 600; font-size: 15px;
+  display: inline-flex; align-items: center; justify-content: center;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.3), 0 4px 10px -2px rgba(255,90,31,.4);
+}
+.avatar-menu-id { min-width: 0; flex: 1; }
+.avatar-menu-name {
+  font-size: 14px; font-weight: 600; color: #fff;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+html.light .avatar-menu-name { color: #0A0A0A; }
+.avatar-menu-email {
+  font-size: 12px; color: rgba(255,255,255,.5);
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-top: 1px;
+}
+html.light .avatar-menu-email { color: rgba(10,10,10,.55); }
+
+.avatar-menu-row {
+  display: flex; align-items: center; gap: 10px;
+  width: 100%; padding: 10px 12px;
+  background: transparent; border: 0; border-radius: 10px;
+  color: rgba(255,255,255,.85);
+  font-family: 'Inter', sans-serif; font-size: 13.5px; font-weight: 500;
+  text-decoration: none; cursor: pointer;
+  transition: background .15s ease, color .15s ease;
+  text-align: left;
+}
+.avatar-menu-row:hover {
+  background: rgba(255,255,255,.04);
+  color: #fff;
+}
+html.light .avatar-menu-row { color: rgba(10,10,10,.78); }
+html.light .avatar-menu-row:hover { background: rgba(0,0,0,.03); color: #0A0A0A; }
+.avatar-menu-row svg { width: 16px; height: 16px; flex-shrink: 0; opacity: .7; }
+.avatar-menu-row:hover svg { opacity: 1; }
+.avatar-menu-label { flex: 1; }
+.avatar-menu-value {
+  font-size: 12px; color: rgba(255,255,255,.55);
+  font-variant-numeric: tabular-nums;
+  letter-spacing: .04em;
+}
+html.light .avatar-menu-value { color: rgba(10,10,10,.5); }
+.avatar-menu-badge {
+  display: none;        /* shown only when count > 0 */
+  min-width: 18px; height: 18px; padding: 0 6px;
+  background: linear-gradient(180deg, #FF7840, #FF5A1F);
+  color: #fff; font-size: 10px; font-weight: 700;
+  border-radius: 9px; align-items: center; justify-content: center;
+}
+.avatar-menu-divider {
+  height: 1px;
+  background: rgba(255,255,255,.06);
+  margin: 6px 4px;
+}
+html.light .avatar-menu-divider { background: rgba(0,0,0,.06); }
+.avatar-menu-logout { color: #fca5a5; }
+.avatar-menu-logout:hover { background: rgba(239,68,68,.12); color: #fca5a5; }
+html.light .avatar-menu-logout { color: #b91c1c; }
+html.light .avatar-menu-logout:hover { background: rgba(239,68,68,.08); color: #b91c1c; }
