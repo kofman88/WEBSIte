@@ -440,11 +440,9 @@ html.light .shell-side-toggle:hover { background: rgba(255,90,31,.08); border-co
 }
 
 body.sidebar-collapsed .sidebar {
-  width: 64px;
+  width: 64px !important;
   overflow: hidden;
-  /* All inner padding/margin removed so each .sidebar-link can use the
-     full 64-px width and self-center its 20-px svg icon. */
-  padding: 0;
+  padding: 0 !important;
 }
 /* Hard-clip everything inside the collapsed rail so wide children
    (badges, promos, sub-text, multi-line tooltips) can't bleed out
@@ -457,59 +455,60 @@ body.sidebar-collapsed .sidebar-footer > * {
   box-sizing: border-box;
 }
 body.sidebar-collapsed .sidebar-nav {
-  padding: 8px 0;
-  gap: 6px;       /* even, breathing vertical rhythm */
-  align-items: center;
+  padding: 8px 0 !important;
+  gap: 6px;
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
 }
 body.sidebar-collapsed .sidebar-footer {
-  padding: 8px 0;
+  padding: 8px 0 !important;
   border-top: 1px solid var(--border);
-  align-items: center;
-  display: flex;
-  flex-direction: column;
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
   gap: 6px;
 }
-/* Each link is now a 40×40 centered square inside the 64-px rail.
-   font-size:0 + line-height:0 collapse any direct text node (some
-   pages render labels as bare text inside <a>, no <span> wrapper),
-   then SVG re-enables its own intrinsic sizing. justify/align:center
-   pin the icon dead-centre regardless of base padding inheritance. */
-body.sidebar-collapsed .sidebar-link {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  width: 40px;
-  height: 40px;
-  margin: 0;
-  padding: 0;
-  border-radius: 10px;
-  font-size: 0;
-  line-height: 0;
+/* 40×40 centered chip, dead-centre in the 64-px rail. Both
+   `align-items:center` (on the parent flex column) AND `margin:0 auto`
+   (on the link itself) — belt + braces against any inherited
+   align-self / left-aligned base rule from the expanded mode. */
+body.sidebar-collapsed .sidebar-link,
+body.sidebar-collapsed .sidebar-footer .sidebar-link {
+  display: flex !important;
+  justify-content: center !important;
+  align-items: center !important;
+  width: 40px !important;
+  height: 40px !important;
+  margin: 0 auto !important;
+  padding: 0 !important;
+  border-radius: 10px !important;
+  font-size: 0 !important;
+  line-height: 0 !important;
   white-space: nowrap;
-  box-sizing: border-box;
+  box-sizing: border-box !important;
   flex-shrink: 0;
+  align-self: center !important;
   transition: background .18s ease, transform .18s ease, box-shadow .18s ease;
 }
 body.sidebar-collapsed .sidebar-link:hover {
   background: rgba(255, 255, 255, .06);
   transform: translateY(-1px);
 }
-/* Premium active-state in collapsed: gradient glow halo + inset
-   highlight, matches the orange brand. Replaces the wide gradient
-   strip from the expanded state which looks awkward in 40-px square. */
 body.sidebar-collapsed .sidebar-link.active {
-  background: linear-gradient(135deg, rgba(255,90,31,.22), rgba(255,140,90,.08));
+  background: linear-gradient(135deg, rgba(255,90,31,.22), rgba(255,140,90,.08)) !important;
   box-shadow:
     inset 0 1px 0 rgba(255,255,255,.08),
     inset 0 0 0 1px rgba(255,140,90,.32),
-    0 4px 14px -4px rgba(255,90,31,.45);
+    0 4px 14px -4px rgba(255,90,31,.45) !important;
 }
 body.sidebar-collapsed .sidebar-link > svg {
-  font-size: initial;
-  line-height: initial;
+  font-size: initial !important;
+  line-height: initial !important;
   flex-shrink: 0;
-  width: 20px;
-  height: 20px;
+  width: 20px !important;
+  height: 20px !important;
+  display: block !important;
 }
 body.sidebar-collapsed .sidebar-link > *:not(svg),
 body.sidebar-collapsed .sidebar-beta,
