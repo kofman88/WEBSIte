@@ -428,31 +428,56 @@ html.light .shell-side-toggle:hover { background: rgba(255,90,31,.08); border-co
 .topbar,
 .main-content { transition: width .2s ease, left .2s ease, margin-left .2s ease, padding .2s ease; }
 
-body.sidebar-collapsed .sidebar { width: 64px; overflow: hidden; }
+body.sidebar-collapsed .sidebar {
+  width: 64px;
+  overflow: hidden;
+  /* All inner padding/margin removed so each .sidebar-link can use the
+     full 64-px width and self-center its 20-px svg icon. */
+  padding: 0;
+}
 /* Hard-clip everything inside the collapsed rail so wide children
    (badges, promos, sub-text, multi-line tooltips) can't bleed out
    to the right of the 64-px column while sidebar.js animates. */
 body.sidebar-collapsed .sidebar > *,
 body.sidebar-collapsed .sidebar-nav > *,
-body.sidebar-collapsed .sidebar-footer > * { max-width: 64px; overflow: hidden; }
-body.sidebar-collapsed .sidebar-nav { padding: 8px 0; }
-/* Show ONLY the SVG icon when collapsed.
-   Earlier we relied on `> span { display:none }`, but some pages
-   render labels as a bare text node inside <a> (no span wrapper),
-   so the text leaked through and got partially clipped (Termin,
-   Copy, Подпис...). This is bullet-proof: font-size:0 collapses
-   text nodes, then everything that isn't an svg gets display:none. */
+body.sidebar-collapsed .sidebar-footer > * {
+  max-width: 64px;
+  overflow: hidden;
+  box-sizing: border-box;
+}
+body.sidebar-collapsed .sidebar-nav {
+  padding: 8px 0;
+  gap: 6px;       /* even, breathing vertical rhythm */
+}
+body.sidebar-collapsed .sidebar-footer {
+  padding: 8px 0;
+  border-top: 1px solid var(--border);
+}
+/* Each link is now a 40×40 centered square inside the 64-px rail.
+   font-size:0 + line-height:0 collapse any direct text node (some
+   pages render labels as bare text inside <a>, no <span> wrapper),
+   then SVG re-enables its own intrinsic sizing. justify/align:center
+   pin the icon dead-centre regardless of base padding inheritance. */
 body.sidebar-collapsed .sidebar-link {
+  display: flex;
   justify-content: center;
-  padding: 12px 0;
+  align-items: center;
+  width: 40px;
+  height: 40px;
+  margin: 0 auto;
+  padding: 0;
+  border-radius: 10px;
   font-size: 0;
   line-height: 0;
   white-space: nowrap;
+  box-sizing: border-box;
 }
 body.sidebar-collapsed .sidebar-link > svg {
   font-size: initial;
   line-height: initial;
   flex-shrink: 0;
+  width: 20px;
+  height: 20px;
 }
 body.sidebar-collapsed .sidebar-link > *:not(svg),
 body.sidebar-collapsed .sidebar-beta,
