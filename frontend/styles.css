@@ -1347,6 +1347,24 @@ html.light .shell-tick-price, html.light .shell-fng-value { color: #0A0A0A !impo
 @media (max-width: 1024px) { #tickEth { display: none; } }
 @media (max-width: 900px)  { .shell-market { display: none; } }
 
+/* Mid-range responsive (1024-1500 px): keep the topbar from spilling
+   off-screen by tightening padding + reducing the BTC/ETH ticker
+   gap. Also lets stat-card grids breathe. */
+@media (max-width: 1500px) {
+  .topbar { padding: 0 16px; }
+  .topbar-actions { gap: 8px; }
+  .main-content { padding-left: 24px; padding-right: 24px; }
+}
+@media (max-width: 1300px) {
+  .topbar { padding: 0 12px; }
+  .topbar-actions { gap: 6px; }
+  .main-content { padding-left: 16px; padding-right: 16px; }
+  /* Drop the search-pill width so it doesn't push action buttons off-screen */
+  .topbar-search { max-width: 220px; }
+  .stat-card { padding: 18px; }
+  .stat-card-icon { width: 36px; height: 36px; }
+}
+
 /* ── Dashboard action bar: status pill + Quick Trade + Pause all ── */
 .chm-status {
   display: inline-flex;
@@ -1534,11 +1552,16 @@ html.light .chm-status[data-state="down"] { border-color: rgba(220,38,38,.35) !i
 }
 .stat-card-value {
   font-family: var(--font-sans);
-  font-size: 30px;
-  line-height: 36px;
+  /* clamp shrinks the number on narrow grid cells (1200-1400 px range,
+     where 4 columns squeeze each card to ~250 px). Was a fixed 30 px,
+     which pushed values like "$1,386.36 · 13.9%" into a second line. */
+  font-size: clamp(20px, 1.85vw, 30px);
+  line-height: 1.2;
   font-weight: 600;
   letter-spacing: -0.025em;
   color: #fff;
+  word-break: break-word;
+  font-variant-numeric: tabular-nums;
 }
 .stat-card-label {
   font-family: var(--font-sans);
