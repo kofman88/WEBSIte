@@ -646,6 +646,7 @@
     /* ── Utility ── */
     .divider-v{width:1px;height:24px;background:var(--border)}
   </style>
+<script src="/yandex-metrika.js" async></script><noscript><div><img src="https://mc.yandex.ru/watch/108973987" style="position:absolute;left:-9999px" alt=""/></div></noscript>
 </head>
 <body>
 
@@ -1607,7 +1608,7 @@ document.getElementById('loginForm')?.addEventListener('submit',async e=>{
       setTimeout(()=>tform?.querySelector('input[name=code]')?.focus(),150);
       return;
     }
-    closeModals();_notify.ok('Вход выполнен!');setTimeout(()=>location.href=_nextUrl(),500);
+    closeModals();_notify.ok('Вход выполнен!');try{window.chmTrack&&window.chmTrack('login_success')}catch(_){}setTimeout(()=>location.href=_nextUrl(),500);
   }
   catch(err){_notify.err(err.message||'Ошибка входа. Проверьте подключение.')}
   finally{if(btn)btn.disabled=false}
@@ -1622,7 +1623,7 @@ document.getElementById('tfaForm')?.addEventListener('submit',async e=>{
     let data={};try{data=await r.json()}catch(_){}
     if(!r.ok)throw new Error(data.error||'Неверный код');
     if(typeof Auth!=='undefined'){Auth.setTokens({accessToken:data.accessToken,refreshToken:data.refreshToken});Auth.setUser(data.user)}
-    closeModals();_notify.ok('Вход выполнен!');setTimeout(()=>location.href=_nextUrl(),500);
+    closeModals();_notify.ok('Вход выполнен!');try{window.chmTrack&&window.chmTrack('login_success')}catch(_){}setTimeout(()=>location.href=_nextUrl(),500);
   }catch(err){_notify.err(err.message||'Неверный код')}
   finally{if(btn)btn.disabled=false}
 });
@@ -1661,7 +1662,7 @@ document.getElementById('registerForm')?.addEventListener('submit',async e=>{
   e.preventDefault();const fd=new FormData(e.target);
   if(fd.get('password')!==fd.get('password2')){_notify.err('Пароли не совпадают');return}
   const btn=e.target.querySelector('button[type=submit]');if(btn)btn.disabled=true;
-  try{await _authCall('/auth/register',{email:fd.get('email'),password:fd.get('password'),referralCode:_refCode(),givenName:fd.get('givenName')||undefined,familyName:fd.get('familyName')||undefined});try{localStorage.removeItem('chm_ref_code')}catch(e){}closeModals();_notify.ok('Аккаунт создан!');setTimeout(()=>location.href=_nextUrl(),500)}
+  try{await _authCall('/auth/register',{email:fd.get('email'),password:fd.get('password'),referralCode:_refCode(),givenName:fd.get('givenName')||undefined,familyName:fd.get('familyName')||undefined});try{localStorage.removeItem('chm_ref_code')}catch(e){}closeModals();_notify.ok('Аккаунт создан!');try{window.chmTrack&&window.chmTrack('register_success')}catch(_){}setTimeout(()=>location.href=_nextUrl(),500)}
   catch(err){_notify.err(err.message||'Ошибка регистрации. Проверьте подключение.')}
   finally{if(btn)btn.disabled=false}
 });
