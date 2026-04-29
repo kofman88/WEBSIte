@@ -1815,26 +1815,29 @@ tr:hover td { background: rgba(255, 255, 255, 0.02); }
   color: rgba(255,255,255,.55);
   border-radius: 50%;
   cursor: help;
-  /* Vertical alignment: most labels are uppercase 10-px Inter and the
-     cap-height baseline sits a couple of pixels below mid-line; nudge
-     the ?-icon down 2 px so it sits visually centred on the cap line.
-     Combined with the :has(.help-tip) flex rule below this gives
-     pixel-perfect alignment whether the parent is inline or flex. */
-  vertical-align: -2px;
+  vertical-align: middle;
   transition: background .15s, color .15s, transform .15s;
   outline: none;
   flex-shrink: 0;
 }
-/* Whenever a label/span sprouts a help-tip child, switch the host to
-   inline-flex with center alignment + small gap. Eliminates the residual
-   baseline drift on tight-letter-spacing uppercase labels (Max Drawdown,
-   Profit Factor, Sharpe, etc.). */
-*:has(> .help-tip) {
+/* Center the ?-icon on the label baseline ONLY for label-style hosts.
+   The earlier `*:has(> .help-tip)` was too broad and forced flex on
+   the topbar account/plan pills (DEMO/Free/EN/theme), shoving the
+   right-side icons out of the page. Whitelist the actual label
+   containers instead — stat-card-label, bp-stat-label, table headers,
+   form labels — where flex-centering is desired. */
+.stat-card-label:has(> .help-tip),
+.bp-stat-label:has(> .help-tip),
+th:has(> .help-tip),
+label:has(> .help-tip) {
   display: inline-flex;
   align-items: center;
   gap: 6px;
 }
-*:has(> .help-tip) .help-tip {
+.stat-card-label:has(> .help-tip) > .help-tip,
+.bp-stat-label:has(> .help-tip) > .help-tip,
+th:has(> .help-tip) > .help-tip,
+label:has(> .help-tip) > .help-tip {
   margin-left: 0;
   vertical-align: baseline;
 }
