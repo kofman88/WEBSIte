@@ -436,8 +436,25 @@ body.sidebar-collapsed .sidebar > *,
 body.sidebar-collapsed .sidebar-nav > *,
 body.sidebar-collapsed .sidebar-footer > * { max-width: 64px; overflow: hidden; }
 body.sidebar-collapsed .sidebar-nav { padding: 8px 0; }
-body.sidebar-collapsed .sidebar-link { justify-content: center; padding: 12px 0; }
-body.sidebar-collapsed .sidebar-link > span,
+/* Show ONLY the SVG icon when collapsed.
+   Earlier we relied on `> span { display:none }`, but some pages
+   render labels as a bare text node inside <a> (no span wrapper),
+   so the text leaked through and got partially clipped (Termin,
+   Copy, Подпис...). This is bullet-proof: font-size:0 collapses
+   text nodes, then everything that isn't an svg gets display:none. */
+body.sidebar-collapsed .sidebar-link {
+  justify-content: center;
+  padding: 12px 0;
+  font-size: 0;
+  line-height: 0;
+  white-space: nowrap;
+}
+body.sidebar-collapsed .sidebar-link > svg {
+  font-size: initial;
+  line-height: initial;
+  flex-shrink: 0;
+}
+body.sidebar-collapsed .sidebar-link > *:not(svg),
 body.sidebar-collapsed .sidebar-beta,
 body.sidebar-collapsed .sidebar-promo,
 body.sidebar-collapsed .sidebar-footer-extras,
