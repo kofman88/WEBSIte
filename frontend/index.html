@@ -258,6 +258,83 @@
     .pill-ghost{background:linear-gradient(180deg,rgba(255,255,255,.06),rgba(255,255,255,.02));box-shadow:inset 0 1px 1px rgba(255,255,255,.1),inset 0 -1px 2px rgba(0,0,0,.4),0 1px 2px rgba(0,0,0,.4);color:rgba(255,255,255,.92)}
     .pill-ghost:hover{background:linear-gradient(180deg,rgba(255,255,255,.1),rgba(255,255,255,.03));transform:translateY(-1px)}
     .pill-dark{background:linear-gradient(180deg,#1e1e1e,#121212);box-shadow:inset 0 2px 2px rgba(255,255,255,.15),inset 0 -2px 8px rgba(0,0,0,.8),0 12px 24px -6px rgba(0,0,0,.9)}
+
+    /* ── Hero Telegram-bot card ──────────────────────────────────────────
+       Premium pill-shaped link sitting just under the two main CTAs.
+       Clickable as a whole; doubles as a teaser ("сигналы онлайн")
+       and a CTA ("Открыть бота"). Telegram-blue accent so it doesn't
+       compete with the orange brand pill above. */
+    .hero-tg{
+      display:inline-flex;align-items:center;gap:14px;
+      margin-top:20px;padding:10px 14px 10px 12px;
+      background:
+        linear-gradient(135deg,rgba(35,158,224,.14) 0%,rgba(35,158,224,.05) 50%,rgba(255,255,255,.025) 100%);
+      border:1px solid rgba(35,158,224,.28);
+      border-radius:999px;
+      box-shadow:
+        inset 0 1px 0 rgba(255,255,255,.05),
+        0 1px 2px rgba(0,0,0,.25),
+        0 8px 24px -8px rgba(35,158,224,.3);
+      text-decoration:none;color:inherit;
+      transition:transform .2s cubic-bezier(.4,0,.2,1),box-shadow .2s,border-color .2s;
+      max-width:100%
+    }
+    .hero-tg:hover{
+      transform:translateY(-1px);
+      border-color:rgba(35,158,224,.5);
+      box-shadow:
+        inset 0 1px 0 rgba(255,255,255,.06),
+        0 2px 4px rgba(0,0,0,.3),
+        0 14px 32px -6px rgba(35,158,224,.45)
+    }
+    html.light .hero-tg{
+      background:linear-gradient(135deg,rgba(35,158,224,.1),rgba(255,255,255,.7));
+      border-color:rgba(35,158,224,.32)
+    }
+
+    .hero-tg-icon{
+      width:38px;height:38px;flex-shrink:0;border-radius:50%;
+      background:linear-gradient(135deg,#3FA9E8 0%,#239EE0 50%,#1E89C4 100%);
+      display:inline-flex;align-items:center;justify-content:center;
+      box-shadow:
+        inset 0 1px 0 rgba(255,255,255,.35),
+        inset 0 -1px 2px rgba(0,0,0,.2),
+        0 4px 12px -2px rgba(35,158,224,.55);
+      color:#fff
+    }
+    .hero-tg-icon svg{width:20px;height:20px;display:block;filter:drop-shadow(0 1px 1px rgba(0,0,0,.25))}
+
+    .hero-tg-body{display:flex;flex-direction:column;line-height:1.2;min-width:0;flex:1}
+    .hero-tg-eyebrow{
+      font-size:10px;letter-spacing:.16em;text-transform:uppercase;
+      font-weight:600;color:#7ec5f0;margin-bottom:3px;
+      font-variant-numeric:tabular-nums
+    }
+    html.light .hero-tg-eyebrow{color:#1E89C4}
+    .hero-tg-title{font-size:14px;font-weight:600;color:#fff;letter-spacing:-.005em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+    html.light .hero-tg-title{color:#0A0A0A}
+
+    .hero-tg-cta{
+      display:inline-flex;align-items:center;gap:6px;flex-shrink:0;
+      padding:8px 14px;border-radius:999px;
+      background:linear-gradient(180deg,#3FA9E8 0%,#239EE0 60%,#1E89C4 100%);
+      color:#fff;font-size:12.5px;font-weight:600;letter-spacing:.005em;
+      box-shadow:
+        inset 0 1px 1px rgba(255,255,255,.28),
+        inset 0 -1px 1px rgba(0,0,0,.2),
+        0 2px 6px rgba(35,158,224,.35),
+        0 4px 12px -2px rgba(35,158,224,.55);
+      transition:filter .15s,transform .15s
+    }
+    .hero-tg:hover .hero-tg-cta{filter:brightness(1.08)}
+    .hero-tg-cta svg{width:12px;height:12px;transition:transform .2s}
+    .hero-tg:hover .hero-tg-cta svg{transform:translateX(2px)}
+
+    @media(max-width:520px){
+      .hero-tg{flex-wrap:wrap;padding:12px}
+      .hero-tg-body{flex:1 1 calc(100% - 60px)}
+      .hero-tg-cta{margin-left:auto;margin-top:4px}
+    }
     .pill-dark:hover{filter:brightness(1.15);transform:translateY(-1px)}
 
     /* ── Icon chip ── */
@@ -591,6 +668,19 @@
         <button type="button" data-open-modal="register" class="pill pill-primary pill-lg" data-t="hero-cta1">Начать бесплатно <iconify-icon icon="solar:alt-arrow-right-linear"></iconify-icon></button>
         <a href="#how" class="pill pill-ghost pill-lg" data-t="hero-cta2">Как это работает</a>
       </div>
+      <a href="https://t.me/chmbotsignal" target="_blank" rel="noopener" class="hero-tg fade-up" aria-label="Открыть Telegram-бота @chmbotsignal">
+        <span class="hero-tg-icon" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="currentColor"><path d="M23.3 2.7 2.4 10.8c-1.4.6-1.4 1.4-.2 1.8l5.3 1.7 2.1 6.3c.3.7.1 1 .9 1 .6 0 .9-.3 1.2-.6l2.6-2.5 5.3 4c1 .5 1.7.2 2-.9L22.9 4c.3-1.5-.5-2-1.6-1.3zM8.3 15.2 17 9.6c.4-.3.8-.1.5.2l-7 6.3-.3 3.6-1.9-4.5z"/></svg>
+        </span>
+        <span class="hero-tg-body">
+          <span class="hero-tg-eyebrow" data-t="hero-tg-eb">TELEGRAM · @chmbotsignal</span>
+          <span class="hero-tg-title" data-t="hero-tg-title">Сигналы бота онлайн — без подписки</span>
+        </span>
+        <span class="hero-tg-cta" data-t="hero-tg-cta">
+          Открыть бота
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 5l7 7-7 7"/></svg>
+        </span>
+      </a>
       <div class="grid grid-cols-2 sm:grid-cols-4 gap-6 mt-16 fade-up">
         <div><div class="stat-num" data-target="10000">0</div><div class="stat-label" data-t="stat-s">Сигналов</div></div>
         <div><div class="stat-num" data-target="87">0</div><div class="stat-label" data-t="stat-a">% Точность<sup><a href="#disclaimer-1" class="text-white/40 hover:text-white/70 no-underline">¹</a></sup></div></div>
@@ -1493,6 +1583,9 @@ const TR={
   'hero-sub':{ru:'Автоматические торговые сигналы и боты для Bybit, Binance, BingX и OKX. Стратегии SMC, Герчика и скальпинг с AI-аналитикой.',en:'Automated trading signals and bots for Bybit, Binance, BingX and OKX. SMC, Gerchik and scalping strategies with AI analytics.',es:'Señales y bots automáticos para Bybit, Binance, BingX y OKX. Estrategias SMC, Gerchik y scalping con análisis IA.',tr:'Bybit, Binance, BingX ve OKX için otomatik sinyaller ve botlar. SMC, Gerchik ve scalping stratejileri, AI analitiği.',id:'Sinyal trading & bot otomatis untuk Bybit, Binance, BingX, dan OKX. Strategi SMC, Gerchik & scalping dengan analitik AI.'},
   'hero-cta1':{ru:'Начать бесплатно',en:'Start Free',es:'Empezar gratis',tr:'Ücretsiz başla',id:'Mulai gratis'},
   'hero-cta2':{ru:'Как это работает',en:'How It Works',es:'Cómo funciona',tr:'Nasıl çalışır',id:'Cara kerja'},
+  'hero-tg-eb':{ru:'TELEGRAM · @chmbotsignal',en:'TELEGRAM · @chmbotsignal',es:'TELEGRAM · @chmbotsignal',tr:'TELEGRAM · @chmbotsignal',id:'TELEGRAM · @chmbotsignal'},
+  'hero-tg-title':{ru:'Сигналы бота онлайн — без подписки',en:'Live bot signals — no subscription',es:'Señales del bot en vivo — sin suscripción',tr:'Bot sinyalleri canlı — abonelik yok',id:'Sinyal bot live — tanpa langganan'},
+  'hero-tg-cta':{ru:'Открыть бота',en:'Open bot',es:'Abrir bot',tr:'Botu aç',id:'Buka bot'},
   'stat-s':{ru:'Сигналов',en:'Signals'},
   'stat-a':{ru:'% Точность<sup><a href="#disclaimer-1" class="text-white/40 hover:text-white/70 no-underline">¹</a></sup>',en:'% Accuracy<sup><a href="#disclaimer-1" class="text-white/40 hover:text-white/70 no-underline">¹</a></sup>'},
   'stat-e':{ru:'Биржи',en:'Exchanges'},'stat-v':{ru:'$M+ Объём',en:'$M+ Volume'},
