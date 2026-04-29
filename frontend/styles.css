@@ -475,9 +475,11 @@ body.sidebar-collapsed .sidebar-footer {
    align-self / left-aligned base rule from the expanded mode. */
 body.sidebar-collapsed .sidebar-link,
 body.sidebar-collapsed .sidebar-footer .sidebar-link {
-  display: flex !important;
-  justify-content: center !important;
-  align-items: center !important;
+  /* grid + place-items:center is the most robust centring primitive —
+     ignores text-align / direction / justify-self overrides from
+     base rules. */
+  display: grid !important;
+  place-items: center !important;
   width: 40px !important;
   height: 40px !important;
   margin: 0 auto !important;
@@ -486,9 +488,11 @@ body.sidebar-collapsed .sidebar-footer .sidebar-link {
   font-size: 0 !important;
   line-height: 0 !important;
   white-space: nowrap;
+  text-align: center !important;
   box-sizing: border-box !important;
   flex-shrink: 0;
   align-self: center !important;
+  justify-self: center !important;
   transition: background .18s ease, transform .18s ease, box-shadow .18s ease;
 }
 body.sidebar-collapsed .sidebar-link:hover {
@@ -509,6 +513,12 @@ body.sidebar-collapsed .sidebar-link > svg {
   width: 20px !important;
   height: 20px !important;
   display: block !important;
+  margin: 0 !important;
+  /* Force the 24×24 viewBox to fill its 20×20 box: some path-only
+     SVGs render with intrinsic whitespace inside the viewBox that
+     visually shifts them off-axis. preserveAspectRatio:xMidYMid meet
+     is the default; we keep it but pin the box itself. */
+  object-fit: contain;
 }
 body.sidebar-collapsed .sidebar-link > *:not(svg),
 body.sidebar-collapsed .sidebar-beta,
