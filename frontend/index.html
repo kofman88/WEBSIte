@@ -408,6 +408,46 @@
     .step-num{width:72px;height:72px;border-radius:var(--radius-pill);display:flex;align-items:center;justify-content:center;font-family:'Inter',sans-serif;font-weight:600;font-size:26px;line-height:1;letter-spacing:-.025em;color:#fff;background:linear-gradient(180deg,rgba(255,255,255,.06),rgba(255,255,255,.01));box-shadow:inset 0 1px 1px rgba(255,255,255,.12),inset 0 -2px 6px rgba(0,0,0,.7),0 8px 24px -6px rgba(0,0,0,.8);position:relative;z-index:1;margin:0 auto 20px}
 
     /* ── Pricing ── */
+    /* Telegram CTA under each plan — vice-button to the primary "Начать /
+       Выбрать" pill above. Reads as "shortcut to bot" without competing
+       with the brand orange action. Telegram-blue accent, subtle. */
+    .price-tg-btn{
+      display:inline-flex;align-items:center;justify-content:center;gap:8px;
+      width:100%;margin-top:8px;padding:9px 14px;
+      background:linear-gradient(180deg,rgba(35,158,224,.08) 0%,rgba(35,158,224,.02) 100%);
+      border:1px solid rgba(35,158,224,.24);border-radius:9999px;
+      color:#7ec5f0;font-family:'Inter',sans-serif;font-size:12.5px;font-weight:500;
+      letter-spacing:.005em;text-decoration:none;
+      transition:transform .18s cubic-bezier(.4,0,.2,1),background .18s,border-color .18s,color .18s
+    }
+    .price-tg-btn:hover{
+      transform:translateY(-1px);
+      background:linear-gradient(180deg,rgba(35,158,224,.16) 0%,rgba(35,158,224,.05) 100%);
+      border-color:rgba(35,158,224,.45);color:#bfe0f5;
+      box-shadow:0 4px 12px -4px rgba(35,158,224,.4)
+    }
+    .price-tg-btn svg{width:14px;height:14px;flex-shrink:0}
+    .price-tg-btn .tg-arrow{transition:transform .18s}
+    .price-tg-btn:hover .tg-arrow{transform:translateX(2px)}
+    /* Popular (Pro) plan — slightly stronger TG accent so it doesn't get
+       drowned by the orange-glow background of the card. */
+    .price-popular .price-tg-btn{
+      background:linear-gradient(180deg,rgba(35,158,224,.16) 0%,rgba(35,158,224,.04) 100%);
+      border-color:rgba(35,158,224,.36);color:#bfe0f5
+    }
+    .price-popular .price-tg-btn:hover{
+      background:linear-gradient(180deg,rgba(35,158,224,.24) 0%,rgba(35,158,224,.06) 100%);
+      border-color:rgba(35,158,224,.55);color:#fff
+    }
+    html.light .price-tg-btn{
+      background:linear-gradient(180deg,rgba(35,158,224,.08),rgba(35,158,224,.02));
+      border-color:rgba(35,158,224,.32);color:#1E89C4
+    }
+    html.light .price-tg-btn:hover{
+      background:linear-gradient(180deg,rgba(35,158,224,.16),rgba(35,158,224,.04));
+      border-color:rgba(35,158,224,.5);color:#1B6FA8
+    }
+
     .price-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:24px;align-items:stretch}
     @media(max-width:1024px){.price-grid{grid-template-columns:repeat(2,1fr)}}
     @media(max-width:640px){.price-grid{grid-template-columns:1fr}}
@@ -846,6 +886,7 @@
             <li class="flex items-center gap-3 t-body"><span class="tick off"><iconify-icon icon="solar:close-circle-linear" style="font-size:14px"></iconify-icon></span> Бэктестинг</li>
           </ul>
           <button type="button" data-pick-plan="free" class="pill pill-ghost pill-md w-full" style="justify-content:center">Начать</button>
+          <a href="https://t.me/chmbotsignal" target="_blank" rel="noopener" class="price-tg-btn" aria-label="Начать в Telegram"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M23.3 2.7 2.4 10.8c-1.4.6-1.4 1.4-.2 1.8l5.3 1.7 2.1 6.3c.3.7.1 1 .9 1 .6 0 .9-.3 1.2-.6l2.6-2.5 5.3 4c1 .5 1.7.2 2-.9L22.9 4c.3-1.5-.5-2-1.6-1.3zM8.3 15.2 17 9.6c.4-.3.8-.1.5.2l-7 6.3-.3 3.6-1.9-4.5z"/></svg><span data-t="pr-tg">Начать в Telegram</span><svg class="tg-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 5l7 7-7 7"/></svg></a>
         </div>
       </div>
       <!-- Starter -->
@@ -863,6 +904,7 @@
             <li class="flex items-center gap-3 t-body"><span class="tick off"><iconify-icon icon="solar:close-circle-linear" style="font-size:14px"></iconify-icon></span> Бэктестинг</li>
           </ul>
           <button type="button" data-pick-plan="starter" class="pill pill-ghost pill-md w-full" style="justify-content:center">Выбрать</button>
+          <a href="https://t.me/chmbotsignal" target="_blank" rel="noopener" class="price-tg-btn" aria-label="Начать в Telegram"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M23.3 2.7 2.4 10.8c-1.4.6-1.4 1.4-.2 1.8l5.3 1.7 2.1 6.3c.3.7.1 1 .9 1 .6 0 .9-.3 1.2-.6l2.6-2.5 5.3 4c1 .5 1.7.2 2-.9L22.9 4c.3-1.5-.5-2-1.6-1.3zM8.3 15.2 17 9.6c.4-.3.8-.1.5.2l-7 6.3-.3 3.6-1.9-4.5z"/></svg><span data-t="pr-tg">Начать в Telegram</span><svg class="tg-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 5l7 7-7 7"/></svg></a>
         </div>
       </div>
       <!-- Pro (popular) -->
@@ -881,6 +923,7 @@
             <li class="flex items-center gap-3 t-body" style="color:rgba(255,255,255,.82);font-size:13px"><span class="tick"><iconify-icon icon="solar:check-circle-bold" style="font-size:14px"></iconify-icon></span> Бэктестинг</li>
           </ul>
           <button type="button" data-pick-plan="pro" class="pill pill-primary pill-md w-full" style="justify-content:center">Выбрать</button>
+          <a href="https://t.me/chmbotsignal" target="_blank" rel="noopener" class="price-tg-btn" aria-label="Начать в Telegram"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M23.3 2.7 2.4 10.8c-1.4.6-1.4 1.4-.2 1.8l5.3 1.7 2.1 6.3c.3.7.1 1 .9 1 .6 0 .9-.3 1.2-.6l2.6-2.5 5.3 4c1 .5 1.7.2 2-.9L22.9 4c.3-1.5-.5-2-1.6-1.3zM8.3 15.2 17 9.6c.4-.3.8-.1.5.2l-7 6.3-.3 3.6-1.9-4.5z"/></svg><span data-t="pr-tg">Начать в Telegram</span><svg class="tg-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 5l7 7-7 7"/></svg></a>
         </div>
       </div>
       <!-- Elite -->
@@ -898,6 +941,7 @@
             <li class="flex items-center gap-3 t-body" style="color:rgba(255,255,255,.82);font-size:13px"><span class="tick"><iconify-icon icon="solar:check-circle-bold" style="font-size:14px"></iconify-icon></span> Личный менеджер</li>
           </ul>
           <button type="button" data-pick-plan="elite" class="pill pill-ghost pill-md w-full" style="justify-content:center">Выбрать</button>
+          <a href="https://t.me/chmbotsignal" target="_blank" rel="noopener" class="price-tg-btn" aria-label="Начать в Telegram"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M23.3 2.7 2.4 10.8c-1.4.6-1.4 1.4-.2 1.8l5.3 1.7 2.1 6.3c.3.7.1 1 .9 1 .6 0 .9-.3 1.2-.6l2.6-2.5 5.3 4c1 .5 1.7.2 2-.9L22.9 4c.3-1.5-.5-2-1.6-1.3zM8.3 15.2 17 9.6c.4-.3.8-.1.5.2l-7 6.3-.3 3.6-1.9-4.5z"/></svg><span data-t="pr-tg">Начать в Telegram</span><svg class="tg-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 5l7 7-7 7"/></svg></a>
         </div>
       </div>
     </div>
@@ -1589,6 +1633,7 @@ const TR={
   'hero-tg-eb':{ru:'TELEGRAM · @chmbotsignal',en:'TELEGRAM · @chmbotsignal',es:'TELEGRAM · @chmbotsignal',tr:'TELEGRAM · @chmbotsignal',id:'TELEGRAM · @chmbotsignal'},
   'hero-tg-title':{ru:'Сигналы бота онлайн — без подписки',en:'Live bot signals — no subscription',es:'Señales del bot en vivo — sin suscripción',tr:'Bot sinyalleri canlı — abonelik yok',id:'Sinyal bot live — tanpa langganan'},
   'hero-tg-cta':{ru:'Открыть бота',en:'Open bot',es:'Abrir bot',tr:'Botu aç',id:'Buka bot'},
+  'pr-tg':{ru:'Начать в Telegram',en:'Start in Telegram',es:'Empezar en Telegram',tr:'Telegram\'da başla',id:'Mulai di Telegram'},
   'stat-s':{ru:'Сигналов',en:'Signals'},
   'stat-a':{ru:'% Точность<sup><a href="#disclaimer-1" class="text-white/40 hover:text-white/70 no-underline">¹</a></sup>',en:'% Accuracy<sup><a href="#disclaimer-1" class="text-white/40 hover:text-white/70 no-underline">¹</a></sup>'},
   'stat-e':{ru:'Биржи',en:'Exchanges'},'stat-v':{ru:'$M+ Объём',en:'$M+ Volume'},
