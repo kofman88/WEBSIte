@@ -430,6 +430,12 @@
         <div class="text-3xl font-bold text-white" id="coAmount">—</div>
         <div class="text-xs text-slate-400 mt-1" id="coNetwork">—</div>
       </div>
+      <!-- QR — сканится кошельком (TrustWallet / MetaMask / SafePal). -->
+      <div class="flex justify-center mb-4">
+        <div class="bg-white p-3 rounded-xl" style="line-height:0">
+          <img id="coQr" alt="QR-код адреса" width="180" height="180" style="display:block;border-radius:6px"/>
+        </div>
+      </div>
       <div class="bg-slate-800/40 border border-slate-700 rounded-xl p-3 mb-4">
         <div class="text-xs text-slate-500 mb-1">Адрес для перевода</div>
         <div class="flex items-center gap-2"><code id="coAddr" class="text-xs text-cyan-400 break-all flex-1">—</code><button id="coCopy" class="text-xs text-slate-400 hover:text-white shrink-0">Копировать</button></div>
@@ -631,6 +637,13 @@ document.querySelectorAll('.co-method').forEach((btn) => {
       document.getElementById('coCopy').onclick = () => navigator.clipboard.writeText(out.address).then(() => Toast.success('Адрес скопирован'));
       const exp = new Date(out.expiresAt).toLocaleString();
       document.getElementById('coExpire').textContent = 'действует до ' + exp;
+      // QR — большинство кошельков читают чистый адрес. Сумму юзер всё
+      // равно вводит вручную (она уникальная — 79.42 / 79.17 — а в QR
+      // зашить через token-deeplink сложно: BEP20 и TRC20 имеют разные
+      // схемы и не все кошельки их понимают). Адрес в QR = надёжный
+      // минимальный путь для всех кошельков.
+      const qrSrc = 'https://api.qrserver.com/v1/create-qr-code/?size=240x240&margin=0&data=' + encodeURIComponent(out.address);
+      document.getElementById('coQr').src = qrSrc;
       document.getElementById('coStep1').classList.add('hidden');
       document.getElementById('coStep2').classList.remove('hidden');
     } catch (err) {

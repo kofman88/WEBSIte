@@ -40,6 +40,7 @@ const marketDataService = require('./services/marketDataService');
 const cryptoMonitor = require('./services/cryptoMonitor');
 const slVerifier = require('./services/slVerifier');
 const maintenanceService = require('./services/maintenanceService');
+const paymentWatcher = require('./workers/paymentWatcher');
 const securityMonitor = require('./services/securityMonitor');
 const db = require('./models/database');
 
@@ -527,6 +528,7 @@ if (IS_TEST) {
   slVerifier.start();
   maintenanceService.start();
   securityMonitor.start();
+  paymentWatcher.start();
   process.on('SIGTERM', shutdown('SIGTERM'));
 } else {
   const server = http.createServer(app);
@@ -538,6 +540,7 @@ if (IS_TEST) {
   slVerifier.start();
   maintenanceService.start();
   securityMonitor.start();
+  paymentWatcher.start();
 
   process.on('SIGTERM', () => { shutdown('SIGTERM')().then(() => server.close()); });
   process.on('SIGINT',  () => { shutdown('SIGINT')().then(() => server.close()); });
