@@ -74,7 +74,9 @@ function createBacktest(userId, cfg) {
       );
       err.statusCode = 403;
       err.code = 'BACKTEST_LIMIT_REACHED';
-      err.requiredPlan = limits.backtestsPerDay === 0 ? 'pro' : 'elite';
+      // Suggest the next tier with a higher quota — free→starter (1/day),
+      // starter→pro (10/day), pro→elite (∞).
+      err.requiredPlan = plan === 'free' ? 'starter' : plan === 'starter' ? 'pro' : 'elite';
       throw err;
     }
   }

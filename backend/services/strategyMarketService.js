@@ -15,6 +15,7 @@
  */
 
 const db = require('../models/database');
+const plans = require('../config/plans');
 const logger = require('../utils/logger');
 
 function _slugify(s) {
@@ -45,10 +46,14 @@ function publish(authorId, { title, description = '', strategy, timeframe = '1h'
   if (!strategy) { const e = new Error('strategy is required'); e.statusCode = 400; throw e; }
   // Clamp price to sane range — prevents typos like $99999 in the UI.
   const price = Math.max(0, Math.min(500, Number(priceUsd) || 0));
-  // Plan gate: only paid users can publish (prevents spam)
-  const plan = db.prepare(`SELECT plan FROM subscriptions WHERE user_id = ?`).get(authorId);
-  if (!plan || plan.plan === 'free') {
-    const e = new Error('Publishing requires a paid plan'); e.statusCode = 403; e.code = 'UPGRADE_REQUIRED'; throw e;
+  // Plan gate: marketplacePublish flag — Starter+ per inventory.
+  const planRow = db.prepare(`SELECT plan FROM subscriptions WHERE user_id = ?`).get(authorId);
+  const userPlan = (planRow && planRow.plan) || 'free';
+  if (!plans.canUseFeature(userPlan, 'marketplacePublish')) {
+    const e = new Error('Publishing strategies requires Starter plan or higher.');
+    e.statusCode = 403; e.code = 'UPGRADE_REQUIRED';
+    e.requiredPlan = plans.requiredPlanFor('marketplacePublish') || 'starter';
+    throw e;
   }
   const baseSlug = _slugify(title) || ('strategy-' + Date.now());
   let slug = baseSlug;

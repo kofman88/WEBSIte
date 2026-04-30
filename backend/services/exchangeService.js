@@ -10,6 +10,7 @@
 const ccxt = require('ccxt');
 const db = require('../models/database');
 const config = require('../config');
+const plans = require('../config/plans');
 const { encrypt, decrypt, mask } = require('../utils/crypto');
 const logger = require('../utils/logger');
 
@@ -100,6 +101,25 @@ function makeCcxt(exchange, { apiKey, apiSecret, passphrase, testnet }) {
  */
 async function addKey(userId, { exchange, apiKey, apiSecret, passphrase, testnet = false, label = null }) {
   ensureSupported(exchange);
+
+  // ── Plan gate: multi-exchange is Pro+ ────────────────────────────────
+  // Free / Starter are allowed exactly one exchange key total. Inventory
+  // pitches "4 exchanges" as a Pro perk, so we cap at the connection
+  // count rather than the exchange-name list (a single Bybit key is fine
+  // for Starter; a second key on any exchange — even same Bybit — is not).
+  const planRow = db.prepare('SELECT plan FROM subscriptions WHERE user_id = ?').get(userId);
+  const plan = (planRow && planRow.plan) || 'free';
+  if (!plans.canUseFeature(plan, 'multiExchange')) {
+    const existingCount = db.prepare(
+      'SELECT COUNT(*) AS n FROM exchange_keys WHERE user_id = ?'
+    ).get(userId).n;
+    if (existingCount >= 1) {
+      const err = new Error('Multiple exchange keys require Pro plan or higher.');
+      err.statusCode = 403; err.code = 'UPGRADE_REQUIRED';
+      err.requiredPlan = plans.requiredPlanFor('multiExchange') || 'pro';
+      throw err;
+    }
+  }
 
   // Pre-flight verify before saving
   const client = makeCcxt(exchange, { apiKey, apiSecret, passphrase, testnet });
