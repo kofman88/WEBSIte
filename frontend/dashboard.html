@@ -541,32 +541,95 @@
       border-color:rgba(255,90,31,.25);color:#C44610
     }
     .ts-item-featured{
-      position:relative;
-      border-color:rgba(255,140,90,.22)!important;
-      background:linear-gradient(160deg,rgba(255,90,31,.06),rgba(255,255,255,.015))!important
+      position:relative;overflow:hidden;
+      padding:20px 22px!important;gap:14px;
+      border-color:rgba(255,140,90,.24)!important;
+      background:
+        radial-gradient(120% 100% at 0% 0%,rgba(255,90,31,.1),transparent 60%),
+        linear-gradient(160deg,rgba(255,255,255,.025),rgba(255,255,255,.005))!important;
+      box-shadow:inset 0 1px 0 rgba(255,255,255,.04),0 8px 24px -16px rgba(255,90,31,.4)
     }
+    /* Premium left-edge gradient accent (instead of corner CURATED badge) */
     .ts-item-featured::before{
-      content:'CURATED';position:absolute;top:10px;right:10px;
-      font-size:8.5px;font-weight:700;letter-spacing:.16em;
-      color:#FFB28A;padding:2px 6px;border-radius:4px;
-      background:rgba(255,90,31,.12);border:1px solid rgba(255,140,90,.3)
+      content:'';position:absolute;left:0;top:0;bottom:0;width:3px;
+      background:linear-gradient(180deg,#FF8C5A 0%,#FF5A1F 60%,rgba(255,90,31,.0) 100%)
     }
-    html.light .ts-item-featured{background:linear-gradient(160deg,#FFF6F0,#fff)!important}
-    html.light .ts-item-featured::before{color:#C44610;background:rgba(255,90,31,.08)}
-    .ts-item-stats{display:flex;gap:14px;font-size:11px;margin-top:8px;color:rgba(255,255,255,.7)}
-    html.light .ts-item-stats{color:rgba(10,10,10,.7)}
-    .ts-item-stats b{font-family:'JetBrains Mono',monospace;font-weight:600;color:#fff;display:block;font-size:13px;margin-top:1px;font-variant-numeric:tabular-nums}
+    .ts-item-featured:hover{
+      transform:translateY(-2px)!important;
+      border-color:rgba(255,140,90,.45)!important;
+      box-shadow:inset 0 1px 0 rgba(255,255,255,.06),0 14px 32px -18px rgba(255,90,31,.6)
+    }
+    html.light .ts-item-featured{
+      background:
+        radial-gradient(120% 100% at 0% 0%,rgba(255,90,31,.08),transparent 60%),
+        linear-gradient(160deg,#FFF8F2,#fff)!important
+    }
+
+    .ts-item-eyebrow{
+      display:flex;align-items:center;gap:8px;
+      font-size:9.5px;font-weight:700;letter-spacing:.18em;text-transform:uppercase;
+      color:#FFB28A
+    }
+    .ts-item-eyebrow::after{
+      content:'';flex:1;height:1px;
+      background:linear-gradient(90deg,rgba(255,140,90,.25),transparent)
+    }
+    html.light .ts-item-eyebrow{color:#C44610}
+    .ts-item-eyebrow .dot{
+      width:5px;height:5px;border-radius:50%;background:#FF8C5A;
+      box-shadow:0 0 8px rgba(255,140,90,.6)
+    }
+    .ts-item-featured .ts-item-title{font-size:16px;line-height:1.25;letter-spacing:-.005em}
+    .ts-item-featured .ts-item-head{margin-bottom:0;align-items:center}
+
+    .ts-item-stats{
+      display:grid;grid-template-columns:repeat(3,1fr);gap:14px;
+      padding:14px 0;margin-top:auto;
+      border-top:1px solid rgba(255,255,255,.06);
+      border-bottom:1px solid rgba(255,255,255,.06)
+    }
+    html.light .ts-item-stats{border-top-color:rgba(0,0,0,.06);border-bottom-color:rgba(0,0,0,.06)}
+    .ts-item-stats > div{display:flex;flex-direction:column;gap:3px}
+    .ts-item-stats span{
+      font-size:9.5px;letter-spacing:.16em;text-transform:uppercase;
+      color:rgba(255,255,255,.42);font-weight:500
+    }
+    html.light .ts-item-stats span{color:rgba(10,10,10,.45)}
+    .ts-item-stats b{
+      font-family:'JetBrains Mono',monospace;font-weight:600;
+      color:#fff;font-size:17px;font-variant-numeric:tabular-nums;letter-spacing:-.01em
+    }
     html.light .ts-item-stats b{color:#0A0A0A}
     .ts-item-stats .pos{color:#4ade80}
-    .ts-item-desc{font-size:11.5px;color:rgba(255,255,255,.55);line-height:1.45;margin:6px 0 4px}
-    html.light .ts-item-desc{color:rgba(10,10,10,.55)}
+
+    .ts-item-desc{
+      font-size:12.5px;color:rgba(255,255,255,.6);line-height:1.5
+    }
+    html.light .ts-item-desc{color:rgba(10,10,10,.6)}
+
+    /* Pill-button CTA at the bottom of each featured card */
+    .ts-item-cta{
+      display:inline-flex;align-items:center;gap:6px;
+      padding:7px 14px;border-radius:9999px;
+      font-size:11.5px;font-weight:600;letter-spacing:.005em;
+      background:linear-gradient(180deg,#FF7840,#FF5A1F 60%,#C44610);
+      color:#fff;
+      box-shadow:inset 0 1px 0 rgba(255,255,255,.28),0 4px 10px -2px rgba(255,90,31,.5);
+      transition:transform .15s,box-shadow .15s
+    }
+    .ts-item-featured:hover .ts-item-cta{
+      transform:translateX(2px);
+      box-shadow:inset 0 1px 0 rgba(255,255,255,.34),0 6px 14px -2px rgba(255,90,31,.65)
+    }
+    .ts-item-bottom{display:flex;justify-content:space-between;align-items:center;gap:10px}
     .ts-sub{font-size:11px;font-weight:500;color:rgba(255,255,255,.45);letter-spacing:.05em;margin-left:6px}
     html.light .ts-sub{color:rgba(10,10,10,.45)}
     .ts-chev{color:rgba(255,255,255,.5);transition:transform .2s}
     .ts-accordion[data-open="1"] .ts-chev{transform:rotate(180deg)}
     .ts-body{padding:0 22px 20px;border-top:1px solid rgba(255,255,255,.06)}
     html.light .ts-body{border-top-color:rgba(0,0,0,.06)}
-    .ts-list{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:12px;padding-top:14px}
+    .ts-list{display:grid;grid-template-columns:repeat(auto-fill,minmax(290px,1fr));gap:16px;padding-top:18px}
+    @media (max-width:1100px){.ts-list{grid-template-columns:repeat(auto-fill,minmax(260px,1fr))}}
     .ts-item{
       padding:14px;border:1px solid rgba(255,255,255,.08);border-radius:12px;
       background:rgba(255,255,255,.02);transition:border-color .15s,transform .15s;
@@ -634,19 +697,21 @@ if(!Auth.requireAuth()) throw new Error('noauth');
     list.innerHTML = FEATURED.map((s) => (
       '<a class="ts-item ts-item-featured" href="bots.html?wizard=1&strategy=' + esc(s.strategy)
         + '&timeframe=' + esc(s.timeframe) + '&symbol=' + esc(s.symbol) + '">' +
+        '<div class="ts-item-eyebrow"><span class="dot"></span>Curated · Free</div>' +
         '<div class="ts-item-head">' +
           '<div class="ts-item-title">' + esc(s.title) + '</div>' +
-          '<span class="ts-item-price free">FREE</span>' +
         '</div>' +
         '<div class="ts-item-desc">' + esc(s.desc) + '</div>' +
         '<div class="ts-item-stats">' +
-          '<div><span style="opacity:.6">ROI</span><b class="pos">' + esc(s.roi) + '</b></div>' +
-          '<div><span style="opacity:.6">Win</span><b>' + esc(s.winRate) + '</b></div>' +
-          '<div><span style="opacity:.6">Срок</span><b>' + esc(s.months) + '</b></div>' +
+          '<div><span>ROI</span><b class="pos">' + esc(s.roi) + '</b></div>' +
+          '<div><span>Win</span><b>' + esc(s.winRate) + '</b></div>' +
+          '<div><span>Срок</span><b>' + esc(s.months) + '</b></div>' +
         '</div>' +
-        '<div class="ts-item-meta" style="margin-top:10px">' +
-          '<span class="ts-item-tag">' + esc(s.strategy) + ' · ' + esc(s.timeframe) + '</span>' +
-          '<span style="color:#FF8C5A">Запустить →</span>' +
+        '<div class="ts-item-bottom">' +
+          '<span class="ts-item-tag">' + esc(s.strategy) + ' · ' + esc(s.timeframe) + ' · ' + esc(s.symbol) + '</span>' +
+          '<span class="ts-item-cta">Запустить ' +
+            '<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 5l7 7-7 7"/></svg>' +
+          '</span>' +
         '</div>' +
       '</a>'
     )).join('');
