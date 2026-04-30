@@ -509,10 +509,21 @@ html.light .chm-select-option.selected{background:rgba(255,90,31,.12);color:#FF5
       </div>
     </div>
     <div class="bd-head-right">
-      <button class="bd-act" id="bdPause" title="Пауза / запуск">—</button>
-      <button class="bd-act" id="bdTv" title="TradingView webhook">TV</button>
-      <button class="bd-act bd-act-danger" id="bdDelete" title="Удалить">Удалить</button>
-      <button class="bd-close" onclick="closeBotDrawer()" aria-label="Закрыть">✕</button>
+      <button class="bd-pill bd-pill-pause" id="bdPause" title="Пауза / запуск" aria-label="Пауза или запуск бота">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><rect x="6" y="5" width="4" height="14" rx="1"/><rect x="14" y="5" width="4" height="14" rx="1"/></svg>
+        <span id="bdPauseLabel">Пауза</span>
+      </button>
+      <button class="bd-pill bd-pill-tv" id="bdTv" title="TradingView webhook" aria-label="TradingView webhook">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="3 17 9 11 13 15 21 7"/><polyline points="14 7 21 7 21 14"/></svg>
+        <span>TradingView</span>
+      </button>
+      <button class="bd-pill bd-pill-delete" id="bdDelete" title="Удалить бота" aria-label="Удалить бота">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"/><path d="M10 11v6M14 11v6"/></svg>
+        <span>Удалить</span>
+      </button>
+      <button class="bd-close" onclick="closeBotDrawer()" aria-label="Закрыть">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M18 6L6 18M6 6l12 12"/></svg>
+      </button>
     </div>
   </header>
 
@@ -525,15 +536,15 @@ html.light .chm-select-option.selected{background:rgba(255,90,31,.12);color:#FF5
       <span class="bd-section-meta" id="bdSettingsMeta">изменения сохраняются в один клик</span>
     </div>
     <form id="bdSettingsForm" class="bd-settings" onsubmit="return false">
-      <label class="bd-field"><span>Имя</span><input name="name" type="text" maxlength="64"/></label>
-      <label class="bd-field"><span>Risk % за сделку</span><input name="riskPct" type="number" min="0.1" max="10" step="0.1"/></label>
-      <label class="bd-field"><span>Плечо</span><input name="leverage" type="number" min="1" max="100" step="1"/></label>
-      <label class="bd-field"><span>Макс открытых сделок</span><input name="maxOpenTrades" type="number" min="1" max="20" step="1"/></label>
-      <label class="bd-field"><span>Направление</span>
+      <label class="bd-field"><span data-help-text="Имя бота — для тебя, как удобнее.">Имя</span><input name="name" type="text" maxlength="64"/></label>
+      <label class="bd-field"><span data-help="risk-pct">Risk % за сделку</span><input name="riskPct" type="number" min="0.1" max="10" step="0.1"/></label>
+      <label class="bd-field"><span data-help="leverage">Плечо</span><input name="leverage" type="number" min="1" max="100" step="1"/></label>
+      <label class="bd-field"><span data-help="max-trades">Макс открытых сделок</span><input name="maxOpenTrades" type="number" min="1" max="20" step="1"/></label>
+      <label class="bd-field"><span data-help="direction">Направление</span>
         <select name="direction"><option value="both">Long + Short</option><option value="long">Long only</option><option value="short">Short only</option></select>
       </label>
       <label class="bd-field bd-field-toggle">
-        <span>Авто-исполнение</span>
+        <span data-help="auto-trade">Авто-исполнение</span>
         <input name="autoTrade" type="checkbox"/>
       </label>
       <div class="bd-settings-actions">
@@ -542,6 +553,18 @@ html.light .chm-select-option.selected{background:rgba(255,90,31,.12);color:#FF5
         <span class="bd-settings-status" id="bdSettingsStatus"></span>
       </div>
     </form>
+  </section>
+
+  <!-- Strategy diagnostics — auto-analyses bot's recent trades and flags
+       what's likely going wrong (TP/SL geometry, win-rate vs PF, etc.) -->
+  <section class="bd-section" id="bdDiagnoseSection">
+    <div class="bd-section-head">
+      <h3>Диагностика стратегии</h3>
+      <span class="bd-section-meta">авто-анализ последних 30 сделок</span>
+    </div>
+    <div id="bdDiagnose" class="bd-diagnose">
+      <div class="bd-diag-empty">Накопим хотя бы 10 закрытых сделок — потом покажем где стратегия теряет.</div>
+    </div>
   </section>
 
   <section class="bd-section">
@@ -607,15 +630,117 @@ html.light .chm-select-option.selected{background:rgba(255,90,31,.12);color:#FF5
   .bd-title{font-size:18px;font-weight:700;letter-spacing:-.02em}
   .bd-sub{font-size:12px;color:rgba(255,255,255,.55);margin-top:2px}
   html.light .bd-sub{color:rgba(10,10,10,.55)}
-  .bd-act{padding:7px 12px;border-radius:8px;border:1px solid rgba(255,255,255,.1);background:rgba(255,255,255,.04);color:rgba(255,255,255,.85);cursor:pointer;font-size:12px;font-weight:500;font-family:inherit;transition:background .15s}
-  .bd-act:hover{background:rgba(255,255,255,.08)}
-  .bd-act-danger{border-color:rgba(239,68,68,.3);background:rgba(239,68,68,.08);color:#fca5a5}
-  .bd-act-danger:hover{background:rgba(239,68,68,.16)}
-  html.light .bd-act{background:rgba(0,0,0,.04);border-color:rgba(0,0,0,.1);color:#0A0A0A}
-  html.light .bd-act:hover{background:rgba(0,0,0,.08)}
-  .bd-close{width:34px;height:34px;border-radius:50%;border:0;background:rgba(255,255,255,.06);color:rgba(255,255,255,.75);cursor:pointer;font-size:16px;line-height:1}
-  .bd-close:hover{background:rgba(255,255,255,.12)}
-  html.light .bd-close{background:rgba(0,0,0,.05);color:rgba(10,10,10,.7)}
+  /* Premium pill-style action buttons in drawer head */
+  .bd-pill{
+    display:inline-flex;align-items:center;gap:7px;
+    padding:8px 14px;border-radius:999px;
+    font-family:inherit;font-size:12.5px;font-weight:500;letter-spacing:.005em;
+    border:1px solid;cursor:pointer;
+    transition:background .18s ease,border-color .18s ease,color .18s ease,transform .18s ease,box-shadow .18s ease;
+    line-height:1
+  }
+  .bd-pill svg{width:14px;height:14px;flex-shrink:0}
+  .bd-pill:hover{transform:translateY(-1px)}
+  .bd-pill-pause{
+    background:linear-gradient(180deg,rgba(255,255,255,.06),rgba(255,255,255,.02));
+    border-color:rgba(255,255,255,.14);color:rgba(255,255,255,.9);
+    box-shadow:inset 0 1px 0 rgba(255,255,255,.05)
+  }
+  .bd-pill-pause:hover{
+    background:linear-gradient(180deg,rgba(255,255,255,.1),rgba(255,255,255,.04));
+    border-color:rgba(255,255,255,.24);color:#fff
+  }
+  /* When bot is currently paused → "Запустить" — promote to brand-orange CTA */
+  .bd-pill-pause.is-paused{
+    background:linear-gradient(180deg,#FF7840,#FF5A1F 60%,#C44610);border-color:rgba(255,90,31,.45);color:#fff;
+    box-shadow:inset 0 1px 1px rgba(255,255,255,.28),0 4px 10px -2px rgba(255,90,31,.5)
+  }
+  .bd-pill-tv{
+    background:linear-gradient(180deg,rgba(35,158,224,.12),rgba(35,158,224,.04));
+    border-color:rgba(35,158,224,.32);color:#7ec5f0
+  }
+  .bd-pill-tv:hover{
+    background:linear-gradient(180deg,rgba(35,158,224,.2),rgba(35,158,224,.06));
+    border-color:rgba(35,158,224,.5);color:#bfe0f5
+  }
+  .bd-pill-delete{
+    background:rgba(239,68,68,.06);border-color:rgba(239,68,68,.22);color:#fca5a5
+  }
+  .bd-pill-delete:hover{
+    background:rgba(239,68,68,.14);border-color:rgba(239,68,68,.4);color:#fff
+  }
+  html.light .bd-pill-pause{background:#fff;border-color:rgba(0,0,0,.1);color:#0A0A0A}
+  html.light .bd-pill-pause:hover{background:rgba(0,0,0,.04)}
+  html.light .bd-pill-tv{color:#1B6FA8;background:rgba(35,158,224,.08)}
+  html.light .bd-pill-delete{color:#b91c1c;background:rgba(239,68,68,.06)}
+
+  .bd-close{
+    width:36px;height:36px;border-radius:50%;border:1px solid rgba(255,255,255,.08);
+    background:rgba(255,255,255,.04);color:rgba(255,255,255,.65);cursor:pointer;
+    display:inline-flex;align-items:center;justify-content:center;
+    transition:background .15s,color .15s,transform .15s
+  }
+  .bd-close svg{width:14px;height:14px}
+  .bd-close:hover{background:rgba(255,255,255,.1);color:#fff;transform:rotate(90deg)}
+  html.light .bd-close{background:rgba(0,0,0,.03);border-color:rgba(0,0,0,.08);color:rgba(10,10,10,.65)}
+
+  /* Premium form inputs — match the rest of the platform glass-shell aesthetic */
+  .bd-settings input[type="text"],
+  .bd-settings input[type="number"],
+  .bd-settings select,
+  .bd-bt select{
+    background:linear-gradient(180deg,rgba(255,255,255,.04),rgba(255,255,255,.015));
+    border:1px solid rgba(255,255,255,.08);
+    border-radius:10px;
+    padding:10px 14px;
+    font-family:'Inter',sans-serif;font-size:13.5px;font-weight:500;
+    color:#fff;letter-spacing:.005em;
+    box-shadow:inset 0 1px 1px rgba(255,255,255,.04);
+    transition:border-color .15s,background .15s,box-shadow .15s;
+    width:100%;outline:none;
+    /* Hide spinners on number inputs — chevron-style native arrows look cheap */
+    appearance:textfield;-moz-appearance:textfield;
+  }
+  .bd-settings input[type="number"]::-webkit-outer-spin-button,
+  .bd-settings input[type="number"]::-webkit-inner-spin-button{-webkit-appearance:none;margin:0}
+  .bd-settings input:focus,.bd-settings select:focus,.bd-bt select:focus{
+    border-color:rgba(255,140,90,.4);background:rgba(255,255,255,.06);
+    box-shadow:0 0 0 3px rgba(255,90,31,.12)
+  }
+  html.light .bd-settings input,html.light .bd-settings select,html.light .bd-bt select{
+    background:#fff;border-color:rgba(0,0,0,.1);color:#0A0A0A
+  }
+
+  /* Strategy diagnostics block */
+  .bd-diagnose{display:flex;flex-direction:column;gap:10px}
+  .bd-diag-empty{
+    padding:20px;text-align:center;color:rgba(255,255,255,.5);font-size:13px;
+    background:rgba(255,255,255,.02);border:1px dashed rgba(255,255,255,.08);border-radius:12px
+  }
+  .bd-diag-card{
+    display:flex;gap:14px;align-items:flex-start;
+    padding:16px 18px;border-radius:12px;
+    background:rgba(255,255,255,.02);border:1px solid rgba(255,255,255,.06)
+  }
+  .bd-diag-card.warn{background:rgba(245,158,11,.06);border-color:rgba(245,158,11,.22)}
+  .bd-diag-card.bad{background:rgba(239,68,68,.05);border-color:rgba(239,68,68,.2)}
+  .bd-diag-card.ok{background:rgba(74,222,128,.05);border-color:rgba(74,222,128,.18)}
+  .bd-diag-icon{
+    width:32px;height:32px;flex-shrink:0;border-radius:50%;
+    display:flex;align-items:center;justify-content:center;font-size:14px
+  }
+  .bd-diag-card.warn .bd-diag-icon{background:rgba(245,158,11,.18);color:#fde68a}
+  .bd-diag-card.bad .bd-diag-icon{background:rgba(239,68,68,.16);color:#fca5a5}
+  .bd-diag-card.ok .bd-diag-icon{background:rgba(74,222,128,.18);color:#86efac}
+  .bd-diag-body{flex:1;min-width:0}
+  .bd-diag-title{font-size:13.5px;font-weight:600;color:#fff;letter-spacing:-.005em;margin-bottom:4px}
+  .bd-diag-card.warn .bd-diag-title{color:#fde68a}
+  .bd-diag-card.bad  .bd-diag-title{color:#fca5a5}
+  .bd-diag-card.ok   .bd-diag-title{color:#86efac}
+  .bd-diag-text{font-size:12.5px;color:rgba(255,255,255,.7);line-height:1.55}
+  .bd-diag-text strong{color:#fff;font-weight:500}
+  html.light .bd-diag-empty,html.light .bd-diag-card{color:rgba(10,10,10,.7)}
+  html.light .bd-diag-title{color:#0A0A0A}
 
   .bd-kpis{padding:20px 24px;display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:12px;border-bottom:1px solid rgba(255,255,255,.04)}
   html.light .bd-kpis{border-bottom-color:rgba(0,0,0,.05)}
@@ -1894,7 +2019,16 @@ function _bdRenderHeader(bot) {
     bot.exchange + ' · ' + syms + ' · ' + (STRATEGY_LABELS[bot.strategy] || bot.strategy) + ' · ' + (bot.timeframe || '—') + ' · ' + (bot.tradingMode === 'live' ? 'LIVE' : 'DEMO');
 
   const pauseBtn = document.getElementById('bdPause');
-  pauseBtn.textContent = bot.isActive ? '⏸ Пауза' : '▶ Запустить';
+  const pauseLabel = document.getElementById('bdPauseLabel');
+  if (pauseLabel) pauseLabel.textContent = bot.isActive ? 'Пауза' : 'Запустить';
+  pauseBtn.classList.toggle('is-paused', !bot.isActive);
+  // Swap the icon: pause-bars when active, play-triangle when paused
+  const pauseIcon = pauseBtn.querySelector('svg');
+  if (pauseIcon) {
+    pauseIcon.innerHTML = bot.isActive
+      ? '<rect x="6" y="5" width="4" height="14" rx="1"/><rect x="14" y="5" width="4" height="14" rx="1"/>'
+      : '<polygon points="7 4 19 12 7 20"/>';
+  }
   pauseBtn.onclick = async () => {
     try { await API.toggleBot(bot.id); Toast.success('Статус изменён'); closeBotDrawer(); loadBots(); }
     catch (e) { Toast.error(e.message); }
@@ -1992,6 +2126,9 @@ function _bdRenderTv(bot) {
 
 function _bdRenderTrades(trades) {
   const list = Array.isArray(trades) ? trades : [];
+  // Diagnostics first — even if there are 0 trades we render a friendly
+  // empty-state explaining what'll be analysed.
+  _bdRenderDiagnose(list);
   if (!list.length) {
     document.getElementById('bdTrades').innerHTML = '<div class="bd-empty">Сделок пока нет</div>';
     return;
@@ -2015,6 +2152,72 @@ function _bdRenderTrades(trades) {
         '<td>' + escapeHtml(t.status || '—') + '</td>' +
       '</tr>';
     }).join('') + '</tbody></table>';
+}
+
+// ── Strategy diagnostics: read closed trades, surface concrete issues ──
+function _bdRenderDiagnose(trades) {
+  const host = document.getElementById('bdDiagnose');
+  if (!host) return;
+  const closed = (trades || []).filter((t) => (t.status === 'closed' || t.exitPrice || t.exit_price));
+  if (closed.length < 10) {
+    host.innerHTML = '<div class="bd-diag-empty">Накопим хотя бы 10 закрытых сделок — потом покажем где стратегия теряет (сейчас: '
+      + closed.length + ').</div>';
+    return;
+  }
+  const wins = closed.filter((t) => Number(t.realizedPnl || t.realized_pnl || 0) > 0);
+  const losses = closed.filter((t) => Number(t.realizedPnl || t.realized_pnl || 0) < 0);
+  const winRate = wins.length / closed.length;
+  const grossWin = wins.reduce((s, t) => s + Number(t.realizedPnl || t.realized_pnl || 0), 0);
+  const grossLoss = Math.abs(losses.reduce((s, t) => s + Number(t.realizedPnl || t.realized_pnl || 0), 0));
+  const pf = grossLoss > 0 ? grossWin / grossLoss : (grossWin > 0 ? Infinity : 0);
+  const avgWin = wins.length ? grossWin / wins.length : 0;
+  const avgLoss = losses.length ? grossLoss / losses.length : 0;
+  const ratioRR = avgLoss > 0 ? avgWin / avgLoss : 0;
+  // Count consecutive losing streak (most recent backwards)
+  let streakLoss = 0;
+  for (let i = closed.length - 1; i >= 0; i--) {
+    if (Number(closed[i].realizedPnl || closed[i].realized_pnl || 0) < 0) streakLoss++;
+    else break;
+  }
+
+  const cards = [];
+  // 1. Win rate
+  if (winRate < 0.35) cards.push({ kind:'bad', title:'Низкий Win Rate (' + (winRate*100).toFixed(0) + '%)',
+    text:'Стратегия выигрывает реже чем 35% сделок. Это критично — даже большой профит на победах не покроет серию убытков. <strong>Что делать:</strong> проверь подходит ли стратегия текущему режиму рынка (тренд/боковик). DCA/Grid отлично работают в боковике, но валятся в тренде; trend-following — наоборот.' });
+  else if (winRate < 0.45) cards.push({ kind:'warn', title:'Win Rate ниже нормы (' + (winRate*100).toFixed(0) + '%)',
+    text:'45-65% — здоровый коридор для большинства стратегий. У тебя ниже. <strong>Что делать:</strong> ужесточи фильтры входа — добавь подтверждение по объёму / RSI / старшему таймфрейму.' });
+  else cards.push({ kind:'ok', title:'Win Rate в норме (' + (winRate*100).toFixed(0) + '%)',
+    text:'45-65% — стандартное поведение здоровой стратегии. Главное чтобы Profit Factor поддерживал.' });
+
+  // 2. R:R / TP-SL geometry
+  if (ratioRR < 1.0 && avgLoss > 0) cards.push({ kind:'bad', title:'TP меньше SL (R:R ' + ratioRR.toFixed(2) + ')',
+    text:'Средняя прибыль (<strong>' + Fmt.currency(avgWin) + '</strong>) меньше среднего убытка (<strong>' + Fmt.currency(avgLoss) + '</strong>). Геометрия проигрышная: даже при 50% Win Rate ты в минусе. <strong>Что делать:</strong> увеличь TP (или поставь TP1/TP2/TP3 ладдером), а SL оставь — целься в R:R ≥ 1.5.' });
+  else if (ratioRR < 1.5) cards.push({ kind:'warn', title:'R:R можно улучшить (' + ratioRR.toFixed(2) + ')',
+    text:'Соотношение средняя-прибыль / средний-убыток на грани. Хочется ≥ 1.5. Подвинь TP дальше или SL ближе.' });
+  else cards.push({ kind:'ok', title:'Хорошее R:R (' + ratioRR.toFixed(2) + ')',
+    text:'TP в среднем покрывает SL с запасом — у стратегии есть математический edge.' });
+
+  // 3. Profit factor
+  if (pf < 1.0 && pf !== Infinity) cards.push({ kind:'bad', title:'Profit Factor < 1 (' + (pf===Infinity?'∞':pf.toFixed(2)) + ')',
+    text:'Брутто-убыток превышает брутто-прибыль. На длинной дистанции это слив. <strong>Что делать:</strong> либо стратегия не работает на этой паре/таймфрейме, либо параметры нужно переоптимизировать. Прогнать бэктест на 60-90 дней с walk-forward.' });
+  else if (pf < 1.3) cards.push({ kind:'warn', title:'Низкий Profit Factor (' + pf.toFixed(2) + ')',
+    text:'≥ 1.3 — норма, ≥ 1.5 — хорошо. У тебя на грани окупаемости после комиссий.' });
+  else cards.push({ kind:'ok', title:'Profit Factor ' + pf.toFixed(2),
+    text:'Стратегия зарабатывает в ' + pf.toFixed(2) + '× больше чем теряет — здоровый запас прочности.' });
+
+  // 4. Loss streak
+  if (streakLoss >= 5) cards.push({ kind:'bad', title:streakLoss + ' убытков подряд',
+    text:'Длинная серия убытков — режим рынка скорее всего сменился. <strong>Что делать:</strong> пауза + проверь MA200 на 4h. Если против стратегии — подожди разворота, не вмешивайся.' });
+
+  host.innerHTML = cards.map((c) =>
+    '<div class="bd-diag-card ' + c.kind + '">' +
+      '<div class="bd-diag-icon">' + (c.kind === 'bad' ? '⚠' : c.kind === 'warn' ? '!' : '✓') + '</div>' +
+      '<div class="bd-diag-body">' +
+        '<div class="bd-diag-title">' + c.title + '</div>' +
+        '<div class="bd-diag-text">' + c.text + '</div>' +
+      '</div>' +
+    '</div>'
+  ).join('');
 }
 
 // ── Phase 2: inline settings editor inside the drawer ──────────────────
