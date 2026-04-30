@@ -46,7 +46,7 @@
     </div>
     <div class="flex gap-2">
       <button onclick="openSmartTrade()" class="px-4 py-2.5 rounded-xl text-sm font-semibold bg-slate-800/50 border border-slate-700 text-slate-300 hover:text-white hover:border-slate-500">⚡ Smart Trade</button>
-      <button onclick="openWizard()" class="btn-primary px-5 py-2.5 rounded-xl text-sm font-semibold" style="background:linear-gradient(180deg,#FF7840 0%,#FF5A1F 60%,#C44610 100%);box-shadow:inset 0 1px 1px rgba(255,255,255,.28),inset 0 -1px 3px rgba(0,0,0,.6),0 4px 8px -2px rgba(0,0,0,.6),0 0 0 1px rgba(255,90,31,.35);border:none;color:#fff;cursor:pointer">+ Создать бота</button>
+      <button id="botsCreateBtn" onclick="openWizard()" class="btn-primary px-5 py-2.5 rounded-xl text-sm font-semibold" style="background:linear-gradient(180deg,#FF7840 0%,#FF5A1F 60%,#C44610 100%);box-shadow:inset 0 1px 1px rgba(255,255,255,.28),inset 0 -1px 3px rgba(0,0,0,.6),0 4px 8px -2px rgba(0,0,0,.6),0 0 0 1px rgba(255,90,31,.35);border:none;color:#fff;cursor:pointer">+ Создать бота</button>
     </div>
   </div>
 
@@ -1845,6 +1845,14 @@ function validateStep(n) {
 function nextStep() { if (validateStep(wizStep)) setStep(wizStep + 1); }
 function prevStep() { setStep(wizStep - 1); }
 function openWizard(preset) {
+  // Plan-gate: Free is read-only — no bot creation. We still let them
+  // see the dashboard and signals; the wizard itself just isn't worth
+  // showing because the final POST would 403 anyway.
+  if (window.PlanGate && PlanGate.ready() && !PlanGate.canUseFeature('canCreateBot')) {
+    if (window.Toast && Toast.warn) Toast.warn('Создание ботов — Starter и выше. Перейди на /subscriptions для апгрейда.');
+    setTimeout(() => { location.href = 'subscriptions.html?plan=starter'; }, 1400);
+    return;
+  }
   const form = document.getElementById('createBotForm');
   form.reset();
   // Pre-fill from {strategy, timeframe, symbol} so a click on a featured
@@ -1891,7 +1899,8 @@ async function _wizApplyPlanGates() {
     marketCard.setAttribute('data-plan-required', 'elite');
     if (!marketCard.querySelector('.plan-lock-chip')) {
       const body = marketCard.querySelector('.wiz-card-body') || marketCard;
-      body.insertAdjacentHTML('beforeend', '<span class="plan-lock-chip">🔒 Elite</span>');
+      const _ic = (window.PlanGate && PlanGate.LOCK_SVG_SM) || '';
+      body.insertAdjacentHTML('beforeend', '<span class="plan-lock-chip">' + _ic + ' Elite</span>');
     }
     const radio = marketCard.querySelector('input[type="radio"]');
     if (radio) radio.disabled = true;
@@ -2165,6 +2174,11 @@ if (window.PlanGate) {
     if (flt) PlanGate.lockStrategySelect(flt, { dropForbidden: true });
     const wizLev = document.querySelector('#createBotForm input[name="leverage"]');
     if (wizLev) PlanGate.clampLeverageInput(wizLev);
+    // Lock the page-level "+ Создать бота" CTA for Free users
+    if (!PlanGate.canUseFeature('canCreateBot')) {
+      const cb = document.getElementById('botsCreateBtn');
+      if (cb) PlanGate.lockButton(cb, { force: true, requiredPlan: 'starter', featureName: 'Создание ботов' });
+    }
   });
 }
 

@@ -34,6 +34,12 @@ beforeEach(() => {
 
 async function regAndBot(email = 'tv@x.com') {
   const u = (await request(app).post('/api/auth/register').send({ email, password: 'Abcdef123' })).body;
+  // Free is now read-only (maxBots: 0) — upgrade to Starter so bot
+  // creation goes through.
+  db.prepare(`
+    INSERT OR REPLACE INTO subscriptions (user_id, plan, status, expires_at)
+    VALUES (?, 'starter', 'active', datetime('now','+30 days'))
+  `).run(u.user.id);
   // Create a fake exchange key first (validation.createBotSchema requires it)
   const cryptoUtil = (await import('../utils/crypto.js')).default || await import('../utils/crypto.js');
   const cfg = (await import('../config/index.js')).default;

@@ -63,7 +63,7 @@
           <div class="w-12 h-12 rounded-lg bg-slate-800/50 flex items-center justify-center text-2xl text-slate-500 mb-3">+</div>
           <div class="font-semibold mb-1">Подключить биржу</div>
           <div class="text-xs text-slate-500 mb-4">BingX, OKX и другие</div>
-          <button onclick="document.getElementById('exModal').style.display='flex'" class="text-xs px-4 py-2 rounded-lg text-indigo-400 border border-indigo-500/30 bg-indigo-500/10">Подключить</button>
+          <button id="walletConnectSmall" onclick="document.getElementById('exModal').style.display='flex'" class="text-xs px-4 py-2 rounded-lg text-indigo-400 border border-indigo-500/30 bg-indigo-500/10">Подключить</button>
         </div>
       </div>
     </div>
@@ -80,7 +80,7 @@
         Polygon USDC для предиктивных рынков Polymarket. Депозит через USDT BEP20/TRC20 с авто-конвертацией, вывод на ваш адрес. Запускаем в следующем апдейте.
       </p>
       <div class="flex items-center justify-center gap-3">
-        <button onclick="switchTab('exchanges')" class="text-sm px-5 py-2.5 rounded-xl bg-indigo-500/10 border border-indigo-500/30 text-indigo-400 hover:bg-indigo-500/20">Подключить биржу</button>
+        <button id="walletConnectBig" onclick="switchTab('exchanges')" class="text-sm px-5 py-2.5 rounded-xl bg-indigo-500/10 border border-indigo-500/30 text-indigo-400 hover:bg-indigo-500/20">Подключить биржу</button>
         <a href="settings.html?upgrade=pro" class="text-sm px-5 py-2.5 rounded-xl font-semibold text-white" style="background:linear-gradient(180deg,#FF7840 0%,#FF5A1F 60%,#C44610 100%)">Оформить Pro</a>
       </div>
     </div>
@@ -108,6 +108,24 @@
 <script>
 if(!Auth.requireAuth()) throw new Error('noauth');
 document.querySelectorAll('.sidebar-link[data-page="wallet"]').forEach(a => a.classList.add('active'));
+
+// Plan-gate: connecting an exchange API key is a write action (it
+// creates a row in exchange_keys + verifies via a fetchBalance call).
+// On Free we lock both the small "Подключить" tile button and the
+// bigger "Подключить биржу" tab CTA — they get the premium lock chip
+// and a click toast that points to /subscriptions.
+if (window.PlanGate) {
+  PlanGate.init().then(() => {
+    if (PlanGate.canUseFeature('canAddExchangeKey')) return;
+    ['walletConnectSmall', 'walletConnectBig'].forEach((id) => {
+      const b = document.getElementById(id);
+      if (!b) return;
+      b.onclick = null;
+      b.setAttribute('onclick', '');
+      PlanGate.lockButton(b, { force: true, requiredPlan: 'starter', featureName: 'Подключение биржи' });
+    });
+  });
+}
 
 window.switchTab = function (t, ev) {
   document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));

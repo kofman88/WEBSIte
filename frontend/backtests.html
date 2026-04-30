@@ -37,17 +37,10 @@
 <header class="topbar"><div class="flex items-center gap-4"><button id="sidebar-toggle" class="lg:hidden" aria-label="Toggle menu" style="background:none;border:none;color:rgba(255,255,255,.62);cursor:pointer"><svg aria-hidden="true" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 6h16M4 12h16M4 18h16"/></svg></button><h1 class="text-xl font-bold">Бэктесты</h1></div><div class="topbar-actions"><button id="shellLang" type="button" class="shell-topbar-btn" title="Language">EN</button><button id="shellTheme" type="button" class="shell-topbar-btn" title="Toggle theme" aria-label="Toggle theme"></button><div class="topbar-user"><div class="topbar-avatar">U</div></div></div></header>
 
 <main class="main-content">
-  <!-- Plan-gate banner — shown to Free users (0 backtests/day) -->
-  <div id="btPlanGate" class="card mb-6" hidden style="background:linear-gradient(135deg,rgba(255,140,90,.08),rgba(255,90,31,.02));border:1px solid rgba(255,140,90,.28)">
-    <div class="flex items-start gap-3" style="padding:6px 4px">
-      <div style="width:36px;height:36px;border-radius:10px;background:rgba(255,90,31,.18);display:flex;align-items:center;justify-content:center;color:#FFB28A;flex-shrink:0;font-size:18px">🔒</div>
-      <div style="flex:1;min-width:0">
-        <div class="font-semibold text-white" style="font-size:15px;margin-bottom:4px">Бэктесты доступны на тарифе Starter и выше</div>
-        <div class="text-sm text-slate-400" style="line-height:1.5">На Free-тарифе бэктестинг отключён. Starter ($29/мес) — 1 запуск в день, Pro ($69) — 10/день, Elite ($149) — ∞.</div>
-        <a href="subscriptions.html" style="display:inline-block;margin-top:10px;padding:7px 14px;border-radius:9999px;background:linear-gradient(180deg,#FF7840,#FF5A1F 60%,#C44610);color:#fff;font-size:12px;font-weight:600;text-decoration:none">Сравнить тарифы →</a>
-      </div>
-    </div>
-  </div>
+  <!-- Plan-gate banner — shown to Free users (0 backtests/day). Inner
+       hero is rendered by PlanGate.gatePageHero() once plan resolves
+       so the visual matches Terminal's locked state pixel-for-pixel. -->
+  <div id="btPlanGate" class="mb-6" hidden></div>
 
   <!-- Create Form -->
   <div class="card mb-6" id="btFormCard">
@@ -82,11 +75,18 @@ document.querySelectorAll('.sidebar-link[data-page="backtests"]').forEach(a => a
 // paid tiers so a Starter user can pick "Levels" but not "Scalping".
 if (window.PlanGate) {
   PlanGate.init().then(() => {
-    const plan = PlanGate.getPlan();
     const banner = document.getElementById('btPlanGate');
     const formCard = document.getElementById('btFormCard');
-    if (plan === 'free') {
-      if (banner) banner.hidden = false;
+    if (!PlanGate.canUseFeature('canRunBacktest')) {
+      if (banner) {
+        banner.hidden = false;
+        PlanGate.gatePageHero(banner, {
+          force: true,
+          requiredPlan: 'starter',
+          featureName: 'Бэктесты',
+          description: 'На Free-тарифе бэктестинг отключён. Starter ($29/мес) — 1 запуск в день, Pro ($69) — 10/день, Elite ($149) — ∞.',
+        });
+      }
       if (formCard) formCard.style.display = 'none';
     } else {
       const sel = document.querySelector('#btForm select[name="strategy"]');

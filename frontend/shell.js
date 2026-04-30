@@ -466,8 +466,17 @@
     wrap.id = 'shellQuick';
     wrap.className = 'shell-quick';
     let html = '';
+    // For Free plan we route the Create-bot pill to subscriptions instead
+    // of bots.html, since the wizard would just toast-reject anyway.
+    // The visible button stays in the same place to keep the layout
+    // stable across plan upgrades — only its href + a small lock chip
+    // change.
+    const isFree = plan === 'free';
     if (!suppressCreateOn.has(path)) {
-      html += '<a href="bots.html" class="shell-pill-create" title="Создать нового бота">'
+      const href = isFree ? 'subscriptions.html?plan=starter' : 'bots.html';
+      const title = isFree ? 'Создание ботов доступно на Starter+' : 'Создать нового бота';
+      html += '<a href="' + href + '" class="shell-pill-create' + (isFree ? ' plan-locked-btn' : '') + '" title="' + title + '"'
+        +   (isFree ? ' data-plan-required="starter"' : '') + '>'
         +   '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M12 5v14M5 12h14"/></svg>'
         +   '<span>Создать бота</span>'
         + '</a>';
@@ -481,6 +490,11 @@
     if (!html) return;
     wrap.innerHTML = html;
     actions.insertBefore(wrap, actions.firstChild);
+    // Append premium lock SVG to the Create-bot pill once PlanGate loads
+    if (isFree && window.PlanGate && PlanGate.LOCK_SVG_SM) {
+      const create = wrap.querySelector('.shell-pill-create');
+      if (create && !create.querySelector('.plan-lock-svg')) create.insertAdjacentHTML('beforeend', PlanGate.LOCK_SVG_SM);
+    }
   }
 
   // Sidebar promo card at the bottom (3Commas-style "Лист ожидания" block).
@@ -1097,7 +1111,10 @@
       const plan = PlanGate.getPlan();
       panel.querySelectorAll('[data-needs="backtest"]').forEach((a) => {
         if (plan === 'free') {
-          if (!a.querySelector('.lock')) a.insertAdjacentHTML('beforeend', '<span class="lock">🔒 Starter</span>');
+          if (!a.querySelector('.lock')) {
+            const ic = (window.PlanGate && PlanGate.LOCK_SVG_SM) || '';
+            a.insertAdjacentHTML('beforeend', '<span class="lock">' + ic + ' Starter</span>');
+          }
         }
       });
     };
@@ -1115,9 +1132,10 @@
       if (btLink && plan === 'free' && !btLink.querySelector('.sidebar-link-lock')) {
         const chip = document.createElement('span');
         chip.className = 'sidebar-link-lock';
-        chip.textContent = '🔒';
         chip.title = 'Бэктесты доступны на тарифе Starter и выше';
-        chip.style.cssText = 'margin-left:auto;font-size:11px;opacity:.7';
+        chip.style.cssText = 'margin-left:auto;color:#FFB28A;display:inline-flex;align-items:center;'
+          + 'filter:drop-shadow(0 0 4px rgba(255,140,90,.5))';
+        chip.innerHTML = (window.PlanGate && PlanGate.LOCK_SVG_SM) || '';
         btLink.appendChild(chip);
       }
     };

@@ -84,7 +84,7 @@
         <span id="sysDot" class="chm-status-dot" aria-hidden="true"></span>
         <span id="sysText">Проверяем систему…</span>
       </div>
-      <button onclick="location.href='bots.html'" class="chm-action chm-action-primary" title="Быстрая торговля — перейти к ботам">
+      <button id="dashQuickTrade" onclick="location.href='bots.html'" class="chm-action chm-action-primary" title="Быстрая торговля — перейти к ботам">
         <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" width="14" height="14"><path d="M13 2 3 14h7l-1 8 10-12h-7l1-8z"/></svg>
         <span>Quick Trade</span>
       </button>
@@ -665,6 +665,21 @@
 <script src="onboarding.js" defer></script>
 <script>
 if(!Auth.requireAuth()) throw new Error('noauth');
+
+// Plan-gate: Quick Trade routes to bots.html, but on Free plan there's
+// nothing to "trade" with (no bot can be created). Lock the button +
+// upgrade-toast on click, redirecting to /subscriptions instead.
+if (window.PlanGate) {
+  PlanGate.init().then(() => {
+    if (PlanGate.canUseFeature('canCreateBot')) return;
+    const qt = document.getElementById('dashQuickTrade');
+    if (qt) {
+      qt.onclick = null;
+      qt.setAttribute('onclick', '');
+      PlanGate.lockButton(qt, { force: true, requiredPlan: 'starter', featureName: 'Quick Trade' });
+    }
+  });
+}
 
 // ── Top strategies accordion — lazy-loads /api/strategies on first open ──
 (function initTopStrategies() {

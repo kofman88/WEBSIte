@@ -233,6 +233,24 @@
   'use strict';
   if (!Auth.isLoggedIn()) { location.href = 'index.html?login'; return; }
 
+  // Plan-gate: Terminal is a write-action page (opens manual trades).
+  // On Free we replace the whole <main> with an upgrade hero so users
+  // can browse the menu and see what Terminal is, without clicking
+  // through to a form whose submit will 403.
+  if (window.PlanGate) {
+    PlanGate.init().then(function () {
+      if (PlanGate.canUseFeature('canTrade')) return;
+      var main = document.querySelector('main.main-content');
+      if (!main) return;
+      PlanGate.gatePageHero(main, {
+        force: true,
+        requiredPlan: 'starter',
+        featureName: 'Терминал ручной торговли',
+        description: 'На Free-тарифе можно знакомиться с интерфейсом, но открывать сделки нельзя. Starter ($29/мес) разблокирует ручной терминал и paper-боты, Pro ($69) — live-торговлю.',
+      });
+    });
+  }
+
   // ── State ──────────────────────────────────────────────────────────
   var state = {
     mode: 'paper',

@@ -19,7 +19,11 @@ const PLANS = Object.freeze({
     name: 'Free',
     priceUsd: 0,
     signalsPerDay: 2,              // 1 утром + 1 вечером (per inventory)
-    maxBots: 1,
+    // Free is now an interface-preview tier: signals + browsing only.
+    // Bot creation, exchange-key creation, terminal trading and
+    // backtests are all gated. The single feature Free really delivers
+    // is the 2 signals/day stream.
+    maxBots: 0,
     autoTrade: false,
     strategies: ['levels'],
     backtestsPerDay: 0,
@@ -33,6 +37,7 @@ const PLANS = Object.freeze({
     expertMode: false,
     marketplacePublish: false,
     prioritySupport: false,
+    readOnly: true,                // every write endpoint should reject
     supportChannel: 'community',
   },
   starter: {
@@ -54,6 +59,7 @@ const PLANS = Object.freeze({
     expertMode: true,
     marketplacePublish: true,
     prioritySupport: false,
+    readOnly: false,
     supportChannel: 'email',
   },
   pro: {
@@ -78,6 +84,7 @@ const PLANS = Object.freeze({
     expertMode: true,
     marketplacePublish: true,
     prioritySupport: false,
+    readOnly: false,
     supportChannel: 'priority-email',
   },
   elite: {
@@ -101,6 +108,7 @@ const PLANS = Object.freeze({
     expertMode: true,
     marketplacePublish: true,
     prioritySupport: true,
+    readOnly: false,
     supportChannel: 'dedicated-manager',
   },
 });
