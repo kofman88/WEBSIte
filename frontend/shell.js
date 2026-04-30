@@ -1026,6 +1026,105 @@
     if (main && !main.getAttribute('role')) main.setAttribute('role', 'main');
   }
 
+  // ── Search dropdown — icon-only trigger that pops a panel below with
+  //     quick links + future search input. Replaces the always-visible
+  //     280px search pill that ate too much topbar room and pushed the
+  //     right-side action cluster around. Plan-aware: locked links show
+  //     a 🔒 marker that resolves once PlanGate.init() is ready.
+  function wireSearchPopup() {
+    const wrap = document.querySelector('.topbar-search');
+    if (!wrap || wrap.dataset.popupReady === '1') return;
+    wrap.dataset.popupReady = '1';
+    // Replace any legacy markup (older templates had <svg><input/>).
+    // Keep a fresh icon + the popup panel.
+    wrap.innerHTML =
+      '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">'
+      +   '<circle cx="11" cy="11" r="7"/><path d="M21 21l-4.35-4.35"/>'
+      + '</svg>'
+      + '<div class="topbar-search-panel" role="dialog" aria-label="Поиск и навигация">'
+      +   '<input type="search" placeholder="Поиск по платформе…" autocomplete="off"/>'
+      +   '<div class="topbar-search-section">'
+      +     '<div class="topbar-search-section-title">Быстрый переход</div>'
+      +     '<a class="topbar-search-link" href="dashboard.html"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.8"><rect x="3" y="3" width="7" height="9" rx="1.5"/><rect x="14" y="3" width="7" height="5" rx="1.5"/><rect x="14" y="12" width="7" height="9" rx="1.5"/><rect x="3" y="16" width="7" height="5" rx="1.5"/></svg>Дашборд</a>'
+      +     '<a class="topbar-search-link" href="bots.html"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.8"><rect x="3" y="11" width="18" height="10" rx="2"/><circle cx="12" cy="5" r="2"/><path d="M12 7v4M8 16h.01M16 16h.01"/></svg>Боты</a>'
+      +     '<a class="topbar-search-link" href="signals.html"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.8"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>Сигналы</a>'
+      +     '<a class="topbar-search-link" href="analytics.html"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.8"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>Аналитика</a>'
+      +     '<a class="topbar-search-link" data-needs="backtest" href="backtests.html"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.8"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>Бэктесты</a>'
+      +     '<a class="topbar-search-link" href="wallet.html"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.8"><rect x="2" y="6" width="20" height="14" rx="2"/><path d="M16 14h2"/></svg>Кошелёк</a>'
+      +     '<a class="topbar-search-link" href="settings.html"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.8"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 01-2.83 2.83l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09a1.65 1.65 0 00-1-1.51 1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 11-2.83-2.83l.06-.06a1.65 1.65 0 00.33-1.82 1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09a1.65 1.65 0 001.51-1 1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 012.83-2.83l.06.06a1.65 1.65 0 001.82.33H9a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 112.83 2.83l-.06.06a1.65 1.65 0 00-.33 1.82V9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z"/></svg>Настройки</a>'
+      +   '</div>'
+      + '</div>';
+
+    const panel = wrap.querySelector('.topbar-search-panel');
+    const input = wrap.querySelector('.topbar-search-panel input');
+
+    const open = () => {
+      wrap.classList.add('open');
+      // micro-defer focus so the click doesn't immediately blur it
+      setTimeout(() => input && input.focus(), 30);
+    };
+    const close = () => wrap.classList.remove('open');
+
+    wrap.addEventListener('click', (e) => {
+      // Click on the trigger itself (icon area) toggles, click inside
+      // the panel passes through.
+      if (panel.contains(e.target)) return;
+      if (wrap.classList.contains('open')) close(); else open();
+    });
+    document.addEventListener('click', (e) => {
+      if (!wrap.contains(e.target)) close();
+    });
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape' && wrap.classList.contains('open')) close();
+      // ⌘K / Ctrl-K opens the search anywhere on the page
+      if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'k') {
+        e.preventDefault();
+        if (wrap.classList.contains('open')) close(); else open();
+      }
+    });
+    // Live filter — hides links that don't match the input value
+    input.addEventListener('input', () => {
+      const q = input.value.trim().toLowerCase();
+      panel.querySelectorAll('.topbar-search-link').forEach((a) => {
+        a.style.display = !q || a.textContent.toLowerCase().includes(q) ? '' : 'none';
+      });
+    });
+
+    // Plan-aware decoration: stamp 🔒 onto links the current plan can't
+    // use. Backtests is the only Free-locked sidebar entry today.
+    const decorate = () => {
+      if (!window.PlanGate) return;
+      const plan = PlanGate.getPlan();
+      panel.querySelectorAll('[data-needs="backtest"]').forEach((a) => {
+        if (plan === 'free') {
+          if (!a.querySelector('.lock')) a.insertAdjacentHTML('beforeend', '<span class="lock">🔒 Starter</span>');
+        }
+      });
+    };
+    if (window.PlanGate && PlanGate.init) PlanGate.init().then(decorate);
+    else decorate();
+  }
+
+  // ── Sidebar plan locks — adds a 🔒 chip to sidebar links the current
+  //     plan can't open productively. Today: Backtests for Free.
+  function wireSidebarPlanLocks() {
+    const apply = () => {
+      if (!window.PlanGate) return;
+      const plan = PlanGate.getPlan();
+      const btLink = document.querySelector('.sidebar-link[data-page="backtests"]');
+      if (btLink && plan === 'free' && !btLink.querySelector('.sidebar-link-lock')) {
+        const chip = document.createElement('span');
+        chip.className = 'sidebar-link-lock';
+        chip.textContent = '🔒';
+        chip.title = 'Бэктесты доступны на тарифе Starter и выше';
+        chip.style.cssText = 'margin-left:auto;font-size:11px;opacity:.7';
+        btLink.appendChild(chip);
+      }
+    };
+    if (window.PlanGate && PlanGate.init) PlanGate.init().then(apply);
+    else apply();
+  }
+
   function boot() {
     applyTheme(); // apply <html class="light"> first so no flash
     wireLogo();
@@ -1033,6 +1132,7 @@
     applyTheme();      // now safely sets the theme-btn icon
     applyLang();       // translates all data-t + refreshes lang button
     wireMarketTickers();
+    wireSearchPopup();
 
     // Inject chrome SYNCHRONOUSLY with pessimistic defaults ('free', no
     // user). This paints the full sidebar/topbar immediately instead of
@@ -1048,6 +1148,7 @@
     // pill removal for Elite, account pill equity).
     wirePlanBadge();
     wireA11y();
+    wireSidebarPlanLocks();
   }
 
   if (document.readyState === 'loading') {

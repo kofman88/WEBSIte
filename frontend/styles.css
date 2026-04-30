@@ -1070,20 +1070,85 @@ html.light .sidebar-promo-sub { color: rgba(10,10,10,.6); }
   padding: 0 24px;
   z-index: 40;
 }
+/* Compact icon-only search trigger — opens a dropdown panel below on click,
+   modeled on Linear / Bybit (post-2024) / Bitsgap. Saves 240+px of topbar
+   width while still keeping a global search affordance one click away. */
 .topbar-search {
-  display: flex;
+  position: relative;
+  display: inline-flex;
   align-items: center;
-  gap: 8px;
+  justify-content: center;
+  width: 40px; height: 40px;
   background: rgba(255, 255, 255, 0.04);
   border: 1px solid var(--border);
-  border-radius: var(--radius-pill);
-  padding: 8px 16px;
-  min-width: 280px;
-  transition: border-color var(--transition-fast), background var(--transition-fast);
+  border-radius: 50%;
+  cursor: pointer;
+  color: rgba(255,255,255,.62);
+  transition: border-color var(--transition-fast), background var(--transition-fast), color var(--transition-fast);
 }
-.topbar-search:focus-within { border-color: var(--accent-blue-light); background: rgba(255, 255, 255, 0.06); }
-.topbar-search input { border: none; background: transparent; padding: 0; font-size: 13px; font-weight: 500; box-shadow: none; }
-.topbar-search input:focus { box-shadow: none; background: transparent; }
+.topbar-search:hover { border-color: rgba(255,140,90,.4); background: rgba(255,90,31,.08); color: #FFB28A; }
+.topbar-search.open { border-color: rgba(255,140,90,.55); color: #FF8C5A; background: rgba(255,90,31,.1); }
+.topbar-search > svg { width: 17px; height: 17px; stroke: currentColor; flex-shrink: 0; pointer-events: none; }
+.topbar-search > input { display: none; }       /* legacy markup hides */
+.topbar-search-panel {
+  position: absolute;
+  top: calc(100% + 8px);
+  left: 0;
+  width: min(360px, calc(100vw - 24px));
+  background: linear-gradient(180deg, #14171F 0%, #0E1117 100%);
+  border: 1px solid rgba(255,255,255,.08);
+  border-radius: 14px;
+  box-shadow: 0 12px 36px rgba(0,0,0,.5), 0 24px 48px -12px rgba(0,0,0,.4);
+  padding: 12px;
+  display: none;
+  z-index: 200;
+  animation: tbSearchSlide .15s ease-out;
+}
+.topbar-search.open .topbar-search-panel { display: block; }
+.topbar-search-panel input {
+  width: 100%; height: 38px;
+  background: rgba(255,255,255,.04);
+  border: 1px solid rgba(255,255,255,.1);
+  border-radius: 9px;
+  padding: 0 12px;
+  font-size: 13px;
+  font-weight: 500;
+  color: #fff;
+  outline: none;
+  box-shadow: none;
+}
+.topbar-search-panel input::placeholder { color: rgba(255,255,255,.4) }
+.topbar-search-panel input:focus { border-color: rgba(255,140,90,.6); background: rgba(255,255,255,.06) }
+.topbar-search-section { margin-top: 10px }
+.topbar-search-section-title {
+  font-size: 9px; font-weight: 700; letter-spacing: .16em; text-transform: uppercase;
+  color: rgba(255,255,255,.4);
+  padding: 8px 4px 4px;
+}
+.topbar-search-link {
+  display: flex; align-items: center; gap: 10px;
+  padding: 8px 10px;
+  border-radius: 8px;
+  color: rgba(255,255,255,.78);
+  text-decoration: none;
+  font-size: 13px;
+  font-weight: 500;
+  transition: background .12s ease, color .12s ease;
+}
+.topbar-search-link:hover { background: rgba(255,255,255,.05); color: #fff }
+.topbar-search-link svg { width: 14px; height: 14px; stroke: currentColor; opacity: .65; flex-shrink: 0 }
+.topbar-search-link .lock { margin-left: auto; font-size: 10px; color: #FFB28A; opacity: .8 }
+@keyframes tbSearchSlide {
+  from { opacity: 0; transform: translateY(-4px) }
+  to   { opacity: 1; transform: translateY(0) }
+}
+html.light .topbar-search { background: rgba(0,0,0,.04); color: rgba(10,10,10,.7); border-color: rgba(0,0,0,.1) }
+html.light .topbar-search:hover { background: rgba(255,90,31,.08); color: #C44610 }
+html.light .topbar-search-panel { background: #fff; border-color: rgba(0,0,0,.08) }
+html.light .topbar-search-panel input { background: rgba(0,0,0,.03); color: #0A0A0A; border-color: rgba(0,0,0,.08) }
+html.light .topbar-search-link { color: rgba(10,10,10,.78) }
+html.light .topbar-search-link:hover { background: rgba(0,0,0,.04); color: #0A0A0A }
+html.light .topbar-search-section-title { color: rgba(10,10,10,.5) }
 .topbar-actions { display: flex; align-items: center; gap: 10px; }
 
 /* ═══════════════════════════════════════════════════════════════════
@@ -1237,6 +1302,10 @@ html.light .topbar-notification .dot { border-color: #F6F7FB; }
   font-family: 'Inter', sans-serif;
   font-size: 12px;
   line-height: 1;
+  /* Reserve enough room for "$1,234,567" + delta so live updates and the
+     loading→ready transition don't reflow neighbouring topbar elements. */
+  min-width: 152px;
+  justify-content: flex-start;
 }
 .shell-tick:hover { border-color: rgba(255,255,255,.18); transform: translateY(-1px); }
 .shell-tick-glyph {
@@ -1266,6 +1335,8 @@ html.light .topbar-notification .dot { border-color: #F6F7FB; }
   color: #fff;
   font-variant-numeric: tabular-nums;
   letter-spacing: -0.015em;
+  display: inline-block;
+  min-width: 64px;       /* fits up to "$999,999" so the corner doesn't shift */
 }
 .shell-tick-delta {
   font-size: 11px;
@@ -1276,6 +1347,9 @@ html.light .topbar-notification .dot { border-color: #F6F7FB; }
   background: rgba(148,163,184,.1);
   color: #94a3b8;
   line-height: 1;
+  display: inline-flex;
+  justify-content: center;
+  min-width: 56px;       /* "▼ 12.34%" max */
 }
 .shell-tick[data-trend="up"]   .shell-tick-delta { background: rgba(74,222,128,.12);  color: #4ade80; }
 .shell-tick[data-trend="down"] .shell-tick-delta { background: rgba(248,113,113,.12); color: #f87171; }
@@ -1309,6 +1383,9 @@ html.light .topbar-notification .dot { border-color: #F6F7FB; }
   color: #fff;
   font-variant-numeric: tabular-nums;
   letter-spacing: -0.02em;
+  display: inline-block;
+  min-width: 24px;       /* fits 0..100 (3 chars) without reflowing */
+  text-align: center;
 }
 .shell-fng-dot {
   width: 8px; height: 8px;
