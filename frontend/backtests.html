@@ -37,12 +37,24 @@
 <header class="topbar"><div class="flex items-center gap-4"><button id="sidebar-toggle" class="lg:hidden" aria-label="Toggle menu" style="background:none;border:none;color:rgba(255,255,255,.62);cursor:pointer"><svg aria-hidden="true" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 6h16M4 12h16M4 18h16"/></svg></button><h1 class="text-xl font-bold">Бэктесты</h1></div><div class="topbar-actions"><button id="shellLang" type="button" class="shell-topbar-btn" title="Language">EN</button><button id="shellTheme" type="button" class="shell-topbar-btn" title="Toggle theme" aria-label="Toggle theme"></button><div class="topbar-user"><div class="topbar-avatar">U</div></div></div></header>
 
 <main class="main-content">
+  <!-- Plan-gate banner — shown to Free users (0 backtests/day) -->
+  <div id="btPlanGate" class="card mb-6" hidden style="background:linear-gradient(135deg,rgba(255,140,90,.08),rgba(255,90,31,.02));border:1px solid rgba(255,140,90,.28)">
+    <div class="flex items-start gap-3" style="padding:6px 4px">
+      <div style="width:36px;height:36px;border-radius:10px;background:rgba(255,90,31,.18);display:flex;align-items:center;justify-content:center;color:#FFB28A;flex-shrink:0;font-size:18px">🔒</div>
+      <div style="flex:1;min-width:0">
+        <div class="font-semibold text-white" style="font-size:15px;margin-bottom:4px">Бэктесты доступны на тарифе Starter и выше</div>
+        <div class="text-sm text-slate-400" style="line-height:1.5">На Free-тарифе бэктестинг отключён. Starter ($29/мес) — 1 запуск в день, Pro ($69) — 10/день, Elite ($149) — ∞.</div>
+        <a href="subscriptions.html" style="display:inline-block;margin-top:10px;padding:7px 14px;border-radius:9999px;background:linear-gradient(180deg,#FF7840,#FF5A1F 60%,#C44610);color:#fff;font-size:12px;font-weight:600;text-decoration:none">Сравнить тарифы →</a>
+      </div>
+    </div>
+  </div>
+
   <!-- Create Form -->
-  <div class="card mb-6">
+  <div class="card mb-6" id="btFormCard">
     <h2 class="font-bold mb-4">Новый бэктест</h2>
     <form id="btForm" class="grid md:grid-cols-3 lg:grid-cols-6 gap-4">
       <div><label class="text-xs text-slate-500 block mb-1">Пара</label><input name="symbol" value="BTCUSDT" class="w-full bg-slate-800/50 border border-slate-700 rounded-lg px-3 py-2 text-sm text-white outline-none"/></div>
-      <div><label class="text-xs text-slate-500 block mb-1" data-help="strategy">Стратегия</label><select name="strategy" class="w-full bg-slate-800/50 border border-slate-700 rounded-lg px-3 py-2 text-sm text-white outline-none"><option>scalping</option><option>smc</option><option>gerchik</option></select></div>
+      <div><label class="text-xs text-slate-500 block mb-1" data-help="strategy">Стратегия</label><select name="strategy" class="w-full bg-slate-800/50 border border-slate-700 rounded-lg px-3 py-2 text-sm text-white outline-none"><option value="levels">Levels</option><option value="smc">SMC</option><option value="gerchik">Gerchik</option><option value="scalping">Scalping</option><option value="dca">DCA</option><option value="grid">Grid</option></select></div>
       <div><label class="text-xs text-slate-500 block mb-1">Таймфрейм</label><select name="timeframe" class="w-full bg-slate-800/50 border border-slate-700 rounded-lg px-3 py-2 text-sm text-white outline-none"><option>15m</option><option>1h</option><option>4h</option><option>1d</option></select></div>
       <div><label class="text-xs text-slate-500 block mb-1">Начало</label><input name="startDate" type="date" value="2025-01-01" class="w-full bg-slate-800/50 border border-slate-700 rounded-lg px-3 py-2 text-sm text-white outline-none"/></div>
       <div><label class="text-xs text-slate-500 block mb-1">Конец</label><input name="endDate" type="date" value="2025-12-31" class="w-full bg-slate-800/50 border border-slate-700 rounded-lg px-3 py-2 text-sm text-white outline-none"/></div>
@@ -58,11 +70,30 @@
 </main>
 
 <script src="app.js"></script>
+<script src="plan-gate.js"></script>
 <script src="shell.js?v=7" defer></script>
 <script src="help-tips.js" defer></script>
 <script>
 if(!Auth.requireAuth()) throw new Error('noauth');
 document.querySelectorAll('.sidebar-link[data-page="backtests"]').forEach(a => a.classList.add('active'));
+
+// Plan-gate: hide form + show upgrade banner for Free users (0 backtests
+// per day per backend). Lock forbidden strategies in the <select> for
+// paid tiers so a Starter user can pick "Levels" but not "Scalping".
+if (window.PlanGate) {
+  PlanGate.init().then(() => {
+    const plan = PlanGate.getPlan();
+    const banner = document.getElementById('btPlanGate');
+    const formCard = document.getElementById('btFormCard');
+    if (plan === 'free') {
+      if (banner) banner.hidden = false;
+      if (formCard) formCard.style.display = 'none';
+    } else {
+      const sel = document.querySelector('#btForm select[name="strategy"]');
+      if (sel) PlanGate.lockStrategySelect(sel);
+    }
+  });
+}
 
 const resultsGrid = document.getElementById('btResultsGrid');
 

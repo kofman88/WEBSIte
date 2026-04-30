@@ -254,10 +254,27 @@
 /* Smooth fade-up when a pane becomes active */
 .wiz-pane:not(.hidden){animation:wizPaneIn .28s cubic-bezier(.16,1,.3,1)}
 @keyframes wizPaneIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
-.wiz-card{cursor:pointer;display:block;border-radius:12px;background:rgba(30,41,59,.5);border:1px solid #334155;padding:14px;transition:all .15s}
+.wiz-card{cursor:pointer;display:block;border-radius:12px;background:rgba(30,41,59,.5);border:1px solid #334155;padding:14px;transition:all .15s;position:relative}
 .wiz-card:hover{border-color:#475569}
 .wiz-card:has(input:checked){border-color:#6366f1;background:rgba(99,102,241,.1);box-shadow:0 0 0 1px rgba(99,102,241,.4)}
 .wiz-card-body{text-align:center}
+/* Plan-locked variant — used when current user's plan can't pick this card */
+.wiz-card.plan-locked{cursor:not-allowed;opacity:.55;border-style:dashed;border-color:rgba(255,140,90,.32)!important;background:rgba(255,90,31,.04)!important;box-shadow:none!important}
+.wiz-card.plan-locked:hover{border-color:rgba(255,140,90,.45)!important;opacity:.7}
+.wiz-card.plan-locked .wiz-card-body{filter:saturate(.5)}
+.plan-lock-chip{
+  position:absolute;top:8px;right:8px;
+  display:inline-flex;align-items:center;gap:3px;
+  font-size:9px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;
+  color:#FFB28A;padding:3px 7px;border-radius:6px;
+  background:rgba(255,90,31,.14);border:1px solid rgba(255,140,90,.34);
+  white-space:nowrap;line-height:1
+}
+html.light .plan-lock-chip{color:#C44610;background:rgba(255,90,31,.08);border-color:rgba(255,90,31,.22)}
+.plan-leverage-hint{display:inline-block;margin-left:10px;font-size:11px;color:rgba(255,255,255,.5)}
+html.light .plan-leverage-hint{color:rgba(10,10,10,.55)}
+/* Generic locked clickable (e.g. backtest submit) */
+.plan-locked[data-plan-required]{position:relative}
 /* ── Info tooltip for beginners (pure CSS, no JS) ── */
 .help-dot{
   display:inline-flex;align-items:center;justify-content:center;
@@ -1409,6 +1426,7 @@ html.light .bp-filter:hover{border-color:rgba(0,0,0,.18)}
 
 <script src="assets/vendor/chart.umd.min.js"></script>
 <script src="app.js"></script>
+<script src="plan-gate.js"></script>
 <script src="shell.js?v=7" defer></script>
 <script src="help-tips.js" defer></script>
 <script>
@@ -1842,6 +1860,45 @@ function openWizard(preset) {
   setStep(1);
   document.getElementById('createModal').style.display = 'flex';
   chmEnhanceSelects(document.getElementById('createModal'));
+  // Plan-gate: hide forbidden strategies/scope/live-trading mode behind
+  // a 🔒 chip. Idempotent — safe to call every openWizard().
+  _wizApplyPlanGates();
+}
+
+// Apply plan-based locks to wizard cards. Called on every open + after
+// PlanGate.init() resolves so locks reflect the *current* plan even if
+// wizard was rendered before user data arrived.
+async function _wizApplyPlanGates() {
+  if (!window.PlanGate) return;
+  await PlanGate.init();
+  const form = document.getElementById('createBotForm');
+  if (!form) return;
+  PlanGate.lockStrategyRadios(form);
+  // Auto-pick the first allowed strategy if the default (scalping) is locked
+  const checked = form.querySelector('input[name="strategyType"]:checked');
+  if (checked && checked.disabled) {
+    const firstAllowed = form.querySelector('input[name="strategyType"]:not(:disabled)');
+    if (firstAllowed) firstAllowed.checked = true;
+  }
+  // Lock "scope=market" card for non-Elite (already had data-elite-only,
+  // we just make the lock more explicit + interactive).
+  const marketCard = form.querySelector('.wiz-card[data-scope="market"]');
+  if (marketCard && !PlanGate.canUseFeature('marketScanner')) {
+    marketCard.classList.add('plan-locked');
+    marketCard.setAttribute('data-plan-required', 'elite');
+    if (!marketCard.querySelector('.plan-lock-chip')) {
+      const body = marketCard.querySelector('.wiz-card-body') || marketCard;
+      body.insertAdjacentHTML('beforeend', '<span class="plan-lock-chip">🔒 Elite</span>');
+    }
+    const radio = marketCard.querySelector('input[type="radio"]');
+    if (radio) radio.disabled = true;
+  }
+  // Lock LIVE trading mode for paper-only plans
+  PlanGate.lockTradingModeRadios(form);
+  // Auto-pick paper if live was locked default
+  const liveR = form.querySelector('input[name="tradingMode"][value="live"]');
+  const paperR = form.querySelector('input[name="tradingMode"][value="paper"]');
+  if (liveR && liveR.disabled && liveR.checked && paperR) paperR.checked = true;
 }
 
 // Auto-open wizard when bots.html is loaded with ?wizard=1&strategy=…
@@ -2094,6 +2151,19 @@ document.getElementById('tvWebhookModal')?.addEventListener('click', (e) => {
 });
 
 loadBots();
+
+// Plan-gate the static filter dropdown + wizard's leverage input on
+// plan resolve. Drops forbidden strategies from filter (so a Free user
+// doesn't see "Filter: Gerchik" — they have no Gerchik bots anyway),
+// and clamps the wizard's leverage input to the plan max.
+if (window.PlanGate) {
+  PlanGate.init().then(() => {
+    const flt = document.getElementById('fltStrategy');
+    if (flt) PlanGate.lockStrategySelect(flt, { dropForbidden: true });
+    const wizLev = document.querySelector('#createBotForm input[name="leverage"]');
+    if (wizLev) PlanGate.clampLeverageInput(wizLev);
+  });
+}
 
 // ── Market Scanner / Elite gate ─────────────────────────────────────
 // Reads user plan from /auth/me once. If not Elite:
@@ -2458,6 +2528,27 @@ function _bdRenderSettings(bot) {
   f.elements.autoTrade.checked = Boolean(bot.autoTrade ?? bot.auto_trade);
   const status = document.getElementById('bdSettingsStatus');
   status.className = 'bd-settings-status'; status.textContent = '';
+
+  // Plan-gate the strategy / tradingMode <select>s and the leverage <input>
+  // so a Free user can't switch to a Pro/Elite-only strategy then save and
+  // hit a 400. We don't drop forbidden strategies (the bot may already
+  // *be* on one from a previous Pro subscription) — we just disable the
+  // forbidden options and append a "(Pro)" / "(Elite)" suffix.
+  if (window.PlanGate) {
+    PlanGate.init().then(() => {
+      PlanGate.lockStrategySelect(f.elements.strategy);
+      // Lock LIVE option in the trading-mode <select> for paper-only plans
+      // (paperOnly flag is true for free/starter; pro+ goes through unchanged).
+      if (PlanGate.canUseFeature('paperOnly')) {
+        const tmSel = f.elements.tradingMode;
+        if (tmSel) {
+          const liveOpt = Array.from(tmSel.options).find((o) => o.value === 'live');
+          if (liveOpt && liveOpt.text.indexOf('(Pro') === -1) { liveOpt.disabled = true; liveOpt.text = liveOpt.text + ' (Pro)'; }
+        }
+      }
+      PlanGate.clampLeverageInput(f.elements.leverage);
+    });
+  }
 
   // Render strategy-specific config below the main form. Re-render when
   // user picks a different strategy in the <select>.
