@@ -706,37 +706,208 @@ html.light .chm-select-option.selected{background:rgba(255,90,31,.12);color:#FF5
   .bd-bt-tile-v.pos{color:#4ade80}.bd-bt-tile-v.neg{color:#f87171}
 </style>
 
-<!-- TRADINGVIEW WEBHOOK MODAL -->
-<div id="tvWebhookModal" class="fixed inset-0 bg-black/70 flex items-center justify-center hidden z-50" style="backdrop-filter:blur(8px)">
-  <div class="bg-slate-900 border border-slate-700/50 rounded-2xl p-6 max-w-xl w-full mx-4 shadow-2xl">
-    <div class="flex items-center justify-between mb-4">
-      <div class="flex items-center gap-2"><span class="text-xl">📡</span><h3 class="text-lg font-bold">TradingView Webhook</h3></div>
-      <button type="button" onclick="closeTvWebhook()" class="text-slate-400 hover:text-white text-xl">&times;</button>
-    </div>
-    <p class="text-xs text-slate-400 mb-4">Настрой TradingView alert → Notifications → Webhook URL — и бот будет исполнять сигналы из TV автоматически.</p>
-    <div class="space-y-3">
-      <div>
-        <label class="text-xs text-slate-400 block mb-1">URL</label>
-        <div class="flex items-center gap-2 p-3 bg-slate-800/40 border border-slate-700 rounded-xl">
-          <code id="tvUrl" class="text-xs text-indigo-400 break-all flex-1">—</code>
-          <button id="tvCopyUrl" class="text-xs text-slate-400 hover:text-white shrink-0">Копировать</button>
+<!-- TRADINGVIEW WEBHOOK MODAL — premium step-by-step guide for newcomers -->
+<div id="tvWebhookModal" class="tv-guide-bg hidden">
+  <div class="tv-guide">
+    <div class="tv-guide-head">
+      <div class="tv-guide-head-id">
+        <div class="tv-guide-orb">📡</div>
+        <div>
+          <div class="tv-guide-title">TradingView → CHM Finance</div>
+          <div class="tv-guide-sub">Подключи свой alert из TradingView и бот будет открывать сделки автоматически. ~3 минуты по шагам.</div>
         </div>
       </div>
-      <div>
-        <label class="text-xs text-slate-400 block mb-1">Secret</label>
-        <div class="flex items-center gap-2 p-3 bg-slate-800/40 border border-slate-700 rounded-xl">
-          <code id="tvSecret" class="text-xs text-cyan-400 break-all flex-1">—</code>
-          <button id="tvCopySecret" class="text-xs text-slate-400 hover:text-white shrink-0">Копировать</button>
+      <button type="button" onclick="closeTvWebhook()" class="tv-guide-close" aria-label="Закрыть">&times;</button>
+    </div>
+
+    <!-- ШАГ 1 -->
+    <div class="tv-step">
+      <div class="tv-step-num">1</div>
+      <div class="tv-step-body">
+        <div class="tv-step-title">Создай Alert на нужном графике</div>
+        <p class="tv-step-text">Открой <a href="https://tradingview.com" target="_blank" rel="noopener" class="tv-link">tradingview.com</a>, выбери пару (например <code>BTCUSDT</code> на Bybit), нажми <strong>«Будильник»</strong> сверху или <kbd>Alt</kbd>+<kbd>A</kbd>. Окно «Создать оповещение» откроется.</p>
+      </div>
+    </div>
+
+    <!-- ШАГ 2 -->
+    <div class="tv-step">
+      <div class="tv-step-num">2</div>
+      <div class="tv-step-body">
+        <div class="tv-step-title">Условие — твоя стратегия</div>
+        <p class="tv-step-text">В поле <strong>Условие</strong> выбери индикатор / Pine-стратегию которая должна триггерить сделку. Например, «Crossing» цены через MA, или сигнал из своего Pine-скрипта.</p>
+      </div>
+    </div>
+
+    <!-- ШАГ 3: URL + Secret + копи-кнопки -->
+    <div class="tv-step">
+      <div class="tv-step-num">3</div>
+      <div class="tv-step-body">
+        <div class="tv-step-title">Вкладка «Уведомления» → включи Webhook URL</div>
+        <p class="tv-step-text">Поставь галку <strong>«Webhook URL»</strong> и вставь сюда:</p>
+        <div class="tv-field">
+          <span class="tv-field-label">URL</span>
+          <code id="tvUrl" class="tv-field-value">—</code>
+          <button id="tvCopyUrl" class="tv-field-copy" type="button">Копировать</button>
         </div>
       </div>
-      <div class="bg-slate-800/30 rounded-xl p-3">
-        <div class="text-xs text-slate-400 mb-2">Пример message payload для TradingView:</div>
-        <pre id="tvPayload" class="text-xs text-slate-300 font-mono leading-relaxed overflow-x-auto">—</pre>
-      </div>
-      <button id="tvRotateBtn" class="w-full py-2.5 rounded-xl bg-red-500/10 border border-red-500/30 text-red-400 text-sm hover:bg-red-500/20">Перегенерировать secret</button>
     </div>
+
+    <!-- ШАГ 4: Сообщение -->
+    <div class="tv-step">
+      <div class="tv-step-num">4</div>
+      <div class="tv-step-body">
+        <div class="tv-step-title">Вкладка «Сообщение» — JSON-payload</div>
+        <p class="tv-step-text">Скопируй ВЕСЬ блок ниже и вставь в поле <strong>«Сообщение»</strong>. <code>secret</code> уже подставлен — он привязан к этому боту.</p>
+        <div class="tv-payload">
+          <button id="tvCopyPayload" class="tv-payload-copy" type="button">Копировать</button>
+          <pre id="tvPayload" class="tv-payload-pre">—</pre>
+        </div>
+        <div class="tv-field" style="margin-top:10px">
+          <span class="tv-field-label">Secret</span>
+          <code id="tvSecret" class="tv-field-value tv-field-secret">—</code>
+          <button id="tvCopySecret" class="tv-field-copy" type="button">Копировать</button>
+        </div>
+        <p class="tv-hint">Поля <code>{{ticker}}</code>, <code>{{strategy.order.action}}</code>, <code>{{close}}</code> — переменные TradingView. Они подставятся автоматически в момент срабатывания alert.</p>
+      </div>
+    </div>
+
+    <!-- ШАГ 5: Тест -->
+    <div class="tv-step">
+      <div class="tv-step-num">5</div>
+      <div class="tv-step-body">
+        <div class="tv-step-title">Создай alert и проверь</div>
+        <p class="tv-step-text">Жми <strong>«Создать»</strong>. Чтобы сразу увидеть как это работает — поставь условие на текущую цену (срабатывает мгновенно) и через 5-10 секунд проверь раздел <a href="signals.html" class="tv-link">«Сигналы»</a>. Должна появиться новая строка от TradingView. Если включён <strong>«Авто-исполнение»</strong> — откроется paper-сделка.</p>
+      </div>
+    </div>
+
+    <!-- TROUBLESHOOT -->
+    <details class="tv-trouble">
+      <summary class="tv-trouble-sum">Что-то не работает?</summary>
+      <ul class="tv-trouble-list">
+        <li><strong>401 Unauthorized в TV-логе</strong> — secret не совпадает. Перегенерируй ниже и обнови сообщение в alert.</li>
+        <li><strong>Сигнал в /signals есть, но сделка не открывается</strong> — включи в карточке бота тогл «Авто-исполнение». Для live-режима требуется Pro+ план.</li>
+        <li><strong>Тишина после alert</strong> — TradingView отправляет webhook только когда условие сработало. Проверь «История оповещений» в TV — стрельнул ли он вообще.</li>
+        <li><strong>Invalid side / missing price</strong> — TradingView не нашёл значение переменной. Используй точные плейсхолдеры из payload выше: <code>{{strategy.order.action}}</code>, <code>{{close}}</code>.</li>
+      </ul>
+    </details>
+
+    <button id="tvRotateBtn" class="tv-rotate" type="button">Перегенерировать secret</button>
+    <p class="tv-rotate-hint">Перегенерация инвалидирует старый secret — придётся обновить сообщение во всех alert этого бота.</p>
   </div>
 </div>
+
+<style>
+.tv-guide-bg{position:fixed;inset:0;background:rgba(0,0,0,.78);z-index:1000;display:flex;align-items:flex-start;justify-content:center;padding:32px 16px;overflow-y:auto;backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px)}
+.tv-guide{
+  width:100%;max-width:640px;
+  background:linear-gradient(180deg,#15171a 0%,#0c0d10 100%);
+  border:1px solid rgba(255,255,255,.08);
+  border-radius:18px;padding:28px;
+  box-shadow:0 24px 60px -12px rgba(0,0,0,.7),0 0 0 1px rgba(255,140,90,.06) inset;
+  font-family:'Inter',sans-serif;color:#E5E5E5
+}
+.tv-guide-head{display:flex;align-items:flex-start;justify-content:space-between;gap:16px;margin-bottom:22px;padding-bottom:18px;border-bottom:1px solid rgba(255,255,255,.06)}
+.tv-guide-head-id{display:flex;gap:14px;align-items:center;min-width:0;flex:1}
+.tv-guide-orb{
+  width:44px;height:44px;border-radius:12px;flex-shrink:0;
+  background:linear-gradient(135deg,#FF7840,#FF5A1F 60%,#C44610);
+  display:flex;align-items:center;justify-content:center;font-size:22px;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.3),0 6px 14px -2px rgba(255,90,31,.45)
+}
+.tv-guide-title{font-size:16px;font-weight:600;color:#fff;letter-spacing:-.01em}
+.tv-guide-sub{font-size:12.5px;color:rgba(255,255,255,.6);margin-top:3px;line-height:1.5}
+.tv-guide-close{
+  width:32px;height:32px;border-radius:8px;border:1px solid rgba(255,255,255,.08);
+  background:rgba(255,255,255,.04);color:rgba(255,255,255,.6);
+  font-size:20px;line-height:1;cursor:pointer;flex-shrink:0
+}
+.tv-guide-close:hover{background:rgba(255,255,255,.1);color:#fff}
+
+.tv-step{display:flex;gap:14px;padding:14px 0;border-bottom:1px solid rgba(255,255,255,.04)}
+.tv-step:last-of-type{border-bottom:0}
+.tv-step-num{
+  width:28px;height:28px;flex-shrink:0;border-radius:50%;
+  background:linear-gradient(135deg,rgba(255,140,90,.25),rgba(255,90,31,.12));
+  color:#FF8C5A;font-weight:700;font-size:13px;
+  display:flex;align-items:center;justify-content:center;
+  box-shadow:inset 0 0 0 1px rgba(255,140,90,.32)
+}
+.tv-step-body{flex:1;min-width:0}
+.tv-step-title{font-size:14px;font-weight:600;color:#fff;margin-bottom:6px;letter-spacing:-.005em}
+.tv-step-text{font-size:13px;color:rgba(255,255,255,.7);line-height:1.6;margin:0 0 10px}
+.tv-step-text strong{color:#fff;font-weight:600}
+.tv-step-text code{
+  background:rgba(255,90,31,.12);color:#FF8C5A;
+  padding:1px 6px;border-radius:4px;font-family:'JetBrains Mono',monospace;font-size:11.5px
+}
+.tv-step-text kbd{
+  display:inline-block;padding:1px 6px;font-size:11px;font-family:'JetBrains Mono',monospace;
+  background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.14);border-radius:4px;
+  box-shadow:0 1px 0 rgba(0,0,0,.3)
+}
+.tv-link{color:#FF8C5A;text-decoration:none;border-bottom:1px dashed rgba(255,140,90,.4)}
+.tv-link:hover{border-bottom-color:#FF8C5A}
+
+.tv-field{
+  display:flex;align-items:center;gap:8px;
+  padding:9px 12px;background:rgba(255,255,255,.03);
+  border:1px solid rgba(255,255,255,.08);border-radius:10px
+}
+.tv-field-label{
+  font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.1em;
+  color:rgba(255,255,255,.5);flex-shrink:0
+}
+.tv-field-value{
+  flex:1;min-width:0;font-family:'JetBrains Mono',monospace;font-size:12px;
+  color:#a5b4fc;word-break:break-all;line-height:1.4
+}
+.tv-field-secret{color:#7ec5f0}
+.tv-field-copy{
+  flex-shrink:0;font-size:11px;color:#FF8C5A;background:rgba(255,90,31,.1);
+  border:1px solid rgba(255,90,31,.25);padding:5px 12px;border-radius:6px;cursor:pointer;
+  font-weight:500;transition:background .15s
+}
+.tv-field-copy:hover{background:rgba(255,90,31,.2);color:#fff}
+
+.tv-payload{position:relative;background:rgba(0,0,0,.4);border:1px solid rgba(255,255,255,.08);border-radius:10px;padding:14px;padding-right:90px}
+.tv-payload-pre{font-family:'JetBrains Mono',monospace;font-size:12px;line-height:1.7;color:#a5b4fc;white-space:pre;overflow-x:auto;margin:0}
+.tv-payload-copy{
+  position:absolute;top:10px;right:10px;
+  font-size:11px;color:#FF8C5A;background:rgba(255,90,31,.12);
+  border:1px solid rgba(255,90,31,.28);padding:5px 12px;border-radius:6px;cursor:pointer;font-weight:500
+}
+.tv-payload-copy:hover{background:rgba(255,90,31,.22);color:#fff}
+
+.tv-hint{font-size:11.5px;color:rgba(255,255,255,.45);line-height:1.55;margin:10px 0 0}
+.tv-hint code{background:rgba(255,255,255,.06);padding:1px 5px;border-radius:3px;font-family:'JetBrains Mono',monospace;font-size:10.5px;color:rgba(255,255,255,.7)}
+
+.tv-trouble{margin:18px 0 0;background:rgba(255,255,255,.025);border:1px solid rgba(255,255,255,.06);border-radius:10px;padding:12px 14px}
+.tv-trouble-sum{font-size:13px;font-weight:600;color:rgba(255,255,255,.85);cursor:pointer;list-style:none;display:flex;align-items:center;gap:8px}
+.tv-trouble-sum::before{content:'?';width:18px;height:18px;border-radius:50%;background:rgba(255,140,90,.18);color:#FF8C5A;display:inline-flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;flex-shrink:0}
+.tv-trouble-sum::-webkit-details-marker{display:none}
+.tv-trouble-list{margin:12px 0 4px;padding-left:18px;font-size:12.5px;color:rgba(255,255,255,.7);line-height:1.65}
+.tv-trouble-list li{margin-bottom:8px}
+.tv-trouble-list strong{color:#fca5a5;font-weight:600}
+.tv-trouble-list code{background:rgba(255,255,255,.06);padding:1px 5px;border-radius:3px;font-family:'JetBrains Mono',monospace;font-size:11px;color:rgba(255,255,255,.78)}
+
+.tv-rotate{
+  width:100%;margin-top:18px;padding:11px;
+  background:rgba(239,68,68,.08);border:1px solid rgba(239,68,68,.25);
+  color:#fca5a5;border-radius:10px;font-size:13px;font-weight:500;cursor:pointer;
+  transition:background .15s
+}
+.tv-rotate:hover{background:rgba(239,68,68,.18);color:#fff}
+.tv-rotate-hint{text-align:center;font-size:11px;color:rgba(255,255,255,.4);margin:6px 0 0;line-height:1.5}
+
+html.light .tv-guide{background:linear-gradient(180deg,#fff 0%,#f8f9fb 100%);color:#0A0A0A;border-color:rgba(0,0,0,.08)}
+html.light .tv-guide-title{color:#0A0A0A}
+html.light .tv-guide-sub{color:rgba(10,10,10,.6)}
+html.light .tv-step-title{color:#0A0A0A}
+html.light .tv-step-text{color:rgba(10,10,10,.7)}
+html.light .tv-field{background:rgba(0,0,0,.03);border-color:rgba(0,0,0,.08)}
+html.light .tv-payload{background:rgba(0,0,0,.04);border-color:rgba(0,0,0,.08)}
+html.light .tv-trouble{background:rgba(0,0,0,.02);border-color:rgba(0,0,0,.06)}
+</style>
 
 <style>
 .st-side{cursor:pointer;display:block;border-radius:10px;background:rgba(30,41,59,.5);border:1px solid #334155;padding:8px;transition:all .15s}
@@ -1507,6 +1678,9 @@ document.getElementById('tvCopyUrl')?.addEventListener('click', () => {
 });
 document.getElementById('tvCopySecret')?.addEventListener('click', () => {
   navigator.clipboard.writeText(document.getElementById('tvSecret').textContent).then(() => Toast.success('Secret скопирован'));
+});
+document.getElementById('tvCopyPayload')?.addEventListener('click', () => {
+  navigator.clipboard.writeText(document.getElementById('tvPayload').textContent).then(() => Toast.success('JSON-сообщение скопировано'));
 });
 document.getElementById('tvRotateBtn')?.addEventListener('click', async () => {
   if (!tvCurrentBotId) return;
