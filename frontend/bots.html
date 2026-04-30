@@ -537,6 +537,38 @@ html.light .chm-select-option.selected{background:rgba(255,90,31,.12);color:#FF5
     </div>
     <form id="bdSettingsForm" class="bd-settings" onsubmit="return false">
       <label class="bd-field"><span data-help-text="Имя бота — для тебя, как удобнее.">Имя</span><input name="name" type="text" maxlength="64"/></label>
+      <label class="bd-field"><span data-help-text="Биржа исполнения. Меняй только если переключаешь ключ API на другую биржу.">Биржа</span>
+        <select name="exchange">
+          <option value="bybit">Bybit</option><option value="binance">Binance</option>
+          <option value="bingx">BingX</option><option value="okx">OKX</option>
+          <option value="bitget">Bitget</option><option value="htx">HTX</option>
+          <option value="gate">Gate.io</option><option value="bitmex">BitMEX</option>
+        </select>
+      </label>
+      <label class="bd-field"><span data-help-text="Торгуемые символы через запятую (напр. BTCUSDT, ETHUSDT). Бот сканирует каждый раз указанные пары.">Символы</span><input name="symbols" type="text" placeholder="BTCUSDT, ETHUSDT"/></label>
+      <label class="bd-field"><span data-help-text="Алгоритм входа. Смена сбросит параметры стратегии на дефолт.">Стратегия</span>
+        <select name="strategy">
+          <option value="levels">Уровни</option><option value="smc">SMC</option>
+          <option value="gerchik">Gerchik</option><option value="scalping">Скальпинг</option>
+          <option value="dca">DCA</option><option value="grid">Grid</option>
+        </select>
+      </label>
+      <label class="bd-field"><span data-help-text="Таймфрейм свечей для анализа. Меньший — больше сигналов и шум.">Таймфрейм</span>
+        <select name="timeframe">
+          <option value="1m">1m</option><option value="3m">3m</option>
+          <option value="5m">5m</option><option value="15m">15m</option>
+          <option value="30m">30m</option><option value="1h">1h</option>
+          <option value="2h">2h</option><option value="4h">4h</option>
+          <option value="6h">6h</option><option value="12h">12h</option>
+          <option value="1d">1d</option><option value="1w">1w</option>
+        </select>
+      </label>
+      <label class="bd-field"><span data-help-text="Paper — виртуальные сделки без денег. Live — реальные ордера через API-ключ биржи.">Режим</span>
+        <select name="tradingMode">
+          <option value="paper">Paper (Demo)</option>
+          <option value="live">Live (реальный)</option>
+        </select>
+      </label>
       <label class="bd-field"><span data-help="risk-pct">Risk % за сделку</span><input name="riskPct" type="number" min="0.1" max="10" step="0.1"/></label>
       <label class="bd-field"><span data-help="leverage">Плечо</span><input name="leverage" type="number" min="1" max="100" step="1"/></label>
       <label class="bd-field"><span data-help="max-trades">Макс открытых сделок</span><input name="maxOpenTrades" type="number" min="1" max="20" step="1"/></label>
@@ -553,6 +585,17 @@ html.light .chm-select-option.selected{background:rgba(255,90,31,.12);color:#FF5
         <span class="bd-settings-status" id="bdSettingsStatus"></span>
       </div>
     </form>
+  </section>
+
+  <!-- Phase 3: parameters specific to the chosen strategy — fetched dynamically
+       from /bots/strategy-schema/:key so any new strategy field appears here
+       without a frontend change. Re-renders when strategy <select> changes. -->
+  <section class="bd-section" id="bdStrategyConfigSection">
+    <div class="bd-section-head">
+      <h3>Параметры стратегии</h3>
+      <span class="bd-section-meta" id="bdStrategyConfigMeta">подгружаются под выбранную стратегию</span>
+    </div>
+    <div id="bdStrategyConfig" class="bd-strategy-config"><div class="bd-empty">Загружаем…</div></div>
   </section>
 
   <!-- Strategy diagnostics — auto-analyses bot's recent trades and flags
@@ -852,6 +895,31 @@ html.light .chm-select-option.selected{background:rgba(255,90,31,.12);color:#FF5
   html.light .bd-bt-tile-l{color:rgba(10,10,10,.5)}
   .bd-bt-tile-v{font-size:18px;font-weight:700;font-family:'JetBrains Mono',monospace;font-variant-numeric:tabular-nums;margin-top:4px;letter-spacing:-.01em}
   .bd-bt-tile-v.pos{color:#4ade80}.bd-bt-tile-v.neg{color:#f87171}
+
+  /* Phase 3: dynamic strategy-config form (mirrors wizard groups) */
+  .bd-strategy-config{display:flex;flex-direction:column;gap:18px}
+  .bd-sc-group{display:flex;flex-direction:column;gap:10px}
+  .bd-sc-group-title{font-size:10px;letter-spacing:.18em;text-transform:uppercase;color:rgba(255,255,255,.45);font-weight:600}
+  html.light .bd-sc-group-title{color:rgba(10,10,10,.45)}
+  .bd-sc-fields{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:12px}
+  .bd-sc-field{display:flex;flex-direction:column;gap:4px;font-size:11px;color:rgba(255,255,255,.55)}
+  html.light .bd-sc-field{color:rgba(10,10,10,.55)}
+  .bd-sc-field-label{font-size:11.5px;font-weight:500;color:rgba(255,255,255,.78);text-transform:none;letter-spacing:0}
+  html.light .bd-sc-field-label{color:rgba(10,10,10,.78)}
+  .bd-sc-field-desc{font-size:10.5px;color:rgba(255,255,255,.4);line-height:1.4;margin-top:2px}
+  html.light .bd-sc-field-desc{color:rgba(10,10,10,.45)}
+  .bd-sc-field input[type="number"]{
+    background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);border-radius:8px;
+    padding:8px 11px;font-family:'JetBrains Mono',monospace;font-size:13px;color:#fff;font-variant-numeric:tabular-nums
+  }
+  .bd-sc-field input[type="number"]:focus{outline:none;border-color:rgba(255,140,90,.55);background:rgba(255,255,255,.06)}
+  html.light .bd-sc-field input[type="number"]{background:#fff;border-color:rgba(0,0,0,.08);color:#0A0A0A}
+  .bd-sc-field-toggle{flex-direction:row;align-items:center;gap:10px;flex-wrap:wrap}
+  .bd-sc-field-toggle input[type="checkbox"]{order:1;width:36px;height:20px;-webkit-appearance:none;appearance:none;background:rgba(255,255,255,.08);border-radius:9999px;position:relative;cursor:pointer;transition:background .15s;border:0;flex-shrink:0}
+  .bd-sc-field-toggle input[type="checkbox"]::after{content:"";position:absolute;top:2px;left:2px;width:16px;height:16px;border-radius:50%;background:#fff;transition:transform .15s}
+  .bd-sc-field-toggle input[type="checkbox"]:checked{background:#FF5A1F}
+  .bd-sc-field-toggle input[type="checkbox"]:checked::after{transform:translateX(16px)}
+  .bd-sc-field-toggle .bd-sc-field-label{order:2}
 </style>
 
 <!-- TRADINGVIEW WEBHOOK MODAL — premium step-by-step guide for newcomers -->
@@ -2124,6 +2192,7 @@ function closeBotDrawer() {
   document.getElementById('botDrawer').classList.remove('open');
   document.body.style.overflow = '';
   _bdCurrentId = null;
+  _bdCurrentSchema = null;
   if (_bdEquityChart) { _bdEquityChart.destroy(); _bdEquityChart = null; }
 }
 document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && _bdCurrentId) closeBotDrawer(); });
@@ -2337,12 +2406,24 @@ function _bdRenderDiagnose(trades) {
   ).join('');
 }
 
-// ── Phase 2: inline settings editor inside the drawer ──────────────────
+// ── Phase 2/3: inline settings editor inside the drawer ───────────────
+// Edits the *full* schema accepted by PATCH /bots/:id —
+// name, exchange, symbols, strategy, timeframe, direction, leverage,
+// riskPct, maxOpenTrades, autoTrade, tradingMode, strategyConfig.
 let _bdOriginal = null;
+let _bdSchemaCache = {};      // strategy key → schema (cached per drawer session)
+let _bdCurrentSchema = null;  // last-rendered strategy schema
 function _bdRenderSettings(bot) {
   _bdOriginal = bot;
   const f = document.getElementById('bdSettingsForm');
+  const symbols = Array.isArray(bot.symbols) ? bot.symbols
+    : (typeof bot.symbols === 'string' ? (bot.symbols.startsWith('[') ? JSON.parse(bot.symbols) : bot.symbols.split(',')) : []);
   f.elements.name.value = bot.name || '';
+  f.elements.exchange.value = bot.exchange || 'bybit';
+  f.elements.symbols.value = symbols.map((s) => String(s).trim()).filter(Boolean).join(', ');
+  f.elements.strategy.value = bot.strategy || 'levels';
+  f.elements.timeframe.value = bot.timeframe || '1h';
+  f.elements.tradingMode.value = bot.tradingMode || bot.trading_mode || 'paper';
   f.elements.riskPct.value = bot.riskPct ?? bot.risk_pct ?? 1;
   f.elements.leverage.value = bot.leverage ?? 1;
   f.elements.maxOpenTrades.value = bot.maxOpenTrades ?? bot.max_open_trades ?? 3;
@@ -2351,15 +2432,35 @@ function _bdRenderSettings(bot) {
   const status = document.getElementById('bdSettingsStatus');
   status.className = 'bd-settings-status'; status.textContent = '';
 
+  // Render strategy-specific config below the main form. Re-render when
+  // user picks a different strategy in the <select>.
+  const initialCfg = bot.strategyConfig || (typeof bot.strategy_config === 'string' ? JSON.parse(bot.strategy_config) : bot.strategy_config) || {};
+  _bdRenderStrategyConfig(bot.strategy || 'levels', initialCfg);
+  f.elements.strategy.onchange = () => {
+    // Strategy changed → fetch new schema. We pass {} so defaults take over.
+    _bdRenderStrategyConfig(f.elements.strategy.value, {});
+  };
+
   document.getElementById('bdSettingsReset').onclick = () => _bdRenderSettings(_bdOriginal);
   document.getElementById('bdSettingsSave').onclick = async () => {
+    const symbolsArr = f.elements.symbols.value.split(/[,\s]+/).map((s) => s.trim().toUpperCase()).filter(Boolean);
+    if (!symbolsArr.length) {
+      status.className = 'bd-settings-status err'; status.textContent = 'Укажите хотя бы один символ';
+      return;
+    }
     const patch = {
       name: f.elements.name.value.trim(),
+      exchange: f.elements.exchange.value,
+      symbols: symbolsArr,
+      strategy: f.elements.strategy.value,
+      timeframe: f.elements.timeframe.value,
+      tradingMode: f.elements.tradingMode.value,
       riskPct: Number(f.elements.riskPct.value),
       leverage: Number(f.elements.leverage.value),
       maxOpenTrades: Number(f.elements.maxOpenTrades.value),
       direction: f.elements.direction.value,
       autoTrade: f.elements.autoTrade.checked,
+      strategyConfig: _bdReadStrategyConfig(),
     };
     status.className = 'bd-settings-status'; status.textContent = 'Сохраняем…';
     try {
@@ -2372,6 +2473,82 @@ function _bdRenderSettings(bot) {
       status.className = 'bd-settings-status err'; status.textContent = err.message || 'Ошибка';
     }
   };
+}
+
+// Fetch strategy schema (cached) and render number/toggle inputs grouped
+// by the schema's `groups`. Values fall back to schema field defaults.
+async function _bdRenderStrategyConfig(strategyKey, currentValues) {
+  const container = document.getElementById('bdStrategyConfig');
+  const meta = document.getElementById('bdStrategyConfigMeta');
+  container.innerHTML = '<div class="bd-empty">Загружаем параметры…</div>';
+  let schema = _bdSchemaCache[strategyKey];
+  try {
+    if (!schema) {
+      schema = await API.strategySchema(strategyKey);
+      _bdSchemaCache[strategyKey] = schema;
+    }
+  } catch (err) {
+    container.innerHTML = '<div class="bd-empty">Не удалось загрузить параметры стратегии</div>';
+    _bdCurrentSchema = null;
+    return;
+  }
+  _bdCurrentSchema = schema;
+  meta.textContent = schema.title || strategyKey;
+  const groups = (schema.groups || []).map((g) => {
+    const fields = (g.fields || []).map((field) => {
+      const cur = (currentValues && Object.prototype.hasOwnProperty.call(currentValues, field.key))
+        ? currentValues[field.key] : field.default;
+      const fid = 'bdsc_' + strategyKey + '_' + field.key;
+      if (field.type === 'bool') {
+        return (
+          '<label class="bd-sc-field bd-sc-field-toggle" data-key="' + escapeHtml(field.key) + '" data-type="bool">' +
+            '<input type="checkbox" id="' + fid + '"' + (cur ? ' checked' : '') + '/>' +
+            '<span class="bd-sc-field-label">' + escapeHtml(field.label || field.key) + '</span>' +
+            (field.desc ? '<span class="bd-sc-field-desc" style="grid-column:1/-1;flex-basis:100%;order:3">' + escapeHtml(field.desc) + '</span>' : '') +
+          '</label>'
+        );
+      }
+      const step = field.step != null ? field.step : (field.type === 'int' ? 1 : 0.01);
+      const minAttr = field.min != null ? ' min="' + field.min + '"' : '';
+      const maxAttr = field.max != null ? ' max="' + field.max + '"' : '';
+      return (
+        '<label class="bd-sc-field" data-key="' + escapeHtml(field.key) + '" data-type="' + escapeHtml(field.type) + '">' +
+          '<span class="bd-sc-field-label">' + escapeHtml(field.label || field.key) + '</span>' +
+          '<input type="number" id="' + fid + '" value="' + cur + '" step="' + step + '"' + minAttr + maxAttr + '/>' +
+          (field.desc ? '<span class="bd-sc-field-desc">' + escapeHtml(field.desc) + '</span>' : '') +
+        '</label>'
+      );
+    }).join('');
+    return (
+      '<div class="bd-sc-group">' +
+        '<div class="bd-sc-group-title">' + escapeHtml(g.title || '') + '</div>' +
+        '<div class="bd-sc-fields">' + fields + '</div>' +
+      '</div>'
+    );
+  }).join('');
+  container.innerHTML = groups || '<div class="bd-empty">У этой стратегии нет настраиваемых параметров</div>';
+}
+
+// Read strategy-config values from the dynamically-rendered fields.
+// Returns {} when no schema is loaded so we don't accidentally wipe
+// the bot's existing strategyConfig.
+function _bdReadStrategyConfig() {
+  if (!_bdCurrentSchema) return undefined;
+  const out = {};
+  document.querySelectorAll('#bdStrategyConfig .bd-sc-field').forEach((el) => {
+    const key = el.getAttribute('data-key');
+    const type = el.getAttribute('data-type');
+    if (!key) return;
+    if (type === 'bool') {
+      out[key] = el.querySelector('input[type="checkbox"]').checked;
+    } else {
+      const raw = el.querySelector('input[type="number"]').value;
+      if (raw === '' || raw == null) return;
+      const n = Number(raw);
+      if (Number.isFinite(n)) out[key] = n;
+    }
+  });
+  return out;
 }
 
 // ── Phase 2: run a backtest of the current bot config from the drawer ──
