@@ -587,7 +587,7 @@ html.light .chm-select-option.selected{background:rgba(255,90,31,.12);color:#FF5
   <section class="bd-section">
     <div class="bd-section-head">
       <h3>Последние сделки</h3>
-      <a href="#" id="bdTradesAll" class="bd-section-meta" style="color:#FF8C5A;text-decoration:underline">все</a>
+      <a href="#" id="bdTradesAll" class="bd-all-btn">Все сделки<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 5l7 7-7 7"/></svg></a>
     </div>
     <div id="bdTrades" class="bd-trades-wrap"><div class="bd-empty">Загрузка…</div></div>
   </section>
@@ -637,10 +637,33 @@ html.light .chm-select-option.selected{background:rgba(255,90,31,.12);color:#FF5
 
   .bd-section{padding:20px 24px;border-bottom:1px solid rgba(255,255,255,.04)}
   html.light .bd-section{border-bottom-color:rgba(0,0,0,.05)}
-  .bd-section-head{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:14px}
+  .bd-section-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:14px}
   .bd-section-head h3{font-size:14px;font-weight:600;letter-spacing:-.01em}
   .bd-section-meta{font-size:11px;color:rgba(255,255,255,.45)}
   html.light .bd-section-meta{color:rgba(10,10,10,.5)}
+  /* "Все сделки" — premium pill replacing the underlined orange link */
+  .bd-all-btn{
+    display:inline-flex;align-items:center;gap:6px;
+    padding:6px 12px 6px 14px;
+    font-family:'Inter',sans-serif;font-size:12px;font-weight:500;letter-spacing:.005em;
+    color:#FF8C5A;text-decoration:none;
+    background:rgba(255,90,31,.08);
+    border:1px solid rgba(255,140,90,.22);
+    border-radius:999px;
+    transition:background .18s ease,border-color .18s ease,color .18s ease,transform .18s ease;
+  }
+  .bd-all-btn:hover{
+    background:rgba(255,90,31,.16);
+    border-color:rgba(255,140,90,.4);
+    color:#fff;
+    transform:translateX(2px);
+  }
+  .bd-all-btn svg{width:12px;height:12px;flex-shrink:0;transition:transform .18s ease}
+  .bd-all-btn:hover svg{transform:translateX(2px)}
+  html.light .bd-all-btn{
+    background:rgba(255,90,31,.08);border-color:rgba(255,140,90,.32);color:#C44610;
+  }
+  html.light .bd-all-btn:hover{background:rgba(255,90,31,.16);color:#0A0A0A}
   .bd-chart-wrap{background:rgba(255,255,255,.02);border-radius:12px;padding:14px;height:260px;position:relative}
   html.light .bd-chart-wrap{background:rgba(0,0,0,.02)}
   .bd-tv-wrap{height:420px;border-radius:12px;overflow:hidden;background:#0d1017;border:1px solid rgba(255,255,255,.04)}
