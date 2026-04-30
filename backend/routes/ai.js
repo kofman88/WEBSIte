@@ -44,4 +44,17 @@ router.get('/usage', (req, res) => {
   });
 });
 
+// Bot-config wizard helper — natural-language intent → structured bot
+// config that the frontend can apply to the wizard / drawer fields.
+router.post('/configure-bot', async (req, res, next) => {
+  try {
+    const body = z.object({
+      intent: z.string().trim().min(4).max(1000),
+    }).parse(req.body);
+    const plan = req.userPlan || 'free';
+    const result = await ai.configureBot({ userId: req.userId, plan, intent: body.intent });
+    res.json(result);
+  } catch (err) { handleErr(err, res, next); }
+});
+
 module.exports = router;

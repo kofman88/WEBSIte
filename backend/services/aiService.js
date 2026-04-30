@@ -216,4 +216,171 @@ async function ask({ userId, plan, message, history = [] }) {
   };
 }
 
-module.exports = { ask, limitForPlan, getCount, looksLikePII, _SYSTEM_PROMPT: SYSTEM_PROMPT_RU };
+// ── Bot config assistant ─────────────────────────────────────────────────
+// Given a free-form intent ("безопасный DCA на BTC, депозит $100"), return
+// a structured bot config that the wizard / drawer can apply directly.
+// Uses Gemini's responseSchema for clean JSON output — no more brittle
+// regex-extraction-of-JSON-from-prose. Validated server-side with zod
+// before returning, so a malicious / hallucinated reply can't sneak past.
+
+const SYSTEM_PROMPT_BOT_CONFIG = `
+Ты — AI-помощник по настройке торговых ботов в CHM Finance.
+Пользователь описывает что хочет, ты возвращаешь конкретные параметры бота
+в виде JSON (схема задана через responseSchema, ничего лишнего не пиши).
+
+Выбирай безопасные дефолты:
+  • leverage: 1–3× для новичков, 3–10× для опытных, выше — только если явно просят.
+  • riskPct: 0.5–1.5% на сделку (никогда не больше 5%).
+  • maxOpenTrades: 1–3 для DCA/Grid, 3–5 для остальных.
+  • tradingMode: "paper" по умолчанию (deemo). "live" только если пользователь явно сказал «реальные деньги».
+  • timeframe: 1h по умолчанию для levels/smc/dca/grid; 5m–15m для scalping; 4h для gerchik.
+  • direction: "both" по умолчанию; "long" если пользователь говорит «лонг» / «вверх» / «бычий»; "short" если «шорт» / «вниз» / «медвежий».
+
+Правила выбора стратегии:
+  • DCA — для усреднения, накопления, спокойных рынков, новичков.
+  • Grid — для боковика / диапазона.
+  • Levels — классические уровни поддержки/сопротивления, универсальная.
+  • SMC — Smart Money Concepts, для опытных, ищет действия крупных игроков.
+  • Gerchik — стратегия Александра Герчика (ретесты ключевых уровней).
+  • Scalping — много мелких сделок на 5m/15m, быстрая ротация.
+
+Объяснение (поле "explanation") — 1–3 предложения, по-русски, простым языком,
+почему ты выбрал именно эти параметры. Если запрос подозрительный (просят
+открыть конкретную сделку «купи BTC сейчас», слить депозит, etc.) — верни
+безопасные демо-настройки и в explanation объясни что делать «прямо сейчас»
+ты не можешь.
+`.trim();
+
+// Schema for Gemini's structured-output mode. Keep it close to the
+// validation.createBotSchema shape so the frontend can apply the result
+// without reshaping. Only the highest-leverage decisions are constrained
+// via `enum` — numeric ranges live in zod for server-side validation.
+const BOT_CONFIG_SCHEMA = {
+  type: 'OBJECT',
+  properties: {
+    name:          { type: 'STRING', description: 'Короткое имя бота, 3–48 символов' },
+    strategy:      { type: 'STRING', enum: ['levels', 'smc', 'gerchik', 'scalping', 'dca', 'grid'] },
+    timeframe:     { type: 'STRING', enum: ['1m', '5m', '15m', '30m', '1h', '2h', '4h', '6h', '12h', '1d'] },
+    symbol:        { type: 'STRING', description: 'Торговый символ, напр. BTCUSDT, ETHUSDT' },
+    direction:     { type: 'STRING', enum: ['long', 'short', 'both'] },
+    leverage:      { type: 'INTEGER', description: '1–100' },
+    riskPct:       { type: 'NUMBER',  description: '0.1–10 (% риска на сделку)' },
+    maxOpenTrades: { type: 'INTEGER', description: '1–20' },
+    tradingMode:   { type: 'STRING', enum: ['paper', 'live'] },
+    explanation:   { type: 'STRING', description: '1–3 предложения почему такие параметры' },
+  },
+  required: ['strategy', 'timeframe', 'direction', 'leverage', 'riskPct', 'maxOpenTrades', 'tradingMode', 'explanation'],
+};
+
+// Server-side validator — defends against hallucinations / out-of-range
+// numbers that slip past the schema (Gemini is loose on numeric ranges).
+function _sanitizeBotConfig(raw, plan) {
+  const STRATS = ['levels', 'smc', 'gerchik', 'scalping', 'dca', 'grid'];
+  const TFS    = ['1m', '5m', '15m', '30m', '1h', '2h', '4h', '6h', '12h', '1d'];
+  const DIRS   = ['long', 'short', 'both'];
+  const MODES  = ['paper', 'live'];
+
+  const out = {};
+  out.strategy = STRATS.includes(raw.strategy) ? raw.strategy : 'levels';
+  out.timeframe = TFS.includes(raw.timeframe) ? raw.timeframe : '1h';
+  out.direction = DIRS.includes(raw.direction) ? raw.direction : 'both';
+  out.tradingMode = MODES.includes(raw.tradingMode) ? raw.tradingMode : 'paper';
+
+  out.leverage = Math.max(1, Math.min(100, Math.round(Number(raw.leverage) || 1)));
+  out.riskPct = Math.max(0.1, Math.min(10, Number(raw.riskPct) || 1));
+  out.maxOpenTrades = Math.max(1, Math.min(20, Math.round(Number(raw.maxOpenTrades) || 3)));
+
+  const sym = String(raw.symbol || '').trim().toUpperCase().replace(/[^A-Z0-9-]/g, '');
+  out.symbol = (sym && sym.length >= 3) ? sym : 'BTCUSDT';
+
+  const name = String(raw.name || '').trim().slice(0, 48);
+  out.name = name || (out.strategy.toUpperCase() + ' ' + out.symbol + ' ' + out.timeframe);
+
+  out.explanation = String(raw.explanation || '').trim().slice(0, 600)
+    || 'Безопасные дефолты для старта. Подкрути параметры под себя.';
+
+  // Clamp leverage to plan limit if known. Frontend also shows the user
+  // why it was clamped via the `_planClamps` field.
+  const PLAN_LEV = { free: 5, starter: 10, pro: 25, elite: 100 };
+  const cap = PLAN_LEV[plan] || 5;
+  if (out.leverage > cap) {
+    out._planClamps = (out._planClamps || []);
+    out._planClamps.push('leverage clamped from ' + out.leverage + '× to ' + cap + '× (plan ' + plan + ')');
+    out.leverage = cap;
+  }
+  return out;
+}
+
+async function configureBot({ userId, plan, intent }) {
+  if (!GEMINI_API_KEY) {
+    const e = new Error('AI assistant is not configured (GEMINI_API_KEY missing)');
+    e.statusCode = 503; e.code = 'AI_DISABLED'; throw e;
+  }
+  const txt = String(intent || '').trim();
+  if (txt.length < 4) {
+    const e = new Error('Опиши задачу (хотя бы 4 символа): «безопасный DCA на BTC, депозит $100»');
+    e.statusCode = 400; throw e;
+  }
+  if (txt.length > 1000) {
+    const e = new Error('Слишком длинно — упрости описание (макс 1000 символов).');
+    e.statusCode = 400; throw e;
+  }
+  if (looksLikePII(txt)) {
+    const e = new Error('Не передавай приватные данные (api-ключи, адреса) — переформулируй без них.');
+    e.statusCode = 400; e.code = 'AI_PII_BLOCKED'; throw e;
+  }
+  const limit = limitForPlan(plan);
+  if (getCount(userId) >= limit) {
+    const e = new Error('Дневной лимит AI-ассистента исчерпан (' + limit + '/день на плане ' + plan + ').');
+    e.statusCode = 429; e.code = 'AI_RATE_LIMITED'; throw e;
+  }
+
+  const contents = [
+    { role: 'user',  parts: [{ text: SYSTEM_PROMPT_BOT_CONFIG }] },
+    { role: 'model', parts: [{ text: 'OK, верну только JSON по схеме.' }] },
+    { role: 'user',  parts: [{ text: 'Запрос пользователя: ' + txt }] },
+  ];
+
+  let json;
+  try {
+    json = await _postJson(GEMINI_ENDPOINT + '?key=' + encodeURIComponent(GEMINI_API_KEY), {
+      contents,
+      generationConfig: {
+        temperature: 0.4,        // lower for structured output — less wild
+        maxOutputTokens: 800,
+        responseMimeType: 'application/json',
+        responseSchema: BOT_CONFIG_SCHEMA,
+      },
+    });
+  } catch (err) {
+    logger.error('gemini configure-bot failed', { err: err.message, status: err.statusCode });
+    const e = new Error('AI временно недоступен — попробуй ещё раз через минуту.');
+    e.statusCode = 502; e.code = 'AI_UPSTREAM'; throw e;
+  }
+
+  const cand = json.candidates && json.candidates[0];
+  const parts = cand && cand.content && cand.content.parts;
+  const text = parts && parts[0] && parts[0].text;
+  if (!text) {
+    logger.warn('gemini empty configure-bot reply', { json });
+    const e = new Error('AI не сгенерировал ответ — попробуй переформулировать.');
+    e.statusCode = 502; throw e;
+  }
+
+  let parsed;
+  try { parsed = JSON.parse(text); }
+  catch (err) {
+    logger.warn('gemini configure-bot non-json reply', { text: text.slice(0, 200) });
+    const e = new Error('AI вернул некорректный JSON — попробуй ещё раз.');
+    e.statusCode = 502; throw e;
+  }
+
+  const config = _sanitizeBotConfig(parsed, plan);
+  bumpCount(userId);
+  return {
+    config,
+    usage: { requestsToday: getCount(userId), requestsLimit: limit },
+  };
+}
+
+module.exports = { ask, configureBot, limitForPlan, getCount, looksLikePII, _SYSTEM_PROMPT: SYSTEM_PROMPT_RU };

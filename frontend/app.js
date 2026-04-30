@@ -445,6 +445,11 @@ const API = {
   pushSubscribe: (subscription) => apiRequest('POST', '/push/subscribe', { subscription }),
   pushUnsubscribe: (endpoint) => apiRequest('POST', '/push/unsubscribe', { endpoint }),
   pushTest: () => apiRequest('POST', '/push/test'),
+
+  // AI assistant — chat (free-form Q&A) + configure-bot (NL → bot config JSON)
+  aiChat: (message, history) => apiRequest('POST', '/ai/chat', { message, history: history || [] }),
+  aiUsage: () => apiRequest('GET', '/ai/usage'),
+  aiConfigureBot: (intent) => apiRequest('POST', '/ai/configure-bot', { intent }),
 };
 
 function saveAuthResp(data) {

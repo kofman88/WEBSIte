@@ -227,6 +227,37 @@
           <div id="wizReview" class="font-mono text-xs text-slate-300 leading-relaxed"></div>
         </div>
       </div>
+      <!-- AI configure-bot panel — collapsible. Click ✨ button → expands a
+           textarea + suggestion chips + apply/cancel. Same UX as 3Commas. -->
+      <div id="aiBotPanel" class="ai-panel">
+        <button type="button" id="aiBotToggle" class="ai-panel-trigger" title="AI-помощник для настройки бота">
+          <svg class="ai-spark" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M12 2L13.5 8.5 20 10l-6.5 1.5L12 18l-1.5-6.5L4 10l6.5-1.5L12 2z"/>
+          </svg>
+          <span>Настроить с AI</span>
+          <span class="ai-panel-beta">BETA</span>
+        </button>
+        <div class="ai-panel-body" hidden>
+          <div class="ai-panel-prompt">
+            <textarea id="aiBotIntent" rows="2" maxlength="1000"
+              placeholder="Опиши что хочешь — например: «безопасный DCA на BTC, депозит $200, плечо 1»"></textarea>
+            <button type="button" id="aiBotSubmit" class="ai-panel-submit">
+              <span class="ai-panel-submit-label">Подобрать настройки</span>
+              <svg class="ai-panel-submit-arrow" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 5l7 7-7 7"/></svg>
+            </button>
+          </div>
+          <div class="ai-panel-chips" id="aiBotChips">
+            <button type="button" class="ai-chip" data-prompt="Безопасный DCA на BTC, депозит $100, плечо 1, для новичка">🛡 Безопасный DCA / BTC</button>
+            <button type="button" class="ai-chip" data-prompt="Grid bot на ETH в боковике 4h, депозит $300">📊 Grid / ETH боковик</button>
+            <button type="button" class="ai-chip" data-prompt="Levels стратегия 1h на BTCUSDT, средний риск, лонг + шорт">📐 Levels / 1h</button>
+            <button type="button" class="ai-chip" data-prompt="SMC ордер блоки на 4h, BTCUSDT, риск 1%">🧠 SMC / Order Blocks</button>
+            <button type="button" class="ai-chip" data-prompt="Скальпинг на 5m, SOLUSDT, агрессивный, плечо 5">⚡ Скальпинг / 5m</button>
+          </div>
+          <div class="ai-panel-status" id="aiBotStatus"></div>
+          <div class="ai-panel-result" id="aiBotResult" hidden></div>
+        </div>
+      </div>
+
       <!-- Nav -->
       <div class="flex items-center justify-between gap-3 pt-2">
         <button type="button" id="wizBack" class="py-2.5 px-5 rounded-xl bg-slate-800 text-slate-300 hover:bg-slate-700 font-medium hidden">← Назад</button>
@@ -439,6 +470,127 @@ html.light .chm-select-menu{background:linear-gradient(180deg,#fff,#F6F7FB);bord
 html.light .chm-select-option{color:rgba(10,10,10,.75)}
 html.light .chm-select-option:hover,html.light .chm-select-option.focused{background:rgba(255,90,31,.08);color:#0A0A0A}
 html.light .chm-select-option.selected{background:rgba(255,90,31,.12);color:#FF5A1F}
+
+/* ── AI bot-config panel — drops in above the wizard nav. ────────────── */
+.ai-panel{
+  margin-top:14px;border-radius:14px;overflow:hidden;
+  background:linear-gradient(160deg,rgba(99,102,241,.06),rgba(255,90,31,.04));
+  border:1px solid rgba(255,140,90,.22);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.04)
+}
+.ai-panel-trigger{
+  display:flex;align-items:center;gap:9px;width:100%;padding:11px 14px;
+  background:none;border:0;cursor:pointer;color:#fff;text-align:left;
+  font-family:inherit;font-size:13px;font-weight:600;letter-spacing:.005em
+}
+.ai-panel-trigger:hover{background:rgba(255,255,255,.03)}
+html.light .ai-panel-trigger{color:#0A0A0A}
+.ai-panel-trigger .ai-spark{
+  color:#FFB28A;flex-shrink:0;
+  filter:drop-shadow(0 0 6px rgba(255,140,90,.55));
+  animation:aiSparkPulse 2.4s ease-in-out infinite
+}
+@keyframes aiSparkPulse{
+  0%,100%{transform:scale(1);filter:drop-shadow(0 0 6px rgba(255,140,90,.55))}
+  50%{transform:scale(1.12);filter:drop-shadow(0 0 10px rgba(255,140,90,.8))}
+}
+.ai-panel-beta{
+  margin-left:auto;font-size:9px;font-weight:700;letter-spacing:.18em;text-transform:uppercase;
+  color:#7ec5f0;padding:2px 7px;border-radius:5px;
+  background:rgba(99,102,241,.14);border:1px solid rgba(99,102,241,.3)
+}
+html.light .ai-panel-beta{color:#1B6FA8;background:rgba(99,102,241,.08)}
+.ai-panel-body{padding:0 14px 14px;display:flex;flex-direction:column;gap:10px}
+.ai-panel.open .ai-panel-body{display:flex!important}
+.ai-panel-prompt{display:flex;gap:8px;align-items:stretch}
+.ai-panel-prompt textarea{
+  flex:1;min-height:54px;resize:vertical;
+  padding:10px 12px;border-radius:10px;
+  background:rgba(10,12,18,.55);border:1px solid rgba(255,255,255,.08);
+  color:#fff;font-family:inherit;font-size:13px;line-height:1.4;outline:none;
+  transition:border-color .15s,background .15s
+}
+.ai-panel-prompt textarea:focus{border-color:rgba(255,140,90,.55);background:rgba(10,12,18,.7)}
+html.light .ai-panel-prompt textarea{background:#fff;color:#0A0A0A;border-color:rgba(0,0,0,.1)}
+.ai-panel-submit{
+  display:inline-flex;align-items:center;gap:6px;
+  padding:0 16px;border-radius:10px;cursor:pointer;border:0;
+  background:linear-gradient(180deg,#7B61FF,#5B47E0 60%,#4839B8);color:#fff;
+  font-family:inherit;font-size:12.5px;font-weight:600;white-space:nowrap;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.22),0 4px 10px -2px rgba(99,102,241,.5);
+  transition:transform .12s,box-shadow .12s
+}
+.ai-panel-submit:hover{transform:translateY(-1px);box-shadow:inset 0 1px 0 rgba(255,255,255,.28),0 6px 14px -2px rgba(99,102,241,.65)}
+.ai-panel-submit:disabled{opacity:.6;cursor:wait;transform:none!important}
+.ai-panel-submit-arrow{flex-shrink:0;transition:transform .15s}
+.ai-panel-submit:hover .ai-panel-submit-arrow{transform:translateX(2px)}
+.ai-panel-chips{display:flex;flex-wrap:wrap;gap:6px}
+.ai-chip{
+  display:inline-flex;align-items:center;gap:5px;padding:6px 11px;border-radius:9999px;
+  background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);
+  color:rgba(255,255,255,.72);font-size:11.5px;font-weight:500;cursor:pointer;
+  transition:background .12s,color .12s,border-color .12s
+}
+.ai-chip:hover{background:rgba(255,140,90,.1);color:#fff;border-color:rgba(255,140,90,.36)}
+html.light .ai-chip{background:rgba(0,0,0,.04);color:rgba(10,10,10,.72);border-color:rgba(0,0,0,.1)}
+html.light .ai-chip:hover{background:rgba(255,90,31,.08);color:#0A0A0A;border-color:rgba(255,90,31,.36)}
+.ai-panel-status{font-size:11.5px;color:rgba(255,255,255,.55);min-height:0;line-height:1.4}
+.ai-panel-status.err{color:#f87171}
+.ai-panel-status.thinking{color:#7ec5f0}
+.ai-panel-status .ai-thinking-dot{display:inline-block;width:5px;height:5px;border-radius:50%;background:#7ec5f0;margin-right:4px;animation:aiThink 1.4s ease-in-out infinite}
+.ai-panel-status .ai-thinking-dot:nth-child(2){animation-delay:.2s}
+.ai-panel-status .ai-thinking-dot:nth-child(3){animation-delay:.4s}
+@keyframes aiThink{0%,100%{opacity:.3;transform:scale(.85)}50%{opacity:1;transform:scale(1)}}
+html.light .ai-panel-status{color:rgba(10,10,10,.6)}
+.ai-panel-result{
+  padding:14px;border-radius:11px;
+  background:rgba(10,12,18,.55);border:1px solid rgba(255,140,90,.32);
+  display:flex;flex-direction:column;gap:12px
+}
+html.light .ai-panel-result{background:#fff;border-color:rgba(255,90,31,.32)}
+.ai-result-explain{font-size:13px;line-height:1.55;color:rgba(255,255,255,.86)}
+html.light .ai-result-explain{color:#0A0A0A}
+.ai-result-grid{
+  display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:8px
+}
+.ai-result-cell{
+  background:rgba(255,255,255,.04);border-radius:8px;padding:8px 10px;
+  font-family:'Inter',sans-serif
+}
+html.light .ai-result-cell{background:rgba(0,0,0,.03)}
+.ai-result-cell-l{
+  font-size:9px;letter-spacing:.16em;text-transform:uppercase;
+  color:rgba(255,255,255,.45);font-weight:600
+}
+html.light .ai-result-cell-l{color:rgba(10,10,10,.5)}
+.ai-result-cell-v{
+  font-family:'JetBrains Mono',monospace;font-weight:600;font-size:13.5px;
+  color:#fff;font-variant-numeric:tabular-nums;margin-top:3px;letter-spacing:-.01em
+}
+html.light .ai-result-cell-v{color:#0A0A0A}
+.ai-result-cell-v.accent{color:#FFB28A}
+.ai-result-actions{display:flex;gap:8px;justify-content:flex-end;flex-wrap:wrap}
+.ai-result-btn{
+  display:inline-flex;align-items:center;gap:6px;
+  padding:8px 16px;border-radius:9999px;cursor:pointer;border:0;
+  font-family:inherit;font-size:12px;font-weight:600;letter-spacing:.005em;
+  transition:transform .12s,box-shadow .12s
+}
+.ai-result-btn-apply{
+  background:linear-gradient(180deg,#FF7840,#FF5A1F 60%,#C44610);color:#fff;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.28),0 4px 10px -2px rgba(255,90,31,.5)
+}
+.ai-result-btn-apply:hover{transform:translateY(-1px)}
+.ai-result-btn-cancel{
+  background:rgba(255,255,255,.04);color:rgba(255,255,255,.72);border:1px solid rgba(255,255,255,.1)
+}
+.ai-result-btn-cancel:hover{background:rgba(255,255,255,.08);color:#fff}
+html.light .ai-result-btn-cancel{background:rgba(0,0,0,.04);color:rgba(10,10,10,.78);border-color:rgba(0,0,0,.1)}
+.ai-clamp-note{
+  font-size:11px;color:#FFB28A;background:rgba(255,140,90,.08);
+  padding:6px 9px;border-radius:7px;border:1px solid rgba(255,140,90,.22);line-height:1.4
+}
+html.light .ai-clamp-note{background:rgba(255,90,31,.06);color:#C44610}
 </style>
 
 <!-- PAPER → LIVE CONFIRM MODAL -->
@@ -554,6 +706,34 @@ html.light .chm-select-option.selected{background:rgba(255,90,31,.12);color:#FF5
     <div class="bd-section-head">
       <h3>Настройки</h3>
       <span class="bd-section-meta" id="bdSettingsMeta">изменения сохраняются в один клик</span>
+    </div>
+
+    <!-- AI bot-config panel (drawer variant) — same flow as wizard, IDs prefixed bd* -->
+    <div id="bdAiPanel" class="ai-panel" style="margin-top:0;margin-bottom:14px">
+      <button type="button" id="bdAiToggle" class="ai-panel-trigger" title="AI-помощник для перенастройки">
+        <svg class="ai-spark" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <path d="M12 2L13.5 8.5 20 10l-6.5 1.5L12 18l-1.5-6.5L4 10l6.5-1.5L12 2z"/>
+        </svg>
+        <span>Перенастроить с AI</span>
+        <span class="ai-panel-beta">BETA</span>
+      </button>
+      <div class="ai-panel-body" hidden>
+        <div class="ai-panel-prompt">
+          <textarea id="bdAiIntent" rows="2" maxlength="1000"
+            placeholder="Что поменять? — например: «сделай менее агрессивным, плечо 1, риск 0.5%»"></textarea>
+          <button type="button" id="bdAiSubmit" class="ai-panel-submit">
+            <span class="ai-panel-submit-label">Подобрать</span>
+            <svg class="ai-panel-submit-arrow" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 5l7 7-7 7"/></svg>
+          </button>
+        </div>
+        <div class="ai-panel-chips" id="bdAiChips">
+          <button type="button" class="ai-chip" data-prompt="Сделай безопаснее: плечо 1, риск 0.5%, paper-режим">🛡 Безопаснее</button>
+          <button type="button" class="ai-chip" data-prompt="Сделай агрессивнее: плечо 10, риск 2%, scalping">🔥 Агрессивнее</button>
+          <button type="button" class="ai-chip" data-prompt="Переключи на DCA с теми же параметрами">📊 → DCA</button>
+        </div>
+        <div class="ai-panel-status" id="bdAiStatus"></div>
+        <div class="ai-panel-result" id="bdAiResult" hidden></div>
+      </div>
     </div>
     <form id="bdSettingsForm" class="bd-settings" onsubmit="return false">
       <label class="bd-field"><span data-help-text="Имя бота — для тебя, как удобнее.">Имя</span><input name="name" type="text" maxlength="64"/></label>
@@ -2766,6 +2946,179 @@ function _bdRenderBtResults(r, container) {
 
 window.openBotDrawer = openBotDrawer;
 window.closeBotDrawer = closeBotDrawer;
+
+// ── AI bot-config helper ───────────────────────────────────────────────
+// Click ✨ → expands panel → user describes intent → /api/ai/configure-bot
+// returns structured JSON → rendered as grid → Apply fills the wizard
+// or drawer settings.
+
+// Shared rendering / status helpers — used by both wizard and drawer.
+function _aiRenderResult(resultEl, cfg, planClamps, onApply) {
+  const labels = {
+    long: 'Long only', short: 'Short only', both: 'Long + Short',
+  };
+  const cells = [
+    { l: 'Стратегия',   v: String(cfg.strategy || '').toUpperCase(), accent: true },
+    { l: 'Таймфрейм',   v: cfg.timeframe },
+    { l: 'Символ',      v: cfg.symbol },
+    { l: 'Направление', v: labels[cfg.direction] || cfg.direction },
+    { l: 'Плечо',       v: cfg.leverage + '×' },
+    { l: 'Risk %',      v: cfg.riskPct + '%' },
+    { l: 'Макс сделок', v: String(cfg.maxOpenTrades) },
+    { l: 'Режим',       v: cfg.tradingMode === 'live' ? 'LIVE' : 'PAPER' },
+  ];
+  const grid = cells.map((c) =>
+    '<div class="ai-result-cell">'
+    + '<div class="ai-result-cell-l">' + escapeHtml(c.l) + '</div>'
+    + '<div class="ai-result-cell-v' + (c.accent ? ' accent' : '') + '">' + escapeHtml(c.v) + '</div>'
+    + '</div>'
+  ).join('');
+  const clampNote = (planClamps && planClamps.length)
+    ? '<div class="ai-clamp-note">⚠ ' + escapeHtml(planClamps.join(' · ')) + '</div>'
+    : '';
+  resultEl.innerHTML =
+    '<div class="ai-result-explain">' + escapeHtml(cfg.explanation || '') + '</div>'
+    + '<div class="ai-result-grid">' + grid + '</div>'
+    + clampNote
+    + '<div class="ai-result-actions">'
+    +   '<button type="button" class="ai-result-btn ai-result-btn-cancel">Отклонить</button>'
+    +   '<button type="button" class="ai-result-btn ai-result-btn-apply">'
+    +     '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>'
+    +     'Применить'
+    +   '</button>'
+    + '</div>';
+  resultEl.hidden = false;
+  resultEl.querySelector('.ai-result-btn-cancel').onclick = () => { resultEl.hidden = true; resultEl.innerHTML = ''; };
+  resultEl.querySelector('.ai-result-btn-apply').onclick  = () => { onApply(cfg); resultEl.hidden = true; resultEl.innerHTML = ''; };
+}
+
+function _aiSetThinking(statusEl) {
+  statusEl.className = 'ai-panel-status thinking';
+  statusEl.innerHTML = '<span class="ai-thinking-dot"></span><span class="ai-thinking-dot"></span><span class="ai-thinking-dot"></span> Подбираю настройки…';
+}
+function _aiSetError(statusEl, msg) {
+  statusEl.className = 'ai-panel-status err';
+  statusEl.textContent = msg || 'Ошибка';
+}
+function _aiClearStatus(statusEl) { statusEl.className = 'ai-panel-status'; statusEl.textContent = ''; }
+
+// Generic wiring — apply the same UX to any panel by passing IDs + an
+// onApply callback that knows where the cfg should land.
+function _wireAiPanel(opts) {
+  const panel = document.getElementById(opts.panelId);
+  if (!panel) return;
+  const trigger = document.getElementById(opts.toggleId);
+  const body = panel.querySelector('.ai-panel-body');
+  const intent = document.getElementById(opts.intentId);
+  const submit = document.getElementById(opts.submitId);
+  const status = document.getElementById(opts.statusId);
+  const result = document.getElementById(opts.resultId);
+  const chips = document.getElementById(opts.chipsId);
+
+  trigger.addEventListener('click', () => {
+    const open = panel.classList.toggle('open');
+    body.hidden = !open;
+    if (open) setTimeout(() => intent && intent.focus(), 50);
+  });
+  chips.addEventListener('click', (e) => {
+    const c = e.target.closest('.ai-chip');
+    if (!c) return;
+    intent.value = c.getAttribute('data-prompt') || '';
+    intent.focus();
+  });
+  submit.addEventListener('click', async () => {
+    const txt = (intent.value || '').trim();
+    if (txt.length < 4) { _aiSetError(status, 'Опиши задачу хотя бы 4 символами.'); return; }
+    submit.disabled = true; _aiSetThinking(status); result.hidden = true;
+    try {
+      const r = await API.aiConfigureBot(txt);
+      const cfg = r && r.config;
+      if (!cfg) throw new Error('AI вернул пустой результат');
+      _aiClearStatus(status);
+      _aiRenderResult(result, cfg, cfg._planClamps, opts.onApply);
+    } catch (err) {
+      _aiSetError(status, err.message || 'AI временно недоступен');
+    } finally {
+      submit.disabled = false;
+    }
+  });
+}
+
+function _aiApplyToWizard(cfg) {
+  const form = document.getElementById('createBotForm');
+  if (!form) return;
+  if (form.elements.symbol && cfg.symbol) form.elements.symbol.value = cfg.symbol;
+  const strRadio = form.querySelector('input[name="strategyType"][value="' + cfg.strategy + '"]');
+  if (strRadio && !strRadio.disabled) strRadio.checked = true;
+  if (form.elements.timeframe) {
+    const tf = form.elements.timeframe;
+    Array.from(tf.options).forEach((o) => { if (o.value === cfg.timeframe) tf.value = o.value; });
+    tf.dispatchEvent(new Event('change', { bubbles: true }));
+  }
+  if (form.elements.leverage)      form.elements.leverage.value = cfg.leverage;
+  if (form.elements.riskPct)       form.elements.riskPct.value = cfg.riskPct;
+  if (form.elements.maxOpenTrades) form.elements.maxOpenTrades.value = cfg.maxOpenTrades;
+  const dirRadio = form.querySelector('input[name="direction"][value="' + cfg.direction + '"]');
+  if (dirRadio) dirRadio.checked = true;
+  const tmRadio = form.querySelector('input[name="tradingMode"][value="' + cfg.tradingMode + '"]');
+  if (tmRadio && !tmRadio.disabled) tmRadio.checked = true;
+  // Sync chmEnhanceSelects-wrapped <select>s so visible labels update.
+  form.querySelectorAll('select').forEach((sel) => {
+    const wrap = sel.closest('.chm-select');
+    const trig = wrap && wrap.querySelector('.chm-select-label');
+    const opt = sel.options[sel.selectedIndex];
+    if (trig && opt) trig.textContent = opt.text;
+  });
+  if (window.Toast && Toast.success) Toast.success('Настройки применены — проверь и нажми «Создать бота».');
+  if (typeof setStep === 'function') setStep(1);
+}
+
+function _aiApplyToDrawer(cfg) {
+  const f = document.getElementById('bdSettingsForm');
+  if (!f) return;
+  if (f.elements.strategy)      f.elements.strategy.value = cfg.strategy;
+  if (f.elements.timeframe)     f.elements.timeframe.value = cfg.timeframe;
+  if (f.elements.symbols && cfg.symbol) f.elements.symbols.value = cfg.symbol;
+  if (f.elements.direction)     f.elements.direction.value = cfg.direction;
+  if (f.elements.leverage)      f.elements.leverage.value = cfg.leverage;
+  if (f.elements.riskPct)       f.elements.riskPct.value = cfg.riskPct;
+  if (f.elements.maxOpenTrades) f.elements.maxOpenTrades.value = cfg.maxOpenTrades;
+  if (f.elements.tradingMode)   f.elements.tradingMode.value = cfg.tradingMode;
+  // Sync chmEnhanceSelects labels for every wrapped select in the drawer.
+  document.querySelectorAll('#botDrawer select').forEach((sel) => {
+    const wrap = sel.closest('.chm-select');
+    const trig = wrap && wrap.querySelector('.chm-select-label');
+    const opt = sel.options[sel.selectedIndex];
+    if (trig && opt) trig.textContent = opt.text;
+  });
+  // Re-render strategy-config panel for the new strategy
+  if (typeof _bdRenderStrategyConfig === 'function') _bdRenderStrategyConfig(cfg.strategy, {});
+  if (window.Toast && Toast.success) Toast.success('Настройки применены — нажми «Сохранить» чтобы применить к боту.');
+}
+
+_wireAiPanel({
+  panelId: 'aiBotPanel', toggleId: 'aiBotToggle', intentId: 'aiBotIntent',
+  submitId: 'aiBotSubmit', statusId: 'aiBotStatus', resultId: 'aiBotResult',
+  chipsId: 'aiBotChips', onApply: _aiApplyToWizard,
+});
+_wireAiPanel({
+  panelId: 'bdAiPanel', toggleId: 'bdAiToggle', intentId: 'bdAiIntent',
+  submitId: 'bdAiSubmit', statusId: 'bdAiStatus', resultId: 'bdAiResult',
+  chipsId: 'bdAiChips', onApply: _aiApplyToDrawer,
+});
+
+// Plan-gate: Free can't create or edit bots productively → hide both
+// panels (their resulting config would 403 on save anyway).
+if (window.PlanGate) {
+  PlanGate.init().then(() => {
+    if (!PlanGate.canUseFeature('canCreateBot')) {
+      ['aiBotPanel', 'bdAiPanel'].forEach((id) => {
+        const p = document.getElementById(id);
+        if (p) p.style.display = 'none';
+      });
+    }
+  });
+}
 </script>
 <script src="support-widget.js" defer></script>
 </body>
