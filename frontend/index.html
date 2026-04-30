@@ -463,6 +463,23 @@
     .popular-badge{position:absolute;top:-14px;left:50%;transform:translateX(-50%);display:inline-flex;align-items:center;white-space:nowrap;padding:6px 16px;border-radius:9999px;font-family:'JetBrains Mono','Inter',monospace;font-weight:500;font-size:10px;line-height:14px;letter-spacing:.18em;text-transform:uppercase;color:#000;background:linear-gradient(180deg,#FF7840 0%,#FF5A1F 50%,#C44610 100%);box-shadow:inset 0 1px 1px rgba(255,255,255,.35),inset 0 -1px 3px rgba(0,0,0,.35),0 4px 12px rgba(255,90,31,.55),0 8px 20px -4px rgba(0,0,0,.5);z-index:3}
     .tick{display:inline-flex;align-items:center;justify-content:center;width:18px;height:18px;border-radius:50%;background:rgba(43,89,54,.5);color:#86efac;flex-shrink:0}
     .tick.off{background:rgba(82,37,37,.4);color:rgba(255,255,255,.28)}
+    /* Advisory (Telegram-bot) feature — visually distinct from code-side check */
+    .tick.tg{background:rgba(35,158,224,.18);color:#7ec5f0}
+    .price-feat-tg{font-size:9px;font-weight:600;letter-spacing:.14em;text-transform:uppercase;color:rgba(126,197,240,.72);margin-left:5px;white-space:nowrap}
+    html.light .tick.tg{background:rgba(35,158,224,.14);color:#1B6FA8}
+    html.light .price-feat-tg{color:#1B6FA8}
+    .price-tg-legend{
+      max-width:720px;margin:24px auto 0;padding:14px 18px;
+      border-radius:12px;background:rgba(35,158,224,.06);
+      border:1px solid rgba(35,158,224,.18);
+      font-size:12.5px;line-height:1.5;color:rgba(255,255,255,.66);text-align:center
+    }
+    .price-tg-legend .tg-mini{
+      display:inline-flex;align-items:center;justify-content:center;
+      width:18px;height:18px;border-radius:50%;
+      background:rgba(35,158,224,.18);color:#7ec5f0;margin-right:4px;vertical-align:-3px
+    }
+    html.light .price-tg-legend{background:rgba(35,158,224,.04);color:rgba(10,10,10,.66)}
 
     /* ── FAQ ── */
     .faq-item{overflow:hidden;cursor:pointer;transition:background .3s ease}
@@ -878,11 +895,15 @@
           <div class="price-head">
             <div class="price-name">Free</div>
             <div class="flex items-baseline gap-2"><span class="price-amt">$0</span><span class="t-meta">/мес</span></div>
+            <div class="t-body" style="font-size:12.5px;color:rgba(255,255,255,.55);margin-top:4px">Попробуй бота</div>
           </div>
           <ul class="space-y-3" style="flex:1">
-            <li class="flex items-center gap-3 t-body" style="color:rgba(255,255,255,.82);font-size:13px"><span class="tick"><iconify-icon icon="solar:check-circle-bold" style="font-size:14px"></iconify-icon></span> 3 сигнала/день</li>
-            <li class="flex items-center gap-3 t-body" style="color:rgba(255,255,255,.82);font-size:13px"><span class="tick"><iconify-icon icon="solar:check-circle-bold" style="font-size:14px"></iconify-icon></span> 1 активный бот</li>
-            <li class="flex items-center gap-3 t-body" style="color:rgba(255,255,255,.82);font-size:13px"><span class="tick"><iconify-icon icon="solar:check-circle-bold" style="font-size:14px"></iconify-icon></span> Скальпинг стратегия</li>
+            <li class="flex items-center gap-3 t-body" style="color:rgba(255,255,255,.82);font-size:13px"><span class="tick"><iconify-icon icon="solar:check-circle-bold" style="font-size:14px"></iconify-icon></span> 2 сигнала/день</li>
+            <li class="flex items-center gap-3 t-body" style="color:rgba(255,255,255,.82);font-size:13px"><span class="tick"><iconify-icon icon="solar:check-circle-bold" style="font-size:14px"></iconify-icon></span> 1 активный бот · demo</li>
+            <li class="flex items-center gap-3 t-body" style="color:rgba(255,255,255,.82);font-size:13px"><span class="tick"><iconify-icon icon="solar:check-circle-bold" style="font-size:14px"></iconify-icon></span> Стратегия Levels</li>
+            <li class="flex items-center gap-3 t-body" style="color:rgba(255,255,255,.82);font-size:13px"><span class="tick"><iconify-icon icon="solar:check-circle-bold" style="font-size:14px"></iconify-icon></span> Топ-5 монет · 15m + 1h</li>
+            <li class="flex items-center gap-3 t-body" style="color:rgba(255,255,255,.82);font-size:13px"><span class="tick"><iconify-icon icon="solar:check-circle-bold" style="font-size:14px"></iconify-icon></span> Плечо до 5×</li>
+            <li class="flex items-center gap-3 t-body" style="color:rgba(255,255,255,.82);font-size:13px"><span class="tick"><iconify-icon icon="solar:check-circle-bold" style="font-size:14px"></iconify-icon></span> 12 готовых пресетов</li>
             <li class="flex items-center gap-3 t-body"><span class="tick off"><iconify-icon icon="solar:close-circle-linear" style="font-size:14px"></iconify-icon></span> Авто-торговля</li>
             <li class="flex items-center gap-3 t-body"><span class="tick off"><iconify-icon icon="solar:close-circle-linear" style="font-size:14px"></iconify-icon></span> Бэктестинг</li>
           </ul>
@@ -896,13 +917,19 @@
           <div class="price-head">
             <div class="price-name">Starter</div>
             <div class="flex items-baseline gap-2"><span class="price-amt">$29</span><span class="t-meta">/мес</span></div>
+            <div class="t-body" style="font-size:12.5px;color:rgba(255,255,255,.55);margin-top:4px">Начни торговать серьёзно</div>
           </div>
           <ul class="space-y-3" style="flex:1">
-            <li class="flex items-center gap-3 t-body" style="color:rgba(255,255,255,.82);font-size:13px"><span class="tick"><iconify-icon icon="solar:check-circle-bold" style="font-size:14px"></iconify-icon></span> Безлимитные сигналы</li>
-            <li class="flex items-center gap-3 t-body" style="color:rgba(255,255,255,.82);font-size:13px"><span class="tick"><iconify-icon icon="solar:check-circle-bold" style="font-size:14px"></iconify-icon></span> 3 активных бота</li>
-            <li class="flex items-center gap-3 t-body" style="color:rgba(255,255,255,.82);font-size:13px"><span class="tick"><iconify-icon icon="solar:check-circle-bold" style="font-size:14px"></iconify-icon></span> Scalping + SMC</li>
+            <li class="flex items-center gap-3 t-body" style="color:rgba(255,255,255,.82);font-size:13px"><span class="tick"><iconify-icon icon="solar:check-circle-bold" style="font-size:14px"></iconify-icon></span> Безлимит сигналов</li>
+            <li class="flex items-center gap-3 t-body" style="color:rgba(255,255,255,.82);font-size:13px"><span class="tick"><iconify-icon icon="solar:check-circle-bold" style="font-size:14px"></iconify-icon></span> 2 активных бота · demo</li>
+            <li class="flex items-center gap-3 t-body" style="color:rgba(255,255,255,.82);font-size:13px"><span class="tick"><iconify-icon icon="solar:check-circle-bold" style="font-size:14px"></iconify-icon></span> Стратегия Levels</li>
+            <li class="flex items-center gap-3 t-body" style="color:rgba(255,255,255,.82);font-size:13px"><span class="tick"><iconify-icon icon="solar:check-circle-bold" style="font-size:14px"></iconify-icon></span> 20 символов · 5m–4h</li>
+            <li class="flex items-center gap-3 t-body" style="color:rgba(255,255,255,.82);font-size:13px"><span class="tick"><iconify-icon icon="solar:check-circle-bold" style="font-size:14px"></iconify-icon></span> Backtest 1/день</li>
+            <li class="flex items-center gap-3 t-body" style="color:rgba(255,255,255,.82);font-size:13px"><span class="tick"><iconify-icon icon="solar:check-circle-bold" style="font-size:14px"></iconify-icon></span> Marketplace · публикация пресетов</li>
+            <li class="flex items-center gap-3 t-body" style="color:rgba(255,255,255,.82);font-size:13px"><span class="tick"><iconify-icon icon="solar:check-circle-bold" style="font-size:14px"></iconify-icon></span> Expert mode (30+ настроек)</li>
+            <li class="flex items-center gap-3 t-body" style="color:rgba(255,255,255,.82);font-size:13px"><span class="tick tg"><iconify-icon icon="solar:bolt-bold" style="font-size:12px"></iconify-icon></span> AI-объяснения сигналов <span class="price-feat-tg">TG</span></li>
+            <li class="flex items-center gap-3 t-body" style="color:rgba(255,255,255,.82);font-size:13px"><span class="tick tg"><iconify-icon icon="solar:bolt-bold" style="font-size:12px"></iconify-icon></span> Pump/Dump просмотр <span class="price-feat-tg">TG</span></li>
             <li class="flex items-center gap-3 t-body"><span class="tick off"><iconify-icon icon="solar:close-circle-linear" style="font-size:14px"></iconify-icon></span> Авто-торговля</li>
-            <li class="flex items-center gap-3 t-body"><span class="tick off"><iconify-icon icon="solar:close-circle-linear" style="font-size:14px"></iconify-icon></span> Бэктестинг</li>
           </ul>
           <button type="button" data-pick-plan="starter" class="pill pill-ghost pill-md w-full" style="justify-content:center">Выбрать</button>
           <a href="https://t.me/chmbotsignal" target="_blank" rel="noopener" class="price-tg-btn" aria-label="Начать в Telegram"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M23.3 2.7 2.4 10.8c-1.4.6-1.4 1.4-.2 1.8l5.3 1.7 2.1 6.3c.3.7.1 1 .9 1 .6 0 .9-.3 1.2-.6l2.6-2.5 5.3 4c1 .5 1.7.2 2-.9L22.9 4c.3-1.5-.5-2-1.6-1.3zM8.3 15.2 17 9.6c.4-.3.8-.1.5.2l-7 6.3-.3 3.6-1.9-4.5z"/></svg><span data-t="pr-tg">Начать в Telegram</span><svg class="tg-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 5l7 7-7 7"/></svg></a>
@@ -914,14 +941,20 @@
         <div class="price-card-body">
           <div class="price-head">
             <div class="price-name">Pro</div>
-            <div class="flex items-baseline gap-2"><span class="price-amt">$79</span><span class="t-meta">/мес</span></div>
+            <div class="flex items-baseline gap-2"><span class="price-amt">$69</span><span class="t-meta">/мес</span></div>
+            <div class="t-body" style="font-size:12.5px;color:rgba(255,255,255,.55);margin-top:4px">Бот торгует за тебя</div>
           </div>
           <ul class="space-y-3" style="flex:1">
-            <li class="flex items-center gap-3 t-body" style="color:rgba(255,255,255,.82);font-size:13px"><span class="tick"><iconify-icon icon="solar:check-circle-bold" style="font-size:14px"></iconify-icon></span> Безлимитные сигналы</li>
-            <li class="flex items-center gap-3 t-body" style="color:rgba(255,255,255,.82);font-size:13px"><span class="tick"><iconify-icon icon="solar:check-circle-bold" style="font-size:14px"></iconify-icon></span> 10 активных ботов</li>
-            <li class="flex items-center gap-3 t-body" style="color:rgba(255,255,255,.82);font-size:13px"><span class="tick"><iconify-icon icon="solar:check-circle-bold" style="font-size:14px"></iconify-icon></span> Все 4 стратегии</li>
-            <li class="flex items-center gap-3 t-body" style="color:rgba(255,255,255,.82);font-size:13px"><span class="tick"><iconify-icon icon="solar:check-circle-bold" style="font-size:14px"></iconify-icon></span> Авто-торговля</li>
-            <li class="flex items-center gap-3 t-body" style="color:rgba(255,255,255,.82);font-size:13px"><span class="tick"><iconify-icon icon="solar:check-circle-bold" style="font-size:14px"></iconify-icon></span> Бэктестинг</li>
+            <li class="flex items-center gap-3 t-body" style="color:rgba(255,255,255,.82);font-size:13px"><span class="tick"><iconify-icon icon="solar:check-circle-bold" style="font-size:14px"></iconify-icon></span> Demo + Live режим</li>
+            <li class="flex items-center gap-3 t-body" style="color:rgba(255,255,255,.82);font-size:13px"><span class="tick"><iconify-icon icon="solar:check-circle-bold" style="font-size:14px"></iconify-icon></span> 5 активных ботов</li>
+            <li class="flex items-center gap-3 t-body" style="color:rgba(255,255,255,.82);font-size:13px"><span class="tick"><iconify-icon icon="solar:check-circle-bold" style="font-size:14px"></iconify-icon></span> Levels + SMC + DCA + Grid</li>
+            <li class="flex items-center gap-3 t-body" style="color:rgba(255,255,255,.82);font-size:13px"><span class="tick"><iconify-icon icon="solar:check-circle-bold" style="font-size:14px"></iconify-icon></span> Все таймфреймы 1m–1d</li>
+            <li class="flex items-center gap-3 t-body" style="color:rgba(255,255,255,.82);font-size:13px"><span class="tick"><iconify-icon icon="solar:check-circle-bold" style="font-size:14px"></iconify-icon></span> Авто-торговля · до 10 позиций</li>
+            <li class="flex items-center gap-3 t-body" style="color:rgba(255,255,255,.82);font-size:13px"><span class="tick"><iconify-icon icon="solar:check-circle-bold" style="font-size:14px"></iconify-icon></span> 4 биржи: Bybit · BingX · Binance · OKX</li>
+            <li class="flex items-center gap-3 t-body" style="color:rgba(255,255,255,.82);font-size:13px"><span class="tick"><iconify-icon icon="solar:check-circle-bold" style="font-size:14px"></iconify-icon></span> Backtest 10/день · плечо до 25×</li>
+            <li class="flex items-center gap-3 t-body" style="color:rgba(255,255,255,.82);font-size:13px"><span class="tick tg"><iconify-icon icon="solar:bolt-bold" style="font-size:12px"></iconify-icon></span> AI-двойник (Personal Learner) <span class="price-feat-tg">TG</span></li>
+            <li class="flex items-center gap-3 t-body" style="color:rgba(255,255,255,.82);font-size:13px"><span class="tick tg"><iconify-icon icon="solar:bolt-bold" style="font-size:12px"></iconify-icon></span> Smart Tools (10 инструментов) <span class="price-feat-tg">TG</span></li>
+            <li class="flex items-center gap-3 t-body" style="color:rgba(255,255,255,.82);font-size:13px"><span class="tick tg"><iconify-icon icon="solar:bolt-bold" style="font-size:12px"></iconify-icon></span> Pump/Dump instant-alerts <span class="price-feat-tg">TG</span></li>
           </ul>
           <button type="button" data-pick-plan="pro" class="pill pill-primary pill-md w-full" style="justify-content:center">Выбрать</button>
           <a href="https://t.me/chmbotsignal" target="_blank" rel="noopener" class="price-tg-btn" aria-label="Начать в Telegram"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M23.3 2.7 2.4 10.8c-1.4.6-1.4 1.4-.2 1.8l5.3 1.7 2.1 6.3c.3.7.1 1 .9 1 .6 0 .9-.3 1.2-.6l2.6-2.5 5.3 4c1 .5 1.7.2 2-.9L22.9 4c.3-1.5-.5-2-1.6-1.3zM8.3 15.2 17 9.6c.4-.3.8-.1.5.2l-7 6.3-.3 3.6-1.9-4.5z"/></svg><span data-t="pr-tg">Начать в Telegram</span><svg class="tg-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 5l7 7-7 7"/></svg></a>
@@ -933,18 +966,29 @@
           <div class="price-head">
             <div class="price-name">Elite</div>
             <div class="flex items-baseline gap-2"><span class="price-amt">$149</span><span class="t-meta">/мес</span></div>
+            <div class="t-body" style="font-size:12.5px;color:rgba(255,255,255,.55);margin-top:4px">Профессиональный инструмент</div>
           </div>
           <ul class="space-y-3" style="flex:1">
-            <li class="flex items-center gap-3 t-body" style="color:rgba(255,255,255,.82);font-size:13px"><span class="tick"><iconify-icon icon="solar:check-circle-bold" style="font-size:14px"></iconify-icon></span> Всё из Pro</li>
-            <li class="flex items-center gap-3 t-body" style="color:rgba(255,255,255,.82);font-size:13px"><span class="tick"><iconify-icon icon="solar:check-circle-bold" style="font-size:14px"></iconify-icon></span> Безлимитные боты</li>
-            <li class="flex items-center gap-3 t-body" style="color:rgba(255,255,255,.82);font-size:13px"><span class="tick"><iconify-icon icon="solar:check-circle-bold" style="font-size:14px"></iconify-icon></span> Приоритетные сигналы</li>
-            <li class="flex items-center gap-3 t-body" style="color:rgba(255,255,255,.82);font-size:13px"><span class="tick"><iconify-icon icon="solar:check-circle-bold" style="font-size:14px"></iconify-icon></span> API доступ</li>
-            <li class="flex items-center gap-3 t-body" style="color:rgba(255,255,255,.82);font-size:13px"><span class="tick"><iconify-icon icon="solar:check-circle-bold" style="font-size:14px"></iconify-icon></span> Личный менеджер</li>
+            <li class="flex items-center gap-3 t-body" style="color:rgba(255,255,255,.82);font-size:13px"><span class="tick"><iconify-icon icon="solar:check-circle-bold" style="font-size:14px"></iconify-icon></span> Безлимит ботов · ∞ бэктестов</li>
+            <li class="flex items-center gap-3 t-body" style="color:rgba(255,255,255,.82);font-size:13px"><span class="tick"><iconify-icon icon="solar:check-circle-bold" style="font-size:14px"></iconify-icon></span> Все 6 стратегий (+Gerchik · Scalping)</li>
+            <li class="flex items-center gap-3 t-body" style="color:rgba(255,255,255,.82);font-size:13px"><span class="tick"><iconify-icon icon="solar:check-circle-bold" style="font-size:14px"></iconify-icon></span> Market Scanner по всему рынку</li>
+            <li class="flex items-center gap-3 t-body" style="color:rgba(255,255,255,.82);font-size:13px"><span class="tick"><iconify-icon icon="solar:check-circle-bold" style="font-size:14px"></iconify-icon></span> Мульти-стратегия на одного бота</li>
+            <li class="flex items-center gap-3 t-body" style="color:rgba(255,255,255,.82);font-size:13px"><span class="tick"><iconify-icon icon="solar:check-circle-bold" style="font-size:14px"></iconify-icon></span> Genome Optimizer (Bayesian + Genetic)</li>
+            <li class="flex items-center gap-3 t-body" style="color:rgba(255,255,255,.82);font-size:13px"><span class="tick"><iconify-icon icon="solar:check-circle-bold" style="font-size:14px"></iconify-icon></span> REST API · плечо до 100×</li>
+            <li class="flex items-center gap-3 t-body" style="color:rgba(255,255,255,.82);font-size:13px"><span class="tick"><iconify-icon icon="solar:check-circle-bold" style="font-size:14px"></iconify-icon></span> Personal manager · приоритет</li>
+            <li class="flex items-center gap-3 t-body" style="color:rgba(255,255,255,.82);font-size:13px"><span class="tick tg"><iconify-icon icon="solar:bolt-bold" style="font-size:12px"></iconify-icon></span> Polymarket prediction-markets <span class="price-feat-tg">TG</span></li>
+            <li class="flex items-center gap-3 t-body" style="color:rgba(255,255,255,.82);font-size:13px"><span class="tick tg"><iconify-icon icon="solar:bolt-bold" style="font-size:12px"></iconify-icon></span> AI Plus · Historical Accuracy <span class="price-feat-tg">TG</span></li>
+            <li class="flex items-center gap-3 t-body" style="color:rgba(255,255,255,.82);font-size:13px"><span class="tick tg"><iconify-icon icon="solar:bolt-bold" style="font-size:12px"></iconify-icon></span> Target WR автонастройка <span class="price-feat-tg">TG</span></li>
           </ul>
           <button type="button" data-pick-plan="elite" class="pill pill-ghost pill-md w-full" style="justify-content:center">Выбрать</button>
           <a href="https://t.me/chmbotsignal" target="_blank" rel="noopener" class="price-tg-btn" aria-label="Начать в Telegram"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M23.3 2.7 2.4 10.8c-1.4.6-1.4 1.4-.2 1.8l5.3 1.7 2.1 6.3c.3.7.1 1 .9 1 .6 0 .9-.3 1.2-.6l2.6-2.5 5.3 4c1 .5 1.7.2 2-.9L22.9 4c.3-1.5-.5-2-1.6-1.3zM8.3 15.2 17 9.6c.4-.3.8-.1.5.2l-7 6.3-.3 3.6-1.9-4.5z"/></svg><span data-t="pr-tg">Начать в Telegram</span><svg class="tg-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 5l7 7-7 7"/></svg></a>
         </div>
       </div>
+    </div>
+    <!-- Legend explaining the TG-marker on advisory features -->
+    <div class="price-tg-legend">
+      <span class="tg-mini"><iconify-icon icon="solar:bolt-bold" style="font-size:11px"></iconify-icon></span>
+      <strong>TG</strong> — фичи Telegram-бота <a href="https://t.me/chmbotsignal" target="_blank" rel="noopener" style="color:#7ec5f0;text-decoration:underline">@chmbotsignal</a>: подключаются одним кликом и работают параллельно с веб-платформой.
     </div>
   </div>
 </section>

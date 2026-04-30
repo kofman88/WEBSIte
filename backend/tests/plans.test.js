@@ -5,7 +5,7 @@ describe('plans.getLimits', () => {
   it('returns all 4 plans correctly', () => {
     expect(plans.getLimits('free').priceUsd).toBe(0);
     expect(plans.getLimits('starter').priceUsd).toBe(29);
-    expect(plans.getLimits('pro').priceUsd).toBe(79);
+    expect(plans.getLimits('pro').priceUsd).toBe(69);
     expect(plans.getLimits('elite').priceUsd).toBe(149);
   });
   it('falls back to free for unknown plan', () => {
@@ -43,15 +43,20 @@ describe('plans.canUseStrategy', () => {
     expect(plans.canUseStrategy('free', 'gerchik')).toBe(false);
     expect(plans.canUseStrategy('free', 'scalping')).toBe(false);
   });
-  it('starter adds smc', () => {
-    expect(plans.canUseStrategy('starter', 'smc')).toBe(true);
+  it('starter only allows levels (SMC moved to Pro per inventory)', () => {
+    expect(plans.canUseStrategy('starter', 'levels')).toBe(true);
+    expect(plans.canUseStrategy('starter', 'smc')).toBe(false);
     expect(plans.canUseStrategy('starter', 'gerchik')).toBe(false);
   });
-  it('pro adds gerchik', () => {
-    expect(plans.canUseStrategy('pro', 'gerchik')).toBe(true);
+  it('pro adds smc + dca + grid (gerchik+scalping are Elite-only)', () => {
+    expect(plans.canUseStrategy('pro', 'smc')).toBe(true);
+    expect(plans.canUseStrategy('pro', 'dca')).toBe(true);
+    expect(plans.canUseStrategy('pro', 'grid')).toBe(true);
+    expect(plans.canUseStrategy('pro', 'gerchik')).toBe(false);
     expect(plans.canUseStrategy('pro', 'scalping')).toBe(false);
   });
   it('elite has all', () => {
+    expect(plans.canUseStrategy('elite', 'gerchik')).toBe(true);
     expect(plans.canUseStrategy('elite', 'scalping')).toBe(true);
     expect(plans.canUseStrategy('elite', 'levels')).toBe(true);
   });
@@ -62,11 +67,14 @@ describe('plans.requiredPlanFor', () => {
     expect(plans.requiredPlanFor('autoTrade')).toBe('pro');
     expect(plans.requiredPlanFor('optimizer')).toBe('elite');
     expect(plans.requiredPlanFor('apiAccess')).toBe('elite');
+    expect(plans.requiredPlanFor('marketScanner')).toBe('elite');
+    expect(plans.requiredPlanFor('multiExchange')).toBe('pro');
+    expect(plans.requiredPlanFor('expertMode')).toBe('starter');
   });
   it('finds minimum plan for strategy', () => {
     expect(plans.requiredPlanForStrategy('levels')).toBe('free');
-    expect(plans.requiredPlanForStrategy('smc')).toBe('starter');
-    expect(plans.requiredPlanForStrategy('gerchik')).toBe('pro');
+    expect(plans.requiredPlanForStrategy('smc')).toBe('pro');
+    expect(plans.requiredPlanForStrategy('gerchik')).toBe('elite');
     expect(plans.requiredPlanForStrategy('scalping')).toBe('elite');
   });
 });

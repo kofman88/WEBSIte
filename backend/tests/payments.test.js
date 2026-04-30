@@ -51,11 +51,11 @@ function makeUser(email = null, ref = null) {
 describe('paymentService.planPrice', () => {
   it('monthly prices match plans.js', () => {
     expect(paymentService.default.planPrice('starter', 'monthly')).toBe(29);
-    expect(paymentService.default.planPrice('pro', 'monthly')).toBe(79);
+    expect(paymentService.default.planPrice('pro', 'monthly')).toBe(69);
     expect(paymentService.default.planPrice('elite', 'monthly')).toBe(149);
   });
   it('yearly = monthly × 12 × 0.8 (20% off)', () => {
-    expect(paymentService.default.planPrice('pro', 'yearly')).toBeCloseTo(79 * 12 * 0.8);
+    expect(paymentService.default.planPrice('pro', 'yearly')).toBeCloseTo(69 * 12 * 0.8);
   });
   it('rejects free plan', () => {
     expect(() => paymentService.default.planPrice('free', 'monthly')).toThrow(/Unpaid/);
@@ -70,8 +70,8 @@ describe('createCryptoPayment', () => {
       plan: 'pro', network: 'bep20',
     });
     expect(out.address).toBeTruthy();
-    expect(out.amountUsdt).toBeGreaterThan(79);
-    expect(out.amountUsdt).toBeLessThan(81);
+    expect(out.amountUsdt).toBeGreaterThan(69);
+    expect(out.amountUsdt).toBeLessThan(71);
     expect(out.expiresAt).toBeTruthy();
 
     const row = db.prepare('SELECT * FROM payments WHERE id = ?').get(out.paymentId);
