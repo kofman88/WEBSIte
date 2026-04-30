@@ -1823,13 +1823,40 @@ function validateStep(n) {
 }
 function nextStep() { if (validateStep(wizStep)) setStep(wizStep + 1); }
 function prevStep() { setStep(wizStep - 1); }
-function openWizard() {
-  document.getElementById('createBotForm').reset();
+function openWizard(preset) {
+  const form = document.getElementById('createBotForm');
+  form.reset();
+  // Pre-fill from {strategy, timeframe, symbol} so a click on a featured
+  // strategy card lands the user on a ready-to-launch wizard.
+  if (preset && typeof preset === 'object') {
+    if (preset.symbol && form.elements.symbol) form.elements.symbol.value = preset.symbol;
+    if (preset.timeframe && form.elements.timeframe) {
+      const tfSel = form.elements.timeframe;
+      Array.from(tfSel.options).forEach((o) => { if (o.value === preset.timeframe || o.text === preset.timeframe) tfSel.value = o.value; });
+    }
+    if (preset.strategy) {
+      const radio = form.querySelector('input[name="strategyType"][value="' + preset.strategy + '"]');
+      if (radio) radio.checked = true;
+    }
+  }
   setStep(1);
   document.getElementById('createModal').style.display = 'flex';
-  // Replace native <select>s with custom CHM-styled dropdowns
   chmEnhanceSelects(document.getElementById('createModal'));
 }
+
+// Auto-open wizard when bots.html is loaded with ?wizard=1&strategy=…
+// (used by featured-strategy cards on the dashboard).
+(function _autoOpenWizardFromUrl() {
+  try {
+    const p = new URLSearchParams(location.search);
+    if (p.get('wizard') !== '1') return;
+    document.addEventListener('DOMContentLoaded', () => {
+      openWizard({ strategy: p.get('strategy'), timeframe: p.get('timeframe'), symbol: p.get('symbol') });
+      // Clean URL so refresh doesn't re-open
+      history.replaceState({}, '', location.pathname);
+    });
+  } catch (_) {}
+})();
 function closeWizard() {
   document.getElementById('createModal').style.display = 'none';
   setStep(1);
