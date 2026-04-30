@@ -1177,6 +1177,96 @@ html.light .bp-chip.bp-mode-demo{background:rgba(0,0,0,.04);color:rgba(10,10,10,
 html.light .bp-chip.bp-status-on{color:#15803d}
 html.light .bp-chip.bp-status-off{background:rgba(0,0,0,.04);color:rgba(10,10,10,.55);border-color:rgba(0,0,0,.08)}
 
+/* HERO ROI block — Veles-style. Big % + amount on the left, equity
+   sparkline in the same panel as a background (right-aligned). Tinted
+   green/red depending on PnL sign. */
+.bp-hero{
+  position:relative;overflow:hidden;
+  margin:14px -2px 14px;padding:18px 18px 16px;
+  border-radius:14px;
+  background:
+    radial-gradient(140% 100% at 100% 50%,rgba(255,255,255,.02) 0%,transparent 70%),
+    linear-gradient(180deg,rgba(255,255,255,.04),rgba(255,255,255,.01));
+  border:1px solid rgba(255,255,255,.06);
+  min-height:120px;
+  display:flex;align-items:stretch
+}
+.bp-hero.up{
+  background:
+    radial-gradient(140% 100% at 100% 50%,rgba(74,222,128,.1) 0%,transparent 70%),
+    linear-gradient(180deg,rgba(74,222,128,.07),rgba(74,222,128,.01));
+  border-color:rgba(74,222,128,.18)
+}
+.bp-hero.down{
+  background:
+    radial-gradient(140% 100% at 100% 50%,rgba(239,68,68,.1) 0%,transparent 70%),
+    linear-gradient(180deg,rgba(239,68,68,.07),rgba(239,68,68,.01));
+  border-color:rgba(239,68,68,.18)
+}
+.bp-hero-inner{
+  position:relative;z-index:2;display:flex;flex-direction:column;justify-content:center;flex:0 0 auto
+}
+.bp-hero-eyebrow{
+  font-size:10px;font-weight:600;letter-spacing:.14em;text-transform:uppercase;
+  color:rgba(255,255,255,.5);margin-bottom:6px
+}
+html.light .bp-hero-eyebrow{color:rgba(10,10,10,.55)}
+.bp-hero-roi{
+  font-family:'Inter',sans-serif;font-size:34px;font-weight:600;letter-spacing:-.025em;
+  line-height:1.05;font-variant-numeric:tabular-nums;color:#fff
+}
+.bp-hero-roi.up{color:#4ade80}
+.bp-hero-roi.down{color:#f87171}
+html.light .bp-hero-roi.up{color:#15803d}
+html.light .bp-hero-roi.down{color:#b91c1c}
+.bp-hero-amount{
+  font-family:'JetBrains Mono','Inter',monospace;font-size:13px;
+  margin-top:4px;letter-spacing:.005em;font-variant-numeric:tabular-nums;
+  color:rgba(255,255,255,.55)
+}
+.bp-hero-amount.up{color:rgba(134,239,172,.8)}
+.bp-hero-amount.down{color:rgba(252,165,165,.8)}
+.bp-hero-spark{
+  position:absolute;top:0;bottom:0;right:0;left:auto;width:62%;height:100%!important;
+  margin:0!important;z-index:1;pointer-events:none;opacity:.85
+}
+
+/* L+S / LONG / SHORT chip — neutral grey */
+.bp-chip.bp-dir{
+  background:rgba(148,163,184,.1);color:rgba(226,232,240,.78);border-color:rgba(148,163,184,.18);
+  font-variant-numeric:tabular-nums
+}
+html.light .bp-chip.bp-dir{background:rgba(0,0,0,.04);color:rgba(10,10,10,.65);border-color:rgba(0,0,0,.08)}
+
+/* Big "Управлять ботом" CTA + icon-buttons row */
+.bp-cta-row{display:flex;align-items:center;gap:8px;margin:14px 0 10px}
+.bp-cta-main{
+  flex:1;display:inline-flex;align-items:center;justify-content:center;gap:8px;
+  padding:11px 16px;
+  background:linear-gradient(180deg,#FF7840 0%,#FF5A1F 60%,#C44610 100%);
+  color:#fff;border:0;border-radius:10px;
+  font-family:'Inter',sans-serif;font-size:13.5px;font-weight:600;letter-spacing:.005em;
+  cursor:pointer;
+  box-shadow:
+    inset 0 1px 1px rgba(255,255,255,.28),
+    inset 0 -1px 2px rgba(0,0,0,.25),
+    0 4px 10px -2px rgba(255,90,31,.4),
+    0 8px 20px -8px rgba(255,90,31,.5);
+  transition:transform .18s ease,filter .18s ease
+}
+.bp-cta-main:hover{transform:translateY(-1px);filter:brightness(1.06)}
+.bp-cta-main svg{width:14px;height:14px;transition:transform .18s ease}
+.bp-cta-main:hover svg{transform:translateX(2px)}
+
+.bp-meta-foot{
+  display:flex;justify-content:center;gap:8px;
+  font-size:11px;color:rgba(255,255,255,.4);font-variant-numeric:tabular-nums;
+  padding-top:8px;border-top:1px solid rgba(255,255,255,.04);margin-top:4px
+}
+.bp-meta-foot b{color:rgba(255,255,255,.7);font-weight:500}
+html.light .bp-meta-foot{color:rgba(10,10,10,.5);border-top-color:rgba(0,0,0,.05)}
+html.light .bp-meta-foot b{color:rgba(10,10,10,.78)}
+
 .bp-spark{height:54px;margin:6px -2px 14px;position:relative}
 .bp-spark-empty{
   height:54px;display:flex;align-items:center;justify-content:center;
@@ -1316,12 +1406,21 @@ async function loadBots() {
       const stats = statsById.get(b.id) || { totalPnl: 0, winRate: null, totalTrades: 0 };
       const card = document.createElement('div');
       card.className = 'bot-card-pro bot-card-click';
-      const pnlClass = stats.totalPnl > 0 ? 'up' : stats.totalPnl < 0 ? 'down' : '';
+      const pnl = Number(stats.totalPnl) || 0;
+      const pnlClass = pnl > 0 ? 'up' : pnl < 0 ? 'down' : '';
+      // ROI% relative to the user's paper-starting balance (default 10k)
+      // OR — if exchange equity is known later — relative to that. For
+      // paper bots this is honest and matches the dashboard "Total PnL".
+      const baseEquity = 10000;
+      const roiPct = (pnl / baseEquity) * 100;
+      const roiText = (pnl >= 0 ? '+' : '') + roiPct.toFixed(2) + '%';
       const syms = Array.isArray(b.symbols) ? b.symbols.slice(0, 3).join(' · ') : '—';
+      const primarySym = (Array.isArray(b.symbols) && b.symbols[0]) ? b.symbols[0] : '—';
       const modeChipClass = b.tradingMode === 'live' ? 'bp-mode-live' : 'bp-mode-demo';
       const modeChipLabel = b.tradingMode === 'live' ? 'LIVE' : 'DEMO';
       const statusChipClass = b.isActive ? 'bp-status-on' : 'bp-status-off';
       const statusChipLabel = b.isActive ? 'Active' : 'Paused';
+      const dirChip = (b.direction === 'long') ? 'LONG' : (b.direction === 'short') ? 'SHORT' : 'L+S';
       card.setAttribute('data-bot-open', b.id);
       card.innerHTML = `
         <div class="bp-head">
@@ -1329,35 +1428,53 @@ async function loadBots() {
             <div class="bp-avatar">${(b.name||'B')[0].toUpperCase()}</div>
             <div style="min-width:0;flex:1">
               <div class="bp-name">${escapeHtml(b.name)}</div>
-              <div class="bp-sub"><strong>${escapeHtml(b.exchange)}</strong> · ${escapeHtml(syms)}</div>
+              <div class="bp-sub"><strong>${escapeHtml(primarySym)}</strong> · ${escapeHtml(b.exchange)}</div>
             </div>
           </div>
           <div class="bp-toggle ${b.isActive?'on':''}" data-bot="${b.id}" data-stop-open="1" title="${b.isActive?'Остановить':'Запустить'}"></div>
         </div>
         <div class="bp-chips">
           <span class="bp-chip bp-strategy" data-help="strategy">${STRATEGY_LABELS[b.strategy]||b.strategy}</span>
+          <span class="bp-chip bp-dir">${dirChip}</span>
           <span class="bp-chip ${modeChipClass}" data-mode="${b.id}" data-current="${b.tradingMode==='live'?'live':'paper'}" data-stop-open="1" data-help="${b.tradingMode==='live'?'live':'demo'}" title="Переключить режим">${modeChipLabel}</span>
           <span class="bp-chip ${statusChipClass}" data-help="auto-trade">${statusChipLabel}</span>
         </div>
-        <div class="bp-spark" id="bspark${b.id}"></div>
-        <div class="bp-stats">
-          <div class="bp-stat"><div class="bp-stat-label" data-help="pnl">PnL</div><div class="bp-stat-val ${pnlClass}">${Fmt.currency(stats.totalPnl)}</div></div>
-          <div class="bp-stat"><div class="bp-stat-label" data-help="win-rate">Win rate</div><div class="bp-stat-val">${stats.winRate!==null?Fmt.percent(stats.winRate*100,{decimals:0}):'—'}</div></div>
-          <div class="bp-stat"><div class="bp-stat-label" data-help="trades">Trades</div><div class="bp-stat-val">${stats.totalTrades}</div></div>
-        </div>
-        <div class="bp-foot">
-          <div class="bp-meta"><b>${b.leverage}×</b><span data-help="leverage"></span> · Risk <b>${b.riskPct}%</b><span data-help="risk-pct"></span> · Max <b>${b.maxOpenTrades}</b><span data-help="max-trades"></span></div>
-          <div class="bp-actions">
-            <button data-tv="${b.id}" data-stop-open="1" class="bp-icon-btn" title="TradingView webhook" aria-label="TV webhook">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 17 9 11 13 15 21 7"/><polyline points="14 7 21 7 21 14"/></svg>
-            </button>
-            <button data-delete="${b.id}" data-stop-open="1" class="bp-icon-btn bp-icon-danger" title="Удалить бота" aria-label="Удалить">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg>
-            </button>
+        <!-- HERO ROI block: Veles/Bitsgap-style — large %-figure with
+             equity curve as background, eyebrow "30Д ROI" tag. -->
+        <div class="bp-hero ${pnlClass}">
+          <div class="bp-hero-inner">
+            <div class="bp-hero-eyebrow" data-help="total-pnl">PnL · все время</div>
+            <div class="bp-hero-roi ${pnlClass}">${roiText}</div>
+            <div class="bp-hero-amount ${pnlClass}">${Fmt.currency(pnl)}</div>
           </div>
+          <div class="bp-spark bp-hero-spark" id="bspark${b.id}"></div>
+        </div>
+        <div class="bp-stats">
+          <div class="bp-stat"><div class="bp-stat-label" data-help="win-rate">Win rate</div><div class="bp-stat-val">${stats.winRate!==null?Fmt.percent(stats.winRate*100,{decimals:0}):'—'}</div></div>
+          <div class="bp-stat"><div class="bp-stat-label" data-help="trades">Сделок</div><div class="bp-stat-val">${stats.totalTrades}</div></div>
+          <div class="bp-stat"><div class="bp-stat-label" data-help="risk-pct">Risk</div><div class="bp-stat-val">${b.riskPct}%</div></div>
+        </div>
+        <div class="bp-cta-row">
+          <button class="bp-cta-main" data-bot-manage="${b.id}" data-stop-open="1">Управлять ботом
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 5l7 7-7 7"/></svg>
+          </button>
+          <button data-tv="${b.id}" data-stop-open="1" class="bp-icon-btn" title="TradingView webhook" aria-label="TV webhook">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 17 9 11 13 15 21 7"/><polyline points="14 7 21 7 21 14"/></svg>
+          </button>
+          <button data-delete="${b.id}" data-stop-open="1" class="bp-icon-btn bp-icon-danger" title="Удалить бота" aria-label="Удалить">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6M14 11v6"/></svg>
+          </button>
+        </div>
+        <div class="bp-meta-foot">
+          <span><b>${b.leverage}×</b> плечо</span>
+          <span>· Max <b>${b.maxOpenTrades}</b> сделок</span>
         </div>`;
       grid.appendChild(card);
     }
+    // "Управлять ботом" → open detail drawer (same as clicking the card itself)
+    grid.querySelectorAll('button[data-bot-manage]').forEach((b) => {
+      b.addEventListener('click', () => openBotDrawer(+b.getAttribute('data-bot-manage')));
+    });
     // Wire toggles
     grid.querySelectorAll('.bp-toggle[data-bot], .toggle[data-bot]').forEach(el => {
       el.addEventListener('click', async () => {
