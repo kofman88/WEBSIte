@@ -430,6 +430,9 @@ html.light .aura-chip-check:has(input:checked) { background: rgba(255,90,31,.1);
   background:#FF8C5A;box-shadow:0 0 8px rgba(255,140,90,.6);flex-shrink:0;
 }
 .chm-select-option:not(.selected)::before{content:'';width:6px;height:6px;flex-shrink:0}
+.chm-select-option.chm-select-option-locked{cursor:not-allowed;opacity:.5;color:rgba(255,140,90,.85)}
+.chm-select-option.chm-select-option-locked:hover{background:rgba(255,90,31,.06)!important;color:#FFB28A}
+.chm-select-option.chm-select-option-locked::after{content:'🔒';margin-left:auto;font-size:11px;opacity:.7}
 html.light .chm-select-trigger{background:rgba(0,0,0,.03);border-color:rgba(0,0,0,.12);color:#0A0A0A}
 html.light .chm-select-trigger:hover{background:rgba(0,0,0,.06);border-color:rgba(0,0,0,.22)}
 html.light .chm-select-menu{background:linear-gradient(180deg,#fff,#F6F7FB);border-color:rgba(0,0,0,.08);box-shadow:0 16px 40px -8px rgba(0,0,0,.15)}
@@ -2537,14 +2540,13 @@ function _bdRenderSettings(bot) {
   if (window.PlanGate) {
     PlanGate.init().then(() => {
       PlanGate.lockStrategySelect(f.elements.strategy);
-      // Lock LIVE option in the trading-mode <select> for paper-only plans
-      // (paperOnly flag is true for free/starter; pro+ goes through unchanged).
+      // Lock LIVE option in trading-mode for paper-only plans (free/starter).
+      // Uses lockSelectOption so it patches BOTH native <option> AND the
+      // visible chm-select-option button (chmEnhanceSelects swallows the
+      // native dropdown and renders custom buttons that don't otherwise
+      // honour `disabled`).
       if (PlanGate.canUseFeature('paperOnly')) {
-        const tmSel = f.elements.tradingMode;
-        if (tmSel) {
-          const liveOpt = Array.from(tmSel.options).find((o) => o.value === 'live');
-          if (liveOpt && liveOpt.text.indexOf('(Pro') === -1) { liveOpt.disabled = true; liveOpt.text = liveOpt.text + ' (Pro)'; }
-        }
+        PlanGate.lockSelectOption(f.elements.tradingMode, 'live', 'pro', 'Live-торговля');
       }
       PlanGate.clampLeverageInput(f.elements.leverage);
     });

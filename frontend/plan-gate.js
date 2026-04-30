@@ -129,13 +129,16 @@
       if (!card) return;
       card.classList.add('plan-locked');
       card.setAttribute('data-plan-required', req);
-      // Append lock chip if not already there
+      r.disabled = true;
+      // Idempotency guard: every openWizard() call would otherwise stack
+      // a new click listener, leading to N toasts on a single click after
+      // N opens.
+      if (card.dataset.planLocked === '1') return;
+      card.dataset.planLocked = '1';
       if (!card.querySelector('.plan-lock-chip')) {
         var holder = card.querySelector('.wiz-card-body') || card;
         holder.insertAdjacentHTML('beforeend', _lockChip(PLAN_LABEL[req]));
       }
-      r.disabled = true;
-      // Capture click on the surrounding label so we can intercept early
       card.addEventListener('click', function (ev) {
         if (r.disabled) {
           ev.preventDefault(); ev.stopPropagation();
@@ -150,39 +153,112 @@
    * append a "(Pro+)" / "(Elite)" suffix. Optionally drop options
    * entirely (set dropForbidden=true) — used for filter dropdowns where
    * a forbidden option is just confusing.
+   *
+   * The bots page wraps every <select> with chmEnhanceSelects() into a
+   * custom dropdown of <button class="chm-select-option" data-value="…">,
+   * so we ALSO have to mirror the disabled / removed state onto those
+   * buttons or the user clicks the visible UI and the native disabled
+   * flag never fires.
    */
   function lockStrategySelect(sel, opts) {
     if (!sel) return;
     var dropForbidden = !!(opts && opts.dropForbidden);
+    var wrap = sel.closest && sel.closest('.chm-select');
+    var currentValue = sel.value;   // preserve legacy/grandfathered selection
+
     Array.from(sel.options).forEach(function (o) {
       var s = (o.value || '').toLowerCase();
       if (!s || !STRATEGY_INFO[s]) return;
       if (canUseStrategy(s)) return;
-      if (dropForbidden) { o.remove(); return; }
+      // Never lock the currently-selected option — a user with a legacy
+      // Gerchik bot from a previous Pro subscription should still see
+      // their bot's strategy displayed correctly. They just can't switch
+      // to another forbidden one.
+      if (s === currentValue) return;
       var req = requiredForStrategy(s);
+      var btn = wrap ? wrap.querySelector('.chm-select-option[data-value="' + CSS.escape(o.value) + '"]') : null;
+
+      if (dropForbidden) {
+        o.remove();
+        if (btn) btn.remove();
+        return;
+      }
       o.disabled = true;
       if (o.text.indexOf('(') === -1) o.text = o.text + ' (' + PLAN_LABEL[req] + ')';
+
+      if (btn && !btn.dataset.planLocked) {
+        btn.dataset.planLocked = '1';
+        btn.dataset.planRequired = req;
+        btn.classList.add('chm-select-option-locked');
+        if (btn.textContent.indexOf('(') === -1) btn.textContent = btn.textContent + ' (' + PLAN_LABEL[req] + ')';
+        btn.title = 'Доступно на тарифе ' + PLAN_LABEL[req] + ' и выше';
+        // Capture-phase listener wins over the default click handler that
+        // would otherwise set sel.value to the locked option.
+        btn.addEventListener('click', function (ev) {
+          ev.stopImmediatePropagation();
+          ev.preventDefault();
+          _upsell('Стратегия ' + (STRATEGY_INFO[s] && STRATEGY_INFO[s].label || s), req);
+        }, true);
+      }
     });
   }
 
   /**
-   * Lock the LIVE radio in a tradingMode pair when the plan is paper-only.
-   * Adds a lock chip and intercepts clicks.
+   * Lock a single <option value="X"> in any <select>. Used for non-strategy
+   * dropdowns like tradingMode (paper/live).
+   */
+  function lockSelectOption(sel, value, requiredPlan, featureName) {
+    if (!sel) return;
+    var opt = Array.from(sel.options).find(function (o) { return o.value === value; });
+    if (!opt) return;
+    var label = PLAN_LABEL[requiredPlan] || requiredPlan;
+    opt.disabled = true;
+    if (opt.text.indexOf('(') === -1) opt.text = opt.text + ' (' + label + ')';
+    var wrap = sel.closest && sel.closest('.chm-select');
+    var btn = wrap ? wrap.querySelector('.chm-select-option[data-value="' + CSS.escape(value) + '"]') : null;
+    if (btn && !btn.dataset.planLocked) {
+      btn.dataset.planLocked = '1';
+      btn.classList.add('chm-select-option-locked');
+      if (btn.textContent.indexOf('(') === -1) btn.textContent = btn.textContent + ' (' + label + ')';
+      btn.addEventListener('click', function (ev) {
+        ev.stopImmediatePropagation();
+        ev.preventDefault();
+        _upsell(featureName, requiredPlan);
+      }, true);
+    }
+    if (sel.value === value) {
+      var firstAllowed = Array.from(sel.options).find(function (o) { return !o.disabled; });
+      if (firstAllowed) {
+        sel.value = firstAllowed.value;
+        sel.dispatchEvent(new Event('change', { bubbles: true }));
+        if (wrap) {
+          var trig = wrap.querySelector('.chm-select-label');
+          if (trig) trig.textContent = firstAllowed.text;
+        }
+      }
+    }
+  }
+
+  /**
+   * Lock the LIVE radio in a tradingMode pair when the plan is paper-only
+   * (Free / Starter). No-op for Pro+ where live trading is allowed.
    */
   function lockTradingModeRadios(root) {
     if (!root) return;
-    if (!canUseFeature('paperOnly') === false) return; // plan IS paper-only
-    if (!PLAN_TABLE[_plan].paperOnly) return;          // Pro+ → no-op
-    var liveRadios = root.querySelectorAll('input[type="radio"][value="live"]');
+    var t = PLAN_TABLE[_plan];
+    if (!t || !t.paperOnly) return; // Pro+ → live is fine
+    var liveRadios = root.querySelectorAll('input[type="radio"][name="tradingMode"][value="live"]');
     liveRadios.forEach(function (r) {
       var card = r.closest('label, .wiz-card') || r.parentElement;
       if (!card) return;
       card.classList.add('plan-locked');
+      r.disabled = true;
+      if (card.dataset.planLocked === '1') return;
+      card.dataset.planLocked = '1';
       if (!card.querySelector('.plan-lock-chip')) {
         var holder = card.querySelector('.wiz-card-body') || card;
         holder.insertAdjacentHTML('beforeend', _lockChip('Pro'));
       }
-      r.disabled = true;
       card.addEventListener('click', function (ev) {
         if (r.disabled) {
           ev.preventDefault(); ev.stopPropagation();
@@ -201,10 +277,12 @@
     var lim = maxLeverage();
     input.max = String(lim);
     if (Number(input.value) > lim) input.value = String(lim);
-    input.addEventListener('input', function () {
-      if (Number(input.value) > lim) input.value = String(lim);
-    });
-    // Add hint next to the field if there isn't one already
+    if (!input.dataset.planClamped) {
+      input.dataset.planClamped = '1';
+      input.addEventListener('input', function () {
+        if (Number(input.value) > lim) input.value = String(lim);
+      });
+    }
     var hint = input.parentElement && input.parentElement.querySelector('.plan-leverage-hint');
     if (!hint && input.parentElement) {
       hint = document.createElement('span');
@@ -241,6 +319,7 @@
     PLAN_LABEL: PLAN_LABEL, STRATEGY_INFO: STRATEGY_INFO,
     lockStrategyRadios: lockStrategyRadios,
     lockStrategySelect: lockStrategySelect,
+    lockSelectOption: lockSelectOption,
     lockTradingModeRadios: lockTradingModeRadios,
     clampLeverageInput: clampLeverageInput,
     gateClickable: gateClickable,
