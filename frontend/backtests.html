@@ -18,6 +18,139 @@
   <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32.png"/>
   <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png"/>
 <script src="/yandex-metrika.js" async></script><noscript><div><img src="https://mc.yandex.ru/watch/108973987" style="position:absolute;left:-9999px" alt=""/></div></noscript>
+<style>
+  /* ── Premium backtest result card ───────────────────────────────── */
+  .bt-result{
+    position:relative;padding:22px 24px 20px;
+    border-radius:18px;
+    background:
+      radial-gradient(140% 100% at 0% 0%,rgba(255,90,31,.06),transparent 55%),
+      linear-gradient(160deg,rgba(255,255,255,.025),rgba(255,255,255,.005));
+    border:1px solid rgba(255,255,255,.07);
+    box-shadow:inset 0 1px 0 rgba(255,255,255,.04),0 12px 30px -16px rgba(0,0,0,.6);
+    font-family:'Inter',sans-serif;
+    transition:border-color .2s ease,transform .2s ease,box-shadow .2s ease
+  }
+  .bt-result:hover{
+    border-color:rgba(255,140,90,.22);
+    transform:translateY(-1px);
+    box-shadow:inset 0 1px 0 rgba(255,255,255,.05),0 16px 36px -16px rgba(255,90,31,.25)
+  }
+  html.light .bt-result{
+    background:linear-gradient(160deg,#fff,rgba(0,0,0,.01));
+    border-color:rgba(0,0,0,.06);
+    box-shadow:0 8px 24px -12px rgba(0,0,0,.08)
+  }
+
+  .bt-head{display:flex;justify-content:space-between;align-items:flex-start;gap:14px;margin-bottom:18px}
+  .bt-head-title{min-width:0;flex:1}
+  .bt-name{
+    font-family:'Inter',sans-serif;font-weight:600;font-size:15.5px;
+    color:#fff;letter-spacing:-.01em;line-height:1.3;
+    overflow:hidden;text-overflow:ellipsis;white-space:nowrap
+  }
+  html.light .bt-name{color:#0A0A0A}
+  .bt-meta{
+    font-size:11.5px;font-weight:500;letter-spacing:.005em;
+    color:rgba(255,255,255,.45);margin-top:4px;
+    font-variant-numeric:tabular-nums
+  }
+  html.light .bt-meta{color:rgba(10,10,10,.5)}
+
+  /* Status badges with refined dot indicator */
+  .bt-status{
+    display:inline-flex;align-items:center;gap:6px;flex-shrink:0;
+    padding:5px 11px;border-radius:9999px;
+    font-size:10.5px;font-weight:600;letter-spacing:.04em;text-transform:uppercase;
+    line-height:1;white-space:nowrap;
+    border:1px solid;
+  }
+  .bt-status-dot{width:6px;height:6px;border-radius:50%;flex-shrink:0;box-shadow:0 0 6px currentColor}
+  .bt-status-ok  {background:rgba(52,211,153,.08);border-color:rgba(52,211,153,.32);color:#6ee7b7}
+  .bt-status-run {background:rgba(245,158,11,.08);border-color:rgba(245,158,11,.32);color:#fcd34d}
+  .bt-status-err {background:rgba(239,68,68,.08); border-color:rgba(239,68,68,.32); color:#fca5a5}
+  .bt-status-wait{background:rgba(148,163,184,.08);border-color:rgba(148,163,184,.32);color:#cbd5e1}
+
+  /* Hero metrics — Прибыль + Доля побед, large display values */
+  .bt-hero{
+    display:grid;grid-template-columns:1fr 1fr;gap:0;
+    border-top:1px solid rgba(255,255,255,.06);
+    border-bottom:1px solid rgba(255,255,255,.06);
+    padding:18px 0
+  }
+  html.light .bt-hero{border-color:rgba(0,0,0,.06)}
+  .bt-hero-cell{padding:0 4px;display:flex;flex-direction:column;gap:6px}
+  .bt-hero-cell + .bt-hero-cell{border-left:1px solid rgba(255,255,255,.06);padding-left:18px}
+  html.light .bt-hero-cell + .bt-hero-cell{border-left-color:rgba(0,0,0,.06)}
+  .bt-hero-label{
+    font-size:10px;font-weight:600;letter-spacing:.16em;text-transform:uppercase;
+    color:rgba(255,255,255,.42)
+  }
+  html.light .bt-hero-label{color:rgba(10,10,10,.5)}
+  .bt-hero-value{
+    font-family:'JetBrains Mono','Inter',monospace;font-weight:600;
+    font-size:28px;letter-spacing:-.015em;color:#fff;
+    font-variant-numeric:tabular-nums;line-height:1.05
+  }
+  html.light .bt-hero-value{color:#0A0A0A}
+
+  /* Secondary 4-cell grid */
+  .bt-grid{
+    display:grid;grid-template-columns:repeat(4,1fr);gap:0;
+    padding:14px 0;
+    border-bottom:1px solid rgba(255,255,255,.06)
+  }
+  html.light .bt-grid{border-color:rgba(0,0,0,.06)}
+  .bt-grid-cell{padding:0 14px;display:flex;flex-direction:column;gap:4px}
+  .bt-grid-cell + .bt-grid-cell{border-left:1px solid rgba(255,255,255,.06)}
+  html.light .bt-grid-cell + .bt-grid-cell{border-left-color:rgba(0,0,0,.06)}
+  .bt-grid-cell:first-child{padding-left:0}
+  .bt-grid-cell:last-child{padding-right:0}
+  .bt-grid-label{
+    font-size:9.5px;font-weight:600;letter-spacing:.16em;text-transform:uppercase;
+    color:rgba(255,255,255,.42)
+  }
+  html.light .bt-grid-label{color:rgba(10,10,10,.5)}
+  .bt-grid-value{
+    font-family:'JetBrains Mono','Inter',monospace;font-weight:600;
+    font-size:15px;letter-spacing:-.005em;color:#fff;
+    font-variant-numeric:tabular-nums
+  }
+  html.light .bt-grid-value{color:#0A0A0A}
+
+  /* Color-coded values — green/yellow/red traffic light */
+  .bt-hero-value.pos, .bt-grid-value.pos { color:#4ade80 }
+  .bt-hero-value.neg, .bt-grid-value.neg { color:#f87171 }
+  .bt-hero-value.warn,.bt-grid-value.warn{ color:#fbbf24 }
+
+  /* Equity chart slot */
+  .bt-chart{position:relative;height:140px;margin-top:14px}
+
+  /* Pending / running / failed progress bar */
+  .bt-progress{
+    width:100%;height:6px;border-radius:9999px;overflow:hidden;
+    background:rgba(255,255,255,.05);margin-top:12px
+  }
+  .bt-progress-bar{
+    height:100%;border-radius:9999px;
+    background:linear-gradient(90deg,#FF8C5A,#FF5A1F);
+    box-shadow:0 0 12px rgba(255,140,90,.45);
+    transition:width .3s ease
+  }
+  .bt-progress-meta{
+    display:flex;justify-content:space-between;align-items:center;gap:8px;
+    margin-top:8px;font-size:11px;color:rgba(255,255,255,.55)
+  }
+  .bt-progress-err{color:#fca5a5}
+  html.light .bt-progress-meta{color:rgba(10,10,10,.55)}
+
+  @media (max-width:600px){
+    .bt-grid{grid-template-columns:repeat(2,1fr);gap:14px;padding:14px 0}
+    .bt-grid-cell + .bt-grid-cell{border-left:0;padding-left:14px}
+    .bt-grid-cell:nth-child(odd){padding-left:0}
+    .bt-hero-value{font-size:22px}
+  }
+</style>
 </head>
 <body>
 <aside class="sidebar" id="sidebar">
@@ -103,49 +236,94 @@ function escapeHtml(s) {
 
 function renderBacktest(bt) {
   const card = document.createElement('div');
-  card.className = 'card card-glow';
+  card.className = 'bt-result';
   card.dataset.btId = bt.id;
-  const pnl = bt.results?.totalPnlUsd;
-  const pnlClass = pnl > 0 ? 'text-green-400' : pnl < 0 ? 'text-red-400' : 'text-slate-400';
-  const statusBadge = bt.status === 'completed'
-    ? '<span class="text-xs px-2 py-0.5 rounded-full bg-green-500/15 text-green-400">Completed</span>'
-    : bt.status === 'running'
-    ? '<span class="text-xs px-2 py-0.5 rounded-full bg-yellow-500/15 text-yellow-400">Running</span>'
-    : bt.status === 'failed'
-    ? '<span class="text-xs px-2 py-0.5 rounded-full bg-red-500/15 text-red-400">Failed</span>'
-    : '<span class="text-xs px-2 py-0.5 rounded-full bg-slate-500/15 text-slate-400">Pending</span>';
   const syms = Array.isArray(bt.symbols) ? bt.symbols.join(', ') : bt.symbols;
+
+  const STATUS_RU = {
+    completed: { label: 'Готов',     cls: 'ok',   dot: '#34d399' },
+    running:   { label: 'В процессе', cls: 'run',  dot: '#f59e0b' },
+    failed:    { label: 'Ошибка',     cls: 'err',  dot: '#ef4444' },
+    pending:   { label: 'В очереди',  cls: 'wait', dot: '#94a3b8' },
+  };
+  const st = STATUS_RU[bt.status] || STATUS_RU.pending;
+  const statusBadge =
+    '<span class="bt-status bt-status-' + st.cls + '">'
+    +   '<span class="bt-status-dot" style="background:' + st.dot + '"></span>'
+    +   st.label
+    + '</span>';
 
   if (bt.status !== 'completed') {
     card.innerHTML = `
-      <div class="flex items-center justify-between mb-3">
-        <div><div class="font-semibold">${escapeHtml(bt.name)}</div>
-        <div class="text-xs text-slate-500">${bt.startDate}–${bt.endDate} · ${escapeHtml(syms)}</div></div>
+      <div class="bt-head">
+        <div class="bt-head-title">
+          <div class="bt-name">${escapeHtml(bt.name)}</div>
+          <div class="bt-meta">${bt.startDate} – ${bt.endDate} · ${escapeHtml(syms)}</div>
+        </div>
         ${statusBadge}
       </div>
-      <div class="w-full bg-slate-800 rounded-full h-2 mt-4"><div class="bg-indigo-500 h-2 rounded-full" style="width:${bt.progressPct||0}%"></div></div>
-      <div class="text-xs text-slate-500 mt-2">${bt.progressPct||0}% complete${bt.errorMessage?'<span class="text-red-400 ml-2">'+escapeHtml(bt.errorMessage)+'</span>':''}</div>`;
+      <div class="bt-progress"><div class="bt-progress-bar" style="width:${bt.progressPct||0}%"></div></div>
+      <div class="bt-progress-meta">
+        <span>${bt.progressPct||0}% выполнено</span>
+        ${bt.errorMessage ? '<span class="bt-progress-err">'+escapeHtml(bt.errorMessage)+'</span>' : ''}
+      </div>`;
     return card;
   }
 
   const r = bt.results;
+  const pnlNum = Number(r.totalPnlUsd) || 0;
+  const pnlCls = pnlNum > 0 ? 'pos' : pnlNum < 0 ? 'neg' : '';
+  const pnlPrefix = pnlNum > 0 ? '+' : '';
+
+  const wr = Number(r.winRatePct) || 0;
+  const wrCls = wr >= 60 ? 'pos' : wr >= 45 ? 'warn' : 'neg';
+
+  const sh = Number(r.sharpeRatio) || 0;
+  const shCls = sh >= 1.5 ? 'pos' : sh > 0 ? 'warn' : 'neg';
+
+  const pf = Number(r.profitFactor) || 0;
+  const pfCls = pf >= 1.5 ? 'pos' : pf >= 1 ? 'warn' : pf > 0 ? 'neg' : '';
+
   card.innerHTML = `
-    <div class="flex items-center justify-between mb-3">
-      <div><div class="font-semibold">${escapeHtml(bt.name)}</div>
-      <div class="text-xs text-slate-500">${bt.startDate}–${bt.endDate} · ${escapeHtml(syms)}</div></div>
+    <div class="bt-head">
+      <div class="bt-head-title">
+        <div class="bt-name">${escapeHtml(bt.name)}</div>
+        <div class="bt-meta">${bt.startDate} – ${bt.endDate} · ${escapeHtml(syms)}</div>
+      </div>
       ${statusBadge}
     </div>
-    <div class="grid grid-cols-3 gap-3 text-center text-sm mb-4">
-      <div><div class="text-xs text-slate-500" data-help="pnl">PnL</div><div class="${pnlClass} font-bold">${Fmt.currency(r.totalPnlUsd)}</div></div>
-      <div><div class="text-xs text-slate-500" data-help="win-rate">Win Rate</div><div class="font-bold">${r.winRatePct}%</div></div>
-      <div><div class="text-xs text-slate-500" data-help="sharpe">Sharpe</div><div class="font-bold">${r.sharpeRatio}</div></div>
+
+    <div class="bt-hero">
+      <div class="bt-hero-cell">
+        <div class="bt-hero-label" data-help="pnl">Прибыль</div>
+        <div class="bt-hero-value ${pnlCls}">${pnlPrefix}${Fmt.currency(pnlNum)}</div>
+      </div>
+      <div class="bt-hero-cell">
+        <div class="bt-hero-label" data-help="win-rate">Доля побед</div>
+        <div class="bt-hero-value ${wrCls}">${wr.toFixed(2)}%</div>
+      </div>
     </div>
-    <div class="grid grid-cols-3 gap-3 text-center text-sm">
-      <div><div class="text-xs text-slate-500" data-help="max-drawdown">Max DD</div><div class="text-red-400">-${r.maxDrawdownPct}%</div></div>
-      <div><div class="text-xs text-slate-500" data-help="profit-factor">PF</div><div>${r.profitFactor || '—'}</div></div>
-      <div><div class="text-xs text-slate-500" data-help="trades">Trades</div><div>${r.totalTrades}</div></div>
+
+    <div class="bt-grid">
+      <div class="bt-grid-cell">
+        <div class="bt-grid-label" data-help="sharpe">Sharpe</div>
+        <div class="bt-grid-value ${shCls}">${sh.toFixed(2)}</div>
+      </div>
+      <div class="bt-grid-cell">
+        <div class="bt-grid-label" data-help="max-drawdown">Просадка</div>
+        <div class="bt-grid-value neg">−${(Number(r.maxDrawdownPct)||0).toFixed(2)}%</div>
+      </div>
+      <div class="bt-grid-cell">
+        <div class="bt-grid-label" data-help="profit-factor">Profit Factor</div>
+        <div class="bt-grid-value ${pfCls}">${pf > 0 ? pf.toFixed(2) : '—'}</div>
+      </div>
+      <div class="bt-grid-cell">
+        <div class="bt-grid-label" data-help="trades">Сделок</div>
+        <div class="bt-grid-value">${r.totalTrades}</div>
+      </div>
     </div>
-    <div class="mt-4" style="position:relative;height:140px"><canvas id="btChart${bt.id}"></canvas></div>`;
+
+    <div class="bt-chart"><canvas id="btChart${bt.id}"></canvas></div>`;
   setTimeout(() => drawEquityChart('btChart' + bt.id, r.equityCurve), 10);
   return card;
 }

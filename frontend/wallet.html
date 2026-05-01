@@ -13,7 +13,53 @@
   <link rel="stylesheet" href="tailwind.css"/>
   <link rel="stylesheet" href="styles.css"/>
   <link rel="stylesheet" href="aura-theme.css"/>
-  <style>.tab-btn{padding:8px 18px;border-radius:9999px;font-family:'Inter',sans-serif;font-size:13px;line-height:18px;font-weight:500;color:rgba(255,255,255,.62);background:transparent;border:none;cursor:pointer;transition:color .15s ease,background .15s ease}.tab-btn:hover{color:#fff}.tab-btn.active{background:linear-gradient(180deg,#FF7840 0%,#FF5A1F 60%,#C44610 100%);color:#fff;box-shadow:inset 0 1px 1px rgba(255,255,255,.25),inset 0 -1px 2px rgba(0,0,0,.4),0 4px 10px -2px rgba(255,90,31,.5)}.tab-content{display:none}.tab-content.active{display:block}</style>
+  <style>
+    .tab-btn{padding:8px 18px;border-radius:9999px;font-family:'Inter',sans-serif;font-size:13px;line-height:18px;font-weight:500;color:rgba(255,255,255,.62);background:transparent;border:none;cursor:pointer;transition:color .15s ease,background .15s ease}
+    .tab-btn:hover{color:#fff}
+    .tab-btn.active{background:linear-gradient(180deg,#FF7840 0%,#FF5A1F 60%,#C44610 100%);color:#fff;box-shadow:inset 0 1px 1px rgba(255,255,255,.25),inset 0 -1px 2px rgba(0,0,0,.4),0 4px 10px -2px rgba(255,90,31,.5)}
+    .tab-content{display:none}.tab-content.active{display:block}
+
+    /* Premium dual-CTA row inside the "Кастодиальный кошелёк — скоро" card.
+       Both buttons share the same height/padding/font; primary is solid amber,
+       ghost is restrained glass — clear hierarchy, no color clash. */
+    .wallet-cta-row{display:inline-flex;align-items:center;gap:10px;flex-wrap:wrap;justify-content:center}
+    .wallet-cta{
+      display:inline-flex;align-items:center;gap:8px;
+      height:42px;padding:0 20px;border-radius:9999px;border:0;
+      font-family:'Inter',sans-serif;font-weight:600;font-size:13px;
+      letter-spacing:-.005em;cursor:pointer;text-decoration:none;
+      white-space:nowrap;line-height:1;
+      transition:transform .18s cubic-bezier(.4,0,.2,1),background .18s ease,box-shadow .18s ease,border-color .18s ease,color .18s ease
+    }
+    .wallet-cta:active{transform:translateY(0) scale(.98)}
+    .wallet-cta svg{flex-shrink:0;opacity:.95}
+    .wallet-cta .plan-lock-svg{margin-left:2px;color:#FFB28A;filter:drop-shadow(0 0 4px rgba(255,140,90,.55))}
+    /* Primary — refined amber gradient (matches dashboard / bots) */
+    .wallet-cta-primary{
+      color:#fff;
+      background:linear-gradient(180deg,#FF9059 0%,#FF6A1F 60%,#D94A0F 100%);
+      box-shadow:inset 0 1px 0 rgba(255,255,255,.32),0 1px 2px rgba(120,40,0,.3),0 8px 20px -8px rgba(255,90,31,.55)
+    }
+    .wallet-cta-primary:hover{
+      transform:translateY(-1px);
+      background:linear-gradient(180deg,#FFA070 0%,#FF7A30 60%,#E45A1A 100%);
+      box-shadow:inset 0 1px 0 rgba(255,255,255,.4),0 12px 26px -6px rgba(255,90,31,.7)
+    }
+    /* Ghost — restrained glass with amber hover */
+    .wallet-cta-ghost{
+      color:rgba(255,140,90,.92);
+      background:rgba(255,90,31,.06);
+      border:1px solid rgba(255,140,90,.28)
+    }
+    .wallet-cta-ghost:hover{
+      transform:translateY(-1px);
+      background:rgba(255,90,31,.12);
+      border-color:rgba(255,140,90,.5);
+      color:#fff
+    }
+    html.light .wallet-cta-ghost{color:#C44610;background:rgba(255,90,31,.05);border-color:rgba(255,90,31,.22)}
+    html.light .wallet-cta-ghost:hover{color:#fff;background:linear-gradient(180deg,#FF7840,#FF5A1F);border-color:rgba(255,90,31,.5)}
+  </style>
   <link rel="icon" type="image/svg+xml" href="/favicon.svg"/>
   <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32.png"/>
   <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png"/>
@@ -79,9 +125,15 @@
       <p class="text-sm text-slate-400" style="max-width:440px;margin:0 auto 22px">
         Polygon USDC для предиктивных рынков Polymarket. Депозит через USDT BEP20/TRC20 с авто-конвертацией, вывод на ваш адрес. Запускаем в следующем апдейте.
       </p>
-      <div class="flex items-center justify-center gap-3">
-        <button id="walletConnectBig" onclick="switchTab('exchanges')" class="text-sm px-5 py-2.5 rounded-xl bg-indigo-500/10 border border-indigo-500/30 text-indigo-400 hover:bg-indigo-500/20">Подключить биржу</button>
-        <a href="settings.html?upgrade=pro" class="text-sm px-5 py-2.5 rounded-xl font-semibold text-white" style="background:linear-gradient(180deg,#FF7840 0%,#FF5A1F 60%,#C44610 100%)">Оформить Pro</a>
+      <div class="wallet-cta-row">
+        <button id="walletConnectBig" onclick="switchTab('exchanges')" class="wallet-cta wallet-cta-primary" type="button">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" width="14" height="14" aria-hidden="true"><rect x="2" y="6" width="20" height="14" rx="2"/><path d="M16 14h2"/><path d="M2 10h20"/></svg>
+          Подключить биржу
+        </button>
+        <a href="settings.html?upgrade=pro" class="wallet-cta wallet-cta-ghost">
+          Оформить Pro
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 5l7 7-7 7"/></svg>
+        </a>
       </div>
     </div>
   </div>
