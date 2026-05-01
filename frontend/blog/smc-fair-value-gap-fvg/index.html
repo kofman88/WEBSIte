@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html lang="ru" class="aura-page">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+  <title>FVG (Fair Value Gap) в крипте: как находить и торговать — CHM Finance</title>
+  <meta name="description" content="Fair Value Gap (FVG) в SMC: что такое 3-свечный гэп, как находить на BTC/ETH, бычий и медвежий FVG, правила входа, SL и TP. Гайд от CHM Finance."/>
+  <meta name="keywords" content="fvg криптовалюта, fair value gap смc, что такое fvg, fvg трейдинг, ордер блок и fvg, fvg bybit, smart money concepts fvg"/>
+  <meta name="robots" content="index,follow,max-image-preview:large"/>
+  <meta name="theme-color" content="#0A0A0A"/>
+  <link rel="canonical" href="https://chmup.top/blog/smc-fair-value-gap-fvg/"/>
+  <meta property="og:type" content="article"/>
+  <meta property="og:site_name" content="CHM Finance"/>
+  <meta property="og:title" content="FVG (Fair Value Gap) в крипте — гайд"/>
+  <meta property="og:description" content="Что такое FVG, как находить и торговать. Бычий и медвежий gap, SL и TP по правилам SMC."/>
+  <meta property="og:url" content="https://chmup.top/blog/smc-fair-value-gap-fvg/"/>
+  <meta property="og:image" content="https://chmup.top/og-cover.png"/>
+  <meta property="og:locale" content="ru_RU"/>
+  <meta property="article:published_time" content="2026-05-01"/>
+  <meta property="article:author" content="CHM Finance"/>
+  <meta property="article:section" content="Trading Strategies"/>
+  <meta property="article:tag" content="FVG"/>
+  <meta property="article:tag" content="SMC"/>
+  <meta property="article:tag" content="Fair Value Gap"/>
+  <meta name="twitter:card" content="summary_large_image"/>
+  <meta name="twitter:title" content="FVG в крипте — гайд"/>
+  <meta name="twitter:description" content="Fair Value Gap простыми словами: поиск, вход, SL, TP."/>
+  <meta name="twitter:image" content="https://chmup.top/og-cover.png"/>
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg"/>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet"/>
+
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "BlogPosting",
+    "headline": "FVG (Fair Value Gap) в крипте: как находить и торговать",
+    "description": "Полный гайд по Fair Value Gap в SMC: определение, поиск 3-свечного паттерна, бычий и медвежий FVG, правила входа, SL и TP. Примеры на BTC.",
+    "author": { "@type": "Organization", "name": "CHM Finance", "url": "https://chmup.top/" },
+    "publisher": {
+      "@type": "Organization",
+      "name": "CHM Finance",
+      "logo": { "@type": "ImageObject", "url": "https://chmup.top/logo.png" }
+    },
+    "datePublished": "2026-05-01",
+    "dateModified": "2026-05-01",
+    "mainEntityOfPage": { "@type": "WebPage", "@id": "https://chmup.top/blog/smc-fair-value-gap-fvg/" },
+    "image": "https://chmup.top/og-cover.png",
+    "inLanguage": "ru-RU",
+    "wordCount": 2100
+  }
+  </script>
+
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    "itemListElement": [
+      {"@type":"ListItem","position":1,"name":"Главная","item":"https://chmup.top/"},
+      {"@type":"ListItem","position":2,"name":"Блог","item":"https://chmup.top/blog/"},
+      {"@type":"ListItem","position":3,"name":"FVG (Fair Value Gap)","item":"https://chmup.top/blog/smc-fair-value-gap-fvg/"}
+    ]
+  }
+  </script>
+
+  <script type="application/ld+json">
+  {"@context":"https://schema.org","@type":"FAQPage","mainEntity":[
+    {"@type":"Question","name":"Что такое FVG (Fair Value Gap) простыми словами?","acceptedAnswer":{"@type":"Answer","text":"FVG — это 3-свечный паттерн, в котором между тенью первой и третьей свечи остаётся «пустое» пространство. Цена прошла зону так быстро, что в ней не успели исполниться все заявки. Считается, что рынок «вернётся залатать» этот гэп — и это даёт сетап для входа. На крипте FVG появляются после новостных движений, ликвидаций и манипуляций маркетмейкеров."}},
+    {"@type":"Question","name":"Как найти FVG на графике?","acceptedAnswer":{"@type":"Answer","text":"Возьми любые 3 соседние свечи. Бычий FVG: нижняя тень третьей свечи выше верхней тени первой свечи — между ними «дыра». Медвежий FVG: верхняя тень третьей свечи ниже нижней тени первой — снова дыра, но в другую сторону. Размер гэпа важен: считай в процентах от цены или в долях ATR. На крипте 1H валидный FVG ≥ 0.1-0.2% размера зоны."}},
+    {"@type":"Question","name":"Чем FVG отличается от Order Block?","acceptedAnswer":{"@type":"Answer","text":"Order Block — это конкретная свеча перед импульсом, зона накопления крупных заявок. FVG — это пустое пространство ВНУТРИ импульса, гэп ликвидности. OB и FVG часто работают вместе: OB задаёт точку входа, FVG показывает первую цель TP1. Для повышения качества сигнала ищи FVG, начинающийся прямо над/под Order Block — это удвоенное подтверждение."}},
+    {"@type":"Question","name":"Закроется ли FVG обязательно?","acceptedAnswer":{"@type":"Answer","text":"Не всегда. Статистика на BTC 1H показывает: 70-80% FVG закрываются в течение 50-100 свечей, 15-20% закрываются позже, 5-10% не закрываются вообще (становятся постоянным «пробоем» структуры). Для торговли нужен фильтр: бери FVG только в направлении тренда высшего таймфрейма + игнорируй гэпы на новостях (они часто остаются «как есть»)."}},
+    {"@type":"Question","name":"Какой размер FVG считается валидным?","acceptedAnswer":{"@type":"Answer","text":"Минимум — 0.5 ATR за период. Меньше — это просто рыночный шум, не торгуй. На BTC 1H ATR обычно 200-400 USDT, значит валидный FVG ≥ 100 USDT (0.15% от цены). На altcoin'ах ATR пропорционально меньше. На CHM Finance в SMC-стратегии параметр fvgMinGapPct настраивается (по умолчанию 0.08%) — повышай для более строгих сетапов."}},
+    {"@type":"Question","name":"Что такое Inverse FVG?","acceptedAnswer":{"@type":"Answer","text":"Inverse FVG — это пробитый FVG. Когда цена прошла через гэп и закрылась за противоположной границей, FVG считается «инвертированным»: бычий FVG становится медвежьим уровнем сопротивления и наоборот. Это превращает любой пробитый FVG в новый тактический уровень. На CHM в SMC-стратегии параметр fvgInversed (по умолчанию true) включает торговлю по инверсии."}},
+    {"@type":"Question","name":"Где ставить SL при торговле FVG?","acceptedAnswer":{"@type":"Answer","text":"SL ставится за противоположной границей FVG с буфером 0.3-0.5%. Пример: бычий FVG на BTC от 60 200 до 60 400. Лонг входим при возврате цены к 60 400 (верхняя граница), SL за нижней границей 60 200 × 0.997 = 60 020. Риск 380 USDT с входа 60 400. TP1 — High импульса который образовал FVG, TP2 — R:R = 2-3 от риска."}}
+  ]}
+  </script>
+
+  <style>
+    body{background:#0A0A0A;color:#E5E5E5;font-family:'Inter',sans-serif;margin:0;line-height:1.7}
+    .container{max-width:720px;margin:0 auto;padding:60px 24px}
+    nav{padding:20px 24px;border-bottom:1px solid rgba(255,255,255,.06)}
+    nav a{color:rgba(255,255,255,.7);text-decoration:none;font-weight:500;font-size:14px;margin-right:20px}
+    nav a:hover{color:#fff}
+    .brand{font-weight:700;font-size:18px;letter-spacing:-.02em;color:#fff}
+    .brand span{color:#FF5A1F}
+    .breadcrumb{font-size:12px;color:rgba(255,255,255,.4);margin-bottom:16px}
+    .breadcrumb a{color:rgba(255,255,255,.55);text-decoration:none}
+    .breadcrumb a:hover{color:#FF8C5A}
+    h1{font-size:clamp(28px,4.5vw,40px);font-weight:700;letter-spacing:-.025em;margin:0 0 16px;line-height:1.15}
+    .meta{color:rgba(255,255,255,.45);font-size:13px;margin-bottom:40px;display:flex;gap:16px;flex-wrap:wrap}
+    .meta span::after{content:'·';margin-left:16px;opacity:.5}
+    .meta span:last-child::after{content:''}
+    h2{font-size:24px;font-weight:600;letter-spacing:-.015em;margin:44px 0 16px;color:#fff}
+    h3{font-size:18px;font-weight:600;margin:32px 0 12px;color:#fff}
+    p{color:rgba(255,255,255,.78);margin:0 0 16px;font-size:16px}
+    ul,ol{color:rgba(255,255,255,.78);padding-left:24px;margin:0 0 20px}
+    li{margin-bottom:8px}
+    code{background:rgba(255,90,31,.12);color:#FF8C5A;padding:2px 6px;border-radius:4px;font-family:'JetBrains Mono',monospace;font-size:13px}
+    .note{padding:16px 20px;border-radius:12px;background:rgba(255,90,31,.08);border:1px solid rgba(255,90,31,.2);margin:24px 0}
+    .note-title{font-weight:600;color:#FF8C5A;font-size:13px;text-transform:uppercase;letter-spacing:.1em;margin:0 0 8px}
+    .cta{display:block;padding:24px;border-radius:16px;background:linear-gradient(135deg,rgba(255,140,90,.12),rgba(255,90,31,.06));border:1px solid rgba(255,140,90,.3);text-decoration:none;color:inherit;margin:40px 0;transition:transform .2s}
+    .cta:hover{transform:translateY(-1px)}
+    .cta-title{font-weight:600;color:#fff;margin:0 0 6px;font-size:17px}
+    .cta-desc{color:rgba(255,255,255,.7);font-size:14px;margin:0}
+    .cta-btn{display:inline-block;margin-top:12px;padding:8px 16px;background:linear-gradient(180deg,#FF8C5A,#FF5A1F);color:#fff;border-radius:999px;font-size:13px;font-weight:600}
+    a.inline{color:#FF8C5A;text-decoration:none}
+    a.inline:hover{text-decoration:underline}
+    table{width:100%;border-collapse:collapse;margin:20px 0;font-size:14px}
+    th,td{padding:10px 12px;text-align:left;border-bottom:1px solid rgba(255,255,255,.08)}
+    th{color:rgba(255,255,255,.5);font-size:11px;text-transform:uppercase;letter-spacing:.1em;font-weight:500}
+    td{color:rgba(255,255,255,.85)}
+    .toc{padding:20px 24px;border-radius:12px;background:rgba(255,255,255,.025);border:1px solid rgba(255,255,255,.06);margin:0 0 32px}
+    .toc-title{font-size:11px;font-weight:600;color:rgba(255,255,255,.45);letter-spacing:.16em;text-transform:uppercase;margin:0 0 10px}
+    .toc ol{margin:0;padding-left:20px;font-size:14px;color:rgba(255,255,255,.7)}
+    .toc a{color:rgba(255,255,255,.7);text-decoration:none}
+    .toc a:hover{color:#FF8C5A}
+  </style>
+<script src="/yandex-metrika.js" async></script><noscript><div><img src="https://mc.yandex.ru/watch/108973987" style="position:absolute;left:-9999px" alt=""/></div></noscript>
+</head>
+<body>
+  <nav>
+    <div style="max-width:960px;margin:0 auto;display:flex;justify-content:space-between;align-items:center">
+      <a href="/" class="brand">CHM<span>.</span></a>
+      <div>
+        <a href="/">Главная</a>
+        <a href="/blog/">Блог</a>
+        <a href="/dashboard.html">Дашборд</a>
+      </div>
+    </div>
+  </nav>
+
+  <main class="container">
+    <div class="breadcrumb">
+      <a href="/">Главная</a> /
+      <a href="/blog/">Блог</a> /
+      FVG (Fair Value Gap)
+    </div>
+    <h1>FVG (Fair Value Gap) в крипте: как находить и торговать</h1>
+    <div class="meta">
+      <span>1 мая 2026</span>
+      <span>11 минут чтения</span>
+      <span>Уровень: средний</span>
+    </div>
+
+    <div class="toc">
+      <div class="toc-title">Содержание</div>
+      <ol>
+        <li><a href="#chto-takoe">Что такое FVG простыми словами</a></li>
+        <li><a href="#kak-naiti">Как найти FVG на графике — 3 шага</a></li>
+        <li><a href="#bull-bear">Бычий и медвежий FVG</a></li>
+        <li><a href="#vhod">Правила входа в сделку</a></li>
+        <li><a href="#sl-tp">Stop Loss и Take Profit</a></li>
+        <li><a href="#inverse">Inverse FVG — пробитый гэп как уровень</a></li>
+        <li><a href="#fvg-ob">FVG + Order Block: двойное подтверждение</a></li>
+        <li><a href="#oshibki">5 ошибок при торговле FVG</a></li>
+      </ol>
+    </div>
+
+    <p>Fair Value Gap (FVG) — второй краеугольный камень <a class="inline" href="/blog/smc-strategia-kripty/">SMC-стратегии</a> после <a class="inline" href="/blog/smc-order-blocks-chto-eto/">Order Blocks</a>. Если OB показывает «где институционалы накопили позицию», то FVG — «куда им ещё нужно вернуться, чтобы заполнить заявки». Связка OB + FVG даёт самые надёжные SMC-сетапы с Win Rate 60%+ при правильной настройке.</p>
+
+    <h2 id="chto-takoe">Что такое FVG простыми словами</h2>
+    <p>FVG — это <strong>3-свечный паттерн с «дырой ликвидности» в середине</strong>. Цена прошла зону так быстро, что в ней не успели исполниться заявки покупателей и продавцов. Со временем рынок стремится «залатать» эту дыру — вернуться и обработать пропущенные ордера.</p>
+
+    <p>Технически FVG появляется когда:</p>
+    <ul>
+      <li>Между нижней тенью третьей свечи и верхней тенью первой свечи остаётся пустое пространство (бычий FVG).</li>
+      <li>Или между верхней тенью третьей свечи и нижней тенью первой свечи (медвежий FVG).</li>
+    </ul>
+
+    <p>Это пустое пространство и называется <em>Fair Value Gap</em> — «гэп справедливой стоимости».</p>
+
+    <div class="note">
+      <div class="note-title">Простая аналогия</div>
+      <p style="margin:0">Представь, что в магазине очередь, и кто-то крупный «пробил» её скупив всё. Между местом, где была очередь, и куском, который он унёс, осталось пустое место. Магазин рано или поздно его заполнит. На графике то же самое — FVG.</p>
+    </div>
+
+    <h2 id="kak-naiti">Как найти FVG на графике — 3 шага</h2>
+    <ol>
+      <li><strong>Найди 3 соседние свечи в одну сторону.</strong> Желательно с большим импульсом — все 3 одного цвета, тела увеличиваются.</li>
+      <li><strong>Сравни тени первой и третьей свечи.</strong> Бычий FVG: нижняя тень 3-й свечи > верхней тени 1-й свечи. Медвежий FVG: верхняя тень 3-й свечи < нижней тени 1-й свечи.</li>
+      <li><strong>Зафиксируй границы зоны.</strong> Бычий FVG: от верхней тени 1-й свечи до нижней тени 3-й. Медвежий: зеркально.</li>
+    </ol>
+
+    <p>Ширина зоны = размер гэпа. В процентах от цены: для бычьего FVG = (Low_3 - High_1) / Цена × 100%.</p>
+
+    <h2 id="bull-bear">Бычий и медвежий FVG</h2>
+    <p><strong>Бычий FVG (Bullish FVG)</strong> формируется в восходящем движении. Цена прошла зону вверх, оставив пустоту. Когда цена возвращается к этой зоне сверху — это сетап на лонг: «купил на возврате к гэпу — катаешься дальше вверх».</p>
+    <p><strong>Медвежий FVG (Bearish FVG)</strong> формируется в нисходящем движении. Цена прошла зону вниз, оставив пустоту. Возврат к зоне снизу = сетап на шорт.</p>
+
+    <h3>Реальный пример на BTC/USDT 1H</h3>
+    <p>Допустим, на BTC 1H видим 3 свечи:</p>
+    <ul>
+      <li>10:00: Open 60 100, High 60 250, Low 60 050, Close 60 200 (бычья, тело 100$).</li>
+      <li>11:00: Open 60 200, High 60 600, Low 60 200, Close 60 580 (бычья, тело 380$ — импульс).</li>
+      <li>12:00: Open 60 580, High 60 700, Low 60 350, Close 60 650 (бычья, тело 70$).</li>
+    </ul>
+    <p>Сравниваем: верхняя тень 1-й свечи = 60 250, нижняя тень 3-й свечи = 60 350. Между ними дыра 100$ — это <strong>бычий FVG</strong> в зоне 60 250–60 350.</p>
+    <p>Когда BTC через несколько часов вернётся к 60 350 сверху, открываем лонг с SL за 60 250 (с буфером).</p>
+
+    <h2 id="vhod">Правила входа в сделку</h2>
+    <p>Входим <strong>на касании ближней границы FVG</strong>, не дожидаясь полного заполнения зоны:</p>
+
+    <table>
+      <thead>
+        <tr><th>Бычий FVG</th><th>Медвежий FVG</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>Точка входа: верхняя граница FVG (она ближе к текущей цене сверху)</td><td>Точка входа: нижняя граница FVG (ближе к цене снизу)</td></tr>
+        <tr><td>Тип ордера: лимитная покупка на уровне границы</td><td>Тип ордера: лимитная продажа на уровне границы</td></tr>
+        <tr><td>Подтверждение: bullish-свеча после касания</td><td>Подтверждение: bearish-свеча после касания</td></tr>
+      </tbody>
+    </table>
+
+    <p>Альтернатива — частичный вход: 50% позиции на ближней границе зоны, 50% на дальней. Это снижает средний риск, но увеличивает шанс не зайти полностью при сильном отскоке от ближней границы.</p>
+
+    <h2 id="sl-tp">Stop Loss и Take Profit</h2>
+    <h3>Stop Loss</h3>
+    <p>SL ставится <strong>за дальней границей FVG с буфером 0.3-0.5%</strong>. На примере выше: бычий FVG 60 250–60 350, лонг от 60 350, SL = 60 250 × 0.997 = 60 070. Риск от точки входа: 60 350 - 60 070 = 280 USDT, или 0.46%.</p>
+
+    <h3>Take Profit (3 цели)</h3>
+    <ul>
+      <li><strong>TP1 (50% позиции):</strong> High импульса, который образовал FVG. На примере выше — 60 700. R:R = (60 700 - 60 350) / 280 = 1.25.</li>
+      <li><strong>TP2 (30% позиции):</strong> R:R = 2.0–2.5. На примере: 60 350 + 280 × 2.5 = 61 050.</li>
+      <li><strong>TP3 (20% позиции):</strong> R:R = 4+, ставится в зоне следующего сильного сопротивления / OB / противоположного FVG.</li>
+    </ul>
+
+    <p>После TP1 переноси SL в безубыток. После TP2 — в зону прибыли. Стандартное правило <a class="inline" href="/blog/kak-ne-slit-depozit-na-botah/">риск-менеджмента</a>: не больше 1% депозита на сделку.</p>
+
+    <h2 id="inverse">Inverse FVG — пробитый гэп как уровень</h2>
+    <p>Что если цена пробила FVG насквозь и закрылась за противоположной границей? Не страшно. Пробитый FVG становится <strong>Inverse FVG</strong> — он меняет полярность:</p>
+    <ul>
+      <li>Пробитый <em>бычий</em> FVG превращается в зону <em>сопротивления</em> (медвежий уровень).</li>
+      <li>Пробитый <em>медвежий</em> FVG становится зоной <em>поддержки</em> (бычий уровень).</li>
+    </ul>
+    <p>Логика: те трейдеры, которые покупали в бычьем FVG, теперь сидят в убытке. При следующем подходе цены к этой зоне они будут стремиться выйти в безубыток — продавать. Это создаёт давление на цену сверху.</p>
+    <p>На <a class="inline" href="/blog/smc-strategia-kripty/">CHM Finance в SMC-стратегии</a> параметр <code>fvgInversed</code> (по умолчанию true) включает торговлю по Inverse FVG. Это удваивает количество валидных сетапов.</p>
+
+    <h2 id="fvg-ob">FVG + Order Block: двойное подтверждение</h2>
+    <p>Самые надёжные сетапы получаются на стыке FVG и Order Block. Алгоритм:</p>
+    <ol>
+      <li>Найди <a class="inline" href="/blog/smc-order-blocks-chto-eto/">Order Block</a> в направлении тренда.</li>
+      <li>Сразу после OB должен идти импульс. Если в этом импульсе образовался FVG — это бонус.</li>
+      <li>Жди возврата цены к OB. FVG между ценой и OB — твоя «карта пути»: цена должна закрыть FVG, а потом войти в OB.</li>
+      <li>Вход — на касании верхней границы OB. SL — за противоположной границей OB. TP1 — start FVG (ближняя к OB сторона), TP2 — конец импульса.</li>
+    </ol>
+    <p>Эта связка повышает Win Rate с базовых 50% до 60-70% при сохранении R:R 2.0+. Profit Factor выходит на 2.0–2.5.</p>
+
+    <h2 id="oshibki">5 ошибок при торговле FVG</h2>
+    <ol>
+      <li><strong>Торговать любой гэп.</strong> Маленькие FVG (< 0.5 ATR) — это шум. Установи минимальный размер: 0.1-0.2% от цены для крипты на 1H.</li>
+      <li><strong>Игнорировать тренд высшего таймфрейма.</strong> Бычий FVG на 1H против медвежьего тренда на 4H = ловушка. Используй MTF-анализ.</li>
+      <li><strong>Не учитывать новостной фон.</strong> FVG на пиках событий (CPI, FOMC, ликвидации) часто остаются «пробитыми» навсегда. Не торгуй за 30 минут до и после.</li>
+      <li><strong>Двигать SL.</strong> Цена не дошла до зоны — отменяй ордер. Цена пробила SL — фиксируй убыток. Никогда не «надейся» на возврат.</li>
+      <li><strong>Не учитывать комиссии.</strong> Скальпинг по FVG на 1m с маленькими гэпами съедается комиссиями. <a class="inline" href="/blog/luchshie-indikatory-dlya-skalpinga/">Лучше работать на 1H+</a>.</li>
+    </ol>
+
+    <a href="/subscriptions.html" class="cta">
+      <h3 class="cta-title">Авто-торговля FVG через бота</h3>
+      <p class="cta-desc">Тариф Pro ($69/мес) открывает SMC-стратегию с авто-разметкой FVG, Order Blocks и Break of Structure. Бот сканирует все свечи 24/7 на 4 биржах. Бэктест 10 запусков в день — проверь стратегию до live.</p>
+      <span class="cta-btn">Сравнить тарифы →</span>
+    </a>
+
+    <h2>Дальше читай</h2>
+    <ul>
+      <li><a class="inline" href="/blog/smc-order-blocks-chto-eto/">Order Block в SMC — как находить и торговать</a></li>
+      <li><a class="inline" href="/blog/smc-strategia-kripty/">SMC стратегия для крипто-трейдинга — полный гайд</a></li>
+      <li><a class="inline" href="/blog/kak-chitat-svechnoy-grafik/">Как читать свечной график — основа Price Action</a></li>
+      <li><a class="inline" href="/blog/kak-ne-slit-depozit-na-botah/">10 правил риск-менеджмента, чтобы не слить депозит</a></li>
+      <li><a class="inline" href="/blog/">Все статьи блога →</a></li>
+    </ul>
+  </main>
+</body>
+</html>
