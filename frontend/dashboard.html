@@ -870,9 +870,15 @@ document.querySelectorAll('.sidebar-link[data-page="dashboard"]').forEach(a => a
 // ── Primary summary (row 1) — bot counts + signals + win rate ──
 async function loadSummary() {
   try {
-    const [botSummary, sigStats] = await Promise.all([
+    // Win-rate / wins / losses now come from /dashboard-v2 (closed-trade
+    // counts) instead of /signals/my-stats (signal-outcome counts) so
+    // they match the trade-based PF / Sharpe / Max DD shown in row 2.
+    // Without this they drifted: a user with 26 signals + real trades
+    // saw "Win Rate —" + "0/0 побед/потерь" while PF/Sharpe were filled.
+    const [botSummary, sigStats, dashStats] = await Promise.all([
       API.botSummary().catch(() => ({ totalBots: 0, activeBots: 0, openTrades: 0, totalPnl: 0 })),
-      API.mySignalStats().catch(() => ({ total: 0, winRate: null })),
+      API.mySignalStats().catch(() => ({ total: 0 })),
+      API.dashboardV2().catch(() => ({ totals: { wins: 0, losses: 0 } })),
     ]);
     const set = (id, v) => { const el = document.getElementById(id); if (el) el.textContent = v; };
     const pnl = Number(botSummary.totalPnl) || 0;
@@ -885,9 +891,19 @@ async function loadSummary() {
     set('botsSubline', (botSummary.openTrades || 0) + ' открытых позиций');
     set('signalsTotal', sigStats.total || 0);
     set('signalsToday', sigStats.today || 0);
-    set('winRateVal', sigStats.winRate !== null && sigStats.winRate !== undefined
-      ? Fmt.percent(sigStats.winRate * 100, { decimals: 1 }) : '—');
-    set('winLossRatio', (sigStats.wins || 0) + '/' + (sigStats.losses || 0));
+
+    const wins   = Number((dashStats.totals && dashStats.totals.wins)   || 0);
+    const losses = Number((dashStats.totals && dashStats.totals.losses) || 0);
+    const closed = wins + losses;
+    set('winRateVal', closed > 0
+      ? Fmt.percent((wins / closed) * 100, { decimals: 1 })
+      : '—');
+    set('winLossRatio', wins + '/' + losses + (closed ? ' побед/потерь' : ' побед/потерь · нужно ≥1 закрытой сделки'));
+    const wrEl = document.getElementById('winRateVal');
+    if (wrEl && closed > 0) {
+      const wr = (wins / closed) * 100;
+      wrEl.className = 'stat-card-value ' + (wr >= 60 ? 'text-green-400' : wr >= 45 ? 'text-yellow-400' : 'text-red-400');
+    }
   } catch (_e) {}
 }
 
