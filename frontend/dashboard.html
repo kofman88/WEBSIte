@@ -45,7 +45,7 @@
       <span data-t="sb-wallet">Кошелёк</span></a>
     <a href="leaderboard.html" class="sidebar-link" data-page="leaderboard">
       <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
-      <span data-t="sb-leaderboard">Leaderboard</span></a>
+      <span data-t="sb-leaderboard">Рейтинг</span></a>
     <a href="settings.html" class="sidebar-link" data-page="settings" data-tour="settings">
       <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 15a3 3 0 100-6 3 3 0 000 6z"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 01-2.83 2.83l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 012.83-2.83l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z"/></svg>
       <span data-t="sb-settings">Настройки</span></a>
@@ -86,11 +86,11 @@
       </div>
       <button id="dashQuickTrade" onclick="location.href='bots.html'" class="chm-action chm-action-primary" title="Быстрая торговля — перейти к ботам">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" width="14" height="14"><polyline points="22 7 13.5 15.5 8.5 10.5 2 17"/><polyline points="16 7 22 7 22 13"/></svg>
-        <span>Quick Trade</span>
+        <span>Открыть сделку</span>
       </button>
       <button id="pauseAllBtn" class="chm-action chm-action-danger" title="Мгновенно остановить всех активных ботов">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true" width="14" height="14"><line x1="9" y1="6" x2="9" y2="18"/><line x1="15" y1="6" x2="15" y2="18"/></svg>
-        <span>Pause all</span>
+        <span>Остановить всех</span>
       </button>
     </div>
   </div>
@@ -339,7 +339,7 @@
   <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-4">
     <div class="stat-card liquid-glass">
       <div class="stat-card-icon" style="background:rgba(255,90,31,.4)"><svg aria-hidden="true" width="22" height="22" fill="none" stroke="#FF8C5A" stroke-width="2"><path d="M21 12V7H5a2 2 0 010-4h14v4M3 5v14a2 2 0 002 2h16v-5M18 12a2 2 0 100 4 2 2 0 000-4z"/></svg></div>
-      <div class="stat-card-label" data-help="total-pnl">Total PnL</div>
+      <div class="stat-card-label" data-help="total-pnl">Общий PnL</div>
       <div class="stat-card-value" id="balanceVal">—</div>
       <div class="text-[10px] text-slate-500 mt-1">30д: <span id="pnl30">—</span></div>
     </div>
@@ -357,7 +357,7 @@
     </div>
     <div class="stat-card liquid-glass">
       <div class="stat-card-icon" style="background:rgba(130,98,98,.18)"><svg aria-hidden="true" width="22" height="22" fill="none" stroke="#C8B9B9" stroke-width="2"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg></div>
-      <div class="stat-card-label" data-help="win-rate">Win Rate</div>
+      <div class="stat-card-label" data-help="win-rate">Доля побед</div>
       <div class="stat-card-value" id="winRateVal">—</div>
       <div class="text-[10px] text-slate-500 mt-1" id="winLossRatio">—</div>
     </div>
@@ -365,31 +365,31 @@
 
   <!-- Row 2 — 4 pro metrics -->
   <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-    <div class="stat-card"><div class="stat-card-label" data-help="max-drawdown">Max Drawdown</div><div class="stat-card-value" id="maxDdVal">—</div><div class="text-[10px] text-slate-500 mt-1" id="maxDdSub">Пик-к-впадине</div></div>
-    <div class="stat-card"><div class="stat-card-label" data-help="sharpe">Sharpe ratio</div><div class="stat-card-value" id="sharpeVal">—</div><div class="text-[10px] text-slate-500 mt-1">&gt;1.5 — хорошо, &gt;2 — отлично</div></div>
-    <div class="stat-card"><div class="stat-card-label" data-help="profit-factor">Profit Factor</div><div class="stat-card-value" id="pfVal">—</div><div class="text-[10px] text-slate-500 mt-1">Gross wins / losses</div></div>
-    <div class="stat-card"><div class="stat-card-label" id="streakLabel" data-help-text="Серия — сколько прибыльных или убыточных сделок подряд закрыл бот. Длинная win-стрик — стратегия в потоке. Длинная loss-стрик — повод включить kill-switch.">Серия</div><div class="stat-card-value" id="streakVal">—</div><div class="text-[10px] text-slate-500 mt-1">Подряд</div></div>
+    <div class="stat-card"><div class="stat-card-label" data-help="max-drawdown">Макс. просадка</div><div class="stat-card-value" id="maxDdVal">—</div><div class="text-[10px] text-slate-500 mt-1" id="maxDdSub">Пик-к-впадине</div></div>
+    <div class="stat-card"><div class="stat-card-label" data-help="sharpe">Коэф. Шарпа</div><div class="stat-card-value" id="sharpeVal">—</div><div class="text-[10px] text-slate-500 mt-1">&gt;1.5 — хорошо, &gt;2 — отлично</div></div>
+    <div class="stat-card"><div class="stat-card-label" data-help="profit-factor">Profit Factor</div><div class="stat-card-value" id="pfVal">—</div><div class="text-[10px] text-slate-500 mt-1">Прибыль / убыток</div></div>
+    <div class="stat-card"><div class="stat-card-label" id="streakLabel" data-help="streak">Серия</div><div class="stat-card-value" id="streakVal">—</div><div class="text-[10px] text-slate-500 mt-1">Подряд</div></div>
   </div>
 
   <!-- Row 3 — Risk budget + percentile + open positions count + best/worst -->
   <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
     <div class="card" style="padding:16px">
-      <div class="text-xs text-slate-500 uppercase tracking-wider mb-2">Risk in play</div>
+      <div class="text-xs text-slate-500 uppercase tracking-wider mb-2" data-help="risk-in-play">Риск в работе</div>
       <div class="text-lg font-mono font-bold" id="riskPlay">—</div>
       <div class="text-[10px] text-slate-500 mt-1" id="riskPlaySub">В открытых позициях</div>
     </div>
     <div class="card" style="padding:16px">
-      <div class="text-xs text-slate-500 uppercase tracking-wider mb-2">Percentile (30d)</div>
+      <div class="text-xs text-slate-500 uppercase tracking-wider mb-2" data-help="percentile">Перцентиль (30д)</div>
       <div class="text-lg font-mono font-bold" id="percentileVal">—</div>
-      <div class="text-[10px] text-slate-500 mt-1">Позиция в Leaderboard</div>
+      <div class="text-[10px] text-slate-500 mt-1">Позиция в рейтинге</div>
     </div>
     <div class="card" style="padding:16px">
-      <div class="text-xs text-slate-500 uppercase tracking-wider mb-2">Лучшая сделка</div>
+      <div class="text-xs text-slate-500 uppercase tracking-wider mb-2" data-help="best-trade">Лучшая сделка</div>
       <div class="text-lg font-mono font-bold text-green-400" id="bestTradeVal">—</div>
       <div class="text-[10px] text-slate-500 mt-1" id="bestTradeSub">—</div>
     </div>
     <div class="card" style="padding:16px">
-      <div class="text-xs text-slate-500 uppercase tracking-wider mb-2">Худшая сделка</div>
+      <div class="text-xs text-slate-500 uppercase tracking-wider mb-2" data-help="worst-trade">Худшая сделка</div>
       <div class="text-lg font-mono font-bold text-red-400" id="worstTradeVal">—</div>
       <div class="text-[10px] text-slate-500 mt-1" id="worstTradeSub">—</div>
     </div>
@@ -398,16 +398,18 @@
   <!-- Row 4 — Equity curve + Open positions -->
   <div class="grid lg:grid-cols-3 gap-6 mb-6">
     <div class="lg:col-span-2 card" data-tour="equity">
-      <div class="flex items-center justify-between mb-4">
-        <h2 class="font-bold">Кривая капитала</h2>
-        <div class="flex gap-1">
-          <button class="eqBtn text-xs px-3 py-1 rounded-lg bg-indigo-500/20 text-indigo-300" data-days="7">1W</button>
-          <button class="eqBtn text-xs px-3 py-1 rounded-lg hover:bg-slate-700/50 text-slate-400" data-days="30">1M</button>
-          <button class="eqBtn text-xs px-3 py-1 rounded-lg hover:bg-slate-700/50 text-slate-400" data-days="90">3M</button>
-          <button class="eqBtn text-xs px-3 py-1 rounded-lg hover:bg-slate-700/50 text-slate-400" data-days="365">1Y</button>
-          <label class="flex items-center gap-1 ml-2 text-xs text-slate-400 cursor-pointer">
-            <input type="checkbox" id="showBench" style="accent-color:#f59e0b"/>
-            BTC
+      <div class="flex items-center justify-between mb-4 flex-wrap gap-3">
+        <h2 class="font-bold" data-help="equity-curve">Кривая капитала</h2>
+        <div class="chm-seg" role="tablist" aria-label="Период графика">
+          <button class="chm-seg-btn active eqBtn" data-days="7"   role="tab" aria-selected="true">Неделя</button>
+          <button class="chm-seg-btn        eqBtn" data-days="30"  role="tab" aria-selected="false">Месяц</button>
+          <button class="chm-seg-btn        eqBtn" data-days="90"  role="tab" aria-selected="false">3 мес</button>
+          <button class="chm-seg-btn        eqBtn" data-days="365" role="tab" aria-selected="false">Год</button>
+          <span class="chm-seg-divider" aria-hidden="true"></span>
+          <label class="chm-seg-toggle" title="Наложить кривую BTC на график для сравнения">
+            <input type="checkbox" id="showBench"/>
+            <span class="chm-seg-toggle-track"><span class="chm-seg-toggle-thumb"></span></span>
+            <span class="chm-seg-toggle-label">vs BTC</span>
           </label>
         </div>
       </div>
@@ -417,11 +419,22 @@
     </div>
     <div class="card">
       <div class="flex items-center justify-between mb-3">
-        <h2 class="font-bold">Открытые позиции</h2>
-        <span id="openPosCount" class="text-xs text-slate-500">—</span>
+        <h2 class="font-bold" data-help="open-positions">Открытые позиции</h2>
+        <span id="openPosCount" class="chm-count-pill">0</span>
       </div>
       <div id="openPosList" class="space-y-2" style="max-height:280px;overflow-y:auto">
-        <div class="text-xs text-slate-500 text-center py-6">Нет открытых позиций</div>
+        <div class="dash-empty">
+          <div class="dash-empty-ic">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <path d="M3 3h18v18H3z" opacity=".2"/>
+              <path d="M7 14l3-3 3 3 4-4"/>
+              <circle cx="17" cy="10" r="1.4" fill="currentColor"/>
+            </svg>
+          </div>
+          <div class="dash-empty-title">Открытых позиций нет</div>
+          <div class="dash-empty-sub">Активируй бота — позиции появятся здесь в реальном времени.</div>
+          <a href="bots.html" class="dash-empty-cta">К ботам →</a>
+        </div>
       </div>
     </div>
   </div>
@@ -429,23 +442,25 @@
   <!-- Row 5 — PnL breakdowns + R-multiple + Bot leaderboard -->
   <div class="grid lg:grid-cols-3 gap-6 mb-6">
     <div class="card">
-      <h2 class="font-bold mb-3">R-multiple distribution</h2>
+      <h2 class="font-bold mb-3" data-help="r-multiple">Распределение R</h2>
       <div style="position:relative;height:200px;overflow:hidden">
         <canvas id="rMultChart" style="display:block;max-width:100%;max-height:100%"></canvas>
       </div>
-      <div class="text-[10px] text-slate-500 mt-2">Сколько сделок на какой R. Правый хвост жирнее = есть edge.</div>
+      <div class="text-[10px] text-slate-500 mt-2">Сколько сделок на какой R. Длинный «правый хвост» = есть устойчивая прибыль.</div>
     </div>
     <div class="card">
-      <h2 class="font-bold mb-3">PnL по стратегиям</h2>
+      <h2 class="font-bold mb-3" data-help="pnl-by-strategy">PnL по стратегиям</h2>
       <div style="position:relative;height:200px;overflow:hidden">
         <canvas id="stratDonut" style="display:block;max-width:100%;max-height:100%"></canvas>
       </div>
       <div id="stratLegend" class="text-[11px] mt-2 space-y-1"></div>
     </div>
     <div class="card">
-      <h2 class="font-bold mb-3">Топ ботов (30д)</h2>
+      <h2 class="font-bold mb-3" data-help="top-bots">Топ ботов (30д)</h2>
       <div id="botLeaderboard" class="space-y-2 text-xs">
-        <div class="text-slate-500 text-center py-3">Загрузка…</div>
+        <div class="dash-empty dash-empty-sm">
+          <div class="dash-empty-title" style="font-size:13px">Загрузка…</div>
+        </div>
       </div>
     </div>
   </div>
@@ -453,16 +468,20 @@
   <!-- Row 5b — Heatmaps: calendar P&L + hours of day -->
   <div class="grid lg:grid-cols-2 gap-6 mb-6">
     <div class="card">
-      <div class="flex items-center justify-between mb-3">
-        <h2 class="font-bold">Календарь P&amp;L (180 дней)</h2>
-        <span class="text-[10px] text-slate-500">Клетка = день. Зелёный = прибыль, красный = убыток</span>
+      <div class="flex items-center justify-between mb-3 flex-wrap gap-2">
+        <h2 class="font-bold" data-help="calendar-pnl">Календарь P&amp;L · 180 дней</h2>
+        <div class="chm-legend">
+          <span class="chm-legend-item"><span class="chm-legend-sw chm-legend-sw-up"></span>Прибыль</span>
+          <span class="chm-legend-item"><span class="chm-legend-sw chm-legend-sw-down"></span>Убыток</span>
+          <span class="chm-legend-item"><span class="chm-legend-sw chm-legend-sw-flat"></span>Без сделок</span>
+        </div>
       </div>
       <div id="calHeat" class="overflow-x-auto" style="min-height:130px"></div>
     </div>
     <div class="card">
-      <div class="flex items-center justify-between mb-3">
-        <h2 class="font-bold">По часам (90 дней)</h2>
-        <span class="text-[10px] text-slate-500">UTC · в какие часы торгуется лучше</span>
+      <div class="flex items-center justify-between mb-3 flex-wrap gap-2">
+        <h2 class="font-bold" data-help="hourly-pnl">По часам · 90 дней</h2>
+        <span class="text-[10px] text-slate-500" style="letter-spacing:.04em">UTC · твои продуктивные окна</span>
       </div>
       <div style="position:relative;height:180px;overflow:hidden">
         <canvas id="hourChart" style="display:block;max-width:100%;max-height:100%"></canvas>
@@ -473,15 +492,20 @@
   <!-- Row 6 — Recent signals + Recent trades -->
   <div class="grid lg:grid-cols-3 gap-6 mb-6">
     <div class="card">
-      <div class="flex items-center justify-between mb-4"><h2 class="font-bold">Последние сигналы</h2><a href="signals.html" class="text-xs text-indigo-400 hover:underline">Все</a></div>
+      <div class="flex items-center justify-between mb-4">
+        <h2 class="font-bold" data-help-text="Последние сигналы — свежие наводки от ваших стратегий. У каждого: пара, направление и оценка качества (Q5 — лучшая, Q1 — худшая). Сигнал ≠ открытая сделка; бот откроет её только если включено авто-исполнение.">Последние сигналы</h2>
+        <a href="signals.html" class="chm-link-pill">Все<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 5l7 7-7 7"/></svg></a>
+      </div>
       <div class="space-y-3" id="recentSignals" style="max-height:360px;overflow-y:auto">
-        <div class="text-xs text-slate-500 text-center py-4">Загрузка…</div>
+        <div class="dash-empty dash-empty-sm">
+          <div class="dash-empty-title" style="font-size:13px">Загрузка…</div>
+        </div>
       </div>
     </div>
     <div class="lg:col-span-2 card">
       <div class="flex items-center justify-between mb-4">
-        <h2 class="font-bold">Последние сделки</h2>
-        <a href="analytics.html" class="text-xs text-indigo-400 hover:underline">Вся история →</a>
+        <h2 class="font-bold" data-help-text="Последние сделки — закрытые позиции с результатом в долларах и процентах. Зелёный = профит, красный = убыток. По нажатию «Вся история» — полный журнал с фильтрами и заметками.">Последние сделки</h2>
+        <a href="analytics.html" class="chm-link-pill">Вся история<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 5l7 7-7 7"/></svg></a>
       </div>
       <div class="overflow-x-auto">
         <table class="w-full text-sm">
@@ -1166,17 +1190,21 @@ document.getElementById('pauseAllBtn')?.addEventListener('click', async () => {
   } catch (e) { Toast.error(e.message || 'Ошибка'); }
 });
 
-// Equity period buttons
+// Equity period buttons — segmented control
 document.querySelectorAll('.eqBtn').forEach((b) => {
   b.addEventListener('click', () => {
-    document.querySelectorAll('.eqBtn').forEach((x) => { x.classList.remove('bg-indigo-500/20', 'text-indigo-300'); x.classList.add('hover:bg-slate-700/50', 'text-slate-400'); });
-    b.classList.remove('hover:bg-slate-700/50', 'text-slate-400');
-    b.classList.add('bg-indigo-500/20', 'text-indigo-300');
+    document.querySelectorAll('.eqBtn').forEach((x) => {
+      x.classList.remove('active');
+      x.setAttribute('aria-selected', 'false');
+    });
+    b.classList.add('active');
+    b.setAttribute('aria-selected', 'true');
     buildChart(+b.dataset.days);
   });
 });
 document.getElementById('showBench')?.addEventListener('change', () => {
-  const act = document.querySelector('.eqBtn.bg-indigo-500\\/20'); buildChart(+(act?.dataset.days || 30));
+  const act = document.querySelector('.eqBtn.active');
+  buildChart(+(act?.dataset.days || 30));
 });
 
 // ── Recent signals ──

@@ -19,7 +19,7 @@
     'sb-analytics':  { ru: 'Аналитика',   en: 'Analytics',   es: 'Análisis',     tr: 'Analitik',       id: 'Analitik' },
     'sb-backtests':  { ru: 'Бэктесты',    en: 'Backtests',   es: 'Backtests',    tr: 'Geri testler',   id: 'Backtest' },
     'sb-wallet':     { ru: 'Кошелёк',     en: 'Wallet',      es: 'Billetera',    tr: 'Cüzdan',         id: 'Dompet' },
-    'sb-leaderboard':{ ru: 'Leaderboard', en: 'Leaderboard', es: 'Tabla',        tr: 'Sıralama',       id: 'Peringkat' },
+    'sb-leaderboard':{ ru: 'Рейтинг',     en: 'Leaderboard', es: 'Tabla',        tr: 'Sıralama',       id: 'Peringkat' },
     'sb-settings':   { ru: 'Настройки',   en: 'Settings',    es: 'Ajustes',      tr: 'Ayarlar',        id: 'Pengaturan' },
     'sb-logout':     { ru: 'Выйти',       en: 'Sign out',    es: 'Salir',        tr: 'Çıkış',          id: 'Keluar' },
 
