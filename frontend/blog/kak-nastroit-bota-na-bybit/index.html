@@ -69,6 +69,17 @@
   </script>
 
   <script type="application/ld+json">
+  {"@context":"https://schema.org","@type":"FAQPage","mainEntity":[
+    {"@type":"Question","name":"Как создать API-ключ на Bybit для бота?","acceptedAnswer":{"@type":"Answer","text":"Зайди на bybit.com → API → Create New Key. Выбери «System-generated API Keys». Включи разрешения: Read-Write, Spot Trading + Derivatives. ОБЯЗАТЕЛЬНО НЕ включай «Withdraw». Установи IP-restriction (свободный IP сервера CHM найдёшь в кабинете). Срок действия 90 дней — Bybit принудительно ротирует. Скопируй API Key + Secret. На CHM Finance: Кошелёк → Подключить биржу → Bybit → вставь оба значения."}},
+    {"@type":"Question","name":"Какие права API-ключа Bybit нужны для CHM Finance?","acceptedAnswer":{"@type":"Answer","text":"Минимум: Contract Trade (для фьючерсов), Spot Trade (если торгуешь споты), Wallet (баланс читать). Withdraw — НИКОГДА не включай: даже при компрометации ключа средства не выведут. Account Transfer — оставь выключенным. На CHM достаточно стандартного набора Contract+Spot+Wallet — этого хватает для всех 6 стратегий."}},
+    {"@type":"Question","name":"Что такое Bybit Demo и зачем он?","acceptedAnswer":{"@type":"Answer","text":"Bybit Demo (api-demo.bybit.com) — отдельный домен с виртуальными $50 000 USDT, на котором сделки исполняются на реальных ценах, но без реальных денег. Идеально для тестирования стратегии 2-4 недели до перехода на live. Также используется prop-firm трейдерами (FTMO, CryptoFundTrader) для имитации challenge-аккаунтов. На CHM Finance demo-режим бесплатен на всех тарифах: Free, Starter, Pro, Elite."}},
+    {"@type":"Question","name":"Как часто Bybit делает обслуживание и теряются ли мои сделки?","acceptedAnswer":{"@type":"Answer","text":"Bybit делает плановое обслуживание раз в 1-2 месяца, обычно ночью UTC. Открытые позиции и SL/TP-ордера сохраняются на сервере биржи и не пропадают. Боту CHM Finance может временно прерваться WebSocket-соединение — он автоматически переподключится после восстановления. Не оставляй активные сделки без SL: маркет-крах в момент обслуживания = ликвидация."}},
+    {"@type":"Question","name":"Можно ли подключить несколько Bybit-аккаунтов на одном тарифе?","acceptedAnswer":{"@type":"Answer","text":"На Free и Starter — только 1 биржевой ключ всего. На Pro ($69/мес) и Elite ($149/мес) — multi-exchange: можешь подключить Bybit + Binance + BingX + OKX параллельно, каждый со своими ботами. Несколько Bybit-ключей одного юзера не поддерживается — они ведут на тот же аккаунт, бот не различит. Нужен второй Bybit-аккаунт — заведи его в семье / друзьях по реферальной программе."}},
+    {"@type":"Question","name":"Какая разница между Spot, USDT-Perpetual и USDC-Perpetual на Bybit?","acceptedAnswer":{"@type":"Answer","text":"Spot — обычная покупка/продажа криптовалюты, без плеча. USDT-Perpetual — бессрочные фьючерсы с расчётом в USDT (самый ликвидный рынок Bybit, плечо до 100×). USDC-Perpetual — те же контракты, но в USDC, ликвидность ниже. Боты CHM Finance по умолчанию работают с USDT-Perpetual: лучшая ликвидность + самая узкий спред. Spot подходит для DCA-ботов без плеча."}}
+  ]}
+  </script>
+
+  <script type="application/ld+json">
   {
     "@context": "https://schema.org",
     "@type": "HowTo",
