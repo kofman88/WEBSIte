@@ -359,7 +359,7 @@
       <div class="stat-card-icon" style="background:rgba(130,98,98,.18)"><svg aria-hidden="true" width="22" height="22" fill="none" stroke="#C8B9B9" stroke-width="2"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg></div>
       <div class="stat-card-label" data-help="win-rate">Win Rate</div>
       <div class="stat-card-value" id="winRateVal">—</div>
-      <div class="text-[10px] text-slate-500 mt-1"><span id="winLossRatio">—</span> побед/потерь</div>
+      <div class="text-[10px] text-slate-500 mt-1" id="winLossRatio">—</div>
     </div>
   </div>
 
@@ -895,14 +895,28 @@ async function loadSummary() {
     const wins   = Number((dashStats.totals && dashStats.totals.wins)   || 0);
     const losses = Number((dashStats.totals && dashStats.totals.losses) || 0);
     const closed = wins + losses;
-    set('winRateVal', closed > 0
-      ? Fmt.percent((wins / closed) * 100, { decimals: 1 })
-      : '—');
-    set('winLossRatio', wins + '/' + losses + (closed ? ' побед/потерь' : ' побед/потерь · нужно ≥1 закрытой сделки'));
     const wrEl = document.getElementById('winRateVal');
-    if (wrEl && closed > 0) {
+    const subEl = document.getElementById('winLossRatio');
+    if (closed > 0) {
       const wr = (wins / closed) * 100;
-      wrEl.className = 'stat-card-value ' + (wr >= 60 ? 'text-green-400' : wr >= 45 ? 'text-yellow-400' : 'text-red-400');
+      if (wrEl) {
+        wrEl.textContent = Fmt.percent(wr, { decimals: 1 });
+        wrEl.className = 'stat-card-value ' + (wr >= 60 ? 'text-green-400' : wr >= 45 ? 'text-yellow-400' : 'text-red-400');
+      }
+      // Premium sub-line: colored win/loss counts with bullet separator,
+      // tabular-nums so the "/" sits on a stable baseline as numbers grow.
+      if (subEl) {
+        subEl.innerHTML =
+          '<span style="font-variant-numeric:tabular-nums">'
+          + '<span style="color:#4ade80;font-weight:600">' + wins + '</span>'
+          + '<span style="color:rgba(255,255,255,.35);margin:0 5px">·</span>'
+          + '<span style="color:#f87171;font-weight:600">' + losses + '</span>'
+          + '<span style="color:rgba(255,255,255,.55);margin-left:6px">из ' + closed + ' сделок</span>'
+          + '</span>';
+      }
+    } else {
+      if (wrEl) { wrEl.textContent = '—'; wrEl.className = 'stat-card-value'; }
+      if (subEl) subEl.innerHTML = '<span style="color:rgba(255,255,255,.4)">Нет закрытых сделок</span>';
     }
   } catch (_e) {}
 }
