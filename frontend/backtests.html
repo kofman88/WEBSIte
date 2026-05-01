@@ -240,6 +240,38 @@ function renderBacktest(bt) {
   card.dataset.btId = bt.id;
   const syms = Array.isArray(bt.symbols) ? bt.symbols.join(', ') : bt.symbols;
 
+  // ── Display helpers ──────────────────────────────────────────────────
+  // Wizard-spawned previews come back from the API with names like
+  // "wizard-preview-1776792414273" — exposing the timestamp is ugly. Map
+  // them to a friendly "Превью · BTCUSDT 15m" derived from symbol +
+  // strategy + timeframe when available, fall back to a short "Превью".
+  function prettyName(rawName, b) {
+    const name = String(rawName || '').trim();
+    if (/^wizard-preview-/i.test(name) || /^preview-/i.test(name)) {
+      const parts = [];
+      const sym = Array.isArray(b.symbols) ? b.symbols[0] : b.symbols;
+      if (sym) parts.push(String(sym).toUpperCase());
+      if (b.strategy)  parts.push(String(b.strategy).toUpperCase());
+      if (b.timeframe) parts.push(b.timeframe);
+      return 'Превью · ' + (parts.join(' · ') || ('#' + b.id));
+    }
+    return name;
+  }
+  // "2025-01-01" → "1 янв 2025". Russian short months, tabular feel.
+  const RU_MONTH_SHORT = ['янв','фев','мар','апр','май','июн','июл','авг','сен','окт','ноя','дек'];
+  function prettyDate(iso) {
+    if (!iso || typeof iso !== 'string') return iso || '';
+    const m = iso.match(/^(\d{4})-(\d{2})-(\d{2})/);
+    if (!m) return iso;
+    return parseInt(m[3], 10) + ' ' + RU_MONTH_SHORT[parseInt(m[2], 10) - 1] + ' ' + m[1];
+  }
+  function prettyRange(a, b) {
+    const same = a && b && a.slice(0, 4) === b.slice(0, 4);
+    return same
+      ? prettyDate(a).replace(/\s\d{4}$/, '') + ' — ' + prettyDate(b)
+      : prettyDate(a) + ' — ' + prettyDate(b);
+  }
+
   const STATUS_RU = {
     completed: { label: 'Готов',     cls: 'ok',   dot: '#34d399' },
     running:   { label: 'В процессе', cls: 'run',  dot: '#f59e0b' },
@@ -253,12 +285,15 @@ function renderBacktest(bt) {
     +   st.label
     + '</span>';
 
+  const displayName = prettyName(bt.name, bt);
+  const displayRange = prettyRange(bt.startDate, bt.endDate);
+
   if (bt.status !== 'completed') {
     card.innerHTML = `
       <div class="bt-head">
         <div class="bt-head-title">
-          <div class="bt-name">${escapeHtml(bt.name)}</div>
-          <div class="bt-meta">${bt.startDate} – ${bt.endDate} · ${escapeHtml(syms)}</div>
+          <div class="bt-name">${escapeHtml(displayName)}</div>
+          <div class="bt-meta">${displayRange} · ${escapeHtml(syms)}</div>
         </div>
         ${statusBadge}
       </div>
@@ -287,8 +322,8 @@ function renderBacktest(bt) {
   card.innerHTML = `
     <div class="bt-head">
       <div class="bt-head-title">
-        <div class="bt-name">${escapeHtml(bt.name)}</div>
-        <div class="bt-meta">${bt.startDate} – ${bt.endDate} · ${escapeHtml(syms)}</div>
+        <div class="bt-name">${escapeHtml(displayName)}</div>
+        <div class="bt-meta">${displayRange} · ${escapeHtml(syms)}</div>
       </div>
       ${statusBadge}
     </div>
