@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang="ru" class="aura-page">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+  <title>Order Block в SMC: что это и как торговать на крипте — CHM Finance</title>
+  <meta name="description" content="Order Block (ордер-блок) в SMC — что такое, как находить на графике BTC/ETH, правила входа, SL и TP. Реальные примеры на 1H/4H. Гайд от CHM Finance."/>
+  <meta name="keywords" content="order block смc, ордер блок крипта, smc order block, как торговать order blocks, order block bybit, smart money concepts ордер блок"/>
+  <meta name="robots" content="index,follow,max-image-preview:large"/>
+  <meta name="theme-color" content="#0A0A0A"/>
+  <link rel="canonical" href="https://chmup.top/blog/smc-order-blocks-chto-eto/"/>
+  <meta property="og:type" content="article"/>
+  <meta property="og:site_name" content="CHM Finance"/>
+  <meta property="og:title" content="Order Block в SMC: гайд по поиску и торговле"/>
+  <meta property="og:description" content="Что такое Order Block, как находить на графике, правила входа, SL и TP. Примеры на BTC/ETH."/>
+  <meta property="og:url" content="https://chmup.top/blog/smc-order-blocks-chto-eto/"/>
+  <meta property="og:image" content="https://chmup.top/og-cover.png"/>
+  <meta property="og:locale" content="ru_RU"/>
+  <meta property="article:published_time" content="2026-05-01"/>
+  <meta property="article:author" content="CHM Finance"/>
+  <meta property="article:section" content="Trading Strategies"/>
+  <meta property="article:tag" content="Order Block"/>
+  <meta property="article:tag" content="SMC"/>
+  <meta property="article:tag" content="Smart Money"/>
+  <meta name="twitter:card" content="summary_large_image"/>
+  <meta name="twitter:title" content="Order Block в SMC — гайд"/>
+  <meta name="twitter:description" content="Как находить и торговать ордер-блоки на крипте."/>
+  <meta name="twitter:image" content="https://chmup.top/og-cover.png"/>
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg"/>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet"/>
+
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "BlogPosting",
+    "headline": "Order Block в SMC: что это и как торговать на крипте",
+    "description": "Полный гайд по Order Block в SMC: определение, правила поиска на графике, вход, SL и TP. Примеры на BTC/ETH с реальными числами.",
+    "author": { "@type": "Organization", "name": "CHM Finance", "url": "https://chmup.top/" },
+    "publisher": {
+      "@type": "Organization",
+      "name": "CHM Finance",
+      "logo": { "@type": "ImageObject", "url": "https://chmup.top/logo.png" }
+    },
+    "datePublished": "2026-05-01",
+    "dateModified": "2026-05-01",
+    "mainEntityOfPage": {
+      "@type": "WebPage",
+      "@id": "https://chmup.top/blog/smc-order-blocks-chto-eto/"
+    },
+    "image": "https://chmup.top/og-cover.png",
+    "inLanguage": "ru-RU",
+    "wordCount": 2400
+  }
+  </script>
+
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    "itemListElement": [
+      {"@type":"ListItem","position":1,"name":"Главная","item":"https://chmup.top/"},
+      {"@type":"ListItem","position":2,"name":"Блог","item":"https://chmup.top/blog/"},
+      {"@type":"ListItem","position":3,"name":"Order Block в SMC","item":"https://chmup.top/blog/smc-order-blocks-chto-eto/"}
+    ]
+  }
+  </script>
+
+  <script type="application/ld+json">
+  {"@context":"https://schema.org","@type":"FAQPage","mainEntity":[
+    {"@type":"Question","name":"Что такое Order Block в SMC?","acceptedAnswer":{"@type":"Answer","text":"Order Block (ордер-блок, OB) — это последняя свеча противоположного направления перед резким импульсом цены. Например, на восходящем движении OB — это последняя медвежья (красная) свеча перед сильным ростом. Считается, что в этой зоне крупные институциональные игроки накопили заявки, и при возврате цены к этому уровню они защитят позицию — отсюда высокая вероятность отскока."}},
+    {"@type":"Question","name":"Как найти Order Block на графике?","acceptedAnswer":{"@type":"Answer","text":"5 шагов: 1) Найди резкий импульсный ход (свеча или серия свечей с длинным телом и большим объёмом). 2) Перед импульсом найди последнюю свечу противоположного направления. 3) Тело этой свечи (от Open до Close) — это и есть Order Block. 4) Проверь, что после OB цена прошла минимум 2-3 ATR в направлении импульса. 5) Жди возврата цены к OB и входи на касании верхней или нижней границы."}},
+    {"@type":"Question","name":"Какой Win Rate у стратегии на Order Blocks?","acceptedAnswer":{"@type":"Answer","text":"При строгих правилах (импульс ≥ 3 ATR после OB, объём в 1.5+ раза выше среднего, R:R ≥ 2.0) ожидаемый Win Rate 50-60%. С Profit Factor 1.8-2.3 это устойчиво прибыльная стратегия. На крипте с 1H/4H таймфреймами реалистично 20-40 OB-сетапов в месяц на одной паре. На CHM Finance стратегия SMC с авто-разметкой OB доступна на тарифе Pro ($69/мес)."}},
+    {"@type":"Question","name":"Где ставить Stop Loss при торговле Order Block?","acceptedAnswer":{"@type":"Answer","text":"SL ставится за противоположной границей OB с буфером 0.3-0.5%. Пример: бычий OB на BTC от 60 000 до 60 500. Лонг входим при касании 60 500 сверху, SL за нижней границей с буфером — 60 000 × 0.997 = 59 820. Это даёт компактный риск 1.1% от точки входа. Никогда не двигай SL «потому что цена пошла против» — это ломает математику стратегии."}},
+    {"@type":"Question","name":"Что такое Mitigated Order Block?","acceptedAnswer":{"@type":"Answer","text":"Mitigated OB — это ордер-блок, к которому цена уже возвращалась хотя бы один раз. Считается, что после первого касания крупные заявки в этой зоне частично исполнены, и при втором касании их недостаточно для разворота. На CHM Finance в SMC-стратегии есть параметр obMitigatedInvalid (по умолчанию true) — бот игнорирует уже отработавшие OB. Включи для повышения качества сигналов."}},
+    {"@type":"Question","name":"Чем Order Block отличается от обычного уровня поддержки?","acceptedAnswer":{"@type":"Answer","text":"Уровень поддержки — горизонтальная линия по нескольким минимумам. Order Block — конкретное тело свечи (зона), привязанное к контексту: должен быть импульс после неё. Уровень видно «всем», OB — только тем, кто знает SMC. Поэтому OB реже даёт ложные пробои: розница не торгует по нему, нет массовых стопов, которые маркет-мейкер мог бы выбить. Это делает OB-сетапы более надёжными для бота."}},
+    {"@type":"Question","name":"На каком таймфрейме лучше искать Order Blocks?","acceptedAnswer":{"@type":"Answer","text":"Оптимальный диапазон 1H–4H. На 1m/5m слишком много шума, OB образуются на каждой свече и теряют смысл. На 1D/1W мало сетапов в месяц. Для крипты лучшим балансом считается 1H: 20-40 валидных OB-сетапов в месяц на одной паре, достаточно для 5-10 сделок. Подтверждение через мульти-таймфрейм: бычий OB на 1H + общий тренд вверх на 4H = высоковероятный сетап."}}
+  ]}
+  </script>
+
+  <style>
+    body{background:#0A0A0A;color:#E5E5E5;font-family:'Inter',sans-serif;margin:0;line-height:1.7}
+    .container{max-width:720px;margin:0 auto;padding:60px 24px}
+    nav{padding:20px 24px;border-bottom:1px solid rgba(255,255,255,.06)}
+    nav a{color:rgba(255,255,255,.7);text-decoration:none;font-weight:500;font-size:14px;margin-right:20px}
+    nav a:hover{color:#fff}
+    .brand{font-weight:700;font-size:18px;letter-spacing:-.02em;color:#fff}
+    .brand span{color:#FF5A1F}
+    .breadcrumb{font-size:12px;color:rgba(255,255,255,.4);margin-bottom:16px}
+    .breadcrumb a{color:rgba(255,255,255,.55);text-decoration:none}
+    .breadcrumb a:hover{color:#FF8C5A}
+    h1{font-size:clamp(28px,4.5vw,40px);font-weight:700;letter-spacing:-.025em;margin:0 0 16px;line-height:1.15}
+    .meta{color:rgba(255,255,255,.45);font-size:13px;margin-bottom:40px;display:flex;gap:16px;flex-wrap:wrap}
+    .meta span::after{content:'·';margin-left:16px;opacity:.5}
+    .meta span:last-child::after{content:''}
+    h2{font-size:24px;font-weight:600;letter-spacing:-.015em;margin:44px 0 16px;color:#fff}
+    h3{font-size:18px;font-weight:600;margin:32px 0 12px;color:#fff}
+    p{color:rgba(255,255,255,.78);margin:0 0 16px;font-size:16px}
+    ul,ol{color:rgba(255,255,255,.78);padding-left:24px;margin:0 0 20px}
+    li{margin-bottom:8px}
+    code{background:rgba(255,90,31,.12);color:#FF8C5A;padding:2px 6px;border-radius:4px;font-family:'JetBrains Mono',monospace;font-size:13px}
+    .note{padding:16px 20px;border-radius:12px;background:rgba(255,90,31,.08);border:1px solid rgba(255,90,31,.2);margin:24px 0}
+    .note-title{font-weight:600;color:#FF8C5A;font-size:13px;text-transform:uppercase;letter-spacing:.1em;margin:0 0 8px}
+    .cta{display:block;padding:24px;border-radius:16px;background:linear-gradient(135deg,rgba(255,140,90,.12),rgba(255,90,31,.06));border:1px solid rgba(255,140,90,.3);text-decoration:none;color:inherit;margin:40px 0;transition:transform .2s}
+    .cta:hover{transform:translateY(-1px)}
+    .cta-title{font-weight:600;color:#fff;margin:0 0 6px;font-size:17px}
+    .cta-desc{color:rgba(255,255,255,.7);font-size:14px;margin:0}
+    .cta-btn{display:inline-block;margin-top:12px;padding:8px 16px;background:linear-gradient(180deg,#FF8C5A,#FF5A1F);color:#fff;border-radius:999px;font-size:13px;font-weight:600}
+    a.inline{color:#FF8C5A;text-decoration:none}
+    a.inline:hover{text-decoration:underline}
+    table{width:100%;border-collapse:collapse;margin:20px 0;font-size:14px}
+    th,td{padding:10px 12px;text-align:left;border-bottom:1px solid rgba(255,255,255,.08)}
+    th{color:rgba(255,255,255,.5);font-size:11px;text-transform:uppercase;letter-spacing:.1em;font-weight:500}
+    td{color:rgba(255,255,255,.85)}
+    .toc{padding:20px 24px;border-radius:12px;background:rgba(255,255,255,.025);border:1px solid rgba(255,255,255,.06);margin:0 0 32px}
+    .toc-title{font-size:11px;font-weight:600;color:rgba(255,255,255,.45);letter-spacing:.16em;text-transform:uppercase;margin:0 0 10px}
+    .toc ol{margin:0;padding-left:20px;font-size:14px;color:rgba(255,255,255,.7)}
+    .toc a{color:rgba(255,255,255,.7);text-decoration:none}
+    .toc a:hover{color:#FF8C5A}
+  </style>
+<script src="/yandex-metrika.js" async></script><noscript><div><img src="https://mc.yandex.ru/watch/108973987" style="position:absolute;left:-9999px" alt=""/></div></noscript>
+</head>
+<body>
+  <nav>
+    <div style="max-width:960px;margin:0 auto;display:flex;justify-content:space-between;align-items:center">
+      <a href="/" class="brand">CHM<span>.</span></a>
+      <div>
+        <a href="/">Главная</a>
+        <a href="/blog/">Блог</a>
+        <a href="/dashboard.html">Дашборд</a>
+      </div>
+    </div>
+  </nav>
+
+  <main class="container">
+    <div class="breadcrumb">
+      <a href="/">Главная</a> /
+      <a href="/blog/">Блог</a> /
+      Order Block в SMC
+    </div>
+    <h1>Order Block в SMC: что это и как торговать на крипте</h1>
+    <div class="meta">
+      <span>1 мая 2026</span>
+      <span>12 минут чтения</span>
+      <span>Уровень: средний</span>
+    </div>
+
+    <div class="toc">
+      <div class="toc-title">Содержание</div>
+      <ol>
+        <li><a href="#chto-takoe">Что такое Order Block простыми словами</a></li>
+        <li><a href="#kak-naiti">Как найти Order Block на графике — 5 шагов</a></li>
+        <li><a href="#vidy">Бычий и медвежий Order Block</a></li>
+        <li><a href="#vhod">Правила входа: касание, не пробитие</a></li>
+        <li><a href="#sl-tp">Где ставить SL и TP</a></li>
+        <li><a href="#mitigated">Mitigated vs Fresh Order Block</a></li>
+        <li><a href="#oshibki">5 типичных ошибок новичков</a></li>
+        <li><a href="#avtomatizacija">Автоматизация через бота</a></li>
+      </ol>
+    </div>
+
+    <p>Order Block — основной строительный блок стратегии <a class="inline" href="/blog/smc-strategia-kripty/">SMC (Smart Money Concepts)</a>. Если ты понимаешь, как находить ордер-блоки и торговать по ним — у тебя есть надёжный инструмент для входа в сделки с соотношением риск/прибыль 1:2 и выше. В этой статье разберём с нуля: что это, как искать на графике, где ставить SL и TP, и как избежать пяти главных ошибок новичка.</p>
+
+    <h2 id="chto-takoe">Что такое Order Block простыми словами</h2>
+    <p>Order Block (ордер-блок, OB) — это <strong>последняя свеча противоположного направления перед резким импульсом цены</strong>. Концепция строится на простой идее: крупные институциональные игроки (фонды, маркет-мейкеры) накапливают позицию постепенно. Когда они закончили накопление, цена резко уходит в их сторону — это и есть импульс. Свеча, которая стояла «прямо перед уходом», содержит финальные заявки крупного игрока.</p>
+
+    <p>Когда цена возвращается к этой зоне (а она часто возвращается — рынок проверяет уровни), у крупного игрока есть мотив защитить свою позицию. Поэтому в зоне OB высокая вероятность отскока — на этом и строится торговля.</p>
+
+    <div class="note">
+      <div class="note-title">Простая аналогия</div>
+      <p style="margin:0">Представь, что банк скупает акцию по 100 рублей в течение часа, потом цена резко уходит к 110. Если она вернётся к 100 — банк не захочет видеть свою позицию в убытке и снова купит. Order Block — это и есть «отметка 100», к которой банк защитит цену.</p>
+    </div>
+
+    <h2 id="kak-naiti">Как найти Order Block на графике — 5 шагов</h2>
+    <ol>
+      <li><strong>Найди импульс.</strong> Резкий ход цены: одна большая свеча или серия 3-5 свечей с длинными телами в одну сторону. На крипте на 1H это движение ≥ 1.5-2% за свечу.</li>
+      <li><strong>Найди последнюю свечу противоположного цвета.</strong> Перед бычьим импульсом — последняя медвежья (красная) свеча. Перед медвежьим — последняя бычья (зелёная).</li>
+      <li><strong>Тело свечи = граница OB.</strong> Зона от Open до Close этой свечи. Тени (фитили) обычно НЕ включаются в зону OB по классическим правилам, но некоторые трейдеры используют High/Low всей свечи.</li>
+      <li><strong>Проверь импульс на качество.</strong> После OB цена должна пройти минимум <code>2-3 ATR</code> в направлении импульса. Если ход слабый — это не настоящий OB, а просто свеча.</li>
+      <li><strong>Жди возврата цены.</strong> OB актуален пока цена не вернулась к нему. Возврат может произойти через несколько часов или несколько дней — зависит от таймфрейма.</li>
+    </ol>
+
+    <h2 id="vidy">Бычий и медвежий Order Block</h2>
+    <p><strong>Бычий OB</strong> формируется перед движением вверх. Это последняя красная свеча перед восходящим импульсом. Торгуется как <em>зона поддержки</em>: цена возвращается → касание → лонг.</p>
+    <p><strong>Медвежий OB</strong> формируется перед движением вниз. Это последняя зелёная свеча перед нисходящим импульсом. Торгуется как <em>зона сопротивления</em>: цена возвращается → касание → шорт.</p>
+
+    <h3>Пример на BTC/USDT 1H</h3>
+    <p>Допустим, BTC находится на отметке 65 000. На графике видим:</p>
+    <ul>
+      <li>Свеча в 14:00 UTC: Open 64 800, Close 64 600 (красная, тело 200$).</li>
+      <li>Свеча в 15:00 UTC: Open 64 600, Close 65 800 (зелёная, тело 1200$ — резкий импульс).</li>
+      <li>Свечи с 16:00 продолжают рост до 66 500.</li>
+    </ul>
+    <p>Свеча в 14:00 — наш бычий Order Block. Зона от 64 600 до 64 800. Когда цена через несколько часов или дней вернётся к 64 800, мы открываем лонг с SL за нижней границей зоны.</p>
+
+    <h2 id="vhod">Правила входа: касание, не пробитие</h2>
+    <p>Главное правило торговли OB: <strong>входим на КАСАНИИ зоны, не на пробитии</strong>. Если цена прошла внутрь OB и закрыла свечу ниже его нижней границы (для бычьего OB) — зона невалидна, OB пробит, не торгуем.</p>
+
+    <table>
+      <thead>
+        <tr><th>Что делать</th><th>Бычий OB</th><th>Медвежий OB</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>Точка входа</td><td>Касание верхней границы зоны</td><td>Касание нижней границы зоны</td></tr>
+        <tr><td>Стоп-лосс</td><td>За нижней границей (с буфером 0.3-0.5%)</td><td>За верхней границей (с буфером)</td></tr>
+        <tr><td>Цель TP1</td><td>Возврат к High предыдущего импульса</td><td>Возврат к Low предыдущего импульса</td></tr>
+        <tr><td>Цель TP2</td><td>R:R = 2-3 от риска</td><td>R:R = 2-3 от риска</td></tr>
+      </tbody>
+    </table>
+
+    <h2 id="sl-tp">Где ставить SL и TP</h2>
+    <h3>Stop Loss</h3>
+    <p>SL ставится за противоположной границей OB с небольшим буфером 0.3-0.5% — чтобы случайный «проколол» свечой тенью не вышибал позицию. На примере BTC выше: бычий OB 64 600-64 800, SL = 64 600 × 0.997 = 64 406. Риск от точки входа 64 800: 64 800 - 64 406 = 394 USDT, или 0.6% от цены.</p>
+
+    <h3>Take Profit (3 цели)</h3>
+    <ul>
+      <li><strong>TP1 (50% позиции):</strong> Возврат к High предыдущего импульса. Это «справедливая цель» — цена просто вернулась к экстремуму перед откатом. R:R обычно 1.5-2.</li>
+      <li><strong>TP2 (30% позиции):</strong> R:R = 2.5-3 от риска. На примере выше: 64 800 + (394 × 2.5) = 65 785.</li>
+      <li><strong>TP3 (20% позиции):</strong> R:R = 4-5+, ставится в зоне следующего сильного сопротивления / FVG / OB.</li>
+    </ul>
+
+    <p>После срабатывания TP1 переноси SL в безубыток (на точку входа). После TP2 — в зону прибыли. Это превращает любую позицию в «бесплатную опцию» на дальнейший ход.</p>
+
+    <h2 id="mitigated">Mitigated vs Fresh Order Block</h2>
+    <p><strong>Fresh OB</strong> — ордер-блок, к которому цена ещё не возвращалась с момента образования. Самые надёжные сетапы.</p>
+    <p><strong>Mitigated OB</strong> — OB, к которому цена уже один раз возвращалась. Часть институциональных заявок уже исполнена, защита уровня ослабевает. На второй раз вероятность отскока ниже на 15-25%.</p>
+    <p>На <a class="inline" href="/blog/smc-strategia-kripty/">CHM Finance в SMC-стратегии</a> есть параметр <code>obMitigatedInvalid</code> (по умолчанию true) — бот игнорирует уже отработавшие OB и торгует только Fresh. Это один из лучших фильтров для повышения качества сигналов.</p>
+
+    <h2 id="oshibki">5 типичных ошибок новичков</h2>
+    <ol>
+      <li><strong>Торговать каждый OB подряд.</strong> Не каждая «последняя свеча перед импульсом» = настоящий OB. Импульс должен быть ≥ 2-3 ATR, объём — выше среднего. Без этих фильтров получишь 30% Win Rate.</li>
+      <li><strong>Двигать SL.</strong> Цена пошла против → передвинул SL дальше → потерял в 2 раза больше. Никогда не двигай SL в убыток. Это ломает математику стратегии.</li>
+      <li><strong>Игнорировать высший таймфрейм.</strong> Бычий OB на 1H против медвежьего тренда на 4H = плохой сетап. Торгуй только OB по тренду высшего таймфрейма.</li>
+      <li><strong>Входить большим объёмом «на одном касании».</strong> Институционалы часто проколят OB ниже на 0.5-1% перед разворотом. Используй частичные входы: 50% на верхней границе, 50% на нижней.</li>
+      <li><strong>Не считать комиссии.</strong> На скальпинге в 1m с OB одна сделка приносит 0.3-0.5%, комиссии 0.1% — половина прибыли уходит в биржу. <a class="inline" href="/blog/luchshie-indikatory-dlya-skalpinga/">OB-стратегии работают лучше на 1H+</a>.</li>
+    </ol>
+
+    <h2 id="avtomatizacija">Автоматизация через бота</h2>
+    <p>Ручной поиск Order Blocks занимает время — ты сидишь у графика, ждёшь возврата цены, пропускаешь ночные сетапы. Автоматизация решает эту проблему: бот сканирует все свечи 24/7, размечает OB по заданным правилам, открывает сделку при касании.</p>
+    <p>На <a class="inline" href="/subscriptions.html">CHM Finance стратегия SMC</a> с авто-разметкой Order Blocks и Fair Value Gap доступна на тарифе <strong>Pro ($69/мес)</strong>. Параметры настраиваются через wizard:</p>
+    <ul>
+      <li><code>obMinImpulsePct</code> — минимальный импульс после OB (рекомендуем 0.15-0.3% для крипты).</li>
+      <li><code>obMaxAgeCandles</code> — срок годности OB в свечах (60-120 для 1H).</li>
+      <li><code>obMitigatedInvalid</code> — игнорировать отработавшие OB (рекомендуем true).</li>
+      <li><code>volMult</code> — фильтр объёма, минимум 1.2-1.5 от среднего.</li>
+      <li><code>minRr</code> — минимальное R:R для входа (рекомендуем 2.0).</li>
+    </ul>
+
+    <a href="/subscriptions.html" class="cta">
+      <h3 class="cta-title">Запустить SMC-бота за 5 минут</h3>
+      <p class="cta-desc">Тариф Pro ($69/мес) открывает SMC с авто-разметкой Order Blocks, FVG и BoS на 4 биржах. Бэктест 10 запусков в день — проверь стратегию на истории до запуска live.</p>
+      <span class="cta-btn">Сравнить тарифы →</span>
+    </a>
+
+    <h2>Дальше читай</h2>
+    <ul>
+      <li><a class="inline" href="/blog/smc-strategia-kripty/">SMC стратегия для крипто-трейдинга — полный гайд</a></li>
+      <li><a class="inline" href="/blog/kak-chitat-svechnoy-grafik/">Как читать свечной график — основа Price Action</a></li>
+      <li><a class="inline" href="/blog/kak-ne-slit-depozit-na-botah/">10 правил риск-менеджмента, чтобы не слить депозит</a></li>
+      <li><a class="inline" href="/blog/kak-sdelat-backtest-strategii/">Как сделать бэктест: проверка стратегии до запуска live</a></li>
+      <li><a class="inline" href="/blog/">Все статьи блога →</a></li>
+    </ul>
+  </main>
+</body>
+</html>
