@@ -406,10 +406,10 @@
           <button class="chm-seg-btn        eqBtn" data-days="90"  role="tab" aria-selected="false">3 мес</button>
           <button class="chm-seg-btn        eqBtn" data-days="365" role="tab" aria-selected="false">Год</button>
           <span class="chm-seg-divider" aria-hidden="true"></span>
-          <label class="chm-seg-toggle" title="Наложить кривую BTC на график для сравнения">
+          <label class="chm-seg-toggle" title="Накладывает на твою кривую капитала график BTC за тот же период. Сразу видно — обогнала ли стратегия простой «купил и держал биткоин» или нет.">
             <input type="checkbox" id="showBench"/>
             <span class="chm-seg-toggle-track"><span class="chm-seg-toggle-thumb"></span></span>
-            <span class="chm-seg-toggle-label">vs BTC</span>
+            <span class="chm-seg-toggle-label">Сравнить с BTC</span>
           </label>
         </div>
       </div>
@@ -646,6 +646,31 @@
       box-shadow:inset 0 1px 0 rgba(255,255,255,.34),0 6px 14px -2px rgba(255,90,31,.65)
     }
     .ts-item-bottom{display:flex;justify-content:space-between;align-items:center;gap:10px}
+
+    /* ── Plan-locked variant: same beautiful card, dimmed CTA + amber lock chip,
+         "Curated · Превью" eyebrow. Click → upsell toast. */
+    .ts-item-locked{cursor:not-allowed}
+    .ts-item-locked .ts-item-stats b,
+    .ts-item-locked .ts-item-title{filter:saturate(.92)}
+    .ts-item-locked::after{
+      content:'';position:absolute;inset:0;border-radius:inherit;pointer-events:none;
+      background:linear-gradient(180deg,transparent 60%,rgba(10,12,18,.35) 100%)
+    }
+    .ts-item-cta-locked{
+      background:linear-gradient(180deg,rgba(255,140,90,.18),rgba(255,90,31,.05))!important;
+      border:1px solid rgba(255,140,90,.28);
+      color:#FFB28A!important;
+      box-shadow:inset 0 1px 0 rgba(255,255,255,.05),0 2px 8px -2px rgba(255,90,31,.25)!important;
+      letter-spacing:.04em;text-transform:uppercase;font-size:10.5px
+    }
+    .ts-item-cta-locked .plan-lock-svg{color:#FFB28A;filter:drop-shadow(0 0 4px rgba(255,140,90,.55))}
+    .ts-item-featured.ts-item-locked:hover .ts-item-cta-locked{
+      transform:none;
+      background:linear-gradient(180deg,rgba(255,140,90,.28),rgba(255,90,31,.1))!important;
+      border-color:rgba(255,140,90,.45);
+      color:#fff!important
+    }
+    html.light .ts-item-cta-locked{color:#C44610!important}
     .ts-sub{font-size:11px;font-weight:500;color:rgba(255,255,255,.45);letter-spacing:.05em;margin-left:6px}
     html.light .ts-sub{color:rgba(10,10,10,.45)}
     .ts-chev{color:rgba(255,255,255,.5);transition:transform .2s}
@@ -734,10 +759,26 @@ if (window.PlanGate) {
   ];
 
   function renderFeatured() {
-    list.innerHTML = FEATURED.map((s) => (
-      '<a class="ts-item ts-item-featured" href="bots.html?wizard=1&strategy=' + esc(s.strategy)
-        + '&timeframe=' + esc(s.timeframe) + '&symbol=' + esc(s.symbol) + '">' +
-        '<div class="ts-item-eyebrow"><span class="dot"></span>Curated · Free</div>' +
+    // Plan-aware: Free users get a "preview" version — same beautiful
+    // cards but the Запустить pill is locked (lock icon + click → upsell).
+    // Cards stay there для наглядности per the user's brief.
+    const isFree = !!(window.PlanGate && PlanGate.ready && PlanGate.ready() && !PlanGate.canUseFeature('canCreateBot'));
+    const lockSvg = (window.PlanGate && PlanGate.LOCK_SVG_SM) || '';
+    const ctaInner = isFree
+      ? 'Превью ' + lockSvg
+      : 'Запустить '
+        + '<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 5l7 7-7 7"/></svg>';
+    const cardHref = isFree ? 'subscriptions.html?plan=starter' : null;
+
+    list.innerHTML = FEATURED.map((s) => {
+      const launchHref = 'bots.html?wizard=1&strategy=' + esc(s.strategy)
+        + '&timeframe=' + esc(s.timeframe) + '&symbol=' + esc(s.symbol);
+      const hrefAttr = isFree
+        ? 'href="' + cardHref + '" data-plan-locked="1"'
+        : 'href="' + launchHref + '"';
+      return (
+        '<a class="ts-item ts-item-featured' + (isFree ? ' ts-item-locked' : '') + '" ' + hrefAttr + '>' +
+        '<div class="ts-item-eyebrow"><span class="dot"></span>' + (isFree ? 'Curated · Превью' : 'Curated · Free') + '</div>' +
         '<div class="ts-item-head">' +
           '<div class="ts-item-title">' + esc(s.title) + '</div>' +
         '</div>' +
@@ -749,16 +790,26 @@ if (window.PlanGate) {
         '</div>' +
         '<div class="ts-item-bottom">' +
           '<span class="ts-item-tag">' + esc(s.strategy) + ' · ' + esc(s.timeframe) + ' · ' + esc(s.symbol) + '</span>' +
-          '<span class="ts-item-cta">Запустить ' +
-            '<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 5l7 7-7 7"/></svg>' +
-          '</span>' +
+          '<span class="ts-item-cta' + (isFree ? ' ts-item-cta-locked' : '') + '">' + ctaInner + '</span>' +
         '</div>' +
       '</a>'
-    )).join('');
-    count.textContent = FEATURED.length + ' рекомендуем';
+      );
+    }).join('');
+    count.textContent = isFree ? 'Превью · Starter+' : (FEATURED.length + ' рекомендуем');
+    // Free clicks → upsell toast on top of the navigation to subscriptions
+    if (isFree) {
+      list.querySelectorAll('.ts-item-locked').forEach((card) => {
+        card.addEventListener('click', (e) => {
+          if (window.Toast && Toast.warn) Toast.warn('Запуск стратегий — Starter и выше. Перейди на /subscriptions для апгрейда.');
+        });
+      });
+    }
   }
 
   async function load() {
+    // Resolve plan first so renderFeatured() can apply the read-only
+    // lock to Запустить without a second render flash.
+    if (window.PlanGate && PlanGate.init) { try { await PlanGate.init(); } catch (_) {} }
     try {
       const r = await API.marketList({ limit: 6 });
       const items = (r && r.strategies) || [];
