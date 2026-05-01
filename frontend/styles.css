@@ -1442,134 +1442,127 @@ html.light .shell-tick-price, html.light .shell-fng-value { color: #0A0A0A !impo
   .stat-card-icon { width: 36px; height: 36px; }
 }
 
-/* ── Dashboard action bar: status pill + Quick Trade + Pause all ── */
+/* ── Dashboard action bar: status pill + Quick Trade + Pause all ──
+ * Premium glass-pill system. No saturated gradients, no emoji glyphs,
+ * no border-glow rings. Typography: tight Inter 13px / 600. Icons are
+ * stroke-only (1.7px) so the row reads as a single design language.
+ */
 .chm-status {
   display: inline-flex;
   align-items: center;
-  gap: 10px;
+  gap: 9px;
   height: 38px;
-  padding: 0 18px;
-  background:
-    linear-gradient(180deg, rgba(255,255,255,.06), rgba(255,255,255,.015));
-  border: 1px solid rgba(255,255,255,.08);
+  padding: 0 18px 0 16px;
+  background: rgba(255,255,255,.025);
+  border: 1px solid rgba(255,255,255,.07);
   border-radius: var(--radius-pill);
-  box-shadow:
-    inset 0 1px 1px rgba(255,255,255,.06),
-    inset 0 -1px 2px rgba(0,0,0,.35),
-    0 1px 3px rgba(0,0,0,.18);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.04);
+  backdrop-filter: blur(12px) saturate(1.2);
+  -webkit-backdrop-filter: blur(12px) saturate(1.2);
   font-family: 'Inter', sans-serif;
   font-size: 12.5px;
   font-weight: 500;
-  letter-spacing: 0.005em;
-  color: rgba(226,232,240,.88);
+  letter-spacing: -.005em;
+  color: rgba(226,232,240,.82);
   white-space: nowrap;
-  transition: border-color .2s ease, box-shadow .2s ease;
+  transition: border-color .2s ease, background .2s ease;
 }
 .chm-status:hover {
-  border-color: rgba(255,255,255,.18);
-  box-shadow:
-    inset 0 1px 1px rgba(255,255,255,.08),
-    inset 0 -1px 2px rgba(0,0,0,.32),
-    0 2px 6px rgba(0,0,0,.22);
+  border-color: rgba(255,255,255,.14);
+  background: rgba(255,255,255,.04);
 }
 .chm-status-dot {
-  width: 8px; height: 8px;
+  width: 7px; height: 7px;
   border-radius: 50%;
   background: #94a3b8;
-  box-shadow: 0 0 6px rgba(148,163,184,.6);
   flex-shrink: 0;
-  animation: chmPulse 2.4s ease-in-out infinite;
+  position: relative;
 }
-@keyframes chmPulse {
-  0%, 100% { opacity: 1; transform: scale(1); }
-  50%      { opacity: .5; transform: scale(.85); }
+/* Subtle pulse halo (instead of the old shadow blur) — feels more techy */
+.chm-status-dot::after {
+  content: ''; position: absolute; inset: -3px;
+  border-radius: 50%; background: inherit;
+  opacity: .35; animation: chmHalo 2.6s ease-in-out infinite;
 }
-.chm-status[data-state="ok"]      { border-color: rgba(74,222,128,.28); color: #bbf7d0; }
-.chm-status[data-state="ok"]      .chm-status-dot { background: #4ade80; box-shadow: 0 0 8px rgba(74,222,128,.7); }
-.chm-status[data-state="warn"]    { border-color: rgba(245,158,11,.32); color: #fde68a; }
-.chm-status[data-state="warn"]    .chm-status-dot { background: #f59e0b; box-shadow: 0 0 8px rgba(245,158,11,.7); }
-.chm-status[data-state="down"]    { border-color: rgba(239,68,68,.35); color: #fecaca; }
-.chm-status[data-state="down"]    .chm-status-dot { background: #ef4444; box-shadow: 0 0 8px rgba(239,68,68,.7); }
-.chm-status[data-state="loading"] .chm-status-dot { background: #64748b; box-shadow: 0 0 4px rgba(100,116,139,.5); }
+@keyframes chmHalo {
+  0%, 100% { transform: scale(1);   opacity: .35; }
+  50%      { transform: scale(1.7); opacity: 0; }
+}
+.chm-status[data-state="ok"]      { color: #d1fae5; }
+.chm-status[data-state="ok"]      .chm-status-dot { background: #34d399; }
+.chm-status[data-state="warn"]    { color: #fde68a; }
+.chm-status[data-state="warn"]    .chm-status-dot { background: #f59e0b; }
+.chm-status[data-state="down"]    { color: #fecaca; }
+.chm-status[data-state="down"]    .chm-status-dot { background: #ef4444; }
+.chm-status[data-state="loading"] .chm-status-dot { background: #64748b; }
+.chm-status[data-state="loading"] .chm-status-dot::after { display: none; }
 
-/* Action pills — primary (Quick Trade) and danger (Pause all) */
+/* Action pills — primary (Quick Trade) and secondary (Pause all). */
 .chm-action {
   display: inline-flex;
   align-items: center;
   gap: 9px;
   height: 38px;
-  padding: 0 22px;
+  padding: 0 20px;
   border: 0;
   border-radius: var(--radius-pill);
   font-family: 'Inter', sans-serif;
   font-weight: 600;
-  font-size: 12.5px;
-  letter-spacing: 0.015em;
+  font-size: 13px;
+  letter-spacing: -.005em;
   color: #fff;
   cursor: pointer;
   white-space: nowrap;
-  transition: transform .18s cubic-bezier(.4,0,.2,1), filter .18s ease, box-shadow .18s ease;
+  transition: transform .18s cubic-bezier(.4,0,.2,1), background .18s ease, box-shadow .18s ease, border-color .18s ease;
   line-height: 1;
   position: relative;
   isolation: isolate;
-  text-shadow: 0 1px 1px rgba(0,0,0,.25);
 }
-.chm-action svg { flex-shrink: 0; }
-.chm-action:active { transform: translateY(0) scale(.97); }
-.chm-action:focus-visible { outline: 2px solid rgba(255,255,255,.4); outline-offset: 3px; }
+.chm-action svg { flex-shrink: 0; opacity: .92; }
+.chm-action:active { transform: translateY(0) scale(.98); }
+.chm-action:focus-visible { outline: 2px solid rgba(255,255,255,.35); outline-offset: 3px; }
 
-/* Primary — clean amber→orange gradient with inset highlight + glow */
+/* Primary — refined amber. Minimal gradient, single inset highlight,
+   single soft warm shadow. No border ring, no rim glow — those look
+   loud at retail size. */
 .chm-action-primary {
-  background:
-    linear-gradient(180deg, rgba(255,255,255,.18) 0%, rgba(255,255,255,0) 45%),
-    linear-gradient(180deg, #FFA340 0%, #FF7A30 50%, #E04A12 100%);
+  background: linear-gradient(180deg, #FF9059 0%, #FF6A1F 60%, #D94A0F 100%);
   box-shadow:
-    inset 0 1px 1px rgba(255,255,255,.45),
-    inset 0 -1px 2px rgba(120,30,0,.45),
-    0 2px 4px rgba(255,90,31,.25),
-    0 10px 24px -6px rgba(255,90,31,.55),
-    0 0 0 1px rgba(255,140,60,.4);
+    inset 0 1px 0 rgba(255,255,255,.32),
+    0 1px 2px rgba(120,40,0,.3),
+    0 8px 20px -8px rgba(255,90,31,.55);
 }
 .chm-action-primary:hover {
   transform: translateY(-1px);
-  filter: brightness(1.06) saturate(1.08);
+  background: linear-gradient(180deg, #FFA070 0%, #FF7A30 60%, #E45A1A 100%);
   box-shadow:
-    inset 0 1px 1px rgba(255,255,255,.55),
-    inset 0 -1px 2px rgba(120,30,0,.4),
-    0 4px 10px rgba(255,90,31,.4),
-    0 14px 32px -4px rgba(255,90,31,.7),
-    0 0 0 1px rgba(255,170,80,.55);
+    inset 0 1px 0 rgba(255,255,255,.4),
+    0 2px 4px rgba(120,40,0,.32),
+    0 12px 26px -6px rgba(255,90,31,.7);
 }
-.chm-action-primary svg { color: #FFE680; filter: drop-shadow(0 1px 2px rgba(80,20,0,.55)); }
+.chm-action-primary svg { color: rgba(255,255,255,.98); }
 
-/* Danger — warm crimson gradient */
+/* Secondary danger — dark slate with restrained red. Pause is a safety
+   action, not a celebration; should read as "considered" not "alarming". */
 .chm-action-danger {
-  background:
-    linear-gradient(180deg, rgba(255,255,255,.16) 0%, rgba(255,255,255,0) 45%),
-    linear-gradient(180deg, #F26A6A 0%, #C53030 55%, #7A1A1A 100%);
-  box-shadow:
-    inset 0 1px 1px rgba(255,255,255,.38),
-    inset 0 -1px 2px rgba(60,0,0,.5),
-    0 2px 4px rgba(192,48,48,.25),
-    0 10px 24px -6px rgba(192,48,48,.55),
-    0 0 0 1px rgba(220,80,80,.4);
+  background: linear-gradient(180deg, rgba(255,255,255,.045), rgba(255,255,255,.01));
+  border: 1px solid rgba(248,113,113,.32);
+  color: #fca5a5;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.04);
 }
 .chm-action-danger:hover {
   transform: translateY(-1px);
-  filter: brightness(1.06) saturate(1.1);
-  box-shadow:
-    inset 0 1px 1px rgba(255,255,255,.45),
-    inset 0 -1px 2px rgba(60,0,0,.45),
-    0 4px 10px rgba(192,48,48,.4),
-    0 14px 32px -4px rgba(239,90,90,.7),
-    0 0 0 1px rgba(255,120,120,.55);
+  background: linear-gradient(180deg, rgba(248,113,113,.12), rgba(248,113,113,.02));
+  border-color: rgba(248,113,113,.5);
+  color: #fff;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.08), 0 6px 16px -6px rgba(239,68,68,.4);
 }
-.chm-action-danger svg { filter: drop-shadow(0 1px 2px rgba(60,0,0,.5)); }
+.chm-action-danger svg { color: currentColor; }
 
 /* Light mode overrides */
 html.light .chm-status {
-  background: linear-gradient(180deg, rgba(0,0,0,.03), rgba(0,0,0,.01)) !important;
-  border-color: rgba(0,0,0,.1) !important;
+  background: rgba(0,0,0,.025) !important;
+  border-color: rgba(0,0,0,.08) !important;
   color: rgba(10,10,10,.75) !important;
   box-shadow: 0 1px 2px rgba(0,0,0,.04), inset 0 1px 1px rgba(255,255,255,.6) !important;
 }
