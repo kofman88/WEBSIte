@@ -172,8 +172,17 @@ router.post('/quick-backtest', authMiddleware, writeCap, (req, res, next) => {
     const startDate = new Date(Date.now() - input.days * 86_400_000).toISOString().slice(0, 10);
     const endDate   = new Date().toISOString().slice(0, 10);
 
+    // Premium auto-generated name: "Превью · BTCUSDT · SCALPING · 15m"
+    // Replaces the previous "wizard-preview-1776792414273" which leaked
+    // a unix timestamp into the UI. Symbol is always upper, strategy
+    // upper too — frontend prettifier was a band-aid; this is the fix.
+    const friendlyName = 'Превью · '
+      + String(input.symbol).toUpperCase()
+      + ' · ' + String(input.strategy).toUpperCase()
+      + ' · ' + input.timeframe;
+
     const bt = backtestService.createBacktest(req.userId, {
-      name: 'wizard-preview-' + Date.now(),
+      name: friendlyName,
       exchange: input.exchange,
       symbols: [input.symbol],
       strategy: input.strategy,
