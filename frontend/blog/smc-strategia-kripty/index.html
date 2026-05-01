@@ -66,6 +66,65 @@
   }
   </script>
 
+  <!-- FAQPage schema — boosts Yandex/Google rich-snippet eligibility.
+       Q&A drawn from real questions readers ask about SMC trading. -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    "mainEntity": [
+      {
+        "@type": "Question",
+        "name": "Что такое SMC (Smart Money Concepts) простыми словами?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "SMC — это методика анализа рынка, в которой трейдер ищет следы крупных институциональных игроков («умных денег»): зоны накопления капитала (Order Blocks), резкие сдвиги структуры цены (Break of Structure), ловушки для розницы (Liquidity Sweep) и заполнение неэффективностей (Fair Value Gap). Идея: вместо борьбы с большими игроками — встать в их позиции."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "Чем SMC отличается от классических стратегий по уровням?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Классические уровни смотрят на максимумы/минимумы цены. SMC дополнительно анализирует ПОВЕДЕНИЕ цены вокруг этих уровней: была ли ликвидация стопов, появился ли импульсный пробой, сформировался ли Order Block. Сигнал SMC требует подтверждения 3 из 5 шагов (BoS / CHoCH / OB / FVG / Sweep) — это снижает количество входов, но повышает качество."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "Подходит ли SMC новичкам?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Не как первая стратегия. SMC требует понимания рыночной структуры (HH/HL, LH/LL), концепции ликвидности и терпения для ожидания качественного сетапа. Новичкам рекомендуем начать с Levels или DCA, освоить риск-менеджмент, и только через 2-3 месяца переходить на SMC. На CHM Finance тариф Pro ($69/мес) открывает SMC-сканер с авто-разметкой Order Blocks."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "Какой таймфрейм лучше использовать для SMC?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Оптимальный диапазон 1H–4H для свинг-трейдинга и 15M для интрадей. На 1M и 5M слишком много шума — сигналы Order Block / FVG путаются с обычной волатильностью. На 1D мало сетапов в неделю. Для крипты лучшим балансом считается 1H: 5-15 качественных входов в неделю на каждой паре."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "Какой Win Rate реалистичен у SMC-стратегии?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "При строгих фильтрах (3+ из 5 шагов SMC, R:R ≥ 2.0, объёмное подтверждение) ожидаемый Win Rate составляет 45-55%. Главное преимущество SMC не в высоком WR, а в высоком R:R: средняя прибыльная сделка в 2-3 раза больше убыточной. С Profit Factor 1.7-2.2 стратегия устойчиво прибыльна даже при WR 45%."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "Можно ли автоматизировать SMC через бота?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Да. CHM Finance предоставляет SMC-сканер на Pro ($69) и Elite ($149) тарифах, который автоматически детектит Order Blocks, FVG и Break of Structure на выбранных парах и таймфреймах. Бот сам ставит SL за противоположной границей OB и фиксирует прибыль по 3 целям (TP1/TP2/TP3). На Free и Starter SMC-сканер заблокирован."
+        }
+      }
+    ]
+  }
+  </script>
+
   <style>
     body{background:#0A0A0A;color:#E5E5E5;font-family:'Inter',sans-serif;margin:0;line-height:1.7}
     .container{max-width:720px;margin:0 auto;padding:60px 24px}
