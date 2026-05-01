@@ -440,7 +440,6 @@
     var desc = opts.description || ('Доступно на тарифе ' + (PLAN_LABEL[req] || req) + ' и выше. Free-пользователи могут только знакомиться с интерфейсом.');
     container.innerHTML =
       '<div class="plan-gate-hero">'
-      +   '<div class="plan-gate-hero-ic">' + LOCK_SVG_LG + '</div>'
       +   '<h2>' + name + ' — ' + (PLAN_LABEL[req] || req) + '+</h2>'
       +   '<p>' + desc + '</p>'
       +   '<a href="subscriptions.html?plan=' + req + '">Перейти на ' + (PLAN_LABEL[req] || req) + ' →</a>'
