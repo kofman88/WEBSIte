@@ -1116,26 +1116,10 @@
     else decorate();
   }
 
-  // ── Sidebar plan locks — adds a 🔒 chip to sidebar links the current
-  //     plan can't open productively. Today: Backtests for Free.
-  function wireSidebarPlanLocks() {
-    const apply = () => {
-      if (!window.PlanGate) return;
-      const plan = PlanGate.getPlan();
-      const btLink = document.querySelector('.sidebar-link[data-page="backtests"]');
-      if (btLink && plan === 'free' && !btLink.querySelector('.sidebar-link-lock')) {
-        const chip = document.createElement('span');
-        chip.className = 'sidebar-link-lock';
-        chip.title = 'Бэктесты доступны на тарифе Starter и выше';
-        chip.style.cssText = 'margin-left:auto;color:#FFB28A;display:inline-flex;align-items:center;'
-          + 'filter:drop-shadow(0 0 4px rgba(255,140,90,.5))';
-        chip.innerHTML = (window.PlanGate && PlanGate.LOCK_SVG_SM) || '';
-        btLink.appendChild(chip);
-      }
-    };
-    if (window.PlanGate && PlanGate.init) PlanGate.init().then(apply);
-    else apply();
-  }
+  // Sidebar lock chip removed — the page itself shows the upgrade hero,
+  // which is the source of truth. Doubling it in the menu felt visually
+  // noisy. Function kept as no-op so boot() doesn't have to change.
+  function wireSidebarPlanLocks() { /* intentionally empty */ }
 
   function boot() {
     applyTheme(); // apply <html class="light"> first so no flash
