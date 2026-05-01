@@ -1,0 +1,307 @@
+<!DOCTYPE html>
+<html lang="ru" class="aura-page">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+  <title>BOS vs CHoCH в SMC: разница, как отличить, примеры — CHM Finance</title>
+  <meta name="description" content="Break of Structure (BOS) vs Change of Character (CHoCH) в SMC: чем различаются, как находить на графике, правила входа, отличие на BTC и ETH. Гайд CHM Finance."/>
+  <meta name="keywords" content="bos choch разница, break of structure smc, change of character трейдинг, bos vs choch, смена характера тренда, смc структура рынка, бос чоч"/>
+  <meta name="robots" content="index,follow,max-image-preview:large"/>
+  <meta name="theme-color" content="#0A0A0A"/>
+  <link rel="canonical" href="https://chmup.top/blog/bos-vs-choch-smc-razlichiya/"/>
+  <meta property="og:type" content="article"/>
+  <meta property="og:site_name" content="CHM Finance"/>
+  <meta property="og:title" content="BOS vs CHoCH в SMC — в чём разница"/>
+  <meta property="og:description" content="Break of Structure против Change of Character: как отличить продолжение тренда от его разворота. Правила входа, SL, примеры на BTC."/>
+  <meta property="og:url" content="https://chmup.top/blog/bos-vs-choch-smc-razlichiya/"/>
+  <meta property="og:image" content="https://chmup.top/og-cover.png"/>
+  <meta property="og:locale" content="ru_RU"/>
+  <meta property="article:published_time" content="2026-05-01"/>
+  <meta property="article:author" content="CHM Finance"/>
+  <meta property="article:section" content="Trading Strategies"/>
+  <meta property="article:tag" content="BOS"/>
+  <meta property="article:tag" content="CHoCH"/>
+  <meta property="article:tag" content="SMC"/>
+  <meta name="twitter:card" content="summary_large_image"/>
+  <meta name="twitter:title" content="BOS vs CHoCH — разница простыми словами"/>
+  <meta name="twitter:description" content="Break of Structure и Change of Character: как отличить, как торговать."/>
+  <meta name="twitter:image" content="https://chmup.top/og-cover.png"/>
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg"/>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet"/>
+
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "BlogPosting",
+    "headline": "BOS vs CHoCH в SMC: разница, как отличить и торговать",
+    "description": "Подробный разбор Break of Structure (BOS) и Change of Character (CHoCH): определения, как отличить на графике, правила входа, SL и TP. Примеры на BTC и ETH.",
+    "author": { "@type": "Organization", "name": "CHM Finance", "url": "https://chmup.top/" },
+    "publisher": {
+      "@type": "Organization",
+      "name": "CHM Finance",
+      "logo": { "@type": "ImageObject", "url": "https://chmup.top/logo.png" }
+    },
+    "datePublished": "2026-05-01",
+    "dateModified": "2026-05-01",
+    "mainEntityOfPage": { "@type": "WebPage", "@id": "https://chmup.top/blog/bos-vs-choch-smc-razlichiya/" },
+    "image": "https://chmup.top/og-cover.png",
+    "inLanguage": "ru-RU",
+    "wordCount": 2200
+  }
+  </script>
+
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    "itemListElement": [
+      {"@type":"ListItem","position":1,"name":"Главная","item":"https://chmup.top/"},
+      {"@type":"ListItem","position":2,"name":"Блог","item":"https://chmup.top/blog/"},
+      {"@type":"ListItem","position":3,"name":"BOS vs CHoCH","item":"https://chmup.top/blog/bos-vs-choch-smc-razlichiya/"}
+    ]
+  }
+  </script>
+
+  <script type="application/ld+json">
+  {"@context":"https://schema.org","@type":"FAQPage","mainEntity":[
+    {"@type":"Question","name":"В чём разница между BOS и CHoCH?","acceptedAnswer":{"@type":"Answer","text":"BOS (Break of Structure) — пробой в направлении текущего тренда: подтверждение, что тренд продолжается. CHoCH (Change of Character) — пробой против тренда: первый сигнал, что тренд может развернуться. На бычьем рынке BOS — это новый High; CHoCH — пробой последнего значимого Low. На медвежьем рынке зеркально. Простыми словами: BOS = «всё по плану», CHoCH = «что-то изменилось»."}},
+    {"@type":"Question","name":"Как отличить BOS от CHoCH на графике?","acceptedAnswer":{"@type":"Answer","text":"Сначала определи текущий тренд по последовательности High и Low. В аптренде: HH (Higher High) и HL (Higher Low). В даунтренде: LL (Lower Low) и LH (Lower High). Затем смотри, какой уровень пробивает цена. Пробой последнего HH в аптренде = BOS вверх (тренд продолжается). Пробой последнего HL в аптренде = CHoCH вниз (возможен разворот). Без определения тренда BOS и CHoCH спутать легко — это типичная ошибка новичков."}},
+    {"@type":"Question","name":"Что важнее при торговле — BOS или CHoCH?","acceptedAnswer":{"@type":"Answer","text":"Зависит от стиля. Для трендовой торговли важнее BOS: он подтверждает продолжение и даёт low-risk вход на ретесте. Для разворотной торговли (counter-trend) важнее CHoCH — он первый сигнал смены характера. На крипте 1H-4H работает связка: жди CHoCH для определения нового тренда, входи на первом BOS внутри этого нового тренда. Это снижает количество false breakouts."}},
+    {"@type":"Question","name":"Какой таймфрейм лучше для определения BOS и CHoCH?","acceptedAnswer":{"@type":"Answer","text":"Стандартное правило SMC: определяй структуру на 4H или 1D, торгуй на 1H или 15m. На 4H+ структура надёжнее (меньше шума), а младший таймфрейм даёт точные точки входа. На 1m-5m BOS и CHoCH ломаются каждые 10 минут — это шум, не торгуй там без подтверждения старшего ТФ. На CHM в SMC-стратегии параметр htfTimeframe (по умолчанию 4H) задаёт уровень структурного анализа."}},
+    {"@type":"Question","name":"Считается ли пробой по тени за BOS?","acceptedAnswer":{"@type":"Answer","text":"Нет, по большинству школ SMC валидным считается пробой по close — то есть свеча должна закрыться выше пробитого High (для BOS вверх) или ниже Low (для BOS вниз). Тень — это «попытка», но если цена откатилась обратно, это false breakout. На крипте 1H фильтр по close снижает ложные сигналы примерно на 30-40%. Альтернатива — пробой на 0.1-0.2% от уровня, но close-фильтр строже и надёжнее."}},
+    {"@type":"Question","name":"Что такое Internal BOS и External BOS?","acceptedAnswer":{"@type":"Answer","text":"External BOS — пробой главных структурных High/Low старшего таймфрейма. Internal BOS — пробой внутренних промежуточных уровней младшего таймфрейма внутри одной волны. External сильнее: он подтверждает продолжение макро-тренда. Internal используется для тактических входов внутри swing'а. Опытные SMC-трейдеры ищут Internal CHoCH на 15m против тренда 4H — это ловушки, которые часто заканчиваются возвратом к External BOS."}},
+    {"@type":"Question","name":"Где ставить SL после BOS-входа?","acceptedAnswer":{"@type":"Answer","text":"Классическая схема: после BOS вверх жди отката к Order Block или FVG, заходи в лонг, SL ставь за последним HL (Higher Low) с буфером 0.3-0.5%. Если последний HL = 60 200, то SL = 60 200 × 0.997 = 60 020. Этот уровень критичен: пробой HL после BOS уже превратится в CHoCH вниз — то есть тренд начал ломаться, дальше держать позицию опасно."}}
+  ]}
+  </script>
+
+  <style>
+    body{background:#0A0A0A;color:#E5E5E5;font-family:'Inter',sans-serif;margin:0;line-height:1.7}
+    .container{max-width:720px;margin:0 auto;padding:60px 24px}
+    nav{padding:20px 24px;border-bottom:1px solid rgba(255,255,255,.06)}
+    nav a{color:rgba(255,255,255,.7);text-decoration:none;font-weight:500;font-size:14px;margin-right:20px}
+    nav a:hover{color:#fff}
+    .brand{font-weight:700;font-size:18px;letter-spacing:-.02em;color:#fff}
+    .brand span{color:#FF5A1F}
+    .breadcrumb{font-size:12px;color:rgba(255,255,255,.4);margin-bottom:16px}
+    .breadcrumb a{color:rgba(255,255,255,.55);text-decoration:none}
+    .breadcrumb a:hover{color:#FF8C5A}
+    h1{font-size:clamp(28px,4.5vw,40px);font-weight:700;letter-spacing:-.025em;margin:0 0 16px;line-height:1.15}
+    .meta{color:rgba(255,255,255,.45);font-size:13px;margin-bottom:40px;display:flex;gap:16px;flex-wrap:wrap}
+    .meta span::after{content:'·';margin-left:16px;opacity:.5}
+    .meta span:last-child::after{content:''}
+    h2{font-size:24px;font-weight:600;letter-spacing:-.015em;margin:44px 0 16px;color:#fff}
+    h3{font-size:18px;font-weight:600;margin:32px 0 12px;color:#fff}
+    p{color:rgba(255,255,255,.78);margin:0 0 16px;font-size:16px}
+    ul,ol{color:rgba(255,255,255,.78);padding-left:24px;margin:0 0 20px}
+    li{margin-bottom:8px}
+    code{background:rgba(255,90,31,.12);color:#FF8C5A;padding:2px 6px;border-radius:4px;font-family:'JetBrains Mono',monospace;font-size:13px}
+    .note{padding:16px 20px;border-radius:12px;background:rgba(255,90,31,.08);border:1px solid rgba(255,90,31,.2);margin:24px 0}
+    .note-title{font-weight:600;color:#FF8C5A;font-size:13px;text-transform:uppercase;letter-spacing:.1em;margin:0 0 8px}
+    .cta{display:block;padding:24px;border-radius:16px;background:linear-gradient(135deg,rgba(255,140,90,.12),rgba(255,90,31,.06));border:1px solid rgba(255,140,90,.3);text-decoration:none;color:inherit;margin:40px 0;transition:transform .2s}
+    .cta:hover{transform:translateY(-1px)}
+    .cta-title{font-weight:600;color:#fff;margin:0 0 6px;font-size:17px}
+    .cta-desc{color:rgba(255,255,255,.7);font-size:14px;margin:0}
+    .cta-btn{display:inline-block;margin-top:12px;padding:8px 16px;background:linear-gradient(180deg,#FF8C5A,#FF5A1F);color:#fff;border-radius:999px;font-size:13px;font-weight:600}
+    a.inline{color:#FF8C5A;text-decoration:none}
+    a.inline:hover{text-decoration:underline}
+    table{width:100%;border-collapse:collapse;margin:20px 0;font-size:14px}
+    th,td{padding:10px 12px;text-align:left;border-bottom:1px solid rgba(255,255,255,.08)}
+    th{color:rgba(255,255,255,.5);font-size:11px;text-transform:uppercase;letter-spacing:.1em;font-weight:500}
+    td{color:rgba(255,255,255,.85)}
+    .toc{padding:20px 24px;border-radius:12px;background:rgba(255,255,255,.025);border:1px solid rgba(255,255,255,.06);margin:0 0 32px}
+    .toc-title{font-size:11px;font-weight:600;color:rgba(255,255,255,.45);letter-spacing:.16em;text-transform:uppercase;margin:0 0 10px}
+    .toc ol{margin:0;padding-left:20px;font-size:14px;color:rgba(255,255,255,.7)}
+    .toc a{color:rgba(255,255,255,.7);text-decoration:none}
+    .toc a:hover{color:#FF8C5A}
+  </style>
+<script src="/yandex-metrika.js" async></script><noscript><div><img src="https://mc.yandex.ru/watch/108973987" style="position:absolute;left:-9999px" alt=""/></div></noscript>
+</head>
+<body>
+  <nav>
+    <div style="max-width:960px;margin:0 auto;display:flex;justify-content:space-between;align-items:center">
+      <a href="/" class="brand">CHM<span>.</span></a>
+      <div>
+        <a href="/">Главная</a>
+        <a href="/blog/">Блог</a>
+        <a href="/dashboard.html">Дашборд</a>
+      </div>
+    </div>
+  </nav>
+
+  <main class="container">
+    <div class="breadcrumb">
+      <a href="/">Главная</a> /
+      <a href="/blog/">Блог</a> /
+      BOS vs CHoCH
+    </div>
+    <h1>BOS vs CHoCH в SMC: в чём разница и как отличить</h1>
+    <div class="meta">
+      <span>1 мая 2026</span>
+      <span>12 минут чтения</span>
+      <span>Уровень: средний</span>
+    </div>
+
+    <div class="toc">
+      <div class="toc-title">Содержание</div>
+      <ol>
+        <li><a href="#osnova">Структура рынка — основа SMC</a></li>
+        <li><a href="#bos">Что такое BOS (Break of Structure)</a></li>
+        <li><a href="#choch">Что такое CHoCH (Change of Character)</a></li>
+        <li><a href="#tablitsa">BOS vs CHoCH — сравнение в таблице</a></li>
+        <li><a href="#kak-otlichit">Как отличить BOS от CHoCH за 30 секунд</a></li>
+        <li><a href="#primer">Реальный пример на BTC/USDT 4H</a></li>
+        <li><a href="#vhod">Правила входа после BOS и CHoCH</a></li>
+        <li><a href="#internal-external">Internal vs External: продвинутый уровень</a></li>
+        <li><a href="#oshibki">5 ошибок при работе со структурой</a></li>
+      </ol>
+    </div>
+
+    <p>Если ты уже разобрался с <a class="inline" href="/blog/smc-order-blocks-chto-eto/">Order Blocks</a> и <a class="inline" href="/blog/smc-fair-value-gap-fvg/">FVG</a>, но всё ещё путаешь BOS и CHoCH — эта статья закроет последний пробел в SMC-фундаменте. Без понимания структуры рынка все остальные SMC-инструменты бесполезны: ты будешь искать Order Blocks в неправильных зонах и торговать FVG против тренда.</p>
+
+    <p><strong>BOS</strong> и <strong>CHoCH</strong> — это два типа пробоя структуры, которые говорят тебе разные вещи. BOS = «тренд продолжается», CHoCH = «тренд может развернуться». Перепутать их = потерять депозит на ложных входах против тренда.</p>
+
+    <h2 id="osnova">Структура рынка — основа SMC</h2>
+    <p>Перед разбором BOS и CHoCH нужно зафиксировать базу: рынок всегда движется в одном из трёх режимов:</p>
+    <ul>
+      <li><strong>Аптренд (бычий тренд):</strong> последовательные Higher Highs (HH) и Higher Lows (HL). Каждый новый максимум выше предыдущего, каждый минимум — тоже выше предыдущего минимума.</li>
+      <li><strong>Даунтренд (медвежий тренд):</strong> Lower Lows (LL) и Lower Highs (LH). Каждый новый минимум ниже предыдущего, максимум — тоже ниже.</li>
+      <li><strong>Боковик (рейндж):</strong> цена болтается в диапазоне без явных HH/HL или LL/LH. Здесь BOS и CHoCH не работают — нет структуры, чтобы её ломать.</li>
+    </ul>
+    <p>Чтобы определить тренд, нужно посмотреть на минимум 2-3 последних свинговых High и Low на старшем таймфрейме (4H или 1D). На крипте режим тренда меняется в среднем раз в 5-10 дней на BTC 4H, реже — на ETH 1D.</p>
+
+    <div class="note">
+      <div class="note-title">Что такое свинг High/Low</div>
+      <p style="margin:0">Свинг High — это локальный максимум: свеча, у которой High выше High'ов 2-3 свечей слева и справа. Свинг Low — зеркально. Это «значимые» точки структуры, по которым строится тренд. Маленькие шумовые пики между ними не считаются.</p>
+    </div>
+
+    <h2 id="bos">Что такое BOS (Break of Structure)</h2>
+    <p><strong>BOS — это пробой последнего значимого High или Low в направлении текущего тренда.</strong> Он подтверждает, что тренд жив и продолжается.</p>
+
+    <h3>Bullish BOS (бычий пробой)</h3>
+    <p>В аптренде цена откатилась к последнему HL, потом снова пошла вверх и пробила последний HH. Этот пробой = Bullish BOS. Он говорит: «откат закончен, покупатели снова контролируют рынок, делаем новый максимум».</p>
+
+    <h3>Bearish BOS (медвежий пробой)</h3>
+    <p>В даунтренде цена сделала откат к последнему LH, затем продолжила падать и пробила последний LL. Это Bearish BOS — даунтренд продолжается, продавцы контролируют ситуацию.</p>
+
+    <p>Главное правило: <strong>BOS всегда происходит в направлении тренда</strong>. Если ты видишь пробой High в даунтренде — это <em>не</em> BOS, это уже CHoCH.</p>
+
+    <h2 id="choch">Что такое CHoCH (Change of Character)</h2>
+    <p><strong>CHoCH — это пробой последнего значимого Low/High против текущего тренда.</strong> Это первый сигнал, что характер рынка меняется и тренд может развернуться.</p>
+
+    <h3>Bearish CHoCH (медвежья смена характера)</h3>
+    <p>Был аптренд: HH, HL, новый HH, новый HL. Затем цена не сделала новый HH, а вместо этого вернулась и пробила последний HL. Этот пробой Low в аптренде = Bearish CHoCH. Аптренд закончился, теперь возможен переход в даунтренд.</p>
+
+    <h3>Bullish CHoCH (бычья смена характера)</h3>
+    <p>Был даунтренд: LL, LH, новый LL, новый LH. Цена не пошла делать новый LL, а вернулась наверх и пробила последний LH. Это Bullish CHoCH — даунтренд сломан, возможен разворот в аптренд.</p>
+
+    <p>Важно: CHoCH сам по себе <em>не означает</em> разворот. Он только <em>сигнализирует возможность</em>. Подтверждение разворота приходит позже — когда после CHoCH формируется первый BOS в новом направлении.</p>
+
+    <h2 id="tablitsa">BOS vs CHoCH — сравнение в таблице</h2>
+    <table>
+      <thead>
+        <tr><th>Параметр</th><th>BOS</th><th>CHoCH</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>Направление</td><td>По тренду</td><td>Против тренда</td></tr>
+        <tr><td>Что значит</td><td>Тренд продолжается</td><td>Тренд может развернуться</td></tr>
+        <tr><td>Что пробивает в аптренде</td><td>Последний HH</td><td>Последний HL</td></tr>
+        <tr><td>Что пробивает в даунтренде</td><td>Последний LL</td><td>Последний LH</td></tr>
+        <tr><td>Тип сделки</td><td>Trend-following</td><td>Counter-trend / разворотная</td></tr>
+        <tr><td>Win Rate (1H BTC)</td><td>~58-65%</td><td>~45-52%</td></tr>
+        <tr><td>R:R сетапа</td><td>1.5-2.5</td><td>2.5-4.0</td></tr>
+        <tr><td>Риск</td><td>Ниже (по тренду)</td><td>Выше (нужно подтверждение)</td></tr>
+      </tbody>
+    </table>
+
+    <p>Видно: BOS чаще выигрывает, но платит меньше. CHoCH реже выигрывает, но даёт большее R:R. Поэтому опытные SMC-трейдеры начинают сетап с CHoCH (поймать разворот рано), а потом добирают по BOS внутри нового тренда.</p>
+
+    <h2 id="kak-otlichit">Как отличить BOS от CHoCH за 30 секунд</h2>
+    <p>Алгоритм для любого графика:</p>
+    <ol>
+      <li><strong>Шаг 1.</strong> Открой 4H и определи тренд. Смотри последние 3-4 свинговых High и Low. HH+HL = аптренд. LL+LH = даунтренд. Хаос = боковик, переходи на 1D.</li>
+      <li><strong>Шаг 2.</strong> Найди последний свинговый уровень. В аптренде — последний HH (сверху) и последний HL (снизу). В даунтренде — последний LL (снизу) и последний LH (сверху).</li>
+      <li><strong>Шаг 3.</strong> Когда цена пробивает один из этих уровней по close — задай вопрос: это уровень в направлении тренда или против?</li>
+      <li><strong>Шаг 4.</strong> По тренду = <strong>BOS</strong>. Против тренда = <strong>CHoCH</strong>.</li>
+    </ol>
+
+    <p>Главный фильтр: <strong>пробой только по close</strong>. Если свеча пробила уровень тенью, но закрылась обратно — это не BOS и не CHoCH, это false breakout (ловушка ликвидности, см. <em>liquidity sweep</em>).</p>
+
+    <h2 id="primer">Реальный пример на BTC/USDT 4H</h2>
+    <p>Допустим, на BTC 4H мы видим последовательность:</p>
+    <ul>
+      <li>Свинг Low #1: 58 000 (старт аптренда)</li>
+      <li>Свинг High #1 (HH): 62 500</li>
+      <li>Откат до Low #2 (HL): 60 200</li>
+      <li>Свинг High #2 (HH): 64 800</li>
+      <li>Откат до Low #3 (HL): 62 900</li>
+    </ul>
+    <p>Текущий тренд — аптренд (HH 62 500 → 64 800, HL 60 200 → 62 900).</p>
+
+    <p><strong>Сценарий A — BOS:</strong> цена идёт вверх и закрывается на 4H выше 64 800. Это пробой последнего HH в направлении тренда → <strong>Bullish BOS</strong>. Сетап: жди отката в зону Order Block или FVG между 64 800 и 62 900, входи в лонг, SL за 62 900 (последний HL). TP1 = R:R 1.5, TP2 = R:R 2.5.</p>
+
+    <p><strong>Сценарий B — CHoCH:</strong> цена не дошла до 64 800, вместо этого упала и закрылась ниже 62 900. Это пробой последнего HL в аптренде → <strong>Bearish CHoCH</strong>. Сетап: НЕ входи сразу в шорт. Жди отката цены наверх (к пробитому уровню 62 900 как новому сопротивлению или к ближайшему bearish OB). Войти в шорт можно только после подтверждения — формирования первого Bearish BOS в новом даунтренде.</p>
+
+    <h2 id="vhod">Правила входа после BOS и CHoCH</h2>
+    <h3>После BOS (по тренду)</h3>
+    <ol>
+      <li>Дождись отката цены после пробоя — обычно 30-50% от длины импульса BOS.</li>
+      <li>Найди в зоне отката <a class="inline" href="/blog/smc-order-blocks-chto-eto/">Order Block</a> или <a class="inline" href="/blog/smc-fair-value-gap-fvg/">FVG</a>.</li>
+      <li>Вход на касании верхней границы OB / FVG (для лонга) или нижней (для шорта).</li>
+      <li>SL — за последним HL (для лонгов) или LH (для шортов) с буфером 0.3-0.5%.</li>
+      <li>TP1 — следующая структурная цель (нет ещё одного BOS в направлении тренда). TP2 — расширение по Фибо 1.272 или 1.618.</li>
+    </ol>
+
+    <h3>После CHoCH (разворотная сделка)</h3>
+    <ol>
+      <li>Не входи сразу — CHoCH часто бывает ложным.</li>
+      <li>Жди отката цены к пробитому уровню. Пример: после Bearish CHoCH ждёшь возврата вверх к старому HL, который теперь стал сопротивлением.</li>
+      <li>Жди формирования первого BOS в новом направлении (для Bearish CHoCH — Bearish BOS на младшем ТФ 1H/15m).</li>
+      <li>Вход на отбое от уровня + подтверждение Bearish BOS на 1H. SL — за High отката с буфером.</li>
+      <li>R:R должен быть 2.5+ — counter-trend сделки требуют большего вознаграждения за риск.</li>
+    </ol>
+
+    <h2 id="internal-external">Internal vs External: продвинутый уровень</h2>
+    <p>В классическом SMC структура делится на два уровня:</p>
+    <ul>
+      <li><strong>External Structure</strong> — глобальные свинговые High/Low старшего таймфрейма (4H, 1D). Это «скелет» тренда.</li>
+      <li><strong>Internal Structure</strong> — промежуточные High/Low внутри одной волны старшего ТФ, видны на младшем ТФ (15m, 1H).</li>
+    </ul>
+    <p>Соответственно:</p>
+    <ul>
+      <li><strong>External BOS / CHoCH</strong> — пробой глобальных уровней. Сильный сигнал.</li>
+      <li><strong>Internal BOS / CHoCH</strong> — пробой внутренних уровней. Тактический сигнал, годится только в направлении External-структуры.</li>
+    </ul>
+    <p>Идеальный сетап: External-тренд аптренд → ждёшь Internal-CHoCH вниз на 15m → ловишь откат → входишь в лонг по Internal-BOS вверх. Получаешь точку входа с риском в 2-3 раза меньше, чем при входе по External-BOS.</p>
+
+    <p>На <a class="inline" href="/blog/smc-strategia-kripty/">CHM Finance в SMC-стратегии</a> автоматическая разметка структуры разделена на два уровня: параметр <code>htfTimeframe</code> (по умолчанию 4H) задаёт External, а <code>ltfTimeframe</code> (1H) — Internal. Бот сам определяет BOS и CHoCH на обоих уровнях и не открывает Internal-сделки против External-тренда.</p>
+
+    <h2 id="oshibki">5 ошибок при работе со структурой</h2>
+    <ol>
+      <li><strong>Не определять тренд перед анализом.</strong> Без зафиксированного режима ты не сможешь понять, BOS перед тобой или CHoCH. Всегда сначала смотри 4H, потом всё остальное.</li>
+      <li><strong>Считать пробой по тени.</strong> Тень = «попытка», close = «факт». На крипте 1H ~30-40% теневых пробоев — это false breakouts. Не торгуй их.</li>
+      <li><strong>Торговать любой CHoCH сразу.</strong> CHoCH — это сигнал «возможно», а не «точно». Жди подтверждения первым BOS в новом направлении.</li>
+      <li><strong>Игнорировать таймфрейм.</strong> CHoCH на 5m в аптренде 4H — это шум, мини-откат. Не путай его с настоящим разворотом тренда.</li>
+      <li><strong>Не передвигать SL.</strong> После BOS-входа всегда передвигай SL за каждый новый HL/LH. Это сохраняет прибыль и работает по принципу <a class="inline" href="/blog/kak-ne-slit-depozit-na-botah/">риск-менеджмента</a>.</li>
+    </ol>
+
+    <a href="/subscriptions.html" class="cta">
+      <h3 class="cta-title">Авто-разметка BOS и CHoCH в боте</h3>
+      <p class="cta-desc">SMC-стратегия на тарифе Pro ($69/мес) автоматически определяет структуру рынка на двух таймфреймах, отмечает BOS и CHoCH, и открывает сделки только по тренду. 4 биржи, бэктест 10 запусков в день, paper-режим.</p>
+      <span class="cta-btn">Сравнить тарифы →</span>
+    </a>
+
+    <h2>Дальше читай</h2>
+    <ul>
+      <li><a class="inline" href="/blog/smc-strategia-kripty/">SMC стратегия для крипто-трейдинга — полный гайд</a></li>
+      <li><a class="inline" href="/blog/smc-order-blocks-chto-eto/">Order Block в SMC — как находить и торговать</a></li>
+      <li><a class="inline" href="/blog/smc-fair-value-gap-fvg/">FVG (Fair Value Gap) — гайд по гэпам ликвидности</a></li>
+      <li><a class="inline" href="/blog/kak-chitat-svechnoy-grafik/">Как читать свечной график — основа Price Action</a></li>
+      <li><a class="inline" href="/blog/kak-ne-slit-depozit-na-botah/">10 правил риск-менеджмента, чтобы не слить депозит</a></li>
+      <li><a class="inline" href="/blog/">Все статьи блога →</a></li>
+    </ul>
+  </main>
+</body>
+</html>
