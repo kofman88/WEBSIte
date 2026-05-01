@@ -44,9 +44,15 @@
       <span class="text-slate-400">Активных: <strong class="text-green-400" id="hdrActive">—</strong></span>
       <span class="text-slate-400">PnL: <strong id="hdrPnl">—</strong></span>
     </div>
-    <div class="flex gap-2">
-      <button onclick="openSmartTrade()" class="px-4 py-2.5 rounded-xl text-sm font-semibold bg-slate-800/50 border border-slate-700 text-slate-300 hover:text-white hover:border-slate-500">⚡ Smart Trade</button>
-      <button id="botsCreateBtn" onclick="openWizard()" class="btn-primary px-5 py-2.5 rounded-xl text-sm font-semibold" style="background:linear-gradient(180deg,#FF7840 0%,#FF5A1F 60%,#C44610 100%);box-shadow:inset 0 1px 1px rgba(255,255,255,.28),inset 0 -1px 3px rgba(0,0,0,.6),0 4px 8px -2px rgba(0,0,0,.6),0 0 0 1px rgba(255,90,31,.35);border:none;color:#fff;cursor:pointer">+ Создать бота</button>
+    <div class="flex gap-2 items-center">
+      <button onclick="openSmartTrade()" class="bp-action-btn bp-action-secondary" type="button" title="Открыть одну сделку вручную">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" width="14" height="14"><polyline points="22 7 13.5 15.5 8.5 10.5 2 17"/><polyline points="16 7 22 7 22 13"/></svg>
+        <span>Быстрая сделка</span>
+      </button>
+      <button id="botsCreateBtn" onclick="openWizard()" class="bp-action-btn bp-action-primary" type="button">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true" width="13" height="13"><path d="M12 5v14M5 12h14"/></svg>
+        <span>Создать бота</span>
+      </button>
     </div>
   </div>
 
@@ -626,7 +632,12 @@ html.light .ai-clamp-note{background:rgba(255,90,31,.06);color:#C44610}
 <div id="smartTradeModal" class="fixed inset-0 bg-black/70 flex items-center justify-center hidden z-50" style="backdrop-filter:blur(8px)">
   <div class="bg-slate-900 border border-slate-700/50 rounded-2xl p-6 max-w-lg w-full mx-4 shadow-2xl max-h-[92vh] overflow-y-auto">
     <div class="flex items-center justify-between mb-4">
-      <div class="flex items-center gap-2"><span class="text-xl">⚡</span><h3 class="text-lg font-bold">Smart Trade</h3></div>
+      <div class="flex items-center gap-2.5">
+        <span style="display:inline-flex;width:28px;height:28px;border-radius:8px;background:linear-gradient(135deg,rgba(255,140,90,.22),rgba(255,90,31,.06));border:1px solid rgba(255,140,90,.32);align-items:center;justify-content:center;color:#FFB28A">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" width="14" height="14" aria-hidden="true"><polyline points="22 7 13.5 15.5 8.5 10.5 2 17"/><polyline points="16 7 22 7 22 13"/></svg>
+        </span>
+        <h3 class="text-lg font-bold">Быстрая сделка</h3>
+      </div>
       <button type="button" onclick="closeSmartTrade()" class="text-slate-400 hover:text-white text-xl">&times;</button>
     </div>
     <p class="text-xs text-slate-400 mb-4">Разовая сделка с автоматическим SL/TP — без бота. Demo-режим работает сразу.</p>
@@ -1605,6 +1616,50 @@ html.light .bp-icon-btn:hover{background:rgba(0,0,0,.06);color:#0A0A0A}
 html.light .bp-filter{background:#fff;border-color:rgba(0,0,0,.1);color:#0A0A0A}
 html.light .bp-filter:hover{border-color:rgba(0,0,0,.18)}
 .bp-filter option{background:#0A0A0A;color:#E5E5E5}
+
+/* Premium top-right action pills (Smart Trade + Создать бота).
+   Stroke icons, tight letter-spacing, no emoji. The lock-icon for
+   plan-locked buttons sits inline next to the label thanks to the
+   inline-flex layout — no more wrapping below the text. */
+.bp-action-btn{
+  display:inline-flex;align-items:center;gap:8px;
+  height:40px;padding:0 18px;
+  border:0;border-radius:9999px;
+  font-family:'Inter',sans-serif;font-weight:600;font-size:13px;
+  letter-spacing:-.005em;line-height:1;cursor:pointer;white-space:nowrap;
+  transition:transform .18s cubic-bezier(.4,0,.2,1),background .18s ease,box-shadow .18s ease,border-color .18s ease,color .18s ease
+}
+.bp-action-btn svg{flex-shrink:0;opacity:.95}
+.bp-action-btn:active{transform:translateY(0) scale(.98)}
+.bp-action-btn .plan-lock-svg{margin-left:2px;color:#FFB28A;flex-shrink:0;filter:drop-shadow(0 0 4px rgba(255,140,90,.55))}
+/* Secondary (Быстрая сделка) — restrained glass */
+.bp-action-secondary{
+  background:rgba(255,255,255,.04);
+  border:1px solid rgba(255,255,255,.08);
+  color:rgba(226,232,240,.85);
+  backdrop-filter:blur(10px) saturate(1.2);
+  -webkit-backdrop-filter:blur(10px) saturate(1.2)
+}
+.bp-action-secondary:hover{
+  transform:translateY(-1px);
+  background:rgba(255,255,255,.07);
+  border-color:rgba(255,255,255,.18);
+  color:#fff
+}
+.bp-action-secondary svg{color:#FFB28A}
+/* Primary (Создать бота) — premium amber, refined gradient */
+.bp-action-primary{
+  background:linear-gradient(180deg,#FF9059 0%,#FF6A1F 60%,#D94A0F 100%);
+  color:#fff;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.32),0 1px 2px rgba(120,40,0,.3),0 8px 20px -8px rgba(255,90,31,.55)
+}
+.bp-action-primary:hover{
+  transform:translateY(-1px);
+  background:linear-gradient(180deg,#FFA070 0%,#FF7A30 60%,#E45A1A 100%);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.4),0 2px 4px rgba(120,40,0,.32),0 12px 26px -6px rgba(255,90,31,.7)
+}
+html.light .bp-action-secondary{background:rgba(0,0,0,.04);border-color:rgba(0,0,0,.08);color:rgba(10,10,10,.78)}
+html.light .bp-action-secondary:hover{background:rgba(0,0,0,.06);color:#0A0A0A}
 </style>
 
 <script src="assets/vendor/chart.umd.min.js"></script>
