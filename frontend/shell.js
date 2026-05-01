@@ -364,14 +364,9 @@
       +    '<a href="https://x.com/CHMBreaker" target="_blank" rel="noopener" aria-label="X (Twitter) — @CHMBreaker" title="X · @CHMBreaker"><svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M18.9 2h3.4l-7.4 8.5L23.7 22h-6.8l-5.3-7L5.5 22H2l7.9-9L1.4 2h7l4.8 6.4L18.9 2zm-1.2 17.9h1.9L6.3 4H4.3l13.4 15.9z"/></svg></a>'
       +  '</div>'
       + '</div>'
-      // Mobile apps (actual links updated when we publish)
-      + '<div class="sbf-apps">'
-      +  '<span class="sbf-apps-label">Приложение</span>'
-      +  '<div class="sbf-apps-badges">'
-      +    '<a href="#coming-soon" class="sbf-app-badge sbf-app-ios"   aria-label="App Store"><svg width="12" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M17.6 12.6c0-2.7 2.2-4 2.3-4-1.2-1.8-3.2-2-3.9-2-1.6-.2-3.2 1-4 1s-2.1-1-3.5-1c-1.8 0-3.5 1-4.4 2.7-1.9 3.3-.5 8.1 1.4 10.8.9 1.3 2 2.8 3.4 2.7 1.4-.1 1.9-.9 3.5-.9s2.1.9 3.5.9c1.5 0 2.4-1.3 3.3-2.6 1-1.4 1.5-2.9 1.5-3 0 0-2.9-1.1-3-4.4zM15 4.5c.7-.9 1.2-2.1 1.1-3.3-1 0-2.3.7-3.1 1.5-.7.8-1.2 2-1.1 3.2 1.1.1 2.3-.6 3.1-1.4z"/></svg><span>App Store</span></a>'
-      +    '<a href="#coming-soon" class="sbf-app-badge sbf-app-android" aria-label="Google Play"><svg width="12" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M3 20.7V3.3c0-.5.2-.9.6-1.2l10.2 10.1L3.6 22.3c-.4-.3-.6-.9-.6-1.6zm13.2-7.5 3.3 1.9c.9.5.9 1.8 0 2.3l-3.6 2.1-3.6-3.6 3.9-2.7zm-2.6-2.4L5 2.2l11.2 6.4-2.6 2.2zm0 2.4 2.6 2.2-11.2 6.5 8.6-8.7z"/></svg><span>Google Play</span></a>'
-      +  '</div>'
-      + '</div>'
+      // Mobile-app section intentionally removed — the apps aren't yet
+      // published and the placeholder badges felt like noise. Add back
+      // once App Store / Google Play links are real.
       + '<div class="sbf-legal">'
       +  '<a href="terms.html">Условия</a>'
       +  '<span>·</span>'

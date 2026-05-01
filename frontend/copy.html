@@ -176,6 +176,25 @@
   'use strict';
   if (!Auth.isLoggedIn()) { location.href = 'index.html?login'; return; }
 
+  // Plan-gate: copy-trading creates paper-bots under the hood, which is
+  // a write action gated by canCreateBot. On Free we replace the whole
+  // <main> with the upgrade hero so users see *what* copy-trading is
+  // without being able to actually subscribe.
+  if (window.PlanGate) {
+    PlanGate.init().then(function () {
+      if (PlanGate.canUseFeature('canCreateBot')) return;
+      var main = document.querySelector('main.main-content');
+      if (!main) return;
+      PlanGate.gatePageHero(main, {
+        force: true,
+        requiredPlan: 'starter',
+        featureName: 'Copy Trading',
+        description: 'Подписка на трейдеров и зеркалирование сделок — Starter и выше. Free-юзеры могут изучить раздел и Leaderboard, но подписаться нельзя.',
+      });
+      return; // skip the rest of init — the form is gone
+    });
+  }
+
   var codeIn  = document.getElementById('cpCode');
   var riskIn  = document.getElementById('cpRisk');
   var riskVal = document.getElementById('cpRiskVal');
@@ -209,6 +228,7 @@
   // ── Load following list
   function loadFollowing() {
     var box = document.getElementById('cpFollowList');
+    if (!box) return; // page got plan-gated → stop quietly
     box.innerHTML = '<div class="text-center py-6 text-sm" style="color:rgba(255,255,255,.5)">Загрузка…</div>';
     API.copyListFollowing().then(function (r) {
       var list = (r && r.following) || [];
