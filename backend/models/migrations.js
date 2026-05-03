@@ -206,6 +206,52 @@ const MIGRATIONS = [
       `);
     },
   },
+  {
+    version: 9,
+    name: 'system_signals_bot',
+    up(db) {
+      // Free-tier delivery vehicle. trading_bots.user_id is NOT NULL, so the
+      // system bot is owned by a non-loginable system user; signalScanner
+      // checks bot.is_system and inserts the signal with user_id=NULL so
+      // signalService.listForUser's `(user_id IS NULL OR user_id = ?)`
+      // clause surfaces it to every free user automatically.
+      const cols = db.prepare("PRAGMA table_info('trading_bots')").all().map((c) => c.name);
+      if (!cols.includes('is_system')) {
+        db.exec("ALTER TABLE trading_bots ADD COLUMN is_system INTEGER DEFAULT 0");
+      }
+
+      const SYSTEM_EMAIL = 'system@chmup.top';
+      let sysRow = db.prepare('SELECT id FROM users WHERE email = ?').get(SYSTEM_EMAIL);
+      if (!sysRow) {
+        // password_hash is set to a literal that bcrypt.compare can never
+        // match, so the account is not loginable through any normal path.
+        const crypto = require('crypto');
+        const refCode = 'SYS' + crypto.randomBytes(3).toString('hex').toUpperCase();
+        db.prepare(`
+          INSERT INTO users (email, password_hash, display_name, referral_code, email_verified, is_active)
+          VALUES (?, ?, ?, ?, 1, 1)
+        `).run(SYSTEM_EMAIL, '!SYSTEM-NO-LOGIN!', 'CHM Signals', refCode);
+        sysRow = db.prepare('SELECT id FROM users WHERE email = ?').get(SYSTEM_EMAIL);
+      }
+
+      const existingBot = db.prepare('SELECT id FROM trading_bots WHERE is_system = 1').get();
+      if (!existingBot) {
+        const symbols = JSON.stringify(['BTC/USDT', 'ETH/USDT', 'SOL/USDT', 'BNB/USDT', 'ADA/USDT']);
+        db.prepare(`
+          INSERT INTO trading_bots
+            (user_id, name, exchange, symbols, strategy, timeframe, direction,
+             leverage, risk_pct, max_open_trades, auto_trade, trading_mode,
+             is_active, is_system)
+          VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        `).run(
+          sysRow.id, 'CHM Public Signals', 'bybit', symbols,
+          'levels', '1h', 'both',
+          1, 1.0, 5, 0, 'paper',
+          1, 1
+        );
+      }
+    },
+  },
 ];
 
 function ensureTable(db) {

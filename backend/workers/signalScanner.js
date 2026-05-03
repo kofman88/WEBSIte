@@ -128,7 +128,9 @@ async function runCycle() {
             if (bot.direction && bot.direction !== 'both' && sig.side !== bot.direction) continue;
 
             const saved = signalService.insert({
-              userId: bot.user_id,
+              // System bot: signals are public (user_id IS NULL) so every
+              // free user sees them via listForUser's OR clause.
+              userId: bot.is_system ? null : bot.user_id,
               botId: bot.id,
               exchange,
               symbol,

@@ -50,7 +50,7 @@
         "priceCurrency": "USD",
         "availability": "https://schema.org/InStock",
         "url": "https://chmup.top/subscriptions.html",
-        "description": "1 бот, 3 сигнала в день, только Levels стратегия, paper trading."
+        "description": "2 публичных сигнала в день от CHM по BTC/ETH/SOL/BNB/ADA на стратегии Levels. Только просмотр, без своих ботов и автотрейдинга."
       },
       {
         "@type": "Offer",
@@ -545,13 +545,12 @@
   // one of: string (shown as plain), {count, label}, or false (muted/dash).
   var PLAN_FEATURES = {
     free: [
-      { t: 'Только demo-режим' },
-      { t: 'Активных ботов', count: 1 },
-      { t: 'Сигналов в день', count: 2 },
-      { t: 'Стратегия: Levels' },
-      { t: 'Топ-5 монет · 15m + 1h' },
-      { t: 'Плечо до 5×' },
+      { t: 'Сигналы CHM · 2/день', count: 2 },
+      { t: 'BTC · ETH · SOL · BNB · ADA' },
+      { t: 'Стратегия: Levels · 1H' },
+      { t: 'Просмотр интерфейса · paper' },
       { t: 'Community-поддержка' },
+      { t: 'Свой бот',         muted: true },
       { t: 'Автотрейдинг',     muted: true },
       { t: 'Backtest',         muted: true },
     ],
@@ -602,7 +601,7 @@
   };
 
   var PLAN_DESC = {
-    free:    'Попробуй бота — песочница без лимитов по времени',
+    free:    '2 сигнала в день от CHM — попробуй точки входа без оплаты',
     starter: 'Начни торговать серьёзно — AI-объяснения и Marketplace',
     pro:     'Бот торгует за тебя — авто-трейд, 4 биржи и Smart Tools',
     elite:   'Профессиональный инструмент — всё без лимитов + AI Plus',
