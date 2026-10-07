@@ -112,6 +112,8 @@ function linkUser(userId, chatId, username = null) {
     WHERE id = ?
   `).run(String(chatId), username || null, userId);
   logger.info('telegram linked', { userId, chatId });
+  // Bot shell: a Pro bought before the link was known is granted now
+  try { require('./botBridge').flushGrants(userId, String(chatId)).catch(() => {}); } catch (_e) { /* optional */ }
 }
 
 function unlinkUser(userId) {

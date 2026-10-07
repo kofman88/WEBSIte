@@ -1,11 +1,9 @@
 /**
  * Subscription plans — feature matrix for gating.
  *
- * Tariff structure aligns with the published marketing inventory
- * (free / starter / pro / elite). Every code-enforced feature is a
- * boolean flag here; advisory / Telegram-bot-only features (smartTools,
- * aiPersonalLearner, polymarket, …) are advertised on the pricing page
- * but not gated in this codebase, so they are intentionally absent.
+ * Two tiers, the same as the Telegram bot: free and pro ($69). Starter and
+ * Elite were retired when the site became a shell of the bot; their ids are
+ * still accepted everywhere (normalizePlan) so old rows keep working.
  *
  * Usage:
  *   const plans = require('./config/plans');
@@ -18,11 +16,7 @@ const PLANS = Object.freeze({
     id: 'free',
     name: 'Free',
     priceUsd: 0,
-    signalsPerDay: 2,              // 1 утром + 1 вечером (per inventory)
-    // Free is now an interface-preview tier: signals + browsing only.
-    // Bot creation, exchange-key creation, terminal trading and
-    // backtests are all gated. The single feature Free really delivers
-    // is the 2 signals/day stream.
+    signalsPerDay: 2,              // 2 LEVELS + 1 SMC-превью в день — как в боте
     maxBots: 0,
     autoTrade: false,
     strategies: ['levels'],
@@ -37,91 +31,55 @@ const PLANS = Object.freeze({
     expertMode: false,
     marketplacePublish: false,
     prioritySupport: false,
-    readOnly: true,                // every write endpoint should reject
+    readOnly: true,
     supportChannel: 'community',
   },
-  starter: {
-    id: 'starter',
-    name: 'Starter',
-    priceUsd: 29,
-    signalsPerDay: Infinity,
-    maxBots: 2,
-    autoTrade: false,              // ручная торговля per inventory
-    strategies: ['levels'],        // SMC moves up to Pro per inventory
-    backtestsPerDay: 1,
-    optimizer: false,
-    apiAccess: false,
-    maxLeverage: 10,
-    paperTradingOnly: true,
-    multiExchange: false,
-    marketScanner: false,
-    multiStrategy: false,
-    expertMode: true,
-    marketplacePublish: true,
-    prioritySupport: false,
-    readOnly: false,
-    supportChannel: 'email',
-  },
+  // Pro = everything (the former Elite). One paid tier, $69/mo, same as the bot.
   pro: {
     id: 'pro',
     name: 'Pro',
-    priceUsd: 69,                  // was $79 — aligned with inventory
-    signalsPerDay: Infinity,
-    maxBots: 5,
-    autoTrade: true,
-    // SMC promoted up from Starter per inventory; DCA/Grid kept here as
-    // utility strategies (not in the marketing inventory but functional
-    // in the codebase, so we slot them at Pro alongside SMC).
-    strategies: ['levels', 'smc', 'dca', 'grid'],
-    backtestsPerDay: 10,
-    optimizer: false,
-    apiAccess: false,
-    maxLeverage: 25,
-    paperTradingOnly: false,
-    multiExchange: true,           // Bybit + BingX + Binance + OKX per inventory
-    marketScanner: false,
-    multiStrategy: false,
-    expertMode: true,
-    marketplacePublish: true,
-    prioritySupport: false,
-    readOnly: false,
-    supportChannel: 'priority-email',
-  },
-  elite: {
-    id: 'elite',
-    name: 'Elite',
-    priceUsd: 149,
+    priceUsd: 69,
     signalsPerDay: Infinity,
     maxBots: Infinity,
     autoTrade: true,
-    // All 4 marketing strategies (levels/smc/gerchik/scalping) plus the
-    // utility ones (dca/grid). Gerchik is Elite-exclusive per inventory.
-    strategies: ['levels', 'smc', 'gerchik', 'scalping', 'dca', 'grid'],
+    strategies: ['levels', 'smc', 'volume', 'dca', 'grid'],
     backtestsPerDay: Infinity,
     optimizer: true,
     apiAccess: true,
     maxLeverage: 100,
     paperTradingOnly: false,
     multiExchange: true,
-    marketScanner: true,           // scope='market' bot — already enforced
-    multiStrategy: true,           // strategiesMulti with >1 entry
+    marketScanner: true,
+    multiStrategy: true,
     expertMode: true,
     marketplacePublish: true,
     prioritySupport: true,
     readOnly: false,
-    supportChannel: 'dedicated-manager',
+    supportChannel: 'priority',
   },
 });
 
-const PLAN_ORDER = ['free', 'starter', 'pro', 'elite'];
+// Legacy tiers still present in old subscriptions / promo rows map onto the
+// two live ones: starter → free (was a paid "manual" tier, no longer sold),
+// elite → pro (Pro now carries every Elite feature).
+const LEGACY_PLANS = Object.freeze({ starter: 'free', elite: 'pro', beginner: 'pro' });
+
+function normalizePlan(planId) {
+  const id = String(planId || '').toLowerCase();
+  if (PLANS[id]) return id;
+  return LEGACY_PLANS[id] || 'free';
+}
+
+const PLAN_ORDER = ['free', 'pro'];
 
 function getLimits(planId) {
-  const plan = PLANS[planId] || PLANS.free;
-  return plan;
+  return PLANS[normalizePlan(planId)];
 }
 
 function getPlan(planId) {
-  return PLANS[planId] || null;
+  const id = String(planId || '').toLowerCase();
+  if (PLANS[id]) return PLANS[id];
+  return LEGACY_PLANS[id] ? PLANS[LEGACY_PLANS[id]] : null;
 }
 
 function listPlans() {
@@ -143,7 +101,7 @@ function listPlans() {
  * @param {string} feature  one of: autoTrade, optimizer, apiAccess, paperTradingOnly
  */
 function canUseFeature(planId, feature) {
-  const plan = PLANS[planId];
+  const plan = getPlan(planId);
   if (!plan) return false;
   return Boolean(plan[feature]);
 }
@@ -152,9 +110,9 @@ function canUseFeature(planId, feature) {
  * Is the strategy allowed for the plan?
  */
 function canUseStrategy(planId, strategy) {
-  const plan = PLANS[planId];
+  const plan = getPlan(planId);
   if (!plan) return false;
-  return plan.strategies.includes(strategy);
+  return plan.strategies.includes(String(strategy || '').toLowerCase());
 }
 
 /**
@@ -179,8 +137,8 @@ function requiredPlanForStrategy(strategy) {
  * Compare plans: returns -1 if a < b, 0 if equal, 1 if a > b.
  */
 function comparePlan(a, b) {
-  const ai = PLAN_ORDER.indexOf(a);
-  const bi = PLAN_ORDER.indexOf(b);
+  const ai = PLAN_ORDER.indexOf(normalizePlan(a));
+  const bi = PLAN_ORDER.indexOf(normalizePlan(b));
   if (ai < 0 || bi < 0) return 0;
   return Math.sign(ai - bi);
 }
@@ -192,6 +150,8 @@ function isAtLeast(userPlan, requiredPlan) {
 module.exports = {
   PLANS,
   PLAN_ORDER,
+  LEGACY_PLANS,
+  normalizePlan,
   getLimits,
   getPlan,
   listPlans,

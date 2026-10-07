@@ -1,85 +1,33 @@
 const db = require('../models/database');
 
+const planConfig = require('../config/plans');
+
 /**
- * Plan definitions with feature limits and pricing.
+ * Plan catalogue — derived from config/plans.js (the single source of truth:
+ * free + pro, $69, same as the Telegram bot). Legacy ids (starter / elite)
+ * resolve through planConfig.normalizePlan so old subscription rows work.
  */
-const PLANS = {
-  free: {
-    id: 'free',
-    name: 'Free',
-    price: 0,
-    interval: null,
+function _entry(id) {
+  const p = planConfig.PLANS[id];
+  const inf = (v) => (v === Infinity ? -1 : v);
+  return {
+    id: p.id,
+    name: p.name,
+    price: p.priceUsd,
+    interval: p.priceUsd ? 'month' : null,
     features: {
-      signalsPerDay: 3,
-      maxBots: 1,
-      autoTrade: false,
-      strategies: ['scalping'],
-      backtesting: false,
-      prioritySignals: false,
-      apiAccess: false,
+      signalsPerDay: inf(p.signalsPerDay),
+      maxBots: inf(p.maxBots),
+      autoTrade: p.autoTrade,
+      strategies: p.strategies.slice(),
+      backtesting: p.backtestsPerDay > 0,
+      prioritySignals: p.prioritySupport,
+      apiAccess: p.apiAccess,
     },
-  },
-  starter: {
-    id: 'starter',
-    name: 'Starter',
-    price: 29,
-    interval: 'month',
-    features: {
-      signalsPerDay: -1, // unlimited
-      maxBots: 3,
-      autoTrade: false,
-      strategies: ['scalping', 'smc'],
-      backtesting: false,
-      prioritySignals: false,
-      apiAccess: false,
-    },
-  },
-  pro: {
-    id: 'pro',
-    name: 'Pro',
-    price: 79,
-    interval: 'month',
-    features: {
-      signalsPerDay: -1,
-      maxBots: 10,
-      autoTrade: true,
-      strategies: ['scalping', 'smc', 'gerchik'],
-      backtesting: true,
-      prioritySignals: false,
-      apiAccess: false,
-    },
-  },
-  elite: {
-    id: 'elite',
-    name: 'Elite',
-    price: 149,
-    interval: 'month',
-    features: {
-      signalsPerDay: -1,
-      maxBots: -1, // unlimited
-      autoTrade: true,
-      strategies: ['scalping', 'smc', 'gerchik'],
-      backtesting: true,
-      prioritySignals: true,
-      apiAccess: true,
-    },
-  },
-  enterprise: {
-    id: 'enterprise',
-    name: 'Enterprise',
-    price: null, // custom pricing
-    interval: 'month',
-    features: {
-      signalsPerDay: -1,
-      maxBots: -1,
-      autoTrade: true,
-      strategies: ['scalping', 'smc', 'gerchik'],
-      backtesting: true,
-      prioritySignals: true,
-      apiAccess: true,
-    },
-  },
-};
+  };
+}
+const PLANS = Object.fromEntries(planConfig.PLAN_ORDER.map((id) => [id, _entry(id)]));
+const planOf = (id) => PLANS[planConfig.normalizePlan(id)];
 
 class SubscriptionService {
   /**
@@ -139,7 +87,7 @@ class SubscriptionService {
       } catch (_e) { /* best-effort */ }
     }
 
-    const planDef = PLANS[sub.plan] || PLANS.free;
+    const planDef = planOf(sub.plan);
 
     return {
       ...sub,
@@ -154,9 +102,10 @@ class SubscriptionService {
    * For now we accept a payment_tx string and trust the caller.
    */
   activateSubscription(userId, { plan, paymentMethod, paymentTx, durationDays }) {
-    if (!PLANS[plan]) {
+    if (!planConfig.getPlan(plan)) {
       throw new Error(`Unknown plan: ${plan}`);
     }
+    plan = planConfig.normalizePlan(plan);
     if (plan === 'free') {
       throw new Error('Cannot activate the free plan; it is the default');
     }
@@ -172,13 +121,13 @@ class SubscriptionService {
     if (existing) {
       db.prepare(
         `UPDATE subscriptions
-         SET plan = ?, status = 'active', expires_at = ?, payment_method = ?, payment_tx = ?,
+         SET plan = ?, status = 'active', expires_at = ?, payment_method = ?, payment_provider_id = ?,
              auto_renew = 0, updated_at = CURRENT_TIMESTAMP
          WHERE user_id = ?`
       ).run(plan, expiresAt.toISOString(), paymentMethod || null, paymentTx || null, userId);
     } else {
       db.prepare(
-        `INSERT INTO subscriptions (user_id, plan, status, expires_at, payment_method, payment_tx)
+        `INSERT INTO subscriptions (user_id, plan, status, expires_at, payment_method, payment_provider_id)
          VALUES (?, ?, 'active', ?, ?, ?)`
       ).run(userId, plan, expiresAt.toISOString(), paymentMethod || null, paymentTx || null);
     }

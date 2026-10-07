@@ -49,11 +49,20 @@ const app = express();
 // Trust proxy for correct req.ip behind Passenger / reverse proxy
 app.set('trust proxy', 1);
 
+// ── Site as a shell of the Telegram bot (SITE_MODE=bot) ────────────────
+// The Mini App lives at /app and is proxied to the bot. Mounted before
+// helmet / body parsers so the request body streams through untouched and
+// the bot's own headers (Set-Cookie for the session) reach the browser.
+const { createBotProxy } = require('./middleware/botProxy');
+const { createEngineGate } = require('./middleware/botShell');
+app.use(createBotProxy({ apiUrl: config.botShell.apiUrl, enabled: config.botShell.enabled }));
+
 // CSP: strict in prod; disabled in dev/tests where inline bits + HMR fight it.
 // Iconify / jsdelivr are CDN deps already used by /frontend.
 const cspDirectives = {
   defaultSrc: ["'self'"],
-  scriptSrc: ["'self'", "'unsafe-inline'", 'https://cdn.jsdelivr.net', 'https://code.iconify.design', 'https://api.iconify.design'],
+  scriptSrc: ["'self'", "'unsafe-inline'", 'https://cdn.jsdelivr.net', 'https://code.iconify.design', 'https://api.iconify.design', 'https://telegram.org'],
+  frameSrc: ['https://oauth.telegram.org'],   // Telegram Login Widget iframe
   styleSrc: ["'self'", "'unsafe-inline'", 'https://fonts.googleapis.com'],
   imgSrc: ["'self'", 'data:', 'https:'],
   fontSrc: ["'self'", 'https://fonts.gstatic.com', 'data:'],
@@ -131,6 +140,9 @@ app.use((req, _res, next) => {
 });
 
 // ── API Routes ─────────────────────────────────────────────────────────
+// SITE_MODE=bot: the site's own engine answers 410 ENGINE_MOVED and its
+// dashboard pages redirect to /app (middleware/botShell.js).
+app.use(createEngineGate({ enabled: config.botShell.enabled }));
 app.use('/api/auth', authRoutes);
 app.use('/api/bots', botsRoutes);
 app.use('/api/backtests', backtestsRoutes);
@@ -319,6 +331,12 @@ app.use(express.static(publicPath, {
   },
 }));
 
+// Pretty URL for the checkout page (the Mini App's «Оформить Pro» lands here)
+app.get('/pricing', (_req, res) => {
+  res.setHeader('Cache-Control', 'public, max-age=300, must-revalidate');
+  res.sendFile(path.join(publicPath, 'pricing.html'));
+});
+
 // SPA fallback — non-API routes serve index.html (also gets short cache)
 app.get('*', (req, res) => {
   if (!req.path.startsWith('/api/')) {
@@ -385,7 +403,7 @@ const RESTART_WINDOW_MS = 5 * 60_000;
 const MAX_RESTARTS = 5;
 const restartTimestamps = [];
 function startScannerWorker() {
-  if (IS_TEST || process.env.SCANNER_DISABLED === '1') return;
+  if (IS_TEST || process.env.SCANNER_DISABLED === '1' || config.botShell.enabled) return;   // bot shell: the bot scans
   try {
     scannerWorker = new Worker(path.join(__dirname, 'workers', 'signalScanner.js'), {
       env: process.env,
@@ -481,7 +499,7 @@ function shutdown(sig) {
 let partialTpWorker = null;
 let partialTpTimer = null; // legacy cron handle, kept null when worker mode is active
 function startPartialTpWorker() {
-  if (IS_TEST || process.env.PARTIAL_TP_DISABLED === '1') return;
+  if (IS_TEST || process.env.PARTIAL_TP_DISABLED === '1' || config.botShell.enabled) return;
   if (partialTpWorker) return;
   try {
     partialTpWorker = new Worker(path.join(__dirname, 'workers', 'partialTpWorker.js'), {
@@ -525,7 +543,7 @@ if (IS_TEST) {
   startScannerWorker();
   startPartialTpWorker();
   cryptoMonitor.start();
-  slVerifier.start();
+  if (!config.botShell.enabled) slVerifier.start();   // site trades don't exist in bot shell mode
   maintenanceService.start();
   securityMonitor.start();
   paymentWatcher.start();
@@ -537,7 +555,7 @@ if (IS_TEST) {
   startScannerWorker();
   startPartialTpWorker();
   cryptoMonitor.start();
-  slVerifier.start();
+  if (!config.botShell.enabled) slVerifier.start();   // site trades don't exist in bot shell mode
   maintenanceService.start();
   securityMonitor.start();
   paymentWatcher.start();

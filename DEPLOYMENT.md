@@ -346,3 +346,22 @@ find backups -mtime +30 -delete
 ```
 
 Либо через cPanel → Backup → Partial Backup → Home Directory.
+
+## Режим «оболочка бота» (SITE_MODE=bot)
+
+Сайт и бот живут на одном хосте: бот слушает `127.0.0.1:8080`, сайт
+(Passenger) проксирует `/app` на него. Порядок включения:
+
+1. В `.env` бота (`~/CHM_BREAKER_V4/.env`): `SITE_SERVICE_TOKEN=<длинная случайная строка>`,
+   при желании `SITE_PAY_URL=/pricing`; `bash deploy.sh`.
+2. В BotFather: `/setdomain` → бот → `chmup.top`.
+3. В `.env` сайта (`~/chmup_backend/.env`): `SITE_MODE=bot`,
+   `BOT_API_URL=http://127.0.0.1:8080`, `BOT_SERVICE_TOKEN=<та же строка>`,
+   `TELEGRAM_LOGIN_BOT=<username бота без @>`.
+4. `bash scripts/deploy-quick.sh` (копирует backend и frontend, рестартит Passenger).
+5. Проверка: `https://chmup.top/app/` открывает приложение с экраном входа,
+   `https://chmup.top/api/public/bot-stats` отдаёт рейтинг, `/dashboard.html`
+   редиректит на `/app/`, `/api/bots` отвечает 410.
+
+Старый поддомен `app.chmup.top` (прокси только `/miniapp/*`) можно оставить —
+cookie `chm_sid` ставится на домен, с которого открыли приложение.

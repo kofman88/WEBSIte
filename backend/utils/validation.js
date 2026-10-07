@@ -11,7 +11,7 @@ const TIMEFRAMES = ['1m', '3m', '5m', '15m', '30m', '1h', '2h', '4h', '6h', '12h
 const STRATEGIES = ['levels', 'smc', 'gerchik', 'scalping', 'dca', 'grid'];
 const SIDES = ['long', 'short'];
 const DIRECTIONS = ['long', 'short', 'both'];
-const PLANS = ['free', 'starter', 'pro', 'elite'];
+const PLANS = ['free', 'pro', 'starter', 'elite'];   // starter/elite — legacy, see config/plans.normalizePlan
 
 const email = z.string().trim().toLowerCase().email().max(254);
 

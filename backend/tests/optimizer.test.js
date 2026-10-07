@@ -157,8 +157,8 @@ describe('gridSearch (real end-to-end on seeded candles)', () => {
 });
 
 describe('optimizationService (gating)', () => {
-  it('rejects non-elite plan', () => {
-    const uid = makeUser('pro');
+  it('rejects the free plan (optimizer is Pro — the former Elite)', () => {
+    const uid = makeUser('free');
     expect(() => optService.default.createOptimization(uid, {
       baseConfig: {
         name: 'x', strategy: 'levels', exchange: 'bybit', symbols: ['BTCUSDT'],
@@ -167,7 +167,7 @@ describe('optimizationService (gating)', () => {
       paramSpace: { minQuality: { type: 'int', min: 3, max: 7 } },
       objective: 'profitFactor',
       nTrials: 5,
-    })).toThrowError(/Elite/);
+    })).toThrowError(/Elite|Pro|plan/i);
   });
 
   it('elite plan gets queued', () => {

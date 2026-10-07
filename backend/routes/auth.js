@@ -12,6 +12,8 @@ const {
 const { geoBlock } = require('../middleware/geoBlock');
 const validation = require('../utils/validation');
 
+const botBridge = require('../services/botBridge');
+
 const router = express.Router();
 
 function getIp(req) { return req.ip || req.headers['x-forwarded-for'] || null; }
@@ -361,7 +363,10 @@ router.get('/oauth/google/callback', async (req, res) => {
 });
 
 // Telegram: POST with the Login Widget payload {id, first_name, username, photo_url, auth_date, hash}
-router.post('/oauth/telegram', (req, res, next) => {
+// SITE_MODE=bot: the signature is verified by the bot (the site never holds
+// the bot token) and the bot's Mini App session cookie is passed through, so
+// one widget click signs the user in on the site AND in /app.
+router.post('/oauth/telegram', async (req, res, next) => {
   try {
     const payload = z.object({
       id: z.union([z.string(), z.number()]).transform(String),
@@ -372,7 +377,19 @@ router.post('/oauth/telegram', (req, res, next) => {
       auth_date: z.union([z.string(), z.number()]).transform(Number),
       hash: z.string().min(32),
     }).parse(req.body);
-    const tg = oauth.verifyTelegram(payload);
+    let tg;
+    let setCookie = [];
+    if (botBridge.enabled()) {
+      const out = await botBridge.verifyLogin({ ...payload, id: Number(payload.id) }, getIp(req));
+      tg = { tgId: String(out.user.id), username: out.user.username || payload.username || null,
+        firstName: out.user.first_name || payload.first_name || null, lastName: payload.last_name || null,
+        photoUrl: payload.photo_url || null };
+      setCookie = out.setCookie;
+    } else {
+      tg = oauth.verifyTelegram(payload);
+    }
+    if (setCookie.length) res.setHeader('Set-Cookie', setCookie);
+    const telegram = { id: tg.tgId, username: tg.username || null, firstName: tg.firstName || null };
     const user = oauth.upsertOAuthUser({
       provider: 'telegram',
       providerId: tg.tgId,
@@ -384,7 +401,25 @@ router.post('/oauth/telegram', (req, res, next) => {
       tgUsername: tg.username,
     });
     const session = authService.issueSessionForUser(user.id, { ipAddress: getIp(req), userAgent: getUA(req) });
-    res.json(session);
+    res.json({ ...session, telegram });
+  } catch (err) { handleServiceError(err, res, next); }
+});
+
+// SITE_MODE=bot: the user already signed in inside /app (cookie chm_sid) and
+// landed on the checkout page — turn that bot session into a site session.
+router.post('/oauth/bot-session', async (req, res, next) => {
+  try {
+    if (!botBridge.enabled()) return res.status(404).json({ error: 'Bot shell disabled', code: 'NOT_FOUND' });
+    const sid = readCookie(req, 'chm_sid');
+    if (!sid) return res.status(401).json({ error: 'Нет сессии бота — войдите через Telegram', code: 'NO_BOT_SESSION' });
+    const u = await botBridge.meFromCookie(sid);
+    if (!u || !u.id) return res.status(401).json({ error: 'Сессия бота истекла — войдите через Telegram', code: 'BOT_SESSION_INVALID' });
+    const user = oauth.upsertOAuthUser({
+      provider: 'telegram', providerId: String(u.id), email: null, emailVerified: false,
+      givenName: u.first_name || null, familyName: null, avatarUrl: null, tgUsername: u.username || null,
+    });
+    const session = authService.issueSessionForUser(user.id, { ipAddress: getIp(req), userAgent: getUA(req) });
+    res.json({ ...session, telegram: { id: String(u.id), username: u.username || null, firstName: u.first_name || null } });
   } catch (err) { handleServiceError(err, res, next); }
 });
 

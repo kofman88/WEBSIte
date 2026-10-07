@@ -162,6 +162,7 @@ async function handleStripeWebhook(rawBody, signature) {
           (inv.metadata && inv.metadata.plan) || 'pro',
           JSON.stringify({ recurring: true }));
         extendSubscription(userId, (inv.metadata && inv.metadata.plan) || 'pro', 30);
+        grantInBot(userId, 30, (inv.metadata && inv.metadata.plan) || 'pro', { source: 'stripe', ref: String(inv.id) });
         refRewards.issueReward(info.lastInsertRowid);
         refRewards.issueSignupBonus(info.lastInsertRowid);
       }
@@ -297,6 +298,16 @@ function confirmCryptoPayment(paymentId, { txHash, fromAddress, amountUsdt }) {
   return { confirmed: true };
 }
 
+// ── Bot shell: mirror the purchase into the Telegram bot ──────────────
+function grantInBot(userId, days, plan, { source, ref }) {
+  try {
+    const botBridge = require('./botBridge');
+    if (!botBridge.enabled() || plans.normalizePlan(plan) !== 'pro') return;
+    botBridge.grantForUser(userId, days, { source, ref })
+      .catch((err) => logger.warn('bot grant failed', { userId, err: err.message }));
+  } catch (err) { logger.warn('bot bridge unavailable', { userId, err: err.message }); }
+}
+
 // ── Core: activate subscription + issue ref reward ─────────────────────
 function confirmPayment(paymentId, { metadata = null } = {}) {
   const payment = db.prepare('SELECT * FROM payments WHERE id = ?').get(paymentId);
@@ -309,6 +320,12 @@ function confirmPayment(paymentId, { metadata = null } = {}) {
   `).run(paymentId);
 
   extendSubscription(payment.user_id, payment.plan, payment.duration_days || 30);
+
+  // Site as a shell of the bot: what was bought is Pro in the Telegram bot.
+  // Best-effort with a durable queue inside botBridge (unknown Telegram id
+  // or bot down → retried when the account is linked / next flush).
+  grantInBot(payment.user_id, payment.duration_days || 30, payment.plan,
+    { source: String(payment.method || 'site').replace(/^usdt_/, 'crypto_'), ref: String(payment.provider_tx_id || ('pay_' + paymentId)) });
 
   // Issue ref reward (silently ignores if no referrer)
   try { refRewards.issueReward(paymentId); }

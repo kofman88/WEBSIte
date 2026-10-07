@@ -80,6 +80,17 @@ module.exports = {
   bscscanApiKey: process.env.BSCSCAN_API_KEY || '',
   tronscanApiKey: process.env.TRONSCAN_API_KEY || '',
 
+  // Site as a shell of the Telegram bot (SITE_MODE=bot): /app is proxied to
+  // the bot, the site's own engine is hidden, Pro is granted in the bot
+  // through its service API. See services/botBridge.js + middleware/botProxy.js.
+  botShell: {
+    enabled: process.env.SITE_MODE === 'bot',
+    apiUrl: process.env.BOT_API_URL || 'http://127.0.0.1:8080',
+    serviceToken: process.env.BOT_SERVICE_TOKEN || '',
+    // Bot username for the Telegram Login Widget on the site (same bot as the Mini App)
+    loginBot: process.env.TELEGRAM_LOGIN_BOT || process.env.TELEGRAM_BOT_USERNAME || '',
+  },
+
   // Monitoring
   sentryDsn: process.env.SENTRY_DSN || '',
   logLevel: process.env.LOG_LEVEL || (IS_PROD ? 'info' : 'debug'),

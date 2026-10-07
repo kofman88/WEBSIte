@@ -251,6 +251,11 @@ function upsertOAuthUser({
     }
     audit(user.id, linked ? 'auth.oauth_link' : 'auth.oauth_login', { provider });
   }
+  // Bot shell: the Telegram id is what Pro grants are keyed on — flush any
+  // purchase made before the account was linked (best-effort, async).
+  if (provider === 'telegram') {
+    try { require('./botBridge').flushGrants(user.id, String(providerId)).catch(() => {}); } catch (_e) { /* optional */ }
+  }
   return user;
 }
 

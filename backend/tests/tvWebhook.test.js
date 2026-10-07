@@ -38,7 +38,7 @@ async function regAndBot(email = 'tv@x.com') {
   // creation goes through.
   db.prepare(`
     INSERT OR REPLACE INTO subscriptions (user_id, plan, status, expires_at)
-    VALUES (?, 'starter', 'active', datetime('now','+30 days'))
+    VALUES (?, 'pro', 'active', datetime('now','+30 days'))
   `).run(u.user.id);
   // Create a fake exchange key first (validation.createBotSchema requires it)
   const cryptoUtil = (await import('../utils/crypto.js')).default || await import('../utils/crypto.js');

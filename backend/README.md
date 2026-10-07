@@ -189,6 +189,38 @@ chmup_backend/
 5. **Настройте .env** файл
 6. **Запустите приложение** через кнопку "Start" в cPanel
 
+## 🤖 Сайт как оболочка Telegram-бота (`SITE_MODE=bot`)
+
+С `SITE_MODE=bot` у сайта нет своего торгового движка — он показывает
+приложение бота (CHM Breaker, репозиторий MAIN_BOT) и продаёт тот же Pro:
+
+- `/app/*` и `/miniapp/*` проксируются на бота (`BOT_API_URL`, по умолчанию
+  `http://127.0.0.1:8080`) — `middleware/botProxy.js`. `/admin` и `/metrics`
+  бота наружу не ходят.
+- Вход — Telegram Login Widget (`TELEGRAM_LOGIN_BOT`, тот же бот, что и Mini App;
+  в BotFather нужен `/setdomain chmup.top`). Подпись проверяет сам бот
+  (`POST /api/auth/oauth/telegram` → `services/botBridge.verifyLogin`), сайт
+  получает JWT, а cookie сессии приложения `chm_sid` пробрасывается в ответ —
+  один клик даёт вход и на сайте, и в `/app`. `POST /api/auth/oauth/bot-session`
+  превращает уже существующую cookie приложения в сессию сайта.
+- Оплата: Stripe / USDT как раньше, после `confirmPayment` Pro выдаётся в боте
+  через `POST /miniapp/api/service/plan` с заголовком `X-CHM-Service-Token`
+  (`BOT_SERVICE_TOKEN` = `SITE_SERVICE_TOKEN` в `.env` бота). Неизвестный ещё
+  Telegram id → грант ждёт в `system_kv` (`botgrant:<userId>`) и выдаётся при
+  привязке. Тарифов два: `free` и `pro` ($69); `starter`/`elite` в старых строках
+  нормализуются (`config/plans.normalizePlan`).
+- Собственный движок скрыт: `/api/bots`, `/api/backtests`, `/api/signals`,
+  `/api/exchanges`, `/api/strategies`, `/api/copy`, `/api/risk`, `/api/ai`,
+  `/api/analytics`, `/api/wallet`, `/api/optimizations` отвечают
+  `410 ENGINE_MOVED`, страницы дашборда редиректят на `/app/`; воркеры
+  сканера, partial-TP и SL-verifier не стартуют (`middleware/botShell.js`).
+- Главная и `/pricing` — `frontend/index.html`, `frontend/pricing.html`,
+  `frontend/glass.css`, `frontend/site.js`; данные для витрины —
+  `GET /api/public/bot-stats`, конфиг — `GET /api/public/site-config`.
+
+Переменные: `SITE_MODE=bot`, `BOT_API_URL`, `BOT_SERVICE_TOKEN`, `TELEGRAM_LOGIN_BOT`
+(см. `.env.example`). Тесты: `tests/botShell.test.js`.
+
 ## 🛡️ Безопасность
 
 - JWT аутентификация
