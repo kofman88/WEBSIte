@@ -34,13 +34,11 @@
 
   var CFG = {
     // ---- общее ----
-    color:      [255, 90, 31],     // RGB: бренд CHM (оранжевый) — dark theme
-    colorLight: [204, 64, 16],     // darker orange for light mode (better contrast on white)
-    bgDark:     '#0A0A0A',
-    bgLight:    '#F5F6F8',
-    lightAlphaMult: 0.55,          // reduce overall alpha in light mode (dots on white read too strong)
-    // color: [16, 185, 129],      // альтернатива: зелёный
-    // color: [255, 255, 255],     // альтернатива: белый
+    color:      [163, 230, 53],    // RGB: lime green accent
+    colorLight: [77, 139, 0],      // darker green for light mode
+    bgDark:     '#050508',
+    bgLight:    '#F5F6F0',
+    lightAlphaMult: 0.5,           // reduce overall alpha in light mode
 
     // ---- точечная сетка ----
     gridSpacing:     28,           // расстояние между точками, px

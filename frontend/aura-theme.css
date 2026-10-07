@@ -50,8 +50,8 @@ body:has(> #aura-bg) { background: transparent !important; }
 
 :root {
   /* ═══ Palette ═══ */
-  --aura-bg: #000000;
-  --aura-surface: #0A0A0A;
+  --aura-bg: #050508;
+  --aura-surface: #0A0A0C;
   --aura-surface-elevated: #18181B;
 
   --aura-text-primary: #FFFFFF;
@@ -62,10 +62,10 @@ body:has(> #aura-bg) { background: transparent !important; }
   --aura-border-strong: rgba(255, 255, 255, 0.2);
 
   /* Accents */
-  --aura-accent: #FF5A1F;
-  --aura-accent-glow: rgba(255, 90, 31, 0.6);
-  --aura-secondary: #10B981;
-  --aura-tertiary: #FFF729;
+  --aura-accent: #A3E635;
+  --aura-accent-glow: rgba(163, 230, 53, 0.5);
+  --aura-secondary: #22D3EE;
+  --aura-tertiary: #BEF264;
 
   /* ═══ Typography ═══ */
   --aura-font-sans: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
@@ -80,7 +80,7 @@ body:has(> #aura-bg) { background: transparent !important; }
 
   /* ═══ Shadows ═══ */
   --aura-shadow-inset: rgba(255, 255, 255, 0.05) 0 1px 0 0 inset;
-  --aura-shadow-glow: 0 0 10px 0 var(--aura-accent-glow);
+  --aura-shadow-glow: rgba(163, 230, 53, 0.5) 0px 0px 10px 0px;
   --aura-shadow-card:
     0 2px 4px 0 rgba(0, 0, 0, 0.5),
     inset 0 1px 0 0 rgba(255, 255, 255, 0.05);
@@ -252,8 +252,8 @@ body:has(> #aura-bg) { background: transparent !important; }
   z-index: 0;
   pointer-events: none;
   background:
-    radial-gradient(ellipse at top,         rgba(255, 90, 31, 0.06), transparent 50%),
-    radial-gradient(ellipse at bottom left, rgba(16, 185, 129, 0.04), transparent 55%);
+    radial-gradient(ellipse at top,         rgba(163, 230, 53, 0.06), transparent 50%),
+    radial-gradient(ellipse at bottom left, rgba(34, 211, 238, 0.04), transparent 55%);
 }
 
 /* ═══════════════════════════════════════════════════════════════════
@@ -346,21 +346,20 @@ body:has(> #aura-bg) { background: transparent !important; }
   background: var(--aura-accent);
   border-color: var(--aura-accent);
   color: #000;
-  font-weight: 500;
+  font-weight: 600;
   box-shadow:
-    inset 0 1px 0 0 rgba(255, 255, 255, 0.25),
-    0 0 0 1px rgba(255, 90, 31, 0.4),
-    0 4px 12px 0 rgba(255, 90, 31, 0.3);
+    inset 0 1px 0 0 rgba(255, 255, 255, 0.35),
+    rgba(163, 230, 53, 0.5) 0px 0px 10px 0px,
+    rgba(163, 230, 53, 0.3) 0px 0px 20px 0px;
 }
 
 .aura-btn-primary:hover {
-  background: #FF6B35;
-  border-color: #FF6B35;
+  background: #BEF264;
+  border-color: #BEF264;
   box-shadow:
-    inset 0 1px 0 0 rgba(255, 255, 255, 0.3),
-    0 0 0 1px rgba(255, 90, 31, 0.5),
-    0 6px 20px 0 rgba(255, 90, 31, 0.55),
-    var(--aura-shadow-glow);
+    inset 0 1px 0 0 rgba(255, 255, 255, 0.4),
+    rgba(163, 230, 53, 0.55) 0px 0px 14px 0px,
+    rgba(163, 230, 53, 0.35) 0px 0px 28px 0px;
 }
 
 /* Ghost — just border, for secondary actions */
@@ -422,7 +421,7 @@ body:has(> #aura-bg) { background: transparent !important; }
 .aura-input:focus {
   border-color: var(--aura-accent);
   background: var(--aura-surface-elevated);
-  box-shadow: 0 0 0 3px rgba(255, 90, 31, 0.18);
+  box-shadow: 0 0 0 3px rgba(163, 230, 53, 0.18);
 }
 
 .aura-field-label {
@@ -458,8 +457,8 @@ body:has(> #aura-bg) { background: transparent !important; }
 }
 
 .aura-chip-accent {
-  background: rgba(255, 90, 31, 0.1);
-  border-color: rgba(255, 90, 31, 0.3);
+  background: rgba(163, 230, 53, 0.1);
+  border-color: rgba(163, 230, 53, 0.3);
   color: var(--aura-accent);
 }
 
