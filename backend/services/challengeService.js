@@ -108,13 +108,32 @@ function pyStrRepr(s) {
   return out + q;
 }
 
+// Unicode decimal digits (\p{Nd}) come in contiguous runs of 10 starting at the zero digit
+// (Unicode stability policy), so a digit's value is its offset in the run modulo 10.
+const ND = /\p{Nd}/u;
+function digitValue(cp) {
+  let start = cp;
+  while (start > 0 && ND.test(String.fromCodePoint(start - 1))) start -= 1;
+  return (cp - start) % 10;
+}
+
+/** Python's int()/float()/re `\d` accept every Unicode decimal digit: map them to ASCII. */
+function asciiDigits(s) {
+  let out = '';
+  for (const ch of s) {
+    const cp = ch.codePointAt(0);
+    out += cp > 0x7f && ND.test(ch) ? String(digitValue(cp)) : ch;
+  }
+  return out;
+}
+
 /** float(v) with CPython's exception classes and messages. */
 function pyFloat(v) {
   if (typeof v === 'boolean') return v ? 1.0 : 0.0;
   if (typeof v === 'number') return v;
   if (typeof v === 'string') {
     try {
-      return coerceFloat(v);
+      return coerceFloat(asciiDigits(v));
     } catch (_e) {
       throw new PyValueError(`could not convert string to float: ${pyStrRepr(v)}`);
     }
@@ -137,7 +156,7 @@ function pyInt(v) {
   }
   if (typeof v === 'string') {
     try {
-      return coerceInt(v);
+      return coerceInt(asciiDigits(v));
     } catch (_e) {
       throw new PyValueError(`invalid literal for int() with base 10: ${pyStrRepr(v)}`);
     }
@@ -1297,7 +1316,7 @@ function answersFromState(ans) {
 
 /** _parse_num(text): the first number after removing spaces, comma → dot; null when none. */
 function parseNum(text) {
-  const m = /[-+]?\d+(?:[.,]\d+)?/.exec(String(truthy(text) ? text : '').split(' ').join(''));
+  const m = /[-+]?\p{Nd}+(?:[.,]\p{Nd}+)?/u.exec(String(truthy(text) ? text : '').split(' ').join(''));
   return m ? pyFloat(m[0].replace(',', '.')) : null;
 }
 
@@ -1388,5 +1407,5 @@ module.exports = {
   // mini app
   challengeDict, challengeState, options, stats30,
   // helpers (tests)
-  dayStart, dayKey, utcHour, pyFloat, pyInt, truthy, pyStrRepr, pyListRepr, pyDictRepr,
+  dayStart, dayKey, utcHour, pyFloat, pyInt, asciiDigits, truthy, pyStrRepr, pyListRepr, pyDictRepr,
 };
