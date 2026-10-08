@@ -73,6 +73,27 @@ function aiohttpJson(resp, { checkContentType = true } = {}) {
   }
 }
 
+const AIOHTTP_POST_METHODS = new Set(['PATCH', 'POST', 'PUT']);
+
+/**
+ * Header fields the bot's HTTP client adds on its own and Node fetch does not.
+ *
+ * aiohttp 3.14 ClientRequest.send: "set default content-type" — a PATCH/POST/PUT that carries
+ * no Content-Type goes out with `Content-Type: application/octet-stream` (BingX / Binance POSTs
+ * sign the query string and send no body, so every one of them carries it on the wire). Node
+ * fetch sends no Content-Type for a body-less POST. pybit (requests) always sets its own
+ * Content-Type, and every other trader request either has one or is a GET/DELETE, so this is
+ * the only gap (verified by tests/exchanges/adversarial.test.js against the real aiohttp).
+ */
+function wireHeaders(method, headers) {
+  const out = { ...(headers || {}) };
+  if (AIOHTTP_POST_METHODS.has(String(method).toUpperCase())
+      && !Object.keys(out).some((k) => k.toLowerCase() === 'content-type')) {
+    out['Content-Type'] = 'application/octet-stream';
+  }
+  return out;
+}
+
 /** Production transport on global fetch (AbortSignal timeout). */
 function fetchTransport({ fetchImpl = globalThis.fetch } = {}) {
   return async ({ method, url, headers = {}, body = undefined, timeoutMs = 15000 }) => {
@@ -80,7 +101,7 @@ function fetchTransport({ fetchImpl = globalThis.fetch } = {}) {
     try {
       res = await fetchImpl(url, {
         method,
-        headers,
+        headers: wireHeaders(method, headers),
         body: body === undefined || body === null ? undefined : body,
         signal: globalThis.AbortSignal.timeout(timeoutMs),
       });
@@ -108,4 +129,4 @@ function defaultTransport() {
   return _default;
 }
 
-module.exports = { TransportError, aiohttpJson, parseJsonPy, headerGet, fetchTransport, defaultTransport, JSON_CT_RE };
+module.exports = { TransportError, aiohttpJson, parseJsonPy, headerGet, fetchTransport, defaultTransport, wireHeaders, JSON_CT_RE };

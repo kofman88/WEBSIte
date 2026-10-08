@@ -17,9 +17,10 @@ function urlPath(url) {
 }
 
 class Router {
-  constructor(routes) {
+  constructor(routes, { allHeaders = false } = {}) {
     this.routes = (routes || []).map((r) => ({ ...r, responses: r.responses.slice() }));
     this.log = [];
+    this.allHeaders = allHeaders;
   }
 
   take(method, url) {
@@ -40,7 +41,13 @@ class Router {
       const kl = k.toLowerCase();
       if (kl.startsWith('x-bapi') || kl.startsWith('x-bx') || kl.startsWith('x-mbx') || kl.startsWith('ok-access') || kl === 'content-type' || kl === 'x-simulated-trading') keep[k] = v;
     }
-    this.log.push({ method, url, headers: keep, body: body === undefined ? null : body });
+    const row = { method, url, headers: keep, body: body === undefined ? null : body };
+    if (this.allHeaders) {
+      // every header the trader handed to the transport, lower-cased (gen_adversarial.py `hdrs`)
+      row.hdrs = {};
+      for (const [k, v] of Object.entries(headers || {})) row.hdrs[k.toLowerCase()] = v;
+    }
+    this.log.push(row);
   }
 }
 
@@ -89,15 +96,17 @@ function makeLog() {
  * @param {Function} create  (overrides) → trader instance
  * @param {Function} invoke  (trader, sc) → Promise<result>
  * @param {Function} [prepare] (trader, sc, ctx) hook to seed exchange-specific state
+ * @param {object} [opts]    { allHeaders } — also record every passed header per request (`hdrs`)
  */
-async function runScenario(sc, create, invoke, prepare) {
+async function runScenario(sc, create, invoke, prepare, opts = {}) {
   const clock = makeClock(sc.clock ?? 1767225600.0, 1000.0);
   const randoms = (sc.random || []).slice();
-  const router = new Router(sc.routes);
+  const router = new Router(sc.routes, { allHeaders: Boolean(opts.allHeaders) });
   const state = sc.state || {};
   const log = makeLog();
   const kv = memoryKv();
   const saved = { hedge_saved: [], auth_reset: [], events: [], metrics: [] };
+  const full = { metrics: [], events: [] };
   const origSet = kv.set;
   kv.set = (k, v) => { if (String(k).startsWith('bybit_mode:')) saved.hedge_saved.push(v === '1'); origSet(k, v); };
   if (state.kv_hedge !== undefined && state.kv_hedge !== null) {
@@ -113,8 +122,18 @@ async function runScenario(sc, create, invoke, prepare) {
     kv,
     killswitch: { requireActive: async () => { if (state.ks_halted) throw Object.assign(new Error(state.ks_halted), { killswitchHalted: true, state: state.ks_halted }); } },
     planGate: { denyReason: async () => (state.plan_deny === undefined ? null : state.plan_deny) },
-    metrics: { record: async (name) => { saved.metrics.push(name); } },
-    events: { emit: (tid, evt) => { saved.events.push([tid, evt]); } },
+    metrics: {
+      record: async (name, value = 1.0, tags = null) => {
+        saved.metrics.push(name);
+        full.metrics.push(JSON.parse(JSON.stringify([name, value, tags === undefined ? null : tags])));
+      },
+    },
+    events: {
+      emit: (tid, evt, payload = null) => {
+        saved.events.push([tid, evt]);
+        full.events.push(JSON.parse(JSON.stringify([tid, evt, payload === undefined ? null : payload])));
+      },
+    },
     onAuthReset: async () => { const uids = state.auth_uids || []; for (const u of uids) saved.auth_reset.push([u, false]); return uids; },
     env: {},
   };
@@ -133,6 +152,8 @@ async function runScenario(sc, create, invoke, prepare) {
   out.markers = [];
   for (const [lvl, msg] of log.lines) for (const m of msg.match(MARKER_RE) || []) out.markers.push([lvl, m]);
   out.saved = saved;
+  out.full_metrics = full.metrics;
+  out.full_events = full.events;
   out.logLines = log.lines;
   return { out, trader, kv };
 }
