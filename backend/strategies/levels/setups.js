@@ -210,7 +210,9 @@ function nearestLevel(supZones, resZones, cNow) {
  * @param {Frame|null} dfHtf  1D candles (HTF marking when given and > 20 bars)
  * @param {object} cfg     IndConfig (config.cfgToInd)
  * @param {object} [opts]  { relax: LEVELS_RELAX_ENABLED, precomputedZones: {sup, res},
- *                           htfZoneCache: Map, symbolForCache }
+ *                           htfZoneCache: Map, symbolForCache,
+ *                           skipGuard: call `_do_analyze` directly (no analyze() length guard,
+ *                           as the bot's backtest / analyze_on_demand do) }
  * @returns {{reject: string}|object}  `reject` ∈ REJECT buckets (NONE for the prologue
  *   guard), or `reject: null` with: pro (prologue), zones {sup, res} (HTF-marked),
  *   rawZones, bullPat, bearPat, signal, sLevel, sType, isCounter, sHits, sClass, sZone,
@@ -219,7 +221,7 @@ function nearestLevel(supZones, resZones, cNow) {
  */
 function analyzePart1(symbol, df, dfHtf, cfg, opts = {}) {
   const relax = opts.relax === undefined ? LEVELS_ENV.LEVELS_RELAX_ENABLED : Boolean(opts.relax);
-  if (!df || df.length < minBars(cfg)) return { reject: REJECT.NONE, reason: 'too_short' };
+  if (!df || (!opts.skipGuard && df.length < minBars(cfg))) return { reject: REJECT.NONE, reason: 'too_short' };
 
   // ── Базовые индикаторы ──
   const pro = prologue(df, cfg);
@@ -274,22 +276,24 @@ function analyzePart1(symbol, df, dfHtf, cfg, opts = {}) {
   if (sigDistPct > cfg.MAX_DIST_PCT) return { reject: REJECT.ZONES, reason: 'signal_level_too_far', pro, distPct, sigDistPct, setup };
 
   const zoneBuf = sLevel * ZONE_PCT / 100;
+  const diag = { pro, setup, distPct, sigDistPct, zoneBuf };
 
   // ── Институциональный паттерн (иерархия A→D) ──
   const inst = P.detectInstitutionalPattern(df, sLevel, signal, volRatio, zoneBuf);
 
   // ── Качество подхода ──
   const approach = P.assessApproachQuality(df, sLevel, zoneBuf, pro.volMa, inst.name);
-  if (!approach.ok) return { reject: REJECT.SIGNAL, reason: 'approach', pro, setup, instPattern: inst.name, patternBonus: inst.bonus, approachReason: approach.reason };
+  if (!approach.ok) return { reject: REJECT.SIGNAL, reason: 'approach', ...diag, instPattern: inst.name, patternBonus: inst.bonus, approachReason: approach.reason };
 
   // ── Тест-счётчик ──
   const testCount = P.countRecentTests(df, sLevel, ZONE_PCT, 30);
-  if (testCount >= cfg.MAX_LEVEL_TESTS) return { reject: REJECT.SIGNAL, reason: 'over_tested', pro, setup, instPattern: inst.name, patternBonus: inst.bonus, approachReason: approach.reason, testCount };
+  if (testCount >= cfg.MAX_LEVEL_TESTS) return { reject: REJECT.SIGNAL, reason: 'over_tested', ...diag, instPattern: inst.name, patternBonus: inst.bonus, approachReason: approach.reason, testCount };
 
   // ── Фильтр RSI ──
   if (cfg.USE_RSI_FILTER) {
-    if (signal === 'LONG' && rsiNow > cfg.RSI_OB) return { reject: REJECT.RSI, reason: 'rsi_ob', pro, setup, testCount };
-    if (signal === 'SHORT' && rsiNow < cfg.RSI_OS) return { reject: REJECT.RSI, reason: 'rsi_os', pro, setup, testCount };
+    const rsiBase = { ...diag, instPattern: inst.name, patternBonus: inst.bonus, approachOk: true, approachReason: approach.reason, testCount };
+    if (signal === 'LONG' && rsiNow > cfg.RSI_OB) return { reject: REJECT.RSI, reason: 'rsi_ob', ...rsiBase };
+    if (signal === 'SHORT' && rsiNow < cfg.RSI_OS) return { reject: REJECT.RSI, reason: 'rsi_os', ...rsiBase };
   }
 
   return {
