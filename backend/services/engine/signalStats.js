@@ -907,7 +907,32 @@ async function attachLive(signals, priceOf) {
   }
 }
 
+/**
+ * h_dashboard(request) body: 30-day signal stats (fallback zeros + warning when the read
+ * fails), the 6 newest signals with live price / R, the all-users strategy rating (15 min
+ * cache). `market` / `trend` / `marketTrend` come from the market-data and trend modules.
+ */
+async function dashboardPayload(db, userId, { now = null, priceOf = null, market = {}, trend = {}, marketTrend = {}, log = null } = {}) {
+  const t = isNone(now) ? nowSec() : now;
+  let stats = { days: 30, signals: 0, trades: 0, wins: 0, win_rate: 0.0, total_rr: 0.0, rr_7d: 0.0 };
+  try {
+    stats = signalStats(db, userId, 30, t);
+  } catch (e) {
+    if (log && log.warn) log.warn(`[MINIAPP] dashboard stats: ${e.message}`);
+  }
+  const recent = userSignals(db, userId, { status: 'all', limit: 6, now: t });
+  await attachLive(recent, priceOf);
+  let rating = null;
+  try {
+    rating = strategyRating(db, 30, { now: t });          // [STRATEGY-RATING] all users, 15 min cache
+  } catch (e) {
+    if (log && log.debug) log.debug(`[MINIAPP] strategy rating: ${e.message}`);
+  }
+  return { ok: true, stats, market, recent, trend, rating, market_trend: marketTrend };
+}
+
 module.exports = {
+  dashboardPayload,
   STRATS, COLS, RATING_TTL_S, VALID_STRATEGIES, LEGACY_STRATEGIES, STATS_HELP_TEXT_RU, TF_ORDER,
   blank, aggregate, signalStats, signalRowsSince, proOverview, proOverviewFromRows, ratingFromRows,
   strategyRating, _resetRatingCache,

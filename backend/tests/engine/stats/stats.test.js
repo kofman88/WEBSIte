@@ -144,6 +144,40 @@ describe('all users — pro_overview, strategy_rating (dedup + cache)', () => {
   });
 });
 
+describe('dashboard payload (h_dashboard)', () => {
+  it('stats 30 d + 6 newest signals with live R + the cached rating; shape like the Mini App', async () => {
+    SS._resetRatingCache();
+    const P = V.per_user['101'];
+    const prices = { BTC: 70000, ETH: null };
+    const d = await SS.dashboardPayload(db, 101, {
+      now: NOW, priceOf: (b) => (Object.prototype.hasOwnProperty.call(prices, b) ? prices[b] : 1.0),
+      market: { BTC: { price: 1, change_pct: 0 } }, trend: { BTC: { H1: 'up' } }, marketTrend: { '15m': { trend: 'up' } },
+    });
+    expect(Object.keys(d)).toEqual(['ok', 'stats', 'market', 'recent', 'trend', 'rating', 'market_trend']);
+    expect(J(d.stats)).toEqual(P.signal_stats_30);
+    expect(J(d.rating)).toEqual(V.rating_30);
+    const plain = J(d.recent).map((s) => { const { price: _p, r_now: _r, ...rest } = s; return rest; });
+    expect(plain).toEqual(P.signals['all||6']);
+    const { pyRound } = nodeRequire('../../../strategies/common/pyround.js');
+    let liveN = 0;
+    for (const s of d.recent) {
+      const live = ['open', 'tp1', 'tp2'].includes(s.status);
+      const px = Object.prototype.hasOwnProperty.call(prices, s.symbol) ? prices[s.symbol] : 1.0;
+      const risk = Math.abs(s.entry - s.sl);                       // the CURRENT stop, like _attach_live
+      if (live && px && risk > 0) {
+        liveN++;
+        expect(s.price).toBe(px);
+        const move = s.direction === 'LONG' ? px - s.entry : s.entry - px;
+        expect(s.r_now).toBe(pyRound(move / risk, 2));
+      } else {
+        expect(s.price).toBeUndefined();
+      }
+    }
+    expect(liveN).toBeGreaterThan(0);
+    SS._resetRatingCache();
+  });
+});
+
 describe('aggregate quirks pinned', () => {
   it('TP1/TP2 stages count both as open and as winning trades (double count)', () => {
     const P = V.per_user['109'].signal_stats_30;
