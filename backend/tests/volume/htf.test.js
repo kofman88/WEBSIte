@@ -14,7 +14,7 @@ import load from '../golden/load.js';
 const { pins } = P;
 const { T0, H } = F;
 
-/** Same bars as volume_verify2.py hourly(): [t, f, f+0.5, f−0.5, f, 100+j]. */
+/** Same bars as gen/gen_pins.py hourly(): [t, f, f+0.5, f−0.5, f, 100+j]. */
 function hourly(n, f, start = T0) {
   return F.toFrame(Array.from({ length: n }, (_, j) => [start + j * H, f(j), f(j) + 0.5, f(j) - 0.5, f(j), 100 + j]));
 }

@@ -10,7 +10,7 @@ import P from './pins.js';
 const { VolumeConfig, minBars, DEFAULTS, FIELD_NAMES, USER_PREF_KEYS, CONFIG_FIELDS, pyInt, pyFloat, pyBool, PyValueError, PyOverflowError } = C;
 const { pins, pinNum } = P;
 
-/** The inputs of pins.config (same literals as volume_verify2.py; None → null, True → true). */
+/** The inputs of pins.config (same literals as gen/gen_pins.py; None → null, True → true). */
 const CASES = {
   spec_example: { ma_fast: 30, ma_mid: 20, tp1_rr: 0.5, tp2_rr: 0.7, climax_mult: 1.0, ma_type: 'EMA', setup_cross: 'off', vol_len: '7', rsi_long_max: 'abc' },
   variants_conservative: { min_quality: 4, vol_mult: 2.0, trend_filter: true, use_htf: true, bounce_vol_mult: 1.2 },

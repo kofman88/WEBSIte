@@ -9,8 +9,14 @@ import { describe, it, expect } from 'vitest';
 import V from '../../strategies/volume/index.js';
 import F from './frames.js';
 import P from './pins.js';
+import prodPython from '../common/prodPython.js';
 
 const { pins, assertSame } = P;
+
+it('pins.json comes from the production interpreter (CPython 3.11)', () => {
+  expect(pins.python).toMatch(prodPython.PROD_PYTHON);
+  expect(pins._provenance).toContain(`python ${pins.python},`);
+});
 
 /** Every hit of every detector on every bar/direction, in the generator's order (Python dict order). */
 function allHits(frame, cfg = new V.VolumeConfig()) {

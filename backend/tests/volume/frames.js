@@ -4,8 +4,8 @@
  *
  * Each builder returns a Frame of hourly bars (open_time from 2026-01-01 00:00 UTC) whose
  * shape targets ONE setup; the expected hits were produced by running the bot's own
- * volume_strategy.py on the very same bars (scratchpad/port/verify/volume_verify.py dumps
- * them from `dumpScenarios()`), see detectors.test.js. Nothing random: every price is a
+ * volume_strategy.py on the very same bars (gen/gen_pins.py reads them from
+ * `dumpScenarios()`), see detectors.test.js. Nothing random: every price is a
  * formula of the bar index, so the frames are reproducible in Python and JS alike.
  */
 
