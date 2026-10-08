@@ -155,7 +155,8 @@ function findSetup(df, pro, supZones, resZones, bullPat, bearPat, zonePct, relax
     if (anyRecentClose((c) => c > lvl) && Math.abs(low1 - lvl) < zoneBuf && bullPat) {
       return hit('LONG', res, SETUP.RETEST_RES, pro.bearLocal);
     }
-    // Честный пробой вверх
+    // Честный пробой вверх (`df["close"].iloc[-2]` raises IndexError on a 1-bar frame)
+    if (n < 2) throw new P.PyIndexError();
     if (close2 < lvl && cNow > lvl + zoneBuf && volRatio > 1.5) return hit('LONG', res, SETUP.BREAKOUT, pro.bearLocal);
   }
 
@@ -181,6 +182,7 @@ function findSetup(df, pro, supZones, resZones, bullPat, bearPat, zonePct, relax
     if (anyRecentClose((c) => c < lvl) && Math.abs(high1 - lvl) < zoneBuf && bearPat) {
       return hit('SHORT', sup, SETUP.RETEST_SUP, pro.bullLocal);
     }
+    if (n < 2) throw new P.PyIndexError();         // `df["close"].iloc[-2]` on a 1-bar frame
     if (close2 > lvl && cNow < lvl - zoneBuf && volRatio > 1.5) return hit('SHORT', sup, SETUP.BREAKDOWN, pro.bullLocal);
   }
 

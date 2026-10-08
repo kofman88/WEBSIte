@@ -1,0 +1,192 @@
+{
+ "suite": "setups",
+ "probe": "levels",
+ "cases": 34,
+ "bars": 33264,
+ "signals": 1018,
+ "null_bars": 32246,
+ "errors": 0,
+ "reject_reasons": {
+  "levels_filter": 235,
+  "none": 17,
+  "quality_hwr": 64,
+  "rr": 199,
+  "rsi": 18,
+  "signal": 20324,
+  "sl_risk": 21,
+  "zones": 11368
+ },
+ "per_case": {
+  "setup_15m_loose": {
+   "signals": 46,
+   "bars": 1008
+  },
+  "setup_15m_prod": {
+   "signals": 0,
+   "bars": 1008
+  },
+  "setup_15m_default": {
+   "signals": 0,
+   "bars": 1008
+  },
+  "setup_15m_default_tp": {
+   "signals": 0,
+   "bars": 1008
+  },
+  "setup_15m_rr18": {
+   "signals": 45,
+   "bars": 1008
+  },
+  "setup_15m_zone07": {
+   "signals": 52,
+   "bars": 1008
+  },
+  "setup_15m_zone015": {
+   "signals": 24,
+   "bars": 1008
+  },
+  "setup_15m_hwr": {
+   "signals": 18,
+   "bars": 1008
+  },
+  "setup_15m_relax": {
+   "signals": 66,
+   "bars": 1008
+  },
+  "setup_15m_gates": {
+   "signals": 0,
+   "bars": 1008
+  },
+  "setup_15m_htf": {
+   "signals": 46,
+   "bars": 1008
+  },
+  "setup_15m_slv2": {
+   "signals": 17,
+   "bars": 1008
+  },
+  "setup_15m_live": {
+   "signals": 46,
+   "bars": 1008
+  },
+  "setup_15m_ondemand": {
+   "signals": 34,
+   "bars": 504
+  },
+  "setup_15m_meme": {
+   "signals": 31,
+   "bars": 1008
+  },
+  "setup_15m_major": {
+   "signals": 46,
+   "bars": 1008
+  },
+  "setup_15m_nocorr": {
+   "signals": 42,
+   "bars": 1008
+  },
+  "setup_4h_loose": {
+   "signals": 40,
+   "bars": 1008
+  },
+  "setup_4h_prod": {
+   "signals": 5,
+   "bars": 1008
+  },
+  "setup_4h_default": {
+   "signals": 0,
+   "bars": 1008
+  },
+  "setup_4h_default_tp": {
+   "signals": 30,
+   "bars": 1008
+  },
+  "setup_4h_rr18": {
+   "signals": 38,
+   "bars": 1008
+  },
+  "setup_4h_zone07": {
+   "signals": 58,
+   "bars": 1008
+  },
+  "setup_4h_zone015": {
+   "signals": 26,
+   "bars": 1008
+  },
+  "setup_4h_hwr": {
+   "signals": 4,
+   "bars": 1008
+  },
+  "setup_4h_relax": {
+   "signals": 69,
+   "bars": 1008
+  },
+  "setup_4h_gates": {
+   "signals": 3,
+   "bars": 1008
+  },
+  "setup_4h_htf": {
+   "signals": 40,
+   "bars": 1008
+  },
+  "setup_4h_slv2": {
+   "signals": 5,
+   "bars": 1008
+  },
+  "setup_4h_live": {
+   "signals": 40,
+   "bars": 1008
+  },
+  "setup_4h_ondemand": {
+   "signals": 36,
+   "bars": 504
+  },
+  "setup_4h_meme": {
+   "signals": 36,
+   "bars": 1008
+  },
+  "setup_4h_major": {
+   "signals": 40,
+   "bars": 1008
+  },
+  "setup_4h_nocorr": {
+   "signals": 35,
+   "bars": 1008
+  }
+ },
+ "sha256": {
+  "levels_probe_setups.json": "5c377962ca1f73c10b89b5f95b246bdec4a7209cfd6407de8ba6249cace12b2c"
+ },
+ "setup_signals": {
+  "LONG SFP (Захват ликвидности) / LIQUIDITY_SWEEP": 22,
+  "LONG SFP (Захват ликвидности) / SFP": 23,
+  "LONG Ложный пробой (Fakeout) / BOUNCE_PLAIN": 1,
+  "LONG Ложный пробой (Fakeout) / BREAKOUT_RETEST": 20,
+  "LONG Ложный пробой (Fakeout) / FAKEOUT_PINBAR": 25,
+  "LONG Ложный пробой (Fakeout) / LIQUIDITY_SWEEP": 21,
+  "LONG Отскок от поддержки / BOUNCE_PLAIN": 124,
+  "LONG Отскок от поддержки / BREAKOUT_RETEST": 21,
+  "LONG Отскок от поддержки / ENGULFING_AT_LEVEL": 58,
+  "LONG Отскок от поддержки / FAKEOUT_PINBAR": 42,
+  "LONG Отскок от поддержки / INSTITUTIONAL_ORDERBLOCK": 20,
+  "LONG Отскок от поддержки / PINBAR_AT_LEVEL": 44,
+  "LONG Пробой уровня / BREAKOUT_RETEST": 18,
+  "LONG Пробой уровня / SFP": 2,
+  "LONG Ретест пробитого уровня / PINBAR_AT_LEVEL": 30,
+  "SHORT SFP (Ложный пробой вверх) / LIQUIDITY_SWEEP": 23,
+  "SHORT SFP (Ложный пробой вверх) / SFP": 22,
+  "SHORT Ложный пробой (Fakeout) / BOUNCE_PLAIN": 1,
+  "SHORT Ложный пробой (Fakeout) / BREAKOUT_RETEST": 19,
+  "SHORT Ложный пробой (Fakeout) / FAKEOUT_PINBAR": 24,
+  "SHORT Ложный пробой (Fakeout) / LIQUIDITY_SWEEP": 20,
+  "SHORT Отскок от сопротивления / BOUNCE_PLAIN": 140,
+  "SHORT Отскок от сопротивления / BREAKOUT_RETEST": 20,
+  "SHORT Отскок от сопротивления / ENGULFING_AT_LEVEL": 134,
+  "SHORT Отскок от сопротивления / FAKEOUT_PINBAR": 39,
+  "SHORT Отскок от сопротивления / INSTITUTIONAL_ORDERBLOCK": 21,
+  "SHORT Отскок от сопротивления / PINBAR_AT_LEVEL": 43,
+  "SHORT Пробой поддержки / BREAKOUT_RETEST": 18,
+  "SHORT Пробой поддержки / SFP": 2,
+  "SHORT Ретест пробитой поддержки / PINBAR_AT_LEVEL": 21
+ }
+}

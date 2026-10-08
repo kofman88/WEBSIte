@@ -637,8 +637,9 @@ def build_cases(seed=DEFAULT_SEED, n_random=DEFAULT_N_RANDOM):
 # the same tail mirrored around L (high ↔ low) on the mirrored range, so every threshold of the
 # LONG block (−z / −0.5·z / −0.3·z / 2·z …) is hit at the same distance on the SHORT side.
 # The frames are stored in the output (frames{src}) — the JS replay does not rebuild them.
-SETUP_TF = {"15m": dict(lo=2.40, hi=2.58, period=30, vol=250_000.0, n=330, seed=151),
-            "4h": dict(lo=100.0, hi=110.0, period=36, vol=18_000.0, n=330, seed=404)}
+SETUP_TF = {"15m": dict(lo=2.40, hi=2.58, period=30, vol=250_000.0, n=240, seed=151, nd=6),
+            "4h": dict(lo=100.0, hi=110.0, period=36, vol=18_000.0, n=240, seed=404, nd=4)}
+SETUP_HTF_BARS = 80
 SETUP_ZONE_PCT = LOOSE["zone_pct"]
 # the design config: LOOSE with a far TP ladder — a structural TP1 at the opposite zone (~5R away)
 # would otherwise sit above the mechanical TP2 = 3R and fail the TP-order check ("rr"); tp1_rr 2.5:
@@ -691,9 +692,10 @@ SHORT_TYPE = {"SFP (Захват ликвидности)": "SFP (Ложный п
 SETUP_SRC = {}     # src → dict(tf, design, direction, want_type, want_pattern, level, z, end_open_ms)
 
 
-def _synth_wave(n, tf, lo, hi, period, phase, end_offset, seed, vol, end_open_ms):
+def _synth_wave(n, tf, lo, hi, period, phase, end_offset, seed, vol, end_open_ms, nd):
     """Triangle wave lo↔hi (the extreme `phase` at index n−1−end_offset) + small seeded noise.
-    open = previous close; wicks 0.08..0.30·step; volume vol·(1 ± 0.25)."""
+    open = previous close; wicks 0.08..0.30·step; volume vol·(1 ± 0.25); prices rounded to `nd`
+    decimals, volumes to integers (exchange-like ticks, and a compact probe file)."""
     import pandas as pd
     rng = random.Random(seed)
     half = period / 2
@@ -704,12 +706,12 @@ def _synth_wave(n, tf, lo, hi, period, phase, end_offset, seed, vol, end_open_ms
     for i in range(n):
         d = (n - 1 - end_offset - i + shift) % period
         x = d / half if d <= half else (period - d) / half
-        cl = lo + (hi - lo) * x + rng.uniform(-0.12, 0.12) * step
+        cl = round(lo + (hi - lo) * x + rng.uniform(-0.12, 0.12) * step, nd)
         op = cl if prev is None else prev
         o.append(op); c.append(cl)
-        h.append(max(op, cl) + rng.uniform(0.08, 0.30) * step)
-        l.append(min(op, cl) - rng.uniform(0.08, 0.30) * step)
-        v.append(vol * (1 + rng.uniform(-0.25, 0.25)))
+        h.append(round(max(op, cl) + rng.uniform(0.08, 0.30) * step, nd))
+        l.append(round(min(op, cl) - rng.uniform(0.08, 0.30) * step, nd))
+        v.append(float(round(vol * (1 + rng.uniform(-0.25, 0.25)))))
         prev = cl
     t = [end_open_ms - (n - 1 - i) * TF_MS[tf] for i in range(n)]
     df = pd.DataFrame({"open": o, "high": h, "low": l, "close": c, "volume": v},
@@ -718,9 +720,9 @@ def _synth_wave(n, tf, lo, hi, period, phase, end_offset, seed, vol, end_open_ms
     return df
 
 
-def _mirror(df, k):
-    return df.assign(open=k - df["open"].to_numpy(), high=k - df["low"].to_numpy(), low=k - df["high"].to_numpy(),
-                     close=k - df["close"].to_numpy())
+def _mirror(df, k, nd):
+    r = lambda col: np.round(k - df[col].to_numpy(), nd)  # noqa: E731
+    return df.assign(open=r("open"), high=r("low"), low=r("high"), close=r("close"))
 
 
 def _apply_tail(df, level, z, bars, sign, vol):
@@ -752,12 +754,12 @@ def build_setup_frames():
                 shift = (j % 6) * TF_MS["4h"] if tf == "4h" else (j * 9 % 96) * TF_MS["15m"]
                 end_open = t_end - TF_MS[tf] - shift
                 base = _synth_wave(p["n"], tf, p["lo"], p["hi"], p["period"], phase, end_off, p["seed"] + 7 * d_i,
-                                   p["vol"], end_open)
-                htf = _synth_wave(120, "1d", p["lo"], p["hi"], 20, "low", 0, p["seed"] + 1000 + d_i, p["vol"] * 6,
-                                  t_end - TF_MS["1d"])
+                                   p["vol"], end_open, p["nd"])
+                htf = _synth_wave(SETUP_HTF_BARS, "1d", p["lo"], p["hi"], 20, "low", 0, p["seed"] + 1000 + d_i, p["vol"] * 6,
+                                  t_end - TF_MS["1d"], p["nd"])
                 sign = 1
                 if dirn == "SHORT":
-                    base, htf, sign = _mirror(base, k_mirror), _mirror(htf, k_mirror), -1
+                    base, htf, sign = _mirror(base, k_mirror, p["nd"]), _mirror(htf, k_mirror, p["nd"]), -1
                 sup, res = ind.get_zones(base)
                 # LONG designs at the support zone / retest+breakout at the resistance zone (mirrored for SHORT)
                 use_sup = (phase == "low") == (dirn == "LONG")
@@ -835,24 +837,230 @@ def check_setup_designs(cases):
     return bad
 
 
+# ────────────────────────────────────────────────────────────────────────────
+# Suite "patterns": lattice fuzz of the candle-pattern layer
+# ────────────────────────────────────────────────────────────────────────────
+# Short frames whose prices sit on a lattice base + k·tick (k ∈ 0..12, wicks 0..6 ticks), so
+# equal open/close/high/low, zero bodies / ranges and exact threshold hits (lw = 1.5·body,
+# body/total = 0.1, …) are common; ticks down to 1e-11 straddle the 1e-10 guards. Each frame is
+# run through _detect_pattern, _detect_institutional_pattern, _assess_approach_quality,
+# _check_fakeout and _count_recent_tests with lattice levels / zone buffers and threshold
+# vol_ratios; an exception is recorded as {"error": type}.
+PAT_TICKS = [1.0, 0.25, 0.01, 1e-6, 3e-11, 1e-11]
+PAT_VOL_RATIOS = [0.5, 1.0, 1.2, 1.2000000000000002, 1.5, 1.5000000000000002, 1.6, 2.0, 2.0000000000000004, 2.5]
+PAT_INST = ["", "LIQUIDITY_SWEEP", "INSTITUTIONAL_ORDERBLOCK", "FAKEOUT_PINBAR", "ENGULFING_AT_LEVEL",
+            "PINBAR_AT_LEVEL", "SFP", "BREAKOUT_RETEST", "BOUNCE_PLAIN"]
+
+
+def _pat_call(fn, *a):
+    try:
+        r = fn(*a)
+    except Exception as e:  # noqa: BLE001
+        return {"error": type(e).__name__}
+    if isinstance(r, tuple):
+        return [x if isinstance(x, str) else (bool(x) if isinstance(x, (bool, np.bool_)) else int(x)) for x in r]
+    if isinstance(r, (bool, np.bool_)):
+        return bool(r)
+    return int(r)
+
+
+def run_patterns_fuzz(seed, n_frames):
+    import pandas as pd
+    from indicator import CHMIndicator
+    from scanner_mid import _cfg_to_ind
+    from user_manager import TradeCfg
+    ind = CHMIndicator(_cfg_to_ind(TradeCfg()))
+    rng = random.Random(seed)
+    out = []
+    for f_i in range(n_frames):
+        tick = rng.choice(PAT_TICKS)
+        base = tick * rng.choice([0, 3, 40, 1000, 250_000])
+        n = rng.choice([4, 5, 6, 7, 8, 10, 12, 16])
+        bars = []
+        prev_c = None
+        for _ in range(n):
+            o = prev_c if (prev_c is not None and rng.random() < 0.5) else base + tick * rng.randint(0, 12)
+            c = base + tick * rng.randint(0, 12) if rng.random() < 0.85 else o
+            h = max(o, c) + tick * rng.choice([0, 0, 1, 2, 3, 6])
+            l = min(o, c) - tick * rng.choice([0, 0, 1, 2, 3, 6])
+            v = rng.choice([0.0, 1.0, 2.0, 3.0, 5.0, 8.0, 13.0]) * rng.choice([1.0, 1000.0])
+            if rng.random() < 0.03:
+                v = float("nan")
+            bars.append([float(o), float(h), float(l), float(c), float(v)])
+            prev_c = c
+        idx = pd.to_datetime(np.arange(n, dtype="int64") * 3_600_000 + 1_767_225_600_000, unit="ms")
+        df = pd.DataFrame(bars, columns=["open", "high", "low", "close", "volume"], index=idx)
+        vol_len = rng.choice([1, 2, 3, 5])
+        vol_ma = df["volume"].rolling(vol_len).mean()
+        # null = NaN volume; vol_ma = df.volume.rolling(vol_len).mean() is recomputed by the replay
+        rec = {"bars": [[None if math.isnan(x) else x for x in b] for b in bars], "vol_len": vol_len,
+               "pattern": _pat_call(ind._detect_pattern, df), "inst": [], "approach": [], "fakeout": [], "tests": []}
+        for _ in range(4):
+            level = base + tick * (rng.randint(-6, 18) + rng.choice([0.0, 0.0, 0.5]))
+            zb = tick * rng.choice([0.25, 0.5, 1.0, 2.0, 4.0])
+            d = rng.choice(["LONG", "SHORT"])
+            vr = rng.choice(PAT_VOL_RATIOS)
+            rec["inst"].append([level, d, vr, zb, _pat_call(ind._detect_institutional_pattern, df, level, d, vr, zb)])
+            ip = rng.choice(PAT_INST)
+            rec["approach"].append([level, zb, ip, _pat_call(ind._assess_approach_quality, df, level, zb, vol_ma, ip)])
+            rec["fakeout"].append([level, d, zb, _pat_call(ind._check_fakeout, df, level, d, zb)])
+            zp = rng.choice([0.1, 0.3, 0.7, 1.5])
+            lb = rng.choice([3, 5, 30])
+            rec["tests"].append([level, zp, lb, _pat_call(ind._count_recent_tests, df, level, zp, lb)])
+        out.append(rec)
+    return out
+
+
+# ────────────────────────────────────────────────────────────────────────────
+# Suite "short": _do_analyze(_precomputed_zones=...) on 1..60-bar frames (the backtest path)
+# ────────────────────────────────────────────────────────────────────────────
+# Frames cut from the fixtures (1h / 15m / 4h) and the hand-constructed setup frames, the zones
+# precomputed by the bot on the 300 bars ending at the same bar (public fields only — no
+# lvn_checker, on both sides). Records the SignalResult (r10), the _ANALYZE_STATS bucket or the
+# exception type; the replay calls doAnalyze(..., { precomputedZones }) and must throw where the
+# bot raised.
+SHORT_CFGS = {"loose": (SETUP_CFG, OFF_ENV, False), "default": ({}, PROD_ENV, False),
+              "relax": (SETUP_CFG, dict(OFF_ENV, LEVELS_RELAX_ENABLED=True), False),
+              "hwr": (SETUP_CFG, OFF_ENV, True), "vol": (dict(SETUP_CFG, use_volume=True, use_rsi=True), OFF_ENV, False)}
+ZONE_PUBLIC = ("price", "hits", "eff_hits", "age_bars", "class", "is_psychological", "layers", "has_hvn", "has_lvn_to_tp")
+
+
+def run_short_fuzz(seed, n_cases):
+    from indicator import CHMIndicator, reset_analyze_stats, get_analyze_stats
+    from scanner_mid import _cfg_to_ind
+    from user_manager import TradeCfg
+    build_setup_frames()
+    rng = random.Random(seed)
+    srcs = [(s, tf) for s in ALL_SRC for tf in ("1h", "15m", "4h")] + [(s, m["tf"]) for s, m in SETUP_SRC.items()]
+    out = []
+    for _ in range(n_cases):
+        src, tf = rng.choice(srcs)
+        base = base_frame(src, tf)
+        i = rng.randint(120, len(base) - 1) if not src.startswith("SETUP") else len(base) - 1 - rng.choice([0, 0, 0, 1, 2, 5])
+        m = rng.choice([1, 1, 2, 2, 3, 4, 5, 6, 6, 7, 8, 10, 12, 15, 20, 25, 30, 40, 60])
+        cfg_name = rng.choice(list(SHORT_CFGS))
+        tc_over, env, hwr = SHORT_CFGS[cfg_name]
+        apply_env(dict(env=env, regime=None, relaxed=False))
+        tc = TradeCfg(**dict(tc_over, timeframe=tf))
+        ind = CHMIndicator(_cfg_to_ind(tc, high_wr_mode=hwr))
+        sup, res = ind.get_zones(base.iloc[max(0, i - 299):i + 1])
+        zs = ([{k: z[k] for k in ZONE_PUBLIC} for z in sup], [{k: z[k] for k in ZONE_PUBLIC} for z in res])
+        df = base.iloc[i - m + 1:i + 1]
+        mqo = rng.choice([None, None, 1])
+        reset_analyze_stats()
+        rec = dict(src=src, tf=tf, i=i, m=m, cfg=cfg_name, min_quality_override=mqo, zones={"sup": zs[0], "res": zs[1]})
+        try:
+            sig = ind._do_analyze(src, df, None, None, None, mqo, _precomputed_zones=([dict(z) for z in zs[0]], [dict(z) for z in zs[1]]))
+            if sig is None:
+                st = get_analyze_stats()
+                rec["reject"] = ",".join(sorted(st)) if st else "none"
+            else:
+                rec["signal"] = mg.r10(dc.asdict(sig))
+        except Exception as e:  # noqa: BLE001
+            rec["error"] = type(e).__name__
+        out.append(rec)
+    return out
+
+
+def main_short(args):
+    """--suite short [--seed S] [--n-random N] → levels_probe_short.json.gz (+ _summary.json)."""
+    import pandas as pd
+    seed = args.seed if args.seed != DEFAULT_SEED else 20261011
+    n = args.n_random if args.n_random != DEFAULT_N_RANDOM else 3000
+    build_cases()      # ALL_SRC
+    mg._attach_capture()
+    t_all = time.time()
+    recs = run_short_fuzz(seed, n)
+    for junk in ("signal_registry.json",):
+        p = os.path.join(mg.BOT_DIR, junk)
+        if os.path.exists(p):
+            os.remove(p)
+    outcome = {}
+    for r in recs:
+        k = f"error:{r['error']}" if "error" in r else (f"signal:{r['signal']['breakout_type']}" if "signal" in r else f"reject:{r['reject']}")
+        outcome[k] = outcome.get(k, 0) + 1
+    print(f"{len(recs)} cases, {time.time() - t_all:.1f}s; {dict(sorted(outcome.items()))}", flush=True)
+    if args.cases:
+        return 0
+    doc = {"probe": "levels_short", "python": sys.version.split()[0], "pandas": pd.__version__, "numpy": np.__version__,
+           "seed": seed, "cfgs": {k: dict(trade_cfg=v[0], env=v[1], high_wr=v[2]) for k, v in SHORT_CFGS.items()},
+           "frames": {src: dict(m, bars=_frame_rows(_FRAMES[(src, m["tf"])])) for src, m in SETUP_SRC.items()},
+           "cases": recs}
+    raw = json.dumps(doc, ensure_ascii=False, separators=(",", ":"), allow_nan=False).encode("utf-8")
+    stem = "levels_probe_short"
+    with gzip.GzipFile(os.path.join(OUT_DIR, f"{stem}.json.gz"), "wb", mtime=0) as fh:
+        fh.write(raw)
+    summary = {"probe": "levels_short", "suite": "short", "seed": seed, "cases": len(recs), "outcomes": dict(sorted(outcome.items())),
+               "sha256": {f"{stem}.json": hashlib.sha256(raw).hexdigest()}}
+    with open(os.path.join(OUT_DIR, f"{stem}_summary.json"), "w") as fh:
+        json.dump(summary, fh, indent=1, ensure_ascii=False)
+    print(f"wrote {stem}.json.gz ({len(raw)} bytes raw)")
+    return 0
+
+
 def _frame_rows(df):
     t = mg.open_ms(df)
     cols = [df[k].to_numpy() for k in ("open", "high", "low", "close", "volume")]
     return [[int(t[i])] + [float(a[i]) for a in cols] for i in range(len(df))]
 
 
+def main_patterns(args):
+    """--suite patterns [--seed S] [--n-random N frames] → levels_probe_patterns.json.gz (+ _summary.json)."""
+    import pandas as pd
+    seed = args.seed if args.seed != DEFAULT_SEED else 20261010
+    n_frames = args.n_random if args.n_random != DEFAULT_N_RANDOM else 4000
+    mg._attach_capture()
+    t_all = time.time()
+    frames = run_patterns_fuzz(seed, n_frames)
+    for junk in ("signal_registry.json",):
+        p = os.path.join(mg.BOT_DIR, junk)
+        if os.path.exists(p):
+            os.remove(p)
+    errors, counts = {}, {}
+    for r in frames:
+        for key in ("inst", "approach", "fakeout", "tests"):
+            for row in r[key]:
+                if isinstance(row[-1], dict):
+                    errors[f"{key}:{row[-1]['error']}"] = errors.get(f"{key}:{row[-1]['error']}", 0) + 1
+        for v in [r["pattern"]] + [row[-1] for row in r["inst"]] + [row[-1] for row in r["approach"]]:
+            if isinstance(v, list):
+                k = " / ".join(str(x) for x in v if x not in ("", 0, 1, 2, 3, True, False)) or "-"
+                counts[k] = counts.get(k, 0) + 1
+    print(f"{len(frames)} frames, {time.time() - t_all:.1f}s; errors {errors}", flush=True)
+    if args.cases:
+        for k, v in sorted(counts.items()):
+            print(f"  {v:6d}  {k}")
+        return 0
+    doc = {"probe": "levels_patterns", "python": sys.version.split()[0], "pandas": pd.__version__, "numpy": np.__version__,
+           "seed": seed, "frames": frames}
+    raw = json.dumps(doc, ensure_ascii=False, separators=(",", ":"), allow_nan=False).encode("utf-8")
+    stem = "levels_probe_patterns"
+    with gzip.GzipFile(os.path.join(OUT_DIR, f"{stem}.json.gz"), "wb", mtime=0) as fh:
+        fh.write(raw)
+    summary = {"probe": "levels_patterns", "suite": "patterns", "seed": seed, "frames": len(frames), "errors": dict(sorted(errors.items())),
+               "outcomes": dict(sorted(counts.items())), "sha256": {f"{stem}.json": hashlib.sha256(raw).hexdigest()}}
+    with open(os.path.join(OUT_DIR, f"{stem}_summary.json"), "w") as fh:
+        json.dump(summary, fh, indent=1, ensure_ascii=False)
+    print(f"wrote {stem}.json.gz ({len(raw)} bytes raw)")
+    return 0
+
+
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--cases", default=None, help="debug: comma-separated case-name prefixes (nothing is written)")
     ap.add_argument("--workers", type=int, default=int(os.environ.get("GOLDEN_PROBE_WORKERS", "4")))
-    ap.add_argument("--suite", choices=("main", "setups"), default="main",
-                    help="main: the sections above; setups: the hand-constructed setup frames")
+    ap.add_argument("--suite", choices=("main", "setups", "patterns", "short"), default="main",
+                    help="main: the sections above; setups: the hand-constructed setup frames; patterns: lattice fuzz")
     ap.add_argument("--seed", type=int, default=DEFAULT_SEED, help="main suite: random-case seed (≠ default → re-check run)")
     ap.add_argument("--n-random", type=int, default=DEFAULT_N_RANDOM, help="main suite: number of random cases")
     args = ap.parse_args()
     import logging
     logging.basicConfig(level=logging.ERROR)
     default_main = args.suite == "main" and args.seed == DEFAULT_SEED and args.n_random == DEFAULT_N_RANDOM
+    if args.suite == "patterns":
+        return main_patterns(args)
+    if args.suite == "short":
+        return main_short(args)
     if args.suite == "setups":
         stem = "levels_probe_setups"
         build_setup_cases()

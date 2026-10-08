@@ -1,0 +1,28 @@
+{
+ "probe": "levels_short",
+ "suite": "short",
+ "seed": 20261011,
+ "cases": 3000,
+ "outcomes": {
+  "error:IndexError": 269,
+  "reject:quality_hwr": 67,
+  "reject:rr": 127,
+  "reject:rsi": 28,
+  "reject:signal": 1694,
+  "reject:sl_risk": 6,
+  "reject:volume": 55,
+  "reject:zones": 518,
+  "signal:SFP (Захват ликвидности)": 22,
+  "signal:SFP (Ложный пробой вверх)": 17,
+  "signal:Ложный пробой (Fakeout)": 45,
+  "signal:Отскок от поддержки": 59,
+  "signal:Отскок от сопротивления": 59,
+  "signal:Пробой поддержки": 6,
+  "signal:Пробой уровня": 13,
+  "signal:Ретест пробитого уровня": 12,
+  "signal:Ретест пробитой поддержки": 3
+ },
+ "sha256": {
+  "levels_probe_short.json": "185dc598587d657a308fa13121d44ea6fbd14a6fff39339d4607f628bc4d1db8"
+ }
+}

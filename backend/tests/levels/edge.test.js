@@ -133,3 +133,50 @@ describe('createIndicator reject counters in relaxed mode (ATR-breakout fallback
     expect(ind.getAnalyzeStats()).toEqual(stats);
   });
 });
+
+describe('short frames: pandas IndexError ↔ a JS throw (re-check: lattice + short-frame fuzz)', () => {
+  // The bars of make_levels_probe --suite short / the re-check's short_frames.py, hourly from BASE.
+  const BARS7 = [[102.8, 102.9, 102.4, 102.5, 11.0], [102.5, 102.6, 102.2, 102.3, 10.0], [102.3, 102.4, 101.9, 102.0, 9.0],
+    [102.0, 102.1, 101.5, 101.6, 8.0], [101.6, 101.7, 101.1, 101.2, 7.0], [101.2, 101.3, 100.5, 100.6, 6.0],
+    [100.05, 100.12, 99.95, 100.1, 5.0]];
+  const fr = (bars) => Frame.fromBars(bars.map((b, i) => [BASE + i * H, ...b]));
+  const rolling3 = (v) => Float64Array.from(v, (_, i) => (i < 2 ? NaN : (v[i - 2] + v[i - 1] + v[i]) / 3));
+
+  it('_assess_approach_quality: 6 bars pass the < 6 guard and reach df.iloc[-7] → IndexError; 7 bars → a verdict', () => {
+    // df = pd.DataFrame(BARS7[-k:], columns=["open", "high", "low", "close", "volume"])
+    // CHMIndicator(_cfg_to_ind(TradeCfg()))._assess_approach_quality(df, 100.0, 0.1, df["volume"].rolling(3).mean(), "PINBAR_AT_LEVEL")
+    //   → k=6: IndexError("single positional indexer is out-of-bounds"); k=7: (True, "✅ Снижение объёма на подходе")
+    const df6 = fr(BARS7.slice(1));
+    const df7 = fr(BARS7);
+    expect(() => L.assessApproachQuality(df6, 100.0, 0.1, rolling3(df6.v), 'PINBAR_AT_LEVEL')).toThrow(L.PyIndexError);
+    expect(L.assessApproachQuality(df7, 100.0, 0.1, rolling3(df7.v), 'PINBAR_AT_LEVEL'))
+      .toEqual({ ok: true, reason: '✅ Снижение объёма на подходе' });
+  });
+
+  // ind = CHMIndicator(_cfg_to_ind(TradeCfg(use_volume=False, use_rsi=False, zone_pct=0.1)))
+  // ind._do_analyze("X-USDT-SWAP", df, None, None, None, None, _precomputed_zones=([zone(p) for p in sup], [zone(p) for p in res]))
+  // with zone(p) = {"price": p, "hits": 2, "eff_hits": 2, "age_bars": 10, "class": 2, "is_psychological": False,
+  //                 "layers": 1, "has_hvn": False, "has_lvn_to_tp": False}
+  const ONE = [[100.0, 100.4, 99.8, 100.2, 10.0]];
+  const TWO = [[100.0, 100.4, 99.8, 100.1, 10.0], [100.1, 100.5, 99.9, 100.2, 10.0]];
+  const VECTORS = [
+    ['1 bar, resistance 100.3: retest misses, breakout reads close[-2]', ONE, [], [100.3], 'IndexError'],
+    ['1 bar, support 100.1: SFP fires before any [-2] read', ONE, [100.1], [], 'SFP (Захват ликвидности)'],
+    ['1 bar, support 99.9: no setup', ONE, [99.9], [], 'reject signal'],
+    ['2 bars, resistance 100.3', TWO, [], [100.3], 'SFP (Ложный пробой вверх)'],
+    ['6 bars, pin-bar bounce at 100.0: approach reads iloc[-7]', BARS7.slice(1), [100.0], [], 'IndexError'],
+    ['7 bars, pin-bar bounce at 100.0', BARS7, [100.0], [], 'Отскок от поддержки'],
+  ];
+  const zone = (price) => ({ price, hits: 2, eff_hits: 2, age_bars: 10, class: 2, is_psychological: false, layers: 1, has_hvn: false, has_lvn_to_tp: false });
+  it.each(VECTORS)('%s → %s', (_name, bars, sup, res, want) => {
+    const cfg = L.cfgToInd(L.tradeCfg({ use_volume: false, use_rsi: false, zone_pct: 0.1 }));
+    let got;
+    try {
+      const r = L.doAnalyze('X-USDT-SWAP', fr(bars), null, null, null, cfg, { precomputedZones: { sup: sup.map(zone), res: res.map(zone) } });
+      got = r.signal ? r.signal.breakout_type : `reject ${r.rejectReason}`;
+    } catch (e) {
+      got = e.name;
+    }
+    expect(got).toBe(want);
+  });
+});
