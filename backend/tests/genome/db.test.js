@@ -20,6 +20,7 @@ const require = createRequire(import.meta.url);
 process.env.NODE_ENV = 'development';
 process.env.JWT_SECRET = 'test-jwt-secret-0123456789abcdef012';
 process.env.JWT_REFRESH_SECRET = 'test-refresh-secret-0123456789abc';
+process.env.WALLET_ENCRYPTION_KEY = '0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef';
 process.env.DATABASE_PATH = path.join(process.cwd(), 'data', 'test-genome-db.db');
 process.env.DB_QUIET = '1';
 process.env.LOG_LEVEL = 'error';

@@ -289,8 +289,10 @@ async function evolveGeneration(strategy, tf = null, deps = {}) {
     for (const [genome, birth, pa, pb] of items) {
       let metrics;
       try {
-        if (d.mono() >= genDeadline.at) throw new evaluate.DeadlineError('generation');
-        const deadlines = [{ at: d.mono() + genomeTimeoutS * 1000, kind: 'genome' }, genDeadline, ...d.deadlines];
+        // asyncio cancels at any await: the manual 700 s / generation 1800 s deadlines are
+        // checked before every genome as well as between the coins inside evaluate
+        for (const dl of [...d.deadlines, genDeadline]) if (d.mono() >= dl.at) throw new evaluate.DeadlineError(dl.kind);
+        const deadlines = [{ at: d.mono() + genomeTimeoutS * 1000, kind: 'genome' }, ...d.deadlines, genDeadline];
         metrics = await d.evaluate(strategy, genome, T, {
           coins: sharedCoins, preloaded, liveWrBaseline,
           deps: { ...deps, now: d.now, mono: d.mono, sleep: d.sleep, cpuShare: d.cpuShare, log, store, deadlines },
