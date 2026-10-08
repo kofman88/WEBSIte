@@ -36,10 +36,19 @@ See the header of `engines.js`. An engine registers `{ run(ctx), prepare?(frames
 generator did: `df = 1h.iloc[:i+1]`, auxiliary frames = bars with `open_time + tf <= close_ms`,
 last 300 (`load.barInputs`). Unregistered engines show up as `todo`, never as failures.
 
+`smc_analysis` (M3, `runners/smcAnalysis.js`) is the SMC analysis layer alone: for every bar
+`strategies/smc/analyzer.analyze(symbol, df_htf, df_mtf, df_ltf)` with the default analysis key +
+`common/squeeze.computeSqueezeScore(df_mtf)`, digested with `analyzer.smcDigest` (=
+`make_golden._smc_digest`) and compared against `expected/smc_analysis.json` with
+`compare.compareDigest` (digest rounding map: `position_pct` 1 dp, `wick_ratio` 3 dp; the digest's
+`vol_ratio` is the raw analyzer ratio, unlike the VOLUME signal field of the same name). The `smc`
+engine (M4) reuses `smcDigest` for the digest it returns next to the signal.
+
 ## Running a subset
 
 ```
 GOLDEN_STRATEGIES=volume GOLDEN_VARIANTS=default GOLDEN_SYMBOLS=SYNRG01,BTC npm run golden
+GOLDEN_STRATEGIES=smc_analysis npm run golden   # SMC analysis-layer digests only (42 fixtures × 200 bars, ≈3 s)
 GOLDEN_STEP=5 npm run golden          # every 5th bar (fast smoke)
 GOLDEN_STRICT=1 npm run golden        # additionally require r10(engine) === fixture (bit-for-bit after the .10g rounding)
 ```
