@@ -270,12 +270,26 @@ function titleOf(text) {
   return String(text).split('\n')[0].replace(/<[^>]+>/g, '').slice(0, 200);
 }
 
+/**
+ * The e-mail rendering of a report: the generic template would escape the Telegram-HTML
+ * subset (<b>/<i>/<code>), so the report goes out as its own HTML (line breaks kept) with a
+ * tag-free plain-text part.
+ */
+function emailTemplate(text) {
+  const subject = titleOf(text);
+  const plain = String(text).replace(/<[^>]+>/g, '').replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&amp;/g, '&');
+  const html = '<div style="font-family:-apple-system,\'Inter\',sans-serif;color:#E5E5E5;background:#0A0A0A;padding:32px">'
+    + '<div style="max-width:560px;margin:0 auto;background:#121626;border-radius:16px;padding:32px;border:1px solid #1f2937;line-height:1.6">'
+    + `${String(text).split('\n').join('<br>')}</div></div>`;
+  return { subject, text: plain, html };
+}
+
 /** notifier.dispatch as the default sender: type report, text verbatim (HTML). */
 function notifierSender(notifier = null) {
   const n = notifier || require('../notifier');
   return (uid, { text, actions = null }) => n.dispatch(uid, {
     type: 'report', title: titleOf(text), body: text, tgText: text, link: STATS_LINK,
-    data: { text, actions },
+    template: emailTemplate(text), data: { text, actions },
   });
 }
 
@@ -500,5 +514,5 @@ module.exports = {
   DAILY_SUMMARY_HOUR_UTC, DAILY_SUMMARY_MINUTE_UTC, KV_LAST_WEEK, SEND_PAUSE_S, T, STATS_LINK,
   dailyEnabled, secondsUntilNextSummary, todayDate, formatSummary,
   readWeeklyConfig, r, period, weekKey, secondsUntilNext, formatDigest, appActions,
-  notifierSender, createReports,
+  notifierSender, emailTemplate, createReports,
 };

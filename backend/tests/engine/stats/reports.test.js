@@ -135,6 +135,10 @@ describe('weekly digest (§14)', () => {
     expect(await send(7, { text: '📊 <b>Итоги недели</b> · x\ny', actions: R.appActions('en') })).toEqual({ dispatched: true });
     expect(calls[0][1]).toMatchObject({ type: 'report', title: '📊 Итоги недели · x', body: '📊 <b>Итоги недели</b> · x\ny', link: '/app/?tab=stats' });
     expect(calls[0][1].data.actions).toEqual([{ text: '📱 Open stats', url: '/app/?tab=stats' }]);
+    // e-mail: own HTML (the generic template would escape <b>), tag-free text part
+    expect(calls[0][1].template.subject).toBe('📊 Итоги недели · x');
+    expect(calls[0][1].template.text).toBe('📊 Итоги недели · x\ny');
+    expect(calls[0][1].template.html).toContain('📊 <b>Итоги недели</b> · x<br>y');
   });
   it('loops honour the *_ENABLED switches', () => {
     const logs = [];
