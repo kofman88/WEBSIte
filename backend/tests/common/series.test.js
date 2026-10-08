@@ -1,12 +1,12 @@
 /**
  * series.js — pandas 2.3.3 / numpy 1.26.4 semantics pinned with reference vectors.
  *
- * Every expected vector below was produced by the exact pandas/numpy versions the golden
- * fixtures are made with (pandas 2.3.3, numpy 1.26.4; recorded under python 3.12.3, spot-
- * checked under the bot's python 3.11.17 — the pandas/numpy kernels do not depend on it); the
- * one-liner that produced it is quoted above each block. Values are repr() (shortest
- * round-trip) so the JS literals are the identical doubles → comparisons are EXACT
- * (Object.is), not approximate. NaN is written as null in the Python output.
+ * Every expected vector below was produced by the exact versions the golden fixtures are made
+ * with (the bot's python 3.11.17, pandas 2.3.3, numpy 1.26.4; all re-derived bit for bit under
+ * 3.11.17, identical to the first 3.12.3 recording); the one-liner that produced it is quoted
+ * above each block. Values are repr() (shortest round-trip) so the JS literals are the
+ * identical doubles → comparisons are EXACT (Object.is), not approximate. NaN is written as
+ * null in the Python output.
  */
 import { describe, it, expect } from 'vitest';
 import S from '../../strategies/common/series.js';
