@@ -2,7 +2,7 @@
  * tracker.js — pure replay vs the bot's signal_tracker.py.
  *
  * Every expected value in fixtures/tracker_vectors.json was printed by the bot's own
- * Python (scratchpad/m10a/gen_tracker_vectors.py, run in the bot venv):
+ * Python (gen/gen_tracker_vectors.py, run in the bot venv — see its docstring):
  *   named / random  → signal_tracker.levels_from_trade + replay + could_change + missed_r + mark_to_market_rr
  *   pick_tfs        → signal_tracker._pick_tfs(age_s)
  *   fmt_r / ago / fmt_outcome_r / outcome_line / card_text → the text helpers

@@ -1,9 +1,11 @@
 """gen_tracker_vectors.py — real outputs of the bot's signal_tracker.py pure functions
-(and process_trade / update_signal_card driven with fakes) for the JS parity tests.
+(and process_trade / update_signal_card / mark_missed / expire_stale / run_cycle driven with
+fakes for the DB, cache, REST, price, users and the Telegram bot) for the JS parity tests in
+backend/tests/engine/tracker/*.test.js. Candles: backend/tests/golden/candles.
 
-Run from the bot dir with the venv:
-  cd /home/user/MAIN_BOT/CHM_BREAKER_V4 && BOT_TOKEN_CHM=test:token ADMIN_IDS=123 \
-    venv/bin/python gen_tracker_vectors.py OUT.json
+Run with the bot's venv (the script chdirs into the bot checkout itself; OUT must be absolute):
+  BOT_TOKEN_CHM=test:token ADMIN_IDS=123 <venv>/bin/python gen_tracker_vectors.py /abs/OUT.json
+  (afterwards: rm -f <bot>/signal_registry.json)
 """
 from __future__ import annotations
 
