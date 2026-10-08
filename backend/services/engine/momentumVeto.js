@@ -67,7 +67,7 @@ function computeAtrPct(frame, period = 14) {
       ]));
     }
     if (!trs.length) return 0.0;
-    const atr = pySum(trs) / trs.length;     // CPython 3.12 sum(): Neumaier-compensated
+    const atr = pySum(trs) / trs.length;     // CPython 3.11 sum(): plain left-to-right
     const lastClose = frame.c[n - 1];
     if (lastClose <= 0) return 0.0;
     return (atr / lastClose) * 100.0;
