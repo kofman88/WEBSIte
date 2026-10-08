@@ -138,7 +138,7 @@ describe('golden fixtures', () => {
     expect(b.dfHtf4h.length).toBe(300);
     // every aux bar is closed at closeMs and the next one is not
     const last4h = b.dfHtf4h.t[b.dfHtf4h.length - 1];
-    expect(last4h + SWEEP.windows.smcHtf * 0 + 14_400_000).toBeLessThanOrEqual(b.closeMs);
+    expect(last4h + 14_400_000).toBeLessThanOrEqual(b.closeMs);
     const idx4h = frames['4h'].lastClosedAt('4h', b.closeMs);
     if (idx4h + 1 < frames['4h'].length) expect(frames['4h'].t[idx4h + 1] + 14_400_000).toBeGreaterThan(b.closeMs);
     expect(tsString(b.openTimeMs)).toMatch(/^\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}$/);

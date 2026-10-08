@@ -76,7 +76,7 @@ function compareValue(actual, expected, pathStr = '', diffs = [], key = '') {
       }
       return diffs;
     }
-    if (INTEGER_FIELDS.has(key) || Number.isInteger(expected) && Number.isInteger(actual) && Math.abs(expected) < 1e6 && key !== '') {
+    if (INTEGER_FIELDS.has(key)) {
       if (actual !== expected) diffs.push({ path: pathStr, actual, expected, rule: 'int' });
       return diffs;
     }
