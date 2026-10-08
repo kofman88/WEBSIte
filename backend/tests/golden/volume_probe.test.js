@@ -92,13 +92,8 @@ function sweepCase(c, cfg, symbol, fx, htfWindow) {
   return { failures, bars: indices.length, signals };
 }
 
-const PROBE_PRESENT = fs.existsSync(path.join(HERE, 'expected', 'volume_probe.json.gz')) && fs.existsSync(path.join(HERE, 'probe_summary.json'));
-
 describe('golden volume probe (make_volume_probe.py)', () => {
-  if (!PROBE_PRESENT) {
-    it.todo('expected/volume_probe.json.gz not generated yet (run make_volume_probe.py with the pinned venv) — probe sweep skipped');
-    return;
-  }
+  // the probe ships with the repo (expected/volume_probe.json.gz + probe_summary.json): a missing file fails loudly
   let probe, summary;
   beforeAll(() => { ({ probe, summary } = loadProbe()); });
 

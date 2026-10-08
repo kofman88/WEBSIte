@@ -209,7 +209,8 @@ def main():
     raw = json.dumps(out, ensure_ascii=False, separators=(",", ":")).encode("utf-8")
     exp_dir = os.path.join(OUT_DIR, "expected")
     os.makedirs(exp_dir, exist_ok=True)
-    with gzip.open(os.path.join(exp_dir, "volume_probe.json.gz"), "wb", mtime=0) as fh:
+    # gzip.open() takes no mtime argument (TypeError); GzipFile does — mtime=0 keeps the bytes reproducible
+    with gzip.GzipFile(filename=os.path.join(exp_dir, "volume_probe.json.gz"), mode="wb", mtime=0) as fh:
         fh.write(raw)
     n_sig = sum(f["n_signals"] for c in out["cases"].values() for f in c["fixtures"].values())
     n_bars = sum(f["n_swept"] for c in out["cases"].values() for f in c["fixtures"].values())
