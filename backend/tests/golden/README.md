@@ -17,6 +17,7 @@ tests/golden/
 ├── load.js                fixture loader (sha256 check, Frame cache, sweep inputs per bar)
 ├── compare.js             tolerance rules (PLAN §3): 1e-9 relative, exact ints/strings/bools, pyRound fields
 ├── engines.js             pluggable engine registry (null until M2–M6 register the engines)
+├── runners/               per-engine adapters (volume.js = M2: fromParams → analyzeVolume → scanner post-steps)
 ├── golden.test.js         the sweep
 └── layers.test.js         M1 primitives vs the layer dumps (squeeze / VOLUME context / LEVELS zone layers)
 ```
@@ -35,6 +36,13 @@ See the header of `engines.js`. An engine registers `{ run(ctx), prepare?(frames
 `run` is pure and synchronous. `ctx` carries zero-copy `Frame` views built like the
 generator did: `df = 1h.iloc[:i+1]`, auxiliary frames = bars with `open_time + tf <= close_ms`,
 last 300 (`load.barInputs`). Unregistered engines show up as `todo`, never as failures.
+The adapters live in `runners/` and do exactly what `make_golden.py` did around the Python
+call (config from the variant params, the scanner's pure post-steps, the record shape).
+
+Registered: **volume** (M2, `strategies/volume`, 162/151/197 signals bit-for-bit, also under
+`GOLDEN_STRICT=1`). The pyRound field map of `compare.js` is per strategy
+(`ROUNDED_FIELDS_BY_STRATEGY`): VOLUME rounds `rr`/`rsi`/`vol_ratio` only — its `risk_pct` is an
+unrounded property and goes through the 1e-9 tolerance rule.
 
 ## Running a subset
 

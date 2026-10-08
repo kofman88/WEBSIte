@@ -20,7 +20,7 @@ import compare from './compare.js';
 import registry from './engines.js';
 
 const { SWEEP, STRATEGIES, VARIANTS, loadExpected, loadFrames, listSymbols, sweepIndices, barInputs, tsString, verifyAll } = load;
-const { compareSignal, compareValue, formatDiffs } = compare;
+const { compareSignal, compareValue, formatDiffs, ROUNDED_FIELDS_BY_STRATEGY } = compare;
 
 const envList = (name) => (process.env[name] ? process.env[name].split(',').map((s) => s.trim()).filter(Boolean) : null);
 const SYMBOL_PREFIXES = envList('GOLDEN_SYMBOLS');
@@ -92,7 +92,7 @@ function sweepFixture(strategy, engine, symbol, variantName, variant, expectedFi
         failures.push(`bar ${i}: expected a ${exp.direction} signal, engine returned null${out && out.rejectReason ? ` (reject=${out.rejectReason})` : ''}`);
       } else {
         signals++;
-        const diffs = compareSignal(sig, exp, { ignoreKeys: HARNESS_KEYS[strategy] });
+        const diffs = compareSignal(sig, exp, { ignoreKeys: HARNESS_KEYS[strategy], roundedFields: ROUNDED_FIELDS_BY_STRATEGY[strategy] });
         const hr = harnessRecord(strategy, ctx);
         for (const k of HARNESS_KEYS[strategy]) {
           if (exp[k] !== undefined && hr[k] !== exp[k]) diffs.push({ path: `harness.${k}`, actual: hr[k], expected: exp[k], rule: 'harness' });
