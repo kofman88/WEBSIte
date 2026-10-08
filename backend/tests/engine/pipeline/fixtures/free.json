@@ -1,0 +1,3874 @@
+{
+ "quota": [
+  {
+   "op": [
+    "should",
+    "a",
+    1,
+    5,
+    30,
+    9
+   ],
+   "now": 1803879000.0,
+   "result": false,
+   "user": {
+    "free_signals_date": "2027-03-01",
+    "free_signals_morning": 0,
+    "free_signals_evening": 0,
+    "free_signals_night": 0,
+    "free_signals_today": 0,
+    "free_missed_today": 0,
+    "free_smc_preview_date": "",
+    "free_smc_preview_today": 0
+   },
+   "logs": [
+    "[FREE-WINDOW] uid=101 off-hours (h=5 UTC) — blocked"
+   ]
+  },
+  {
+   "op": [
+    "should",
+    "a",
+    1,
+    6,
+    10,
+    4
+   ],
+   "now": 1803881400.0,
+   "result": false,
+   "user": {
+    "free_signals_date": "2027-03-01",
+    "free_signals_morning": 0,
+    "free_signals_evening": 0,
+    "free_signals_night": 0,
+    "free_signals_today": 0,
+    "free_missed_today": 0,
+    "free_smc_preview_date": "",
+    "free_smc_preview_today": 0
+   },
+   "logs": []
+  },
+  {
+   "op": [
+    "should",
+    "a",
+    1,
+    6,
+    20,
+    5
+   ],
+   "now": 1803882000.0,
+   "result": true,
+   "user": {
+    "free_signals_date": "2027-03-01",
+    "free_signals_morning": 0,
+    "free_signals_evening": 0,
+    "free_signals_night": 0,
+    "free_signals_today": 0,
+    "free_missed_today": 0,
+    "free_smc_preview_date": "",
+    "free_smc_preview_today": 0
+   },
+   "logs": [
+    "[FREE-WINDOW] uid=101 window=morning quality=5 permission granted (awaiting delivery confirmation)"
+   ]
+  },
+  {
+   "op": [
+    "record",
+    "a",
+    1,
+    6,
+    21,
+    ""
+   ],
+   "now": 1803882060.0,
+   "result": null,
+   "user": {
+    "free_signals_date": "2027-03-01",
+    "free_signals_morning": 1,
+    "free_signals_evening": 0,
+    "free_signals_night": 0,
+    "free_signals_today": 1,
+    "free_missed_today": 0,
+    "free_smc_preview_date": "",
+    "free_smc_preview_today": 0
+   },
+   "logs": [
+    "[FREE-WINDOW] uid=101 window=morning SENT (total_today=1)"
+   ]
+  },
+  {
+   "op": [
+    "should",
+    "a",
+    1,
+    7,
+    0,
+    9
+   ],
+   "now": 1803884400.0,
+   "result": false,
+   "user": {
+    "free_signals_date": "2027-03-01",
+    "free_signals_morning": 1,
+    "free_signals_evening": 0,
+    "free_signals_night": 0,
+    "free_signals_today": 1,
+    "free_missed_today": 0,
+    "free_smc_preview_date": "",
+    "free_smc_preview_today": 0
+   },
+   "logs": [
+    "[FREE-WINDOW] uid=101 window=morning already_sent=1 — blocked"
+   ]
+  },
+  {
+   "op": [
+    "should",
+    "a",
+    1,
+    12,
+    30,
+    3
+   ],
+   "now": 1803904200.0,
+   "result": false,
+   "user": {
+    "free_signals_date": "2027-03-01",
+    "free_signals_morning": 1,
+    "free_signals_evening": 0,
+    "free_signals_night": 0,
+    "free_signals_today": 1,
+    "free_missed_today": 0,
+    "free_smc_preview_date": "",
+    "free_smc_preview_today": 0
+   },
+   "logs": [
+    "[FREE-WINDOW] uid=101 window=morning already_sent=1 — blocked"
+   ]
+  },
+  {
+   "op": [
+    "should",
+    "a",
+    1,
+    13,
+    5,
+    4
+   ],
+   "now": 1803906300.0,
+   "result": false,
+   "user": {
+    "free_signals_date": "2027-03-01",
+    "free_signals_morning": 1,
+    "free_signals_evening": 0,
+    "free_signals_night": 0,
+    "free_signals_today": 1,
+    "free_missed_today": 0,
+    "free_smc_preview_date": "",
+    "free_smc_preview_today": 0
+   },
+   "logs": []
+  },
+  {
+   "op": [
+    "should",
+    "a",
+    1,
+    13,
+    6,
+    5.5
+   ],
+   "now": 1803906360.0,
+   "result": true,
+   "user": {
+    "free_signals_date": "2027-03-01",
+    "free_signals_morning": 1,
+    "free_signals_evening": 0,
+    "free_signals_night": 0,
+    "free_signals_today": 1,
+    "free_missed_today": 0,
+    "free_smc_preview_date": "",
+    "free_smc_preview_today": 0
+   },
+   "logs": [
+    "[FREE-WINDOW] uid=101 window=evening quality=5 permission granted (awaiting delivery confirmation)"
+   ]
+  },
+  {
+   "op": [
+    "should",
+    "a",
+    1,
+    20,
+    10,
+    3
+   ],
+   "now": 1803931800.0,
+   "result": true,
+   "user": {
+    "free_signals_date": "2027-03-01",
+    "free_signals_morning": 1,
+    "free_signals_evening": 0,
+    "free_signals_night": 0,
+    "free_signals_today": 1,
+    "free_missed_today": 0,
+    "free_smc_preview_date": "",
+    "free_smc_preview_today": 0
+   },
+   "logs": [
+    "[GUARANTEED-DELIVERY] uid=101 window=evening closing — relaxed min_q=3",
+    "[FREE-WINDOW] uid=101 window=evening quality=3 permission granted (awaiting delivery confirmation)"
+   ]
+  },
+  {
+   "op": [
+    "record",
+    "a",
+    1,
+    20,
+    11,
+    ""
+   ],
+   "now": 1803931860.0,
+   "result": null,
+   "user": {
+    "free_signals_date": "2027-03-01",
+    "free_signals_morning": 1,
+    "free_signals_evening": 1,
+    "free_signals_night": 0,
+    "free_signals_today": 2,
+    "free_missed_today": 0,
+    "free_smc_preview_date": "",
+    "free_smc_preview_today": 0
+   },
+   "logs": [
+    "[FREE-WINDOW] uid=101 window=evening SENT (total_today=2)"
+   ]
+  },
+  {
+   "op": [
+    "should",
+    "a",
+    1,
+    20,
+    30,
+    9
+   ],
+   "now": 1803933000.0,
+   "result": false,
+   "user": {
+    "free_signals_date": "2027-03-01",
+    "free_signals_morning": 1,
+    "free_signals_evening": 1,
+    "free_signals_night": 0,
+    "free_signals_today": 2,
+    "free_missed_today": 0,
+    "free_smc_preview_date": "",
+    "free_smc_preview_today": 0
+   },
+   "logs": [
+    "[FREE-WINDOW] uid=101 window=evening already_sent=1 — blocked"
+   ]
+  },
+  {
+   "op": [
+    "should",
+    "a",
+    1,
+    21,
+    0,
+    9
+   ],
+   "now": 1803934800.0,
+   "result": false,
+   "user": {
+    "free_signals_date": "2027-03-01",
+    "free_signals_morning": 1,
+    "free_signals_evening": 1,
+    "free_signals_night": 0,
+    "free_signals_today": 2,
+    "free_missed_today": 0,
+    "free_smc_preview_date": "",
+    "free_smc_preview_today": 0
+   },
+   "logs": [
+    "[FREE-WINDOW] uid=101 off-hours (h=21 UTC) — blocked"
+   ]
+  },
+  {
+   "op": [
+    "record",
+    "a",
+    1,
+    22,
+    0,
+    ""
+   ],
+   "now": 1803938400.0,
+   "result": null,
+   "user": {
+    "free_signals_date": "2027-03-01",
+    "free_signals_morning": 1,
+    "free_signals_evening": 2,
+    "free_signals_night": 0,
+    "free_signals_today": 3,
+    "free_missed_today": 0,
+    "free_smc_preview_date": "",
+    "free_smc_preview_today": 0
+   },
+   "logs": [
+    "[FREE-WINDOW] uid=101 window=evening SENT (total_today=3)"
+   ]
+  },
+  {
+   "op": [
+    "record",
+    "a",
+    1,
+    23,
+    0,
+    "morning"
+   ],
+   "now": 1803942000.0,
+   "result": null,
+   "user": {
+    "free_signals_date": "2027-03-01",
+    "free_signals_morning": 2,
+    "free_signals_evening": 2,
+    "free_signals_night": 0,
+    "free_signals_today": 4,
+    "free_missed_today": 0,
+    "free_smc_preview_date": "",
+    "free_smc_preview_today": 0
+   },
+   "logs": [
+    "[FREE-WINDOW] uid=101 window=morning SENT (total_today=4)"
+   ]
+  },
+  {
+   "op": [
+    "should",
+    "a",
+    2,
+    6,
+    0,
+    5
+   ],
+   "now": 1803967200.0,
+   "result": true,
+   "user": {
+    "free_signals_date": "2027-03-02",
+    "free_signals_morning": 0,
+    "free_signals_evening": 0,
+    "free_signals_night": 0,
+    "free_signals_today": 0,
+    "free_missed_today": 0,
+    "free_smc_preview_date": "",
+    "free_smc_preview_today": 0
+   },
+   "logs": [
+    "[FREE-WINDOW] uid=101 window=morning quality=5 permission granted (awaiting delivery confirmation)"
+   ]
+  },
+  {
+   "op": [
+    "should",
+    "a",
+    2,
+    12,
+    59,
+    2
+   ],
+   "now": 1803992340.0,
+   "result": false,
+   "user": {
+    "free_signals_date": "2027-03-02",
+    "free_signals_morning": 0,
+    "free_signals_evening": 0,
+    "free_signals_night": 0,
+    "free_signals_today": 0,
+    "free_missed_today": 0,
+    "free_smc_preview_date": "",
+    "free_smc_preview_today": 0
+   },
+   "logs": [
+    "[GUARANTEED-DELIVERY] uid=101 window=morning closing — relaxed min_q=3"
+   ]
+  },
+  {
+   "op": [
+    "should",
+    "b",
+    2,
+    12,
+    0,
+    3
+   ],
+   "now": 1803988800.0,
+   "result": true,
+   "user": {
+    "free_signals_date": "2027-03-02",
+    "free_signals_morning": 0,
+    "free_signals_evening": 0,
+    "free_signals_night": 0,
+    "free_signals_today": 0,
+    "free_missed_today": 0,
+    "free_smc_preview_date": "",
+    "free_smc_preview_today": 0
+   },
+   "logs": [
+    "[GUARANTEED-DELIVERY] uid=102 window=morning closing — relaxed min_q=3",
+    "[FREE-WINDOW] uid=102 window=morning quality=3 permission granted (awaiting delivery confirmation)"
+   ]
+  },
+  {
+   "op": [
+    "record",
+    "b",
+    2,
+    12,
+    1,
+    "evening"
+   ],
+   "now": 1803988860.0,
+   "result": null,
+   "user": {
+    "free_signals_date": "2027-03-02",
+    "free_signals_morning": 0,
+    "free_signals_evening": 1,
+    "free_signals_night": 0,
+    "free_signals_today": 1,
+    "free_missed_today": 0,
+    "free_smc_preview_date": "",
+    "free_smc_preview_today": 0
+   },
+   "logs": [
+    "[FREE-WINDOW] uid=102 window=evening SENT (total_today=1)"
+   ]
+  },
+  {
+   "op": [
+    "should",
+    "b",
+    2,
+    12,
+    2,
+    3
+   ],
+   "now": 1803988920.0,
+   "result": true,
+   "user": {
+    "free_signals_date": "2027-03-02",
+    "free_signals_morning": 0,
+    "free_signals_evening": 1,
+    "free_signals_night": 0,
+    "free_signals_today": 1,
+    "free_missed_today": 0,
+    "free_smc_preview_date": "",
+    "free_smc_preview_today": 0
+   },
+   "logs": [
+    "[GUARANTEED-DELIVERY] uid=102 window=morning closing — relaxed min_q=3",
+    "[FREE-WINDOW] uid=102 window=morning quality=3 permission granted (awaiting delivery confirmation)"
+   ]
+  },
+  {
+   "op": [
+    "should",
+    "b",
+    2,
+    20,
+    59,
+    3
+   ],
+   "now": 1804021140.0,
+   "result": false,
+   "user": {
+    "free_signals_date": "2027-03-02",
+    "free_signals_morning": 0,
+    "free_signals_evening": 1,
+    "free_signals_night": 0,
+    "free_signals_today": 1,
+    "free_missed_today": 0,
+    "free_smc_preview_date": "",
+    "free_smc_preview_today": 0
+   },
+   "logs": [
+    "[FREE-WINDOW] uid=102 window=evening already_sent=1 — blocked"
+   ]
+  },
+  {
+   "op": [
+    "should",
+    "pro",
+    2,
+    3,
+    0,
+    0
+   ],
+   "now": 1803956400.0,
+   "result": true,
+   "user": {
+    "free_signals_date": "",
+    "free_signals_morning": 0,
+    "free_signals_evening": 0,
+    "free_signals_night": 0,
+    "free_signals_today": 0,
+    "free_missed_today": 0,
+    "free_smc_preview_date": "",
+    "free_smc_preview_today": 0
+   },
+   "logs": []
+  },
+  {
+   "op": [
+    "record",
+    "pro",
+    2,
+    3,
+    1,
+    ""
+   ],
+   "now": 1803956460.0,
+   "result": null,
+   "user": {
+    "free_signals_date": "2027-03-02",
+    "free_signals_morning": 0,
+    "free_signals_evening": 1,
+    "free_signals_night": 0,
+    "free_signals_today": 1,
+    "free_missed_today": 0,
+    "free_smc_preview_date": "",
+    "free_smc_preview_today": 0
+   },
+   "logs": [
+    "[FREE-WINDOW] uid=103 window=evening SENT (total_today=1)"
+   ]
+  },
+  {
+   "op": [
+    "should",
+    "c",
+    2,
+    9,
+    0,
+    6
+   ],
+   "now": 1803978000.0,
+   "result": true,
+   "user": {
+    "free_signals_date": "2027-03-02",
+    "free_signals_morning": 0,
+    "free_signals_evening": 0,
+    "free_signals_night": 0,
+    "free_signals_today": 0,
+    "free_missed_today": 0,
+    "free_smc_preview_date": "",
+    "free_smc_preview_today": 0
+   },
+   "logs": [
+    "[FREE-WINDOW] uid=104 window=morning quality=6 permission granted (awaiting delivery confirmation)"
+   ]
+  }
+ ],
+ "missed": [
+  {
+   "i": 0,
+   "user": {
+    "free_signals_date": "2027-03-03",
+    "free_signals_morning": 0,
+    "free_signals_evening": 0,
+    "free_signals_night": 0,
+    "free_signals_today": 0,
+    "free_missed_today": 1,
+    "free_smc_preview_date": "",
+    "free_smc_preview_today": 0
+   },
+   "writes": []
+  },
+  {
+   "i": 1,
+   "user": {
+    "free_signals_date": "2027-03-03",
+    "free_signals_morning": 0,
+    "free_signals_evening": 0,
+    "free_signals_night": 0,
+    "free_signals_today": 0,
+    "free_missed_today": 1,
+    "free_smc_preview_date": "",
+    "free_smc_preview_today": 0
+   },
+   "writes": []
+  },
+  {
+   "i": 2,
+   "user": {
+    "free_signals_date": "2027-03-03",
+    "free_signals_morning": 0,
+    "free_signals_evening": 0,
+    "free_signals_night": 0,
+    "free_signals_today": 0,
+    "free_missed_today": 1,
+    "free_smc_preview_date": "",
+    "free_smc_preview_today": 0
+   },
+   "writes": []
+  },
+  {
+   "i": 3,
+   "user": {
+    "free_signals_date": "2027-03-03",
+    "free_signals_morning": 0,
+    "free_signals_evening": 0,
+    "free_signals_night": 0,
+    "free_signals_today": 0,
+    "free_missed_today": 2,
+    "free_smc_preview_date": "",
+    "free_smc_preview_today": 0
+   },
+   "writes": []
+  },
+  {
+   "i": 4,
+   "user": {
+    "free_signals_date": "2027-03-03",
+    "free_signals_morning": 0,
+    "free_signals_evening": 0,
+    "free_signals_night": 0,
+    "free_signals_today": 0,
+    "free_missed_today": 2,
+    "free_smc_preview_date": "",
+    "free_smc_preview_today": 0
+   },
+   "writes": []
+  },
+  {
+   "i": 5,
+   "user": {
+    "free_signals_date": "2027-03-03",
+    "free_signals_morning": 0,
+    "free_signals_evening": 0,
+    "free_signals_night": 0,
+    "free_signals_today": 0,
+    "free_missed_today": 2,
+    "free_smc_preview_date": "",
+    "free_smc_preview_today": 0
+   },
+   "writes": []
+  },
+  {
+   "i": 6,
+   "user": {
+    "free_signals_date": "2027-03-03",
+    "free_signals_morning": 0,
+    "free_signals_evening": 0,
+    "free_signals_night": 0,
+    "free_signals_today": 0,
+    "free_missed_today": 3,
+    "free_smc_preview_date": "",
+    "free_smc_preview_today": 0
+   },
+   "writes": []
+  },
+  {
+   "i": 7,
+   "user": {
+    "free_signals_date": "2027-03-03",
+    "free_signals_morning": 0,
+    "free_signals_evening": 0,
+    "free_signals_night": 0,
+    "free_signals_today": 0,
+    "free_missed_today": 3,
+    "free_smc_preview_date": "",
+    "free_smc_preview_today": 0
+   },
+   "writes": []
+  },
+  {
+   "i": 8,
+   "user": {
+    "free_signals_date": "2027-03-03",
+    "free_signals_morning": 0,
+    "free_signals_evening": 0,
+    "free_signals_night": 0,
+    "free_signals_today": 0,
+    "free_missed_today": 3,
+    "free_smc_preview_date": "",
+    "free_smc_preview_today": 0
+   },
+   "writes": []
+  },
+  {
+   "i": 9,
+   "user": {
+    "free_signals_date": "2027-03-03",
+    "free_signals_morning": 0,
+    "free_signals_evening": 0,
+    "free_signals_night": 0,
+    "free_signals_today": 0,
+    "free_missed_today": 4,
+    "free_smc_preview_date": "",
+    "free_smc_preview_today": 0
+   },
+   "writes": [
+    [
+     "free_missed_buffer",
+     "{\"201\": [{\"symbol\": \"S0-USDT-SWAP\", \"direction\": \"SHORT\", \"quality\": 0, \"rr\": 0, \"ts\": 1804068000.0}, {\"symbol\": \"S3-USDT-SWAP\", \"direction\": \"LONG\", \"quality\": 3, \"rr\": 2.75, \"ts\": 1804068021.75}, {\"symbol\": \"S6-USDT-SWAP\", \"direction\": \"SHORT\", \"quality\": 6, \"rr\": 1.25, \"ts\": 1804068043.5}, {\"symbol\": \"S9-USDT-SWAP\", \"direction\": \"LONG\", \"quality\": 9, \"rr\": 0.5, \"ts\": 1804068065.25}], \"202\": [{\"symbol\": \"S1-USDT-SWAP\", \"direction\": \"LONG\", \"quality\": 1, \"rr\": 0.5, \"ts\": 1804068007.25}, {\"symbol\": \"S4-USDT-SWAP\", \"direction\": \"SHORT\", \"quality\": 4, \"rr\": 0, \"ts\": 1804068029.0}, {\"symbol\": \"S7-USDT-SWAP\", \"direction\": \"LONG\", \"quality\": 7, \"rr\": 2.75, \"ts\": 1804068050.75}], \"203\": [{\"symbol\": \"S2-USDT-SWAP\", \"direction\": \"SHORT\", \"quality\": 2, \"rr\": 1.25, \"ts\": 1804068014.5}, {\"symbol\": \"S5-USDT-SWAP\", \"direction\": \"LONG\", \"quality\": 5, \"rr\": 0.5, \"ts\": 1804068036.25}, {\"symbol\": \"S8-USDT-SWAP\", \"direction\": \"SHORT\", \"quality\": 8, \"rr\": 0, \"ts\": 1804068058.0}]}"
+    ]
+   ]
+  },
+  {
+   "i": 10,
+   "user": {
+    "free_signals_date": "2027-03-03",
+    "free_signals_morning": 0,
+    "free_signals_evening": 0,
+    "free_signals_night": 0,
+    "free_signals_today": 0,
+    "free_missed_today": 4,
+    "free_smc_preview_date": "",
+    "free_smc_preview_today": 0
+   },
+   "writes": []
+  },
+  {
+   "i": 11,
+   "user": {
+    "free_signals_date": "2027-03-03",
+    "free_signals_morning": 0,
+    "free_signals_evening": 0,
+    "free_signals_night": 0,
+    "free_signals_today": 0,
+    "free_missed_today": 4,
+    "free_smc_preview_date": "",
+    "free_smc_preview_today": 0
+   },
+   "writes": []
+  },
+  {
+   "i": 12,
+   "user": {
+    "free_signals_date": "2027-03-03",
+    "free_signals_morning": 0,
+    "free_signals_evening": 0,
+    "free_signals_night": 0,
+    "free_signals_today": 0,
+    "free_missed_today": 5,
+    "free_smc_preview_date": "",
+    "free_smc_preview_today": 0
+   },
+   "writes": []
+  },
+  {
+   "i": 13,
+   "user": {
+    "free_signals_date": "2027-03-03",
+    "free_signals_morning": 0,
+    "free_signals_evening": 0,
+    "free_signals_night": 0,
+    "free_signals_today": 0,
+    "free_missed_today": 5,
+    "free_smc_preview_date": "",
+    "free_smc_preview_today": 0
+   },
+   "writes": []
+  },
+  {
+   "i": 14,
+   "user": {
+    "free_signals_date": "2027-03-03",
+    "free_signals_morning": 0,
+    "free_signals_evening": 0,
+    "free_signals_night": 0,
+    "free_signals_today": 0,
+    "free_missed_today": 5,
+    "free_smc_preview_date": "",
+    "free_smc_preview_today": 0
+   },
+   "writes": []
+  },
+  {
+   "i": 15,
+   "user": {
+    "free_signals_date": "2027-03-03",
+    "free_signals_morning": 0,
+    "free_signals_evening": 0,
+    "free_signals_night": 0,
+    "free_signals_today": 0,
+    "free_missed_today": 6,
+    "free_smc_preview_date": "",
+    "free_smc_preview_today": 0
+   },
+   "writes": []
+  },
+  {
+   "i": 16,
+   "user": {
+    "free_signals_date": "2027-03-03",
+    "free_signals_morning": 0,
+    "free_signals_evening": 0,
+    "free_signals_night": 0,
+    "free_signals_today": 0,
+    "free_missed_today": 6,
+    "free_smc_preview_date": "",
+    "free_smc_preview_today": 0
+   },
+   "writes": []
+  },
+  {
+   "i": 17,
+   "user": {
+    "free_signals_date": "2027-03-03",
+    "free_signals_morning": 0,
+    "free_signals_evening": 0,
+    "free_signals_night": 0,
+    "free_signals_today": 0,
+    "free_missed_today": 6,
+    "free_smc_preview_date": "",
+    "free_smc_preview_today": 0
+   },
+   "writes": []
+  },
+  {
+   "i": 18,
+   "user": {
+    "free_signals_date": "2027-03-03",
+    "free_signals_morning": 0,
+    "free_signals_evening": 0,
+    "free_signals_night": 0,
+    "free_signals_today": 0,
+    "free_missed_today": 7,
+    "free_smc_preview_date": "",
+    "free_smc_preview_today": 0
+   },
+   "writes": []
+  },
+  {
+   "i": 19,
+   "user": {
+    "free_signals_date": "2027-03-03",
+    "free_signals_morning": 0,
+    "free_signals_evening": 0,
+    "free_signals_night": 0,
+    "free_signals_today": 0,
+    "free_missed_today": 7,
+    "free_smc_preview_date": "",
+    "free_smc_preview_today": 0
+   },
+   "writes": [
+    [
+     "free_missed_buffer",
+     "{\"201\": [{\"symbol\": \"S0-USDT-SWAP\", \"direction\": \"SHORT\", \"quality\": 0, \"rr\": 0, \"ts\": 1804068000.0}, {\"symbol\": \"S3-USDT-SWAP\", \"direction\": \"LONG\", \"quality\": 3, \"rr\": 2.75, \"ts\": 1804068021.75}, {\"symbol\": \"S6-USDT-SWAP\", \"direction\": \"SHORT\", \"quality\": 6, \"rr\": 1.25, \"ts\": 1804068043.5}, {\"symbol\": \"S9-USDT-SWAP\", \"direction\": \"LONG\", \"quality\": 9, \"rr\": 0.5, \"ts\": 1804068065.25}, {\"symbol\": \"S12-USDT-SWAP\", \"direction\": \"SHORT\", \"quality\": 2, \"rr\": 0, \"ts\": 1804068087.0}, {\"symbol\": \"S15-USDT-SWAP\", \"direction\": \"LONG\", \"quality\": 5, \"rr\": 2.75, \"ts\": 1804068108.75}, {\"symbol\": \"S18-USDT-SWAP\", \"direction\": \"SHORT\", \"quality\": 8, \"rr\": 1.25, \"ts\": 1804068130.5}], \"202\": [{\"symbol\": \"S1-USDT-SWAP\", \"direction\": \"LONG\", \"quality\": 1, \"rr\": 0.5, \"ts\": 1804068007.25}, {\"symbol\": \"S4-USDT-SWAP\", \"direction\": \"SHORT\", \"quality\": 4, \"rr\": 0, \"ts\": 1804068029.0}, {\"symbol\": \"S7-USDT-SWAP\", \"direction\": \"LONG\", \"quality\": 7, \"rr\": 2.75, \"ts\": 1804068050.75}, {\"symbol\": \"S10-USDT-SWAP\", \"direction\": \"SHORT\", \"quality\": 0, \"rr\": 1.25, \"ts\": 1804068072.5}, {\"symbol\": \"S13-USDT-SWAP\", \"direction\": \"LONG\", \"quality\": 3, \"rr\": 0.5, \"ts\": 1804068094.25}, {\"symbol\": \"S16-USDT-SWAP\", \"direction\": \"SHORT\", \"quality\": 6, \"rr\": 0, \"ts\": 1804068116.0}, {\"symbol\": \"S19-USDT-SWAP\", \"direction\": \"LONG\", \"quality\": 9, \"rr\": 2.75, \"ts\": 1804068137.75}], \"203\": [{\"symbol\": \"S2-USDT-SWAP\", \"direction\": \"SHORT\", \"quality\": 2, \"rr\": 1.25, \"ts\": 1804068014.5}, {\"symbol\": \"S5-USDT-SWAP\", \"direction\": \"LONG\", \"quality\": 5, \"rr\": 0.5, \"ts\": 1804068036.25}, {\"symbol\": \"S8-USDT-SWAP\", \"direction\": \"SHORT\", \"quality\": 8, \"rr\": 0, \"ts\": 1804068058.0}, {\"symbol\": \"S11-USDT-SWAP\", \"direction\": \"LONG\", \"quality\": 1, \"rr\": 2.75, \"ts\": 1804068079.75}, {\"symbol\": \"S14-USDT-SWAP\", \"direction\": \"SHORT\", \"quality\": 4, \"rr\": 1.25, \"ts\": 1804068101.5}, {\"symbol\": \"S17-USDT-SWAP\", \"direction\": \"LONG\", \"quality\": 7, \"rr\": 0.5, \"ts\": 1804068123.25}]}"
+    ]
+   ]
+  },
+  {
+   "i": 20,
+   "user": {
+    "free_signals_date": "2027-03-03",
+    "free_signals_morning": 0,
+    "free_signals_evening": 0,
+    "free_signals_night": 0,
+    "free_signals_today": 0,
+    "free_missed_today": 7,
+    "free_smc_preview_date": "",
+    "free_smc_preview_today": 0
+   },
+   "writes": []
+  },
+  {
+   "i": 21,
+   "user": {
+    "free_signals_date": "2027-03-03",
+    "free_signals_morning": 0,
+    "free_signals_evening": 0,
+    "free_signals_night": 0,
+    "free_signals_today": 0,
+    "free_missed_today": 8,
+    "free_smc_preview_date": "",
+    "free_smc_preview_today": 0
+   },
+   "writes": []
+  },
+  {
+   "i": 22,
+   "user": {
+    "free_signals_date": "2027-03-03",
+    "free_signals_morning": 0,
+    "free_signals_evening": 0,
+    "free_signals_night": 0,
+    "free_signals_today": 0,
+    "free_missed_today": 8,
+    "free_smc_preview_date": "",
+    "free_smc_preview_today": 0
+   },
+   "writes": []
+  },
+  {
+   "i": 23,
+   "user": {
+    "free_signals_date": "2027-03-03",
+    "free_signals_morning": 0,
+    "free_signals_evening": 0,
+    "free_signals_night": 0,
+    "free_signals_today": 0,
+    "free_missed_today": 8,
+    "free_smc_preview_date": "",
+    "free_smc_preview_today": 0
+   },
+   "writes": []
+  },
+  {
+   "i": 24,
+   "user": {
+    "free_signals_date": "2027-03-03",
+    "free_signals_morning": 0,
+    "free_signals_evening": 0,
+    "free_signals_night": 0,
+    "free_signals_today": 0,
+    "free_missed_today": 9,
+    "free_smc_preview_date": "",
+    "free_smc_preview_today": 0
+   },
+   "writes": []
+  },
+  {
+   "i": 25,
+   "user": {
+    "free_signals_date": "2027-03-03",
+    "free_signals_morning": 0,
+    "free_signals_evening": 0,
+    "free_signals_night": 0,
+    "free_signals_today": 0,
+    "free_missed_today": 9,
+    "free_smc_preview_date": "",
+    "free_smc_preview_today": 0
+   },
+   "writes": []
+  },
+  {
+   "i": 26,
+   "user": {
+    "free_signals_date": "2027-03-03",
+    "free_signals_morning": 0,
+    "free_signals_evening": 0,
+    "free_signals_night": 0,
+    "free_signals_today": 0,
+    "free_missed_today": 9,
+    "free_smc_preview_date": "",
+    "free_smc_preview_today": 0
+   },
+   "writes": []
+  },
+  {
+   "i": 27,
+   "user": {
+    "free_signals_date": "2027-03-03",
+    "free_signals_morning": 0,
+    "free_signals_evening": 0,
+    "free_signals_night": 0,
+    "free_signals_today": 0,
+    "free_missed_today": 10,
+    "free_smc_preview_date": "",
+    "free_smc_preview_today": 0
+   },
+   "writes": []
+  },
+  {
+   "i": 28,
+   "user": {
+    "free_signals_date": "2027-03-03",
+    "free_signals_morning": 0,
+    "free_signals_evening": 0,
+    "free_signals_night": 0,
+    "free_signals_today": 0,
+    "free_missed_today": 10,
+    "free_smc_preview_date": "",
+    "free_smc_preview_today": 0
+   },
+   "writes": []
+  },
+  {
+   "i": 29,
+   "user": {
+    "free_signals_date": "2027-03-03",
+    "free_signals_morning": 0,
+    "free_signals_evening": 0,
+    "free_signals_night": 0,
+    "free_signals_today": 0,
+    "free_missed_today": 10,
+    "free_smc_preview_date": "",
+    "free_smc_preview_today": 0
+   },
+   "writes": [
+    [
+     "free_missed_buffer",
+     "{\"201\": [{\"symbol\": \"S0-USDT-SWAP\", \"direction\": \"SHORT\", \"quality\": 0, \"rr\": 0, \"ts\": 1804068000.0}, {\"symbol\": \"S3-USDT-SWAP\", \"direction\": \"LONG\", \"quality\": 3, \"rr\": 2.75, \"ts\": 1804068021.75}, {\"symbol\": \"S6-USDT-SWAP\", \"direction\": \"SHORT\", \"quality\": 6, \"rr\": 1.25, \"ts\": 1804068043.5}, {\"symbol\": \"S9-USDT-SWAP\", \"direction\": \"LONG\", \"quality\": 9, \"rr\": 0.5, \"ts\": 1804068065.25}, {\"symbol\": \"S12-USDT-SWAP\", \"direction\": \"SHORT\", \"quality\": 2, \"rr\": 0, \"ts\": 1804068087.0}, {\"symbol\": \"S15-USDT-SWAP\", \"direction\": \"LONG\", \"quality\": 5, \"rr\": 2.75, \"ts\": 1804068108.75}, {\"symbol\": \"S18-USDT-SWAP\", \"direction\": \"SHORT\", \"quality\": 8, \"rr\": 1.25, \"ts\": 1804068130.5}, {\"symbol\": \"S21-USDT-SWAP\", \"direction\": \"LONG\", \"quality\": 1, \"rr\": 0.5, \"ts\": 1804068152.25}, {\"symbol\": \"S24-USDT-SWAP\", \"direction\": \"SHORT\", \"quality\": 4, \"rr\": 0, \"ts\": 1804068174.0}, {\"symbol\": \"S27-USDT-SWAP\", \"direction\": \"LONG\", \"quality\": 7, \"rr\": 2.75, \"ts\": 1804068195.75}], \"202\": [{\"symbol\": \"S1-USDT-SWAP\", \"direction\": \"LONG\", \"quality\": 1, \"rr\": 0.5, \"ts\": 1804068007.25}, {\"symbol\": \"S4-USDT-SWAP\", \"direction\": \"SHORT\", \"quality\": 4, \"rr\": 0, \"ts\": 1804068029.0}, {\"symbol\": \"S7-USDT-SWAP\", \"direction\": \"LONG\", \"quality\": 7, \"rr\": 2.75, \"ts\": 1804068050.75}, {\"symbol\": \"S10-USDT-SWAP\", \"direction\": \"SHORT\", \"quality\": 0, \"rr\": 1.25, \"ts\": 1804068072.5}, {\"symbol\": \"S13-USDT-SWAP\", \"direction\": \"LONG\", \"quality\": 3, \"rr\": 0.5, \"ts\": 1804068094.25}, {\"symbol\": \"S16-USDT-SWAP\", \"direction\": \"SHORT\", \"quality\": 6, \"rr\": 0, \"ts\": 1804068116.0}, {\"symbol\": \"S19-USDT-SWAP\", \"direction\": \"LONG\", \"quality\": 9, \"rr\": 2.75, \"ts\": 1804068137.75}, {\"symbol\": \"S22-USDT-SWAP\", \"direction\": \"SHORT\", \"quality\": 2, \"rr\": 1.25, \"ts\": 1804068159.5}, {\"symbol\": \"S25-USDT-SWAP\", \"direction\": \"LONG\", \"quality\": 5, \"rr\": 0.5, \"ts\": 1804068181.25}, {\"symbol\": \"S28-USDT-SWAP\", \"direction\": \"SHORT\", \"quality\": 8, \"rr\": 0, \"ts\": 1804068203.0}], \"203\": [{\"symbol\": \"S2-USDT-SWAP\", \"direction\": \"SHORT\", \"quality\": 2, \"rr\": 1.25, \"ts\": 1804068014.5}, {\"symbol\": \"S5-USDT-SWAP\", \"direction\": \"LONG\", \"quality\": 5, \"rr\": 0.5, \"ts\": 1804068036.25}, {\"symbol\": \"S8-USDT-SWAP\", \"direction\": \"SHORT\", \"quality\": 8, \"rr\": 0, \"ts\": 1804068058.0}, {\"symbol\": \"S11-USDT-SWAP\", \"direction\": \"LONG\", \"quality\": 1, \"rr\": 2.75, \"ts\": 1804068079.75}, {\"symbol\": \"S14-USDT-SWAP\", \"direction\": \"SHORT\", \"quality\": 4, \"rr\": 1.25, \"ts\": 1804068101.5}, {\"symbol\": \"S17-USDT-SWAP\", \"direction\": \"LONG\", \"quality\": 7, \"rr\": 0.5, \"ts\": 1804068123.25}, {\"symbol\": \"S20-USDT-SWAP\", \"direction\": \"SHORT\", \"quality\": 0, \"rr\": 0, \"ts\": 1804068145.0}, {\"symbol\": \"S23-USDT-SWAP\", \"direction\": \"LONG\", \"quality\": 3, \"rr\": 2.75, \"ts\": 1804068166.75}, {\"symbol\": \"S26-USDT-SWAP\", \"direction\": \"SHORT\", \"quality\": 6, \"rr\": 1.25, \"ts\": 1804068188.5}, {\"symbol\": \"S29-USDT-SWAP\", \"direction\": \"LONG\", \"quality\": 9, \"rr\": 0.5, \"ts\": 1804068210.25}]}"
+    ]
+   ]
+  },
+  {
+   "i": 30,
+   "user": {
+    "free_signals_date": "2027-03-03",
+    "free_signals_morning": 0,
+    "free_signals_evening": 0,
+    "free_signals_night": 0,
+    "free_signals_today": 0,
+    "free_missed_today": 11,
+    "free_smc_preview_date": "",
+    "free_smc_preview_today": 0
+   },
+   "writes": []
+  },
+  {
+   "i": 31,
+   "user": {
+    "free_signals_date": "2027-03-03",
+    "free_signals_morning": 0,
+    "free_signals_evening": 0,
+    "free_signals_night": 0,
+    "free_signals_today": 0,
+    "free_missed_today": 11,
+    "free_smc_preview_date": "",
+    "free_smc_preview_today": 0
+   },
+   "writes": []
+  },
+  {
+   "i": 32,
+   "user": {
+    "free_signals_date": "2027-03-03",
+    "free_signals_morning": 0,
+    "free_signals_evening": 0,
+    "free_signals_night": 0,
+    "free_signals_today": 0,
+    "free_missed_today": 11,
+    "free_smc_preview_date": "",
+    "free_smc_preview_today": 0
+   },
+   "writes": []
+  },
+  {
+   "i": 33,
+   "user": {
+    "free_signals_date": "2027-03-03",
+    "free_signals_morning": 0,
+    "free_signals_evening": 0,
+    "free_signals_night": 0,
+    "free_signals_today": 0,
+    "free_missed_today": 12,
+    "free_smc_preview_date": "",
+    "free_smc_preview_today": 0
+   },
+   "writes": []
+  },
+  {
+   "i": 34,
+   "user": {
+    "free_signals_date": "2027-03-03",
+    "free_signals_morning": 0,
+    "free_signals_evening": 0,
+    "free_signals_night": 0,
+    "free_signals_today": 0,
+    "free_missed_today": 12,
+    "free_smc_preview_date": "",
+    "free_smc_preview_today": 0
+   },
+   "writes": []
+  },
+  {
+   "i": 35,
+   "user": {
+    "free_signals_date": "2027-03-03",
+    "free_signals_morning": 0,
+    "free_signals_evening": 0,
+    "free_signals_night": 0,
+    "free_signals_today": 0,
+    "free_missed_today": 12,
+    "free_smc_preview_date": "",
+    "free_smc_preview_today": 0
+   },
+   "writes": []
+  },
+  {
+   "i": 36,
+   "user": {
+    "free_signals_date": "2027-03-03",
+    "free_signals_morning": 0,
+    "free_signals_evening": 0,
+    "free_signals_night": 0,
+    "free_signals_today": 0,
+    "free_missed_today": 13,
+    "free_smc_preview_date": "",
+    "free_smc_preview_today": 0
+   },
+   "writes": []
+  },
+  {
+   "i": 37,
+   "user": {
+    "free_signals_date": "2027-03-03",
+    "free_signals_morning": 0,
+    "free_signals_evening": 0,
+    "free_signals_night": 0,
+    "free_signals_today": 0,
+    "free_missed_today": 13,
+    "free_smc_preview_date": "",
+    "free_smc_preview_today": 0
+   },
+   "writes": []
+  },
+  {
+   "i": 38,
+   "user": {
+    "free_signals_date": "2027-03-03",
+    "free_signals_morning": 0,
+    "free_signals_evening": 0,
+    "free_signals_night": 0,
+    "free_signals_today": 0,
+    "free_missed_today": 13,
+    "free_smc_preview_date": "",
+    "free_smc_preview_today": 0
+   },
+   "writes": []
+  },
+  {
+   "i": 39,
+   "user": {
+    "free_signals_date": "2027-03-03",
+    "free_signals_morning": 0,
+    "free_signals_evening": 0,
+    "free_signals_night": 0,
+    "free_signals_today": 0,
+    "free_missed_today": 14,
+    "free_smc_preview_date": "",
+    "free_smc_preview_today": 0
+   },
+   "writes": [
+    [
+     "free_missed_buffer",
+     "{\"201\": [{\"symbol\": \"S0-USDT-SWAP\", \"direction\": \"SHORT\", \"quality\": 0, \"rr\": 0, \"ts\": 1804068000.0}, {\"symbol\": \"S3-USDT-SWAP\", \"direction\": \"LONG\", \"quality\": 3, \"rr\": 2.75, \"ts\": 1804068021.75}, {\"symbol\": \"S6-USDT-SWAP\", \"direction\": \"SHORT\", \"quality\": 6, \"rr\": 1.25, \"ts\": 1804068043.5}, {\"symbol\": \"S9-USDT-SWAP\", \"direction\": \"LONG\", \"quality\": 9, \"rr\": 0.5, \"ts\": 1804068065.25}, {\"symbol\": \"S12-USDT-SWAP\", \"direction\": \"SHORT\", \"quality\": 2, \"rr\": 0, \"ts\": 1804068087.0}, {\"symbol\": \"S15-USDT-SWAP\", \"direction\": \"LONG\", \"quality\": 5, \"rr\": 2.75, \"ts\": 1804068108.75}, {\"symbol\": \"S18-USDT-SWAP\", \"direction\": \"SHORT\", \"quality\": 8, \"rr\": 1.25, \"ts\": 1804068130.5}, {\"symbol\": \"S21-USDT-SWAP\", \"direction\": \"LONG\", \"quality\": 1, \"rr\": 0.5, \"ts\": 1804068152.25}, {\"symbol\": \"S24-USDT-SWAP\", \"direction\": \"SHORT\", \"quality\": 4, \"rr\": 0, \"ts\": 1804068174.0}, {\"symbol\": \"S27-USDT-SWAP\", \"direction\": \"LONG\", \"quality\": 7, \"rr\": 2.75, \"ts\": 1804068195.75}, {\"symbol\": \"S30-USDT-SWAP\", \"direction\": \"SHORT\", \"quality\": 0, \"rr\": 1.25, \"ts\": 1804068217.5}, {\"symbol\": \"S33-USDT-SWAP\", \"direction\": \"LONG\", \"quality\": 3, \"rr\": 0.5, \"ts\": 1804068239.25}, {\"symbol\": \"S36-USDT-SWAP\", \"direction\": \"SHORT\", \"quality\": 6, \"rr\": 0, \"ts\": 1804068261.0}, {\"symbol\": \"S39-USDT-SWAP\", \"direction\": \"LONG\", \"quality\": 9, \"rr\": 2.75, \"ts\": 1804068282.75}], \"202\": [{\"symbol\": \"S1-USDT-SWAP\", \"direction\": \"LONG\", \"quality\": 1, \"rr\": 0.5, \"ts\": 1804068007.25}, {\"symbol\": \"S4-USDT-SWAP\", \"direction\": \"SHORT\", \"quality\": 4, \"rr\": 0, \"ts\": 1804068029.0}, {\"symbol\": \"S7-USDT-SWAP\", \"direction\": \"LONG\", \"quality\": 7, \"rr\": 2.75, \"ts\": 1804068050.75}, {\"symbol\": \"S10-USDT-SWAP\", \"direction\": \"SHORT\", \"quality\": 0, \"rr\": 1.25, \"ts\": 1804068072.5}, {\"symbol\": \"S13-USDT-SWAP\", \"direction\": \"LONG\", \"quality\": 3, \"rr\": 0.5, \"ts\": 1804068094.25}, {\"symbol\": \"S16-USDT-SWAP\", \"direction\": \"SHORT\", \"quality\": 6, \"rr\": 0, \"ts\": 1804068116.0}, {\"symbol\": \"S19-USDT-SWAP\", \"direction\": \"LONG\", \"quality\": 9, \"rr\": 2.75, \"ts\": 1804068137.75}, {\"symbol\": \"S22-USDT-SWAP\", \"direction\": \"SHORT\", \"quality\": 2, \"rr\": 1.25, \"ts\": 1804068159.5}, {\"symbol\": \"S25-USDT-SWAP\", \"direction\": \"LONG\", \"quality\": 5, \"rr\": 0.5, \"ts\": 1804068181.25}, {\"symbol\": \"S28-USDT-SWAP\", \"direction\": \"SHORT\", \"quality\": 8, \"rr\": 0, \"ts\": 1804068203.0}, {\"symbol\": \"S31-USDT-SWAP\", \"direction\": \"LONG\", \"quality\": 1, \"rr\": 2.75, \"ts\": 1804068224.75}, {\"symbol\": \"S34-USDT-SWAP\", \"direction\": \"SHORT\", \"quality\": 4, \"rr\": 1.25, \"ts\": 1804068246.5}, {\"symbol\": \"S37-USDT-SWAP\", \"direction\": \"LONG\", \"quality\": 7, \"rr\": 0.5, \"ts\": 1804068268.25}], \"203\": [{\"symbol\": \"S2-USDT-SWAP\", \"direction\": \"SHORT\", \"quality\": 2, \"rr\": 1.25, \"ts\": 1804068014.5}, {\"symbol\": \"S5-USDT-SWAP\", \"direction\": \"LONG\", \"quality\": 5, \"rr\": 0.5, \"ts\": 1804068036.25}, {\"symbol\": \"S8-USDT-SWAP\", \"direction\": \"SHORT\", \"quality\": 8, \"rr\": 0, \"ts\": 1804068058.0}, {\"symbol\": \"S11-USDT-SWAP\", \"direction\": \"LONG\", \"quality\": 1, \"rr\": 2.75, \"ts\": 1804068079.75}, {\"symbol\": \"S14-USDT-SWAP\", \"direction\": \"SHORT\", \"quality\": 4, \"rr\": 1.25, \"ts\": 1804068101.5}, {\"symbol\": \"S17-USDT-SWAP\", \"direction\": \"LONG\", \"quality\": 7, \"rr\": 0.5, \"ts\": 1804068123.25}, {\"symbol\": \"S20-USDT-SWAP\", \"direction\": \"SHORT\", \"quality\": 0, \"rr\": 0, \"ts\": 1804068145.0}, {\"symbol\": \"S23-USDT-SWAP\", \"direction\": \"LONG\", \"quality\": 3, \"rr\": 2.75, \"ts\": 1804068166.75}, {\"symbol\": \"S26-USDT-SWAP\", \"direction\": \"SHORT\", \"quality\": 6, \"rr\": 1.25, \"ts\": 1804068188.5}, {\"symbol\": \"S29-USDT-SWAP\", \"direction\": \"LONG\", \"quality\": 9, \"rr\": 0.5, \"ts\": 1804068210.25}, {\"symbol\": \"S32-USDT-SWAP\", \"direction\": \"SHORT\", \"quality\": 2, \"rr\": 0, \"ts\": 1804068232.0}, {\"symbol\": \"S35-USDT-SWAP\", \"direction\": \"LONG\", \"quality\": 5, \"rr\": 2.75, \"ts\": 1804068253.75}, {\"symbol\": \"S38-USDT-SWAP\", \"direction\": \"SHORT\", \"quality\": 8, \"rr\": 1.25, \"ts\": 1804068275.5}]}"
+    ]
+   ]
+  },
+  {
+   "i": 40,
+   "user": {
+    "free_signals_date": "2027-03-03",
+    "free_signals_morning": 0,
+    "free_signals_evening": 0,
+    "free_signals_night": 0,
+    "free_signals_today": 0,
+    "free_missed_today": 14,
+    "free_smc_preview_date": "",
+    "free_smc_preview_today": 0
+   },
+   "writes": []
+  },
+  {
+   "i": 41,
+   "user": {
+    "free_signals_date": "2027-03-03",
+    "free_signals_morning": 0,
+    "free_signals_evening": 0,
+    "free_signals_night": 0,
+    "free_signals_today": 0,
+    "free_missed_today": 14,
+    "free_smc_preview_date": "",
+    "free_smc_preview_today": 0
+   },
+   "writes": []
+  },
+  {
+   "i": 42,
+   "user": {
+    "free_signals_date": "2027-03-03",
+    "free_signals_morning": 0,
+    "free_signals_evening": 0,
+    "free_signals_night": 0,
+    "free_signals_today": 0,
+    "free_missed_today": 15,
+    "free_smc_preview_date": "",
+    "free_smc_preview_today": 0
+   },
+   "writes": []
+  },
+  {
+   "i": 43,
+   "user": {
+    "free_signals_date": "2027-03-03",
+    "free_signals_morning": 0,
+    "free_signals_evening": 0,
+    "free_signals_night": 0,
+    "free_signals_today": 0,
+    "free_missed_today": 15,
+    "free_smc_preview_date": "",
+    "free_smc_preview_today": 0
+   },
+   "writes": []
+  },
+  {
+   "i": 44,
+   "user": {
+    "free_signals_date": "2027-03-03",
+    "free_signals_morning": 0,
+    "free_signals_evening": 0,
+    "free_signals_night": 0,
+    "free_signals_today": 0,
+    "free_missed_today": 15,
+    "free_smc_preview_date": "",
+    "free_smc_preview_today": 0
+   },
+   "writes": []
+  },
+  {
+   "i": 45,
+   "user": {
+    "free_signals_date": "2027-03-03",
+    "free_signals_morning": 0,
+    "free_signals_evening": 0,
+    "free_signals_night": 0,
+    "free_signals_today": 0,
+    "free_missed_today": 16,
+    "free_smc_preview_date": "",
+    "free_smc_preview_today": 0
+   },
+   "writes": []
+  },
+  {
+   "i": 46,
+   "user": {
+    "free_signals_date": "2027-03-03",
+    "free_signals_morning": 0,
+    "free_signals_evening": 0,
+    "free_signals_night": 0,
+    "free_signals_today": 0,
+    "free_missed_today": 16,
+    "free_smc_preview_date": "",
+    "free_smc_preview_today": 0
+   },
+   "writes": []
+  },
+  {
+   "i": 47,
+   "user": {
+    "free_signals_date": "2027-03-03",
+    "free_signals_morning": 0,
+    "free_signals_evening": 0,
+    "free_signals_night": 0,
+    "free_signals_today": 0,
+    "free_missed_today": 16,
+    "free_smc_preview_date": "",
+    "free_smc_preview_today": 0
+   },
+   "writes": []
+  },
+  {
+   "i": 48,
+   "user": {
+    "free_signals_date": "2027-03-03",
+    "free_signals_morning": 0,
+    "free_signals_evening": 0,
+    "free_signals_night": 0,
+    "free_signals_today": 0,
+    "free_missed_today": 17,
+    "free_smc_preview_date": "",
+    "free_smc_preview_today": 0
+   },
+   "writes": []
+  },
+  {
+   "i": 49,
+   "user": {
+    "free_signals_date": "2027-03-03",
+    "free_signals_morning": 0,
+    "free_signals_evening": 0,
+    "free_signals_night": 0,
+    "free_signals_today": 0,
+    "free_missed_today": 17,
+    "free_smc_preview_date": "",
+    "free_smc_preview_today": 0
+   },
+   "writes": [
+    [
+     "free_missed_buffer",
+     "{\"201\": [{\"symbol\": \"S0-USDT-SWAP\", \"direction\": \"SHORT\", \"quality\": 0, \"rr\": 0, \"ts\": 1804068000.0}, {\"symbol\": \"S3-USDT-SWAP\", \"direction\": \"LONG\", \"quality\": 3, \"rr\": 2.75, \"ts\": 1804068021.75}, {\"symbol\": \"S6-USDT-SWAP\", \"direction\": \"SHORT\", \"quality\": 6, \"rr\": 1.25, \"ts\": 1804068043.5}, {\"symbol\": \"S9-USDT-SWAP\", \"direction\": \"LONG\", \"quality\": 9, \"rr\": 0.5, \"ts\": 1804068065.25}, {\"symbol\": \"S12-USDT-SWAP\", \"direction\": \"SHORT\", \"quality\": 2, \"rr\": 0, \"ts\": 1804068087.0}, {\"symbol\": \"S15-USDT-SWAP\", \"direction\": \"LONG\", \"quality\": 5, \"rr\": 2.75, \"ts\": 1804068108.75}, {\"symbol\": \"S18-USDT-SWAP\", \"direction\": \"SHORT\", \"quality\": 8, \"rr\": 1.25, \"ts\": 1804068130.5}, {\"symbol\": \"S21-USDT-SWAP\", \"direction\": \"LONG\", \"quality\": 1, \"rr\": 0.5, \"ts\": 1804068152.25}, {\"symbol\": \"S24-USDT-SWAP\", \"direction\": \"SHORT\", \"quality\": 4, \"rr\": 0, \"ts\": 1804068174.0}, {\"symbol\": \"S27-USDT-SWAP\", \"direction\": \"LONG\", \"quality\": 7, \"rr\": 2.75, \"ts\": 1804068195.75}, {\"symbol\": \"S30-USDT-SWAP\", \"direction\": \"SHORT\", \"quality\": 0, \"rr\": 1.25, \"ts\": 1804068217.5}, {\"symbol\": \"S33-USDT-SWAP\", \"direction\": \"LONG\", \"quality\": 3, \"rr\": 0.5, \"ts\": 1804068239.25}, {\"symbol\": \"S36-USDT-SWAP\", \"direction\": \"SHORT\", \"quality\": 6, \"rr\": 0, \"ts\": 1804068261.0}, {\"symbol\": \"S39-USDT-SWAP\", \"direction\": \"LONG\", \"quality\": 9, \"rr\": 2.75, \"ts\": 1804068282.75}, {\"symbol\": \"S42-USDT-SWAP\", \"direction\": \"SHORT\", \"quality\": 2, \"rr\": 1.25, \"ts\": 1804068304.5}, {\"symbol\": \"S45-USDT-SWAP\", \"direction\": \"LONG\", \"quality\": 5, \"rr\": 0.5, \"ts\": 1804068326.25}, {\"symbol\": \"S48-USDT-SWAP\", \"direction\": \"SHORT\", \"quality\": 8, \"rr\": 0, \"ts\": 1804068348.0}], \"202\": [{\"symbol\": \"S1-USDT-SWAP\", \"direction\": \"LONG\", \"quality\": 1, \"rr\": 0.5, \"ts\": 1804068007.25}, {\"symbol\": \"S4-USDT-SWAP\", \"direction\": \"SHORT\", \"quality\": 4, \"rr\": 0, \"ts\": 1804068029.0}, {\"symbol\": \"S7-USDT-SWAP\", \"direction\": \"LONG\", \"quality\": 7, \"rr\": 2.75, \"ts\": 1804068050.75}, {\"symbol\": \"S10-USDT-SWAP\", \"direction\": \"SHORT\", \"quality\": 0, \"rr\": 1.25, \"ts\": 1804068072.5}, {\"symbol\": \"S13-USDT-SWAP\", \"direction\": \"LONG\", \"quality\": 3, \"rr\": 0.5, \"ts\": 1804068094.25}, {\"symbol\": \"S16-USDT-SWAP\", \"direction\": \"SHORT\", \"quality\": 6, \"rr\": 0, \"ts\": 1804068116.0}, {\"symbol\": \"S19-USDT-SWAP\", \"direction\": \"LONG\", \"quality\": 9, \"rr\": 2.75, \"ts\": 1804068137.75}, {\"symbol\": \"S22-USDT-SWAP\", \"direction\": \"SHORT\", \"quality\": 2, \"rr\": 1.25, \"ts\": 1804068159.5}, {\"symbol\": \"S25-USDT-SWAP\", \"direction\": \"LONG\", \"quality\": 5, \"rr\": 0.5, \"ts\": 1804068181.25}, {\"symbol\": \"S28-USDT-SWAP\", \"direction\": \"SHORT\", \"quality\": 8, \"rr\": 0, \"ts\": 1804068203.0}, {\"symbol\": \"S31-USDT-SWAP\", \"direction\": \"LONG\", \"quality\": 1, \"rr\": 2.75, \"ts\": 1804068224.75}, {\"symbol\": \"S34-USDT-SWAP\", \"direction\": \"SHORT\", \"quality\": 4, \"rr\": 1.25, \"ts\": 1804068246.5}, {\"symbol\": \"S37-USDT-SWAP\", \"direction\": \"LONG\", \"quality\": 7, \"rr\": 0.5, \"ts\": 1804068268.25}, {\"symbol\": \"S40-USDT-SWAP\", \"direction\": \"SHORT\", \"quality\": 0, \"rr\": 0, \"ts\": 1804068290.0}, {\"symbol\": \"S43-USDT-SWAP\", \"direction\": \"LONG\", \"quality\": 3, \"rr\": 2.75, \"ts\": 1804068311.75}, {\"symbol\": \"S46-USDT-SWAP\", \"direction\": \"SHORT\", \"quality\": 6, \"rr\": 1.25, \"ts\": 1804068333.5}, {\"symbol\": \"S49-USDT-SWAP\", \"direction\": \"LONG\", \"quality\": 9, \"rr\": 0.5, \"ts\": 1804068355.25}], \"203\": [{\"symbol\": \"S2-USDT-SWAP\", \"direction\": \"SHORT\", \"quality\": 2, \"rr\": 1.25, \"ts\": 1804068014.5}, {\"symbol\": \"S5-USDT-SWAP\", \"direction\": \"LONG\", \"quality\": 5, \"rr\": 0.5, \"ts\": 1804068036.25}, {\"symbol\": \"S8-USDT-SWAP\", \"direction\": \"SHORT\", \"quality\": 8, \"rr\": 0, \"ts\": 1804068058.0}, {\"symbol\": \"S11-USDT-SWAP\", \"direction\": \"LONG\", \"quality\": 1, \"rr\": 2.75, \"ts\": 1804068079.75}, {\"symbol\": \"S14-USDT-SWAP\", \"direction\": \"SHORT\", \"quality\": 4, \"rr\": 1.25, \"ts\": 1804068101.5}, {\"symbol\": \"S17-USDT-SWAP\", \"direction\": \"LONG\", \"quality\": 7, \"rr\": 0.5, \"ts\": 1804068123.25}, {\"symbol\": \"S20-USDT-SWAP\", \"direction\": \"SHORT\", \"quality\": 0, \"rr\": 0, \"ts\": 1804068145.0}, {\"symbol\": \"S23-USDT-SWAP\", \"direction\": \"LONG\", \"quality\": 3, \"rr\": 2.75, \"ts\": 1804068166.75}, {\"symbol\": \"S26-USDT-SWAP\", \"direction\": \"SHORT\", \"quality\": 6, \"rr\": 1.25, \"ts\": 1804068188.5}, {\"symbol\": \"S29-USDT-SWAP\", \"direction\": \"LONG\", \"quality\": 9, \"rr\": 0.5, \"ts\": 1804068210.25}, {\"symbol\": \"S32-USDT-SWAP\", \"direction\": \"SHORT\", \"quality\": 2, \"rr\": 0, \"ts\": 1804068232.0}, {\"symbol\": \"S35-USDT-SWAP\", \"direction\": \"LONG\", \"quality\": 5, \"rr\": 2.75, \"ts\": 1804068253.75}, {\"symbol\": \"S38-USDT-SWAP\", \"direction\": \"SHORT\", \"quality\": 8, \"rr\": 1.25, \"ts\": 1804068275.5}, {\"symbol\": \"S41-USDT-SWAP\", \"direction\": \"LONG\", \"quality\": 1, \"rr\": 0.5, \"ts\": 1804068297.25}, {\"symbol\": \"S44-USDT-SWAP\", \"direction\": \"SHORT\", \"quality\": 4, \"rr\": 0, \"ts\": 1804068319.0}, {\"symbol\": \"S47-USDT-SWAP\", \"direction\": \"LONG\", \"quality\": 7, \"rr\": 2.75, \"ts\": 1804068340.75}]}"
+    ]
+   ]
+  },
+  {
+   "i": 50,
+   "user": {
+    "free_signals_date": "2027-03-03",
+    "free_signals_morning": 0,
+    "free_signals_evening": 0,
+    "free_signals_night": 0,
+    "free_signals_today": 0,
+    "free_missed_today": 17,
+    "free_smc_preview_date": "",
+    "free_smc_preview_today": 0
+   },
+   "writes": []
+  },
+  {
+   "i": 51,
+   "user": {
+    "free_signals_date": "2027-03-03",
+    "free_signals_morning": 0,
+    "free_signals_evening": 0,
+    "free_signals_night": 0,
+    "free_signals_today": 0,
+    "free_missed_today": 18,
+    "free_smc_preview_date": "",
+    "free_smc_preview_today": 0
+   },
+   "writes": []
+  },
+  {
+   "i": 52,
+   "user": {
+    "free_signals_date": "2027-03-03",
+    "free_signals_morning": 0,
+    "free_signals_evening": 0,
+    "free_signals_night": 0,
+    "free_signals_today": 0,
+    "free_missed_today": 18,
+    "free_smc_preview_date": "",
+    "free_smc_preview_today": 0
+   },
+   "writes": []
+  },
+  {
+   "i": 53,
+   "user": {
+    "free_signals_date": "2027-03-03",
+    "free_signals_morning": 0,
+    "free_signals_evening": 0,
+    "free_signals_night": 0,
+    "free_signals_today": 0,
+    "free_missed_today": 18,
+    "free_smc_preview_date": "",
+    "free_smc_preview_today": 0
+   },
+   "writes": []
+  },
+  {
+   "i": 54,
+   "user": {
+    "free_signals_date": "2027-03-03",
+    "free_signals_morning": 0,
+    "free_signals_evening": 0,
+    "free_signals_night": 0,
+    "free_signals_today": 0,
+    "free_missed_today": 19,
+    "free_smc_preview_date": "",
+    "free_smc_preview_today": 0
+   },
+   "writes": []
+  },
+  {
+   "i": 55,
+   "user": {
+    "free_signals_date": "2027-03-04",
+    "free_signals_morning": 0,
+    "free_signals_evening": 0,
+    "free_signals_night": 0,
+    "free_signals_today": 0,
+    "free_missed_today": 1,
+    "free_smc_preview_date": "",
+    "free_smc_preview_today": 0
+   },
+   "writes": []
+  }
+ ],
+ "missed_final": {
+  "201": [
+   {
+    "symbol": "S0-USDT-SWAP",
+    "direction": "SHORT",
+    "quality": 0,
+    "rr": 0,
+    "ts": 1804068000.0
+   },
+   {
+    "symbol": "S3-USDT-SWAP",
+    "direction": "LONG",
+    "quality": 3,
+    "rr": 2.75,
+    "ts": 1804068021.75
+   },
+   {
+    "symbol": "S6-USDT-SWAP",
+    "direction": "SHORT",
+    "quality": 6,
+    "rr": 1.25,
+    "ts": 1804068043.5
+   },
+   {
+    "symbol": "S9-USDT-SWAP",
+    "direction": "LONG",
+    "quality": 9,
+    "rr": 0.5,
+    "ts": 1804068065.25
+   },
+   {
+    "symbol": "S12-USDT-SWAP",
+    "direction": "SHORT",
+    "quality": 2,
+    "rr": 0,
+    "ts": 1804068087.0
+   },
+   {
+    "symbol": "S15-USDT-SWAP",
+    "direction": "LONG",
+    "quality": 5,
+    "rr": 2.75,
+    "ts": 1804068108.75
+   },
+   {
+    "symbol": "S18-USDT-SWAP",
+    "direction": "SHORT",
+    "quality": 8,
+    "rr": 1.25,
+    "ts": 1804068130.5
+   },
+   {
+    "symbol": "S21-USDT-SWAP",
+    "direction": "LONG",
+    "quality": 1,
+    "rr": 0.5,
+    "ts": 1804068152.25
+   },
+   {
+    "symbol": "S24-USDT-SWAP",
+    "direction": "SHORT",
+    "quality": 4,
+    "rr": 0,
+    "ts": 1804068174.0
+   },
+   {
+    "symbol": "S27-USDT-SWAP",
+    "direction": "LONG",
+    "quality": 7,
+    "rr": 2.75,
+    "ts": 1804068195.75
+   },
+   {
+    "symbol": "S30-USDT-SWAP",
+    "direction": "SHORT",
+    "quality": 0,
+    "rr": 1.25,
+    "ts": 1804068217.5
+   },
+   {
+    "symbol": "S33-USDT-SWAP",
+    "direction": "LONG",
+    "quality": 3,
+    "rr": 0.5,
+    "ts": 1804068239.25
+   },
+   {
+    "symbol": "S36-USDT-SWAP",
+    "direction": "SHORT",
+    "quality": 6,
+    "rr": 0,
+    "ts": 1804068261.0
+   },
+   {
+    "symbol": "S39-USDT-SWAP",
+    "direction": "LONG",
+    "quality": 9,
+    "rr": 2.75,
+    "ts": 1804068282.75
+   },
+   {
+    "symbol": "S42-USDT-SWAP",
+    "direction": "SHORT",
+    "quality": 2,
+    "rr": 1.25,
+    "ts": 1804068304.5
+   },
+   {
+    "symbol": "S45-USDT-SWAP",
+    "direction": "LONG",
+    "quality": 5,
+    "rr": 0.5,
+    "ts": 1804068326.25
+   },
+   {
+    "symbol": "S48-USDT-SWAP",
+    "direction": "SHORT",
+    "quality": 8,
+    "rr": 0,
+    "ts": 1804068348.0
+   },
+   {
+    "symbol": "S51-USDT-SWAP",
+    "direction": "LONG",
+    "quality": 1,
+    "rr": 2.75,
+    "ts": 1804068369.75
+   },
+   {
+    "symbol": "S54-USDT-SWAP",
+    "direction": "SHORT",
+    "quality": 4,
+    "rr": 1.25,
+    "ts": 1804068391.5
+   },
+   {
+    "symbol": "X-USDT-SWAP",
+    "direction": "LONG",
+    "quality": 5,
+    "rr": 0,
+    "ts": 1804122000.0
+   }
+  ],
+  "202": [
+   {
+    "symbol": "S1-USDT-SWAP",
+    "direction": "LONG",
+    "quality": 1,
+    "rr": 0.5,
+    "ts": 1804068007.25
+   },
+   {
+    "symbol": "S4-USDT-SWAP",
+    "direction": "SHORT",
+    "quality": 4,
+    "rr": 0,
+    "ts": 1804068029.0
+   },
+   {
+    "symbol": "S7-USDT-SWAP",
+    "direction": "LONG",
+    "quality": 7,
+    "rr": 2.75,
+    "ts": 1804068050.75
+   },
+   {
+    "symbol": "S10-USDT-SWAP",
+    "direction": "SHORT",
+    "quality": 0,
+    "rr": 1.25,
+    "ts": 1804068072.5
+   },
+   {
+    "symbol": "S13-USDT-SWAP",
+    "direction": "LONG",
+    "quality": 3,
+    "rr": 0.5,
+    "ts": 1804068094.25
+   },
+   {
+    "symbol": "S16-USDT-SWAP",
+    "direction": "SHORT",
+    "quality": 6,
+    "rr": 0,
+    "ts": 1804068116.0
+   },
+   {
+    "symbol": "S19-USDT-SWAP",
+    "direction": "LONG",
+    "quality": 9,
+    "rr": 2.75,
+    "ts": 1804068137.75
+   },
+   {
+    "symbol": "S22-USDT-SWAP",
+    "direction": "SHORT",
+    "quality": 2,
+    "rr": 1.25,
+    "ts": 1804068159.5
+   },
+   {
+    "symbol": "S25-USDT-SWAP",
+    "direction": "LONG",
+    "quality": 5,
+    "rr": 0.5,
+    "ts": 1804068181.25
+   },
+   {
+    "symbol": "S28-USDT-SWAP",
+    "direction": "SHORT",
+    "quality": 8,
+    "rr": 0,
+    "ts": 1804068203.0
+   },
+   {
+    "symbol": "S31-USDT-SWAP",
+    "direction": "LONG",
+    "quality": 1,
+    "rr": 2.75,
+    "ts": 1804068224.75
+   },
+   {
+    "symbol": "S34-USDT-SWAP",
+    "direction": "SHORT",
+    "quality": 4,
+    "rr": 1.25,
+    "ts": 1804068246.5
+   },
+   {
+    "symbol": "S37-USDT-SWAP",
+    "direction": "LONG",
+    "quality": 7,
+    "rr": 0.5,
+    "ts": 1804068268.25
+   },
+   {
+    "symbol": "S40-USDT-SWAP",
+    "direction": "SHORT",
+    "quality": 0,
+    "rr": 0,
+    "ts": 1804068290.0
+   },
+   {
+    "symbol": "S43-USDT-SWAP",
+    "direction": "LONG",
+    "quality": 3,
+    "rr": 2.75,
+    "ts": 1804068311.75
+   },
+   {
+    "symbol": "S46-USDT-SWAP",
+    "direction": "SHORT",
+    "quality": 6,
+    "rr": 1.25,
+    "ts": 1804068333.5
+   },
+   {
+    "symbol": "S49-USDT-SWAP",
+    "direction": "LONG",
+    "quality": 9,
+    "rr": 0.5,
+    "ts": 1804068355.25
+   },
+   {
+    "symbol": "S52-USDT-SWAP",
+    "direction": "SHORT",
+    "quality": 2,
+    "rr": 0,
+    "ts": 1804068377.0
+   }
+  ],
+  "203": [
+   {
+    "symbol": "S2-USDT-SWAP",
+    "direction": "SHORT",
+    "quality": 2,
+    "rr": 1.25,
+    "ts": 1804068014.5
+   },
+   {
+    "symbol": "S5-USDT-SWAP",
+    "direction": "LONG",
+    "quality": 5,
+    "rr": 0.5,
+    "ts": 1804068036.25
+   },
+   {
+    "symbol": "S8-USDT-SWAP",
+    "direction": "SHORT",
+    "quality": 8,
+    "rr": 0,
+    "ts": 1804068058.0
+   },
+   {
+    "symbol": "S11-USDT-SWAP",
+    "direction": "LONG",
+    "quality": 1,
+    "rr": 2.75,
+    "ts": 1804068079.75
+   },
+   {
+    "symbol": "S14-USDT-SWAP",
+    "direction": "SHORT",
+    "quality": 4,
+    "rr": 1.25,
+    "ts": 1804068101.5
+   },
+   {
+    "symbol": "S17-USDT-SWAP",
+    "direction": "LONG",
+    "quality": 7,
+    "rr": 0.5,
+    "ts": 1804068123.25
+   },
+   {
+    "symbol": "S20-USDT-SWAP",
+    "direction": "SHORT",
+    "quality": 0,
+    "rr": 0,
+    "ts": 1804068145.0
+   },
+   {
+    "symbol": "S23-USDT-SWAP",
+    "direction": "LONG",
+    "quality": 3,
+    "rr": 2.75,
+    "ts": 1804068166.75
+   },
+   {
+    "symbol": "S26-USDT-SWAP",
+    "direction": "SHORT",
+    "quality": 6,
+    "rr": 1.25,
+    "ts": 1804068188.5
+   },
+   {
+    "symbol": "S29-USDT-SWAP",
+    "direction": "LONG",
+    "quality": 9,
+    "rr": 0.5,
+    "ts": 1804068210.25
+   },
+   {
+    "symbol": "S32-USDT-SWAP",
+    "direction": "SHORT",
+    "quality": 2,
+    "rr": 0,
+    "ts": 1804068232.0
+   },
+   {
+    "symbol": "S35-USDT-SWAP",
+    "direction": "LONG",
+    "quality": 5,
+    "rr": 2.75,
+    "ts": 1804068253.75
+   },
+   {
+    "symbol": "S38-USDT-SWAP",
+    "direction": "SHORT",
+    "quality": 8,
+    "rr": 1.25,
+    "ts": 1804068275.5
+   },
+   {
+    "symbol": "S41-USDT-SWAP",
+    "direction": "LONG",
+    "quality": 1,
+    "rr": 0.5,
+    "ts": 1804068297.25
+   },
+   {
+    "symbol": "S44-USDT-SWAP",
+    "direction": "SHORT",
+    "quality": 4,
+    "rr": 0,
+    "ts": 1804068319.0
+   },
+   {
+    "symbol": "S47-USDT-SWAP",
+    "direction": "LONG",
+    "quality": 7,
+    "rr": 2.75,
+    "ts": 1804068340.75
+   },
+   {
+    "symbol": "S50-USDT-SWAP",
+    "direction": "SHORT",
+    "quality": 0,
+    "rr": 1.25,
+    "ts": 1804068362.5
+   },
+   {
+    "symbol": "S53-USDT-SWAP",
+    "direction": "LONG",
+    "quality": 3,
+    "rr": 0.5,
+    "ts": 1804068384.25
+   }
+  ]
+ },
+ "closed": [
+  {
+   "i": 0,
+   "len": 1,
+   "first": {
+    "symbol": "C0-USDT-SWAP",
+    "direction": "LONG",
+    "result_rr": 1.5,
+    "closed_at": 1804032000.0
+   },
+   "writes": []
+  },
+  {
+   "i": 1,
+   "len": 1,
+   "first": {
+    "symbol": "C0-USDT-SWAP",
+    "direction": "LONG",
+    "result_rr": 1.5,
+    "closed_at": 1804032000.0
+   },
+   "writes": []
+  },
+  {
+   "i": 2,
+   "len": 1,
+   "first": {
+    "symbol": "C0-USDT-SWAP",
+    "direction": "LONG",
+    "result_rr": 1.5,
+    "closed_at": 1804032000.0
+   },
+   "writes": []
+  },
+  {
+   "i": 3,
+   "len": 2,
+   "first": {
+    "symbol": "C0-USDT-SWAP",
+    "direction": "LONG",
+    "result_rr": 1.5,
+    "closed_at": 1804032000.0
+   },
+   "writes": []
+  },
+  {
+   "i": 4,
+   "len": 3,
+   "first": {
+    "symbol": "C0-USDT-SWAP",
+    "direction": "LONG",
+    "result_rr": 1.5,
+    "closed_at": 1804032000.0
+   },
+   "writes": []
+  },
+  {
+   "i": 5,
+   "len": 4,
+   "first": {
+    "symbol": "C0-USDT-SWAP",
+    "direction": "LONG",
+    "result_rr": 1.5,
+    "closed_at": 1804032000.0
+   },
+   "writes": []
+  },
+  {
+   "i": 6,
+   "len": 5,
+   "first": {
+    "symbol": "C0-USDT-SWAP",
+    "direction": "LONG",
+    "result_rr": 1.5,
+    "closed_at": 1804032000.0
+   },
+   "writes": [
+    [
+     "free_closed_profitable",
+     "[{\"symbol\": \"C0-USDT-SWAP\", \"direction\": \"LONG\", \"result_rr\": 1.5, \"closed_at\": 1804032000.0}, {\"symbol\": \"C3-USDT-SWAP\", \"direction\": \"SHORT\", \"result_rr\": 2.0, \"closed_at\": 1804033801.5}, {\"symbol\": \"C4-USDT-SWAP\", \"direction\": \"LONG\", \"result_rr\": 0.75, \"closed_at\": 1804034402.0}, {\"symbol\": \"C5-USDT-SWAP\", \"direction\": \"SHORT\", \"result_rr\": 3.25, \"closed_at\": 1804035002.5}, {\"symbol\": \"C6-USDT-SWAP\", \"direction\": \"LONG\", \"result_rr\": 1.5, \"closed_at\": 1804035603.0}]"
+    ]
+   ]
+  },
+  {
+   "i": 7,
+   "len": 5,
+   "first": {
+    "symbol": "C0-USDT-SWAP",
+    "direction": "LONG",
+    "result_rr": 1.5,
+    "closed_at": 1804032000.0
+   },
+   "writes": []
+  },
+  {
+   "i": 8,
+   "len": 5,
+   "first": {
+    "symbol": "C0-USDT-SWAP",
+    "direction": "LONG",
+    "result_rr": 1.5,
+    "closed_at": 1804032000.0
+   },
+   "writes": []
+  },
+  {
+   "i": 9,
+   "len": 6,
+   "first": {
+    "symbol": "C0-USDT-SWAP",
+    "direction": "LONG",
+    "result_rr": 1.5,
+    "closed_at": 1804032000.0
+   },
+   "writes": []
+  },
+  {
+   "i": 10,
+   "len": 7,
+   "first": {
+    "symbol": "C0-USDT-SWAP",
+    "direction": "LONG",
+    "result_rr": 1.5,
+    "closed_at": 1804032000.0
+   },
+   "writes": []
+  },
+  {
+   "i": 11,
+   "len": 8,
+   "first": {
+    "symbol": "C0-USDT-SWAP",
+    "direction": "LONG",
+    "result_rr": 1.5,
+    "closed_at": 1804032000.0
+   },
+   "writes": []
+  },
+  {
+   "i": 12,
+   "len": 9,
+   "first": {
+    "symbol": "C0-USDT-SWAP",
+    "direction": "LONG",
+    "result_rr": 1.5,
+    "closed_at": 1804032000.0
+   },
+   "writes": []
+  },
+  {
+   "i": 13,
+   "len": 9,
+   "first": {
+    "symbol": "C0-USDT-SWAP",
+    "direction": "LONG",
+    "result_rr": 1.5,
+    "closed_at": 1804032000.0
+   },
+   "writes": []
+  },
+  {
+   "i": 14,
+   "len": 9,
+   "first": {
+    "symbol": "C0-USDT-SWAP",
+    "direction": "LONG",
+    "result_rr": 1.5,
+    "closed_at": 1804032000.0
+   },
+   "writes": []
+  },
+  {
+   "i": 15,
+   "len": 10,
+   "first": {
+    "symbol": "C0-USDT-SWAP",
+    "direction": "LONG",
+    "result_rr": 1.5,
+    "closed_at": 1804032000.0
+   },
+   "writes": [
+    [
+     "free_closed_profitable",
+     "[{\"symbol\": \"C0-USDT-SWAP\", \"direction\": \"LONG\", \"result_rr\": 1.5, \"closed_at\": 1804032000.0}, {\"symbol\": \"C3-USDT-SWAP\", \"direction\": \"SHORT\", \"result_rr\": 2.0, \"closed_at\": 1804033801.5}, {\"symbol\": \"C4-USDT-SWAP\", \"direction\": \"LONG\", \"result_rr\": 0.75, \"closed_at\": 1804034402.0}, {\"symbol\": \"C5-USDT-SWAP\", \"direction\": \"SHORT\", \"result_rr\": 3.25, \"closed_at\": 1804035002.5}, {\"symbol\": \"C6-USDT-SWAP\", \"direction\": \"LONG\", \"result_rr\": 1.5, \"closed_at\": 1804035603.0}, {\"symbol\": \"C9-USDT-SWAP\", \"direction\": \"SHORT\", \"result_rr\": 2.0, \"closed_at\": 1804037404.5}, {\"symbol\": \"C10-USDT-SWAP\", \"direction\": \"LONG\", \"result_rr\": 0.75, \"closed_at\": 1804038005.0}, {\"symbol\": \"C11-USDT-SWAP\", \"direction\": \"SHORT\", \"result_rr\": 3.25, \"closed_at\": 1804038605.5}, {\"symbol\": \"C12-USDT-SWAP\", \"direction\": \"LONG\", \"result_rr\": 1.5, \"closed_at\": 1804039206.0}, {\"symbol\": \"C15-USDT-SWAP\", \"direction\": \"SHORT\", \"result_rr\": 2.0, \"closed_at\": 1804041007.5}]"
+    ]
+   ]
+  },
+  {
+   "i": 16,
+   "len": 11,
+   "first": {
+    "symbol": "C0-USDT-SWAP",
+    "direction": "LONG",
+    "result_rr": 1.5,
+    "closed_at": 1804032000.0
+   },
+   "writes": []
+  },
+  {
+   "i": 17,
+   "len": 12,
+   "first": {
+    "symbol": "C0-USDT-SWAP",
+    "direction": "LONG",
+    "result_rr": 1.5,
+    "closed_at": 1804032000.0
+   },
+   "writes": []
+  },
+  {
+   "i": 18,
+   "len": 13,
+   "first": {
+    "symbol": "C0-USDT-SWAP",
+    "direction": "LONG",
+    "result_rr": 1.5,
+    "closed_at": 1804032000.0
+   },
+   "writes": []
+  },
+  {
+   "i": 19,
+   "len": 13,
+   "first": {
+    "symbol": "C0-USDT-SWAP",
+    "direction": "LONG",
+    "result_rr": 1.5,
+    "closed_at": 1804032000.0
+   },
+   "writes": []
+  },
+  {
+   "i": 20,
+   "len": 13,
+   "first": {
+    "symbol": "C0-USDT-SWAP",
+    "direction": "LONG",
+    "result_rr": 1.5,
+    "closed_at": 1804032000.0
+   },
+   "writes": []
+  },
+  {
+   "i": 21,
+   "len": 14,
+   "first": {
+    "symbol": "C0-USDT-SWAP",
+    "direction": "LONG",
+    "result_rr": 1.5,
+    "closed_at": 1804032000.0
+   },
+   "writes": []
+  },
+  {
+   "i": 22,
+   "len": 15,
+   "first": {
+    "symbol": "C0-USDT-SWAP",
+    "direction": "LONG",
+    "result_rr": 1.5,
+    "closed_at": 1804032000.0
+   },
+   "writes": [
+    [
+     "free_closed_profitable",
+     "[{\"symbol\": \"C0-USDT-SWAP\", \"direction\": \"LONG\", \"result_rr\": 1.5, \"closed_at\": 1804032000.0}, {\"symbol\": \"C3-USDT-SWAP\", \"direction\": \"SHORT\", \"result_rr\": 2.0, \"closed_at\": 1804033801.5}, {\"symbol\": \"C4-USDT-SWAP\", \"direction\": \"LONG\", \"result_rr\": 0.75, \"closed_at\": 1804034402.0}, {\"symbol\": \"C5-USDT-SWAP\", \"direction\": \"SHORT\", \"result_rr\": 3.25, \"closed_at\": 1804035002.5}, {\"symbol\": \"C6-USDT-SWAP\", \"direction\": \"LONG\", \"result_rr\": 1.5, \"closed_at\": 1804035603.0}, {\"symbol\": \"C9-USDT-SWAP\", \"direction\": \"SHORT\", \"result_rr\": 2.0, \"closed_at\": 1804037404.5}, {\"symbol\": \"C10-USDT-SWAP\", \"direction\": \"LONG\", \"result_rr\": 0.75, \"closed_at\": 1804038005.0}, {\"symbol\": \"C11-USDT-SWAP\", \"direction\": \"SHORT\", \"result_rr\": 3.25, \"closed_at\": 1804038605.5}, {\"symbol\": \"C12-USDT-SWAP\", \"direction\": \"LONG\", \"result_rr\": 1.5, \"closed_at\": 1804039206.0}, {\"symbol\": \"C15-USDT-SWAP\", \"direction\": \"SHORT\", \"result_rr\": 2.0, \"closed_at\": 1804041007.5}, {\"symbol\": \"C16-USDT-SWAP\", \"direction\": \"LONG\", \"result_rr\": 0.75, \"closed_at\": 1804041608.0}, {\"symbol\": \"C17-USDT-SWAP\", \"direction\": \"SHORT\", \"result_rr\": 3.25, \"closed_at\": 1804042208.5}, {\"symbol\": \"C18-USDT-SWAP\", \"direction\": \"LONG\", \"result_rr\": 1.5, \"closed_at\": 1804042809.0}, {\"symbol\": \"C21-USDT-SWAP\", \"direction\": \"SHORT\", \"result_rr\": 2.0, \"closed_at\": 1804044610.5}, {\"symbol\": \"C22-USDT-SWAP\", \"direction\": \"LONG\", \"result_rr\": 0.75, \"closed_at\": 1804045211.0}]"
+    ]
+   ]
+  },
+  {
+   "i": 23,
+   "len": 16,
+   "first": {
+    "symbol": "C0-USDT-SWAP",
+    "direction": "LONG",
+    "result_rr": 1.5,
+    "closed_at": 1804032000.0
+   },
+   "writes": []
+  },
+  {
+   "i": 24,
+   "len": 17,
+   "first": {
+    "symbol": "C0-USDT-SWAP",
+    "direction": "LONG",
+    "result_rr": 1.5,
+    "closed_at": 1804032000.0
+   },
+   "writes": []
+  },
+  {
+   "i": 25,
+   "len": 17,
+   "first": {
+    "symbol": "C0-USDT-SWAP",
+    "direction": "LONG",
+    "result_rr": 1.5,
+    "closed_at": 1804032000.0
+   },
+   "writes": []
+  },
+  {
+   "i": 26,
+   "len": 17,
+   "first": {
+    "symbol": "C0-USDT-SWAP",
+    "direction": "LONG",
+    "result_rr": 1.5,
+    "closed_at": 1804032000.0
+   },
+   "writes": []
+  },
+  {
+   "i": 27,
+   "len": 18,
+   "first": {
+    "symbol": "C0-USDT-SWAP",
+    "direction": "LONG",
+    "result_rr": 1.5,
+    "closed_at": 1804032000.0
+   },
+   "writes": []
+  },
+  {
+   "i": 28,
+   "len": 19,
+   "first": {
+    "symbol": "C0-USDT-SWAP",
+    "direction": "LONG",
+    "result_rr": 1.5,
+    "closed_at": 1804032000.0
+   },
+   "writes": []
+  },
+  {
+   "i": 29,
+   "len": 20,
+   "first": {
+    "symbol": "C0-USDT-SWAP",
+    "direction": "LONG",
+    "result_rr": 1.5,
+    "closed_at": 1804032000.0
+   },
+   "writes": [
+    [
+     "free_closed_profitable",
+     "[{\"symbol\": \"C0-USDT-SWAP\", \"direction\": \"LONG\", \"result_rr\": 1.5, \"closed_at\": 1804032000.0}, {\"symbol\": \"C3-USDT-SWAP\", \"direction\": \"SHORT\", \"result_rr\": 2.0, \"closed_at\": 1804033801.5}, {\"symbol\": \"C4-USDT-SWAP\", \"direction\": \"LONG\", \"result_rr\": 0.75, \"closed_at\": 1804034402.0}, {\"symbol\": \"C5-USDT-SWAP\", \"direction\": \"SHORT\", \"result_rr\": 3.25, \"closed_at\": 1804035002.5}, {\"symbol\": \"C6-USDT-SWAP\", \"direction\": \"LONG\", \"result_rr\": 1.5, \"closed_at\": 1804035603.0}, {\"symbol\": \"C9-USDT-SWAP\", \"direction\": \"SHORT\", \"result_rr\": 2.0, \"closed_at\": 1804037404.5}, {\"symbol\": \"C10-USDT-SWAP\", \"direction\": \"LONG\", \"result_rr\": 0.75, \"closed_at\": 1804038005.0}, {\"symbol\": \"C11-USDT-SWAP\", \"direction\": \"SHORT\", \"result_rr\": 3.25, \"closed_at\": 1804038605.5}, {\"symbol\": \"C12-USDT-SWAP\", \"direction\": \"LONG\", \"result_rr\": 1.5, \"closed_at\": 1804039206.0}, {\"symbol\": \"C15-USDT-SWAP\", \"direction\": \"SHORT\", \"result_rr\": 2.0, \"closed_at\": 1804041007.5}, {\"symbol\": \"C16-USDT-SWAP\", \"direction\": \"LONG\", \"result_rr\": 0.75, \"closed_at\": 1804041608.0}, {\"symbol\": \"C17-USDT-SWAP\", \"direction\": \"SHORT\", \"result_rr\": 3.25, \"closed_at\": 1804042208.5}, {\"symbol\": \"C18-USDT-SWAP\", \"direction\": \"LONG\", \"result_rr\": 1.5, \"closed_at\": 1804042809.0}, {\"symbol\": \"C21-USDT-SWAP\", \"direction\": \"SHORT\", \"result_rr\": 2.0, \"closed_at\": 1804044610.5}, {\"symbol\": \"C22-USDT-SWAP\", \"direction\": \"LONG\", \"result_rr\": 0.75, \"closed_at\": 1804045211.0}, {\"symbol\": \"C23-USDT-SWAP\", \"direction\": \"SHORT\", \"result_rr\": 3.25, \"closed_at\": 1804045811.5}, {\"symbol\": \"C24-USDT-SWAP\", \"direction\": \"LONG\", \"result_rr\": 1.5, \"closed_at\": 1804046412.0}, {\"symbol\": \"C27-USDT-SWAP\", \"direction\": \"SHORT\", \"result_rr\": 2.0, \"closed_at\": 1804048213.5}, {\"symbol\": \"C28-USDT-SWAP\", \"direction\": \"LONG\", \"result_rr\": 0.75, \"closed_at\": 1804048814.0}, {\"symbol\": \"C29-USDT-SWAP\", \"direction\": \"SHORT\", \"result_rr\": 3.25, \"closed_at\": 1804049414.5}]"
+    ]
+   ]
+  },
+  {
+   "i": 30,
+   "len": 21,
+   "first": {
+    "symbol": "C0-USDT-SWAP",
+    "direction": "LONG",
+    "result_rr": 1.5,
+    "closed_at": 1804032000.0
+   },
+   "writes": []
+  },
+  {
+   "i": 31,
+   "len": 21,
+   "first": {
+    "symbol": "C0-USDT-SWAP",
+    "direction": "LONG",
+    "result_rr": 1.5,
+    "closed_at": 1804032000.0
+   },
+   "writes": []
+  },
+  {
+   "i": 32,
+   "len": 21,
+   "first": {
+    "symbol": "C0-USDT-SWAP",
+    "direction": "LONG",
+    "result_rr": 1.5,
+    "closed_at": 1804032000.0
+   },
+   "writes": []
+  },
+  {
+   "i": 33,
+   "len": 22,
+   "first": {
+    "symbol": "C0-USDT-SWAP",
+    "direction": "LONG",
+    "result_rr": 1.5,
+    "closed_at": 1804032000.0
+   },
+   "writes": []
+  },
+  {
+   "i": 34,
+   "len": 23,
+   "first": {
+    "symbol": "C0-USDT-SWAP",
+    "direction": "LONG",
+    "result_rr": 1.5,
+    "closed_at": 1804032000.0
+   },
+   "writes": []
+  },
+  {
+   "i": 35,
+   "len": 24,
+   "first": {
+    "symbol": "C0-USDT-SWAP",
+    "direction": "LONG",
+    "result_rr": 1.5,
+    "closed_at": 1804032000.0
+   },
+   "writes": []
+  },
+  {
+   "i": 36,
+   "len": 25,
+   "first": {
+    "symbol": "C0-USDT-SWAP",
+    "direction": "LONG",
+    "result_rr": 1.5,
+    "closed_at": 1804032000.0
+   },
+   "writes": [
+    [
+     "free_closed_profitable",
+     "[{\"symbol\": \"C0-USDT-SWAP\", \"direction\": \"LONG\", \"result_rr\": 1.5, \"closed_at\": 1804032000.0}, {\"symbol\": \"C3-USDT-SWAP\", \"direction\": \"SHORT\", \"result_rr\": 2.0, \"closed_at\": 1804033801.5}, {\"symbol\": \"C4-USDT-SWAP\", \"direction\": \"LONG\", \"result_rr\": 0.75, \"closed_at\": 1804034402.0}, {\"symbol\": \"C5-USDT-SWAP\", \"direction\": \"SHORT\", \"result_rr\": 3.25, \"closed_at\": 1804035002.5}, {\"symbol\": \"C6-USDT-SWAP\", \"direction\": \"LONG\", \"result_rr\": 1.5, \"closed_at\": 1804035603.0}, {\"symbol\": \"C9-USDT-SWAP\", \"direction\": \"SHORT\", \"result_rr\": 2.0, \"closed_at\": 1804037404.5}, {\"symbol\": \"C10-USDT-SWAP\", \"direction\": \"LONG\", \"result_rr\": 0.75, \"closed_at\": 1804038005.0}, {\"symbol\": \"C11-USDT-SWAP\", \"direction\": \"SHORT\", \"result_rr\": 3.25, \"closed_at\": 1804038605.5}, {\"symbol\": \"C12-USDT-SWAP\", \"direction\": \"LONG\", \"result_rr\": 1.5, \"closed_at\": 1804039206.0}, {\"symbol\": \"C15-USDT-SWAP\", \"direction\": \"SHORT\", \"result_rr\": 2.0, \"closed_at\": 1804041007.5}, {\"symbol\": \"C16-USDT-SWAP\", \"direction\": \"LONG\", \"result_rr\": 0.75, \"closed_at\": 1804041608.0}, {\"symbol\": \"C17-USDT-SWAP\", \"direction\": \"SHORT\", \"result_rr\": 3.25, \"closed_at\": 1804042208.5}, {\"symbol\": \"C18-USDT-SWAP\", \"direction\": \"LONG\", \"result_rr\": 1.5, \"closed_at\": 1804042809.0}, {\"symbol\": \"C21-USDT-SWAP\", \"direction\": \"SHORT\", \"result_rr\": 2.0, \"closed_at\": 1804044610.5}, {\"symbol\": \"C22-USDT-SWAP\", \"direction\": \"LONG\", \"result_rr\": 0.75, \"closed_at\": 1804045211.0}, {\"symbol\": \"C23-USDT-SWAP\", \"direction\": \"SHORT\", \"result_rr\": 3.25, \"closed_at\": 1804045811.5}, {\"symbol\": \"C24-USDT-SWAP\", \"direction\": \"LONG\", \"result_rr\": 1.5, \"closed_at\": 1804046412.0}, {\"symbol\": \"C27-USDT-SWAP\", \"direction\": \"SHORT\", \"result_rr\": 2.0, \"closed_at\": 1804048213.5}, {\"symbol\": \"C28-USDT-SWAP\", \"direction\": \"LONG\", \"result_rr\": 0.75, \"closed_at\": 1804048814.0}, {\"symbol\": \"C29-USDT-SWAP\", \"direction\": \"SHORT\", \"result_rr\": 3.25, \"closed_at\": 1804049414.5}, {\"symbol\": \"C30-USDT-SWAP\", \"direction\": \"LONG\", \"result_rr\": 1.5, \"closed_at\": 1804050015.0}, {\"symbol\": \"C33-USDT-SWAP\", \"direction\": \"SHORT\", \"result_rr\": 2.0, \"closed_at\": 1804051816.5}, {\"symbol\": \"C34-USDT-SWAP\", \"direction\": \"LONG\", \"result_rr\": 0.75, \"closed_at\": 1804052417.0}, {\"symbol\": \"C35-USDT-SWAP\", \"direction\": \"SHORT\", \"result_rr\": 3.25, \"closed_at\": 1804053017.5}, {\"symbol\": \"C36-USDT-SWAP\", \"direction\": \"LONG\", \"result_rr\": 1.5, \"closed_at\": 1804053618.0}]"
+    ]
+   ]
+  },
+  {
+   "i": 37,
+   "len": 25,
+   "first": {
+    "symbol": "C0-USDT-SWAP",
+    "direction": "LONG",
+    "result_rr": 1.5,
+    "closed_at": 1804032000.0
+   },
+   "writes": []
+  },
+  {
+   "i": 38,
+   "len": 25,
+   "first": {
+    "symbol": "C0-USDT-SWAP",
+    "direction": "LONG",
+    "result_rr": 1.5,
+    "closed_at": 1804032000.0
+   },
+   "writes": []
+  },
+  {
+   "i": 39,
+   "len": 26,
+   "first": {
+    "symbol": "C0-USDT-SWAP",
+    "direction": "LONG",
+    "result_rr": 1.5,
+    "closed_at": 1804032000.0
+   },
+   "writes": []
+  },
+  {
+   "i": 40,
+   "len": 27,
+   "first": {
+    "symbol": "C0-USDT-SWAP",
+    "direction": "LONG",
+    "result_rr": 1.5,
+    "closed_at": 1804032000.0
+   },
+   "writes": []
+  },
+  {
+   "i": 41,
+   "len": 28,
+   "first": {
+    "symbol": "C0-USDT-SWAP",
+    "direction": "LONG",
+    "result_rr": 1.5,
+    "closed_at": 1804032000.0
+   },
+   "writes": []
+  },
+  {
+   "i": 42,
+   "len": 29,
+   "first": {
+    "symbol": "C0-USDT-SWAP",
+    "direction": "LONG",
+    "result_rr": 1.5,
+    "closed_at": 1804032000.0
+   },
+   "writes": []
+  },
+  {
+   "i": 43,
+   "len": 29,
+   "first": {
+    "symbol": "C0-USDT-SWAP",
+    "direction": "LONG",
+    "result_rr": 1.5,
+    "closed_at": 1804032000.0
+   },
+   "writes": []
+  },
+  {
+   "i": 44,
+   "len": 29,
+   "first": {
+    "symbol": "C0-USDT-SWAP",
+    "direction": "LONG",
+    "result_rr": 1.5,
+    "closed_at": 1804032000.0
+   },
+   "writes": []
+  },
+  {
+   "i": 45,
+   "len": 30,
+   "first": {
+    "symbol": "C0-USDT-SWAP",
+    "direction": "LONG",
+    "result_rr": 1.5,
+    "closed_at": 1804032000.0
+   },
+   "writes": [
+    [
+     "free_closed_profitable",
+     "[{\"symbol\": \"C0-USDT-SWAP\", \"direction\": \"LONG\", \"result_rr\": 1.5, \"closed_at\": 1804032000.0}, {\"symbol\": \"C3-USDT-SWAP\", \"direction\": \"SHORT\", \"result_rr\": 2.0, \"closed_at\": 1804033801.5}, {\"symbol\": \"C4-USDT-SWAP\", \"direction\": \"LONG\", \"result_rr\": 0.75, \"closed_at\": 1804034402.0}, {\"symbol\": \"C5-USDT-SWAP\", \"direction\": \"SHORT\", \"result_rr\": 3.25, \"closed_at\": 1804035002.5}, {\"symbol\": \"C6-USDT-SWAP\", \"direction\": \"LONG\", \"result_rr\": 1.5, \"closed_at\": 1804035603.0}, {\"symbol\": \"C9-USDT-SWAP\", \"direction\": \"SHORT\", \"result_rr\": 2.0, \"closed_at\": 1804037404.5}, {\"symbol\": \"C10-USDT-SWAP\", \"direction\": \"LONG\", \"result_rr\": 0.75, \"closed_at\": 1804038005.0}, {\"symbol\": \"C11-USDT-SWAP\", \"direction\": \"SHORT\", \"result_rr\": 3.25, \"closed_at\": 1804038605.5}, {\"symbol\": \"C12-USDT-SWAP\", \"direction\": \"LONG\", \"result_rr\": 1.5, \"closed_at\": 1804039206.0}, {\"symbol\": \"C15-USDT-SWAP\", \"direction\": \"SHORT\", \"result_rr\": 2.0, \"closed_at\": 1804041007.5}, {\"symbol\": \"C16-USDT-SWAP\", \"direction\": \"LONG\", \"result_rr\": 0.75, \"closed_at\": 1804041608.0}, {\"symbol\": \"C17-USDT-SWAP\", \"direction\": \"SHORT\", \"result_rr\": 3.25, \"closed_at\": 1804042208.5}, {\"symbol\": \"C18-USDT-SWAP\", \"direction\": \"LONG\", \"result_rr\": 1.5, \"closed_at\": 1804042809.0}, {\"symbol\": \"C21-USDT-SWAP\", \"direction\": \"SHORT\", \"result_rr\": 2.0, \"closed_at\": 1804044610.5}, {\"symbol\": \"C22-USDT-SWAP\", \"direction\": \"LONG\", \"result_rr\": 0.75, \"closed_at\": 1804045211.0}, {\"symbol\": \"C23-USDT-SWAP\", \"direction\": \"SHORT\", \"result_rr\": 3.25, \"closed_at\": 1804045811.5}, {\"symbol\": \"C24-USDT-SWAP\", \"direction\": \"LONG\", \"result_rr\": 1.5, \"closed_at\": 1804046412.0}, {\"symbol\": \"C27-USDT-SWAP\", \"direction\": \"SHORT\", \"result_rr\": 2.0, \"closed_at\": 1804048213.5}, {\"symbol\": \"C28-USDT-SWAP\", \"direction\": \"LONG\", \"result_rr\": 0.75, \"closed_at\": 1804048814.0}, {\"symbol\": \"C29-USDT-SWAP\", \"direction\": \"SHORT\", \"result_rr\": 3.25, \"closed_at\": 1804049414.5}, {\"symbol\": \"C30-USDT-SWAP\", \"direction\": \"LONG\", \"result_rr\": 1.5, \"closed_at\": 1804050015.0}, {\"symbol\": \"C33-USDT-SWAP\", \"direction\": \"SHORT\", \"result_rr\": 2.0, \"closed_at\": 1804051816.5}, {\"symbol\": \"C34-USDT-SWAP\", \"direction\": \"LONG\", \"result_rr\": 0.75, \"closed_at\": 1804052417.0}, {\"symbol\": \"C35-USDT-SWAP\", \"direction\": \"SHORT\", \"result_rr\": 3.25, \"closed_at\": 1804053017.5}, {\"symbol\": \"C36-USDT-SWAP\", \"direction\": \"LONG\", \"result_rr\": 1.5, \"closed_at\": 1804053618.0}, {\"symbol\": \"C39-USDT-SWAP\", \"direction\": \"SHORT\", \"result_rr\": 2.0, \"closed_at\": 1804055419.5}, {\"symbol\": \"C40-USDT-SWAP\", \"direction\": \"LONG\", \"result_rr\": 0.75, \"closed_at\": 1804056020.0}, {\"symbol\": \"C41-USDT-SWAP\", \"direction\": \"SHORT\", \"result_rr\": 3.25, \"closed_at\": 1804056620.5}, {\"symbol\": \"C42-USDT-SWAP\", \"direction\": \"LONG\", \"result_rr\": 1.5, \"closed_at\": 1804057221.0}, {\"symbol\": \"C45-USDT-SWAP\", \"direction\": \"SHORT\", \"result_rr\": 2.0, \"closed_at\": 1804059022.5}]"
+    ]
+   ]
+  },
+  {
+   "i": 46,
+   "len": 31,
+   "first": {
+    "symbol": "C0-USDT-SWAP",
+    "direction": "LONG",
+    "result_rr": 1.5,
+    "closed_at": 1804032000.0
+   },
+   "writes": []
+  },
+  {
+   "i": 47,
+   "len": 32,
+   "first": {
+    "symbol": "C0-USDT-SWAP",
+    "direction": "LONG",
+    "result_rr": 1.5,
+    "closed_at": 1804032000.0
+   },
+   "writes": []
+  },
+  {
+   "i": 48,
+   "len": 33,
+   "first": {
+    "symbol": "C0-USDT-SWAP",
+    "direction": "LONG",
+    "result_rr": 1.5,
+    "closed_at": 1804032000.0
+   },
+   "writes": []
+  },
+  {
+   "i": 49,
+   "len": 33,
+   "first": {
+    "symbol": "C0-USDT-SWAP",
+    "direction": "LONG",
+    "result_rr": 1.5,
+    "closed_at": 1804032000.0
+   },
+   "writes": []
+  },
+  {
+   "i": 50,
+   "len": 33,
+   "first": {
+    "symbol": "C0-USDT-SWAP",
+    "direction": "LONG",
+    "result_rr": 1.5,
+    "closed_at": 1804032000.0
+   },
+   "writes": []
+  },
+  {
+   "i": 51,
+   "len": 34,
+   "first": {
+    "symbol": "C0-USDT-SWAP",
+    "direction": "LONG",
+    "result_rr": 1.5,
+    "closed_at": 1804032000.0
+   },
+   "writes": []
+  },
+  {
+   "i": 52,
+   "len": 35,
+   "first": {
+    "symbol": "C0-USDT-SWAP",
+    "direction": "LONG",
+    "result_rr": 1.5,
+    "closed_at": 1804032000.0
+   },
+   "writes": [
+    [
+     "free_closed_profitable",
+     "[{\"symbol\": \"C0-USDT-SWAP\", \"direction\": \"LONG\", \"result_rr\": 1.5, \"closed_at\": 1804032000.0}, {\"symbol\": \"C3-USDT-SWAP\", \"direction\": \"SHORT\", \"result_rr\": 2.0, \"closed_at\": 1804033801.5}, {\"symbol\": \"C4-USDT-SWAP\", \"direction\": \"LONG\", \"result_rr\": 0.75, \"closed_at\": 1804034402.0}, {\"symbol\": \"C5-USDT-SWAP\", \"direction\": \"SHORT\", \"result_rr\": 3.25, \"closed_at\": 1804035002.5}, {\"symbol\": \"C6-USDT-SWAP\", \"direction\": \"LONG\", \"result_rr\": 1.5, \"closed_at\": 1804035603.0}, {\"symbol\": \"C9-USDT-SWAP\", \"direction\": \"SHORT\", \"result_rr\": 2.0, \"closed_at\": 1804037404.5}, {\"symbol\": \"C10-USDT-SWAP\", \"direction\": \"LONG\", \"result_rr\": 0.75, \"closed_at\": 1804038005.0}, {\"symbol\": \"C11-USDT-SWAP\", \"direction\": \"SHORT\", \"result_rr\": 3.25, \"closed_at\": 1804038605.5}, {\"symbol\": \"C12-USDT-SWAP\", \"direction\": \"LONG\", \"result_rr\": 1.5, \"closed_at\": 1804039206.0}, {\"symbol\": \"C15-USDT-SWAP\", \"direction\": \"SHORT\", \"result_rr\": 2.0, \"closed_at\": 1804041007.5}, {\"symbol\": \"C16-USDT-SWAP\", \"direction\": \"LONG\", \"result_rr\": 0.75, \"closed_at\": 1804041608.0}, {\"symbol\": \"C17-USDT-SWAP\", \"direction\": \"SHORT\", \"result_rr\": 3.25, \"closed_at\": 1804042208.5}, {\"symbol\": \"C18-USDT-SWAP\", \"direction\": \"LONG\", \"result_rr\": 1.5, \"closed_at\": 1804042809.0}, {\"symbol\": \"C21-USDT-SWAP\", \"direction\": \"SHORT\", \"result_rr\": 2.0, \"closed_at\": 1804044610.5}, {\"symbol\": \"C22-USDT-SWAP\", \"direction\": \"LONG\", \"result_rr\": 0.75, \"closed_at\": 1804045211.0}, {\"symbol\": \"C23-USDT-SWAP\", \"direction\": \"SHORT\", \"result_rr\": 3.25, \"closed_at\": 1804045811.5}, {\"symbol\": \"C24-USDT-SWAP\", \"direction\": \"LONG\", \"result_rr\": 1.5, \"closed_at\": 1804046412.0}, {\"symbol\": \"C27-USDT-SWAP\", \"direction\": \"SHORT\", \"result_rr\": 2.0, \"closed_at\": 1804048213.5}, {\"symbol\": \"C28-USDT-SWAP\", \"direction\": \"LONG\", \"result_rr\": 0.75, \"closed_at\": 1804048814.0}, {\"symbol\": \"C29-USDT-SWAP\", \"direction\": \"SHORT\", \"result_rr\": 3.25, \"closed_at\": 1804049414.5}, {\"symbol\": \"C30-USDT-SWAP\", \"direction\": \"LONG\", \"result_rr\": 1.5, \"closed_at\": 1804050015.0}, {\"symbol\": \"C33-USDT-SWAP\", \"direction\": \"SHORT\", \"result_rr\": 2.0, \"closed_at\": 1804051816.5}, {\"symbol\": \"C34-USDT-SWAP\", \"direction\": \"LONG\", \"result_rr\": 0.75, \"closed_at\": 1804052417.0}, {\"symbol\": \"C35-USDT-SWAP\", \"direction\": \"SHORT\", \"result_rr\": 3.25, \"closed_at\": 1804053017.5}, {\"symbol\": \"C36-USDT-SWAP\", \"direction\": \"LONG\", \"result_rr\": 1.5, \"closed_at\": 1804053618.0}, {\"symbol\": \"C39-USDT-SWAP\", \"direction\": \"SHORT\", \"result_rr\": 2.0, \"closed_at\": 1804055419.5}, {\"symbol\": \"C40-USDT-SWAP\", \"direction\": \"LONG\", \"result_rr\": 0.75, \"closed_at\": 1804056020.0}, {\"symbol\": \"C41-USDT-SWAP\", \"direction\": \"SHORT\", \"result_rr\": 3.25, \"closed_at\": 1804056620.5}, {\"symbol\": \"C42-USDT-SWAP\", \"direction\": \"LONG\", \"result_rr\": 1.5, \"closed_at\": 1804057221.0}, {\"symbol\": \"C45-USDT-SWAP\", \"direction\": \"SHORT\", \"result_rr\": 2.0, \"closed_at\": 1804059022.5}, {\"symbol\": \"C46-USDT-SWAP\", \"direction\": \"LONG\", \"result_rr\": 0.75, \"closed_at\": 1804059623.0}, {\"symbol\": \"C47-USDT-SWAP\", \"direction\": \"SHORT\", \"result_rr\": 3.25, \"closed_at\": 1804060223.5}, {\"symbol\": \"C48-USDT-SWAP\", \"direction\": \"LONG\", \"result_rr\": 1.5, \"closed_at\": 1804060824.0}, {\"symbol\": \"C51-USDT-SWAP\", \"direction\": \"SHORT\", \"result_rr\": 2.0, \"closed_at\": 1804062625.5}, {\"symbol\": \"C52-USDT-SWAP\", \"direction\": \"LONG\", \"result_rr\": 0.75, \"closed_at\": 1804063226.0}]"
+    ]
+   ]
+  },
+  {
+   "i": 53,
+   "len": 36,
+   "first": {
+    "symbol": "C0-USDT-SWAP",
+    "direction": "LONG",
+    "result_rr": 1.5,
+    "closed_at": 1804032000.0
+   },
+   "writes": []
+  },
+  {
+   "i": 54,
+   "len": 37,
+   "first": {
+    "symbol": "C0-USDT-SWAP",
+    "direction": "LONG",
+    "result_rr": 1.5,
+    "closed_at": 1804032000.0
+   },
+   "writes": []
+  },
+  {
+   "i": 55,
+   "len": 37,
+   "first": {
+    "symbol": "C0-USDT-SWAP",
+    "direction": "LONG",
+    "result_rr": 1.5,
+    "closed_at": 1804032000.0
+   },
+   "writes": []
+  },
+  {
+   "i": 56,
+   "len": 37,
+   "first": {
+    "symbol": "C0-USDT-SWAP",
+    "direction": "LONG",
+    "result_rr": 1.5,
+    "closed_at": 1804032000.0
+   },
+   "writes": []
+  },
+  {
+   "i": 57,
+   "len": 38,
+   "first": {
+    "symbol": "C0-USDT-SWAP",
+    "direction": "LONG",
+    "result_rr": 1.5,
+    "closed_at": 1804032000.0
+   },
+   "writes": []
+  },
+  {
+   "i": 58,
+   "len": 39,
+   "first": {
+    "symbol": "C0-USDT-SWAP",
+    "direction": "LONG",
+    "result_rr": 1.5,
+    "closed_at": 1804032000.0
+   },
+   "writes": []
+  },
+  {
+   "i": 59,
+   "len": 40,
+   "first": {
+    "symbol": "C0-USDT-SWAP",
+    "direction": "LONG",
+    "result_rr": 1.5,
+    "closed_at": 1804032000.0
+   },
+   "writes": [
+    [
+     "free_closed_profitable",
+     "[{\"symbol\": \"C0-USDT-SWAP\", \"direction\": \"LONG\", \"result_rr\": 1.5, \"closed_at\": 1804032000.0}, {\"symbol\": \"C3-USDT-SWAP\", \"direction\": \"SHORT\", \"result_rr\": 2.0, \"closed_at\": 1804033801.5}, {\"symbol\": \"C4-USDT-SWAP\", \"direction\": \"LONG\", \"result_rr\": 0.75, \"closed_at\": 1804034402.0}, {\"symbol\": \"C5-USDT-SWAP\", \"direction\": \"SHORT\", \"result_rr\": 3.25, \"closed_at\": 1804035002.5}, {\"symbol\": \"C6-USDT-SWAP\", \"direction\": \"LONG\", \"result_rr\": 1.5, \"closed_at\": 1804035603.0}, {\"symbol\": \"C9-USDT-SWAP\", \"direction\": \"SHORT\", \"result_rr\": 2.0, \"closed_at\": 1804037404.5}, {\"symbol\": \"C10-USDT-SWAP\", \"direction\": \"LONG\", \"result_rr\": 0.75, \"closed_at\": 1804038005.0}, {\"symbol\": \"C11-USDT-SWAP\", \"direction\": \"SHORT\", \"result_rr\": 3.25, \"closed_at\": 1804038605.5}, {\"symbol\": \"C12-USDT-SWAP\", \"direction\": \"LONG\", \"result_rr\": 1.5, \"closed_at\": 1804039206.0}, {\"symbol\": \"C15-USDT-SWAP\", \"direction\": \"SHORT\", \"result_rr\": 2.0, \"closed_at\": 1804041007.5}, {\"symbol\": \"C16-USDT-SWAP\", \"direction\": \"LONG\", \"result_rr\": 0.75, \"closed_at\": 1804041608.0}, {\"symbol\": \"C17-USDT-SWAP\", \"direction\": \"SHORT\", \"result_rr\": 3.25, \"closed_at\": 1804042208.5}, {\"symbol\": \"C18-USDT-SWAP\", \"direction\": \"LONG\", \"result_rr\": 1.5, \"closed_at\": 1804042809.0}, {\"symbol\": \"C21-USDT-SWAP\", \"direction\": \"SHORT\", \"result_rr\": 2.0, \"closed_at\": 1804044610.5}, {\"symbol\": \"C22-USDT-SWAP\", \"direction\": \"LONG\", \"result_rr\": 0.75, \"closed_at\": 1804045211.0}, {\"symbol\": \"C23-USDT-SWAP\", \"direction\": \"SHORT\", \"result_rr\": 3.25, \"closed_at\": 1804045811.5}, {\"symbol\": \"C24-USDT-SWAP\", \"direction\": \"LONG\", \"result_rr\": 1.5, \"closed_at\": 1804046412.0}, {\"symbol\": \"C27-USDT-SWAP\", \"direction\": \"SHORT\", \"result_rr\": 2.0, \"closed_at\": 1804048213.5}, {\"symbol\": \"C28-USDT-SWAP\", \"direction\": \"LONG\", \"result_rr\": 0.75, \"closed_at\": 1804048814.0}, {\"symbol\": \"C29-USDT-SWAP\", \"direction\": \"SHORT\", \"result_rr\": 3.25, \"closed_at\": 1804049414.5}, {\"symbol\": \"C30-USDT-SWAP\", \"direction\": \"LONG\", \"result_rr\": 1.5, \"closed_at\": 1804050015.0}, {\"symbol\": \"C33-USDT-SWAP\", \"direction\": \"SHORT\", \"result_rr\": 2.0, \"closed_at\": 1804051816.5}, {\"symbol\": \"C34-USDT-SWAP\", \"direction\": \"LONG\", \"result_rr\": 0.75, \"closed_at\": 1804052417.0}, {\"symbol\": \"C35-USDT-SWAP\", \"direction\": \"SHORT\", \"result_rr\": 3.25, \"closed_at\": 1804053017.5}, {\"symbol\": \"C36-USDT-SWAP\", \"direction\": \"LONG\", \"result_rr\": 1.5, \"closed_at\": 1804053618.0}, {\"symbol\": \"C39-USDT-SWAP\", \"direction\": \"SHORT\", \"result_rr\": 2.0, \"closed_at\": 1804055419.5}, {\"symbol\": \"C40-USDT-SWAP\", \"direction\": \"LONG\", \"result_rr\": 0.75, \"closed_at\": 1804056020.0}, {\"symbol\": \"C41-USDT-SWAP\", \"direction\": \"SHORT\", \"result_rr\": 3.25, \"closed_at\": 1804056620.5}, {\"symbol\": \"C42-USDT-SWAP\", \"direction\": \"LONG\", \"result_rr\": 1.5, \"closed_at\": 1804057221.0}, {\"symbol\": \"C45-USDT-SWAP\", \"direction\": \"SHORT\", \"result_rr\": 2.0, \"closed_at\": 1804059022.5}, {\"symbol\": \"C46-USDT-SWAP\", \"direction\": \"LONG\", \"result_rr\": 0.75, \"closed_at\": 1804059623.0}, {\"symbol\": \"C47-USDT-SWAP\", \"direction\": \"SHORT\", \"result_rr\": 3.25, \"closed_at\": 1804060223.5}, {\"symbol\": \"C48-USDT-SWAP\", \"direction\": \"LONG\", \"result_rr\": 1.5, \"closed_at\": 1804060824.0}, {\"symbol\": \"C51-USDT-SWAP\", \"direction\": \"SHORT\", \"result_rr\": 2.0, \"closed_at\": 1804062625.5}, {\"symbol\": \"C52-USDT-SWAP\", \"direction\": \"LONG\", \"result_rr\": 0.75, \"closed_at\": 1804063226.0}, {\"symbol\": \"C53-USDT-SWAP\", \"direction\": \"SHORT\", \"result_rr\": 3.25, \"closed_at\": 1804063826.5}, {\"symbol\": \"C54-USDT-SWAP\", \"direction\": \"LONG\", \"result_rr\": 1.5, \"closed_at\": 1804064427.0}, {\"symbol\": \"C57-USDT-SWAP\", \"direction\": \"SHORT\", \"result_rr\": 2.0, \"closed_at\": 1804066228.5}, {\"symbol\": \"C58-USDT-SWAP\", \"direction\": \"LONG\", \"result_rr\": 0.75, \"closed_at\": 1804066829.0}, {\"symbol\": \"C59-USDT-SWAP\", \"direction\": \"SHORT\", \"result_rr\": 3.25, \"closed_at\": 1804067429.5}]"
+    ]
+   ]
+  },
+  {
+   "i": 60,
+   "len": 41,
+   "first": {
+    "symbol": "C0-USDT-SWAP",
+    "direction": "LONG",
+    "result_rr": 1.5,
+    "closed_at": 1804032000.0
+   },
+   "writes": []
+  },
+  {
+   "i": 61,
+   "len": 41,
+   "first": {
+    "symbol": "C0-USDT-SWAP",
+    "direction": "LONG",
+    "result_rr": 1.5,
+    "closed_at": 1804032000.0
+   },
+   "writes": []
+  },
+  {
+   "i": 62,
+   "len": 41,
+   "first": {
+    "symbol": "C0-USDT-SWAP",
+    "direction": "LONG",
+    "result_rr": 1.5,
+    "closed_at": 1804032000.0
+   },
+   "writes": []
+  },
+  {
+   "i": 63,
+   "len": 42,
+   "first": {
+    "symbol": "C0-USDT-SWAP",
+    "direction": "LONG",
+    "result_rr": 1.5,
+    "closed_at": 1804032000.0
+   },
+   "writes": []
+  },
+  {
+   "i": 64,
+   "len": 43,
+   "first": {
+    "symbol": "C0-USDT-SWAP",
+    "direction": "LONG",
+    "result_rr": 1.5,
+    "closed_at": 1804032000.0
+   },
+   "writes": []
+  },
+  {
+   "i": 65,
+   "len": 44,
+   "first": {
+    "symbol": "C0-USDT-SWAP",
+    "direction": "LONG",
+    "result_rr": 1.5,
+    "closed_at": 1804032000.0
+   },
+   "writes": []
+  },
+  {
+   "i": 66,
+   "len": 45,
+   "first": {
+    "symbol": "C0-USDT-SWAP",
+    "direction": "LONG",
+    "result_rr": 1.5,
+    "closed_at": 1804032000.0
+   },
+   "writes": [
+    [
+     "free_closed_profitable",
+     "[{\"symbol\": \"C0-USDT-SWAP\", \"direction\": \"LONG\", \"result_rr\": 1.5, \"closed_at\": 1804032000.0}, {\"symbol\": \"C3-USDT-SWAP\", \"direction\": \"SHORT\", \"result_rr\": 2.0, \"closed_at\": 1804033801.5}, {\"symbol\": \"C4-USDT-SWAP\", \"direction\": \"LONG\", \"result_rr\": 0.75, \"closed_at\": 1804034402.0}, {\"symbol\": \"C5-USDT-SWAP\", \"direction\": \"SHORT\", \"result_rr\": 3.25, \"closed_at\": 1804035002.5}, {\"symbol\": \"C6-USDT-SWAP\", \"direction\": \"LONG\", \"result_rr\": 1.5, \"closed_at\": 1804035603.0}, {\"symbol\": \"C9-USDT-SWAP\", \"direction\": \"SHORT\", \"result_rr\": 2.0, \"closed_at\": 1804037404.5}, {\"symbol\": \"C10-USDT-SWAP\", \"direction\": \"LONG\", \"result_rr\": 0.75, \"closed_at\": 1804038005.0}, {\"symbol\": \"C11-USDT-SWAP\", \"direction\": \"SHORT\", \"result_rr\": 3.25, \"closed_at\": 1804038605.5}, {\"symbol\": \"C12-USDT-SWAP\", \"direction\": \"LONG\", \"result_rr\": 1.5, \"closed_at\": 1804039206.0}, {\"symbol\": \"C15-USDT-SWAP\", \"direction\": \"SHORT\", \"result_rr\": 2.0, \"closed_at\": 1804041007.5}, {\"symbol\": \"C16-USDT-SWAP\", \"direction\": \"LONG\", \"result_rr\": 0.75, \"closed_at\": 1804041608.0}, {\"symbol\": \"C17-USDT-SWAP\", \"direction\": \"SHORT\", \"result_rr\": 3.25, \"closed_at\": 1804042208.5}, {\"symbol\": \"C18-USDT-SWAP\", \"direction\": \"LONG\", \"result_rr\": 1.5, \"closed_at\": 1804042809.0}, {\"symbol\": \"C21-USDT-SWAP\", \"direction\": \"SHORT\", \"result_rr\": 2.0, \"closed_at\": 1804044610.5}, {\"symbol\": \"C22-USDT-SWAP\", \"direction\": \"LONG\", \"result_rr\": 0.75, \"closed_at\": 1804045211.0}, {\"symbol\": \"C23-USDT-SWAP\", \"direction\": \"SHORT\", \"result_rr\": 3.25, \"closed_at\": 1804045811.5}, {\"symbol\": \"C24-USDT-SWAP\", \"direction\": \"LONG\", \"result_rr\": 1.5, \"closed_at\": 1804046412.0}, {\"symbol\": \"C27-USDT-SWAP\", \"direction\": \"SHORT\", \"result_rr\": 2.0, \"closed_at\": 1804048213.5}, {\"symbol\": \"C28-USDT-SWAP\", \"direction\": \"LONG\", \"result_rr\": 0.75, \"closed_at\": 1804048814.0}, {\"symbol\": \"C29-USDT-SWAP\", \"direction\": \"SHORT\", \"result_rr\": 3.25, \"closed_at\": 1804049414.5}, {\"symbol\": \"C30-USDT-SWAP\", \"direction\": \"LONG\", \"result_rr\": 1.5, \"closed_at\": 1804050015.0}, {\"symbol\": \"C33-USDT-SWAP\", \"direction\": \"SHORT\", \"result_rr\": 2.0, \"closed_at\": 1804051816.5}, {\"symbol\": \"C34-USDT-SWAP\", \"direction\": \"LONG\", \"result_rr\": 0.75, \"closed_at\": 1804052417.0}, {\"symbol\": \"C35-USDT-SWAP\", \"direction\": \"SHORT\", \"result_rr\": 3.25, \"closed_at\": 1804053017.5}, {\"symbol\": \"C36-USDT-SWAP\", \"direction\": \"LONG\", \"result_rr\": 1.5, \"closed_at\": 1804053618.0}, {\"symbol\": \"C39-USDT-SWAP\", \"direction\": \"SHORT\", \"result_rr\": 2.0, \"closed_at\": 1804055419.5}, {\"symbol\": \"C40-USDT-SWAP\", \"direction\": \"LONG\", \"result_rr\": 0.75, \"closed_at\": 1804056020.0}, {\"symbol\": \"C41-USDT-SWAP\", \"direction\": \"SHORT\", \"result_rr\": 3.25, \"closed_at\": 1804056620.5}, {\"symbol\": \"C42-USDT-SWAP\", \"direction\": \"LONG\", \"result_rr\": 1.5, \"closed_at\": 1804057221.0}, {\"symbol\": \"C45-USDT-SWAP\", \"direction\": \"SHORT\", \"result_rr\": 2.0, \"closed_at\": 1804059022.5}, {\"symbol\": \"C46-USDT-SWAP\", \"direction\": \"LONG\", \"result_rr\": 0.75, \"closed_at\": 1804059623.0}, {\"symbol\": \"C47-USDT-SWAP\", \"direction\": \"SHORT\", \"result_rr\": 3.25, \"closed_at\": 1804060223.5}, {\"symbol\": \"C48-USDT-SWAP\", \"direction\": \"LONG\", \"result_rr\": 1.5, \"closed_at\": 1804060824.0}, {\"symbol\": \"C51-USDT-SWAP\", \"direction\": \"SHORT\", \"result_rr\": 2.0, \"closed_at\": 1804062625.5}, {\"symbol\": \"C52-USDT-SWAP\", \"direction\": \"LONG\", \"result_rr\": 0.75, \"closed_at\": 1804063226.0}, {\"symbol\": \"C53-USDT-SWAP\", \"direction\": \"SHORT\", \"result_rr\": 3.25, \"closed_at\": 1804063826.5}, {\"symbol\": \"C54-USDT-SWAP\", \"direction\": \"LONG\", \"result_rr\": 1.5, \"closed_at\": 1804064427.0}, {\"symbol\": \"C57-USDT-SWAP\", \"direction\": \"SHORT\", \"result_rr\": 2.0, \"closed_at\": 1804066228.5}, {\"symbol\": \"C58-USDT-SWAP\", \"direction\": \"LONG\", \"result_rr\": 0.75, \"closed_at\": 1804066829.0}, {\"symbol\": \"C59-USDT-SWAP\", \"direction\": \"SHORT\", \"result_rr\": 3.25, \"closed_at\": 1804067429.5}, {\"symbol\": \"C60-USDT-SWAP\", \"direction\": \"LONG\", \"result_rr\": 1.5, \"closed_at\": 1804068030.0}, {\"symbol\": \"C63-USDT-SWAP\", \"direction\": \"SHORT\", \"result_rr\": 2.0, \"closed_at\": 1804069831.5}, {\"symbol\": \"C64-USDT-SWAP\", \"direction\": \"LONG\", \"result_rr\": 0.75, \"closed_at\": 1804070432.0}, {\"symbol\": \"C65-USDT-SWAP\", \"direction\": \"SHORT\", \"result_rr\": 3.25, \"closed_at\": 1804071032.5}, {\"symbol\": \"C66-USDT-SWAP\", \"direction\": \"LONG\", \"result_rr\": 1.5, \"closed_at\": 1804071633.0}]"
+    ]
+   ]
+  },
+  {
+   "i": 67,
+   "len": 45,
+   "first": {
+    "symbol": "C0-USDT-SWAP",
+    "direction": "LONG",
+    "result_rr": 1.5,
+    "closed_at": 1804032000.0
+   },
+   "writes": []
+  },
+  {
+   "i": 68,
+   "len": 45,
+   "first": {
+    "symbol": "C0-USDT-SWAP",
+    "direction": "LONG",
+    "result_rr": 1.5,
+    "closed_at": 1804032000.0
+   },
+   "writes": []
+  },
+  {
+   "i": 69,
+   "len": 46,
+   "first": {
+    "symbol": "C0-USDT-SWAP",
+    "direction": "LONG",
+    "result_rr": 1.5,
+    "closed_at": 1804032000.0
+   },
+   "writes": []
+  },
+  {
+   "i": 70,
+   "len": 47,
+   "first": {
+    "symbol": "C0-USDT-SWAP",
+    "direction": "LONG",
+    "result_rr": 1.5,
+    "closed_at": 1804032000.0
+   },
+   "writes": []
+  },
+  {
+   "i": 71,
+   "len": 48,
+   "first": {
+    "symbol": "C0-USDT-SWAP",
+    "direction": "LONG",
+    "result_rr": 1.5,
+    "closed_at": 1804032000.0
+   },
+   "writes": []
+  },
+  {
+   "i": 72,
+   "len": 49,
+   "first": {
+    "symbol": "C0-USDT-SWAP",
+    "direction": "LONG",
+    "result_rr": 1.5,
+    "closed_at": 1804032000.0
+   },
+   "writes": []
+  },
+  {
+   "i": 73,
+   "len": 49,
+   "first": {
+    "symbol": "C0-USDT-SWAP",
+    "direction": "LONG",
+    "result_rr": 1.5,
+    "closed_at": 1804032000.0
+   },
+   "writes": []
+  },
+  {
+   "i": 74,
+   "len": 49,
+   "first": {
+    "symbol": "C0-USDT-SWAP",
+    "direction": "LONG",
+    "result_rr": 1.5,
+    "closed_at": 1804032000.0
+   },
+   "writes": []
+  },
+  {
+   "i": 75,
+   "len": 50,
+   "first": {
+    "symbol": "C0-USDT-SWAP",
+    "direction": "LONG",
+    "result_rr": 1.5,
+    "closed_at": 1804032000.0
+   },
+   "writes": [
+    [
+     "free_closed_profitable",
+     "[{\"symbol\": \"C0-USDT-SWAP\", \"direction\": \"LONG\", \"result_rr\": 1.5, \"closed_at\": 1804032000.0}, {\"symbol\": \"C3-USDT-SWAP\", \"direction\": \"SHORT\", \"result_rr\": 2.0, \"closed_at\": 1804033801.5}, {\"symbol\": \"C4-USDT-SWAP\", \"direction\": \"LONG\", \"result_rr\": 0.75, \"closed_at\": 1804034402.0}, {\"symbol\": \"C5-USDT-SWAP\", \"direction\": \"SHORT\", \"result_rr\": 3.25, \"closed_at\": 1804035002.5}, {\"symbol\": \"C6-USDT-SWAP\", \"direction\": \"LONG\", \"result_rr\": 1.5, \"closed_at\": 1804035603.0}, {\"symbol\": \"C9-USDT-SWAP\", \"direction\": \"SHORT\", \"result_rr\": 2.0, \"closed_at\": 1804037404.5}, {\"symbol\": \"C10-USDT-SWAP\", \"direction\": \"LONG\", \"result_rr\": 0.75, \"closed_at\": 1804038005.0}, {\"symbol\": \"C11-USDT-SWAP\", \"direction\": \"SHORT\", \"result_rr\": 3.25, \"closed_at\": 1804038605.5}, {\"symbol\": \"C12-USDT-SWAP\", \"direction\": \"LONG\", \"result_rr\": 1.5, \"closed_at\": 1804039206.0}, {\"symbol\": \"C15-USDT-SWAP\", \"direction\": \"SHORT\", \"result_rr\": 2.0, \"closed_at\": 1804041007.5}, {\"symbol\": \"C16-USDT-SWAP\", \"direction\": \"LONG\", \"result_rr\": 0.75, \"closed_at\": 1804041608.0}, {\"symbol\": \"C17-USDT-SWAP\", \"direction\": \"SHORT\", \"result_rr\": 3.25, \"closed_at\": 1804042208.5}, {\"symbol\": \"C18-USDT-SWAP\", \"direction\": \"LONG\", \"result_rr\": 1.5, \"closed_at\": 1804042809.0}, {\"symbol\": \"C21-USDT-SWAP\", \"direction\": \"SHORT\", \"result_rr\": 2.0, \"closed_at\": 1804044610.5}, {\"symbol\": \"C22-USDT-SWAP\", \"direction\": \"LONG\", \"result_rr\": 0.75, \"closed_at\": 1804045211.0}, {\"symbol\": \"C23-USDT-SWAP\", \"direction\": \"SHORT\", \"result_rr\": 3.25, \"closed_at\": 1804045811.5}, {\"symbol\": \"C24-USDT-SWAP\", \"direction\": \"LONG\", \"result_rr\": 1.5, \"closed_at\": 1804046412.0}, {\"symbol\": \"C27-USDT-SWAP\", \"direction\": \"SHORT\", \"result_rr\": 2.0, \"closed_at\": 1804048213.5}, {\"symbol\": \"C28-USDT-SWAP\", \"direction\": \"LONG\", \"result_rr\": 0.75, \"closed_at\": 1804048814.0}, {\"symbol\": \"C29-USDT-SWAP\", \"direction\": \"SHORT\", \"result_rr\": 3.25, \"closed_at\": 1804049414.5}, {\"symbol\": \"C30-USDT-SWAP\", \"direction\": \"LONG\", \"result_rr\": 1.5, \"closed_at\": 1804050015.0}, {\"symbol\": \"C33-USDT-SWAP\", \"direction\": \"SHORT\", \"result_rr\": 2.0, \"closed_at\": 1804051816.5}, {\"symbol\": \"C34-USDT-SWAP\", \"direction\": \"LONG\", \"result_rr\": 0.75, \"closed_at\": 1804052417.0}, {\"symbol\": \"C35-USDT-SWAP\", \"direction\": \"SHORT\", \"result_rr\": 3.25, \"closed_at\": 1804053017.5}, {\"symbol\": \"C36-USDT-SWAP\", \"direction\": \"LONG\", \"result_rr\": 1.5, \"closed_at\": 1804053618.0}, {\"symbol\": \"C39-USDT-SWAP\", \"direction\": \"SHORT\", \"result_rr\": 2.0, \"closed_at\": 1804055419.5}, {\"symbol\": \"C40-USDT-SWAP\", \"direction\": \"LONG\", \"result_rr\": 0.75, \"closed_at\": 1804056020.0}, {\"symbol\": \"C41-USDT-SWAP\", \"direction\": \"SHORT\", \"result_rr\": 3.25, \"closed_at\": 1804056620.5}, {\"symbol\": \"C42-USDT-SWAP\", \"direction\": \"LONG\", \"result_rr\": 1.5, \"closed_at\": 1804057221.0}, {\"symbol\": \"C45-USDT-SWAP\", \"direction\": \"SHORT\", \"result_rr\": 2.0, \"closed_at\": 1804059022.5}, {\"symbol\": \"C46-USDT-SWAP\", \"direction\": \"LONG\", \"result_rr\": 0.75, \"closed_at\": 1804059623.0}, {\"symbol\": \"C47-USDT-SWAP\", \"direction\": \"SHORT\", \"result_rr\": 3.25, \"closed_at\": 1804060223.5}, {\"symbol\": \"C48-USDT-SWAP\", \"direction\": \"LONG\", \"result_rr\": 1.5, \"closed_at\": 1804060824.0}, {\"symbol\": \"C51-USDT-SWAP\", \"direction\": \"SHORT\", \"result_rr\": 2.0, \"closed_at\": 1804062625.5}, {\"symbol\": \"C52-USDT-SWAP\", \"direction\": \"LONG\", \"result_rr\": 0.75, \"closed_at\": 1804063226.0}, {\"symbol\": \"C53-USDT-SWAP\", \"direction\": \"SHORT\", \"result_rr\": 3.25, \"closed_at\": 1804063826.5}, {\"symbol\": \"C54-USDT-SWAP\", \"direction\": \"LONG\", \"result_rr\": 1.5, \"closed_at\": 1804064427.0}, {\"symbol\": \"C57-USDT-SWAP\", \"direction\": \"SHORT\", \"result_rr\": 2.0, \"closed_at\": 1804066228.5}, {\"symbol\": \"C58-USDT-SWAP\", \"direction\": \"LONG\", \"result_rr\": 0.75, \"closed_at\": 1804066829.0}, {\"symbol\": \"C59-USDT-SWAP\", \"direction\": \"SHORT\", \"result_rr\": 3.25, \"closed_at\": 1804067429.5}, {\"symbol\": \"C60-USDT-SWAP\", \"direction\": \"LONG\", \"result_rr\": 1.5, \"closed_at\": 1804068030.0}, {\"symbol\": \"C63-USDT-SWAP\", \"direction\": \"SHORT\", \"result_rr\": 2.0, \"closed_at\": 1804069831.5}, {\"symbol\": \"C64-USDT-SWAP\", \"direction\": \"LONG\", \"result_rr\": 0.75, \"closed_at\": 1804070432.0}, {\"symbol\": \"C65-USDT-SWAP\", \"direction\": \"SHORT\", \"result_rr\": 3.25, \"closed_at\": 1804071032.5}, {\"symbol\": \"C66-USDT-SWAP\", \"direction\": \"LONG\", \"result_rr\": 1.5, \"closed_at\": 1804071633.0}, {\"symbol\": \"C69-USDT-SWAP\", \"direction\": \"SHORT\", \"result_rr\": 2.0, \"closed_at\": 1804073434.5}, {\"symbol\": \"C70-USDT-SWAP\", \"direction\": \"LONG\", \"result_rr\": 0.75, \"closed_at\": 1804074035.0}, {\"symbol\": \"C71-USDT-SWAP\", \"direction\": \"SHORT\", \"result_rr\": 3.25, \"closed_at\": 1804074635.5}, {\"symbol\": \"C72-USDT-SWAP\", \"direction\": \"LONG\", \"result_rr\": 1.5, \"closed_at\": 1804075236.0}, {\"symbol\": \"C75-USDT-SWAP\", \"direction\": \"SHORT\", \"result_rr\": 2.0, \"closed_at\": 1804077037.5}]"
+    ]
+   ]
+  },
+  {
+   "i": 76,
+   "len": 51,
+   "first": {
+    "symbol": "C0-USDT-SWAP",
+    "direction": "LONG",
+    "result_rr": 1.5,
+    "closed_at": 1804032000.0
+   },
+   "writes": []
+  },
+  {
+   "i": 77,
+   "len": 52,
+   "first": {
+    "symbol": "C0-USDT-SWAP",
+    "direction": "LONG",
+    "result_rr": 1.5,
+    "closed_at": 1804032000.0
+   },
+   "writes": []
+  },
+  {
+   "i": 78,
+   "len": 53,
+   "first": {
+    "symbol": "C0-USDT-SWAP",
+    "direction": "LONG",
+    "result_rr": 1.5,
+    "closed_at": 1804032000.0
+   },
+   "writes": []
+  },
+  {
+   "i": 79,
+   "len": 53,
+   "first": {
+    "symbol": "C0-USDT-SWAP",
+    "direction": "LONG",
+    "result_rr": 1.5,
+    "closed_at": 1804032000.0
+   },
+   "writes": []
+  },
+  {
+   "i": 80,
+   "len": 53,
+   "first": {
+    "symbol": "C0-USDT-SWAP",
+    "direction": "LONG",
+    "result_rr": 1.5,
+    "closed_at": 1804032000.0
+   },
+   "writes": []
+  },
+  {
+   "i": 81,
+   "len": 54,
+   "first": {
+    "symbol": "C0-USDT-SWAP",
+    "direction": "LONG",
+    "result_rr": 1.5,
+    "closed_at": 1804032000.0
+   },
+   "writes": []
+  },
+  {
+   "i": 82,
+   "len": 55,
+   "first": {
+    "symbol": "C0-USDT-SWAP",
+    "direction": "LONG",
+    "result_rr": 1.5,
+    "closed_at": 1804032000.0
+   },
+   "writes": [
+    [
+     "free_closed_profitable",
+     "[{\"symbol\": \"C0-USDT-SWAP\", \"direction\": \"LONG\", \"result_rr\": 1.5, \"closed_at\": 1804032000.0}, {\"symbol\": \"C3-USDT-SWAP\", \"direction\": \"SHORT\", \"result_rr\": 2.0, \"closed_at\": 1804033801.5}, {\"symbol\": \"C4-USDT-SWAP\", \"direction\": \"LONG\", \"result_rr\": 0.75, \"closed_at\": 1804034402.0}, {\"symbol\": \"C5-USDT-SWAP\", \"direction\": \"SHORT\", \"result_rr\": 3.25, \"closed_at\": 1804035002.5}, {\"symbol\": \"C6-USDT-SWAP\", \"direction\": \"LONG\", \"result_rr\": 1.5, \"closed_at\": 1804035603.0}, {\"symbol\": \"C9-USDT-SWAP\", \"direction\": \"SHORT\", \"result_rr\": 2.0, \"closed_at\": 1804037404.5}, {\"symbol\": \"C10-USDT-SWAP\", \"direction\": \"LONG\", \"result_rr\": 0.75, \"closed_at\": 1804038005.0}, {\"symbol\": \"C11-USDT-SWAP\", \"direction\": \"SHORT\", \"result_rr\": 3.25, \"closed_at\": 1804038605.5}, {\"symbol\": \"C12-USDT-SWAP\", \"direction\": \"LONG\", \"result_rr\": 1.5, \"closed_at\": 1804039206.0}, {\"symbol\": \"C15-USDT-SWAP\", \"direction\": \"SHORT\", \"result_rr\": 2.0, \"closed_at\": 1804041007.5}, {\"symbol\": \"C16-USDT-SWAP\", \"direction\": \"LONG\", \"result_rr\": 0.75, \"closed_at\": 1804041608.0}, {\"symbol\": \"C17-USDT-SWAP\", \"direction\": \"SHORT\", \"result_rr\": 3.25, \"closed_at\": 1804042208.5}, {\"symbol\": \"C18-USDT-SWAP\", \"direction\": \"LONG\", \"result_rr\": 1.5, \"closed_at\": 1804042809.0}, {\"symbol\": \"C21-USDT-SWAP\", \"direction\": \"SHORT\", \"result_rr\": 2.0, \"closed_at\": 1804044610.5}, {\"symbol\": \"C22-USDT-SWAP\", \"direction\": \"LONG\", \"result_rr\": 0.75, \"closed_at\": 1804045211.0}, {\"symbol\": \"C23-USDT-SWAP\", \"direction\": \"SHORT\", \"result_rr\": 3.25, \"closed_at\": 1804045811.5}, {\"symbol\": \"C24-USDT-SWAP\", \"direction\": \"LONG\", \"result_rr\": 1.5, \"closed_at\": 1804046412.0}, {\"symbol\": \"C27-USDT-SWAP\", \"direction\": \"SHORT\", \"result_rr\": 2.0, \"closed_at\": 1804048213.5}, {\"symbol\": \"C28-USDT-SWAP\", \"direction\": \"LONG\", \"result_rr\": 0.75, \"closed_at\": 1804048814.0}, {\"symbol\": \"C29-USDT-SWAP\", \"direction\": \"SHORT\", \"result_rr\": 3.25, \"closed_at\": 1804049414.5}, {\"symbol\": \"C30-USDT-SWAP\", \"direction\": \"LONG\", \"result_rr\": 1.5, \"closed_at\": 1804050015.0}, {\"symbol\": \"C33-USDT-SWAP\", \"direction\": \"SHORT\", \"result_rr\": 2.0, \"closed_at\": 1804051816.5}, {\"symbol\": \"C34-USDT-SWAP\", \"direction\": \"LONG\", \"result_rr\": 0.75, \"closed_at\": 1804052417.0}, {\"symbol\": \"C35-USDT-SWAP\", \"direction\": \"SHORT\", \"result_rr\": 3.25, \"closed_at\": 1804053017.5}, {\"symbol\": \"C36-USDT-SWAP\", \"direction\": \"LONG\", \"result_rr\": 1.5, \"closed_at\": 1804053618.0}, {\"symbol\": \"C39-USDT-SWAP\", \"direction\": \"SHORT\", \"result_rr\": 2.0, \"closed_at\": 1804055419.5}, {\"symbol\": \"C40-USDT-SWAP\", \"direction\": \"LONG\", \"result_rr\": 0.75, \"closed_at\": 1804056020.0}, {\"symbol\": \"C41-USDT-SWAP\", \"direction\": \"SHORT\", \"result_rr\": 3.25, \"closed_at\": 1804056620.5}, {\"symbol\": \"C42-USDT-SWAP\", \"direction\": \"LONG\", \"result_rr\": 1.5, \"closed_at\": 1804057221.0}, {\"symbol\": \"C45-USDT-SWAP\", \"direction\": \"SHORT\", \"result_rr\": 2.0, \"closed_at\": 1804059022.5}, {\"symbol\": \"C46-USDT-SWAP\", \"direction\": \"LONG\", \"result_rr\": 0.75, \"closed_at\": 1804059623.0}, {\"symbol\": \"C47-USDT-SWAP\", \"direction\": \"SHORT\", \"result_rr\": 3.25, \"closed_at\": 1804060223.5}, {\"symbol\": \"C48-USDT-SWAP\", \"direction\": \"LONG\", \"result_rr\": 1.5, \"closed_at\": 1804060824.0}, {\"symbol\": \"C51-USDT-SWAP\", \"direction\": \"SHORT\", \"result_rr\": 2.0, \"closed_at\": 1804062625.5}, {\"symbol\": \"C52-USDT-SWAP\", \"direction\": \"LONG\", \"result_rr\": 0.75, \"closed_at\": 1804063226.0}, {\"symbol\": \"C53-USDT-SWAP\", \"direction\": \"SHORT\", \"result_rr\": 3.25, \"closed_at\": 1804063826.5}, {\"symbol\": \"C54-USDT-SWAP\", \"direction\": \"LONG\", \"result_rr\": 1.5, \"closed_at\": 1804064427.0}, {\"symbol\": \"C57-USDT-SWAP\", \"direction\": \"SHORT\", \"result_rr\": 2.0, \"closed_at\": 1804066228.5}, {\"symbol\": \"C58-USDT-SWAP\", \"direction\": \"LONG\", \"result_rr\": 0.75, \"closed_at\": 1804066829.0}, {\"symbol\": \"C59-USDT-SWAP\", \"direction\": \"SHORT\", \"result_rr\": 3.25, \"closed_at\": 1804067429.5}, {\"symbol\": \"C60-USDT-SWAP\", \"direction\": \"LONG\", \"result_rr\": 1.5, \"closed_at\": 1804068030.0}, {\"symbol\": \"C63-USDT-SWAP\", \"direction\": \"SHORT\", \"result_rr\": 2.0, \"closed_at\": 1804069831.5}, {\"symbol\": \"C64-USDT-SWAP\", \"direction\": \"LONG\", \"result_rr\": 0.75, \"closed_at\": 1804070432.0}, {\"symbol\": \"C65-USDT-SWAP\", \"direction\": \"SHORT\", \"result_rr\": 3.25, \"closed_at\": 1804071032.5}, {\"symbol\": \"C66-USDT-SWAP\", \"direction\": \"LONG\", \"result_rr\": 1.5, \"closed_at\": 1804071633.0}, {\"symbol\": \"C69-USDT-SWAP\", \"direction\": \"SHORT\", \"result_rr\": 2.0, \"closed_at\": 1804073434.5}, {\"symbol\": \"C70-USDT-SWAP\", \"direction\": \"LONG\", \"result_rr\": 0.75, \"closed_at\": 1804074035.0}, {\"symbol\": \"C71-USDT-SWAP\", \"direction\": \"SHORT\", \"result_rr\": 3.25, \"closed_at\": 1804074635.5}, {\"symbol\": \"C72-USDT-SWAP\", \"direction\": \"LONG\", \"result_rr\": 1.5, \"closed_at\": 1804075236.0}, {\"symbol\": \"C75-USDT-SWAP\", \"direction\": \"SHORT\", \"result_rr\": 2.0, \"closed_at\": 1804077037.5}, {\"symbol\": \"C76-USDT-SWAP\", \"direction\": \"LONG\", \"result_rr\": 0.75, \"closed_at\": 1804077638.0}, {\"symbol\": \"C77-USDT-SWAP\", \"direction\": \"SHORT\", \"result_rr\": 3.25, \"closed_at\": 1804078238.5}, {\"symbol\": \"C78-USDT-SWAP\", \"direction\": \"LONG\", \"result_rr\": 1.5, \"closed_at\": 1804078839.0}, {\"symbol\": \"C81-USDT-SWAP\", \"direction\": \"SHORT\", \"result_rr\": 2.0, \"closed_at\": 1804080640.5}, {\"symbol\": \"C82-USDT-SWAP\", \"direction\": \"LONG\", \"result_rr\": 0.75, \"closed_at\": 1804081241.0}]"
+    ]
+   ]
+  },
+  {
+   "i": 83,
+   "len": 56,
+   "first": {
+    "symbol": "C0-USDT-SWAP",
+    "direction": "LONG",
+    "result_rr": 1.5,
+    "closed_at": 1804032000.0
+   },
+   "writes": []
+  },
+  {
+   "i": 84,
+   "len": 57,
+   "first": {
+    "symbol": "C0-USDT-SWAP",
+    "direction": "LONG",
+    "result_rr": 1.5,
+    "closed_at": 1804032000.0
+   },
+   "writes": []
+  },
+  {
+   "i": 85,
+   "len": 57,
+   "first": {
+    "symbol": "C0-USDT-SWAP",
+    "direction": "LONG",
+    "result_rr": 1.5,
+    "closed_at": 1804032000.0
+   },
+   "writes": []
+  },
+  {
+   "i": 86,
+   "len": 57,
+   "first": {
+    "symbol": "C0-USDT-SWAP",
+    "direction": "LONG",
+    "result_rr": 1.5,
+    "closed_at": 1804032000.0
+   },
+   "writes": []
+  },
+  {
+   "i": 87,
+   "len": 58,
+   "first": {
+    "symbol": "C0-USDT-SWAP",
+    "direction": "LONG",
+    "result_rr": 1.5,
+    "closed_at": 1804032000.0
+   },
+   "writes": []
+  },
+  {
+   "i": 88,
+   "len": 59,
+   "first": {
+    "symbol": "C0-USDT-SWAP",
+    "direction": "LONG",
+    "result_rr": 1.5,
+    "closed_at": 1804032000.0
+   },
+   "writes": []
+  },
+  {
+   "i": 89,
+   "len": 60,
+   "first": {
+    "symbol": "C0-USDT-SWAP",
+    "direction": "LONG",
+    "result_rr": 1.5,
+    "closed_at": 1804032000.0
+   },
+   "writes": [
+    [
+     "free_closed_profitable",
+     "[{\"symbol\": \"C0-USDT-SWAP\", \"direction\": \"LONG\", \"result_rr\": 1.5, \"closed_at\": 1804032000.0}, {\"symbol\": \"C3-USDT-SWAP\", \"direction\": \"SHORT\", \"result_rr\": 2.0, \"closed_at\": 1804033801.5}, {\"symbol\": \"C4-USDT-SWAP\", \"direction\": \"LONG\", \"result_rr\": 0.75, \"closed_at\": 1804034402.0}, {\"symbol\": \"C5-USDT-SWAP\", \"direction\": \"SHORT\", \"result_rr\": 3.25, \"closed_at\": 1804035002.5}, {\"symbol\": \"C6-USDT-SWAP\", \"direction\": \"LONG\", \"result_rr\": 1.5, \"closed_at\": 1804035603.0}, {\"symbol\": \"C9-USDT-SWAP\", \"direction\": \"SHORT\", \"result_rr\": 2.0, \"closed_at\": 1804037404.5}, {\"symbol\": \"C10-USDT-SWAP\", \"direction\": \"LONG\", \"result_rr\": 0.75, \"closed_at\": 1804038005.0}, {\"symbol\": \"C11-USDT-SWAP\", \"direction\": \"SHORT\", \"result_rr\": 3.25, \"closed_at\": 1804038605.5}, {\"symbol\": \"C12-USDT-SWAP\", \"direction\": \"LONG\", \"result_rr\": 1.5, \"closed_at\": 1804039206.0}, {\"symbol\": \"C15-USDT-SWAP\", \"direction\": \"SHORT\", \"result_rr\": 2.0, \"closed_at\": 1804041007.5}, {\"symbol\": \"C16-USDT-SWAP\", \"direction\": \"LONG\", \"result_rr\": 0.75, \"closed_at\": 1804041608.0}, {\"symbol\": \"C17-USDT-SWAP\", \"direction\": \"SHORT\", \"result_rr\": 3.25, \"closed_at\": 1804042208.5}, {\"symbol\": \"C18-USDT-SWAP\", \"direction\": \"LONG\", \"result_rr\": 1.5, \"closed_at\": 1804042809.0}, {\"symbol\": \"C21-USDT-SWAP\", \"direction\": \"SHORT\", \"result_rr\": 2.0, \"closed_at\": 1804044610.5}, {\"symbol\": \"C22-USDT-SWAP\", \"direction\": \"LONG\", \"result_rr\": 0.75, \"closed_at\": 1804045211.0}, {\"symbol\": \"C23-USDT-SWAP\", \"direction\": \"SHORT\", \"result_rr\": 3.25, \"closed_at\": 1804045811.5}, {\"symbol\": \"C24-USDT-SWAP\", \"direction\": \"LONG\", \"result_rr\": 1.5, \"closed_at\": 1804046412.0}, {\"symbol\": \"C27-USDT-SWAP\", \"direction\": \"SHORT\", \"result_rr\": 2.0, \"closed_at\": 1804048213.5}, {\"symbol\": \"C28-USDT-SWAP\", \"direction\": \"LONG\", \"result_rr\": 0.75, \"closed_at\": 1804048814.0}, {\"symbol\": \"C29-USDT-SWAP\", \"direction\": \"SHORT\", \"result_rr\": 3.25, \"closed_at\": 1804049414.5}, {\"symbol\": \"C30-USDT-SWAP\", \"direction\": \"LONG\", \"result_rr\": 1.5, \"closed_at\": 1804050015.0}, {\"symbol\": \"C33-USDT-SWAP\", \"direction\": \"SHORT\", \"result_rr\": 2.0, \"closed_at\": 1804051816.5}, {\"symbol\": \"C34-USDT-SWAP\", \"direction\": \"LONG\", \"result_rr\": 0.75, \"closed_at\": 1804052417.0}, {\"symbol\": \"C35-USDT-SWAP\", \"direction\": \"SHORT\", \"result_rr\": 3.25, \"closed_at\": 1804053017.5}, {\"symbol\": \"C36-USDT-SWAP\", \"direction\": \"LONG\", \"result_rr\": 1.5, \"closed_at\": 1804053618.0}, {\"symbol\": \"C39-USDT-SWAP\", \"direction\": \"SHORT\", \"result_rr\": 2.0, \"closed_at\": 1804055419.5}, {\"symbol\": \"C40-USDT-SWAP\", \"direction\": \"LONG\", \"result_rr\": 0.75, \"closed_at\": 1804056020.0}, {\"symbol\": \"C41-USDT-SWAP\", \"direction\": \"SHORT\", \"result_rr\": 3.25, \"closed_at\": 1804056620.5}, {\"symbol\": \"C42-USDT-SWAP\", \"direction\": \"LONG\", \"result_rr\": 1.5, \"closed_at\": 1804057221.0}, {\"symbol\": \"C45-USDT-SWAP\", \"direction\": \"SHORT\", \"result_rr\": 2.0, \"closed_at\": 1804059022.5}, {\"symbol\": \"C46-USDT-SWAP\", \"direction\": \"LONG\", \"result_rr\": 0.75, \"closed_at\": 1804059623.0}, {\"symbol\": \"C47-USDT-SWAP\", \"direction\": \"SHORT\", \"result_rr\": 3.25, \"closed_at\": 1804060223.5}, {\"symbol\": \"C48-USDT-SWAP\", \"direction\": \"LONG\", \"result_rr\": 1.5, \"closed_at\": 1804060824.0}, {\"symbol\": \"C51-USDT-SWAP\", \"direction\": \"SHORT\", \"result_rr\": 2.0, \"closed_at\": 1804062625.5}, {\"symbol\": \"C52-USDT-SWAP\", \"direction\": \"LONG\", \"result_rr\": 0.75, \"closed_at\": 1804063226.0}, {\"symbol\": \"C53-USDT-SWAP\", \"direction\": \"SHORT\", \"result_rr\": 3.25, \"closed_at\": 1804063826.5}, {\"symbol\": \"C54-USDT-SWAP\", \"direction\": \"LONG\", \"result_rr\": 1.5, \"closed_at\": 1804064427.0}, {\"symbol\": \"C57-USDT-SWAP\", \"direction\": \"SHORT\", \"result_rr\": 2.0, \"closed_at\": 1804066228.5}, {\"symbol\": \"C58-USDT-SWAP\", \"direction\": \"LONG\", \"result_rr\": 0.75, \"closed_at\": 1804066829.0}, {\"symbol\": \"C59-USDT-SWAP\", \"direction\": \"SHORT\", \"result_rr\": 3.25, \"closed_at\": 1804067429.5}, {\"symbol\": \"C60-USDT-SWAP\", \"direction\": \"LONG\", \"result_rr\": 1.5, \"closed_at\": 1804068030.0}, {\"symbol\": \"C63-USDT-SWAP\", \"direction\": \"SHORT\", \"result_rr\": 2.0, \"closed_at\": 1804069831.5}, {\"symbol\": \"C64-USDT-SWAP\", \"direction\": \"LONG\", \"result_rr\": 0.75, \"closed_at\": 1804070432.0}, {\"symbol\": \"C65-USDT-SWAP\", \"direction\": \"SHORT\", \"result_rr\": 3.25, \"closed_at\": 1804071032.5}, {\"symbol\": \"C66-USDT-SWAP\", \"direction\": \"LONG\", \"result_rr\": 1.5, \"closed_at\": 1804071633.0}, {\"symbol\": \"C69-USDT-SWAP\", \"direction\": \"SHORT\", \"result_rr\": 2.0, \"closed_at\": 1804073434.5}, {\"symbol\": \"C70-USDT-SWAP\", \"direction\": \"LONG\", \"result_rr\": 0.75, \"closed_at\": 1804074035.0}, {\"symbol\": \"C71-USDT-SWAP\", \"direction\": \"SHORT\", \"result_rr\": 3.25, \"closed_at\": 1804074635.5}, {\"symbol\": \"C72-USDT-SWAP\", \"direction\": \"LONG\", \"result_rr\": 1.5, \"closed_at\": 1804075236.0}, {\"symbol\": \"C75-USDT-SWAP\", \"direction\": \"SHORT\", \"result_rr\": 2.0, \"closed_at\": 1804077037.5}, {\"symbol\": \"C76-USDT-SWAP\", \"direction\": \"LONG\", \"result_rr\": 0.75, \"closed_at\": 1804077638.0}, {\"symbol\": \"C77-USDT-SWAP\", \"direction\": \"SHORT\", \"result_rr\": 3.25, \"closed_at\": 1804078238.5}, {\"symbol\": \"C78-USDT-SWAP\", \"direction\": \"LONG\", \"result_rr\": 1.5, \"closed_at\": 1804078839.0}, {\"symbol\": \"C81-USDT-SWAP\", \"direction\": \"SHORT\", \"result_rr\": 2.0, \"closed_at\": 1804080640.5}, {\"symbol\": \"C82-USDT-SWAP\", \"direction\": \"LONG\", \"result_rr\": 0.75, \"closed_at\": 1804081241.0}, {\"symbol\": \"C83-USDT-SWAP\", \"direction\": \"SHORT\", \"result_rr\": 3.25, \"closed_at\": 1804081841.5}, {\"symbol\": \"C84-USDT-SWAP\", \"direction\": \"LONG\", \"result_rr\": 1.5, \"closed_at\": 1804082442.0}, {\"symbol\": \"C87-USDT-SWAP\", \"direction\": \"SHORT\", \"result_rr\": 2.0, \"closed_at\": 1804084243.5}, {\"symbol\": \"C88-USDT-SWAP\", \"direction\": \"LONG\", \"result_rr\": 0.75, \"closed_at\": 1804084844.0}, {\"symbol\": \"C89-USDT-SWAP\", \"direction\": \"SHORT\", \"result_rr\": 3.25, \"closed_at\": 1804085444.5}]"
+    ]
+   ]
+  },
+  {
+   "i": 90,
+   "len": 61,
+   "first": {
+    "symbol": "C0-USDT-SWAP",
+    "direction": "LONG",
+    "result_rr": 1.5,
+    "closed_at": 1804032000.0
+   },
+   "writes": []
+  },
+  {
+   "i": 91,
+   "len": 61,
+   "first": {
+    "symbol": "C0-USDT-SWAP",
+    "direction": "LONG",
+    "result_rr": 1.5,
+    "closed_at": 1804032000.0
+   },
+   "writes": []
+  },
+  {
+   "i": 92,
+   "len": 61,
+   "first": {
+    "symbol": "C0-USDT-SWAP",
+    "direction": "LONG",
+    "result_rr": 1.5,
+    "closed_at": 1804032000.0
+   },
+   "writes": []
+  },
+  {
+   "i": 93,
+   "len": 62,
+   "first": {
+    "symbol": "C0-USDT-SWAP",
+    "direction": "LONG",
+    "result_rr": 1.5,
+    "closed_at": 1804032000.0
+   },
+   "writes": []
+  },
+  {
+   "i": 94,
+   "len": 63,
+   "first": {
+    "symbol": "C0-USDT-SWAP",
+    "direction": "LONG",
+    "result_rr": 1.5,
+    "closed_at": 1804032000.0
+   },
+   "writes": []
+  },
+  {
+   "i": 95,
+   "len": 64,
+   "first": {
+    "symbol": "C0-USDT-SWAP",
+    "direction": "LONG",
+    "result_rr": 1.5,
+    "closed_at": 1804032000.0
+   },
+   "writes": []
+  },
+  {
+   "i": 96,
+   "len": 65,
+   "first": {
+    "symbol": "C0-USDT-SWAP",
+    "direction": "LONG",
+    "result_rr": 1.5,
+    "closed_at": 1804032000.0
+   },
+   "writes": [
+    [
+     "free_closed_profitable",
+     "[{\"symbol\": \"C0-USDT-SWAP\", \"direction\": \"LONG\", \"result_rr\": 1.5, \"closed_at\": 1804032000.0}, {\"symbol\": \"C3-USDT-SWAP\", \"direction\": \"SHORT\", \"result_rr\": 2.0, \"closed_at\": 1804033801.5}, {\"symbol\": \"C4-USDT-SWAP\", \"direction\": \"LONG\", \"result_rr\": 0.75, \"closed_at\": 1804034402.0}, {\"symbol\": \"C5-USDT-SWAP\", \"direction\": \"SHORT\", \"result_rr\": 3.25, \"closed_at\": 1804035002.5}, {\"symbol\": \"C6-USDT-SWAP\", \"direction\": \"LONG\", \"result_rr\": 1.5, \"closed_at\": 1804035603.0}, {\"symbol\": \"C9-USDT-SWAP\", \"direction\": \"SHORT\", \"result_rr\": 2.0, \"closed_at\": 1804037404.5}, {\"symbol\": \"C10-USDT-SWAP\", \"direction\": \"LONG\", \"result_rr\": 0.75, \"closed_at\": 1804038005.0}, {\"symbol\": \"C11-USDT-SWAP\", \"direction\": \"SHORT\", \"result_rr\": 3.25, \"closed_at\": 1804038605.5}, {\"symbol\": \"C12-USDT-SWAP\", \"direction\": \"LONG\", \"result_rr\": 1.5, \"closed_at\": 1804039206.0}, {\"symbol\": \"C15-USDT-SWAP\", \"direction\": \"SHORT\", \"result_rr\": 2.0, \"closed_at\": 1804041007.5}, {\"symbol\": \"C16-USDT-SWAP\", \"direction\": \"LONG\", \"result_rr\": 0.75, \"closed_at\": 1804041608.0}, {\"symbol\": \"C17-USDT-SWAP\", \"direction\": \"SHORT\", \"result_rr\": 3.25, \"closed_at\": 1804042208.5}, {\"symbol\": \"C18-USDT-SWAP\", \"direction\": \"LONG\", \"result_rr\": 1.5, \"closed_at\": 1804042809.0}, {\"symbol\": \"C21-USDT-SWAP\", \"direction\": \"SHORT\", \"result_rr\": 2.0, \"closed_at\": 1804044610.5}, {\"symbol\": \"C22-USDT-SWAP\", \"direction\": \"LONG\", \"result_rr\": 0.75, \"closed_at\": 1804045211.0}, {\"symbol\": \"C23-USDT-SWAP\", \"direction\": \"SHORT\", \"result_rr\": 3.25, \"closed_at\": 1804045811.5}, {\"symbol\": \"C24-USDT-SWAP\", \"direction\": \"LONG\", \"result_rr\": 1.5, \"closed_at\": 1804046412.0}, {\"symbol\": \"C27-USDT-SWAP\", \"direction\": \"SHORT\", \"result_rr\": 2.0, \"closed_at\": 1804048213.5}, {\"symbol\": \"C28-USDT-SWAP\", \"direction\": \"LONG\", \"result_rr\": 0.75, \"closed_at\": 1804048814.0}, {\"symbol\": \"C29-USDT-SWAP\", \"direction\": \"SHORT\", \"result_rr\": 3.25, \"closed_at\": 1804049414.5}, {\"symbol\": \"C30-USDT-SWAP\", \"direction\": \"LONG\", \"result_rr\": 1.5, \"closed_at\": 1804050015.0}, {\"symbol\": \"C33-USDT-SWAP\", \"direction\": \"SHORT\", \"result_rr\": 2.0, \"closed_at\": 1804051816.5}, {\"symbol\": \"C34-USDT-SWAP\", \"direction\": \"LONG\", \"result_rr\": 0.75, \"closed_at\": 1804052417.0}, {\"symbol\": \"C35-USDT-SWAP\", \"direction\": \"SHORT\", \"result_rr\": 3.25, \"closed_at\": 1804053017.5}, {\"symbol\": \"C36-USDT-SWAP\", \"direction\": \"LONG\", \"result_rr\": 1.5, \"closed_at\": 1804053618.0}, {\"symbol\": \"C39-USDT-SWAP\", \"direction\": \"SHORT\", \"result_rr\": 2.0, \"closed_at\": 1804055419.5}, {\"symbol\": \"C40-USDT-SWAP\", \"direction\": \"LONG\", \"result_rr\": 0.75, \"closed_at\": 1804056020.0}, {\"symbol\": \"C41-USDT-SWAP\", \"direction\": \"SHORT\", \"result_rr\": 3.25, \"closed_at\": 1804056620.5}, {\"symbol\": \"C42-USDT-SWAP\", \"direction\": \"LONG\", \"result_rr\": 1.5, \"closed_at\": 1804057221.0}, {\"symbol\": \"C45-USDT-SWAP\", \"direction\": \"SHORT\", \"result_rr\": 2.0, \"closed_at\": 1804059022.5}, {\"symbol\": \"C46-USDT-SWAP\", \"direction\": \"LONG\", \"result_rr\": 0.75, \"closed_at\": 1804059623.0}, {\"symbol\": \"C47-USDT-SWAP\", \"direction\": \"SHORT\", \"result_rr\": 3.25, \"closed_at\": 1804060223.5}, {\"symbol\": \"C48-USDT-SWAP\", \"direction\": \"LONG\", \"result_rr\": 1.5, \"closed_at\": 1804060824.0}, {\"symbol\": \"C51-USDT-SWAP\", \"direction\": \"SHORT\", \"result_rr\": 2.0, \"closed_at\": 1804062625.5}, {\"symbol\": \"C52-USDT-SWAP\", \"direction\": \"LONG\", \"result_rr\": 0.75, \"closed_at\": 1804063226.0}, {\"symbol\": \"C53-USDT-SWAP\", \"direction\": \"SHORT\", \"result_rr\": 3.25, \"closed_at\": 1804063826.5}, {\"symbol\": \"C54-USDT-SWAP\", \"direction\": \"LONG\", \"result_rr\": 1.5, \"closed_at\": 1804064427.0}, {\"symbol\": \"C57-USDT-SWAP\", \"direction\": \"SHORT\", \"result_rr\": 2.0, \"closed_at\": 1804066228.5}, {\"symbol\": \"C58-USDT-SWAP\", \"direction\": \"LONG\", \"result_rr\": 0.75, \"closed_at\": 1804066829.0}, {\"symbol\": \"C59-USDT-SWAP\", \"direction\": \"SHORT\", \"result_rr\": 3.25, \"closed_at\": 1804067429.5}, {\"symbol\": \"C60-USDT-SWAP\", \"direction\": \"LONG\", \"result_rr\": 1.5, \"closed_at\": 1804068030.0}, {\"symbol\": \"C63-USDT-SWAP\", \"direction\": \"SHORT\", \"result_rr\": 2.0, \"closed_at\": 1804069831.5}, {\"symbol\": \"C64-USDT-SWAP\", \"direction\": \"LONG\", \"result_rr\": 0.75, \"closed_at\": 1804070432.0}, {\"symbol\": \"C65-USDT-SWAP\", \"direction\": \"SHORT\", \"result_rr\": 3.25, \"closed_at\": 1804071032.5}, {\"symbol\": \"C66-USDT-SWAP\", \"direction\": \"LONG\", \"result_rr\": 1.5, \"closed_at\": 1804071633.0}, {\"symbol\": \"C69-USDT-SWAP\", \"direction\": \"SHORT\", \"result_rr\": 2.0, \"closed_at\": 1804073434.5}, {\"symbol\": \"C70-USDT-SWAP\", \"direction\": \"LONG\", \"result_rr\": 0.75, \"closed_at\": 1804074035.0}, {\"symbol\": \"C71-USDT-SWAP\", \"direction\": \"SHORT\", \"result_rr\": 3.25, \"closed_at\": 1804074635.5}, {\"symbol\": \"C72-USDT-SWAP\", \"direction\": \"LONG\", \"result_rr\": 1.5, \"closed_at\": 1804075236.0}, {\"symbol\": \"C75-USDT-SWAP\", \"direction\": \"SHORT\", \"result_rr\": 2.0, \"closed_at\": 1804077037.5}, {\"symbol\": \"C76-USDT-SWAP\", \"direction\": \"LONG\", \"result_rr\": 0.75, \"closed_at\": 1804077638.0}, {\"symbol\": \"C77-USDT-SWAP\", \"direction\": \"SHORT\", \"result_rr\": 3.25, \"closed_at\": 1804078238.5}, {\"symbol\": \"C78-USDT-SWAP\", \"direction\": \"LONG\", \"result_rr\": 1.5, \"closed_at\": 1804078839.0}, {\"symbol\": \"C81-USDT-SWAP\", \"direction\": \"SHORT\", \"result_rr\": 2.0, \"closed_at\": 1804080640.5}, {\"symbol\": \"C82-USDT-SWAP\", \"direction\": \"LONG\", \"result_rr\": 0.75, \"closed_at\": 1804081241.0}, {\"symbol\": \"C83-USDT-SWAP\", \"direction\": \"SHORT\", \"result_rr\": 3.25, \"closed_at\": 1804081841.5}, {\"symbol\": \"C84-USDT-SWAP\", \"direction\": \"LONG\", \"result_rr\": 1.5, \"closed_at\": 1804082442.0}, {\"symbol\": \"C87-USDT-SWAP\", \"direction\": \"SHORT\", \"result_rr\": 2.0, \"closed_at\": 1804084243.5}, {\"symbol\": \"C88-USDT-SWAP\", \"direction\": \"LONG\", \"result_rr\": 0.75, \"closed_at\": 1804084844.0}, {\"symbol\": \"C89-USDT-SWAP\", \"direction\": \"SHORT\", \"result_rr\": 3.25, \"closed_at\": 1804085444.5}, {\"symbol\": \"C90-USDT-SWAP\", \"direction\": \"LONG\", \"result_rr\": 1.5, \"closed_at\": 1804086045.0}, {\"symbol\": \"C93-USDT-SWAP\", \"direction\": \"SHORT\", \"result_rr\": 2.0, \"closed_at\": 1804087846.5}, {\"symbol\": \"C94-USDT-SWAP\", \"direction\": \"LONG\", \"result_rr\": 0.75, \"closed_at\": 1804088447.0}, {\"symbol\": \"C95-USDT-SWAP\", \"direction\": \"SHORT\", \"result_rr\": 3.25, \"closed_at\": 1804089047.5}, {\"symbol\": \"C96-USDT-SWAP\", \"direction\": \"LONG\", \"result_rr\": 1.5, \"closed_at\": 1804089648.0}]"
+    ]
+   ]
+  },
+  {
+   "i": 97,
+   "len": 65,
+   "first": {
+    "symbol": "C0-USDT-SWAP",
+    "direction": "LONG",
+    "result_rr": 1.5,
+    "closed_at": 1804032000.0
+   },
+   "writes": []
+  },
+  {
+   "i": 98,
+   "len": 65,
+   "first": {
+    "symbol": "C0-USDT-SWAP",
+    "direction": "LONG",
+    "result_rr": 1.5,
+    "closed_at": 1804032000.0
+   },
+   "writes": []
+  },
+  {
+   "i": 99,
+   "len": 66,
+   "first": {
+    "symbol": "C0-USDT-SWAP",
+    "direction": "LONG",
+    "result_rr": 1.5,
+    "closed_at": 1804032000.0
+   },
+   "writes": []
+  },
+  {
+   "i": 100,
+   "len": 67,
+   "first": {
+    "symbol": "C0-USDT-SWAP",
+    "direction": "LONG",
+    "result_rr": 1.5,
+    "closed_at": 1804032000.0
+   },
+   "writes": []
+  },
+  {
+   "i": 101,
+   "len": 68,
+   "first": {
+    "symbol": "C0-USDT-SWAP",
+    "direction": "LONG",
+    "result_rr": 1.5,
+    "closed_at": 1804032000.0
+   },
+   "writes": []
+  },
+  {
+   "i": 102,
+   "len": 69,
+   "first": {
+    "symbol": "C0-USDT-SWAP",
+    "direction": "LONG",
+    "result_rr": 1.5,
+    "closed_at": 1804032000.0
+   },
+   "writes": []
+  },
+  {
+   "i": 103,
+   "len": 69,
+   "first": {
+    "symbol": "C0-USDT-SWAP",
+    "direction": "LONG",
+    "result_rr": 1.5,
+    "closed_at": 1804032000.0
+   },
+   "writes": []
+  },
+  {
+   "i": 104,
+   "len": 69,
+   "first": {
+    "symbol": "C0-USDT-SWAP",
+    "direction": "LONG",
+    "result_rr": 1.5,
+    "closed_at": 1804032000.0
+   },
+   "writes": []
+  },
+  {
+   "i": 105,
+   "len": 70,
+   "first": {
+    "symbol": "C0-USDT-SWAP",
+    "direction": "LONG",
+    "result_rr": 1.5,
+    "closed_at": 1804032000.0
+   },
+   "writes": [
+    [
+     "free_closed_profitable",
+     "[{\"symbol\": \"C0-USDT-SWAP\", \"direction\": \"LONG\", \"result_rr\": 1.5, \"closed_at\": 1804032000.0}, {\"symbol\": \"C3-USDT-SWAP\", \"direction\": \"SHORT\", \"result_rr\": 2.0, \"closed_at\": 1804033801.5}, {\"symbol\": \"C4-USDT-SWAP\", \"direction\": \"LONG\", \"result_rr\": 0.75, \"closed_at\": 1804034402.0}, {\"symbol\": \"C5-USDT-SWAP\", \"direction\": \"SHORT\", \"result_rr\": 3.25, \"closed_at\": 1804035002.5}, {\"symbol\": \"C6-USDT-SWAP\", \"direction\": \"LONG\", \"result_rr\": 1.5, \"closed_at\": 1804035603.0}, {\"symbol\": \"C9-USDT-SWAP\", \"direction\": \"SHORT\", \"result_rr\": 2.0, \"closed_at\": 1804037404.5}, {\"symbol\": \"C10-USDT-SWAP\", \"direction\": \"LONG\", \"result_rr\": 0.75, \"closed_at\": 1804038005.0}, {\"symbol\": \"C11-USDT-SWAP\", \"direction\": \"SHORT\", \"result_rr\": 3.25, \"closed_at\": 1804038605.5}, {\"symbol\": \"C12-USDT-SWAP\", \"direction\": \"LONG\", \"result_rr\": 1.5, \"closed_at\": 1804039206.0}, {\"symbol\": \"C15-USDT-SWAP\", \"direction\": \"SHORT\", \"result_rr\": 2.0, \"closed_at\": 1804041007.5}, {\"symbol\": \"C16-USDT-SWAP\", \"direction\": \"LONG\", \"result_rr\": 0.75, \"closed_at\": 1804041608.0}, {\"symbol\": \"C17-USDT-SWAP\", \"direction\": \"SHORT\", \"result_rr\": 3.25, \"closed_at\": 1804042208.5}, {\"symbol\": \"C18-USDT-SWAP\", \"direction\": \"LONG\", \"result_rr\": 1.5, \"closed_at\": 1804042809.0}, {\"symbol\": \"C21-USDT-SWAP\", \"direction\": \"SHORT\", \"result_rr\": 2.0, \"closed_at\": 1804044610.5}, {\"symbol\": \"C22-USDT-SWAP\", \"direction\": \"LONG\", \"result_rr\": 0.75, \"closed_at\": 1804045211.0}, {\"symbol\": \"C23-USDT-SWAP\", \"direction\": \"SHORT\", \"result_rr\": 3.25, \"closed_at\": 1804045811.5}, {\"symbol\": \"C24-USDT-SWAP\", \"direction\": \"LONG\", \"result_rr\": 1.5, \"closed_at\": 1804046412.0}, {\"symbol\": \"C27-USDT-SWAP\", \"direction\": \"SHORT\", \"result_rr\": 2.0, \"closed_at\": 1804048213.5}, {\"symbol\": \"C28-USDT-SWAP\", \"direction\": \"LONG\", \"result_rr\": 0.75, \"closed_at\": 1804048814.0}, {\"symbol\": \"C29-USDT-SWAP\", \"direction\": \"SHORT\", \"result_rr\": 3.25, \"closed_at\": 1804049414.5}, {\"symbol\": \"C30-USDT-SWAP\", \"direction\": \"LONG\", \"result_rr\": 1.5, \"closed_at\": 1804050015.0}, {\"symbol\": \"C33-USDT-SWAP\", \"direction\": \"SHORT\", \"result_rr\": 2.0, \"closed_at\": 1804051816.5}, {\"symbol\": \"C34-USDT-SWAP\", \"direction\": \"LONG\", \"result_rr\": 0.75, \"closed_at\": 1804052417.0}, {\"symbol\": \"C35-USDT-SWAP\", \"direction\": \"SHORT\", \"result_rr\": 3.25, \"closed_at\": 1804053017.5}, {\"symbol\": \"C36-USDT-SWAP\", \"direction\": \"LONG\", \"result_rr\": 1.5, \"closed_at\": 1804053618.0}, {\"symbol\": \"C39-USDT-SWAP\", \"direction\": \"SHORT\", \"result_rr\": 2.0, \"closed_at\": 1804055419.5}, {\"symbol\": \"C40-USDT-SWAP\", \"direction\": \"LONG\", \"result_rr\": 0.75, \"closed_at\": 1804056020.0}, {\"symbol\": \"C41-USDT-SWAP\", \"direction\": \"SHORT\", \"result_rr\": 3.25, \"closed_at\": 1804056620.5}, {\"symbol\": \"C42-USDT-SWAP\", \"direction\": \"LONG\", \"result_rr\": 1.5, \"closed_at\": 1804057221.0}, {\"symbol\": \"C45-USDT-SWAP\", \"direction\": \"SHORT\", \"result_rr\": 2.0, \"closed_at\": 1804059022.5}, {\"symbol\": \"C46-USDT-SWAP\", \"direction\": \"LONG\", \"result_rr\": 0.75, \"closed_at\": 1804059623.0}, {\"symbol\": \"C47-USDT-SWAP\", \"direction\": \"SHORT\", \"result_rr\": 3.25, \"closed_at\": 1804060223.5}, {\"symbol\": \"C48-USDT-SWAP\", \"direction\": \"LONG\", \"result_rr\": 1.5, \"closed_at\": 1804060824.0}, {\"symbol\": \"C51-USDT-SWAP\", \"direction\": \"SHORT\", \"result_rr\": 2.0, \"closed_at\": 1804062625.5}, {\"symbol\": \"C52-USDT-SWAP\", \"direction\": \"LONG\", \"result_rr\": 0.75, \"closed_at\": 1804063226.0}, {\"symbol\": \"C53-USDT-SWAP\", \"direction\": \"SHORT\", \"result_rr\": 3.25, \"closed_at\": 1804063826.5}, {\"symbol\": \"C54-USDT-SWAP\", \"direction\": \"LONG\", \"result_rr\": 1.5, \"closed_at\": 1804064427.0}, {\"symbol\": \"C57-USDT-SWAP\", \"direction\": \"SHORT\", \"result_rr\": 2.0, \"closed_at\": 1804066228.5}, {\"symbol\": \"C58-USDT-SWAP\", \"direction\": \"LONG\", \"result_rr\": 0.75, \"closed_at\": 1804066829.0}, {\"symbol\": \"C59-USDT-SWAP\", \"direction\": \"SHORT\", \"result_rr\": 3.25, \"closed_at\": 1804067429.5}, {\"symbol\": \"C60-USDT-SWAP\", \"direction\": \"LONG\", \"result_rr\": 1.5, \"closed_at\": 1804068030.0}, {\"symbol\": \"C63-USDT-SWAP\", \"direction\": \"SHORT\", \"result_rr\": 2.0, \"closed_at\": 1804069831.5}, {\"symbol\": \"C64-USDT-SWAP\", \"direction\": \"LONG\", \"result_rr\": 0.75, \"closed_at\": 1804070432.0}, {\"symbol\": \"C65-USDT-SWAP\", \"direction\": \"SHORT\", \"result_rr\": 3.25, \"closed_at\": 1804071032.5}, {\"symbol\": \"C66-USDT-SWAP\", \"direction\": \"LONG\", \"result_rr\": 1.5, \"closed_at\": 1804071633.0}, {\"symbol\": \"C69-USDT-SWAP\", \"direction\": \"SHORT\", \"result_rr\": 2.0, \"closed_at\": 1804073434.5}, {\"symbol\": \"C70-USDT-SWAP\", \"direction\": \"LONG\", \"result_rr\": 0.75, \"closed_at\": 1804074035.0}, {\"symbol\": \"C71-USDT-SWAP\", \"direction\": \"SHORT\", \"result_rr\": 3.25, \"closed_at\": 1804074635.5}, {\"symbol\": \"C72-USDT-SWAP\", \"direction\": \"LONG\", \"result_rr\": 1.5, \"closed_at\": 1804075236.0}, {\"symbol\": \"C75-USDT-SWAP\", \"direction\": \"SHORT\", \"result_rr\": 2.0, \"closed_at\": 1804077037.5}, {\"symbol\": \"C76-USDT-SWAP\", \"direction\": \"LONG\", \"result_rr\": 0.75, \"closed_at\": 1804077638.0}, {\"symbol\": \"C77-USDT-SWAP\", \"direction\": \"SHORT\", \"result_rr\": 3.25, \"closed_at\": 1804078238.5}, {\"symbol\": \"C78-USDT-SWAP\", \"direction\": \"LONG\", \"result_rr\": 1.5, \"closed_at\": 1804078839.0}, {\"symbol\": \"C81-USDT-SWAP\", \"direction\": \"SHORT\", \"result_rr\": 2.0, \"closed_at\": 1804080640.5}, {\"symbol\": \"C82-USDT-SWAP\", \"direction\": \"LONG\", \"result_rr\": 0.75, \"closed_at\": 1804081241.0}, {\"symbol\": \"C83-USDT-SWAP\", \"direction\": \"SHORT\", \"result_rr\": 3.25, \"closed_at\": 1804081841.5}, {\"symbol\": \"C84-USDT-SWAP\", \"direction\": \"LONG\", \"result_rr\": 1.5, \"closed_at\": 1804082442.0}, {\"symbol\": \"C87-USDT-SWAP\", \"direction\": \"SHORT\", \"result_rr\": 2.0, \"closed_at\": 1804084243.5}, {\"symbol\": \"C88-USDT-SWAP\", \"direction\": \"LONG\", \"result_rr\": 0.75, \"closed_at\": 1804084844.0}, {\"symbol\": \"C89-USDT-SWAP\", \"direction\": \"SHORT\", \"result_rr\": 3.25, \"closed_at\": 1804085444.5}, {\"symbol\": \"C90-USDT-SWAP\", \"direction\": \"LONG\", \"result_rr\": 1.5, \"closed_at\": 1804086045.0}, {\"symbol\": \"C93-USDT-SWAP\", \"direction\": \"SHORT\", \"result_rr\": 2.0, \"closed_at\": 1804087846.5}, {\"symbol\": \"C94-USDT-SWAP\", \"direction\": \"LONG\", \"result_rr\": 0.75, \"closed_at\": 1804088447.0}, {\"symbol\": \"C95-USDT-SWAP\", \"direction\": \"SHORT\", \"result_rr\": 3.25, \"closed_at\": 1804089047.5}, {\"symbol\": \"C96-USDT-SWAP\", \"direction\": \"LONG\", \"result_rr\": 1.5, \"closed_at\": 1804089648.0}, {\"symbol\": \"C99-USDT-SWAP\", \"direction\": \"SHORT\", \"result_rr\": 2.0, \"closed_at\": 1804091449.5}, {\"symbol\": \"C100-USDT-SWAP\", \"direction\": \"LONG\", \"result_rr\": 0.75, \"closed_at\": 1804092050.0}, {\"symbol\": \"C101-USDT-SWAP\", \"direction\": \"SHORT\", \"result_rr\": 3.25, \"closed_at\": 1804092650.5}, {\"symbol\": \"C102-USDT-SWAP\", \"direction\": \"LONG\", \"result_rr\": 1.5, \"closed_at\": 1804093251.0}, {\"symbol\": \"C105-USDT-SWAP\", \"direction\": \"SHORT\", \"result_rr\": 2.0, \"closed_at\": 1804095052.5}]"
+    ]
+   ]
+  },
+  {
+   "i": 106,
+   "len": 71,
+   "first": {
+    "symbol": "C0-USDT-SWAP",
+    "direction": "LONG",
+    "result_rr": 1.5,
+    "closed_at": 1804032000.0
+   },
+   "writes": []
+  }
+ ],
+ "preview": [
+  {
+   "op": [
+    "already",
+    301,
+    "BTC-USDT-SWAP",
+    "LONG",
+    5,
+    9
+   ],
+   "now": 1804237200.0,
+   "result": false,
+   "user": {
+    "free_signals_date": "",
+    "free_signals_morning": 0,
+    "free_signals_evening": 0,
+    "free_signals_night": 0,
+    "free_signals_today": 0,
+    "free_missed_today": 0,
+    "free_smc_preview_date": "",
+    "free_smc_preview_today": 0
+   },
+   "writes": [],
+   "logs": []
+  },
+  {
+   "op": [
+    "should",
+    "u",
+    5,
+    9
+   ],
+   "now": 1804237200.0,
+   "result": true,
+   "user": {
+    "free_signals_date": "",
+    "free_signals_morning": 0,
+    "free_signals_evening": 0,
+    "free_signals_night": 0,
+    "free_signals_today": 0,
+    "free_missed_today": 0,
+    "free_smc_preview_date": "2027-03-05",
+    "free_smc_preview_today": 0
+   },
+   "writes": [],
+   "logs": []
+  },
+  {
+   "op": [
+    "record",
+    "u",
+    5,
+    9
+   ],
+   "now": 1804237200.0,
+   "result": null,
+   "user": {
+    "free_signals_date": "",
+    "free_signals_morning": 0,
+    "free_signals_evening": 0,
+    "free_signals_night": 0,
+    "free_signals_today": 0,
+    "free_missed_today": 0,
+    "free_smc_preview_date": "2027-03-05",
+    "free_smc_preview_today": 1
+   },
+   "writes": [],
+   "logs": [
+    "[FREE-SMC-PREVIEW] uid=301 sent (total_today=1)"
+   ]
+  },
+  {
+   "op": [
+    "mark",
+    301,
+    "BTC-USDT-SWAP",
+    "LONG",
+    5,
+    9
+   ],
+   "now": 1804237200.0,
+   "result": null,
+   "user": {
+    "free_signals_date": "",
+    "free_signals_morning": 0,
+    "free_signals_evening": 0,
+    "free_signals_night": 0,
+    "free_signals_today": 0,
+    "free_missed_today": 0,
+    "free_smc_preview_date": "2027-03-05",
+    "free_smc_preview_today": 1
+   },
+   "writes": [
+    [
+     "free_preview_sent",
+     "{\"301\": {\"BTC-USDT-SWAP:LONG\": \"2027-03-05\"}}"
+    ]
+   ],
+   "logs": []
+  },
+  {
+   "op": [
+    "already",
+    301,
+    "BTC-USDT-SWAP",
+    "LONG",
+    5,
+    10
+   ],
+   "now": 1804240800.0,
+   "result": true,
+   "user": {
+    "free_signals_date": "",
+    "free_signals_morning": 0,
+    "free_signals_evening": 0,
+    "free_signals_night": 0,
+    "free_signals_today": 0,
+    "free_missed_today": 0,
+    "free_smc_preview_date": "2027-03-05",
+    "free_smc_preview_today": 1
+   },
+   "writes": [],
+   "logs": []
+  },
+  {
+   "op": [
+    "already",
+    301,
+    "BTC-USDT-SWAP",
+    "SHORT",
+    5,
+    10
+   ],
+   "now": 1804240800.0,
+   "result": false,
+   "user": {
+    "free_signals_date": "",
+    "free_signals_morning": 0,
+    "free_signals_evening": 0,
+    "free_signals_night": 0,
+    "free_signals_today": 0,
+    "free_missed_today": 0,
+    "free_smc_preview_date": "2027-03-05",
+    "free_smc_preview_today": 1
+   },
+   "writes": [],
+   "logs": []
+  },
+  {
+   "op": [
+    "should",
+    "u",
+    5,
+    11
+   ],
+   "now": 1804244400.0,
+   "result": true,
+   "user": {
+    "free_signals_date": "",
+    "free_signals_morning": 0,
+    "free_signals_evening": 0,
+    "free_signals_night": 0,
+    "free_signals_today": 0,
+    "free_missed_today": 0,
+    "free_smc_preview_date": "2027-03-05",
+    "free_smc_preview_today": 1
+   },
+   "writes": [],
+   "logs": []
+  },
+  {
+   "op": [
+    "record",
+    "u",
+    5,
+    11
+   ],
+   "now": 1804244400.0,
+   "result": null,
+   "user": {
+    "free_signals_date": "",
+    "free_signals_morning": 0,
+    "free_signals_evening": 0,
+    "free_signals_night": 0,
+    "free_signals_today": 0,
+    "free_missed_today": 0,
+    "free_smc_preview_date": "2027-03-05",
+    "free_smc_preview_today": 2
+   },
+   "writes": [],
+   "logs": [
+    "[FREE-SMC-PREVIEW] uid=301 sent (total_today=2)"
+   ]
+  },
+  {
+   "op": [
+    "mark",
+    301,
+    "ETH-USDT-SWAP",
+    "SHORT",
+    5,
+    11
+   ],
+   "now": 1804244400.0,
+   "result": null,
+   "user": {
+    "free_signals_date": "",
+    "free_signals_morning": 0,
+    "free_signals_evening": 0,
+    "free_signals_night": 0,
+    "free_signals_today": 0,
+    "free_missed_today": 0,
+    "free_smc_preview_date": "2027-03-05",
+    "free_smc_preview_today": 2
+   },
+   "writes": [
+    [
+     "free_preview_sent",
+     "{\"301\": {\"BTC-USDT-SWAP:LONG\": \"2027-03-05\", \"ETH-USDT-SWAP:SHORT\": \"2027-03-05\"}}"
+    ]
+   ],
+   "logs": []
+  },
+  {
+   "op": [
+    "record",
+    "u",
+    5,
+    12
+   ],
+   "now": 1804248000.0,
+   "result": null,
+   "user": {
+    "free_signals_date": "",
+    "free_signals_morning": 0,
+    "free_signals_evening": 0,
+    "free_signals_night": 0,
+    "free_signals_today": 0,
+    "free_missed_today": 0,
+    "free_smc_preview_date": "2027-03-05",
+    "free_smc_preview_today": 3
+   },
+   "writes": [],
+   "logs": [
+    "[FREE-SMC-PREVIEW] uid=301 sent (total_today=3)"
+   ]
+  },
+  {
+   "op": [
+    "should",
+    "u",
+    5,
+    12
+   ],
+   "now": 1804248000.0,
+   "result": false,
+   "user": {
+    "free_signals_date": "",
+    "free_signals_morning": 0,
+    "free_signals_evening": 0,
+    "free_signals_night": 0,
+    "free_signals_today": 0,
+    "free_missed_today": 0,
+    "free_smc_preview_date": "2027-03-05",
+    "free_smc_preview_today": 3
+   },
+   "writes": [],
+   "logs": []
+  },
+  {
+   "op": [
+    "should",
+    "pro",
+    5,
+    12
+   ],
+   "now": 1804248000.0,
+   "result": false,
+   "user": {
+    "free_signals_date": "",
+    "free_signals_morning": 0,
+    "free_signals_evening": 0,
+    "free_signals_night": 0,
+    "free_signals_today": 0,
+    "free_missed_today": 0,
+    "free_smc_preview_date": "2027-03-05",
+    "free_smc_preview_today": 3
+   },
+   "writes": [],
+   "logs": []
+  },
+  {
+   "op": [
+    "mark",
+    302,
+    "SOL-USDT-SWAP",
+    "LONG",
+    5,
+    13
+   ],
+   "now": 1804251600.0,
+   "result": null,
+   "user": {
+    "free_signals_date": "",
+    "free_signals_morning": 0,
+    "free_signals_evening": 0,
+    "free_signals_night": 0,
+    "free_signals_today": 0,
+    "free_missed_today": 0,
+    "free_smc_preview_date": "2027-03-05",
+    "free_smc_preview_today": 3
+   },
+   "writes": [
+    [
+     "free_preview_sent",
+     "{\"301\": {\"BTC-USDT-SWAP:LONG\": \"2027-03-05\", \"ETH-USDT-SWAP:SHORT\": \"2027-03-05\"}, \"302\": {\"SOL-USDT-SWAP:LONG\": \"2027-03-05\"}}"
+    ]
+   ],
+   "logs": []
+  },
+  {
+   "op": [
+    "already",
+    301,
+    "BTC-USDT-SWAP",
+    "LONG",
+    6,
+    1
+   ],
+   "now": 1804294800.0,
+   "result": false,
+   "user": {
+    "free_signals_date": "",
+    "free_signals_morning": 0,
+    "free_signals_evening": 0,
+    "free_signals_night": 0,
+    "free_signals_today": 0,
+    "free_missed_today": 0,
+    "free_smc_preview_date": "2027-03-05",
+    "free_smc_preview_today": 3
+   },
+   "writes": [],
+   "logs": []
+  },
+  {
+   "op": [
+    "should",
+    "u",
+    6,
+    1
+   ],
+   "now": 1804294800.0,
+   "result": true,
+   "user": {
+    "free_signals_date": "",
+    "free_signals_morning": 0,
+    "free_signals_evening": 0,
+    "free_signals_night": 0,
+    "free_signals_today": 0,
+    "free_missed_today": 0,
+    "free_smc_preview_date": "2027-03-06",
+    "free_smc_preview_today": 0
+   },
+   "writes": [],
+   "logs": []
+  },
+  {
+   "op": [
+    "mark",
+    301,
+    "DOGE-USDT-SWAP",
+    "LONG",
+    6,
+    2
+   ],
+   "now": 1804298400.0,
+   "result": null,
+   "user": {
+    "free_signals_date": "",
+    "free_signals_morning": 0,
+    "free_signals_evening": 0,
+    "free_signals_night": 0,
+    "free_signals_today": 0,
+    "free_missed_today": 0,
+    "free_smc_preview_date": "2027-03-06",
+    "free_smc_preview_today": 0
+   },
+   "writes": [
+    [
+     "free_preview_sent",
+     "{\"301\": {\"DOGE-USDT-SWAP:LONG\": \"2027-03-06\"}}"
+    ]
+   ],
+   "logs": []
+  },
+  {
+   "op": [
+    "already",
+    301,
+    "ETH-USDT-SWAP",
+    "SHORT",
+    6,
+    3
+   ],
+   "now": 1804302000.0,
+   "result": false,
+   "user": {
+    "free_signals_date": "",
+    "free_signals_morning": 0,
+    "free_signals_evening": 0,
+    "free_signals_night": 0,
+    "free_signals_today": 0,
+    "free_missed_today": 0,
+    "free_smc_preview_date": "2027-03-06",
+    "free_smc_preview_today": 0
+   },
+   "writes": [],
+   "logs": []
+  },
+  {
+   "op": [
+    "already",
+    "301",
+    "DOGE-USDT-SWAP",
+    "LONG",
+    6,
+    3
+   ],
+   "now": 1804302000.0,
+   "result": true,
+   "user": {
+    "free_signals_date": "",
+    "free_signals_morning": 0,
+    "free_signals_evening": 0,
+    "free_signals_night": 0,
+    "free_signals_today": 0,
+    "free_missed_today": 0,
+    "free_smc_preview_date": "2027-03-06",
+    "free_smc_preview_today": 0
+   },
+   "writes": [],
+   "logs": []
+  }
+ ],
+ "cards": [
+  {
+   "sig": {
+    "direction": "LONG",
+    "score": 4,
+    "entry": 64123.456789,
+    "sl": 63000.5,
+    "tp1": 66000.0
+   },
+   "symbol": "BTC-USDT-SWAP",
+   "lang": "ru",
+   "text": "🎁 <b>Pro Preview</b> — SMC сигнал\n\n<b>BTC-USDT-SWAP</b> · LONG · quality 4/10\nEntry: <code>64123.5</code> · SL: <code>63000.5</code> · TP1: <code>66000</code>\n\n💡 Это сигнал стратегии <b>SMC</b> — она ловит точки входа на order-blocks и работает даже в тренде, когда LEVELS молчит. На Free-плане ты видишь до <b>3 таких сигналов в день</b> как тизер.\n\n💎 Разблокировать все SMC сигналы + авто-торговля → /subscribe"
+  },
+  {
+   "sig": {
+    "direction": "LONG",
+    "score": 4,
+    "entry": 64123.456789,
+    "sl": 63000.5,
+    "tp1": 66000.0
+   },
+   "symbol": "BTC-USDT-SWAP",
+   "lang": "en",
+   "text": "🎁 <b>Pro Preview</b> — SMC signal\n\n<b>BTC-USDT-SWAP</b> · LONG · quality 4/10\nEntry: <code>64123.5</code> · SL: <code>63000.5</code> · TP1: <code>66000</code>\n\n💡 This is a signal from the <b>SMC</b> strategy — it finds entries at order-blocks and works in trending markets where LEVELS goes quiet. On Free plan you see up to <b>3 such signals per day</b> as a teaser.\n\n💎 Unlock all SMC signals + auto-trading → /subscribe"
+  },
+  {
+   "sig": {
+    "direction": "LONG",
+    "score": 4,
+    "entry": 64123.456789,
+    "sl": 63000.5,
+    "tp1": 66000.0
+   },
+   "symbol": "BTC-USDT-SWAP",
+   "lang": "de",
+   "text": "🎁 <b>Pro Preview</b> — SMC сигнал\n\n<b>BTC-USDT-SWAP</b> · LONG · quality 4/10\nEntry: <code>64123.5</code> · SL: <code>63000.5</code> · TP1: <code>66000</code>\n\n💡 Это сигнал стратегии <b>SMC</b> — она ловит точки входа на order-blocks и работает даже в тренде, когда LEVELS молчит. На Free-плане ты видишь до <b>3 таких сигналов в день</b> как тизер.\n\n💎 Разблокировать все SMC сигналы + авто-торговля → /subscribe"
+  },
+  {
+   "sig": {
+    "direction": "SHORT",
+    "score": 5,
+    "entry": 1.23456789e-05,
+    "sl": 1.30001e-05,
+    "tp1": 1e-05
+   },
+   "symbol": "PEPE-USDT-SWAP",
+   "lang": "ru",
+   "text": "🎁 <b>Pro Preview</b> — SMC сигнал\n\n<b>PEPE-USDT-SWAP</b> · SHORT · quality 5/10\nEntry: <code>1.23457e-05</code> · SL: <code>1.30001e-05</code> · TP1: <code>1e-05</code>\n\n💡 Это сигнал стратегии <b>SMC</b> — она ловит точки входа на order-blocks и работает даже в тренде, когда LEVELS молчит. На Free-плане ты видишь до <b>3 таких сигналов в день</b> как тизер.\n\n💎 Разблокировать все SMC сигналы + авто-торговля → /subscribe"
+  },
+  {
+   "sig": {
+    "direction": "SHORT",
+    "score": 5,
+    "entry": 1.23456789e-05,
+    "sl": 1.30001e-05,
+    "tp1": 1e-05
+   },
+   "symbol": "PEPE-USDT-SWAP",
+   "lang": "en",
+   "text": "🎁 <b>Pro Preview</b> — SMC signal\n\n<b>PEPE-USDT-SWAP</b> · SHORT · quality 5/10\nEntry: <code>1.23457e-05</code> · SL: <code>1.30001e-05</code> · TP1: <code>1e-05</code>\n\n💡 This is a signal from the <b>SMC</b> strategy — it finds entries at order-blocks and works in trending markets where LEVELS goes quiet. On Free plan you see up to <b>3 such signals per day</b> as a teaser.\n\n💎 Unlock all SMC signals + auto-trading → /subscribe"
+  },
+  {
+   "sig": {
+    "direction": "SHORT",
+    "score": 5,
+    "entry": 1.23456789e-05,
+    "sl": 1.30001e-05,
+    "tp1": 1e-05
+   },
+   "symbol": "PEPE-USDT-SWAP",
+   "lang": "de",
+   "text": "🎁 <b>Pro Preview</b> — SMC сигнал\n\n<b>PEPE-USDT-SWAP</b> · SHORT · quality 5/10\nEntry: <code>1.23457e-05</code> · SL: <code>1.30001e-05</code> · TP1: <code>1e-05</code>\n\n💡 Это сигнал стратегии <b>SMC</b> — она ловит точки входа на order-blocks и работает даже в тренде, когда LEVELS молчит. На Free-плане ты видишь до <b>3 таких сигналов в день</b> как тизер.\n\n💎 Разблокировать все SMC сигналы + авто-торговля → /subscribe"
+  },
+  {
+   "sig": {
+    "direction": "LONG",
+    "score": null,
+    "entry": 3456.5,
+    "sl": 3400.0,
+    "tp1": 3600.25
+   },
+   "symbol": "ETH-USDT-SWAP",
+   "lang": "ru",
+   "text": "🎁 <b>Pro Preview</b> — SMC сигнал\n\n<b>ETH-USDT-SWAP</b> · LONG · quality 0/10\nEntry: <code>3456.5</code> · SL: <code>3400</code> · TP1: <code>3600.25</code>\n\n💡 Это сигнал стратегии <b>SMC</b> — она ловит точки входа на order-blocks и работает даже в тренде, когда LEVELS молчит. На Free-плане ты видишь до <b>3 таких сигналов в день</b> как тизер.\n\n💎 Разблокировать все SMC сигналы + авто-торговля → /subscribe"
+  },
+  {
+   "sig": {
+    "direction": "LONG",
+    "score": null,
+    "entry": 3456.5,
+    "sl": 3400.0,
+    "tp1": 3600.25
+   },
+   "symbol": "ETH-USDT-SWAP",
+   "lang": "en",
+   "text": "🎁 <b>Pro Preview</b> — SMC signal\n\n<b>ETH-USDT-SWAP</b> · LONG · quality 0/10\nEntry: <code>3456.5</code> · SL: <code>3400</code> · TP1: <code>3600.25</code>\n\n💡 This is a signal from the <b>SMC</b> strategy — it finds entries at order-blocks and works in trending markets where LEVELS goes quiet. On Free plan you see up to <b>3 such signals per day</b> as a teaser.\n\n💎 Unlock all SMC signals + auto-trading → /subscribe"
+  },
+  {
+   "sig": {
+    "direction": "LONG",
+    "score": null,
+    "entry": 3456.5,
+    "sl": 3400.0,
+    "tp1": 3600.25
+   },
+   "symbol": "ETH-USDT-SWAP",
+   "lang": "de",
+   "text": "🎁 <b>Pro Preview</b> — SMC сигнал\n\n<b>ETH-USDT-SWAP</b> · LONG · quality 0/10\nEntry: <code>3456.5</code> · SL: <code>3400</code> · TP1: <code>3600.25</code>\n\n💡 Это сигнал стратегии <b>SMC</b> — она ловит точки входа на order-blocks и работает даже в тренде, когда LEVELS молчит. На Free-плане ты видишь до <b>3 таких сигналов в день</b> как тизер.\n\n💎 Разблокировать все SMC сигналы + авто-торговля → /subscribe"
+  },
+  {
+   "sig": {
+    "direction": "SHORT",
+    "score": 3.7,
+    "entry": 1e-07,
+    "sl": 2e-07,
+    "tp1": 5e-08
+   },
+   "symbol": "X-USDT-SWAP",
+   "lang": "ru",
+   "text": "🎁 <b>Pro Preview</b> — SMC сигнал\n\n<b>X-USDT-SWAP</b> · SHORT · quality 3/10\nEntry: <code>1e-07</code> · SL: <code>2e-07</code> · TP1: <code>5e-08</code>\n\n💡 Это сигнал стратегии <b>SMC</b> — она ловит точки входа на order-blocks и работает даже в тренде, когда LEVELS молчит. На Free-плане ты видишь до <b>3 таких сигналов в день</b> как тизер.\n\n💎 Разблокировать все SMC сигналы + авто-торговля → /subscribe"
+  },
+  {
+   "sig": {
+    "direction": "SHORT",
+    "score": 3.7,
+    "entry": 1e-07,
+    "sl": 2e-07,
+    "tp1": 5e-08
+   },
+   "symbol": "X-USDT-SWAP",
+   "lang": "en",
+   "text": "🎁 <b>Pro Preview</b> — SMC signal\n\n<b>X-USDT-SWAP</b> · SHORT · quality 3/10\nEntry: <code>1e-07</code> · SL: <code>2e-07</code> · TP1: <code>5e-08</code>\n\n💡 This is a signal from the <b>SMC</b> strategy — it finds entries at order-blocks and works in trending markets where LEVELS goes quiet. On Free plan you see up to <b>3 such signals per day</b> as a teaser.\n\n💎 Unlock all SMC signals + auto-trading → /subscribe"
+  },
+  {
+   "sig": {
+    "direction": "SHORT",
+    "score": 3.7,
+    "entry": 1e-07,
+    "sl": 2e-07,
+    "tp1": 5e-08
+   },
+   "symbol": "X-USDT-SWAP",
+   "lang": "de",
+   "text": "🎁 <b>Pro Preview</b> — SMC сигнал\n\n<b>X-USDT-SWAP</b> · SHORT · quality 3/10\nEntry: <code>1e-07</code> · SL: <code>2e-07</code> · TP1: <code>5e-08</code>\n\n💡 Это сигнал стратегии <b>SMC</b> — она ловит точки входа на order-blocks и работает даже в тренде, когда LEVELS молчит. На Free-плане ты видишь до <b>3 таких сигналов в день</b> как тизер.\n\n💎 Разблокировать все SMC сигналы + авто-торговля → /subscribe"
+  }
+ ],
+ "loads": [
+  {
+   "missed": "{\"5\": [{\"symbol\": \"A\"}], \"6\": []}",
+   "closed": "[{\"symbol\": \"B\", \"direction\": \"LONG\", \"result_rr\": 1.5, \"closed_at\": 1.0}]",
+   "preview": "{\"7\": {\"A:LONG\": \"2027-03-07\", \"B:SHORT\": \"2027-03-06\"}, \"8\": {\"C:LONG\": \"2027-03-06\"}, \"9\": null}",
+   "missed_buffer": {
+    "5": [
+     {
+      "symbol": "A"
+     }
+    ],
+    "6": []
+   },
+   "closed_buffer": [
+    {
+     "symbol": "B",
+     "direction": "LONG",
+     "result_rr": 1.5,
+     "closed_at": 1.0
+    }
+   ],
+   "preview_sent": {
+    "7": {
+     "A:LONG": "2027-03-07"
+    }
+   }
+  },
+  {
+   "missed": "{bad",
+   "closed": "[bad",
+   "preview": "{bad",
+   "missed_buffer": {},
+   "closed_buffer": [],
+   "preview_sent": {}
+  },
+  {
+   "missed": null,
+   "closed": null,
+   "preview": null,
+   "missed_buffer": {},
+   "closed_buffer": [],
+   "preview_sent": {}
+  },
+  {
+   "missed": "{\"x\": []}",
+   "closed": "{\"a\": 1}",
+   "preview": "{\"10\": {\"Z:SHORT\": \"2027-03-07\"}}",
+   "missed_buffer": {},
+   "closed_buffer": {
+    "a": 1
+   },
+   "preview_sent": {
+    "10": {
+     "Z:SHORT": "2027-03-07"
+    }
+   }
+  }
+ ],
+ "report": {
+  "now": 1804539600.0,
+  "closed": [
+   {
+    "symbol": "OLD-USDT-SWAP",
+    "direction": "LONG",
+    "result_rr": 9.0,
+    "closed_at": 1804460400.0
+   },
+   {
+    "symbol": "BTC-USDT-SWAP",
+    "direction": "LONG",
+    "result_rr": 1.25,
+    "closed_at": 1804464000.0
+   },
+   {
+    "symbol": "ETH-USDT",
+    "direction": "SHORT",
+    "result_rr": 2.0,
+    "closed_at": 1804474800.0
+   },
+   {
+    "symbol": "SOL-USDT-SWAP",
+    "direction": "LONG",
+    "result_rr": 0.05,
+    "closed_at": 1804478400.0
+   },
+   {
+    "symbol": "XRP-USDT-SWAP",
+    "direction": "SHORT",
+    "result_rr": 3.35,
+    "closed_at": 1804482000.0
+   },
+   {
+    "symbol": "ADA-USDT-SWAP",
+    "direction": "LONG",
+    "result_rr": 0.25,
+    "closed_at": 1804485600.0
+   },
+   {
+    "symbol": "DOGE-USDT-SWAP",
+    "direction": "SHORT",
+    "result_rr": 1.0,
+    "closed_at": 1804539540.0
+   }
+  ],
+  "users": [
+   {
+    "user_id": 401,
+    "sub_plan": "free",
+    "lang": "ru",
+    "free_signals_date": "2027-03-08",
+    "free_signals_morning": 1,
+    "free_signals_evening": 0,
+    "free_signals_night": 0,
+    "free_signals_today": 1,
+    "free_missed_today": 0,
+    "free_smc_preview_date": "",
+    "free_smc_preview_today": 0
+   },
+   {
+    "user_id": 402,
+    "sub_plan": "free",
+    "lang": "en",
+    "free_signals_date": "2027-03-08",
+    "free_signals_morning": 1,
+    "free_signals_evening": 1,
+    "free_signals_night": 0,
+    "free_signals_today": 2,
+    "free_missed_today": 0,
+    "free_smc_preview_date": "",
+    "free_smc_preview_today": 0
+   },
+   {
+    "user_id": 403,
+    "sub_plan": "free",
+    "lang": "ru",
+    "free_signals_date": "2027-03-07",
+    "free_signals_morning": 1,
+    "free_signals_evening": 1,
+    "free_signals_night": 0,
+    "free_signals_today": 0,
+    "free_missed_today": 0,
+    "free_smc_preview_date": "",
+    "free_smc_preview_today": 0
+   },
+   {
+    "user_id": 404,
+    "sub_plan": "pro",
+    "lang": "ru",
+    "free_signals_date": "2027-03-08",
+    "free_signals_morning": 1,
+    "free_signals_evening": 0,
+    "free_signals_night": 0,
+    "free_signals_today": 0,
+    "free_missed_today": 0,
+    "free_smc_preview_date": "",
+    "free_smc_preview_today": 0
+   },
+   {
+    "user_id": 405,
+    "sub_plan": "free",
+    "lang": "",
+    "free_signals_date": "2027-03-08",
+    "free_signals_morning": 0,
+    "free_signals_evening": 0,
+    "free_signals_night": 0,
+    "free_signals_today": 3,
+    "free_missed_today": 0,
+    "free_smc_preview_date": "",
+    "free_smc_preview_today": 0
+   },
+   {
+    "user_id": 406,
+    "sub_plan": "free",
+    "lang": "de",
+    "free_signals_date": "2027-03-08",
+    "free_signals_morning": 0,
+    "free_signals_evening": 0,
+    "free_signals_night": 0,
+    "free_signals_today": 0,
+    "free_missed_today": 0,
+    "free_smc_preview_date": "",
+    "free_smc_preview_today": 0
+   }
+  ],
+  "sent": [
+   [
+    401,
+    "📊 <b>Вечерний отчёт (Free план)</b>\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\nСегодня получено: <b>1</b> сигналов\n  🌅 Утро: 1/1  ·  🌆 Вечер: 0/1\n\n🔥 <b>На платформе закрыто по TP сегодня (6):</b>\n   <i>(трейды Pro юзеров — для мотивации)</i>\n  📈 BTC LONG → <b>+1.2R</b>\n  📈 ETH SHORT → <b>+2.0R</b>\n  📈 SOL LONG → <b>+0.1R</b>\n  📈 XRP SHORT → <b>+3.4R</b>\n  📈 ADA LONG → <b>+0.2R</b>\n  ... и ещё 1\n  Итого: <b>+7.9R</b>\n\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n⭐ <b>Pro $69</b> — LEVELS + SMC автотрейд + AI-фильтр + оптимизатор + Genome"
+   ],
+   [
+    402,
+    "📊 <b>Evening report (Free plan)</b>\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\nToday received: <b>2</b> signals\n  🌅 Morning: 1/1  ·  🌆 Evening: 1/1\n\n🔥 <b>Closed at TP across platform today (6):</b>\n   <i>(trades from Pro users — for motivation)</i>\n  📈 BTC LONG → <b>+1.2R</b>\n  📈 ETH SHORT → <b>+2.0R</b>\n  📈 SOL LONG → <b>+0.1R</b>\n  📈 XRP SHORT → <b>+3.4R</b>\n  📈 ADA LONG → <b>+0.2R</b>\n  ... and 1 more\n  Total: <b>+7.9R</b>\n\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n⭐ <b>Pro $69</b> — LEVELS + SMC auto-trade + AI filter + optimizer + Genome"
+   ],
+   [
+    403,
+    "📊 <b>Вечерний отчёт (Free план)</b>\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\nСегодня получено: <b>0</b> сигналов\n\n🔥 <b>На платформе закрыто по TP сегодня (6):</b>\n   <i>(трейды Pro юзеров — для мотивации)</i>\n  📈 BTC LONG → <b>+1.2R</b>\n  📈 ETH SHORT → <b>+2.0R</b>\n  📈 SOL LONG → <b>+0.1R</b>\n  📈 XRP SHORT → <b>+3.4R</b>\n  📈 ADA LONG → <b>+0.2R</b>\n  ... и ещё 1\n  Итого: <b>+7.9R</b>\n\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n⭐ <b>Pro $69</b> — LEVELS + SMC автотрейд + AI-фильтр + оптимизатор + Genome"
+   ],
+   [
+    405,
+    "📊 <b>Вечерний отчёт (Free план)</b>\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\nСегодня получено: <b>3</b> сигналов\n\n🔥 <b>На платформе закрыто по TP сегодня (6):</b>\n   <i>(трейды Pro юзеров — для мотивации)</i>\n  📈 BTC LONG → <b>+1.2R</b>\n  📈 ETH SHORT → <b>+2.0R</b>\n  📈 SOL LONG → <b>+0.1R</b>\n  📈 XRP SHORT → <b>+3.4R</b>\n  📈 ADA LONG → <b>+0.2R</b>\n  ... и ещё 1\n  Итого: <b>+7.9R</b>\n\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n⭐ <b>Pro $69</b> — LEVELS + SMC автотрейд + AI-фильтр + оптимизатор + Genome"
+   ],
+   [
+    406,
+    "📊 <b>Вечерний отчёт (Free план)</b>\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\nСегодня получено: <b>0</b> сигналов\n\n🔥 <b>На платформе закрыто по TP сегодня (6):</b>\n   <i>(трейды Pro юзеров — для мотивации)</i>\n  📈 BTC LONG → <b>+1.2R</b>\n  📈 ETH SHORT → <b>+2.0R</b>\n  📈 SOL LONG → <b>+0.1R</b>\n  📈 XRP SHORT → <b>+3.4R</b>\n  📈 ADA LONG → <b>+0.2R</b>\n  ... и ещё 1\n  Итого: <b>+7.9R</b>\n\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n⭐ <b>Pro $69</b> — LEVELS + SMC автотрейд + AI-фильтр + оптимизатор + Genome"
+   ]
+  ],
+  "writes": [
+   [
+    "free_missed_buffer",
+    "{}"
+   ],
+   [
+    "free_closed_profitable",
+    "[]"
+   ]
+  ],
+  "sent_small": [
+   [
+    401,
+    "📊 <b>Вечерний отчёт (Free план)</b>\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\nСегодня получено: <b>1</b> сигналов\n  🌅 Утро: 1/1  ·  🌆 Вечер: 0/1\n\n🔥 <b>На платформе закрыто по TP сегодня (1):</b>\n   <i>(трейды Pro юзеров — для мотивации)</i>\n  📈 AAA LONG → <b>+0.5R</b>\n  Итого: <b>+0.5R</b>\n\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n⭐ <b>Pro $69</b> — LEVELS + SMC автотрейд + AI-фильтр + оптимизатор + Genome"
+   ],
+   [
+    402,
+    "📊 <b>Evening report (Free plan)</b>\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\nToday received: <b>2</b> signals\n  🌅 Morning: 1/1  ·  🌆 Evening: 1/1\n\n🔥 <b>Closed at TP across platform today (1):</b>\n   <i>(trades from Pro users — for motivation)</i>\n  📈 AAA LONG → <b>+0.5R</b>\n  Total: <b>+0.5R</b>\n\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n⭐ <b>Pro $69</b> — LEVELS + SMC auto-trade + AI filter + optimizer + Genome"
+   ],
+   [
+    403,
+    "📊 <b>Вечерний отчёт (Free план)</b>\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\nСегодня получено: <b>0</b> сигналов\n\n🔥 <b>На платформе закрыто по TP сегодня (1):</b>\n   <i>(трейды Pro юзеров — для мотивации)</i>\n  📈 AAA LONG → <b>+0.5R</b>\n  Итого: <b>+0.5R</b>\n\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n⭐ <b>Pro $69</b> — LEVELS + SMC автотрейд + AI-фильтр + оптимизатор + Genome"
+   ],
+   [
+    405,
+    "📊 <b>Вечерний отчёт (Free план)</b>\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\nСегодня получено: <b>3</b> сигналов\n\n🔥 <b>На платформе закрыто по TP сегодня (1):</b>\n   <i>(трейды Pro юзеров — для мотивации)</i>\n  📈 AAA LONG → <b>+0.5R</b>\n  Итого: <b>+0.5R</b>\n\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n⭐ <b>Pro $69</b> — LEVELS + SMC автотрейд + AI-фильтр + оптимизатор + Genome"
+   ],
+   [
+    406,
+    "📊 <b>Вечерний отчёт (Free план)</b>\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\nСегодня получено: <b>0</b> сигналов\n\n🔥 <b>На платформе закрыто по TP сегодня (1):</b>\n   <i>(трейды Pro юзеров — для мотивации)</i>\n  📈 AAA LONG → <b>+0.5R</b>\n  Итого: <b>+0.5R</b>\n\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n⭐ <b>Pro $69</b> — LEVELS + SMC автотрейд + AI-фильтр + оптимизатор + Genome"
+   ]
+  ],
+  "closed_small": [
+   {
+    "symbol": "AAA-USDT-SWAP",
+    "direction": "LONG",
+    "result_rr": 0.5,
+    "closed_at": 1804467600.0
+   }
+  ]
+ },
+ "quota_const": 3
+}

@@ -237,7 +237,7 @@ function createFreeReport(deps = {}) {
         log.debug(`[GUARANTEED-DELIVERY] uid=${attr(user, 'user_id', '?')} window=${window} closing — relaxed min_q=3`);
       }
       if (quality < minQ) return false;
-      log.debug(`[FREE-WINDOW] uid=${attr(user, 'user_id', '?')} window=${window} quality=${quality} permission granted (awaiting delivery confirmation)`);
+      log.debug(`[FREE-WINDOW] uid=${attr(user, 'user_id', '?')} window=${window} quality=${Math.trunc(quality)} permission granted (awaiting delivery confirmation)`);
       return true;
     },
 
@@ -336,7 +336,8 @@ function createFreeReport(deps = {}) {
         const raw = kvOf().get(KV_CLOSED);
         if (raw) {
           closedProfitable = JSON.parse(raw);
-          log.info(`free_report: restored ${closedProfitable.length} closed profitable signals`);
+          const n = Array.isArray(closedProfitable) ? closedProfitable.length : Object.keys(closedProfitable || {}).length;
+          log.info(`free_report: restored ${n} closed profitable signals`);
         }
       } catch (e) {
         log.debug(`load closed buffer: ${e && e.message}`);
@@ -458,6 +459,12 @@ function createFreeReport(deps = {}) {
           await sleep(3600 * 1000);
         }
       }
+    },
+
+    /** Tests: replace the buffers (like a kv restore). */
+    _setBuffers({ missed = null, closed = null } = {}) {
+      if (missed) missedBuffer = new Map(Object.entries(missed).map(([k, v]) => [pyInt(k), v]));
+      if (closed) closedProfitable = closed.map((x) => ({ ...x }));
     },
 
     _resetForTests() {

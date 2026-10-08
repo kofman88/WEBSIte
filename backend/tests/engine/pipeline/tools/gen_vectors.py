@@ -972,7 +972,228 @@ def trend_refresh_vectors(series):
                             "steps": steps})
 
 
+# ── free report ────────────────────────────────────────────────────────────
+def free_vectors():
+    import free_report as fr
+    from datetime import datetime, timezone
+
+    clk = Clock(0)
+
+    class FakeDT(datetime):
+        @classmethod
+        def now(cls, tz=None):
+            return datetime.fromtimestamp(clk.t, tz)
+    fr.datetime = FakeDT
+    fr.time = clk
+    kv = FakeKV()
+    install_kv(kv)
+    fr.db = database
+    cap = capture("CHM.FreeReport")
+
+    def ts(day, hh, mm=0):
+        return datetime(2027, 3, day, hh, mm, tzinfo=timezone.utc).timestamp()
+
+    fields = ["free_signals_date", "free_signals_morning", "free_signals_evening", "free_signals_night", "free_signals_today",
+              "free_missed_today", "free_smc_preview_date", "free_smc_preview_today"]
+
+    def new_user(uid, plan="free", **kw):
+        d = dict(user_id=uid, sub_plan=plan, lang="ru", free_signals_date="", free_signals_morning=0, free_signals_evening=0,
+                 free_signals_night=0, free_signals_today=0, free_missed_today=0, free_smc_preview_date="", free_smc_preview_today=0)
+        d.update(kw)
+        return types.SimpleNamespace(**d)
+
+    def ustate(u):
+        return {k: getattr(u, k, None) for k in fields}
+
+    users = {"a": new_user(101), "b": new_user(102), "pro": new_user(103, plan="pro"), "c": new_user(104, free_signals_date="2027-03-01",
+                                                                                                  free_signals_morning=1, free_signals_evening=1, free_signals_today=2)}
+    quota_ops = [
+        ["should", "a", 1, 5, 30, 9], ["should", "a", 1, 6, 10, 4], ["should", "a", 1, 6, 20, 5], ["record", "a", 1, 6, 21, ""],
+        ["should", "a", 1, 7, 0, 9], ["should", "a", 1, 12, 30, 3], ["should", "a", 1, 13, 5, 4], ["should", "a", 1, 13, 6, 5.5],
+        ["should", "a", 1, 20, 10, 3], ["record", "a", 1, 20, 11, ""], ["should", "a", 1, 20, 30, 9], ["should", "a", 1, 21, 0, 9],
+        ["record", "a", 1, 22, 0, ""], ["record", "a", 1, 23, 0, "morning"], ["should", "a", 2, 6, 0, 5], ["should", "a", 2, 12, 59, 2],
+        ["should", "b", 2, 12, 0, 3], ["record", "b", 2, 12, 1, "evening"], ["should", "b", 2, 12, 2, 3], ["should", "b", 2, 20, 59, 3],
+        ["should", "pro", 2, 3, 0, 0], ["record", "pro", 2, 3, 1, ""], ["should", "c", 2, 9, 0, 6],
+    ]
+    quota = []
+    for op in quota_ops:
+        kind, who, day, hh, mm, arg = op
+        clk.t = ts(day, hh, mm)
+        u = users[who]
+        cap.lines.clear()
+        res = None
+        if kind == "should":
+            res = asyncio.run(fr.should_send_free_signal(u, arg))
+        else:
+            fr.record_free_signal_sent(u, arg)
+        quota.append({"op": op, "now": clk.t, "result": res, "user": ustate(u), "logs": [l[1] for l in cap.lines]})
+
+    # missed buffer + closed profitable (saves run as background tasks inside a loop)
+    async def missed_run():
+        out = []
+        u = new_user(201)
+        nou = types.SimpleNamespace(user_id=202)
+        for i in range(55):
+            clk.t = ts(3, 10, 0) + i * 7.25
+            target = [u, nou, 203][i % 3]
+            # rr: the LEVELS scanner passes int 0 (SignalResult has no rr) — floats are non-integral here
+            fr.record_missed_signal(target, f"S{i}-USDT-SWAP", "LONG" if i % 2 else "SHORT", i % 10, rr=[0, 0.5, 1.25, 2.75][i % 4])
+            await asyncio.sleep(0)
+            await asyncio.sleep(0)
+            out.append({"i": i, "user": ustate(u), "writes": [w for w in kv.writes if w[0] == "free_missed_buffer"]})
+            kv.writes.clear()
+        clk.t = ts(4, 1, 0)   # next day: free_missed_today resets
+        fr.record_missed_signal(u, "X-USDT-SWAP", "LONG", 5)
+        out.append({"i": 55, "user": ustate(u), "writes": []})
+        closed = []
+        for i in range(107):
+            clk.t = ts(3, 0, 0) + i * 600.5
+            rr = [1.5, -1.0, 0.0, 2.0, 0.75, 3.25][i % 6]
+            fr.record_closed_profitable(f"C{i}-USDT-SWAP", "SHORT" if i % 2 else "LONG", rr)
+            await asyncio.sleep(0)
+            await asyncio.sleep(0)
+            closed.append({"i": i, "len": len(fr._closed_profitable), "first": dict(fr._closed_profitable[0]) if fr._closed_profitable else None,
+                           "writes": [w for w in kv.writes if w[0] == "free_closed_profitable"]})
+            kv.writes.clear()
+        return out, closed
+    fr._missed_buffer.clear()
+    fr._missed_buffer_dirty = 0
+    fr._closed_profitable.clear()
+    fr._closed_dirty = 0
+    kv.writes.clear()
+    missed, closed = asyncio.run(missed_run())
+    missed_final = {str(k): v for k, v in fr._missed_buffer.items()}
+
+    # SMC preview dedup + quota
+    async def preview_run():
+        out = []
+        fr._FREE_PREVIEW_SENT.clear()
+        u = new_user(301)
+        pro = new_user(302, plan="pro")
+        ops = [["already", 301, "BTC-USDT-SWAP", "LONG", 5, 9], ["should", "u", 5, 9], ["record", "u", 5, 9], ["mark", 301, "BTC-USDT-SWAP", "LONG", 5, 9],
+               ["already", 301, "BTC-USDT-SWAP", "LONG", 5, 10], ["already", 301, "BTC-USDT-SWAP", "SHORT", 5, 10],
+               ["should", "u", 5, 11], ["record", "u", 5, 11], ["mark", 301, "ETH-USDT-SWAP", "SHORT", 5, 11],
+               ["record", "u", 5, 12], ["should", "u", 5, 12], ["should", "pro", 5, 12], ["mark", 302, "SOL-USDT-SWAP", "LONG", 5, 13],
+               ["already", 301, "BTC-USDT-SWAP", "LONG", 6, 1], ["should", "u", 6, 1], ["mark", 301, "DOGE-USDT-SWAP", "LONG", 6, 2],
+               ["already", 301, "ETH-USDT-SWAP", "SHORT", 6, 3], ["already", "301", "DOGE-USDT-SWAP", "LONG", 6, 3]]
+        for op in ops:
+            day, hh = op[-2], op[-1]
+            clk.t = ts(day, hh, 0)
+            cap.lines.clear()
+            res = None
+            if op[0] == "already":
+                res = fr._free_preview_already_sent_today(op[1], op[2], op[3])
+            elif op[0] == "mark":
+                fr._mark_free_preview_sent(op[1], op[2], op[3])
+                await asyncio.sleep(0)
+                await asyncio.sleep(0)
+            elif op[0] == "should":
+                res = await fr.should_send_free_smc_preview(u if op[1] == "u" else pro)
+            elif op[0] == "record":
+                fr.record_free_smc_preview_sent(u)
+            out.append({"op": op, "now": clk.t, "result": res, "user": ustate(u),
+                        "writes": [w for w in kv.writes if w[0] == "free_preview_sent"], "logs": [l[1] for l in cap.lines if l[0] == "INFO"]})
+            kv.writes.clear()
+        return out
+    preview = asyncio.run(preview_run())
+
+    cards = []
+    from i18n import t as _t
+    for sym, d, score, entry, sl, tp1 in [("BTC-USDT-SWAP", "LONG", 4, 64123.456789, 63000.5, 66000.0), ("PEPE-USDT-SWAP", "SHORT", 5, 0.0000123456789, 0.0000130001, 0.00001),
+                                          ("ETH-USDT-SWAP", "LONG", None, 3456.5, 3400.0, 3600.25), ("X-USDT-SWAP", "SHORT", 3.7, 1e-07, 2e-07, 5e-08)]:
+        sig = types.SimpleNamespace(direction=d, score=score, entry=entry, sl=sl, tp1=tp1)
+        for lang in ("ru", "en", "de"):
+            cards.append({"sig": {"direction": d, "score": score, "entry": entry, "sl": sl, "tp1": tp1}, "symbol": sym, "lang": lang,
+                          "text": _t("smc_pro_preview_card", lang, symbol=sym, direction=sig.direction, score=int(sig.score or 0),
+                                     entry=f"{sig.entry:.6g}", sl=f"{sig.sl:.6g}", tp1=f"{sig.tp1:.6g}")})
+
+    # load_persistent_buffers
+    loads = []
+    clk.t = ts(7, 12, 0)
+    for missed_raw, closed_raw, prev_raw in [
+        (json.dumps({"5": [{"symbol": "A"}], "6": []}), json.dumps([{"symbol": "B", "direction": "LONG", "result_rr": 1.5, "closed_at": 1.0}]),
+         json.dumps({"7": {"A:LONG": "2027-03-07", "B:SHORT": "2027-03-06"}, "8": {"C:LONG": "2027-03-06"}, "9": None})),
+        ("{bad", "[bad", "{bad"),
+        (None, None, None),
+        (json.dumps({"x": []}), json.dumps({"a": 1}), json.dumps({"10": {"Z:SHORT": "2027-03-07"}})),
+    ]:
+        fr._missed_buffer.clear()
+        fr._closed_profitable.clear()
+        fr._FREE_PREVIEW_SENT.clear()
+        kv.d.clear()
+        for k, v in (("free_missed_buffer", missed_raw), ("free_closed_profitable", closed_raw), ("free_preview_sent", prev_raw)):
+            if v is not None:
+                kv.d[k] = v
+        asyncio.run(fr.load_persistent_buffers())
+        loads.append({"missed": missed_raw, "closed": closed_raw, "preview": prev_raw,
+                      "missed_buffer": {str(k): v for k, v in fr._missed_buffer.items()},
+                      "closed_buffer": json.loads(json.dumps(fr._closed_profitable)),
+                      "preview_sent": {str(k): dict(v) for k, v in fr._FREE_PREVIEW_SENT.items()}})
+
+    # evening report
+    clk.t = ts(8, 21, 0)
+    fr._closed_profitable = []
+    fr._missed_buffer = {}
+    fr._closed_profitable.extend([
+        {"symbol": "OLD-USDT-SWAP", "direction": "LONG", "result_rr": 9.0, "closed_at": ts(7, 23, 0)},
+        {"symbol": "BTC-USDT-SWAP", "direction": "LONG", "result_rr": 1.25, "closed_at": ts(8, 0, 0)},
+        {"symbol": "ETH-USDT", "direction": "SHORT", "result_rr": 2.0, "closed_at": ts(8, 3, 0)},
+        {"symbol": "SOL-USDT-SWAP", "direction": "LONG", "result_rr": 0.05, "closed_at": ts(8, 4, 0)},
+        {"symbol": "XRP-USDT-SWAP", "direction": "SHORT", "result_rr": 3.35, "closed_at": ts(8, 5, 0)},
+        {"symbol": "ADA-USDT-SWAP", "direction": "LONG", "result_rr": 0.25, "closed_at": ts(8, 6, 0)},
+        {"symbol": "DOGE-USDT-SWAP", "direction": "SHORT", "result_rr": 1.0, "closed_at": ts(8, 20, 59)},
+    ])
+    fr._missed_buffer.clear()
+    fr._missed_buffer[1] = [{"symbol": "Q"}]
+    rep_users = [
+        new_user(401, free_signals_date="2027-03-08", free_signals_morning=1, free_signals_evening=0, free_signals_today=1),
+        new_user(402, lang="en", free_signals_date="2027-03-08", free_signals_morning=1, free_signals_evening=1, free_signals_today=2),
+        new_user(403, free_signals_date="2027-03-07", free_signals_morning=1, free_signals_evening=1),
+        new_user(404, plan="pro", free_signals_date="2027-03-08", free_signals_morning=1),
+        new_user(405, lang="", free_signals_date="2027-03-08", free_signals_morning=0, free_signals_evening=0, free_signals_today=3),
+        new_user(406, lang="de", free_signals_date="2027-03-08"),
+    ]
+    sent = []
+
+    class Bot:
+        async def send_message(self, uid, text, parse_mode=None):
+            sent.append([uid, text])
+
+    class UM:
+        async def all_users(self):
+            return rep_users
+
+    async def no_sleep(*_a, **_k):
+        return None
+    fr.asyncio = types.SimpleNamespace(sleep=no_sleep, get_event_loop=asyncio.get_event_loop,
+                                       get_running_loop=asyncio.get_running_loop)
+    kv.writes.clear()
+    asyncio.run(fr._send_evening_report(Bot(), UM()))
+    report = {"now": clk.t, "closed": [{"symbol": "OLD-USDT-SWAP", "direction": "LONG", "result_rr": 9.0, "closed_at": ts(7, 23, 0)},
+                                        {"symbol": "BTC-USDT-SWAP", "direction": "LONG", "result_rr": 1.25, "closed_at": ts(8, 0, 0)},
+                                        {"symbol": "ETH-USDT", "direction": "SHORT", "result_rr": 2.0, "closed_at": ts(8, 3, 0)},
+                                        {"symbol": "SOL-USDT-SWAP", "direction": "LONG", "result_rr": 0.05, "closed_at": ts(8, 4, 0)},
+                                        {"symbol": "XRP-USDT-SWAP", "direction": "SHORT", "result_rr": 3.35, "closed_at": ts(8, 5, 0)},
+                                        {"symbol": "ADA-USDT-SWAP", "direction": "LONG", "result_rr": 0.25, "closed_at": ts(8, 6, 0)},
+                                        {"symbol": "DOGE-USDT-SWAP", "direction": "SHORT", "result_rr": 1.0, "closed_at": ts(8, 20, 59)}],
+              "users": [vars(u) for u in rep_users], "sent": sent, "writes": kv.writes[:]}
+    # report with fewer closed entries and without any
+    sent2 = []
+
+    class Bot2:
+        async def send_message(self, uid, text, parse_mode=None):
+            sent2.append([uid, text])
+    fr._closed_profitable.clear()
+    fr._closed_profitable.extend([{"symbol": "AAA-USDT-SWAP", "direction": "LONG", "result_rr": 0.5, "closed_at": ts(8, 1, 0)}])
+    asyncio.run(fr._send_evening_report(Bot2(), UM()))
+    report["sent_small"] = sent2
+    report["closed_small"] = [{"symbol": "AAA-USDT-SWAP", "direction": "LONG", "result_rr": 0.5, "closed_at": ts(8, 1, 0)}]
+    write("free", {"quota": quota, "missed": missed, "missed_final": missed_final, "closed": closed, "preview": preview,
+                   "cards": cards, "loads": loads, "report": report, "quota_const": fr._FREE_SMC_PREVIEW_DAILY_QUOTA})
+
+
 SECTIONS = {
+    "free": free_vectors,
     "trend": trend_vectors,
     "registry": registry_vectors,
     "freshness": freshness_vectors,
