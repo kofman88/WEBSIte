@@ -844,6 +844,7 @@ function signalView(row, now = null) {
   if (sOr(row.strategy).toUpperCase() === 'LEVELS') q = levelsStars(q);
   const res = sOr(row.result).toUpperCase();
   const orderId = sOr(row.order_id);
+  const osl = fOr0(row.original_sl);
   return {
     id: sOr(row.trade_id),
     symbol: base, pair: `${base}/USDT`,
@@ -851,7 +852,7 @@ function signalView(row, now = null) {
     strategy: sOr(row.strategy, 'LEVELS').toUpperCase(),
     timeframe: sOr(row.timeframe, '1h'),
     entry, sl,
-    sl0: fOr0(row.original_sl) || sl,
+    sl0: osl !== 0 ? osl : sl,                         // Python `or`: a NaN stop is truthy
     tp1: fOr0(row.tp1), tp2: fOr0(row.tp2), tp3: fOr0(row.tp3),
     quality: Math.max(1, Math.min(5, q || 1)),
     counter_trend: Boolean(Math.trunc(fOr0(row.is_counter_trend))),

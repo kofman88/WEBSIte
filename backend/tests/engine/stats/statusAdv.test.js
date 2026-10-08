@@ -47,4 +47,21 @@ describe('signal_status / signal_rr on 300 random rows', () => {
     }
     expect([...seen].sort()).toEqual(['be', 'closed', 'expired', 'missed', 'open', 'skip', 'sl', 'tp1', 'tp2', 'tp3']);
   });
+
+  it("Python `or` keeps a NaN stop (float('nan') or sl → nan); ±0.0 falls through to sl", () => {
+    // python -c "from db.signal_outcome import signal_rr; print(signal_rr({'entry':100,'original_sl':'nan','sl':95,'tp1':110},'tp1'))"  → None
+    expect(SO.signalRr({ entry: 100, original_sl: 'nan', sl: 95, tp1: 110 }, 'tp1')).toBe(null);
+    // python -c "from db.signal_outcome import signal_rr; print(signal_rr({'entry':100,'original_sl':-0.0,'sl':95,'tp1':110},'tp1'))"  → 2.0
+    expect(SO.signalRr({ entry: 100, original_sl: -0.0, sl: 95, tp1: 110 }, 'tp1')).toBe(2.0);
+    // python -c "import signal_tracker as st; print(st.mark_to_market_rr({'entry':100,'original_sl':'nan','direction':'SHORT','tp3':70}, 100))"  → -1.0
+    const T = nodeRequire('../../../services/engine/tracker.js');
+    expect(T.markToMarketRr({ entry: 100, original_sl: 'nan', direction: 'SHORT', tp3: 70 }, 100)).toBe(-1.0);
+    // miniapp_api._signal: "sl0": float(row.get("original_sl") or 0) or sl
+    const SS = nodeRequire('../../../services/engine/signalStats.js');
+    const view = (osl) => SS.signalView({ trade_id: 't', symbol: 'BTC-USDT-SWAP', direction: 'LONG', entry: 100, sl: 95, original_sl: osl, tp1: 110, created_at: V.now - 60 }, V.now);
+    expect(Number.isNaN(view('nan').sl0)).toBe(true);
+    expect(view(0).sl0).toBe(95);
+    expect(view(null).sl0).toBe(95);
+    expect(view(94).sl0).toBe(94);
+  });
 });
