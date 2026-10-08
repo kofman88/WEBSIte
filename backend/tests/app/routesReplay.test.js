@@ -6,7 +6,7 @@
  * normalisation, bad_strategy (400) / free mutex / locked strategies /
  * _apply_multi effects, profile apply + skipped lists per plan, lang parsing.
  *
- * Regenerate: scratchpad/m7verify/replay_routes.py (bot venv).
+ * Regenerate: gen/gen_routes_replay.py (inputs gen/route_cases.json; CPython 3.11 venv, see its docstring).
  */
 import { describe, it, expect, beforeAll, beforeEach } from 'vitest';
 import fs from 'fs';

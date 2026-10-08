@@ -8,7 +8,7 @@
  * message), the resulting trader_settings state, the VOLUME kv config and the
  * Mini App subset of the returned `settings` must equal the bot's.
  *
- * Regenerate: scratchpad/m7verify/replay_settings_all.py (bot venv).
+ * Regenerate: gen/gen_settings_all_replay.py (inputs gen/settings_all_cases.json; CPython 3.11 venv, see its docstring).
  */
 import { describe, it, expect, beforeAll, beforeEach } from 'vitest';
 import fs from 'fs';

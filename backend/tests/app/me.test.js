@@ -220,6 +220,7 @@ describe('POST lang / GET plan / GET help', () => {
     expect((await request(app).get('/api/app/plan').set(H(uid))).status).toBe(200);
   });
   it('help: 11 sections in the user language, HTML stripped exactly like the bot', async () => {
+    // fixtures/help_plain.json: the bot's own help payload (gen/gen_help_plain.py, CPython 3.11)
     const fx = JSON.parse(fs.readFileSync(path.join(process.cwd(), 'tests', 'app', 'fixtures', 'help_plain.json'), 'utf8'));
     const uid = makeUser();
     let r = await request(app).get('/api/app/help').set(H(uid));
