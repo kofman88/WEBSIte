@@ -19,7 +19,9 @@
 
 'use strict';
 
-const { pyJsonDumps, pyJsonLoads } = require('./pyjson');
+const { pyJsonDumps } = require('./pyjson');
+const { pyInt, pyFloat } = require('./pycoerce');
+const { pyMax, pyMin } = require('../../strategies/common/pyround');
 const { log: defaultLog } = require('../marketData/mdLog');
 
 const CROSS_TTL = 4 * 3600;        // 4 часа: покрывает 1H и 4H сигналы
@@ -47,27 +49,42 @@ function splitKey(key) {
   return { uid: parts[0], symbol: parts[1], direction: parts[2], strategy: parts.length > 3 ? parts.slice(3).join('|') : '' };
 }
 
-/** int(env POST_CLOSE_COOLDOWN_SEC, default 1800) */
+/**
+ * scanner_mid._check_breakevens: `int(os.getenv("POST_CLOSE_COOLDOWN_SEC", "1800"))`.
+ * Python raises on a malformed value (the post-close branch is skipped); the site
+ * falls back to the default instead of skipping the cooldown.
+ */
 function postCloseCooldownS(env = process.env) {
   const raw = env.POST_CLOSE_COOLDOWN_SEC;
-  if (raw === undefined || raw === null || String(raw).trim() === '') return POST_CLOSE_COOLDOWN_DEFAULT;
-  const s = String(raw).trim();
-  return /^[+-]?\d+$/.test(s) ? parseInt(s, 10) : POST_CLOSE_COOLDOWN_DEFAULT;
+  if (raw === undefined || raw === null) return POST_CLOSE_COOLDOWN_DEFAULT;
+  try {
+    return pyInt(String(raw));
+  } catch (_e) {
+    return POST_CLOSE_COOLDOWN_DEFAULT;
+  }
 }
 
 const nowSec = () => Date.now() / 1000;
 
 /**
- * createSignalRegistry({ kv, now, log, isAdmin, enabledStrategies })
+ * createSignalRegistry({ kv, now, log, isAdmin, isMulti })
  *   kv       — { get(key), set(key, value) } (default services/engineKvService, lazily)
  *   now      — () → unix seconds
- *   isMulti  — (user) → bool (default: planFeatures.isMulti(user, { admin: isAdmin(user) }))
+ *   isAdmin  — (user) → bool, the bot's ADMIN_IDS bypass (default traderSettingsService.isAdmin)
+ *   isMulti  — (user) → bool, `len(enabled_strategies(user)) >= 2`
+ *              (default: planFeatures.isMulti(user, { admin: isAdmin(user) }); any error → False)
  */
 function createSignalRegistry(deps = {}) {
   const log = deps.log || defaultLog;
   const now = deps.now || nowSec;
   const kvOf = () => (deps.kv !== undefined ? deps.kv : require('../engineKvService'));
-  const isAdmin = deps.isAdmin || (() => false);
+  const isAdmin = deps.isAdmin || ((user) => {
+    try {
+      return require('../traderSettingsService').isAdmin(user.user_id);
+    } catch (_e) {
+      return false;
+    }
+  });
   const isMultiFn = deps.isMulti || ((user) => {
     try {
       return require('../../config/planFeatures').isMulti(user, { admin: Boolean(isAdmin(user)) });
@@ -109,27 +126,34 @@ function createSignalRegistry(deps = {}) {
     CROSS_TTL, CLAIM_TTL_S, PERSIST_KEY,
     _registry: registry,
 
-    /** _persist_load(): restore the live entries from kv. Silent on errors. */
+    /**
+     * _persist_load(): restore the live entries from kv. Like the bot, any malformed
+     * timestamp aborts the whole load (nothing restored, one warning); a key whose uid
+     * is not an int is skipped; only entries with now − ts < ttl are kept.
+     */
     load() {
       try {
         const raw = kvOf().get(PERSIST_KEY);
         if (!raw) return 0;
-        const data = pyJsonLoads(raw, null);
-        if (!data || typeof data !== 'object') return 0;
-        const t = now();
-        let n = 0;
-        for (const [kStr, ts] of Object.entries(data)) {
-          const parts = kStr.split('|');
-          if (parts.length < 3) continue;
-          if (!/^[+-]?\d+$/.test(parts[0])) continue;   // int(parts[0]) ValueError → skip
-          const key = [String(parseInt(parts[0], 10)), ...parts.slice(1)].join('|');
-          const ttl = ttlFor(parts.length > 3 ? parts[3] : '');
-          const f = Number(ts);
-          if (!Number.isFinite(f)) continue;
-          if (t - f < ttl) { registry.set(key, f); n++; }   // загружаем только не истёкшие
+        const data = JSON.parse(raw);
+        if (data === null || typeof data !== 'object' || Array.isArray(data)) {
+          throw new TypeError(`'${Array.isArray(data) ? 'list' : typeof data}' object has no attribute 'items'`);
         }
-        log.info(`FIX-AUDIT-26: signal_registry загружен (${n} записей)`);
-        return n;
+        const t = now();
+        const loaded = new Map();
+        for (const [kStr, ts] of Object.entries(data)) {
+          const parts = String(kStr).split('|');
+          if (parts.length < 3) continue;
+          let uid;
+          try { uid = pyInt(parts[0]); } catch (_e) { continue; }   // int(parts[0]) ValueError → skip
+          const key = [String(uid), ...parts.slice(1)].join('|');
+          const ttl = ttlFor(parts.length > 3 ? parts[3] : '');
+          const f = pyFloat(ts);   // float(ts): TypeError / ValueError abort the load (outer except)
+          if (t - f < ttl) loaded.set(key, f);   // загружаем только не истёкшие
+        }
+        for (const [k, v] of loaded) registry.set(k, v);
+        log.info(`FIX-AUDIT-26: signal_registry загружен (${loaded.size} записей)`);
+        return loaded.size;
       } catch (e) {
         log.warning(`FIX-AUDIT-26: signal_registry load error: ${e && e.message}`);
         return 0;
@@ -168,7 +192,7 @@ function createSignalRegistry(deps = {}) {
       const key = makeKey(uid, symbol, direction, strategy);
       const t = now();
       let ts = t;
-      if (ttlS !== null && ttlS !== undefined) ts = t + (Math.max(60, Math.trunc(Number(ttlS))) - ttlFor(strategy));
+      if (ttlS !== null && ttlS !== undefined) ts = t + (pyMax(60, pyInt(ttlS)) - ttlFor(strategy));
       if (t - lastCleanup > CLEANUP_INTERVAL) { cleanupLocked(t); lastCleanup = t; }
       registry.set(key, ts);
       stats.allowed += 1;
@@ -221,7 +245,7 @@ function createSignalRegistry(deps = {}) {
      * with ts = now − (CROSS_TTL − cooldown). peek returns True again after cooldown_s.
      */
     applyCooldown(uid, symbol, direction, cooldownS = POST_CLOSE_COOLDOWN_DEFAULT) {
-      const cd = Math.max(60, Math.min(Math.trunc(Number(cooldownS)), CROSS_TTL));
+      const cd = pyMax(60, pyMin(Number(cooldownS), CROSS_TTL));   // max(60, min(cooldown_s, CROSS_TTL)) — no int()
       const t = now();
       const keys = [];
       for (const k of registry.keys()) {
@@ -230,11 +254,11 @@ function createSignalRegistry(deps = {}) {
       }
       for (const k of keys) {
         const kTtl = ttlFor(splitKey(k).strategy);
-        const kCd = Math.min(cd, kTtl);
+        const kCd = pyMin(cd, kTtl);
         registry.set(k, t - (kTtl - kCd));
       }
       if (!keys.length) registry.set(makeKey(uid, symbol, direction), t - (CROSS_TTL - cd));
-      log.info(`[REGISTRY-COOLDOWN] uid=${uid} ${symbol} ${direction} — block re-entry for ${cd}s`);
+      log.info(`[REGISTRY-COOLDOWN] uid=${uid} ${symbol} ${direction} — block re-entry for ${Math.trunc(cd)}s`);   // %ds
       persistSave();
     },
 

@@ -10,9 +10,9 @@
 
 'use strict';
 
-const { fp, fmtFixed, fmtG } = require('../../../strategies/common/pyfmt');
+const { fmtFixed, fmtG } = require('../../../strategies/common/pyfmt');
 const { pyRound } = require('../../../strategies/common/pyround');
-const { escape, makeT, repeat } = require('./html');
+const { escape, makeT, repeat, cardFp: fp } = require('./html');
 
 const MESSAGES = {
   smc_long_header: { ru: '🟢 <b>LONG — ПОКУПКА</b>', en: '🟢 <b>LONG — BUY</b>' },

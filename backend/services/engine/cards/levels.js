@@ -11,8 +11,8 @@
 
 'use strict';
 
-const { fp, fmtFixed, fmtSigned } = require('../../../strategies/common/pyfmt');
-const { escape, makeT } = require('./html');
+const { fmtFixed, fmtSigned } = require('../../../strategies/common/pyfmt');
+const { escape, makeT, pyStr, cardFp: fp } = require('./html');
 const { levelsStars, starsStr } = require('./qualityScale');
 
 const MESSAGES = {
@@ -64,13 +64,6 @@ function resolveCardLine(opts) {
   if (opts && typeof opts.cardLine === 'function') return opts.cardLine;
   if (opts && opts.trend && typeof opts.trend.cardLine === 'function') return opts.trend.cardLine.bind(opts.trend);
   return require('../trendMonitor').cardLine;
-}
-
-/** Python str() of the quality value as the card prints it (`{sig.quality}/10`). */
-function pyStr(v) {
-  if (typeof v === 'number') return Number.isInteger(v) ? String(v) : require('../../../strategies/common/pyfmt').pyRepr(v);
-  if (typeof v === 'boolean') return v ? 'True' : 'False';
-  return String(v);
 }
 
 /** signal_text(sig, cfg, lang) */

@@ -9,6 +9,9 @@
 
 'use strict';
 
+const { pyInt } = require('./pycoerce');
+const { pyTruthy } = require('../../strategies/common/pyval');
+
 const CONFLUENCE_WINDOW_S = 1800;   // 30 min — covers 1H scan cycles
 const GRADE_DOUBLE = '⭐ Confluence ×2';
 const GRADE_TRIPLE = '🌟 A++ Confluence ×3';
@@ -37,8 +40,8 @@ function createSignalConfluence(deps = {}) {
       const t = now();
       const key = keyOf(symbol, direction);
       let items = (recent.get(key) || []).filter((e) => e.strategy !== strategy);
-      const q = quality ? Math.trunc(Number(quality)) : 0;   // int(quality) if quality else 0
-      items.push({ strategy, ts: t, quality: Number.isNaN(q) ? 0 : q });
+      const q = pyTruthy(quality) ? pyInt(quality) : 0;   // int(quality) if quality else 0 (raises like int())
+      items.push({ strategy, ts: t, quality: q });
       recent.set(key, items);
       trim(key, t);
     },

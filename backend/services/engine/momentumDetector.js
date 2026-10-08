@@ -5,18 +5,22 @@
  * LEVELS min_quality −1 (floor 2), min_rr −0.5 (floor 1.5), SMC
  * MIN_CONFIRMATIONS −1 (floor 2). Plus the per-symbol ATR breakout
  * detector (bar range > 2×ATR(14), body ≥ 50 %, volume ≥ 1.5× the previous
- * 20 bars; 1 h cooldown per symbol).
+ * 20 bars; 1 h cooldown per symbol) — the computation is the LEVELS port's
+ * strategies/levels/atrBreakout.detectAtrBreakout; this module owns the
+ * module-level `_last_breakout_alert` map and hands it to the LEVELS engine
+ * through `levelsOpts()` (indicator.analyze's relaxed-mode fallback).
  *
  * The clock is injected (`now` → unix seconds); the macro check takes a
- * `lastClosed1h` provider (the worker wires the BingX fetcher through
- * `lastClosed1hViaFetcher`). The loop cadence (120 s warm-up, 300 s period)
- * is the worker's.
+ * `lastClosed1h` provider (DATA_SOURCE=bingx path: the last CLOSED 1H bar of
+ * BTC and ETH through the REST fetcher, `lastClosed1hViaFetcher`).
+ * `runLoop()` is momentum_loop: 120 s warm-up, then every 300 s.
  */
 
 'use strict';
 
-const { fmtSigned, fmtFixed } = require('../../strategies/common/pyfmt');
-const { rollingMean, seriesMean } = require('../../strategies/common/series');
+const { fmtSigned } = require('../../strategies/common/pyfmt');
+const { pyMax } = require('../../strategies/common/pyround');
+const atrBreakout = require('../../strategies/levels/atrBreakout');
 const { log: defaultLog } = require('../marketData/mdLog');
 
 const MOMENTUM_1H_PCT = 2.0;        // BTC/ETH move >2% за 1h = импульс
@@ -28,6 +32,7 @@ const LOOP_WARMUP_S = 120;
 const LOOP_INTERVAL_S = 300;
 
 const nowSec = () => Date.now() / 1000;
+const sleepMs = (ms) => new Promise((r) => { const h = setTimeout(r, ms); if (h.unref) h.unref(); });
 
 /** ((btc_open, btc_close), (eth_open, eth_close)) of the last CLOSED 1H bar via a REST fetcher; null when missing. */
 async function lastClosed1hViaFetcher(fetcher) {
@@ -35,7 +40,7 @@ async function lastClosed1hViaFetcher(fetcher) {
   for (const sym of ['BTC-USDT-SWAP', 'ETH-USDT-SWAP']) {
     const df = await fetcher.getCandles(sym, '1H', 3);
     if (!df || df.length === 0) return null;
-    const i = df.length - 1;      // old → new → the last closed bar
+    const i = df.length - 1;      // от старых к новым → последняя закрытая
     out.push([Number(df.o[i]), Number(df.c[i])]);
   }
   return out;
@@ -78,9 +83,9 @@ function createMomentumDetector(deps = {}) {
       log.info(`🔥 MOMENTUM: Relaxed mode ACTIVATED by ${symbol} (${reason}). BTC 1h=${fmtSigned(btcChange, 2)}%, ETH 1h=${fmtSigned(ethChange, 2)}%`);
     },
 
-    relaxMinQuality(original) { return d.isRelaxedMode() ? Math.max(2, original - 1) : original; },
-    relaxMinRr(original) { return d.isRelaxedMode() ? Math.max(1.5, original - 0.5) : original; },
-    relaxConfirmations(original) { return d.isRelaxedMode() ? Math.max(2, original - 1) : original; },
+    relaxMinQuality(original) { return d.isRelaxedMode() ? pyMax(2, original - 1) : original; },
+    relaxMinRr(original) { return d.isRelaxedMode() ? pyMax(1.5, original - 0.5) : original; },
+    relaxConfirmations(original) { return d.isRelaxedMode() ? pyMax(2, original - 1) : original; },
 
     /**
      * check_macro_momentum(): `lastClosed1h` → [[btc_o, btc_c], [eth_o, eth_c]] | null.
@@ -114,64 +119,34 @@ function createMomentumDetector(deps = {}) {
     /**
      * detect_atr_breakout(symbol, df): the last closed bar with range > 2×ATR(14),
      * body ≥ 50 % of the range and volume ≥ 1.5× the mean of the 20 bars before it.
-     * Returns the breakout dict or null; one alert per symbol per hour.
+     * Returns the breakout dict or null; one alert per symbol per hour (shared map).
      */
     detectAtrBreakout(symbol, frame) {
-      try {
-        if (!frame || frame.length < 20) return null;
-        const t = now();
-        if (t - (lastBreakoutAlert.get(symbol) || 0) < ATR_BREAKOUT_COOLDOWN) return null;
+      return atrBreakout.detectAtrBreakout(symbol, frame, { nowSec: now(), lastAlert: lastBreakoutAlert });
+    },
 
-        const n = frame.length;
-        // pd.concat([...]).max(axis=1) skips the NaN prev_close of the first bar → high − low
-        const tr = new Float64Array(n);
-        for (let i = 0; i < n; i++) {
-          const hl = frame.h[i] - frame.l[i];
-          if (i === 0) { tr[i] = hl; continue; }
-          tr[i] = Math.max(hl, Math.abs(frame.h[i] - frame.c[i - 1]), Math.abs(frame.l[i] - frame.c[i - 1]));
+    /**
+     * The live state indicator.analyze reads from this module: relaxed mode on/off,
+     * the breakout cooldown map, the trigger reason for the ATR-breakout reasons line.
+     * Pass as LEVELS `analyze(…, opts)` overrides.
+     */
+    levelsOpts() {
+      return { relaxed: d.isRelaxedMode(), nowSec: now(), breakoutState: lastBreakoutAlert, triggerReason: state.trigger_reason };
+    },
+
+    /** momentum_loop: sleep 120 s, then check_macro_momentum() every 300 s until `signal.aborted`. */
+    async runLoop(lastClosed1h, { signal = null, sleep = sleepMs } = {}) {
+      log.info('Momentum loop started');
+      await sleep(LOOP_WARMUP_S * 1000);
+      while (!(signal && signal.aborted)) {
+        try {
+          await d.checkMacroMomentum(lastClosed1h);
+        } catch (e) {
+          log.debug(`momentum_loop: ${e && e.message}`);
         }
-        const atr = rollingMean(tr, 14);
-        const lastAtr = atr[n - 1];
-        if (!(lastAtr > 0)) return null;
-
-        const lastO = frame.o[n - 1];
-        const lastC = frame.c[n - 1];
-        const lastH = frame.h[n - 1];
-        const lastL = frame.l[n - 1];
-        const lastVol = frame.v[n - 1];
-
-        const candleRange = lastH - lastL;
-        const candleBody = Math.abs(lastC - lastO);
-        if (candleRange < ATR_BREAKOUT_MULT * lastAtr) return null;
-        if (candleBody / candleRange < 0.5) return null;
-
-        const avgVol = seriesMean(frame.v.subarray(n - 21, n - 1));   // [CLOSED-BAR] 20 bars before the last closed one
-        if (!(avgVol > 0) || lastVol < avgVol * 1.5) return null;
-
-        const direction = lastC > lastO ? 'LONG' : 'SHORT';
-        const entry = lastC;
-        let sl;
-        let tp;
-        if (direction === 'LONG') {
-          sl = lastL - lastAtr * 0.3;
-          const risk = entry - sl;
-          tp = entry + Math.max(lastAtr * 2.5, risk * 2.0);
-        } else {
-          sl = lastH + lastAtr * 0.3;
-          const risk = sl - entry;
-          tp = entry - Math.max(lastAtr * 2.5, risk * 2.0);
-        }
-        lastBreakoutAlert.set(symbol, t);
-        return {
-          symbol, direction, entry, sl, tp, atr: lastAtr,
-          range_atr_mult: candleRange / lastAtr,
-          vol_ratio: lastVol / avgVol,
-          reason: `ATR Breakout ${fmtFixed(candleRange / lastAtr, 1)}×ATR ${direction}`,
-        };
-      } catch (e) {
-        log.debug(`detect_atr_breakout ${symbol}: ${e && e.message}`);
+        if (signal && signal.aborted) break;
+        await sleep(LOOP_INTERVAL_S * 1000);
       }
-      return null;
     },
 
     _resetForTests() {
@@ -195,4 +170,5 @@ module.exports = {
   relaxConfirmations: (...a) => defaultDetector.relaxConfirmations(...a),
   checkMacroMomentum: (...a) => defaultDetector.checkMacroMomentum(...a),
   detectAtrBreakout: (...a) => defaultDetector.detectAtrBreakout(...a),
+  levelsOpts: () => defaultDetector.levelsOpts(),
 };

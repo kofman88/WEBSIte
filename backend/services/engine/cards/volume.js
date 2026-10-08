@@ -11,7 +11,8 @@
 'use strict';
 
 const { fpVolume, fmtFixed } = require('../../../strategies/common/pyfmt');
-const { escape, pyTruthy, repeat } = require('./html');
+const { pyInt, pyFloat } = require('../pycoerce');
+const { escape, pyTruthy, pyStr, repeat } = require('./html');
 
 const SETUP_NAMES = {
   cross: ['✂️', 'Пересечение', 'Cross'],
@@ -20,16 +21,15 @@ const SETUP_NAMES = {
   ribbon: ['🔁', 'Откат к ленте', 'Pullback to ribbon'],   // [VOLUME-RIBBON]
 };
 
-/** volume_scanner._fp — any exception → str(v). */
+/** volume_scanner._fp — float(v) and the formatting inside one try: any exception → str(v). */
 function fp(v) {
+  let x;
   try {
-    const n = Number(v);
-    if (typeof v === 'string' && v.trim() === '') return String(v);
-    if (Number.isNaN(n)) return String(v);
-    return fpVolume(n);
+    x = typeof v === 'number' ? v : pyFloat(v);
   } catch (_e) {
-    return String(v);
+    return pyStr(v);
   }
+  return fpVolume(x);
 }
 
 /** setup_title(sig, lang): «↩️ Отскок от EMA200» */
@@ -59,7 +59,7 @@ function signalText(sig, lang = 'ru', opts = {}) {
   const NL = '\n';
   const sym = escape(String(sig.symbol).replace(/-USDT-SWAP/g, '').replace(/-USDT/g, ''));
   const head = sig.direction === 'LONG' ? '🟢 <b>LONG</b>' : '🔴 <b>SHORT</b>';
-  const q = Math.max(0, Math.min(5, Math.trunc(Number(sig.quality))));
+  const q = Math.max(0, Math.min(5, pyInt(sig.quality)));
   const stars = repeat('⭐', q) + repeat('☆', 5 - q);
   const entry = Number(sig.entry);
   const slPct = pyTruthy(sig.entry) ? Math.abs(Number(sig.sl) - entry) / entry * 100 : 0.0;
@@ -79,7 +79,7 @@ function signalText(sig, lang = 'ru', opts = {}) {
   try { trendLn = cardLine(sig.direction, sig.timeframe, lang); } catch (_e) { trendLn = ''; }   // [TREND-MONITOR]
   if (trendLn) lines.push(trendLn);
   if (pyTruthy(sig.squeeze)) {
-    const strong = Math.trunc(Number(sig.squeeze)) >= 2;
+    const strong = pyInt(sig.squeeze) >= 2;
     lines.push(ru
       ? '💥 Выход из сжатия волатильности' + (strong ? ' (сильное)' : '') + ' — +1 к качеству'
       : '💥 Breakout from volatility squeeze' + (strong ? ' (strong)' : '') + ' — +1 quality');
@@ -91,7 +91,7 @@ function signalText(sig, lang = 'ru', opts = {}) {
   }
   lines.push(`📦 ${ru ? 'Объём' : 'Volume'} ×${fmtFixed(sig.vol_ratio, 1)}  ·  RSI ${fmtFixed(sig.rsi, 0)}`);
   if (sig.htf_tf && pyTruthy(sig.htf_state)) {
-    const strong = Math.abs(Math.trunc(Number(sig.htf_state))) === 2;
+    const strong = Math.abs(pyInt(sig.htf_state)) === 2;
     lines.push(
       (ru ? `🕐 Старший ТФ ${sig.htf_tf}: ` : `🕐 HTF ${sig.htf_tf}: `)
       + (ru ? (strong ? 'по тренду ✅' : 'цена за EMA50 ☑️') : (strong ? 'with trend ✅' : 'price beyond EMA50 ☑️')),

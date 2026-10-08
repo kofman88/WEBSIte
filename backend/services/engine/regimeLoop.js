@@ -4,14 +4,16 @@
  * the regime_loop of background_loops.py (every 30 min: BTC 1H × 120 bars by
  * REST → candle cache with TTL 1800 → detect_regime → cache).
  *
- * The pure classifier `detectRegime(frame, {tf})` lives in
- * strategies/common/marketRegime.js (LEVELS port); it is required lazily so
- * this module loads without it (tests inject a fake through `deps.detectRegime`).
+ * The pure classifier `detectRegime(frame, {tf})` and regime_allows_direction
+ * live in strategies/common/marketRegime.js (LEVELS port); tests may inject a
+ * fake classifier through `deps.detectRegime`. `runLoop()` = regime_loop:
+ * 60 s warm-up, then every REGIME_INTERVAL.
  */
 
 'use strict';
 
-const { pyJsonDumps, pyJsonLoads } = require('./pyjson');
+const { pyJsonDumps } = require('./pyjson');
+const marketRegime = require('../../strategies/common/marketRegime');
 const { log: defaultLog } = require('../marketData/mdLog');
 
 const REGIME_INTERVAL = 1800;      // 30 мин — обновляем режим BTC в кэше
@@ -25,24 +27,16 @@ const FETCH_LIMIT = 120;
 const MIN_BARS = 60;
 
 const nowSec = () => Date.now() / 1000;
+const sleepMs = (ms) => new Promise((r) => { const h = setTimeout(r, ms); if (h.unref) h.unref(); });
 
 /**
  * regime_allows_direction(regime, direction): trending_up → no SHORT,
- * trending_down → no LONG, high_vol / ranging → both.
+ * trending_down → no LONG, high_vol / ranging → both (marketRegime.js).
  */
-function regimeAllowsDirection(regime, direction) {
-  if (regime === 'trending_up' && direction === 'SHORT') return false;
-  if (regime === 'trending_down' && direction === 'LONG') return false;
-  return true;
-}
+const { regimeAllowsDirection } = marketRegime;
 
 function resolveDetectRegime(deps) {
-  if (typeof deps.detectRegime === 'function') return deps.detectRegime;
-  // eslint-disable-next-line global-require
-  const mod = require('../../strategies/common/marketRegime');
-  const fn = mod.detectRegime || mod.detect_regime;
-  if (typeof fn !== 'function') throw new Error('strategies/common/marketRegime.detectRegime missing');
-  return fn;
+  return typeof deps.detectRegime === 'function' ? deps.detectRegime : marketRegime.detectRegime;
 }
 
 /**
@@ -80,13 +74,22 @@ function createRegimeLoop(deps = {}) {
       }
     },
 
-    /** _append_regime_history(prev, new, ts): kv['regime_history'] = last 30 changes. */
+    /**
+     * _append_regime_history(prev, new, ts): kv['regime_history'] = the last 30 changes.
+     * Unparsable JSON starts a new list; a parsed non-list (no .append) aborts the write.
+     */
     appendRegimeHistory(prev, next, ts) {
       try {
         const kv = kvOf();
         const raw = kv.get(HISTORY_KEY) || '[]';
-        let hist = pyJsonLoads(raw, []);
-        if (!Array.isArray(hist)) hist = [];
+        let hist;
+        try {
+          hist = raw ? JSON.parse(raw) : [];
+        } catch (_e) {
+          log.warning('market_regime._append_regime_history() unhandled exception');
+          hist = [];
+        }
+        if (!Array.isArray(hist)) throw new TypeError(`'${typeof hist}' object has no attribute 'append'`);
         hist.push({ ts, from: prev, to: next });
         hist = hist.slice(-HISTORY_MAX);
         kv.set(HISTORY_KEY, pyJsonDumps(hist, ['ts']));
@@ -95,12 +98,15 @@ function createRegimeLoop(deps = {}) {
       }
     },
 
+    /** get_regime_history(limit): hist[-limit:] ([] on any error / non-list). */
     getRegimeHistory(limit = 10) {
       try {
         const raw = kvOf().get(HISTORY_KEY) || '[]';
-        const hist = pyJsonLoads(raw, []);
-        return Array.isArray(hist) ? hist.slice(-limit) : [];
+        const hist = raw ? JSON.parse(raw) : [];
+        if (!Array.isArray(hist)) return [];
+        return limit > 0 ? hist.slice(-limit) : hist.slice(limit === 0 ? 0 : -limit);
       } catch (_e) {
+        log.warning('market_regime.get_regime_history() unhandled exception');
         return [];
       }
     },
@@ -123,6 +129,18 @@ function createRegimeLoop(deps = {}) {
         log.warning(`regime_loop error: ${e && e.message}`);
       }
       return null;
+    },
+
+    /** regime_loop(um, fetcher): sleep 60 s, then tick() every 30 min until `signal.aborted`. */
+    async runLoop({ signal = null, sleep = sleepMs } = {}) {
+      log.info('regime_loop запущен');
+      await sleep(REGIME_START_DELAY_S * 1000);
+      while (!(signal && signal.aborted)) {
+        await r.tick();
+        if (signal && signal.aborted) break;
+        await sleep(REGIME_INTERVAL * 1000);
+      }
+      log.info('regime_loop остановлен.');
     },
 
     _resetForTests() { cachedRegime = null; cachedAt = 0.0; },

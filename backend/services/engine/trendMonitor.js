@@ -20,9 +20,12 @@
 'use strict';
 
 const { ewmSpan } = require('../../strategies/common/series');
-const { fmtFixed, fmtG } = require('../../strategies/common/pyfmt');
-const { pyRoundInt } = require('../../strategies/common/pyround');
-const { pyJsonDumps, pyJsonLoads } = require('./pyjson');
+const { fmtFixed, fmtG, pyRepr } = require('../../strategies/common/pyfmt');
+const { pyRoundInt, pyMax, pyMin } = require('../../strategies/common/pyround');
+const { pyTruthy } = require('../../strategies/common/pyval');
+const { GRADES } = require('../../strategies/smc/signalBuilder');
+const { pyJsonDumps } = require('./pyjson');
+const { pyInt, pyFloat } = require('./pycoerce');
 const { log: defaultLog } = require('../marketData/mdLog');
 
 const SYMBOL = 'BTC-USDT-SWAP';
@@ -60,35 +63,40 @@ const WORD = Object.freeze({
 });
 
 // ── env ───────────────────────────────────────────────────────────────────
-function envStr(env, name, dflt) {
+// The module-level constants of trend_monitor.py, read from `env` like
+// `os.getenv(NAME, "<default>") or <fallback>`: an unset variable gives the
+// default string, an EMPTY one the `or` fallback (TREND_MTF_BONUS="" → 0,
+// TREND_NOTIFY_TFS="" → no TF at all). A malformed number raises at import in
+// the bot; the site keeps the default instead.
+function envGet(env, name, dflt) {
   const v = env[name];
-  return v === undefined || v === null || v === '' ? dflt : String(v);
+  return v === undefined || v === null ? dflt : String(v);
 }
-function envFloat(env, name, dflt) {
-  const n = Number(envStr(env, name, String(dflt)));
-  return Number.isFinite(n) ? n : dflt;
-}
-function envInt(env, name, dflt) {
-  const s = envStr(env, name, String(dflt));
-  return /^\s*[+-]?\d+\s*$/.test(s) ? parseInt(s, 10) : dflt;
+function envNum(env, name, dfltStr, orFallback, parse) {
+  const raw = envGet(env, name, dfltStr);
+  if (raw === '') return orFallback;
+  try { return parse(raw); } catch (_e) { return parse(dfltStr); }
 }
 function envOn(env, name) {
-  return !['0', 'false', 'off'].includes(envStr(env, name, '1').trim());
+  return !['0', 'false', 'off'].includes((envGet(env, name, '1') || '1').trim());
 }
 
-/** TREND_CTX_RISK="aligned=1,with=1,counter=0.5,strong_counter=0" over the defaults, each clamped to [0, 2]. */
+/**
+ * _parse_ctx_risk(): TREND_CTX_RISK="aligned=1,with=1,counter=0.5,strong_counter=0" over
+ * the defaults; each value = max(0.0, min(2.0, float(v))), unparsable values ignored.
+ */
 function parseCtxRisk(env = process.env) {
   const out = { ...CTX_RISK_DEFAULT };
-  const raw = envStr(env, 'TREND_CTX_RISK', '');
+  const raw = envGet(env, 'TREND_CTX_RISK', '') || '';
   for (const part of raw.split(',')) {
     if (!part.includes('=')) continue;
     const idx = part.indexOf('=');
     const k = part.slice(0, idx).trim();
     const v = part.slice(idx + 1);
     if (!Object.prototype.hasOwnProperty.call(out, k)) continue;
-    const f = Number(v.trim());
-    if (v.trim() === '' || Number.isNaN(f)) continue;   // float(v) ValueError → pass
-    out[k] = Math.max(0.0, Math.min(2.0, f));
+    let f;
+    try { f = pyFloat(v); } catch (_e) { continue; }   // float(v) ValueError → pass
+    out[k] = pyMax(0.0, pyMin(2.0, f));
   }
   return out;
 }
@@ -96,12 +104,12 @@ function parseCtxRisk(env = process.env) {
 /** The module-level env constants of trend_monitor.py. */
 function readConfig(env = process.env) {
   return {
-    REST_REFRESH_S: Math.max(300.0, envFloat(env, 'TREND_REST_REFRESH_S', 1800)),
-    MTF_BONUS: Math.max(0, envInt(env, 'TREND_MTF_BONUS', 1)),
-    STRONG_TREND: Math.max(0, Math.min(100, envInt(env, 'TREND_STRONG_PCT', 70))),
-    STRONG_COUNTER_PENALTY: Math.max(0, envInt(env, 'TREND_STRONG_COUNTER_PENALTY', 1)),
-    INTERVAL_S: Math.max(20.0, envFloat(env, 'TREND_MONITOR_INTERVAL_S', 60)),
-    NOTIFY_TFS: envStr(env, 'TREND_NOTIFY_TFS', '15m,1H,4H,1D,1W,1M').split(',').map((t) => t.trim()).filter(Boolean),
+    REST_REFRESH_S: pyMax(300.0, envNum(env, 'TREND_REST_REFRESH_S', '1800', 1800, pyFloat)),
+    MTF_BONUS: pyMax(0, envNum(env, 'TREND_MTF_BONUS', '1', 0, pyInt)),
+    STRONG_TREND: pyMax(0, pyMin(100, envNum(env, 'TREND_STRONG_PCT', '70', 70, pyInt))),
+    STRONG_COUNTER_PENALTY: pyMax(0, envNum(env, 'TREND_STRONG_COUNTER_PENALTY', '1', 0, pyInt)),
+    INTERVAL_S: pyMax(20.0, envNum(env, 'TREND_MONITOR_INTERVAL_S', '60', 60, pyFloat)),
+    NOTIFY_TFS: (envGet(env, 'TREND_NOTIFY_TFS', '15m,1H,4H,1D,1W,1M') || '').split(',').map((t) => t.trim()).filter(Boolean),
     ENABLED: envOn(env, 'TREND_MONITOR_ENABLED'),
     ALIGNED_NOTIFY: envOn(env, 'TREND_ALIGNED_NOTIFY'),
     CTX_RISK: parseCtxRisk(env),
@@ -243,13 +251,27 @@ function changeText(tf, newTrend, prev, since, lang = 'ru', now = Date.now() / 1
   return head;
 }
 
-/** int(getattr(sig, attr, 0) or 0) */
+/** int(getattr(sig, attr, 0) or 0) — raises like int() (NaN, "5.5", objects). */
 function intAttr(v) {
-  if (v === null || v === undefined || v === false || v === '' || v === 0) return 0;
-  if (typeof v === 'number') return Math.trunc(v);
-  const n = parseInt(String(v), 10);
-  if (Number.isNaN(n)) throw new TypeError(`int(): ${v}`);
-  return n;
+  return pyTruthy(v) ? pyInt(v) : 0;
+}
+
+/** str(x) of a JSON-loaded value (the bot keeps `str(st["trend"])`). */
+function pyStr(v) {
+  if (v === null || v === undefined) return 'None';
+  if (typeof v === 'boolean') return v ? 'True' : 'False';
+  if (typeof v === 'number') return Number.isInteger(v) && !Object.is(v, -0) && Math.abs(v) < 1e16 ? String(v) : pyRepr(v);
+  return String(v);
+}
+
+/** smc.signal_builder GRADES.get(int(score), current) */
+function gradeAfter(score, current) {
+  try {
+    const k = pyInt(score);
+    return Object.prototype.hasOwnProperty.call(GRADES, k) ? GRADES[k] : current;
+  } catch (_e) {
+    return current;
+  }
 }
 
 const nowSec = () => Date.now() / 1000;
@@ -342,7 +364,7 @@ function createTrendMonitor(deps = {}) {
     },
 
     ctxRiskMult(ctx) {
-      const k = String(ctx == null ? '' : ctx);
+      const k = pyTruthy(ctx) ? String(ctx) : '';
       return Object.prototype.hasOwnProperty.call(cfg.CTX_RISK, k) ? Number(cfg.CTX_RISK[k]) : 1.0;
     },
 
@@ -367,34 +389,38 @@ function createTrendMonitor(deps = {}) {
     /**
      * apply_mtf_bonus(sig, attr="quality", cap=10): sets sig.mtf_aligned / strong_counter /
      * trend_ctx once and adjusts sig[attr] (+MTF_BONUS when aligned, −STRONG_COUNTER_PENALTY
-     * against a strong 15m trend, floor 1). Idempotent via sig.mtf_aligned.
-     * D6: when attr is "score" (SMC) the grade is recomputed from the adjusted score.
+     * against a strong 15m trend, floor 1). Idempotent via sig.mtf_aligned (LEVELS hands
+     * deep copies of one memo result to several users).
+     *
+     * attr "score" (SMC, cap 5): the SMC scanner recomputes `grade = GRADES.get(int(score),
+     * grade)` whenever this returns True; PORT_DECISIONS D6 extends that to the strong-counter
+     * penalty, so the grade always follows the adjusted score.
      */
     applyMtfBonus(sig, attr = 'quality', cap = 10) {
-      if (sig.mtf_aligned !== null && sig.mtf_aligned !== undefined) return Boolean(sig.mtf_aligned);
+      if (sig.mtf_aligned !== null && sig.mtf_aligned !== undefined) {
+        const okPrev = Boolean(sig.mtf_aligned);
+        if (attr === 'score' && okPrev) sig.grade = gradeAfter(sig.score, sig.grade);
+        return okPrev;
+      }
       const direction = sig.direction === undefined ? '' : sig.direction;
       const ok = Boolean(m.mtfAligned(direction));
       const strongCounter = Boolean(m.isCounter(direction, '15m')) && m.isStrong('15m');
       sig.mtf_aligned = ok;
       sig.strong_counter = strongCounter;
       sig.trend_ctx = m.trendContext(direction, ok, strongCounter);   // [TREND-CTX]
+      let penalised = false;
       try {
         const q = intAttr(sig[attr]);
-        let changed = false;
         if (ok && cfg.MTF_BONUS > 0) {
-          sig[attr] = Math.min(Math.trunc(cap), q + cfg.MTF_BONUS);
-          changed = true;
+          sig[attr] = pyMin(pyInt(cap), q + cfg.MTF_BONUS);
         } else if (strongCounter && cfg.STRONG_COUNTER_PENALTY > 0) {
-          sig[attr] = Math.max(1, q - cfg.STRONG_COUNTER_PENALTY);
-          changed = true;
-        }
-        if (changed && attr === 'score' && sig[attr] !== q) {
-          // D6 (PORT_DECISIONS): the SMC grade follows the adjusted score
-          sig.grade = require('./cards/smc').gradeFor(sig[attr]);
+          sig[attr] = pyMax(1, q - cfg.STRONG_COUNTER_PENALTY);
+          penalised = true;
         }
       } catch (e) {
         log.debug(`[MTF-ALIGNED] bonus ${attr}: ${e && e.message}`);
       }
+      if (attr === 'score' && (ok || penalised)) sig.grade = gradeAfter(sig.score, sig.grade);   // bot + D6
       return ok;
     },
 
@@ -436,17 +462,26 @@ function createTrendMonitor(deps = {}) {
     },
 
     // ── state ─────────────────────────────────────────────────────────
+    /**
+     * load_state(): kv trend_state_v1 → state (only the six TFs, entries with a truthy
+     * trend). A malformed since/price aborts the rest of the load (one debug line),
+     * the entries read before it stay — like the bot's single try block.
+     */
     loadState() {
       if (loaded) return;
       loaded = true;
       try {
         const raw = kvOf().get(KV_KEY);
         if (raw) {
-          const data = pyJsonLoads(raw, null);
+          const data = JSON.parse(raw);
           if (data && typeof data === 'object' && !Array.isArray(data)) {
             for (const [tf, st] of Object.entries(data)) {
-              if (TFS.includes(tf) && st && typeof st === 'object' && st.trend) {
-                state[tf] = { trend: String(st.trend), since: Number(st.since || 0), price: Number(st.price || 0) };
+              if (TFS.includes(tf) && st && typeof st === 'object' && !Array.isArray(st) && pyTruthy(st.trend)) {
+                state[tf] = {
+                  trend: pyStr(st.trend),
+                  since: pyFloat(pyTruthy(st.since) ? st.since : 0),
+                  price: pyFloat(pyTruthy(st.price) ? st.price : 0),
+                };
               }
             }
           }
@@ -467,13 +502,14 @@ function createTrendMonitor(deps = {}) {
     /** The serialized state (what kv `trend_state_v1` holds). */
     dumpState() { return pyJsonDumps(state, ['since', 'price']); },
 
+    /** set_opted_out(uid, off): kv trend_notify_off_<uid> = "1" / deleted. */
     setOptedOut(uid, off) {
-      const key = `${KV_OFF_PREFIX}${Math.trunc(Number(uid))}`;
+      const key = `${KV_OFF_PREFIX}${pyInt(uid)}`;
       if (off) kvOf().set(key, '1'); else kvOf().del(key);
     },
 
     isOptedOut(uid) {
-      return kvOf().has(`${KV_OFF_PREFIX}${Math.trunc(Number(uid))}`);
+      return kvOf().has(`${KV_OFF_PREFIX}${pyInt(uid)}`);
     },
 
     /**
@@ -488,8 +524,12 @@ function createTrendMonitor(deps = {}) {
       try {
         users = getUsers() || [];
         const kv = kvOf();
-        if (typeof kv.keysWithPrefix === 'function') {
-          off = new Set(kv.keysWithPrefix(KV_OFF_PREFIX).map((k) => k.slice(KV_OFF_PREFIX.length)));
+        if (kv && typeof kv.keysWithPrefix === 'function') {
+          try {
+            off = new Set(kv.keysWithPrefix(KV_OFF_PREFIX).map((k) => k.slice(KV_OFF_PREFIX.length)));
+          } catch (e) {
+            log.debug(`[TREND-CHANGE] opt-out list: ${e && e.message}`);
+          }
         }
       } catch (e) {
         log.warning(`[TREND-CHANGE] users load failed: ${e && e.message}`);
@@ -497,12 +537,17 @@ function createTrendMonitor(deps = {}) {
       }
       let sent = 0;
       const t = now();
+      const perUserCheck = !(kvOf() && typeof kvOf().keysWithPrefix === 'function');
       for (const row of users) {
-        const uid = Math.trunc(Number(row && row.user_id));
-        if (!Number.isFinite(uid) || uid <= 0) continue;
-        if (off.has(String(uid))) continue;
-        if (typeof kvOf().keysWithPrefix !== 'function' && m.isOptedOut(uid)) continue;
-        const lang = (row && row.lang) || 'ru';
+        let uid;
+        try { uid = pyInt(row ? row.user_id : 0); } catch (_e) { continue; }   // (TypeError, ValueError) → skip
+        if (uid <= 0 || off.has(String(uid))) continue;
+        if (perUserCheck) {
+          let optedOut = false;
+          try { optedOut = m.isOptedOut(uid); } catch (_e) { optedOut = false; }
+          if (optedOut) continue;
+        }
+        const lang = (row && pyTruthy(row.lang) ? row.lang : 'ru');
         let silent = false;
         try { silent = Boolean(isQuiet(row, t)); } catch (_e) { silent = false; }
         try {
@@ -583,15 +628,19 @@ function createTrendMonitor(deps = {}) {
       return changes;
     },
 
+    /** _load_aligned(): kv trend_aligned_v1 once; had_kv only when the JSON object parsed. */
     loadAligned() {
       if (aligned.loaded) return;
       aligned.loaded = true;
       try {
         const raw = kvOf().get(KV_ALIGNED);
         if (raw) {
-          const data = pyJsonLoads(raw, {});
-          aligned.dir = String(data.dir || '') || null;
-          aligned.since = Number(data.since || 0);
+          const data = JSON.parse(raw);
+          if (data === null || typeof data !== 'object' || Array.isArray(data)) {
+            throw new TypeError("object has no attribute 'get'");
+          }
+          aligned.dir = (pyTruthy(data.dir) ? pyStr(data.dir) : '') || null;
+          aligned.since = pyFloat(pyTruthy(data.since) ? data.since : 0);
           aligned.had_kv = true;
         }
       } catch (e) {
@@ -629,6 +678,32 @@ function createTrendMonitor(deps = {}) {
         }
       }
       return cur;
+    },
+
+    /**
+     * trend_monitor_loop: disabled → one log line; else load_state(), the start log,
+     * a 90 s warm-up, then refresh() every INTERVAL_S until `signal.aborted`.
+     */
+    async runLoop({ signal = null } = {}) {
+      if (!cfg.ENABLED) {
+        log.info('[TREND-MONITOR] disabled (TREND_MONITOR_ENABLED=0)');
+        return;
+      }
+      m.loadState();
+      const st = Object.entries(state).map(([k, v]) => `'${k}': '${v.trend}'`).join(', ');
+      log.info(`[TREND-MONITOR] started: tfs=(${TFS.map((t) => `'${t}'`).join(', ')}) `
+        + `notify=(${cfg.NOTIFY_TFS.map((t) => `'${t}'`).join(', ')}${cfg.NOTIFY_TFS.length === 1 ? ',' : ''}) `
+        + `interval=${fmtFixed(cfg.INTERVAL_S, 0)}s state={${st}}`);
+      await sleep(90 * 1000);
+      while (!(signal && signal.aborted)) {
+        try {
+          await m.refresh();
+        } catch (e) {
+          log.warning(`[TREND-MONITOR] cycle error: ${e && e.message}`);
+        }
+        if (signal && signal.aborted) break;
+        await sleep(cfg.INTERVAL_S * 1000);
+      }
     },
 
     /** Tests / admin: drop the in-memory state. */

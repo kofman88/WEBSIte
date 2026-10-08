@@ -1,0 +1,3414 @@
+{
+ "tolerance": [
+  {
+   "env": {},
+   "ema": 0.0,
+   "tol": 0.0
+  },
+  {
+   "env": {},
+   "ema": 29.9,
+   "tol": 0.0
+  },
+  {
+   "env": {},
+   "ema": 30.0,
+   "tol": 0.0
+  },
+  {
+   "env": {},
+   "ema": 30.5,
+   "tol": 5e-06
+  },
+  {
+   "env": {},
+   "ema": 45.0,
+   "tol": 0.00015000000000000001
+  },
+  {
+   "env": {},
+   "ema": 100.0,
+   "tol": 0.0007000000000000001
+  },
+  {
+   "env": {},
+   "ema": 130.0,
+   "tol": 0.001
+  },
+  {
+   "env": {},
+   "ema": 529.9,
+   "tol": 0.004999
+  },
+  {
+   "env": {},
+   "ema": 530.0,
+   "tol": 0.005
+  },
+  {
+   "env": {},
+   "ema": 1000.0,
+   "tol": 0.005
+  },
+  {
+   "env": {},
+   "ema": 1000000.0,
+   "tol": 0.005
+  },
+  {
+   "env": {},
+   "ema": -5.0,
+   "tol": 0.0
+  },
+  {
+   "env": {
+    "FRESHNESS_BASELINE_S": "10",
+    "FRESHNESS_TOLERANCE_STEP_PCT": "0.01",
+    "FRESHNESS_TOLERANCE_MAX_PCT": "0.002"
+   },
+   "ema": 0.0,
+   "tol": 0.0
+  },
+  {
+   "env": {
+    "FRESHNESS_BASELINE_S": "10",
+    "FRESHNESS_TOLERANCE_STEP_PCT": "0.01",
+    "FRESHNESS_TOLERANCE_MAX_PCT": "0.002"
+   },
+   "ema": 29.9,
+   "tol": 0.00199
+  },
+  {
+   "env": {
+    "FRESHNESS_BASELINE_S": "10",
+    "FRESHNESS_TOLERANCE_STEP_PCT": "0.01",
+    "FRESHNESS_TOLERANCE_MAX_PCT": "0.002"
+   },
+   "ema": 30.0,
+   "tol": 0.002
+  },
+  {
+   "env": {
+    "FRESHNESS_BASELINE_S": "10",
+    "FRESHNESS_TOLERANCE_STEP_PCT": "0.01",
+    "FRESHNESS_TOLERANCE_MAX_PCT": "0.002"
+   },
+   "ema": 30.5,
+   "tol": 0.002
+  },
+  {
+   "env": {
+    "FRESHNESS_BASELINE_S": "10",
+    "FRESHNESS_TOLERANCE_STEP_PCT": "0.01",
+    "FRESHNESS_TOLERANCE_MAX_PCT": "0.002"
+   },
+   "ema": 45.0,
+   "tol": 0.002
+  },
+  {
+   "env": {
+    "FRESHNESS_BASELINE_S": "10",
+    "FRESHNESS_TOLERANCE_STEP_PCT": "0.01",
+    "FRESHNESS_TOLERANCE_MAX_PCT": "0.002"
+   },
+   "ema": 100.0,
+   "tol": 0.002
+  },
+  {
+   "env": {
+    "FRESHNESS_BASELINE_S": "10",
+    "FRESHNESS_TOLERANCE_STEP_PCT": "0.01",
+    "FRESHNESS_TOLERANCE_MAX_PCT": "0.002"
+   },
+   "ema": 130.0,
+   "tol": 0.002
+  },
+  {
+   "env": {
+    "FRESHNESS_BASELINE_S": "10",
+    "FRESHNESS_TOLERANCE_STEP_PCT": "0.01",
+    "FRESHNESS_TOLERANCE_MAX_PCT": "0.002"
+   },
+   "ema": 529.9,
+   "tol": 0.002
+  },
+  {
+   "env": {
+    "FRESHNESS_BASELINE_S": "10",
+    "FRESHNESS_TOLERANCE_STEP_PCT": "0.01",
+    "FRESHNESS_TOLERANCE_MAX_PCT": "0.002"
+   },
+   "ema": 530.0,
+   "tol": 0.002
+  },
+  {
+   "env": {
+    "FRESHNESS_BASELINE_S": "10",
+    "FRESHNESS_TOLERANCE_STEP_PCT": "0.01",
+    "FRESHNESS_TOLERANCE_MAX_PCT": "0.002"
+   },
+   "ema": 1000.0,
+   "tol": 0.002
+  },
+  {
+   "env": {
+    "FRESHNESS_BASELINE_S": "10",
+    "FRESHNESS_TOLERANCE_STEP_PCT": "0.01",
+    "FRESHNESS_TOLERANCE_MAX_PCT": "0.002"
+   },
+   "ema": 1000000.0,
+   "tol": 0.002
+  },
+  {
+   "env": {
+    "FRESHNESS_BASELINE_S": "10",
+    "FRESHNESS_TOLERANCE_STEP_PCT": "0.01",
+    "FRESHNESS_TOLERANCE_MAX_PCT": "0.002"
+   },
+   "ema": -5.0,
+   "tol": 0.0
+  },
+  {
+   "env": {
+    "FRESHNESS_BASELINE_S": "",
+    "FRESHNESS_TOLERANCE_STEP_PCT": "abc",
+    "FRESHNESS_TOLERANCE_MAX_PCT": " 0.004 "
+   },
+   "ema": 0.0,
+   "tol": 0.0
+  },
+  {
+   "env": {
+    "FRESHNESS_BASELINE_S": "",
+    "FRESHNESS_TOLERANCE_STEP_PCT": "abc",
+    "FRESHNESS_TOLERANCE_MAX_PCT": " 0.004 "
+   },
+   "ema": 29.9,
+   "tol": 0.0
+  },
+  {
+   "env": {
+    "FRESHNESS_BASELINE_S": "",
+    "FRESHNESS_TOLERANCE_STEP_PCT": "abc",
+    "FRESHNESS_TOLERANCE_MAX_PCT": " 0.004 "
+   },
+   "ema": 30.0,
+   "tol": 0.0
+  },
+  {
+   "env": {
+    "FRESHNESS_BASELINE_S": "",
+    "FRESHNESS_TOLERANCE_STEP_PCT": "abc",
+    "FRESHNESS_TOLERANCE_MAX_PCT": " 0.004 "
+   },
+   "ema": 30.5,
+   "tol": 5e-06
+  },
+  {
+   "env": {
+    "FRESHNESS_BASELINE_S": "",
+    "FRESHNESS_TOLERANCE_STEP_PCT": "abc",
+    "FRESHNESS_TOLERANCE_MAX_PCT": " 0.004 "
+   },
+   "ema": 45.0,
+   "tol": 0.00015000000000000001
+  },
+  {
+   "env": {
+    "FRESHNESS_BASELINE_S": "",
+    "FRESHNESS_TOLERANCE_STEP_PCT": "abc",
+    "FRESHNESS_TOLERANCE_MAX_PCT": " 0.004 "
+   },
+   "ema": 100.0,
+   "tol": 0.0007000000000000001
+  },
+  {
+   "env": {
+    "FRESHNESS_BASELINE_S": "",
+    "FRESHNESS_TOLERANCE_STEP_PCT": "abc",
+    "FRESHNESS_TOLERANCE_MAX_PCT": " 0.004 "
+   },
+   "ema": 130.0,
+   "tol": 0.001
+  },
+  {
+   "env": {
+    "FRESHNESS_BASELINE_S": "",
+    "FRESHNESS_TOLERANCE_STEP_PCT": "abc",
+    "FRESHNESS_TOLERANCE_MAX_PCT": " 0.004 "
+   },
+   "ema": 529.9,
+   "tol": 0.004
+  },
+  {
+   "env": {
+    "FRESHNESS_BASELINE_S": "",
+    "FRESHNESS_TOLERANCE_STEP_PCT": "abc",
+    "FRESHNESS_TOLERANCE_MAX_PCT": " 0.004 "
+   },
+   "ema": 530.0,
+   "tol": 0.004
+  },
+  {
+   "env": {
+    "FRESHNESS_BASELINE_S": "",
+    "FRESHNESS_TOLERANCE_STEP_PCT": "abc",
+    "FRESHNESS_TOLERANCE_MAX_PCT": " 0.004 "
+   },
+   "ema": 1000.0,
+   "tol": 0.004
+  },
+  {
+   "env": {
+    "FRESHNESS_BASELINE_S": "",
+    "FRESHNESS_TOLERANCE_STEP_PCT": "abc",
+    "FRESHNESS_TOLERANCE_MAX_PCT": " 0.004 "
+   },
+   "ema": 1000000.0,
+   "tol": 0.004
+  },
+  {
+   "env": {
+    "FRESHNESS_BASELINE_S": "",
+    "FRESHNESS_TOLERANCE_STEP_PCT": "abc",
+    "FRESHNESS_TOLERANCE_MAX_PCT": " 0.004 "
+   },
+   "ema": -5.0,
+   "tol": 0.0
+  },
+  {
+   "env": {
+    "FRESHNESS_TOLERANCE_MAX_PCT": "inf",
+    "FRESHNESS_BASELINE_S": "1_0"
+   },
+   "ema": 0.0,
+   "tol": 0.0
+  },
+  {
+   "env": {
+    "FRESHNESS_TOLERANCE_MAX_PCT": "inf",
+    "FRESHNESS_BASELINE_S": "1_0"
+   },
+   "ema": 29.9,
+   "tol": 0.000199
+  },
+  {
+   "env": {
+    "FRESHNESS_TOLERANCE_MAX_PCT": "inf",
+    "FRESHNESS_BASELINE_S": "1_0"
+   },
+   "ema": 30.0,
+   "tol": 0.0002
+  },
+  {
+   "env": {
+    "FRESHNESS_TOLERANCE_MAX_PCT": "inf",
+    "FRESHNESS_BASELINE_S": "1_0"
+   },
+   "ema": 30.5,
+   "tol": 0.00020500000000000002
+  },
+  {
+   "env": {
+    "FRESHNESS_TOLERANCE_MAX_PCT": "inf",
+    "FRESHNESS_BASELINE_S": "1_0"
+   },
+   "ema": 45.0,
+   "tol": 0.00035000000000000005
+  },
+  {
+   "env": {
+    "FRESHNESS_TOLERANCE_MAX_PCT": "inf",
+    "FRESHNESS_BASELINE_S": "1_0"
+   },
+   "ema": 100.0,
+   "tol": 0.0009000000000000001
+  },
+  {
+   "env": {
+    "FRESHNESS_TOLERANCE_MAX_PCT": "inf",
+    "FRESHNESS_BASELINE_S": "1_0"
+   },
+   "ema": 130.0,
+   "tol": 0.0012000000000000001
+  },
+  {
+   "env": {
+    "FRESHNESS_TOLERANCE_MAX_PCT": "inf",
+    "FRESHNESS_BASELINE_S": "1_0"
+   },
+   "ema": 529.9,
+   "tol": 0.0051990000000000005
+  },
+  {
+   "env": {
+    "FRESHNESS_TOLERANCE_MAX_PCT": "inf",
+    "FRESHNESS_BASELINE_S": "1_0"
+   },
+   "ema": 530.0,
+   "tol": 0.005200000000000001
+  },
+  {
+   "env": {
+    "FRESHNESS_TOLERANCE_MAX_PCT": "inf",
+    "FRESHNESS_BASELINE_S": "1_0"
+   },
+   "ema": 1000.0,
+   "tol": 0.0099
+  },
+  {
+   "env": {
+    "FRESHNESS_TOLERANCE_MAX_PCT": "inf",
+    "FRESHNESS_BASELINE_S": "1_0"
+   },
+   "ema": 1000000.0,
+   "tol": 9.9999
+  },
+  {
+   "env": {
+    "FRESHNESS_TOLERANCE_MAX_PCT": "inf",
+    "FRESHNESS_BASELINE_S": "1_0"
+   },
+   "ema": -5.0,
+   "tol": 0.0
+  }
+ ],
+ "ema_steps": [
+  {
+   "strategy": "levels",
+   "seconds": 40.0,
+   "ema": {
+    "LEVELS": 40.0,
+    "levels": 40.0,
+    "SMC": 0.0,
+    "VOLUME": 0.0,
+    "": 0.0,
+    "OTHER": 0.0
+   }
+  },
+  {
+   "strategy": "LEVELS",
+   "seconds": 100.0,
+   "ema": {
+    "LEVELS": 58.0,
+    "levels": 58.0,
+    "SMC": 0.0,
+    "VOLUME": 0.0,
+    "": 0.0,
+    "OTHER": 0.0
+   }
+  },
+  {
+   "strategy": "smc",
+   "seconds": 10,
+   "ema": {
+    "LEVELS": 58.0,
+    "levels": 58.0,
+    "SMC": 10.0,
+    "VOLUME": 0.0,
+    "": 0.0,
+    "OTHER": 0.0
+   }
+  },
+  {
+   "strategy": "SMC",
+   "seconds": 0,
+   "ema": {
+    "LEVELS": 58.0,
+    "levels": 58.0,
+    "SMC": 10.0,
+    "VOLUME": 0.0,
+    "": 0.0,
+    "OTHER": 0.0
+   }
+  },
+  {
+   "strategy": "",
+   "seconds": 50,
+   "ema": {
+    "LEVELS": 58.0,
+    "levels": 58.0,
+    "SMC": 10.0,
+    "VOLUME": 0.0,
+    "": 0.0,
+    "OTHER": 0.0
+   }
+  },
+  {
+   "strategy": "VOLUME",
+   "seconds": -3,
+   "ema": {
+    "LEVELS": 58.0,
+    "levels": 58.0,
+    "SMC": 10.0,
+    "VOLUME": 0.0,
+    "": 0.0,
+    "OTHER": 0.0
+   }
+  },
+  {
+   "strategy": "LEVELS",
+   "seconds": 61.5,
+   "ema": {
+    "LEVELS": 59.05,
+    "levels": 59.05,
+    "SMC": 10.0,
+    "VOLUME": 0.0,
+    "": 0.0,
+    "OTHER": 0.0
+   }
+  },
+  {
+   "strategy": "volume",
+   "seconds": 12.25,
+   "ema": {
+    "LEVELS": 59.05,
+    "levels": 59.05,
+    "SMC": 10.0,
+    "VOLUME": 12.25,
+    "": 0.0,
+    "OTHER": 0.0
+   }
+  },
+  {
+   "strategy": "LeVeLs",
+   "seconds": 7.0,
+   "ema": {
+    "LEVELS": 43.434999999999995,
+    "levels": 43.434999999999995,
+    "SMC": 10.0,
+    "VOLUME": 12.25,
+    "": 0.0,
+    "OTHER": 0.0
+   }
+  }
+ ],
+ "fresh": [
+  {
+   "ema": 0.0,
+   "symbol": "TEST-USDT-SWAP",
+   "strategy": "LEVELS",
+   "uid": 42,
+   "direction": "LONG",
+   "entry": 100.0,
+   "tp1": 104.0,
+   "sl": 98.0,
+   "current": null,
+   "fresh": true,
+   "logs": []
+  },
+  {
+   "ema": 0.0,
+   "symbol": "TEST-USDT-SWAP",
+   "strategy": "LEVELS",
+   "uid": 42,
+   "direction": "LONG",
+   "entry": 100.0,
+   "tp1": 104.0,
+   "sl": 0.0,
+   "current": null,
+   "fresh": true,
+   "logs": []
+  },
+  {
+   "ema": 0.0,
+   "symbol": "TEST-USDT-SWAP",
+   "strategy": "LEVELS",
+   "uid": 42,
+   "direction": "LONG",
+   "entry": 100.0,
+   "tp1": 104.0,
+   "sl": 98.0,
+   "current": 95.0,
+   "fresh": false,
+   "logs": [
+    "[SIGNAL-STALE-SL] strategy=LEVELS uid=42 sym=TEST-USDT-SWAP LONG entry=100 sl=98 current=95 — drop (price past SL)"
+   ]
+  },
+  {
+   "ema": 0.0,
+   "symbol": "TEST-USDT-SWAP",
+   "strategy": "LEVELS",
+   "uid": 42,
+   "direction": "LONG",
+   "entry": 100.0,
+   "tp1": 104.0,
+   "sl": 0.0,
+   "current": 95.0,
+   "fresh": true,
+   "logs": []
+  },
+  {
+   "ema": 0.0,
+   "symbol": "TEST-USDT-SWAP",
+   "strategy": "LEVELS",
+   "uid": 42,
+   "direction": "LONG",
+   "entry": 100.0,
+   "tp1": 104.0,
+   "sl": 98.0,
+   "current": 97.9,
+   "fresh": false,
+   "logs": [
+    "[SIGNAL-STALE-SL] strategy=LEVELS uid=42 sym=TEST-USDT-SWAP LONG entry=100 sl=98 current=97.9 — drop (price past SL)"
+   ]
+  },
+  {
+   "ema": 0.0,
+   "symbol": "TEST-USDT-SWAP",
+   "strategy": "LEVELS",
+   "uid": 42,
+   "direction": "LONG",
+   "entry": 100.0,
+   "tp1": 104.0,
+   "sl": 0.0,
+   "current": 97.9,
+   "fresh": true,
+   "logs": []
+  },
+  {
+   "ema": 0.0,
+   "symbol": "TEST-USDT-SWAP",
+   "strategy": "LEVELS",
+   "uid": 42,
+   "direction": "LONG",
+   "entry": 100.0,
+   "tp1": 104.0,
+   "sl": 98.0,
+   "current": 98.0,
+   "fresh": false,
+   "logs": [
+    "[SIGNAL-STALE-SL] strategy=LEVELS uid=42 sym=TEST-USDT-SWAP LONG entry=100 sl=98 current=98 — drop (price past SL)"
+   ]
+  },
+  {
+   "ema": 0.0,
+   "symbol": "TEST-USDT-SWAP",
+   "strategy": "LEVELS",
+   "uid": 42,
+   "direction": "LONG",
+   "entry": 100.0,
+   "tp1": 104.0,
+   "sl": 0.0,
+   "current": 98.0,
+   "fresh": true,
+   "logs": []
+  },
+  {
+   "ema": 0.0,
+   "symbol": "TEST-USDT-SWAP",
+   "strategy": "LEVELS",
+   "uid": 42,
+   "direction": "LONG",
+   "entry": 100.0,
+   "tp1": 104.0,
+   "sl": 98.0,
+   "current": 98.9,
+   "fresh": false,
+   "logs": [
+    "[SIGNAL-DRIFT] strategy=LEVELS uid=42 sym=TEST-USDT-SWAP LONG entry=100 current=98.9 drift=0.55R > 0.50R — drop"
+   ]
+  },
+  {
+   "ema": 0.0,
+   "symbol": "TEST-USDT-SWAP",
+   "strategy": "LEVELS",
+   "uid": 42,
+   "direction": "LONG",
+   "entry": 100.0,
+   "tp1": 104.0,
+   "sl": 0.0,
+   "current": 98.9,
+   "fresh": true,
+   "logs": []
+  },
+  {
+   "ema": 0.0,
+   "symbol": "TEST-USDT-SWAP",
+   "strategy": "LEVELS",
+   "uid": 42,
+   "direction": "LONG",
+   "entry": 100.0,
+   "tp1": 104.0,
+   "sl": 98.0,
+   "current": 99.0,
+   "fresh": true,
+   "logs": []
+  },
+  {
+   "ema": 0.0,
+   "symbol": "TEST-USDT-SWAP",
+   "strategy": "LEVELS",
+   "uid": 42,
+   "direction": "LONG",
+   "entry": 100.0,
+   "tp1": 104.0,
+   "sl": 0.0,
+   "current": 99.0,
+   "fresh": true,
+   "logs": []
+  },
+  {
+   "ema": 0.0,
+   "symbol": "TEST-USDT-SWAP",
+   "strategy": "LEVELS",
+   "uid": 42,
+   "direction": "LONG",
+   "entry": 100.0,
+   "tp1": 104.0,
+   "sl": 98.0,
+   "current": 100.0,
+   "fresh": true,
+   "logs": []
+  },
+  {
+   "ema": 0.0,
+   "symbol": "TEST-USDT-SWAP",
+   "strategy": "LEVELS",
+   "uid": 42,
+   "direction": "LONG",
+   "entry": 100.0,
+   "tp1": 104.0,
+   "sl": 0.0,
+   "current": 100.0,
+   "fresh": true,
+   "logs": []
+  },
+  {
+   "ema": 0.0,
+   "symbol": "TEST-USDT-SWAP",
+   "strategy": "LEVELS",
+   "uid": 42,
+   "direction": "LONG",
+   "entry": 100.0,
+   "tp1": 104.0,
+   "sl": 98.0,
+   "current": 100.99,
+   "fresh": true,
+   "logs": []
+  },
+  {
+   "ema": 0.0,
+   "symbol": "TEST-USDT-SWAP",
+   "strategy": "LEVELS",
+   "uid": 42,
+   "direction": "LONG",
+   "entry": 100.0,
+   "tp1": 104.0,
+   "sl": 0.0,
+   "current": 100.99,
+   "fresh": true,
+   "logs": []
+  },
+  {
+   "ema": 0.0,
+   "symbol": "TEST-USDT-SWAP",
+   "strategy": "LEVELS",
+   "uid": 42,
+   "direction": "LONG",
+   "entry": 100.0,
+   "tp1": 104.0,
+   "sl": 98.0,
+   "current": 101.0,
+   "fresh": true,
+   "logs": []
+  },
+  {
+   "ema": 0.0,
+   "symbol": "TEST-USDT-SWAP",
+   "strategy": "LEVELS",
+   "uid": 42,
+   "direction": "LONG",
+   "entry": 100.0,
+   "tp1": 104.0,
+   "sl": 0.0,
+   "current": 101.0,
+   "fresh": true,
+   "logs": []
+  },
+  {
+   "ema": 0.0,
+   "symbol": "TEST-USDT-SWAP",
+   "strategy": "LEVELS",
+   "uid": 42,
+   "direction": "LONG",
+   "entry": 100.0,
+   "tp1": 104.0,
+   "sl": 98.0,
+   "current": 101.01,
+   "fresh": false,
+   "logs": [
+    "[SIGNAL-DRIFT] strategy=LEVELS uid=42 sym=TEST-USDT-SWAP LONG entry=100 current=101.01 drift=0.51R > 0.50R — drop"
+   ]
+  },
+  {
+   "ema": 0.0,
+   "symbol": "TEST-USDT-SWAP",
+   "strategy": "LEVELS",
+   "uid": 42,
+   "direction": "LONG",
+   "entry": 100.0,
+   "tp1": 104.0,
+   "sl": 0.0,
+   "current": 101.01,
+   "fresh": true,
+   "logs": []
+  },
+  {
+   "ema": 0.0,
+   "symbol": "TEST-USDT-SWAP",
+   "strategy": "LEVELS",
+   "uid": 42,
+   "direction": "LONG",
+   "entry": 100.0,
+   "tp1": 104.0,
+   "sl": 98.0,
+   "current": 102.0,
+   "fresh": false,
+   "logs": [
+    "[SIGNAL-DRIFT] strategy=LEVELS uid=42 sym=TEST-USDT-SWAP LONG entry=100 current=102 drift=1.00R > 0.50R — drop"
+   ]
+  },
+  {
+   "ema": 0.0,
+   "symbol": "TEST-USDT-SWAP",
+   "strategy": "LEVELS",
+   "uid": 42,
+   "direction": "LONG",
+   "entry": 100.0,
+   "tp1": 104.0,
+   "sl": 0.0,
+   "current": 102.0,
+   "fresh": true,
+   "logs": []
+  },
+  {
+   "ema": 0.0,
+   "symbol": "TEST-USDT-SWAP",
+   "strategy": "LEVELS",
+   "uid": 42,
+   "direction": "LONG",
+   "entry": 100.0,
+   "tp1": 104.0,
+   "sl": 98.0,
+   "current": 103.0,
+   "fresh": false,
+   "logs": [
+    "[SIGNAL-DRIFT] strategy=LEVELS uid=42 sym=TEST-USDT-SWAP LONG entry=100 current=103 drift=1.50R > 0.50R — drop"
+   ]
+  },
+  {
+   "ema": 0.0,
+   "symbol": "TEST-USDT-SWAP",
+   "strategy": "LEVELS",
+   "uid": 42,
+   "direction": "LONG",
+   "entry": 100.0,
+   "tp1": 104.0,
+   "sl": 0.0,
+   "current": 103.0,
+   "fresh": true,
+   "logs": []
+  },
+  {
+   "ema": 0.0,
+   "symbol": "TEST-USDT-SWAP",
+   "strategy": "LEVELS",
+   "uid": 42,
+   "direction": "LONG",
+   "entry": 100.0,
+   "tp1": 104.0,
+   "sl": 98.0,
+   "current": 104.0,
+   "fresh": false,
+   "logs": [
+    "[SIGNAL-DRIFT] strategy=LEVELS uid=42 sym=TEST-USDT-SWAP LONG entry=100 current=104 drift=2.00R > 0.50R — drop"
+   ]
+  },
+  {
+   "ema": 0.0,
+   "symbol": "TEST-USDT-SWAP",
+   "strategy": "LEVELS",
+   "uid": 42,
+   "direction": "LONG",
+   "entry": 100.0,
+   "tp1": 104.0,
+   "sl": 0.0,
+   "current": 104.0,
+   "fresh": false,
+   "logs": [
+    "[SIGNAL-EXPIRED] strategy=LEVELS uid=42 sym=TEST-USDT-SWAP direction=LONG entry=100 current=104 tp1=104 delta=4.00% tol=0.000% cycle_ema=0.0s — drop (price past TP1+tolerance)"
+   ]
+  },
+  {
+   "ema": 0.0,
+   "symbol": "TEST-USDT-SWAP",
+   "strategy": "LEVELS",
+   "uid": 42,
+   "direction": "LONG",
+   "entry": 100.0,
+   "tp1": 104.0,
+   "sl": 98.0,
+   "current": 104.3,
+   "fresh": false,
+   "logs": [
+    "[SIGNAL-DRIFT] strategy=LEVELS uid=42 sym=TEST-USDT-SWAP LONG entry=100 current=104.3 drift=2.15R > 0.50R — drop"
+   ]
+  },
+  {
+   "ema": 0.0,
+   "symbol": "TEST-USDT-SWAP",
+   "strategy": "LEVELS",
+   "uid": 42,
+   "direction": "LONG",
+   "entry": 100.0,
+   "tp1": 104.0,
+   "sl": 0.0,
+   "current": 104.3,
+   "fresh": false,
+   "logs": [
+    "[SIGNAL-EXPIRED] strategy=LEVELS uid=42 sym=TEST-USDT-SWAP direction=LONG entry=100 current=104.3 tp1=104 delta=4.30% tol=0.000% cycle_ema=0.0s — drop (price past TP1+tolerance)"
+   ]
+  },
+  {
+   "ema": 0.0,
+   "symbol": "TEST-USDT-SWAP",
+   "strategy": "LEVELS",
+   "uid": 42,
+   "direction": "LONG",
+   "entry": 100.0,
+   "tp1": 104.0,
+   "sl": 98.0,
+   "current": 104.6,
+   "fresh": false,
+   "logs": [
+    "[SIGNAL-DRIFT] strategy=LEVELS uid=42 sym=TEST-USDT-SWAP LONG entry=100 current=104.6 drift=2.30R > 0.50R — drop"
+   ]
+  },
+  {
+   "ema": 0.0,
+   "symbol": "TEST-USDT-SWAP",
+   "strategy": "LEVELS",
+   "uid": 42,
+   "direction": "LONG",
+   "entry": 100.0,
+   "tp1": 104.0,
+   "sl": 0.0,
+   "current": 104.6,
+   "fresh": false,
+   "logs": [
+    "[SIGNAL-EXPIRED] strategy=LEVELS uid=42 sym=TEST-USDT-SWAP direction=LONG entry=100 current=104.6 tp1=104 delta=4.60% tol=0.000% cycle_ema=0.0s — drop (price past TP1+tolerance)"
+   ]
+  },
+  {
+   "ema": 0.0,
+   "symbol": "TEST-USDT-SWAP",
+   "strategy": "LEVELS",
+   "uid": 42,
+   "direction": "LONG",
+   "entry": 100.0,
+   "tp1": 104.0,
+   "sl": 98.0,
+   "current": 96.0,
+   "fresh": false,
+   "logs": [
+    "[SIGNAL-STALE-SL] strategy=LEVELS uid=42 sym=TEST-USDT-SWAP LONG entry=100 sl=98 current=96 — drop (price past SL)"
+   ]
+  },
+  {
+   "ema": 0.0,
+   "symbol": "TEST-USDT-SWAP",
+   "strategy": "LEVELS",
+   "uid": 42,
+   "direction": "LONG",
+   "entry": 100.0,
+   "tp1": 104.0,
+   "sl": 0.0,
+   "current": 96.0,
+   "fresh": true,
+   "logs": []
+  },
+  {
+   "ema": 0.0,
+   "symbol": "TEST-USDT-SWAP",
+   "strategy": "LEVELS",
+   "uid": 42,
+   "direction": "LONG",
+   "entry": 100.0,
+   "tp1": 104.0,
+   "sl": 98.0,
+   "current": 95.7,
+   "fresh": false,
+   "logs": [
+    "[SIGNAL-STALE-SL] strategy=LEVELS uid=42 sym=TEST-USDT-SWAP LONG entry=100 sl=98 current=95.7 — drop (price past SL)"
+   ]
+  },
+  {
+   "ema": 0.0,
+   "symbol": "TEST-USDT-SWAP",
+   "strategy": "LEVELS",
+   "uid": 42,
+   "direction": "LONG",
+   "entry": 100.0,
+   "tp1": 104.0,
+   "sl": 0.0,
+   "current": 95.7,
+   "fresh": true,
+   "logs": []
+  },
+  {
+   "ema": 0.0,
+   "symbol": "TEST-USDT-SWAP",
+   "strategy": "LEVELS",
+   "uid": 42,
+   "direction": "SHORT",
+   "entry": 100.0,
+   "tp1": 96.0,
+   "sl": 102.0,
+   "current": null,
+   "fresh": true,
+   "logs": []
+  },
+  {
+   "ema": 0.0,
+   "symbol": "TEST-USDT-SWAP",
+   "strategy": "LEVELS",
+   "uid": 42,
+   "direction": "SHORT",
+   "entry": 100.0,
+   "tp1": 96.0,
+   "sl": 0.0,
+   "current": null,
+   "fresh": true,
+   "logs": []
+  },
+  {
+   "ema": 0.0,
+   "symbol": "TEST-USDT-SWAP",
+   "strategy": "LEVELS",
+   "uid": 42,
+   "direction": "SHORT",
+   "entry": 100.0,
+   "tp1": 96.0,
+   "sl": 102.0,
+   "current": 95.0,
+   "fresh": false,
+   "logs": [
+    "[SIGNAL-DRIFT] strategy=LEVELS uid=42 sym=TEST-USDT-SWAP SHORT entry=100 current=95 drift=2.50R > 0.50R — drop"
+   ]
+  },
+  {
+   "ema": 0.0,
+   "symbol": "TEST-USDT-SWAP",
+   "strategy": "LEVELS",
+   "uid": 42,
+   "direction": "SHORT",
+   "entry": 100.0,
+   "tp1": 96.0,
+   "sl": 0.0,
+   "current": 95.0,
+   "fresh": false,
+   "logs": [
+    "[SIGNAL-EXPIRED] strategy=LEVELS uid=42 sym=TEST-USDT-SWAP direction=SHORT entry=100 current=95 tp1=96 delta=-5.00% tol=0.000% cycle_ema=0.0s — drop (price past TP1+tolerance)"
+   ]
+  },
+  {
+   "ema": 0.0,
+   "symbol": "TEST-USDT-SWAP",
+   "strategy": "LEVELS",
+   "uid": 42,
+   "direction": "SHORT",
+   "entry": 100.0,
+   "tp1": 96.0,
+   "sl": 102.0,
+   "current": 97.9,
+   "fresh": false,
+   "logs": [
+    "[SIGNAL-DRIFT] strategy=LEVELS uid=42 sym=TEST-USDT-SWAP SHORT entry=100 current=97.9 drift=1.05R > 0.50R — drop"
+   ]
+  },
+  {
+   "ema": 0.0,
+   "symbol": "TEST-USDT-SWAP",
+   "strategy": "LEVELS",
+   "uid": 42,
+   "direction": "SHORT",
+   "entry": 100.0,
+   "tp1": 96.0,
+   "sl": 0.0,
+   "current": 97.9,
+   "fresh": true,
+   "logs": []
+  },
+  {
+   "ema": 0.0,
+   "symbol": "TEST-USDT-SWAP",
+   "strategy": "LEVELS",
+   "uid": 42,
+   "direction": "SHORT",
+   "entry": 100.0,
+   "tp1": 96.0,
+   "sl": 102.0,
+   "current": 98.0,
+   "fresh": false,
+   "logs": [
+    "[SIGNAL-DRIFT] strategy=LEVELS uid=42 sym=TEST-USDT-SWAP SHORT entry=100 current=98 drift=1.00R > 0.50R — drop"
+   ]
+  },
+  {
+   "ema": 0.0,
+   "symbol": "TEST-USDT-SWAP",
+   "strategy": "LEVELS",
+   "uid": 42,
+   "direction": "SHORT",
+   "entry": 100.0,
+   "tp1": 96.0,
+   "sl": 0.0,
+   "current": 98.0,
+   "fresh": true,
+   "logs": []
+  },
+  {
+   "ema": 0.0,
+   "symbol": "TEST-USDT-SWAP",
+   "strategy": "LEVELS",
+   "uid": 42,
+   "direction": "SHORT",
+   "entry": 100.0,
+   "tp1": 96.0,
+   "sl": 102.0,
+   "current": 98.9,
+   "fresh": false,
+   "logs": [
+    "[SIGNAL-DRIFT] strategy=LEVELS uid=42 sym=TEST-USDT-SWAP SHORT entry=100 current=98.9 drift=0.55R > 0.50R — drop"
+   ]
+  },
+  {
+   "ema": 0.0,
+   "symbol": "TEST-USDT-SWAP",
+   "strategy": "LEVELS",
+   "uid": 42,
+   "direction": "SHORT",
+   "entry": 100.0,
+   "tp1": 96.0,
+   "sl": 0.0,
+   "current": 98.9,
+   "fresh": true,
+   "logs": []
+  },
+  {
+   "ema": 0.0,
+   "symbol": "TEST-USDT-SWAP",
+   "strategy": "LEVELS",
+   "uid": 42,
+   "direction": "SHORT",
+   "entry": 100.0,
+   "tp1": 96.0,
+   "sl": 102.0,
+   "current": 99.0,
+   "fresh": true,
+   "logs": []
+  },
+  {
+   "ema": 0.0,
+   "symbol": "TEST-USDT-SWAP",
+   "strategy": "LEVELS",
+   "uid": 42,
+   "direction": "SHORT",
+   "entry": 100.0,
+   "tp1": 96.0,
+   "sl": 0.0,
+   "current": 99.0,
+   "fresh": true,
+   "logs": []
+  },
+  {
+   "ema": 0.0,
+   "symbol": "TEST-USDT-SWAP",
+   "strategy": "LEVELS",
+   "uid": 42,
+   "direction": "SHORT",
+   "entry": 100.0,
+   "tp1": 96.0,
+   "sl": 102.0,
+   "current": 100.0,
+   "fresh": true,
+   "logs": []
+  },
+  {
+   "ema": 0.0,
+   "symbol": "TEST-USDT-SWAP",
+   "strategy": "LEVELS",
+   "uid": 42,
+   "direction": "SHORT",
+   "entry": 100.0,
+   "tp1": 96.0,
+   "sl": 0.0,
+   "current": 100.0,
+   "fresh": true,
+   "logs": []
+  },
+  {
+   "ema": 0.0,
+   "symbol": "TEST-USDT-SWAP",
+   "strategy": "LEVELS",
+   "uid": 42,
+   "direction": "SHORT",
+   "entry": 100.0,
+   "tp1": 96.0,
+   "sl": 102.0,
+   "current": 100.99,
+   "fresh": true,
+   "logs": []
+  },
+  {
+   "ema": 0.0,
+   "symbol": "TEST-USDT-SWAP",
+   "strategy": "LEVELS",
+   "uid": 42,
+   "direction": "SHORT",
+   "entry": 100.0,
+   "tp1": 96.0,
+   "sl": 0.0,
+   "current": 100.99,
+   "fresh": true,
+   "logs": []
+  },
+  {
+   "ema": 0.0,
+   "symbol": "TEST-USDT-SWAP",
+   "strategy": "LEVELS",
+   "uid": 42,
+   "direction": "SHORT",
+   "entry": 100.0,
+   "tp1": 96.0,
+   "sl": 102.0,
+   "current": 101.0,
+   "fresh": true,
+   "logs": []
+  },
+  {
+   "ema": 0.0,
+   "symbol": "TEST-USDT-SWAP",
+   "strategy": "LEVELS",
+   "uid": 42,
+   "direction": "SHORT",
+   "entry": 100.0,
+   "tp1": 96.0,
+   "sl": 0.0,
+   "current": 101.0,
+   "fresh": true,
+   "logs": []
+  },
+  {
+   "ema": 0.0,
+   "symbol": "TEST-USDT-SWAP",
+   "strategy": "LEVELS",
+   "uid": 42,
+   "direction": "SHORT",
+   "entry": 100.0,
+   "tp1": 96.0,
+   "sl": 102.0,
+   "current": 101.01,
+   "fresh": false,
+   "logs": [
+    "[SIGNAL-DRIFT] strategy=LEVELS uid=42 sym=TEST-USDT-SWAP SHORT entry=100 current=101.01 drift=0.51R > 0.50R — drop"
+   ]
+  },
+  {
+   "ema": 0.0,
+   "symbol": "TEST-USDT-SWAP",
+   "strategy": "LEVELS",
+   "uid": 42,
+   "direction": "SHORT",
+   "entry": 100.0,
+   "tp1": 96.0,
+   "sl": 0.0,
+   "current": 101.01,
+   "fresh": true,
+   "logs": []
+  },
+  {
+   "ema": 0.0,
+   "symbol": "TEST-USDT-SWAP",
+   "strategy": "LEVELS",
+   "uid": 42,
+   "direction": "SHORT",
+   "entry": 100.0,
+   "tp1": 96.0,
+   "sl": 102.0,
+   "current": 102.0,
+   "fresh": false,
+   "logs": [
+    "[SIGNAL-STALE-SL] strategy=LEVELS uid=42 sym=TEST-USDT-SWAP SHORT entry=100 sl=102 current=102 — drop (price past SL)"
+   ]
+  },
+  {
+   "ema": 0.0,
+   "symbol": "TEST-USDT-SWAP",
+   "strategy": "LEVELS",
+   "uid": 42,
+   "direction": "SHORT",
+   "entry": 100.0,
+   "tp1": 96.0,
+   "sl": 0.0,
+   "current": 102.0,
+   "fresh": true,
+   "logs": []
+  },
+  {
+   "ema": 0.0,
+   "symbol": "TEST-USDT-SWAP",
+   "strategy": "LEVELS",
+   "uid": 42,
+   "direction": "SHORT",
+   "entry": 100.0,
+   "tp1": 96.0,
+   "sl": 102.0,
+   "current": 103.0,
+   "fresh": false,
+   "logs": [
+    "[SIGNAL-STALE-SL] strategy=LEVELS uid=42 sym=TEST-USDT-SWAP SHORT entry=100 sl=102 current=103 — drop (price past SL)"
+   ]
+  },
+  {
+   "ema": 0.0,
+   "symbol": "TEST-USDT-SWAP",
+   "strategy": "LEVELS",
+   "uid": 42,
+   "direction": "SHORT",
+   "entry": 100.0,
+   "tp1": 96.0,
+   "sl": 0.0,
+   "current": 103.0,
+   "fresh": true,
+   "logs": []
+  },
+  {
+   "ema": 0.0,
+   "symbol": "TEST-USDT-SWAP",
+   "strategy": "LEVELS",
+   "uid": 42,
+   "direction": "SHORT",
+   "entry": 100.0,
+   "tp1": 96.0,
+   "sl": 102.0,
+   "current": 104.0,
+   "fresh": false,
+   "logs": [
+    "[SIGNAL-STALE-SL] strategy=LEVELS uid=42 sym=TEST-USDT-SWAP SHORT entry=100 sl=102 current=104 — drop (price past SL)"
+   ]
+  },
+  {
+   "ema": 0.0,
+   "symbol": "TEST-USDT-SWAP",
+   "strategy": "LEVELS",
+   "uid": 42,
+   "direction": "SHORT",
+   "entry": 100.0,
+   "tp1": 96.0,
+   "sl": 0.0,
+   "current": 104.0,
+   "fresh": true,
+   "logs": []
+  },
+  {
+   "ema": 0.0,
+   "symbol": "TEST-USDT-SWAP",
+   "strategy": "LEVELS",
+   "uid": 42,
+   "direction": "SHORT",
+   "entry": 100.0,
+   "tp1": 96.0,
+   "sl": 102.0,
+   "current": 104.3,
+   "fresh": false,
+   "logs": [
+    "[SIGNAL-STALE-SL] strategy=LEVELS uid=42 sym=TEST-USDT-SWAP SHORT entry=100 sl=102 current=104.3 — drop (price past SL)"
+   ]
+  },
+  {
+   "ema": 0.0,
+   "symbol": "TEST-USDT-SWAP",
+   "strategy": "LEVELS",
+   "uid": 42,
+   "direction": "SHORT",
+   "entry": 100.0,
+   "tp1": 96.0,
+   "sl": 0.0,
+   "current": 104.3,
+   "fresh": true,
+   "logs": []
+  },
+  {
+   "ema": 0.0,
+   "symbol": "TEST-USDT-SWAP",
+   "strategy": "LEVELS",
+   "uid": 42,
+   "direction": "SHORT",
+   "entry": 100.0,
+   "tp1": 96.0,
+   "sl": 102.0,
+   "current": 104.6,
+   "fresh": false,
+   "logs": [
+    "[SIGNAL-STALE-SL] strategy=LEVELS uid=42 sym=TEST-USDT-SWAP SHORT entry=100 sl=102 current=104.6 — drop (price past SL)"
+   ]
+  },
+  {
+   "ema": 0.0,
+   "symbol": "TEST-USDT-SWAP",
+   "strategy": "LEVELS",
+   "uid": 42,
+   "direction": "SHORT",
+   "entry": 100.0,
+   "tp1": 96.0,
+   "sl": 0.0,
+   "current": 104.6,
+   "fresh": true,
+   "logs": []
+  },
+  {
+   "ema": 0.0,
+   "symbol": "TEST-USDT-SWAP",
+   "strategy": "LEVELS",
+   "uid": 42,
+   "direction": "SHORT",
+   "entry": 100.0,
+   "tp1": 96.0,
+   "sl": 102.0,
+   "current": 96.0,
+   "fresh": false,
+   "logs": [
+    "[SIGNAL-DRIFT] strategy=LEVELS uid=42 sym=TEST-USDT-SWAP SHORT entry=100 current=96 drift=2.00R > 0.50R — drop"
+   ]
+  },
+  {
+   "ema": 0.0,
+   "symbol": "TEST-USDT-SWAP",
+   "strategy": "LEVELS",
+   "uid": 42,
+   "direction": "SHORT",
+   "entry": 100.0,
+   "tp1": 96.0,
+   "sl": 0.0,
+   "current": 96.0,
+   "fresh": false,
+   "logs": [
+    "[SIGNAL-EXPIRED] strategy=LEVELS uid=42 sym=TEST-USDT-SWAP direction=SHORT entry=100 current=96 tp1=96 delta=-4.00% tol=0.000% cycle_ema=0.0s — drop (price past TP1+tolerance)"
+   ]
+  },
+  {
+   "ema": 0.0,
+   "symbol": "TEST-USDT-SWAP",
+   "strategy": "LEVELS",
+   "uid": 42,
+   "direction": "SHORT",
+   "entry": 100.0,
+   "tp1": 96.0,
+   "sl": 102.0,
+   "current": 95.7,
+   "fresh": false,
+   "logs": [
+    "[SIGNAL-DRIFT] strategy=LEVELS uid=42 sym=TEST-USDT-SWAP SHORT entry=100 current=95.7 drift=2.15R > 0.50R — drop"
+   ]
+  },
+  {
+   "ema": 0.0,
+   "symbol": "TEST-USDT-SWAP",
+   "strategy": "LEVELS",
+   "uid": 42,
+   "direction": "SHORT",
+   "entry": 100.0,
+   "tp1": 96.0,
+   "sl": 0.0,
+   "current": 95.7,
+   "fresh": false,
+   "logs": [
+    "[SIGNAL-EXPIRED] strategy=LEVELS uid=42 sym=TEST-USDT-SWAP direction=SHORT entry=100 current=95.7 tp1=96 delta=-4.30% tol=0.000% cycle_ema=0.0s — drop (price past TP1+tolerance)"
+   ]
+  },
+  {
+   "ema": 130.0,
+   "symbol": "TEST-USDT-SWAP",
+   "strategy": "LEVELS",
+   "uid": 42,
+   "direction": "LONG",
+   "entry": 100.0,
+   "tp1": 104.0,
+   "sl": 98.0,
+   "current": null,
+   "fresh": true,
+   "logs": []
+  },
+  {
+   "ema": 130.0,
+   "symbol": "TEST-USDT-SWAP",
+   "strategy": "LEVELS",
+   "uid": 42,
+   "direction": "LONG",
+   "entry": 100.0,
+   "tp1": 104.0,
+   "sl": 0.0,
+   "current": null,
+   "fresh": true,
+   "logs": []
+  },
+  {
+   "ema": 130.0,
+   "symbol": "TEST-USDT-SWAP",
+   "strategy": "LEVELS",
+   "uid": 42,
+   "direction": "LONG",
+   "entry": 100.0,
+   "tp1": 104.0,
+   "sl": 98.0,
+   "current": 95.0,
+   "fresh": false,
+   "logs": [
+    "[SIGNAL-STALE-SL] strategy=LEVELS uid=42 sym=TEST-USDT-SWAP LONG entry=100 sl=98 current=95 — drop (price past SL)"
+   ]
+  },
+  {
+   "ema": 130.0,
+   "symbol": "TEST-USDT-SWAP",
+   "strategy": "LEVELS",
+   "uid": 42,
+   "direction": "LONG",
+   "entry": 100.0,
+   "tp1": 104.0,
+   "sl": 0.0,
+   "current": 95.0,
+   "fresh": true,
+   "logs": []
+  },
+  {
+   "ema": 130.0,
+   "symbol": "TEST-USDT-SWAP",
+   "strategy": "LEVELS",
+   "uid": 42,
+   "direction": "LONG",
+   "entry": 100.0,
+   "tp1": 104.0,
+   "sl": 98.0,
+   "current": 97.9,
+   "fresh": false,
+   "logs": [
+    "[SIGNAL-STALE-SL] strategy=LEVELS uid=42 sym=TEST-USDT-SWAP LONG entry=100 sl=98 current=97.9 — drop (price past SL)"
+   ]
+  },
+  {
+   "ema": 130.0,
+   "symbol": "TEST-USDT-SWAP",
+   "strategy": "LEVELS",
+   "uid": 42,
+   "direction": "LONG",
+   "entry": 100.0,
+   "tp1": 104.0,
+   "sl": 0.0,
+   "current": 97.9,
+   "fresh": true,
+   "logs": []
+  },
+  {
+   "ema": 130.0,
+   "symbol": "TEST-USDT-SWAP",
+   "strategy": "LEVELS",
+   "uid": 42,
+   "direction": "LONG",
+   "entry": 100.0,
+   "tp1": 104.0,
+   "sl": 98.0,
+   "current": 98.0,
+   "fresh": false,
+   "logs": [
+    "[SIGNAL-STALE-SL] strategy=LEVELS uid=42 sym=TEST-USDT-SWAP LONG entry=100 sl=98 current=98 — drop (price past SL)"
+   ]
+  },
+  {
+   "ema": 130.0,
+   "symbol": "TEST-USDT-SWAP",
+   "strategy": "LEVELS",
+   "uid": 42,
+   "direction": "LONG",
+   "entry": 100.0,
+   "tp1": 104.0,
+   "sl": 0.0,
+   "current": 98.0,
+   "fresh": true,
+   "logs": []
+  },
+  {
+   "ema": 130.0,
+   "symbol": "TEST-USDT-SWAP",
+   "strategy": "LEVELS",
+   "uid": 42,
+   "direction": "LONG",
+   "entry": 100.0,
+   "tp1": 104.0,
+   "sl": 98.0,
+   "current": 98.9,
+   "fresh": false,
+   "logs": [
+    "[SIGNAL-DRIFT] strategy=LEVELS uid=42 sym=TEST-USDT-SWAP LONG entry=100 current=98.9 drift=0.55R > 0.50R — drop"
+   ]
+  },
+  {
+   "ema": 130.0,
+   "symbol": "TEST-USDT-SWAP",
+   "strategy": "LEVELS",
+   "uid": 42,
+   "direction": "LONG",
+   "entry": 100.0,
+   "tp1": 104.0,
+   "sl": 0.0,
+   "current": 98.9,
+   "fresh": true,
+   "logs": []
+  },
+  {
+   "ema": 130.0,
+   "symbol": "TEST-USDT-SWAP",
+   "strategy": "LEVELS",
+   "uid": 42,
+   "direction": "LONG",
+   "entry": 100.0,
+   "tp1": 104.0,
+   "sl": 98.0,
+   "current": 99.0,
+   "fresh": true,
+   "logs": []
+  },
+  {
+   "ema": 130.0,
+   "symbol": "TEST-USDT-SWAP",
+   "strategy": "LEVELS",
+   "uid": 42,
+   "direction": "LONG",
+   "entry": 100.0,
+   "tp1": 104.0,
+   "sl": 0.0,
+   "current": 99.0,
+   "fresh": true,
+   "logs": []
+  },
+  {
+   "ema": 130.0,
+   "symbol": "TEST-USDT-SWAP",
+   "strategy": "LEVELS",
+   "uid": 42,
+   "direction": "LONG",
+   "entry": 100.0,
+   "tp1": 104.0,
+   "sl": 98.0,
+   "current": 100.0,
+   "fresh": true,
+   "logs": []
+  },
+  {
+   "ema": 130.0,
+   "symbol": "TEST-USDT-SWAP",
+   "strategy": "LEVELS",
+   "uid": 42,
+   "direction": "LONG",
+   "entry": 100.0,
+   "tp1": 104.0,
+   "sl": 0.0,
+   "current": 100.0,
+   "fresh": true,
+   "logs": []
+  },
+  {
+   "ema": 130.0,
+   "symbol": "TEST-USDT-SWAP",
+   "strategy": "LEVELS",
+   "uid": 42,
+   "direction": "LONG",
+   "entry": 100.0,
+   "tp1": 104.0,
+   "sl": 98.0,
+   "current": 100.99,
+   "fresh": true,
+   "logs": []
+  },
+  {
+   "ema": 130.0,
+   "symbol": "TEST-USDT-SWAP",
+   "strategy": "LEVELS",
+   "uid": 42,
+   "direction": "LONG",
+   "entry": 100.0,
+   "tp1": 104.0,
+   "sl": 0.0,
+   "current": 100.99,
+   "fresh": true,
+   "logs": []
+  },
+  {
+   "ema": 130.0,
+   "symbol": "TEST-USDT-SWAP",
+   "strategy": "LEVELS",
+   "uid": 42,
+   "direction": "LONG",
+   "entry": 100.0,
+   "tp1": 104.0,
+   "sl": 98.0,
+   "current": 101.0,
+   "fresh": true,
+   "logs": []
+  },
+  {
+   "ema": 130.0,
+   "symbol": "TEST-USDT-SWAP",
+   "strategy": "LEVELS",
+   "uid": 42,
+   "direction": "LONG",
+   "entry": 100.0,
+   "tp1": 104.0,
+   "sl": 0.0,
+   "current": 101.0,
+   "fresh": true,
+   "logs": []
+  },
+  {
+   "ema": 130.0,
+   "symbol": "TEST-USDT-SWAP",
+   "strategy": "LEVELS",
+   "uid": 42,
+   "direction": "LONG",
+   "entry": 100.0,
+   "tp1": 104.0,
+   "sl": 98.0,
+   "current": 101.01,
+   "fresh": false,
+   "logs": [
+    "[SIGNAL-DRIFT] strategy=LEVELS uid=42 sym=TEST-USDT-SWAP LONG entry=100 current=101.01 drift=0.51R > 0.50R — drop"
+   ]
+  },
+  {
+   "ema": 130.0,
+   "symbol": "TEST-USDT-SWAP",
+   "strategy": "LEVELS",
+   "uid": 42,
+   "direction": "LONG",
+   "entry": 100.0,
+   "tp1": 104.0,
+   "sl": 0.0,
+   "current": 101.01,
+   "fresh": true,
+   "logs": []
+  },
+  {
+   "ema": 130.0,
+   "symbol": "TEST-USDT-SWAP",
+   "strategy": "LEVELS",
+   "uid": 42,
+   "direction": "LONG",
+   "entry": 100.0,
+   "tp1": 104.0,
+   "sl": 98.0,
+   "current": 102.0,
+   "fresh": false,
+   "logs": [
+    "[SIGNAL-DRIFT] strategy=LEVELS uid=42 sym=TEST-USDT-SWAP LONG entry=100 current=102 drift=1.00R > 0.50R — drop"
+   ]
+  },
+  {
+   "ema": 130.0,
+   "symbol": "TEST-USDT-SWAP",
+   "strategy": "LEVELS",
+   "uid": 42,
+   "direction": "LONG",
+   "entry": 100.0,
+   "tp1": 104.0,
+   "sl": 0.0,
+   "current": 102.0,
+   "fresh": true,
+   "logs": []
+  },
+  {
+   "ema": 130.0,
+   "symbol": "TEST-USDT-SWAP",
+   "strategy": "LEVELS",
+   "uid": 42,
+   "direction": "LONG",
+   "entry": 100.0,
+   "tp1": 104.0,
+   "sl": 98.0,
+   "current": 103.0,
+   "fresh": false,
+   "logs": [
+    "[SIGNAL-DRIFT] strategy=LEVELS uid=42 sym=TEST-USDT-SWAP LONG entry=100 current=103 drift=1.50R > 0.50R — drop"
+   ]
+  },
+  {
+   "ema": 130.0,
+   "symbol": "TEST-USDT-SWAP",
+   "strategy": "LEVELS",
+   "uid": 42,
+   "direction": "LONG",
+   "entry": 100.0,
+   "tp1": 104.0,
+   "sl": 0.0,
+   "current": 103.0,
+   "fresh": true,
+   "logs": []
+  },
+  {
+   "ema": 130.0,
+   "symbol": "TEST-USDT-SWAP",
+   "strategy": "LEVELS",
+   "uid": 42,
+   "direction": "LONG",
+   "entry": 100.0,
+   "tp1": 104.0,
+   "sl": 98.0,
+   "current": 104.0,
+   "fresh": false,
+   "logs": [
+    "[SIGNAL-DRIFT] strategy=LEVELS uid=42 sym=TEST-USDT-SWAP LONG entry=100 current=104 drift=2.00R > 0.50R — drop"
+   ]
+  },
+  {
+   "ema": 130.0,
+   "symbol": "TEST-USDT-SWAP",
+   "strategy": "LEVELS",
+   "uid": 42,
+   "direction": "LONG",
+   "entry": 100.0,
+   "tp1": 104.0,
+   "sl": 0.0,
+   "current": 104.0,
+   "fresh": true,
+   "logs": [
+    "[FRESHNESS-TOLERANCE] strategy=LEVELS uid=42 sym=TEST-USDT-SWAP direction=LONG current=104 tp1=104 tol=0.100% cycle_ema=130.0s — keep (within tolerance)"
+   ]
+  },
+  {
+   "ema": 130.0,
+   "symbol": "TEST-USDT-SWAP",
+   "strategy": "LEVELS",
+   "uid": 42,
+   "direction": "LONG",
+   "entry": 100.0,
+   "tp1": 104.0,
+   "sl": 98.0,
+   "current": 104.3,
+   "fresh": false,
+   "logs": [
+    "[SIGNAL-DRIFT] strategy=LEVELS uid=42 sym=TEST-USDT-SWAP LONG entry=100 current=104.3 drift=2.15R > 0.50R — drop"
+   ]
+  },
+  {
+   "ema": 130.0,
+   "symbol": "TEST-USDT-SWAP",
+   "strategy": "LEVELS",
+   "uid": 42,
+   "direction": "LONG",
+   "entry": 100.0,
+   "tp1": 104.0,
+   "sl": 0.0,
+   "current": 104.3,
+   "fresh": false,
+   "logs": [
+    "[SIGNAL-EXPIRED] strategy=LEVELS uid=42 sym=TEST-USDT-SWAP direction=LONG entry=100 current=104.3 tp1=104 delta=4.30% tol=0.100% cycle_ema=130.0s — drop (price past TP1+tolerance)"
+   ]
+  },
+  {
+   "ema": 130.0,
+   "symbol": "TEST-USDT-SWAP",
+   "strategy": "LEVELS",
+   "uid": 42,
+   "direction": "LONG",
+   "entry": 100.0,
+   "tp1": 104.0,
+   "sl": 98.0,
+   "current": 104.6,
+   "fresh": false,
+   "logs": [
+    "[SIGNAL-DRIFT] strategy=LEVELS uid=42 sym=TEST-USDT-SWAP LONG entry=100 current=104.6 drift=2.30R > 0.50R — drop"
+   ]
+  },
+  {
+   "ema": 130.0,
+   "symbol": "TEST-USDT-SWAP",
+   "strategy": "LEVELS",
+   "uid": 42,
+   "direction": "LONG",
+   "entry": 100.0,
+   "tp1": 104.0,
+   "sl": 0.0,
+   "current": 104.6,
+   "fresh": false,
+   "logs": [
+    "[SIGNAL-EXPIRED] strategy=LEVELS uid=42 sym=TEST-USDT-SWAP direction=LONG entry=100 current=104.6 tp1=104 delta=4.60% tol=0.100% cycle_ema=130.0s — drop (price past TP1+tolerance)"
+   ]
+  },
+  {
+   "ema": 130.0,
+   "symbol": "TEST-USDT-SWAP",
+   "strategy": "LEVELS",
+   "uid": 42,
+   "direction": "LONG",
+   "entry": 100.0,
+   "tp1": 104.0,
+   "sl": 98.0,
+   "current": 96.0,
+   "fresh": false,
+   "logs": [
+    "[SIGNAL-STALE-SL] strategy=LEVELS uid=42 sym=TEST-USDT-SWAP LONG entry=100 sl=98 current=96 — drop (price past SL)"
+   ]
+  },
+  {
+   "ema": 130.0,
+   "symbol": "TEST-USDT-SWAP",
+   "strategy": "LEVELS",
+   "uid": 42,
+   "direction": "LONG",
+   "entry": 100.0,
+   "tp1": 104.0,
+   "sl": 0.0,
+   "current": 96.0,
+   "fresh": true,
+   "logs": []
+  },
+  {
+   "ema": 130.0,
+   "symbol": "TEST-USDT-SWAP",
+   "strategy": "LEVELS",
+   "uid": 42,
+   "direction": "LONG",
+   "entry": 100.0,
+   "tp1": 104.0,
+   "sl": 98.0,
+   "current": 95.7,
+   "fresh": false,
+   "logs": [
+    "[SIGNAL-STALE-SL] strategy=LEVELS uid=42 sym=TEST-USDT-SWAP LONG entry=100 sl=98 current=95.7 — drop (price past SL)"
+   ]
+  },
+  {
+   "ema": 130.0,
+   "symbol": "TEST-USDT-SWAP",
+   "strategy": "LEVELS",
+   "uid": 42,
+   "direction": "LONG",
+   "entry": 100.0,
+   "tp1": 104.0,
+   "sl": 0.0,
+   "current": 95.7,
+   "fresh": true,
+   "logs": []
+  },
+  {
+   "ema": 130.0,
+   "symbol": "TEST-USDT-SWAP",
+   "strategy": "LEVELS",
+   "uid": 42,
+   "direction": "SHORT",
+   "entry": 100.0,
+   "tp1": 96.0,
+   "sl": 102.0,
+   "current": null,
+   "fresh": true,
+   "logs": []
+  },
+  {
+   "ema": 130.0,
+   "symbol": "TEST-USDT-SWAP",
+   "strategy": "LEVELS",
+   "uid": 42,
+   "direction": "SHORT",
+   "entry": 100.0,
+   "tp1": 96.0,
+   "sl": 0.0,
+   "current": null,
+   "fresh": true,
+   "logs": []
+  },
+  {
+   "ema": 130.0,
+   "symbol": "TEST-USDT-SWAP",
+   "strategy": "LEVELS",
+   "uid": 42,
+   "direction": "SHORT",
+   "entry": 100.0,
+   "tp1": 96.0,
+   "sl": 102.0,
+   "current": 95.0,
+   "fresh": false,
+   "logs": [
+    "[SIGNAL-DRIFT] strategy=LEVELS uid=42 sym=TEST-USDT-SWAP SHORT entry=100 current=95 drift=2.50R > 0.50R — drop"
+   ]
+  },
+  {
+   "ema": 130.0,
+   "symbol": "TEST-USDT-SWAP",
+   "strategy": "LEVELS",
+   "uid": 42,
+   "direction": "SHORT",
+   "entry": 100.0,
+   "tp1": 96.0,
+   "sl": 0.0,
+   "current": 95.0,
+   "fresh": false,
+   "logs": [
+    "[SIGNAL-EXPIRED] strategy=LEVELS uid=42 sym=TEST-USDT-SWAP direction=SHORT entry=100 current=95 tp1=96 delta=-5.00% tol=0.100% cycle_ema=130.0s — drop (price past TP1+tolerance)"
+   ]
+  },
+  {
+   "ema": 130.0,
+   "symbol": "TEST-USDT-SWAP",
+   "strategy": "LEVELS",
+   "uid": 42,
+   "direction": "SHORT",
+   "entry": 100.0,
+   "tp1": 96.0,
+   "sl": 102.0,
+   "current": 97.9,
+   "fresh": false,
+   "logs": [
+    "[SIGNAL-DRIFT] strategy=LEVELS uid=42 sym=TEST-USDT-SWAP SHORT entry=100 current=97.9 drift=1.05R > 0.50R — drop"
+   ]
+  },
+  {
+   "ema": 130.0,
+   "symbol": "TEST-USDT-SWAP",
+   "strategy": "LEVELS",
+   "uid": 42,
+   "direction": "SHORT",
+   "entry": 100.0,
+   "tp1": 96.0,
+   "sl": 0.0,
+   "current": 97.9,
+   "fresh": true,
+   "logs": []
+  },
+  {
+   "ema": 130.0,
+   "symbol": "TEST-USDT-SWAP",
+   "strategy": "LEVELS",
+   "uid": 42,
+   "direction": "SHORT",
+   "entry": 100.0,
+   "tp1": 96.0,
+   "sl": 102.0,
+   "current": 98.0,
+   "fresh": false,
+   "logs": [
+    "[SIGNAL-DRIFT] strategy=LEVELS uid=42 sym=TEST-USDT-SWAP SHORT entry=100 current=98 drift=1.00R > 0.50R — drop"
+   ]
+  },
+  {
+   "ema": 130.0,
+   "symbol": "TEST-USDT-SWAP",
+   "strategy": "LEVELS",
+   "uid": 42,
+   "direction": "SHORT",
+   "entry": 100.0,
+   "tp1": 96.0,
+   "sl": 0.0,
+   "current": 98.0,
+   "fresh": true,
+   "logs": []
+  },
+  {
+   "ema": 130.0,
+   "symbol": "TEST-USDT-SWAP",
+   "strategy": "LEVELS",
+   "uid": 42,
+   "direction": "SHORT",
+   "entry": 100.0,
+   "tp1": 96.0,
+   "sl": 102.0,
+   "current": 98.9,
+   "fresh": false,
+   "logs": [
+    "[SIGNAL-DRIFT] strategy=LEVELS uid=42 sym=TEST-USDT-SWAP SHORT entry=100 current=98.9 drift=0.55R > 0.50R — drop"
+   ]
+  },
+  {
+   "ema": 130.0,
+   "symbol": "TEST-USDT-SWAP",
+   "strategy": "LEVELS",
+   "uid": 42,
+   "direction": "SHORT",
+   "entry": 100.0,
+   "tp1": 96.0,
+   "sl": 0.0,
+   "current": 98.9,
+   "fresh": true,
+   "logs": []
+  },
+  {
+   "ema": 130.0,
+   "symbol": "TEST-USDT-SWAP",
+   "strategy": "LEVELS",
+   "uid": 42,
+   "direction": "SHORT",
+   "entry": 100.0,
+   "tp1": 96.0,
+   "sl": 102.0,
+   "current": 99.0,
+   "fresh": true,
+   "logs": []
+  },
+  {
+   "ema": 130.0,
+   "symbol": "TEST-USDT-SWAP",
+   "strategy": "LEVELS",
+   "uid": 42,
+   "direction": "SHORT",
+   "entry": 100.0,
+   "tp1": 96.0,
+   "sl": 0.0,
+   "current": 99.0,
+   "fresh": true,
+   "logs": []
+  },
+  {
+   "ema": 130.0,
+   "symbol": "TEST-USDT-SWAP",
+   "strategy": "LEVELS",
+   "uid": 42,
+   "direction": "SHORT",
+   "entry": 100.0,
+   "tp1": 96.0,
+   "sl": 102.0,
+   "current": 100.0,
+   "fresh": true,
+   "logs": []
+  },
+  {
+   "ema": 130.0,
+   "symbol": "TEST-USDT-SWAP",
+   "strategy": "LEVELS",
+   "uid": 42,
+   "direction": "SHORT",
+   "entry": 100.0,
+   "tp1": 96.0,
+   "sl": 0.0,
+   "current": 100.0,
+   "fresh": true,
+   "logs": []
+  },
+  {
+   "ema": 130.0,
+   "symbol": "TEST-USDT-SWAP",
+   "strategy": "LEVELS",
+   "uid": 42,
+   "direction": "SHORT",
+   "entry": 100.0,
+   "tp1": 96.0,
+   "sl": 102.0,
+   "current": 100.99,
+   "fresh": true,
+   "logs": []
+  },
+  {
+   "ema": 130.0,
+   "symbol": "TEST-USDT-SWAP",
+   "strategy": "LEVELS",
+   "uid": 42,
+   "direction": "SHORT",
+   "entry": 100.0,
+   "tp1": 96.0,
+   "sl": 0.0,
+   "current": 100.99,
+   "fresh": true,
+   "logs": []
+  },
+  {
+   "ema": 130.0,
+   "symbol": "TEST-USDT-SWAP",
+   "strategy": "LEVELS",
+   "uid": 42,
+   "direction": "SHORT",
+   "entry": 100.0,
+   "tp1": 96.0,
+   "sl": 102.0,
+   "current": 101.0,
+   "fresh": true,
+   "logs": []
+  },
+  {
+   "ema": 130.0,
+   "symbol": "TEST-USDT-SWAP",
+   "strategy": "LEVELS",
+   "uid": 42,
+   "direction": "SHORT",
+   "entry": 100.0,
+   "tp1": 96.0,
+   "sl": 0.0,
+   "current": 101.0,
+   "fresh": true,
+   "logs": []
+  },
+  {
+   "ema": 130.0,
+   "symbol": "TEST-USDT-SWAP",
+   "strategy": "LEVELS",
+   "uid": 42,
+   "direction": "SHORT",
+   "entry": 100.0,
+   "tp1": 96.0,
+   "sl": 102.0,
+   "current": 101.01,
+   "fresh": false,
+   "logs": [
+    "[SIGNAL-DRIFT] strategy=LEVELS uid=42 sym=TEST-USDT-SWAP SHORT entry=100 current=101.01 drift=0.51R > 0.50R — drop"
+   ]
+  },
+  {
+   "ema": 130.0,
+   "symbol": "TEST-USDT-SWAP",
+   "strategy": "LEVELS",
+   "uid": 42,
+   "direction": "SHORT",
+   "entry": 100.0,
+   "tp1": 96.0,
+   "sl": 0.0,
+   "current": 101.01,
+   "fresh": true,
+   "logs": []
+  },
+  {
+   "ema": 130.0,
+   "symbol": "TEST-USDT-SWAP",
+   "strategy": "LEVELS",
+   "uid": 42,
+   "direction": "SHORT",
+   "entry": 100.0,
+   "tp1": 96.0,
+   "sl": 102.0,
+   "current": 102.0,
+   "fresh": false,
+   "logs": [
+    "[SIGNAL-STALE-SL] strategy=LEVELS uid=42 sym=TEST-USDT-SWAP SHORT entry=100 sl=102 current=102 — drop (price past SL)"
+   ]
+  },
+  {
+   "ema": 130.0,
+   "symbol": "TEST-USDT-SWAP",
+   "strategy": "LEVELS",
+   "uid": 42,
+   "direction": "SHORT",
+   "entry": 100.0,
+   "tp1": 96.0,
+   "sl": 0.0,
+   "current": 102.0,
+   "fresh": true,
+   "logs": []
+  },
+  {
+   "ema": 130.0,
+   "symbol": "TEST-USDT-SWAP",
+   "strategy": "LEVELS",
+   "uid": 42,
+   "direction": "SHORT",
+   "entry": 100.0,
+   "tp1": 96.0,
+   "sl": 102.0,
+   "current": 103.0,
+   "fresh": false,
+   "logs": [
+    "[SIGNAL-STALE-SL] strategy=LEVELS uid=42 sym=TEST-USDT-SWAP SHORT entry=100 sl=102 current=103 — drop (price past SL)"
+   ]
+  },
+  {
+   "ema": 130.0,
+   "symbol": "TEST-USDT-SWAP",
+   "strategy": "LEVELS",
+   "uid": 42,
+   "direction": "SHORT",
+   "entry": 100.0,
+   "tp1": 96.0,
+   "sl": 0.0,
+   "current": 103.0,
+   "fresh": true,
+   "logs": []
+  },
+  {
+   "ema": 130.0,
+   "symbol": "TEST-USDT-SWAP",
+   "strategy": "LEVELS",
+   "uid": 42,
+   "direction": "SHORT",
+   "entry": 100.0,
+   "tp1": 96.0,
+   "sl": 102.0,
+   "current": 104.0,
+   "fresh": false,
+   "logs": [
+    "[SIGNAL-STALE-SL] strategy=LEVELS uid=42 sym=TEST-USDT-SWAP SHORT entry=100 sl=102 current=104 — drop (price past SL)"
+   ]
+  },
+  {
+   "ema": 130.0,
+   "symbol": "TEST-USDT-SWAP",
+   "strategy": "LEVELS",
+   "uid": 42,
+   "direction": "SHORT",
+   "entry": 100.0,
+   "tp1": 96.0,
+   "sl": 0.0,
+   "current": 104.0,
+   "fresh": true,
+   "logs": []
+  },
+  {
+   "ema": 130.0,
+   "symbol": "TEST-USDT-SWAP",
+   "strategy": "LEVELS",
+   "uid": 42,
+   "direction": "SHORT",
+   "entry": 100.0,
+   "tp1": 96.0,
+   "sl": 102.0,
+   "current": 104.3,
+   "fresh": false,
+   "logs": [
+    "[SIGNAL-STALE-SL] strategy=LEVELS uid=42 sym=TEST-USDT-SWAP SHORT entry=100 sl=102 current=104.3 — drop (price past SL)"
+   ]
+  },
+  {
+   "ema": 130.0,
+   "symbol": "TEST-USDT-SWAP",
+   "strategy": "LEVELS",
+   "uid": 42,
+   "direction": "SHORT",
+   "entry": 100.0,
+   "tp1": 96.0,
+   "sl": 0.0,
+   "current": 104.3,
+   "fresh": true,
+   "logs": []
+  },
+  {
+   "ema": 130.0,
+   "symbol": "TEST-USDT-SWAP",
+   "strategy": "LEVELS",
+   "uid": 42,
+   "direction": "SHORT",
+   "entry": 100.0,
+   "tp1": 96.0,
+   "sl": 102.0,
+   "current": 104.6,
+   "fresh": false,
+   "logs": [
+    "[SIGNAL-STALE-SL] strategy=LEVELS uid=42 sym=TEST-USDT-SWAP SHORT entry=100 sl=102 current=104.6 — drop (price past SL)"
+   ]
+  },
+  {
+   "ema": 130.0,
+   "symbol": "TEST-USDT-SWAP",
+   "strategy": "LEVELS",
+   "uid": 42,
+   "direction": "SHORT",
+   "entry": 100.0,
+   "tp1": 96.0,
+   "sl": 0.0,
+   "current": 104.6,
+   "fresh": true,
+   "logs": []
+  },
+  {
+   "ema": 130.0,
+   "symbol": "TEST-USDT-SWAP",
+   "strategy": "LEVELS",
+   "uid": 42,
+   "direction": "SHORT",
+   "entry": 100.0,
+   "tp1": 96.0,
+   "sl": 102.0,
+   "current": 96.0,
+   "fresh": false,
+   "logs": [
+    "[SIGNAL-DRIFT] strategy=LEVELS uid=42 sym=TEST-USDT-SWAP SHORT entry=100 current=96 drift=2.00R > 0.50R — drop"
+   ]
+  },
+  {
+   "ema": 130.0,
+   "symbol": "TEST-USDT-SWAP",
+   "strategy": "LEVELS",
+   "uid": 42,
+   "direction": "SHORT",
+   "entry": 100.0,
+   "tp1": 96.0,
+   "sl": 0.0,
+   "current": 96.0,
+   "fresh": true,
+   "logs": [
+    "[FRESHNESS-TOLERANCE] strategy=LEVELS uid=42 sym=TEST-USDT-SWAP direction=SHORT current=96 tp1=96 tol=0.100% cycle_ema=130.0s — keep (within tolerance)"
+   ]
+  },
+  {
+   "ema": 130.0,
+   "symbol": "TEST-USDT-SWAP",
+   "strategy": "LEVELS",
+   "uid": 42,
+   "direction": "SHORT",
+   "entry": 100.0,
+   "tp1": 96.0,
+   "sl": 102.0,
+   "current": 95.7,
+   "fresh": false,
+   "logs": [
+    "[SIGNAL-DRIFT] strategy=LEVELS uid=42 sym=TEST-USDT-SWAP SHORT entry=100 current=95.7 drift=2.15R > 0.50R — drop"
+   ]
+  },
+  {
+   "ema": 130.0,
+   "symbol": "TEST-USDT-SWAP",
+   "strategy": "LEVELS",
+   "uid": 42,
+   "direction": "SHORT",
+   "entry": 100.0,
+   "tp1": 96.0,
+   "sl": 0.0,
+   "current": 95.7,
+   "fresh": false,
+   "logs": [
+    "[SIGNAL-EXPIRED] strategy=LEVELS uid=42 sym=TEST-USDT-SWAP direction=SHORT entry=100 current=95.7 tp1=96 delta=-4.30% tol=0.100% cycle_ema=130.0s — drop (price past TP1+tolerance)"
+   ]
+  },
+  {
+   "ema": 1000.0,
+   "symbol": "TEST-USDT-SWAP",
+   "strategy": "LEVELS",
+   "uid": 42,
+   "direction": "LONG",
+   "entry": 100.0,
+   "tp1": 104.0,
+   "sl": 98.0,
+   "current": null,
+   "fresh": true,
+   "logs": []
+  },
+  {
+   "ema": 1000.0,
+   "symbol": "TEST-USDT-SWAP",
+   "strategy": "LEVELS",
+   "uid": 42,
+   "direction": "LONG",
+   "entry": 100.0,
+   "tp1": 104.0,
+   "sl": 0.0,
+   "current": null,
+   "fresh": true,
+   "logs": []
+  },
+  {
+   "ema": 1000.0,
+   "symbol": "TEST-USDT-SWAP",
+   "strategy": "LEVELS",
+   "uid": 42,
+   "direction": "LONG",
+   "entry": 100.0,
+   "tp1": 104.0,
+   "sl": 98.0,
+   "current": 95.0,
+   "fresh": false,
+   "logs": [
+    "[SIGNAL-STALE-SL] strategy=LEVELS uid=42 sym=TEST-USDT-SWAP LONG entry=100 sl=98 current=95 — drop (price past SL)"
+   ]
+  },
+  {
+   "ema": 1000.0,
+   "symbol": "TEST-USDT-SWAP",
+   "strategy": "LEVELS",
+   "uid": 42,
+   "direction": "LONG",
+   "entry": 100.0,
+   "tp1": 104.0,
+   "sl": 0.0,
+   "current": 95.0,
+   "fresh": true,
+   "logs": []
+  },
+  {
+   "ema": 1000.0,
+   "symbol": "TEST-USDT-SWAP",
+   "strategy": "LEVELS",
+   "uid": 42,
+   "direction": "LONG",
+   "entry": 100.0,
+   "tp1": 104.0,
+   "sl": 98.0,
+   "current": 97.9,
+   "fresh": false,
+   "logs": [
+    "[SIGNAL-STALE-SL] strategy=LEVELS uid=42 sym=TEST-USDT-SWAP LONG entry=100 sl=98 current=97.9 — drop (price past SL)"
+   ]
+  },
+  {
+   "ema": 1000.0,
+   "symbol": "TEST-USDT-SWAP",
+   "strategy": "LEVELS",
+   "uid": 42,
+   "direction": "LONG",
+   "entry": 100.0,
+   "tp1": 104.0,
+   "sl": 0.0,
+   "current": 97.9,
+   "fresh": true,
+   "logs": []
+  },
+  {
+   "ema": 1000.0,
+   "symbol": "TEST-USDT-SWAP",
+   "strategy": "LEVELS",
+   "uid": 42,
+   "direction": "LONG",
+   "entry": 100.0,
+   "tp1": 104.0,
+   "sl": 98.0,
+   "current": 98.0,
+   "fresh": false,
+   "logs": [
+    "[SIGNAL-STALE-SL] strategy=LEVELS uid=42 sym=TEST-USDT-SWAP LONG entry=100 sl=98 current=98 — drop (price past SL)"
+   ]
+  },
+  {
+   "ema": 1000.0,
+   "symbol": "TEST-USDT-SWAP",
+   "strategy": "LEVELS",
+   "uid": 42,
+   "direction": "LONG",
+   "entry": 100.0,
+   "tp1": 104.0,
+   "sl": 0.0,
+   "current": 98.0,
+   "fresh": true,
+   "logs": []
+  },
+  {
+   "ema": 1000.0,
+   "symbol": "TEST-USDT-SWAP",
+   "strategy": "LEVELS",
+   "uid": 42,
+   "direction": "LONG",
+   "entry": 100.0,
+   "tp1": 104.0,
+   "sl": 98.0,
+   "current": 98.9,
+   "fresh": false,
+   "logs": [
+    "[SIGNAL-DRIFT] strategy=LEVELS uid=42 sym=TEST-USDT-SWAP LONG entry=100 current=98.9 drift=0.55R > 0.50R — drop"
+   ]
+  },
+  {
+   "ema": 1000.0,
+   "symbol": "TEST-USDT-SWAP",
+   "strategy": "LEVELS",
+   "uid": 42,
+   "direction": "LONG",
+   "entry": 100.0,
+   "tp1": 104.0,
+   "sl": 0.0,
+   "current": 98.9,
+   "fresh": true,
+   "logs": []
+  },
+  {
+   "ema": 1000.0,
+   "symbol": "TEST-USDT-SWAP",
+   "strategy": "LEVELS",
+   "uid": 42,
+   "direction": "LONG",
+   "entry": 100.0,
+   "tp1": 104.0,
+   "sl": 98.0,
+   "current": 99.0,
+   "fresh": true,
+   "logs": []
+  },
+  {
+   "ema": 1000.0,
+   "symbol": "TEST-USDT-SWAP",
+   "strategy": "LEVELS",
+   "uid": 42,
+   "direction": "LONG",
+   "entry": 100.0,
+   "tp1": 104.0,
+   "sl": 0.0,
+   "current": 99.0,
+   "fresh": true,
+   "logs": []
+  },
+  {
+   "ema": 1000.0,
+   "symbol": "TEST-USDT-SWAP",
+   "strategy": "LEVELS",
+   "uid": 42,
+   "direction": "LONG",
+   "entry": 100.0,
+   "tp1": 104.0,
+   "sl": 98.0,
+   "current": 100.0,
+   "fresh": true,
+   "logs": []
+  },
+  {
+   "ema": 1000.0,
+   "symbol": "TEST-USDT-SWAP",
+   "strategy": "LEVELS",
+   "uid": 42,
+   "direction": "LONG",
+   "entry": 100.0,
+   "tp1": 104.0,
+   "sl": 0.0,
+   "current": 100.0,
+   "fresh": true,
+   "logs": []
+  },
+  {
+   "ema": 1000.0,
+   "symbol": "TEST-USDT-SWAP",
+   "strategy": "LEVELS",
+   "uid": 42,
+   "direction": "LONG",
+   "entry": 100.0,
+   "tp1": 104.0,
+   "sl": 98.0,
+   "current": 100.99,
+   "fresh": true,
+   "logs": []
+  },
+  {
+   "ema": 1000.0,
+   "symbol": "TEST-USDT-SWAP",
+   "strategy": "LEVELS",
+   "uid": 42,
+   "direction": "LONG",
+   "entry": 100.0,
+   "tp1": 104.0,
+   "sl": 0.0,
+   "current": 100.99,
+   "fresh": true,
+   "logs": []
+  },
+  {
+   "ema": 1000.0,
+   "symbol": "TEST-USDT-SWAP",
+   "strategy": "LEVELS",
+   "uid": 42,
+   "direction": "LONG",
+   "entry": 100.0,
+   "tp1": 104.0,
+   "sl": 98.0,
+   "current": 101.0,
+   "fresh": true,
+   "logs": []
+  },
+  {
+   "ema": 1000.0,
+   "symbol": "TEST-USDT-SWAP",
+   "strategy": "LEVELS",
+   "uid": 42,
+   "direction": "LONG",
+   "entry": 100.0,
+   "tp1": 104.0,
+   "sl": 0.0,
+   "current": 101.0,
+   "fresh": true,
+   "logs": []
+  },
+  {
+   "ema": 1000.0,
+   "symbol": "TEST-USDT-SWAP",
+   "strategy": "LEVELS",
+   "uid": 42,
+   "direction": "LONG",
+   "entry": 100.0,
+   "tp1": 104.0,
+   "sl": 98.0,
+   "current": 101.01,
+   "fresh": false,
+   "logs": [
+    "[SIGNAL-DRIFT] strategy=LEVELS uid=42 sym=TEST-USDT-SWAP LONG entry=100 current=101.01 drift=0.51R > 0.50R — drop"
+   ]
+  },
+  {
+   "ema": 1000.0,
+   "symbol": "TEST-USDT-SWAP",
+   "strategy": "LEVELS",
+   "uid": 42,
+   "direction": "LONG",
+   "entry": 100.0,
+   "tp1": 104.0,
+   "sl": 0.0,
+   "current": 101.01,
+   "fresh": true,
+   "logs": []
+  },
+  {
+   "ema": 1000.0,
+   "symbol": "TEST-USDT-SWAP",
+   "strategy": "LEVELS",
+   "uid": 42,
+   "direction": "LONG",
+   "entry": 100.0,
+   "tp1": 104.0,
+   "sl": 98.0,
+   "current": 102.0,
+   "fresh": false,
+   "logs": [
+    "[SIGNAL-DRIFT] strategy=LEVELS uid=42 sym=TEST-USDT-SWAP LONG entry=100 current=102 drift=1.00R > 0.50R — drop"
+   ]
+  },
+  {
+   "ema": 1000.0,
+   "symbol": "TEST-USDT-SWAP",
+   "strategy": "LEVELS",
+   "uid": 42,
+   "direction": "LONG",
+   "entry": 100.0,
+   "tp1": 104.0,
+   "sl": 0.0,
+   "current": 102.0,
+   "fresh": true,
+   "logs": []
+  },
+  {
+   "ema": 1000.0,
+   "symbol": "TEST-USDT-SWAP",
+   "strategy": "LEVELS",
+   "uid": 42,
+   "direction": "LONG",
+   "entry": 100.0,
+   "tp1": 104.0,
+   "sl": 98.0,
+   "current": 103.0,
+   "fresh": false,
+   "logs": [
+    "[SIGNAL-DRIFT] strategy=LEVELS uid=42 sym=TEST-USDT-SWAP LONG entry=100 current=103 drift=1.50R > 0.50R — drop"
+   ]
+  },
+  {
+   "ema": 1000.0,
+   "symbol": "TEST-USDT-SWAP",
+   "strategy": "LEVELS",
+   "uid": 42,
+   "direction": "LONG",
+   "entry": 100.0,
+   "tp1": 104.0,
+   "sl": 0.0,
+   "current": 103.0,
+   "fresh": true,
+   "logs": []
+  },
+  {
+   "ema": 1000.0,
+   "symbol": "TEST-USDT-SWAP",
+   "strategy": "LEVELS",
+   "uid": 42,
+   "direction": "LONG",
+   "entry": 100.0,
+   "tp1": 104.0,
+   "sl": 98.0,
+   "current": 104.0,
+   "fresh": false,
+   "logs": [
+    "[SIGNAL-DRIFT] strategy=LEVELS uid=42 sym=TEST-USDT-SWAP LONG entry=100 current=104 drift=2.00R > 0.50R — drop"
+   ]
+  },
+  {
+   "ema": 1000.0,
+   "symbol": "TEST-USDT-SWAP",
+   "strategy": "LEVELS",
+   "uid": 42,
+   "direction": "LONG",
+   "entry": 100.0,
+   "tp1": 104.0,
+   "sl": 0.0,
+   "current": 104.0,
+   "fresh": true,
+   "logs": [
+    "[FRESHNESS-TOLERANCE] strategy=LEVELS uid=42 sym=TEST-USDT-SWAP direction=LONG current=104 tp1=104 tol=0.500% cycle_ema=1000.0s — keep (within tolerance)"
+   ]
+  },
+  {
+   "ema": 1000.0,
+   "symbol": "TEST-USDT-SWAP",
+   "strategy": "LEVELS",
+   "uid": 42,
+   "direction": "LONG",
+   "entry": 100.0,
+   "tp1": 104.0,
+   "sl": 98.0,
+   "current": 104.3,
+   "fresh": false,
+   "logs": [
+    "[SIGNAL-DRIFT] strategy=LEVELS uid=42 sym=TEST-USDT-SWAP LONG entry=100 current=104.3 drift=2.15R > 0.50R — drop"
+   ]
+  },
+  {
+   "ema": 1000.0,
+   "symbol": "TEST-USDT-SWAP",
+   "strategy": "LEVELS",
+   "uid": 42,
+   "direction": "LONG",
+   "entry": 100.0,
+   "tp1": 104.0,
+   "sl": 0.0,
+   "current": 104.3,
+   "fresh": true,
+   "logs": [
+    "[FRESHNESS-TOLERANCE] strategy=LEVELS uid=42 sym=TEST-USDT-SWAP direction=LONG current=104.3 tp1=104 tol=0.500% cycle_ema=1000.0s — keep (within tolerance)"
+   ]
+  },
+  {
+   "ema": 1000.0,
+   "symbol": "TEST-USDT-SWAP",
+   "strategy": "LEVELS",
+   "uid": 42,
+   "direction": "LONG",
+   "entry": 100.0,
+   "tp1": 104.0,
+   "sl": 98.0,
+   "current": 104.6,
+   "fresh": false,
+   "logs": [
+    "[SIGNAL-DRIFT] strategy=LEVELS uid=42 sym=TEST-USDT-SWAP LONG entry=100 current=104.6 drift=2.30R > 0.50R — drop"
+   ]
+  },
+  {
+   "ema": 1000.0,
+   "symbol": "TEST-USDT-SWAP",
+   "strategy": "LEVELS",
+   "uid": 42,
+   "direction": "LONG",
+   "entry": 100.0,
+   "tp1": 104.0,
+   "sl": 0.0,
+   "current": 104.6,
+   "fresh": false,
+   "logs": [
+    "[SIGNAL-EXPIRED] strategy=LEVELS uid=42 sym=TEST-USDT-SWAP direction=LONG entry=100 current=104.6 tp1=104 delta=4.60% tol=0.500% cycle_ema=1000.0s — drop (price past TP1+tolerance)"
+   ]
+  },
+  {
+   "ema": 1000.0,
+   "symbol": "TEST-USDT-SWAP",
+   "strategy": "LEVELS",
+   "uid": 42,
+   "direction": "LONG",
+   "entry": 100.0,
+   "tp1": 104.0,
+   "sl": 98.0,
+   "current": 96.0,
+   "fresh": false,
+   "logs": [
+    "[SIGNAL-STALE-SL] strategy=LEVELS uid=42 sym=TEST-USDT-SWAP LONG entry=100 sl=98 current=96 — drop (price past SL)"
+   ]
+  },
+  {
+   "ema": 1000.0,
+   "symbol": "TEST-USDT-SWAP",
+   "strategy": "LEVELS",
+   "uid": 42,
+   "direction": "LONG",
+   "entry": 100.0,
+   "tp1": 104.0,
+   "sl": 0.0,
+   "current": 96.0,
+   "fresh": true,
+   "logs": []
+  },
+  {
+   "ema": 1000.0,
+   "symbol": "TEST-USDT-SWAP",
+   "strategy": "LEVELS",
+   "uid": 42,
+   "direction": "LONG",
+   "entry": 100.0,
+   "tp1": 104.0,
+   "sl": 98.0,
+   "current": 95.7,
+   "fresh": false,
+   "logs": [
+    "[SIGNAL-STALE-SL] strategy=LEVELS uid=42 sym=TEST-USDT-SWAP LONG entry=100 sl=98 current=95.7 — drop (price past SL)"
+   ]
+  },
+  {
+   "ema": 1000.0,
+   "symbol": "TEST-USDT-SWAP",
+   "strategy": "LEVELS",
+   "uid": 42,
+   "direction": "LONG",
+   "entry": 100.0,
+   "tp1": 104.0,
+   "sl": 0.0,
+   "current": 95.7,
+   "fresh": true,
+   "logs": []
+  },
+  {
+   "ema": 1000.0,
+   "symbol": "TEST-USDT-SWAP",
+   "strategy": "LEVELS",
+   "uid": 42,
+   "direction": "SHORT",
+   "entry": 100.0,
+   "tp1": 96.0,
+   "sl": 102.0,
+   "current": null,
+   "fresh": true,
+   "logs": []
+  },
+  {
+   "ema": 1000.0,
+   "symbol": "TEST-USDT-SWAP",
+   "strategy": "LEVELS",
+   "uid": 42,
+   "direction": "SHORT",
+   "entry": 100.0,
+   "tp1": 96.0,
+   "sl": 0.0,
+   "current": null,
+   "fresh": true,
+   "logs": []
+  },
+  {
+   "ema": 1000.0,
+   "symbol": "TEST-USDT-SWAP",
+   "strategy": "LEVELS",
+   "uid": 42,
+   "direction": "SHORT",
+   "entry": 100.0,
+   "tp1": 96.0,
+   "sl": 102.0,
+   "current": 95.0,
+   "fresh": false,
+   "logs": [
+    "[SIGNAL-DRIFT] strategy=LEVELS uid=42 sym=TEST-USDT-SWAP SHORT entry=100 current=95 drift=2.50R > 0.50R — drop"
+   ]
+  },
+  {
+   "ema": 1000.0,
+   "symbol": "TEST-USDT-SWAP",
+   "strategy": "LEVELS",
+   "uid": 42,
+   "direction": "SHORT",
+   "entry": 100.0,
+   "tp1": 96.0,
+   "sl": 0.0,
+   "current": 95.0,
+   "fresh": false,
+   "logs": [
+    "[SIGNAL-EXPIRED] strategy=LEVELS uid=42 sym=TEST-USDT-SWAP direction=SHORT entry=100 current=95 tp1=96 delta=-5.00% tol=0.500% cycle_ema=1000.0s — drop (price past TP1+tolerance)"
+   ]
+  },
+  {
+   "ema": 1000.0,
+   "symbol": "TEST-USDT-SWAP",
+   "strategy": "LEVELS",
+   "uid": 42,
+   "direction": "SHORT",
+   "entry": 100.0,
+   "tp1": 96.0,
+   "sl": 102.0,
+   "current": 97.9,
+   "fresh": false,
+   "logs": [
+    "[SIGNAL-DRIFT] strategy=LEVELS uid=42 sym=TEST-USDT-SWAP SHORT entry=100 current=97.9 drift=1.05R > 0.50R — drop"
+   ]
+  },
+  {
+   "ema": 1000.0,
+   "symbol": "TEST-USDT-SWAP",
+   "strategy": "LEVELS",
+   "uid": 42,
+   "direction": "SHORT",
+   "entry": 100.0,
+   "tp1": 96.0,
+   "sl": 0.0,
+   "current": 97.9,
+   "fresh": true,
+   "logs": []
+  },
+  {
+   "ema": 1000.0,
+   "symbol": "TEST-USDT-SWAP",
+   "strategy": "LEVELS",
+   "uid": 42,
+   "direction": "SHORT",
+   "entry": 100.0,
+   "tp1": 96.0,
+   "sl": 102.0,
+   "current": 98.0,
+   "fresh": false,
+   "logs": [
+    "[SIGNAL-DRIFT] strategy=LEVELS uid=42 sym=TEST-USDT-SWAP SHORT entry=100 current=98 drift=1.00R > 0.50R — drop"
+   ]
+  },
+  {
+   "ema": 1000.0,
+   "symbol": "TEST-USDT-SWAP",
+   "strategy": "LEVELS",
+   "uid": 42,
+   "direction": "SHORT",
+   "entry": 100.0,
+   "tp1": 96.0,
+   "sl": 0.0,
+   "current": 98.0,
+   "fresh": true,
+   "logs": []
+  },
+  {
+   "ema": 1000.0,
+   "symbol": "TEST-USDT-SWAP",
+   "strategy": "LEVELS",
+   "uid": 42,
+   "direction": "SHORT",
+   "entry": 100.0,
+   "tp1": 96.0,
+   "sl": 102.0,
+   "current": 98.9,
+   "fresh": false,
+   "logs": [
+    "[SIGNAL-DRIFT] strategy=LEVELS uid=42 sym=TEST-USDT-SWAP SHORT entry=100 current=98.9 drift=0.55R > 0.50R — drop"
+   ]
+  },
+  {
+   "ema": 1000.0,
+   "symbol": "TEST-USDT-SWAP",
+   "strategy": "LEVELS",
+   "uid": 42,
+   "direction": "SHORT",
+   "entry": 100.0,
+   "tp1": 96.0,
+   "sl": 0.0,
+   "current": 98.9,
+   "fresh": true,
+   "logs": []
+  },
+  {
+   "ema": 1000.0,
+   "symbol": "TEST-USDT-SWAP",
+   "strategy": "LEVELS",
+   "uid": 42,
+   "direction": "SHORT",
+   "entry": 100.0,
+   "tp1": 96.0,
+   "sl": 102.0,
+   "current": 99.0,
+   "fresh": true,
+   "logs": []
+  },
+  {
+   "ema": 1000.0,
+   "symbol": "TEST-USDT-SWAP",
+   "strategy": "LEVELS",
+   "uid": 42,
+   "direction": "SHORT",
+   "entry": 100.0,
+   "tp1": 96.0,
+   "sl": 0.0,
+   "current": 99.0,
+   "fresh": true,
+   "logs": []
+  },
+  {
+   "ema": 1000.0,
+   "symbol": "TEST-USDT-SWAP",
+   "strategy": "LEVELS",
+   "uid": 42,
+   "direction": "SHORT",
+   "entry": 100.0,
+   "tp1": 96.0,
+   "sl": 102.0,
+   "current": 100.0,
+   "fresh": true,
+   "logs": []
+  },
+  {
+   "ema": 1000.0,
+   "symbol": "TEST-USDT-SWAP",
+   "strategy": "LEVELS",
+   "uid": 42,
+   "direction": "SHORT",
+   "entry": 100.0,
+   "tp1": 96.0,
+   "sl": 0.0,
+   "current": 100.0,
+   "fresh": true,
+   "logs": []
+  },
+  {
+   "ema": 1000.0,
+   "symbol": "TEST-USDT-SWAP",
+   "strategy": "LEVELS",
+   "uid": 42,
+   "direction": "SHORT",
+   "entry": 100.0,
+   "tp1": 96.0,
+   "sl": 102.0,
+   "current": 100.99,
+   "fresh": true,
+   "logs": []
+  },
+  {
+   "ema": 1000.0,
+   "symbol": "TEST-USDT-SWAP",
+   "strategy": "LEVELS",
+   "uid": 42,
+   "direction": "SHORT",
+   "entry": 100.0,
+   "tp1": 96.0,
+   "sl": 0.0,
+   "current": 100.99,
+   "fresh": true,
+   "logs": []
+  },
+  {
+   "ema": 1000.0,
+   "symbol": "TEST-USDT-SWAP",
+   "strategy": "LEVELS",
+   "uid": 42,
+   "direction": "SHORT",
+   "entry": 100.0,
+   "tp1": 96.0,
+   "sl": 102.0,
+   "current": 101.0,
+   "fresh": true,
+   "logs": []
+  },
+  {
+   "ema": 1000.0,
+   "symbol": "TEST-USDT-SWAP",
+   "strategy": "LEVELS",
+   "uid": 42,
+   "direction": "SHORT",
+   "entry": 100.0,
+   "tp1": 96.0,
+   "sl": 0.0,
+   "current": 101.0,
+   "fresh": true,
+   "logs": []
+  },
+  {
+   "ema": 1000.0,
+   "symbol": "TEST-USDT-SWAP",
+   "strategy": "LEVELS",
+   "uid": 42,
+   "direction": "SHORT",
+   "entry": 100.0,
+   "tp1": 96.0,
+   "sl": 102.0,
+   "current": 101.01,
+   "fresh": false,
+   "logs": [
+    "[SIGNAL-DRIFT] strategy=LEVELS uid=42 sym=TEST-USDT-SWAP SHORT entry=100 current=101.01 drift=0.51R > 0.50R — drop"
+   ]
+  },
+  {
+   "ema": 1000.0,
+   "symbol": "TEST-USDT-SWAP",
+   "strategy": "LEVELS",
+   "uid": 42,
+   "direction": "SHORT",
+   "entry": 100.0,
+   "tp1": 96.0,
+   "sl": 0.0,
+   "current": 101.01,
+   "fresh": true,
+   "logs": []
+  },
+  {
+   "ema": 1000.0,
+   "symbol": "TEST-USDT-SWAP",
+   "strategy": "LEVELS",
+   "uid": 42,
+   "direction": "SHORT",
+   "entry": 100.0,
+   "tp1": 96.0,
+   "sl": 102.0,
+   "current": 102.0,
+   "fresh": false,
+   "logs": [
+    "[SIGNAL-STALE-SL] strategy=LEVELS uid=42 sym=TEST-USDT-SWAP SHORT entry=100 sl=102 current=102 — drop (price past SL)"
+   ]
+  },
+  {
+   "ema": 1000.0,
+   "symbol": "TEST-USDT-SWAP",
+   "strategy": "LEVELS",
+   "uid": 42,
+   "direction": "SHORT",
+   "entry": 100.0,
+   "tp1": 96.0,
+   "sl": 0.0,
+   "current": 102.0,
+   "fresh": true,
+   "logs": []
+  },
+  {
+   "ema": 1000.0,
+   "symbol": "TEST-USDT-SWAP",
+   "strategy": "LEVELS",
+   "uid": 42,
+   "direction": "SHORT",
+   "entry": 100.0,
+   "tp1": 96.0,
+   "sl": 102.0,
+   "current": 103.0,
+   "fresh": false,
+   "logs": [
+    "[SIGNAL-STALE-SL] strategy=LEVELS uid=42 sym=TEST-USDT-SWAP SHORT entry=100 sl=102 current=103 — drop (price past SL)"
+   ]
+  },
+  {
+   "ema": 1000.0,
+   "symbol": "TEST-USDT-SWAP",
+   "strategy": "LEVELS",
+   "uid": 42,
+   "direction": "SHORT",
+   "entry": 100.0,
+   "tp1": 96.0,
+   "sl": 0.0,
+   "current": 103.0,
+   "fresh": true,
+   "logs": []
+  },
+  {
+   "ema": 1000.0,
+   "symbol": "TEST-USDT-SWAP",
+   "strategy": "LEVELS",
+   "uid": 42,
+   "direction": "SHORT",
+   "entry": 100.0,
+   "tp1": 96.0,
+   "sl": 102.0,
+   "current": 104.0,
+   "fresh": false,
+   "logs": [
+    "[SIGNAL-STALE-SL] strategy=LEVELS uid=42 sym=TEST-USDT-SWAP SHORT entry=100 sl=102 current=104 — drop (price past SL)"
+   ]
+  },
+  {
+   "ema": 1000.0,
+   "symbol": "TEST-USDT-SWAP",
+   "strategy": "LEVELS",
+   "uid": 42,
+   "direction": "SHORT",
+   "entry": 100.0,
+   "tp1": 96.0,
+   "sl": 0.0,
+   "current": 104.0,
+   "fresh": true,
+   "logs": []
+  },
+  {
+   "ema": 1000.0,
+   "symbol": "TEST-USDT-SWAP",
+   "strategy": "LEVELS",
+   "uid": 42,
+   "direction": "SHORT",
+   "entry": 100.0,
+   "tp1": 96.0,
+   "sl": 102.0,
+   "current": 104.3,
+   "fresh": false,
+   "logs": [
+    "[SIGNAL-STALE-SL] strategy=LEVELS uid=42 sym=TEST-USDT-SWAP SHORT entry=100 sl=102 current=104.3 — drop (price past SL)"
+   ]
+  },
+  {
+   "ema": 1000.0,
+   "symbol": "TEST-USDT-SWAP",
+   "strategy": "LEVELS",
+   "uid": 42,
+   "direction": "SHORT",
+   "entry": 100.0,
+   "tp1": 96.0,
+   "sl": 0.0,
+   "current": 104.3,
+   "fresh": true,
+   "logs": []
+  },
+  {
+   "ema": 1000.0,
+   "symbol": "TEST-USDT-SWAP",
+   "strategy": "LEVELS",
+   "uid": 42,
+   "direction": "SHORT",
+   "entry": 100.0,
+   "tp1": 96.0,
+   "sl": 102.0,
+   "current": 104.6,
+   "fresh": false,
+   "logs": [
+    "[SIGNAL-STALE-SL] strategy=LEVELS uid=42 sym=TEST-USDT-SWAP SHORT entry=100 sl=102 current=104.6 — drop (price past SL)"
+   ]
+  },
+  {
+   "ema": 1000.0,
+   "symbol": "TEST-USDT-SWAP",
+   "strategy": "LEVELS",
+   "uid": 42,
+   "direction": "SHORT",
+   "entry": 100.0,
+   "tp1": 96.0,
+   "sl": 0.0,
+   "current": 104.6,
+   "fresh": true,
+   "logs": []
+  },
+  {
+   "ema": 1000.0,
+   "symbol": "TEST-USDT-SWAP",
+   "strategy": "LEVELS",
+   "uid": 42,
+   "direction": "SHORT",
+   "entry": 100.0,
+   "tp1": 96.0,
+   "sl": 102.0,
+   "current": 96.0,
+   "fresh": false,
+   "logs": [
+    "[SIGNAL-DRIFT] strategy=LEVELS uid=42 sym=TEST-USDT-SWAP SHORT entry=100 current=96 drift=2.00R > 0.50R — drop"
+   ]
+  },
+  {
+   "ema": 1000.0,
+   "symbol": "TEST-USDT-SWAP",
+   "strategy": "LEVELS",
+   "uid": 42,
+   "direction": "SHORT",
+   "entry": 100.0,
+   "tp1": 96.0,
+   "sl": 0.0,
+   "current": 96.0,
+   "fresh": true,
+   "logs": [
+    "[FRESHNESS-TOLERANCE] strategy=LEVELS uid=42 sym=TEST-USDT-SWAP direction=SHORT current=96 tp1=96 tol=0.500% cycle_ema=1000.0s — keep (within tolerance)"
+   ]
+  },
+  {
+   "ema": 1000.0,
+   "symbol": "TEST-USDT-SWAP",
+   "strategy": "LEVELS",
+   "uid": 42,
+   "direction": "SHORT",
+   "entry": 100.0,
+   "tp1": 96.0,
+   "sl": 102.0,
+   "current": 95.7,
+   "fresh": false,
+   "logs": [
+    "[SIGNAL-DRIFT] strategy=LEVELS uid=42 sym=TEST-USDT-SWAP SHORT entry=100 current=95.7 drift=2.15R > 0.50R — drop"
+   ]
+  },
+  {
+   "ema": 1000.0,
+   "symbol": "TEST-USDT-SWAP",
+   "strategy": "LEVELS",
+   "uid": 42,
+   "direction": "SHORT",
+   "entry": 100.0,
+   "tp1": 96.0,
+   "sl": 0.0,
+   "current": 95.7,
+   "fresh": true,
+   "logs": [
+    "[FRESHNESS-TOLERANCE] strategy=LEVELS uid=42 sym=TEST-USDT-SWAP direction=SHORT current=95.7 tp1=96 tol=0.500% cycle_ema=1000.0s — keep (within tolerance)"
+   ]
+  },
+  {
+   "ema": 0.0,
+   "symbol": "X",
+   "strategy": "",
+   "uid": 0,
+   "direction": "LONG",
+   "sl": 0.0,
+   "current": 5.0,
+   "fresh": true,
+   "logs": [],
+   "entry": 0.0,
+   "tp1": 1.0
+  },
+  {
+   "ema": 0.0,
+   "symbol": "X",
+   "strategy": "",
+   "uid": 0,
+   "direction": "LONG",
+   "sl": 0.0,
+   "current": 5.0,
+   "fresh": true,
+   "logs": [],
+   "entry": 1.0,
+   "tp1": 0.0
+  },
+  {
+   "ema": 0.0,
+   "symbol": "X",
+   "strategy": "",
+   "uid": 0,
+   "direction": "LONG",
+   "sl": 0.0,
+   "current": 5.0,
+   "fresh": true,
+   "logs": [],
+   "entry": -1.0,
+   "tp1": 1.0
+  },
+  {
+   "ema": 0.0,
+   "symbol": "X",
+   "strategy": "",
+   "uid": 0,
+   "direction": "LONG",
+   "sl": 0.0,
+   "current": 5.0,
+   "fresh": true,
+   "logs": [],
+   "entry": 1.0,
+   "tp1": -2.0
+  },
+  {
+   "ema": 0.0,
+   "symbol": "X",
+   "direction": "long",
+   "entry": 100.0,
+   "tp1": 104.0,
+   "sl": 98.0,
+   "current": 200.0,
+   "fresh": false,
+   "logs": [
+    "[SIGNAL-DRIFT] strategy=SMC uid=1 sym=X LONG entry=100 current=200 drift=50.00R > 0.50R — drop"
+   ],
+   "strategy": "SMC",
+   "uid": 1
+  },
+  {
+   "ema": 0.0,
+   "symbol": "X",
+   "direction": "",
+   "entry": 100.0,
+   "tp1": 104.0,
+   "sl": 98.0,
+   "current": 200.0,
+   "fresh": true,
+   "logs": [],
+   "strategy": "SMC",
+   "uid": 1
+  },
+  {
+   "ema": 0.0,
+   "symbol": "X",
+   "direction": "BOTH",
+   "entry": 100.0,
+   "tp1": 104.0,
+   "sl": 98.0,
+   "current": 200.0,
+   "fresh": true,
+   "logs": [],
+   "strategy": "SMC",
+   "uid": 1
+  }
+ ],
+ "MAX_DRIFT_R": 0.5
+}

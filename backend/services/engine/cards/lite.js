@@ -5,8 +5,10 @@
 
 'use strict';
 
-const { fp, fmtFixed } = require('../../../strategies/common/pyfmt');
-const { escape, pyTruthy, repeat } = require('./html');
+const { fmtFixed } = require('../../../strategies/common/pyfmt');
+const { pyMax, pyMin } = require('../../../strategies/common/pyround');
+const { pyFloat, pyInt } = require('../pycoerce');
+const { escape, pyTruthy, repeat, cardFp: fp } = require('./html');
 const { levelsStars } = require('./qualityScale');
 
 /**
@@ -20,23 +22,20 @@ function formatSignalLite({ symbol, direction, quality, entry, sl, tp1, tp2 = nu
 
   // float(quality) with (TypeError, ValueError) → 0.0
   let q;
-  if (typeof quality === 'number') q = quality;
-  else if (typeof quality === 'boolean') q = quality ? 1 : 0;
-  else if (quality === null || quality === undefined) q = 0.0;
-  else { const s = String(quality).trim(); const n = Number(s); q = s === '' || Number.isNaN(n) ? 0.0 : n; }
+  try { q = pyFloat(quality); } catch (_e) { q = 0.0; }
 
   let q5;
-  if (Math.trunc(Number(qualityScale || 5)) === 10 || String(strategy || '').toUpperCase() === 'LEVELS') {
-    q5 = levelsStars(q);
+  if (pyInt(pyTruthy(qualityScale) ? qualityScale : 5) === 10 || String(strategy || '').toUpperCase() === 'LEVELS') {
+    q5 = levelsStars(q);                      // [QUALITY-SCALE] 0..10 → 1..5
   } else {
-    q5 = Math.max(0, Math.min(Math.trunc(q), 5));
+    q5 = pyMax(0, pyMin(pyInt(q), 5));        // int(nan) raises like the bot
   }
   const stars = repeat('⭐', q5) + repeat('☆', 5 - q5);
 
   const e = Number(entry);
   const pctSigned = (price) => {
     if (!pyTruthy(price) || !pyTruthy(entry) || e === 0) return '';
-    let delta = (Number(price) - e) / e * 100;
+    let delta = (Number(price) - e) / e * 100;   // SHORT: -0.0 stays "+-0.00%" like the bot
     if (directionUp === 'SHORT') delta = -delta;
     const sign = delta >= 0 ? '+' : '';
     return `${sign}${fmtFixed(delta, 2)}%`;

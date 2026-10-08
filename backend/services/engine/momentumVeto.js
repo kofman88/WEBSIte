@@ -14,29 +14,38 @@
 'use strict';
 
 const { fmtFixed } = require('../../strategies/common/pyfmt');
+const { pySum } = require('../../strategies/common/series');
+const { pyMaxList } = require('../../strategies/common/pyval');
+const { pyFloat, pyInt } = require('./pycoerce');
 
 function envRaw(env, key) {
   const v = env[key];
   return v === undefined || v === null ? '' : String(v).trim();
 }
-/** float(os.environ.get(key, "").strip() or default), ValueError → default */
+/** _env_float: float(os.environ.get(key, "").strip() or default); ValueError / TypeError → default */
 function envFloat(env, key, dflt) {
   const s = envRaw(env, key);
   if (!s) return dflt;
-  if (!/^[+-]?(\d+\.?\d*|\.\d+)([eE][+-]?\d+)?$/i.test(s) && !/^[+-]?(inf|infinity|nan)$/i.test(s)) return dflt;
-  const n = Number(s.toLowerCase().replace('infinity', 'Infinity').replace('inf', 'Infinity').replace('nan', 'NaN'));
-  return Number.isNaN(n) && !/nan/i.test(s) ? dflt : n;
+  try { return pyFloat(s); } catch (_e) { return dflt; }
 }
-/** int(...) — "0.8" raises in Python → default */
+/** _env_int: int(os.environ.get(key, "").strip() or default); "0.8" raises in Python → default */
 function envInt(env, key, dflt) {
   const s = envRaw(env, key);
   if (!s) return dflt;
-  return /^[+-]?\d+$/.test(s) ? parseInt(s, 10) : dflt;
+  try { return pyInt(s); } catch (_e) { return dflt; }
 }
+/** _env_bool: empty → default, else value in (1, true, yes, on) */
 function envBool(env, key, dflt) {
   const raw = envRaw(env, key).toLowerCase();
   if (!raw) return dflt;
   return ['1', 'true', 'yes', 'on'].includes(raw);
+}
+
+/** Python `seq[-k:]` bounds for a length-n sequence (k may be 0 or negative). */
+function tailStart(n, k) {
+  if (k > 0) return Math.max(0, n - k);
+  if (k === 0) return 0;
+  return Math.min(n, -k);
 }
 
 /**
@@ -50,17 +59,15 @@ function computeAtrPct(frame, period = 14) {
     const start = n - (period + 1);
     const trs = [];
     for (let i = start + 1; i < n; i++) {
-      const tr = Math.max(
+      // max(a, b, c) — Python builtin (first wins on ties / NaN)
+      trs.push(pyMaxList([
         frame.h[i] - frame.l[i],
         Math.abs(frame.h[i] - frame.c[i - 1]),
         Math.abs(frame.l[i] - frame.c[i - 1]),
-      );
-      trs.push(tr);
+      ]));
     }
     if (!trs.length) return 0.0;
-    let sum = 0.0;
-    for (const x of trs) sum += x;          // Python sum(): sequential
-    const atr = sum / trs.length;
+    const atr = pySum(trs) / trs.length;     // CPython 3.12 sum(): Neumaier-compensated
     const lastClose = frame.c[n - 1];
     if (lastClose <= 0) return 0.0;
     return (atr / lastClose) * 100.0;
@@ -114,15 +121,12 @@ function createMomentumVeto(env = process.env) {
       const baselineWindow = 20;
       const baselineStart = Math.max(0, n - lookback - baselineWindow);
       const baselineEnd = n - lookback;
-      const recentLen = lookback;
-      const baselineLen = baselineEnd - baselineStart;
-      if (baselineLen < 5) return [false, 'insufficient_data'];
-      let sumRecent = 0.0;
-      for (let i = n - lookback; i < n; i++) sumRecent += Number(volumes[i]);
-      let sumBase = 0.0;
-      for (let i = baselineStart; i < baselineEnd; i++) sumBase += Number(volumes[i]);
-      const avgRecent = sumRecent / recentLen;
-      const avgBaseline = sumBase / baselineLen;
+      const recent = Array.from(volumes.slice(tailStart(n, lookback), n), Number);          // volumes[-lookback:]
+      const baseline = baselineEnd > baselineStart ? Array.from(volumes.slice(baselineStart, baselineEnd), Number) : [];
+      if (!recent.length) throw new RangeError('division by zero');                         // ZeroDivisionError → compute_error
+      if (baseline.length < 5) return [false, 'insufficient_data'];
+      const avgRecent = pySum(recent) / recent.length;
+      const avgBaseline = pySum(baseline) / baseline.length;
       if (avgBaseline <= 0) return [false, 'no_volume_baseline'];
       const volRatio = avgRecent / avgBaseline;
 

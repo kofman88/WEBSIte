@@ -12,19 +12,22 @@
 'use strict';
 
 const { fmtG, fmtFixed } = require('../../strategies/common/pyfmt');
+const { pyFloat } = require('./pycoerce');
+const { pyMax, pyMin } = require('../../strategies/common/pyround');
 const { log: defaultLog } = require('../marketData/mdLog');
 
 const EMA_ALPHA = 0.3;
 const PRICE_TFS = Object.freeze(['15m', '1H', '4H']);   // [NO-5M] 5m/1m больше не в кэше
 
-/** _env_float(name, default): float(os.getenv(name, str(default)) or default), parse failure → default. */
+/** _env_float(name, default): float(os.getenv(name, str(default)) or default); ValueError / TypeError → default. */
 function envFloat(env, name, dflt) {
   const raw = env[name];
   if (raw === undefined || raw === null || raw === '') return dflt;
-  const s = String(raw).trim();
-  if (!/^[+-]?(\d+\.?\d*|\.\d+)([eE][+-]?\d+)?$/.test(s)) return dflt;
-  const n = Number(s);
-  return Number.isFinite(n) ? n : dflt;
+  try {
+    return pyFloat(String(raw));
+  } catch (_e) {
+    return dflt;
+  }
 }
 
 /**
@@ -36,8 +39,8 @@ function computeTolerancePct(cycleEmaS, env = process.env) {
   const baseline = envFloat(env, 'FRESHNESS_BASELINE_S', 30.0);
   const stepPerSec = envFloat(env, 'FRESHNESS_TOLERANCE_STEP_PCT', 0.001) / 100.0;
   const maxTol = envFloat(env, 'FRESHNESS_TOLERANCE_MAX_PCT', 0.005);
-  const over = Math.max(0.0, Number(cycleEmaS) - baseline);
-  return Math.min(maxTol, over * stepPerSec);
+  const over = pyMax(0.0, Number(cycleEmaS) - baseline);
+  return pyMin(maxTol, over * stepPerSec);
 }
 
 const pyTruthy = (v) => !(v === null || v === undefined || v === false || v === 0 || v === '');
@@ -58,7 +61,7 @@ function createFreshness(deps = {}) {
 
     /** report_cycle_time(strategy, seconds): first value seeds, then ema = 0.3·s + 0.7·prev. */
     reportCycleTime(strategy, seconds) {
-      if (!strategy || !(seconds > 0)) return;
+      if (!strategy || seconds <= 0) return;   // NaN passes like in Python
       const key = String(strategy).toUpperCase();
       const prev = cycleEma.get(key);
       if (prev === undefined) cycleEma.set(key, Number(seconds));

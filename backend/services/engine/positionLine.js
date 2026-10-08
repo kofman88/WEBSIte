@@ -11,18 +11,19 @@
 'use strict';
 
 const { fmtComma, fmtG } = require('../../strategies/common/pyfmt');
-const { pyRound } = require('../../strategies/common/pyround');
+const { pyRound, pyMax } = require('../../strategies/common/pyround');
 const { pyFloat, pyInt } = require('./pycoerce');
+const { pyTruthy } = require('../../strategies/common/pyval');
+
+const or = (v, d) => (pyTruthy(v) ? v : d);   // Python `v or d`
 
 const DEFAULT_DEPOSIT = 1000.0;
 
 /** position_size.compute(balance, risk_pct, entry, sl, leverage) → {} when nothing to show. */
 function compute(balance, riskPct, entry, sl, leverage) {
-  const e = Number(entry);
-  const slPct = e ? Math.abs(e - Number(sl)) / e : 0.0;
+  const slPct = pyTruthy(entry) ? Math.abs(pyFloat(entry) - pyFloat(sl)) / pyFloat(entry) : 0.0;
   if (slPct <= 0 || balance <= 0 || riskPct <= 0) return {};
-  // int(leverage or 1): a float leverage truncates
-  const lev = Math.max(1, Math.trunc(Number(leverage || 1)));
+  const lev = pyMax(1, pyInt(or(leverage, 1)));   // max(1, int(leverage or 1))
   const riskUsd = balance * riskPct / 100.0;
   let notional = riskUsd / slPct;
   let capped = false;
@@ -47,7 +48,7 @@ function usd(v) {
 function positionLine(user, entry, sl, lang = 'ru', ctx = '', opts = {}) {
   try {
     const u = user || {};
-    let riskPct = pyFloat(u.trade_risk_pct || 1.0);
+    let riskPct = pyFloat(or(Object.prototype.hasOwnProperty.call(u, 'trade_risk_pct') ? u.trade_risk_pct : 1.0, 1.0));
     let mult = 1.0;
     let multNote = '';
     if (ctx) {
@@ -65,7 +66,7 @@ function positionLine(user, entry, sl, lang = 'ru', ctx = '', opts = {}) {
         }
       } catch (_e) { /* log.debug("[POSITION-SIZE] ctx: %s") */ }
     }
-    const lev = pyInt(u.trade_leverage || 10);
+    const lev = pyInt(or(Object.prototype.hasOwnProperty.call(u, 'trade_leverage') ? u.trade_leverage : 10, 10));
     const bal = opts.balance === undefined ? null : opts.balance;
     const hypothetical = bal === null || pyFloat(bal) <= 0;
     const base = hypothetical ? DEFAULT_DEPOSIT : pyFloat(bal);
