@@ -86,9 +86,12 @@ def jsonable(x):
 
 
 def write_fixture(name: str, doc) -> str:
+    """fixtures/<name>.gz — gzip (mtime 0, so a re-run with the same inputs is byte-identical)."""
+    import gzip
     os.makedirs(FIXTURES_DIR, exist_ok=True)
-    path = os.path.join(FIXTURES_DIR, name)
-    with open(path, "w") as fh:
-        json.dump(jsonable(doc), fh, ensure_ascii=False, separators=(",", ":"), allow_nan=False)
-        fh.write("\n")
+    path = os.path.join(FIXTURES_DIR, name + ".gz")
+    raw = json.dumps(jsonable(doc), ensure_ascii=False, separators=(",", ":"), allow_nan=False).encode("utf-8") + b"\n"
+    with open(path, "wb") as fh:
+        with gzip.GzipFile(filename="", mode="wb", fileobj=fh, mtime=0) as gz:
+            gz.write(raw)
     return path
