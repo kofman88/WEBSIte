@@ -17,7 +17,7 @@
  * Pure functions take rows and `now`; the SQL helpers take a better-sqlite3 handle (`db`)
  * and run the bot's statements verbatim on `signal_trades` (the bot's `trades`) and
  * `trader_settings` (the bot's `users` for `sub_plan`). Number semantics follow CPython:
- * `sum()` is the 3.12 compensated sum (series.pySum), `+=` loops stay sequential, round()
+ * `sum()` is the 3.11 left-to-right sum (series.pySum), `+=` loops stay sequential, round()
  * is banker's on the exact binary value (pyround), `//` is floor division.
  *
  * Quirks kept (PORT_DECISIONS D6 lists none here):
