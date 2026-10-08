@@ -20,6 +20,8 @@ const telegramRoutes = require('./routes/telegram');
 const publicRoutes = require('./routes/public');
 const supportRoutes = require('./routes/support');
 const pushRoutes = require('./routes/push');
+const appRoutes = require('./routes/app');
+const planService = require('./services/planService');
 const maintenanceService = require('./services/maintenanceService');
 const paymentWatcher = require('./workers/paymentWatcher');
 const securityMonitor = require('./services/securityMonitor');
@@ -126,6 +128,9 @@ app.use('/api/telegram', telegramRoutes);
 app.use('/api/public', publicRoutes);
 app.use('/api/support', supportRoutes);
 app.use('/api/push', pushRoutes);
+// The bot's Mini App API (M7+): me, strategy, settings, settings/all, profile,
+// lang, plan, help, settings/reset, volume/reset — Mini App envelope.
+app.use('/api/app', appRoutes);
 
 // Build info — resolved once at boot. Git SHA + build time come from
 // BUILD_SHA / BUILD_TIME env vars (set by CI). Fall back to package.json
@@ -326,12 +331,15 @@ function startBackground() {
   maintenanceService.start();
   securityMonitor.start();
   paymentWatcher.start();
+  // bot loop A: hourly subscription expiry / renewal reminders (first run after 60 s)
+  planService.startExpiryLoop();
 }
 
 function shutdown(sig) {
   return async () => {
     logger.info('received ' + sig + ', shutting down');
     try { maintenanceService.stop(); } catch (_e) { /* */ }
+    try { planService.stopExpiryLoop(); } catch (_e) { /* */ }
     try { db.close(); } catch (_e) { /* */ }
     process.exit(0);
   };
