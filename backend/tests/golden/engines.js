@@ -63,4 +63,7 @@ function get(name) {
 // M3 — SMC analysis layer (structure / liquidity / OB / FVG / PD / ATR / volume / squeeze)
 register('smc_analysis', require('./runners/smcAnalysis'));
 
+// M4 — SMC signal builder on top of the analysis layer (3 variants, digest for default)
+register('smc', require('./runners/smc'));
+
 module.exports = { engines, register, get };
