@@ -322,10 +322,16 @@ function pyLen(v) {
  * numbers, str with str; anything else raises TypeError like CPython (`None >= 0`, `'1' < 0`).
  */
 function pyCmp(a, op, b) {
-  const num = (x) => typeof x === 'number' || typeof x === 'boolean';
+  const num = (v) => typeof v === 'number' || typeof v === 'boolean';
   let x;
   let y;
-  if (num(a) && num(b)) { x = Number(a); y = Number(b); } else if (typeof a === 'string' && typeof b === 'string') { x = a; y = b; } else {
+  if (num(a) && num(b)) {
+    x = Number(a);
+    y = Number(b);
+  } else if (typeof a === 'string' && typeof b === 'string') {
+    x = a;
+    y = b;
+  } else {
     throw TypeError_(`'${op}' not supported between instances of '${pyTypeName(a)}' and '${pyTypeName(b)}'`);
   }
   switch (op) {

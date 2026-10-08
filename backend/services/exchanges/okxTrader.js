@@ -32,8 +32,7 @@ const crypto = require('crypto');
 const { makeRuntime } = require('./runtime');
 const { TransportError, aiohttpJson } = require('./transport');
 const {
-  PyError, errStr, pyGet, pyIndex, pyFloat, pyInt, pyStr, pyFloatStr, pyTruthy, pyOr, pyUrlencode, yarlUrl, htmlEscape, pySlice, isDict,
-  pyTypeName,
+  errStr, pyGet, pyIndex, pyFloat, pyInt, pyStr, pyFloatStr, pyTruthy, pyOr, pyUrlencode, yarlUrl, htmlEscape, pySlice, isDict,
   pyIter,
 } = require('./pyCompat');
 const { fmtFixed, fmtG } = require('../../strategies/common/pyfmt');

@@ -71,19 +71,17 @@ class FailedRequestError extends PyError {
 }
 
 /**
- * Transport failure → the requests exception pybit lets through (force_retry=False):
- * ReadTimeout for timeouts, ConnectionError otherwise; str(e) = the transport message or
- * a urllib3-style text when the transport gave none.
+ * Transport failure → the requests exception pybit lets through (force_retry=False).
+ * The production transport attaches the exact requests 2.x class and text of the failure
+ * (`requestsType` / `requestsMessage`, see transport.fetchError); scripted transports (the replay
+ * fixtures) carry str(e) of the requests exception as the message itself — kept verbatim, ''
+ * included (requests.ReadTimeout('') prints ''): ReadTimeout for timeouts, ConnectionError otherwise.
  */
-function requestsError(e, url, timeout) {
+function requestsError(e, _url, _timeout) {
   if (!(e instanceof TransportError)) return e;
-  // production transport: the exact requests 2.x flavour of the failure (transport.fetchError)
   if (e.requestsMessage !== undefined) {
     return new PyError(e.requestsType || (e.kind === 'timeout' ? 'ReadTimeout' : 'ConnectionError'), e.requestsMessage);
   }
-  // scripted transports (replay fixtures) carry str(e) of the requests exception as the message
-  // itself — kept verbatim, '' included (requests.ReadTimeout('') prints '')
-  void url; void timeout;
   return new PyError(e.kind === 'timeout' ? 'ReadTimeout' : 'ConnectionError', e.message);
 }
 
