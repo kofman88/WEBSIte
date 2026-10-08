@@ -953,6 +953,236 @@ def section_db():
     emit("db_cases.json", out)
 
 
+# ─────────────────────────────────────────────────────────────────────────────
+# coin basket: _get_context_aware_coins with a fake HistoryLoader (golden candles)
+# ─────────────────────────────────────────────────────────────────────────────
+
+class FakeLoader:
+    CANDIDATES = []
+    TF = "1h"
+
+    def __init__(self, *a, **k):
+        pass
+
+    async def get_top_coins(self, min_volume_usdt=5_000_000):
+        return list(FakeLoader.CANDIDATES)
+
+    async def load_cached(self, coin, tf, days):
+        try:
+            return pyenv.load_df(coin, tf)
+        except FileNotFoundError:
+            return None
+
+    async def close(self):
+        return None
+
+
+class FakeResp:
+    def __init__(self, status, data):
+        self.status = status
+        self._data = data
+
+    async def json(self, content_type=None):
+        return self._data
+
+    async def __aenter__(self):
+        return self
+
+    async def __aexit__(self, *a):
+        return False
+
+
+class FakeSession:
+    RESP = (200, [])
+
+    def __init__(self, *a, **k):
+        pass
+
+    def get(self, url, params=None):
+        FakeSession.LAST = (url, params)
+        return FakeResp(*FakeSession.RESP)
+
+    async def __aenter__(self):
+        return self
+
+    async def __aexit__(self, *a):
+        return False
+
+
+def section_coins():
+    import aiohttp
+    real_hl = backtest.HistoryLoader
+    real_session = aiohttp.ClientSession
+    real_build = genome._build_tier_mixed_basket
+    captured = {}
+
+    async def capture_build(scored, limit, strategy, tf):
+        captured["scored"] = [list(x) for x in scored]
+        return await real_build(scored, limit, strategy, tf)
+
+    golden = json.load(open(os.path.join(pyenv.GOLDEN_DIR, "candles", "index.json")))["fixtures"]
+    symbols = [f["symbol"] for f in golden]
+    rng = REAL_RANDOM(2718)
+    cg_sets = [
+        [{"id": i} for i in ["bitcoin", "ethereum", "cardano", "dogecoin", "kaspa", "unknown-x", "cardano", "the-graph"]],
+        [{"id": "bitcoin"}],                    # nothing mappable → static fallback
+        "not a list",
+    ]
+    out = {"cases": [], "tier2": []}
+    aiohttp.ClientSession = FakeSession
+    backtest.HistoryLoader = FakeLoader
+    genome._build_tier_mixed_basket = capture_build
+    try:
+        for status, data in [(200, cg_sets[0]), (200, cg_sets[1]), (200, cg_sets[2]), (500, [])]:
+            genome._TIER2_DYNAMIC_CACHE = (0.0, ())
+            FakeSession.RESP = (status, data)
+            res = asyncio.run(genome._get_tier2_dynamic())
+            out["tier2"].append({"status": status, "data": data, "out": list(res)})
+        FakeSession.RESP = (200, cg_sets[0])
+        for k in range(12):
+            strat = ["LEVELS", "SMC", "VOLUME"][k % 3]
+            tf = ["1h", "15m", "4h"][k % 3]
+            cands = rng.sample(symbols, rng.randint(5, len(symbols)))
+            cands += rng.sample(["LAB-USDT-SWAP", "PENGU-USDT-SWAP", "SOL-USDT-SWAP", "ADA-USDT-SWAP", "DOGE-USDT-SWAP"], 3)
+            rng.shuffle(cands)
+            if k == 11:
+                cands = []
+            FakeLoader.CANDIDATES = cands
+            genome._CONTEXT_COINS_CACHE.clear()
+            genome._TIER2_DYNAMIC_CACHE = (0.0, ())
+            captured.clear()
+            limit = genome._eval_top_n(strat) if k % 4 else rng.choice([1, 2, 3, 5, 20])
+            res = asyncio.run(genome._get_context_aware_coins(tf, strat, limit=limit))
+            out["cases"].append({"strategy": strat, "tf": tf, "limit": limit, "candidates": cands,
+                                 "scored": captured.get("scored"), "out": res,
+                                 "tier2_pool": list(genome._TIER2_DYNAMIC_CACHE[1])})
+    finally:
+        aiohttp.ClientSession = real_session
+        backtest.HistoryLoader = real_hl
+        genome._build_tier_mixed_basket = real_build
+    emit("coins.json", out)
+
+
+# ─────────────────────────────────────────────────────────────────────────────
+# handler texts: handlers/genome.py callbacks driven with fakes, i18n strings
+# ─────────────────────────────────────────────────────────────────────────────
+
+class _FakeDP:
+    def __init__(self):
+        self.handlers = {}
+
+    def callback_query(self, *filters):
+        def deco(fn):
+            self.handlers[fn.__name__] = fn
+            return fn
+        return deco
+
+
+class _FakeUser:
+    def __init__(self, uid, can=True, auto=False, lang="ru"):
+        self.user_id = uid
+        self._can = can
+        self.genome_auto_apply = auto
+        self.lang = lang
+
+    def can(self, feature):
+        return self._can
+
+
+class _FakeUM:
+    def __init__(self, user):
+        self.user = user
+
+    async def get_or_create(self, uid, *a, **k):
+        return self.user
+
+    async def save(self, user):
+        return None
+
+
+class _FakeMsg:
+    def __init__(self, log):
+        self.log = log
+
+    async def answer(self, text, parse_mode=None, **k):
+        self.log.append(("message", text, parse_mode))
+
+
+class _FakeCB:
+    def __init__(self, data, uid, log):
+        self.data = data
+        self.from_user = type("U", (), {"id": uid})()
+        self.message = _FakeMsg(log)
+        self.log = log
+
+    async def answer(self, text=None, show_alert=False, **k):
+        self.log.append(("answer", text, show_alert))
+
+
+def section_handlers():
+    import handlers.genome as hg
+    import genome_ui
+    import i18n
+    out = {"i18n": {}, "evolve": [], "apply": [], "keyboards": []}
+    for key in ("sub_genome_locked", "genome_auto_apply_btn_on", "genome_auto_apply_btn_off",
+                "genome_auto_apply_disabled", "genome_auto_apply_enabled_warn", "btn_back"):
+        out["i18n"][key] = {lang: i18n.t(key, lang) for lang in ("ru", "en")}
+
+    async def fake_edit(cb, text=None, reply_markup=None):
+        cb.log.append(("edit", text, [[(b.text, b.callback_data) for b in row] for row in reply_markup.inline_keyboard]))
+
+    async def fake_dash(strategy="LEVELS", tf=""):
+        return f"DASH {strategy}/{tf}"
+
+    hg.safe_edit = fake_edit
+    genome_ui.format_genome_dashboard = fake_dash
+    evolve_results = [
+        {"ok": True, "strategy": "SMC", "tf": "1h", "generation": 7, "best_fitness": 1.23456, "best_wr": 55.55, "best_pf": 1.6, "elapsed": 93.6},
+        {"ok": True, "generation": 1, "best_fitness": 0, "best_wr": 0, "best_pf": 0, "elapsed": 0.4},
+        {"ok": False, "error": "Эволюция уже идёт, подожди 1-3 мин"},
+        {"ok": False},
+    ]
+    apply_results = [
+        {"ok": True, "changed": {}, "fitness": 1.0, "winrate": 50.0, "pf": 1.5, "trades": 10},
+        {"ok": True, "changed": {"use_rsi": 1, "min_rr": 2.4, "tp2_rr": 3.0, "smc_retrace_depth": 0.5, "ma_type": "ema", "fvg_enabled": True, "<x>": "a&b"},
+         "fitness": 2.71828, "winrate": 61.25, "pf": 1.875, "trades": 33},
+        {"ok": False, "error": "Apply error: 'list' object has no attribute 'get' <tag>"},
+        {"ok": False},
+    ]
+    for res in evolve_results:
+        log = []
+        dp = _FakeDP()
+
+        async def fake_trigger(strategy, tf=None, _r=res):
+            return dict(_r)
+        genome.trigger_evolution_now = fake_trigger
+        hg.register_handlers(dp, None, _FakeUM(_FakeUser(42)))
+        asyncio.run(dp.handlers["cb_genome_evolve"](_FakeCB("adv_g_ev_SMC_1h", 42, log)))
+        out["evolve"].append({"result": res, "log": log})
+    for res in apply_results:
+        log = []
+        dp = _FakeDP()
+
+        async def fake_apply(uid, strategy, tf=None, _r=res):
+            return dict(_r)
+        genome.apply_best_to_user = fake_apply
+        hg.register_handlers(dp, None, _FakeUM(_FakeUser(42)))
+        asyncio.run(dp.handlers["cb_genome_apply"](_FakeCB("adv_g_ap_LEVELS_4h", 42, log)))
+        out["apply"].append({"result": res, "log": log})
+    for (strategy, tf, auto, lang) in [("LEVELS", "1h", False, "ru"), ("SMC", "15m", True, "en"), ("VOLUME", "4h", True, "ru")]:
+        log = []
+        dp = _FakeDP()
+        hg.register_handlers(dp, None, _FakeUM(_FakeUser(42, auto=auto, lang=lang)))
+        asyncio.run(dp.handlers["cb_genome_tf"](_FakeCB(f"adv_g_tf_{strategy}_{tf}", 42, log)))
+        out["keyboards"].append({"strategy": strategy, "tf": tf, "auto": auto, "lang": lang, "log": log})
+    log = []
+    dp = _FakeDP()
+    hg.register_handlers(dp, None, _FakeUM(_FakeUser(42, can=False, lang="en")))
+    asyncio.run(dp.handlers["cb_genome_evolve"](_FakeCB("adv_g_ev_SMC_1h", 42, log)))
+    out["locked"] = log
+    emit("handlers.json", out)
+
+
 if __name__ == "__main__":
     for s in SECTIONS:
         print(f"== {s}", file=sys.stderr)
