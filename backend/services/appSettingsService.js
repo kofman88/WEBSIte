@@ -17,7 +17,7 @@
  *   risk.advanced   — spread / boost / risk preview / corr cap / adaptive
  *                     sizing / tilt / hold-lock / Profit Maximizer quality
  *   trading.{disabled_days, fixed_amount, vol_filter_mode, max_coins_count,
- *            at_stats_period}
+ *            at_stats_period, optimizer_enabled, optimizer_strategies}
  *   notifications.{notify_signal, notify_breakout}
  *
  * Validation of the D9 keys mirrors the Telegram handlers: radio menus accept
@@ -158,7 +158,10 @@ const SCHEMA = Object.freeze({
   trading: {
     auto_trade: ['bool'], auto_trade_mode: ['enum', ['auto', 'confirm']],
     trade_exchange: ['enum', EXCHANGES], trade_risk_pct: ['float', 0.1, 5],
-    trade_leverage: ['int', 1, 50], max_trades_limit: ['int', 1, 50],
+    trade_leverage: ['int', 1, 50],
+    // D9: the Mini App took 1..50; the bot's «✏️ Своё значение» (set_at_maxtr_custom)
+    // accepts 0..9999 with 0 = unlimited, so the web takes the superset.
+    max_trades_limit: ['int', 0, 9999],
     risk_mode: ['enum', ['risk', 'notional']], partial_tp_enabled: ['bool'],
     auto_trailing_enabled: ['bool'], prefer_market_entry: ['bool'],
     bybit_demo: ['bool'],
@@ -168,6 +171,9 @@ const SCHEMA = Object.freeze({
     vol_filter_mode: ['enum', ['usdt', 'count', 'both', 'off']],
     max_coins_count: ['choice', [20, 30, 50, 100, 200]],
     at_stats_period: ['choice', [1, 7, 30]],
+    // D9 (handlers/settings.py optimizer_menu: toggle_optimizer / optim_strat_<S>, decision D11)
+    optimizer_enabled: ['bool'],
+    optimizer_strategies: ['strats', ['LEVELS', 'SMC']],
   },
   // D9 (handlers/partial_tp.py)
   ptp: {
@@ -212,7 +218,8 @@ const TOP_SCHEMA = Object.freeze({
   lang: ['enum', ['ru', 'en']], ui_mode: ['enum', ['simple', 'expert']], genome_auto_apply: ['bool'],
 });
 // QUIRK(D9): keys the bot lets Free users change although the Mini App locks `trading.*`.
-const TRADING_FREE_KEYS = new Set(['disabled_days', 'fixed_amount', 'vol_filter_mode', 'max_coins_count', 'at_stats_period']);
+const TRADING_FREE_KEYS = new Set(['disabled_days', 'fixed_amount', 'vol_filter_mode', 'max_coins_count', 'at_stats_period',
+  'optimizer_enabled', 'optimizer_strategies']);
 
 class BadRequest extends Error {
   constructor(key) { super(key); this.key = key; }
@@ -265,6 +272,21 @@ function coerce(spec, v) {
       out.add(n);
     }
     return [...out].sort((a, b) => a - b);
+  }
+  if (kind === 'strats') {
+    // optim_strat_<S>: strategy names (list or CSV), upper-cased, de-duplicated in the
+    // given order like the handler's toggle list; empty → "LEVELS". Stored as CSV.
+    const raw = Array.isArray(v) ? v : (typeof v === 'string' ? v.split(',') : null);
+    if (!raw) throw new BadRequest('strats');
+    const out = [];
+    for (const s of raw) {
+      if (typeof s !== 'string') throw new BadRequest('strats');
+      const t = s.trim().toUpperCase();
+      if (!t) continue;
+      if (!spec[1].includes(t)) throw new BadRequest('strats');
+      if (!out.includes(t)) out.push(t);
+    }
+    return out.length ? out.join(',') : 'LEVELS';
   }
   const num = toNumber(v);
   if (Number.isNaN(num)) throw new BadRequest('nan');
@@ -385,7 +407,7 @@ function choices() {
   const walk = (schema, prefix) => {
     for (const [k, spec] of Object.entries(schema)) {
       if (spec[0] === 'section') walk(spec[1], `${prefix}${k}.`);
-      else if (spec[0] === 'enum' || spec[0] === 'choice') out[`${prefix}${k}`] = spec[1].slice();
+      else if (spec[0] === 'enum' || spec[0] === 'choice' || spec[0] === 'strats') out[`${prefix}${k}`] = spec[1].slice();
     }
   };
   for (const [section, schema] of Object.entries(SCHEMA)) walk(schema, `${section}.`);
@@ -487,6 +509,8 @@ function settingsAll(user) {
       vol_filter_mode: ['usdt', 'count', 'both', 'off'].includes(g('vol_filter_mode')) ? g('vol_filter_mode') : 'usdt',
       max_coins_count: Math.trunc(Number(g('max_coins_count', 50) || 50)),
       at_stats_period: Math.trunc(Number(g('at_stats_period', 1) || 1)),
+      optimizer_enabled: Boolean(g('optimizer_enabled', false)),
+      optimizer_strategies: String(g('optimizer_strategies', 'LEVELS') || 'LEVELS'),     // kb_optimizer
     },
     ptp: {
       ptp_mode: g('ptp_mode') === 'PCT' ? 'PCT' : 'R',

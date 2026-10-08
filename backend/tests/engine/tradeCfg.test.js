@@ -95,6 +95,19 @@ describe('_sparse_merge (legacy full dump vs sparse)', () => {
     expect(tc.valEq('7', 7, 'int')).toBe(false);
     expect(tc.valEq(7.0, 7, 'int')).toBe(true);
   });
+  it('QUIRK: min_volume_usdt default is the int literal 300_000 — legacy values near it are compared exactly, not with isclose', () => {
+    // bot: _val_eq(300000.15, 300000) → not both floats → 300000.15 == 300000 → False → kept
+    expect(tc.loadSparse('{"min_volume_usdt": 300000.15}')).toEqual({ min_volume_usdt: 300000.15 });
+    expect(tc.loadSparse('{"min_volume_usdt": 300000.0000000001}')).toEqual({ min_volume_usdt: 300000.0000000001 });
+    expect(tc.loadSparse('{"min_volume_usdt": 300000.0}')).toEqual({});
+    expect(tc.loadSparse('{"min_volume_usdt": 300000}')).toEqual({});
+    // a float-literal default keeps the isclose branch (zone_pct 0.7 vs 0.7000000001)
+    expect(tc.loadSparse('{"zone_pct": 0.7000000001}')).toEqual({});
+    const base = tc.tradeCfg({ min_volume_usdt: 1000000 });
+    expect(tc.sparseMerge(base, '{"min_volume_usdt": 300000.15}').min_volume_usdt).toBe(300000.15);
+    expect(tc.sparseMerge(base, '{"min_volume_usdt": 300000.0}').min_volume_usdt).toBe(1000000);
+  });
+
   it('loadSparse keeps only TradeCfg keys and drops "_sparse"', () => {
     expect(tc.loadSparse('{"pivot_strength": 5, "foo": 1, "_sparse": true}')).toEqual({ pivot_strength: 5 });
     expect(tc.loadSparse('{"pivot_strength": 7, "min_rr": 2.5}')).toEqual({ min_rr: 2.5 });

@@ -114,8 +114,25 @@ function diffKeys(actual, expected) {
     .map((k) => `${k}: js=${JSON.stringify(actual[k])} bot=${JSON.stringify(expected[k])}`);
 }
 
+// Documented deviations from the Mini App (decision D9): the web takes the superset of
+// what the bot's Telegram menus accepted, so these bot vectors are asserted inverted.
+const DEVIATIONS = {
+  'max_trades_limit 0 pro': 'trading.max_trades_limit: Mini App 1..50, Telegram «✏️ Своё значение» 0..9999 → web 0..9999',
+};
+
 describe('POST settings/all — bot vectors', () => {
   for (const c of CASES) {
+    if (DEVIATIONS[c.name]) {
+      it(`${c.name} — D9 deviation: ${DEVIATIONS[c.name]}`, async () => {
+        const uid = await setupUser(c.user);
+        expect(c.expected.ok).toBe(false);                          // the Mini App rejected it …
+        const r = await request(app).post('/api/app/settings/all').set(H(uid)).send(c.body);
+        expect(r.status).toBe(200);
+        expect(r.body.ok).toBe(true);                              // … the web accepts it
+        expect(ts.get(uid).max_trades_limit).toBe(0);
+      });
+      continue;
+    }
     it(c.name, async () => {
       const uid = await setupUser(c.user);
       const exp = c.expected;

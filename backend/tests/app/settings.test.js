@@ -86,7 +86,7 @@ describe('GET settings/all', () => {
     expect(s.smc).toMatchObject({ tf_key: '1H', direction: 'BOTH', min_volume_usdt: 300000, max_sl_pct: 5, scan_interval: 300 });
     expect(s.smc.advanced).toEqual({ min_confirmations: 3, min_rr: 2, sl_buffer_pct: 0.35, fvg_enabled: true, choch_enabled: true, ob_use_breaker: true, sweep_close_req: true, ob_max_age: 80, smc_conf_type: 'BODY_CLOSE', smc_pd_filter: false, smc_retrace_depth: 0.2, smc_mtf_check: false, smc_use_volume_filter: false, smc_vol_mult: 1.2, smc_counter_trend_min_quality: 4 });
     expect(s.volume).toEqual({ timeframe: '1h', setup_cross: true, setup_turn: true, setup_bounce: true, setup_golden: true, setup_ribbon: true, ma_type: 'sma', vol_mult: 1.5, use_htf: true, min_quality: 3 });
-    expect(s.trading).toEqual({ auto_trade: false, auto_trade_mode: 'confirm', trade_exchange: 'bybit', trade_risk_pct: 1, trade_leverage: 10, max_trades_limit: 5, risk_mode: 'risk', partial_tp_enabled: true, auto_trailing_enabled: true, prefer_market_entry: false, bybit_demo: false, disabled_days: [], fixed_amount: 0, vol_filter_mode: 'usdt', max_coins_count: 50, at_stats_period: 1 });
+    expect(s.trading).toEqual({ auto_trade: false, auto_trade_mode: 'confirm', trade_exchange: 'bybit', trade_risk_pct: 1, trade_leverage: 10, max_trades_limit: 5, risk_mode: 'risk', partial_tp_enabled: true, auto_trailing_enabled: true, prefer_market_entry: false, bybit_demo: false, disabled_days: [], fixed_amount: 0, vol_filter_mode: 'usdt', max_coins_count: 50, at_stats_period: 1, optimizer_enabled: false, optimizer_strategies: 'LEVELS' });
     expect(s.ptp).toEqual({ ptp_mode: 'R', partial_tp1_r: 1, partial_tp2_r: 1.5, partial_tp1_pct: 50, partial_tp2_pct: 40, ptp_profit_pct1: 30, ptp_profit_pct2: 50 });
     expect(s.risk).toMatchObject({ sl_streak_enabled: true, sl_streak_threshold: 3, circuit_breaker_enabled: false, circuit_breaker_threshold_r: 0, allow_counter_trend: false, filters_all_off: false, btc_correlation_block: false, spread_check_enabled: true, trade_trending_only: false, hour_filter_enabled: true });
     expect(s.risk.advanced).toEqual({ spread_max_pct: 0.3, allow_low_notional_boost: false, show_risk_preview: true, correlation_cap_enabled: false, correlation_cap_threshold: 0.7, adaptive_sizing_enabled: false, adaptive_sizing_mode: 'all', tilt_detector_enabled: true, hold_lock_enabled: false, hold_lock_min_rr: 0.5, min_signal_quality: 3 });
@@ -424,6 +424,50 @@ describe('POST settings/all — apply order and side effects', () => {
     const r = await post(uid, { lang: 'en', ui_mode: 'expert', genome_auto_apply: '1' });
     expect(r.body.settings).toMatchObject({ lang: 'en', ui_mode: 'expert', genome_auto_apply: true });
     expect(ts.get(uid)).toMatchObject({ lang: 'en', ui_mode: 'expert', genome_auto_apply: true });
+  });
+});
+
+describe('POST settings/all — D9 keys found by the M7 verification', () => {
+  it('trading.max_trades_limit takes the Telegram custom range 0..9999 (0 = unlimited)', async () => {
+    const uid = makeUser({ pro: true });
+    expect((await post(uid, { trading: { max_trades_limit: 0 } })).body.ok).toBe(true);
+    expect(ts.get(uid).max_trades_limit).toBe(0);
+    expect((await post(uid, { trading: { max_trades_limit: 9999 } })).body.ok).toBe(true);
+    expect(ts.get(uid).max_trades_limit).toBe(9999);
+    expect((await post(uid, { trading: { max_trades_limit: 10000 } })).body).toEqual(bad('trading.max_trades_limit'));
+    expect((await post(uid, { trading: { max_trades_limit: -1 } })).body).toEqual(bad('trading.max_trades_limit'));
+    expect((await post(uid, { trading: { max_trades_limit: 50 } })).body.ok).toBe(true);
+  });
+
+  it('trading.optimizer_enabled / optimizer_strategies (optimizer_menu, Free too)', async () => {
+    const uid = makeUser();                                   // free — the bot's optimizer menu has no plan gate
+    let r = await post(uid, { trading: { optimizer_enabled: true, optimizer_strategies: ['smc', 'LEVELS', 'SMC'] } });
+    expect(r.body.ok).toBe(true);
+    expect(ts.get(uid)).toMatchObject({ optimizer_enabled: true, optimizer_strategies: 'SMC,LEVELS' });   // insertion order kept
+    expect(r.body.settings.trading).toMatchObject({ optimizer_enabled: true, optimizer_strategies: 'SMC,LEVELS' });
+    r = await post(uid, { trading: { optimizer_strategies: 'levels' } });
+    expect(ts.get(uid).optimizer_strategies).toBe('LEVELS');
+    r = await post(uid, { trading: { optimizer_strategies: [] } });
+    expect(ts.get(uid).optimizer_strategies).toBe('LEVELS');                                             // handler: empty → "LEVELS"
+    r = await post(uid, { trading: { optimizer_strategies: ', ,' } });
+    expect(ts.get(uid).optimizer_strategies).toBe('LEVELS');
+    expect((await post(uid, { trading: { optimizer_strategies: 'VOLUME' } })).body).toEqual(bad('trading.optimizer_strategies'));
+    expect((await post(uid, { trading: { optimizer_strategies: 5 } })).body).toEqual(bad('trading.optimizer_strategies'));
+    expect((await post(uid, { trading: { optimizer_strategies: [1] } })).body).toEqual(bad('trading.optimizer_strategies'));
+    expect((await post(uid, { trading: { optimizer_enabled: 'maybe' } })).body).toEqual(bad('trading.optimizer_enabled'));
+    expect((await post(uid, { trading: { optimizer_enabled: false, trade_leverage: 5 } })).body).toEqual({ ok: false, error: 'pro_required' });
+    expect((await getAll(uid)).body.options.choices['trading.optimizer_strategies']).toEqual(['LEVELS', 'SMC']);
+  });
+
+  it('numeric strings with PEP 515 underscores are accepted like Python float()', async () => {
+    const uid = makeUser({ pro: true });
+    expect((await post(uid, { levels: { min_quality: '1_0' } })).body.ok).toBe(true);
+    expect(ts.get(uid).min_quality).toBe(10);
+    expect((await post(uid, { levels: { min_volume_usdt: '1_000_000.5' } })).body.ok).toBe(true);
+    expect(ts.get(uid).min_volume_usdt).toBe(1000000.5);
+    expect((await post(uid, { levels: { min_quality: '1__0' } })).body).toEqual(bad('levels.min_quality'));
+    expect((await post(uid, { levels: { min_quality: '_10' } })).body).toEqual(bad('levels.min_quality'));
+    expect((await post(uid, { levels: { min_quality: '10_' } })).body).toEqual(bad('levels.min_quality'));
   });
 });
 
