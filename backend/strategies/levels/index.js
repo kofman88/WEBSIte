@@ -42,6 +42,7 @@ const atrBreakout = require('./atrBreakout');
 const result = require('./result');
 const squeeze = require('../common/squeeze');
 const { levelsRegimeMultiplier } = require('../common/marketRegime');
+const { pyMax } = require('../common/pyround');
 
 const { REJECT, LEVELS_ENV, minBars } = config;
 const { signalResult } = result;
@@ -124,7 +125,7 @@ function doAnalyze(symbol, df, dfHtf, dfBtc, dfEth, cfg, opts = {}) {
   // ══ ЦЕЛИ (структурные TP → fallback на механический RR) ══
   const stp = targets.findTpLevels(signal, entry, supZones, resZones);
   const scale = targets.tpScale(atrNow, cNow);
-  const tg = targets.assembleTargets(signal, entry, risk, stp, cfg, scale);
+  const tg = { ...targets.assembleTargets(signal, entry, risk, stp, cfg, scale), structural: stp };
   if (tg.reject) return none(tg.reject, 'tp_order', { reason: tg.reason, part1: p1, stop: st, targets: tg });
   let { tp1, tp2, tp3 } = tg;
 
@@ -151,7 +152,7 @@ function doAnalyze(symbol, df, dfHtf, dfBtc, dfEth, cfg, opts = {}) {
     hasLvnPath, divergOk, divergLabel, approachOk, approachReason, signal, rsiNow, corr: corrData,
     testCount, isDeadSession, session, rrScore, memcoin,
   });
-  const diag = { part1: p1, stop: st, targets: tg, rrActual, rrScore, corrData, divergOk, divergLabel, hasLvnPath, htfOk, quality: q };
+  const diag = { part1: p1, stop: st, targets: tg, rrActual, effectiveMinRr, riskPct, rrScore, corrData, divergOk, divergLabel, hasLvnPath, htfOk, quality: q };
   if (q.reject) return none(q.reject, 'rr_score_1.2', { reason: q.reason, ...diag });
   let qualityScore = q.quality;
   const reasons = q.reasons;
@@ -159,7 +160,8 @@ function doAnalyze(symbol, df, dfHtf, dfBtc, dfEth, cfg, opts = {}) {
   // ── Финальный чеклист ──
   const hasPattern = Boolean(signal === 'LONG' ? bullPat : bearPat);
   const chk = quality.finalChecklist({ approachOk, hasPattern, sType, volRatio, rrActual, effectiveMinRr, testCount, maxLevelTests: cfg.MAX_LEVEL_TESTS });
-  if (!chk.ok) return none(REJECT.CHECKLIST, 'checklist', { reason: 'checklist', checklist: chk.items, ...diag });
+  diag.checklist = chk.items;
+  if (!chk.ok) return none(REJECT.CHECKLIST, 'checklist', { reason: 'checklist', ...diag });
 
   // ── Quality фильтр (analyze_on_demand → min_quality_override=1) ──
   if (o.minQualityOverride !== null && qualityScore < o.minQualityOverride) {
@@ -169,6 +171,7 @@ function doAnalyze(symbol, df, dfHtf, dfBtc, dfEth, cfg, opts = {}) {
   // ── High-WR Mode фильтры ──
   if (cfg.HIGH_WR_MODE) {
     const hw = highWr.applyHighWr({ signal, isCounter, quality: qualityScore, df, entry, risk, tp1, tp2, tp3, bullLocal, bearLocal });
+    diag.highWr = hw;
     if (hw.reject) return none(hw.reject, 'high_wr', { reason: hw.reason, ...diag });
     tp1 = hw.tp1; tp2 = hw.tp2; tp3 = hw.tp3;
   }
@@ -179,6 +182,7 @@ function doAnalyze(symbol, df, dfHtf, dfBtc, dfEth, cfg, opts = {}) {
   const explanation = explain.buildHumanExplanation(
     signal, sLevel, sClass, sHits, sType, entry, sl, tp1, tp2, rr1Val, rr2Val, riskPct, session, corrData.label, divergLabel,
   );
+  diag.final = { tp1, tp2, tp3, riskPct, rr1Val, rr2Val, explanation, effectiveMinRr };
 
   // ── [LEVELS-FILTERS] regime / vol / confirm (fail-open) ──
   let shadowFilters = [];
@@ -287,13 +291,13 @@ function createIndicator(cfg, opts = {}) {
 function scannerPostSteps(sig, df, minQuality, { relaxed = false } = {}) {
   const sq = squeeze.computeSqueezeScore(df);
   const qualityAfter = sq >= 1 ? Math.min(sig.quality + 1, 10) : sig.quality;
-  const effMinQ = relaxed ? Math.max(2, minQuality - 1) : minQuality;
+  const effMinQ = relaxMinQuality(minQuality, relaxed);
   return { squeeze_score: sq, quality_after_squeeze: qualityAfter, passes_min_quality: qualityAfter >= effMinQ };
 }
 
 /** momentum_detector.relax_min_quality */
 function relaxMinQuality(original, relaxed = false) {
-  return relaxed ? Math.max(2, original - 1) : original;
+  return relaxed ? pyMax(2, original - 1) : original;
 }
 
 module.exports = {

@@ -148,11 +148,12 @@ function getZones(df, strength, atrNow, zoneBuffer) {
   };
 
   const makeZone = (group) => {
-    // Python: sum(x[0] for x in group) / len(group) — sequential builtin sum
-    let s = 0.0;
+    // Python: sum(x[0] for x in group) / len(group) — CPython 3.12 builtin sum() is Neumaier
+    // compensated (series.pySum); a plain sequential sum is 1 ulp off on some groups
+    const prices = new Float64Array(group.length);
     let minAge = Infinity;
-    for (let i = 0; i < group.length; i++) { s += group[i][0]; if (group[i][1] < minAge) minAge = group[i][1]; }
-    const avgPrice = s / group.length;
+    for (let i = 0; i < group.length; i++) { prices[i] = group[i][0]; if (group[i][1] < minAge) minAge = group[i][1]; }
+    const avgPrice = S.pySum(prices) / group.length;
     const hits = group.length;
     const isPsych = isPsychologicalLevel(avgPrice);
     const layers = (anyWithin(avgPrice, kdePrices) ? 1 : 0) + (anyWithin(avgPrice, hvn) ? 1 : 0);

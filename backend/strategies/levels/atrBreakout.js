@@ -16,6 +16,7 @@
 
 const S = require('../common/series');
 const { fmtFixed } = require('../common/pyfmt');
+const { pyMax } = require('../common/pyround');
 
 const ATR_BREAKOUT_MULT = 2.0;
 const ATR_BREAKOUT_COOLDOWN_S = 3600;
@@ -53,11 +54,11 @@ function detectAtrBreakout(symbol, df, { nowSec = 0, lastAlert = null, cooldownS
     if (direction === 'LONG') {
       sl = lastL - lastAtr * 0.3;
       const risk = entry - sl;
-      tp = entry + Math.max(lastAtr * 2.5, risk * 2.0);
+      tp = entry + pyMax(lastAtr * 2.5, risk * 2.0);
     } else {
       sl = lastH + lastAtr * 0.3;
       const risk = sl - entry;
-      tp = entry - Math.max(lastAtr * 2.5, risk * 2.0);
+      tp = entry - pyMax(lastAtr * 2.5, risk * 2.0);
     }
     if (lastAlert) lastAlert.set(symbol, nowSec);
     const rangeAtrMult = candleRange / lastAtr;

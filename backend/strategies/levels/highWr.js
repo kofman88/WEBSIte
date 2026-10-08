@@ -11,13 +11,14 @@
 
 const { REJECT } = require('./config');
 const { levelsStars } = require('./stars');
+const { pyMax, pyMin } = require('../common/pyround');
 
-/** The HIGH_WR ladder (step 4) alone. Returns { tp1, tp2, tp3 }. */
+/** The HIGH_WR ladder (step 4) alone: Python max/min (first operand wins on ties). Returns { tp1, tp2, tp3 }. */
 function highWrLadder(signal, entry, risk, tp2, tp3) {
   if (signal === 'LONG') {
-    return { tp1: entry + risk * 1.5, tp2: Math.max(tp2, entry + risk * 2.5), tp3: Math.max(tp3, entry + risk * 4.0) };
+    return { tp1: entry + risk * 1.5, tp2: pyMax(tp2, entry + risk * 2.5), tp3: pyMax(tp3, entry + risk * 4.0) };
   }
-  return { tp1: entry - risk * 1.5, tp2: Math.min(tp2, entry - risk * 2.5), tp3: Math.min(tp3, entry - risk * 4.0) };
+  return { tp1: entry - risk * 1.5, tp2: pyMin(tp2, entry - risk * 2.5), tp3: pyMin(tp3, entry - risk * 4.0) };
 }
 
 /**

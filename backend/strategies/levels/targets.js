@@ -16,6 +16,7 @@
  */
 
 const { REJECT } = require('./config');
+const { pyMax } = require('../common/pyround');
 
 /** FIX-WR-4: 0.05 % pull toward entry. */
 const TP_MARGIN = 0.0005;
@@ -72,7 +73,7 @@ function assembleTargets(signal, entry, risk, stp, cfg, scale) {
   const sign = signal === 'LONG' ? 1 : -1;
   const [stp1, stp2, stp3] = stp;
   // [LEVELS-FIX 2026-10] пол = MIN_RR для механического TP1
-  const tp1MechRr = Math.max(cfg.TP1_RR * scale, Number(cfg.MIN_RR));
+  const tp1MechRr = pyMax(cfg.TP1_RR * scale, Number(cfg.MIN_RR));
   let tp1 = stp1 !== null && stp1 !== undefined ? stp1 : entry + sign * risk * tp1MechRr;
   let tp2 = stp2 !== null && stp2 !== undefined ? stp2 : entry + sign * risk * cfg.TP2_RR * scale;
   let tp3 = stp3 !== null && stp3 !== undefined ? stp3 : entry + sign * risk * cfg.TP3_RR * scale;
@@ -97,7 +98,7 @@ function rrActual(signal, entry, tp1, risk) {
 
 /** momentum_detector.relax_min_rr(original): max(1.5, original − 0.5) when relaxed mode is on. */
 function effectiveMinRr(minRr, relaxed = false) {
-  return relaxed ? Math.max(1.5, minRr - 0.5) : minRr;
+  return relaxed ? pyMax(1.5, minRr - 0.5) : minRr;
 }
 
 /** `_calculate_rr_score(direction, entry, sl, tp1, tp2, tp3)`: risk ≤ 0 → 0.0. */

@@ -122,12 +122,36 @@ function seriesMax(x) {
   return m;
 }
 
-/** Python builtin sum() over floats: sequential left-to-right starting at 0. */
+/** Plain sequential left-to-right float sum starting at 0 (CPython < 3.12 builtin sum()). */
 function seqSum(x) {
   const a = toF64(x);
   let s = 0.0;
   for (let i = 0; i < a.length; i++) s += a[i];
   return s;
+}
+
+/**
+ * CPython ≥ 3.12 builtin sum() over a list of floats (Python/bltinmodule.c): the int start
+ * 0 plus the first float gives `f_result = 0.0 + x0`, every further float is added with the
+ * Neumaier compensated step (c += (f − t) + x when |f| ≥ |x| else (x − t) + f), and the
+ * compensation is added at the end only when it is non-zero and finite. The bot's
+ * `_make_zone` (`sum(x[0] for x in group) / len(group)`) depends on it: a plain sequential
+ * sum is 1 ulp off on some groups. Empty → 0.
+ */
+function pySum(x) {
+  const a = toF64(x);
+  if (a.length === 0) return 0;
+  let f = 0.0 + a[0];
+  let c = 0.0;
+  for (let i = 1; i < a.length; i++) {
+    const v = a[i];
+    const t = f + v;
+    if (Math.abs(f) >= Math.abs(v)) c += (f - t) + v;
+    else c += (v - t) + f;
+    f = t;
+  }
+  if (c !== 0 && Number.isFinite(c)) f += c;
+  return f;
 }
 
 /** Kahan–Babuska compensated sum as used by pandas groupby/resample "sum" (group_sum). NaN skipped. */
@@ -823,7 +847,7 @@ function reindexNearest(srcT, srcV, dstT) {
 module.exports = {
   toF64,
   // numpy reductions
-  pairwiseSum, npSum, npMean, npVar, npStd, seriesMean, seriesMin, seriesMax, seqSum, kahanSum,
+  pairwiseSum, npSum, npMean, npVar, npStd, seriesMean, seriesMin, seriesMax, seqSum, pySum, kahanSum,
   // elementwise
   shift, diff, ffill, pctChange, clipLower, clipUpper, neg, abs, fillna, replaceZeroNaN,
   cumsum, seriesCumsum, cummax, cummin, linspace,

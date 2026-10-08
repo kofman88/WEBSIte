@@ -36,6 +36,14 @@ See the header of `engines.js`. An engine registers `{ run(ctx), prepare?(frames
 generator did: `df = 1h.iloc[:i+1]`, auxiliary frames = bars with `open_time + tf <= close_ms`,
 last 300 (`load.barInputs`). Unregistered engines show up as `todo`, never as failures.
 
+Registered adapters live in `runners/`: `runners/levels.js` (M6) rebuilds the IndConfig from the
+variant's `trade_cfg` (asserted equal to the stored `ind_config`), runs a fresh
+`strategies/levels.analyze` per bar (no zone cache, no cooldown, relaxed mode off, BTC regime
+unknown) and appends the scanner post-steps (`squeeze_score`, `quality_after_squeeze`,
+`passes_min_quality`). `compare.js` applies the pyRound rule per strategy
+(`ROUNDED_FIELDS_BY_STRATEGY`): the LEVELS `SignalResult` rounds nothing, so every LEVELS
+float is compared under the 1e-9 rule (and bit-for-bit after r10 with `GOLDEN_STRICT=1`).
+
 ## Running a subset
 
 ```

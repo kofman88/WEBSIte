@@ -16,6 +16,7 @@
  */
 
 const { REJECT } = require('./config');
+const { pyMax, pyMin } = require('../common/pyround');
 
 /** _MEMCOIN_KW (indicator.py) */
 const MEMCOIN_KW = Object.freeze(['FLOKI', 'PEPE', 'SHIB', 'DOGE', 'WIF', 'BONK', 'NEIRO',
@@ -57,8 +58,9 @@ function structuralStop(signal, entry, sLevel, zoneBuf, atrNow, cfg, { regimeMul
   }
   const slDistFromEntry = Math.abs(entry - rawSl);
   const minSlDist = atrNow * 0.5;
-  const legacyDist = Math.max(Math.min(slDistFromEntry, entry * cfg.MAX_RISK_PCT / 100), minSlDist);
-  const newDist = Math.max(Math.min(slDistFromEntry, entry * effectiveMaxRiskPct / 100), minSlDist);
+  // Python max(min(a, b), c): first operand wins on ties / NaN (common/pyround.pyMax)
+  const legacyDist = pyMax(pyMin(slDistFromEntry, entry * cfg.MAX_RISK_PCT / 100), minSlDist);
+  const newDist = pyMax(pyMin(slDistFromEntry, entry * effectiveMaxRiskPct / 100), minSlDist);
   const slDist = slV2Enabled ? newDist : legacyDist;
   const sl = signal === 'LONG' ? entry - slDist : entry + slDist;
   return { sl, slDist, rawSl, legacyDist, newDist, effectiveMaxRiskPct };
@@ -121,17 +123,19 @@ function adjustSlForMagnets(sl, direction, magnetPrices, { dangerZonePct = 0.5, 
 function checkStopValidity(symbol, signal, entry, sl, atrNow) {
   const memcoin = isMemcoin(symbol);
   const major = isMajor(symbol);
-  const bad = (reason) => ({ reject: REJECT.SL_RISK, reason, memcoin, major });
+  const bad = (reason, extra) => ({ reject: REJECT.SL_RISK, reason, memcoin, major, ...(extra || {}) });
   if (signal === 'LONG' && sl >= entry) return bad('sl_above_entry');
   if (signal !== 'LONG' && sl <= entry) return bad('sl_below_entry');
   const risk = Math.abs(entry - sl);
-  if (risk <= 0) return bad('risk_zero');
+  if (risk <= 0) return bad('risk_zero', { risk });
   const riskPctRaw = risk / entry * 100;
-  if (major && riskPctRaw < MIN_STOP_PCT.major) return bad('min_stop_major');
-  if (memcoin && riskPctRaw < MIN_STOP_PCT.memcoin) return bad('min_stop_memcoin');
-  if (!major && !memcoin && riskPctRaw < MIN_STOP_PCT.alt) return bad('min_stop_alt');
-  // ATR-проверка: стоп должен быть хотя бы 0.3×ATR (базовый шум)
-  if (atrNow > 0 && risk < atrNow * 0.3) return bad('min_stop_atr');
+  if (major && riskPctRaw < MIN_STOP_PCT.major) return bad('min_stop_major', { risk, riskPctRaw });
+  if (memcoin && riskPctRaw < MIN_STOP_PCT.memcoin) return bad('min_stop_memcoin', { risk, riskPctRaw });
+  if (!major && !memcoin && riskPctRaw < MIN_STOP_PCT.alt) return bad('min_stop_alt', { risk, riskPctRaw });
+  // ATR-проверка: стоп должен быть хотя бы 0.3×ATR (базовый шум). QUIRK(spec §10.4): the
+  // structural distance is already floored at 0.5·ATR and magnets only widen, so this gate
+  // cannot fire on the normal path — kept for parity.
+  if (atrNow > 0 && risk < atrNow * 0.3) return bad('min_stop_atr', { risk, riskPctRaw });
   return { reject: null, risk, riskPctRaw, memcoin, major };
 }
 
