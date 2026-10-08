@@ -301,11 +301,33 @@ function noSetupText(symbol, strategy) {
 
 // ── Mini App analyze: body, quota, payload ──────────────────────────────────
 
-/** h_analyze body → { symbol, strategy } | { error: 'bad_symbol' }. */
+/**
+ * str(v) of a parsed JSON value as Python prints it: None / True / False; a list or dict prints
+ * with brackets (never a valid symbol or strategy name), so JSON text stands in for its repr.
+ */
+function pyStrJson(v) {
+  if (v === null) return 'None';
+  if (v === true) return 'True';
+  if (v === false) return 'False';
+  if (typeof v === 'object') return JSON.stringify(v);
+  return String(v);
+}
+
+/** dict.get(key, default) on the request body. */
+function bodyGet(body, key, dflt) {
+  return body && typeof body === 'object' && Object.prototype.hasOwnProperty.call(body, key) && body[key] !== undefined
+    ? body[key] : dflt;
+}
+
+/**
+ * h_analyze body → { symbol, strategy } | { error: 'bad_symbol' }:
+ * str(body.get("symbol", "")).upper().strip() (Python whitespace: U+001C–U+001F and U+0085 are
+ * stripped, U+FEFF is not) minus "/USDT" and "USDT"; str(body.get("strategy", "AUTO")).upper().
+ */
 function parseAnalyzeBody(body) {
-  const raw = body && body.symbol !== undefined && body.symbol !== null ? body.symbol : '';
-  const symbol = String(raw).toUpperCase().trim().split('/USDT').join('').split('USDT').join('');
-  let strategy = String(body && body.strategy !== undefined && body.strategy !== null ? body.strategy : 'AUTO').toUpperCase();
+  const symbol = pyStrip(pyStrJson(bodyGet(body, 'symbol', '')).toUpperCase())
+    .split('/USDT').join('').split('USDT').join('');
+  let strategy = pyStrJson(bodyGet(body, 'strategy', 'AUTO')).toUpperCase();
   if (!SYMBOL_RE.test(symbol || '')) return { error: 'bad_symbol' };
   if (!STRATEGIES.includes(strategy) && strategy !== 'AUTO') strategy = 'AUTO';
   return { symbol, strategy };
