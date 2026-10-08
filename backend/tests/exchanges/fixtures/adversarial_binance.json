@@ -13061,5 +13061,4003 @@
 ],
 "full_events": []
 }
+},
+{
+"scenario": {
+"name": "rd_00_cancel_tp_orders_only_mut",
+"exchange": "binance",
+"call": "cancel_tp_orders_only",
+"args": [
+"BNKEY-abc123",
+"bn-secret-456",
+"BTC-USDT-SWAP"
+],
+"kwargs": {},
+"routes": [
+{
+"method": "GET",
+"path": "/fapi/v1/openOrders",
+"responses": [
+{
+"text": "[{\"orderId\": 1, \"symbol\": \"BTCUSDT\", \"type\": \"STOP_MARKET\", \"side\": \"SELL\", \"positionSide\": \"LONG\", \"price\": \"0\", \"origQty\": \"0.011\", \"stopPrice\": \"86000.0\"}, {\"orderId\": 2, \"symbol\": \"BTCUSDT\", \"type\": \"TAKE_PROFIT_MARKET\", \"side\": \"SELL\", \"positionSide\": \"LONG\", \"price\": \"0\", \"origQty\": \"0.011\", \"stopPrice\": \"86000.0\"}, {\"orderId\": 3, \"symbol\": \"BTCUSDT\", \"type\": \"take_profit_market\", \"side\": \"SELL\", \"positionSide\": \"LONG\", \"price\": \"0\", \"origQty\": \"0.011\", \"stopPrice\": \"86000.0\"}, {\"orderId\": null, \"symbol\": \"BTCUSDT\", \"type\": \"TAKE_PROFIT_MARKET\", \"side\": \"SELL\", \"positionSide\": \"LONG\", \"price\": \"0\", \"origQty\": \"0.011\", \"stopPrice\": \"86000.0\"}]"
+}
+]
+},
+{
+"method": "DELETE",
+"path": "/fapi/v1/order",
+"responses": [
+{
+"text": "{\"orderId\": 2, \"symbol\": \"BTCUSDT\", \"status\": \"NEW\", \"clientOrderId\": \"null\", \"price\": \"0\", \"avgPrice\": \"0.00000\", \"origQty\": \"0.011\", \"executedQty\": \"0\", \"type\": \"MARKET\"}"
+},
+{
+"text": "{\"code\": -2011, \"msg\": \"Unknown order sent.\"}"
+}
+]
+}
+],
+"state": {},
+"random": [
+0.974294998692516,
+0.7569847779043244,
+0.49611807954384146,
+0.35900452810238936,
+0.19271635379805896,
+0.36827723136719104
+],
+"clock": 1767828718.0
+},
+"expected": {
+"name": "rd_00_cancel_tp_orders_only_mut",
+"result": {
+"ok": true,
+"cancelled": 1,
+"total_tp": 3,
+"errors": [
+"Неизвестная ошибка Binance."
+]
+},
+"requests": [
+{
+"method": "GET",
+"url": "https://fapi.binance.com/fapi/v1/openOrders?symbol=BTCUSDT&timestamp=1767828718000&recvWindow=5000&signature=df7ed52c9d755fa947dbed8e2ad9e6818e6c8a9f6b4558e9defcd1298bd2c54e",
+"headers": {
+"X-MBX-APIKEY": "BNKEY-abc123"
+},
+"body": null,
+"hdrs": {
+"x-mbx-apikey": "BNKEY-abc123"
+},
+"wire": {
+"method": "GET",
+"target": "/fapi/v1/openOrders?symbol=BTCUSDT&timestamp=1767828718000&recvWindow=5000&signature=df7ed52c9d755fa947dbed8e2ad9e6818e6c8a9f6b4558e9defcd1298bd2c54e",
+"headers": {
+"x-mbx-apikey": "BNKEY-abc123",
+"accept": "*/*"
+},
+"body": null
+}
+},
+{
+"method": "DELETE",
+"url": "https://fapi.binance.com/fapi/v1/order?symbol=BTCUSDT&orderId=2&timestamp=1767828718000&recvWindow=5000&signature=88459fd252938c4e0cacf09b3665e0fd724f2ac01b5e477f7921ebfc887334af",
+"headers": {
+"X-MBX-APIKEY": "BNKEY-abc123"
+},
+"body": null,
+"hdrs": {
+"x-mbx-apikey": "BNKEY-abc123"
+},
+"wire": {
+"method": "DELETE",
+"target": "/fapi/v1/order?symbol=BTCUSDT&orderId=2&timestamp=1767828718000&recvWindow=5000&signature=88459fd252938c4e0cacf09b3665e0fd724f2ac01b5e477f7921ebfc887334af",
+"headers": {
+"x-mbx-apikey": "BNKEY-abc123",
+"accept": "*/*"
+},
+"body": null
+}
+},
+{
+"method": "DELETE",
+"url": "https://fapi.binance.com/fapi/v1/order?symbol=BTCUSDT&orderId=3&timestamp=1767828718000&recvWindow=5000&signature=ec99316cfbfbc90bd866e01d7a21b68d8b48677277148a2c1f2a3f34169434e4",
+"headers": {
+"X-MBX-APIKEY": "BNKEY-abc123"
+},
+"body": null,
+"hdrs": {
+"x-mbx-apikey": "BNKEY-abc123"
+},
+"wire": {
+"method": "DELETE",
+"target": "/fapi/v1/order?symbol=BTCUSDT&orderId=3&timestamp=1767828718000&recvWindow=5000&signature=ec99316cfbfbc90bd866e01d7a21b68d8b48677277148a2c1f2a3f34169434e4",
+"headers": {
+"x-mbx-apikey": "BNKEY-abc123",
+"accept": "*/*"
+},
+"body": null
+}
+}
+],
+"sleeps": [],
+"clock_end": 1767828718.0,
+"markers": [],
+"saved": {
+"hedge_saved": [],
+"auth_reset": [],
+"events": [],
+"metrics": []
+},
+"final": {
+"hedge": {},
+"account_type": {},
+"delisted": [],
+"fail_count": {},
+"bybit_offset": 0,
+"binance_base": "https://fapi.binance.com",
+"binance_offset": 0,
+"bingx_offset": 0,
+"okx_offset": 0
+},
+"full_metrics": [],
+"full_events": []
+}
+},
+{
+"scenario": {
+"name": "rd_01_sync_time_fail",
+"exchange": "binance",
+"call": "sync_time",
+"args": [],
+"kwargs": {},
+"routes": [
+{
+"method": "GET",
+"path": "/fapi/v1/time",
+"responses": [
+{
+"raise": "connect",
+"message": "Cannot connect to host example:443 ssl:default [Name or service not known]"
+}
+]
+}
+],
+"state": {},
+"random": [
+0.6945150840895935,
+0.5015469441888812,
+0.41519277390113307,
+0.21177462745009568,
+0.4259827737349807,
+0.8095242294974878
+],
+"clock": 1767894098.606599
+},
+"expected": {
+"name": "rd_01_sync_time_fail",
+"result": 0,
+"requests": [
+{
+"method": "GET",
+"url": "https://fapi.binance.com/fapi/v1/time",
+"headers": {},
+"body": null,
+"hdrs": {},
+"wire": {
+"method": "GET",
+"target": "/fapi/v1/time",
+"headers": {
+"accept": "*/*"
+},
+"body": null
+}
+}
+],
+"sleeps": [],
+"clock_end": 1767894098.606599,
+"markers": [],
+"saved": {
+"hedge_saved": [],
+"auth_reset": [],
+"events": [],
+"metrics": []
+},
+"final": {
+"hedge": {},
+"account_type": {},
+"delisted": [],
+"fail_count": {},
+"bybit_offset": 0,
+"binance_base": "https://fapi.binance.com",
+"binance_offset": 0,
+"bingx_offset": 0,
+"okx_offset": 0
+},
+"full_metrics": [],
+"full_events": []
+}
+},
+{
+"scenario": {
+"name": "rd_02_get_positions_fail",
+"exchange": "binance",
+"call": "get_positions",
+"args": [
+"BNKEY-abc123",
+"bn-secret-456"
+],
+"kwargs": {},
+"routes": [
+{
+"method": "GET",
+"path": "/fapi/v2/positionRisk",
+"responses": [
+{
+"raise": "error",
+"message": "Server disconnected"
+}
+]
+}
+],
+"state": {},
+"random": [
+0.34345443449025637,
+0.5859617087601583,
+0.3534589222716259,
+0.9505319939932798,
+0.6293609262980232,
+0.6201123703383609
+],
+"clock": 1770530580.470593
+},
+"expected": {
+"name": "rd_02_get_positions_fail",
+"result": [],
+"requests": [
+{
+"method": "GET",
+"url": "https://fapi.binance.com/fapi/v2/positionRisk?timestamp=1770530580470&recvWindow=5000&signature=c504ce92af9a221d7d726d2f251025b6be25d76ee30ec21457844f8467ccd442",
+"headers": {
+"X-MBX-APIKEY": "BNKEY-abc123"
+},
+"body": null,
+"hdrs": {
+"x-mbx-apikey": "BNKEY-abc123"
+},
+"wire": {
+"method": "GET",
+"target": "/fapi/v2/positionRisk?timestamp=1770530580470&recvWindow=5000&signature=c504ce92af9a221d7d726d2f251025b6be25d76ee30ec21457844f8467ccd442",
+"headers": {
+"x-mbx-apikey": "BNKEY-abc123",
+"accept": "*/*"
+},
+"body": null
+}
+}
+],
+"sleeps": [],
+"clock_end": 1770530580.470593,
+"markers": [],
+"saved": {
+"hedge_saved": [],
+"auth_reset": [],
+"events": [],
+"metrics": []
+},
+"final": {
+"hedge": {},
+"account_type": {},
+"delisted": [],
+"fail_count": {},
+"bybit_offset": 0,
+"binance_base": "https://fapi.binance.com",
+"binance_offset": 0,
+"bingx_offset": 0,
+"okx_offset": 0
+},
+"full_metrics": [],
+"full_events": []
+}
+},
+{
+"scenario": {
+"name": "rd_03_get_positions_",
+"exchange": "binance",
+"call": "get_positions",
+"args": [
+"BNKEY-abc123",
+"bn-secret-456",
+"BTC-USDT-SWAP"
+],
+"kwargs": {},
+"routes": [
+{
+"method": "GET",
+"path": "/fapi/v2/positionRisk",
+"responses": [
+{
+"text": "[{\"symbol\": \"BTCUSDT\", \"positionAmt\": \"0.011\", \"entryPrice\": \"87000.5\", \"markPrice\": \"87010.1\", \"unRealizedProfit\": \"0.11\", \"liquidationPrice\": \"0\", \"leverage\": \"10\", \"positionSide\": \"LONG\"}, {\"symbol\": \"BTCUSDT\", \"positionAmt\": \"0.000\", \"entryPrice\": \"0.0\", \"markPrice\": \"87010.1\", \"unRealizedProfit\": \"0.0\", \"leverage\": \"10\", \"positionSide\": \"SHORT\"}]"
+}
+]
+}
+],
+"state": {},
+"random": [
+0.19949387297875354,
+0.6267243148434377,
+0.212478492530367,
+0.9627459840581077,
+0.460645370244844,
+0.33785214600240987
+],
+"clock": 1769909385.6163
+},
+"expected": {
+"name": "rd_03_get_positions_",
+"result": [
+{
+"symbol": "BTCUSDT",
+"side": "LONG",
+"size": 0.011,
+"entryPrice": 87000.5,
+"markPrice": 87010.1,
+"unrealisedPnl": 0.11,
+"leverage": 10,
+"stopLoss": 0.0,
+"positionIdx": 0
+}
+],
+"requests": [
+{
+"method": "GET",
+"url": "https://fapi.binance.com/fapi/v2/positionRisk?symbol=BTCUSDT&timestamp=1769909385616&recvWindow=5000&signature=97de3f7359ea77d5c5633d1c3b0472a056207155617e28526449ec982404a6aa",
+"headers": {
+"X-MBX-APIKEY": "BNKEY-abc123"
+},
+"body": null,
+"hdrs": {
+"x-mbx-apikey": "BNKEY-abc123"
+},
+"wire": {
+"method": "GET",
+"target": "/fapi/v2/positionRisk?symbol=BTCUSDT&timestamp=1769909385616&recvWindow=5000&signature=97de3f7359ea77d5c5633d1c3b0472a056207155617e28526449ec982404a6aa",
+"headers": {
+"x-mbx-apikey": "BNKEY-abc123",
+"accept": "*/*"
+},
+"body": null
+}
+}
+],
+"sleeps": [],
+"clock_end": 1769909385.6163,
+"markers": [],
+"saved": {
+"hedge_saved": [],
+"auth_reset": [],
+"events": [],
+"metrics": []
+},
+"final": {
+"hedge": {},
+"account_type": {},
+"delisted": [],
+"fail_count": {},
+"bybit_offset": 0,
+"binance_base": "https://fapi.binance.com",
+"binance_offset": 0,
+"bingx_offset": 0,
+"okx_offset": 0
+},
+"full_metrics": [],
+"full_events": []
+}
+},
+{
+"scenario": {
+"name": "rd_04_get_closed_pnl_",
+"exchange": "binance",
+"call": "get_closed_pnl",
+"args": [
+"BNKEY-abc123",
+"bn-secret-456",
+"BTC-USDT-SWAP"
+],
+"kwargs": {},
+"routes": [
+{
+"method": "GET",
+"path": "/fapi/v1/userTrades",
+"responses": [
+{
+"text": "[{\"symbol\": \"BTCUSDT\", \"id\": 1, \"orderId\": 8389765519, \"side\": \"BUY\", \"price\": \"87000.5\", \"qty\": \"0.011\", \"realizedPnl\": \"0\", \"time\": 1767220000000}, {\"symbol\": \"BTCUSDT\", \"id\": 2, \"orderId\": 8389765520, \"side\": \"SELL\", \"price\": \"87500.0\", \"qty\": \"0.011\", \"realizedPnl\": \"5.49450000\", \"time\": 1767225000000}, {\"symbol\": \"BTCUSDT\", \"id\": 3, \"orderId\": null, \"side\": \"sell\", \"price\": \"87400.0\", \"qty\": \"0.001\", \"realizedPnl\": \"\", \"time\": null}, {\"symbol\": \"BTCUSDT\", \"id\": 4, \"orderId\": 5, \"side\": \"SELL\", \"price\": \"0\", \"qty\": \"0.001\", \"realizedPnl\": \"1\"}, {\"symbol\": \"BTCUSDT\", \"id\": 5, \"orderId\": 6, \"side\": \"SELL\", \"price\": \"87400.0\", \"qty\": \"0.001\", \"realizedPnl\": \"n/a\", \"time\": 1}]"
+}
+]
+}
+],
+"state": {},
+"random": [
+0.3593635051346761,
+0.3339577298114873,
+0.37382278685095294,
+0.30154277991806555,
+0.8173711883234047,
+0.12964817082640234
+],
+"clock": 1769064873.505903
+},
+"expected": {
+"name": "rd_04_get_closed_pnl_",
+"result": [
+{
+"side": "Buy",
+"avgExitPrice": 87000.5,
+"updatedTime": 1767220000000.0,
+"closedPnl": 0.0,
+"orderLinkId": "8389765519"
+},
+{
+"side": "Sell",
+"avgExitPrice": 87500.0,
+"updatedTime": 1767225000000.0,
+"closedPnl": 5.4945,
+"orderLinkId": "8389765520"
+},
+{
+"side": "Sell",
+"avgExitPrice": 87400.0,
+"updatedTime": 0.0,
+"closedPnl": null,
+"orderLinkId": ""
+},
+{
+"side": "Sell",
+"avgExitPrice": 87400.0,
+"updatedTime": 1.0,
+"closedPnl": null,
+"orderLinkId": "6"
+}
+],
+"requests": [
+{
+"method": "GET",
+"url": "https://fapi.binance.com/fapi/v1/userTrades?symbol=BTCUSDT&limit=20&timestamp=1769064873505&recvWindow=5000&signature=f74950b39548082a55f1ff0449f6ee76da15ad3c1c325c1ee18882a91c026d8a",
+"headers": {
+"X-MBX-APIKEY": "BNKEY-abc123"
+},
+"body": null,
+"hdrs": {
+"x-mbx-apikey": "BNKEY-abc123"
+},
+"wire": {
+"method": "GET",
+"target": "/fapi/v1/userTrades?symbol=BTCUSDT&limit=20&timestamp=1769064873505&recvWindow=5000&signature=f74950b39548082a55f1ff0449f6ee76da15ad3c1c325c1ee18882a91c026d8a",
+"headers": {
+"x-mbx-apikey": "BNKEY-abc123",
+"accept": "*/*"
+},
+"body": null
+}
+}
+],
+"sleeps": [],
+"clock_end": 1769064873.505903,
+"markers": [],
+"saved": {
+"hedge_saved": [],
+"auth_reset": [],
+"events": [],
+"metrics": []
+},
+"final": {
+"hedge": {},
+"account_type": {},
+"delisted": [],
+"fail_count": {},
+"bybit_offset": 0,
+"binance_base": "https://fapi.binance.com",
+"binance_offset": 0,
+"bingx_offset": 0,
+"okx_offset": 0
+},
+"full_metrics": [],
+"full_events": []
+}
+},
+{
+"scenario": {
+"name": "rd_05_test_connection_",
+"exchange": "binance",
+"call": "test_connection",
+"args": [
+"BNKEY-abc123",
+"bn-secret-456"
+],
+"kwargs": {},
+"routes": [
+{
+"method": "GET",
+"path": "/fapi/v2/balance",
+"responses": [
+{
+"text": "{\"code\": -2014, \"msg\": \"API-key format invalid.\"}"
+}
+]
+}
+],
+"state": {},
+"random": [
+0.8354298326891471,
+0.4795838886438559,
+0.021150192091973885,
+0.4146739623943263,
+0.5249637051733498,
+0.04132893000013205
+],
+"clock": 1770641328.8218
+},
+"expected": {
+"name": "rd_05_test_connection_",
+"result": {
+"ok": false,
+"balance": 0.0,
+"error": "Неизвестная ошибка Binance."
+},
+"requests": [
+{
+"method": "GET",
+"url": "https://fapi.binance.com/fapi/v2/balance?timestamp=1770641328821&recvWindow=5000&signature=a6318b469c8cff8d1b55195f8246487e70292a0250209780d68bd59903fb6222",
+"headers": {
+"X-MBX-APIKEY": "BNKEY-abc123"
+},
+"body": null,
+"hdrs": {
+"x-mbx-apikey": "BNKEY-abc123"
+},
+"wire": {
+"method": "GET",
+"target": "/fapi/v2/balance?timestamp=1770641328821&recvWindow=5000&signature=a6318b469c8cff8d1b55195f8246487e70292a0250209780d68bd59903fb6222",
+"headers": {
+"x-mbx-apikey": "BNKEY-abc123",
+"accept": "*/*"
+},
+"body": null
+}
+}
+],
+"sleeps": [],
+"clock_end": 1770641328.8218,
+"markers": [],
+"saved": {
+"hedge_saved": [],
+"auth_reset": [],
+"events": [],
+"metrics": []
+},
+"final": {
+"hedge": {},
+"account_type": {},
+"delisted": [],
+"fail_count": {},
+"bybit_offset": 0,
+"binance_base": "https://fapi.binance.com",
+"binance_offset": 0,
+"bingx_offset": 0,
+"okx_offset": 0
+},
+"full_metrics": [],
+"full_events": []
+}
+},
+{
+"scenario": {
+"name": "rd_06_get_balance_mut",
+"exchange": "binance",
+"call": "get_balance",
+"args": [
+"BNKEY-abc123",
+"bn-secret-456"
+],
+"kwargs": {},
+"routes": [
+{
+"method": "GET",
+"path": "/fapi/v2/balance",
+"responses": [
+{
+"text": "[{\"asset\": \"BNB\", \"balance\": null}]"
+}
+]
+}
+],
+"state": {},
+"random": [
+0.9129925865395078,
+0.059634240952044726,
+0.2642736829152865,
+0.07558147213510469,
+0.4726802909126748,
+0.8664644387732224
+],
+"clock": 1767249202.573
+},
+"expected": {
+"name": "rd_06_get_balance_mut",
+"result": 0.0,
+"requests": [
+{
+"method": "GET",
+"url": "https://fapi.binance.com/fapi/v2/balance?timestamp=1767249202573&recvWindow=5000&signature=58f26bac0e8d65afcf346bd7aa3650beea4b783309c336f376269aab8e5b92ca",
+"headers": {
+"X-MBX-APIKEY": "BNKEY-abc123"
+},
+"body": null,
+"hdrs": {
+"x-mbx-apikey": "BNKEY-abc123"
+},
+"wire": {
+"method": "GET",
+"target": "/fapi/v2/balance?timestamp=1767249202573&recvWindow=5000&signature=58f26bac0e8d65afcf346bd7aa3650beea4b783309c336f376269aab8e5b92ca",
+"headers": {
+"x-mbx-apikey": "BNKEY-abc123",
+"accept": "*/*"
+},
+"body": null
+}
+}
+],
+"sleeps": [],
+"clock_end": 1767249202.573,
+"markers": [],
+"saved": {
+"hedge_saved": [],
+"auth_reset": [],
+"events": [],
+"metrics": []
+},
+"final": {
+"hedge": {},
+"account_type": {},
+"delisted": [],
+"fail_count": {},
+"bybit_offset": 0,
+"binance_base": "https://fapi.binance.com",
+"binance_offset": 0,
+"bingx_offset": 0,
+"okx_offset": 0
+},
+"full_metrics": [],
+"full_events": []
+}
+},
+{
+"scenario": {
+"name": "rd_07_cancel_all_orders_mut",
+"exchange": "binance",
+"call": "cancel_all_orders",
+"args": [
+"BNKEY-abc123",
+"bn-secret-456",
+"BTC-USDT-SWAP"
+],
+"kwargs": {},
+"routes": [
+{
+"method": "DELETE",
+"path": "/fapi/v1/allOpenOrders",
+"responses": [
+{
+"text": "{\"code\": -2015, \"msg\": null}"
+}
+]
+}
+],
+"state": {},
+"random": [
+0.9153911171393542,
+0.06026150275898634,
+0.7256196411370404,
+0.6247814190472012,
+0.6621850249390506,
+0.7040072483030717
+],
+"clock": 1768524256.0
+},
+"expected": {
+"name": "rd_07_cancel_all_orders_mut",
+"result": {
+"ok": false,
+"cancelled": 0,
+"error": "Неизвестная ошибка Binance."
+},
+"requests": [
+{
+"method": "DELETE",
+"url": "https://fapi.binance.com/fapi/v1/allOpenOrders?symbol=BTCUSDT&timestamp=1768524256000&recvWindow=5000&signature=c06d4159561a3ec11e03b1d74d7f23a286448a859da433516ecabb2dc9911053",
+"headers": {
+"X-MBX-APIKEY": "BNKEY-abc123"
+},
+"body": null,
+"hdrs": {
+"x-mbx-apikey": "BNKEY-abc123"
+},
+"wire": {
+"method": "DELETE",
+"target": "/fapi/v1/allOpenOrders?symbol=BTCUSDT&timestamp=1768524256000&recvWindow=5000&signature=c06d4159561a3ec11e03b1d74d7f23a286448a859da433516ecabb2dc9911053",
+"headers": {
+"x-mbx-apikey": "BNKEY-abc123",
+"accept": "*/*"
+},
+"body": null
+}
+}
+],
+"sleeps": [],
+"clock_end": 1768524256.0,
+"markers": [],
+"saved": {
+"hedge_saved": [],
+"auth_reset": [],
+"events": [],
+"metrics": []
+},
+"final": {
+"hedge": {},
+"account_type": {},
+"delisted": [],
+"fail_count": {},
+"bybit_offset": 0,
+"binance_base": "https://fapi.binance.com",
+"binance_offset": 0,
+"bingx_offset": 0,
+"okx_offset": 0
+},
+"full_metrics": [],
+"full_events": []
+}
+},
+{
+"scenario": {
+"name": "rd_08_get_positions_",
+"exchange": "binance",
+"call": "get_positions",
+"args": [
+"BNKEY-abc123",
+"bn-secret-456",
+"BTC-USDT-SWAP"
+],
+"kwargs": {},
+"routes": [
+{
+"method": "GET",
+"path": "/fapi/v2/positionRisk",
+"responses": [
+{
+"text": "[{\"symbol\": \"BTCUSDT\", \"positionAmt\": \"0.011\", \"entryPrice\": \"87000.5\", \"markPrice\": \"87010.1\", \"unRealizedProfit\": \"0.11\", \"liquidationPrice\": \"0\", \"leverage\": \"10\", \"positionSide\": \"LONG\"}, {\"symbol\": \"BTCUSDT\", \"positionAmt\": \"0.000\", \"entryPrice\": \"0.0\", \"markPrice\": \"87010.1\", \"unRealizedProfit\": \"0.0\", \"leverage\": \"10\", \"positionSide\": \"SHORT\"}]"
+}
+]
+}
+],
+"state": {},
+"random": [
+0.2700771890317939,
+0.027641565267332857,
+0.7400214400652966,
+0.8588555151406154,
+0.4305336469741192,
+0.4271893879471871
+],
+"clock": 1771489601.9895
+},
+"expected": {
+"name": "rd_08_get_positions_",
+"result": [
+{
+"symbol": "BTCUSDT",
+"side": "LONG",
+"size": 0.011,
+"entryPrice": 87000.5,
+"markPrice": 87010.1,
+"unrealisedPnl": 0.11,
+"leverage": 10,
+"stopLoss": 0.0,
+"positionIdx": 0
+}
+],
+"requests": [
+{
+"method": "GET",
+"url": "https://fapi.binance.com/fapi/v2/positionRisk?symbol=BTCUSDT&timestamp=1771489601989&recvWindow=5000&signature=89c925fa203a656b485ea4e941a37a64848283bea652fee9b75fe6e3f19c42b6",
+"headers": {
+"X-MBX-APIKEY": "BNKEY-abc123"
+},
+"body": null,
+"hdrs": {
+"x-mbx-apikey": "BNKEY-abc123"
+},
+"wire": {
+"method": "GET",
+"target": "/fapi/v2/positionRisk?symbol=BTCUSDT&timestamp=1771489601989&recvWindow=5000&signature=89c925fa203a656b485ea4e941a37a64848283bea652fee9b75fe6e3f19c42b6",
+"headers": {
+"x-mbx-apikey": "BNKEY-abc123",
+"accept": "*/*"
+},
+"body": null
+}
+}
+],
+"sleeps": [],
+"clock_end": 1771489601.9895,
+"markers": [],
+"saved": {
+"hedge_saved": [],
+"auth_reset": [],
+"events": [],
+"metrics": []
+},
+"final": {
+"hedge": {},
+"account_type": {},
+"delisted": [],
+"fail_count": {},
+"bybit_offset": 0,
+"binance_base": "https://fapi.binance.com",
+"binance_offset": 0,
+"bingx_offset": 0,
+"okx_offset": 0
+},
+"full_metrics": [],
+"full_events": []
+}
+},
+{
+"scenario": {
+"name": "rd_09_get_positions_mut",
+"exchange": "binance",
+"call": "get_positions",
+"args": [
+"BNKEY-abc123",
+"bn-secret-456"
+],
+"kwargs": {},
+"routes": [
+{
+"method": "GET",
+"path": "/fapi/v2/positionRisk",
+"responses": [
+{
+"text": "{\"code\": 0.1, \"msg\": \"Timestamp for this request is outside of the recvWindow.\"}"
+}
+]
+}
+],
+"state": {},
+"random": [
+0.14225454752674438,
+0.845899872534375,
+0.5510226602173978,
+0.8715862872606198,
+0.854523960647759,
+0.63454695184147
+],
+"clock": 1767618483.1651
+},
+"expected": {
+"name": "rd_09_get_positions_mut",
+"result": [],
+"requests": [
+{
+"method": "GET",
+"url": "https://fapi.binance.com/fapi/v2/positionRisk?timestamp=1767618483165&recvWindow=5000&signature=a9283cc3202036c3290ba4856fb6163af70fa69d41413d5ab2a591e7ed07b65d",
+"headers": {
+"X-MBX-APIKEY": "BNKEY-abc123"
+},
+"body": null,
+"hdrs": {
+"x-mbx-apikey": "BNKEY-abc123"
+},
+"wire": {
+"method": "GET",
+"target": "/fapi/v2/positionRisk?timestamp=1767618483165&recvWindow=5000&signature=a9283cc3202036c3290ba4856fb6163af70fa69d41413d5ab2a591e7ed07b65d",
+"headers": {
+"x-mbx-apikey": "BNKEY-abc123",
+"accept": "*/*"
+},
+"body": null
+}
+}
+],
+"sleeps": [],
+"clock_end": 1767618483.1651,
+"markers": [],
+"saved": {
+"hedge_saved": [],
+"auth_reset": [],
+"events": [],
+"metrics": []
+},
+"final": {
+"hedge": {},
+"account_type": {},
+"delisted": [],
+"fail_count": {},
+"bybit_offset": 0,
+"binance_base": "https://fapi.binance.com",
+"binance_offset": 0,
+"bingx_offset": 0,
+"okx_offset": 0
+},
+"full_metrics": [],
+"full_events": []
+}
+},
+{
+"scenario": {
+"name": "rd_10_sync_time_",
+"exchange": "binance",
+"call": "sync_time",
+"args": [],
+"kwargs": {},
+"routes": [
+{
+"method": "GET",
+"path": "/fapi/v1/time",
+"responses": [
+{
+"text": "{\"code\": -1}"
+}
+]
+}
+],
+"state": {},
+"random": [
+0.1396029218430036,
+0.4210431888665582,
+0.48604708527965623,
+0.8756512769938436,
+0.7579930308451347,
+0.11301337077688067
+],
+"clock": 1770350717.144
+},
+"expected": {
+"name": "rd_10_sync_time_",
+"result": 0,
+"requests": [
+{
+"method": "GET",
+"url": "https://fapi.binance.com/fapi/v1/time",
+"headers": {},
+"body": null,
+"hdrs": {},
+"wire": {
+"method": "GET",
+"target": "/fapi/v1/time",
+"headers": {
+"accept": "*/*"
+},
+"body": null
+}
+}
+],
+"sleeps": [],
+"clock_end": 1770350717.144,
+"markers": [],
+"saved": {
+"hedge_saved": [],
+"auth_reset": [],
+"events": [],
+"metrics": []
+},
+"final": {
+"hedge": {},
+"account_type": {},
+"delisted": [],
+"fail_count": {},
+"bybit_offset": 0,
+"binance_base": "https://fapi.binance.com",
+"binance_offset": 0,
+"bingx_offset": 0,
+"okx_offset": 0
+},
+"full_metrics": [],
+"full_events": []
+}
+},
+{
+"scenario": {
+"name": "rd_11_cancel_all_orders_none",
+"exchange": "binance",
+"call": "cancel_all_orders",
+"args": [
+"BNKEY-abc123",
+"bn-secret-456",
+"BTC-USDT-SWAP"
+],
+"kwargs": {},
+"routes": [
+{
+"method": "DELETE",
+"path": "/fapi/v1/allOpenOrders",
+"responses": [
+{
+"raise": "timeout"
+}
+]
+}
+],
+"state": {},
+"random": [
+0.0990137423029056,
+0.6042377089669002,
+0.1632890248405291,
+0.7975343670479575,
+0.9438516539330158,
+0.16119648116348428
+],
+"clock": 1770201330.43718
+},
+"expected": {
+"name": "rd_11_cancel_all_orders_none",
+"result": {
+"ok": false,
+"cancelled": 0,
+"error": "Неизвестная ошибка Binance."
+},
+"requests": [
+{
+"method": "DELETE",
+"url": "https://fapi.binance.com/fapi/v1/allOpenOrders?symbol=BTCUSDT&timestamp=1770201330437&recvWindow=5000&signature=4e14ea4af9d8e5fb6808e04da10e1f8d8d2a36bdd0f1f749926da826248fad8e",
+"headers": {
+"X-MBX-APIKEY": "BNKEY-abc123"
+},
+"body": null,
+"hdrs": {
+"x-mbx-apikey": "BNKEY-abc123"
+},
+"wire": {
+"method": "DELETE",
+"target": "/fapi/v1/allOpenOrders?symbol=BTCUSDT&timestamp=1770201330437&recvWindow=5000&signature=4e14ea4af9d8e5fb6808e04da10e1f8d8d2a36bdd0f1f749926da826248fad8e",
+"headers": {
+"x-mbx-apikey": "BNKEY-abc123",
+"accept": "*/*"
+},
+"body": null
+}
+}
+],
+"sleeps": [],
+"clock_end": 1770201330.43718,
+"markers": [],
+"saved": {
+"hedge_saved": [],
+"auth_reset": [],
+"events": [],
+"metrics": []
+},
+"final": {
+"hedge": {},
+"account_type": {},
+"delisted": [],
+"fail_count": {},
+"bybit_offset": 0,
+"binance_base": "https://fapi.binance.com",
+"binance_offset": 0,
+"bingx_offset": 0,
+"okx_offset": 0
+},
+"full_metrics": [],
+"full_events": []
+}
+},
+{
+"scenario": {
+"name": "rd_12_test_connection_mut",
+"exchange": "binance",
+"call": "test_connection",
+"args": [
+"BNKEY-abc123",
+"bn-secret-456"
+],
+"kwargs": {},
+"routes": [
+{
+"method": "GET",
+"path": "/fapi/v2/balance",
+"responses": [
+{
+"text": "{\"code\": -2014, \"msg\": \"inf\"}"
+}
+]
+}
+],
+"state": {},
+"random": [
+0.19616100089181254,
+0.5452599112978977,
+0.7999744505424069,
+0.4620094676095855,
+0.026818055051201606,
+0.8614296320029988
+],
+"clock": 1769577981.268
+},
+"expected": {
+"name": "rd_12_test_connection_mut",
+"result": {
+"ok": false,
+"balance": 0.0,
+"error": "Неизвестная ошибка Binance."
+},
+"requests": [
+{
+"method": "GET",
+"url": "https://fapi.binance.com/fapi/v2/balance?timestamp=1769577981268&recvWindow=5000&signature=dd57d59356df588fbe72f65cc4821e323bfc4ed858efc03d706a2bb23b3b4126",
+"headers": {
+"X-MBX-APIKEY": "BNKEY-abc123"
+},
+"body": null,
+"hdrs": {
+"x-mbx-apikey": "BNKEY-abc123"
+},
+"wire": {
+"method": "GET",
+"target": "/fapi/v2/balance?timestamp=1769577981268&recvWindow=5000&signature=dd57d59356df588fbe72f65cc4821e323bfc4ed858efc03d706a2bb23b3b4126",
+"headers": {
+"x-mbx-apikey": "BNKEY-abc123",
+"accept": "*/*"
+},
+"body": null
+}
+}
+],
+"sleeps": [],
+"clock_end": 1769577981.268,
+"markers": [],
+"saved": {
+"hedge_saved": [],
+"auth_reset": [],
+"events": [],
+"metrics": []
+},
+"final": {
+"hedge": {},
+"account_type": {},
+"delisted": [],
+"fail_count": {},
+"bybit_offset": 0,
+"binance_base": "https://fapi.binance.com",
+"binance_offset": 0,
+"bingx_offset": 0,
+"okx_offset": 0
+},
+"full_metrics": [],
+"full_events": []
+}
+},
+{
+"scenario": {
+"name": "rd_13_get_dashboard_mut+mut",
+"exchange": "binance",
+"call": "get_dashboard",
+"args": [
+"BNKEY-abc123",
+"bn-secret-456"
+],
+"kwargs": {},
+"routes": [
+{
+"method": "GET",
+"path": "/fapi/v2/positionRisk",
+"responses": [
+{
+"text": "[{\"symbol\": \"BTCUSDT\", \"positionAmt\": \"0.011\", \"entryPrice\": \"87000.5\", \"markPrice\": \"87010.1\", \"unRealizedProfit\": \"0.11\", \"liquidationPrice\": \"0\", \"leverage\": \"10\", \"positionSide\": \"LONG\"}, {\"symbol\": \"BTCUSDT\", \"positionAmt\": \"007\", \"entryPrice\": \"0.0\", \"markPrice\": \"87010.1\", \"unRealizedProfit\": \"0.0\", \"leverage\": \"10\", \"positionSide\": \"SHORT\"}]"
+}
+]
+},
+{
+"method": "GET",
+"path": "/fapi/v1/openOrders",
+"responses": [
+{
+"text": "[{\"orderId\": 1, \"symbol\": \"BTCUSDT\", \"type\": \"STOP_MARKET\", \"side\": \"SELL\", \"positionSide\": \"LONG\", \"price\": \"0\", \"origQty\": \"0.011\", \"stopPrice\": \"86000.0\"}, {\"orderId\": 2, \"symbol\": \"BTCUSDT\", \"type\": \"TAKE_PROFIT_MARKET\", \"side\": \"SELL\", \"positionSide\": \"LONG\", \"price\": \"0\", \"origQty\": \"0.011\", \"stopPrice\": \"88500\"}]"
+}
+]
+},
+{
+"method": "GET",
+"path": "/fapi/v2/balance",
+"responses": [
+{
+"text": "[{\"accountAlias\": \"SgsR\", \"asset\": \"BNB\", \"balance\": \"0.10\", \"crossWalletBalance\": \"0.1\", \"crossUnPnl\": \"0.0\", \"availableBalance\": \"0.1\", \"maxWithdrawAmount\": \"0.1\"}, {\"accountAlias\": \"SgsR\", \"asset\": \"USDT\", \"balance\": \"1000.50\", \"crossWalletBalance\": \"1000.50\", \"crossUnPnl\": \"0.25\", \"availableBalance\": \"900.10\", \"maxWithdrawAmount\": \"900.10\"}]"
+}
+]
+},
+{
+"method": "GET",
+"path": "/fapi/v1/income",
+"responses": [
+{
+"text": "[{\"income\": \"5.5\"}, {\"income\": \"-2.25\"}, {\"income\": \"0.1\"}, {\"income\": \"inf\"}]"
+}
+]
+}
+],
+"state": {},
+"random": [
+0.9113346906705796,
+0.23945437341768327,
+0.5233684325318549,
+0.8089624983276472,
+0.9214623321126628,
+0.7856368830347512
+],
+"clock": 1771481997.52213
+},
+"expected": {
+"name": "rd_13_get_dashboard_mut+mut",
+"result": [
+[
+{
+"symbol": "BTCUSDT",
+"side": "LONG",
+"size": 0.011,
+"entryPrice": 87000.5,
+"markPrice": 87010.1,
+"unrealisedPnl": 0.11,
+"leverage": 10,
+"stopLoss": 0.0,
+"positionIdx": 0
+},
+{
+"symbol": "BTCUSDT",
+"side": "SHORT",
+"size": 7.0,
+"entryPrice": 0.0,
+"markPrice": 87010.1,
+"unrealisedPnl": 0.0,
+"leverage": 10,
+"stopLoss": 0.0,
+"positionIdx": 0
+}
+],
+[
+{
+"orderId": "1",
+"symbol": "BTCUSDT",
+"side": "SELL",
+"type": "STOP_MARKET",
+"price": 0.0,
+"origQty": 0.011,
+"stopPrice": 86000.0
+},
+{
+"orderId": "2",
+"symbol": "BTCUSDT",
+"side": "SELL",
+"type": "TAKE_PROFIT_MARKET",
+"price": 0.0,
+"origQty": 0.011,
+"stopPrice": 88500.0
+}
+],
+{
+"equity": 1000.5,
+"unrealized_pnl": 0.25,
+"available": 900.1,
+"closed_pnl_24h": {
+"__float__": "inf"
+},
+"trades_24h": 4,
+"wins_24h": 3
+}
+],
+"requests": [
+{
+"method": "GET",
+"url": "https://fapi.binance.com/fapi/v2/positionRisk?timestamp=1771481997522&recvWindow=5000&signature=674600236ebcf1b3ed02416447233601552e018a07b10caea2a6c43a43a232da",
+"headers": {
+"X-MBX-APIKEY": "BNKEY-abc123"
+},
+"body": null,
+"hdrs": {
+"x-mbx-apikey": "BNKEY-abc123"
+},
+"wire": {
+"method": "GET",
+"target": "/fapi/v2/positionRisk?timestamp=1771481997522&recvWindow=5000&signature=674600236ebcf1b3ed02416447233601552e018a07b10caea2a6c43a43a232da",
+"headers": {
+"x-mbx-apikey": "BNKEY-abc123",
+"accept": "*/*"
+},
+"body": null
+}
+},
+{
+"method": "GET",
+"url": "https://fapi.binance.com/fapi/v1/openOrders?timestamp=1771481997522&recvWindow=5000&signature=674600236ebcf1b3ed02416447233601552e018a07b10caea2a6c43a43a232da",
+"headers": {
+"X-MBX-APIKEY": "BNKEY-abc123"
+},
+"body": null,
+"hdrs": {
+"x-mbx-apikey": "BNKEY-abc123"
+},
+"wire": {
+"method": "GET",
+"target": "/fapi/v1/openOrders?timestamp=1771481997522&recvWindow=5000&signature=674600236ebcf1b3ed02416447233601552e018a07b10caea2a6c43a43a232da",
+"headers": {
+"x-mbx-apikey": "BNKEY-abc123",
+"accept": "*/*"
+},
+"body": null
+}
+},
+{
+"method": "GET",
+"url": "https://fapi.binance.com/fapi/v2/balance?timestamp=1771481997522&recvWindow=5000&signature=674600236ebcf1b3ed02416447233601552e018a07b10caea2a6c43a43a232da",
+"headers": {
+"X-MBX-APIKEY": "BNKEY-abc123"
+},
+"body": null,
+"hdrs": {
+"x-mbx-apikey": "BNKEY-abc123"
+},
+"wire": {
+"method": "GET",
+"target": "/fapi/v2/balance?timestamp=1771481997522&recvWindow=5000&signature=674600236ebcf1b3ed02416447233601552e018a07b10caea2a6c43a43a232da",
+"headers": {
+"x-mbx-apikey": "BNKEY-abc123",
+"accept": "*/*"
+},
+"body": null
+}
+},
+{
+"method": "GET",
+"url": "https://fapi.binance.com/fapi/v1/income?incomeType=REALIZED_PNL&startTime=1771395597522&limit=100&timestamp=1771481997522&recvWindow=5000&signature=a155b9cc27ce22998d7be3285f9de984617d646ccd557e261456da25adca677f",
+"headers": {
+"X-MBX-APIKEY": "BNKEY-abc123"
+},
+"body": null,
+"hdrs": {
+"x-mbx-apikey": "BNKEY-abc123"
+},
+"wire": {
+"method": "GET",
+"target": "/fapi/v1/income?incomeType=REALIZED_PNL&startTime=1771395597522&limit=100&timestamp=1771481997522&recvWindow=5000&signature=a155b9cc27ce22998d7be3285f9de984617d646ccd557e261456da25adca677f",
+"headers": {
+"x-mbx-apikey": "BNKEY-abc123",
+"accept": "*/*"
+},
+"body": null
+}
+}
+],
+"sleeps": [],
+"clock_end": 1771481997.52213,
+"markers": [],
+"saved": {
+"hedge_saved": [],
+"auth_reset": [],
+"events": [],
+"metrics": []
+},
+"final": {
+"hedge": {},
+"account_type": {},
+"delisted": [],
+"fail_count": {},
+"bybit_offset": 0,
+"binance_base": "https://fapi.binance.com",
+"binance_offset": 0,
+"bingx_offset": 0,
+"okx_offset": 0
+},
+"full_metrics": [],
+"full_events": []
+}
+},
+{
+"scenario": {
+"name": "rd_14_sync_time_none",
+"exchange": "binance",
+"call": "sync_time",
+"args": [],
+"kwargs": {},
+"routes": [
+{
+"method": "GET",
+"path": "/fapi/v1/time",
+"responses": [
+{
+"status": 451,
+"text": "geo",
+"headers": {
+"Content-Type": "text/plain"
+}
+}
+]
+}
+],
+"state": {},
+"random": [
+0.1742547159337503,
+0.38375355934752986,
+0.5322426890747072,
+0.9818446055937263,
+0.3732822510033975,
+0.7338448167506059
+],
+"clock": 1767564534.2875
+},
+"expected": {
+"name": "rd_14_sync_time_none",
+"result": 0,
+"requests": [
+{
+"method": "GET",
+"url": "https://fapi.binance.com/fapi/v1/time",
+"headers": {},
+"body": null,
+"hdrs": {},
+"wire": {
+"method": "GET",
+"target": "/fapi/v1/time",
+"headers": {
+"accept": "*/*"
+},
+"body": null
+}
+}
+],
+"sleeps": [],
+"clock_end": 1767564534.2875,
+"markers": [],
+"saved": {
+"hedge_saved": [],
+"auth_reset": [],
+"events": [],
+"metrics": []
+},
+"final": {
+"hedge": {},
+"account_type": {},
+"delisted": [],
+"fail_count": {},
+"bybit_offset": 0,
+"binance_base": "https://fapi.binance.com",
+"binance_offset": 0,
+"bingx_offset": 0,
+"okx_offset": 0
+},
+"full_metrics": [],
+"full_events": []
+}
+},
+{
+"scenario": {
+"name": "rd_15_cancel_tp_orders_only_fail",
+"exchange": "binance",
+"call": "cancel_tp_orders_only",
+"args": [
+"BNKEY-abc123",
+"bn-secret-456",
+"BTC-USDT-SWAP"
+],
+"kwargs": {},
+"routes": [
+{
+"method": "GET",
+"path": "/fapi/v1/openOrders",
+"responses": [
+{
+"raise": "connect",
+"message": "Cannot connect to host example:443 ssl:default [Name or service not known]"
+}
+]
+}
+],
+"state": {},
+"random": [
+0.10042689972886398,
+0.8062603513779784,
+0.7587619325446541,
+0.5111797153714679,
+0.6516910430045955,
+0.5461764953399396
+],
+"clock": 1768347508.153
+},
+"expected": {
+"name": "rd_15_cancel_tp_orders_only_fail",
+"result": {
+"ok": true,
+"cancelled": 0,
+"total_tp": 0
+},
+"requests": [
+{
+"method": "GET",
+"url": "https://fapi.binance.com/fapi/v1/openOrders?symbol=BTCUSDT&timestamp=1768347508153&recvWindow=5000&signature=51d86f11f74ff8d3ca525320da4870b0cb05c7cb691aa212439411daa0257208",
+"headers": {
+"X-MBX-APIKEY": "BNKEY-abc123"
+},
+"body": null,
+"hdrs": {
+"x-mbx-apikey": "BNKEY-abc123"
+},
+"wire": {
+"method": "GET",
+"target": "/fapi/v1/openOrders?symbol=BTCUSDT&timestamp=1768347508153&recvWindow=5000&signature=51d86f11f74ff8d3ca525320da4870b0cb05c7cb691aa212439411daa0257208",
+"headers": {
+"x-mbx-apikey": "BNKEY-abc123",
+"accept": "*/*"
+},
+"body": null
+}
+}
+],
+"sleeps": [],
+"clock_end": 1768347508.153,
+"markers": [],
+"saved": {
+"hedge_saved": [],
+"auth_reset": [],
+"events": [],
+"metrics": []
+},
+"final": {
+"hedge": {},
+"account_type": {},
+"delisted": [],
+"fail_count": {},
+"bybit_offset": 0,
+"binance_base": "https://fapi.binance.com",
+"binance_offset": 0,
+"bingx_offset": 0,
+"okx_offset": 0
+},
+"full_metrics": [],
+"full_events": []
+}
+},
+{
+"scenario": {
+"name": "fz_00_pt_sl_fail_safety_close_ok_mut",
+"exchange": "binance",
+"call": "place_trade",
+"args": [
+"BNKEY-abc123",
+"bn-secret-456",
+"BTC-USDT-SWAP",
+"LONG",
+87000.5,
+86000.0,
+88500.0,
+1.0,
+10
+],
+"kwargs": {},
+"routes": [
+{
+"method": "GET",
+"path": "/fapi/v1/exchangeInfo",
+"responses": [
+{
+"text": "{\"timezone\": \"UTC\", \"serverTime\": 1767225600000, \"symbols\": [{\"symbol\": \"BTCUSDT\", \"status\": \"TRADING\", \"filters\": [{\"filterType\": \"PRICE_FILTER\", \"minPrice\": \"556.80\", \"maxPrice\": \"4529764\", \"tickSize\": \"0.10\"}, {\"filterType\": \"LOT_SIZE\", \"stepSize\": \"0.001\", \"maxQty\": \"1000\", \"minQty\": \"0.001\"}, {\"filterType\": \"MIN_NOTIONAL\", \"notional\": \"100\"}]}, {\"symbol\": \"ETHUSDT\", \"status\": \"TRADING\", \"leverageBracket\": [{\"initialLeverage\": 20}], \"filters\": [{\"filterType\": \"PRICE_FILTER\", \"tickSize\": \"0.01\"}, {\"filterType\": \"LOT_SIZE\", \"stepSize\": \"0.001\"}]}, {\"symbol\": \"1000PEPEUSDT\", \"status\": \"TRADING\", \"filters\": [{\"filterType\": \"PRICE_FILTER\", \"tickSize\": \"0.0000001\"}, {\"filterType\": \"LOT_SIZE\", \"stepSize\": \"1\"}]}, {\"symbol\": \"SOLUSDT\", \"status\": \"SETTLING\", \"filters\": []}, {\"symbol\": \"DOGEUSDT\", \"status\": \"TRADING\", \"filters\": [{\"filterType\": \"PRICE_FILTER\", \"tickSize\": \"\"}, {\"filterType\": \"LOT_SIZE\", \"stepSize\": \"1\"}]}]}"
+}
+]
+},
+{
+"method": "GET",
+"path": "/fapi/v2/balance",
+"responses": [
+{
+"text": "[{\"accountAlias\": \"SgsR\", \"asset\": \"BNB\", \"balance\": \"0.10\", \"crossWalletBalance\": \"0.1\", \"crossUnPnl\": \"0.0\", \"availableBalance\": \"0.1\", \"maxWithdrawAmount\": \"0.1\"}, {\"accountAlias\": \"SgsR\", \"asset\": \"USDT\", \"balance\": \"1000.50\", \"crossWalletBalance\": \"1000.50\", \"crossUnPnl\": \"0.25\", \"availableBalance\": \"900.10\", \"maxWithdrawAmount\": \"900.10\"}]"
+}
+]
+},
+{
+"method": "POST",
+"path": "/fapi/v1/positionSide/dual",
+"responses": [
+{
+"text": "{\"code\": 200, \"msg\": \"success\"}"
+}
+]
+},
+{
+"method": "POST",
+"path": "/fapi/v1/leverage",
+"responses": [
+{
+"text": "{\"leverage\": 1, \"maxNotionalValue\": \"1000000\", \"symbol\": \"BTCUSDT\"}"
+}
+]
+},
+{
+"method": "GET",
+"path": "/fapi/v1/ticker/price",
+"responses": [
+{
+"text": "{\"symbol\": \"BTCUSDT\", \"price\": \"88000.00\", \"time\": 1767225600000}"
+}
+]
+},
+{
+"method": "POST",
+"path": "/fapi/v1/order",
+"responses": [
+{
+"text": "{\"orderId\": 1, \"symbol\": \"BTCUSDT\", \"status\": \"NEW\", \"clientOrderId\": \"x\", \"price\": \"0\", \"avgPrice\": \"0.00000\", \"origQty\": \"0.011\", \"executedQty\": \"0\", \"type\": \"MARKET\"}"
+},
+{
+"text": "{\"code\": -2021, \"msg\": \"Order would immediately trigger.\"}"
+},
+{
+"text": "{}"
+},
+{
+"text": "{\"code\": -1001, \"msg\": \"Internal error; unable to process your request. Please try again.\"}"
+},
+{
+"text": "{\"orderId\": 77, \"symbol\": \"BTCUSDT\", \"status\": \"NEW\", \"clientOrderId\": \"x\", \"price\": \"0\", \"avgPrice\": \"0.00000\", \"origQty\": \"0.011\", \"executedQty\": \"0\", \"type\": \"MARKET\"}"
+}
+]
+},
+{
+"method": "DELETE",
+"path": "/fapi/v1/allOpenOrders",
+"responses": [
+{
+"text": "{\"code\": 200, \"msg\": \"The operation of cancel all open order is done.\"}"
+}
+]
+},
+{
+"method": "GET",
+"path": "/fapi/v2/positionRisk",
+"responses": [
+{
+"text": "[{\"symbol\": \"BTCUSDT\", \"positionAmt\": \"0.011\", \"entryPrice\": \"87000.5\", \"markPrice\": \"87010.1\", \"unRealizedProfit\": \"0.11\", \"liquidationPrice\": \"0\", \"leverage\": \"10\", \"positionSide\": \"LONG\"}, {\"symbol\": \"BTCUSDT\", \"positionAmt\": \"0.000\", \"entryPrice\": \"0.0\", \"markPrice\": \"87010.1\", \"unRealizedProfit\": \"0.0\", \"leverage\": \"10\", \"positionSide\": \"SHORT\"}]"
+}
+]
+}
+],
+"state": {},
+"random": [
+0.47950509286312903,
+0.453952152744011,
+0.5882400805811563,
+0.2748021109198746,
+0.6013682068897327,
+0.8151496985432322
+],
+"clock": 1767225600.0
+},
+"expected": {
+"name": "fz_00_pt_sl_fail_safety_close_ok_mut",
+"result": {
+"ok": false,
+"error": "SL-ордер не выставлен после 3 попыток. Ордер на BTCUSDT отменён для безопасности. Попробуйте ещё раз."
+},
+"requests": [
+{
+"method": "GET",
+"url": "https://fapi.binance.com/fapi/v1/exchangeInfo",
+"headers": {},
+"body": null,
+"hdrs": {},
+"wire": {
+"method": "GET",
+"target": "/fapi/v1/exchangeInfo",
+"headers": {
+"accept": "*/*"
+},
+"body": null
+}
+},
+{
+"method": "GET",
+"url": "https://fapi.binance.com/fapi/v2/balance?timestamp=1767225600000&recvWindow=5000&signature=35c66fcf72a2460d05c229397270c691faa54178111eb5f177fb30e60b7cd6ac",
+"headers": {
+"X-MBX-APIKEY": "BNKEY-abc123"
+},
+"body": null,
+"hdrs": {
+"x-mbx-apikey": "BNKEY-abc123"
+},
+"wire": {
+"method": "GET",
+"target": "/fapi/v2/balance?timestamp=1767225600000&recvWindow=5000&signature=35c66fcf72a2460d05c229397270c691faa54178111eb5f177fb30e60b7cd6ac",
+"headers": {
+"x-mbx-apikey": "BNKEY-abc123",
+"accept": "*/*"
+},
+"body": null
+}
+},
+{
+"method": "POST",
+"url": "https://fapi.binance.com/fapi/v1/positionSide/dual?dualSidePosition=true&timestamp=1767225600000&recvWindow=5000&signature=74d605afe74fb8af8155b660e6fcb772f52c8715d77508ba5d1821979003fe27",
+"headers": {
+"X-MBX-APIKEY": "BNKEY-abc123"
+},
+"body": null,
+"hdrs": {
+"x-mbx-apikey": "BNKEY-abc123"
+},
+"wire": {
+"method": "POST",
+"target": "/fapi/v1/positionSide/dual?dualSidePosition=true&timestamp=1767225600000&recvWindow=5000&signature=74d605afe74fb8af8155b660e6fcb772f52c8715d77508ba5d1821979003fe27",
+"headers": {
+"x-mbx-apikey": "BNKEY-abc123",
+"accept": "*/*",
+"content-type": "application/octet-stream"
+},
+"body": null
+}
+},
+{
+"method": "POST",
+"url": "https://fapi.binance.com/fapi/v1/leverage?symbol=BTCUSDT&leverage=10&timestamp=1767225600000&recvWindow=5000&signature=dc240a2d6847e1aa8ffe77a767c194237062d1f43849e8d8e38413bc44546856",
+"headers": {
+"X-MBX-APIKEY": "BNKEY-abc123"
+},
+"body": null,
+"hdrs": {
+"x-mbx-apikey": "BNKEY-abc123"
+},
+"wire": {
+"method": "POST",
+"target": "/fapi/v1/leverage?symbol=BTCUSDT&leverage=10&timestamp=1767225600000&recvWindow=5000&signature=dc240a2d6847e1aa8ffe77a767c194237062d1f43849e8d8e38413bc44546856",
+"headers": {
+"x-mbx-apikey": "BNKEY-abc123",
+"accept": "*/*",
+"content-type": "application/octet-stream"
+},
+"body": null
+}
+},
+{
+"method": "GET",
+"url": "https://fapi.binance.com/fapi/v1/ticker/price?symbol=BTCUSDT",
+"headers": {},
+"body": null,
+"hdrs": {},
+"wire": {
+"method": "GET",
+"target": "/fapi/v1/ticker/price?symbol=BTCUSDT",
+"headers": {
+"accept": "*/*"
+},
+"body": null
+}
+},
+{
+"method": "POST",
+"url": "https://fapi.binance.com/fapi/v1/order?symbol=BTCUSDT&side=BUY&quantity=0.010&positionSide=LONG&type=MARKET&timestamp=1767225600000&recvWindow=5000&signature=59b322b5c07ee1c3b76ca791c9290d2892de1f375a3569be29529586b988c80a",
+"headers": {
+"X-MBX-APIKEY": "BNKEY-abc123"
+},
+"body": null,
+"hdrs": {
+"x-mbx-apikey": "BNKEY-abc123"
+},
+"wire": {
+"method": "POST",
+"target": "/fapi/v1/order?symbol=BTCUSDT&side=BUY&quantity=0.010&positionSide=LONG&type=MARKET&timestamp=1767225600000&recvWindow=5000&signature=59b322b5c07ee1c3b76ca791c9290d2892de1f375a3569be29529586b988c80a",
+"headers": {
+"x-mbx-apikey": "BNKEY-abc123",
+"accept": "*/*",
+"content-type": "application/octet-stream"
+},
+"body": null
+}
+},
+{
+"method": "POST",
+"url": "https://fapi.binance.com/fapi/v1/order?symbol=BTCUSDT&side=SELL&type=STOP_MARKET&quantity=0.010&stopPrice=86000.0&workingType=MARK_PRICE&timeInForce=GTC&positionSide=LONG&timestamp=1767225600000&recvWindow=5000&signature=7ff239aee6c8d50a081703eeeb9966be8dcc8a6531a3bda06cd5bb05327d38dc",
+"headers": {
+"X-MBX-APIKEY": "BNKEY-abc123"
+},
+"body": null,
+"hdrs": {
+"x-mbx-apikey": "BNKEY-abc123"
+},
+"wire": {
+"method": "POST",
+"target": "/fapi/v1/order?symbol=BTCUSDT&side=SELL&type=STOP_MARKET&quantity=0.010&stopPrice=86000.0&workingType=MARK_PRICE&timeInForce=GTC&positionSide=LONG&timestamp=1767225600000&recvWindow=5000&signature=7ff239aee6c8d50a081703eeeb9966be8dcc8a6531a3bda06cd5bb05327d38dc",
+"headers": {
+"x-mbx-apikey": "BNKEY-abc123",
+"accept": "*/*",
+"content-type": "application/octet-stream"
+},
+"body": null
+}
+},
+{
+"method": "POST",
+"url": "https://fapi.binance.com/fapi/v1/order?symbol=BTCUSDT&side=SELL&type=STOP_MARKET&quantity=0.010&stopPrice=86000.0&workingType=MARK_PRICE&timeInForce=GTC&positionSide=LONG&timestamp=1767225601000&recvWindow=5000&signature=b1d28c15856dc4cd118d0be3813ec2fc9d0a4ae6896a659156a7cbf53a1353a4",
+"headers": {
+"X-MBX-APIKEY": "BNKEY-abc123"
+},
+"body": null,
+"hdrs": {
+"x-mbx-apikey": "BNKEY-abc123"
+},
+"wire": {
+"method": "POST",
+"target": "/fapi/v1/order?symbol=BTCUSDT&side=SELL&type=STOP_MARKET&quantity=0.010&stopPrice=86000.0&workingType=MARK_PRICE&timeInForce=GTC&positionSide=LONG&timestamp=1767225601000&recvWindow=5000&signature=b1d28c15856dc4cd118d0be3813ec2fc9d0a4ae6896a659156a7cbf53a1353a4",
+"headers": {
+"x-mbx-apikey": "BNKEY-abc123",
+"accept": "*/*",
+"content-type": "application/octet-stream"
+},
+"body": null
+}
+},
+{
+"method": "POST",
+"url": "https://fapi.binance.com/fapi/v1/order?symbol=BTCUSDT&side=SELL&type=STOP_MARKET&quantity=0.010&stopPrice=86000.0&workingType=MARK_PRICE&timeInForce=GTC&positionSide=LONG&timestamp=1767225602000&recvWindow=5000&signature=7dccaa022dc748f4441dab9c68e26e08f1eb2f35e50d1c34ad6b5d746d18d4d3",
+"headers": {
+"X-MBX-APIKEY": "BNKEY-abc123"
+},
+"body": null,
+"hdrs": {
+"x-mbx-apikey": "BNKEY-abc123"
+},
+"wire": {
+"method": "POST",
+"target": "/fapi/v1/order?symbol=BTCUSDT&side=SELL&type=STOP_MARKET&quantity=0.010&stopPrice=86000.0&workingType=MARK_PRICE&timeInForce=GTC&positionSide=LONG&timestamp=1767225602000&recvWindow=5000&signature=7dccaa022dc748f4441dab9c68e26e08f1eb2f35e50d1c34ad6b5d746d18d4d3",
+"headers": {
+"x-mbx-apikey": "BNKEY-abc123",
+"accept": "*/*",
+"content-type": "application/octet-stream"
+},
+"body": null
+}
+},
+{
+"method": "DELETE",
+"url": "https://fapi.binance.com/fapi/v1/allOpenOrders?symbol=BTCUSDT&timestamp=1767225603000&recvWindow=5000&signature=7302160ad951809f69746152c9b142e68bbf0b1041d09b4af64ab4a5fffaf2c9",
+"headers": {
+"X-MBX-APIKEY": "BNKEY-abc123"
+},
+"body": null,
+"hdrs": {
+"x-mbx-apikey": "BNKEY-abc123"
+},
+"wire": {
+"method": "DELETE",
+"target": "/fapi/v1/allOpenOrders?symbol=BTCUSDT&timestamp=1767225603000&recvWindow=5000&signature=7302160ad951809f69746152c9b142e68bbf0b1041d09b4af64ab4a5fffaf2c9",
+"headers": {
+"x-mbx-apikey": "BNKEY-abc123",
+"accept": "*/*"
+},
+"body": null
+}
+},
+{
+"method": "GET",
+"url": "https://fapi.binance.com/fapi/v2/positionRisk?symbol=BTCUSDT&timestamp=1767225603000&recvWindow=5000&signature=7302160ad951809f69746152c9b142e68bbf0b1041d09b4af64ab4a5fffaf2c9",
+"headers": {
+"X-MBX-APIKEY": "BNKEY-abc123"
+},
+"body": null,
+"hdrs": {
+"x-mbx-apikey": "BNKEY-abc123"
+},
+"wire": {
+"method": "GET",
+"target": "/fapi/v2/positionRisk?symbol=BTCUSDT&timestamp=1767225603000&recvWindow=5000&signature=7302160ad951809f69746152c9b142e68bbf0b1041d09b4af64ab4a5fffaf2c9",
+"headers": {
+"x-mbx-apikey": "BNKEY-abc123",
+"accept": "*/*"
+},
+"body": null
+}
+},
+{
+"method": "POST",
+"url": "https://fapi.binance.com/fapi/v1/order?symbol=BTCUSDT&side=SELL&positionSide=LONG&type=MARKET&quantity=0.011&timestamp=1767225603000&recvWindow=5000&signature=214c41cd0a4ff6fe73c93a21999b8a0a9f56af7d9a9c020891bbcdb10c1370d0",
+"headers": {
+"X-MBX-APIKEY": "BNKEY-abc123"
+},
+"body": null,
+"hdrs": {
+"x-mbx-apikey": "BNKEY-abc123"
+},
+"wire": {
+"method": "POST",
+"target": "/fapi/v1/order?symbol=BTCUSDT&side=SELL&positionSide=LONG&type=MARKET&quantity=0.011&timestamp=1767225603000&recvWindow=5000&signature=214c41cd0a4ff6fe73c93a21999b8a0a9f56af7d9a9c020891bbcdb10c1370d0",
+"headers": {
+"x-mbx-apikey": "BNKEY-abc123",
+"accept": "*/*",
+"content-type": "application/octet-stream"
+},
+"body": null
+}
+}
+],
+"sleeps": [
+1,
+1,
+1
+],
+"clock_end": 1767225603.0,
+"markers": [
+[
+"ERROR",
+"[SL-SAFETY-CLOSE-BINANCE]"
+],
+[
+"ERROR",
+"[SL-SAFETY-CLOSE-BINANCE-OK]"
+]
+],
+"saved": {
+"hedge_saved": [],
+"auth_reset": [],
+"events": [],
+"metrics": []
+},
+"final": {
+"hedge": {},
+"account_type": {},
+"delisted": [],
+"fail_count": {},
+"bybit_offset": 0,
+"binance_base": "https://fapi.binance.com",
+"binance_offset": 0,
+"bingx_offset": 0,
+"okx_offset": 0
+},
+"full_metrics": [],
+"full_events": []
+}
+},
+{
+"scenario": {
+"name": "fz_01_pt_atomic_list_nondict_entries_mut",
+"exchange": "binance",
+"call": "place_trade",
+"args": [
+"BNKEY-abc123",
+"bn-secret-456",
+"BTC-USDT-SWAP",
+"LONG",
+87000.5,
+86000.0,
+88500.0,
+1.0,
+10
+],
+"kwargs": {
+"tp2": 89500.0,
+"tp3": 90500.0,
+"trade_id": "bn-1",
+"user_id": 42
+},
+"routes": [
+{
+"method": "GET",
+"path": "/fapi/v1/exchangeInfo",
+"responses": [
+{
+"text": "{\"timezone\": \"UTC\", \"serverTime\": 1767225600000, \"symbols\": [{\"symbol\": \"BTCUSDT\", \"status\": \"TRADING\", \"filters\": [{\"filterType\": \"PRICE_FILTER\", \"minPrice\": \"556.80\", \"maxPrice\": \"4529764\", \"tickSize\": \"0.10\"}, {\"filterType\": \"LOT_SIZE\", \"stepSize\": \"0.001\", \"maxQty\": \"1000\", \"minQty\": \"0.001\"}, {\"filterType\": \"MIN_NOTIONAL\", \"notional\": \"100\"}]}, {\"symbol\": \"ETHUSDT\", \"status\": \"TRADING\", \"leverageBracket\": [{\"initialLeverage\": 20}], \"filters\": [{\"filterType\": \"PRICE_FILTER\", \"tickSize\": \"0.01\"}, {\"filterType\": \"LOT_SIZE\", \"stepSize\": \"0.001\"}]}, {\"symbol\": \"1000PEPEUSDT\", \"status\": \"TRADING\", \"filters\": [{\"filterType\": \"PRICE_FILTER\", \"tickSize\": \"0.0000001\"}, {\"filterType\": \"LOT_SIZE\", \"stepSize\": \"1\"}]}, {\"symbol\": \"SOLUSDT\", \"status\": \"SETTLING\", \"filters\": []}, {\"symbol\": \"DOGEUSDT\", \"status\": \"TRADING\", \"filters\": [{\"filterType\": \"PRICE_FILTER\", \"tickSize\": \"\"}, {\"filterType\": \"LOT_SIZE\", \"stepSize\": \"1\"}]}]}"
+}
+]
+},
+{
+"method": "GET",
+"path": "/fapi/v2/balance",
+"responses": [
+{
+"text": "[{\"accountAlias\": \"SgsR\", \"asset\": \"BNB\", \"balance\": \"0.10\", \"crossWalletBalance\": \"0.1\", \"crossUnPnl\": \"0.0\", \"availableBalance\": \"0.1\", \"maxWithdrawAmount\": \"0.1\"}, {\"accountAlias\": \"SgsR\", \"asset\": \"USDT\", \"balance\": \"1000.50\", \"crossWalletBalance\": \"1000.50\", \"crossUnPnl\": \"0.25\", \"availableBalance\": \"900.10\", \"maxWithdrawAmount\": \"900.10\"}]"
+}
+]
+},
+{
+"method": "POST",
+"path": "/fapi/v1/positionSide/dual",
+"responses": [
+{
+"text": "{\"code\": 200, \"msg\": \"success\"}"
+}
+]
+},
+{
+"method": "POST",
+"path": "/fapi/v1/leverage",
+"responses": [
+{
+"text": "{\"leverage\": 10, \"maxNotionalValue\": \"1000000\", \"symbol\": \"BTCUSDT\"}"
+}
+]
+},
+{
+"method": "POST",
+"path": "/fapi/v1/batchOrders",
+"responses": [
+{
+"text": "[null, \"x\"]"
+}
+]
+},
+{
+"method": "GET",
+"path": "/fapi/v1/ticker/price",
+"responses": [
+{
+"text": "{\"symbol\": \"0.00000001\", \"price\": \"88000.00\", \"time\": 1767225600000}"
+}
+]
+},
+{
+"method": "POST",
+"path": "/fapi/v1/order",
+"responses": [
+{
+"text": "{\"orderId\": 9501, \"symbol\": \"BTCUSDT\", \"status\": \"NEW\", \"clientOrderId\": \"x\", \"price\": \"0\", \"avgPrice\": \"0.00000\", \"origQty\": \"0.011\", \"executedQty\": \"0\", \"type\": \"MARKET\"}"
+},
+{
+"text": "{\"orderId\": 9502, \"symbol\": \"BTCUSDT\", \"status\": \"NEW\", \"clientOrderId\": \"x\", \"price\": \"0\", \"avgPrice\": \"0.00000\", \"origQty\": \"0.011\", \"executedQty\": \"0\", \"type\": \"MARKET\"}"
+},
+{
+"text": "{\"orderId\": 9503, \"symbol\": \"BTCUSDT\", \"status\": \"NEW\", \"clientOrderId\": \"x\", \"price\": \"0\", \"avgPrice\": \"0.00000\", \"origQty\": \"0.011\", \"executedQty\": \"0\", \"type\": \"MARKET\"}"
+},
+{
+"text": "{\"orderId\": 9504, \"symbol\": \"BTCUSDT\", \"status\": \"NEW\", \"clientOrderId\": \"x\", \"price\": \"0\", \"avgPrice\": \"0.00000\", \"origQty\": \"0.011\", \"executedQty\": \"0\", \"type\": \"MARKET\"}"
+},
+{
+"text": "{\"orderId\": 9505, \"symbol\": \"BTCUSDT\", \"status\": \"NEW\", \"clientOrderId\": \"x\", \"price\": \"0\", \"avgPrice\": \"0.00000\", \"origQty\": \"0.011\", \"executedQty\": \"0\", \"type\": \"MARKET\"}"
+}
+]
+}
+],
+"state": {},
+"random": [
+0.24452023140421864,
+0.06214848279366891,
+0.19530233784403916,
+0.9014078508178769,
+0.8571319509665013,
+0.5178595088439024
+],
+"clock": 1767225600.0
+},
+"expected": {
+"name": "fz_01_pt_atomic_list_nondict_entries_mut",
+"result": {
+"ok": true,
+"order_id": "9501",
+"error": "",
+"tp_placed": true,
+"qty": 0.01
+},
+"requests": [
+{
+"method": "GET",
+"url": "https://fapi.binance.com/fapi/v1/exchangeInfo",
+"headers": {},
+"body": null,
+"hdrs": {},
+"wire": {
+"method": "GET",
+"target": "/fapi/v1/exchangeInfo",
+"headers": {
+"accept": "*/*"
+},
+"body": null
+}
+},
+{
+"method": "GET",
+"url": "https://fapi.binance.com/fapi/v2/balance?timestamp=1767225600000&recvWindow=5000&signature=35c66fcf72a2460d05c229397270c691faa54178111eb5f177fb30e60b7cd6ac",
+"headers": {
+"X-MBX-APIKEY": "BNKEY-abc123"
+},
+"body": null,
+"hdrs": {
+"x-mbx-apikey": "BNKEY-abc123"
+},
+"wire": {
+"method": "GET",
+"target": "/fapi/v2/balance?timestamp=1767225600000&recvWindow=5000&signature=35c66fcf72a2460d05c229397270c691faa54178111eb5f177fb30e60b7cd6ac",
+"headers": {
+"x-mbx-apikey": "BNKEY-abc123",
+"accept": "*/*"
+},
+"body": null
+}
+},
+{
+"method": "POST",
+"url": "https://fapi.binance.com/fapi/v1/positionSide/dual?dualSidePosition=true&timestamp=1767225600000&recvWindow=5000&signature=74d605afe74fb8af8155b660e6fcb772f52c8715d77508ba5d1821979003fe27",
+"headers": {
+"X-MBX-APIKEY": "BNKEY-abc123"
+},
+"body": null,
+"hdrs": {
+"x-mbx-apikey": "BNKEY-abc123"
+},
+"wire": {
+"method": "POST",
+"target": "/fapi/v1/positionSide/dual?dualSidePosition=true&timestamp=1767225600000&recvWindow=5000&signature=74d605afe74fb8af8155b660e6fcb772f52c8715d77508ba5d1821979003fe27",
+"headers": {
+"x-mbx-apikey": "BNKEY-abc123",
+"accept": "*/*",
+"content-type": "application/octet-stream"
+},
+"body": null
+}
+},
+{
+"method": "POST",
+"url": "https://fapi.binance.com/fapi/v1/leverage?symbol=BTCUSDT&leverage=10&timestamp=1767225600000&recvWindow=5000&signature=dc240a2d6847e1aa8ffe77a767c194237062d1f43849e8d8e38413bc44546856",
+"headers": {
+"X-MBX-APIKEY": "BNKEY-abc123"
+},
+"body": null,
+"hdrs": {
+"x-mbx-apikey": "BNKEY-abc123"
+},
+"wire": {
+"method": "POST",
+"target": "/fapi/v1/leverage?symbol=BTCUSDT&leverage=10&timestamp=1767225600000&recvWindow=5000&signature=dc240a2d6847e1aa8ffe77a767c194237062d1f43849e8d8e38413bc44546856",
+"headers": {
+"x-mbx-apikey": "BNKEY-abc123",
+"accept": "*/*",
+"content-type": "application/octet-stream"
+},
+"body": null
+}
+},
+{
+"method": "POST",
+"url": "https://fapi.binance.com/fapi/v1/batchOrders?batchOrders=%5B%7B%22symbol%22:+%22BTCUSDT%22,+%22side%22:+%22BUY%22,+%22positionSide%22:+%22LONG%22,+%22type%22:+%22MARKET%22,+%22quantity%22:+%220.010%22,+%22newClientOrderId%22:+%22chm_c11a32f12b1a%22%7D,+%7B%22symbol%22:+%22BTCUSDT%22,+%22side%22:+%22SELL%22,+%22positionSide%22:+%22LONG%22,+%22type%22:+%22STOP_MARKET%22,+%22stopPrice%22:+%2286000.0%22,+%22quantity%22:+%220.010%22,+%22workingType%22:+%22MARK_PRICE%22,+%22timeInForce%22:+%22GTC%22,+%22newClientOrderId%22:+%22chm_5c8b8e025baa%22%7D,+%7B%22symbol%22:+%22BTCUSDT%22,+%22side%22:+%22SELL%22,+%22positionSide%22:+%22LONG%22,+%22type%22:+%22TAKE_PROFIT_MARKET%22,+%22stopPrice%22:+%2288500.0%22,+%22quantity%22:+%220.006%22,+%22workingType%22:+%22MARK_PRICE%22,+%22timeInForce%22:+%22GTC%22,+%22newClientOrderId%22:+%22chm_17b3fc6be39a%22%7D,+%7B%22symbol%22:+%22BTCUSDT%22,+%22side%22:+%22SELL%22,+%22positionSide%22:+%22LONG%22,+%22type%22:+%22TAKE_PROFIT_MARKET%22,+%22stopPrice%22:+%2289500.0%22,+%22quantity%22:+%220.002%22,+%22workingType%22:+%22MARK_PRICE%22,+%22timeInForce%22:+%22GTC%22,+%22newClientOrderId%22:+%22chm_52591fe886a7%22%7D,+%7B%22symbol%22:+%22BTCUSDT%22,+%22side%22:+%22SELL%22,+%22positionSide%22:+%22LONG%22,+%22type%22:+%22TAKE_PROFIT_MARKET%22,+%22stopPrice%22:+%2290500.0%22,+%22quantity%22:+%220.002%22,+%22workingType%22:+%22MARK_PRICE%22,+%22timeInForce%22:+%22GTC%22,+%22newClientOrderId%22:+%22chm_f07c2799feb5%22%7D%5D&timestamp=1767225600000&recvWindow=5000&signature=ddc2c3a26e717ba03865dec8efcf827a781f056e8bf7bd9fd907ca5acc080174",
+"headers": {
+"X-MBX-APIKEY": "BNKEY-abc123"
+},
+"body": null,
+"hdrs": {
+"x-mbx-apikey": "BNKEY-abc123"
+},
+"wire": {
+"method": "POST",
+"target": "/fapi/v1/batchOrders?batchOrders=%5B%7B%22symbol%22:+%22BTCUSDT%22,+%22side%22:+%22BUY%22,+%22positionSide%22:+%22LONG%22,+%22type%22:+%22MARKET%22,+%22quantity%22:+%220.010%22,+%22newClientOrderId%22:+%22chm_c11a32f12b1a%22%7D,+%7B%22symbol%22:+%22BTCUSDT%22,+%22side%22:+%22SELL%22,+%22positionSide%22:+%22LONG%22,+%22type%22:+%22STOP_MARKET%22,+%22stopPrice%22:+%2286000.0%22,+%22quantity%22:+%220.010%22,+%22workingType%22:+%22MARK_PRICE%22,+%22timeInForce%22:+%22GTC%22,+%22newClientOrderId%22:+%22chm_5c8b8e025baa%22%7D,+%7B%22symbol%22:+%22BTCUSDT%22,+%22side%22:+%22SELL%22,+%22positionSide%22:+%22LONG%22,+%22type%22:+%22TAKE_PROFIT_MARKET%22,+%22stopPrice%22:+%2288500.0%22,+%22quantity%22:+%220.006%22,+%22workingType%22:+%22MARK_PRICE%22,+%22timeInForce%22:+%22GTC%22,+%22newClientOrderId%22:+%22chm_17b3fc6be39a%22%7D,+%7B%22symbol%22:+%22BTCUSDT%22,+%22side%22:+%22SELL%22,+%22positionSide%22:+%22LONG%22,+%22type%22:+%22TAKE_PROFIT_MARKET%22,+%22stopPrice%22:+%2289500.0%22,+%22quantity%22:+%220.002%22,+%22workingType%22:+%22MARK_PRICE%22,+%22timeInForce%22:+%22GTC%22,+%22newClientOrderId%22:+%22chm_52591fe886a7%22%7D,+%7B%22symbol%22:+%22BTCUSDT%22,+%22side%22:+%22SELL%22,+%22positionSide%22:+%22LONG%22,+%22type%22:+%22TAKE_PROFIT_MARKET%22,+%22stopPrice%22:+%2290500.0%22,+%22quantity%22:+%220.002%22,+%22workingType%22:+%22MARK_PRICE%22,+%22timeInForce%22:+%22GTC%22,+%22newClientOrderId%22:+%22chm_f07c2799feb5%22%7D%5D&timestamp=1767225600000&recvWindow=5000&signature=ddc2c3a26e717ba03865dec8efcf827a781f056e8bf7bd9fd907ca5acc080174",
+"headers": {
+"x-mbx-apikey": "BNKEY-abc123",
+"accept": "*/*",
+"content-type": "application/octet-stream"
+},
+"body": null
+}
+},
+{
+"method": "GET",
+"url": "https://fapi.binance.com/fapi/v1/ticker/price?symbol=BTCUSDT",
+"headers": {},
+"body": null,
+"hdrs": {},
+"wire": {
+"method": "GET",
+"target": "/fapi/v1/ticker/price?symbol=BTCUSDT",
+"headers": {
+"accept": "*/*"
+},
+"body": null
+}
+},
+{
+"method": "POST",
+"url": "https://fapi.binance.com/fapi/v1/order?symbol=BTCUSDT&side=BUY&quantity=0.010&positionSide=LONG&newClientOrderId=chm_c11a32f12b1a&type=MARKET&timestamp=1767225600000&recvWindow=5000&signature=a204895666c7a4f09d6d43a1c0dfeb8787d0d8a2959083bdd251fc2bf26080ec",
+"headers": {
+"X-MBX-APIKEY": "BNKEY-abc123"
+},
+"body": null,
+"hdrs": {
+"x-mbx-apikey": "BNKEY-abc123"
+},
+"wire": {
+"method": "POST",
+"target": "/fapi/v1/order?symbol=BTCUSDT&side=BUY&quantity=0.010&positionSide=LONG&newClientOrderId=chm_c11a32f12b1a&type=MARKET&timestamp=1767225600000&recvWindow=5000&signature=a204895666c7a4f09d6d43a1c0dfeb8787d0d8a2959083bdd251fc2bf26080ec",
+"headers": {
+"x-mbx-apikey": "BNKEY-abc123",
+"accept": "*/*",
+"content-type": "application/octet-stream"
+},
+"body": null
+}
+},
+{
+"method": "POST",
+"url": "https://fapi.binance.com/fapi/v1/order?symbol=BTCUSDT&side=SELL&type=STOP_MARKET&quantity=0.010&stopPrice=86000.0&workingType=MARK_PRICE&timeInForce=GTC&positionSide=LONG&newClientOrderId=chm_5c8b8e025baa&timestamp=1767225600000&recvWindow=5000&signature=f1becdc25ba0a1072844004c9a972db36db02d574da287a9c76a15e693cd015a",
+"headers": {
+"X-MBX-APIKEY": "BNKEY-abc123"
+},
+"body": null,
+"hdrs": {
+"x-mbx-apikey": "BNKEY-abc123"
+},
+"wire": {
+"method": "POST",
+"target": "/fapi/v1/order?symbol=BTCUSDT&side=SELL&type=STOP_MARKET&quantity=0.010&stopPrice=86000.0&workingType=MARK_PRICE&timeInForce=GTC&positionSide=LONG&newClientOrderId=chm_5c8b8e025baa&timestamp=1767225600000&recvWindow=5000&signature=f1becdc25ba0a1072844004c9a972db36db02d574da287a9c76a15e693cd015a",
+"headers": {
+"x-mbx-apikey": "BNKEY-abc123",
+"accept": "*/*",
+"content-type": "application/octet-stream"
+},
+"body": null
+}
+},
+{
+"method": "POST",
+"url": "https://fapi.binance.com/fapi/v1/order?symbol=BTCUSDT&side=SELL&type=TAKE_PROFIT_MARKET&quantity=0.006&stopPrice=88500.0&workingType=MARK_PRICE&timeInForce=GTC&positionSide=LONG&newClientOrderId=chm_17b3fc6be39a&timestamp=1767225600000&recvWindow=5000&signature=012c9877137abab48c73aac215b727315b072a1a6cdb97570467a9eabe201142",
+"headers": {
+"X-MBX-APIKEY": "BNKEY-abc123"
+},
+"body": null,
+"hdrs": {
+"x-mbx-apikey": "BNKEY-abc123"
+},
+"wire": {
+"method": "POST",
+"target": "/fapi/v1/order?symbol=BTCUSDT&side=SELL&type=TAKE_PROFIT_MARKET&quantity=0.006&stopPrice=88500.0&workingType=MARK_PRICE&timeInForce=GTC&positionSide=LONG&newClientOrderId=chm_17b3fc6be39a&timestamp=1767225600000&recvWindow=5000&signature=012c9877137abab48c73aac215b727315b072a1a6cdb97570467a9eabe201142",
+"headers": {
+"x-mbx-apikey": "BNKEY-abc123",
+"accept": "*/*",
+"content-type": "application/octet-stream"
+},
+"body": null
+}
+},
+{
+"method": "POST",
+"url": "https://fapi.binance.com/fapi/v1/order?symbol=BTCUSDT&side=SELL&type=TAKE_PROFIT_MARKET&quantity=0.002&stopPrice=89500.0&workingType=MARK_PRICE&timeInForce=GTC&positionSide=LONG&newClientOrderId=chm_52591fe886a7&timestamp=1767225600000&recvWindow=5000&signature=dc41f8585fb307a917670016e4f5886c7175daa5dd368715228ba37be78164e3",
+"headers": {
+"X-MBX-APIKEY": "BNKEY-abc123"
+},
+"body": null,
+"hdrs": {
+"x-mbx-apikey": "BNKEY-abc123"
+},
+"wire": {
+"method": "POST",
+"target": "/fapi/v1/order?symbol=BTCUSDT&side=SELL&type=TAKE_PROFIT_MARKET&quantity=0.002&stopPrice=89500.0&workingType=MARK_PRICE&timeInForce=GTC&positionSide=LONG&newClientOrderId=chm_52591fe886a7&timestamp=1767225600000&recvWindow=5000&signature=dc41f8585fb307a917670016e4f5886c7175daa5dd368715228ba37be78164e3",
+"headers": {
+"x-mbx-apikey": "BNKEY-abc123",
+"accept": "*/*",
+"content-type": "application/octet-stream"
+},
+"body": null
+}
+},
+{
+"method": "POST",
+"url": "https://fapi.binance.com/fapi/v1/order?symbol=BTCUSDT&side=SELL&type=TAKE_PROFIT_MARKET&quantity=0.002&stopPrice=90500.0&workingType=MARK_PRICE&timeInForce=GTC&positionSide=LONG&newClientOrderId=chm_f07c2799feb5&timestamp=1767225600000&recvWindow=5000&signature=8ffc2d263424ae062be9ed42b8e249a45f7d3c1272f7c71ab5ea0fda9cdd9cab",
+"headers": {
+"X-MBX-APIKEY": "BNKEY-abc123"
+},
+"body": null,
+"hdrs": {
+"x-mbx-apikey": "BNKEY-abc123"
+},
+"wire": {
+"method": "POST",
+"target": "/fapi/v1/order?symbol=BTCUSDT&side=SELL&type=TAKE_PROFIT_MARKET&quantity=0.002&stopPrice=90500.0&workingType=MARK_PRICE&timeInForce=GTC&positionSide=LONG&newClientOrderId=chm_f07c2799feb5&timestamp=1767225600000&recvWindow=5000&signature=8ffc2d263424ae062be9ed42b8e249a45f7d3c1272f7c71ab5ea0fda9cdd9cab",
+"headers": {
+"x-mbx-apikey": "BNKEY-abc123",
+"accept": "*/*",
+"content-type": "application/octet-stream"
+},
+"body": null
+}
+}
+],
+"sleeps": [],
+"clock_end": 1767225600.0,
+"markers": [
+[
+"WARNING",
+"[BINANCE-ATOMIC-FALLBACK]"
+]
+],
+"saved": {
+"hedge_saved": [],
+"auth_reset": [],
+"events": [],
+"metrics": [
+"trade_placed",
+"trade_placement_latency_ms",
+"sl_tp_attached"
+]
+},
+"final": {
+"hedge": {},
+"account_type": {},
+"delisted": [],
+"fail_count": {},
+"bybit_offset": 0,
+"binance_base": "https://fapi.binance.com",
+"binance_offset": 0,
+"bingx_offset": 0,
+"okx_offset": 0
+},
+"full_metrics": [
+[
+"trade_placed",
+1.0,
+{
+"symbol": "BTC-USDT-SWAP",
+"direction": "LONG",
+"exchange": "binance"
+}
+],
+[
+"trade_placement_latency_ms",
+0.0,
+{
+"symbol": "BTC-USDT-SWAP",
+"direction": "LONG",
+"exchange": "binance"
+}
+],
+[
+"sl_tp_attached",
+1.0,
+{
+"symbol": "BTC-USDT-SWAP",
+"direction": "LONG",
+"exchange": "binance"
+}
+]
+],
+"full_events": []
+}
+},
+{
+"scenario": {
+"name": "fz_02_close_position_short_error_fail",
+"exchange": "binance",
+"call": "close_position",
+"args": [
+"BNKEY-abc123",
+"bn-secret-456",
+"ETH-USDT-SWAP",
+"short",
+1.5
+],
+"kwargs": {},
+"routes": [
+{
+"method": "GET",
+"path": "/fapi/v1/exchangeInfo",
+"responses": [
+{
+"text": "{\"timezone\": \"UTC\", \"serverTime\": 1767225600000, \"symbols\": [{\"symbol\": \"BTCUSDT\", \"status\": \"TRADING\", \"filters\": [{\"filterType\": \"PRICE_FILTER\", \"minPrice\": \"556.80\", \"maxPrice\": \"4529764\", \"tickSize\": \"0.10\"}, {\"filterType\": \"LOT_SIZE\", \"stepSize\": \"0.001\", \"maxQty\": \"1000\", \"minQty\": \"0.001\"}, {\"filterType\": \"MIN_NOTIONAL\", \"notional\": \"100\"}]}, {\"symbol\": \"ETHUSDT\", \"status\": \"TRADING\", \"leverageBracket\": [{\"initialLeverage\": 20}], \"filters\": [{\"filterType\": \"PRICE_FILTER\", \"tickSize\": \"0.01\"}, {\"filterType\": \"LOT_SIZE\", \"stepSize\": \"0.001\"}]}, {\"symbol\": \"1000PEPEUSDT\", \"status\": \"TRADING\", \"filters\": [{\"filterType\": \"PRICE_FILTER\", \"tickSize\": \"0.0000001\"}, {\"filterType\": \"LOT_SIZE\", \"stepSize\": \"1\"}]}, {\"symbol\": \"SOLUSDT\", \"status\": \"SETTLING\", \"filters\": []}, {\"symbol\": \"DOGEUSDT\", \"status\": \"TRADING\", \"filters\": [{\"filterType\": \"PRICE_FILTER\", \"tickSize\": \"\"}, {\"filterType\": \"LOT_SIZE\", \"stepSize\": \"1\"}]}]}"
+}
+]
+},
+{
+"method": "POST",
+"path": "/fapi/v1/order",
+"responses": [
+{
+"status": 200,
+"text": "null"
+}
+]
+}
+],
+"state": {},
+"random": [
+0.9164922722714509,
+0.06488548658085247,
+0.6088782716486826,
+0.07034289024285545,
+0.5858118392402192,
+0.7038115603746077
+],
+"clock": 1767225600.0
+},
+"expected": {
+"name": "fz_02_close_position_short_error_fail",
+"result": {
+"ok": false,
+"order_id": "",
+"error": "'NoneType' object has no attribute 'get'"
+},
+"requests": [
+{
+"method": "GET",
+"url": "https://fapi.binance.com/fapi/v1/exchangeInfo",
+"headers": {},
+"body": null,
+"hdrs": {},
+"wire": {
+"method": "GET",
+"target": "/fapi/v1/exchangeInfo",
+"headers": {
+"accept": "*/*"
+},
+"body": null
+}
+},
+{
+"method": "POST",
+"url": "https://fapi.binance.com/fapi/v1/order?symbol=ETHUSDT&side=BUY&positionSide=SHORT&type=MARKET&quantity=1.500&timestamp=1767225600000&recvWindow=5000&signature=01f35efebdb658ddab469833dea8ab51807cc166b1b447a34fa9d73b00da8c87",
+"headers": {
+"X-MBX-APIKEY": "BNKEY-abc123"
+},
+"body": null,
+"hdrs": {
+"x-mbx-apikey": "BNKEY-abc123"
+},
+"wire": {
+"method": "POST",
+"target": "/fapi/v1/order?symbol=ETHUSDT&side=BUY&positionSide=SHORT&type=MARKET&quantity=1.500&timestamp=1767225600000&recvWindow=5000&signature=01f35efebdb658ddab469833dea8ab51807cc166b1b447a34fa9d73b00da8c87",
+"headers": {
+"x-mbx-apikey": "BNKEY-abc123",
+"accept": "*/*",
+"content-type": "application/octet-stream"
+},
+"body": null
+}
+}
+],
+"sleeps": [],
+"clock_end": 1767225600.0,
+"markers": [],
+"saved": {
+"hedge_saved": [],
+"auth_reset": [],
+"events": [],
+"metrics": []
+},
+"final": {
+"hedge": {},
+"account_type": {},
+"delisted": [],
+"fail_count": {},
+"bybit_offset": 0,
+"binance_base": "https://fapi.binance.com",
+"binance_offset": 0,
+"bingx_offset": 0,
+"okx_offset": 0
+},
+"full_metrics": [],
+"full_events": []
+}
+},
+{
+"scenario": {
+"name": "fz_03_pt_low_notional_boost_mut",
+"exchange": "binance",
+"call": "place_trade",
+"args": [
+"BNKEY-abc123",
+"bn-secret-456",
+"BTC-USDT-SWAP",
+"LONG",
+87000.5,
+86000.0,
+88500.0,
+0.05,
+10
+],
+"kwargs": {
+"allow_low_notional_boost": true
+},
+"routes": [
+{
+"method": "GET",
+"path": "/fapi/v1/exchangeInfo",
+"responses": [
+{
+"text": "{\"timezone\": \"UTC\", \"serverTime\": 1767225600000, \"symbols\": [{\"symbol\": \"BTCUSDT\", \"status\": \"TRADING\", \"filters\": [{\"filterType\": \"PRICE_FILTER\", \"minPrice\": \"556.80\", \"maxPrice\": \"4529764\", \"tickSize\": \"0.10\"}, {\"filterType\": \"LOT_SIZE\", \"stepSize\": \"0.001\", \"maxQty\": \"1000\", \"minQty\": \"0.001\"}, {\"filterType\": \"MIN_NOTIONAL\", \"notional\": \"100\"}]}, {\"symbol\": \"ETHUSDT\", \"status\": \"TRADING\", \"leverageBracket\": [{\"initialLeverage\": 20}], \"filters\": [{\"filterType\": \"PRICE_FILTER\", \"tickSize\": \"0.01\"}, {\"filterType\": \"LOT_SIZE\", \"stepSize\": \"0.001\"}]}, {\"symbol\": \"1000PEPEUSDT\", \"status\": \"TRADING\", \"filters\": [{\"filterType\": \"PRICE_FILTER\", \"tickSize\": \"0.0000001\"}, {\"filterType\": \"LOT_SIZE\", \"stepSize\": \"1\"}]}, {\"symbol\": \"SOLUSDT\", \"status\": \"SETTLING\", \"filters\": []}, {\"symbol\": \"DOGEUSDT\", \"status\": \"TRADING\", \"filters\": [{\"filterType\": \"PRICE_FILTER\", \"tickSize\": \"\"}, {\"filterType\": \"LOT_SIZE\", \"stepSize\": \"1\"}]}]}"
+}
+]
+},
+{
+"method": "GET",
+"path": "/fapi/v2/balance",
+"responses": [
+{
+"text": "[{\"accountAlias\": \"SgsR\", \"asset\": \"BNB\", \"balance\": \"0.10\", \"crossWalletBalance\": \"0.1\", \"crossUnPnl\": \"0.0\", \"availableBalance\": \"0.1\", \"maxWithdrawAmount\": \"0.1\"}, {\"accountAlias\": \"SgsR\", \"asset\": \"USDT\", \"balance\": \"100.0\", \"crossWalletBalance\": \"100.0\", \"crossUnPnl\": \"0.25\", \"availableBalance\": \"900.10\", \"maxWithdrawAmount\": \"900.10\"}]"
+}
+]
+},
+{
+"method": "POST",
+"path": "/fapi/v1/positionSide/dual",
+"responses": [
+{
+"text": "{\"code\": 200, \"msg\": \"success\"}"
+}
+]
+},
+{
+"method": "POST",
+"path": "/fapi/v1/leverage",
+"responses": [
+{
+"text": "{\"leverage\": 10, \"maxNotionalValue\": \"1000000\", \"symbol\": \"BTCUSDT\"}"
+}
+]
+},
+{
+"method": "GET",
+"path": "/fapi/v1/ticker/price",
+"responses": [
+{
+"text": "{\"symbol\": \"BTCUSDT\", \"price\": \"87500.00\", \"time\": 1767225600000}"
+}
+]
+},
+{
+"method": "POST",
+"path": "/fapi/v1/order",
+"responses": [
+{
+"text": "{\"orderId\": 1, \"symbol\": \"BTCUSDT\", \"status\": \"NEW\", \"clientOrderId\": \"x\", \"price\": \"0\", \"avgPrice\": \"0.00000\", \"origQty\": \"0.011\", \"executedQty\": \"0\", \"type\": \"MARKET\"}"
+},
+{
+"text": "{\"orderId\": 2, \"symbol\": \"BTCUSDT\", \"status\": \"NEW\", \"clientOrderId\": \"x\", \"price\": \"0\", \"avgPrice\": \"0.00000\", \"origQty\": \"0.011\", \"executedQty\": \"0\", \"type\": \"MARKET\"}"
+},
+{
+"text": "{\"orderId\": 3, \"symbol\": null, \"status\": \"NEW\", \"clientOrderId\": \"x\", \"price\": \"0\", \"avgPrice\": \"0.00000\", \"origQty\": \"0.011\", \"executedQty\": \"0\", \"type\": \"MARKET\"}"
+}
+]
+}
+],
+"state": {},
+"random": [
+0.8753889700135613,
+0.34439441400210846,
+0.3389780128961939,
+0.7496892608589867,
+0.2563522198448457,
+0.0223513176618918
+],
+"clock": 1767225600.0
+},
+"expected": {
+"name": "fz_03_pt_low_notional_boost_mut",
+"result": {
+"ok": true,
+"order_id": "1",
+"error": "",
+"tp_placed": true,
+"qty": 0.001
+},
+"requests": [
+{
+"method": "GET",
+"url": "https://fapi.binance.com/fapi/v1/exchangeInfo",
+"headers": {},
+"body": null,
+"hdrs": {},
+"wire": {
+"method": "GET",
+"target": "/fapi/v1/exchangeInfo",
+"headers": {
+"accept": "*/*"
+},
+"body": null
+}
+},
+{
+"method": "GET",
+"url": "https://fapi.binance.com/fapi/v2/balance?timestamp=1767225600000&recvWindow=5000&signature=35c66fcf72a2460d05c229397270c691faa54178111eb5f177fb30e60b7cd6ac",
+"headers": {
+"X-MBX-APIKEY": "BNKEY-abc123"
+},
+"body": null,
+"hdrs": {
+"x-mbx-apikey": "BNKEY-abc123"
+},
+"wire": {
+"method": "GET",
+"target": "/fapi/v2/balance?timestamp=1767225600000&recvWindow=5000&signature=35c66fcf72a2460d05c229397270c691faa54178111eb5f177fb30e60b7cd6ac",
+"headers": {
+"x-mbx-apikey": "BNKEY-abc123",
+"accept": "*/*"
+},
+"body": null
+}
+},
+{
+"method": "POST",
+"url": "https://fapi.binance.com/fapi/v1/positionSide/dual?dualSidePosition=true&timestamp=1767225600000&recvWindow=5000&signature=74d605afe74fb8af8155b660e6fcb772f52c8715d77508ba5d1821979003fe27",
+"headers": {
+"X-MBX-APIKEY": "BNKEY-abc123"
+},
+"body": null,
+"hdrs": {
+"x-mbx-apikey": "BNKEY-abc123"
+},
+"wire": {
+"method": "POST",
+"target": "/fapi/v1/positionSide/dual?dualSidePosition=true&timestamp=1767225600000&recvWindow=5000&signature=74d605afe74fb8af8155b660e6fcb772f52c8715d77508ba5d1821979003fe27",
+"headers": {
+"x-mbx-apikey": "BNKEY-abc123",
+"accept": "*/*",
+"content-type": "application/octet-stream"
+},
+"body": null
+}
+},
+{
+"method": "POST",
+"url": "https://fapi.binance.com/fapi/v1/leverage?symbol=BTCUSDT&leverage=10&timestamp=1767225600000&recvWindow=5000&signature=dc240a2d6847e1aa8ffe77a767c194237062d1f43849e8d8e38413bc44546856",
+"headers": {
+"X-MBX-APIKEY": "BNKEY-abc123"
+},
+"body": null,
+"hdrs": {
+"x-mbx-apikey": "BNKEY-abc123"
+},
+"wire": {
+"method": "POST",
+"target": "/fapi/v1/leverage?symbol=BTCUSDT&leverage=10&timestamp=1767225600000&recvWindow=5000&signature=dc240a2d6847e1aa8ffe77a767c194237062d1f43849e8d8e38413bc44546856",
+"headers": {
+"x-mbx-apikey": "BNKEY-abc123",
+"accept": "*/*",
+"content-type": "application/octet-stream"
+},
+"body": null
+}
+},
+{
+"method": "GET",
+"url": "https://fapi.binance.com/fapi/v1/ticker/price?symbol=BTCUSDT",
+"headers": {},
+"body": null,
+"hdrs": {},
+"wire": {
+"method": "GET",
+"target": "/fapi/v1/ticker/price?symbol=BTCUSDT",
+"headers": {
+"accept": "*/*"
+},
+"body": null
+}
+},
+{
+"method": "POST",
+"url": "https://fapi.binance.com/fapi/v1/order?symbol=BTCUSDT&side=BUY&quantity=0.001&positionSide=LONG&type=MARKET&timestamp=1767225600000&recvWindow=5000&signature=bcd4051664b445011cda49fa2e412ee47f00a1e220ab0879b338f30b4916fda8",
+"headers": {
+"X-MBX-APIKEY": "BNKEY-abc123"
+},
+"body": null,
+"hdrs": {
+"x-mbx-apikey": "BNKEY-abc123"
+},
+"wire": {
+"method": "POST",
+"target": "/fapi/v1/order?symbol=BTCUSDT&side=BUY&quantity=0.001&positionSide=LONG&type=MARKET&timestamp=1767225600000&recvWindow=5000&signature=bcd4051664b445011cda49fa2e412ee47f00a1e220ab0879b338f30b4916fda8",
+"headers": {
+"x-mbx-apikey": "BNKEY-abc123",
+"accept": "*/*",
+"content-type": "application/octet-stream"
+},
+"body": null
+}
+},
+{
+"method": "POST",
+"url": "https://fapi.binance.com/fapi/v1/order?symbol=BTCUSDT&side=SELL&type=STOP_MARKET&quantity=0.001&stopPrice=86000.0&workingType=MARK_PRICE&timeInForce=GTC&positionSide=LONG&timestamp=1767225600000&recvWindow=5000&signature=8813eac8843215172a073358218802d05fa20acb510edf477b28f12c94238053",
+"headers": {
+"X-MBX-APIKEY": "BNKEY-abc123"
+},
+"body": null,
+"hdrs": {
+"x-mbx-apikey": "BNKEY-abc123"
+},
+"wire": {
+"method": "POST",
+"target": "/fapi/v1/order?symbol=BTCUSDT&side=SELL&type=STOP_MARKET&quantity=0.001&stopPrice=86000.0&workingType=MARK_PRICE&timeInForce=GTC&positionSide=LONG&timestamp=1767225600000&recvWindow=5000&signature=8813eac8843215172a073358218802d05fa20acb510edf477b28f12c94238053",
+"headers": {
+"x-mbx-apikey": "BNKEY-abc123",
+"accept": "*/*",
+"content-type": "application/octet-stream"
+},
+"body": null
+}
+},
+{
+"method": "POST",
+"url": "https://fapi.binance.com/fapi/v1/order?symbol=BTCUSDT&side=SELL&type=TAKE_PROFIT_MARKET&quantity=0.001&stopPrice=88500.0&workingType=MARK_PRICE&timeInForce=GTC&positionSide=LONG&timestamp=1767225600000&recvWindow=5000&signature=8a37e0a88f53f647bac030432788737062cedc606aa0d6622791cc8b5b93f7f8",
+"headers": {
+"X-MBX-APIKEY": "BNKEY-abc123"
+},
+"body": null,
+"hdrs": {
+"x-mbx-apikey": "BNKEY-abc123"
+},
+"wire": {
+"method": "POST",
+"target": "/fapi/v1/order?symbol=BTCUSDT&side=SELL&type=TAKE_PROFIT_MARKET&quantity=0.001&stopPrice=88500.0&workingType=MARK_PRICE&timeInForce=GTC&positionSide=LONG&timestamp=1767225600000&recvWindow=5000&signature=8a37e0a88f53f647bac030432788737062cedc606aa0d6622791cc8b5b93f7f8",
+"headers": {
+"x-mbx-apikey": "BNKEY-abc123",
+"accept": "*/*",
+"content-type": "application/octet-stream"
+},
+"body": null
+}
+}
+],
+"sleeps": [],
+"clock_end": 1767225600.0,
+"markers": [],
+"saved": {
+"hedge_saved": [],
+"auth_reset": [],
+"events": [],
+"metrics": [
+"trade_placed",
+"trade_placement_latency_ms",
+"sl_tp_attached"
+]
+},
+"final": {
+"hedge": {},
+"account_type": {},
+"delisted": [],
+"fail_count": {},
+"bybit_offset": 0,
+"binance_base": "https://fapi.binance.com",
+"binance_offset": 0,
+"bingx_offset": 0,
+"okx_offset": 0
+},
+"full_metrics": [
+[
+"trade_placed",
+1.0,
+{
+"symbol": "BTC-USDT-SWAP",
+"direction": "LONG",
+"exchange": "binance"
+}
+],
+[
+"trade_placement_latency_ms",
+0.0,
+{
+"symbol": "BTC-USDT-SWAP",
+"direction": "LONG",
+"exchange": "binance"
+}
+],
+[
+"sl_tp_attached",
+1.0,
+{
+"symbol": "BTC-USDT-SWAP",
+"direction": "LONG",
+"exchange": "binance"
+}
+]
+],
+"full_events": []
+}
+},
+{
+"scenario": {
+"name": "fz_04_pt_dual_4061_other_msg_mut",
+"exchange": "binance",
+"call": "place_trade",
+"args": [
+"BNKEY-abc123",
+"bn-secret-456",
+"ETH-USDT-SWAP",
+"SHORT",
+3000.0,
+3060.0,
+2900.0,
+2.0,
+50
+],
+"kwargs": {},
+"routes": [
+{
+"method": "GET",
+"path": "/fapi/v1/exchangeInfo",
+"responses": [
+{
+"text": "{\"timezone\": \"UTC\", \"serverTime\": 1767225600000, \"symbols\": [{\"symbol\": \"BTCUSDT\", \"status\": \"TRADING\", \"filters\": [{\"filterType\": \"PRICE_FILTER\", \"minPrice\": \"556.80\", \"maxPrice\": \"4529764\", \"tickSize\": \"0.10\"}, {\"filterType\": \"LOT_SIZE\", \"stepSize\": \"0.001\", \"maxQty\": \"1000\", \"minQty\": \"0.001\"}, {\"filterType\": \"MIN_NOTIONAL\", \"notional\": \"100\"}]}, {\"symbol\": \"ETHUSDT\", \"status\": \"TRADING\", \"leverageBracket\": [{\"initialLeverage\": 20}], \"filters\": [{\"filterType\": \"PRICE_FILTER\", \"tickSize\": \"0.01\"}, {\"filterType\": \"LOT_SIZE\", \"stepSize\": \"0.001\"}]}, {}, {\"symbol\": \"SOLUSDT\", \"status\": \"SETTLING\", \"filters\": []}, {\"symbol\": \"DOGEUSDT\", \"status\": \"TRADING\", \"filters\": [{\"filterType\": \"PRICE_FILTER\", \"tickSize\": \"\"}, {\"filterType\": \"LOT_SIZE\", \"stepSize\": \"1\"}]}]}"
+}
+]
+},
+{
+"method": "GET",
+"path": "/fapi/v2/balance",
+"responses": [
+{
+"text": "[{\"accountAlias\": \"SgsR\", \"asset\": \"BNB\", \"balance\": \"0.10\", \"crossWalletBalance\": \"0.1\", \"crossUnPnl\": \"0.0\", \"availableBalance\": \"0.1\", \"maxWithdrawAmount\": \"0.1\"}, {\"accountAlias\": \"SgsR\", \"asset\": \"USDT\", \"balance\": \"1000.50\", \"crossWalletBalance\": \"1000.50\", \"crossUnPnl\": \"0.25\", \"availableBalance\": \"900.10\", \"maxWithdrawAmount\": \"900.10\"}]"
+}
+]
+},
+{
+"method": "POST",
+"path": "/fapi/v1/positionSide/dual",
+"responses": [
+{
+"text": "{\"code\": -4061, \"msg\": \"Order's position side does not match user's setting.\"}"
+}
+]
+},
+{
+"method": "POST",
+"path": "/fapi/v1/leverage",
+"responses": [
+{
+"text": "{\"leverage\": 10, \"maxNotionalValue\": \"1000000\", \"symbol\": \"BTCUSDT\"}"
+}
+]
+},
+{
+"method": "GET",
+"path": "/fapi/v1/ticker/price",
+"responses": [
+{
+"text": "{\"symbol\": \"ETHUSDT\", \"price\": \"3100.0\", \"time\": 1767225600000}"
+}
+]
+},
+{
+"method": "POST",
+"path": "/fapi/v1/order",
+"responses": [
+{
+"text": "{\"orderId\": 11, \"symbol\": \"BTCUSDT\", \"status\": \"NEW\", \"clientOrderId\": \"x\", \"price\": \"0\", \"avgPrice\": \"0.00000\", \"origQty\": \"0.011\", \"executedQty\": \"0\", \"type\": \"MARKET\"}"
+},
+{
+"text": "{\"orderId\": 12, \"symbol\": \"BTCUSDT\", \"status\": \"NEW\", \"clientOrderId\": \"x\", \"price\": \"0\", \"avgPrice\": \"0.00000\", \"origQty\": \"0.011\", \"executedQty\": \"0\", \"type\": \"MARKET\"}"
+},
+{
+"text": "{\"orderId\": 13, \"symbol\": \"BTCUSDT\", \"status\": \"NEW\", \"clientOrderId\": \"x\", \"price\": \"0\", \"avgPrice\": \"0.00000\", \"origQty\": \"0.011\", \"executedQty\": \"0\", \"type\": \"MARKET\"}"
+}
+]
+}
+],
+"state": {},
+"random": [
+0.13624166767743473,
+0.7629380918084896,
+0.9143867872421206,
+0.4349114528096363,
+0.07524179294177369,
+0.595772020261443
+],
+"clock": 1767225600.0
+},
+"expected": {
+"name": "fz_04_pt_dual_4061_other_msg_mut",
+"result": {
+"ok": true,
+"order_id": "11",
+"error": "",
+"tp_placed": true,
+"qty": 0.333
+},
+"requests": [
+{
+"method": "GET",
+"url": "https://fapi.binance.com/fapi/v1/exchangeInfo",
+"headers": {},
+"body": null,
+"hdrs": {},
+"wire": {
+"method": "GET",
+"target": "/fapi/v1/exchangeInfo",
+"headers": {
+"accept": "*/*"
+},
+"body": null
+}
+},
+{
+"method": "GET",
+"url": "https://fapi.binance.com/fapi/v2/balance?timestamp=1767225600000&recvWindow=5000&signature=35c66fcf72a2460d05c229397270c691faa54178111eb5f177fb30e60b7cd6ac",
+"headers": {
+"X-MBX-APIKEY": "BNKEY-abc123"
+},
+"body": null,
+"hdrs": {
+"x-mbx-apikey": "BNKEY-abc123"
+},
+"wire": {
+"method": "GET",
+"target": "/fapi/v2/balance?timestamp=1767225600000&recvWindow=5000&signature=35c66fcf72a2460d05c229397270c691faa54178111eb5f177fb30e60b7cd6ac",
+"headers": {
+"x-mbx-apikey": "BNKEY-abc123",
+"accept": "*/*"
+},
+"body": null
+}
+},
+{
+"method": "POST",
+"url": "https://fapi.binance.com/fapi/v1/positionSide/dual?dualSidePosition=true&timestamp=1767225600000&recvWindow=5000&signature=74d605afe74fb8af8155b660e6fcb772f52c8715d77508ba5d1821979003fe27",
+"headers": {
+"X-MBX-APIKEY": "BNKEY-abc123"
+},
+"body": null,
+"hdrs": {
+"x-mbx-apikey": "BNKEY-abc123"
+},
+"wire": {
+"method": "POST",
+"target": "/fapi/v1/positionSide/dual?dualSidePosition=true&timestamp=1767225600000&recvWindow=5000&signature=74d605afe74fb8af8155b660e6fcb772f52c8715d77508ba5d1821979003fe27",
+"headers": {
+"x-mbx-apikey": "BNKEY-abc123",
+"accept": "*/*",
+"content-type": "application/octet-stream"
+},
+"body": null
+}
+},
+{
+"method": "POST",
+"url": "https://fapi.binance.com/fapi/v1/leverage?symbol=ETHUSDT&leverage=20&timestamp=1767225600000&recvWindow=5000&signature=0d2108fec0c2669938d4d4b79ce693fe58899b553ae8e9e9cad80663ed878c8e",
+"headers": {
+"X-MBX-APIKEY": "BNKEY-abc123"
+},
+"body": null,
+"hdrs": {
+"x-mbx-apikey": "BNKEY-abc123"
+},
+"wire": {
+"method": "POST",
+"target": "/fapi/v1/leverage?symbol=ETHUSDT&leverage=20&timestamp=1767225600000&recvWindow=5000&signature=0d2108fec0c2669938d4d4b79ce693fe58899b553ae8e9e9cad80663ed878c8e",
+"headers": {
+"x-mbx-apikey": "BNKEY-abc123",
+"accept": "*/*",
+"content-type": "application/octet-stream"
+},
+"body": null
+}
+},
+{
+"method": "GET",
+"url": "https://fapi.binance.com/fapi/v1/ticker/price?symbol=ETHUSDT",
+"headers": {},
+"body": null,
+"hdrs": {},
+"wire": {
+"method": "GET",
+"target": "/fapi/v1/ticker/price?symbol=ETHUSDT",
+"headers": {
+"accept": "*/*"
+},
+"body": null
+}
+},
+{
+"method": "POST",
+"url": "https://fapi.binance.com/fapi/v1/order?symbol=ETHUSDT&side=SELL&quantity=0.333&positionSide=SHORT&type=MARKET&timestamp=1767225600000&recvWindow=5000&signature=8ed56720541e40396b6c61295a955e3c0dcff5a9866e315b096612815be4e1f8",
+"headers": {
+"X-MBX-APIKEY": "BNKEY-abc123"
+},
+"body": null,
+"hdrs": {
+"x-mbx-apikey": "BNKEY-abc123"
+},
+"wire": {
+"method": "POST",
+"target": "/fapi/v1/order?symbol=ETHUSDT&side=SELL&quantity=0.333&positionSide=SHORT&type=MARKET&timestamp=1767225600000&recvWindow=5000&signature=8ed56720541e40396b6c61295a955e3c0dcff5a9866e315b096612815be4e1f8",
+"headers": {
+"x-mbx-apikey": "BNKEY-abc123",
+"accept": "*/*",
+"content-type": "application/octet-stream"
+},
+"body": null
+}
+},
+{
+"method": "POST",
+"url": "https://fapi.binance.com/fapi/v1/order?symbol=ETHUSDT&side=BUY&type=STOP_MARKET&quantity=0.333&stopPrice=3060.00&workingType=MARK_PRICE&timeInForce=GTC&positionSide=SHORT&timestamp=1767225600000&recvWindow=5000&signature=ae8a2836d439c32b278f5bb421ddcb59fdbab6c680e9e953e380872aa5a9aaf3",
+"headers": {
+"X-MBX-APIKEY": "BNKEY-abc123"
+},
+"body": null,
+"hdrs": {
+"x-mbx-apikey": "BNKEY-abc123"
+},
+"wire": {
+"method": "POST",
+"target": "/fapi/v1/order?symbol=ETHUSDT&side=BUY&type=STOP_MARKET&quantity=0.333&stopPrice=3060.00&workingType=MARK_PRICE&timeInForce=GTC&positionSide=SHORT&timestamp=1767225600000&recvWindow=5000&signature=ae8a2836d439c32b278f5bb421ddcb59fdbab6c680e9e953e380872aa5a9aaf3",
+"headers": {
+"x-mbx-apikey": "BNKEY-abc123",
+"accept": "*/*",
+"content-type": "application/octet-stream"
+},
+"body": null
+}
+},
+{
+"method": "POST",
+"url": "https://fapi.binance.com/fapi/v1/order?symbol=ETHUSDT&side=BUY&type=TAKE_PROFIT_MARKET&quantity=0.333&stopPrice=2900.00&workingType=MARK_PRICE&timeInForce=GTC&positionSide=SHORT&timestamp=1767225600000&recvWindow=5000&signature=bda85720fbf592d8535ad589c29bf81180163bf147e785e162a1f2f9314f3a97",
+"headers": {
+"X-MBX-APIKEY": "BNKEY-abc123"
+},
+"body": null,
+"hdrs": {
+"x-mbx-apikey": "BNKEY-abc123"
+},
+"wire": {
+"method": "POST",
+"target": "/fapi/v1/order?symbol=ETHUSDT&side=BUY&type=TAKE_PROFIT_MARKET&quantity=0.333&stopPrice=2900.00&workingType=MARK_PRICE&timeInForce=GTC&positionSide=SHORT&timestamp=1767225600000&recvWindow=5000&signature=bda85720fbf592d8535ad589c29bf81180163bf147e785e162a1f2f9314f3a97",
+"headers": {
+"x-mbx-apikey": "BNKEY-abc123",
+"accept": "*/*",
+"content-type": "application/octet-stream"
+},
+"body": null
+}
+}
+],
+"sleeps": [],
+"clock_end": 1767225600.0,
+"markers": [],
+"saved": {
+"hedge_saved": [],
+"auth_reset": [],
+"events": [],
+"metrics": [
+"trade_placed",
+"trade_placement_latency_ms",
+"sl_tp_attached"
+]
+},
+"final": {
+"hedge": {},
+"account_type": {},
+"delisted": [],
+"fail_count": {},
+"bybit_offset": 0,
+"binance_base": "https://fapi.binance.com",
+"binance_offset": 0,
+"bingx_offset": 0,
+"okx_offset": 0
+},
+"full_metrics": [
+[
+"trade_placed",
+1.0,
+{
+"symbol": "ETH-USDT-SWAP",
+"direction": "SHORT",
+"exchange": "binance"
+}
+],
+[
+"trade_placement_latency_ms",
+0.0,
+{
+"symbol": "ETH-USDT-SWAP",
+"direction": "SHORT",
+"exchange": "binance"
+}
+],
+[
+"sl_tp_attached",
+1.0,
+{
+"symbol": "ETH-USDT-SWAP",
+"direction": "SHORT",
+"exchange": "binance"
+}
+]
+],
+"full_events": []
+}
+},
+{
+"scenario": {
+"name": "fz_05_breakeven_error_mut",
+"exchange": "binance",
+"call": "set_breakeven",
+"args": [
+"BNKEY-abc123",
+"bn-secret-456",
+"BTC-USDT-SWAP",
+87000.5,
+"LONG"
+],
+"kwargs": {},
+"routes": [
+{
+"method": "GET",
+"path": "/fapi/v1/exchangeInfo",
+"responses": [
+{
+"text": "{\"timezone\": \"UTC\", \"serverTime\": 1767225600000, \"symbols\": [{\"symbol\": \"BTCUSDT\", \"status\": \"TRADING\", \"filters\": [{\"filterType\": \"PRICE_FILTER\", \"minPrice\": \"556.80\", \"maxPrice\": \"4529764\", \"tickSize\": \"0.10\"}, {\"filterType\": \"LOT_SIZE\", \"stepSize\": \"0.001\", \"maxQty\": \"1000\", \"minQty\": \"0.001\"}, {\"filterType\": \"MIN_NOTIONAL\", \"notional\": \"100\"}]}, {\"symbol\": \"ETHUSDT\", \"status\": \"TRADING\", \"leverageBracket\": [{\"initialLeverage\": 20}], \"filters\": [{\"filterType\": \"PRICE_FILTER\", \"tickSize\": \"0.01\"}, {\"filterType\": \"LOT_SIZE\", \"stepSize\": \"0.001\"}]}, {\"symbol\": \"1000PEPEUSDT\", \"status\": \"TRADING\", \"filters\": [{\"filterType\": \"PRICE_FILTER\", \"tickSize\": \"0.0000001\"}, {\"filterType\": \"LOT_SIZE\", \"stepSize\": \"1\"}]}, {\"symbol\": \"SOLUSDT\", \"status\": \"SETTLING\", \"filters\": []}, {\"symbol\": \"DOGEUSDT\", \"status\": \"TRADING\", \"filters\": []}]}"
+}
+]
+},
+{
+"method": "GET",
+"path": "/fapi/v1/openOrders",
+"responses": [
+{
+"text": "[]"
+}
+]
+},
+{
+"method": "GET",
+"path": "/fapi/v2/positionRisk",
+"responses": [
+{
+"text": "[{\"symbol\": \"BTCUSDT\", \"positionAmt\": \"0.011\", \"entryPrice\": \"87000.5\", \"markPrice\": \"87010.1\", \"unRealizedProfit\": \"0.11\", \"liquidationPrice\": \"0\", \"leverage\": \"10\", \"positionSide\": \"LONG\"}, {\"symbol\": \"BTCUSDT\", \"positionAmt\": \"0.000\", \"entryPrice\": \"0.0\", \"markPrice\": \"87010.1\", \"unRealizedProfit\": \"0.0\", \"leverage\": \"10\", \"positionSide\": \"SHORT\"}]"
+}
+]
+},
+{
+"method": "POST",
+"path": "/fapi/v1/order",
+"responses": [
+{
+"text": "{\"code\": -4131, \"msg\": \"x\"}"
+}
+]
+}
+],
+"state": {},
+"random": [
+0.34088561498506087,
+0.7971527223137558,
+0.23920101351699985,
+0.4246709285647833,
+0.36629638752806715,
+0.8471390155175237
+],
+"clock": 1767225600.0
+},
+"expected": {
+"name": "fz_05_breakeven_error_mut",
+"result": {
+"ok": false,
+"error": "Неизвестная ошибка Binance."
+},
+"requests": [
+{
+"method": "GET",
+"url": "https://fapi.binance.com/fapi/v1/exchangeInfo",
+"headers": {},
+"body": null,
+"hdrs": {},
+"wire": {
+"method": "GET",
+"target": "/fapi/v1/exchangeInfo",
+"headers": {
+"accept": "*/*"
+},
+"body": null
+}
+},
+{
+"method": "GET",
+"url": "https://fapi.binance.com/fapi/v1/openOrders?symbol=BTCUSDT&timestamp=1767225600000&recvWindow=5000&signature=13921ec8d587fd67e30b45105c5851a9080e63d1fbf7a0745ede801947e81623",
+"headers": {
+"X-MBX-APIKEY": "BNKEY-abc123"
+},
+"body": null,
+"hdrs": {
+"x-mbx-apikey": "BNKEY-abc123"
+},
+"wire": {
+"method": "GET",
+"target": "/fapi/v1/openOrders?symbol=BTCUSDT&timestamp=1767225600000&recvWindow=5000&signature=13921ec8d587fd67e30b45105c5851a9080e63d1fbf7a0745ede801947e81623",
+"headers": {
+"x-mbx-apikey": "BNKEY-abc123",
+"accept": "*/*"
+},
+"body": null
+}
+},
+{
+"method": "GET",
+"url": "https://fapi.binance.com/fapi/v2/positionRisk?symbol=BTCUSDT&timestamp=1767225600000&recvWindow=5000&signature=13921ec8d587fd67e30b45105c5851a9080e63d1fbf7a0745ede801947e81623",
+"headers": {
+"X-MBX-APIKEY": "BNKEY-abc123"
+},
+"body": null,
+"hdrs": {
+"x-mbx-apikey": "BNKEY-abc123"
+},
+"wire": {
+"method": "GET",
+"target": "/fapi/v2/positionRisk?symbol=BTCUSDT&timestamp=1767225600000&recvWindow=5000&signature=13921ec8d587fd67e30b45105c5851a9080e63d1fbf7a0745ede801947e81623",
+"headers": {
+"x-mbx-apikey": "BNKEY-abc123",
+"accept": "*/*"
+},
+"body": null
+}
+},
+{
+"method": "POST",
+"url": "https://fapi.binance.com/fapi/v1/order?symbol=BTCUSDT&side=SELL&positionSide=LONG&type=STOP_MARKET&quantity=0.011&stopPrice=87000.5&workingType=MARK_PRICE&timeInForce=GTC&timestamp=1767225600000&recvWindow=5000&signature=216665890fef909847796be2db72fe1f1cbc380909305db43f90e181bc06d071",
+"headers": {
+"X-MBX-APIKEY": "BNKEY-abc123"
+},
+"body": null,
+"hdrs": {
+"x-mbx-apikey": "BNKEY-abc123"
+},
+"wire": {
+"method": "POST",
+"target": "/fapi/v1/order?symbol=BTCUSDT&side=SELL&positionSide=LONG&type=STOP_MARKET&quantity=0.011&stopPrice=87000.5&workingType=MARK_PRICE&timeInForce=GTC&timestamp=1767225600000&recvWindow=5000&signature=216665890fef909847796be2db72fe1f1cbc380909305db43f90e181bc06d071",
+"headers": {
+"x-mbx-apikey": "BNKEY-abc123",
+"accept": "*/*",
+"content-type": "application/octet-stream"
+},
+"body": null
+}
+}
+],
+"sleeps": [],
+"clock_end": 1767225600.0,
+"markers": [],
+"saved": {
+"hedge_saved": [],
+"auth_reset": [],
+"events": [],
+"metrics": []
+},
+"final": {
+"hedge": {},
+"account_type": {},
+"delisted": [],
+"fail_count": {},
+"bybit_offset": 0,
+"binance_base": "https://fapi.binance.com",
+"binance_offset": 0,
+"bingx_offset": 0,
+"okx_offset": 0
+},
+"full_metrics": [],
+"full_events": []
+}
+},
+{
+"scenario": {
+"name": "fz_06_pt_zero_balance_mut",
+"exchange": "binance",
+"call": "place_trade",
+"args": [
+"BNKEY-abc123",
+"bn-secret-456",
+"BTC-USDT-SWAP",
+"LONG",
+87000.5,
+86000.0,
+88500.0,
+1.0,
+10
+],
+"kwargs": {},
+"routes": [
+{
+"method": "GET",
+"path": "/fapi/v1/exchangeInfo",
+"responses": [
+{
+"text": "{\"timezone\": \"UTC\", \"serverTime\": 1767225600000, \"symbols\": [{\"symbol\": \"BTCUSDT\", \"status\": \"TRADING\", \"filters\": [{\"filterType\": \"PRICE_FILTER\", \"minPrice\": \"556.80\", \"maxPrice\": \"4529764\", \"tickSize\": \"0.10\"}, {\"filterType\": \"LOT_SIZE\", \"stepSize\": \"0.001\", \"maxQty\": \"1000\", \"minQty\": \"0.001\"}, {\"filterType\": \"MIN_NOTIONAL\", \"notional\": \"100\"}]}, {\"symbol\": \"ETHUSDT\", \"status\": \"TRADING\", \"filters\": [{\"filterType\": \"PRICE_FILTER\", \"tickSize\": \"0.01\"}, {\"filterType\": \"LOT_SIZE\", \"stepSize\": \"0.001\"}]}, {\"symbol\": \"1000PEPEUSDT\", \"status\": \"TRADING\", \"filters\": [{\"filterType\": \"PRICE_FILTER\", \"tickSize\": \"0.0000001\"}, {\"filterType\": \"LOT_SIZE\", \"stepSize\": \"1\"}]}, {\"symbol\": \"SOLUSDT\", \"status\": \"SETTLING\", \"filters\": []}, {\"symbol\": \"DOGEUSDT\", \"status\": \"TRADING\", \"filters\": [{\"filterType\": \"PRICE_FILTER\", \"tickSize\": \"\"}, {\"filterType\": \"LOT_SIZE\", \"stepSize\": \"1\"}]}]}"
+}
+]
+},
+{
+"method": "GET",
+"path": "/fapi/v2/balance",
+"responses": [
+{
+"text": "{\"code\": -2015, \"msg\": \"Invalid API-key, IP, or permissions for action.\"}"
+}
+]
+}
+],
+"state": {},
+"random": [
+0.20040877872484408,
+0.2146742233602389,
+0.8822112662767583,
+0.41419038950199294,
+0.17152288818618366,
+0.16474695672320772
+],
+"clock": 1767225600.0
+},
+"expected": {
+"name": "fz_06_pt_zero_balance_mut",
+"result": {
+"ok": false,
+"order_id": "",
+"error": "Нулевой баланс Binance."
+},
+"requests": [
+{
+"method": "GET",
+"url": "https://fapi.binance.com/fapi/v1/exchangeInfo",
+"headers": {},
+"body": null,
+"hdrs": {},
+"wire": {
+"method": "GET",
+"target": "/fapi/v1/exchangeInfo",
+"headers": {
+"accept": "*/*"
+},
+"body": null
+}
+},
+{
+"method": "GET",
+"url": "https://fapi.binance.com/fapi/v2/balance?timestamp=1767225600000&recvWindow=5000&signature=35c66fcf72a2460d05c229397270c691faa54178111eb5f177fb30e60b7cd6ac",
+"headers": {
+"X-MBX-APIKEY": "BNKEY-abc123"
+},
+"body": null,
+"hdrs": {
+"x-mbx-apikey": "BNKEY-abc123"
+},
+"wire": {
+"method": "GET",
+"target": "/fapi/v2/balance?timestamp=1767225600000&recvWindow=5000&signature=35c66fcf72a2460d05c229397270c691faa54178111eb5f177fb30e60b7cd6ac",
+"headers": {
+"x-mbx-apikey": "BNKEY-abc123",
+"accept": "*/*"
+},
+"body": null
+}
+}
+],
+"sleeps": [],
+"clock_end": 1767225600.0,
+"markers": [],
+"saved": {
+"hedge_saved": [],
+"auth_reset": [],
+"events": [],
+"metrics": []
+},
+"final": {
+"hedge": {},
+"account_type": {},
+"delisted": [],
+"fail_count": {},
+"bybit_offset": 0,
+"binance_base": "https://fapi.binance.com",
+"binance_offset": 0,
+"bingx_offset": 0,
+"okx_offset": 0
+},
+"full_metrics": [],
+"full_events": []
+}
+},
+{
+"scenario": {
+"name": "fz_07_sltp_for_position_no_sl_mut",
+"exchange": "binance",
+"call": "place_sl_tp_for_position",
+"args": [
+"BNKEY-abc123",
+"bn-secret-456",
+"BTC-USDT-SWAP",
+"LONG",
+0.011,
+0.0,
+88500.0
+],
+"kwargs": {},
+"routes": [
+{
+"method": "GET",
+"path": "/fapi/v1/exchangeInfo",
+"responses": [
+{
+"text": "{\"timezone\": \"UTC\", \"serverTime\": 1767225600000, \"symbols\": [{\"symbol\": \"BTCUSDT\", \"status\": \"TRADING\", \"filters\": [{\"filterType\": \"PRICE_FILTER\", \"minPrice\": \"556.80\", \"maxPrice\": \"4529764\", \"tickSize\": \"0.10\"}, {\"filterType\": \"LOT_SIZE\", \"stepSize\": \"0.001\", \"maxQty\": \"1000\", \"minQty\": \"0.001\"}, {\"filterType\": \"MIN_NOTIONAL\", \"notional\": \"100\"}]}, {\"symbol\": \"ETHUSDT\", \"status\": \"TRADING\", \"leverageBracket\": [{\"initialLeverage\": 20}], \"filters\": [{\"filterType\": \"PRICE_FILTER\", \"tickSize\": \"0.01\"}, {\"filterType\": \"LOT_SIZE\", \"stepSize\": \"0.001\"}]}, {\"symbol\": \"1000PEPEUSDT\", \"status\": \"TRADING\", \"filters\": [{\"filterType\": \"PRICE_FILTER\", \"tickSize\": \"0.0000001\"}, {\"filterType\": \"LOT_SIZE\", \"stepSize\": \"1\"}]}, {\"symbol\": \"SOLUSDT\", \"status\": \"SETTLING\", \"filters\": []}, {\"symbol\": \"DOGEUSDT\", \"status\": \"TRADING\", \"filters\": [{\"filterType\": \"PRICE_FILTER\", \"tickSize\": \"\"}, {\"filterType\": \"LOT_SIZE\", \"stepSize\": \"1\"}]}]}"
+}
+]
+},
+{
+"method": "POST",
+"path": "/fapi/v1/order",
+"responses": [
+{
+"text": "{\"orderId\": 1, \"symbol\": \"BTCUSDT\", \"status\": \"NEW\", \"clientOrderId\": \"0.00000001\", \"price\": \"0\", \"avgPrice\": \"0.00000\", \"origQty\": \"0.011\", \"executedQty\": \"0\", \"type\": \"MARKET\"}"
+}
+]
+},
+{
+"method": "GET",
+"path": "/fapi/v1/openOrders",
+"responses": [
+{
+"text": "\"not-a-list\""
+},
+{
+"text": "[{\"orderId\": 1, \"symbol\": \"BTCUSDT\", \"type\": \"TAKE_PROFIT_MARKET\", \"side\": \"SELL\", \"positionSide\": \"LONG\", \"price\": \"0\", \"origQty\": \"0.011\", \"stopPrice\": \"86000.0\"}]"
+}
+]
+}
+],
+"state": {},
+"random": [
+0.49608758484662785,
+0.7689673601918191,
+0.3732959888826798,
+0.25753218242786813,
+0.26893340008290834,
+0.00810301242350242
+],
+"clock": 1767225600.0
+},
+"expected": {
+"name": "fz_07_sltp_for_position_no_sl_mut",
+"result": {
+"sl_placed": false,
+"tp_placed": true
+},
+"requests": [
+{
+"method": "GET",
+"url": "https://fapi.binance.com/fapi/v1/exchangeInfo",
+"headers": {},
+"body": null,
+"hdrs": {},
+"wire": {
+"method": "GET",
+"target": "/fapi/v1/exchangeInfo",
+"headers": {
+"accept": "*/*"
+},
+"body": null
+}
+},
+{
+"method": "GET",
+"url": "https://fapi.binance.com/fapi/v1/openOrders?symbol=BTCUSDT&timestamp=1767225600000&recvWindow=5000&signature=13921ec8d587fd67e30b45105c5851a9080e63d1fbf7a0745ede801947e81623",
+"headers": {
+"X-MBX-APIKEY": "BNKEY-abc123"
+},
+"body": null,
+"hdrs": {
+"x-mbx-apikey": "BNKEY-abc123"
+},
+"wire": {
+"method": "GET",
+"target": "/fapi/v1/openOrders?symbol=BTCUSDT&timestamp=1767225600000&recvWindow=5000&signature=13921ec8d587fd67e30b45105c5851a9080e63d1fbf7a0745ede801947e81623",
+"headers": {
+"x-mbx-apikey": "BNKEY-abc123",
+"accept": "*/*"
+},
+"body": null
+}
+},
+{
+"method": "POST",
+"url": "https://fapi.binance.com/fapi/v1/order?symbol=BTCUSDT&side=SELL&positionSide=LONG&type=TAKE_PROFIT_MARKET&quantity=0.011&stopPrice=88500.0&workingType=MARK_PRICE&timeInForce=GTC&timestamp=1767225600000&recvWindow=5000&signature=dbf185fc23b4ccfcb2817f6b7b530f8339de362d1d08113041ffd82e67ec7dcd",
+"headers": {
+"X-MBX-APIKEY": "BNKEY-abc123"
+},
+"body": null,
+"hdrs": {
+"x-mbx-apikey": "BNKEY-abc123"
+},
+"wire": {
+"method": "POST",
+"target": "/fapi/v1/order?symbol=BTCUSDT&side=SELL&positionSide=LONG&type=TAKE_PROFIT_MARKET&quantity=0.011&stopPrice=88500.0&workingType=MARK_PRICE&timeInForce=GTC&timestamp=1767225600000&recvWindow=5000&signature=dbf185fc23b4ccfcb2817f6b7b530f8339de362d1d08113041ffd82e67ec7dcd",
+"headers": {
+"x-mbx-apikey": "BNKEY-abc123",
+"accept": "*/*",
+"content-type": "application/octet-stream"
+},
+"body": null
+}
+},
+{
+"method": "GET",
+"url": "https://fapi.binance.com/fapi/v1/openOrders?symbol=BTCUSDT&timestamp=1767225602000&recvWindow=5000&signature=055c56424e45ff3cce6f803106ed3d3760cf4bb7cff249858c0ade4c0d616a7b",
+"headers": {
+"X-MBX-APIKEY": "BNKEY-abc123"
+},
+"body": null,
+"hdrs": {
+"x-mbx-apikey": "BNKEY-abc123"
+},
+"wire": {
+"method": "GET",
+"target": "/fapi/v1/openOrders?symbol=BTCUSDT&timestamp=1767225602000&recvWindow=5000&signature=055c56424e45ff3cce6f803106ed3d3760cf4bb7cff249858c0ade4c0d616a7b",
+"headers": {
+"x-mbx-apikey": "BNKEY-abc123",
+"accept": "*/*"
+},
+"body": null
+}
+}
+],
+"sleeps": [
+2.0
+],
+"clock_end": 1767225602.0,
+"markers": [
+[
+"DEBUG",
+"[TP-VERIFIED]"
+]
+],
+"saved": {
+"hedge_saved": [],
+"auth_reset": [],
+"events": [],
+"metrics": []
+},
+"final": {
+"hedge": {},
+"account_type": {},
+"delisted": [],
+"fail_count": {},
+"bybit_offset": 0,
+"binance_base": "https://fapi.binance.com",
+"binance_offset": 0,
+"bingx_offset": 0,
+"okx_offset": 0
+},
+"full_metrics": [],
+"full_events": []
+}
+},
+{
+"scenario": {
+"name": "fz_08_breakeven_error_mut",
+"exchange": "binance",
+"call": "set_breakeven",
+"args": [
+"BNKEY-abc123",
+"bn-secret-456",
+"BTC-USDT-SWAP",
+87000.5,
+"LONG"
+],
+"kwargs": {},
+"routes": [
+{
+"method": "GET",
+"path": "/fapi/v1/exchangeInfo",
+"responses": [
+{
+"text": "{\"timezone\": \"UTC\", \"serverTime\": 1767225600000, \"symbols\": [{\"symbol\": \"BTCUSDT\", \"status\": \"TRADING\", \"filters\": [{\"filterType\": \"PRICE_FILTER\", \"minPrice\": \"556.80\", \"maxPrice\": \"4529764\", \"tickSize\": \"0.10\"}, {\"filterType\": \"LOT_SIZE\", \"stepSize\": \"0.001\", \"maxQty\": \"1000\", \"minQty\": \"0.001\"}, {\"filterType\": \"MIN_NOTIONAL\", \"notional\": \"100\"}]}, {\"symbol\": \"ETHUSDT\", \"status\": \"TRADING\", \"leverageBracket\": [{\"initialLeverage\": 20}], \"filters\": [{\"filterType\": \"PRICE_FILTER\", \"tickSize\": \"0.01\"}, {\"filterType\": \"LOT_SIZE\", \"stepSize\": \"0.001\"}]}, {\"symbol\": \"1000PEPEUSDT\", \"status\": \"TRADING\", \"filters\": [{\"filterType\": \"PRICE_FILTER\", \"tickSize\": \"0.0000001\"}, {\"filterType\": \"LOT_SIZE\", \"stepSize\": \"1\"}]}, {\"symbol\": \"SOLUSDT\", \"status\": \"SETTLING\", \"filters\": []}, {\"symbol\": \"DOGEUSDT\", \"status\": \"TRADING\", \"filters\": [{\"filterType\": \"PRICE_FILTER\", \"tickSize\": \"\"}, {\"filterType\": \"LOT_SIZE\", \"stepSize\": \"1\"}]}]}"
+}
+]
+},
+{
+"method": "GET",
+"path": "/fapi/v1/openOrders",
+"responses": [
+{
+"text": "null"
+}
+]
+},
+{
+"method": "GET",
+"path": "/fapi/v2/positionRisk",
+"responses": [
+{
+"text": "[{\"symbol\": \"BTCUSDT\", \"positionAmt\": \"0.011\", \"entryPrice\": \"87000.5\", \"markPrice\": \"87010.1\", \"unRealizedProfit\": \"0.11\", \"liquidationPrice\": \"0\", \"leverage\": \"10\", \"positionSide\": \"LONG\"}, {\"symbol\": \"BTCUSDT\", \"positionAmt\": \"0.000\", \"entryPrice\": \"0.0\", \"markPrice\": \"87010.1\", \"unRealizedProfit\": \"0.0\", \"leverage\": \"10\", \"positionSide\": \"SHORT\"}]"
+}
+]
+},
+{
+"method": "POST",
+"path": "/fapi/v1/order",
+"responses": [
+{
+"text": "{\"code\": -4131, \"msg\": \"x\"}"
+}
+]
+}
+],
+"state": {},
+"random": [
+0.4899307332096552,
+0.4110463341471682,
+0.7155086762229153,
+0.5333917753431239,
+0.4301006520835119,
+0.4974382729023149
+],
+"clock": 1767225600.0
+},
+"expected": {
+"name": "fz_08_breakeven_error_mut",
+"result": {
+"ok": false,
+"error": "Неизвестная ошибка Binance."
+},
+"requests": [
+{
+"method": "GET",
+"url": "https://fapi.binance.com/fapi/v1/exchangeInfo",
+"headers": {},
+"body": null,
+"hdrs": {},
+"wire": {
+"method": "GET",
+"target": "/fapi/v1/exchangeInfo",
+"headers": {
+"accept": "*/*"
+},
+"body": null
+}
+},
+{
+"method": "GET",
+"url": "https://fapi.binance.com/fapi/v1/openOrders?symbol=BTCUSDT&timestamp=1767225600000&recvWindow=5000&signature=13921ec8d587fd67e30b45105c5851a9080e63d1fbf7a0745ede801947e81623",
+"headers": {
+"X-MBX-APIKEY": "BNKEY-abc123"
+},
+"body": null,
+"hdrs": {
+"x-mbx-apikey": "BNKEY-abc123"
+},
+"wire": {
+"method": "GET",
+"target": "/fapi/v1/openOrders?symbol=BTCUSDT&timestamp=1767225600000&recvWindow=5000&signature=13921ec8d587fd67e30b45105c5851a9080e63d1fbf7a0745ede801947e81623",
+"headers": {
+"x-mbx-apikey": "BNKEY-abc123",
+"accept": "*/*"
+},
+"body": null
+}
+},
+{
+"method": "GET",
+"url": "https://fapi.binance.com/fapi/v2/positionRisk?symbol=BTCUSDT&timestamp=1767225600000&recvWindow=5000&signature=13921ec8d587fd67e30b45105c5851a9080e63d1fbf7a0745ede801947e81623",
+"headers": {
+"X-MBX-APIKEY": "BNKEY-abc123"
+},
+"body": null,
+"hdrs": {
+"x-mbx-apikey": "BNKEY-abc123"
+},
+"wire": {
+"method": "GET",
+"target": "/fapi/v2/positionRisk?symbol=BTCUSDT&timestamp=1767225600000&recvWindow=5000&signature=13921ec8d587fd67e30b45105c5851a9080e63d1fbf7a0745ede801947e81623",
+"headers": {
+"x-mbx-apikey": "BNKEY-abc123",
+"accept": "*/*"
+},
+"body": null
+}
+},
+{
+"method": "POST",
+"url": "https://fapi.binance.com/fapi/v1/order?symbol=BTCUSDT&side=SELL&positionSide=LONG&type=STOP_MARKET&quantity=0.011&stopPrice=87000.5&workingType=MARK_PRICE&timeInForce=GTC&timestamp=1767225600000&recvWindow=5000&signature=216665890fef909847796be2db72fe1f1cbc380909305db43f90e181bc06d071",
+"headers": {
+"X-MBX-APIKEY": "BNKEY-abc123"
+},
+"body": null,
+"hdrs": {
+"x-mbx-apikey": "BNKEY-abc123"
+},
+"wire": {
+"method": "POST",
+"target": "/fapi/v1/order?symbol=BTCUSDT&side=SELL&positionSide=LONG&type=STOP_MARKET&quantity=0.011&stopPrice=87000.5&workingType=MARK_PRICE&timeInForce=GTC&timestamp=1767225600000&recvWindow=5000&signature=216665890fef909847796be2db72fe1f1cbc380909305db43f90e181bc06d071",
+"headers": {
+"x-mbx-apikey": "BNKEY-abc123",
+"accept": "*/*",
+"content-type": "application/octet-stream"
+},
+"body": null
+}
+}
+],
+"sleeps": [],
+"clock_end": 1767225600.0,
+"markers": [],
+"saved": {
+"hedge_saved": [],
+"auth_reset": [],
+"events": [],
+"metrics": []
+},
+"final": {
+"hedge": {},
+"account_type": {},
+"delisted": [],
+"fail_count": {},
+"bybit_offset": 0,
+"binance_base": "https://fapi.binance.com",
+"binance_offset": 0,
+"bingx_offset": 0,
+"okx_offset": 0
+},
+"full_metrics": [],
+"full_events": []
+}
+},
+{
+"scenario": {
+"name": "fz_09_pt_entry_duplicate_4015_mut",
+"exchange": "binance",
+"call": "place_trade",
+"args": [
+"BNKEY-abc123",
+"bn-secret-456",
+"BTC-USDT-SWAP",
+"LONG",
+87000.5,
+86000.0,
+88500.0,
+1.0,
+10
+],
+"kwargs": {
+"tp2": 89500.0,
+"tp3": 90500.0,
+"trade_id": "bn-1",
+"user_id": 42
+},
+"routes": [
+{
+"method": "GET",
+"path": "/fapi/v1/exchangeInfo",
+"responses": [
+{
+"text": "{\"timezone\": \"UTC\", \"serverTime\": 1767225600000, \"symbols\": [{\"symbol\": \"BTCUSDT\", \"status\": \"TRADING\", \"filters\": [{\"filterType\": \"PRICE_FILTER\", \"minPrice\": \"556.80\", \"maxPrice\": \"4529764\", \"tickSize\": \"0.10\"}, {\"filterType\": \"LOT_SIZE\", \"stepSize\": \"0.001\", \"maxQty\": \"1000\", \"minQty\": \"0.001\"}, {\"filterType\": \"MIN_NOTIONAL\", \"notional\": \"100\"}]}, {\"symbol\": \"ETHUSDT\", \"status\": \"TRADING\", \"leverageBracket\": [{\"initialLeverage\": 20}], \"filters\": [{\"filterType\": \"PRICE_FILTER\", \"tickSize\": \"0.01\"}, {\"filterType\": \"LOT_SIZE\", \"stepSize\": \"0.001\"}]}, {\"symbol\": \"1000PEPEUSDT\", \"status\": \"TRADING\", \"filters\": [{\"filterType\": \"PRICE_FILTER\", \"tickSize\": \"0.0000001\"}, {\"filterType\": \"LOT_SIZE\", \"stepSize\": \"1\"}]}, {\"symbol\": \"SOLUSDT\", \"status\": \"SETTLING\", \"filters\": []}, {\"symbol\": \"DOGEUSDT\", \"status\": \"TRADING\", \"filters\": [{\"filterType\": \"PRICE_FILTER\", \"tickSize\": \"\"}, {\"filterType\": \"LOT_SIZE\", \"stepSize\": \"1\"}]}]}"
+}
+]
+},
+{
+"method": "GET",
+"path": "/fapi/v2/balance",
+"responses": [
+{
+"text": "[{\"accountAlias\": \"SgsR\", \"asset\": \"BNB\", \"balance\": \"0.10\", \"crossWalletBalance\": \"0.1\", \"crossUnPnl\": \"null\", \"availableBalance\": \"0.1\", \"maxWithdrawAmount\": \"0.1\"}, {\"accountAlias\": \"SgsR\", \"asset\": \"USDT\", \"balance\": \"1000.50\", \"crossWalletBalance\": \"1000.50\", \"crossUnPnl\": \"0.25\", \"availableBalance\": \"900.10\", \"maxWithdrawAmount\": \"900.10\"}]"
+}
+]
+},
+{
+"method": "POST",
+"path": "/fapi/v1/positionSide/dual",
+"responses": [
+{
+"text": "{\"code\": 200, \"msg\": \"success\"}"
+}
+]
+},
+{
+"method": "POST",
+"path": "/fapi/v1/leverage",
+"responses": [
+{
+"text": "{\"leverage\": 10, \"maxNotionalValue\": \"1000000\", \"symbol\": \"BTCUSDT\"}"
+}
+]
+},
+{
+"method": "POST",
+"path": "/fapi/v1/batchOrders",
+"responses": [
+{
+"text": "{\"code\": -1022, \"msg\": \"Signature for this request is not valid.\"}"
+}
+]
+},
+{
+"method": "GET",
+"path": "/fapi/v1/ticker/price",
+"responses": [
+{
+"text": "{\"symbol\": \"BTCUSDT\", \"price\": \"88000.00\", \"time\": 1767225600000}"
+}
+]
+},
+{
+"method": "POST",
+"path": "/fapi/v1/order",
+"responses": [
+{
+"text": "{\"code\": -4015, \"msg\": \"Client order id is not valid.\"}"
+}
+]
+}
+],
+"state": {},
+"random": [
+0.3991872212605615,
+0.12019718508194455,
+0.7274520859130132,
+0.4010888469151831,
+0.14680449490456215,
+0.3112327659216406
+],
+"clock": 1767225600.0
+},
+"expected": {
+"name": "fz_09_pt_entry_duplicate_4015_mut",
+"result": {
+"ok": true,
+"order_id": "chm_c11a32f12b1a",
+"error": "",
+"tp_placed": false,
+"duplicate": true,
+"qty": 0.01
+},
+"requests": [
+{
+"method": "GET",
+"url": "https://fapi.binance.com/fapi/v1/exchangeInfo",
+"headers": {},
+"body": null,
+"hdrs": {},
+"wire": {
+"method": "GET",
+"target": "/fapi/v1/exchangeInfo",
+"headers": {
+"accept": "*/*"
+},
+"body": null
+}
+},
+{
+"method": "GET",
+"url": "https://fapi.binance.com/fapi/v2/balance?timestamp=1767225600000&recvWindow=5000&signature=35c66fcf72a2460d05c229397270c691faa54178111eb5f177fb30e60b7cd6ac",
+"headers": {
+"X-MBX-APIKEY": "BNKEY-abc123"
+},
+"body": null,
+"hdrs": {
+"x-mbx-apikey": "BNKEY-abc123"
+},
+"wire": {
+"method": "GET",
+"target": "/fapi/v2/balance?timestamp=1767225600000&recvWindow=5000&signature=35c66fcf72a2460d05c229397270c691faa54178111eb5f177fb30e60b7cd6ac",
+"headers": {
+"x-mbx-apikey": "BNKEY-abc123",
+"accept": "*/*"
+},
+"body": null
+}
+},
+{
+"method": "POST",
+"url": "https://fapi.binance.com/fapi/v1/positionSide/dual?dualSidePosition=true&timestamp=1767225600000&recvWindow=5000&signature=74d605afe74fb8af8155b660e6fcb772f52c8715d77508ba5d1821979003fe27",
+"headers": {
+"X-MBX-APIKEY": "BNKEY-abc123"
+},
+"body": null,
+"hdrs": {
+"x-mbx-apikey": "BNKEY-abc123"
+},
+"wire": {
+"method": "POST",
+"target": "/fapi/v1/positionSide/dual?dualSidePosition=true&timestamp=1767225600000&recvWindow=5000&signature=74d605afe74fb8af8155b660e6fcb772f52c8715d77508ba5d1821979003fe27",
+"headers": {
+"x-mbx-apikey": "BNKEY-abc123",
+"accept": "*/*",
+"content-type": "application/octet-stream"
+},
+"body": null
+}
+},
+{
+"method": "POST",
+"url": "https://fapi.binance.com/fapi/v1/leverage?symbol=BTCUSDT&leverage=10&timestamp=1767225600000&recvWindow=5000&signature=dc240a2d6847e1aa8ffe77a767c194237062d1f43849e8d8e38413bc44546856",
+"headers": {
+"X-MBX-APIKEY": "BNKEY-abc123"
+},
+"body": null,
+"hdrs": {
+"x-mbx-apikey": "BNKEY-abc123"
+},
+"wire": {
+"method": "POST",
+"target": "/fapi/v1/leverage?symbol=BTCUSDT&leverage=10&timestamp=1767225600000&recvWindow=5000&signature=dc240a2d6847e1aa8ffe77a767c194237062d1f43849e8d8e38413bc44546856",
+"headers": {
+"x-mbx-apikey": "BNKEY-abc123",
+"accept": "*/*",
+"content-type": "application/octet-stream"
+},
+"body": null
+}
+},
+{
+"method": "POST",
+"url": "https://fapi.binance.com/fapi/v1/batchOrders?batchOrders=%5B%7B%22symbol%22:+%22BTCUSDT%22,+%22side%22:+%22BUY%22,+%22positionSide%22:+%22LONG%22,+%22type%22:+%22MARKET%22,+%22quantity%22:+%220.010%22,+%22newClientOrderId%22:+%22chm_c11a32f12b1a%22%7D,+%7B%22symbol%22:+%22BTCUSDT%22,+%22side%22:+%22SELL%22,+%22positionSide%22:+%22LONG%22,+%22type%22:+%22STOP_MARKET%22,+%22stopPrice%22:+%2286000.0%22,+%22quantity%22:+%220.010%22,+%22workingType%22:+%22MARK_PRICE%22,+%22timeInForce%22:+%22GTC%22,+%22newClientOrderId%22:+%22chm_5c8b8e025baa%22%7D,+%7B%22symbol%22:+%22BTCUSDT%22,+%22side%22:+%22SELL%22,+%22positionSide%22:+%22LONG%22,+%22type%22:+%22TAKE_PROFIT_MARKET%22,+%22stopPrice%22:+%2288500.0%22,+%22quantity%22:+%220.006%22,+%22workingType%22:+%22MARK_PRICE%22,+%22timeInForce%22:+%22GTC%22,+%22newClientOrderId%22:+%22chm_17b3fc6be39a%22%7D,+%7B%22symbol%22:+%22BTCUSDT%22,+%22side%22:+%22SELL%22,+%22positionSide%22:+%22LONG%22,+%22type%22:+%22TAKE_PROFIT_MARKET%22,+%22stopPrice%22:+%2289500.0%22,+%22quantity%22:+%220.002%22,+%22workingType%22:+%22MARK_PRICE%22,+%22timeInForce%22:+%22GTC%22,+%22newClientOrderId%22:+%22chm_52591fe886a7%22%7D,+%7B%22symbol%22:+%22BTCUSDT%22,+%22side%22:+%22SELL%22,+%22positionSide%22:+%22LONG%22,+%22type%22:+%22TAKE_PROFIT_MARKET%22,+%22stopPrice%22:+%2290500.0%22,+%22quantity%22:+%220.002%22,+%22workingType%22:+%22MARK_PRICE%22,+%22timeInForce%22:+%22GTC%22,+%22newClientOrderId%22:+%22chm_f07c2799feb5%22%7D%5D&timestamp=1767225600000&recvWindow=5000&signature=ddc2c3a26e717ba03865dec8efcf827a781f056e8bf7bd9fd907ca5acc080174",
+"headers": {
+"X-MBX-APIKEY": "BNKEY-abc123"
+},
+"body": null,
+"hdrs": {
+"x-mbx-apikey": "BNKEY-abc123"
+},
+"wire": {
+"method": "POST",
+"target": "/fapi/v1/batchOrders?batchOrders=%5B%7B%22symbol%22:+%22BTCUSDT%22,+%22side%22:+%22BUY%22,+%22positionSide%22:+%22LONG%22,+%22type%22:+%22MARKET%22,+%22quantity%22:+%220.010%22,+%22newClientOrderId%22:+%22chm_c11a32f12b1a%22%7D,+%7B%22symbol%22:+%22BTCUSDT%22,+%22side%22:+%22SELL%22,+%22positionSide%22:+%22LONG%22,+%22type%22:+%22STOP_MARKET%22,+%22stopPrice%22:+%2286000.0%22,+%22quantity%22:+%220.010%22,+%22workingType%22:+%22MARK_PRICE%22,+%22timeInForce%22:+%22GTC%22,+%22newClientOrderId%22:+%22chm_5c8b8e025baa%22%7D,+%7B%22symbol%22:+%22BTCUSDT%22,+%22side%22:+%22SELL%22,+%22positionSide%22:+%22LONG%22,+%22type%22:+%22TAKE_PROFIT_MARKET%22,+%22stopPrice%22:+%2288500.0%22,+%22quantity%22:+%220.006%22,+%22workingType%22:+%22MARK_PRICE%22,+%22timeInForce%22:+%22GTC%22,+%22newClientOrderId%22:+%22chm_17b3fc6be39a%22%7D,+%7B%22symbol%22:+%22BTCUSDT%22,+%22side%22:+%22SELL%22,+%22positionSide%22:+%22LONG%22,+%22type%22:+%22TAKE_PROFIT_MARKET%22,+%22stopPrice%22:+%2289500.0%22,+%22quantity%22:+%220.002%22,+%22workingType%22:+%22MARK_PRICE%22,+%22timeInForce%22:+%22GTC%22,+%22newClientOrderId%22:+%22chm_52591fe886a7%22%7D,+%7B%22symbol%22:+%22BTCUSDT%22,+%22side%22:+%22SELL%22,+%22positionSide%22:+%22LONG%22,+%22type%22:+%22TAKE_PROFIT_MARKET%22,+%22stopPrice%22:+%2290500.0%22,+%22quantity%22:+%220.002%22,+%22workingType%22:+%22MARK_PRICE%22,+%22timeInForce%22:+%22GTC%22,+%22newClientOrderId%22:+%22chm_f07c2799feb5%22%7D%5D&timestamp=1767225600000&recvWindow=5000&signature=ddc2c3a26e717ba03865dec8efcf827a781f056e8bf7bd9fd907ca5acc080174",
+"headers": {
+"x-mbx-apikey": "BNKEY-abc123",
+"accept": "*/*",
+"content-type": "application/octet-stream"
+},
+"body": null
+}
+},
+{
+"method": "GET",
+"url": "https://fapi.binance.com/fapi/v1/ticker/price?symbol=BTCUSDT",
+"headers": {},
+"body": null,
+"hdrs": {},
+"wire": {
+"method": "GET",
+"target": "/fapi/v1/ticker/price?symbol=BTCUSDT",
+"headers": {
+"accept": "*/*"
+},
+"body": null
+}
+},
+{
+"method": "POST",
+"url": "https://fapi.binance.com/fapi/v1/order?symbol=BTCUSDT&side=BUY&quantity=0.010&positionSide=LONG&newClientOrderId=chm_c11a32f12b1a&type=MARKET&timestamp=1767225600000&recvWindow=5000&signature=a204895666c7a4f09d6d43a1c0dfeb8787d0d8a2959083bdd251fc2bf26080ec",
+"headers": {
+"X-MBX-APIKEY": "BNKEY-abc123"
+},
+"body": null,
+"hdrs": {
+"x-mbx-apikey": "BNKEY-abc123"
+},
+"wire": {
+"method": "POST",
+"target": "/fapi/v1/order?symbol=BTCUSDT&side=BUY&quantity=0.010&positionSide=LONG&newClientOrderId=chm_c11a32f12b1a&type=MARKET&timestamp=1767225600000&recvWindow=5000&signature=a204895666c7a4f09d6d43a1c0dfeb8787d0d8a2959083bdd251fc2bf26080ec",
+"headers": {
+"x-mbx-apikey": "BNKEY-abc123",
+"accept": "*/*",
+"content-type": "application/octet-stream"
+},
+"body": null
+}
+}
+],
+"sleeps": [],
+"clock_end": 1767225600.0,
+"markers": [
+[
+"WARNING",
+"[BINANCE-ATOMIC-FALLBACK]"
+]
+],
+"saved": {
+"hedge_saved": [],
+"auth_reset": [],
+"events": [],
+"metrics": []
+},
+"final": {
+"hedge": {},
+"account_type": {},
+"delisted": [],
+"fail_count": {},
+"bybit_offset": 0,
+"binance_base": "https://fapi.binance.com",
+"binance_offset": 0,
+"bingx_offset": 0,
+"okx_offset": 0
+},
+"full_metrics": [],
+"full_events": []
+}
 }
 ]

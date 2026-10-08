@@ -750,6 +750,170 @@ def okx_rows(g: Gen):
     return out
 
 
+
+# ══ Reads + fuzzed responses (all exchanges) ════════════════════════════════
+#
+# rd_*: random read calls (balances, prices, positions, orders, PnL, dashboards, time sync, the
+#       Bybit public tickers helpers) on templates taken from scen_<exchange>.py plus a few built
+#       here, with the response bodies fuzzed and transport failures injected.
+# fz_*: the hand-written order / management flows of scen_<exchange>.py with ONE response fuzzed.
+# A fuzz step picks a random node of a JSON body and sets it to an odd value ("", None, "abc",
+# 0, [], {}, True, "NaN", " 12.5 ", 1e20, 2**63 …), deletes it or empties a container — this
+# drives the Python-semantics emulation (truthiness, float()/int() of odd types, .get on None,
+# partial accumulation before an exception, exception texts that end up in results).
+
+N_READ = 16
+N_FUZZ = 10
+# Fuzz values. Type-preserving mode (default, committed fixtures): a str becomes another str, a
+# number another number, a bool the other bool; any node may also become None, vanish, or (for
+# containers) be emptied. Cross-type mode (--cross-type, exploration only) draws from MUT_VALUES
+# regardless of the original type (bool where a number was, int where a str was, ...) — the JS
+# port coerces those where Python raises/compares differently; see the module notes below.
+# Never used: integers beyond 2**53 and integral-valued floats (0.0, 1e20) — JSON.parse cannot
+# keep Python's int/float distinction for them (int64 order ids are carried as exact strings,
+# transport.parseJsonPy), so such a value printed raw would read differently.
+STR_VALUES = ["", "0", "abc", "-1", "-0.5", "1e-7", "NaN", "inf", " 12.5 ", "null", "1,5", "007", "1.0", "0.00000001"]
+NUM_VALUES = [0, -1, 1, 2.5, -0.25, 2 ** 40, 7, 0.1]
+MUT_VALUES = STR_VALUES + NUM_VALUES + [None, [], {}, True, False]
+CROSS_TYPE = False
+
+READ_CALLS = {
+    "bybit": {"get_balance", "get_positions", "get_open_orders", "get_closed_pnl", "get_dashboard", "test_connection",
+              "get_execution_exit_price", "cancel_all_orders", "cancel_order"},
+    "bingx": {"get_balance", "get_last_price", "get_positions", "get_open_orders", "get_closed_pnl", "get_dashboard",
+              "test_connection", "sync_time", "cancel_order", "cancel_tp_orders_only", "cancel_all_orders"},
+    "binance": {"get_balance", "get_last_price", "get_positions", "get_open_orders", "get_closed_pnl", "get_dashboard",
+                "test_connection", "sync_time", "cancel_order", "cancel_tp_orders_only", "cancel_all_orders"},
+    "okx": {"get_balance", "get_last_price", "get_positions", "get_open_orders", "get_closed_pnl", "get_dashboard",
+            "get_account_summary", "test_connection", "sync_time", "cancel_order", "cancel_all_orders", "okx_sz"},
+}
+FAILS = [
+    {"status": 502, "text": "<html><body>502 Bad Gateway</body></html>", "headers": {"Content-Type": "text/html"}},
+    {"status": 200, "text": ""},
+    {"status": 200, "text": "not json"},
+    {"status": 200, "text": "[]"},
+    {"status": 200, "text": "null"},
+    {"status": 429, "text": "{\"code\": 429, \"msg\": \"Too Many Requests\"}"},
+    {"raise": "timeout"},
+    {"raise": "connect", "message": "Cannot connect to host example:443 ssl:default [Name or service not known]"},
+    {"raise": "error", "message": "Server disconnected"},
+]
+
+
+def mutate(obj, g):
+    """One random structural / value mutation of a JSON-like object (returns a new object)."""
+    obj = json.loads(json.dumps(obj))
+    paths = []
+
+    def walk(o, path):
+        paths.append(path)
+        if isinstance(o, dict):
+            for k in list(o.keys()):
+                walk(o[k], path + [k])
+        elif isinstance(o, list):
+            for i in range(len(o)):
+                walk(o[i], path + [i])
+    walk(obj, [])
+    if len(paths) <= 1:
+        return g.choice(MUT_VALUES) if CROSS_TYPE else (g.choice(STR_VALUES) if isinstance(obj, str) else None)
+    path = g.choice(paths[1:])
+    parent = obj
+    for p in path[:-1]:
+        parent = parent[p]
+    last = path[-1]
+    op = g.choice(["set", "set", "set", "set", "none", "del", "empty"])
+    cur = parent[last]
+    if op == "del":
+        if isinstance(parent, dict):
+            del parent[last]
+        else:
+            parent.pop(last)
+    elif op == "empty" and isinstance(cur, (dict, list)):
+        parent[last] = type(cur)()
+    elif op == "none":
+        parent[last] = None
+    elif CROSS_TYPE:
+        parent[last] = g.choice(MUT_VALUES)
+    elif isinstance(cur, bool):
+        parent[last] = not cur
+    elif isinstance(cur, str):
+        parent[last] = g.choice(STR_VALUES)
+    elif isinstance(cur, (int, float)):
+        parent[last] = g.choice(NUM_VALUES)
+    elif isinstance(cur, (dict, list)):
+        parent[last] = type(cur)()
+    else:
+        parent[last] = None
+    return obj
+
+
+def _fuzz_routes(routes, g, n_mut=1, fail_p=0.2):
+    routes = json.loads(json.dumps(routes))
+    cands = [(i, j) for i, r in enumerate(routes) for j, x in enumerate(r["responses"]) if "json" in x]
+    if not cands:
+        return routes, "none"
+    tag = []
+    for _ in range(n_mut):
+        i, j = g.choice(cands)
+        if "json" not in routes[i]["responses"][j]:
+            continue
+        if g.chance(fail_p):
+            routes[i]["responses"][j] = dict(g.choice(FAILS))
+            tag.append("fail")
+        else:
+            spec = routes[i]["responses"][j]
+            spec["json"] = mutate(spec["json"], g)
+            tag.append("mut")
+    return routes, "+".join(tag)
+
+
+def _bybit_extra_read_templates(g):
+    KEY, SEC = "BYKEYFUZZ1234567", "by-fuzz-secret"
+    tick = {"retCode": 0, "retMsg": "OK", "result": {"category": "linear", "list": [{
+        "symbol": "BTCUSDT", "lastPrice": "87001.5", "bid1Price": "87001.4", "ask1Price": "87001.6", "fundingRate": "0.0001",
+        "markPrice": "87001.2"}]}}
+    tm = {"retCode": 0, "retMsg": "OK", "result": {"timeSecond": "1767225601", "timeNano": "1767225601234567890"}}
+    wallet = {"retCode": 0, "retMsg": "OK", "result": {"list": [{"totalEquity": "1000.5", "totalWalletBalance": "990.1",
+              "totalUnrealisedPnl": "10.4", "totalAvailableBalance": "800", "coin": [
+                  {"coin": "BTC", "walletBalance": "0.1"},
+                  {"coin": "USDT", "walletBalance": "990.1", "equity": "1000.5", "availableToWithdraw": "", "availableBalance": "777.7"}]}]}}
+    pnl = {"retCode": 0, "retMsg": "OK", "result": {"list": [{"closedPnl": "1.25", "symbol": "BTCUSDT"}, {"closedPnl": "-0.5"}, {"closedPnl": "2"}]}}
+    T = lambda name, call, args, routes: {"name": name, "exchange": "bybit", "call": call, "args": args, "kwargs": {},  # noqa: E731
+                                          "routes": routes, "state": {}, "mode": "wire", "random": [], "clock": 1767225600.0}
+    return [
+        T("last_price", "get_last_price", [KEY, SEC, g.choice(["BTC-USDT-SWAP", "PEPE-USDT-SWAP", "SHIB-USDT-SWAP"])], [R("GET", "/v5/market/tickers", tick)]),
+        T("spread", "get_spread_pct", [g.choice(["BTC-USDT-SWAP", "SATS-USDT-SWAP"])], [R("GET", "/v5/market/tickers", tick)]),
+        T("funding", "get_funding_rate", [g.choice(["ETH-USDT-SWAP", "BONK-USDT-SWAP"])], [R("GET", "/v5/market/tickers", tick)]),
+        T("sync_time", "sync_time", [], [R("GET", "/v5/market/time", tm)]),
+        T("all_closed_pnl", "get_all_closed_pnl", [KEY, SEC, g.choice([10, 50, 100])], [R("GET", "/v5/position/closed-pnl", pnl)]),
+        T("account_summary", "get_account_summary", [KEY, SEC], [R("GET", "/v5/account/wallet-balance", wallet),
+                                                               R("GET", "/v5/position/closed-pnl", pnl)]),
+    ]
+
+
+def fuzz_rows(ex, g):
+    mod = __import__(f"scen_{ex}")
+    base = [sc for sc in mod.SCENARIOS if sc.get("mode") != "session"]
+    reads = [sc for sc in base if sc["call"] in READ_CALLS[ex]]
+    if ex == "bybit":
+        reads = reads + _bybit_extra_read_templates(g)
+    flows = [sc for sc in base if sc["call"] not in READ_CALLS[ex] and sc["routes"]]
+    out = []
+    for i in range(N_READ):
+        t = g.choice(reads)
+        routes, tag = _fuzz_routes(t["routes"], g, n_mut=g.choice([0, 1, 1, 2]), fail_p=0.3)
+        sc = dict(json.loads(json.dumps(t)), routes=routes, name=f"rd_{i:02d}_{t['call']}_{tag}",
+                  clock=g.clock(), random=[g.r.random() for _ in range(6)])
+        out.append(sc)
+    for i in range(N_FUZZ):
+        t = g.choice(flows)
+        routes, tag = _fuzz_routes(t["routes"], g, n_mut=1, fail_p=0.15)
+        sc = dict(json.loads(json.dumps(t)), routes=routes, name=f"fz_{i:02d}_{t['name']}_{tag}",
+                  clock=t.get("clock", 1767225600.0), random=[g.r.random() for _ in range(6)])
+        out.append(sc)
+    return out
+
+
 BUILDERS = {"bybit": bybit_rows, "bingx": bingx_rows, "binance": binance_rows, "okx": okx_rows}
 
 
@@ -798,7 +962,7 @@ def main(which, out_dir=None):
     for ex in which:
         g = Gen(f"{SEED}:{ex}" + (":x" if EXTREME else ""))
         rows = []
-        for sc in BUILDERS[ex](g):
+        for sc in BUILDERS[ex](g) + fuzz_rows(ex, Gen(f"{SEED}:{ex}:fuzz" + (":x" if EXTREME else ""))):
             frozen = _freeze_routes(sc)
             res = run(json.loads(json.dumps(frozen)))
             bad = [r for r in res["requests"] if "wire" in r and "error" in r["wire"]]
@@ -821,7 +985,10 @@ if __name__ == "__main__":
     ap.add_argument("--seed", type=int, default=SEED)
     ap.add_argument("--orders", type=int, default=N_ORDER)
     ap.add_argument("--extreme", action="store_true")
+    ap.add_argument("--reads", type=int, default=N_READ)
+    ap.add_argument("--fuzz", type=int, default=N_FUZZ)
+    ap.add_argument("--cross-type", action="store_true", help="fuzz with cross-type values (exploration)")
     ap.add_argument("--out", default=None, help="output dir (default: ../fixtures)")
     a = ap.parse_args()
-    SEED, N_ORDER, EXTREME = a.seed, a.orders, a.extreme
+    SEED, N_ORDER, EXTREME, N_READ, N_FUZZ, CROSS_TYPE = a.seed, a.orders, a.extreme, a.reads, a.fuzz, a.cross_type
     main(a.exchanges, a.out)

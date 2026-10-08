@@ -67,9 +67,11 @@ for (const ex of ['bybit', 'bingx', 'binance', 'okx']) {
   const ROWS = loadRows(ex);
 
   describe(`${ex} adversarial parity (${ROWS.length} scenarios)`, () => {
-    it.skipIf(Boolean(EXPLORE_DIR))('fixture covers 30 random orders + 10 error replays', () => {
+    it.skipIf(Boolean(EXPLORE_DIR))('fixture covers 30 random orders + 10 error replays + 16 fuzzed reads + 10 fuzzed flows', () => {
       expect(ROWS.filter((r) => r.scenario.name.startsWith('rnd_')).length).toBe(30);
       expect(ROWS.filter((r) => r.scenario.name.startsWith('err_')).length).toBe(10);
+      expect(ROWS.filter((r) => r.scenario.name.startsWith('rd_')).length).toBe(16);
+      expect(ROWS.filter((r) => r.scenario.name.startsWith('fz_')).length).toBe(10);
     });
 
     for (const { scenario: sc, expected: exp } of ROWS) {

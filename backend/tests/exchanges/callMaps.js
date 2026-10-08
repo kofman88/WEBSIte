@@ -39,6 +39,12 @@ const EXCHANGES = {
       place_trade_split: (t, a, kw) => t.placeTradeSplit(...a.slice(0, 10), camel(kw)),
       get_execution_exit_price: (t, a) => t.getExecutionExitPrice(...a),
       place_tp_orders: (t, a) => t.placeTpOrders(...a),
+      get_last_price: (t, a) => t.getLastPrice(...a),
+      get_spread_pct: (t, a) => t.getSpreadPct(...a),
+      get_funding_rate: (t, a) => t.getFundingRate(...a),
+      sync_time: (t) => t.syncTime(),
+      get_all_closed_pnl: (t, a) => t.getAllClosedPnl(...a),
+      get_account_summary: (t, a) => t.getAccountSummary(...a),
     },
     prepare(t, sc) {
       const st = sc.state || {};

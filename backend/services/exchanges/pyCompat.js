@@ -41,6 +41,7 @@ const KeyError = (key) => new PyError('KeyError', pyRepr(key));
 const IndexError = (m) => new PyError('IndexError', m);
 const TypeError_ = (m) => new PyError('TypeError', m);
 const ValueError = (m) => new PyError('ValueError', m);
+const ZeroDivisionError = (m = 'float division by zero') => new PyError('ZeroDivisionError', m);
 const OverflowError = (m) => new PyError('OverflowError', m);
 
 /** str(e) for any thrown value (Python exceptions, JS errors, strings). */
@@ -100,6 +101,7 @@ function pyIndex(d, key) {
     return d[key];
   }
   if (typeof d === 'string') {
+    if (typeof key !== 'number') throw TypeError_(`string indices must be integers, not '${pyTypeName(key)}'`);
     const i = key < 0 ? d.length + key : key;
     if (i < 0 || i >= d.length) throw IndexError('string index out of range');
     return d[i];
@@ -294,6 +296,55 @@ function pyInt(v) {
   throw TypeError_(`int() argument must be a string, a bytes-like object or a real number, not '${pyTypeName(v)}'`);
 }
 
+/** int(v) as an exact BigInt (Python ints are unbounded): bool, integral-valued float, int literal str. */
+function pyBigInt(v) {
+  if (typeof v === 'bigint') return v;
+  if (typeof v === 'boolean') return v ? 1n : 0n;
+  if (typeof v === 'number') return BigInt(pyInt(v));
+  if (typeof v === 'string') {
+    const t = v.trim();
+    if (!/^[+-]?\d(?:_?\d)*$/.test(t)) throw ValueError(`invalid literal for int() with base 10: ${pyStrRepr(v)}`);
+    return BigInt(t.replace(/_/g, '').replace(/^\+/, ''));
+  }
+  throw TypeError_(`int() argument must be a string, a bytes-like object or a real number, not '${pyTypeName(v)}'`);
+}
+
+/** len(v): str (code points) / list / dict; anything else raises like CPython. */
+function pyLen(v) {
+  if (typeof v === 'string') return Array.from(v).length;
+  if (Array.isArray(v)) return v.length;
+  if (isDict(v)) return Object.keys(v).length;
+  throw TypeError_(`object of type '${pyTypeName(v)}' has no len()`);
+}
+
+/**
+ * Python ordering comparison `a <op> b` (op: '<' '<=' '>' '>='): numbers and bools compare as
+ * numbers, str with str; anything else raises TypeError like CPython (`None >= 0`, `'1' < 0`).
+ */
+function pyCmp(a, op, b) {
+  const num = (x) => typeof x === 'number' || typeof x === 'boolean';
+  let x;
+  let y;
+  if (num(a) && num(b)) { x = Number(a); y = Number(b); } else if (typeof a === 'string' && typeof b === 'string') { x = a; y = b; } else {
+    throw TypeError_(`'${op}' not supported between instances of '${pyTypeName(a)}' and '${pyTypeName(b)}'`);
+  }
+  switch (op) {
+    case '<': return x < y;
+    case '<=': return x <= y;
+    case '>': return x > y;
+    case '>=': return x >= y;
+    default: throw new Error(`pyCmp: bad operator ${op}`);
+  }
+}
+
+/** Python `for x in v` over a JSON value: list items / str chars / dict keys; others raise TypeError. */
+function pyIter(v) {
+  if (Array.isArray(v)) return v;
+  if (typeof v === 'string') return Array.from(v);
+  if (isDict(v)) return Object.keys(v);
+  throw TypeError_(`'${pyTypeName(v)}' object is not iterable`);
+}
+
 /** float(x or 0) — the bot's most common coercion. */
 function pyFloatOr0(v) { return pyFloat(pyOr(v, 0)); }
 
@@ -446,8 +497,8 @@ function pyIn(x, ...vals) {
 }
 
 module.exports = {
-  PyError, AttributeError, KeyError, IndexError, TypeError: TypeError_, ValueError, OverflowError,
-  errStr, isDict, pyTypeName, pyTruthy, pyOr, pyGet, pyIndex,
+  PyError, AttributeError, KeyError, IndexError, TypeError: TypeError_, ValueError, OverflowError, ZeroDivisionError,
+  errStr, isDict, pyTypeName, pyTruthy, pyOr, pyGet, pyIndex, pyBigInt, pyLen, pyIter, pyCmp,
   pyStrRepr, pyRepr, pyStr, pyFloatStr, attachRepr, reprFromJsonText,
   pyFloat, pyInt, pyFloatOr0,
   pyQuote, pyQuotePlus, pyUrlencode, yarlQuote, yarlRequoteQuery, yarlUrl, yarlQueryFromParams,

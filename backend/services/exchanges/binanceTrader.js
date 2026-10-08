@@ -24,6 +24,8 @@ const { TransportError, aiohttpJson } = require('./transport');
 const {
   errStr, pyGet, pyIndex, pyFloat, pyInt, pyStr, pyRepr, pyFloatStr, pyTruthy, pyOr, pyUrlencode, yarlUrl,
   htmlEscape, pySlice, isDict,
+  pyIter,
+  pyCmp,
 } = require('./pyCompat');
 const { fmtFixed, fmtComma, fmtG } = require('../../strategies/common/pyfmt');
 const { pyRound } = require('../../strategies/common/pyround');
@@ -204,11 +206,11 @@ function createBinanceTrader(overrides = {}) {
     try {
       const resp = await rt.transport({ method: 'GET', url: `${st.baseUrl}/fapi/v1/exchangeInfo`, headers: {}, timeoutMs: 10000 });
       const data = aiohttpJson(resp);
-      for (const item of pyGet(data, 'symbols', [])) {
+      for (const item of pyIter(pyGet(data, 'symbols', []))) {
         if (pyGet(item, 'symbol') === symbol && pyGet(item, 'status') === 'TRADING') {
           let qtyStep = 0.001;
           let tickSize = 0.0001;
-          for (const f of pyGet(item, 'filters', [])) {
+          for (const f of pyIter(pyGet(item, 'filters', []))) {
             const ft = pyGet(f, 'filterType', '');
             if (ft === 'LOT_SIZE') qtyStep = pyFloat(pyOr(pyGet(f, 'stepSize', 0.001), 0.001));
             else if (ft === 'PRICE_FILTER') tickSize = pyFloat(pyOr(pyGet(f, 'tickSize', 0.0001), 0.0001));
@@ -230,7 +232,7 @@ function createBinanceTrader(overrides = {}) {
     try {
       const data = await _request('GET', '/fapi/v2/balance', apiKey, secret);
       if (Array.isArray(data)) {
-        for (const asset of data) if (pyGet(asset, 'asset') === 'USDT') return pyFloat(pyOr(pyGet(asset, 'balance', 0), 0));
+        for (const asset of pyIter(data)) if (pyGet(asset, 'asset') === 'USDT') return pyFloat(pyOr(pyGet(asset, 'balance', 0), 0));
       }
       log.warning(`Binance get_balance unexpected: ${pyStr(data)}`);
       return 0.0;
@@ -260,7 +262,7 @@ function createBinanceTrader(overrides = {}) {
         return { ok: true, balance: pyFloat(pyOr(pyGet(pyOr(usdt, {}), 'balance', 0), 0)), error: '' };
       }
       const code = pyGet(data, 'code', 0);
-      if (pyTruthy(code) && code < 0) {
+      if (pyTruthy(code) && pyCmp(code, '<', 0)) {
         const err = humanizeBinanceError(pyStr(data));
         log.warning(`Binance test_connection code=${pyStr(code)} key=${safeKeyId(apiKey)}`);
         return { ok: false, balance: 0.0, error: err };
@@ -320,7 +322,7 @@ function createBinanceTrader(overrides = {}) {
       let lev = Math.min(leverage, MAX_LEVERAGE, symMaxLev);
       for (let a = 0; a < 3; a++) {
         const levData = await _request('POST', '/fapi/v1/leverage', apiKey, secret, { symbol: bs, leverage: String(lev) });
-        if (pyGet(levData, 'code', 0) >= 0 || pyGet(levData, 'leverage') !== null) break;
+        if (pyCmp(pyGet(levData, 'code', 0), '>=', 0) || pyGet(levData, 'leverage') !== null) break;
         const levCode = pyGet(levData, 'code', 0);
         if ((levCode === -4028 || levCode === -4060) && lev > 1) {
           const newLev = Math.max(1, Math.floor(lev / 2));
@@ -435,7 +437,7 @@ function createBinanceTrader(overrides = {}) {
             if (entryOk && slOk) {
               atomicOk = true;
               atomicOrderId = pyStr(pyGet(first, 'orderId', cidEntry));
-              for (const r of results.slice(2)) if (isDict(r) && pyTruthy(pyGet(r, 'orderId'))) { atomicTpPlaced = true; break; }
+              for (const r of pyIter(results.slice(2))) if (isDict(r) && pyTruthy(pyGet(r, 'orderId'))) { atomicTpPlaced = true; break; }
               const n = results.slice(2).filter((r) => isDict(r) && pyTruthy(pyGet(r, 'orderId'))).length;
               log.info(`[BINANCE-ATOMIC-OK] ${bs}: batch placed entry+SL+${n} TP orders`);
             } else {
@@ -443,7 +445,7 @@ function createBinanceTrader(overrides = {}) {
             }
           } else if (isDict(batchResp)) {
             const bcode = pyGet(batchResp, 'code', 0);
-            if (bcode < 0) log.warning(`[BINANCE-ATOMIC-FALLBACK] ${bs}: batch endpoint error (code=${pyStr(bcode)} msg=${pySlice(pyStr(pyGet(batchResp, 'msg', '')), 100)}) — legacy flow`);
+            if (pyCmp(bcode, '<', 0)) log.warning(`[BINANCE-ATOMIC-FALLBACK] ${bs}: batch endpoint error (code=${pyStr(bcode)} msg=${pySlice(pyStr(pyGet(batchResp, 'msg', '')), 100)}) — legacy flow`);
             else log.warning(`[BINANCE-ATOMIC-FALLBACK] ${bs}: batch response not a list (got dict ${pySlice(pyStr(batchResp), 100)}) — legacy flow`);
           } else {
             log.warning(`[BINANCE-ATOMIC-FALLBACK] ${bs}: batch unexpected response type=${batchResp === null ? 'NoneType' : typeof batchResp} — legacy flow`);
@@ -480,7 +482,7 @@ function createBinanceTrader(overrides = {}) {
         log.info(`Duplicate order rejected by exchange (idempotency works): ${bs} cid=${cidEntry} — assuming prior attempt succeeded`);
         return { ok: true, order_id: cidEntry, error: '', tp_placed: false, duplicate: true, qty: pyFloat(qtyStr) };
       }
-      if (pyGet(resp, 'code', 0) < 0) {
+      if (pyCmp(pyGet(resp, 'code', 0), '<', 0)) {
         log.error(`Binance order failed ${bs}: ${pyStr(resp)} params=${pyRepr(orderParams)}`);
         return { ok: false, order_id: '', error: humanizeBinanceError(pyStr(resp)) };
       }
@@ -517,7 +519,7 @@ function createBinanceTrader(overrides = {}) {
         try {
           const positions = await getPositions(apiKey, secret, symbol);
           let liveSize = 0.0;
-          for (const p of pyOr(positions, [])) {
+          for (const p of pyIter(pyOr(positions, []))) {
             const ps = pyFloat(pyOr(pyGet(p, 'positionAmt', 0), pyGet(p, 'size', 0), 0));
             if (Math.abs(ps) > 0) { liveSize = Math.abs(ps); break; }
           }
@@ -618,7 +620,7 @@ function createBinanceTrader(overrides = {}) {
         return [];
       }
       const positions = [];
-      for (const p of data) {
+      for (const p of pyIter(data)) {
         const size = pyFloat(pyOr(pyGet(p, 'positionAmt', 0), 0));
         if (size === 0) continue;
         let ps = pyGet(p, 'positionSide', 'BOTH');
@@ -681,7 +683,7 @@ function createBinanceTrader(overrides = {}) {
     try {
       const bs = toBinanceSymbol(symbol);
       const resp = await _request('DELETE', '/fapi/v1/order', apiKey, secret, { symbol: bs, orderId: pyStr(orderId) });
-      if (pyGet(resp, 'code', 0) >= 0) return { ok: true };
+      if (pyCmp(pyGet(resp, 'code', 0), '>=', 0)) return { ok: true };
       return { ok: false, error: humanizeBinanceError(pyStr(resp)) };
     } catch (e) {
       if (e instanceof TransportError && e.kind === 'timeout') return { ok: false, error: 'Таймаут соединения с Binance.' };
@@ -695,7 +697,7 @@ function createBinanceTrader(overrides = {}) {
       const bs = toBinanceSymbol(symbol);
       const resp = await _request('DELETE', '/fapi/v1/allOpenOrders', apiKey, secret, { symbol: bs });
       const c = pyGet(resp, 'code', 0);
-      if (c === 200 || c === 0 || pyGet(resp, 'code', -1) >= 0) return { ok: true, cancelled: 0 };
+      if (c === 200 || c === 0 || pyCmp(pyGet(resp, 'code', -1), '>=', 0)) return { ok: true, cancelled: 0 };
       return { ok: false, cancelled: 0, error: humanizeBinanceError(pyStr(resp)) };
     } catch (e) {
       if (e instanceof TransportError && e.kind === 'timeout') return { ok: false, cancelled: 0, error: 'Таймаут соединения с Binance.' };
@@ -716,10 +718,10 @@ function createBinanceTrader(overrides = {}) {
       const resp = await _request('GET', '/fapi/v1/openOrders', apiKey, secret, { symbol: bs });
       const ordersRaw = isDict(resp) ? pyGet(resp, 'data', resp) : resp;
       if (!Array.isArray(ordersRaw)) return { ok: true, cancelled: 0, total_tp: 0 };
-      const tpOrders = ordersRaw.filter((x) => pyStr(pyGet(x, 'type', '')).toUpperCase() === 'TAKE_PROFIT_MARKET');
+      const tpOrders = pyIter(ordersRaw).filter((x) => pyStr(pyGet(x, 'type', '')).toUpperCase() === 'TAKE_PROFIT_MARKET');
       let cancelled = 0;
       const errors = [];
-      for (const x of tpOrders) {
+      for (const x of pyIter(tpOrders)) {
         const oid = pyStr(pyOr(pyGet(x, 'orderId', ''), ''));
         if (!oid) continue;
         const cr = await cancelOrder(apiKey, secret, symbol, oid);
@@ -737,7 +739,7 @@ function createBinanceTrader(overrides = {}) {
   async function _cancelSlOrders(apiKey, secret, bs, closeSide) {
     const ordData = await _request('GET', '/fapi/v1/openOrders', apiKey, secret, { symbol: bs });
     if (!Array.isArray(ordData)) return;
-    for (const x of ordData) {
+    for (const x of pyIter(ordData)) {
       if (pyGet(x, 'type') === 'STOP_MARKET' && pyStr(pyGet(x, 'side', '')).toUpperCase() === closeSide.toUpperCase()) {
         await _request('DELETE', '/fapi/v1/order', apiKey, secret, { symbol: bs, orderId: pyStr(pyGet(x, 'orderId', '')) });
       }
@@ -768,7 +770,7 @@ function createBinanceTrader(overrides = {}) {
       const resp = await callWithRetry(postSl, {
         maxAttempts: 3, baseBackoff: 0.3, opName: `binance_set_trailing_sl_${bs}`, sleep: rt.sleep, random: rt.random, log,
       });
-      if (pyGet(resp, 'code', 0) >= 0) return { ok: true };
+      if (pyCmp(pyGet(resp, 'code', 0), '>=', 0)) return { ok: true };
       log.warning(`Binance set_trailing_sl ${bs}: ${pyStr(resp)}`);
       return { ok: false, error: humanizeBinanceError(pyStr(resp)) };
     } catch (e) {
@@ -799,7 +801,7 @@ function createBinanceTrader(overrides = {}) {
         stopPrice: PP.roundPrice(entry * pmult, tickSize), workingType: 'MARK_PRICE', timeInForce: 'GTC',
       };
       const resp = await _request('POST', '/fapi/v1/order', apiKey, secret, slParams);
-      if (pyGet(resp, 'code', 0) >= 0) return { ok: true };
+      if (pyCmp(pyGet(resp, 'code', 0), '>=', 0)) return { ok: true };
       log.warning(`Binance set_breakeven ${bs}: ${pyStr(resp)}`);
       return { ok: false, error: humanizeBinanceError(pyStr(resp)) };
     } catch (e) {
@@ -838,7 +840,7 @@ function createBinanceTrader(overrides = {}) {
       try {
         const ordData = await _request('GET', '/fapi/v1/openOrders', apiKey, secret, { symbol: bs });
         if (Array.isArray(ordData)) {
-          for (const x of ordData) {
+          for (const x of pyIter(ordData)) {
             if (pyStr(pyGet(x, 'side', '')).toUpperCase() !== closeSide) continue;
             if (!['STOP_MARKET', 'TAKE_PROFIT_MARKET'].includes(pyGet(x, 'type'))) continue;
             const oid = pyStr(pyGet(x, 'orderId', ''));
@@ -895,7 +897,7 @@ function createBinanceTrader(overrides = {}) {
           const od = await _request('GET', '/fapi/v1/openOrders', apiKey, secret, { symbol: bs });
           let liveTp = 0;
           if (Array.isArray(od)) {
-            for (const x of od) {
+            for (const x of pyIter(od)) {
               if (pyStr(pyGet(x, 'type', '')) === 'TAKE_PROFIT_MARKET' && pyStr(pyGet(x, 'side', '')).toUpperCase() === closeSide
                 && pyStr(pyGet(x, 'positionSide', '')).toUpperCase() === posSide) liveTp += 1;
             }
@@ -927,7 +929,7 @@ function createBinanceTrader(overrides = {}) {
         return [];
       }
       const result = [];
-      for (const t of data) {
+      for (const t of pyIter(data)) {
         const price = pyFloat(pyOr(pyGet(t, 'price'), 0));
         const qty = pyFloat(pyOr(pyGet(t, 'qty'), 0));
         const side = pyGet(t, 'side', '');
@@ -959,7 +961,7 @@ function createBinanceTrader(overrides = {}) {
       const ordData = await _request('GET', '/fapi/v1/openOrders', apiKey, secret, {});
       const orders = [];
       if (Array.isArray(ordData)) {
-        for (const x of ordData) {
+        for (const x of pyIter(ordData)) {
           orders.push({
             orderId: pyStr(pyGet(x, 'orderId', '')),
             symbol: pyGet(x, 'symbol', ''),
@@ -984,7 +986,7 @@ function createBinanceTrader(overrides = {}) {
       const ts24h = Math.trunc((rt.now() - 86400) * 1000);
       const incomeData = await _request('GET', '/fapi/v1/income', apiKey, secret, { incomeType: 'REALIZED_PNL', startTime: String(ts24h), limit: '100' });
       if (Array.isArray(incomeData)) {
-        const pnls = incomeData.map((i) => pyFloat(pyOr(pyGet(i, 'income', 0), 0)));
+        const pnls = pyIter(incomeData).map((i) => pyFloat(pyOr(pyGet(i, 'income', 0), 0)));
         summary.closed_pnl_24h = pySum(pnls);
         summary.trades_24h = pnls.length;
         summary.wins_24h = pnls.filter((p) => p > 0).length;

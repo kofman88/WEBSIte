@@ -28,6 +28,8 @@ const { TransportError, aiohttpJson } = require('./transport');
 const {
   PyError, errStr, pyGet, pyIndex, pyFloat, pyInt, pyStr, pyRepr, pyFloatStr, pyTruthy, pyOr, pyQuote,
   htmlEscape, pySlice, isDict,
+  pyLen,
+  pyIter,
 } = require('./pyCompat');
 const { fmtFixed, fmtComma, fmtG } = require('../../strategies/common/pyfmt');
 const { pyRound } = require('../../strategies/common/pyround');
@@ -226,7 +228,7 @@ function createBingxTrader(overrides = {}) {
       const resp = await rt.transport({ method: 'GET', url: `${BASE_URL}/openApi/swap/v2/quote/contracts`, headers: {}, timeoutMs: 30000 });
       const data = aiohttpJson(resp);
       if (pyGet(data, 'code') === 0) {
-        for (const item of pyGet(data, 'data', [])) {
+        for (const item of pyIter(pyGet(data, 'data', []))) {
           if (pyGet(item, 'symbol') === symbol) {
             const qtyStep = pyFloat(pyOr(pyGet(item, 'tradeMinQuantity', 0.001), 0.001));
             const p = pyInt(pyFloat(pyGet(item, 'pricePrecision', 4)));
@@ -442,7 +444,7 @@ function createBingxTrader(overrides = {}) {
               if (entryOk && slOk) {
                 atomicOk = true;
                 atomicOrderId = pyStr(pyOr(isDict(entryR) ? pyGet(entryR, 'orderId') : '', pyGet(pyGet(entryR, 'order', {}), 'orderId', cidEntry)));
-                for (const tpR of bResults.slice(2)) {
+                for (const tpR of pyIter(bResults.slice(2))) {
                   if (isDict(tpR) && (pyTruthy(pyGet(tpR, 'orderId')) || pyGet(tpR, 'code', -1) === 0)) { atomicTpPlaced = true; break; }
                 }
                 const n = bResults.slice(2).filter((r) => isDict(r) && pyTruthy(pyGet(r, 'orderId'))).length;
@@ -518,7 +520,7 @@ function createBingxTrader(overrides = {}) {
         try {
           const posData = await _request('GET', '/openApi/swap/v2/user/positions', apiKey, secret, { symbol: bingxSymbol });
           if (pyGet(posData, 'code') === 0) {
-            for (const p of pyOr(pyGet(posData, 'data', []), [])) {
+            for (const p of pyIter(pyOr(pyGet(posData, 'data', []), []))) {
               if (pyFloat(pyOr(pyGet(p, 'positionAmt', 0), 0)) !== 0) { posReady = true; break; }
             }
           }
@@ -585,7 +587,7 @@ function createBingxTrader(overrides = {}) {
         try {
           const positions = await getPositions(apiKey, secret, symbol);
           let liveSize = 0.0;
-          for (const p of pyOr(positions, [])) {
+          for (const p of pyIter(pyOr(positions, []))) {
             const ps = pyFloat(pyOr(pyGet(p, 'positionAmt', 0), pyGet(p, 'size', 0), 0));
             if (Math.abs(ps) > 0) { liveSize = Math.abs(ps); break; }
           }
@@ -691,7 +693,7 @@ function createBingxTrader(overrides = {}) {
           await rt.sleep(2.0);
           const verifyData = await _request('GET', '/openApi/swap/v2/trade/openOrders', apiKey, secret, { symbol: bingxSymbol });
           const liveOrders = pyGet(verifyData, 'code') === 0 ? pyGet(pyGet(verifyData, 'data', {}), 'orders', []) : [];
-          const liveTp = liveOrders.filter((x) => pyGet(x, 'type') === 'TAKE_PROFIT_MARKET' && pyStr(pyGet(x, 'side', '')).toUpperCase() === closeSide).length;
+          const liveTp = pyIter(liveOrders).filter((x) => pyGet(x, 'type') === 'TAKE_PROFIT_MARKET' && pyStr(pyGet(x, 'side', '')).toUpperCase() === closeSide).length;
           const missing = tpExpected.length - liveTp;
           if (missing > 0) {
             log.warning(`[TP-PHANTOM] BingX ${bingxSymbol}: expected ${tpExpected.length} TP orders, only ${liveTp} on exchange — retrying missing ${missing}`);
@@ -730,7 +732,7 @@ function createBingxTrader(overrides = {}) {
         return [];
       }
       const positions = [];
-      for (const p of pyGet(data, 'data', [])) {
+      for (const p of pyIter(pyGet(data, 'data', []))) {
         const size = pyFloat(pyOr(pyGet(p, 'positionAmt', 0), 0));
         if (size === 0) continue;
         positions.push({
@@ -761,7 +763,7 @@ function createBingxTrader(overrides = {}) {
       const ordData = await _request('GET', '/openApi/swap/v2/trade/openOrders', apiKey, secret, {});
       const orders = [];
       if (pyGet(ordData, 'code') === 0) {
-        for (const o of pyGet(pyGet(ordData, 'data', {}), 'orders', [])) {
+        for (const o of pyIter(pyGet(pyGet(ordData, 'data', {}), 'orders', []))) {
           orders.push({
             orderId: pyStr(pyGet(o, 'orderId', '')),
             symbol: pyGet(o, 'symbol', ''),
@@ -787,7 +789,7 @@ function createBingxTrader(overrides = {}) {
       });
       if (pyGet(histData, 'code') === 0) {
         const fills = pyOr(pyGet(pyGet(histData, 'data', {}), 'fill_orders', []), []);
-        const pnls = fills.map((f) => pyFloat(pyOr(pyGet(f, 'profit', 0), 0)));
+        const pnls = pyIter(fills).map((f) => pyFloat(pyOr(pyGet(f, 'profit', 0), 0)));
         summary.closed_pnl_24h = pySum(pnls);
         summary.trades_24h = pnls.length;
         summary.wins_24h = pnls.filter((p) => p > 0).length;
@@ -867,7 +869,7 @@ function createBingxTrader(overrides = {}) {
     try {
       const bingxSymbol = toBingxSymbol(symbol);
       const resp = await _request('DELETE', '/openApi/swap/v2/trade/allOpenOrders', apiKey, secret, { symbol: bingxSymbol });
-      if (pyGet(resp, 'code') === 0) return { ok: true, cancelled: pyOr(pyGet(pyGet(resp, 'data', {}), 'orders', []), []).length };
+      if (pyGet(resp, 'code') === 0) return { ok: true, cancelled: pyLen(pyOr(pyGet(pyGet(resp, 'data', {}), 'orders', []), [])) };
       return { ok: false, cancelled: 0, error: humanizeBingxError(pyStr(resp)) };
     } catch (e) {
       if (e instanceof TransportError && e.kind === 'timeout') return { ok: false, cancelled: 0, error: 'Таймаут соединения с BingX.' };
@@ -888,10 +890,10 @@ function createBingxTrader(overrides = {}) {
       const resp = await _request('GET', '/openApi/swap/v2/trade/openOrders', apiKey, secret, { symbol: bingxSymbol });
       if (pyGet(resp, 'code') !== 0) return { ok: false, cancelled: 0, error: humanizeBingxError(pyStr(resp)) };
       const orders = pyOr(pyGet(pyGet(resp, 'data', {}), 'orders', []), []);
-      const tpOrders = orders.filter((x) => pyStr(pyGet(x, 'type', '')).toUpperCase() === 'TAKE_PROFIT_MARKET');
+      const tpOrders = pyIter(orders).filter((x) => pyStr(pyGet(x, 'type', '')).toUpperCase() === 'TAKE_PROFIT_MARKET');
       let cancelled = 0;
       const errors = [];
-      for (const x of tpOrders) {
+      for (const x of pyIter(tpOrders)) {
         const oid = pyStr(pyOr(pyGet(x, 'orderId', ''), ''));
         if (!oid) continue;
         const cr = await cancelOrder(apiKey, secret, symbol, oid);
@@ -914,7 +916,7 @@ function createBingxTrader(overrides = {}) {
       const [qtyStep, tickSize] = await _getInstrumentFilters(bingxSymbol);
       const ordData = await _request('GET', '/openApi/swap/v2/trade/openOrders', apiKey, secret, { symbol: bingxSymbol });
       if (pyGet(ordData, 'code') === 0) {
-        for (const x of pyGet(pyGet(ordData, 'data', {}), 'orders', [])) {
+        for (const x of pyIter(pyGet(pyGet(ordData, 'data', {}), 'orders', []))) {
           if (pyGet(x, 'type') === 'STOP_MARKET' && pyStr(pyGet(x, 'side', '')).toUpperCase() === closeSide) {
             await _request('DELETE', '/openApi/swap/v2/trade/order', apiKey, secret, { symbol: bingxSymbol, orderId: pyStr(pyGet(x, 'orderId', '')) });
           }
@@ -1013,7 +1015,7 @@ function createBingxTrader(overrides = {}) {
       try {
         const ordData = await _request('GET', '/openApi/swap/v2/trade/openOrders', apiKey, secret, { symbol: bingxSymbol });
         if (pyGet(ordData, 'code') === 0) {
-          for (const x of pyGet(pyGet(ordData, 'data', {}), 'orders', [])) {
+          for (const x of pyIter(pyGet(pyGet(ordData, 'data', {}), 'orders', []))) {
             const oid = pyStr(pyGet(x, 'orderId', ''));
             if (pyGet(x, 'type') === 'STOP_MARKET' && pyStr(pyGet(x, 'side', '')).toUpperCase() === closeSide && oid !== newSlId) {
               try {
@@ -1069,7 +1071,7 @@ function createBingxTrader(overrides = {}) {
       try {
         const ordData = await _request('GET', '/openApi/swap/v2/trade/openOrders', apiKey, secret, { symbol: bingxSymbol });
         if (pyGet(ordData, 'code') === 0) {
-          for (const x of pyGet(pyGet(ordData, 'data', {}), 'orders', [])) {
+          for (const x of pyIter(pyGet(pyGet(ordData, 'data', {}), 'orders', []))) {
             if (pyStr(pyGet(x, 'side', '')).toUpperCase() !== closeSide) continue;
             if (!['STOP_MARKET', 'TAKE_PROFIT_MARKET'].includes(pyGet(x, 'type'))) continue;
             const oid = pyStr(pyGet(x, 'orderId', ''));
@@ -1129,7 +1131,7 @@ function createBingxTrader(overrides = {}) {
           await rt.sleep(2.0);
           const vd = await _request('GET', '/openApi/swap/v2/trade/openOrders', apiKey, secret, { symbol: bingxSymbol });
           const liveO = pyGet(vd, 'code') === 0 ? pyGet(pyGet(vd, 'data', {}), 'orders', []) : [];
-          const liveTp = liveO.filter((x) => pyGet(x, 'type') === 'TAKE_PROFIT_MARKET' && pyStr(pyGet(x, 'side', '')).toUpperCase() === closeSide).length;
+          const liveTp = pyIter(liveO).filter((x) => pyGet(x, 'type') === 'TAKE_PROFIT_MARKET' && pyStr(pyGet(x, 'side', '')).toUpperCase() === closeSide).length;
           if (liveTp < tpExpectedCount) {
             log.warning(`[TP-PHANTOM] BingX ${bingxSymbol} (post-fill): expected ${tpExpectedCount} TP, only ${liveTp} on exchange`);
             tpPlaced = false;
@@ -1178,7 +1180,7 @@ function createBingxTrader(overrides = {}) {
       const data = await _request('GET', '/openApi/swap/v2/trade/allOrders', apiKey, secret, { symbol: toBingxSymbol(symbol), limit: '20' });
       const orders = pyOr(pyGet(pyGet(data, 'data', {}), 'orders', []), []);
       const result = [];
-      for (const o of orders) {
+      for (const o of pyIter(orders)) {
         const side = pyGet(o, 'side', '');
         const avgPrice = pyFloat(pyOr(pyGet(o, 'avgPrice'), pyGet(o, 'price'), 0));
         const updatedTime = pyFloat(pyOr(pyGet(o, 'updateTime'), pyGet(o, 'time'), 0));

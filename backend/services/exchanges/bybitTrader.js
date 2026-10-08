@@ -38,7 +38,8 @@ const { makeRuntime, makeLock } = require('./runtime');
 const { TransportError, aiohttpJson } = require('./transport');
 const {
   PyError, errStr, pyGet, pyIndex, pyFloat, pyInt, pyStr, pyRepr, pyFloatStr, pyTruthy, pyOr,
-  htmlEscape, pySlice, isDict,
+  htmlEscape, pySlice, isDict, pyBigInt, pyLen,
+  pyIter,
 } = require('./pyCompat');
 const { fmtFixed, fmtSigned } = require('../../strategies/common/pyfmt');
 const { pyRound, pyMax } = require('../../strategies/common/pyround');
@@ -314,7 +315,10 @@ function createBybitTrader(overrides = {}) {
       const data = aiohttpJson(resp);
       const result = pyIndex(data, 'result');
       if (isDict(result) && Object.prototype.hasOwnProperty.call(result, 'timeNano')) {
-        return Math.floor(Number(BigInt(pyStr(pyIndex(result, 'timeNano')).trim()) / 1000000n));
+        // int(result["timeNano"]) // 1_000_000 — exact (19-digit str), Python int() of bool / float / str
+        const n = pyBigInt(pyIndex(result, 'timeNano'));
+        const q = n / 1000000n;
+        return Number(n < 0n && q * 1000000n !== n ? q - 1n : q);
       }
       return pyInt(pyIndex(result, 'timeSecond')) * 1000;
     } catch (e) {
@@ -642,7 +646,7 @@ function createBybitTrader(overrides = {}) {
       if (!(e && ['KeyError', 'IndexError', 'TypeError'].includes(e.pyType))) throw e;
     }
     const coins = pyIndex(pyIndex(pyIndex(pyIndex(resp, 'result'), 'list'), 0), 'coin');
-    for (const coin of coins) {
+    for (const coin of pyIter(coins)) {
       if (pyIndex(coin, 'coin') === 'USDT') {
         const val = pyOr(pyGet(coin, 'walletBalance'), pyGet(coin, 'equity'), pyGet(coin, 'availableBalance'), pyGet(coin, 'availableToWithdraw'), '0');
         return tryFloat(val, 0.0);
@@ -669,7 +673,7 @@ function createBybitTrader(overrides = {}) {
       if (!(e && ['KeyError', 'IndexError', 'TypeError'].includes(e.pyType))) throw e;
       acctTotalAvail = null;
     }
-    for (const coin of coins) {
+    for (const coin of pyIter(coins)) {
       if (pyGet(coin, 'coin') !== 'USDT') continue;
       let raw = pyOr(pyGet(coin, 'availableBalance'), pyGet(coin, 'availableToWithdraw'));
       if (!pyTruthy(raw)) raw = acctTotalAvail;
@@ -807,7 +811,7 @@ function createBybitTrader(overrides = {}) {
           let balance = 0.0;
           try {
             const coins = pyIndex(pyIndex(pyIndex(pyIndex(body, 'result'), 'list'), 0), 'coin');
-            for (const c of coins) {
+            for (const c of pyIter(coins)) {
               if (pyIndex(c, 'coin') === 'USDT') {
                 balance = pyFloat(pyOr(pyGet(c, 'availableBalance'), pyGet(c, 'availableToWithdraw'), pyGet(c, 'walletBalance'), '0'));
                 break;
@@ -832,7 +836,7 @@ function createBybitTrader(overrides = {}) {
           if (pyGet(resp, 'retCode') === 0) {
             const coins = pyIndex(pyIndex(pyIndex(pyIndex(resp, 'result'), 'list'), 0), 'coin');
             let balance = 0.0;
-            for (const c of coins) {
+            for (const c of pyIter(coins)) {
               if (pyIndex(c, 'coin') === 'USDT') { balance = pyFloat(pyOr(pyGet(c, 'walletBalance'), pyGet(c, 'availableBalance'), 0)); break; }
             }
             return { ok: true, balance };
@@ -841,7 +845,7 @@ function createBybitTrader(overrides = {}) {
           if (pyGet(resp2, 'retCode') === 0) {
             const coins = pyIndex(pyIndex(pyIndex(pyIndex(resp2, 'result'), 'list'), 0), 'coin');
             let balance = 0.0;
-            for (const c of coins) {
+            for (const c of pyIter(coins)) {
               if (pyIndex(c, 'coin') === 'USDT') { balance = pyFloat(pyOr(pyGet(c, 'walletBalance'), pyGet(c, 'availableBalance'), 0)); break; }
             }
             return { ok: true, balance };
@@ -885,15 +889,15 @@ function createBybitTrader(overrides = {}) {
       const resp = await session.get_positions({ category: 'linear', symbol: bbSymbol });
       if (pyGet(resp, 'retCode', -1) !== 0) return 0.0;
       const rows = pyOr(pyGet(pyGet(resp, 'result', {}), 'list', []), []);
-      const matching = rows.filter((p) => pyGet(p, 'symbol') === bbSymbol);
+      const matching = pyIter(rows).filter((p) => pyGet(p, 'symbol') === bbSymbol);
       if (!matching.length) return 0.0;
       if (posIdx !== -1) {
-        for (const p of matching) {
+        for (const p of pyIter(matching)) {
           if (pyInt(pyOr(pyGet(p, 'positionIdx', 0), 0)) === posIdx) return pyFloat(pyOr(pyGet(p, 'size', '0'), '0'));
         }
         return 0.0;
       }
-      for (const p of matching) {
+      for (const p of pyIter(matching)) {
         const sz = pyFloat(pyOr(pyGet(p, 'size', '0'), '0'));
         if (sz > 0) return sz;
       }
@@ -918,7 +922,7 @@ function createBybitTrader(overrides = {}) {
         if (apiKey) await _getKeyBucket(apiKey).acquire();
         const posResp = await session.get_positions({ category: 'linear', symbol: bbSymbol });
         if (pyGet(posResp, 'retCode', -1) === 0) {
-          for (const p of pyOr(pyGet(pyGet(posResp, 'result', {}), 'list', []), [])) {
+          for (const p of pyIter(pyOr(pyGet(pyGet(posResp, 'result', {}), 'list', []), []))) {
             if (pyGet(p, 'symbol') !== bbSymbol) continue;
             if (pyInt(pyOr(pyGet(p, 'positionIdx', 0), 0)) !== posIdx) continue;
             if (pyFloat(pyOr(pyGet(p, 'size', '0'), '0')) > 0) { ready = true; break; }
@@ -1047,7 +1051,7 @@ function createBybitTrader(overrides = {}) {
       const orders = await getOpenOrders(apiKey, apiSecret, demo);
       const bb = toBybitSymbol(symbol);
       const closeSide = direction === 'LONG' ? 'Sell' : 'Buy';
-      const live = orders.filter((o) => pyStr(pyGet(o, 'symbol', '')) === bb
+      const live = pyIter(orders).filter((o) => pyStr(pyGet(o, 'symbol', '')) === bb
         && pyGet(o, 'reduceOnly') === true
         && pyStr(pyGet(o, 'orderType', '')) === 'Limit'
         && pyStr(pyGet(o, 'side', '')) === closeSide).length;
@@ -1279,7 +1283,7 @@ function createBybitTrader(overrides = {}) {
         try {
           await _getKeyBucket(apiKey).acquire();
           const pos = await session.get_positions({ category: 'linear', symbol: bbSymbol });
-          const hasPos = pyOr(pyGet(pyGet(pos, 'result', {}), 'list', []), [])
+          const hasPos = pyIter(pyOr(pyGet(pyGet(pos, 'result', {}), 'list', []), []))
             .some((p) => pyFloat(pyOr(pyGet(p, 'size', '0'), '0')) > 0);
           if (hasPos) {
             return {
@@ -1344,7 +1348,7 @@ function createBybitTrader(overrides = {}) {
           try {
             await _getKeyBucket(apiKey).acquire();
             const ap = await session.get_positions({ category: 'linear', symbol: bbSymbol });
-            for (const p of pyOr(pyGet(pyGet(ap, 'result', {}), 'list', []), [])) {
+            for (const p of pyIter(pyOr(pyGet(pyGet(ap, 'result', {}), 'list', []), []))) {
               if (pyGet(p, 'symbol') === bbSymbol && pyFloat(pyOr(pyGet(p, 'size', '0'), '0')) > 0) {
                 avgPrice = pyFloat(pyOr(pyGet(p, 'avgPrice', 0), 0));
                 break;
@@ -1918,7 +1922,7 @@ function createBybitTrader(overrides = {}) {
     try {
       await _getKeyBucket(apiKey).acquire();
       const resp = await session.cancel_all_orders({ category: 'linear', symbol: bb });
-      if (pyGet(resp, 'retCode', -1) === 0) return { ok: true, cancelled: pyGet(pyGet(resp, 'result', {}), 'list', []).length };
+      if (pyGet(resp, 'retCode', -1) === 0) return { ok: true, cancelled: pyLen(pyGet(pyGet(resp, 'result', {}), 'list', [])) };
       return { ok: false, error: pyGet(resp, 'retMsg', 'cancel error') };
     } catch (e0) {
       const e = asRequestsError(e0);
@@ -2062,7 +2066,7 @@ function createBybitTrader(overrides = {}) {
         result.equity = pyFloat(pyOr(pyGet(acct, 'totalEquity'), 0));
         result.wallet_balance = pyFloat(pyOr(pyGet(acct, 'totalWalletBalance'), 0));
         result.unrealized_pnl = pyFloat(pyOr(pyGet(acct, 'totalUnrealisedPnl'), 0));
-        for (const coin of pyGet(acct, 'coin', [])) {
+        for (const coin of pyIter(pyGet(acct, 'coin', []))) {
           if (pyIndex(coin, 'coin') === 'USDT') result.available = pyFloat(pyOr(pyGet(coin, 'availableToWithdraw'), pyGet(coin, 'availableBalance'), 0));
         }
       }
@@ -2081,8 +2085,8 @@ function createBybitTrader(overrides = {}) {
       const resp = await session.get_closed_pnl({ category: 'linear', startTime: startTs, limit: 50 });
       if (pyGet(resp, 'retCode', -1) === 0) {
         const records = pyGet(pyIndex(resp, 'result'), 'list', []);
-        result.trades_24h = records.length;
-        for (const r of records) {
+        result.trades_24h = pyLen(records);
+        for (const r of pyIter(records)) {
           const pnl = pyFloat(pyGet(r, 'closedPnl', 0));
           result.closed_pnl_24h += pnl;
           if (pnl > 0) result.wins_24h += 1;
@@ -2110,7 +2114,7 @@ function createBybitTrader(overrides = {}) {
     try {
       await _getKeyBucket(apiKey).acquire();
       const resp = await session.get_positions({ category: 'linear', settleCoin: 'USDT' });
-      if (pyGet(resp, 'retCode', -1) === 0) positions = pyGet(pyIndex(resp, 'result'), 'list', []).filter((p) => pyFloat(pyGet(p, 'size', 0)) > 0);
+      if (pyGet(resp, 'retCode', -1) === 0) positions = pyIter(pyGet(pyIndex(resp, 'result'), 'list', [])).filter((p) => pyFloat(pyGet(p, 'size', 0)) > 0);
     } catch (e) {
       log.debug(`dashboard positions: ${errStr(asRequestsError(e))}`);
     }
@@ -2139,7 +2143,7 @@ function createBybitTrader(overrides = {}) {
       const items = pyGet(pyGet(resp, 'result', {}), 'list', []);
       const prices = [];
       const qtys = [];
-      for (const ex of items) {
+      for (const ex of pyIter(items)) {
         if (pyFloat(pyGet(ex, 'execTime', 0)) < createdMs) continue;
         const closedSize = pyFloat(pyOr(pyGet(ex, 'closedSize'), 0));
         if (closedSize <= 0) continue;

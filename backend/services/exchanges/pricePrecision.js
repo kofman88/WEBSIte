@@ -19,7 +19,7 @@
  */
 
 const { fmtFixed, fmtPriceDisplay: _fmtPriceDisplay, pyRepr: floatRepr } = require('../../strategies/common/pyfmt');
-const { ValueError, OverflowError } = require('./pyCompat');
+const { ValueError, OverflowError, ZeroDivisionError } = require('./pyCompat');
 
 const PREC = 28;
 const TEN = 10n;
@@ -130,16 +130,19 @@ function roundQty(qty, qtyStep) {
   if (qty <= 0) return fmtFixed(0.0, stepDecimals(qtyStep));
   const decimals = stepDecimals(qtyStep);
   const factor = 1.0 / qtyStep;
-  const qtyFloor = pyFloorF(qty * factor) / factor;
-  return fmtFixed(qtyFloor, decimals);
+  const floored = pyFloorF(qty * factor);
+  if (factor === 0) throw ZeroDivisionError(); // qty_step = inf: 1.0 / inf == 0.0, then x / 0.0
+  return fmtFixed(floored / factor, decimals);
 }
 
 /** Shared Decimal path: quantize(price / tick) with `mode`, × tick, float, format. */
 function _decRound(price, tickSize, mode, fallback) {
   const decimals = stepDecimals(tickSize);
-  if (Number.isNaN(price)) return 'nan'; // Decimal('NaN') propagates → float nan → 'nan'
+  // Decimal('NaN') (price or tick) propagates quietly → float nan → 'nan'
+  if (Number.isNaN(price) || Number.isNaN(tickSize)) return 'nan';
   try {
-    if (!Number.isFinite(price)) throw new InvalidOperation('infinite');
+    // Decimal('Infinity') operands: ticks × Infinity / inf / inf signal InvalidOperation → float fallback
+    if (!Number.isFinite(price) || !Number.isFinite(tickSize)) throw new InvalidOperation('infinite');
     const dPrice = decFromFloat(price);
     const dTick = decFromFloat(tickSize);
     const q = decDiv(dPrice, dTick);
@@ -150,7 +153,9 @@ function _decRound(price, tickSize, mode, fallback) {
   } catch (e) {
     if (!(e instanceof InvalidOperation)) throw e;
     const factor = 1.0 / tickSize;
-    return fmtFixed(fallback(price, factor) / factor, decimals);
+    const rounded = fallback(price, factor);
+    if (factor === 0) throw ZeroDivisionError(); // tick = inf
+    return fmtFixed(rounded / factor, decimals);
   }
 }
 

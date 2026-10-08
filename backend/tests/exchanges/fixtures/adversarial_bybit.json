@@ -15190,5 +15190,6293 @@ true
 ],
 "full_events": []
 }
+},
+{
+"scenario": {
+"name": "rd_00_get_balance_mut",
+"exchange": "bybit",
+"call": "get_balance",
+"args": [
+"BYBITKEY123456789",
+"bybit-secret-xyz"
+],
+"kwargs": {},
+"routes": [
+{
+"method": "GET",
+"path": "/v5/account/wallet-balance",
+"responses": [
+{
+"text": "{\"retCode\": 10002, \"retMsg\": \"invalid request, please check your server timestamp or recv_window param\", \"result\": {}}"
+},
+{
+"text": "{\"retCode\": 0, \"retMsg\": \"OK\", \"result\": {\"list\": [{\"totalEquity\": \"55.5\", \"totalAvailableBalance\": \"800.25\", \"totalWalletBalance\": \"55.5\", \"totalUnrealisedPnl\": \"1.5\", \"coin\": [{\"coin\": \"USDT\", \"walletBalance\": \"55.5\", \"equity\": \"55.5\", \"availableBalance\": \"\", \"availableToWithdraw\": \"\"}]}]}}"
+}
+]
+},
+{
+"method": "GET",
+"path": "/v5/market/time",
+"responses": [
+{
+"text": "{\"retCode\": 0, \"retMsg\": \"OK\"}"
+}
+]
+}
+],
+"state": {},
+"mode": "wire",
+"random": [
+0.029685662324390516,
+0.13040829017965205,
+0.484127835004869,
+0.43886567532884657,
+0.45100456300947833,
+0.1494284285277826
+],
+"clock": 1769210238.6775
+},
+"expected": {
+"name": "rd_00_get_balance_mut",
+"result": 55.5,
+"requests": [
+{
+"method": "GET",
+"url": "https://api.bybit.com/v5/account/wallet-balance?accountType=UNIFIED&coin=USDT",
+"headers": {
+"Content-Type": "application/json",
+"X-BAPI-API-KEY": "BYBITKEY123456789",
+"X-BAPI-SIGN": "b11958a602956ea187f5df379fb287bbe0292b6e2c169100b3a318bb63055704",
+"X-BAPI-SIGN-TYPE": "2",
+"X-BAPI-TIMESTAMP": "1769210238677",
+"X-BAPI-RECV-WINDOW": "15000"
+},
+"body": null,
+"hdrs": {
+"accept": "application/json",
+"content-type": "application/json",
+"x-bapi-api-key": "BYBITKEY123456789",
+"x-bapi-sign": "b11958a602956ea187f5df379fb287bbe0292b6e2c169100b3a318bb63055704",
+"x-bapi-sign-type": "2",
+"x-bapi-timestamp": "1769210238677",
+"x-bapi-recv-window": "15000"
+},
+"wire": {
+"method": "GET",
+"target": "/v5/account/wallet-balance?accountType=UNIFIED&coin=USDT",
+"headers": {
+"accept": "application/json",
+"content-type": "application/json",
+"x-bapi-api-key": "BYBITKEY123456789",
+"x-bapi-sign": "b11958a602956ea187f5df379fb287bbe0292b6e2c169100b3a318bb63055704",
+"x-bapi-sign-type": "2",
+"x-bapi-timestamp": "1769210238677",
+"x-bapi-recv-window": "15000"
+},
+"body": null
+}
+},
+{
+"method": "GET",
+"url": "https://api.bybit.com/v5/account/wallet-balance?accountType=UNIFIED&coin=USDT",
+"headers": {
+"Content-Type": "application/json",
+"X-BAPI-API-KEY": "BYBITKEY123456789",
+"X-BAPI-SIGN": "e9e34f8de2a06b9d57553d1b52b5ff1d5953e0c3d1e54de48543281e3a7ebaf3",
+"X-BAPI-SIGN-TYPE": "2",
+"X-BAPI-TIMESTAMP": "1769210242177",
+"X-BAPI-RECV-WINDOW": "15000"
+},
+"body": null,
+"hdrs": {
+"accept": "application/json",
+"content-type": "application/json",
+"x-bapi-api-key": "BYBITKEY123456789",
+"x-bapi-sign": "e9e34f8de2a06b9d57553d1b52b5ff1d5953e0c3d1e54de48543281e3a7ebaf3",
+"x-bapi-sign-type": "2",
+"x-bapi-timestamp": "1769210242177",
+"x-bapi-recv-window": "15000"
+},
+"wire": {
+"method": "GET",
+"target": "/v5/account/wallet-balance?accountType=UNIFIED&coin=USDT",
+"headers": {
+"accept": "application/json",
+"content-type": "application/json",
+"x-bapi-api-key": "BYBITKEY123456789",
+"x-bapi-sign": "e9e34f8de2a06b9d57553d1b52b5ff1d5953e0c3d1e54de48543281e3a7ebaf3",
+"x-bapi-sign-type": "2",
+"x-bapi-timestamp": "1769210242177",
+"x-bapi-recv-window": "15000"
+},
+"body": null
+}
+}
+],
+"sleeps": [
+3,
+0.5
+],
+"clock_end": 1769210242.1775,
+"markers": [],
+"saved": {
+"hedge_saved": [],
+"auth_reset": [],
+"events": [],
+"metrics": []
+},
+"final": {
+"hedge": {},
+"account_type": {
+"BYBITKEY123456789": "UNIFIED"
+},
+"delisted": [],
+"fail_count": {},
+"bybit_offset": 0,
+"binance_base": "https://fapi.binance.com",
+"binance_offset": 0,
+"bingx_offset": 0,
+"okx_offset": 0
+},
+"full_metrics": [],
+"full_events": []
+}
+},
+{
+"scenario": {
+"name": "rd_01_get_funding_rate_fail",
+"exchange": "bybit",
+"call": "get_funding_rate",
+"args": [
+"BONK-USDT-SWAP"
+],
+"kwargs": {},
+"routes": [
+{
+"method": "GET",
+"path": "/v5/market/tickers",
+"responses": [
+{
+"status": 200,
+"text": ""
+}
+]
+}
+],
+"state": {},
+"mode": "wire",
+"random": [
+0.4881517877314261,
+0.3827419119587251,
+0.6117837559200089,
+0.18605742782265744,
+0.2563146355025808,
+0.8613172493739022
+],
+"clock": 1770817866.625484
+},
+"expected": {
+"name": "rd_01_get_funding_rate_fail",
+"result": 0.0,
+"requests": [
+{
+"method": "GET",
+"url": "https://api.bybit.com/v5/market/tickers?category=linear&symbol=1000BONKUSDT",
+"headers": {},
+"body": null,
+"hdrs": {},
+"wire": {
+"method": "GET",
+"target": "/v5/market/tickers?category=linear&symbol=1000BONKUSDT",
+"headers": {
+"accept": "*/*"
+},
+"body": null
+}
+}
+],
+"sleeps": [],
+"clock_end": 1770817866.625484,
+"markers": [],
+"saved": {
+"hedge_saved": [],
+"auth_reset": [],
+"events": [],
+"metrics": []
+},
+"final": {
+"hedge": {},
+"account_type": {},
+"delisted": [],
+"fail_count": {},
+"bybit_offset": 0,
+"binance_base": "https://fapi.binance.com",
+"binance_offset": 0,
+"bingx_offset": 0,
+"okx_offset": 0
+},
+"full_metrics": [],
+"full_events": []
+}
+},
+{
+"scenario": {
+"name": "rd_02_test_connection_none",
+"exchange": "bybit",
+"call": "test_connection",
+"args": [
+"BYBITKEY123456789",
+"bybit-secret-xyz"
+],
+"kwargs": {},
+"routes": [
+{
+"method": "GET",
+"path": "/v5/market/time",
+"responses": [
+{
+"status": 502,
+"text": "bad gateway",
+"headers": {
+"Content-Type": "text/html"
+}
+}
+]
+}
+],
+"state": {},
+"mode": "wire",
+"random": [
+0.2978313777439291,
+0.5842639648006274,
+0.8725238499001953,
+0.9611258184232817,
+0.04842153488352996,
+0.707299327693025
+],
+"clock": 1768461787.0
+},
+"expected": {
+"name": "rd_02_test_connection_none",
+"result": {
+"ok": false,
+"error": "Bybit API недоступен (HTTP 502). Проверьте сетевое соединение или статус биржи на status.bybit.com"
+},
+"requests": [
+{
+"method": "GET",
+"url": "https://api.bybit.com/v5/market/time",
+"headers": {},
+"body": null,
+"hdrs": {},
+"wire": {
+"method": "GET",
+"target": "/v5/market/time",
+"headers": {
+"accept": "*/*"
+},
+"body": null
+}
+},
+{
+"method": "GET",
+"url": "https://api-demo.bybit.com/v5/market/time",
+"headers": {},
+"body": null,
+"hdrs": {},
+"wire": {
+"method": "GET",
+"target": "/v5/market/time",
+"headers": {
+"accept": "*/*"
+},
+"body": null
+}
+}
+],
+"sleeps": [],
+"clock_end": 1768461787.0,
+"markers": [],
+"saved": {
+"hedge_saved": [],
+"auth_reset": [],
+"events": [],
+"metrics": []
+},
+"final": {
+"hedge": {},
+"account_type": {},
+"delisted": [],
+"fail_count": {},
+"bybit_offset": 0,
+"binance_base": "https://fapi.binance.com",
+"binance_offset": 0,
+"bingx_offset": 0,
+"okx_offset": 0
+},
+"full_metrics": [],
+"full_events": []
+}
+},
+{
+"scenario": {
+"name": "rd_03_sync_time_mut",
+"exchange": "bybit",
+"call": "sync_time",
+"args": [],
+"kwargs": {},
+"routes": [
+{
+"method": "GET",
+"path": "/v5/market/time",
+"responses": [
+{
+"text": "{\"retCode\": 0, \"retMsg\": \"inf\", \"result\": {\"timeSecond\": \"1767225601\", \"timeNano\": \"1767225601234567890\"}}"
+}
+]
+}
+],
+"state": {},
+"mode": "wire",
+"random": [
+0.4956824453090466,
+0.38897289616046726,
+0.6545905165866008,
+0.2516644537301299,
+0.4758393216792134,
+0.29709239976485746
+],
+"clock": 1767335257.837
+},
+"expected": {
+"name": "rd_03_sync_time_mut",
+"result": -109656603,
+"requests": [
+{
+"method": "GET",
+"url": "https://api.bybit.com/v5/market/time",
+"headers": {},
+"body": null,
+"hdrs": {},
+"wire": {
+"method": "GET",
+"target": "/v5/market/time",
+"headers": {
+"accept": "*/*"
+},
+"body": null
+}
+}
+],
+"sleeps": [],
+"clock_end": 1767335257.837,
+"markers": [
+[
+"WARNING",
+"[BYBIT-TIME-DRIFT]"
+]
+],
+"saved": {
+"hedge_saved": [],
+"auth_reset": [],
+"events": [],
+"metrics": []
+},
+"final": {
+"hedge": {},
+"account_type": {},
+"delisted": [],
+"fail_count": {},
+"bybit_offset": -109656603,
+"binance_base": "https://fapi.binance.com",
+"binance_offset": 0,
+"bingx_offset": 0,
+"okx_offset": 0
+},
+"full_metrics": [],
+"full_events": []
+}
+},
+{
+"scenario": {
+"name": "rd_04_get_positions_",
+"exchange": "bybit",
+"call": "get_positions",
+"args": [
+"BYBITKEY123456789",
+"bybit-secret-xyz",
+"PEPE-USDT-SWAP"
+],
+"kwargs": {},
+"routes": [
+{
+"method": "GET",
+"path": "/v5/position/list",
+"responses": [
+{
+"text": "{\"retCode\": 0, \"retMsg\": \"OK\", \"result\": {\"list\": [{\"symbol\": \"1000PEPEUSDT\", \"side\": \"Buy\", \"size\": \"1000\", \"positionIdx\": 0, \"avgPrice\": \"0.0039\", \"markPrice\": \"0.0039\", \"stopLoss\": \"\"}]}}"
+}
+]
+}
+],
+"state": {},
+"mode": "wire",
+"random": [
+0.817688079180757,
+0.31381930624022425,
+0.8655996625568001,
+0.06865158772123348,
+0.4867725418187582,
+0.2264977659003493
+],
+"clock": 1770505786.0
+},
+"expected": {
+"name": "rd_04_get_positions_",
+"result": [
+{
+"symbol": "1000PEPEUSDT",
+"side": "Buy",
+"size": "1000",
+"positionIdx": 0,
+"avgPrice": "0.0039",
+"markPrice": "0.0039",
+"stopLoss": ""
+}
+],
+"requests": [
+{
+"method": "GET",
+"url": "https://api.bybit.com/v5/position/list?category=linear&settleCoin=USDT&symbol=1000PEPEUSDT",
+"headers": {
+"Content-Type": "application/json",
+"X-BAPI-API-KEY": "BYBITKEY123456789",
+"X-BAPI-SIGN": "244e6ecc4854c6c353b0fb92eb84b66ce6b8a09043470eb4cf5588b448a824be",
+"X-BAPI-SIGN-TYPE": "2",
+"X-BAPI-TIMESTAMP": "1770505786000",
+"X-BAPI-RECV-WINDOW": "15000"
+},
+"body": null,
+"hdrs": {
+"accept": "application/json",
+"content-type": "application/json",
+"x-bapi-api-key": "BYBITKEY123456789",
+"x-bapi-sign": "244e6ecc4854c6c353b0fb92eb84b66ce6b8a09043470eb4cf5588b448a824be",
+"x-bapi-sign-type": "2",
+"x-bapi-timestamp": "1770505786000",
+"x-bapi-recv-window": "15000"
+},
+"wire": {
+"method": "GET",
+"target": "/v5/position/list?category=linear&settleCoin=USDT&symbol=1000PEPEUSDT",
+"headers": {
+"accept": "application/json",
+"content-type": "application/json",
+"x-bapi-api-key": "BYBITKEY123456789",
+"x-bapi-sign": "244e6ecc4854c6c353b0fb92eb84b66ce6b8a09043470eb4cf5588b448a824be",
+"x-bapi-sign-type": "2",
+"x-bapi-timestamp": "1770505786000",
+"x-bapi-recv-window": "15000"
+},
+"body": null
+}
+}
+],
+"sleeps": [],
+"clock_end": 1770505786.0,
+"markers": [],
+"saved": {
+"hedge_saved": [],
+"auth_reset": [],
+"events": [],
+"metrics": []
+},
+"final": {
+"hedge": {},
+"account_type": {},
+"delisted": [],
+"fail_count": {},
+"bybit_offset": 0,
+"binance_base": "https://fapi.binance.com",
+"binance_offset": 0,
+"bingx_offset": 0,
+"okx_offset": 0
+},
+"full_metrics": [],
+"full_events": []
+}
+},
+{
+"scenario": {
+"name": "rd_05_test_connection_none",
+"exchange": "bybit",
+"call": "test_connection",
+"args": [
+"BYBITKEY123456789",
+"bybit-secret-xyz"
+],
+"kwargs": {},
+"routes": [
+{
+"method": "GET",
+"path": "/v5/market/time",
+"responses": [
+{
+"status": 502,
+"text": "bad gateway",
+"headers": {
+"Content-Type": "text/html"
+}
+}
+]
+}
+],
+"state": {},
+"mode": "wire",
+"random": [
+0.5251598862004367,
+0.5046171764787958,
+0.14963027090700065,
+0.5955255005934221,
+0.4889787813408075,
+0.07847217263762174
+],
+"clock": 1767573544.487
+},
+"expected": {
+"name": "rd_05_test_connection_none",
+"result": {
+"ok": false,
+"error": "Bybit API недоступен (HTTP 502). Проверьте сетевое соединение или статус биржи на status.bybit.com"
+},
+"requests": [
+{
+"method": "GET",
+"url": "https://api.bybit.com/v5/market/time",
+"headers": {},
+"body": null,
+"hdrs": {},
+"wire": {
+"method": "GET",
+"target": "/v5/market/time",
+"headers": {
+"accept": "*/*"
+},
+"body": null
+}
+},
+{
+"method": "GET",
+"url": "https://api-demo.bybit.com/v5/market/time",
+"headers": {},
+"body": null,
+"hdrs": {},
+"wire": {
+"method": "GET",
+"target": "/v5/market/time",
+"headers": {
+"accept": "*/*"
+},
+"body": null
+}
+}
+],
+"sleeps": [],
+"clock_end": 1767573544.487,
+"markers": [],
+"saved": {
+"hedge_saved": [],
+"auth_reset": [],
+"events": [],
+"metrics": []
+},
+"final": {
+"hedge": {},
+"account_type": {},
+"delisted": [],
+"fail_count": {},
+"bybit_offset": 0,
+"binance_base": "https://fapi.binance.com",
+"binance_offset": 0,
+"bingx_offset": 0,
+"okx_offset": 0
+},
+"full_metrics": [],
+"full_events": []
+}
+},
+{
+"scenario": {
+"name": "rd_06_get_funding_rate_fail",
+"exchange": "bybit",
+"call": "get_funding_rate",
+"args": [
+"BONK-USDT-SWAP"
+],
+"kwargs": {},
+"routes": [
+{
+"method": "GET",
+"path": "/v5/market/tickers",
+"responses": [
+{
+"status": 200,
+"text": "null"
+}
+]
+}
+],
+"state": {},
+"mode": "wire",
+"random": [
+0.49510087771460587,
+0.103043024833255,
+0.2704474436064628,
+0.4156351536462203,
+0.3231264187120281,
+0.7665246877696069
+],
+"clock": 1769216381.927
+},
+"expected": {
+"name": "rd_06_get_funding_rate_fail",
+"result": 0.0,
+"requests": [
+{
+"method": "GET",
+"url": "https://api.bybit.com/v5/market/tickers?category=linear&symbol=1000BONKUSDT",
+"headers": {},
+"body": null,
+"hdrs": {},
+"wire": {
+"method": "GET",
+"target": "/v5/market/tickers?category=linear&symbol=1000BONKUSDT",
+"headers": {
+"accept": "*/*"
+},
+"body": null
+}
+}
+],
+"sleeps": [],
+"clock_end": 1769216381.927,
+"markers": [],
+"saved": {
+"hedge_saved": [],
+"auth_reset": [],
+"events": [],
+"metrics": []
+},
+"final": {
+"hedge": {},
+"account_type": {},
+"delisted": [],
+"fail_count": {},
+"bybit_offset": 0,
+"binance_base": "https://fapi.binance.com",
+"binance_offset": 0,
+"bingx_offset": 0,
+"okx_offset": 0
+},
+"full_metrics": [],
+"full_events": []
+}
+},
+{
+"scenario": {
+"name": "rd_07_get_spread_pct_fail",
+"exchange": "bybit",
+"call": "get_spread_pct",
+"args": [
+"SATS-USDT-SWAP"
+],
+"kwargs": {},
+"routes": [
+{
+"method": "GET",
+"path": "/v5/market/tickers",
+"responses": [
+{
+"status": 200,
+"text": ""
+}
+]
+}
+],
+"state": {},
+"mode": "wire",
+"random": [
+0.5586210028791709,
+0.9824438572818186,
+0.7392028297278787,
+0.9334174198733,
+0.6574629045817584,
+0.2927864562319048
+],
+"clock": 1767596820.391
+},
+"expected": {
+"name": "rd_07_get_spread_pct_fail",
+"result": 0.0,
+"requests": [
+{
+"method": "GET",
+"url": "https://api.bybit.com/v5/market/tickers?category=linear&symbol=10000SATSUSDT",
+"headers": {},
+"body": null,
+"hdrs": {},
+"wire": {
+"method": "GET",
+"target": "/v5/market/tickers?category=linear&symbol=10000SATSUSDT",
+"headers": {
+"accept": "*/*"
+},
+"body": null
+}
+}
+],
+"sleeps": [],
+"clock_end": 1767596820.391,
+"markers": [],
+"saved": {
+"hedge_saved": [],
+"auth_reset": [],
+"events": [],
+"metrics": []
+},
+"final": {
+"hedge": {},
+"account_type": {},
+"delisted": [],
+"fail_count": {},
+"bybit_offset": 0,
+"binance_base": "https://fapi.binance.com",
+"binance_offset": 0,
+"bingx_offset": 0,
+"okx_offset": 0
+},
+"full_metrics": [],
+"full_events": []
+}
+},
+{
+"scenario": {
+"name": "rd_08_get_balance_",
+"exchange": "bybit",
+"call": "get_balance",
+"args": [
+"BYBITKEY123456789",
+"bybit-secret-xyz"
+],
+"kwargs": {},
+"routes": [
+{
+"method": "GET",
+"path": "/v5/account/wallet-balance",
+"responses": [
+{
+"text": "{\"retCode\": 10002, \"retMsg\": \"invalid request, please check your server timestamp or recv_window param\", \"result\": {}}"
+},
+{
+"text": "{\"retCode\": 0, \"retMsg\": \"OK\", \"result\": {\"list\": [{\"totalEquity\": \"55.5\", \"totalAvailableBalance\": \"800.25\", \"totalWalletBalance\": \"55.5\", \"totalUnrealisedPnl\": \"1.5\", \"coin\": [{\"coin\": \"USDT\", \"walletBalance\": \"55.5\", \"equity\": \"55.5\", \"availableBalance\": \"\", \"availableToWithdraw\": \"\"}]}]}}"
+}
+]
+},
+{
+"method": "GET",
+"path": "/v5/market/time",
+"responses": [
+{
+"text": "{\"retCode\": 0, \"retMsg\": \"OK\", \"result\": {\"timeSecond\": \"1767225600\", \"timeNano\": \"1767225600250000000\"}}"
+}
+]
+}
+],
+"state": {},
+"mode": "wire",
+"random": [
+0.0014621493549606956,
+0.928134967360215,
+0.23750374701321497,
+0.6613644489950032,
+0.9396787677927382,
+0.9585821953179929
+],
+"clock": 1768019938.540682
+},
+"expected": {
+"name": "rd_08_get_balance_",
+"result": 55.5,
+"requests": [
+{
+"method": "GET",
+"url": "https://api.bybit.com/v5/account/wallet-balance?accountType=UNIFIED&coin=USDT",
+"headers": {
+"Content-Type": "application/json",
+"X-BAPI-API-KEY": "BYBITKEY123456789",
+"X-BAPI-SIGN": "f7263b7d3bbb1cdd5a96efde9298cce269fc42d678208e03ee5599dcc3067363",
+"X-BAPI-SIGN-TYPE": "2",
+"X-BAPI-TIMESTAMP": "1768019938540",
+"X-BAPI-RECV-WINDOW": "15000"
+},
+"body": null,
+"hdrs": {
+"accept": "application/json",
+"content-type": "application/json",
+"x-bapi-api-key": "BYBITKEY123456789",
+"x-bapi-sign": "f7263b7d3bbb1cdd5a96efde9298cce269fc42d678208e03ee5599dcc3067363",
+"x-bapi-sign-type": "2",
+"x-bapi-timestamp": "1768019938540",
+"x-bapi-recv-window": "15000"
+},
+"wire": {
+"method": "GET",
+"target": "/v5/account/wallet-balance?accountType=UNIFIED&coin=USDT",
+"headers": {
+"accept": "application/json",
+"content-type": "application/json",
+"x-bapi-api-key": "BYBITKEY123456789",
+"x-bapi-sign": "f7263b7d3bbb1cdd5a96efde9298cce269fc42d678208e03ee5599dcc3067363",
+"x-bapi-sign-type": "2",
+"x-bapi-timestamp": "1768019938540",
+"x-bapi-recv-window": "15000"
+},
+"body": null
+}
+},
+{
+"method": "GET",
+"url": "https://api.bybit.com/v5/account/wallet-balance?accountType=UNIFIED&coin=USDT",
+"headers": {
+"Content-Type": "application/json",
+"X-BAPI-API-KEY": "BYBITKEY123456789",
+"X-BAPI-SIGN": "e8a6c63c3245506f62d04d2652f6aabdbe33d2b7d542634e138785a27d8e4fa9",
+"X-BAPI-SIGN-TYPE": "2",
+"X-BAPI-TIMESTAMP": "1768019942040",
+"X-BAPI-RECV-WINDOW": "15000"
+},
+"body": null,
+"hdrs": {
+"accept": "application/json",
+"content-type": "application/json",
+"x-bapi-api-key": "BYBITKEY123456789",
+"x-bapi-sign": "e8a6c63c3245506f62d04d2652f6aabdbe33d2b7d542634e138785a27d8e4fa9",
+"x-bapi-sign-type": "2",
+"x-bapi-timestamp": "1768019942040",
+"x-bapi-recv-window": "15000"
+},
+"wire": {
+"method": "GET",
+"target": "/v5/account/wallet-balance?accountType=UNIFIED&coin=USDT",
+"headers": {
+"accept": "application/json",
+"content-type": "application/json",
+"x-bapi-api-key": "BYBITKEY123456789",
+"x-bapi-sign": "e8a6c63c3245506f62d04d2652f6aabdbe33d2b7d542634e138785a27d8e4fa9",
+"x-bapi-sign-type": "2",
+"x-bapi-timestamp": "1768019942040",
+"x-bapi-recv-window": "15000"
+},
+"body": null
+}
+}
+],
+"sleeps": [
+3,
+0.5
+],
+"clock_end": 1768019942.040682,
+"markers": [],
+"saved": {
+"hedge_saved": [],
+"auth_reset": [],
+"events": [],
+"metrics": []
+},
+"final": {
+"hedge": {},
+"account_type": {
+"BYBITKEY123456789": "UNIFIED"
+},
+"delisted": [],
+"fail_count": {},
+"bybit_offset": 0,
+"binance_base": "https://fapi.binance.com",
+"binance_offset": 0,
+"bingx_offset": 0,
+"okx_offset": 0
+},
+"full_metrics": [],
+"full_events": []
+}
+},
+{
+"scenario": {
+"name": "rd_09_test_connection_fail",
+"exchange": "bybit",
+"call": "test_connection",
+"args": [
+"BYBITKEY123456789",
+"bybit-secret-xyz"
+],
+"kwargs": {},
+"routes": [
+{
+"method": "GET",
+"path": "/v5/market/time",
+"responses": [
+{
+"text": "{\"retCode\": 0, \"retMsg\": \"OK\", \"result\": {\"timeSecond\": \"1767225600\", \"timeNano\": \"1767225600250000000\"}}"
+}
+]
+},
+{
+"method": "GET",
+"path": "/v5/account/wallet-balance",
+"responses": [
+{
+"status": 502,
+"text": "<html><body>502 Bad Gateway</body></html>",
+"headers": {
+"Content-Type": "text/html"
+}
+}
+]
+}
+],
+"state": {},
+"mode": "wire",
+"random": [
+0.446549015229341,
+0.6737022602490307,
+0.445582493360385,
+0.3047704053132487,
+0.6169653232149732,
+0.9053344585855473
+],
+"clock": 1771991740.029
+},
+"expected": {
+"name": "rd_09_test_connection_fail",
+"result": {
+"ok": false,
+"error": "Expecting value: line 1 column 1 (char 0)."
+},
+"requests": [
+{
+"method": "GET",
+"url": "https://api.bybit.com/v5/market/time",
+"headers": {},
+"body": null,
+"hdrs": {},
+"wire": {
+"method": "GET",
+"target": "/v5/market/time",
+"headers": {
+"accept": "*/*"
+},
+"body": null
+}
+},
+{
+"method": "GET",
+"url": "https://api.bybit.com/v5/account/wallet-balance?accountType=UNIFIED&coin=USDT",
+"headers": {
+"X-BAPI-API-KEY": "BYBITKEY123456789",
+"X-BAPI-SIGN": "00e95f9f0a737063dd866b189d0b1478d061d181047c9f5b2ad929e147bf98e7",
+"X-BAPI-SIGN-TYPE": "2",
+"X-BAPI-TIMESTAMP": "1767225600000",
+"X-BAPI-RECV-WINDOW": "10000"
+},
+"body": null,
+"hdrs": {
+"x-bapi-api-key": "BYBITKEY123456789",
+"x-bapi-sign": "00e95f9f0a737063dd866b189d0b1478d061d181047c9f5b2ad929e147bf98e7",
+"x-bapi-sign-type": "2",
+"x-bapi-timestamp": "1767225600000",
+"x-bapi-recv-window": "10000"
+},
+"wire": {
+"method": "GET",
+"target": "/v5/account/wallet-balance?accountType=UNIFIED&coin=USDT",
+"headers": {
+"x-bapi-api-key": "BYBITKEY123456789",
+"x-bapi-sign": "00e95f9f0a737063dd866b189d0b1478d061d181047c9f5b2ad929e147bf98e7",
+"x-bapi-sign-type": "2",
+"x-bapi-timestamp": "1767225600000",
+"x-bapi-recv-window": "10000",
+"accept": "*/*"
+},
+"body": null
+}
+},
+{
+"method": "GET",
+"url": "https://api-demo.bybit.com/v5/market/time",
+"headers": {},
+"body": null,
+"hdrs": {},
+"wire": {
+"method": "GET",
+"target": "/v5/market/time",
+"headers": {
+"accept": "*/*"
+},
+"body": null
+}
+},
+{
+"method": "GET",
+"url": "https://api-demo.bybit.com/v5/account/wallet-balance?accountType=UNIFIED&coin=USDT",
+"headers": {
+"X-BAPI-API-KEY": "BYBITKEY123456789",
+"X-BAPI-SIGN": "00e95f9f0a737063dd866b189d0b1478d061d181047c9f5b2ad929e147bf98e7",
+"X-BAPI-SIGN-TYPE": "2",
+"X-BAPI-TIMESTAMP": "1767225600000",
+"X-BAPI-RECV-WINDOW": "10000"
+},
+"body": null,
+"hdrs": {
+"x-bapi-api-key": "BYBITKEY123456789",
+"x-bapi-sign": "00e95f9f0a737063dd866b189d0b1478d061d181047c9f5b2ad929e147bf98e7",
+"x-bapi-sign-type": "2",
+"x-bapi-timestamp": "1767225600000",
+"x-bapi-recv-window": "10000"
+},
+"wire": {
+"method": "GET",
+"target": "/v5/account/wallet-balance?accountType=UNIFIED&coin=USDT",
+"headers": {
+"x-bapi-api-key": "BYBITKEY123456789",
+"x-bapi-sign": "00e95f9f0a737063dd866b189d0b1478d061d181047c9f5b2ad929e147bf98e7",
+"x-bapi-sign-type": "2",
+"x-bapi-timestamp": "1767225600000",
+"x-bapi-recv-window": "10000",
+"accept": "*/*"
+},
+"body": null
+}
+}
+],
+"sleeps": [],
+"clock_end": 1771991740.029,
+"markers": [],
+"saved": {
+"hedge_saved": [],
+"auth_reset": [],
+"events": [],
+"metrics": []
+},
+"final": {
+"hedge": {},
+"account_type": {},
+"delisted": [],
+"fail_count": {},
+"bybit_offset": -4766140029,
+"binance_base": "https://fapi.binance.com",
+"binance_offset": 0,
+"bingx_offset": 0,
+"okx_offset": 0
+},
+"full_metrics": [],
+"full_events": []
+}
+},
+{
+"scenario": {
+"name": "rd_10_get_open_orders_",
+"exchange": "bybit",
+"call": "get_open_orders",
+"args": [
+"BYBITKEY123456789",
+"bybit-secret-xyz"
+],
+"kwargs": {},
+"routes": [
+{
+"method": "GET",
+"path": "/v5/order/realtime",
+"responses": [
+{
+"text": "{\"retCode\": 0, \"retMsg\": \"OK\", \"result\": {\"list\": [{\"orderId\": \"o1\", \"symbol\": \"BTCUSDT\", \"side\": \"Sell\", \"orderType\": \"Limit\", \"reduceOnly\": true}]}}"
+}
+]
+}
+],
+"state": {},
+"mode": "wire",
+"random": [
+0.2111903951648011,
+0.6698525488560794,
+0.8231815450660688,
+0.6632539327759566,
+0.7823704031724554,
+0.4923895080486297
+],
+"clock": 1771700435.387
+},
+"expected": {
+"name": "rd_10_get_open_orders_",
+"result": [
+{
+"orderId": "o1",
+"symbol": "BTCUSDT",
+"side": "Sell",
+"orderType": "Limit",
+"reduceOnly": true
+}
+],
+"requests": [
+{
+"method": "GET",
+"url": "https://api.bybit.com/v5/order/realtime?category=linear&limit=50&settleCoin=USDT",
+"headers": {
+"Content-Type": "application/json",
+"X-BAPI-API-KEY": "BYBITKEY123456789",
+"X-BAPI-SIGN": "d2440ed76a287bd3b33e6336f4f71cc05cddff20fa8cc3fdd758e349f7cd3401",
+"X-BAPI-SIGN-TYPE": "2",
+"X-BAPI-TIMESTAMP": "1771700435387",
+"X-BAPI-RECV-WINDOW": "15000"
+},
+"body": null,
+"hdrs": {
+"accept": "application/json",
+"content-type": "application/json",
+"x-bapi-api-key": "BYBITKEY123456789",
+"x-bapi-sign": "d2440ed76a287bd3b33e6336f4f71cc05cddff20fa8cc3fdd758e349f7cd3401",
+"x-bapi-sign-type": "2",
+"x-bapi-timestamp": "1771700435387",
+"x-bapi-recv-window": "15000"
+},
+"wire": {
+"method": "GET",
+"target": "/v5/order/realtime?category=linear&limit=50&settleCoin=USDT",
+"headers": {
+"accept": "application/json",
+"content-type": "application/json",
+"x-bapi-api-key": "BYBITKEY123456789",
+"x-bapi-sign": "d2440ed76a287bd3b33e6336f4f71cc05cddff20fa8cc3fdd758e349f7cd3401",
+"x-bapi-sign-type": "2",
+"x-bapi-timestamp": "1771700435387",
+"x-bapi-recv-window": "15000"
+},
+"body": null
+}
+}
+],
+"sleeps": [],
+"clock_end": 1771700435.387,
+"markers": [],
+"saved": {
+"hedge_saved": [],
+"auth_reset": [],
+"events": [],
+"metrics": []
+},
+"final": {
+"hedge": {},
+"account_type": {},
+"delisted": [],
+"fail_count": {},
+"bybit_offset": 0,
+"binance_base": "https://fapi.binance.com",
+"binance_offset": 0,
+"bingx_offset": 0,
+"okx_offset": 0
+},
+"full_metrics": [],
+"full_events": []
+}
+},
+{
+"scenario": {
+"name": "rd_11_get_spread_pct_fail",
+"exchange": "bybit",
+"call": "get_spread_pct",
+"args": [
+"SATS-USDT-SWAP"
+],
+"kwargs": {},
+"routes": [
+{
+"method": "GET",
+"path": "/v5/market/tickers",
+"responses": [
+{
+"status": 200,
+"text": "null"
+}
+]
+}
+],
+"state": {},
+"mode": "wire",
+"random": [
+0.46972698911883193,
+0.8124332784629625,
+0.8239227496606107,
+0.2935246840056829,
+0.09955557575527085,
+0.27984930804600916
+],
+"clock": 1767290628.0
+},
+"expected": {
+"name": "rd_11_get_spread_pct_fail",
+"result": 0.0,
+"requests": [
+{
+"method": "GET",
+"url": "https://api.bybit.com/v5/market/tickers?category=linear&symbol=10000SATSUSDT",
+"headers": {},
+"body": null,
+"hdrs": {},
+"wire": {
+"method": "GET",
+"target": "/v5/market/tickers?category=linear&symbol=10000SATSUSDT",
+"headers": {
+"accept": "*/*"
+},
+"body": null
+}
+}
+],
+"sleeps": [],
+"clock_end": 1767290628.0,
+"markers": [],
+"saved": {
+"hedge_saved": [],
+"auth_reset": [],
+"events": [],
+"metrics": []
+},
+"final": {
+"hedge": {},
+"account_type": {},
+"delisted": [],
+"fail_count": {},
+"bybit_offset": 0,
+"binance_base": "https://fapi.binance.com",
+"binance_offset": 0,
+"bingx_offset": 0,
+"okx_offset": 0
+},
+"full_metrics": [],
+"full_events": []
+}
+},
+{
+"scenario": {
+"name": "rd_12_get_last_price_fail",
+"exchange": "bybit",
+"call": "get_last_price",
+"args": [
+"BYKEYFUZZ1234567",
+"by-fuzz-secret",
+"PEPE-USDT-SWAP"
+],
+"kwargs": {},
+"routes": [
+{
+"method": "GET",
+"path": "/v5/market/tickers",
+"responses": [
+{
+"raise": "timeout"
+}
+]
+}
+],
+"state": {},
+"mode": "wire",
+"random": [
+0.5985340140011269,
+0.7543627068553056,
+0.450738491721447,
+0.6087639525196281,
+0.990734281729436,
+0.646076718822626
+],
+"clock": 1772288172.0
+},
+"expected": {
+"name": "rd_12_get_last_price_fail",
+"result": 0.0,
+"requests": [
+{
+"method": "GET",
+"url": "https://api.bybit.com/v5/market/tickers?category=linear&symbol=1000PEPEUSDT",
+"headers": {},
+"body": null,
+"hdrs": {},
+"wire": {
+"method": "GET",
+"target": "/v5/market/tickers?category=linear&symbol=1000PEPEUSDT",
+"headers": {
+"accept": "*/*"
+},
+"body": null
+}
+}
+],
+"sleeps": [],
+"clock_end": 1772288172.0,
+"markers": [],
+"saved": {
+"hedge_saved": [],
+"auth_reset": [],
+"events": [],
+"metrics": []
+},
+"final": {
+"hedge": {},
+"account_type": {},
+"delisted": [],
+"fail_count": {},
+"bybit_offset": 0,
+"binance_base": "https://fapi.binance.com",
+"binance_offset": 0,
+"bingx_offset": 0,
+"okx_offset": 0
+},
+"full_metrics": [],
+"full_events": []
+}
+},
+{
+"scenario": {
+"name": "rd_13_cancel_all_orders_mut+fail",
+"exchange": "bybit",
+"call": "cancel_all_orders",
+"args": [
+"BYBITKEY123456789",
+"bybit-secret-xyz",
+"BTC-USDT-SWAP"
+],
+"kwargs": {},
+"routes": [
+{
+"method": "POST",
+"path": "/v5/order/cancel-all",
+"responses": [
+{
+"status": 200,
+"text": "null"
+}
+]
+}
+],
+"state": {},
+"mode": "wire",
+"random": [
+0.9809463050242045,
+0.8477824438867183,
+0.6967695532605864,
+0.831581152206112,
+0.035875647176029535,
+0.10836328627128489
+],
+"clock": 1768917832.3395
+},
+"expected": {
+"name": "rd_13_cancel_all_orders_mut+fail",
+"result": {
+"ok": false,
+"error": "'NoneType' object has no attribute 'get'"
+},
+"requests": [
+{
+"method": "POST",
+"url": "https://api.bybit.com/v5/order/cancel-all",
+"headers": {
+"Content-Type": "application/json",
+"X-BAPI-API-KEY": "BYBITKEY123456789",
+"X-BAPI-SIGN": "0dfa1c498ede44d2f46f450a3f21bad500db9f406d5391eccb40658075e7fbe9",
+"X-BAPI-SIGN-TYPE": "2",
+"X-BAPI-TIMESTAMP": "1768917832339",
+"X-BAPI-RECV-WINDOW": "15000"
+},
+"body": "{\"category\": \"linear\", \"symbol\": \"BTCUSDT\"}",
+"hdrs": {
+"accept": "application/json",
+"content-type": "application/json",
+"x-bapi-api-key": "BYBITKEY123456789",
+"x-bapi-sign": "0dfa1c498ede44d2f46f450a3f21bad500db9f406d5391eccb40658075e7fbe9",
+"x-bapi-sign-type": "2",
+"x-bapi-timestamp": "1768917832339",
+"x-bapi-recv-window": "15000"
+},
+"wire": {
+"method": "POST",
+"target": "/v5/order/cancel-all",
+"headers": {
+"accept": "application/json",
+"content-type": "application/json",
+"x-bapi-api-key": "BYBITKEY123456789",
+"x-bapi-sign": "0dfa1c498ede44d2f46f450a3f21bad500db9f406d5391eccb40658075e7fbe9",
+"x-bapi-sign-type": "2",
+"x-bapi-timestamp": "1768917832339",
+"x-bapi-recv-window": "15000"
+},
+"body": "{\"category\": \"linear\", \"symbol\": \"BTCUSDT\"}"
+}
+}
+],
+"sleeps": [],
+"clock_end": 1768917832.3395,
+"markers": [],
+"saved": {
+"hedge_saved": [],
+"auth_reset": [],
+"events": [],
+"metrics": []
+},
+"final": {
+"hedge": {},
+"account_type": {},
+"delisted": [],
+"fail_count": {},
+"bybit_offset": 0,
+"binance_base": "https://fapi.binance.com",
+"binance_offset": 0,
+"bingx_offset": 0,
+"okx_offset": 0
+},
+"full_metrics": [],
+"full_events": []
+}
+},
+{
+"scenario": {
+"name": "rd_14_get_balance_mut",
+"exchange": "bybit",
+"call": "get_balance",
+"args": [
+"BYBITKEY123456789",
+"bybit-secret-xyz"
+],
+"kwargs": {},
+"routes": [
+{
+"method": "GET",
+"path": "/v5/account/wallet-balance",
+"responses": [
+{
+"text": "{\"retCode\": 10002, \"retMsg\": \"007\", \"result\": {}}"
+},
+{
+"text": "{\"retCode\": 0, \"retMsg\": \"OK\", \"result\": {\"list\": [{\"totalEquity\": \"55.5\", \"totalAvailableBalance\": \"800.25\", \"totalWalletBalance\": \"55.5\", \"totalUnrealisedPnl\": \"1.5\", \"coin\": [{\"coin\": \"USDT\", \"walletBalance\": \"55.5\", \"equity\": \"55.5\", \"availableBalance\": \"\", \"availableToWithdraw\": \"\"}]}]}}"
+}
+]
+},
+{
+"method": "GET",
+"path": "/v5/market/time",
+"responses": [
+{
+"text": "{\"retCode\": 0, \"retMsg\": \"OK\", \"result\": {\"timeSecond\": \"1767225600\", \"timeNano\": \"1767225600250000000\"}}"
+}
+]
+}
+],
+"state": {},
+"mode": "wire",
+"random": [
+0.9924943780144865,
+0.11130770929623912,
+0.23476264668713753,
+0.8054806238116283,
+0.12655794130404074,
+0.7466658697924994
+],
+"clock": 1770442566.314
+},
+"expected": {
+"name": "rd_14_get_balance_mut",
+"result": 55.5,
+"requests": [
+{
+"method": "GET",
+"url": "https://api.bybit.com/v5/account/wallet-balance?accountType=UNIFIED&coin=USDT",
+"headers": {
+"Content-Type": "application/json",
+"X-BAPI-API-KEY": "BYBITKEY123456789",
+"X-BAPI-SIGN": "a692ad0b8e66b164cafe4530317453c3eb10f6dba9bfc6ee96bb5cc7454a3578",
+"X-BAPI-SIGN-TYPE": "2",
+"X-BAPI-TIMESTAMP": "1770442566314",
+"X-BAPI-RECV-WINDOW": "15000"
+},
+"body": null,
+"hdrs": {
+"accept": "application/json",
+"content-type": "application/json",
+"x-bapi-api-key": "BYBITKEY123456789",
+"x-bapi-sign": "a692ad0b8e66b164cafe4530317453c3eb10f6dba9bfc6ee96bb5cc7454a3578",
+"x-bapi-sign-type": "2",
+"x-bapi-timestamp": "1770442566314",
+"x-bapi-recv-window": "15000"
+},
+"wire": {
+"method": "GET",
+"target": "/v5/account/wallet-balance?accountType=UNIFIED&coin=USDT",
+"headers": {
+"accept": "application/json",
+"content-type": "application/json",
+"x-bapi-api-key": "BYBITKEY123456789",
+"x-bapi-sign": "a692ad0b8e66b164cafe4530317453c3eb10f6dba9bfc6ee96bb5cc7454a3578",
+"x-bapi-sign-type": "2",
+"x-bapi-timestamp": "1770442566314",
+"x-bapi-recv-window": "15000"
+},
+"body": null
+}
+},
+{
+"method": "GET",
+"url": "https://api.bybit.com/v5/account/wallet-balance?accountType=UNIFIED&coin=USDT",
+"headers": {
+"Content-Type": "application/json",
+"X-BAPI-API-KEY": "BYBITKEY123456789",
+"X-BAPI-SIGN": "6ebd906a3d96a2db128c5342a38def39b4ff26f050cb9cea4a76b96e246468ed",
+"X-BAPI-SIGN-TYPE": "2",
+"X-BAPI-TIMESTAMP": "1770442569814",
+"X-BAPI-RECV-WINDOW": "15000"
+},
+"body": null,
+"hdrs": {
+"accept": "application/json",
+"content-type": "application/json",
+"x-bapi-api-key": "BYBITKEY123456789",
+"x-bapi-sign": "6ebd906a3d96a2db128c5342a38def39b4ff26f050cb9cea4a76b96e246468ed",
+"x-bapi-sign-type": "2",
+"x-bapi-timestamp": "1770442569814",
+"x-bapi-recv-window": "15000"
+},
+"wire": {
+"method": "GET",
+"target": "/v5/account/wallet-balance?accountType=UNIFIED&coin=USDT",
+"headers": {
+"accept": "application/json",
+"content-type": "application/json",
+"x-bapi-api-key": "BYBITKEY123456789",
+"x-bapi-sign": "6ebd906a3d96a2db128c5342a38def39b4ff26f050cb9cea4a76b96e246468ed",
+"x-bapi-sign-type": "2",
+"x-bapi-timestamp": "1770442569814",
+"x-bapi-recv-window": "15000"
+},
+"body": null
+}
+}
+],
+"sleeps": [
+3,
+0.5
+],
+"clock_end": 1770442569.814,
+"markers": [],
+"saved": {
+"hedge_saved": [],
+"auth_reset": [],
+"events": [],
+"metrics": []
+},
+"final": {
+"hedge": {},
+"account_type": {
+"BYBITKEY123456789": "UNIFIED"
+},
+"delisted": [],
+"fail_count": {},
+"bybit_offset": 0,
+"binance_base": "https://fapi.binance.com",
+"binance_offset": 0,
+"bingx_offset": 0,
+"okx_offset": 0
+},
+"full_metrics": [],
+"full_events": []
+}
+},
+{
+"scenario": {
+"name": "rd_15_get_positions_fail",
+"exchange": "bybit",
+"call": "get_positions",
+"args": [
+"BYBITKEY123456789",
+"bybit-secret-xyz",
+"PEPE-USDT-SWAP"
+],
+"kwargs": {},
+"routes": [
+{
+"method": "GET",
+"path": "/v5/position/list",
+"responses": [
+{
+"status": 200,
+"text": "null"
+}
+]
+}
+],
+"state": {},
+"mode": "wire",
+"random": [
+0.37885133573211427,
+0.4205000167525086,
+0.6179198435233396,
+0.9073489462594231,
+0.4384008221147422,
+0.48848412250810946
+],
+"clock": 1768615617.185475
+},
+"expected": {
+"name": "rd_15_get_positions_fail",
+"result": [],
+"requests": [
+{
+"method": "GET",
+"url": "https://api.bybit.com/v5/position/list?category=linear&settleCoin=USDT&symbol=1000PEPEUSDT",
+"headers": {
+"Content-Type": "application/json",
+"X-BAPI-API-KEY": "BYBITKEY123456789",
+"X-BAPI-SIGN": "4520b1c3e81edfa34fc3ff48b41d8211894b3046770fa11c8b211ac37a3bc1e3",
+"X-BAPI-SIGN-TYPE": "2",
+"X-BAPI-TIMESTAMP": "1768615617185",
+"X-BAPI-RECV-WINDOW": "15000"
+},
+"body": null,
+"hdrs": {
+"accept": "application/json",
+"content-type": "application/json",
+"x-bapi-api-key": "BYBITKEY123456789",
+"x-bapi-sign": "4520b1c3e81edfa34fc3ff48b41d8211894b3046770fa11c8b211ac37a3bc1e3",
+"x-bapi-sign-type": "2",
+"x-bapi-timestamp": "1768615617185",
+"x-bapi-recv-window": "15000"
+},
+"wire": {
+"method": "GET",
+"target": "/v5/position/list?category=linear&settleCoin=USDT&symbol=1000PEPEUSDT",
+"headers": {
+"accept": "application/json",
+"content-type": "application/json",
+"x-bapi-api-key": "BYBITKEY123456789",
+"x-bapi-sign": "4520b1c3e81edfa34fc3ff48b41d8211894b3046770fa11c8b211ac37a3bc1e3",
+"x-bapi-sign-type": "2",
+"x-bapi-timestamp": "1768615617185",
+"x-bapi-recv-window": "15000"
+},
+"body": null
+}
+}
+],
+"sleeps": [],
+"clock_end": 1768615617.185475,
+"markers": [],
+"saved": {
+"hedge_saved": [],
+"auth_reset": [],
+"events": [],
+"metrics": []
+},
+"final": {
+"hedge": {},
+"account_type": {},
+"delisted": [],
+"fail_count": {},
+"bybit_offset": 0,
+"binance_base": "https://fapi.binance.com",
+"binance_offset": 0,
+"bingx_offset": 0,
+"okx_offset": 0
+},
+"full_metrics": [],
+"full_events": []
+}
+},
+{
+"scenario": {
+"name": "fz_00_pt_token_bucket_exhaustion_mut",
+"exchange": "bybit",
+"call": "place_trade",
+"args": [
+"BYBITKEY123456789",
+"bybit-secret-xyz",
+"BTC-USDT-SWAP",
+"LONG",
+87000.5,
+86000.0,
+88500.0,
+1.0,
+10
+],
+"kwargs": {
+"tp2": 89500.0,
+"tp3": 90500.0
+},
+"routes": [
+{
+"method": "GET",
+"path": "/v5/market/time",
+"responses": [
+{
+"text": "{\"retCode\": 0, \"retMsg\": \"OK\", \"result\": {\"timeSecond\": \"1767225600\", \"timeNano\": \"1767225600250000000\"}}"
+}
+]
+},
+{
+"method": "POST",
+"path": "/v5/position/switch-isolated",
+"responses": [
+{
+"text": "{\"retCode\": 110026, \"retMsg\": \"Cross/isolated margin mode is not modified\", \"result\": {}}"
+}
+]
+},
+{
+"method": "POST",
+"path": "/v5/position/set-leverage",
+"responses": [
+{
+"text": "{\"retCode\": 110043, \"retMsg\": \"leverage not modified\", \"result\": {}}"
+}
+]
+},
+{
+"method": "GET",
+"path": "/v5/account/wallet-balance",
+"responses": [
+{
+"text": "{\"retCode\": 0, \"retMsg\": \"OK\", \"result\": {\"list\": [{\"totalEquity\": \"1000.5\", \"totalAvailableBalance\": \"800.25\", \"totalWalletBalance\": \"1000.5\", \"totalUnrealisedPnl\": \"1.5\", \"coin\": [{\"coin\": \"USDT\", \"walletBalance\": \"1000.5\", \"equity\": \"1000.5\", \"availableBalance\": \"\", \"availableToWithdraw\": \"\"}]}]}}"
+}
+]
+},
+{
+"method": "GET",
+"path": "/v5/market/instruments-info",
+"responses": [
+{
+"text": "{\"retCode\": 0, \"retMsg\": \"OK\", \"result\": {\"list\": [{\"lotSizeFilter\": {\"qtyStep\": \"0.001\"}, \"priceFilter\": {\"tickSize\": \"0.1\"}}]}}"
+}
+]
+},
+{
+"method": "POST",
+"path": "/v5/order/create",
+"responses": [
+{
+"text": "{\"retCode\": 0, \"retMsg\": \"OK\", \"result\": {\"orderId\": \"b-1\", \"orderLinkId\": \"\"}}"
+},
+{
+"text": "{\"retCode\": 0, \"retMsg\": \"OK\", \"result\": {\"orderId\": \"b-2\", \"orderLinkId\": \"\"}}"
+},
+{
+"text": "{\"retCode\": 0, \"retMsg\": \"OK\", \"result\": {\"orderId\": \"b-3\", \"orderLinkId\": \"\"}}"
+}
+]
+},
+{
+"method": "GET",
+"path": "/v5/position/list",
+"responses": [
+{
+"text": "{\"retCode\": 0, \"retMsg\": \"OK\", \"result\": {\"list\": [{\"symbol\": \"BTCUSDT\", \"side\": \"Buy\", \"size\": \"0\", \"positionIdx\": 0, \"avgPrice\": \"87000.5\", \"markPrice\": \"87000.5\", \"stopLoss\": \"\"}]}}"
+},
+{
+"text": "{\"retCode\": 0, \"retMsg\": \"OK\", \"result\": {\"list\": [{\"symbol\": \"BTCUSDT\", \"side\": \"Buy\", \"size\": \"0\", \"positionIdx\": 0, \"avgPrice\": \"87000.5\", \"markPrice\": \"87000.5\", \"stopLoss\": \"\"}]}}"
+},
+{
+"text": "{\"retCode\": 0, \"retMsg\": \"OK\", \"result\": {\"list\": [{\"symbol\": \"BTCUSDT\", \"side\": \"Buy\", \"size\": \"0\", \"positionIdx\": 0, \"avgPrice\": \"87000.5\", \"markPrice\": \"87000.5\", \"stopLoss\": \"\"}]}}"
+},
+{
+"text": "{\"retCode\": 0, \"retMsg\": \"OK\", \"result\": {\"list\": [{\"symbol\": \"BTCUSDT\", \"side\": \"Buy\", \"size\": \"0\", \"positionIdx\": 0, \"avgPrice\": \"87000.5\", \"markPrice\": \"87000.5\", \"stopLoss\": \"\"}]}}"
+},
+{
+"text": "{\"retCode\": 0, \"retMsg\": \"OK\", \"result\": {}}"
+},
+{
+"text": "{\"retCode\": 0, \"retMsg\": \"OK\", \"result\": {\"list\": [{\"symbol\": \"BTCUSDT\", \"side\": \"Buy\", \"size\": \"0\", \"positionIdx\": 0, \"avgPrice\": \"87000.5\", \"markPrice\": \"87000.5\", \"stopLoss\": \"\"}]}}"
+},
+{
+"text": "{\"retCode\": 0, \"retMsg\": \"OK\", \"result\": {\"list\": [{\"symbol\": \"BTCUSDT\", \"side\": \"Buy\", \"size\": \"0\", \"positionIdx\": 0, \"avgPrice\": \"87000.5\", \"markPrice\": \"87000.5\", \"stopLoss\": \"\"}]}}"
+},
+{
+"text": "{\"retCode\": 0, \"retMsg\": \"OK\", \"result\": {\"list\": [{\"symbol\": \"BTCUSDT\", \"side\": \"Buy\", \"size\": \"0\", \"positionIdx\": 0, \"avgPrice\": \"87000.5\", \"markPrice\": \"87000.5\", \"stopLoss\": \"\"}]}}"
+},
+{
+"text": "{\"retCode\": 0, \"retMsg\": \"OK\", \"result\": {\"list\": [{\"symbol\": \"BTCUSDT\", \"side\": \"Buy\", \"size\": \"0\", \"positionIdx\": 0, \"avgPrice\": \"87000.5\", \"markPrice\": \"87000.5\", \"stopLoss\": \"\"}]}}"
+},
+{
+"text": "{\"retCode\": 0, \"retMsg\": \"OK\", \"result\": {\"list\": [{\"symbol\": \"BTCUSDT\", \"side\": \"Buy\", \"size\": \"0\", \"positionIdx\": 0, \"avgPrice\": \"87000.5\", \"markPrice\": \"87000.5\", \"stopLoss\": \"\"}]}}"
+},
+{
+"text": "{\"retCode\": 0, \"retMsg\": \"OK\", \"result\": {\"list\": [{\"symbol\": \"BTCUSDT\", \"side\": \"Buy\", \"size\": \"0\", \"positionIdx\": 0, \"avgPrice\": \"87000.5\", \"markPrice\": \"87000.5\", \"stopLoss\": \"\"}]}}"
+},
+{
+"text": "{\"retCode\": 0, \"retMsg\": \"OK\", \"result\": {\"list\": [{\"symbol\": \"BTCUSDT\", \"side\": \"Buy\", \"size\": \"0\", \"positionIdx\": 0, \"avgPrice\": \"87000.5\", \"markPrice\": \"87000.5\", \"stopLoss\": \"\"}]}}"
+},
+{
+"text": "{\"retCode\": 0, \"retMsg\": \"OK\", \"result\": {\"list\": [{\"symbol\": \"BTCUSDT\", \"side\": \"Buy\", \"size\": \"0\", \"positionIdx\": 0, \"avgPrice\": \"87000.5\", \"markPrice\": \"87000.5\", \"stopLoss\": \"\"}]}}"
+},
+{
+"text": "{\"retCode\": 0, \"retMsg\": \"OK\", \"result\": {\"list\": [{\"symbol\": \"BTCUSDT\", \"side\": \"Buy\", \"size\": \"0.012\", \"positionIdx\": 0, \"avgPrice\": \"87000.5\", \"markPrice\": \"87000.5\", \"stopLoss\": \"\"}]}}"
+}
+]
+}
+],
+"state": {},
+"mode": "wire",
+"random": [
+0.12092250793282078,
+0.26235793137660324,
+0.3176618419206799,
+0.3634969838760008,
+0.38339383078009914,
+0.8202694545986216
+],
+"clock": 1767225600.0
+},
+"expected": {
+"name": "fz_00_pt_token_bucket_exhaustion_mut",
+"result": {
+"ok": true,
+"order_id": "b-1",
+"qty": "0.010",
+"notional": 870.005,
+"balance": 1000.5,
+"symbol": "BTCUSDT",
+"side": "Buy",
+"leverage": 10,
+"pos_idx": 0,
+"tp_placed": true,
+"order_type": "Limit",
+"avg_price": 0.0,
+"leverage_downgraded": false,
+"leverage_requested": 10,
+"leverage_applied": 10,
+"risk_boosted": false,
+"risk_requested_pct": 1.0,
+"risk_actual_pct": 1.0
+},
+"requests": [
+{
+"method": "GET",
+"url": "https://api.bybit.com/v5/market/time",
+"headers": {},
+"body": null,
+"hdrs": {},
+"wire": {
+"method": "GET",
+"target": "/v5/market/time",
+"headers": {
+"accept": "*/*"
+},
+"body": null
+}
+},
+{
+"method": "POST",
+"url": "https://api.bybit.com/v5/position/switch-isolated",
+"headers": {
+"Content-Type": "application/json",
+"X-BAPI-API-KEY": "BYBITKEY123456789",
+"X-BAPI-SIGN": "a63eb17cd78b2be7a89cc07d655e1b447750800ff2baa71ddd4998cbcaf3e00e",
+"X-BAPI-SIGN-TYPE": "2",
+"X-BAPI-TIMESTAMP": "1767225600000",
+"X-BAPI-RECV-WINDOW": "15000"
+},
+"body": "{\"category\": \"linear\", \"symbol\": \"BTCUSDT\", \"tradeMode\": 1}",
+"hdrs": {
+"accept": "application/json",
+"content-type": "application/json",
+"x-bapi-api-key": "BYBITKEY123456789",
+"x-bapi-sign": "a63eb17cd78b2be7a89cc07d655e1b447750800ff2baa71ddd4998cbcaf3e00e",
+"x-bapi-sign-type": "2",
+"x-bapi-timestamp": "1767225600000",
+"x-bapi-recv-window": "15000"
+},
+"wire": {
+"method": "POST",
+"target": "/v5/position/switch-isolated",
+"headers": {
+"accept": "application/json",
+"content-type": "application/json",
+"x-bapi-api-key": "BYBITKEY123456789",
+"x-bapi-sign": "a63eb17cd78b2be7a89cc07d655e1b447750800ff2baa71ddd4998cbcaf3e00e",
+"x-bapi-sign-type": "2",
+"x-bapi-timestamp": "1767225600000",
+"x-bapi-recv-window": "15000"
+},
+"body": "{\"category\": \"linear\", \"symbol\": \"BTCUSDT\", \"tradeMode\": 1}"
+}
+},
+{
+"method": "POST",
+"url": "https://api.bybit.com/v5/position/set-leverage",
+"headers": {
+"Content-Type": "application/json",
+"X-BAPI-API-KEY": "BYBITKEY123456789",
+"X-BAPI-SIGN": "675c3a147187bc2435f79543d0a7850639d843f418f54f0f6ed24fecdb90051a",
+"X-BAPI-SIGN-TYPE": "2",
+"X-BAPI-TIMESTAMP": "1767225600000",
+"X-BAPI-RECV-WINDOW": "15000"
+},
+"body": "{\"category\": \"linear\", \"symbol\": \"BTCUSDT\", \"buyLeverage\": \"10\", \"sellLeverage\": \"10\"}",
+"hdrs": {
+"accept": "application/json",
+"content-type": "application/json",
+"x-bapi-api-key": "BYBITKEY123456789",
+"x-bapi-sign": "675c3a147187bc2435f79543d0a7850639d843f418f54f0f6ed24fecdb90051a",
+"x-bapi-sign-type": "2",
+"x-bapi-timestamp": "1767225600000",
+"x-bapi-recv-window": "15000"
+},
+"wire": {
+"method": "POST",
+"target": "/v5/position/set-leverage",
+"headers": {
+"accept": "application/json",
+"content-type": "application/json",
+"x-bapi-api-key": "BYBITKEY123456789",
+"x-bapi-sign": "675c3a147187bc2435f79543d0a7850639d843f418f54f0f6ed24fecdb90051a",
+"x-bapi-sign-type": "2",
+"x-bapi-timestamp": "1767225600000",
+"x-bapi-recv-window": "15000"
+},
+"body": "{\"category\": \"linear\", \"symbol\": \"BTCUSDT\", \"buyLeverage\": \"10\", \"sellLeverage\": \"10\"}"
+}
+},
+{
+"method": "GET",
+"url": "https://api.bybit.com/v5/account/wallet-balance?accountType=UNIFIED&coin=USDT",
+"headers": {
+"Content-Type": "application/json",
+"X-BAPI-API-KEY": "BYBITKEY123456789",
+"X-BAPI-SIGN": "fa9306bfef7f11116d8aac5602e50aa6643c5d1b3509f4c3b1b02f61c47aeb4b",
+"X-BAPI-SIGN-TYPE": "2",
+"X-BAPI-TIMESTAMP": "1767225600000",
+"X-BAPI-RECV-WINDOW": "15000"
+},
+"body": null,
+"hdrs": {
+"accept": "application/json",
+"content-type": "application/json",
+"x-bapi-api-key": "BYBITKEY123456789",
+"x-bapi-sign": "fa9306bfef7f11116d8aac5602e50aa6643c5d1b3509f4c3b1b02f61c47aeb4b",
+"x-bapi-sign-type": "2",
+"x-bapi-timestamp": "1767225600000",
+"x-bapi-recv-window": "15000"
+},
+"wire": {
+"method": "GET",
+"target": "/v5/account/wallet-balance?accountType=UNIFIED&coin=USDT",
+"headers": {
+"accept": "application/json",
+"content-type": "application/json",
+"x-bapi-api-key": "BYBITKEY123456789",
+"x-bapi-sign": "fa9306bfef7f11116d8aac5602e50aa6643c5d1b3509f4c3b1b02f61c47aeb4b",
+"x-bapi-sign-type": "2",
+"x-bapi-timestamp": "1767225600000",
+"x-bapi-recv-window": "15000"
+},
+"body": null
+}
+},
+{
+"method": "GET",
+"url": "https://api.bybit.com/v5/market/instruments-info?category=linear&symbol=BTCUSDT",
+"headers": {
+"Content-Type": "application/json"
+},
+"body": null,
+"hdrs": {
+"accept": "application/json",
+"content-type": "application/json"
+},
+"wire": {
+"method": "GET",
+"target": "/v5/market/instruments-info?category=linear&symbol=BTCUSDT",
+"headers": {
+"accept": "application/json",
+"content-type": "application/json"
+},
+"body": null
+}
+},
+{
+"method": "GET",
+"url": "https://api.bybit.com/v5/account/wallet-balance?accountType=UNIFIED&coin=USDT",
+"headers": {
+"Content-Type": "application/json",
+"X-BAPI-API-KEY": "BYBITKEY123456789",
+"X-BAPI-SIGN": "fa9306bfef7f11116d8aac5602e50aa6643c5d1b3509f4c3b1b02f61c47aeb4b",
+"X-BAPI-SIGN-TYPE": "2",
+"X-BAPI-TIMESTAMP": "1767225600000",
+"X-BAPI-RECV-WINDOW": "15000"
+},
+"body": null,
+"hdrs": {
+"accept": "application/json",
+"content-type": "application/json",
+"x-bapi-api-key": "BYBITKEY123456789",
+"x-bapi-sign": "fa9306bfef7f11116d8aac5602e50aa6643c5d1b3509f4c3b1b02f61c47aeb4b",
+"x-bapi-sign-type": "2",
+"x-bapi-timestamp": "1767225600000",
+"x-bapi-recv-window": "15000"
+},
+"wire": {
+"method": "GET",
+"target": "/v5/account/wallet-balance?accountType=UNIFIED&coin=USDT",
+"headers": {
+"accept": "application/json",
+"content-type": "application/json",
+"x-bapi-api-key": "BYBITKEY123456789",
+"x-bapi-sign": "fa9306bfef7f11116d8aac5602e50aa6643c5d1b3509f4c3b1b02f61c47aeb4b",
+"x-bapi-sign-type": "2",
+"x-bapi-timestamp": "1767225600000",
+"x-bapi-recv-window": "15000"
+},
+"body": null
+}
+},
+{
+"method": "POST",
+"url": "https://api.bybit.com/v5/order/create",
+"headers": {
+"Content-Type": "application/json",
+"X-BAPI-API-KEY": "BYBITKEY123456789",
+"X-BAPI-SIGN": "a40e9fed4bb45674c302443583f8a488aee3bb0090584e6876a424bd89bfad09",
+"X-BAPI-SIGN-TYPE": "2",
+"X-BAPI-TIMESTAMP": "1767225600000",
+"X-BAPI-RECV-WINDOW": "15000"
+},
+"body": "{\"category\": \"linear\", \"symbol\": \"BTCUSDT\", \"side\": \"Buy\", \"orderType\": \"Limit\", \"timeInForce\": \"GTC\", \"qty\": \"0.010\", \"positionIdx\": 0, \"price\": \"87000.5\", \"takeProfit\": \"88500.0\", \"stopLoss\": \"86000.0\", \"tpslMode\": \"Partial\", \"tpOrderType\": \"Limit\", \"tpLimitPrice\": \"88500.0\", \"tpSize\": \"0.005\", \"slSize\": \"0.010\", \"tpTriggerBy\": \"LastPrice\", \"slTriggerBy\": \"MarkPrice\", \"slOrderType\": \"Market\"}",
+"hdrs": {
+"accept": "application/json",
+"content-type": "application/json",
+"x-bapi-api-key": "BYBITKEY123456789",
+"x-bapi-sign": "a40e9fed4bb45674c302443583f8a488aee3bb0090584e6876a424bd89bfad09",
+"x-bapi-sign-type": "2",
+"x-bapi-timestamp": "1767225600000",
+"x-bapi-recv-window": "15000"
+},
+"wire": {
+"method": "POST",
+"target": "/v5/order/create",
+"headers": {
+"accept": "application/json",
+"content-type": "application/json",
+"x-bapi-api-key": "BYBITKEY123456789",
+"x-bapi-sign": "a40e9fed4bb45674c302443583f8a488aee3bb0090584e6876a424bd89bfad09",
+"x-bapi-sign-type": "2",
+"x-bapi-timestamp": "1767225600000",
+"x-bapi-recv-window": "15000"
+},
+"body": "{\"category\": \"linear\", \"symbol\": \"BTCUSDT\", \"side\": \"Buy\", \"orderType\": \"Limit\", \"timeInForce\": \"GTC\", \"qty\": \"0.010\", \"positionIdx\": 0, \"price\": \"87000.5\", \"takeProfit\": \"88500.0\", \"stopLoss\": \"86000.0\", \"tpslMode\": \"Partial\", \"tpOrderType\": \"Limit\", \"tpLimitPrice\": \"88500.0\", \"tpSize\": \"0.005\", \"slSize\": \"0.010\", \"tpTriggerBy\": \"LastPrice\", \"slTriggerBy\": \"MarkPrice\", \"slOrderType\": \"Market\"}"
+}
+},
+{
+"method": "GET",
+"url": "https://api.bybit.com/v5/position/list?category=linear&symbol=BTCUSDT",
+"headers": {
+"Content-Type": "application/json",
+"X-BAPI-API-KEY": "BYBITKEY123456789",
+"X-BAPI-SIGN": "3a4d1adb8a08f81956f7f86790fdeddf3a05651e6e5a7d708ed2cd3c28b967a0",
+"X-BAPI-SIGN-TYPE": "2",
+"X-BAPI-TIMESTAMP": "1767225600000",
+"X-BAPI-RECV-WINDOW": "15000"
+},
+"body": null,
+"hdrs": {
+"accept": "application/json",
+"content-type": "application/json",
+"x-bapi-api-key": "BYBITKEY123456789",
+"x-bapi-sign": "3a4d1adb8a08f81956f7f86790fdeddf3a05651e6e5a7d708ed2cd3c28b967a0",
+"x-bapi-sign-type": "2",
+"x-bapi-timestamp": "1767225600000",
+"x-bapi-recv-window": "15000"
+},
+"wire": {
+"method": "GET",
+"target": "/v5/position/list?category=linear&symbol=BTCUSDT",
+"headers": {
+"accept": "application/json",
+"content-type": "application/json",
+"x-bapi-api-key": "BYBITKEY123456789",
+"x-bapi-sign": "3a4d1adb8a08f81956f7f86790fdeddf3a05651e6e5a7d708ed2cd3c28b967a0",
+"x-bapi-sign-type": "2",
+"x-bapi-timestamp": "1767225600000",
+"x-bapi-recv-window": "15000"
+},
+"body": null
+}
+},
+{
+"method": "GET",
+"url": "https://api.bybit.com/v5/position/list?category=linear&symbol=BTCUSDT",
+"headers": {
+"Content-Type": "application/json",
+"X-BAPI-API-KEY": "BYBITKEY123456789",
+"X-BAPI-SIGN": "93800e9f1dce85637410e94963735df086c1362f3ef9670946adc28b1098c47c",
+"X-BAPI-SIGN-TYPE": "2",
+"X-BAPI-TIMESTAMP": "1767225601000",
+"X-BAPI-RECV-WINDOW": "15000"
+},
+"body": null,
+"hdrs": {
+"accept": "application/json",
+"content-type": "application/json",
+"x-bapi-api-key": "BYBITKEY123456789",
+"x-bapi-sign": "93800e9f1dce85637410e94963735df086c1362f3ef9670946adc28b1098c47c",
+"x-bapi-sign-type": "2",
+"x-bapi-timestamp": "1767225601000",
+"x-bapi-recv-window": "15000"
+},
+"wire": {
+"method": "GET",
+"target": "/v5/position/list?category=linear&symbol=BTCUSDT",
+"headers": {
+"accept": "application/json",
+"content-type": "application/json",
+"x-bapi-api-key": "BYBITKEY123456789",
+"x-bapi-sign": "93800e9f1dce85637410e94963735df086c1362f3ef9670946adc28b1098c47c",
+"x-bapi-sign-type": "2",
+"x-bapi-timestamp": "1767225601000",
+"x-bapi-recv-window": "15000"
+},
+"body": null
+}
+},
+{
+"method": "GET",
+"url": "https://api.bybit.com/v5/position/list?category=linear&symbol=BTCUSDT",
+"headers": {
+"Content-Type": "application/json",
+"X-BAPI-API-KEY": "BYBITKEY123456789",
+"X-BAPI-SIGN": "0a17474d6d6de4f435f877e6741c4799a883d510311888fa582bacaf3867604b",
+"X-BAPI-SIGN-TYPE": "2",
+"X-BAPI-TIMESTAMP": "1767225602000",
+"X-BAPI-RECV-WINDOW": "15000"
+},
+"body": null,
+"hdrs": {
+"accept": "application/json",
+"content-type": "application/json",
+"x-bapi-api-key": "BYBITKEY123456789",
+"x-bapi-sign": "0a17474d6d6de4f435f877e6741c4799a883d510311888fa582bacaf3867604b",
+"x-bapi-sign-type": "2",
+"x-bapi-timestamp": "1767225602000",
+"x-bapi-recv-window": "15000"
+},
+"wire": {
+"method": "GET",
+"target": "/v5/position/list?category=linear&symbol=BTCUSDT",
+"headers": {
+"accept": "application/json",
+"content-type": "application/json",
+"x-bapi-api-key": "BYBITKEY123456789",
+"x-bapi-sign": "0a17474d6d6de4f435f877e6741c4799a883d510311888fa582bacaf3867604b",
+"x-bapi-sign-type": "2",
+"x-bapi-timestamp": "1767225602000",
+"x-bapi-recv-window": "15000"
+},
+"body": null
+}
+},
+{
+"method": "GET",
+"url": "https://api.bybit.com/v5/position/list?category=linear&symbol=BTCUSDT",
+"headers": {
+"Content-Type": "application/json",
+"X-BAPI-API-KEY": "BYBITKEY123456789",
+"X-BAPI-SIGN": "576a8951094d0d8ffc8553fcf06f31fc0413422945394701a6cd79ccea3941db",
+"X-BAPI-SIGN-TYPE": "2",
+"X-BAPI-TIMESTAMP": "1767225603000",
+"X-BAPI-RECV-WINDOW": "15000"
+},
+"body": null,
+"hdrs": {
+"accept": "application/json",
+"content-type": "application/json",
+"x-bapi-api-key": "BYBITKEY123456789",
+"x-bapi-sign": "576a8951094d0d8ffc8553fcf06f31fc0413422945394701a6cd79ccea3941db",
+"x-bapi-sign-type": "2",
+"x-bapi-timestamp": "1767225603000",
+"x-bapi-recv-window": "15000"
+},
+"wire": {
+"method": "GET",
+"target": "/v5/position/list?category=linear&symbol=BTCUSDT",
+"headers": {
+"accept": "application/json",
+"content-type": "application/json",
+"x-bapi-api-key": "BYBITKEY123456789",
+"x-bapi-sign": "576a8951094d0d8ffc8553fcf06f31fc0413422945394701a6cd79ccea3941db",
+"x-bapi-sign-type": "2",
+"x-bapi-timestamp": "1767225603000",
+"x-bapi-recv-window": "15000"
+},
+"body": null
+}
+},
+{
+"method": "GET",
+"url": "https://api.bybit.com/v5/position/list?category=linear&symbol=BTCUSDT",
+"headers": {
+"Content-Type": "application/json",
+"X-BAPI-API-KEY": "BYBITKEY123456789",
+"X-BAPI-SIGN": "7fea819390744ba960bb99becc13789cae7efcab84bffa7f2193ec171c83461c",
+"X-BAPI-SIGN-TYPE": "2",
+"X-BAPI-TIMESTAMP": "1767225604000",
+"X-BAPI-RECV-WINDOW": "15000"
+},
+"body": null,
+"hdrs": {
+"accept": "application/json",
+"content-type": "application/json",
+"x-bapi-api-key": "BYBITKEY123456789",
+"x-bapi-sign": "7fea819390744ba960bb99becc13789cae7efcab84bffa7f2193ec171c83461c",
+"x-bapi-sign-type": "2",
+"x-bapi-timestamp": "1767225604000",
+"x-bapi-recv-window": "15000"
+},
+"wire": {
+"method": "GET",
+"target": "/v5/position/list?category=linear&symbol=BTCUSDT",
+"headers": {
+"accept": "application/json",
+"content-type": "application/json",
+"x-bapi-api-key": "BYBITKEY123456789",
+"x-bapi-sign": "7fea819390744ba960bb99becc13789cae7efcab84bffa7f2193ec171c83461c",
+"x-bapi-sign-type": "2",
+"x-bapi-timestamp": "1767225604000",
+"x-bapi-recv-window": "15000"
+},
+"body": null
+}
+},
+{
+"method": "GET",
+"url": "https://api.bybit.com/v5/position/list?category=linear&symbol=BTCUSDT",
+"headers": {
+"Content-Type": "application/json",
+"X-BAPI-API-KEY": "BYBITKEY123456789",
+"X-BAPI-SIGN": "ab7ce4b8b572ebcd37d9031820b2d9d25776a6c201a6dd23262b3b0dc09730d6",
+"X-BAPI-SIGN-TYPE": "2",
+"X-BAPI-TIMESTAMP": "1767225605000",
+"X-BAPI-RECV-WINDOW": "15000"
+},
+"body": null,
+"hdrs": {
+"accept": "application/json",
+"content-type": "application/json",
+"x-bapi-api-key": "BYBITKEY123456789",
+"x-bapi-sign": "ab7ce4b8b572ebcd37d9031820b2d9d25776a6c201a6dd23262b3b0dc09730d6",
+"x-bapi-sign-type": "2",
+"x-bapi-timestamp": "1767225605000",
+"x-bapi-recv-window": "15000"
+},
+"wire": {
+"method": "GET",
+"target": "/v5/position/list?category=linear&symbol=BTCUSDT",
+"headers": {
+"accept": "application/json",
+"content-type": "application/json",
+"x-bapi-api-key": "BYBITKEY123456789",
+"x-bapi-sign": "ab7ce4b8b572ebcd37d9031820b2d9d25776a6c201a6dd23262b3b0dc09730d6",
+"x-bapi-sign-type": "2",
+"x-bapi-timestamp": "1767225605000",
+"x-bapi-recv-window": "15000"
+},
+"body": null
+}
+},
+{
+"method": "GET",
+"url": "https://api.bybit.com/v5/position/list?category=linear&symbol=BTCUSDT",
+"headers": {
+"Content-Type": "application/json",
+"X-BAPI-API-KEY": "BYBITKEY123456789",
+"X-BAPI-SIGN": "17cf9e462308b4c79cd6c4f5ca6c049c2e5600133127120c53acfb6dee70ceed",
+"X-BAPI-SIGN-TYPE": "2",
+"X-BAPI-TIMESTAMP": "1767225606000",
+"X-BAPI-RECV-WINDOW": "15000"
+},
+"body": null,
+"hdrs": {
+"accept": "application/json",
+"content-type": "application/json",
+"x-bapi-api-key": "BYBITKEY123456789",
+"x-bapi-sign": "17cf9e462308b4c79cd6c4f5ca6c049c2e5600133127120c53acfb6dee70ceed",
+"x-bapi-sign-type": "2",
+"x-bapi-timestamp": "1767225606000",
+"x-bapi-recv-window": "15000"
+},
+"wire": {
+"method": "GET",
+"target": "/v5/position/list?category=linear&symbol=BTCUSDT",
+"headers": {
+"accept": "application/json",
+"content-type": "application/json",
+"x-bapi-api-key": "BYBITKEY123456789",
+"x-bapi-sign": "17cf9e462308b4c79cd6c4f5ca6c049c2e5600133127120c53acfb6dee70ceed",
+"x-bapi-sign-type": "2",
+"x-bapi-timestamp": "1767225606000",
+"x-bapi-recv-window": "15000"
+},
+"body": null
+}
+},
+{
+"method": "GET",
+"url": "https://api.bybit.com/v5/position/list?category=linear&symbol=BTCUSDT",
+"headers": {
+"Content-Type": "application/json",
+"X-BAPI-API-KEY": "BYBITKEY123456789",
+"X-BAPI-SIGN": "4fc0675fffe55b942ceac66651284120817331efd964266b47c014d10df3610f",
+"X-BAPI-SIGN-TYPE": "2",
+"X-BAPI-TIMESTAMP": "1767225607000",
+"X-BAPI-RECV-WINDOW": "15000"
+},
+"body": null,
+"hdrs": {
+"accept": "application/json",
+"content-type": "application/json",
+"x-bapi-api-key": "BYBITKEY123456789",
+"x-bapi-sign": "4fc0675fffe55b942ceac66651284120817331efd964266b47c014d10df3610f",
+"x-bapi-sign-type": "2",
+"x-bapi-timestamp": "1767225607000",
+"x-bapi-recv-window": "15000"
+},
+"wire": {
+"method": "GET",
+"target": "/v5/position/list?category=linear&symbol=BTCUSDT",
+"headers": {
+"accept": "application/json",
+"content-type": "application/json",
+"x-bapi-api-key": "BYBITKEY123456789",
+"x-bapi-sign": "4fc0675fffe55b942ceac66651284120817331efd964266b47c014d10df3610f",
+"x-bapi-sign-type": "2",
+"x-bapi-timestamp": "1767225607000",
+"x-bapi-recv-window": "15000"
+},
+"body": null
+}
+},
+{
+"method": "GET",
+"url": "https://api.bybit.com/v5/position/list?category=linear&symbol=BTCUSDT",
+"headers": {
+"Content-Type": "application/json",
+"X-BAPI-API-KEY": "BYBITKEY123456789",
+"X-BAPI-SIGN": "c3ed37ef1e3ef610063fa654731cb1379e8cb449a9185522dd1488e23d765346",
+"X-BAPI-SIGN-TYPE": "2",
+"X-BAPI-TIMESTAMP": "1767225608000",
+"X-BAPI-RECV-WINDOW": "15000"
+},
+"body": null,
+"hdrs": {
+"accept": "application/json",
+"content-type": "application/json",
+"x-bapi-api-key": "BYBITKEY123456789",
+"x-bapi-sign": "c3ed37ef1e3ef610063fa654731cb1379e8cb449a9185522dd1488e23d765346",
+"x-bapi-sign-type": "2",
+"x-bapi-timestamp": "1767225608000",
+"x-bapi-recv-window": "15000"
+},
+"wire": {
+"method": "GET",
+"target": "/v5/position/list?category=linear&symbol=BTCUSDT",
+"headers": {
+"accept": "application/json",
+"content-type": "application/json",
+"x-bapi-api-key": "BYBITKEY123456789",
+"x-bapi-sign": "c3ed37ef1e3ef610063fa654731cb1379e8cb449a9185522dd1488e23d765346",
+"x-bapi-sign-type": "2",
+"x-bapi-timestamp": "1767225608000",
+"x-bapi-recv-window": "15000"
+},
+"body": null
+}
+},
+{
+"method": "GET",
+"url": "https://api.bybit.com/v5/position/list?category=linear&symbol=BTCUSDT",
+"headers": {
+"Content-Type": "application/json",
+"X-BAPI-API-KEY": "BYBITKEY123456789",
+"X-BAPI-SIGN": "a2766ab8911be20798404029b9d9763524dcdac0df010fa3a4e56a3aae00240c",
+"X-BAPI-SIGN-TYPE": "2",
+"X-BAPI-TIMESTAMP": "1767225609000",
+"X-BAPI-RECV-WINDOW": "15000"
+},
+"body": null,
+"hdrs": {
+"accept": "application/json",
+"content-type": "application/json",
+"x-bapi-api-key": "BYBITKEY123456789",
+"x-bapi-sign": "a2766ab8911be20798404029b9d9763524dcdac0df010fa3a4e56a3aae00240c",
+"x-bapi-sign-type": "2",
+"x-bapi-timestamp": "1767225609000",
+"x-bapi-recv-window": "15000"
+},
+"wire": {
+"method": "GET",
+"target": "/v5/position/list?category=linear&symbol=BTCUSDT",
+"headers": {
+"accept": "application/json",
+"content-type": "application/json",
+"x-bapi-api-key": "BYBITKEY123456789",
+"x-bapi-sign": "a2766ab8911be20798404029b9d9763524dcdac0df010fa3a4e56a3aae00240c",
+"x-bapi-sign-type": "2",
+"x-bapi-timestamp": "1767225609000",
+"x-bapi-recv-window": "15000"
+},
+"body": null
+}
+},
+{
+"method": "GET",
+"url": "https://api.bybit.com/v5/position/list?category=linear&symbol=BTCUSDT",
+"headers": {
+"Content-Type": "application/json",
+"X-BAPI-API-KEY": "BYBITKEY123456789",
+"X-BAPI-SIGN": "7fd7aad984cd3dd7a162a8ec5bb13ca0c317c50762a10972f50ce02c086fbc33",
+"X-BAPI-SIGN-TYPE": "2",
+"X-BAPI-TIMESTAMP": "1767225610000",
+"X-BAPI-RECV-WINDOW": "15000"
+},
+"body": null,
+"hdrs": {
+"accept": "application/json",
+"content-type": "application/json",
+"x-bapi-api-key": "BYBITKEY123456789",
+"x-bapi-sign": "7fd7aad984cd3dd7a162a8ec5bb13ca0c317c50762a10972f50ce02c086fbc33",
+"x-bapi-sign-type": "2",
+"x-bapi-timestamp": "1767225610000",
+"x-bapi-recv-window": "15000"
+},
+"wire": {
+"method": "GET",
+"target": "/v5/position/list?category=linear&symbol=BTCUSDT",
+"headers": {
+"accept": "application/json",
+"content-type": "application/json",
+"x-bapi-api-key": "BYBITKEY123456789",
+"x-bapi-sign": "7fd7aad984cd3dd7a162a8ec5bb13ca0c317c50762a10972f50ce02c086fbc33",
+"x-bapi-sign-type": "2",
+"x-bapi-timestamp": "1767225610000",
+"x-bapi-recv-window": "15000"
+},
+"body": null
+}
+},
+{
+"method": "GET",
+"url": "https://api.bybit.com/v5/position/list?category=linear&symbol=BTCUSDT",
+"headers": {
+"Content-Type": "application/json",
+"X-BAPI-API-KEY": "BYBITKEY123456789",
+"X-BAPI-SIGN": "1acc472b8d01a842edba06285b2e9140db0bbc55e5a3fa7a1da99086649e50bc",
+"X-BAPI-SIGN-TYPE": "2",
+"X-BAPI-TIMESTAMP": "1767225611000",
+"X-BAPI-RECV-WINDOW": "15000"
+},
+"body": null,
+"hdrs": {
+"accept": "application/json",
+"content-type": "application/json",
+"x-bapi-api-key": "BYBITKEY123456789",
+"x-bapi-sign": "1acc472b8d01a842edba06285b2e9140db0bbc55e5a3fa7a1da99086649e50bc",
+"x-bapi-sign-type": "2",
+"x-bapi-timestamp": "1767225611000",
+"x-bapi-recv-window": "15000"
+},
+"wire": {
+"method": "GET",
+"target": "/v5/position/list?category=linear&symbol=BTCUSDT",
+"headers": {
+"accept": "application/json",
+"content-type": "application/json",
+"x-bapi-api-key": "BYBITKEY123456789",
+"x-bapi-sign": "1acc472b8d01a842edba06285b2e9140db0bbc55e5a3fa7a1da99086649e50bc",
+"x-bapi-sign-type": "2",
+"x-bapi-timestamp": "1767225611000",
+"x-bapi-recv-window": "15000"
+},
+"body": null
+}
+},
+{
+"method": "GET",
+"url": "https://api.bybit.com/v5/position/list?category=linear&symbol=BTCUSDT",
+"headers": {
+"Content-Type": "application/json",
+"X-BAPI-API-KEY": "BYBITKEY123456789",
+"X-BAPI-SIGN": "730b8ce5904e4ec1cebaf388bbfd66499768c597485154c54e8ff40123808862",
+"X-BAPI-SIGN-TYPE": "2",
+"X-BAPI-TIMESTAMP": "1767225612000",
+"X-BAPI-RECV-WINDOW": "15000"
+},
+"body": null,
+"hdrs": {
+"accept": "application/json",
+"content-type": "application/json",
+"x-bapi-api-key": "BYBITKEY123456789",
+"x-bapi-sign": "730b8ce5904e4ec1cebaf388bbfd66499768c597485154c54e8ff40123808862",
+"x-bapi-sign-type": "2",
+"x-bapi-timestamp": "1767225612000",
+"x-bapi-recv-window": "15000"
+},
+"wire": {
+"method": "GET",
+"target": "/v5/position/list?category=linear&symbol=BTCUSDT",
+"headers": {
+"accept": "application/json",
+"content-type": "application/json",
+"x-bapi-api-key": "BYBITKEY123456789",
+"x-bapi-sign": "730b8ce5904e4ec1cebaf388bbfd66499768c597485154c54e8ff40123808862",
+"x-bapi-sign-type": "2",
+"x-bapi-timestamp": "1767225612000",
+"x-bapi-recv-window": "15000"
+},
+"body": null
+}
+},
+{
+"method": "GET",
+"url": "https://api.bybit.com/v5/position/list?category=linear&symbol=BTCUSDT",
+"headers": {
+"Content-Type": "application/json",
+"X-BAPI-API-KEY": "BYBITKEY123456789",
+"X-BAPI-SIGN": "5758c7ba17d14a5a73ca4051975fd24688a78371058cf580d24302bb55b1a33d",
+"X-BAPI-SIGN-TYPE": "2",
+"X-BAPI-TIMESTAMP": "1767225613000",
+"X-BAPI-RECV-WINDOW": "15000"
+},
+"body": null,
+"hdrs": {
+"accept": "application/json",
+"content-type": "application/json",
+"x-bapi-api-key": "BYBITKEY123456789",
+"x-bapi-sign": "5758c7ba17d14a5a73ca4051975fd24688a78371058cf580d24302bb55b1a33d",
+"x-bapi-sign-type": "2",
+"x-bapi-timestamp": "1767225613000",
+"x-bapi-recv-window": "15000"
+},
+"wire": {
+"method": "GET",
+"target": "/v5/position/list?category=linear&symbol=BTCUSDT",
+"headers": {
+"accept": "application/json",
+"content-type": "application/json",
+"x-bapi-api-key": "BYBITKEY123456789",
+"x-bapi-sign": "5758c7ba17d14a5a73ca4051975fd24688a78371058cf580d24302bb55b1a33d",
+"x-bapi-sign-type": "2",
+"x-bapi-timestamp": "1767225613000",
+"x-bapi-recv-window": "15000"
+},
+"body": null
+}
+},
+{
+"method": "GET",
+"url": "https://api.bybit.com/v5/position/list?category=linear&symbol=BTCUSDT",
+"headers": {
+"Content-Type": "application/json",
+"X-BAPI-API-KEY": "BYBITKEY123456789",
+"X-BAPI-SIGN": "5758c7ba17d14a5a73ca4051975fd24688a78371058cf580d24302bb55b1a33d",
+"X-BAPI-SIGN-TYPE": "2",
+"X-BAPI-TIMESTAMP": "1767225613000",
+"X-BAPI-RECV-WINDOW": "15000"
+},
+"body": null,
+"hdrs": {
+"accept": "application/json",
+"content-type": "application/json",
+"x-bapi-api-key": "BYBITKEY123456789",
+"x-bapi-sign": "5758c7ba17d14a5a73ca4051975fd24688a78371058cf580d24302bb55b1a33d",
+"x-bapi-sign-type": "2",
+"x-bapi-timestamp": "1767225613000",
+"x-bapi-recv-window": "15000"
+},
+"wire": {
+"method": "GET",
+"target": "/v5/position/list?category=linear&symbol=BTCUSDT",
+"headers": {
+"accept": "application/json",
+"content-type": "application/json",
+"x-bapi-api-key": "BYBITKEY123456789",
+"x-bapi-sign": "5758c7ba17d14a5a73ca4051975fd24688a78371058cf580d24302bb55b1a33d",
+"x-bapi-sign-type": "2",
+"x-bapi-timestamp": "1767225613000",
+"x-bapi-recv-window": "15000"
+},
+"body": null
+}
+},
+{
+"method": "POST",
+"url": "https://api.bybit.com/v5/order/create",
+"headers": {
+"Content-Type": "application/json",
+"X-BAPI-API-KEY": "BYBITKEY123456789",
+"X-BAPI-SIGN": "0a622d9037dee51d4fc3bb8b3fc26f7379a25457a42118237475b86b43b4c5fa",
+"X-BAPI-SIGN-TYPE": "2",
+"X-BAPI-TIMESTAMP": "1767225613000",
+"X-BAPI-RECV-WINDOW": "15000"
+},
+"body": "{\"category\": \"linear\", \"symbol\": \"BTCUSDT\", \"side\": \"Sell\", \"orderType\": \"Limit\", \"qty\": \"0.002\", \"price\": \"89500.0\", \"reduceOnly\": true, \"timeInForce\": \"GTC\", \"positionIdx\": 0}",
+"hdrs": {
+"accept": "application/json",
+"content-type": "application/json",
+"x-bapi-api-key": "BYBITKEY123456789",
+"x-bapi-sign": "0a622d9037dee51d4fc3bb8b3fc26f7379a25457a42118237475b86b43b4c5fa",
+"x-bapi-sign-type": "2",
+"x-bapi-timestamp": "1767225613000",
+"x-bapi-recv-window": "15000"
+},
+"wire": {
+"method": "POST",
+"target": "/v5/order/create",
+"headers": {
+"accept": "application/json",
+"content-type": "application/json",
+"x-bapi-api-key": "BYBITKEY123456789",
+"x-bapi-sign": "0a622d9037dee51d4fc3bb8b3fc26f7379a25457a42118237475b86b43b4c5fa",
+"x-bapi-sign-type": "2",
+"x-bapi-timestamp": "1767225613000",
+"x-bapi-recv-window": "15000"
+},
+"body": "{\"category\": \"linear\", \"symbol\": \"BTCUSDT\", \"side\": \"Sell\", \"orderType\": \"Limit\", \"qty\": \"0.002\", \"price\": \"89500.0\", \"reduceOnly\": true, \"timeInForce\": \"GTC\", \"positionIdx\": 0}"
+}
+},
+{
+"method": "POST",
+"url": "https://api.bybit.com/v5/order/create",
+"headers": {
+"Content-Type": "application/json",
+"X-BAPI-API-KEY": "BYBITKEY123456789",
+"X-BAPI-SIGN": "5ff06971f1849e479780a45626af9659604777fea2c7d848b7a4a222e59d9545",
+"X-BAPI-SIGN-TYPE": "2",
+"X-BAPI-TIMESTAMP": "1767225613300",
+"X-BAPI-RECV-WINDOW": "15000"
+},
+"body": "{\"category\": \"linear\", \"symbol\": \"BTCUSDT\", \"side\": \"Sell\", \"orderType\": \"Limit\", \"qty\": \"0.002\", \"price\": \"90500.0\", \"reduceOnly\": true, \"timeInForce\": \"GTC\", \"positionIdx\": 0}",
+"hdrs": {
+"accept": "application/json",
+"content-type": "application/json",
+"x-bapi-api-key": "BYBITKEY123456789",
+"x-bapi-sign": "5ff06971f1849e479780a45626af9659604777fea2c7d848b7a4a222e59d9545",
+"x-bapi-sign-type": "2",
+"x-bapi-timestamp": "1767225613300",
+"x-bapi-recv-window": "15000"
+},
+"wire": {
+"method": "POST",
+"target": "/v5/order/create",
+"headers": {
+"accept": "application/json",
+"content-type": "application/json",
+"x-bapi-api-key": "BYBITKEY123456789",
+"x-bapi-sign": "5ff06971f1849e479780a45626af9659604777fea2c7d848b7a4a222e59d9545",
+"x-bapi-sign-type": "2",
+"x-bapi-timestamp": "1767225613300",
+"x-bapi-recv-window": "15000"
+},
+"body": "{\"category\": \"linear\", \"symbol\": \"BTCUSDT\", \"side\": \"Sell\", \"orderType\": \"Limit\", \"qty\": \"0.002\", \"price\": \"90500.0\", \"reduceOnly\": true, \"timeInForce\": \"GTC\", \"positionIdx\": 0}"
+}
+}
+],
+"sleeps": [
+1.0,
+1.0,
+1.0,
+1.0,
+1.0,
+1.0,
+1.0,
+1.0,
+1.0,
+1.0,
+1.0,
+1.0,
+1.0,
+0.3,
+0.3
+],
+"clock_end": 1767225613.6,
+"markers": [],
+"saved": {
+"hedge_saved": [],
+"auth_reset": [],
+"events": [],
+"metrics": [
+"trade_placed",
+"trade_placement_latency_ms",
+"sl_tp_attached"
+]
+},
+"final": {
+"hedge": {},
+"account_type": {
+"BYBITKEY123456789": "UNIFIED"
+},
+"delisted": [],
+"fail_count": {},
+"bybit_offset": 250,
+"binance_base": "https://fapi.binance.com",
+"binance_offset": 0,
+"bingx_offset": 0,
+"okx_offset": 0
+},
+"full_metrics": [
+[
+"trade_placed",
+1.0,
+{
+"symbol": "BTC-USDT-SWAP",
+"direction": "LONG",
+"exchange": "bybit"
+}
+],
+[
+"trade_placement_latency_ms",
+13599.0,
+{
+"symbol": "BTC-USDT-SWAP",
+"direction": "LONG",
+"exchange": "bybit"
+}
+],
+[
+"sl_tp_attached",
+1.0,
+{
+"symbol": "BTC-USDT-SWAP",
+"direction": "LONG",
+"exchange": "bybit"
+}
+]
+],
+"full_events": []
+}
+},
+{
+"scenario": {
+"name": "fz_01_pt_order_insufficient_110007_mut",
+"exchange": "bybit",
+"call": "place_trade",
+"args": [
+"BYBITKEY123456789",
+"bybit-secret-xyz",
+"BTC-USDT-SWAP",
+"LONG",
+87000.5,
+86000.0,
+88500.0,
+1.0,
+10
+],
+"kwargs": {
+"tp2": 89500.0
+},
+"routes": [
+{
+"method": "GET",
+"path": "/v5/market/time",
+"responses": [
+{
+"text": "{\"retCode\": 0, \"retMsg\": \"OK\", \"result\": {\"timeSecond\": \"1767225600\", \"timeNano\": \"1767225600250000000\"}}"
+}
+]
+},
+{
+"method": "POST",
+"path": "/v5/position/switch-isolated",
+"responses": [
+{
+"text": "{\"retCode\": 110026, \"retMsg\": \"Cross/isolated margin mode is not modified\", \"result\": {}}"
+}
+]
+},
+{
+"method": "POST",
+"path": "/v5/position/set-leverage",
+"responses": [
+{
+"text": "{\"retCode\": 110043, \"retMsg\": \"leverage not modified\", \"result\": {}}"
+}
+]
+},
+{
+"method": "GET",
+"path": "/v5/account/wallet-balance",
+"responses": [
+{
+"text": "{\"retCode\": 0, \"retMsg\": \"OK\", \"result\": {\"list\": [{\"totalEquity\": \"1000.5\", \"totalAvailableBalance\": \"800.25\", \"totalWalletBalance\": \"1000.5\", \"totalUnrealisedPnl\": \"1.5\", \"coin\": [{\"coin\": \"USDT\", \"walletBalance\": \"1000.5\", \"equity\": \"1000.5\", \"availableBalance\": \"\", \"availableToWithdraw\": \"\"}]}]}}"
+}
+]
+},
+{
+"method": "GET",
+"path": "/v5/market/instruments-info",
+"responses": [
+{
+"text": "{\"retCode\": 0, \"retMsg\": \"OK\", \"result\": {\"list\": [{\"lotSizeFilter\": {\"qtyStep\": \"0.001\"}, \"priceFilter\": {\"tickSize\": \"0.1\"}}]}}"
+}
+]
+},
+{
+"method": "POST",
+"path": "/v5/order/create",
+"responses": [
+{
+"text": "{\"retCode\": 0.1, \"retMsg\": \"ab not enough for new order\", \"result\": {}}"
+}
+]
+}
+],
+"state": {},
+"mode": "wire",
+"random": [
+0.014350146057072966,
+0.46939192279622477,
+0.2360248775543181,
+0.33973208897147555,
+0.00391042642553352,
+0.19641411684471255
+],
+"clock": 1767225600.0
+},
+"expected": {
+"name": "fz_01_pt_order_insufficient_110007_mut",
+"result": {
+"ok": false,
+"error": "ab not enough for new order (ErrCode: 0.1) (ErrTime: 00:00:00).\nRequest → POST https://api.bybit.com/v5/order/create: {\"category\": \"linear\", \"symbol\": \"BTCUSDT\", \"side\": \"Buy\", \"orderType\": \"Limit\", \"timeInForce\": \"GTC\", \"qty\": \"0.010\", \"positionIdx\": 0, \"price\": \"87000.5\", \"takeProfit\": \"88500.0\", \"stopLoss\": \"86000.0\", \"tpslMode\": \"Partial\", \"tpOrderType\": \"Limit\", \"tpLimitPrice\": \"88500.0\", \"tpSize\": \"0.005\", \"slSize\": \"0.010\", \"tpTriggerBy\": \"LastPrice\", \"slTriggerBy\": \"MarkPrice\", \"slOrderType\": \"Market\"}."
+},
+"requests": [
+{
+"method": "GET",
+"url": "https://api.bybit.com/v5/market/time",
+"headers": {},
+"body": null,
+"hdrs": {},
+"wire": {
+"method": "GET",
+"target": "/v5/market/time",
+"headers": {
+"accept": "*/*"
+},
+"body": null
+}
+},
+{
+"method": "POST",
+"url": "https://api.bybit.com/v5/position/switch-isolated",
+"headers": {
+"Content-Type": "application/json",
+"X-BAPI-API-KEY": "BYBITKEY123456789",
+"X-BAPI-SIGN": "a63eb17cd78b2be7a89cc07d655e1b447750800ff2baa71ddd4998cbcaf3e00e",
+"X-BAPI-SIGN-TYPE": "2",
+"X-BAPI-TIMESTAMP": "1767225600000",
+"X-BAPI-RECV-WINDOW": "15000"
+},
+"body": "{\"category\": \"linear\", \"symbol\": \"BTCUSDT\", \"tradeMode\": 1}",
+"hdrs": {
+"accept": "application/json",
+"content-type": "application/json",
+"x-bapi-api-key": "BYBITKEY123456789",
+"x-bapi-sign": "a63eb17cd78b2be7a89cc07d655e1b447750800ff2baa71ddd4998cbcaf3e00e",
+"x-bapi-sign-type": "2",
+"x-bapi-timestamp": "1767225600000",
+"x-bapi-recv-window": "15000"
+},
+"wire": {
+"method": "POST",
+"target": "/v5/position/switch-isolated",
+"headers": {
+"accept": "application/json",
+"content-type": "application/json",
+"x-bapi-api-key": "BYBITKEY123456789",
+"x-bapi-sign": "a63eb17cd78b2be7a89cc07d655e1b447750800ff2baa71ddd4998cbcaf3e00e",
+"x-bapi-sign-type": "2",
+"x-bapi-timestamp": "1767225600000",
+"x-bapi-recv-window": "15000"
+},
+"body": "{\"category\": \"linear\", \"symbol\": \"BTCUSDT\", \"tradeMode\": 1}"
+}
+},
+{
+"method": "POST",
+"url": "https://api.bybit.com/v5/position/set-leverage",
+"headers": {
+"Content-Type": "application/json",
+"X-BAPI-API-KEY": "BYBITKEY123456789",
+"X-BAPI-SIGN": "675c3a147187bc2435f79543d0a7850639d843f418f54f0f6ed24fecdb90051a",
+"X-BAPI-SIGN-TYPE": "2",
+"X-BAPI-TIMESTAMP": "1767225600000",
+"X-BAPI-RECV-WINDOW": "15000"
+},
+"body": "{\"category\": \"linear\", \"symbol\": \"BTCUSDT\", \"buyLeverage\": \"10\", \"sellLeverage\": \"10\"}",
+"hdrs": {
+"accept": "application/json",
+"content-type": "application/json",
+"x-bapi-api-key": "BYBITKEY123456789",
+"x-bapi-sign": "675c3a147187bc2435f79543d0a7850639d843f418f54f0f6ed24fecdb90051a",
+"x-bapi-sign-type": "2",
+"x-bapi-timestamp": "1767225600000",
+"x-bapi-recv-window": "15000"
+},
+"wire": {
+"method": "POST",
+"target": "/v5/position/set-leverage",
+"headers": {
+"accept": "application/json",
+"content-type": "application/json",
+"x-bapi-api-key": "BYBITKEY123456789",
+"x-bapi-sign": "675c3a147187bc2435f79543d0a7850639d843f418f54f0f6ed24fecdb90051a",
+"x-bapi-sign-type": "2",
+"x-bapi-timestamp": "1767225600000",
+"x-bapi-recv-window": "15000"
+},
+"body": "{\"category\": \"linear\", \"symbol\": \"BTCUSDT\", \"buyLeverage\": \"10\", \"sellLeverage\": \"10\"}"
+}
+},
+{
+"method": "GET",
+"url": "https://api.bybit.com/v5/account/wallet-balance?accountType=UNIFIED&coin=USDT",
+"headers": {
+"Content-Type": "application/json",
+"X-BAPI-API-KEY": "BYBITKEY123456789",
+"X-BAPI-SIGN": "fa9306bfef7f11116d8aac5602e50aa6643c5d1b3509f4c3b1b02f61c47aeb4b",
+"X-BAPI-SIGN-TYPE": "2",
+"X-BAPI-TIMESTAMP": "1767225600000",
+"X-BAPI-RECV-WINDOW": "15000"
+},
+"body": null,
+"hdrs": {
+"accept": "application/json",
+"content-type": "application/json",
+"x-bapi-api-key": "BYBITKEY123456789",
+"x-bapi-sign": "fa9306bfef7f11116d8aac5602e50aa6643c5d1b3509f4c3b1b02f61c47aeb4b",
+"x-bapi-sign-type": "2",
+"x-bapi-timestamp": "1767225600000",
+"x-bapi-recv-window": "15000"
+},
+"wire": {
+"method": "GET",
+"target": "/v5/account/wallet-balance?accountType=UNIFIED&coin=USDT",
+"headers": {
+"accept": "application/json",
+"content-type": "application/json",
+"x-bapi-api-key": "BYBITKEY123456789",
+"x-bapi-sign": "fa9306bfef7f11116d8aac5602e50aa6643c5d1b3509f4c3b1b02f61c47aeb4b",
+"x-bapi-sign-type": "2",
+"x-bapi-timestamp": "1767225600000",
+"x-bapi-recv-window": "15000"
+},
+"body": null
+}
+},
+{
+"method": "GET",
+"url": "https://api.bybit.com/v5/market/instruments-info?category=linear&symbol=BTCUSDT",
+"headers": {
+"Content-Type": "application/json"
+},
+"body": null,
+"hdrs": {
+"accept": "application/json",
+"content-type": "application/json"
+},
+"wire": {
+"method": "GET",
+"target": "/v5/market/instruments-info?category=linear&symbol=BTCUSDT",
+"headers": {
+"accept": "application/json",
+"content-type": "application/json"
+},
+"body": null
+}
+},
+{
+"method": "GET",
+"url": "https://api.bybit.com/v5/account/wallet-balance?accountType=UNIFIED&coin=USDT",
+"headers": {
+"Content-Type": "application/json",
+"X-BAPI-API-KEY": "BYBITKEY123456789",
+"X-BAPI-SIGN": "fa9306bfef7f11116d8aac5602e50aa6643c5d1b3509f4c3b1b02f61c47aeb4b",
+"X-BAPI-SIGN-TYPE": "2",
+"X-BAPI-TIMESTAMP": "1767225600000",
+"X-BAPI-RECV-WINDOW": "15000"
+},
+"body": null,
+"hdrs": {
+"accept": "application/json",
+"content-type": "application/json",
+"x-bapi-api-key": "BYBITKEY123456789",
+"x-bapi-sign": "fa9306bfef7f11116d8aac5602e50aa6643c5d1b3509f4c3b1b02f61c47aeb4b",
+"x-bapi-sign-type": "2",
+"x-bapi-timestamp": "1767225600000",
+"x-bapi-recv-window": "15000"
+},
+"wire": {
+"method": "GET",
+"target": "/v5/account/wallet-balance?accountType=UNIFIED&coin=USDT",
+"headers": {
+"accept": "application/json",
+"content-type": "application/json",
+"x-bapi-api-key": "BYBITKEY123456789",
+"x-bapi-sign": "fa9306bfef7f11116d8aac5602e50aa6643c5d1b3509f4c3b1b02f61c47aeb4b",
+"x-bapi-sign-type": "2",
+"x-bapi-timestamp": "1767225600000",
+"x-bapi-recv-window": "15000"
+},
+"body": null
+}
+},
+{
+"method": "POST",
+"url": "https://api.bybit.com/v5/order/create",
+"headers": {
+"Content-Type": "application/json",
+"X-BAPI-API-KEY": "BYBITKEY123456789",
+"X-BAPI-SIGN": "a40e9fed4bb45674c302443583f8a488aee3bb0090584e6876a424bd89bfad09",
+"X-BAPI-SIGN-TYPE": "2",
+"X-BAPI-TIMESTAMP": "1767225600000",
+"X-BAPI-RECV-WINDOW": "15000"
+},
+"body": "{\"category\": \"linear\", \"symbol\": \"BTCUSDT\", \"side\": \"Buy\", \"orderType\": \"Limit\", \"timeInForce\": \"GTC\", \"qty\": \"0.010\", \"positionIdx\": 0, \"price\": \"87000.5\", \"takeProfit\": \"88500.0\", \"stopLoss\": \"86000.0\", \"tpslMode\": \"Partial\", \"tpOrderType\": \"Limit\", \"tpLimitPrice\": \"88500.0\", \"tpSize\": \"0.005\", \"slSize\": \"0.010\", \"tpTriggerBy\": \"LastPrice\", \"slTriggerBy\": \"MarkPrice\", \"slOrderType\": \"Market\"}",
+"hdrs": {
+"accept": "application/json",
+"content-type": "application/json",
+"x-bapi-api-key": "BYBITKEY123456789",
+"x-bapi-sign": "a40e9fed4bb45674c302443583f8a488aee3bb0090584e6876a424bd89bfad09",
+"x-bapi-sign-type": "2",
+"x-bapi-timestamp": "1767225600000",
+"x-bapi-recv-window": "15000"
+},
+"wire": {
+"method": "POST",
+"target": "/v5/order/create",
+"headers": {
+"accept": "application/json",
+"content-type": "application/json",
+"x-bapi-api-key": "BYBITKEY123456789",
+"x-bapi-sign": "a40e9fed4bb45674c302443583f8a488aee3bb0090584e6876a424bd89bfad09",
+"x-bapi-sign-type": "2",
+"x-bapi-timestamp": "1767225600000",
+"x-bapi-recv-window": "15000"
+},
+"body": "{\"category\": \"linear\", \"symbol\": \"BTCUSDT\", \"side\": \"Buy\", \"orderType\": \"Limit\", \"timeInForce\": \"GTC\", \"qty\": \"0.010\", \"positionIdx\": 0, \"price\": \"87000.5\", \"takeProfit\": \"88500.0\", \"stopLoss\": \"86000.0\", \"tpslMode\": \"Partial\", \"tpOrderType\": \"Limit\", \"tpLimitPrice\": \"88500.0\", \"tpSize\": \"0.005\", \"slSize\": \"0.010\", \"tpTriggerBy\": \"LastPrice\", \"slTriggerBy\": \"MarkPrice\", \"slOrderType\": \"Market\"}"
+}
+}
+],
+"sleeps": [],
+"clock_end": 1767225600.0,
+"markers": [],
+"saved": {
+"hedge_saved": [],
+"auth_reset": [],
+"events": [],
+"metrics": []
+},
+"final": {
+"hedge": {},
+"account_type": {
+"BYBITKEY123456789": "UNIFIED"
+},
+"delisted": [],
+"fail_count": {},
+"bybit_offset": 250,
+"binance_base": "https://fapi.binance.com",
+"binance_offset": 0,
+"bingx_offset": 0,
+"okx_offset": 0
+},
+"full_metrics": [],
+"full_events": []
+}
+},
+{
+"scenario": {
+"name": "fz_02_pt_low_notional_boost_mut",
+"exchange": "bybit",
+"call": "place_trade",
+"args": [
+"BYBITKEY123456789",
+"bybit-secret-xyz",
+"XRP-USDT-SWAP",
+"LONG",
+2.5,
+2.4,
+2.7,
+0.5,
+10
+],
+"kwargs": {
+"allow_low_notional_boost": true
+},
+"routes": [
+{
+"method": "GET",
+"path": "/v5/market/time",
+"responses": [
+{
+"text": "{\"retCode\": 0, \"retMsg\": \"OK\", \"result\": {\"timeSecond\": \"1767225600\", \"timeNano\": \"1767225600250000000\"}}"
+}
+]
+},
+{
+"method": "POST",
+"path": "/v5/position/switch-isolated",
+"responses": [
+{
+"text": "{\"retCode\": 110026, \"retMsg\": \"Cross/isolated margin mode is not modified\", \"result\": {}}"
+}
+]
+},
+{
+"method": "POST",
+"path": "/v5/position/set-leverage",
+"responses": [
+{
+"text": "{\"retCode\": 110043, \"retMsg\": \"leverage not modified\", \"result\": {}}"
+}
+]
+},
+{
+"method": "GET",
+"path": "/v5/account/wallet-balance",
+"responses": [
+{
+"text": "{\"retCode\": 0, \"retMsg\": \"OK\", \"result\": {\"list\": [{\"totalEquity\": \"100.0\", \"totalAvailableBalance\": \"90\", \"totalWalletBalance\": \"100.0\", \"totalUnrealisedPnl\": \"1.5\", \"coin\": [{\"coin\": \"USDT\", \"walletBalance\": \"100.0\", \"equity\": \"100.0\", \"availableBalance\": \"\", \"availableToWithdraw\": \"\"}]}]}}"
+}
+]
+},
+{
+"method": "GET",
+"path": "/v5/market/instruments-info",
+"responses": [
+{
+"text": "{\"retCode\": 1099511627776, \"retMsg\": \"OK\", \"result\": {\"list\": [{\"lotSizeFilter\": {\"qtyStep\": \"1\"}, \"priceFilter\": {\"tickSize\": \"0.0001\"}}]}}"
+}
+]
+},
+{
+"method": "POST",
+"path": "/v5/order/create",
+"responses": [
+{
+"text": "{\"retCode\": 0, \"retMsg\": \"OK\", \"result\": {\"orderId\": \"x-1\", \"orderLinkId\": \"\"}}"
+}
+]
+},
+{
+"method": "GET",
+"path": "/v5/position/list",
+"responses": [
+{
+"text": "{\"retCode\": 0, \"retMsg\": \"OK\", \"result\": {\"list\": [{\"symbol\": \"XRPUSDT\", \"side\": \"Buy\", \"size\": \"4\", \"positionIdx\": 0, \"avgPrice\": \"2.5\", \"markPrice\": \"2.5\", \"stopLoss\": \"\"}]}}"
+}
+]
+}
+],
+"state": {},
+"mode": "wire",
+"random": [
+0.16714211591292605,
+0.9478923441599388,
+0.9719738309823711,
+0.9987426653454307,
+0.33462024184573114,
+0.6785201024674664
+],
+"clock": 1767225600.0
+},
+"expected": {
+"name": "fz_02_pt_low_notional_boost_mut",
+"result": {
+"ok": true,
+"order_id": "x-1",
+"qty": "4.999",
+"notional": 12.497499999999999,
+"balance": 100.0,
+"symbol": "XRPUSDT",
+"side": "Buy",
+"leverage": 10,
+"pos_idx": 0,
+"tp_placed": true,
+"order_type": "Limit",
+"avg_price": 0.0,
+"leverage_downgraded": false,
+"leverage_requested": 10,
+"leverage_applied": 10,
+"risk_boosted": false,
+"risk_requested_pct": 0.5,
+"risk_actual_pct": 0.5
+},
+"requests": [
+{
+"method": "GET",
+"url": "https://api.bybit.com/v5/market/time",
+"headers": {},
+"body": null,
+"hdrs": {},
+"wire": {
+"method": "GET",
+"target": "/v5/market/time",
+"headers": {
+"accept": "*/*"
+},
+"body": null
+}
+},
+{
+"method": "POST",
+"url": "https://api.bybit.com/v5/position/switch-isolated",
+"headers": {
+"Content-Type": "application/json",
+"X-BAPI-API-KEY": "BYBITKEY123456789",
+"X-BAPI-SIGN": "2035fe54b772c2871c964bf23761d17d2d8e3298309a2b97168d6a41bf400eaf",
+"X-BAPI-SIGN-TYPE": "2",
+"X-BAPI-TIMESTAMP": "1767225600000",
+"X-BAPI-RECV-WINDOW": "15000"
+},
+"body": "{\"category\": \"linear\", \"symbol\": \"XRPUSDT\", \"tradeMode\": 1}",
+"hdrs": {
+"accept": "application/json",
+"content-type": "application/json",
+"x-bapi-api-key": "BYBITKEY123456789",
+"x-bapi-sign": "2035fe54b772c2871c964bf23761d17d2d8e3298309a2b97168d6a41bf400eaf",
+"x-bapi-sign-type": "2",
+"x-bapi-timestamp": "1767225600000",
+"x-bapi-recv-window": "15000"
+},
+"wire": {
+"method": "POST",
+"target": "/v5/position/switch-isolated",
+"headers": {
+"accept": "application/json",
+"content-type": "application/json",
+"x-bapi-api-key": "BYBITKEY123456789",
+"x-bapi-sign": "2035fe54b772c2871c964bf23761d17d2d8e3298309a2b97168d6a41bf400eaf",
+"x-bapi-sign-type": "2",
+"x-bapi-timestamp": "1767225600000",
+"x-bapi-recv-window": "15000"
+},
+"body": "{\"category\": \"linear\", \"symbol\": \"XRPUSDT\", \"tradeMode\": 1}"
+}
+},
+{
+"method": "POST",
+"url": "https://api.bybit.com/v5/position/set-leverage",
+"headers": {
+"Content-Type": "application/json",
+"X-BAPI-API-KEY": "BYBITKEY123456789",
+"X-BAPI-SIGN": "91792d190ccc7a8dfd65035b56de983e82a0aa24125975d736a98b0ee25b33bf",
+"X-BAPI-SIGN-TYPE": "2",
+"X-BAPI-TIMESTAMP": "1767225600000",
+"X-BAPI-RECV-WINDOW": "15000"
+},
+"body": "{\"category\": \"linear\", \"symbol\": \"XRPUSDT\", \"buyLeverage\": \"10\", \"sellLeverage\": \"10\"}",
+"hdrs": {
+"accept": "application/json",
+"content-type": "application/json",
+"x-bapi-api-key": "BYBITKEY123456789",
+"x-bapi-sign": "91792d190ccc7a8dfd65035b56de983e82a0aa24125975d736a98b0ee25b33bf",
+"x-bapi-sign-type": "2",
+"x-bapi-timestamp": "1767225600000",
+"x-bapi-recv-window": "15000"
+},
+"wire": {
+"method": "POST",
+"target": "/v5/position/set-leverage",
+"headers": {
+"accept": "application/json",
+"content-type": "application/json",
+"x-bapi-api-key": "BYBITKEY123456789",
+"x-bapi-sign": "91792d190ccc7a8dfd65035b56de983e82a0aa24125975d736a98b0ee25b33bf",
+"x-bapi-sign-type": "2",
+"x-bapi-timestamp": "1767225600000",
+"x-bapi-recv-window": "15000"
+},
+"body": "{\"category\": \"linear\", \"symbol\": \"XRPUSDT\", \"buyLeverage\": \"10\", \"sellLeverage\": \"10\"}"
+}
+},
+{
+"method": "GET",
+"url": "https://api.bybit.com/v5/account/wallet-balance?accountType=UNIFIED&coin=USDT",
+"headers": {
+"Content-Type": "application/json",
+"X-BAPI-API-KEY": "BYBITKEY123456789",
+"X-BAPI-SIGN": "fa9306bfef7f11116d8aac5602e50aa6643c5d1b3509f4c3b1b02f61c47aeb4b",
+"X-BAPI-SIGN-TYPE": "2",
+"X-BAPI-TIMESTAMP": "1767225600000",
+"X-BAPI-RECV-WINDOW": "15000"
+},
+"body": null,
+"hdrs": {
+"accept": "application/json",
+"content-type": "application/json",
+"x-bapi-api-key": "BYBITKEY123456789",
+"x-bapi-sign": "fa9306bfef7f11116d8aac5602e50aa6643c5d1b3509f4c3b1b02f61c47aeb4b",
+"x-bapi-sign-type": "2",
+"x-bapi-timestamp": "1767225600000",
+"x-bapi-recv-window": "15000"
+},
+"wire": {
+"method": "GET",
+"target": "/v5/account/wallet-balance?accountType=UNIFIED&coin=USDT",
+"headers": {
+"accept": "application/json",
+"content-type": "application/json",
+"x-bapi-api-key": "BYBITKEY123456789",
+"x-bapi-sign": "fa9306bfef7f11116d8aac5602e50aa6643c5d1b3509f4c3b1b02f61c47aeb4b",
+"x-bapi-sign-type": "2",
+"x-bapi-timestamp": "1767225600000",
+"x-bapi-recv-window": "15000"
+},
+"body": null
+}
+},
+{
+"method": "GET",
+"url": "https://api.bybit.com/v5/market/instruments-info?category=linear&symbol=XRPUSDT",
+"headers": {
+"Content-Type": "application/json"
+},
+"body": null,
+"hdrs": {
+"accept": "application/json",
+"content-type": "application/json"
+},
+"wire": {
+"method": "GET",
+"target": "/v5/market/instruments-info?category=linear&symbol=XRPUSDT",
+"headers": {
+"accept": "application/json",
+"content-type": "application/json"
+},
+"body": null
+}
+},
+{
+"method": "GET",
+"url": "https://api.bybit.com/v5/account/wallet-balance?accountType=UNIFIED&coin=USDT",
+"headers": {
+"Content-Type": "application/json",
+"X-BAPI-API-KEY": "BYBITKEY123456789",
+"X-BAPI-SIGN": "fa9306bfef7f11116d8aac5602e50aa6643c5d1b3509f4c3b1b02f61c47aeb4b",
+"X-BAPI-SIGN-TYPE": "2",
+"X-BAPI-TIMESTAMP": "1767225600000",
+"X-BAPI-RECV-WINDOW": "15000"
+},
+"body": null,
+"hdrs": {
+"accept": "application/json",
+"content-type": "application/json",
+"x-bapi-api-key": "BYBITKEY123456789",
+"x-bapi-sign": "fa9306bfef7f11116d8aac5602e50aa6643c5d1b3509f4c3b1b02f61c47aeb4b",
+"x-bapi-sign-type": "2",
+"x-bapi-timestamp": "1767225600000",
+"x-bapi-recv-window": "15000"
+},
+"wire": {
+"method": "GET",
+"target": "/v5/account/wallet-balance?accountType=UNIFIED&coin=USDT",
+"headers": {
+"accept": "application/json",
+"content-type": "application/json",
+"x-bapi-api-key": "BYBITKEY123456789",
+"x-bapi-sign": "fa9306bfef7f11116d8aac5602e50aa6643c5d1b3509f4c3b1b02f61c47aeb4b",
+"x-bapi-sign-type": "2",
+"x-bapi-timestamp": "1767225600000",
+"x-bapi-recv-window": "15000"
+},
+"body": null
+}
+},
+{
+"method": "POST",
+"url": "https://api.bybit.com/v5/order/create",
+"headers": {
+"Content-Type": "application/json",
+"X-BAPI-API-KEY": "BYBITKEY123456789",
+"X-BAPI-SIGN": "e7361f12ec1cbc154b90e223635a3dff0bc63a58cf668f3d2abde6776c37a5a5",
+"X-BAPI-SIGN-TYPE": "2",
+"X-BAPI-TIMESTAMP": "1767225600000",
+"X-BAPI-RECV-WINDOW": "15000"
+},
+"body": "{\"category\": \"linear\", \"symbol\": \"XRPUSDT\", \"side\": \"Buy\", \"orderType\": \"Limit\", \"timeInForce\": \"GTC\", \"qty\": \"4.999\", \"positionIdx\": 0, \"price\": \"2.5000\", \"takeProfit\": \"2.7000\", \"stopLoss\": \"2.4000\", \"tpslMode\": \"Partial\", \"tpOrderType\": \"Limit\", \"tpLimitPrice\": \"2.7000\", \"tpSize\": \"4.999\", \"slSize\": \"4.999\", \"tpTriggerBy\": \"LastPrice\", \"slTriggerBy\": \"MarkPrice\", \"slOrderType\": \"Market\"}",
+"hdrs": {
+"accept": "application/json",
+"content-type": "application/json",
+"x-bapi-api-key": "BYBITKEY123456789",
+"x-bapi-sign": "e7361f12ec1cbc154b90e223635a3dff0bc63a58cf668f3d2abde6776c37a5a5",
+"x-bapi-sign-type": "2",
+"x-bapi-timestamp": "1767225600000",
+"x-bapi-recv-window": "15000"
+},
+"wire": {
+"method": "POST",
+"target": "/v5/order/create",
+"headers": {
+"accept": "application/json",
+"content-type": "application/json",
+"x-bapi-api-key": "BYBITKEY123456789",
+"x-bapi-sign": "e7361f12ec1cbc154b90e223635a3dff0bc63a58cf668f3d2abde6776c37a5a5",
+"x-bapi-sign-type": "2",
+"x-bapi-timestamp": "1767225600000",
+"x-bapi-recv-window": "15000"
+},
+"body": "{\"category\": \"linear\", \"symbol\": \"XRPUSDT\", \"side\": \"Buy\", \"orderType\": \"Limit\", \"timeInForce\": \"GTC\", \"qty\": \"4.999\", \"positionIdx\": 0, \"price\": \"2.5000\", \"takeProfit\": \"2.7000\", \"stopLoss\": \"2.4000\", \"tpslMode\": \"Partial\", \"tpOrderType\": \"Limit\", \"tpLimitPrice\": \"2.7000\", \"tpSize\": \"4.999\", \"slSize\": \"4.999\", \"tpTriggerBy\": \"LastPrice\", \"slTriggerBy\": \"MarkPrice\", \"slOrderType\": \"Market\"}"
+}
+},
+{
+"method": "GET",
+"url": "https://api.bybit.com/v5/position/list?category=linear&symbol=XRPUSDT",
+"headers": {
+"Content-Type": "application/json",
+"X-BAPI-API-KEY": "BYBITKEY123456789",
+"X-BAPI-SIGN": "388c3354a9b5a4058d2fb3caa8e6fc694f1bfb5df65ace4d0b2fff4c2abf56f1",
+"X-BAPI-SIGN-TYPE": "2",
+"X-BAPI-TIMESTAMP": "1767225600000",
+"X-BAPI-RECV-WINDOW": "15000"
+},
+"body": null,
+"hdrs": {
+"accept": "application/json",
+"content-type": "application/json",
+"x-bapi-api-key": "BYBITKEY123456789",
+"x-bapi-sign": "388c3354a9b5a4058d2fb3caa8e6fc694f1bfb5df65ace4d0b2fff4c2abf56f1",
+"x-bapi-sign-type": "2",
+"x-bapi-timestamp": "1767225600000",
+"x-bapi-recv-window": "15000"
+},
+"wire": {
+"method": "GET",
+"target": "/v5/position/list?category=linear&symbol=XRPUSDT",
+"headers": {
+"accept": "application/json",
+"content-type": "application/json",
+"x-bapi-api-key": "BYBITKEY123456789",
+"x-bapi-sign": "388c3354a9b5a4058d2fb3caa8e6fc694f1bfb5df65ace4d0b2fff4c2abf56f1",
+"x-bapi-sign-type": "2",
+"x-bapi-timestamp": "1767225600000",
+"x-bapi-recv-window": "15000"
+},
+"body": null
+}
+},
+{
+"method": "GET",
+"url": "https://api.bybit.com/v5/position/list?category=linear&symbol=XRPUSDT",
+"headers": {
+"Content-Type": "application/json",
+"X-BAPI-API-KEY": "BYBITKEY123456789",
+"X-BAPI-SIGN": "388c3354a9b5a4058d2fb3caa8e6fc694f1bfb5df65ace4d0b2fff4c2abf56f1",
+"X-BAPI-SIGN-TYPE": "2",
+"X-BAPI-TIMESTAMP": "1767225600000",
+"X-BAPI-RECV-WINDOW": "15000"
+},
+"body": null,
+"hdrs": {
+"accept": "application/json",
+"content-type": "application/json",
+"x-bapi-api-key": "BYBITKEY123456789",
+"x-bapi-sign": "388c3354a9b5a4058d2fb3caa8e6fc694f1bfb5df65ace4d0b2fff4c2abf56f1",
+"x-bapi-sign-type": "2",
+"x-bapi-timestamp": "1767225600000",
+"x-bapi-recv-window": "15000"
+},
+"wire": {
+"method": "GET",
+"target": "/v5/position/list?category=linear&symbol=XRPUSDT",
+"headers": {
+"accept": "application/json",
+"content-type": "application/json",
+"x-bapi-api-key": "BYBITKEY123456789",
+"x-bapi-sign": "388c3354a9b5a4058d2fb3caa8e6fc694f1bfb5df65ace4d0b2fff4c2abf56f1",
+"x-bapi-sign-type": "2",
+"x-bapi-timestamp": "1767225600000",
+"x-bapi-recv-window": "15000"
+},
+"body": null
+}
+},
+{
+"method": "POST",
+"url": "https://api.bybit.com/v5/order/create",
+"headers": {
+"Content-Type": "application/json",
+"X-BAPI-API-KEY": "BYBITKEY123456789",
+"X-BAPI-SIGN": "029c41c61512a707870ec3c176f1e2e54819f0cbd218431e3bdbc018f6a9e43a",
+"X-BAPI-SIGN-TYPE": "2",
+"X-BAPI-TIMESTAMP": "1767225600000",
+"X-BAPI-RECV-WINDOW": "15000"
+},
+"body": "{\"category\": \"linear\", \"symbol\": \"XRPUSDT\", \"side\": \"Sell\", \"orderType\": \"Limit\", \"qty\": \"4.000\", \"price\": \"2.7000\", \"reduceOnly\": true, \"timeInForce\": \"GTC\", \"positionIdx\": 0}",
+"hdrs": {
+"accept": "application/json",
+"content-type": "application/json",
+"x-bapi-api-key": "BYBITKEY123456789",
+"x-bapi-sign": "029c41c61512a707870ec3c176f1e2e54819f0cbd218431e3bdbc018f6a9e43a",
+"x-bapi-sign-type": "2",
+"x-bapi-timestamp": "1767225600000",
+"x-bapi-recv-window": "15000"
+},
+"wire": {
+"method": "POST",
+"target": "/v5/order/create",
+"headers": {
+"accept": "application/json",
+"content-type": "application/json",
+"x-bapi-api-key": "BYBITKEY123456789",
+"x-bapi-sign": "029c41c61512a707870ec3c176f1e2e54819f0cbd218431e3bdbc018f6a9e43a",
+"x-bapi-sign-type": "2",
+"x-bapi-timestamp": "1767225600000",
+"x-bapi-recv-window": "15000"
+},
+"body": "{\"category\": \"linear\", \"symbol\": \"XRPUSDT\", \"side\": \"Sell\", \"orderType\": \"Limit\", \"qty\": \"4.000\", \"price\": \"2.7000\", \"reduceOnly\": true, \"timeInForce\": \"GTC\", \"positionIdx\": 0}"
+}
+}
+],
+"sleeps": [
+0.3
+],
+"clock_end": 1767225600.3,
+"markers": [],
+"saved": {
+"hedge_saved": [],
+"auth_reset": [],
+"events": [],
+"metrics": [
+"trade_placed",
+"trade_placement_latency_ms",
+"sl_tp_attached"
+]
+},
+"final": {
+"hedge": {},
+"account_type": {
+"BYBITKEY123456789": "UNIFIED"
+},
+"delisted": [],
+"fail_count": {},
+"bybit_offset": 250,
+"binance_base": "https://fapi.binance.com",
+"binance_offset": 0,
+"bingx_offset": 0,
+"okx_offset": 0
+},
+"full_metrics": [
+[
+"trade_placed",
+1.0,
+{
+"symbol": "XRP-USDT-SWAP",
+"direction": "LONG",
+"exchange": "bybit"
+}
+],
+[
+"trade_placement_latency_ms",
+299.0,
+{
+"symbol": "XRP-USDT-SWAP",
+"direction": "LONG",
+"exchange": "bybit"
+}
+],
+[
+"sl_tp_attached",
+1.0,
+{
+"symbol": "XRP-USDT-SWAP",
+"direction": "LONG",
+"exchange": "bybit"
+}
+]
+],
+"full_events": []
+}
+},
+{
+"scenario": {
+"name": "fz_03_pt_balance_network_error_mut",
+"exchange": "bybit",
+"call": "place_trade",
+"args": [
+"BYBITKEY123456789",
+"bybit-secret-xyz",
+"BTC-USDT-SWAP",
+"LONG",
+87000.5,
+86000.0,
+88500.0,
+1.0,
+10
+],
+"kwargs": {},
+"routes": [
+{
+"method": "GET",
+"path": "/v5/market/time",
+"responses": [
+{
+"text": "{\"retCode\": 0, \"retMsg\": \"OK\", \"result\": {\"timeSecond\": \"1767225600\", \"timeNano\": \"1767225600250000000\"}}"
+}
+]
+},
+{
+"method": "POST",
+"path": "/v5/position/switch-isolated",
+"responses": [
+{
+"text": "{\"retCode\": 110026, \"retMsg\": \"Cross/isolated margin mode is not modified\", \"result\": {}}"
+}
+]
+},
+{
+"method": "POST",
+"path": "/v5/position/set-leverage",
+"responses": [
+{
+"text": "{\"retCode\": 110043, \"retMsg\": \"\", \"result\": {}}"
+}
+]
+},
+{
+"method": "GET",
+"path": "/v5/account/wallet-balance",
+"responses": [
+{
+"raise": "connect",
+"message": "HTTPSConnectionPool(host='api.bybit.com', port=443): Max retries exceeded (Caused by NameResolutionError)"
+}
+]
+}
+],
+"state": {},
+"mode": "wire",
+"random": [
+0.3590239347630747,
+0.38760645324786,
+0.40483911425988806,
+0.10599979961621597,
+0.6725700955151007,
+0.15460647172306974
+],
+"clock": 1767225600.0
+},
+"expected": {
+"name": "fz_03_pt_balance_network_error_mut",
+"raised": {
+"type": "RuntimeError",
+"msg": "⚠️ Временные сетевые проблемы с api.bybit.com (DNS/connection). Попробуй ещё раз через 1-2 минуты."
+},
+"requests": [
+{
+"method": "GET",
+"url": "https://api.bybit.com/v5/market/time",
+"headers": {},
+"body": null,
+"hdrs": {},
+"wire": {
+"method": "GET",
+"target": "/v5/market/time",
+"headers": {
+"accept": "*/*"
+},
+"body": null
+}
+},
+{
+"method": "POST",
+"url": "https://api.bybit.com/v5/position/switch-isolated",
+"headers": {
+"Content-Type": "application/json",
+"X-BAPI-API-KEY": "BYBITKEY123456789",
+"X-BAPI-SIGN": "a63eb17cd78b2be7a89cc07d655e1b447750800ff2baa71ddd4998cbcaf3e00e",
+"X-BAPI-SIGN-TYPE": "2",
+"X-BAPI-TIMESTAMP": "1767225600000",
+"X-BAPI-RECV-WINDOW": "15000"
+},
+"body": "{\"category\": \"linear\", \"symbol\": \"BTCUSDT\", \"tradeMode\": 1}",
+"hdrs": {
+"accept": "application/json",
+"content-type": "application/json",
+"x-bapi-api-key": "BYBITKEY123456789",
+"x-bapi-sign": "a63eb17cd78b2be7a89cc07d655e1b447750800ff2baa71ddd4998cbcaf3e00e",
+"x-bapi-sign-type": "2",
+"x-bapi-timestamp": "1767225600000",
+"x-bapi-recv-window": "15000"
+},
+"wire": {
+"method": "POST",
+"target": "/v5/position/switch-isolated",
+"headers": {
+"accept": "application/json",
+"content-type": "application/json",
+"x-bapi-api-key": "BYBITKEY123456789",
+"x-bapi-sign": "a63eb17cd78b2be7a89cc07d655e1b447750800ff2baa71ddd4998cbcaf3e00e",
+"x-bapi-sign-type": "2",
+"x-bapi-timestamp": "1767225600000",
+"x-bapi-recv-window": "15000"
+},
+"body": "{\"category\": \"linear\", \"symbol\": \"BTCUSDT\", \"tradeMode\": 1}"
+}
+},
+{
+"method": "POST",
+"url": "https://api.bybit.com/v5/position/set-leverage",
+"headers": {
+"Content-Type": "application/json",
+"X-BAPI-API-KEY": "BYBITKEY123456789",
+"X-BAPI-SIGN": "675c3a147187bc2435f79543d0a7850639d843f418f54f0f6ed24fecdb90051a",
+"X-BAPI-SIGN-TYPE": "2",
+"X-BAPI-TIMESTAMP": "1767225600000",
+"X-BAPI-RECV-WINDOW": "15000"
+},
+"body": "{\"category\": \"linear\", \"symbol\": \"BTCUSDT\", \"buyLeverage\": \"10\", \"sellLeverage\": \"10\"}",
+"hdrs": {
+"accept": "application/json",
+"content-type": "application/json",
+"x-bapi-api-key": "BYBITKEY123456789",
+"x-bapi-sign": "675c3a147187bc2435f79543d0a7850639d843f418f54f0f6ed24fecdb90051a",
+"x-bapi-sign-type": "2",
+"x-bapi-timestamp": "1767225600000",
+"x-bapi-recv-window": "15000"
+},
+"wire": {
+"method": "POST",
+"target": "/v5/position/set-leverage",
+"headers": {
+"accept": "application/json",
+"content-type": "application/json",
+"x-bapi-api-key": "BYBITKEY123456789",
+"x-bapi-sign": "675c3a147187bc2435f79543d0a7850639d843f418f54f0f6ed24fecdb90051a",
+"x-bapi-sign-type": "2",
+"x-bapi-timestamp": "1767225600000",
+"x-bapi-recv-window": "15000"
+},
+"body": "{\"category\": \"linear\", \"symbol\": \"BTCUSDT\", \"buyLeverage\": \"10\", \"sellLeverage\": \"10\"}"
+}
+},
+{
+"method": "GET",
+"url": "https://api.bybit.com/v5/account/wallet-balance?accountType=UNIFIED&coin=USDT",
+"headers": {
+"Content-Type": "application/json",
+"X-BAPI-API-KEY": "BYBITKEY123456789",
+"X-BAPI-SIGN": "fa9306bfef7f11116d8aac5602e50aa6643c5d1b3509f4c3b1b02f61c47aeb4b",
+"X-BAPI-SIGN-TYPE": "2",
+"X-BAPI-TIMESTAMP": "1767225600000",
+"X-BAPI-RECV-WINDOW": "15000"
+},
+"body": null,
+"hdrs": {
+"accept": "application/json",
+"content-type": "application/json",
+"x-bapi-api-key": "BYBITKEY123456789",
+"x-bapi-sign": "fa9306bfef7f11116d8aac5602e50aa6643c5d1b3509f4c3b1b02f61c47aeb4b",
+"x-bapi-sign-type": "2",
+"x-bapi-timestamp": "1767225600000",
+"x-bapi-recv-window": "15000"
+},
+"wire": {
+"method": "GET",
+"target": "/v5/account/wallet-balance?accountType=UNIFIED&coin=USDT",
+"headers": {
+"accept": "application/json",
+"content-type": "application/json",
+"x-bapi-api-key": "BYBITKEY123456789",
+"x-bapi-sign": "fa9306bfef7f11116d8aac5602e50aa6643c5d1b3509f4c3b1b02f61c47aeb4b",
+"x-bapi-sign-type": "2",
+"x-bapi-timestamp": "1767225600000",
+"x-bapi-recv-window": "15000"
+},
+"body": null
+}
+},
+{
+"method": "GET",
+"url": "https://api.bybit.com/v5/account/wallet-balance?accountType=UNIFIED&coin=USDT",
+"headers": {
+"Content-Type": "application/json",
+"X-BAPI-API-KEY": "BYBITKEY123456789",
+"X-BAPI-SIGN": "da020d51fd4b38b70ee2dd03bfdfba048976676175344150c18c060b90d3a99c",
+"X-BAPI-SIGN-TYPE": "2",
+"X-BAPI-TIMESTAMP": "1767225600500",
+"X-BAPI-RECV-WINDOW": "15000"
+},
+"body": null,
+"hdrs": {
+"accept": "application/json",
+"content-type": "application/json",
+"x-bapi-api-key": "BYBITKEY123456789",
+"x-bapi-sign": "da020d51fd4b38b70ee2dd03bfdfba048976676175344150c18c060b90d3a99c",
+"x-bapi-sign-type": "2",
+"x-bapi-timestamp": "1767225600500",
+"x-bapi-recv-window": "15000"
+},
+"wire": {
+"method": "GET",
+"target": "/v5/account/wallet-balance?accountType=UNIFIED&coin=USDT",
+"headers": {
+"accept": "application/json",
+"content-type": "application/json",
+"x-bapi-api-key": "BYBITKEY123456789",
+"x-bapi-sign": "da020d51fd4b38b70ee2dd03bfdfba048976676175344150c18c060b90d3a99c",
+"x-bapi-sign-type": "2",
+"x-bapi-timestamp": "1767225600500",
+"x-bapi-recv-window": "15000"
+},
+"body": null
+}
+},
+{
+"method": "GET",
+"url": "https://api.bybit.com/v5/account/wallet-balance?accountType=UNIFIED&coin=USDT",
+"headers": {
+"Content-Type": "application/json",
+"X-BAPI-API-KEY": "BYBITKEY123456789",
+"X-BAPI-SIGN": "22a6cbd923ac76119eef760276079c8207dabd970a22fa83e6ffbd6ee7408215",
+"X-BAPI-SIGN-TYPE": "2",
+"X-BAPI-TIMESTAMP": "1767225601500",
+"X-BAPI-RECV-WINDOW": "15000"
+},
+"body": null,
+"hdrs": {
+"accept": "application/json",
+"content-type": "application/json",
+"x-bapi-api-key": "BYBITKEY123456789",
+"x-bapi-sign": "22a6cbd923ac76119eef760276079c8207dabd970a22fa83e6ffbd6ee7408215",
+"x-bapi-sign-type": "2",
+"x-bapi-timestamp": "1767225601500",
+"x-bapi-recv-window": "15000"
+},
+"wire": {
+"method": "GET",
+"target": "/v5/account/wallet-balance?accountType=UNIFIED&coin=USDT",
+"headers": {
+"accept": "application/json",
+"content-type": "application/json",
+"x-bapi-api-key": "BYBITKEY123456789",
+"x-bapi-sign": "22a6cbd923ac76119eef760276079c8207dabd970a22fa83e6ffbd6ee7408215",
+"x-bapi-sign-type": "2",
+"x-bapi-timestamp": "1767225601500",
+"x-bapi-recv-window": "15000"
+},
+"body": null
+}
+},
+{
+"method": "GET",
+"url": "https://api.bybit.com/v5/account/wallet-balance?accountType=UNIFIED&coin=USDT",
+"headers": {
+"Content-Type": "application/json",
+"X-BAPI-API-KEY": "BYBITKEY123456789",
+"X-BAPI-SIGN": "06d71452c719f6689a212381b5f01c54fdba6b6a57eda0d1574921cd96e21bb9",
+"X-BAPI-SIGN-TYPE": "2",
+"X-BAPI-TIMESTAMP": "1767225603500",
+"X-BAPI-RECV-WINDOW": "15000"
+},
+"body": null,
+"hdrs": {
+"accept": "application/json",
+"content-type": "application/json",
+"x-bapi-api-key": "BYBITKEY123456789",
+"x-bapi-sign": "06d71452c719f6689a212381b5f01c54fdba6b6a57eda0d1574921cd96e21bb9",
+"x-bapi-sign-type": "2",
+"x-bapi-timestamp": "1767225603500",
+"x-bapi-recv-window": "15000"
+},
+"wire": {
+"method": "GET",
+"target": "/v5/account/wallet-balance?accountType=UNIFIED&coin=USDT",
+"headers": {
+"accept": "application/json",
+"content-type": "application/json",
+"x-bapi-api-key": "BYBITKEY123456789",
+"x-bapi-sign": "06d71452c719f6689a212381b5f01c54fdba6b6a57eda0d1574921cd96e21bb9",
+"x-bapi-sign-type": "2",
+"x-bapi-timestamp": "1767225603500",
+"x-bapi-recv-window": "15000"
+},
+"body": null
+}
+},
+{
+"method": "GET",
+"url": "https://api.bybit.com/v5/account/wallet-balance?accountType=CONTRACT&coin=USDT",
+"headers": {
+"Content-Type": "application/json",
+"X-BAPI-API-KEY": "BYBITKEY123456789",
+"X-BAPI-SIGN": "2ce7c892cada350d11ef016750a7bfec27e5bc3f602deb9f2ea5f2c2885e99ad",
+"X-BAPI-SIGN-TYPE": "2",
+"X-BAPI-TIMESTAMP": "1767225603500",
+"X-BAPI-RECV-WINDOW": "15000"
+},
+"body": null,
+"hdrs": {
+"accept": "application/json",
+"content-type": "application/json",
+"x-bapi-api-key": "BYBITKEY123456789",
+"x-bapi-sign": "2ce7c892cada350d11ef016750a7bfec27e5bc3f602deb9f2ea5f2c2885e99ad",
+"x-bapi-sign-type": "2",
+"x-bapi-timestamp": "1767225603500",
+"x-bapi-recv-window": "15000"
+},
+"wire": {
+"method": "GET",
+"target": "/v5/account/wallet-balance?accountType=CONTRACT&coin=USDT",
+"headers": {
+"accept": "application/json",
+"content-type": "application/json",
+"x-bapi-api-key": "BYBITKEY123456789",
+"x-bapi-sign": "2ce7c892cada350d11ef016750a7bfec27e5bc3f602deb9f2ea5f2c2885e99ad",
+"x-bapi-sign-type": "2",
+"x-bapi-timestamp": "1767225603500",
+"x-bapi-recv-window": "15000"
+},
+"body": null
+}
+},
+{
+"method": "GET",
+"url": "https://api.bybit.com/v5/account/wallet-balance?accountType=CONTRACT&coin=USDT",
+"headers": {
+"Content-Type": "application/json",
+"X-BAPI-API-KEY": "BYBITKEY123456789",
+"X-BAPI-SIGN": "61e6107026faa4a83c41c57d5141107a7738683f3b97b64e27d182b6f6cee805",
+"X-BAPI-SIGN-TYPE": "2",
+"X-BAPI-TIMESTAMP": "1767225604000",
+"X-BAPI-RECV-WINDOW": "15000"
+},
+"body": null,
+"hdrs": {
+"accept": "application/json",
+"content-type": "application/json",
+"x-bapi-api-key": "BYBITKEY123456789",
+"x-bapi-sign": "61e6107026faa4a83c41c57d5141107a7738683f3b97b64e27d182b6f6cee805",
+"x-bapi-sign-type": "2",
+"x-bapi-timestamp": "1767225604000",
+"x-bapi-recv-window": "15000"
+},
+"wire": {
+"method": "GET",
+"target": "/v5/account/wallet-balance?accountType=CONTRACT&coin=USDT",
+"headers": {
+"accept": "application/json",
+"content-type": "application/json",
+"x-bapi-api-key": "BYBITKEY123456789",
+"x-bapi-sign": "61e6107026faa4a83c41c57d5141107a7738683f3b97b64e27d182b6f6cee805",
+"x-bapi-sign-type": "2",
+"x-bapi-timestamp": "1767225604000",
+"x-bapi-recv-window": "15000"
+},
+"body": null
+}
+},
+{
+"method": "GET",
+"url": "https://api.bybit.com/v5/account/wallet-balance?accountType=CONTRACT&coin=USDT",
+"headers": {
+"Content-Type": "application/json",
+"X-BAPI-API-KEY": "BYBITKEY123456789",
+"X-BAPI-SIGN": "fa62f0b2a348db3287eae677161be6ff3d24a249fd41fcf63a58f81575db8fc1",
+"X-BAPI-SIGN-TYPE": "2",
+"X-BAPI-TIMESTAMP": "1767225605000",
+"X-BAPI-RECV-WINDOW": "15000"
+},
+"body": null,
+"hdrs": {
+"accept": "application/json",
+"content-type": "application/json",
+"x-bapi-api-key": "BYBITKEY123456789",
+"x-bapi-sign": "fa62f0b2a348db3287eae677161be6ff3d24a249fd41fcf63a58f81575db8fc1",
+"x-bapi-sign-type": "2",
+"x-bapi-timestamp": "1767225605000",
+"x-bapi-recv-window": "15000"
+},
+"wire": {
+"method": "GET",
+"target": "/v5/account/wallet-balance?accountType=CONTRACT&coin=USDT",
+"headers": {
+"accept": "application/json",
+"content-type": "application/json",
+"x-bapi-api-key": "BYBITKEY123456789",
+"x-bapi-sign": "fa62f0b2a348db3287eae677161be6ff3d24a249fd41fcf63a58f81575db8fc1",
+"x-bapi-sign-type": "2",
+"x-bapi-timestamp": "1767225605000",
+"x-bapi-recv-window": "15000"
+},
+"body": null
+}
+},
+{
+"method": "GET",
+"url": "https://api.bybit.com/v5/account/wallet-balance?accountType=CONTRACT&coin=USDT",
+"headers": {
+"Content-Type": "application/json",
+"X-BAPI-API-KEY": "BYBITKEY123456789",
+"X-BAPI-SIGN": "fffc1dcdb92c5d776d89d7a1ff29ff0f019d7532555dbf6ba52f7931f97e8aa2",
+"X-BAPI-SIGN-TYPE": "2",
+"X-BAPI-TIMESTAMP": "1767225607000",
+"X-BAPI-RECV-WINDOW": "15000"
+},
+"body": null,
+"hdrs": {
+"accept": "application/json",
+"content-type": "application/json",
+"x-bapi-api-key": "BYBITKEY123456789",
+"x-bapi-sign": "fffc1dcdb92c5d776d89d7a1ff29ff0f019d7532555dbf6ba52f7931f97e8aa2",
+"x-bapi-sign-type": "2",
+"x-bapi-timestamp": "1767225607000",
+"x-bapi-recv-window": "15000"
+},
+"wire": {
+"method": "GET",
+"target": "/v5/account/wallet-balance?accountType=CONTRACT&coin=USDT",
+"headers": {
+"accept": "application/json",
+"content-type": "application/json",
+"x-bapi-api-key": "BYBITKEY123456789",
+"x-bapi-sign": "fffc1dcdb92c5d776d89d7a1ff29ff0f019d7532555dbf6ba52f7931f97e8aa2",
+"x-bapi-sign-type": "2",
+"x-bapi-timestamp": "1767225607000",
+"x-bapi-recv-window": "15000"
+},
+"body": null
+}
+}
+],
+"sleeps": [
+0.5,
+1.0,
+2.0,
+0.5,
+1.0,
+2.0
+],
+"clock_end": 1767225607.0,
+"markers": [],
+"saved": {
+"hedge_saved": [],
+"auth_reset": [],
+"events": [],
+"metrics": []
+},
+"final": {
+"hedge": {},
+"account_type": {},
+"delisted": [],
+"fail_count": {},
+"bybit_offset": 250,
+"binance_base": "https://fapi.binance.com",
+"binance_offset": 0,
+"bingx_offset": 0,
+"okx_offset": 0
+},
+"full_metrics": [],
+"full_events": []
+}
+},
+{
+"scenario": {
+"name": "fz_04_pt_kv_hedge_warm_fail",
+"exchange": "bybit",
+"call": "place_trade",
+"args": [
+"BYBITKEY123456789",
+"bybit-secret-xyz",
+"BTC-USDT-SWAP",
+"LONG",
+87000.5,
+86000.0,
+88500.0,
+1.0,
+10
+],
+"kwargs": {
+"order_type": "Market"
+},
+"routes": [
+{
+"method": "GET",
+"path": "/v5/market/time",
+"responses": [
+{
+"text": "{\"retCode\": 0, \"retMsg\": \"OK\", \"result\": {\"timeSecond\": \"1767225600\", \"timeNano\": \"1767225600250000000\"}}"
+}
+]
+},
+{
+"method": "POST",
+"path": "/v5/position/switch-isolated",
+"responses": [
+{
+"text": "{\"retCode\": 110026, \"retMsg\": \"Cross/isolated margin mode is not modified\", \"result\": {}}"
+}
+]
+},
+{
+"method": "POST",
+"path": "/v5/position/set-leverage",
+"responses": [
+{
+"text": "{\"retCode\": 110043, \"retMsg\": \"leverage not modified\", \"result\": {}}"
+}
+]
+},
+{
+"method": "GET",
+"path": "/v5/account/wallet-balance",
+"responses": [
+{
+"text": "{\"retCode\": 0, \"retMsg\": \"OK\", \"result\": {\"list\": [{\"totalEquity\": \"1000.5\", \"totalAvailableBalance\": \"800.25\", \"totalWalletBalance\": \"1000.5\", \"totalUnrealisedPnl\": \"1.5\", \"coin\": [{\"coin\": \"USDT\", \"walletBalance\": \"1000.5\", \"equity\": \"1000.5\", \"availableBalance\": \"\", \"availableToWithdraw\": \"\"}]}]}}"
+}
+]
+},
+{
+"method": "GET",
+"path": "/v5/market/instruments-info",
+"responses": [
+{
+"text": "{\"retCode\": 0, \"retMsg\": \"OK\", \"result\": {\"list\": [{\"lotSizeFilter\": {\"qtyStep\": \"0.001\"}, \"priceFilter\": {\"tickSize\": \"0.1\"}}]}}"
+}
+]
+},
+{
+"method": "POST",
+"path": "/v5/order/create",
+"responses": [
+{
+"status": 200,
+"text": "null"
+},
+{
+"text": "{\"retCode\": 0, \"retMsg\": \"OK\", \"result\": {\"orderId\": \"k-tp\", \"orderLinkId\": \"\"}}"
+}
+]
+},
+{
+"method": "GET",
+"path": "/v5/position/list",
+"responses": [
+{
+"text": "{\"retCode\": 0, \"retMsg\": \"OK\", \"result\": {\"list\": [{\"symbol\": \"BTCUSDT\", \"side\": \"Buy\", \"size\": \"0.012\", \"positionIdx\": 1, \"avgPrice\": \"87000.5\", \"markPrice\": \"87000.5\", \"stopLoss\": \"\"}]}}"
+}
+]
+}
+],
+"state": {
+"kv_hedge": true
+},
+"mode": "wire",
+"random": [
+0.9778331921431042,
+0.3295719281047671,
+0.6482525662971885,
+0.5611057645223297,
+0.3082696846488069,
+0.6159704456770768
+],
+"clock": 1767225600.0
+},
+"expected": {
+"name": "fz_04_pt_kv_hedge_warm_fail",
+"result": {
+"ok": false,
+"error": "'NoneType' object has no attribute 'get'"
+},
+"requests": [
+{
+"method": "GET",
+"url": "https://api.bybit.com/v5/market/time",
+"headers": {},
+"body": null,
+"hdrs": {},
+"wire": {
+"method": "GET",
+"target": "/v5/market/time",
+"headers": {
+"accept": "*/*"
+},
+"body": null
+}
+},
+{
+"method": "POST",
+"url": "https://api.bybit.com/v5/position/switch-isolated",
+"headers": {
+"Content-Type": "application/json",
+"X-BAPI-API-KEY": "BYBITKEY123456789",
+"X-BAPI-SIGN": "a63eb17cd78b2be7a89cc07d655e1b447750800ff2baa71ddd4998cbcaf3e00e",
+"X-BAPI-SIGN-TYPE": "2",
+"X-BAPI-TIMESTAMP": "1767225600000",
+"X-BAPI-RECV-WINDOW": "15000"
+},
+"body": "{\"category\": \"linear\", \"symbol\": \"BTCUSDT\", \"tradeMode\": 1}",
+"hdrs": {
+"accept": "application/json",
+"content-type": "application/json",
+"x-bapi-api-key": "BYBITKEY123456789",
+"x-bapi-sign": "a63eb17cd78b2be7a89cc07d655e1b447750800ff2baa71ddd4998cbcaf3e00e",
+"x-bapi-sign-type": "2",
+"x-bapi-timestamp": "1767225600000",
+"x-bapi-recv-window": "15000"
+},
+"wire": {
+"method": "POST",
+"target": "/v5/position/switch-isolated",
+"headers": {
+"accept": "application/json",
+"content-type": "application/json",
+"x-bapi-api-key": "BYBITKEY123456789",
+"x-bapi-sign": "a63eb17cd78b2be7a89cc07d655e1b447750800ff2baa71ddd4998cbcaf3e00e",
+"x-bapi-sign-type": "2",
+"x-bapi-timestamp": "1767225600000",
+"x-bapi-recv-window": "15000"
+},
+"body": "{\"category\": \"linear\", \"symbol\": \"BTCUSDT\", \"tradeMode\": 1}"
+}
+},
+{
+"method": "POST",
+"url": "https://api.bybit.com/v5/position/set-leverage",
+"headers": {
+"Content-Type": "application/json",
+"X-BAPI-API-KEY": "BYBITKEY123456789",
+"X-BAPI-SIGN": "675c3a147187bc2435f79543d0a7850639d843f418f54f0f6ed24fecdb90051a",
+"X-BAPI-SIGN-TYPE": "2",
+"X-BAPI-TIMESTAMP": "1767225600000",
+"X-BAPI-RECV-WINDOW": "15000"
+},
+"body": "{\"category\": \"linear\", \"symbol\": \"BTCUSDT\", \"buyLeverage\": \"10\", \"sellLeverage\": \"10\"}",
+"hdrs": {
+"accept": "application/json",
+"content-type": "application/json",
+"x-bapi-api-key": "BYBITKEY123456789",
+"x-bapi-sign": "675c3a147187bc2435f79543d0a7850639d843f418f54f0f6ed24fecdb90051a",
+"x-bapi-sign-type": "2",
+"x-bapi-timestamp": "1767225600000",
+"x-bapi-recv-window": "15000"
+},
+"wire": {
+"method": "POST",
+"target": "/v5/position/set-leverage",
+"headers": {
+"accept": "application/json",
+"content-type": "application/json",
+"x-bapi-api-key": "BYBITKEY123456789",
+"x-bapi-sign": "675c3a147187bc2435f79543d0a7850639d843f418f54f0f6ed24fecdb90051a",
+"x-bapi-sign-type": "2",
+"x-bapi-timestamp": "1767225600000",
+"x-bapi-recv-window": "15000"
+},
+"body": "{\"category\": \"linear\", \"symbol\": \"BTCUSDT\", \"buyLeverage\": \"10\", \"sellLeverage\": \"10\"}"
+}
+},
+{
+"method": "GET",
+"url": "https://api.bybit.com/v5/account/wallet-balance?accountType=UNIFIED&coin=USDT",
+"headers": {
+"Content-Type": "application/json",
+"X-BAPI-API-KEY": "BYBITKEY123456789",
+"X-BAPI-SIGN": "fa9306bfef7f11116d8aac5602e50aa6643c5d1b3509f4c3b1b02f61c47aeb4b",
+"X-BAPI-SIGN-TYPE": "2",
+"X-BAPI-TIMESTAMP": "1767225600000",
+"X-BAPI-RECV-WINDOW": "15000"
+},
+"body": null,
+"hdrs": {
+"accept": "application/json",
+"content-type": "application/json",
+"x-bapi-api-key": "BYBITKEY123456789",
+"x-bapi-sign": "fa9306bfef7f11116d8aac5602e50aa6643c5d1b3509f4c3b1b02f61c47aeb4b",
+"x-bapi-sign-type": "2",
+"x-bapi-timestamp": "1767225600000",
+"x-bapi-recv-window": "15000"
+},
+"wire": {
+"method": "GET",
+"target": "/v5/account/wallet-balance?accountType=UNIFIED&coin=USDT",
+"headers": {
+"accept": "application/json",
+"content-type": "application/json",
+"x-bapi-api-key": "BYBITKEY123456789",
+"x-bapi-sign": "fa9306bfef7f11116d8aac5602e50aa6643c5d1b3509f4c3b1b02f61c47aeb4b",
+"x-bapi-sign-type": "2",
+"x-bapi-timestamp": "1767225600000",
+"x-bapi-recv-window": "15000"
+},
+"body": null
+}
+},
+{
+"method": "GET",
+"url": "https://api.bybit.com/v5/market/instruments-info?category=linear&symbol=BTCUSDT",
+"headers": {
+"Content-Type": "application/json"
+},
+"body": null,
+"hdrs": {
+"accept": "application/json",
+"content-type": "application/json"
+},
+"wire": {
+"method": "GET",
+"target": "/v5/market/instruments-info?category=linear&symbol=BTCUSDT",
+"headers": {
+"accept": "application/json",
+"content-type": "application/json"
+},
+"body": null
+}
+},
+{
+"method": "GET",
+"url": "https://api.bybit.com/v5/account/wallet-balance?accountType=UNIFIED&coin=USDT",
+"headers": {
+"Content-Type": "application/json",
+"X-BAPI-API-KEY": "BYBITKEY123456789",
+"X-BAPI-SIGN": "fa9306bfef7f11116d8aac5602e50aa6643c5d1b3509f4c3b1b02f61c47aeb4b",
+"X-BAPI-SIGN-TYPE": "2",
+"X-BAPI-TIMESTAMP": "1767225600000",
+"X-BAPI-RECV-WINDOW": "15000"
+},
+"body": null,
+"hdrs": {
+"accept": "application/json",
+"content-type": "application/json",
+"x-bapi-api-key": "BYBITKEY123456789",
+"x-bapi-sign": "fa9306bfef7f11116d8aac5602e50aa6643c5d1b3509f4c3b1b02f61c47aeb4b",
+"x-bapi-sign-type": "2",
+"x-bapi-timestamp": "1767225600000",
+"x-bapi-recv-window": "15000"
+},
+"wire": {
+"method": "GET",
+"target": "/v5/account/wallet-balance?accountType=UNIFIED&coin=USDT",
+"headers": {
+"accept": "application/json",
+"content-type": "application/json",
+"x-bapi-api-key": "BYBITKEY123456789",
+"x-bapi-sign": "fa9306bfef7f11116d8aac5602e50aa6643c5d1b3509f4c3b1b02f61c47aeb4b",
+"x-bapi-sign-type": "2",
+"x-bapi-timestamp": "1767225600000",
+"x-bapi-recv-window": "15000"
+},
+"body": null
+}
+},
+{
+"method": "POST",
+"url": "https://api.bybit.com/v5/order/create",
+"headers": {
+"Content-Type": "application/json",
+"X-BAPI-API-KEY": "BYBITKEY123456789",
+"X-BAPI-SIGN": "eb65b4291b8878000ab87e403c8b52d99a0332d3866cc0fe0bd99c0bde27794e",
+"X-BAPI-SIGN-TYPE": "2",
+"X-BAPI-TIMESTAMP": "1767225600000",
+"X-BAPI-RECV-WINDOW": "15000"
+},
+"body": "{\"category\": \"linear\", \"symbol\": \"BTCUSDT\", \"side\": \"Buy\", \"orderType\": \"Market\", \"timeInForce\": \"IOC\", \"qty\": \"0.010\", \"positionIdx\": 1, \"takeProfit\": \"88500.0\", \"stopLoss\": \"86000.0\", \"tpslMode\": \"Partial\", \"tpOrderType\": \"Limit\", \"tpLimitPrice\": \"88500.0\", \"tpSize\": \"0.010\", \"slSize\": \"0.010\", \"tpTriggerBy\": \"LastPrice\", \"slTriggerBy\": \"MarkPrice\", \"slOrderType\": \"Market\"}",
+"hdrs": {
+"accept": "application/json",
+"content-type": "application/json",
+"x-bapi-api-key": "BYBITKEY123456789",
+"x-bapi-sign": "eb65b4291b8878000ab87e403c8b52d99a0332d3866cc0fe0bd99c0bde27794e",
+"x-bapi-sign-type": "2",
+"x-bapi-timestamp": "1767225600000",
+"x-bapi-recv-window": "15000"
+},
+"wire": {
+"method": "POST",
+"target": "/v5/order/create",
+"headers": {
+"accept": "application/json",
+"content-type": "application/json",
+"x-bapi-api-key": "BYBITKEY123456789",
+"x-bapi-sign": "eb65b4291b8878000ab87e403c8b52d99a0332d3866cc0fe0bd99c0bde27794e",
+"x-bapi-sign-type": "2",
+"x-bapi-timestamp": "1767225600000",
+"x-bapi-recv-window": "15000"
+},
+"body": "{\"category\": \"linear\", \"symbol\": \"BTCUSDT\", \"side\": \"Buy\", \"orderType\": \"Market\", \"timeInForce\": \"IOC\", \"qty\": \"0.010\", \"positionIdx\": 1, \"takeProfit\": \"88500.0\", \"stopLoss\": \"86000.0\", \"tpslMode\": \"Partial\", \"tpOrderType\": \"Limit\", \"tpLimitPrice\": \"88500.0\", \"tpSize\": \"0.010\", \"slSize\": \"0.010\", \"tpTriggerBy\": \"LastPrice\", \"slTriggerBy\": \"MarkPrice\", \"slOrderType\": \"Market\"}"
+}
+}
+],
+"sleeps": [],
+"clock_end": 1767225600.0,
+"markers": [],
+"saved": {
+"hedge_saved": [],
+"auth_reset": [],
+"events": [],
+"metrics": []
+},
+"final": {
+"hedge": {
+"BYBITKEY123456789": true
+},
+"account_type": {
+"BYBITKEY123456789": "UNIFIED"
+},
+"delisted": [],
+"fail_count": {},
+"bybit_offset": 250,
+"binance_base": "https://fapi.binance.com",
+"binance_offset": 0,
+"bingx_offset": 0,
+"okx_offset": 0
+},
+"full_metrics": [],
+"full_events": []
+}
+},
+{
+"scenario": {
+"name": "fz_05_trail_precheck_wrong_side_fail",
+"exchange": "bybit",
+"call": "set_trailing_sl",
+"args": [
+"BYBITKEY123456789",
+"bybit-secret-xyz",
+"BTC-USDT-SWAP",
+87100.0,
+"LONG",
+0
+],
+"kwargs": {},
+"routes": [
+{
+"method": "GET",
+"path": "/v5/market/instruments-info",
+"responses": [
+{
+"status": 200,
+"text": "[]"
+}
+]
+},
+{
+"method": "GET",
+"path": "/v5/market/tickers",
+"responses": [
+{
+"text": "{\"retCode\": 0, \"retMsg\": \"OK\", \"result\": {\"list\": [{\"symbol\": \"BTCUSDT\", \"markPrice\": \"87000.0\", \"lastPrice\": \"87000.0\", \"bid1Price\": \"86999.5\", \"ask1Price\": \"87000.5\", \"fundingRate\": \"0.0001\"}]}}"
+}
+]
+}
+],
+"state": {},
+"mode": "wire",
+"random": [
+0.03324970440329289,
+0.6513463032986466,
+0.23910790461100528,
+0.04366454999507807,
+0.20641143924658512,
+0.8635886371118031
+],
+"clock": 1767225600.0
+},
+"expected": {
+"name": "fz_05_trail_precheck_wrong_side_fail",
+"result": {
+"ok": false,
+"error": "new_sl 87100.0 >= mark 87000.0 for LONG (would trigger immediate)"
+},
+"requests": [
+{
+"method": "GET",
+"url": "https://api.bybit.com/v5/market/instruments-info?category=linear&symbol=BTCUSDT",
+"headers": {
+"Content-Type": "application/json"
+},
+"body": null,
+"hdrs": {
+"accept": "application/json",
+"content-type": "application/json"
+},
+"wire": {
+"method": "GET",
+"target": "/v5/market/instruments-info?category=linear&symbol=BTCUSDT",
+"headers": {
+"accept": "application/json",
+"content-type": "application/json"
+},
+"body": null
+}
+},
+{
+"method": "GET",
+"url": "https://api.bybit.com/v5/market/tickers?category=linear&symbol=BTCUSDT",
+"headers": {
+"Content-Type": "application/json"
+},
+"body": null,
+"hdrs": {
+"accept": "application/json",
+"content-type": "application/json"
+},
+"wire": {
+"method": "GET",
+"target": "/v5/market/tickers?category=linear&symbol=BTCUSDT",
+"headers": {
+"accept": "application/json",
+"content-type": "application/json"
+},
+"body": null
+}
+}
+],
+"sleeps": [],
+"clock_end": 1767225600.0,
+"markers": [],
+"saved": {
+"hedge_saved": [],
+"auth_reset": [],
+"events": [],
+"metrics": []
+},
+"final": {
+"hedge": {},
+"account_type": {},
+"delisted": [],
+"fail_count": {},
+"bybit_offset": 0,
+"binance_base": "https://fapi.binance.com",
+"binance_offset": 0,
+"bingx_offset": 0,
+"okx_offset": 0
+},
+"full_metrics": [],
+"full_events": []
+}
+},
+{
+"scenario": {
+"name": "fz_06_pt_available_margin_insufficient_mut",
+"exchange": "bybit",
+"call": "place_trade",
+"args": [
+"BYBITKEY123456789",
+"bybit-secret-xyz",
+"BTC-USDT-SWAP",
+"LONG",
+87000.5,
+86900.0,
+88500.0,
+3.0,
+1
+],
+"kwargs": {},
+"routes": [
+{
+"method": "GET",
+"path": "/v5/market/time",
+"responses": [
+{
+"text": "{\"retCode\": 0, \"retMsg\": \"OK\", \"result\": {\"timeSecond\": \"1767225600\", \"timeNano\": \"1767225600250000000\"}}"
+}
+]
+},
+{
+"method": "POST",
+"path": "/v5/position/switch-isolated",
+"responses": [
+{
+"text": "{\"retCode\": 110026, \"retMsg\": \"Cross/isolated margin mode is not modified\", \"result\": {}}"
+}
+]
+},
+{
+"method": "POST",
+"path": "/v5/position/set-leverage",
+"responses": [
+{
+"text": "{\"retCode\": 110043, \"retMsg\": \"leverage not modified\", \"result\": {}}"
+}
+]
+},
+{
+"method": "GET",
+"path": "/v5/account/wallet-balance",
+"responses": [
+{
+"text": "{\"retCode\": 0, \"retMsg\": \"OK\", \"result\": {\"list\": [{\"totalEquity\": \"100000.0\", \"totalAvailableBalance\": \"1500.123\", \"totalWalletBalance\": \"100000.0\", \"totalUnrealisedPnl\": \"1.5\", \"coin\": [{\"coin\": \"USDT\", \"walletBalance\": \"100000.0\", \"equity\": \"100000.0\", \"availableBalance\": \"\", \"availableToWithdraw\": \"\"}]}]}}"
+}
+]
+},
+{
+"method": "GET",
+"path": "/v5/market/instruments-info",
+"responses": [
+{
+"text": "{\"retCode\": 0, \"retMsg\": \"OK\", \"result\": {\"list\": [{\"lotSizeFilter\": {\"qtyStep\": \"1,5\"}, \"priceFilter\": {\"tickSize\": \"0.1\"}}]}}"
+}
+]
+}
+],
+"state": {},
+"mode": "wire",
+"random": [
+0.8885464208688858,
+0.3946461515577425,
+0.10410909942552293,
+0.012448343661894401,
+0.773812374962952,
+0.6491572167437164
+],
+"clock": 1767225600.0
+},
+"expected": {
+"name": "fz_06_pt_available_margin_insufficient_mut",
+"result": {
+"ok": false,
+"error": "Недостаточно маржи для открытия позиции.\nТребуется: $2597484.32 USDT (маржа $2596964.93 + комиссия ~$519.39)\nДоступно:  $100000.00 USDT\nУменьши риск (сейчас 3.0%) или пополни счёт."
+},
+"requests": [
+{
+"method": "GET",
+"url": "https://api.bybit.com/v5/market/time",
+"headers": {},
+"body": null,
+"hdrs": {},
+"wire": {
+"method": "GET",
+"target": "/v5/market/time",
+"headers": {
+"accept": "*/*"
+},
+"body": null
+}
+},
+{
+"method": "POST",
+"url": "https://api.bybit.com/v5/position/switch-isolated",
+"headers": {
+"Content-Type": "application/json",
+"X-BAPI-API-KEY": "BYBITKEY123456789",
+"X-BAPI-SIGN": "a63eb17cd78b2be7a89cc07d655e1b447750800ff2baa71ddd4998cbcaf3e00e",
+"X-BAPI-SIGN-TYPE": "2",
+"X-BAPI-TIMESTAMP": "1767225600000",
+"X-BAPI-RECV-WINDOW": "15000"
+},
+"body": "{\"category\": \"linear\", \"symbol\": \"BTCUSDT\", \"tradeMode\": 1}",
+"hdrs": {
+"accept": "application/json",
+"content-type": "application/json",
+"x-bapi-api-key": "BYBITKEY123456789",
+"x-bapi-sign": "a63eb17cd78b2be7a89cc07d655e1b447750800ff2baa71ddd4998cbcaf3e00e",
+"x-bapi-sign-type": "2",
+"x-bapi-timestamp": "1767225600000",
+"x-bapi-recv-window": "15000"
+},
+"wire": {
+"method": "POST",
+"target": "/v5/position/switch-isolated",
+"headers": {
+"accept": "application/json",
+"content-type": "application/json",
+"x-bapi-api-key": "BYBITKEY123456789",
+"x-bapi-sign": "a63eb17cd78b2be7a89cc07d655e1b447750800ff2baa71ddd4998cbcaf3e00e",
+"x-bapi-sign-type": "2",
+"x-bapi-timestamp": "1767225600000",
+"x-bapi-recv-window": "15000"
+},
+"body": "{\"category\": \"linear\", \"symbol\": \"BTCUSDT\", \"tradeMode\": 1}"
+}
+},
+{
+"method": "POST",
+"url": "https://api.bybit.com/v5/position/set-leverage",
+"headers": {
+"Content-Type": "application/json",
+"X-BAPI-API-KEY": "BYBITKEY123456789",
+"X-BAPI-SIGN": "9e1673f57821f1c92deb0db13bcfc110018913d716dea67359ca50d0e4a128ee",
+"X-BAPI-SIGN-TYPE": "2",
+"X-BAPI-TIMESTAMP": "1767225600000",
+"X-BAPI-RECV-WINDOW": "15000"
+},
+"body": "{\"category\": \"linear\", \"symbol\": \"BTCUSDT\", \"buyLeverage\": \"1\", \"sellLeverage\": \"1\"}",
+"hdrs": {
+"accept": "application/json",
+"content-type": "application/json",
+"x-bapi-api-key": "BYBITKEY123456789",
+"x-bapi-sign": "9e1673f57821f1c92deb0db13bcfc110018913d716dea67359ca50d0e4a128ee",
+"x-bapi-sign-type": "2",
+"x-bapi-timestamp": "1767225600000",
+"x-bapi-recv-window": "15000"
+},
+"wire": {
+"method": "POST",
+"target": "/v5/position/set-leverage",
+"headers": {
+"accept": "application/json",
+"content-type": "application/json",
+"x-bapi-api-key": "BYBITKEY123456789",
+"x-bapi-sign": "9e1673f57821f1c92deb0db13bcfc110018913d716dea67359ca50d0e4a128ee",
+"x-bapi-sign-type": "2",
+"x-bapi-timestamp": "1767225600000",
+"x-bapi-recv-window": "15000"
+},
+"body": "{\"category\": \"linear\", \"symbol\": \"BTCUSDT\", \"buyLeverage\": \"1\", \"sellLeverage\": \"1\"}"
+}
+},
+{
+"method": "GET",
+"url": "https://api.bybit.com/v5/account/wallet-balance?accountType=UNIFIED&coin=USDT",
+"headers": {
+"Content-Type": "application/json",
+"X-BAPI-API-KEY": "BYBITKEY123456789",
+"X-BAPI-SIGN": "fa9306bfef7f11116d8aac5602e50aa6643c5d1b3509f4c3b1b02f61c47aeb4b",
+"X-BAPI-SIGN-TYPE": "2",
+"X-BAPI-TIMESTAMP": "1767225600000",
+"X-BAPI-RECV-WINDOW": "15000"
+},
+"body": null,
+"hdrs": {
+"accept": "application/json",
+"content-type": "application/json",
+"x-bapi-api-key": "BYBITKEY123456789",
+"x-bapi-sign": "fa9306bfef7f11116d8aac5602e50aa6643c5d1b3509f4c3b1b02f61c47aeb4b",
+"x-bapi-sign-type": "2",
+"x-bapi-timestamp": "1767225600000",
+"x-bapi-recv-window": "15000"
+},
+"wire": {
+"method": "GET",
+"target": "/v5/account/wallet-balance?accountType=UNIFIED&coin=USDT",
+"headers": {
+"accept": "application/json",
+"content-type": "application/json",
+"x-bapi-api-key": "BYBITKEY123456789",
+"x-bapi-sign": "fa9306bfef7f11116d8aac5602e50aa6643c5d1b3509f4c3b1b02f61c47aeb4b",
+"x-bapi-sign-type": "2",
+"x-bapi-timestamp": "1767225600000",
+"x-bapi-recv-window": "15000"
+},
+"body": null
+}
+},
+{
+"method": "GET",
+"url": "https://api.bybit.com/v5/market/instruments-info?category=linear&symbol=BTCUSDT",
+"headers": {
+"Content-Type": "application/json"
+},
+"body": null,
+"hdrs": {
+"accept": "application/json",
+"content-type": "application/json"
+},
+"wire": {
+"method": "GET",
+"target": "/v5/market/instruments-info?category=linear&symbol=BTCUSDT",
+"headers": {
+"accept": "application/json",
+"content-type": "application/json"
+},
+"body": null
+}
+}
+],
+"sleeps": [],
+"clock_end": 1767225600.0,
+"markers": [],
+"saved": {
+"hedge_saved": [],
+"auth_reset": [],
+"events": [],
+"metrics": []
+},
+"final": {
+"hedge": {},
+"account_type": {
+"BYBITKEY123456789": "UNIFIED"
+},
+"delisted": [],
+"fail_count": {},
+"bybit_offset": 250,
+"binance_base": "https://fapi.binance.com",
+"binance_offset": 0,
+"bingx_offset": 0,
+"okx_offset": 0
+},
+"full_metrics": [],
+"full_events": []
+}
+},
+{
+"scenario": {
+"name": "fz_07_split_short_one_leg_fails_mut",
+"exchange": "bybit",
+"call": "place_trade_split",
+"args": [
+"BYBITKEY123456789",
+"bybit-secret-xyz",
+"ETH-USDT-SWAP",
+"SHORT",
+3010.0,
+3030.0,
+3080.0,
+2950.0,
+1.0,
+10
+],
+"kwargs": {},
+"routes": [
+{
+"method": "GET",
+"path": "/v5/market/time",
+"responses": [
+{
+"text": "{\"retCode\": 0, \"retMsg\": \"OK\", \"result\": {\"timeSecond\": \"1767225600\", \"timeNano\": \"1767225600250000000\"}}"
+}
+]
+},
+{
+"method": "POST",
+"path": "/v5/position/switch-isolated",
+"responses": [
+{
+"text": "{\"retCode\": 110026, \"retMsg\": \"Cross/isolated margin mode is not modified\", \"result\": {}}"
+}
+]
+},
+{
+"method": "POST",
+"path": "/v5/position/set-leverage",
+"responses": [
+{
+"text": "{\"retCode\": 110043, \"retMsg\": \"leverage not modified\", \"result\": {}}"
+}
+]
+},
+{
+"method": "GET",
+"path": "/v5/account/wallet-balance",
+"responses": [
+{
+"text": "{\"retCode\": 0, \"retMsg\": \"OK\", \"result\": {\"list\": [{\"totalEquity\": \"1000.5\", \"totalAvailableBalance\": \"800.25\", \"totalWalletBalance\": \"1000.5\", \"totalUnrealisedPnl\": \"1.5\", \"coin\": [{\"coin\": \"USDT\", \"walletBalance\": \"1000.5\", \"equity\": \"1000.5\", \"availableBalance\": \"\", \"availableToWithdraw\": \"\"}]}]}}"
+}
+]
+},
+{
+"method": "GET",
+"path": "/v5/market/instruments-info",
+"responses": [
+{
+"text": "{\"retCode\": 0, \"retMsg\": \"OK\", \"result\": {\"list\": [{\"lotSizeFilter\": {\"qtyStep\": \"0.001\"}, \"priceFilter\": {\"tickSize\": \"0.1\"}}]}}"
+}
+]
+},
+{
+"method": "POST",
+"path": "/v5/order/create",
+"responses": [
+{
+"text": "{\"retCode\": 110007, \"retMsg\": \"ab not enough for new order\", \"result\": {}}"
+},
+{
+"text": "{\"retCode\": 0, \"retMsg\": \"OK\", \"result\": {\"orderId\": \"hi-2\", \"orderLinkId\": \"\"}}"
+},
+{
+"text": "{\"retCode\": 0, \"retMsg\": \"OK\", \"result\": {\"orderId\": \"tp\", \"orderLinkId\": \"1e-7\"}}"
+}
+]
+},
+{
+"method": "GET",
+"path": "/v5/position/list",
+"responses": [
+{
+"text": "{\"retCode\": 0, \"retMsg\": \"OK\", \"result\": {\"list\": [{\"symbol\": \"ETHUSDT\", \"side\": \"Sell\", \"size\": \"0.84\", \"positionIdx\": 0, \"avgPrice\": \"3030\", \"markPrice\": \"3030\", \"stopLoss\": \"\"}]}}"
+}
+]
+}
+],
+"state": {},
+"mode": "wire",
+"random": [
+0.9973792054881806,
+0.9727387838639853,
+0.8509685592698625,
+0.3331771215501802,
+0.8235676650903322,
+0.4817877589119983
+],
+"clock": 1767225600.0
+},
+"expected": {
+"name": "fz_07_split_short_one_leg_fails_mut",
+"result": {
+"ok": true,
+"order_id": "hi-2",
+"order_id_lo": "",
+"order_id_hi": "hi-2",
+"qty": "0.166",
+"notional": 501.32000000000005,
+"balance": 1000.5,
+"symbol": "ETHUSDT",
+"side": "Sell",
+"leverage": 10,
+"pos_idx": 0,
+"tp_placed": true,
+"leverage_downgraded": false,
+"leverage_requested": 10,
+"leverage_applied": 10,
+"entry_lo": 3010.0,
+"entry_hi": 3030.0
+},
+"requests": [
+{
+"method": "POST",
+"url": "https://api.bybit.com/v5/position/switch-isolated",
+"headers": {
+"Content-Type": "application/json",
+"X-BAPI-API-KEY": "BYBITKEY123456789",
+"X-BAPI-SIGN": "e411480163d0645e0b90c791c6fac4a295fd931ed429331060009169f8533ecc",
+"X-BAPI-SIGN-TYPE": "2",
+"X-BAPI-TIMESTAMP": "1767225600000",
+"X-BAPI-RECV-WINDOW": "15000"
+},
+"body": "{\"category\": \"linear\", \"symbol\": \"ETHUSDT\", \"tradeMode\": 1}",
+"hdrs": {
+"accept": "application/json",
+"content-type": "application/json",
+"x-bapi-api-key": "BYBITKEY123456789",
+"x-bapi-sign": "e411480163d0645e0b90c791c6fac4a295fd931ed429331060009169f8533ecc",
+"x-bapi-sign-type": "2",
+"x-bapi-timestamp": "1767225600000",
+"x-bapi-recv-window": "15000"
+},
+"wire": {
+"method": "POST",
+"target": "/v5/position/switch-isolated",
+"headers": {
+"accept": "application/json",
+"content-type": "application/json",
+"x-bapi-api-key": "BYBITKEY123456789",
+"x-bapi-sign": "e411480163d0645e0b90c791c6fac4a295fd931ed429331060009169f8533ecc",
+"x-bapi-sign-type": "2",
+"x-bapi-timestamp": "1767225600000",
+"x-bapi-recv-window": "15000"
+},
+"body": "{\"category\": \"linear\", \"symbol\": \"ETHUSDT\", \"tradeMode\": 1}"
+}
+},
+{
+"method": "POST",
+"url": "https://api.bybit.com/v5/position/set-leverage",
+"headers": {
+"Content-Type": "application/json",
+"X-BAPI-API-KEY": "BYBITKEY123456789",
+"X-BAPI-SIGN": "64e890cdc2e1f80eea64cec6f5255ad21bfaf6c87c2edc057d9b0645617140bf",
+"X-BAPI-SIGN-TYPE": "2",
+"X-BAPI-TIMESTAMP": "1767225600000",
+"X-BAPI-RECV-WINDOW": "15000"
+},
+"body": "{\"category\": \"linear\", \"symbol\": \"ETHUSDT\", \"buyLeverage\": \"10\", \"sellLeverage\": \"10\"}",
+"hdrs": {
+"accept": "application/json",
+"content-type": "application/json",
+"x-bapi-api-key": "BYBITKEY123456789",
+"x-bapi-sign": "64e890cdc2e1f80eea64cec6f5255ad21bfaf6c87c2edc057d9b0645617140bf",
+"x-bapi-sign-type": "2",
+"x-bapi-timestamp": "1767225600000",
+"x-bapi-recv-window": "15000"
+},
+"wire": {
+"method": "POST",
+"target": "/v5/position/set-leverage",
+"headers": {
+"accept": "application/json",
+"content-type": "application/json",
+"x-bapi-api-key": "BYBITKEY123456789",
+"x-bapi-sign": "64e890cdc2e1f80eea64cec6f5255ad21bfaf6c87c2edc057d9b0645617140bf",
+"x-bapi-sign-type": "2",
+"x-bapi-timestamp": "1767225600000",
+"x-bapi-recv-window": "15000"
+},
+"body": "{\"category\": \"linear\", \"symbol\": \"ETHUSDT\", \"buyLeverage\": \"10\", \"sellLeverage\": \"10\"}"
+}
+},
+{
+"method": "GET",
+"url": "https://api.bybit.com/v5/account/wallet-balance?accountType=UNIFIED&coin=USDT",
+"headers": {
+"Content-Type": "application/json",
+"X-BAPI-API-KEY": "BYBITKEY123456789",
+"X-BAPI-SIGN": "fa9306bfef7f11116d8aac5602e50aa6643c5d1b3509f4c3b1b02f61c47aeb4b",
+"X-BAPI-SIGN-TYPE": "2",
+"X-BAPI-TIMESTAMP": "1767225600000",
+"X-BAPI-RECV-WINDOW": "15000"
+},
+"body": null,
+"hdrs": {
+"accept": "application/json",
+"content-type": "application/json",
+"x-bapi-api-key": "BYBITKEY123456789",
+"x-bapi-sign": "fa9306bfef7f11116d8aac5602e50aa6643c5d1b3509f4c3b1b02f61c47aeb4b",
+"x-bapi-sign-type": "2",
+"x-bapi-timestamp": "1767225600000",
+"x-bapi-recv-window": "15000"
+},
+"wire": {
+"method": "GET",
+"target": "/v5/account/wallet-balance?accountType=UNIFIED&coin=USDT",
+"headers": {
+"accept": "application/json",
+"content-type": "application/json",
+"x-bapi-api-key": "BYBITKEY123456789",
+"x-bapi-sign": "fa9306bfef7f11116d8aac5602e50aa6643c5d1b3509f4c3b1b02f61c47aeb4b",
+"x-bapi-sign-type": "2",
+"x-bapi-timestamp": "1767225600000",
+"x-bapi-recv-window": "15000"
+},
+"body": null
+}
+},
+{
+"method": "GET",
+"url": "https://api.bybit.com/v5/market/instruments-info?category=linear&symbol=ETHUSDT",
+"headers": {
+"Content-Type": "application/json"
+},
+"body": null,
+"hdrs": {
+"accept": "application/json",
+"content-type": "application/json"
+},
+"wire": {
+"method": "GET",
+"target": "/v5/market/instruments-info?category=linear&symbol=ETHUSDT",
+"headers": {
+"accept": "application/json",
+"content-type": "application/json"
+},
+"body": null
+}
+},
+{
+"method": "GET",
+"url": "https://api.bybit.com/v5/account/wallet-balance?accountType=UNIFIED&coin=USDT",
+"headers": {
+"Content-Type": "application/json",
+"X-BAPI-API-KEY": "BYBITKEY123456789",
+"X-BAPI-SIGN": "fa9306bfef7f11116d8aac5602e50aa6643c5d1b3509f4c3b1b02f61c47aeb4b",
+"X-BAPI-SIGN-TYPE": "2",
+"X-BAPI-TIMESTAMP": "1767225600000",
+"X-BAPI-RECV-WINDOW": "15000"
+},
+"body": null,
+"hdrs": {
+"accept": "application/json",
+"content-type": "application/json",
+"x-bapi-api-key": "BYBITKEY123456789",
+"x-bapi-sign": "fa9306bfef7f11116d8aac5602e50aa6643c5d1b3509f4c3b1b02f61c47aeb4b",
+"x-bapi-sign-type": "2",
+"x-bapi-timestamp": "1767225600000",
+"x-bapi-recv-window": "15000"
+},
+"wire": {
+"method": "GET",
+"target": "/v5/account/wallet-balance?accountType=UNIFIED&coin=USDT",
+"headers": {
+"accept": "application/json",
+"content-type": "application/json",
+"x-bapi-api-key": "BYBITKEY123456789",
+"x-bapi-sign": "fa9306bfef7f11116d8aac5602e50aa6643c5d1b3509f4c3b1b02f61c47aeb4b",
+"x-bapi-sign-type": "2",
+"x-bapi-timestamp": "1767225600000",
+"x-bapi-recv-window": "15000"
+},
+"body": null
+}
+},
+{
+"method": "POST",
+"url": "https://api.bybit.com/v5/order/create",
+"headers": {
+"Content-Type": "application/json",
+"X-BAPI-API-KEY": "BYBITKEY123456789",
+"X-BAPI-SIGN": "4dfedd6aff33991218c0b26f2b5c0b12e7d5f4745447c3f50b1611cdd7a2f1a9",
+"X-BAPI-SIGN-TYPE": "2",
+"X-BAPI-TIMESTAMP": "1767225600000",
+"X-BAPI-RECV-WINDOW": "15000"
+},
+"body": "{\"category\": \"linear\", \"symbol\": \"ETHUSDT\", \"side\": \"Sell\", \"orderType\": \"Limit\", \"price\": \"3010.0\", \"timeInForce\": \"GTC\", \"qty\": \"0.083\", \"positionIdx\": 0, \"stopLoss\": \"3080.0\", \"slTriggerBy\": \"MarkPrice\"}",
+"hdrs": {
+"accept": "application/json",
+"content-type": "application/json",
+"x-bapi-api-key": "BYBITKEY123456789",
+"x-bapi-sign": "4dfedd6aff33991218c0b26f2b5c0b12e7d5f4745447c3f50b1611cdd7a2f1a9",
+"x-bapi-sign-type": "2",
+"x-bapi-timestamp": "1767225600000",
+"x-bapi-recv-window": "15000"
+},
+"wire": {
+"method": "POST",
+"target": "/v5/order/create",
+"headers": {
+"accept": "application/json",
+"content-type": "application/json",
+"x-bapi-api-key": "BYBITKEY123456789",
+"x-bapi-sign": "4dfedd6aff33991218c0b26f2b5c0b12e7d5f4745447c3f50b1611cdd7a2f1a9",
+"x-bapi-sign-type": "2",
+"x-bapi-timestamp": "1767225600000",
+"x-bapi-recv-window": "15000"
+},
+"body": "{\"category\": \"linear\", \"symbol\": \"ETHUSDT\", \"side\": \"Sell\", \"orderType\": \"Limit\", \"price\": \"3010.0\", \"timeInForce\": \"GTC\", \"qty\": \"0.083\", \"positionIdx\": 0, \"stopLoss\": \"3080.0\", \"slTriggerBy\": \"MarkPrice\"}"
+}
+},
+{
+"method": "POST",
+"url": "https://api.bybit.com/v5/order/create",
+"headers": {
+"Content-Type": "application/json",
+"X-BAPI-API-KEY": "BYBITKEY123456789",
+"X-BAPI-SIGN": "75c31f2f3b6cf8111910409d2bb90082b2bf2a5cba9a765c4f4907c8a8440bd5",
+"X-BAPI-SIGN-TYPE": "2",
+"X-BAPI-TIMESTAMP": "1767225600000",
+"X-BAPI-RECV-WINDOW": "15000"
+},
+"body": "{\"category\": \"linear\", \"symbol\": \"ETHUSDT\", \"side\": \"Sell\", \"orderType\": \"Limit\", \"price\": \"3030.0\", \"timeInForce\": \"GTC\", \"qty\": \"0.083\", \"positionIdx\": 0, \"stopLoss\": \"3080.0\", \"slTriggerBy\": \"MarkPrice\"}",
+"hdrs": {
+"accept": "application/json",
+"content-type": "application/json",
+"x-bapi-api-key": "BYBITKEY123456789",
+"x-bapi-sign": "75c31f2f3b6cf8111910409d2bb90082b2bf2a5cba9a765c4f4907c8a8440bd5",
+"x-bapi-sign-type": "2",
+"x-bapi-timestamp": "1767225600000",
+"x-bapi-recv-window": "15000"
+},
+"wire": {
+"method": "POST",
+"target": "/v5/order/create",
+"headers": {
+"accept": "application/json",
+"content-type": "application/json",
+"x-bapi-api-key": "BYBITKEY123456789",
+"x-bapi-sign": "75c31f2f3b6cf8111910409d2bb90082b2bf2a5cba9a765c4f4907c8a8440bd5",
+"x-bapi-sign-type": "2",
+"x-bapi-timestamp": "1767225600000",
+"x-bapi-recv-window": "15000"
+},
+"body": "{\"category\": \"linear\", \"symbol\": \"ETHUSDT\", \"side\": \"Sell\", \"orderType\": \"Limit\", \"price\": \"3030.0\", \"timeInForce\": \"GTC\", \"qty\": \"0.083\", \"positionIdx\": 0, \"stopLoss\": \"3080.0\", \"slTriggerBy\": \"MarkPrice\"}"
+}
+},
+{
+"method": "GET",
+"url": "https://api.bybit.com/v5/position/list?category=linear&symbol=ETHUSDT",
+"headers": {
+"Content-Type": "application/json",
+"X-BAPI-API-KEY": "BYBITKEY123456789",
+"X-BAPI-SIGN": "2a4410ca97bd4f83f7327422239c83a6b583fc87b5baa7a3e316a69fae7eaf80",
+"X-BAPI-SIGN-TYPE": "2",
+"X-BAPI-TIMESTAMP": "1767225600000",
+"X-BAPI-RECV-WINDOW": "15000"
+},
+"body": null,
+"hdrs": {
+"accept": "application/json",
+"content-type": "application/json",
+"x-bapi-api-key": "BYBITKEY123456789",
+"x-bapi-sign": "2a4410ca97bd4f83f7327422239c83a6b583fc87b5baa7a3e316a69fae7eaf80",
+"x-bapi-sign-type": "2",
+"x-bapi-timestamp": "1767225600000",
+"x-bapi-recv-window": "15000"
+},
+"wire": {
+"method": "GET",
+"target": "/v5/position/list?category=linear&symbol=ETHUSDT",
+"headers": {
+"accept": "application/json",
+"content-type": "application/json",
+"x-bapi-api-key": "BYBITKEY123456789",
+"x-bapi-sign": "2a4410ca97bd4f83f7327422239c83a6b583fc87b5baa7a3e316a69fae7eaf80",
+"x-bapi-sign-type": "2",
+"x-bapi-timestamp": "1767225600000",
+"x-bapi-recv-window": "15000"
+},
+"body": null
+}
+},
+{
+"method": "GET",
+"url": "https://api.bybit.com/v5/position/list?category=linear&symbol=ETHUSDT",
+"headers": {
+"Content-Type": "application/json",
+"X-BAPI-API-KEY": "BYBITKEY123456789",
+"X-BAPI-SIGN": "2a4410ca97bd4f83f7327422239c83a6b583fc87b5baa7a3e316a69fae7eaf80",
+"X-BAPI-SIGN-TYPE": "2",
+"X-BAPI-TIMESTAMP": "1767225600000",
+"X-BAPI-RECV-WINDOW": "15000"
+},
+"body": null,
+"hdrs": {
+"accept": "application/json",
+"content-type": "application/json",
+"x-bapi-api-key": "BYBITKEY123456789",
+"x-bapi-sign": "2a4410ca97bd4f83f7327422239c83a6b583fc87b5baa7a3e316a69fae7eaf80",
+"x-bapi-sign-type": "2",
+"x-bapi-timestamp": "1767225600000",
+"x-bapi-recv-window": "15000"
+},
+"wire": {
+"method": "GET",
+"target": "/v5/position/list?category=linear&symbol=ETHUSDT",
+"headers": {
+"accept": "application/json",
+"content-type": "application/json",
+"x-bapi-api-key": "BYBITKEY123456789",
+"x-bapi-sign": "2a4410ca97bd4f83f7327422239c83a6b583fc87b5baa7a3e316a69fae7eaf80",
+"x-bapi-sign-type": "2",
+"x-bapi-timestamp": "1767225600000",
+"x-bapi-recv-window": "15000"
+},
+"body": null
+}
+},
+{
+"method": "POST",
+"url": "https://api.bybit.com/v5/order/create",
+"headers": {
+"Content-Type": "application/json",
+"X-BAPI-API-KEY": "BYBITKEY123456789",
+"X-BAPI-SIGN": "486289911f41072ae62ee14dbb82b69a81e63de59b87a93c825c121283457fef",
+"X-BAPI-SIGN-TYPE": "2",
+"X-BAPI-TIMESTAMP": "1767225600000",
+"X-BAPI-RECV-WINDOW": "15000"
+},
+"body": "{\"category\": \"linear\", \"symbol\": \"ETHUSDT\", \"side\": \"Buy\", \"orderType\": \"Limit\", \"qty\": \"0.166\", \"price\": \"2950.0\", \"reduceOnly\": true, \"timeInForce\": \"GTC\", \"positionIdx\": 0}",
+"hdrs": {
+"accept": "application/json",
+"content-type": "application/json",
+"x-bapi-api-key": "BYBITKEY123456789",
+"x-bapi-sign": "486289911f41072ae62ee14dbb82b69a81e63de59b87a93c825c121283457fef",
+"x-bapi-sign-type": "2",
+"x-bapi-timestamp": "1767225600000",
+"x-bapi-recv-window": "15000"
+},
+"wire": {
+"method": "POST",
+"target": "/v5/order/create",
+"headers": {
+"accept": "application/json",
+"content-type": "application/json",
+"x-bapi-api-key": "BYBITKEY123456789",
+"x-bapi-sign": "486289911f41072ae62ee14dbb82b69a81e63de59b87a93c825c121283457fef",
+"x-bapi-sign-type": "2",
+"x-bapi-timestamp": "1767225600000",
+"x-bapi-recv-window": "15000"
+},
+"body": "{\"category\": \"linear\", \"symbol\": \"ETHUSDT\", \"side\": \"Buy\", \"orderType\": \"Limit\", \"qty\": \"0.166\", \"price\": \"2950.0\", \"reduceOnly\": true, \"timeInForce\": \"GTC\", \"positionIdx\": 0}"
+}
+}
+],
+"sleeps": [
+0.3
+],
+"clock_end": 1767225600.3,
+"markers": [],
+"saved": {
+"hedge_saved": [],
+"auth_reset": [],
+"events": [],
+"metrics": [
+"trade_placed",
+"trade_placement_latency_ms",
+"sl_tp_attached"
+]
+},
+"final": {
+"hedge": {},
+"account_type": {
+"BYBITKEY123456789": "UNIFIED"
+},
+"delisted": [],
+"fail_count": {},
+"bybit_offset": 0,
+"binance_base": "https://fapi.binance.com",
+"binance_offset": 0,
+"bingx_offset": 0,
+"okx_offset": 0
+},
+"full_metrics": [
+[
+"trade_placed",
+1.0,
+{
+"symbol": "ETH-USDT-SWAP",
+"direction": "SHORT",
+"exchange": "bybit_split"
+}
+],
+[
+"trade_placement_latency_ms",
+299.0,
+{
+"symbol": "ETH-USDT-SWAP",
+"direction": "SHORT",
+"exchange": "bybit_split"
+}
+],
+[
+"sl_tp_attached",
+1.0,
+{
+"symbol": "ETH-USDT-SWAP",
+"direction": "SHORT",
+"exchange": "bybit_split"
+}
+]
+],
+"full_events": []
+}
+},
+{
+"scenario": {
+"name": "fz_08_pt_long_limit_atomic_ladder_mut",
+"exchange": "bybit",
+"call": "place_trade",
+"args": [
+"BYBITKEY123456789",
+"bybit-secret-xyz",
+"BTC-USDT-SWAP",
+"LONG",
+87000.5,
+86000.0,
+88500.0,
+1.0,
+10
+],
+"kwargs": {
+"tp2": 89500.0,
+"tp3": 90500.0,
+"trade_id": "tr-1",
+"user_id": 42
+},
+"routes": [
+{
+"method": "GET",
+"path": "/v5/market/time",
+"responses": [
+{
+"text": "{\"retCode\": 0, \"retMsg\": \"OK\", \"result\": {\"timeSecond\": \"1767225600\", \"timeNano\": \"1767225600250000000\"}}"
+}
+]
+},
+{
+"method": "POST",
+"path": "/v5/position/switch-isolated",
+"responses": [
+{
+"text": "{\"retCode\": 110026, \"retMsg\": \"Cross/isolated margin mode is not modified\", \"result\": {}}"
+}
+]
+},
+{
+"method": "POST",
+"path": "/v5/position/set-leverage",
+"responses": [
+{
+"text": "{\"retCode\": 110043, \"retMsg\": \"leverage not modified\", \"result\": {}}"
+}
+]
+},
+{
+"method": "GET",
+"path": "/v5/account/wallet-balance",
+"responses": [
+{
+"text": "{\"retCode\": 0, \"retMsg\": \"OK\", \"result\": {\"list\": [{\"totalEquity\": \"1000.5\", \"totalAvailableBalance\": \"800.25\", \"totalWalletBalance\": \"1000.5\", \"totalUnrealisedPnl\": \"1.5\", \"coin\": [{\"coin\": \"USDT\", \"walletBalance\": \"1000.5\", \"equity\": \"1000.5\", \"availableBalance\": \"\", \"availableToWithdraw\": \"\"}]}]}}"
+}
+]
+},
+{
+"method": "GET",
+"path": "/v5/market/instruments-info",
+"responses": [
+{
+"text": "{\"retCode\": 0, \"retMsg\": \"OK\", \"result\": {\"list\": [{\"lotSizeFilter\": {\"qtyStep\": \"0.001\"}, \"priceFilter\": {\"tickSize\": \"0.1\"}}]}}"
+}
+]
+},
+{
+"method": "POST",
+"path": "/v5/order/create",
+"responses": [
+{
+"text": "{\"retCode\": 0, \"retMsg\": \"OK\", \"result\": {\"orderId\": \"ord-entry\", \"orderLinkId\": \"\"}}"
+},
+{
+"text": "{\"retCode\": 0, \"retMsg\": \"OK\", \"result\": {\"orderId\": \"ord-tp2\", \"orderLinkId\": \"\"}}"
+},
+{
+"text": "{\"retCode\": 0, \"retMsg\": null, \"result\": {\"orderId\": \"ord-tp3\", \"orderLinkId\": \"\"}}"
+}
+]
+},
+{
+"method": "GET",
+"path": "/v5/position/list",
+"responses": [
+{
+"text": "{\"retCode\": 0, \"retMsg\": \"OK\", \"result\": {\"list\": [{\"symbol\": \"BTCUSDT\", \"side\": \"Buy\", \"size\": \"0.012\", \"positionIdx\": 0, \"avgPrice\": \"87000.5\", \"markPrice\": \"87000.5\", \"stopLoss\": \"\"}]}}"
+}
+]
+}
+],
+"state": {},
+"mode": "wire",
+"random": [
+0.6397765666111452,
+0.6657767007948976,
+0.5455137677875262,
+0.3216877850071945,
+0.8597338748045165,
+0.09017794135738988
+],
+"clock": 1767225600.0
+},
+"expected": {
+"name": "fz_08_pt_long_limit_atomic_ladder_mut",
+"result": {
+"ok": true,
+"order_id": "ord-entry",
+"qty": "0.010",
+"notional": 870.005,
+"balance": 1000.5,
+"symbol": "BTCUSDT",
+"side": "Buy",
+"leverage": 10,
+"pos_idx": 0,
+"tp_placed": true,
+"order_type": "Limit",
+"avg_price": 0.0,
+"leverage_downgraded": false,
+"leverage_requested": 10,
+"leverage_applied": 10,
+"risk_boosted": false,
+"risk_requested_pct": 1.0,
+"risk_actual_pct": 1.0
+},
+"requests": [
+{
+"method": "GET",
+"url": "https://api.bybit.com/v5/market/time",
+"headers": {},
+"body": null,
+"hdrs": {},
+"wire": {
+"method": "GET",
+"target": "/v5/market/time",
+"headers": {
+"accept": "*/*"
+},
+"body": null
+}
+},
+{
+"method": "POST",
+"url": "https://api.bybit.com/v5/position/switch-isolated",
+"headers": {
+"Content-Type": "application/json",
+"X-BAPI-API-KEY": "BYBITKEY123456789",
+"X-BAPI-SIGN": "a63eb17cd78b2be7a89cc07d655e1b447750800ff2baa71ddd4998cbcaf3e00e",
+"X-BAPI-SIGN-TYPE": "2",
+"X-BAPI-TIMESTAMP": "1767225600000",
+"X-BAPI-RECV-WINDOW": "15000"
+},
+"body": "{\"category\": \"linear\", \"symbol\": \"BTCUSDT\", \"tradeMode\": 1}",
+"hdrs": {
+"accept": "application/json",
+"content-type": "application/json",
+"x-bapi-api-key": "BYBITKEY123456789",
+"x-bapi-sign": "a63eb17cd78b2be7a89cc07d655e1b447750800ff2baa71ddd4998cbcaf3e00e",
+"x-bapi-sign-type": "2",
+"x-bapi-timestamp": "1767225600000",
+"x-bapi-recv-window": "15000"
+},
+"wire": {
+"method": "POST",
+"target": "/v5/position/switch-isolated",
+"headers": {
+"accept": "application/json",
+"content-type": "application/json",
+"x-bapi-api-key": "BYBITKEY123456789",
+"x-bapi-sign": "a63eb17cd78b2be7a89cc07d655e1b447750800ff2baa71ddd4998cbcaf3e00e",
+"x-bapi-sign-type": "2",
+"x-bapi-timestamp": "1767225600000",
+"x-bapi-recv-window": "15000"
+},
+"body": "{\"category\": \"linear\", \"symbol\": \"BTCUSDT\", \"tradeMode\": 1}"
+}
+},
+{
+"method": "POST",
+"url": "https://api.bybit.com/v5/position/set-leverage",
+"headers": {
+"Content-Type": "application/json",
+"X-BAPI-API-KEY": "BYBITKEY123456789",
+"X-BAPI-SIGN": "675c3a147187bc2435f79543d0a7850639d843f418f54f0f6ed24fecdb90051a",
+"X-BAPI-SIGN-TYPE": "2",
+"X-BAPI-TIMESTAMP": "1767225600000",
+"X-BAPI-RECV-WINDOW": "15000"
+},
+"body": "{\"category\": \"linear\", \"symbol\": \"BTCUSDT\", \"buyLeverage\": \"10\", \"sellLeverage\": \"10\"}",
+"hdrs": {
+"accept": "application/json",
+"content-type": "application/json",
+"x-bapi-api-key": "BYBITKEY123456789",
+"x-bapi-sign": "675c3a147187bc2435f79543d0a7850639d843f418f54f0f6ed24fecdb90051a",
+"x-bapi-sign-type": "2",
+"x-bapi-timestamp": "1767225600000",
+"x-bapi-recv-window": "15000"
+},
+"wire": {
+"method": "POST",
+"target": "/v5/position/set-leverage",
+"headers": {
+"accept": "application/json",
+"content-type": "application/json",
+"x-bapi-api-key": "BYBITKEY123456789",
+"x-bapi-sign": "675c3a147187bc2435f79543d0a7850639d843f418f54f0f6ed24fecdb90051a",
+"x-bapi-sign-type": "2",
+"x-bapi-timestamp": "1767225600000",
+"x-bapi-recv-window": "15000"
+},
+"body": "{\"category\": \"linear\", \"symbol\": \"BTCUSDT\", \"buyLeverage\": \"10\", \"sellLeverage\": \"10\"}"
+}
+},
+{
+"method": "GET",
+"url": "https://api.bybit.com/v5/account/wallet-balance?accountType=UNIFIED&coin=USDT",
+"headers": {
+"Content-Type": "application/json",
+"X-BAPI-API-KEY": "BYBITKEY123456789",
+"X-BAPI-SIGN": "fa9306bfef7f11116d8aac5602e50aa6643c5d1b3509f4c3b1b02f61c47aeb4b",
+"X-BAPI-SIGN-TYPE": "2",
+"X-BAPI-TIMESTAMP": "1767225600000",
+"X-BAPI-RECV-WINDOW": "15000"
+},
+"body": null,
+"hdrs": {
+"accept": "application/json",
+"content-type": "application/json",
+"x-bapi-api-key": "BYBITKEY123456789",
+"x-bapi-sign": "fa9306bfef7f11116d8aac5602e50aa6643c5d1b3509f4c3b1b02f61c47aeb4b",
+"x-bapi-sign-type": "2",
+"x-bapi-timestamp": "1767225600000",
+"x-bapi-recv-window": "15000"
+},
+"wire": {
+"method": "GET",
+"target": "/v5/account/wallet-balance?accountType=UNIFIED&coin=USDT",
+"headers": {
+"accept": "application/json",
+"content-type": "application/json",
+"x-bapi-api-key": "BYBITKEY123456789",
+"x-bapi-sign": "fa9306bfef7f11116d8aac5602e50aa6643c5d1b3509f4c3b1b02f61c47aeb4b",
+"x-bapi-sign-type": "2",
+"x-bapi-timestamp": "1767225600000",
+"x-bapi-recv-window": "15000"
+},
+"body": null
+}
+},
+{
+"method": "GET",
+"url": "https://api.bybit.com/v5/market/instruments-info?category=linear&symbol=BTCUSDT",
+"headers": {
+"Content-Type": "application/json"
+},
+"body": null,
+"hdrs": {
+"accept": "application/json",
+"content-type": "application/json"
+},
+"wire": {
+"method": "GET",
+"target": "/v5/market/instruments-info?category=linear&symbol=BTCUSDT",
+"headers": {
+"accept": "application/json",
+"content-type": "application/json"
+},
+"body": null
+}
+},
+{
+"method": "GET",
+"url": "https://api.bybit.com/v5/account/wallet-balance?accountType=UNIFIED&coin=USDT",
+"headers": {
+"Content-Type": "application/json",
+"X-BAPI-API-KEY": "BYBITKEY123456789",
+"X-BAPI-SIGN": "fa9306bfef7f11116d8aac5602e50aa6643c5d1b3509f4c3b1b02f61c47aeb4b",
+"X-BAPI-SIGN-TYPE": "2",
+"X-BAPI-TIMESTAMP": "1767225600000",
+"X-BAPI-RECV-WINDOW": "15000"
+},
+"body": null,
+"hdrs": {
+"accept": "application/json",
+"content-type": "application/json",
+"x-bapi-api-key": "BYBITKEY123456789",
+"x-bapi-sign": "fa9306bfef7f11116d8aac5602e50aa6643c5d1b3509f4c3b1b02f61c47aeb4b",
+"x-bapi-sign-type": "2",
+"x-bapi-timestamp": "1767225600000",
+"x-bapi-recv-window": "15000"
+},
+"wire": {
+"method": "GET",
+"target": "/v5/account/wallet-balance?accountType=UNIFIED&coin=USDT",
+"headers": {
+"accept": "application/json",
+"content-type": "application/json",
+"x-bapi-api-key": "BYBITKEY123456789",
+"x-bapi-sign": "fa9306bfef7f11116d8aac5602e50aa6643c5d1b3509f4c3b1b02f61c47aeb4b",
+"x-bapi-sign-type": "2",
+"x-bapi-timestamp": "1767225600000",
+"x-bapi-recv-window": "15000"
+},
+"body": null
+}
+},
+{
+"method": "POST",
+"url": "https://api.bybit.com/v5/order/create",
+"headers": {
+"Content-Type": "application/json",
+"X-BAPI-API-KEY": "BYBITKEY123456789",
+"X-BAPI-SIGN": "0f068638a6463c3f4b6fd46362e292cd33474eb5f17f73914e8195775a2e49c8",
+"X-BAPI-SIGN-TYPE": "2",
+"X-BAPI-TIMESTAMP": "1767225600000",
+"X-BAPI-RECV-WINDOW": "15000"
+},
+"body": "{\"category\": \"linear\", \"symbol\": \"BTCUSDT\", \"side\": \"Buy\", \"orderType\": \"Limit\", \"timeInForce\": \"GTC\", \"qty\": \"0.010\", \"positionIdx\": 0, \"price\": \"87000.5\", \"takeProfit\": \"88500.0\", \"stopLoss\": \"86000.0\", \"tpslMode\": \"Partial\", \"tpOrderType\": \"Limit\", \"tpLimitPrice\": \"88500.0\", \"tpSize\": \"0.005\", \"slSize\": \"0.010\", \"tpTriggerBy\": \"LastPrice\", \"slTriggerBy\": \"MarkPrice\", \"slOrderType\": \"Market\", \"orderLinkId\": \"chm_cbb6f4d30c08\"}",
+"hdrs": {
+"accept": "application/json",
+"content-type": "application/json",
+"x-bapi-api-key": "BYBITKEY123456789",
+"x-bapi-sign": "0f068638a6463c3f4b6fd46362e292cd33474eb5f17f73914e8195775a2e49c8",
+"x-bapi-sign-type": "2",
+"x-bapi-timestamp": "1767225600000",
+"x-bapi-recv-window": "15000"
+},
+"wire": {
+"method": "POST",
+"target": "/v5/order/create",
+"headers": {
+"accept": "application/json",
+"content-type": "application/json",
+"x-bapi-api-key": "BYBITKEY123456789",
+"x-bapi-sign": "0f068638a6463c3f4b6fd46362e292cd33474eb5f17f73914e8195775a2e49c8",
+"x-bapi-sign-type": "2",
+"x-bapi-timestamp": "1767225600000",
+"x-bapi-recv-window": "15000"
+},
+"body": "{\"category\": \"linear\", \"symbol\": \"BTCUSDT\", \"side\": \"Buy\", \"orderType\": \"Limit\", \"timeInForce\": \"GTC\", \"qty\": \"0.010\", \"positionIdx\": 0, \"price\": \"87000.5\", \"takeProfit\": \"88500.0\", \"stopLoss\": \"86000.0\", \"tpslMode\": \"Partial\", \"tpOrderType\": \"Limit\", \"tpLimitPrice\": \"88500.0\", \"tpSize\": \"0.005\", \"slSize\": \"0.010\", \"tpTriggerBy\": \"LastPrice\", \"slTriggerBy\": \"MarkPrice\", \"slOrderType\": \"Market\", \"orderLinkId\": \"chm_cbb6f4d30c08\"}"
+}
+},
+{
+"method": "GET",
+"url": "https://api.bybit.com/v5/position/list?category=linear&symbol=BTCUSDT",
+"headers": {
+"Content-Type": "application/json",
+"X-BAPI-API-KEY": "BYBITKEY123456789",
+"X-BAPI-SIGN": "3a4d1adb8a08f81956f7f86790fdeddf3a05651e6e5a7d708ed2cd3c28b967a0",
+"X-BAPI-SIGN-TYPE": "2",
+"X-BAPI-TIMESTAMP": "1767225600000",
+"X-BAPI-RECV-WINDOW": "15000"
+},
+"body": null,
+"hdrs": {
+"accept": "application/json",
+"content-type": "application/json",
+"x-bapi-api-key": "BYBITKEY123456789",
+"x-bapi-sign": "3a4d1adb8a08f81956f7f86790fdeddf3a05651e6e5a7d708ed2cd3c28b967a0",
+"x-bapi-sign-type": "2",
+"x-bapi-timestamp": "1767225600000",
+"x-bapi-recv-window": "15000"
+},
+"wire": {
+"method": "GET",
+"target": "/v5/position/list?category=linear&symbol=BTCUSDT",
+"headers": {
+"accept": "application/json",
+"content-type": "application/json",
+"x-bapi-api-key": "BYBITKEY123456789",
+"x-bapi-sign": "3a4d1adb8a08f81956f7f86790fdeddf3a05651e6e5a7d708ed2cd3c28b967a0",
+"x-bapi-sign-type": "2",
+"x-bapi-timestamp": "1767225600000",
+"x-bapi-recv-window": "15000"
+},
+"body": null
+}
+},
+{
+"method": "GET",
+"url": "https://api.bybit.com/v5/position/list?category=linear&symbol=BTCUSDT",
+"headers": {
+"Content-Type": "application/json",
+"X-BAPI-API-KEY": "BYBITKEY123456789",
+"X-BAPI-SIGN": "3a4d1adb8a08f81956f7f86790fdeddf3a05651e6e5a7d708ed2cd3c28b967a0",
+"X-BAPI-SIGN-TYPE": "2",
+"X-BAPI-TIMESTAMP": "1767225600000",
+"X-BAPI-RECV-WINDOW": "15000"
+},
+"body": null,
+"hdrs": {
+"accept": "application/json",
+"content-type": "application/json",
+"x-bapi-api-key": "BYBITKEY123456789",
+"x-bapi-sign": "3a4d1adb8a08f81956f7f86790fdeddf3a05651e6e5a7d708ed2cd3c28b967a0",
+"x-bapi-sign-type": "2",
+"x-bapi-timestamp": "1767225600000",
+"x-bapi-recv-window": "15000"
+},
+"wire": {
+"method": "GET",
+"target": "/v5/position/list?category=linear&symbol=BTCUSDT",
+"headers": {
+"accept": "application/json",
+"content-type": "application/json",
+"x-bapi-api-key": "BYBITKEY123456789",
+"x-bapi-sign": "3a4d1adb8a08f81956f7f86790fdeddf3a05651e6e5a7d708ed2cd3c28b967a0",
+"x-bapi-sign-type": "2",
+"x-bapi-timestamp": "1767225600000",
+"x-bapi-recv-window": "15000"
+},
+"body": null
+}
+},
+{
+"method": "POST",
+"url": "https://api.bybit.com/v5/order/create",
+"headers": {
+"Content-Type": "application/json",
+"X-BAPI-API-KEY": "BYBITKEY123456789",
+"X-BAPI-SIGN": "db5be68f3f4167db99000d6b618f7381a629b34d2193993e7dd6854b90f41205",
+"X-BAPI-SIGN-TYPE": "2",
+"X-BAPI-TIMESTAMP": "1767225600000",
+"X-BAPI-RECV-WINDOW": "15000"
+},
+"body": "{\"category\": \"linear\", \"symbol\": \"BTCUSDT\", \"side\": \"Sell\", \"orderType\": \"Limit\", \"qty\": \"0.002\", \"price\": \"89500.0\", \"reduceOnly\": true, \"timeInForce\": \"GTC\", \"positionIdx\": 0, \"orderLinkId\": \"chm_1e3695aed242\"}",
+"hdrs": {
+"accept": "application/json",
+"content-type": "application/json",
+"x-bapi-api-key": "BYBITKEY123456789",
+"x-bapi-sign": "db5be68f3f4167db99000d6b618f7381a629b34d2193993e7dd6854b90f41205",
+"x-bapi-sign-type": "2",
+"x-bapi-timestamp": "1767225600000",
+"x-bapi-recv-window": "15000"
+},
+"wire": {
+"method": "POST",
+"target": "/v5/order/create",
+"headers": {
+"accept": "application/json",
+"content-type": "application/json",
+"x-bapi-api-key": "BYBITKEY123456789",
+"x-bapi-sign": "db5be68f3f4167db99000d6b618f7381a629b34d2193993e7dd6854b90f41205",
+"x-bapi-sign-type": "2",
+"x-bapi-timestamp": "1767225600000",
+"x-bapi-recv-window": "15000"
+},
+"body": "{\"category\": \"linear\", \"symbol\": \"BTCUSDT\", \"side\": \"Sell\", \"orderType\": \"Limit\", \"qty\": \"0.002\", \"price\": \"89500.0\", \"reduceOnly\": true, \"timeInForce\": \"GTC\", \"positionIdx\": 0, \"orderLinkId\": \"chm_1e3695aed242\"}"
+}
+},
+{
+"method": "POST",
+"url": "https://api.bybit.com/v5/order/create",
+"headers": {
+"Content-Type": "application/json",
+"X-BAPI-API-KEY": "BYBITKEY123456789",
+"X-BAPI-SIGN": "ed1bda3393d1475c73db36660b9682273db804193cd0c553986bc829e2f344b9",
+"X-BAPI-SIGN-TYPE": "2",
+"X-BAPI-TIMESTAMP": "1767225600300",
+"X-BAPI-RECV-WINDOW": "15000"
+},
+"body": "{\"category\": \"linear\", \"symbol\": \"BTCUSDT\", \"side\": \"Sell\", \"orderType\": \"Limit\", \"qty\": \"0.002\", \"price\": \"90500.0\", \"reduceOnly\": true, \"timeInForce\": \"GTC\", \"positionIdx\": 0, \"orderLinkId\": \"chm_72ac223d4c32\"}",
+"hdrs": {
+"accept": "application/json",
+"content-type": "application/json",
+"x-bapi-api-key": "BYBITKEY123456789",
+"x-bapi-sign": "ed1bda3393d1475c73db36660b9682273db804193cd0c553986bc829e2f344b9",
+"x-bapi-sign-type": "2",
+"x-bapi-timestamp": "1767225600300",
+"x-bapi-recv-window": "15000"
+},
+"wire": {
+"method": "POST",
+"target": "/v5/order/create",
+"headers": {
+"accept": "application/json",
+"content-type": "application/json",
+"x-bapi-api-key": "BYBITKEY123456789",
+"x-bapi-sign": "ed1bda3393d1475c73db36660b9682273db804193cd0c553986bc829e2f344b9",
+"x-bapi-sign-type": "2",
+"x-bapi-timestamp": "1767225600300",
+"x-bapi-recv-window": "15000"
+},
+"body": "{\"category\": \"linear\", \"symbol\": \"BTCUSDT\", \"side\": \"Sell\", \"orderType\": \"Limit\", \"qty\": \"0.002\", \"price\": \"90500.0\", \"reduceOnly\": true, \"timeInForce\": \"GTC\", \"positionIdx\": 0, \"orderLinkId\": \"chm_72ac223d4c32\"}"
+}
+}
+],
+"sleeps": [
+0.3,
+0.3
+],
+"clock_end": 1767225600.6,
+"markers": [],
+"saved": {
+"hedge_saved": [],
+"auth_reset": [],
+"events": [
+[
+"tr-1",
+"sl_attempt"
+],
+[
+"tr-1",
+"sl_response"
+]
+],
+"metrics": [
+"trade_placed",
+"trade_placement_latency_ms",
+"sl_tp_attached"
+]
+},
+"final": {
+"hedge": {},
+"account_type": {
+"BYBITKEY123456789": "UNIFIED"
+},
+"delisted": [],
+"fail_count": {},
+"bybit_offset": 250,
+"binance_base": "https://fapi.binance.com",
+"binance_offset": 0,
+"bingx_offset": 0,
+"okx_offset": 0
+},
+"full_metrics": [
+[
+"trade_placed",
+1.0,
+{
+"symbol": "BTC-USDT-SWAP",
+"direction": "LONG",
+"exchange": "bybit"
+}
+],
+[
+"trade_placement_latency_ms",
+599.0,
+{
+"symbol": "BTC-USDT-SWAP",
+"direction": "LONG",
+"exchange": "bybit"
+}
+],
+[
+"sl_tp_attached",
+1.0,
+{
+"symbol": "BTC-USDT-SWAP",
+"direction": "LONG",
+"exchange": "bybit"
+}
+]
+],
+"full_events": [
+[
+"tr-1",
+"sl_attempt",
+{
+"exchange": "bybit",
+"sl_price": 86000.0,
+"atomic": true
+}
+],
+[
+"tr-1",
+"sl_response",
+{
+"exchange": "bybit",
+"ok": true,
+"order_id": "ord-entry",
+"error": ""
+}
+]
+]
+}
+},
+{
+"scenario": {
+"name": "fz_09_pt_long_limit_atomic_ladder_mut",
+"exchange": "bybit",
+"call": "place_trade",
+"args": [
+"BYBITKEY123456789",
+"bybit-secret-xyz",
+"BTC-USDT-SWAP",
+"LONG",
+87000.5,
+86000.0,
+88500.0,
+1.0,
+10
+],
+"kwargs": {
+"tp2": 89500.0,
+"tp3": 90500.0,
+"trade_id": "tr-1",
+"user_id": 42
+},
+"routes": [
+{
+"method": "GET",
+"path": "/v5/market/time",
+"responses": [
+{
+"text": "{\"retCode\": 0, \"retMsg\": \"OK\", \"result\": {\"timeSecond\": \"1767225600\", \"timeNano\": \"1767225600250000000\"}}"
+}
+]
+},
+{
+"method": "POST",
+"path": "/v5/position/switch-isolated",
+"responses": [
+{
+"text": "{\"retCode\": 110026, \"retMsg\": \"Cross/isolated margin mode is not modified\", \"result\": {}}"
+}
+]
+},
+{
+"method": "POST",
+"path": "/v5/position/set-leverage",
+"responses": [
+{
+"text": "{\"retCode\": 110043, \"retMsg\": \"leverage not modified\", \"result\": {}}"
+}
+]
+},
+{
+"method": "GET",
+"path": "/v5/account/wallet-balance",
+"responses": [
+{
+"text": "{\"retCode\": 0, \"retMsg\": \"OK\", \"result\": {\"list\": [{\"totalEquity\": \"1000.5\", \"totalAvailableBalance\": \"800.25\", \"totalWalletBalance\": \"1000.5\", \"totalUnrealisedPnl\": \"1.5\", \"coin\": [{\"coin\": \"null\", \"walletBalance\": \"1000.5\", \"equity\": \"1000.5\", \"availableBalance\": \"\", \"availableToWithdraw\": \"\"}]}]}}"
+}
+]
+},
+{
+"method": "GET",
+"path": "/v5/market/instruments-info",
+"responses": [
+{
+"text": "{\"retCode\": 0, \"retMsg\": \"OK\", \"result\": {\"list\": [{\"lotSizeFilter\": {\"qtyStep\": \"0.001\"}, \"priceFilter\": {\"tickSize\": \"0.1\"}}]}}"
+}
+]
+},
+{
+"method": "POST",
+"path": "/v5/order/create",
+"responses": [
+{
+"text": "{\"retCode\": 0, \"retMsg\": \"OK\", \"result\": {\"orderId\": \"ord-entry\", \"orderLinkId\": \"\"}}"
+},
+{
+"text": "{\"retCode\": 0, \"retMsg\": \"OK\", \"result\": {\"orderId\": \"ord-tp2\", \"orderLinkId\": \"\"}}"
+},
+{
+"text": "{\"retCode\": 0, \"retMsg\": \"OK\", \"result\": {\"orderId\": \"ord-tp3\", \"orderLinkId\": \"\"}}"
+}
+]
+},
+{
+"method": "GET",
+"path": "/v5/position/list",
+"responses": [
+{
+"text": "{\"retCode\": 0, \"retMsg\": \"OK\", \"result\": {\"list\": [{\"symbol\": \"BTCUSDT\", \"side\": \"Buy\", \"size\": \"0.012\", \"positionIdx\": 0, \"avgPrice\": \"87000.5\", \"markPrice\": \"87000.5\", \"stopLoss\": \"\"}]}}"
+}
+]
+}
+],
+"state": {},
+"mode": "wire",
+"random": [
+0.5807267674078862,
+0.9445540719014902,
+0.495118806749681,
+0.09748537337152663,
+0.2116952391953626,
+0.20624886067394554
+],
+"clock": 1767225600.0
+},
+"expected": {
+"name": "fz_09_pt_long_limit_atomic_ladder_mut",
+"result": {
+"ok": false,
+"error": "❌ Недостаточно свободной маржи\n\nНужно: $91.35\nДоступно: $0.00\n\n▸ Закрой часть открытых позиций\n▸ Уменьши leverage (сейчас ×10)\n▸ Уменьши risk (сейчас 1.0%)",
+"insufficient_margin": true
+},
+"requests": [
+{
+"method": "GET",
+"url": "https://api.bybit.com/v5/market/time",
+"headers": {},
+"body": null,
+"hdrs": {},
+"wire": {
+"method": "GET",
+"target": "/v5/market/time",
+"headers": {
+"accept": "*/*"
+},
+"body": null
+}
+},
+{
+"method": "POST",
+"url": "https://api.bybit.com/v5/position/switch-isolated",
+"headers": {
+"Content-Type": "application/json",
+"X-BAPI-API-KEY": "BYBITKEY123456789",
+"X-BAPI-SIGN": "a63eb17cd78b2be7a89cc07d655e1b447750800ff2baa71ddd4998cbcaf3e00e",
+"X-BAPI-SIGN-TYPE": "2",
+"X-BAPI-TIMESTAMP": "1767225600000",
+"X-BAPI-RECV-WINDOW": "15000"
+},
+"body": "{\"category\": \"linear\", \"symbol\": \"BTCUSDT\", \"tradeMode\": 1}",
+"hdrs": {
+"accept": "application/json",
+"content-type": "application/json",
+"x-bapi-api-key": "BYBITKEY123456789",
+"x-bapi-sign": "a63eb17cd78b2be7a89cc07d655e1b447750800ff2baa71ddd4998cbcaf3e00e",
+"x-bapi-sign-type": "2",
+"x-bapi-timestamp": "1767225600000",
+"x-bapi-recv-window": "15000"
+},
+"wire": {
+"method": "POST",
+"target": "/v5/position/switch-isolated",
+"headers": {
+"accept": "application/json",
+"content-type": "application/json",
+"x-bapi-api-key": "BYBITKEY123456789",
+"x-bapi-sign": "a63eb17cd78b2be7a89cc07d655e1b447750800ff2baa71ddd4998cbcaf3e00e",
+"x-bapi-sign-type": "2",
+"x-bapi-timestamp": "1767225600000",
+"x-bapi-recv-window": "15000"
+},
+"body": "{\"category\": \"linear\", \"symbol\": \"BTCUSDT\", \"tradeMode\": 1}"
+}
+},
+{
+"method": "POST",
+"url": "https://api.bybit.com/v5/position/set-leverage",
+"headers": {
+"Content-Type": "application/json",
+"X-BAPI-API-KEY": "BYBITKEY123456789",
+"X-BAPI-SIGN": "675c3a147187bc2435f79543d0a7850639d843f418f54f0f6ed24fecdb90051a",
+"X-BAPI-SIGN-TYPE": "2",
+"X-BAPI-TIMESTAMP": "1767225600000",
+"X-BAPI-RECV-WINDOW": "15000"
+},
+"body": "{\"category\": \"linear\", \"symbol\": \"BTCUSDT\", \"buyLeverage\": \"10\", \"sellLeverage\": \"10\"}",
+"hdrs": {
+"accept": "application/json",
+"content-type": "application/json",
+"x-bapi-api-key": "BYBITKEY123456789",
+"x-bapi-sign": "675c3a147187bc2435f79543d0a7850639d843f418f54f0f6ed24fecdb90051a",
+"x-bapi-sign-type": "2",
+"x-bapi-timestamp": "1767225600000",
+"x-bapi-recv-window": "15000"
+},
+"wire": {
+"method": "POST",
+"target": "/v5/position/set-leverage",
+"headers": {
+"accept": "application/json",
+"content-type": "application/json",
+"x-bapi-api-key": "BYBITKEY123456789",
+"x-bapi-sign": "675c3a147187bc2435f79543d0a7850639d843f418f54f0f6ed24fecdb90051a",
+"x-bapi-sign-type": "2",
+"x-bapi-timestamp": "1767225600000",
+"x-bapi-recv-window": "15000"
+},
+"body": "{\"category\": \"linear\", \"symbol\": \"BTCUSDT\", \"buyLeverage\": \"10\", \"sellLeverage\": \"10\"}"
+}
+},
+{
+"method": "GET",
+"url": "https://api.bybit.com/v5/account/wallet-balance?accountType=UNIFIED&coin=USDT",
+"headers": {
+"Content-Type": "application/json",
+"X-BAPI-API-KEY": "BYBITKEY123456789",
+"X-BAPI-SIGN": "fa9306bfef7f11116d8aac5602e50aa6643c5d1b3509f4c3b1b02f61c47aeb4b",
+"X-BAPI-SIGN-TYPE": "2",
+"X-BAPI-TIMESTAMP": "1767225600000",
+"X-BAPI-RECV-WINDOW": "15000"
+},
+"body": null,
+"hdrs": {
+"accept": "application/json",
+"content-type": "application/json",
+"x-bapi-api-key": "BYBITKEY123456789",
+"x-bapi-sign": "fa9306bfef7f11116d8aac5602e50aa6643c5d1b3509f4c3b1b02f61c47aeb4b",
+"x-bapi-sign-type": "2",
+"x-bapi-timestamp": "1767225600000",
+"x-bapi-recv-window": "15000"
+},
+"wire": {
+"method": "GET",
+"target": "/v5/account/wallet-balance?accountType=UNIFIED&coin=USDT",
+"headers": {
+"accept": "application/json",
+"content-type": "application/json",
+"x-bapi-api-key": "BYBITKEY123456789",
+"x-bapi-sign": "fa9306bfef7f11116d8aac5602e50aa6643c5d1b3509f4c3b1b02f61c47aeb4b",
+"x-bapi-sign-type": "2",
+"x-bapi-timestamp": "1767225600000",
+"x-bapi-recv-window": "15000"
+},
+"body": null
+}
+},
+{
+"method": "GET",
+"url": "https://api.bybit.com/v5/market/instruments-info?category=linear&symbol=BTCUSDT",
+"headers": {
+"Content-Type": "application/json"
+},
+"body": null,
+"hdrs": {
+"accept": "application/json",
+"content-type": "application/json"
+},
+"wire": {
+"method": "GET",
+"target": "/v5/market/instruments-info?category=linear&symbol=BTCUSDT",
+"headers": {
+"accept": "application/json",
+"content-type": "application/json"
+},
+"body": null
+}
+},
+{
+"method": "GET",
+"url": "https://api.bybit.com/v5/account/wallet-balance?accountType=UNIFIED&coin=USDT",
+"headers": {
+"Content-Type": "application/json",
+"X-BAPI-API-KEY": "BYBITKEY123456789",
+"X-BAPI-SIGN": "fa9306bfef7f11116d8aac5602e50aa6643c5d1b3509f4c3b1b02f61c47aeb4b",
+"X-BAPI-SIGN-TYPE": "2",
+"X-BAPI-TIMESTAMP": "1767225600000",
+"X-BAPI-RECV-WINDOW": "15000"
+},
+"body": null,
+"hdrs": {
+"accept": "application/json",
+"content-type": "application/json",
+"x-bapi-api-key": "BYBITKEY123456789",
+"x-bapi-sign": "fa9306bfef7f11116d8aac5602e50aa6643c5d1b3509f4c3b1b02f61c47aeb4b",
+"x-bapi-sign-type": "2",
+"x-bapi-timestamp": "1767225600000",
+"x-bapi-recv-window": "15000"
+},
+"wire": {
+"method": "GET",
+"target": "/v5/account/wallet-balance?accountType=UNIFIED&coin=USDT",
+"headers": {
+"accept": "application/json",
+"content-type": "application/json",
+"x-bapi-api-key": "BYBITKEY123456789",
+"x-bapi-sign": "fa9306bfef7f11116d8aac5602e50aa6643c5d1b3509f4c3b1b02f61c47aeb4b",
+"x-bapi-sign-type": "2",
+"x-bapi-timestamp": "1767225600000",
+"x-bapi-recv-window": "15000"
+},
+"body": null
+}
+}
+],
+"sleeps": [],
+"clock_end": 1767225600.0,
+"markers": [
+[
+"WARNING",
+"[MARGIN-PRECHECK]"
+]
+],
+"saved": {
+"hedge_saved": [],
+"auth_reset": [],
+"events": [
+[
+"tr-1",
+"sl_attempt"
+],
+[
+"tr-1",
+"sl_response"
+]
+],
+"metrics": []
+},
+"final": {
+"hedge": {},
+"account_type": {
+"BYBITKEY123456789": "UNIFIED"
+},
+"delisted": [],
+"fail_count": {},
+"bybit_offset": 250,
+"binance_base": "https://fapi.binance.com",
+"binance_offset": 0,
+"bingx_offset": 0,
+"okx_offset": 0
+},
+"full_metrics": [],
+"full_events": [
+[
+"tr-1",
+"sl_attempt",
+{
+"exchange": "bybit",
+"sl_price": 86000.0,
+"atomic": true
+}
+],
+[
+"tr-1",
+"sl_response",
+{
+"exchange": "bybit",
+"ok": false,
+"order_id": "",
+"error": "❌ Недостаточно свободной маржи\n\nНужно: $91.35\nДоступно: $0.00\n\n▸ Закрой часть открытых позиций\n▸ Уменьши leverage (сейчас ×10)\n▸ Уменьши risk (сейчас 1.0%)"
+}
+]
+]
+}
 }
 ]

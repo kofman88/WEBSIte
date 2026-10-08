@@ -33,6 +33,8 @@ const { makeRuntime } = require('./runtime');
 const { TransportError, aiohttpJson } = require('./transport');
 const {
   PyError, errStr, pyGet, pyIndex, pyFloat, pyInt, pyStr, pyFloatStr, pyTruthy, pyOr, pyUrlencode, yarlUrl, htmlEscape, pySlice, isDict,
+  pyTypeName,
+  pyIter,
 } = require('./pyCompat');
 const { fmtFixed, fmtG } = require('../../strategies/common/pyfmt');
 const { pyRound, pyRoundInt } = require('../../strategies/common/pyround');
@@ -98,13 +100,6 @@ function isoTimestamp(nowS, offsetMs = 0) {
   return `${new Date(s * 1000).toISOString().slice(0, 19)}.${String(Math.floor(rem / 1000)).padStart(3, '0')}Z`;
 }
 
-/** Python `for x in v` over a JSON value (list / str / dict keys); None → TypeError. */
-function pyIter(v) {
-  if (Array.isArray(v)) return v;
-  if (typeof v === 'string') return Array.from(v);
-  if (isDict(v)) return Object.keys(v);
-  throw new PyError('TypeError', `'${v === null || v === undefined ? 'NoneType' : typeof v}' object is not iterable`);
-}
 
 const isPyErr = (e, types) => Boolean(e && types.includes(e.pyType));
 
@@ -522,7 +517,7 @@ function createOkxTrader(overrides = {}) {
     const instId = toOkxSymbol(symbol);
     let cancelled = 0;
     const orders = await getOpenOrders(apiKey, secret, passphrase);
-    for (const x of orders) {
+    for (const x of pyIter(orders)) {
       if (pyGet(x, 'symbol') === instId) {
         const r = await cancelOrder(apiKey, secret, symbol, pyIndex(x, 'orderId'), passphrase);
         if (pyTruthy(pyGet(r, 'ok'))) cancelled += 1;

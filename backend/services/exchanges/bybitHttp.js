@@ -81,14 +81,10 @@ function requestsError(e, url, timeout) {
   if (e.requestsMessage !== undefined) {
     return new PyError(e.requestsType || (e.kind === 'timeout' ? 'ReadTimeout' : 'ConnectionError'), e.requestsMessage);
   }
-  // scripted transports (replay fixtures) carry the requests text as the message itself
-  let host = '';
-  let path = '';
-  try { const u = new URL(url); host = u.host; path = u.pathname + u.search; } catch (_x) { /* ignore */ }
-  if (e.kind === 'timeout') {
-    return new PyError('ReadTimeout', e.message || `HTTPSConnectionPool(host='${host}', port=443): Read timed out. (read timeout=${timeout})`);
-  }
-  return new PyError('ConnectionError', e.message || `HTTPSConnectionPool(host='${host}', port=443): Max retries exceeded with url: ${path}`);
+  // scripted transports (replay fixtures) carry str(e) of the requests exception as the message
+  // itself — kept verbatim, '' included (requests.ReadTimeout('') prints '')
+  void url; void timeout;
+  return new PyError(e.kind === 'timeout' ? 'ReadTimeout' : 'ConnectionError', e.message);
 }
 
 /** HMAC-SHA256 hex — pybit generate_signature (HMAC mode). */
