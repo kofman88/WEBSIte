@@ -1,0 +1,5798 @@
+[
+ {
+  "scenario": {
+   "name": "pt_long_limit_legacy_full",
+   "exchange": "bingx",
+   "call": "place_trade",
+   "args": [
+    "BXKEY-abc123",
+    "bx-secret-456",
+    "BTC-USDT-SWAP",
+    "LONG",
+    87000.5,
+    86000.0,
+    88500.0,
+    1.0,
+    10
+   ],
+   "kwargs": {
+    "tp2": 89500.0,
+    "tp3": 90500.0,
+    "trade_id": "bx-1",
+    "user_id": 42
+   },
+   "routes": [
+    {
+     "method": "GET",
+     "path": "/openApi/swap/v2/quote/contracts",
+     "responses": [
+      {
+       "text": "{\"code\": 0, \"msg\": \"\", \"data\": [{\"symbol\": \"BTC-USDT\", \"tradeMinQuantity\": 0.0001, \"pricePrecision\": 1, \"maxLeverage\": 125, \"status\": 1}, {\"symbol\": \"ETH-USDT\", \"tradeMinQuantity\": 0.01, \"pricePrecision\": 2, \"maxLeverage\": 100, \"status\": 1}, {\"symbol\": \"1000PEPE-USDT\", \"tradeMinQuantity\": 100, \"pricePrecision\": 7, \"maxLeverage\": 50, \"status\": 1}, {\"symbol\": \"TONCOIN-USDT\", \"tradeMinQuantity\": 1, \"pricePrecision\": 4, \"maxLeverage\": \"75\", \"status\": 1}, {\"symbol\": \"ASTER-USDT\", \"tradeMinQuantity\": 2.64, \"pricePrecision\": 4, \"maxLeverage\": 20, \"status\": 1}]}"
+      }
+     ]
+    },
+    {
+     "method": "GET",
+     "path": "/openApi/swap/v2/user/balance",
+     "responses": [
+      {
+       "text": "{\"code\": 0, \"msg\": \"\", \"data\": {\"balance\": {\"userId\": \"1\", \"asset\": \"USDT\", \"balance\": \"1000.0\", \"equity\": \"1000.5\", \"unrealizedProfit\": \"0.5\", \"availableMargin\": \"900.0\"}}}"
+      }
+     ]
+    },
+    {
+     "method": "POST",
+     "path": "/openApi/swap/v2/trade/leverage",
+     "responses": [
+      {
+       "text": "{\"code\": 0, \"msg\": \"\", \"data\": {\"leverage\": 10, \"symbol\": \"BTC-USDT\"}}"
+      }
+     ]
+    },
+    {
+     "method": "POST",
+     "path": "/openApi/swap/v2/trade/batchOrders",
+     "responses": [
+      {
+       "text": "{\"code\": 100001, \"msg\": \"Signature verification failed\", \"data\": {}}"
+      }
+     ]
+    },
+    {
+     "method": "GET",
+     "path": "/openApi/swap/v2/quote/price",
+     "responses": [
+      {
+       "text": "{\"code\": 0, \"msg\": \"\", \"data\": {\"symbol\": \"BTC-USDT\", \"price\": \"87010.0\", \"time\": 1767225600000}}"
+      }
+     ]
+    },
+    {
+     "method": "POST",
+     "path": "/openApi/swap/v2/trade/order",
+     "responses": [
+      {
+       "text": "{\"code\": 0, \"msg\": \"\", \"data\": {\"order\": {\"orderId\": 1735947220470939648, \"symbol\": \"BTC-USDT\", \"side\": \"BUY\", \"type\": \"LIMIT\"}}}"
+      },
+      {
+       "text": "{\"code\": 0, \"msg\": \"\", \"data\": {\"order\": {\"orderId\": 11, \"symbol\": \"BTC-USDT\", \"side\": \"BUY\", \"type\": \"LIMIT\"}}}"
+      },
+      {
+       "text": "{\"code\": 0, \"msg\": \"\", \"data\": {\"order\": {\"orderId\": 12, \"symbol\": \"BTC-USDT\", \"side\": \"BUY\", \"type\": \"LIMIT\"}}}"
+      },
+      {
+       "text": "{\"code\": 0, \"msg\": \"\", \"data\": {\"order\": {\"orderId\": 13, \"symbol\": \"BTC-USDT\", \"side\": \"BUY\", \"type\": \"LIMIT\"}}}"
+      },
+      {
+       "text": "{\"code\": 0, \"msg\": \"\", \"data\": {\"order\": {\"orderId\": 14, \"symbol\": \"BTC-USDT\", \"side\": \"BUY\", \"type\": \"LIMIT\"}}}"
+      }
+     ]
+    },
+    {
+     "method": "GET",
+     "path": "/openApi/swap/v2/user/positions",
+     "responses": [
+      {
+       "text": "{\"code\": 0, \"msg\": \"\", \"data\": []}"
+      },
+      {
+       "text": "{\"code\": 0, \"msg\": \"\", \"data\": [{\"symbol\": \"BTC-USDT\", \"positionSide\": \"LONG\", \"positionAmt\": \"0.0115\", \"avgPrice\": \"87000.5\", \"markPrice\": \"87000.5\", \"unrealizedProfit\": \"0.12\", \"leverage\": 10, \"stopLoss\": \"\"}]}"
+      }
+     ]
+    },
+    {
+     "method": "GET",
+     "path": "/openApi/swap/v2/trade/openOrders",
+     "responses": [
+      {
+       "text": "{\"code\": 0, \"msg\": \"\", \"data\": {\"orders\": [{\"orderId\": 12, \"type\": \"TAKE_PROFIT_MARKET\", \"side\": \"SELL\"}, {\"orderId\": 13, \"type\": \"TAKE_PROFIT_MARKET\", \"side\": \"SELL\"}, {\"orderId\": 14, \"type\": \"TAKE_PROFIT_MARKET\", \"side\": \"SELL\"}]}}"
+      }
+     ]
+    }
+   ],
+   "state": {},
+   "random": [],
+   "clock": 1767225600.0
+  },
+  "expected": {
+   "name": "pt_long_limit_legacy_full",
+   "result": {
+    "ok": true,
+    "order_id": "1735947220470939648",
+    "error": "",
+    "tp_placed": true,
+    "qty": 0.01
+   },
+   "requests": [
+    {
+     "method": "GET",
+     "url": "https://open-api.bingx.com/openApi/swap/v2/quote/contracts",
+     "headers": {},
+     "body": null
+    },
+    {
+     "method": "GET",
+     "url": "https://open-api.bingx.com/openApi/swap/v2/user/balance?recvWindow=15000&timestamp=1767225600000&signature=54dc97c97f1c3ca650cfcefb891ffa5c88591dda3defded4580343391c67be79",
+     "headers": {
+      "X-BX-APIKEY": "BXKEY-abc123"
+     },
+     "body": null
+    },
+    {
+     "method": "POST",
+     "url": "https://open-api.bingx.com/openApi/swap/v2/trade/leverage?leverage=10&recvWindow=15000&side=LONG&symbol=BTC-USDT&timestamp=1767225600000&signature=c65994213f74624bfdf7eb14611228af6bdd3257908b32b53ef5cff0f9eb7a0e",
+     "headers": {
+      "X-BX-APIKEY": "BXKEY-abc123"
+     },
+     "body": null
+    },
+    {
+     "method": "POST",
+     "url": "https://open-api.bingx.com/openApi/swap/v2/trade/batchOrders?batchOrders=%5B%7B%22symbol%22%3A%20%22BTC-USDT%22%2C%20%22side%22%3A%20%22BUY%22%2C%20%22type%22%3A%20%22MARKET%22%2C%20%22quantity%22%3A%20%220.0100%22%2C%20%22positionSide%22%3A%20%22LONG%22%2C%20%22clientOrderId%22%3A%20%22chm_1a189d79b8ce%22%7D%2C%20%7B%22symbol%22%3A%20%22BTC-USDT%22%2C%20%22side%22%3A%20%22SELL%22%2C%20%22type%22%3A%20%22STOP_MARKET%22%2C%20%22quantity%22%3A%20%220.0100%22%2C%20%22stopPrice%22%3A%20%2286000.0%22%2C%20%22workingType%22%3A%20%22MARK_PRICE%22%2C%20%22positionSide%22%3A%20%22LONG%22%2C%20%22clientOrderId%22%3A%20%22chm_b1353307fd6f%22%7D%2C%20%7B%22symbol%22%3A%20%22BTC-USDT%22%2C%20%22side%22%3A%20%22SELL%22%2C%20%22type%22%3A%20%22TAKE_PROFIT_MARKET%22%2C%20%22quantity%22%3A%20%220.0049%22%2C%20%22stopPrice%22%3A%20%2288500.0%22%2C%20%22workingType%22%3A%20%22MARK_PRICE%22%2C%20%22positionSide%22%3A%20%22LONG%22%2C%20%22clientOrderId%22%3A%20%22chm_1128660837c0%22%7D%2C%20%7B%22symbol%22%3A%20%22BTC-USDT%22%2C%20%22side%22%3A%20%22SELL%22%2C%20%22type%22%3A%20%22TAKE_PROFIT_MARKET%22%2C%20%22quantity%22%3A%20%220.0025%22%2C%20%22stopPrice%22%3A%20%2289500.0%22%2C%20%22workingType%22%3A%20%22MARK_PRICE%22%2C%20%22positionSide%22%3A%20%22LONG%22%2C%20%22clientOrderId%22%3A%20%22chm_8a47704075c3%22%7D%2C%20%7B%22symbol%22%3A%20%22BTC-USDT%22%2C%20%22side%22%3A%20%22SELL%22%2C%20%22type%22%3A%20%22TAKE_PROFIT_MARKET%22%2C%20%22quantity%22%3A%20%220.0025%22%2C%20%22stopPrice%22%3A%20%2290500.0%22%2C%20%22workingType%22%3A%20%22MARK_PRICE%22%2C%20%22positionSide%22%3A%20%22LONG%22%2C%20%22clientOrderId%22%3A%20%22chm_1edb54eff773%22%7D%5D&recvWindow=15000&timestamp=1767225600000&signature=e711f87c3c3dfb3c50313745b90c6e059c5beab549a0706cbad166e851e8c655",
+     "headers": {
+      "X-BX-APIKEY": "BXKEY-abc123"
+     },
+     "body": null
+    },
+    {
+     "method": "GET",
+     "url": "https://open-api.bingx.com/openApi/swap/v2/quote/price?recvWindow=15000&symbol=BTC-USDT&timestamp=1767225600000&signature=8c72fd5c91131844fbe8cf03300f72a097966266a3b2ecd7e45acbf566990a04",
+     "headers": {
+      "X-BX-APIKEY": "BXKEY-abc123"
+     },
+     "body": null
+    },
+    {
+     "method": "POST",
+     "url": "https://open-api.bingx.com/openApi/swap/v2/trade/order?clientOrderId=chm_1a189d79b8ce&positionSide=LONG&price=87000.5&quantity=0.0100&recvWindow=15000&side=BUY&symbol=BTC-USDT&timeInForce=GTC&timestamp=1767225600000&type=LIMIT&signature=36919d9562bd337ddfdd1ac75f0ef354b5845f000e634f3a3020cb21af98e0bf",
+     "headers": {
+      "X-BX-APIKEY": "BXKEY-abc123"
+     },
+     "body": null
+    },
+    {
+     "method": "GET",
+     "url": "https://open-api.bingx.com/openApi/swap/v2/user/positions?recvWindow=15000&symbol=BTC-USDT&timestamp=1767225600000&signature=8c72fd5c91131844fbe8cf03300f72a097966266a3b2ecd7e45acbf566990a04",
+     "headers": {
+      "X-BX-APIKEY": "BXKEY-abc123"
+     },
+     "body": null
+    },
+    {
+     "method": "GET",
+     "url": "https://open-api.bingx.com/openApi/swap/v2/user/positions?recvWindow=15000&symbol=BTC-USDT&timestamp=1767225600200&signature=001895d2304ea85e235ef3a033e0918f1d3b509bc1dbdac3eabf2be9ae4cfef8",
+     "headers": {
+      "X-BX-APIKEY": "BXKEY-abc123"
+     },
+     "body": null
+    },
+    {
+     "method": "POST",
+     "url": "https://open-api.bingx.com/openApi/swap/v2/trade/order?clientOrderId=chm_b1353307fd6f&positionSide=LONG&quantity=0.0100&recvWindow=15000&side=SELL&stopPrice=86000.0&symbol=BTC-USDT&timestamp=1767225600200&type=STOP_MARKET&workingType=MARK_PRICE&signature=f4391ed56f5e26697b84ce2432364be1be70232875c67a8db2303b5587d7163f",
+     "headers": {
+      "X-BX-APIKEY": "BXKEY-abc123"
+     },
+     "body": null
+    },
+    {
+     "method": "POST",
+     "url": "https://open-api.bingx.com/openApi/swap/v2/trade/order?clientOrderId=chm_1128660837c0&positionSide=LONG&quantity=0.0049&recvWindow=15000&side=SELL&stopPrice=88500.0&symbol=BTC-USDT&timestamp=1767225600200&type=TAKE_PROFIT_MARKET&workingType=MARK_PRICE&signature=884501db3133e601f92fe7cfedd53fdd77a622f50af7b26ff1694fceb0141e53",
+     "headers": {
+      "X-BX-APIKEY": "BXKEY-abc123"
+     },
+     "body": null
+    },
+    {
+     "method": "POST",
+     "url": "https://open-api.bingx.com/openApi/swap/v2/trade/order?clientOrderId=chm_8a47704075c3&positionSide=LONG&quantity=0.0025&recvWindow=15000&side=SELL&stopPrice=89500.0&symbol=BTC-USDT&timestamp=1767225600200&type=TAKE_PROFIT_MARKET&workingType=MARK_PRICE&signature=9fefb4da8539724e902f213aeb629c2a1ae1c35520fca0620fa251ac87b0d92a",
+     "headers": {
+      "X-BX-APIKEY": "BXKEY-abc123"
+     },
+     "body": null
+    },
+    {
+     "method": "POST",
+     "url": "https://open-api.bingx.com/openApi/swap/v2/trade/order?clientOrderId=chm_1edb54eff773&positionSide=LONG&quantity=0.0025&recvWindow=15000&side=SELL&stopPrice=90500.0&symbol=BTC-USDT&timestamp=1767225600200&type=TAKE_PROFIT_MARKET&workingType=MARK_PRICE&signature=42ca28b9fa774c7a598dfa2670d7f0cec1f5002950558b9622f3e55bf1b2ed36",
+     "headers": {
+      "X-BX-APIKEY": "BXKEY-abc123"
+     },
+     "body": null
+    },
+    {
+     "method": "GET",
+     "url": "https://open-api.bingx.com/openApi/swap/v2/trade/openOrders?recvWindow=15000&symbol=BTC-USDT&timestamp=1767225602200&signature=bb4bdadcbb6834ff25b0c92e58598d14ce6fdf959020b81fa7d75acd7b209c0d",
+     "headers": {
+      "X-BX-APIKEY": "BXKEY-abc123"
+     },
+     "body": null
+    }
+   ],
+   "sleeps": [
+    0.2,
+    2.0
+   ],
+   "clock_end": 1767225602.2,
+   "markers": [
+    [
+     "WARNING",
+     "[BINGX-ATOMIC-FALLBACK]"
+    ],
+    [
+     "INFO",
+     "[BINGX-LEGACY-GAP]"
+    ],
+    [
+     "DEBUG",
+     "[TP-VERIFIED]"
+    ]
+   ],
+   "saved": {
+    "hedge_saved": [],
+    "auth_reset": [],
+    "events": [],
+    "metrics": [
+     "trade_placed",
+     "trade_placement_latency_ms",
+     "sl_tp_attached"
+    ]
+   },
+   "final": {
+    "hedge": {},
+    "account_type": {},
+    "delisted": [],
+    "fail_count": {},
+    "bybit_offset": 0
+   }
+  }
+ },
+ {
+  "scenario": {
+   "name": "pt_short_market_oneway_109400",
+   "exchange": "bingx",
+   "call": "place_trade",
+   "args": [
+    "BXKEY-abc123",
+    "bx-secret-456",
+    "ETH-USDT-SWAP",
+    "SHORT",
+    3000.0,
+    3060.0,
+    2900.0,
+    2.0,
+    20
+   ],
+   "kwargs": {},
+   "routes": [
+    {
+     "method": "GET",
+     "path": "/openApi/swap/v2/quote/contracts",
+     "responses": [
+      {
+       "text": "{\"code\": 0, \"msg\": \"\", \"data\": [{\"symbol\": \"BTC-USDT\", \"tradeMinQuantity\": 0.0001, \"pricePrecision\": 1, \"maxLeverage\": 125, \"status\": 1}, {\"symbol\": \"ETH-USDT\", \"tradeMinQuantity\": 0.01, \"pricePrecision\": 2, \"maxLeverage\": 100, \"status\": 1}, {\"symbol\": \"1000PEPE-USDT\", \"tradeMinQuantity\": 100, \"pricePrecision\": 7, \"maxLeverage\": 50, \"status\": 1}, {\"symbol\": \"TONCOIN-USDT\", \"tradeMinQuantity\": 1, \"pricePrecision\": 4, \"maxLeverage\": \"75\", \"status\": 1}, {\"symbol\": \"ASTER-USDT\", \"tradeMinQuantity\": 2.64, \"pricePrecision\": 4, \"maxLeverage\": 20, \"status\": 1}]}"
+      }
+     ]
+    },
+    {
+     "method": "GET",
+     "path": "/openApi/swap/v2/user/balance",
+     "responses": [
+      {
+       "text": "{\"code\": 0, \"msg\": \"\", \"data\": {\"balance\": {\"userId\": \"1\", \"asset\": \"USDT\", \"balance\": \"1000.0\", \"equity\": \"1000.5\", \"unrealizedProfit\": \"0.5\", \"availableMargin\": \"900.0\"}}}"
+      }
+     ]
+    },
+    {
+     "method": "POST",
+     "path": "/openApi/swap/v2/trade/leverage",
+     "responses": [
+      {
+       "text": "{\"code\": 109400, \"msg\": \"In One-way mode, side should be BOTH\", \"data\": {}}"
+      },
+      {
+       "text": "{\"code\": 0, \"msg\": \"\", \"data\": {\"leverage\": 10, \"symbol\": \"BTC-USDT\"}}"
+      }
+     ]
+    },
+    {
+     "method": "GET",
+     "path": "/openApi/swap/v2/quote/price",
+     "responses": [
+      {
+       "text": "{\"code\": 0, \"msg\": \"\", \"data\": {\"symbol\": \"BTC-USDT\", \"price\": \"3050.0\", \"time\": 1767225600000}}"
+      }
+     ]
+    },
+    {
+     "method": "POST",
+     "path": "/openApi/swap/v2/trade/order",
+     "responses": [
+      {
+       "text": "{\"code\": 109400, \"msg\": \"positionSide error\", \"data\": {}}"
+      },
+      {
+       "text": "{\"code\": 0, \"msg\": \"\", \"data\": {\"order\": {\"orderId\": 21, \"symbol\": \"BTC-USDT\", \"side\": \"BUY\", \"type\": \"LIMIT\"}}}"
+      },
+      {
+       "text": "{\"code\": 0, \"msg\": \"\", \"data\": {\"order\": {\"orderId\": 22, \"symbol\": \"BTC-USDT\", \"side\": \"BUY\", \"type\": \"LIMIT\"}}}"
+      },
+      {
+       "text": "{\"code\": 0, \"msg\": \"\", \"data\": {\"order\": {\"orderId\": 23, \"symbol\": \"BTC-USDT\", \"side\": \"BUY\", \"type\": \"LIMIT\"}}}"
+      },
+      {
+       "text": "{\"code\": 0, \"msg\": \"\", \"data\": {\"order\": {\"orderId\": 24, \"symbol\": \"BTC-USDT\", \"side\": \"BUY\", \"type\": \"LIMIT\"}}}"
+      }
+     ]
+    },
+    {
+     "method": "GET",
+     "path": "/openApi/swap/v2/user/positions",
+     "responses": [
+      {
+       "text": "{\"code\": 0, \"msg\": \"\", \"data\": [{\"symbol\": \"ETH-USDT\", \"positionSide\": \"BOTH\", \"positionAmt\": \"-6.66\", \"avgPrice\": \"87000.5\", \"markPrice\": \"87000.5\", \"unrealizedProfit\": \"0.12\", \"leverage\": 10, \"stopLoss\": \"\"}]}"
+      }
+     ]
+    },
+    {
+     "method": "GET",
+     "path": "/openApi/swap/v2/trade/openOrders",
+     "responses": [
+      {
+       "text": "{\"code\": 0, \"msg\": \"\", \"data\": {\"orders\": []}}"
+      }
+     ]
+    }
+   ],
+   "state": {},
+   "random": [],
+   "clock": 1767225600.0
+  },
+  "expected": {
+   "name": "pt_short_market_oneway_109400",
+   "result": {
+    "ok": true,
+    "order_id": "21",
+    "error": "",
+    "tp_placed": true,
+    "qty": 0.33
+   },
+   "requests": [
+    {
+     "method": "GET",
+     "url": "https://open-api.bingx.com/openApi/swap/v2/quote/contracts",
+     "headers": {},
+     "body": null
+    },
+    {
+     "method": "GET",
+     "url": "https://open-api.bingx.com/openApi/swap/v2/user/balance?recvWindow=15000&timestamp=1767225600000&signature=54dc97c97f1c3ca650cfcefb891ffa5c88591dda3defded4580343391c67be79",
+     "headers": {
+      "X-BX-APIKEY": "BXKEY-abc123"
+     },
+     "body": null
+    },
+    {
+     "method": "POST",
+     "url": "https://open-api.bingx.com/openApi/swap/v2/trade/leverage?leverage=20&recvWindow=15000&side=SHORT&symbol=ETH-USDT&timestamp=1767225600000&signature=908be3cd88ca91bd76ac7ab5f25f2f7b68e6f310b53ce7e46f9b11ef3112c8b7",
+     "headers": {
+      "X-BX-APIKEY": "BXKEY-abc123"
+     },
+     "body": null
+    },
+    {
+     "method": "POST",
+     "url": "https://open-api.bingx.com/openApi/swap/v2/trade/leverage?leverage=20&recvWindow=15000&side=BOTH&symbol=ETH-USDT&timestamp=1767225600000&signature=735722f02e52df2c55469f1bd3a0f1efeb1816c529a8cb6ccd37f8ba4d1cf6b0",
+     "headers": {
+      "X-BX-APIKEY": "BXKEY-abc123"
+     },
+     "body": null
+    },
+    {
+     "method": "GET",
+     "url": "https://open-api.bingx.com/openApi/swap/v2/quote/price?recvWindow=15000&symbol=ETH-USDT&timestamp=1767225600000&signature=d50551757214d9202dcbfa5c8e415bd09a3d45afa14fd44a3a55919706c5f274",
+     "headers": {
+      "X-BX-APIKEY": "BXKEY-abc123"
+     },
+     "body": null
+    },
+    {
+     "method": "POST",
+     "url": "https://open-api.bingx.com/openApi/swap/v2/trade/order?positionSide=BOTH&quantity=0.33&recvWindow=15000&side=SELL&symbol=ETH-USDT&timestamp=1767225600000&type=MARKET&signature=2727f5c680e3657d6cfb9befe37c8ad47c14aac3abe3b1b744c4fe35aa834182",
+     "headers": {
+      "X-BX-APIKEY": "BXKEY-abc123"
+     },
+     "body": null
+    },
+    {
+     "method": "POST",
+     "url": "https://open-api.bingx.com/openApi/swap/v2/trade/order?quantity=0.33&recvWindow=15000&side=SELL&symbol=ETH-USDT&timestamp=1767225600000&type=MARKET&signature=2e49eec0b4a5f062b0862a2674d7158b85504f8ff255c6e7cebb1d2bf915b511",
+     "headers": {
+      "X-BX-APIKEY": "BXKEY-abc123"
+     },
+     "body": null
+    },
+    {
+     "method": "GET",
+     "url": "https://open-api.bingx.com/openApi/swap/v2/user/positions?recvWindow=15000&symbol=ETH-USDT&timestamp=1767225600000&signature=d50551757214d9202dcbfa5c8e415bd09a3d45afa14fd44a3a55919706c5f274",
+     "headers": {
+      "X-BX-APIKEY": "BXKEY-abc123"
+     },
+     "body": null
+    },
+    {
+     "method": "POST",
+     "url": "https://open-api.bingx.com/openApi/swap/v2/trade/order?positionSide=BOTH&quantity=0.33&recvWindow=15000&side=BUY&stopPrice=3060.00&symbol=ETH-USDT&timestamp=1767225600000&type=STOP_MARKET&workingType=MARK_PRICE&signature=8893057af63e6aced8027c014f43323a3bc92e4173f545ab915d6e5c226297de",
+     "headers": {
+      "X-BX-APIKEY": "BXKEY-abc123"
+     },
+     "body": null
+    },
+    {
+     "method": "POST",
+     "url": "https://open-api.bingx.com/openApi/swap/v2/trade/order?positionSide=BOTH&quantity=0.33&recvWindow=15000&side=BUY&stopPrice=2900.00&symbol=ETH-USDT&timestamp=1767225600000&type=TAKE_PROFIT_MARKET&workingType=MARK_PRICE&signature=03c0a5ce87207166fadd28188f6695e05bcc945019e2693809de8c64c8171eff",
+     "headers": {
+      "X-BX-APIKEY": "BXKEY-abc123"
+     },
+     "body": null
+    },
+    {
+     "method": "GET",
+     "url": "https://open-api.bingx.com/openApi/swap/v2/trade/openOrders?recvWindow=15000&symbol=ETH-USDT&timestamp=1767225602000&signature=8146363a8107c8a89c4b998eb6cdfcee92040fc58dd4c3605b6f668bdb2e215d",
+     "headers": {
+      "X-BX-APIKEY": "BXKEY-abc123"
+     },
+     "body": null
+    },
+    {
+     "method": "POST",
+     "url": "https://open-api.bingx.com/openApi/swap/v2/trade/order?positionSide=BOTH&quantity=0.33&recvWindow=15000&side=BUY&stopPrice=2900.0&symbol=ETH-USDT&timestamp=1767225602000&type=TAKE_PROFIT_MARKET&workingType=MARK_PRICE&signature=066086bedcdfa9420d316579cbb20480de003c5d8132cd6586e361c339979b64",
+     "headers": {
+      "X-BX-APIKEY": "BXKEY-abc123"
+     },
+     "body": null
+    }
+   ],
+   "sleeps": [
+    2.0
+   ],
+   "clock_end": 1767225602.0,
+   "markers": [
+    [
+     "INFO",
+     "[BINGX-LEGACY-GAP]"
+    ],
+    [
+     "WARNING",
+     "[TP-PHANTOM]"
+    ],
+    [
+     "INFO",
+     "[TP-RETRY]"
+    ]
+   ],
+   "saved": {
+    "hedge_saved": [],
+    "auth_reset": [],
+    "events": [],
+    "metrics": [
+     "trade_placed",
+     "trade_placement_latency_ms",
+     "sl_tp_attached"
+    ]
+   },
+   "final": {
+    "hedge": {},
+    "account_type": {},
+    "delisted": [],
+    "fail_count": {},
+    "bybit_offset": 0
+   }
+  }
+ },
+ {
+  "scenario": {
+   "name": "pt_atomic_batch_ok",
+   "exchange": "bingx",
+   "call": "place_trade",
+   "args": [
+    "BXKEY-abc123",
+    "bx-secret-456",
+    "BTC-USDT-SWAP",
+    "LONG",
+    87000.5,
+    86000.0,
+    88500.0,
+    1.0,
+    10
+   ],
+   "kwargs": {
+    "tp2": 89500.0,
+    "trade_id": "bx-2",
+    "user_id": 1
+   },
+   "routes": [
+    {
+     "method": "GET",
+     "path": "/openApi/swap/v2/quote/contracts",
+     "responses": [
+      {
+       "text": "{\"code\": 0, \"msg\": \"\", \"data\": [{\"symbol\": \"BTC-USDT\", \"tradeMinQuantity\": 0.0001, \"pricePrecision\": 1, \"maxLeverage\": 125, \"status\": 1}, {\"symbol\": \"ETH-USDT\", \"tradeMinQuantity\": 0.01, \"pricePrecision\": 2, \"maxLeverage\": 100, \"status\": 1}, {\"symbol\": \"1000PEPE-USDT\", \"tradeMinQuantity\": 100, \"pricePrecision\": 7, \"maxLeverage\": 50, \"status\": 1}, {\"symbol\": \"TONCOIN-USDT\", \"tradeMinQuantity\": 1, \"pricePrecision\": 4, \"maxLeverage\": \"75\", \"status\": 1}, {\"symbol\": \"ASTER-USDT\", \"tradeMinQuantity\": 2.64, \"pricePrecision\": 4, \"maxLeverage\": 20, \"status\": 1}]}"
+      }
+     ]
+    },
+    {
+     "method": "GET",
+     "path": "/openApi/swap/v2/user/balance",
+     "responses": [
+      {
+       "text": "{\"code\": 0, \"msg\": \"\", \"data\": {\"balance\": {\"userId\": \"1\", \"asset\": \"USDT\", \"balance\": \"1000.0\", \"equity\": \"1000.5\", \"unrealizedProfit\": \"0.5\", \"availableMargin\": \"900.0\"}}}"
+      }
+     ]
+    },
+    {
+     "method": "POST",
+     "path": "/openApi/swap/v2/trade/leverage",
+     "responses": [
+      {
+       "text": "{\"code\": 0, \"msg\": \"\", \"data\": {\"leverage\": 10, \"symbol\": \"BTC-USDT\"}}"
+      }
+     ]
+    },
+    {
+     "method": "POST",
+     "path": "/openApi/swap/v2/trade/batchOrders",
+     "responses": [
+      {
+       "text": "{\"code\": 0, \"msg\": \"\", \"data\": {\"orders\": [{\"orderId\": 1735947220470939648}, {\"orderId\": 2}, {\"orderId\": 3}, {\"code\": 101, \"msg\": \"x\"}]}}"
+      }
+     ]
+    }
+   ],
+   "state": {},
+   "random": [],
+   "clock": 1767225600.0
+  },
+  "expected": {
+   "name": "pt_atomic_batch_ok",
+   "result": {
+    "ok": true,
+    "order_id": "1735947220470939648",
+    "error": "",
+    "tp_placed": true,
+    "atomic": true,
+    "qty": 0.01
+   },
+   "requests": [
+    {
+     "method": "GET",
+     "url": "https://open-api.bingx.com/openApi/swap/v2/quote/contracts",
+     "headers": {},
+     "body": null
+    },
+    {
+     "method": "GET",
+     "url": "https://open-api.bingx.com/openApi/swap/v2/user/balance?recvWindow=15000&timestamp=1767225600000&signature=54dc97c97f1c3ca650cfcefb891ffa5c88591dda3defded4580343391c67be79",
+     "headers": {
+      "X-BX-APIKEY": "BXKEY-abc123"
+     },
+     "body": null
+    },
+    {
+     "method": "POST",
+     "url": "https://open-api.bingx.com/openApi/swap/v2/trade/leverage?leverage=10&recvWindow=15000&side=LONG&symbol=BTC-USDT&timestamp=1767225600000&signature=c65994213f74624bfdf7eb14611228af6bdd3257908b32b53ef5cff0f9eb7a0e",
+     "headers": {
+      "X-BX-APIKEY": "BXKEY-abc123"
+     },
+     "body": null
+    },
+    {
+     "method": "POST",
+     "url": "https://open-api.bingx.com/openApi/swap/v2/trade/batchOrders?batchOrders=%5B%7B%22symbol%22%3A%20%22BTC-USDT%22%2C%20%22side%22%3A%20%22BUY%22%2C%20%22type%22%3A%20%22MARKET%22%2C%20%22quantity%22%3A%20%220.0100%22%2C%20%22positionSide%22%3A%20%22LONG%22%2C%20%22clientOrderId%22%3A%20%22chm_ac4712eb804e%22%7D%2C%20%7B%22symbol%22%3A%20%22BTC-USDT%22%2C%20%22side%22%3A%20%22SELL%22%2C%20%22type%22%3A%20%22STOP_MARKET%22%2C%20%22quantity%22%3A%20%220.0100%22%2C%20%22stopPrice%22%3A%20%2286000.0%22%2C%20%22workingType%22%3A%20%22MARK_PRICE%22%2C%20%22positionSide%22%3A%20%22LONG%22%2C%20%22clientOrderId%22%3A%20%22chm_c72a775339f4%22%7D%2C%20%7B%22symbol%22%3A%20%22BTC-USDT%22%2C%20%22side%22%3A%20%22SELL%22%2C%20%22type%22%3A%20%22TAKE_PROFIT_MARKET%22%2C%20%22quantity%22%3A%20%220.0075%22%2C%20%22stopPrice%22%3A%20%2288500.0%22%2C%20%22workingType%22%3A%20%22MARK_PRICE%22%2C%20%22positionSide%22%3A%20%22LONG%22%2C%20%22clientOrderId%22%3A%20%22chm_e87b13218bbc%22%7D%2C%20%7B%22symbol%22%3A%20%22BTC-USDT%22%2C%20%22side%22%3A%20%22SELL%22%2C%20%22type%22%3A%20%22TAKE_PROFIT_MARKET%22%2C%20%22quantity%22%3A%20%220.0025%22%2C%20%22stopPrice%22%3A%20%2289500.0%22%2C%20%22workingType%22%3A%20%22MARK_PRICE%22%2C%20%22positionSide%22%3A%20%22LONG%22%2C%20%22clientOrderId%22%3A%20%22chm_3bdff7bd3143%22%7D%5D&recvWindow=15000&timestamp=1767225600000&signature=9bb6bab2a52ec4d5d15d57443cfe9bfc59f4cdfc0592f5875e1b8002b1459851",
+     "headers": {
+      "X-BX-APIKEY": "BXKEY-abc123"
+     },
+     "body": null
+    }
+   ],
+   "sleeps": [],
+   "clock_end": 1767225600.0,
+   "markers": [
+    [
+     "INFO",
+     "[BINGX-ATOMIC-OK]"
+    ]
+   ],
+   "saved": {
+    "hedge_saved": [],
+    "auth_reset": [],
+    "events": [],
+    "metrics": []
+   },
+   "final": {
+    "hedge": {},
+    "account_type": {},
+    "delisted": [],
+    "fail_count": {},
+    "bybit_offset": 0
+   }
+  }
+ },
+ {
+  "scenario": {
+   "name": "pt_atomic_batch_partial",
+   "exchange": "bingx",
+   "call": "place_trade",
+   "args": [
+    "BXKEY-abc123",
+    "bx-secret-456",
+    "BTC-USDT-SWAP",
+    "LONG",
+    87000.5,
+    86000.0,
+    88500.0,
+    1.0,
+    10
+   ],
+   "kwargs": {
+    "trade_id": "bx-3",
+    "user_id": 1
+   },
+   "routes": [
+    {
+     "method": "GET",
+     "path": "/openApi/swap/v2/quote/contracts",
+     "responses": [
+      {
+       "text": "{\"code\": 0, \"msg\": \"\", \"data\": [{\"symbol\": \"BTC-USDT\", \"tradeMinQuantity\": 0.0001, \"pricePrecision\": 1, \"maxLeverage\": 125, \"status\": 1}, {\"symbol\": \"ETH-USDT\", \"tradeMinQuantity\": 0.01, \"pricePrecision\": 2, \"maxLeverage\": 100, \"status\": 1}, {\"symbol\": \"1000PEPE-USDT\", \"tradeMinQuantity\": 100, \"pricePrecision\": 7, \"maxLeverage\": 50, \"status\": 1}, {\"symbol\": \"TONCOIN-USDT\", \"tradeMinQuantity\": 1, \"pricePrecision\": 4, \"maxLeverage\": \"75\", \"status\": 1}, {\"symbol\": \"ASTER-USDT\", \"tradeMinQuantity\": 2.64, \"pricePrecision\": 4, \"maxLeverage\": 20, \"status\": 1}]}"
+      }
+     ]
+    },
+    {
+     "method": "GET",
+     "path": "/openApi/swap/v2/user/balance",
+     "responses": [
+      {
+       "text": "{\"code\": 0, \"msg\": \"\", \"data\": {\"balance\": {\"userId\": \"1\", \"asset\": \"USDT\", \"balance\": \"1000.0\", \"equity\": \"1000.5\", \"unrealizedProfit\": \"0.5\", \"availableMargin\": \"900.0\"}}}"
+      }
+     ]
+    },
+    {
+     "method": "POST",
+     "path": "/openApi/swap/v2/trade/leverage",
+     "responses": [
+      {
+       "text": "{\"code\": 0, \"msg\": \"\", \"data\": {\"leverage\": 10, \"symbol\": \"BTC-USDT\"}}"
+      }
+     ]
+    },
+    {
+     "method": "POST",
+     "path": "/openApi/swap/v2/trade/batchOrders",
+     "responses": [
+      {
+       "text": "{\"code\": 0, \"msg\": \"\", \"data\": [{\"orderId\": 5}, {\"code\": 0}]}"
+      }
+     ]
+    },
+    {
+     "method": "GET",
+     "path": "/openApi/swap/v2/quote/price",
+     "responses": [
+      {
+       "text": "{\"code\": 0, \"msg\": \"\", \"data\": {\"symbol\": \"BTC-USDT\", \"price\": \"90000\", \"time\": 1767225600000}}"
+      }
+     ]
+    },
+    {
+     "method": "POST",
+     "path": "/openApi/swap/v2/trade/order",
+     "responses": [
+      {
+       "text": "{\"code\": 0, \"msg\": \"\", \"data\": {\"order\": {\"orderId\": 31, \"symbol\": \"BTC-USDT\", \"side\": \"BUY\", \"type\": \"LIMIT\"}}}"
+      },
+      {
+       "text": "{\"code\": 0, \"msg\": \"\", \"data\": {\"order\": {\"orderId\": 32, \"symbol\": \"BTC-USDT\", \"side\": \"BUY\", \"type\": \"LIMIT\"}}}"
+      },
+      {
+       "text": "{\"code\": 0, \"msg\": \"\", \"data\": {\"order\": {\"orderId\": 33, \"symbol\": \"BTC-USDT\", \"side\": \"BUY\", \"type\": \"LIMIT\"}}}"
+      }
+     ]
+    },
+    {
+     "method": "GET",
+     "path": "/openApi/swap/v2/user/positions",
+     "responses": [
+      {
+       "text": "{\"code\": 0, \"msg\": \"\", \"data\": [{\"symbol\": \"BTC-USDT\", \"positionSide\": \"LONG\", \"positionAmt\": \"0.0115\", \"avgPrice\": \"87000.5\", \"markPrice\": \"87000.5\", \"unrealizedProfit\": \"0.12\", \"leverage\": 10, \"stopLoss\": \"\"}]}"
+      }
+     ]
+    },
+    {
+     "method": "GET",
+     "path": "/openApi/swap/v2/trade/openOrders",
+     "responses": [
+      {
+       "text": "{\"code\": 0, \"msg\": \"\", \"data\": {\"orders\": [{\"orderId\": 33, \"type\": \"TAKE_PROFIT_MARKET\", \"side\": \"SELL\"}]}}"
+      }
+     ]
+    }
+   ],
+   "state": {},
+   "random": [],
+   "clock": 1767225600.0
+  },
+  "expected": {
+   "name": "pt_atomic_batch_partial",
+   "result": {
+    "ok": true,
+    "order_id": "31",
+    "error": "",
+    "tp_placed": true,
+    "qty": 0.01
+   },
+   "requests": [
+    {
+     "method": "GET",
+     "url": "https://open-api.bingx.com/openApi/swap/v2/quote/contracts",
+     "headers": {},
+     "body": null
+    },
+    {
+     "method": "GET",
+     "url": "https://open-api.bingx.com/openApi/swap/v2/user/balance?recvWindow=15000&timestamp=1767225600000&signature=54dc97c97f1c3ca650cfcefb891ffa5c88591dda3defded4580343391c67be79",
+     "headers": {
+      "X-BX-APIKEY": "BXKEY-abc123"
+     },
+     "body": null
+    },
+    {
+     "method": "POST",
+     "url": "https://open-api.bingx.com/openApi/swap/v2/trade/leverage?leverage=10&recvWindow=15000&side=LONG&symbol=BTC-USDT&timestamp=1767225600000&signature=c65994213f74624bfdf7eb14611228af6bdd3257908b32b53ef5cff0f9eb7a0e",
+     "headers": {
+      "X-BX-APIKEY": "BXKEY-abc123"
+     },
+     "body": null
+    },
+    {
+     "method": "POST",
+     "url": "https://open-api.bingx.com/openApi/swap/v2/trade/batchOrders?batchOrders=%5B%7B%22symbol%22%3A%20%22BTC-USDT%22%2C%20%22side%22%3A%20%22BUY%22%2C%20%22type%22%3A%20%22MARKET%22%2C%20%22quantity%22%3A%20%220.0100%22%2C%20%22positionSide%22%3A%20%22LONG%22%2C%20%22clientOrderId%22%3A%20%22chm_36952ec58c64%22%7D%2C%20%7B%22symbol%22%3A%20%22BTC-USDT%22%2C%20%22side%22%3A%20%22SELL%22%2C%20%22type%22%3A%20%22STOP_MARKET%22%2C%20%22quantity%22%3A%20%220.0100%22%2C%20%22stopPrice%22%3A%20%2286000.0%22%2C%20%22workingType%22%3A%20%22MARK_PRICE%22%2C%20%22positionSide%22%3A%20%22LONG%22%2C%20%22clientOrderId%22%3A%20%22chm_c02d56a76c98%22%7D%2C%20%7B%22symbol%22%3A%20%22BTC-USDT%22%2C%20%22side%22%3A%20%22SELL%22%2C%20%22type%22%3A%20%22TAKE_PROFIT_MARKET%22%2C%20%22quantity%22%3A%20%220.0100%22%2C%20%22stopPrice%22%3A%20%2288500.0%22%2C%20%22workingType%22%3A%20%22MARK_PRICE%22%2C%20%22positionSide%22%3A%20%22LONG%22%2C%20%22clientOrderId%22%3A%20%22chm_ae851600b580%22%7D%5D&recvWindow=15000&timestamp=1767225600000&signature=81b8db8a41a1757ca6b9de9fdeab65327bc06ff4b78e1adeb854151e1d89c57c",
+     "headers": {
+      "X-BX-APIKEY": "BXKEY-abc123"
+     },
+     "body": null
+    },
+    {
+     "method": "GET",
+     "url": "https://open-api.bingx.com/openApi/swap/v2/quote/price?recvWindow=15000&symbol=BTC-USDT&timestamp=1767225600000&signature=8c72fd5c91131844fbe8cf03300f72a097966266a3b2ecd7e45acbf566990a04",
+     "headers": {
+      "X-BX-APIKEY": "BXKEY-abc123"
+     },
+     "body": null
+    },
+    {
+     "method": "POST",
+     "url": "https://open-api.bingx.com/openApi/swap/v2/trade/order?clientOrderId=chm_36952ec58c64&positionSide=LONG&quantity=0.0100&recvWindow=15000&side=BUY&symbol=BTC-USDT&timestamp=1767225600000&type=MARKET&signature=9a85f49a7c9a3125ec62752ce4e3007f5e345443dc92edb60601bc0388c93db5",
+     "headers": {
+      "X-BX-APIKEY": "BXKEY-abc123"
+     },
+     "body": null
+    },
+    {
+     "method": "GET",
+     "url": "https://open-api.bingx.com/openApi/swap/v2/user/positions?recvWindow=15000&symbol=BTC-USDT&timestamp=1767225600000&signature=8c72fd5c91131844fbe8cf03300f72a097966266a3b2ecd7e45acbf566990a04",
+     "headers": {
+      "X-BX-APIKEY": "BXKEY-abc123"
+     },
+     "body": null
+    },
+    {
+     "method": "POST",
+     "url": "https://open-api.bingx.com/openApi/swap/v2/trade/order?clientOrderId=chm_c02d56a76c98&positionSide=LONG&quantity=0.0100&recvWindow=15000&side=SELL&stopPrice=86000.0&symbol=BTC-USDT&timestamp=1767225600000&type=STOP_MARKET&workingType=MARK_PRICE&signature=c68c9adab00db7a58aae8ce838a3a59e4cb84bd59061711022fed74eefb581df",
+     "headers": {
+      "X-BX-APIKEY": "BXKEY-abc123"
+     },
+     "body": null
+    },
+    {
+     "method": "POST",
+     "url": "https://open-api.bingx.com/openApi/swap/v2/trade/order?clientOrderId=chm_ae851600b580&positionSide=LONG&quantity=0.0100&recvWindow=15000&side=SELL&stopPrice=88500.0&symbol=BTC-USDT&timestamp=1767225600000&type=TAKE_PROFIT_MARKET&workingType=MARK_PRICE&signature=f93fd4c790e08055f35f99e82b267e49c97850f798eb65cdc1fee269b6312fd8",
+     "headers": {
+      "X-BX-APIKEY": "BXKEY-abc123"
+     },
+     "body": null
+    },
+    {
+     "method": "GET",
+     "url": "https://open-api.bingx.com/openApi/swap/v2/trade/openOrders?recvWindow=15000&symbol=BTC-USDT&timestamp=1767225602000&signature=2a2e9ab996f56f5a656cbd86ef925ea2804fb5b4f2833a1929aaeceb64682b2e",
+     "headers": {
+      "X-BX-APIKEY": "BXKEY-abc123"
+     },
+     "body": null
+    }
+   ],
+   "sleeps": [
+    2.0
+   ],
+   "clock_end": 1767225602.0,
+   "markers": [
+    [
+     "WARNING",
+     "[BINGX-ATOMIC-FALLBACK]"
+    ],
+    [
+     "INFO",
+     "[BINGX-LEGACY-GAP]"
+    ],
+    [
+     "DEBUG",
+     "[TP-VERIFIED]"
+    ]
+   ],
+   "saved": {
+    "hedge_saved": [],
+    "auth_reset": [],
+    "events": [],
+    "metrics": [
+     "trade_placed",
+     "trade_placement_latency_ms",
+     "sl_tp_attached"
+    ]
+   },
+   "final": {
+    "hedge": {},
+    "account_type": {},
+    "delisted": [],
+    "fail_count": {},
+    "bybit_offset": 0
+   }
+  }
+ },
+ {
+  "scenario": {
+   "name": "pt_limit_unfilled_cancel",
+   "exchange": "bingx",
+   "call": "place_trade",
+   "args": [
+    "BXKEY-abc123",
+    "bx-secret-456",
+    "BTC-USDT-SWAP",
+    "LONG",
+    87000.5,
+    86000.0,
+    88500.0,
+    1.0,
+    10
+   ],
+   "kwargs": {},
+   "routes": [
+    {
+     "method": "GET",
+     "path": "/openApi/swap/v2/quote/contracts",
+     "responses": [
+      {
+       "text": "{\"code\": 0, \"msg\": \"\", \"data\": [{\"symbol\": \"BTC-USDT\", \"tradeMinQuantity\": 0.0001, \"pricePrecision\": 1, \"maxLeverage\": 125, \"status\": 1}, {\"symbol\": \"ETH-USDT\", \"tradeMinQuantity\": 0.01, \"pricePrecision\": 2, \"maxLeverage\": 100, \"status\": 1}, {\"symbol\": \"1000PEPE-USDT\", \"tradeMinQuantity\": 100, \"pricePrecision\": 7, \"maxLeverage\": 50, \"status\": 1}, {\"symbol\": \"TONCOIN-USDT\", \"tradeMinQuantity\": 1, \"pricePrecision\": 4, \"maxLeverage\": \"75\", \"status\": 1}, {\"symbol\": \"ASTER-USDT\", \"tradeMinQuantity\": 2.64, \"pricePrecision\": 4, \"maxLeverage\": 20, \"status\": 1}]}"
+      }
+     ]
+    },
+    {
+     "method": "GET",
+     "path": "/openApi/swap/v2/user/balance",
+     "responses": [
+      {
+       "text": "{\"code\": 0, \"msg\": \"\", \"data\": {\"balance\": {\"userId\": \"1\", \"asset\": \"USDT\", \"balance\": \"1000.0\", \"equity\": \"1000.5\", \"unrealizedProfit\": \"0.5\", \"availableMargin\": \"900.0\"}}}"
+      }
+     ]
+    },
+    {
+     "method": "POST",
+     "path": "/openApi/swap/v2/trade/leverage",
+     "responses": [
+      {
+       "text": "{\"code\": 0, \"msg\": \"\", \"data\": {\"leverage\": 10, \"symbol\": \"BTC-USDT\"}}"
+      }
+     ]
+    },
+    {
+     "method": "GET",
+     "path": "/openApi/swap/v2/quote/price",
+     "responses": [
+      {
+       "text": "{\"code\": 0, \"msg\": \"\", \"data\": {\"symbol\": \"BTC-USDT\", \"price\": \"87000.0\", \"time\": 1767225600000}}"
+      }
+     ]
+    },
+    {
+     "method": "POST",
+     "path": "/openApi/swap/v2/trade/order",
+     "responses": [
+      {
+       "text": "{\"code\": 0, \"msg\": \"\", \"data\": {\"order\": {\"orderId\": 1735947220470939648, \"symbol\": \"BTC-USDT\", \"side\": \"BUY\", \"type\": \"LIMIT\"}}}"
+      }
+     ]
+    },
+    {
+     "method": "GET",
+     "path": "/openApi/swap/v2/user/positions",
+     "responses": [
+      {
+       "text": "{\"code\": 0, \"msg\": \"\", \"data\": []}"
+      }
+     ]
+    },
+    {
+     "method": "DELETE",
+     "path": "/openApi/swap/v2/trade/allOpenOrders",
+     "responses": [
+      {
+       "text": "{\"code\": 0, \"msg\": \"\", \"data\": {\"success\": [], \"orders\": [{\"orderId\": 1735947220470939648}]}}"
+      }
+     ]
+    }
+   ],
+   "state": {},
+   "random": [],
+   "clock": 1767225600.0
+  },
+  "expected": {
+   "name": "pt_limit_unfilled_cancel",
+   "result": {
+    "ok": false,
+    "error": "Лимитный ордер на BTC-USDT не исполнился за 10 сек (цена ушла). Ордер отменён. Попробуйте ещё раз."
+   },
+   "requests": [
+    {
+     "method": "GET",
+     "url": "https://open-api.bingx.com/openApi/swap/v2/quote/contracts",
+     "headers": {},
+     "body": null
+    },
+    {
+     "method": "GET",
+     "url": "https://open-api.bingx.com/openApi/swap/v2/user/balance?recvWindow=15000&timestamp=1767225600000&signature=54dc97c97f1c3ca650cfcefb891ffa5c88591dda3defded4580343391c67be79",
+     "headers": {
+      "X-BX-APIKEY": "BXKEY-abc123"
+     },
+     "body": null
+    },
+    {
+     "method": "POST",
+     "url": "https://open-api.bingx.com/openApi/swap/v2/trade/leverage?leverage=10&recvWindow=15000&side=LONG&symbol=BTC-USDT&timestamp=1767225600000&signature=c65994213f74624bfdf7eb14611228af6bdd3257908b32b53ef5cff0f9eb7a0e",
+     "headers": {
+      "X-BX-APIKEY": "BXKEY-abc123"
+     },
+     "body": null
+    },
+    {
+     "method": "GET",
+     "url": "https://open-api.bingx.com/openApi/swap/v2/quote/price?recvWindow=15000&symbol=BTC-USDT&timestamp=1767225600000&signature=8c72fd5c91131844fbe8cf03300f72a097966266a3b2ecd7e45acbf566990a04",
+     "headers": {
+      "X-BX-APIKEY": "BXKEY-abc123"
+     },
+     "body": null
+    },
+    {
+     "method": "POST",
+     "url": "https://open-api.bingx.com/openApi/swap/v2/trade/order?positionSide=LONG&price=87000.5&quantity=0.0100&recvWindow=15000&side=BUY&symbol=BTC-USDT&timeInForce=GTC&timestamp=1767225600000&type=LIMIT&signature=d9ca18c4bf27dc659558b2ef345b844e9ced6bb2c2599fba1382f3aac106b9d4",
+     "headers": {
+      "X-BX-APIKEY": "BXKEY-abc123"
+     },
+     "body": null
+    },
+    {
+     "method": "GET",
+     "url": "https://open-api.bingx.com/openApi/swap/v2/user/positions?recvWindow=15000&symbol=BTC-USDT&timestamp=1767225600000&signature=8c72fd5c91131844fbe8cf03300f72a097966266a3b2ecd7e45acbf566990a04",
+     "headers": {
+      "X-BX-APIKEY": "BXKEY-abc123"
+     },
+     "body": null
+    },
+    {
+     "method": "GET",
+     "url": "https://open-api.bingx.com/openApi/swap/v2/user/positions?recvWindow=15000&symbol=BTC-USDT&timestamp=1767225600200&signature=001895d2304ea85e235ef3a033e0918f1d3b509bc1dbdac3eabf2be9ae4cfef8",
+     "headers": {
+      "X-BX-APIKEY": "BXKEY-abc123"
+     },
+     "body": null
+    },
+    {
+     "method": "GET",
+     "url": "https://open-api.bingx.com/openApi/swap/v2/user/positions?recvWindow=15000&symbol=BTC-USDT&timestamp=1767225600400&signature=ddfbc76d6ac980d4644bb3c88ef6cd44cb6cd5c93bc9dfced0ee6ab53e0b1a47",
+     "headers": {
+      "X-BX-APIKEY": "BXKEY-abc123"
+     },
+     "body": null
+    },
+    {
+     "method": "GET",
+     "url": "https://open-api.bingx.com/openApi/swap/v2/user/positions?recvWindow=15000&symbol=BTC-USDT&timestamp=1767225600600&signature=430d48007528a6296c73c7817689ee91f3473bd0d093d99c049f2ec7304de266",
+     "headers": {
+      "X-BX-APIKEY": "BXKEY-abc123"
+     },
+     "body": null
+    },
+    {
+     "method": "GET",
+     "url": "https://open-api.bingx.com/openApi/swap/v2/user/positions?recvWindow=15000&symbol=BTC-USDT&timestamp=1767225600800&signature=435fe0af6246df85e22575698ba81f7bee92ff4aa518b7845d1e9c89c38973e8",
+     "headers": {
+      "X-BX-APIKEY": "BXKEY-abc123"
+     },
+     "body": null
+    },
+    {
+     "method": "GET",
+     "url": "https://open-api.bingx.com/openApi/swap/v2/user/positions?recvWindow=15000&symbol=BTC-USDT&timestamp=1767225601000&signature=ec6d24eed5c44a16cb9b4a3e2ca461dab7d2535ae437a73c3ca8835ef628f337",
+     "headers": {
+      "X-BX-APIKEY": "BXKEY-abc123"
+     },
+     "body": null
+    },
+    {
+     "method": "GET",
+     "url": "https://open-api.bingx.com/openApi/swap/v2/user/positions?recvWindow=15000&symbol=BTC-USDT&timestamp=1767225601200&signature=30c2a60d9159627024db3e70bc50eea65497bc24b49a8f520ad96cf2558a05c9",
+     "headers": {
+      "X-BX-APIKEY": "BXKEY-abc123"
+     },
+     "body": null
+    },
+    {
+     "method": "GET",
+     "url": "https://open-api.bingx.com/openApi/swap/v2/user/positions?recvWindow=15000&symbol=BTC-USDT&timestamp=1767225601400&signature=9ffd3f932d43e144e9fb3371cd805e993992d8e410478b6659ea8160db11b798",
+     "headers": {
+      "X-BX-APIKEY": "BXKEY-abc123"
+     },
+     "body": null
+    },
+    {
+     "method": "GET",
+     "url": "https://open-api.bingx.com/openApi/swap/v2/user/positions?recvWindow=15000&symbol=BTC-USDT&timestamp=1767225601600&signature=ef548c40b59af9781cd33931c0cc93faf1987920a80fd87540c276cbce56edd6",
+     "headers": {
+      "X-BX-APIKEY": "BXKEY-abc123"
+     },
+     "body": null
+    },
+    {
+     "method": "GET",
+     "url": "https://open-api.bingx.com/openApi/swap/v2/user/positions?recvWindow=15000&symbol=BTC-USDT&timestamp=1767225601800&signature=f2fdfe219e17f2bbc0fb4c6c498af203b297fc8d914f682d4220c7a4f19c8628",
+     "headers": {
+      "X-BX-APIKEY": "BXKEY-abc123"
+     },
+     "body": null
+    },
+    {
+     "method": "GET",
+     "url": "https://open-api.bingx.com/openApi/swap/v2/user/positions?recvWindow=15000&symbol=BTC-USDT&timestamp=1767225602000&signature=2a2e9ab996f56f5a656cbd86ef925ea2804fb5b4f2833a1929aaeceb64682b2e",
+     "headers": {
+      "X-BX-APIKEY": "BXKEY-abc123"
+     },
+     "body": null
+    },
+    {
+     "method": "GET",
+     "url": "https://open-api.bingx.com/openApi/swap/v2/user/positions?recvWindow=15000&symbol=BTC-USDT&timestamp=1767225602200&signature=bb4bdadcbb6834ff25b0c92e58598d14ce6fdf959020b81fa7d75acd7b209c0d",
+     "headers": {
+      "X-BX-APIKEY": "BXKEY-abc123"
+     },
+     "body": null
+    },
+    {
+     "method": "GET",
+     "url": "https://open-api.bingx.com/openApi/swap/v2/user/positions?recvWindow=15000&symbol=BTC-USDT&timestamp=1767225602400&signature=f718e1ef115e7b280ffe9451bd51a8f555875066102bf8d10f03f7b31cffa17a",
+     "headers": {
+      "X-BX-APIKEY": "BXKEY-abc123"
+     },
+     "body": null
+    },
+    {
+     "method": "GET",
+     "url": "https://open-api.bingx.com/openApi/swap/v2/user/positions?recvWindow=15000&symbol=BTC-USDT&timestamp=1767225602600&signature=bde73659752c3a40d4b8177fe9b884516c167b9c3759ce75bb4965a704696397",
+     "headers": {
+      "X-BX-APIKEY": "BXKEY-abc123"
+     },
+     "body": null
+    },
+    {
+     "method": "GET",
+     "url": "https://open-api.bingx.com/openApi/swap/v2/user/positions?recvWindow=15000&symbol=BTC-USDT&timestamp=1767225602800&signature=cbc98530841737ae1b736d81896d4abb6af5f306da66ea958226f3366a16cfef",
+     "headers": {
+      "X-BX-APIKEY": "BXKEY-abc123"
+     },
+     "body": null
+    },
+    {
+     "method": "GET",
+     "url": "https://open-api.bingx.com/openApi/swap/v2/user/positions?recvWindow=15000&symbol=BTC-USDT&timestamp=1767225603000&signature=37069f8dc7438efd6d572062c31e0b4646f00c46044864db8879451b96865cfa",
+     "headers": {
+      "X-BX-APIKEY": "BXKEY-abc123"
+     },
+     "body": null
+    },
+    {
+     "method": "GET",
+     "url": "https://open-api.bingx.com/openApi/swap/v2/user/positions?recvWindow=15000&symbol=BTC-USDT&timestamp=1767225603200&signature=ee2e8962a9b1f43383a29790b403dc12bed1a4a8bedad7c84a40f1a8f155e0f5",
+     "headers": {
+      "X-BX-APIKEY": "BXKEY-abc123"
+     },
+     "body": null
+    },
+    {
+     "method": "GET",
+     "url": "https://open-api.bingx.com/openApi/swap/v2/user/positions?recvWindow=15000&symbol=BTC-USDT&timestamp=1767225603400&signature=06727e44db30682ee022d1d3a46a23def6cb8a8c483d571a52973bed6c2b7992",
+     "headers": {
+      "X-BX-APIKEY": "BXKEY-abc123"
+     },
+     "body": null
+    },
+    {
+     "method": "GET",
+     "url": "https://open-api.bingx.com/openApi/swap/v2/user/positions?recvWindow=15000&symbol=BTC-USDT&timestamp=1767225603600&signature=fd5240de504bd23512c38b341bb6e7976026223ca8ccd94d42771576830d1527",
+     "headers": {
+      "X-BX-APIKEY": "BXKEY-abc123"
+     },
+     "body": null
+    },
+    {
+     "method": "GET",
+     "url": "https://open-api.bingx.com/openApi/swap/v2/user/positions?recvWindow=15000&symbol=BTC-USDT&timestamp=1767225603800&signature=7e3768322f36d1a94f9bef1920634605950919bd62d0761d4baa60786fd0b601",
+     "headers": {
+      "X-BX-APIKEY": "BXKEY-abc123"
+     },
+     "body": null
+    },
+    {
+     "method": "GET",
+     "url": "https://open-api.bingx.com/openApi/swap/v2/user/positions?recvWindow=15000&symbol=BTC-USDT&timestamp=1767225604000&signature=cfd67cda04d66704eba245342ec35db7078a4a82ad23f99c95a1d5cbd1bd7a1f",
+     "headers": {
+      "X-BX-APIKEY": "BXKEY-abc123"
+     },
+     "body": null
+    },
+    {
+     "method": "GET",
+     "url": "https://open-api.bingx.com/openApi/swap/v2/user/positions?recvWindow=15000&symbol=BTC-USDT&timestamp=1767225604200&signature=7661359db3f029285021586380b8ed3d0c13a31a4952cb8604063ceeadd4ec5f",
+     "headers": {
+      "X-BX-APIKEY": "BXKEY-abc123"
+     },
+     "body": null
+    },
+    {
+     "method": "GET",
+     "url": "https://open-api.bingx.com/openApi/swap/v2/user/positions?recvWindow=15000&symbol=BTC-USDT&timestamp=1767225604400&signature=7f542e1717b72a2c0760a6f1c5ecee44121ba5a92c69c2aeada215b061ce9fe2",
+     "headers": {
+      "X-BX-APIKEY": "BXKEY-abc123"
+     },
+     "body": null
+    },
+    {
+     "method": "GET",
+     "url": "https://open-api.bingx.com/openApi/swap/v2/user/positions?recvWindow=15000&symbol=BTC-USDT&timestamp=1767225604600&signature=65027f7b986e07afd928942146c1dd5e9b56508379912d403cc16406d32b7960",
+     "headers": {
+      "X-BX-APIKEY": "BXKEY-abc123"
+     },
+     "body": null
+    },
+    {
+     "method": "GET",
+     "url": "https://open-api.bingx.com/openApi/swap/v2/user/positions?recvWindow=15000&symbol=BTC-USDT&timestamp=1767225604800&signature=125f649b67ce954ab945bf1313a1ccd5453e9c34fa956d41d8e0a469c4503ace",
+     "headers": {
+      "X-BX-APIKEY": "BXKEY-abc123"
+     },
+     "body": null
+    },
+    {
+     "method": "GET",
+     "url": "https://open-api.bingx.com/openApi/swap/v2/user/positions?recvWindow=15000&symbol=BTC-USDT&timestamp=1767225605000&signature=fe227a225e6e0c08ed662459785a4c5ff3200cc91c9857efbfc4487ba88d3edb",
+     "headers": {
+      "X-BX-APIKEY": "BXKEY-abc123"
+     },
+     "body": null
+    },
+    {
+     "method": "GET",
+     "url": "https://open-api.bingx.com/openApi/swap/v2/user/positions?recvWindow=15000&symbol=BTC-USDT&timestamp=1767225605200&signature=6988f7207accdc33bb2d70bd8e83349078c3278d5b6b160bd2cda1d0c84c9579",
+     "headers": {
+      "X-BX-APIKEY": "BXKEY-abc123"
+     },
+     "body": null
+    },
+    {
+     "method": "GET",
+     "url": "https://open-api.bingx.com/openApi/swap/v2/user/positions?recvWindow=15000&symbol=BTC-USDT&timestamp=1767225605400&signature=af65bdf21af6900bd0214319bb4d4b363ae684256d62e62c794d282513c60971",
+     "headers": {
+      "X-BX-APIKEY": "BXKEY-abc123"
+     },
+     "body": null
+    },
+    {
+     "method": "GET",
+     "url": "https://open-api.bingx.com/openApi/swap/v2/user/positions?recvWindow=15000&symbol=BTC-USDT&timestamp=1767225605600&signature=dab2c72e25e790ea0a6936b86b90bb63ffa51f4aa4ef358f5e2d8f75d648de47",
+     "headers": {
+      "X-BX-APIKEY": "BXKEY-abc123"
+     },
+     "body": null
+    },
+    {
+     "method": "GET",
+     "url": "https://open-api.bingx.com/openApi/swap/v2/user/positions?recvWindow=15000&symbol=BTC-USDT&timestamp=1767225605800&signature=e063eb59984db0b8b428d5e3382ed70e148e5230500dc9b09083fd7a01e9ae21",
+     "headers": {
+      "X-BX-APIKEY": "BXKEY-abc123"
+     },
+     "body": null
+    },
+    {
+     "method": "GET",
+     "url": "https://open-api.bingx.com/openApi/swap/v2/user/positions?recvWindow=15000&symbol=BTC-USDT&timestamp=1767225606000&signature=05e9263a63a2c9599ed0d23a7291bc386f045b109d93878dd893c4cf88823d1d",
+     "headers": {
+      "X-BX-APIKEY": "BXKEY-abc123"
+     },
+     "body": null
+    },
+    {
+     "method": "GET",
+     "url": "https://open-api.bingx.com/openApi/swap/v2/user/positions?recvWindow=15000&symbol=BTC-USDT&timestamp=1767225606200&signature=3150aca5df78f0ed3e11b975e28d8cbd4f58594f73deefff99f5e21695e16d0a",
+     "headers": {
+      "X-BX-APIKEY": "BXKEY-abc123"
+     },
+     "body": null
+    },
+    {
+     "method": "GET",
+     "url": "https://open-api.bingx.com/openApi/swap/v2/user/positions?recvWindow=15000&symbol=BTC-USDT&timestamp=1767225606400&signature=7af1f7e8756cb19da16a367f2ece25a147b88737c9b73023008b694431116986",
+     "headers": {
+      "X-BX-APIKEY": "BXKEY-abc123"
+     },
+     "body": null
+    },
+    {
+     "method": "GET",
+     "url": "https://open-api.bingx.com/openApi/swap/v2/user/positions?recvWindow=15000&symbol=BTC-USDT&timestamp=1767225606600&signature=d09974e0a73b17c7d2065642c3eda113d6c8cb68fad4cf4145753a35c9d133c7",
+     "headers": {
+      "X-BX-APIKEY": "BXKEY-abc123"
+     },
+     "body": null
+    },
+    {
+     "method": "GET",
+     "url": "https://open-api.bingx.com/openApi/swap/v2/user/positions?recvWindow=15000&symbol=BTC-USDT&timestamp=1767225606800&signature=fdb874fccd5a25d0ba3d1eb51a23aa9e22f7e129db26ffb0483466c2683917ff",
+     "headers": {
+      "X-BX-APIKEY": "BXKEY-abc123"
+     },
+     "body": null
+    },
+    {
+     "method": "GET",
+     "url": "https://open-api.bingx.com/openApi/swap/v2/user/positions?recvWindow=15000&symbol=BTC-USDT&timestamp=1767225607000&signature=b2729b30f7d9f1a45be03113311528b96ec28eb29939d1339d9b95986fdfe750",
+     "headers": {
+      "X-BX-APIKEY": "BXKEY-abc123"
+     },
+     "body": null
+    },
+    {
+     "method": "GET",
+     "url": "https://open-api.bingx.com/openApi/swap/v2/user/positions?recvWindow=15000&symbol=BTC-USDT&timestamp=1767225607200&signature=4684c16e6488451b92de5bff7069c2053c28bc99d3347c1659152fa882d43af6",
+     "headers": {
+      "X-BX-APIKEY": "BXKEY-abc123"
+     },
+     "body": null
+    },
+    {
+     "method": "GET",
+     "url": "https://open-api.bingx.com/openApi/swap/v2/user/positions?recvWindow=15000&symbol=BTC-USDT&timestamp=1767225607400&signature=0e8c87d8d5db29b1b3521ec36cc4fc683928d026751fabfd3b64c9aaf6ef944e",
+     "headers": {
+      "X-BX-APIKEY": "BXKEY-abc123"
+     },
+     "body": null
+    },
+    {
+     "method": "GET",
+     "url": "https://open-api.bingx.com/openApi/swap/v2/user/positions?recvWindow=15000&symbol=BTC-USDT&timestamp=1767225607600&signature=937df05b19facb15c12e1ed1c42e619cebda04d555d718d83d5211fe8ddbc7b7",
+     "headers": {
+      "X-BX-APIKEY": "BXKEY-abc123"
+     },
+     "body": null
+    },
+    {
+     "method": "GET",
+     "url": "https://open-api.bingx.com/openApi/swap/v2/user/positions?recvWindow=15000&symbol=BTC-USDT&timestamp=1767225607800&signature=aff478da66eeac7e890800437edfc0ef1debbc761a91e06b52267f9c80f0e4f2",
+     "headers": {
+      "X-BX-APIKEY": "BXKEY-abc123"
+     },
+     "body": null
+    },
+    {
+     "method": "GET",
+     "url": "https://open-api.bingx.com/openApi/swap/v2/user/positions?recvWindow=15000&symbol=BTC-USDT&timestamp=1767225608000&signature=224e72f95761b5339bd8bae46b3b0b389bd824d3828c563235853f8fe0a99da9",
+     "headers": {
+      "X-BX-APIKEY": "BXKEY-abc123"
+     },
+     "body": null
+    },
+    {
+     "method": "GET",
+     "url": "https://open-api.bingx.com/openApi/swap/v2/user/positions?recvWindow=15000&symbol=BTC-USDT&timestamp=1767225608200&signature=bfb923e262a6d7c2a1851243d2efe0edf6607f1fc1468fa524208a522b414d8c",
+     "headers": {
+      "X-BX-APIKEY": "BXKEY-abc123"
+     },
+     "body": null
+    },
+    {
+     "method": "GET",
+     "url": "https://open-api.bingx.com/openApi/swap/v2/user/positions?recvWindow=15000&symbol=BTC-USDT&timestamp=1767225608400&signature=a7476498ac863a199b17e377bdbee839eaaa1bf9458c8c957420ca373c7868b8",
+     "headers": {
+      "X-BX-APIKEY": "BXKEY-abc123"
+     },
+     "body": null
+    },
+    {
+     "method": "GET",
+     "url": "https://open-api.bingx.com/openApi/swap/v2/user/positions?recvWindow=15000&symbol=BTC-USDT&timestamp=1767225608600&signature=de0e82df10a20d6b646798d5804912d7402af75f4d59f126a0795150ecc5a3b8",
+     "headers": {
+      "X-BX-APIKEY": "BXKEY-abc123"
+     },
+     "body": null
+    },
+    {
+     "method": "GET",
+     "url": "https://open-api.bingx.com/openApi/swap/v2/user/positions?recvWindow=15000&symbol=BTC-USDT&timestamp=1767225608800&signature=958fac40f1f2847d953d28170852c30a73e2b38c01dd5a0df67f01f471eaf0ff",
+     "headers": {
+      "X-BX-APIKEY": "BXKEY-abc123"
+     },
+     "body": null
+    },
+    {
+     "method": "GET",
+     "url": "https://open-api.bingx.com/openApi/swap/v2/user/positions?recvWindow=15000&symbol=BTC-USDT&timestamp=1767225609000&signature=cbab806916fe89b32a6f53c199e8b82544432c7d007bcac843d81c02ca0c0a29",
+     "headers": {
+      "X-BX-APIKEY": "BXKEY-abc123"
+     },
+     "body": null
+    },
+    {
+     "method": "GET",
+     "url": "https://open-api.bingx.com/openApi/swap/v2/user/positions?recvWindow=15000&symbol=BTC-USDT&timestamp=1767225609200&signature=92776f50e75c0b404181f95ff869c7d20ed23fefc1cb9809cb9b8d1e97fc455b",
+     "headers": {
+      "X-BX-APIKEY": "BXKEY-abc123"
+     },
+     "body": null
+    },
+    {
+     "method": "GET",
+     "url": "https://open-api.bingx.com/openApi/swap/v2/user/positions?recvWindow=15000&symbol=BTC-USDT&timestamp=1767225609400&signature=86a162b8f22dd1189a38898549c8d600c4cf4b9d1168a4980c8ec49ce30c7d1b",
+     "headers": {
+      "X-BX-APIKEY": "BXKEY-abc123"
+     },
+     "body": null
+    },
+    {
+     "method": "GET",
+     "url": "https://open-api.bingx.com/openApi/swap/v2/user/positions?recvWindow=15000&symbol=BTC-USDT&timestamp=1767225609600&signature=d36c872d3411486c877ea6ddb66d9f1172f3331c73ba6c02f33313f78c986ba5",
+     "headers": {
+      "X-BX-APIKEY": "BXKEY-abc123"
+     },
+     "body": null
+    },
+    {
+     "method": "GET",
+     "url": "https://open-api.bingx.com/openApi/swap/v2/user/positions?recvWindow=15000&symbol=BTC-USDT&timestamp=1767225609800&signature=74b17314d8d3f9260210f1f073dd5f4702553364f240759277a7befc665394fe",
+     "headers": {
+      "X-BX-APIKEY": "BXKEY-abc123"
+     },
+     "body": null
+    },
+    {
+     "method": "DELETE",
+     "url": "https://open-api.bingx.com/openApi/swap/v2/trade/allOpenOrders?recvWindow=15000&symbol=BTC-USDT&timestamp=1767225610000&signature=6bdb69bdfc6082d307d406c3a02287f2497940234d1db8ef483a8d0cfcc909ba",
+     "headers": {
+      "X-BX-APIKEY": "BXKEY-abc123"
+     },
+     "body": null
+    }
+   ],
+   "sleeps": [
+    0.2,
+    0.2,
+    0.2,
+    0.2,
+    0.2,
+    0.2,
+    0.2,
+    0.2,
+    0.2,
+    0.2,
+    0.2,
+    0.2,
+    0.2,
+    0.2,
+    0.2,
+    0.2,
+    0.2,
+    0.2,
+    0.2,
+    0.2,
+    0.2,
+    0.2,
+    0.2,
+    0.2,
+    0.2,
+    0.2,
+    0.2,
+    0.2,
+    0.2,
+    0.2,
+    0.2,
+    0.2,
+    0.2,
+    0.2,
+    0.2,
+    0.2,
+    0.2,
+    0.2,
+    0.2,
+    0.2,
+    0.2,
+    0.2,
+    0.2,
+    0.2,
+    0.2,
+    0.2,
+    0.2,
+    0.2,
+    0.2,
+    0.2
+   ],
+   "clock_end": 1767225610.0000024,
+   "markers": [
+    [
+     "INFO",
+     "[BINGX-LEGACY-GAP]"
+    ]
+   ],
+   "saved": {
+    "hedge_saved": [],
+    "auth_reset": [],
+    "events": [],
+    "metrics": []
+   },
+   "final": {
+    "hedge": {},
+    "account_type": {},
+    "delisted": [],
+    "fail_count": {},
+    "bybit_offset": 0
+   }
+  }
+ },
+ {
+  "scenario": {
+   "name": "pt_sl_fail_safety_close",
+   "exchange": "bingx",
+   "call": "place_trade",
+   "args": [
+    "BXKEY-abc123",
+    "bx-secret-456",
+    "BTC-USDT-SWAP",
+    "LONG",
+    87000.5,
+    86000.0,
+    88500.0,
+    1.0,
+    10
+   ],
+   "kwargs": {
+    "trade_id": "bx-4",
+    "user_id": 2
+   },
+   "routes": [
+    {
+     "method": "GET",
+     "path": "/openApi/swap/v2/quote/contracts",
+     "responses": [
+      {
+       "text": "{\"code\": 0, \"msg\": \"\", \"data\": [{\"symbol\": \"BTC-USDT\", \"tradeMinQuantity\": 0.0001, \"pricePrecision\": 1, \"maxLeverage\": 125, \"status\": 1}, {\"symbol\": \"ETH-USDT\", \"tradeMinQuantity\": 0.01, \"pricePrecision\": 2, \"maxLeverage\": 100, \"status\": 1}, {\"symbol\": \"1000PEPE-USDT\", \"tradeMinQuantity\": 100, \"pricePrecision\": 7, \"maxLeverage\": 50, \"status\": 1}, {\"symbol\": \"TONCOIN-USDT\", \"tradeMinQuantity\": 1, \"pricePrecision\": 4, \"maxLeverage\": \"75\", \"status\": 1}, {\"symbol\": \"ASTER-USDT\", \"tradeMinQuantity\": 2.64, \"pricePrecision\": 4, \"maxLeverage\": 20, \"status\": 1}]}"
+      }
+     ]
+    },
+    {
+     "method": "GET",
+     "path": "/openApi/swap/v2/user/balance",
+     "responses": [
+      {
+       "text": "{\"code\": 0, \"msg\": \"\", \"data\": {\"balance\": {\"userId\": \"1\", \"asset\": \"USDT\", \"balance\": \"1000.0\", \"equity\": \"1000.5\", \"unrealizedProfit\": \"0.5\", \"availableMargin\": \"900.0\"}}}"
+      }
+     ]
+    },
+    {
+     "method": "POST",
+     "path": "/openApi/swap/v2/trade/leverage",
+     "responses": [
+      {
+       "text": "{\"code\": 0, \"msg\": \"\", \"data\": {\"leverage\": 10, \"symbol\": \"BTC-USDT\"}}"
+      }
+     ]
+    },
+    {
+     "method": "POST",
+     "path": "/openApi/swap/v2/trade/batchOrders",
+     "responses": [
+      {
+       "text": "{\"code\": 100001, \"msg\": \"Signature verification failed\", \"data\": {}}"
+      }
+     ]
+    },
+    {
+     "method": "GET",
+     "path": "/openApi/swap/v2/quote/price",
+     "responses": [
+      {
+       "text": "{\"code\": 0, \"msg\": \"\", \"data\": {\"symbol\": \"BTC-USDT\", \"price\": \"80000\", \"time\": 1767225600000}}"
+      }
+     ]
+    },
+    {
+     "method": "POST",
+     "path": "/openApi/swap/v2/trade/order",
+     "responses": [
+      {
+       "text": "{\"code\": 0, \"msg\": \"\", \"data\": {\"order\": {\"orderId\": 1735947220470939648, \"symbol\": \"BTC-USDT\", \"side\": \"BUY\", \"type\": \"LIMIT\"}}}"
+      },
+      {
+       "text": "{\"code\": 101400, \"msg\": \"invalid stopPrice trigger\", \"data\": {}}"
+      },
+      {
+       "text": "{\"code\": 101400, \"msg\": \"stopPrice invalid\", \"data\": {}}"
+      },
+      {
+       "text": "{\"code\": 80012, \"msg\": \"service unavailable\", \"data\": {}}"
+      },
+      {
+       "text": "{\"code\": 80012, \"msg\": \"x\", \"data\": {}}"
+      },
+      {
+       "text": "{\"code\": 80012, \"msg\": \"y\", \"data\": {}}"
+      },
+      {
+       "text": "{\"code\": 0, \"msg\": \"\", \"data\": {\"order\": {\"orderId\": 99, \"symbol\": \"BTC-USDT\", \"side\": \"BUY\", \"type\": \"LIMIT\"}}}"
+      }
+     ]
+    },
+    {
+     "method": "GET",
+     "path": "/openApi/swap/v2/user/positions",
+     "responses": [
+      {
+       "text": "{\"code\": 0, \"msg\": \"\", \"data\": [{\"symbol\": \"BTC-USDT\", \"positionSide\": \"LONG\", \"positionAmt\": \"0.0115\", \"avgPrice\": \"87000.5\", \"markPrice\": \"87000.5\", \"unrealizedProfit\": \"0.12\", \"leverage\": 10, \"stopLoss\": \"\"}]}"
+      }
+     ]
+    },
+    {
+     "method": "DELETE",
+     "path": "/openApi/swap/v2/trade/allOpenOrders",
+     "responses": [
+      {
+       "text": "{\"code\": 0, \"msg\": \"\", \"data\": {\"orders\": []}}"
+      }
+     ]
+    }
+   ],
+   "state": {},
+   "random": [],
+   "clock": 1767225600.0
+  },
+  "expected": {
+   "name": "pt_sl_fail_safety_close",
+   "result": {
+    "ok": false,
+    "error": "SL-ордер не выставлен после 3 попыток. Ордер на BTC-USDT отменён для безопасности. Попробуйте ещё раз."
+   },
+   "requests": [
+    {
+     "method": "GET",
+     "url": "https://open-api.bingx.com/openApi/swap/v2/quote/contracts",
+     "headers": {},
+     "body": null
+    },
+    {
+     "method": "GET",
+     "url": "https://open-api.bingx.com/openApi/swap/v2/user/balance?recvWindow=15000&timestamp=1767225600000&signature=54dc97c97f1c3ca650cfcefb891ffa5c88591dda3defded4580343391c67be79",
+     "headers": {
+      "X-BX-APIKEY": "BXKEY-abc123"
+     },
+     "body": null
+    },
+    {
+     "method": "POST",
+     "url": "https://open-api.bingx.com/openApi/swap/v2/trade/leverage?leverage=10&recvWindow=15000&side=LONG&symbol=BTC-USDT&timestamp=1767225600000&signature=c65994213f74624bfdf7eb14611228af6bdd3257908b32b53ef5cff0f9eb7a0e",
+     "headers": {
+      "X-BX-APIKEY": "BXKEY-abc123"
+     },
+     "body": null
+    },
+    {
+     "method": "POST",
+     "url": "https://open-api.bingx.com/openApi/swap/v2/trade/batchOrders?batchOrders=%5B%7B%22symbol%22%3A%20%22BTC-USDT%22%2C%20%22side%22%3A%20%22BUY%22%2C%20%22type%22%3A%20%22MARKET%22%2C%20%22quantity%22%3A%20%220.0100%22%2C%20%22positionSide%22%3A%20%22LONG%22%2C%20%22clientOrderId%22%3A%20%22chm_cb72f706881a%22%7D%2C%20%7B%22symbol%22%3A%20%22BTC-USDT%22%2C%20%22side%22%3A%20%22SELL%22%2C%20%22type%22%3A%20%22STOP_MARKET%22%2C%20%22quantity%22%3A%20%220.0100%22%2C%20%22stopPrice%22%3A%20%2286000.0%22%2C%20%22workingType%22%3A%20%22MARK_PRICE%22%2C%20%22positionSide%22%3A%20%22LONG%22%2C%20%22clientOrderId%22%3A%20%22chm_8a61dc5289c1%22%7D%2C%20%7B%22symbol%22%3A%20%22BTC-USDT%22%2C%20%22side%22%3A%20%22SELL%22%2C%20%22type%22%3A%20%22TAKE_PROFIT_MARKET%22%2C%20%22quantity%22%3A%20%220.0100%22%2C%20%22stopPrice%22%3A%20%2288500.0%22%2C%20%22workingType%22%3A%20%22MARK_PRICE%22%2C%20%22positionSide%22%3A%20%22LONG%22%2C%20%22clientOrderId%22%3A%20%22chm_34ba811f4afd%22%7D%5D&recvWindow=15000&timestamp=1767225600000&signature=27c64506ba95f89da2923878f74c5f049f6035bbb642fe9a8d5ff4d602861208",
+     "headers": {
+      "X-BX-APIKEY": "BXKEY-abc123"
+     },
+     "body": null
+    },
+    {
+     "method": "GET",
+     "url": "https://open-api.bingx.com/openApi/swap/v2/quote/price?recvWindow=15000&symbol=BTC-USDT&timestamp=1767225600000&signature=8c72fd5c91131844fbe8cf03300f72a097966266a3b2ecd7e45acbf566990a04",
+     "headers": {
+      "X-BX-APIKEY": "BXKEY-abc123"
+     },
+     "body": null
+    },
+    {
+     "method": "POST",
+     "url": "https://open-api.bingx.com/openApi/swap/v2/trade/order?clientOrderId=chm_cb72f706881a&positionSide=LONG&quantity=0.0100&recvWindow=15000&side=BUY&symbol=BTC-USDT&timestamp=1767225600000&type=MARKET&signature=2b74aa50ad358a46dc3afc684bc6273cf72284a0bb3e3aa03b2725c6b68352a3",
+     "headers": {
+      "X-BX-APIKEY": "BXKEY-abc123"
+     },
+     "body": null
+    },
+    {
+     "method": "GET",
+     "url": "https://open-api.bingx.com/openApi/swap/v2/user/positions?recvWindow=15000&symbol=BTC-USDT&timestamp=1767225600000&signature=8c72fd5c91131844fbe8cf03300f72a097966266a3b2ecd7e45acbf566990a04",
+     "headers": {
+      "X-BX-APIKEY": "BXKEY-abc123"
+     },
+     "body": null
+    },
+    {
+     "method": "POST",
+     "url": "https://open-api.bingx.com/openApi/swap/v2/trade/order?clientOrderId=chm_8a61dc5289c1&positionSide=LONG&quantity=0.0100&recvWindow=15000&side=SELL&stopPrice=86000.0&symbol=BTC-USDT&timestamp=1767225600000&type=STOP_MARKET&workingType=MARK_PRICE&signature=9d9b91e6b29ef84c2ba8989b886bfd580e123ec68b534dbd74a754018cd2d4ed",
+     "headers": {
+      "X-BX-APIKEY": "BXKEY-abc123"
+     },
+     "body": null
+    },
+    {
+     "method": "POST",
+     "url": "https://open-api.bingx.com/openApi/swap/v2/trade/order?clientOrderId=chm_8a61dc5289c1&positionSide=LONG&quantity=0.0100&recvWindow=15000&side=SELL&stopPrice=86000.0&symbol=BTC-USDT&timestamp=1767225602000&type=STOP_MARKET&workingType=MARK_PRICE&signature=8a03dde867a4d035c5dad3c4010835b61a65c74bb7463ba26842b550aefdd3f0",
+     "headers": {
+      "X-BX-APIKEY": "BXKEY-abc123"
+     },
+     "body": null
+    },
+    {
+     "method": "POST",
+     "url": "https://open-api.bingx.com/openApi/swap/v2/trade/order?clientOrderId=chm_8a61dc5289c1&positionSide=LONG&quantity=0.0100&recvWindow=15000&side=SELL&stopPrice=86000.0&symbol=BTC-USDT&timestamp=1767225602000&type=STOP_MARKET&workingType=CONTRACT_PRICE&signature=9d68bd8328641aeffc34bef0ffa02677c091dc3cf5dd20952795701c58891151",
+     "headers": {
+      "X-BX-APIKEY": "BXKEY-abc123"
+     },
+     "body": null
+    },
+    {
+     "method": "POST",
+     "url": "https://open-api.bingx.com/openApi/swap/v2/trade/order?clientOrderId=chm_8a61dc5289c1&positionSide=LONG&quantity=0.0100&recvWindow=15000&side=SELL&stopPrice=86000.0&symbol=BTC-USDT&timestamp=1767225604000&type=STOP_MARKET&workingType=CONTRACT_PRICE&signature=872c7e22cab2306d6fbd207edee13010a5f5391079f0ab656a712aa88b614fce",
+     "headers": {
+      "X-BX-APIKEY": "BXKEY-abc123"
+     },
+     "body": null
+    },
+    {
+     "method": "POST",
+     "url": "https://open-api.bingx.com/openApi/swap/v2/trade/order?clientOrderId=chm_8a61dc5289c1&positionSide=LONG&quantity=0.0100&recvWindow=15000&side=SELL&stopPrice=86000.0&symbol=BTC-USDT&timestamp=1767225606000&type=STOP_MARKET&workingType=CONTRACT_PRICE&signature=3f0501038a580bc6e2a36556d448b3eff051ecfe9ff42724fb523de2046966e2",
+     "headers": {
+      "X-BX-APIKEY": "BXKEY-abc123"
+     },
+     "body": null
+    },
+    {
+     "method": "DELETE",
+     "url": "https://open-api.bingx.com/openApi/swap/v2/trade/allOpenOrders?recvWindow=15000&symbol=BTC-USDT&timestamp=1767225608000&signature=224e72f95761b5339bd8bae46b3b0b389bd824d3828c563235853f8fe0a99da9",
+     "headers": {
+      "X-BX-APIKEY": "BXKEY-abc123"
+     },
+     "body": null
+    },
+    {
+     "method": "GET",
+     "url": "https://open-api.bingx.com/openApi/swap/v2/user/positions?recvWindow=15000&symbol=BTC-USDT&timestamp=1767225608000&signature=224e72f95761b5339bd8bae46b3b0b389bd824d3828c563235853f8fe0a99da9",
+     "headers": {
+      "X-BX-APIKEY": "BXKEY-abc123"
+     },
+     "body": null
+    },
+    {
+     "method": "POST",
+     "url": "https://open-api.bingx.com/openApi/swap/v2/trade/order?positionSide=LONG&quantity=0.0115&recvWindow=15000&side=SELL&symbol=BTC-USDT&timestamp=1767225608000&type=MARKET&signature=c728687b356ecf3d25a0eceff9a928dbf83d63ca386762874ade84fd15eb8003",
+     "headers": {
+      "X-BX-APIKEY": "BXKEY-abc123"
+     },
+     "body": null
+    }
+   ],
+   "sleeps": [
+    2.0,
+    2.0,
+    2.0,
+    2.0
+   ],
+   "clock_end": 1767225608.0,
+   "markers": [
+    [
+     "WARNING",
+     "[BINGX-ATOMIC-FALLBACK]"
+    ],
+    [
+     "INFO",
+     "[BINGX-LEGACY-GAP]"
+    ],
+    [
+     "ERROR",
+     "[SL-SAFETY-CLOSE-BINGX]"
+    ],
+    [
+     "ERROR",
+     "[SL-SAFETY-CLOSE-BINGX-OK]"
+    ]
+   ],
+   "saved": {
+    "hedge_saved": [],
+    "auth_reset": [],
+    "events": [],
+    "metrics": []
+   },
+   "final": {
+    "hedge": {},
+    "account_type": {},
+    "delisted": [],
+    "fail_count": {},
+    "bybit_offset": 0
+   }
+  }
+ },
+ {
+  "scenario": {
+   "name": "pt_tp_110413_adaptive",
+   "exchange": "bingx",
+   "call": "place_trade",
+   "args": [
+    "BXKEY-abc123",
+    "bx-secret-456",
+    "BTC-USDT-SWAP",
+    "LONG",
+    87000.5,
+    86000.0,
+    88500.0,
+    1.0,
+    10
+   ],
+   "kwargs": {
+    "tp2": 89500.0
+   },
+   "routes": [
+    {
+     "method": "GET",
+     "path": "/openApi/swap/v2/quote/contracts",
+     "responses": [
+      {
+       "text": "{\"code\": 0, \"msg\": \"\", \"data\": [{\"symbol\": \"BTC-USDT\", \"tradeMinQuantity\": 0.0001, \"pricePrecision\": 1, \"maxLeverage\": 125, \"status\": 1}, {\"symbol\": \"ETH-USDT\", \"tradeMinQuantity\": 0.01, \"pricePrecision\": 2, \"maxLeverage\": 100, \"status\": 1}, {\"symbol\": \"1000PEPE-USDT\", \"tradeMinQuantity\": 100, \"pricePrecision\": 7, \"maxLeverage\": 50, \"status\": 1}, {\"symbol\": \"TONCOIN-USDT\", \"tradeMinQuantity\": 1, \"pricePrecision\": 4, \"maxLeverage\": \"75\", \"status\": 1}, {\"symbol\": \"ASTER-USDT\", \"tradeMinQuantity\": 2.64, \"pricePrecision\": 4, \"maxLeverage\": 20, \"status\": 1}]}"
+      }
+     ]
+    },
+    {
+     "method": "GET",
+     "path": "/openApi/swap/v2/user/balance",
+     "responses": [
+      {
+       "text": "{\"code\": 0, \"msg\": \"\", \"data\": {\"balance\": {\"userId\": \"1\", \"asset\": \"USDT\", \"balance\": \"1000.0\", \"equity\": \"1000.5\", \"unrealizedProfit\": \"0.5\", \"availableMargin\": \"900.0\"}}}"
+      }
+     ]
+    },
+    {
+     "method": "POST",
+     "path": "/openApi/swap/v2/trade/leverage",
+     "responses": [
+      {
+       "text": "{\"code\": 0, \"msg\": \"\", \"data\": {\"leverage\": 10, \"symbol\": \"BTC-USDT\"}}"
+      }
+     ]
+    },
+    {
+     "method": "GET",
+     "path": "/openApi/swap/v2/quote/price",
+     "responses": [
+      {
+       "text": "{\"code\": 0, \"msg\": \"\", \"data\": {\"symbol\": \"BTC-USDT\", \"price\": \"87300\", \"time\": 1767225600000}}"
+      },
+      {
+       "text": "{\"code\": 0, \"msg\": \"\", \"data\": {\"symbol\": \"BTC-USDT\", \"price\": \"88900.5\", \"time\": 1767225600000}}"
+      }
+     ]
+    },
+    {
+     "method": "POST",
+     "path": "/openApi/swap/v2/trade/order",
+     "responses": [
+      {
+       "text": "{\"code\": 0, \"msg\": \"\", \"data\": {\"order\": {\"orderId\": 1735947220470939648, \"symbol\": \"BTC-USDT\", \"side\": \"BUY\", \"type\": \"LIMIT\"}}}"
+      },
+      {
+       "text": "{\"code\": 0, \"msg\": \"\", \"data\": {\"order\": {\"orderId\": 2, \"symbol\": \"BTC-USDT\", \"side\": \"BUY\", \"type\": \"LIMIT\"}}}"
+      },
+      {
+       "text": "{\"code\": 110413, \"msg\": \"TP price must be greater than current\", \"data\": {}}"
+      },
+      {
+       "text": "{\"code\": 0, \"msg\": \"\", \"data\": {\"order\": {\"orderId\": 4, \"symbol\": \"BTC-USDT\", \"side\": \"BUY\", \"type\": \"LIMIT\"}}}"
+      }
+     ]
+    },
+    {
+     "method": "GET",
+     "path": "/openApi/swap/v2/user/positions",
+     "responses": [
+      {
+       "text": "{\"code\": 0, \"msg\": \"\", \"data\": [{\"symbol\": \"BTC-USDT\", \"positionSide\": \"LONG\", \"positionAmt\": \"0.0115\", \"avgPrice\": \"87000.5\", \"markPrice\": \"87000.5\", \"unrealizedProfit\": \"0.12\", \"leverage\": 10, \"stopLoss\": \"\"}]}"
+      }
+     ]
+    },
+    {
+     "method": "GET",
+     "path": "/openApi/swap/v2/trade/openOrders",
+     "responses": [
+      {
+       "text": "{\"code\": 0, \"msg\": \"\", \"data\": {\"orders\": [{\"type\": \"TAKE_PROFIT_MARKET\", \"side\": \"SELL\"}, {\"type\": \"TAKE_PROFIT_MARKET\", \"side\": \"SELL\"}]}}"
+      }
+     ]
+    }
+   ],
+   "state": {},
+   "random": [],
+   "clock": 1767225600.0
+  },
+  "expected": {
+   "name": "pt_tp_110413_adaptive",
+   "result": {
+    "ok": true,
+    "order_id": "1735947220470939648",
+    "error": "",
+    "tp_placed": true,
+    "qty": 0.01
+   },
+   "requests": [
+    {
+     "method": "GET",
+     "url": "https://open-api.bingx.com/openApi/swap/v2/quote/contracts",
+     "headers": {},
+     "body": null
+    },
+    {
+     "method": "GET",
+     "url": "https://open-api.bingx.com/openApi/swap/v2/user/balance?recvWindow=15000&timestamp=1767225600000&signature=54dc97c97f1c3ca650cfcefb891ffa5c88591dda3defded4580343391c67be79",
+     "headers": {
+      "X-BX-APIKEY": "BXKEY-abc123"
+     },
+     "body": null
+    },
+    {
+     "method": "POST",
+     "url": "https://open-api.bingx.com/openApi/swap/v2/trade/leverage?leverage=10&recvWindow=15000&side=LONG&symbol=BTC-USDT&timestamp=1767225600000&signature=c65994213f74624bfdf7eb14611228af6bdd3257908b32b53ef5cff0f9eb7a0e",
+     "headers": {
+      "X-BX-APIKEY": "BXKEY-abc123"
+     },
+     "body": null
+    },
+    {
+     "method": "GET",
+     "url": "https://open-api.bingx.com/openApi/swap/v2/quote/price?recvWindow=15000&symbol=BTC-USDT&timestamp=1767225600000&signature=8c72fd5c91131844fbe8cf03300f72a097966266a3b2ecd7e45acbf566990a04",
+     "headers": {
+      "X-BX-APIKEY": "BXKEY-abc123"
+     },
+     "body": null
+    },
+    {
+     "method": "POST",
+     "url": "https://open-api.bingx.com/openApi/swap/v2/trade/order?positionSide=LONG&quantity=0.0100&recvWindow=15000&side=BUY&symbol=BTC-USDT&timestamp=1767225600000&type=MARKET&signature=086c56d5fab5af4fd16121a0dd76708be31054cd004c2025db9fed75df5d0255",
+     "headers": {
+      "X-BX-APIKEY": "BXKEY-abc123"
+     },
+     "body": null
+    },
+    {
+     "method": "GET",
+     "url": "https://open-api.bingx.com/openApi/swap/v2/user/positions?recvWindow=15000&symbol=BTC-USDT&timestamp=1767225600000&signature=8c72fd5c91131844fbe8cf03300f72a097966266a3b2ecd7e45acbf566990a04",
+     "headers": {
+      "X-BX-APIKEY": "BXKEY-abc123"
+     },
+     "body": null
+    },
+    {
+     "method": "POST",
+     "url": "https://open-api.bingx.com/openApi/swap/v2/trade/order?positionSide=LONG&quantity=0.0100&recvWindow=15000&side=SELL&stopPrice=86000.0&symbol=BTC-USDT&timestamp=1767225600000&type=STOP_MARKET&workingType=MARK_PRICE&signature=1699031c0e7b134d6f54d509ea1f6da1162af6e6b94746421d53766f08b5558f",
+     "headers": {
+      "X-BX-APIKEY": "BXKEY-abc123"
+     },
+     "body": null
+    },
+    {
+     "method": "POST",
+     "url": "https://open-api.bingx.com/openApi/swap/v2/trade/order?positionSide=LONG&quantity=0.0075&recvWindow=15000&side=SELL&stopPrice=88500.0&symbol=BTC-USDT&timestamp=1767225600000&type=TAKE_PROFIT_MARKET&workingType=MARK_PRICE&signature=0958bc7052e3a5658909fe4a72769b14cc84a14042ecc45edc816d4140da8c49",
+     "headers": {
+      "X-BX-APIKEY": "BXKEY-abc123"
+     },
+     "body": null
+    },
+    {
+     "method": "GET",
+     "url": "https://open-api.bingx.com/openApi/swap/v2/quote/price?recvWindow=15000&symbol=BTC-USDT&timestamp=1767225600000&signature=8c72fd5c91131844fbe8cf03300f72a097966266a3b2ecd7e45acbf566990a04",
+     "headers": {
+      "X-BX-APIKEY": "BXKEY-abc123"
+     },
+     "body": null
+    },
+    {
+     "method": "POST",
+     "url": "https://open-api.bingx.com/openApi/swap/v2/trade/order?positionSide=LONG&quantity=0.0075&recvWindow=15000&side=SELL&stopPrice=90234.0&symbol=BTC-USDT&timestamp=1767225600000&type=TAKE_PROFIT_MARKET&workingType=MARK_PRICE&signature=b74e382e5a95daa2cb2bd37bc6851ff02e295f07e2d8ac32e14d17b6823ddb5c",
+     "headers": {
+      "X-BX-APIKEY": "BXKEY-abc123"
+     },
+     "body": null
+    },
+    {
+     "method": "POST",
+     "url": "https://open-api.bingx.com/openApi/swap/v2/trade/order?positionSide=LONG&quantity=0.0025&recvWindow=15000&side=SELL&stopPrice=89500.0&symbol=BTC-USDT&timestamp=1767225600000&type=TAKE_PROFIT_MARKET&workingType=MARK_PRICE&signature=a6e9c205a9e11cd2dc8d5e5439450e9ccd7af2d26e681e5a0d2fe5c95ac5eb49",
+     "headers": {
+      "X-BX-APIKEY": "BXKEY-abc123"
+     },
+     "body": null
+    },
+    {
+     "method": "GET",
+     "url": "https://open-api.bingx.com/openApi/swap/v2/trade/openOrders?recvWindow=15000&symbol=BTC-USDT&timestamp=1767225602000&signature=2a2e9ab996f56f5a656cbd86ef925ea2804fb5b4f2833a1929aaeceb64682b2e",
+     "headers": {
+      "X-BX-APIKEY": "BXKEY-abc123"
+     },
+     "body": null
+    }
+   ],
+   "sleeps": [
+    2.0
+   ],
+   "clock_end": 1767225602.0,
+   "markers": [
+    [
+     "INFO",
+     "[BINGX-LEGACY-GAP]"
+    ],
+    [
+     "INFO",
+     "[TP-ADAPTIVE-SHIFT]"
+    ],
+    [
+     "DEBUG",
+     "[TP-VERIFIED]"
+    ]
+   ],
+   "saved": {
+    "hedge_saved": [],
+    "auth_reset": [],
+    "events": [],
+    "metrics": [
+     "trade_placed",
+     "trade_placement_latency_ms",
+     "sl_tp_attached"
+    ]
+   },
+   "final": {
+    "hedge": {},
+    "account_type": {},
+    "delisted": [],
+    "fail_count": {},
+    "bybit_offset": 0
+   }
+  }
+ },
+ {
+  "scenario": {
+   "name": "pt_duplicate_entry",
+   "exchange": "bingx",
+   "call": "place_trade",
+   "args": [
+    "BXKEY-abc123",
+    "bx-secret-456",
+    "BTC-USDT-SWAP",
+    "LONG",
+    87000.5,
+    86000.0,
+    88500.0,
+    1.0,
+    10
+   ],
+   "kwargs": {
+    "trade_id": "bx-5",
+    "user_id": 3
+   },
+   "routes": [
+    {
+     "method": "GET",
+     "path": "/openApi/swap/v2/quote/contracts",
+     "responses": [
+      {
+       "text": "{\"code\": 0, \"msg\": \"\", \"data\": [{\"symbol\": \"BTC-USDT\", \"tradeMinQuantity\": 0.0001, \"pricePrecision\": 1, \"maxLeverage\": 125, \"status\": 1}, {\"symbol\": \"ETH-USDT\", \"tradeMinQuantity\": 0.01, \"pricePrecision\": 2, \"maxLeverage\": 100, \"status\": 1}, {\"symbol\": \"1000PEPE-USDT\", \"tradeMinQuantity\": 100, \"pricePrecision\": 7, \"maxLeverage\": 50, \"status\": 1}, {\"symbol\": \"TONCOIN-USDT\", \"tradeMinQuantity\": 1, \"pricePrecision\": 4, \"maxLeverage\": \"75\", \"status\": 1}, {\"symbol\": \"ASTER-USDT\", \"tradeMinQuantity\": 2.64, \"pricePrecision\": 4, \"maxLeverage\": 20, \"status\": 1}]}"
+      }
+     ]
+    },
+    {
+     "method": "GET",
+     "path": "/openApi/swap/v2/user/balance",
+     "responses": [
+      {
+       "text": "{\"code\": 0, \"msg\": \"\", \"data\": {\"balance\": {\"userId\": \"1\", \"asset\": \"USDT\", \"balance\": \"1000.0\", \"equity\": \"1000.5\", \"unrealizedProfit\": \"0.5\", \"availableMargin\": \"900.0\"}}}"
+      }
+     ]
+    },
+    {
+     "method": "POST",
+     "path": "/openApi/swap/v2/trade/leverage",
+     "responses": [
+      {
+       "text": "{\"code\": 0, \"msg\": \"\", \"data\": {\"leverage\": 10, \"symbol\": \"BTC-USDT\"}}"
+      }
+     ]
+    },
+    {
+     "method": "POST",
+     "path": "/openApi/swap/v2/trade/batchOrders",
+     "responses": [
+      {
+       "text": "{\"code\": 100001, \"msg\": \"Signature verification failed\", \"data\": {}}"
+      }
+     ]
+    },
+    {
+     "method": "GET",
+     "path": "/openApi/swap/v2/quote/price",
+     "responses": [
+      {
+       "text": "{\"code\": 0, \"msg\": \"\", \"data\": {\"symbol\": \"BTC-USDT\", \"price\": \"87000\", \"time\": 1767225600000}}"
+      }
+     ]
+    },
+    {
+     "method": "POST",
+     "path": "/openApi/swap/v2/trade/order",
+     "responses": [
+      {
+       "text": "{\"code\": 101404, \"msg\": \"duplicate clientOrderID\", \"data\": {}}"
+      }
+     ]
+    }
+   ],
+   "state": {},
+   "random": [],
+   "clock": 1767225600.0
+  },
+  "expected": {
+   "name": "pt_duplicate_entry",
+   "result": {
+    "ok": true,
+    "order_id": "chm_8466968306a7",
+    "error": "",
+    "tp_placed": false,
+    "duplicate": true,
+    "qty": 0.01
+   },
+   "requests": [
+    {
+     "method": "GET",
+     "url": "https://open-api.bingx.com/openApi/swap/v2/quote/contracts",
+     "headers": {},
+     "body": null
+    },
+    {
+     "method": "GET",
+     "url": "https://open-api.bingx.com/openApi/swap/v2/user/balance?recvWindow=15000&timestamp=1767225600000&signature=54dc97c97f1c3ca650cfcefb891ffa5c88591dda3defded4580343391c67be79",
+     "headers": {
+      "X-BX-APIKEY": "BXKEY-abc123"
+     },
+     "body": null
+    },
+    {
+     "method": "POST",
+     "url": "https://open-api.bingx.com/openApi/swap/v2/trade/leverage?leverage=10&recvWindow=15000&side=LONG&symbol=BTC-USDT&timestamp=1767225600000&signature=c65994213f74624bfdf7eb14611228af6bdd3257908b32b53ef5cff0f9eb7a0e",
+     "headers": {
+      "X-BX-APIKEY": "BXKEY-abc123"
+     },
+     "body": null
+    },
+    {
+     "method": "POST",
+     "url": "https://open-api.bingx.com/openApi/swap/v2/trade/batchOrders?batchOrders=%5B%7B%22symbol%22%3A%20%22BTC-USDT%22%2C%20%22side%22%3A%20%22BUY%22%2C%20%22type%22%3A%20%22MARKET%22%2C%20%22quantity%22%3A%20%220.0100%22%2C%20%22positionSide%22%3A%20%22LONG%22%2C%20%22clientOrderId%22%3A%20%22chm_8466968306a7%22%7D%2C%20%7B%22symbol%22%3A%20%22BTC-USDT%22%2C%20%22side%22%3A%20%22SELL%22%2C%20%22type%22%3A%20%22STOP_MARKET%22%2C%20%22quantity%22%3A%20%220.0100%22%2C%20%22stopPrice%22%3A%20%2286000.0%22%2C%20%22workingType%22%3A%20%22MARK_PRICE%22%2C%20%22positionSide%22%3A%20%22LONG%22%2C%20%22clientOrderId%22%3A%20%22chm_d632e156f28d%22%7D%2C%20%7B%22symbol%22%3A%20%22BTC-USDT%22%2C%20%22side%22%3A%20%22SELL%22%2C%20%22type%22%3A%20%22TAKE_PROFIT_MARKET%22%2C%20%22quantity%22%3A%20%220.0100%22%2C%20%22stopPrice%22%3A%20%2288500.0%22%2C%20%22workingType%22%3A%20%22MARK_PRICE%22%2C%20%22positionSide%22%3A%20%22LONG%22%2C%20%22clientOrderId%22%3A%20%22chm_bbf967e211ba%22%7D%5D&recvWindow=15000&timestamp=1767225600000&signature=bf207ec60d4b2dca3f16903fa303f39b4e7b8f4383b109efbdde789c31258ac2",
+     "headers": {
+      "X-BX-APIKEY": "BXKEY-abc123"
+     },
+     "body": null
+    },
+    {
+     "method": "GET",
+     "url": "https://open-api.bingx.com/openApi/swap/v2/quote/price?recvWindow=15000&symbol=BTC-USDT&timestamp=1767225600000&signature=8c72fd5c91131844fbe8cf03300f72a097966266a3b2ecd7e45acbf566990a04",
+     "headers": {
+      "X-BX-APIKEY": "BXKEY-abc123"
+     },
+     "body": null
+    },
+    {
+     "method": "POST",
+     "url": "https://open-api.bingx.com/openApi/swap/v2/trade/order?clientOrderId=chm_8466968306a7&positionSide=LONG&price=87000.5&quantity=0.0100&recvWindow=15000&side=BUY&symbol=BTC-USDT&timeInForce=GTC&timestamp=1767225600000&type=LIMIT&signature=51562fa9637fcb3fdd4cf4419dd0f99026e03d9504f2a87d2b21f7573ceeb791",
+     "headers": {
+      "X-BX-APIKEY": "BXKEY-abc123"
+     },
+     "body": null
+    }
+   ],
+   "sleeps": [],
+   "clock_end": 1767225600.0,
+   "markers": [
+    [
+     "WARNING",
+     "[BINGX-ATOMIC-FALLBACK]"
+    ]
+   ],
+   "saved": {
+    "hedge_saved": [],
+    "auth_reset": [],
+    "events": [],
+    "metrics": []
+   },
+   "final": {
+    "hedge": {},
+    "account_type": {},
+    "delisted": [],
+    "fail_count": {},
+    "bybit_offset": 0
+   }
+  }
+ },
+ {
+  "scenario": {
+   "name": "pt_symbol_missing",
+   "exchange": "bingx",
+   "call": "place_trade",
+   "args": [
+    "BXKEY-abc123",
+    "bx-secret-456",
+    "NOPE-USDT-SWAP",
+    "LONG",
+    1.0,
+    0.9,
+    1.2,
+    1.0,
+    5
+   ],
+   "kwargs": {},
+   "routes": [
+    {
+     "method": "GET",
+     "path": "/openApi/swap/v2/quote/contracts",
+     "responses": [
+      {
+       "text": "{\"code\": 0, \"msg\": \"\", \"data\": [{\"symbol\": \"BTC-USDT\", \"tradeMinQuantity\": 0.0001, \"pricePrecision\": 1, \"maxLeverage\": 125, \"status\": 1}, {\"symbol\": \"ETH-USDT\", \"tradeMinQuantity\": 0.01, \"pricePrecision\": 2, \"maxLeverage\": 100, \"status\": 1}, {\"symbol\": \"1000PEPE-USDT\", \"tradeMinQuantity\": 100, \"pricePrecision\": 7, \"maxLeverage\": 50, \"status\": 1}, {\"symbol\": \"TONCOIN-USDT\", \"tradeMinQuantity\": 1, \"pricePrecision\": 4, \"maxLeverage\": \"75\", \"status\": 1}, {\"symbol\": \"ASTER-USDT\", \"tradeMinQuantity\": 2.64, \"pricePrecision\": 4, \"maxLeverage\": 20, \"status\": 1}]}"
+      }
+     ]
+    }
+   ],
+   "state": {},
+   "random": [],
+   "clock": 1767225600.0
+  },
+  "expected": {
+   "name": "pt_symbol_missing",
+   "result": {
+    "ok": false,
+    "order_id": "",
+    "error": "Символ NOPE-USDT недоступен на BingX Futures."
+   },
+   "requests": [
+    {
+     "method": "GET",
+     "url": "https://open-api.bingx.com/openApi/swap/v2/quote/contracts",
+     "headers": {},
+     "body": null
+    }
+   ],
+   "sleeps": [],
+   "clock_end": 1767225600.0,
+   "markers": [],
+   "saved": {
+    "hedge_saved": [],
+    "auth_reset": [],
+    "events": [],
+    "metrics": []
+   },
+   "final": {
+    "hedge": {},
+    "account_type": {},
+    "delisted": [],
+    "fail_count": {},
+    "bybit_offset": 0
+   }
+  }
+ },
+ {
+  "scenario": {
+   "name": "pt_balance_error",
+   "exchange": "bingx",
+   "call": "place_trade",
+   "args": [
+    "BXKEY-abc123",
+    "bx-secret-456",
+    "BTC-USDT-SWAP",
+    "LONG",
+    87000.5,
+    86000.0,
+    88500.0,
+    1.0,
+    10
+   ],
+   "kwargs": {},
+   "routes": [
+    {
+     "method": "GET",
+     "path": "/openApi/swap/v2/quote/contracts",
+     "responses": [
+      {
+       "text": "{\"code\": 0, \"msg\": \"\", \"data\": [{\"symbol\": \"BTC-USDT\", \"tradeMinQuantity\": 0.0001, \"pricePrecision\": 1, \"maxLeverage\": 125, \"status\": 1}, {\"symbol\": \"ETH-USDT\", \"tradeMinQuantity\": 0.01, \"pricePrecision\": 2, \"maxLeverage\": 100, \"status\": 1}, {\"symbol\": \"1000PEPE-USDT\", \"tradeMinQuantity\": 100, \"pricePrecision\": 7, \"maxLeverage\": 50, \"status\": 1}, {\"symbol\": \"TONCOIN-USDT\", \"tradeMinQuantity\": 1, \"pricePrecision\": 4, \"maxLeverage\": \"75\", \"status\": 1}, {\"symbol\": \"ASTER-USDT\", \"tradeMinQuantity\": 2.64, \"pricePrecision\": 4, \"maxLeverage\": 20, \"status\": 1}]}"
+      }
+     ]
+    },
+    {
+     "method": "GET",
+     "path": "/openApi/swap/v2/user/balance",
+     "responses": [
+      {
+       "text": "{\"code\": 100413, \"msg\": \"Incorrect apiKey\", \"data\": {}}"
+      }
+     ]
+    }
+   ],
+   "state": {},
+   "random": [],
+   "clock": 1767225600.0
+  },
+  "expected": {
+   "name": "pt_balance_error",
+   "result": {
+    "ok": false,
+    "order_id": "",
+    "error": "Неверный API ключ."
+   },
+   "requests": [
+    {
+     "method": "GET",
+     "url": "https://open-api.bingx.com/openApi/swap/v2/quote/contracts",
+     "headers": {},
+     "body": null
+    },
+    {
+     "method": "GET",
+     "url": "https://open-api.bingx.com/openApi/swap/v2/user/balance?recvWindow=15000&timestamp=1767225600000&signature=54dc97c97f1c3ca650cfcefb891ffa5c88591dda3defded4580343391c67be79",
+     "headers": {
+      "X-BX-APIKEY": "BXKEY-abc123"
+     },
+     "body": null
+    }
+   ],
+   "sleeps": [],
+   "clock_end": 1767225600.0,
+   "markers": [],
+   "saved": {
+    "hedge_saved": [],
+    "auth_reset": [],
+    "events": [],
+    "metrics": []
+   },
+   "final": {
+    "hedge": {},
+    "account_type": {},
+    "delisted": [],
+    "fail_count": {},
+    "bybit_offset": 0
+   }
+  }
+ },
+ {
+  "scenario": {
+   "name": "pt_low_notional_skip",
+   "exchange": "bingx",
+   "call": "place_trade",
+   "args": [
+    "BXKEY-abc123",
+    "bx-secret-456",
+    "BTC-USDT-SWAP",
+    "LONG",
+    87000.5,
+    86000.0,
+    88500.0,
+    1.0,
+    10
+   ],
+   "kwargs": {},
+   "routes": [
+    {
+     "method": "GET",
+     "path": "/openApi/swap/v2/quote/contracts",
+     "responses": [
+      {
+       "text": "{\"code\": 0, \"msg\": \"\", \"data\": [{\"symbol\": \"BTC-USDT\", \"tradeMinQuantity\": 0.0001, \"pricePrecision\": 1, \"maxLeverage\": 125, \"status\": 1}, {\"symbol\": \"ETH-USDT\", \"tradeMinQuantity\": 0.01, \"pricePrecision\": 2, \"maxLeverage\": 100, \"status\": 1}, {\"symbol\": \"1000PEPE-USDT\", \"tradeMinQuantity\": 100, \"pricePrecision\": 7, \"maxLeverage\": 50, \"status\": 1}, {\"symbol\": \"TONCOIN-USDT\", \"tradeMinQuantity\": 1, \"pricePrecision\": 4, \"maxLeverage\": \"75\", \"status\": 1}, {\"symbol\": \"ASTER-USDT\", \"tradeMinQuantity\": 2.64, \"pricePrecision\": 4, \"maxLeverage\": 20, \"status\": 1}]}"
+      }
+     ]
+    },
+    {
+     "method": "GET",
+     "path": "/openApi/swap/v2/user/balance",
+     "responses": [
+      {
+       "text": "{\"code\": 0, \"msg\": \"\", \"data\": {\"balance\": {\"userId\": \"1\", \"asset\": \"USDT\", \"balance\": \"1000.0\", \"equity\": \"20.0\", \"unrealizedProfit\": \"0.5\", \"availableMargin\": \"900.0\"}}}"
+      }
+     ]
+    },
+    {
+     "method": "POST",
+     "path": "/openApi/swap/v2/trade/leverage",
+     "responses": [
+      {
+       "text": "{\"code\": 0, \"msg\": \"\", \"data\": {\"leverage\": 10, \"symbol\": \"BTC-USDT\"}}"
+      }
+     ]
+    }
+   ],
+   "state": {},
+   "random": [],
+   "clock": 1767225600.0
+  },
+  "expected": {
+   "name": "pt_low_notional_skip",
+   "result": {
+    "ok": false,
+    "order_id": "",
+    "low_notional_skip": true,
+    "required_balance": 1000.0,
+    "requested_risk_pct": 1.0,
+    "min_risk_for_balance_pct": 50.0,
+    "error": "Баланс $20.00 слишком мал для risk=1.0% (минимум биржи $10 notional). Пополни до $1000+ или risk≥50.0%."
+   },
+   "requests": [
+    {
+     "method": "GET",
+     "url": "https://open-api.bingx.com/openApi/swap/v2/quote/contracts",
+     "headers": {},
+     "body": null
+    },
+    {
+     "method": "GET",
+     "url": "https://open-api.bingx.com/openApi/swap/v2/user/balance?recvWindow=15000&timestamp=1767225600000&signature=54dc97c97f1c3ca650cfcefb891ffa5c88591dda3defded4580343391c67be79",
+     "headers": {
+      "X-BX-APIKEY": "BXKEY-abc123"
+     },
+     "body": null
+    },
+    {
+     "method": "POST",
+     "url": "https://open-api.bingx.com/openApi/swap/v2/trade/leverage?leverage=10&recvWindow=15000&side=LONG&symbol=BTC-USDT&timestamp=1767225600000&signature=c65994213f74624bfdf7eb14611228af6bdd3257908b32b53ef5cff0f9eb7a0e",
+     "headers": {
+      "X-BX-APIKEY": "BXKEY-abc123"
+     },
+     "body": null
+    }
+   ],
+   "sleeps": [],
+   "clock_end": 1767225600.0,
+   "markers": [],
+   "saved": {
+    "hedge_saved": [],
+    "auth_reset": [],
+    "events": [],
+    "metrics": []
+   },
+   "final": {
+    "hedge": {},
+    "account_type": {},
+    "delisted": [],
+    "fail_count": {},
+    "bybit_offset": 0
+   }
+  }
+ },
+ {
+  "scenario": {
+   "name": "pt_low_notional_boost_market",
+   "exchange": "bingx",
+   "call": "place_trade",
+   "args": [
+    "BXKEY-abc123",
+    "bx-secret-456",
+    "ETH-USDT-SWAP",
+    "LONG",
+    3000.0,
+    2900.0,
+    3200.0,
+    0.1,
+    5
+   ],
+   "kwargs": {
+    "allow_low_notional_boost": true
+   },
+   "routes": [
+    {
+     "method": "GET",
+     "path": "/openApi/swap/v2/quote/contracts",
+     "responses": [
+      {
+       "text": "{\"code\": 0, \"msg\": \"\", \"data\": [{\"symbol\": \"BTC-USDT\", \"tradeMinQuantity\": 0.0001, \"pricePrecision\": 1, \"maxLeverage\": 125, \"status\": 1}, {\"symbol\": \"ETH-USDT\", \"tradeMinQuantity\": 0.01, \"pricePrecision\": 2, \"maxLeverage\": 100, \"status\": 1}, {\"symbol\": \"1000PEPE-USDT\", \"tradeMinQuantity\": 100, \"pricePrecision\": 7, \"maxLeverage\": 50, \"status\": 1}, {\"symbol\": \"TONCOIN-USDT\", \"tradeMinQuantity\": 1, \"pricePrecision\": 4, \"maxLeverage\": \"75\", \"status\": 1}, {\"symbol\": \"ASTER-USDT\", \"tradeMinQuantity\": 2.64, \"pricePrecision\": 4, \"maxLeverage\": 20, \"status\": 1}]}"
+      }
+     ]
+    },
+    {
+     "method": "GET",
+     "path": "/openApi/swap/v2/user/balance",
+     "responses": [
+      {
+       "text": "{\"code\": 0, \"msg\": \"\", \"data\": {\"balance\": {\"userId\": \"1\", \"asset\": \"USDT\", \"balance\": \"1000.0\", \"equity\": \"100\", \"unrealizedProfit\": \"0.5\", \"availableMargin\": \"900.0\"}}}"
+      }
+     ]
+    },
+    {
+     "method": "POST",
+     "path": "/openApi/swap/v2/trade/leverage",
+     "responses": [
+      {
+       "text": "{\"code\": 0, \"msg\": \"\", \"data\": {\"leverage\": 10, \"symbol\": \"BTC-USDT\"}}"
+      }
+     ]
+    },
+    {
+     "method": "GET",
+     "path": "/openApi/swap/v2/quote/price",
+     "responses": [
+      {
+       "text": "{\"code\": 0, \"msg\": \"\", \"data\": {\"symbol\": \"BTC-USDT\", \"price\": \"2900\", \"time\": 1767225600000}}"
+      }
+     ]
+    },
+    {
+     "method": "POST",
+     "path": "/openApi/swap/v2/trade/order",
+     "responses": [
+      {
+       "text": "{\"code\": 0, \"msg\": \"\", \"data\": {\"order\": {\"orderId\": 1735947220470939648, \"symbol\": \"BTC-USDT\", \"side\": \"BUY\", \"type\": \"LIMIT\"}}}"
+      },
+      {
+       "text": "{\"code\": 0, \"msg\": \"\", \"data\": {\"order\": {\"orderId\": 2, \"symbol\": \"BTC-USDT\", \"side\": \"BUY\", \"type\": \"LIMIT\"}}}"
+      },
+      {
+       "text": "{\"code\": 0, \"msg\": \"\", \"data\": {\"order\": {\"orderId\": 3, \"symbol\": \"BTC-USDT\", \"side\": \"BUY\", \"type\": \"LIMIT\"}}}"
+      }
+     ]
+    },
+    {
+     "method": "GET",
+     "path": "/openApi/swap/v2/user/positions",
+     "responses": [
+      {
+       "text": "{\"code\": 0, \"msg\": \"\", \"data\": [{\"symbol\": \"ETH-USDT\", \"positionSide\": \"LONG\", \"positionAmt\": \"0.01\", \"avgPrice\": \"87000.5\", \"markPrice\": \"87000.5\", \"unrealizedProfit\": \"0.12\", \"leverage\": 10, \"stopLoss\": \"\"}]}"
+      }
+     ]
+    },
+    {
+     "method": "GET",
+     "path": "/openApi/swap/v2/trade/openOrders",
+     "responses": [
+      {
+       "text": "{\"code\": 0, \"msg\": \"\", \"data\": {\"orders\": [{\"type\": \"TAKE_PROFIT_MARKET\", \"side\": \"SELL\"}]}}"
+      }
+     ]
+    }
+   ],
+   "state": {},
+   "random": [],
+   "clock": 1767225600.0
+  },
+  "expected": {
+   "name": "pt_low_notional_boost_market",
+   "result": {
+    "ok": true,
+    "order_id": "1735947220470939648",
+    "error": "",
+    "tp_placed": true,
+    "qty": 0.01
+   },
+   "requests": [
+    {
+     "method": "GET",
+     "url": "https://open-api.bingx.com/openApi/swap/v2/quote/contracts",
+     "headers": {},
+     "body": null
+    },
+    {
+     "method": "GET",
+     "url": "https://open-api.bingx.com/openApi/swap/v2/user/balance?recvWindow=15000&timestamp=1767225600000&signature=54dc97c97f1c3ca650cfcefb891ffa5c88591dda3defded4580343391c67be79",
+     "headers": {
+      "X-BX-APIKEY": "BXKEY-abc123"
+     },
+     "body": null
+    },
+    {
+     "method": "POST",
+     "url": "https://open-api.bingx.com/openApi/swap/v2/trade/leverage?leverage=5&recvWindow=15000&side=LONG&symbol=ETH-USDT&timestamp=1767225600000&signature=db56e28fbda57b20fd8c51809f9611330ed340f88f22583187e09261c3dcfa44",
+     "headers": {
+      "X-BX-APIKEY": "BXKEY-abc123"
+     },
+     "body": null
+    },
+    {
+     "method": "GET",
+     "url": "https://open-api.bingx.com/openApi/swap/v2/quote/price?recvWindow=15000&symbol=ETH-USDT&timestamp=1767225600000&signature=d50551757214d9202dcbfa5c8e415bd09a3d45afa14fd44a3a55919706c5f274",
+     "headers": {
+      "X-BX-APIKEY": "BXKEY-abc123"
+     },
+     "body": null
+    },
+    {
+     "method": "POST",
+     "url": "https://open-api.bingx.com/openApi/swap/v2/trade/order?positionSide=LONG&quantity=0.01&recvWindow=15000&side=BUY&symbol=ETH-USDT&timestamp=1767225600000&type=MARKET&signature=7d04234dcae9435a46dae034378e6b236a9847768b72e22313512fcab13a767a",
+     "headers": {
+      "X-BX-APIKEY": "BXKEY-abc123"
+     },
+     "body": null
+    },
+    {
+     "method": "GET",
+     "url": "https://open-api.bingx.com/openApi/swap/v2/user/positions?recvWindow=15000&symbol=ETH-USDT&timestamp=1767225600000&signature=d50551757214d9202dcbfa5c8e415bd09a3d45afa14fd44a3a55919706c5f274",
+     "headers": {
+      "X-BX-APIKEY": "BXKEY-abc123"
+     },
+     "body": null
+    },
+    {
+     "method": "POST",
+     "url": "https://open-api.bingx.com/openApi/swap/v2/trade/order?positionSide=LONG&quantity=0.01&recvWindow=15000&side=SELL&stopPrice=2900.00&symbol=ETH-USDT&timestamp=1767225600000&type=STOP_MARKET&workingType=MARK_PRICE&signature=71fce39d49100b8453acf43332cb5823b4483511b64e3c6e48463d0700c4b400",
+     "headers": {
+      "X-BX-APIKEY": "BXKEY-abc123"
+     },
+     "body": null
+    },
+    {
+     "method": "POST",
+     "url": "https://open-api.bingx.com/openApi/swap/v2/trade/order?positionSide=LONG&quantity=0.01&recvWindow=15000&side=SELL&stopPrice=3200.00&symbol=ETH-USDT&timestamp=1767225600000&type=TAKE_PROFIT_MARKET&workingType=MARK_PRICE&signature=4b4dca1d89ba36be4ab19e3870243e32e745703640aabdbbab68cc2cdc5704d8",
+     "headers": {
+      "X-BX-APIKEY": "BXKEY-abc123"
+     },
+     "body": null
+    },
+    {
+     "method": "GET",
+     "url": "https://open-api.bingx.com/openApi/swap/v2/trade/openOrders?recvWindow=15000&symbol=ETH-USDT&timestamp=1767225602000&signature=8146363a8107c8a89c4b998eb6cdfcee92040fc58dd4c3605b6f668bdb2e215d",
+     "headers": {
+      "X-BX-APIKEY": "BXKEY-abc123"
+     },
+     "body": null
+    }
+   ],
+   "sleeps": [
+    2.0
+   ],
+   "clock_end": 1767225602.0,
+   "markers": [
+    [
+     "INFO",
+     "[BINGX-LEGACY-GAP]"
+    ],
+    [
+     "DEBUG",
+     "[TP-VERIFIED]"
+    ]
+   ],
+   "saved": {
+    "hedge_saved": [],
+    "auth_reset": [],
+    "events": [],
+    "metrics": [
+     "trade_placed",
+     "trade_placement_latency_ms",
+     "sl_tp_attached"
+    ]
+   },
+   "final": {
+    "hedge": {},
+    "account_type": {},
+    "delisted": [],
+    "fail_count": {},
+    "bybit_offset": 0
+   }
+  }
+ },
+ {
+  "scenario": {
+   "name": "pt_pepe_live_short",
+   "exchange": "bingx",
+   "call": "place_trade",
+   "args": [
+    "BXKEY-abc123",
+    "bx-secret-456",
+    "PEPE-USDT-SWAP",
+    "SHORT",
+    3.91e-06,
+    4.02e-06,
+    3.7e-06,
+    1.5,
+    5
+   ],
+   "kwargs": {
+    "tp2": 3.6e-06
+   },
+   "routes": [
+    {
+     "method": "GET",
+     "path": "/openApi/swap/v2/quote/contracts",
+     "responses": [
+      {
+       "text": "{\"code\": 0, \"msg\": \"\", \"data\": [{\"symbol\": \"BTC-USDT\", \"tradeMinQuantity\": 0.0001, \"pricePrecision\": 1, \"maxLeverage\": 125, \"status\": 1}, {\"symbol\": \"ETH-USDT\", \"tradeMinQuantity\": 0.01, \"pricePrecision\": 2, \"maxLeverage\": 100, \"status\": 1}, {\"symbol\": \"1000PEPE-USDT\", \"tradeMinQuantity\": 100, \"pricePrecision\": 7, \"maxLeverage\": 50, \"status\": 1}, {\"symbol\": \"TONCOIN-USDT\", \"tradeMinQuantity\": 1, \"pricePrecision\": 4, \"maxLeverage\": \"75\", \"status\": 1}, {\"symbol\": \"ASTER-USDT\", \"tradeMinQuantity\": 2.64, \"pricePrecision\": 4, \"maxLeverage\": 20, \"status\": 1}]}"
+      }
+     ]
+    },
+    {
+     "method": "GET",
+     "path": "/openApi/swap/v2/user/balance",
+     "responses": [
+      {
+       "text": "{\"code\": 0, \"msg\": \"\", \"data\": {\"balance\": {\"userId\": \"1\", \"asset\": \"USDT\", \"balance\": \"1000.0\", \"equity\": \"1000.5\", \"unrealizedProfit\": \"0.5\", \"availableMargin\": \"900.0\"}}}"
+      }
+     ]
+    },
+    {
+     "method": "POST",
+     "path": "/openApi/swap/v2/trade/leverage",
+     "responses": [
+      {
+       "text": "{\"code\": 0, \"msg\": \"\", \"data\": {\"leverage\": 10, \"symbol\": \"BTC-USDT\"}}"
+      }
+     ]
+    },
+    {
+     "method": "GET",
+     "path": "/openApi/swap/v2/quote/price",
+     "responses": [
+      {
+       "text": "{\"code\": 0, \"msg\": \"\", \"data\": {\"symbol\": \"BTC-USDT\", \"price\": \"0.0039105\", \"time\": 1767225600000}}"
+      }
+     ]
+    },
+    {
+     "method": "POST",
+     "path": "/openApi/swap/v2/trade/order",
+     "responses": [
+      {
+       "text": "{\"code\": 0, \"msg\": \"\", \"data\": {\"order\": {\"orderId\": 1735947220470939648, \"symbol\": \"BTC-USDT\", \"side\": \"BUY\", \"type\": \"LIMIT\"}}}"
+      },
+      {
+       "text": "{\"code\": 0, \"msg\": \"\", \"data\": {\"order\": {\"orderId\": 2, \"symbol\": \"BTC-USDT\", \"side\": \"BUY\", \"type\": \"LIMIT\"}}}"
+      },
+      {
+       "text": "{\"code\": 0, \"msg\": \"\", \"data\": {\"order\": {\"orderId\": 3, \"symbol\": \"BTC-USDT\", \"side\": \"BUY\", \"type\": \"LIMIT\"}}}"
+      },
+      {
+       "text": "{\"code\": 0, \"msg\": \"\", \"data\": {\"order\": {\"orderId\": 4, \"symbol\": \"BTC-USDT\", \"side\": \"BUY\", \"type\": \"LIMIT\"}}}"
+      }
+     ]
+    },
+    {
+     "method": "GET",
+     "path": "/openApi/swap/v2/user/positions",
+     "responses": [
+      {
+       "text": "{\"code\": 0, \"msg\": \"\", \"data\": [{\"symbol\": \"1000PEPE-USDT\", \"positionSide\": \"SHORT\", \"positionAmt\": \"-1364000\", \"avgPrice\": \"87000.5\", \"markPrice\": \"87000.5\", \"unrealizedProfit\": \"0.12\", \"leverage\": 10, \"stopLoss\": \"\"}]}"
+      }
+     ]
+    },
+    {
+     "method": "GET",
+     "path": "/openApi/swap/v2/trade/openOrders",
+     "responses": [
+      {
+       "text": "{\"code\": 0, \"msg\": \"\", \"data\": {\"orders\": [{\"type\": \"TAKE_PROFIT_MARKET\", \"side\": \"BUY\"}, {\"type\": \"TAKE_PROFIT_MARKET\", \"side\": \"BUY\"}]}}"
+      }
+     ]
+    }
+   ],
+   "state": {
+    "live_bingx": [
+     "1000PEPE-USDT",
+     "BTC-USDT",
+     "ETH-USDT"
+    ]
+   },
+   "random": [],
+   "clock": 1767225600.0
+  },
+  "expected": {
+   "name": "pt_pepe_live_short",
+   "result": {
+    "ok": true,
+    "order_id": "1735947220470939648",
+    "error": "",
+    "tp_placed": true,
+    "qty": 136400.0
+   },
+   "requests": [
+    {
+     "method": "GET",
+     "url": "https://open-api.bingx.com/openApi/swap/v2/quote/contracts",
+     "headers": {},
+     "body": null
+    },
+    {
+     "method": "GET",
+     "url": "https://open-api.bingx.com/openApi/swap/v2/user/balance?recvWindow=15000&timestamp=1767225600000&signature=54dc97c97f1c3ca650cfcefb891ffa5c88591dda3defded4580343391c67be79",
+     "headers": {
+      "X-BX-APIKEY": "BXKEY-abc123"
+     },
+     "body": null
+    },
+    {
+     "method": "POST",
+     "url": "https://open-api.bingx.com/openApi/swap/v2/trade/leverage?leverage=5&recvWindow=15000&side=SHORT&symbol=1000PEPE-USDT&timestamp=1767225600000&signature=97813ee648c887cd51ff72872a4bc8f45bc966f53f83e4f34cbb036e4ffeb8b3",
+     "headers": {
+      "X-BX-APIKEY": "BXKEY-abc123"
+     },
+     "body": null
+    },
+    {
+     "method": "GET",
+     "url": "https://open-api.bingx.com/openApi/swap/v2/quote/price?recvWindow=15000&symbol=1000PEPE-USDT&timestamp=1767225600000&signature=d5a2c6ac6cc07fd17cec9faabea724090926c38a5b5c89d2214f4632cb4ce1d7",
+     "headers": {
+      "X-BX-APIKEY": "BXKEY-abc123"
+     },
+     "body": null
+    },
+    {
+     "method": "POST",
+     "url": "https://open-api.bingx.com/openApi/swap/v2/trade/order?positionSide=SHORT&price=0.0039100&quantity=136400&recvWindow=15000&side=SELL&symbol=1000PEPE-USDT&timeInForce=GTC&timestamp=1767225600000&type=LIMIT&signature=e64972ed406ac8e2f269ec9df5a8c7ae2f1af8de45e78e90eda5e128264ae81f",
+     "headers": {
+      "X-BX-APIKEY": "BXKEY-abc123"
+     },
+     "body": null
+    },
+    {
+     "method": "GET",
+     "url": "https://open-api.bingx.com/openApi/swap/v2/user/positions?recvWindow=15000&symbol=1000PEPE-USDT&timestamp=1767225600000&signature=d5a2c6ac6cc07fd17cec9faabea724090926c38a5b5c89d2214f4632cb4ce1d7",
+     "headers": {
+      "X-BX-APIKEY": "BXKEY-abc123"
+     },
+     "body": null
+    },
+    {
+     "method": "POST",
+     "url": "https://open-api.bingx.com/openApi/swap/v2/trade/order?positionSide=SHORT&quantity=136400&recvWindow=15000&side=BUY&stopPrice=0.0040200&symbol=1000PEPE-USDT&timestamp=1767225600000&type=STOP_MARKET&workingType=MARK_PRICE&signature=56e66a36f98a9e1c8a0831f1b9db7d6640e41f297935e841f77bfc62ea3cc5b9",
+     "headers": {
+      "X-BX-APIKEY": "BXKEY-abc123"
+     },
+     "body": null
+    },
+    {
+     "method": "POST",
+     "url": "https://open-api.bingx.com/openApi/swap/v2/trade/order?positionSide=SHORT&quantity=102300&recvWindow=15000&side=BUY&stopPrice=0.0037000&symbol=1000PEPE-USDT&timestamp=1767225600000&type=TAKE_PROFIT_MARKET&workingType=MARK_PRICE&signature=54623021662efd1b8cd41101a34e3ec8bd55adc3f8bd563d9109085fc9385a59",
+     "headers": {
+      "X-BX-APIKEY": "BXKEY-abc123"
+     },
+     "body": null
+    },
+    {
+     "method": "POST",
+     "url": "https://open-api.bingx.com/openApi/swap/v2/trade/order?positionSide=SHORT&quantity=34100&recvWindow=15000&side=BUY&stopPrice=0.0036000&symbol=1000PEPE-USDT&timestamp=1767225600000&type=TAKE_PROFIT_MARKET&workingType=MARK_PRICE&signature=9a0d6fc99651a00edf7ebe3d8570ad5ebfeeba079c47e4dfc77979abdc15c669",
+     "headers": {
+      "X-BX-APIKEY": "BXKEY-abc123"
+     },
+     "body": null
+    },
+    {
+     "method": "GET",
+     "url": "https://open-api.bingx.com/openApi/swap/v2/trade/openOrders?recvWindow=15000&symbol=1000PEPE-USDT&timestamp=1767225602000&signature=5a29c6824b60f2043e8a81c6db6e228510265671908420f3d92ec43975bb6cbf",
+     "headers": {
+      "X-BX-APIKEY": "BXKEY-abc123"
+     },
+     "body": null
+    }
+   ],
+   "sleeps": [
+    2.0
+   ],
+   "clock_end": 1767225602.0,
+   "markers": [
+    [
+     "INFO",
+     "[BINGX-LEGACY-GAP]"
+    ],
+    [
+     "DEBUG",
+     "[TP-VERIFIED]"
+    ]
+   ],
+   "saved": {
+    "hedge_saved": [],
+    "auth_reset": [],
+    "events": [],
+    "metrics": [
+     "trade_placed",
+     "trade_placement_latency_ms",
+     "sl_tp_attached"
+    ]
+   },
+   "final": {
+    "hedge": {},
+    "account_type": {},
+    "delisted": [],
+    "fail_count": {},
+    "bybit_offset": 0
+   }
+  }
+ },
+ {
+  "scenario": {
+   "name": "pt_ton_alias",
+   "exchange": "bingx",
+   "call": "place_trade",
+   "args": [
+    "BXKEY-abc123",
+    "bx-secret-456",
+    "TON-USDT-SWAP",
+    "LONG",
+    5.0,
+    4.8,
+    5.5,
+    1.0,
+    100
+   ],
+   "kwargs": {},
+   "routes": [
+    {
+     "method": "GET",
+     "path": "/openApi/swap/v2/quote/contracts",
+     "responses": [
+      {
+       "text": "{\"code\": 0, \"msg\": \"\", \"data\": [{\"symbol\": \"BTC-USDT\", \"tradeMinQuantity\": 0.0001, \"pricePrecision\": 1, \"maxLeverage\": 125, \"status\": 1}, {\"symbol\": \"ETH-USDT\", \"tradeMinQuantity\": 0.01, \"pricePrecision\": 2, \"maxLeverage\": 100, \"status\": 1}, {\"symbol\": \"1000PEPE-USDT\", \"tradeMinQuantity\": 100, \"pricePrecision\": 7, \"maxLeverage\": 50, \"status\": 1}, {\"symbol\": \"TONCOIN-USDT\", \"tradeMinQuantity\": 1, \"pricePrecision\": 4, \"maxLeverage\": \"75\", \"status\": 1}, {\"symbol\": \"ASTER-USDT\", \"tradeMinQuantity\": 2.64, \"pricePrecision\": 4, \"maxLeverage\": 20, \"status\": 1}]}"
+      }
+     ]
+    },
+    {
+     "method": "GET",
+     "path": "/openApi/swap/v2/user/balance",
+     "responses": [
+      {
+       "text": "{\"code\": 0, \"msg\": \"\", \"data\": {\"balance\": {\"userId\": \"1\", \"asset\": \"USDT\", \"balance\": \"1000.0\", \"equity\": \"1000.5\", \"unrealizedProfit\": \"0.5\", \"availableMargin\": \"900.0\"}}}"
+      }
+     ]
+    },
+    {
+     "method": "POST",
+     "path": "/openApi/swap/v2/trade/leverage",
+     "responses": [
+      {
+       "text": "{\"code\": 0, \"msg\": \"\", \"data\": {\"leverage\": 10, \"symbol\": \"BTC-USDT\"}}"
+      }
+     ]
+    },
+    {
+     "method": "GET",
+     "path": "/openApi/swap/v2/quote/price",
+     "responses": [
+      {
+       "text": "{\"code\": 0, \"msg\": \"\", \"data\": {\"symbol\": \"BTC-USDT\", \"price\": \"5.001\", \"time\": 1767225600000}}"
+      }
+     ]
+    },
+    {
+     "method": "POST",
+     "path": "/openApi/swap/v2/trade/order",
+     "responses": [
+      {
+       "text": "{\"code\": 0, \"msg\": \"\", \"data\": {\"order\": {\"orderId\": 1735947220470939648, \"symbol\": \"BTC-USDT\", \"side\": \"BUY\", \"type\": \"LIMIT\"}}}"
+      },
+      {
+       "text": "{\"code\": 0, \"msg\": \"\", \"data\": {\"order\": {\"orderId\": 2, \"symbol\": \"BTC-USDT\", \"side\": \"BUY\", \"type\": \"LIMIT\"}}}"
+      },
+      {
+       "text": "{\"code\": 0, \"msg\": \"\", \"data\": {\"order\": {\"orderId\": 3, \"symbol\": \"BTC-USDT\", \"side\": \"BUY\", \"type\": \"LIMIT\"}}}"
+      }
+     ]
+    },
+    {
+     "method": "GET",
+     "path": "/openApi/swap/v2/user/positions",
+     "responses": [
+      {
+       "text": "{\"code\": 0, \"msg\": \"\", \"data\": [{\"symbol\": \"TONCOIN-USDT\", \"positionSide\": \"LONG\", \"positionAmt\": \"50\", \"avgPrice\": \"87000.5\", \"markPrice\": \"87000.5\", \"unrealizedProfit\": \"0.12\", \"leverage\": 10, \"stopLoss\": \"\"}]}"
+      }
+     ]
+    },
+    {
+     "method": "GET",
+     "path": "/openApi/swap/v2/trade/openOrders",
+     "responses": [
+      {
+       "text": "{\"code\": 0, \"msg\": \"\", \"data\": {\"orders\": [{\"type\": \"TAKE_PROFIT_MARKET\", \"side\": \"SELL\"}]}}"
+      }
+     ]
+    }
+   ],
+   "state": {},
+   "random": [],
+   "clock": 1767225600.0
+  },
+  "expected": {
+   "name": "pt_ton_alias",
+   "result": {
+    "ok": true,
+    "order_id": "1735947220470939648",
+    "error": "",
+    "tp_placed": true,
+    "qty": 50.0
+   },
+   "requests": [
+    {
+     "method": "GET",
+     "url": "https://open-api.bingx.com/openApi/swap/v2/quote/contracts",
+     "headers": {},
+     "body": null
+    },
+    {
+     "method": "GET",
+     "url": "https://open-api.bingx.com/openApi/swap/v2/user/balance?recvWindow=15000&timestamp=1767225600000&signature=54dc97c97f1c3ca650cfcefb891ffa5c88591dda3defded4580343391c67be79",
+     "headers": {
+      "X-BX-APIKEY": "BXKEY-abc123"
+     },
+     "body": null
+    },
+    {
+     "method": "POST",
+     "url": "https://open-api.bingx.com/openApi/swap/v2/trade/leverage?leverage=75&recvWindow=15000&side=LONG&symbol=TONCOIN-USDT&timestamp=1767225600000&signature=5f715f33dc1b2645bd8986b0a9e153ac0381d6ba979af5356012d7b85b332714",
+     "headers": {
+      "X-BX-APIKEY": "BXKEY-abc123"
+     },
+     "body": null
+    },
+    {
+     "method": "GET",
+     "url": "https://open-api.bingx.com/openApi/swap/v2/quote/price?recvWindow=15000&symbol=TONCOIN-USDT&timestamp=1767225600000&signature=23a1f10626df5eed2a47590053145b1885c40a43f49ae62c75bc9567d3310359",
+     "headers": {
+      "X-BX-APIKEY": "BXKEY-abc123"
+     },
+     "body": null
+    },
+    {
+     "method": "POST",
+     "url": "https://open-api.bingx.com/openApi/swap/v2/trade/order?positionSide=LONG&price=5.0000&quantity=50&recvWindow=15000&side=BUY&symbol=TONCOIN-USDT&timeInForce=GTC&timestamp=1767225600000&type=LIMIT&signature=f2e521f91291252afe993b4274bd1acbfd830d125c387e033b8704c1928eddce",
+     "headers": {
+      "X-BX-APIKEY": "BXKEY-abc123"
+     },
+     "body": null
+    },
+    {
+     "method": "GET",
+     "url": "https://open-api.bingx.com/openApi/swap/v2/user/positions?recvWindow=15000&symbol=TONCOIN-USDT&timestamp=1767225600000&signature=23a1f10626df5eed2a47590053145b1885c40a43f49ae62c75bc9567d3310359",
+     "headers": {
+      "X-BX-APIKEY": "BXKEY-abc123"
+     },
+     "body": null
+    },
+    {
+     "method": "POST",
+     "url": "https://open-api.bingx.com/openApi/swap/v2/trade/order?positionSide=LONG&quantity=50&recvWindow=15000&side=SELL&stopPrice=4.8000&symbol=TONCOIN-USDT&timestamp=1767225600000&type=STOP_MARKET&workingType=MARK_PRICE&signature=10f3ce90d1e4b1e2238d4c0ffecb5f7bb142dde5990e966800c6c493709b8315",
+     "headers": {
+      "X-BX-APIKEY": "BXKEY-abc123"
+     },
+     "body": null
+    },
+    {
+     "method": "POST",
+     "url": "https://open-api.bingx.com/openApi/swap/v2/trade/order?positionSide=LONG&quantity=50&recvWindow=15000&side=SELL&stopPrice=5.5000&symbol=TONCOIN-USDT&timestamp=1767225600000&type=TAKE_PROFIT_MARKET&workingType=MARK_PRICE&signature=fc044de9772244b1d57725a62af17adb122498288fa72e108cad7381b7f62df9",
+     "headers": {
+      "X-BX-APIKEY": "BXKEY-abc123"
+     },
+     "body": null
+    },
+    {
+     "method": "GET",
+     "url": "https://open-api.bingx.com/openApi/swap/v2/trade/openOrders?recvWindow=15000&symbol=TONCOIN-USDT&timestamp=1767225602000&signature=3d8449cb0a35f37ce8c68c4bb95297231a72789fb1c590b52e6b4df53a863aba",
+     "headers": {
+      "X-BX-APIKEY": "BXKEY-abc123"
+     },
+     "body": null
+    }
+   ],
+   "sleeps": [
+    2.0
+   ],
+   "clock_end": 1767225602.0,
+   "markers": [
+    [
+     "INFO",
+     "[BINGX-LEGACY-GAP]"
+    ],
+    [
+     "DEBUG",
+     "[TP-VERIFIED]"
+    ]
+   ],
+   "saved": {
+    "hedge_saved": [],
+    "auth_reset": [],
+    "events": [],
+    "metrics": [
+     "trade_placed",
+     "trade_placement_latency_ms",
+     "sl_tp_attached"
+    ]
+   },
+   "final": {
+    "hedge": {},
+    "account_type": {},
+    "delisted": [],
+    "fail_count": {},
+    "bybit_offset": 0
+   }
+  }
+ },
+ {
+  "scenario": {
+   "name": "pt_network_retry_then_fail",
+   "exchange": "bingx",
+   "call": "place_trade",
+   "args": [
+    "BXKEY-abc123",
+    "bx-secret-456",
+    "BTC-USDT-SWAP",
+    "LONG",
+    87000.5,
+    86000.0,
+    88500.0,
+    1.0,
+    10
+   ],
+   "kwargs": {},
+   "routes": [
+    {
+     "method": "GET",
+     "path": "/openApi/swap/v2/quote/contracts",
+     "responses": [
+      {
+       "text": "{\"code\": 0, \"msg\": \"\", \"data\": [{\"symbol\": \"BTC-USDT\", \"tradeMinQuantity\": 0.0001, \"pricePrecision\": 1, \"maxLeverage\": 125, \"status\": 1}, {\"symbol\": \"ETH-USDT\", \"tradeMinQuantity\": 0.01, \"pricePrecision\": 2, \"maxLeverage\": 100, \"status\": 1}, {\"symbol\": \"1000PEPE-USDT\", \"tradeMinQuantity\": 100, \"pricePrecision\": 7, \"maxLeverage\": 50, \"status\": 1}, {\"symbol\": \"TONCOIN-USDT\", \"tradeMinQuantity\": 1, \"pricePrecision\": 4, \"maxLeverage\": \"75\", \"status\": 1}, {\"symbol\": \"ASTER-USDT\", \"tradeMinQuantity\": 2.64, \"pricePrecision\": 4, \"maxLeverage\": 20, \"status\": 1}]}"
+      }
+     ]
+    },
+    {
+     "method": "GET",
+     "path": "/openApi/swap/v2/user/balance",
+     "responses": [
+      {
+       "raise": "connect",
+       "message": "Cannot connect to host open-api.bingx.com:443 ssl:default [Name or service not known]"
+      }
+     ]
+    }
+   ],
+   "state": {},
+   "random": [],
+   "clock": 1767225600.0
+  },
+  "expected": {
+   "name": "pt_network_retry_then_fail",
+   "result": {
+    "ok": false,
+    "order_id": "",
+    "error": "Неизвестная ошибка BingX."
+   },
+   "requests": [
+    {
+     "method": "GET",
+     "url": "https://open-api.bingx.com/openApi/swap/v2/quote/contracts",
+     "headers": {},
+     "body": null
+    },
+    {
+     "method": "GET",
+     "url": "https://open-api.bingx.com/openApi/swap/v2/user/balance?recvWindow=15000&timestamp=1767225600000&signature=54dc97c97f1c3ca650cfcefb891ffa5c88591dda3defded4580343391c67be79",
+     "headers": {
+      "X-BX-APIKEY": "BXKEY-abc123"
+     },
+     "body": null
+    },
+    {
+     "method": "GET",
+     "url": "https://open-api.bingx.com/openApi/swap/v2/user/balance?recvWindow=15000&timestamp=1767225600000&signature=54dc97c97f1c3ca650cfcefb891ffa5c88591dda3defded4580343391c67be79",
+     "headers": {
+      "X-BX-APIKEY": "BXKEY-abc123"
+     },
+     "body": null
+    },
+    {
+     "method": "GET",
+     "url": "https://open-api.bingx.com/openApi/swap/v2/user/balance?recvWindow=15000&timestamp=1767225600000&signature=54dc97c97f1c3ca650cfcefb891ffa5c88591dda3defded4580343391c67be79",
+     "headers": {
+      "X-BX-APIKEY": "BXKEY-abc123"
+     },
+     "body": null
+    }
+   ],
+   "sleeps": [
+    0.5,
+    1.0
+   ],
+   "clock_end": 1767225601.5,
+   "markers": [
+    [
+     "WARNING",
+     "[BINGX-NET-RETRY]"
+    ]
+   ],
+   "saved": {
+    "hedge_saved": [],
+    "auth_reset": [],
+    "events": [],
+    "metrics": []
+   },
+   "final": {
+    "hedge": {},
+    "account_type": {},
+    "delisted": [],
+    "fail_count": {},
+    "bybit_offset": 0
+   }
+  }
+ },
+ {
+  "scenario": {
+   "name": "pt_html_502_balance",
+   "exchange": "bingx",
+   "call": "place_trade",
+   "args": [
+    "BXKEY-abc123",
+    "bx-secret-456",
+    "BTC-USDT-SWAP",
+    "LONG",
+    87000.5,
+    86000.0,
+    88500.0,
+    1.0,
+    10
+   ],
+   "kwargs": {},
+   "routes": [
+    {
+     "method": "GET",
+     "path": "/openApi/swap/v2/quote/contracts",
+     "responses": [
+      {
+       "text": "{\"code\": 0, \"msg\": \"\", \"data\": [{\"symbol\": \"BTC-USDT\", \"tradeMinQuantity\": 0.0001, \"pricePrecision\": 1, \"maxLeverage\": 125, \"status\": 1}, {\"symbol\": \"ETH-USDT\", \"tradeMinQuantity\": 0.01, \"pricePrecision\": 2, \"maxLeverage\": 100, \"status\": 1}, {\"symbol\": \"1000PEPE-USDT\", \"tradeMinQuantity\": 100, \"pricePrecision\": 7, \"maxLeverage\": 50, \"status\": 1}, {\"symbol\": \"TONCOIN-USDT\", \"tradeMinQuantity\": 1, \"pricePrecision\": 4, \"maxLeverage\": \"75\", \"status\": 1}, {\"symbol\": \"ASTER-USDT\", \"tradeMinQuantity\": 2.64, \"pricePrecision\": 4, \"maxLeverage\": 20, \"status\": 1}]}"
+      }
+     ]
+    },
+    {
+     "method": "GET",
+     "path": "/openApi/swap/v2/user/balance",
+     "responses": [
+      {
+       "status": 502,
+       "text": "<html>Bad Gateway</html>",
+       "headers": {
+        "Content-Type": "text/html"
+       }
+      }
+     ]
+    }
+   ],
+   "state": {},
+   "random": [],
+   "clock": 1767225600.0
+  },
+  "expected": {
+   "name": "pt_html_502_balance",
+   "result": {
+    "ok": false,
+    "order_id": "",
+    "error": "Неизвестная ошибка BingX."
+   },
+   "requests": [
+    {
+     "method": "GET",
+     "url": "https://open-api.bingx.com/openApi/swap/v2/quote/contracts",
+     "headers": {},
+     "body": null
+    },
+    {
+     "method": "GET",
+     "url": "https://open-api.bingx.com/openApi/swap/v2/user/balance?recvWindow=15000&timestamp=1767225600000&signature=54dc97c97f1c3ca650cfcefb891ffa5c88591dda3defded4580343391c67be79",
+     "headers": {
+      "X-BX-APIKEY": "BXKEY-abc123"
+     },
+     "body": null
+    }
+   ],
+   "sleeps": [],
+   "clock_end": 1767225600.0,
+   "markers": [],
+   "saved": {
+    "hedge_saved": [],
+    "auth_reset": [],
+    "events": [],
+    "metrics": []
+   },
+   "final": {
+    "hedge": {},
+    "account_type": {},
+    "delisted": [],
+    "fail_count": {},
+    "bybit_offset": 0
+   }
+  }
+ },
+ {
+  "scenario": {
+   "name": "pt_killswitch",
+   "exchange": "bingx",
+   "call": "place_trade",
+   "args": [
+    "BXKEY-abc123",
+    "bx-secret-456",
+    "BTC-USDT-SWAP",
+    "LONG",
+    87000.5,
+    86000.0,
+    88500.0,
+    1.0,
+    10
+   ],
+   "kwargs": {},
+   "routes": [],
+   "state": {
+    "ks_halted": "HALTED_ALL"
+   },
+   "random": [],
+   "clock": 1767225600.0
+  },
+  "expected": {
+   "name": "pt_killswitch",
+   "result": {
+    "ok": false,
+    "order_id": "",
+    "error": "killswitch_halted: HALTED_ALL"
+   },
+   "requests": [],
+   "sleeps": [],
+   "clock_end": 1767225600.0,
+   "markers": [],
+   "saved": {
+    "hedge_saved": [],
+    "auth_reset": [],
+    "events": [],
+    "metrics": []
+   },
+   "final": {
+    "hedge": {},
+    "account_type": {},
+    "delisted": [],
+    "fail_count": {},
+    "bybit_offset": 0
+   }
+  }
+ },
+ {
+  "scenario": {
+   "name": "pt_order_rejected",
+   "exchange": "bingx",
+   "call": "place_trade",
+   "args": [
+    "BXKEY-abc123",
+    "bx-secret-456",
+    "BTC-USDT-SWAP",
+    "LONG",
+    87000.5,
+    86000.0,
+    88500.0,
+    1.0,
+    10
+   ],
+   "kwargs": {},
+   "routes": [
+    {
+     "method": "GET",
+     "path": "/openApi/swap/v2/quote/contracts",
+     "responses": [
+      {
+       "text": "{\"code\": 0, \"msg\": \"\", \"data\": [{\"symbol\": \"BTC-USDT\", \"tradeMinQuantity\": 0.0001, \"pricePrecision\": 1, \"maxLeverage\": 125, \"status\": 1}, {\"symbol\": \"ETH-USDT\", \"tradeMinQuantity\": 0.01, \"pricePrecision\": 2, \"maxLeverage\": 100, \"status\": 1}, {\"symbol\": \"1000PEPE-USDT\", \"tradeMinQuantity\": 100, \"pricePrecision\": 7, \"maxLeverage\": 50, \"status\": 1}, {\"symbol\": \"TONCOIN-USDT\", \"tradeMinQuantity\": 1, \"pricePrecision\": 4, \"maxLeverage\": \"75\", \"status\": 1}, {\"symbol\": \"ASTER-USDT\", \"tradeMinQuantity\": 2.64, \"pricePrecision\": 4, \"maxLeverage\": 20, \"status\": 1}]}"
+      }
+     ]
+    },
+    {
+     "method": "GET",
+     "path": "/openApi/swap/v2/user/balance",
+     "responses": [
+      {
+       "text": "{\"code\": 0, \"msg\": \"\", \"data\": {\"balance\": {\"userId\": \"1\", \"asset\": \"USDT\", \"balance\": \"1000.0\", \"equity\": \"1000.5\", \"unrealizedProfit\": \"0.5\", \"availableMargin\": \"900.0\"}}}"
+      }
+     ]
+    },
+    {
+     "method": "POST",
+     "path": "/openApi/swap/v2/trade/leverage",
+     "responses": [
+      {
+       "text": "{\"code\": 0, \"msg\": \"\", \"data\": {\"leverage\": 10, \"symbol\": \"BTC-USDT\"}}"
+      }
+     ]
+    },
+    {
+     "method": "GET",
+     "path": "/openApi/swap/v2/quote/price",
+     "responses": [
+      {
+       "text": "{\"code\": 0, \"msg\": \"\", \"data\": {\"symbol\": \"BTC-USDT\", \"price\": \"87000\", \"time\": 1767225600000}}"
+      }
+     ]
+    },
+    {
+     "method": "POST",
+     "path": "/openApi/swap/v2/trade/order",
+     "responses": [
+      {
+       "text": "{\"code\": 101204, \"msg\": \"Insufficient margin\", \"data\": {}}"
+      }
+     ]
+    }
+   ],
+   "state": {},
+   "random": [],
+   "clock": 1767225600.0
+  },
+  "expected": {
+   "name": "pt_order_rejected",
+   "result": {
+    "ok": false,
+    "order_id": "",
+    "error": "Недостаточно средств на счёте. Пополните баланс."
+   },
+   "requests": [
+    {
+     "method": "GET",
+     "url": "https://open-api.bingx.com/openApi/swap/v2/quote/contracts",
+     "headers": {},
+     "body": null
+    },
+    {
+     "method": "GET",
+     "url": "https://open-api.bingx.com/openApi/swap/v2/user/balance?recvWindow=15000&timestamp=1767225600000&signature=54dc97c97f1c3ca650cfcefb891ffa5c88591dda3defded4580343391c67be79",
+     "headers": {
+      "X-BX-APIKEY": "BXKEY-abc123"
+     },
+     "body": null
+    },
+    {
+     "method": "POST",
+     "url": "https://open-api.bingx.com/openApi/swap/v2/trade/leverage?leverage=10&recvWindow=15000&side=LONG&symbol=BTC-USDT&timestamp=1767225600000&signature=c65994213f74624bfdf7eb14611228af6bdd3257908b32b53ef5cff0f9eb7a0e",
+     "headers": {
+      "X-BX-APIKEY": "BXKEY-abc123"
+     },
+     "body": null
+    },
+    {
+     "method": "GET",
+     "url": "https://open-api.bingx.com/openApi/swap/v2/quote/price?recvWindow=15000&symbol=BTC-USDT&timestamp=1767225600000&signature=8c72fd5c91131844fbe8cf03300f72a097966266a3b2ecd7e45acbf566990a04",
+     "headers": {
+      "X-BX-APIKEY": "BXKEY-abc123"
+     },
+     "body": null
+    },
+    {
+     "method": "POST",
+     "url": "https://open-api.bingx.com/openApi/swap/v2/trade/order?positionSide=LONG&price=87000.5&quantity=0.0100&recvWindow=15000&side=BUY&symbol=BTC-USDT&timeInForce=GTC&timestamp=1767225600000&type=LIMIT&signature=d9ca18c4bf27dc659558b2ef345b844e9ced6bb2c2599fba1382f3aac106b9d4",
+     "headers": {
+      "X-BX-APIKEY": "BXKEY-abc123"
+     },
+     "body": null
+    }
+   ],
+   "sleeps": [],
+   "clock_end": 1767225600.0,
+   "markers": [],
+   "saved": {
+    "hedge_saved": [],
+    "auth_reset": [],
+    "events": [],
+    "metrics": []
+   },
+   "final": {
+    "hedge": {},
+    "account_type": {},
+    "delisted": [],
+    "fail_count": {},
+    "bybit_offset": 0
+   }
+  }
+ },
+ {
+  "scenario": {
+   "name": "pt_order_rejected_generic",
+   "exchange": "bingx",
+   "call": "place_trade",
+   "args": [
+    "BXKEY-abc123",
+    "bx-secret-456",
+    "BTC-USDT-SWAP",
+    "LONG",
+    87000.5,
+    86000.0,
+    88500.0,
+    1.0,
+    10
+   ],
+   "kwargs": {},
+   "routes": [
+    {
+     "method": "GET",
+     "path": "/openApi/swap/v2/quote/contracts",
+     "responses": [
+      {
+       "text": "{\"code\": 0, \"msg\": \"\", \"data\": [{\"symbol\": \"BTC-USDT\", \"tradeMinQuantity\": 0.0001, \"pricePrecision\": 1, \"maxLeverage\": 125, \"status\": 1}, {\"symbol\": \"ETH-USDT\", \"tradeMinQuantity\": 0.01, \"pricePrecision\": 2, \"maxLeverage\": 100, \"status\": 1}, {\"symbol\": \"1000PEPE-USDT\", \"tradeMinQuantity\": 100, \"pricePrecision\": 7, \"maxLeverage\": 50, \"status\": 1}, {\"symbol\": \"TONCOIN-USDT\", \"tradeMinQuantity\": 1, \"pricePrecision\": 4, \"maxLeverage\": \"75\", \"status\": 1}, {\"symbol\": \"ASTER-USDT\", \"tradeMinQuantity\": 2.64, \"pricePrecision\": 4, \"maxLeverage\": 20, \"status\": 1}]}"
+      }
+     ]
+    },
+    {
+     "method": "GET",
+     "path": "/openApi/swap/v2/user/balance",
+     "responses": [
+      {
+       "text": "{\"code\": 0, \"msg\": \"\", \"data\": {\"balance\": {\"userId\": \"1\", \"asset\": \"USDT\", \"balance\": \"1000.0\", \"equity\": \"1000.5\", \"unrealizedProfit\": \"0.5\", \"availableMargin\": \"900.0\"}}}"
+      }
+     ]
+    },
+    {
+     "method": "POST",
+     "path": "/openApi/swap/v2/trade/leverage",
+     "responses": [
+      {
+       "text": "{\"code\": 0, \"msg\": \"\", \"data\": {\"leverage\": 10, \"symbol\": \"BTC-USDT\"}}"
+      }
+     ]
+    },
+    {
+     "method": "GET",
+     "path": "/openApi/swap/v2/quote/price",
+     "responses": [
+      {
+       "text": "{\"code\": 0, \"msg\": \"\", \"data\": {\"symbol\": \"BTC-USDT\", \"price\": \"87000\", \"time\": 1767225600000}}"
+      }
+     ]
+    },
+    {
+     "method": "POST",
+     "path": "/openApi/swap/v2/trade/order",
+     "responses": [
+      {
+       "text": "{\"code\": 1, \"msg\": \"something odd\", \"data\": {}}"
+      }
+     ]
+    }
+   ],
+   "state": {},
+   "random": [],
+   "clock": 1767225600.0
+  },
+  "expected": {
+   "name": "pt_order_rejected_generic",
+   "result": {
+    "ok": false,
+    "order_id": "",
+    "error": "Неизвестная ошибка BingX."
+   },
+   "requests": [
+    {
+     "method": "GET",
+     "url": "https://open-api.bingx.com/openApi/swap/v2/quote/contracts",
+     "headers": {},
+     "body": null
+    },
+    {
+     "method": "GET",
+     "url": "https://open-api.bingx.com/openApi/swap/v2/user/balance?recvWindow=15000&timestamp=1767225600000&signature=54dc97c97f1c3ca650cfcefb891ffa5c88591dda3defded4580343391c67be79",
+     "headers": {
+      "X-BX-APIKEY": "BXKEY-abc123"
+     },
+     "body": null
+    },
+    {
+     "method": "POST",
+     "url": "https://open-api.bingx.com/openApi/swap/v2/trade/leverage?leverage=10&recvWindow=15000&side=LONG&symbol=BTC-USDT&timestamp=1767225600000&signature=c65994213f74624bfdf7eb14611228af6bdd3257908b32b53ef5cff0f9eb7a0e",
+     "headers": {
+      "X-BX-APIKEY": "BXKEY-abc123"
+     },
+     "body": null
+    },
+    {
+     "method": "GET",
+     "url": "https://open-api.bingx.com/openApi/swap/v2/quote/price?recvWindow=15000&symbol=BTC-USDT&timestamp=1767225600000&signature=8c72fd5c91131844fbe8cf03300f72a097966266a3b2ecd7e45acbf566990a04",
+     "headers": {
+      "X-BX-APIKEY": "BXKEY-abc123"
+     },
+     "body": null
+    },
+    {
+     "method": "POST",
+     "url": "https://open-api.bingx.com/openApi/swap/v2/trade/order?positionSide=LONG&price=87000.5&quantity=0.0100&recvWindow=15000&side=BUY&symbol=BTC-USDT&timeInForce=GTC&timestamp=1767225600000&type=LIMIT&signature=d9ca18c4bf27dc659558b2ef345b844e9ced6bb2c2599fba1382f3aac106b9d4",
+     "headers": {
+      "X-BX-APIKEY": "BXKEY-abc123"
+     },
+     "body": null
+    }
+   ],
+   "sleeps": [],
+   "clock_end": 1767225600.0,
+   "markers": [],
+   "saved": {
+    "hedge_saved": [],
+    "auth_reset": [],
+    "events": [],
+    "metrics": []
+   },
+   "final": {
+    "hedge": {},
+    "account_type": {},
+    "delisted": [],
+    "fail_count": {},
+    "bybit_offset": 0
+   }
+  }
+ },
+ {
+  "scenario": {
+   "name": "trail_long_ok",
+   "exchange": "bingx",
+   "call": "set_trailing_sl",
+   "args": [
+    "BXKEY-abc123",
+    "bx-secret-456",
+    "BTC-USDT-SWAP",
+    86500.0,
+    "LONG",
+    0
+   ],
+   "kwargs": {},
+   "routes": [
+    {
+     "method": "GET",
+     "path": "/openApi/swap/v2/quote/contracts",
+     "responses": [
+      {
+       "text": "{\"code\": 0, \"msg\": \"\", \"data\": [{\"symbol\": \"BTC-USDT\", \"tradeMinQuantity\": 0.0001, \"pricePrecision\": 1, \"maxLeverage\": 125, \"status\": 1}, {\"symbol\": \"ETH-USDT\", \"tradeMinQuantity\": 0.01, \"pricePrecision\": 2, \"maxLeverage\": 100, \"status\": 1}, {\"symbol\": \"1000PEPE-USDT\", \"tradeMinQuantity\": 100, \"pricePrecision\": 7, \"maxLeverage\": 50, \"status\": 1}, {\"symbol\": \"TONCOIN-USDT\", \"tradeMinQuantity\": 1, \"pricePrecision\": 4, \"maxLeverage\": \"75\", \"status\": 1}, {\"symbol\": \"ASTER-USDT\", \"tradeMinQuantity\": 2.64, \"pricePrecision\": 4, \"maxLeverage\": 20, \"status\": 1}]}"
+      }
+     ]
+    },
+    {
+     "method": "GET",
+     "path": "/openApi/swap/v2/user/positions",
+     "responses": [
+      {
+       "text": "{\"code\": 0, \"msg\": \"\", \"data\": [{\"symbol\": \"BTC-USDT\", \"positionSide\": \"LONG\", \"positionAmt\": \"0.0115\", \"avgPrice\": \"87000.5\", \"markPrice\": \"87000.5\", \"unrealizedProfit\": \"0.12\", \"leverage\": 10, \"stopLoss\": \"\"}]}"
+      }
+     ]
+    },
+    {
+     "method": "POST",
+     "path": "/openApi/swap/v2/trade/order",
+     "responses": [
+      {
+       "text": "{\"code\": 0, \"msg\": \"\", \"data\": {\"order\": {\"orderId\": 777, \"symbol\": \"BTC-USDT\", \"side\": \"BUY\", \"type\": \"LIMIT\"}}}"
+      }
+     ]
+    },
+    {
+     "method": "GET",
+     "path": "/openApi/swap/v2/trade/openOrders",
+     "responses": [
+      {
+       "text": "{\"code\": 0, \"msg\": \"\", \"data\": {\"orders\": [{\"orderId\": 777, \"type\": \"STOP_MARKET\", \"side\": \"SELL\"}, {\"orderId\": 555, \"type\": \"STOP_MARKET\", \"side\": \"SELL\"}, {\"orderId\": 556, \"type\": \"TAKE_PROFIT_MARKET\", \"side\": \"SELL\"}]}}"
+      }
+     ]
+    },
+    {
+     "method": "DELETE",
+     "path": "/openApi/swap/v2/trade/order",
+     "responses": [
+      {
+       "text": "{\"code\": 109400, \"msg\": \"order not exist\", \"data\": {}}"
+      }
+     ]
+    }
+   ],
+   "state": {},
+   "random": [],
+   "clock": 1767225600.0
+  },
+  "expected": {
+   "name": "trail_long_ok",
+   "result": {
+    "ok": true
+   },
+   "requests": [
+    {
+     "method": "GET",
+     "url": "https://open-api.bingx.com/openApi/swap/v2/quote/contracts",
+     "headers": {},
+     "body": null
+    },
+    {
+     "method": "GET",
+     "url": "https://open-api.bingx.com/openApi/swap/v2/user/positions?recvWindow=15000&symbol=BTC-USDT&timestamp=1767225600000&signature=8c72fd5c91131844fbe8cf03300f72a097966266a3b2ecd7e45acbf566990a04",
+     "headers": {
+      "X-BX-APIKEY": "BXKEY-abc123"
+     },
+     "body": null
+    },
+    {
+     "method": "POST",
+     "url": "https://open-api.bingx.com/openApi/swap/v2/trade/order?positionSide=LONG&quantity=0.0115&recvWindow=15000&side=SELL&stopPrice=86500.0&symbol=BTC-USDT&timestamp=1767225600000&type=STOP_MARKET&workingType=MARK_PRICE&signature=47bc48b73309511937a3df919f5f69ae7015f427eb35075f451f05a779154797",
+     "headers": {
+      "X-BX-APIKEY": "BXKEY-abc123"
+     },
+     "body": null
+    },
+    {
+     "method": "GET",
+     "url": "https://open-api.bingx.com/openApi/swap/v2/trade/openOrders?recvWindow=15000&symbol=BTC-USDT&timestamp=1767225600000&signature=8c72fd5c91131844fbe8cf03300f72a097966266a3b2ecd7e45acbf566990a04",
+     "headers": {
+      "X-BX-APIKEY": "BXKEY-abc123"
+     },
+     "body": null
+    },
+    {
+     "method": "DELETE",
+     "url": "https://open-api.bingx.com/openApi/swap/v2/trade/order?orderId=555&recvWindow=15000&symbol=BTC-USDT&timestamp=1767225600000&signature=11cc1e71b65ab7b96e6c0efe497f8b25e0e923a9c01c300b35319c4912bcf245",
+     "headers": {
+      "X-BX-APIKEY": "BXKEY-abc123"
+     },
+     "body": null
+    }
+   ],
+   "sleeps": [],
+   "clock_end": 1767225600.0,
+   "markers": [],
+   "saved": {
+    "hedge_saved": [],
+    "auth_reset": [],
+    "events": [],
+    "metrics": []
+   },
+   "final": {
+    "hedge": {},
+    "account_type": {},
+    "delisted": [],
+    "fail_count": {},
+    "bybit_offset": 0
+   }
+  }
+ },
+ {
+  "scenario": {
+   "name": "trail_110424",
+   "exchange": "bingx",
+   "call": "set_trailing_sl",
+   "args": [
+    "BXKEY-abc123",
+    "bx-secret-456",
+    "BTC-USDT-SWAP",
+    86500.0,
+    "LONG",
+    0
+   ],
+   "kwargs": {},
+   "routes": [
+    {
+     "method": "GET",
+     "path": "/openApi/swap/v2/quote/contracts",
+     "responses": [
+      {
+       "text": "{\"code\": 0, \"msg\": \"\", \"data\": [{\"symbol\": \"BTC-USDT\", \"tradeMinQuantity\": 0.0001, \"pricePrecision\": 1, \"maxLeverage\": 125, \"status\": 1}, {\"symbol\": \"ETH-USDT\", \"tradeMinQuantity\": 0.01, \"pricePrecision\": 2, \"maxLeverage\": 100, \"status\": 1}, {\"symbol\": \"1000PEPE-USDT\", \"tradeMinQuantity\": 100, \"pricePrecision\": 7, \"maxLeverage\": 50, \"status\": 1}, {\"symbol\": \"TONCOIN-USDT\", \"tradeMinQuantity\": 1, \"pricePrecision\": 4, \"maxLeverage\": \"75\", \"status\": 1}, {\"symbol\": \"ASTER-USDT\", \"tradeMinQuantity\": 2.64, \"pricePrecision\": 4, \"maxLeverage\": 20, \"status\": 1}]}"
+      }
+     ]
+    },
+    {
+     "method": "GET",
+     "path": "/openApi/swap/v2/user/positions",
+     "responses": [
+      {
+       "text": "{\"code\": 0, \"msg\": \"\", \"data\": [{\"symbol\": \"BTC-USDT\", \"positionSide\": \"LONG\", \"positionAmt\": \"0.0115\", \"avgPrice\": \"87000.5\", \"markPrice\": \"87000.5\", \"unrealizedProfit\": \"0.12\", \"leverage\": 10, \"stopLoss\": \"\"}]}"
+      }
+     ]
+    },
+    {
+     "method": "POST",
+     "path": "/openApi/swap/v2/trade/order",
+     "responses": [
+      {
+       "text": "{\"code\": 110424, \"msg\": \"order size > available\", \"data\": {}}"
+      }
+     ]
+    }
+   ],
+   "state": {},
+   "random": [],
+   "clock": 1767225600.0
+  },
+  "expected": {
+   "name": "trail_110424",
+   "result": {
+    "ok": false,
+    "error": "Размер ордера больше доступного (позиция мала для нового SL — оригинальный SL остаётся в силе).",
+    "code": 110424
+   },
+   "requests": [
+    {
+     "method": "GET",
+     "url": "https://open-api.bingx.com/openApi/swap/v2/quote/contracts",
+     "headers": {},
+     "body": null
+    },
+    {
+     "method": "GET",
+     "url": "https://open-api.bingx.com/openApi/swap/v2/user/positions?recvWindow=15000&symbol=BTC-USDT&timestamp=1767225600000&signature=8c72fd5c91131844fbe8cf03300f72a097966266a3b2ecd7e45acbf566990a04",
+     "headers": {
+      "X-BX-APIKEY": "BXKEY-abc123"
+     },
+     "body": null
+    },
+    {
+     "method": "POST",
+     "url": "https://open-api.bingx.com/openApi/swap/v2/trade/order?positionSide=LONG&quantity=0.0115&recvWindow=15000&side=SELL&stopPrice=86500.0&symbol=BTC-USDT&timestamp=1767225600000&type=STOP_MARKET&workingType=MARK_PRICE&signature=47bc48b73309511937a3df919f5f69ae7015f427eb35075f451f05a779154797",
+     "headers": {
+      "X-BX-APIKEY": "BXKEY-abc123"
+     },
+     "body": null
+    }
+   ],
+   "sleeps": [],
+   "clock_end": 1767225600.0,
+   "markers": [],
+   "saved": {
+    "hedge_saved": [],
+    "auth_reset": [],
+    "events": [],
+    "metrics": []
+   },
+   "final": {
+    "hedge": {},
+    "account_type": {},
+    "delisted": [],
+    "fail_count": {},
+    "bybit_offset": 0
+   }
+  }
+ },
+ {
+  "scenario": {
+   "name": "trail_no_position",
+   "exchange": "bingx",
+   "call": "set_trailing_sl",
+   "args": [
+    "BXKEY-abc123",
+    "bx-secret-456",
+    "BTC-USDT-SWAP",
+    86500.0,
+    "SHORT",
+    0
+   ],
+   "kwargs": {},
+   "routes": [
+    {
+     "method": "GET",
+     "path": "/openApi/swap/v2/quote/contracts",
+     "responses": [
+      {
+       "text": "{\"code\": 0, \"msg\": \"\", \"data\": [{\"symbol\": \"BTC-USDT\", \"tradeMinQuantity\": 0.0001, \"pricePrecision\": 1, \"maxLeverage\": 125, \"status\": 1}, {\"symbol\": \"ETH-USDT\", \"tradeMinQuantity\": 0.01, \"pricePrecision\": 2, \"maxLeverage\": 100, \"status\": 1}, {\"symbol\": \"1000PEPE-USDT\", \"tradeMinQuantity\": 100, \"pricePrecision\": 7, \"maxLeverage\": 50, \"status\": 1}, {\"symbol\": \"TONCOIN-USDT\", \"tradeMinQuantity\": 1, \"pricePrecision\": 4, \"maxLeverage\": \"75\", \"status\": 1}, {\"symbol\": \"ASTER-USDT\", \"tradeMinQuantity\": 2.64, \"pricePrecision\": 4, \"maxLeverage\": 20, \"status\": 1}]}"
+      }
+     ]
+    },
+    {
+     "method": "GET",
+     "path": "/openApi/swap/v2/user/positions",
+     "responses": [
+      {
+       "text": "{\"code\": 0, \"msg\": \"\", \"data\": []}"
+      }
+     ]
+    }
+   ],
+   "state": {},
+   "random": [],
+   "clock": 1767225600.0
+  },
+  "expected": {
+   "name": "trail_no_position",
+   "result": {
+    "ok": false,
+    "error": "position not confirmed"
+   },
+   "requests": [
+    {
+     "method": "GET",
+     "url": "https://open-api.bingx.com/openApi/swap/v2/quote/contracts",
+     "headers": {},
+     "body": null
+    },
+    {
+     "method": "GET",
+     "url": "https://open-api.bingx.com/openApi/swap/v2/user/positions?recvWindow=15000&symbol=BTC-USDT&timestamp=1767225600000&signature=8c72fd5c91131844fbe8cf03300f72a097966266a3b2ecd7e45acbf566990a04",
+     "headers": {
+      "X-BX-APIKEY": "BXKEY-abc123"
+     },
+     "body": null
+    },
+    {
+     "method": "GET",
+     "url": "https://open-api.bingx.com/openApi/swap/v2/user/positions?recvWindow=15000&symbol=BTC-USDT&timestamp=1767225602000&signature=2a2e9ab996f56f5a656cbd86ef925ea2804fb5b4f2833a1929aaeceb64682b2e",
+     "headers": {
+      "X-BX-APIKEY": "BXKEY-abc123"
+     },
+     "body": null
+    },
+    {
+     "method": "GET",
+     "url": "https://open-api.bingx.com/openApi/swap/v2/user/positions?recvWindow=15000&symbol=BTC-USDT&timestamp=1767225604000&signature=cfd67cda04d66704eba245342ec35db7078a4a82ad23f99c95a1d5cbd1bd7a1f",
+     "headers": {
+      "X-BX-APIKEY": "BXKEY-abc123"
+     },
+     "body": null
+    }
+   ],
+   "sleeps": [
+    2.0,
+    2.0,
+    2.0
+   ],
+   "clock_end": 1767225606.0,
+   "markers": [],
+   "saved": {
+    "hedge_saved": [],
+    "auth_reset": [],
+    "events": [],
+    "metrics": []
+   },
+   "final": {
+    "hedge": {},
+    "account_type": {},
+    "delisted": [],
+    "fail_count": {},
+    "bybit_offset": 0
+   }
+  }
+ },
+ {
+  "scenario": {
+   "name": "trail_lock_109500",
+   "exchange": "bingx",
+   "call": "set_trailing_sl",
+   "args": [
+    "BXKEY-abc123",
+    "bx-secret-456",
+    "ETH-USDT-SWAP",
+    3100.0,
+    "SHORT",
+    0
+   ],
+   "kwargs": {},
+   "routes": [
+    {
+     "method": "GET",
+     "path": "/openApi/swap/v2/quote/contracts",
+     "responses": [
+      {
+       "text": "{\"code\": 0, \"msg\": \"\", \"data\": [{\"symbol\": \"BTC-USDT\", \"tradeMinQuantity\": 0.0001, \"pricePrecision\": 1, \"maxLeverage\": 125, \"status\": 1}, {\"symbol\": \"ETH-USDT\", \"tradeMinQuantity\": 0.01, \"pricePrecision\": 2, \"maxLeverage\": 100, \"status\": 1}, {\"symbol\": \"1000PEPE-USDT\", \"tradeMinQuantity\": 100, \"pricePrecision\": 7, \"maxLeverage\": 50, \"status\": 1}, {\"symbol\": \"TONCOIN-USDT\", \"tradeMinQuantity\": 1, \"pricePrecision\": 4, \"maxLeverage\": \"75\", \"status\": 1}, {\"symbol\": \"ASTER-USDT\", \"tradeMinQuantity\": 2.64, \"pricePrecision\": 4, \"maxLeverage\": 20, \"status\": 1}]}"
+      }
+     ]
+    },
+    {
+     "method": "GET",
+     "path": "/openApi/swap/v2/user/positions",
+     "responses": [
+      {
+       "text": "{\"code\": 0, \"msg\": \"\", \"data\": [{\"symbol\": \"ETH-USDT\", \"positionSide\": \"BOTH\", \"positionAmt\": \"-2.5\", \"avgPrice\": \"87000.5\", \"markPrice\": \"87000.5\", \"unrealizedProfit\": \"0.12\", \"leverage\": 10, \"stopLoss\": \"\"}]}"
+      }
+     ]
+    },
+    {
+     "method": "POST",
+     "path": "/openApi/swap/v2/trade/order",
+     "responses": [
+      {
+       "text": "{\"code\": 109500, \"msg\": \"lock fail\", \"data\": {}}"
+      },
+      {
+       "text": "{\"code\": 109400, \"msg\": \"positionSide\", \"data\": {}}"
+      },
+      {
+       "text": "{\"code\": 0, \"msg\": \"\", \"data\": {\"order\": {\"orderId\": 5, \"symbol\": \"BTC-USDT\", \"side\": \"BUY\", \"type\": \"LIMIT\"}}}"
+      }
+     ]
+    },
+    {
+     "method": "GET",
+     "path": "/openApi/swap/v2/trade/openOrders",
+     "responses": [
+      {
+       "text": "{\"code\": 0, \"msg\": \"\", \"data\": {\"orders\": []}}"
+      }
+     ]
+    }
+   ],
+   "state": {},
+   "random": [],
+   "clock": 1767225600.0
+  },
+  "expected": {
+   "name": "trail_lock_109500",
+   "result": {
+    "ok": true
+   },
+   "requests": [
+    {
+     "method": "GET",
+     "url": "https://open-api.bingx.com/openApi/swap/v2/quote/contracts",
+     "headers": {},
+     "body": null
+    },
+    {
+     "method": "GET",
+     "url": "https://open-api.bingx.com/openApi/swap/v2/user/positions?recvWindow=15000&symbol=ETH-USDT&timestamp=1767225600000&signature=d50551757214d9202dcbfa5c8e415bd09a3d45afa14fd44a3a55919706c5f274",
+     "headers": {
+      "X-BX-APIKEY": "BXKEY-abc123"
+     },
+     "body": null
+    },
+    {
+     "method": "POST",
+     "url": "https://open-api.bingx.com/openApi/swap/v2/trade/order?positionSide=BOTH&quantity=2.50&recvWindow=15000&side=BUY&stopPrice=3100.00&symbol=ETH-USDT&timestamp=1767225600000&type=STOP_MARKET&workingType=MARK_PRICE&signature=ec326bbe2f73b55d92d955d58eb339fc6311cb84e8662c761172d47bb26c0a3b",
+     "headers": {
+      "X-BX-APIKEY": "BXKEY-abc123"
+     },
+     "body": null
+    },
+    {
+     "method": "POST",
+     "url": "https://open-api.bingx.com/openApi/swap/v2/trade/order?positionSide=BOTH&quantity=2.50&recvWindow=15000&side=BUY&stopPrice=3100.00&symbol=ETH-USDT&timestamp=1767225603000&type=STOP_MARKET&workingType=MARK_PRICE&signature=35a318a6a8e62cb9d3e2c06c4350df1075cf755c249d323a13e71d3e92bea0c3",
+     "headers": {
+      "X-BX-APIKEY": "BXKEY-abc123"
+     },
+     "body": null
+    },
+    {
+     "method": "POST",
+     "url": "https://open-api.bingx.com/openApi/swap/v2/trade/order?positionSide=BOTH&quantity=2.50&recvWindow=15000&side=BUY&stopPrice=3100.00&symbol=ETH-USDT&timestamp=1767225603000&type=STOP_MARKET&workingType=MARK_PRICE&signature=35a318a6a8e62cb9d3e2c06c4350df1075cf755c249d323a13e71d3e92bea0c3",
+     "headers": {
+      "X-BX-APIKEY": "BXKEY-abc123"
+     },
+     "body": null
+    },
+    {
+     "method": "GET",
+     "url": "https://open-api.bingx.com/openApi/swap/v2/trade/openOrders?recvWindow=15000&symbol=ETH-USDT&timestamp=1767225603000&signature=a717ad7e0b6bb18a12453e4eadfc706efe5923967884931712fea5664b947dec",
+     "headers": {
+      "X-BX-APIKEY": "BXKEY-abc123"
+     },
+     "body": null
+    }
+   ],
+   "sleeps": [
+    3.0
+   ],
+   "clock_end": 1767225603.0,
+   "markers": [],
+   "saved": {
+    "hedge_saved": [],
+    "auth_reset": [],
+    "events": [],
+    "metrics": []
+   },
+   "final": {
+    "hedge": {},
+    "account_type": {},
+    "delisted": [],
+    "fail_count": {},
+    "bybit_offset": 0
+   }
+  }
+ },
+ {
+  "scenario": {
+   "name": "trail_qty_zero",
+   "exchange": "bingx",
+   "call": "set_trailing_sl",
+   "args": [
+    "BXKEY-abc123",
+    "bx-secret-456",
+    "ASTER-USDT-SWAP",
+    1.2,
+    "LONG",
+    0
+   ],
+   "kwargs": {},
+   "routes": [
+    {
+     "method": "GET",
+     "path": "/openApi/swap/v2/quote/contracts",
+     "responses": [
+      {
+       "text": "{\"code\": 0, \"msg\": \"\", \"data\": [{\"symbol\": \"BTC-USDT\", \"tradeMinQuantity\": 0.0001, \"pricePrecision\": 1, \"maxLeverage\": 125, \"status\": 1}, {\"symbol\": \"ETH-USDT\", \"tradeMinQuantity\": 0.01, \"pricePrecision\": 2, \"maxLeverage\": 100, \"status\": 1}, {\"symbol\": \"1000PEPE-USDT\", \"tradeMinQuantity\": 100, \"pricePrecision\": 7, \"maxLeverage\": 50, \"status\": 1}, {\"symbol\": \"TONCOIN-USDT\", \"tradeMinQuantity\": 1, \"pricePrecision\": 4, \"maxLeverage\": \"75\", \"status\": 1}, {\"symbol\": \"ASTER-USDT\", \"tradeMinQuantity\": 2.64, \"pricePrecision\": 4, \"maxLeverage\": 20, \"status\": 1}]}"
+      }
+     ]
+    },
+    {
+     "method": "GET",
+     "path": "/openApi/swap/v2/user/positions",
+     "responses": [
+      {
+       "text": "{\"code\": 0, \"msg\": \"\", \"data\": [{\"symbol\": \"ASTER-USDT\", \"positionSide\": \"LONG\", \"positionAmt\": \"1.86\", \"avgPrice\": \"87000.5\", \"markPrice\": \"87000.5\", \"unrealizedProfit\": \"0.12\", \"leverage\": 10, \"stopLoss\": \"\"}]}"
+      }
+     ]
+    }
+   ],
+   "state": {},
+   "random": [],
+   "clock": 1767225600.0
+  },
+  "expected": {
+   "name": "trail_qty_zero",
+   "result": {
+    "ok": false,
+    "error": "position smaller than minimum step (trail skipped)",
+    "skipped": true
+   },
+   "requests": [
+    {
+     "method": "GET",
+     "url": "https://open-api.bingx.com/openApi/swap/v2/quote/contracts",
+     "headers": {},
+     "body": null
+    },
+    {
+     "method": "GET",
+     "url": "https://open-api.bingx.com/openApi/swap/v2/user/positions?recvWindow=15000&symbol=ASTER-USDT&timestamp=1767225600000&signature=ca94af1e3f196597edeca49c02a871cf202e12e0be6e62eaa971cebd89572af6",
+     "headers": {
+      "X-BX-APIKEY": "BXKEY-abc123"
+     },
+     "body": null
+    }
+   ],
+   "sleeps": [],
+   "clock_end": 1767225600.0,
+   "markers": [],
+   "saved": {
+    "hedge_saved": [],
+    "auth_reset": [],
+    "events": [],
+    "metrics": []
+   },
+   "final": {
+    "hedge": {},
+    "account_type": {},
+    "delisted": [],
+    "fail_count": {},
+    "bybit_offset": 0
+   }
+  }
+ },
+ {
+  "scenario": {
+   "name": "breakeven_short",
+   "exchange": "bingx",
+   "call": "set_breakeven",
+   "args": [
+    "BXKEY-abc123",
+    "bx-secret-456",
+    "ETH-USDT-SWAP",
+    3000.123,
+    "SHORT",
+    0
+   ],
+   "kwargs": {},
+   "routes": [
+    {
+     "method": "GET",
+     "path": "/openApi/swap/v2/quote/contracts",
+     "responses": [
+      {
+       "text": "{\"code\": 0, \"msg\": \"\", \"data\": [{\"symbol\": \"BTC-USDT\", \"tradeMinQuantity\": 0.0001, \"pricePrecision\": 1, \"maxLeverage\": 125, \"status\": 1}, {\"symbol\": \"ETH-USDT\", \"tradeMinQuantity\": 0.01, \"pricePrecision\": 2, \"maxLeverage\": 100, \"status\": 1}, {\"symbol\": \"1000PEPE-USDT\", \"tradeMinQuantity\": 100, \"pricePrecision\": 7, \"maxLeverage\": 50, \"status\": 1}, {\"symbol\": \"TONCOIN-USDT\", \"tradeMinQuantity\": 1, \"pricePrecision\": 4, \"maxLeverage\": \"75\", \"status\": 1}, {\"symbol\": \"ASTER-USDT\", \"tradeMinQuantity\": 2.64, \"pricePrecision\": 4, \"maxLeverage\": 20, \"status\": 1}]}"
+      }
+     ]
+    },
+    {
+     "method": "GET",
+     "path": "/openApi/swap/v2/trade/openOrders",
+     "responses": [
+      {
+       "text": "{\"code\": 0, \"msg\": \"\", \"data\": {\"orders\": [{\"orderId\": 1, \"type\": \"STOP_MARKET\", \"side\": \"BUY\"}]}}"
+      }
+     ]
+    },
+    {
+     "method": "DELETE",
+     "path": "/openApi/swap/v2/trade/order",
+     "responses": [
+      {
+       "text": "{\"code\": 0, \"msg\": \"\", \"data\": {}}"
+      }
+     ]
+    },
+    {
+     "method": "GET",
+     "path": "/openApi/swap/v2/user/positions",
+     "responses": [
+      {
+       "text": "{\"code\": 0, \"msg\": \"\", \"data\": [{\"symbol\": \"ETH-USDT\", \"positionSide\": \"SHORT\", \"positionAmt\": \"-2.5\", \"avgPrice\": \"87000.5\", \"markPrice\": \"87000.5\", \"unrealizedProfit\": \"0.12\", \"leverage\": 10, \"stopLoss\": \"\"}]}"
+      }
+     ]
+    },
+    {
+     "method": "POST",
+     "path": "/openApi/swap/v2/trade/order",
+     "responses": [
+      {
+       "text": "{\"code\": 0, \"msg\": \"\", \"data\": {\"order\": {\"orderId\": 9, \"symbol\": \"BTC-USDT\", \"side\": \"BUY\", \"type\": \"LIMIT\"}}}"
+      }
+     ]
+    }
+   ],
+   "state": {},
+   "random": [],
+   "clock": 1767225600.0
+  },
+  "expected": {
+   "name": "breakeven_short",
+   "result": {
+    "ok": true
+   },
+   "requests": [
+    {
+     "method": "GET",
+     "url": "https://open-api.bingx.com/openApi/swap/v2/quote/contracts",
+     "headers": {},
+     "body": null
+    },
+    {
+     "method": "GET",
+     "url": "https://open-api.bingx.com/openApi/swap/v2/trade/openOrders?recvWindow=15000&symbol=ETH-USDT&timestamp=1767225600000&signature=d50551757214d9202dcbfa5c8e415bd09a3d45afa14fd44a3a55919706c5f274",
+     "headers": {
+      "X-BX-APIKEY": "BXKEY-abc123"
+     },
+     "body": null
+    },
+    {
+     "method": "DELETE",
+     "url": "https://open-api.bingx.com/openApi/swap/v2/trade/order?orderId=1&recvWindow=15000&symbol=ETH-USDT&timestamp=1767225600000&signature=9873cf250a67f011d6505de0598df2e63f8c03f328eabb3bbc86d5a63ec62850",
+     "headers": {
+      "X-BX-APIKEY": "BXKEY-abc123"
+     },
+     "body": null
+    },
+    {
+     "method": "GET",
+     "url": "https://open-api.bingx.com/openApi/swap/v2/user/positions?recvWindow=15000&symbol=ETH-USDT&timestamp=1767225600000&signature=d50551757214d9202dcbfa5c8e415bd09a3d45afa14fd44a3a55919706c5f274",
+     "headers": {
+      "X-BX-APIKEY": "BXKEY-abc123"
+     },
+     "body": null
+    },
+    {
+     "method": "POST",
+     "url": "https://open-api.bingx.com/openApi/swap/v2/trade/order?positionSide=SHORT&quantity=2.50&recvWindow=15000&side=BUY&stopPrice=3000.12&symbol=ETH-USDT&timestamp=1767225600000&type=STOP_MARKET&workingType=MARK_PRICE&signature=1b2fe1d602726bcdd89aa65b5775b6ed90afe1ea62b72d66bc0e0e2f6faeb14d",
+     "headers": {
+      "X-BX-APIKEY": "BXKEY-abc123"
+     },
+     "body": null
+    }
+   ],
+   "sleeps": [],
+   "clock_end": 1767225600.0,
+   "markers": [],
+   "saved": {
+    "hedge_saved": [],
+    "auth_reset": [],
+    "events": [],
+    "metrics": []
+   },
+   "final": {
+    "hedge": {},
+    "account_type": {},
+    "delisted": [],
+    "fail_count": {},
+    "bybit_offset": 0
+   }
+  }
+ },
+ {
+  "scenario": {
+   "name": "sltp_for_position",
+   "exchange": "bingx",
+   "call": "place_sl_tp_for_position",
+   "args": [
+    "BXKEY-abc123",
+    "bx-secret-456",
+    "BTC-USDT-SWAP",
+    "LONG",
+    0.0115,
+    86000.0,
+    88500.0,
+    89500.0,
+    90500.0
+   ],
+   "kwargs": {},
+   "routes": [
+    {
+     "method": "GET",
+     "path": "/openApi/swap/v2/quote/contracts",
+     "responses": [
+      {
+       "text": "{\"code\": 0, \"msg\": \"\", \"data\": [{\"symbol\": \"BTC-USDT\", \"tradeMinQuantity\": 0.0001, \"pricePrecision\": 1, \"maxLeverage\": 125, \"status\": 1}, {\"symbol\": \"ETH-USDT\", \"tradeMinQuantity\": 0.01, \"pricePrecision\": 2, \"maxLeverage\": 100, \"status\": 1}, {\"symbol\": \"1000PEPE-USDT\", \"tradeMinQuantity\": 100, \"pricePrecision\": 7, \"maxLeverage\": 50, \"status\": 1}, {\"symbol\": \"TONCOIN-USDT\", \"tradeMinQuantity\": 1, \"pricePrecision\": 4, \"maxLeverage\": \"75\", \"status\": 1}, {\"symbol\": \"ASTER-USDT\", \"tradeMinQuantity\": 2.64, \"pricePrecision\": 4, \"maxLeverage\": 20, \"status\": 1}]}"
+      }
+     ]
+    },
+    {
+     "method": "POST",
+     "path": "/openApi/swap/v2/trade/order",
+     "responses": [
+      {
+       "text": "{\"code\": 0, \"msg\": \"\", \"data\": {\"order\": {\"orderId\": 41, \"symbol\": \"BTC-USDT\", \"side\": \"BUY\", \"type\": \"LIMIT\"}}}"
+      },
+      {
+       "text": "{\"code\": 0, \"msg\": \"\", \"data\": {\"order\": {\"orderId\": 42, \"symbol\": \"BTC-USDT\", \"side\": \"BUY\", \"type\": \"LIMIT\"}}}"
+      },
+      {
+       "text": "{\"code\": 110413, \"msg\": \"tp below\", \"data\": {}}"
+      },
+      {
+       "text": "{\"code\": 0, \"msg\": \"\", \"data\": {\"order\": {\"orderId\": 43, \"symbol\": \"BTC-USDT\", \"side\": \"BUY\", \"type\": \"LIMIT\"}}}"
+      },
+      {
+       "text": "{\"code\": 0, \"msg\": \"\", \"data\": {\"order\": {\"orderId\": 44, \"symbol\": \"BTC-USDT\", \"side\": \"BUY\", \"type\": \"LIMIT\"}}}"
+      }
+     ]
+    },
+    {
+     "method": "GET",
+     "path": "/openApi/swap/v2/trade/openOrders",
+     "responses": [
+      {
+       "text": "{\"code\": 0, \"msg\": \"\", \"data\": {\"orders\": [{\"orderId\": 41, \"type\": \"STOP_MARKET\", \"side\": \"SELL\"}, {\"orderId\": 7, \"type\": \"STOP_MARKET\", \"side\": \"SELL\"}, {\"orderId\": 8, \"type\": \"TAKE_PROFIT_MARKET\", \"side\": \"SELL\"}]}}"
+      },
+      {
+       "text": "{\"code\": 0, \"msg\": \"\", \"data\": {\"orders\": [{\"type\": \"TAKE_PROFIT_MARKET\", \"side\": \"SELL\"}, {\"type\": \"TAKE_PROFIT_MARKET\", \"side\": \"SELL\"}]}}"
+      }
+     ]
+    },
+    {
+     "method": "DELETE",
+     "path": "/openApi/swap/v2/trade/order",
+     "responses": [
+      {
+       "text": "{\"code\": 0, \"msg\": \"\", \"data\": {}}"
+      }
+     ]
+    }
+   ],
+   "state": {},
+   "random": [],
+   "clock": 1767225600.0
+  },
+  "expected": {
+   "name": "sltp_for_position",
+   "result": {
+    "sl_placed": true,
+    "tp_placed": false
+   },
+   "requests": [
+    {
+     "method": "GET",
+     "url": "https://open-api.bingx.com/openApi/swap/v2/quote/contracts",
+     "headers": {},
+     "body": null
+    },
+    {
+     "method": "POST",
+     "url": "https://open-api.bingx.com/openApi/swap/v2/trade/order?positionSide=LONG&quantity=0.0115&recvWindow=15000&side=SELL&stopPrice=86000.0&symbol=BTC-USDT&timestamp=1767225600000&type=STOP_MARKET&workingType=MARK_PRICE&signature=5036993b445d56794dc9af2bcec949be6013ffc58d7b1fa7040f1e21628c25b2",
+     "headers": {
+      "X-BX-APIKEY": "BXKEY-abc123"
+     },
+     "body": null
+    },
+    {
+     "method": "GET",
+     "url": "https://open-api.bingx.com/openApi/swap/v2/trade/openOrders?recvWindow=15000&symbol=BTC-USDT&timestamp=1767225600000&signature=8c72fd5c91131844fbe8cf03300f72a097966266a3b2ecd7e45acbf566990a04",
+     "headers": {
+      "X-BX-APIKEY": "BXKEY-abc123"
+     },
+     "body": null
+    },
+    {
+     "method": "DELETE",
+     "url": "https://open-api.bingx.com/openApi/swap/v2/trade/order?orderId=7&recvWindow=15000&symbol=BTC-USDT&timestamp=1767225600000&signature=974fc9289612f2d3df46fea71ffa0c46104e36763456e59c707b3df31fe38dcc",
+     "headers": {
+      "X-BX-APIKEY": "BXKEY-abc123"
+     },
+     "body": null
+    },
+    {
+     "method": "DELETE",
+     "url": "https://open-api.bingx.com/openApi/swap/v2/trade/order?orderId=8&recvWindow=15000&symbol=BTC-USDT&timestamp=1767225600000&signature=47e02a90a61b164bdfddf2c87bf9a2ad66838c2f24fb34e57234ec5cea563359",
+     "headers": {
+      "X-BX-APIKEY": "BXKEY-abc123"
+     },
+     "body": null
+    },
+    {
+     "method": "POST",
+     "url": "https://open-api.bingx.com/openApi/swap/v2/trade/order?positionSide=LONG&quantity=0.0058&recvWindow=15000&side=SELL&stopPrice=88500.0&symbol=BTC-USDT&timestamp=1767225600000&type=TAKE_PROFIT_MARKET&workingType=MARK_PRICE&signature=f3d80b738fdd5a68db558df3986eefe0969c6b800eb8657361b2ce702e0f989a",
+     "headers": {
+      "X-BX-APIKEY": "BXKEY-abc123"
+     },
+     "body": null
+    },
+    {
+     "method": "POST",
+     "url": "https://open-api.bingx.com/openApi/swap/v2/trade/order?positionSide=LONG&quantity=0.0028&recvWindow=15000&side=SELL&stopPrice=89500.0&symbol=BTC-USDT&timestamp=1767225600000&type=TAKE_PROFIT_MARKET&workingType=MARK_PRICE&signature=807854010c5defac95c7d0b1dfae3fb06a4e05c8530efcc168ec0fefe62d19bc",
+     "headers": {
+      "X-BX-APIKEY": "BXKEY-abc123"
+     },
+     "body": null
+    },
+    {
+     "method": "POST",
+     "url": "https://open-api.bingx.com/openApi/swap/v2/trade/order?positionSide=LONG&quantity=0.0028&recvWindow=15000&side=SELL&stopPrice=89634.3&symbol=BTC-USDT&timestamp=1767225600000&type=TAKE_PROFIT_MARKET&workingType=MARK_PRICE&signature=13124044e4e44e23b787be5d2c71695000b4eff8723809b8d7113c99904d3251",
+     "headers": {
+      "X-BX-APIKEY": "BXKEY-abc123"
+     },
+     "body": null
+    },
+    {
+     "method": "POST",
+     "url": "https://open-api.bingx.com/openApi/swap/v2/trade/order?positionSide=LONG&quantity=0.0028&recvWindow=15000&side=SELL&stopPrice=90500.0&symbol=BTC-USDT&timestamp=1767225600000&type=TAKE_PROFIT_MARKET&workingType=MARK_PRICE&signature=f5fa6cc2a9e9cafff533c4a7329edd885148e5b0fbeaa4dc480db1ad64315e3a",
+     "headers": {
+      "X-BX-APIKEY": "BXKEY-abc123"
+     },
+     "body": null
+    },
+    {
+     "method": "GET",
+     "url": "https://open-api.bingx.com/openApi/swap/v2/trade/openOrders?recvWindow=15000&symbol=BTC-USDT&timestamp=1767225602000&signature=2a2e9ab996f56f5a656cbd86ef925ea2804fb5b4f2833a1929aaeceb64682b2e",
+     "headers": {
+      "X-BX-APIKEY": "BXKEY-abc123"
+     },
+     "body": null
+    }
+   ],
+   "sleeps": [
+    2.0
+   ],
+   "clock_end": 1767225602.0,
+   "markers": [
+    [
+     "WARNING",
+     "[TP-PHANTOM]"
+    ]
+   ],
+   "saved": {
+    "hedge_saved": [],
+    "auth_reset": [],
+    "events": [],
+    "metrics": []
+   },
+   "final": {
+    "hedge": {},
+    "account_type": {},
+    "delisted": [],
+    "fail_count": {},
+    "bybit_offset": 0
+   }
+  }
+ },
+ {
+  "scenario": {
+   "name": "close_long_rounded",
+   "exchange": "bingx",
+   "call": "close_position",
+   "args": [
+    "BXKEY-abc123",
+    "bx-secret-456",
+    "ASTER-USDT-SWAP",
+    "LONG",
+    5.7
+   ],
+   "kwargs": {},
+   "routes": [
+    {
+     "method": "GET",
+     "path": "/openApi/swap/v2/quote/contracts",
+     "responses": [
+      {
+       "text": "{\"code\": 0, \"msg\": \"\", \"data\": [{\"symbol\": \"BTC-USDT\", \"tradeMinQuantity\": 0.0001, \"pricePrecision\": 1, \"maxLeverage\": 125, \"status\": 1}, {\"symbol\": \"ETH-USDT\", \"tradeMinQuantity\": 0.01, \"pricePrecision\": 2, \"maxLeverage\": 100, \"status\": 1}, {\"symbol\": \"1000PEPE-USDT\", \"tradeMinQuantity\": 100, \"pricePrecision\": 7, \"maxLeverage\": 50, \"status\": 1}, {\"symbol\": \"TONCOIN-USDT\", \"tradeMinQuantity\": 1, \"pricePrecision\": 4, \"maxLeverage\": \"75\", \"status\": 1}, {\"symbol\": \"ASTER-USDT\", \"tradeMinQuantity\": 2.64, \"pricePrecision\": 4, \"maxLeverage\": 20, \"status\": 1}]}"
+      }
+     ]
+    },
+    {
+     "method": "POST",
+     "path": "/openApi/swap/v2/trade/order",
+     "responses": [
+      {
+       "text": "{\"code\": 0, \"msg\": \"\", \"data\": {\"order\": {\"orderId\": 61, \"symbol\": \"BTC-USDT\", \"side\": \"BUY\", \"type\": \"LIMIT\"}}}"
+      }
+     ]
+    }
+   ],
+   "state": {},
+   "random": [],
+   "clock": 1767225600.0
+  },
+  "expected": {
+   "name": "close_long_rounded",
+   "result": {
+    "ok": true,
+    "order_id": "61"
+   },
+   "requests": [
+    {
+     "method": "GET",
+     "url": "https://open-api.bingx.com/openApi/swap/v2/quote/contracts",
+     "headers": {},
+     "body": null
+    },
+    {
+     "method": "POST",
+     "url": "https://open-api.bingx.com/openApi/swap/v2/trade/order?positionSide=LONG&quantity=5.28&recvWindow=15000&side=SELL&symbol=ASTER-USDT&timestamp=1767225600000&type=MARKET&signature=8725862268c81176ec45c006f8c277e364257f8e3da609ebb0192f11534451eb",
+     "headers": {
+      "X-BX-APIKEY": "BXKEY-abc123"
+     },
+     "body": null
+    }
+   ],
+   "sleeps": [],
+   "clock_end": 1767225600.0,
+   "markers": [],
+   "saved": {
+    "hedge_saved": [],
+    "auth_reset": [],
+    "events": [],
+    "metrics": []
+   },
+   "final": {
+    "hedge": {},
+    "account_type": {},
+    "delisted": [],
+    "fail_count": {},
+    "bybit_offset": 0
+   }
+  }
+ },
+ {
+  "scenario": {
+   "name": "close_short_109400_both",
+   "exchange": "bingx",
+   "call": "close_position",
+   "args": [
+    "BXKEY-abc123",
+    "bx-secret-456",
+    "ETH-USDT-SWAP",
+    "SHORT",
+    2.555
+   ],
+   "kwargs": {},
+   "routes": [
+    {
+     "method": "GET",
+     "path": "/openApi/swap/v2/quote/contracts",
+     "responses": [
+      {
+       "text": "{\"code\": 0, \"msg\": \"\", \"data\": [{\"symbol\": \"BTC-USDT\", \"tradeMinQuantity\": 0.0001, \"pricePrecision\": 1, \"maxLeverage\": 125, \"status\": 1}, {\"symbol\": \"ETH-USDT\", \"tradeMinQuantity\": 0.01, \"pricePrecision\": 2, \"maxLeverage\": 100, \"status\": 1}, {\"symbol\": \"1000PEPE-USDT\", \"tradeMinQuantity\": 100, \"pricePrecision\": 7, \"maxLeverage\": 50, \"status\": 1}, {\"symbol\": \"TONCOIN-USDT\", \"tradeMinQuantity\": 1, \"pricePrecision\": 4, \"maxLeverage\": \"75\", \"status\": 1}, {\"symbol\": \"ASTER-USDT\", \"tradeMinQuantity\": 2.64, \"pricePrecision\": 4, \"maxLeverage\": 20, \"status\": 1}]}"
+      }
+     ]
+    },
+    {
+     "method": "POST",
+     "path": "/openApi/swap/v2/trade/order",
+     "responses": [
+      {
+       "text": "{\"code\": 109400, \"msg\": \"positionSide\", \"data\": {}}"
+      },
+      {
+       "text": "{\"code\": 0, \"msg\": \"\", \"data\": {\"order\": {\"orderId\": 62, \"symbol\": \"BTC-USDT\", \"side\": \"BUY\", \"type\": \"LIMIT\"}}}"
+      }
+     ]
+    }
+   ],
+   "state": {},
+   "random": [],
+   "clock": 1767225600.0
+  },
+  "expected": {
+   "name": "close_short_109400_both",
+   "result": {
+    "ok": true,
+    "order_id": "62"
+   },
+   "requests": [
+    {
+     "method": "GET",
+     "url": "https://open-api.bingx.com/openApi/swap/v2/quote/contracts",
+     "headers": {},
+     "body": null
+    },
+    {
+     "method": "POST",
+     "url": "https://open-api.bingx.com/openApi/swap/v2/trade/order?positionSide=SHORT&quantity=2.55&recvWindow=15000&side=BUY&symbol=ETH-USDT&timestamp=1767225600000&type=MARKET&signature=0e73cea0998df2b2f4d7a2b13d971e015c8115c3521935de08485c54e1eddc8d",
+     "headers": {
+      "X-BX-APIKEY": "BXKEY-abc123"
+     },
+     "body": null
+    },
+    {
+     "method": "POST",
+     "url": "https://open-api.bingx.com/openApi/swap/v2/trade/order?positionSide=BOTH&quantity=2.55&recvWindow=15000&reduceOnly=true&side=BUY&symbol=ETH-USDT&timestamp=1767225600000&type=MARKET&signature=03db17313db1dc27da280681f14b413b6e364fa8b1d209c29252f91b90a5f069",
+     "headers": {
+      "X-BX-APIKEY": "BXKEY-abc123"
+     },
+     "body": null
+    }
+   ],
+   "sleeps": [],
+   "clock_end": 1767225600.0,
+   "markers": [],
+   "saved": {
+    "hedge_saved": [],
+    "auth_reset": [],
+    "events": [],
+    "metrics": []
+   },
+   "final": {
+    "hedge": {},
+    "account_type": {},
+    "delisted": [],
+    "fail_count": {},
+    "bybit_offset": 0
+   }
+  }
+ },
+ {
+  "scenario": {
+   "name": "close_below_step",
+   "exchange": "bingx",
+   "call": "close_position",
+   "args": [
+    "BXKEY-abc123",
+    "bx-secret-456",
+    "ASTER-USDT-SWAP",
+    "LONG",
+    1.86
+   ],
+   "kwargs": {},
+   "routes": [
+    {
+     "method": "GET",
+     "path": "/openApi/swap/v2/quote/contracts",
+     "responses": [
+      {
+       "text": "{\"code\": 0, \"msg\": \"\", \"data\": [{\"symbol\": \"BTC-USDT\", \"tradeMinQuantity\": 0.0001, \"pricePrecision\": 1, \"maxLeverage\": 125, \"status\": 1}, {\"symbol\": \"ETH-USDT\", \"tradeMinQuantity\": 0.01, \"pricePrecision\": 2, \"maxLeverage\": 100, \"status\": 1}, {\"symbol\": \"1000PEPE-USDT\", \"tradeMinQuantity\": 100, \"pricePrecision\": 7, \"maxLeverage\": 50, \"status\": 1}, {\"symbol\": \"TONCOIN-USDT\", \"tradeMinQuantity\": 1, \"pricePrecision\": 4, \"maxLeverage\": \"75\", \"status\": 1}, {\"symbol\": \"ASTER-USDT\", \"tradeMinQuantity\": 2.64, \"pricePrecision\": 4, \"maxLeverage\": 20, \"status\": 1}]}"
+      }
+     ]
+    }
+   ],
+   "state": {},
+   "random": [],
+   "clock": 1767225600.0
+  },
+  "expected": {
+   "name": "close_below_step",
+   "result": {
+    "ok": false,
+    "order_id": "",
+    "error": "qty rounded to 0 (below lot step)",
+    "skipped": true
+   },
+   "requests": [
+    {
+     "method": "GET",
+     "url": "https://open-api.bingx.com/openApi/swap/v2/quote/contracts",
+     "headers": {},
+     "body": null
+    }
+   ],
+   "sleeps": [],
+   "clock_end": 1767225600.0,
+   "markers": [],
+   "saved": {
+    "hedge_saved": [],
+    "auth_reset": [],
+    "events": [],
+    "metrics": []
+   },
+   "final": {
+    "hedge": {},
+    "account_type": {},
+    "delisted": [],
+    "fail_count": {},
+    "bybit_offset": 0
+   }
+  }
+ },
+ {
+  "scenario": {
+   "name": "close_error",
+   "exchange": "bingx",
+   "call": "close_position",
+   "args": [
+    "BXKEY-abc123",
+    "bx-secret-456",
+    "BTC-USDT-SWAP",
+    "LONG",
+    0.5
+   ],
+   "kwargs": {},
+   "routes": [
+    {
+     "method": "GET",
+     "path": "/openApi/swap/v2/quote/contracts",
+     "responses": [
+      {
+       "text": "{\"code\": 0, \"msg\": \"\", \"data\": [{\"symbol\": \"BTC-USDT\", \"tradeMinQuantity\": 0.0001, \"pricePrecision\": 1, \"maxLeverage\": 125, \"status\": 1}, {\"symbol\": \"ETH-USDT\", \"tradeMinQuantity\": 0.01, \"pricePrecision\": 2, \"maxLeverage\": 100, \"status\": 1}, {\"symbol\": \"1000PEPE-USDT\", \"tradeMinQuantity\": 100, \"pricePrecision\": 7, \"maxLeverage\": 50, \"status\": 1}, {\"symbol\": \"TONCOIN-USDT\", \"tradeMinQuantity\": 1, \"pricePrecision\": 4, \"maxLeverage\": \"75\", \"status\": 1}, {\"symbol\": \"ASTER-USDT\", \"tradeMinQuantity\": 2.64, \"pricePrecision\": 4, \"maxLeverage\": 20, \"status\": 1}]}"
+      }
+     ]
+    },
+    {
+     "method": "POST",
+     "path": "/openApi/swap/v2/trade/order",
+     "responses": [
+      {
+       "text": "{\"code\": 101514, \"msg\": \"position not exist\", \"data\": {}}"
+      }
+     ]
+    }
+   ],
+   "state": {},
+   "random": [],
+   "clock": 1767225600.0
+  },
+  "expected": {
+   "name": "close_error",
+   "result": {
+    "ok": false,
+    "order_id": "",
+    "error": "Позиция уже закрыта или не существует."
+   },
+   "requests": [
+    {
+     "method": "GET",
+     "url": "https://open-api.bingx.com/openApi/swap/v2/quote/contracts",
+     "headers": {},
+     "body": null
+    },
+    {
+     "method": "POST",
+     "url": "https://open-api.bingx.com/openApi/swap/v2/trade/order?positionSide=LONG&quantity=0.5000&recvWindow=15000&side=SELL&symbol=BTC-USDT&timestamp=1767225600000&type=MARKET&signature=ec94eb67c18d3da099ccf90001706388b60c993bec980739545a67f5517f19e5",
+     "headers": {
+      "X-BX-APIKEY": "BXKEY-abc123"
+     },
+     "body": null
+    }
+   ],
+   "sleeps": [],
+   "clock_end": 1767225600.0,
+   "markers": [],
+   "saved": {
+    "hedge_saved": [],
+    "auth_reset": [],
+    "events": [],
+    "metrics": []
+   },
+   "final": {
+    "hedge": {},
+    "account_type": {},
+    "delisted": [],
+    "fail_count": {},
+    "bybit_offset": 0
+   }
+  }
+ },
+ {
+  "scenario": {
+   "name": "cancel_all",
+   "exchange": "bingx",
+   "call": "cancel_all_orders",
+   "args": [
+    "BXKEY-abc123",
+    "bx-secret-456",
+    "BTC-USDT-SWAP"
+   ],
+   "kwargs": {},
+   "routes": [
+    {
+     "method": "DELETE",
+     "path": "/openApi/swap/v2/trade/allOpenOrders",
+     "responses": [
+      {
+       "text": "{\"code\": 0, \"msg\": \"\", \"data\": {\"orders\": [{\"orderId\": 1}, {\"orderId\": 2}]}}"
+      }
+     ]
+    }
+   ],
+   "state": {},
+   "random": [],
+   "clock": 1767225600.0
+  },
+  "expected": {
+   "name": "cancel_all",
+   "result": {
+    "ok": true,
+    "cancelled": 2
+   },
+   "requests": [
+    {
+     "method": "DELETE",
+     "url": "https://open-api.bingx.com/openApi/swap/v2/trade/allOpenOrders?recvWindow=15000&symbol=BTC-USDT&timestamp=1767225600000&signature=8c72fd5c91131844fbe8cf03300f72a097966266a3b2ecd7e45acbf566990a04",
+     "headers": {
+      "X-BX-APIKEY": "BXKEY-abc123"
+     },
+     "body": null
+    }
+   ],
+   "sleeps": [],
+   "clock_end": 1767225600.0,
+   "markers": [],
+   "saved": {
+    "hedge_saved": [],
+    "auth_reset": [],
+    "events": [],
+    "metrics": []
+   },
+   "final": {
+    "hedge": {},
+    "account_type": {},
+    "delisted": [],
+    "fail_count": {},
+    "bybit_offset": 0
+   }
+  }
+ },
+ {
+  "scenario": {
+   "name": "cancel_all_timeout_retry",
+   "exchange": "bingx",
+   "call": "cancel_all_orders",
+   "args": [
+    "BXKEY-abc123",
+    "bx-secret-456",
+    "BTC-USDT-SWAP"
+   ],
+   "kwargs": {},
+   "routes": [
+    {
+     "method": "DELETE",
+     "path": "/openApi/swap/v2/trade/allOpenOrders",
+     "responses": [
+      {
+       "raise": "timeout"
+      },
+      {
+       "text": "{\"code\": 0, \"msg\": \"\", \"data\": {\"orders\": []}}"
+      }
+     ]
+    }
+   ],
+   "state": {},
+   "random": [
+    0.9
+   ],
+   "clock": 1767225600.0
+  },
+  "expected": {
+   "name": "cancel_all_timeout_retry",
+   "result": {
+    "ok": false,
+    "cancelled": 0,
+    "error": "Неизвестная ошибка BingX."
+   },
+   "requests": [
+    {
+     "method": "DELETE",
+     "url": "https://open-api.bingx.com/openApi/swap/v2/trade/allOpenOrders?recvWindow=15000&symbol=BTC-USDT&timestamp=1767225600000&signature=8c72fd5c91131844fbe8cf03300f72a097966266a3b2ecd7e45acbf566990a04",
+     "headers": {
+      "X-BX-APIKEY": "BXKEY-abc123"
+     },
+     "body": null
+    }
+   ],
+   "sleeps": [],
+   "clock_end": 1767225600.0,
+   "markers": [],
+   "saved": {
+    "hedge_saved": [],
+    "auth_reset": [],
+    "events": [],
+    "metrics": []
+   },
+   "final": {
+    "hedge": {},
+    "account_type": {},
+    "delisted": [],
+    "fail_count": {},
+    "bybit_offset": 0
+   }
+  }
+ },
+ {
+  "scenario": {
+   "name": "cancel_tp_only",
+   "exchange": "bingx",
+   "call": "cancel_tp_orders_only",
+   "args": [
+    "BXKEY-abc123",
+    "bx-secret-456",
+    "BTC-USDT-SWAP"
+   ],
+   "kwargs": {},
+   "routes": [
+    {
+     "method": "GET",
+     "path": "/openApi/swap/v2/trade/openOrders",
+     "responses": [
+      {
+       "text": "{\"code\": 0, \"msg\": \"\", \"data\": {\"orders\": [{\"orderId\": 1735947220470939648, \"type\": \"TAKE_PROFIT_MARKET\"}, {\"orderId\": 2, \"type\": \"STOP_MARKET\"}, {\"orderId\": 3, \"type\": \"take_profit_market\"}, {\"orderId\": \"\", \"type\": \"TAKE_PROFIT_MARKET\"}]}}"
+      }
+     ]
+    },
+    {
+     "method": "DELETE",
+     "path": "/openApi/swap/v2/trade/order",
+     "responses": [
+      {
+       "text": "{\"code\": 0, \"msg\": \"\", \"data\": {}}"
+      },
+      {
+       "text": "{\"code\": 109400, \"msg\": \"order not exist\", \"data\": {}}"
+      }
+     ]
+    }
+   ],
+   "state": {},
+   "random": [],
+   "clock": 1767225600.0
+  },
+  "expected": {
+   "name": "cancel_tp_only",
+   "result": {
+    "ok": true,
+    "cancelled": 1,
+    "total_tp": 3,
+    "errors": [
+     "Ошибка BingX (код 109400)."
+    ]
+   },
+   "requests": [
+    {
+     "method": "GET",
+     "url": "https://open-api.bingx.com/openApi/swap/v2/trade/openOrders?recvWindow=15000&symbol=BTC-USDT&timestamp=1767225600000&signature=8c72fd5c91131844fbe8cf03300f72a097966266a3b2ecd7e45acbf566990a04",
+     "headers": {
+      "X-BX-APIKEY": "BXKEY-abc123"
+     },
+     "body": null
+    },
+    {
+     "method": "DELETE",
+     "url": "https://open-api.bingx.com/openApi/swap/v2/trade/order?orderId=1735947220470939648&recvWindow=15000&symbol=BTC-USDT&timestamp=1767225600000&signature=8810811be17db0b5e02caa19e754c968b81a2c078eb90563173c0f7319805544",
+     "headers": {
+      "X-BX-APIKEY": "BXKEY-abc123"
+     },
+     "body": null
+    },
+    {
+     "method": "DELETE",
+     "url": "https://open-api.bingx.com/openApi/swap/v2/trade/order?orderId=3&recvWindow=15000&symbol=BTC-USDT&timestamp=1767225600000&signature=d81ceae95359854e6576eec77cda1ded522358e4a05584981266b3dfe961bf62",
+     "headers": {
+      "X-BX-APIKEY": "BXKEY-abc123"
+     },
+     "body": null
+    }
+   ],
+   "sleeps": [],
+   "clock_end": 1767225600.0,
+   "markers": [],
+   "saved": {
+    "hedge_saved": [],
+    "auth_reset": [],
+    "events": [],
+    "metrics": []
+   },
+   "final": {
+    "hedge": {},
+    "account_type": {},
+    "delisted": [],
+    "fail_count": {},
+    "bybit_offset": 0
+   }
+  }
+ },
+ {
+  "scenario": {
+   "name": "cancel_order",
+   "exchange": "bingx",
+   "call": "cancel_order",
+   "args": [
+    "BXKEY-abc123",
+    "bx-secret-456",
+    "BTC-USDT-SWAP",
+    "123"
+   ],
+   "kwargs": {},
+   "routes": [
+    {
+     "method": "DELETE",
+     "path": "/openApi/swap/v2/trade/order",
+     "responses": [
+      {
+       "text": "{\"code\": 109400, \"msg\": \"order not exist\", \"data\": {}}"
+      }
+     ]
+    }
+   ],
+   "state": {},
+   "random": [],
+   "clock": 1767225600.0
+  },
+  "expected": {
+   "name": "cancel_order",
+   "result": {
+    "ok": false,
+    "error": "Ошибка BingX (код 109400)."
+   },
+   "requests": [
+    {
+     "method": "DELETE",
+     "url": "https://open-api.bingx.com/openApi/swap/v2/trade/order?orderId=123&recvWindow=15000&symbol=BTC-USDT&timestamp=1767225600000&signature=b9bd68d6d4f20f4ddebf57c331d98b5a12677b00570549d20b5e43456a42b795",
+     "headers": {
+      "X-BX-APIKEY": "BXKEY-abc123"
+     },
+     "body": null
+    }
+   ],
+   "sleeps": [],
+   "clock_end": 1767225600.0,
+   "markers": [],
+   "saved": {
+    "hedge_saved": [],
+    "auth_reset": [],
+    "events": [],
+    "metrics": []
+   },
+   "final": {
+    "hedge": {},
+    "account_type": {},
+    "delisted": [],
+    "fail_count": {},
+    "bybit_offset": 0
+   }
+  }
+ },
+ {
+  "scenario": {
+   "name": "get_positions_all",
+   "exchange": "bingx",
+   "call": "get_positions",
+   "args": [
+    "BXKEY-abc123",
+    "bx-secret-456"
+   ],
+   "kwargs": {},
+   "routes": [
+    {
+     "method": "GET",
+     "path": "/openApi/swap/v2/user/positions",
+     "responses": [
+      {
+       "text": "{\"code\": 0, \"msg\": \"\", \"data\": [{\"symbol\": \"BTC-USDT\", \"positionSide\": \"LONG\", \"positionAmt\": \"0.5\", \"avgPrice\": \"87000\", \"markPrice\": \"87100\", \"unrealizedProfit\": \"50\", \"leverage\": 10}, {\"symbol\": \"ETH-USDT\", \"positionSide\": \"SHORT\", \"positionAmt\": \"0\", \"avgPrice\": \"3000\"}, {\"symbol\": \"SOL-USDT\", \"positionSide\": \"BOTH\", \"positionAmt\": \"-3\", \"avgPrice\": \"150\", \"leverage\": \"5\"}]}"
+      }
+     ]
+    }
+   ],
+   "state": {},
+   "random": [],
+   "clock": 1767225600.0
+  },
+  "expected": {
+   "name": "get_positions_all",
+   "result": [
+    {
+     "symbol": "BTC-USDT",
+     "side": "LONG",
+     "size": 0.5,
+     "entryPrice": 87000.0,
+     "markPrice": 87100.0,
+     "unrealisedPnl": 50.0,
+     "leverage": 10,
+     "stopLoss": 0.0,
+     "positionIdx": 0
+    },
+    {
+     "symbol": "SOL-USDT",
+     "side": "BOTH",
+     "size": 3.0,
+     "entryPrice": 150.0,
+     "markPrice": 0.0,
+     "unrealisedPnl": 0.0,
+     "leverage": 5,
+     "stopLoss": 0.0,
+     "positionIdx": 0
+    }
+   ],
+   "requests": [
+    {
+     "method": "GET",
+     "url": "https://open-api.bingx.com/openApi/swap/v2/user/positions?recvWindow=15000&timestamp=1767225600000&signature=54dc97c97f1c3ca650cfcefb891ffa5c88591dda3defded4580343391c67be79",
+     "headers": {
+      "X-BX-APIKEY": "BXKEY-abc123"
+     },
+     "body": null
+    }
+   ],
+   "sleeps": [],
+   "clock_end": 1767225600.0,
+   "markers": [],
+   "saved": {
+    "hedge_saved": [],
+    "auth_reset": [],
+    "events": [],
+    "metrics": []
+   },
+   "final": {
+    "hedge": {},
+    "account_type": {},
+    "delisted": [],
+    "fail_count": {},
+    "bybit_offset": 0
+   }
+  }
+ },
+ {
+  "scenario": {
+   "name": "get_positions_bad_leverage",
+   "exchange": "bingx",
+   "call": "get_positions",
+   "args": [
+    "BXKEY-abc123",
+    "bx-secret-456",
+    "BTC-USDT-SWAP"
+   ],
+   "kwargs": {},
+   "routes": [
+    {
+     "method": "GET",
+     "path": "/openApi/swap/v2/user/positions",
+     "responses": [
+      {
+       "text": "{\"code\": 0, \"msg\": \"\", \"data\": [{\"symbol\": \"BTC-USDT\", \"positionAmt\": \"1\", \"leverage\": \"10.5\"}]}"
+      }
+     ]
+    }
+   ],
+   "state": {},
+   "random": [],
+   "clock": 1767225600.0
+  },
+  "expected": {
+   "name": "get_positions_bad_leverage",
+   "result": [],
+   "requests": [
+    {
+     "method": "GET",
+     "url": "https://open-api.bingx.com/openApi/swap/v2/user/positions?recvWindow=15000&symbol=BTC-USDT&timestamp=1767225600000&signature=8c72fd5c91131844fbe8cf03300f72a097966266a3b2ecd7e45acbf566990a04",
+     "headers": {
+      "X-BX-APIKEY": "BXKEY-abc123"
+     },
+     "body": null
+    }
+   ],
+   "sleeps": [],
+   "clock_end": 1767225600.0,
+   "markers": [],
+   "saved": {
+    "hedge_saved": [],
+    "auth_reset": [],
+    "events": [],
+    "metrics": []
+   },
+   "final": {
+    "hedge": {},
+    "account_type": {},
+    "delisted": [],
+    "fail_count": {},
+    "bybit_offset": 0
+   }
+  }
+ },
+ {
+  "scenario": {
+   "name": "get_balance",
+   "exchange": "bingx",
+   "call": "get_balance",
+   "args": [
+    "BXKEY-abc123",
+    "bx-secret-456"
+   ],
+   "kwargs": {},
+   "routes": [
+    {
+     "method": "GET",
+     "path": "/openApi/swap/v2/user/balance",
+     "responses": [
+      {
+       "text": "{\"code\": 0, \"msg\": \"\", \"data\": {\"balance\": {\"userId\": \"1\", \"asset\": \"USDT\", \"balance\": \"1000.0\", \"equity\": \"1000.5\", \"unrealizedProfit\": \"0.5\", \"availableMargin\": \"900.0\"}}}"
+      }
+     ]
+    }
+   ],
+   "state": {},
+   "random": [],
+   "clock": 1767225600.0
+  },
+  "expected": {
+   "name": "get_balance",
+   "result": 1000.5,
+   "requests": [
+    {
+     "method": "GET",
+     "url": "https://open-api.bingx.com/openApi/swap/v2/user/balance?recvWindow=15000&timestamp=1767225600000&signature=54dc97c97f1c3ca650cfcefb891ffa5c88591dda3defded4580343391c67be79",
+     "headers": {
+      "X-BX-APIKEY": "BXKEY-abc123"
+     },
+     "body": null
+    }
+   ],
+   "sleeps": [],
+   "clock_end": 1767225600.0,
+   "markers": [],
+   "saved": {
+    "hedge_saved": [],
+    "auth_reset": [],
+    "events": [],
+    "metrics": []
+   },
+   "final": {
+    "hedge": {},
+    "account_type": {},
+    "delisted": [],
+    "fail_count": {},
+    "bybit_offset": 0
+   }
+  }
+ },
+ {
+  "scenario": {
+   "name": "get_balance_err",
+   "exchange": "bingx",
+   "call": "get_balance",
+   "args": [
+    "BXKEY-abc123",
+    "bx-secret-456"
+   ],
+   "kwargs": {},
+   "routes": [
+    {
+     "method": "GET",
+     "path": "/openApi/swap/v2/user/balance",
+     "responses": [
+      {
+       "text": "{\"code\": 100001, \"msg\": \"Signature verification failed\", \"data\": {}}"
+      }
+     ]
+    }
+   ],
+   "state": {},
+   "random": [],
+   "clock": 1767225600.0
+  },
+  "expected": {
+   "name": "get_balance_err",
+   "result": 0.0,
+   "requests": [
+    {
+     "method": "GET",
+     "url": "https://open-api.bingx.com/openApi/swap/v2/user/balance?recvWindow=15000&timestamp=1767225600000&signature=54dc97c97f1c3ca650cfcefb891ffa5c88591dda3defded4580343391c67be79",
+     "headers": {
+      "X-BX-APIKEY": "BXKEY-abc123"
+     },
+     "body": null
+    }
+   ],
+   "sleeps": [],
+   "clock_end": 1767225600.0,
+   "markers": [],
+   "saved": {
+    "hedge_saved": [],
+    "auth_reset": [],
+    "events": [],
+    "metrics": []
+   },
+   "final": {
+    "hedge": {},
+    "account_type": {},
+    "delisted": [],
+    "fail_count": {},
+    "bybit_offset": 0
+   }
+  }
+ },
+ {
+  "scenario": {
+   "name": "get_last_price",
+   "exchange": "bingx",
+   "call": "get_last_price",
+   "args": [
+    "BXKEY-abc123",
+    "bx-secret-456",
+    "BTC-USDT-SWAP"
+   ],
+   "kwargs": {},
+   "routes": [
+    {
+     "method": "GET",
+     "path": "/openApi/swap/v2/quote/price",
+     "responses": [
+      {
+       "text": "{\"code\": 0, \"msg\": \"\", \"data\": {\"symbol\": \"BTC-USDT\", \"price\": \"87123.4\", \"time\": 1767225600000}}"
+      }
+     ]
+    }
+   ],
+   "state": {},
+   "random": [],
+   "clock": 1767225600.0
+  },
+  "expected": {
+   "name": "get_last_price",
+   "result": 87123.4,
+   "requests": [
+    {
+     "method": "GET",
+     "url": "https://open-api.bingx.com/openApi/swap/v2/quote/price?recvWindow=15000&symbol=BTC-USDT&timestamp=1767225600000&signature=8c72fd5c91131844fbe8cf03300f72a097966266a3b2ecd7e45acbf566990a04",
+     "headers": {
+      "X-BX-APIKEY": "BXKEY-abc123"
+     },
+     "body": null
+    }
+   ],
+   "sleeps": [],
+   "clock_end": 1767225600.0,
+   "markers": [],
+   "saved": {
+    "hedge_saved": [],
+    "auth_reset": [],
+    "events": [],
+    "metrics": []
+   },
+   "final": {
+    "hedge": {},
+    "account_type": {},
+    "delisted": [],
+    "fail_count": {},
+    "bybit_offset": 0
+   }
+  }
+ },
+ {
+  "scenario": {
+   "name": "get_closed_pnl",
+   "exchange": "bingx",
+   "call": "get_closed_pnl",
+   "args": [
+    "BXKEY-abc123",
+    "bx-secret-456",
+    "BTC-USDT-SWAP"
+   ],
+   "kwargs": {},
+   "routes": [
+    {
+     "method": "GET",
+     "path": "/openApi/swap/v2/trade/allOrders",
+     "responses": [
+      {
+       "text": "{\"code\": 0, \"msg\": \"\", \"data\": {\"orders\": [{\"side\": \"SELL\", \"avgPrice\": \"88000\", \"updateTime\": 1767225000000, \"profit\": \"12.5\", \"clientOrderId\": \"chm_x\"}, {\"side\": \"BUY\", \"avgPrice\": \"0\", \"price\": \"87000\", \"time\": 1767224000000, \"profit\": \"\"}, {\"side\": \"BUY\", \"avgPrice\": \"\", \"price\": \"0\"}, {\"side\": \"sell\", \"price\": \"86000\", \"profit\": \"bad\"}]}}"
+      }
+     ]
+    }
+   ],
+   "state": {},
+   "random": [],
+   "clock": 1767225600.0
+  },
+  "expected": {
+   "name": "get_closed_pnl",
+   "result": [
+    {
+     "side": "Sell",
+     "avgExitPrice": 88000.0,
+     "updatedTime": 1767225000000.0,
+     "closedPnl": 12.5,
+     "orderLinkId": "chm_x"
+    },
+    {
+     "side": "Sell",
+     "avgExitPrice": 86000.0,
+     "updatedTime": 0.0,
+     "closedPnl": null,
+     "orderLinkId": ""
+    }
+   ],
+   "requests": [
+    {
+     "method": "GET",
+     "url": "https://open-api.bingx.com/openApi/swap/v2/trade/allOrders?limit=20&recvWindow=15000&symbol=BTC-USDT&timestamp=1767225600000&signature=50606ae50c47f1ffab4282d60b7a611a905dd68b08eeb563f9e96c377a611e2c",
+     "headers": {
+      "X-BX-APIKEY": "BXKEY-abc123"
+     },
+     "body": null
+    }
+   ],
+   "sleeps": [],
+   "clock_end": 1767225600.0,
+   "markers": [],
+   "saved": {
+    "hedge_saved": [],
+    "auth_reset": [],
+    "events": [],
+    "metrics": []
+   },
+   "final": {
+    "hedge": {},
+    "account_type": {},
+    "delisted": [],
+    "fail_count": {},
+    "bybit_offset": 0
+   }
+  }
+ },
+ {
+  "scenario": {
+   "name": "get_open_orders",
+   "exchange": "bingx",
+   "call": "get_open_orders",
+   "args": [
+    "BXKEY-abc123",
+    "bx-secret-456"
+   ],
+   "kwargs": {},
+   "routes": [
+    {
+     "method": "GET",
+     "path": "/openApi/swap/v2/trade/openOrders",
+     "responses": [
+      {
+       "text": "{\"code\": 0, \"msg\": \"\", \"data\": {\"orders\": [{\"orderId\": 1735947220470939648, \"symbol\": \"BTC-USDT\", \"type\": \"LIMIT\"}]}}"
+      }
+     ]
+    }
+   ],
+   "state": {},
+   "random": [],
+   "clock": 1767225600.0
+  },
+  "expected": {
+   "name": "get_open_orders",
+   "result": [
+    {
+     "orderId": 1735947220470939648,
+     "symbol": "BTC-USDT",
+     "type": "LIMIT"
+    }
+   ],
+   "requests": [
+    {
+     "method": "GET",
+     "url": "https://open-api.bingx.com/openApi/swap/v2/trade/openOrders?recvWindow=15000&timestamp=1767225600000&signature=54dc97c97f1c3ca650cfcefb891ffa5c88591dda3defded4580343391c67be79",
+     "headers": {
+      "X-BX-APIKEY": "BXKEY-abc123"
+     },
+     "body": null
+    }
+   ],
+   "sleeps": [],
+   "clock_end": 1767225600.0,
+   "markers": [],
+   "saved": {
+    "hedge_saved": [],
+    "auth_reset": [],
+    "events": [],
+    "metrics": []
+   },
+   "final": {
+    "hedge": {},
+    "account_type": {},
+    "delisted": [],
+    "fail_count": {},
+    "bybit_offset": 0
+   }
+  }
+ },
+ {
+  "scenario": {
+   "name": "dashboard_with_penalty",
+   "exchange": "bingx",
+   "call": "get_dashboard",
+   "args": [
+    "BXKEY-abc123",
+    "bx-secret-456"
+   ],
+   "kwargs": {},
+   "routes": [
+    {
+     "method": "GET",
+     "path": "/openApi/swap/v2/user/positions",
+     "responses": [
+      {
+       "raise": "error",
+       "message": "429, message='Too Many Requests', url='https://open-api.bingx.com'"
+      }
+     ]
+    },
+    {
+     "method": "GET",
+     "path": "/openApi/swap/v2/trade/openOrders",
+     "responses": [
+      {
+       "text": "{\"code\": 0, \"msg\": \"\", \"data\": {\"orders\": [{\"orderId\": 1, \"symbol\": \"BTC-USDT\", \"side\": \"SELL\", \"type\": \"LIMIT\", \"price\": \"88000\", \"origQty\": \"0.1\"}]}}"
+      }
+     ]
+    },
+    {
+     "method": "GET",
+     "path": "/openApi/swap/v2/user/balance",
+     "responses": [
+      {
+       "text": "{\"code\": 0, \"msg\": \"\", \"data\": {\"balance\": {\"userId\": \"1\", \"asset\": \"USDT\", \"balance\": \"1000.0\", \"equity\": \"1000.5\", \"unrealizedProfit\": \"0.5\", \"availableMargin\": \"900.0\"}}}"
+      }
+     ]
+    },
+    {
+     "method": "GET",
+     "path": "/openApi/swap/v2/trade/allFillOrders",
+     "responses": [
+      {
+       "text": "{\"code\": 0, \"msg\": \"\", \"data\": {\"fill_orders\": [{\"profit\": \"1.1\"}, {\"profit\": \"-0.3\"}, {\"profit\": \"2.2\"}]}}"
+      }
+     ]
+    }
+   ],
+   "state": {},
+   "random": [],
+   "clock": 1767225600.0
+  },
+  "expected": {
+   "name": "dashboard_with_penalty",
+   "result": [
+    [],
+    [
+     {
+      "orderId": "1",
+      "symbol": "BTC-USDT",
+      "side": "SELL",
+      "type": "LIMIT",
+      "price": 88000.0,
+      "origQty": 0.1,
+      "stopPrice": 0.0
+     }
+    ],
+    {
+     "equity": 1000.5,
+     "unrealized_pnl": 0.5,
+     "available": 900.0,
+     "closed_pnl_24h": 3.0000000000000004,
+     "trades_24h": 3,
+     "wins_24h": 2
+    }
+   ],
+   "requests": [
+    {
+     "method": "GET",
+     "url": "https://open-api.bingx.com/openApi/swap/v2/user/positions?recvWindow=15000&timestamp=1767225600000&signature=54dc97c97f1c3ca650cfcefb891ffa5c88591dda3defded4580343391c67be79",
+     "headers": {
+      "X-BX-APIKEY": "BXKEY-abc123"
+     },
+     "body": null
+    },
+    {
+     "method": "GET",
+     "url": "https://open-api.bingx.com/openApi/swap/v2/trade/openOrders?recvWindow=15000&timestamp=1767225630000&signature=49883fb1c71f7cbe0561c7936b1166df06728e5beb4543f3a06eed874f7c0ebd",
+     "headers": {
+      "X-BX-APIKEY": "BXKEY-abc123"
+     },
+     "body": null
+    },
+    {
+     "method": "GET",
+     "url": "https://open-api.bingx.com/openApi/swap/v2/user/balance?recvWindow=15000&timestamp=1767225630000&signature=49883fb1c71f7cbe0561c7936b1166df06728e5beb4543f3a06eed874f7c0ebd",
+     "headers": {
+      "X-BX-APIKEY": "BXKEY-abc123"
+     },
+     "body": null
+    },
+    {
+     "method": "GET",
+     "url": "https://open-api.bingx.com/openApi/swap/v2/trade/allFillOrders?endTs=1767225630000&limit=100&recvWindow=15000&startTs=1767139230000&timestamp=1767225630000&signature=c15c9c4b60d2e2d16542c54e6308dcf5945e084d5c7f7ffb982c7acc54e99887",
+     "headers": {
+      "X-BX-APIKEY": "BXKEY-abc123"
+     },
+     "body": null
+    }
+   ],
+   "sleeps": [
+    30.0
+   ],
+   "clock_end": 1767225630.0,
+   "markers": [
+    [
+     "WARNING",
+     "[AUDIT-FIX]"
+    ],
+    [
+     "DEBUG",
+     "[AUDIT-FIX]"
+    ]
+   ],
+   "saved": {
+    "hedge_saved": [],
+    "auth_reset": [],
+    "events": [],
+    "metrics": []
+   },
+   "final": {
+    "hedge": {},
+    "account_type": {},
+    "delisted": [],
+    "fail_count": {},
+    "bybit_offset": 0
+   }
+  }
+ },
+ {
+  "scenario": {
+   "name": "test_connection_v1_fallback",
+   "exchange": "bingx",
+   "call": "test_connection",
+   "args": [
+    "BXKEY-abc123",
+    "bx-secret-456"
+   ],
+   "kwargs": {},
+   "routes": [
+    {
+     "method": "GET",
+     "path": "/openApi/swap/v2/user/balance",
+     "responses": [
+      {
+       "text": "{\"code\": 100500, \"msg\": \"internal\", \"data\": {}}"
+      }
+     ]
+    },
+    {
+     "method": "GET",
+     "path": "/openApi/swap/v1/user/balance",
+     "responses": [
+      {
+       "text": "{\"code\": 0, \"msg\": \"\", \"data\": [{\"balance\": \"77.5\"}]}"
+      }
+     ]
+    }
+   ],
+   "state": {},
+   "random": [],
+   "clock": 1767225600.0
+  },
+  "expected": {
+   "name": "test_connection_v1_fallback",
+   "result": {
+    "ok": false,
+    "balance": 0.0,
+    "error": "'list' object has no attribute 'get'"
+   },
+   "requests": [
+    {
+     "method": "GET",
+     "url": "https://open-api.bingx.com/openApi/swap/v2/user/balance?recvWindow=15000&timestamp=1767225600000&signature=54dc97c97f1c3ca650cfcefb891ffa5c88591dda3defded4580343391c67be79",
+     "headers": {
+      "X-BX-APIKEY": "BXKEY-abc123"
+     },
+     "body": null
+    },
+    {
+     "method": "GET",
+     "url": "https://open-api.bingx.com/openApi/swap/v1/user/balance?recvWindow=15000&timestamp=1767225600000&signature=54dc97c97f1c3ca650cfcefb891ffa5c88591dda3defded4580343391c67be79",
+     "headers": {
+      "X-BX-APIKEY": "BXKEY-abc123"
+     },
+     "body": null
+    }
+   ],
+   "sleeps": [],
+   "clock_end": 1767225600.0,
+   "markers": [],
+   "saved": {
+    "hedge_saved": [],
+    "auth_reset": [],
+    "events": [],
+    "metrics": []
+   },
+   "final": {
+    "hedge": {},
+    "account_type": {},
+    "delisted": [],
+    "fail_count": {},
+    "bybit_offset": 0
+   }
+  }
+ },
+ {
+  "scenario": {
+   "name": "test_connection_bad_key",
+   "exchange": "bingx",
+   "call": "test_connection",
+   "args": [
+    "gAAAAAbroken",
+    "bx-secret-456"
+   ],
+   "kwargs": {},
+   "routes": [],
+   "state": {},
+   "random": [],
+   "clock": 1767225600.0
+  },
+  "expected": {
+   "name": "test_connection_bad_key",
+   "result": {
+    "ok": false,
+    "balance": 0.0,
+    "error": "Неверный API ключ."
+   },
+   "requests": [],
+   "sleeps": [],
+   "clock_end": 1767225600.0,
+   "markers": [],
+   "saved": {
+    "hedge_saved": [],
+    "auth_reset": [],
+    "events": [],
+    "metrics": []
+   },
+   "final": {
+    "hedge": {},
+    "account_type": {},
+    "delisted": [],
+    "fail_count": {},
+    "bybit_offset": 0
+   }
+  }
+ },
+ {
+  "scenario": {
+   "name": "sync_time",
+   "exchange": "bingx",
+   "call": "sync_time",
+   "args": [],
+   "kwargs": {},
+   "routes": [
+    {
+     "method": "GET",
+     "path": "/openApi/server/v1/time",
+     "responses": [
+      {
+       "text": "{\"code\": 0, \"msg\": \"\", \"data\": {\"serverTime\": 1767225600420}}"
+      }
+     ]
+    }
+   ],
+   "state": {},
+   "random": [],
+   "clock": 1767225600.0
+  },
+  "expected": {
+   "name": "sync_time",
+   "result": 420,
+   "requests": [
+    {
+     "method": "GET",
+     "url": "https://open-api.bingx.com/openApi/server/v1/time",
+     "headers": {},
+     "body": null
+    }
+   ],
+   "sleeps": [],
+   "clock_end": 1767225600.0,
+   "markers": [],
+   "saved": {
+    "hedge_saved": [],
+    "auth_reset": [],
+    "events": [],
+    "metrics": []
+   },
+   "final": {
+    "hedge": {},
+    "account_type": {},
+    "delisted": [],
+    "fail_count": {},
+    "bybit_offset": 0
+   }
+  }
+ },
+ {
+  "scenario": {
+   "name": "sync_time_missing_data",
+   "exchange": "bingx",
+   "call": "sync_time",
+   "args": [],
+   "kwargs": {},
+   "routes": [
+    {
+     "method": "GET",
+     "path": "/openApi/server/v1/time",
+     "responses": [
+      {
+       "text": "{\"code\": 100, \"msg\": \"maintenance\"}"
+      }
+     ]
+    }
+   ],
+   "state": {},
+   "random": [],
+   "clock": 1767225600.0
+  },
+  "expected": {
+   "name": "sync_time_missing_data",
+   "result": 0,
+   "requests": [
+    {
+     "method": "GET",
+     "url": "https://open-api.bingx.com/openApi/server/v1/time",
+     "headers": {},
+     "body": null
+    }
+   ],
+   "sleeps": [],
+   "clock_end": 1767225600.0,
+   "markers": [],
+   "saved": {
+    "hedge_saved": [],
+    "auth_reset": [],
+    "events": [],
+    "metrics": []
+   },
+   "final": {
+    "hedge": {},
+    "account_type": {},
+    "delisted": [],
+    "fail_count": {},
+    "bybit_offset": 0
+   }
+  }
+ }
+]

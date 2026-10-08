@@ -35,9 +35,20 @@ function headerGet(resp, name) {
   return v === undefined ? null : v;
 }
 
-/** json.loads → JS value with the Python repr attached (null for 'null'). */
+/**
+ * json.loads → JS value with the Python repr attached (null for 'null').
+ * Integers beyond 2^53 (BingX int64 order ids) become their exact decimal STRING: Python
+ * keeps them as exact ints and the traders only ever str() / compare them.
+ */
+function bigIntReviver(_k, v, ctx) {
+  if (typeof v === 'number' && !Number.isSafeInteger(v) && Number.isInteger(v) && ctx && typeof ctx.source === 'string' && /^-?\d+$/.test(ctx.source)) {
+    return ctx.source;
+  }
+  return v;
+}
+
 function parseJsonPy(text) {
-  const value = JSON.parse(text);
+  const value = JSON.parse(text, bigIntReviver);
   try { attachRepr(value, reprFromJsonText(text)); } catch (_e) { /* keep generic repr */ }
   return value;
 }
