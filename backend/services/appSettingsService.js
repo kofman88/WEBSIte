@@ -386,7 +386,7 @@ function choices() {
       else if (spec[0] === 'enum' || spec[0] === 'choice') out[`${prefix}${k}`] = spec[1].slice();
     }
   };
-  walk(SCHEMA, '');
+  for (const [section, schema] of Object.entries(SCHEMA)) walk(schema, `${section}.`);
   walk(TOP_SCHEMA, '');
   return out;
 }
@@ -426,7 +426,7 @@ function settingsAll(user) {
     cooldown_bars: Number(cfg.cooldown_bars), atr_period: Number(cfg.atr_period),
     atr_mult: Number(cfg.atr_mult), tp1_rr: Number(cfg.tp1_rr), tp2_rr: Number(cfg.tp2_rr),
     tp3_rr: Number(cfg.tp3_rr), high_wr_mode: Boolean(g('high_wr_mode', false)),
-    levels_counter_trend_min_quality: Number(g('levels_counter_trend_min_quality', 4) || 4),
+    levels_counter_trend_min_quality: Math.trunc(Number(g('levels_counter_trend_min_quality', 4))),   // 0 = "any" is a valid value
   };
   return {
     lang: g('lang') === 'en' ? 'en' : 'ru',
@@ -457,7 +457,7 @@ function settingsAll(user) {
         smc_pd_filter: Boolean(smc.smc_pd_filter), smc_retrace_depth: Number(smc.smc_retrace_depth),
         smc_mtf_check: Boolean(smc.smc_mtf_check), smc_use_volume_filter: Boolean(smc.smc_use_volume_filter),
         smc_vol_mult: Number(smc.smc_vol_mult),
-        smc_counter_trend_min_quality: Number(g('smc_counter_trend_min_quality', 4) || 4),
+        smc_counter_trend_min_quality: Math.trunc(Number(g('smc_counter_trend_min_quality', 4))),
       },
     },
     volume: {
