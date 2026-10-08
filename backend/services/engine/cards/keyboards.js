@@ -76,14 +76,14 @@ function smcKeyboard(symbol, tradeId = '', { showTradeBtn = false, isAutoTraded 
   return rows;
 }
 
-/** trend_monitor._keyboard(lang) — the single opt-out button under a trend alert. */
+/** trend_monitor._keyboard(lang) — the single opt-out button under a trend alert (EN only for lang == "en"). */
 function trendKeyboard(lang = 'ru') {
-  return [[cb('trend_notify_off', t('trend_notify_off_btn', lang), 'trend_notify_off')]];
+  return [[cb('trend_notify_off', lang !== 'en' ? MESSAGES.trend_notify_off_btn.ru : MESSAGES.trend_notify_off_btn.en, 'trend_notify_off')]];
 }
 
-/** chart_sender: the single «🖼 Что значат символы?» button under a chart. */
+/** chart_sender._send_chart: the single «🖼 Что значат символы?» button (RU only for lang == "ru"). */
 function chartKeyboard(lang = 'ru') {
-  return [[cb('chart_help', t('chart_help_btn', lang), 'chart_help')]];
+  return [[cb('chart_help', lang === 'ru' ? MESSAGES.chart_help_btn.ru : MESSAGES.chart_help_btn.en, 'chart_help')]];
 }
 
 /** Telegram `inline_keyboard` shape (for the optional Telegram mirror). */

@@ -1,0 +1,7196 @@
+{
+ "levels_stars": [
+  [
+   0,
+   1
+  ],
+  [
+   1,
+   1
+  ],
+  [
+   2,
+   2
+  ],
+  [
+   3,
+   2
+  ],
+  [
+   4,
+   3
+  ],
+  [
+   5,
+   3
+  ],
+  [
+   6,
+   4
+  ],
+  [
+   7,
+   4
+  ],
+  [
+   8,
+   5
+  ],
+  [
+   9,
+   5
+  ],
+  [
+   10,
+   5
+  ],
+  [
+   11,
+   5
+  ],
+  [
+   -1,
+   1
+  ],
+  [
+   4.9,
+   3
+  ],
+  [
+   5.5,
+   3
+  ],
+  [
+   7.99,
+   4
+  ],
+  [
+   "7",
+   4
+  ],
+  [
+   " 8 ",
+   5
+  ],
+  [
+   "abc",
+   1
+  ],
+  [
+   null,
+   1
+  ],
+  [
+   true,
+   1
+  ],
+  [
+   false,
+   1
+  ],
+  [
+   {
+    "$f": "nan"
+   },
+   5
+  ],
+  [
+   {
+    "$f": "inf"
+   },
+   5
+  ],
+  [
+   {
+    "$f": "-inf"
+   },
+   1
+  ],
+  [
+   "nan",
+   5
+  ],
+  [
+   "1_0",
+   5
+  ],
+  [
+   "",
+   1
+  ],
+  [
+   0.0,
+   1
+  ]
+ ],
+ "stars_str": [
+  [
+   0,
+   "☆☆☆☆☆"
+  ],
+  [
+   1,
+   "⭐☆☆☆☆"
+  ],
+  [
+   2,
+   "⭐⭐☆☆☆"
+  ],
+  [
+   3,
+   "⭐⭐⭐☆☆"
+  ],
+  [
+   4,
+   "⭐⭐⭐⭐☆"
+  ],
+  [
+   5,
+   "⭐⭐⭐⭐⭐"
+  ],
+  [
+   6,
+   "⭐⭐⭐⭐⭐"
+  ],
+  [
+   -1,
+   "☆☆☆☆☆"
+  ],
+  [
+   3.7,
+   "⭐⭐⭐☆☆"
+  ],
+  [
+   "4",
+   "⭐⭐⭐⭐☆"
+  ],
+  [
+   "4.5",
+   "☆☆☆☆☆"
+  ],
+  [
+   null,
+   "☆☆☆☆☆"
+  ],
+  [
+   true,
+   "⭐☆☆☆☆"
+  ],
+  [
+   {
+    "$f": "nan"
+   },
+   "☆☆☆☆☆"
+  ],
+  [
+   "",
+   "☆☆☆☆☆"
+  ],
+  [
+   " 2 ",
+   "⭐⭐☆☆☆"
+  ]
+ ],
+ "fp": [
+  [
+   null,
+   "None",
+   "None",
+   "None"
+  ],
+  [
+   "abc",
+   "abc",
+   "abc",
+   "abc"
+  ],
+  [
+   "12.5",
+   "12.5",
+   "12.5",
+   "12.5"
+  ],
+  [
+   0,
+   "0",
+   "0",
+   "0"
+  ],
+  [
+   -1.0,
+   "0",
+   "0",
+   "-1"
+  ],
+  [
+   1e-09,
+   "0.000000001",
+   "0.000000001",
+   "0"
+  ],
+  [
+   0.000123456,
+   "0.0001235",
+   "0.0001235",
+   "0.00012346"
+  ],
+  [
+   1e-05,
+   "0.00001",
+   "0.00001",
+   "0.00001"
+  ],
+  [
+   0.5,
+   "0.5",
+   "0.5",
+   "0.5"
+  ],
+  [
+   0.999999,
+   "1",
+   "1",
+   "0.999999"
+  ],
+  [
+   1,
+   "1",
+   "1",
+   "1"
+  ],
+  [
+   1.23456789,
+   "1.2346",
+   "1.2346",
+   "1.2346"
+  ],
+  [
+   9.99995,
+   "10",
+   "10",
+   "10"
+  ],
+  [
+   99.99,
+   "99.99",
+   "99.99",
+   "99.99"
+  ],
+  [
+   99.95,
+   "99.95",
+   "99.95",
+   "99.95"
+  ],
+  [
+   100,
+   "100.0",
+   "100.0",
+   "100.00"
+  ],
+  [
+   123.456,
+   "123.5",
+   "123.5",
+   "123.46"
+  ],
+  [
+   9999.94,
+   "9,999.9",
+   "9,999.9",
+   "9,999.94"
+  ],
+  [
+   9999.96,
+   "10,000.0",
+   "10,000.0",
+   "9,999.96"
+  ],
+  [
+   12345.678,
+   "12,346",
+   "12,346",
+   "12,346"
+  ],
+  [
+   10000000.0,
+   "10,000,000",
+   "10,000,000",
+   "10,000,000"
+  ],
+  [
+   2.5e-05,
+   "0.000025",
+   "0.000025",
+   "0.000025"
+  ],
+  [
+   0.1,
+   "0.1",
+   "0.1",
+   "0.1"
+  ],
+  [
+   {
+    "$f": "inf"
+   },
+   "inf",
+   "inf",
+   "inf"
+  ],
+  [
+   true,
+   "1",
+   "1",
+   "1"
+  ],
+  [
+   3,
+   "3",
+   "3",
+   "3"
+  ]
+ ],
+ "lite": [
+  [
+   {
+    "symbol": "BTC-USDT-SWAP",
+    "direction": "LONG",
+    "quality": 8,
+    "entry": 100,
+    "sl": 98,
+    "tp1": 104,
+    "strategy": "LEVELS",
+    "lang": "ru",
+    "quality_scale": 10
+   },
+   "📈 <b>BTC-USDT-SWAP</b> ЛОНГ\nКачество: ⭐⭐⭐⭐⭐ (5/5)\n\n🎯 Entry: <code>100.0</code>\n🛑 SL: <code>98</code>  <i>(-2.00%)</i>\n✅ TP1: <code>104.0</code>  <i>(+4.00%)</i>\n\n<i>Strategy: LEVELS</i>"
+  ],
+  [
+   {
+    "symbol": "BTC-USDT-SWAP",
+    "direction": "SHORT",
+    "quality": 4,
+    "entry": 100.0,
+    "sl": 102.0,
+    "tp1": 95.0,
+    "tp2": null,
+    "tp3": 0,
+    "strategy": "SMC",
+    "lang": "en"
+   },
+   "📉 <b>BTC-USDT-SWAP</b> ШОРТ\nQuality: ⭐⭐⭐⭐☆ (4/5)\n\n🎯 Entry: <code>100.0</code>\n🛑 SL: <code>102.0</code>  <i>(-2.00%)</i>\n✅ TP1: <code>95</code>  <i>(+5.00%)</i>\n\n<i>Strategy: SMC</i>"
+  ],
+  [
+   {
+    "symbol": "X<Y>",
+    "direction": "short",
+    "quality": "3",
+    "entry": 1.0,
+    "sl": 1.05,
+    "tp1": 1.0,
+    "tp2": 0.9,
+    "tp3": 0.8,
+    "strategy": "",
+    "lang": "ru"
+   },
+   "📉 <b>X&lt;Y&gt;</b> ШОРТ\nКачество: ⭐⭐⭐☆☆ (3/5)\n\n🎯 Entry: <code>1</code>\n🛑 SL: <code>1.05</code>  <i>(-5.00%)</i>\n✅ TP1: <code>1</code>  <i>(+-0.00%)</i>\n✅ TP2: <code>0.9</code>  <i>(+10.00%)</i>\n✅ TP3: <code>0.8</code>  <i>(+20.00%)</i>"
+  ],
+  [
+   {
+    "symbol": "Q",
+    "direction": "LONG",
+    "quality": null,
+    "entry": 0.0,
+    "sl": 1.0,
+    "tp1": 2.0,
+    "strategy": "VOLUME",
+    "lang": "de"
+   },
+   "📈 <b>Q</b> ЛОНГ\nКачество: ☆☆☆☆☆ (0/5)\n\n🎯 Entry: <code>0</code>\n🛑 SL: <code>1</code>  <i>()</i>\n✅ TP1: <code>2</code>  <i>()</i>\n\n<i>Strategy: VOLUME</i>"
+  ],
+  [
+   {
+    "symbol": "Q",
+    "direction": "",
+    "quality": 7.9,
+    "entry": 50.0,
+    "sl": 49.0,
+    "tp1": 55.0,
+    "tp2": 60.0,
+    "tp3": 65.0,
+    "strategy": "levels",
+    "lang": "en"
+   },
+   "📉 <b>Q</b> ШОРТ\nQuality: ⭐⭐⭐⭐☆ (4/5)\n\n🎯 Entry: <code>50</code>\n🛑 SL: <code>49</code>  <i>(-2.00%)</i>\n✅ TP1: <code>55</code>  <i>(+10.00%)</i>\n✅ TP2: <code>60</code>  <i>(+20.00%)</i>\n✅ TP3: <code>65</code>  <i>(+30.00%)</i>\n\n<i>Strategy: levels</i>"
+  ],
+  [
+   {
+    "symbol": "Q",
+    "direction": "LONG",
+    "quality": 12,
+    "entry": 50.0,
+    "sl": 49.0,
+    "tp1": 55.0,
+    "strategy": "SMC",
+    "lang": "ru",
+    "quality_scale": 0
+   },
+   "📈 <b>Q</b> ЛОНГ\nКачество: ⭐⭐⭐⭐⭐ (5/5)\n\n🎯 Entry: <code>50</code>\n🛑 SL: <code>49</code>  <i>(-2.00%)</i>\n✅ TP1: <code>55</code>  <i>(+10.00%)</i>\n\n<i>Strategy: SMC</i>"
+  ],
+  [
+   {
+    "symbol": "Q",
+    "direction": "LONG",
+    "quality": -3,
+    "entry": 50.0,
+    "sl": 49.0,
+    "tp1": 55.0,
+    "strategy": "SMC",
+    "lang": "ru"
+   },
+   "📈 <b>Q</b> ЛОНГ\nКачество: ☆☆☆☆☆ (0/5)\n\n🎯 Entry: <code>50</code>\n🛑 SL: <code>49</code>  <i>(-2.00%)</i>\n✅ TP1: <code>55</code>  <i>(+10.00%)</i>\n\n<i>Strategy: SMC</i>"
+  ],
+  [
+   {
+    "symbol": "PEPE-USDT-SWAP",
+    "direction": "SHORT",
+    "quality": 5,
+    "entry": 1.234e-05,
+    "sl": 1.29e-05,
+    "tp1": 1.18e-05,
+    "tp2": 1.12e-05,
+    "tp3": 1e-05,
+    "strategy": "SMC & co",
+    "lang": "en"
+   },
+   "📉 <b>PEPE-USDT-SWAP</b> ШОРТ\nQuality: ⭐⭐⭐⭐⭐ (5/5)\n\n🎯 Entry: <code>0.00001234</code>\n🛑 SL: <code>0.0000129</code>  <i>(-4.54%)</i>\n✅ TP1: <code>0.0000118</code>  <i>(+4.38%)</i>\n✅ TP2: <code>0.0000112</code>  <i>(+9.24%)</i>\n✅ TP3: <code>0.00001</code>  <i>(+18.96%)</i>\n\n<i>Strategy: SMC &amp; co</i>"
+  ],
+  [
+   {
+    "symbol": "Q",
+    "direction": "LONG",
+    "quality": "abc",
+    "entry": 50.0,
+    "sl": 49.0,
+    "tp1": 55.0,
+    "strategy": "SMC",
+    "lang": "ru"
+   },
+   "📈 <b>Q</b> ЛОНГ\nКачество: ☆☆☆☆☆ (0/5)\n\n🎯 Entry: <code>50</code>\n🛑 SL: <code>49</code>  <i>(-2.00%)</i>\n✅ TP1: <code>55</code>  <i>(+10.00%)</i>\n\n<i>Strategy: SMC</i>"
+  ]
+ ],
+ "wm_encode": [
+  [
+   0,
+   "​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​"
+  ],
+  [
+   1,
+   "‌​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​"
+  ],
+  [
+   2,
+   "​‌​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​"
+  ],
+  [
+   123456789,
+   "‌​‌​‌​​​‌​‌‌​​‌‌‌‌​‌‌​‌​‌‌‌​​​​​​​​​​​​​"
+  ],
+  [
+   1099511627775,
+   "‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌"
+  ],
+  [
+   1099511627776,
+   "​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​"
+  ],
+  [
+   2199023255557,
+   "‌​‌​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​"
+  ],
+  [
+   7107654772,
+   "​​‌​‌‌‌​​​‌​‌‌​​​‌‌​​‌​‌‌‌‌​​‌​‌‌​​​​​​​"
+  ]
+ ],
+ "wm_inject": [
+  [
+   "",
+   5,
+   "‌​‌​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​"
+  ],
+  [
+   "",
+   123456789,
+   "‌​‌​‌​​​‌​‌‌​​‌‌‌‌​‌‌​‌​‌‌‌​​​​​​​​​​​​​"
+  ],
+  [
+   "a",
+   5,
+   "a‌​‌​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​"
+  ],
+  [
+   "a",
+   123456789,
+   "a‌​‌​‌​​​‌​‌‌​​‌‌‌‌​‌‌​‌​‌‌‌​​​​​​​​​​​​​"
+  ],
+  [
+   "ab",
+   5,
+   "a‌​‌​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​b"
+  ],
+  [
+   "ab",
+   123456789,
+   "a‌​‌​‌​​​‌​‌‌​​‌‌‌‌​‌‌​‌​‌‌‌​​​​​​​​​​​​​b"
+  ],
+  [
+   "🟢 <b>LONG</b>",
+   5,
+   "🟢‌​‌​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​ <b>LONG</b>"
+  ],
+  [
+   "🟢 <b>LONG</b>",
+   123456789,
+   "🟢‌​‌​‌​​​‌​‌‌​​‌‌‌‌​‌‌​‌​‌‌‌​​​​​​​​​​​​​ <b>LONG</b>"
+  ],
+  [
+   "↔️ y",
+   5,
+   "↔‌​‌​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​️ y"
+  ],
+  [
+   "↔️ y",
+   123456789,
+   "↔‌​‌​‌​​​‌​‌‌​​‌‌‌‌​‌‌​‌​‌‌‌​​​​​​​​​​​​​️ y"
+  ],
+  [
+   "日本語",
+   5,
+   "日‌​‌​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​本語"
+  ],
+  [
+   "日本語",
+   123456789,
+   "日‌​‌​‌​​​‌​‌‌​​‌‌‌‌​‌‌​‌​‌‌‌​​​​​​​​​​​​​本語"
+  ]
+ ],
+ "wm_decode": [
+  [
+   "h​‌​‌​‌​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​ello",
+   42
+  ],
+  [
+   "plain",
+   null
+  ],
+  [
+   "‌‌‌​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​",
+   null
+  ],
+  [
+   "‌‌‌​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​‌‌‌​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​",
+   null
+  ],
+  [
+   "x‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌",
+   1099511627775
+  ]
+ ],
+ "position_line": [
+  {
+   "user": {
+    "trade_risk_pct": 1.0,
+    "trade_leverage": 10
+   },
+   "entry": 100.0,
+   "sl": 98.0,
+   "ctx": "",
+   "balance": null,
+   "lang": "ru",
+   "line": "💼 Позиция ≈ <b>$500</b> · риск 1% = $10.0 · маржа $50.0 при 10x <i>(при депозите $1,000)</i>"
+  },
+  {
+   "user": {
+    "trade_risk_pct": 1.0,
+    "trade_leverage": 10
+   },
+   "entry": 100.0,
+   "sl": 98.0,
+   "ctx": "",
+   "balance": null,
+   "lang": "en",
+   "line": "💼 Position ≈ <b>$500</b> · risk 1% = $10.0 · margin $50.0 at 10x <i>(on a $1,000 deposit)</i>"
+  },
+  {
+   "user": {
+    "trade_risk_pct": 1.0,
+    "trade_leverage": 10
+   },
+   "entry": 100.0,
+   "sl": 98.0,
+   "ctx": "aligned",
+   "balance": 0.0,
+   "lang": "ru",
+   "line": "💼 Позиция ≈ <b>$500</b> · риск 1% = $10.0 · маржа $50.0 при 10x <i>(при депозите $1,000)</i>"
+  },
+  {
+   "user": {
+    "trade_risk_pct": 1.0,
+    "trade_leverage": 10
+   },
+   "entry": 100.0,
+   "sl": 98.0,
+   "ctx": "aligned",
+   "balance": 0.0,
+   "lang": "en",
+   "line": "💼 Position ≈ <b>$500</b> · risk 1% = $10.0 · margin $50.0 at 10x <i>(on a $1,000 deposit)</i>"
+  },
+  {
+   "user": {
+    "trade_risk_pct": 1.0,
+    "trade_leverage": 10
+   },
+   "entry": 100.0,
+   "sl": 98.0,
+   "ctx": "with",
+   "balance": -5.0,
+   "lang": "ru",
+   "line": "💼 Позиция ≈ <b>$500</b> · риск 1% = $10.0 · маржа $50.0 при 10x <i>(при депозите $1,000)</i>"
+  },
+  {
+   "user": {
+    "trade_risk_pct": 1.0,
+    "trade_leverage": 10
+   },
+   "entry": 100.0,
+   "sl": 98.0,
+   "ctx": "with",
+   "balance": -5.0,
+   "lang": "en",
+   "line": "💼 Position ≈ <b>$500</b> · risk 1% = $10.0 · margin $50.0 at 10x <i>(on a $1,000 deposit)</i>"
+  },
+  {
+   "user": {
+    "trade_risk_pct": 1.0,
+    "trade_leverage": 10
+   },
+   "entry": 100.0,
+   "sl": 98.0,
+   "ctx": "counter",
+   "balance": 87.5,
+   "lang": "ru",
+   "line": "💼 Позиция ≈ <b>$21.9</b> · риск 0.5% (×0.5, против тренда) = $0.4 · маржа $2.2 при 10x <i>(баланс $87.5)</i>"
+  },
+  {
+   "user": {
+    "trade_risk_pct": 1.0,
+    "trade_leverage": 10
+   },
+   "entry": 100.0,
+   "sl": 98.0,
+   "ctx": "counter",
+   "balance": 87.5,
+   "lang": "en",
+   "line": "💼 Position ≈ <b>$21.9</b> · risk 0.5% (×0.5, counter-trend) = $0.4 · margin $2.2 at 10x <i>(balance $87.5)</i>"
+  },
+  {
+   "user": {
+    "trade_risk_pct": 1.0,
+    "trade_leverage": 10
+   },
+   "entry": 100.0,
+   "sl": 98.0,
+   "ctx": "strong_counter",
+   "balance": 2500.0,
+   "lang": "ru",
+   "line": "⛔ <i>Автотрейд: сделка против сильного тренда BTC будет пропущена</i>"
+  },
+  {
+   "user": {
+    "trade_risk_pct": 1.0,
+    "trade_leverage": 10
+   },
+   "entry": 100.0,
+   "sl": 98.0,
+   "ctx": "strong_counter",
+   "balance": 2500.0,
+   "lang": "en",
+   "line": "⛔ <i>Auto-trade: a trade against a strong BTC trend will be skipped</i>"
+  },
+  {
+   "user": {
+    "trade_risk_pct": 1.0,
+    "trade_leverage": 10
+   },
+   "entry": 100.0,
+   "sl": 98.0,
+   "ctx": "weird",
+   "balance": 1234567.0,
+   "lang": "ru",
+   "line": "💼 Позиция ≈ <b>$617,284</b> · риск 1% = $12,346 · маржа $61,728 при 10x <i>(баланс $1,234,567)</i>"
+  },
+  {
+   "user": {
+    "trade_risk_pct": 1.0,
+    "trade_leverage": 10
+   },
+   "entry": 100.0,
+   "sl": 98.0,
+   "ctx": "weird",
+   "balance": 1234567.0,
+   "lang": "en",
+   "line": "💼 Position ≈ <b>$617,284</b> · risk 1% = $12,346 · margin $61,728 at 10x <i>(balance $1,234,567)</i>"
+  },
+  {
+   "user": {
+    "trade_risk_pct": 1.0,
+    "trade_leverage": 10
+   },
+   "entry": 64123.5,
+   "sl": 63000.0,
+   "ctx": "",
+   "balance": 0.0,
+   "lang": "ru",
+   "line": "💼 Позиция ≈ <b>$571</b> · риск 1% = $10.0 · маржа $57.1 при 10x <i>(при депозите $1,000)</i>"
+  },
+  {
+   "user": {
+    "trade_risk_pct": 1.0,
+    "trade_leverage": 10
+   },
+   "entry": 64123.5,
+   "sl": 63000.0,
+   "ctx": "",
+   "balance": 0.0,
+   "lang": "en",
+   "line": "💼 Position ≈ <b>$571</b> · risk 1% = $10.0 · margin $57.1 at 10x <i>(on a $1,000 deposit)</i>"
+  },
+  {
+   "user": {
+    "trade_risk_pct": 1.0,
+    "trade_leverage": 10
+   },
+   "entry": 64123.5,
+   "sl": 63000.0,
+   "ctx": "aligned",
+   "balance": -5.0,
+   "lang": "ru",
+   "line": "💼 Позиция ≈ <b>$571</b> · риск 1% = $10.0 · маржа $57.1 при 10x <i>(при депозите $1,000)</i>"
+  },
+  {
+   "user": {
+    "trade_risk_pct": 1.0,
+    "trade_leverage": 10
+   },
+   "entry": 64123.5,
+   "sl": 63000.0,
+   "ctx": "aligned",
+   "balance": -5.0,
+   "lang": "en",
+   "line": "💼 Position ≈ <b>$571</b> · risk 1% = $10.0 · margin $57.1 at 10x <i>(on a $1,000 deposit)</i>"
+  },
+  {
+   "user": {
+    "trade_risk_pct": 1.0,
+    "trade_leverage": 10
+   },
+   "entry": 64123.5,
+   "sl": 63000.0,
+   "ctx": "with",
+   "balance": 87.5,
+   "lang": "ru",
+   "line": "💼 Позиция ≈ <b>$49.9</b> · риск 1% = $0.9 · маржа $5.0 при 10x <i>(баланс $87.5)</i>"
+  },
+  {
+   "user": {
+    "trade_risk_pct": 1.0,
+    "trade_leverage": 10
+   },
+   "entry": 64123.5,
+   "sl": 63000.0,
+   "ctx": "with",
+   "balance": 87.5,
+   "lang": "en",
+   "line": "💼 Position ≈ <b>$49.9</b> · risk 1% = $0.9 · margin $5.0 at 10x <i>(balance $87.5)</i>"
+  },
+  {
+   "user": {
+    "trade_risk_pct": 1.0,
+    "trade_leverage": 10
+   },
+   "entry": 64123.5,
+   "sl": 63000.0,
+   "ctx": "counter",
+   "balance": 2500.0,
+   "lang": "ru",
+   "line": "💼 Позиция ≈ <b>$713</b> · риск 0.5% (×0.5, против тренда) = $12.5 · маржа $71.3 при 10x <i>(баланс $2,500)</i>"
+  },
+  {
+   "user": {
+    "trade_risk_pct": 1.0,
+    "trade_leverage": 10
+   },
+   "entry": 64123.5,
+   "sl": 63000.0,
+   "ctx": "counter",
+   "balance": 2500.0,
+   "lang": "en",
+   "line": "💼 Position ≈ <b>$713</b> · risk 0.5% (×0.5, counter-trend) = $12.5 · margin $71.3 at 10x <i>(balance $2,500)</i>"
+  },
+  {
+   "user": {
+    "trade_risk_pct": 1.0,
+    "trade_leverage": 10
+   },
+   "entry": 64123.5,
+   "sl": 63000.0,
+   "ctx": "strong_counter",
+   "balance": 1234567.0,
+   "lang": "ru",
+   "line": "⛔ <i>Автотрейд: сделка против сильного тренда BTC будет пропущена</i>"
+  },
+  {
+   "user": {
+    "trade_risk_pct": 1.0,
+    "trade_leverage": 10
+   },
+   "entry": 64123.5,
+   "sl": 63000.0,
+   "ctx": "strong_counter",
+   "balance": 1234567.0,
+   "lang": "en",
+   "line": "⛔ <i>Auto-trade: a trade against a strong BTC trend will be skipped</i>"
+  },
+  {
+   "user": {
+    "trade_risk_pct": 1.0,
+    "trade_leverage": 10
+   },
+   "entry": 64123.5,
+   "sl": 63000.0,
+   "ctx": "weird",
+   "balance": null,
+   "lang": "ru",
+   "line": "💼 Позиция ≈ <b>$571</b> · риск 1% = $10.0 · маржа $57.1 при 10x <i>(при депозите $1,000)</i>"
+  },
+  {
+   "user": {
+    "trade_risk_pct": 1.0,
+    "trade_leverage": 10
+   },
+   "entry": 64123.5,
+   "sl": 63000.0,
+   "ctx": "weird",
+   "balance": null,
+   "lang": "en",
+   "line": "💼 Position ≈ <b>$571</b> · risk 1% = $10.0 · margin $57.1 at 10x <i>(on a $1,000 deposit)</i>"
+  },
+  {
+   "user": {
+    "trade_risk_pct": 1.0,
+    "trade_leverage": 10
+   },
+   "entry": 0.0001234,
+   "sl": 0.00012,
+   "ctx": "",
+   "balance": -5.0,
+   "lang": "ru",
+   "line": "💼 Позиция ≈ <b>$363</b> · риск 1% = $10.0 · маржа $36.3 при 10x <i>(при депозите $1,000)</i>"
+  },
+  {
+   "user": {
+    "trade_risk_pct": 1.0,
+    "trade_leverage": 10
+   },
+   "entry": 0.0001234,
+   "sl": 0.00012,
+   "ctx": "",
+   "balance": -5.0,
+   "lang": "en",
+   "line": "💼 Position ≈ <b>$363</b> · risk 1% = $10.0 · margin $36.3 at 10x <i>(on a $1,000 deposit)</i>"
+  },
+  {
+   "user": {
+    "trade_risk_pct": 1.0,
+    "trade_leverage": 10
+   },
+   "entry": 0.0001234,
+   "sl": 0.00012,
+   "ctx": "aligned",
+   "balance": 87.5,
+   "lang": "ru",
+   "line": "💼 Позиция ≈ <b>$31.8</b> · риск 1% = $0.9 · маржа $3.2 при 10x <i>(баланс $87.5)</i>"
+  },
+  {
+   "user": {
+    "trade_risk_pct": 1.0,
+    "trade_leverage": 10
+   },
+   "entry": 0.0001234,
+   "sl": 0.00012,
+   "ctx": "aligned",
+   "balance": 87.5,
+   "lang": "en",
+   "line": "💼 Position ≈ <b>$31.8</b> · risk 1% = $0.9 · margin $3.2 at 10x <i>(balance $87.5)</i>"
+  },
+  {
+   "user": {
+    "trade_risk_pct": 1.0,
+    "trade_leverage": 10
+   },
+   "entry": 0.0001234,
+   "sl": 0.00012,
+   "ctx": "with",
+   "balance": 2500.0,
+   "lang": "ru",
+   "line": "💼 Позиция ≈ <b>$907</b> · риск 1% = $25.0 · маржа $90.7 при 10x <i>(баланс $2,500)</i>"
+  },
+  {
+   "user": {
+    "trade_risk_pct": 1.0,
+    "trade_leverage": 10
+   },
+   "entry": 0.0001234,
+   "sl": 0.00012,
+   "ctx": "with",
+   "balance": 2500.0,
+   "lang": "en",
+   "line": "💼 Position ≈ <b>$907</b> · risk 1% = $25.0 · margin $90.7 at 10x <i>(balance $2,500)</i>"
+  },
+  {
+   "user": {
+    "trade_risk_pct": 1.0,
+    "trade_leverage": 10
+   },
+   "entry": 0.0001234,
+   "sl": 0.00012,
+   "ctx": "counter",
+   "balance": 1234567.0,
+   "lang": "ru",
+   "line": "💼 Позиция ≈ <b>$224,038</b> · риск 0.5% (×0.5, против тренда) = $6,173 · маржа $22,404 при 10x <i>(баланс $1,234,567)</i>"
+  },
+  {
+   "user": {
+    "trade_risk_pct": 1.0,
+    "trade_leverage": 10
+   },
+   "entry": 0.0001234,
+   "sl": 0.00012,
+   "ctx": "counter",
+   "balance": 1234567.0,
+   "lang": "en",
+   "line": "💼 Position ≈ <b>$224,038</b> · risk 0.5% (×0.5, counter-trend) = $6,173 · margin $22,404 at 10x <i>(balance $1,234,567)</i>"
+  },
+  {
+   "user": {
+    "trade_risk_pct": 1.0,
+    "trade_leverage": 10
+   },
+   "entry": 0.0001234,
+   "sl": 0.00012,
+   "ctx": "strong_counter",
+   "balance": null,
+   "lang": "ru",
+   "line": "⛔ <i>Автотрейд: сделка против сильного тренда BTC будет пропущена</i>"
+  },
+  {
+   "user": {
+    "trade_risk_pct": 1.0,
+    "trade_leverage": 10
+   },
+   "entry": 0.0001234,
+   "sl": 0.00012,
+   "ctx": "strong_counter",
+   "balance": null,
+   "lang": "en",
+   "line": "⛔ <i>Auto-trade: a trade against a strong BTC trend will be skipped</i>"
+  },
+  {
+   "user": {
+    "trade_risk_pct": 1.0,
+    "trade_leverage": 10
+   },
+   "entry": 0.0001234,
+   "sl": 0.00012,
+   "ctx": "weird",
+   "balance": 0.0,
+   "lang": "ru",
+   "line": "💼 Позиция ≈ <b>$363</b> · риск 1% = $10.0 · маржа $36.3 при 10x <i>(при депозите $1,000)</i>"
+  },
+  {
+   "user": {
+    "trade_risk_pct": 1.0,
+    "trade_leverage": 10
+   },
+   "entry": 0.0001234,
+   "sl": 0.00012,
+   "ctx": "weird",
+   "balance": 0.0,
+   "lang": "en",
+   "line": "💼 Position ≈ <b>$363</b> · risk 1% = $10.0 · margin $36.3 at 10x <i>(on a $1,000 deposit)</i>"
+  },
+  {
+   "user": {
+    "trade_risk_pct": 1.0,
+    "trade_leverage": 10
+   },
+   "entry": 100.0,
+   "sl": 100.0,
+   "ctx": "",
+   "balance": 87.5,
+   "lang": "ru",
+   "line": ""
+  },
+  {
+   "user": {
+    "trade_risk_pct": 1.0,
+    "trade_leverage": 10
+   },
+   "entry": 100.0,
+   "sl": 100.0,
+   "ctx": "",
+   "balance": 87.5,
+   "lang": "en",
+   "line": ""
+  },
+  {
+   "user": {
+    "trade_risk_pct": 1.0,
+    "trade_leverage": 10
+   },
+   "entry": 100.0,
+   "sl": 100.0,
+   "ctx": "aligned",
+   "balance": 2500.0,
+   "lang": "ru",
+   "line": ""
+  },
+  {
+   "user": {
+    "trade_risk_pct": 1.0,
+    "trade_leverage": 10
+   },
+   "entry": 100.0,
+   "sl": 100.0,
+   "ctx": "aligned",
+   "balance": 2500.0,
+   "lang": "en",
+   "line": ""
+  },
+  {
+   "user": {
+    "trade_risk_pct": 1.0,
+    "trade_leverage": 10
+   },
+   "entry": 100.0,
+   "sl": 100.0,
+   "ctx": "with",
+   "balance": 1234567.0,
+   "lang": "ru",
+   "line": ""
+  },
+  {
+   "user": {
+    "trade_risk_pct": 1.0,
+    "trade_leverage": 10
+   },
+   "entry": 100.0,
+   "sl": 100.0,
+   "ctx": "with",
+   "balance": 1234567.0,
+   "lang": "en",
+   "line": ""
+  },
+  {
+   "user": {
+    "trade_risk_pct": 1.0,
+    "trade_leverage": 10
+   },
+   "entry": 100.0,
+   "sl": 100.0,
+   "ctx": "counter",
+   "balance": null,
+   "lang": "ru",
+   "line": ""
+  },
+  {
+   "user": {
+    "trade_risk_pct": 1.0,
+    "trade_leverage": 10
+   },
+   "entry": 100.0,
+   "sl": 100.0,
+   "ctx": "counter",
+   "balance": null,
+   "lang": "en",
+   "line": ""
+  },
+  {
+   "user": {
+    "trade_risk_pct": 1.0,
+    "trade_leverage": 10
+   },
+   "entry": 100.0,
+   "sl": 100.0,
+   "ctx": "strong_counter",
+   "balance": 0.0,
+   "lang": "ru",
+   "line": "⛔ <i>Автотрейд: сделка против сильного тренда BTC будет пропущена</i>"
+  },
+  {
+   "user": {
+    "trade_risk_pct": 1.0,
+    "trade_leverage": 10
+   },
+   "entry": 100.0,
+   "sl": 100.0,
+   "ctx": "strong_counter",
+   "balance": 0.0,
+   "lang": "en",
+   "line": "⛔ <i>Auto-trade: a trade against a strong BTC trend will be skipped</i>"
+  },
+  {
+   "user": {
+    "trade_risk_pct": 1.0,
+    "trade_leverage": 10
+   },
+   "entry": 100.0,
+   "sl": 100.0,
+   "ctx": "weird",
+   "balance": -5.0,
+   "lang": "ru",
+   "line": ""
+  },
+  {
+   "user": {
+    "trade_risk_pct": 1.0,
+    "trade_leverage": 10
+   },
+   "entry": 100.0,
+   "sl": 100.0,
+   "ctx": "weird",
+   "balance": -5.0,
+   "lang": "en",
+   "line": ""
+  },
+  {
+   "user": {
+    "trade_risk_pct": 1.0,
+    "trade_leverage": 10
+   },
+   "entry": 0.0,
+   "sl": 1.0,
+   "ctx": "",
+   "balance": 2500.0,
+   "lang": "ru",
+   "line": ""
+  },
+  {
+   "user": {
+    "trade_risk_pct": 1.0,
+    "trade_leverage": 10
+   },
+   "entry": 0.0,
+   "sl": 1.0,
+   "ctx": "",
+   "balance": 2500.0,
+   "lang": "en",
+   "line": ""
+  },
+  {
+   "user": {
+    "trade_risk_pct": 1.0,
+    "trade_leverage": 10
+   },
+   "entry": 0.0,
+   "sl": 1.0,
+   "ctx": "aligned",
+   "balance": 1234567.0,
+   "lang": "ru",
+   "line": ""
+  },
+  {
+   "user": {
+    "trade_risk_pct": 1.0,
+    "trade_leverage": 10
+   },
+   "entry": 0.0,
+   "sl": 1.0,
+   "ctx": "aligned",
+   "balance": 1234567.0,
+   "lang": "en",
+   "line": ""
+  },
+  {
+   "user": {
+    "trade_risk_pct": 1.0,
+    "trade_leverage": 10
+   },
+   "entry": 0.0,
+   "sl": 1.0,
+   "ctx": "with",
+   "balance": null,
+   "lang": "ru",
+   "line": ""
+  },
+  {
+   "user": {
+    "trade_risk_pct": 1.0,
+    "trade_leverage": 10
+   },
+   "entry": 0.0,
+   "sl": 1.0,
+   "ctx": "with",
+   "balance": null,
+   "lang": "en",
+   "line": ""
+  },
+  {
+   "user": {
+    "trade_risk_pct": 1.0,
+    "trade_leverage": 10
+   },
+   "entry": 0.0,
+   "sl": 1.0,
+   "ctx": "counter",
+   "balance": 0.0,
+   "lang": "ru",
+   "line": ""
+  },
+  {
+   "user": {
+    "trade_risk_pct": 1.0,
+    "trade_leverage": 10
+   },
+   "entry": 0.0,
+   "sl": 1.0,
+   "ctx": "counter",
+   "balance": 0.0,
+   "lang": "en",
+   "line": ""
+  },
+  {
+   "user": {
+    "trade_risk_pct": 1.0,
+    "trade_leverage": 10
+   },
+   "entry": 0.0,
+   "sl": 1.0,
+   "ctx": "strong_counter",
+   "balance": -5.0,
+   "lang": "ru",
+   "line": "⛔ <i>Автотрейд: сделка против сильного тренда BTC будет пропущена</i>"
+  },
+  {
+   "user": {
+    "trade_risk_pct": 1.0,
+    "trade_leverage": 10
+   },
+   "entry": 0.0,
+   "sl": 1.0,
+   "ctx": "strong_counter",
+   "balance": -5.0,
+   "lang": "en",
+   "line": "⛔ <i>Auto-trade: a trade against a strong BTC trend will be skipped</i>"
+  },
+  {
+   "user": {
+    "trade_risk_pct": 1.0,
+    "trade_leverage": 10
+   },
+   "entry": 0.0,
+   "sl": 1.0,
+   "ctx": "weird",
+   "balance": 87.5,
+   "lang": "ru",
+   "line": ""
+  },
+  {
+   "user": {
+    "trade_risk_pct": 1.0,
+    "trade_leverage": 10
+   },
+   "entry": 0.0,
+   "sl": 1.0,
+   "ctx": "weird",
+   "balance": 87.5,
+   "lang": "en",
+   "line": ""
+  },
+  {
+   "user": {
+    "trade_risk_pct": 1.0,
+    "trade_leverage": 10
+   },
+   "entry": 2.0,
+   "sl": 2.5,
+   "ctx": "",
+   "balance": 1234567.0,
+   "lang": "ru",
+   "line": "💼 Позиция ≈ <b>$49,383</b> · риск 1% = $12,346 · маржа $4,938 при 10x <i>(баланс $1,234,567)</i>"
+  },
+  {
+   "user": {
+    "trade_risk_pct": 1.0,
+    "trade_leverage": 10
+   },
+   "entry": 2.0,
+   "sl": 2.5,
+   "ctx": "",
+   "balance": 1234567.0,
+   "lang": "en",
+   "line": "💼 Position ≈ <b>$49,383</b> · risk 1% = $12,346 · margin $4,938 at 10x <i>(balance $1,234,567)</i>"
+  },
+  {
+   "user": {
+    "trade_risk_pct": 1.0,
+    "trade_leverage": 10
+   },
+   "entry": 2.0,
+   "sl": 2.5,
+   "ctx": "aligned",
+   "balance": null,
+   "lang": "ru",
+   "line": "💼 Позиция ≈ <b>$40.0</b> · риск 1% = $10.0 · маржа $4.0 при 10x <i>(при депозите $1,000)</i>"
+  },
+  {
+   "user": {
+    "trade_risk_pct": 1.0,
+    "trade_leverage": 10
+   },
+   "entry": 2.0,
+   "sl": 2.5,
+   "ctx": "aligned",
+   "balance": null,
+   "lang": "en",
+   "line": "💼 Position ≈ <b>$40.0</b> · risk 1% = $10.0 · margin $4.0 at 10x <i>(on a $1,000 deposit)</i>"
+  },
+  {
+   "user": {
+    "trade_risk_pct": 1.0,
+    "trade_leverage": 10
+   },
+   "entry": 2.0,
+   "sl": 2.5,
+   "ctx": "with",
+   "balance": 0.0,
+   "lang": "ru",
+   "line": "💼 Позиция ≈ <b>$40.0</b> · риск 1% = $10.0 · маржа $4.0 при 10x <i>(при депозите $1,000)</i>"
+  },
+  {
+   "user": {
+    "trade_risk_pct": 1.0,
+    "trade_leverage": 10
+   },
+   "entry": 2.0,
+   "sl": 2.5,
+   "ctx": "with",
+   "balance": 0.0,
+   "lang": "en",
+   "line": "💼 Position ≈ <b>$40.0</b> · risk 1% = $10.0 · margin $4.0 at 10x <i>(on a $1,000 deposit)</i>"
+  },
+  {
+   "user": {
+    "trade_risk_pct": 1.0,
+    "trade_leverage": 10
+   },
+   "entry": 2.0,
+   "sl": 2.5,
+   "ctx": "counter",
+   "balance": -5.0,
+   "lang": "ru",
+   "line": "💼 Позиция ≈ <b>$20.0</b> · риск 0.5% (×0.5, против тренда) = $5.0 · маржа $2.0 при 10x <i>(при депозите $1,000)</i>"
+  },
+  {
+   "user": {
+    "trade_risk_pct": 1.0,
+    "trade_leverage": 10
+   },
+   "entry": 2.0,
+   "sl": 2.5,
+   "ctx": "counter",
+   "balance": -5.0,
+   "lang": "en",
+   "line": "💼 Position ≈ <b>$20.0</b> · risk 0.5% (×0.5, counter-trend) = $5.0 · margin $2.0 at 10x <i>(on a $1,000 deposit)</i>"
+  },
+  {
+   "user": {
+    "trade_risk_pct": 1.0,
+    "trade_leverage": 10
+   },
+   "entry": 2.0,
+   "sl": 2.5,
+   "ctx": "strong_counter",
+   "balance": 87.5,
+   "lang": "ru",
+   "line": "⛔ <i>Автотрейд: сделка против сильного тренда BTC будет пропущена</i>"
+  },
+  {
+   "user": {
+    "trade_risk_pct": 1.0,
+    "trade_leverage": 10
+   },
+   "entry": 2.0,
+   "sl": 2.5,
+   "ctx": "strong_counter",
+   "balance": 87.5,
+   "lang": "en",
+   "line": "⛔ <i>Auto-trade: a trade against a strong BTC trend will be skipped</i>"
+  },
+  {
+   "user": {
+    "trade_risk_pct": 1.0,
+    "trade_leverage": 10
+   },
+   "entry": 2.0,
+   "sl": 2.5,
+   "ctx": "weird",
+   "balance": 2500.0,
+   "lang": "ru",
+   "line": "💼 Позиция ≈ <b>$100</b> · риск 1% = $25.0 · маржа $10.0 при 10x <i>(баланс $2,500)</i>"
+  },
+  {
+   "user": {
+    "trade_risk_pct": 1.0,
+    "trade_leverage": 10
+   },
+   "entry": 2.0,
+   "sl": 2.5,
+   "ctx": "weird",
+   "balance": 2500.0,
+   "lang": "en",
+   "line": "💼 Position ≈ <b>$100</b> · risk 1% = $25.0 · margin $10.0 at 10x <i>(balance $2,500)</i>"
+  },
+  {
+   "user": {
+    "trade_risk_pct": 2.5,
+    "trade_leverage": 3
+   },
+   "entry": 100.0,
+   "sl": 98.0,
+   "ctx": "",
+   "balance": 0.0,
+   "lang": "ru",
+   "line": "💼 Позиция ≈ <b>$1,250</b> · риск 2.5% = $25.0 · маржа $417 при 3x <i>(при депозите $1,000)</i>"
+  },
+  {
+   "user": {
+    "trade_risk_pct": 2.5,
+    "trade_leverage": 3
+   },
+   "entry": 100.0,
+   "sl": 98.0,
+   "ctx": "",
+   "balance": 0.0,
+   "lang": "en",
+   "line": "💼 Position ≈ <b>$1,250</b> · risk 2.5% = $25.0 · margin $417 at 3x <i>(on a $1,000 deposit)</i>"
+  },
+  {
+   "user": {
+    "trade_risk_pct": 2.5,
+    "trade_leverage": 3
+   },
+   "entry": 100.0,
+   "sl": 98.0,
+   "ctx": "aligned",
+   "balance": -5.0,
+   "lang": "ru",
+   "line": "💼 Позиция ≈ <b>$1,250</b> · риск 2.5% = $25.0 · маржа $417 при 3x <i>(при депозите $1,000)</i>"
+  },
+  {
+   "user": {
+    "trade_risk_pct": 2.5,
+    "trade_leverage": 3
+   },
+   "entry": 100.0,
+   "sl": 98.0,
+   "ctx": "aligned",
+   "balance": -5.0,
+   "lang": "en",
+   "line": "💼 Position ≈ <b>$1,250</b> · risk 2.5% = $25.0 · margin $417 at 3x <i>(on a $1,000 deposit)</i>"
+  },
+  {
+   "user": {
+    "trade_risk_pct": 2.5,
+    "trade_leverage": 3
+   },
+   "entry": 100.0,
+   "sl": 98.0,
+   "ctx": "with",
+   "balance": 87.5,
+   "lang": "ru",
+   "line": "💼 Позиция ≈ <b>$109</b> · риск 2.5% = $2.2 · маржа $36.5 при 3x <i>(баланс $87.5)</i>"
+  },
+  {
+   "user": {
+    "trade_risk_pct": 2.5,
+    "trade_leverage": 3
+   },
+   "entry": 100.0,
+   "sl": 98.0,
+   "ctx": "with",
+   "balance": 87.5,
+   "lang": "en",
+   "line": "💼 Position ≈ <b>$109</b> · risk 2.5% = $2.2 · margin $36.5 at 3x <i>(balance $87.5)</i>"
+  },
+  {
+   "user": {
+    "trade_risk_pct": 2.5,
+    "trade_leverage": 3
+   },
+   "entry": 100.0,
+   "sl": 98.0,
+   "ctx": "counter",
+   "balance": 2500.0,
+   "lang": "ru",
+   "line": "💼 Позиция ≈ <b>$1,562</b> · риск 1.25% (×0.5, против тренда) = $31.2 · маржа $521 при 3x <i>(баланс $2,500)</i>"
+  },
+  {
+   "user": {
+    "trade_risk_pct": 2.5,
+    "trade_leverage": 3
+   },
+   "entry": 100.0,
+   "sl": 98.0,
+   "ctx": "counter",
+   "balance": 2500.0,
+   "lang": "en",
+   "line": "💼 Position ≈ <b>$1,562</b> · risk 1.25% (×0.5, counter-trend) = $31.2 · margin $521 at 3x <i>(balance $2,500)</i>"
+  },
+  {
+   "user": {
+    "trade_risk_pct": 2.5,
+    "trade_leverage": 3
+   },
+   "entry": 100.0,
+   "sl": 98.0,
+   "ctx": "strong_counter",
+   "balance": 1234567.0,
+   "lang": "ru",
+   "line": "⛔ <i>Автотрейд: сделка против сильного тренда BTC будет пропущена</i>"
+  },
+  {
+   "user": {
+    "trade_risk_pct": 2.5,
+    "trade_leverage": 3
+   },
+   "entry": 100.0,
+   "sl": 98.0,
+   "ctx": "strong_counter",
+   "balance": 1234567.0,
+   "lang": "en",
+   "line": "⛔ <i>Auto-trade: a trade against a strong BTC trend will be skipped</i>"
+  },
+  {
+   "user": {
+    "trade_risk_pct": 2.5,
+    "trade_leverage": 3
+   },
+   "entry": 100.0,
+   "sl": 98.0,
+   "ctx": "weird",
+   "balance": null,
+   "lang": "ru",
+   "line": "💼 Позиция ≈ <b>$1,250</b> · риск 2.5% = $25.0 · маржа $417 при 3x <i>(при депозите $1,000)</i>"
+  },
+  {
+   "user": {
+    "trade_risk_pct": 2.5,
+    "trade_leverage": 3
+   },
+   "entry": 100.0,
+   "sl": 98.0,
+   "ctx": "weird",
+   "balance": null,
+   "lang": "en",
+   "line": "💼 Position ≈ <b>$1,250</b> · risk 2.5% = $25.0 · margin $417 at 3x <i>(on a $1,000 deposit)</i>"
+  },
+  {
+   "user": {
+    "trade_risk_pct": 2.5,
+    "trade_leverage": 3
+   },
+   "entry": 64123.5,
+   "sl": 63000.0,
+   "ctx": "",
+   "balance": -5.0,
+   "lang": "ru",
+   "line": "💼 Позиция ≈ <b>$1,427</b> · риск 2.5% = $25.0 · маржа $476 при 3x <i>(при депозите $1,000)</i>"
+  },
+  {
+   "user": {
+    "trade_risk_pct": 2.5,
+    "trade_leverage": 3
+   },
+   "entry": 64123.5,
+   "sl": 63000.0,
+   "ctx": "",
+   "balance": -5.0,
+   "lang": "en",
+   "line": "💼 Position ≈ <b>$1,427</b> · risk 2.5% = $25.0 · margin $476 at 3x <i>(on a $1,000 deposit)</i>"
+  },
+  {
+   "user": {
+    "trade_risk_pct": 2.5,
+    "trade_leverage": 3
+   },
+   "entry": 64123.5,
+   "sl": 63000.0,
+   "ctx": "aligned",
+   "balance": 87.5,
+   "lang": "ru",
+   "line": "💼 Позиция ≈ <b>$125</b> · риск 2.5% = $2.2 · маржа $41.6 при 3x <i>(баланс $87.5)</i>"
+  },
+  {
+   "user": {
+    "trade_risk_pct": 2.5,
+    "trade_leverage": 3
+   },
+   "entry": 64123.5,
+   "sl": 63000.0,
+   "ctx": "aligned",
+   "balance": 87.5,
+   "lang": "en",
+   "line": "💼 Position ≈ <b>$125</b> · risk 2.5% = $2.2 · margin $41.6 at 3x <i>(balance $87.5)</i>"
+  },
+  {
+   "user": {
+    "trade_risk_pct": 2.5,
+    "trade_leverage": 3
+   },
+   "entry": 64123.5,
+   "sl": 63000.0,
+   "ctx": "with",
+   "balance": 2500.0,
+   "lang": "ru",
+   "line": "💼 Позиция ≈ <b>$3,567</b> · риск 2.5% = $62.5 · маржа $1,189 при 3x <i>(баланс $2,500)</i>"
+  },
+  {
+   "user": {
+    "trade_risk_pct": 2.5,
+    "trade_leverage": 3
+   },
+   "entry": 64123.5,
+   "sl": 63000.0,
+   "ctx": "with",
+   "balance": 2500.0,
+   "lang": "en",
+   "line": "💼 Position ≈ <b>$3,567</b> · risk 2.5% = $62.5 · margin $1,189 at 3x <i>(balance $2,500)</i>"
+  },
+  {
+   "user": {
+    "trade_risk_pct": 2.5,
+    "trade_leverage": 3
+   },
+   "entry": 64123.5,
+   "sl": 63000.0,
+   "ctx": "counter",
+   "balance": 1234567.0,
+   "lang": "ru",
+   "line": "💼 Позиция ≈ <b>$880,783</b> · риск 1.25% (×0.5, против тренда) = $15,432 · маржа $293,594 при 3x <i>(баланс $1,234,567)</i>"
+  },
+  {
+   "user": {
+    "trade_risk_pct": 2.5,
+    "trade_leverage": 3
+   },
+   "entry": 64123.5,
+   "sl": 63000.0,
+   "ctx": "counter",
+   "balance": 1234567.0,
+   "lang": "en",
+   "line": "💼 Position ≈ <b>$880,783</b> · risk 1.25% (×0.5, counter-trend) = $15,432 · margin $293,594 at 3x <i>(balance $1,234,567)</i>"
+  },
+  {
+   "user": {
+    "trade_risk_pct": 2.5,
+    "trade_leverage": 3
+   },
+   "entry": 64123.5,
+   "sl": 63000.0,
+   "ctx": "strong_counter",
+   "balance": null,
+   "lang": "ru",
+   "line": "⛔ <i>Автотрейд: сделка против сильного тренда BTC будет пропущена</i>"
+  },
+  {
+   "user": {
+    "trade_risk_pct": 2.5,
+    "trade_leverage": 3
+   },
+   "entry": 64123.5,
+   "sl": 63000.0,
+   "ctx": "strong_counter",
+   "balance": null,
+   "lang": "en",
+   "line": "⛔ <i>Auto-trade: a trade against a strong BTC trend will be skipped</i>"
+  },
+  {
+   "user": {
+    "trade_risk_pct": 2.5,
+    "trade_leverage": 3
+   },
+   "entry": 64123.5,
+   "sl": 63000.0,
+   "ctx": "weird",
+   "balance": 0.0,
+   "lang": "ru",
+   "line": "💼 Позиция ≈ <b>$1,427</b> · риск 2.5% = $25.0 · маржа $476 при 3x <i>(при депозите $1,000)</i>"
+  },
+  {
+   "user": {
+    "trade_risk_pct": 2.5,
+    "trade_leverage": 3
+   },
+   "entry": 64123.5,
+   "sl": 63000.0,
+   "ctx": "weird",
+   "balance": 0.0,
+   "lang": "en",
+   "line": "💼 Position ≈ <b>$1,427</b> · risk 2.5% = $25.0 · margin $476 at 3x <i>(on a $1,000 deposit)</i>"
+  },
+  {
+   "user": {
+    "trade_risk_pct": 2.5,
+    "trade_leverage": 3
+   },
+   "entry": 0.0001234,
+   "sl": 0.00012,
+   "ctx": "",
+   "balance": 87.5,
+   "lang": "ru",
+   "line": "💼 Позиция ≈ <b>$79.4</b> · риск 2.5% = $2.2 · маржа $26.5 при 3x <i>(баланс $87.5)</i>"
+  },
+  {
+   "user": {
+    "trade_risk_pct": 2.5,
+    "trade_leverage": 3
+   },
+   "entry": 0.0001234,
+   "sl": 0.00012,
+   "ctx": "",
+   "balance": 87.5,
+   "lang": "en",
+   "line": "💼 Position ≈ <b>$79.4</b> · risk 2.5% = $2.2 · margin $26.5 at 3x <i>(balance $87.5)</i>"
+  },
+  {
+   "user": {
+    "trade_risk_pct": 2.5,
+    "trade_leverage": 3
+   },
+   "entry": 0.0001234,
+   "sl": 0.00012,
+   "ctx": "aligned",
+   "balance": 2500.0,
+   "lang": "ru",
+   "line": "💼 Позиция ≈ <b>$2,268</b> · риск 2.5% = $62.5 · маржа $756 при 3x <i>(баланс $2,500)</i>"
+  },
+  {
+   "user": {
+    "trade_risk_pct": 2.5,
+    "trade_leverage": 3
+   },
+   "entry": 0.0001234,
+   "sl": 0.00012,
+   "ctx": "aligned",
+   "balance": 2500.0,
+   "lang": "en",
+   "line": "💼 Position ≈ <b>$2,268</b> · risk 2.5% = $62.5 · margin $756 at 3x <i>(balance $2,500)</i>"
+  },
+  {
+   "user": {
+    "trade_risk_pct": 2.5,
+    "trade_leverage": 3
+   },
+   "entry": 0.0001234,
+   "sl": 0.00012,
+   "ctx": "with",
+   "balance": 1234567.0,
+   "lang": "ru",
+   "line": "💼 Позиция ≈ <b>$1,120,188</b> · риск 2.5% = $30,864 · маржа $373,396 при 3x <i>(баланс $1,234,567)</i>"
+  },
+  {
+   "user": {
+    "trade_risk_pct": 2.5,
+    "trade_leverage": 3
+   },
+   "entry": 0.0001234,
+   "sl": 0.00012,
+   "ctx": "with",
+   "balance": 1234567.0,
+   "lang": "en",
+   "line": "💼 Position ≈ <b>$1,120,188</b> · risk 2.5% = $30,864 · margin $373,396 at 3x <i>(balance $1,234,567)</i>"
+  },
+  {
+   "user": {
+    "trade_risk_pct": 2.5,
+    "trade_leverage": 3
+   },
+   "entry": 0.0001234,
+   "sl": 0.00012,
+   "ctx": "counter",
+   "balance": null,
+   "lang": "ru",
+   "line": "💼 Позиция ≈ <b>$454</b> · риск 1.25% (×0.5, против тренда) = $12.5 · маржа $151 при 3x <i>(при депозите $1,000)</i>"
+  },
+  {
+   "user": {
+    "trade_risk_pct": 2.5,
+    "trade_leverage": 3
+   },
+   "entry": 0.0001234,
+   "sl": 0.00012,
+   "ctx": "counter",
+   "balance": null,
+   "lang": "en",
+   "line": "💼 Position ≈ <b>$454</b> · risk 1.25% (×0.5, counter-trend) = $12.5 · margin $151 at 3x <i>(on a $1,000 deposit)</i>"
+  },
+  {
+   "user": {
+    "trade_risk_pct": 2.5,
+    "trade_leverage": 3
+   },
+   "entry": 0.0001234,
+   "sl": 0.00012,
+   "ctx": "strong_counter",
+   "balance": 0.0,
+   "lang": "ru",
+   "line": "⛔ <i>Автотрейд: сделка против сильного тренда BTC будет пропущена</i>"
+  },
+  {
+   "user": {
+    "trade_risk_pct": 2.5,
+    "trade_leverage": 3
+   },
+   "entry": 0.0001234,
+   "sl": 0.00012,
+   "ctx": "strong_counter",
+   "balance": 0.0,
+   "lang": "en",
+   "line": "⛔ <i>Auto-trade: a trade against a strong BTC trend will be skipped</i>"
+  },
+  {
+   "user": {
+    "trade_risk_pct": 2.5,
+    "trade_leverage": 3
+   },
+   "entry": 0.0001234,
+   "sl": 0.00012,
+   "ctx": "weird",
+   "balance": -5.0,
+   "lang": "ru",
+   "line": "💼 Позиция ≈ <b>$907</b> · риск 2.5% = $25.0 · маржа $302 при 3x <i>(при депозите $1,000)</i>"
+  },
+  {
+   "user": {
+    "trade_risk_pct": 2.5,
+    "trade_leverage": 3
+   },
+   "entry": 0.0001234,
+   "sl": 0.00012,
+   "ctx": "weird",
+   "balance": -5.0,
+   "lang": "en",
+   "line": "💼 Position ≈ <b>$907</b> · risk 2.5% = $25.0 · margin $302 at 3x <i>(on a $1,000 deposit)</i>"
+  },
+  {
+   "user": {
+    "trade_risk_pct": 2.5,
+    "trade_leverage": 3
+   },
+   "entry": 100.0,
+   "sl": 100.0,
+   "ctx": "",
+   "balance": 2500.0,
+   "lang": "ru",
+   "line": ""
+  },
+  {
+   "user": {
+    "trade_risk_pct": 2.5,
+    "trade_leverage": 3
+   },
+   "entry": 100.0,
+   "sl": 100.0,
+   "ctx": "",
+   "balance": 2500.0,
+   "lang": "en",
+   "line": ""
+  },
+  {
+   "user": {
+    "trade_risk_pct": 2.5,
+    "trade_leverage": 3
+   },
+   "entry": 100.0,
+   "sl": 100.0,
+   "ctx": "aligned",
+   "balance": 1234567.0,
+   "lang": "ru",
+   "line": ""
+  },
+  {
+   "user": {
+    "trade_risk_pct": 2.5,
+    "trade_leverage": 3
+   },
+   "entry": 100.0,
+   "sl": 100.0,
+   "ctx": "aligned",
+   "balance": 1234567.0,
+   "lang": "en",
+   "line": ""
+  },
+  {
+   "user": {
+    "trade_risk_pct": 2.5,
+    "trade_leverage": 3
+   },
+   "entry": 100.0,
+   "sl": 100.0,
+   "ctx": "with",
+   "balance": null,
+   "lang": "ru",
+   "line": ""
+  },
+  {
+   "user": {
+    "trade_risk_pct": 2.5,
+    "trade_leverage": 3
+   },
+   "entry": 100.0,
+   "sl": 100.0,
+   "ctx": "with",
+   "balance": null,
+   "lang": "en",
+   "line": ""
+  },
+  {
+   "user": {
+    "trade_risk_pct": 2.5,
+    "trade_leverage": 3
+   },
+   "entry": 100.0,
+   "sl": 100.0,
+   "ctx": "counter",
+   "balance": 0.0,
+   "lang": "ru",
+   "line": ""
+  },
+  {
+   "user": {
+    "trade_risk_pct": 2.5,
+    "trade_leverage": 3
+   },
+   "entry": 100.0,
+   "sl": 100.0,
+   "ctx": "counter",
+   "balance": 0.0,
+   "lang": "en",
+   "line": ""
+  },
+  {
+   "user": {
+    "trade_risk_pct": 2.5,
+    "trade_leverage": 3
+   },
+   "entry": 100.0,
+   "sl": 100.0,
+   "ctx": "strong_counter",
+   "balance": -5.0,
+   "lang": "ru",
+   "line": "⛔ <i>Автотрейд: сделка против сильного тренда BTC будет пропущена</i>"
+  },
+  {
+   "user": {
+    "trade_risk_pct": 2.5,
+    "trade_leverage": 3
+   },
+   "entry": 100.0,
+   "sl": 100.0,
+   "ctx": "strong_counter",
+   "balance": -5.0,
+   "lang": "en",
+   "line": "⛔ <i>Auto-trade: a trade against a strong BTC trend will be skipped</i>"
+  },
+  {
+   "user": {
+    "trade_risk_pct": 2.5,
+    "trade_leverage": 3
+   },
+   "entry": 100.0,
+   "sl": 100.0,
+   "ctx": "weird",
+   "balance": 87.5,
+   "lang": "ru",
+   "line": ""
+  },
+  {
+   "user": {
+    "trade_risk_pct": 2.5,
+    "trade_leverage": 3
+   },
+   "entry": 100.0,
+   "sl": 100.0,
+   "ctx": "weird",
+   "balance": 87.5,
+   "lang": "en",
+   "line": ""
+  },
+  {
+   "user": {
+    "trade_risk_pct": 2.5,
+    "trade_leverage": 3
+   },
+   "entry": 0.0,
+   "sl": 1.0,
+   "ctx": "",
+   "balance": 1234567.0,
+   "lang": "ru",
+   "line": ""
+  },
+  {
+   "user": {
+    "trade_risk_pct": 2.5,
+    "trade_leverage": 3
+   },
+   "entry": 0.0,
+   "sl": 1.0,
+   "ctx": "",
+   "balance": 1234567.0,
+   "lang": "en",
+   "line": ""
+  },
+  {
+   "user": {
+    "trade_risk_pct": 2.5,
+    "trade_leverage": 3
+   },
+   "entry": 0.0,
+   "sl": 1.0,
+   "ctx": "aligned",
+   "balance": null,
+   "lang": "ru",
+   "line": ""
+  },
+  {
+   "user": {
+    "trade_risk_pct": 2.5,
+    "trade_leverage": 3
+   },
+   "entry": 0.0,
+   "sl": 1.0,
+   "ctx": "aligned",
+   "balance": null,
+   "lang": "en",
+   "line": ""
+  },
+  {
+   "user": {
+    "trade_risk_pct": 2.5,
+    "trade_leverage": 3
+   },
+   "entry": 0.0,
+   "sl": 1.0,
+   "ctx": "with",
+   "balance": 0.0,
+   "lang": "ru",
+   "line": ""
+  },
+  {
+   "user": {
+    "trade_risk_pct": 2.5,
+    "trade_leverage": 3
+   },
+   "entry": 0.0,
+   "sl": 1.0,
+   "ctx": "with",
+   "balance": 0.0,
+   "lang": "en",
+   "line": ""
+  },
+  {
+   "user": {
+    "trade_risk_pct": 2.5,
+    "trade_leverage": 3
+   },
+   "entry": 0.0,
+   "sl": 1.0,
+   "ctx": "counter",
+   "balance": -5.0,
+   "lang": "ru",
+   "line": ""
+  },
+  {
+   "user": {
+    "trade_risk_pct": 2.5,
+    "trade_leverage": 3
+   },
+   "entry": 0.0,
+   "sl": 1.0,
+   "ctx": "counter",
+   "balance": -5.0,
+   "lang": "en",
+   "line": ""
+  },
+  {
+   "user": {
+    "trade_risk_pct": 2.5,
+    "trade_leverage": 3
+   },
+   "entry": 0.0,
+   "sl": 1.0,
+   "ctx": "strong_counter",
+   "balance": 87.5,
+   "lang": "ru",
+   "line": "⛔ <i>Автотрейд: сделка против сильного тренда BTC будет пропущена</i>"
+  },
+  {
+   "user": {
+    "trade_risk_pct": 2.5,
+    "trade_leverage": 3
+   },
+   "entry": 0.0,
+   "sl": 1.0,
+   "ctx": "strong_counter",
+   "balance": 87.5,
+   "lang": "en",
+   "line": "⛔ <i>Auto-trade: a trade against a strong BTC trend will be skipped</i>"
+  },
+  {
+   "user": {
+    "trade_risk_pct": 2.5,
+    "trade_leverage": 3
+   },
+   "entry": 0.0,
+   "sl": 1.0,
+   "ctx": "weird",
+   "balance": 2500.0,
+   "lang": "ru",
+   "line": ""
+  },
+  {
+   "user": {
+    "trade_risk_pct": 2.5,
+    "trade_leverage": 3
+   },
+   "entry": 0.0,
+   "sl": 1.0,
+   "ctx": "weird",
+   "balance": 2500.0,
+   "lang": "en",
+   "line": ""
+  },
+  {
+   "user": {
+    "trade_risk_pct": 2.5,
+    "trade_leverage": 3
+   },
+   "entry": 2.0,
+   "sl": 2.5,
+   "ctx": "",
+   "balance": null,
+   "lang": "ru",
+   "line": "💼 Позиция ≈ <b>$100</b> · риск 2.5% = $25.0 · маржа $33.3 при 3x <i>(при депозите $1,000)</i>"
+  },
+  {
+   "user": {
+    "trade_risk_pct": 2.5,
+    "trade_leverage": 3
+   },
+   "entry": 2.0,
+   "sl": 2.5,
+   "ctx": "",
+   "balance": null,
+   "lang": "en",
+   "line": "💼 Position ≈ <b>$100</b> · risk 2.5% = $25.0 · margin $33.3 at 3x <i>(on a $1,000 deposit)</i>"
+  },
+  {
+   "user": {
+    "trade_risk_pct": 2.5,
+    "trade_leverage": 3
+   },
+   "entry": 2.0,
+   "sl": 2.5,
+   "ctx": "aligned",
+   "balance": 0.0,
+   "lang": "ru",
+   "line": "💼 Позиция ≈ <b>$100</b> · риск 2.5% = $25.0 · маржа $33.3 при 3x <i>(при депозите $1,000)</i>"
+  },
+  {
+   "user": {
+    "trade_risk_pct": 2.5,
+    "trade_leverage": 3
+   },
+   "entry": 2.0,
+   "sl": 2.5,
+   "ctx": "aligned",
+   "balance": 0.0,
+   "lang": "en",
+   "line": "💼 Position ≈ <b>$100</b> · risk 2.5% = $25.0 · margin $33.3 at 3x <i>(on a $1,000 deposit)</i>"
+  },
+  {
+   "user": {
+    "trade_risk_pct": 2.5,
+    "trade_leverage": 3
+   },
+   "entry": 2.0,
+   "sl": 2.5,
+   "ctx": "with",
+   "balance": -5.0,
+   "lang": "ru",
+   "line": "💼 Позиция ≈ <b>$100</b> · риск 2.5% = $25.0 · маржа $33.3 при 3x <i>(при депозите $1,000)</i>"
+  },
+  {
+   "user": {
+    "trade_risk_pct": 2.5,
+    "trade_leverage": 3
+   },
+   "entry": 2.0,
+   "sl": 2.5,
+   "ctx": "with",
+   "balance": -5.0,
+   "lang": "en",
+   "line": "💼 Position ≈ <b>$100</b> · risk 2.5% = $25.0 · margin $33.3 at 3x <i>(on a $1,000 deposit)</i>"
+  },
+  {
+   "user": {
+    "trade_risk_pct": 2.5,
+    "trade_leverage": 3
+   },
+   "entry": 2.0,
+   "sl": 2.5,
+   "ctx": "counter",
+   "balance": 87.5,
+   "lang": "ru",
+   "line": "💼 Позиция ≈ <b>$4.4</b> · риск 1.25% (×0.5, против тренда) = $1.1 · маржа $1.5 при 3x <i>(баланс $87.5)</i>"
+  },
+  {
+   "user": {
+    "trade_risk_pct": 2.5,
+    "trade_leverage": 3
+   },
+   "entry": 2.0,
+   "sl": 2.5,
+   "ctx": "counter",
+   "balance": 87.5,
+   "lang": "en",
+   "line": "💼 Position ≈ <b>$4.4</b> · risk 1.25% (×0.5, counter-trend) = $1.1 · margin $1.5 at 3x <i>(balance $87.5)</i>"
+  },
+  {
+   "user": {
+    "trade_risk_pct": 2.5,
+    "trade_leverage": 3
+   },
+   "entry": 2.0,
+   "sl": 2.5,
+   "ctx": "strong_counter",
+   "balance": 2500.0,
+   "lang": "ru",
+   "line": "⛔ <i>Автотрейд: сделка против сильного тренда BTC будет пропущена</i>"
+  },
+  {
+   "user": {
+    "trade_risk_pct": 2.5,
+    "trade_leverage": 3
+   },
+   "entry": 2.0,
+   "sl": 2.5,
+   "ctx": "strong_counter",
+   "balance": 2500.0,
+   "lang": "en",
+   "line": "⛔ <i>Auto-trade: a trade against a strong BTC trend will be skipped</i>"
+  },
+  {
+   "user": {
+    "trade_risk_pct": 2.5,
+    "trade_leverage": 3
+   },
+   "entry": 2.0,
+   "sl": 2.5,
+   "ctx": "weird",
+   "balance": 1234567.0,
+   "lang": "ru",
+   "line": "💼 Позиция ≈ <b>$123,457</b> · риск 2.5% = $30,864 · маржа $41,152 при 3x <i>(баланс $1,234,567)</i>"
+  },
+  {
+   "user": {
+    "trade_risk_pct": 2.5,
+    "trade_leverage": 3
+   },
+   "entry": 2.0,
+   "sl": 2.5,
+   "ctx": "weird",
+   "balance": 1234567.0,
+   "lang": "en",
+   "line": "💼 Position ≈ <b>$123,457</b> · risk 2.5% = $30,864 · margin $41,152 at 3x <i>(balance $1,234,567)</i>"
+  },
+  {
+   "user": {
+    "trade_risk_pct": 0,
+    "trade_leverage": 0
+   },
+   "entry": 100.0,
+   "sl": 98.0,
+   "ctx": "",
+   "balance": -5.0,
+   "lang": "ru",
+   "line": "💼 Позиция ≈ <b>$500</b> · риск 1% = $10.0 · маржа $50.0 при 10x <i>(при депозите $1,000)</i>"
+  },
+  {
+   "user": {
+    "trade_risk_pct": 0,
+    "trade_leverage": 0
+   },
+   "entry": 100.0,
+   "sl": 98.0,
+   "ctx": "",
+   "balance": -5.0,
+   "lang": "en",
+   "line": "💼 Position ≈ <b>$500</b> · risk 1% = $10.0 · margin $50.0 at 10x <i>(on a $1,000 deposit)</i>"
+  },
+  {
+   "user": {
+    "trade_risk_pct": 0,
+    "trade_leverage": 0
+   },
+   "entry": 100.0,
+   "sl": 98.0,
+   "ctx": "aligned",
+   "balance": 87.5,
+   "lang": "ru",
+   "line": "💼 Позиция ≈ <b>$43.8</b> · риск 1% = $0.9 · маржа $4.4 при 10x <i>(баланс $87.5)</i>"
+  },
+  {
+   "user": {
+    "trade_risk_pct": 0,
+    "trade_leverage": 0
+   },
+   "entry": 100.0,
+   "sl": 98.0,
+   "ctx": "aligned",
+   "balance": 87.5,
+   "lang": "en",
+   "line": "💼 Position ≈ <b>$43.8</b> · risk 1% = $0.9 · margin $4.4 at 10x <i>(balance $87.5)</i>"
+  },
+  {
+   "user": {
+    "trade_risk_pct": 0,
+    "trade_leverage": 0
+   },
+   "entry": 100.0,
+   "sl": 98.0,
+   "ctx": "with",
+   "balance": 2500.0,
+   "lang": "ru",
+   "line": "💼 Позиция ≈ <b>$1,250</b> · риск 1% = $25.0 · маржа $125 при 10x <i>(баланс $2,500)</i>"
+  },
+  {
+   "user": {
+    "trade_risk_pct": 0,
+    "trade_leverage": 0
+   },
+   "entry": 100.0,
+   "sl": 98.0,
+   "ctx": "with",
+   "balance": 2500.0,
+   "lang": "en",
+   "line": "💼 Position ≈ <b>$1,250</b> · risk 1% = $25.0 · margin $125 at 10x <i>(balance $2,500)</i>"
+  },
+  {
+   "user": {
+    "trade_risk_pct": 0,
+    "trade_leverage": 0
+   },
+   "entry": 100.0,
+   "sl": 98.0,
+   "ctx": "counter",
+   "balance": 1234567.0,
+   "lang": "ru",
+   "line": "💼 Позиция ≈ <b>$308,642</b> · риск 0.5% (×0.5, против тренда) = $6,173 · маржа $30,864 при 10x <i>(баланс $1,234,567)</i>"
+  },
+  {
+   "user": {
+    "trade_risk_pct": 0,
+    "trade_leverage": 0
+   },
+   "entry": 100.0,
+   "sl": 98.0,
+   "ctx": "counter",
+   "balance": 1234567.0,
+   "lang": "en",
+   "line": "💼 Position ≈ <b>$308,642</b> · risk 0.5% (×0.5, counter-trend) = $6,173 · margin $30,864 at 10x <i>(balance $1,234,567)</i>"
+  },
+  {
+   "user": {
+    "trade_risk_pct": 0,
+    "trade_leverage": 0
+   },
+   "entry": 100.0,
+   "sl": 98.0,
+   "ctx": "strong_counter",
+   "balance": null,
+   "lang": "ru",
+   "line": "⛔ <i>Автотрейд: сделка против сильного тренда BTC будет пропущена</i>"
+  },
+  {
+   "user": {
+    "trade_risk_pct": 0,
+    "trade_leverage": 0
+   },
+   "entry": 100.0,
+   "sl": 98.0,
+   "ctx": "strong_counter",
+   "balance": null,
+   "lang": "en",
+   "line": "⛔ <i>Auto-trade: a trade against a strong BTC trend will be skipped</i>"
+  },
+  {
+   "user": {
+    "trade_risk_pct": 0,
+    "trade_leverage": 0
+   },
+   "entry": 100.0,
+   "sl": 98.0,
+   "ctx": "weird",
+   "balance": 0.0,
+   "lang": "ru",
+   "line": "💼 Позиция ≈ <b>$500</b> · риск 1% = $10.0 · маржа $50.0 при 10x <i>(при депозите $1,000)</i>"
+  },
+  {
+   "user": {
+    "trade_risk_pct": 0,
+    "trade_leverage": 0
+   },
+   "entry": 100.0,
+   "sl": 98.0,
+   "ctx": "weird",
+   "balance": 0.0,
+   "lang": "en",
+   "line": "💼 Position ≈ <b>$500</b> · risk 1% = $10.0 · margin $50.0 at 10x <i>(on a $1,000 deposit)</i>"
+  },
+  {
+   "user": {
+    "trade_risk_pct": 0,
+    "trade_leverage": 0
+   },
+   "entry": 64123.5,
+   "sl": 63000.0,
+   "ctx": "",
+   "balance": 87.5,
+   "lang": "ru",
+   "line": "💼 Позиция ≈ <b>$49.9</b> · риск 1% = $0.9 · маржа $5.0 при 10x <i>(баланс $87.5)</i>"
+  },
+  {
+   "user": {
+    "trade_risk_pct": 0,
+    "trade_leverage": 0
+   },
+   "entry": 64123.5,
+   "sl": 63000.0,
+   "ctx": "",
+   "balance": 87.5,
+   "lang": "en",
+   "line": "💼 Position ≈ <b>$49.9</b> · risk 1% = $0.9 · margin $5.0 at 10x <i>(balance $87.5)</i>"
+  },
+  {
+   "user": {
+    "trade_risk_pct": 0,
+    "trade_leverage": 0
+   },
+   "entry": 64123.5,
+   "sl": 63000.0,
+   "ctx": "aligned",
+   "balance": 2500.0,
+   "lang": "ru",
+   "line": "💼 Позиция ≈ <b>$1,427</b> · риск 1% = $25.0 · маржа $143 при 10x <i>(баланс $2,500)</i>"
+  },
+  {
+   "user": {
+    "trade_risk_pct": 0,
+    "trade_leverage": 0
+   },
+   "entry": 64123.5,
+   "sl": 63000.0,
+   "ctx": "aligned",
+   "balance": 2500.0,
+   "lang": "en",
+   "line": "💼 Position ≈ <b>$1,427</b> · risk 1% = $25.0 · margin $143 at 10x <i>(balance $2,500)</i>"
+  },
+  {
+   "user": {
+    "trade_risk_pct": 0,
+    "trade_leverage": 0
+   },
+   "entry": 64123.5,
+   "sl": 63000.0,
+   "ctx": "with",
+   "balance": 1234567.0,
+   "lang": "ru",
+   "line": "💼 Позиция ≈ <b>$704,626</b> · риск 1% = $12,346 · маржа $70,463 при 10x <i>(баланс $1,234,567)</i>"
+  },
+  {
+   "user": {
+    "trade_risk_pct": 0,
+    "trade_leverage": 0
+   },
+   "entry": 64123.5,
+   "sl": 63000.0,
+   "ctx": "with",
+   "balance": 1234567.0,
+   "lang": "en",
+   "line": "💼 Position ≈ <b>$704,626</b> · risk 1% = $12,346 · margin $70,463 at 10x <i>(balance $1,234,567)</i>"
+  },
+  {
+   "user": {
+    "trade_risk_pct": 0,
+    "trade_leverage": 0
+   },
+   "entry": 64123.5,
+   "sl": 63000.0,
+   "ctx": "counter",
+   "balance": null,
+   "lang": "ru",
+   "line": "💼 Позиция ≈ <b>$285</b> · риск 0.5% (×0.5, против тренда) = $5.0 · маржа $28.5 при 10x <i>(при депозите $1,000)</i>"
+  },
+  {
+   "user": {
+    "trade_risk_pct": 0,
+    "trade_leverage": 0
+   },
+   "entry": 64123.5,
+   "sl": 63000.0,
+   "ctx": "counter",
+   "balance": null,
+   "lang": "en",
+   "line": "💼 Position ≈ <b>$285</b> · risk 0.5% (×0.5, counter-trend) = $5.0 · margin $28.5 at 10x <i>(on a $1,000 deposit)</i>"
+  },
+  {
+   "user": {
+    "trade_risk_pct": 0,
+    "trade_leverage": 0
+   },
+   "entry": 64123.5,
+   "sl": 63000.0,
+   "ctx": "strong_counter",
+   "balance": 0.0,
+   "lang": "ru",
+   "line": "⛔ <i>Автотрейд: сделка против сильного тренда BTC будет пропущена</i>"
+  },
+  {
+   "user": {
+    "trade_risk_pct": 0,
+    "trade_leverage": 0
+   },
+   "entry": 64123.5,
+   "sl": 63000.0,
+   "ctx": "strong_counter",
+   "balance": 0.0,
+   "lang": "en",
+   "line": "⛔ <i>Auto-trade: a trade against a strong BTC trend will be skipped</i>"
+  },
+  {
+   "user": {
+    "trade_risk_pct": 0,
+    "trade_leverage": 0
+   },
+   "entry": 64123.5,
+   "sl": 63000.0,
+   "ctx": "weird",
+   "balance": -5.0,
+   "lang": "ru",
+   "line": "💼 Позиция ≈ <b>$571</b> · риск 1% = $10.0 · маржа $57.1 при 10x <i>(при депозите $1,000)</i>"
+  },
+  {
+   "user": {
+    "trade_risk_pct": 0,
+    "trade_leverage": 0
+   },
+   "entry": 64123.5,
+   "sl": 63000.0,
+   "ctx": "weird",
+   "balance": -5.0,
+   "lang": "en",
+   "line": "💼 Position ≈ <b>$571</b> · risk 1% = $10.0 · margin $57.1 at 10x <i>(on a $1,000 deposit)</i>"
+  },
+  {
+   "user": {
+    "trade_risk_pct": 0,
+    "trade_leverage": 0
+   },
+   "entry": 0.0001234,
+   "sl": 0.00012,
+   "ctx": "",
+   "balance": 2500.0,
+   "lang": "ru",
+   "line": "💼 Позиция ≈ <b>$907</b> · риск 1% = $25.0 · маржа $90.7 при 10x <i>(баланс $2,500)</i>"
+  },
+  {
+   "user": {
+    "trade_risk_pct": 0,
+    "trade_leverage": 0
+   },
+   "entry": 0.0001234,
+   "sl": 0.00012,
+   "ctx": "",
+   "balance": 2500.0,
+   "lang": "en",
+   "line": "💼 Position ≈ <b>$907</b> · risk 1% = $25.0 · margin $90.7 at 10x <i>(balance $2,500)</i>"
+  },
+  {
+   "user": {
+    "trade_risk_pct": 0,
+    "trade_leverage": 0
+   },
+   "entry": 0.0001234,
+   "sl": 0.00012,
+   "ctx": "aligned",
+   "balance": 1234567.0,
+   "lang": "ru",
+   "line": "💼 Позиция ≈ <b>$448,075</b> · риск 1% = $12,346 · маржа $44,808 при 10x <i>(баланс $1,234,567)</i>"
+  },
+  {
+   "user": {
+    "trade_risk_pct": 0,
+    "trade_leverage": 0
+   },
+   "entry": 0.0001234,
+   "sl": 0.00012,
+   "ctx": "aligned",
+   "balance": 1234567.0,
+   "lang": "en",
+   "line": "💼 Position ≈ <b>$448,075</b> · risk 1% = $12,346 · margin $44,808 at 10x <i>(balance $1,234,567)</i>"
+  },
+  {
+   "user": {
+    "trade_risk_pct": 0,
+    "trade_leverage": 0
+   },
+   "entry": 0.0001234,
+   "sl": 0.00012,
+   "ctx": "with",
+   "balance": null,
+   "lang": "ru",
+   "line": "💼 Позиция ≈ <b>$363</b> · риск 1% = $10.0 · маржа $36.3 при 10x <i>(при депозите $1,000)</i>"
+  },
+  {
+   "user": {
+    "trade_risk_pct": 0,
+    "trade_leverage": 0
+   },
+   "entry": 0.0001234,
+   "sl": 0.00012,
+   "ctx": "with",
+   "balance": null,
+   "lang": "en",
+   "line": "💼 Position ≈ <b>$363</b> · risk 1% = $10.0 · margin $36.3 at 10x <i>(on a $1,000 deposit)</i>"
+  },
+  {
+   "user": {
+    "trade_risk_pct": 0,
+    "trade_leverage": 0
+   },
+   "entry": 0.0001234,
+   "sl": 0.00012,
+   "ctx": "counter",
+   "balance": 0.0,
+   "lang": "ru",
+   "line": "💼 Позиция ≈ <b>$181</b> · риск 0.5% (×0.5, против тренда) = $5.0 · маржа $18.1 при 10x <i>(при депозите $1,000)</i>"
+  },
+  {
+   "user": {
+    "trade_risk_pct": 0,
+    "trade_leverage": 0
+   },
+   "entry": 0.0001234,
+   "sl": 0.00012,
+   "ctx": "counter",
+   "balance": 0.0,
+   "lang": "en",
+   "line": "💼 Position ≈ <b>$181</b> · risk 0.5% (×0.5, counter-trend) = $5.0 · margin $18.1 at 10x <i>(on a $1,000 deposit)</i>"
+  },
+  {
+   "user": {
+    "trade_risk_pct": 0,
+    "trade_leverage": 0
+   },
+   "entry": 0.0001234,
+   "sl": 0.00012,
+   "ctx": "strong_counter",
+   "balance": -5.0,
+   "lang": "ru",
+   "line": "⛔ <i>Автотрейд: сделка против сильного тренда BTC будет пропущена</i>"
+  },
+  {
+   "user": {
+    "trade_risk_pct": 0,
+    "trade_leverage": 0
+   },
+   "entry": 0.0001234,
+   "sl": 0.00012,
+   "ctx": "strong_counter",
+   "balance": -5.0,
+   "lang": "en",
+   "line": "⛔ <i>Auto-trade: a trade against a strong BTC trend will be skipped</i>"
+  },
+  {
+   "user": {
+    "trade_risk_pct": 0,
+    "trade_leverage": 0
+   },
+   "entry": 0.0001234,
+   "sl": 0.00012,
+   "ctx": "weird",
+   "balance": 87.5,
+   "lang": "ru",
+   "line": "💼 Позиция ≈ <b>$31.8</b> · риск 1% = $0.9 · маржа $3.2 при 10x <i>(баланс $87.5)</i>"
+  },
+  {
+   "user": {
+    "trade_risk_pct": 0,
+    "trade_leverage": 0
+   },
+   "entry": 0.0001234,
+   "sl": 0.00012,
+   "ctx": "weird",
+   "balance": 87.5,
+   "lang": "en",
+   "line": "💼 Position ≈ <b>$31.8</b> · risk 1% = $0.9 · margin $3.2 at 10x <i>(balance $87.5)</i>"
+  },
+  {
+   "user": {
+    "trade_risk_pct": 0,
+    "trade_leverage": 0
+   },
+   "entry": 100.0,
+   "sl": 100.0,
+   "ctx": "",
+   "balance": 1234567.0,
+   "lang": "ru",
+   "line": ""
+  },
+  {
+   "user": {
+    "trade_risk_pct": 0,
+    "trade_leverage": 0
+   },
+   "entry": 100.0,
+   "sl": 100.0,
+   "ctx": "",
+   "balance": 1234567.0,
+   "lang": "en",
+   "line": ""
+  },
+  {
+   "user": {
+    "trade_risk_pct": 0,
+    "trade_leverage": 0
+   },
+   "entry": 100.0,
+   "sl": 100.0,
+   "ctx": "aligned",
+   "balance": null,
+   "lang": "ru",
+   "line": ""
+  },
+  {
+   "user": {
+    "trade_risk_pct": 0,
+    "trade_leverage": 0
+   },
+   "entry": 100.0,
+   "sl": 100.0,
+   "ctx": "aligned",
+   "balance": null,
+   "lang": "en",
+   "line": ""
+  },
+  {
+   "user": {
+    "trade_risk_pct": 0,
+    "trade_leverage": 0
+   },
+   "entry": 100.0,
+   "sl": 100.0,
+   "ctx": "with",
+   "balance": 0.0,
+   "lang": "ru",
+   "line": ""
+  },
+  {
+   "user": {
+    "trade_risk_pct": 0,
+    "trade_leverage": 0
+   },
+   "entry": 100.0,
+   "sl": 100.0,
+   "ctx": "with",
+   "balance": 0.0,
+   "lang": "en",
+   "line": ""
+  },
+  {
+   "user": {
+    "trade_risk_pct": 0,
+    "trade_leverage": 0
+   },
+   "entry": 100.0,
+   "sl": 100.0,
+   "ctx": "counter",
+   "balance": -5.0,
+   "lang": "ru",
+   "line": ""
+  },
+  {
+   "user": {
+    "trade_risk_pct": 0,
+    "trade_leverage": 0
+   },
+   "entry": 100.0,
+   "sl": 100.0,
+   "ctx": "counter",
+   "balance": -5.0,
+   "lang": "en",
+   "line": ""
+  },
+  {
+   "user": {
+    "trade_risk_pct": 0,
+    "trade_leverage": 0
+   },
+   "entry": 100.0,
+   "sl": 100.0,
+   "ctx": "strong_counter",
+   "balance": 87.5,
+   "lang": "ru",
+   "line": "⛔ <i>Автотрейд: сделка против сильного тренда BTC будет пропущена</i>"
+  },
+  {
+   "user": {
+    "trade_risk_pct": 0,
+    "trade_leverage": 0
+   },
+   "entry": 100.0,
+   "sl": 100.0,
+   "ctx": "strong_counter",
+   "balance": 87.5,
+   "lang": "en",
+   "line": "⛔ <i>Auto-trade: a trade against a strong BTC trend will be skipped</i>"
+  },
+  {
+   "user": {
+    "trade_risk_pct": 0,
+    "trade_leverage": 0
+   },
+   "entry": 100.0,
+   "sl": 100.0,
+   "ctx": "weird",
+   "balance": 2500.0,
+   "lang": "ru",
+   "line": ""
+  },
+  {
+   "user": {
+    "trade_risk_pct": 0,
+    "trade_leverage": 0
+   },
+   "entry": 100.0,
+   "sl": 100.0,
+   "ctx": "weird",
+   "balance": 2500.0,
+   "lang": "en",
+   "line": ""
+  },
+  {
+   "user": {
+    "trade_risk_pct": 0,
+    "trade_leverage": 0
+   },
+   "entry": 0.0,
+   "sl": 1.0,
+   "ctx": "",
+   "balance": null,
+   "lang": "ru",
+   "line": ""
+  },
+  {
+   "user": {
+    "trade_risk_pct": 0,
+    "trade_leverage": 0
+   },
+   "entry": 0.0,
+   "sl": 1.0,
+   "ctx": "",
+   "balance": null,
+   "lang": "en",
+   "line": ""
+  },
+  {
+   "user": {
+    "trade_risk_pct": 0,
+    "trade_leverage": 0
+   },
+   "entry": 0.0,
+   "sl": 1.0,
+   "ctx": "aligned",
+   "balance": 0.0,
+   "lang": "ru",
+   "line": ""
+  },
+  {
+   "user": {
+    "trade_risk_pct": 0,
+    "trade_leverage": 0
+   },
+   "entry": 0.0,
+   "sl": 1.0,
+   "ctx": "aligned",
+   "balance": 0.0,
+   "lang": "en",
+   "line": ""
+  },
+  {
+   "user": {
+    "trade_risk_pct": 0,
+    "trade_leverage": 0
+   },
+   "entry": 0.0,
+   "sl": 1.0,
+   "ctx": "with",
+   "balance": -5.0,
+   "lang": "ru",
+   "line": ""
+  },
+  {
+   "user": {
+    "trade_risk_pct": 0,
+    "trade_leverage": 0
+   },
+   "entry": 0.0,
+   "sl": 1.0,
+   "ctx": "with",
+   "balance": -5.0,
+   "lang": "en",
+   "line": ""
+  },
+  {
+   "user": {
+    "trade_risk_pct": 0,
+    "trade_leverage": 0
+   },
+   "entry": 0.0,
+   "sl": 1.0,
+   "ctx": "counter",
+   "balance": 87.5,
+   "lang": "ru",
+   "line": ""
+  },
+  {
+   "user": {
+    "trade_risk_pct": 0,
+    "trade_leverage": 0
+   },
+   "entry": 0.0,
+   "sl": 1.0,
+   "ctx": "counter",
+   "balance": 87.5,
+   "lang": "en",
+   "line": ""
+  },
+  {
+   "user": {
+    "trade_risk_pct": 0,
+    "trade_leverage": 0
+   },
+   "entry": 0.0,
+   "sl": 1.0,
+   "ctx": "strong_counter",
+   "balance": 2500.0,
+   "lang": "ru",
+   "line": "⛔ <i>Автотрейд: сделка против сильного тренда BTC будет пропущена</i>"
+  },
+  {
+   "user": {
+    "trade_risk_pct": 0,
+    "trade_leverage": 0
+   },
+   "entry": 0.0,
+   "sl": 1.0,
+   "ctx": "strong_counter",
+   "balance": 2500.0,
+   "lang": "en",
+   "line": "⛔ <i>Auto-trade: a trade against a strong BTC trend will be skipped</i>"
+  },
+  {
+   "user": {
+    "trade_risk_pct": 0,
+    "trade_leverage": 0
+   },
+   "entry": 0.0,
+   "sl": 1.0,
+   "ctx": "weird",
+   "balance": 1234567.0,
+   "lang": "ru",
+   "line": ""
+  },
+  {
+   "user": {
+    "trade_risk_pct": 0,
+    "trade_leverage": 0
+   },
+   "entry": 0.0,
+   "sl": 1.0,
+   "ctx": "weird",
+   "balance": 1234567.0,
+   "lang": "en",
+   "line": ""
+  },
+  {
+   "user": {
+    "trade_risk_pct": 0,
+    "trade_leverage": 0
+   },
+   "entry": 2.0,
+   "sl": 2.5,
+   "ctx": "",
+   "balance": 0.0,
+   "lang": "ru",
+   "line": "💼 Позиция ≈ <b>$40.0</b> · риск 1% = $10.0 · маржа $4.0 при 10x <i>(при депозите $1,000)</i>"
+  },
+  {
+   "user": {
+    "trade_risk_pct": 0,
+    "trade_leverage": 0
+   },
+   "entry": 2.0,
+   "sl": 2.5,
+   "ctx": "",
+   "balance": 0.0,
+   "lang": "en",
+   "line": "💼 Position ≈ <b>$40.0</b> · risk 1% = $10.0 · margin $4.0 at 10x <i>(on a $1,000 deposit)</i>"
+  },
+  {
+   "user": {
+    "trade_risk_pct": 0,
+    "trade_leverage": 0
+   },
+   "entry": 2.0,
+   "sl": 2.5,
+   "ctx": "aligned",
+   "balance": -5.0,
+   "lang": "ru",
+   "line": "💼 Позиция ≈ <b>$40.0</b> · риск 1% = $10.0 · маржа $4.0 при 10x <i>(при депозите $1,000)</i>"
+  },
+  {
+   "user": {
+    "trade_risk_pct": 0,
+    "trade_leverage": 0
+   },
+   "entry": 2.0,
+   "sl": 2.5,
+   "ctx": "aligned",
+   "balance": -5.0,
+   "lang": "en",
+   "line": "💼 Position ≈ <b>$40.0</b> · risk 1% = $10.0 · margin $4.0 at 10x <i>(on a $1,000 deposit)</i>"
+  },
+  {
+   "user": {
+    "trade_risk_pct": 0,
+    "trade_leverage": 0
+   },
+   "entry": 2.0,
+   "sl": 2.5,
+   "ctx": "with",
+   "balance": 87.5,
+   "lang": "ru",
+   "line": "💼 Позиция ≈ <b>$3.5</b> · риск 1% = $0.9 · маржа $0.3 при 10x <i>(баланс $87.5)</i>"
+  },
+  {
+   "user": {
+    "trade_risk_pct": 0,
+    "trade_leverage": 0
+   },
+   "entry": 2.0,
+   "sl": 2.5,
+   "ctx": "with",
+   "balance": 87.5,
+   "lang": "en",
+   "line": "💼 Position ≈ <b>$3.5</b> · risk 1% = $0.9 · margin $0.3 at 10x <i>(balance $87.5)</i>"
+  },
+  {
+   "user": {
+    "trade_risk_pct": 0,
+    "trade_leverage": 0
+   },
+   "entry": 2.0,
+   "sl": 2.5,
+   "ctx": "counter",
+   "balance": 2500.0,
+   "lang": "ru",
+   "line": "💼 Позиция ≈ <b>$50.0</b> · риск 0.5% (×0.5, против тренда) = $12.5 · маржа $5.0 при 10x <i>(баланс $2,500)</i>"
+  },
+  {
+   "user": {
+    "trade_risk_pct": 0,
+    "trade_leverage": 0
+   },
+   "entry": 2.0,
+   "sl": 2.5,
+   "ctx": "counter",
+   "balance": 2500.0,
+   "lang": "en",
+   "line": "💼 Position ≈ <b>$50.0</b> · risk 0.5% (×0.5, counter-trend) = $12.5 · margin $5.0 at 10x <i>(balance $2,500)</i>"
+  },
+  {
+   "user": {
+    "trade_risk_pct": 0,
+    "trade_leverage": 0
+   },
+   "entry": 2.0,
+   "sl": 2.5,
+   "ctx": "strong_counter",
+   "balance": 1234567.0,
+   "lang": "ru",
+   "line": "⛔ <i>Автотрейд: сделка против сильного тренда BTC будет пропущена</i>"
+  },
+  {
+   "user": {
+    "trade_risk_pct": 0,
+    "trade_leverage": 0
+   },
+   "entry": 2.0,
+   "sl": 2.5,
+   "ctx": "strong_counter",
+   "balance": 1234567.0,
+   "lang": "en",
+   "line": "⛔ <i>Auto-trade: a trade against a strong BTC trend will be skipped</i>"
+  },
+  {
+   "user": {
+    "trade_risk_pct": 0,
+    "trade_leverage": 0
+   },
+   "entry": 2.0,
+   "sl": 2.5,
+   "ctx": "weird",
+   "balance": null,
+   "lang": "ru",
+   "line": "💼 Позиция ≈ <b>$40.0</b> · риск 1% = $10.0 · маржа $4.0 при 10x <i>(при депозите $1,000)</i>"
+  },
+  {
+   "user": {
+    "trade_risk_pct": 0,
+    "trade_leverage": 0
+   },
+   "entry": 2.0,
+   "sl": 2.5,
+   "ctx": "weird",
+   "balance": null,
+   "lang": "en",
+   "line": "💼 Position ≈ <b>$40.0</b> · risk 1% = $10.0 · margin $4.0 at 10x <i>(on a $1,000 deposit)</i>"
+  },
+  {
+   "user": {
+    "trade_risk_pct": null,
+    "trade_leverage": null
+   },
+   "entry": 100.0,
+   "sl": 98.0,
+   "ctx": "",
+   "balance": 87.5,
+   "lang": "ru",
+   "line": "💼 Позиция ≈ <b>$43.8</b> · риск 1% = $0.9 · маржа $4.4 при 10x <i>(баланс $87.5)</i>"
+  },
+  {
+   "user": {
+    "trade_risk_pct": null,
+    "trade_leverage": null
+   },
+   "entry": 100.0,
+   "sl": 98.0,
+   "ctx": "",
+   "balance": 87.5,
+   "lang": "en",
+   "line": "💼 Position ≈ <b>$43.8</b> · risk 1% = $0.9 · margin $4.4 at 10x <i>(balance $87.5)</i>"
+  },
+  {
+   "user": {
+    "trade_risk_pct": null,
+    "trade_leverage": null
+   },
+   "entry": 100.0,
+   "sl": 98.0,
+   "ctx": "aligned",
+   "balance": 2500.0,
+   "lang": "ru",
+   "line": "💼 Позиция ≈ <b>$1,250</b> · риск 1% = $25.0 · маржа $125 при 10x <i>(баланс $2,500)</i>"
+  },
+  {
+   "user": {
+    "trade_risk_pct": null,
+    "trade_leverage": null
+   },
+   "entry": 100.0,
+   "sl": 98.0,
+   "ctx": "aligned",
+   "balance": 2500.0,
+   "lang": "en",
+   "line": "💼 Position ≈ <b>$1,250</b> · risk 1% = $25.0 · margin $125 at 10x <i>(balance $2,500)</i>"
+  },
+  {
+   "user": {
+    "trade_risk_pct": null,
+    "trade_leverage": null
+   },
+   "entry": 100.0,
+   "sl": 98.0,
+   "ctx": "with",
+   "balance": 1234567.0,
+   "lang": "ru",
+   "line": "💼 Позиция ≈ <b>$617,284</b> · риск 1% = $12,346 · маржа $61,728 при 10x <i>(баланс $1,234,567)</i>"
+  },
+  {
+   "user": {
+    "trade_risk_pct": null,
+    "trade_leverage": null
+   },
+   "entry": 100.0,
+   "sl": 98.0,
+   "ctx": "with",
+   "balance": 1234567.0,
+   "lang": "en",
+   "line": "💼 Position ≈ <b>$617,284</b> · risk 1% = $12,346 · margin $61,728 at 10x <i>(balance $1,234,567)</i>"
+  },
+  {
+   "user": {
+    "trade_risk_pct": null,
+    "trade_leverage": null
+   },
+   "entry": 100.0,
+   "sl": 98.0,
+   "ctx": "counter",
+   "balance": null,
+   "lang": "ru",
+   "line": "💼 Позиция ≈ <b>$250</b> · риск 0.5% (×0.5, против тренда) = $5.0 · маржа $25.0 при 10x <i>(при депозите $1,000)</i>"
+  },
+  {
+   "user": {
+    "trade_risk_pct": null,
+    "trade_leverage": null
+   },
+   "entry": 100.0,
+   "sl": 98.0,
+   "ctx": "counter",
+   "balance": null,
+   "lang": "en",
+   "line": "💼 Position ≈ <b>$250</b> · risk 0.5% (×0.5, counter-trend) = $5.0 · margin $25.0 at 10x <i>(on a $1,000 deposit)</i>"
+  },
+  {
+   "user": {
+    "trade_risk_pct": null,
+    "trade_leverage": null
+   },
+   "entry": 100.0,
+   "sl": 98.0,
+   "ctx": "strong_counter",
+   "balance": 0.0,
+   "lang": "ru",
+   "line": "⛔ <i>Автотрейд: сделка против сильного тренда BTC будет пропущена</i>"
+  },
+  {
+   "user": {
+    "trade_risk_pct": null,
+    "trade_leverage": null
+   },
+   "entry": 100.0,
+   "sl": 98.0,
+   "ctx": "strong_counter",
+   "balance": 0.0,
+   "lang": "en",
+   "line": "⛔ <i>Auto-trade: a trade against a strong BTC trend will be skipped</i>"
+  },
+  {
+   "user": {
+    "trade_risk_pct": null,
+    "trade_leverage": null
+   },
+   "entry": 100.0,
+   "sl": 98.0,
+   "ctx": "weird",
+   "balance": -5.0,
+   "lang": "ru",
+   "line": "💼 Позиция ≈ <b>$500</b> · риск 1% = $10.0 · маржа $50.0 при 10x <i>(при депозите $1,000)</i>"
+  },
+  {
+   "user": {
+    "trade_risk_pct": null,
+    "trade_leverage": null
+   },
+   "entry": 100.0,
+   "sl": 98.0,
+   "ctx": "weird",
+   "balance": -5.0,
+   "lang": "en",
+   "line": "💼 Position ≈ <b>$500</b> · risk 1% = $10.0 · margin $50.0 at 10x <i>(on a $1,000 deposit)</i>"
+  },
+  {
+   "user": {
+    "trade_risk_pct": null,
+    "trade_leverage": null
+   },
+   "entry": 64123.5,
+   "sl": 63000.0,
+   "ctx": "",
+   "balance": 2500.0,
+   "lang": "ru",
+   "line": "💼 Позиция ≈ <b>$1,427</b> · риск 1% = $25.0 · маржа $143 при 10x <i>(баланс $2,500)</i>"
+  },
+  {
+   "user": {
+    "trade_risk_pct": null,
+    "trade_leverage": null
+   },
+   "entry": 64123.5,
+   "sl": 63000.0,
+   "ctx": "",
+   "balance": 2500.0,
+   "lang": "en",
+   "line": "💼 Position ≈ <b>$1,427</b> · risk 1% = $25.0 · margin $143 at 10x <i>(balance $2,500)</i>"
+  },
+  {
+   "user": {
+    "trade_risk_pct": null,
+    "trade_leverage": null
+   },
+   "entry": 64123.5,
+   "sl": 63000.0,
+   "ctx": "aligned",
+   "balance": 1234567.0,
+   "lang": "ru",
+   "line": "💼 Позиция ≈ <b>$704,626</b> · риск 1% = $12,346 · маржа $70,463 при 10x <i>(баланс $1,234,567)</i>"
+  },
+  {
+   "user": {
+    "trade_risk_pct": null,
+    "trade_leverage": null
+   },
+   "entry": 64123.5,
+   "sl": 63000.0,
+   "ctx": "aligned",
+   "balance": 1234567.0,
+   "lang": "en",
+   "line": "💼 Position ≈ <b>$704,626</b> · risk 1% = $12,346 · margin $70,463 at 10x <i>(balance $1,234,567)</i>"
+  },
+  {
+   "user": {
+    "trade_risk_pct": null,
+    "trade_leverage": null
+   },
+   "entry": 64123.5,
+   "sl": 63000.0,
+   "ctx": "with",
+   "balance": null,
+   "lang": "ru",
+   "line": "💼 Позиция ≈ <b>$571</b> · риск 1% = $10.0 · маржа $57.1 при 10x <i>(при депозите $1,000)</i>"
+  },
+  {
+   "user": {
+    "trade_risk_pct": null,
+    "trade_leverage": null
+   },
+   "entry": 64123.5,
+   "sl": 63000.0,
+   "ctx": "with",
+   "balance": null,
+   "lang": "en",
+   "line": "💼 Position ≈ <b>$571</b> · risk 1% = $10.0 · margin $57.1 at 10x <i>(on a $1,000 deposit)</i>"
+  },
+  {
+   "user": {
+    "trade_risk_pct": null,
+    "trade_leverage": null
+   },
+   "entry": 64123.5,
+   "sl": 63000.0,
+   "ctx": "counter",
+   "balance": 0.0,
+   "lang": "ru",
+   "line": "💼 Позиция ≈ <b>$285</b> · риск 0.5% (×0.5, против тренда) = $5.0 · маржа $28.5 при 10x <i>(при депозите $1,000)</i>"
+  },
+  {
+   "user": {
+    "trade_risk_pct": null,
+    "trade_leverage": null
+   },
+   "entry": 64123.5,
+   "sl": 63000.0,
+   "ctx": "counter",
+   "balance": 0.0,
+   "lang": "en",
+   "line": "💼 Position ≈ <b>$285</b> · risk 0.5% (×0.5, counter-trend) = $5.0 · margin $28.5 at 10x <i>(on a $1,000 deposit)</i>"
+  },
+  {
+   "user": {
+    "trade_risk_pct": null,
+    "trade_leverage": null
+   },
+   "entry": 64123.5,
+   "sl": 63000.0,
+   "ctx": "strong_counter",
+   "balance": -5.0,
+   "lang": "ru",
+   "line": "⛔ <i>Автотрейд: сделка против сильного тренда BTC будет пропущена</i>"
+  },
+  {
+   "user": {
+    "trade_risk_pct": null,
+    "trade_leverage": null
+   },
+   "entry": 64123.5,
+   "sl": 63000.0,
+   "ctx": "strong_counter",
+   "balance": -5.0,
+   "lang": "en",
+   "line": "⛔ <i>Auto-trade: a trade against a strong BTC trend will be skipped</i>"
+  },
+  {
+   "user": {
+    "trade_risk_pct": null,
+    "trade_leverage": null
+   },
+   "entry": 64123.5,
+   "sl": 63000.0,
+   "ctx": "weird",
+   "balance": 87.5,
+   "lang": "ru",
+   "line": "💼 Позиция ≈ <b>$49.9</b> · риск 1% = $0.9 · маржа $5.0 при 10x <i>(баланс $87.5)</i>"
+  },
+  {
+   "user": {
+    "trade_risk_pct": null,
+    "trade_leverage": null
+   },
+   "entry": 64123.5,
+   "sl": 63000.0,
+   "ctx": "weird",
+   "balance": 87.5,
+   "lang": "en",
+   "line": "💼 Position ≈ <b>$49.9</b> · risk 1% = $0.9 · margin $5.0 at 10x <i>(balance $87.5)</i>"
+  },
+  {
+   "user": {
+    "trade_risk_pct": null,
+    "trade_leverage": null
+   },
+   "entry": 0.0001234,
+   "sl": 0.00012,
+   "ctx": "",
+   "balance": 1234567.0,
+   "lang": "ru",
+   "line": "💼 Позиция ≈ <b>$448,075</b> · риск 1% = $12,346 · маржа $44,808 при 10x <i>(баланс $1,234,567)</i>"
+  },
+  {
+   "user": {
+    "trade_risk_pct": null,
+    "trade_leverage": null
+   },
+   "entry": 0.0001234,
+   "sl": 0.00012,
+   "ctx": "",
+   "balance": 1234567.0,
+   "lang": "en",
+   "line": "💼 Position ≈ <b>$448,075</b> · risk 1% = $12,346 · margin $44,808 at 10x <i>(balance $1,234,567)</i>"
+  },
+  {
+   "user": {
+    "trade_risk_pct": null,
+    "trade_leverage": null
+   },
+   "entry": 0.0001234,
+   "sl": 0.00012,
+   "ctx": "aligned",
+   "balance": null,
+   "lang": "ru",
+   "line": "💼 Позиция ≈ <b>$363</b> · риск 1% = $10.0 · маржа $36.3 при 10x <i>(при депозите $1,000)</i>"
+  },
+  {
+   "user": {
+    "trade_risk_pct": null,
+    "trade_leverage": null
+   },
+   "entry": 0.0001234,
+   "sl": 0.00012,
+   "ctx": "aligned",
+   "balance": null,
+   "lang": "en",
+   "line": "💼 Position ≈ <b>$363</b> · risk 1% = $10.0 · margin $36.3 at 10x <i>(on a $1,000 deposit)</i>"
+  },
+  {
+   "user": {
+    "trade_risk_pct": null,
+    "trade_leverage": null
+   },
+   "entry": 0.0001234,
+   "sl": 0.00012,
+   "ctx": "with",
+   "balance": 0.0,
+   "lang": "ru",
+   "line": "💼 Позиция ≈ <b>$363</b> · риск 1% = $10.0 · маржа $36.3 при 10x <i>(при депозите $1,000)</i>"
+  },
+  {
+   "user": {
+    "trade_risk_pct": null,
+    "trade_leverage": null
+   },
+   "entry": 0.0001234,
+   "sl": 0.00012,
+   "ctx": "with",
+   "balance": 0.0,
+   "lang": "en",
+   "line": "💼 Position ≈ <b>$363</b> · risk 1% = $10.0 · margin $36.3 at 10x <i>(on a $1,000 deposit)</i>"
+  },
+  {
+   "user": {
+    "trade_risk_pct": null,
+    "trade_leverage": null
+   },
+   "entry": 0.0001234,
+   "sl": 0.00012,
+   "ctx": "counter",
+   "balance": -5.0,
+   "lang": "ru",
+   "line": "💼 Позиция ≈ <b>$181</b> · риск 0.5% (×0.5, против тренда) = $5.0 · маржа $18.1 при 10x <i>(при депозите $1,000)</i>"
+  },
+  {
+   "user": {
+    "trade_risk_pct": null,
+    "trade_leverage": null
+   },
+   "entry": 0.0001234,
+   "sl": 0.00012,
+   "ctx": "counter",
+   "balance": -5.0,
+   "lang": "en",
+   "line": "💼 Position ≈ <b>$181</b> · risk 0.5% (×0.5, counter-trend) = $5.0 · margin $18.1 at 10x <i>(on a $1,000 deposit)</i>"
+  },
+  {
+   "user": {
+    "trade_risk_pct": null,
+    "trade_leverage": null
+   },
+   "entry": 0.0001234,
+   "sl": 0.00012,
+   "ctx": "strong_counter",
+   "balance": 87.5,
+   "lang": "ru",
+   "line": "⛔ <i>Автотрейд: сделка против сильного тренда BTC будет пропущена</i>"
+  },
+  {
+   "user": {
+    "trade_risk_pct": null,
+    "trade_leverage": null
+   },
+   "entry": 0.0001234,
+   "sl": 0.00012,
+   "ctx": "strong_counter",
+   "balance": 87.5,
+   "lang": "en",
+   "line": "⛔ <i>Auto-trade: a trade against a strong BTC trend will be skipped</i>"
+  },
+  {
+   "user": {
+    "trade_risk_pct": null,
+    "trade_leverage": null
+   },
+   "entry": 0.0001234,
+   "sl": 0.00012,
+   "ctx": "weird",
+   "balance": 2500.0,
+   "lang": "ru",
+   "line": "💼 Позиция ≈ <b>$907</b> · риск 1% = $25.0 · маржа $90.7 при 10x <i>(баланс $2,500)</i>"
+  },
+  {
+   "user": {
+    "trade_risk_pct": null,
+    "trade_leverage": null
+   },
+   "entry": 0.0001234,
+   "sl": 0.00012,
+   "ctx": "weird",
+   "balance": 2500.0,
+   "lang": "en",
+   "line": "💼 Position ≈ <b>$907</b> · risk 1% = $25.0 · margin $90.7 at 10x <i>(balance $2,500)</i>"
+  },
+  {
+   "user": {
+    "trade_risk_pct": null,
+    "trade_leverage": null
+   },
+   "entry": 100.0,
+   "sl": 100.0,
+   "ctx": "",
+   "balance": null,
+   "lang": "ru",
+   "line": ""
+  },
+  {
+   "user": {
+    "trade_risk_pct": null,
+    "trade_leverage": null
+   },
+   "entry": 100.0,
+   "sl": 100.0,
+   "ctx": "",
+   "balance": null,
+   "lang": "en",
+   "line": ""
+  },
+  {
+   "user": {
+    "trade_risk_pct": null,
+    "trade_leverage": null
+   },
+   "entry": 100.0,
+   "sl": 100.0,
+   "ctx": "aligned",
+   "balance": 0.0,
+   "lang": "ru",
+   "line": ""
+  },
+  {
+   "user": {
+    "trade_risk_pct": null,
+    "trade_leverage": null
+   },
+   "entry": 100.0,
+   "sl": 100.0,
+   "ctx": "aligned",
+   "balance": 0.0,
+   "lang": "en",
+   "line": ""
+  },
+  {
+   "user": {
+    "trade_risk_pct": null,
+    "trade_leverage": null
+   },
+   "entry": 100.0,
+   "sl": 100.0,
+   "ctx": "with",
+   "balance": -5.0,
+   "lang": "ru",
+   "line": ""
+  },
+  {
+   "user": {
+    "trade_risk_pct": null,
+    "trade_leverage": null
+   },
+   "entry": 100.0,
+   "sl": 100.0,
+   "ctx": "with",
+   "balance": -5.0,
+   "lang": "en",
+   "line": ""
+  },
+  {
+   "user": {
+    "trade_risk_pct": null,
+    "trade_leverage": null
+   },
+   "entry": 100.0,
+   "sl": 100.0,
+   "ctx": "counter",
+   "balance": 87.5,
+   "lang": "ru",
+   "line": ""
+  },
+  {
+   "user": {
+    "trade_risk_pct": null,
+    "trade_leverage": null
+   },
+   "entry": 100.0,
+   "sl": 100.0,
+   "ctx": "counter",
+   "balance": 87.5,
+   "lang": "en",
+   "line": ""
+  },
+  {
+   "user": {
+    "trade_risk_pct": null,
+    "trade_leverage": null
+   },
+   "entry": 100.0,
+   "sl": 100.0,
+   "ctx": "strong_counter",
+   "balance": 2500.0,
+   "lang": "ru",
+   "line": "⛔ <i>Автотрейд: сделка против сильного тренда BTC будет пропущена</i>"
+  },
+  {
+   "user": {
+    "trade_risk_pct": null,
+    "trade_leverage": null
+   },
+   "entry": 100.0,
+   "sl": 100.0,
+   "ctx": "strong_counter",
+   "balance": 2500.0,
+   "lang": "en",
+   "line": "⛔ <i>Auto-trade: a trade against a strong BTC trend will be skipped</i>"
+  },
+  {
+   "user": {
+    "trade_risk_pct": null,
+    "trade_leverage": null
+   },
+   "entry": 100.0,
+   "sl": 100.0,
+   "ctx": "weird",
+   "balance": 1234567.0,
+   "lang": "ru",
+   "line": ""
+  },
+  {
+   "user": {
+    "trade_risk_pct": null,
+    "trade_leverage": null
+   },
+   "entry": 100.0,
+   "sl": 100.0,
+   "ctx": "weird",
+   "balance": 1234567.0,
+   "lang": "en",
+   "line": ""
+  },
+  {
+   "user": {
+    "trade_risk_pct": null,
+    "trade_leverage": null
+   },
+   "entry": 0.0,
+   "sl": 1.0,
+   "ctx": "",
+   "balance": 0.0,
+   "lang": "ru",
+   "line": ""
+  },
+  {
+   "user": {
+    "trade_risk_pct": null,
+    "trade_leverage": null
+   },
+   "entry": 0.0,
+   "sl": 1.0,
+   "ctx": "",
+   "balance": 0.0,
+   "lang": "en",
+   "line": ""
+  },
+  {
+   "user": {
+    "trade_risk_pct": null,
+    "trade_leverage": null
+   },
+   "entry": 0.0,
+   "sl": 1.0,
+   "ctx": "aligned",
+   "balance": -5.0,
+   "lang": "ru",
+   "line": ""
+  },
+  {
+   "user": {
+    "trade_risk_pct": null,
+    "trade_leverage": null
+   },
+   "entry": 0.0,
+   "sl": 1.0,
+   "ctx": "aligned",
+   "balance": -5.0,
+   "lang": "en",
+   "line": ""
+  },
+  {
+   "user": {
+    "trade_risk_pct": null,
+    "trade_leverage": null
+   },
+   "entry": 0.0,
+   "sl": 1.0,
+   "ctx": "with",
+   "balance": 87.5,
+   "lang": "ru",
+   "line": ""
+  },
+  {
+   "user": {
+    "trade_risk_pct": null,
+    "trade_leverage": null
+   },
+   "entry": 0.0,
+   "sl": 1.0,
+   "ctx": "with",
+   "balance": 87.5,
+   "lang": "en",
+   "line": ""
+  },
+  {
+   "user": {
+    "trade_risk_pct": null,
+    "trade_leverage": null
+   },
+   "entry": 0.0,
+   "sl": 1.0,
+   "ctx": "counter",
+   "balance": 2500.0,
+   "lang": "ru",
+   "line": ""
+  },
+  {
+   "user": {
+    "trade_risk_pct": null,
+    "trade_leverage": null
+   },
+   "entry": 0.0,
+   "sl": 1.0,
+   "ctx": "counter",
+   "balance": 2500.0,
+   "lang": "en",
+   "line": ""
+  },
+  {
+   "user": {
+    "trade_risk_pct": null,
+    "trade_leverage": null
+   },
+   "entry": 0.0,
+   "sl": 1.0,
+   "ctx": "strong_counter",
+   "balance": 1234567.0,
+   "lang": "ru",
+   "line": "⛔ <i>Автотрейд: сделка против сильного тренда BTC будет пропущена</i>"
+  },
+  {
+   "user": {
+    "trade_risk_pct": null,
+    "trade_leverage": null
+   },
+   "entry": 0.0,
+   "sl": 1.0,
+   "ctx": "strong_counter",
+   "balance": 1234567.0,
+   "lang": "en",
+   "line": "⛔ <i>Auto-trade: a trade against a strong BTC trend will be skipped</i>"
+  },
+  {
+   "user": {
+    "trade_risk_pct": null,
+    "trade_leverage": null
+   },
+   "entry": 0.0,
+   "sl": 1.0,
+   "ctx": "weird",
+   "balance": null,
+   "lang": "ru",
+   "line": ""
+  },
+  {
+   "user": {
+    "trade_risk_pct": null,
+    "trade_leverage": null
+   },
+   "entry": 0.0,
+   "sl": 1.0,
+   "ctx": "weird",
+   "balance": null,
+   "lang": "en",
+   "line": ""
+  },
+  {
+   "user": {
+    "trade_risk_pct": null,
+    "trade_leverage": null
+   },
+   "entry": 2.0,
+   "sl": 2.5,
+   "ctx": "",
+   "balance": -5.0,
+   "lang": "ru",
+   "line": "💼 Позиция ≈ <b>$40.0</b> · риск 1% = $10.0 · маржа $4.0 при 10x <i>(при депозите $1,000)</i>"
+  },
+  {
+   "user": {
+    "trade_risk_pct": null,
+    "trade_leverage": null
+   },
+   "entry": 2.0,
+   "sl": 2.5,
+   "ctx": "",
+   "balance": -5.0,
+   "lang": "en",
+   "line": "💼 Position ≈ <b>$40.0</b> · risk 1% = $10.0 · margin $4.0 at 10x <i>(on a $1,000 deposit)</i>"
+  },
+  {
+   "user": {
+    "trade_risk_pct": null,
+    "trade_leverage": null
+   },
+   "entry": 2.0,
+   "sl": 2.5,
+   "ctx": "aligned",
+   "balance": 87.5,
+   "lang": "ru",
+   "line": "💼 Позиция ≈ <b>$3.5</b> · риск 1% = $0.9 · маржа $0.3 при 10x <i>(баланс $87.5)</i>"
+  },
+  {
+   "user": {
+    "trade_risk_pct": null,
+    "trade_leverage": null
+   },
+   "entry": 2.0,
+   "sl": 2.5,
+   "ctx": "aligned",
+   "balance": 87.5,
+   "lang": "en",
+   "line": "💼 Position ≈ <b>$3.5</b> · risk 1% = $0.9 · margin $0.3 at 10x <i>(balance $87.5)</i>"
+  },
+  {
+   "user": {
+    "trade_risk_pct": null,
+    "trade_leverage": null
+   },
+   "entry": 2.0,
+   "sl": 2.5,
+   "ctx": "with",
+   "balance": 2500.0,
+   "lang": "ru",
+   "line": "💼 Позиция ≈ <b>$100</b> · риск 1% = $25.0 · маржа $10.0 при 10x <i>(баланс $2,500)</i>"
+  },
+  {
+   "user": {
+    "trade_risk_pct": null,
+    "trade_leverage": null
+   },
+   "entry": 2.0,
+   "sl": 2.5,
+   "ctx": "with",
+   "balance": 2500.0,
+   "lang": "en",
+   "line": "💼 Position ≈ <b>$100</b> · risk 1% = $25.0 · margin $10.0 at 10x <i>(balance $2,500)</i>"
+  },
+  {
+   "user": {
+    "trade_risk_pct": null,
+    "trade_leverage": null
+   },
+   "entry": 2.0,
+   "sl": 2.5,
+   "ctx": "counter",
+   "balance": 1234567.0,
+   "lang": "ru",
+   "line": "💼 Позиция ≈ <b>$24,691</b> · риск 0.5% (×0.5, против тренда) = $6,173 · маржа $2,469 при 10x <i>(баланс $1,234,567)</i>"
+  },
+  {
+   "user": {
+    "trade_risk_pct": null,
+    "trade_leverage": null
+   },
+   "entry": 2.0,
+   "sl": 2.5,
+   "ctx": "counter",
+   "balance": 1234567.0,
+   "lang": "en",
+   "line": "💼 Position ≈ <b>$24,691</b> · risk 0.5% (×0.5, counter-trend) = $6,173 · margin $2,469 at 10x <i>(balance $1,234,567)</i>"
+  },
+  {
+   "user": {
+    "trade_risk_pct": null,
+    "trade_leverage": null
+   },
+   "entry": 2.0,
+   "sl": 2.5,
+   "ctx": "strong_counter",
+   "balance": null,
+   "lang": "ru",
+   "line": "⛔ <i>Автотрейд: сделка против сильного тренда BTC будет пропущена</i>"
+  },
+  {
+   "user": {
+    "trade_risk_pct": null,
+    "trade_leverage": null
+   },
+   "entry": 2.0,
+   "sl": 2.5,
+   "ctx": "strong_counter",
+   "balance": null,
+   "lang": "en",
+   "line": "⛔ <i>Auto-trade: a trade against a strong BTC trend will be skipped</i>"
+  },
+  {
+   "user": {
+    "trade_risk_pct": null,
+    "trade_leverage": null
+   },
+   "entry": 2.0,
+   "sl": 2.5,
+   "ctx": "weird",
+   "balance": 0.0,
+   "lang": "ru",
+   "line": "💼 Позиция ≈ <b>$40.0</b> · риск 1% = $10.0 · маржа $4.0 при 10x <i>(при депозите $1,000)</i>"
+  },
+  {
+   "user": {
+    "trade_risk_pct": null,
+    "trade_leverage": null
+   },
+   "entry": 2.0,
+   "sl": 2.5,
+   "ctx": "weird",
+   "balance": 0.0,
+   "lang": "en",
+   "line": "💼 Position ≈ <b>$40.0</b> · risk 1% = $10.0 · margin $4.0 at 10x <i>(on a $1,000 deposit)</i>"
+  },
+  {
+   "user": {},
+   "entry": 100.0,
+   "sl": 98.0,
+   "ctx": "",
+   "balance": 2500.0,
+   "lang": "ru",
+   "line": "💼 Позиция ≈ <b>$1,250</b> · риск 1% = $25.0 · маржа $125 при 10x <i>(баланс $2,500)</i>"
+  },
+  {
+   "user": {},
+   "entry": 100.0,
+   "sl": 98.0,
+   "ctx": "",
+   "balance": 2500.0,
+   "lang": "en",
+   "line": "💼 Position ≈ <b>$1,250</b> · risk 1% = $25.0 · margin $125 at 10x <i>(balance $2,500)</i>"
+  },
+  {
+   "user": {},
+   "entry": 100.0,
+   "sl": 98.0,
+   "ctx": "aligned",
+   "balance": 1234567.0,
+   "lang": "ru",
+   "line": "💼 Позиция ≈ <b>$617,284</b> · риск 1% = $12,346 · маржа $61,728 при 10x <i>(баланс $1,234,567)</i>"
+  },
+  {
+   "user": {},
+   "entry": 100.0,
+   "sl": 98.0,
+   "ctx": "aligned",
+   "balance": 1234567.0,
+   "lang": "en",
+   "line": "💼 Position ≈ <b>$617,284</b> · risk 1% = $12,346 · margin $61,728 at 10x <i>(balance $1,234,567)</i>"
+  },
+  {
+   "user": {},
+   "entry": 100.0,
+   "sl": 98.0,
+   "ctx": "with",
+   "balance": null,
+   "lang": "ru",
+   "line": "💼 Позиция ≈ <b>$500</b> · риск 1% = $10.0 · маржа $50.0 при 10x <i>(при депозите $1,000)</i>"
+  },
+  {
+   "user": {},
+   "entry": 100.0,
+   "sl": 98.0,
+   "ctx": "with",
+   "balance": null,
+   "lang": "en",
+   "line": "💼 Position ≈ <b>$500</b> · risk 1% = $10.0 · margin $50.0 at 10x <i>(on a $1,000 deposit)</i>"
+  },
+  {
+   "user": {},
+   "entry": 100.0,
+   "sl": 98.0,
+   "ctx": "counter",
+   "balance": 0.0,
+   "lang": "ru",
+   "line": "💼 Позиция ≈ <b>$250</b> · риск 0.5% (×0.5, против тренда) = $5.0 · маржа $25.0 при 10x <i>(при депозите $1,000)</i>"
+  },
+  {
+   "user": {},
+   "entry": 100.0,
+   "sl": 98.0,
+   "ctx": "counter",
+   "balance": 0.0,
+   "lang": "en",
+   "line": "💼 Position ≈ <b>$250</b> · risk 0.5% (×0.5, counter-trend) = $5.0 · margin $25.0 at 10x <i>(on a $1,000 deposit)</i>"
+  },
+  {
+   "user": {},
+   "entry": 100.0,
+   "sl": 98.0,
+   "ctx": "strong_counter",
+   "balance": -5.0,
+   "lang": "ru",
+   "line": "⛔ <i>Автотрейд: сделка против сильного тренда BTC будет пропущена</i>"
+  },
+  {
+   "user": {},
+   "entry": 100.0,
+   "sl": 98.0,
+   "ctx": "strong_counter",
+   "balance": -5.0,
+   "lang": "en",
+   "line": "⛔ <i>Auto-trade: a trade against a strong BTC trend will be skipped</i>"
+  },
+  {
+   "user": {},
+   "entry": 100.0,
+   "sl": 98.0,
+   "ctx": "weird",
+   "balance": 87.5,
+   "lang": "ru",
+   "line": "💼 Позиция ≈ <b>$43.8</b> · риск 1% = $0.9 · маржа $4.4 при 10x <i>(баланс $87.5)</i>"
+  },
+  {
+   "user": {},
+   "entry": 100.0,
+   "sl": 98.0,
+   "ctx": "weird",
+   "balance": 87.5,
+   "lang": "en",
+   "line": "💼 Position ≈ <b>$43.8</b> · risk 1% = $0.9 · margin $4.4 at 10x <i>(balance $87.5)</i>"
+  },
+  {
+   "user": {},
+   "entry": 64123.5,
+   "sl": 63000.0,
+   "ctx": "",
+   "balance": 1234567.0,
+   "lang": "ru",
+   "line": "💼 Позиция ≈ <b>$704,626</b> · риск 1% = $12,346 · маржа $70,463 при 10x <i>(баланс $1,234,567)</i>"
+  },
+  {
+   "user": {},
+   "entry": 64123.5,
+   "sl": 63000.0,
+   "ctx": "",
+   "balance": 1234567.0,
+   "lang": "en",
+   "line": "💼 Position ≈ <b>$704,626</b> · risk 1% = $12,346 · margin $70,463 at 10x <i>(balance $1,234,567)</i>"
+  },
+  {
+   "user": {},
+   "entry": 64123.5,
+   "sl": 63000.0,
+   "ctx": "aligned",
+   "balance": null,
+   "lang": "ru",
+   "line": "💼 Позиция ≈ <b>$571</b> · риск 1% = $10.0 · маржа $57.1 при 10x <i>(при депозите $1,000)</i>"
+  },
+  {
+   "user": {},
+   "entry": 64123.5,
+   "sl": 63000.0,
+   "ctx": "aligned",
+   "balance": null,
+   "lang": "en",
+   "line": "💼 Position ≈ <b>$571</b> · risk 1% = $10.0 · margin $57.1 at 10x <i>(on a $1,000 deposit)</i>"
+  },
+  {
+   "user": {},
+   "entry": 64123.5,
+   "sl": 63000.0,
+   "ctx": "with",
+   "balance": 0.0,
+   "lang": "ru",
+   "line": "💼 Позиция ≈ <b>$571</b> · риск 1% = $10.0 · маржа $57.1 при 10x <i>(при депозите $1,000)</i>"
+  },
+  {
+   "user": {},
+   "entry": 64123.5,
+   "sl": 63000.0,
+   "ctx": "with",
+   "balance": 0.0,
+   "lang": "en",
+   "line": "💼 Position ≈ <b>$571</b> · risk 1% = $10.0 · margin $57.1 at 10x <i>(on a $1,000 deposit)</i>"
+  },
+  {
+   "user": {},
+   "entry": 64123.5,
+   "sl": 63000.0,
+   "ctx": "counter",
+   "balance": -5.0,
+   "lang": "ru",
+   "line": "💼 Позиция ≈ <b>$285</b> · риск 0.5% (×0.5, против тренда) = $5.0 · маржа $28.5 при 10x <i>(при депозите $1,000)</i>"
+  },
+  {
+   "user": {},
+   "entry": 64123.5,
+   "sl": 63000.0,
+   "ctx": "counter",
+   "balance": -5.0,
+   "lang": "en",
+   "line": "💼 Position ≈ <b>$285</b> · risk 0.5% (×0.5, counter-trend) = $5.0 · margin $28.5 at 10x <i>(on a $1,000 deposit)</i>"
+  },
+  {
+   "user": {},
+   "entry": 64123.5,
+   "sl": 63000.0,
+   "ctx": "strong_counter",
+   "balance": 87.5,
+   "lang": "ru",
+   "line": "⛔ <i>Автотрейд: сделка против сильного тренда BTC будет пропущена</i>"
+  },
+  {
+   "user": {},
+   "entry": 64123.5,
+   "sl": 63000.0,
+   "ctx": "strong_counter",
+   "balance": 87.5,
+   "lang": "en",
+   "line": "⛔ <i>Auto-trade: a trade against a strong BTC trend will be skipped</i>"
+  },
+  {
+   "user": {},
+   "entry": 64123.5,
+   "sl": 63000.0,
+   "ctx": "weird",
+   "balance": 2500.0,
+   "lang": "ru",
+   "line": "💼 Позиция ≈ <b>$1,427</b> · риск 1% = $25.0 · маржа $143 при 10x <i>(баланс $2,500)</i>"
+  },
+  {
+   "user": {},
+   "entry": 64123.5,
+   "sl": 63000.0,
+   "ctx": "weird",
+   "balance": 2500.0,
+   "lang": "en",
+   "line": "💼 Position ≈ <b>$1,427</b> · risk 1% = $25.0 · margin $143 at 10x <i>(balance $2,500)</i>"
+  },
+  {
+   "user": {},
+   "entry": 0.0001234,
+   "sl": 0.00012,
+   "ctx": "",
+   "balance": null,
+   "lang": "ru",
+   "line": "💼 Позиция ≈ <b>$363</b> · риск 1% = $10.0 · маржа $36.3 при 10x <i>(при депозите $1,000)</i>"
+  },
+  {
+   "user": {},
+   "entry": 0.0001234,
+   "sl": 0.00012,
+   "ctx": "",
+   "balance": null,
+   "lang": "en",
+   "line": "💼 Position ≈ <b>$363</b> · risk 1% = $10.0 · margin $36.3 at 10x <i>(on a $1,000 deposit)</i>"
+  },
+  {
+   "user": {},
+   "entry": 0.0001234,
+   "sl": 0.00012,
+   "ctx": "aligned",
+   "balance": 0.0,
+   "lang": "ru",
+   "line": "💼 Позиция ≈ <b>$363</b> · риск 1% = $10.0 · маржа $36.3 при 10x <i>(при депозите $1,000)</i>"
+  },
+  {
+   "user": {},
+   "entry": 0.0001234,
+   "sl": 0.00012,
+   "ctx": "aligned",
+   "balance": 0.0,
+   "lang": "en",
+   "line": "💼 Position ≈ <b>$363</b> · risk 1% = $10.0 · margin $36.3 at 10x <i>(on a $1,000 deposit)</i>"
+  },
+  {
+   "user": {},
+   "entry": 0.0001234,
+   "sl": 0.00012,
+   "ctx": "with",
+   "balance": -5.0,
+   "lang": "ru",
+   "line": "💼 Позиция ≈ <b>$363</b> · риск 1% = $10.0 · маржа $36.3 при 10x <i>(при депозите $1,000)</i>"
+  },
+  {
+   "user": {},
+   "entry": 0.0001234,
+   "sl": 0.00012,
+   "ctx": "with",
+   "balance": -5.0,
+   "lang": "en",
+   "line": "💼 Position ≈ <b>$363</b> · risk 1% = $10.0 · margin $36.3 at 10x <i>(on a $1,000 deposit)</i>"
+  },
+  {
+   "user": {},
+   "entry": 0.0001234,
+   "sl": 0.00012,
+   "ctx": "counter",
+   "balance": 87.5,
+   "lang": "ru",
+   "line": "💼 Позиция ≈ <b>$15.9</b> · риск 0.5% (×0.5, против тренда) = $0.4 · маржа $1.6 при 10x <i>(баланс $87.5)</i>"
+  },
+  {
+   "user": {},
+   "entry": 0.0001234,
+   "sl": 0.00012,
+   "ctx": "counter",
+   "balance": 87.5,
+   "lang": "en",
+   "line": "💼 Position ≈ <b>$15.9</b> · risk 0.5% (×0.5, counter-trend) = $0.4 · margin $1.6 at 10x <i>(balance $87.5)</i>"
+  },
+  {
+   "user": {},
+   "entry": 0.0001234,
+   "sl": 0.00012,
+   "ctx": "strong_counter",
+   "balance": 2500.0,
+   "lang": "ru",
+   "line": "⛔ <i>Автотрейд: сделка против сильного тренда BTC будет пропущена</i>"
+  },
+  {
+   "user": {},
+   "entry": 0.0001234,
+   "sl": 0.00012,
+   "ctx": "strong_counter",
+   "balance": 2500.0,
+   "lang": "en",
+   "line": "⛔ <i>Auto-trade: a trade against a strong BTC trend will be skipped</i>"
+  },
+  {
+   "user": {},
+   "entry": 0.0001234,
+   "sl": 0.00012,
+   "ctx": "weird",
+   "balance": 1234567.0,
+   "lang": "ru",
+   "line": "💼 Позиция ≈ <b>$448,075</b> · риск 1% = $12,346 · маржа $44,808 при 10x <i>(баланс $1,234,567)</i>"
+  },
+  {
+   "user": {},
+   "entry": 0.0001234,
+   "sl": 0.00012,
+   "ctx": "weird",
+   "balance": 1234567.0,
+   "lang": "en",
+   "line": "💼 Position ≈ <b>$448,075</b> · risk 1% = $12,346 · margin $44,808 at 10x <i>(balance $1,234,567)</i>"
+  },
+  {
+   "user": {},
+   "entry": 100.0,
+   "sl": 100.0,
+   "ctx": "",
+   "balance": 0.0,
+   "lang": "ru",
+   "line": ""
+  },
+  {
+   "user": {},
+   "entry": 100.0,
+   "sl": 100.0,
+   "ctx": "",
+   "balance": 0.0,
+   "lang": "en",
+   "line": ""
+  },
+  {
+   "user": {},
+   "entry": 100.0,
+   "sl": 100.0,
+   "ctx": "aligned",
+   "balance": -5.0,
+   "lang": "ru",
+   "line": ""
+  },
+  {
+   "user": {},
+   "entry": 100.0,
+   "sl": 100.0,
+   "ctx": "aligned",
+   "balance": -5.0,
+   "lang": "en",
+   "line": ""
+  },
+  {
+   "user": {},
+   "entry": 100.0,
+   "sl": 100.0,
+   "ctx": "with",
+   "balance": 87.5,
+   "lang": "ru",
+   "line": ""
+  },
+  {
+   "user": {},
+   "entry": 100.0,
+   "sl": 100.0,
+   "ctx": "with",
+   "balance": 87.5,
+   "lang": "en",
+   "line": ""
+  },
+  {
+   "user": {},
+   "entry": 100.0,
+   "sl": 100.0,
+   "ctx": "counter",
+   "balance": 2500.0,
+   "lang": "ru",
+   "line": ""
+  },
+  {
+   "user": {},
+   "entry": 100.0,
+   "sl": 100.0,
+   "ctx": "counter",
+   "balance": 2500.0,
+   "lang": "en",
+   "line": ""
+  },
+  {
+   "user": {},
+   "entry": 100.0,
+   "sl": 100.0,
+   "ctx": "strong_counter",
+   "balance": 1234567.0,
+   "lang": "ru",
+   "line": "⛔ <i>Автотрейд: сделка против сильного тренда BTC будет пропущена</i>"
+  },
+  {
+   "user": {},
+   "entry": 100.0,
+   "sl": 100.0,
+   "ctx": "strong_counter",
+   "balance": 1234567.0,
+   "lang": "en",
+   "line": "⛔ <i>Auto-trade: a trade against a strong BTC trend will be skipped</i>"
+  },
+  {
+   "user": {},
+   "entry": 100.0,
+   "sl": 100.0,
+   "ctx": "weird",
+   "balance": null,
+   "lang": "ru",
+   "line": ""
+  },
+  {
+   "user": {},
+   "entry": 100.0,
+   "sl": 100.0,
+   "ctx": "weird",
+   "balance": null,
+   "lang": "en",
+   "line": ""
+  },
+  {
+   "user": {},
+   "entry": 0.0,
+   "sl": 1.0,
+   "ctx": "",
+   "balance": -5.0,
+   "lang": "ru",
+   "line": ""
+  },
+  {
+   "user": {},
+   "entry": 0.0,
+   "sl": 1.0,
+   "ctx": "",
+   "balance": -5.0,
+   "lang": "en",
+   "line": ""
+  },
+  {
+   "user": {},
+   "entry": 0.0,
+   "sl": 1.0,
+   "ctx": "aligned",
+   "balance": 87.5,
+   "lang": "ru",
+   "line": ""
+  },
+  {
+   "user": {},
+   "entry": 0.0,
+   "sl": 1.0,
+   "ctx": "aligned",
+   "balance": 87.5,
+   "lang": "en",
+   "line": ""
+  },
+  {
+   "user": {},
+   "entry": 0.0,
+   "sl": 1.0,
+   "ctx": "with",
+   "balance": 2500.0,
+   "lang": "ru",
+   "line": ""
+  },
+  {
+   "user": {},
+   "entry": 0.0,
+   "sl": 1.0,
+   "ctx": "with",
+   "balance": 2500.0,
+   "lang": "en",
+   "line": ""
+  },
+  {
+   "user": {},
+   "entry": 0.0,
+   "sl": 1.0,
+   "ctx": "counter",
+   "balance": 1234567.0,
+   "lang": "ru",
+   "line": ""
+  },
+  {
+   "user": {},
+   "entry": 0.0,
+   "sl": 1.0,
+   "ctx": "counter",
+   "balance": 1234567.0,
+   "lang": "en",
+   "line": ""
+  },
+  {
+   "user": {},
+   "entry": 0.0,
+   "sl": 1.0,
+   "ctx": "strong_counter",
+   "balance": null,
+   "lang": "ru",
+   "line": "⛔ <i>Автотрейд: сделка против сильного тренда BTC будет пропущена</i>"
+  },
+  {
+   "user": {},
+   "entry": 0.0,
+   "sl": 1.0,
+   "ctx": "strong_counter",
+   "balance": null,
+   "lang": "en",
+   "line": "⛔ <i>Auto-trade: a trade against a strong BTC trend will be skipped</i>"
+  },
+  {
+   "user": {},
+   "entry": 0.0,
+   "sl": 1.0,
+   "ctx": "weird",
+   "balance": 0.0,
+   "lang": "ru",
+   "line": ""
+  },
+  {
+   "user": {},
+   "entry": 0.0,
+   "sl": 1.0,
+   "ctx": "weird",
+   "balance": 0.0,
+   "lang": "en",
+   "line": ""
+  },
+  {
+   "user": {},
+   "entry": 2.0,
+   "sl": 2.5,
+   "ctx": "",
+   "balance": 87.5,
+   "lang": "ru",
+   "line": "💼 Позиция ≈ <b>$3.5</b> · риск 1% = $0.9 · маржа $0.3 при 10x <i>(баланс $87.5)</i>"
+  },
+  {
+   "user": {},
+   "entry": 2.0,
+   "sl": 2.5,
+   "ctx": "",
+   "balance": 87.5,
+   "lang": "en",
+   "line": "💼 Position ≈ <b>$3.5</b> · risk 1% = $0.9 · margin $0.3 at 10x <i>(balance $87.5)</i>"
+  },
+  {
+   "user": {},
+   "entry": 2.0,
+   "sl": 2.5,
+   "ctx": "aligned",
+   "balance": 2500.0,
+   "lang": "ru",
+   "line": "💼 Позиция ≈ <b>$100</b> · риск 1% = $25.0 · маржа $10.0 при 10x <i>(баланс $2,500)</i>"
+  },
+  {
+   "user": {},
+   "entry": 2.0,
+   "sl": 2.5,
+   "ctx": "aligned",
+   "balance": 2500.0,
+   "lang": "en",
+   "line": "💼 Position ≈ <b>$100</b> · risk 1% = $25.0 · margin $10.0 at 10x <i>(balance $2,500)</i>"
+  },
+  {
+   "user": {},
+   "entry": 2.0,
+   "sl": 2.5,
+   "ctx": "with",
+   "balance": 1234567.0,
+   "lang": "ru",
+   "line": "💼 Позиция ≈ <b>$49,383</b> · риск 1% = $12,346 · маржа $4,938 при 10x <i>(баланс $1,234,567)</i>"
+  },
+  {
+   "user": {},
+   "entry": 2.0,
+   "sl": 2.5,
+   "ctx": "with",
+   "balance": 1234567.0,
+   "lang": "en",
+   "line": "💼 Position ≈ <b>$49,383</b> · risk 1% = $12,346 · margin $4,938 at 10x <i>(balance $1,234,567)</i>"
+  },
+  {
+   "user": {},
+   "entry": 2.0,
+   "sl": 2.5,
+   "ctx": "counter",
+   "balance": null,
+   "lang": "ru",
+   "line": "💼 Позиция ≈ <b>$20.0</b> · риск 0.5% (×0.5, против тренда) = $5.0 · маржа $2.0 при 10x <i>(при депозите $1,000)</i>"
+  },
+  {
+   "user": {},
+   "entry": 2.0,
+   "sl": 2.5,
+   "ctx": "counter",
+   "balance": null,
+   "lang": "en",
+   "line": "💼 Position ≈ <b>$20.0</b> · risk 0.5% (×0.5, counter-trend) = $5.0 · margin $2.0 at 10x <i>(on a $1,000 deposit)</i>"
+  },
+  {
+   "user": {},
+   "entry": 2.0,
+   "sl": 2.5,
+   "ctx": "strong_counter",
+   "balance": 0.0,
+   "lang": "ru",
+   "line": "⛔ <i>Автотрейд: сделка против сильного тренда BTC будет пропущена</i>"
+  },
+  {
+   "user": {},
+   "entry": 2.0,
+   "sl": 2.5,
+   "ctx": "strong_counter",
+   "balance": 0.0,
+   "lang": "en",
+   "line": "⛔ <i>Auto-trade: a trade against a strong BTC trend will be skipped</i>"
+  },
+  {
+   "user": {},
+   "entry": 2.0,
+   "sl": 2.5,
+   "ctx": "weird",
+   "balance": -5.0,
+   "lang": "ru",
+   "line": "💼 Позиция ≈ <b>$40.0</b> · риск 1% = $10.0 · маржа $4.0 при 10x <i>(при депозите $1,000)</i>"
+  },
+  {
+   "user": {},
+   "entry": 2.0,
+   "sl": 2.5,
+   "ctx": "weird",
+   "balance": -5.0,
+   "lang": "en",
+   "line": "💼 Position ≈ <b>$40.0</b> · risk 1% = $10.0 · margin $4.0 at 10x <i>(on a $1,000 deposit)</i>"
+  },
+  {
+   "user": {
+    "trade_risk_pct": 0.75,
+    "trade_leverage": 50
+   },
+   "entry": 100.0,
+   "sl": 98.0,
+   "ctx": "",
+   "balance": 1234567.0,
+   "lang": "ru",
+   "line": "💼 Позиция ≈ <b>$462,963</b> · риск 0.75% = $9,259 · маржа $9,259 при 50x <i>(баланс $1,234,567)</i>"
+  },
+  {
+   "user": {
+    "trade_risk_pct": 0.75,
+    "trade_leverage": 50
+   },
+   "entry": 100.0,
+   "sl": 98.0,
+   "ctx": "",
+   "balance": 1234567.0,
+   "lang": "en",
+   "line": "💼 Position ≈ <b>$462,963</b> · risk 0.75% = $9,259 · margin $9,259 at 50x <i>(balance $1,234,567)</i>"
+  },
+  {
+   "user": {
+    "trade_risk_pct": 0.75,
+    "trade_leverage": 50
+   },
+   "entry": 100.0,
+   "sl": 98.0,
+   "ctx": "aligned",
+   "balance": null,
+   "lang": "ru",
+   "line": "💼 Позиция ≈ <b>$375</b> · риск 0.75% = $7.5 · маржа $7.5 при 50x <i>(при депозите $1,000)</i>"
+  },
+  {
+   "user": {
+    "trade_risk_pct": 0.75,
+    "trade_leverage": 50
+   },
+   "entry": 100.0,
+   "sl": 98.0,
+   "ctx": "aligned",
+   "balance": null,
+   "lang": "en",
+   "line": "💼 Position ≈ <b>$375</b> · risk 0.75% = $7.5 · margin $7.5 at 50x <i>(on a $1,000 deposit)</i>"
+  },
+  {
+   "user": {
+    "trade_risk_pct": 0.75,
+    "trade_leverage": 50
+   },
+   "entry": 100.0,
+   "sl": 98.0,
+   "ctx": "with",
+   "balance": 0.0,
+   "lang": "ru",
+   "line": "💼 Позиция ≈ <b>$375</b> · риск 0.75% = $7.5 · маржа $7.5 при 50x <i>(при депозите $1,000)</i>"
+  },
+  {
+   "user": {
+    "trade_risk_pct": 0.75,
+    "trade_leverage": 50
+   },
+   "entry": 100.0,
+   "sl": 98.0,
+   "ctx": "with",
+   "balance": 0.0,
+   "lang": "en",
+   "line": "💼 Position ≈ <b>$375</b> · risk 0.75% = $7.5 · margin $7.5 at 50x <i>(on a $1,000 deposit)</i>"
+  },
+  {
+   "user": {
+    "trade_risk_pct": 0.75,
+    "trade_leverage": 50
+   },
+   "entry": 100.0,
+   "sl": 98.0,
+   "ctx": "counter",
+   "balance": -5.0,
+   "lang": "ru",
+   "line": "💼 Позиция ≈ <b>$188</b> · риск 0.375% (×0.5, против тренда) = $3.8 · маржа $3.8 при 50x <i>(при депозите $1,000)</i>"
+  },
+  {
+   "user": {
+    "trade_risk_pct": 0.75,
+    "trade_leverage": 50
+   },
+   "entry": 100.0,
+   "sl": 98.0,
+   "ctx": "counter",
+   "balance": -5.0,
+   "lang": "en",
+   "line": "💼 Position ≈ <b>$188</b> · risk 0.375% (×0.5, counter-trend) = $3.8 · margin $3.8 at 50x <i>(on a $1,000 deposit)</i>"
+  },
+  {
+   "user": {
+    "trade_risk_pct": 0.75,
+    "trade_leverage": 50
+   },
+   "entry": 100.0,
+   "sl": 98.0,
+   "ctx": "strong_counter",
+   "balance": 87.5,
+   "lang": "ru",
+   "line": "⛔ <i>Автотрейд: сделка против сильного тренда BTC будет пропущена</i>"
+  },
+  {
+   "user": {
+    "trade_risk_pct": 0.75,
+    "trade_leverage": 50
+   },
+   "entry": 100.0,
+   "sl": 98.0,
+   "ctx": "strong_counter",
+   "balance": 87.5,
+   "lang": "en",
+   "line": "⛔ <i>Auto-trade: a trade against a strong BTC trend will be skipped</i>"
+  },
+  {
+   "user": {
+    "trade_risk_pct": 0.75,
+    "trade_leverage": 50
+   },
+   "entry": 100.0,
+   "sl": 98.0,
+   "ctx": "weird",
+   "balance": 2500.0,
+   "lang": "ru",
+   "line": "💼 Позиция ≈ <b>$938</b> · риск 0.75% = $18.8 · маржа $18.8 при 50x <i>(баланс $2,500)</i>"
+  },
+  {
+   "user": {
+    "trade_risk_pct": 0.75,
+    "trade_leverage": 50
+   },
+   "entry": 100.0,
+   "sl": 98.0,
+   "ctx": "weird",
+   "balance": 2500.0,
+   "lang": "en",
+   "line": "💼 Position ≈ <b>$938</b> · risk 0.75% = $18.8 · margin $18.8 at 50x <i>(balance $2,500)</i>"
+  },
+  {
+   "user": {
+    "trade_risk_pct": 0.75,
+    "trade_leverage": 50
+   },
+   "entry": 64123.5,
+   "sl": 63000.0,
+   "ctx": "",
+   "balance": null,
+   "lang": "ru",
+   "line": "💼 Позиция ≈ <b>$428</b> · риск 0.75% = $7.5 · маржа $8.6 при 50x <i>(при депозите $1,000)</i>"
+  },
+  {
+   "user": {
+    "trade_risk_pct": 0.75,
+    "trade_leverage": 50
+   },
+   "entry": 64123.5,
+   "sl": 63000.0,
+   "ctx": "",
+   "balance": null,
+   "lang": "en",
+   "line": "💼 Position ≈ <b>$428</b> · risk 0.75% = $7.5 · margin $8.6 at 50x <i>(on a $1,000 deposit)</i>"
+  },
+  {
+   "user": {
+    "trade_risk_pct": 0.75,
+    "trade_leverage": 50
+   },
+   "entry": 64123.5,
+   "sl": 63000.0,
+   "ctx": "aligned",
+   "balance": 0.0,
+   "lang": "ru",
+   "line": "💼 Позиция ≈ <b>$428</b> · риск 0.75% = $7.5 · маржа $8.6 при 50x <i>(при депозите $1,000)</i>"
+  },
+  {
+   "user": {
+    "trade_risk_pct": 0.75,
+    "trade_leverage": 50
+   },
+   "entry": 64123.5,
+   "sl": 63000.0,
+   "ctx": "aligned",
+   "balance": 0.0,
+   "lang": "en",
+   "line": "💼 Position ≈ <b>$428</b> · risk 0.75% = $7.5 · margin $8.6 at 50x <i>(on a $1,000 deposit)</i>"
+  },
+  {
+   "user": {
+    "trade_risk_pct": 0.75,
+    "trade_leverage": 50
+   },
+   "entry": 64123.5,
+   "sl": 63000.0,
+   "ctx": "with",
+   "balance": -5.0,
+   "lang": "ru",
+   "line": "💼 Позиция ≈ <b>$428</b> · риск 0.75% = $7.5 · маржа $8.6 при 50x <i>(при депозите $1,000)</i>"
+  },
+  {
+   "user": {
+    "trade_risk_pct": 0.75,
+    "trade_leverage": 50
+   },
+   "entry": 64123.5,
+   "sl": 63000.0,
+   "ctx": "with",
+   "balance": -5.0,
+   "lang": "en",
+   "line": "💼 Position ≈ <b>$428</b> · risk 0.75% = $7.5 · margin $8.6 at 50x <i>(on a $1,000 deposit)</i>"
+  },
+  {
+   "user": {
+    "trade_risk_pct": 0.75,
+    "trade_leverage": 50
+   },
+   "entry": 64123.5,
+   "sl": 63000.0,
+   "ctx": "counter",
+   "balance": 87.5,
+   "lang": "ru",
+   "line": "💼 Позиция ≈ <b>$18.7</b> · риск 0.375% (×0.5, против тренда) = $0.3 · маржа $0.4 при 50x <i>(баланс $87.5)</i>"
+  },
+  {
+   "user": {
+    "trade_risk_pct": 0.75,
+    "trade_leverage": 50
+   },
+   "entry": 64123.5,
+   "sl": 63000.0,
+   "ctx": "counter",
+   "balance": 87.5,
+   "lang": "en",
+   "line": "💼 Position ≈ <b>$18.7</b> · risk 0.375% (×0.5, counter-trend) = $0.3 · margin $0.4 at 50x <i>(balance $87.5)</i>"
+  },
+  {
+   "user": {
+    "trade_risk_pct": 0.75,
+    "trade_leverage": 50
+   },
+   "entry": 64123.5,
+   "sl": 63000.0,
+   "ctx": "strong_counter",
+   "balance": 2500.0,
+   "lang": "ru",
+   "line": "⛔ <i>Автотрейд: сделка против сильного тренда BTC будет пропущена</i>"
+  },
+  {
+   "user": {
+    "trade_risk_pct": 0.75,
+    "trade_leverage": 50
+   },
+   "entry": 64123.5,
+   "sl": 63000.0,
+   "ctx": "strong_counter",
+   "balance": 2500.0,
+   "lang": "en",
+   "line": "⛔ <i>Auto-trade: a trade against a strong BTC trend will be skipped</i>"
+  },
+  {
+   "user": {
+    "trade_risk_pct": 0.75,
+    "trade_leverage": 50
+   },
+   "entry": 64123.5,
+   "sl": 63000.0,
+   "ctx": "weird",
+   "balance": 1234567.0,
+   "lang": "ru",
+   "line": "💼 Позиция ≈ <b>$528,470</b> · риск 0.75% = $9,259 · маржа $10,569 при 50x <i>(баланс $1,234,567)</i>"
+  },
+  {
+   "user": {
+    "trade_risk_pct": 0.75,
+    "trade_leverage": 50
+   },
+   "entry": 64123.5,
+   "sl": 63000.0,
+   "ctx": "weird",
+   "balance": 1234567.0,
+   "lang": "en",
+   "line": "💼 Position ≈ <b>$528,470</b> · risk 0.75% = $9,259 · margin $10,569 at 50x <i>(balance $1,234,567)</i>"
+  },
+  {
+   "user": {
+    "trade_risk_pct": 0.75,
+    "trade_leverage": 50
+   },
+   "entry": 0.0001234,
+   "sl": 0.00012,
+   "ctx": "",
+   "balance": 0.0,
+   "lang": "ru",
+   "line": "💼 Позиция ≈ <b>$272</b> · риск 0.75% = $7.5 · маржа $5.4 при 50x <i>(при депозите $1,000)</i>"
+  },
+  {
+   "user": {
+    "trade_risk_pct": 0.75,
+    "trade_leverage": 50
+   },
+   "entry": 0.0001234,
+   "sl": 0.00012,
+   "ctx": "",
+   "balance": 0.0,
+   "lang": "en",
+   "line": "💼 Position ≈ <b>$272</b> · risk 0.75% = $7.5 · margin $5.4 at 50x <i>(on a $1,000 deposit)</i>"
+  },
+  {
+   "user": {
+    "trade_risk_pct": 0.75,
+    "trade_leverage": 50
+   },
+   "entry": 0.0001234,
+   "sl": 0.00012,
+   "ctx": "aligned",
+   "balance": -5.0,
+   "lang": "ru",
+   "line": "💼 Позиция ≈ <b>$272</b> · риск 0.75% = $7.5 · маржа $5.4 при 50x <i>(при депозите $1,000)</i>"
+  },
+  {
+   "user": {
+    "trade_risk_pct": 0.75,
+    "trade_leverage": 50
+   },
+   "entry": 0.0001234,
+   "sl": 0.00012,
+   "ctx": "aligned",
+   "balance": -5.0,
+   "lang": "en",
+   "line": "💼 Position ≈ <b>$272</b> · risk 0.75% = $7.5 · margin $5.4 at 50x <i>(on a $1,000 deposit)</i>"
+  },
+  {
+   "user": {
+    "trade_risk_pct": 0.75,
+    "trade_leverage": 50
+   },
+   "entry": 0.0001234,
+   "sl": 0.00012,
+   "ctx": "with",
+   "balance": 87.5,
+   "lang": "ru",
+   "line": "💼 Позиция ≈ <b>$23.8</b> · риск 0.75% = $0.7 · маржа $0.5 при 50x <i>(баланс $87.5)</i>"
+  },
+  {
+   "user": {
+    "trade_risk_pct": 0.75,
+    "trade_leverage": 50
+   },
+   "entry": 0.0001234,
+   "sl": 0.00012,
+   "ctx": "with",
+   "balance": 87.5,
+   "lang": "en",
+   "line": "💼 Position ≈ <b>$23.8</b> · risk 0.75% = $0.7 · margin $0.5 at 50x <i>(balance $87.5)</i>"
+  },
+  {
+   "user": {
+    "trade_risk_pct": 0.75,
+    "trade_leverage": 50
+   },
+   "entry": 0.0001234,
+   "sl": 0.00012,
+   "ctx": "counter",
+   "balance": 2500.0,
+   "lang": "ru",
+   "line": "💼 Позиция ≈ <b>$340</b> · риск 0.375% (×0.5, против тренда) = $9.4 · маржа $6.8 при 50x <i>(баланс $2,500)</i>"
+  },
+  {
+   "user": {
+    "trade_risk_pct": 0.75,
+    "trade_leverage": 50
+   },
+   "entry": 0.0001234,
+   "sl": 0.00012,
+   "ctx": "counter",
+   "balance": 2500.0,
+   "lang": "en",
+   "line": "💼 Position ≈ <b>$340</b> · risk 0.375% (×0.5, counter-trend) = $9.4 · margin $6.8 at 50x <i>(balance $2,500)</i>"
+  },
+  {
+   "user": {
+    "trade_risk_pct": 0.75,
+    "trade_leverage": 50
+   },
+   "entry": 0.0001234,
+   "sl": 0.00012,
+   "ctx": "strong_counter",
+   "balance": 1234567.0,
+   "lang": "ru",
+   "line": "⛔ <i>Автотрейд: сделка против сильного тренда BTC будет пропущена</i>"
+  },
+  {
+   "user": {
+    "trade_risk_pct": 0.75,
+    "trade_leverage": 50
+   },
+   "entry": 0.0001234,
+   "sl": 0.00012,
+   "ctx": "strong_counter",
+   "balance": 1234567.0,
+   "lang": "en",
+   "line": "⛔ <i>Auto-trade: a trade against a strong BTC trend will be skipped</i>"
+  },
+  {
+   "user": {
+    "trade_risk_pct": 0.75,
+    "trade_leverage": 50
+   },
+   "entry": 0.0001234,
+   "sl": 0.00012,
+   "ctx": "weird",
+   "balance": null,
+   "lang": "ru",
+   "line": "💼 Позиция ≈ <b>$272</b> · риск 0.75% = $7.5 · маржа $5.4 при 50x <i>(при депозите $1,000)</i>"
+  },
+  {
+   "user": {
+    "trade_risk_pct": 0.75,
+    "trade_leverage": 50
+   },
+   "entry": 0.0001234,
+   "sl": 0.00012,
+   "ctx": "weird",
+   "balance": null,
+   "lang": "en",
+   "line": "💼 Position ≈ <b>$272</b> · risk 0.75% = $7.5 · margin $5.4 at 50x <i>(on a $1,000 deposit)</i>"
+  },
+  {
+   "user": {
+    "trade_risk_pct": 0.75,
+    "trade_leverage": 50
+   },
+   "entry": 100.0,
+   "sl": 100.0,
+   "ctx": "",
+   "balance": -5.0,
+   "lang": "ru",
+   "line": ""
+  },
+  {
+   "user": {
+    "trade_risk_pct": 0.75,
+    "trade_leverage": 50
+   },
+   "entry": 100.0,
+   "sl": 100.0,
+   "ctx": "",
+   "balance": -5.0,
+   "lang": "en",
+   "line": ""
+  },
+  {
+   "user": {
+    "trade_risk_pct": 0.75,
+    "trade_leverage": 50
+   },
+   "entry": 100.0,
+   "sl": 100.0,
+   "ctx": "aligned",
+   "balance": 87.5,
+   "lang": "ru",
+   "line": ""
+  },
+  {
+   "user": {
+    "trade_risk_pct": 0.75,
+    "trade_leverage": 50
+   },
+   "entry": 100.0,
+   "sl": 100.0,
+   "ctx": "aligned",
+   "balance": 87.5,
+   "lang": "en",
+   "line": ""
+  },
+  {
+   "user": {
+    "trade_risk_pct": 0.75,
+    "trade_leverage": 50
+   },
+   "entry": 100.0,
+   "sl": 100.0,
+   "ctx": "with",
+   "balance": 2500.0,
+   "lang": "ru",
+   "line": ""
+  },
+  {
+   "user": {
+    "trade_risk_pct": 0.75,
+    "trade_leverage": 50
+   },
+   "entry": 100.0,
+   "sl": 100.0,
+   "ctx": "with",
+   "balance": 2500.0,
+   "lang": "en",
+   "line": ""
+  },
+  {
+   "user": {
+    "trade_risk_pct": 0.75,
+    "trade_leverage": 50
+   },
+   "entry": 100.0,
+   "sl": 100.0,
+   "ctx": "counter",
+   "balance": 1234567.0,
+   "lang": "ru",
+   "line": ""
+  },
+  {
+   "user": {
+    "trade_risk_pct": 0.75,
+    "trade_leverage": 50
+   },
+   "entry": 100.0,
+   "sl": 100.0,
+   "ctx": "counter",
+   "balance": 1234567.0,
+   "lang": "en",
+   "line": ""
+  },
+  {
+   "user": {
+    "trade_risk_pct": 0.75,
+    "trade_leverage": 50
+   },
+   "entry": 100.0,
+   "sl": 100.0,
+   "ctx": "strong_counter",
+   "balance": null,
+   "lang": "ru",
+   "line": "⛔ <i>Автотрейд: сделка против сильного тренда BTC будет пропущена</i>"
+  },
+  {
+   "user": {
+    "trade_risk_pct": 0.75,
+    "trade_leverage": 50
+   },
+   "entry": 100.0,
+   "sl": 100.0,
+   "ctx": "strong_counter",
+   "balance": null,
+   "lang": "en",
+   "line": "⛔ <i>Auto-trade: a trade against a strong BTC trend will be skipped</i>"
+  },
+  {
+   "user": {
+    "trade_risk_pct": 0.75,
+    "trade_leverage": 50
+   },
+   "entry": 100.0,
+   "sl": 100.0,
+   "ctx": "weird",
+   "balance": 0.0,
+   "lang": "ru",
+   "line": ""
+  },
+  {
+   "user": {
+    "trade_risk_pct": 0.75,
+    "trade_leverage": 50
+   },
+   "entry": 100.0,
+   "sl": 100.0,
+   "ctx": "weird",
+   "balance": 0.0,
+   "lang": "en",
+   "line": ""
+  },
+  {
+   "user": {
+    "trade_risk_pct": 0.75,
+    "trade_leverage": 50
+   },
+   "entry": 0.0,
+   "sl": 1.0,
+   "ctx": "",
+   "balance": 87.5,
+   "lang": "ru",
+   "line": ""
+  },
+  {
+   "user": {
+    "trade_risk_pct": 0.75,
+    "trade_leverage": 50
+   },
+   "entry": 0.0,
+   "sl": 1.0,
+   "ctx": "",
+   "balance": 87.5,
+   "lang": "en",
+   "line": ""
+  },
+  {
+   "user": {
+    "trade_risk_pct": 0.75,
+    "trade_leverage": 50
+   },
+   "entry": 0.0,
+   "sl": 1.0,
+   "ctx": "aligned",
+   "balance": 2500.0,
+   "lang": "ru",
+   "line": ""
+  },
+  {
+   "user": {
+    "trade_risk_pct": 0.75,
+    "trade_leverage": 50
+   },
+   "entry": 0.0,
+   "sl": 1.0,
+   "ctx": "aligned",
+   "balance": 2500.0,
+   "lang": "en",
+   "line": ""
+  },
+  {
+   "user": {
+    "trade_risk_pct": 0.75,
+    "trade_leverage": 50
+   },
+   "entry": 0.0,
+   "sl": 1.0,
+   "ctx": "with",
+   "balance": 1234567.0,
+   "lang": "ru",
+   "line": ""
+  },
+  {
+   "user": {
+    "trade_risk_pct": 0.75,
+    "trade_leverage": 50
+   },
+   "entry": 0.0,
+   "sl": 1.0,
+   "ctx": "with",
+   "balance": 1234567.0,
+   "lang": "en",
+   "line": ""
+  },
+  {
+   "user": {
+    "trade_risk_pct": 0.75,
+    "trade_leverage": 50
+   },
+   "entry": 0.0,
+   "sl": 1.0,
+   "ctx": "counter",
+   "balance": null,
+   "lang": "ru",
+   "line": ""
+  },
+  {
+   "user": {
+    "trade_risk_pct": 0.75,
+    "trade_leverage": 50
+   },
+   "entry": 0.0,
+   "sl": 1.0,
+   "ctx": "counter",
+   "balance": null,
+   "lang": "en",
+   "line": ""
+  },
+  {
+   "user": {
+    "trade_risk_pct": 0.75,
+    "trade_leverage": 50
+   },
+   "entry": 0.0,
+   "sl": 1.0,
+   "ctx": "strong_counter",
+   "balance": 0.0,
+   "lang": "ru",
+   "line": "⛔ <i>Автотрейд: сделка против сильного тренда BTC будет пропущена</i>"
+  },
+  {
+   "user": {
+    "trade_risk_pct": 0.75,
+    "trade_leverage": 50
+   },
+   "entry": 0.0,
+   "sl": 1.0,
+   "ctx": "strong_counter",
+   "balance": 0.0,
+   "lang": "en",
+   "line": "⛔ <i>Auto-trade: a trade against a strong BTC trend will be skipped</i>"
+  },
+  {
+   "user": {
+    "trade_risk_pct": 0.75,
+    "trade_leverage": 50
+   },
+   "entry": 0.0,
+   "sl": 1.0,
+   "ctx": "weird",
+   "balance": -5.0,
+   "lang": "ru",
+   "line": ""
+  },
+  {
+   "user": {
+    "trade_risk_pct": 0.75,
+    "trade_leverage": 50
+   },
+   "entry": 0.0,
+   "sl": 1.0,
+   "ctx": "weird",
+   "balance": -5.0,
+   "lang": "en",
+   "line": ""
+  },
+  {
+   "user": {
+    "trade_risk_pct": 0.75,
+    "trade_leverage": 50
+   },
+   "entry": 2.0,
+   "sl": 2.5,
+   "ctx": "",
+   "balance": 2500.0,
+   "lang": "ru",
+   "line": "💼 Позиция ≈ <b>$75.0</b> · риск 0.75% = $18.8 · маржа $1.5 при 50x <i>(баланс $2,500)</i>"
+  },
+  {
+   "user": {
+    "trade_risk_pct": 0.75,
+    "trade_leverage": 50
+   },
+   "entry": 2.0,
+   "sl": 2.5,
+   "ctx": "",
+   "balance": 2500.0,
+   "lang": "en",
+   "line": "💼 Position ≈ <b>$75.0</b> · risk 0.75% = $18.8 · margin $1.5 at 50x <i>(balance $2,500)</i>"
+  },
+  {
+   "user": {
+    "trade_risk_pct": 0.75,
+    "trade_leverage": 50
+   },
+   "entry": 2.0,
+   "sl": 2.5,
+   "ctx": "aligned",
+   "balance": 1234567.0,
+   "lang": "ru",
+   "line": "💼 Позиция ≈ <b>$37,037</b> · риск 0.75% = $9,259 · маржа $741 при 50x <i>(баланс $1,234,567)</i>"
+  },
+  {
+   "user": {
+    "trade_risk_pct": 0.75,
+    "trade_leverage": 50
+   },
+   "entry": 2.0,
+   "sl": 2.5,
+   "ctx": "aligned",
+   "balance": 1234567.0,
+   "lang": "en",
+   "line": "💼 Position ≈ <b>$37,037</b> · risk 0.75% = $9,259 · margin $741 at 50x <i>(balance $1,234,567)</i>"
+  },
+  {
+   "user": {
+    "trade_risk_pct": 0.75,
+    "trade_leverage": 50
+   },
+   "entry": 2.0,
+   "sl": 2.5,
+   "ctx": "with",
+   "balance": null,
+   "lang": "ru",
+   "line": "💼 Позиция ≈ <b>$30.0</b> · риск 0.75% = $7.5 · маржа $0.6 при 50x <i>(при депозите $1,000)</i>"
+  },
+  {
+   "user": {
+    "trade_risk_pct": 0.75,
+    "trade_leverage": 50
+   },
+   "entry": 2.0,
+   "sl": 2.5,
+   "ctx": "with",
+   "balance": null,
+   "lang": "en",
+   "line": "💼 Position ≈ <b>$30.0</b> · risk 0.75% = $7.5 · margin $0.6 at 50x <i>(on a $1,000 deposit)</i>"
+  },
+  {
+   "user": {
+    "trade_risk_pct": 0.75,
+    "trade_leverage": 50
+   },
+   "entry": 2.0,
+   "sl": 2.5,
+   "ctx": "counter",
+   "balance": 0.0,
+   "lang": "ru",
+   "line": "💼 Позиция ≈ <b>$15.0</b> · риск 0.375% (×0.5, против тренда) = $3.8 · маржа $0.3 при 50x <i>(при депозите $1,000)</i>"
+  },
+  {
+   "user": {
+    "trade_risk_pct": 0.75,
+    "trade_leverage": 50
+   },
+   "entry": 2.0,
+   "sl": 2.5,
+   "ctx": "counter",
+   "balance": 0.0,
+   "lang": "en",
+   "line": "💼 Position ≈ <b>$15.0</b> · risk 0.375% (×0.5, counter-trend) = $3.8 · margin $0.3 at 50x <i>(on a $1,000 deposit)</i>"
+  },
+  {
+   "user": {
+    "trade_risk_pct": 0.75,
+    "trade_leverage": 50
+   },
+   "entry": 2.0,
+   "sl": 2.5,
+   "ctx": "strong_counter",
+   "balance": -5.0,
+   "lang": "ru",
+   "line": "⛔ <i>Автотрейд: сделка против сильного тренда BTC будет пропущена</i>"
+  },
+  {
+   "user": {
+    "trade_risk_pct": 0.75,
+    "trade_leverage": 50
+   },
+   "entry": 2.0,
+   "sl": 2.5,
+   "ctx": "strong_counter",
+   "balance": -5.0,
+   "lang": "en",
+   "line": "⛔ <i>Auto-trade: a trade against a strong BTC trend will be skipped</i>"
+  },
+  {
+   "user": {
+    "trade_risk_pct": 0.75,
+    "trade_leverage": 50
+   },
+   "entry": 2.0,
+   "sl": 2.5,
+   "ctx": "weird",
+   "balance": 87.5,
+   "lang": "ru",
+   "line": "💼 Позиция ≈ <b>$2.6</b> · риск 0.75% = $0.7 · маржа $0.1 при 50x <i>(баланс $87.5)</i>"
+  },
+  {
+   "user": {
+    "trade_risk_pct": 0.75,
+    "trade_leverage": 50
+   },
+   "entry": 2.0,
+   "sl": 2.5,
+   "ctx": "weird",
+   "balance": 87.5,
+   "lang": "en",
+   "line": "💼 Position ≈ <b>$2.6</b> · risk 0.75% = $0.7 · margin $0.1 at 50x <i>(balance $87.5)</i>"
+  },
+  {
+   "user": {
+    "trade_risk_pct": 5.0,
+    "trade_leverage": 1
+   },
+   "entry": 100.0,
+   "sl": 98.0,
+   "ctx": "",
+   "balance": null,
+   "lang": "ru",
+   "line": "💼 Позиция ≈ <b>$1,000</b> · риск 5% = $50.0 · маржа $1,000 при 1x <i>(при депозите $1,000)</i> ⚠️ <i>маржи на полный риск не хватит</i>"
+  },
+  {
+   "user": {
+    "trade_risk_pct": 5.0,
+    "trade_leverage": 1
+   },
+   "entry": 100.0,
+   "sl": 98.0,
+   "ctx": "",
+   "balance": null,
+   "lang": "en",
+   "line": "💼 Position ≈ <b>$1,000</b> · risk 5% = $50.0 · margin $1,000 at 1x <i>(on a $1,000 deposit)</i> ⚠️ <i>not enough margin for the full risk</i>"
+  },
+  {
+   "user": {
+    "trade_risk_pct": 5.0,
+    "trade_leverage": 1
+   },
+   "entry": 100.0,
+   "sl": 98.0,
+   "ctx": "aligned",
+   "balance": 0.0,
+   "lang": "ru",
+   "line": "💼 Позиция ≈ <b>$1,000</b> · риск 5% = $50.0 · маржа $1,000 при 1x <i>(при депозите $1,000)</i> ⚠️ <i>маржи на полный риск не хватит</i>"
+  },
+  {
+   "user": {
+    "trade_risk_pct": 5.0,
+    "trade_leverage": 1
+   },
+   "entry": 100.0,
+   "sl": 98.0,
+   "ctx": "aligned",
+   "balance": 0.0,
+   "lang": "en",
+   "line": "💼 Position ≈ <b>$1,000</b> · risk 5% = $50.0 · margin $1,000 at 1x <i>(on a $1,000 deposit)</i> ⚠️ <i>not enough margin for the full risk</i>"
+  },
+  {
+   "user": {
+    "trade_risk_pct": 5.0,
+    "trade_leverage": 1
+   },
+   "entry": 100.0,
+   "sl": 98.0,
+   "ctx": "with",
+   "balance": -5.0,
+   "lang": "ru",
+   "line": "💼 Позиция ≈ <b>$1,000</b> · риск 5% = $50.0 · маржа $1,000 при 1x <i>(при депозите $1,000)</i> ⚠️ <i>маржи на полный риск не хватит</i>"
+  },
+  {
+   "user": {
+    "trade_risk_pct": 5.0,
+    "trade_leverage": 1
+   },
+   "entry": 100.0,
+   "sl": 98.0,
+   "ctx": "with",
+   "balance": -5.0,
+   "lang": "en",
+   "line": "💼 Position ≈ <b>$1,000</b> · risk 5% = $50.0 · margin $1,000 at 1x <i>(on a $1,000 deposit)</i> ⚠️ <i>not enough margin for the full risk</i>"
+  },
+  {
+   "user": {
+    "trade_risk_pct": 5.0,
+    "trade_leverage": 1
+   },
+   "entry": 100.0,
+   "sl": 98.0,
+   "ctx": "counter",
+   "balance": 87.5,
+   "lang": "ru",
+   "line": "💼 Позиция ≈ <b>$87.5</b> · риск 2.5% (×0.5, против тренда) = $2.2 · маржа $87.5 при 1x <i>(баланс $87.5)</i> ⚠️ <i>маржи на полный риск не хватит</i>"
+  },
+  {
+   "user": {
+    "trade_risk_pct": 5.0,
+    "trade_leverage": 1
+   },
+   "entry": 100.0,
+   "sl": 98.0,
+   "ctx": "counter",
+   "balance": 87.5,
+   "lang": "en",
+   "line": "💼 Position ≈ <b>$87.5</b> · risk 2.5% (×0.5, counter-trend) = $2.2 · margin $87.5 at 1x <i>(balance $87.5)</i> ⚠️ <i>not enough margin for the full risk</i>"
+  },
+  {
+   "user": {
+    "trade_risk_pct": 5.0,
+    "trade_leverage": 1
+   },
+   "entry": 100.0,
+   "sl": 98.0,
+   "ctx": "strong_counter",
+   "balance": 2500.0,
+   "lang": "ru",
+   "line": "⛔ <i>Автотрейд: сделка против сильного тренда BTC будет пропущена</i>"
+  },
+  {
+   "user": {
+    "trade_risk_pct": 5.0,
+    "trade_leverage": 1
+   },
+   "entry": 100.0,
+   "sl": 98.0,
+   "ctx": "strong_counter",
+   "balance": 2500.0,
+   "lang": "en",
+   "line": "⛔ <i>Auto-trade: a trade against a strong BTC trend will be skipped</i>"
+  },
+  {
+   "user": {
+    "trade_risk_pct": 5.0,
+    "trade_leverage": 1
+   },
+   "entry": 100.0,
+   "sl": 98.0,
+   "ctx": "weird",
+   "balance": 1234567.0,
+   "lang": "ru",
+   "line": "💼 Позиция ≈ <b>$1,234,567</b> · риск 5% = $61,728 · маржа $1,234,567 при 1x <i>(баланс $1,234,567)</i> ⚠️ <i>маржи на полный риск не хватит</i>"
+  },
+  {
+   "user": {
+    "trade_risk_pct": 5.0,
+    "trade_leverage": 1
+   },
+   "entry": 100.0,
+   "sl": 98.0,
+   "ctx": "weird",
+   "balance": 1234567.0,
+   "lang": "en",
+   "line": "💼 Position ≈ <b>$1,234,567</b> · risk 5% = $61,728 · margin $1,234,567 at 1x <i>(balance $1,234,567)</i> ⚠️ <i>not enough margin for the full risk</i>"
+  },
+  {
+   "user": {
+    "trade_risk_pct": 5.0,
+    "trade_leverage": 1
+   },
+   "entry": 64123.5,
+   "sl": 63000.0,
+   "ctx": "",
+   "balance": 0.0,
+   "lang": "ru",
+   "line": "💼 Позиция ≈ <b>$1,000</b> · риск 5% = $50.0 · маржа $1,000 при 1x <i>(при депозите $1,000)</i> ⚠️ <i>маржи на полный риск не хватит</i>"
+  },
+  {
+   "user": {
+    "trade_risk_pct": 5.0,
+    "trade_leverage": 1
+   },
+   "entry": 64123.5,
+   "sl": 63000.0,
+   "ctx": "",
+   "balance": 0.0,
+   "lang": "en",
+   "line": "💼 Position ≈ <b>$1,000</b> · risk 5% = $50.0 · margin $1,000 at 1x <i>(on a $1,000 deposit)</i> ⚠️ <i>not enough margin for the full risk</i>"
+  },
+  {
+   "user": {
+    "trade_risk_pct": 5.0,
+    "trade_leverage": 1
+   },
+   "entry": 64123.5,
+   "sl": 63000.0,
+   "ctx": "aligned",
+   "balance": -5.0,
+   "lang": "ru",
+   "line": "💼 Позиция ≈ <b>$1,000</b> · риск 5% = $50.0 · маржа $1,000 при 1x <i>(при депозите $1,000)</i> ⚠️ <i>маржи на полный риск не хватит</i>"
+  },
+  {
+   "user": {
+    "trade_risk_pct": 5.0,
+    "trade_leverage": 1
+   },
+   "entry": 64123.5,
+   "sl": 63000.0,
+   "ctx": "aligned",
+   "balance": -5.0,
+   "lang": "en",
+   "line": "💼 Position ≈ <b>$1,000</b> · risk 5% = $50.0 · margin $1,000 at 1x <i>(on a $1,000 deposit)</i> ⚠️ <i>not enough margin for the full risk</i>"
+  },
+  {
+   "user": {
+    "trade_risk_pct": 5.0,
+    "trade_leverage": 1
+   },
+   "entry": 64123.5,
+   "sl": 63000.0,
+   "ctx": "with",
+   "balance": 87.5,
+   "lang": "ru",
+   "line": "💼 Позиция ≈ <b>$87.5</b> · риск 5% = $4.4 · маржа $87.5 при 1x <i>(баланс $87.5)</i> ⚠️ <i>маржи на полный риск не хватит</i>"
+  },
+  {
+   "user": {
+    "trade_risk_pct": 5.0,
+    "trade_leverage": 1
+   },
+   "entry": 64123.5,
+   "sl": 63000.0,
+   "ctx": "with",
+   "balance": 87.5,
+   "lang": "en",
+   "line": "💼 Position ≈ <b>$87.5</b> · risk 5% = $4.4 · margin $87.5 at 1x <i>(balance $87.5)</i> ⚠️ <i>not enough margin for the full risk</i>"
+  },
+  {
+   "user": {
+    "trade_risk_pct": 5.0,
+    "trade_leverage": 1
+   },
+   "entry": 64123.5,
+   "sl": 63000.0,
+   "ctx": "counter",
+   "balance": 2500.0,
+   "lang": "ru",
+   "line": "💼 Позиция ≈ <b>$2,500</b> · риск 2.5% (×0.5, против тренда) = $62.5 · маржа $2,500 при 1x <i>(баланс $2,500)</i> ⚠️ <i>маржи на полный риск не хватит</i>"
+  },
+  {
+   "user": {
+    "trade_risk_pct": 5.0,
+    "trade_leverage": 1
+   },
+   "entry": 64123.5,
+   "sl": 63000.0,
+   "ctx": "counter",
+   "balance": 2500.0,
+   "lang": "en",
+   "line": "💼 Position ≈ <b>$2,500</b> · risk 2.5% (×0.5, counter-trend) = $62.5 · margin $2,500 at 1x <i>(balance $2,500)</i> ⚠️ <i>not enough margin for the full risk</i>"
+  },
+  {
+   "user": {
+    "trade_risk_pct": 5.0,
+    "trade_leverage": 1
+   },
+   "entry": 64123.5,
+   "sl": 63000.0,
+   "ctx": "strong_counter",
+   "balance": 1234567.0,
+   "lang": "ru",
+   "line": "⛔ <i>Автотрейд: сделка против сильного тренда BTC будет пропущена</i>"
+  },
+  {
+   "user": {
+    "trade_risk_pct": 5.0,
+    "trade_leverage": 1
+   },
+   "entry": 64123.5,
+   "sl": 63000.0,
+   "ctx": "strong_counter",
+   "balance": 1234567.0,
+   "lang": "en",
+   "line": "⛔ <i>Auto-trade: a trade against a strong BTC trend will be skipped</i>"
+  },
+  {
+   "user": {
+    "trade_risk_pct": 5.0,
+    "trade_leverage": 1
+   },
+   "entry": 64123.5,
+   "sl": 63000.0,
+   "ctx": "weird",
+   "balance": null,
+   "lang": "ru",
+   "line": "💼 Позиция ≈ <b>$1,000</b> · риск 5% = $50.0 · маржа $1,000 при 1x <i>(при депозите $1,000)</i> ⚠️ <i>маржи на полный риск не хватит</i>"
+  },
+  {
+   "user": {
+    "trade_risk_pct": 5.0,
+    "trade_leverage": 1
+   },
+   "entry": 64123.5,
+   "sl": 63000.0,
+   "ctx": "weird",
+   "balance": null,
+   "lang": "en",
+   "line": "💼 Position ≈ <b>$1,000</b> · risk 5% = $50.0 · margin $1,000 at 1x <i>(on a $1,000 deposit)</i> ⚠️ <i>not enough margin for the full risk</i>"
+  },
+  {
+   "user": {
+    "trade_risk_pct": 5.0,
+    "trade_leverage": 1
+   },
+   "entry": 0.0001234,
+   "sl": 0.00012,
+   "ctx": "",
+   "balance": -5.0,
+   "lang": "ru",
+   "line": "💼 Позиция ≈ <b>$1,000</b> · риск 5% = $50.0 · маржа $1,000 при 1x <i>(при депозите $1,000)</i> ⚠️ <i>маржи на полный риск не хватит</i>"
+  },
+  {
+   "user": {
+    "trade_risk_pct": 5.0,
+    "trade_leverage": 1
+   },
+   "entry": 0.0001234,
+   "sl": 0.00012,
+   "ctx": "",
+   "balance": -5.0,
+   "lang": "en",
+   "line": "💼 Position ≈ <b>$1,000</b> · risk 5% = $50.0 · margin $1,000 at 1x <i>(on a $1,000 deposit)</i> ⚠️ <i>not enough margin for the full risk</i>"
+  },
+  {
+   "user": {
+    "trade_risk_pct": 5.0,
+    "trade_leverage": 1
+   },
+   "entry": 0.0001234,
+   "sl": 0.00012,
+   "ctx": "aligned",
+   "balance": 87.5,
+   "lang": "ru",
+   "line": "💼 Позиция ≈ <b>$87.5</b> · риск 5% = $4.4 · маржа $87.5 при 1x <i>(баланс $87.5)</i> ⚠️ <i>маржи на полный риск не хватит</i>"
+  },
+  {
+   "user": {
+    "trade_risk_pct": 5.0,
+    "trade_leverage": 1
+   },
+   "entry": 0.0001234,
+   "sl": 0.00012,
+   "ctx": "aligned",
+   "balance": 87.5,
+   "lang": "en",
+   "line": "💼 Position ≈ <b>$87.5</b> · risk 5% = $4.4 · margin $87.5 at 1x <i>(balance $87.5)</i> ⚠️ <i>not enough margin for the full risk</i>"
+  },
+  {
+   "user": {
+    "trade_risk_pct": 5.0,
+    "trade_leverage": 1
+   },
+   "entry": 0.0001234,
+   "sl": 0.00012,
+   "ctx": "with",
+   "balance": 2500.0,
+   "lang": "ru",
+   "line": "💼 Позиция ≈ <b>$2,500</b> · риск 5% = $125 · маржа $2,500 при 1x <i>(баланс $2,500)</i> ⚠️ <i>маржи на полный риск не хватит</i>"
+  },
+  {
+   "user": {
+    "trade_risk_pct": 5.0,
+    "trade_leverage": 1
+   },
+   "entry": 0.0001234,
+   "sl": 0.00012,
+   "ctx": "with",
+   "balance": 2500.0,
+   "lang": "en",
+   "line": "💼 Position ≈ <b>$2,500</b> · risk 5% = $125 · margin $2,500 at 1x <i>(balance $2,500)</i> ⚠️ <i>not enough margin for the full risk</i>"
+  },
+  {
+   "user": {
+    "trade_risk_pct": 5.0,
+    "trade_leverage": 1
+   },
+   "entry": 0.0001234,
+   "sl": 0.00012,
+   "ctx": "counter",
+   "balance": 1234567.0,
+   "lang": "ru",
+   "line": "💼 Позиция ≈ <b>$1,120,188</b> · риск 2.5% (×0.5, против тренда) = $30,864 · маржа $1,120,188 при 1x <i>(баланс $1,234,567)</i>"
+  },
+  {
+   "user": {
+    "trade_risk_pct": 5.0,
+    "trade_leverage": 1
+   },
+   "entry": 0.0001234,
+   "sl": 0.00012,
+   "ctx": "counter",
+   "balance": 1234567.0,
+   "lang": "en",
+   "line": "💼 Position ≈ <b>$1,120,188</b> · risk 2.5% (×0.5, counter-trend) = $30,864 · margin $1,120,188 at 1x <i>(balance $1,234,567)</i>"
+  },
+  {
+   "user": {
+    "trade_risk_pct": 5.0,
+    "trade_leverage": 1
+   },
+   "entry": 0.0001234,
+   "sl": 0.00012,
+   "ctx": "strong_counter",
+   "balance": null,
+   "lang": "ru",
+   "line": "⛔ <i>Автотрейд: сделка против сильного тренда BTC будет пропущена</i>"
+  },
+  {
+   "user": {
+    "trade_risk_pct": 5.0,
+    "trade_leverage": 1
+   },
+   "entry": 0.0001234,
+   "sl": 0.00012,
+   "ctx": "strong_counter",
+   "balance": null,
+   "lang": "en",
+   "line": "⛔ <i>Auto-trade: a trade against a strong BTC trend will be skipped</i>"
+  },
+  {
+   "user": {
+    "trade_risk_pct": 5.0,
+    "trade_leverage": 1
+   },
+   "entry": 0.0001234,
+   "sl": 0.00012,
+   "ctx": "weird",
+   "balance": 0.0,
+   "lang": "ru",
+   "line": "💼 Позиция ≈ <b>$1,000</b> · риск 5% = $50.0 · маржа $1,000 при 1x <i>(при депозите $1,000)</i> ⚠️ <i>маржи на полный риск не хватит</i>"
+  },
+  {
+   "user": {
+    "trade_risk_pct": 5.0,
+    "trade_leverage": 1
+   },
+   "entry": 0.0001234,
+   "sl": 0.00012,
+   "ctx": "weird",
+   "balance": 0.0,
+   "lang": "en",
+   "line": "💼 Position ≈ <b>$1,000</b> · risk 5% = $50.0 · margin $1,000 at 1x <i>(on a $1,000 deposit)</i> ⚠️ <i>not enough margin for the full risk</i>"
+  },
+  {
+   "user": {
+    "trade_risk_pct": 5.0,
+    "trade_leverage": 1
+   },
+   "entry": 100.0,
+   "sl": 100.0,
+   "ctx": "",
+   "balance": 87.5,
+   "lang": "ru",
+   "line": ""
+  },
+  {
+   "user": {
+    "trade_risk_pct": 5.0,
+    "trade_leverage": 1
+   },
+   "entry": 100.0,
+   "sl": 100.0,
+   "ctx": "",
+   "balance": 87.5,
+   "lang": "en",
+   "line": ""
+  },
+  {
+   "user": {
+    "trade_risk_pct": 5.0,
+    "trade_leverage": 1
+   },
+   "entry": 100.0,
+   "sl": 100.0,
+   "ctx": "aligned",
+   "balance": 2500.0,
+   "lang": "ru",
+   "line": ""
+  },
+  {
+   "user": {
+    "trade_risk_pct": 5.0,
+    "trade_leverage": 1
+   },
+   "entry": 100.0,
+   "sl": 100.0,
+   "ctx": "aligned",
+   "balance": 2500.0,
+   "lang": "en",
+   "line": ""
+  },
+  {
+   "user": {
+    "trade_risk_pct": 5.0,
+    "trade_leverage": 1
+   },
+   "entry": 100.0,
+   "sl": 100.0,
+   "ctx": "with",
+   "balance": 1234567.0,
+   "lang": "ru",
+   "line": ""
+  },
+  {
+   "user": {
+    "trade_risk_pct": 5.0,
+    "trade_leverage": 1
+   },
+   "entry": 100.0,
+   "sl": 100.0,
+   "ctx": "with",
+   "balance": 1234567.0,
+   "lang": "en",
+   "line": ""
+  },
+  {
+   "user": {
+    "trade_risk_pct": 5.0,
+    "trade_leverage": 1
+   },
+   "entry": 100.0,
+   "sl": 100.0,
+   "ctx": "counter",
+   "balance": null,
+   "lang": "ru",
+   "line": ""
+  },
+  {
+   "user": {
+    "trade_risk_pct": 5.0,
+    "trade_leverage": 1
+   },
+   "entry": 100.0,
+   "sl": 100.0,
+   "ctx": "counter",
+   "balance": null,
+   "lang": "en",
+   "line": ""
+  },
+  {
+   "user": {
+    "trade_risk_pct": 5.0,
+    "trade_leverage": 1
+   },
+   "entry": 100.0,
+   "sl": 100.0,
+   "ctx": "strong_counter",
+   "balance": 0.0,
+   "lang": "ru",
+   "line": "⛔ <i>Автотрейд: сделка против сильного тренда BTC будет пропущена</i>"
+  },
+  {
+   "user": {
+    "trade_risk_pct": 5.0,
+    "trade_leverage": 1
+   },
+   "entry": 100.0,
+   "sl": 100.0,
+   "ctx": "strong_counter",
+   "balance": 0.0,
+   "lang": "en",
+   "line": "⛔ <i>Auto-trade: a trade against a strong BTC trend will be skipped</i>"
+  },
+  {
+   "user": {
+    "trade_risk_pct": 5.0,
+    "trade_leverage": 1
+   },
+   "entry": 100.0,
+   "sl": 100.0,
+   "ctx": "weird",
+   "balance": -5.0,
+   "lang": "ru",
+   "line": ""
+  },
+  {
+   "user": {
+    "trade_risk_pct": 5.0,
+    "trade_leverage": 1
+   },
+   "entry": 100.0,
+   "sl": 100.0,
+   "ctx": "weird",
+   "balance": -5.0,
+   "lang": "en",
+   "line": ""
+  },
+  {
+   "user": {
+    "trade_risk_pct": 5.0,
+    "trade_leverage": 1
+   },
+   "entry": 0.0,
+   "sl": 1.0,
+   "ctx": "",
+   "balance": 2500.0,
+   "lang": "ru",
+   "line": ""
+  },
+  {
+   "user": {
+    "trade_risk_pct": 5.0,
+    "trade_leverage": 1
+   },
+   "entry": 0.0,
+   "sl": 1.0,
+   "ctx": "",
+   "balance": 2500.0,
+   "lang": "en",
+   "line": ""
+  },
+  {
+   "user": {
+    "trade_risk_pct": 5.0,
+    "trade_leverage": 1
+   },
+   "entry": 0.0,
+   "sl": 1.0,
+   "ctx": "aligned",
+   "balance": 1234567.0,
+   "lang": "ru",
+   "line": ""
+  },
+  {
+   "user": {
+    "trade_risk_pct": 5.0,
+    "trade_leverage": 1
+   },
+   "entry": 0.0,
+   "sl": 1.0,
+   "ctx": "aligned",
+   "balance": 1234567.0,
+   "lang": "en",
+   "line": ""
+  },
+  {
+   "user": {
+    "trade_risk_pct": 5.0,
+    "trade_leverage": 1
+   },
+   "entry": 0.0,
+   "sl": 1.0,
+   "ctx": "with",
+   "balance": null,
+   "lang": "ru",
+   "line": ""
+  },
+  {
+   "user": {
+    "trade_risk_pct": 5.0,
+    "trade_leverage": 1
+   },
+   "entry": 0.0,
+   "sl": 1.0,
+   "ctx": "with",
+   "balance": null,
+   "lang": "en",
+   "line": ""
+  },
+  {
+   "user": {
+    "trade_risk_pct": 5.0,
+    "trade_leverage": 1
+   },
+   "entry": 0.0,
+   "sl": 1.0,
+   "ctx": "counter",
+   "balance": 0.0,
+   "lang": "ru",
+   "line": ""
+  },
+  {
+   "user": {
+    "trade_risk_pct": 5.0,
+    "trade_leverage": 1
+   },
+   "entry": 0.0,
+   "sl": 1.0,
+   "ctx": "counter",
+   "balance": 0.0,
+   "lang": "en",
+   "line": ""
+  },
+  {
+   "user": {
+    "trade_risk_pct": 5.0,
+    "trade_leverage": 1
+   },
+   "entry": 0.0,
+   "sl": 1.0,
+   "ctx": "strong_counter",
+   "balance": -5.0,
+   "lang": "ru",
+   "line": "⛔ <i>Автотрейд: сделка против сильного тренда BTC будет пропущена</i>"
+  },
+  {
+   "user": {
+    "trade_risk_pct": 5.0,
+    "trade_leverage": 1
+   },
+   "entry": 0.0,
+   "sl": 1.0,
+   "ctx": "strong_counter",
+   "balance": -5.0,
+   "lang": "en",
+   "line": "⛔ <i>Auto-trade: a trade against a strong BTC trend will be skipped</i>"
+  },
+  {
+   "user": {
+    "trade_risk_pct": 5.0,
+    "trade_leverage": 1
+   },
+   "entry": 0.0,
+   "sl": 1.0,
+   "ctx": "weird",
+   "balance": 87.5,
+   "lang": "ru",
+   "line": ""
+  },
+  {
+   "user": {
+    "trade_risk_pct": 5.0,
+    "trade_leverage": 1
+   },
+   "entry": 0.0,
+   "sl": 1.0,
+   "ctx": "weird",
+   "balance": 87.5,
+   "lang": "en",
+   "line": ""
+  },
+  {
+   "user": {
+    "trade_risk_pct": 5.0,
+    "trade_leverage": 1
+   },
+   "entry": 2.0,
+   "sl": 2.5,
+   "ctx": "",
+   "balance": 1234567.0,
+   "lang": "ru",
+   "line": "💼 Позиция ≈ <b>$246,913</b> · риск 5% = $61,728 · маржа $246,913 при 1x <i>(баланс $1,234,567)</i>"
+  },
+  {
+   "user": {
+    "trade_risk_pct": 5.0,
+    "trade_leverage": 1
+   },
+   "entry": 2.0,
+   "sl": 2.5,
+   "ctx": "",
+   "balance": 1234567.0,
+   "lang": "en",
+   "line": "💼 Position ≈ <b>$246,913</b> · risk 5% = $61,728 · margin $246,913 at 1x <i>(balance $1,234,567)</i>"
+  },
+  {
+   "user": {
+    "trade_risk_pct": 5.0,
+    "trade_leverage": 1
+   },
+   "entry": 2.0,
+   "sl": 2.5,
+   "ctx": "aligned",
+   "balance": null,
+   "lang": "ru",
+   "line": "💼 Позиция ≈ <b>$200</b> · риск 5% = $50.0 · маржа $200 при 1x <i>(при депозите $1,000)</i>"
+  },
+  {
+   "user": {
+    "trade_risk_pct": 5.0,
+    "trade_leverage": 1
+   },
+   "entry": 2.0,
+   "sl": 2.5,
+   "ctx": "aligned",
+   "balance": null,
+   "lang": "en",
+   "line": "💼 Position ≈ <b>$200</b> · risk 5% = $50.0 · margin $200 at 1x <i>(on a $1,000 deposit)</i>"
+  },
+  {
+   "user": {
+    "trade_risk_pct": 5.0,
+    "trade_leverage": 1
+   },
+   "entry": 2.0,
+   "sl": 2.5,
+   "ctx": "with",
+   "balance": 0.0,
+   "lang": "ru",
+   "line": "💼 Позиция ≈ <b>$200</b> · риск 5% = $50.0 · маржа $200 при 1x <i>(при депозите $1,000)</i>"
+  },
+  {
+   "user": {
+    "trade_risk_pct": 5.0,
+    "trade_leverage": 1
+   },
+   "entry": 2.0,
+   "sl": 2.5,
+   "ctx": "with",
+   "balance": 0.0,
+   "lang": "en",
+   "line": "💼 Position ≈ <b>$200</b> · risk 5% = $50.0 · margin $200 at 1x <i>(on a $1,000 deposit)</i>"
+  },
+  {
+   "user": {
+    "trade_risk_pct": 5.0,
+    "trade_leverage": 1
+   },
+   "entry": 2.0,
+   "sl": 2.5,
+   "ctx": "counter",
+   "balance": -5.0,
+   "lang": "ru",
+   "line": "💼 Позиция ≈ <b>$100</b> · риск 2.5% (×0.5, против тренда) = $25.0 · маржа $100 при 1x <i>(при депозите $1,000)</i>"
+  },
+  {
+   "user": {
+    "trade_risk_pct": 5.0,
+    "trade_leverage": 1
+   },
+   "entry": 2.0,
+   "sl": 2.5,
+   "ctx": "counter",
+   "balance": -5.0,
+   "lang": "en",
+   "line": "💼 Position ≈ <b>$100</b> · risk 2.5% (×0.5, counter-trend) = $25.0 · margin $100 at 1x <i>(on a $1,000 deposit)</i>"
+  },
+  {
+   "user": {
+    "trade_risk_pct": 5.0,
+    "trade_leverage": 1
+   },
+   "entry": 2.0,
+   "sl": 2.5,
+   "ctx": "strong_counter",
+   "balance": 87.5,
+   "lang": "ru",
+   "line": "⛔ <i>Автотрейд: сделка против сильного тренда BTC будет пропущена</i>"
+  },
+  {
+   "user": {
+    "trade_risk_pct": 5.0,
+    "trade_leverage": 1
+   },
+   "entry": 2.0,
+   "sl": 2.5,
+   "ctx": "strong_counter",
+   "balance": 87.5,
+   "lang": "en",
+   "line": "⛔ <i>Auto-trade: a trade against a strong BTC trend will be skipped</i>"
+  },
+  {
+   "user": {
+    "trade_risk_pct": 5.0,
+    "trade_leverage": 1
+   },
+   "entry": 2.0,
+   "sl": 2.5,
+   "ctx": "weird",
+   "balance": 2500.0,
+   "lang": "ru",
+   "line": "💼 Позиция ≈ <b>$500</b> · риск 5% = $125 · маржа $500 при 1x <i>(баланс $2,500)</i>"
+  },
+  {
+   "user": {
+    "trade_risk_pct": 5.0,
+    "trade_leverage": 1
+   },
+   "entry": 2.0,
+   "sl": 2.5,
+   "ctx": "weird",
+   "balance": 2500.0,
+   "lang": "en",
+   "line": "💼 Position ≈ <b>$500</b> · risk 5% = $125 · margin $500 at 1x <i>(balance $2,500)</i>"
+  }
+ ],
+ "compute": [
+  [
+   1000.0,
+   1.0,
+   100.0,
+   99.0,
+   10,
+   {
+    "risk_usd": 10.0,
+    "notional": 1000.0,
+    "margin": 100.0,
+    "sl_pct": 1.0,
+    "leverage": 10,
+    "capped": false
+   }
+  ],
+  [
+   1000.0,
+   1.0,
+   100.0,
+   99.0,
+   0,
+   {
+    "risk_usd": 10.0,
+    "notional": 1000.0,
+    "margin": 1000.0,
+    "sl_pct": 1.0,
+    "leverage": 1,
+    "capped": false
+   }
+  ],
+  [
+   1000.0,
+   1.0,
+   100.0,
+   99.0,
+   1,
+   {
+    "risk_usd": 10.0,
+    "notional": 1000.0,
+    "margin": 1000.0,
+    "sl_pct": 1.0,
+    "leverage": 1,
+    "capped": false
+   }
+  ],
+  [
+   1000.0,
+   1.0,
+   100.0,
+   50.0,
+   10,
+   {
+    "risk_usd": 10.0,
+    "notional": 20.0,
+    "margin": 2.0,
+    "sl_pct": 50.0,
+    "leverage": 10,
+    "capped": false
+   }
+  ],
+  [
+   1000.0,
+   1.0,
+   100.0,
+   50.0,
+   0,
+   {
+    "risk_usd": 10.0,
+    "notional": 20.0,
+    "margin": 20.0,
+    "sl_pct": 50.0,
+    "leverage": 1,
+    "capped": false
+   }
+  ],
+  [
+   1000.0,
+   1.0,
+   100.0,
+   50.0,
+   1,
+   {
+    "risk_usd": 10.0,
+    "notional": 20.0,
+    "margin": 20.0,
+    "sl_pct": 50.0,
+    "leverage": 1,
+    "capped": false
+   }
+  ],
+  [
+   1000.0,
+   1.0,
+   0.0,
+   1.0,
+   10,
+   {}
+  ],
+  [
+   1000.0,
+   1.0,
+   0.0,
+   1.0,
+   0,
+   {}
+  ],
+  [
+   1000.0,
+   1.0,
+   0.0,
+   1.0,
+   1,
+   {}
+  ],
+  [
+   1000.0,
+   0.0,
+   100.0,
+   99.0,
+   10,
+   {}
+  ],
+  [
+   1000.0,
+   0.0,
+   100.0,
+   99.0,
+   0,
+   {}
+  ],
+  [
+   1000.0,
+   0.0,
+   100.0,
+   99.0,
+   1,
+   {}
+  ],
+  [
+   1000.0,
+   0.0,
+   100.0,
+   50.0,
+   10,
+   {}
+  ],
+  [
+   1000.0,
+   0.0,
+   100.0,
+   50.0,
+   0,
+   {}
+  ],
+  [
+   1000.0,
+   0.0,
+   100.0,
+   50.0,
+   1,
+   {}
+  ],
+  [
+   1000.0,
+   0.0,
+   0.0,
+   1.0,
+   10,
+   {}
+  ],
+  [
+   1000.0,
+   0.0,
+   0.0,
+   1.0,
+   0,
+   {}
+  ],
+  [
+   1000.0,
+   0.0,
+   0.0,
+   1.0,
+   1,
+   {}
+  ],
+  [
+   1000.0,
+   3.0,
+   100.0,
+   99.0,
+   10,
+   {
+    "risk_usd": 30.0,
+    "notional": 3000.0,
+    "margin": 300.0,
+    "sl_pct": 1.0,
+    "leverage": 10,
+    "capped": false
+   }
+  ],
+  [
+   1000.0,
+   3.0,
+   100.0,
+   99.0,
+   0,
+   {
+    "risk_usd": 30.0,
+    "notional": 1000.0,
+    "margin": 1000.0,
+    "sl_pct": 1.0,
+    "leverage": 1,
+    "capped": true
+   }
+  ],
+  [
+   1000.0,
+   3.0,
+   100.0,
+   99.0,
+   1,
+   {
+    "risk_usd": 30.0,
+    "notional": 1000.0,
+    "margin": 1000.0,
+    "sl_pct": 1.0,
+    "leverage": 1,
+    "capped": true
+   }
+  ],
+  [
+   1000.0,
+   3.0,
+   100.0,
+   50.0,
+   10,
+   {
+    "risk_usd": 30.0,
+    "notional": 60.0,
+    "margin": 6.0,
+    "sl_pct": 50.0,
+    "leverage": 10,
+    "capped": false
+   }
+  ],
+  [
+   1000.0,
+   3.0,
+   100.0,
+   50.0,
+   0,
+   {
+    "risk_usd": 30.0,
+    "notional": 60.0,
+    "margin": 60.0,
+    "sl_pct": 50.0,
+    "leverage": 1,
+    "capped": false
+   }
+  ],
+  [
+   1000.0,
+   3.0,
+   100.0,
+   50.0,
+   1,
+   {
+    "risk_usd": 30.0,
+    "notional": 60.0,
+    "margin": 60.0,
+    "sl_pct": 50.0,
+    "leverage": 1,
+    "capped": false
+   }
+  ],
+  [
+   1000.0,
+   3.0,
+   0.0,
+   1.0,
+   10,
+   {}
+  ],
+  [
+   1000.0,
+   3.0,
+   0.0,
+   1.0,
+   0,
+   {}
+  ],
+  [
+   1000.0,
+   3.0,
+   0.0,
+   1.0,
+   1,
+   {}
+  ],
+  [
+   50.0,
+   1.0,
+   100.0,
+   99.0,
+   10,
+   {
+    "risk_usd": 0.5,
+    "notional": 50.0,
+    "margin": 5.0,
+    "sl_pct": 1.0,
+    "leverage": 10,
+    "capped": false
+   }
+  ],
+  [
+   50.0,
+   1.0,
+   100.0,
+   99.0,
+   0,
+   {
+    "risk_usd": 0.5,
+    "notional": 50.0,
+    "margin": 50.0,
+    "sl_pct": 1.0,
+    "leverage": 1,
+    "capped": false
+   }
+  ],
+  [
+   50.0,
+   1.0,
+   100.0,
+   99.0,
+   1,
+   {
+    "risk_usd": 0.5,
+    "notional": 50.0,
+    "margin": 50.0,
+    "sl_pct": 1.0,
+    "leverage": 1,
+    "capped": false
+   }
+  ],
+  [
+   50.0,
+   1.0,
+   100.0,
+   50.0,
+   10,
+   {
+    "risk_usd": 0.5,
+    "notional": 1.0,
+    "margin": 0.1,
+    "sl_pct": 50.0,
+    "leverage": 10,
+    "capped": false
+   }
+  ],
+  [
+   50.0,
+   1.0,
+   100.0,
+   50.0,
+   0,
+   {
+    "risk_usd": 0.5,
+    "notional": 1.0,
+    "margin": 1.0,
+    "sl_pct": 50.0,
+    "leverage": 1,
+    "capped": false
+   }
+  ],
+  [
+   50.0,
+   1.0,
+   100.0,
+   50.0,
+   1,
+   {
+    "risk_usd": 0.5,
+    "notional": 1.0,
+    "margin": 1.0,
+    "sl_pct": 50.0,
+    "leverage": 1,
+    "capped": false
+   }
+  ],
+  [
+   50.0,
+   1.0,
+   0.0,
+   1.0,
+   10,
+   {}
+  ],
+  [
+   50.0,
+   1.0,
+   0.0,
+   1.0,
+   0,
+   {}
+  ],
+  [
+   50.0,
+   1.0,
+   0.0,
+   1.0,
+   1,
+   {}
+  ],
+  [
+   50.0,
+   0.0,
+   100.0,
+   99.0,
+   10,
+   {}
+  ],
+  [
+   50.0,
+   0.0,
+   100.0,
+   99.0,
+   0,
+   {}
+  ],
+  [
+   50.0,
+   0.0,
+   100.0,
+   99.0,
+   1,
+   {}
+  ],
+  [
+   50.0,
+   0.0,
+   100.0,
+   50.0,
+   10,
+   {}
+  ],
+  [
+   50.0,
+   0.0,
+   100.0,
+   50.0,
+   0,
+   {}
+  ],
+  [
+   50.0,
+   0.0,
+   100.0,
+   50.0,
+   1,
+   {}
+  ],
+  [
+   50.0,
+   0.0,
+   0.0,
+   1.0,
+   10,
+   {}
+  ],
+  [
+   50.0,
+   0.0,
+   0.0,
+   1.0,
+   0,
+   {}
+  ],
+  [
+   50.0,
+   0.0,
+   0.0,
+   1.0,
+   1,
+   {}
+  ],
+  [
+   50.0,
+   3.0,
+   100.0,
+   99.0,
+   10,
+   {
+    "risk_usd": 1.5,
+    "notional": 150.0,
+    "margin": 15.0,
+    "sl_pct": 1.0,
+    "leverage": 10,
+    "capped": false
+   }
+  ],
+  [
+   50.0,
+   3.0,
+   100.0,
+   99.0,
+   0,
+   {
+    "risk_usd": 1.5,
+    "notional": 50.0,
+    "margin": 50.0,
+    "sl_pct": 1.0,
+    "leverage": 1,
+    "capped": true
+   }
+  ],
+  [
+   50.0,
+   3.0,
+   100.0,
+   99.0,
+   1,
+   {
+    "risk_usd": 1.5,
+    "notional": 50.0,
+    "margin": 50.0,
+    "sl_pct": 1.0,
+    "leverage": 1,
+    "capped": true
+   }
+  ],
+  [
+   50.0,
+   3.0,
+   100.0,
+   50.0,
+   10,
+   {
+    "risk_usd": 1.5,
+    "notional": 3.0,
+    "margin": 0.3,
+    "sl_pct": 50.0,
+    "leverage": 10,
+    "capped": false
+   }
+  ],
+  [
+   50.0,
+   3.0,
+   100.0,
+   50.0,
+   0,
+   {
+    "risk_usd": 1.5,
+    "notional": 3.0,
+    "margin": 3.0,
+    "sl_pct": 50.0,
+    "leverage": 1,
+    "capped": false
+   }
+  ],
+  [
+   50.0,
+   3.0,
+   100.0,
+   50.0,
+   1,
+   {
+    "risk_usd": 1.5,
+    "notional": 3.0,
+    "margin": 3.0,
+    "sl_pct": 50.0,
+    "leverage": 1,
+    "capped": false
+   }
+  ],
+  [
+   50.0,
+   3.0,
+   0.0,
+   1.0,
+   10,
+   {}
+  ],
+  [
+   50.0,
+   3.0,
+   0.0,
+   1.0,
+   0,
+   {}
+  ],
+  [
+   50.0,
+   3.0,
+   0.0,
+   1.0,
+   1,
+   {}
+  ]
+ ],
+ "usd": [
+  [
+   0,
+   "$0.0"
+  ],
+  [
+   0.04,
+   "$0.0"
+  ],
+  [
+   0.05,
+   "$0.1"
+  ],
+  [
+   99.94,
+   "$99.9"
+  ],
+  [
+   99.96,
+   "$100.0"
+  ],
+  [
+   100,
+   "$100"
+  ],
+  [
+   1234.5,
+   "$1,234"
+  ],
+  [
+   1000000.0,
+   "$1,000,000"
+  ],
+  [
+   12.25,
+   "$12.2"
+  ]
+ ],
+ "trend_kb": [
+  [
+   "ru",
+   [
+    [
+     {
+      "text": "🔕 Не присылать смену тренда",
+      "callback_data": "trend_notify_off"
+     }
+    ]
+   ]
+  ],
+  [
+   "en",
+   [
+    [
+     {
+      "text": "🔕 Stop trend alerts",
+      "callback_data": "trend_notify_off"
+     }
+    ]
+   ]
+  ],
+  [
+   "de",
+   [
+    [
+     {
+      "text": "🔕 Не присылать смену тренда",
+      "callback_data": "trend_notify_off"
+     }
+    ]
+   ]
+  ]
+ ],
+ "i18n_free": {
+  "free_report_title": {
+   "ru": "📊 <b>Вечерний отчёт (Free план)</b>",
+   "en": "📊 <b>Evening report (Free plan)</b>"
+  },
+  "free_report_received": {
+   "ru": "Сегодня получено: <b>{n}</b> сигналов",
+   "en": "Today received: <b>{n}</b> signals"
+  },
+  "free_report_closed_today_header": {
+   "ru": "🔥 <b>На платформе закрыто по TP сегодня ({n}):</b>\n   <i>(трейды Pro юзеров — для мотивации)</i>",
+   "en": "🔥 <b>Closed at TP across platform today ({n}):</b>\n   <i>(trades from Pro users — for motivation)</i>"
+  },
+  "free_report_more": {
+   "ru": "  ... и ещё {n}",
+   "en": "  ... and {n} more"
+  },
+  "free_report_total": {
+   "ru": "  Итого: <b>+{r:.1f}R</b>",
+   "en": "  Total: <b>+{r:.1f}R</b>"
+  },
+  "free_report_upsell_pro": {
+   "ru": "⭐ <b>Pro $69</b> — LEVELS + SMC автотрейд + AI-фильтр + оптимизатор + Genome",
+   "en": "⭐ <b>Pro $69</b> — LEVELS + SMC auto-trade + AI filter + optimizer + Genome"
+  },
+  "smc_pro_preview_card": {
+   "ru": "🎁 <b>Pro Preview</b> — SMC сигнал\n\n<b>{symbol}</b> · {direction} · quality {score}/10\nEntry: <code>{entry}</code> · SL: <code>{sl}</code> · TP1: <code>{tp1}</code>\n\n💡 Это сигнал стратегии <b>SMC</b> — она ловит точки входа на order-blocks и работает даже в тренде, когда LEVELS молчит. На Free-плане ты видишь до <b>3 таких сигналов в день</b> как тизер.\n\n💎 Разблокировать все SMC сигналы + авто-торговля → /subscribe",
+   "en": "🎁 <b>Pro Preview</b> — SMC signal\n\n<b>{symbol}</b> · {direction} · quality {score}/10\nEntry: <code>{entry}</code> · SL: <code>{sl}</code> · TP1: <code>{tp1}</code>\n\n💡 This is a signal from the <b>SMC</b> strategy — it finds entries at order-blocks and works in trending markets where LEVELS goes quiet. On Free plan you see up to <b>3 such signals per day</b> as a teaser.\n\n💎 Unlock all SMC signals + auto-trading → /subscribe"
+  }
+ },
+ "t_format": [
+  [
+   "free_report_total",
+   "ru",
+   {
+    "r": 7.85
+   },
+   "  Итого: <b>+7.8R</b>"
+  ],
+  [
+   "free_report_total",
+   "en",
+   {
+    "r": 0.05
+   },
+   "  Total: <b>+0.1R</b>"
+  ],
+  [
+   "free_report_received",
+   "en",
+   {
+    "n": 3
+   },
+   "Today received: <b>3</b> signals"
+  ],
+  [
+   "free_report_received",
+   "ru",
+   {},
+   "Сегодня получено: <b>{n}</b> сигналов"
+  ],
+  [
+   "smc_sl_inline_warning",
+   "en",
+   {
+    "sl_pct": "6.1"
+   },
+   "\n⚠️ <b>SL {sl_pct}% > your limit {max_pct}%</b>\nAuto-trade will skip this signal."
+  ],
+  [
+   "smc_confirmations",
+   "de",
+   {
+    "score": 4
+   },
+   "ПОДТВЕРЖДЕНИЯ (4/5):"
+  ],
+  [
+   "no_such_key",
+   "ru",
+   {
+    "a": 1
+   },
+   "no_such_key"
+  ]
+ ]
+}

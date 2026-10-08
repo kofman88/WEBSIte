@@ -1192,7 +1192,350 @@ def free_vectors():
                    "cards": cards, "loads": loads, "report": report, "quota_const": fr._FREE_SMC_PREVIEW_DAILY_QUOTA})
 
 
+# ── volume filter ──────────────────────────────────────────────────────────
+def volume_filter_vectors():
+    import volume_filter as vf
+    import scanner_mid
+    rnd = random.Random(77)
+    coins = [f"C{i:02d}-USDT-SWAP" for i in range(40)]
+    vol = {}
+    for i, c in enumerate(coins):
+        if i % 9 == 4:
+            continue                       # missing → 0
+        v = rnd.choice([0, 0, 150_000, 300_000, 500_000, 1_000_000, 2_500_000, 7_000_000, 7_000_000, 12_345_678.5, 50_000_000])
+        vol[c] = v
+    U = lambda **kw: types.SimpleNamespace(**kw)  # noqa: E731
+    groups = {
+        "usdt": [U(vol_filter_mode="usdt", max_coins_count=50, min_volume_usdt=1_000_000)],
+        "usdt_low": [U(vol_filter_mode="usdt", max_coins_count=50, min_volume_usdt=300_000), U(vol_filter_mode="usdt", max_coins_count=10, min_volume_usdt=5_000_000)],
+        "count": [U(vol_filter_mode="count", max_coins_count=7, min_volume_usdt=1_000_000), U(vol_filter_mode="count", max_coins_count=12, min_volume_usdt=0)],
+        "both": [U(vol_filter_mode="both", max_coins_count=15, min_volume_usdt=2_000_000)],
+        "mixed": [U(vol_filter_mode="count", max_coins_count=9, min_volume_usdt=3_000_000), U(vol_filter_mode="usdt", max_coins_count=20, min_volume_usdt=600_000)],
+        "off": [U(vol_filter_mode="off", max_coins_count=5, min_volume_usdt=9_000_000), U(vol_filter_mode="count", max_coins_count=3, min_volume_usdt=1)],
+        "zero_min": [U(vol_filter_mode="usdt", max_coins_count=0, min_volume_usdt=0), U(vol_filter_mode="usdt", max_coins_count=None, min_volume_usdt=None)],
+        "defaults": [U()],
+        "neg_count": [U(vol_filter_mode="count", max_coins_count=-5, min_volume_usdt=1)],
+        "none": [],
+    }
+    cases = []
+    for name, users in groups.items():
+        for cap, floor in [(200, 0.0), (10, 0.0), (0, 0.0), (200, 500_000.0), (5, 2_000_000.0)]:
+            got = vf.apply_vol_filter(coins, users, vol, lambda u: getattr(u, "min_volume_usdt", 0), cap_count=cap, floor_usdt=floor,
+                                      strategy_tag="SMC")
+            cases.append({"group": name, "cap": cap, "floor": floor, "result": got})
+    cases.append({"group": "usdt", "cap": 200, "floor": 0.0, "coins": [], "result": vf.apply_vol_filter([], groups["usdt"], vol, lambda u: 0)})
+    mid = []
+    fake = types.SimpleNamespace(fetcher=types.SimpleNamespace(vol_by_sym=vol))
+    mid_groups = {k: v for k, v in groups.items() if k not in ("zero_min",)}
+    mid_groups["zero_min_mid"] = [U(vol_filter_mode="usdt", max_coins_count=0, min_volume_usdt=0)]
+    mid_groups["huge_min"] = [U(vol_filter_mode="usdt", max_coins_count=50, min_volume_usdt=1e12)]
+    for name, users in mid_groups.items():
+        jobs = [types.SimpleNamespace(user=u) for u in users]
+        mid.append({"group": name, "result": scanner_mid.MidScanner._apply_vol_filter(fake, coins, jobs)})
+    write("volume_filter", {"coins": coins, "vol": vol,
+                            "groups": {k: [vars(u) for u in v] for k, v in groups.items()},
+                            "mid_groups": {k: [vars(u) for u in v] for k, v in mid_groups.items()},
+                            "cases": cases, "mid": mid})
+
+
+# ── coin quality learner ───────────────────────────────────────────────────
+def coin_quality_vectors():
+    import sqlite3
+    import coin_quality_learner as cq
+    clk = Clock(1_800_000_000.0)
+    cq.time = clk
+    kv = FakeKV()
+    install_kv(kv)
+    tmp = tempfile.mkdtemp()
+    path = os.path.join(tmp, "cq.db")
+    with open(os.path.join(FIX, "trades_ddl.sql"), encoding="utf-8") as fh:
+        ddl = fh.read()
+    conn = sqlite3.connect(path)
+    conn.executescript(ddl)
+    rows = []
+    rnd = random.Random(5)
+    day = 86400
+
+    def add(sym, strat, result, rr, age_days):
+        rows.append({"trade_id": f"t{len(rows)}", "user_id": 1, "symbol": sym, "direction": "LONG", "entry": 1.0, "sl": 0.9,
+                     "tp1": 1.1, "tp2": 1.2, "tp3": 1.3, "strategy": strat, "result": result, "result_rr": rr,
+                     "created_at": clk.t - age_days * day})
+    for _ in range(12):
+        add("BAD-USDT-SWAP", "SMC", rnd.choice(["SL", "SL", "TP1"]), rnd.choice([-1.0, -1.0, 0.5]), rnd.uniform(1, 29))
+    for _ in range(9):
+        add("FEW-USDT-SWAP", "LEVELS", "SL", -1.0, 3)
+    for _ in range(15):
+        add("GOOD-USDT-SWAP", "VOLUME", rnd.choice(["TP1", "TP2", "SL"]), rnd.choice([1.25, 2.0, -1.0]), rnd.uniform(1, 25))
+    for _ in range(11):
+        add("btc-usdt-swap", "smc", "SL", -0.75, 2)
+    for _ in range(10):
+        add("GER-USDT-SWAP", "GERCHIK", "SL", -1.0, 2)
+    for _ in range(6):
+        add("MIX-USDT-SWAP", "LEVELS", "SL", -1.0, 2)
+    for _ in range(4):
+        add("MIX-USDT-SWAP", "LEVELS", "", 0.0, 2)          # open rows count (quirk)
+    for _ in range(3):
+        add("MIX-USDT-SWAP", "LEVELS", "SKIP", 0.0, 2)      # excluded
+    add("MIX-USDT-SWAP", "LEVELS", "SL", -1.0, 31)           # too old
+    for _ in range(10):
+        add("PF-USDT-SWAP", "SMC", "SL", -1.0, 4)
+    for _ in range(10):
+        add("PF-USDT-SWAP", "SMC", "TP2", 0.75, 4)           # PF 0.75 ≥ 0.7 → not banned
+    for _ in range(10):
+        add("ZERO-USDT-SWAP", "SMC", "BE", 0.0, 4)          # avg 0 → not banned
+    for r in rows:
+        keys = list(r)
+        conn.execute(f"INSERT INTO trades ({', '.join(keys)}) VALUES ({', '.join('?' * len(keys))})", [r[k] for k in keys])
+    conn.execute("INSERT INTO trades (trade_id, user_id, symbol, direction, entry, sl, tp1, tp2, tp3, strategy, result, result_rr, created_at) "
+                 "VALUES ('tnull', 1, 'NUL-USDT-SWAP', 'LONG', 1, 1, 1, 1, 1, 'SMC', 'SL', NULL, ?)", (clk.t - 100,))
+    conn.commit()
+    conn.close()
+    database._db_path = path
+    cap = capture("CHM.CoinQuality")
+    steps = []
+    kv.d["coin_blacklist_v1"] = json.dumps({"OLD-USDT-SWAP::SMC": clk.t - 5, "KEEP-USDT-SWAP::LEVELS": clk.t + 3600.5,
+                                            "lower-usdt-swap::smc": clk.t + 999, "nocolon": clk.t + 50, "BAD-USDT-SWAP::SMC": "x"})
+
+    def check():
+        return {f"{s}|{st}": cq.is_blacklisted(s, st) for s, st in [("BAD-USDT-SWAP", "SMC"), ("bad-usdt-swap", "smc"), ("BTC-USDT-SWAP", "SMC"),
+                                                                    ("KEEP-USDT-SWAP", "LEVELS"), ("lower-usdt-swap", "smc"), ("FEW-USDT-SWAP", "LEVELS"),
+                                                                    ("GER-USDT-SWAP", "GERCHIK"), ("MIX-USDT-SWAP", "LEVELS"), ("", "SMC"),
+                                                                    ("PF-USDT-SWAP", "SMC")]}
+
+    def snap():
+        return {f"{k[0]}::{k[1]}": v for k, v in cq.get_blacklist_snapshot().items()}
+
+    async def run():
+        cap.lines.clear()
+        n = await cq.restore_blacklist_from_kv()
+        steps.append({"op": "restore", "now": clk.t, "result": n, "snapshot": snap(), "check": check(),
+                      "logs": [l[1] for l in cap.lines if l[0] in ("INFO", "WARNING")]})
+        cap.lines.clear()
+        kv.writes.clear()
+        res = await cq.recompute_blacklist()
+        steps.append({"op": "recompute", "now": clk.t, "result": res, "snapshot": snap(), "check": check(),
+                      "kv": [w[1] for w in kv.writes], "logs": [l[1] for l in cap.lines if l[0] in ("INFO", "WARNING")]})
+        clk.t += 14 * day + 1
+        cap.lines.clear()
+        steps.append({"op": "check_later", "now": clk.t, "check": check(), "snapshot": snap()})
+        kv.writes.clear()
+        res = await cq.recompute_blacklist()
+        steps.append({"op": "recompute2", "now": clk.t, "result": res, "snapshot": snap(), "check": check(),
+                      "kv": [w[1] for w in kv.writes], "logs": [l[1] for l in cap.lines if l[0] in ("INFO", "WARNING")]})
+    cq._blacklist.clear()
+    asyncio.run(run())
+    write("coin_quality", {"rows": rows, "null_row": {"created_at": 1_800_000_000.0 - 100}, "initial_kv":
+                           {"coin_blacklist_v1": json.dumps({"OLD-USDT-SWAP::SMC": 1_800_000_000.0 - 5, "KEEP-USDT-SWAP::LEVELS": 1_800_000_000.0 + 3600.5,
+                                                             "lower-usdt-swap::smc": 1_800_000_000.0 + 999, "nocolon": 1_800_000_000.0 + 50,
+                                                             "BAD-USDT-SWAP::SMC": "x"})},
+                           "steps": steps})
+
+
+# ── signal trades repo ─────────────────────────────────────────────────────
+def repo_vectors():
+    import sqlite3
+    from db import core, trades as dbt, signal_progress as sp, trade_events as te, signals as dbs
+    clk = Clock(1_800_000_000.5)
+    dbt.time = clk
+    te._t = clk
+    tmp = tempfile.mkdtemp()
+    path = os.path.join(tmp, "repo.db")
+    with open(os.path.join(FIX, "trades_ddl.sql"), encoding="utf-8") as fh:
+        ddl = fh.read()
+    c0 = sqlite3.connect(path)
+    c0.executescript(ddl)
+    c0.commit()
+    c0.close()
+    core._db_path = path
+    core._read_pool = None
+    core._write_conn = None
+    database._db_path = path
+    cap = capture("CHM.DB")
+
+    def all_rows():
+        c = sqlite3.connect(path)
+        c.row_factory = sqlite3.Row
+        out = [dict(r) for r in c.execute("SELECT * FROM trades ORDER BY trade_id")]
+        ev = [dict(r) for r in c.execute("SELECT * FROM trade_events ORDER BY id")]
+        c.close()
+        return out, ev
+
+    base = {"user_id": 7, "symbol": "BTC-USDT-SWAP", "direction": "LONG", "entry": 100.0, "sl": 98.0, "tp1": 104.0, "tp2": 106.0, "tp3": 109.0}
+    steps = []
+
+    async def run():
+        async def step(name, coro_or_val):
+            cap.lines.clear()
+            try:
+                res = await coro_or_val if asyncio.iscoroutine(coro_or_val) else coro_or_val
+                err = None
+            except Exception as e:  # noqa: BLE001
+                res, err = None, type(e).__name__
+            await asyncio.sleep(0)
+            await asyncio.sleep(0)
+            await asyncio.sleep(0)
+            rows, ev = all_rows()
+            steps.append({"name": name, "now": clk.t, "result": res, "error": err, "rows": rows, "events": ev,
+                          "logs": [l[1] for l in cap.lines if l[0] in ("INFO", "WARNING")]})
+        await step("add_t1", dbt.db_add_trade({**base, "trade_id": "t1", "quality": 7, "timeframe": "1h", "breakout_type": "Отскок",
+                                               "created_at": clk.t, "strategy": "LEVELS", "is_counter_trend": True, "mtf_aligned": False,
+                                               "trend_ctx": "with", "state": "PENDING", "state_changed_at": clk.t, "original_sl": 98.0,
+                                               "signal_msg_id": 55, "progress_stage": "TP1", "foo": 1, "preset_name": None,
+                                               "signal_type": "x" * 70, "rsi": 51.5, "volume_ratio": 1.0}))
+        await step("add_dup", dbt.db_add_trade({**base, "trade_id": "t1", "entry": 1.0}))
+        await step("add_empty", dbt.db_add_trade({"foo": 1}))
+        await step("add_t2", dbt.db_add_trade({**base, "trade_id": "t2", "direction": "SHORT", "entry_lo": 99.0, "entry_hi": 101.0,
+                                               "created_at": clk.t - 3600, "strategy": "SMC", "state": "PENDING", "tp_placed": 1}))
+        await step("add_t3", dbt.db_add_trade({**base, "trade_id": "t3", "created_at": clk.t - 80 * 3600, "strategy": "VOLUME",
+                                               "state": "PENDING", "order_id": "ex-1"}))
+        await step("add_t4", dbt.db_add_trade({**base, "trade_id": "t4", "created_at": clk.t - 4 * 86400, "strategy": "LEVELS", "state": "PENDING"}))
+        clk.t += 10
+        await step("state_placing", dbt.db_set_trade_state("t2", "PLACING", bump_attempts=True))
+        await step("state_open", dbt.db_set_trade_state("t2", "OPEN"))
+        await step("state_back", dbt.db_set_trade_state("t2", "PLACING"))
+        await step("state_bad", dbt.db_set_trade_state("t2", "WAT"))
+        await step("state_no_pred", dbt.db_set_trade_state("t2", "PENDING"))
+        await step("state_expected", dbt.db_set_trade_state("t1", "FAILED", expected_from=frozenset({"PENDING", "CLOSED"})))
+        clk.t += 5
+        await step("result_tp1", dbt.db_set_trade_result("t2", "TP1", 2.0))
+        await step("result_again", dbt.db_set_trade_result("t2", "SL", -1.0))
+        await step("result_skip", dbt.db_set_trade_result("t3", "SKIP", 0.0, skip_reason="not_delivered_" + "y" * 80))
+        await step("result_overwrite", dbt.db_set_trade_result("t3", "TP2", 3.0, closed_pnl_usd=12.5, allow_overwrite_skip=True))
+        await step("result_unknown", dbt.db_set_trade_result("t4", "LIQUIDATED", -2.0, closed_pnl_usd=-50))
+        await step("result_missing", dbt.db_set_trade_result("nope", "SL", -1.0))
+        await step("note", dbt.db_set_trade_note("t1", note="заметка " * 80, skip_reason="manual"))
+        await step("note_none", dbt.db_set_trade_note("t1"))
+        clk.t += 5
+        await step("add_p1", dbt.db_add_trade({**base, "trade_id": "p1", "created_at": clk.t - 100, "strategy": "LEVELS", "state": "PENDING"}))
+        await step("add_p2", dbt.db_add_trade({**base, "trade_id": "p2", "created_at": clk.t - 200, "strategy": "SMC", "state": "PENDING",
+                                               "entry_lo": 99.5, "entry_hi": 100.5}))
+        await step("add_p3", dbt.db_add_trade({**base, "trade_id": "p3", "created_at": clk.t - 73 * 3600, "strategy": "VOLUME", "state": "PENDING"}))
+        await step("msg_p1", sp.db_set_signal_msg_id("p1", 101, json.dumps({"html": "<b>x</b> ✅", "kb": None}, ensure_ascii=False)))
+        await step("msg_p2", sp.db_set_signal_msg_id("p2", 102))
+        await step("msg_p3", sp.db_set_signal_msg_id("p3", 103, "{}"))
+        await step("msg_zero", sp.db_set_signal_msg_id("t4", 0, "x"))
+        await step("trackable", sp.db_get_trackable_signals(clk.t - 72 * 3600))
+        await step("trackable_lim", sp.db_get_trackable_signals(clk.t - 100 * 3600, limit=1))
+        await step("advance_ok", sp.db_advance_signal_progress("p1", "", "ENTRY", clk.t - 50))
+        await step("advance_stale", sp.db_advance_signal_progress("p1", "", "TP1", clk.t - 40))
+        await step("advance_ok2", sp.db_advance_signal_progress("p1", "ENTRY", "TP1", clk.t - 30))
+        await step("expire_cands", sp.db_get_expire_candidates(clk.t, 72 * 3600))
+        await step("expire_mark", sp.db_mark_signal_expired("p3", "", 0.42, clk.t))
+        await step("expire_mark_again", sp.db_mark_signal_expired("p3", "", 0.5, clk.t))
+        await step("trackable_after", sp.db_get_trackable_signals(clk.t - 100 * 3600))
+        await step("evt_add", te.db_add_trade_event("p1", te.EVT_NOTIFICATION_SENT, {"ok": True, "uid": 7, "rr": 1.5, "n": 2.0,
+                                                                                      "txt": "привет", "nested": {"a": [1, None]}}))
+        await step("evt_empty", te.db_add_trade_event("p1", te.EVT_FILTER_BLOCK, {}))
+        await step("evt_none", te.db_add_trade_event("", te.EVT_FILTER_BLOCK, {"x": 1}))
+        await step("evt_long", te.db_add_trade_event("p2", te.EVT_ANOMALY_DETECTED, {"blob": "ж" * 5000}))
+        await step("evt_get", te.db_get_trade_events("p1"))
+        await step("evt_get_lim", te.db_get_trade_events("t2", limit=1))
+        await step("signals_get", dbs.get_signal("p2"))
+        await step("signals_records", dbs.get_signal_records("zzz"))
+        await step("signals_tp", dbs.update_signal_tp("p2", tp2=107.5))
+        await step("signals_record", dbs.add_trade_record(7, "p2", "tp3", 4.5))
+        await step("user_trades", dbt.db_get_user_trades(7))
+        clk.t += 86400 * 31
+        await step("evt_gc", te.gc_trade_events(30))
+        await step("ghost_user", dbt.db_cleanup_ghost_trades(7, max_age_days=3))
+        await core.close_write_conn()
+    asyncio.run(run())
+    write("repo", {"base": base, "steps": steps, "allowed": sorted(dbt._ALLOWED_TRADE_COLS), "states": sorted(dbt.TRADE_STATES),
+                   "transitions": {k: sorted(v) for k, v in dbt._ALLOWED_TRANSITIONS.items()},
+                   "final_stages": sorted(sp.FINAL_STAGES), "stop_results": list(sp._STOP_RESULTS)})
+
+
+# ── small primitives: quality scale, price formats, lite, watermark, position line ──
+def primitives_vectors():
+    import quality_scale as qs
+    import signal_format as sfmt
+    import volume_scanner as vsc
+    from smc import scanner as smcs
+    import watermark as wm
+    import position_size as ps
+    import balance_cache
+    import trend_monitor as tm
+    from i18n import t as _t
+    out = {}
+    q_in = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, -1, 4.9, 5.5, 7.99, "7", " 8 ", "abc", None, True, False, float("nan"), float("inf"),
+            float("-inf"), "nan", "1_0", "", 0.0]
+    out["levels_stars"] = [[q, qs.levels_stars(q)] for q in q_in]
+    s_in = [0, 1, 2, 3, 4, 5, 6, -1, 3.7, "4", "4.5", None, True, float("nan"), "", " 2 "]
+    out["stars_str"] = [[n, qs.stars_str(n)] for n in s_in]
+    p_in = [None, "abc", "12.5", 0, -1.0, 1e-9, 0.000123456, 0.00001, 0.5, 0.999999, 1, 1.23456789, 9.99995, 99.99, 99.95, 100, 123.456,
+            9999.94, 9999.96, 12345.678, 1e7, 2.5e-5, 0.1, float("inf"), True, 3]
+    fps = []
+    for v in p_in:
+        row = [v]
+        for fn in (smcs._fp, sfmt._fmt_price, vsc._fp):
+            try:
+                row.append(fn(v))
+            except Exception as e:  # noqa: BLE001
+                row.append({"error": type(e).__name__})
+        fps.append(row)
+    out["fp"] = fps
+    lite = []
+    lite_cases = [
+        dict(symbol="BTC-USDT-SWAP", direction="LONG", quality=8, entry=100, sl=98, tp1=104, strategy="LEVELS", lang="ru", quality_scale=10),
+        dict(symbol="BTC-USDT-SWAP", direction="SHORT", quality=4, entry=100.0, sl=102.0, tp1=95.0, tp2=None, tp3=0, strategy="SMC", lang="en"),
+        dict(symbol="X<Y>", direction="short", quality="3", entry=1.0, sl=1.05, tp1=1.0, tp2=0.9, tp3=0.8, strategy="", lang="ru"),
+        dict(symbol="Q", direction="LONG", quality=None, entry=0.0, sl=1.0, tp1=2.0, strategy="VOLUME", lang="de"),
+        dict(symbol="Q", direction="", quality=7.9, entry=50.0, sl=49.0, tp1=55.0, tp2=60.0, tp3=65.0, strategy="levels", lang="en"),
+        dict(symbol="Q", direction="LONG", quality=12, entry=50.0, sl=49.0, tp1=55.0, strategy="SMC", lang="ru", quality_scale=0),
+        dict(symbol="Q", direction="LONG", quality=-3, entry=50.0, sl=49.0, tp1=55.0, strategy="SMC", lang="ru"),
+        dict(symbol="PEPE-USDT-SWAP", direction="SHORT", quality=5, entry=0.00001234, sl=0.0000129, tp1=0.0000118, tp2=0.0000112,
+             tp3=0.00001, strategy="SMC & co", lang="en"),
+        dict(symbol="Q", direction="LONG", quality="abc", entry=50.0, sl=49.0, tp1=55.0, strategy="SMC", lang="ru"),
+    ]
+    for kw in lite_cases:
+        lite.append([kw, sfmt.format_signal_lite(**kw)])
+    out["lite"] = lite
+    uids = [0, 1, 2, 123456789, 2 ** 40 - 1, 2 ** 40, 2 ** 41 + 5, 7107654772]
+    out["wm_encode"] = [[u, wm.wm_encode(u)] for u in uids]
+    texts = ["", "a", "ab", "🟢 <b>LONG</b>", "↔️ y", "日本語"]
+    out["wm_inject"] = [[t_, u, wm.wm_inject(t_, u)] for t_ in texts for u in (5, 123456789)]
+    out["wm_decode"] = [[t_, wm.wm_decode(t_)] for t_ in [wm.wm_inject("hello", 42), "plain", wm.wm_encode(7)[:39], wm.wm_encode(7) * 2,
+                                                          "x" + wm.wm_encode(2 ** 40 - 1)]]
+    # position line
+    plines = []
+    users = [dict(trade_risk_pct=1.0, trade_leverage=10), dict(trade_risk_pct=2.5, trade_leverage=3), dict(trade_risk_pct=0, trade_leverage=0),
+             dict(trade_risk_pct=None, trade_leverage=None), dict(), dict(trade_risk_pct=0.75, trade_leverage=50), dict(trade_risk_pct=5.0, trade_leverage=1)]
+    entries = [(100.0, 98.0), (64123.5, 63000.0), (0.0001234, 0.0001200), (100.0, 100.0), (0.0, 1.0), (2.0, 2.5)]
+    ctxs = ["", "aligned", "with", "counter", "strong_counter", "weird"]
+    bals = [None, 0.0, -5.0, 87.5, 2500.0, 1234567.0]
+
+    async def bal_of(b):
+        async def f(_u, _e):
+            return b
+        balance_cache.get_cached_balance = f
+    for ui, u in enumerate(users):
+        for ei, (e, s_) in enumerate(entries):
+            for ci, cx in enumerate(ctxs):
+                b = bals[(ui + ei + ci) % len(bals)]
+                for lang in ("ru", "en"):
+                    asyncio.run(bal_of(b))
+                    line = asyncio.run(ps.position_line(types.SimpleNamespace(**u), e, s_, lang, ctx=cx))
+                    plines.append({"user": u, "entry": e, "sl": s_, "ctx": cx, "balance": b, "lang": lang, "line": line})
+    out["position_line"] = plines
+    out["compute"] = [[b, r, e, s_, lv, ps.compute(b, r, e, s_, lv)] for b in (1000.0, 50.0) for r in (1.0, 0.0, 3.0)
+                      for (e, s_) in ((100.0, 99.0), (100.0, 50.0), (0.0, 1.0)) for lv in (10, 0, 1)]
+    out["usd"] = [[v, ps._usd(v)] for v in [0, 0.04, 0.05, 99.94, 99.96, 100, 1234.5, 1e6, 12.25]]
+    out["trend_kb"] = [[l, kb_rows_tm(tm._keyboard(l))] for l in ("ru", "en", "de")]
+    out["i18n_free"] = {k: {"ru": __import__("i18n").MESSAGES[k].get("ru"), "en": __import__("i18n").MESSAGES[k].get("en")}
+                        for k in ["free_report_title", "free_report_received", "free_report_closed_today_header", "free_report_more",
+                                  "free_report_total", "free_report_upsell_pro", "smc_pro_preview_card"]}
+    out["t_format"] = [[k, l, kw, _t(k, l, **kw)] for k, l, kw in [
+        ("free_report_total", "ru", {"r": 7.85}), ("free_report_total", "en", {"r": 0.05}), ("free_report_received", "en", {"n": 3}),
+        ("free_report_received", "ru", {}), ("smc_sl_inline_warning", "en", {"sl_pct": "6.1"}), ("smc_confirmations", "de", {"score": 4}),
+        ("no_such_key", "ru", {"a": 1})]]
+    write("primitives", out)
+
+
 SECTIONS = {
+    "volume_filter": volume_filter_vectors,
+    "coin_quality": coin_quality_vectors,
+    "repo": repo_vectors,
+    "primitives": primitives_vectors,
     "free": free_vectors,
     "trend": trend_vectors,
     "registry": registry_vectors,
