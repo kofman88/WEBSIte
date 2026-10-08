@@ -31,8 +31,11 @@
 <aside class="sidebar" id="sidebar">
   <div class="sidebar-logo">CHM<span>.</span> <span class="admin-badge ml-2">ADMIN</span></div>
   <nav class="sidebar-nav">
-    <a href="dashboard.html" class="sidebar-link"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>Дашборд</a>
-    <a href="admin.html" class="sidebar-link active"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 15a3 3 0 100-6 3 3 0 000 6z"/><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>Админ</a>
+    <a href="/app/" class="sidebar-link" data-page="app"><svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M13 10V3L4 14h7v7l9-11h-7z"/></svg><span data-t="sb-app">Приложение</span></a>
+    <a href="settings.html" class="sidebar-link" data-page="settings"><svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0116 0"/></svg><span data-t="sb-account">Аккаунт</span></a>
+    <a href="subscriptions.html" class="sidebar-link" data-page="subscriptions"><svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg><span data-t="sb-plan">Тариф</span></a>
+    <a href="settings.html#support" class="sidebar-link" data-page="support"><svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg><span data-t="sb-support">Поддержка</span></a>
+    <a href="ops.html" class="sidebar-link active" data-page="admin"><svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2l7 4v6c0 5-3.5 8.5-7 10-3.5-1.5-7-5-7-10V6l7-4z"/></svg><span data-t="sb-admin">Админ</span></a>
   </nav>
   <div class="sidebar-footer">
     <button onclick="Auth.logout()" class="sidebar-link mt-2" style="color:#C8B9B9"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4M16 17l5-5-5-5M21 12H9"/></svg>Выйти</button>
@@ -107,7 +110,7 @@
       <form id="promoForm" class="grid md:grid-cols-5 gap-3 mb-6">
         <input name="code" placeholder="WELCOME2026" class="bg-slate-800/50 border border-slate-700 rounded-lg px-3 py-2 text-sm text-white outline-none" required/>
         <select name="plan" class="bg-slate-800/50 border border-slate-700 rounded-lg px-3 py-2 text-sm text-white outline-none">
-          <option value="starter">Starter</option><option value="pro" selected>Pro</option><option value="elite">Elite</option>
+          <option value="pro" selected>Pro</option>
         </select>
         <input name="durationDays" type="number" value="30" placeholder="Дней" class="bg-slate-800/50 border border-slate-700 rounded-lg px-3 py-2 text-sm text-white outline-none"/>
         <input name="maxUses" type="number" value="100" placeholder="Лимит" class="bg-slate-800/50 border border-slate-700 rounded-lg px-3 py-2 text-sm text-white outline-none"/>
@@ -219,7 +222,7 @@ async function adminFetch(method, path, body) {
   const res = await fetch(ADMIN_BASE + path, opts);
   if (res.status === 403) {
     Toast.error('Требуются права администратора');
-    setTimeout(() => location.href = 'dashboard.html', 1500);
+    setTimeout(() => location.href = '/app/', 1500);
     throw new Error('forbidden');
   }
   const data = await res.json().catch(() => ({}));
@@ -249,9 +252,8 @@ async function loadStats() {
     const s = await adminFetch('GET', '/stats');
     const cards = [
       ['Пользователи', s.users.total, `+${s.users.today} сегодня`],
-      ['Подписок', s.subscriptions.total, `${s.subscriptions.pro + s.subscriptions.elite} платных`],
+      ['Подписок', s.subscriptions.total, `${s.subscriptions.paid} платных`],
       ['Revenue', Fmt.currency(s.payments.revenue, {decimals:0}), `${s.payments.today} сегодня`],
-      ['Боты / Сигналы', `${s.bots.active}/${s.signals.today}`, `${s.bots.total} всего`],
     ];
     document.getElementById('statsGrid').innerHTML = cards.map(c => `
       <div class="stat-card"><div class="stat-card-label">${c[0]}</div>
@@ -260,14 +262,9 @@ async function loadStats() {
 
     document.getElementById('subsBreakdown').innerHTML = `
       <div class="flex justify-between"><span>Free</span><span class="font-bold">${s.subscriptions.free}</span></div>
-      <div class="flex justify-between"><span>Starter $29</span><span class="font-bold">${s.subscriptions.starter}</span></div>
-      <div class="flex justify-between"><span>Pro $79</span><span class="font-bold text-indigo-400">${s.subscriptions.pro}</span></div>
-      <div class="flex justify-between"><span>Elite $149</span><span class="font-bold text-purple-400">${s.subscriptions.elite}</span></div>`;
+      <div class="flex justify-between"><span>Pro $69</span><span class="font-bold text-indigo-400">${s.subscriptions.pro}</span></div>`;
 
     document.getElementById('activityBreakdown').innerHTML = `
-      <div class="flex justify-between"><span>Активных ботов</span><span class="font-bold">${s.bots.active} / ${s.bots.total}</span></div>
-      <div class="flex justify-between"><span>Сигналов (today)</span><span class="font-bold">${s.signals.today}</span></div>
-      <div class="flex justify-between"><span>Бэктестов</span><span class="font-bold">${s.backtests.completed} / ${s.backtests.total}</span></div>
       <div class="flex justify-between"><span>Активных юзеров</span><span class="font-bold">${s.users.active} / ${s.users.total}</span></div>`;
   } catch (err) { Toast.error(err.message); }
 }

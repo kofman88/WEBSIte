@@ -141,7 +141,6 @@ module.exports = [
       'frontend/tailwind.css',
       '**/*.min.js',
       'phase_*.md',
-      'academy/**',
     ],
   },
   {
@@ -154,10 +153,11 @@ module.exports = [
     rules: BASE_RULES,
   },
   {
+    // vitest files are ESM (`import … from`), unlike the CJS backend.
     files: ['backend/tests/**/*.js', 'backend/**/*.test.js'],
     languageOptions: {
       ecmaVersion: 2022,
-      sourceType: 'commonjs',
+      sourceType: 'module',
       globals: { ...NODE_GLOBALS, ...TEST_GLOBALS },
     },
     rules: BASE_RULES,

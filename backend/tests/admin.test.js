@@ -37,7 +37,6 @@ beforeEach(() => {
   db.prepare('DELETE FROM payments').run();
   db.prepare('DELETE FROM promo_redemptions').run();
   db.prepare('DELETE FROM promo_codes').run();
-  db.prepare('DELETE FROM trading_bots').run();
   db.prepare('DELETE FROM refresh_tokens').run();
   db.prepare('DELETE FROM subscriptions').run();
   db.prepare('DELETE FROM audit_log').run();
@@ -80,13 +79,9 @@ describe('adminService.listUsers', () => {
 });
 
 describe('adminService.setUserActive', () => {
-  it('deactivates user + pauses bots + revokes refresh tokens', () => {
+  it('deactivates user + revokes refresh tokens', () => {
     const adminUid = makeUser({ isAdmin: 1 });
     const u = makeUser();
-    db.prepare(`
-      INSERT INTO trading_bots (user_id, name, exchange, symbols, strategy, is_active)
-      VALUES (?, 'b1', 'bybit', '["BTC/USDT"]', 'scalping', 1)
-    `).run(u);
     db.prepare(`
       INSERT INTO refresh_tokens (user_id, token_hash, expires_at)
       VALUES (?, 'h1', datetime('now', '+7 days'))
@@ -96,8 +91,6 @@ describe('adminService.setUserActive', () => {
 
     const user = db.prepare('SELECT is_active FROM users WHERE id = ?').get(u);
     expect(user.is_active).toBe(0);
-    const bot = db.prepare('SELECT is_active FROM trading_bots WHERE user_id = ?').get(u);
-    expect(bot.is_active).toBe(0);
     const tok = db.prepare('SELECT revoked_at FROM refresh_tokens WHERE user_id = ?').get(u);
     expect(tok.revoked_at).toBeTruthy();
 
@@ -207,10 +200,6 @@ describe('adminService.systemStats', () => {
   it('returns aggregated counts', () => {
     const u = makeUser();
     db.prepare("INSERT INTO subscriptions (user_id, plan, status) VALUES (?, 'pro', 'active')").run(u);
-    db.prepare(`
-      INSERT INTO trading_bots (user_id, name, exchange, symbols, strategy, is_active)
-      VALUES (?, 'b', 'bybit', '["BTC/USDT"]', 'scalping', 1)
-    `).run(u);
     const out = paymentService.createCryptoPayment(u, { plan: 'pro', network: 'bep20' });
     paymentService.confirmCryptoPayment(out.paymentId, { txHash: '0x1', amountUsdt: out.amountUsdt });
 
@@ -218,8 +207,6 @@ describe('adminService.systemStats', () => {
     expect(s.users.total).toBe(1);
     expect(s.users.active).toBe(1);
     expect(s.subscriptions.pro).toBe(1);
-    expect(s.bots.total).toBe(1);
-    expect(s.bots.active).toBe(1);
     expect(s.payments.total).toBe(1);
     expect(s.payments.revenue).toBeGreaterThan(0);
   });

@@ -21,11 +21,10 @@ const logger = require('../utils/logger');
 const DEFAULTS = {
   maintenance:        { value: false, desc: 'Maintenance mode — API returns 503 on mutating endpoints' },
   signup_disabled:    { value: false, desc: 'Stop new registrations (for incident response)' },
-  live_trading:       { value: true,  desc: 'Allow live-mode bots; off forces paper only' },
+  live_trading:       { value: true,  desc: 'Allow live auto-trade (master switch for the M13+ traders)' },
   new_pricing_page:   { value: false, desc: 'Show new /pricing variant to visitors' },
   email_notifications: { value: true,  desc: 'Master switch for outbound emails' },
   telegram_notifications: { value: true, desc: 'Master switch for Telegram outbound' },
-  public_leaderboard: { value: true,  desc: 'Render /leaderboard.html publicly' },
 };
 
 const CACHE_TTL_MS = 30_000;

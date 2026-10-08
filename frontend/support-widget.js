@@ -224,19 +224,6 @@
 
   .chm-sup-hint{font-size:11px;color:rgba(255,255,255,.45);line-height:1.4}
 
-  /* AI tab extras — note block above the thread + pulsing "typing" bubble */
-  .chm-ai-note{
-    padding:10px 14px;margin:8px 0 4px;border-radius:10px;
-    background:linear-gradient(135deg,rgba(255,90,31,.14),rgba(255,140,90,.05));
-    border:1px solid rgba(255,90,31,.25);
-    font-size:11px;color:rgba(255,255,255,.82);line-height:1.5
-  }
-  .chm-ai-note #chmAiUsage{
-    font-family:'JetBrains Mono',monospace;color:#FF8C5A;font-weight:600
-  }
-  html.light .chm-ai-note{background:linear-gradient(135deg,rgba(255,90,31,.08),rgba(255,140,90,.03));color:#0A0A0A;border-color:rgba(255,90,31,.25)}
-  .chm-ai-thread{min-height:180px;max-height:calc(100% - 180px)}
-  .chm-sup-msg.chm-ai-typing{opacity:.6;animation:chmAiPulse 1.2s ease-in-out infinite}
   .chm-sup-typing-dot{display:inline-block;width:5px;height:5px;border-radius:50%;background:rgba(255,255,255,.55);animation:chmAiPulse 1.1s ease-in-out infinite;margin:0 1px}
   @keyframes chmAiPulse{0%,100%{opacity:.45}50%{opacity:.9}}
   .chm-sup-btn-primary{
@@ -276,7 +263,6 @@
     chev:   '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"/></svg>',
     status: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><path d="m9 11 3 3L22 4"/></svg>',
     community:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>',
-    ai:       '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2l1.5 4.5L18 8l-4.5 1.5L12 14l-1.5-4.5L6 8l4.5-1.5L12 2z"/><path d="M19 14l.75 2.25L22 17l-2.25.75L19 20l-.75-2.25L16 17l2.25-.75L19 14z"/></svg>',
   };
 
   var root = document.createElement('div');
@@ -297,7 +283,6 @@
       '<div class="chm-sup-tabs">' +
         '<button class="chm-sup-tab active" data-tab="home">' + SVG.home + '<span>Главная</span></button>' +
         '<button class="chm-sup-tab" data-tab="chat">' + SVG.chat + '<span>Чат</span></button>' +
-        '<button class="chm-sup-tab" data-tab="ai">'   + SVG.ai   + '<span>AI</span></button>' +
         '<button class="chm-sup-tab" data-tab="help">' + SVG.help + '<span>Помощь</span></button>' +
       '</div>' +
     '</div>';
@@ -361,7 +346,6 @@
   function renderTab(tab) {
     if (tab === 'home')     renderHome();
     else if (tab === 'chat') renderChat();
-    else if (tab === 'ai')   renderAI();
     else if (tab === 'help') renderHelp();
   }
 
@@ -380,12 +364,6 @@
           '<span class="chm-sup-meta"><span class="t">Статус: все системы работают</span>' +
             '<span class="s">Обновлено ' + new Date().toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit' }) + '</span></span>' +
         '</div>' +
-        '<a class="chm-sup-home-card" href="academy/" target="_blank">' +
-          '<span class="chm-sup-icn">' + SVG.community + '</span>' +
-          '<span class="chm-sup-meta"><span class="t">Академия CHM</span>' +
-            '<span class="s">База знаний, гайды по стратегиям</span></span>' +
-          '<span class="chm-sup-chev">' + SVG.chev + '</span>' +
-        '</a>' +
         '<a class="chm-sup-home-card" href="https://t.me/chmup_support" target="_blank" rel="noopener">' +
           '<span class="chm-sup-icn">' +
             '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M23.3 2.7 2.4 10.8c-1.4.6-1.4 1.4-.2 1.8l5.3 1.7 2.1 6.3c.3.7.1 1 .9 1 .6 0 .9-.3 1.2-.6l2.6-2.5 5.3 4c1 .5 1.7.2 2-.9L22.9 4c.3-1.5-.5-2-1.6-1.3zM8.3 15.2 17 9.6c.4-.3.8-.1.5.2l-7 6.3-.3 3.6-1.9-4.5z"/></svg>' +
@@ -585,17 +563,9 @@
     var sendBtn = document.getElementById('chmSupSend');
     function validate() { sendBtn.disabled = (input.value || '').trim().length < 2 && _pendingAttach.length === 0; }
     validate();
-    // Typing emit — start on input, auto-stop after 3s idle or on send
-    var typingTimer = null;
-    input.addEventListener('input', function () {
-      validate();
-      if (!activeTicketId || !window.WS) return;
-      try { WS._send && WS._send({ type: 'support.typing', ticketId: activeTicketId, state: 'start' }); } catch (_) {}
-      clearTimeout(typingTimer);
-      typingTimer = setTimeout(() => {
-        try { WS._send && WS._send({ type: 'support.typing', ticketId: activeTicketId, state: 'stop' }); } catch (_) {}
-      }, 3000);
-    });
+    // Typing indicator went away with the WebSocket channel (port plan
+    // M0); live updates return as SSE/polling in M10.
+    input.addEventListener('input', validate);
     input.addEventListener('keydown', function (e) {
       if ((e.ctrlKey || e.metaKey) && e.key === 'Enter' && !sendBtn.disabled) sendBtn.click();
     });
@@ -603,7 +573,6 @@
       var txt = (input.value || '').trim();
       if (txt.length < 2 && _pendingAttach.length === 0) return;
       sendBtn.disabled = true;
-      try { WS._send && activeTicketId && WS._send({ type: 'support.typing', ticketId: activeTicketId, state: 'stop' }); } catch (_) {}
       submitFn(txt).then(function (r) {
         if (r && r.ok) {
           input.value = '';
@@ -649,176 +618,6 @@
     });
   }
 
-  // ── AI chat tab (Gemini-backed, free tier). Guest users see a prompt
-  // to log in — Gemini traffic requires an authed user so we can
-  // rate-limit per plan.
-  var _aiHistory = [];   // [{role:'user'|'assistant', content}]
-  function renderAI() {
-    if (!isLoggedIn()) {
-      body.innerHTML =
-        '<div class="chm-sup-home-card" style="flex-direction:column;align-items:flex-start;gap:10px">' +
-          '<span class="chm-sup-icn">' + SVG.ai + '</span>' +
-          '<div><strong style="display:block;margin-bottom:4px;color:#fff">AI-ассистент</strong>' +
-            '<span style="font-size:12px;color:rgba(255,255,255,.6)">Доступен залогиненным пользователям. Задавай вопросы про стратегии, термины, интерфейс — отвечает Gemini 2.0 Flash.</span></div>' +
-          '<a class="chm-sup-btn-primary" href="index.html?login=1" style="text-decoration:none;text-align:center">Войти →</a>' +
-        '</div>';
-      return;
-    }
-    body.innerHTML =
-      '<div class="chm-ai-note">' +
-        'AI ассистент (beta) · Gemini · <span id="chmAiUsage">— / —</span>' +
-        '<br><span style="opacity:.65">Стратегии, термины, интерфейс — на русском. Не даёт financial advice. Не пересылай приватные данные в beta.</span>' +
-      '</div>' +
-      '<div class="chm-sup-msgs chm-ai-thread" id="chmAiThread"></div>' +
-      '<div class="chm-sup-compose">' +
-        '<div class="chm-sup-compose-row">' +
-          '<textarea id="chmAiText" placeholder="Что такое trailing stop?"></textarea>' +
-          '<button id="chmAiSend" class="chm-sup-send" aria-label="Отправить">' + SVG.send + '</button>' +
-        '</div>' +
-        '<div class="chm-sup-hint">⌘/Ctrl + Enter — отправить · ответ 2–5 сек</div>' +
-      '</div>';
-    var thread = document.getElementById('chmAiThread');
-    var textarea = document.getElementById('chmAiText');
-    var sendBtn = document.getElementById('chmAiSend');
-    var usageEl = document.getElementById('chmAiUsage');
-
-    // Render any existing in-memory history (persists within the session)
-    _aiHistory.forEach(function (m) { appendMsg(m.role, m.content); });
-    if (!_aiHistory.length) appendMsg('assistant',
-      'Привет! Я помогу разобраться с CHM Finance — стратегиями, сигналами, настройкой ботов. Что интересует?');
-
-    // Fetch usage once to show X / Y
-    fetch(API_BASE + '/ai/usage', { headers: authHeaders() })
-      .then(function (r) { return r.ok ? r.json() : null; })
-      .then(function (d) {
-        if (!d) return;
-        if (!d.enabled) {
-          usageEl.textContent = 'ключ не настроен';
-          sendBtn.disabled = true;
-          textarea.disabled = true;
-          textarea.placeholder = 'AI-ассистент не подключён. Свяжись с админом.';
-        } else {
-          usageEl.textContent = d.requestsToday + ' / ' + d.requestsLimit;
-        }
-      })
-      .catch(function () { usageEl.textContent = ''; });
-
-    function appendMsg(role, text) {
-      var el = document.createElement('div');
-      // Reuse existing .chm-sup-msg styles (me = orange bubble right,
-      // default = grey bubble left), just flip the semantics for AI:
-      // "me" = the user's message, "them" (no class) = AI reply.
-      el.className = 'chm-sup-msg' + (role === 'user' ? ' me' : '');
-      el.textContent = text;
-      thread.appendChild(el);
-      thread.scrollTop = thread.scrollHeight;
-      return el;
-    }
-
-    function send() {
-      var msg = (textarea.value || '').trim();
-      if (msg.length < 2) return;
-      textarea.value = '';
-      sendBtn.disabled = true;
-      appendMsg('user', msg);
-      _aiHistory.push({ role: 'user', content: msg });
-      var typingEl = appendMsg('assistant', '…');
-      typingEl.classList.add('chm-ai-typing');
-
-      fetch(API_BASE + '/ai/chat', {
-        method: 'POST',
-        headers: Object.assign({ 'Content-Type': 'application/json' }, authHeaders()),
-        body: JSON.stringify({ message: msg, history: _aiHistory.slice(-10) }),
-      }).then(function (r) {
-        return r.json().then(function (data) {
-          if (!r.ok) throw new Error(data && data.error || 'HTTP ' + r.status);
-          return data;
-        });
-      }).then(function (data) {
-        typingEl.classList.remove('chm-ai-typing');
-        typingEl.textContent = data.reply || '—';
-        _aiHistory.push({ role: 'assistant', content: data.reply });
-        if (data.usage) usageEl.textContent = data.usage.requestsToday + ' / ' + data.usage.requestsLimit;
-      }).catch(function (err) {
-        typingEl.classList.remove('chm-ai-typing');
-        typingEl.textContent = '⚠ ' + (err.message || 'Ошибка AI');
-        typingEl.style.color = '#C8A0A0';
-      }).finally(function () {
-        sendBtn.disabled = false;
-        textarea.focus();
-      });
-    }
-
-    sendBtn.addEventListener('click', send);
-    textarea.addEventListener('keydown', function (e) {
-      if ((e.metaKey || e.ctrlKey) && e.key === 'Enter') send();
-    });
-    textarea.focus();
-  }
-
-  // ── Live WS updates: admin replies appear in-flight ──────────────────
-  // When the global WS object is available (app.js WS client, loaded on
-  // every authed page), subscribe to `support.message_added`. If the
-  // widget panel is open on the Chat tab with a matching ticketId we
-  // append the bubble live. Otherwise we bump the floating-button
-  // badge and toast if the page permits.
-  function wireLiveUpdates() {
-    if (!window.WS || !WS.on) { setTimeout(wireLiveUpdates, 500); return; }
-    // Ensure WS is connecting (app.js does this lazily on first use)
-    try { WS.connect && WS.connect(); } catch (_) {}
-    WS.on('support.message_added', function (ev) {
-      try {
-        var d = ev && ev.data;
-        if (!d || !d.message) return;
-        // Internal notes never reach the user (server already filters),
-        // but belt-and-suspenders in case admin+user share a tab.
-        if (d.message.isInternal) return;
-        if (!d.message.isAdmin) return;
-        var panelOpen = panel.classList.contains('open');
-        var threadOpen = panelOpen && currentTab === 'chat' && activeTicketId === d.ticketId;
-        if (threadOpen) {
-          var msgsEl = document.querySelector('.chm-sup-msgs');
-          if (msgsEl) {
-            // Insert before the typing indicator (last child) if present
-            var typingEl = document.getElementById('chmSupAgentTyping');
-            var html = _renderMsgBubble({
-              isAdmin: true, body: d.message.body,
-              attachments: d.message.attachments,
-              created_at: new Date().toISOString(),
-            });
-            if (typingEl) typingEl.insertAdjacentHTML('beforebegin', html);
-            else msgsEl.insertAdjacentHTML('beforeend', html);
-            msgsEl.scrollTop = msgsEl.scrollHeight;
-          }
-          try {
-            fetch(API_BASE + '/support/tickets/' + d.ticketId + '/mark-read', {
-              method: 'POST', headers: authHeaders(), body: '{}',
-            });
-          } catch (_) {}
-        } else {
-          bumpBadge();
-        }
-      } catch (_) {}
-    });
-    // Agent typing indicator
-    WS.on('support.typing', function (ev) {
-      try {
-        var d = ev && ev.data;
-        if (!d || activeTicketId !== d.ticketId) return;
-        if (!d.isAdmin) return;  // We only show when the AGENT is typing
-        var el = document.getElementById('chmSupAgentTyping');
-        if (!el) return;
-        el.style.display = d.state === 'stop' ? 'none' : 'block';
-        var msgsEl = document.querySelector('.chm-sup-msgs');
-        if (msgsEl) msgsEl.scrollTop = msgsEl.scrollHeight;
-        clearTimeout(window._chmSupTypingTimer);
-        if (d.state !== 'stop') {
-          window._chmSupTypingTimer = setTimeout(function () { el.style.display = 'none'; }, 5000);
-        }
-      } catch (_) {}
-    });
-  }
-
   var _unreadCount = 0;
   function bumpBadge() {
     _unreadCount += 1;
@@ -849,7 +648,6 @@
         }
       })
       .catch(function () {});
-    wireLiveUpdates();
   }
 
 })();

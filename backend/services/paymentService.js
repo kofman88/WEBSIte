@@ -58,6 +58,7 @@ async function createStripeCheckout(userId, { plan, billingCycle = 'monthly', su
     throw err;
   }
   const price = planPrice(plan, billingCycle);
+  plan = plans.normalizePlan(plan);   // legacy ids (elite/beginner) are stored as 'pro'
   const user = db.prepare('SELECT email FROM users WHERE id = ?').get(userId);
   if (!user) throw new Error('User not found');
 
@@ -248,6 +249,7 @@ function createCryptoPayment(userId, { plan, network, billingCycle = 'monthly' }
     err.statusCode = 503; err.code = 'CRYPTO_DISABLED'; throw err;
   }
   const basePrice = planPrice(plan, billingCycle);
+  plan = plans.normalizePlan(plan);   // legacy ids (elite/beginner) are stored as 'pro'
   const amountUsdt = _uniqueAmount(basePrice);
 
   const info = db.prepare(`
@@ -323,26 +325,15 @@ function confirmPayment(paymentId, { metadata = null } = {}) {
   `).run(payment.user_id, paymentId,
     JSON.stringify({ plan: payment.plan, amount: payment.amount_usd, method: payment.method }));
 
-  // Notify any connected websocket of this user — best-effort, lazy-required
-  // to avoid a circular dep with websocketService (which doesn't import us).
+  // In-app notification — best-effort, lazy-required to avoid a circular dep.
   try {
-    const ws = require('./websocketService');
-    if (ws && ws.broadcastToUser) {
-      ws.broadcastToUser(payment.user_id, {
-        type: 'payment_confirmed',
-        data: { paymentId, plan: payment.plan, method: payment.method },
-        ts: Date.now(),
-      });
-      try {
-        const notifier = require('./notifier');
-        notifier.dispatch(payment.user_id, {
-          type: 'payment',
-          title: 'Оплата получена',
-          body: 'Тариф ' + payment.plan.toUpperCase() + ' активирован · ' + payment.method,
-          link: '/settings.html',
-        });
-      } catch (_e) {}
-    }
+    const notifier = require('./notifier');
+    notifier.dispatch(payment.user_id, {
+      type: 'payment',
+      title: 'Оплата получена',
+      body: 'Тариф ' + payment.plan.toUpperCase() + ' активирован · ' + payment.method,
+      link: '/settings.html',
+    });
   } catch (_e) { /* ignore */ }
 
   // Email receipt — durable outbox so a transient SMTP blip doesn't
@@ -366,6 +357,8 @@ function confirmPayment(paymentId, { metadata = null } = {}) {
 }
 
 function extendSubscription(userId, plan, days) {
+  // Only the two live ids are ever written (bot normalize_plan semantics).
+  plan = plans.normalizePlan(plan);
   const existing = db.prepare('SELECT * FROM subscriptions WHERE user_id = ?').get(userId);
   const now = Date.now();
   const baseMs = existing && existing.expires_at && new Date(existing.expires_at).getTime() > now
@@ -386,26 +379,6 @@ function extendSubscription(userId, plan, days) {
   }
   logger.info('subscription extended', { userId, plan, until: newExpires });
 
-  // Downgrade safety: if the new plan has a lower maxBots than currently
-  // active, deactivate the oldest-created excess bots. Otherwise a user who
-  // went Pro→Free after a refund would keep trading with 5 active bots.
-  try {
-    const plans = require('../config/plans');
-    const limits = plans.getLimits(plan);
-    if (limits && limits.maxBots !== Infinity && limits.maxBots >= 0) {
-      const excess = db.prepare(`
-        SELECT id FROM trading_bots
-        WHERE user_id = ? AND is_active = 1
-        ORDER BY created_at DESC
-        LIMIT -1 OFFSET ?
-      `).all(userId, limits.maxBots);
-      if (excess.length) {
-        const stmt = db.prepare('UPDATE trading_bots SET is_active = 0, updated_at = CURRENT_TIMESTAMP WHERE id = ?');
-        for (const b of excess) stmt.run(b.id);
-        logger.warn('deactivated excess bots on plan change', { userId, plan, count: excess.length });
-      }
-    }
-  } catch (e) { logger.error('downgrade cleanup failed', { userId, err: e.message }); }
 }
 
 function getUserPayments(userId, { limit = 50, offset = 0 } = {}) {
@@ -510,14 +483,6 @@ async function cancelSubscription(userId, { atPeriodEnd = true } = {}) {
     db.prepare(`UPDATE subscriptions SET auto_renew = 0, status = 'cancelling', updated_at = CURRENT_TIMESTAMP WHERE user_id = ?`).run(userId);
   } else {
     db.prepare(`UPDATE subscriptions SET plan = 'free', status = 'cancelled', auto_renew = 0, expires_at = NULL, updated_at = CURRENT_TIMESTAMP WHERE user_id = ?`).run(userId);
-    // Downgrade cleanup — same cascade as in extendSubscription
-    try {
-      const plans = require('../config/plans');
-      const limits = plans.getLimits('free');
-      const excess = db.prepare(`SELECT id FROM trading_bots WHERE user_id = ? AND is_active = 1 ORDER BY created_at DESC LIMIT -1 OFFSET ?`).all(userId, limits.maxBots);
-      const stmt = db.prepare('UPDATE trading_bots SET is_active = 0 WHERE id = ?');
-      for (const b of excess) stmt.run(b.id);
-    } catch (_e) {}
   }
 
   db.prepare(`

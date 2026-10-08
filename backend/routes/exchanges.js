@@ -2,7 +2,6 @@ const express = require('express');
 const { z } = require('zod');
 const { authMiddleware, exchangeKeyLimiter, requireVerifiedEmail } = require('../middleware/auth');
 const exchangeService = require('../services/exchangeService');
-const marketData = require('../services/marketDataService');
 const validation = require('../utils/validation');
 const handleErr = require('../middleware/handleErr');
 
@@ -13,44 +12,9 @@ router.get('/', (_req, res) => {
   res.json({ exchanges: exchangeService.listSupported() });
 });
 
-// ── Public: trading symbols of an exchange ──────────────────────────────
-router.get('/:exchange/symbols', async (req, res, next) => {
-  try {
-    const exchange = validation.exchange.parse(req.params.exchange);
-    const symbols = await marketData.fetchSymbols(exchange);
-    res.json({ exchange, count: symbols.length, symbols });
-  } catch (err) { handleErr(err, res, next); }
-});
-
-// ── Public: 24h ticker ──────────────────────────────────────────────────
-router.get('/:exchange/ticker/:symbol', async (req, res, next) => {
-  try {
-    const exchange = validation.exchange.parse(req.params.exchange);
-    // Symbol may arrive URL-encoded with `/` — accept both BTC/USDT and BTCUSDT
-    const raw = decodeURIComponent(req.params.symbol);
-    const symbol = validation.symbol.parse(raw);
-    const t = await marketData.fetchTicker(exchange, symbol);
-    res.json(t);
-  } catch (err) { handleErr(err, res, next); }
-});
-
-// ── Public: candles (OHLCV) ─────────────────────────────────────────────
-router.get('/:exchange/candles/:symbol', async (req, res, next) => {
-  try {
-    const exchange = validation.exchange.parse(req.params.exchange);
-    const raw = decodeURIComponent(req.params.symbol);
-    const symbol = validation.symbol.parse(raw);
-    const q = z.object({
-      timeframe: validation.timeframe.default('1h'),
-      since: z.coerce.number().int().nonnegative().optional(),
-      limit: z.coerce.number().int().min(1).max(1000).default(500),
-    }).parse(req.query);
-    const candles = await marketData.fetchCandles(exchange, symbol, q.timeframe, {
-      since: q.since, limit: q.limit,
-    });
-    res.json({ exchange, symbol, timeframe: q.timeframe, count: candles.length, candles });
-  } catch (err) { handleErr(err, res, next); }
-});
+// Public symbols / ticker / candles endpoints (CCXT-backed) were removed in
+// M0 together with the per-bot UI. Market data returns in M8 as the BingX
+// layer under services/marketData/*, exposed through /api/app/*.
 
 // ── Authed: list my keys ────────────────────────────────────────────────
 router.get('/keys', authMiddleware, (req, res, next) => {
@@ -59,7 +23,7 @@ router.get('/keys', authMiddleware, (req, res, next) => {
   } catch (err) { handleErr(err, res, next); }
 });
 
-// ── Authed: add a new key (verifies before save) ────────────────────────
+// ── Authed: add a new key ───────────────────────────────────────────────
 router.post('/keys', authMiddleware, exchangeKeyLimiter, requireVerifiedEmail, async (req, res, next) => {
   try {
     const input = validation.addKeySchema.parse(req.body);
@@ -77,7 +41,7 @@ router.delete('/keys/:id', authMiddleware, (req, res, next) => {
   } catch (err) { handleErr(err, res, next); }
 });
 
-// ── Authed: re-verify a key ─────────────────────────────────────────────
+// ── Authed: re-verify a key (501 until the exchange adapters land, M13) ─
 router.post('/keys/:id/verify', authMiddleware, exchangeKeyLimiter, async (req, res, next) => {
   try {
     const id = z.coerce.number().int().positive().parse(req.params.id);
@@ -86,7 +50,7 @@ router.post('/keys/:id/verify', authMiddleware, exchangeKeyLimiter, async (req, 
   } catch (err) { handleErr(err, res, next); }
 });
 
-// ── Authed: balance for a key ───────────────────────────────────────────
+// ── Authed: balance for a key (501 until the exchange adapters land, M13) ─
 router.get('/keys/:id/balance', authMiddleware, async (req, res, next) => {
   try {
     const id = z.coerce.number().int().positive().parse(req.params.id);

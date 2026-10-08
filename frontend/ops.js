@@ -24,7 +24,7 @@
     try {
       const r = await API.me();
       const u = r.user || r;
-      if (!u.isAdmin) { location.replace('/dashboard.html'); return false; }
+      if (!u.isAdmin) { location.replace('/app/'); return false; }
       const emailEl = document.getElementById('opsAdminEmail');
       if (emailEl) emailEl.textContent = u.email;
       return true;
@@ -62,16 +62,10 @@
           <div class="ops-card kpi"><div class="kpi-label">DAU</div><div class="kpi-value mono">${d.users.dau}</div></div>
           <div class="ops-card kpi"><div class="kpi-label">WAU</div><div class="kpi-value mono">${d.users.wau}</div></div>
           <div class="ops-card kpi"><div class="kpi-label">MAU</div><div class="kpi-value mono">${d.users.mau}</div></div>
-          <div class="ops-card kpi"><div class="kpi-label">Bots · active</div><div class="kpi-value mono">${d.bots.active}/${d.bots.total}</div><div class="kpi-sub">${d.bots.autotrading} auto</div></div>
+          <div class="ops-card kpi"><div class="kpi-label">Payments · pending</div><div class="kpi-value mono">${d.pipeline.paymentsPending}</div><div class="kpi-sub">crypto invoices</div></div>
         </div>
 
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-3 mb-6">
-          <div class="ops-card">
-            <div class="kpi-label mb-2">Trades</div>
-            <div class="dl-pair"><span class="k">Open now</span><span class="v">${d.trades.open}</span></div>
-            <div class="dl-pair"><span class="k">Opened · 24h</span><span class="v">${d.trades.openedLast24h}</span></div>
-            <div class="dl-pair"><span class="k">Closed · 24h</span><span class="v">${d.trades.closedLast24h}</span></div>
-          </div>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-3 mb-6">
           <div class="ops-card">
             <div class="kpi-label mb-2">Support queue</div>
             <div class="dl-pair"><span class="k">Open</span><span class="v">${d.support.open} <span class="${d.support.open > 5 ? 'text-red-400' : 'text-slate-500'}">${d.support.open > 5 ? '⚠' : ''}</span></span></div>
@@ -80,7 +74,6 @@
           </div>
           <div class="ops-card">
             <div class="kpi-label mb-2">Pipeline</div>
-            <div class="dl-pair"><span class="k">Signals · 24h</span><span class="v">${d.pipeline.signalsToday}</span></div>
             <div class="dl-pair"><span class="k">Payments pending</span><span class="v">${d.pipeline.paymentsPending}</span></div>
             <div class="dl-pair"><span class="k">Ref rewards pending</span><span class="v">${d.pipeline.refRewardsPending.count} · ${money(d.pipeline.refRewardsPending.amountUsd)}</span></div>
           </div>
@@ -172,9 +165,9 @@
       <div class="ops-card" style="padding:0;overflow:auto">
         <table class="ops-table">
           <thead><tr>
-            <th>Email</th><th>Plan</th><th>2FA</th><th>Bots</th><th>Trades</th><th>$</th><th>Registered</th><th>Last login</th><th></th>
+            <th>Email</th><th>Plan</th><th>2FA</th><th>$</th><th>Registered</th><th>Last login</th><th></th>
           </tr></thead>
-          <tbody id="usersTb"><tr><td colspan="9" class="text-center py-8 text-slate-500">Загрузка…</td></tr></tbody>
+          <tbody id="usersTb"><tr><td colspan="7" class="text-center py-8 text-slate-500">Загрузка…</td></tr></tbody>
         </table>
       </div>
     `;
@@ -187,25 +180,23 @@
     try {
       const data = await API.adminListUsers({ search: _usersSearch, limit: 200 });
       const rows = (data.users || []).map((u) => {
-        const planBadge = u.plan === 'free' ? 'badge-gray' : u.plan === 'elite' ? 'badge-blue' : 'badge-yellow';
+        const planBadge = u.plan === 'free' ? 'badge-gray' : 'badge-yellow';
         const adminTag = u.isAdmin ? ' <span class="badge badge-red">ADMIN</span>' : '';
         const blockedTag = !u.isActive ? ' <span class="badge badge-red">BLOCKED</span>' : '';
         return `<tr style="cursor:pointer" data-uid="${u.id}">
           <td class="mono">${esc(u.email)}${adminTag}${blockedTag}</td>
           <td><span class="badge ${planBadge}">${u.plan}</span></td>
           <td>${u.twoFactor && u.twoFactor.enabled ? '<span class="badge badge-green">ON</span>' : '<span class="text-slate-600">—</span>'}</td>
-          <td class="mono">${u.botCount || 0}</td>
-          <td class="mono">${u.tradeCount || 0}</td>
           <td class="mono">${u.paidCount || 0}</td>
           <td class="mono text-xs text-slate-500">${fmtDateShort(u.createdAt)}</td>
           <td class="mono text-xs text-slate-500">${u.lastLoginAt ? fmtDateShort(u.lastLoginAt) : '—'}</td>
           <td><button class="ops-btn">Открыть →</button></td>
         </tr>`;
       }).join('');
-      document.getElementById('usersTb').innerHTML = rows || '<tr><td colspan="9" class="text-center py-8 text-slate-500">Нет результатов</td></tr>';
+      document.getElementById('usersTb').innerHTML = rows || '<tr><td colspan="7" class="text-center py-8 text-slate-500">Нет результатов</td></tr>';
       document.querySelectorAll('#usersTb tr[data-uid]').forEach((tr) => tr.addEventListener('click', () => openUser(+tr.dataset.uid)));
     } catch (e) {
-      document.getElementById('usersTb').innerHTML = `<tr><td colspan="9" class="text-center py-8 text-red-400">${esc(e.message)}</td></tr>`;
+      document.getElementById('usersTb').innerHTML = `<tr><td colspan="7" class="text-center py-8 text-red-400">${esc(e.message)}</td></tr>`;
     }
   }
   loaders.users = loadUsers;
@@ -219,8 +210,6 @@
     try {
       const d = await API.adminUserDetail(userId);
       const u = d.user;
-      const pnl = d.pnl;
-      const pnlCls = pnl.totalPnl > 0 ? 'text-green-400' : pnl.totalPnl < 0 ? 'text-red-400' : '';
       body.innerHTML = `
         <div class="drawer-section">
           <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px">
@@ -252,23 +241,12 @@
           <div class="dl-pair"><span class="k">2FA</span><span class="v">${u.twoFactor.enabled ? 'Enabled · ' + fmtDateShort(u.twoFactor.enabledAt) : 'Off'}</span></div>
           <div class="dl-pair"><span class="k">Last login</span><span class="v">${u.lastLoginAt ? fmtDate(u.lastLoginAt) : '—'}</span></div>
           <div class="dl-pair"><span class="k">Telegram</span><span class="v">${u.telegramUsername ? '@' + esc(u.telegramUsername) : '—'}</span></div>
-          <div class="dl-pair"><span class="k">Public profile</span><span class="v">${u.publicProfile ? 'yes' : 'no'}</span></div>
         </div>
 
         <div class="drawer-section">
-          <div class="kpi-label mb-2">Trading (${pnl.closedTrades} closed)</div>
-          <div class="dl-pair"><span class="k">Total PnL</span><span class="v ${pnlCls} mono">${money(pnl.totalPnl)}</span></div>
-          <div class="dl-pair"><span class="k">Wins / Losses</span><span class="v mono">${pnl.wins} / ${pnl.losses}</span></div>
-          <div class="dl-pair"><span class="k">Win rate</span><span class="v mono">${pnl.winRate !== null ? pct(pnl.winRate * 100) : '—'}</span></div>
-          <div class="dl-pair"><span class="k">Bots</span><span class="v mono">${d.bots.length}</span></div>
+          <div class="kpi-label mb-2">Trading</div>
           <div class="dl-pair"><span class="k">Exchange keys</span><span class="v mono">${d.exchangeKeys.length}</span></div>
-        </div>
-
-        <div class="drawer-section">
-          <div class="kpi-label mb-2">Bots · ${d.bots.length}</div>
-          ${d.bots.length ? `<table class="ops-table"><thead><tr><th>Name</th><th>Strategy</th><th>Mode</th><th>Status</th></tr></thead><tbody>
-            ${d.bots.slice(0, 10).map((b) => `<tr><td>${esc(b.name)}</td><td>${esc(b.strategy)}</td><td>${esc(b.trading_mode)}</td><td>${b.is_active ? '<span class="badge badge-green">active</span>' : '<span class="badge badge-gray">off</span>'}</td></tr>`).join('')}
-          </tbody></table>` : '<div class="text-xs text-slate-600">Ботов нет</div>'}
+          <div class="text-xs text-slate-600 mt-1">Signal / trade history joins the drawer with the engine (port plan M10/M18).</div>
         </div>
 
         <div class="drawer-section">
@@ -319,7 +297,7 @@
     catch (e) { Toast.error(e.message); }
   };
   window.Ops.changePlan = async (id) => {
-    const plan = prompt('Новый план (free / starter / pro / elite)?', 'pro');
+    const plan = prompt('Новый план (free / pro)?', 'pro');
     if (!plan) return;
     const days = parseInt(prompt('На сколько дней?', '30'), 10);
     if (!days || days < 1) return;
@@ -337,7 +315,8 @@
       // URL hash. app.js picks it up into sessionStorage (scoped to that
       // tab only) so our own admin session in localStorage is never
       // touched. The hash is stripped from the URL on first render.
-      const url = '/dashboard.html#imp=' + encodeURIComponent(r.accessToken) + '&email=' + encodeURIComponent(email);
+      // settings.html loads app.js, whose bootImpersonation() reads #imp=
+      const url = '/settings.html#imp=' + encodeURIComponent(r.accessToken) + '&email=' + encodeURIComponent(email);
       window.open(url, '_blank', 'noopener');
       Toast.success('Impersonating ' + email + ' · opened in new tab');
     } catch (e) { Toast.error(e.message || 'Ошибка'); }
@@ -351,157 +330,6 @@
     try { await API.adminNotifyUser(id, { type: 'system', title, body }); Toast.success('Отправлено: in-app + email + Telegram'); }
     catch (e) { Toast.error(e.message); }
   };
-
-  // ── Bots (global) ─────────────────────────────────────────────────────
-  let _botsFilter = '';
-  async function loadBots() {
-    const pane = document.getElementById('pane-bots');
-    pane.innerHTML = `
-      <div class="ops-card mb-4" style="display:flex;gap:10px;align-items:center;flex-wrap:wrap">
-        <select id="botsF" class="ops-input">
-          <option value="">Все</option>
-          <option value="active" ${_botsFilter === 'active' ? 'selected' : ''}>Active</option>
-          <option value="inactive" ${_botsFilter === 'inactive' ? 'selected' : ''}>Inactive</option>
-        </select>
-        <button class="ops-btn" id="botsR">Обновить</button>
-      </div>
-      <div class="ops-card" style="padding:0;overflow:auto">
-        <table class="ops-table">
-          <thead><tr>
-            <th>User</th><th>Name</th><th>Exchange</th><th>Symbols</th><th>Strategy</th><th>TF</th><th>Mode</th><th>Status</th><th>Trades</th><th>PnL</th><th>Last run</th>
-          </tr></thead>
-          <tbody id="botsTb"><tr><td colspan="11" class="text-center py-8 text-slate-500">Загрузка…</td></tr></tbody>
-        </table>
-      </div>
-    `;
-    document.getElementById('botsF').addEventListener('change', (e) => { _botsFilter = e.target.value; loadBots(); });
-    document.getElementById('botsR').addEventListener('click', loadBots);
-    try {
-      const data = await API.adminListBots({ status: _botsFilter || undefined, limit: 300 });
-      document.getElementById('botsTb').innerHTML = (data.bots || []).map((b) => {
-        const pnl = Number(b.total_pnl) || 0;
-        const pnlCls = pnl > 0 ? 'text-green-400' : pnl < 0 ? 'text-red-400' : 'text-slate-400';
-        return `<tr style="cursor:pointer" onclick="Ops.openUser(${b.user_id})">
-          <td class="mono text-xs">${esc(b.user_email)}</td>
-          <td>${esc(b.name)}</td>
-          <td>${esc(b.exchange)}</td>
-          <td class="text-xs">${esc(b.symbols)}</td>
-          <td>${esc(b.strategy)}</td>
-          <td>${esc(b.timeframe)}</td>
-          <td>${b.trading_mode === 'live' ? '<span class="badge badge-red">live</span>' : '<span class="badge badge-gray">paper</span>'}</td>
-          <td>${b.is_active ? '<span class="badge badge-green">on</span>' : '<span class="badge badge-gray">off</span>'}${b.auto_trade ? ' <span class="badge badge-blue">auto</span>' : ''}</td>
-          <td class="mono">${b.trade_count || 0}</td>
-          <td class="mono ${pnlCls}">${money(pnl)}</td>
-          <td class="mono text-xs text-slate-500">${b.last_run_at ? fmtDateShort(b.last_run_at) : '—'}</td>
-        </tr>`;
-      }).join('') || '<tr><td colspan="11" class="text-center py-8 text-slate-500">Нет ботов</td></tr>';
-    } catch (e) {
-      document.getElementById('botsTb').innerHTML = `<tr><td colspan="11" class="text-center py-8 text-red-400">${esc(e.message)}</td></tr>`;
-    }
-  }
-  loaders.bots = loadBots;
-
-  // ── Trades (global) ───────────────────────────────────────────────────
-  let _tradesFilters = { status: '', mode: '' };
-  async function loadTrades() {
-    const pane = document.getElementById('pane-trades');
-    pane.innerHTML = `
-      <div class="ops-card mb-4" style="display:flex;gap:10px;align-items:center;flex-wrap:wrap">
-        <select id="trStatus" class="ops-input">
-          <option value="">Все статусы</option>
-          <option value="open" ${_tradesFilters.status === 'open' ? 'selected' : ''}>Open</option>
-          <option value="closed" ${_tradesFilters.status === 'closed' ? 'selected' : ''}>Closed</option>
-          <option value="cancelled" ${_tradesFilters.status === 'cancelled' ? 'selected' : ''}>Cancelled</option>
-        </select>
-        <select id="trMode" class="ops-input">
-          <option value="">Все режимы</option>
-          <option value="paper" ${_tradesFilters.mode === 'paper' ? 'selected' : ''}>Paper</option>
-          <option value="live" ${_tradesFilters.mode === 'live' ? 'selected' : ''}>Live</option>
-        </select>
-        <button class="ops-btn" id="trR">Обновить</button>
-      </div>
-      <div class="ops-card" style="padding:0;overflow:auto">
-        <table class="ops-table">
-          <thead><tr>
-            <th>Opened</th><th>User</th><th>Symbol</th><th>Side</th><th>Entry</th><th>Exit</th><th>PnL</th><th>%</th><th>Status</th><th>Mode</th>
-          </tr></thead>
-          <tbody id="trTb"><tr><td colspan="10" class="text-center py-8 text-slate-500">Загрузка…</td></tr></tbody>
-        </table>
-      </div>
-    `;
-    document.getElementById('trStatus').addEventListener('change', (e) => { _tradesFilters.status = e.target.value; loadTrades(); });
-    document.getElementById('trMode').addEventListener('change', (e) => { _tradesFilters.mode = e.target.value; loadTrades(); });
-    document.getElementById('trR').addEventListener('click', loadTrades);
-    try {
-      const data = await API.adminListTrades({
-        status: _tradesFilters.status || undefined,
-        mode: _tradesFilters.mode || undefined,
-        limit: 300,
-      });
-      document.getElementById('trTb').innerHTML = (data.trades || []).map((t) => {
-        const pnl = Number(t.realized_pnl) || 0;
-        const pct = Number(t.realized_pnl_pct) || 0;
-        const cls = pnl > 0 ? 'text-green-400' : pnl < 0 ? 'text-red-400' : 'text-slate-400';
-        return `<tr style="cursor:pointer" onclick="Ops.openUser(${t.user_id})">
-          <td class="mono text-xs text-slate-500">${fmtDateShort(t.opened_at)}</td>
-          <td class="mono text-xs">${esc(t.user_email)}</td>
-          <td>${esc(t.symbol)}</td>
-          <td><span class="badge ${t.side === 'long' ? 'badge-green' : 'badge-red'}">${t.side}</span></td>
-          <td class="mono text-xs">${esc(t.entry_price || '—')}</td>
-          <td class="mono text-xs">${esc(t.exit_price || '—')}</td>
-          <td class="mono ${cls}">${t.realized_pnl !== null ? money(pnl) : '—'}</td>
-          <td class="mono ${cls}">${t.realized_pnl_pct !== null ? pct.toFixed(2) + '%' : '—'}</td>
-          <td><span class="badge ${t.status === 'open' ? 'badge-yellow' : t.status === 'closed' ? 'badge-gray' : 'badge-red'}">${t.status}</span></td>
-          <td>${t.trading_mode === 'live' ? '<span class="badge badge-red">live</span>' : '<span class="badge badge-gray">paper</span>'}</td>
-        </tr>`;
-      }).join('') || '<tr><td colspan="10" class="text-center py-8 text-slate-500">Нет сделок</td></tr>';
-    } catch (e) {
-      document.getElementById('trTb').innerHTML = `<tr><td colspan="10" class="text-center py-8 text-red-400">${esc(e.message)}</td></tr>`;
-    }
-  }
-  loaders.trades = loadTrades;
-
-  // ── Signals (global) ──────────────────────────────────────────────────
-  let _signalsFilter = '';
-  async function loadSignals() {
-    const pane = document.getElementById('pane-signals');
-    pane.innerHTML = `
-      <div class="ops-card mb-4" style="display:flex;gap:10px;align-items:center;flex-wrap:wrap">
-        <input id="sigF" class="ops-input" placeholder="Стратегия (smc, dca, grid, tradingview…)" value="${esc(_signalsFilter)}"/>
-        <button class="ops-btn" id="sigR">Обновить</button>
-      </div>
-      <div class="ops-card" style="padding:0;overflow:auto">
-        <table class="ops-table">
-          <thead><tr>
-            <th>Created</th><th>User</th><th>Symbol</th><th>Side</th><th>Strategy</th><th>Entry</th><th>TP</th><th>SL</th><th>Result</th>
-          </tr></thead>
-          <tbody id="sigTb"><tr><td colspan="9" class="text-center py-8 text-slate-500">Загрузка…</td></tr></tbody>
-        </table>
-      </div>
-    `;
-    document.getElementById('sigF').addEventListener('change', (e) => { _signalsFilter = e.target.value.trim(); loadSignals(); });
-    document.getElementById('sigR').addEventListener('click', loadSignals);
-    try {
-      const data = await API.adminListSignals({ strategy: _signalsFilter || undefined, limit: 300 });
-      document.getElementById('sigTb').innerHTML = (data.signals || []).map((s) => {
-        const resultBadge = s.result === 'tp' ? 'badge-green' : s.result === 'sl' ? 'badge-red' : s.result === 'expired' ? 'badge-gray' : 'badge-yellow';
-        return `<tr ${s.user_id ? 'style="cursor:pointer" onclick="Ops.openUser(' + s.user_id + ')"' : ''}>
-          <td class="mono text-xs text-slate-500">${fmtDate(s.created_at)}</td>
-          <td class="mono text-xs">${s.user_email ? esc(s.user_email) : '<span class="text-slate-600">public</span>'}</td>
-          <td>${esc(s.symbol)}</td>
-          <td><span class="badge ${s.side === 'long' ? 'badge-green' : 'badge-red'}">${s.side}</span></td>
-          <td>${esc(s.strategy)}</td>
-          <td class="mono text-xs">${esc(s.entry || '—')}</td>
-          <td class="mono text-xs">${esc(s.tp || '—')}</td>
-          <td class="mono text-xs">${esc(s.sl || '—')}</td>
-          <td><span class="badge ${resultBadge}">${s.result || 'pending'}</span></td>
-        </tr>`;
-      }).join('') || '<tr><td colspan="9" class="text-center py-8 text-slate-500">Нет сигналов</td></tr>';
-    } catch (e) {
-      document.getElementById('sigTb').innerHTML = `<tr><td colspan="9" class="text-center py-8 text-red-400">${esc(e.message)}</td></tr>`;
-    }
-  }
-  loaders.signals = loadSignals;
 
   // ── Payments ──────────────────────────────────────────────────────────
   let _payFilters = { status: '', method: '' };
@@ -625,7 +453,7 @@
       <div class="ops-card mb-4">
         <form id="promoForm" style="display:grid;grid-template-columns:repeat(5,1fr) auto;gap:10px;align-items:end">
           <div><label class="kpi-label block mb-1">Code</label><input name="code" required class="ops-input" style="width:100%" placeholder="FRIEND2026"/></div>
-          <div><label class="kpi-label block mb-1">Plan</label><select name="plan" class="ops-input" style="width:100%"><option>starter</option><option selected>pro</option><option>elite</option></select></div>
+          <div><label class="kpi-label block mb-1">Plan</label><select name="plan" class="ops-input" style="width:100%"><option selected>pro</option></select></div>
           <div><label class="kpi-label block mb-1">Days</label><input name="durationDays" type="number" min="1" max="3650" value="30" class="ops-input" style="width:100%"/></div>
           <div><label class="kpi-label block mb-1">Max uses</label><input name="maxUses" type="number" min="0" value="1" class="ops-input" style="width:100%"/></div>
           <div><label class="kpi-label block mb-1">Discount %</label><input name="discountPct" type="number" min="0" max="100" value="100" class="ops-input" style="width:100%"/></div>
@@ -1303,168 +1131,6 @@
     }
   }
   loaders.audit = loadAudit;
-
-  // ── Marketplace moderation ────────────────────────────────────────────
-  async function loadMarketplace() {
-    const pane = document.getElementById('pane-marketplace');
-    pane.innerHTML = '<div class="text-center py-12 text-slate-500 text-sm">Загрузка…</div>';
-    try {
-      const r = await API.adminMarketplace();
-      const list = r.strategies || [];
-      pane.innerHTML =
-        '<div class="ops-card mb-4">' +
-        '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">' +
-          '<div style="font-weight:600">Опубликованные стратегии</div>' +
-          '<div class="text-xs" style="color:rgba(255,255,255,.45)">' + list.length + ' items · hidden inclusive</div>' +
-        '</div>' +
-        '<table class="ops-table"><thead><tr>' +
-          '<th>Title / Slug</th><th>Author</th><th>Strategy</th><th>Price</th>' +
-          '<th>Installs</th><th>Earnings</th><th>Status</th><th></th>' +
-        '</tr></thead><tbody>' +
-        (list.length ? list.map(function (s) {
-          var priceTxt = (s.price_usd > 0) ? '$' + s.price_usd.toFixed(0) : 'free';
-          var earnTxt = (s.earnings_count > 0)
-            ? '<span class="mono">$' + (s.pending_usd + s.paid_usd).toFixed(2) + '</span>' +
-              '<span class="text-xs" style="color:rgba(255,255,255,.5);margin-left:6px">' + s.earnings_count + '</span>'
-            : '<span class="text-slate-600">—</span>';
-          var badge = s.is_public
-            ? '<span class="badge badge-green">public</span>'
-            : '<span class="badge badge-gray">hidden</span>';
-          var btnLabel = s.is_public ? 'Unpublish' : 'Republish';
-          var btnCls = s.is_public ? 'ops-btn ops-btn-danger' : 'ops-btn';
-          return '<tr>' +
-            '<td><div style="font-weight:500">' + esc(s.title) + '</div>' +
-              '<div class="text-xs mono" style="color:rgba(255,255,255,.4)">' + esc(s.slug) + '</div></td>' +
-            '<td class="text-xs">' + esc(s.author_email) + '</td>' +
-            '<td><span class="badge badge-blue">' + esc(s.strategy) + '</span> <span class="text-xs text-slate-500">' + esc(s.timeframe) + '</span></td>' +
-            '<td>' + priceTxt + '</td>' +
-            '<td>' + s.installs + '</td>' +
-            '<td>' + earnTxt + '</td>' +
-            '<td>' + badge + '</td>' +
-            '<td><button class="' + btnCls + '" data-mkt-toggle="' + s.id + '" data-next="' + (!s.is_public) + '">' + btnLabel + '</button></td>' +
-          '</tr>';
-        }).join('') : '<tr><td colspan="8" class="text-center py-8" style="color:rgba(255,255,255,.45)">Пока ничего не опубликовано</td></tr>') +
-        '</tbody></table></div>';
-
-      pane.querySelectorAll('[data-mkt-toggle]').forEach(function (btn) {
-        btn.addEventListener('click', async function () {
-          var id = btn.getAttribute('data-mkt-toggle');
-          var next = btn.getAttribute('data-next') === 'true';
-          btn.disabled = true; btn.textContent = '…';
-          try {
-            await API.adminSetStrategyPublic(id, next);
-            loadMarketplace();
-          } catch (e) { btn.disabled = false; alert(e.message || 'Ошибка'); btn.textContent = next ? 'Republish' : 'Unpublish'; }
-        });
-      });
-    } catch (e) {
-      pane.innerHTML = '<div class="text-center py-12 text-red-400 text-sm">' + esc(e.message) + '</div>';
-    }
-  }
-  loaders.marketplace = loadMarketplace;
-
-  // ── Copy Trading moderation ───────────────────────────────────────────
-  async function loadCopy() {
-    const pane = document.getElementById('pane-copy');
-    pane.innerHTML = '<div class="text-center py-12 text-slate-500 text-sm">Загрузка…</div>';
-    try {
-      const r = await API.adminCopyList({ activeOnly: false });
-      const subs = r.subscriptions || [];
-      pane.innerHTML =
-        '<div class="ops-card">' +
-        '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">' +
-          '<div style="font-weight:600">Copy subscriptions</div>' +
-          '<div class="text-xs" style="color:rgba(255,255,255,.45)">' + subs.length + ' total · ' + subs.filter(function(x){return x.is_active}).length + ' active</div>' +
-        '</div>' +
-        '<table class="ops-table"><thead><tr>' +
-          '<th>Leader</th><th>Follower</th><th>Mode</th><th>Risk×</th>' +
-          '<th>Leader PnL</th><th>Leader trades</th><th>Status</th><th></th>' +
-        '</tr></thead><tbody>' +
-        (subs.length ? subs.map(function (s) {
-          var status = s.is_active
-            ? '<span class="badge badge-green">active</span>'
-            : '<span class="badge badge-gray">off</span>';
-          var pnlCls = s.leader_total_pnl >= 0 ? 'text-green-400' : 'text-red-400';
-          return '<tr>' +
-            '<td><div class="text-xs">' + esc(s.leader_email) + '</div>' +
-              '<div class="mono text-xs" style="color:rgba(255,255,255,.4)">#' + esc(s.leader_code) + '</div></td>' +
-            '<td class="text-xs">' + esc(s.follower_email) + '</td>' +
-            '<td><span class="badge ' + (s.mode === 'live' ? 'badge-green' : 'badge-yellow') + '">' + esc(s.mode) + '</span></td>' +
-            '<td class="mono">' + Number(s.risk_mult).toFixed(1) + '</td>' +
-            '<td class="mono ' + pnlCls + '">' + (Number(s.leader_total_pnl) >= 0 ? '+' : '') + Number(s.leader_total_pnl).toFixed(2) + '</td>' +
-            '<td class="text-xs">' + s.leader_closed_trades + '</td>' +
-            '<td>' + status + '</td>' +
-            '<td>' +
-              (s.is_active ? '<button class="ops-btn ops-btn-danger" data-cp-disable="' + s.leader_id + '-' + s.follower_id + '">Disable</button>' : '') +
-              '<button class="ops-btn ops-btn-danger" style="margin-left:4px" data-cp-ban="' + s.leader_id + '" title="Disable all subs + revoke public profile">Ban leader</button>' +
-            '</td>' +
-          '</tr>';
-        }).join('') : '<tr><td colspan="8" class="text-center py-8" style="color:rgba(255,255,255,.45)">Ни одной подписки</td></tr>') +
-        '</tbody></table></div>';
-
-      pane.querySelectorAll('[data-cp-disable]').forEach(function (btn) {
-        btn.addEventListener('click', async function () {
-          var parts = btn.getAttribute('data-cp-disable').split('-');
-          btn.disabled = true; btn.textContent = '…';
-          try {
-            await API.adminCopyDisable(Number(parts[0]), Number(parts[1]));
-            loadCopy();
-          } catch (e) { btn.disabled = false; btn.textContent = 'Disable'; alert(e.message || 'Ошибка'); }
-        });
-      });
-      pane.querySelectorAll('[data-cp-ban]').forEach(function (btn) {
-        btn.addEventListener('click', async function () {
-          if (!confirm('Заблокировать лидера? Все активные подписки отключатся + публичный профиль закроется.')) return;
-          var lid = btn.getAttribute('data-cp-ban');
-          btn.disabled = true; btn.textContent = '…';
-          try { await API.adminCopyBanLeader(lid); loadCopy(); }
-          catch (e) { btn.disabled = false; btn.textContent = 'Ban leader'; alert(e.message || 'Ошибка'); }
-        });
-      });
-    } catch (e) {
-      pane.innerHTML = '<div class="text-center py-12 text-red-400 text-sm">' + esc(e.message) + '</div>';
-    }
-  }
-  loaders.copy = loadCopy;
-
-  // ── AI usage (Gemini) ─────────────────────────────────────────────────
-  async function loadAI() {
-    const pane = document.getElementById('pane-ai');
-    pane.innerHTML = '<div class="text-center py-12 text-slate-500 text-sm">Загрузка…</div>';
-    try {
-      const r = await API.adminAIUsage();
-      var enabled = r.enabled ? '<span class="badge badge-green">enabled</span>' : '<span class="badge badge-red">disabled</span>';
-      var rows = r.users || [];
-      pane.innerHTML =
-        '<div class="ops-card">' +
-        '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">' +
-          '<div style="font-weight:600">Gemini AI usage · сегодня · in-memory</div>' +
-          enabled +
-        '</div>' +
-        '<div class="text-xs" style="color:rgba(255,255,255,.5);margin-bottom:12px">' +
-          'Счётчик хранится в памяти процесса — сбрасывается после рестарта Passenger. ' +
-          'Ниже только юзеры с запросами > 0 в текущем процессе.' +
-        '</div>' +
-        '<table class="ops-table"><thead><tr>' +
-          '<th>User</th><th>Plan</th><th>Today</th><th>Limit</th><th>% of limit</th>' +
-        '</tr></thead><tbody>' +
-        (rows.length ? rows.map(function (u) {
-          var pct = u.limit ? Math.round(u.requestsToday / u.limit * 100) : 0;
-          var pctCls = pct >= 90 ? 'badge-red' : pct >= 60 ? 'badge-yellow' : 'badge-gray';
-          return '<tr>' +
-            '<td class="text-xs">' + esc(u.email) + '</td>' +
-            '<td><span class="badge badge-blue">' + esc(u.plan) + '</span></td>' +
-            '<td class="mono">' + u.requestsToday + '</td>' +
-            '<td class="mono" style="color:rgba(255,255,255,.5)">' + u.limit + '</td>' +
-            '<td><span class="badge ' + pctCls + '">' + pct + '%</span></td>' +
-          '</tr>';
-        }).join('') : '<tr><td colspan="5" class="text-center py-8" style="color:rgba(255,255,255,.45)">Никто ещё не пользовался AI в этом процессе</td></tr>') +
-        '</tbody></table></div>';
-    } catch (e) {
-      pane.innerHTML = '<div class="text-center py-12 text-red-400 text-sm">' + esc(e.message) + '</div>';
-    }
-  }
-  loaders.ai = loadAI;
 
   // ── Feature flags ─────────────────────────────────────────────────────
   async function loadFlags() {

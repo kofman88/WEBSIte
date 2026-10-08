@@ -1,62 +1,121 @@
 /**
  * Plan-gate helper — single source of truth on the frontend for
  * "what's allowed on the current user's plan." Mirrors the backend
- * matrix in /backend/config/plans.js so we stop showing buttons that
- * the API will reject anyway.
+ * matrix in /backend/config/planFeatures.js (the bot's PLAN_FEATURES,
+ * verbatim) so we stop showing buttons that the API will reject anyway.
+ *
+ * Two plans, like the bot: free and pro. Retired ids (starter / elite /
+ * beginner) normalise exactly like the bot's normalize_plan:
+ * pro | elite | beginner → pro, anything else → free.
  *
  * Usage:
- *   await PlanGate.init();              // once, after Auth resolves
- *   PlanGate.canUseStrategy('smc');     // boolean
- *   PlanGate.requiredFor('strategy', 'gerchik'); // 'elite'
- *   PlanGate.maxLeverage();             // number (5 / 10 / 25 / 100)
- *   PlanGate.lockStrategyRadios(form);  // adds 🔒 + click→toast
- *   PlanGate.lockStrategySelect(select);
- *   PlanGate.lockTradingModeRadios(form);
+ *   await PlanGate.init();                 // once, after Auth resolves
+ *   PlanGate.canUseStrategy('smc');        // boolean (any case)
+ *   PlanGate.canUseFeature('auto_trade');  // bot key …
+ *   PlanGate.canUseFeature('autoTrade');   // … or the site's camelCase alias
+ *   PlanGate.planLimit('analyze_per_day'); // 1 / 999
+ *   PlanGate.requiredForStrategy('smc');   // 'pro'
  */
 (function (global) {
   'use strict';
 
-  // Mirror of backend/config/plans.js — strategies + feature flags only.
-  // Numeric quotas (signalsPerDay, backtestsPerDay) are read separately
-  // via API.me() since they can change with promo / trial.
-  var PLAN_TABLE = {
-    free:    { strategies: ['levels'], maxLeverage: 5,
-               autoTrade: false, paperOnly: true, multiExchange: false,
-               marketScanner: false, multiStrategy: false,
-               optimizer: false, apiAccess: false, marketplacePublish: false,
-               canCreateBot: false, canTrade: false, canAddExchangeKey: false, canRunBacktest: false,
-               readOnly: true },
-    starter: { strategies: ['levels'], maxLeverage: 10,
-               autoTrade: false, paperOnly: true, multiExchange: false,
-               marketScanner: false, multiStrategy: false,
-               optimizer: false, apiAccess: false, marketplacePublish: true,
-               canCreateBot: true, canTrade: true, canAddExchangeKey: true, canRunBacktest: true,
-               readOnly: false },
-    pro:     { strategies: ['levels', 'smc', 'dca', 'grid'], maxLeverage: 25,
-               autoTrade: true, paperOnly: false, multiExchange: true,
-               marketScanner: false, multiStrategy: false,
-               optimizer: false, apiAccess: false, marketplacePublish: true,
-               canCreateBot: true, canTrade: true, canAddExchangeKey: true, canRunBacktest: true,
-               readOnly: false },
-    elite:   { strategies: ['levels', 'smc', 'gerchik', 'scalping', 'dca', 'grid'], maxLeverage: 100,
-               autoTrade: true, paperOnly: false, multiExchange: true,
-               marketScanner: true, multiStrategy: true,
-               optimizer: true, apiAccess: true, marketplacePublish: true,
-               canCreateBot: true, canTrade: true, canAddExchangeKey: true, canRunBacktest: true,
-               readOnly: false },
+  // ── Mirror of backend/config/planFeatures.js — keep in sync ─────────
+  var PLAN_FEATURES = {
+    free: {
+      strategies:                 ['LEVELS'],
+      both_directions:            false,
+      long_only:                  false,
+      auto_trade:                 false,
+      max_trades:                 0,
+      signals_per_day:            2,
+      min_signal_quality:         5,
+      signal_window_morning_utc:  [6, 13],
+      signal_window_evening_utc:  [13, 21],
+      analyze_per_day:            1,
+      symbols_limit:              5,
+      timeframes:                 ['15m', '1h'],
+      smc:                        false,
+      volume:                     false,
+      notifications:              'basic',
+      optimizer:                  false,
+      target_wr:                  false,
+      genome:                     false,
+      ai_explanations:            false,
+      multi_exchange:             false,
+      api_access:                 false,
+      priority_support:           false,
+      all_timeframes:             false,
+      more_symbols:               false,
+      unlimited_trades:           false,
+      expert_mode:                false,
+      strategies_extended:        false,
+      ai_layer_market_regime:     false,
+      ai_layer_news_monitor:      false,
+      ai_layer_genome_engine:     false,
+      ai_plus_tools:              false,
+      challenge:                  false
+    },
+    pro: {
+      strategies:                 ['LEVELS', 'SMC', 'VOLUME'],
+      both_directions:            true,
+      long_only:                  false,
+      auto_trade:                 true,
+      max_trades:                 0,
+      signals_per_day:            999,
+      min_signal_quality:         3,
+      analyze_per_day:            999,
+      symbols_limit:              999,
+      timeframes:                 ['15m', '30m', '1h', '4h', '1d'],
+      smc:                        true,
+      volume:                     true,
+      notifications:              'premium',
+      optimizer:                  true,
+      target_wr:                  true,
+      genome:                     true,
+      ai_explanations:            true,
+      multi_exchange:             true,
+      api_access:                 true,
+      priority_support:           true,
+      all_timeframes:             true,
+      more_symbols:               true,
+      unlimited_trades:           true,
+      expert_mode:                true,
+      strategies_extended:        true,
+      ai_layer_market_regime:     true,
+      ai_layer_news_monitor:      true,
+      ai_layer_genome_engine:     true,
+      ai_plus_tools:              true,
+      challenge:                  true
+    }
   };
-  var PLAN_ORDER = ['free', 'starter', 'pro', 'elite'];
-  var PLAN_LABEL = { free: 'Free', starter: 'Starter', pro: 'Pro', elite: 'Elite' };
+  var PLAN_PRICES_USD = { free: 0, pro: 69 };
+  var PLAN_ORDER = ['free', 'pro'];
+  var PLAN_LABEL = { free: 'Free', pro: 'Pro' };
 
-  // Russian display name + the plan that unlocks it (for upsell toast).
-  var STRATEGY_INFO = {
-    levels:   { label: 'Levels',   minPlan: 'free' },
-    smc:      { label: 'SMC',      minPlan: 'pro' },
-    dca:      { label: 'DCA',      minPlan: 'pro' },
-    grid:     { label: 'Grid',     minPlan: 'pro' },
-    gerchik:  { label: 'Gerchik',  minPlan: 'elite' },
-    scalping: { label: 'Scalping', minPlan: 'elite' },
+  // camelCase site flags → bot feature keys
+  var FLAG_TO_FEATURE = {
+    autoTrade: 'auto_trade', bothDirections: 'both_directions',
+    multiExchange: 'multi_exchange', apiAccess: 'api_access',
+    prioritySupport: 'priority_support', allTimeframes: 'all_timeframes',
+    expertMode: 'expert_mode', moreSymbols: 'more_symbols',
+    unlimitedTrades: 'unlimited_trades', aiExplanations: 'ai_explanations',
+    targetWr: 'target_wr',
+    // legacy site flags from the per-bot product
+    canAddExchangeKey: 'auto_trade', paperOnly: 'paperTradingOnly'
   };
+
+  // Display name + the plan that unlocks it (for upsell toast).
+  var STRATEGY_INFO = {
+    levels: { label: 'Levels', minPlan: 'free' },
+    smc:    { label: 'SMC',    minPlan: 'pro' },
+    volume: { label: 'Volume', minPlan: 'pro' }
+  };
+
+  function normalizePlan(p) {
+    var id = String(p == null ? '' : p).trim().toLowerCase();
+    if (id === 'pro' || id === 'elite' || id === 'beginner') return 'pro';
+    return 'free';
+  }
 
   var _plan = 'free';
   var _ready = false;
@@ -69,7 +128,7 @@
         if (global.API && typeof API.me === 'function') {
           var r = await API.me();
           var u = r && (r.user || r);
-          if (u && u.subscription && u.subscription.plan) _plan = u.subscription.plan;
+          if (u && u.subscription && u.subscription.plan) _plan = normalizePlan(u.subscription.plan);
         }
       } catch (_) { /* offline / not logged in → free */ }
       _ready = true;
@@ -79,45 +138,60 @@
 
   function getPlan() { return _plan; }
   function ready() { return _ready; }
-  function setPlan(p) { if (PLAN_TABLE[p]) _plan = p; }   // for testing / refresh
+  function setPlan(p) { _plan = normalizePlan(p); }   // for testing / refresh
+
+  // bot `can()`: bool → itself; number → > 0; set → non-empty; else Boolean
+  function _can(plan, feature) {
+    var row = PLAN_FEATURES[normalizePlan(plan)];
+    if (feature === 'paperTradingOnly') return !row.auto_trade;
+    var key = FLAG_TO_FEATURE[feature] || feature;
+    if (key === 'paperTradingOnly') return !row.auto_trade;
+    var val = row[key];
+    if (typeof val === 'boolean') return val;
+    if (typeof val === 'number') return val > 0;
+    if (Array.isArray(val)) return val.length > 0;
+    return Boolean(val);
+  }
 
   function canUseStrategy(s) {
-    var t = PLAN_TABLE[_plan];
-    return Boolean(t && t.strategies.indexOf(s) !== -1);
+    return PLAN_FEATURES[_plan].strategies.indexOf(String(s || '').toUpperCase()) !== -1;
   }
-  function canUseFeature(flag) {
-    var t = PLAN_TABLE[_plan];
-    return Boolean(t && t[flag]);
+  function canUseTimeframe(tf) {
+    return PLAN_FEATURES[_plan].timeframes.indexOf(String(tf || '')) !== -1;
   }
-  function maxLeverage() {
-    return (PLAN_TABLE[_plan] && PLAN_TABLE[_plan].maxLeverage) || 5;
+  function canUseFeature(flag) { return _can(_plan, flag); }
+  function planLimit(key) {
+    var v = PLAN_FEATURES[_plan][key];
+    return v === undefined ? 0 : v;
   }
   function requiredForStrategy(s) {
-    return (STRATEGY_INFO[s] && STRATEGY_INFO[s].minPlan) || 'pro';
+    var key = String(s || '').toLowerCase();
+    return (STRATEGY_INFO[key] && STRATEGY_INFO[key].minPlan) || 'pro';
   }
   function requiredForFeature(flag) {
     for (var i = 0; i < PLAN_ORDER.length; i++) {
-      var t = PLAN_TABLE[PLAN_ORDER[i]];
-      if (t && t[flag]) return PLAN_ORDER[i];
+      if (_can(PLAN_ORDER[i], flag)) return PLAN_ORDER[i];
     }
-    return 'elite';
+    return 'pro';
   }
   function isAtLeast(target) {
-    return PLAN_ORDER.indexOf(_plan) >= PLAN_ORDER.indexOf(target);
+    return PLAN_ORDER.indexOf(_plan) >= PLAN_ORDER.indexOf(normalizePlan(target));
   }
+  // The bot lets Free users change every setting; there is no read-only tier.
+  function isReadOnly() { return false; }
 
   // ── UI helpers ───────────────────────────────────────────────────────
 
   // Show a toast (or alert fallback) explaining the upsell.
   function _upsell(featureName, requiredPlan) {
-    var msg = featureName + ' — доступно на тарифе ' + (PLAN_LABEL[requiredPlan] || requiredPlan) + ' и выше';
+    var msg = featureName + ' — доступно на тарифе ' + (PLAN_LABEL[requiredPlan] || requiredPlan);
     if (global.Toast && typeof Toast.warn === 'function') Toast.warn(msg);
     else if (global.Toast && typeof Toast.info === 'function') Toast.info(msg);
     else console.warn(msg);
   }
 
   // Premium lock icon — inline SVG (no emoji, no font dependency). Two
-  // sizes: 12px for inline chips, 18px for hero banners. Solid amber-gold
+  // sizes: 12px for inline chips, 22px for hero banners. Solid amber-gold
   // fill that lights up on dark backgrounds without competing with our
   // primary orange CTA — feels like a hardware-keychain token rather than
   // a generic 🔒 glyph.
@@ -164,7 +238,7 @@
       + 'background:linear-gradient(135deg,rgba(255,140,90,.0),rgba(255,140,90,.12));pointer-events:none}'
       + '.plan-locked-btn .plan-lock-svg{margin-left:6px;color:#FFB28A;'
       + 'filter:drop-shadow(0 0 4px rgba(255,140,90,.6));vertical-align:-2px}'
-      // Hero banner for whole-page locks (Terminal, etc.)
+      // Hero banner for whole-page locks
       + '.plan-gate-hero{max-width:560px;margin:48px auto;padding:32px 28px;'
       + 'border-radius:18px;text-align:center;'
       + 'background:radial-gradient(120% 100% at 50% 0%,rgba(255,90,31,.14),rgba(255,90,31,.02) 60%),'
@@ -195,99 +269,8 @@
   else if (typeof document !== 'undefined') document.addEventListener('DOMContentLoaded', _injectStyles);
 
   /**
-   * Walk every <input name="strategyType"> radio in `root`. Disable + dim
-   * the ones the current plan can't use, and append a small 🔒 chip with
-   * the unlocking plan. Click on a locked radio shows an upsell toast
-   * and refuses to select it.
-   */
-  function lockStrategyRadios(root) {
-    if (!root) return;
-    var radios = root.querySelectorAll('input[type="radio"][name="strategyType"]');
-    radios.forEach(function (r) {
-      var s = r.value;
-      if (canUseStrategy(s)) return;
-      var req = requiredForStrategy(s);
-      var card = r.closest('label, .wiz-card') || r.parentElement;
-      if (!card) return;
-      card.classList.add('plan-locked');
-      card.setAttribute('data-plan-required', req);
-      r.disabled = true;
-      // Idempotency guard: every openWizard() call would otherwise stack
-      // a new click listener, leading to N toasts on a single click after
-      // N opens.
-      if (card.dataset.planLocked === '1') return;
-      card.dataset.planLocked = '1';
-      if (!card.querySelector('.plan-lock-chip')) {
-        var holder = card.querySelector('.wiz-card-body') || card;
-        holder.insertAdjacentHTML('beforeend', _lockChip(PLAN_LABEL[req]));
-      }
-      card.addEventListener('click', function (ev) {
-        if (r.disabled) {
-          ev.preventDefault(); ev.stopPropagation();
-          _upsell('Стратегия ' + (STRATEGY_INFO[s] && STRATEGY_INFO[s].label || s), req);
-        }
-      }, true);
-    });
-  }
-
-  /**
-   * Mark forbidden <option>s in a strategy <select> as disabled and
-   * append a "(Pro+)" / "(Elite)" suffix. Optionally drop options
-   * entirely (set dropForbidden=true) — used for filter dropdowns where
-   * a forbidden option is just confusing.
-   *
-   * The bots page wraps every <select> with chmEnhanceSelects() into a
-   * custom dropdown of <button class="chm-select-option" data-value="…">,
-   * so we ALSO have to mirror the disabled / removed state onto those
-   * buttons or the user clicks the visible UI and the native disabled
-   * flag never fires.
-   */
-  function lockStrategySelect(sel, opts) {
-    if (!sel) return;
-    var dropForbidden = !!(opts && opts.dropForbidden);
-    var wrap = sel.closest && sel.closest('.chm-select');
-    var currentValue = sel.value;   // preserve legacy/grandfathered selection
-
-    Array.from(sel.options).forEach(function (o) {
-      var s = (o.value || '').toLowerCase();
-      if (!s || !STRATEGY_INFO[s]) return;
-      if (canUseStrategy(s)) return;
-      // Never lock the currently-selected option — a user with a legacy
-      // Gerchik bot from a previous Pro subscription should still see
-      // their bot's strategy displayed correctly. They just can't switch
-      // to another forbidden one.
-      if (s === currentValue) return;
-      var req = requiredForStrategy(s);
-      var btn = wrap ? wrap.querySelector('.chm-select-option[data-value="' + CSS.escape(o.value) + '"]') : null;
-
-      if (dropForbidden) {
-        o.remove();
-        if (btn) btn.remove();
-        return;
-      }
-      o.disabled = true;
-      if (o.text.indexOf('(') === -1) o.text = o.text + ' (' + PLAN_LABEL[req] + ')';
-
-      if (btn && !btn.dataset.planLocked) {
-        btn.dataset.planLocked = '1';
-        btn.dataset.planRequired = req;
-        btn.classList.add('chm-select-option-locked');
-        if (btn.textContent.indexOf('(') === -1) btn.textContent = btn.textContent + ' (' + PLAN_LABEL[req] + ')';
-        btn.title = 'Доступно на тарифе ' + PLAN_LABEL[req] + ' и выше';
-        // Capture-phase listener wins over the default click handler that
-        // would otherwise set sel.value to the locked option.
-        btn.addEventListener('click', function (ev) {
-          ev.stopImmediatePropagation();
-          ev.preventDefault();
-          _upsell('Стратегия ' + (STRATEGY_INFO[s] && STRATEGY_INFO[s].label || s), req);
-        }, true);
-      }
-    });
-  }
-
-  /**
    * Lock a single <option value="X"> in any <select>. Used for non-strategy
-   * dropdowns like tradingMode (paper/live).
+   * dropdowns (e.g. an exchange or timeframe selector).
    */
   function lockSelectOption(sel, value, requiredPlan, featureName) {
     if (!sel) return;
@@ -322,59 +305,6 @@
   }
 
   /**
-   * Lock the LIVE radio in a tradingMode pair when the plan is paper-only
-   * (Free / Starter). No-op for Pro+ where live trading is allowed.
-   */
-  function lockTradingModeRadios(root) {
-    if (!root) return;
-    var t = PLAN_TABLE[_plan];
-    if (!t || !t.paperOnly) return; // Pro+ → live is fine
-    var liveRadios = root.querySelectorAll('input[type="radio"][name="tradingMode"][value="live"]');
-    liveRadios.forEach(function (r) {
-      var card = r.closest('label, .wiz-card') || r.parentElement;
-      if (!card) return;
-      card.classList.add('plan-locked');
-      r.disabled = true;
-      if (card.dataset.planLocked === '1') return;
-      card.dataset.planLocked = '1';
-      if (!card.querySelector('.plan-lock-chip')) {
-        var holder = card.querySelector('.wiz-card-body') || card;
-        holder.insertAdjacentHTML('beforeend', _lockChip('Pro'));
-      }
-      card.addEventListener('click', function (ev) {
-        if (r.disabled) {
-          ev.preventDefault(); ev.stopPropagation();
-          _upsell('Live-торговля', 'pro');
-        }
-      }, true);
-    });
-  }
-
-  /**
-   * Clamp a leverage <input>'s `max` to the user's plan limit and add a
-   * small label hint next to it.
-   */
-  function clampLeverageInput(input) {
-    if (!input) return;
-    var lim = maxLeverage();
-    input.max = String(lim);
-    if (Number(input.value) > lim) input.value = String(lim);
-    if (!input.dataset.planClamped) {
-      input.dataset.planClamped = '1';
-      input.addEventListener('input', function () {
-        if (Number(input.value) > lim) input.value = String(lim);
-      });
-    }
-    var hint = input.parentElement && input.parentElement.querySelector('.plan-leverage-hint');
-    if (!hint && input.parentElement) {
-      hint = document.createElement('span');
-      hint.className = 'plan-leverage-hint';
-      hint.textContent = 'до ' + lim + '× на тарифе ' + PLAN_LABEL[_plan];
-      input.parentElement.appendChild(hint);
-    }
-  }
-
-  /**
    * Generic gate: if the feature is locked, replace `el`'s click with an
    * upsell toast and add `.plan-locked` class. `featureName` is shown in
    * the toast.
@@ -391,13 +321,11 @@
     }, true);
   }
 
-  function isReadOnly() { return Boolean(PLAN_TABLE[_plan] && PLAN_TABLE[_plan].readOnly); }
-
   /**
    * Lock a button (or any clickable). Adds the premium SVG inline,
    * intercepts click with an upsell toast, and applies the
    * .plan-locked-btn dimming.
-   *   PlanGate.lockButton(btn, { flag: 'canCreateBot', requiredPlan: 'starter', featureName: 'Создание ботов' })
+   *   PlanGate.lockButton(btn, { flag: 'auto_trade', requiredPlan: 'pro', featureName: 'Автоторговля' })
    * Either pass a `flag` (looked up via canUseFeature) or `force: true`
    * to always lock.
    */
@@ -407,7 +335,7 @@
     var flag = opts.flag;
     if (!force && flag && canUseFeature(flag)) return;
     if (el.dataset.planLocked === '1') return;
-    var req = opts.requiredPlan || (flag ? requiredForFeature(flag) : 'starter');
+    var req = opts.requiredPlan || (flag ? requiredForFeature(flag) : 'pro');
     var name = opts.featureName || 'Эта функция';
     el.dataset.planLocked = '1';
     el.classList.add('plan-locked-btn');
@@ -423,11 +351,11 @@
 
   /**
    * Replace a container's contents with a premium upgrade banner. Used
-   * for whole-page locks (Terminal, etc.).
+   * for whole-page locks.
    *   PlanGate.gatePageHero(document.querySelector('main'), {
-   *     featureName: 'Терминал ручной торговли',
-   *     requiredPlan: 'starter',
-   *     description: 'На Free-тарифе можно только смотреть. ...',
+   *     featureName: 'Автоторговля',
+   *     requiredPlan: 'pro',
+   *     description: 'На Free-тарифе доступны только сигналы LEVELS. ...',
    *   })
    * Returns true if the gate was applied (plan can't use the feature).
    */
@@ -435,12 +363,12 @@
     if (!container || !opts) return false;
     if (opts.flag && canUseFeature(opts.flag)) return false;
     if (!opts.flag && !opts.force) return false;
-    var req = opts.requiredPlan || (opts.flag ? requiredForFeature(opts.flag) : 'starter');
+    var req = opts.requiredPlan || (opts.flag ? requiredForFeature(opts.flag) : 'pro');
     var name = opts.featureName || 'Эта функция';
-    var desc = opts.description || ('Доступно на тарифе ' + (PLAN_LABEL[req] || req) + ' и выше. Free-пользователи могут только знакомиться с интерфейсом.');
+    var desc = opts.description || ('Доступно на тарифе ' + (PLAN_LABEL[req] || req) + '. Free — 2 сигнала LEVELS в день, одно направление.');
     container.innerHTML =
       '<div class="plan-gate-hero">'
-      +   '<h2>' + name + ' — ' + (PLAN_LABEL[req] || req) + '+</h2>'
+      +   '<h2>' + name + ' — ' + (PLAN_LABEL[req] || req) + '</h2>'
       +   '<p>' + desc + '</p>'
       +   '<a href="subscriptions.html?plan=' + req + '">Перейти на ' + (PLAN_LABEL[req] || req) + ' →</a>'
       + '</div>';
@@ -450,20 +378,19 @@
   // Expose
   global.PlanGate = {
     init: init, ready: ready, getPlan: getPlan, setPlan: setPlan,
+    normalizePlan: normalizePlan,
     canUseStrategy: canUseStrategy, canUseFeature: canUseFeature,
-    maxLeverage: maxLeverage,
+    canUseTimeframe: canUseTimeframe, planLimit: planLimit,
     requiredForStrategy: requiredForStrategy, requiredForFeature: requiredForFeature,
     isAtLeast: isAtLeast, isReadOnly: isReadOnly,
-    PLAN_LABEL: PLAN_LABEL, STRATEGY_INFO: STRATEGY_INFO,
+    PLAN_FEATURES: PLAN_FEATURES, PLAN_PRICES_USD: PLAN_PRICES_USD,
+    PLAN_ORDER: PLAN_ORDER, PLAN_LABEL: PLAN_LABEL, STRATEGY_INFO: STRATEGY_INFO,
     LOCK_SVG_SM: LOCK_SVG_SM, LOCK_SVG_LG: LOCK_SVG_LG,
-    lockStrategyRadios: lockStrategyRadios,
-    lockStrategySelect: lockStrategySelect,
     lockSelectOption: lockSelectOption,
-    lockTradingModeRadios: lockTradingModeRadios,
-    clampLeverageInput: clampLeverageInput,
     gateClickable: gateClickable,
     lockButton: lockButton,
     gatePageHero: gatePageHero,
+    _lockChip: _lockChip
   };
 
   // Auto-init as soon as the script loads — most pages need the plan

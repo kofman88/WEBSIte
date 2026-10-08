@@ -1,6 +1,6 @@
 /**
  * In-app notifications service — writes to notifications table and
- * optionally broadcasts over websocket so a bell-icon in the UI updates
+ * (the bell icon polls /api/notifications; live push arrives with SSE in M10)
  * instantly.
  *
  * Usage:
@@ -21,18 +21,6 @@ function create(userId, { type, title, body = null, link = null }) {
     INSERT INTO notifications (user_id, type, title, body, link)
     VALUES (?, ?, ?, ?, ?)
   `).run(userId, type, title, body, link);
-
-  // Best-effort WS broadcast — lazy-required to avoid circular dep
-  try {
-    const ws = require('./websocketService');
-    if (ws && ws.broadcastToUser) {
-      ws.broadcastToUser(userId, {
-        type: 'notification',
-        data: { id: info.lastInsertRowid, type, title, body, link, createdAt: new Date().toISOString() },
-        ts: Date.now(),
-      });
-    }
-  } catch (_e) { /* silent */ }
 
   return info.lastInsertRowid;
 }

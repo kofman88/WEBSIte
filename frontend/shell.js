@@ -1,5 +1,6 @@
-/* Dashboard shell — shared across dashboard/bots/signals/analytics/backtests/
- * wallet/leaderboard/settings. Handles:
+/* App shell — shared across the authed pages (settings / subscriptions /
+ * admin). Port plan M0: sidebar trimmed to App · Account · Plan · Support
+ * (+ Admin). Handles:
  *   1. Clickable CHM logo → /
  *   2. Plan badge auto-pulled from /api/auth/me
  *   3. Topbar theme + language toggles (persisted in localStorage)
@@ -13,28 +14,13 @@
   // ── Translation dictionary (RU/EN/ES/TR/ID) ─────────────────────────────
   const TR = {
     // Sidebar
-    'sb-dashboard':  { ru: 'Дашборд',     en: 'Dashboard',   es: 'Panel',        tr: 'Panel',          id: 'Dasbor' },
-    'sb-bots':       { ru: 'Боты',        en: 'Bots',        es: 'Bots',         tr: 'Botlar',         id: 'Bot' },
-    'sb-signals':    { ru: 'Сигналы',     en: 'Signals',     es: 'Señales',      tr: 'Sinyaller',      id: 'Sinyal' },
-    'sb-analytics':  { ru: 'Аналитика',   en: 'Analytics',   es: 'Análisis',     tr: 'Analitik',       id: 'Analitik' },
-    'sb-backtests':  { ru: 'Бэктесты',    en: 'Backtests',   es: 'Backtests',    tr: 'Geri testler',   id: 'Backtest' },
-    'sb-wallet':     { ru: 'Кошелёк',     en: 'Wallet',      es: 'Billetera',    tr: 'Cüzdan',         id: 'Dompet' },
-    'sb-leaderboard':{ ru: 'Рейтинг',     en: 'Leaderboard', es: 'Tabla',        tr: 'Sıralama',       id: 'Peringkat' },
+    'sb-app':        { ru: 'Приложение', en: 'App',      es: 'App',      tr: 'Uygulama', id: 'Aplikasi' },
+    'sb-account':    { ru: 'Аккаунт',    en: 'Account',  es: 'Cuenta',   tr: 'Hesap',    id: 'Akun' },
+    'sb-plan':       { ru: 'Тариф',      en: 'Plan',     es: 'Plan',     tr: 'Plan',     id: 'Paket' },
+    'sb-support':    { ru: 'Поддержка',  en: 'Support',  es: 'Soporte',  tr: 'Destek',   id: 'Dukungan' },
+    'sb-admin':      { ru: 'Админ',      en: 'Admin',    es: 'Admin',    tr: 'Yönetici', id: 'Admin' },
     'sb-settings':   { ru: 'Настройки',   en: 'Settings',    es: 'Ajustes',      tr: 'Ayarlar',        id: 'Pengaturan' },
     'sb-logout':     { ru: 'Выйти',       en: 'Sign out',    es: 'Salir',        tr: 'Çıkış',          id: 'Keluar' },
-
-    // Dashboard
-    'd-title':       { ru: 'Дашборд',                    en: 'Dashboard',             es: 'Panel de control',      tr: 'Gösterge paneli',        id: 'Dasbor' },
-    'd-total-pnl':   { ru: 'Total PnL',                  en: 'Total PnL',             es: 'PnL total',             tr: 'Toplam PnL',             id: 'Total PnL' },
-    'd-active-bots': { ru: 'Активные боты',              en: 'Active bots',           es: 'Bots activos',          tr: 'Aktif botlar',           id: 'Bot aktif' },
-    'd-signals-total':{ru: 'Сигналов всего',             en: 'Signals total',         es: 'Señales totales',       tr: 'Toplam sinyal',          id: 'Total sinyal' },
-    'd-win-rate':    { ru: 'Win Rate',                   en: 'Win rate',              es: 'Ratio ganador',         tr: 'Kazanma oranı',          id: 'Win rate' },
-    'd-equity':      { ru: 'Кривая капитала',            en: 'Equity curve',          es: 'Curva de capital',      tr: 'Sermaye eğrisi',         id: 'Kurva ekuitas' },
-    'd-latest-signals':{ru: 'Последние сигналы',         en: 'Latest signals',        es: 'Últimas señales',       tr: 'Son sinyaller',          id: 'Sinyal terbaru' },
-    'd-latest-trades':{ru: 'Последние сделки',           en: 'Recent trades',         es: 'Últimas operaciones',   tr: 'Son işlemler',           id: 'Transaksi terbaru' },
-    'd-all':         { ru: 'Все',                        en: 'All',                   es: 'Todo',                  tr: 'Tümü',                   id: 'Semua' },
-    'd-no-trades':   { ru: 'Сделок пока нет — создай бота, чтобы начать', en: 'No trades yet — create a bot to begin', es: 'Sin operaciones — crea un bot', tr: 'Henüz işlem yok — bot oluştur', id: 'Belum ada transaksi — buat bot' },
-    'd-loading':     { ru: 'Загрузка…',                  en: 'Loading…',              es: 'Cargando…',             tr: 'Yükleniyor…',            id: 'Memuat…' },
 
     // Common table headers
     't-date':  { ru: 'Дата',       en: 'Date',      es: 'Fecha',     tr: 'Tarih',    id: 'Tanggal' },
@@ -100,31 +86,60 @@
   }
 
   // ── 2. Plan badge from /auth/me ────────────────────────────────────────
+  // Two plans like the bot (config/planFeatures.js). Retired ids still map
+  // to a label so a not-yet-migrated row never renders as "undefined".
   const PLAN_LABEL = {
     free:    { label: 'Free',    class: 'plan-free' },
-    starter: { label: 'Starter', class: 'plan-starter' },
     pro:     { label: 'Pro',     class: 'plan-pro' },
-    elite:   { label: 'Elite',   class: 'plan-elite' },
+    starter: { label: 'Free',    class: 'plan-free' },
+    elite:   { label: 'Pro',     class: 'plan-pro' },
   };
-  // Runs injectors that should appear on EVERY authed page (sidebar items,
-  // promo card, footer extras, topbar pills). Separated from wirePlanBadge
+  // Runs injectors that should appear on EVERY authed page (sidebar nav,
+  // footer extras, plan pill, avatar menu). Separated from wirePlanBadge
   // so pages without a .sidebar-sub-badge anchor still get the chrome.
-  // `plan` defaults to 'free' when user lookup fails or feature-gating
-  // isn't needed; `user` is passed through to injectAccountPill so it can
-  // display the real paperStartingBalance if available.
   function applyChrome(plan, user) {
     plan = plan || 'free';
-    injectAIAssistantLink();
-    injectTerminalLink();
-    injectCopyLink();
-    injectSubscriptionsLink();
-    if (plan === 'elite') injectMarketScannerLink();
-    injectSidebarPromo(plan);
+    buildSidebarNav(user);
     injectSidebarFooterExtras();
-    injectTopbarQuickActions(plan);
-    injectAccountPill(user);
     injectPlanPill(plan);
     injectAvatarMenu(user);
+  }
+
+  // ── Sidebar navigation ─────────────────────────────────────────────────
+  // Pages ship the same static list for no-JS parity; this rebuilds it so
+  // every authed page stays in sync, marks the current page active and adds
+  // the Admin entry for admins once /auth/me resolves. `/app/` is the web
+  // app that replaces the Telegram Mini App (port plan M11).
+  const NAV_ICON = {
+    app:      '<svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>',
+    account:  '<svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0116 0"/></svg>',
+    plan:     '<svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg>',
+    support:  '<svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>',
+    admin:    '<svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2l7 4v6c0 5-3.5 8.5-7 10-3.5-1.5-7-5-7-10V6l7-4z"/></svg>',
+  };
+  const NAV_ITEMS = [
+    { page: 'app',           href: '/app/',                 t: 'sb-app',     icon: NAV_ICON.app },
+    { page: 'settings',      href: 'settings.html',         t: 'sb-account', icon: NAV_ICON.account },
+    { page: 'subscriptions', href: 'subscriptions.html',    t: 'sb-plan',    icon: NAV_ICON.plan },
+    { page: 'support',       href: 'settings.html#support', t: 'sb-support', icon: NAV_ICON.support },
+  ];
+  function buildSidebarNav(user) {
+    const nav = document.querySelector('.sidebar-nav');
+    if (!nav) return;
+    const file = (location.pathname || '').split('/').pop() || 'index.html';
+    const onSupport = file === 'settings.html' && location.hash === '#support';
+    const items = NAV_ITEMS.slice();
+    if (user && user.isAdmin) items.push({ page: 'admin', href: 'ops.html', t: 'sb-admin', icon: NAV_ICON.admin });
+    const isActive = (it) => {
+      if (it.page === 'support') return onSupport;
+      if (it.page === 'settings') return file === 'settings.html' && !onSupport;
+      if (it.page === 'subscriptions') return file === 'subscriptions.html';
+      if (it.page === 'admin') return file === 'ops.html' || file === 'admin.html';
+      return false;
+    };
+    nav.innerHTML = items.map((it) =>
+      '<a href="' + it.href + '" class="sidebar-link' + (isActive(it) ? ' active' : '') + '" data-page="' + it.page + '">'
+      + it.icon + '<span data-t="' + it.t + '">' + escapeHtml(tr(it.t)) + '</span></a>').join('');
   }
 
   // ── Avatar dropdown menu ─────────────────────────────────────────────
@@ -280,65 +295,7 @@
     } catch (_e) {
       if (text) text.textContent = 'Free Plan';
     }
-    // Refine plan-dependent items. Chrome was already injected synchronously
-    // in boot() with 'free' defaults; here we add Elite-only pieces and
-    // strip items that shouldn't be there on Elite.
-    if (plan === 'elite') {
-      injectMarketScannerLink();
-      // Elite users don't need the "Upgrade" pill
-      const up = document.querySelector('.shell-pill-upgrade');
-      if (up) up.remove();
-      // Swap the promo to "Academy" (was "Elite upsell" on default)
-      const promo = document.querySelector('.sidebar-promo');
-      if (promo && !promo.getAttribute('href').includes('academy')) {
-        promo.remove();
-        injectSidebarPromo('elite');
-      }
-    }
-    // Account pill equity — re-fetched now that we have the real user
-    if (user) {
-      const modeEl = document.getElementById('shellAcctMode');
-      const valEl = document.getElementById('shellAcctVal');
-      if (valEl && (window.API && API.botSummary)) {
-        API.botSummary().then((s) => {
-          if (!s) return;
-          const total = Number(s.totalPnl || 0);
-          const base = Number(user.paperStartingBalance || 10000);
-          valEl.textContent = '$' + (base + total).toLocaleString('en-US', { maximumFractionDigits: 0 });
-          if (modeEl) {
-            // LIVE only when the user has at least one active bot in
-            // live trading_mode. DEMO covers Free plan, paper-only bots,
-            // and users without any active live bot.
-            const hasLive = Number(s.liveBots) > 0;
-            const mode = hasLive ? 'LIVE' : 'DEMO';
-            modeEl.textContent = mode; modeEl.setAttribute('data-mode', mode.toLowerCase());
-          }
-        }).catch(() => {});
-      }
-    }
-  }
-
-  // AI-assistant sidebar item (BETA) — sits at the top above Dashboard.
-  // Now navigates to the dedicated /ai.html page (full-screen chat).
-  // The widget in the corner still has its AI tab as a quick-access
-  // fallback, so users get two ways in: big page + corner bubble.
-  function injectAIAssistantLink() {
-    if (document.querySelector('.sidebar-link[data-page="ai"]')) return;
-    const nav = document.querySelector('.sidebar-nav');
-    const dash = document.querySelector('.sidebar-link[data-page="dashboard"]');
-    if (!nav || !dash) return;
-    const link = document.createElement('a');
-    link.href = 'ai.html';
-    link.className = 'sidebar-link sidebar-link-ai';
-    link.setAttribute('data-page', 'ai');
-    link.setAttribute('aria-label', 'AI-ассистент (бета)');
-    link.innerHTML = '<svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">'
-      + '<path d="M12 2l1.5 4.5L18 8l-4.5 1.5L12 14l-1.5-4.5L6 8l4.5-1.5L12 2z"/>'
-      + '<path d="M19 14l.75 2.25L22 17l-2.25.75L19 20l-.75-2.25L16 17l2.25-.75L19 14z"/>'
-      + '</svg>'
-      + '<span>AI-ассистент</span>'
-      + '<span class="sidebar-beta">BETA</span>';
-    nav.insertBefore(link, dash);
+    buildSidebarNav(user);
   }
 
   // Extended sidebar footer — community icons + Chat/Email/Request links
@@ -391,138 +348,6 @@
     footer.insertBefore(wrap, footer.firstChild);
   }
 
-  // Topbar account pill — 3Commas "РЕАЛЬНЫЙ АККАУНТ ▾" equivalent.
-  // Shows mode (Live / Paper) + aggregated equity. Clicking drills into
-  // /wallet (which holds the real account switcher + balance detail).
-  function injectAccountPill(user) {
-    const ticker = document.getElementById('shellMarket');
-    const actions = document.querySelector('.topbar-actions');
-    if (!actions || document.getElementById('shellAcct')) return;
-    const pill = document.createElement('a');
-    pill.id = 'shellAcct';
-    pill.className = 'shell-acct';
-    pill.href = 'wallet.html';
-    pill.title = 'Твой аккаунт — перейти в Кошелёк';
-    pill.innerHTML =
-      '<span class="shell-acct-mode" id="shellAcctMode" data-help="demo">DEMO</span>'
-      + '<span class="shell-acct-val" id="shellAcctVal" data-help="equity">—</span>'
-      + '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>';
-    // Place in topbar-actions (RIGHT side), before the "+ Создать бота"
-    // / Upgrade pills so the order reads: ACCOUNT · [+ BOT] · [UPGRADE] ·
-    // LANG · THEME · 🔔 · AVATAR. Previously lived between collapse-btn
-    // and BTC/ETH tickers on the left, which made the left group wrap
-    // when ticker labels grew to "BTC/USDT" / "ETH/USDT".
-    const quick = document.getElementById('shellQuick');
-    if (quick) actions.insertBefore(pill, quick);
-    else actions.insertBefore(pill, actions.firstChild);
-
-    // Paint from cache immediately (survives page nav), then refresh.
-    // v2: bumped cache key after the LIVE/DEMO heuristic was fixed —
-    // forces a one-time refresh so users still showing a stale "LIVE"
-    // pill from the broken NaN-check don't keep seeing it for 10 min.
-    const ACCT_CACHE = 'chm_acct_cache_v2';
-    try { localStorage.removeItem('chm_acct_cache'); } catch (_) {}
-    const modeEl = document.getElementById('shellAcctMode');
-    const valEl = document.getElementById('shellAcctVal');
-    try {
-      const cached = JSON.parse(localStorage.getItem(ACCT_CACHE) || 'null');
-      if (cached && (Date.now() - (cached.at || 0) < 10 * 60 * 1000)) {
-        if (modeEl) { modeEl.textContent = cached.mode; modeEl.setAttribute('data-mode', cached.mode.toLowerCase()); }
-        if (valEl) valEl.textContent = '$' + cached.equity.toLocaleString('en-US', { maximumFractionDigits: 0 });
-      }
-    } catch (_) {}
-
-    (async () => {
-      try {
-        const s = await (window.API && API.botSummary ? API.botSummary() : Promise.resolve(null));
-        if (!s) return;
-        const hasLive = Number(s.liveBots) > 0;
-        const mode = hasLive ? 'LIVE' : 'DEMO';
-        const total = Number(s.totalPnl || 0);
-        const paperBase = Number((user && user.paperStartingBalance) || 10000);
-        const equity = paperBase + total;
-        if (modeEl) { modeEl.textContent = mode; modeEl.setAttribute('data-mode', mode.toLowerCase()); }
-        if (valEl) valEl.textContent = '$' + equity.toLocaleString('en-US', { maximumFractionDigits: 0 });
-        try { localStorage.setItem(ACCT_CACHE, JSON.stringify({ mode, equity, at: Date.now() })); } catch (_) {}
-      } catch (_) {}
-    })();
-  }
-
-  // Topbar quick actions — 3Commas-style pills. Inserts BEFORE the existing
-  // lang/theme/avatar stack. Skipped on the bots / terminal pages where the
-  // action is primary content already.
-  function injectTopbarQuickActions(plan) {
-    const actions = document.querySelector('.topbar-actions');
-    if (!actions || document.getElementById('shellQuick')) return;
-    const path = (location.pathname || '').split('/').pop();
-    const suppressCreateOn = new Set(['bots.html', 'terminal.html']);
-    const wrap = document.createElement('div');
-    wrap.id = 'shellQuick';
-    wrap.className = 'shell-quick';
-    let html = '';
-    // For Free plan we route the Create-bot pill to subscriptions instead
-    // of bots.html, since the wizard would just toast-reject anyway.
-    // The visible button stays in the same place to keep the layout
-    // stable across plan upgrades — only its href + a small lock chip
-    // change.
-    const isFree = plan === 'free';
-    if (!suppressCreateOn.has(path)) {
-      const href = isFree ? 'subscriptions.html?plan=starter' : 'bots.html';
-      const title = isFree ? 'Создание ботов доступно на Starter+' : 'Создать нового бота';
-      html += '<a href="' + href + '" class="shell-pill-create' + (isFree ? ' plan-locked-btn' : '') + '" title="' + title + '"'
-        +   (isFree ? ' data-plan-required="starter"' : '') + '>'
-        +   '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M12 5v14M5 12h14"/></svg>'
-        +   '<span>Создать бота</span>'
-        + '</a>';
-    }
-    if (plan !== 'elite') {
-      html += '<a href="subscriptions.html?plan=elite" class="shell-pill-upgrade" title="Перейти на Elite">'
-        +   '<svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>'
-        +   '<span>Upgrade</span>'
-        + '</a>';
-    }
-    if (!html) return;
-    wrap.innerHTML = html;
-    actions.insertBefore(wrap, actions.firstChild);
-    // Append premium lock SVG to the Create-bot pill once PlanGate loads
-    if (isFree && window.PlanGate && PlanGate.LOCK_SVG_SM) {
-      const create = wrap.querySelector('.shell-pill-create');
-      if (create && !create.querySelector('.plan-lock-svg')) create.insertAdjacentHTML('beforeend', PlanGate.LOCK_SVG_SM);
-    }
-  }
-
-  // Sidebar promo card at the bottom (3Commas-style "Лист ожидания" block).
-  // For non-Elite: upsell Market Scanner + multi-strategy combo.
-  // For Elite:     promote Academy to drive engagement.
-  function injectSidebarPromo(plan) {
-    if (document.querySelector('.sidebar-promo')) return;
-    const sidebar = document.getElementById('sidebar') || document.querySelector('.sidebar');
-    if (!sidebar) return;
-    const footer = sidebar.querySelector('.sidebar-footer');
-    const isElite = plan === 'elite';
-    const promo = document.createElement('a');
-    promo.className = 'sidebar-promo';
-    promo.href = isElite ? 'academy/index.html' : 'subscriptions.html?plan=elite';
-    // Clean line SVG icons — no emoji
-    const eliteIcon = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>';
-    const academyIcon = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>';
-    promo.innerHTML = isElite
-      ? '<div class="sidebar-promo-ic">' + academyIcon + '</div>'
-        + '<div class="sidebar-promo-body">'
-        +   '<div class="sidebar-promo-title">Академия CHM</div>'
-        +   '<div class="sidebar-promo-sub">Разборы стратегий SMC, Gerchik, DCA — бесплатно.</div>'
-        + '</div>'
-        + '<div class="sidebar-promo-arrow">→</div>'
-      : '<div class="sidebar-promo-ic">' + eliteIcon + '</div>'
-        + '<div class="sidebar-promo-body">'
-        +   '<div class="sidebar-promo-title">Elite · Market Scanner</div>'
-        +   '<div class="sidebar-promo-sub">Сканирует весь рынок × мульти-стратегии. 7 дней бесплатно.</div>'
-        + '</div>'
-        + '<div class="sidebar-promo-arrow">→</div>';
-    if (footer) sidebar.insertBefore(promo, footer);
-    else sidebar.appendChild(promo);
-  }
-
   // Topbar plan pill + dropdown — our take on 3Commas "Free тариф ▾" but
   // designed around progress bars, plan-ladder visualisation, and an
   // inline "what unlocks next" teaser rather than a plain counter list.
@@ -536,11 +361,10 @@
     // chip looks finished even with a short label like "Free".
     const PLAN_META = {
       free:    { label: 'Free',    bg: 'rgba(148,163,184,.12)', fg: '#CBD5E1', ring: 'rgba(148,163,184,.22)', dot: '#94A3B8' },
-      starter: { label: 'Starter', bg: 'rgba(59,130,246,.15)',  fg: '#93C5FD', ring: 'rgba(59,130,246,.3)',   dot: '#60A5FA' },
       pro:     { label: 'Pro',     bg: 'rgba(255,140,90,.18)',  fg: '#FF8C5A', ring: 'rgba(255,140,90,.35)',  dot: '#FF5A1F' },
-      elite:   { label: 'Elite',   bg: 'rgba(250,204,21,.15)',  fg: '#FDE047', ring: 'rgba(250,204,21,.32)',  dot: '#FDE047' },
     };
-    const meta = PLAN_META[plan] || PLAN_META.free;
+    const planId = (window.PlanGate && PlanGate.normalizePlan) ? PlanGate.normalizePlan(plan) : plan;
+    const meta = PLAN_META[planId] || PLAN_META.free;
     const btn = document.createElement('button');
     btn.type = 'button';
     btn.id = 'shellPlanPill';
@@ -646,7 +470,7 @@
     })();
 
     const escHtml = (s) => String(s == null ? '' : s).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
-    const PLAN_ORDER = ['free', 'starter', 'pro', 'elite'];
+    const PLAN_ORDER = ['free', 'pro'];
     const curIdx = PLAN_ORDER.indexOf(data.plan.id);
 
     // Ladder — horizontal pills with current highlighted
@@ -707,69 +531,10 @@
       '</div>' +
       '<div class="shell-plan-ladder">' + ladder + '</div>' +
       '<div class="shell-plan-metrics">' +
-        bar('Активные боты',     ICON.bot,    data.usage.bots.used,      data.usage.bots.limit) +
-        bar('Сигналов сегодня',  ICON.signal, data.usage.signals.used,   data.usage.signals.limit) +
-        bar('API-ключи бирж',    ICON.key,    data.usage.keys.used,      data.usage.keys.limit) +
-        bar('Бэктесты в месяце', ICON.chart,  data.usage.backtests.used, data.usage.backtests.limit) +
+        bar('API-ключи бирж', ICON.key, data.usage.keys.used, data.usage.keys.limit) +
       '</div>' +
       nextHtml
     );
-  }
-
-  // Market Scanner sidebar link — shown only to Elite. Idempotent.
-  function injectMarketScannerLink() {
-    if (document.querySelector('.sidebar-link[data-page="market-scanner"]')) return;
-    const signals = document.querySelector('.sidebar-link[data-page="signals"]');
-    if (!signals) return;
-    const link = document.createElement('a');
-    link.href = 'market-scanner.html';
-    link.className = 'sidebar-link';
-    link.setAttribute('data-page', 'market-scanner');
-    link.innerHTML = '<svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.35-4.35"/></svg>Market Scanner';
-    signals.parentNode.insertBefore(link, signals.nextSibling);
-  }
-
-  // SmartTrade Terminal sidebar link — shown to every authed user. Idempotent.
-  function injectTerminalLink() {
-    if (document.querySelector('.sidebar-link[data-page="terminal"]')) return;
-    const bots = document.querySelector('.sidebar-link[data-page="bots"]');
-    if (!bots) return;
-    const link = document.createElement('a');
-    link.href = 'terminal.html';
-    link.className = 'sidebar-link';
-    link.setAttribute('data-page', 'terminal');
-    link.innerHTML = '<svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 3h18v18H3z"/><path d="M7 8l3 3-3 3M12 15h5"/></svg>Terminal';
-    bots.parentNode.insertBefore(link, bots.nextSibling);
-  }
-
-  // Copy Trading sidebar link — shown to every authed user. Idempotent.
-  // Sits right after Terminal (if present), else after Bots.
-  function injectCopyLink() {
-    if (document.querySelector('.sidebar-link[data-page="copy"]')) return;
-    const anchor = document.querySelector('.sidebar-link[data-page="terminal"]')
-      || document.querySelector('.sidebar-link[data-page="bots"]');
-    if (!anchor) return;
-    const link = document.createElement('a');
-    link.href = 'copy.html';
-    link.className = 'sidebar-link';
-    link.setAttribute('data-page', 'copy');
-    link.innerHTML = '<svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 14.66V20a2 2 0 01-2 2H4a2 2 0 01-2-2V6a2 2 0 012-2h5.34"/><polygon points="18 2 22 6 12 16 8 16 8 12 18 2"/></svg>Copy';
-    anchor.parentNode.insertBefore(link, anchor.nextSibling);
-  }
-
-  // Subscriptions sidebar link — always present for authed users.
-  // Inserted between Leaderboard and Настройки (or before Настройки if
-  // Leaderboard is missing). Idempotent.
-  function injectSubscriptionsLink() {
-    if (document.querySelector('.sidebar-link[data-page="subscriptions"]')) return;
-    const settings = document.querySelector('.sidebar-link[data-page="settings"]');
-    if (!settings) return;
-    const link = document.createElement('a');
-    link.href = 'subscriptions.html';
-    link.className = 'sidebar-link';
-    link.setAttribute('data-page', 'subscriptions');
-    link.innerHTML = '<svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg>Подписки';
-    settings.parentNode.insertBefore(link, settings);
   }
 
   // ── 3 & 4. Topbar toggles ──────────────────────────────────────────────
@@ -849,169 +614,6 @@
     });
   }
 
-  // ── Market tickers + Fear & Greed (topbar, public data) ───────────────
-  async function wireMarketTickers() {
-    // Place on the RIGHT side of the topbar (inside .topbar-actions) so
-    // the layout is identical on every page regardless of whether the
-    // left group has a search pill, sidebar-toggle, or page title. Goes
-    // before the account pill so the reading order is always:
-    // [tickers] [ACCOUNT] [+ BOT] [Upgrade] [EN] [🌙] [🔔] [avatar].
-    const actions = document.querySelector('.topbar-actions');
-    if (!actions || !window.API || !API.marketContext) return;
-    if (document.getElementById('shellMarket')) return;
-    const wrap = document.createElement('div');
-    wrap.id = 'shellMarket';
-    wrap.className = 'shell-market';
-    // Build pill per ticker: glyph + code + price + delta chip. Skeleton
-    // state uses "—" placeholders until the fetch resolves.
-    const tickerSkel = (id, code, color) => `
-      <div id="${id}" class="shell-tick" data-state="loading">
-        <span class="shell-tick-glyph" style="background:${color}"><span>${code[0]}</span></span>
-        <span class="shell-tick-body">
-          <span class="shell-tick-code">${code}</span>
-          <span class="shell-tick-price mono">—</span>
-        </span>
-        <span class="shell-tick-delta mono">—</span>
-      </div>`;
-    wrap.innerHTML =
-      tickerSkel('tickBtc', 'BTC/USDT', 'linear-gradient(135deg,#F7931A,#E07D10)') +
-      tickerSkel('tickEth', 'ETH/USDT', 'linear-gradient(135deg,#627EEA,#3C58B8)') +
-      `<div id="fngBadge" class="shell-fng" title="Crypto Fear & Greed — 0=extreme fear, 100=extreme greed">
-         <span class="shell-fng-label">F&amp;G</span>
-         <span class="shell-fng-value mono">—</span>
-         <span class="shell-fng-dot"></span>
-       </div>`;
-    // Insert BEFORE the account pill if already present, else at the start
-    const acctEl = document.getElementById('shellAcct');
-    if (acctEl) actions.insertBefore(wrap, acctEl);
-    else actions.insertBefore(wrap, actions.firstChild);
-
-    // Ticker cache — survives page navigations so the bars never flash "—"
-    // on a fresh load. Every update writes to localStorage; on boot we
-    // paint the cached value immediately, and WS/REST deliver the fresh
-    // data on top. Makes the shell feel persistent across SPA-less nav.
-    const CACHE_KEY = 'chm_ticker_cache';
-    const loadCache = () => {
-      try { return JSON.parse(localStorage.getItem(CACHE_KEY) || '{}') || {}; }
-      catch { return {}; }
-    };
-    const saveCache = (id, t) => {
-      try {
-        const c = loadCache();
-        c[id] = { price: t.price, change24h: t.change24h, at: Date.now() };
-        localStorage.setItem(CACHE_KEY, JSON.stringify(c));
-      } catch (_) {}
-    };
-
-    const paintTick = (id, t, opts) => {
-      const el = document.getElementById(id); if (!el) return;
-      if (!t) { el.dataset.state = 'empty'; return; }
-      const up = t.change24h > 0, down = t.change24h < 0;
-      const trend = up ? 'up' : down ? 'down' : 'flat';
-      el.dataset.state = 'ready';
-      el.dataset.trend = trend;
-      // Show 2 decimals on prices < $100, round on > $1000
-      const price = t.price < 100 ? t.price.toFixed(2)
-                  : t.price < 1000 ? t.price.toFixed(1)
-                  : Math.round(t.price).toLocaleString('en-US');
-      el.querySelector('.shell-tick-price').textContent = '$' + price;
-      const d = el.querySelector('.shell-tick-delta');
-      const arrow = up ? '▲' : down ? '▼' : '·';
-      d.textContent = `${arrow} ${Math.abs(t.change24h).toFixed(2)}%`;
-      if (!opts || opts.cache !== false) saveCache(id, t);
-    };
-
-    // Paint from cache INSTANTLY so the bar never renders empty on a
-    // fresh page load. Stale data is OK — WS/REST below overwrite it
-    // within 100–300ms. Ignore entries older than 10 minutes to avoid
-    // showing 2-day-old BTC price if user's been offline.
-    const cache = loadCache();
-    const STALE_MS = 10 * 60 * 1000;
-    ['tickBtc', 'tickEth'].forEach((id) => {
-      const hit = cache[id];
-      if (hit && (Date.now() - (hit.at || 0) < STALE_MS)) {
-        paintTick(id, hit, { cache: false });
-      }
-    });
-
-    const refresh = async () => {
-      try {
-        const r = await API.marketContext(); if (!r) return;
-        if (r.tickers) { paintTick('tickBtc', r.tickers.btc); paintTick('tickEth', r.tickers.eth); }
-        if (r.fearGreed) {
-          const fng = r.fearGreed, v = Number(fng.value);
-          paintFng(v, fng.classification);
-          try { localStorage.setItem('chm_fng_cache', JSON.stringify({ v, c: fng.classification, at: Date.now() })); } catch (_) {}
-        }
-      } catch (_e) {}
-    };
-    function paintFng(v, classification) {
-      const level = v < 25 ? 'extreme-fear' : v < 45 ? 'fear' : v < 55 ? 'neutral' : v < 75 ? 'greed' : 'extreme-greed';
-      const el = document.getElementById('fngBadge');
-      if (!el) return;
-      el.dataset.level = level;
-      el.querySelector('.shell-fng-value').textContent = v;
-      el.title = `Crypto Fear & Greed: ${v} — ${classification || ''}`;
-    }
-    // Paint cached F&G instantly
-    try {
-      const cached = JSON.parse(localStorage.getItem('chm_fng_cache') || 'null');
-      if (cached && (Date.now() - (cached.at || 0) < 60 * 60 * 1000)) paintFng(cached.v, cached.c);
-    } catch (_) {}
-    refresh();
-    setInterval(refresh, 60_000);
-
-    // Real-time stream: Binance public WebSocket pushes ticker updates ~1/s.
-    // Runs entirely client-side (browser → Binance), no server load, no
-    // auth, no rate limits. On drop we reconnect with exponential backoff.
-    // If WS is unavailable (old browser / blocked), the 60s REST refresh
-    // above keeps prices updating anyway — graceful degradation.
-    (function openBinanceWS() {
-      if (typeof WebSocket === 'undefined') return;
-      let ws = null;
-      let delay = 1000;
-      let reconnectTimer = null;
-      let closedByUs = false;
-      function connect() {
-        try {
-          ws = new WebSocket('wss://stream.binance.com:9443/stream?streams=btcusdt@ticker/ethusdt@ticker');
-        } catch (e) { scheduleReconnect(); return; }
-        ws.onopen = () => { delay = 1000; };
-        ws.onmessage = (ev) => {
-          try {
-            const msg = JSON.parse(ev.data);
-            const d = msg && msg.data;
-            if (!d || d.e !== '24hrTicker') return;
-            const t = { price: Number(d.c), change24h: Number(d.P) };
-            if (d.s === 'BTCUSDT') paintTick('tickBtc', t);
-            else if (d.s === 'ETHUSDT') paintTick('tickEth', t);
-          } catch (_) {}
-        };
-        ws.onerror = () => { try { ws && ws.close(); } catch (_) {} };
-        ws.onclose = () => { if (!closedByUs) scheduleReconnect(); };
-      }
-      function scheduleReconnect() {
-        clearTimeout(reconnectTimer);
-        reconnectTimer = setTimeout(() => {
-          delay = Math.min(30_000, delay * 2);
-          connect();
-        }, delay);
-      }
-      // Pause when tab hidden to save Binance's resources and our bandwidth
-      document.addEventListener('visibilitychange', () => {
-        if (document.hidden) {
-          closedByUs = true;
-          try { ws && ws.close(); } catch (_) {}
-          clearTimeout(reconnectTimer);
-        } else {
-          closedByUs = false;
-          connect();
-        }
-      });
-      connect();
-    })();
-  }
-
   // A11y: mark the current sidebar link with aria-current="page" for SR users
   // and set a proper aria-label on the sidebar nav so assistive tech can
   // announce it. Also populates `title=` on every sidebar-link so that
@@ -1053,13 +655,10 @@
       +   '<input type="search" placeholder="Поиск по платформе…" autocomplete="off"/>'
       +   '<div class="topbar-search-section">'
       +     '<div class="topbar-search-section-title">Быстрый переход</div>'
-      +     '<a class="topbar-search-link" href="dashboard.html"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.8"><rect x="3" y="3" width="7" height="9" rx="1.5"/><rect x="14" y="3" width="7" height="5" rx="1.5"/><rect x="14" y="12" width="7" height="9" rx="1.5"/><rect x="3" y="16" width="7" height="5" rx="1.5"/></svg>Дашборд</a>'
-      +     '<a class="topbar-search-link" href="bots.html"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.8"><rect x="3" y="11" width="18" height="10" rx="2"/><circle cx="12" cy="5" r="2"/><path d="M12 7v4M8 16h.01M16 16h.01"/></svg>Боты</a>'
-      +     '<a class="topbar-search-link" href="signals.html"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.8"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>Сигналы</a>'
-      +     '<a class="topbar-search-link" href="analytics.html"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.8"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>Аналитика</a>'
-      +     '<a class="topbar-search-link" data-needs="backtest" href="backtests.html"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.8"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>Бэктесты</a>'
-      +     '<a class="topbar-search-link" href="wallet.html"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.8"><rect x="2" y="6" width="20" height="14" rx="2"/><path d="M16 14h2"/></svg>Кошелёк</a>'
-      +     '<a class="topbar-search-link" href="settings.html"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.8"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 01-2.83 2.83l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09a1.65 1.65 0 00-1-1.51 1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 11-2.83-2.83l.06-.06a1.65 1.65 0 00.33-1.82 1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09a1.65 1.65 0 001.51-1 1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 012.83-2.83l.06.06a1.65 1.65 0 001.82.33H9a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 112.83 2.83l-.06.06a1.65 1.65 0 00-.33 1.82V9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z"/></svg>Настройки</a>'
+      +     '<a class="topbar-search-link" href="/app/">' + NAV_ICON.app + 'Приложение</a>'
+      +     '<a class="topbar-search-link" href="settings.html">' + NAV_ICON.account + 'Аккаунт</a>'
+      +     '<a class="topbar-search-link" href="subscriptions.html">' + NAV_ICON.plan + 'Тариф</a>'
+      +     '<a class="topbar-search-link" href="settings.html#support">' + NAV_ICON.support + 'Поддержка</a>'
       +   '</div>'
       + '</div>';
 
@@ -1107,7 +706,7 @@
         if (plan === 'free') {
           if (!a.querySelector('.lock')) {
             const ic = (window.PlanGate && PlanGate.LOCK_SVG_SM) || '';
-            a.insertAdjacentHTML('beforeend', '<span class="lock">' + ic + ' Starter</span>');
+            a.insertAdjacentHTML('beforeend', '<span class="lock">' + ic + ' Pro</span>');
           }
         }
       });
@@ -1127,7 +726,6 @@
     wireTopbar();      // creates #shellLang + #shellTheme
     applyTheme();      // now safely sets the theme-btn icon
     applyLang();       // translates all data-t + refreshes lang button
-    wireMarketTickers();
     wireSearchPopup();
 
     // Inject chrome SYNCHRONOUSLY with pessimistic defaults ('free', no
@@ -1139,9 +737,8 @@
     applyChrome('free', null);
     document.documentElement.setAttribute('data-chrome-ready', '1');
 
-    // Async refinement: pulls real plan + user, updates plan-dependent
-    // bits (Market Scanner link for Elite, promo card variant, Upgrade
-    // pill removal for Elite, account pill equity).
+    // Async refinement: pulls real plan + user (adds the Admin nav entry
+    // for admins).
     wirePlanBadge();
     wireA11y();
     wireSidebarPlanLocks();

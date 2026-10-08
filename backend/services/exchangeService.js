@@ -1,58 +1,24 @@
 /**
- * Exchange service — CCXT wrapper for managing per-user API keys + client pool.
+ * Exchange keys service — per-user API keys, encrypted at rest.
+ *
+ * M0 (port plan §5): the CCXT client pool and every CCXT trading / balance /
+ * market-data path were removed together with the `ccxt` dependency. The
+ * bot's own exchange adapters (Bybit, BingX, Binance, OKX — REST + HMAC)
+ * land in M13 under services/exchanges/*; until then `verifyKey` and
+ * `getBalance` answer 501 NOT_IMPLEMENTED and new keys are stored unverified.
  *
  * Security:
  *  - api_key, api_secret, passphrase all encrypted at rest (AES-256-GCM)
  *  - plaintext never returned by any API; only `mask()`ed preview
- *  - client pool (LRU) reuses expensive CCXT instances across requests
  */
 
-const ccxt = require('ccxt');
 const db = require('../models/database');
 const config = require('../config');
 const plans = require('../config/plans');
 const { encrypt, decrypt, mask } = require('../utils/crypto');
-const logger = require('../utils/logger');
 
-const SUPPORTED = ['bybit', 'binance', 'bingx', 'okx', 'bitget', 'htx', 'gate', 'bitmex'];
-
-// ── LRU cache: keyId → { client, loadedAt } ──────────────────────────────
-const CLIENT_TTL_MS = 10 * 60 * 1000;
-const CLIENT_MAX = 100;
-const clientCache = new Map(); // insertion-ordered = naive LRU
-
-function pruneCache() {
-  const now = Date.now();
-  for (const [k, v] of clientCache) {
-    if (now - v.loadedAt > CLIENT_TTL_MS) clientCache.delete(k);
-  }
-  while (clientCache.size > CLIENT_MAX) {
-    const oldest = clientCache.keys().next().value;
-    clientCache.delete(oldest);
-  }
-}
-
-function cacheGet(keyId) {
-  const entry = clientCache.get(keyId);
-  if (!entry) return null;
-  if (Date.now() - entry.loadedAt > CLIENT_TTL_MS) {
-    clientCache.delete(keyId);
-    return null;
-  }
-  // Refresh position (naive LRU)
-  clientCache.delete(keyId);
-  clientCache.set(keyId, entry);
-  return entry.client;
-}
-
-function cacheSet(keyId, client) {
-  clientCache.set(keyId, { client, loadedAt: Date.now() });
-  pruneCache();
-}
-
-function cacheDrop(keyId) {
-  clientCache.delete(keyId);
-}
+// The four exchanges the bot trades on (autotrade.md §14).
+const SUPPORTED = ['bybit', 'binance', 'bingx', 'okx'];
 
 // ── Helpers ──────────────────────────────────────────────────────────────
 function encField(plaintext) {
@@ -74,39 +40,40 @@ function ensureSupported(exchange) {
   }
 }
 
-function makeCcxt(exchange, { apiKey, apiSecret, passphrase, testnet }) {
-  if (typeof ccxt[exchange] !== 'function') {
-    throw new Error(`CCXT missing class for ${exchange}`);
-  }
-  const opts = {
-    apiKey,
-    secret: apiSecret,
-    enableRateLimit: true,
-    timeout: 15000,
+function notImplemented(what) {
+  const err = new Error(what + ' is not available until the exchange adapters land (port plan M13)');
+  err.statusCode = 501;
+  err.code = 'NOT_IMPLEMENTED';
+  throw err;
+}
+
+function toPublic(r) {
+  let apiKeyMasked = '••••';
+  try { apiKeyMasked = mask(decField(r.api_key_encrypted)); } catch (_e) { /* decryption failed — show as opaque */ }
+  return {
+    id: r.id,
+    exchange: r.exchange,
+    apiKeyMasked,
+    hasPassphrase: Boolean(r.passphrase_encrypted),
+    isTestnet: Boolean(r.is_testnet),
+    label: r.label,
+    lastVerifiedAt: r.last_verified_at,
+    lastError: r.last_error,
+    createdAt: r.created_at,
   };
-  if (passphrase) opts.password = passphrase;
-  const client = new ccxt[exchange](opts);
-  if (testnet && typeof client.setSandboxMode === 'function') {
-    client.setSandboxMode(true);
-  }
-  return client;
 }
 
 // ── Public API ───────────────────────────────────────────────────────────
 
 /**
- * Add a new exchange key for the user.
- * Verifies the key by calling fetchBalance; throws on failure so bad keys
- * never reach the DB.
+ * Add a new exchange key for the user. Stored unverified (last_verified_at
+ * NULL) until the M13 adapters can call the exchange.
  */
 async function addKey(userId, { exchange, apiKey, apiSecret, passphrase, testnet = false, label = null }) {
   ensureSupported(exchange);
 
-  // ── Plan gate: multi-exchange is Pro+ ────────────────────────────────
-  // Free / Starter are allowed exactly one exchange key total. Inventory
-  // pitches "4 exchanges" as a Pro perk, so we cap at the connection
-  // count rather than the exchange-name list (a single Bybit key is fine
-  // for Starter; a second key on any exchange — even same Bybit — is not).
+  // ── Plan gate: multi-exchange is Pro ─────────────────────────────────
+  // Free is allowed exactly one exchange key total.
   const planRow = db.prepare('SELECT plan FROM subscriptions WHERE user_id = ?').get(userId);
   const plan = (planRow && planRow.plan) || 'free';
   if (!plans.canUseFeature(plan, 'multiExchange')) {
@@ -119,17 +86,6 @@ async function addKey(userId, { exchange, apiKey, apiSecret, passphrase, testnet
       err.requiredPlan = plans.requiredPlanFor('multiExchange') || 'pro';
       throw err;
     }
-  }
-
-  // Pre-flight verify before saving
-  const client = makeCcxt(exchange, { apiKey, apiSecret, passphrase, testnet });
-  try {
-    await client.fetchBalance();
-  } catch (e) {
-    const err = new Error('Exchange key verification failed: ' + (e.message || e));
-    err.statusCode = 400;
-    err.code = 'KEY_VERIFY_FAILED';
-    throw err;
   }
 
   const existing = db.prepare(
@@ -146,7 +102,7 @@ async function addKey(userId, { exchange, apiKey, apiSecret, passphrase, testnet
     INSERT INTO exchange_keys
       (user_id, exchange, api_key_encrypted, api_secret_encrypted, passphrase_encrypted,
        is_testnet, label, last_verified_at)
-    VALUES (?, ?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP)
+    VALUES (?, ?, ?, ?, ?, ?, ?, NULL)
   `).run(
     userId,
     exchange,
@@ -160,40 +116,13 @@ async function addKey(userId, { exchange, apiKey, apiSecret, passphrase, testnet
   return getPublicKey(result.lastInsertRowid, userId);
 }
 
-/**
- * Re-verify an existing key against the exchange. Updates last_verified_at
- * on success or last_error on failure.
- */
+/** Re-verify an existing key against the exchange — 501 until M13. */
 async function verifyKey(keyId, userId) {
   const row = db.prepare(
-    'SELECT * FROM exchange_keys WHERE id = ? AND user_id = ?'
+    'SELECT id FROM exchange_keys WHERE id = ? AND user_id = ?'
   ).get(keyId, userId);
   if (!row) { const err = new Error('Key not found'); err.statusCode = 404; throw err; }
-
-  const apiKey = decField(row.api_key_encrypted);
-  const apiSecret = decField(row.api_secret_encrypted);
-  const passphrase = decField(row.passphrase_encrypted);
-  const client = makeCcxt(row.exchange, {
-    apiKey, apiSecret, passphrase, testnet: Boolean(row.is_testnet),
-  });
-
-  try {
-    await client.fetchBalance();
-    db.prepare(
-      'UPDATE exchange_keys SET last_verified_at = CURRENT_TIMESTAMP, last_error = NULL WHERE id = ?'
-    ).run(keyId);
-    cacheDrop(keyId); // force rebuild so fresh creds used
-    return { verified: true };
-  } catch (e) {
-    db.prepare(
-      'UPDATE exchange_keys SET last_error = ? WHERE id = ?'
-    ).run((e.message || String(e)).slice(0, 500), keyId);
-    cacheDrop(keyId);
-    const err = new Error('Verification failed: ' + (e.message || e));
-    err.statusCode = 400;
-    err.code = 'KEY_VERIFY_FAILED';
-    throw err;
-  }
+  return notImplemented('Key verification');
 }
 
 /**
@@ -207,25 +136,7 @@ function listKeys(userId) {
     WHERE user_id = ?
     ORDER BY created_at DESC
   `).all(userId);
-
-  return rows.map((r) => {
-    let apiKeyMasked = '••••';
-    try {
-      const plain = decField(r.api_key_encrypted);
-      apiKeyMasked = mask(plain);
-    } catch (_e) { /* decryption failed — show as opaque */ }
-    return {
-      id: r.id,
-      exchange: r.exchange,
-      apiKeyMasked,
-      hasPassphrase: Boolean(r.passphrase_encrypted),
-      isTestnet: Boolean(r.is_testnet),
-      label: r.label,
-      lastVerifiedAt: r.last_verified_at,
-      lastError: r.last_error,
-      createdAt: r.created_at,
-    };
-  });
+  return rows.map(toPublic);
 }
 
 function getPublicKey(keyId, userId) {
@@ -236,36 +147,21 @@ function getPublicKey(keyId, userId) {
     WHERE id = ? AND user_id = ?
   `).get(keyId, userId);
   if (!r) return null;
-  let apiKeyMasked = '••••';
-  try { apiKeyMasked = mask(decField(r.api_key_encrypted)); } catch (_e) { /* */ }
-  return {
-    id: r.id,
-    exchange: r.exchange,
-    apiKeyMasked,
-    hasPassphrase: Boolean(r.passphrase_encrypted),
-    isTestnet: Boolean(r.is_testnet),
-    label: r.label,
-    lastVerifiedAt: r.last_verified_at,
-    lastError: r.last_error,
-    createdAt: r.created_at,
-  };
+  return toPublic(r);
 }
 
 function deleteKey(keyId, userId) {
   const info = db.prepare('DELETE FROM exchange_keys WHERE id = ? AND user_id = ?').run(keyId, userId);
   if (info.changes === 0) { const err = new Error('Key not found'); err.statusCode = 404; throw err; }
-  cacheDrop(keyId);
   return { deleted: true };
 }
 
 /**
- * Get a CCXT client for the given key, with LRU cache.
- * Internal only — never expose to API.
+ * Decrypted credentials for a key. Internal only — never expose to API.
+ * The M13 traders consume this shape ({ exchange, apiKey, apiSecret,
+ * passphrase, testnet }).
  */
-function getCcxtClient(keyId, userId = null) {
-  const cached = cacheGet(keyId);
-  if (cached) return cached;
-
+function getCredentials(keyId, userId = null) {
   const sql = userId
     ? 'SELECT * FROM exchange_keys WHERE id = ? AND user_id = ?'
     : 'SELECT * FROM exchange_keys WHERE id = ?';
@@ -274,55 +170,35 @@ function getCcxtClient(keyId, userId = null) {
   if (!row) { const err = new Error('Key not found'); err.statusCode = 404; throw err; }
 
   // decField → AES-GCM decrypt. Throws on tampered ciphertext, bad
-  // WALLET_ENCRYPTION_KEY rotation, or DB corruption. Surface as a
-  // typed error instead of letting the trade-flow crash with a
-  // cryptic "invalid ciphertext" — the bot pause flow upstream
-  // checks .code so we set DECRYPT_FAILED.
+  // WALLET_ENCRYPTION_KEY rotation, or DB corruption. Surface as a typed
+  // error instead of a cryptic "invalid ciphertext".
   let apiKey; let apiSecret; let passphrase;
   try {
     apiKey = decField(row.api_key_encrypted);
     apiSecret = decField(row.api_secret_encrypted);
     passphrase = decField(row.passphrase_encrypted);
-  } catch (err) {
+  } catch (_err) {
     const e = new Error('Failed to decrypt exchange key — re-add the key in Settings');
     e.statusCode = 503; e.code = 'DECRYPT_FAILED';
     throw e;
   }
-  // Reject keys saved with empty/null fields. CCXT would happily
-  // create a client with apiKey=null, then the exchange answers 401
-  // and we'd open a "live" trade with no actual order placed.
   if (!apiKey || !apiSecret) {
     const e = new Error('Exchange key is missing apiKey or apiSecret');
     e.statusCode = 503; e.code = 'INVALID_EXCHANGE_KEY';
     throw e;
   }
-
-  const client = makeCcxt(row.exchange, {
-    apiKey, apiSecret, passphrase,
-    testnet: Boolean(row.is_testnet),
-  });
-  cacheSet(keyId, client);
-  return client;
+  return { exchange: row.exchange, apiKey, apiSecret, passphrase, testnet: Boolean(row.is_testnet) };
 }
 
-/**
- * Fetch balance for a user's exchange key.
- */
+/** Balance for a user's exchange key — 501 until M13. */
 async function getBalance(keyId, userId) {
-  const client = getCcxtClient(keyId, userId);
-  const bal = await client.fetchBalance();
-  // Return a trimmed shape — CCXT balance objects are enormous
-  const out = { total: bal.total, free: bal.free, used: bal.used };
-  return out;
+  getCredentials(keyId, userId); // ownership + decryptability check
+  return notImplemented('Balance lookup');
 }
 
 function listSupported() {
   return SUPPORTED.slice();
 }
-
-// For tests
-function _clearCache() { clientCache.clear(); }
-function _getCacheSize() { return clientCache.size; }
 
 module.exports = {
   addKey,
@@ -330,10 +206,8 @@ module.exports = {
   listKeys,
   getPublicKey,
   deleteKey,
-  getCcxtClient,
+  getCredentials,
   getBalance,
   listSupported,
   SUPPORTED,
-  _clearCache,
-  _getCacheSize,
 };

@@ -1,6 +1,10 @@
 /**
- * Strategy parameter schemas — drives the dynamic config form in the
- * bot wizard. Each entry describes one DEFAULT_CONFIG field so the UI
+ * Strategy parameter schemas — used to describe one DEFAULT_CONFIG field
+ * so a UI can render the right input. Only the strategies the bot has
+ * (LEVELS / SMC) remain; the per-user TradeCfg sanitiser replaces this
+ * module in M7 (services/engine/tradeCfg.js).
+ *
+ * Originally drove the dynamic config form in the bot wizard. Each entry describes one DEFAULT_CONFIG field so the UI
  * can render the right input (number with min/max/step, boolean toggle,
  * or select) and show a Russian description.
  *
@@ -64,51 +68,6 @@ const SCHEMAS = {
     ],
   },
 
-  gerchik: {
-    title: 'Gerchik (ключевые опорные точки)',
-    description: 'Строгий ретест уровней с ≥3 касаниями, поглощающая свеча, объёмный спайк, по тренду HTF.',
-    groups: [
-      {
-        title: 'Pivot & уровни',
-        fields: [
-          { key: 'pivotStrength',   type: 'int',   min: 3,   max: 15,  step: 1,    default: 5,   label: 'Pivot strength', desc: 'Баров слева/справа для swing' },
-          { key: 'maxBarsLookback', type: 'int',   min: 100, max: 500, step: 10,   default: 300, label: 'Max lookback',   desc: 'Глубина анализа' },
-          { key: 'minTouches',      type: 'int',   min: 2,   max: 6,   step: 1,    default: 3,   label: 'Min touches (KRP)',desc: 'Касаний уровня чтоб считать ключевым' },
-          { key: 'clusterAtrMult',  type: 'float', min: 0.2, max: 1.5, step: 0.1,  default: 0.5, label: 'Cluster × ATR',   desc: 'Склейка близких уровней' },
-          { key: 'topLevelsPerSide',type: 'int',   min: 1,   max: 10,  step: 1,    default: 3,   label: 'Top levels per side',desc: 'Сколько уровней учитывать' },
-          { key: 'maxLevelAgeBars', type: 'int',   min: 50,  max: 500, step: 10,   default: 200, label: 'Max level age',   desc: 'Старый уровень игнорим' },
-        ],
-      },
-      {
-        title: 'Ретест',
-        fields: [
-          { key: 'retestZoneAtrMult', type: 'float',min: 0.1,max: 1.0, step: 0.05, default: 0.4, label: 'Retest zone × ATR',desc: 'Зона вокруг уровня для ретеста' },
-          { key: 'requireCloseBack',  type: 'bool',                                default: true,label: 'Close back',      desc: 'Закрытие обратно за уровень' },
-          { key: 'requireAbsorption', type: 'bool',                                default: true,label: 'Absorption candle',desc: 'Поглощающая свеча (hammer/engulfing) обязательна' },
-        ],
-      },
-      {
-        title: 'HTF тренд',
-        fields: [
-          { key: 'requireTrendAlignment', type: 'bool',                              default: true, label: 'HTF trend alignment', desc: 'Торговать только по тренду старшего TF' },
-          { key: 'trendEmaPeriod',       type: 'int',  min: 20, max: 200, step: 10, default: 50,   label: 'Trend EMA period',    desc: 'Период EMA для тренда' },
-          { key: 'volumeRatioMin',       type: 'float',min: 1.0,max: 3.0, step: 0.1,default: 1.5,  label: 'Volume × avg',        desc: 'Объёмный спайк минимум' },
-        ],
-      },
-      {
-        title: 'Risk',
-        fields: [
-          { key: 'slAtrMult',      type: 'float', min: 0.5, max: 3.0, step: 0.1, default: 1.0, label: 'SL × ATR',     desc: 'Стоп за уровень' },
-          { key: 'tp1RR',          type: 'float', min: 1.0, max: 3.0, step: 0.1, default: 1.5, label: 'TP1 R:R',      desc: 'Первый тейк' },
-          { key: 'tp2RR',          type: 'float', min: 1.5, max: 5.0, step: 0.1, default: 2.5, label: 'TP2 R:R',      desc: 'Основной тейк (Gerchik 2.5)' },
-          { key: 'tp3RR',          type: 'float', min: 2.0, max: 8.0, step: 0.1, default: 3.5, label: 'TP3 R:R',      desc: 'Дальний тейк' },
-          { key: 'minQuality',     type: 'int',   min: 1,   max: 10,  step: 1,   default: 6,   label: 'Min quality',  desc: 'Минимальный скор (0–10)' },
-          { key: 'minRiskReward',  type: 'float', min: 1.0, max: 4.0, step: 0.1, default: 2.0, label: 'Min R:R',      desc: 'Фиксированный минимум Герчика' },
-        ],
-      },
-    ],
-  },
-
   levels: {
     title: 'Levels (отбой от уровня)',
     description: 'Классический S/R retest с расширенными порогами (чаще сигналы, чем Gerchik).',
@@ -147,94 +106,6 @@ const SCHEMAS = {
     ],
   },
 
-  scalping: {
-    title: 'Scalping (быстрые сетапы на 1-15m)',
-    description: 'Pullback к BB middle + RSI divergence + squeeze. Для внутридневной торговли.',
-    groups: [
-      {
-        title: 'Индикаторы',
-        fields: [
-          { key: 'bbPeriod',      type: 'int',   min: 10, max: 50, step: 1,   default: 20,  label: 'Bollinger period' },
-          { key: 'bbStdDev',      type: 'float', min: 1.5,max: 3.0,step: 0.1, default: 2.0, label: 'BB std dev' },
-          { key: 'rsiPeriod',     type: 'int',   min: 7,  max: 30, step: 1,   default: 14,  label: 'RSI period' },
-          { key: 'rsiOversold',   type: 'int',   min: 15, max: 40, step: 1,   default: 30,  label: 'RSI oversold' },
-          { key: 'rsiOverbought', type: 'int',   min: 60, max: 85, step: 1,   default: 70,  label: 'RSI overbought' },
-          { key: 'emaFast',       type: 'int',   min: 5,  max: 30, step: 1,   default: 9,   label: 'EMA fast' },
-          { key: 'emaSlow',       type: 'int',   min: 15, max: 100,step: 1,   default: 21,  label: 'EMA slow' },
-        ],
-      },
-      {
-        title: 'Risk',
-        fields: [
-          { key: 'slAtrMult', type: 'float', min: 0.5,max: 2.5, step: 0.1, default: 1.0, label: 'SL × ATR' },
-          { key: 'tp1RR',     type: 'float', min: 0.5,max: 2.0, step: 0.1, default: 0.8, label: 'TP1 R:R (scalp = быстрый тейк)' },
-          { key: 'tp2RR',     type: 'float', min: 1.0,max: 3.0, step: 0.1, default: 1.5, label: 'TP2 R:R' },
-          { key: 'minQuality',type: 'int',   min: 1,  max: 10,  step: 1,   default: 5,   label: 'Min quality' },
-        ],
-      },
-    ],
-  },
-
-  dca: {
-    title: 'DCA (усреднение на дипах)',
-    description: 'Покупает на просадках к SMA-50, продаёт по лестнице TP. Работает в боковом / растущем рынке.',
-    groups: [
-      {
-        title: 'Триггер',
-        fields: [
-          { key: 'smaPeriod',     type: 'int',   min: 20, max: 200, step: 5,   default: 50,  label: 'SMA period' },
-          { key: 'dipPct',        type: 'float', min: 0.5,max: 10,  step: 0.5, default: 3.0, label: 'Dip % от SMA', desc: 'Какой дроп триггерит покупку' },
-          { key: 'rsiFilter',     type: 'bool',                                 default: true,label: 'RSI фильтр (< 40)' },
-        ],
-      },
-      {
-        title: 'Ordering',
-        fields: [
-          { key: 'baseOrderSize',   type: 'float', min: 1,  max: 100, step: 1,   default: 10, label: 'Base order (USDT)' },
-          { key: 'safetyOrders',    type: 'int',   min: 0,  max: 10,  step: 1,   default: 3,  label: 'Safety orders (докупки)' },
-          { key: 'safetyStepPct',   type: 'float', min: 0.5,max: 10,  step: 0.5, default: 2,  label: 'Шаг между докупками %' },
-          { key: 'safetyVolumeMult',type: 'float', min: 1.0,max: 3.0, step: 0.1, default: 1.5,label: 'Множитель размера докупки' },
-        ],
-      },
-      {
-        title: 'Take profit',
-        fields: [
-          { key: 'takeProfitPct', type: 'float', min: 0.5,max: 10,  step: 0.25,default: 1.5, label: 'TP % от средней цены' },
-          { key: 'trailingTp',    type: 'bool',                                default: false,label: 'Trailing TP' },
-        ],
-      },
-    ],
-  },
-
-  grid: {
-    title: 'Grid (сеточная стратегия)',
-    description: 'Равномерная сетка ордеров в заданном диапазоне. Работает в боковом рынке.',
-    groups: [
-      {
-        title: 'Диапазон',
-        fields: [
-          { key: 'autoRange',      type: 'bool',                                default: true,label: 'Авто-определение диапазона' },
-          { key: 'rangePct',       type: 'float', min: 1, max: 30, step: 0.5,  default: 5,   label: 'Ширина диапазона %' },
-          { key: 'rangeLookbackBars',type: 'int', min: 50,max: 500,step: 10,   default: 200, label: 'Lookback для расчёта' },
-        ],
-      },
-      {
-        title: 'Сетка',
-        fields: [
-          { key: 'gridLevels',     type: 'int',   min: 3, max: 30, step: 1,    default: 10,  label: 'Количество уровней' },
-          { key: 'orderSize',      type: 'float', min: 1, max: 100,step: 1,    default: 10,  label: 'Размер ордера (USDT)' },
-          { key: 'takeProfitPct',  type: 'float', min: 0.2,max: 5, step: 0.1,  default: 0.8, label: 'TP между уровнями %' },
-        ],
-      },
-      {
-        title: 'Защита',
-        fields: [
-          { key: 'stopLossPct',    type: 'float', min: 1, max: 20, step: 0.5, default: 5,   label: 'SL при пробое диапазона %' },
-          { key: 'pauseOnTrend',   type: 'bool',                              default: true,label: 'Пауза при сильном тренде' },
-        ],
-      },
-    ],
-  },
 };
 
 function listStrategies() {

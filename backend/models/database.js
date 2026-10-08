@@ -5,14 +5,25 @@
  * so running against a pre-existing schema is safe (but will NOT migrate
  * structure changes — for that use utils/db-reset.js in dev).
  *
- * Schema overview (19 tables):
+ * Schema overview:
  *   Core:      users, refresh_tokens, subscriptions, payments,
  *              promo_codes, promo_redemptions
- *   Trading:   exchange_keys, trading_bots, trades, trade_fills,
- *              signals, signal_registry, user_signal_prefs, signal_views
- *   Analytics: backtests, backtest_trades, optimizations, candles_cache
+ *   Trading:   exchange_keys, candles_cache
+ *   Engine:    trader_settings, signal_trades, engine_kv, trade_events,
+ *              plan_changes, genome_population, genome_history,
+ *              optimizer_params  (migrations v10–v11, models/engineSchema.js)
  *   Referral:  referrals, ref_rewards
- *   System:    audit_log, system_kv
+ *   System:    audit_log, system_kv, email_*, password_resets,
+ *              two_factor_secrets, login_history, notifications,
+ *              impersonation_tokens, stripe_webhooks, push_subscriptions,
+ *              support_*
+ *
+ * The per-bot product's tables (trading_bots, trades, trade_fills, signals,
+ * signal_registry, signal_views, user_signal_prefs, backtests,
+ * backtest_trades, optimizations, copy_subscriptions, published_strategies,
+ * strategy_installs, strategy_earnings, wallets, wallet_transactions) are
+ * exported and dropped by migration v12 (retire_bots) and are no longer
+ * created here.
  */
 
 const Database = require('better-sqlite3');
@@ -89,34 +100,6 @@ db.exec(`
   // password-only users don't clash on NULL.
   try { db.exec("CREATE UNIQUE INDEX IF NOT EXISTS idx_users_google_id ON users(google_id) WHERE google_id IS NOT NULL"); } catch(_){}
   try { db.exec("CREATE UNIQUE INDEX IF NOT EXISTS idx_users_tg_id     ON users(tg_id)     WHERE tg_id     IS NOT NULL"); } catch(_){}
-})();
-// Phase C: trade journal — add `note` column to trades (idempotent)
-(function migrateTradesNote(){
-  try {
-    const cols = db.prepare("PRAGMA table_info('trades')").all().map(c => c.name);
-    if (!cols.includes('note')) db.exec("ALTER TABLE trades ADD COLUMN note TEXT");
-  } catch(_){}
-})();
-// Phase D: TradingView webhook secret per-bot + manual-trade tag
-(function migrateBotsWebhook(){
-  try {
-    const cols = db.prepare("PRAGMA table_info('trading_bots')").all().map(c => c.name);
-    if (!cols.includes('tv_webhook_secret')) db.exec("ALTER TABLE trading_bots ADD COLUMN tv_webhook_secret TEXT");
-    // Market Scanner (Elite-only feature):
-    //   scope            'pair' (existing) | 'market' (scan entire universe)
-    //   market_exchanges JSON array, e.g. ["bybit","binance"] — for scope='market'
-    //   strategies_multi JSON array — Elite combo, e.g. ["smc","levels"]; null = use single `strategy`
-    if (!cols.includes('scope'))            db.exec("ALTER TABLE trading_bots ADD COLUMN scope TEXT DEFAULT 'pair'");
-    if (!cols.includes('market_exchanges')) db.exec("ALTER TABLE trading_bots ADD COLUMN market_exchanges TEXT");
-    if (!cols.includes('strategies_multi')) db.exec("ALTER TABLE trading_bots ADD COLUMN strategies_multi TEXT");
-  } catch(_){}
-})();
-// Phase E: public profile opt-in
-(function migrateUsersPublic(){
-  try {
-    const cols = db.prepare("PRAGMA table_info('users')").all().map(c => c.name);
-    if (!cols.includes('public_profile')) db.exec("ALTER TABLE users ADD COLUMN public_profile INTEGER DEFAULT 0");
-  } catch(_){}
 })();
 // Ops phase: admin sub-roles — superadmin / support / billing / viewer.
 // NULL = not an admin. Legacy is_admin=1 is treated as 'superadmin' by the
@@ -327,205 +310,10 @@ db.exec(`
     FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
     UNIQUE(user_id, exchange, label)
   );
-
-  CREATE TABLE IF NOT EXISTS trading_bots (
-    id               INTEGER PRIMARY KEY AUTOINCREMENT,
-    user_id          INTEGER NOT NULL,
-    name             TEXT NOT NULL,
-    exchange         TEXT NOT NULL,
-    exchange_key_id  INTEGER,
-    symbols          TEXT NOT NULL,
-    strategy         TEXT NOT NULL,
-    timeframe        TEXT NOT NULL DEFAULT '1h',
-    direction        TEXT DEFAULT 'both',
-    leverage         INTEGER DEFAULT 1,
-    risk_pct         REAL DEFAULT 1.0,
-    max_open_trades  INTEGER DEFAULT 3,
-    auto_trade       INTEGER DEFAULT 0,
-    trading_mode     TEXT DEFAULT 'paper',
-    strategy_config  TEXT,
-    risk_config      TEXT,
-    is_active        INTEGER DEFAULT 0,
-    last_run_at      DATETIME,
-    created_at       DATETIME DEFAULT CURRENT_TIMESTAMP,
-    updated_at       DATETIME DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
-    FOREIGN KEY (exchange_key_id) REFERENCES exchange_keys(id) ON DELETE SET NULL
-  );
-
-  CREATE TABLE IF NOT EXISTS trades (
-    id                  INTEGER PRIMARY KEY AUTOINCREMENT,
-    user_id             INTEGER NOT NULL,
-    bot_id              INTEGER,
-    signal_id           INTEGER,
-    exchange            TEXT NOT NULL,
-    symbol              TEXT NOT NULL,
-    side                TEXT NOT NULL,
-    strategy            TEXT,
-    timeframe           TEXT,
-    entry_price         REAL NOT NULL,
-    exit_price          REAL,
-    quantity            REAL NOT NULL,
-    leverage            INTEGER DEFAULT 1,
-    margin_used         REAL,
-    stop_loss           REAL,
-    take_profit_1       REAL,
-    take_profit_2       REAL,
-    take_profit_3       REAL,
-    realized_pnl        REAL DEFAULT 0,
-    realized_pnl_pct    REAL DEFAULT 0,
-    fees_paid           REAL DEFAULT 0,
-    status              TEXT DEFAULT 'open',
-    close_reason        TEXT,
-    trading_mode        TEXT DEFAULT 'paper',
-    exchange_order_ids  TEXT,
-    opened_at           DATETIME DEFAULT CURRENT_TIMESTAMP,
-    closed_at           DATETIME,
-    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
-    FOREIGN KEY (bot_id) REFERENCES trading_bots(id) ON DELETE SET NULL
-  );
-
-  CREATE TABLE IF NOT EXISTS trade_fills (
-    id                 INTEGER PRIMARY KEY AUTOINCREMENT,
-    trade_id           INTEGER NOT NULL,
-    event_type         TEXT NOT NULL,
-    price              REAL NOT NULL,
-    quantity           REAL NOT NULL,
-    pnl                REAL DEFAULT 0,
-    exchange_order_id  TEXT,
-    executed_at        DATETIME DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (trade_id) REFERENCES trades(id) ON DELETE CASCADE
-  );
-
-  CREATE TABLE IF NOT EXISTS signals (
-    id             INTEGER PRIMARY KEY AUTOINCREMENT,
-    user_id        INTEGER,
-    bot_id         INTEGER,
-    exchange       TEXT NOT NULL,
-    symbol         TEXT NOT NULL,
-    strategy       TEXT NOT NULL,
-    timeframe      TEXT NOT NULL,
-    side           TEXT NOT NULL,
-    entry_price    REAL NOT NULL,
-    stop_loss      REAL NOT NULL,
-    take_profit_1  REAL,
-    take_profit_2  REAL,
-    take_profit_3  REAL,
-    risk_reward    REAL,
-    confidence     INTEGER,
-    quality        INTEGER,
-    reason         TEXT,
-    metadata       TEXT,
-    result         TEXT DEFAULT 'pending',
-    result_price   REAL,
-    result_pnl_pct REAL,
-    expires_at     DATETIME,
-    created_at     DATETIME DEFAULT CURRENT_TIMESTAMP,
-    closed_at      DATETIME,
-    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
-    FOREIGN KEY (bot_id) REFERENCES trading_bots(id) ON DELETE SET NULL
-  );
-
-  CREATE TABLE IF NOT EXISTS signal_registry (
-    id           INTEGER PRIMARY KEY AUTOINCREMENT,
-    fingerprint  TEXT UNIQUE NOT NULL,
-    signal_id    INTEGER NOT NULL,
-    created_at   DATETIME DEFAULT CURRENT_TIMESTAMP,
-    expires_at   DATETIME NOT NULL,
-    FOREIGN KEY (signal_id) REFERENCES signals(id) ON DELETE CASCADE
-  );
-
-  CREATE TABLE IF NOT EXISTS user_signal_prefs (
-    user_id                 INTEGER PRIMARY KEY,
-    enabled_strategies      TEXT DEFAULT '["levels"]',
-    watched_symbols         TEXT DEFAULT '[]',
-    blacklisted_symbols     TEXT DEFAULT '[]',
-    min_confidence          INTEGER DEFAULT 60,
-    min_rr                  REAL DEFAULT 1.5,
-    timeframes              TEXT DEFAULT '["1h","4h"]',
-    directions              TEXT DEFAULT '["long","short"]',
-    notifications_web       INTEGER DEFAULT 1,
-    notifications_email     INTEGER DEFAULT 0,
-    notifications_telegram  INTEGER DEFAULT 0,
-    telegram_chat_id        TEXT,
-    created_at              DATETIME DEFAULT CURRENT_TIMESTAMP,
-    updated_at              DATETIME DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
-  );
-
-  CREATE TABLE IF NOT EXISTS signal_views (
-    id         INTEGER PRIMARY KEY AUTOINCREMENT,
-    user_id    INTEGER NOT NULL,
-    signal_id  INTEGER NOT NULL,
-    viewed_at  DATETIME DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
-    FOREIGN KEY (signal_id) REFERENCES signals(id) ON DELETE CASCADE
-  );
 `);
 
-// ── ANALYTICS (backtests + optimizer + market-data cache) ────────────────
+// ── MARKET DATA (persistent candle store; genome/backtester history, M8) ─
 db.exec(`
-  CREATE TABLE IF NOT EXISTS backtests (
-    id               INTEGER PRIMARY KEY AUTOINCREMENT,
-    user_id          INTEGER NOT NULL,
-    name             TEXT NOT NULL,
-    strategy         TEXT NOT NULL,
-    exchange         TEXT NOT NULL,
-    symbols          TEXT NOT NULL,
-    timeframe        TEXT NOT NULL,
-    start_date       DATE NOT NULL,
-    end_date         DATE NOT NULL,
-    initial_capital  REAL NOT NULL,
-    strategy_config  TEXT,
-    risk_config      TEXT,
-    status           TEXT DEFAULT 'pending',
-    progress_pct     REAL DEFAULT 0,
-    results          TEXT,
-    error_message    TEXT,
-    duration_ms      INTEGER,
-    created_at       DATETIME DEFAULT CURRENT_TIMESTAMP,
-    started_at       DATETIME,
-    completed_at     DATETIME,
-    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
-  );
-
-  CREATE TABLE IF NOT EXISTS backtest_trades (
-    id             INTEGER PRIMARY KEY AUTOINCREMENT,
-    backtest_id    INTEGER NOT NULL,
-    symbol         TEXT NOT NULL,
-    side           TEXT NOT NULL,
-    entry_time     DATETIME NOT NULL,
-    entry_price    REAL NOT NULL,
-    exit_time      DATETIME,
-    exit_price     REAL,
-    quantity       REAL,
-    stop_loss      REAL,
-    take_profit_1  REAL,
-    take_profit_2  REAL,
-    take_profit_3  REAL,
-    pnl_pct        REAL,
-    pnl_usd        REAL,
-    close_reason   TEXT,
-    equity_after   REAL,
-    FOREIGN KEY (backtest_id) REFERENCES backtests(id) ON DELETE CASCADE
-  );
-
-  CREATE TABLE IF NOT EXISTS optimizations (
-    id                 INTEGER PRIMARY KEY AUTOINCREMENT,
-    user_id            INTEGER NOT NULL,
-    backtest_config    TEXT NOT NULL,
-    param_space        TEXT NOT NULL,
-    objective          TEXT NOT NULL,
-    n_trials           INTEGER DEFAULT 50,
-    trials_completed   INTEGER DEFAULT 0,
-    best_params        TEXT,
-    best_score         REAL,
-    status             TEXT DEFAULT 'pending',
-    created_at         DATETIME DEFAULT CURRENT_TIMESTAMP,
-    completed_at       DATETIME,
-    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
-  );
-
   CREATE TABLE IF NOT EXISTS candles_cache (
     exchange   TEXT NOT NULL,
     symbol     TEXT NOT NULL,
@@ -645,34 +433,6 @@ db.exec(`
     FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
   );
 
-  CREATE TABLE IF NOT EXISTS wallets (
-    id                     INTEGER PRIMARY KEY AUTOINCREMENT,
-    user_id                INTEGER NOT NULL UNIQUE,
-    address                TEXT NOT NULL,
-    encrypted_private_key  TEXT NOT NULL,
-    balance                REAL NOT NULL DEFAULT 0,
-    created_at             DATETIME DEFAULT CURRENT_TIMESTAMP,
-    updated_at             DATETIME DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
-  );
-
-  CREATE TABLE IF NOT EXISTS wallet_transactions (
-    id                   INTEGER PRIMARY KEY AUTOINCREMENT,
-    user_id              INTEGER NOT NULL,
-    wallet_id            INTEGER NOT NULL,
-    type                 TEXT NOT NULL CHECK (type IN ('deposit','withdrawal')),
-    amount               REAL NOT NULL,
-    tx_hash              TEXT UNIQUE,
-    destination_address  TEXT,
-    status               TEXT NOT NULL DEFAULT 'pending'
-                           CHECK (status IN ('pending','processing','completed','cancelled','failed')),
-    notes                TEXT,
-    created_at           DATETIME DEFAULT CURRENT_TIMESTAMP,
-    updated_at           DATETIME DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (user_id)   REFERENCES users(id)   ON DELETE CASCADE,
-    FOREIGN KEY (wallet_id) REFERENCES wallets(id) ON DELETE CASCADE
-  );
-
   -- Stripe webhook idempotency — dedupe retries so a repeated
   -- checkout.session.completed can't trigger confirmPayment twice.
   CREATE TABLE IF NOT EXISTS stripe_webhooks (
@@ -721,29 +481,12 @@ db.exec(`
   CREATE INDEX IF NOT EXISTS idx_promo_codes_code ON promo_codes(code);
 
   CREATE INDEX IF NOT EXISTS idx_exchange_keys_user ON exchange_keys(user_id);
-  CREATE INDEX IF NOT EXISTS idx_trading_bots_user ON trading_bots(user_id);
-  CREATE INDEX IF NOT EXISTS idx_trading_bots_active ON trading_bots(is_active, last_run_at);
-  CREATE INDEX IF NOT EXISTS idx_trades_user ON trades(user_id, opened_at DESC);
-  CREATE INDEX IF NOT EXISTS idx_trades_user_status_closed ON trades(user_id, status, closed_at DESC);
-  CREATE INDEX IF NOT EXISTS idx_trades_bot ON trades(bot_id);
-  CREATE INDEX IF NOT EXISTS idx_trades_status ON trades(status, opened_at DESC);
-  CREATE INDEX IF NOT EXISTS idx_trade_fills_trade ON trade_fills(trade_id);
-  CREATE INDEX IF NOT EXISTS idx_signals_user_created ON signals(user_id, created_at DESC);
-  CREATE INDEX IF NOT EXISTS idx_signals_strategy ON signals(strategy, created_at DESC);
-  CREATE INDEX IF NOT EXISTS idx_signals_symbol ON signals(symbol, created_at DESC);
-  CREATE INDEX IF NOT EXISTS idx_signals_pending ON signals(result, expires_at);
 
   CREATE INDEX IF NOT EXISTS idx_email_verif_user ON email_verifications(user_id, verified_at);
   CREATE INDEX IF NOT EXISTS idx_password_reset_user ON password_resets(user_id, used_at);
   CREATE INDEX IF NOT EXISTS idx_login_history_user ON login_history(user_id, created_at DESC);
   CREATE INDEX IF NOT EXISTS idx_notifications_user ON notifications(user_id, read_at, created_at DESC);
-  CREATE INDEX IF NOT EXISTS idx_signal_registry_fp ON signal_registry(fingerprint);
-  CREATE INDEX IF NOT EXISTS idx_signal_registry_expires ON signal_registry(expires_at);
-  CREATE INDEX IF NOT EXISTS idx_signal_views_user ON signal_views(user_id, viewed_at DESC);
 
-  CREATE INDEX IF NOT EXISTS idx_backtests_user ON backtests(user_id, created_at DESC);
-  CREATE INDEX IF NOT EXISTS idx_backtest_trades_bt ON backtest_trades(backtest_id);
-  CREATE INDEX IF NOT EXISTS idx_optimizations_user ON optimizations(user_id, created_at DESC);
   CREATE INDEX IF NOT EXISTS idx_candles_lookup ON candles_cache(exchange, symbol, timeframe, open_time DESC);
 
   CREATE INDEX IF NOT EXISTS idx_referrals_referrer ON referrals(referrer_id);
@@ -755,10 +498,7 @@ db.exec(`
   CREATE INDEX IF NOT EXISTS idx_audit_action ON audit_log(action, created_at DESC);
   CREATE INDEX IF NOT EXISTS idx_audit_entity ON audit_log(entity_type, entity_id);
 
-  CREATE INDEX IF NOT EXISTS idx_wallet_tx_user ON wallet_transactions(user_id, created_at DESC);
   CREATE INDEX IF NOT EXISTS idx_users_admin_role ON users(admin_role) WHERE admin_role IS NOT NULL;
-  CREATE INDEX IF NOT EXISTS idx_wallet_tx_status ON wallet_transactions(status, type);
-  CREATE INDEX IF NOT EXISTS idx_wallets_user ON wallets(user_id);
   CREATE INDEX IF NOT EXISTS idx_stripe_webhooks_processed ON stripe_webhooks(processed_at);
   CREATE INDEX IF NOT EXISTS idx_push_subs_user ON push_subscriptions(user_id);
   CREATE INDEX IF NOT EXISTS idx_email_bounces_email ON email_bounces(email, suppressed);

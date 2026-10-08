@@ -33,7 +33,6 @@ function mkTgPayload({ id = 12345, firstName = 'Alex', lastName = 'Smith', usern
 }
 
 beforeEach(() => {
-  db.prepare('DELETE FROM trading_bots').run();
   db.prepare('DELETE FROM refresh_tokens').run();
   db.prepare('DELETE FROM subscriptions').run();
   db.prepare('DELETE FROM users').run();

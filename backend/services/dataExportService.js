@@ -10,6 +10,10 @@
  *     plaintext in their biros; our copy is opaque anyway)
  *   - refresh_token hashes are omitted
  *
+ * M0 (port plan §5): exports only the kept platform tables. The engine
+ * tables (`trader_settings`, `signal_trades`, …) are added to this export
+ * when they land (M7/M10).
+ *
  * Called from GET /api/auth/me/export and the Settings button.
  */
 
@@ -26,7 +30,7 @@ function build(userId) {
   const user = db.prepare(`
     SELECT id, email, display_name, avatar_url, locale, timezone,
            referral_code, referred_by, email_verified, is_admin, admin_role,
-           is_active, public_profile, telegram_username, telegram_chat_id,
+           is_active, telegram_username, telegram_chat_id,
            telegram_linked_at, notification_prefs, last_login_at, created_at, updated_at
     FROM users WHERE id = ?
   `).get(userId);
@@ -34,13 +38,9 @@ function build(userId) {
 
   const subscription = db.prepare(`SELECT plan, status, expires_at, auto_renew, created_at, updated_at FROM subscriptions WHERE user_id = ?`).get(userId) || null;
   const exchangeKeys = db.prepare(`
-    SELECT id, exchange, label, verified_at, created_at
+    SELECT id, exchange, label, is_testnet, last_verified_at AS verified_at, created_at
     FROM exchange_keys WHERE user_id = ?
   `).all(userId);
-  const bots = db.prepare(`SELECT * FROM trading_bots WHERE user_id = ?`).all(userId)
-    .map((b) => _strip(b, 'tv_webhook_secret'));
-  const trades = db.prepare(`SELECT * FROM trades WHERE user_id = ?`).all(userId);
-  const signals = db.prepare(`SELECT * FROM signals WHERE user_id = ?`).all(userId);
   const payments = db.prepare(`SELECT * FROM payments WHERE user_id = ?`).all(userId);
   const refRewards = db.prepare(`
     SELECT * FROM ref_rewards WHERE referrer_id = ? OR referred_id = ?
@@ -61,21 +61,14 @@ function build(userId) {
     WHERE t.user_id = ? OR m.author_id = ?
   `).all(userId, userId);
   const audit = db.prepare(`SELECT * FROM audit_log WHERE user_id = ?`).all(userId);
-  const wallet = db.prepare(`SELECT id, address, balance, created_at, updated_at FROM wallets WHERE user_id = ?`).get(userId) || null;
-  const walletTx = db.prepare(`SELECT * FROM wallet_transactions WHERE user_id = ?`).all(userId);
 
   return {
     exportedAt: new Date().toISOString(),
     exportedFor: user.email,
-    notice: 'This is a full copy of the personal data CHM Finance holds on you. Sensitive fields (password hash, 2FA secret, recovery codes, refresh-token hashes, exchange API secrets, wallet private keys) have been excluded as they cannot be derived back to readable credentials and are not useful for a GDPR subject-access request.',
+    notice: 'This is a full copy of the personal data CHM Finance holds on you. Sensitive fields (password hash, 2FA secret, recovery codes, refresh-token hashes, exchange API secrets) have been excluded as they cannot be derived back to readable credentials and are not useful for a GDPR subject-access request.',
     profile: _strip(user),
     subscription,
     exchangeKeys,
-    wallet,
-    walletTransactions: walletTx,
-    bots,
-    trades,
-    signals,
     payments,
     referralRewards: refRewards,
     sessions,

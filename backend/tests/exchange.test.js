@@ -4,11 +4,9 @@
  *   - Encryption at rest (round-trip, masking)
  *   - Key listing scoped by user
  *   - Deletion scoped by user (404 for other users' keys)
- *   - LRU cache drop on verify/delete
  *
- * Live CCXT interactions (addKey pre-flight, verify, balance) are integration
- * tests that require real exchange access — those are covered manually after
- * deployment and by a dev `smoke-exchange.js` script (see phase_3_report).
+ * Live exchange interactions (verify, balance) answer 501 until the bot's
+ * exchange adapters land (port plan M13); they get their own tests then.
  */
 
 import { describe, it, expect, beforeAll, beforeEach } from 'vitest';
@@ -62,14 +60,28 @@ function makeUser(email, referralCode = null) {
 beforeEach(() => {
   db.prepare('DELETE FROM exchange_keys').run();
   db.prepare('DELETE FROM users').run();
-  exchangeService._clearCache();
 });
 
 describe('listSupported', () => {
-  it('contains all 8 expected exchanges', () => {
+  it('contains exactly the 4 exchanges the bot trades on', () => {
     const list = exchangeService.listSupported();
-    ['bybit', 'binance', 'bingx', 'okx', 'bitget', 'htx', 'gate', 'bitmex']
-      .forEach((e) => expect(list).toContain(e));
+    expect(list).toEqual(['bybit', 'binance', 'bingx', 'okx']);
+  });
+});
+
+describe('verifyKey / getBalance (adapters land in M13)', () => {
+  it('answer 501 NOT_IMPLEMENTED for an own key', async () => {
+    const u = makeUser('v@x.com');
+    const keyId = insertRawKey({ userId: u, exchange: 'bybit', apiKey: 'k1234567', apiSecret: 's' });
+    await expect(exchangeService.verifyKey(keyId, u)).rejects.toMatchObject({ statusCode: 501, code: 'NOT_IMPLEMENTED' });
+    await expect(exchangeService.getBalance(keyId, u)).rejects.toMatchObject({ statusCode: 501, code: 'NOT_IMPLEMENTED' });
+  });
+
+  it("still 404 for another user's key", async () => {
+    const alice = makeUser('alice-v@x.com');
+    const mal = makeUser('mal-v@x.com');
+    const keyId = insertRawKey({ userId: alice, exchange: 'bybit', apiKey: 'k', apiSecret: 's' });
+    await expect(exchangeService.verifyKey(keyId, mal)).rejects.toMatchObject({ statusCode: 404 });
   });
 });
 
@@ -138,15 +150,6 @@ describe('deleteKey', () => {
     expect(() => exchangeService.deleteKey(keyId, mal)).toThrowError();
   });
 
-  it('also drops LRU cache entry', () => {
-    const u = makeUser('lru-del@x.com');
-    const keyId = insertRawKey({ userId: u, exchange: 'bybit', apiKey: 'k', apiSecret: 's' });
-    // Manually seed cache to simulate a live client
-    // (we can't easily instantiate CCXT here without network, so inspect size)
-    expect(exchangeService._getCacheSize()).toBe(0);
-    exchangeService.deleteKey(keyId, u);
-    expect(exchangeService._getCacheSize()).toBe(0);
-  });
 });
 
 describe('Encryption at rest', () => {

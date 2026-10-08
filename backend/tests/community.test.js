@@ -18,17 +18,15 @@ function freshDb() {
   ['', '-wal', '-shm'].forEach((ext) => { try { fs.unlinkSync(p + ext); } catch (_e) {} });
 }
 
-let app, db, leaderboard;
+let app, db;
 beforeAll(async () => {
   freshDb();
   app = (await import('../server.js')).default;
   db = (await import('../models/database.js')).default;
-  leaderboard = (await import('../services/leaderboardService.js')).default;
 });
 beforeEach(() => {
   db.prepare('DELETE FROM support_messages').run();
   db.prepare('DELETE FROM support_tickets').run();
-  db.prepare('DELETE FROM trades').run();
   db.prepare('DELETE FROM refresh_tokens').run();
   db.prepare('DELETE FROM subscriptions').run();
   db.prepare('DELETE FROM users').run();
@@ -37,116 +35,6 @@ beforeEach(() => {
 async function reg(email = 'x@x.com') {
   return (await request(app).post('/api/auth/register').send({ email, password: 'Abcdef123' })).body;
 }
-function mkTrade(userId, pnl, { strategy = 'smc', symbol = 'BTC/USDT' } = {}) {
-  return db.prepare(`
-    INSERT INTO trades (user_id, exchange, symbol, side, strategy, entry_price, quantity,
-      stop_loss, status, realized_pnl, realized_pnl_pct, margin_used, trading_mode, closed_at, opened_at)
-    VALUES (?, 'bybit', ?, 'long', ?, 50000, 0.01, 49000, 'closed', ?, ?, 500, 'paper',
-      CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
-  `).run(userId, symbol, strategy, pnl, (pnl / 500) * 100).lastInsertRowid;
-}
-
-describe('Public leaderboard', () => {
-  it('excludes users who did not opt-in', async () => {
-    const u1 = await reg('private@x.com');
-    mkTrade(u1.user.id, 100);
-    mkTrade(u1.user.id, 200);
-    const res = await request(app).get('/api/public/leaderboard');
-    expect(res.status).toBe(200);
-    expect(res.body.traders).toHaveLength(0);
-  });
-
-  it('includes opted-in users, ranks by pnl', async () => {
-    const a = await reg('a@x.com');
-    const b = await reg('b@x.com');
-    db.prepare('UPDATE users SET public_profile = 1 WHERE id IN (?, ?)').run(a.user.id, b.user.id);
-    mkTrade(a.user.id, 100); mkTrade(a.user.id, 50); mkTrade(a.user.id, 30);
-    mkTrade(b.user.id, 500); mkTrade(b.user.id, -100); mkTrade(b.user.id, 10);
-
-    const res = await request(app).get('/api/public/leaderboard?period=all&sort=pnl');
-    expect(res.status).toBe(200);
-    expect(res.body.traders).toHaveLength(2);
-    expect(res.body.traders[0].rank).toBe(1);
-    expect(res.body.traders[0].totalPnl).toBe(410); // b wins by PnL
-    expect(res.body.traders[1].totalPnl).toBe(180);
-  });
-
-  it('winrate sort respects min-trades threshold (10)', async () => {
-    const a = await reg('a2@x.com');
-    const b = await reg('b2@x.com');
-    db.prepare('UPDATE users SET public_profile = 1 WHERE id IN (?, ?)').run(a.user.id, b.user.id);
-    // a: 2 wins only (below 10-trade threshold — excluded from winrate ranking)
-    mkTrade(a.user.id, 50); mkTrade(a.user.id, 50);
-    // b: 11 wins
-    for (let i = 0; i < 11; i++) mkTrade(b.user.id, 10);
-
-    const res = await request(app).get('/api/public/leaderboard?period=all&sort=winrate');
-    expect(res.body.traders).toHaveLength(1);
-    expect(res.body.traders[0].userId).toBe(b.user.id);
-  });
-
-  it('hides email, shows anonymized name when no display_name', async () => {
-    const u = await reg('priv@x.com');
-    db.prepare('UPDATE users SET public_profile = 1 WHERE id = ?').run(u.user.id);
-    mkTrade(u.user.id, 50); mkTrade(u.user.id, 50); mkTrade(u.user.id, 50);
-    const res = await request(app).get('/api/public/leaderboard');
-    const t = res.body.traders[0];
-    expect(t.displayName).toMatch(/^Trader#/);
-    expect(t.email).toBeUndefined();
-  });
-});
-
-describe('Public profile /api/public/u/:code', () => {
-  it('404 for private profile', async () => {
-    const u = await reg();
-    const code = u.user.referralCode;
-    const res = await request(app).get('/api/public/u/' + code);
-    expect(res.status).toBe(404);
-  });
-
-  it('returns aggregated stats when opted-in', async () => {
-    const u = await reg();
-    db.prepare('UPDATE users SET public_profile = 1 WHERE id = ?').run(u.user.id);
-    mkTrade(u.user.id, 100, { strategy: 'smc' });
-    mkTrade(u.user.id, -30, { strategy: 'scalping' });
-    mkTrade(u.user.id, 40, { strategy: 'smc' });
-    const res = await request(app).get('/api/public/u/' + u.user.referralCode);
-    expect(res.status).toBe(200);
-    expect(res.body.stats.closedTrades).toBe(3);
-    expect(res.body.stats.totalPnl).toBe(110);
-    expect(res.body.stats.wins).toBe(2);
-    expect(res.body.byStrategy.length).toBeGreaterThan(0);
-    expect(res.body.recent.length).toBeGreaterThan(0);
-    expect(res.body.email).toBeUndefined();
-  });
-
-  it('rejects invalid ref code format with 400', async () => {
-    const res = await request(app).get('/api/public/u/!!!');
-    expect(res.status).toBe(400);
-  });
-});
-
-describe('Profile privacy toggle', () => {
-  it('PUT /api/support/profile/public flips flag', async () => {
-    const u = await reg();
-    // Off by default
-    let row = db.prepare('SELECT public_profile FROM users WHERE id = ?').get(u.user.id);
-    expect(row.public_profile).toBe(0);
-
-    const r1 = await request(app).put('/api/support/profile/public')
-      .set('Authorization', 'Bearer ' + u.accessToken).send({ enabled: true });
-    expect(r1.status).toBe(200);
-    row = db.prepare('SELECT public_profile FROM users WHERE id = ?').get(u.user.id);
-    expect(row.public_profile).toBe(1);
-
-    const r2 = await request(app).put('/api/support/profile/public')
-      .set('Authorization', 'Bearer ' + u.accessToken).send({ enabled: false });
-    expect(r2.status).toBe(200);
-    row = db.prepare('SELECT public_profile FROM users WHERE id = ?').get(u.user.id);
-    expect(row.public_profile).toBe(0);
-  });
-});
-
 describe('Support tickets', () => {
   it('create → list → get → reply → close lifecycle', async () => {
     const u = await reg();

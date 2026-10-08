@@ -5,7 +5,6 @@
  *   Auth    — token storage + refresh rotation
  *   API     — fetch-based client (auto-refresh on 401)
  *   Toast   — transient notifications
- *   WS      — WebSocket client (auto-reconnect, auth, subscriptions)
  *   Fmt     — formatting helpers (currency, percent, time)
  *   I18n    — translations (RU/EN)
  */
@@ -14,7 +13,6 @@
 
 const API_BASE = (location.hostname === 'localhost' || location.hostname === '127.0.0.1')
   ? 'http://localhost:3000/api' : '/api';
-const WS_URL = (location.protocol === 'https:' ? 'wss://' : 'ws://') + location.host + '/ws';
 
 // ── Auth — token storage + refresh rotation ────────────────────────────
 // Impersonation mode: if the URL has #imp=<token>, we're a fresh tab opened
@@ -233,57 +231,16 @@ const API = {
 
   // Exchanges
   listExchanges: () => apiRequest('GET', '/exchanges', null, { skipAuth: true }),
-  listSymbols: (exchange) => apiRequest('GET', '/exchanges/' + exchange + '/symbols', null, { skipAuth: true }),
-  ticker: (exchange, symbol) => apiRequest('GET', '/exchanges/' + exchange + '/ticker/' + encodeURIComponent(symbol), null, { skipAuth: true }),
-  candles: (exchange, symbol, tf = '1h', limit = 500) =>
-    apiRequest('GET', '/exchanges/' + exchange + '/candles/' + encodeURIComponent(symbol) + '?timeframe=' + tf + '&limit=' + limit, null, { skipAuth: true }),
   listKeys: () => apiRequest('GET', '/exchanges/keys'),
   addKey: (payload) => apiRequest('POST', '/exchanges/keys', payload),
   verifyKey: (id) => apiRequest('POST', '/exchanges/keys/' + id + '/verify'),
   deleteKey: (id) => apiRequest('DELETE', '/exchanges/keys/' + id),
   getBalance: (id) => apiRequest('GET', '/exchanges/keys/' + id + '/balance'),
 
-  // Bots
-  listBots: () => apiRequest('GET', '/bots'),
-  botSummary: () => apiRequest('GET', '/bots/summary'),
-  createBot: (payload) => apiRequest('POST', '/bots', payload),
-  getBot: (id) => apiRequest('GET', '/bots/' + id),
-  updateBot: (id, patch) => apiRequest('PATCH', '/bots/' + id, patch),
-  toggleBot: (id) => apiRequest('POST', '/bots/' + id + '/toggle'),
-  deleteBot: (id) => apiRequest('DELETE', '/bots/' + id),
-  botTrades: (id, opts = {}) => apiRequest('GET', '/bots/' + id + '/trades?' + qs(opts)),
-  botStats: (id) => apiRequest('GET', '/bots/' + id + '/stats'),
-  botEquity: (id) => apiRequest('GET', '/bots/' + id + '/equity'),
-  quickBacktest: (cfg) => apiRequest('POST', '/bots/quick-backtest', cfg),
-  // getBacktest is defined in the Backtests section below — used by both
-  // bot drawer (poll quick-backtest result) and the standalone backtests page.
-
-  // Signals
-  listSignals: (opts = {}) => apiRequest('GET', '/signals?' + qs(opts)),
-  publicSignals: (opts = {}) => apiRequest('GET', '/signals/public?' + qs(opts), null, { skipAuth: true }),
-  getSignal: (id) => apiRequest('GET', '/signals/' + id),
-  mySignalStats: () => apiRequest('GET', '/signals/stats/me'),
-  globalSignalStats: () => apiRequest('GET', '/signals/stats/global', null, { skipAuth: true }),
-  getPrefs: () => apiRequest('GET', '/signals/prefs/me'),
-  updatePrefs: (patch) => apiRequest('PATCH', '/signals/prefs/me', patch),
-
-  // Backtests
-  listBacktests: (opts = {}) => apiRequest('GET', '/backtests?' + qs(opts)),
-  createBacktest: (payload) => apiRequest('POST', '/backtests', payload),
-  getBacktest: (id) => apiRequest('GET', '/backtests/' + id),
-  getBacktestTrades: (id, opts = {}) => apiRequest('GET', '/backtests/' + id + '/trades?' + qs(opts)),
-  deleteBacktest: (id) => apiRequest('DELETE', '/backtests/' + id),
-  backtestStats: () => apiRequest('GET', '/backtests/stats'),
-
   // Subscriptions / promo
   listPlans: () => apiRequest('GET', '/subscriptions/plans', null, { skipAuth: true }),
   mySubscription: () => apiRequest('GET', '/subscriptions/status'),
   redeemPromo: (code) => apiRequest('POST', '/subscriptions/promo', { code }),
-
-  // Optimizations
-  listOptimizations: () => apiRequest('GET', '/optimizations'),
-  createOptimization: (payload) => apiRequest('POST', '/optimizations', payload),
-  getOptimization: (id) => apiRequest('GET', '/optimizations/' + id),
 
   // Payments / referrals
   listPayments: (opts = {}) => apiRequest('GET', '/payments?' + qs(opts)),
@@ -312,63 +269,6 @@ const API = {
   markNotificationRead: (id) => apiRequest('POST', '/notifications/' + id + '/read'),
   markAllNotificationsRead: () => apiRequest('POST', '/notifications/read-all'),
   removeNotification: (id) => apiRequest('DELETE', '/notifications/' + id),
-
-  // Analytics / portfolio / trade journal
-  portfolio: (fresh = false) => apiRequest('GET', '/analytics/portfolio' + (fresh ? '?fresh=1' : '')),
-  analyticsSummary: (opts = {}) => apiRequest('GET', '/analytics/summary?' + qs(opts)),
-  analyticsBySymbol: (opts = {}) => apiRequest('GET', '/analytics/by-symbol?' + qs(opts)),
-  analyticsByStrategy: (opts = {}) => apiRequest('GET', '/analytics/by-strategy?' + qs(opts)),
-  analyticsByMonth: (opts = {}) => apiRequest('GET', '/analytics/by-month?' + qs(opts)),
-  equityCurve: (days = 90) => apiRequest('GET', '/analytics/equity-curve?days=' + days),
-  listTrades: (opts = {}) => apiRequest('GET', '/analytics/trades?' + qs(opts)),
-  setTradeNote: (id, note) => apiRequest('PATCH', '/analytics/trades/' + id + '/note', { note }),
-  // Manual (Smart) Trade + TV webhook management
-  manualTrade: (payload) => apiRequest('POST', '/bots/manual-trade', payload),
-  getTvWebhook: (botId) => apiRequest('GET', '/bots/' + botId + '/tv-webhook'),
-  rotateTvWebhook: (botId) => apiRequest('POST', '/bots/' + botId + '/tv-webhook/rotate'),
-  // Risk Manager
-  getRiskLimits: () => apiRequest('GET', '/risk/limits'),
-  setRiskLimits: (patch) => apiRequest('PATCH', '/risk/limits', patch),
-  // Copy Trading
-  copyListFollowing: () => apiRequest('GET', '/copy/following'),
-  copySubscribe: (payload) => apiRequest('POST', '/copy/subscribe', payload),
-  copyUnsubscribe: (leaderId) => apiRequest('POST', '/copy/unsubscribe', { leaderId }),
-
-  // Community / public
-  leaderboard: (opts = {}) => apiRequest('GET', '/public/leaderboard?' + qs(opts), null, { skipAuth: true }),
-  publicProfile: (code) => apiRequest('GET', '/public/u/' + code, null, { skipAuth: true }),
-  setPublicProfile: (enabled) => apiRequest('PUT', '/support/profile/public', { enabled }),
-  setPaperBalance: (amount) => apiRequest('PUT', '/support/profile/paper-balance', { amount }),
-
-  // Copy trading — copySubscribe / copyUnsubscribe / copyListFollowing are
-  // defined earlier in this object. Removed duplicate stubs that used to
-  // overwrite them with a different signature (leaderCode, opts) and broke
-  // callers that passed a single payload object.
-
-  // Strategy marketplace
-  marketList: (opts = {}) => apiRequest('GET', '/strategies?' + qs(opts), null, { skipAuth: true }),
-  marketGet: (slug) => apiRequest('GET', '/strategies/' + encodeURIComponent(slug), null, { skipAuth: true }),
-  marketPublish: (body) => apiRequest('POST', '/strategies', body),
-  marketInstall: (slug, body = {}) => apiRequest('POST', '/strategies/' + encodeURIComponent(slug) + '/install', body),
-  marketRate: (slug, stars) => apiRequest('POST', '/strategies/' + encodeURIComponent(slug) + '/rate', { stars }),
-  marketUnpublish: (slug) => apiRequest('DELETE', '/strategies/' + encodeURIComponent(slug)),
-
-  // Dashboard v2 — advanced analytics
-  dashboardV2:        () => apiRequest('GET', '/analytics/dashboard-v2'),
-  openPositions:      () => apiRequest('GET', '/analytics/open-positions'),
-  calendarPnl:        (days = 180) => apiRequest('GET', '/analytics/calendar-pnl?days=' + days),
-  hourlyPnl:          (days = 90) => apiRequest('GET', '/analytics/hourly-pnl?days=' + days),
-  botLeaderboard:     (days = 30) => apiRequest('GET', '/analytics/bot-leaderboard?days=' + days),
-  btcBenchmark:       (days = 90) => apiRequest('GET', '/analytics/btc-benchmark?days=' + days),
-  myPercentile:       (period = '30d') => apiRequest('GET', '/analytics/percentile?period=' + period),
-  marketContext:      () => apiRequest('GET', '/public/market-context', null, { skipAuth: true }),
-  // analyticsByStrategy / analyticsBySymbol / toggleBot / quickBacktest /
-  // getBacktest are defined earlier in this object — duplicate stubs
-  // here used to overwrite them and lose their `opts` parameter. Removed.
-
-  // Bot wizard — strategy schemas
-  strategySchemas:    () => apiRequest('GET', '/bots/strategy-schemas'),
-  strategySchema:     (key) => apiRequest('GET', '/bots/strategy-schema/' + encodeURIComponent(key)),
 
   // Support tickets
   listTickets: (opts = {}) => apiRequest('GET', '/support/tickets?' + qs(opts)),
@@ -411,9 +311,6 @@ const API = {
   adminSetUserPlan: (id, plan, durationDays = 30) => apiRequest('PATCH', '/admin/users/' + id + '/plan', { plan, durationDays }),
   adminSetUserAdmin: (id, isAdmin) => apiRequest('PATCH', '/admin/users/' + id + '/admin', { isAdmin }),
   adminNotifyUser: (id, payload) => apiRequest('POST', '/admin/users/' + id + '/notify', payload),
-  adminListBots: (opts = {}) => apiRequest('GET', '/admin/bots?' + qs(opts)),
-  adminListTrades: (opts = {}) => apiRequest('GET', '/admin/trades?' + qs(opts)),
-  adminListSignals: (opts = {}) => apiRequest('GET', '/admin/signals?' + qs(opts)),
   adminSystem: () => apiRequest('GET', '/admin/system'),
   adminListPayments: (opts = {}) => apiRequest('GET', '/admin/payments?' + qs(opts)),
   adminConfirmPayment: (id, note) => apiRequest('POST', '/admin/payments/' + id + '/confirm', { note }),
@@ -432,12 +329,6 @@ const API = {
   adminBillingAnalytics: () => apiRequest('GET', '/admin/billing-analytics'),
   adminAuditAnalytics: (days = 14) => apiRequest('GET', '/admin/audit-analytics?days=' + days),
   adminImpersonate: (id, reason) => apiRequest('POST', '/admin/users/' + id + '/impersonate', { reason }),
-  adminMarketplace: (opts = {}) => apiRequest('GET', '/admin/marketplace?' + qs(opts)),
-  adminSetStrategyPublic: (id, isPublic) => apiRequest('PATCH', '/admin/marketplace/' + id + '/public', { isPublic }),
-  adminCopyList: (opts = {}) => apiRequest('GET', '/admin/copy?' + qs(opts)),
-  adminCopyDisable: (leaderId, followerId) => apiRequest('POST', '/admin/copy/disable', { leaderId, followerId }),
-  adminCopyBanLeader: (leaderId) => apiRequest('POST', '/admin/copy/leader/' + leaderId + '/ban', {}),
-  adminAIUsage: () => apiRequest('GET', '/admin/ai/usage'),
   adminListRoles: () => apiRequest('GET', '/admin/roles'),
   adminSetUserRole: (id, role) => apiRequest('PATCH', '/admin/users/' + id + '/admin-role', { role }),
 
@@ -445,11 +336,6 @@ const API = {
   pushSubscribe: (subscription) => apiRequest('POST', '/push/subscribe', { subscription }),
   pushUnsubscribe: (endpoint) => apiRequest('POST', '/push/unsubscribe', { endpoint }),
   pushTest: () => apiRequest('POST', '/push/test'),
-
-  // AI assistant — chat (free-form Q&A) + configure-bot (NL → bot config JSON)
-  aiChat: (message, history) => apiRequest('POST', '/ai/chat', { message, history: history || [] }),
-  aiUsage: () => apiRequest('GET', '/ai/usage'),
-  aiConfigureBot: (intent) => apiRequest('POST', '/ai/configure-bot', { intent }),
 };
 
 function saveAuthResp(data) {
@@ -500,58 +386,6 @@ const Toast = {
   warn(m)    { this._show('warning', m, 5000); },
 };
 
-// ── WebSocket client (auto-auth, reconnect, subscriptions) ─────────────
-const WS = {
-  _ws: null,
-  _reconnectTimer: null,
-  _reconnectAttempts: 0,
-  _listeners: new Map(), // type → Set<fn>
-  _connectedResolvers: [],
-  connect() {
-    if (this._ws && (this._ws.readyState === 0 || this._ws.readyState === 1)) return;
-    try {
-      this._ws = new WebSocket(WS_URL);
-    } catch (err) { this._scheduleReconnect(); return; }
-    this._ws.addEventListener('open', () => {
-      this._reconnectAttempts = 0;
-      if (Auth.accessToken) this._send({ type: 'auth', token: 'Bearer ' + Auth.accessToken });
-      this._connectedResolvers.forEach((r) => r(true));
-      this._connectedResolvers = [];
-    });
-    this._ws.addEventListener('message', (ev) => {
-      try {
-        const msg = JSON.parse(ev.data);
-        this._dispatch(msg.type, msg);
-      } catch (_e) { /* */ }
-    });
-    this._ws.addEventListener('close', () => { this._scheduleReconnect(); });
-    this._ws.addEventListener('error', () => { /* close handler will schedule */ });
-  },
-  _send(payload) {
-    try { this._ws.send(JSON.stringify(payload)); } catch (_e) {}
-  },
-  _scheduleReconnect() {
-    if (this._reconnectTimer) return;
-    const backoff = Math.min(30_000, 1000 * Math.pow(2, this._reconnectAttempts++));
-    this._reconnectTimer = setTimeout(() => { this._reconnectTimer = null; this.connect(); }, backoff);
-  },
-  on(type, fn) {
-    if (!this._listeners.has(type)) this._listeners.set(type, new Set());
-    this._listeners.get(type).add(fn);
-    return () => this._listeners.get(type).delete(fn);
-  },
-  off(type, fn) {
-    const set = this._listeners.get(type);
-    if (set) set.delete(fn);
-  },
-  _dispatch(type, msg) {
-    const set = this._listeners.get(type);
-    if (set) for (const fn of set) { try { fn(msg); } catch (_e) {} }
-    const allSet = this._listeners.get('*');
-    if (allSet) for (const fn of allSet) { try { fn(msg); } catch (_e) {} }
-  },
-};
-
 // ── Formatting helpers ─────────────────────────────────────────────────
 const Fmt = {
   currency(n, { decimals = 2, symbol = '$' } = {}) {
@@ -596,7 +430,7 @@ const Fmt = {
   },
 };
 
-// ── i18n stub (used by index.html for landing page; dashboard uses static RU) ──
+// ── i18n stub (used by index.html for landing page; authed pages use static RU) ──
 const I18n = {
   setLang(lang) {
     try { localStorage.setItem('chm_lang', lang); } catch (_e) {}
@@ -610,7 +444,6 @@ const I18n = {
 window.Auth = Auth;
 window.API = API;
 window.Toast = Toast;
-window.WS = WS;
 window.Fmt = Fmt;
 
 // ── Notifications bell widget (auto-initializes on any page with .topbar-notification) ──
@@ -628,11 +461,6 @@ const Notifications = (function () {
     });
     refreshCount();
     setInterval(refreshCount, 45000);
-    try {
-      if (typeof WS !== 'undefined' && WS.on) {
-        WS.on('notification', (msg) => { unread += 1; render(); if (open) buildPanel(); });
-      }
-    } catch (_e) {}
   }
 
   async function refreshCount() {
@@ -713,11 +541,6 @@ const Notifications = (function () {
 })();
 window.Notifications = Notifications;
 window.I18n = I18n;
-
-// Auto-connect WS on auth'd pages
-if (Auth.isLoggedIn()) {
-  WS.connect();
-}
 
 // Inject toast-in keyframes once
 if (!document.getElementById('chm-toast-keyframes')) {

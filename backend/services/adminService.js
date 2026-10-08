@@ -9,13 +9,12 @@ const db = require('../models/database');
 const logger = require('../utils/logger');
 const paymentService = require('./paymentService');
 const refRewards = require('./refRewards');
+const plansConfig = require('../config/plans');
 
 // ── Users ──────────────────────────────────────────────────────────────
-// Batched-aggregate version: previously each row had 3 correlated subqueries
-// (bot_count, trade_count, paid_count). At LIMIT=50 that meant 150 indexed
-// row scans; at search-driven LIMIT=200 it stalls the admin UI.
-// Now we run the main query, then 3 batched COUNT(*)…GROUP BY queries
-// scoped to the user_ids on this page, and stitch counts into the rows.
+// Batched-aggregate version: the paid-payment count is loaded with one
+// COUNT(*)…GROUP BY query scoped to the user_ids on this page instead of a
+// correlated subquery per row.
 function listUsers({ search = null, limit = 50, offset = 0 } = {}) {
   const parts = [];
   const params = [];
@@ -41,22 +40,14 @@ function listUsers({ search = null, limit = 50, offset = 0 } = {}) {
 
   // Batch-load aggregates only for the page we're returning.
   const ids = rows.map((r) => r.id);
-  const counts = { bot: new Map(), trade: new Map(), paid: new Map() };
+  const counts = { paid: new Map() };
   if (ids.length) {
     const ph = ids.map(() => '?').join(',');
-    for (const r of db.prepare(
-      `SELECT user_id, COUNT(*) as n FROM trading_bots WHERE user_id IN (${ph}) GROUP BY user_id`,
-    ).all(...ids)) counts.bot.set(r.user_id, r.n);
-    for (const r of db.prepare(
-      `SELECT user_id, COUNT(*) as n FROM trades WHERE user_id IN (${ph}) GROUP BY user_id`,
-    ).all(...ids)) counts.trade.set(r.user_id, r.n);
     for (const r of db.prepare(
       `SELECT user_id, COUNT(*) as n FROM payments WHERE user_id IN (${ph}) AND status = 'confirmed' GROUP BY user_id`,
     ).all(...ids)) counts.paid.set(r.user_id, r.n);
   }
   for (const r of rows) {
-    r.bot_count = counts.bot.get(r.id) || 0;
-    r.trade_count = counts.trade.get(r.id) || 0;
     r.paid_count = counts.paid.get(r.id) || 0;
   }
 
@@ -76,9 +67,8 @@ function setUserActive(userId, isActive, { adminId } = {}) {
   const info = db.prepare('UPDATE users SET is_active = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?')
     .run(isActive ? 1 : 0, userId);
   if (info.changes === 0) { const err = new Error('User not found'); err.statusCode = 404; throw err; }
-  // If disabling, also pause bots + revoke all refresh tokens
+  // If disabling, also revoke all refresh tokens
   if (!isActive) {
-    db.prepare('UPDATE trading_bots SET is_active = 0 WHERE user_id = ?').run(userId);
     db.prepare('UPDATE refresh_tokens SET revoked_at = CURRENT_TIMESTAMP WHERE user_id = ? AND revoked_at IS NULL').run(userId);
   }
   db.prepare(`
@@ -155,8 +145,7 @@ function refundPayment(paymentId, { adminId, reason = null } = {}) {
   }
 
   // If this refund leaves the user with no later confirmed payment, drop
-  // them back to the free plan. extendSubscription() will then cascade
-  // and deactivate any bots above the free-plan cap.
+  // them back to the free plan.
   try {
     const laterConfirmed = db.prepare(`
       SELECT COUNT(*) AS n FROM payments
@@ -166,8 +155,7 @@ function refundPayment(paymentId, { adminId, reason = null } = {}) {
       const sub = db.prepare('SELECT plan FROM subscriptions WHERE user_id = ?').get(payment.user_id);
       if (sub && sub.plan !== 'free') {
         // Put them on the free plan, wipe the expiry so they can't keep
-        // the old tier until expires_at. 0 days means "no extension" —
-        // extendSubscription still runs the bot-cleanup pass.
+        // the old tier until expires_at. 0 days means "no extension".
         const paymentService = require('./paymentService');
         paymentService.extendSubscription(payment.user_id, 'free', 0);
         db.prepare(`UPDATE subscriptions SET expires_at = NULL, status = 'refunded', updated_at = CURRENT_TIMESTAMP WHERE user_id = ?`)
@@ -264,12 +252,13 @@ function systemStats() {
     FROM users
   `).get();
 
+  // Two tiers (config/plans): free + pro. Legacy ids are rewritten by
+  // migration v12; anything that is not 'free' counts as paid.
   const subs = db.prepare(`
     SELECT COUNT(*) as total,
-           SUM(CASE WHEN plan = 'starter' THEN 1 ELSE 0 END) as starter,
-           SUM(CASE WHEN plan = 'pro'     THEN 1 ELSE 0 END) as pro,
-           SUM(CASE WHEN plan = 'elite'   THEN 1 ELSE 0 END) as elite,
-           SUM(CASE WHEN plan = 'free'    THEN 1 ELSE 0 END) as free
+           SUM(CASE WHEN plan = 'free' THEN 1 ELSE 0 END) as free,
+           SUM(CASE WHEN plan != 'free' THEN 1 ELSE 0 END) as pro,
+           SUM(CASE WHEN plan != 'free' THEN 1 ELSE 0 END) as paid
     FROM subscriptions
   `).get();
 
@@ -280,25 +269,7 @@ function systemStats() {
     FROM payments
   `).get();
 
-  const bots = db.prepare(`
-    SELECT COUNT(*) as total, SUM(CASE WHEN is_active = 1 THEN 1 ELSE 0 END) as active
-    FROM trading_bots
-  `).get();
-
-  const signals = db.prepare(`
-    SELECT COUNT(*) as total,
-           SUM(CASE WHEN DATE(created_at) = DATE('now') THEN 1 ELSE 0 END) as today
-    FROM signals
-  `).get();
-
-  const backtests = db.prepare(`
-    SELECT COUNT(*) as total,
-           SUM(CASE WHEN status = 'completed' THEN 1 ELSE 0 END) as completed,
-           SUM(CASE WHEN status = 'running' THEN 1 ELSE 0 END) as running
-    FROM backtests
-  `).get();
-
-  return { users, subscriptions: subs, payments: pay, bots, signals, backtests };
+  return { users, subscriptions: subs, payments: pay };
 }
 
 function auditLog({ userId = null, action = null, entityType = null, limit = 100, offset = 0 } = {}) {
@@ -341,8 +312,6 @@ function hydrateUser(r) {
     plan: r.plan || 'free',
     subStatus: r.sub_status || 'active',
     subExpiresAt: r.sub_expires_at,
-    botCount: r.bot_count || 0,
-    tradeCount: r.trade_count || 0,
     paidCount: r.paid_count || 0,
   };
 }
@@ -384,26 +353,10 @@ function userDetail(userId) {
   const safe = (fn, fb) => { try { return fn(); } catch (e) { logger.warn('userDetail subquery failed', { err: e.message }); return fb; } };
 
   const keys = safe(() => db.prepare(`SELECT id, exchange, label, last_verified_at AS verified_at, created_at FROM exchange_keys WHERE user_id = ? ORDER BY created_at DESC`).all(userId), []);
-  const bots = safe(() => db.prepare(`
-    SELECT id, name, exchange, symbols, strategy, timeframe, is_active, auto_trade, trading_mode, created_at
-    FROM trading_bots WHERE user_id = ? ORDER BY created_at DESC LIMIT 50
-  `).all(userId), []);
   const payments = safe(() => db.prepare(`
     SELECT id, amount_usd, method, plan, status, created_at, confirmed_at
     FROM payments WHERE user_id = ? ORDER BY created_at DESC LIMIT 50
   `).all(userId), []);
-  const trades = safe(() => db.prepare(`
-    SELECT id, bot_id, symbol, side, status, trading_mode, entry_price, exit_price,
-           realized_pnl, realized_pnl_pct, opened_at, closed_at
-    FROM trades WHERE user_id = ? ORDER BY opened_at DESC LIMIT 100
-  `).all(userId), []);
-  const pnl = safe(() => db.prepare(`
-    SELECT COUNT(*) AS n,
-           COALESCE(SUM(realized_pnl), 0) AS total,
-           SUM(CASE WHEN realized_pnl > 0 THEN 1 ELSE 0 END) AS wins,
-           SUM(CASE WHEN realized_pnl < 0 THEN 1 ELSE 0 END) AS losses
-    FROM trades WHERE user_id = ? AND status = 'closed' AND realized_pnl IS NOT NULL
-  `).get(userId), { n: 0, total: 0, wins: 0, losses: 0 });
   const sessions = safe(() => db.prepare(`
     SELECT id, created_at, expires_at, revoked_at, ip_address, user_agent
     FROM refresh_tokens WHERE user_id = ? ORDER BY created_at DESC LIMIT 20
@@ -438,7 +391,6 @@ function userDetail(userId) {
       isAdmin: Boolean(u.is_admin), adminRole: u.is_admin ? (u.admin_role || 'superadmin') : null,
       isActive: Boolean(u.is_active),
       emailVerified: Boolean(u.email_verified),
-      publicProfile: Boolean(u.public_profile),
       telegramUsername: u.telegram_username,
       telegramChatId: u.telegram_chat_id,
       createdAt: u.created_at, lastLoginAt: u.last_login_at,
@@ -449,14 +401,7 @@ function userDetail(userId) {
       twoFactor: { enabled: Boolean(tfa && tfa.enabled), enabledAt: tfa && tfa.enabled_at },
     },
     exchangeKeys: keys,
-    bots,
     payments,
-    trades,
-    pnl: {
-      closedTrades: pnl.n || 0, totalPnl: Number(pnl.total) || 0,
-      wins: pnl.wins || 0, losses: pnl.losses || 0,
-      winRate: (pnl.n || 0) > 0 ? (pnl.wins || 0) / pnl.n : null,
-    },
     sessions: sessions.map((s) => ({
       ...s, active: !s.revoked_at && new Date(s.expires_at).getTime() > Date.now(),
     })),
@@ -466,61 +411,6 @@ function userDetail(userId) {
     referrals,
     audit: audits.map((a) => ({ ...a, metadata: safeJson(a.metadata, null) })),
   };
-}
-
-/** Global bot feed for ops — all users. */
-function listAllBots({ status = null, limit = 100, offset = 0 } = {}) {
-  const parts = [];
-  const params = [];
-  if (status === 'active') parts.push('b.is_active = 1');
-  if (status === 'inactive') parts.push('b.is_active = 0');
-  const where = parts.length ? 'WHERE ' + parts.join(' AND ') : '';
-  return db.prepare(`
-    SELECT b.id, b.user_id, u.email AS user_email, b.name, b.exchange, b.symbols,
-           b.strategy, b.timeframe, b.is_active, b.auto_trade, b.trading_mode,
-           b.created_at, b.last_run_at,
-           (SELECT COUNT(*) FROM trades t WHERE t.bot_id = b.id) AS trade_count,
-           (SELECT COALESCE(SUM(realized_pnl), 0) FROM trades t WHERE t.bot_id = b.id AND t.status = 'closed') AS total_pnl
-    FROM trading_bots b JOIN users u ON u.id = b.user_id
-    ${where}
-    ORDER BY b.created_at DESC
-    LIMIT ? OFFSET ?
-  `).all(...params, limit, offset);
-}
-
-/** Global trades feed. */
-function listAllTrades({ status = null, mode = null, limit = 100, offset = 0 } = {}) {
-  const parts = [];
-  const params = [];
-  if (status) { parts.push('t.status = ?'); params.push(status); }
-  if (mode)   { parts.push('t.trading_mode = ?'); params.push(mode); }
-  const where = parts.length ? 'WHERE ' + parts.join(' AND ') : '';
-  return db.prepare(`
-    SELECT t.id, t.user_id, u.email AS user_email, t.bot_id, t.symbol, t.side,
-           t.status, t.trading_mode, t.entry_price, t.exit_price,
-           t.realized_pnl, t.realized_pnl_pct, t.opened_at, t.closed_at
-    FROM trades t JOIN users u ON u.id = t.user_id
-    ${where}
-    ORDER BY t.opened_at DESC
-    LIMIT ? OFFSET ?
-  `).all(...params, limit, offset);
-}
-
-/** Global signal feed. */
-function listAllSignals({ strategy = null, limit = 100, offset = 0 } = {}) {
-  const parts = [];
-  const params = [];
-  if (strategy) { parts.push('s.strategy = ?'); params.push(strategy); }
-  const where = parts.length ? 'WHERE ' + parts.join(' AND ') : '';
-  return db.prepare(`
-    SELECT s.id, s.user_id, u.email AS user_email, s.symbol, s.side, s.strategy,
-           s.entry_price AS entry, s.take_profit_1 AS tp, s.stop_loss AS sl,
-           s.result, s.created_at, s.expires_at
-    FROM signals s LEFT JOIN users u ON u.id = s.user_id
-    ${where}
-    ORDER BY s.created_at DESC
-    LIMIT ? OFFSET ?
-  `).all(...params, limit, offset);
 }
 
 /** Dashboard KPIs for the ops landing page. */
@@ -548,29 +438,10 @@ function opsDashboard() {
   `).get(d24, d30);
 
   const mrr = db.prepare(`
-    SELECT COALESCE(SUM(CASE
-      WHEN plan = 'starter' THEN 29
-      WHEN plan = 'pro' THEN 79
-      WHEN plan = 'elite' THEN 149
-      ELSE 0 END), 0) AS mrr
+    SELECT COALESCE(SUM(CASE WHEN plan != 'free' THEN ? ELSE 0 END), 0) AS mrr
     FROM subscriptions
     WHERE status = 'active' AND (expires_at IS NULL OR expires_at > CURRENT_TIMESTAMP)
-  `).get();
-
-  const bots = db.prepare(`
-    SELECT COUNT(*) AS total,
-           SUM(CASE WHEN is_active = 1 THEN 1 ELSE 0 END) AS active,
-           SUM(CASE WHEN auto_trade = 1 AND is_active = 1 THEN 1 ELSE 0 END) AS autotrading
-    FROM trading_bots
-  `).get();
-
-  const trades = db.prepare(`
-    SELECT
-      SUM(CASE WHEN status = 'open' THEN 1 ELSE 0 END) AS open,
-      SUM(CASE WHEN opened_at >= ? THEN 1 ELSE 0 END) AS open24h,
-      SUM(CASE WHEN closed_at >= ? THEN 1 ELSE 0 END) AS closed24h
-    FROM trades
-  `).get(d24, d24);
+  `).get(plansConfig.PLANS.pro.priceUsd);
 
   const support = db.prepare(`
     SELECT
@@ -580,7 +451,6 @@ function opsDashboard() {
     FROM support_tickets
   `).get(d24);
 
-  const signalsToday = db.prepare(`SELECT COUNT(*) AS n FROM signals WHERE created_at >= ?`).get(d24).n;
   const paymentsPending = db.prepare(`SELECT COUNT(*) AS n FROM payments WHERE status = 'pending'`).get().n;
   const refRewardsPending = db.prepare(`
     SELECT COUNT(*) AS n, COALESCE(SUM(amount_usd), 0) AS total
@@ -595,11 +465,8 @@ function opsDashboard() {
       last30d: Number(revenue.rev30d),
       lifetime: Number(revenue.revAll),
     },
-    bots: { total: bots.total || 0, active: bots.active || 0, autotrading: bots.autotrading || 0 },
-    trades: { open: trades.open || 0, openedLast24h: trades.open24h || 0, closedLast24h: trades.closed24h || 0 },
     support: { open: support.open || 0, pending: support.pending || 0, new24h: support.new24h || 0 },
     pipeline: {
-      signalsToday,
       paymentsPending,
       refRewardsPending: { count: refRewardsPending.n, amountUsd: Number(refRewardsPending.total) },
     },
@@ -656,7 +523,9 @@ function revenueTimeseries({ days = 30 } = {}) {
  * LTV: mean lifetime revenue per paid user who has churned OR is > 6m old.
  */
 function billingAnalytics() {
-  const PRICE = { free: 0, starter: 29, pro: 79, elite: 149 };
+  // Price per stored plan id — legacy ids resolve through normalizePlan
+  // (elite/beginner → pro price; starter has no bot equivalent → 0).
+  const PRICE = new Proxy({}, { get: (_t, id) => plansConfig.getLimits(id).priceUsd });
   // Paid cohorts by first payment month
   const cohorts = db.prepare(`
     SELECT strftime('%Y-%m', MIN(created_at)) AS cohort, user_id
@@ -798,7 +667,7 @@ function systemInfo() {
     };
     // Row counts for the big tables (fast via explicit indexes)
     const counts = {};
-    for (const t of ['users', 'trades', 'signals', 'payments', 'audit_log', 'notifications', 'login_history']) {
+    for (const t of ['users', 'payments', 'audit_log', 'notifications', 'login_history']) {
       try { counts[t] = db.prepare(`SELECT COUNT(*) AS n FROM ${t}`).get().n; } catch (_e) {}
     }
     out.db.rowCounts = counts;
@@ -831,6 +700,6 @@ module.exports = {
   listPromoCodes, createPromoCode, setPromoActive, deletePromo,
   listAllRewards,
   systemStats, auditLog,
-  userDetail, listAllBots, listAllTrades, listAllSignals,
+  userDetail,
   opsDashboard, systemInfo, revenueTimeseries, billingAnalytics, auditAnalytics,
 };

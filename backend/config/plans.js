@@ -1,166 +1,137 @@
 /**
- * Subscription plans — feature matrix for gating.
+ * Subscription plans — the site's catalogue, derived from the bot's plan
+ * matrix (config/planFeatures.js). Two tiers, exactly like the Telegram bot:
  *
- * Tariff structure aligns with the published marketing inventory
- * (free / starter / pro / elite). Every code-enforced feature is a
- * boolean flag here; advisory / Telegram-bot-only features (smartTools,
- * aiPersonalLearner, polymarket, …) are advertised on the pricing page
- * but not gated in this codebase, so they are intentionally absent.
+ *   free — the bot's Free plan (LEVELS only, 2 signals/day, one direction)
+ *   pro  — $69 / 30 days, everything (the former Elite); yearly = 12 × 0.8
+ *
+ * Starter / Elite / beginner are retired ids. They are still *accepted*
+ * everywhere through normalizePlan (pro|elite|beginner → pro, anything
+ * else → free, same as the bot's normalize_plan) so old rows, promo codes
+ * and links keep working; migration v12 rewrites the stored rows (D1).
  *
  * Usage:
  *   const plans = require('./config/plans');
  *   const limits = plans.getLimits(user.subscription.plan);
  *   if (!plans.canUseFeature(plan, 'autoTrade')) return res.status(403)...
+ *
+ * canUseFeature accepts both the site's camelCase flags (autoTrade,
+ * multiExchange, …) and the bot's snake_case keys (auto_trade, smc,
+ * genome, challenge, …) — the latter go straight to planFeatures.can().
  */
 
-const PLANS = Object.freeze({
-  free: {
-    id: 'free',
-    name: 'Free',
-    priceUsd: 0,
-    signalsPerDay: 2,              // 1 утром + 1 вечером (per inventory)
-    // Free is now an interface-preview tier: signals + browsing only.
-    // Bot creation, exchange-key creation, terminal trading and
-    // backtests are all gated. The single feature Free really delivers
-    // is the 2 signals/day stream.
-    maxBots: 0,
-    autoTrade: false,
-    strategies: ['levels'],
-    backtestsPerDay: 0,
-    optimizer: false,
-    apiAccess: false,
-    maxLeverage: 5,
-    paperTradingOnly: true,
-    multiExchange: false,
-    marketScanner: false,
-    multiStrategy: false,
-    expertMode: false,
-    marketplacePublish: false,
-    prioritySupport: false,
-    readOnly: true,                // every write endpoint should reject
-    supportChannel: 'community',
-  },
-  starter: {
-    id: 'starter',
-    name: 'Starter',
-    priceUsd: 29,
-    signalsPerDay: Infinity,
-    maxBots: 2,
-    autoTrade: false,              // ручная торговля per inventory
-    strategies: ['levels'],        // SMC moves up to Pro per inventory
-    backtestsPerDay: 1,
-    optimizer: false,
-    apiAccess: false,
-    maxLeverage: 10,
-    paperTradingOnly: true,
-    multiExchange: false,
-    marketScanner: false,
-    multiStrategy: false,
-    expertMode: true,
-    marketplacePublish: true,
-    prioritySupport: false,
-    readOnly: false,
-    supportChannel: 'email',
-  },
-  pro: {
-    id: 'pro',
-    name: 'Pro',
-    priceUsd: 69,                  // was $79 — aligned with inventory
-    signalsPerDay: Infinity,
-    maxBots: 5,
-    autoTrade: true,
-    // SMC promoted up from Starter per inventory; DCA/Grid kept here as
-    // utility strategies (not in the marketing inventory but functional
-    // in the codebase, so we slot them at Pro alongside SMC).
-    strategies: ['levels', 'smc', 'dca', 'grid'],
-    backtestsPerDay: 10,
-    optimizer: false,
-    apiAccess: false,
-    maxLeverage: 25,
-    paperTradingOnly: false,
-    multiExchange: true,           // Bybit + BingX + Binance + OKX per inventory
-    marketScanner: false,
-    multiStrategy: false,
-    expertMode: true,
-    marketplacePublish: true,
-    prioritySupport: false,
-    readOnly: false,
-    supportChannel: 'priority-email',
-  },
-  elite: {
-    id: 'elite',
-    name: 'Elite',
-    priceUsd: 149,
-    signalsPerDay: Infinity,
-    maxBots: Infinity,
-    autoTrade: true,
-    // All 4 marketing strategies (levels/smc/gerchik/scalping) plus the
-    // utility ones (dca/grid). Gerchik is Elite-exclusive per inventory.
-    strategies: ['levels', 'smc', 'gerchik', 'scalping', 'dca', 'grid'],
-    backtestsPerDay: Infinity,
-    optimizer: true,
-    apiAccess: true,
-    maxLeverage: 100,
-    paperTradingOnly: false,
-    multiExchange: true,
-    marketScanner: true,           // scope='market' bot — already enforced
-    multiStrategy: true,           // strategiesMulti with >1 entry
-    expertMode: true,
-    marketplacePublish: true,
-    prioritySupport: true,
-    readOnly: false,
-    supportChannel: 'dedicated-manager',
-  },
-});
+const pf = require('./planFeatures');
 
-const PLAN_ORDER = ['free', 'starter', 'pro', 'elite'];
+const YEARLY_MULTIPLIER = 12 * 0.8;   // 20 % yearly discount (paymentService)
+const round2 = (x) => Math.round(x * 100) / 100;
 
-function getLimits(planId) {
-  const plan = PLANS[planId] || PLANS.free;
-  return plan;
-}
-
-function getPlan(planId) {
-  return PLANS[planId] || null;
-}
-
-function listPlans() {
-  return PLAN_ORDER.map((id) => {
-    const p = PLANS[id];
-    return {
-      ...p,
-      // Convert Infinity to null for JSON serialization
-      signalsPerDay: p.signalsPerDay === Infinity ? null : p.signalsPerDay,
-      maxBots: p.maxBots === Infinity ? null : p.maxBots,
-      backtestsPerDay: p.backtestsPerDay === Infinity ? null : p.backtestsPerDay,
-    };
+function build(id, name) {
+  const f = pf.PLAN_FEATURES[id];
+  return Object.freeze({
+    id,
+    name,
+    priceUsd: pf.PLAN_PRICES_USD[id],
+    periodDays: pf.PLAN_PERIOD_DAYS,
+    yearlyPriceUsd: round2(pf.PLAN_PRICES_USD[id] * YEARLY_MULTIPLIER),
+    // The bot matrix, verbatim (snake_case). Everything below is derived.
+    features: f,
+    // Engine vocabulary (lowercase for the site's enums; see validation.js)
+    strategies: Object.freeze(f.strategies.map((s) => s.toLowerCase())),
+    timeframes: f.timeframes,
+    // Numeric limits
+    signalsPerDay: f.signals_per_day,
+    analyzePerDay: f.analyze_per_day,
+    symbolsLimit: f.symbols_limit,
+    minSignalQuality: f.min_signal_quality,
+    maxTrades: f.max_trades,
+    // Boolean gates used by the site
+    bothDirections: f.both_directions,
+    autoTrade: f.auto_trade,
+    smc: f.smc,
+    volume: f.volume,
+    genome: f.genome,
+    challenge: f.challenge,
+    optimizer: f.optimizer,
+    apiAccess: f.api_access,
+    multiExchange: f.multi_exchange,
+    expertMode: f.expert_mode,
+    prioritySupport: f.priority_support,
+    allTimeframes: f.all_timeframes,
+    notifications: f.notifications,
+    // Site-only presentation: the web "DEMO" is the signal feed without
+    // auto-trade (PLAN §2.1) — there is no paper book any more.
+    paperTradingOnly: !f.auto_trade,
+    supportChannel: f.priority_support ? 'priority' : 'community',
   });
 }
 
+const PLANS = Object.freeze({
+  free: build('free', 'Free'),
+  pro: build('pro', 'Pro'),
+});
+
+const PLAN_ORDER = Object.freeze(['free', 'pro']);
+
+// Retired ids that normalizePlan still understands (bot: elite/beginner →
+// pro; the site's own "starter" has no bot equivalent → free at read time,
+// grandfathered to pro until expires_at by migration v12, decision D1).
+const LEGACY_PLAN_IDS = Object.freeze(['starter', 'elite', 'beginner']);
+const LEGACY_PLANS = Object.freeze({ starter: 'free', elite: 'pro', beginner: 'pro' });
+
+const normalizePlan = pf.normalizePlan;
+
+function getLimits(planId) {
+  return PLANS[normalizePlan(planId)];
+}
+
+/** Known id (live or legacy) → plan object; anything else → null. */
+function getPlan(planId) {
+  const id = String(planId || '').trim().toLowerCase();
+  if (PLANS[id]) return PLANS[id];
+  if (LEGACY_PLAN_IDS.includes(id)) return PLANS[normalizePlan(id)];
+  return null;
+}
+
+function listPlans() {
+  return PLAN_ORDER.map((id) => ({ ...PLANS[id] }));
+}
+
+// camelCase site flag → bot feature key
+const FLAG_TO_FEATURE = Object.freeze({
+  autoTrade: 'auto_trade',
+  bothDirections: 'both_directions',
+  multiExchange: 'multi_exchange',
+  apiAccess: 'api_access',
+  prioritySupport: 'priority_support',
+  allTimeframes: 'all_timeframes',
+  expertMode: 'expert_mode',
+  moreSymbols: 'more_symbols',
+  unlimitedTrades: 'unlimited_trades',
+  aiExplanations: 'ai_explanations',
+  targetWr: 'target_wr',
+});
+
 /**
- * Does plan include the given boolean feature?
- * @param {string} planId
- * @param {string} feature  one of: autoTrade, optimizer, apiAccess, paperTradingOnly
+ * Does the plan include the feature? Accepts camelCase site flags and the
+ * bot's snake_case keys. Unknown plan ids normalise like the bot (→ free).
  */
 function canUseFeature(planId, feature) {
-  const plan = PLANS[planId];
-  if (!plan) return false;
-  return Boolean(plan[feature]);
+  const plan = getLimits(planId);
+  if (feature === 'paperTradingOnly') return plan.paperTradingOnly;
+  const key = FLAG_TO_FEATURE[feature] || feature;
+  return pf.can(plan.id, key);
 }
 
-/**
- * Is the strategy allowed for the plan?
- */
+/** Is the strategy (any case: 'smc' / 'SMC') allowed on the plan? */
 function canUseStrategy(planId, strategy) {
-  const plan = PLANS[planId];
-  if (!plan) return false;
-  return plan.strategies.includes(strategy);
+  return getLimits(planId).strategies.includes(String(strategy || '').toLowerCase());
 }
 
-/**
- * Returns the minimum plan that grants access to `feature`.
- * e.g. requiredPlanFor('autoTrade') → 'pro'
- */
+function canUseTimeframe(planId, tf) {
+  return pf.timeframeAllowed(getLimits(planId).id, tf);
+}
+
+/** Minimum plan that grants `feature`, e.g. requiredPlanFor('autoTrade') → 'pro'. */
 function requiredPlanFor(feature) {
   for (const id of PLAN_ORDER) {
     if (canUseFeature(id, feature)) return id;
@@ -175,13 +146,10 @@ function requiredPlanForStrategy(strategy) {
   return null;
 }
 
-/**
- * Compare plans: returns -1 if a < b, 0 if equal, 1 if a > b.
- */
+/** Compare plans: -1 if a < b, 0 if equal, 1 if a > b (legacy ids normalised). */
 function comparePlan(a, b) {
-  const ai = PLAN_ORDER.indexOf(a);
-  const bi = PLAN_ORDER.indexOf(b);
-  if (ai < 0 || bi < 0) return 0;
+  const ai = PLAN_ORDER.indexOf(normalizePlan(a));
+  const bi = PLAN_ORDER.indexOf(normalizePlan(b));
   return Math.sign(ai - bi);
 }
 
@@ -192,11 +160,16 @@ function isAtLeast(userPlan, requiredPlan) {
 module.exports = {
   PLANS,
   PLAN_ORDER,
+  LEGACY_PLAN_IDS,
+  LEGACY_PLANS,
+  YEARLY_MULTIPLIER,
+  normalizePlan,
   getLimits,
   getPlan,
   listPlans,
   canUseFeature,
   canUseStrategy,
+  canUseTimeframe,
   requiredPlanFor,
   requiredPlanForStrategy,
   comparePlan,

@@ -1,41 +1,9 @@
 const express = require('express');
-const { z } = require('zod');
-const leaderboard = require('../services/leaderboardService');
 
 const router = express.Router();
 
-// Public — no auth, rate-limited only by the global /api limiter
-router.get('/leaderboard', (req, res, next) => {
-  try {
-    const q = z.object({
-      period: z.enum(['7d', '30d', '90d', '1y', 'all']).default('30d'),
-      sort: z.enum(['pnl', 'winrate', 'sharpe', 'roi']).default('pnl'),
-      limit: z.coerce.number().int().min(1).max(200).default(50),
-    }).parse(req.query);
-    res.json({ period: q.period, sort: q.sort, traders: leaderboard.topTraders(q) });
-  } catch (err) {
-    if (err instanceof z.ZodError) return res.status(400).json({ error: 'Validation failed', issues: err.issues });
-    next(err);
-  }
-});
-
-// Public market context — BTC/ETH spot + fear & greed + funding
-const marketContext = require('../services/marketContextService');
-router.get('/market-context', async (_req, res) => {
-  try { res.json(await marketContext.summary()); }
-  catch (_e) { res.json({ tickers: null, fearGreed: null, funding: null }); }
-});
-
-router.get('/u/:code', (req, res, next) => {
-  try {
-    const code = z.string().trim().regex(/^[A-Z0-9]{4,12}$/i).parse(req.params.code);
-    const profile = leaderboard.publicProfile(code);
-    if (!profile) return res.status(404).json({ error: 'Profile not public or does not exist' });
-    res.json(profile);
-  } catch (err) {
-    if (err instanceof z.ZodError) return res.status(400).json({ error: 'Invalid referral code' });
-    next(err);
-  }
-});
+// Public, unauthenticated endpoints. The old leaderboard, public-profile and
+// market-context endpoints were removed in M0 (port plan §5). The Free plan's
+// public stats / health for the web app arrive with the engine (M10).
 
 module.exports = router;

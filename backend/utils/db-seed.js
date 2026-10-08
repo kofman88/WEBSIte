@@ -61,7 +61,7 @@ function ensurePromo(code, { plan = 'pro', days = 30, maxUses = 100 } = {}) {
 const adminPass = process.env.SEED_ADMIN_PASSWORD || 'admin123456';
 const testPass  = process.env.SEED_TEST_PASSWORD  || 'test12345';
 
-ensureUser({ email: 'admin@chm.local', password: adminPass, isAdmin: 1, plan: 'elite' });
+ensureUser({ email: 'admin@chm.local', password: adminPass, isAdmin: 1, plan: 'pro' });
 ensureUser({ email: 'test@chm.local',  password: testPass,  isAdmin: 0, plan: 'pro'   });
 ensurePromo('WELCOME2026', { plan: 'pro', days: 30, maxUses: 100 });
 

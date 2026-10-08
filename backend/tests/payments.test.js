@@ -49,10 +49,10 @@ function makeUser(email = null, ref = null) {
 
 // ── planPrice ──────────────────────────────────────────────────────────
 describe('paymentService.planPrice', () => {
-  it('monthly prices match plans.js', () => {
-    expect(paymentService.default.planPrice('starter', 'monthly')).toBe(29);
+  it('monthly prices match plans.js (pro $69; elite is a legacy alias of pro; starter is retired → unpaid)', () => {
     expect(paymentService.default.planPrice('pro', 'monthly')).toBe(69);
-    expect(paymentService.default.planPrice('elite', 'monthly')).toBe(149);
+    expect(paymentService.default.planPrice('elite', 'monthly')).toBe(69);
+    expect(() => paymentService.default.planPrice('starter', 'monthly')).toThrow(/Unpaid/);
   });
   it('yearly = monthly × 12 × 0.8 (20% off)', () => {
     expect(paymentService.default.planPrice('pro', 'yearly')).toBeCloseTo(69 * 12 * 0.8);
@@ -215,10 +215,12 @@ describe('getUserPayments', () => {
     const a = makeUser('a@x.com');
     const b = makeUser('b@x.com');
     paymentService.default.createCryptoPayment(a, { plan: 'pro', network: 'bep20' });
-    paymentService.default.createCryptoPayment(a, { plan: 'starter', network: 'trc20' });
-    paymentService.default.createCryptoPayment(b, { plan: 'elite', network: 'bep20' });
+    paymentService.default.createCryptoPayment(a, { plan: 'elite', network: 'trc20' });   // legacy id → stored as pro
+    paymentService.default.createCryptoPayment(b, { plan: 'pro', network: 'bep20' });
+    expect(() => paymentService.default.createCryptoPayment(b, { plan: 'starter', network: 'bep20' })).toThrow(/Unpaid/);
     const list = paymentService.default.getUserPayments(a);
     expect(list).toHaveLength(2);
     expect(list.every((p) => p.userId === a)).toBe(true);
+    expect(list.every((p) => p.plan === 'pro')).toBe(true);
   });
 });

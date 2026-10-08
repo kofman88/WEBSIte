@@ -6,12 +6,16 @@
 
 const { z } = require('zod');
 
-const EXCHANGES = ['bybit', 'binance', 'bingx', 'okx', 'bitget', 'htx', 'gate', 'bitmex'];
-const TIMEFRAMES = ['1m', '3m', '5m', '15m', '30m', '1h', '2h', '4h', '6h', '12h', '1d', '1w'];
-const STRATEGIES = ['levels', 'smc', 'gerchik', 'scalping', 'dca', 'grid'];
+// Enums mirror the bot (port plan §0 conventions): 4 exchanges, the
+// user-facing timeframes, the three strategies.
+const EXCHANGES = ['bybit', 'binance', 'bingx', 'okx'];
+const TIMEFRAMES = ['15m', '30m', '1h', '4h', '1d'];
+const STRATEGIES = ['levels', 'smc', 'volume'];
 const SIDES = ['long', 'short'];
 const DIRECTIONS = ['long', 'short', 'both'];
-const PLANS = ['free', 'starter', 'pro', 'elite'];
+// Two tiers like the bot. Retired ids (starter / elite / beginner) are not
+// accepted on input any more; stored rows go through config/plans.normalizePlan.
+const PLANS = ['free', 'pro'];
 
 const email = z.string().trim().toLowerCase().email().max(254);
 
@@ -77,43 +81,6 @@ const addKeySchema = z.object({
   label: z.string().trim().min(1).max(32).optional(),
 });
 
-// ── Bots ────────────────────────────────────────────────────────────────
-const botBaseShape = z.object({
-  name: z.string().trim().min(1).max(64),
-  exchange,
-  // Exchange key only required for live trading — paper bots don't need it.
-  exchangeKeyId: z.number().int().positive().optional(),
-  symbols: z.array(symbol).min(1).max(50),
-  strategy,
-  timeframe,
-  direction: direction.default('both'),
-  leverage: z.number().int().min(1).max(100).default(1),
-  riskPct: z.number().min(0.1).max(10).default(1),
-  maxOpenTrades: z.number().int().min(1).max(20).default(3),
-  autoTrade: z.boolean().default(false),
-  tradingMode: z.enum(['paper', 'live']).default('paper'),
-  strategyConfig: z.record(z.any()).optional(),
-  riskConfig: z.record(z.any()).optional(),
-});
-const liveKeyRefine = (b) => b.tradingMode !== 'live' || (typeof b.exchangeKeyId === 'number' && b.exchangeKeyId > 0);
-const liveKeyIssue = { message: 'exchangeKeyId is required for live mode', path: ['exchangeKeyId'] };
-const createBotSchema = botBaseShape.refine(liveKeyRefine, liveKeyIssue);
-const updateBotSchema = botBaseShape.partial().refine(liveKeyRefine, liveKeyIssue);
-
-// ── Backtests ───────────────────────────────────────────────────────────
-const createBacktestSchema = z.object({
-  name: z.string().trim().min(1).max(64),
-  strategy,
-  exchange,
-  symbols: z.array(symbol).min(1).max(20),
-  timeframe,
-  startDate: dateString,
-  endDate: dateString,
-  initialCapital: z.number().positive().max(10_000_000),
-  strategyConfig: z.record(z.any()).optional(),
-  riskConfig: z.record(z.any()).optional(),
-});
-
 // ── Payments ────────────────────────────────────────────────────────────
 const stripeCheckoutSchema = z.object({
   plan: plan.exclude(['free']),
@@ -129,21 +96,6 @@ const promoRedeemSchema = z.object({
   code: z.string().trim().min(1).max(32),
 });
 
-// ── Signal prefs ────────────────────────────────────────────────────────
-const signalPrefsSchema = z.object({
-  enabledStrategies: z.array(strategy).optional(),
-  watchedSymbols: z.array(symbol).optional(),
-  blacklistedSymbols: z.array(symbol).optional(),
-  minConfidence: z.number().int().min(0).max(100).optional(),
-  minRr: z.number().min(0).max(10).optional(),
-  timeframes: z.array(timeframe).optional(),
-  directions: z.array(side).optional(),
-  notificationsWeb: z.boolean().optional(),
-  notificationsEmail: z.boolean().optional(),
-  notificationsTelegram: z.boolean().optional(),
-  telegramChatId: z.string().trim().max(64).nullable().optional(),
-});
-
 module.exports = {
   // enums
   EXCHANGES, TIMEFRAMES, STRATEGIES, SIDES, DIRECTIONS, PLANS,
@@ -153,8 +105,5 @@ module.exports = {
   // schemas
   registerSchema, loginSchema, refreshSchema,
   addKeySchema,
-  createBotSchema, updateBotSchema,
-  createBacktestSchema,
   stripeCheckoutSchema, cryptoPaymentSchema, promoRedeemSchema,
-  signalPrefsSchema,
 };

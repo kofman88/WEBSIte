@@ -14,11 +14,8 @@ WEBSIte/
 │   └── package.json
 ├── frontend/          # Статические HTML файлы
 │   ├── index.html     # Лендинг (главная)
-│   ├── dashboard.html # Дашборд
-│   ├── bots.html      # Управление ботами
-│   ├── signals.html   # Сигналы
-│   ├── backtests.html # Бэктесты
-│   ├── wallet.html    # Кошелёк и биржи
+│   ├── app/           # Веб-приложение (порт Mini App бота, появляется в M11)
+│   ├── subscriptions.html # Тарифы
 │   ├── settings.html  # Настройки
 │   ├── app.js         # Общий JS (API client, Auth, i18n)
 │   ├── styles.css     # Общие стили
@@ -160,7 +157,7 @@ curl https://chmup.top/api/health
 Откройте в браузере:
 - `https://chmup.top/` — лендинг
 - `https://chmup.top/api/health` — API health check
-- Зарегистрируйтесь через форму → попадёте в дашборд
+- Зарегистрируйтесь через форму → попадёте в `/app/`
 
 ---
 
@@ -171,21 +168,11 @@ curl https://chmup.top/api/health
 | POST | `/api/auth/register` | Регистрация |
 | POST | `/api/auth/login` | Вход |
 | GET | `/api/auth/me` | Текущий пользователь |
-| GET | `/api/bots` | Список ботов |
-| POST | `/api/bots` | Создать бота |
-| PATCH | `/api/bots/:id/toggle` | Вкл/выкл бота |
-| GET | `/api/signals` | Сигналы (с пагинацией) |
-| GET | `/api/signals/live` | SSE поток сигналов |
-| GET | `/api/signals/stats` | Статистика сигналов |
 | GET | `/api/subscriptions/plans` | Тарифы |
 | POST | `/api/subscriptions/activate` | Активация подписки |
 | POST | `/api/subscriptions/promo` | Промо-код |
-| POST | `/api/wallet/create` | Создать кошелёк |
-| GET | `/api/wallet/balance` | Баланс кошелька |
-| POST | `/api/wallet/withdraw` | Вывод средств |
-| GET | `/api/backtests` | Список бэктестов |
-| POST | `/api/backtests` | Запустить бэктест |
-| GET | `/api/exchanges/exchanges` | Список бирж |
+| GET | `/api/exchanges` | Список бирж |
+| GET | `/api/exchanges/keys` | Биржевые ключи (auth) |
 | GET | `/api/health` | Health check |
 
 ---
@@ -298,26 +285,12 @@ pm2 restart chm-api  # рестарт без downtime
 ### 3. Health-чеки
 
 - **Liveness**: `GET /api/health` — быстрый 200 без DB
-- **Readiness**: `GET /api/health/deep` — проверяет DB, scanner worker,
-  partialTp cron, slVerifier; возвращает 503 если любая подсистема упала
+- **Readiness**: `GET /api/health/deep` — проверяет DB, миграции, email outbox,
+  SMTP, память; возвращает 503 если любая подсистема упала
 
 Для UptimeRobot: настройте HTTP-проверку `/api/health/deep` каждые 5 минут.
 
-### 4. Safety-крон: slVerifier
-
-`services/slVerifier.js` каждые 5 минут:
-- Считывает все trades где `status='open' AND trading_mode='live'`
-- Для каждой сделки парсит `exchange_order_ids.sl`
-- Вызывает `ccxt.fetchOrder(sl_id)`
-- Если ордера нет / cancelled / filled — пишет в `audit_log` с
-  `action='sl_verifier.missing'` и выдаёт ERROR-лог
-
-Проверка работы:
-```bash
-sqlite3 data/chm.db "SELECT * FROM audit_log WHERE action LIKE 'sl_verifier.%' ORDER BY created_at DESC LIMIT 20;"
-```
-
-### 5. Аудит безопасности
+### 4. Аудит безопасности
 
 ```bash
 cd backend
@@ -327,7 +300,7 @@ npm audit --omit=dev    # должно быть "found 0 vulnerabilities"
 Dev-зависимости (vitest/vite) содержат известные низко-критичные
 уязвимости — на прод они не попадают.
 
-### 6. Нагрузочный тест (smoke)
+### 5. Нагрузочный тест (smoke)
 
 Быстрый тест 100 параллельных запросов к health:
 ```bash
@@ -337,7 +310,7 @@ autocannon -c 50 -d 30 https://chmup.top/api/health
 
 Ожидаемо: p99 < 100ms, 0 ошибок.
 
-### 7. Бэкапы
+### 6. Бэкапы
 
 SQLite файл `data/chm.db` — единственное состояние. Настройте daily:
 ```bash

@@ -4,15 +4,15 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1.0"/>
-  <title>API CHM Finance — публичная документация (REST + WebSocket)</title>
-  <meta name="description" content="Публичная API-документация CHM Finance: leaderboard, профили, статус, подписка на сигналы через WebSocket."/>
-  <meta name="keywords" content="CHM Finance API, crypto trading bot API, REST API криптобот, WebSocket крипто сигналы"/>
+  <title>API CHM Finance — публичная документация (REST)</title>
+  <meta name="description" content="Публичная API-документация CHM Finance: health checks, авторизация, формат ошибок, rate limits."/>
+  <meta name="keywords" content="CHM Finance API, crypto signals API, REST API криптосигналы"/>
   <meta name="robots" content="index,follow"/>
   <meta name="theme-color" content="#0A0A0A"/>
   <link rel="canonical" href="https://chmup.top/api-docs.html"/>
   <meta property="og:type" content="website"/>
   <meta property="og:title" content="API CHM Finance — документация"/>
-  <meta property="og:description" content="REST + WebSocket API платформы крипто-ботов."/>
+  <meta property="og:description" content="REST API платформы крипто-сигналов CHM Finance."/>
   <meta property="og:url" content="https://chmup.top/api-docs.html"/>
   <meta property="og:image" content="https://chmup.top/og-cover.png"/>
   <meta property="og:locale" content="ru_RU"/>
@@ -53,7 +53,6 @@
     <a href="/" style="font-weight:600;font-size:22px;letter-spacing:-.02em;color:#fff;text-decoration:none">CHM<span style="color:#FF8C5A">.</span></a>
     <div class="flex items-center gap-3 text-sm">
       <a href="/" class="text-slate-400 hover:text-white">Главная</a>
-      <a href="/leaderboard.html" class="text-slate-400 hover:text-white">Leaderboard</a>
       <a href="/status.html" class="text-slate-400 hover:text-white">Статус</a>
     </div>
   </div>
@@ -71,9 +70,6 @@
       <a href="#base">Базовый URL</a>
       <a href="#auth">Авторизация</a>
       <a href="#health">Health checks</a>
-      <a href="#public">Публичные endpoints</a>
-      <a href="#leaderboard">Leaderboard</a>
-      <a href="#profile">Public profile</a>
       <a href="#errors">Ошибки</a>
       <a href="#ratelimits">Rate limits</a>
     </aside>
@@ -87,7 +83,7 @@
 
       <div class="card mb-6" id="auth">
         <h2 class="text-lg font-semibold mb-2">Авторизация</h2>
-        <p class="text-sm text-slate-400 mb-3">Публичные endpoints (<span class="mono text-indigo-300">/api/public/*</span>, <span class="mono text-indigo-300">/api/health*</span>) не требуют токена.</p>
+        <p class="text-sm text-slate-400 mb-3">Публичные endpoints (<span class="mono text-indigo-300">/api/health*</span>) не требуют токена.</p>
         <p class="text-sm text-slate-400 mb-3">Приватные endpoints ожидают JWT в заголовке:</p>
         <pre><code>Authorization: Bearer &lt;access_token&gt;</code></pre>
         <p class="text-xs text-slate-500 mt-3">Access-токен получается через <span class="mono">/api/auth/login</span> и живёт 15 минут. Обновляется через <span class="mono">/api/auth/refresh</span>.</p>
@@ -118,72 +114,6 @@
     "partialTp":  { "ok": true },
     "slVerifier": { "ok": true }
   }
-}</code></pre>
-        </div>
-      </div>
-
-      <div class="card mb-6" id="public">
-        <h2 class="text-lg font-semibold mb-4" id="leaderboard">Публичный Leaderboard</h2>
-        <div class="endpoint">
-          <h3><span class="method m-get">GET</span> <span class="mono">/api/public/leaderboard</span></h3>
-          <p class="desc">Топ трейдеров по закрытым сделкам. Только opted-in пользователи (<span class="mono">users.public_profile=1</span>).</p>
-          <p class="text-xs text-slate-400 mb-2 font-semibold">Query-параметры:</p>
-          <ul class="text-xs text-slate-400 mb-3 pl-4">
-            <li>• <span class="param-name mono">period</span> — <span class="mono">7d | 30d | 90d | 1y | all</span> (default: <span class="mono">30d</span>)</li>
-            <li>• <span class="param-name mono">sort</span> — <span class="mono">pnl | roi | winrate | sharpe</span> (default: <span class="mono">pnl</span>)</li>
-            <li>• <span class="param-name mono">limit</span> — 1..200 (default: <span class="mono">50</span>)</li>
-          </ul>
-          <p class="text-xs text-slate-400 mb-2 font-semibold">Пример:</p>
-          <pre><code>curl https://chmup.top/api/public/leaderboard?period=30d&sort=pnl&limit=10</code></pre>
-          <p class="text-xs text-slate-400 mt-3 mb-2 font-semibold">Ответ:</p>
-          <pre><code>{
-  "period": "30d",
-  "sort": "pnl",
-  "traders": [{
-    "rank": 1,
-    "displayName": "Trader#A1B2",
-    "referralCode": "A1B2C3D4",
-    "closedTrades": 47,
-    "wins": 34,
-    "losses": 13,
-    "winRate": 0.7234,
-    "totalPnl": 3180.50,
-    "roi": 12.45,
-    "sharpe": null
-  }]
-}</code></pre>
-          <p class="text-xs text-slate-500 mt-2">Примечания: <span class="mono">winrate</span> / <span class="mono">sharpe</span> сортировки требуют минимум 10 закрытых сделок.</p>
-        </div>
-
-        <h2 class="text-lg font-semibold mb-4 mt-6" id="profile">Публичный профиль</h2>
-        <div class="endpoint">
-          <h3><span class="method m-get">GET</span> <span class="mono">/api/public/u/:code</span></h3>
-          <p class="desc">Публичная статистика трейдера по его referral-коду. Возвращает 404 для приватных профилей.</p>
-          <p class="text-xs text-slate-400 mb-2 font-semibold">Путь-параметры:</p>
-          <ul class="text-xs text-slate-400 mb-3 pl-4">
-            <li>• <span class="param-name mono">code</span> — referral-код (4–12 символов, A-Z0-9), case-insensitive<span class="param-req">required</span></li>
-          </ul>
-          <p class="text-xs text-slate-400 mb-2 font-semibold">Пример:</p>
-          <pre><code>curl https://chmup.top/api/public/u/A1B2C3D4</code></pre>
-          <p class="text-xs text-slate-400 mt-3 mb-2 font-semibold">Ответ:</p>
-          <pre><code>{
-  "displayName": "Алексей К.",
-  "referralCode": "A1B2C3D4",
-  "joinedAt": "2025-11-01T12:00:00.000Z",
-  "stats": {
-    "closedTrades": 47,
-    "wins": 34,
-    "losses": 13,
-    "winRate": 0.7234,
-    "totalPnl": 3180.50,
-    "meanPnlPct": 2.1
-  },
-  "byStrategy": [
-    { "strategy": "smc", "trades": 30, "pnl": 2500, "winRate": 0.8 }
-  ],
-  "recent": [
-    { "symbol": "BTC/USDT", "side": "long", "strategy": "smc", "pnlPct": 3.4, "closedAt": "..." }
-  ]
 }</code></pre>
         </div>
       </div>

@@ -16,7 +16,74 @@
  * clean linear history and can roll back by inspection.
  */
 
+const fs = require('fs');
+const path = require('path');
 const logger = require('../utils/logger');
+const engineSchema = require('./engineSchema');
+
+// ── helpers ──────────────────────────────────────────────────────────────
+function tableExists(db, name) {
+  return Boolean(db.prepare("SELECT 1 FROM sqlite_master WHERE type = 'table' AND name = ?").get(name));
+}
+
+function columnExists(db, table, col) {
+  if (!tableExists(db, table)) return false;
+  return db.prepare(`PRAGMA table_info('${table}')`).all().some((c) => c.name === col);
+}
+
+function quiet() { return process.env.DB_QUIET === '1'; }
+
+// Where migration v12 writes the legacy export. Next to the DB file
+// (./data/backups, same place maintenanceService keeps its backups) unless
+// LEGACY_BACKUP_DIR says otherwise (tests).
+function legacyBackupDir(db) {
+  if (process.env.LEGACY_BACKUP_DIR) return process.env.LEGACY_BACKUP_DIR;
+  const file = db.name && db.name !== ':memory:' ? db.name : './data/chmup.db';
+  return path.join(path.dirname(file), 'backups');
+}
+
+// Site timestamps are ISO strings (toISOString) or SQLite CURRENT_TIMESTAMP
+// ('YYYY-MM-DD HH:MM:SS', UTC). → unix seconds, 0 when unparsable/empty.
+function toUnixSeconds(value) {
+  if (!value) return 0;
+  let s = String(value);
+  if (/^\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}$/.test(s)) s = s.replace(' ', 'T') + 'Z';
+  const ms = new Date(s).getTime();
+  return Number.isFinite(ms) ? Math.floor(ms / 1000) : 0;
+}
+
+/**
+ * Export every legacy table (PLAN §2.1) and the retired users columns to
+ * data/backups/legacy-<ts>.json. Returns {file, rows} — file is null when
+ * there was nothing to export (fresh install).
+ */
+function exportLegacy(db) {
+  const payload = {
+    exported_at: new Date().toISOString(),
+    migration: 'v12 retire_bots',
+    tables: {},
+    users_dropped_columns: { columns: [], rows: [] },
+  };
+  let total = 0;
+  for (const t of engineSchema.LEGACY_TABLES) {
+    if (!tableExists(db, t)) continue;
+    const rows = db.prepare(`SELECT * FROM "${t}"`).all();
+    payload.tables[t] = { rows: rows.length, data: rows };
+    total += rows.length;
+  }
+  const cols = engineSchema.LEGACY_USER_COLUMNS.filter((c) => columnExists(db, 'users', c));
+  if (cols.length) {
+    payload.users_dropped_columns.columns = cols;
+    payload.users_dropped_columns.rows = db.prepare(`SELECT id, ${cols.join(', ')} FROM users`).all();
+  }
+  if (total === 0) return { file: null, rows: 0 };
+  const dir = legacyBackupDir(db);
+  fs.mkdirSync(dir, { recursive: true });
+  const ts = new Date().toISOString().replace(/[:.]/g, '-');
+  const file = path.join(dir, `legacy-${ts}.json`);
+  fs.writeFileSync(file, JSON.stringify(payload));
+  return { file, rows: total };
+}
 
 // ── Migration list — append only, never reorder ─────────────────────────
 const MIGRATIONS = [
@@ -215,6 +282,11 @@ const MIGRATIONS = [
       // checks bot.is_system and inserts the signal with user_id=NULL so
       // signalService.listForUser's `(user_id IS NULL OR user_id = ?)`
       // clause surfaces it to every free user automatically.
+      //
+      // Retired by v12 (retire_bots): database.js no longer creates
+      // trading_bots, so on a fresh install this migration is a no-op; on a
+      // legacy DB it still runs as it always did and v12 exports + drops.
+      if (!tableExists(db, 'trading_bots')) return;
       const cols = db.prepare("PRAGMA table_info('trading_bots')").all().map((c) => c.name);
       if (!cols.includes('is_system')) {
         db.exec("ALTER TABLE trading_bots ADD COLUMN is_system INTEGER DEFAULT 0");
@@ -249,6 +321,120 @@ const MIGRATIONS = [
           1, 1.0, 5, 0, 'paper',
           1, 1
         );
+      }
+    },
+  },
+  {
+    version: 10,
+    name: 'engine_core',
+    // The bot's per-user model under the site's names (PLAN §2.1):
+    // trader_settings (bot users minus identity/keys/dead columns, dataclass
+    // defaults), signal_trades (bot trades verbatim + 11 indexes), engine_kv
+    // (bot kv), trade_events, plan_changes. Column lists: models/engineSchema.js.
+    up(db) {
+      db.exec(engineSchema.traderSettingsDDL());
+      db.exec(engineSchema.signalTradesDDL());
+      db.exec(engineSchema.ENGINE_KV_DDL);
+      db.exec(engineSchema.TRADE_EVENTS_DDL);
+      db.exec(engineSchema.PLAN_CHANGES_DDL);
+    },
+  },
+  {
+    version: 11,
+    name: 'genome',
+    // genome_population / genome_history / optimizer_params — verbatim
+    // (genome-challenge-profiles.md §1.14).
+    up(db) {
+      db.exec(engineSchema.GENOME_DDL);
+    },
+  },
+  {
+    version: 12,
+    name: 'retire_bots',
+    // 1. export the per-bot product's tables + retired users columns to
+    //    data/backups/legacy-<ts>.json (only when there is anything to export);
+    // 2. DROP them (PLAN §2.1 list, children first);
+    // 3. drop users.paper_starting_balance / users.public_profile;
+    // 4. subscriptions → the two live plans (decision D1): elite/beginner → pro,
+    //    starter → pro until its current expires_at (then the normal expiry
+    //    check downgrades to free), expired/open-ended starter → free; each
+    //    rewrite is logged in plan_changes. Pending payments and promo codes
+    //    on a retired paid id become 'pro' (a grant is never downgraded);
+    // 5. a default trader_settings row (onboarding_done = 0) for every user,
+    //    with the sub_plan/sub_status/sub_expires mirror initialised from
+    //    subscriptions (planService owns the mirror from here on).
+    up(db) {
+      const nowSec = Math.floor(Date.now() / 1000);
+
+      // 1. export
+      const exp = exportLegacy(db);
+      if (!quiet()) logger.info('v12 legacy export', { file: exp.file, rows: exp.rows });
+
+      // 2. drop legacy tables
+      for (const t of engineSchema.LEGACY_TABLES) db.exec(`DROP TABLE IF EXISTS "${t}"`);
+
+      // 3. retired users columns (SQLite ≥ 3.35 supports DROP COLUMN)
+      for (const col of engineSchema.LEGACY_USER_COLUMNS) {
+        if (columnExists(db, 'users', col)) db.exec(`ALTER TABLE users DROP COLUMN ${col}`);
+      }
+
+      // 4. subscriptions → free / pro (D1)
+      const { normalizePlan } = require('../config/planFeatures');
+      const logChange = db.prepare(`
+        INSERT INTO plan_changes (ts, user_id, old_plan, new_plan, actor, reason)
+        VALUES (?, ?, ?, ?, 'system:migration_v12', ?)
+      `);
+      const setPlan = db.prepare('UPDATE subscriptions SET plan = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?');
+      const legacySubs = db.prepare(
+        "SELECT id, user_id, plan, status, expires_at FROM subscriptions WHERE lower(plan) NOT IN ('free', 'pro')"
+      ).all();
+      for (const s of legacySubs) {
+        const id = String(s.plan || '').trim().toLowerCase();
+        let newPlan;
+        let reason;
+        if (id === 'starter') {
+          const paidUntil = toUnixSeconds(s.expires_at);
+          const live = s.status === 'active' && paidUntil > nowSec;
+          newPlan = live ? 'pro' : 'free';
+          reason = live
+            ? 'D1: starter grandfathered to pro until expires_at'
+            : 'D1: starter retired (not active or no expiry) → free';
+        } else {
+          newPlan = normalizePlan(id);   // elite / beginner → pro, unknown → free
+          reason = `legacy plan id '${id}' → ${newPlan} (normalize_plan)`;
+        }
+        setPlan.run(newPlan, s.id);
+        logChange.run(nowSec, s.user_id, s.plan, newPlan, reason);
+      }
+      if (tableExists(db, 'promo_codes')) {
+        db.prepare("UPDATE promo_codes SET plan = 'pro' WHERE lower(plan) IN ('starter', 'elite', 'beginner')").run();
+      }
+      if (tableExists(db, 'payments')) {
+        db.prepare("UPDATE payments SET plan = 'pro' WHERE status = 'pending' AND lower(plan) IN ('starter', 'elite', 'beginner')").run();
+      }
+
+      // 5. default trader_settings rows
+      const users = db.prepare(`
+        SELECT u.id, u.locale, s.plan, s.status, s.expires_at
+        FROM users u LEFT JOIN subscriptions s ON s.user_id = u.id
+      `).all();
+      const insert = db.prepare(`
+        INSERT OR IGNORE INTO trader_settings
+          (user_id, created_at, updated_at, lang, sub_plan, sub_status, sub_expires, onboarding_done)
+        VALUES (?, ?, ?, ?, ?, ?, ?, 0)
+      `);
+      for (const u of users) {
+        const plan = normalizePlan(u.plan);
+        const until = toUnixSeconds(u.expires_at);
+        const paid = plan === 'pro' && u.status === 'active' && until > nowSec;
+        const lang = u.locale === 'en' ? 'en' : 'ru';
+        if (paid) insert.run(u.id, nowSec, nowSec, lang, 'pro', 'active', until);
+        else insert.run(u.id, nowSec, nowSec, lang, 'free', 'expired', 0);
+      }
+      if (!quiet()) {
+        logger.info('v12 retire_bots applied', {
+          subscriptionsRemapped: legacySubs.length, traderSettingsRows: users.length,
+        });
       }
     },
   },
@@ -299,4 +485,4 @@ function run(db) {
   return { ran: pending.length, current: pending[pending.length - 1].version };
 }
 
-module.exports = { run, currentVersion, MIGRATIONS };
+module.exports = { run, currentVersion, MIGRATIONS, tableExists, columnExists, exportLegacy };

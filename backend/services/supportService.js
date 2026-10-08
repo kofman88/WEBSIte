@@ -27,7 +27,6 @@ function create(userId, { subject, body }) {
 
   logger.info('support ticket created', { userId, ticketId: info.lastInsertRowid });
   const ticket = getForUser(info.lastInsertRowid, userId);
-  _broadcastNew(ticket, { userId, isAdmin: false, messageId: msgInfo.lastInsertRowid });
   return ticket;
 }
 
@@ -72,54 +71,8 @@ function reply(ticketId, { userId, body, isAdmin = false, isInternal = false, at
     }
   } catch (_e) {}
 
-  // WS push — internal notes go only to admins, public messages to both sides
-  _broadcastMessage(ticketId, {
-    id: msgInfo.lastInsertRowid,
-    authorId: userId,
-    isAdmin: Boolean(isAdmin),
-    isInternal: internal,
-    body: String(body).slice(0, 10000),
-    attachments: attachments || null,
-    userId: ticket.user_id,
-  });
 
   return getForUser(ticketId, userId, isAdmin);
-}
-
-// ── WebSocket broadcast helpers ──────────────────────────────────────────
-// Deliver live updates so user widget + ops inbox refresh without a page
-// reload. Each event targets the ticket owner (always) and every admin
-// whose socket is connected (discovered via users.is_admin=1).
-function _allAdminIds() {
-  try {
-    return db.prepare('SELECT id FROM users WHERE is_admin = 1').all().map((r) => r.id);
-  } catch { return []; }
-}
-function _broadcastMessage(ticketId, msg) {
-  try {
-    const ws = require('./websocketService');
-    const payload = {
-      type: 'support.message_added',
-      data: { ticketId, message: msg },
-      ts: Date.now(),
-    };
-    // Internal notes — admins only. Public messages — both sides.
-    if (!msg.isInternal && msg.userId) ws.broadcastToUser(msg.userId, payload);
-    for (const adminId of _allAdminIds()) {
-      if (adminId !== msg.userId) ws.broadcastToUser(adminId, payload);
-    }
-  } catch (e) { logger.warn('support WS broadcast failed', { err: e.message }); }
-}
-function _broadcastNew(ticket, ctx) {
-  try {
-    const ws = require('./websocketService');
-    const payload = {
-      type: 'support.ticket_created',
-      data: { ticket, from: ctx },
-      ts: Date.now(),
-    };
-    for (const adminId of _allAdminIds()) ws.broadcastToUser(adminId, payload);
-  } catch (e) { logger.warn('support WS ticket broadcast failed', { err: e.message }); }
 }
 
 // Mark-read: records a timestamp on support_tickets so inbox can compute
@@ -138,8 +91,8 @@ function markReadByAdmin(ticketId) {
 }
 
 // ── Assignment ────────────────────────────────────────────────────────
-// When an agent "takes" a ticket, we stamp assigned_to + broadcast so
-// other agents see it's claimed in their inbox.
+// When an agent "takes" a ticket, we stamp assigned_to so other agents
+// see it's claimed in their inbox (the ops inbox polls).
 function assign(ticketId, adminId, { targetAdminId = null } = {}) {
   const ticket = db.prepare('SELECT * FROM support_tickets WHERE id = ?').get(ticketId);
   if (!ticket) { const e = new Error('Ticket not found'); e.statusCode = 404; throw e; }
@@ -150,7 +103,6 @@ function assign(ticketId, adminId, { targetAdminId = null } = {}) {
     INSERT INTO audit_log (user_id, action, entity_type, entity_id, metadata)
     VALUES (?, 'support.assign', 'support_ticket', ?, ?)
   `).run(adminId, ticketId, JSON.stringify({ assignedTo: assignee }));
-  _broadcastAssign(ticketId, assignee);
   return { assignedTo: assignee };
 }
 function unassign(ticketId, adminId) {
@@ -161,19 +113,7 @@ function unassign(ticketId, adminId) {
     INSERT INTO audit_log (user_id, action, entity_type, entity_id, metadata)
     VALUES (?, 'support.unassign', 'support_ticket', ?, '{}')
   `).run(adminId, ticketId);
-  _broadcastAssign(ticketId, null);
   return { assignedTo: null };
-}
-function _broadcastAssign(ticketId, assignedTo) {
-  try {
-    const ws = require('./websocketService');
-    const payload = {
-      type: 'support.assignment_changed',
-      data: { ticketId, assignedTo },
-      ts: Date.now(),
-    };
-    for (const adminId of _allAdminIds()) ws.broadcastToUser(adminId, payload);
-  } catch (_) {}
 }
 
 function listForUser(userId, { status = null, limit = 50, offset = 0 } = {}) {

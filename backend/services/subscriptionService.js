@@ -1,98 +1,48 @@
 const db = require('../models/database');
+const plans = require('../config/plans');
+const planFeatures = require('../config/planFeatures');
 
 /**
- * Plan definitions with feature limits and pricing.
+ * Subscription service — the plan catalogue is derived from config/plans.js
+ * (itself derived from the bot matrix in config/planFeatures.js): free + pro,
+ * $69 / 30 days. Legacy ids (starter / elite / beginner) resolve through
+ * plans.normalizePlan, so old subscription / promo rows keep working until
+ * migration v12 rewrites them.
  */
-const PLANS = {
-  free: {
-    id: 'free',
-    name: 'Free',
-    price: 0,
-    interval: null,
-    features: {
-      signalsPerDay: 3,
-      maxBots: 1,
-      autoTrade: false,
-      strategies: ['scalping'],
-      backtesting: false,
-      prioritySignals: false,
-      apiAccess: false,
+
+function catalogueEntry(p) {
+  return {
+    id: p.id,
+    name: p.name,
+    price: p.priceUsd,
+    interval: p.priceUsd ? 'month' : null,
+    periodDays: p.periodDays,
+    yearlyPrice: p.yearlyPriceUsd,
+    strategies: p.strategies,
+    timeframes: p.timeframes,
+    // The bot's matrix verbatim (snake_case keys) — what the UI renders.
+    features: p.features,
+    limits: {
+      signalsPerDay: p.signalsPerDay,
+      analyzePerDay: p.analyzePerDay,
+      symbolsLimit: p.symbolsLimit,
+      autoTrade: p.autoTrade,
+      bothDirections: p.bothDirections,
+      multiExchange: p.multiExchange,
+      genome: p.genome,
+      challenge: p.challenge,
+      apiAccess: p.apiAccess,
+      prioritySupport: p.prioritySupport,
     },
-  },
-  starter: {
-    id: 'starter',
-    name: 'Starter',
-    price: 29,
-    interval: 'month',
-    features: {
-      signalsPerDay: -1, // unlimited
-      maxBots: 3,
-      autoTrade: false,
-      strategies: ['scalping', 'smc'],
-      backtesting: false,
-      prioritySignals: false,
-      apiAccess: false,
-    },
-  },
-  pro: {
-    id: 'pro',
-    name: 'Pro',
-    price: 79,
-    interval: 'month',
-    features: {
-      signalsPerDay: -1,
-      maxBots: 10,
-      autoTrade: true,
-      strategies: ['scalping', 'smc', 'gerchik'],
-      backtesting: true,
-      prioritySignals: false,
-      apiAccess: false,
-    },
-  },
-  elite: {
-    id: 'elite',
-    name: 'Elite',
-    price: 149,
-    interval: 'month',
-    features: {
-      signalsPerDay: -1,
-      maxBots: -1, // unlimited
-      autoTrade: true,
-      strategies: ['scalping', 'smc', 'gerchik'],
-      backtesting: true,
-      prioritySignals: true,
-      apiAccess: true,
-    },
-  },
-  enterprise: {
-    id: 'enterprise',
-    name: 'Enterprise',
-    price: null, // custom pricing
-    interval: 'month',
-    features: {
-      signalsPerDay: -1,
-      maxBots: -1,
-      autoTrade: true,
-      strategies: ['scalping', 'smc', 'gerchik'],
-      backtesting: true,
-      prioritySignals: true,
-      apiAccess: true,
-    },
-  },
-};
+  };
+}
 
 class SubscriptionService {
   /**
    * Return the static plan catalogue (public, no auth needed).
    */
   getPlans() {
-    return Object.values(PLANS).map((p) => ({
-      id: p.id,
-      name: p.name,
-      price: p.price,
-      interval: p.interval,
-      features: p.features,
-    }));
+    return plans.listPlans().map(catalogueEntry);
   }
 
   /**
@@ -121,29 +71,14 @@ class SubscriptionService {
       ).run(userId);
       sub.plan = 'free';
       sub.status = 'expired';
-      // Elite-only features must not keep running after downgrade.
-      // Pause any market-scope bots so they don't burn through pairs
-      // on a non-Elite subscription. User can unfreeze on upgrade.
-      try {
-        const paused = db.prepare(`
-          UPDATE trading_bots
-          SET is_active = 0, updated_at = CURRENT_TIMESTAMP
-          WHERE user_id = ? AND scope = 'market' AND is_active = 1
-        `).run(userId);
-        if (paused.changes > 0) {
-          db.prepare(`
-            INSERT INTO audit_log (user_id, action, entity_type, entity_id, metadata)
-            VALUES (?, 'bot.auto_pause_downgrade', 'user', ?, ?)
-          `).run(userId, userId, JSON.stringify({ bots: paused.changes, reason: 'plan_expired' }));
-        }
-      } catch (_e) { /* best-effort */ }
     }
 
-    const planDef = PLANS[sub.plan] || PLANS.free;
+    const planId = plans.normalizePlan(sub.plan);
 
     return {
       ...sub,
-      planDetails: planDef,
+      planId,
+      planDetails: plans.getLimits(planId),
     };
   }
 
@@ -151,17 +86,20 @@ class SubscriptionService {
    * Activate (or upgrade) a subscription.
    *
    * In production this would verify a Stripe / crypto payment.
-   * For now we accept a payment_tx string and trust the caller.
+   * For now we accept a payment_tx string and trust the caller; it is
+   * stored in subscriptions.payment_provider_id (the only provider-ref
+   * column the table has).
    */
   activateSubscription(userId, { plan, paymentMethod, paymentTx, durationDays }) {
-    if (!PLANS[plan]) {
+    if (!plans.getPlan(plan)) {
       throw new Error(`Unknown plan: ${plan}`);
     }
+    plan = plans.normalizePlan(plan);
     if (plan === 'free') {
       throw new Error('Cannot activate the free plan; it is the default');
     }
 
-    const duration = durationDays || 30;
+    const duration = durationDays || plans.PLANS[plan].periodDays;
     const expiresAt = new Date();
     expiresAt.setDate(expiresAt.getDate() + duration);
 
@@ -172,13 +110,13 @@ class SubscriptionService {
     if (existing) {
       db.prepare(
         `UPDATE subscriptions
-         SET plan = ?, status = 'active', expires_at = ?, payment_method = ?, payment_tx = ?,
+         SET plan = ?, status = 'active', expires_at = ?, payment_method = ?, payment_provider_id = ?,
              auto_renew = 0, updated_at = CURRENT_TIMESTAMP
          WHERE user_id = ?`
       ).run(plan, expiresAt.toISOString(), paymentMethod || null, paymentTx || null, userId);
     } else {
       db.prepare(
-        `INSERT INTO subscriptions (user_id, plan, status, expires_at, payment_method, payment_tx)
+        `INSERT INTO subscriptions (user_id, plan, status, expires_at, payment_method, payment_provider_id)
          VALUES (?, ?, 'active', ?, ?, ?)`
       ).run(userId, plan, expiresAt.toISOString(), paymentMethod || null, paymentTx || null);
     }
@@ -256,52 +194,23 @@ class SubscriptionService {
   // ── Limit helpers ────────────────────────────────────────────────────
 
   /**
-   * Return the feature limits for a given user.
+   * Return the plan (limits + feature matrix) for a given user.
    */
   getUserLimits(userId) {
     const sub = this.getUserSubscription(userId);
-    return sub.planDetails.features;
+    return sub.planDetails;
   }
 
   /**
-   * Check whether the user can create another bot.
+   * Bot `plan_limit(feature)` for a user — numeric limits such as
+   * 'signals_per_day' / 'analyze_per_day'. The per-day counters themselves
+   * (free_signals_*, analyze_count_<uid>_<day>) arrive with the engine
+   * (M9/M10); this only answers "what is the cap".
    */
-  canCreateBot(userId) {
-    const limits = this.getUserLimits(userId);
-    if (limits.maxBots === -1) return true;
-
-    const count = db
-      .prepare('SELECT COUNT(*) as cnt FROM trading_bots WHERE user_id = ?')
-      .get(userId).cnt;
-
-    return count < limits.maxBots;
-  }
-
-  /**
-   * Check whether the user can view another signal today (free-tier gate).
-   */
-  canViewSignal(userId) {
-    const limits = this.getUserLimits(userId);
-    if (limits.signalsPerDay === -1) return true;
-
-    const today = new Date().toISOString().slice(0, 10);
-    const count = db
-      .prepare(
-        `SELECT COUNT(*) as cnt FROM user_signal_usage
-         WHERE user_id = ? AND DATE(viewed_at) = ?`
-      )
-      .get(userId, today).cnt;
-
-    return count < limits.signalsPerDay;
-  }
-
-  /**
-   * Record that a user viewed a signal (for free-tier rate limiting).
-   */
-  recordSignalView(userId, signalId) {
-    db.prepare(
-      'INSERT INTO user_signal_usage (user_id, signal_id) VALUES (?, ?)'
-    ).run(userId, signalId);
+  planLimit(userId, feature) {
+    const sub = this.getUserSubscription(userId);
+    const admin = db.prepare('SELECT is_admin FROM users WHERE id = ?').get(userId);
+    return planFeatures.planLimit(sub.planId, feature, { admin: Boolean(admin && admin.is_admin) });
   }
 }
 

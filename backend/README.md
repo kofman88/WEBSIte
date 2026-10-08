@@ -1,19 +1,28 @@
 # CHMUP Backend
 
-Бэкенд для платформы chmup.top - создание торговых ботов и бэктестов для криптовалютных бирж.
+Бэкенд для платформы chmup.top — standalone-порт Telegram-бота CHM_BREAKER_V4
+(сигналы LEVELS / SMC / VOLUME, авто-трейд, тарифы Free/Pro). План порта:
+`docs/port/PLAN.md` (в репозитории — после M0), спеки — `docs/port/*.md`.
 
-## 🚀 Возможности
+Статус: **M0 (prune)** — удалено всё, чего нет у бота (боты-инстансы, бэктесты,
+маркетплейс, копитрейдинг, кошелёк, академия/блог/AI, старый движок сигналов и
+аналитика). Движок (`strategies/{levels,smc,volume}`, `services/engine/*`,
+`routes/app.js`) появляется в M1–M12.
 
-- **Аутентификация**: Регистрация, вход, JWT токены
-- **Торговые боты**: Создание, управление, активация/деактивация
-- **Бэктесты**: Запуск тестирования стратегий на исторических данных
-- **Биржи**: Поддержка Bybit, BingX, Binance, OKX через CCXT
-- **API**: REST API с документацией
+## 🚀 Что уже есть (платформа)
+
+- **Аутентификация**: регистрация, вход, JWT + refresh-rotation, email-верификация, 2FA, сессии, OAuth (Google / Telegram)
+- **Платежи и подписки**: Stripe, USDT (BEP20/TRC20) с авто-подтверждением, промокоды, рефералы
+- **Биржевые ключи**: AES-256-GCM хранение ключей Bybit / Binance / BingX / OKX (`/api/exchanges/keys`)
+- **Админ / ops**: пользователи, платежи, промо, рефералы, флаги, аудит, impersonation (`/ops.html`)
+- **Поддержка**: тикеты, шаблоны ответов, присутствие агентов
+- **Уведомления**: in-app, email outbox, Telegram, Web Push
+- **Платформа**: health/metrics, бэкапы и retention, Sentry, логи
 
 ## 📋 Требования
 
-- Node.js 18+ 
-- npm или yarn
+- Node.js 18+ (CI — 20)
+- npm
 - cPanel с поддержкой Node.js (для продакшена)
 
 ## ⚙️ Установка
@@ -21,25 +30,28 @@
 ### 1. Клонирование и установка зависимостей
 
 ```bash
-cd chmup_backend
+cd backend
 npm install
 ```
 
 ### 2. Настройка переменных окружения
 
-Скопируйте `.env.example` в `.env` и настройте:
+Скопируйте `.env.example` в `.env` и заполните:
 
 ```bash
 cp .env.example .env
 ```
 
-Откройте `.env` и измените:
+Критичные переменные (в production сервер не стартует без них):
 
 ```env
 PORT=3000
-JWT_SECRET=ваш-секретный-ключ-случайная-строка
+JWT_SECRET=...            # openssl rand -hex 32
+JWT_REFRESH_SECRET=...    # openssl rand -hex 32
+WALLET_ENCRYPTION_KEY=... # ровно 64 hex-символа — шифрование биржевых ключей
 DATABASE_PATH=./data/chmup.db
 NODE_ENV=production
+CORS_ORIGIN=https://chmup.top
 ```
 
 ### 3. Запуск сервера
@@ -54,122 +66,66 @@ npm run dev
 npm start
 ```
 
+**Проверки:**
+```bash
+npm run lint       # eslint (flat config в корне репозитория)
+npm run test:run   # vitest
+npm run smoke      # scripts/smoke.js против запущенного сервера
+```
+
 ## 📡 API Endpoints
 
-### Аутентификация
+Пользовательский API движка (`/api/app/*`, зеркало `miniapp/API.md` бота)
+появляется с M7. Сейчас доступны платформенные маршруты:
 
-| Метод | Endpoint | Описание |
-|-------|----------|----------|
-| POST | `/api/auth/register` | Регистрация нового пользователя |
-| POST | `/api/auth/login` | Вход пользователя |
-| GET | `/api/auth/me` | Получить текущего пользователя |
+| Префикс | Описание |
+|---------|----------|
+| `/api/auth` | Регистрация, вход, refresh, `/me`, email-верификация, сброс пароля, 2FA, сессии, OAuth, экспорт данных |
+| `/api/exchanges` | Список бирж, CRUD биржевых ключей (`verify` / `balance` отвечают 501 до M13) |
+| `/api/subscriptions` | Тарифы, статус, промокоды, usage, отмена |
+| `/api/payments` | Stripe checkout + webhooks, USDT-инвойсы, рефералы |
+| `/api/notifications` | In-app уведомления |
+| `/api/telegram`, `/api/push` | Привязка Telegram, Web Push подписки |
+| `/api/support` | Тикеты (пользователь + админ), гостевой контакт |
+| `/api/admin` | Back-office (требует `is_admin`) |
+| `/api/health`, `/api/health/deep`, `/api/version`, `/metrics` | Liveness / readiness / build info / Prometheus |
 
-### Боты
+### Примеры
 
-| Метод | Endpoint | Описание |
-|-------|----------|----------|
-| GET | `/api/bots` | Список всех ботов |
-| GET | `/api/bots/stats` | Статистика по ботам |
-| POST | `/api/bots` | Создать нового бота |
-| GET | `/api/bots/:id` | Получить бота по ID |
-| PUT | `/api/bots/:id` | Обновить бота |
-| PATCH | `/api/bots/:id/toggle` | Активировать/деактивировать |
-| GET | `/api/bots/:id/trades` | История сделок |
-| DELETE | `/api/bots/:id` | Удалить бота |
-
-### Бэктесты
-
-| Метод | Endpoint | Описание |
-|-------|----------|----------|
-| GET | `/api/backtests` | Список всех бэктестов |
-| GET | `/api/backtests/stats` | Статистика по бэктестам |
-| POST | `/api/backtests` | Создать новый бэктест |
-| GET | `/api/backtests/:id` | Получить бэктест по ID |
-| DELETE | `/api/backtests/:id` | Удалить бэктест |
-
-### Биржи
-
-| Метод | Endpoint | Описание |
-|-------|----------|----------|
-| GET | `/api/exchanges` | Список поддерживаемых бирж |
-| GET | `/api/exchanges/:name/pairs` | Торговые пары биржи |
-| GET | `/api/exchanges/:name/price?symbol=` | Цена для символа |
-| GET | `/api/balance/:exchangeName` | Баланс на бирже (требуется auth) |
-
-## 🔐 Примеры запросов
-
-### Регистрация
 ```bash
 curl -X POST http://localhost:3000/api/auth/register \
   -H "Content-Type: application/json" \
   -d '{"email":"user@example.com","password":"password123"}'
-```
 
-### Вход
-```bash
 curl -X POST http://localhost:3000/api/auth/login \
   -H "Content-Type: application/json" \
   -d '{"email":"user@example.com","password":"password123"}'
-```
 
-### Создание бота (нужен токен)
-```bash
-curl -X POST http://localhost:3000/api/bots \
-  -H "Content-Type: application/json" \
-  -H "Authorization: Bearer YOUR_TOKEN" \
-  -d '{
-    "name": "BTC Scalper",
-    "exchangeName": "bybit",
-    "symbol": "BTCUSDT",
-    "strategyType": "scalping",
-    "leverage": 5,
-    "positionSizeUsd": 100,
-    "stopLossPct": 2,
-    "takeProfitPct": 4
-  }'
-```
-
-### Запуск бэктеста
-```bash
-curl -X POST http://localhost:3000/api/backtests \
-  -H "Content-Type: application/json" \
-  -H "Authorization: Bearer YOUR_TOKEN" \
-  -d '{
-    "name": "BTC Strategy Test",
-    "symbol": "BTCUSDT",
-    "exchangeName": "bybit",
-    "timeframe": "1h",
-    "startDate": "2024-01-01",
-    "endDate": "2024-03-01",
-    "initialCapital": 1000,
-    "strategyConfig": {"rsiPeriod": 14, "emaPeriod": 50}
-  }'
+curl http://localhost:3000/api/exchanges/keys -H "Authorization: Bearer YOUR_TOKEN"
 ```
 
 ## 📁 Структура проекта
 
 ```
-chmup_backend/
-├── config/          # Конфигурация
-│   └── index.js
-├── models/          # Модель базы данных
-│   └── database.js
-├── routes/          # API роуты
-│   ├── auth.js
-│   ├── bots.js
-│   ├── backtests.js
-│   └── exchanges.js
-├── services/        # Бизнес-логика
-│   ├── authService.js
-│   ├── botService.js
-│   ├── backtestService.js
-│   └── exchangeService.js
-├── utils/           # Утилиты
-├── data/            # SQLite база данных (создается автоматически)
-├── .env             # Переменные окружения
-├── .env.example     # Шаблон переменных
+backend/
+├── config/          # index.js (env), planFeatures.js (матрица тарифов бота, verbatim),
+│                    # plans.js (каталог free / pro, производный от planFeatures)
+├── middleware/      # auth, geoBlock, handleErr, requestId
+├── models/          # database.js (better-sqlite3, WAL), migrations.js (v10 engine_core,
+│                    # v11 genome, v12 retire_bots), engineSchema.js (trader_settings /
+│                    # signal_trades / engine_kv / … — см. services/engine/README.md)
+├── routes/          # auth, exchanges, subscriptions, payments, admin,
+│                    # notifications, telegram, push, support, public
+├── services/        # authService, paymentService, subscriptionService,
+│                    # adminService, supportService, notifier, emailService,
+│                    # telegramService, pushService, exchangeService, …
+├── workers/         # paymentWatcher (крипто-платежи)
+├── utils/           # logger, metrics, sentry, crypto, validation, db-*
+├── tests/           # vitest
+├── data/            # SQLite база данных + бэкапы (создаётся автоматически)
+├── .env.example
 ├── package.json
-└── server.js        # Точка входа
+└── server.js        # Точка входа (Passenger / standalone)
 ```
 
 ## 🔧 Установка на cPanel
@@ -189,13 +145,14 @@ chmup_backend/
 5. **Настройте .env** файл
 6. **Запустите приложение** через кнопку "Start" в cPanel
 
+Подробнее: `DEPLOYMENT.md`, `docs/runbook.md`.
+
 ## 🛡️ Безопасность
 
-- JWT аутентификация
-- Хеширование паролей (bcrypt)
-- Rate limiting
-- Helmet.js заголовки безопасности
-- Валидация входных данных
+- JWT аутентификация + refresh-rotation
+- Хеширование паролей (bcrypt), 2FA (TOTP)
+- Rate limiting, Helmet.js, валидация входных данных (zod)
+- Биржевые ключи только в зашифрованном виде (AES-256-GCM)
 
 ## 📝 Лицензия
 

@@ -99,13 +99,11 @@ router.post('/promo', authMiddleware, (req, res) => {
 router.get('/limits', authMiddleware, (req, res) => {
   try {
     const limits = subscriptionService.getUserLimits(req.userId);
-    const canBot = subscriptionService.canCreateBot(req.userId);
-    const canSignal = subscriptionService.canViewSignal(req.userId);
 
     res.json({
       limits,
-      canCreateBot: canBot,
-      canViewSignal: canSignal,
+      signalsPerDay: subscriptionService.planLimit(req.userId, 'signals_per_day'),
+      analyzePerDay: subscriptionService.planLimit(req.userId, 'analyze_per_day'),
     });
   } catch (error) {
     console.error('Error fetching limits:', error.message);
@@ -121,55 +119,42 @@ router.get('/usage', authMiddleware, (req, res) => {
     const db = require('../models/database');
     const plans = require('../config/plans');
     // Route through subscriptionService.getUserSubscription — it handles
-    // expired-sub auto-downgrade + auto-pauses Elite-only market bots.
+    // expired-sub auto-downgrade.
     // A raw SELECT here would silently keep showing "Pro" to an expired
     // user until some other endpoint triggered the downgrade.
     const sub = subscriptionService.getUserSubscription(req.userId);
-    const plan = plans.getPlan(sub.plan) || plans.getPlan('free');
+    const plan = plans.getLimits(sub.plan);
     const order = plans.PLAN_ORDER;
     const idx = order.indexOf(plan.id);
     const nextId = order[idx + 1] || null;
     const next = nextId ? plans.getPlan(nextId) : null;
 
-    const startOfDayUtc = new Date(); startOfDayUtc.setUTCHours(0, 0, 0, 0);
-    const startOfMonthUtc = new Date(); startOfMonthUtc.setUTCDate(1); startOfMonthUtc.setUTCHours(0, 0, 0, 0);
-
-    const botCount = db.prepare('SELECT COUNT(*) AS n FROM trading_bots WHERE user_id = ? AND is_active = 1').get(req.userId).n;
-    const signalsToday = db.prepare(
-      'SELECT COUNT(*) AS n FROM signals WHERE user_id = ? AND created_at > ?'
-    ).get(req.userId, startOfDayUtc.toISOString()).n;
+    // Engine quotas (signals today, analyze count) join this snapshot with
+    // the engine (M7/M10); until then only the exchange-key count is live.
     const keysCount = db.prepare('SELECT COUNT(*) AS n FROM exchange_keys WHERE user_id = ?').get(req.userId).n;
-    const backtestsThisMonth = (() => {
-      try {
-        return db.prepare('SELECT COUNT(*) AS n FROM backtests WHERE user_id = ? AND created_at > ?').get(req.userId, startOfMonthUtc.toISOString()).n;
-      } catch { return 0; }
-    })();
 
     // Features unlocked on the NEXT plan — simple diff string list for
     // the UI to render as a bullet teaser.
     const nextUnlocks = [];
     if (next) {
       if (!plan.autoTrade && next.autoTrade) nextUnlocks.push('Автоторговля с реальной биржей');
-      if (plan.paperTradingOnly && !next.paperTradingOnly) nextUnlocks.push('Live-режим (реальные деньги)');
-      if (!plan.optimizer && next.optimizer) nextUnlocks.push('Оптимизатор параметров (grid-search)');
-      if (!plan.apiAccess && next.apiAccess) nextUnlocks.push('REST API для своих скриптов');
+      if (!plan.bothDirections && next.bothDirections) nextUnlocks.push('LONG + SHORT одновременно');
       const newStrats = next.strategies.filter((s) => !plan.strategies.includes(s));
-      if (newStrats.length) nextUnlocks.push('Стратегии: ' + newStrats.join(', '));
-      if (next.maxLeverage > plan.maxLeverage) nextUnlocks.push('Плечо до ' + next.maxLeverage + '×');
-      if (nextId === 'elite') nextUnlocks.push('Market Scanner по всему рынку');
+      if (newStrats.length) nextUnlocks.push('Стратегии: ' + newStrats.map((s) => s.toUpperCase()).join(', '));
+      const newTfs = next.timeframes.filter((t) => !plan.timeframes.includes(t));
+      if (newTfs.length) nextUnlocks.push('Таймфреймы: ' + newTfs.join(' · '));
+      if (plan.signalsPerDay < next.signalsPerDay) nextUnlocks.push('Без лимита сигналов в день');
+      if (!plan.genome && next.genome) nextUnlocks.push('Strategy Genome');
+      if (!plan.challenge && next.challenge) nextUnlocks.push('Челлендж');
     }
 
-    const finite = (v) => (v === null || v === Infinity ? null : v);
     res.json({
       plan: { id: plan.id, name: plan.name, priceUsd: plan.priceUsd },
       status: sub.status || (sub.plan === 'free' ? 'active' : 'unknown'),
       expiresAt: sub.expires_at || null,
       trialEndsAt: sub.trial_ends_at || null,
       usage: {
-        bots:      { used: botCount,           limit: finite(plan.maxBots) },
-        signals:   { used: signalsToday,       limit: finite(plan.signalsPerDay) },
-        keys:      { used: keysCount,          limit: null },   // no hard cap per plan
-        backtests: { used: backtestsThisMonth, limit: finite(plan.backtestsPerDay) },
+        keys: { used: keysCount, limit: null },   // no hard cap per plan
       },
       next: next ? {
         id: next.id, name: next.name, priceUsd: next.priceUsd,

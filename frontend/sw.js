@@ -10,7 +10,7 @@ self.addEventListener('push', (event) => {
   try { data = event.data ? event.data.json() : {}; } catch (_e) {}
   const title = data.title || 'CHM Finance';
   const body = data.body || '';
-  const url = data.url || '/dashboard.html';
+  const url = data.url || '/app/';
   const tag = data.tag || 'chm';
   event.waitUntil(self.registration.showNotification(title, {
     body, tag,
@@ -23,7 +23,7 @@ self.addEventListener('push', (event) => {
 
 self.addEventListener('notificationclick', (event) => {
   event.notification.close();
-  const url = (event.notification.data && event.notification.data.url) || '/dashboard.html';
+  const url = (event.notification.data && event.notification.data.url) || '/app/';
   event.waitUntil(clients.matchAll({ type: 'window' }).then((wins) => {
     for (const w of wins) {
       if (w.url.includes(self.location.origin)) { w.focus(); w.navigate(url); return; }

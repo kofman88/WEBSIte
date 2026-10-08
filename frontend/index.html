@@ -692,14 +692,13 @@
       <a href="#how" class="nav-link" data-t="nav-how">Как работает</a>
       <a href="#community" class="nav-link" data-t="nav-community">Сообщество</a>
       <a href="#faq" class="nav-link" data-t="nav-faq">FAQ</a>
-      <a href="academy/" class="nav-link" data-t="nav-academy">Академия</a>
     </div>
     <div class="flex items-center gap-3">
       <button onclick="toggleLang()" class="pill pill-ghost pill-sm" id="langBtn" aria-label="Toggle language">EN</button>
       <button onclick="toggleTheme()" class="chip" id="themeBtn" title="Toggle theme" aria-label="Toggle theme"><iconify-icon icon="solar:moon-linear"></iconify-icon></button>
       <button type="button" data-open-modal="login" class="nav-link hidden sm:inline-block auth-guest" id="loginBtn" data-t="nav-login" style="background:none;border:none;cursor:pointer;font:inherit">Войти</button>
       <button type="button" data-open-modal="register" class="pill pill-primary pill-sm auth-guest" data-t="nav-start">Регистрация</button>
-      <a href="dashboard.html" class="pill pill-primary pill-sm auth-user" data-t="nav-cabinet" style="display:none;align-items:center;gap:6px">
+      <a href="/app/" class="pill pill-primary pill-sm auth-user" data-t="nav-cabinet" style="display:none;align-items:center;gap:6px">
         <iconify-icon icon="solar:widget-2-linear" style="font-size:14px"></iconify-icon>
         Дашборд
       </a>
@@ -1512,7 +1511,7 @@ document.addEventListener('click',(e)=>{
   if(open){
     e.preventDefault();
     const plan=open.getAttribute('data-open-modal');
-    try{if(typeof Auth!=='undefined'&&Auth.isLoggedIn()){location.href='dashboard.html';return}}catch(_){}
+    try{if(typeof Auth!=='undefined'&&Auth.isLoggedIn()){location.href='/app/';return}}catch(_){}
     openModal(plan);return;
   }
   const close=e.target.closest('[data-close-modal]');
@@ -1522,7 +1521,7 @@ document.addEventListener('click',(e)=>{
     e.preventDefault();
     const plan=pick.getAttribute('data-pick-plan');
     if(plan==='free'){
-      try{if(typeof Auth!=='undefined'&&Auth.isLoggedIn()){location.href='dashboard.html';return}}catch(_){}
+      try{if(typeof Auth!=='undefined'&&Auth.isLoggedIn()){location.href='/app/';return}}catch(_){}
       openModal('register');return;
     }
     try{if(typeof Auth!=='undefined'&&Auth.isLoggedIn()){location.href='settings.html?upgrade='+encodeURIComponent(plan);return}}catch(_){}
@@ -1635,7 +1634,7 @@ function _refCode(){
 function _nextUrl(){
   let pending='';try{pending=localStorage.getItem('chm_pending_plan')||''}catch(e){}
   if(pending){try{localStorage.removeItem('chm_pending_plan')}catch(e){}return 'settings.html?upgrade='+encodeURIComponent(pending)}
-  return 'dashboard.html';
+  return '/app/';
 }
 document.getElementById('loginForm')?.addEventListener('submit',async e=>{
   e.preventDefault();const fd=new FormData(e.target);const btn=e.target.querySelector('button[type=submit]');if(btn)btn.disabled=true;
@@ -1719,7 +1718,6 @@ const TR={
   'nav-how':{ru:'Как работает',en:'How It Works',es:'Cómo funciona',tr:'Nasıl çalışır',id:'Cara kerja'},
   'nav-community':{ru:'Сообщество',en:'Community',es:'Comunidad',tr:'Topluluk',id:'Komunitas'},
   'nav-faq':{ru:'FAQ',en:'FAQ',es:'FAQ',tr:'SSS',id:'FAQ'},
-  'nav-academy':{ru:'Академия',en:'Academy',es:'Academia',tr:'Akademi',id:'Akademi'},
   'nav-login':{ru:'Войти',en:'Login',es:'Entrar',tr:'Giriş',id:'Masuk'},
   'nav-start':{ru:'Регистрация',en:'Sign Up',es:'Registrarse',tr:'Kayıt ol',id:'Daftar'},
   'nav-cabinet':{ru:'Дашборд',en:'Dashboard',es:'Panel',tr:'Panel',id:'Dasbor'},
@@ -1911,13 +1909,13 @@ applyLang();
 
 // ── Login / Register buttons ──
 function _loggedIn(){try{return typeof Auth!=='undefined'&&Auth.isLoggedIn()}catch(e){return false}}
-function handleLogin(e){if(e&&e.preventDefault)e.preventDefault();if(_loggedIn()){location.href='dashboard.html';return false}openModal('login');return false}
-function handleRegister(e){if(e&&e.preventDefault)e.preventDefault();if(_loggedIn()){location.href='dashboard.html';return false}openModal('register');return false}
+function handleLogin(e){if(e&&e.preventDefault)e.preventDefault();if(_loggedIn()){location.href='/app/';return false}openModal('login');return false}
+function handleRegister(e){if(e&&e.preventDefault)e.preventDefault();if(_loggedIn()){location.href='/app/';return false}openModal('register');return false}
 // Unified pricing CTA — route logged-in users to settings checkout, otherwise
 // open register modal with plan remembered for the post-register redirect.
 function pickPlan(plan){
   if(plan==='free'){
-    if(_loggedIn()){location.href='dashboard.html';return false}
+    if(_loggedIn()){location.href='/app/';return false}
     openModal('register');return false;
   }
   if(_loggedIn()){location.href='settings.html?upgrade='+encodeURIComponent(plan);return false}
@@ -1992,7 +1990,7 @@ function toggleTheme(){
       // Purge fragment from URL before any further processing
       history.replaceState({},'',location.pathname);
       _notify.ok('Вход через '+(prov||'OAuth')+' выполнен!');
-      setTimeout(()=>location.href='dashboard.html',500);
+      setTimeout(()=>location.href='/app/',500);
     }
   }catch(e){_notify.err('Ошибка OAuth: '+e.message)}
 })();

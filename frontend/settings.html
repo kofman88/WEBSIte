@@ -23,14 +23,10 @@
 <aside class="sidebar" id="sidebar">
   <div class="sidebar-logo">CHM<span>.</span></div>
   <nav class="sidebar-nav">
-    <a href="dashboard.html" class="sidebar-link" data-page="dashboard"><svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>Дашборд</a>
-    <a href="bots.html" class="sidebar-link" data-page="bots"><svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2a4 4 0 014 4v1h2a2 2 0 012 2v10a2 2 0 01-2 2H6a2 2 0 01-2-2V9a2 2 0 012-2h2V6a4 4 0 014-4z"/></svg>Боты</a>
-    <a href="signals.html" class="sidebar-link" data-page="signals"><svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>Сигналы</a>
-    <a href="analytics.html" class="sidebar-link" data-page="analytics"><svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 3v18h18"/><path d="M7 14l4-4 4 4 5-5"/></svg>Аналитика</a>
-    <a href="backtests.html" class="sidebar-link" data-page="backtests"><svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6m6 0h10"/></svg>Бэктесты</a>
-    <a href="wallet.html" class="sidebar-link" data-page="wallet"><svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12V7H5a2 2 0 010-4h14v4M3 5v14a2 2 0 002 2h16v-5"/></svg>Кошелёк</a>
-    <a href="leaderboard.html" class="sidebar-link" data-page="leaderboard"><svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>Leaderboard</a>
-    <a href="settings.html" class="sidebar-link active" data-page="settings"><svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/></svg>Настройки</a>
+    <a href="/app/" class="sidebar-link" data-page="app"><svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M13 10V3L4 14h7v7l9-11h-7z"/></svg><span data-t="sb-app">Приложение</span></a>
+    <a href="settings.html" class="sidebar-link active" data-page="settings"><svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0116 0"/></svg><span data-t="sb-account">Аккаунт</span></a>
+    <a href="subscriptions.html" class="sidebar-link" data-page="subscriptions"><svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg><span data-t="sb-plan">Тариф</span></a>
+    <a href="settings.html#support" class="sidebar-link" data-page="support"><svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg><span data-t="sb-support">Поддержка</span></a>
   </nav>
   <div class="sidebar-footer"><button onclick="Auth.logout()" class="sidebar-link" style="color:#C8B9B9"><svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4M16 17l5-5-5-5M21 12H9"/></svg>Выйти</button></div>
 </aside>
@@ -42,10 +38,8 @@
     <button class="stab active" onclick="stab('profile')">Профиль</button>
     <button class="stab" onclick="stab('subscription')">Подписка</button>
     <button class="stab" onclick="stab('trading')">Торговля</button>
-    <button class="stab" onclick="stab('risk')">Риск</button>
     <button class="stab" onclick="stab('notifications')">Уведомления</button>
     <button class="stab" onclick="stab('security')">Безопасность</button>
-    <button class="stab" onclick="stab('community')">Сообщество</button>
     <button class="stab" onclick="stab('support')">Поддержка</button>
   </div>
 
@@ -65,7 +59,6 @@
           <div><label class="text-sm text-slate-400 block mb-1">Часовой пояс</label><select class="w-full bg-slate-800/50 border border-slate-700 rounded-xl px-4 py-3 text-white outline-none"><option>UTC+3 (Moscow)</option><option>UTC+0 (London)</option><option>UTC-5 (New York)</option></select></div>
         </div>
         <button type="button" onclick="Toast.success('Профиль сохранён')" class="px-6 py-2.5 rounded-xl font-semibold text-white text-sm" style="background:linear-gradient(180deg,#FF7840 0%,#FF5A1F 60%,#C44610 100%);box-shadow:inset 0 1px 1px rgba(255,255,255,.28),inset 0 -1px 3px rgba(0,0,0,.6),0 4px 8px -2px rgba(0,0,0,.6),0 0 0 1px rgba(255,90,31,.35)">Сохранить</button>
-        <button type="button" onclick="location.href='/dashboard.html?tour=1'" class="ml-2 text-xs text-slate-400 hover:text-white underline">Показать обзорный тур</button>
       </form>
     </div>
   </div>
@@ -117,7 +110,6 @@
         <div><label class="text-sm text-slate-400 block mb-1">Биржа по умолчанию</label><select class="w-full bg-slate-800/50 border border-slate-700 rounded-xl px-4 py-3 text-white outline-none"><option>Bybit</option><option>Binance</option><option>BingX</option></select></div>
         <div><label class="text-sm text-slate-400 block mb-2">Leverage по умолчанию: <span id="levVal" class="text-indigo-400">10x</span></label><input type="range" min="1" max="100" value="10" class="w-full" oninput="document.getElementById('levVal').textContent=this.value+'x'"/></div>
         <div><label class="text-sm text-slate-400 block mb-2">Риск на сделку: <span id="riskVal" class="text-indigo-400">2%</span></label><input type="range" min="0.5" max="10" step="0.5" value="2" class="w-full" oninput="document.getElementById('riskVal').textContent=this.value+'%'"/></div>
-        <div><label class="text-sm text-slate-400 block mb-1">Стартовый баланс (paper)</label><div class="flex gap-2"><input id="paperBalanceInput" type="number" value="10000" min="100" max="10000000" step="100" class="flex-1 bg-slate-800/50 border border-slate-700 rounded-xl px-4 py-3 text-white outline-none"/><button type="button" id="paperBalanceSave" class="px-4 py-3 rounded-xl text-sm font-semibold text-white" style="background:linear-gradient(180deg,#FF7840,#FF5A1F 60%,#C44610)">Применить</button></div><div class="text-xs text-slate-500 mt-1">Виртуальный баланс для бумажной торговли и Equity-кривой. От $100 до $10 000 000.</div></div>
         <div><label class="text-sm text-slate-400 block mb-1">Макс. одновременных сделок</label><input type="number" value="5" min="1" max="20" class="w-full bg-slate-800/50 border border-slate-700 rounded-xl px-4 py-3 text-white outline-none"/></div>
         <div><label class="text-sm text-slate-400 block mb-1">Дневной лимит потерь (%)</label><input type="number" value="5" step="0.5" class="w-full bg-slate-800/50 border border-slate-700 rounded-xl px-4 py-3 text-white outline-none"/></div>
         <div class="flex items-center justify-between p-3 bg-slate-800/30 rounded-xl"><span class="text-sm">Авто-торговля</span><div class="toggle on" onclick="this.classList.toggle('on')"></div></div>
@@ -125,52 +117,6 @@
         <div class="flex items-center justify-between p-3 bg-slate-800/30 rounded-xl"><span class="text-sm">Trailing Stop по умолчанию</span><div class="toggle on" onclick="this.classList.toggle('on')"></div></div>
         <button type="button" onclick="Toast.success('Настройки сохранены')" class="px-6 py-2.5 rounded-xl font-semibold text-white text-sm" style="background:linear-gradient(180deg,#FF7840 0%,#FF5A1F 60%,#C44610 100%);box-shadow:inset 0 1px 1px rgba(255,255,255,.28),inset 0 -1px 3px rgba(0,0,0,.6),0 4px 8px -2px rgba(0,0,0,.6),0 0 0 1px rgba(255,90,31,.35)">Сохранить</button>
       </form>
-    </div>
-  </div>
-
-  <!-- RISK MANAGER -->
-  <div class="stab-content" id="stab-risk">
-    <div class="card max-w-2xl mb-6">
-      <div class="flex items-start justify-between mb-4">
-        <div>
-          <h3 class="font-bold mb-1">Kill Switch</h3>
-          <div class="text-sm text-slate-400">Аварийная кнопка: блокирует всю авто-торговлю по всем ботам. Открытые позиции не закрываются — новые не открываются.</div>
-        </div>
-        <div class="toggle" id="rkKill" onclick="this.classList.toggle('on');rkDirty()"></div>
-      </div>
-      <div id="rkKillState" class="text-xs px-3 py-2 rounded-lg" style="background:rgba(255,140,90,.08);color:#FF8C5A;display:none">⚠️ Авто-торговля отключена пользователем</div>
-    </div>
-
-    <div class="card max-w-2xl mb-6">
-      <h3 class="font-bold mb-4">Лимиты</h3>
-      <form class="space-y-4" onsubmit="return false">
-        <div>
-          <label class="text-sm text-slate-400 block mb-1">Максимум открытых позиций (глобально)</label>
-          <input id="rkMaxOpen" type="number" min="1" max="500" value="20" class="w-full bg-slate-800/50 border border-slate-700 rounded-xl px-4 py-3 text-white outline-none" oninput="rkDirty()"/>
-          <div class="text-xs text-slate-500 mt-1">Общий лимит по всем ботам сразу — чтобы сигнал-бомба не открыла 200 сделок одновременно.</div>
-        </div>
-        <div>
-          <label class="text-sm text-slate-400 block mb-1">Дневной лимит убытка, %</label>
-          <input id="rkMaxLoss" type="number" min="0.1" max="50" step="0.1" value="5" class="w-full bg-slate-800/50 border border-slate-700 rounded-xl px-4 py-3 text-white outline-none" oninput="rkDirty()"/>
-          <div class="text-xs text-slate-500 mt-1">Сумма % PnL по закрытым за 24ч сделкам. При достижении новые сделки блокируются до следующего дня.</div>
-        </div>
-        <div>
-          <label class="text-sm text-slate-400 block mb-1">Чёрный список символов (через запятую)</label>
-          <input id="rkBlacklist" type="text" placeholder="DOGEUSDT, PEPEUSDT" class="w-full bg-slate-800/50 border border-slate-700 rounded-xl px-4 py-3 text-white outline-none" oninput="rkDirty()"/>
-          <div class="text-xs text-slate-500 mt-1">Точное совпадение — бот не откроет сделку на этих парах, даже если сигнал есть.</div>
-        </div>
-        <button type="button" id="rkSaveBtn" class="px-6 py-2.5 rounded-xl font-semibold text-white text-sm" style="background:linear-gradient(180deg,#FF7840 0%,#FF5A1F 60%,#C44610 100%);box-shadow:inset 0 1px 1px rgba(255,255,255,.28),inset 0 -1px 3px rgba(0,0,0,.6),0 4px 8px -2px rgba(0,0,0,.6),0 0 0 1px rgba(255,90,31,.35)">Сохранить</button>
-      </form>
-    </div>
-
-    <div class="card max-w-2xl">
-      <h3 class="font-bold mb-2">Как это работает</h3>
-      <ul class="text-sm text-slate-400 space-y-2 list-disc list-inside">
-        <li>Проверка выполняется перед каждым новым auto-trade (до отправки ордера на биржу).</li>
-        <li>Закрытие позиций по SL/TP не затрагивается — только блокируется открытие новых.</li>
-        <li>Ручные сделки через SmartTrade Terminal под лимиты НЕ подпадают.</li>
-        <li>Если хочешь временно снять лимит — отключи, сохрани, через полдня можно вернуть.</li>
-      </ul>
     </div>
   </div>
 
@@ -305,35 +251,6 @@
     </div>
   </div>
 
-  <!-- COMMUNITY -->
-  <div class="stab-content" id="stab-community">
-    <div class="card max-w-2xl mb-6">
-      <div class="flex items-start gap-3 mb-4">
-        <div class="w-10 h-10 rounded-lg bg-indigo-500/10 flex items-center justify-center shrink-0">
-          <iconify-icon icon="solar:users-group-rounded-linear" style="color:#FF8C5A;font-size:20px"></iconify-icon>
-        </div>
-        <div class="flex-1">
-          <h3 class="font-bold mb-1">Публичный профиль</h3>
-          <div class="text-sm text-slate-400">Включи, чтобы твои обезличенные результаты (PnL, win rate, стратегии) появились в публичном <a href="/leaderboard.html" class="text-indigo-400 hover:underline">Leaderboard</a>.</div>
-        </div>
-        <div id="pubToggle" class="toggle shrink-0" onclick="togglePublic()" role="switch" aria-checked="false"></div>
-      </div>
-      <div id="pubProfileLink" class="hidden p-3 bg-slate-800/40 rounded-xl border border-slate-700">
-        <div class="text-xs text-slate-500 mb-1">Твой публичный профиль:</div>
-        <a id="pubProfileUrl" href="#" target="_blank" rel="noopener" class="text-indigo-400 hover:text-indigo-300 text-sm font-mono break-all"></a>
-      </div>
-      <div class="text-xs text-slate-500 mt-3">
-        Видимы: display name (или <span class="mono">Trader#XXXX</span>), суммарный PnL, win rate, последние 30 сделок (символ + % PnL). Email и точные объёмы всегда скрыты.
-      </div>
-    </div>
-
-    <div class="card max-w-2xl">
-      <h3 class="font-bold mb-1">Leaderboard</h3>
-      <div class="text-sm text-slate-400 mb-3">Соревнуйся с другими трейдерами CHM Finance.</div>
-      <a href="/leaderboard.html" class="inline-block text-sm px-4 py-2 rounded-lg bg-indigo-500/10 border border-indigo-500/30 text-indigo-400 hover:bg-indigo-500/20">Открыть Leaderboard →</a>
-    </div>
-  </div>
-
   <!-- SUPPORT -->
   <div class="stab-content" id="stab-support">
     <div class="card max-w-2xl mb-6">
@@ -401,10 +318,8 @@
     <!-- Step 1: pick plan + cycle -->
     <div id="coStep1">
       <label class="text-sm text-slate-400 block mb-2">Тариф</label>
-      <div class="grid grid-cols-3 gap-2 mb-4">
-        <label class="co-card"><input type="radio" name="coPlan" value="starter" class="sr-only"/><div class="co-body"><div class="font-semibold text-white text-sm">Starter</div><div class="text-xs text-slate-400 mt-1">$29/мес</div></div></label>
-        <label class="co-card"><input type="radio" name="coPlan" value="pro" checked class="sr-only"/><div class="co-body"><div class="font-semibold text-indigo-400 text-sm">Pro</div><div class="text-xs text-slate-400 mt-1">$79/мес</div></div></label>
-        <label class="co-card"><input type="radio" name="coPlan" value="elite" class="sr-only"/><div class="co-body"><div class="font-semibold text-white text-sm">Elite</div><div class="text-xs text-slate-400 mt-1">$149/мес</div></div></label>
+      <div class="grid grid-cols-1 gap-2 mb-4">
+        <label class="co-card"><input type="radio" name="coPlan" value="pro" checked class="sr-only"/><div class="co-body"><div class="font-semibold text-indigo-400 text-sm">Pro</div><div class="text-xs text-slate-400 mt-1">$69/мес · все три стратегии, LONG + SHORT, автотрейд</div></div></label>
       </div>
       <label class="text-sm text-slate-400 block mb-2">Период</label>
       <div class="grid grid-cols-2 gap-2 mb-5">
@@ -656,7 +571,6 @@ document.querySelectorAll('.co-method').forEach((btn) => {
 });
 
 // WS: payment confirmed → success + reload
-WS.on('payment_confirmed', () => { Toast.success('Платёж подтверждён, тариф активирован'); closeCheckout(); loadSubscription(); });
 
 // ── Security tab ──
 async function loadSecurity() {
@@ -897,8 +811,11 @@ loadPrefs();
 // ── Auto-open checkout if ?upgrade=<plan> came from landing pricing CTA ──
 (function autoUpgrade(){
   try {
-    const p = new URLSearchParams(location.search).get('upgrade');
-    if (!p || !['starter','pro','elite'].includes(p)) return;
+    const raw = new URLSearchParams(location.search).get('upgrade');
+    if (!raw) return;
+    // Retired ids in old links (starter / elite) all lead to the one paid plan.
+    const p = (window.PlanGate && PlanGate.normalizePlan) ? PlanGate.normalizePlan(raw) : raw;
+    if (p !== 'pro') return;
     const radio = document.querySelector('input[name="coPlan"][value="'+p+'"]');
     if (radio) radio.checked = true;
     openCheckout();
@@ -907,39 +824,8 @@ loadPrefs();
   } catch (_e) {}
 })();
 
-// ── Community tab: public profile toggle ──
-let _pubState = false;
+
 function escTk(s){return String(s||'').replace(/[&<>"']/g,(c)=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
-async function loadPublicState(){
-  try{
-    const r = await API.me();
-    const me = r.user || r;
-    _pubState = Boolean(me.publicProfile);
-    const t = document.getElementById('pubToggle');
-    if(t){ t.classList.toggle('on', _pubState); t.setAttribute('aria-checked', _pubState); }
-    const link = document.getElementById('pubProfileLink');
-    const url = document.getElementById('pubProfileUrl');
-    if(_pubState && me.referralCode){
-      const full = location.origin + '/u.html?code=' + encodeURIComponent(me.referralCode);
-      url.textContent = full; url.href = full;
-      link.classList.remove('hidden');
-    } else if(link){ link.classList.add('hidden'); }
-  } catch(_){}
-}
-async function togglePublic(){
-  const t = document.getElementById('pubToggle');
-  const next = !_pubState;
-  t.classList.toggle('on', next);
-  try{
-    await API.setPublicProfile(next);
-    _pubState = next;
-    Toast.success(next ? 'Профиль публичный' : 'Профиль скрыт');
-    loadPublicState();
-  } catch(e){
-    t.classList.toggle('on', _pubState);
-    Toast.error(e.message || 'Ошибка');
-  }
-}
 
 // ── Support tab: tickets list + create + detail ──
 let _currentTicketId = null;
@@ -1095,27 +981,9 @@ document.addEventListener('DOMContentLoaded', () => {
   const pt = document.getElementById('pushTestBtn');
   if (pt) pt.addEventListener('click', () => Push.test());
 
-  // Paper starting balance — fetch current value + wire save button
-  (async () => {
-    const inp = document.getElementById('paperBalanceInput');
-    const btn = document.getElementById('paperBalanceSave');
-    if (!inp || !btn) return;
-    try {
-      const me = await API.me();
-      const u = me.user || me;
-      if (u && Number(u.paperStartingBalance) > 0) inp.value = u.paperStartingBalance;
-    } catch (_e) {}
-    btn.addEventListener('click', async () => {
-      const amount = parseFloat(inp.value);
-      if (!(amount >= 100 && amount <= 10_000_000)) { Toast.error('От $100 до $10M'); return; }
-      try { await API.setPaperBalance(amount); Toast.success('Сохранено · обнови дашборд'); }
-      catch (e) { Toast.error(e.message || 'Ошибка'); }
-    });
-  })();
-
   const eb = document.getElementById('exportDataBtn');
   if (eb) eb.addEventListener('click', async () => {
-    if (!confirm('Скачать ZIP / JSON со всеми вашими данными (профиль, сделки, платежи, логины, тикеты)? Это может занять до 30 секунд.')) return;
+    if (!confirm('Скачать JSON со всеми вашими данными (профиль, платежи, логины, тикеты)? Это может занять до 30 секунд.')) return;
     try {
       eb.disabled = true; eb.textContent = 'Готовим экспорт…';
       const res = await fetch('/api/auth/me/export', {
@@ -1170,47 +1038,14 @@ document.addEventListener('DOMContentLoaded', () => {
   const origStab = window.stab;
   window.stab = function(t, ev){
     origStab && origStab(t, ev);
-    if(t==='community') loadPublicState();
     if(t==='support') loadTickets();
-    if(t==='risk') loadRisk();
   };
+  // Sidebar "Support" entry deep-links here as settings.html#support
+  if (location.hash === '#support') { try { window.stab('support'); } catch (_e) {} }
+  window.addEventListener('hashchange', () => { if (location.hash === '#support') { try { window.stab('support'); } catch (_e) {} } });
 });
 
-// ── Risk Manager ────────────────────────────────────────────────────
-let _rkLoaded = false;
-function rkDirty(){
-  const b = document.getElementById('rkSaveBtn'); if (b) b.classList.add('dirty');
-}
-async function loadRisk(){
-  if (_rkLoaded) return;
-  try {
-    const r = await API.getRiskLimits();
-    document.getElementById('rkKill').classList.toggle('on', !!r.killSwitchEnabled);
-    document.getElementById('rkKillState').style.display = r.killSwitchEnabled ? 'block' : 'none';
-    document.getElementById('rkMaxOpen').value = r.maxOpenPositions;
-    document.getElementById('rkMaxLoss').value = r.maxDailyLossPct;
-    document.getElementById('rkBlacklist').value = (r.blacklistedSymbols || []).join(', ');
-    _rkLoaded = true;
-  } catch (e) { Toast.error('Не удалось загрузить риск-лимиты: ' + e.message); }
-}
-document.getElementById('rkKill')?.addEventListener('click', () => {
-  const on = document.getElementById('rkKill').classList.contains('on');
-  document.getElementById('rkKillState').style.display = on ? 'block' : 'none';
-});
-document.getElementById('rkSaveBtn')?.addEventListener('click', async () => {
-  const on = document.getElementById('rkKill').classList.contains('on');
-  const maxOpen = parseInt(document.getElementById('rkMaxOpen').value, 10);
-  const maxLoss = parseFloat(document.getElementById('rkMaxLoss').value);
-  const bl = (document.getElementById('rkBlacklist').value || '')
-    .split(',').map(s => s.trim().toUpperCase()).filter(Boolean);
-  if (!Number.isFinite(maxOpen) || maxOpen < 1 || maxOpen > 500) return Toast.error('Max open: 1–500');
-  if (!Number.isFinite(maxLoss) || maxLoss < 0.1 || maxLoss > 50)  return Toast.error('Max loss: 0.1–50%');
-  try {
-    await API.setRiskLimits({ killSwitchEnabled: on, maxOpenPositions: maxOpen, maxDailyLossPct: maxLoss, blacklistedSymbols: bl });
-    Toast.success('Лимиты сохранены');
-    document.getElementById('rkSaveBtn').classList.remove('dirty');
-  } catch (e) { Toast.error(e.message); }
-});
+
 </script>
 <script src="support-widget.js" defer></script>
 </body>

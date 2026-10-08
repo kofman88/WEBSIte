@@ -15,9 +15,8 @@ SMOKE_URL=https://chmup.top node scripts/smoke.js
 SMOKE_URL=https://chmup.top SMOKE_STRICT=1 node scripts/smoke.js   # fails on SMTP missing
 ```
 
-- [ ] All checks PASS (health, auth, bot CRUD, PATCH, stats, equity, quick-backtest polling, signals, analytics)
+- [ ] All checks PASS (health, deep health, register/login, /auth/me, plan usage)
 - [ ] Migration at v7+ (proves `email_outbox` exists)
-- [ ] Backtest queue <50 pending
 - [ ] Email outbox sane (oldest pending < 60min)
 
 ### Live exchange keys
@@ -78,11 +77,8 @@ SMOKE_URL=https://chmup.top SMOKE_STRICT=1 node scripts/smoke.js   # fails on SM
 ### Frontend smoke (manual, in a browser)
 
 - [ ] Landing (/) renders — hero, pricing, FAQ all show
-- [ ] Register → login → dashboard
-- [ ] Create paper bot via wizard → it appears in the list with a sparkline
-- [ ] Click bot card → drawer opens with KPIs + equity chart + TV iframe + trades
-- [ ] Inline settings form saves (PATCH returns 200, header updates)
-- [ ] Quick-backtest from drawer completes and shows 6 result tiles
+- [ ] Register → login → `/app/` loads (web app lands in M11; until then settings.html)
+- [ ] Exchange key add / delete works from the app (verify / balance return 501 until M13)
 - [ ] Mobile: landing renders on iPhone-sized viewport without horizontal scroll
 - [ ] Dark/light theme toggle works on every page
 
@@ -91,9 +87,9 @@ SMOKE_URL=https://chmup.top SMOKE_STRICT=1 node scripts/smoke.js   # fails on SM
 - [ ] Terms of Service published at `/terms.html` (or equivalent)
 - [ ] Privacy Policy published
 - [ ] Risk disclosure (prominent, especially for LIVE mode)
-- [ ] Footer links resolve — no broken links to docs/blog/telegram
+- [ ] Footer links resolve — no broken links to docs/telegram
 - [ ] Cookie / analytics consent banner if tracking non-essential (EU users)
-- [ ] Jurisdiction: confirmed with a local lawyer that bots-with-user-keys isn't a licenced activity where you operate
+- [ ] Jurisdiction: confirmed with a local lawyer that auto-trading with user API keys isn't a licenced activity where you operate
 
 ---
 
@@ -110,6 +106,6 @@ SMOKE_URL=https://chmup.top SMOKE_STRICT=1 node scripts/smoke.js   # fails on SM
 ## Post-launch watch
 
 - Smoke cron: `*/5 * * * * SMOKE_URL=https://chmup.top node ~/WEBSIte/scripts/smoke.js >> ~/smoke.log 2>&1`
-- Alert on: `health/deep` returning 503, `email_outbox.oldestPendingMinutes > 60`, `backtestQueue.pending > 50`
+- Alert on: `health/deep` returning 503, `email_outbox.oldestPendingMinutes > 60`
 - Weekly: `VACUUM` the DB and compare size before/after to spot bloat
 - Every 30 days: rotate `JWT_SECRET` (kicks all sessions — warn users)

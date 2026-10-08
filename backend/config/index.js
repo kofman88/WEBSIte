@@ -51,7 +51,6 @@ module.exports = {
   nodeEnv: NODE_ENV,
   isProd: IS_PROD,
   port: parseInt(process.env.PORT, 10) || 3000,
-  wsPort: parseInt(process.env.WS_PORT, 10) || 3001,
 
   // Critical secrets
   jwtSecret: devFallback(jwtSecret, 'dev-only-jwt-secret-32chars-long!!!!'),
@@ -83,10 +82,4 @@ module.exports = {
   // Monitoring
   sentryDsn: process.env.SENTRY_DSN || '',
   logLevel: process.env.LOG_LEVEL || (IS_PROD ? 'info' : 'debug'),
-
-  // Signal defaults
-  signalDefaults: {
-    maxFreeSignalsPerDay: 3,
-    minConfidence: 60,
-  },
 };

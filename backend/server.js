@@ -1,6 +1,5 @@
 const http = require('http');
 const path = require('path');
-const { Worker } = require('worker_threads');
 const express = require('express');
 const helmet = require('helmet');
 const cors = require('cors');
@@ -12,33 +11,15 @@ const logger = require('./utils/logger');
 const sentry = require('./utils/sentry');
 
 const authRoutes = require('./routes/auth');
-const botsRoutes = require('./routes/bots');
-const backtestsRoutes = require('./routes/backtests');
 const exchangesRoutes = require('./routes/exchanges');
 const subscriptionsRoutes = require('./routes/subscriptions');
-const signalsRoutes = require('./routes/signals');
-const walletRoutes = require('./routes/wallet');
-const optimizationsRoutes = require('./routes/optimizations');
 const paymentsRoutes = require('./routes/payments');
 const adminRoutes = require('./routes/admin');
 const notificationsRoutes = require('./routes/notifications');
 const telegramRoutes = require('./routes/telegram');
-const analyticsRoutes = require('./routes/analytics');
-const webhooksRoutes = require('./routes/webhooks');
 const publicRoutes = require('./routes/public');
 const supportRoutes = require('./routes/support');
 const pushRoutes = require('./routes/push');
-const copyRoutes = require('./routes/copy');
-const strategyMarketRoutes = require('./routes/strategyMarket');
-const riskRoutes = require('./routes/risk');
-const aiRoutes = require('./routes/ai');
-const websocketService = require('./services/websocketService');
-const autoTradeService = require('./services/autoTradeService');
-const partialTpManager = require('./services/partialTpManager');
-const exchangeService = require('./services/exchangeService');
-const marketDataService = require('./services/marketDataService');
-const cryptoMonitor = require('./services/cryptoMonitor');
-const slVerifier = require('./services/slVerifier');
 const maintenanceService = require('./services/maintenanceService');
 const paymentWatcher = require('./workers/paymentWatcher');
 const securityMonitor = require('./services/securityMonitor');
@@ -131,27 +112,20 @@ app.use((req, _res, next) => {
 });
 
 // ── API Routes ─────────────────────────────────────────────────────────
+// Port plan (docs/port/PLAN.md §2.7): the engine's user-facing API arrives
+// as `/api/app/*` from M7 onward. Everything the bot does not have (bots,
+// backtests, signals v1, wallet, analytics, copy-trading, marketplace,
+// risk, AI, TradingView webhooks) was removed in M0.
 app.use('/api/auth', authRoutes);
-app.use('/api/bots', botsRoutes);
-app.use('/api/backtests', backtestsRoutes);
 app.use('/api/exchanges', exchangesRoutes);
 app.use('/api/subscriptions', subscriptionsRoutes);
-app.use('/api/signals', signalsRoutes);
-app.use('/api/wallet', walletRoutes);
-app.use('/api/optimizations', optimizationsRoutes);
 app.use('/api/payments', paymentsRoutes);
 app.use('/api/admin', adminRoutes);
 app.use('/api/notifications', notificationsRoutes);
 app.use('/api/telegram', telegramRoutes);
-app.use('/api/analytics', analyticsRoutes);
-app.use('/api/webhooks', webhooksRoutes);
 app.use('/api/public', publicRoutes);
 app.use('/api/support', supportRoutes);
 app.use('/api/push', pushRoutes);
-app.use('/api/copy', copyRoutes);
-app.use('/api/strategies', strategyMarketRoutes);
-app.use('/api/risk', riskRoutes);
-app.use('/api/ai', aiRoutes);
 
 // Build info — resolved once at boot. Git SHA + build time come from
 // BUILD_SHA / BUILD_TIME env vars (set by CI). Fall back to package.json
@@ -175,25 +149,14 @@ app.get('/api/version', (_req, res) => {
   res.json(BUILD_INFO);
 });
 
-// Gauges refreshed from DB on each /metrics scrape. Scanner runs in a
-// worker thread (separate V8 isolate), so we can't share counters
-// directly — we read from the DB instead, which is the source of truth.
-const gActiveBots    = metrics.gauge('chm_active_bots', 'Currently active bots');
-const gOpenTrades    = metrics.gauge('chm_open_trades', 'Open (unclosed) trades');
-const gSignals24h    = metrics.gauge('chm_signals_last_24h', 'Signals produced in the last 24h');
-const gTrades24h     = metrics.gauge('chm_trades_closed_last_24h', 'Trades closed in the last 24h');
+// Gauges refreshed from DB on each /metrics scrape. Engine gauges (signals,
+// open trades, scanner liveness) return with the engine worker (M9/M10).
 const gUsers         = metrics.gauge('chm_users_total', 'Total registered users');
 const gPaidUsers     = metrics.gauge('chm_users_paid', 'Users on a paid plan');
-const gScannerAlive  = metrics.gauge('chm_scanner_alive', 'Scanner worker alive (1/0)');
 function refreshGauges() {
   try {
-    gActiveBots.set(db.prepare("SELECT COUNT(*) n FROM trading_bots WHERE is_active=1").get().n);
-    gOpenTrades.set(db.prepare("SELECT COUNT(*) n FROM trades WHERE status='open'").get().n);
-    gSignals24h.set(db.prepare("SELECT COUNT(*) n FROM signals WHERE created_at >= datetime('now','-1 day')").get().n);
-    gTrades24h.set(db.prepare("SELECT COUNT(*) n FROM trades WHERE closed_at >= datetime('now','-1 day')").get().n);
     gUsers.set(db.prepare("SELECT COUNT(*) n FROM users").get().n);
     gPaidUsers.set(db.prepare("SELECT COUNT(*) n FROM subscriptions WHERE plan != 'free' AND status='active'").get().n);
-    gScannerAlive.set(scannerWorker ? 1 : 0);
   } catch (_e) { /* metrics best-effort */ }
 }
 
@@ -236,9 +199,6 @@ app.get('/api/health/deep', (_req, res) => {
   } catch (e) {
     out.status = 'degraded'; out.subsystems.database = { ok: false, error: e.message };
   }
-  out.subsystems.scanner = { ok: scannerWorker !== null || IS_TEST };
-  out.subsystems.partialTp = { ok: partialTpWorker !== null || partialTpTimer !== null || IS_TEST };
-  out.subsystems.slVerifier = { ok: true };
   // Migration version — proves all schema changes applied at boot.
   try {
     const migrations = require('./models/migrations');
@@ -246,23 +206,6 @@ app.get('/api/health/deep', (_req, res) => {
   } catch (e) {
     out.status = 'degraded';
     out.subsystems.migrations = { ok: false, error: e.message };
-  }
-  // Backtest queue depth — pending/running from the DB (fresh data, not
-  // in-memory since restarts re-enqueue from the same DB state).
-  try {
-    const bq = db.prepare(
-      `SELECT status, COUNT(*) AS n FROM backtests WHERE status IN ('pending','running','failed') GROUP BY status`,
-    ).all();
-    const by = { pending: 0, running: 0, failed24h: 0 };
-    for (const r of bq) { if (r.status !== 'failed') by[r.status] = r.n; }
-    by.failed24h = db.prepare(
-      `SELECT COUNT(*) AS n FROM backtests WHERE status='failed' AND created_at >= datetime('now','-1 day')`,
-    ).get().n;
-    // Warn if >50 queued — suggests a stuck worker or runaway client.
-    out.subsystems.backtestQueue = { ok: by.pending < 50, ...by };
-    if (by.pending >= 50) out.status = out.status === 'ok' ? 'degraded' : out.status;
-  } catch (e) {
-    out.subsystems.backtestQueue = { ok: false, error: e.message };
   }
   // Email outbox health — warns if old pending rows suggest SMTP is down.
   try {
@@ -376,171 +319,34 @@ if (!IS_TEST) {
   });
 }
 
-// ── Scanner worker_thread (Phase 6) ──────────────────────────────────
-// Restart budget: if the worker crashes more than MAX_RESTARTS times in
-// RESTART_WINDOW_MS, we stop auto-restarting and alert. Otherwise a broken
-// strategy could thrash the CPU in a restart loop indefinitely.
-let scannerWorker = null;
-const RESTART_WINDOW_MS = 5 * 60_000;
-const MAX_RESTARTS = 5;
-const restartTimestamps = [];
-function startScannerWorker() {
-  if (IS_TEST || process.env.SCANNER_DISABLED === '1') return;
-  try {
-    scannerWorker = new Worker(path.join(__dirname, 'workers', 'signalScanner.js'), {
-      env: process.env,
-    });
-    scannerWorker.on('message', (msg) => {
-      if (!msg || !msg.type) return;
-      if (msg.type === 'signal' && msg.signal) {
-        try { websocketService.broadcastSignal(msg.signal); } catch (e) { /* */ }
-      } else if (msg.type === 'auto_trade_request' && msg.signal) {
-        // Phase 10 — load bot + route to autoTradeService
-        (async () => {
-          try {
-            const bot = db.prepare('SELECT * FROM trading_bots WHERE id = ?').get(msg.botId);
-            if (!bot || !bot.is_active || !bot.auto_trade) return;
-            const trade = await autoTradeService.executeSignal(msg.signal, bot, {
-              exchangeService, marketData: marketDataService,
-            });
-            if (trade) {
-              try {
-                websocketService.broadcastToUser(bot.user_id, {
-                  type: 'trade_opened', data: trade, ts: Date.now(),
-                });
-              } catch (_e) { /* */ }
-            }
-          } catch (err) {
-            logger.error('auto_trade_request failed', { err: err.message, botId: msg.botId });
-          }
-        })();
-      } else if (msg.type === 'stopped') {
-        logger.info('scanner worker stopped cleanly');
-      }
-    });
-    scannerWorker.on('error', (err) => logger.error('scanner worker error', { err: err.message }));
-    scannerWorker.on('exit', (code) => {
-      logger.warn('scanner worker exited', { code });
-      scannerWorker = null;
-      if (code === 0 || scannerShutdownRequested) return;
-
-      const now = Date.now();
-      while (restartTimestamps.length && restartTimestamps[0] < now - RESTART_WINDOW_MS) {
-        restartTimestamps.shift();
-      }
-      if (restartTimestamps.length >= MAX_RESTARTS) {
-        logger.error('scanner worker crashed too many times — auto-restart disabled', {
-          restarts: restartTimestamps.length, windowMs: RESTART_WINDOW_MS,
-        });
-        try { sentry.captureException(new Error('scanner worker restart budget exhausted')); } catch (_e) {}
-        return;
-      }
-      // Exponential-ish backoff: 5s, 10s, 20s, 40s, 80s
-      const delay = 5_000 * Math.pow(2, restartTimestamps.length);
-      restartTimestamps.push(now);
-      setTimeout(() => { if (!scannerShutdownRequested) startScannerWorker(); }, delay);
-    });
-    logger.info('scanner worker started');
-  } catch (err) {
-    logger.error('failed to start scanner worker', { err: err.message });
-  }
-}
-
-let scannerShutdownRequested = false;
-async function stopScannerWorker() {
-  scannerShutdownRequested = true;
-  if (!scannerWorker) return;
-  try {
-    scannerWorker.postMessage({ type: 'stop' });
-  } catch (_e) { /* */ }
-  // Give it 3s to stop gracefully then terminate
-  await new Promise((r) => setTimeout(r, 3000));
-  try { scannerWorker.terminate(); } catch (_e) { /* */ }
-  scannerWorker = null;
+// Background services. The engine worker (scanner / tracker / trade-ops)
+// is added in M9+ via worker_threads with the restart budget the old
+// scanner had; until then the site boots with no scanner.
+function startBackground() {
+  maintenanceService.start();
+  securityMonitor.start();
+  paymentWatcher.start();
 }
 
 function shutdown(sig) {
   return async () => {
     logger.info('received ' + sig + ', shutting down');
-    try { await stopScannerWorker(); } catch (e) { /* */ }
-    // Clear all timers so the event loop drains and process can exit cleanly.
-    // Without these, graceful shutdown hangs until process.exit() force-kills.
-    if (partialTpTimer) { clearInterval(partialTpTimer); partialTpTimer = null; }
-    try { await stopPartialTpWorker(); } catch (_e) { /* */ }
-    try { websocketService.shutdown(); } catch (e) { /* */ }
-    try { db.close(); } catch (e) { /* */ }
+    try { maintenanceService.stop(); } catch (_e) { /* */ }
+    try { db.close(); } catch (_e) { /* */ }
     process.exit(0);
   };
-}
-
-// partialTpManager runs in its own worker_thread so its tickOpen
-// loop (DB writes + candle fetches per open trade) doesn't pin the
-// main event loop on accounts with many concurrent positions. The
-// worker forwards trade_closed events back here for WebSocket
-// broadcast — the parent process owns the WS clients.
-let partialTpWorker = null;
-let partialTpTimer = null; // legacy cron handle, kept null when worker mode is active
-function startPartialTpWorker() {
-  if (IS_TEST || process.env.PARTIAL_TP_DISABLED === '1') return;
-  if (partialTpWorker) return;
-  try {
-    partialTpWorker = new Worker(path.join(__dirname, 'workers', 'partialTpWorker.js'), {
-      env: process.env,
-    });
-    partialTpWorker.on('message', (msg) => {
-      if (!msg || !msg.type) return;
-      if (msg.type === 'trade_closed' && msg.userId) {
-        try {
-          websocketService.broadcastToUser(msg.userId, {
-            type: msg.type, data: msg.data, ts: msg.ts,
-          });
-        } catch (_e) { /* */ }
-      } else if (msg.type === 'tick' && msg.closed > 0) {
-        logger.debug('partialTp tick', { closed: msg.closed, processed: msg.processed });
-      }
-    });
-    partialTpWorker.on('error', (err) => logger.error('partialTp worker error', { err: err.message }));
-    partialTpWorker.on('exit', (code) => {
-      logger.warn('partialTp worker exited', { code });
-      partialTpWorker = null;
-    });
-    logger.info('partialTp worker started');
-  } catch (err) {
-    logger.error('failed to start partialTp worker', { err: err.message });
-  }
-}
-
-async function stopPartialTpWorker() {
-  if (!partialTpWorker) return;
-  try { partialTpWorker.postMessage({ type: 'stop' }); } catch (_e) { /* */ }
-  await new Promise((r) => setTimeout(r, 1500));
-  try { partialTpWorker.terminate(); } catch (_e) { /* */ }
-  partialTpWorker = null;
 }
 
 if (IS_TEST) {
   // Test env — do not start HTTP listener, just export the app for supertest
 } else if (typeof(PhusionPassenger) !== 'undefined') {
   app.listen('passenger', () => logger.info('CHM Finance running via Passenger'));
-  startScannerWorker();
-  startPartialTpWorker();
-  cryptoMonitor.start();
-  slVerifier.start();
-  maintenanceService.start();
-  securityMonitor.start();
-  paymentWatcher.start();
+  startBackground();
   process.on('SIGTERM', shutdown('SIGTERM'));
 } else {
   const server = http.createServer(app);
-  websocketService.init({ server });
   server.listen(PORT, () => logger.info('CHM Finance running on port ' + PORT));
-  startScannerWorker();
-  startPartialTpWorker();
-  cryptoMonitor.start();
-  slVerifier.start();
-  maintenanceService.start();
-  securityMonitor.start();
-  paymentWatcher.start();
+  startBackground();
 
   process.on('SIGTERM', () => { shutdown('SIGTERM')().then(() => server.close()); });
   process.on('SIGINT',  () => { shutdown('SIGINT')().then(() => server.close()); });

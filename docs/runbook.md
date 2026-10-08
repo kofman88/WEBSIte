@@ -160,16 +160,13 @@ crontab -e
 
 ## 4. Использование `/ops` back-office
 
-Открыть `https://chmup.top/ops.html` залогиненным админом. 11 вкладок:
+Открыть `https://chmup.top/ops.html` залогиненным админом. 10 вкладок:
 
 | Вкладка | Что делает |
 |---|---|
 | Dashboard | MRR, DAU/WAU/MAU, revenue-chart (7/30/90d), support queue, pipeline |
 | Users | Поиск по email/ref-коду → клик на строку → 360° drawer (Block/Grant admin/Plan/Notify/Impersonate) |
-| Bots | Global feed со всеми ботами платформы |
-| Trades | Global feed сделок, фильтры status/mode |
-| Signals | Global feed сигналов, фильтр strategy |
-| Payments | Confirm (manual) + Refund (авто-cascade: cancel reward → downgrade → deactivate bots) |
+| Payments | Confirm (manual) + Refund (авто-cascade: cancel reward → downgrade) |
 | Billing | Cohort MRR, churn 30d, LTV, ARPPU (block 23) |
 | Promo | CRUD промокодов |
 | Referrals | Pay/Cancel выплат |
@@ -196,7 +193,7 @@ Role → capabilities матрица зашита в `middleware/auth.ADMIN_ROLE
 | Role | Capabilities (кратко) |
 |---|---|
 | `superadmin` | `*` — всё, включая feature flags и grant admin |
-| `support` | User read/notify/plan/block, support r/w, read bots/trades/signals, audit, impersonate |
+| `support` | User read/notify/plan/block, support r/w, audit, impersonate |
 | `billing` | User read/plan, payments r/confirm/refund, promo r/w, rewards r/payout, audit |
 | `viewer` | Read-only всё |
 
@@ -229,28 +226,12 @@ Flags → `maintenance` → Turn on. API возвращает 503 для все�
 ```bash
 curl -X PATCH https://chmup.top/api/admin/users/42/plan \
   -H "Authorization: Bearer $TOKEN" -H "Content-Type: application/json" \
-  -d '{"plan":"elite","durationDays":365}'
+  -d '{"plan":"pro","durationDays":365}'
 ```
 
 ---
 
-## 6. Community features (block 30-31)
-
-### Copy trading
-
-- **Публичный профиль** — пользователь включает в `/settings.html` → Community → Public profile toggle.
-- **Подписка** — `/leaderboard.html` → кнопка **Copy** на любой строке → paper-бот `copy:<leaderId>` автоматически создаётся и зеркалит сигналы.
-- **Live copy** намеренно выключено (400) — требует отдельного compliance-ревью.
-
-### Strategy marketplace
-
-- **Публикация** — `/market.html` → «+ Опубликовать свою» (требует paid-plan).
-- **Установка** — 1 клик = клон в paper-бот, `is_active=0` (юзер активирует вручную).
-- **Рейтинг** — 1-5 звёзд, после install, одна оценка на юзера на стратегию.
-
----
-
-## 7. Проверка после деплоя
+## 6. Проверка после деплоя
 
 ```bash
 # 1. Health
@@ -270,18 +251,16 @@ curl -s https://chmup.top/api/admin/flags -H "Authorization: Bearer $TOKEN" | jq
 # Из логов Passenger:
 tail -f ~/chmup_backend/logs/app-$(date +%Y-%m-%d).log
 # Должны видеть:
-#   "scanner worker started"
 #   "maintenance started"
 #   "security monitor started"
 ```
 
 ---
 
-## 8. Часто встречающиеся проблемы
+## 7. Часто встречающиеся проблемы
 
 | Симптом | Решение |
 |---|---|
-| «Validation failed» при создании paper-бота | Проверь что deployed версия включает block-18 фикс (`createBotSchema` с refine на `tradingMode==='live'`) |
 | Stripe webhook → 503 | `STRIPE_WEBHOOK_SECRET` не задан в prod `.env` |
 | «Кривая капитала плывёт» | Hard-reload (Ctrl+Shift+R) — HTML кэшируется 5 минут |
 | Email не доходят | `/ops` → System → проверь `subsystems.database.userCount`, потом проверь `email_bounces` на suppression + DNS: SPF/DKIM/DMARC |
@@ -292,7 +271,7 @@ tail -f ~/chmup_backend/logs/app-$(date +%Y-%m-%d).log
 
 ---
 
-## 9. Monitoring checklist (ежедневно)
+## 8. Monitoring checklist (ежедневно)
 
 - `/ops` → Dashboard — аномалии в DAU/revenue
 - `/ops` → Support — open > 5?
@@ -304,13 +283,9 @@ tail -f ~/chmup_backend/logs/app-$(date +%Y-%m-%d).log
 
 ---
 
-## 10. Полезные команды
+## 9. Полезные команды
 
 ```bash
-# Список активных ботов
-sqlite3 ~/chmup_backend/data/chm.db \
-  "SELECT u.email, b.name, b.strategy, b.trading_mode FROM trading_bots b JOIN users u ON u.id=b.user_id WHERE b.is_active=1"
-
 # Суммарный revenue за 30 дней
 sqlite3 ~/chmup_backend/data/chm.db \
   "SELECT SUM(amount_usd) FROM payments WHERE status='confirmed' AND created_at > datetime('now','-30 day')"

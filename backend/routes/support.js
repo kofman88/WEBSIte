@@ -2,7 +2,6 @@ const express = require('express');
 const { z } = require('zod');
 const { authMiddleware, requireAdmin } = require('../middleware/auth');
 const support = require('../services/supportService');
-const leaderboard = require('../services/leaderboardService');
 const handleErr = require('../middleware/handleErr');
 
 const router = express.Router();
@@ -209,27 +208,6 @@ router.post('/admin/presence/ping', requireAdmin, (req, res) => {
 });
 router.get('/admin/presence/online', requireAdmin, (_req, res) => {
   res.json({ agents: presence.listOnlineAgents() });
-});
-
-// ── Profile privacy toggle (lives here to keep all "community" endpoints together) ──
-router.put('/profile/public', (req, res, next) => {
-  try {
-    const body = z.object({ enabled: z.boolean() }).parse(req.body);
-    res.json(leaderboard.setPublicProfile(req.userId, body.enabled));
-  } catch (err) { handleErr(err, res, next); }
-});
-
-// ── Paper-trading starting balance ───────────────────────────────────────
-// Users configure their own "virtual account" — used for equity-curve
-// baseline on the dashboard + analytics page. $100 min, $10M max to
-// keep P&L% math reasonable.
-router.put('/profile/paper-balance', (req, res, next) => {
-  try {
-    const body = z.object({ amount: z.number().min(100).max(10_000_000) }).parse(req.body);
-    const db = require('../models/database');
-    db.prepare(`UPDATE users SET paper_starting_balance = ? WHERE id = ?`).run(body.amount, req.userId);
-    res.json({ paperStartingBalance: body.amount });
-  } catch (err) { handleErr(err, res, next); }
 });
 
 module.exports = router;
