@@ -1,0 +1,1603 @@
+{
+ "constants": {
+  "CROSS_TTL": 14400,
+  "CLAIM_TTL_S": 120,
+  "_CLEANUP_INTERVAL": 1800,
+  "_PERSIST_INTERVAL": 10.0,
+  "_STRATEGY_TTL": {}
+ },
+ "users": {
+  "multi": {
+   "user_id": 555,
+   "strategy": "LEVELS",
+   "extra_strategies": "SMC",
+   "sub_plan": "pro"
+  },
+  "single": {
+   "user_id": 556,
+   "strategy": "SMC",
+   "extra_strategies": "",
+   "sub_plan": "pro"
+  },
+  "free_extras": {
+   "user_id": 557,
+   "strategy": "LEVELS",
+   "extra_strategies": "SMC,VOLUME",
+   "sub_plan": "free"
+  },
+  "admin": {
+   "user_id": 123,
+   "strategy": "LEVELS",
+   "extra_strategies": "VOLUME",
+   "sub_plan": "free"
+  },
+  "vol_pro": {
+   "user_id": 558,
+   "strategy": "VOLUME",
+   "extra_strategies": "LEVELS",
+   "sub_plan": "pro"
+  }
+ },
+ "scripts": {
+  "basic": [
+   {
+    "op": [
+     "peek",
+     1,
+     "BTC-USDT-SWAP",
+     "LONG",
+     ""
+    ],
+    "now": 1800000000.25,
+    "result": true,
+    "registry": {},
+    "persisted": null,
+    "logs": []
+   },
+   {
+    "op": [
+     "commit",
+     1,
+     "BTC-USDT-SWAP",
+     "LONG",
+     "",
+     null
+    ],
+    "now": 1800000000.25,
+    "result": null,
+    "registry": {
+     "1|BTC-USDT-SWAP|LONG": 1800000000.25
+    },
+    "persisted": "{\"1|BTC-USDT-SWAP|LONG\": 1800000000.25}",
+    "logs": []
+   },
+   {
+    "op": [
+     "peek",
+     1,
+     "BTC-USDT-SWAP",
+     "LONG",
+     ""
+    ],
+    "now": 1800000000.25,
+    "result": false,
+    "registry": {
+     "1|BTC-USDT-SWAP|LONG": 1800000000.25
+    },
+    "persisted": "{\"1|BTC-USDT-SWAP|LONG\": 1800000000.25}",
+    "logs": []
+   },
+   {
+    "op": [
+     "peek",
+     1,
+     "BTC-USDT-SWAP",
+     "LONG",
+     "SMC"
+    ],
+    "now": 1800000000.25,
+    "result": true,
+    "registry": {
+     "1|BTC-USDT-SWAP|LONG": 1800000000.25
+    },
+    "persisted": "{\"1|BTC-USDT-SWAP|LONG\": 1800000000.25}",
+    "logs": []
+   },
+   {
+    "op": [
+     "advance",
+     5
+    ],
+    "now": 1800000005.25,
+    "result": null,
+    "registry": {
+     "1|BTC-USDT-SWAP|LONG": 1800000000.25
+    },
+    "persisted": "{\"1|BTC-USDT-SWAP|LONG\": 1800000000.25}",
+    "logs": []
+   },
+   {
+    "op": [
+     "commit",
+     1,
+     "BTC-USDT-SWAP",
+     "LONG",
+     "SMC",
+     null
+    ],
+    "now": 1800000005.25,
+    "result": null,
+    "registry": {
+     "1|BTC-USDT-SWAP|LONG": 1800000000.25,
+     "1|BTC-USDT-SWAP|LONG|SMC": 1800000005.25
+    },
+    "persisted": "{\"1|BTC-USDT-SWAP|LONG\": 1800000000.25}",
+    "logs": []
+   },
+   {
+    "op": [
+     "advance",
+     14399.0
+    ],
+    "now": 1800014404.25,
+    "result": null,
+    "registry": {
+     "1|BTC-USDT-SWAP|LONG": 1800000000.25,
+     "1|BTC-USDT-SWAP|LONG|SMC": 1800000005.25
+    },
+    "persisted": "{\"1|BTC-USDT-SWAP|LONG\": 1800000000.25}",
+    "logs": []
+   },
+   {
+    "op": [
+     "peek",
+     1,
+     "BTC-USDT-SWAP",
+     "LONG",
+     ""
+    ],
+    "now": 1800014404.25,
+    "result": true,
+    "registry": {
+     "1|BTC-USDT-SWAP|LONG": 1800000000.25,
+     "1|BTC-USDT-SWAP|LONG|SMC": 1800000005.25
+    },
+    "persisted": "{\"1|BTC-USDT-SWAP|LONG\": 1800000000.25}",
+    "logs": []
+   },
+   {
+    "op": [
+     "advance",
+     1.0
+    ],
+    "now": 1800014405.25,
+    "result": null,
+    "registry": {
+     "1|BTC-USDT-SWAP|LONG": 1800000000.25,
+     "1|BTC-USDT-SWAP|LONG|SMC": 1800000005.25
+    },
+    "persisted": "{\"1|BTC-USDT-SWAP|LONG\": 1800000000.25}",
+    "logs": []
+   },
+   {
+    "op": [
+     "peek",
+     1,
+     "BTC-USDT-SWAP",
+     "LONG",
+     ""
+    ],
+    "now": 1800014405.25,
+    "result": true,
+    "registry": {
+     "1|BTC-USDT-SWAP|LONG": 1800000000.25,
+     "1|BTC-USDT-SWAP|LONG|SMC": 1800000005.25
+    },
+    "persisted": "{\"1|BTC-USDT-SWAP|LONG\": 1800000000.25}",
+    "logs": []
+   },
+   {
+    "op": [
+     "peek",
+     1,
+     "BTC-USDT-SWAP",
+     "LONG",
+     "SMC"
+    ],
+    "now": 1800014405.25,
+    "result": true,
+    "registry": {
+     "1|BTC-USDT-SWAP|LONG": 1800000000.25,
+     "1|BTC-USDT-SWAP|LONG|SMC": 1800000005.25
+    },
+    "persisted": "{\"1|BTC-USDT-SWAP|LONG\": 1800000000.25}",
+    "logs": []
+   },
+   {
+    "op": [
+     "advance",
+     6.0
+    ],
+    "now": 1800014411.25,
+    "result": null,
+    "registry": {
+     "1|BTC-USDT-SWAP|LONG": 1800000000.25,
+     "1|BTC-USDT-SWAP|LONG|SMC": 1800000005.25
+    },
+    "persisted": "{\"1|BTC-USDT-SWAP|LONG\": 1800000000.25}",
+    "logs": []
+   },
+   {
+    "op": [
+     "peek",
+     1,
+     "BTC-USDT-SWAP",
+     "LONG",
+     "SMC"
+    ],
+    "now": 1800014411.25,
+    "result": true,
+    "registry": {
+     "1|BTC-USDT-SWAP|LONG": 1800000000.25,
+     "1|BTC-USDT-SWAP|LONG|SMC": 1800000005.25
+    },
+    "persisted": "{\"1|BTC-USDT-SWAP|LONG\": 1800000000.25}",
+    "logs": []
+   },
+   {
+    "op": [
+     "stats"
+    ],
+    "now": 1800014411.25,
+    "result": {
+     "allowed": 2,
+     "blocked": 1,
+     "active": 2
+    },
+    "registry": {
+     "1|BTC-USDT-SWAP|LONG": 1800000000.25,
+     "1|BTC-USDT-SWAP|LONG|SMC": 1800000005.25
+    },
+    "persisted": "{\"1|BTC-USDT-SWAP|LONG\": 1800000000.25}",
+    "logs": []
+   }
+  ],
+  "ttl_shift": [
+   {
+    "op": [
+     "commit",
+     7,
+     "ETH-USDT-SWAP",
+     "SHORT",
+     "VOLUME",
+     3600
+    ],
+    "now": 1800000000.25,
+    "result": null,
+    "registry": {
+     "7|ETH-USDT-SWAP|SHORT|VOLUME": 1799989200.25
+    },
+    "persisted": "{\"7|ETH-USDT-SWAP|SHORT|VOLUME\": 1799989200.25}",
+    "logs": []
+   },
+   {
+    "op": [
+     "advance",
+     3599.5
+    ],
+    "now": 1800003599.75,
+    "result": null,
+    "registry": {
+     "7|ETH-USDT-SWAP|SHORT|VOLUME": 1799989200.25
+    },
+    "persisted": "{\"7|ETH-USDT-SWAP|SHORT|VOLUME\": 1799989200.25}",
+    "logs": []
+   },
+   {
+    "op": [
+     "peek",
+     7,
+     "ETH-USDT-SWAP",
+     "SHORT",
+     "VOLUME"
+    ],
+    "now": 1800003599.75,
+    "result": false,
+    "registry": {
+     "7|ETH-USDT-SWAP|SHORT|VOLUME": 1799989200.25
+    },
+    "persisted": "{\"7|ETH-USDT-SWAP|SHORT|VOLUME\": 1799989200.25}",
+    "logs": []
+   },
+   {
+    "op": [
+     "advance",
+     0.5
+    ],
+    "now": 1800003600.25,
+    "result": null,
+    "registry": {
+     "7|ETH-USDT-SWAP|SHORT|VOLUME": 1799989200.25
+    },
+    "persisted": "{\"7|ETH-USDT-SWAP|SHORT|VOLUME\": 1799989200.25}",
+    "logs": []
+   },
+   {
+    "op": [
+     "peek",
+     7,
+     "ETH-USDT-SWAP",
+     "SHORT",
+     "VOLUME"
+    ],
+    "now": 1800003600.25,
+    "result": true,
+    "registry": {
+     "7|ETH-USDT-SWAP|SHORT|VOLUME": 1799989200.25
+    },
+    "persisted": "{\"7|ETH-USDT-SWAP|SHORT|VOLUME\": 1799989200.25}",
+    "logs": []
+   },
+   {
+    "op": [
+     "commit",
+     7,
+     "ETH-USDT-SWAP",
+     "SHORT",
+     "VOLUME",
+     30
+    ],
+    "now": 1800003600.25,
+    "result": null,
+    "registry": {
+     "7|ETH-USDT-SWAP|SHORT|VOLUME": 1799989260.25
+    },
+    "persisted": "{\"7|ETH-USDT-SWAP|SHORT|VOLUME\": 1799989260.25}",
+    "logs": []
+   },
+   {
+    "op": [
+     "peek",
+     7,
+     "ETH-USDT-SWAP",
+     "SHORT",
+     "VOLUME"
+    ],
+    "now": 1800003600.25,
+    "result": false,
+    "registry": {
+     "7|ETH-USDT-SWAP|SHORT|VOLUME": 1799989260.25
+    },
+    "persisted": "{\"7|ETH-USDT-SWAP|SHORT|VOLUME\": 1799989260.25}",
+    "logs": []
+   },
+   {
+    "op": [
+     "advance",
+     59.9
+    ],
+    "now": 1800003660.15,
+    "result": null,
+    "registry": {
+     "7|ETH-USDT-SWAP|SHORT|VOLUME": 1799989260.25
+    },
+    "persisted": "{\"7|ETH-USDT-SWAP|SHORT|VOLUME\": 1799989260.25}",
+    "logs": []
+   },
+   {
+    "op": [
+     "peek",
+     7,
+     "ETH-USDT-SWAP",
+     "SHORT",
+     "VOLUME"
+    ],
+    "now": 1800003660.15,
+    "result": false,
+    "registry": {
+     "7|ETH-USDT-SWAP|SHORT|VOLUME": 1799989260.25
+    },
+    "persisted": "{\"7|ETH-USDT-SWAP|SHORT|VOLUME\": 1799989260.25}",
+    "logs": []
+   },
+   {
+    "op": [
+     "advance",
+     0.2
+    ],
+    "now": 1800003660.3500001,
+    "result": null,
+    "registry": {
+     "7|ETH-USDT-SWAP|SHORT|VOLUME": 1799989260.25
+    },
+    "persisted": "{\"7|ETH-USDT-SWAP|SHORT|VOLUME\": 1799989260.25}",
+    "logs": []
+   },
+   {
+    "op": [
+     "peek",
+     7,
+     "ETH-USDT-SWAP",
+     "SHORT",
+     "VOLUME"
+    ],
+    "now": 1800003660.3500001,
+    "result": true,
+    "registry": {
+     "7|ETH-USDT-SWAP|SHORT|VOLUME": 1799989260.25
+    },
+    "persisted": "{\"7|ETH-USDT-SWAP|SHORT|VOLUME\": 1799989260.25}",
+    "logs": []
+   },
+   {
+    "op": [
+     "commit",
+     7,
+     "ETH-USDT-SWAP",
+     "SHORT",
+     "VOLUME",
+     57600.9
+    ],
+    "now": 1800003660.3500001,
+    "result": null,
+    "registry": {
+     "7|ETH-USDT-SWAP|SHORT|VOLUME": 1800046860.3500001
+    },
+    "persisted": "{\"7|ETH-USDT-SWAP|SHORT|VOLUME\": 1800046860.3500001}",
+    "logs": []
+   },
+   {
+    "op": [
+     "advance",
+     57600.0
+    ],
+    "now": 1800061260.3500001,
+    "result": null,
+    "registry": {
+     "7|ETH-USDT-SWAP|SHORT|VOLUME": 1800046860.3500001
+    },
+    "persisted": "{\"7|ETH-USDT-SWAP|SHORT|VOLUME\": 1800046860.3500001}",
+    "logs": []
+   },
+   {
+    "op": [
+     "peek",
+     7,
+     "ETH-USDT-SWAP",
+     "SHORT",
+     "VOLUME"
+    ],
+    "now": 1800061260.3500001,
+    "result": true,
+    "registry": {
+     "7|ETH-USDT-SWAP|SHORT|VOLUME": 1800046860.3500001
+    },
+    "persisted": "{\"7|ETH-USDT-SWAP|SHORT|VOLUME\": 1800046860.3500001}",
+    "logs": []
+   },
+   {
+    "op": [
+     "advance",
+     0.5
+    ],
+    "now": 1800061260.8500001,
+    "result": null,
+    "registry": {
+     "7|ETH-USDT-SWAP|SHORT|VOLUME": 1800046860.3500001
+    },
+    "persisted": "{\"7|ETH-USDT-SWAP|SHORT|VOLUME\": 1800046860.3500001}",
+    "logs": []
+   },
+   {
+    "op": [
+     "peek",
+     7,
+     "ETH-USDT-SWAP",
+     "SHORT",
+     "VOLUME"
+    ],
+    "now": 1800061260.8500001,
+    "result": true,
+    "registry": {
+     "7|ETH-USDT-SWAP|SHORT|VOLUME": 1800046860.3500001
+    },
+    "persisted": "{\"7|ETH-USDT-SWAP|SHORT|VOLUME\": 1800046860.3500001}",
+    "logs": []
+   },
+   {
+    "op": [
+     "commit",
+     7,
+     "SOL-USDT-SWAP",
+     "LONG",
+     "",
+     14400
+    ],
+    "now": 1800061260.8500001,
+    "result": null,
+    "registry": {
+     "7|SOL-USDT-SWAP|LONG": 1800061260.8500001
+    },
+    "persisted": "{\"7|SOL-USDT-SWAP|LONG\": 1800061260.8500001}",
+    "logs": []
+   },
+   {
+    "op": [
+     "commit",
+     7,
+     "XRP-USDT-SWAP",
+     "LONG",
+     "",
+     100000
+    ],
+    "now": 1800061260.8500001,
+    "result": null,
+    "registry": {
+     "7|SOL-USDT-SWAP|LONG": 1800061260.8500001,
+     "7|XRP-USDT-SWAP|LONG": 1800146860.8500001
+    },
+    "persisted": "{\"7|SOL-USDT-SWAP|LONG\": 1800061260.8500001}",
+    "logs": []
+   },
+   {
+    "op": [
+     "stats"
+    ],
+    "now": 1800061260.8500001,
+    "result": {
+     "allowed": 5,
+     "blocked": 3,
+     "active": 2
+    },
+    "registry": {
+     "7|SOL-USDT-SWAP|LONG": 1800061260.8500001,
+     "7|XRP-USDT-SWAP|LONG": 1800146860.8500001
+    },
+    "persisted": "{\"7|SOL-USDT-SWAP|LONG\": 1800061260.8500001}",
+    "logs": []
+   }
+  ],
+  "multi": [
+   {
+    "op": [
+     "peek_multi",
+     "multi",
+     "BTC-USDT-SWAP",
+     "LONG"
+    ],
+    "now": 1800000000.25,
+    "result": true,
+    "registry": {},
+    "persisted": null,
+    "logs": []
+   },
+   {
+    "op": [
+     "claim_multi",
+     "multi",
+     "BTC-USDT-SWAP",
+     "LONG",
+     120
+    ],
+    "now": 1800000000.25,
+    "result": null,
+    "registry": {
+     "555|BTC-USDT-SWAP|LONG|MULTI": 1799985720.25
+    },
+    "persisted": "{\"555|BTC-USDT-SWAP|LONG|MULTI\": 1799985720.25}",
+    "logs": []
+   },
+   {
+    "op": [
+     "peek_multi",
+     "multi",
+     "BTC-USDT-SWAP",
+     "LONG"
+    ],
+    "now": 1800000000.25,
+    "result": false,
+    "registry": {
+     "555|BTC-USDT-SWAP|LONG|MULTI": 1799985720.25
+    },
+    "persisted": "{\"555|BTC-USDT-SWAP|LONG|MULTI\": 1799985720.25}",
+    "logs": []
+   },
+   {
+    "op": [
+     "advance",
+     121
+    ],
+    "now": 1800000121.25,
+    "result": null,
+    "registry": {
+     "555|BTC-USDT-SWAP|LONG|MULTI": 1799985720.25
+    },
+    "persisted": "{\"555|BTC-USDT-SWAP|LONG|MULTI\": 1799985720.25}",
+    "logs": []
+   },
+   {
+    "op": [
+     "peek_multi",
+     "multi",
+     "BTC-USDT-SWAP",
+     "LONG"
+    ],
+    "now": 1800000121.25,
+    "result": true,
+    "registry": {
+     "555|BTC-USDT-SWAP|LONG|MULTI": 1799985720.25
+    },
+    "persisted": "{\"555|BTC-USDT-SWAP|LONG|MULTI\": 1799985720.25}",
+    "logs": []
+   },
+   {
+    "op": [
+     "claim_multi",
+     "multi",
+     "BTC-USDT-SWAP",
+     "LONG",
+     120
+    ],
+    "now": 1800000121.25,
+    "result": null,
+    "registry": {
+     "555|BTC-USDT-SWAP|LONG|MULTI": 1799985841.25
+    },
+    "persisted": "{\"555|BTC-USDT-SWAP|LONG|MULTI\": 1799985841.25}",
+    "logs": []
+   },
+   {
+    "op": [
+     "commit_multi",
+     "multi",
+     "BTC-USDT-SWAP",
+     "LONG"
+    ],
+    "now": 1800000121.25,
+    "result": null,
+    "registry": {
+     "555|BTC-USDT-SWAP|LONG|MULTI": 1800000121.25
+    },
+    "persisted": "{\"555|BTC-USDT-SWAP|LONG|MULTI\": 1799985841.25}",
+    "logs": []
+   },
+   {
+    "op": [
+     "advance",
+     7200
+    ],
+    "now": 1800007321.25,
+    "result": null,
+    "registry": {
+     "555|BTC-USDT-SWAP|LONG|MULTI": 1800000121.25
+    },
+    "persisted": "{\"555|BTC-USDT-SWAP|LONG|MULTI\": 1799985841.25}",
+    "logs": []
+   },
+   {
+    "op": [
+     "peek_multi",
+     "multi",
+     "BTC-USDT-SWAP",
+     "LONG"
+    ],
+    "now": 1800007321.25,
+    "result": false,
+    "registry": {
+     "555|BTC-USDT-SWAP|LONG|MULTI": 1800000121.25
+    },
+    "persisted": "{\"555|BTC-USDT-SWAP|LONG|MULTI\": 1799985841.25}",
+    "logs": []
+   },
+   {
+    "op": [
+     "peek_multi",
+     "single",
+     "BTC-USDT-SWAP",
+     "LONG"
+    ],
+    "now": 1800007321.25,
+    "result": true,
+    "registry": {
+     "555|BTC-USDT-SWAP|LONG|MULTI": 1800000121.25
+    },
+    "persisted": "{\"555|BTC-USDT-SWAP|LONG|MULTI\": 1799985841.25}",
+    "logs": []
+   },
+   {
+    "op": [
+     "claim_multi",
+     "single",
+     "BTC-USDT-SWAP",
+     "LONG",
+     120
+    ],
+    "now": 1800007321.25,
+    "result": null,
+    "registry": {
+     "555|BTC-USDT-SWAP|LONG|MULTI": 1800000121.25
+    },
+    "persisted": "{\"555|BTC-USDT-SWAP|LONG|MULTI\": 1799985841.25}",
+    "logs": []
+   },
+   {
+    "op": [
+     "commit_multi",
+     "single",
+     "BTC-USDT-SWAP",
+     "LONG"
+    ],
+    "now": 1800007321.25,
+    "result": null,
+    "registry": {
+     "555|BTC-USDT-SWAP|LONG|MULTI": 1800000121.25
+    },
+    "persisted": "{\"555|BTC-USDT-SWAP|LONG|MULTI\": 1799985841.25}",
+    "logs": []
+   },
+   {
+    "op": [
+     "peek_multi",
+     "free_extras",
+     "BTC-USDT-SWAP",
+     "LONG"
+    ],
+    "now": 1800007321.25,
+    "result": true,
+    "registry": {
+     "555|BTC-USDT-SWAP|LONG|MULTI": 1800000121.25
+    },
+    "persisted": "{\"555|BTC-USDT-SWAP|LONG|MULTI\": 1799985841.25}",
+    "logs": []
+   },
+   {
+    "op": [
+     "claim_multi",
+     "free_extras",
+     "BTC-USDT-SWAP",
+     "LONG",
+     120
+    ],
+    "now": 1800007321.25,
+    "result": null,
+    "registry": {
+     "555|BTC-USDT-SWAP|LONG|MULTI": 1800000121.25
+    },
+    "persisted": "{\"555|BTC-USDT-SWAP|LONG|MULTI\": 1799985841.25}",
+    "logs": []
+   },
+   {
+    "op": [
+     "claim_multi",
+     "admin",
+     "ETH-USDT-SWAP",
+     "SHORT",
+     120
+    ],
+    "now": 1800007321.25,
+    "result": null,
+    "registry": {
+     "555|BTC-USDT-SWAP|LONG|MULTI": 1800000121.25,
+     "123|ETH-USDT-SWAP|SHORT|MULTI": 1799993041.25
+    },
+    "persisted": "{\"555|BTC-USDT-SWAP|LONG|MULTI\": 1800000121.25, \"123|ETH-USDT-SWAP|SHORT|MULTI\": 1799993041.25}",
+    "logs": []
+   },
+   {
+    "op": [
+     "peek_multi",
+     "admin",
+     "ETH-USDT-SWAP",
+     "SHORT"
+    ],
+    "now": 1800007321.25,
+    "result": false,
+    "registry": {
+     "555|BTC-USDT-SWAP|LONG|MULTI": 1800000121.25,
+     "123|ETH-USDT-SWAP|SHORT|MULTI": 1799993041.25
+    },
+    "persisted": "{\"555|BTC-USDT-SWAP|LONG|MULTI\": 1800000121.25, \"123|ETH-USDT-SWAP|SHORT|MULTI\": 1799993041.25}",
+    "logs": []
+   },
+   {
+    "op": [
+     "can_send_multi",
+     "vol_pro",
+     "ETH-USDT-SWAP",
+     "SHORT"
+    ],
+    "now": 1800007321.25,
+    "result": true,
+    "registry": {
+     "555|BTC-USDT-SWAP|LONG|MULTI": 1800000121.25,
+     "123|ETH-USDT-SWAP|SHORT|MULTI": 1799993041.25,
+     "558|ETH-USDT-SWAP|SHORT|MULTI": 1800007321.25
+    },
+    "persisted": "{\"555|BTC-USDT-SWAP|LONG|MULTI\": 1800000121.25, \"123|ETH-USDT-SWAP|SHORT|MULTI\": 1799993041.25}",
+    "logs": []
+   },
+   {
+    "op": [
+     "can_send_multi",
+     "vol_pro",
+     "ETH-USDT-SWAP",
+     "SHORT"
+    ],
+    "now": 1800007321.25,
+    "result": false,
+    "registry": {
+     "555|BTC-USDT-SWAP|LONG|MULTI": 1800000121.25,
+     "123|ETH-USDT-SWAP|SHORT|MULTI": 1799993041.25,
+     "558|ETH-USDT-SWAP|SHORT|MULTI": 1800007321.25
+    },
+    "persisted": "{\"555|BTC-USDT-SWAP|LONG|MULTI\": 1800000121.25, \"123|ETH-USDT-SWAP|SHORT|MULTI\": 1799993041.25}",
+    "logs": []
+   },
+   {
+    "op": [
+     "can_send",
+     9,
+     "ADA-USDT-SWAP",
+     "LONG",
+     ""
+    ],
+    "now": 1800007321.25,
+    "result": true,
+    "registry": {
+     "555|BTC-USDT-SWAP|LONG|MULTI": 1800000121.25,
+     "123|ETH-USDT-SWAP|SHORT|MULTI": 1799993041.25,
+     "558|ETH-USDT-SWAP|SHORT|MULTI": 1800007321.25,
+     "9|ADA-USDT-SWAP|LONG": 1800007321.25
+    },
+    "persisted": "{\"555|BTC-USDT-SWAP|LONG|MULTI\": 1800000121.25, \"123|ETH-USDT-SWAP|SHORT|MULTI\": 1799993041.25}",
+    "logs": []
+   },
+   {
+    "op": [
+     "can_send",
+     9,
+     "ADA-USDT-SWAP",
+     "LONG",
+     ""
+    ],
+    "now": 1800007321.25,
+    "result": false,
+    "registry": {
+     "555|BTC-USDT-SWAP|LONG|MULTI": 1800000121.25,
+     "123|ETH-USDT-SWAP|SHORT|MULTI": 1799993041.25,
+     "558|ETH-USDT-SWAP|SHORT|MULTI": 1800007321.25,
+     "9|ADA-USDT-SWAP|LONG": 1800007321.25
+    },
+    "persisted": "{\"555|BTC-USDT-SWAP|LONG|MULTI\": 1800000121.25, \"123|ETH-USDT-SWAP|SHORT|MULTI\": 1799993041.25}",
+    "logs": []
+   },
+   {
+    "op": [
+     "stats"
+    ],
+    "now": 1800007321.25,
+    "result": {
+     "allowed": 6,
+     "blocked": 5,
+     "active": 4
+    },
+    "registry": {
+     "555|BTC-USDT-SWAP|LONG|MULTI": 1800000121.25,
+     "123|ETH-USDT-SWAP|SHORT|MULTI": 1799993041.25,
+     "558|ETH-USDT-SWAP|SHORT|MULTI": 1800007321.25,
+     "9|ADA-USDT-SWAP|LONG": 1800007321.25
+    },
+    "persisted": "{\"555|BTC-USDT-SWAP|LONG|MULTI\": 1800000121.25, \"123|ETH-USDT-SWAP|SHORT|MULTI\": 1799993041.25}",
+    "logs": []
+   }
+  ],
+  "cooldown": [
+   {
+    "op": [
+     "commit",
+     3,
+     "PEPE-USDT-SWAP",
+     "LONG",
+     "",
+     null
+    ],
+    "now": 1800000000.25,
+    "result": null,
+    "registry": {
+     "3|PEPE-USDT-SWAP|LONG": 1800000000.25
+    },
+    "persisted": "{\"3|PEPE-USDT-SWAP|LONG\": 1800000000.25}",
+    "logs": []
+   },
+   {
+    "op": [
+     "commit",
+     3,
+     "PEPE-USDT-SWAP",
+     "LONG",
+     "SMC",
+     null
+    ],
+    "now": 1800000000.25,
+    "result": null,
+    "registry": {
+     "3|PEPE-USDT-SWAP|LONG": 1800000000.25,
+     "3|PEPE-USDT-SWAP|LONG|SMC": 1800000000.25
+    },
+    "persisted": "{\"3|PEPE-USDT-SWAP|LONG\": 1800000000.25}",
+    "logs": []
+   },
+   {
+    "op": [
+     "commit",
+     3,
+     "PEPE-USDT-SWAP",
+     "LONG",
+     "MULTI",
+     null
+    ],
+    "now": 1800000000.25,
+    "result": null,
+    "registry": {
+     "3|PEPE-USDT-SWAP|LONG": 1800000000.25,
+     "3|PEPE-USDT-SWAP|LONG|SMC": 1800000000.25,
+     "3|PEPE-USDT-SWAP|LONG|MULTI": 1800000000.25
+    },
+    "persisted": "{\"3|PEPE-USDT-SWAP|LONG\": 1800000000.25}",
+    "logs": []
+   },
+   {
+    "op": [
+     "commit",
+     3,
+     "PEPE-USDT-SWAP",
+     "SHORT",
+     "SMC",
+     null
+    ],
+    "now": 1800000000.25,
+    "result": null,
+    "registry": {
+     "3|PEPE-USDT-SWAP|LONG": 1800000000.25,
+     "3|PEPE-USDT-SWAP|LONG|SMC": 1800000000.25,
+     "3|PEPE-USDT-SWAP|LONG|MULTI": 1800000000.25,
+     "3|PEPE-USDT-SWAP|SHORT|SMC": 1800000000.25
+    },
+    "persisted": "{\"3|PEPE-USDT-SWAP|LONG\": 1800000000.25}",
+    "logs": []
+   },
+   {
+    "op": [
+     "commit",
+     4,
+     "PEPE-USDT-SWAP",
+     "LONG",
+     "SMC",
+     null
+    ],
+    "now": 1800000000.25,
+    "result": null,
+    "registry": {
+     "3|PEPE-USDT-SWAP|LONG": 1800000000.25,
+     "3|PEPE-USDT-SWAP|LONG|SMC": 1800000000.25,
+     "3|PEPE-USDT-SWAP|LONG|MULTI": 1800000000.25,
+     "3|PEPE-USDT-SWAP|SHORT|SMC": 1800000000.25,
+     "4|PEPE-USDT-SWAP|LONG|SMC": 1800000000.25
+    },
+    "persisted": "{\"3|PEPE-USDT-SWAP|LONG\": 1800000000.25}",
+    "logs": []
+   },
+   {
+    "op": [
+     "advance",
+     600
+    ],
+    "now": 1800000600.25,
+    "result": null,
+    "registry": {
+     "3|PEPE-USDT-SWAP|LONG": 1800000000.25,
+     "3|PEPE-USDT-SWAP|LONG|SMC": 1800000000.25,
+     "3|PEPE-USDT-SWAP|LONG|MULTI": 1800000000.25,
+     "3|PEPE-USDT-SWAP|SHORT|SMC": 1800000000.25,
+     "4|PEPE-USDT-SWAP|LONG|SMC": 1800000000.25
+    },
+    "persisted": "{\"3|PEPE-USDT-SWAP|LONG\": 1800000000.25}",
+    "logs": []
+   },
+   {
+    "op": [
+     "cooldown",
+     3,
+     "PEPE-USDT-SWAP",
+     "LONG",
+     1800
+    ],
+    "now": 1800000600.25,
+    "result": null,
+    "registry": {
+     "3|PEPE-USDT-SWAP|LONG": 1799988000.25,
+     "3|PEPE-USDT-SWAP|LONG|SMC": 1799988000.25,
+     "3|PEPE-USDT-SWAP|LONG|MULTI": 1799988000.25,
+     "3|PEPE-USDT-SWAP|SHORT|SMC": 1800000000.25,
+     "4|PEPE-USDT-SWAP|LONG|SMC": 1800000000.25
+    },
+    "persisted": "{\"3|PEPE-USDT-SWAP|LONG\": 1799988000.25, \"3|PEPE-USDT-SWAP|LONG|SMC\": 1799988000.25, \"3|PEPE-USDT-SWAP|LONG|MULTI\": 1799988000.25, \"3|PEPE-USDT-SWAP|SHORT|SMC\": 1800000000.25, \"4|PEPE-USDT-SWAP|LONG|SMC\": 1800000000.25}",
+    "logs": [
+     [
+      "INFO",
+      "[REGISTRY-COOLDOWN] uid=3 PEPE-USDT-SWAP LONG — block re-entry for 1800s"
+     ]
+    ]
+   },
+   {
+    "op": [
+     "peek",
+     3,
+     "PEPE-USDT-SWAP",
+     "LONG",
+     ""
+    ],
+    "now": 1800000600.25,
+    "result": false,
+    "registry": {
+     "3|PEPE-USDT-SWAP|LONG": 1799988000.25,
+     "3|PEPE-USDT-SWAP|LONG|SMC": 1799988000.25,
+     "3|PEPE-USDT-SWAP|LONG|MULTI": 1799988000.25,
+     "3|PEPE-USDT-SWAP|SHORT|SMC": 1800000000.25,
+     "4|PEPE-USDT-SWAP|LONG|SMC": 1800000000.25
+    },
+    "persisted": "{\"3|PEPE-USDT-SWAP|LONG\": 1799988000.25, \"3|PEPE-USDT-SWAP|LONG|SMC\": 1799988000.25, \"3|PEPE-USDT-SWAP|LONG|MULTI\": 1799988000.25, \"3|PEPE-USDT-SWAP|SHORT|SMC\": 1800000000.25, \"4|PEPE-USDT-SWAP|LONG|SMC\": 1800000000.25}",
+    "logs": []
+   },
+   {
+    "op": [
+     "peek",
+     3,
+     "PEPE-USDT-SWAP",
+     "LONG",
+     "SMC"
+    ],
+    "now": 1800000600.25,
+    "result": false,
+    "registry": {
+     "3|PEPE-USDT-SWAP|LONG": 1799988000.25,
+     "3|PEPE-USDT-SWAP|LONG|SMC": 1799988000.25,
+     "3|PEPE-USDT-SWAP|LONG|MULTI": 1799988000.25,
+     "3|PEPE-USDT-SWAP|SHORT|SMC": 1800000000.25,
+     "4|PEPE-USDT-SWAP|LONG|SMC": 1800000000.25
+    },
+    "persisted": "{\"3|PEPE-USDT-SWAP|LONG\": 1799988000.25, \"3|PEPE-USDT-SWAP|LONG|SMC\": 1799988000.25, \"3|PEPE-USDT-SWAP|LONG|MULTI\": 1799988000.25, \"3|PEPE-USDT-SWAP|SHORT|SMC\": 1800000000.25, \"4|PEPE-USDT-SWAP|LONG|SMC\": 1800000000.25}",
+    "logs": []
+   },
+   {
+    "op": [
+     "advance",
+     1799.5
+    ],
+    "now": 1800002399.75,
+    "result": null,
+    "registry": {
+     "3|PEPE-USDT-SWAP|LONG": 1799988000.25,
+     "3|PEPE-USDT-SWAP|LONG|SMC": 1799988000.25,
+     "3|PEPE-USDT-SWAP|LONG|MULTI": 1799988000.25,
+     "3|PEPE-USDT-SWAP|SHORT|SMC": 1800000000.25,
+     "4|PEPE-USDT-SWAP|LONG|SMC": 1800000000.25
+    },
+    "persisted": "{\"3|PEPE-USDT-SWAP|LONG\": 1799988000.25, \"3|PEPE-USDT-SWAP|LONG|SMC\": 1799988000.25, \"3|PEPE-USDT-SWAP|LONG|MULTI\": 1799988000.25, \"3|PEPE-USDT-SWAP|SHORT|SMC\": 1800000000.25, \"4|PEPE-USDT-SWAP|LONG|SMC\": 1800000000.25}",
+    "logs": []
+   },
+   {
+    "op": [
+     "peek",
+     3,
+     "PEPE-USDT-SWAP",
+     "LONG",
+     "SMC"
+    ],
+    "now": 1800002399.75,
+    "result": false,
+    "registry": {
+     "3|PEPE-USDT-SWAP|LONG": 1799988000.25,
+     "3|PEPE-USDT-SWAP|LONG|SMC": 1799988000.25,
+     "3|PEPE-USDT-SWAP|LONG|MULTI": 1799988000.25,
+     "3|PEPE-USDT-SWAP|SHORT|SMC": 1800000000.25,
+     "4|PEPE-USDT-SWAP|LONG|SMC": 1800000000.25
+    },
+    "persisted": "{\"3|PEPE-USDT-SWAP|LONG\": 1799988000.25, \"3|PEPE-USDT-SWAP|LONG|SMC\": 1799988000.25, \"3|PEPE-USDT-SWAP|LONG|MULTI\": 1799988000.25, \"3|PEPE-USDT-SWAP|SHORT|SMC\": 1800000000.25, \"4|PEPE-USDT-SWAP|LONG|SMC\": 1800000000.25}",
+    "logs": []
+   },
+   {
+    "op": [
+     "advance",
+     1.0
+    ],
+    "now": 1800002400.75,
+    "result": null,
+    "registry": {
+     "3|PEPE-USDT-SWAP|LONG": 1799988000.25,
+     "3|PEPE-USDT-SWAP|LONG|SMC": 1799988000.25,
+     "3|PEPE-USDT-SWAP|LONG|MULTI": 1799988000.25,
+     "3|PEPE-USDT-SWAP|SHORT|SMC": 1800000000.25,
+     "4|PEPE-USDT-SWAP|LONG|SMC": 1800000000.25
+    },
+    "persisted": "{\"3|PEPE-USDT-SWAP|LONG\": 1799988000.25, \"3|PEPE-USDT-SWAP|LONG|SMC\": 1799988000.25, \"3|PEPE-USDT-SWAP|LONG|MULTI\": 1799988000.25, \"3|PEPE-USDT-SWAP|SHORT|SMC\": 1800000000.25, \"4|PEPE-USDT-SWAP|LONG|SMC\": 1800000000.25}",
+    "logs": []
+   },
+   {
+    "op": [
+     "peek",
+     3,
+     "PEPE-USDT-SWAP",
+     "LONG",
+     "SMC"
+    ],
+    "now": 1800002400.75,
+    "result": true,
+    "registry": {
+     "3|PEPE-USDT-SWAP|LONG": 1799988000.25,
+     "3|PEPE-USDT-SWAP|LONG|SMC": 1799988000.25,
+     "3|PEPE-USDT-SWAP|LONG|MULTI": 1799988000.25,
+     "3|PEPE-USDT-SWAP|SHORT|SMC": 1800000000.25,
+     "4|PEPE-USDT-SWAP|LONG|SMC": 1800000000.25
+    },
+    "persisted": "{\"3|PEPE-USDT-SWAP|LONG\": 1799988000.25, \"3|PEPE-USDT-SWAP|LONG|SMC\": 1799988000.25, \"3|PEPE-USDT-SWAP|LONG|MULTI\": 1799988000.25, \"3|PEPE-USDT-SWAP|SHORT|SMC\": 1800000000.25, \"4|PEPE-USDT-SWAP|LONG|SMC\": 1800000000.25}",
+    "logs": []
+   },
+   {
+    "op": [
+     "peek",
+     3,
+     "PEPE-USDT-SWAP",
+     "SHORT",
+     "SMC"
+    ],
+    "now": 1800002400.75,
+    "result": false,
+    "registry": {
+     "3|PEPE-USDT-SWAP|LONG": 1799988000.25,
+     "3|PEPE-USDT-SWAP|LONG|SMC": 1799988000.25,
+     "3|PEPE-USDT-SWAP|LONG|MULTI": 1799988000.25,
+     "3|PEPE-USDT-SWAP|SHORT|SMC": 1800000000.25,
+     "4|PEPE-USDT-SWAP|LONG|SMC": 1800000000.25
+    },
+    "persisted": "{\"3|PEPE-USDT-SWAP|LONG\": 1799988000.25, \"3|PEPE-USDT-SWAP|LONG|SMC\": 1799988000.25, \"3|PEPE-USDT-SWAP|LONG|MULTI\": 1799988000.25, \"3|PEPE-USDT-SWAP|SHORT|SMC\": 1800000000.25, \"4|PEPE-USDT-SWAP|LONG|SMC\": 1800000000.25}",
+    "logs": []
+   },
+   {
+    "op": [
+     "peek",
+     4,
+     "PEPE-USDT-SWAP",
+     "LONG",
+     "SMC"
+    ],
+    "now": 1800002400.75,
+    "result": false,
+    "registry": {
+     "3|PEPE-USDT-SWAP|LONG": 1799988000.25,
+     "3|PEPE-USDT-SWAP|LONG|SMC": 1799988000.25,
+     "3|PEPE-USDT-SWAP|LONG|MULTI": 1799988000.25,
+     "3|PEPE-USDT-SWAP|SHORT|SMC": 1800000000.25,
+     "4|PEPE-USDT-SWAP|LONG|SMC": 1800000000.25
+    },
+    "persisted": "{\"3|PEPE-USDT-SWAP|LONG\": 1799988000.25, \"3|PEPE-USDT-SWAP|LONG|SMC\": 1799988000.25, \"3|PEPE-USDT-SWAP|LONG|MULTI\": 1799988000.25, \"3|PEPE-USDT-SWAP|SHORT|SMC\": 1800000000.25, \"4|PEPE-USDT-SWAP|LONG|SMC\": 1800000000.25}",
+    "logs": []
+   },
+   {
+    "op": [
+     "cooldown",
+     5,
+     "DOGE-USDT-SWAP",
+     "SHORT",
+     30
+    ],
+    "now": 1800002400.75,
+    "result": null,
+    "registry": {
+     "3|PEPE-USDT-SWAP|LONG": 1799988000.25,
+     "3|PEPE-USDT-SWAP|LONG|SMC": 1799988000.25,
+     "3|PEPE-USDT-SWAP|LONG|MULTI": 1799988000.25,
+     "3|PEPE-USDT-SWAP|SHORT|SMC": 1800000000.25,
+     "4|PEPE-USDT-SWAP|LONG|SMC": 1800000000.25,
+     "5|DOGE-USDT-SWAP|SHORT": 1799988060.75
+    },
+    "persisted": "{\"3|PEPE-USDT-SWAP|LONG\": 1799988000.25, \"3|PEPE-USDT-SWAP|LONG|SMC\": 1799988000.25, \"3|PEPE-USDT-SWAP|LONG|MULTI\": 1799988000.25, \"3|PEPE-USDT-SWAP|SHORT|SMC\": 1800000000.25, \"4|PEPE-USDT-SWAP|LONG|SMC\": 1800000000.25, \"5|DOGE-USDT-SWAP|SHORT\": 1799988060.75}",
+    "logs": [
+     [
+      "INFO",
+      "[REGISTRY-COOLDOWN] uid=5 DOGE-USDT-SWAP SHORT — block re-entry for 60s"
+     ]
+    ]
+   },
+   {
+    "op": [
+     "peek",
+     5,
+     "DOGE-USDT-SWAP",
+     "SHORT",
+     ""
+    ],
+    "now": 1800002400.75,
+    "result": false,
+    "registry": {
+     "3|PEPE-USDT-SWAP|LONG": 1799988000.25,
+     "3|PEPE-USDT-SWAP|LONG|SMC": 1799988000.25,
+     "3|PEPE-USDT-SWAP|LONG|MULTI": 1799988000.25,
+     "3|PEPE-USDT-SWAP|SHORT|SMC": 1800000000.25,
+     "4|PEPE-USDT-SWAP|LONG|SMC": 1800000000.25,
+     "5|DOGE-USDT-SWAP|SHORT": 1799988060.75
+    },
+    "persisted": "{\"3|PEPE-USDT-SWAP|LONG\": 1799988000.25, \"3|PEPE-USDT-SWAP|LONG|SMC\": 1799988000.25, \"3|PEPE-USDT-SWAP|LONG|MULTI\": 1799988000.25, \"3|PEPE-USDT-SWAP|SHORT|SMC\": 1800000000.25, \"4|PEPE-USDT-SWAP|LONG|SMC\": 1800000000.25, \"5|DOGE-USDT-SWAP|SHORT\": 1799988060.75}",
+    "logs": []
+   },
+   {
+    "op": [
+     "advance",
+     59
+    ],
+    "now": 1800002459.75,
+    "result": null,
+    "registry": {
+     "3|PEPE-USDT-SWAP|LONG": 1799988000.25,
+     "3|PEPE-USDT-SWAP|LONG|SMC": 1799988000.25,
+     "3|PEPE-USDT-SWAP|LONG|MULTI": 1799988000.25,
+     "3|PEPE-USDT-SWAP|SHORT|SMC": 1800000000.25,
+     "4|PEPE-USDT-SWAP|LONG|SMC": 1800000000.25,
+     "5|DOGE-USDT-SWAP|SHORT": 1799988060.75
+    },
+    "persisted": "{\"3|PEPE-USDT-SWAP|LONG\": 1799988000.25, \"3|PEPE-USDT-SWAP|LONG|SMC\": 1799988000.25, \"3|PEPE-USDT-SWAP|LONG|MULTI\": 1799988000.25, \"3|PEPE-USDT-SWAP|SHORT|SMC\": 1800000000.25, \"4|PEPE-USDT-SWAP|LONG|SMC\": 1800000000.25, \"5|DOGE-USDT-SWAP|SHORT\": 1799988060.75}",
+    "logs": []
+   },
+   {
+    "op": [
+     "peek",
+     5,
+     "DOGE-USDT-SWAP",
+     "SHORT",
+     ""
+    ],
+    "now": 1800002459.75,
+    "result": false,
+    "registry": {
+     "3|PEPE-USDT-SWAP|LONG": 1799988000.25,
+     "3|PEPE-USDT-SWAP|LONG|SMC": 1799988000.25,
+     "3|PEPE-USDT-SWAP|LONG|MULTI": 1799988000.25,
+     "3|PEPE-USDT-SWAP|SHORT|SMC": 1800000000.25,
+     "4|PEPE-USDT-SWAP|LONG|SMC": 1800000000.25,
+     "5|DOGE-USDT-SWAP|SHORT": 1799988060.75
+    },
+    "persisted": "{\"3|PEPE-USDT-SWAP|LONG\": 1799988000.25, \"3|PEPE-USDT-SWAP|LONG|SMC\": 1799988000.25, \"3|PEPE-USDT-SWAP|LONG|MULTI\": 1799988000.25, \"3|PEPE-USDT-SWAP|SHORT|SMC\": 1800000000.25, \"4|PEPE-USDT-SWAP|LONG|SMC\": 1800000000.25, \"5|DOGE-USDT-SWAP|SHORT\": 1799988060.75}",
+    "logs": []
+   },
+   {
+    "op": [
+     "advance",
+     1.5
+    ],
+    "now": 1800002461.25,
+    "result": null,
+    "registry": {
+     "3|PEPE-USDT-SWAP|LONG": 1799988000.25,
+     "3|PEPE-USDT-SWAP|LONG|SMC": 1799988000.25,
+     "3|PEPE-USDT-SWAP|LONG|MULTI": 1799988000.25,
+     "3|PEPE-USDT-SWAP|SHORT|SMC": 1800000000.25,
+     "4|PEPE-USDT-SWAP|LONG|SMC": 1800000000.25,
+     "5|DOGE-USDT-SWAP|SHORT": 1799988060.75
+    },
+    "persisted": "{\"3|PEPE-USDT-SWAP|LONG\": 1799988000.25, \"3|PEPE-USDT-SWAP|LONG|SMC\": 1799988000.25, \"3|PEPE-USDT-SWAP|LONG|MULTI\": 1799988000.25, \"3|PEPE-USDT-SWAP|SHORT|SMC\": 1800000000.25, \"4|PEPE-USDT-SWAP|LONG|SMC\": 1800000000.25, \"5|DOGE-USDT-SWAP|SHORT\": 1799988060.75}",
+    "logs": []
+   },
+   {
+    "op": [
+     "peek",
+     5,
+     "DOGE-USDT-SWAP",
+     "SHORT",
+     ""
+    ],
+    "now": 1800002461.25,
+    "result": true,
+    "registry": {
+     "3|PEPE-USDT-SWAP|LONG": 1799988000.25,
+     "3|PEPE-USDT-SWAP|LONG|SMC": 1799988000.25,
+     "3|PEPE-USDT-SWAP|LONG|MULTI": 1799988000.25,
+     "3|PEPE-USDT-SWAP|SHORT|SMC": 1800000000.25,
+     "4|PEPE-USDT-SWAP|LONG|SMC": 1800000000.25,
+     "5|DOGE-USDT-SWAP|SHORT": 1799988060.75
+    },
+    "persisted": "{\"3|PEPE-USDT-SWAP|LONG\": 1799988000.25, \"3|PEPE-USDT-SWAP|LONG|SMC\": 1799988000.25, \"3|PEPE-USDT-SWAP|LONG|MULTI\": 1799988000.25, \"3|PEPE-USDT-SWAP|SHORT|SMC\": 1800000000.25, \"4|PEPE-USDT-SWAP|LONG|SMC\": 1800000000.25, \"5|DOGE-USDT-SWAP|SHORT\": 1799988060.75}",
+    "logs": []
+   },
+   {
+    "op": [
+     "cooldown",
+     6,
+     "WIF-USDT-SWAP",
+     "LONG",
+     99999
+    ],
+    "now": 1800002461.25,
+    "result": null,
+    "registry": {
+     "3|PEPE-USDT-SWAP|LONG": 1799988000.25,
+     "3|PEPE-USDT-SWAP|LONG|SMC": 1799988000.25,
+     "3|PEPE-USDT-SWAP|LONG|MULTI": 1799988000.25,
+     "3|PEPE-USDT-SWAP|SHORT|SMC": 1800000000.25,
+     "4|PEPE-USDT-SWAP|LONG|SMC": 1800000000.25,
+     "5|DOGE-USDT-SWAP|SHORT": 1799988060.75,
+     "6|WIF-USDT-SWAP|LONG": 1800002461.25
+    },
+    "persisted": "{\"3|PEPE-USDT-SWAP|LONG\": 1799988000.25, \"3|PEPE-USDT-SWAP|LONG|SMC\": 1799988000.25, \"3|PEPE-USDT-SWAP|LONG|MULTI\": 1799988000.25, \"3|PEPE-USDT-SWAP|SHORT|SMC\": 1800000000.25, \"4|PEPE-USDT-SWAP|LONG|SMC\": 1800000000.25, \"5|DOGE-USDT-SWAP|SHORT\": 1799988060.75, \"6|WIF-USDT-SWAP|LONG\": 1800002461.25}",
+    "logs": [
+     [
+      "INFO",
+      "[REGISTRY-COOLDOWN] uid=6 WIF-USDT-SWAP LONG — block re-entry for 14400s"
+     ]
+    ]
+   },
+   {
+    "op": [
+     "cooldown",
+     6,
+     "WIF-USDT-SWAP",
+     "SHORT",
+     90.5
+    ],
+    "now": 1800002461.25,
+    "result": null,
+    "registry": {
+     "3|PEPE-USDT-SWAP|LONG": 1799988000.25,
+     "3|PEPE-USDT-SWAP|LONG|SMC": 1799988000.25,
+     "3|PEPE-USDT-SWAP|LONG|MULTI": 1799988000.25,
+     "3|PEPE-USDT-SWAP|SHORT|SMC": 1800000000.25,
+     "4|PEPE-USDT-SWAP|LONG|SMC": 1800000000.25,
+     "5|DOGE-USDT-SWAP|SHORT": 1799988060.75,
+     "6|WIF-USDT-SWAP|LONG": 1800002461.25,
+     "6|WIF-USDT-SWAP|SHORT": 1799988151.75
+    },
+    "persisted": "{\"3|PEPE-USDT-SWAP|LONG\": 1799988000.25, \"3|PEPE-USDT-SWAP|LONG|SMC\": 1799988000.25, \"3|PEPE-USDT-SWAP|LONG|MULTI\": 1799988000.25, \"3|PEPE-USDT-SWAP|SHORT|SMC\": 1800000000.25, \"4|PEPE-USDT-SWAP|LONG|SMC\": 1800000000.25, \"5|DOGE-USDT-SWAP|SHORT\": 1799988060.75, \"6|WIF-USDT-SWAP|LONG\": 1800002461.25}",
+    "logs": [
+     [
+      "INFO",
+      "[REGISTRY-COOLDOWN] uid=6 WIF-USDT-SWAP SHORT — block re-entry for 90s"
+     ]
+    ]
+   },
+   {
+    "op": [
+     "clear",
+     3,
+     "PEPE-USDT-SWAP",
+     "LONG"
+    ],
+    "now": 1800002461.25,
+    "result": null,
+    "registry": {
+     "3|PEPE-USDT-SWAP|SHORT|SMC": 1800000000.25,
+     "4|PEPE-USDT-SWAP|LONG|SMC": 1800000000.25,
+     "5|DOGE-USDT-SWAP|SHORT": 1799988060.75,
+     "6|WIF-USDT-SWAP|LONG": 1800002461.25,
+     "6|WIF-USDT-SWAP|SHORT": 1799988151.75
+    },
+    "persisted": "{\"3|PEPE-USDT-SWAP|LONG\": 1799988000.25, \"3|PEPE-USDT-SWAP|LONG|SMC\": 1799988000.25, \"3|PEPE-USDT-SWAP|LONG|MULTI\": 1799988000.25, \"3|PEPE-USDT-SWAP|SHORT|SMC\": 1800000000.25, \"4|PEPE-USDT-SWAP|LONG|SMC\": 1800000000.25, \"5|DOGE-USDT-SWAP|SHORT\": 1799988060.75, \"6|WIF-USDT-SWAP|LONG\": 1800002461.25}",
+    "logs": []
+   },
+   {
+    "op": [
+     "clear",
+     3,
+     "NONE-USDT-SWAP",
+     "LONG"
+    ],
+    "now": 1800002461.25,
+    "result": null,
+    "registry": {
+     "3|PEPE-USDT-SWAP|SHORT|SMC": 1800000000.25,
+     "4|PEPE-USDT-SWAP|LONG|SMC": 1800000000.25,
+     "5|DOGE-USDT-SWAP|SHORT": 1799988060.75,
+     "6|WIF-USDT-SWAP|LONG": 1800002461.25,
+     "6|WIF-USDT-SWAP|SHORT": 1799988151.75
+    },
+    "persisted": "{\"3|PEPE-USDT-SWAP|LONG\": 1799988000.25, \"3|PEPE-USDT-SWAP|LONG|SMC\": 1799988000.25, \"3|PEPE-USDT-SWAP|LONG|MULTI\": 1799988000.25, \"3|PEPE-USDT-SWAP|SHORT|SMC\": 1800000000.25, \"4|PEPE-USDT-SWAP|LONG|SMC\": 1800000000.25, \"5|DOGE-USDT-SWAP|SHORT\": 1799988060.75, \"6|WIF-USDT-SWAP|LONG\": 1800002461.25}",
+    "logs": []
+   },
+   {
+    "op": [
+     "advance",
+     20000
+    ],
+    "now": 1800022461.25,
+    "result": null,
+    "registry": {
+     "3|PEPE-USDT-SWAP|SHORT|SMC": 1800000000.25,
+     "4|PEPE-USDT-SWAP|LONG|SMC": 1800000000.25,
+     "5|DOGE-USDT-SWAP|SHORT": 1799988060.75,
+     "6|WIF-USDT-SWAP|LONG": 1800002461.25,
+     "6|WIF-USDT-SWAP|SHORT": 1799988151.75
+    },
+    "persisted": "{\"3|PEPE-USDT-SWAP|LONG\": 1799988000.25, \"3|PEPE-USDT-SWAP|LONG|SMC\": 1799988000.25, \"3|PEPE-USDT-SWAP|LONG|MULTI\": 1799988000.25, \"3|PEPE-USDT-SWAP|SHORT|SMC\": 1800000000.25, \"4|PEPE-USDT-SWAP|LONG|SMC\": 1800000000.25, \"5|DOGE-USDT-SWAP|SHORT\": 1799988060.75, \"6|WIF-USDT-SWAP|LONG\": 1800002461.25}",
+    "logs": []
+   },
+   {
+    "op": [
+     "commit",
+     8,
+     "LINK-USDT-SWAP",
+     "LONG",
+     "",
+     null
+    ],
+    "now": 1800022461.25,
+    "result": null,
+    "registry": {
+     "8|LINK-USDT-SWAP|LONG": 1800022461.25
+    },
+    "persisted": "{\"8|LINK-USDT-SWAP|LONG\": 1800022461.25}",
+    "logs": []
+   },
+   {
+    "op": [
+     "stats"
+    ],
+    "now": 1800022461.25,
+    "result": {
+     "allowed": 6,
+     "blocked": 7,
+     "active": 1
+    },
+    "registry": {
+     "8|LINK-USDT-SWAP|LONG": 1800022461.25
+    },
+    "persisted": "{\"8|LINK-USDT-SWAP|LONG\": 1800022461.25}",
+    "logs": []
+   },
+   {
+    "op": [
+     "force_save"
+    ],
+    "now": 1800022461.25,
+    "result": 1,
+    "registry": {
+     "8|LINK-USDT-SWAP|LONG": 1800022461.25
+    },
+    "persisted": "{\"8|LINK-USDT-SWAP|LONG\": 1800022461.25}",
+    "logs": []
+   }
+  ]
+ },
+ "loads": [
+  {
+   "raw": "{\"1|BTC-USDT-SWAP|LONG\": 1799999900.0, \"2|ETH-USDT-SWAP|SHORT|SMC\": 1799985600.5, \"3|X-USDT-SWAP|LONG|VOLUME\": 1799985600.0, \"4|Y-USDT-SWAP|LONG|MULTI\": 1800000500.5, \"abc|Z-USDT-SWAP|LONG\": 1800000000.0, \"5|onlytwo\": 1800000000.0, \"007|Q-USDT-SWAP|SHORT\": 1799999999.0}",
+   "now": 1800000000.0,
+   "registry": {
+    "1|BTC-USDT-SWAP|LONG": 1799999900.0,
+    "2|ETH-USDT-SWAP|SHORT|SMC": 1799985600.5,
+    "4|Y-USDT-SWAP|LONG|MULTI": 1800000500.5,
+    "7|Q-USDT-SWAP|SHORT": 1799999999.0
+   },
+   "logs": [
+    [
+     "INFO",
+     "FIX-AUDIT-26: signal_registry загружен (4 записей)"
+    ]
+   ]
+  },
+  {
+   "raw": "{\"1|A-USDT-SWAP|LONG\": \"1799999999.5\", \"2|B-USDT-SWAP|LONG\": true}",
+   "now": 1800000000.0,
+   "registry": {
+    "1|A-USDT-SWAP|LONG": 1799999999.5
+   },
+   "logs": [
+    [
+     "INFO",
+     "FIX-AUDIT-26: signal_registry загружен (1 записей)"
+    ]
+   ]
+  },
+  {
+   "raw": "{\"1|A-USDT-SWAP|LONG\": 1800000000.0, \"2|B-USDT-SWAP|LONG\": null, \"3|C-USDT-SWAP|LONG\": 1800000000.0}",
+   "now": 1800000000.0,
+   "registry": {},
+   "logs": [
+    [
+     "WARNING",
+     "FIX-AUDIT-26: signal_registry load error: float() argument must be a string or a real number, not 'NoneType'"
+    ]
+   ]
+  },
+  {
+   "raw": "{\"1|A-USDT-SWAP|LONG\": 1800000000.0, \"2|B-USDT-SWAP|LONG\": \"soon\"}",
+   "now": 1800000000.0,
+   "registry": {},
+   "logs": [
+    [
+     "WARNING",
+     "FIX-AUDIT-26: signal_registry load error: could not convert string to float: 'soon'"
+    ]
+   ]
+  },
+  {
+   "raw": "[1, 2, 3]",
+   "now": 1800000000.0,
+   "registry": {},
+   "logs": [
+    [
+     "WARNING",
+     "FIX-AUDIT-26: signal_registry load error: 'list' object has no attribute 'items'"
+    ]
+   ]
+  },
+  {
+   "raw": "{not json",
+   "now": 1800000000.0,
+   "registry": {},
+   "logs": [
+    [
+     "WARNING",
+     "FIX-AUDIT-26: signal_registry load error: Expecting property name enclosed in double quotes: line 1 column 2 (char 1)"
+    ]
+   ]
+  },
+  {
+   "raw": "{\" 12 |A-USDT-SWAP|LONG\": 1799999995.0, \"+13|B-USDT-SWAP|LONG|SMC|extra\": 1799999995.0, \"1_4|C|LONG\": 1800000000.0}",
+   "now": 1800000000.0,
+   "registry": {
+    "12|A-USDT-SWAP|LONG": 1799999995.0,
+    "13|B-USDT-SWAP|LONG|SMC|extra": 1799999995.0,
+    "14|C|LONG": 1800000000.0
+   },
+   "logs": [
+    [
+     "INFO",
+     "FIX-AUDIT-26: signal_registry загружен (3 записей)"
+    ]
+   ]
+  },
+  {
+   "raw": "{}",
+   "now": 1800000000.0,
+   "registry": {},
+   "logs": [
+    [
+     "INFO",
+     "FIX-AUDIT-26: signal_registry загружен (0 записей)"
+    ]
+   ]
+  }
+ ],
+ "env_cooldown": [
+  [
+   null,
+   1800
+  ],
+  [
+   "1800",
+   1800
+  ],
+  [
+   " 600 ",
+   600
+  ],
+  [
+   "abc",
+   "raise"
+  ],
+  [
+   "",
+   "raise"
+  ],
+  [
+   "-5",
+   -5
+  ],
+  [
+   "1_200",
+   1200
+  ],
+  [
+   "3600.0",
+   "raise"
+  ]
+ ]
+}

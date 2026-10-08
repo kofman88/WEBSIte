@@ -1,0 +1,320 @@
+{
+ "steps": [
+  {
+   "op": [
+    "record",
+    "BTC-USDT-SWAP",
+    "LONG",
+    "LEVELS",
+    7
+   ],
+   "now": 1800000000.0,
+   "result": null
+  },
+  {
+   "op": [
+    "label",
+    "BTC-USDT-SWAP",
+    "LONG",
+    "SMC"
+   ],
+   "now": 1800000000.0,
+   "result": "⭐ Confluence ×2"
+  },
+  {
+   "op": [
+    "label",
+    "BTC-USDT-SWAP",
+    "LONG",
+    "LEVELS"
+   ],
+   "now": 1800000000.0,
+   "result": ""
+  },
+  {
+   "op": [
+    "label",
+    "BTC-USDT-SWAP",
+    "LONG",
+    null
+   ],
+   "now": 1800000000.0,
+   "result": ""
+  },
+  {
+   "op": [
+    "advance",
+    60
+   ],
+   "now": 1800000060.0,
+   "result": null
+  },
+  {
+   "op": [
+    "record",
+    "BTC-USDT-SWAP",
+    "LONG",
+    "VOLUME",
+    3.9
+   ],
+   "now": 1800000060.0,
+   "result": null
+  },
+  {
+   "op": [
+    "label",
+    "BTC-USDT-SWAP",
+    "LONG",
+    "SMC"
+   ],
+   "now": 1800000060.0,
+   "result": "🌟 A++ Confluence ×3"
+  },
+  {
+   "op": [
+    "label",
+    "BTC-USDT-SWAP",
+    "SHORT",
+    "SMC"
+   ],
+   "now": 1800000060.0,
+   "result": ""
+  },
+  {
+   "op": [
+    "record",
+    "BTC-USDT-SWAP",
+    "LONG",
+    "SMC",
+    0
+   ],
+   "now": 1800000060.0,
+   "result": null
+  },
+  {
+   "op": [
+    "strategies",
+    "BTC-USDT-SWAP",
+    "LONG",
+    null
+   ],
+   "now": 1800000060.0,
+   "result": [
+    [
+     "LEVELS",
+     1800000000.0,
+     7
+    ],
+    [
+     "VOLUME",
+     1800000060.0,
+     3
+    ],
+    [
+     "SMC",
+     1800000060.0,
+     0
+    ]
+   ]
+  },
+  {
+   "op": [
+    "strategies",
+    "BTC-USDT-SWAP",
+    "LONG",
+    "SMC"
+   ],
+   "now": 1800000060.0,
+   "result": [
+    [
+     "LEVELS",
+     1800000000.0,
+     7
+    ],
+    [
+     "VOLUME",
+     1800000060.0,
+     3
+    ]
+   ]
+  },
+  {
+   "op": [
+    "label",
+    "BTC-USDT-SWAP",
+    "LONG",
+    "SMC"
+   ],
+   "now": 1800000060.0,
+   "result": "🌟 A++ Confluence ×3"
+  },
+  {
+   "op": [
+    "record",
+    "BTC-USDT-SWAP",
+    "LONG",
+    "LEVELS",
+    "5"
+   ],
+   "now": 1800000060.0,
+   "result": null
+  },
+  {
+   "op": [
+    "advance",
+    1740
+   ],
+   "now": 1800001800.0,
+   "result": null
+  },
+  {
+   "op": [
+    "strategies",
+    "BTC-USDT-SWAP",
+    "LONG",
+    null
+   ],
+   "now": 1800001800.0,
+   "result": [
+    [
+     "VOLUME",
+     1800000060.0,
+     3
+    ],
+    [
+     "SMC",
+     1800000060.0,
+     0
+    ],
+    [
+     "LEVELS",
+     1800000060.0,
+     5
+    ]
+   ]
+  },
+  {
+   "op": [
+    "advance",
+    0.5
+   ],
+   "now": 1800001800.5,
+   "result": null
+  },
+  {
+   "op": [
+    "strategies",
+    "BTC-USDT-SWAP",
+    "LONG",
+    null
+   ],
+   "now": 1800001800.5,
+   "result": [
+    [
+     "VOLUME",
+     1800000060.0,
+     3
+    ],
+    [
+     "SMC",
+     1800000060.0,
+     0
+    ],
+    [
+     "LEVELS",
+     1800000060.0,
+     5
+    ]
+   ]
+  },
+  {
+   "op": [
+    "label",
+    "BTC-USDT-SWAP",
+    "LONG",
+    "SMC"
+   ],
+   "now": 1800001800.5,
+   "result": "🌟 A++ Confluence ×3"
+  },
+  {
+   "op": [
+    "record",
+    "",
+    "LONG",
+    "SMC",
+    3
+   ],
+   "now": 1800001800.5,
+   "result": null
+  },
+  {
+   "op": [
+    "record",
+    "ETH-USDT-SWAP",
+    "",
+    "SMC",
+    3
+   ],
+   "now": 1800001800.5,
+   "result": null
+  },
+  {
+   "op": [
+    "record",
+    "ETH-USDT-SWAP",
+    "SHORT",
+    "",
+    3
+   ],
+   "now": 1800001800.5,
+   "result": null
+  },
+  {
+   "op": [
+    "record",
+    "ETH-USDT-SWAP",
+    "SHORT",
+    "SMC",
+    null
+   ],
+   "now": 1800001800.5,
+   "result": null
+  },
+  {
+   "op": [
+    "stats"
+   ],
+   "now": 1800001800.5,
+   "result": {
+    "keys": 2,
+    "entries": 4
+   }
+  },
+  {
+   "op": [
+    "advance",
+    3600
+   ],
+   "now": 1800005400.5,
+   "result": null
+  },
+  {
+   "op": [
+    "gc"
+   ],
+   "now": 1800005400.5,
+   "result": 2
+  },
+  {
+   "op": [
+    "stats"
+   ],
+   "now": 1800005400.5,
+   "result": {
+    "keys": 0,
+    "entries": 0
+   }
+  }
+ ]
+}
