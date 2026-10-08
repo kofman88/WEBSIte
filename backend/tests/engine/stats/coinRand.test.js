@@ -6,7 +6,7 @@
  *   • the REAL miniapp_api.h_analyze on 37 adversarial bodies: symbol / strategy parsing
  *     (Python str() of JSON null / bool / list, str.strip() whitespace set incl. U+001F / U+0085
  *     but not U+FEFF, upper-casing), bad_symbol, the parsed symbol and the fetch calls.
- * e.g. python -c "print(repr(str(None).upper().strip()), repr('ETH﻿'.strip()))"  → 'NONE' 'ETH﻿'
+ * e.g. python -c "print(repr(str(None).upper().strip()), len(('ETH' + chr(0xfeff)).strip()))"  → 'NONE' 4
  */
 import { describe, it, expect } from 'vitest';
 import fs from 'fs';
