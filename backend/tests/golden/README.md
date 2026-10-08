@@ -16,7 +16,7 @@ tests/golden/
 ├── dumps/                 optional layer dumps (--dump-zones / --dump-volume-ctx / --dump-squeeze)
 ├── load.js                fixture loader (sha256 check, Frame cache, sweep inputs per bar)
 ├── compare.js             tolerance rules (PLAN §3): 1e-9 relative, exact ints/strings/bools, pyRound fields
-├── engines.js             pluggable engine registry (null until M2–M6 register the engines)
+├── engines.js             pluggable engine registry (smc_analysis + smc registered; levels/volume null until M2/M5–M6)
 ├── golden.test.js         the sweep
 └── layers.test.js         M1 primitives vs the layer dumps (squeeze / VOLUME context / LEVELS zone layers)
 ```
@@ -44,11 +44,22 @@ last 300 (`load.barInputs`). Unregistered engines show up as `todo`, never as fa
 `vol_ratio` is the raw analyzer ratio, unlike the VOLUME signal field of the same name). The `smc`
 engine (M4) reuses `smcDigest` for the digest it returns next to the signal.
 
+`smc` (M4, `runners/smc.js`) is the full SMC engine: `strategies/smc/index.evaluate` =
+`SMCAnalyzer(SMCConfig(key)).analyze` + squeeze injection + `build_smc_signal(symbol, analysis,
+cfg_obj, **build_kwargs)` (`strategies/smc/{levels,signalBuilder,narrative}.js`), the record completed
+with `squeeze_score`, `passes_ctx_gate` (= `score >= cfg_obj.MIN_CONFIRMATIONS`) and `rr_ladder`
+(`smc/scanner._rr_ladder`). The builder config is DERIVED from the recorded `smc_user_cfg` +
+`high_wr_mode` with `strategies/smc/smcUserCfg.builderConfig` (the scanner's code path) and asserted
+equal to the recorded `smc_config` / `analysis_key` / `build_kwargs` in `prepare()`. All three variants
+(3642 / 377 / 4697 signals) match bit-for-bit incl. narrative and confirmation strings, also under
+`GOLDEN_STRICT=1`; `tests/smc/builder.test.js` pins the gates on Python-generated cases.
+
 ## Running a subset
 
 ```
 GOLDEN_STRATEGIES=volume GOLDEN_VARIANTS=default GOLDEN_SYMBOLS=SYNRG01,BTC npm run golden
 GOLDEN_STRATEGIES=smc_analysis npm run golden   # SMC analysis-layer digests only (42 fixtures × 200 bars, ≈3 s)
+GOLDEN_STRATEGIES=smc npm run golden            # SMC signals, 3 variants (126 sweeps, ≈10 s)
 GOLDEN_STEP=5 npm run golden          # every 5th bar (fast smoke)
 GOLDEN_STRICT=1 npm run golden        # additionally require r10(engine) === fixture (bit-for-bit after the .10g rounding)
 ```
