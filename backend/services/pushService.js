@@ -16,7 +16,7 @@ let webpush = null;
 let configured = false;
 
 try {
-  // eslint-disable-next-line global-require, import/no-unresolved
+  // eslint-disable-next-line global-require
   webpush = require('web-push');
 } catch (_e) { /* web-push not installed */ }
 

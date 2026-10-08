@@ -20,7 +20,7 @@ let enabled = false;
 (function init() {
   if (!config.sentryDsn) return;
   try {
-    // eslint-disable-next-line global-require, import/no-unresolved
+    // eslint-disable-next-line global-require
     Sentry = require('@sentry/node');
   } catch (_e) {
     logger.warn('SENTRY_DSN is set but @sentry/node is not installed — install it to enable error tracking');

@@ -29,7 +29,7 @@ function transport() {
     return null;
   }
   try {
-    // eslint-disable-next-line global-require, import/no-unresolved
+    // eslint-disable-next-line global-require
     const nodemailer = require('nodemailer');
     _transport = nodemailer.createTransport({
       host: SMTP_HOST,
