@@ -155,7 +155,8 @@ function findSetup(df, pro, supZones, resZones, bullPat, bearPat, zonePct, relax
     if (anyRecentClose((c) => c > lvl) && Math.abs(low1 - lvl) < zoneBuf && bullPat) {
       return hit('LONG', res, SETUP.RETEST_RES, pro.bearLocal);
     }
-    // Честный пробой вверх
+    // Честный пробой вверх (`df["close"].iloc[-2]` raises IndexError on a 1-bar frame)
+    if (n < 2) throw new P.PyIndexError();
     if (close2 < lvl && cNow > lvl + zoneBuf && volRatio > 1.5) return hit('LONG', res, SETUP.BREAKOUT, pro.bearLocal);
   }
 
@@ -181,6 +182,7 @@ function findSetup(df, pro, supZones, resZones, bullPat, bearPat, zonePct, relax
     if (anyRecentClose((c) => c < lvl) && Math.abs(high1 - lvl) < zoneBuf && bearPat) {
       return hit('SHORT', sup, SETUP.RETEST_SUP, pro.bullLocal);
     }
+    if (n < 2) throw new P.PyIndexError();         // `df["close"].iloc[-2]` on a 1-bar frame
     if (close2 > lvl && cNow < lvl - zoneBuf && volRatio > 1.5) return hit('SHORT', sup, SETUP.BREAKDOWN, pro.bullLocal);
   }
 
@@ -210,7 +212,8 @@ function nearestLevel(supZones, resZones, cNow) {
  * @param {Frame|null} dfHtf  1D candles (HTF marking when given and > 20 bars)
  * @param {object} cfg     IndConfig (config.cfgToInd)
  * @param {object} [opts]  { relax: LEVELS_RELAX_ENABLED, precomputedZones: {sup, res},
- *                           htfZoneCache: Map, symbolForCache,
+ *                           zoneCache: zones.ZoneCache + nowSec (the live `_zone_cache` path),
+ *                           htfZoneCache: Map, cacheMax (`_ZONE_CACHE_MAX`, both caches), symbolForCache,
  *                           skipGuard: call `_do_analyze` directly (no analyze() length guard,
  *                           as the bot's backtest / analyze_on_demand do) }
  * @returns {{reject: string}|object}  `reject` ∈ REJECT buckets (NONE for the prologue
@@ -231,9 +234,29 @@ function analyzePart1(symbol, df, dfHtf, cfg, opts = {}) {
   let supZones;
   let resZones;
   let rawZones = null;
+  let zoneCacheHit = false;
   if (opts.precomputedZones) {
     supZones = opts.precomputedZones.sup;
     resZones = opts.precomputedZones.res;
+  } else if (opts.zoneCache) {
+    // [AUDIT-FIX] live zone cache (`_zone_cache`, TTL by TIMEFRAME, clock injected as nowSec):
+    // a fresh entry is reused and pre-filtered (price > 2·MAX_DIST_PCT from every cached zone →
+    // "zones"); a stale / missing one is recomputed and stored (eviction inside ZoneCache.store)
+    const nowSec = opts.nowSec === undefined ? 0 : opts.nowSec;
+    const ttl = Z.zoneCacheTtl(cfg.TIMEFRAME === undefined ? '1h' : cfg.TIMEFRAME);
+    const key = opts.symbolForCache || symbol;
+    const hit = opts.zoneCache.lookup(key, nowSec, ttl);
+    if (hit) {
+      zoneCacheHit = true;
+      supZones = hit.sup;
+      resZones = hit.res;
+      if (Z.preFilterSkip(supZones, resZones, cNow, cfg.MAX_DIST_PCT)) return { reject: REJECT.ZONES, reason: 'zone_prefilter', pro, zoneCacheHit };
+    } else {
+      rawZones = Z.getZones(df, cfg.PIVOT_STRENGTH, atrNow, cfg.ZONE_BUFFER);
+      supZones = rawZones.sup;
+      resZones = rawZones.res;
+      opts.zoneCache.store(key, nowSec, supZones, resZones, ttl);
+    }
   } else {
     rawZones = Z.getZones(df, cfg.PIVOT_STRENGTH, atrNow, cfg.ZONE_BUFFER);
     supZones = rawZones.sup;
@@ -251,7 +274,7 @@ function analyzePart1(symbol, df, dfHtf, cfg, opts = {}) {
   // [LEVELS-MTF] HTF zone confluence marking (independent of USE_HTF_FILTER — the scanner
   // only passes df_htf when use_htf is on)
   if (dfHtf && dfHtf.length > 20) {
-    const htf = Z.htfZones(dfHtf, cfg.PIVOT_STRENGTH, atrNow, cfg.ZONE_BUFFER, opts.htfZoneCache || null, opts.symbolForCache || symbol);
+    const htf = Z.htfZones(dfHtf, cfg.PIVOT_STRENGTH, atrNow, cfg.ZONE_BUFFER, opts.htfZoneCache || null, opts.symbolForCache || symbol, opts.cacheMax);
     const marked = Z.markHtfConfluence(supZones, resZones, htf.sup, htf.res, atrNow);
     supZones = marked.sup; resZones = marked.res;
   }

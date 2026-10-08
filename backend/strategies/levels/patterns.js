@@ -57,6 +57,17 @@ const APPROACH = Object.freeze({
   NEUTRAL: 'Нейтральный подход',
 });
 
+/**
+ * Where the bot indexes past the start of a short frame (`df.iloc[-7]` on 6 bars) pandas raises
+ * IndexError; the port throws this instead of reading `undefined` (a Python exception ↔ a JS throw).
+ */
+class PyIndexError extends Error {
+  constructor(message = 'single positional indexer is out-of-bounds') {
+    super(message);
+    this.name = 'IndexError';
+  }
+}
+
 /** Patterns that exempt the impulse check (FIX-WR-2). */
 const IMPULSE_EXEMPT = Object.freeze(new Set([INST.LIQUIDITY_SWEEP, INST.INSTITUTIONAL_ORDERBLOCK]));
 
@@ -244,7 +255,9 @@ function assessApproachQuality(df, level, zoneBuf, volMa, instPattern = '') {
   const vols = [df.v[n - 4], df.v[n - 3], df.v[n - 2]];
   const volDeclining = vols[0] > 0 ? (vols[2] < vols[1] && vols[1] < vols[0]) : true;
 
-  // ✅ Консолидация у уровня (bars −7..−2)
+  // ✅ Консолидация у уровня (bars −7..−2): `df.iloc[-7]` raises IndexError on a 6-bar frame
+  // (the < 6 guard above lets exactly 6 bars through; reachable only via precomputed zones)
+  if (n < 7) throw new PyIndexError();
   let consolCount = 0;
   for (let i = n - 7; i < n - 1; i++) {
     if (df.l[i] <= level + zoneBuf && df.h[i] >= level - zoneBuf) consolCount++;
@@ -284,7 +297,7 @@ function countRecentTests(df, level, zonePct, lookback = 30) {
 }
 
 module.exports = {
-  PATTERN, INST, APPROACH, IMPULSE_EXEMPT,
+  PATTERN, INST, APPROACH, IMPULSE_EXEMPT, PyIndexError,
   detectPattern, detectWeakPattern, detectInstitutionalPattern, assessApproachQuality,
   checkFakeout, countRecentTests,
 };

@@ -86,6 +86,26 @@ function fractalPivots(highs, lows, strength) {
   return { res, sup };
 }
 
+/**
+ * indicator._volume_profile(df, n_bins=50) with numpy's NaN propagation. The bot sums
+ * `mask2d * (volume / spans)[:, None]` over the bars: a False cell contributes 0·share, which is
+ * NaN when the bar's volume is NaN or ±inf. So ONE non-finite volume anywhere in the frame turns
+ * every bin NaN and HVN/LVN come out empty — even when that bar spans no bin centre (spans = 0
+ * → clipped to 1, all cells False), where common/kde.volumeProfile (sum over the True cells
+ * only) would still report nodes. Finite volumes are passed through unchanged.
+ * Python: lo=[100+i*.5 …]; lo[7],hi[7]=100.01,100.02; vol[7]=nan → _volume_profile → hvn=[], lvn=[].
+ */
+function volumeProfileNp(low, high, volume, nBins = 50) {
+  const vp = K.volumeProfile(low, high, volume, nBins);
+  if (!vp.binEdges.length) return vp;            // the len < 10 / high ≤ low guards: already empty
+  for (let i = 0; i < volume.length; i++) {
+    if (!Number.isFinite(volume[i])) {
+      return { ...vp, hvn: [], lvn: [], volumes: new Float64Array(nBins).fill(NaN) };
+    }
+  }
+  return vp;
+}
+
 /** Attach the `lvn_checker` closure as a non-enumerable property (keeps zones JSON-comparable). */
 function attachLvnChecker(zone, lvn) {
   Object.defineProperty(zone, 'lvn_checker', {
@@ -134,7 +154,7 @@ function getZones(df, strength, atrNow, zoneBuffer) {
   const kdePrices = K.kdeLevels(allPivotPrices, priceRange);
 
   // ── Слой 3: Volume Profile ──
-  const vp = K.volumeProfile(lows, highs, df.v, 50);
+  const vp = volumeProfileNp(lows, highs, df.v, 50);
   const hvn = vp.hvn;
   const lvn = vp.lvn;
 
@@ -220,9 +240,10 @@ function markHtfConfluence(supZones, resZones, htfSup, htfRes, atrNow) {
 /**
  * HTF zones for `_mark_htf_confluence`: `_get_zones(df_htf, PIVOT_STRENGTH, atr_now)` with
  * the WORKING-TF atr_now (QUIRK(spec §7.7): the daily frame is clustered with the 1h ATR).
- * `cache` (optional Map) mirrors `_htf_zone_cache`: key (len, last open_time) per symbol.
+ * `cache` (optional Map) mirrors `_htf_zone_cache`: key (len, last open_time) per symbol;
+ * the whole map is cleared before an insert once it holds `max` (`_ZONE_CACHE_MAX`) symbols.
  */
-function htfZones(dfHtf, strength, atrNow, zoneBuffer, cache = null, symbol = '') {
+function htfZones(dfHtf, strength, atrNow, zoneBuffer, cache = null, symbol = '', max = ZONE_CACHE_MAX) {
   const key = `${dfHtf.length}_${dfHtf.t ? dfHtf.t[dfHtf.length - 1] : ''}`;
   if (cache) {
     const hit = cache.get(symbol);
@@ -230,7 +251,7 @@ function htfZones(dfHtf, strength, atrNow, zoneBuffer, cache = null, symbol = ''
   }
   const z = getZones(dfHtf, strength, atrNow, zoneBuffer);
   if (cache) {
-    if (cache.size >= ZONE_CACHE_MAX) cache.clear();
+    if (cache.size >= (max === undefined || max === null ? ZONE_CACHE_MAX : max)) cache.clear();
     cache.set(symbol, { key, sup: z.sup, res: z.res });
   }
   return { sup: z.sup, res: z.res };
@@ -292,7 +313,7 @@ class ZoneCache {
 
 module.exports = {
   CLASS_NAMES, PSYCH_MAGNITUDES,
-  isPsychologicalLevel, classifyLevel, fractalPivots, getZones, markHtfConfluence, htfZones,
+  isPsychologicalLevel, classifyLevel, fractalPivots, volumeProfileNp, getZones, markHtfConfluence, htfZones,
   attachLvnChecker, copyZone, zonePublic,
   zoneCacheTtl, preFilterSkip, ZoneCache,
 };
