@@ -371,6 +371,19 @@ for i in range(100):
                            "en_short": C.progress_text(ch, pr, "en", short=True),
                            "block_ru": C.block_text(pr["block_reason"], "ru") if pr["blocked"] else None,
                            "block_en": C.block_text(pr["block_reason"], "en") if pr["blocked"] else None})
+# pinned edge: pace = round(0.57 - 0.6, 1) = -0.0 → "темп +-0.0R" (the sign test passes, str() keeps the sign)
+_ch = C.build(1, {"deposit": 1000, "goal_kind": "pct", "goal_value": 6, "term": "2w", "risk_pct": 1, "leverage": 5,
+                  "strategies": ["LEVELS"]}, now=T0)
+_rows = [{"result": "MANUAL", "result_rr": 0.57, "order_id": "x", "created_at": T0 + 100, "strategy": "LEVELS",
+          "signal_msg_id": 1, "symbol": "BTC-USDT-SWAP", "direction": "LONG", "entry": 1.0, "sl": 0.9, "tp1": 1.1,
+          "tp2": 1.2, "tp3": 1.3}]
+_now = T0 + 1.4 * D_
+_pr = C.progress(_ch, _rows, now=_now)
+assert str(_pr["pace_r"]) == "-0.0"
+progress_cases.append({"json": _ch.to_json(), "rows": _rows, "now": _now, "progress": _pr,
+                       "ru": C.progress_text(_ch, _pr, "ru"), "en": C.progress_text(_ch, _pr, "en"),
+                       "ru_short": C.progress_text(_ch, _pr, "ru", short=True),
+                       "en_short": C.progress_text(_ch, _pr, "en", short=True), "block_ru": None, "block_en": None})
 out["progress"] = progress_cases
 
 # ════════════════════════════════════════════════════════════════════════
