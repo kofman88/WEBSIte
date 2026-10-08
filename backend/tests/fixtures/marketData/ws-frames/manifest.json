@@ -1,0 +1,83 @@
+{
+  "NOW_MS": 1717000600000,
+  "T0": 1716997500000,
+  "T3": 1716998400000,
+  "H0": 1716980400000,
+  "M5": 300000,
+  "H1": 3600000,
+  "frames": {
+    "ping.gz": {
+      "note": "server heartbeat; client must answer \"Pong\"",
+      "size": 24,
+      "text": "Ping"
+    },
+    "json_ping.gz": {
+      "note": "JSON heartbeat variant → {\"pong\":\"abc\",\"time\":…}",
+      "size": 59
+    },
+    "sub_ack.gz": {
+      "note": "subscribe acknowledgement — ignored",
+      "size": 53
+    },
+    "sub_error.gz": {
+      "note": "subscribe error — counted in sub_errors",
+      "size": 61
+    },
+    "kline_pepe_5m_forming_1.gz": {
+      "note": "first update of the forming bar T3 (BingX units ×1000)",
+      "size": 128
+    },
+    "kline_pepe_5m_forming_2.gz": {
+      "note": "second (cumulative) update of T3",
+      "size": 127
+    },
+    "kline_pepe_5m_next.gz": {
+      "note": "newer T → T3 is closed with the last known values",
+      "size": 117
+    },
+    "kline_pepe_5m_late.gz": {
+      "note": "late update of the already-closed T3 (correct values, no second bar-close)",
+      "size": 129
+    },
+    "kline_pepe_5m_old.gz": {
+      "note": "out-of-order old bar — ignored",
+      "size": 111
+    },
+    "kline_btc_1h_closetime.gz": {
+      "note": "close-time style T (…999) → open = T + 1 − tf",
+      "size": 123
+    },
+    "kline_btc_1h_unsubscribed.gz": {
+      "note": "push for a channel the feed did not subscribe — dropped",
+      "size": 108
+    },
+    "kline_toncoin_4h.gz": {
+      "note": "alias TONCOIN → TON-USDT-SWAP, tf 4h → 4H",
+      "size": 126
+    },
+    "kline_multi_unsorted.gz": {
+      "note": "two valid items out of order + one malformed (skipped); items are processed oldest-first",
+      "size": 140
+    },
+    "zlib_frame.bin": {
+      "note": "zlib-wrapped (auto header) — decoded by unzipSync",
+      "size": 15,
+      "text": "{\"a\":1}"
+    },
+    "raw_deflate.bin": {
+      "note": "raw deflate — third codec",
+      "size": 14,
+      "text": "{\"raw\":true}"
+    },
+    "plain_text.bin": {
+      "note": "uncompressed bytes — returned as utf-8",
+      "size": 14,
+      "text": "{\"plain\":true}"
+    },
+    "garbage.bin": {
+      "note": "neither compressed nor utf-8 → null",
+      "size": 7,
+      "text": null
+    }
+  }
+}
