@@ -1,7 +1,7 @@
 /**
  * tradeCfg.js — the bot's TradeCfg / shared-vs-LONG/SHORT model.
  *
- * Reference values printed by the bot (CHM_BREAKER_V4, python 3.12, venv):
+ * Reference values printed by the bot (CHM_BREAKER_V4, CPython 3.11 = the production interpreter):
  *   user_manager._sparse_merge / handlers._common._update_long_field /
  *   UserSettings.get_long_cfg — see the A…L vectors inline.
  */

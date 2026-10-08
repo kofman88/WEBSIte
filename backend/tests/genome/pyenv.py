@@ -1,6 +1,7 @@
 """pyenv.py — shared setup of the genome vector generators (bot repo on sys.path, pinned env).
 
-Run the generators with the bot's venv from any cwd, e.g.
+Run the generators with the production interpreter (CPython 3.11 + the bot's pinned requirements)
+from any cwd, e.g.
   VENV=/path/to/venv/bin/python
   $VENV backend/tests/genome/make_genome_vectors.py
   rm -f /home/user/MAIN_BOT/CHM_BREAKER_V4/signal_registry.json

@@ -1182,6 +1182,11 @@ def repo_vectors():
                 err = type(e).__name__
             for _ in range(4):
                 await asyncio.sleep(0)   # emit_bg event tasks
+            # emit_bg tasks write through aiosqlite worker threads: a few loop turns are not
+            # always enough (under CPU load the event landed one step late), so wait for them
+            _evt = [t for t in asyncio.all_tasks() if t.get_name().startswith("evt_")]
+            if _evt:
+                await asyncio.gather(*_evt, return_exceptions=True)
             rows, ev = all_rows(path)
             steps.append(delta(op, {"now": clk.t, "result": res, "error": err, "rows": rows, "events": ev,
                                     "logs": [l[1] for l in cap.lines if l[0] in ("INFO", "WARNING") and "Persistent write" not in l[1]]}))

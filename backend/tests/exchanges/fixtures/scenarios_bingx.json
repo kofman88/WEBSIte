@@ -5671,7 +5671,7 @@
      "equity": 1000.5,
      "unrealized_pnl": 0.5,
      "available": 900.0,
-     "closed_pnl_24h": 3.0000000000000004,
+     "closed_pnl_24h": 3.0,
      "trades_24h": 3,
      "wins_24h": 2
     }

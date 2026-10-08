@@ -65,37 +65,19 @@ function npRound(x, k) {
 }
 
 /**
- * CPython 3.12 builtin sum() over a mix of exact Python floats and numpy float64 scalars
- * (`items` = [[value, isNumpy]]): exact floats are Neumaier-compensated; the first numpy item
- * leaves the fast path (the pending compensation is added) and the rest is plain left-to-right
- * addition. Returns [sum, isNumpy].
+ * CPython 3.11 builtin sum() over a mix of exact Python floats and numpy float64 scalars
+ * (`items` = [[value, isNumpy]]): the float fast path and the generic PyNumber_Add loop the
+ * first numpy item drops to are both plain left-to-right additions (3.12+ would compensate the
+ * fast path). The result is a numpy float64 as soon as one item is. Returns [sum, isNumpy].
  */
 function cpySum(items) {
-  if (!items.length) return [0, false];
-  let k = 1;
-  let res = 0 + items[0][0];
-  if (items[0][1]) {
-    for (; k < items.length; k++) res += items[k][0];
-    return [res, true];
+  let res = 0;
+  let isNp = false;
+  for (const [x, np] of items) {
+    res += x;
+    if (np) isNp = true;
   }
-  let f = res;
-  let c = 0.0;
-  for (; k < items.length; k++) {
-    const [x, isNp] = items[k];
-    if (!isNp) {
-      const t = f + x;
-      if (Math.abs(f) >= Math.abs(x)) c += (f - t) + x;
-      else c += (x - t) + f;
-      f = t;
-      continue;
-    }
-    if (c && Number.isFinite(c)) f += c;
-    res = f + x;
-    for (k += 1; k < items.length; k++) res += items[k][0];
-    return [res, true];
-  }
-  if (c && Number.isFinite(c)) f += c;
-  return [f, false];
+  return [res, isNp];
 }
 
 /** pandas str(Timestamp(ms, unit="ms")) for a naive UTC index: "2025-12-23 16:00:00[.ffffff]". */

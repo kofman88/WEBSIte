@@ -4,7 +4,7 @@ Every value in tests/genome/fixtures/*.json is produced by the bot's OWN code
 (/home/user/MAIN_BOT/CHM_BREAKER_V4: genome.py, genome_ui.py, backtest.py, …), never typed by
 hand. Re-run:
 
-  VENV=/tmp/…/venv/bin/python        # the bot's pinned venv (numpy/pandas/scipy/aiosqlite)
+  VENV=/tmp/…/venv311/bin/python     # CPython 3.11 (production) + the bot's pinned requirements
   $VENV backend/tests/genome/make_genome_vectors.py [section …]
   rm -f /home/user/MAIN_BOT/CHM_BREAKER_V4/signal_registry.json
 
