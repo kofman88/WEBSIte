@@ -418,6 +418,15 @@ def _install_fake_db(kv):
     database.db_kv_set = kv.set
 
 
+def _restore_real_db():
+    """Undo _install_fake_db: the DB-backed sections (db / handlers) run after evaluate /
+    backtests in a default all-sections run and must see the real kv (volume_cfg, live baseline)."""
+    import database
+    from db import misc as _misc
+    database.db_kv_get = _misc.db_kv_get
+    database.db_kv_set = _misc.db_kv_set
+
+
 async def _run_eval(strategy, genome_d, tf, preloaded, baseline, kv):
     MC_RECORD.clear()
     genome._eval_cache.clear()
@@ -464,6 +473,7 @@ def section_evaluate():
         backtest.Backtester = REAL_BT
         pyrandom.Random = REAL_RANDOM
         genome.time = REAL_GENOME_TIME
+        _restore_real_db()
 
 
 def _section_evaluate(rng):
@@ -615,6 +625,7 @@ def section_backtests():
     finally:
         pyrandom.Random = REAL_RANDOM
         genome.time = REAL_GENOME_TIME
+        _restore_real_db()
 
 
 def _section_backtests():
