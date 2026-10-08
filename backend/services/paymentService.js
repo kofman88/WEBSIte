@@ -379,6 +379,14 @@ function extendSubscription(userId, plan, days) {
   }
   logger.info('subscription extended', { userId, plan, until: newExpires });
 
+  // Mirror into trader_settings (bot sub_plan / sub_status / sub_expires) —
+  // planService is the single writer of that mirror (M7). Lazy require: the
+  // plan service depends on this module's siblings.
+  try {
+    require('./planService').sync(userId).catch((err) => logger.warn('plan mirror sync failed', { userId, err: err.message }));
+  } catch (err) {
+    logger.warn('plan mirror sync failed', { userId, err: err.message });
+  }
 }
 
 function getUserPayments(userId, { limit = 50, offset = 0 } = {}) {

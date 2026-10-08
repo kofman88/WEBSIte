@@ -121,6 +121,12 @@ class SubscriptionService {
       ).run(userId, plan, expiresAt.toISOString(), paymentMethod || null, paymentTx || null);
     }
 
+    // Mirror into trader_settings (planService owns sub_plan / sub_status /
+    // sub_expires, M7). Lazy require avoids a circular import.
+    try {
+      require('./planService').sync(userId).catch(() => {});
+    } catch (_e) { /* best-effort */ }
+
     return this.getUserSubscription(userId);
   }
 
