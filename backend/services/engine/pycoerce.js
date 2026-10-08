@@ -10,9 +10,11 @@
 class PyValueError extends Error {}
 class PyTypeError extends Error {}
 
-const INT_RE = /^\s*[+-]?\d+\s*$/;
-// float(): decimal / exponent forms, inf / nan spellings (case-insensitive)
-const FLOAT_RE = /^\s*[+-]?(\d+\.?\d*(e[+-]?\d+)?|\.\d+(e[+-]?\d+)?|inf|infinity|nan)\s*$/i;
+// PEP 515: single underscores are allowed between digits ("1_000", "1_0.5_5", "1e1_0").
+const DIGITS = '\\d(?:_?\\d)*';
+const INT_RE = new RegExp(`^\\s*[+-]?${DIGITS}\\s*$`);
+// float(): decimal / exponent forms (with PEP 515 underscores), inf / nan spellings (case-insensitive)
+const FLOAT_RE = new RegExp(`^\\s*[+-]?(?:(?:${DIGITS}(?:\\.(?:${DIGITS})?)?|\\.${DIGITS})(?:e[+-]?${DIGITS})?|inf|infinity|nan)\\s*$`, 'i');
 
 /** int(v): bool → 0/1; number → truncated (finite only); numeric string; else raises. */
 function pyInt(v) {
@@ -23,18 +25,18 @@ function pyInt(v) {
   }
   if (typeof v === 'string') {
     if (!INT_RE.test(v)) throw new PyValueError(`invalid literal for int() with base 10: '${v}'`);
-    return parseInt(v.trim(), 10);
+    return parseInt(v.trim().replace(/_/g, ''), 10);
   }
   throw new PyTypeError(`int() argument must be a string, a bytes-like object or a real number, not '${v === null ? 'NoneType' : typeof v}'`);
 }
 
-/** float(v): bool → 0.0/1.0; number as is; numeric string (incl. inf/nan); else raises. */
+/** float(v): bool → 0.0/1.0; number as is; numeric string (incl. inf/nan, PEP 515 underscores); else raises. */
 function pyFloat(v) {
   if (typeof v === 'boolean') return v ? 1 : 0;
   if (typeof v === 'number') return v;
   if (typeof v === 'string') {
     if (!FLOAT_RE.test(v)) throw new PyValueError(`could not convert string to float: '${v}'`);
-    const t = v.trim().toLowerCase();
+    const t = v.trim().toLowerCase().replace(/_/g, '');
     if (t.endsWith('inf') || t.endsWith('infinity')) return t.startsWith('-') ? -Infinity : Infinity;
     if (t.endsWith('nan')) return NaN;
     return Number(t);

@@ -43,7 +43,7 @@ const quietHours = require('./engine/quietHours');
 const volumeUserCfg = require('./volumeUserCfg');
 const volumeCfg = require('./engine/volumeCfgShim');
 const exchangeService = require('./exchangeService');
-const { isClose } = require('./engine/pycoerce');
+const { isClose, pyFloat } = require('./engine/pycoerce');
 const logger = require('../utils/logger');
 
 // ── constants (miniapp_api.py) ───────────────────────────────────────────
@@ -223,9 +223,11 @@ function toNumber(v) {
   if (typeof v === 'boolean') throw new BadRequest('bool');
   if (typeof v === 'string') {
     if (!v.trim()) throw new BadRequest('blank');
-    const n = Number(v);
-    if (!/^\s*[+-]?(\d+\.?\d*|\.\d+)([eE][+-]?\d+)?\s*$/.test(v)) throw new BadRequest('nan');
-    return n;
+    try {
+      return pyFloat(v);          // QUIRK: Python float() accepts "1_0" (PEP 515), "inf", "nan"
+    } catch (_e) {
+      throw new BadRequest('nan');
+    }
   }
   if (typeof v !== 'number') throw new BadRequest('type');   // Python float(list) → TypeError
   return v;

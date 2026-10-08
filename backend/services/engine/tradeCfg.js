@@ -63,6 +63,12 @@ const FIELD_NAMES = Object.freeze(FIELDS.map((f) => f[0]));
 const FIELD_TYPES = Object.freeze(Object.fromEntries(FIELDS.map((f) => [f[0], f[1]])));
 const DEFAULTS = Object.freeze(Object.fromEntries(FIELDS.map((f) => [f[0], f[2]])));
 const FLOAT_KEYS = Object.freeze(FIELDS.filter((f) => f[1] === 'float').map((f) => f[0]));
+// QUIRK(user_manager.TradeCfg): `min_volume_usdt: float = 300_000` — the dataclass
+// default is an int literal, so `_val_eq(raw, default)` never takes the
+// math.isclose branch for it (both operands must be Python floats) and a legacy
+// override such as 300000.15 is kept, not dropped. Every other float default is
+// a float literal.
+const INT_LITERAL_DEFAULTS = Object.freeze(new Set(['min_volume_usdt']));
 const LEVELS_MIN_RR = Number(process.env.LEVELS_MIN_RR || '1.8');   // Config.LEVELS_MIN_RR
 
 /** TradeCfg.__post_init__ — exact order. Mutates and returns cfg. */
@@ -142,7 +148,8 @@ function loadSparse(rawJson) {
   const out = {};
   for (const k of Object.keys(raw)) {
     if (!FIELD_TYPES[k]) continue;                       // drops "_sparse" and unknown keys
-    if (!isSparse && valEq(raw[k], DEFAULTS[k], FIELD_TYPES[k])) continue;
+    const cmpType = INT_LITERAL_DEFAULTS.has(k) ? 'int' : FIELD_TYPES[k];
+    if (!isSparse && valEq(raw[k], DEFAULTS[k], cmpType)) continue;
     out[k] = raw[k];
   }
   return out;
