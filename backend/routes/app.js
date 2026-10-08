@@ -102,6 +102,10 @@ function loadUser(req) {
 }
 
 const body = (req) => (req.body && typeof req.body === 'object' && !Array.isArray(req.body) ? req.body : {});
+// Python `str(v)` as the bot applies it to enum-like fields: only a real string can ever
+// match ("ru", "LEVELS", "active"); str(None) = "None", str(["en"]) = "['en']", str(5) = "5"
+// never do, so every non-string collapses to '' (→ the same rejection).
+const pyStr = (v) => (typeof v === 'string' ? v : '');
 const bad = (res, key) => res.json({ ok: false, error: 'bad_request', message: key });
 const STRATS = strategySet.STRATS;
 const PREF_BOOLS = ['progress_notify_enabled', 'send_chart_enabled', 'genome_auto_apply'];
@@ -158,7 +162,7 @@ router.get('/me', wrap((req, res) => {
 router.post('/strategy', wrap((req, res) => {
   const { user, opts } = loadUser(req);
   const b = body(req);
-  const s = String(b.strategy === undefined || b.strategy === null ? '' : b.strategy).toUpperCase();
+  const s = pyStr(b.strategy).toUpperCase();
   if (!STRATS.includes(s)) return res.status(400).json({ ok: false, error: 'bad_strategy' });
   const wantLong = pyBool(b.long);
   const wantShort = pyBool(b.short);
@@ -221,7 +225,7 @@ router.post('/settings/all', wrap((req, res) => {
 // ── POST profile {name} ──────────────────────────────────────────────────
 router.post('/profile', wrap((req, res) => {
   const { user, opts } = loadUser(req);
-  const name = String(body(req).name || '').toLowerCase();
+  const name = pyStr(body(req).name).toLowerCase();
   if (!profilesService.PROFILES[name]) return bad(res, 'name');
   const r = profilesService.applyProfile(user, name, opts);
   logger.info(`[MINIAPP] [PROFILE] uid=${user.user_id} ${JSON.stringify(r)}`);
@@ -231,7 +235,7 @@ router.post('/profile', wrap((req, res) => {
 // ── POST lang {lang} ─────────────────────────────────────────────────────
 router.post('/lang', wrap((req, res) => {
   const { user } = loadUser(req);
-  const lang = String(body(req).lang === undefined || body(req).lang === null ? '' : body(req).lang).toLowerCase().trim();
+  const lang = pyStr(body(req).lang).toLowerCase().trim();
   if (!['ru', 'en'].includes(lang)) return bad(res, 'lang');
   const before = user.lang || '?';
   user.lang = lang;
