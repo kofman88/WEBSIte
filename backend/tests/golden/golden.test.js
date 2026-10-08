@@ -20,7 +20,7 @@ import compare from './compare.js';
 import registry from './engines.js';
 
 const { SWEEP, STRATEGIES, VARIANTS, loadExpected, loadFrames, listSymbols, sweepIndices, barInputs, tsString, verifyAll } = load;
-const { compareSignal, compareValue, formatDiffs } = compare;
+const { compareSignal, compareValue, compareDigest, formatDiffs, ROUNDED_FIELDS_BY_STRATEGY } = compare;
 
 const envList = (name) => (process.env[name] ? process.env[name].split(',').map((s) => s.trim()).filter(Boolean) : null);
 const SYMBOL_PREFIXES = envList('GOLDEN_SYMBOLS');
@@ -92,7 +92,7 @@ function sweepFixture(strategy, engine, symbol, variantName, variant, expectedFi
         failures.push(`bar ${i}: expected a ${exp.direction} signal, engine returned null${out && out.rejectReason ? ` (reject=${out.rejectReason})` : ''}`);
       } else {
         signals++;
-        const diffs = compareSignal(sig, exp, { ignoreKeys: HARNESS_KEYS[strategy] });
+        const diffs = compareSignal(sig, exp, { ignoreKeys: HARNESS_KEYS[strategy], roundedFields: ROUNDED_FIELDS_BY_STRATEGY[strategy] });
         const hr = harnessRecord(strategy, ctx);
         for (const k of HARNESS_KEYS[strategy]) {
           if (exp[k] !== undefined && hr[k] !== exp[k]) diffs.push({ path: `harness.${k}`, actual: hr[k], expected: exp[k], rule: 'harness' });
@@ -109,7 +109,7 @@ function sweepFixture(strategy, engine, symbol, variantName, variant, expectedFi
     if (strategy === 'smc' && digestFixture && variantName === 'default') {
       const wantDigest = digestFixture[String(i)];
       if (wantDigest && out && out.digest) {
-        const d = compareValue(out.digest, wantDigest, 'digest', [], '');
+        const d = compareDigest(out.digest, wantDigest);
         if (d.length) failures.push(`bar ${i} analysis digest:\n${formatDiffs(d)}`);
       } else if (wantDigest && out && out.digest === undefined) {
         failures.push(`bar ${i}: engine returned no analysis digest`);
@@ -144,6 +144,68 @@ describe('golden fixtures', () => {
     expect(tsString(b.openTimeMs)).toMatch(/^\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}$/);
   });
 });
+
+/**
+ * Digest-only sweep of the SMC ANALYSIS layer (M3): for every bar the engine's
+ * `digest` must equal expected/smc_analysis.json (default analysis key) under the
+ * compare.js rules. Runs before the strategy sweeps so a divergence is attributed
+ * to structure / liquidity / OB / FVG / PD / ATR / volume / squeeze before the
+ * signal builder is involved. Selected with GOLDEN_STRATEGIES=smc_analysis.
+ */
+function sweepDigestFixture(engine, symbol, digestDoc) {
+  const frames = loadFrames(symbol);
+  const n = frames['1h'].length;
+  const indices = sweepIndices(n, STEP);
+  const variant = { analysis_key: digestDoc.analysis_key };
+  const prepared = typeof engine.prepare === 'function' ? engine.prepare(frames, { name: 'default', ...variant }) : undefined;
+  const want = digestDoc.fixtures[symbol] || {};
+  const failures = [];
+  let compared = 0;
+  for (const i of indices) {
+    const ctx = makeCtx('smc', symbol, 'default', variant, frames, i, prepared);
+    let out;
+    try {
+      out = engine.run(ctx);
+    } catch (e) {
+      failures.push(`bar ${i}: engine threw ${e && e.stack ? e.stack.split('\n').slice(0, 3).join(' | ') : e}`);
+      continue;
+    }
+    const exp = want[String(i)];
+    if (!exp) { failures.push(`bar ${i}: fixture has no digest for this bar`); continue; }
+    if (!out || !out.digest) { failures.push(`bar ${i}: engine returned no analysis digest`); continue; }
+    const d = compareDigest(out.digest, exp);
+    if (d.length) failures.push(`bar ${i} analysis digest:\n${formatDiffs(d)}`); else compared++;
+    if (failures.length > 25) { failures.push('… stopping after 25 failures'); break; }
+  }
+  return { failures, bars: indices.length, compared };
+}
+
+if (!STRATEGY_FILTER || STRATEGY_FILTER.includes('smc_analysis')) {
+  const engine = registry.get('smc_analysis');
+  describe('golden smc_analysis', () => {
+    if (!engine || typeof engine.run !== 'function') {
+      it.todo('smc_analysis engine not registered yet (tests/golden/engines.js) — sweep skipped');
+      return;
+    }
+    if (VARIANT_FILTER && !VARIANT_FILTER.includes('default')) {
+      it.skip('smc_analysis digests exist for the default analysis key only', () => {});
+      return;
+    }
+    let digest;
+    beforeAll(() => { digest = loadExpected('smc_analysis'); });
+    describe('variant default', () => {
+      for (const symbol of symbolsToRun()) {
+        it(`${symbol}`, () => {
+          const res = sweepDigestFixture(engine, symbol, digest);
+          if (res.failures.length) {
+            throw new Error(`smc_analysis/default/${symbol}: ${res.failures.length} failing bars of ${res.bars}\n${res.failures.join('\n')}`);
+          }
+          expect(res.compared).toBe(res.bars);
+        });
+      }
+    });
+  });
+}
 
 // Order matters: smc_analysis digests are checked inside the smc sweep (default
 // variant) BEFORE the signal fields so a divergence is attributed to a module.
