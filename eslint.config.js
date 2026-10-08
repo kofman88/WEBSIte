@@ -174,4 +174,21 @@ module.exports = [
     },
     rules: BASE_RULES,
   },
+  {
+    // frontend/app — the web app port of the bot's Mini App (ES5 IIFE, no build
+    // step). Extra browser globals it uses plus the globals its own scripts define.
+    files: ['frontend/app/**/*.js'],
+    languageOptions: {
+      ecmaVersion: 2022,
+      sourceType: 'script',
+      globals: {
+        ...BROWSER_GLOBALS,
+        Node: 'readonly', AbortController: 'readonly', Blob: 'readonly', File: 'readonly',
+        Image: 'readonly', screen: 'readonly', prompt: 'readonly', devicePixelRatio: 'readonly',
+        AudioContext: 'readonly', webkitAudioContext: 'readonly',
+        CHMFX: 'readonly', CHMChart: 'readonly',
+      },
+    },
+    rules: BASE_RULES,
+  },
 ];

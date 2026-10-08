@@ -1,0 +1,76 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+  <meta name="theme-color" content="#060204">
+  <meta name="color-scheme" content="dark">
+  <meta name="robots" content="noindex, nofollow">
+  <title>CHM Breaker — приложение</title>
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg">
+  <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <!-- [AUDIT F-3] шрифты не блокируют отрисовку: при недоступном Google экран не пустой -->
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&family=Oswald:wght@500;600;700&display=swap" media="print" onload="this.media='all'">
+  <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&family=Oswald:wght@500;600;700&display=swap"></noscript>
+  <!-- ?v= bumps the 30-day immutable cache of the static middleware; raise it with every release -->
+  <link rel="stylesheet" href="./app.css?v=m11">
+</head>
+<body>
+  <div class="bg" aria-hidden="true"><i class="blob b1"></i><i class="blob b2"></i><i class="blob b3"></i></div>
+
+  <div id="splash" class="splash" role="presentation" aria-hidden="true">
+    <div class="splash-inner">
+      <svg class="splash-mark" viewBox="0 0 24 24" aria-hidden="true"><path d="M13.5 2L5 13.5h6L9.5 22 19 9.5h-6.2L13.5 2z"/></svg>
+      <div class="splash-word">CHM<span>BREAKER</span></div>
+      <div class="splash-tag">Сигналы. Дисциплина. Результат.</div>
+      <div class="splash-candles" aria-hidden="true"></div>
+    </div>
+    <div class="splash-hint">Нажмите, чтобы продолжить</div>
+  </div>
+
+  <div id="app" class="app">
+    <header class="topbar">
+      <a class="brand" href="/" aria-label="CHM Breaker — на сайт">
+        <svg class="brand-mark" viewBox="0 0 24 24" aria-hidden="true"><path d="M13.5 2L5 13.5h6L9.5 22 19 9.5h-6.2L13.5 2z"/></svg>
+        <span class="brand-name">CHM&nbsp;BREAKER</span>
+      </a>
+      <div class="topbar-right">
+        <span id="demo-badge" class="badge badge-demo" hidden>DEMO</span>
+        <span id="plan-badge" class="badge badge-plan">···</span>
+      </div>
+    </header>
+
+    <main id="view" class="view"></main>
+
+    <section id="detail" class="detail" hidden role="dialog" aria-modal="true"></section>
+
+    <nav class="tabbar" id="tabbar">
+      <button class="tab is-active" data-tab="home" type="button">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 5l14 14M19 5L5 19"/></svg>
+        <span>Главная</span>
+      </button>
+      <button class="tab" data-tab="signals" type="button">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="4" width="16" height="16" rx="1"/><path d="M7.5 15l3-3.5 2.5 2 3.5-5"/></svg>
+        <span>Сигналы</span>
+      </button>
+      <button class="tab" data-tab="analyze" type="button">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="M16.2 16.2L21 21"/><path d="M8 12.5l2-2 1.5 1.5 2.5-3"/></svg>
+        <span>Анализ</span>
+      </button>
+      <button class="tab" data-tab="profile" type="button">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8.5" r="4"/><path d="M4.5 20.5c1.2-4 4-5.5 7.5-5.5s6.3 1.5 7.5 5.5"/></svg>
+        <span>Профиль</span>
+      </button>
+    </nav>
+
+    <div id="toast" class="toast" role="status" hidden></div>
+  </div>
+
+  <noscript><p class="noscript">Включите JavaScript, чтобы открыть приложение.</p></noscript>
+  <script src="./splash.js?v=m11"></script>
+  <script src="./chart.js?v=m11"></script>
+  <script src="./app.js?v=m11"></script>
+</body>
+</html>
