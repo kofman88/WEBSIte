@@ -26,8 +26,10 @@
 
 'use strict';
 
-const { pyInt: coerceInt, pyFloat: coerceFloat } = require('./engine/pycoerce');
 const { pyRoundInt, pyMax, pyMin } = require('../strategies/common/pyround');
+// CPython's int() / float() / str.strip() (its Unicode digits and spaces, PEP 515, the
+// 4300-digit limit, the exact error messages) — shared with the challenge port.
+const { pyInt: coerceInt, pyFloat: coerceFloat, pyIntStr, pyStrip } = require('./challengeService');
 
 const KV_PREFIX = 'entry_advice_';
 const STRATS = Object.freeze(['LEVELS', 'SMC', 'VOLUME']);
@@ -42,16 +44,30 @@ function envRaw(env, name, dflt) {
   return v === '' ? dflt : v;
 }
 
+/** max(lo, int(raw)) as Python sees it: the value plus its exact decimal (ints are unbounded). */
+function intAtLeast(lo, raw) {
+  const s = pyIntStr(raw);
+  const big = BigInt(s);
+  return big > BigInt(lo) ? { n: Number(big), text: s, big } : { n: lo, text: String(lo), big: BigInt(lo) };
+}
+
 function readConfig(env = process.env) {
   const enabledRaw = envRaw(env, 'ENTRY_ADVISOR_ENABLED', '1');
-  return {
-    ENABLED: !['0', 'false', 'off'].includes(String(enabledRaw).trim()),
-    DAYS: pyMax(3, coerceInt(envRaw(env, 'ENTRY_ADVISOR_DAYS', '14'))),
+  const ENABLED = !['0', 'false', 'off'].includes(pyStrip(String(enabledRaw)));
+  const days = intAtLeast(3, envRaw(env, 'ENTRY_ADVISOR_DAYS', '14'));
+  const cfg = {
+    ENABLED,
+    DAYS: days.n,
     MIN_MISSED: pyMax(2, coerceInt(envRaw(env, 'ENTRY_ADVISOR_MIN_MISSED', '5'))),
     MIN_SHARE: pyMax(0.05, pyMin(0.9, coerceFloat(envRaw(env, 'ENTRY_ADVISOR_MIN_SHARE', '0.3')))),
     REPEAT_DAYS: pyMax(1, coerceInt(envRaw(env, 'ENTRY_ADVISOR_REPEAT_DAYS', '7'))),
     INTERVAL_S: pyMax(600.0, coerceFloat(envRaw(env, 'ENTRY_ADVISOR_INTERVAL_S', '86400'))),
   };
+  // f"За {DAYS} дней" prints the exact int; `time.time() - DAYS * 86400` raises OverflowError
+  // once DAYS * 86400 no longer fits a float (both only for absurd ENTRY_ADVISOR_DAYS values)
+  Object.defineProperty(cfg, 'DAYS_TEXT', { value: days.text, enumerable: false });
+  Object.defineProperty(cfg, 'DAYS_SECONDS', { value: Number(days.big * 86400n), enumerable: false });
+  return cfg;
 }
 
 let CONFIG = readConfig(process.env);
@@ -111,7 +127,13 @@ const config = () => CONFIG;
  */
 function missedStats(userId, days = null) {
   const d = isNone(days) ? CONFIG.DAYS : days;
-  const cutoff = _deps.clock() - d * 86400;
+  const span = isNone(days) && CONFIG.DAYS_SECONDS !== undefined ? CONFIG.DAYS_SECONDS : d * 86400;
+  if (!Number.isFinite(span)) {
+    const e = new Error('int too large to convert to float');
+    e.pyType = 'OverflowError';
+    throw e;
+  }
+  const cutoff = _deps.clock() - span;
   const out = {};
   for (const s of STRATS) out[s] = { missed: 0, total: 0 };
   const rows = db().prepare(
@@ -155,7 +177,7 @@ function adviceText(strategy, missed, total, lang = 'ru') {
   const names = NAMES[lang === 'en' ? 'en' : 'ru'];
   const name = htmlEscape(Object.prototype.hasOwnProperty.call(names, strategy) ? names[strategy] : strategy);
   const share = pyRoundInt(100.0 * missed / pyMax(1, total));
-  const days = CONFIG.DAYS;
+  const days = CONFIG.DAYS_TEXT !== undefined && Number(CONFIG.DAYS_TEXT) === CONFIG.DAYS ? CONFIG.DAYS_TEXT : String(CONFIG.DAYS);
   if (lang === 'en') {
     return `🎯 <b>Entry type: ${name}</b>\n\n`
       + `Over the last ${days} days <b>${missed} of ${total}</b> ${name} signals (${share}%) `
