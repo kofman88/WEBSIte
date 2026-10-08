@@ -1,0 +1,3854 @@
+{
+"daily_texts": [
+{
+"name": "zero",
+"lang": "ru",
+"now": 1766000000.0,
+"s24": {
+"closed": 0,
+"tp1": 2,
+"tp2": 1,
+"tp3": 0,
+"sl": 1,
+"be": 0,
+"total_rr": 2.5,
+"winrate_pct": 75,
+"best_symbol": "BTC-USDT-SWAP",
+"worst_symbol": "PEPE-USDT"
+},
+"s7": {
+"closed": 9,
+"total_rr": -1.255,
+"winrate_pct": 44
+},
+"text": null
+},
+{
+"name": "zero",
+"lang": "en",
+"now": 1766000000.0,
+"s24": {
+"closed": 0,
+"tp1": 2,
+"tp2": 1,
+"tp3": 0,
+"sl": 1,
+"be": 0,
+"total_rr": 2.5,
+"winrate_pct": 75,
+"best_symbol": "BTC-USDT-SWAP",
+"worst_symbol": "PEPE-USDT"
+},
+"s7": {
+"closed": 9,
+"total_rr": -1.255,
+"winrate_pct": 44
+},
+"text": null
+},
+{
+"name": "zero",
+"lang": "de",
+"now": 1766000000.0,
+"s24": {
+"closed": 0,
+"tp1": 2,
+"tp2": 1,
+"tp3": 0,
+"sl": 1,
+"be": 0,
+"total_rr": 2.5,
+"winrate_pct": 75,
+"best_symbol": "BTC-USDT-SWAP",
+"worst_symbol": "PEPE-USDT"
+},
+"s7": {
+"closed": 9,
+"total_rr": -1.255,
+"winrate_pct": 44
+},
+"text": null
+},
+{
+"name": "great",
+"lang": "ru",
+"now": 1767225599.0,
+"s24": {
+"closed": 4,
+"tp1": 2,
+"tp2": 1,
+"tp3": 0,
+"sl": 1,
+"be": 0,
+"total_rr": 2.5,
+"winrate_pct": 75,
+"best_symbol": "BTC-USDT-SWAP",
+"worst_symbol": "PEPE-USDT"
+},
+"s7": {
+"closed": 9,
+"total_rr": -1.255,
+"winrate_pct": 44
+},
+"text": "🌙 <b>Твой день — 31 декабря</b>\n\n🔥 <b>Отличный день</b>\n📊 Сделок: <b>4</b> (3 ✅ / 1 ❌)\n💰 Результат: <b>+2.50R</b>\n🎯 Win Rate: <b>75%</b>\n🏆 Лучшая: <b>BTC</b>\n📉 Худшая: <b>PEPE</b>\n\n📅 За 7 дней: <b>-1.25R</b> | WR 44% (9 сделок)\n\n😴 Хорошо отдохнуть!"
+},
+{
+"name": "great",
+"lang": "en",
+"now": 1767225599.0,
+"s24": {
+"closed": 4,
+"tp1": 2,
+"tp2": 1,
+"tp3": 0,
+"sl": 1,
+"be": 0,
+"total_rr": 2.5,
+"winrate_pct": 75,
+"best_symbol": "BTC-USDT-SWAP",
+"worst_symbol": "PEPE-USDT"
+},
+"s7": {
+"closed": 9,
+"total_rr": -1.255,
+"winrate_pct": 44
+},
+"text": "🌙 <b>Твой день — 31 December</b>\n\n🔥 <b>Отличный день</b>\n📊 Сделок: <b>4</b> (3 ✅ / 1 ❌)\n💰 Результат: <b>+2.50R</b>\n🎯 Win Rate: <b>75%</b>\n🏆 Лучшая: <b>BTC</b>\n📉 Худшая: <b>PEPE</b>\n\n📅 За 7 дней: <b>-1.25R</b> | WR 44% (9 сделок)\n\n😴 Хорошо отдохнуть!"
+},
+{
+"name": "great",
+"lang": "de",
+"now": 1767225599.0,
+"s24": {
+"closed": 4,
+"tp1": 2,
+"tp2": 1,
+"tp3": 0,
+"sl": 1,
+"be": 0,
+"total_rr": 2.5,
+"winrate_pct": 75,
+"best_symbol": "BTC-USDT-SWAP",
+"worst_symbol": "PEPE-USDT"
+},
+"s7": {
+"closed": 9,
+"total_rr": -1.255,
+"winrate_pct": 44
+},
+"text": "🌙 <b>Твой день — 31 December</b>\n\n🔥 <b>Отличный день</b>\n📊 Сделок: <b>4</b> (3 ✅ / 1 ❌)\n💰 Результат: <b>+2.50R</b>\n🎯 Win Rate: <b>75%</b>\n🏆 Лучшая: <b>BTC</b>\n📉 Худшая: <b>PEPE</b>\n\n📅 За 7 дней: <b>-1.25R</b> | WR 44% (9 сделок)\n\n😴 Хорошо отдохнуть!"
+},
+{
+"name": "positive small",
+"lang": "ru",
+"now": 1770000000.0,
+"s24": {
+"closed": 4,
+"tp1": 2,
+"tp2": 1,
+"tp3": 0,
+"sl": 1,
+"be": 0,
+"total_rr": 0.4,
+"winrate_pct": 75,
+"best_symbol": "BTC-USDT-SWAP",
+"worst_symbol": "PEPE-USDT"
+},
+"s7": {
+"closed": 9,
+"total_rr": -1.255,
+"winrate_pct": 44
+},
+"text": "🌙 <b>Твой день — 02 февраля</b>\n\n✅ <b>Положительный день</b>\n📊 Сделок: <b>4</b> (3 ✅ / 1 ❌)\n💰 Результат: <b>+0.40R</b>\n🎯 Win Rate: <b>75%</b>\n🏆 Лучшая: <b>BTC</b>\n📉 Худшая: <b>PEPE</b>\n\n📅 За 7 дней: <b>-1.25R</b> | WR 44% (9 сделок)\n\n😴 Хорошо отдохнуть!"
+},
+{
+"name": "positive small",
+"lang": "en",
+"now": 1770000000.0,
+"s24": {
+"closed": 4,
+"tp1": 2,
+"tp2": 1,
+"tp3": 0,
+"sl": 1,
+"be": 0,
+"total_rr": 0.4,
+"winrate_pct": 75,
+"best_symbol": "BTC-USDT-SWAP",
+"worst_symbol": "PEPE-USDT"
+},
+"s7": {
+"closed": 9,
+"total_rr": -1.255,
+"winrate_pct": 44
+},
+"text": "🌙 <b>Твой день — 02 February</b>\n\n✅ <b>Положительный день</b>\n📊 Сделок: <b>4</b> (3 ✅ / 1 ❌)\n💰 Результат: <b>+0.40R</b>\n🎯 Win Rate: <b>75%</b>\n🏆 Лучшая: <b>BTC</b>\n📉 Худшая: <b>PEPE</b>\n\n📅 За 7 дней: <b>-1.25R</b> | WR 44% (9 сделок)\n\n😴 Хорошо отдохнуть!"
+},
+{
+"name": "positive small",
+"lang": "de",
+"now": 1770000000.0,
+"s24": {
+"closed": 4,
+"tp1": 2,
+"tp2": 1,
+"tp3": 0,
+"sl": 1,
+"be": 0,
+"total_rr": 0.4,
+"winrate_pct": 75,
+"best_symbol": "BTC-USDT-SWAP",
+"worst_symbol": "PEPE-USDT"
+},
+"s7": {
+"closed": 9,
+"total_rr": -1.255,
+"winrate_pct": 44
+},
+"text": "🌙 <b>Твой день — 02 February</b>\n\n✅ <b>Положительный день</b>\n📊 Сделок: <b>4</b> (3 ✅ / 1 ❌)\n💰 Результат: <b>+0.40R</b>\n🎯 Win Rate: <b>75%</b>\n🏆 Лучшая: <b>BTC</b>\n📉 Худшая: <b>PEPE</b>\n\n📅 За 7 дней: <b>-1.25R</b> | WR 44% (9 сделок)\n\n😴 Хорошо отдохнуть!"
+},
+{
+"name": "calm",
+"lang": "ru",
+"now": 1772150400.0,
+"s24": {
+"closed": 4,
+"tp1": 2,
+"tp2": 1,
+"tp3": 0,
+"sl": 1,
+"be": 0,
+"total_rr": -0.5,
+"winrate_pct": 75,
+"best_symbol": "BTC-USDT-SWAP",
+"worst_symbol": "PEPE-USDT"
+},
+"s7": {
+"closed": 9,
+"total_rr": -1.255,
+"winrate_pct": 44
+},
+"text": "🌙 <b>Твой день — 27 февраля</b>\n\n💤 <b>Спокойный день</b>\n📊 Сделок: <b>4</b> (3 ✅ / 1 ❌)\n💰 Результат: <b>-0.50R</b>\n🎯 Win Rate: <b>75%</b>\n🏆 Лучшая: <b>BTC</b>\n📉 Худшая: <b>PEPE</b>\n\n📅 За 7 дней: <b>-1.25R</b> | WR 44% (9 сделок)\n\n💪 Завтра новый день — без эмоций."
+},
+{
+"name": "calm",
+"lang": "en",
+"now": 1772150400.0,
+"s24": {
+"closed": 4,
+"tp1": 2,
+"tp2": 1,
+"tp3": 0,
+"sl": 1,
+"be": 0,
+"total_rr": -0.5,
+"winrate_pct": 75,
+"best_symbol": "BTC-USDT-SWAP",
+"worst_symbol": "PEPE-USDT"
+},
+"s7": {
+"closed": 9,
+"total_rr": -1.255,
+"winrate_pct": 44
+},
+"text": "🌙 <b>Твой день — 27 February</b>\n\n💤 <b>Спокойный день</b>\n📊 Сделок: <b>4</b> (3 ✅ / 1 ❌)\n💰 Результат: <b>-0.50R</b>\n🎯 Win Rate: <b>75%</b>\n🏆 Лучшая: <b>BTC</b>\n📉 Худшая: <b>PEPE</b>\n\n📅 За 7 дней: <b>-1.25R</b> | WR 44% (9 сделок)\n\n💪 Завтра новый день — без эмоций."
+},
+{
+"name": "calm",
+"lang": "de",
+"now": 1772150400.0,
+"s24": {
+"closed": 4,
+"tp1": 2,
+"tp2": 1,
+"tp3": 0,
+"sl": 1,
+"be": 0,
+"total_rr": -0.5,
+"winrate_pct": 75,
+"best_symbol": "BTC-USDT-SWAP",
+"worst_symbol": "PEPE-USDT"
+},
+"s7": {
+"closed": 9,
+"total_rr": -1.255,
+"winrate_pct": 44
+},
+"text": "🌙 <b>Твой день — 27 February</b>\n\n💤 <b>Спокойный день</b>\n📊 Сделок: <b>4</b> (3 ✅ / 1 ❌)\n💰 Результат: <b>-0.50R</b>\n🎯 Win Rate: <b>75%</b>\n🏆 Лучшая: <b>BTC</b>\n📉 Худшая: <b>PEPE</b>\n\n📅 За 7 дней: <b>-1.25R</b> | WR 44% (9 сделок)\n\n💪 Завтра новый день — без эмоций."
+},
+{
+"name": "hard",
+"lang": "ru",
+"now": 1780000000.0,
+"s24": {
+"closed": 4,
+"tp1": 2,
+"tp2": 1,
+"tp3": 0,
+"sl": 1,
+"be": 0,
+"total_rr": -1.0,
+"winrate_pct": 75,
+"best_symbol": "BTC-USDT-SWAP",
+"worst_symbol": "PEPE-USDT"
+},
+"s7": {
+"closed": 9,
+"total_rr": -1.255,
+"winrate_pct": 44
+},
+"text": "🌙 <b>Твой день — 28 мая</b>\n\n📉 <b>Тяжёлый день</b>\n📊 Сделок: <b>4</b> (3 ✅ / 1 ❌)\n💰 Результат: <b>-1.00R</b>\n🎯 Win Rate: <b>75%</b>\n🏆 Лучшая: <b>BTC</b>\n📉 Худшая: <b>PEPE</b>\n\n📅 За 7 дней: <b>-1.25R</b> | WR 44% (9 сделок)\n\n💪 Завтра новый день — без эмоций."
+},
+{
+"name": "hard",
+"lang": "en",
+"now": 1780000000.0,
+"s24": {
+"closed": 4,
+"tp1": 2,
+"tp2": 1,
+"tp3": 0,
+"sl": 1,
+"be": 0,
+"total_rr": -1.0,
+"winrate_pct": 75,
+"best_symbol": "BTC-USDT-SWAP",
+"worst_symbol": "PEPE-USDT"
+},
+"s7": {
+"closed": 9,
+"total_rr": -1.255,
+"winrate_pct": 44
+},
+"text": "🌙 <b>Твой день — 28 May</b>\n\n📉 <b>Тяжёлый день</b>\n📊 Сделок: <b>4</b> (3 ✅ / 1 ❌)\n💰 Результат: <b>-1.00R</b>\n🎯 Win Rate: <b>75%</b>\n🏆 Лучшая: <b>BTC</b>\n📉 Худшая: <b>PEPE</b>\n\n📅 За 7 дней: <b>-1.25R</b> | WR 44% (9 сделок)\n\n💪 Завтра новый день — без эмоций."
+},
+{
+"name": "hard",
+"lang": "de",
+"now": 1780000000.0,
+"s24": {
+"closed": 4,
+"tp1": 2,
+"tp2": 1,
+"tp3": 0,
+"sl": 1,
+"be": 0,
+"total_rr": -1.0,
+"winrate_pct": 75,
+"best_symbol": "BTC-USDT-SWAP",
+"worst_symbol": "PEPE-USDT"
+},
+"s7": {
+"closed": 9,
+"total_rr": -1.255,
+"winrate_pct": 44
+},
+"text": "🌙 <b>Твой день — 28 May</b>\n\n📉 <b>Тяжёлый день</b>\n📊 Сделок: <b>4</b> (3 ✅ / 1 ❌)\n💰 Результат: <b>-1.00R</b>\n🎯 Win Rate: <b>75%</b>\n🏆 Лучшая: <b>BTC</b>\n📉 Худшая: <b>PEPE</b>\n\n📅 За 7 дней: <b>-1.25R</b> | WR 44% (9 сделок)\n\n💪 Завтра новый день — без эмоций."
+},
+{
+"name": "hard2",
+"lang": "ru",
+"now": 1757000000.0,
+"s24": {
+"closed": 4,
+"tp1": 2,
+"tp2": 1,
+"tp3": 0,
+"sl": 1,
+"be": 0,
+"total_rr": -3.333,
+"winrate_pct": 75,
+"best_symbol": "BTC-USDT-SWAP",
+"worst_symbol": "PEPE-USDT"
+},
+"s7": {
+"closed": 2,
+"total_rr": -1.255,
+"winrate_pct": 44
+},
+"text": "🌙 <b>Твой день — 04 сентября</b>\n\n📉 <b>Тяжёлый день</b>\n📊 Сделок: <b>4</b> (3 ✅ / 1 ❌)\n💰 Результат: <b>-3.33R</b>\n🎯 Win Rate: <b>75%</b>\n🏆 Лучшая: <b>BTC</b>\n📉 Худшая: <b>PEPE</b>\n\n💪 Завтра новый день — без эмоций."
+},
+{
+"name": "hard2",
+"lang": "en",
+"now": 1757000000.0,
+"s24": {
+"closed": 4,
+"tp1": 2,
+"tp2": 1,
+"tp3": 0,
+"sl": 1,
+"be": 0,
+"total_rr": -3.333,
+"winrate_pct": 75,
+"best_symbol": "BTC-USDT-SWAP",
+"worst_symbol": "PEPE-USDT"
+},
+"s7": {
+"closed": 2,
+"total_rr": -1.255,
+"winrate_pct": 44
+},
+"text": "🌙 <b>Твой день — 04 September</b>\n\n📉 <b>Тяжёлый день</b>\n📊 Сделок: <b>4</b> (3 ✅ / 1 ❌)\n💰 Результат: <b>-3.33R</b>\n🎯 Win Rate: <b>75%</b>\n🏆 Лучшая: <b>BTC</b>\n📉 Худшая: <b>PEPE</b>\n\n💪 Завтра новый день — без эмоций."
+},
+{
+"name": "hard2",
+"lang": "de",
+"now": 1757000000.0,
+"s24": {
+"closed": 4,
+"tp1": 2,
+"tp2": 1,
+"tp3": 0,
+"sl": 1,
+"be": 0,
+"total_rr": -3.333,
+"winrate_pct": 75,
+"best_symbol": "BTC-USDT-SWAP",
+"worst_symbol": "PEPE-USDT"
+},
+"s7": {
+"closed": 2,
+"total_rr": -1.255,
+"winrate_pct": 44
+},
+"text": "🌙 <b>Твой день — 04 September</b>\n\n📉 <b>Тяжёлый день</b>\n📊 Сделок: <b>4</b> (3 ✅ / 1 ❌)\n💰 Результат: <b>-3.33R</b>\n🎯 Win Rate: <b>75%</b>\n🏆 Лучшая: <b>BTC</b>\n📉 Худшая: <b>PEPE</b>\n\n💪 Завтра новый день — без эмоций."
+},
+{
+"name": "be shown",
+"lang": "ru",
+"now": 1762000000.0,
+"s24": {
+"closed": 4,
+"tp1": 2,
+"tp2": 1,
+"tp3": 0,
+"sl": 1,
+"be": 2,
+"total_rr": 2.5,
+"winrate_pct": 75,
+"best_symbol": "BTC-USDT-SWAP",
+"worst_symbol": "PEPE-USDT"
+},
+"s7": {
+"closed": 9,
+"total_rr": -1.255,
+"winrate_pct": 44
+},
+"text": "🌙 <b>Твой день — 01 ноября</b>\n\n🔥 <b>Отличный день</b>\n📊 Сделок: <b>4</b> (3 ✅ / 1 ❌ / 2 ♻️)\n💰 Результат: <b>+2.50R</b>\n🎯 Win Rate: <b>75%</b>\n🏆 Лучшая: <b>BTC</b>\n📉 Худшая: <b>PEPE</b>\n\n📅 За 7 дней: <b>-1.25R</b> | WR 44% (9 сделок)\n\n😴 Хорошо отдохнуть!"
+},
+{
+"name": "be shown",
+"lang": "en",
+"now": 1762000000.0,
+"s24": {
+"closed": 4,
+"tp1": 2,
+"tp2": 1,
+"tp3": 0,
+"sl": 1,
+"be": 2,
+"total_rr": 2.5,
+"winrate_pct": 75,
+"best_symbol": "BTC-USDT-SWAP",
+"worst_symbol": "PEPE-USDT"
+},
+"s7": {
+"closed": 9,
+"total_rr": -1.255,
+"winrate_pct": 44
+},
+"text": "🌙 <b>Твой день — 01 November</b>\n\n🔥 <b>Отличный день</b>\n📊 Сделок: <b>4</b> (3 ✅ / 1 ❌ / 2 ♻️)\n💰 Результат: <b>+2.50R</b>\n🎯 Win Rate: <b>75%</b>\n🏆 Лучшая: <b>BTC</b>\n📉 Худшая: <b>PEPE</b>\n\n📅 За 7 дней: <b>-1.25R</b> | WR 44% (9 сделок)\n\n😴 Хорошо отдохнуть!"
+},
+{
+"name": "be shown",
+"lang": "de",
+"now": 1762000000.0,
+"s24": {
+"closed": 4,
+"tp1": 2,
+"tp2": 1,
+"tp3": 0,
+"sl": 1,
+"be": 2,
+"total_rr": 2.5,
+"winrate_pct": 75,
+"best_symbol": "BTC-USDT-SWAP",
+"worst_symbol": "PEPE-USDT"
+},
+"s7": {
+"closed": 9,
+"total_rr": -1.255,
+"winrate_pct": 44
+},
+"text": "🌙 <b>Твой день — 01 November</b>\n\n🔥 <b>Отличный день</b>\n📊 Сделок: <b>4</b> (3 ✅ / 1 ❌ / 2 ♻️)\n💰 Результат: <b>+2.50R</b>\n🎯 Win Rate: <b>75%</b>\n🏆 Лучшая: <b>BTC</b>\n📉 Худшая: <b>PEPE</b>\n\n📅 За 7 дней: <b>-1.25R</b> | WR 44% (9 сделок)\n\n😴 Хорошо отдохнуть!"
+},
+{
+"name": "best only",
+"lang": "ru",
+"now": 1741000000.0,
+"s24": {
+"closed": 4,
+"tp1": 2,
+"tp2": 1,
+"tp3": 0,
+"sl": 1,
+"be": 0,
+"total_rr": 2.5,
+"winrate_pct": 75,
+"best_symbol": "BTC-USDT-SWAP",
+"worst_symbol": ""
+},
+"s7": {
+"closed": 9,
+"total_rr": -1.255,
+"winrate_pct": 44
+},
+"text": "🌙 <b>Твой день — 03 марта</b>\n\n🔥 <b>Отличный день</b>\n📊 Сделок: <b>4</b> (3 ✅ / 1 ❌)\n💰 Результат: <b>+2.50R</b>\n🎯 Win Rate: <b>75%</b>\n🏆 Лучшая: <b>BTC</b>\n\n📅 За 7 дней: <b>-1.25R</b> | WR 44% (9 сделок)\n\n😴 Хорошо отдохнуть!"
+},
+{
+"name": "best only",
+"lang": "en",
+"now": 1741000000.0,
+"s24": {
+"closed": 4,
+"tp1": 2,
+"tp2": 1,
+"tp3": 0,
+"sl": 1,
+"be": 0,
+"total_rr": 2.5,
+"winrate_pct": 75,
+"best_symbol": "BTC-USDT-SWAP",
+"worst_symbol": ""
+},
+"s7": {
+"closed": 9,
+"total_rr": -1.255,
+"winrate_pct": 44
+},
+"text": "🌙 <b>Твой день — 03 March</b>\n\n🔥 <b>Отличный день</b>\n📊 Сделок: <b>4</b> (3 ✅ / 1 ❌)\n💰 Результат: <b>+2.50R</b>\n🎯 Win Rate: <b>75%</b>\n🏆 Лучшая: <b>BTC</b>\n\n📅 За 7 дней: <b>-1.25R</b> | WR 44% (9 сделок)\n\n😴 Хорошо отдохнуть!"
+},
+{
+"name": "best only",
+"lang": "de",
+"now": 1741000000.0,
+"s24": {
+"closed": 4,
+"tp1": 2,
+"tp2": 1,
+"tp3": 0,
+"sl": 1,
+"be": 0,
+"total_rr": 2.5,
+"winrate_pct": 75,
+"best_symbol": "BTC-USDT-SWAP",
+"worst_symbol": ""
+},
+"s7": {
+"closed": 9,
+"total_rr": -1.255,
+"winrate_pct": 44
+},
+"text": "🌙 <b>Твой день — 03 March</b>\n\n🔥 <b>Отличный день</b>\n📊 Сделок: <b>4</b> (3 ✅ / 1 ❌)\n💰 Результат: <b>+2.50R</b>\n🎯 Win Rate: <b>75%</b>\n🏆 Лучшая: <b>BTC</b>\n\n📅 За 7 дней: <b>-1.25R</b> | WR 44% (9 сделок)\n\n😴 Хорошо отдохнуть!"
+},
+{
+"name": "worst == best",
+"lang": "ru",
+"now": 1745000000.0,
+"s24": {
+"closed": 4,
+"tp1": 2,
+"tp2": 1,
+"tp3": 0,
+"sl": 1,
+"be": 0,
+"total_rr": 2.5,
+"winrate_pct": 75,
+"best_symbol": "BTC-USDT-SWAP",
+"worst_symbol": "BTC-USDT-SWAP"
+},
+"s7": {
+"closed": 9,
+"total_rr": -1.255,
+"winrate_pct": 44
+},
+"text": "🌙 <b>Твой день — 18 апреля</b>\n\n🔥 <b>Отличный день</b>\n📊 Сделок: <b>4</b> (3 ✅ / 1 ❌)\n💰 Результат: <b>+2.50R</b>\n🎯 Win Rate: <b>75%</b>\n🏆 Лучшая: <b>BTC</b>\n\n📅 За 7 дней: <b>-1.25R</b> | WR 44% (9 сделок)\n\n😴 Хорошо отдохнуть!"
+},
+{
+"name": "worst == best",
+"lang": "en",
+"now": 1745000000.0,
+"s24": {
+"closed": 4,
+"tp1": 2,
+"tp2": 1,
+"tp3": 0,
+"sl": 1,
+"be": 0,
+"total_rr": 2.5,
+"winrate_pct": 75,
+"best_symbol": "BTC-USDT-SWAP",
+"worst_symbol": "BTC-USDT-SWAP"
+},
+"s7": {
+"closed": 9,
+"total_rr": -1.255,
+"winrate_pct": 44
+},
+"text": "🌙 <b>Твой день — 18 April</b>\n\n🔥 <b>Отличный день</b>\n📊 Сделок: <b>4</b> (3 ✅ / 1 ❌)\n💰 Результат: <b>+2.50R</b>\n🎯 Win Rate: <b>75%</b>\n🏆 Лучшая: <b>BTC</b>\n\n📅 За 7 дней: <b>-1.25R</b> | WR 44% (9 сделок)\n\n😴 Хорошо отдохнуть!"
+},
+{
+"name": "worst == best",
+"lang": "de",
+"now": 1745000000.0,
+"s24": {
+"closed": 4,
+"tp1": 2,
+"tp2": 1,
+"tp3": 0,
+"sl": 1,
+"be": 0,
+"total_rr": 2.5,
+"winrate_pct": 75,
+"best_symbol": "BTC-USDT-SWAP",
+"worst_symbol": "BTC-USDT-SWAP"
+},
+"s7": {
+"closed": 9,
+"total_rr": -1.255,
+"winrate_pct": 44
+},
+"text": "🌙 <b>Твой день — 18 April</b>\n\n🔥 <b>Отличный день</b>\n📊 Сделок: <b>4</b> (3 ✅ / 1 ❌)\n💰 Результат: <b>+2.50R</b>\n🎯 Win Rate: <b>75%</b>\n🏆 Лучшая: <b>BTC</b>\n\n📅 За 7 дней: <b>-1.25R</b> | WR 44% (9 сделок)\n\n😴 Хорошо отдохнуть!"
+},
+{
+"name": "no best",
+"lang": "ru",
+"now": 1748000000.0,
+"s24": {
+"closed": 4,
+"tp1": 2,
+"tp2": 1,
+"tp3": 0,
+"sl": 1,
+"be": 0,
+"total_rr": 2.5,
+"winrate_pct": 75,
+"best_symbol": "",
+"worst_symbol": "ETH-USDT-SWAP"
+},
+"s7": {
+"closed": 9,
+"total_rr": -1.255,
+"winrate_pct": 44
+},
+"text": "🌙 <b>Твой день — 23 мая</b>\n\n🔥 <b>Отличный день</b>\n📊 Сделок: <b>4</b> (3 ✅ / 1 ❌)\n💰 Результат: <b>+2.50R</b>\n🎯 Win Rate: <b>75%</b>\n📉 Худшая: <b>ETH</b>\n\n📅 За 7 дней: <b>-1.25R</b> | WR 44% (9 сделок)\n\n😴 Хорошо отдохнуть!"
+},
+{
+"name": "no best",
+"lang": "en",
+"now": 1748000000.0,
+"s24": {
+"closed": 4,
+"tp1": 2,
+"tp2": 1,
+"tp3": 0,
+"sl": 1,
+"be": 0,
+"total_rr": 2.5,
+"winrate_pct": 75,
+"best_symbol": "",
+"worst_symbol": "ETH-USDT-SWAP"
+},
+"s7": {
+"closed": 9,
+"total_rr": -1.255,
+"winrate_pct": 44
+},
+"text": "🌙 <b>Твой день — 23 May</b>\n\n🔥 <b>Отличный день</b>\n📊 Сделок: <b>4</b> (3 ✅ / 1 ❌)\n💰 Результат: <b>+2.50R</b>\n🎯 Win Rate: <b>75%</b>\n📉 Худшая: <b>ETH</b>\n\n📅 За 7 дней: <b>-1.25R</b> | WR 44% (9 сделок)\n\n😴 Хорошо отдохнуть!"
+},
+{
+"name": "no best",
+"lang": "de",
+"now": 1748000000.0,
+"s24": {
+"closed": 4,
+"tp1": 2,
+"tp2": 1,
+"tp3": 0,
+"sl": 1,
+"be": 0,
+"total_rr": 2.5,
+"winrate_pct": 75,
+"best_symbol": "",
+"worst_symbol": "ETH-USDT-SWAP"
+},
+"s7": {
+"closed": 9,
+"total_rr": -1.255,
+"winrate_pct": 44
+},
+"text": "🌙 <b>Твой день — 23 May</b>\n\n🔥 <b>Отличный день</b>\n📊 Сделок: <b>4</b> (3 ✅ / 1 ❌)\n💰 Результат: <b>+2.50R</b>\n🎯 Win Rate: <b>75%</b>\n📉 Худшая: <b>ETH</b>\n\n📅 За 7 дней: <b>-1.25R</b> | WR 44% (9 сделок)\n\n😴 Хорошо отдохнуть!"
+},
+{
+"name": "7d exactly 3",
+"lang": "ru",
+"now": 1751000000.0,
+"s24": {
+"closed": 4,
+"tp1": 2,
+"tp2": 1,
+"tp3": 0,
+"sl": 1,
+"be": 0,
+"total_rr": 2.5,
+"winrate_pct": 75,
+"best_symbol": "BTC-USDT-SWAP",
+"worst_symbol": "PEPE-USDT"
+},
+"s7": {
+"closed": 3,
+"total_rr": 0.0,
+"winrate_pct": 44
+},
+"text": "🌙 <b>Твой день — 27 июня</b>\n\n🔥 <b>Отличный день</b>\n📊 Сделок: <b>4</b> (3 ✅ / 1 ❌)\n💰 Результат: <b>+2.50R</b>\n🎯 Win Rate: <b>75%</b>\n🏆 Лучшая: <b>BTC</b>\n📉 Худшая: <b>PEPE</b>\n\n📅 За 7 дней: <b>+0.00R</b> | WR 44% (3 сделок)\n\n😴 Хорошо отдохнуть!"
+},
+{
+"name": "7d exactly 3",
+"lang": "en",
+"now": 1751000000.0,
+"s24": {
+"closed": 4,
+"tp1": 2,
+"tp2": 1,
+"tp3": 0,
+"sl": 1,
+"be": 0,
+"total_rr": 2.5,
+"winrate_pct": 75,
+"best_symbol": "BTC-USDT-SWAP",
+"worst_symbol": "PEPE-USDT"
+},
+"s7": {
+"closed": 3,
+"total_rr": 0.0,
+"winrate_pct": 44
+},
+"text": "🌙 <b>Твой день — 27 June</b>\n\n🔥 <b>Отличный день</b>\n📊 Сделок: <b>4</b> (3 ✅ / 1 ❌)\n💰 Результат: <b>+2.50R</b>\n🎯 Win Rate: <b>75%</b>\n🏆 Лучшая: <b>BTC</b>\n📉 Худшая: <b>PEPE</b>\n\n📅 За 7 дней: <b>+0.00R</b> | WR 44% (3 сделок)\n\n😴 Хорошо отдохнуть!"
+},
+{
+"name": "7d exactly 3",
+"lang": "de",
+"now": 1751000000.0,
+"s24": {
+"closed": 4,
+"tp1": 2,
+"tp2": 1,
+"tp3": 0,
+"sl": 1,
+"be": 0,
+"total_rr": 2.5,
+"winrate_pct": 75,
+"best_symbol": "BTC-USDT-SWAP",
+"worst_symbol": "PEPE-USDT"
+},
+"s7": {
+"closed": 3,
+"total_rr": 0.0,
+"winrate_pct": 44
+},
+"text": "🌙 <b>Твой день — 27 June</b>\n\n🔥 <b>Отличный день</b>\n📊 Сделок: <b>4</b> (3 ✅ / 1 ❌)\n💰 Результат: <b>+2.50R</b>\n🎯 Win Rate: <b>75%</b>\n🏆 Лучшая: <b>BTC</b>\n📉 Худшая: <b>PEPE</b>\n\n📅 За 7 дней: <b>+0.00R</b> | WR 44% (3 сделок)\n\n😴 Хорошо отдохнуть!"
+},
+{
+"name": "rr exactly 1",
+"lang": "ru",
+"now": 1754000000.0,
+"s24": {
+"closed": 4,
+"tp1": 2,
+"tp2": 1,
+"tp3": 0,
+"sl": 1,
+"be": 0,
+"total_rr": 1.0,
+"winrate_pct": 75,
+"best_symbol": "BTC-USDT-SWAP",
+"worst_symbol": "PEPE-USDT"
+},
+"s7": {
+"closed": 9,
+"total_rr": -1.255,
+"winrate_pct": 44
+},
+"text": "🌙 <b>Твой день — 31 июля</b>\n\n✅ <b>Положительный день</b>\n📊 Сделок: <b>4</b> (3 ✅ / 1 ❌)\n💰 Результат: <b>+1.00R</b>\n🎯 Win Rate: <b>75%</b>\n🏆 Лучшая: <b>BTC</b>\n📉 Худшая: <b>PEPE</b>\n\n📅 За 7 дней: <b>-1.25R</b> | WR 44% (9 сделок)\n\n😴 Хорошо отдохнуть!"
+},
+{
+"name": "rr exactly 1",
+"lang": "en",
+"now": 1754000000.0,
+"s24": {
+"closed": 4,
+"tp1": 2,
+"tp2": 1,
+"tp3": 0,
+"sl": 1,
+"be": 0,
+"total_rr": 1.0,
+"winrate_pct": 75,
+"best_symbol": "BTC-USDT-SWAP",
+"worst_symbol": "PEPE-USDT"
+},
+"s7": {
+"closed": 9,
+"total_rr": -1.255,
+"winrate_pct": 44
+},
+"text": "🌙 <b>Твой день — 31 July</b>\n\n✅ <b>Положительный день</b>\n📊 Сделок: <b>4</b> (3 ✅ / 1 ❌)\n💰 Результат: <b>+1.00R</b>\n🎯 Win Rate: <b>75%</b>\n🏆 Лучшая: <b>BTC</b>\n📉 Худшая: <b>PEPE</b>\n\n📅 За 7 дней: <b>-1.25R</b> | WR 44% (9 сделок)\n\n😴 Хорошо отдохнуть!"
+},
+{
+"name": "rr exactly 1",
+"lang": "de",
+"now": 1754000000.0,
+"s24": {
+"closed": 4,
+"tp1": 2,
+"tp2": 1,
+"tp3": 0,
+"sl": 1,
+"be": 0,
+"total_rr": 1.0,
+"winrate_pct": 75,
+"best_symbol": "BTC-USDT-SWAP",
+"worst_symbol": "PEPE-USDT"
+},
+"s7": {
+"closed": 9,
+"total_rr": -1.255,
+"winrate_pct": 44
+},
+"text": "🌙 <b>Твой день — 31 July</b>\n\n✅ <b>Положительный день</b>\n📊 Сделок: <b>4</b> (3 ✅ / 1 ❌)\n💰 Результат: <b>+1.00R</b>\n🎯 Win Rate: <b>75%</b>\n🏆 Лучшая: <b>BTC</b>\n📉 Худшая: <b>PEPE</b>\n\n📅 За 7 дней: <b>-1.25R</b> | WR 44% (9 сделок)\n\n😴 Хорошо отдохнуть!"
+},
+{
+"name": "rr exactly 0",
+"lang": "ru",
+"now": 1766000000.0,
+"s24": {
+"closed": 4,
+"tp1": 2,
+"tp2": 1,
+"tp3": 0,
+"sl": 1,
+"be": 0,
+"total_rr": 0.0,
+"winrate_pct": 75,
+"best_symbol": "BTC-USDT-SWAP",
+"worst_symbol": "PEPE-USDT"
+},
+"s7": {
+"closed": 9,
+"total_rr": -1.255,
+"winrate_pct": 44
+},
+"text": "🌙 <b>Твой день — 17 декабря</b>\n\n💤 <b>Спокойный день</b>\n📊 Сделок: <b>4</b> (3 ✅ / 1 ❌)\n💰 Результат: <b>+0.00R</b>\n🎯 Win Rate: <b>75%</b>\n🏆 Лучшая: <b>BTC</b>\n📉 Худшая: <b>PEPE</b>\n\n📅 За 7 дней: <b>-1.25R</b> | WR 44% (9 сделок)\n\n💪 Завтра новый день — без эмоций."
+},
+{
+"name": "rr exactly 0",
+"lang": "en",
+"now": 1766000000.0,
+"s24": {
+"closed": 4,
+"tp1": 2,
+"tp2": 1,
+"tp3": 0,
+"sl": 1,
+"be": 0,
+"total_rr": 0.0,
+"winrate_pct": 75,
+"best_symbol": "BTC-USDT-SWAP",
+"worst_symbol": "PEPE-USDT"
+},
+"s7": {
+"closed": 9,
+"total_rr": -1.255,
+"winrate_pct": 44
+},
+"text": "🌙 <b>Твой день — 17 December</b>\n\n💤 <b>Спокойный день</b>\n📊 Сделок: <b>4</b> (3 ✅ / 1 ❌)\n💰 Результат: <b>+0.00R</b>\n🎯 Win Rate: <b>75%</b>\n🏆 Лучшая: <b>BTC</b>\n📉 Худшая: <b>PEPE</b>\n\n📅 За 7 дней: <b>-1.25R</b> | WR 44% (9 сделок)\n\n💪 Завтра новый день — без эмоций."
+},
+{
+"name": "rr exactly 0",
+"lang": "de",
+"now": 1766000000.0,
+"s24": {
+"closed": 4,
+"tp1": 2,
+"tp2": 1,
+"tp3": 0,
+"sl": 1,
+"be": 0,
+"total_rr": 0.0,
+"winrate_pct": 75,
+"best_symbol": "BTC-USDT-SWAP",
+"worst_symbol": "PEPE-USDT"
+},
+"s7": {
+"closed": 9,
+"total_rr": -1.255,
+"winrate_pct": 44
+},
+"text": "🌙 <b>Твой день — 17 December</b>\n\n💤 <b>Спокойный день</b>\n📊 Сделок: <b>4</b> (3 ✅ / 1 ❌)\n💰 Результат: <b>+0.00R</b>\n🎯 Win Rate: <b>75%</b>\n🏆 Лучшая: <b>BTC</b>\n📉 Худшая: <b>PEPE</b>\n\n📅 За 7 дней: <b>-1.25R</b> | WR 44% (9 сделок)\n\n💪 Завтра новый день — без эмоций."
+},
+{
+"name": "rounding .125",
+"lang": "ru",
+"now": 1767225599.0,
+"s24": {
+"closed": 4,
+"tp1": 2,
+"tp2": 1,
+"tp3": 0,
+"sl": 1,
+"be": 0,
+"total_rr": 0.125,
+"winrate_pct": 62.5,
+"best_symbol": "BTC-USDT-SWAP",
+"worst_symbol": "PEPE-USDT"
+},
+"s7": {
+"closed": 9,
+"total_rr": 2.675,
+"winrate_pct": 50.5
+},
+"text": "🌙 <b>Твой день — 31 декабря</b>\n\n✅ <b>Положительный день</b>\n📊 Сделок: <b>4</b> (3 ✅ / 1 ❌)\n💰 Результат: <b>+0.12R</b>\n🎯 Win Rate: <b>62%</b>\n🏆 Лучшая: <b>BTC</b>\n📉 Худшая: <b>PEPE</b>\n\n📅 За 7 дней: <b>+2.67R</b> | WR 50% (9 сделок)\n\n😴 Хорошо отдохнуть!"
+},
+{
+"name": "rounding .125",
+"lang": "en",
+"now": 1767225599.0,
+"s24": {
+"closed": 4,
+"tp1": 2,
+"tp2": 1,
+"tp3": 0,
+"sl": 1,
+"be": 0,
+"total_rr": 0.125,
+"winrate_pct": 62.5,
+"best_symbol": "BTC-USDT-SWAP",
+"worst_symbol": "PEPE-USDT"
+},
+"s7": {
+"closed": 9,
+"total_rr": 2.675,
+"winrate_pct": 50.5
+},
+"text": "🌙 <b>Твой день — 31 December</b>\n\n✅ <b>Положительный день</b>\n📊 Сделок: <b>4</b> (3 ✅ / 1 ❌)\n💰 Результат: <b>+0.12R</b>\n🎯 Win Rate: <b>62%</b>\n🏆 Лучшая: <b>BTC</b>\n📉 Худшая: <b>PEPE</b>\n\n📅 За 7 дней: <b>+2.67R</b> | WR 50% (9 сделок)\n\n😴 Хорошо отдохнуть!"
+},
+{
+"name": "rounding .125",
+"lang": "de",
+"now": 1767225599.0,
+"s24": {
+"closed": 4,
+"tp1": 2,
+"tp2": 1,
+"tp3": 0,
+"sl": 1,
+"be": 0,
+"total_rr": 0.125,
+"winrate_pct": 62.5,
+"best_symbol": "BTC-USDT-SWAP",
+"worst_symbol": "PEPE-USDT"
+},
+"s7": {
+"closed": 9,
+"total_rr": 2.675,
+"winrate_pct": 50.5
+},
+"text": "🌙 <b>Твой день — 31 December</b>\n\n✅ <b>Положительный день</b>\n📊 Сделок: <b>4</b> (3 ✅ / 1 ❌)\n💰 Результат: <b>+0.12R</b>\n🎯 Win Rate: <b>62%</b>\n🏆 Лучшая: <b>BTC</b>\n📉 Худшая: <b>PEPE</b>\n\n📅 За 7 дней: <b>+2.67R</b> | WR 50% (9 сделок)\n\n😴 Хорошо отдохнуть!"
+},
+{
+"name": "none values",
+"lang": "ru",
+"now": 1770000000.0,
+"s24": {
+"closed": 4,
+"tp1": null,
+"tp2": 1,
+"tp3": 0,
+"sl": 1,
+"be": null,
+"total_rr": null,
+"winrate_pct": null,
+"best_symbol": "BTC-USDT-SWAP",
+"worst_symbol": "PEPE-USDT"
+},
+"s7": {},
+"text": "🌙 <b>Твой день — 02 февраля</b>\n\n💤 <b>Спокойный день</b>\n📊 Сделок: <b>4</b> (1 ✅ / 1 ❌)\n💰 Результат: <b>+0.00R</b>\n🎯 Win Rate: <b>0%</b>\n🏆 Лучшая: <b>BTC</b>\n📉 Худшая: <b>PEPE</b>\n\n💪 Завтра новый день — без эмоций."
+},
+{
+"name": "none values",
+"lang": "en",
+"now": 1770000000.0,
+"s24": {
+"closed": 4,
+"tp1": null,
+"tp2": 1,
+"tp3": 0,
+"sl": 1,
+"be": null,
+"total_rr": null,
+"winrate_pct": null,
+"best_symbol": "BTC-USDT-SWAP",
+"worst_symbol": "PEPE-USDT"
+},
+"s7": {},
+"text": "🌙 <b>Твой день — 02 February</b>\n\n💤 <b>Спокойный день</b>\n📊 Сделок: <b>4</b> (1 ✅ / 1 ❌)\n💰 Результат: <b>+0.00R</b>\n🎯 Win Rate: <b>0%</b>\n🏆 Лучшая: <b>BTC</b>\n📉 Худшая: <b>PEPE</b>\n\n💪 Завтра новый день — без эмоций."
+},
+{
+"name": "none values",
+"lang": "de",
+"now": 1770000000.0,
+"s24": {
+"closed": 4,
+"tp1": null,
+"tp2": 1,
+"tp3": 0,
+"sl": 1,
+"be": null,
+"total_rr": null,
+"winrate_pct": null,
+"best_symbol": "BTC-USDT-SWAP",
+"worst_symbol": "PEPE-USDT"
+},
+"s7": {},
+"text": "🌙 <b>Твой день — 02 February</b>\n\n💤 <b>Спокойный день</b>\n📊 Сделок: <b>4</b> (1 ✅ / 1 ❌)\n💰 Результат: <b>+0.00R</b>\n🎯 Win Rate: <b>0%</b>\n🏆 Лучшая: <b>BTC</b>\n📉 Худшая: <b>PEPE</b>\n\n💪 Завтра новый день — без эмоций."
+},
+{
+"name": "strings",
+"lang": "ru",
+"now": 1772150400.0,
+"s24": {
+"closed": "3",
+"tp1": "1",
+"tp2": 1,
+"tp3": 0,
+"sl": 1,
+"be": 0,
+"total_rr": "1.5",
+"winrate_pct": 75,
+"best_symbol": "BTC-USDT-SWAP",
+"worst_symbol": "PEPE-USDT"
+},
+"s7": {
+"closed": "5",
+"total_rr": -1.255,
+"winrate_pct": 44
+},
+"text": "🌙 <b>Твой день — 27 февраля</b>\n\n🔥 <b>Отличный день</b>\n📊 Сделок: <b>3</b> (2 ✅ / 1 ❌)\n💰 Результат: <b>+1.50R</b>\n🎯 Win Rate: <b>75%</b>\n🏆 Лучшая: <b>BTC</b>\n📉 Худшая: <b>PEPE</b>\n\n📅 За 7 дней: <b>-1.25R</b> | WR 44% (5 сделок)\n\n😴 Хорошо отдохнуть!"
+},
+{
+"name": "strings",
+"lang": "en",
+"now": 1772150400.0,
+"s24": {
+"closed": "3",
+"tp1": "1",
+"tp2": 1,
+"tp3": 0,
+"sl": 1,
+"be": 0,
+"total_rr": "1.5",
+"winrate_pct": 75,
+"best_symbol": "BTC-USDT-SWAP",
+"worst_symbol": "PEPE-USDT"
+},
+"s7": {
+"closed": "5",
+"total_rr": -1.255,
+"winrate_pct": 44
+},
+"text": "🌙 <b>Твой день — 27 February</b>\n\n🔥 <b>Отличный день</b>\n📊 Сделок: <b>3</b> (2 ✅ / 1 ❌)\n💰 Результат: <b>+1.50R</b>\n🎯 Win Rate: <b>75%</b>\n🏆 Лучшая: <b>BTC</b>\n📉 Худшая: <b>PEPE</b>\n\n📅 За 7 дней: <b>-1.25R</b> | WR 44% (5 сделок)\n\n😴 Хорошо отдохнуть!"
+},
+{
+"name": "strings",
+"lang": "de",
+"now": 1772150400.0,
+"s24": {
+"closed": "3",
+"tp1": "1",
+"tp2": 1,
+"tp3": 0,
+"sl": 1,
+"be": 0,
+"total_rr": "1.5",
+"winrate_pct": 75,
+"best_symbol": "BTC-USDT-SWAP",
+"worst_symbol": "PEPE-USDT"
+},
+"s7": {
+"closed": "5",
+"total_rr": -1.255,
+"winrate_pct": 44
+},
+"text": "🌙 <b>Твой день — 27 February</b>\n\n🔥 <b>Отличный день</b>\n📊 Сделок: <b>3</b> (2 ✅ / 1 ❌)\n💰 Результат: <b>+1.50R</b>\n🎯 Win Rate: <b>75%</b>\n🏆 Лучшая: <b>BTC</b>\n📉 Худшая: <b>PEPE</b>\n\n📅 За 7 дней: <b>-1.25R</b> | WR 44% (5 сделок)\n\n😴 Хорошо отдохнуть!"
+}
+],
+"daily_next": [
+{
+"now": 1766000000.0,
+"s": 15700.0
+},
+{
+"now": 1766015700.0,
+"s": 86400.0
+},
+{
+"now": 1766015699.0,
+"s": 1.0
+},
+{
+"now": 1766015701.0,
+"s": 86399.0
+},
+{
+"now": 1766016000.0,
+"s": 86100.0
+},
+{
+"now": 1765929600.0,
+"s": 86100.0
+}
+],
+"daily_per_user": {
+"101": {
+"ru": null,
+"en": null
+},
+"102": {
+"ru": null,
+"en": null
+},
+"103": {
+"ru": null,
+"en": null
+},
+"104": {
+"ru": null,
+"en": null
+},
+"105": {
+"ru": null,
+"en": null
+},
+"106": {
+"ru": null,
+"en": null
+},
+"107": {
+"ru": null,
+"en": null
+},
+"108": {
+"ru": null,
+"en": null
+},
+"109": {
+"ru": null,
+"en": null
+}
+},
+"weekly_per_user": {
+"101": {
+"ru|pro|pro_overview_7": "📊 <b>Итоги недели</b> · 10.12 – 16.12\nСигналов: <b>8</b> · в плюс 6 · в минус 1 · безубыток 1\nИтог: <b>+13.8R</b> · win rate 75%\nЛучший: ETH LONG +4.5R\nВ работе сейчас: 4\nПо стратегиям: LEVELS +1.5R (2) · SMC +4.8R (3)\n\nНовая неделя — новые сетапы. Удачи!",
+"ru|pro|none": "📊 <b>Итоги недели</b> · 10.12 – 16.12\nСигналов: <b>8</b> · в плюс 6 · в минус 1 · безубыток 1\nИтог: <b>+13.8R</b> · win rate 75%\nЛучший: ETH LONG +4.5R\nВ работе сейчас: 4\nПо стратегиям: LEVELS +1.5R (2) · SMC +4.8R (3)\n\nНовая неделя — новые сетапы. Удачи!",
+"ru|pro|zero": "📊 <b>Итоги недели</b> · 10.12 – 16.12\nСигналов: <b>8</b> · в плюс 6 · в минус 1 · безубыток 1\nИтог: <b>+13.8R</b> · win rate 75%\nЛучший: ETH LONG +4.5R\nВ работе сейчас: 4\nПо стратегиям: LEVELS +1.5R (2) · SMC +4.8R (3)\n\nНовая неделя — новые сетапы. Удачи!",
+"ru|free|pro_overview_7": "📊 <b>Итоги недели</b> · 10.12 – 16.12\nСигналов: <b>8</b> · в плюс 6 · в минус 1 · безубыток 1\nИтог: <b>+13.8R</b> · win rate 75%\nЛучший: ETH LONG +4.5R\nВ работе сейчас: 4\nПо стратегиям: LEVELS +1.5R (2) · SMC +4.8R (3)\n\n⭐ Pro на этой неделе: в среднем 6.0 сигналов на юзера, +23.3R по 23 уникальным сигналам. У тебя — 8.\n\nНовая неделя — новые сетапы. Удачи!",
+"ru|free|none": "📊 <b>Итоги недели</b> · 10.12 – 16.12\nСигналов: <b>8</b> · в плюс 6 · в минус 1 · безубыток 1\nИтог: <b>+13.8R</b> · win rate 75%\nЛучший: ETH LONG +4.5R\nВ работе сейчас: 4\nПо стратегиям: LEVELS +1.5R (2) · SMC +4.8R (3)\n\nНовая неделя — новые сетапы. Удачи!",
+"ru|free|zero": "📊 <b>Итоги недели</b> · 10.12 – 16.12\nСигналов: <b>8</b> · в плюс 6 · в минус 1 · безубыток 1\nИтог: <b>+13.8R</b> · win rate 75%\nЛучший: ETH LONG +4.5R\nВ работе сейчас: 4\nПо стратегиям: LEVELS +1.5R (2) · SMC +4.8R (3)\n\nНовая неделя — новые сетапы. Удачи!",
+"ru||pro_overview_7": "📊 <b>Итоги недели</b> · 10.12 – 16.12\nСигналов: <b>8</b> · в плюс 6 · в минус 1 · безубыток 1\nИтог: <b>+13.8R</b> · win rate 75%\nЛучший: ETH LONG +4.5R\nВ работе сейчас: 4\nПо стратегиям: LEVELS +1.5R (2) · SMC +4.8R (3)\n\nНовая неделя — новые сетапы. Удачи!",
+"ru||none": "📊 <b>Итоги недели</b> · 10.12 – 16.12\nСигналов: <b>8</b> · в плюс 6 · в минус 1 · безубыток 1\nИтог: <b>+13.8R</b> · win rate 75%\nЛучший: ETH LONG +4.5R\nВ работе сейчас: 4\nПо стратегиям: LEVELS +1.5R (2) · SMC +4.8R (3)\n\nНовая неделя — новые сетапы. Удачи!",
+"ru||zero": "📊 <b>Итоги недели</b> · 10.12 – 16.12\nСигналов: <b>8</b> · в плюс 6 · в минус 1 · безубыток 1\nИтог: <b>+13.8R</b> · win rate 75%\nЛучший: ETH LONG +4.5R\nВ работе сейчас: 4\nПо стратегиям: LEVELS +1.5R (2) · SMC +4.8R (3)\n\nНовая неделя — новые сетапы. Удачи!",
+"ru|FREE|pro_overview_7": "📊 <b>Итоги недели</b> · 10.12 – 16.12\nСигналов: <b>8</b> · в плюс 6 · в минус 1 · безубыток 1\nИтог: <b>+13.8R</b> · win rate 75%\nЛучший: ETH LONG +4.5R\nВ работе сейчас: 4\nПо стратегиям: LEVELS +1.5R (2) · SMC +4.8R (3)\n\n⭐ Pro на этой неделе: в среднем 6.0 сигналов на юзера, +23.3R по 23 уникальным сигналам. У тебя — 8.\n\nНовая неделя — новые сетапы. Удачи!",
+"ru|FREE|none": "📊 <b>Итоги недели</b> · 10.12 – 16.12\nСигналов: <b>8</b> · в плюс 6 · в минус 1 · безубыток 1\nИтог: <b>+13.8R</b> · win rate 75%\nЛучший: ETH LONG +4.5R\nВ работе сейчас: 4\nПо стратегиям: LEVELS +1.5R (2) · SMC +4.8R (3)\n\nНовая неделя — новые сетапы. Удачи!",
+"ru|FREE|zero": "📊 <b>Итоги недели</b> · 10.12 – 16.12\nСигналов: <b>8</b> · в плюс 6 · в минус 1 · безубыток 1\nИтог: <b>+13.8R</b> · win rate 75%\nЛучший: ETH LONG +4.5R\nВ работе сейчас: 4\nПо стратегиям: LEVELS +1.5R (2) · SMC +4.8R (3)\n\nНовая неделя — новые сетапы. Удачи!",
+"en|pro|pro_overview_7": "📊 <b>Weekly recap</b> · 10.12 – 16.12\nSignals: <b>8</b> · wins 6 · losses 1 · break-even 1\nResult: <b>+13.8R</b> · win rate 75%\nBest: ETH LONG +4.5R\nStill running: 4\nBy strategy: LEVELS +1.5R (2) · SMC +4.8R (3)\n\nNew week, new setups. Good luck!",
+"en|pro|none": "📊 <b>Weekly recap</b> · 10.12 – 16.12\nSignals: <b>8</b> · wins 6 · losses 1 · break-even 1\nResult: <b>+13.8R</b> · win rate 75%\nBest: ETH LONG +4.5R\nStill running: 4\nBy strategy: LEVELS +1.5R (2) · SMC +4.8R (3)\n\nNew week, new setups. Good luck!",
+"en|pro|zero": "📊 <b>Weekly recap</b> · 10.12 – 16.12\nSignals: <b>8</b> · wins 6 · losses 1 · break-even 1\nResult: <b>+13.8R</b> · win rate 75%\nBest: ETH LONG +4.5R\nStill running: 4\nBy strategy: LEVELS +1.5R (2) · SMC +4.8R (3)\n\nNew week, new setups. Good luck!",
+"en|free|pro_overview_7": "📊 <b>Weekly recap</b> · 10.12 – 16.12\nSignals: <b>8</b> · wins 6 · losses 1 · break-even 1\nResult: <b>+13.8R</b> · win rate 75%\nBest: ETH LONG +4.5R\nStill running: 4\nBy strategy: LEVELS +1.5R (2) · SMC +4.8R (3)\n\n⭐ Pro this week: 6.0 signals per user on average, +23.3R across 23 unique signals. You got 8.\n\nNew week, new setups. Good luck!",
+"en|free|none": "📊 <b>Weekly recap</b> · 10.12 – 16.12\nSignals: <b>8</b> · wins 6 · losses 1 · break-even 1\nResult: <b>+13.8R</b> · win rate 75%\nBest: ETH LONG +4.5R\nStill running: 4\nBy strategy: LEVELS +1.5R (2) · SMC +4.8R (3)\n\nNew week, new setups. Good luck!",
+"en|free|zero": "📊 <b>Weekly recap</b> · 10.12 – 16.12\nSignals: <b>8</b> · wins 6 · losses 1 · break-even 1\nResult: <b>+13.8R</b> · win rate 75%\nBest: ETH LONG +4.5R\nStill running: 4\nBy strategy: LEVELS +1.5R (2) · SMC +4.8R (3)\n\nNew week, new setups. Good luck!",
+"en||pro_overview_7": "📊 <b>Weekly recap</b> · 10.12 – 16.12\nSignals: <b>8</b> · wins 6 · losses 1 · break-even 1\nResult: <b>+13.8R</b> · win rate 75%\nBest: ETH LONG +4.5R\nStill running: 4\nBy strategy: LEVELS +1.5R (2) · SMC +4.8R (3)\n\nNew week, new setups. Good luck!",
+"en||none": "📊 <b>Weekly recap</b> · 10.12 – 16.12\nSignals: <b>8</b> · wins 6 · losses 1 · break-even 1\nResult: <b>+13.8R</b> · win rate 75%\nBest: ETH LONG +4.5R\nStill running: 4\nBy strategy: LEVELS +1.5R (2) · SMC +4.8R (3)\n\nNew week, new setups. Good luck!",
+"en||zero": "📊 <b>Weekly recap</b> · 10.12 – 16.12\nSignals: <b>8</b> · wins 6 · losses 1 · break-even 1\nResult: <b>+13.8R</b> · win rate 75%\nBest: ETH LONG +4.5R\nStill running: 4\nBy strategy: LEVELS +1.5R (2) · SMC +4.8R (3)\n\nNew week, new setups. Good luck!",
+"en|FREE|pro_overview_7": "📊 <b>Weekly recap</b> · 10.12 – 16.12\nSignals: <b>8</b> · wins 6 · losses 1 · break-even 1\nResult: <b>+13.8R</b> · win rate 75%\nBest: ETH LONG +4.5R\nStill running: 4\nBy strategy: LEVELS +1.5R (2) · SMC +4.8R (3)\n\n⭐ Pro this week: 6.0 signals per user on average, +23.3R across 23 unique signals. You got 8.\n\nNew week, new setups. Good luck!",
+"en|FREE|none": "📊 <b>Weekly recap</b> · 10.12 – 16.12\nSignals: <b>8</b> · wins 6 · losses 1 · break-even 1\nResult: <b>+13.8R</b> · win rate 75%\nBest: ETH LONG +4.5R\nStill running: 4\nBy strategy: LEVELS +1.5R (2) · SMC +4.8R (3)\n\nNew week, new setups. Good luck!",
+"en|FREE|zero": "📊 <b>Weekly recap</b> · 10.12 – 16.12\nSignals: <b>8</b> · wins 6 · losses 1 · break-even 1\nResult: <b>+13.8R</b> · win rate 75%\nBest: ETH LONG +4.5R\nStill running: 4\nBy strategy: LEVELS +1.5R (2) · SMC +4.8R (3)\n\nNew week, new setups. Good luck!",
+"xx|pro|pro_overview_7": "📊 <b>Итоги недели</b> · 10.12 – 16.12\nСигналов: <b>8</b> · в плюс 6 · в минус 1 · безубыток 1\nИтог: <b>+13.8R</b> · win rate 75%\nЛучший: ETH LONG +4.5R\nВ работе сейчас: 4\nПо стратегиям: LEVELS +1.5R (2) · SMC +4.8R (3)\n\nНовая неделя — новые сетапы. Удачи!",
+"xx|pro|none": "📊 <b>Итоги недели</b> · 10.12 – 16.12\nСигналов: <b>8</b> · в плюс 6 · в минус 1 · безубыток 1\nИтог: <b>+13.8R</b> · win rate 75%\nЛучший: ETH LONG +4.5R\nВ работе сейчас: 4\nПо стратегиям: LEVELS +1.5R (2) · SMC +4.8R (3)\n\nНовая неделя — новые сетапы. Удачи!",
+"xx|pro|zero": "📊 <b>Итоги недели</b> · 10.12 – 16.12\nСигналов: <b>8</b> · в плюс 6 · в минус 1 · безубыток 1\nИтог: <b>+13.8R</b> · win rate 75%\nЛучший: ETH LONG +4.5R\nВ работе сейчас: 4\nПо стратегиям: LEVELS +1.5R (2) · SMC +4.8R (3)\n\nНовая неделя — новые сетапы. Удачи!",
+"xx|free|pro_overview_7": "📊 <b>Итоги недели</b> · 10.12 – 16.12\nСигналов: <b>8</b> · в плюс 6 · в минус 1 · безубыток 1\nИтог: <b>+13.8R</b> · win rate 75%\nЛучший: ETH LONG +4.5R\nВ работе сейчас: 4\nПо стратегиям: LEVELS +1.5R (2) · SMC +4.8R (3)\n\n⭐ Pro на этой неделе: в среднем 6.0 сигналов на юзера, +23.3R по 23 уникальным сигналам. У тебя — 8.\n\nНовая неделя — новые сетапы. Удачи!",
+"xx|free|none": "📊 <b>Итоги недели</b> · 10.12 – 16.12\nСигналов: <b>8</b> · в плюс 6 · в минус 1 · безубыток 1\nИтог: <b>+13.8R</b> · win rate 75%\nЛучший: ETH LONG +4.5R\nВ работе сейчас: 4\nПо стратегиям: LEVELS +1.5R (2) · SMC +4.8R (3)\n\nНовая неделя — новые сетапы. Удачи!",
+"xx|free|zero": "📊 <b>Итоги недели</b> · 10.12 – 16.12\nСигналов: <b>8</b> · в плюс 6 · в минус 1 · безубыток 1\nИтог: <b>+13.8R</b> · win rate 75%\nЛучший: ETH LONG +4.5R\nВ работе сейчас: 4\nПо стратегиям: LEVELS +1.5R (2) · SMC +4.8R (3)\n\nНовая неделя — новые сетапы. Удачи!",
+"xx||pro_overview_7": "📊 <b>Итоги недели</b> · 10.12 – 16.12\nСигналов: <b>8</b> · в плюс 6 · в минус 1 · безубыток 1\nИтог: <b>+13.8R</b> · win rate 75%\nЛучший: ETH LONG +4.5R\nВ работе сейчас: 4\nПо стратегиям: LEVELS +1.5R (2) · SMC +4.8R (3)\n\nНовая неделя — новые сетапы. Удачи!",
+"xx||none": "📊 <b>Итоги недели</b> · 10.12 – 16.12\nСигналов: <b>8</b> · в плюс 6 · в минус 1 · безубыток 1\nИтог: <b>+13.8R</b> · win rate 75%\nЛучший: ETH LONG +4.5R\nВ работе сейчас: 4\nПо стратегиям: LEVELS +1.5R (2) · SMC +4.8R (3)\n\nНовая неделя — новые сетапы. Удачи!",
+"xx||zero": "📊 <b>Итоги недели</b> · 10.12 – 16.12\nСигналов: <b>8</b> · в плюс 6 · в минус 1 · безубыток 1\nИтог: <b>+13.8R</b> · win rate 75%\nЛучший: ETH LONG +4.5R\nВ работе сейчас: 4\nПо стратегиям: LEVELS +1.5R (2) · SMC +4.8R (3)\n\nНовая неделя — новые сетапы. Удачи!",
+"xx|FREE|pro_overview_7": "📊 <b>Итоги недели</b> · 10.12 – 16.12\nСигналов: <b>8</b> · в плюс 6 · в минус 1 · безубыток 1\nИтог: <b>+13.8R</b> · win rate 75%\nЛучший: ETH LONG +4.5R\nВ работе сейчас: 4\nПо стратегиям: LEVELS +1.5R (2) · SMC +4.8R (3)\n\n⭐ Pro на этой неделе: в среднем 6.0 сигналов на юзера, +23.3R по 23 уникальным сигналам. У тебя — 8.\n\nНовая неделя — новые сетапы. Удачи!",
+"xx|FREE|none": "📊 <b>Итоги недели</b> · 10.12 – 16.12\nСигналов: <b>8</b> · в плюс 6 · в минус 1 · безубыток 1\nИтог: <b>+13.8R</b> · win rate 75%\nЛучший: ETH LONG +4.5R\nВ работе сейчас: 4\nПо стратегиям: LEVELS +1.5R (2) · SMC +4.8R (3)\n\nНовая неделя — новые сетапы. Удачи!",
+"xx|FREE|zero": "📊 <b>Итоги недели</b> · 10.12 – 16.12\nСигналов: <b>8</b> · в плюс 6 · в минус 1 · безубыток 1\nИтог: <b>+13.8R</b> · win rate 75%\nЛучший: ETH LONG +4.5R\nВ работе сейчас: 4\nПо стратегиям: LEVELS +1.5R (2) · SMC +4.8R (3)\n\nНовая неделя — новые сетапы. Удачи!"
+},
+"102": {
+"ru|pro|pro_overview_7": "📊 <b>Итоги недели</b> · 10.12 – 16.12\nСигналов: <b>10</b> · в плюс 2 · в минус 4 · безубыток 1 · без итога 3\nИтог: <b>+3.0R</b> · win rate 29%\nЛучший: SOL LONG +5.0R\nВ работе сейчас: 1\nПо стратегиям: LEVELS +2.0R (2) · SMC -2.0R (2) · VOLUME 0R (0)\n\nНовая неделя — новые сетапы. Удачи!",
+"ru|pro|none": "📊 <b>Итоги недели</b> · 10.12 – 16.12\nСигналов: <b>10</b> · в плюс 2 · в минус 4 · безубыток 1 · без итога 3\nИтог: <b>+3.0R</b> · win rate 29%\nЛучший: SOL LONG +5.0R\nВ работе сейчас: 1\nПо стратегиям: LEVELS +2.0R (2) · SMC -2.0R (2) · VOLUME 0R (0)\n\nНовая неделя — новые сетапы. Удачи!",
+"ru|pro|zero": "📊 <b>Итоги недели</b> · 10.12 – 16.12\nСигналов: <b>10</b> · в плюс 2 · в минус 4 · безубыток 1 · без итога 3\nИтог: <b>+3.0R</b> · win rate 29%\nЛучший: SOL LONG +5.0R\nВ работе сейчас: 1\nПо стратегиям: LEVELS +2.0R (2) · SMC -2.0R (2) · VOLUME 0R (0)\n\nНовая неделя — новые сетапы. Удачи!",
+"ru|free|pro_overview_7": "📊 <b>Итоги недели</b> · 10.12 – 16.12\nСигналов: <b>10</b> · в плюс 2 · в минус 4 · безубыток 1 · без итога 3\nИтог: <b>+3.0R</b> · win rate 29%\nЛучший: SOL LONG +5.0R\nВ работе сейчас: 1\nПо стратегиям: LEVELS +2.0R (2) · SMC -2.0R (2) · VOLUME 0R (0)\n\n⭐ Pro на этой неделе: в среднем 6.0 сигналов на юзера, +23.3R по 23 уникальным сигналам. У тебя — 10.\n\nНовая неделя — новые сетапы. Удачи!",
+"ru|free|none": "📊 <b>Итоги недели</b> · 10.12 – 16.12\nСигналов: <b>10</b> · в плюс 2 · в минус 4 · безубыток 1 · без итога 3\nИтог: <b>+3.0R</b> · win rate 29%\nЛучший: SOL LONG +5.0R\nВ работе сейчас: 1\nПо стратегиям: LEVELS +2.0R (2) · SMC -2.0R (2) · VOLUME 0R (0)\n\nНовая неделя — новые сетапы. Удачи!",
+"ru|free|zero": "📊 <b>Итоги недели</b> · 10.12 – 16.12\nСигналов: <b>10</b> · в плюс 2 · в минус 4 · безубыток 1 · без итога 3\nИтог: <b>+3.0R</b> · win rate 29%\nЛучший: SOL LONG +5.0R\nВ работе сейчас: 1\nПо стратегиям: LEVELS +2.0R (2) · SMC -2.0R (2) · VOLUME 0R (0)\n\nНовая неделя — новые сетапы. Удачи!",
+"ru||pro_overview_7": "📊 <b>Итоги недели</b> · 10.12 – 16.12\nСигналов: <b>10</b> · в плюс 2 · в минус 4 · безубыток 1 · без итога 3\nИтог: <b>+3.0R</b> · win rate 29%\nЛучший: SOL LONG +5.0R\nВ работе сейчас: 1\nПо стратегиям: LEVELS +2.0R (2) · SMC -2.0R (2) · VOLUME 0R (0)\n\nНовая неделя — новые сетапы. Удачи!",
+"ru||none": "📊 <b>Итоги недели</b> · 10.12 – 16.12\nСигналов: <b>10</b> · в плюс 2 · в минус 4 · безубыток 1 · без итога 3\nИтог: <b>+3.0R</b> · win rate 29%\nЛучший: SOL LONG +5.0R\nВ работе сейчас: 1\nПо стратегиям: LEVELS +2.0R (2) · SMC -2.0R (2) · VOLUME 0R (0)\n\nНовая неделя — новые сетапы. Удачи!",
+"ru||zero": "📊 <b>Итоги недели</b> · 10.12 – 16.12\nСигналов: <b>10</b> · в плюс 2 · в минус 4 · безубыток 1 · без итога 3\nИтог: <b>+3.0R</b> · win rate 29%\nЛучший: SOL LONG +5.0R\nВ работе сейчас: 1\nПо стратегиям: LEVELS +2.0R (2) · SMC -2.0R (2) · VOLUME 0R (0)\n\nНовая неделя — новые сетапы. Удачи!",
+"ru|FREE|pro_overview_7": "📊 <b>Итоги недели</b> · 10.12 – 16.12\nСигналов: <b>10</b> · в плюс 2 · в минус 4 · безубыток 1 · без итога 3\nИтог: <b>+3.0R</b> · win rate 29%\nЛучший: SOL LONG +5.0R\nВ работе сейчас: 1\nПо стратегиям: LEVELS +2.0R (2) · SMC -2.0R (2) · VOLUME 0R (0)\n\n⭐ Pro на этой неделе: в среднем 6.0 сигналов на юзера, +23.3R по 23 уникальным сигналам. У тебя — 10.\n\nНовая неделя — новые сетапы. Удачи!",
+"ru|FREE|none": "📊 <b>Итоги недели</b> · 10.12 – 16.12\nСигналов: <b>10</b> · в плюс 2 · в минус 4 · безубыток 1 · без итога 3\nИтог: <b>+3.0R</b> · win rate 29%\nЛучший: SOL LONG +5.0R\nВ работе сейчас: 1\nПо стратегиям: LEVELS +2.0R (2) · SMC -2.0R (2) · VOLUME 0R (0)\n\nНовая неделя — новые сетапы. Удачи!",
+"ru|FREE|zero": "📊 <b>Итоги недели</b> · 10.12 – 16.12\nСигналов: <b>10</b> · в плюс 2 · в минус 4 · безубыток 1 · без итога 3\nИтог: <b>+3.0R</b> · win rate 29%\nЛучший: SOL LONG +5.0R\nВ работе сейчас: 1\nПо стратегиям: LEVELS +2.0R (2) · SMC -2.0R (2) · VOLUME 0R (0)\n\nНовая неделя — новые сетапы. Удачи!",
+"en|pro|pro_overview_7": "📊 <b>Weekly recap</b> · 10.12 – 16.12\nSignals: <b>10</b> · wins 2 · losses 4 · break-even 1 · no outcome 3\nResult: <b>+3.0R</b> · win rate 29%\nBest: SOL LONG +5.0R\nStill running: 1\nBy strategy: LEVELS +2.0R (2) · SMC -2.0R (2) · VOLUME 0R (0)\n\nNew week, new setups. Good luck!",
+"en|pro|none": "📊 <b>Weekly recap</b> · 10.12 – 16.12\nSignals: <b>10</b> · wins 2 · losses 4 · break-even 1 · no outcome 3\nResult: <b>+3.0R</b> · win rate 29%\nBest: SOL LONG +5.0R\nStill running: 1\nBy strategy: LEVELS +2.0R (2) · SMC -2.0R (2) · VOLUME 0R (0)\n\nNew week, new setups. Good luck!",
+"en|pro|zero": "📊 <b>Weekly recap</b> · 10.12 – 16.12\nSignals: <b>10</b> · wins 2 · losses 4 · break-even 1 · no outcome 3\nResult: <b>+3.0R</b> · win rate 29%\nBest: SOL LONG +5.0R\nStill running: 1\nBy strategy: LEVELS +2.0R (2) · SMC -2.0R (2) · VOLUME 0R (0)\n\nNew week, new setups. Good luck!",
+"en|free|pro_overview_7": "📊 <b>Weekly recap</b> · 10.12 – 16.12\nSignals: <b>10</b> · wins 2 · losses 4 · break-even 1 · no outcome 3\nResult: <b>+3.0R</b> · win rate 29%\nBest: SOL LONG +5.0R\nStill running: 1\nBy strategy: LEVELS +2.0R (2) · SMC -2.0R (2) · VOLUME 0R (0)\n\n⭐ Pro this week: 6.0 signals per user on average, +23.3R across 23 unique signals. You got 10.\n\nNew week, new setups. Good luck!",
+"en|free|none": "📊 <b>Weekly recap</b> · 10.12 – 16.12\nSignals: <b>10</b> · wins 2 · losses 4 · break-even 1 · no outcome 3\nResult: <b>+3.0R</b> · win rate 29%\nBest: SOL LONG +5.0R\nStill running: 1\nBy strategy: LEVELS +2.0R (2) · SMC -2.0R (2) · VOLUME 0R (0)\n\nNew week, new setups. Good luck!",
+"en|free|zero": "📊 <b>Weekly recap</b> · 10.12 – 16.12\nSignals: <b>10</b> · wins 2 · losses 4 · break-even 1 · no outcome 3\nResult: <b>+3.0R</b> · win rate 29%\nBest: SOL LONG +5.0R\nStill running: 1\nBy strategy: LEVELS +2.0R (2) · SMC -2.0R (2) · VOLUME 0R (0)\n\nNew week, new setups. Good luck!",
+"en||pro_overview_7": "📊 <b>Weekly recap</b> · 10.12 – 16.12\nSignals: <b>10</b> · wins 2 · losses 4 · break-even 1 · no outcome 3\nResult: <b>+3.0R</b> · win rate 29%\nBest: SOL LONG +5.0R\nStill running: 1\nBy strategy: LEVELS +2.0R (2) · SMC -2.0R (2) · VOLUME 0R (0)\n\nNew week, new setups. Good luck!",
+"en||none": "📊 <b>Weekly recap</b> · 10.12 – 16.12\nSignals: <b>10</b> · wins 2 · losses 4 · break-even 1 · no outcome 3\nResult: <b>+3.0R</b> · win rate 29%\nBest: SOL LONG +5.0R\nStill running: 1\nBy strategy: LEVELS +2.0R (2) · SMC -2.0R (2) · VOLUME 0R (0)\n\nNew week, new setups. Good luck!",
+"en||zero": "📊 <b>Weekly recap</b> · 10.12 – 16.12\nSignals: <b>10</b> · wins 2 · losses 4 · break-even 1 · no outcome 3\nResult: <b>+3.0R</b> · win rate 29%\nBest: SOL LONG +5.0R\nStill running: 1\nBy strategy: LEVELS +2.0R (2) · SMC -2.0R (2) · VOLUME 0R (0)\n\nNew week, new setups. Good luck!",
+"en|FREE|pro_overview_7": "📊 <b>Weekly recap</b> · 10.12 – 16.12\nSignals: <b>10</b> · wins 2 · losses 4 · break-even 1 · no outcome 3\nResult: <b>+3.0R</b> · win rate 29%\nBest: SOL LONG +5.0R\nStill running: 1\nBy strategy: LEVELS +2.0R (2) · SMC -2.0R (2) · VOLUME 0R (0)\n\n⭐ Pro this week: 6.0 signals per user on average, +23.3R across 23 unique signals. You got 10.\n\nNew week, new setups. Good luck!",
+"en|FREE|none": "📊 <b>Weekly recap</b> · 10.12 – 16.12\nSignals: <b>10</b> · wins 2 · losses 4 · break-even 1 · no outcome 3\nResult: <b>+3.0R</b> · win rate 29%\nBest: SOL LONG +5.0R\nStill running: 1\nBy strategy: LEVELS +2.0R (2) · SMC -2.0R (2) · VOLUME 0R (0)\n\nNew week, new setups. Good luck!",
+"en|FREE|zero": "📊 <b>Weekly recap</b> · 10.12 – 16.12\nSignals: <b>10</b> · wins 2 · losses 4 · break-even 1 · no outcome 3\nResult: <b>+3.0R</b> · win rate 29%\nBest: SOL LONG +5.0R\nStill running: 1\nBy strategy: LEVELS +2.0R (2) · SMC -2.0R (2) · VOLUME 0R (0)\n\nNew week, new setups. Good luck!",
+"xx|pro|pro_overview_7": "📊 <b>Итоги недели</b> · 10.12 – 16.12\nСигналов: <b>10</b> · в плюс 2 · в минус 4 · безубыток 1 · без итога 3\nИтог: <b>+3.0R</b> · win rate 29%\nЛучший: SOL LONG +5.0R\nВ работе сейчас: 1\nПо стратегиям: LEVELS +2.0R (2) · SMC -2.0R (2) · VOLUME 0R (0)\n\nНовая неделя — новые сетапы. Удачи!",
+"xx|pro|none": "📊 <b>Итоги недели</b> · 10.12 – 16.12\nСигналов: <b>10</b> · в плюс 2 · в минус 4 · безубыток 1 · без итога 3\nИтог: <b>+3.0R</b> · win rate 29%\nЛучший: SOL LONG +5.0R\nВ работе сейчас: 1\nПо стратегиям: LEVELS +2.0R (2) · SMC -2.0R (2) · VOLUME 0R (0)\n\nНовая неделя — новые сетапы. Удачи!",
+"xx|pro|zero": "📊 <b>Итоги недели</b> · 10.12 – 16.12\nСигналов: <b>10</b> · в плюс 2 · в минус 4 · безубыток 1 · без итога 3\nИтог: <b>+3.0R</b> · win rate 29%\nЛучший: SOL LONG +5.0R\nВ работе сейчас: 1\nПо стратегиям: LEVELS +2.0R (2) · SMC -2.0R (2) · VOLUME 0R (0)\n\nНовая неделя — новые сетапы. Удачи!",
+"xx|free|pro_overview_7": "📊 <b>Итоги недели</b> · 10.12 – 16.12\nСигналов: <b>10</b> · в плюс 2 · в минус 4 · безубыток 1 · без итога 3\nИтог: <b>+3.0R</b> · win rate 29%\nЛучший: SOL LONG +5.0R\nВ работе сейчас: 1\nПо стратегиям: LEVELS +2.0R (2) · SMC -2.0R (2) · VOLUME 0R (0)\n\n⭐ Pro на этой неделе: в среднем 6.0 сигналов на юзера, +23.3R по 23 уникальным сигналам. У тебя — 10.\n\nНовая неделя — новые сетапы. Удачи!",
+"xx|free|none": "📊 <b>Итоги недели</b> · 10.12 – 16.12\nСигналов: <b>10</b> · в плюс 2 · в минус 4 · безубыток 1 · без итога 3\nИтог: <b>+3.0R</b> · win rate 29%\nЛучший: SOL LONG +5.0R\nВ работе сейчас: 1\nПо стратегиям: LEVELS +2.0R (2) · SMC -2.0R (2) · VOLUME 0R (0)\n\nНовая неделя — новые сетапы. Удачи!",
+"xx|free|zero": "📊 <b>Итоги недели</b> · 10.12 – 16.12\nСигналов: <b>10</b> · в плюс 2 · в минус 4 · безубыток 1 · без итога 3\nИтог: <b>+3.0R</b> · win rate 29%\nЛучший: SOL LONG +5.0R\nВ работе сейчас: 1\nПо стратегиям: LEVELS +2.0R (2) · SMC -2.0R (2) · VOLUME 0R (0)\n\nНовая неделя — новые сетапы. Удачи!",
+"xx||pro_overview_7": "📊 <b>Итоги недели</b> · 10.12 – 16.12\nСигналов: <b>10</b> · в плюс 2 · в минус 4 · безубыток 1 · без итога 3\nИтог: <b>+3.0R</b> · win rate 29%\nЛучший: SOL LONG +5.0R\nВ работе сейчас: 1\nПо стратегиям: LEVELS +2.0R (2) · SMC -2.0R (2) · VOLUME 0R (0)\n\nНовая неделя — новые сетапы. Удачи!",
+"xx||none": "📊 <b>Итоги недели</b> · 10.12 – 16.12\nСигналов: <b>10</b> · в плюс 2 · в минус 4 · безубыток 1 · без итога 3\nИтог: <b>+3.0R</b> · win rate 29%\nЛучший: SOL LONG +5.0R\nВ работе сейчас: 1\nПо стратегиям: LEVELS +2.0R (2) · SMC -2.0R (2) · VOLUME 0R (0)\n\nНовая неделя — новые сетапы. Удачи!",
+"xx||zero": "📊 <b>Итоги недели</b> · 10.12 – 16.12\nСигналов: <b>10</b> · в плюс 2 · в минус 4 · безубыток 1 · без итога 3\nИтог: <b>+3.0R</b> · win rate 29%\nЛучший: SOL LONG +5.0R\nВ работе сейчас: 1\nПо стратегиям: LEVELS +2.0R (2) · SMC -2.0R (2) · VOLUME 0R (0)\n\nНовая неделя — новые сетапы. Удачи!",
+"xx|FREE|pro_overview_7": "📊 <b>Итоги недели</b> · 10.12 – 16.12\nСигналов: <b>10</b> · в плюс 2 · в минус 4 · безубыток 1 · без итога 3\nИтог: <b>+3.0R</b> · win rate 29%\nЛучший: SOL LONG +5.0R\nВ работе сейчас: 1\nПо стратегиям: LEVELS +2.0R (2) · SMC -2.0R (2) · VOLUME 0R (0)\n\n⭐ Pro на этой неделе: в среднем 6.0 сигналов на юзера, +23.3R по 23 уникальным сигналам. У тебя — 10.\n\nНовая неделя — новые сетапы. Удачи!",
+"xx|FREE|none": "📊 <b>Итоги недели</b> · 10.12 – 16.12\nСигналов: <b>10</b> · в плюс 2 · в минус 4 · безубыток 1 · без итога 3\nИтог: <b>+3.0R</b> · win rate 29%\nЛучший: SOL LONG +5.0R\nВ работе сейчас: 1\nПо стратегиям: LEVELS +2.0R (2) · SMC -2.0R (2) · VOLUME 0R (0)\n\nНовая неделя — новые сетапы. Удачи!",
+"xx|FREE|zero": "📊 <b>Итоги недели</b> · 10.12 – 16.12\nСигналов: <b>10</b> · в плюс 2 · в минус 4 · безубыток 1 · без итога 3\nИтог: <b>+3.0R</b> · win rate 29%\nЛучший: SOL LONG +5.0R\nВ работе сейчас: 1\nПо стратегиям: LEVELS +2.0R (2) · SMC -2.0R (2) · VOLUME 0R (0)\n\nНовая неделя — новые сетапы. Удачи!"
+},
+"103": {
+"ru|pro|pro_overview_7": "📊 <b>Итоги недели</b> · 10.12 – 16.12\nСигналов: <b>7</b> · в плюс 2 · в минус 0 · безубыток 2 · без итога 1\nИтог: <b>+6.0R</b> · win rate 50%\nЛучший: DOGE-USDT LONG +4.5R\nВ работе сейчас: 2\nПо стратегиям: LEVELS +4.5R (2) · SMC 0R (0)\n\nНовая неделя — новые сетапы. Удачи!",
+"ru|pro|none": "📊 <b>Итоги недели</b> · 10.12 – 16.12\nСигналов: <b>7</b> · в плюс 2 · в минус 0 · безубыток 2 · без итога 1\nИтог: <b>+6.0R</b> · win rate 50%\nЛучший: DOGE-USDT LONG +4.5R\nВ работе сейчас: 2\nПо стратегиям: LEVELS +4.5R (2) · SMC 0R (0)\n\nНовая неделя — новые сетапы. Удачи!",
+"ru|pro|zero": "📊 <b>Итоги недели</b> · 10.12 – 16.12\nСигналов: <b>7</b> · в плюс 2 · в минус 0 · безубыток 2 · без итога 1\nИтог: <b>+6.0R</b> · win rate 50%\nЛучший: DOGE-USDT LONG +4.5R\nВ работе сейчас: 2\nПо стратегиям: LEVELS +4.5R (2) · SMC 0R (0)\n\nНовая неделя — новые сетапы. Удачи!",
+"ru|free|pro_overview_7": "📊 <b>Итоги недели</b> · 10.12 – 16.12\nСигналов: <b>7</b> · в плюс 2 · в минус 0 · безубыток 2 · без итога 1\nИтог: <b>+6.0R</b> · win rate 50%\nЛучший: DOGE-USDT LONG +4.5R\nВ работе сейчас: 2\nПо стратегиям: LEVELS +4.5R (2) · SMC 0R (0)\n\n⭐ Pro на этой неделе: в среднем 6.0 сигналов на юзера, +23.3R по 23 уникальным сигналам. У тебя — 7.\n\nНовая неделя — новые сетапы. Удачи!",
+"ru|free|none": "📊 <b>Итоги недели</b> · 10.12 – 16.12\nСигналов: <b>7</b> · в плюс 2 · в минус 0 · безубыток 2 · без итога 1\nИтог: <b>+6.0R</b> · win rate 50%\nЛучший: DOGE-USDT LONG +4.5R\nВ работе сейчас: 2\nПо стратегиям: LEVELS +4.5R (2) · SMC 0R (0)\n\nНовая неделя — новые сетапы. Удачи!",
+"ru|free|zero": "📊 <b>Итоги недели</b> · 10.12 – 16.12\nСигналов: <b>7</b> · в плюс 2 · в минус 0 · безубыток 2 · без итога 1\nИтог: <b>+6.0R</b> · win rate 50%\nЛучший: DOGE-USDT LONG +4.5R\nВ работе сейчас: 2\nПо стратегиям: LEVELS +4.5R (2) · SMC 0R (0)\n\nНовая неделя — новые сетапы. Удачи!",
+"ru||pro_overview_7": "📊 <b>Итоги недели</b> · 10.12 – 16.12\nСигналов: <b>7</b> · в плюс 2 · в минус 0 · безубыток 2 · без итога 1\nИтог: <b>+6.0R</b> · win rate 50%\nЛучший: DOGE-USDT LONG +4.5R\nВ работе сейчас: 2\nПо стратегиям: LEVELS +4.5R (2) · SMC 0R (0)\n\nНовая неделя — новые сетапы. Удачи!",
+"ru||none": "📊 <b>Итоги недели</b> · 10.12 – 16.12\nСигналов: <b>7</b> · в плюс 2 · в минус 0 · безубыток 2 · без итога 1\nИтог: <b>+6.0R</b> · win rate 50%\nЛучший: DOGE-USDT LONG +4.5R\nВ работе сейчас: 2\nПо стратегиям: LEVELS +4.5R (2) · SMC 0R (0)\n\nНовая неделя — новые сетапы. Удачи!",
+"ru||zero": "📊 <b>Итоги недели</b> · 10.12 – 16.12\nСигналов: <b>7</b> · в плюс 2 · в минус 0 · безубыток 2 · без итога 1\nИтог: <b>+6.0R</b> · win rate 50%\nЛучший: DOGE-USDT LONG +4.5R\nВ работе сейчас: 2\nПо стратегиям: LEVELS +4.5R (2) · SMC 0R (0)\n\nНовая неделя — новые сетапы. Удачи!",
+"ru|FREE|pro_overview_7": "📊 <b>Итоги недели</b> · 10.12 – 16.12\nСигналов: <b>7</b> · в плюс 2 · в минус 0 · безубыток 2 · без итога 1\nИтог: <b>+6.0R</b> · win rate 50%\nЛучший: DOGE-USDT LONG +4.5R\nВ работе сейчас: 2\nПо стратегиям: LEVELS +4.5R (2) · SMC 0R (0)\n\n⭐ Pro на этой неделе: в среднем 6.0 сигналов на юзера, +23.3R по 23 уникальным сигналам. У тебя — 7.\n\nНовая неделя — новые сетапы. Удачи!",
+"ru|FREE|none": "📊 <b>Итоги недели</b> · 10.12 – 16.12\nСигналов: <b>7</b> · в плюс 2 · в минус 0 · безубыток 2 · без итога 1\nИтог: <b>+6.0R</b> · win rate 50%\nЛучший: DOGE-USDT LONG +4.5R\nВ работе сейчас: 2\nПо стратегиям: LEVELS +4.5R (2) · SMC 0R (0)\n\nНовая неделя — новые сетапы. Удачи!",
+"ru|FREE|zero": "📊 <b>Итоги недели</b> · 10.12 – 16.12\nСигналов: <b>7</b> · в плюс 2 · в минус 0 · безубыток 2 · без итога 1\nИтог: <b>+6.0R</b> · win rate 50%\nЛучший: DOGE-USDT LONG +4.5R\nВ работе сейчас: 2\nПо стратегиям: LEVELS +4.5R (2) · SMC 0R (0)\n\nНовая неделя — новые сетапы. Удачи!",
+"en|pro|pro_overview_7": "📊 <b>Weekly recap</b> · 10.12 – 16.12\nSignals: <b>7</b> · wins 2 · losses 0 · break-even 2 · no outcome 1\nResult: <b>+6.0R</b> · win rate 50%\nBest: DOGE-USDT LONG +4.5R\nStill running: 2\nBy strategy: LEVELS +4.5R (2) · SMC 0R (0)\n\nNew week, new setups. Good luck!",
+"en|pro|none": "📊 <b>Weekly recap</b> · 10.12 – 16.12\nSignals: <b>7</b> · wins 2 · losses 0 · break-even 2 · no outcome 1\nResult: <b>+6.0R</b> · win rate 50%\nBest: DOGE-USDT LONG +4.5R\nStill running: 2\nBy strategy: LEVELS +4.5R (2) · SMC 0R (0)\n\nNew week, new setups. Good luck!",
+"en|pro|zero": "📊 <b>Weekly recap</b> · 10.12 – 16.12\nSignals: <b>7</b> · wins 2 · losses 0 · break-even 2 · no outcome 1\nResult: <b>+6.0R</b> · win rate 50%\nBest: DOGE-USDT LONG +4.5R\nStill running: 2\nBy strategy: LEVELS +4.5R (2) · SMC 0R (0)\n\nNew week, new setups. Good luck!",
+"en|free|pro_overview_7": "📊 <b>Weekly recap</b> · 10.12 – 16.12\nSignals: <b>7</b> · wins 2 · losses 0 · break-even 2 · no outcome 1\nResult: <b>+6.0R</b> · win rate 50%\nBest: DOGE-USDT LONG +4.5R\nStill running: 2\nBy strategy: LEVELS +4.5R (2) · SMC 0R (0)\n\n⭐ Pro this week: 6.0 signals per user on average, +23.3R across 23 unique signals. You got 7.\n\nNew week, new setups. Good luck!",
+"en|free|none": "📊 <b>Weekly recap</b> · 10.12 – 16.12\nSignals: <b>7</b> · wins 2 · losses 0 · break-even 2 · no outcome 1\nResult: <b>+6.0R</b> · win rate 50%\nBest: DOGE-USDT LONG +4.5R\nStill running: 2\nBy strategy: LEVELS +4.5R (2) · SMC 0R (0)\n\nNew week, new setups. Good luck!",
+"en|free|zero": "📊 <b>Weekly recap</b> · 10.12 – 16.12\nSignals: <b>7</b> · wins 2 · losses 0 · break-even 2 · no outcome 1\nResult: <b>+6.0R</b> · win rate 50%\nBest: DOGE-USDT LONG +4.5R\nStill running: 2\nBy strategy: LEVELS +4.5R (2) · SMC 0R (0)\n\nNew week, new setups. Good luck!",
+"en||pro_overview_7": "📊 <b>Weekly recap</b> · 10.12 – 16.12\nSignals: <b>7</b> · wins 2 · losses 0 · break-even 2 · no outcome 1\nResult: <b>+6.0R</b> · win rate 50%\nBest: DOGE-USDT LONG +4.5R\nStill running: 2\nBy strategy: LEVELS +4.5R (2) · SMC 0R (0)\n\nNew week, new setups. Good luck!",
+"en||none": "📊 <b>Weekly recap</b> · 10.12 – 16.12\nSignals: <b>7</b> · wins 2 · losses 0 · break-even 2 · no outcome 1\nResult: <b>+6.0R</b> · win rate 50%\nBest: DOGE-USDT LONG +4.5R\nStill running: 2\nBy strategy: LEVELS +4.5R (2) · SMC 0R (0)\n\nNew week, new setups. Good luck!",
+"en||zero": "📊 <b>Weekly recap</b> · 10.12 – 16.12\nSignals: <b>7</b> · wins 2 · losses 0 · break-even 2 · no outcome 1\nResult: <b>+6.0R</b> · win rate 50%\nBest: DOGE-USDT LONG +4.5R\nStill running: 2\nBy strategy: LEVELS +4.5R (2) · SMC 0R (0)\n\nNew week, new setups. Good luck!",
+"en|FREE|pro_overview_7": "📊 <b>Weekly recap</b> · 10.12 – 16.12\nSignals: <b>7</b> · wins 2 · losses 0 · break-even 2 · no outcome 1\nResult: <b>+6.0R</b> · win rate 50%\nBest: DOGE-USDT LONG +4.5R\nStill running: 2\nBy strategy: LEVELS +4.5R (2) · SMC 0R (0)\n\n⭐ Pro this week: 6.0 signals per user on average, +23.3R across 23 unique signals. You got 7.\n\nNew week, new setups. Good luck!",
+"en|FREE|none": "📊 <b>Weekly recap</b> · 10.12 – 16.12\nSignals: <b>7</b> · wins 2 · losses 0 · break-even 2 · no outcome 1\nResult: <b>+6.0R</b> · win rate 50%\nBest: DOGE-USDT LONG +4.5R\nStill running: 2\nBy strategy: LEVELS +4.5R (2) · SMC 0R (0)\n\nNew week, new setups. Good luck!",
+"en|FREE|zero": "📊 <b>Weekly recap</b> · 10.12 – 16.12\nSignals: <b>7</b> · wins 2 · losses 0 · break-even 2 · no outcome 1\nResult: <b>+6.0R</b> · win rate 50%\nBest: DOGE-USDT LONG +4.5R\nStill running: 2\nBy strategy: LEVELS +4.5R (2) · SMC 0R (0)\n\nNew week, new setups. Good luck!",
+"xx|pro|pro_overview_7": "📊 <b>Итоги недели</b> · 10.12 – 16.12\nСигналов: <b>7</b> · в плюс 2 · в минус 0 · безубыток 2 · без итога 1\nИтог: <b>+6.0R</b> · win rate 50%\nЛучший: DOGE-USDT LONG +4.5R\nВ работе сейчас: 2\nПо стратегиям: LEVELS +4.5R (2) · SMC 0R (0)\n\nНовая неделя — новые сетапы. Удачи!",
+"xx|pro|none": "📊 <b>Итоги недели</b> · 10.12 – 16.12\nСигналов: <b>7</b> · в плюс 2 · в минус 0 · безубыток 2 · без итога 1\nИтог: <b>+6.0R</b> · win rate 50%\nЛучший: DOGE-USDT LONG +4.5R\nВ работе сейчас: 2\nПо стратегиям: LEVELS +4.5R (2) · SMC 0R (0)\n\nНовая неделя — новые сетапы. Удачи!",
+"xx|pro|zero": "📊 <b>Итоги недели</b> · 10.12 – 16.12\nСигналов: <b>7</b> · в плюс 2 · в минус 0 · безубыток 2 · без итога 1\nИтог: <b>+6.0R</b> · win rate 50%\nЛучший: DOGE-USDT LONG +4.5R\nВ работе сейчас: 2\nПо стратегиям: LEVELS +4.5R (2) · SMC 0R (0)\n\nНовая неделя — новые сетапы. Удачи!",
+"xx|free|pro_overview_7": "📊 <b>Итоги недели</b> · 10.12 – 16.12\nСигналов: <b>7</b> · в плюс 2 · в минус 0 · безубыток 2 · без итога 1\nИтог: <b>+6.0R</b> · win rate 50%\nЛучший: DOGE-USDT LONG +4.5R\nВ работе сейчас: 2\nПо стратегиям: LEVELS +4.5R (2) · SMC 0R (0)\n\n⭐ Pro на этой неделе: в среднем 6.0 сигналов на юзера, +23.3R по 23 уникальным сигналам. У тебя — 7.\n\nНовая неделя — новые сетапы. Удачи!",
+"xx|free|none": "📊 <b>Итоги недели</b> · 10.12 – 16.12\nСигналов: <b>7</b> · в плюс 2 · в минус 0 · безубыток 2 · без итога 1\nИтог: <b>+6.0R</b> · win rate 50%\nЛучший: DOGE-USDT LONG +4.5R\nВ работе сейчас: 2\nПо стратегиям: LEVELS +4.5R (2) · SMC 0R (0)\n\nНовая неделя — новые сетапы. Удачи!",
+"xx|free|zero": "📊 <b>Итоги недели</b> · 10.12 – 16.12\nСигналов: <b>7</b> · в плюс 2 · в минус 0 · безубыток 2 · без итога 1\nИтог: <b>+6.0R</b> · win rate 50%\nЛучший: DOGE-USDT LONG +4.5R\nВ работе сейчас: 2\nПо стратегиям: LEVELS +4.5R (2) · SMC 0R (0)\n\nНовая неделя — новые сетапы. Удачи!",
+"xx||pro_overview_7": "📊 <b>Итоги недели</b> · 10.12 – 16.12\nСигналов: <b>7</b> · в плюс 2 · в минус 0 · безубыток 2 · без итога 1\nИтог: <b>+6.0R</b> · win rate 50%\nЛучший: DOGE-USDT LONG +4.5R\nВ работе сейчас: 2\nПо стратегиям: LEVELS +4.5R (2) · SMC 0R (0)\n\nНовая неделя — новые сетапы. Удачи!",
+"xx||none": "📊 <b>Итоги недели</b> · 10.12 – 16.12\nСигналов: <b>7</b> · в плюс 2 · в минус 0 · безубыток 2 · без итога 1\nИтог: <b>+6.0R</b> · win rate 50%\nЛучший: DOGE-USDT LONG +4.5R\nВ работе сейчас: 2\nПо стратегиям: LEVELS +4.5R (2) · SMC 0R (0)\n\nНовая неделя — новые сетапы. Удачи!",
+"xx||zero": "📊 <b>Итоги недели</b> · 10.12 – 16.12\nСигналов: <b>7</b> · в плюс 2 · в минус 0 · безубыток 2 · без итога 1\nИтог: <b>+6.0R</b> · win rate 50%\nЛучший: DOGE-USDT LONG +4.5R\nВ работе сейчас: 2\nПо стратегиям: LEVELS +4.5R (2) · SMC 0R (0)\n\nНовая неделя — новые сетапы. Удачи!",
+"xx|FREE|pro_overview_7": "📊 <b>Итоги недели</b> · 10.12 – 16.12\nСигналов: <b>7</b> · в плюс 2 · в минус 0 · безубыток 2 · без итога 1\nИтог: <b>+6.0R</b> · win rate 50%\nЛучший: DOGE-USDT LONG +4.5R\nВ работе сейчас: 2\nПо стратегиям: LEVELS +4.5R (2) · SMC 0R (0)\n\n⭐ Pro на этой неделе: в среднем 6.0 сигналов на юзера, +23.3R по 23 уникальным сигналам. У тебя — 7.\n\nНовая неделя — новые сетапы. Удачи!",
+"xx|FREE|none": "📊 <b>Итоги недели</b> · 10.12 – 16.12\nСигналов: <b>7</b> · в плюс 2 · в минус 0 · безубыток 2 · без итога 1\nИтог: <b>+6.0R</b> · win rate 50%\nЛучший: DOGE-USDT LONG +4.5R\nВ работе сейчас: 2\nПо стратегиям: LEVELS +4.5R (2) · SMC 0R (0)\n\nНовая неделя — новые сетапы. Удачи!",
+"xx|FREE|zero": "📊 <b>Итоги недели</b> · 10.12 – 16.12\nСигналов: <b>7</b> · в плюс 2 · в минус 0 · безубыток 2 · без итога 1\nИтог: <b>+6.0R</b> · win rate 50%\nЛучший: DOGE-USDT LONG +4.5R\nВ работе сейчас: 2\nПо стратегиям: LEVELS +4.5R (2) · SMC 0R (0)\n\nНовая неделя — новые сетапы. Удачи!"
+},
+"104": {
+"ru|pro|pro_overview_7": "📊 <b>Итоги недели</b> · 10.12 – 16.12\nСигналов: <b>5</b> · в плюс 5 · в минус 0\nИтог: <b>+14.0R</b> · win rate 100%\nЛучший: SOL LONG +5.0R\nВ работе сейчас: 4\n\nНовая неделя — новые сетапы. Удачи!",
+"ru|pro|none": "📊 <b>Итоги недели</b> · 10.12 – 16.12\nСигналов: <b>5</b> · в плюс 5 · в минус 0\nИтог: <b>+14.0R</b> · win rate 100%\nЛучший: SOL LONG +5.0R\nВ работе сейчас: 4\n\nНовая неделя — новые сетапы. Удачи!",
+"ru|pro|zero": "📊 <b>Итоги недели</b> · 10.12 – 16.12\nСигналов: <b>5</b> · в плюс 5 · в минус 0\nИтог: <b>+14.0R</b> · win rate 100%\nЛучший: SOL LONG +5.0R\nВ работе сейчас: 4\n\nНовая неделя — новые сетапы. Удачи!",
+"ru|free|pro_overview_7": "📊 <b>Итоги недели</b> · 10.12 – 16.12\nСигналов: <b>5</b> · в плюс 5 · в минус 0\nИтог: <b>+14.0R</b> · win rate 100%\nЛучший: SOL LONG +5.0R\nВ работе сейчас: 4\n\n⭐ Pro на этой неделе: в среднем 6.0 сигналов на юзера, +23.3R по 23 уникальным сигналам. У тебя — 5.\n\nНовая неделя — новые сетапы. Удачи!",
+"ru|free|none": "📊 <b>Итоги недели</b> · 10.12 – 16.12\nСигналов: <b>5</b> · в плюс 5 · в минус 0\nИтог: <b>+14.0R</b> · win rate 100%\nЛучший: SOL LONG +5.0R\nВ работе сейчас: 4\n\nНовая неделя — новые сетапы. Удачи!",
+"ru|free|zero": "📊 <b>Итоги недели</b> · 10.12 – 16.12\nСигналов: <b>5</b> · в плюс 5 · в минус 0\nИтог: <b>+14.0R</b> · win rate 100%\nЛучший: SOL LONG +5.0R\nВ работе сейчас: 4\n\nНовая неделя — новые сетапы. Удачи!",
+"ru||pro_overview_7": "📊 <b>Итоги недели</b> · 10.12 – 16.12\nСигналов: <b>5</b> · в плюс 5 · в минус 0\nИтог: <b>+14.0R</b> · win rate 100%\nЛучший: SOL LONG +5.0R\nВ работе сейчас: 4\n\nНовая неделя — новые сетапы. Удачи!",
+"ru||none": "📊 <b>Итоги недели</b> · 10.12 – 16.12\nСигналов: <b>5</b> · в плюс 5 · в минус 0\nИтог: <b>+14.0R</b> · win rate 100%\nЛучший: SOL LONG +5.0R\nВ работе сейчас: 4\n\nНовая неделя — новые сетапы. Удачи!",
+"ru||zero": "📊 <b>Итоги недели</b> · 10.12 – 16.12\nСигналов: <b>5</b> · в плюс 5 · в минус 0\nИтог: <b>+14.0R</b> · win rate 100%\nЛучший: SOL LONG +5.0R\nВ работе сейчас: 4\n\nНовая неделя — новые сетапы. Удачи!",
+"ru|FREE|pro_overview_7": "📊 <b>Итоги недели</b> · 10.12 – 16.12\nСигналов: <b>5</b> · в плюс 5 · в минус 0\nИтог: <b>+14.0R</b> · win rate 100%\nЛучший: SOL LONG +5.0R\nВ работе сейчас: 4\n\n⭐ Pro на этой неделе: в среднем 6.0 сигналов на юзера, +23.3R по 23 уникальным сигналам. У тебя — 5.\n\nНовая неделя — новые сетапы. Удачи!",
+"ru|FREE|none": "📊 <b>Итоги недели</b> · 10.12 – 16.12\nСигналов: <b>5</b> · в плюс 5 · в минус 0\nИтог: <b>+14.0R</b> · win rate 100%\nЛучший: SOL LONG +5.0R\nВ работе сейчас: 4\n\nНовая неделя — новые сетапы. Удачи!",
+"ru|FREE|zero": "📊 <b>Итоги недели</b> · 10.12 – 16.12\nСигналов: <b>5</b> · в плюс 5 · в минус 0\nИтог: <b>+14.0R</b> · win rate 100%\nЛучший: SOL LONG +5.0R\nВ работе сейчас: 4\n\nНовая неделя — новые сетапы. Удачи!",
+"en|pro|pro_overview_7": "📊 <b>Weekly recap</b> · 10.12 – 16.12\nSignals: <b>5</b> · wins 5 · losses 0\nResult: <b>+14.0R</b> · win rate 100%\nBest: SOL LONG +5.0R\nStill running: 4\n\nNew week, new setups. Good luck!",
+"en|pro|none": "📊 <b>Weekly recap</b> · 10.12 – 16.12\nSignals: <b>5</b> · wins 5 · losses 0\nResult: <b>+14.0R</b> · win rate 100%\nBest: SOL LONG +5.0R\nStill running: 4\n\nNew week, new setups. Good luck!",
+"en|pro|zero": "📊 <b>Weekly recap</b> · 10.12 – 16.12\nSignals: <b>5</b> · wins 5 · losses 0\nResult: <b>+14.0R</b> · win rate 100%\nBest: SOL LONG +5.0R\nStill running: 4\n\nNew week, new setups. Good luck!",
+"en|free|pro_overview_7": "📊 <b>Weekly recap</b> · 10.12 – 16.12\nSignals: <b>5</b> · wins 5 · losses 0\nResult: <b>+14.0R</b> · win rate 100%\nBest: SOL LONG +5.0R\nStill running: 4\n\n⭐ Pro this week: 6.0 signals per user on average, +23.3R across 23 unique signals. You got 5.\n\nNew week, new setups. Good luck!",
+"en|free|none": "📊 <b>Weekly recap</b> · 10.12 – 16.12\nSignals: <b>5</b> · wins 5 · losses 0\nResult: <b>+14.0R</b> · win rate 100%\nBest: SOL LONG +5.0R\nStill running: 4\n\nNew week, new setups. Good luck!",
+"en|free|zero": "📊 <b>Weekly recap</b> · 10.12 – 16.12\nSignals: <b>5</b> · wins 5 · losses 0\nResult: <b>+14.0R</b> · win rate 100%\nBest: SOL LONG +5.0R\nStill running: 4\n\nNew week, new setups. Good luck!",
+"en||pro_overview_7": "📊 <b>Weekly recap</b> · 10.12 – 16.12\nSignals: <b>5</b> · wins 5 · losses 0\nResult: <b>+14.0R</b> · win rate 100%\nBest: SOL LONG +5.0R\nStill running: 4\n\nNew week, new setups. Good luck!",
+"en||none": "📊 <b>Weekly recap</b> · 10.12 – 16.12\nSignals: <b>5</b> · wins 5 · losses 0\nResult: <b>+14.0R</b> · win rate 100%\nBest: SOL LONG +5.0R\nStill running: 4\n\nNew week, new setups. Good luck!",
+"en||zero": "📊 <b>Weekly recap</b> · 10.12 – 16.12\nSignals: <b>5</b> · wins 5 · losses 0\nResult: <b>+14.0R</b> · win rate 100%\nBest: SOL LONG +5.0R\nStill running: 4\n\nNew week, new setups. Good luck!",
+"en|FREE|pro_overview_7": "📊 <b>Weekly recap</b> · 10.12 – 16.12\nSignals: <b>5</b> · wins 5 · losses 0\nResult: <b>+14.0R</b> · win rate 100%\nBest: SOL LONG +5.0R\nStill running: 4\n\n⭐ Pro this week: 6.0 signals per user on average, +23.3R across 23 unique signals. You got 5.\n\nNew week, new setups. Good luck!",
+"en|FREE|none": "📊 <b>Weekly recap</b> · 10.12 – 16.12\nSignals: <b>5</b> · wins 5 · losses 0\nResult: <b>+14.0R</b> · win rate 100%\nBest: SOL LONG +5.0R\nStill running: 4\n\nNew week, new setups. Good luck!",
+"en|FREE|zero": "📊 <b>Weekly recap</b> · 10.12 – 16.12\nSignals: <b>5</b> · wins 5 · losses 0\nResult: <b>+14.0R</b> · win rate 100%\nBest: SOL LONG +5.0R\nStill running: 4\n\nNew week, new setups. Good luck!",
+"xx|pro|pro_overview_7": "📊 <b>Итоги недели</b> · 10.12 – 16.12\nСигналов: <b>5</b> · в плюс 5 · в минус 0\nИтог: <b>+14.0R</b> · win rate 100%\nЛучший: SOL LONG +5.0R\nВ работе сейчас: 4\n\nНовая неделя — новые сетапы. Удачи!",
+"xx|pro|none": "📊 <b>Итоги недели</b> · 10.12 – 16.12\nСигналов: <b>5</b> · в плюс 5 · в минус 0\nИтог: <b>+14.0R</b> · win rate 100%\nЛучший: SOL LONG +5.0R\nВ работе сейчас: 4\n\nНовая неделя — новые сетапы. Удачи!",
+"xx|pro|zero": "📊 <b>Итоги недели</b> · 10.12 – 16.12\nСигналов: <b>5</b> · в плюс 5 · в минус 0\nИтог: <b>+14.0R</b> · win rate 100%\nЛучший: SOL LONG +5.0R\nВ работе сейчас: 4\n\nНовая неделя — новые сетапы. Удачи!",
+"xx|free|pro_overview_7": "📊 <b>Итоги недели</b> · 10.12 – 16.12\nСигналов: <b>5</b> · в плюс 5 · в минус 0\nИтог: <b>+14.0R</b> · win rate 100%\nЛучший: SOL LONG +5.0R\nВ работе сейчас: 4\n\n⭐ Pro на этой неделе: в среднем 6.0 сигналов на юзера, +23.3R по 23 уникальным сигналам. У тебя — 5.\n\nНовая неделя — новые сетапы. Удачи!",
+"xx|free|none": "📊 <b>Итоги недели</b> · 10.12 – 16.12\nСигналов: <b>5</b> · в плюс 5 · в минус 0\nИтог: <b>+14.0R</b> · win rate 100%\nЛучший: SOL LONG +5.0R\nВ работе сейчас: 4\n\nНовая неделя — новые сетапы. Удачи!",
+"xx|free|zero": "📊 <b>Итоги недели</b> · 10.12 – 16.12\nСигналов: <b>5</b> · в плюс 5 · в минус 0\nИтог: <b>+14.0R</b> · win rate 100%\nЛучший: SOL LONG +5.0R\nВ работе сейчас: 4\n\nНовая неделя — новые сетапы. Удачи!",
+"xx||pro_overview_7": "📊 <b>Итоги недели</b> · 10.12 – 16.12\nСигналов: <b>5</b> · в плюс 5 · в минус 0\nИтог: <b>+14.0R</b> · win rate 100%\nЛучший: SOL LONG +5.0R\nВ работе сейчас: 4\n\nНовая неделя — новые сетапы. Удачи!",
+"xx||none": "📊 <b>Итоги недели</b> · 10.12 – 16.12\nСигналов: <b>5</b> · в плюс 5 · в минус 0\nИтог: <b>+14.0R</b> · win rate 100%\nЛучший: SOL LONG +5.0R\nВ работе сейчас: 4\n\nНовая неделя — новые сетапы. Удачи!",
+"xx||zero": "📊 <b>Итоги недели</b> · 10.12 – 16.12\nСигналов: <b>5</b> · в плюс 5 · в минус 0\nИтог: <b>+14.0R</b> · win rate 100%\nЛучший: SOL LONG +5.0R\nВ работе сейчас: 4\n\nНовая неделя — новые сетапы. Удачи!",
+"xx|FREE|pro_overview_7": "📊 <b>Итоги недели</b> · 10.12 – 16.12\nСигналов: <b>5</b> · в плюс 5 · в минус 0\nИтог: <b>+14.0R</b> · win rate 100%\nЛучший: SOL LONG +5.0R\nВ работе сейчас: 4\n\n⭐ Pro на этой неделе: в среднем 6.0 сигналов на юзера, +23.3R по 23 уникальным сигналам. У тебя — 5.\n\nНовая неделя — новые сетапы. Удачи!",
+"xx|FREE|none": "📊 <b>Итоги недели</b> · 10.12 – 16.12\nСигналов: <b>5</b> · в плюс 5 · в минус 0\nИтог: <b>+14.0R</b> · win rate 100%\nЛучший: SOL LONG +5.0R\nВ работе сейчас: 4\n\nНовая неделя — новые сетапы. Удачи!",
+"xx|FREE|zero": "📊 <b>Итоги недели</b> · 10.12 – 16.12\nСигналов: <b>5</b> · в плюс 5 · в минус 0\nИтог: <b>+14.0R</b> · win rate 100%\nЛучший: SOL LONG +5.0R\nВ работе сейчас: 4\n\nНовая неделя — новые сетапы. Удачи!"
+},
+"105": {
+"ru|pro|pro_overview_7": "📊 <b>Итоги недели</b> · 10.12 – 16.12\nСигналов: <b>11</b> · в плюс 2 · в минус 3 · безубыток 1 · без итога 2\nИтог: <b>+1.9R</b> · win rate 33%\nЛучший: SOL LONG +3.0R\nВ работе сейчас: 6\nПо стратегиям: LEVELS 0R (0) · SMC -1.0R (1) · VOLUME 0R (1)\n\nНовая неделя — новые сетапы. Удачи!",
+"ru|pro|none": "📊 <b>Итоги недели</b> · 10.12 – 16.12\nСигналов: <b>11</b> · в плюс 2 · в минус 3 · безубыток 1 · без итога 2\nИтог: <b>+1.9R</b> · win rate 33%\nЛучший: SOL LONG +3.0R\nВ работе сейчас: 6\nПо стратегиям: LEVELS 0R (0) · SMC -1.0R (1) · VOLUME 0R (1)\n\nНовая неделя — новые сетапы. Удачи!",
+"ru|pro|zero": "📊 <b>Итоги недели</b> · 10.12 – 16.12\nСигналов: <b>11</b> · в плюс 2 · в минус 3 · безубыток 1 · без итога 2\nИтог: <b>+1.9R</b> · win rate 33%\nЛучший: SOL LONG +3.0R\nВ работе сейчас: 6\nПо стратегиям: LEVELS 0R (0) · SMC -1.0R (1) · VOLUME 0R (1)\n\nНовая неделя — новые сетапы. Удачи!",
+"ru|free|pro_overview_7": "📊 <b>Итоги недели</b> · 10.12 – 16.12\nСигналов: <b>11</b> · в плюс 2 · в минус 3 · безубыток 1 · без итога 2\nИтог: <b>+1.9R</b> · win rate 33%\nЛучший: SOL LONG +3.0R\nВ работе сейчас: 6\nПо стратегиям: LEVELS 0R (0) · SMC -1.0R (1) · VOLUME 0R (1)\n\n⭐ Pro на этой неделе: в среднем 6.0 сигналов на юзера, +23.3R по 23 уникальным сигналам. У тебя — 11.\n\nНовая неделя — новые сетапы. Удачи!",
+"ru|free|none": "📊 <b>Итоги недели</b> · 10.12 – 16.12\nСигналов: <b>11</b> · в плюс 2 · в минус 3 · безубыток 1 · без итога 2\nИтог: <b>+1.9R</b> · win rate 33%\nЛучший: SOL LONG +3.0R\nВ работе сейчас: 6\nПо стратегиям: LEVELS 0R (0) · SMC -1.0R (1) · VOLUME 0R (1)\n\nНовая неделя — новые сетапы. Удачи!",
+"ru|free|zero": "📊 <b>Итоги недели</b> · 10.12 – 16.12\nСигналов: <b>11</b> · в плюс 2 · в минус 3 · безубыток 1 · без итога 2\nИтог: <b>+1.9R</b> · win rate 33%\nЛучший: SOL LONG +3.0R\nВ работе сейчас: 6\nПо стратегиям: LEVELS 0R (0) · SMC -1.0R (1) · VOLUME 0R (1)\n\nНовая неделя — новые сетапы. Удачи!",
+"ru||pro_overview_7": "📊 <b>Итоги недели</b> · 10.12 – 16.12\nСигналов: <b>11</b> · в плюс 2 · в минус 3 · безубыток 1 · без итога 2\nИтог: <b>+1.9R</b> · win rate 33%\nЛучший: SOL LONG +3.0R\nВ работе сейчас: 6\nПо стратегиям: LEVELS 0R (0) · SMC -1.0R (1) · VOLUME 0R (1)\n\nНовая неделя — новые сетапы. Удачи!",
+"ru||none": "📊 <b>Итоги недели</b> · 10.12 – 16.12\nСигналов: <b>11</b> · в плюс 2 · в минус 3 · безубыток 1 · без итога 2\nИтог: <b>+1.9R</b> · win rate 33%\nЛучший: SOL LONG +3.0R\nВ работе сейчас: 6\nПо стратегиям: LEVELS 0R (0) · SMC -1.0R (1) · VOLUME 0R (1)\n\nНовая неделя — новые сетапы. Удачи!",
+"ru||zero": "📊 <b>Итоги недели</b> · 10.12 – 16.12\nСигналов: <b>11</b> · в плюс 2 · в минус 3 · безубыток 1 · без итога 2\nИтог: <b>+1.9R</b> · win rate 33%\nЛучший: SOL LONG +3.0R\nВ работе сейчас: 6\nПо стратегиям: LEVELS 0R (0) · SMC -1.0R (1) · VOLUME 0R (1)\n\nНовая неделя — новые сетапы. Удачи!",
+"ru|FREE|pro_overview_7": "📊 <b>Итоги недели</b> · 10.12 – 16.12\nСигналов: <b>11</b> · в плюс 2 · в минус 3 · безубыток 1 · без итога 2\nИтог: <b>+1.9R</b> · win rate 33%\nЛучший: SOL LONG +3.0R\nВ работе сейчас: 6\nПо стратегиям: LEVELS 0R (0) · SMC -1.0R (1) · VOLUME 0R (1)\n\n⭐ Pro на этой неделе: в среднем 6.0 сигналов на юзера, +23.3R по 23 уникальным сигналам. У тебя — 11.\n\nНовая неделя — новые сетапы. Удачи!",
+"ru|FREE|none": "📊 <b>Итоги недели</b> · 10.12 – 16.12\nСигналов: <b>11</b> · в плюс 2 · в минус 3 · безубыток 1 · без итога 2\nИтог: <b>+1.9R</b> · win rate 33%\nЛучший: SOL LONG +3.0R\nВ работе сейчас: 6\nПо стратегиям: LEVELS 0R (0) · SMC -1.0R (1) · VOLUME 0R (1)\n\nНовая неделя — новые сетапы. Удачи!",
+"ru|FREE|zero": "📊 <b>Итоги недели</b> · 10.12 – 16.12\nСигналов: <b>11</b> · в плюс 2 · в минус 3 · безубыток 1 · без итога 2\nИтог: <b>+1.9R</b> · win rate 33%\nЛучший: SOL LONG +3.0R\nВ работе сейчас: 6\nПо стратегиям: LEVELS 0R (0) · SMC -1.0R (1) · VOLUME 0R (1)\n\nНовая неделя — новые сетапы. Удачи!",
+"en|pro|pro_overview_7": "📊 <b>Weekly recap</b> · 10.12 – 16.12\nSignals: <b>11</b> · wins 2 · losses 3 · break-even 1 · no outcome 2\nResult: <b>+1.9R</b> · win rate 33%\nBest: SOL LONG +3.0R\nStill running: 6\nBy strategy: LEVELS 0R (0) · SMC -1.0R (1) · VOLUME 0R (1)\n\nNew week, new setups. Good luck!",
+"en|pro|none": "📊 <b>Weekly recap</b> · 10.12 – 16.12\nSignals: <b>11</b> · wins 2 · losses 3 · break-even 1 · no outcome 2\nResult: <b>+1.9R</b> · win rate 33%\nBest: SOL LONG +3.0R\nStill running: 6\nBy strategy: LEVELS 0R (0) · SMC -1.0R (1) · VOLUME 0R (1)\n\nNew week, new setups. Good luck!",
+"en|pro|zero": "📊 <b>Weekly recap</b> · 10.12 – 16.12\nSignals: <b>11</b> · wins 2 · losses 3 · break-even 1 · no outcome 2\nResult: <b>+1.9R</b> · win rate 33%\nBest: SOL LONG +3.0R\nStill running: 6\nBy strategy: LEVELS 0R (0) · SMC -1.0R (1) · VOLUME 0R (1)\n\nNew week, new setups. Good luck!",
+"en|free|pro_overview_7": "📊 <b>Weekly recap</b> · 10.12 – 16.12\nSignals: <b>11</b> · wins 2 · losses 3 · break-even 1 · no outcome 2\nResult: <b>+1.9R</b> · win rate 33%\nBest: SOL LONG +3.0R\nStill running: 6\nBy strategy: LEVELS 0R (0) · SMC -1.0R (1) · VOLUME 0R (1)\n\n⭐ Pro this week: 6.0 signals per user on average, +23.3R across 23 unique signals. You got 11.\n\nNew week, new setups. Good luck!",
+"en|free|none": "📊 <b>Weekly recap</b> · 10.12 – 16.12\nSignals: <b>11</b> · wins 2 · losses 3 · break-even 1 · no outcome 2\nResult: <b>+1.9R</b> · win rate 33%\nBest: SOL LONG +3.0R\nStill running: 6\nBy strategy: LEVELS 0R (0) · SMC -1.0R (1) · VOLUME 0R (1)\n\nNew week, new setups. Good luck!",
+"en|free|zero": "📊 <b>Weekly recap</b> · 10.12 – 16.12\nSignals: <b>11</b> · wins 2 · losses 3 · break-even 1 · no outcome 2\nResult: <b>+1.9R</b> · win rate 33%\nBest: SOL LONG +3.0R\nStill running: 6\nBy strategy: LEVELS 0R (0) · SMC -1.0R (1) · VOLUME 0R (1)\n\nNew week, new setups. Good luck!",
+"en||pro_overview_7": "📊 <b>Weekly recap</b> · 10.12 – 16.12\nSignals: <b>11</b> · wins 2 · losses 3 · break-even 1 · no outcome 2\nResult: <b>+1.9R</b> · win rate 33%\nBest: SOL LONG +3.0R\nStill running: 6\nBy strategy: LEVELS 0R (0) · SMC -1.0R (1) · VOLUME 0R (1)\n\nNew week, new setups. Good luck!",
+"en||none": "📊 <b>Weekly recap</b> · 10.12 – 16.12\nSignals: <b>11</b> · wins 2 · losses 3 · break-even 1 · no outcome 2\nResult: <b>+1.9R</b> · win rate 33%\nBest: SOL LONG +3.0R\nStill running: 6\nBy strategy: LEVELS 0R (0) · SMC -1.0R (1) · VOLUME 0R (1)\n\nNew week, new setups. Good luck!",
+"en||zero": "📊 <b>Weekly recap</b> · 10.12 – 16.12\nSignals: <b>11</b> · wins 2 · losses 3 · break-even 1 · no outcome 2\nResult: <b>+1.9R</b> · win rate 33%\nBest: SOL LONG +3.0R\nStill running: 6\nBy strategy: LEVELS 0R (0) · SMC -1.0R (1) · VOLUME 0R (1)\n\nNew week, new setups. Good luck!",
+"en|FREE|pro_overview_7": "📊 <b>Weekly recap</b> · 10.12 – 16.12\nSignals: <b>11</b> · wins 2 · losses 3 · break-even 1 · no outcome 2\nResult: <b>+1.9R</b> · win rate 33%\nBest: SOL LONG +3.0R\nStill running: 6\nBy strategy: LEVELS 0R (0) · SMC -1.0R (1) · VOLUME 0R (1)\n\n⭐ Pro this week: 6.0 signals per user on average, +23.3R across 23 unique signals. You got 11.\n\nNew week, new setups. Good luck!",
+"en|FREE|none": "📊 <b>Weekly recap</b> · 10.12 – 16.12\nSignals: <b>11</b> · wins 2 · losses 3 · break-even 1 · no outcome 2\nResult: <b>+1.9R</b> · win rate 33%\nBest: SOL LONG +3.0R\nStill running: 6\nBy strategy: LEVELS 0R (0) · SMC -1.0R (1) · VOLUME 0R (1)\n\nNew week, new setups. Good luck!",
+"en|FREE|zero": "📊 <b>Weekly recap</b> · 10.12 – 16.12\nSignals: <b>11</b> · wins 2 · losses 3 · break-even 1 · no outcome 2\nResult: <b>+1.9R</b> · win rate 33%\nBest: SOL LONG +3.0R\nStill running: 6\nBy strategy: LEVELS 0R (0) · SMC -1.0R (1) · VOLUME 0R (1)\n\nNew week, new setups. Good luck!",
+"xx|pro|pro_overview_7": "📊 <b>Итоги недели</b> · 10.12 – 16.12\nСигналов: <b>11</b> · в плюс 2 · в минус 3 · безубыток 1 · без итога 2\nИтог: <b>+1.9R</b> · win rate 33%\nЛучший: SOL LONG +3.0R\nВ работе сейчас: 6\nПо стратегиям: LEVELS 0R (0) · SMC -1.0R (1) · VOLUME 0R (1)\n\nНовая неделя — новые сетапы. Удачи!",
+"xx|pro|none": "📊 <b>Итоги недели</b> · 10.12 – 16.12\nСигналов: <b>11</b> · в плюс 2 · в минус 3 · безубыток 1 · без итога 2\nИтог: <b>+1.9R</b> · win rate 33%\nЛучший: SOL LONG +3.0R\nВ работе сейчас: 6\nПо стратегиям: LEVELS 0R (0) · SMC -1.0R (1) · VOLUME 0R (1)\n\nНовая неделя — новые сетапы. Удачи!",
+"xx|pro|zero": "📊 <b>Итоги недели</b> · 10.12 – 16.12\nСигналов: <b>11</b> · в плюс 2 · в минус 3 · безубыток 1 · без итога 2\nИтог: <b>+1.9R</b> · win rate 33%\nЛучший: SOL LONG +3.0R\nВ работе сейчас: 6\nПо стратегиям: LEVELS 0R (0) · SMC -1.0R (1) · VOLUME 0R (1)\n\nНовая неделя — новые сетапы. Удачи!",
+"xx|free|pro_overview_7": "📊 <b>Итоги недели</b> · 10.12 – 16.12\nСигналов: <b>11</b> · в плюс 2 · в минус 3 · безубыток 1 · без итога 2\nИтог: <b>+1.9R</b> · win rate 33%\nЛучший: SOL LONG +3.0R\nВ работе сейчас: 6\nПо стратегиям: LEVELS 0R (0) · SMC -1.0R (1) · VOLUME 0R (1)\n\n⭐ Pro на этой неделе: в среднем 6.0 сигналов на юзера, +23.3R по 23 уникальным сигналам. У тебя — 11.\n\nНовая неделя — новые сетапы. Удачи!",
+"xx|free|none": "📊 <b>Итоги недели</b> · 10.12 – 16.12\nСигналов: <b>11</b> · в плюс 2 · в минус 3 · безубыток 1 · без итога 2\nИтог: <b>+1.9R</b> · win rate 33%\nЛучший: SOL LONG +3.0R\nВ работе сейчас: 6\nПо стратегиям: LEVELS 0R (0) · SMC -1.0R (1) · VOLUME 0R (1)\n\nНовая неделя — новые сетапы. Удачи!",
+"xx|free|zero": "📊 <b>Итоги недели</b> · 10.12 – 16.12\nСигналов: <b>11</b> · в плюс 2 · в минус 3 · безубыток 1 · без итога 2\nИтог: <b>+1.9R</b> · win rate 33%\nЛучший: SOL LONG +3.0R\nВ работе сейчас: 6\nПо стратегиям: LEVELS 0R (0) · SMC -1.0R (1) · VOLUME 0R (1)\n\nНовая неделя — новые сетапы. Удачи!",
+"xx||pro_overview_7": "📊 <b>Итоги недели</b> · 10.12 – 16.12\nСигналов: <b>11</b> · в плюс 2 · в минус 3 · безубыток 1 · без итога 2\nИтог: <b>+1.9R</b> · win rate 33%\nЛучший: SOL LONG +3.0R\nВ работе сейчас: 6\nПо стратегиям: LEVELS 0R (0) · SMC -1.0R (1) · VOLUME 0R (1)\n\nНовая неделя — новые сетапы. Удачи!",
+"xx||none": "📊 <b>Итоги недели</b> · 10.12 – 16.12\nСигналов: <b>11</b> · в плюс 2 · в минус 3 · безубыток 1 · без итога 2\nИтог: <b>+1.9R</b> · win rate 33%\nЛучший: SOL LONG +3.0R\nВ работе сейчас: 6\nПо стратегиям: LEVELS 0R (0) · SMC -1.0R (1) · VOLUME 0R (1)\n\nНовая неделя — новые сетапы. Удачи!",
+"xx||zero": "📊 <b>Итоги недели</b> · 10.12 – 16.12\nСигналов: <b>11</b> · в плюс 2 · в минус 3 · безубыток 1 · без итога 2\nИтог: <b>+1.9R</b> · win rate 33%\nЛучший: SOL LONG +3.0R\nВ работе сейчас: 6\nПо стратегиям: LEVELS 0R (0) · SMC -1.0R (1) · VOLUME 0R (1)\n\nНовая неделя — новые сетапы. Удачи!",
+"xx|FREE|pro_overview_7": "📊 <b>Итоги недели</b> · 10.12 – 16.12\nСигналов: <b>11</b> · в плюс 2 · в минус 3 · безубыток 1 · без итога 2\nИтог: <b>+1.9R</b> · win rate 33%\nЛучший: SOL LONG +3.0R\nВ работе сейчас: 6\nПо стратегиям: LEVELS 0R (0) · SMC -1.0R (1) · VOLUME 0R (1)\n\n⭐ Pro на этой неделе: в среднем 6.0 сигналов на юзера, +23.3R по 23 уникальным сигналам. У тебя — 11.\n\nНовая неделя — новые сетапы. Удачи!",
+"xx|FREE|none": "📊 <b>Итоги недели</b> · 10.12 – 16.12\nСигналов: <b>11</b> · в плюс 2 · в минус 3 · безубыток 1 · без итога 2\nИтог: <b>+1.9R</b> · win rate 33%\nЛучший: SOL LONG +3.0R\nВ работе сейчас: 6\nПо стратегиям: LEVELS 0R (0) · SMC -1.0R (1) · VOLUME 0R (1)\n\nНовая неделя — новые сетапы. Удачи!",
+"xx|FREE|zero": "📊 <b>Итоги недели</b> · 10.12 – 16.12\nСигналов: <b>11</b> · в плюс 2 · в минус 3 · безубыток 1 · без итога 2\nИтог: <b>+1.9R</b> · win rate 33%\nЛучший: SOL LONG +3.0R\nВ работе сейчас: 6\nПо стратегиям: LEVELS 0R (0) · SMC -1.0R (1) · VOLUME 0R (1)\n\nНовая неделя — новые сетапы. Удачи!"
+},
+"106": {
+"ru|pro|pro_overview_7": "📊 <b>Итоги недели</b> · 10.12 – 16.12\nСигналов: <b>7</b> · в плюс 1 · в минус 2 · безубыток 1 · без итога 1\nИтог: <b>0R</b> · win rate 25%\nЛучший: DOGE-USDT LONG +2.0R\nВ работе сейчас: 3\nПо стратегиям: LEVELS +2.0R (1) · SMC -1.0R (1)\n\nНовая неделя — новые сетапы. Удачи!",
+"ru|pro|none": "📊 <b>Итоги недели</b> · 10.12 – 16.12\nСигналов: <b>7</b> · в плюс 1 · в минус 2 · безубыток 1 · без итога 1\nИтог: <b>0R</b> · win rate 25%\nЛучший: DOGE-USDT LONG +2.0R\nВ работе сейчас: 3\nПо стратегиям: LEVELS +2.0R (1) · SMC -1.0R (1)\n\nНовая неделя — новые сетапы. Удачи!",
+"ru|pro|zero": "📊 <b>Итоги недели</b> · 10.12 – 16.12\nСигналов: <b>7</b> · в плюс 1 · в минус 2 · безубыток 1 · без итога 1\nИтог: <b>0R</b> · win rate 25%\nЛучший: DOGE-USDT LONG +2.0R\nВ работе сейчас: 3\nПо стратегиям: LEVELS +2.0R (1) · SMC -1.0R (1)\n\nНовая неделя — новые сетапы. Удачи!",
+"ru|free|pro_overview_7": "📊 <b>Итоги недели</b> · 10.12 – 16.12\nСигналов: <b>7</b> · в плюс 1 · в минус 2 · безубыток 1 · без итога 1\nИтог: <b>0R</b> · win rate 25%\nЛучший: DOGE-USDT LONG +2.0R\nВ работе сейчас: 3\nПо стратегиям: LEVELS +2.0R (1) · SMC -1.0R (1)\n\n⭐ Pro на этой неделе: в среднем 6.0 сигналов на юзера, +23.3R по 23 уникальным сигналам. У тебя — 7.\n\nНовая неделя — новые сетапы. Удачи!",
+"ru|free|none": "📊 <b>Итоги недели</b> · 10.12 – 16.12\nСигналов: <b>7</b> · в плюс 1 · в минус 2 · безубыток 1 · без итога 1\nИтог: <b>0R</b> · win rate 25%\nЛучший: DOGE-USDT LONG +2.0R\nВ работе сейчас: 3\nПо стратегиям: LEVELS +2.0R (1) · SMC -1.0R (1)\n\nНовая неделя — новые сетапы. Удачи!",
+"ru|free|zero": "📊 <b>Итоги недели</b> · 10.12 – 16.12\nСигналов: <b>7</b> · в плюс 1 · в минус 2 · безубыток 1 · без итога 1\nИтог: <b>0R</b> · win rate 25%\nЛучший: DOGE-USDT LONG +2.0R\nВ работе сейчас: 3\nПо стратегиям: LEVELS +2.0R (1) · SMC -1.0R (1)\n\nНовая неделя — новые сетапы. Удачи!",
+"ru||pro_overview_7": "📊 <b>Итоги недели</b> · 10.12 – 16.12\nСигналов: <b>7</b> · в плюс 1 · в минус 2 · безубыток 1 · без итога 1\nИтог: <b>0R</b> · win rate 25%\nЛучший: DOGE-USDT LONG +2.0R\nВ работе сейчас: 3\nПо стратегиям: LEVELS +2.0R (1) · SMC -1.0R (1)\n\nНовая неделя — новые сетапы. Удачи!",
+"ru||none": "📊 <b>Итоги недели</b> · 10.12 – 16.12\nСигналов: <b>7</b> · в плюс 1 · в минус 2 · безубыток 1 · без итога 1\nИтог: <b>0R</b> · win rate 25%\nЛучший: DOGE-USDT LONG +2.0R\nВ работе сейчас: 3\nПо стратегиям: LEVELS +2.0R (1) · SMC -1.0R (1)\n\nНовая неделя — новые сетапы. Удачи!",
+"ru||zero": "📊 <b>Итоги недели</b> · 10.12 – 16.12\nСигналов: <b>7</b> · в плюс 1 · в минус 2 · безубыток 1 · без итога 1\nИтог: <b>0R</b> · win rate 25%\nЛучший: DOGE-USDT LONG +2.0R\nВ работе сейчас: 3\nПо стратегиям: LEVELS +2.0R (1) · SMC -1.0R (1)\n\nНовая неделя — новые сетапы. Удачи!",
+"ru|FREE|pro_overview_7": "📊 <b>Итоги недели</b> · 10.12 – 16.12\nСигналов: <b>7</b> · в плюс 1 · в минус 2 · безубыток 1 · без итога 1\nИтог: <b>0R</b> · win rate 25%\nЛучший: DOGE-USDT LONG +2.0R\nВ работе сейчас: 3\nПо стратегиям: LEVELS +2.0R (1) · SMC -1.0R (1)\n\n⭐ Pro на этой неделе: в среднем 6.0 сигналов на юзера, +23.3R по 23 уникальным сигналам. У тебя — 7.\n\nНовая неделя — новые сетапы. Удачи!",
+"ru|FREE|none": "📊 <b>Итоги недели</b> · 10.12 – 16.12\nСигналов: <b>7</b> · в плюс 1 · в минус 2 · безубыток 1 · без итога 1\nИтог: <b>0R</b> · win rate 25%\nЛучший: DOGE-USDT LONG +2.0R\nВ работе сейчас: 3\nПо стратегиям: LEVELS +2.0R (1) · SMC -1.0R (1)\n\nНовая неделя — новые сетапы. Удачи!",
+"ru|FREE|zero": "📊 <b>Итоги недели</b> · 10.12 – 16.12\nСигналов: <b>7</b> · в плюс 1 · в минус 2 · безубыток 1 · без итога 1\nИтог: <b>0R</b> · win rate 25%\nЛучший: DOGE-USDT LONG +2.0R\nВ работе сейчас: 3\nПо стратегиям: LEVELS +2.0R (1) · SMC -1.0R (1)\n\nНовая неделя — новые сетапы. Удачи!",
+"en|pro|pro_overview_7": "📊 <b>Weekly recap</b> · 10.12 – 16.12\nSignals: <b>7</b> · wins 1 · losses 2 · break-even 1 · no outcome 1\nResult: <b>0R</b> · win rate 25%\nBest: DOGE-USDT LONG +2.0R\nStill running: 3\nBy strategy: LEVELS +2.0R (1) · SMC -1.0R (1)\n\nNew week, new setups. Good luck!",
+"en|pro|none": "📊 <b>Weekly recap</b> · 10.12 – 16.12\nSignals: <b>7</b> · wins 1 · losses 2 · break-even 1 · no outcome 1\nResult: <b>0R</b> · win rate 25%\nBest: DOGE-USDT LONG +2.0R\nStill running: 3\nBy strategy: LEVELS +2.0R (1) · SMC -1.0R (1)\n\nNew week, new setups. Good luck!",
+"en|pro|zero": "📊 <b>Weekly recap</b> · 10.12 – 16.12\nSignals: <b>7</b> · wins 1 · losses 2 · break-even 1 · no outcome 1\nResult: <b>0R</b> · win rate 25%\nBest: DOGE-USDT LONG +2.0R\nStill running: 3\nBy strategy: LEVELS +2.0R (1) · SMC -1.0R (1)\n\nNew week, new setups. Good luck!",
+"en|free|pro_overview_7": "📊 <b>Weekly recap</b> · 10.12 – 16.12\nSignals: <b>7</b> · wins 1 · losses 2 · break-even 1 · no outcome 1\nResult: <b>0R</b> · win rate 25%\nBest: DOGE-USDT LONG +2.0R\nStill running: 3\nBy strategy: LEVELS +2.0R (1) · SMC -1.0R (1)\n\n⭐ Pro this week: 6.0 signals per user on average, +23.3R across 23 unique signals. You got 7.\n\nNew week, new setups. Good luck!",
+"en|free|none": "📊 <b>Weekly recap</b> · 10.12 – 16.12\nSignals: <b>7</b> · wins 1 · losses 2 · break-even 1 · no outcome 1\nResult: <b>0R</b> · win rate 25%\nBest: DOGE-USDT LONG +2.0R\nStill running: 3\nBy strategy: LEVELS +2.0R (1) · SMC -1.0R (1)\n\nNew week, new setups. Good luck!",
+"en|free|zero": "📊 <b>Weekly recap</b> · 10.12 – 16.12\nSignals: <b>7</b> · wins 1 · losses 2 · break-even 1 · no outcome 1\nResult: <b>0R</b> · win rate 25%\nBest: DOGE-USDT LONG +2.0R\nStill running: 3\nBy strategy: LEVELS +2.0R (1) · SMC -1.0R (1)\n\nNew week, new setups. Good luck!",
+"en||pro_overview_7": "📊 <b>Weekly recap</b> · 10.12 – 16.12\nSignals: <b>7</b> · wins 1 · losses 2 · break-even 1 · no outcome 1\nResult: <b>0R</b> · win rate 25%\nBest: DOGE-USDT LONG +2.0R\nStill running: 3\nBy strategy: LEVELS +2.0R (1) · SMC -1.0R (1)\n\nNew week, new setups. Good luck!",
+"en||none": "📊 <b>Weekly recap</b> · 10.12 – 16.12\nSignals: <b>7</b> · wins 1 · losses 2 · break-even 1 · no outcome 1\nResult: <b>0R</b> · win rate 25%\nBest: DOGE-USDT LONG +2.0R\nStill running: 3\nBy strategy: LEVELS +2.0R (1) · SMC -1.0R (1)\n\nNew week, new setups. Good luck!",
+"en||zero": "📊 <b>Weekly recap</b> · 10.12 – 16.12\nSignals: <b>7</b> · wins 1 · losses 2 · break-even 1 · no outcome 1\nResult: <b>0R</b> · win rate 25%\nBest: DOGE-USDT LONG +2.0R\nStill running: 3\nBy strategy: LEVELS +2.0R (1) · SMC -1.0R (1)\n\nNew week, new setups. Good luck!",
+"en|FREE|pro_overview_7": "📊 <b>Weekly recap</b> · 10.12 – 16.12\nSignals: <b>7</b> · wins 1 · losses 2 · break-even 1 · no outcome 1\nResult: <b>0R</b> · win rate 25%\nBest: DOGE-USDT LONG +2.0R\nStill running: 3\nBy strategy: LEVELS +2.0R (1) · SMC -1.0R (1)\n\n⭐ Pro this week: 6.0 signals per user on average, +23.3R across 23 unique signals. You got 7.\n\nNew week, new setups. Good luck!",
+"en|FREE|none": "📊 <b>Weekly recap</b> · 10.12 – 16.12\nSignals: <b>7</b> · wins 1 · losses 2 · break-even 1 · no outcome 1\nResult: <b>0R</b> · win rate 25%\nBest: DOGE-USDT LONG +2.0R\nStill running: 3\nBy strategy: LEVELS +2.0R (1) · SMC -1.0R (1)\n\nNew week, new setups. Good luck!",
+"en|FREE|zero": "📊 <b>Weekly recap</b> · 10.12 – 16.12\nSignals: <b>7</b> · wins 1 · losses 2 · break-even 1 · no outcome 1\nResult: <b>0R</b> · win rate 25%\nBest: DOGE-USDT LONG +2.0R\nStill running: 3\nBy strategy: LEVELS +2.0R (1) · SMC -1.0R (1)\n\nNew week, new setups. Good luck!",
+"xx|pro|pro_overview_7": "📊 <b>Итоги недели</b> · 10.12 – 16.12\nСигналов: <b>7</b> · в плюс 1 · в минус 2 · безубыток 1 · без итога 1\nИтог: <b>0R</b> · win rate 25%\nЛучший: DOGE-USDT LONG +2.0R\nВ работе сейчас: 3\nПо стратегиям: LEVELS +2.0R (1) · SMC -1.0R (1)\n\nНовая неделя — новые сетапы. Удачи!",
+"xx|pro|none": "📊 <b>Итоги недели</b> · 10.12 – 16.12\nСигналов: <b>7</b> · в плюс 1 · в минус 2 · безубыток 1 · без итога 1\nИтог: <b>0R</b> · win rate 25%\nЛучший: DOGE-USDT LONG +2.0R\nВ работе сейчас: 3\nПо стратегиям: LEVELS +2.0R (1) · SMC -1.0R (1)\n\nНовая неделя — новые сетапы. Удачи!",
+"xx|pro|zero": "📊 <b>Итоги недели</b> · 10.12 – 16.12\nСигналов: <b>7</b> · в плюс 1 · в минус 2 · безубыток 1 · без итога 1\nИтог: <b>0R</b> · win rate 25%\nЛучший: DOGE-USDT LONG +2.0R\nВ работе сейчас: 3\nПо стратегиям: LEVELS +2.0R (1) · SMC -1.0R (1)\n\nНовая неделя — новые сетапы. Удачи!",
+"xx|free|pro_overview_7": "📊 <b>Итоги недели</b> · 10.12 – 16.12\nСигналов: <b>7</b> · в плюс 1 · в минус 2 · безубыток 1 · без итога 1\nИтог: <b>0R</b> · win rate 25%\nЛучший: DOGE-USDT LONG +2.0R\nВ работе сейчас: 3\nПо стратегиям: LEVELS +2.0R (1) · SMC -1.0R (1)\n\n⭐ Pro на этой неделе: в среднем 6.0 сигналов на юзера, +23.3R по 23 уникальным сигналам. У тебя — 7.\n\nНовая неделя — новые сетапы. Удачи!",
+"xx|free|none": "📊 <b>Итоги недели</b> · 10.12 – 16.12\nСигналов: <b>7</b> · в плюс 1 · в минус 2 · безубыток 1 · без итога 1\nИтог: <b>0R</b> · win rate 25%\nЛучший: DOGE-USDT LONG +2.0R\nВ работе сейчас: 3\nПо стратегиям: LEVELS +2.0R (1) · SMC -1.0R (1)\n\nНовая неделя — новые сетапы. Удачи!",
+"xx|free|zero": "📊 <b>Итоги недели</b> · 10.12 – 16.12\nСигналов: <b>7</b> · в плюс 1 · в минус 2 · безубыток 1 · без итога 1\nИтог: <b>0R</b> · win rate 25%\nЛучший: DOGE-USDT LONG +2.0R\nВ работе сейчас: 3\nПо стратегиям: LEVELS +2.0R (1) · SMC -1.0R (1)\n\nНовая неделя — новые сетапы. Удачи!",
+"xx||pro_overview_7": "📊 <b>Итоги недели</b> · 10.12 – 16.12\nСигналов: <b>7</b> · в плюс 1 · в минус 2 · безубыток 1 · без итога 1\nИтог: <b>0R</b> · win rate 25%\nЛучший: DOGE-USDT LONG +2.0R\nВ работе сейчас: 3\nПо стратегиям: LEVELS +2.0R (1) · SMC -1.0R (1)\n\nНовая неделя — новые сетапы. Удачи!",
+"xx||none": "📊 <b>Итоги недели</b> · 10.12 – 16.12\nСигналов: <b>7</b> · в плюс 1 · в минус 2 · безубыток 1 · без итога 1\nИтог: <b>0R</b> · win rate 25%\nЛучший: DOGE-USDT LONG +2.0R\nВ работе сейчас: 3\nПо стратегиям: LEVELS +2.0R (1) · SMC -1.0R (1)\n\nНовая неделя — новые сетапы. Удачи!",
+"xx||zero": "📊 <b>Итоги недели</b> · 10.12 – 16.12\nСигналов: <b>7</b> · в плюс 1 · в минус 2 · безубыток 1 · без итога 1\nИтог: <b>0R</b> · win rate 25%\nЛучший: DOGE-USDT LONG +2.0R\nВ работе сейчас: 3\nПо стратегиям: LEVELS +2.0R (1) · SMC -1.0R (1)\n\nНовая неделя — новые сетапы. Удачи!",
+"xx|FREE|pro_overview_7": "📊 <b>Итоги недели</b> · 10.12 – 16.12\nСигналов: <b>7</b> · в плюс 1 · в минус 2 · безубыток 1 · без итога 1\nИтог: <b>0R</b> · win rate 25%\nЛучший: DOGE-USDT LONG +2.0R\nВ работе сейчас: 3\nПо стратегиям: LEVELS +2.0R (1) · SMC -1.0R (1)\n\n⭐ Pro на этой неделе: в среднем 6.0 сигналов на юзера, +23.3R по 23 уникальным сигналам. У тебя — 7.\n\nНовая неделя — новые сетапы. Удачи!",
+"xx|FREE|none": "📊 <b>Итоги недели</b> · 10.12 – 16.12\nСигналов: <b>7</b> · в плюс 1 · в минус 2 · безубыток 1 · без итога 1\nИтог: <b>0R</b> · win rate 25%\nЛучший: DOGE-USDT LONG +2.0R\nВ работе сейчас: 3\nПо стратегиям: LEVELS +2.0R (1) · SMC -1.0R (1)\n\nНовая неделя — новые сетапы. Удачи!",
+"xx|FREE|zero": "📊 <b>Итоги недели</b> · 10.12 – 16.12\nСигналов: <b>7</b> · в плюс 1 · в минус 2 · безубыток 1 · без итога 1\nИтог: <b>0R</b> · win rate 25%\nЛучший: DOGE-USDT LONG +2.0R\nВ работе сейчас: 3\nПо стратегиям: LEVELS +2.0R (1) · SMC -1.0R (1)\n\nНовая неделя — новые сетапы. Удачи!"
+},
+"107": {
+"ru|pro|pro_overview_7": "📊 <b>Итоги недели</b> · 10.12 – 16.12\nСигналов: <b>3</b> · в плюс 1 · в минус 0 · безубыток 1\nИтог: <b>+3.0R</b> · win rate 50%\nЛучший: BTC SHORT +3.0R\nВ работе сейчас: 1\n\nНовая неделя — новые сетапы. Удачи!",
+"ru|pro|none": "📊 <b>Итоги недели</b> · 10.12 – 16.12\nСигналов: <b>3</b> · в плюс 1 · в минус 0 · безубыток 1\nИтог: <b>+3.0R</b> · win rate 50%\nЛучший: BTC SHORT +3.0R\nВ работе сейчас: 1\n\nНовая неделя — новые сетапы. Удачи!",
+"ru|pro|zero": "📊 <b>Итоги недели</b> · 10.12 – 16.12\nСигналов: <b>3</b> · в плюс 1 · в минус 0 · безубыток 1\nИтог: <b>+3.0R</b> · win rate 50%\nЛучший: BTC SHORT +3.0R\nВ работе сейчас: 1\n\nНовая неделя — новые сетапы. Удачи!",
+"ru|free|pro_overview_7": "📊 <b>Итоги недели</b> · 10.12 – 16.12\nСигналов: <b>3</b> · в плюс 1 · в минус 0 · безубыток 1\nИтог: <b>+3.0R</b> · win rate 50%\nЛучший: BTC SHORT +3.0R\nВ работе сейчас: 1\n\n⭐ Pro на этой неделе: в среднем 6.0 сигналов на юзера, +23.3R по 23 уникальным сигналам. У тебя — 3.\n\nНовая неделя — новые сетапы. Удачи!",
+"ru|free|none": "📊 <b>Итоги недели</b> · 10.12 – 16.12\nСигналов: <b>3</b> · в плюс 1 · в минус 0 · безубыток 1\nИтог: <b>+3.0R</b> · win rate 50%\nЛучший: BTC SHORT +3.0R\nВ работе сейчас: 1\n\nНовая неделя — новые сетапы. Удачи!",
+"ru|free|zero": "📊 <b>Итоги недели</b> · 10.12 – 16.12\nСигналов: <b>3</b> · в плюс 1 · в минус 0 · безубыток 1\nИтог: <b>+3.0R</b> · win rate 50%\nЛучший: BTC SHORT +3.0R\nВ работе сейчас: 1\n\nНовая неделя — новые сетапы. Удачи!",
+"ru||pro_overview_7": "📊 <b>Итоги недели</b> · 10.12 – 16.12\nСигналов: <b>3</b> · в плюс 1 · в минус 0 · безубыток 1\nИтог: <b>+3.0R</b> · win rate 50%\nЛучший: BTC SHORT +3.0R\nВ работе сейчас: 1\n\nНовая неделя — новые сетапы. Удачи!",
+"ru||none": "📊 <b>Итоги недели</b> · 10.12 – 16.12\nСигналов: <b>3</b> · в плюс 1 · в минус 0 · безубыток 1\nИтог: <b>+3.0R</b> · win rate 50%\nЛучший: BTC SHORT +3.0R\nВ работе сейчас: 1\n\nНовая неделя — новые сетапы. Удачи!",
+"ru||zero": "📊 <b>Итоги недели</b> · 10.12 – 16.12\nСигналов: <b>3</b> · в плюс 1 · в минус 0 · безубыток 1\nИтог: <b>+3.0R</b> · win rate 50%\nЛучший: BTC SHORT +3.0R\nВ работе сейчас: 1\n\nНовая неделя — новые сетапы. Удачи!",
+"ru|FREE|pro_overview_7": "📊 <b>Итоги недели</b> · 10.12 – 16.12\nСигналов: <b>3</b> · в плюс 1 · в минус 0 · безубыток 1\nИтог: <b>+3.0R</b> · win rate 50%\nЛучший: BTC SHORT +3.0R\nВ работе сейчас: 1\n\n⭐ Pro на этой неделе: в среднем 6.0 сигналов на юзера, +23.3R по 23 уникальным сигналам. У тебя — 3.\n\nНовая неделя — новые сетапы. Удачи!",
+"ru|FREE|none": "📊 <b>Итоги недели</b> · 10.12 – 16.12\nСигналов: <b>3</b> · в плюс 1 · в минус 0 · безубыток 1\nИтог: <b>+3.0R</b> · win rate 50%\nЛучший: BTC SHORT +3.0R\nВ работе сейчас: 1\n\nНовая неделя — новые сетапы. Удачи!",
+"ru|FREE|zero": "📊 <b>Итоги недели</b> · 10.12 – 16.12\nСигналов: <b>3</b> · в плюс 1 · в минус 0 · безубыток 1\nИтог: <b>+3.0R</b> · win rate 50%\nЛучший: BTC SHORT +3.0R\nВ работе сейчас: 1\n\nНовая неделя — новые сетапы. Удачи!",
+"en|pro|pro_overview_7": "📊 <b>Weekly recap</b> · 10.12 – 16.12\nSignals: <b>3</b> · wins 1 · losses 0 · break-even 1\nResult: <b>+3.0R</b> · win rate 50%\nBest: BTC SHORT +3.0R\nStill running: 1\n\nNew week, new setups. Good luck!",
+"en|pro|none": "📊 <b>Weekly recap</b> · 10.12 – 16.12\nSignals: <b>3</b> · wins 1 · losses 0 · break-even 1\nResult: <b>+3.0R</b> · win rate 50%\nBest: BTC SHORT +3.0R\nStill running: 1\n\nNew week, new setups. Good luck!",
+"en|pro|zero": "📊 <b>Weekly recap</b> · 10.12 – 16.12\nSignals: <b>3</b> · wins 1 · losses 0 · break-even 1\nResult: <b>+3.0R</b> · win rate 50%\nBest: BTC SHORT +3.0R\nStill running: 1\n\nNew week, new setups. Good luck!",
+"en|free|pro_overview_7": "📊 <b>Weekly recap</b> · 10.12 – 16.12\nSignals: <b>3</b> · wins 1 · losses 0 · break-even 1\nResult: <b>+3.0R</b> · win rate 50%\nBest: BTC SHORT +3.0R\nStill running: 1\n\n⭐ Pro this week: 6.0 signals per user on average, +23.3R across 23 unique signals. You got 3.\n\nNew week, new setups. Good luck!",
+"en|free|none": "📊 <b>Weekly recap</b> · 10.12 – 16.12\nSignals: <b>3</b> · wins 1 · losses 0 · break-even 1\nResult: <b>+3.0R</b> · win rate 50%\nBest: BTC SHORT +3.0R\nStill running: 1\n\nNew week, new setups. Good luck!",
+"en|free|zero": "📊 <b>Weekly recap</b> · 10.12 – 16.12\nSignals: <b>3</b> · wins 1 · losses 0 · break-even 1\nResult: <b>+3.0R</b> · win rate 50%\nBest: BTC SHORT +3.0R\nStill running: 1\n\nNew week, new setups. Good luck!",
+"en||pro_overview_7": "📊 <b>Weekly recap</b> · 10.12 – 16.12\nSignals: <b>3</b> · wins 1 · losses 0 · break-even 1\nResult: <b>+3.0R</b> · win rate 50%\nBest: BTC SHORT +3.0R\nStill running: 1\n\nNew week, new setups. Good luck!",
+"en||none": "📊 <b>Weekly recap</b> · 10.12 – 16.12\nSignals: <b>3</b> · wins 1 · losses 0 · break-even 1\nResult: <b>+3.0R</b> · win rate 50%\nBest: BTC SHORT +3.0R\nStill running: 1\n\nNew week, new setups. Good luck!",
+"en||zero": "📊 <b>Weekly recap</b> · 10.12 – 16.12\nSignals: <b>3</b> · wins 1 · losses 0 · break-even 1\nResult: <b>+3.0R</b> · win rate 50%\nBest: BTC SHORT +3.0R\nStill running: 1\n\nNew week, new setups. Good luck!",
+"en|FREE|pro_overview_7": "📊 <b>Weekly recap</b> · 10.12 – 16.12\nSignals: <b>3</b> · wins 1 · losses 0 · break-even 1\nResult: <b>+3.0R</b> · win rate 50%\nBest: BTC SHORT +3.0R\nStill running: 1\n\n⭐ Pro this week: 6.0 signals per user on average, +23.3R across 23 unique signals. You got 3.\n\nNew week, new setups. Good luck!",
+"en|FREE|none": "📊 <b>Weekly recap</b> · 10.12 – 16.12\nSignals: <b>3</b> · wins 1 · losses 0 · break-even 1\nResult: <b>+3.0R</b> · win rate 50%\nBest: BTC SHORT +3.0R\nStill running: 1\n\nNew week, new setups. Good luck!",
+"en|FREE|zero": "📊 <b>Weekly recap</b> · 10.12 – 16.12\nSignals: <b>3</b> · wins 1 · losses 0 · break-even 1\nResult: <b>+3.0R</b> · win rate 50%\nBest: BTC SHORT +3.0R\nStill running: 1\n\nNew week, new setups. Good luck!",
+"xx|pro|pro_overview_7": "📊 <b>Итоги недели</b> · 10.12 – 16.12\nСигналов: <b>3</b> · в плюс 1 · в минус 0 · безубыток 1\nИтог: <b>+3.0R</b> · win rate 50%\nЛучший: BTC SHORT +3.0R\nВ работе сейчас: 1\n\nНовая неделя — новые сетапы. Удачи!",
+"xx|pro|none": "📊 <b>Итоги недели</b> · 10.12 – 16.12\nСигналов: <b>3</b> · в плюс 1 · в минус 0 · безубыток 1\nИтог: <b>+3.0R</b> · win rate 50%\nЛучший: BTC SHORT +3.0R\nВ работе сейчас: 1\n\nНовая неделя — новые сетапы. Удачи!",
+"xx|pro|zero": "📊 <b>Итоги недели</b> · 10.12 – 16.12\nСигналов: <b>3</b> · в плюс 1 · в минус 0 · безубыток 1\nИтог: <b>+3.0R</b> · win rate 50%\nЛучший: BTC SHORT +3.0R\nВ работе сейчас: 1\n\nНовая неделя — новые сетапы. Удачи!",
+"xx|free|pro_overview_7": "📊 <b>Итоги недели</b> · 10.12 – 16.12\nСигналов: <b>3</b> · в плюс 1 · в минус 0 · безубыток 1\nИтог: <b>+3.0R</b> · win rate 50%\nЛучший: BTC SHORT +3.0R\nВ работе сейчас: 1\n\n⭐ Pro на этой неделе: в среднем 6.0 сигналов на юзера, +23.3R по 23 уникальным сигналам. У тебя — 3.\n\nНовая неделя — новые сетапы. Удачи!",
+"xx|free|none": "📊 <b>Итоги недели</b> · 10.12 – 16.12\nСигналов: <b>3</b> · в плюс 1 · в минус 0 · безубыток 1\nИтог: <b>+3.0R</b> · win rate 50%\nЛучший: BTC SHORT +3.0R\nВ работе сейчас: 1\n\nНовая неделя — новые сетапы. Удачи!",
+"xx|free|zero": "📊 <b>Итоги недели</b> · 10.12 – 16.12\nСигналов: <b>3</b> · в плюс 1 · в минус 0 · безубыток 1\nИтог: <b>+3.0R</b> · win rate 50%\nЛучший: BTC SHORT +3.0R\nВ работе сейчас: 1\n\nНовая неделя — новые сетапы. Удачи!",
+"xx||pro_overview_7": "📊 <b>Итоги недели</b> · 10.12 – 16.12\nСигналов: <b>3</b> · в плюс 1 · в минус 0 · безубыток 1\nИтог: <b>+3.0R</b> · win rate 50%\nЛучший: BTC SHORT +3.0R\nВ работе сейчас: 1\n\nНовая неделя — новые сетапы. Удачи!",
+"xx||none": "📊 <b>Итоги недели</b> · 10.12 – 16.12\nСигналов: <b>3</b> · в плюс 1 · в минус 0 · безубыток 1\nИтог: <b>+3.0R</b> · win rate 50%\nЛучший: BTC SHORT +3.0R\nВ работе сейчас: 1\n\nНовая неделя — новые сетапы. Удачи!",
+"xx||zero": "📊 <b>Итоги недели</b> · 10.12 – 16.12\nСигналов: <b>3</b> · в плюс 1 · в минус 0 · безубыток 1\nИтог: <b>+3.0R</b> · win rate 50%\nЛучший: BTC SHORT +3.0R\nВ работе сейчас: 1\n\nНовая неделя — новые сетапы. Удачи!",
+"xx|FREE|pro_overview_7": "📊 <b>Итоги недели</b> · 10.12 – 16.12\nСигналов: <b>3</b> · в плюс 1 · в минус 0 · безубыток 1\nИтог: <b>+3.0R</b> · win rate 50%\nЛучший: BTC SHORT +3.0R\nВ работе сейчас: 1\n\n⭐ Pro на этой неделе: в среднем 6.0 сигналов на юзера, +23.3R по 23 уникальным сигналам. У тебя — 3.\n\nНовая неделя — новые сетапы. Удачи!",
+"xx|FREE|none": "📊 <b>Итоги недели</b> · 10.12 – 16.12\nСигналов: <b>3</b> · в плюс 1 · в минус 0 · безубыток 1\nИтог: <b>+3.0R</b> · win rate 50%\nЛучший: BTC SHORT +3.0R\nВ работе сейчас: 1\n\nНовая неделя — новые сетапы. Удачи!",
+"xx|FREE|zero": "📊 <b>Итоги недели</b> · 10.12 – 16.12\nСигналов: <b>3</b> · в плюс 1 · в минус 0 · безубыток 1\nИтог: <b>+3.0R</b> · win rate 50%\nЛучший: BTC SHORT +3.0R\nВ работе сейчас: 1\n\nНовая неделя — новые сетапы. Удачи!"
+},
+"108": {
+"ru|pro|pro_overview_7": "📊 <b>Итоги недели</b> · 10.12 – 16.12\nСигналов: <b>1</b> · в плюс 1 · в минус 0\nИтог: <b>+1.5R</b> · win rate 100%\nЛучший: ADA LONG +1.5R\nВ работе сейчас: 1\n\nНовая неделя — новые сетапы. Удачи!",
+"ru|pro|none": "📊 <b>Итоги недели</b> · 10.12 – 16.12\nСигналов: <b>1</b> · в плюс 1 · в минус 0\nИтог: <b>+1.5R</b> · win rate 100%\nЛучший: ADA LONG +1.5R\nВ работе сейчас: 1\n\nНовая неделя — новые сетапы. Удачи!",
+"ru|pro|zero": "📊 <b>Итоги недели</b> · 10.12 – 16.12\nСигналов: <b>1</b> · в плюс 1 · в минус 0\nИтог: <b>+1.5R</b> · win rate 100%\nЛучший: ADA LONG +1.5R\nВ работе сейчас: 1\n\nНовая неделя — новые сетапы. Удачи!",
+"ru|free|pro_overview_7": "📊 <b>Итоги недели</b> · 10.12 – 16.12\nСигналов: <b>1</b> · в плюс 1 · в минус 0\nИтог: <b>+1.5R</b> · win rate 100%\nЛучший: ADA LONG +1.5R\nВ работе сейчас: 1\n\n⭐ Pro на этой неделе: в среднем 6.0 сигналов на юзера, +23.3R по 23 уникальным сигналам. У тебя — 1.\n\nНовая неделя — новые сетапы. Удачи!",
+"ru|free|none": "📊 <b>Итоги недели</b> · 10.12 – 16.12\nСигналов: <b>1</b> · в плюс 1 · в минус 0\nИтог: <b>+1.5R</b> · win rate 100%\nЛучший: ADA LONG +1.5R\nВ работе сейчас: 1\n\nНовая неделя — новые сетапы. Удачи!",
+"ru|free|zero": "📊 <b>Итоги недели</b> · 10.12 – 16.12\nСигналов: <b>1</b> · в плюс 1 · в минус 0\nИтог: <b>+1.5R</b> · win rate 100%\nЛучший: ADA LONG +1.5R\nВ работе сейчас: 1\n\nНовая неделя — новые сетапы. Удачи!",
+"ru||pro_overview_7": "📊 <b>Итоги недели</b> · 10.12 – 16.12\nСигналов: <b>1</b> · в плюс 1 · в минус 0\nИтог: <b>+1.5R</b> · win rate 100%\nЛучший: ADA LONG +1.5R\nВ работе сейчас: 1\n\nНовая неделя — новые сетапы. Удачи!",
+"ru||none": "📊 <b>Итоги недели</b> · 10.12 – 16.12\nСигналов: <b>1</b> · в плюс 1 · в минус 0\nИтог: <b>+1.5R</b> · win rate 100%\nЛучший: ADA LONG +1.5R\nВ работе сейчас: 1\n\nНовая неделя — новые сетапы. Удачи!",
+"ru||zero": "📊 <b>Итоги недели</b> · 10.12 – 16.12\nСигналов: <b>1</b> · в плюс 1 · в минус 0\nИтог: <b>+1.5R</b> · win rate 100%\nЛучший: ADA LONG +1.5R\nВ работе сейчас: 1\n\nНовая неделя — новые сетапы. Удачи!",
+"ru|FREE|pro_overview_7": "📊 <b>Итоги недели</b> · 10.12 – 16.12\nСигналов: <b>1</b> · в плюс 1 · в минус 0\nИтог: <b>+1.5R</b> · win rate 100%\nЛучший: ADA LONG +1.5R\nВ работе сейчас: 1\n\n⭐ Pro на этой неделе: в среднем 6.0 сигналов на юзера, +23.3R по 23 уникальным сигналам. У тебя — 1.\n\nНовая неделя — новые сетапы. Удачи!",
+"ru|FREE|none": "📊 <b>Итоги недели</b> · 10.12 – 16.12\nСигналов: <b>1</b> · в плюс 1 · в минус 0\nИтог: <b>+1.5R</b> · win rate 100%\nЛучший: ADA LONG +1.5R\nВ работе сейчас: 1\n\nНовая неделя — новые сетапы. Удачи!",
+"ru|FREE|zero": "📊 <b>Итоги недели</b> · 10.12 – 16.12\nСигналов: <b>1</b> · в плюс 1 · в минус 0\nИтог: <b>+1.5R</b> · win rate 100%\nЛучший: ADA LONG +1.5R\nВ работе сейчас: 1\n\nНовая неделя — новые сетапы. Удачи!",
+"en|pro|pro_overview_7": "📊 <b>Weekly recap</b> · 10.12 – 16.12\nSignals: <b>1</b> · wins 1 · losses 0\nResult: <b>+1.5R</b> · win rate 100%\nBest: ADA LONG +1.5R\nStill running: 1\n\nNew week, new setups. Good luck!",
+"en|pro|none": "📊 <b>Weekly recap</b> · 10.12 – 16.12\nSignals: <b>1</b> · wins 1 · losses 0\nResult: <b>+1.5R</b> · win rate 100%\nBest: ADA LONG +1.5R\nStill running: 1\n\nNew week, new setups. Good luck!",
+"en|pro|zero": "📊 <b>Weekly recap</b> · 10.12 – 16.12\nSignals: <b>1</b> · wins 1 · losses 0\nResult: <b>+1.5R</b> · win rate 100%\nBest: ADA LONG +1.5R\nStill running: 1\n\nNew week, new setups. Good luck!",
+"en|free|pro_overview_7": "📊 <b>Weekly recap</b> · 10.12 – 16.12\nSignals: <b>1</b> · wins 1 · losses 0\nResult: <b>+1.5R</b> · win rate 100%\nBest: ADA LONG +1.5R\nStill running: 1\n\n⭐ Pro this week: 6.0 signals per user on average, +23.3R across 23 unique signals. You got 1.\n\nNew week, new setups. Good luck!",
+"en|free|none": "📊 <b>Weekly recap</b> · 10.12 – 16.12\nSignals: <b>1</b> · wins 1 · losses 0\nResult: <b>+1.5R</b> · win rate 100%\nBest: ADA LONG +1.5R\nStill running: 1\n\nNew week, new setups. Good luck!",
+"en|free|zero": "📊 <b>Weekly recap</b> · 10.12 – 16.12\nSignals: <b>1</b> · wins 1 · losses 0\nResult: <b>+1.5R</b> · win rate 100%\nBest: ADA LONG +1.5R\nStill running: 1\n\nNew week, new setups. Good luck!",
+"en||pro_overview_7": "📊 <b>Weekly recap</b> · 10.12 – 16.12\nSignals: <b>1</b> · wins 1 · losses 0\nResult: <b>+1.5R</b> · win rate 100%\nBest: ADA LONG +1.5R\nStill running: 1\n\nNew week, new setups. Good luck!",
+"en||none": "📊 <b>Weekly recap</b> · 10.12 – 16.12\nSignals: <b>1</b> · wins 1 · losses 0\nResult: <b>+1.5R</b> · win rate 100%\nBest: ADA LONG +1.5R\nStill running: 1\n\nNew week, new setups. Good luck!",
+"en||zero": "📊 <b>Weekly recap</b> · 10.12 – 16.12\nSignals: <b>1</b> · wins 1 · losses 0\nResult: <b>+1.5R</b> · win rate 100%\nBest: ADA LONG +1.5R\nStill running: 1\n\nNew week, new setups. Good luck!",
+"en|FREE|pro_overview_7": "📊 <b>Weekly recap</b> · 10.12 – 16.12\nSignals: <b>1</b> · wins 1 · losses 0\nResult: <b>+1.5R</b> · win rate 100%\nBest: ADA LONG +1.5R\nStill running: 1\n\n⭐ Pro this week: 6.0 signals per user on average, +23.3R across 23 unique signals. You got 1.\n\nNew week, new setups. Good luck!",
+"en|FREE|none": "📊 <b>Weekly recap</b> · 10.12 – 16.12\nSignals: <b>1</b> · wins 1 · losses 0\nResult: <b>+1.5R</b> · win rate 100%\nBest: ADA LONG +1.5R\nStill running: 1\n\nNew week, new setups. Good luck!",
+"en|FREE|zero": "📊 <b>Weekly recap</b> · 10.12 – 16.12\nSignals: <b>1</b> · wins 1 · losses 0\nResult: <b>+1.5R</b> · win rate 100%\nBest: ADA LONG +1.5R\nStill running: 1\n\nNew week, new setups. Good luck!",
+"xx|pro|pro_overview_7": "📊 <b>Итоги недели</b> · 10.12 – 16.12\nСигналов: <b>1</b> · в плюс 1 · в минус 0\nИтог: <b>+1.5R</b> · win rate 100%\nЛучший: ADA LONG +1.5R\nВ работе сейчас: 1\n\nНовая неделя — новые сетапы. Удачи!",
+"xx|pro|none": "📊 <b>Итоги недели</b> · 10.12 – 16.12\nСигналов: <b>1</b> · в плюс 1 · в минус 0\nИтог: <b>+1.5R</b> · win rate 100%\nЛучший: ADA LONG +1.5R\nВ работе сейчас: 1\n\nНовая неделя — новые сетапы. Удачи!",
+"xx|pro|zero": "📊 <b>Итоги недели</b> · 10.12 – 16.12\nСигналов: <b>1</b> · в плюс 1 · в минус 0\nИтог: <b>+1.5R</b> · win rate 100%\nЛучший: ADA LONG +1.5R\nВ работе сейчас: 1\n\nНовая неделя — новые сетапы. Удачи!",
+"xx|free|pro_overview_7": "📊 <b>Итоги недели</b> · 10.12 – 16.12\nСигналов: <b>1</b> · в плюс 1 · в минус 0\nИтог: <b>+1.5R</b> · win rate 100%\nЛучший: ADA LONG +1.5R\nВ работе сейчас: 1\n\n⭐ Pro на этой неделе: в среднем 6.0 сигналов на юзера, +23.3R по 23 уникальным сигналам. У тебя — 1.\n\nНовая неделя — новые сетапы. Удачи!",
+"xx|free|none": "📊 <b>Итоги недели</b> · 10.12 – 16.12\nСигналов: <b>1</b> · в плюс 1 · в минус 0\nИтог: <b>+1.5R</b> · win rate 100%\nЛучший: ADA LONG +1.5R\nВ работе сейчас: 1\n\nНовая неделя — новые сетапы. Удачи!",
+"xx|free|zero": "📊 <b>Итоги недели</b> · 10.12 – 16.12\nСигналов: <b>1</b> · в плюс 1 · в минус 0\nИтог: <b>+1.5R</b> · win rate 100%\nЛучший: ADA LONG +1.5R\nВ работе сейчас: 1\n\nНовая неделя — новые сетапы. Удачи!",
+"xx||pro_overview_7": "📊 <b>Итоги недели</b> · 10.12 – 16.12\nСигналов: <b>1</b> · в плюс 1 · в минус 0\nИтог: <b>+1.5R</b> · win rate 100%\nЛучший: ADA LONG +1.5R\nВ работе сейчас: 1\n\nНовая неделя — новые сетапы. Удачи!",
+"xx||none": "📊 <b>Итоги недели</b> · 10.12 – 16.12\nСигналов: <b>1</b> · в плюс 1 · в минус 0\nИтог: <b>+1.5R</b> · win rate 100%\nЛучший: ADA LONG +1.5R\nВ работе сейчас: 1\n\nНовая неделя — новые сетапы. Удачи!",
+"xx||zero": "📊 <b>Итоги недели</b> · 10.12 – 16.12\nСигналов: <b>1</b> · в плюс 1 · в минус 0\nИтог: <b>+1.5R</b> · win rate 100%\nЛучший: ADA LONG +1.5R\nВ работе сейчас: 1\n\nНовая неделя — новые сетапы. Удачи!",
+"xx|FREE|pro_overview_7": "📊 <b>Итоги недели</b> · 10.12 – 16.12\nСигналов: <b>1</b> · в плюс 1 · в минус 0\nИтог: <b>+1.5R</b> · win rate 100%\nЛучший: ADA LONG +1.5R\nВ работе сейчас: 1\n\n⭐ Pro на этой неделе: в среднем 6.0 сигналов на юзера, +23.3R по 23 уникальным сигналам. У тебя — 1.\n\nНовая неделя — новые сетапы. Удачи!",
+"xx|FREE|none": "📊 <b>Итоги недели</b> · 10.12 – 16.12\nСигналов: <b>1</b> · в плюс 1 · в минус 0\nИтог: <b>+1.5R</b> · win rate 100%\nЛучший: ADA LONG +1.5R\nВ работе сейчас: 1\n\nНовая неделя — новые сетапы. Удачи!",
+"xx|FREE|zero": "📊 <b>Итоги недели</b> · 10.12 – 16.12\nСигналов: <b>1</b> · в плюс 1 · в минус 0\nИтог: <b>+1.5R</b> · win rate 100%\nЛучший: ADA LONG +1.5R\nВ работе сейчас: 1\n\nНовая неделя — новые сетапы. Удачи!"
+},
+"109": {
+"ru|pro|pro_overview_7": "📊 <b>Итоги недели</b> · 10.12 – 16.12\nСигналов: <b>3</b> · в плюс 3 · в минус 0\nИтог: <b>+6.0R</b> · win rate 100%\nЛучший: BNB SHORT +3.0R\nВ работе сейчас: 3\n\nНовая неделя — новые сетапы. Удачи!",
+"ru|pro|none": "📊 <b>Итоги недели</b> · 10.12 – 16.12\nСигналов: <b>3</b> · в плюс 3 · в минус 0\nИтог: <b>+6.0R</b> · win rate 100%\nЛучший: BNB SHORT +3.0R\nВ работе сейчас: 3\n\nНовая неделя — новые сетапы. Удачи!",
+"ru|pro|zero": "📊 <b>Итоги недели</b> · 10.12 – 16.12\nСигналов: <b>3</b> · в плюс 3 · в минус 0\nИтог: <b>+6.0R</b> · win rate 100%\nЛучший: BNB SHORT +3.0R\nВ работе сейчас: 3\n\nНовая неделя — новые сетапы. Удачи!",
+"ru|free|pro_overview_7": "📊 <b>Итоги недели</b> · 10.12 – 16.12\nСигналов: <b>3</b> · в плюс 3 · в минус 0\nИтог: <b>+6.0R</b> · win rate 100%\nЛучший: BNB SHORT +3.0R\nВ работе сейчас: 3\n\n⭐ Pro на этой неделе: в среднем 6.0 сигналов на юзера, +23.3R по 23 уникальным сигналам. У тебя — 3.\n\nНовая неделя — новые сетапы. Удачи!",
+"ru|free|none": "📊 <b>Итоги недели</b> · 10.12 – 16.12\nСигналов: <b>3</b> · в плюс 3 · в минус 0\nИтог: <b>+6.0R</b> · win rate 100%\nЛучший: BNB SHORT +3.0R\nВ работе сейчас: 3\n\nНовая неделя — новые сетапы. Удачи!",
+"ru|free|zero": "📊 <b>Итоги недели</b> · 10.12 – 16.12\nСигналов: <b>3</b> · в плюс 3 · в минус 0\nИтог: <b>+6.0R</b> · win rate 100%\nЛучший: BNB SHORT +3.0R\nВ работе сейчас: 3\n\nНовая неделя — новые сетапы. Удачи!",
+"ru||pro_overview_7": "📊 <b>Итоги недели</b> · 10.12 – 16.12\nСигналов: <b>3</b> · в плюс 3 · в минус 0\nИтог: <b>+6.0R</b> · win rate 100%\nЛучший: BNB SHORT +3.0R\nВ работе сейчас: 3\n\nНовая неделя — новые сетапы. Удачи!",
+"ru||none": "📊 <b>Итоги недели</b> · 10.12 – 16.12\nСигналов: <b>3</b> · в плюс 3 · в минус 0\nИтог: <b>+6.0R</b> · win rate 100%\nЛучший: BNB SHORT +3.0R\nВ работе сейчас: 3\n\nНовая неделя — новые сетапы. Удачи!",
+"ru||zero": "📊 <b>Итоги недели</b> · 10.12 – 16.12\nСигналов: <b>3</b> · в плюс 3 · в минус 0\nИтог: <b>+6.0R</b> · win rate 100%\nЛучший: BNB SHORT +3.0R\nВ работе сейчас: 3\n\nНовая неделя — новые сетапы. Удачи!",
+"ru|FREE|pro_overview_7": "📊 <b>Итоги недели</b> · 10.12 – 16.12\nСигналов: <b>3</b> · в плюс 3 · в минус 0\nИтог: <b>+6.0R</b> · win rate 100%\nЛучший: BNB SHORT +3.0R\nВ работе сейчас: 3\n\n⭐ Pro на этой неделе: в среднем 6.0 сигналов на юзера, +23.3R по 23 уникальным сигналам. У тебя — 3.\n\nНовая неделя — новые сетапы. Удачи!",
+"ru|FREE|none": "📊 <b>Итоги недели</b> · 10.12 – 16.12\nСигналов: <b>3</b> · в плюс 3 · в минус 0\nИтог: <b>+6.0R</b> · win rate 100%\nЛучший: BNB SHORT +3.0R\nВ работе сейчас: 3\n\nНовая неделя — новые сетапы. Удачи!",
+"ru|FREE|zero": "📊 <b>Итоги недели</b> · 10.12 – 16.12\nСигналов: <b>3</b> · в плюс 3 · в минус 0\nИтог: <b>+6.0R</b> · win rate 100%\nЛучший: BNB SHORT +3.0R\nВ работе сейчас: 3\n\nНовая неделя — новые сетапы. Удачи!",
+"en|pro|pro_overview_7": "📊 <b>Weekly recap</b> · 10.12 – 16.12\nSignals: <b>3</b> · wins 3 · losses 0\nResult: <b>+6.0R</b> · win rate 100%\nBest: BNB SHORT +3.0R\nStill running: 3\n\nNew week, new setups. Good luck!",
+"en|pro|none": "📊 <b>Weekly recap</b> · 10.12 – 16.12\nSignals: <b>3</b> · wins 3 · losses 0\nResult: <b>+6.0R</b> · win rate 100%\nBest: BNB SHORT +3.0R\nStill running: 3\n\nNew week, new setups. Good luck!",
+"en|pro|zero": "📊 <b>Weekly recap</b> · 10.12 – 16.12\nSignals: <b>3</b> · wins 3 · losses 0\nResult: <b>+6.0R</b> · win rate 100%\nBest: BNB SHORT +3.0R\nStill running: 3\n\nNew week, new setups. Good luck!",
+"en|free|pro_overview_7": "📊 <b>Weekly recap</b> · 10.12 – 16.12\nSignals: <b>3</b> · wins 3 · losses 0\nResult: <b>+6.0R</b> · win rate 100%\nBest: BNB SHORT +3.0R\nStill running: 3\n\n⭐ Pro this week: 6.0 signals per user on average, +23.3R across 23 unique signals. You got 3.\n\nNew week, new setups. Good luck!",
+"en|free|none": "📊 <b>Weekly recap</b> · 10.12 – 16.12\nSignals: <b>3</b> · wins 3 · losses 0\nResult: <b>+6.0R</b> · win rate 100%\nBest: BNB SHORT +3.0R\nStill running: 3\n\nNew week, new setups. Good luck!",
+"en|free|zero": "📊 <b>Weekly recap</b> · 10.12 – 16.12\nSignals: <b>3</b> · wins 3 · losses 0\nResult: <b>+6.0R</b> · win rate 100%\nBest: BNB SHORT +3.0R\nStill running: 3\n\nNew week, new setups. Good luck!",
+"en||pro_overview_7": "📊 <b>Weekly recap</b> · 10.12 – 16.12\nSignals: <b>3</b> · wins 3 · losses 0\nResult: <b>+6.0R</b> · win rate 100%\nBest: BNB SHORT +3.0R\nStill running: 3\n\nNew week, new setups. Good luck!",
+"en||none": "📊 <b>Weekly recap</b> · 10.12 – 16.12\nSignals: <b>3</b> · wins 3 · losses 0\nResult: <b>+6.0R</b> · win rate 100%\nBest: BNB SHORT +3.0R\nStill running: 3\n\nNew week, new setups. Good luck!",
+"en||zero": "📊 <b>Weekly recap</b> · 10.12 – 16.12\nSignals: <b>3</b> · wins 3 · losses 0\nResult: <b>+6.0R</b> · win rate 100%\nBest: BNB SHORT +3.0R\nStill running: 3\n\nNew week, new setups. Good luck!",
+"en|FREE|pro_overview_7": "📊 <b>Weekly recap</b> · 10.12 – 16.12\nSignals: <b>3</b> · wins 3 · losses 0\nResult: <b>+6.0R</b> · win rate 100%\nBest: BNB SHORT +3.0R\nStill running: 3\n\n⭐ Pro this week: 6.0 signals per user on average, +23.3R across 23 unique signals. You got 3.\n\nNew week, new setups. Good luck!",
+"en|FREE|none": "📊 <b>Weekly recap</b> · 10.12 – 16.12\nSignals: <b>3</b> · wins 3 · losses 0\nResult: <b>+6.0R</b> · win rate 100%\nBest: BNB SHORT +3.0R\nStill running: 3\n\nNew week, new setups. Good luck!",
+"en|FREE|zero": "📊 <b>Weekly recap</b> · 10.12 – 16.12\nSignals: <b>3</b> · wins 3 · losses 0\nResult: <b>+6.0R</b> · win rate 100%\nBest: BNB SHORT +3.0R\nStill running: 3\n\nNew week, new setups. Good luck!",
+"xx|pro|pro_overview_7": "📊 <b>Итоги недели</b> · 10.12 – 16.12\nСигналов: <b>3</b> · в плюс 3 · в минус 0\nИтог: <b>+6.0R</b> · win rate 100%\nЛучший: BNB SHORT +3.0R\nВ работе сейчас: 3\n\nНовая неделя — новые сетапы. Удачи!",
+"xx|pro|none": "📊 <b>Итоги недели</b> · 10.12 – 16.12\nСигналов: <b>3</b> · в плюс 3 · в минус 0\nИтог: <b>+6.0R</b> · win rate 100%\nЛучший: BNB SHORT +3.0R\nВ работе сейчас: 3\n\nНовая неделя — новые сетапы. Удачи!",
+"xx|pro|zero": "📊 <b>Итоги недели</b> · 10.12 – 16.12\nСигналов: <b>3</b> · в плюс 3 · в минус 0\nИтог: <b>+6.0R</b> · win rate 100%\nЛучший: BNB SHORT +3.0R\nВ работе сейчас: 3\n\nНовая неделя — новые сетапы. Удачи!",
+"xx|free|pro_overview_7": "📊 <b>Итоги недели</b> · 10.12 – 16.12\nСигналов: <b>3</b> · в плюс 3 · в минус 0\nИтог: <b>+6.0R</b> · win rate 100%\nЛучший: BNB SHORT +3.0R\nВ работе сейчас: 3\n\n⭐ Pro на этой неделе: в среднем 6.0 сигналов на юзера, +23.3R по 23 уникальным сигналам. У тебя — 3.\n\nНовая неделя — новые сетапы. Удачи!",
+"xx|free|none": "📊 <b>Итоги недели</b> · 10.12 – 16.12\nСигналов: <b>3</b> · в плюс 3 · в минус 0\nИтог: <b>+6.0R</b> · win rate 100%\nЛучший: BNB SHORT +3.0R\nВ работе сейчас: 3\n\nНовая неделя — новые сетапы. Удачи!",
+"xx|free|zero": "📊 <b>Итоги недели</b> · 10.12 – 16.12\nСигналов: <b>3</b> · в плюс 3 · в минус 0\nИтог: <b>+6.0R</b> · win rate 100%\nЛучший: BNB SHORT +3.0R\nВ работе сейчас: 3\n\nНовая неделя — новые сетапы. Удачи!",
+"xx||pro_overview_7": "📊 <b>Итоги недели</b> · 10.12 – 16.12\nСигналов: <b>3</b> · в плюс 3 · в минус 0\nИтог: <b>+6.0R</b> · win rate 100%\nЛучший: BNB SHORT +3.0R\nВ работе сейчас: 3\n\nНовая неделя — новые сетапы. Удачи!",
+"xx||none": "📊 <b>Итоги недели</b> · 10.12 – 16.12\nСигналов: <b>3</b> · в плюс 3 · в минус 0\nИтог: <b>+6.0R</b> · win rate 100%\nЛучший: BNB SHORT +3.0R\nВ работе сейчас: 3\n\nНовая неделя — новые сетапы. Удачи!",
+"xx||zero": "📊 <b>Итоги недели</b> · 10.12 – 16.12\nСигналов: <b>3</b> · в плюс 3 · в минус 0\nИтог: <b>+6.0R</b> · win rate 100%\nЛучший: BNB SHORT +3.0R\nВ работе сейчас: 3\n\nНовая неделя — новые сетапы. Удачи!",
+"xx|FREE|pro_overview_7": "📊 <b>Итоги недели</b> · 10.12 – 16.12\nСигналов: <b>3</b> · в плюс 3 · в минус 0\nИтог: <b>+6.0R</b> · win rate 100%\nЛучший: BNB SHORT +3.0R\nВ работе сейчас: 3\n\n⭐ Pro на этой неделе: в среднем 6.0 сигналов на юзера, +23.3R по 23 уникальным сигналам. У тебя — 3.\n\nНовая неделя — новые сетапы. Удачи!",
+"xx|FREE|none": "📊 <b>Итоги недели</b> · 10.12 – 16.12\nСигналов: <b>3</b> · в плюс 3 · в минус 0\nИтог: <b>+6.0R</b> · win rate 100%\nЛучший: BNB SHORT +3.0R\nВ работе сейчас: 3\n\nНовая неделя — новые сетапы. Удачи!",
+"xx|FREE|zero": "📊 <b>Итоги недели</b> · 10.12 – 16.12\nСигналов: <b>3</b> · в плюс 3 · в минус 0\nИтог: <b>+6.0R</b> · win rate 100%\nЛучший: BNB SHORT +3.0R\nВ работе сейчас: 3\n\nНовая неделя — новые сетапы. Удачи!"
+}
+},
+"weekly_extra": [
+{
+"stats": {
+"signals": 0
+},
+"pro": null,
+"lang": "ru",
+"plan": "free",
+"now": 1766000000.0,
+"text": null
+},
+{
+"stats": {
+"signals": 0
+},
+"pro": null,
+"lang": "ru",
+"plan": "free",
+"now": 1767225600.0,
+"text": null
+},
+{
+"stats": {
+"signals": 0
+},
+"pro": null,
+"lang": "ru",
+"plan": "free",
+"now": 1772323200.0,
+"text": null
+},
+{
+"stats": {
+"signals": 0
+},
+"pro": null,
+"lang": "en",
+"plan": "free",
+"now": 1766000000.0,
+"text": null
+},
+{
+"stats": {
+"signals": 0
+},
+"pro": null,
+"lang": "en",
+"plan": "free",
+"now": 1767225600.0,
+"text": null
+},
+{
+"stats": {
+"signals": 0
+},
+"pro": null,
+"lang": "en",
+"plan": "free",
+"now": 1772323200.0,
+"text": null
+},
+{
+"stats": {
+"signals": 0
+},
+"pro": {
+"pro_users": 3,
+"avg_signals": 4.5,
+"unique_rr": 12.349,
+"unique_signals": 9
+},
+"lang": "ru",
+"plan": "free",
+"now": 1766000000.0,
+"text": null
+},
+{
+"stats": {
+"signals": 0
+},
+"pro": {
+"pro_users": 3,
+"avg_signals": 4.5,
+"unique_rr": 12.349,
+"unique_signals": 9
+},
+"lang": "ru",
+"plan": "free",
+"now": 1767225600.0,
+"text": null
+},
+{
+"stats": {
+"signals": 0
+},
+"pro": {
+"pro_users": 3,
+"avg_signals": 4.5,
+"unique_rr": 12.349,
+"unique_signals": 9
+},
+"lang": "ru",
+"plan": "free",
+"now": 1772323200.0,
+"text": null
+},
+{
+"stats": {
+"signals": 0
+},
+"pro": {
+"pro_users": 3,
+"avg_signals": 4.5,
+"unique_rr": 12.349,
+"unique_signals": 9
+},
+"lang": "en",
+"plan": "free",
+"now": 1766000000.0,
+"text": null
+},
+{
+"stats": {
+"signals": 0
+},
+"pro": {
+"pro_users": 3,
+"avg_signals": 4.5,
+"unique_rr": 12.349,
+"unique_signals": 9
+},
+"lang": "en",
+"plan": "free",
+"now": 1767225600.0,
+"text": null
+},
+{
+"stats": {
+"signals": 0
+},
+"pro": {
+"pro_users": 3,
+"avg_signals": 4.5,
+"unique_rr": 12.349,
+"unique_signals": 9
+},
+"lang": "en",
+"plan": "free",
+"now": 1772323200.0,
+"text": null
+},
+{
+"stats": {
+"signals": 0
+},
+"pro": {
+"pro_users": 1,
+"avg_signals": 0.0,
+"unique_rr": -0.04,
+"unique_signals": 0
+},
+"lang": "ru",
+"plan": "free",
+"now": 1766000000.0,
+"text": null
+},
+{
+"stats": {
+"signals": 0
+},
+"pro": {
+"pro_users": 1,
+"avg_signals": 0.0,
+"unique_rr": -0.04,
+"unique_signals": 0
+},
+"lang": "ru",
+"plan": "free",
+"now": 1767225600.0,
+"text": null
+},
+{
+"stats": {
+"signals": 0
+},
+"pro": {
+"pro_users": 1,
+"avg_signals": 0.0,
+"unique_rr": -0.04,
+"unique_signals": 0
+},
+"lang": "ru",
+"plan": "free",
+"now": 1772323200.0,
+"text": null
+},
+{
+"stats": {
+"signals": 0
+},
+"pro": {
+"pro_users": 1,
+"avg_signals": 0.0,
+"unique_rr": -0.04,
+"unique_signals": 0
+},
+"lang": "en",
+"plan": "free",
+"now": 1766000000.0,
+"text": null
+},
+{
+"stats": {
+"signals": 0
+},
+"pro": {
+"pro_users": 1,
+"avg_signals": 0.0,
+"unique_rr": -0.04,
+"unique_signals": 0
+},
+"lang": "en",
+"plan": "free",
+"now": 1767225600.0,
+"text": null
+},
+{
+"stats": {
+"signals": 0
+},
+"pro": {
+"pro_users": 1,
+"avg_signals": 0.0,
+"unique_rr": -0.04,
+"unique_signals": 0
+},
+"lang": "en",
+"plan": "free",
+"now": 1772323200.0,
+"text": null
+},
+{
+"stats": {
+"signals": 3,
+"wins": 0,
+"losses": 0,
+"trades": 0,
+"open": 3,
+"per_strategy": {}
+},
+"pro": null,
+"lang": "ru",
+"plan": "free",
+"now": 1766000000.0,
+"text": "📊 <b>Итоги недели</b> · 10.12 – 16.12\nСигналов: <b>3</b> · в плюс 0 · в минус 0\nИтог: пока без закрытых сигналов\nВ работе сейчас: 3\n\nНовая неделя — новые сетапы. Удачи!"
+},
+{
+"stats": {
+"signals": 3,
+"wins": 0,
+"losses": 0,
+"trades": 0,
+"open": 3,
+"per_strategy": {}
+},
+"pro": null,
+"lang": "ru",
+"plan": "free",
+"now": 1767225600.0,
+"text": "📊 <b>Итоги недели</b> · 25.12 – 31.12\nСигналов: <b>3</b> · в плюс 0 · в минус 0\nИтог: пока без закрытых сигналов\nВ работе сейчас: 3\n\nНовая неделя — новые сетапы. Удачи!"
+},
+{
+"stats": {
+"signals": 3,
+"wins": 0,
+"losses": 0,
+"trades": 0,
+"open": 3,
+"per_strategy": {}
+},
+"pro": null,
+"lang": "ru",
+"plan": "free",
+"now": 1772323200.0,
+"text": "📊 <b>Итоги недели</b> · 22.02 – 28.02\nСигналов: <b>3</b> · в плюс 0 · в минус 0\nИтог: пока без закрытых сигналов\nВ работе сейчас: 3\n\nНовая неделя — новые сетапы. Удачи!"
+},
+{
+"stats": {
+"signals": 3,
+"wins": 0,
+"losses": 0,
+"trades": 0,
+"open": 3,
+"per_strategy": {}
+},
+"pro": null,
+"lang": "en",
+"plan": "free",
+"now": 1766000000.0,
+"text": "📊 <b>Weekly recap</b> · 10.12 – 16.12\nSignals: <b>3</b> · wins 0 · losses 0\nResult: no closed signals yet\nStill running: 3\n\nNew week, new setups. Good luck!"
+},
+{
+"stats": {
+"signals": 3,
+"wins": 0,
+"losses": 0,
+"trades": 0,
+"open": 3,
+"per_strategy": {}
+},
+"pro": null,
+"lang": "en",
+"plan": "free",
+"now": 1767225600.0,
+"text": "📊 <b>Weekly recap</b> · 25.12 – 31.12\nSignals: <b>3</b> · wins 0 · losses 0\nResult: no closed signals yet\nStill running: 3\n\nNew week, new setups. Good luck!"
+},
+{
+"stats": {
+"signals": 3,
+"wins": 0,
+"losses": 0,
+"trades": 0,
+"open": 3,
+"per_strategy": {}
+},
+"pro": null,
+"lang": "en",
+"plan": "free",
+"now": 1772323200.0,
+"text": "📊 <b>Weekly recap</b> · 22.02 – 28.02\nSignals: <b>3</b> · wins 0 · losses 0\nResult: no closed signals yet\nStill running: 3\n\nNew week, new setups. Good luck!"
+},
+{
+"stats": {
+"signals": 3,
+"wins": 0,
+"losses": 0,
+"trades": 0,
+"open": 3,
+"per_strategy": {}
+},
+"pro": {
+"pro_users": 3,
+"avg_signals": 4.5,
+"unique_rr": 12.349,
+"unique_signals": 9
+},
+"lang": "ru",
+"plan": "free",
+"now": 1766000000.0,
+"text": "📊 <b>Итоги недели</b> · 10.12 – 16.12\nСигналов: <b>3</b> · в плюс 0 · в минус 0\nИтог: пока без закрытых сигналов\nВ работе сейчас: 3\n\n⭐ Pro на этой неделе: в среднем 4.5 сигналов на юзера, +12.3R по 9 уникальным сигналам. У тебя — 3.\n\nНовая неделя — новые сетапы. Удачи!"
+},
+{
+"stats": {
+"signals": 3,
+"wins": 0,
+"losses": 0,
+"trades": 0,
+"open": 3,
+"per_strategy": {}
+},
+"pro": {
+"pro_users": 3,
+"avg_signals": 4.5,
+"unique_rr": 12.349,
+"unique_signals": 9
+},
+"lang": "ru",
+"plan": "free",
+"now": 1767225600.0,
+"text": "📊 <b>Итоги недели</b> · 25.12 – 31.12\nСигналов: <b>3</b> · в плюс 0 · в минус 0\nИтог: пока без закрытых сигналов\nВ работе сейчас: 3\n\n⭐ Pro на этой неделе: в среднем 4.5 сигналов на юзера, +12.3R по 9 уникальным сигналам. У тебя — 3.\n\nНовая неделя — новые сетапы. Удачи!"
+},
+{
+"stats": {
+"signals": 3,
+"wins": 0,
+"losses": 0,
+"trades": 0,
+"open": 3,
+"per_strategy": {}
+},
+"pro": {
+"pro_users": 3,
+"avg_signals": 4.5,
+"unique_rr": 12.349,
+"unique_signals": 9
+},
+"lang": "ru",
+"plan": "free",
+"now": 1772323200.0,
+"text": "📊 <b>Итоги недели</b> · 22.02 – 28.02\nСигналов: <b>3</b> · в плюс 0 · в минус 0\nИтог: пока без закрытых сигналов\nВ работе сейчас: 3\n\n⭐ Pro на этой неделе: в среднем 4.5 сигналов на юзера, +12.3R по 9 уникальным сигналам. У тебя — 3.\n\nНовая неделя — новые сетапы. Удачи!"
+},
+{
+"stats": {
+"signals": 3,
+"wins": 0,
+"losses": 0,
+"trades": 0,
+"open": 3,
+"per_strategy": {}
+},
+"pro": {
+"pro_users": 3,
+"avg_signals": 4.5,
+"unique_rr": 12.349,
+"unique_signals": 9
+},
+"lang": "en",
+"plan": "free",
+"now": 1766000000.0,
+"text": "📊 <b>Weekly recap</b> · 10.12 – 16.12\nSignals: <b>3</b> · wins 0 · losses 0\nResult: no closed signals yet\nStill running: 3\n\n⭐ Pro this week: 4.5 signals per user on average, +12.3R across 9 unique signals. You got 3.\n\nNew week, new setups. Good luck!"
+},
+{
+"stats": {
+"signals": 3,
+"wins": 0,
+"losses": 0,
+"trades": 0,
+"open": 3,
+"per_strategy": {}
+},
+"pro": {
+"pro_users": 3,
+"avg_signals": 4.5,
+"unique_rr": 12.349,
+"unique_signals": 9
+},
+"lang": "en",
+"plan": "free",
+"now": 1767225600.0,
+"text": "📊 <b>Weekly recap</b> · 25.12 – 31.12\nSignals: <b>3</b> · wins 0 · losses 0\nResult: no closed signals yet\nStill running: 3\n\n⭐ Pro this week: 4.5 signals per user on average, +12.3R across 9 unique signals. You got 3.\n\nNew week, new setups. Good luck!"
+},
+{
+"stats": {
+"signals": 3,
+"wins": 0,
+"losses": 0,
+"trades": 0,
+"open": 3,
+"per_strategy": {}
+},
+"pro": {
+"pro_users": 3,
+"avg_signals": 4.5,
+"unique_rr": 12.349,
+"unique_signals": 9
+},
+"lang": "en",
+"plan": "free",
+"now": 1772323200.0,
+"text": "📊 <b>Weekly recap</b> · 22.02 – 28.02\nSignals: <b>3</b> · wins 0 · losses 0\nResult: no closed signals yet\nStill running: 3\n\n⭐ Pro this week: 4.5 signals per user on average, +12.3R across 9 unique signals. You got 3.\n\nNew week, new setups. Good luck!"
+},
+{
+"stats": {
+"signals": 3,
+"wins": 0,
+"losses": 0,
+"trades": 0,
+"open": 3,
+"per_strategy": {}
+},
+"pro": {
+"pro_users": 1,
+"avg_signals": 0.0,
+"unique_rr": -0.04,
+"unique_signals": 0
+},
+"lang": "ru",
+"plan": "free",
+"now": 1766000000.0,
+"text": "📊 <b>Итоги недели</b> · 10.12 – 16.12\nСигналов: <b>3</b> · в плюс 0 · в минус 0\nИтог: пока без закрытых сигналов\nВ работе сейчас: 3\n\n⭐ Pro на этой неделе: в среднем 0.0 сигналов на юзера, 0R по 0 уникальным сигналам. У тебя — 3.\n\nНовая неделя — новые сетапы. Удачи!"
+},
+{
+"stats": {
+"signals": 3,
+"wins": 0,
+"losses": 0,
+"trades": 0,
+"open": 3,
+"per_strategy": {}
+},
+"pro": {
+"pro_users": 1,
+"avg_signals": 0.0,
+"unique_rr": -0.04,
+"unique_signals": 0
+},
+"lang": "ru",
+"plan": "free",
+"now": 1767225600.0,
+"text": "📊 <b>Итоги недели</b> · 25.12 – 31.12\nСигналов: <b>3</b> · в плюс 0 · в минус 0\nИтог: пока без закрытых сигналов\nВ работе сейчас: 3\n\n⭐ Pro на этой неделе: в среднем 0.0 сигналов на юзера, 0R по 0 уникальным сигналам. У тебя — 3.\n\nНовая неделя — новые сетапы. Удачи!"
+},
+{
+"stats": {
+"signals": 3,
+"wins": 0,
+"losses": 0,
+"trades": 0,
+"open": 3,
+"per_strategy": {}
+},
+"pro": {
+"pro_users": 1,
+"avg_signals": 0.0,
+"unique_rr": -0.04,
+"unique_signals": 0
+},
+"lang": "ru",
+"plan": "free",
+"now": 1772323200.0,
+"text": "📊 <b>Итоги недели</b> · 22.02 – 28.02\nСигналов: <b>3</b> · в плюс 0 · в минус 0\nИтог: пока без закрытых сигналов\nВ работе сейчас: 3\n\n⭐ Pro на этой неделе: в среднем 0.0 сигналов на юзера, 0R по 0 уникальным сигналам. У тебя — 3.\n\nНовая неделя — новые сетапы. Удачи!"
+},
+{
+"stats": {
+"signals": 3,
+"wins": 0,
+"losses": 0,
+"trades": 0,
+"open": 3,
+"per_strategy": {}
+},
+"pro": {
+"pro_users": 1,
+"avg_signals": 0.0,
+"unique_rr": -0.04,
+"unique_signals": 0
+},
+"lang": "en",
+"plan": "free",
+"now": 1766000000.0,
+"text": "📊 <b>Weekly recap</b> · 10.12 – 16.12\nSignals: <b>3</b> · wins 0 · losses 0\nResult: no closed signals yet\nStill running: 3\n\n⭐ Pro this week: 0.0 signals per user on average, 0R across 0 unique signals. You got 3.\n\nNew week, new setups. Good luck!"
+},
+{
+"stats": {
+"signals": 3,
+"wins": 0,
+"losses": 0,
+"trades": 0,
+"open": 3,
+"per_strategy": {}
+},
+"pro": {
+"pro_users": 1,
+"avg_signals": 0.0,
+"unique_rr": -0.04,
+"unique_signals": 0
+},
+"lang": "en",
+"plan": "free",
+"now": 1767225600.0,
+"text": "📊 <b>Weekly recap</b> · 25.12 – 31.12\nSignals: <b>3</b> · wins 0 · losses 0\nResult: no closed signals yet\nStill running: 3\n\n⭐ Pro this week: 0.0 signals per user on average, 0R across 0 unique signals. You got 3.\n\nNew week, new setups. Good luck!"
+},
+{
+"stats": {
+"signals": 3,
+"wins": 0,
+"losses": 0,
+"trades": 0,
+"open": 3,
+"per_strategy": {}
+},
+"pro": {
+"pro_users": 1,
+"avg_signals": 0.0,
+"unique_rr": -0.04,
+"unique_signals": 0
+},
+"lang": "en",
+"plan": "free",
+"now": 1772323200.0,
+"text": "📊 <b>Weekly recap</b> · 22.02 – 28.02\nSignals: <b>3</b> · wins 0 · losses 0\nResult: no closed signals yet\nStill running: 3\n\n⭐ Pro this week: 0.0 signals per user on average, 0R across 0 unique signals. You got 3.\n\nNew week, new setups. Good luck!"
+},
+{
+"stats": {
+"signals": 5,
+"wins": 2,
+"losses": 1,
+"be": 1,
+"expired": 1,
+"trades": 4,
+"total_rr": -0.04,
+"win_rate": 50.5,
+"best_rr": 2.0,
+"best_symbol": "SOL",
+"best_direction": "LONG",
+"open": 0,
+"per_strategy": {
+"LEVELS": {
+"signals": 2,
+"total_rr": 1.25,
+"trades": 2
+},
+"SMC": {
+"signals": 0
+},
+"VOLUME": {
+"signals": 3,
+"total_rr": -0.05,
+"trades": 1
+}
+}
+},
+"pro": null,
+"lang": "ru",
+"plan": "free",
+"now": 1766000000.0,
+"text": "📊 <b>Итоги недели</b> · 10.12 – 16.12\nСигналов: <b>5</b> · в плюс 2 · в минус 1 · безубыток 1 · без итога 1\nИтог: <b>0R</b> · win rate 50%\nЛучший: SOL LONG +2.0R\nПо стратегиям: LEVELS +1.2R (2) · VOLUME -0.1R (1)\n\nНовая неделя — новые сетапы. Удачи!"
+},
+{
+"stats": {
+"signals": 5,
+"wins": 2,
+"losses": 1,
+"be": 1,
+"expired": 1,
+"trades": 4,
+"total_rr": -0.04,
+"win_rate": 50.5,
+"best_rr": 2.0,
+"best_symbol": "SOL",
+"best_direction": "LONG",
+"open": 0,
+"per_strategy": {
+"LEVELS": {
+"signals": 2,
+"total_rr": 1.25,
+"trades": 2
+},
+"SMC": {
+"signals": 0
+},
+"VOLUME": {
+"signals": 3,
+"total_rr": -0.05,
+"trades": 1
+}
+}
+},
+"pro": null,
+"lang": "ru",
+"plan": "free",
+"now": 1767225600.0,
+"text": "📊 <b>Итоги недели</b> · 25.12 – 31.12\nСигналов: <b>5</b> · в плюс 2 · в минус 1 · безубыток 1 · без итога 1\nИтог: <b>0R</b> · win rate 50%\nЛучший: SOL LONG +2.0R\nПо стратегиям: LEVELS +1.2R (2) · VOLUME -0.1R (1)\n\nНовая неделя — новые сетапы. Удачи!"
+},
+{
+"stats": {
+"signals": 5,
+"wins": 2,
+"losses": 1,
+"be": 1,
+"expired": 1,
+"trades": 4,
+"total_rr": -0.04,
+"win_rate": 50.5,
+"best_rr": 2.0,
+"best_symbol": "SOL",
+"best_direction": "LONG",
+"open": 0,
+"per_strategy": {
+"LEVELS": {
+"signals": 2,
+"total_rr": 1.25,
+"trades": 2
+},
+"SMC": {
+"signals": 0
+},
+"VOLUME": {
+"signals": 3,
+"total_rr": -0.05,
+"trades": 1
+}
+}
+},
+"pro": null,
+"lang": "ru",
+"plan": "free",
+"now": 1772323200.0,
+"text": "📊 <b>Итоги недели</b> · 22.02 – 28.02\nСигналов: <b>5</b> · в плюс 2 · в минус 1 · безубыток 1 · без итога 1\nИтог: <b>0R</b> · win rate 50%\nЛучший: SOL LONG +2.0R\nПо стратегиям: LEVELS +1.2R (2) · VOLUME -0.1R (1)\n\nНовая неделя — новые сетапы. Удачи!"
+},
+{
+"stats": {
+"signals": 5,
+"wins": 2,
+"losses": 1,
+"be": 1,
+"expired": 1,
+"trades": 4,
+"total_rr": -0.04,
+"win_rate": 50.5,
+"best_rr": 2.0,
+"best_symbol": "SOL",
+"best_direction": "LONG",
+"open": 0,
+"per_strategy": {
+"LEVELS": {
+"signals": 2,
+"total_rr": 1.25,
+"trades": 2
+},
+"SMC": {
+"signals": 0
+},
+"VOLUME": {
+"signals": 3,
+"total_rr": -0.05,
+"trades": 1
+}
+}
+},
+"pro": null,
+"lang": "en",
+"plan": "free",
+"now": 1766000000.0,
+"text": "📊 <b>Weekly recap</b> · 10.12 – 16.12\nSignals: <b>5</b> · wins 2 · losses 1 · break-even 1 · no outcome 1\nResult: <b>0R</b> · win rate 50%\nBest: SOL LONG +2.0R\nBy strategy: LEVELS +1.2R (2) · VOLUME -0.1R (1)\n\nNew week, new setups. Good luck!"
+},
+{
+"stats": {
+"signals": 5,
+"wins": 2,
+"losses": 1,
+"be": 1,
+"expired": 1,
+"trades": 4,
+"total_rr": -0.04,
+"win_rate": 50.5,
+"best_rr": 2.0,
+"best_symbol": "SOL",
+"best_direction": "LONG",
+"open": 0,
+"per_strategy": {
+"LEVELS": {
+"signals": 2,
+"total_rr": 1.25,
+"trades": 2
+},
+"SMC": {
+"signals": 0
+},
+"VOLUME": {
+"signals": 3,
+"total_rr": -0.05,
+"trades": 1
+}
+}
+},
+"pro": null,
+"lang": "en",
+"plan": "free",
+"now": 1767225600.0,
+"text": "📊 <b>Weekly recap</b> · 25.12 – 31.12\nSignals: <b>5</b> · wins 2 · losses 1 · break-even 1 · no outcome 1\nResult: <b>0R</b> · win rate 50%\nBest: SOL LONG +2.0R\nBy strategy: LEVELS +1.2R (2) · VOLUME -0.1R (1)\n\nNew week, new setups. Good luck!"
+},
+{
+"stats": {
+"signals": 5,
+"wins": 2,
+"losses": 1,
+"be": 1,
+"expired": 1,
+"trades": 4,
+"total_rr": -0.04,
+"win_rate": 50.5,
+"best_rr": 2.0,
+"best_symbol": "SOL",
+"best_direction": "LONG",
+"open": 0,
+"per_strategy": {
+"LEVELS": {
+"signals": 2,
+"total_rr": 1.25,
+"trades": 2
+},
+"SMC": {
+"signals": 0
+},
+"VOLUME": {
+"signals": 3,
+"total_rr": -0.05,
+"trades": 1
+}
+}
+},
+"pro": null,
+"lang": "en",
+"plan": "free",
+"now": 1772323200.0,
+"text": "📊 <b>Weekly recap</b> · 22.02 – 28.02\nSignals: <b>5</b> · wins 2 · losses 1 · break-even 1 · no outcome 1\nResult: <b>0R</b> · win rate 50%\nBest: SOL LONG +2.0R\nBy strategy: LEVELS +1.2R (2) · VOLUME -0.1R (1)\n\nNew week, new setups. Good luck!"
+},
+{
+"stats": {
+"signals": 5,
+"wins": 2,
+"losses": 1,
+"be": 1,
+"expired": 1,
+"trades": 4,
+"total_rr": -0.04,
+"win_rate": 50.5,
+"best_rr": 2.0,
+"best_symbol": "SOL",
+"best_direction": "LONG",
+"open": 0,
+"per_strategy": {
+"LEVELS": {
+"signals": 2,
+"total_rr": 1.25,
+"trades": 2
+},
+"SMC": {
+"signals": 0
+},
+"VOLUME": {
+"signals": 3,
+"total_rr": -0.05,
+"trades": 1
+}
+}
+},
+"pro": {
+"pro_users": 3,
+"avg_signals": 4.5,
+"unique_rr": 12.349,
+"unique_signals": 9
+},
+"lang": "ru",
+"plan": "free",
+"now": 1766000000.0,
+"text": "📊 <b>Итоги недели</b> · 10.12 – 16.12\nСигналов: <b>5</b> · в плюс 2 · в минус 1 · безубыток 1 · без итога 1\nИтог: <b>0R</b> · win rate 50%\nЛучший: SOL LONG +2.0R\nПо стратегиям: LEVELS +1.2R (2) · VOLUME -0.1R (1)\n\n⭐ Pro на этой неделе: в среднем 4.5 сигналов на юзера, +12.3R по 9 уникальным сигналам. У тебя — 5.\n\nНовая неделя — новые сетапы. Удачи!"
+},
+{
+"stats": {
+"signals": 5,
+"wins": 2,
+"losses": 1,
+"be": 1,
+"expired": 1,
+"trades": 4,
+"total_rr": -0.04,
+"win_rate": 50.5,
+"best_rr": 2.0,
+"best_symbol": "SOL",
+"best_direction": "LONG",
+"open": 0,
+"per_strategy": {
+"LEVELS": {
+"signals": 2,
+"total_rr": 1.25,
+"trades": 2
+},
+"SMC": {
+"signals": 0
+},
+"VOLUME": {
+"signals": 3,
+"total_rr": -0.05,
+"trades": 1
+}
+}
+},
+"pro": {
+"pro_users": 3,
+"avg_signals": 4.5,
+"unique_rr": 12.349,
+"unique_signals": 9
+},
+"lang": "ru",
+"plan": "free",
+"now": 1767225600.0,
+"text": "📊 <b>Итоги недели</b> · 25.12 – 31.12\nСигналов: <b>5</b> · в плюс 2 · в минус 1 · безубыток 1 · без итога 1\nИтог: <b>0R</b> · win rate 50%\nЛучший: SOL LONG +2.0R\nПо стратегиям: LEVELS +1.2R (2) · VOLUME -0.1R (1)\n\n⭐ Pro на этой неделе: в среднем 4.5 сигналов на юзера, +12.3R по 9 уникальным сигналам. У тебя — 5.\n\nНовая неделя — новые сетапы. Удачи!"
+},
+{
+"stats": {
+"signals": 5,
+"wins": 2,
+"losses": 1,
+"be": 1,
+"expired": 1,
+"trades": 4,
+"total_rr": -0.04,
+"win_rate": 50.5,
+"best_rr": 2.0,
+"best_symbol": "SOL",
+"best_direction": "LONG",
+"open": 0,
+"per_strategy": {
+"LEVELS": {
+"signals": 2,
+"total_rr": 1.25,
+"trades": 2
+},
+"SMC": {
+"signals": 0
+},
+"VOLUME": {
+"signals": 3,
+"total_rr": -0.05,
+"trades": 1
+}
+}
+},
+"pro": {
+"pro_users": 3,
+"avg_signals": 4.5,
+"unique_rr": 12.349,
+"unique_signals": 9
+},
+"lang": "ru",
+"plan": "free",
+"now": 1772323200.0,
+"text": "📊 <b>Итоги недели</b> · 22.02 – 28.02\nСигналов: <b>5</b> · в плюс 2 · в минус 1 · безубыток 1 · без итога 1\nИтог: <b>0R</b> · win rate 50%\nЛучший: SOL LONG +2.0R\nПо стратегиям: LEVELS +1.2R (2) · VOLUME -0.1R (1)\n\n⭐ Pro на этой неделе: в среднем 4.5 сигналов на юзера, +12.3R по 9 уникальным сигналам. У тебя — 5.\n\nНовая неделя — новые сетапы. Удачи!"
+},
+{
+"stats": {
+"signals": 5,
+"wins": 2,
+"losses": 1,
+"be": 1,
+"expired": 1,
+"trades": 4,
+"total_rr": -0.04,
+"win_rate": 50.5,
+"best_rr": 2.0,
+"best_symbol": "SOL",
+"best_direction": "LONG",
+"open": 0,
+"per_strategy": {
+"LEVELS": {
+"signals": 2,
+"total_rr": 1.25,
+"trades": 2
+},
+"SMC": {
+"signals": 0
+},
+"VOLUME": {
+"signals": 3,
+"total_rr": -0.05,
+"trades": 1
+}
+}
+},
+"pro": {
+"pro_users": 3,
+"avg_signals": 4.5,
+"unique_rr": 12.349,
+"unique_signals": 9
+},
+"lang": "en",
+"plan": "free",
+"now": 1766000000.0,
+"text": "📊 <b>Weekly recap</b> · 10.12 – 16.12\nSignals: <b>5</b> · wins 2 · losses 1 · break-even 1 · no outcome 1\nResult: <b>0R</b> · win rate 50%\nBest: SOL LONG +2.0R\nBy strategy: LEVELS +1.2R (2) · VOLUME -0.1R (1)\n\n⭐ Pro this week: 4.5 signals per user on average, +12.3R across 9 unique signals. You got 5.\n\nNew week, new setups. Good luck!"
+},
+{
+"stats": {
+"signals": 5,
+"wins": 2,
+"losses": 1,
+"be": 1,
+"expired": 1,
+"trades": 4,
+"total_rr": -0.04,
+"win_rate": 50.5,
+"best_rr": 2.0,
+"best_symbol": "SOL",
+"best_direction": "LONG",
+"open": 0,
+"per_strategy": {
+"LEVELS": {
+"signals": 2,
+"total_rr": 1.25,
+"trades": 2
+},
+"SMC": {
+"signals": 0
+},
+"VOLUME": {
+"signals": 3,
+"total_rr": -0.05,
+"trades": 1
+}
+}
+},
+"pro": {
+"pro_users": 3,
+"avg_signals": 4.5,
+"unique_rr": 12.349,
+"unique_signals": 9
+},
+"lang": "en",
+"plan": "free",
+"now": 1767225600.0,
+"text": "📊 <b>Weekly recap</b> · 25.12 – 31.12\nSignals: <b>5</b> · wins 2 · losses 1 · break-even 1 · no outcome 1\nResult: <b>0R</b> · win rate 50%\nBest: SOL LONG +2.0R\nBy strategy: LEVELS +1.2R (2) · VOLUME -0.1R (1)\n\n⭐ Pro this week: 4.5 signals per user on average, +12.3R across 9 unique signals. You got 5.\n\nNew week, new setups. Good luck!"
+},
+{
+"stats": {
+"signals": 5,
+"wins": 2,
+"losses": 1,
+"be": 1,
+"expired": 1,
+"trades": 4,
+"total_rr": -0.04,
+"win_rate": 50.5,
+"best_rr": 2.0,
+"best_symbol": "SOL",
+"best_direction": "LONG",
+"open": 0,
+"per_strategy": {
+"LEVELS": {
+"signals": 2,
+"total_rr": 1.25,
+"trades": 2
+},
+"SMC": {
+"signals": 0
+},
+"VOLUME": {
+"signals": 3,
+"total_rr": -0.05,
+"trades": 1
+}
+}
+},
+"pro": {
+"pro_users": 3,
+"avg_signals": 4.5,
+"unique_rr": 12.349,
+"unique_signals": 9
+},
+"lang": "en",
+"plan": "free",
+"now": 1772323200.0,
+"text": "📊 <b>Weekly recap</b> · 22.02 – 28.02\nSignals: <b>5</b> · wins 2 · losses 1 · break-even 1 · no outcome 1\nResult: <b>0R</b> · win rate 50%\nBest: SOL LONG +2.0R\nBy strategy: LEVELS +1.2R (2) · VOLUME -0.1R (1)\n\n⭐ Pro this week: 4.5 signals per user on average, +12.3R across 9 unique signals. You got 5.\n\nNew week, new setups. Good luck!"
+},
+{
+"stats": {
+"signals": 5,
+"wins": 2,
+"losses": 1,
+"be": 1,
+"expired": 1,
+"trades": 4,
+"total_rr": -0.04,
+"win_rate": 50.5,
+"best_rr": 2.0,
+"best_symbol": "SOL",
+"best_direction": "LONG",
+"open": 0,
+"per_strategy": {
+"LEVELS": {
+"signals": 2,
+"total_rr": 1.25,
+"trades": 2
+},
+"SMC": {
+"signals": 0
+},
+"VOLUME": {
+"signals": 3,
+"total_rr": -0.05,
+"trades": 1
+}
+}
+},
+"pro": {
+"pro_users": 1,
+"avg_signals": 0.0,
+"unique_rr": -0.04,
+"unique_signals": 0
+},
+"lang": "ru",
+"plan": "free",
+"now": 1766000000.0,
+"text": "📊 <b>Итоги недели</b> · 10.12 – 16.12\nСигналов: <b>5</b> · в плюс 2 · в минус 1 · безубыток 1 · без итога 1\nИтог: <b>0R</b> · win rate 50%\nЛучший: SOL LONG +2.0R\nПо стратегиям: LEVELS +1.2R (2) · VOLUME -0.1R (1)\n\n⭐ Pro на этой неделе: в среднем 0.0 сигналов на юзера, 0R по 0 уникальным сигналам. У тебя — 5.\n\nНовая неделя — новые сетапы. Удачи!"
+},
+{
+"stats": {
+"signals": 5,
+"wins": 2,
+"losses": 1,
+"be": 1,
+"expired": 1,
+"trades": 4,
+"total_rr": -0.04,
+"win_rate": 50.5,
+"best_rr": 2.0,
+"best_symbol": "SOL",
+"best_direction": "LONG",
+"open": 0,
+"per_strategy": {
+"LEVELS": {
+"signals": 2,
+"total_rr": 1.25,
+"trades": 2
+},
+"SMC": {
+"signals": 0
+},
+"VOLUME": {
+"signals": 3,
+"total_rr": -0.05,
+"trades": 1
+}
+}
+},
+"pro": {
+"pro_users": 1,
+"avg_signals": 0.0,
+"unique_rr": -0.04,
+"unique_signals": 0
+},
+"lang": "ru",
+"plan": "free",
+"now": 1767225600.0,
+"text": "📊 <b>Итоги недели</b> · 25.12 – 31.12\nСигналов: <b>5</b> · в плюс 2 · в минус 1 · безубыток 1 · без итога 1\nИтог: <b>0R</b> · win rate 50%\nЛучший: SOL LONG +2.0R\nПо стратегиям: LEVELS +1.2R (2) · VOLUME -0.1R (1)\n\n⭐ Pro на этой неделе: в среднем 0.0 сигналов на юзера, 0R по 0 уникальным сигналам. У тебя — 5.\n\nНовая неделя — новые сетапы. Удачи!"
+},
+{
+"stats": {
+"signals": 5,
+"wins": 2,
+"losses": 1,
+"be": 1,
+"expired": 1,
+"trades": 4,
+"total_rr": -0.04,
+"win_rate": 50.5,
+"best_rr": 2.0,
+"best_symbol": "SOL",
+"best_direction": "LONG",
+"open": 0,
+"per_strategy": {
+"LEVELS": {
+"signals": 2,
+"total_rr": 1.25,
+"trades": 2
+},
+"SMC": {
+"signals": 0
+},
+"VOLUME": {
+"signals": 3,
+"total_rr": -0.05,
+"trades": 1
+}
+}
+},
+"pro": {
+"pro_users": 1,
+"avg_signals": 0.0,
+"unique_rr": -0.04,
+"unique_signals": 0
+},
+"lang": "ru",
+"plan": "free",
+"now": 1772323200.0,
+"text": "📊 <b>Итоги недели</b> · 22.02 – 28.02\nСигналов: <b>5</b> · в плюс 2 · в минус 1 · безубыток 1 · без итога 1\nИтог: <b>0R</b> · win rate 50%\nЛучший: SOL LONG +2.0R\nПо стратегиям: LEVELS +1.2R (2) · VOLUME -0.1R (1)\n\n⭐ Pro на этой неделе: в среднем 0.0 сигналов на юзера, 0R по 0 уникальным сигналам. У тебя — 5.\n\nНовая неделя — новые сетапы. Удачи!"
+},
+{
+"stats": {
+"signals": 5,
+"wins": 2,
+"losses": 1,
+"be": 1,
+"expired": 1,
+"trades": 4,
+"total_rr": -0.04,
+"win_rate": 50.5,
+"best_rr": 2.0,
+"best_symbol": "SOL",
+"best_direction": "LONG",
+"open": 0,
+"per_strategy": {
+"LEVELS": {
+"signals": 2,
+"total_rr": 1.25,
+"trades": 2
+},
+"SMC": {
+"signals": 0
+},
+"VOLUME": {
+"signals": 3,
+"total_rr": -0.05,
+"trades": 1
+}
+}
+},
+"pro": {
+"pro_users": 1,
+"avg_signals": 0.0,
+"unique_rr": -0.04,
+"unique_signals": 0
+},
+"lang": "en",
+"plan": "free",
+"now": 1766000000.0,
+"text": "📊 <b>Weekly recap</b> · 10.12 – 16.12\nSignals: <b>5</b> · wins 2 · losses 1 · break-even 1 · no outcome 1\nResult: <b>0R</b> · win rate 50%\nBest: SOL LONG +2.0R\nBy strategy: LEVELS +1.2R (2) · VOLUME -0.1R (1)\n\n⭐ Pro this week: 0.0 signals per user on average, 0R across 0 unique signals. You got 5.\n\nNew week, new setups. Good luck!"
+},
+{
+"stats": {
+"signals": 5,
+"wins": 2,
+"losses": 1,
+"be": 1,
+"expired": 1,
+"trades": 4,
+"total_rr": -0.04,
+"win_rate": 50.5,
+"best_rr": 2.0,
+"best_symbol": "SOL",
+"best_direction": "LONG",
+"open": 0,
+"per_strategy": {
+"LEVELS": {
+"signals": 2,
+"total_rr": 1.25,
+"trades": 2
+},
+"SMC": {
+"signals": 0
+},
+"VOLUME": {
+"signals": 3,
+"total_rr": -0.05,
+"trades": 1
+}
+}
+},
+"pro": {
+"pro_users": 1,
+"avg_signals": 0.0,
+"unique_rr": -0.04,
+"unique_signals": 0
+},
+"lang": "en",
+"plan": "free",
+"now": 1767225600.0,
+"text": "📊 <b>Weekly recap</b> · 25.12 – 31.12\nSignals: <b>5</b> · wins 2 · losses 1 · break-even 1 · no outcome 1\nResult: <b>0R</b> · win rate 50%\nBest: SOL LONG +2.0R\nBy strategy: LEVELS +1.2R (2) · VOLUME -0.1R (1)\n\n⭐ Pro this week: 0.0 signals per user on average, 0R across 0 unique signals. You got 5.\n\nNew week, new setups. Good luck!"
+},
+{
+"stats": {
+"signals": 5,
+"wins": 2,
+"losses": 1,
+"be": 1,
+"expired": 1,
+"trades": 4,
+"total_rr": -0.04,
+"win_rate": 50.5,
+"best_rr": 2.0,
+"best_symbol": "SOL",
+"best_direction": "LONG",
+"open": 0,
+"per_strategy": {
+"LEVELS": {
+"signals": 2,
+"total_rr": 1.25,
+"trades": 2
+},
+"SMC": {
+"signals": 0
+},
+"VOLUME": {
+"signals": 3,
+"total_rr": -0.05,
+"trades": 1
+}
+}
+},
+"pro": {
+"pro_users": 1,
+"avg_signals": 0.0,
+"unique_rr": -0.04,
+"unique_signals": 0
+},
+"lang": "en",
+"plan": "free",
+"now": 1772323200.0,
+"text": "📊 <b>Weekly recap</b> · 22.02 – 28.02\nSignals: <b>5</b> · wins 2 · losses 1 · break-even 1 · no outcome 1\nResult: <b>0R</b> · win rate 50%\nBest: SOL LONG +2.0R\nBy strategy: LEVELS +1.2R (2) · VOLUME -0.1R (1)\n\n⭐ Pro this week: 0.0 signals per user on average, 0R across 0 unique signals. You got 5.\n\nNew week, new setups. Good luck!"
+},
+{
+"stats": {
+"signals": 2,
+"wins": 1,
+"losses": 1,
+"trades": 2,
+"total_rr": 0.0,
+"win_rate": 62.5,
+"best_rr": null,
+"best_symbol": "X"
+},
+"pro": null,
+"lang": "ru",
+"plan": "free",
+"now": 1766000000.0,
+"text": "📊 <b>Итоги недели</b> · 10.12 – 16.12\nСигналов: <b>2</b> · в плюс 1 · в минус 1\nИтог: <b>0R</b> · win rate 62%\n\nНовая неделя — новые сетапы. Удачи!"
+},
+{
+"stats": {
+"signals": 2,
+"wins": 1,
+"losses": 1,
+"trades": 2,
+"total_rr": 0.0,
+"win_rate": 62.5,
+"best_rr": null,
+"best_symbol": "X"
+},
+"pro": null,
+"lang": "ru",
+"plan": "free",
+"now": 1767225600.0,
+"text": "📊 <b>Итоги недели</b> · 25.12 – 31.12\nСигналов: <b>2</b> · в плюс 1 · в минус 1\nИтог: <b>0R</b> · win rate 62%\n\nНовая неделя — новые сетапы. Удачи!"
+},
+{
+"stats": {
+"signals": 2,
+"wins": 1,
+"losses": 1,
+"trades": 2,
+"total_rr": 0.0,
+"win_rate": 62.5,
+"best_rr": null,
+"best_symbol": "X"
+},
+"pro": null,
+"lang": "ru",
+"plan": "free",
+"now": 1772323200.0,
+"text": "📊 <b>Итоги недели</b> · 22.02 – 28.02\nСигналов: <b>2</b> · в плюс 1 · в минус 1\nИтог: <b>0R</b> · win rate 62%\n\nНовая неделя — новые сетапы. Удачи!"
+},
+{
+"stats": {
+"signals": 2,
+"wins": 1,
+"losses": 1,
+"trades": 2,
+"total_rr": 0.0,
+"win_rate": 62.5,
+"best_rr": null,
+"best_symbol": "X"
+},
+"pro": null,
+"lang": "en",
+"plan": "free",
+"now": 1766000000.0,
+"text": "📊 <b>Weekly recap</b> · 10.12 – 16.12\nSignals: <b>2</b> · wins 1 · losses 1\nResult: <b>0R</b> · win rate 62%\n\nNew week, new setups. Good luck!"
+},
+{
+"stats": {
+"signals": 2,
+"wins": 1,
+"losses": 1,
+"trades": 2,
+"total_rr": 0.0,
+"win_rate": 62.5,
+"best_rr": null,
+"best_symbol": "X"
+},
+"pro": null,
+"lang": "en",
+"plan": "free",
+"now": 1767225600.0,
+"text": "📊 <b>Weekly recap</b> · 25.12 – 31.12\nSignals: <b>2</b> · wins 1 · losses 1\nResult: <b>0R</b> · win rate 62%\n\nNew week, new setups. Good luck!"
+},
+{
+"stats": {
+"signals": 2,
+"wins": 1,
+"losses": 1,
+"trades": 2,
+"total_rr": 0.0,
+"win_rate": 62.5,
+"best_rr": null,
+"best_symbol": "X"
+},
+"pro": null,
+"lang": "en",
+"plan": "free",
+"now": 1772323200.0,
+"text": "📊 <b>Weekly recap</b> · 22.02 – 28.02\nSignals: <b>2</b> · wins 1 · losses 1\nResult: <b>0R</b> · win rate 62%\n\nNew week, new setups. Good luck!"
+},
+{
+"stats": {
+"signals": 2,
+"wins": 1,
+"losses": 1,
+"trades": 2,
+"total_rr": 0.0,
+"win_rate": 62.5,
+"best_rr": null,
+"best_symbol": "X"
+},
+"pro": {
+"pro_users": 3,
+"avg_signals": 4.5,
+"unique_rr": 12.349,
+"unique_signals": 9
+},
+"lang": "ru",
+"plan": "free",
+"now": 1766000000.0,
+"text": "📊 <b>Итоги недели</b> · 10.12 – 16.12\nСигналов: <b>2</b> · в плюс 1 · в минус 1\nИтог: <b>0R</b> · win rate 62%\n\n⭐ Pro на этой неделе: в среднем 4.5 сигналов на юзера, +12.3R по 9 уникальным сигналам. У тебя — 2.\n\nНовая неделя — новые сетапы. Удачи!"
+},
+{
+"stats": {
+"signals": 2,
+"wins": 1,
+"losses": 1,
+"trades": 2,
+"total_rr": 0.0,
+"win_rate": 62.5,
+"best_rr": null,
+"best_symbol": "X"
+},
+"pro": {
+"pro_users": 3,
+"avg_signals": 4.5,
+"unique_rr": 12.349,
+"unique_signals": 9
+},
+"lang": "ru",
+"plan": "free",
+"now": 1767225600.0,
+"text": "📊 <b>Итоги недели</b> · 25.12 – 31.12\nСигналов: <b>2</b> · в плюс 1 · в минус 1\nИтог: <b>0R</b> · win rate 62%\n\n⭐ Pro на этой неделе: в среднем 4.5 сигналов на юзера, +12.3R по 9 уникальным сигналам. У тебя — 2.\n\nНовая неделя — новые сетапы. Удачи!"
+},
+{
+"stats": {
+"signals": 2,
+"wins": 1,
+"losses": 1,
+"trades": 2,
+"total_rr": 0.0,
+"win_rate": 62.5,
+"best_rr": null,
+"best_symbol": "X"
+},
+"pro": {
+"pro_users": 3,
+"avg_signals": 4.5,
+"unique_rr": 12.349,
+"unique_signals": 9
+},
+"lang": "ru",
+"plan": "free",
+"now": 1772323200.0,
+"text": "📊 <b>Итоги недели</b> · 22.02 – 28.02\nСигналов: <b>2</b> · в плюс 1 · в минус 1\nИтог: <b>0R</b> · win rate 62%\n\n⭐ Pro на этой неделе: в среднем 4.5 сигналов на юзера, +12.3R по 9 уникальным сигналам. У тебя — 2.\n\nНовая неделя — новые сетапы. Удачи!"
+},
+{
+"stats": {
+"signals": 2,
+"wins": 1,
+"losses": 1,
+"trades": 2,
+"total_rr": 0.0,
+"win_rate": 62.5,
+"best_rr": null,
+"best_symbol": "X"
+},
+"pro": {
+"pro_users": 3,
+"avg_signals": 4.5,
+"unique_rr": 12.349,
+"unique_signals": 9
+},
+"lang": "en",
+"plan": "free",
+"now": 1766000000.0,
+"text": "📊 <b>Weekly recap</b> · 10.12 – 16.12\nSignals: <b>2</b> · wins 1 · losses 1\nResult: <b>0R</b> · win rate 62%\n\n⭐ Pro this week: 4.5 signals per user on average, +12.3R across 9 unique signals. You got 2.\n\nNew week, new setups. Good luck!"
+},
+{
+"stats": {
+"signals": 2,
+"wins": 1,
+"losses": 1,
+"trades": 2,
+"total_rr": 0.0,
+"win_rate": 62.5,
+"best_rr": null,
+"best_symbol": "X"
+},
+"pro": {
+"pro_users": 3,
+"avg_signals": 4.5,
+"unique_rr": 12.349,
+"unique_signals": 9
+},
+"lang": "en",
+"plan": "free",
+"now": 1767225600.0,
+"text": "📊 <b>Weekly recap</b> · 25.12 – 31.12\nSignals: <b>2</b> · wins 1 · losses 1\nResult: <b>0R</b> · win rate 62%\n\n⭐ Pro this week: 4.5 signals per user on average, +12.3R across 9 unique signals. You got 2.\n\nNew week, new setups. Good luck!"
+},
+{
+"stats": {
+"signals": 2,
+"wins": 1,
+"losses": 1,
+"trades": 2,
+"total_rr": 0.0,
+"win_rate": 62.5,
+"best_rr": null,
+"best_symbol": "X"
+},
+"pro": {
+"pro_users": 3,
+"avg_signals": 4.5,
+"unique_rr": 12.349,
+"unique_signals": 9
+},
+"lang": "en",
+"plan": "free",
+"now": 1772323200.0,
+"text": "📊 <b>Weekly recap</b> · 22.02 – 28.02\nSignals: <b>2</b> · wins 1 · losses 1\nResult: <b>0R</b> · win rate 62%\n\n⭐ Pro this week: 4.5 signals per user on average, +12.3R across 9 unique signals. You got 2.\n\nNew week, new setups. Good luck!"
+},
+{
+"stats": {
+"signals": 2,
+"wins": 1,
+"losses": 1,
+"trades": 2,
+"total_rr": 0.0,
+"win_rate": 62.5,
+"best_rr": null,
+"best_symbol": "X"
+},
+"pro": {
+"pro_users": 1,
+"avg_signals": 0.0,
+"unique_rr": -0.04,
+"unique_signals": 0
+},
+"lang": "ru",
+"plan": "free",
+"now": 1766000000.0,
+"text": "📊 <b>Итоги недели</b> · 10.12 – 16.12\nСигналов: <b>2</b> · в плюс 1 · в минус 1\nИтог: <b>0R</b> · win rate 62%\n\n⭐ Pro на этой неделе: в среднем 0.0 сигналов на юзера, 0R по 0 уникальным сигналам. У тебя — 2.\n\nНовая неделя — новые сетапы. Удачи!"
+},
+{
+"stats": {
+"signals": 2,
+"wins": 1,
+"losses": 1,
+"trades": 2,
+"total_rr": 0.0,
+"win_rate": 62.5,
+"best_rr": null,
+"best_symbol": "X"
+},
+"pro": {
+"pro_users": 1,
+"avg_signals": 0.0,
+"unique_rr": -0.04,
+"unique_signals": 0
+},
+"lang": "ru",
+"plan": "free",
+"now": 1767225600.0,
+"text": "📊 <b>Итоги недели</b> · 25.12 – 31.12\nСигналов: <b>2</b> · в плюс 1 · в минус 1\nИтог: <b>0R</b> · win rate 62%\n\n⭐ Pro на этой неделе: в среднем 0.0 сигналов на юзера, 0R по 0 уникальным сигналам. У тебя — 2.\n\nНовая неделя — новые сетапы. Удачи!"
+},
+{
+"stats": {
+"signals": 2,
+"wins": 1,
+"losses": 1,
+"trades": 2,
+"total_rr": 0.0,
+"win_rate": 62.5,
+"best_rr": null,
+"best_symbol": "X"
+},
+"pro": {
+"pro_users": 1,
+"avg_signals": 0.0,
+"unique_rr": -0.04,
+"unique_signals": 0
+},
+"lang": "ru",
+"plan": "free",
+"now": 1772323200.0,
+"text": "📊 <b>Итоги недели</b> · 22.02 – 28.02\nСигналов: <b>2</b> · в плюс 1 · в минус 1\nИтог: <b>0R</b> · win rate 62%\n\n⭐ Pro на этой неделе: в среднем 0.0 сигналов на юзера, 0R по 0 уникальным сигналам. У тебя — 2.\n\nНовая неделя — новые сетапы. Удачи!"
+},
+{
+"stats": {
+"signals": 2,
+"wins": 1,
+"losses": 1,
+"trades": 2,
+"total_rr": 0.0,
+"win_rate": 62.5,
+"best_rr": null,
+"best_symbol": "X"
+},
+"pro": {
+"pro_users": 1,
+"avg_signals": 0.0,
+"unique_rr": -0.04,
+"unique_signals": 0
+},
+"lang": "en",
+"plan": "free",
+"now": 1766000000.0,
+"text": "📊 <b>Weekly recap</b> · 10.12 – 16.12\nSignals: <b>2</b> · wins 1 · losses 1\nResult: <b>0R</b> · win rate 62%\n\n⭐ Pro this week: 0.0 signals per user on average, 0R across 0 unique signals. You got 2.\n\nNew week, new setups. Good luck!"
+},
+{
+"stats": {
+"signals": 2,
+"wins": 1,
+"losses": 1,
+"trades": 2,
+"total_rr": 0.0,
+"win_rate": 62.5,
+"best_rr": null,
+"best_symbol": "X"
+},
+"pro": {
+"pro_users": 1,
+"avg_signals": 0.0,
+"unique_rr": -0.04,
+"unique_signals": 0
+},
+"lang": "en",
+"plan": "free",
+"now": 1767225600.0,
+"text": "📊 <b>Weekly recap</b> · 25.12 – 31.12\nSignals: <b>2</b> · wins 1 · losses 1\nResult: <b>0R</b> · win rate 62%\n\n⭐ Pro this week: 0.0 signals per user on average, 0R across 0 unique signals. You got 2.\n\nNew week, new setups. Good luck!"
+},
+{
+"stats": {
+"signals": 2,
+"wins": 1,
+"losses": 1,
+"trades": 2,
+"total_rr": 0.0,
+"win_rate": 62.5,
+"best_rr": null,
+"best_symbol": "X"
+},
+"pro": {
+"pro_users": 1,
+"avg_signals": 0.0,
+"unique_rr": -0.04,
+"unique_signals": 0
+},
+"lang": "en",
+"plan": "free",
+"now": 1772323200.0,
+"text": "📊 <b>Weekly recap</b> · 22.02 – 28.02\nSignals: <b>2</b> · wins 1 · losses 1\nResult: <b>0R</b> · win rate 62%\n\n⭐ Pro this week: 0.0 signals per user on average, 0R across 0 unique signals. You got 2.\n\nNew week, new setups. Good luck!"
+},
+{
+"stats": {
+"signals": 2,
+"wins": 1,
+"losses": 1,
+"trades": 2,
+"total_rr": 0.05,
+"win_rate": 2.5,
+"best_rr": 0.04,
+"best_symbol": ""
+},
+"pro": null,
+"lang": "ru",
+"plan": "free",
+"now": 1766000000.0,
+"text": "📊 <b>Итоги недели</b> · 10.12 – 16.12\nСигналов: <b>2</b> · в плюс 1 · в минус 1\nИтог: <b>+0.1R</b> · win rate 2%\n\nНовая неделя — новые сетапы. Удачи!"
+},
+{
+"stats": {
+"signals": 2,
+"wins": 1,
+"losses": 1,
+"trades": 2,
+"total_rr": 0.05,
+"win_rate": 2.5,
+"best_rr": 0.04,
+"best_symbol": ""
+},
+"pro": null,
+"lang": "ru",
+"plan": "free",
+"now": 1767225600.0,
+"text": "📊 <b>Итоги недели</b> · 25.12 – 31.12\nСигналов: <b>2</b> · в плюс 1 · в минус 1\nИтог: <b>+0.1R</b> · win rate 2%\n\nНовая неделя — новые сетапы. Удачи!"
+},
+{
+"stats": {
+"signals": 2,
+"wins": 1,
+"losses": 1,
+"trades": 2,
+"total_rr": 0.05,
+"win_rate": 2.5,
+"best_rr": 0.04,
+"best_symbol": ""
+},
+"pro": null,
+"lang": "ru",
+"plan": "free",
+"now": 1772323200.0,
+"text": "📊 <b>Итоги недели</b> · 22.02 – 28.02\nСигналов: <b>2</b> · в плюс 1 · в минус 1\nИтог: <b>+0.1R</b> · win rate 2%\n\nНовая неделя — новые сетапы. Удачи!"
+},
+{
+"stats": {
+"signals": 2,
+"wins": 1,
+"losses": 1,
+"trades": 2,
+"total_rr": 0.05,
+"win_rate": 2.5,
+"best_rr": 0.04,
+"best_symbol": ""
+},
+"pro": null,
+"lang": "en",
+"plan": "free",
+"now": 1766000000.0,
+"text": "📊 <b>Weekly recap</b> · 10.12 – 16.12\nSignals: <b>2</b> · wins 1 · losses 1\nResult: <b>+0.1R</b> · win rate 2%\n\nNew week, new setups. Good luck!"
+},
+{
+"stats": {
+"signals": 2,
+"wins": 1,
+"losses": 1,
+"trades": 2,
+"total_rr": 0.05,
+"win_rate": 2.5,
+"best_rr": 0.04,
+"best_symbol": ""
+},
+"pro": null,
+"lang": "en",
+"plan": "free",
+"now": 1767225600.0,
+"text": "📊 <b>Weekly recap</b> · 25.12 – 31.12\nSignals: <b>2</b> · wins 1 · losses 1\nResult: <b>+0.1R</b> · win rate 2%\n\nNew week, new setups. Good luck!"
+},
+{
+"stats": {
+"signals": 2,
+"wins": 1,
+"losses": 1,
+"trades": 2,
+"total_rr": 0.05,
+"win_rate": 2.5,
+"best_rr": 0.04,
+"best_symbol": ""
+},
+"pro": null,
+"lang": "en",
+"plan": "free",
+"now": 1772323200.0,
+"text": "📊 <b>Weekly recap</b> · 22.02 – 28.02\nSignals: <b>2</b> · wins 1 · losses 1\nResult: <b>+0.1R</b> · win rate 2%\n\nNew week, new setups. Good luck!"
+},
+{
+"stats": {
+"signals": 2,
+"wins": 1,
+"losses": 1,
+"trades": 2,
+"total_rr": 0.05,
+"win_rate": 2.5,
+"best_rr": 0.04,
+"best_symbol": ""
+},
+"pro": {
+"pro_users": 3,
+"avg_signals": 4.5,
+"unique_rr": 12.349,
+"unique_signals": 9
+},
+"lang": "ru",
+"plan": "free",
+"now": 1766000000.0,
+"text": "📊 <b>Итоги недели</b> · 10.12 – 16.12\nСигналов: <b>2</b> · в плюс 1 · в минус 1\nИтог: <b>+0.1R</b> · win rate 2%\n\n⭐ Pro на этой неделе: в среднем 4.5 сигналов на юзера, +12.3R по 9 уникальным сигналам. У тебя — 2.\n\nНовая неделя — новые сетапы. Удачи!"
+},
+{
+"stats": {
+"signals": 2,
+"wins": 1,
+"losses": 1,
+"trades": 2,
+"total_rr": 0.05,
+"win_rate": 2.5,
+"best_rr": 0.04,
+"best_symbol": ""
+},
+"pro": {
+"pro_users": 3,
+"avg_signals": 4.5,
+"unique_rr": 12.349,
+"unique_signals": 9
+},
+"lang": "ru",
+"plan": "free",
+"now": 1767225600.0,
+"text": "📊 <b>Итоги недели</b> · 25.12 – 31.12\nСигналов: <b>2</b> · в плюс 1 · в минус 1\nИтог: <b>+0.1R</b> · win rate 2%\n\n⭐ Pro на этой неделе: в среднем 4.5 сигналов на юзера, +12.3R по 9 уникальным сигналам. У тебя — 2.\n\nНовая неделя — новые сетапы. Удачи!"
+},
+{
+"stats": {
+"signals": 2,
+"wins": 1,
+"losses": 1,
+"trades": 2,
+"total_rr": 0.05,
+"win_rate": 2.5,
+"best_rr": 0.04,
+"best_symbol": ""
+},
+"pro": {
+"pro_users": 3,
+"avg_signals": 4.5,
+"unique_rr": 12.349,
+"unique_signals": 9
+},
+"lang": "ru",
+"plan": "free",
+"now": 1772323200.0,
+"text": "📊 <b>Итоги недели</b> · 22.02 – 28.02\nСигналов: <b>2</b> · в плюс 1 · в минус 1\nИтог: <b>+0.1R</b> · win rate 2%\n\n⭐ Pro на этой неделе: в среднем 4.5 сигналов на юзера, +12.3R по 9 уникальным сигналам. У тебя — 2.\n\nНовая неделя — новые сетапы. Удачи!"
+},
+{
+"stats": {
+"signals": 2,
+"wins": 1,
+"losses": 1,
+"trades": 2,
+"total_rr": 0.05,
+"win_rate": 2.5,
+"best_rr": 0.04,
+"best_symbol": ""
+},
+"pro": {
+"pro_users": 3,
+"avg_signals": 4.5,
+"unique_rr": 12.349,
+"unique_signals": 9
+},
+"lang": "en",
+"plan": "free",
+"now": 1766000000.0,
+"text": "📊 <b>Weekly recap</b> · 10.12 – 16.12\nSignals: <b>2</b> · wins 1 · losses 1\nResult: <b>+0.1R</b> · win rate 2%\n\n⭐ Pro this week: 4.5 signals per user on average, +12.3R across 9 unique signals. You got 2.\n\nNew week, new setups. Good luck!"
+},
+{
+"stats": {
+"signals": 2,
+"wins": 1,
+"losses": 1,
+"trades": 2,
+"total_rr": 0.05,
+"win_rate": 2.5,
+"best_rr": 0.04,
+"best_symbol": ""
+},
+"pro": {
+"pro_users": 3,
+"avg_signals": 4.5,
+"unique_rr": 12.349,
+"unique_signals": 9
+},
+"lang": "en",
+"plan": "free",
+"now": 1767225600.0,
+"text": "📊 <b>Weekly recap</b> · 25.12 – 31.12\nSignals: <b>2</b> · wins 1 · losses 1\nResult: <b>+0.1R</b> · win rate 2%\n\n⭐ Pro this week: 4.5 signals per user on average, +12.3R across 9 unique signals. You got 2.\n\nNew week, new setups. Good luck!"
+},
+{
+"stats": {
+"signals": 2,
+"wins": 1,
+"losses": 1,
+"trades": 2,
+"total_rr": 0.05,
+"win_rate": 2.5,
+"best_rr": 0.04,
+"best_symbol": ""
+},
+"pro": {
+"pro_users": 3,
+"avg_signals": 4.5,
+"unique_rr": 12.349,
+"unique_signals": 9
+},
+"lang": "en",
+"plan": "free",
+"now": 1772323200.0,
+"text": "📊 <b>Weekly recap</b> · 22.02 – 28.02\nSignals: <b>2</b> · wins 1 · losses 1\nResult: <b>+0.1R</b> · win rate 2%\n\n⭐ Pro this week: 4.5 signals per user on average, +12.3R across 9 unique signals. You got 2.\n\nNew week, new setups. Good luck!"
+},
+{
+"stats": {
+"signals": 2,
+"wins": 1,
+"losses": 1,
+"trades": 2,
+"total_rr": 0.05,
+"win_rate": 2.5,
+"best_rr": 0.04,
+"best_symbol": ""
+},
+"pro": {
+"pro_users": 1,
+"avg_signals": 0.0,
+"unique_rr": -0.04,
+"unique_signals": 0
+},
+"lang": "ru",
+"plan": "free",
+"now": 1766000000.0,
+"text": "📊 <b>Итоги недели</b> · 10.12 – 16.12\nСигналов: <b>2</b> · в плюс 1 · в минус 1\nИтог: <b>+0.1R</b> · win rate 2%\n\n⭐ Pro на этой неделе: в среднем 0.0 сигналов на юзера, 0R по 0 уникальным сигналам. У тебя — 2.\n\nНовая неделя — новые сетапы. Удачи!"
+},
+{
+"stats": {
+"signals": 2,
+"wins": 1,
+"losses": 1,
+"trades": 2,
+"total_rr": 0.05,
+"win_rate": 2.5,
+"best_rr": 0.04,
+"best_symbol": ""
+},
+"pro": {
+"pro_users": 1,
+"avg_signals": 0.0,
+"unique_rr": -0.04,
+"unique_signals": 0
+},
+"lang": "ru",
+"plan": "free",
+"now": 1767225600.0,
+"text": "📊 <b>Итоги недели</b> · 25.12 – 31.12\nСигналов: <b>2</b> · в плюс 1 · в минус 1\nИтог: <b>+0.1R</b> · win rate 2%\n\n⭐ Pro на этой неделе: в среднем 0.0 сигналов на юзера, 0R по 0 уникальным сигналам. У тебя — 2.\n\nНовая неделя — новые сетапы. Удачи!"
+},
+{
+"stats": {
+"signals": 2,
+"wins": 1,
+"losses": 1,
+"trades": 2,
+"total_rr": 0.05,
+"win_rate": 2.5,
+"best_rr": 0.04,
+"best_symbol": ""
+},
+"pro": {
+"pro_users": 1,
+"avg_signals": 0.0,
+"unique_rr": -0.04,
+"unique_signals": 0
+},
+"lang": "ru",
+"plan": "free",
+"now": 1772323200.0,
+"text": "📊 <b>Итоги недели</b> · 22.02 – 28.02\nСигналов: <b>2</b> · в плюс 1 · в минус 1\nИтог: <b>+0.1R</b> · win rate 2%\n\n⭐ Pro на этой неделе: в среднем 0.0 сигналов на юзера, 0R по 0 уникальным сигналам. У тебя — 2.\n\nНовая неделя — новые сетапы. Удачи!"
+},
+{
+"stats": {
+"signals": 2,
+"wins": 1,
+"losses": 1,
+"trades": 2,
+"total_rr": 0.05,
+"win_rate": 2.5,
+"best_rr": 0.04,
+"best_symbol": ""
+},
+"pro": {
+"pro_users": 1,
+"avg_signals": 0.0,
+"unique_rr": -0.04,
+"unique_signals": 0
+},
+"lang": "en",
+"plan": "free",
+"now": 1766000000.0,
+"text": "📊 <b>Weekly recap</b> · 10.12 – 16.12\nSignals: <b>2</b> · wins 1 · losses 1\nResult: <b>+0.1R</b> · win rate 2%\n\n⭐ Pro this week: 0.0 signals per user on average, 0R across 0 unique signals. You got 2.\n\nNew week, new setups. Good luck!"
+},
+{
+"stats": {
+"signals": 2,
+"wins": 1,
+"losses": 1,
+"trades": 2,
+"total_rr": 0.05,
+"win_rate": 2.5,
+"best_rr": 0.04,
+"best_symbol": ""
+},
+"pro": {
+"pro_users": 1,
+"avg_signals": 0.0,
+"unique_rr": -0.04,
+"unique_signals": 0
+},
+"lang": "en",
+"plan": "free",
+"now": 1767225600.0,
+"text": "📊 <b>Weekly recap</b> · 25.12 – 31.12\nSignals: <b>2</b> · wins 1 · losses 1\nResult: <b>+0.1R</b> · win rate 2%\n\n⭐ Pro this week: 0.0 signals per user on average, 0R across 0 unique signals. You got 2.\n\nNew week, new setups. Good luck!"
+},
+{
+"stats": {
+"signals": 2,
+"wins": 1,
+"losses": 1,
+"trades": 2,
+"total_rr": 0.05,
+"win_rate": 2.5,
+"best_rr": 0.04,
+"best_symbol": ""
+},
+"pro": {
+"pro_users": 1,
+"avg_signals": 0.0,
+"unique_rr": -0.04,
+"unique_signals": 0
+},
+"lang": "en",
+"plan": "free",
+"now": 1772323200.0,
+"text": "📊 <b>Weekly recap</b> · 22.02 – 28.02\nSignals: <b>2</b> · wins 1 · losses 1\nResult: <b>+0.1R</b> · win rate 2%\n\n⭐ Pro this week: 0.0 signals per user on average, 0R across 0 unique signals. You got 2.\n\nNew week, new setups. Good luck!"
+}
+],
+"weekly_r": {
+"0.0": "0R",
+"-0.0": "0R",
+"0.04": "0R",
+"-0.04": "0R",
+"0.05": "+0.1R",
+"-0.05": "-0.1R",
+"1.25": "+1.2R",
+"-1.25": "-1.2R",
+"0.15": "+0.1R",
+"2.675": "+2.7R",
+"10.0": "+10.0R",
+"-0.01": "0R"
+},
+"weekly_next": [
+{
+"now": 1766000000.0,
+"s": 394300.0,
+"week": "2025-W51"
+},
+{
+"now": 1765789500.0,
+"s": 604800.0,
+"week": "2025-W51"
+},
+{
+"now": 1765789499.0,
+"s": 1.0,
+"week": "2025-W51"
+},
+{
+"now": 1765789501.0,
+"s": 604799.0,
+"week": "2025-W51"
+},
+{
+"now": 1765000000.0,
+"s": 184700.0,
+"week": "2025-W49"
+},
+{
+"now": 1765800000.0,
+"s": 594300.0,
+"week": "2025-W51"
+}
+],
+"week_keys": {
+"1735603200.0": "2025-W01",
+"1735689600.0": "2025-W01",
+"1767139200.0": "2026-W01",
+"1767225600.0": "2026-W01",
+"1767830400.0": "2026-W02",
+"1704067200.0": "2024-W01",
+"1609459200.0": "2020-W53"
+},
+"weekly_consts": {
+"WEEKDAY": 0,
+"HOUR_UTC": 9,
+"MINUTE_UTC": 5,
+"KV": "weekly_digest_last_week",
+"PAUSE": 0.5,
+"T": {
+"ru": {
+"title": "📊 <b>Итоги недели</b> · {period}",
+"signals": "Сигналов: <b>{n}</b> · в плюс {w} · в минус {l}{be}{exp}",
+"be": " · безубыток {n}",
+"exp": " · без итога {n}",
+"total": "Итог: <b>{rr}</b> · win rate {wr}%",
+"total_none": "Итог: пока без закрытых сигналов",
+"best": "Лучший: {sym} {dir} {rr}",
+"open": "В работе сейчас: {n}",
+"by_strat": "По стратегиям: {parts}",
+"pro": "⭐ Pro на этой неделе: в среднем {avg} сигналов на юзера, {rr} по {n} уникальным сигналам. У тебя — {mine}.",
+"btn": "📱 Открыть статистику",
+"foot": "Новая неделя — новые сетапы. Удачи!"
+},
+"en": {
+"title": "📊 <b>Weekly recap</b> · {period}",
+"signals": "Signals: <b>{n}</b> · wins {w} · losses {l}{be}{exp}",
+"be": " · break-even {n}",
+"exp": " · no outcome {n}",
+"total": "Result: <b>{rr}</b> · win rate {wr}%",
+"total_none": "Result: no closed signals yet",
+"best": "Best: {sym} {dir} {rr}",
+"open": "Still running: {n}",
+"by_strat": "By strategy: {parts}",
+"pro": "⭐ Pro this week: {avg} signals per user on average, {rr} across {n} unique signals. You got {mine}.",
+"btn": "📱 Open stats",
+"foot": "New week, new setups. Good luck!"
+}
+}
+},
+"daily_auto": {
+"101": {
+"1": {
+"closed": 4,
+"tp1": 2,
+"tp2": 1,
+"tp3": 0,
+"sl": 1,
+"be": 0,
+"total_rr": 2.5,
+"winrate_pct": 75,
+"best_symbol": "BTC-USDT-SWAP",
+"worst_symbol": "PEPE-USDT"
+},
+"7": {
+"closed": 9,
+"total_rr": -1.255,
+"winrate_pct": 44
+}
+},
+"103": {
+"1": {
+"closed": 4,
+"tp1": 2,
+"tp2": 1,
+"tp3": 0,
+"sl": 1,
+"be": 1,
+"total_rr": -2.0,
+"winrate_pct": 75,
+"best_symbol": "BTC-USDT-SWAP",
+"worst_symbol": "PEPE-USDT"
+},
+"7": {
+"closed": 1,
+"total_rr": -1.255,
+"winrate_pct": 44
+}
+},
+"104": {
+"1": {
+"closed": 4,
+"tp1": 2,
+"tp2": 1,
+"tp3": 0,
+"sl": 1,
+"be": 0,
+"total_rr": 2.5,
+"winrate_pct": 75,
+"best_symbol": "BTC-USDT-SWAP",
+"worst_symbol": "PEPE-USDT"
+},
+"7": {
+"closed": 9,
+"total_rr": -1.255,
+"winrate_pct": 44
+}
+},
+"105": {
+"1": {
+"closed": 0,
+"tp1": 2,
+"tp2": 1,
+"tp3": 0,
+"sl": 1,
+"be": 0,
+"total_rr": 2.5,
+"winrate_pct": 75,
+"best_symbol": "BTC-USDT-SWAP",
+"worst_symbol": "PEPE-USDT"
+},
+"7": {
+"closed": 9,
+"total_rr": -1.255,
+"winrate_pct": 44
+}
+},
+"109": {
+"1": {
+"closed": 4,
+"tp1": 2,
+"tp2": 1,
+"tp3": 0,
+"sl": 1,
+"be": 0,
+"total_rr": 0.5,
+"winrate_pct": 75,
+"best_symbol": "BTC-USDT-SWAP",
+"worst_symbol": ""
+},
+"7": {}
+}
+},
+"daily_run": {
+"now": 1766000000.0,
+"users": [
+{
+"user_id": 101,
+"auto_trade": 1
+},
+{
+"user_id": 102,
+"auto_trade": 0
+},
+{
+"user_id": 103,
+"auto_trade": 1
+},
+{
+"user_id": 104,
+"auto_trade": 1
+},
+{
+"user_id": 999,
+"auto_trade": 1
+},
+{
+"user_id": 105,
+"auto_trade": 1
+},
+{
+"user_id": 106,
+"auto_trade": 0
+},
+{
+"user_id": 109,
+"auto_trade": 1
+}
+],
+"um": {
+"101": {
+"user_id": 101,
+"lang": "ru",
+"sub_plan": "pro"
+},
+"102": {
+"user_id": 102,
+"lang": "en",
+"sub_plan": "pro"
+},
+"103": {
+"user_id": 103,
+"lang": "ru",
+"sub_plan": "free"
+},
+"104": {
+"user_id": 104,
+"lang": "en",
+"sub_plan": "pro"
+},
+"105": {
+"user_id": 105,
+"lang": "ru",
+"sub_plan": "free"
+},
+"106": {
+"user_id": 106,
+"lang": "ru",
+"sub_plan": "pro"
+},
+"109": {
+"user_id": 109,
+"lang": "en",
+"sub_plan": "pro"
+}
+},
+"result": [
+4,
+4
+],
+"sent": [
+{
+"uid": 101,
+"text": "🌙 <b>Твой день — 17 декабря</b>\n\n🔥 <b>Отличный день</b>\n📊 Сделок: <b>4</b> (3 ✅ / 1 ❌)\n💰 Результат: <b>+2.50R</b>\n🎯 Win Rate: <b>75%</b>\n🏆 Лучшая: <b>BTC</b>\n📉 Худшая: <b>PEPE</b>\n\n📅 За 7 дней: <b>-1.25R</b> | WR 44% (9 сделок)\n\n😴 Хорошо отдохнуть!\n\n🎯 Челлендж (ru): +1.5R"
+},
+{
+"uid": 103,
+"text": "🌙 <b>Твой день — 17 декабря</b>\n\n📉 <b>Тяжёлый день</b>\n📊 Сделок: <b>4</b> (3 ✅ / 1 ❌ / 1 ♻️)\n💰 Результат: <b>-2.00R</b>\n🎯 Win Rate: <b>75%</b>\n🏆 Лучшая: <b>BTC</b>\n📉 Худшая: <b>PEPE</b>\n\n💪 Завтра новый день — без эмоций."
+},
+{
+"uid": 104,
+"text": "🌙 <b>Твой день — 17 December</b>\n\n🔥 <b>Отличный день</b>\n📊 Сделок: <b>4</b> (3 ✅ / 1 ❌)\n💰 Результат: <b>+2.50R</b>\n🎯 Win Rate: <b>75%</b>\n🏆 Лучшая: <b>BTC</b>\n📉 Худшая: <b>PEPE</b>\n\n📅 За 7 дней: <b>-1.25R</b> | WR 44% (9 сделок)\n\n😴 Хорошо отдохнуть!"
+},
+{
+"uid": 109,
+"text": "🌙 <b>Твой день — 17 December</b>\n\n✅ <b>Положительный день</b>\n📊 Сделок: <b>4</b> (3 ✅ / 1 ❌)\n💰 Результат: <b>+0.50R</b>\n🎯 Win Rate: <b>75%</b>\n🏆 Лучшая: <b>BTC</b>\n\n😴 Хорошо отдохнуть!"
+}
+],
+"log": [
+"[DAILY-SUMMARY] uid=101 sent=True trades=4 rr=2.50",
+"[DAILY-SUMMARY] uid=103 sent=True trades=4 rr=-2.00",
+"[DAILY-SUMMARY] uid=104 sent=True trades=4 rr=2.50",
+"[DAILY-SUMMARY] uid=109 sent=True trades=4 rr=0.50",
+"[DAILY-SUMMARY] iteration: sent=4 skipped=4 total=8"
+],
+"fail_send": [
+104
+]
+},
+"weekly_run": {
+"now": 1766000000.0,
+"result": [
+6,
+2
+],
+"sent": [
+{
+"uid": 101,
+"text": "📊 <b>Итоги недели</b> · 10.12 – 16.12\nСигналов: <b>8</b> · в плюс 6 · в минус 1 · безубыток 1\nИтог: <b>+13.8R</b> · win rate 75%\nЛучший: ETH LONG +4.5R\nВ работе сейчас: 4\nПо стратегиям: LEVELS +1.5R (2) · SMC +4.8R (3)\n\nНовая неделя — новые сетапы. Удачи!"
+},
+{
+"uid": 102,
+"text": "📊 <b>Weekly recap</b> · 10.12 – 16.12\nSignals: <b>10</b> · wins 2 · losses 4 · break-even 1 · no outcome 3\nResult: <b>+3.0R</b> · win rate 29%\nBest: SOL LONG +5.0R\nStill running: 1\nBy strategy: LEVELS +2.0R (2) · SMC -2.0R (2) · VOLUME 0R (0)\n\nNew week, new setups. Good luck!"
+},
+{
+"uid": 103,
+"text": "📊 <b>Итоги недели</b> · 10.12 – 16.12\nСигналов: <b>7</b> · в плюс 2 · в минус 0 · безубыток 2 · без итога 1\nИтог: <b>+6.0R</b> · win rate 50%\nЛучший: DOGE-USDT LONG +4.5R\nВ работе сейчас: 2\nПо стратегиям: LEVELS +4.5R (2) · SMC 0R (0)\n\n⭐ Pro на этой неделе: в среднем 6.0 сигналов на юзера, +23.3R по 23 уникальным сигналам. У тебя — 7.\n\nНовая неделя — новые сетапы. Удачи!"
+},
+{
+"uid": 104,
+"text": "📊 <b>Weekly recap</b> · 10.12 – 16.12\nSignals: <b>5</b> · wins 5 · losses 0\nResult: <b>+14.0R</b> · win rate 100%\nBest: SOL LONG +5.0R\nStill running: 4\n\nNew week, new setups. Good luck!"
+},
+{
+"uid": 105,
+"text": "📊 <b>Итоги недели</b> · 10.12 – 16.12\nСигналов: <b>11</b> · в плюс 2 · в минус 3 · безубыток 1 · без итога 2\nИтог: <b>+1.9R</b> · win rate 33%\nЛучший: SOL LONG +3.0R\nВ работе сейчас: 6\nПо стратегиям: LEVELS 0R (0) · SMC -1.0R (1) · VOLUME 0R (1)\n\n⭐ Pro на этой неделе: в среднем 6.0 сигналов на юзера, +23.3R по 23 уникальным сигналам. У тебя — 11.\n\nНовая неделя — новые сетапы. Удачи!"
+},
+{
+"uid": 106,
+"text": "📊 <b>Итоги недели</b> · 10.12 – 16.12\nСигналов: <b>7</b> · в плюс 1 · в минус 2 · безубыток 1 · без итога 1\nИтог: <b>0R</b> · win rate 25%\nЛучший: DOGE-USDT LONG +2.0R\nВ работе сейчас: 3\nПо стратегиям: LEVELS +2.0R (1) · SMC -1.0R (1)\n\nНовая неделя — новые сетапы. Удачи!"
+},
+{
+"uid": 109,
+"text": "📊 <b>Weekly recap</b> · 10.12 – 16.12\nSignals: <b>3</b> · wins 3 · losses 0\nResult: <b>+6.0R</b> · win rate 100%\nBest: BNB SHORT +3.0R\nStill running: 3\n\nNew week, new setups. Good luck!"
+}
+],
+"log": [
+"[WEEKLY-DIGEST] uid=101 sent=True signals=8 rr=13.83",
+"[WEEKLY-DIGEST] uid=102 sent=True signals=10 rr=2.99",
+"[WEEKLY-DIGEST] uid=103 sent=True signals=7 rr=6.00",
+"[WEEKLY-DIGEST] uid=104 sent=False signals=5 rr=14.00",
+"[WEEKLY-DIGEST] uid=105 sent=True signals=11 rr=1.95",
+"[WEEKLY-DIGEST] uid=106 sent=True signals=7 rr=0.00",
+"[WEEKLY-DIGEST] uid=109 sent=True signals=3 rr=6.00",
+"[WEEKLY-DIGEST] iteration: sent=6 skipped=2 total=8"
+]
+}
+}
