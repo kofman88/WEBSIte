@@ -504,7 +504,8 @@ function hitLevelsFor(hit, stage) {
 function markToMarketRr(trade, price) {
   try {
     const entry = fOr0(trade.entry);
-    const sl0 = fOr0(trade.original_sl) || fOr0(trade.sl);
+    let sl0 = fOr0(trade.original_sl);
+    if (sl0 === 0) sl0 = fOr0(trade.sl);           // Python `a or b`: lazy, NaN truthy, ±0.0 falsy
     const rsk = Math.abs(entry - sl0);
     if (entry <= 0 || rsk <= 0 || falsy(price)) return null;
     const sign = sOr(trade.direction, 'LONG').toUpperCase() === 'LONG' ? 1.0 : -1.0;

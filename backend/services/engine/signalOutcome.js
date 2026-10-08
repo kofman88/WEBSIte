@@ -101,7 +101,8 @@ function signalRr(row, status) {
     try {
       const e = _g(row, 'entry', 0); entry = pyFloat(pyFalsy(e) ? 0 : e);
       const o = _g(row, 'original_sl', 0); const s = _g(row, 'sl', 0);
-      sl0 = pyFloat(pyFalsy(o) ? 0 : o) || pyFloat(pyFalsy(s) ? 0 : s);
+      sl0 = pyFloat(pyFalsy(o) ? 0 : o);
+      if (sl0 === 0) sl0 = pyFloat(pyFalsy(s) ? 0 : s);                 // Python `or`: NaN is truthy
       const t = _g(row, status, 0); tp = pyFloat(pyFalsy(t) ? 0 : t);
     } catch (_e) {
       return null;
