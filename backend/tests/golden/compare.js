@@ -11,9 +11,9 @@
  *             rsi 1 dp, vol_ratio 2 dp, gap_pct 3 dp, position_pct 1 dp, rr_structural
  *             2 dp, wick_ratio 3 dp (smc/liquidity.py round(wr, 3)), rr_ladder 2 dp) go through
  *             pyRound before an EXACT compare — a mismatch there is a pyround/engine bug,
- *             never tolerance. The map is PER STRATEGY (ROUNDED_FIELDS_BY_STRATEGY):
- *             VOLUME's `risk_pct` is an unrounded property, so it falls under the tolerance
- *             rule there; the SMC analysis digest uses DIGEST_ROUNDED_FIELDS;
+ *             never tolerance. The map is PER STRATEGY (ROUNDED_FIELDS_BY_STRATEGY): LEVELS
+ *             rounds nothing; VOLUME's `risk_pct` is an unrounded property, so it falls
+ *             under the tolerance rule there; the SMC analysis digest uses DIGEST_ROUNDED_FIELDS;
  *   strict    GOLDEN_STRICT=1 additionally requires r10(engine value) === fixture value
  *             for every float (true bit-for-bit after the fixture rounding).
  */
@@ -32,10 +32,13 @@ const ROUNDED_FIELDS = Object.freeze({
 /**
  * Per-strategy overrides of ROUNDED_FIELDS (the fields a strategy's signal object really
  * rounds). VOLUME: rr = round(tp2_rr, 2), rsi = round(r_now, 1), vol_ratio/volume_ratio =
- * round(vr, 2); risk_pct is `abs(entry − sl) / entry · 100` unrounded.
+ * round(vr, 2); risk_pct is `abs(entry − sl) / entry · 100` unrounded. LEVELS:
+ * indicator.SignalResult rounds NOTHING — risk_pct, rsi, volume_ratio and rr_score are raw
+ * float64 and btc_corr / eth_corr are the constant 0.0, so every LEVELS float falls under
+ * the tolerance rule.
  */
 const ROUNDED_FIELDS_BY_STRATEGY = Object.freeze({
-  levels: ROUNDED_FIELDS,
+  levels: Object.freeze({}),
   smc: ROUNDED_FIELDS,
   volume: Object.freeze({ rr: 2, rsi: 1, vol_ratio: 2, volume_ratio: 2 }),
 });

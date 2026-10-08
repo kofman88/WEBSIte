@@ -45,7 +45,7 @@
  */
 
 const engines = {
-  levels: null,
+  levels: require('./runners/levels'),   // M6
   smc: null,
   smc_analysis: null,
   volume: require('./runners/volume'),   // M2

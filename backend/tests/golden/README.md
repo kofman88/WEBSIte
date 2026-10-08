@@ -82,6 +82,14 @@ equal to the recorded `smc_config` / `analysis_key` / `build_kwargs` in `prepare
 the engine record has exactly the keys of `asdict(SMCSignalResult)` + the scanner post-steps, in
 order, the `round(x, k)` fields are rounded by the engine itself, confirmations are `[label, bool]`.
 
+Registered adapters live in `runners/`: `runners/levels.js` (M6) rebuilds the IndConfig from the
+variant's `trade_cfg` (asserted equal to the stored `ind_config`), runs a fresh
+`strategies/levels.analyze` per bar (no zone cache, no cooldown, relaxed mode off, BTC regime
+unknown) and appends the scanner post-steps (`squeeze_score`, `quality_after_squeeze`,
+`passes_min_quality`). `compare.js` applies the pyRound rule per strategy
+(`ROUNDED_FIELDS_BY_STRATEGY`): the LEVELS `SignalResult` rounds nothing, so every LEVELS
+float is compared under the 1e-9 rule (and bit-for-bit after r10 with `GOLDEN_STRICT=1`).
+
 ## Running a subset
 
 ```
