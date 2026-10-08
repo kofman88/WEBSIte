@@ -2,7 +2,7 @@
 the inputs of make_genome_vectors.py), produced by the bot's OWN code
 (/home/user/MAIN_BOT/CHM_BREAKER_V4). Re-run:
 
-  VENV=/tmp/…/venv/bin/python        # the bot's pinned venv
+  VENV=/tmp/…/venv311/bin/python     # CPython 3.11 (production) + the bot's pinned requirements
   BOT_TOKEN_CHM=test:token ADMIN_IDS=123 $VENV backend/tests/genome/make_genome_verify_vectors.py [section …]
   rm -f /home/user/MAIN_BOT/CHM_BREAKER_V4/signal_registry.json
 

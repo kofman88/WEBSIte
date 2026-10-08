@@ -22,7 +22,7 @@
  * design. Only the formula (200 shuffles of the test R list, index int(200 × 0.95), the
  * 15 / 10 / 5 R thresholds) is pinned; `opts.mcP95Dd` injects the value for parity tests.
  *
- * Sums use CPython ≥ 3.12 builtin sum() semantics (series.pySum, Neumaier compensated).
+ * Sums use the bot's CPython 3.11 builtin sum() (series.pySum: plain left-to-right addition).
  */
 
 const { pyRound } = require('../../strategies/common/pyround');

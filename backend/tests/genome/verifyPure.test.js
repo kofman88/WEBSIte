@@ -13,8 +13,8 @@
  *                                             15m: 6 golden fixtures × 3 strategies × 5 genomes, + the
  *                                             evaluate_genome dict over the 6 recorded results;
  *                                             1h / 4h: the same genomes over 12 golden fixtures
- * Every comparison is exact except the documented SMC liquidity price ulp (1e-12 relative on the
- * price fields; strategies/smc/liquidity.js is outside services/genome).
+ * Every comparison is exact, SMC liquidity-adjusted prices included: the bot's CPython 3.11 sum()
+ * is the same left-to-right addition as strategies/smc/liquidity.js (a 1-ulp price diff fails).
  */
 import { describe, it, expect } from 'vitest';
 import fs from 'fs';
@@ -197,7 +197,7 @@ describe('run_in_thread on fresh golden fixtures × 5 genomes per strategy vs th
           const p = run.result.trades[i];
           if (Object.keys(t).sort().join() !== Object.keys(p).sort().join()) bad.push(`${lab} trade ${i} keys`);
           for (const k of Object.keys(p)) {
-            if (PRICE.has(k) && run.strategy === 'SMC' && t[k] !== p[k] && Math.abs(t[k] - p[k]) <= 1e-12 * Math.abs(p[k])) { ulp++; continue; }
+            if (PRICE.has(k) && t[k] !== p[k] && Math.abs(t[k] - p[k]) <= 1e-12 * Math.abs(p[k])) ulp++;   // counted: must stay 0
             if (!pyEqual(t[k], p[k])) bad.push(`${lab} trade ${i} ${k}: js ${t[k]} py ${p[k]}`);
           }
         });
@@ -222,7 +222,7 @@ describe('run_in_thread on fresh golden fixtures × 5 genomes per strategy vs th
       expect(V.runs).toHaveLength(wide ? 360 : 30);
       expect(V.coins).toHaveLength(wide ? 12 : 6);
       expect(trades).toBeGreaterThan(name.endsWith('levels') ? 5 : 300);
-      expect(ulp).toBeLessThan(40);
+      expect(ulp).toBe(0);
     }, 300_000);
   }
 });

@@ -37,7 +37,7 @@ Entry points outside this folder:
 
 ## Design decisions
 
-- **Exact numerics.** Python's compensated `sum()` (`pySum`), round-half-even `round()`, numpy float64 `round` (`rint(x·10^k)/10^k`) and mixed float/np.float64 summation are reproduced wherever the bot uses them. This makes fitness, the trade lists and the result dicts bit-for-bit equal to the bot on the golden candles.
+- **Exact numerics.** The bot's CPython 3.11 `sum()` (`pySum`, plain left-to-right), round-half-even `round()`, numpy float64 `round` (`rint(x·10^k)/10^k`) and mixed float/np.float64 summation (`cpySum`: the result is np.float64 once an item is) are reproduced wherever the bot uses them. This makes fitness, the trade lists (SMC liquidity-adjusted prices included) and the result dicts bit-for-bit equal to the bot on the golden candles.
 - **RNG.** The JS generator cannot be CPython's Mersenne Twister. The vector generator therefore replaces `genome.random` with a mulberry32 shim that uses the same algorithms, so the operators are compared draw-for-draw. `crossover` iterates a Python `set` (hash order), so only its invariants are pinned.
 - **Monte Carlo** uses the JS RNG (`createRng(42)`), so its p95 drawdown differs from Python's `random.Random(42)` **by design**. The parity tests inject Python's p95 (`opts.mcP95Dd`). The MC formula itself is pinned separately.
 - **Timeouts.** The bot's `asyncio.wait_for` calls become cooperative deadlines (`DeadlineError` kind `genome` / `generation` / `manual`). They are checked before every genome and every coin, which gives the same 1800 s generation abort and the same 700 s manual abort with the same Russian texts.
@@ -48,7 +48,7 @@ Entry points outside this folder:
 ## Re-generating the vectors
 
 ```
-VENV=/path/to/bot/venv/bin/python
+VENV=/path/to/python3.11-venv/bin/python   # the production interpreter + the bot's pinned requirements
 BOT_TOKEN_CHM=test:token ADMIN_IDS=123 $VENV backend/tests/genome/make_genome_vectors.py [section …]
 rm -f /home/user/MAIN_BOT/CHM_BREAKER_V4/signal_registry.json
 ```
@@ -74,7 +74,6 @@ strategy), `routes` (the real `miniapp_api.h_genome` / `h_genome_apply`).
 
 ## Known gaps (outside this folder's ownership)
 
-- **SMC liquidity sum.** `strategies/smc/liquidity.js` `findEqualLevels` sums sequentially, while CPython 3.12's `sum()` is compensated. This causes 1-ulp differences in liquidity-adjusted SL/TP prices. The backtest parity tests compare those price fields with a 1e-12 relative tolerance. Everything else is exact.
 - **Scanners do not read `optimizer_params` yet.** The LEVELS/SMC scanners (services/engine, strategies/levels) must call `optimizerParams.applyLevelsOptimizerParams(cfg, user)` before building the LEVELS indicator config, and `smcOptimizerFilters(user)` together with `smcPassesOptimizerFilters` in the SMC per-user loop. Until they do, auto-apply writes rows that nothing reads.
 - **Regime provider.** The engine worker must install `regime.setRegimeProvider(() => cachedBtcRegime)`. Without it, drift, paper validation and `params_for_regime` all see `null` (the "unknown" defaults).
 - **Schedulers.** The 6 h evolution cycle (`evolve.genomeEvolutionLoop` / `runner.triggerEvolution(..., {mode: 'cycle'})`) and `maintenance.runGenomeMaintenanceLoop` are deliberately not started. The scheduler process has to wire them.

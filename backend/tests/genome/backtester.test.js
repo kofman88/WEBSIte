@@ -7,10 +7,9 @@
  *   Backtester(S, params=genome + fees, silent=True, fast_mode=True).run_in_thread(sym, df, "15m", days)
  *       3 golden fixtures (BTC / SYNDN01 / SYNLV01 15m) × LEVELS / SMC / VOLUME, fixed genomes
  *   await genome.evaluate_genome(S, g, "15m", _preloaded={sym: df}) on the same three coins
- * Price fields of SMC trades are compared to 1e-12 relative: the SMC engine's equal-level mean
- * (strategies/smc/liquidity.js findEqualLevels) sums sequentially where CPython 3.12 sum() is
- * compensated, so a liquidity-adjusted SL/TP can differ by 1 ulp (rr_realized, results, times
- * and every metric are still identical).
+ * Every value is bit-identical, SMC liquidity-adjusted prices included: the bot's CPython 3.11
+ * sum() is the same left-to-right addition as findEqualLevels (strategies/smc/liquidity.js), so
+ * no price field may differ by even 1 ulp (compareTrade still reports any such diff by name).
  */
 import { describe, it, expect } from 'vitest';
 import { createRequire } from 'module';
@@ -27,7 +26,7 @@ const BT = loadFixture('backtests');
 
 const PRICE_FIELDS = new Set(['entry', 'sl', 'tp1', 'tp2', 'tp3', 'exit_price']);
 
-/** Compare two trade dicts: prices to 1e-12 relative, everything else exact. Returns the ulp-diff count. */
+/** Compare two trade dicts (everything exact; a price off by <= 1e-12 relative is counted, not thrown). Returns that count. */
 function compareTrade(js, py, label) {
   let ulp = 0;
   expect(Object.keys(js).sort(), label).toEqual(Object.keys(py).filter((k) => k !== '_exit_idx').sort());
@@ -79,8 +78,22 @@ describe('_simulate_trade branch table', () => {
   });
 });
 
+describe('cpySum — builtin sum() over Python floats mixed with np.float64 (backtest.py avg_mae / avg_mfe)', () => {
+  // Printed by CPython 3.11.17 + numpy 1.26.4: sum(xs) → (repr(float(s)), type(s).__name__).
+  // 3.12 would give 1.0 / float for the first two (Neumaier-compensated float fast path).
+  it('plain left-to-right like CPython 3.11; np.float64 as soon as one item is', () => {
+    expect(B.cpySum(Array(10).fill([0.1, false]))).toEqual([0.9999999999999999, false]);
+    expect(B.cpySum([[1e16, false], [1.0, false], [-1e16, false]])).toEqual([0.0, false]);
+    expect(B.cpySum([[0.1, false], [0.2, false], [0.3, true], [0.4, false], [1e16, false], [-1e16, false]])).toEqual([0.0, true]);
+    expect(B.cpySum([[1e16, false], [1.0, false], [-1e16, true], [1.0, false]])).toEqual([1.0, true]);
+    expect(B.cpySum([[0.1, true], [0.2, false], [0.3, false]])).toEqual([0.6000000000000001, true]);
+    expect(B.cpySum([[0.0, false], [0.0, false], [0.7, true], [0.1, false], [0.2, false]])).toEqual([1.0, true]);
+    expect(B.cpySum([])).toEqual([0, false]);
+  });
+});
+
 describe('run_in_thread on 3 golden fixtures × 3 strategies vs the bot', () => {
-  it('identical BacktestResult (trade list, counts, PF, ratios); SMC prices within 1 ulp', () => {
+  it('identical BacktestResult (trade list, counts, PF, ratios); SMC prices bit-identical', () => {
     let totalTrades = 0;
     let ulp = 0;
     for (const run of BT.runs) {
@@ -95,12 +108,12 @@ describe('run_in_thread on 3 golden fixtures × 3 strategies vs the bot', () => 
       expect(r.trades.length, label).toBe(run.result.trades.length);
       let runUlp = 0;
       r.trades.forEach((t, i) => { runUlp += compareTrade(t, run.result.trades[i], `${label} trade ${i}`); });
-      if (run.strategy !== 'SMC') expect(runUlp, label).toBe(0);
+      expect(runUlp, label).toBe(0);
       ulp += runUlp;
       totalTrades += r.total_trades;
     }
     expect(totalTrades).toBeGreaterThan(200);
-    expect(ulp).toBeLessThan(10);
+    expect(ulp).toBe(0);
   }, 120_000);
 });
 
