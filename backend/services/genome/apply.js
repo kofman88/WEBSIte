@@ -202,10 +202,18 @@ function applyBestToUser(userId, strategy, tf = null, deps = {}) {
         cfg = {};
       }
       if (cfg === null || typeof cfg !== 'object' || Array.isArray(cfg)) {
-        // json.loads gave a non-dict → `cfg_dict.get(k)` raises AttributeError → "Apply error: …"
-        const pyType = cfg === null ? 'NoneType' : Array.isArray(cfg) ? 'list' : typeof cfg === 'string' ? 'str'
-          : typeof cfg === 'boolean' ? 'bool' : Number.isInteger(cfg) ? 'int' : 'float';
-        throw new Error(`'${pyType}' object has no attribute 'get'`);
+        // json.loads gave a non-dict → the first `cfg_dict.get(k)` raises AttributeError →
+        // "Apply error: …"; with an EMPTY genome the loop never runs and the bot re-writes
+        // json.dumps(<the non-dict value>) and answers ok with changed {}
+        if (Object.keys(genome).length) {
+          const pyType = cfg === null ? 'NoneType' : Array.isArray(cfg) ? 'list' : typeof cfg === 'string' ? 'str'
+            : typeof cfg === 'boolean' ? 'bool' : Number.isInteger(cfg) ? 'int' : 'float';
+          throw new Error(`'${pyType}' object has no attribute 'get'`);
+        }
+        d.db.prepare('UPDATE trader_settings SET smc_cfg=?, updated_at=? WHERE user_id=?')
+          .run(pyDumps(cfg, { floatKeys: srcFloats }), d.now(), Number(userId));
+        d.invalidate();
+        return { ok: true, changed, fitness: best.fitness, winrate: best.winrate, pf: best.profit_factor, trades: best.trades };
       }
       for (const [k, v] of Object.entries(genome)) {
         if (pyNe(own(cfg, k) ? cfg[k] : null, v)) {
