@@ -115,6 +115,20 @@ describe('/api/app auth: site JWT, envelope', () => {
     expect(ok.status).toBe(200);
     expect(ok.body.accessToken).toBeTruthy();
   });
+  it('X-Demo-Plan previews the other plan for the same account; /api/auth/me; disabled account → 403 envelope', async () => {
+    const s = await login();
+    const me = await request(app).get('/api/app/me').set(bearer(s.accessToken)).set('X-Demo-Plan', 'pro');
+    expect(me.body.user).toMatchObject({ plan: 'pro', is_pro: true });
+    expect((await request(app).get('/api/app/me').set(bearer(s.accessToken))).body.user.plan).toBe('free');
+    const am = await request(app).get('/api/auth/me').set(bearer(s.accessToken));
+    expect(am.body.user).toMatchObject({ email: 'demo@chm.local', plan: 'free' });
+    await request(app).post('/api/auth/__stub/disable').send({ email: 'empty@chm.local', disabled: true });
+    const d = await login('empty@chm.local');
+    const r = await request(app).get('/api/app/me').set(bearer(d.accessToken));
+    expect(r.status).toBe(403);
+    expect(r.body).toEqual({ ok: false, error: 'unauthorized', code: 'ACCOUNT_DISABLED' });
+    await request(app).post('/api/auth/__stub/disable').send({ email: 'empty@chm.local', disabled: false });
+  });
   it('register validates like the site (8+ chars, letter + digit) and refuses a taken email', async () => {
     expect((await request(app).post('/api/auth/register').send({ email: 'x@y.z', password: 'short' })).status).toBe(400);
     expect((await request(app).post('/api/auth/register').send({ email: 'demo@chm.local', password: 'demo1234' })).status).toBe(409);
@@ -208,17 +222,41 @@ describe('/api/app contract (miniapp/API.md one-to-one)', () => {
     expect(r.body.ok).toBe(true);
     for (const k of ['lang', 'ui_mode', 'levels', 'smc', 'volume', 'trading', 'risk', 'exchanges', 'notifications', 'genome_auto_apply']) expect(r.body.settings, k).toHaveProperty(k);
     expect(r.body.options.locked).toEqual(expect.arrayContaining(['smc.*', 'volume.*', 'trading.*', 'genome_auto_apply', 'ui_mode.expert', 'levels.long_tf', 'levels.short_tf']));
-    expect(r.body.settings.levels).toHaveProperty('pivot_strength');   // D9 extension → «Расширенные настройки»
+    // D9 sections (M7 appSettingsService.settingsAll) → the «Расширенные настройки» screen
+    for (const k of ['shared', 'long', 'short']) expect(r.body.settings.levels, k).toHaveProperty(k);
+    expect(r.body.settings.levels.shared).toHaveProperty('pivot_strength');
+    expect(r.body.settings.levels.short.overrides).toEqual([]);
+    expect(r.body.settings.smc).toHaveProperty('advanced');
+    expect(r.body.settings.risk).toHaveProperty('advanced');
+    expect(r.body.settings).toHaveProperty('ptp');
+    expect(r.body.settings.trading.disabled_days).toEqual([]);
+    expect(r.body.options.choices['levels.shared.pivot_strength']).toEqual([3, 5, 7, 10, 15, 17, 20]);
+    expect(r.body.options.choices['ui_mode']).toEqual(['simple', 'expert']);
+    expect(r.body.options.intervals).toContain(300);
     const locked = await request(app).post('/api/app/settings/all').send({ smc: { tf_key: '4H' } }).set(bearer(tok));
     expect(locked.body).toEqual({ ok: false, error: 'pro_required' });
     const bad = await request(app).post('/api/app/settings/all').send({ levels: { use_rsi: 'yes' } }).set(bearer(tok));
     expect(bad.body).toMatchObject({ ok: false, error: 'bad_request', message: 'levels.use_rsi' });
     const empty = await request(app).post('/api/app/settings/all').send({}).set(bearer(tok));
     expect(empty.body).toMatchObject({ ok: false, error: 'bad_request', message: 'empty' });
-    const ok = await request(app).post('/api/app/settings/all').send({ levels: { min_quality: 4, pivot_strength: 10 }, ui_mode: 'simple' }).set(bearer(tok));
+    // ranges / choices as in the M7 schema: bad_request names the dotted key
+    expect((await request(app).post('/api/app/settings/all').send({ levels: { min_quality: 99 } }).set(bearer(tok))).body).toMatchObject({ ok: false, error: 'bad_request', message: 'levels.min_quality' });
+    expect((await request(app).post('/api/app/settings/all').send({ levels: { shared: { pivot_strength: 8 } } }).set(bearer(tok))).body).toMatchObject({ ok: false, error: 'bad_request', message: 'levels.shared.pivot_strength' });
+    expect((await request(app).post('/api/app/settings/all').send({ levels: { long_tf: '5m' } }).set(bearer(proTok))).body).toMatchObject({ ok: false, error: 'bad_request', message: 'levels.long_tf' });
+    const ok = await request(app).post('/api/app/settings/all').send({ levels: { min_quality: 4, shared: { pivot_strength: 10 }, short: { zone_pct: 0.5 } }, ui_mode: 'simple' }).set(bearer(tok));
     expect(ok.body.ok).toBe(true);
-    expect(ok.body.settings.levels).toMatchObject({ min_quality: 4, pivot_strength: 10 });
+    expect(ok.body.settings.levels).toMatchObject({ min_quality: 4 });
+    expect(ok.body.settings.levels.shared.pivot_strength).toBe(10);
+    expect(ok.body.settings.levels.short).toMatchObject({ zone_pct: 0.5, overrides: ['zone_pct'] });
     expect(ok.body).not.toHaveProperty('options');   // quirk §10.3: POST returns settings only
+    const reset = await request(app).post('/api/app/settings/all').send({ levels: { short: { reset: true } } }).set(bearer(tok));
+    expect(reset.body.settings.levels.short.overrides).toEqual([]);
+    // D9 trading keys stay open on Free (QUIRK: options.locked keeps trading.*), the Mini App keys do not
+    expect((await request(app).post('/api/app/settings/all').send({ trading: { disabled_days: [0, 6] } }).set(bearer(tok))).body.settings.trading.disabled_days).toEqual([0, 6]);
+    expect((await request(app).post('/api/app/settings/all').send({ trading: { trade_leverage: 3 } }).set(bearer(tok))).body).toEqual({ ok: false, error: 'pro_required' });
+    const rf = await request(app).post('/api/app/settings/all').send({ risk: { advanced: { reset_all_filters: true } } }).set(bearer(proTok));
+    expect(rf.body.settings.risk).toMatchObject({ filters_all_off: true, allow_counter_trend: true, btc_correlation_block: false });
+    expect(rf.body.settings.risk.advanced).not.toHaveProperty('reset_all_filters');
     const expert = await request(app).post('/api/app/settings/all').send({ ui_mode: 'expert' }).set(bearer(tok));
     expect(expert.body).toEqual({ ok: false, error: 'pro_required' });
     const vol = await request(app).post('/api/app/settings/all').send({ volume: { setup_cross: false, setup_turn: false, setup_bounce: false, setup_golden: false, setup_ribbon: false } }).set(bearer(proTok));

@@ -204,7 +204,7 @@ def main():
         page.wait_for_selector(".tiles", timeout=5000)
         page.click(".tile:has-text('Расширенные настройки')")
         page.wait_for_selector(".group", timeout=5000)
-        chk.ok(page.locator(".ctl-title", has_text="Пивоты: сила").count() == 1, "D9 preset control rendered")
+        chk.ok(page.locator(".ctl-title", has_text="Пивоты: сила").count() >= 1, "D9 preset control rendered")
         chk.ok(page.locator(".ctl-title", has_text="Режим меню").count() == 1, "ui_mode control")
         shot("08-advanced")
         page.click(".back")

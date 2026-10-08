@@ -67,6 +67,146 @@ function candles(seed, n, end, vol, trendSign, tfSec, t0) {
 }
 const TF_SEC = { '15m': 900, '30m': 1800, '1h': 3600, '4h': 14400, '1d': 86400 };
 
+// ----------------------------------------------------------------------------- settings/all schema
+// Mirrors backend/services/appSettingsService.js (M7): the Mini App keys plus the
+// D9 sections (`levels.shared` / `levels.long` / `levels.short`, `smc.advanced`,
+// `risk.advanced`, `ptp`, the extra `trading.*` / `notifications.*` keys).
+// kind: bool | enum[values] | int[lo,hi] | float[lo,hi] | float_gt[lo,hi] | float_any | choice[values] | days | section{…}
+const TF_LEVELS = ['15m', '30m', '1h', '4h', '1d'], TF_SMC = ['15m', '1H', '4H'], TF_VOLUME = ['15m', '1h', '4h'];
+const INTERVALS = [60, 180, 300, 900, 1800, 3600, 7200, 14400, 86400];
+const LEVELS_CHOICES = {
+  pivot_strength: [3, 5, 7, 10, 15, 17, 20], max_level_age: [30, 50, 75, 100, 142, 150, 200, 250, 300],
+  max_retest_bars: [10, 20, 30, 50], zone_buffer: [0, 0.1, 0.2, 0.3, 0.5, 0.7, 1],
+  zone_pct: [0.2, 0.3, 0.5, 0.7, 1, 1.2, 1.35, 1.5, 2, 2.5, 3], max_dist_pct: [0.3, 0.5, 0.7, 1, 1.5, 2, 2.5, 3, 3.5, 4, 5, 7],
+  max_level_tests: [1, 2, 3, 4, 5, 6, 7, 8, 10, 99], min_rr: [0.8, 1, 1.2, 1.5, 2, 2.5, 3, 4, 5],
+  ema_fast: [20, 50, 100], ema_slow: [100, 200, 500], htf_ema_period: [20, 50, 100, 200],
+  rsi_period: [7, 14, 21], rsi_ob: [60, 65, 70, 75], rsi_os: [25, 30, 35, 40], vol_mult: [1, 1.2, 1.5, 2],
+  min_quality: [1, 2, 3, 4, 5], cooldown_bars: [0, 1, 2, 3, 5, 8, 10, 15, 20], atr_period: [7, 14, 21],
+  atr_mult: [0.5, 1, 1.5, 2], max_risk_pct: [0.5, 1, 1.5, 2, 3],
+  min_volume_usdt: [100000, 300000, 1000000, 5000000, 10000000, 25000000, 50000000, 100000000],
+};
+const LEVELS_TOGGLES = ['use_rsi', 'use_volume', 'use_pattern', 'use_htf', 'trend_only'];
+const MINIAPP_LEVELS_KEYS = ['long_tf', 'short_tf', 'min_quality', 'min_volume_usdt', 'min_rr', 'max_dist_pct', 'zone_pct', 'use_rsi', 'use_volume', 'use_htf', 'trend_only', 'max_risk_pct'];
+function directionSchema() {
+  const s = {};
+  for (const [k, list] of Object.entries(LEVELS_CHOICES)) s[k] = ['choice', list];
+  for (const k of LEVELS_TOGGLES) s[k] = ['bool'];
+  s.tp1_rr = ['float_any']; s.tp2_rr = ['float_any']; s.tp3_rr = ['float_any'];
+  s.interval = ['choice', INTERVALS]; s.reset = ['bool'];
+  return s;
+}
+function sharedSchema() {
+  const s = { timeframe: ['enum', TF_LEVELS], scan_interval: ['choice', INTERVALS] };
+  for (const [k, list] of Object.entries(LEVELS_CHOICES)) if (!MINIAPP_LEVELS_KEYS.includes(k)) s[k] = ['choice', list];
+  s.use_pattern = ['bool']; s.tp1_rr = ['float_gt', 0, 100]; s.tp2_rr = ['float_any']; s.tp3_rr = ['float_any'];
+  s.high_wr_mode = ['bool']; s.levels_counter_trend_min_quality = ['int', 0, 5];
+  return s;
+}
+const SCHEMA = {
+  levels: {
+    long_tf: ['enum', TF_LEVELS], short_tf: ['enum', TF_LEVELS], min_quality: ['int', 0, 10], min_volume_usdt: ['float', 0, 1e10],
+    min_rr: ['float', 0.5, 10], max_dist_pct: ['float', 0.1, 10], zone_pct: ['float', 0.1, 5], use_rsi: ['bool'], use_volume: ['bool'],
+    use_htf: ['bool'], trend_only: ['bool'], max_risk_pct: ['float', 0.1, 5],
+    shared: ['section', sharedSchema()], long: ['section', directionSchema()], short: ['section', directionSchema()],
+  },
+  smc: {
+    tf_key: ['enum', TF_SMC], direction: ['enum', ['BOTH', 'LONG', 'SHORT']], min_volume_usdt: ['float', 0, 1e10], max_sl_pct: ['float', 0, 20],
+    scan_interval: ['int', 60, 86400],
+    advanced: ['section', {
+      min_confirmations: ['choice', [2, 3, 4, 5]], min_rr: ['choice', [1.5, 2, 2.5, 3]], sl_buffer_pct: ['choice', [0.1, 0.15, 0.25, 0.5]],
+      fvg_enabled: ['bool'], choch_enabled: ['bool'], ob_use_breaker: ['bool'], sweep_close_req: ['bool'], ob_max_age: ['choice', [20, 30, 50, 100]],
+      smc_conf_type: ['enum', ['BODY_CLOSE', 'WICK_TOUCH']], smc_pd_filter: ['bool'], smc_retrace_depth: ['float', 0, 1], smc_mtf_check: ['bool'],
+      smc_use_volume_filter: ['bool'], smc_vol_mult: ['float', 0.5, 5], smc_counter_trend_min_quality: ['int', 0, 5],
+    }],
+  },
+  volume: {
+    timeframe: ['enum', TF_VOLUME], setup_cross: ['bool'], setup_turn: ['bool'], setup_bounce: ['bool'], setup_golden: ['bool'], setup_ribbon: ['bool'],
+    ma_type: ['enum', ['sma', 'ema']], vol_mult: ['float', 0.5, 10], use_htf: ['bool'], min_quality: ['int', 1, 5],
+  },
+  trading: {
+    auto_trade: ['bool'], auto_trade_mode: ['enum', ['auto', 'confirm']], trade_exchange: ['enum', EXCHANGES], trade_risk_pct: ['float', 0.1, 5],
+    trade_leverage: ['int', 1, 50], max_trades_limit: ['int', 1, 50], risk_mode: ['enum', ['risk', 'notional']], partial_tp_enabled: ['bool'],
+    auto_trailing_enabled: ['bool'], prefer_market_entry: ['bool'], bybit_demo: ['bool'],
+    disabled_days: ['days'], fixed_amount: ['choice', [0, 0.5, 1, 1.5, 2, 2.5, 3]], vol_filter_mode: ['enum', ['usdt', 'count', 'both', 'off']],
+    max_coins_count: ['choice', [20, 30, 50, 100, 200]], at_stats_period: ['choice', [1, 7, 30]],
+  },
+  ptp: {
+    ptp_mode: ['enum', ['R', 'PCT']], partial_tp1_r: ['choice', [0.5, 0.75, 1, 1.25, 1.5]], partial_tp2_r: ['choice', [1, 1.5, 2, 2.5, 3]],
+    partial_tp1_pct: ['choice', [20, 30, 40, 50, 60]], partial_tp2_pct: ['choice', [15, 20, 25, 30, 40]],
+    ptp_profit_pct1: ['choice', [15, 20, 30, 40, 50]], ptp_profit_pct2: ['choice', [30, 40, 50, 70, 100]],
+  },
+  risk: {
+    sl_streak_enabled: ['bool'], sl_streak_threshold: ['int', 1, 20], circuit_breaker_enabled: ['bool'], circuit_breaker_threshold_r: ['float', 0, 100],
+    allow_counter_trend: ['bool'], filters_all_off: ['bool'], btc_correlation_block: ['bool'], spread_check_enabled: ['bool'],
+    trade_trending_only: ['bool'], hour_filter_enabled: ['bool'],
+    advanced: ['section', {
+      spread_max_pct: ['choice', [0.1, 0.2, 0.3, 0.5, 1]], allow_low_notional_boost: ['bool'], show_risk_preview: ['bool'],
+      correlation_cap_enabled: ['bool'], correlation_cap_threshold: ['float', 0.4, 0.95], adaptive_sizing_enabled: ['bool'],
+      adaptive_sizing_mode: ['enum', ['all', 'kelly', 'vol', 'dd', 'off']], tilt_detector_enabled: ['bool'], hold_lock_enabled: ['bool'],
+      hold_lock_min_rr: ['float', 0, 5], min_signal_quality: ['choice', [3, 4, 5]], reset_all_filters: ['bool'],
+    }],
+  },
+  notifications: {
+    progress_notify_enabled: ['bool'], send_chart_enabled: ['bool'], signal_format: ['enum', ['full', 'lite']],
+    quiet_start: ['int', -1, 23], quiet_end: ['int', -1, 23], notify_signal: ['bool'], notify_breakout: ['bool'],
+  },
+};
+const TOP_SCHEMA = { lang: ['enum', ['ru', 'en']], ui_mode: ['enum', ['simple', 'expert']], genome_auto_apply: ['bool'] };
+// QUIRK(D9): keys the bot lets Free users change although the Mini App locks `trading.*`.
+const TRADING_FREE_KEYS = ['disabled_days', 'fixed_amount', 'vol_filter_mode', 'max_coins_count', 'at_stats_period'];
+const OPTIONS = { tf_levels: TF_LEVELS, tf_smc: TF_SMC, tf_volume: TF_VOLUME, exchanges: EXCHANGES, leverage: [1, 2, 3, 5, 10, 20],
+  risk_pct: [0.25, 0.5, 1, 1.5, 2, 3], max_trades: [1, 2, 3, 5, 10], min_volume: [300000, 1000000, 5000000, 10000000, 25000000, 50000000] };
+/** Dotted path → allowed values for every enum / choice key (for the web UI). */
+function choices() {
+  const out = {};
+  const walk = (schema, prefix) => {
+    for (const [k, spec] of Object.entries(schema)) {
+      if (spec[0] === 'section') walk(spec[1], `${prefix}${k}.`);
+      else if (spec[0] === 'enum' || spec[0] === 'choice') out[`${prefix}${k}`] = spec[1].slice();
+    }
+  };
+  for (const [section, schema] of Object.entries(SCHEMA)) walk(schema, `${section}.`);
+  walk(TOP_SCHEMA, '');
+  return out;
+}
+class BadRequest extends Error { constructor(key) { super(key); this.key = key; } }
+const isNum = (v) => typeof v === 'number' && isFinite(v);
+function coerce(spec, v, path) {
+  const kind = spec[0];
+  if (kind === 'bool') { if (typeof v !== 'boolean') throw new BadRequest(path); return v; }
+  if (kind === 'enum') { if (!spec[1].includes(v)) throw new BadRequest(path); return v; }
+  if (kind === 'choice') { if (!isNum(v) || !spec[1].some((x) => Math.abs(x - v) < 1e-9)) throw new BadRequest(path); return v; }
+  if (kind === 'int') { if (!isNum(v) || !Number.isInteger(v) || v < spec[1] || v > spec[2]) throw new BadRequest(path); return v; }
+  if (kind === 'float') { if (!isNum(v) || v < spec[1] || v > spec[2]) throw new BadRequest(path); return v; }
+  if (kind === 'float_gt') { if (!isNum(v) || v <= spec[1] || v > spec[2]) throw new BadRequest(path); return v; }
+  if (kind === 'float_any') { if (!isNum(v)) throw new BadRequest(path); return v; }
+  if (kind === 'days') {
+    const list = Array.isArray(v) ? v : typeof v === 'string' ? v.split(',').filter(Boolean) : null;
+    if (!list) throw new BadRequest(path);
+    const days = list.map((d) => Number(d));
+    if (days.some((d) => !Number.isInteger(d) || d < 0 || d > 6)) throw new BadRequest(path);
+    return [...new Set(days)].sort((a, b) => a - b);
+  }
+  throw new BadRequest(path);
+}
+function validatePart(schema, part, path) {
+  if (!part || typeof part !== 'object' || Array.isArray(part)) throw new BadRequest(path);
+  const out = {};
+  for (const [k, spec] of Object.entries(schema)) {
+    if (!(k in part)) continue;
+    const p = `${path}.${k}`;
+    out[k] = spec[0] === 'section' ? validatePart(spec[1], part[k], p) : coerce(spec, part[k], p);
+    if (spec[0] === 'section' && !Object.keys(out[k]).length) delete out[k];
+  }
+  return out;
+}
+function deepMerge(dst, src) {
+  for (const [k, v] of Object.entries(src)) {
+    if (v && typeof v === 'object' && !Array.isArray(v) && dst[k] && typeof dst[k] === 'object' && !Array.isArray(dst[k])) deepMerge(dst[k], v);
+    else dst[k] = v;
+  }
+}
+
 function mkSignal(id, uid, sym, dir, strat, tf, entry, slPct, q, minsAgo, status, rNow, extra) {
   const long = dir === 'LONG';
   const risk = entry * slPct;
@@ -170,29 +310,41 @@ function buildUserState(user) {
     '1W': { trend: 'SHORT', since: t - 20 * 86400, price: 85400.1, ema: '20/50', strength: 55 },
     '1M': { trend: 'LONG', since: t - 90 * 86400, price: 85400.1, ema: '10/20' },
   };
+  // settings/all in the M7 shape (appSettingsService.settingsAll): Mini App keys + the D9 sections.
+  const levelsFine = { pivot_strength: 7, max_level_age: 100, max_retest_bars: 30, zone_buffer: 0.3, max_level_tests: 4, ema_fast: 50, ema_slow: 200,
+    htf_ema_period: 50, use_pattern: true, rsi_period: 14, rsi_ob: 70, rsi_os: 30, vol_mult: 1.2, cooldown_bars: 3, atr_period: 14, atr_mult: 1,
+    tp1_rr: 1.5, tp2_rr: 2.5, tp3_rr: 3.5 };
+  const levelsMini = { min_quality: 6, min_volume_usdt: 1000000, min_rr: 2, max_dist_pct: 2, zone_pct: 1, use_rsi: true, use_volume: true, use_htf: true, trend_only: false, max_risk_pct: 2 };
+  const dirBlock = (over, interval) => Object.assign({}, levelsMini, levelsFine, over, { interval, overrides: Object.keys(over) });
   const settings = {
     lang: 'ru', ui_mode: pro ? 'expert' : 'simple',
-    levels: { long_tf: '1h', short_tf: '4h', min_quality: 6, min_volume_usdt: 1000000, min_rr: 2, max_dist_pct: 2, zone_pct: 1,
-      use_rsi: true, use_volume: true, use_htf: true, trend_only: false, max_risk_pct: 2,
-      // D9 extension (Telegram-menu-only parameters): rendered by the «Расширенные настройки» screen
-      pivot_strength: 7, cooldown_bars: 3, use_pattern: true, tp1_rr: 1.5 },
-    smc: { tf_key: '1H', direction: 'BOTH', min_volume_usdt: 5000000, max_sl_pct: 3, scan_interval: 300, min_confirmations: 3, fvg_enabled: true },
+    levels: Object.assign({ long_tf: '1h', short_tf: '4h' }, levelsMini, {
+      shared: Object.assign({ timeframe: '1h', scan_interval: 300 }, levelsFine, { high_wr_mode: false, levels_counter_trend_min_quality: 4 }),
+      long: dirBlock({}, 3600),
+      short: dirBlock(pro ? { min_quality: 4, zone_pct: 0.7 } : {}, 14400),
+    }),
+    smc: { tf_key: '1H', direction: 'BOTH', min_volume_usdt: 5000000, max_sl_pct: 3, scan_interval: 300,
+      advanced: { min_confirmations: 3, min_rr: 2, sl_buffer_pct: 0.15, fvg_enabled: true, choch_enabled: true, ob_use_breaker: false, sweep_close_req: true,
+        ob_max_age: 50, smc_conf_type: 'BODY_CLOSE', smc_pd_filter: false, smc_retrace_depth: 0.5, smc_mtf_check: true, smc_use_volume_filter: false,
+        smc_vol_mult: 1.2, smc_counter_trend_min_quality: 4 } },
     volume: { timeframe: '1h', setup_cross: true, setup_turn: false, setup_bounce: true, setup_golden: true, setup_ribbon: true, ma_type: 'sma', vol_mult: 1.8, use_htf: true, min_quality: 3 },
-    trading: { auto_trade: pro, auto_trade_mode: 'auto', trade_exchange: pro ? 'bingx' : '', trade_risk_pct: 1, trade_leverage: 5, max_trades_limit: 3,
-      risk_mode: 'risk', partial_tp_enabled: true, auto_trailing_enabled: true, prefer_market_entry: false, bybit_demo: false, fixed_amount: 0 },
+    trading: { auto_trade: pro, auto_trade_mode: 'auto', trade_exchange: pro ? 'bingx' : 'bybit', trade_risk_pct: 1, trade_leverage: 5, max_trades_limit: 3,
+      risk_mode: 'risk', partial_tp_enabled: true, auto_trailing_enabled: true, prefer_market_entry: false, bybit_demo: false,
+      disabled_days: pro ? [6] : [], fixed_amount: 0, vol_filter_mode: 'usdt', max_coins_count: 50, at_stats_period: 1 },
+    ptp: { ptp_mode: 'R', partial_tp1_r: 1, partial_tp2_r: 1.5, partial_tp1_pct: 50, partial_tp2_pct: 40, ptp_profit_pct1: 30, ptp_profit_pct2: 50 },
     risk: { sl_streak_enabled: true, sl_streak_threshold: 3, circuit_breaker_enabled: pro, circuit_breaker_threshold_r: 5, allow_counter_trend: false,
-      filters_all_off: false, btc_correlation_block: true, spread_check_enabled: true, trade_trending_only: false, hour_filter_enabled: false, spread_max_pct: 0.3 },
+      filters_all_off: false, btc_correlation_block: true, spread_check_enabled: true, trade_trending_only: false, hour_filter_enabled: false,
+      advanced: { spread_max_pct: 0.3, allow_low_notional_boost: false, show_risk_preview: true, correlation_cap_enabled: false, correlation_cap_threshold: 0.7,
+        adaptive_sizing_enabled: false, adaptive_sizing_mode: 'all', tilt_detector_enabled: true, hold_lock_enabled: false, hold_lock_min_rr: 0.5, min_signal_quality: 3 } },
     exchanges: { bybit: { connected: false, key_hint: '' }, bingx: { connected: pro, key_hint: pro ? 'Kx7q…fA' : '' }, binance: { connected: false, key_hint: '' }, okx: { connected: false, key_hint: '' } },
     notifications: { progress_notify_enabled: true, send_chart_enabled: true, signal_format: 'full', quiet_start: -1, quiet_end: -1, notify_signal: true, notify_breakout: false },
     genome_auto_apply: pro,
   };
-  const options = {
-    tf_levels: ['15m', '30m', '1h', '4h', '1d'], tf_smc: ['15m', '1H', '4H'], tf_volume: ['15m', '1h', '4h'],
-    exchanges: EXCHANGES, leverage: [1, 2, 3, 5, 10, 20], risk_pct: [0.25, 0.5, 1, 1.5, 2, 3], max_trades: [1, 2, 3, 5, 10],
-    min_volume: [300000, 1000000, 5000000, 10000000, 25000000, 50000000],
+  const options = Object.assign({}, OPTIONS, {
     // the real server's _locked_keys (ui-inventory §3)
     locked: pro ? [] : ['smc.*', 'volume.*', 'trading.*', 'genome_auto_apply', 'ui_mode.expert', 'levels.long_tf', 'levels.short_tf'],
-  };
+    intervals: INTERVALS.slice(), choices: choices(),
+  });
   const positions = pro && !user.empty ? [
     { exchange: 'bingx', symbol: 'ETH-USDT', side: 'SHORT', size: 0.42, entry: 2698.79, mark: 2674.1, pnl_usd: 10.37, pnl_pct: 4.57, leverage: 5 },
     { exchange: 'bingx', symbol: 'BTC-USDT', side: 'LONG', size: 0.012, entry: 85400.1, mark: 85172.5, pnl_usd: -2.73, pnl_pct: -1.33, leverage: 5 },
@@ -282,8 +434,21 @@ function createAuthStub(opts = {}) {
     const u = users.get(email) || addUser({ id: Number(b.id), email, password: '', username: b.username || '', firstName: b.first_name || 'Трейдер', plan: 'free', twoFactor: false, empty: true });
     res.json(issue(u));
   });
-  // Test hook: drop every access token (keeps refresh tokens) → the app must refresh once.
+  router.get('/me', (req, res) => {
+    const h = String(req.headers.authorization || '');
+    const u = h.startsWith('Bearer ') ? userForToken(h.slice(7).trim()) : null;
+    if (!u) return fail(res, 401, 'Invalid or expired token', 'INVALID_TOKEN');
+    res.json({ user: publicUser(u) });
+  });
+  // Test hooks: drop every access token (keeps refresh tokens) → the app must refresh once;
+  // disable / enable an account → /api/app answers 403 {ok:false, error:'unauthorized', code:'ACCOUNT_DISABLED'}.
   router.post('/__stub/expire-access', (_req, res) => { sessions.access.clear(); res.json({ ok: true }); });
+  router.post('/__stub/disable', (req, res) => {
+    const u = users.get(String((req.body || {}).email || '').toLowerCase());
+    if (!u) return fail(res, 404, 'User not found', 'NO_USER');
+    u.disabled = (req.body || {}).disabled !== false;
+    res.json({ ok: true, disabled: u.disabled });
+  });
 
   function userForToken(token) {
     const uid = sessions.access.get(token);
@@ -293,17 +458,27 @@ function createAuthStub(opts = {}) {
 }
 
 // ----------------------------------------------------------------------------- app stub
+function levelsMiniOf(st) { const L = st.settings.levels, o = {}; for (const k of MINIAPP_LEVELS_KEYS) if (!/_tf$/.test(k)) o[k] = L[k]; return o; }
+function levelsFineOf(st) { const S = st.settings.levels.shared, o = {}; for (const k of Object.keys(S)) if (!['timeframe', 'scan_interval', 'high_wr_mode', 'levels_counter_trend_min_quality'].includes(k)) o[k] = S[k]; return o; }
+
 function createAppStub({ userForToken }) {
   const router = express.Router();
   const states = new Map();
-  const stateFor = (u) => { if (!states.has(u.id)) states.set(u.id, buildUserState(u)); return states.get(u.id); };
+  // `X-Demo-Plan: pro|free` previews the other plan for the same account (separate in-memory state per plan).
+  const stateFor = (u, plan) => {
+    const key = plan ? `${u.id}:${plan}` : u.id;
+    if (!states.has(key)) states.set(key, buildUserState(plan ? Object.assign({}, u, { plan }) : u));
+    return states.get(key);
+  };
   const bad = (res, key) => res.json({ ok: false, error: 'bad_request', message: key });
 
   router.use((req, res, next) => {
     const h = String(req.headers.authorization || '');
     const u = h.startsWith('Bearer ') ? userForToken(h.slice(7).trim()) : null;
     if (!u) return res.status(401).json({ ok: false, error: 'unauthorized' });
-    req.st = stateFor(u);
+    if (u.disabled) return res.status(403).json({ ok: false, error: 'unauthorized', code: 'ACCOUNT_DISABLED' });
+    const demoPlan = String(req.headers['x-demo-plan'] || '').toLowerCase();
+    req.st = stateFor(u, demoPlan === 'pro' || demoPlan === 'free' ? demoPlan : null);
     res.setHeader('Cache-Control', 'no-store');
     next();
   });
@@ -425,33 +600,54 @@ function createAppStub({ userForToken }) {
   });
   router.get('/settings/all', (req, res) => res.json({ ok: true, settings: clone(req.st.settings), options: clone(req.st.options) }));
   router.post('/settings/all', (req, res) => {
-    const st = req.st, b = req.body || {};
-    const locked = (full) => st.options.locked.some((k) => k === full || k === full.split('.')[0] + '.*' || k === full.split('.')[0]);
-    const pending = []; let any = false;
-    for (const sec of ['levels', 'smc', 'volume', 'trading', 'risk', 'notifications']) {
-      if (!(sec in b)) continue;
-      if (!b[sec] || typeof b[sec] !== 'object') return bad(res, sec);
-      for (const k of Object.keys(b[sec])) {
-        if (!(k in st.settings[sec])) continue;
-        any = true;
-        const v = b[sec][k], cur = st.settings[sec][k];
-        if (typeof cur === 'boolean' && typeof v !== 'boolean') return bad(res, `${sec}.${k}`);
-        if (typeof cur === 'number' && (typeof v !== 'number' || !isFinite(v))) return bad(res, `${sec}.${k}`);
-        if (/tf|timeframe/.test(k) && String(v).toLowerCase() === '5m') return bad(res, `${sec}.${k}`);
-        pending.push([sec, k, v]);
+    // h_settings_all_post order (M7): validation → empty → plan gates (nothing saved) → business checks → apply.
+    const st = req.st, b = req.body && typeof req.body === 'object' && !Array.isArray(req.body) ? req.body : {};
+    const changes = {}, top = {};
+    try {
+      for (const [sec, schema] of Object.entries(SCHEMA)) {
+        if (!(sec in b)) continue;
+        const part = validatePart(schema, b[sec], sec);
+        if (Object.keys(part).length) changes[sec] = part;
       }
+      for (const [k, spec] of Object.entries(TOP_SCHEMA)) if (k in b) top[k] = coerce(spec, b[k], k);
+    } catch (e) {
+      if (e instanceof BadRequest) return bad(res, e.key);
+      throw e;
     }
-    for (const k of ['lang', 'ui_mode', 'genome_auto_apply']) if (k in b) { any = true; pending.push(['', k, b[k]]); }
-    if (!any) return bad(res, 'empty');
-    for (const [sec, k, v] of pending) {
-      const full = sec ? `${sec}.${k}` : k;
-      if (locked(full) || (full === 'ui_mode' && v === 'expert' && locked('ui_mode.expert')) || (full === 'genome_auto_apply' && v && locked(full))) return res.json({ ok: false, error: 'pro_required' });
-      if (full === 'trading.auto_trade' && v && !Object.values(st.settings.exchanges).some((x) => x.connected)) return res.json({ ok: false, error: 'bad_request', message: 'trading.auto_trade: no API keys for bybit' });
+    if (!Object.keys(changes).length && !Object.keys(top).length) return bad(res, 'empty');
+    const pro = st.user.plan === 'pro';
+    if ((changes.smc || changes.volume) && !pro) return res.json({ ok: false, error: 'pro_required' });
+    if (changes.trading && Object.keys(changes.trading).some((k) => !TRADING_FREE_KEYS.includes(k)) && !pro) return res.json({ ok: false, error: 'pro_required' });
+    if (top.ui_mode === 'expert' && !pro) return res.json({ ok: false, error: 'pro_required' });
+    if (top.genome_auto_apply && !pro) return res.json({ ok: false, error: 'pro_required' });
+    const tr = changes.trading || {};
+    if (tr.auto_trade) {
+      const ex = tr.trade_exchange || st.settings.trading.trade_exchange || 'bybit';
+      if (!(st.settings.exchanges[ex] || {}).connected) return res.json({ ok: false, error: 'bad_request', message: `trading.auto_trade: no API keys for ${ex}` });
     }
-    for (const [sec, k, v] of pending) { if (sec) st.settings[sec][k] = v; else st.settings[k] = v; }
-    if (!['setup_cross', 'setup_turn', 'setup_bounce', 'setup_golden', 'setup_ribbon'].some((k) => st.settings.volume[k])) return bad(res, 'volume.setup_*');
+    if (changes.volume) {
+      const v = Object.assign({}, st.settings.volume, changes.volume);
+      if (!['setup_cross', 'setup_turn', 'setup_bounce', 'setup_golden', 'setup_ribbon'].some((k) => v[k])) return bad(res, 'volume.setup_*');
+    }
+    // apply: `levels.long.reset` / `levels.short.reset` drop the direction overrides; other keys deep-merge
+    for (const side of ['long', 'short']) {
+      const d = changes.levels && changes.levels[side];
+      if (!d) continue;
+      if (d.reset) { st.settings.levels[side] = Object.assign({}, levelsMiniOf(st), levelsFineOf(st), { interval: st.settings.levels[side].interval, overrides: [] }); }
+      delete d.reset;
+      const over = Object.keys(d).filter((k) => k !== 'interval');
+      st.settings.levels[side].overrides = [...new Set(st.settings.levels[side].overrides.concat(over))];
+    }
+    if (changes.risk && changes.risk.advanced && changes.risk.advanced.reset_all_filters) {
+      Object.assign(st.settings.risk, { filters_all_off: true, allow_counter_trend: true, btc_correlation_block: false });
+      st.settings.trading.disabled_days = [];
+    }
+    if (changes.risk && changes.risk.advanced) delete changes.risk.advanced.reset_all_filters;
+    if (changes.risk && changes.risk.advanced && 'spread_max_pct' in changes.risk.advanced) st.settings.risk.spread_check_enabled = true;
+    deepMerge(st.settings, changes);
+    Object.assign(st.settings, top);
     st.me.auto_trade = !!st.settings.trading.auto_trade; st.me.exchange = st.settings.trading.trade_exchange;
-    res.json({ ok: true, settings: clone(st.settings) });
+    res.json({ ok: true, settings: clone(st.settings) });   // no `options` (quirk §10.3)
   });
   router.post('/profile', (req, res) => {
     const st = req.st, name = String((req.body || {}).name || '').toLowerCase();
@@ -633,6 +829,7 @@ function createAppStub({ userForToken }) {
     res.json(chState(st));
   });
   router.use((_req, res) => res.status(404).json({ ok: false, error: 'not_found' }));
+  router.resetStates = () => states.clear();   // test hook: fresh per-user state (see createStubServer)
   return router;
 }
 
@@ -642,8 +839,11 @@ function createStubServer({ staticDir, telegram = true, telegramUsername } = {})
   app.disable('x-powered-by');
   app.use(express.json({ limit: '1mb' }));
   const auth = createAuthStub({ telegram, telegramUsername });
+  const appRouter = createAppStub({ userForToken: auth.userForToken });
+  // Test hook: forget every user's in-memory /api/app state (settings, signals, flags) — E2E runs isolate on it.
+  app.post('/api/auth/__stub/reset', (_req, res) => { appRouter.resetStates(); for (const u of auth.users.values()) u.disabled = false; res.json({ ok: true }); });
   app.use('/api/auth', auth.router);
-  app.use('/api/app', createAppStub({ userForToken: auth.userForToken }));
+  app.use('/api/app', appRouter);
   app.get('/api/health', (_req, res) => res.json({ status: 'ok', stub: true }));
   app.use('/api', (_req, res) => res.status(404).json({ error: 'Route not found', code: 'NOT_FOUND' }));
   const root = staticDir || path.join(__dirname, '..', '..', 'frontend');
@@ -655,4 +855,4 @@ function createStubServer({ staticDir, telegram = true, telegramUsername } = {})
   return app;
 }
 
-module.exports = { createAppStub, createAuthStub, createStubServer, buildUserState, STRATS, EXCHANGES };
+module.exports = { createAppStub, createAuthStub, createStubServer, buildUserState, STRATS, EXCHANGES, SCHEMA, TOP_SCHEMA, choices };
