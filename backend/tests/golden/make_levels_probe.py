@@ -621,8 +621,7 @@ def main():
                "reject_reasons": dict(sorted(reasons.items())),
                "per_case": {k: {"signals": sum(f["n_signals"] for f in v["fixtures"].values()),
                                 "bars": sum(f["n_swept"] for f in v["fixtures"].values())} for k, v in cases.items()},
-               "sha256": {"levels_probe.json": hashlib.sha256(raw).hexdigest()},
-               "elapsed_s": round(time.time() - t_all, 1)}
+               "sha256": {"levels_probe.json": hashlib.sha256(raw).hexdigest()}}   # no wall-clock values: re-runs are byte-identical
     with open(os.path.join(OUT_DIR, "levels_probe_summary.json"), "w") as fh:
         json.dump(summary, fh, indent=1, ensure_ascii=False)
     print(f"wrote levels_probe.json.gz ({len(raw)} bytes raw)")
