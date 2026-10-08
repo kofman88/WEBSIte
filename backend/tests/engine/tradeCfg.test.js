@@ -209,6 +209,9 @@ describe('pyjson / pycoerce', () => {
     expect(pyBool(0)).toBe(false);
     expect(pyBool([])).toBe(false);
     expect(pyBool({ a: 1 })).toBe(true);
+    expect(pyBool(NaN)).toBe(true);            // bool(float('nan')) is True
+    expect(pyBool(-0)).toBe(false);
+    expect(pyBool(-Infinity)).toBe(true);
     expect(isClose(1.0000001, 1.0, 1e-6, 1e-9)).toBe(true);
     expect(isClose(0, 1e-10, 1e-6, 1e-9)).toBe(true);
     expect(isClose(1, 1.01, 1e-6, 1e-9)).toBe(false);

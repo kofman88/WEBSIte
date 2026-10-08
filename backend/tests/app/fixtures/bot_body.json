@@ -1,0 +1,554 @@
+{
+ "python": "3.11.17",
+ "cases": [
+  {
+   "hex": "",
+   "ctype": null,
+   "result": {
+    "$o": []
+   }
+  },
+  {
+   "hex": "",
+   "ctype": "application/json",
+   "result": {
+    "$o": []
+   }
+  },
+  {
+   "hex": "7b7d",
+   "ctype": null,
+   "result": {
+    "$o": []
+   }
+  },
+  {
+   "hex": "7b226c616e67223a22656e227d",
+   "ctype": "application/json",
+   "result": {
+    "$o": [
+     [
+      "lang",
+      "en"
+     ]
+    ]
+   }
+  },
+  {
+   "hex": "7b226c616e67223a22656e227d",
+   "ctype": "text/plain",
+   "result": {
+    "$o": [
+     [
+      "lang",
+      "en"
+     ]
+    ]
+   }
+  },
+  {
+   "hex": "7b226c616e67223a22656e227d",
+   "ctype": "application/x-www-form-urlencoded",
+   "result": {
+    "$o": [
+     [
+      "lang",
+      "en"
+     ]
+    ]
+   }
+  },
+  {
+   "hex": "7b226c616e67223a22656e227d",
+   "ctype": "application/octet-stream",
+   "result": {
+    "$o": [
+     [
+      "lang",
+      "en"
+     ]
+    ]
+   }
+  },
+  {
+   "hex": "7b226c616e67223a22656e227d",
+   "ctype": null,
+   "result": {
+    "$o": [
+     [
+      "lang",
+      "en"
+     ]
+    ]
+   }
+  },
+  {
+   "hex": "efbbbf7b226c616e67223a22656e227d",
+   "ctype": "application/json",
+   "result": {
+    "$o": []
+   }
+  },
+  {
+   "hex": "efbbbf7b226c616e67223a22656e227d",
+   "ctype": "application/json; charset=utf-8-sig",
+   "result": {
+    "$o": [
+     [
+      "lang",
+      "en"
+     ]
+    ]
+   }
+  },
+  {
+   "hex": "7b226c616e67223a22c3a9227d",
+   "ctype": "application/json; charset=utf-8",
+   "result": {
+    "$o": [
+     [
+      "lang",
+      "\u00e9"
+     ]
+    ]
+   }
+  },
+  {
+   "hex": "7b226c616e67223a22c3a9227d",
+   "ctype": "application/json; charset=latin-1",
+   "result": {
+    "$o": [
+     [
+      "lang",
+      "\u00c3\u00a9"
+     ]
+    ]
+   }
+  },
+  {
+   "hex": "7b226c616e67223a22c3a9227d",
+   "ctype": "application/json; charset=\"UTF-8\"",
+   "result": {
+    "$o": [
+     [
+      "lang",
+      "\u00e9"
+     ]
+    ]
+   }
+  },
+  {
+   "hex": "7b226c616e67223a22c3a9227d",
+   "ctype": "application/json; charset=ascii",
+   "result": {
+    "$o": []
+   }
+  },
+  {
+   "hex": "7b226c616e67223a22656e227d",
+   "ctype": "application/json; charset=us-ascii",
+   "result": {
+    "$o": [
+     [
+      "lang",
+      "en"
+     ]
+    ]
+   }
+  },
+  {
+   "hex": "7b226c616e67223a22656e227d",
+   "ctype": "application/json; charset=bogus-xyz",
+   "result": {
+    "$o": []
+   }
+  },
+  {
+   "hex": "7b226c616e67223a22656e227d",
+   "ctype": "application/json; charset=utf8",
+   "result": {
+    "$o": [
+     [
+      "lang",
+      "en"
+     ]
+    ]
+   }
+  },
+  {
+   "hex": "7b226c616e67223a22656e227d",
+   "ctype": "application/json; charset=UTF_8",
+   "result": {
+    "$o": [
+     [
+      "lang",
+      "en"
+     ]
+    ]
+   }
+  },
+  {
+   "hex": "7b226c616e67223a22656e227d",
+   "ctype": "application/json;charset=l1",
+   "result": {
+    "$o": [
+     [
+      "lang",
+      "en"
+     ]
+    ]
+   }
+  },
+  {
+   "hex": "7b226c616e67223a22ff227d",
+   "ctype": "application/json",
+   "result": {
+    "$o": []
+   }
+  },
+  {
+   "hex": "7b226c616e67223a22eda080227d",
+   "ctype": "application/json",
+   "result": {
+    "$o": []
+   }
+  },
+  {
+   "hex": "7b226c616e67223a2280227d",
+   "ctype": "application/json; charset=latin-1",
+   "result": {
+    "$o": [
+     [
+      "lang",
+      "\u0080"
+     ]
+    ]
+   }
+  },
+  {
+   "hex": "6e6f74206a736f6e",
+   "ctype": "application/json",
+   "result": {
+    "$o": []
+   }
+  },
+  {
+   "hex": "7b",
+   "ctype": "application/json",
+   "result": {
+    "$o": []
+   }
+  },
+  {
+   "hex": "224c4556454c5322",
+   "ctype": "application/json",
+   "result": {
+    "$o": []
+   }
+  },
+  {
+   "hex": "5b315d",
+   "ctype": "application/json",
+   "result": {
+    "$o": []
+   }
+  },
+  {
+   "hex": "5b7b227374726174656779223a224c4556454c53227d5d",
+   "ctype": null,
+   "result": {
+    "$o": []
+   }
+  },
+  {
+   "hex": "3432",
+   "ctype": null,
+   "result": {
+    "$o": []
+   }
+  },
+  {
+   "hex": "6e756c6c",
+   "ctype": null,
+   "result": {
+    "$o": []
+   }
+  },
+  {
+   "hex": "74727565",
+   "ctype": null,
+   "result": {
+    "$o": []
+   }
+  },
+  {
+   "hex": "20090a7b2261223a317d0d0a20",
+   "ctype": null,
+   "result": {
+    "$o": [
+     [
+      "a",
+      1
+     ]
+    ]
+   }
+  },
+  {
+   "hex": "7b2261223a317d78",
+   "ctype": null,
+   "result": {
+    "$o": []
+   }
+  },
+  {
+   "hex": "7b2261223a317d207b2262223a327d",
+   "ctype": null,
+   "result": {
+    "$o": []
+   }
+  },
+  {
+   "hex": "7b2261223a204e614e2c202262223a20496e66696e6974792c202263223a202d496e66696e6974797d",
+   "ctype": null,
+   "result": {
+    "$o": [
+     [
+      "a",
+      {
+       "$f": "nan"
+      }
+     ],
+     [
+      "b",
+      {
+       "$f": "inf"
+      }
+     ],
+     [
+      "c",
+      {
+       "$f": "-inf"
+      }
+     ]
+    ]
+   }
+  },
+  {
+   "hex": "7b2261223a205b4e614e2c2031653430302c202d31653430305d7d",
+   "ctype": null,
+   "result": {
+    "$o": [
+     [
+      "a",
+      [
+       {
+        "$f": "nan"
+       },
+       {
+        "$f": "inf"
+       },
+       {
+        "$f": "-inf"
+       }
+      ]
+     ]
+    ]
+   }
+  },
+  {
+   "hex": "7b4e614e3a20317d",
+   "ctype": null,
+   "result": {
+    "$o": []
+   }
+  },
+  {
+   "hex": "7b2261223a202d4e614e7d",
+   "ctype": null,
+   "result": {
+    "$o": []
+   }
+  },
+  {
+   "hex": "7b2261223a20314e614e7d",
+   "ctype": null,
+   "result": {
+    "$o": []
+   }
+  },
+  {
+   "hex": "7b2261223a206e616e7d",
+   "ctype": null,
+   "result": {
+    "$o": []
+   }
+  },
+  {
+   "hex": "7b2261223a20224e614e222c202262223a2022785c224e614e227d",
+   "ctype": null,
+   "result": {
+    "$o": [
+     [
+      "a",
+      "NaN"
+     ],
+     [
+      "b",
+      "x\"NaN"
+     ]
+    ]
+   }
+  },
+  {
+   "hex": "7b2261223a20312c202261223a20327d",
+   "ctype": null,
+   "result": {
+    "$o": [
+     [
+      "a",
+      2
+     ]
+    ]
+   }
+  },
+  {
+   "hex": "7b2261223a20312e302c202262223a2031652d30357d",
+   "ctype": null,
+   "result": {
+    "$o": [
+     [
+      "a",
+      {
+       "$f": "1.0"
+      }
+     ],
+     [
+      "b",
+      {
+       "$f": "1e-05"
+      }
+     ]
+    ]
+   }
+  },
+  {
+   "hex": "7b2261223a20225c75303065395c75643833645c7564653030227d",
+   "ctype": null,
+   "result": {
+    "$o": [
+     [
+      "a",
+      "\u00e9\ud83d\ude00"
+     ]
+    ]
+   }
+  },
+  {
+   "hex": "7b2261223a20227461620968657265227d",
+   "ctype": null,
+   "result": {
+    "$o": []
+   }
+  },
+  {
+   "hex": "7b2761273a20317d",
+   "ctype": null,
+   "result": {
+    "$o": []
+   }
+  },
+  {
+   "hex": "7b2261223a2030317d",
+   "ctype": null,
+   "result": {
+    "$o": []
+   }
+  },
+  {
+   "hex": "7b2261223a202e357d",
+   "ctype": null,
+   "result": {
+    "$o": []
+   }
+  },
+  {
+   "hex": "7b2261223a202b317d",
+   "ctype": null,
+   "result": {
+    "$o": []
+   }
+  },
+  {
+   "hex": "7b2261223a20312e7d",
+   "ctype": null,
+   "result": {
+    "$o": []
+   }
+  },
+  {
+   "hex": "7b2261223a20747275652c202262223a206e756c6c2c202263223a207b2264223a205b312c202278222c2066616c73655d7d7d",
+   "ctype": null,
+   "result": {
+    "$o": [
+     [
+      "a",
+      true
+     ],
+     [
+      "b",
+      null
+     ],
+     [
+      "c",
+      {
+       "$o": [
+        [
+         "d",
+         [
+          1,
+          "x",
+          false
+         ]
+        ]
+       ]
+      }
+     ]
+    ]
+   }
+  },
+  {
+   "hex": "4e614e",
+   "ctype": null,
+   "result": {
+    "$o": []
+   }
+  },
+  {
+   "hex": "496e66696e697479",
+   "ctype": null,
+   "result": {
+    "$o": []
+   }
+  },
+  {
+   "hex": "7b227374726174656779223a226c6576656c73222c226c6f6e67223a747275652c2273686f7274223a66616c73657d",
+   "ctype": "application/json",
+   "result": {
+    "$o": [
+     [
+      "strategy",
+      "levels"
+     ],
+     [
+      "long",
+      true
+     ],
+     [
+      "short",
+      false
+     ]
+    ]
+   }
+  }
+ ]
+}

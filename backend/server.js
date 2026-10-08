@@ -21,6 +21,7 @@ const publicRoutes = require('./routes/public');
 const supportRoutes = require('./routes/support');
 const pushRoutes = require('./routes/push');
 const appRoutes = require('./routes/app');
+const { readBotBody } = require('./services/engine/botBody');
 const planService = require('./services/planService');
 const maintenanceService = require('./services/maintenanceService');
 const paymentWatcher = require('./workers/paymentWatcher');
@@ -77,6 +78,14 @@ if (process.env.NODE_ENV !== 'test' && process.env.VITEST !== 'true') {
 app.use('/api/payments/webhooks/stripe', express.raw({ type: 'application/json', limit: '1mb' }),
   (req, _res, next) => { req.rawBody = req.body; next(); });
 
+// /api/app/* reads its body like the bot's miniapp_api._read_body() on aiohttp (botBody.js):
+// Content-Type ignored, strict decode by its charset (utf-8 by default), json.loads; malformed
+// JSON, a BOM, invalid bytes or a top level that is not an object reach the route as {}, so it
+// answers with its own business error instead of a 400 from the strict parser.
+app.use('/api/app', express.raw({ type: () => true, limit: '1mb' }), (req, _res, next) => {
+  req.body = readBotBody(req.body, req.headers['content-type']);
+  next();
+});
 app.use(express.json({ limit: '1mb' }));
 app.use(express.urlencoded({ extended: true, limit: '1mb' }));
 

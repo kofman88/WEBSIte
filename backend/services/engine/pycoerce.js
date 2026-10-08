@@ -49,7 +49,7 @@ function pyBool(v) {
   if (v === null || v === undefined) return false;
   if (Array.isArray(v)) return v.length > 0;
   if (typeof v === 'object') return Object.keys(v).length > 0;
-  if (typeof v === 'number') return v !== 0 && !Number.isNaN(v);
+  if (typeof v === 'number') return v !== 0;            // bool(float('nan')) is True, bool(-0.0) False
   return Boolean(v);
 }
 
