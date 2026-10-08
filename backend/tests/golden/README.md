@@ -52,7 +52,10 @@ with `squeeze_score`, `passes_ctx_gate` (= `score >= cfg_obj.MIN_CONFIRMATIONS`)
 `high_wr_mode` with `strategies/smc/smcUserCfg.builderConfig` (the scanner's code path) and asserted
 equal to the recorded `smc_config` / `analysis_key` / `build_kwargs` in `prepare()`. All three variants
 (3642 / 377 / 4697 signals) match bit-for-bit incl. narrative and confirmation strings, also under
-`GOLDEN_STRICT=1`; `tests/smc/builder.test.js` pins the gates on Python-generated cases.
+`GOLDEN_STRICT=1`; `tests/smc/builder.test.js` pins the gates on Python-generated cases and
+`tests/smc/recordSchema.test.js` pins what the comparator leaves open (it walks the fixture's keys):
+the engine record has exactly the keys of `asdict(SMCSignalResult)` + the scanner post-steps, in
+order, the `round(x, k)` fields are rounded by the engine itself, confirmations are `[label, bool]`.
 
 ## Running a subset
 
