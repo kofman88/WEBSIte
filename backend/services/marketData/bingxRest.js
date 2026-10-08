@@ -87,7 +87,7 @@ class BingxRest {
   /** The gated GET + BingX envelope validation. Returns the parsed body or null. */
   async getJson(url, params = {}, { timeoutMs = 20_000, symbol = '', timeframe = '' } = {}) {
     this.apiCalls += 1;
-    const data = await this._gate.run(async () => {
+    const result = await this._gate.run(async () => {
       const resp = await this._http(url, { params, timeoutMs });
       if (resp.status === 429) {
         const h = resp.headers && resp.headers.get ? resp.headers.get('Retry-After') : null;
@@ -101,9 +101,15 @@ class BingxRest {
         this._fail(`HTTP ${resp.status} ${url} params=${JSON.stringify(params)} body=${JSON.stringify(body)}`);
         return null;
       }
-      return resp.json === undefined ? null : resp.json;
+      if ((resp.json === null || resp.json === undefined) && String(resp.text ?? '').trim() !== 'null') {
+        // aiohttp's resp.json() raised on a non-JSON body → the caller's except → _fail
+        this._fail(`invalid JSON from ${url}: ${JSON.stringify(String(resp.text ?? '').slice(0, 200))}`);
+        return null;
+      }
+      return { data: resp.json === undefined ? null : resp.json };
     });
-    if (data === null) return null;
+    if (result === null) return null;
+    const { data } = result;
     if (!isPlainObject(data)) {
       this._fail(`non-dict JSON from ${url}: ${JSON.stringify(String(JSON.stringify(data)).slice(0, 200))}`);
       return null;

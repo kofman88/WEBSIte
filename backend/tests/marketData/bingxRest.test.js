@@ -88,6 +88,13 @@ describe('getCandles', () => {
     expect(log.lines.warning[0]).toMatch(/^\[BINGX-DATA\] HTTP 500/);
     expect(rest.lastError).toContain('code=100400');
     expect(rest.isDead('BTC-USDT-SWAP')).toBe(false);
+    // an unparsable 200 body (aiohttp resp.json() raising) and a literal JSON null
+    const { rest: r2 } = mk(() => ({ status: 200, json: null, text: '<html>maintenance</html>' }));
+    expect(await r2.getCandles('BTC-USDT-SWAP', '1h', 300, 1)).toBe(null);
+    expect(r2.lastError).toContain('invalid JSON');
+    const { rest: r3 } = mk(() => ({ status: 200, json: null, text: 'null' }));
+    expect(await r3.getCandles('BTC-USDT-SWAP', '1h', 300, 1)).toBe(null);
+    expect(r3.lastError).toContain('non-dict JSON');
   });
 
   it('109425 / 109418 mark the symbol dead for 3600 s: no retries, no requests', async () => {
