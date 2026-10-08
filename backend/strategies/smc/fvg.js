@@ -33,6 +33,9 @@ function findFvgs(frame, minGapPct = 0.1, direction = 'both', includeFilled = fa
       const gapLow = highs[i - 2];
       const gapHigh = lows[i];
       if (gapHigh > gapLow) {
+        // QUIRK(spec §4.4): only the bearish branch guards `gap_low > 0`; a zero high two bars
+        // back is a Python float ZeroDivisionError (captured as analysis.error)
+        if (gapLow === 0) throw new Error('float division by zero');
         const gapPct = (gapHigh - gapLow) / gapLow * 100;
         if (gapPct >= minGapPct) {
           result.push({ type: 'bullish', fvg_low: gapLow, fvg_high: gapHigh, gap_pct: pyRound(gapPct, 3), bar_ago: n - 1 - i, idx: i, filled: false, inversed: false });

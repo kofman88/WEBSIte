@@ -66,6 +66,9 @@ function findImpulseFvg(frame, obIdx, direction) {
     const gapLow = highs[obIdx];
     const gapHigh = lows[i2];
     if (gapHigh > gapLow) {
+      // QUIRK(spec §4.3 step 4): Python float division — an OB candle with high 0 raises
+      // ZeroDivisionError inside get_order_blocks (captured as analysis.error)
+      if (gapLow === 0) throw new Error('float division by zero');
       const gapPct = (gapHigh - gapLow) / gapLow * 100;
       return { type: 'bullish', fvg_low: gapLow, fvg_high: gapHigh, gap_pct: pyRound(gapPct, 3), idx: i2, bar_ago: n - 1 - i2 };
     }
@@ -73,6 +76,7 @@ function findImpulseFvg(frame, obIdx, direction) {
     const gapHigh = lows[obIdx];
     const gapLow = highs[i2];
     if (gapHigh > gapLow) {
+      if (gapHigh === 0) throw new Error('float division by zero');
       const gapPct = (gapHigh - gapLow) / gapHigh * 100;
       return { type: 'bearish', fvg_low: gapLow, fvg_high: gapHigh, gap_pct: pyRound(gapPct, 3), idx: i2, bar_ago: n - 1 - i2 };
     }

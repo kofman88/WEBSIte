@@ -49,6 +49,33 @@ function passesCtxGate(sig, cfg) {
 }
 
 /**
+ * Scanner post-build direction filters (spec §6.5), applied AFTER build_smc_signal:
+ *   ucfg.direction != "BOTH" and sig.direction != ucfg.direction → skip
+ *   (smc_long_active or smc_short_active) and the flag of sig.direction is off → skip
+ * QUIRK: the first test is a raw string compare — a direction value outside BOTH/LONG/SHORT
+ * (e.g. "long") lets build_smc_signal try both sides (§6.2) and then rejects every signal here.
+ */
+function passesUserDirection(sig, ucfg, smcLongActive = false, smcShortActive = false) {
+  const direction = pyGet(ucfg, 'direction', 'BOTH');
+  if (direction !== 'BOTH' && sig.direction !== direction) return false;
+  const l = Boolean(smcLongActive);
+  const s = Boolean(smcShortActive);
+  if ((l || s) && !(sig.direction === 'LONG' ? l : s)) return false;
+  return true;
+}
+
+/**
+ * [SMC-VOL-GATE] per-(user, symbol) 24 h volume gate (spec §3 step 3 / §6.2):
+ *   user_min = float(ucfg.min_volume_usdt or 0); coin_vol = float(vol_by_sym.get(symbol, 0) or 0)
+ *   scanned unless user_min > 0 and coin_vol < user_min.
+ */
+function passesVolumeGate(ucfg, coinVol) {
+  const userMin = pyFloat(pyOr(pyGet(ucfg, 'min_volume_usdt', 5000000), 0));
+  const vol = pyFloat(pyOr(coinVol === undefined ? 0 : coinVol, 0));
+  return !(userMin > 0 && vol < userMin);
+}
+
+/**
  * The complete pure path of one (symbol, user) in smc/scanner._scan_cycle up to the
  * signal object (no BTC-trend bonus, momentum veto, dedup or quotas):
  *   analysis = SMCAnalyzer(SMCConfig(key)).analyze(...); analysis.squeeze_score = int(squeeze or 0);
@@ -56,8 +83,8 @@ function passesCtxGate(sig, cfg) {
  * Returns { analysis, signal (with squeeze_score / passes_ctx_gate / rr_ladder) | null, cfg, buildKwargs, analysisKey }.
  * Pass `analyzerCfg` to reuse a prepared analyzer config and `builderCfg` to skip the derivation.
  */
-function evaluate({ symbol, dfHtf, dfMtf, dfLtf, ucfg = null, highWrMode = false, smcLongActive = false, smcShortActive = false, allowedDirs = null, builderCfg = null, analyzerCfg = null }) {
-  const bc = builderCfg || smcUserCfg.builderConfig(ucfg || smcUserCfg.defaults(), { highWrMode, smcLongActive, smcShortActive, allowedDirs });
+function evaluate({ symbol, dfHtf, dfMtf, dfLtf, ucfg = null, highWrMode = false, relaxedMode = false, smcLongActive = false, smcShortActive = false, allowedDirs = null, builderCfg = null, analyzerCfg = null }) {
+  const bc = builderCfg || smcUserCfg.builderConfig(ucfg || smcUserCfg.defaults(), { highWrMode, relaxedMode, smcLongActive, smcShortActive, allowedDirs });
   const anCfg = analyzerCfg || configFromAnalysisKey(bc.analysisKey);
   const analysis = analyze(symbol, dfHtf, dfMtf, dfLtf, anCfg);
   analysis.squeeze_score = computeSqueezeScore(dfMtf) || 0;   // int(compute_squeeze_score(df_mtf) or 0)
@@ -80,6 +107,6 @@ module.exports = {
   buildSmcSignal: builder.buildSmcSignal, scoreBullish: builder.scoreBullish, scoreBearish: builder.scoreBearish,
   checkRetraceWithDepth: builder.checkRetraceWithDepth, computeModeTag: builder.computeModeTag,
   GRADES: builder.GRADES, LABELS: builder.LABELS,
-  rrLadder, rrLadderText, passesCtxGate, evaluate,
+  rrLadder, rrLadderText, passesCtxGate, passesUserDirection, passesVolumeGate, evaluate,
   smcUserCfg,
 };

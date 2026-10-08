@@ -48,6 +48,11 @@ const FIELD_NAMES = Object.freeze(FIELDS.map((f) => f[0]));
 const FIELD_TYPES = Object.freeze(Object.fromEntries(FIELDS.map((f) => [f[0], f[1]])));
 const DEFAULTS = Object.freeze(Object.fromEntries(FIELDS.map((f) => [f[0], f[2]])));
 
+/** Python `k in valid` on the dataclass field set — own keys only (never "constructor" & co.). */
+function isField(k) {
+  return Object.prototype.hasOwnProperty.call(FIELD_TYPES, k);
+}
+
 /** Bot keyboard options / handler clamps (spec §2.2). Defaults missing from a list are a bot quirk (§11.16). */
 const RANGES = Object.freeze({
   tf_key: Object.freeze(['15m', '1H', '4H']),
@@ -80,7 +85,7 @@ function fromJson(s) {
     const d = JSON.parse(s || '{}');
     if (!d || typeof d !== 'object' || Array.isArray(d)) return defaults();
     const cfg = defaults();
-    for (const k of Object.keys(d)) if (FIELD_TYPES[k]) cfg[k] = d[k];
+    for (const k of Object.keys(d)) if (isField(k)) cfg[k] = d[k];
     return cfg;
   } catch {
     return defaults();
@@ -90,13 +95,29 @@ function fromJson(s) {
 /** SMCUserCfg(**overrides) — unknown keys raise in Python; here they are ignored (settings layer validates). */
 function fromOverrides(overrides = {}) {
   const cfg = defaults();
-  for (const k of Object.keys(overrides || {})) if (FIELD_TYPES[k]) cfg[k] = overrides[k];
+  for (const k of Object.keys(overrides || {})) if (isField(k)) cfg[k] = overrides[k];
   return cfg;
 }
 
-/** The (HTF, MTF, LTF) group of a tf_key; unknown keys fall back to the "1H" group. */
+/**
+ * The (HTF, MTF, LTF) group of a tf_key; unknown keys fall back to the "1H" group
+ * (`if tf_key not in _SMC_TF_MAP: tf_key = "1H"` — a dict lookup, so a key like
+ * "constructor" is unknown too, not an inherited property).
+ */
 function tfGroup(tfKey) {
-  return SMC_TF_MAP[tfKey] || SMC_TF_MAP['1H'];
+  return Object.prototype.hasOwnProperty.call(SMC_TF_MAP, tfKey) ? SMC_TF_MAP[tfKey] : SMC_TF_MAP['1H'];
+}
+
+/**
+ * momentum_detector.relax_confirmations / relax_min_rr while the global relaxed mode is on
+ * (BTC/ETH moved > 2 % in 1 h or volume > 2.5× average, 30 min): max(2, x − 1) / max(1.5, x − 0.5).
+ * Outside relaxed mode both are the identity (spec §2.5).
+ */
+function relaxConfirmations(x, relaxed = true) {
+  return relaxed ? pyMax2(2, x - 1) : x;
+}
+function relaxMinRr(x, relaxed = true) {
+  return relaxed ? pyMax2(1.5, x - 0.5) : x;
 }
 
 /**
@@ -115,17 +136,18 @@ function allowedDirs(ucfg, smcLongActive = false, smcShortActive = false) {
 }
 
 /**
- * smc/scanner._scan_cycle user-cache construction (momentum relaxed mode = off), i.e.
- * make_golden._smc_cfg_from_user(ucfg, high_wr_mode):
- *   cfg_obj = SMCConfig() with the user fields copied on; key = _analysis_key(cfg_obj);
+ * smc/scanner._scan_cycle user-cache construction, i.e. make_golden._smc_cfg_from_user(ucfg,
+ * high_wr_mode) plus the momentum relaxed mode the generator keeps off:
+ *   cfg_obj = SMCConfig() with the user fields copied on; MIN_CONFIRMATIONS / MIN_RR go through
+ *   relax_confirmations / relax_min_rr first (identity unless `relaxedMode`); key = _analysis_key(cfg_obj);
  *   high_wr_mode → MIN_CONFIRMATIONS = max(., 4), pd_filter = mtf_check = True.
  * Returns { cfg, analysisKey, buildKwargs, pdFilter, mtfCheck }; `buildKwargs` are the
  * exact keyword arguments of build_smc_signal (tf_* from the user's tf_key group).
  */
-function builderConfig(ucfg, { highWrMode = false, smcLongActive = false, smcShortActive = false, allowedDirs: dirsOverride = null } = {}) {
+function builderConfig(ucfg, { highWrMode = false, relaxedMode = false, smcLongActive = false, smcShortActive = false, allowedDirs: dirsOverride = null } = {}) {
   const cfg = smcConfig();
-  cfg.MIN_CONFIRMATIONS = ucfg.min_confirmations;
-  cfg.MIN_RR = ucfg.min_rr;
+  cfg.MIN_CONFIRMATIONS = relaxConfirmations(ucfg.min_confirmations, pyTruthy(relaxedMode));
+  cfg.MIN_RR = relaxMinRr(ucfg.min_rr, pyTruthy(relaxedMode));
   cfg.SL_BUFFER_PCT = ucfg.sl_buffer_pct;
   cfg.FVG_ENABLED = ucfg.fvg_enabled;
   cfg.CHOCH_ENABLED = ucfg.choch_enabled;
@@ -163,5 +185,5 @@ function builderConfig(ucfg, { highWrMode = false, smcLongActive = false, smcSho
 
 module.exports = {
   FIELDS, FIELD_NAMES, FIELD_TYPES, DEFAULTS, RANGES, SMC_TF_MAP,
-  defaults, fromJson, fromOverrides, tfGroup, allowedDirs, builderConfig,
+  defaults, fromJson, fromOverrides, isField, tfGroup, allowedDirs, relaxConfirmations, relaxMinRr, builderConfig,
 };

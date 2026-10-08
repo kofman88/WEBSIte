@@ -37,6 +37,9 @@ function findEqualLevels(levels, thresholdPct = 0.05) {
   for (let k = 1; k < sorted.length; k++) {
     const lvl = sorted[k];
     const ref = group[0].price;
+    // QUIRK(spec §4.2): `abs(price - ref) / ref` is Python float division — a swing at price 0
+    // (a zero low/high in the frame) raises ZeroDivisionError, captured as analysis.error
+    if (ref === 0) throw new Error('float division by zero');
     const diff = Math.abs(lvl.price - ref) / ref * 100;
     if (diff <= thresholdPct) {
       group.push(lvl);
