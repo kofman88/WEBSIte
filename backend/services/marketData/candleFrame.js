@@ -10,6 +10,7 @@
  */
 
 const { Frame } = require('../../strategies/common/frame');
+const { ND_DIGIT, PY_SPACE } = require('../engine/pyUnicode');
 
 // BingX interval strings — all lower-case except 1M.
 const TF_TO_BINGX = Object.freeze({
@@ -68,31 +69,36 @@ function tfMsBingx(tfBingx) { return TF_MS[tfBingx] ?? DEFAULT_TF_MS; }
 class PyValueError extends Error {}
 
 // Python's `int()` / `float()` string grammar: optional sign, decimal digits of ANY Unicode
-// script (category Nd — fullwidth, Arabic-Indic, …), single underscores only BETWEEN digits
-// ("1_0" ok, "1__0" / "_10" / "10_" raise), surrounding whitespace ignored; floats add the
-// fraction / exponent (underscores allowed inside each digit run) and the inf / nan words.
-const ND_RE = /\p{Nd}/u;
+// script (category Nd of the bot's Unicode database, CPython 3.11 = unicodedata 14.0.0:
+// fullwidth, Arabic-Indic, … but not the Kawi / Nag Mundari digits of Unicode 15), single
+// underscores only BETWEEN digits ("1_0" ok, "1__0" / "_10" / "10_" raise), surrounding
+// whitespace ignored; floats add the fraction / exponent (underscores allowed inside each
+// digit run) and the inf / nan words.
 const INT_RE = /^[+-]?\d(?:_?\d)*$/;
 const FLOAT_RE = /^[+-]?(?:\d(?:_?\d)*(?:\.(?:\d(?:_?\d)*)?)?|\.\d(?:_?\d)*)(?:e[+-]?\d(?:_?\d)*)?$/;
 
-/**
- * Every Unicode decimal digit → its ASCII digit. Nd characters are encoded in contiguous
- * runs 0…9 (Unicode stability policy), so the offset inside the run modulo 10 is the value.
- */
+/** Every Unicode decimal digit (the bot's Nd table) → its ASCII digit; anything else is kept. */
 function asciiDigits(s) {
   let out = '';
   for (const ch of s) {
-    if (ch >= '0' && ch <= '9') { out += ch; continue; }
-    if (ND_RE.test(ch)) {
-      const cp = ch.codePointAt(0);
-      let start = cp;
-      while (start > 0 && ND_RE.test(String.fromCodePoint(start - 1))) start -= 1;
-      out += String((cp - start) % 10);
-    } else {
-      out += ch;
-    }
+    const d = ND_DIGIT.get(ch.codePointAt(0));
+    out += d === undefined ? ch : String(d);
   }
   return out;
+}
+
+/**
+ * The text int() / float() parse (_PyUnicode_TransformDecimalAndSpaceToASCII): a non-ASCII
+ * str.isspace() character reads as ' ', a decimal digit as its ASCII digit, then only the ASCII
+ * whitespace " \t\n\v\f\r" is stripped (U+FEFF and \x1c–\x1f are no number whitespace).
+ */
+function numText(s) {
+  let out = '';
+  for (const ch of s) {
+    const c = ch.codePointAt(0);
+    out += c >= 0x80 && PY_SPACE.has(c) ? ' ' : ch;
+  }
+  return asciiDigits(out).replace(/^[ \t\n\v\f\r]+|[ \t\n\v\f\r]+$/g, '');
 }
 
 /** Python `int(x)`: ints, floats (truncated), integer strings; anything else throws. */
@@ -104,7 +110,7 @@ function pyInt(x) {
   if (typeof x === 'boolean') return x ? 1 : 0;
   if (typeof x === 'bigint') return Number(x);
   if (typeof x === 'string') {
-    const s = asciiDigits(x.trim());
+    const s = numText(x);
     if (!INT_RE.test(s)) throw new PyValueError(`invalid literal for int() with base 10: ${JSON.stringify(x)}`);
     return Number(s.replace(/_/g, ''));
   }
@@ -117,7 +123,7 @@ function pyFloat(x) {
   if (typeof x === 'boolean') return x ? 1 : 0;
   if (typeof x === 'bigint') return Number(x);
   if (typeof x === 'string') {
-    const s = asciiDigits(x.trim()).toLowerCase();
+    const s = numText(x).toLowerCase();
     if (s === '') throw new PyValueError('could not convert string to float: \'\'');
     if (s === 'inf' || s === '+inf' || s === 'infinity' || s === '+infinity') return Infinity;
     if (s === '-inf' || s === '-infinity') return -Infinity;

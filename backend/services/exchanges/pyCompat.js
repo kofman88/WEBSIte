@@ -27,6 +27,9 @@
  */
 
 const { pyRepr: floatRepr } = require('../../strategies/common/pyfmt');
+// str.isprintable() of the bot's Unicode database (CPython 3.11: unicodedata 14.0.0), not Node's
+// \p{…} classes (Unicode 16): a character assigned after 14.0 is Cn for the bot, so repr() escapes it.
+const { isPrintable } = require('../engine/pyUnicode');
 
 class PyError extends Error {
   constructor(pyType, message) {
@@ -111,8 +114,6 @@ function pyIndex(d, key) {
 
 // ── repr ────────────────────────────────────────────────────────────────────
 
-const NON_PRINTABLE = /[\p{Cc}\p{Cf}\p{Cs}\p{Co}\p{Cn}\p{Zl}\p{Zp}\p{Zs}]/u;
-
 function hex(n, width) { return n.toString(16).padStart(width, '0'); }
 
 /** repr(str) — CPython unicode_repr. */
@@ -128,7 +129,7 @@ function pyStrRepr(s) {
     else if (ch === '\r') out += '\\r';
     else if (cp < 0x20 || cp === 0x7f) out += '\\x' + hex(cp, 2);
     else if (cp < 0x7f) out += ch;
-    else if (ch !== ' ' && NON_PRINTABLE.test(ch)) {
+    else if (!isPrintable(cp)) {
       if (cp <= 0xff) out += '\\x' + hex(cp, 2);
       else if (cp <= 0xffff) out += '\\u' + hex(cp, 4);
       else out += '\\U' + hex(cp, 8);
