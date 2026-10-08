@@ -117,9 +117,20 @@ function htmlEscape(s) {
     .replace(/"/g, '&quot;').replace(/'/g, '&#x27;');
 }
 
+// str.isspace() code points (CPython _PyUnicode_IsWhitespace) — note U+FEFF is NOT one,
+// unlike JS \s; U+001C..U+001F and U+0085 are.
+const PY_SPACE = new Set([
+  0x09, 0x0a, 0x0b, 0x0c, 0x0d, 0x1c, 0x1d, 0x1e, 0x1f, 0x20, 0x85, 0xa0, 0x1680,
+  0x2000, 0x2001, 0x2002, 0x2003, 0x2004, 0x2005, 0x2006, 0x2007, 0x2008, 0x2009, 0x200a,
+  0x2028, 0x2029, 0x202f, 0x205f, 0x3000,
+]);
+
 /** Python str.rstrip() (whitespace). */
 function rstrip(s) {
-  return String(s).replace(/[\s\u0085\u001c-\u001f]+$/u, '');
+  const str = String(s);
+  let end = str.length;
+  while (end > 0 && PY_SPACE.has(str.charCodeAt(end - 1))) end--;
+  return str.slice(0, end);
 }
 
 /** len(str) in code points, like Python. */

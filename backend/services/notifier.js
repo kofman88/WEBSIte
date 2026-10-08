@@ -12,6 +12,13 @@
  *     telegram: { trade_opened: true, trade_closed: true, signal: true,  payment: true, referral: true }
  *   }
  * Missing keys default to `true`. Users can opt out per type in Settings.
+ *
+ * Engine types (M10, PLAN §2.4): `signal` (delivered card → feed row; its id becomes
+ * signal_trades.signal_msg_id), `progress` (tracker TP/SL/BE notice), `trend` (BTC trend
+ * change), `report` (daily summary / weekly digest), `trade` (exchange position events).
+ * `silent: true` is the bot's `disable_notification` (quiet hours): in-app only — no
+ * e-mail, no Telegram mirror, no Web Push. Every in-app row is also pushed to the user's
+ * open SSE streams (`notification`, plus the type's own event for engine types).
  */
 
 const db = require('../models/database');
@@ -21,9 +28,24 @@ const telegramService = require('./telegramService');
 const logger = require('../utils/logger');
 
 const DEFAULT_PREFS = {
-  email:    { trade_opened: true, trade_closed: true, signal: false, payment: true, referral: true, security: true, weekly_digest: true },
-  telegram: { trade_opened: true, trade_closed: true, signal: true,  payment: true, referral: true, security: true },
+  email:    { trade_opened: true, trade_closed: true, signal: false, payment: true, referral: true, security: true, weekly_digest: true,
+    progress: false, trend: true, report: true, trade: true },
+  telegram: { trade_opened: true, trade_closed: true, signal: true,  payment: true, referral: true, security: true,
+    progress: true, trend: true, report: true, trade: true },
 };
+
+/** Notification types the engine dispatches (each is also an SSE event name). */
+const ENGINE_TYPES = Object.freeze(['signal', 'progress', 'trend', 'report', 'trade']);
+const SSE_TYPES = new Set([...ENGINE_TYPES, 'payment']);
+
+function sseBroadcast(userId, event, data) {
+  try {
+    return require('./sseService').broadcast(userId, event, data);
+  } catch (err) {
+    logger.warn('sse broadcast failed', { userId, event, err: err.message });
+    return 0;
+  }
+}
 
 function getPrefs(userId) {
   const row = db.prepare('SELECT notification_prefs FROM users WHERE id = ?').get(userId);
@@ -60,9 +82,12 @@ function defaults() { return DEFAULT_PREFS; }
  * @param {string} [opts.link]    — relative URL for in-app click
  * @param {string} [opts.emailHtml] — optional full HTML body for email
  * @param {string} [opts.tgText]  — optional HTML for Telegram (uses title+body if absent)
+ * @param {boolean} [opts.silent] — quiet hours: in-app (+ SSE) only, no e-mail / Telegram / push
+ * @param {Object} [opts.data]    — payload of the type's SSE event (engine types; default: the row)
+ * @returns {{dispatched: true, notificationId: number|null, silent: boolean}|{error: string}}
  */
 async function dispatch(userId, opts) {
-  const { type, title, body = null, link = null, emailHtml = null, tgText = null } = opts;
+  const { type, title, body = null, link = null, emailHtml = null, tgText = null, silent = false, data = null } = opts;
   if (!userId || !type || !title) return { error: 'invalid_args' };
 
   const user = db.prepare('SELECT email, email_verified FROM users WHERE id = ? AND is_active = 1').get(userId);
@@ -70,8 +95,16 @@ async function dispatch(userId, opts) {
   const prefs = getPrefs(userId);
 
   // 1. In-app (always)
-  try { notifications.create(userId, { type, title, body, link }); }
+  let notificationId = null;
+  try { notificationId = Number(notifications.create(userId, { type, title, body, link })); }
   catch (err) { logger.warn('in-app notification failed', { userId, type, err: err.message }); }
+
+  // 1b. Live push to open SSE streams (best-effort; polling is the baseline — D2)
+  const row = { id: notificationId, type, title, body, link };
+  sseBroadcast(userId, 'notification', row);
+  if (SSE_TYPES.has(type)) sseBroadcast(userId, type, data || row);
+
+  if (silent) return { dispatched: true, notificationId, silent: true };
 
   // Master switches from feature flags — lets ops kill a channel during
   // an incident (spam wave / SMTP provider outage) without a code push.
@@ -115,7 +148,7 @@ async function dispatch(userId, opts) {
     }
   } catch (_e) { /* web-push not installed */ }
 
-  return { dispatched: true };
+  return { dispatched: true, notificationId, silent: false };
 }
 
 function fallbackEmailHtml(title, body, link) {
@@ -134,4 +167,4 @@ function fallbackEmailHtml(title, body, link) {
 function escapeHtml(s) { return String(s || '').replace(/[&<>"']/g, (c) => ({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' }[c])); }
 function escapeAttr(s) { return String(s || '').replace(/"/g, '&quot;'); }
 
-module.exports = { dispatch, getPrefs, savePrefs, defaults };
+module.exports = { dispatch, getPrefs, savePrefs, defaults, ENGINE_TYPES };
