@@ -4,8 +4,8 @@
  * fixtures/frames.json holds small deterministic candle frames; fixtures/expected.json
  * is what the bot's own Python code (smc/structure.py, liquidity.py, order_block.py,
  * fvg.py, premium_discount.py, analyzer.py, squeeze_detector.py) returned for them
- * (generated with the pinned venv, see the scratchpad generator in the M3 branch
- * notes). Every block asserts the pinned behaviour AND deep equality with Python.
+ * (fixtures/gen_expected.py with the pinned CPython 3.11 venv, see its docstring).
+ * Every block asserts the pinned behaviour AND deep equality with Python.
  */
 import { describe, it, expect } from 'vitest';
 import fs from 'fs';

@@ -4,7 +4,7 @@
  * encoding of the Python generators), a deterministic clock and a log capture.
  *
  * Fixtures are produced by the bot's own Python code — see py/README.md for the
- * generator commands (venv: scratchpad/venv/bin/python, cwd MAIN_BOT/CHM_BREAKER_V4,
+ * generator commands (venv: CPython 3.11 + the bot's pinned requirements, cwd MAIN_BOT/CHM_BREAKER_V4,
  * env BOT_TOKEN_CHM=test:token ADMIN_IDS=123).
  */
 const fs = require('fs');
