@@ -26,6 +26,7 @@ const { pyTruthy } = require('../../strategies/common/pyval');
 const { GRADES } = require('../../strategies/smc/signalBuilder');
 const { pyJsonDumps } = require('./pyjson');
 const { pyInt, pyFloat } = require('./pycoerce');
+const { pyLoads } = require('./signalTradesRepo');
 const { log: defaultLog } = require('../marketData/mdLog');
 
 const SYMBOL = 'BTC-USDT-SWAP';
@@ -473,7 +474,7 @@ function createTrendMonitor(deps = {}) {
       try {
         const raw = kvOf().get(KV_KEY);
         if (raw) {
-          const data = JSON.parse(raw);
+          const data = pyLoads(raw);   // json.loads: a NaN price (last close NaN) round-trips like in the bot
           if (data && typeof data === 'object' && !Array.isArray(data)) {
             for (const [tf, st] of Object.entries(data)) {
               if (TFS.includes(tf) && st && typeof st === 'object' && !Array.isArray(st) && pyTruthy(st.trend)) {
@@ -635,7 +636,7 @@ function createTrendMonitor(deps = {}) {
       try {
         const raw = kvOf().get(KV_ALIGNED);
         if (raw) {
-          const data = JSON.parse(raw);
+          const data = pyLoads(raw);
           if (data === null || typeof data !== 'object' || Array.isArray(data)) {
             throw new TypeError("object has no attribute 'get'");
           }

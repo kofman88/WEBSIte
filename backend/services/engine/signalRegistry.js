@@ -20,6 +20,7 @@
 'use strict';
 
 const { pyJsonDumps } = require('./pyjson');
+const { pyLoads, pyTypeName } = require('./signalTradesRepo');
 const { pyInt, pyFloat } = require('./pycoerce');
 const { pyMax, pyMin } = require('../../strategies/common/pyround');
 const { log: defaultLog } = require('../marketData/mdLog');
@@ -129,25 +130,28 @@ function createSignalRegistry(deps = {}) {
     /**
      * _persist_load(): restore the live entries from kv. Like the bot, any malformed
      * timestamp aborts the whole load (nothing restored, one warning); a key whose uid
-     * is not an int is skipped; only entries with now − ts < ttl are kept.
+     * is not an int is skipped; only entries with now − ts < ttl are kept. Parsed like
+     * json.load (NaN / Infinity tokens; an empty value warns "Expecting value").
      */
     load() {
       try {
         const raw = kvOf().get(PERSIST_KEY);
-        if (!raw) return 0;
-        const data = JSON.parse(raw);
-        if (data === null || typeof data !== 'object' || Array.isArray(data)) {
-          throw new TypeError(`'${Array.isArray(data) ? 'list' : typeof data}' object has no attribute 'items'`);
-        }
+        if (raw === null || raw === undefined) return 0;   // no file → silent; an empty one fails json.load below
+        // json.load: NaN / Infinity tokens, document order, the bot's JSONDecodeError text
+        const data = pyLoads(raw, { mapDepth: 1 });
+        if (!(data instanceof Map)) throw new TypeError(`'${pyTypeName(data, raw)}' object has no attribute 'items'`);
         const t = now();
         const loaded = new Map();
-        for (const [kStr, ts] of Object.entries(data)) {
+        for (const [kStr, ts] of data) {
           const parts = String(kStr).split('|');
           if (parts.length < 3) continue;
           let uid;
           try { uid = pyInt(parts[0]); } catch (_e) { continue; }   // int(parts[0]) ValueError → skip
           const key = [String(uid), ...parts.slice(1)].join('|');
           const ttl = ttlFor(parts.length > 3 ? parts[3] : '');
+          if (ts !== null && typeof ts === 'object') {   // float(list / dict) → TypeError aborts the load
+            throw new TypeError(`float() argument must be a string or a real number, not '${pyTypeName(ts)}'`);
+          }
           const f = pyFloat(ts);   // float(ts): TypeError / ValueError abort the load (outer except)
           if (t - f < ttl) loaded.set(key, f);   // загружаем только не истёкшие
         }

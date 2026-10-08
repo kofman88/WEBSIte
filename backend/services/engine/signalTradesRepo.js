@@ -114,26 +114,178 @@ function escapeJsonString(s, ensureAscii) {
  * json.dumps(value, default=str, ensure_ascii=False) for plain JS values: Python
  * separators (", ", ": "), non-integral numbers as repr(float), integral numbers as
  * ints, NaN/Infinity tokens, anything else → its str().
+ *
+ * `floatKeys` names the dict keys whose numbers are Python floats (JS has one number
+ * type): an integral value under such a key prints as repr(float) — `2.0`, not `2`.
  */
-function pyDumps(value, { ensureAscii = false } = {}) {
-  const walk = (v) => {
+function pyDumps(value, { ensureAscii = false, floatKeys = null } = {}) {
+  const floats = floatKeys ? new Set(floatKeys) : null;
+  const walk = (v, key) => {
     if (v === null || v === undefined) return 'null';
     if (typeof v === 'boolean') return v ? 'true' : 'false';
     if (typeof v === 'number') {
       if (Number.isNaN(v)) return 'NaN';
       if (!Number.isFinite(v)) return v > 0 ? 'Infinity' : '-Infinity';
-      return Number.isInteger(v) && !Object.is(v, -0) ? String(v) : pyRepr(v);
+      const isFloat = Boolean(floats && key !== null && floats.has(key));
+      return !isFloat && Number.isInteger(v) && !Object.is(v, -0) ? String(v) : pyRepr(v);
     }
     if (typeof v === 'bigint') return v.toString();
     if (typeof v === 'string') return escapeJsonString(v, ensureAscii);
-    if (Array.isArray(v)) return '[' + v.map(walk).join(', ') + ']';
+    if (Array.isArray(v)) return '[' + v.map((x) => walk(x, null)).join(', ') + ']';
     if (v instanceof Date) return escapeJsonString(String(v), ensureAscii);
     if (typeof v === 'object') {
-      return '{' + Object.keys(v).map((k) => escapeJsonString(String(k), ensureAscii) + ': ' + walk(v[k])).join(', ') + '}';
+      return '{' + Object.keys(v).map((k) => escapeJsonString(String(k), ensureAscii) + ': ' + walk(v[k], k)).join(', ') + '}';
     }
     return escapeJsonString(String(v), ensureAscii);
   };
-  return walk(value);
+  return walk(value, null);
+}
+
+/** json.JSONDecodeError: "<msg>: line L column C (char P)" (positions in code points, like CPython). */
+class PyJSONDecodeError extends SyntaxError {
+  constructor(msg, doc, pos) {
+    const head = Array.from(doc.slice(0, pos));
+    const cpPos = head.length;
+    let lineno = 1;
+    let lastNl = -1;
+    head.forEach((ch, i) => { if (ch === '\n') { lineno++; lastNl = i; } });
+    super(`${msg}: line ${lineno} column ${cpPos - lastNl} (char ${cpPos})`);
+    this.name = 'JSONDecodeError';
+    this.msg = msg;
+    this.pos = cpPos;
+  }
+}
+
+/**
+ * json.loads(text) as CPython's C scanner reads it: the NaN / Infinity / -Infinity
+ * tokens are accepted, integers and floats as numbers (an integer "-0" is 0), duplicate
+ * keys keep the first position and the last value, a BOM / extra data / any syntax error
+ * throws PyJSONDecodeError with the bot's message ("Expecting value: line 1 column 1
+ * (char 0)", "Expecting ',' delimiter: …", "Extra data: …").
+ *
+ * JSON.parse cannot read what Python's json.dumps writes for a NaN / ±inf float, and a
+ * plain JS object reorders integer-like keys ("101" before "7"); objects nested less
+ * than `mapDepth` levels deep are therefore returned as Maps in document order (a
+ * uid-keyed kv blob iterates like the bot's dict).
+ */
+function pyLoads(text, { mapDepth = 0 } = {}) {
+  const s = String(text);
+  const n = s.length;
+  if (s.charCodeAt(0) === 0xfeff) throw new PyJSONDecodeError('Unexpected UTF-8 BOM (decode using utf-8-sig)', s, 0);
+  const isWs = (c) => c === ' ' || c === '\t' || c === '\n' || c === '\r';
+  const skipWs = (i) => { while (i < n && isWs(s[i])) i++; return i; };
+  const STOP = Symbol('stop');
+  const stop = (pos) => { const e = new Error('StopIteration'); e[STOP] = pos; return e; };
+  const ESC = { '"': '"', '\\': '\\', '/': '/', b: '\b', f: '\f', n: '\n', r: '\r', t: '\t' };
+  const hex4 = (i) => (/^[0-9a-fA-F]{4}$/.test(s.slice(i, i + 4)) ? parseInt(s.slice(i, i + 4), 16) : -1);
+  const NUM = /(-?(?:0|[1-9][0-9]*))(\.[0-9]+)?([eE][-+]?[0-9]+)?/y;
+
+  function scanString(end) {   // end = index after the opening quote
+    const begin = end - 1;
+    let out = '';
+    let i = end;
+    for (;;) {
+      let j = i;
+      while (j < n && s[j] !== '"' && s[j] !== '\\') {
+        if (s.charCodeAt(j) <= 0x1f) throw new PyJSONDecodeError('Invalid control character at', s, j);
+        j++;
+      }
+      if (j >= n) throw new PyJSONDecodeError('Unterminated string starting at', s, begin);
+      out += s.slice(i, j);
+      if (s[j] === '"') return [out, j + 1];
+      const k = j + 1;
+      if (k >= n) throw new PyJSONDecodeError('Unterminated string starting at', s, begin);
+      const c = s[k];
+      if (c !== 'u') {
+        if (!Object.prototype.hasOwnProperty.call(ESC, c)) throw new PyJSONDecodeError('Invalid \\escape', s, j);
+        out += ESC[c];
+        i = k + 1;
+      } else {
+        if (k + 5 >= n) throw new PyJSONDecodeError('Invalid \\uXXXX escape', s, k);
+        const u = hex4(k + 1);
+        if (u < 0) throw new PyJSONDecodeError('Invalid \\uXXXX escape', s, k);
+        out += String.fromCharCode(u);   // a surrogate pair joins in UTF-16 like chr(join) in Python
+        i = k + 5;
+      }
+    }
+  }
+
+  function setKey(obj, key, val) {
+    if (obj instanceof Map) obj.set(key, val);
+    else if (key === '__proto__') Object.defineProperty(obj, key, { value: val, enumerable: true, writable: true, configurable: true });
+    else obj[key] = val;
+  }
+
+  function scanOnce(i, depth) {
+    if (i >= n) throw stop(i);
+    const c = s[i];
+    if (c === '"') return scanString(i + 1);
+    if (c === '{') {
+      const obj = depth < mapDepth ? new Map() : {};
+      let j = skipWs(i + 1);
+      if (j < n && s[j] === '}') return [obj, j + 1];
+      for (;;) {
+        if (j >= n || s[j] !== '"') throw new PyJSONDecodeError('Expecting property name enclosed in double quotes', s, j);
+        const [key, afterKey] = scanString(j + 1);
+        j = skipWs(afterKey);
+        if (j >= n || s[j] !== ':') throw new PyJSONDecodeError("Expecting ':' delimiter", s, j);
+        j = skipWs(j + 1);
+        const [val, afterVal] = scanOnce(j, depth + 1);
+        setKey(obj, key, val);
+        j = skipWs(afterVal);
+        if (j < n && s[j] === '}') return [obj, j + 1];
+        if (j >= n || s[j] !== ',') throw new PyJSONDecodeError("Expecting ',' delimiter", s, j);
+        j = skipWs(j + 1);
+      }
+    }
+    if (c === '[') {
+      const arr = [];
+      let j = skipWs(i + 1);
+      if (j < n && s[j] === ']') return [arr, j + 1];
+      for (;;) {
+        const [val, afterVal] = scanOnce(j, depth + 1);
+        arr.push(val);
+        j = skipWs(afterVal);
+        if (j < n && s[j] === ']') return [arr, j + 1];
+        if (j >= n || s[j] !== ',') throw new PyJSONDecodeError("Expecting ',' delimiter", s, j);
+        j = skipWs(j + 1);
+      }
+    }
+    if (s.startsWith('null', i)) return [null, i + 4];
+    if (s.startsWith('true', i)) return [true, i + 4];
+    if (s.startsWith('false', i)) return [false, i + 5];
+    if (s.startsWith('NaN', i)) return [NaN, i + 3];
+    if (s.startsWith('Infinity', i)) return [Infinity, i + 8];
+    if (s.startsWith('-Infinity', i)) return [-Infinity, i + 9];
+    NUM.lastIndex = i;
+    const m = NUM.exec(s);
+    if (!m) throw stop(i);
+    if (m[2] || m[3]) return [Number(m[0]), i + m[0].length];
+    const v = Number(m[1]);
+    return [Object.is(v, -0) ? 0 : v, i + m[0].length];
+  }
+
+  let value;
+  let end;
+  try {
+    [value, end] = scanOnce(skipWs(0), 0);
+  } catch (e) {
+    if (e && e[STOP] !== undefined) throw new PyJSONDecodeError('Expecting value', s, e[STOP]);
+    throw e;
+  }
+  end = skipWs(end);
+  if (end !== n) throw new PyJSONDecodeError('Extra data', s, end);
+  return value;
+}
+
+/** type(x).__name__ of a pyLoads value (`literal` = its source text, to tell int from float). */
+function pyTypeName(v, literal = '') {
+  if (v === null || v === undefined) return 'NoneType';
+  if (typeof v === 'boolean') return 'bool';
+  if (typeof v === 'number') return Number.isFinite(v) && !/[.eEnN]/.test(String(literal).trim()) ? 'int' : 'float';
+  if (typeof v === 'string') return 'str';
+  if (Array.isArray(v)) return 'list';
+  return 'dict';
 }
 
 /**
@@ -217,7 +369,8 @@ function createSignalTradesRepo(deps = {}) {
         }
       })();
       if (updated > 0) {
-        repo.addTradeEvent(tid, EVT.POSITION_CLOSED, { result, result_rr: resultRr, new_state: newState });
+        // result_rr is a Python float at every bot call site (0.0, 2.0, -1.0, computed R)
+        repo.addTradeEvent(tid, EVT.POSITION_CLOSED, { result, result_rr: resultRr, new_state: newState }, { floatKeys: ['result_rr'] });
       }
       const trade = repo.getTrade(tid);
       if (updated > 0 && trade && result && result !== 'SKIP' && typeof deps.onClosed === 'function') {
@@ -310,14 +463,17 @@ function createSignalTradesRepo(deps = {}) {
     },
 
     // ── db/trade_events.py ─────────────────────────────────────────────
-    /** db_add_trade_event(trade_id, event_type, payload): best-effort append (errors swallowed). */
-    addTradeEvent(tradeId, eventType, payload = null) {
+    /**
+     * db_add_trade_event(trade_id, event_type, payload): best-effort append (errors swallowed).
+     * `opts.floatKeys` — payload keys holding Python floats (printed `2.0`, like json.dumps).
+     */
+    addTradeEvent(tradeId, eventType, payload = null, { floatKeys = null } = {}) {
       if (!tradeId || !eventType) return false;
       try {
         let payloadStr = '';
         if (payload && (typeof payload !== 'object' || Object.keys(payload).length)) {
           try {
-            payloadStr = pySlice(pyDumps(payload), MAX_PAYLOAD_CHARS);
+            payloadStr = pySlice(pyDumps(payload, { floatKeys }), MAX_PAYLOAD_CHARS);
           } catch (_e) {
             payloadStr = pySlice(String(payload), MAX_PAYLOAD_CHARS);
           }
@@ -339,7 +495,7 @@ function createSignalTradesRepo(deps = {}) {
           .all(String(tradeId), Math.trunc(Number(limit)));
         return rows.map((r) => {
           let payload;
-          try { payload = JSON.parse(r.payload_json || '{}'); } catch (_e) { payload = { _raw: r.payload_json || '' }; }
+          try { payload = pyLoads(r.payload_json || '{}'); } catch (_e) { payload = { _raw: r.payload_json || '' }; }   // json.loads: NaN tokens too
           return { ...r, payload };
         });
       } catch (e) {
@@ -435,5 +591,5 @@ const defaultRepo = createSignalTradesRepo();
 module.exports = {
   ALLOWED_TRADE_COLS, TRADE_STATES, ALLOWED_TRANSITIONS, CLOSED_RESULTS, FAILED_RESULTS,
   FINAL_STAGES, STOP_RESULTS, CARD_MAX_JSON, MAX_PAYLOAD_CHARS, EVT,
-  bindValue, pySlice, pyDumps, createSignalTradesRepo, defaultRepo,
+  bindValue, pySlice, pyDumps, pyLoads, pyTypeName, PyJSONDecodeError, createSignalTradesRepo, defaultRepo,
 };

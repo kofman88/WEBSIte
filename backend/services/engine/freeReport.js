@@ -25,6 +25,7 @@
 'use strict';
 
 const { pyJsonDumps } = require('./pyjson');
+const { pyLoads } = require('./signalTradesRepo');
 const { pyInt } = require('./pycoerce');
 const { fmtFixed, fmtG } = require('../../strategies/common/pyfmt');
 const { pySum } = require('../../strategies/common/series');
@@ -93,6 +94,21 @@ function utcDate(ts) {
 }
 function utcHour(ts) {
   return new Date(Math.floor(ts * 1000)).getUTCHours();
+}
+
+/**
+ * json.dumps of a uid-keyed dict in the bot's insertion order: a plain JS object would
+ * list integer-like keys ("7", "101") in ascending order instead.
+ */
+function dumpOrdered(entries, floatKeys = null) {
+  return '{' + entries.map(([k, v]) => `${pyJsonDumps(String(k))}: ${pyJsonDumps(v, floatKeys)}`).join(', ') + '}';
+}
+
+/** `x.items()` of a json.loads value: a dict (Map) only — anything else raises AttributeError in the bot. */
+function itemsOf(v) {
+  if (v instanceof Map) return Array.from(v.entries());
+  if (v !== null && typeof v === 'object' && !Array.isArray(v)) return Object.entries(v);
+  throw new TypeError("object has no attribute 'items'");
 }
 
 function resetDay(user, today) {
@@ -164,13 +180,13 @@ function createFreeReport(deps = {}) {
     savePreviewSent() {
       try {
         const d = today();
-        const payload = {};
+        const payload = [];   // [uid, {"SYM:DIR": date}] in _FREE_PREVIEW_SENT order
         for (const [uid, m] of previewSent) {
           const keep = {};
           for (const [k, v] of m) if (v === d) keep[k] = v;
-          if (Object.keys(keep).length) payload[String(uid)] = keep;
+          if (Object.keys(keep).length) payload.push([String(uid), keep]);
         }
-        kvOf().set(KV_PREVIEW, pyJsonDumps(payload));
+        kvOf().set(KV_PREVIEW, dumpOrdered(payload));
       } catch (e) {
         log.debug(`save preview sent: ${e && e.message}`);
       }
@@ -302,9 +318,8 @@ function createFreeReport(deps = {}) {
     // ── persistence ────────────────────────────────────────────────────
     saveMissedBuffer() {
       try {
-        const payload = {};
-        for (const [k, v] of missedBuffer) payload[String(k)] = v;
-        kvOf().set(KV_MISSED, pyJsonDumps(payload, ['ts']));
+        // {str(uid): [items]} in _missed_buffer order
+        kvOf().set(KV_MISSED, dumpOrdered(Array.from(missedBuffer, ([k, v]) => [String(k), v]), ['ts']));
       } catch (e) {
         log.debug(`save missed buffer: ${e && e.message}`);
       }
@@ -323,9 +338,9 @@ function createFreeReport(deps = {}) {
       try {
         const raw = kvOf().get(KV_MISSED);
         if (raw) {
-          const data = JSON.parse(raw);
+          const data = pyLoads(raw, { mapDepth: 1 });   // document order, like {int(k): v for k, v in data.items()}
           const m = new Map();
-          for (const [k, v] of Object.entries(data)) m.set(pyInt(k), v);
+          for (const [k, v] of itemsOf(data)) m.set(pyInt(k), v);
           missedBuffer = m;
           log.info(`free_report: restored ${missedBuffer.size} users' missed buffer`);
         }
@@ -335,7 +350,7 @@ function createFreeReport(deps = {}) {
       try {
         const raw = kvOf().get(KV_CLOSED);
         if (raw) {
-          closedProfitable = JSON.parse(raw);
+          closedProfitable = pyLoads(raw);
           const n = Array.isArray(closedProfitable) ? closedProfitable.length : Object.keys(closedProfitable || {}).length;
           log.info(`free_report: restored ${n} closed profitable signals`);
         }
@@ -346,11 +361,11 @@ function createFreeReport(deps = {}) {
         const raw = kvOf().get(KV_PREVIEW);
         if (raw) {
           const d = today();
-          const data = JSON.parse(raw);
+          const data = pyLoads(raw, { mapDepth: 1 });
           let restored = 0;
-          for (const [uid, m] of Object.entries(data)) {
+          for (const [uid, m] of itemsOf(data)) {
             const keep = new Map();
-            for (const [k, v] of Object.entries(m || {})) if (v === d) keep.set(k, v);
+            for (const [k, v] of itemsOf(pyTruthy(m) ? m : {})) if (v === d) keep.set(k, v);   // (m or {}).items()
             if (keep.size) {
               previewSent.set(pyInt(uid), keep);
               restored += 1;
