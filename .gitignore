@@ -42,3 +42,6 @@ tmp/
 
 # Context (large file, not needed in deploy)
 full_project_context.txt
+
+# harness worktrees of parallel agents
+.claude/worktrees/
