@@ -291,7 +291,18 @@ ALIASES = ["PEPE-USDT-SWAP", "DOGE-USDT-SWAP", "WIF-USDT-SWAP", "BTC-USDT-SWAP",
            "SOL-USDT-SWAP", "XRP-USDT-SWAP", "AVAX-USDT-SWAP", "FACT-USDT-SWAP", "TIA-USDT-SWAP", "SHIB-USDT-SWAP"]
 
 
-def random_case(rng):
+DEFAULT_SEED = 20261008
+DEFAULT_N_RANDOM = 44
+# --seed ≠ DEFAULT_SEED (re-check runs): the random cases also draw these (appended AFTER the
+# original draws, so the default seed reproduces levels_probe.json.gz byte for byte)
+EXT_MUTATIONS = [dict(zero_vol_every=7), dict(nan_vol_every=11), dict(nan_vol_every=3), dict(flat_every=3),
+                 dict(const_tail=60), dict(spike_every=13), dict(wick_every=5), dict(jump_every=17),
+                 dict(drop_every=3, drop_rem=1), dict(drop_every=5, drop_rem=2), dict(nan_flat_every=60),
+                 dict(zero_vol_every=7, flat_every=11, spike_every=13, jump_every=17, wick_every=19),
+                 dict(scale=1e-3), dict(scale=7.0), dict(wick_every=7, spike_every=5), dict(zero_vol_every=1)]
+
+
+def random_case(rng, extended=False):
     tc = {}
     for k, vals in UI.items():
         if rng.random() < 0.75:
@@ -324,9 +335,52 @@ def random_case(rng):
         regime = rng.choice(["ranging", "trending_down", "high_vol", "volatile", "range"])
     srcs = rng.sample(ALL_SRC, 4)
     names = rng.sample(ALIASES, 4) if rng.random() < 0.6 else srcs
-    return case(tf=tf, window=window, sweep=90 if tf in ("15m", "30m") else 80, symbols=_alias(srcs, names), trade_cfg=tc,
-                high_wr=rng.random() < 0.2, env=env, regime=regime, relaxed=rng.random() < 0.15,
-                corr=rng.choice(["same", "same", "same", "none", "btc_only", "short", "stale"]))
+    kw = dict(tf=tf, window=window, sweep=90 if tf in ("15m", "30m") else 80, symbols=_alias(srcs, names), trade_cfg=tc,
+              high_wr=rng.random() < 0.2, env=env, regime=regime, relaxed=rng.random() < 0.15,
+              corr=rng.choice(["same", "same", "same", "none", "btc_only", "short", "stale"]))
+    if extended:
+        # mutations, the live path (one persistent indicator, injected clock, small cache caps),
+        # analyze_on_demand with short windows, short HTF frames, the remaining corr modes
+        if rng.random() < 0.35:
+            kw["mutate"] = dict(rng.choice(EXT_MUTATIONS))
+        if rng.random() < 0.25:
+            kw["mode"] = "live"
+            kw["clock_step"] = rng.choice([250, 600, 900, 1800, 3600, 7200])
+            kw["cache_max"] = rng.choice([None, None, 2, 3])
+        if rng.random() < 0.15:
+            kw["call"] = "on_demand"
+            kw["window"] = rng.choice([None, 50, 60, 120, 299])
+        kw["htf_window"] = rng.choice([299, 299, 99, 21, 15])
+        if rng.random() < 0.15:
+            kw["corr"] = rng.choice(["self", "tf1h"])
+    return case(**kw)
+
+
+_KEEP_SRC = ("BTC-USDT-SWAP", "ETH-USDT-SWAP")
+_FIXED_SRC_CASES = ("deg_scale_", "deg_psych_", "corr_self_btc", "rand")
+
+
+def redraw_sources(rng):
+    """Re-check runs (--seed ≠ DEFAULT_SEED): every structured case keeps its spec (TF, config,
+    modes, mutation) but runs on other fixture candles — each SYN*/PEPEVL/DOGEVL source is replaced
+    by a seeded draw (distinct within the case; an alias equal to its source follows the source,
+    class aliases such as PEPE-USDT-SWAP stay). BTC/ETH sources and the price-scale / psych /
+    BTC-self cases keep their designed sources."""
+    pool = [s for s in ALL_SRC if s not in _KEEP_SRC]
+    for name in list(CASES):
+        if name.startswith(_FIXED_SRC_CASES):
+            continue
+        c = CASES[name]
+        n_new = sum(1 for s, _ in c["symbols"] if s not in _KEEP_SRC)
+        fresh = iter(rng.sample(pool, n_new))
+        out = []
+        for s, a in c["symbols"]:
+            if s in _KEEP_SRC:
+                out.append([s, a])
+                continue
+            ns = next(fresh)
+            out.append([ns, ns if a == s else a])
+        c["symbols"] = out
 
 
 # ────────────────────────────────────────────────────────────────────────────
@@ -551,7 +605,10 @@ def _init_worker():
     mg._attach_capture()
 
 
-def build_cases():
+def build_cases(seed=DEFAULT_SEED, n_random=DEFAULT_N_RANDOM):
+    """The main suite. seed = DEFAULT_SEED reproduces levels_probe.json.gz; any other seed is a
+    re-check run: structured sources redrawn (redraw_sources) and random cases with the extended
+    draws (random_case(extended=True))."""
     global ALL_SRC
     with open(os.path.join(OUT_DIR, "candles", "index.json")) as fh:
         ALL_SRC = [f["symbol"] for f in json.load(fh)["fixtures"]]
@@ -562,22 +619,249 @@ def build_cases():
         CASES[f"deg_{nm}"] = case(sweep=180, symbols=[[src, src], ["SYNLV04-USDT-SWAP", "SYNLV04-USDT-SWAP"]],
                                   trade_cfg=dict(LOOSE, use_htf=True), env=OFF_ENV,
                                   mutate=dict(scale=_psych_factor(src, "1h", target)))
-    rng = random.Random(20261008)
-    for k in range(44):
-        CASES[f"rand{k:02d}"] = random_case(rng)
+    rng = random.Random(seed)
+    extended = seed != DEFAULT_SEED
+    if extended:
+        redraw_sources(rng)
+    for k in range(n_random):
+        CASES[f"rand{k:03d}" if n_random > 100 else f"rand{k:02d}"] = random_case(rng, extended=extended)
+
+
+# ────────────────────────────────────────────────────────────────────────────
+# Suite "setups": hand-constructed frames, one per setup block of _do_analyze
+# ────────────────────────────────────────────────────────────────────────────
+# A clean synthetic range (triangle wave lo↔hi, pivots only at the extremes → one support zone
+# near lo, one resistance zone near hi) whose last 1–6 bars are replaced by a designed tail.
+# Tail bars are (open, high, low, close, volume factor) in units of the zone buffer z = L·0.3 %
+# (LOOSE zone_pct) relative to the zone level L the bot finds on the base frame; a SHORT design is
+# the same tail mirrored around L (high ↔ low) on the mirrored range, so every threshold of the
+# LONG block (−z / −0.5·z / −0.3·z / 2·z …) is hit at the same distance on the SHORT side.
+# The frames are stored in the output (frames{src}) — the JS replay does not rebuild them.
+SETUP_TF = {"15m": dict(lo=2.40, hi=2.58, period=30, vol=250_000.0, n=330, seed=151),
+            "4h": dict(lo=100.0, hi=110.0, period=36, vol=18_000.0, n=330, seed=404)}
+SETUP_ZONE_PCT = LOOSE["zone_pct"]
+# the design config: LOOSE with a far TP ladder — a structural TP1 at the opposite zone (~5R away)
+# would otherwise sit above the mechanical TP2 = 3R and fail the TP-order check ("rr"); tp1_rr 2.5:
+# the mechanical TP1 of a retest / breakout (no zone beyond) is max(2.0·0.85, MIN_RR 1.8) = 1.8R at
+# ATR < 1 %, and (tp1 − entry)/risk then lands a few ulps either side of 1.8 (kept as the *_rr18 cases)
+SETUP_CFG = dict(LOOSE, tp1_rr=2.5, tp2_rr=8.0, tp3_rr=12.0)
+
+# name: (phase of the base wave at the end, end offset of that extreme, tail bars, LONG type, pattern)
+#   phase "low": the frame ends on a down leg into the support zone; "high": an up leg into resistance
+_T_SUP = "Отскок от поддержки"
+SETUP_DESIGNS = {
+    # SFP: low < L − z, close > L, vol_ratio > 1.2 (checked before Fakeout)
+    "sfp_ls": ("low", 0, [(2.0, 2.1, -1.8, 0.5, 3.0)], "SFP (Захват ликвидности)", "LIQUIDITY_SWEEP"),
+    "sfp_c": ("low", 0, [(-0.5, 0.55, -1.4, 0.5, 1.6)], "SFP (Захват ликвидности)", "SFP"),
+    # Fakeout: L − z ≤ low < L − 0.5·z, close > L
+    "fakeout_fp": ("low", 0, [(0.1, 0.35, -0.75, 0.3, 1.0)], "Ложный пробой (Fakeout)", "FAKEOUT_PINBAR"),
+    "fakeout_ls": ("low", 0, [(1.5, 1.6, -0.9, 0.6, 3.0)], "Ложный пробой (Fakeout)", "LIQUIDITY_SWEEP"),
+    # Bounce: |c − L| < 2·z, c ≥ L − z, a candle pattern; one design per institutional tier A/B/C/D
+    "bounce_ob": ("low", 0, [(1.6, 1.7, 0.1, 0.2, 1.0), (0.15, 1.75, -0.2, 1.7, 3.0)], _T_SUP, "INSTITUTIONAL_ORDERBLOCK"),
+    "bounce_eg": ("low", 0, [(1.6, 1.7, 0.1, 0.2, 1.0), (0.15, 1.75, -0.2, 1.7, 1.2)], _T_SUP, "ENGULFING_AT_LEVEL"),
+    "bounce_fp": ("low", 0, [(0.2, 0.5, -0.4, 0.45, 1.0)], _T_SUP, "FAKEOUT_PINBAR"),
+    "bounce_pb": ("low", 0, [(0.5, 0.75, -0.2, 0.7, 1.0)], _T_SUP, "PINBAR_AT_LEVEL"),
+    "bounce_hammer": ("low", 0, [(0.6, 0.65, -0.25, 0.5, 1.0)], _T_SUP, "BOUNCE_PLAIN"),
+    "bounce_doji": ("low", 0, [(0.38, 0.47, -0.2, 0.42, 1.7)], _T_SUP, "BREAKOUT_RETEST"),
+    "bounce_inside": ("low", 0, [(1.5, 1.6, -0.1, 0.3, 1.0), (0.2, 0.9, 0.0, 0.6, 1.0)], _T_SUP, "BOUNCE_PLAIN"),
+    "bounce_mstar": ("low", 0, [(2.6, 2.7, 0.9, 1.0, 1.0), (0.5, 0.9, 0.1, 0.6, 0.9), (0.3, 1.95, 0.2, 1.9, 1.0)],
+                     _T_SUP, "BOUNCE_PLAIN"),
+    # no classic pattern: a bounce only with LEVELS_RELAX_ENABLED (weak pattern, lower wick ≥ 0.8·body)
+    "bounce_weak": ("low", 0, [(0.3, 1.3, -0.25, 0.8, 1.0)], None, None),
+    # Retest of the broken resistance: closes above L in bars −7..−2, |low − L| < z, a pin bar
+    "retest": ("high", 6, [(-0.35, 2.1, -0.45, 2.0, 1.3), (2.0, 3.2, 1.9, 3.0, 1.1), (3.0, 3.6, 2.8, 3.4, 1.0),
+                           (3.4, 3.5, 2.5, 2.6, 0.9), (2.6, 2.7, 1.5, 1.6, 0.8), (1.45, 1.7, 0.1, 1.65, 0.8)],
+               "Ретест пробитого уровня", "PINBAR_AT_LEVEL"),
+    # Breakout: close[−2] < L, close > L + z, vol_ratio > 1.5 (body/range < 0.7: no impulse veto)
+    "breakout": ("high", 0, [(-0.8, 2.6, -0.9, 1.5, 1.9)], "Пробой уровня", "BREAKOUT_RETEST"),
+    # threshold edges (no designed outcome — whatever the bot does at the exact boundary):
+    #   low = L − z (SFP needs <), low = L − 0.5·z (Fakeout needs <), close = L + 2·z (bounce |c − L| < 2·z,
+    #   pin lw = 1.5·body), close = L − z (bounce c ≥ L − z), |low − L| = z (retest needs <), close = L + z (breakout needs >)
+    "edge_sfp_eq": ("low", 0, [(-0.5, 0.55, -1.0, 0.5, 1.6)], None, None),
+    "edge_fake_eq": ("low", 0, [(0.2, 0.5, -0.5, 0.45, 1.0)], None, None),
+    "edge_bounce_2z": ("low", 0, [(1.8, 2.05, 1.5, 2.0, 1.0)], None, None),
+    "edge_bounce_floor": ("low", 0, [(-1.2, -0.97, -1.6, -1.0, 1.0)], None, None),
+    "edge_retest_z": ("high", 6, [(-0.35, 2.1, -0.45, 2.0, 1.3), (2.0, 3.2, 1.9, 3.0, 1.1), (3.0, 3.6, 2.8, 3.4, 1.0),
+                                  (3.4, 3.5, 2.5, 2.6, 0.9), (2.6, 2.7, 1.5, 1.6, 0.8), (1.45, 1.7, 1.0, 1.65, 0.8)], None, None),
+    "edge_breakout_z": ("high", 0, [(-0.8, 2.6, -0.9, 1.0, 1.9)], None, None),
+}
+SHORT_TYPE = {"SFP (Захват ликвидности)": "SFP (Ложный пробой вверх)", "Ложный пробой (Fakeout)": "Ложный пробой (Fakeout)",
+              _T_SUP: "Отскок от сопротивления", "Ретест пробитого уровня": "Ретест пробитой поддержки",
+              "Пробой уровня": "Пробой поддержки"}
+SETUP_SRC = {}     # src → dict(tf, design, direction, want_type, want_pattern, level, z, end_open_ms)
+
+
+def _synth_wave(n, tf, lo, hi, period, phase, end_offset, seed, vol, end_open_ms):
+    """Triangle wave lo↔hi (the extreme `phase` at index n−1−end_offset) + small seeded noise.
+    open = previous close; wicks 0.08..0.30·step; volume vol·(1 ± 0.25)."""
+    import pandas as pd
+    rng = random.Random(seed)
+    half = period / 2
+    step = (hi - lo) / half
+    shift = 0 if phase == "low" else half
+    o, h, l, c, v = [], [], [], [], []
+    prev = None
+    for i in range(n):
+        d = (n - 1 - end_offset - i + shift) % period
+        x = d / half if d <= half else (period - d) / half
+        cl = lo + (hi - lo) * x + rng.uniform(-0.12, 0.12) * step
+        op = cl if prev is None else prev
+        o.append(op); c.append(cl)
+        h.append(max(op, cl) + rng.uniform(0.08, 0.30) * step)
+        l.append(min(op, cl) - rng.uniform(0.08, 0.30) * step)
+        v.append(vol * (1 + rng.uniform(-0.25, 0.25)))
+        prev = cl
+    t = [end_open_ms - (n - 1 - i) * TF_MS[tf] for i in range(n)]
+    df = pd.DataFrame({"open": o, "high": h, "low": l, "close": c, "volume": v},
+                      index=pd.to_datetime(np.array(t, dtype="int64"), unit="ms"))
+    df.index.name = "open_time"
+    return df
+
+
+def _mirror(df, k):
+    return df.assign(open=k - df["open"].to_numpy(), high=k - df["low"].to_numpy(), low=k - df["high"].to_numpy(),
+                     close=k - df["close"].to_numpy())
+
+
+def _apply_tail(df, level, z, bars, sign, vol):
+    """Replace the last len(bars) rows: price(off) = level + sign·off·z (sign −1 swaps high/low)."""
+    df = df.copy()
+    o, h, l, c, v = (df[k].to_numpy().copy() for k in ("open", "high", "low", "close", "volume"))
+    n = len(df)
+    for j, (bo, bh, bl, bc, vf) in enumerate(bars):
+        i = n - len(bars) + j
+        p = lambda off: level + sign * off * z  # noqa: E731
+        o[i], c[i] = p(bo), p(bc)
+        h[i], l[i] = (p(bh), p(bl)) if sign > 0 else (p(bl), p(bh))
+        v[i] = vol * vf
+    return df.assign(open=o, high=h, low=l, close=c, volume=v)
+
+
+def build_setup_frames():
+    """Every design × LONG/SHORT × 15m/4h → _FRAMES[(src, tf)] + a synthetic 1D range _FRAMES[(src, '1d')]."""
+    from indicator import CHMIndicator
+    from scanner_mid import _cfg_to_ind
+    from user_manager import TradeCfg
+    t_end = int(mg.T_END.value // 1_000_000)
+    for tf, p in SETUP_TF.items():
+        ind = CHMIndicator(_cfg_to_ind(TradeCfg(**dict(SETUP_CFG, timeframe=tf))))
+        k_mirror = p["lo"] + p["hi"]
+        for d_i, (name, (phase, end_off, bars, want_type, want_pat)) in enumerate(SETUP_DESIGNS.items()):
+            for dirn in ("LONG", "SHORT"):
+                j = 2 * d_i + (dirn == "SHORT")
+                shift = (j % 6) * TF_MS["4h"] if tf == "4h" else (j * 9 % 96) * TF_MS["15m"]
+                end_open = t_end - TF_MS[tf] - shift
+                base = _synth_wave(p["n"], tf, p["lo"], p["hi"], p["period"], phase, end_off, p["seed"] + 7 * d_i,
+                                   p["vol"], end_open)
+                htf = _synth_wave(120, "1d", p["lo"], p["hi"], 20, "low", 0, p["seed"] + 1000 + d_i, p["vol"] * 6,
+                                  t_end - TF_MS["1d"])
+                sign = 1
+                if dirn == "SHORT":
+                    base, htf, sign = _mirror(base, k_mirror), _mirror(htf, k_mirror), -1
+                sup, res = ind.get_zones(base)
+                # LONG designs at the support zone / retest+breakout at the resistance zone (mirrored for SHORT)
+                use_sup = (phase == "low") == (dirn == "LONG")
+                zs = sup if use_sup else res
+                anchor = (p["lo"] if phase == "low" else p["hi"]) if dirn == "LONG" else \
+                    (k_mirror - p["lo"] if phase == "low" else k_mirror - p["hi"])
+                level = min((z["price"] for z in zs), key=lambda x: abs(x - anchor))
+                z = level * SETUP_ZONE_PCT / 100
+                df = _apply_tail(base, level, z, bars, sign, p["vol"])
+                src = f"SETUP{tf.upper()}{d_i:02d}{dirn[0]}-USDT-SWAP"
+                _FRAMES[(src, tf)] = df
+                _FRAMES[(src, "1d")] = htf
+                SETUP_SRC[src] = dict(tf=tf, design=name, direction=dirn, level=level, z=z, end_open_ms=end_open,
+                                      want_type=(want_type if dirn == "LONG" else SHORT_TYPE.get(want_type)) if want_type else None,
+                                      want_pattern=want_pat)
+
+
+def _setup_syms(tf, alias=None):
+    srcs = [s for s, m in SETUP_SRC.items() if m["tf"] == tf]
+    return [[s, alias(s) if alias else s] for s in srcs]
+
+
+def build_setup_cases():
+    build_setup_frames()
+    sec = {"15m": 900, "4h": 14_400}
+    LS = SETUP_CFG
+    for tf in SETUP_TF:
+        sy = _setup_syms(tf)
+        base = dict(tf=tf, sweep=24, symbols=sy)
+        CASES[f"setup_{tf}_loose"] = case(**base, trade_cfg=LS, env=OFF_ENV)
+        CASES[f"setup_{tf}_prod"] = case(**base, trade_cfg=LS, env=PROD_ENV)
+        CASES[f"setup_{tf}_default"] = case(**base, trade_cfg={}, env=PROD_ENV)
+        CASES[f"setup_{tf}_default_tp"] = case(**base, trade_cfg=dict(tp2_rr=8.0, tp3_rr=12.0), env=PROD_ENV)
+        CASES[f"setup_{tf}_rr18"] = case(**base, trade_cfg=dict(LS, tp1_rr=2.0), env=OFF_ENV)
+        CASES[f"setup_{tf}_zone07"] = case(**base, trade_cfg=dict(LS, zone_pct=0.7), env=OFF_ENV)
+        CASES[f"setup_{tf}_zone015"] = case(**base, trade_cfg=dict(LS, zone_pct=0.15, max_dist_pct=1.0), env=OFF_ENV)
+        CASES[f"setup_{tf}_hwr"] = case(**base, trade_cfg=LS, env=OFF_ENV, high_wr=True)
+        CASES[f"setup_{tf}_relax"] = case(**base, trade_cfg=LS, env=dict(OFF_ENV, LEVELS_RELAX_ENABLED=True), relaxed=True)
+        CASES[f"setup_{tf}_gates"] = case(**base, trade_cfg=dict(LS, use_volume=True, use_htf=True, use_rsi=True), htf_window=99,
+                                          env=dict(PROD_ENV, LEVELS_VOL_GATE="enforce", LEVELS_MAX_ATR_PCT=1.0,
+                                                   LEVELS_ENTRY_CONFIRM="enforce"))
+        CASES[f"setup_{tf}_htf"] = case(**base, trade_cfg=dict(LS, use_htf=True, htf_ema_period=20), env=OFF_ENV)
+        CASES[f"setup_{tf}_slv2"] = case(**base, trade_cfg=dict(LS, max_risk_pct=1.0), regime="trending_up",
+                                         env=dict(OFF_ENV, SL_V2_LEVELS_ENABLED=True))
+        CASES[f"setup_{tf}_live"] = case(**base, trade_cfg=dict(LS, cooldown_bars=2), env=OFF_ENV, mode="live",
+                                         clock_step=sec[tf] // 2)
+        CASES[f"setup_{tf}_ondemand"] = case(**dict(base, sweep=12), trade_cfg=LS, env=OFF_ENV, call="on_demand", window=120)
+        CASES[f"setup_{tf}_meme"] = case(**dict(base, symbols=_setup_syms(tf, lambda s: "PEPE" + s)), trade_cfg=LS, env=OFF_ENV)
+        CASES[f"setup_{tf}_major"] = case(**dict(base, symbols=_setup_syms(tf, lambda s: "ETH" + s)), trade_cfg=LS, env=OFF_ENV)
+        CASES[f"setup_{tf}_nocorr"] = case(**base, trade_cfg=dict(LS, use_rsi=True), env=OFF_ENV, corr="none")
+
+
+# which designs a case must reproduce exactly (the generator asserts them at the last bar)
+SETUP_ASSERT = {"loose": lambda m: m["want_type"] is not None, "relax": lambda m: m["design"] == "bounce_weak"}
+
+
+def check_setup_designs(cases):
+    """Assert that the bot itself hits every designed setup block at the last bar."""
+    bad = []
+    for name, c in cases.items():
+        kind = name.split("_", 2)[2] if name.startswith("setup_") else None
+        if kind not in SETUP_ASSERT:
+            continue
+        for alias, fx in c["fixtures"].items():
+            m = SETUP_SRC[fx["src"]]
+            if not SETUP_ASSERT[kind](m):
+                continue
+            last = fx["swept"][1]
+            sig = next((s for s in fx["signals"] if s["i"] == last), None)
+            want_t = m["want_type"] or (_T_SUP if m["direction"] == "LONG" else SHORT_TYPE[_T_SUP])
+            want_p = m["want_pattern"] or "BOUNCE_PLAIN"
+            got = (sig["breakout_type"], sig["pattern"], sig["direction"]) if sig else ("reject", fx["rejects"].get(str(last)), None)
+            if got != (want_t, want_p, m["direction"]):
+                bad.append(f"{name} {alias} ({m['design']} {m['direction']}): got {got}, want {(want_t, want_p, m['direction'])}")
+    return bad
+
+
+def _frame_rows(df):
+    t = mg.open_ms(df)
+    cols = [df[k].to_numpy() for k in ("open", "high", "low", "close", "volume")]
+    return [[int(t[i])] + [float(a[i]) for a in cols] for i in range(len(df))]
 
 
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--cases", default=None, help="debug: comma-separated case-name prefixes (nothing is written)")
     ap.add_argument("--workers", type=int, default=int(os.environ.get("GOLDEN_PROBE_WORKERS", "4")))
+    ap.add_argument("--suite", choices=("main", "setups"), default="main",
+                    help="main: the sections above; setups: the hand-constructed setup frames")
+    ap.add_argument("--seed", type=int, default=DEFAULT_SEED, help="main suite: random-case seed (≠ default → re-check run)")
+    ap.add_argument("--n-random", type=int, default=DEFAULT_N_RANDOM, help="main suite: number of random cases")
     args = ap.parse_args()
     import logging
     logging.basicConfig(level=logging.ERROR)
-    build_cases()
+    default_main = args.suite == "main" and args.seed == DEFAULT_SEED and args.n_random == DEFAULT_N_RANDOM
+    if args.suite == "setups":
+        stem = "levels_probe_setups"
+        build_setup_cases()
+    else:
+        stem = "levels_probe" if default_main else f"levels_probe_s{args.seed}"
+        build_cases(args.seed, args.n_random)
     import pandas as pd
     import scipy
-    names = list(CASES)
+    names = [n for n in CASES if n.startswith("setup_") == (args.suite == "setups")]
     if args.cases:
         pref = tuple(x.strip() for x in args.cases.split(",") if x.strip())
         names = [n for n in names if n.startswith(pref)]
@@ -604,6 +888,21 @@ def main():
                 reasons[r] = reasons.get(r, 0) + 1
     print(f"{len(cases)} cases, {n_bars} bars, {n_sig} signals, {n_rej} null bars, {n_err} errors, "
           f"{time.time() - t_all:.1f}s; rejects {dict(sorted(reasons.items()))}", flush=True)
+    setup_types = {}
+    if args.suite == "setups":
+        for c in cases.values():
+            for f in c["fixtures"].values():
+                for s in f["signals"]:
+                    k = f"{s['direction']} {s['breakout_type']} / {s['pattern']}"
+                    setup_types[k] = setup_types.get(k, 0) + 1
+        for k, v in sorted(setup_types.items()):
+            print(f"  {v:5d}  {k}")
+        bad = check_setup_designs(cases)
+        for b in bad:
+            print("DESIGN MISS", b)
+        if bad and not args.cases:
+            print(f"{len(bad)} designed setups not reproduced by the bot — nothing written")
+            return 1
     if args.cases:
         for n, c in cases.items():
             print(f"  {n:<26} " + " ".join(f"{a}:{f['n_signals']}/{f['n_swept']}" for a, f in c["fixtures"].items()))
@@ -614,17 +913,31 @@ def main():
                    "bars outer / symbols inner, clock = t0 + k*clock_step, mark_signal(alias, df) after every signal; "
                    "sig = ind.analyze(alias, df, df_htf, btc, eth) or ind.analyze_on_demand(...)",
            "cases": cases}
+    if not default_main:
+        doc["suite"] = args.suite
+        if args.suite == "main":
+            doc.update(seed=args.seed, n_random=args.n_random)
+        else:
+            # the hand-constructed frames themselves (working TF + the synthetic 1D range), exact floats
+            doc["frames"] = {src: dict(m, bars=_frame_rows(_FRAMES[(src, m["tf"])]), htf_bars=_frame_rows(_FRAMES[(src, "1d")]))
+                             for src, m in SETUP_SRC.items()}
     raw = json.dumps(doc, ensure_ascii=False, separators=(",", ":"), allow_nan=False).encode("utf-8")
-    with gzip.GzipFile(os.path.join(OUT_DIR, "levels_probe.json.gz"), "wb", mtime=0) as fh:
+    with gzip.GzipFile(os.path.join(OUT_DIR, f"{stem}.json.gz"), "wb", mtime=0) as fh:
         fh.write(raw)
     summary = {"probe": "levels", "cases": len(cases), "bars": n_bars, "signals": n_sig, "null_bars": n_rej, "errors": n_err,
                "reject_reasons": dict(sorted(reasons.items())),
                "per_case": {k: {"signals": sum(f["n_signals"] for f in v["fixtures"].values()),
                                 "bars": sum(f["n_swept"] for f in v["fixtures"].values())} for k, v in cases.items()},
-               "sha256": {"levels_probe.json": hashlib.sha256(raw).hexdigest()}}   # no wall-clock values: re-runs are byte-identical
-    with open(os.path.join(OUT_DIR, "levels_probe_summary.json"), "w") as fh:
+               "sha256": {f"{stem}.json": hashlib.sha256(raw).hexdigest()}}   # no wall-clock values: re-runs are byte-identical
+    if not default_main:
+        summary = dict({"suite": args.suite}, **summary)
+        if args.suite == "main":
+            summary.update(seed=args.seed, n_random=args.n_random)
+        else:
+            summary["setup_signals"] = dict(sorted(setup_types.items()))
+    with open(os.path.join(OUT_DIR, f"{stem}_summary.json"), "w") as fh:
         json.dump(summary, fh, indent=1, ensure_ascii=False)
-    print(f"wrote levels_probe.json.gz ({len(raw)} bytes raw)")
+    print(f"wrote {stem}.json.gz ({len(raw)} bytes raw)")
     return 0
 
 
