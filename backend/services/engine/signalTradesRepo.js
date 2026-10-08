@@ -75,6 +75,10 @@ const nowSec = () => Date.now() / 1000;
 function bindValue(v) {
   if (v === undefined) return null;
   if (typeof v === 'boolean') return v ? 1 : 0;
+  // An integral number binds as an INTEGER like a Python int: better-sqlite3 binds every JS
+  // number as REAL, which a TEXT column stores as '3.0' where the bot stores '3'
+  // (REAL / INTEGER columns are unaffected — affinity converts either way).
+  if (typeof v === 'number' && Number.isSafeInteger(v) && !Object.is(v, -0)) return BigInt(v);
   return v;
 }
 
@@ -344,7 +348,10 @@ function createSignalTradesRepo(deps = {}) {
         try {
           const existing = repo.getTrade(tid);
           if (existing && Number(existing.tp_placed || 0) > 0) {
-            log.warning(`[SKIP-AFTER-TP-PLACED] trade_id=${tid} tp_placed=${existing.tp_placed} result_was=${existing.result || ''} reason=${skipReason || ''}`);
+            // the bot appends "".join(traceback.format_stack(limit=8)[:-1]) — here the JS call stack
+            const stack = String(new Error().stack || '').split('\n').slice(2, 9).map((l) => `  ${l.trim()}\n`).join('');
+            log.warning(`[SKIP-AFTER-TP-PLACED] trade_id=${tid} tp_placed=${existing.tp_placed} result_was=${existing.result || ''} `
+              + `reason=${skipReason || ''} — logging call stack:\n${stack}`);
           }
         } catch (e) {
           log.debug(`SKIP-AFTER-TP-PLACED instrument failed: ${e && e.message}`);

@@ -437,7 +437,9 @@ describe('signalTradesRepo random op sequences (bot table after every step)', ()
       if (!['add', 'msg', 'evt_add', 'tp', 'advance_clock'].includes(op[0]) && s.error === null) expect(res, where).toEqual(s.result);
       expect(db.prepare('SELECT * FROM signal_trades ORDER BY trade_id').all(), where).toEqual(s.rows);
       expect(db.prepare('SELECT * FROM trade_events ORDER BY id').all(), where).toEqual(s.events);   // payload_json byte for byte
-      expect(log.lines.filter((l) => l[0] === 'INFO' || l[0] === 'WARNING').map((l) => l[1]), where).toEqual(s.logs);
+      // [SKIP-AFTER-TP-PLACED] ends with the runtime's own call stack (Python's vs JS's)
+      const noStack = (m) => m.split(' — logging call stack:')[0];
+      expect(log.lines.filter((l) => l[0] === 'INFO' || l[0] === 'WARNING').map((l) => noStack(l[1])), where).toEqual(s.logs.map(noStack));
     }
   });
 });

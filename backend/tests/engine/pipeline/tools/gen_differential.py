@@ -1042,10 +1042,10 @@ def repo_vectors():
     stages = ["", "ENTRY", "TP1", "TP2", "TP3", "SL", "BE", "EXPIRED", "MISSED"]
 
     def rand_val(rnd, col):
-        # text columns get strings: a Python int bound into TEXT is stored "3", a JS number "3.0"
-        # (one number type) — the bot's callers never write numbers there
+        # text columns also get ints (bound as INTEGER like a Python int → '3', not '3.0') and
+        # non-integral floats; an integral Python *float* into TEXT ('3.0') has no JS twin
         if col in text_cols and col not in ("order_id", "result", "state", "progress_stage", "strategy", "direction", "symbol"):
-            return rnd.choice(["x", "", "Отскок", "a" * 70, None])
+            return rnd.choice(["x", "", "Отскок", "a" * 70, None, 3, 2.5, 101])
         if col in ("entry", "sl", "tp1", "tp2", "tp3", "entry_lo", "entry_hi", "original_sl", "rsi", "volume_ratio", "result_rr"):
             return rnd.choice([100.0, 98.5, 104.25, 0.0, 1e-7, 64000.5, None, 7])
         if col in ("created_at", "state_changed_at", "progress_ts"):
@@ -1076,15 +1076,17 @@ def repo_vectors():
         c.close()
         return rows, ev
 
-    async def run_seq(rnd, path):
+    async def run_seq(rnd, path, fixed=None):
         tids = [f"t{i}" for i in range(6)]
         uids = [7, 8]
         delta = Delta(["now", "result", "error", "rows", "events", "logs"])
         steps = []
-        for _ in range(rnd.randint(40, 70)):
+        for si_ in range(len(fixed) if fixed else rnd.randint(40, 70)):
             k = rnd.random()
             tid = rnd.choice(tids + ["nope"])
-            if k < 0.20:
+            if fixed:
+                op = fixed[si_]
+            elif k < 0.20:
                 d = {"symbol": rnd.choice(["BTC-USDT-SWAP", "ETH-USDT-SWAP"]), "direction": rnd.choice(["LONG", "SHORT"]),
                      "entry": 100.0, "sl": 98.0, "tp1": 104.0, "tp2": 106.0, "tp3": 109.0}
                 for c in rnd.sample(allowed, rnd.randint(1, 12)):
@@ -1185,8 +1187,16 @@ def repo_vectors():
                                     "logs": [l[1] for l in cap.lines if l[0] in ("INFO", "WARNING") and "Persistent write" not in l[1]]}))
         return steps
 
+    base = {"symbol": "BTC-USDT-SWAP", "direction": "LONG", "entry": 100.0, "sl": 98.0, "tp1": 104.0, "tp2": 106.0, "tp3": 109.0}
+    fixed = [   # [SKIP-AFTER-TP-PLACED]: a SKIP written over a trade whose TPs were placed
+        ["add", {**base, "trade_id": "s1", "user_id": 7, "tp_placed": 1, "result": "", "state": "OPEN", "created_at": 1_800_000_000.0}],
+        ["result", "s1", "SKIP", 0.0, None, "not_delivered", False],
+        ["add", {**base, "trade_id": "s2", "user_id": 7, "tp_placed": 3, "result": "TP1", "state": "CLOSED", "created_at": 1_800_000_000.0,
+                 "session": 7, "order_link_id": 123456789012, "signal_type": 2.5}],
+        ["result", "s2", "SKIP", 0.0, None, None, True],
+    ]
     seqs = []
-    for si in range(8):
+    for si in range(9):
         rnd = random.Random(555 + si)
         clk.t = 1_800_000_000.5 + si
         tmp = tempfile.mkdtemp()
@@ -1202,7 +1212,7 @@ def repo_vectors():
         t0 = clk.t
 
         async def go():
-            st = await run_seq(rnd, path)
+            st = await run_seq(rnd, path, fixed if si == 8 else None)
             await core.close_write_conn()
             return st
         seqs.append({"t0": t0, "steps": asyncio.run(go())})
