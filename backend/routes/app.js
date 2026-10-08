@@ -297,6 +297,8 @@ router.post('/volume/reset', wrap((req, res) => {
   res.json({ ok: true, settings: appSettings.settingsAll(user) });
 }));
 
+router.use('/genome', require('./appGenome'));    // M16: GET genome, POST genome/apply, POST genome/evolve (D10)
+
 module.exports = router;
 module.exports.rateOk = rateOk;
 module.exports.resetRateLimits = resetRateLimits;
