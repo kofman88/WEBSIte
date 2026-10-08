@@ -3,7 +3,8 @@ entry_advisor.py and the Mini App challenge handlers (miniapp_api.h_challenge_*)
 JS parity tests in backend/tests/challenge/*.test.js.
 
 Run with the bot's venv (the script chdirs into the bot checkout itself):
-  BOT_TOKEN_CHM=test:token ADMIN_IDS=123 <venv>/bin/python gen_challenge_vectors.py OUT.json
+  BOT_TOKEN_CHM=test:token ADMIN_IDS=123 <venv>/bin/python gen_challenge_vectors.py [OUT]
+  ([OUT] defaults to the shipped fixture; a relative path resolves against the caller's cwd)
 afterwards: rm -f /home/user/MAIN_BOT/CHM_BREAKER_V4/signal_registry.json
 
 time.time() is pinned (FAKE[0]) so every function that reads the wall clock (notify_once,
@@ -25,6 +26,7 @@ import time as _time
 from types import SimpleNamespace
 
 BOT = "/home/user/MAIN_BOT/CHM_BREAKER_V4"
+_CWD = os.getcwd()   # caller cwd: relative paths below resolve against it, not against the bot dir
 os.chdir(BOT)
 sys.path.insert(0, BOT)
 os.environ.setdefault("BOT_TOKEN_CHM", "test:token")
@@ -42,7 +44,7 @@ from aiohttp import web  # noqa: E402
 from db import signal_stats as SS  # noqa: E402
 from user_manager import UserSettings  # noqa: E402
 
-OUT = sys.argv[1] if len(sys.argv) > 1 else "challenge_vectors.json"
+OUT = os.path.join(_CWD, sys.argv[1]) if len(sys.argv) > 1 else os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "fixtures", "challenge_vectors.json")
 rng = random.Random(20261017)
 T0 = 1_767_225_600.0                      # 2026-01-01 00:00:00 UTC (Thursday)
 FAKE = [T0]

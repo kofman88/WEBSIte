@@ -3,8 +3,9 @@
 fakes for the DB, cache, REST, price, users and the Telegram bot) for the JS parity tests in
 backend/tests/engine/tracker/*.test.js. Candles: backend/tests/golden/candles.
 
-Run with the bot's venv (the script chdirs into the bot checkout itself; OUT must be absolute):
-  BOT_TOKEN_CHM=test:token ADMIN_IDS=123 <venv>/bin/python gen_tracker_vectors.py /abs/OUT.json
+Run with the bot's venv (the script chdirs into the bot checkout itself):
+  BOT_TOKEN_CHM=test:token ADMIN_IDS=123 <venv>/bin/python gen_tracker_vectors.py [OUT]
+  ([OUT] defaults to the shipped fixture; a relative path resolves against the caller's cwd)
   (afterwards: rm -f <bot>/signal_registry.json)
 """
 from __future__ import annotations
@@ -17,6 +18,7 @@ import sys
 from types import SimpleNamespace
 
 BOT = "/home/user/MAIN_BOT/CHM_BREAKER_V4"
+_CWD = os.getcwd()   # caller cwd: relative paths below resolve against it, not against the bot dir
 os.chdir(BOT)
 sys.path.insert(0, BOT)
 
@@ -27,7 +29,7 @@ import signal_tracker as st  # noqa: E402
 from db.signal_outcome import signal_rr  # noqa: E402
 
 GOLDEN = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "..", "..", "golden", "candles")
-OUT = sys.argv[1] if len(sys.argv) > 1 else "tracker_vectors.json"
+OUT = os.path.join(_CWD, sys.argv[1]) if len(sys.argv) > 1 else os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "fixtures", "tracker_vectors.json")
 
 # capture the tracker's INFO / WARNING log lines (the [SIGNAL-PROGRESS*] grep contract)
 import logging  # noqa: E402

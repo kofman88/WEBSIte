@@ -10,7 +10,8 @@ NULL strategies and results, manual SKIP over a tracker stage, ghost SKIP with a
 card, ORPHAN, whitespace order ids, '-USDT' / bare symbols, closed_pnl_usd on some rows,
 plans 'pro' / 'free' / 'trial' / ''.
 
-  BOT_TOKEN_CHM=test:token ADMIN_IDS=123 <venv>/bin/python gen_stats_rand.py /abs/stats_rand.json
+  BOT_TOKEN_CHM=test:token ADMIN_IDS=123 <venv>/bin/python gen_stats_rand.py [OUT]
+  ([OUT] defaults to the shipped fixture; a relative path resolves against the caller's cwd)
   (afterwards: rm -f <bot>/signal_registry.json)
 """
 from __future__ import annotations
@@ -26,6 +27,7 @@ import time as _time
 from types import SimpleNamespace
 
 BOT = "/home/user/MAIN_BOT/CHM_BREAKER_V4"
+_CWD = os.getcwd()   # caller cwd: relative paths below resolve against it, not against the bot dir
 os.chdir(BOT)
 sys.path.insert(0, BOT)
 os.environ.setdefault("BOT_TOKEN_CHM", "test:token")
@@ -38,7 +40,7 @@ import miniapp_api  # noqa: E402
 from db import signal_stats as ss  # noqa: E402
 from db import stats as dbs  # noqa: E402
 
-OUT = sys.argv[1] if len(sys.argv) > 1 else "stats_rand.json"
+OUT = os.path.join(_CWD, sys.argv[1]) if len(sys.argv) > 1 else os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "fixtures", "stats_rand.json")
 rng = random.Random(500500)
 
 tmp = tempfile.mkdtemp(prefix="m10a_stats_rand_")

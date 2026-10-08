@@ -4,7 +4,8 @@ levels_from_trade on legacy / string / NaN rows; mark_to_market_rr; missed_r at 
 MISSED_R boundary; _fmt_r ties; _ago; build_text; outcome lines; _chart_df) for
 backend/tests/engine/tracker/adv.test.js.
 
-  BOT_TOKEN_CHM=test:token ADMIN_IDS=123 <venv>/bin/python gen_tracker_adv.py /abs/tracker_adv.json
+  BOT_TOKEN_CHM=test:token ADMIN_IDS=123 <venv>/bin/python gen_tracker_adv.py [OUT]
+  ([OUT] defaults to the shipped fixture; a relative path resolves against the caller's cwd)
   (afterwards: rm -f <bot>/signal_registry.json)
 """
 from __future__ import annotations
@@ -16,6 +17,7 @@ import random
 import sys
 
 BOT = "/home/user/MAIN_BOT/CHM_BREAKER_V4"
+_CWD = os.getcwd()   # caller cwd: relative paths below resolve against it, not against the bot dir
 os.chdir(BOT)
 sys.path.insert(0, BOT)
 os.environ.setdefault("BOT_TOKEN_CHM", "test:token")
@@ -26,7 +28,7 @@ import pandas as pd  # noqa: E402
 
 import signal_tracker as st  # noqa: E402
 
-OUT = sys.argv[1] if len(sys.argv) > 1 else "tracker_adv.json"
+OUT = os.path.join(_CWD, sys.argv[1]) if len(sys.argv) > 1 else os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "fixtures", "tracker_adv.json")
 rng = random.Random(81081)
 
 
