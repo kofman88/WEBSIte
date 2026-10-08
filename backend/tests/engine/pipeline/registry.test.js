@@ -25,13 +25,9 @@ function make(c, kv, log) {
   });
 }
 
+/** INFO/WARNING lines verbatim — json.load's JSONDecodeError text included (pyLoads mirrors CPython). */
 function sameLogs(js, py) {
-  expect(js.length).toBe(py.length);
-  py.forEach(([lvl, msg], i) => {
-    expect(js[i][0]).toBe(lvl);
-    if (/Expecting|line \d+ column/.test(msg)) expect(js[i][1].split('load error:')[0]).toBe(msg.split('load error:')[0]);
-    else expect(js[i][1]).toBe(msg);
-  });
+  expect(js).toEqual(py);
 }
 
 describe('constants', () => {
