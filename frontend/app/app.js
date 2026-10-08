@@ -433,6 +433,13 @@
             throw unauthorized();
           });
         }
+        // HTTP 403 from the site's auth middleware (ACCOUNT_DISABLED) arrives in the Mini App
+        // envelope as `unauthorized`; no refresh can fix it → the login screen with the reason.
+        if (res.status === 403 && data && data.error === "unauthorized") {
+          Auth.clear();
+          showLogin(data.code === "ACCOUNT_DISABLED" ? AUTH_ERRORS.ACCOUNT_DISABLED : errText("unauthorized"));
+          throw new ApiError("unauthorized");
+        }
         if (!data) throw new ApiError(res.status === 429 ? "rate_limited" : res.status === 504 ? "timeout" : res.status === 404 ? "not_found" : "network");
         return data;
       });
@@ -2199,12 +2206,22 @@
   }
   function lockBadge() { return h("span", { class: "tag locked" }, icon("lock"), "Pro"); }
   function lockedTap() { hap("warning"); toast(errText("pro_required"), true); }
+  // Body of POST settings/all for one key: `sec` may be a dotted path into the D9
+  // sections ("levels.shared", "levels.long", "smc.advanced", "risk.advanced").
+  function settingsBody(sec, key, value) {
+    var body = {}, b = body;
+    (sec ? sec.split(".") : []).forEach(function (sg) { b = b[sg] = {}; });
+    b[key] = value;
+    return body;
+  }
   // sec === "" → a top-level key of settings/all (lang, ui_mode, genome_auto_apply, …)
   function saveSetting(sec, key, value) {
     var d = settingsData();
     if (!d) return;
     var st = d.settings = d.settings || {};
-    var tgt = sec ? (st[sec] = st[sec] || {}) : st;
+    var segs = sec ? sec.split(".") : [];
+    var tgt = st;
+    segs.forEach(function (sg) { tgt = tgt[sg] = (tgt[sg] && typeof tgt[sg] === "object") ? tgt[sg] : {}; });
     // [AUDIT F-5] повторный тап по тому же контролу, пока запрос в полёте — игнорируем;
     // ответы применяем только от последнего запроса (иначе «поздний» откатывал значение)
     S.savingKeys = S.savingKeys || {};
@@ -2215,8 +2232,7 @@
     var seq = S.saveSeq;
     var prev = tgt[key];
     tgt[key] = value;   // optimistic
-    var body = {};
-    if (sec) { body[sec] = {}; body[sec][key] = value; } else body[key] = value;
+    var body = settingsBody(sec, key, value);
     S.saving++;
     rerenderSub();          // сразу показываем новое значение
     api("settings/all", { method: "POST", body: body, timeout: 15000 }).then(function (r) {
@@ -2225,7 +2241,7 @@
         if (r.settings && typeof r.settings === "object") d.settings = r.settings;
         if (r.options && typeof r.options === "object") d.options = r.options;
       }
-      if (sec === "trading" && S.me) {
+      if (segs[0] === "trading" && S.me) {
         var T = d.settings.trading || {};
         S.me.auto_trade = !!T.auto_trade;
         if (T.trade_exchange != null) S.me.exchange = T.trade_exchange;
@@ -2238,6 +2254,27 @@
       if (e.code === "pro_required") toast(errText("pro_required"), true);
       else if (e.code !== "unauthorized") toast(errText(e.code), true);
     }).then(function () { S.saving--; delete S.savingKeys[slot]; rerenderSub(); });
+  }
+  // Server-side actions carried by settings/all (`levels.long.reset`, `risk.advanced.reset_all_filters`):
+  // no optimistic value, the response `settings` replaces the cache.
+  function actionSetting(sec, key, value, doneText) {
+    var d = settingsData();
+    if (!d) return;
+    var slot = "action:" + sec + "." + key;
+    S.savingKeys = S.savingKeys || {};
+    if (S.savingKeys[slot]) return;
+    S.savingKeys[slot] = true;
+    hap("medium");
+    api("settings/all", { method: "POST", body: settingsBody(sec, key, value), timeout: 15000 }).then(function (r) {
+      okOrThrow(r);
+      if (r.settings && typeof r.settings === "object") d.settings = r.settings;
+      if (sec === "risk.advanced" && S.me && d.settings.trading) S.me.auto_trade = !!d.settings.trading.auto_trade;
+      hap("success");
+      toast(doneText || "Сохранено");
+    }).catch(function (e) {
+      hap("error");
+      if (e.code !== "unauthorized") toast(errText(e.code), true);
+    }).then(function () { delete S.savingKeys[slot]; rerenderSub(); });
   }
 
   // --- controls -------------------------------------------------------------
@@ -2768,8 +2805,11 @@
 
     // Оплата — картой или USDT на странице тарифов сайта (TON-блок бота не переносится, D12).
     var pay = groupCard(pro ? "Продление" : "Оформить Pro", pro ? "Продлить ещё на 30 дней" : "Pro на 30 дней — $" + price, icon("bolt"), "glow-violet");
+    // GET plan may carry `checkout_url` (same-origin path) — it wins over the CHECKOUT_URL constant.
+    var checkout = typeof d.checkout_url === "string" && /^\/[^/\\]/.test(d.checkout_url) ? d.checkout_url : null;
     pay.appendChild(h("div", { class: "stack", style: "margin:12px 0 12px" },
-      h("button", { class: "btn btn-red btn-block", type: "button", onclick: openCheckout }, pro ? "Продлить Pro" : "Оформить Pro", icon("arrow")),
+      h("button", { class: "btn btn-red btn-block", type: "button", onclick: function () { if (!checkout) return openCheckout(); hap("medium"); location.href = checkout; } },
+        pro ? "Продлить Pro" : "Оформить Pro", icon("arrow")),
       h("p", { class: "desc", style: "margin:0", text: "Оплата картой или USDT на странице тарифов. Подписка активируется автоматически после оплаты." })));
     root.appendChild(pay);
     if (d.admin_contact) {
@@ -3074,17 +3114,39 @@
     notifications: ["progress_notify_enabled", "send_chart_enabled", "signal_format", "quiet_start", "quiet_end"]
   };
   var ADV_SKIP_TOP = { lang: 1, genome_auto_apply: 1, exchanges: 1 };   // have their own screens
+  var ADV_READONLY = { overrides: 1 };   // informational arrays the server returns (which keys override the shared config)
   var ADV_GROUP = {
     levels: ["Уровни — тонкие параметры", "Пивоты, EMA, фильтры, цели: как в /settings бота"],
+    "levels.shared": ["Уровни — общие параметры", "Пивоты, EMA, фильтры, цели: как в /settings бота"],
+    "levels.long": ["Уровни — LONG", "Переопределения для лонгов (меню «📈 ЛОНГ» бота)"],
+    "levels.short": ["Уровни — SHORT", "Переопределения для шортов (меню «📉 ШОРТ» бота)"],
     smc: ["SMC — тонкие параметры", "Подтверждения, R:R, буфер SL, OB/FVG: как в меню SMC"],
+    "smc.advanced": ["SMC — тонкие параметры", "Подтверждения, R:R, буфер SL, OB/FVG: как в меню SMC"],
     volume: ["Объём + MA — дополнительно", "Параметры сканера объёма"],
-    trading: ["Авто-трейд — дополнительно", "Partial TP, дни без торговли, фикс. риск"],
+    trading: ["Авто-трейд — дополнительно", "Дни без торговли, фикс. риск, фильтр монет"],
+    ptp: ["Partial TP", "Частичная фиксация: режим R / %, доли на TP1 и TP2"],
     risk: ["Risk Management — дополнительно", "Спред, corr-cap, adaptive sizing, tilt, hold-lock"],
+    "risk.advanced": ["Risk Management — дополнительно", "Спред, corr-cap, adaptive sizing, tilt, hold-lock"],
     notifications: ["Уведомления — флаги", "Сигнал входа, ранний пробой"]
   };
-  // Подписи и наборы значений Telegram-меню бота (ui-inventory §7.4–7.6).
+  // Подписи и наборы значений Telegram-меню бота (ui-inventory §7.4–7.6). Ключ — полный
+  // путь settings/all или "<раздел>.<ключ>" (подходит для вложенных levels.shared / levels.long /
+  // levels.short / smc.advanced / risk.advanced); наборы значений сервера (options.choices) главнее.
   var ADV_PRESET = {
     "ui_mode": { t: "Режим меню", s: "Простой — короткое меню; Эксперт — все параметры", o: [{ v: "simple", l: "Простой" }, { v: "expert", l: "Эксперт" }] },
+    // LEVELS — Mini App keys (appear again inside the per-direction blocks)
+    "levels.timeframe": { t: "Таймфрейм", s: "Общий ТФ уровней", f: "tf" },
+    "levels.min_quality": { t: "Мин. качество", s: "Сигналы ниже порога не отправляются", u: "⭐" },
+    "levels.min_volume_usdt": { t: "Мин. объём за 24ч", s: "USDT — отсекает тонкие монеты", f: "vol" },
+    "levels.min_rr": { t: "Мин. RR", s: "Цель к стопу, не меньше", u: "R" },
+    "levels.max_dist_pct": { t: "Расстояние до уровня", s: "Макс. % от цены до уровня", u: "%" },
+    "levels.zone_pct": { t: "Ширина зоны", s: "% вокруг уровня", u: "%" },
+    "levels.max_risk_pct": { t: "Макс. риск на сделку", s: "% депозита при стопе", u: "%" },
+    "levels.use_rsi": { t: "Фильтр RSI", s: "Не входить в перекупленность / перепроданность" },
+    "levels.use_volume": { t: "Фильтр объёма", s: "Подтверждение объёмом на сигнальной свече" },
+    "levels.use_htf": { t: "Старший таймфрейм", s: "HTF тренд (+⭐ качество)" },
+    "levels.trend_only": { t: "Только по тренду", s: "Без контртрендовых входов" },
+    // LEVELS — /settings menu (shared / long / short)
     "levels.pivot_strength": { t: "Пивоты: сила", s: "Баров слева/справа для уровня S/R", o: [3, 5, 7, 10, 15, 17, 20] },
     "levels.max_level_age": { t: "Возраст уровня", s: "Макс. баров с момента образования", o: [30, 50, 75, 100, 142, 150, 200, 250, 300] },
     "levels.max_retest_bars": { t: "Ретест", s: "Макс. баров до ретеста", o: [10, 20, 30, 50] },
@@ -3105,37 +3167,61 @@
     "levels.tp2_rr": { t: "TP2", s: "Цели (Take Profit R:R)", n: { min: 0.1, max: 100, step: 0.1 }, u: "R" },
     "levels.tp3_rr": { t: "TP3", s: "Цели (Take Profit R:R)", n: { min: 0.1, max: 100, step: 0.1 }, u: "R" },
     "levels.scan_interval": { t: "Интервал сканирования", s: "Секунд между проходами", o: [60, 180, 300, 900, 1800, 3600, 7200, 14400, 86400], u: " с" },
-    "levels.vol_filter_mode": { t: "Фильтр монет по объёму", o: [{ v: "count", l: "Топ-N" }, { v: "usdt", l: "USDT" }, { v: "both", l: "Оба" }, { v: "off", l: "Выкл" }] },
-    "levels.max_coins_count": { t: "Монет в сканере", s: "Топ-N по объёму", o: [20, 30, 50, 100, 200] },
+    "levels.interval": { t: "Интервал сканирования", s: "Секунд между проходами этого направления", o: [60, 180, 300, 900, 1800, 3600, 7200, 14400, 86400], u: " с" },
     "levels.levels_counter_trend_min_quality": { t: "Мин. качество контр-тренда", s: "0 — любое", o: [0, 1, 2, 3, 4, 5], u: "⭐" },
     "levels.counter_trend_min_quality": { t: "Мин. качество контр-тренда", s: "0 — любое", o: [0, 1, 2, 3, 4, 5], u: "⭐" },
     "levels.high_wr_mode": { t: "High WR Mode", s: "Только сетапы 4⭐+" },
+    "levels.vol_filter_mode": { t: "Фильтр монет по объёму", o: [{ v: "count", l: "Топ-N" }, { v: "usdt", l: "USDT" }, { v: "both", l: "Оба" }, { v: "off", l: "Выкл" }] },
+    "levels.max_coins_count": { t: "Монет в сканере", s: "Топ-N по объёму", o: [20, 30, 50, 100, 200] },
+    // SMC — kb_smc_main (smc.advanced on the server)
     "smc.min_confirmations": { t: "Мин. подтверждений", s: "из 5", o: [2, 3, 4, 5] },
     "smc.min_rr": { t: "Мин. R:R", o: [1.5, 2, 2.5, 3], u: "R" },
     "smc.sl_buffer_pct": { t: "Буфер SL", o: [0.1, 0.15, 0.25, 0.5], u: "%" },
+    "smc.smc_use_volume_filter": { t: "Объём свечи", s: "Фильтр объёма ×1.2 (жёсткий / только confirmation)" },
     "smc.use_volume_filter": { t: "Объём свечи", s: "Фильтр объёма ×1.2 (жёсткий / только confirmation)" },
+    "smc.smc_vol_mult": { t: "Множитель объёма", o: [1, 1.2, 1.5, 2, 3], u: "×", n: { min: 0.5, max: 5, step: 0.1 } },
     "smc.vol_mult": { t: "Множитель объёма", o: [1, 1.2, 1.5, 2, 3], u: "×" },
     "smc.fvg_enabled": { t: "FVG" },
     "smc.choch_enabled": { t: "CHoCH" },
     "smc.ob_use_breaker": { t: "Breaker blocks" },
     "smc.sweep_close_req": { t: "Закрытие sweep" },
+    "smc.ob_max_age": { t: "Макс. возраст OB", o: [20, 30, 50, 100] },
     "smc.max_ob_age": { t: "Макс. возраст OB", o: [20, 30, 50, 100] },
+    "smc.smc_conf_type": { t: "Подтверждение", o: [{ v: "BODY_CLOSE", l: "Тело свечи" }, { v: "WICK_TOUCH", l: "Тень/Тело" }] },
     "smc.conf_type": { t: "Подтверждение", o: [{ v: "body", l: "Тело свечи" }, { v: "wick", l: "Тень/Тело" }] },
+    "smc.smc_pd_filter": { t: "P/D фильтр", s: "50/50 правило" },
     "smc.pd_filter": { t: "P/D фильтр", s: "50/50 правило" },
+    "smc.smc_retrace_depth": { t: "Вход в OB", s: "Глубина входа в блок (0 — край, 1 — дальний край)", n: { min: 0, max: 1, step: 0.1 } },
     "smc.ob_entry_pct": { t: "Вход в OB", s: "% глубины блока", o: [0, 30, 50], u: "%" },
+    "smc.smc_mtf_check": { t: "MTF конфлюэнс", s: "H1 → M15" },
     "smc.mtf_confluence": { t: "MTF конфлюэнс", s: "H1 → M15" },
+    "smc.smc_counter_trend_min_quality": { t: "Контр-тренд: мин. качество", o: [0, 1, 2, 3, 4, 5], u: "⭐" },
     "smc.counter_trend_min_quality": { t: "Контр-тренд: мин. качество", o: [0, 1, 2, 3, 4, 5], u: "⭐" },
+    // Auto-trade menu extras (kb_auto_trade)
     "trading.fixed_amount": { t: "Фикс. риск", s: "% депозита, 0 — выкл", o: [0, 0.5, 1, 1.5, 2, 2.5, 3], u: "%" },
-    "trading.autotrade_disabled_days": { t: "Дни без торговли", s: "Список дней недели" },
+    "trading.disabled_days": { t: "Дни без торговли", s: "В эти дни автотрейд не открывает сделки", kind: "days" },
+    "trading.autotrade_disabled_days": { t: "Дни без торговли", s: "В эти дни автотрейд не открывает сделки", kind: "days" },
+    "trading.vol_filter_mode": { t: "Фильтр монет по объёму", o: [{ v: "count", l: "Топ-N" }, { v: "usdt", l: "USDT" }, { v: "both", l: "Оба" }, { v: "off", l: "Выкл" }] },
+    "trading.max_coins_count": { t: "Монет в сканере", s: "Топ-N по объёму", o: [20, 30, 50, 100, 200] },
+    "trading.at_stats_period": { t: "Период статистики автотрейда", o: [{ v: 1, l: "24h" }, { v: 7, l: "7d" }, { v: 30, l: "30d" }] },
     "trading.partial_tp_mode": { t: "Partial TP: режим", o: [{ v: "r", l: "R" }, { v: "pct", l: "%" }] },
     "trading.optimizer_enabled": { t: "Оптимизатор", s: "Адаптивный подбор параметров" },
+    // Partial TP (handlers/partial_tp.py)
+    "ptp.ptp_mode": { t: "Partial TP: режим", s: "Цели в R или в % от входа", o: [{ v: "R", l: "R" }, { v: "PCT", l: "%" }] },
+    "ptp.partial_tp1_r": { t: "TP1", s: "Цель первой частичной фиксации", u: "R" },
+    "ptp.partial_tp2_r": { t: "TP2", s: "Цель второй частичной фиксации", u: "R" },
+    "ptp.partial_tp1_pct": { t: "TP1", s: "Цель первой частичной фиксации", u: "%" },
+    "ptp.partial_tp2_pct": { t: "TP2", s: "Цель второй частичной фиксации", u: "%" },
+    "ptp.ptp_profit_pct1": { t: "Доля на TP1", s: "% позиции, закрываемый на TP1", u: "%" },
+    "ptp.ptp_profit_pct2": { t: "Доля на TP2", s: "% позиции, закрываемый на TP2", u: "%" },
+    // Risk Management extras (kb_risk_mgmt; risk.advanced on the server)
     "risk.spread_max_pct": { t: "Порог спреда", o: [0.1, 0.2, 0.3, 0.5, 1], u: "%" },
     "risk.allow_low_notional_boost": { t: "Boost объёма", s: "Добивать до минимального номинала" },
     "risk.show_risk_preview": { t: "Risk preview", s: "Показывать риск перед сделкой" },
     "risk.correlation_cap_enabled": { t: "Corr-cap", s: "Лимит коррелирующих позиций" },
-    "risk.correlation_cap_threshold": { t: "Corr-cap: порог", o: [0.5, 0.6, 0.7, 0.8, 0.9] },
+    "risk.correlation_cap_threshold": { t: "Corr-cap: порог", o: [0.5, 0.6, 0.7, 0.8, 0.9], n: { min: 0.4, max: 0.95, step: 0.05 } },
     "risk.adaptive_sizing_enabled": { t: "Adaptive sizing", s: "Kelly / волатильность / просадка" },
-    "risk.adaptive_sizing_mode": { t: "Adaptive sizing: режим", o: [{ v: "all", l: "Все" }, { v: "kelly", l: "Kelly" }, { v: "vol", l: "Vol" }, { v: "dd", l: "DD" }] },
+    "risk.adaptive_sizing_mode": { t: "Adaptive sizing: режим", o: [{ v: "all", l: "Все" }, { v: "kelly", l: "Kelly" }, { v: "vol", l: "Vol" }, { v: "dd", l: "DD" }, { v: "off", l: "Выкл" }] },
     "risk.tilt_detector_enabled": { t: "Tilt detector", s: "Предупреждение о тильте" },
     "risk.hold_lock_enabled": { t: "Hold-lock", s: "Подтверждение закрытия ниже min R" },
     "risk.hold_lock_min_rr": { t: "Hold-lock: мин. R", n: { min: 0, max: 5, step: 0.1 }, u: "R" },
@@ -3143,9 +3229,13 @@
     "notifications.notify_signal": { t: "Сигнал входа" },
     "notifications.notify_breakout": { t: "Пробой уровня (ранний)" }
   };
-  function advTitle(full, key, op) {
+  var ADV_FMT = { tf: function (v) { return String(v).toUpperCase(); }, vol: function (v) { return volLabel(v); } };
+  function advPreset(full, key) {
+    var top = full.split(".")[0];
+    return ADV_PRESET[full] || ADV_PRESET[top + "." + key] || null;
+  }
+  function advTitle(full, key, op, p) {
     if (op.labels && op.labels[full]) return String(op.labels[full]);
-    var p = ADV_PRESET[full];
     return p && p.t ? p.t : key.replace(/_/g, " ");
   }
   function advInput(type, value, onChange, locked) {
@@ -3159,22 +3249,59 @@
     });
     return inp;
   }
+  // Option list for a key: the server's options.choices[full] wins (labels taken from the
+  // preset when it names them), then the preset's own list, then options.schema.
+  function advOptions(full, p, schema, op) {
+    var preset = p && Array.isArray(p.o) ? p.o : null;
+    var labelOf = function (v) {
+      if (!preset) return null;
+      for (var i = 0; i < preset.length; i++) if (preset[i] && typeof preset[i] === "object" && String(preset[i].v) === String(v)) return preset[i].l;
+      return null;
+    };
+    var srv = op.choices && op.choices[full];
+    if (Array.isArray(srv) && srv.length) return srv.map(function (v) { var l = labelOf(v); return l != null ? { v: v, l: l } : v; });
+    if (preset) return preset;
+    if (schema && Array.isArray(schema.values)) return schema.values;
+    return null;
+  }
+  // «Дни без торговли»: multi-toggle Пн…Вс (0 = Monday, as the bot stores them).
+  function daysCtl(title, sub, sec, key, val, locked) {
+    var cur = (Array.isArray(val) ? val : String(val == null ? "" : val).split(",")).map(function (d) { return num(d); }).filter(function (d) { return d !== null; });
+    var wrap = h("div", { class: "seg grow" });
+    WD.forEach(function (name, i) {
+      var on = cur.indexOf(i) >= 0;
+      wrap.appendChild(h("button", { class: "seg-b" + (on ? " on" : ""), type: "button", "aria-pressed": on ? "true" : "false", onclick: function () {
+        if (locked) return lockedTap();
+        hap("select");
+        var next = on ? cur.filter(function (d) { return d !== i; }) : cur.concat([i]).sort(function (a, b) { return a - b; });
+        saveSetting(sec, key, next);
+      } }, name));
+    });
+    return ctlRow(title, sub, wrap, locked);
+  }
   function advControl(sec, key, val, op) {
     var full = sec ? sec + "." + key : key;
-    var p = ADV_PRESET[full] || {};
+    var p = advPreset(full, key) || {};
     var schema = (op.schema && (op.schema[full] || (op.schema[sec] && op.schema[sec][key]))) || {};
     var locked = isLocked(full);
-    var title = advTitle(full, key, op);
+    var title = advTitle(full, key, op, p);
     var sub = p.s || schema.title || null;
-    var opts = p.o || schema.values || (op.choices && op.choices[full]) || null;
     var unit = p.u || schema.unit || "";
+    var fmt = p.f && ADV_FMT[p.f] ? ADV_FMT[p.f] : (unit ? function (x) { return String(x) + unit; } : null);
     var save = function (v) { if (isLocked(full + "." + v)) return lockedTap(); saveSetting(sec, key, v); };
+    if (ADV_READONLY[key] || (Array.isArray(val) && p.kind !== "days" && key !== "disabled_days")) {
+      var items = Array.isArray(val) ? val.map(String) : [];
+      return ctlRow(key === "overrides" ? "Переопределено" : title, key === "overrides" ? "Ключи, заданные отдельно для этого направления" : sub,
+        h("div", { class: "desc", style: "margin:0", text: items.length ? items.join(", ") : "— (как в общих параметрах)" }), false);
+    }
     if (typeof val === "boolean") {
       var sw = switchEl(val, { aria: title, onChange: function (v, inp) { if (locked) { inp.checked = val; lockedTap(); return; } saveSetting(sec, key, v); } });
       return toggleRow([title, locked ? lockBadge() : null], sub, sw, "dense" + (locked ? " is-locked" : ""));
     }
+    if (p.kind === "days" || key === "disabled_days" || key === "autotrade_disabled_days") return daysCtl(title, sub, sec, key, val, locked);
+    var opts = advOptions(full, p, schema, op);
     if (Array.isArray(opts) && opts.length) {
-      return ctlRow(title, sub, seg(opts, val, save, locked, unit ? function (x) { return String(x) + unit; } : null, true), locked);
+      return ctlRow(title, sub, seg(opts, val, save, locked, fmt, true), locked);
     }
     if (typeof val === "number") {
       var n = p.n || (schema.min != null && schema.max != null ? schema : null);
@@ -3185,34 +3312,56 @@
     if (val === null || val === undefined) return ctlRow(title, sub, advInput("text", "", save, locked), locked);
     return ctlRow(title, sub, h("code", { class: "desc", style: "margin:0;word-break:break-all", text: JSON.stringify(val) }), locked);
   }
+  // One settings/all object (a section or a nested D9 block) → group card(s). Nested
+  // objects become their own cards after the parent's leaf controls.
+  function advSection(root, path, obj, op, known, counter) {
+    var leaf = [], nested = [];
+    Object.keys(obj).forEach(function (k) {
+      if (known.indexOf(k) >= 0) return;
+      var v = obj[k];
+      if (v && typeof v === "object" && !Array.isArray(v)) nested.push(k); else leaf.push(k);
+    });
+    if (leaf.length) {
+      var meta = ADV_GROUP[path] || [path.replace(/[._]/g, " "), "Раздел settings/all: " + path];
+      var g = groupCard(meta[0], meta[1]);
+      leaf.forEach(function (k) { g.appendChild(advControl(path, k, obj[k], op)); counter.n++; });
+      if (path === "levels.long" || path === "levels.short") {
+        // the bot's «Сбросить» of the direction override (long_cfg / short_cfg = "{}")
+        g.appendChild(h("div", { class: "btn-row mt12" },
+          h("button", { class: "btn btn-dark btn-sm", type: "button", disabled: isLocked(path + ".reset") ? true : null,
+            onclick: function () { actionSetting(path, "reset", true, "Переопределения сброшены"); } }, "Сбросить", icon("refresh"))));
+      }
+      if (path === "risk.advanced") {
+        // kb_auto_trade «♻️ Сбросить все фильтры (ONE-CLICK)»
+        g.appendChild(h("div", { class: "btn-row mt12" },
+          h("button", { class: "btn btn-dark btn-sm danger", type: "button", disabled: isLocked(path + ".reset_all_filters") ? true : null,
+            onclick: function () { actionSetting(path, "reset_all_filters", true, "Все фильтры сброшены"); } }, "♻️ Сбросить все фильтры")));
+      }
+      root.appendChild(g);
+    }
+    nested.forEach(function (k) { advSection(root, path + "." + k, obj[k], op, [], counter); });
+  }
   function secAdvanced(root) {
     settingsGate(root, function (st, op) {
       root.appendChild(hintCard("Экран-заглушка: здесь показывается всё, что сервер отдаёт в settings/all сверх основных разделов — параметры, которые в боте менялись через Telegram-меню. Подписи и наборы значений — как в меню бота, остальное — по имени ключа.", ""));
-      var count = 0, misc = [];
+      var counter = { n: 0 }, misc = [];
       if (st.ui_mode != null) {
         var g0 = groupCard("Интерфейс", "Режим меню бота: простой или эксперт");
         g0.appendChild(advControl("", "ui_mode", st.ui_mode, op));
-        root.appendChild(g0); count++;
+        root.appendChild(g0); counter.n++;
       }
       Object.keys(st).forEach(function (sec) {
         if (sec === "ui_mode" || ADV_SKIP_TOP[sec]) return;
         var v = st[sec];
-        if (v && typeof v === "object" && !Array.isArray(v)) {
-          var known = KNOWN_KEYS[sec] || [];
-          var extra = Object.keys(v).filter(function (k) { return known.indexOf(k) < 0; });
-          if (!extra.length) return;
-          var meta = ADV_GROUP[sec] || [sec.replace(/_/g, " "), "Раздел settings/all: " + sec];
-          var g = groupCard(meta[0], meta[1]);
-          extra.forEach(function (k) { g.appendChild(advControl(sec, k, v[k], op)); count++; });
-          root.appendChild(g);
-        } else if (v === null || typeof v !== "object") misc.push(sec);
+        if (v && typeof v === "object" && !Array.isArray(v)) advSection(root, sec, v, op, KNOWN_KEYS[sec] || [], counter);
+        else if (v === null || typeof v !== "object") misc.push(sec);
       });
       if (misc.length) {
         var gm = groupCard("Прочее", "Параметры верхнего уровня settings/all");
-        misc.forEach(function (k) { gm.appendChild(advControl("", k, st[k], op)); count++; });
+        misc.forEach(function (k) { gm.appendChild(advControl("", k, st[k], op)); counter.n++; });
         root.appendChild(gm);
       }
-      if (!count) root.appendChild(emptyCard("Дополнительных параметров нет", "Сервер пока не отдаёт параметры сверх основных разделов. Как только они появятся в settings/all — покажутся здесь автоматически."));
+      if (!counter.n) root.appendChild(emptyCard("Дополнительных параметров нет", "Сервер пока не отдаёт параметры сверх основных разделов. Как только они появятся в settings/all — покажутся здесь автоматически."));
     });
   }
 
