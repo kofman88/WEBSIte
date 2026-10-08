@@ -19,7 +19,7 @@
 const { pyFloat, pyTruthy } = require('../../strategies/common/pyval');
 const { pyIntOf } = require('./constraints');
 const { pyNe } = require('./operators');
-const { pyDumps, FLOAT_GENE_KEYS } = require('./geneSpace');
+const { pyDumps, parsePyJson, FLOAT_GENE_KEYS } = require('./geneSpace');
 const C = require('./config');
 
 const defaultLog = () => require('../../utils/logger');
@@ -192,8 +192,11 @@ function applyBestToUser(userId, strategy, tf = null, deps = {}) {
       for (const [k, v] of Object.entries(after)) if (pyNe(own(before, k) ? before[k] : null, v)) changed[k] = v;
     } else if (strategy === 'SMC') {
       let cfg = {};
+      let srcFloats = new Set();
       try {
-        cfg = JSON.parse(user.smc_cfg || '{}');
+        const parsed = parsePyJson(user.smc_cfg || '{}');
+        cfg = parsed.value;
+        srcFloats = parsed.floatKeys;
       } catch (_e) {
         d.log.warn('genome.apply_best_to_user() unhandled exception');
         cfg = {};
@@ -210,7 +213,10 @@ function applyBestToUser(userId, strategy, tf = null, deps = {}) {
           changed[k] = v;
         }
       }
-      const floatKeys = new Set([...require('../engine/smcUserCfg').FLOAT_KEYS, ...FLOAT_GENE_KEYS]);
+      // Python keeps each value's own type: untouched keys as they were in the stored JSON,
+      // genome-written keys with the genome's type (float genes are floats).
+      const floatKeys = new Set([...srcFloats].filter((k) => !own(changed, k)));
+      for (const k of Object.keys(changed)) if (FLOAT_GENE_KEYS.has(k)) floatKeys.add(k);
       d.db.prepare('UPDATE trader_settings SET smc_cfg=?, updated_at=? WHERE user_id=?')
         .run(pyDumps(cfg, { floatKeys }), d.now(), Number(userId));
       d.invalidate();

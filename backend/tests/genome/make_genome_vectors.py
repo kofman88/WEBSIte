@@ -840,29 +840,37 @@ async def section_db_async(out):
         # ── check_drift / validate_via_paper ─────────────────────────────────
         drift = []
         paper = []
-        for k in range(36):
+        for k in range(60):
             await _db_reset(db, cx)
             strat = ["LEVELS", "SMC", "VOLUME"][k % 3]
             tf = "1h"
             regime_box["r"] = [None, "trending_up", "ranging", "high_vol", "trending_down", "weird"][k % 6]
-            n_tr = [0, 10, 14, 15, 29, 30, 31, 60, 120, 220][k % 10]
+            n_tr = [0, 10, 14, 15, 29, 30, 31, 60, 120, 220][k % 10] if k != 5 else 80
             trades = []
             for j in range(n_tr):
                 e = 100.0 + rng.uniform(-5, 5)
                 d = rng.choice(["LONG", "SHORT"])
                 sgn = 1 if d == "LONG" else -1
                 risk = rng.uniform(0.5, 2.0)
-                res = rng.choice(["TP1", "TP2", "TP3", "SL", "BE", "MANUAL", "SL", "TP1", "OPEN", ""])
+                p_win = [0.15, 0.35, 0.5, 0.7, 0.9][(k // 3) % 5]
+                if rng.random() < p_win:
+                    res = rng.choice(["TP1", "TP2", "TP3", "MANUAL"])
+                else:
+                    res = rng.choice(["SL", "SL", "BE", "MANUAL", "OPEN", ""])
                 rr = {"TP1": 1.0, "TP2": 2.0, "TP3": 3.0, "SL": -1.0, "BE": 0.0}.get(res, round(rng.uniform(-1.2, 1.5), 3))
+                if res == "SL" and rng.random() < 0.3:
+                    rr = round(rng.uniform(-1.3, -0.8), 3)
+                if k == 5 and j == 3:
+                    res, rr = "SL", None          # result_rr NULL → validate_via_paper float(None) → ERROR
                 trades.append({"direction": d, "entry": e if rng.random() > 0.03 else 0, "sl": e - sgn * risk,
                                "tp1": e + sgn * risk * rng.choice([0.8, 1.0, 1.5, 2.2]),
                                "tp2": rng.choice([0, e + sgn * risk * rng.choice([1.5, 2.0, 3.0])]),
                                "result": res, "result_rr": rr,
-                               "created_at": NOW - rng.uniform(0, 16) * 86400})
+                               "created_at": NOW - rng.uniform(0, [16, 4, 2.5][k % 3]) * 86400})
             await _insert_trades(cx, strat, trades)
             gen_items = [{"genome": with_shim(k, genome.random_genome, strat), "fitness": 1.0 + j * 0.1,
                           "winrate": round(rng.uniform(30, 90), 2), "profit_factor": 1.5,
-                          "trades": rng.choice([3, 4, 5, 20])} for j in range(3)]
+                          "trades": rng.choice([3, 5, 20, 40])} for j in range(3)]
             if k % 7 != 6:
                 await _insert_pop(cx, strat, tf, 2, gen_items)
             await cx.commit()
@@ -903,6 +911,10 @@ async def section_db_async(out):
                                 "parent_b": rng.choice([0, 12]),
                                 "birth_type": rng.choice(["random", "elite", "crossover", "mutation", "bayesian_mut", "cross_strategy", ""])})
                 await _insert_pop(cx, S, T, 4, pop)
+                cx.row_factory = None
+                async with cx.execute("SELECT id FROM genome_population WHERE strategy=? AND timeframe=? AND generation=4 ORDER BY id", (S, T)) as cur:
+                    for it, r in zip(pop, await cur.fetchall()):
+                        it["id"] = r[0]
                 for gnum in range(1, rng.choice([1, 2, 5, 17]) + 1):
                     hist.append({"generation": gnum, "best_fitness": round(rng.uniform(0, 3), 4) if k != 5 else 0.0,
                                  "avg_fitness": round(rng.uniform(0, 1.5), 4), "best_wr": 50.0, "best_pf": 1.5})

@@ -162,6 +162,23 @@ function pyDumps(value, { sortKeys = false, itemSep = ', ', keySep = ': ', float
   return walk(value, null);
 }
 
+/**
+ * json.loads for a JSON object that will be re-dumped with Python semantics: returns
+ * {value, floatKeys} where floatKeys are the keys whose number literal was a float in the
+ * source text ("2.0", "1e-05") — JS numbers cannot carry the int/float distinction, so a
+ * read-modify-write (smc_cfg) keeps `300000` as an int and `2.0` as a float like the bot.
+ */
+function parsePyJson(text) {
+  const value = JSON.parse(String(text));
+  const floatKeys = new Set();
+  const re = /"((?:[^"\\]|\\.)*)"\s*:\s*(-?\d+(?:\.\d+)?(?:[eE][+-]?\d+)?)\b/g;
+  let m;
+  while ((m = re.exec(String(text))) !== null) {
+    if (/[.eE]/.test(m[2])) floatKeys.add(JSON.parse(`"${m[1]}"`));
+  }
+  return { value, floatKeys };
+}
+
 /** serialize_genome(genome) = json.dumps(genome, sort_keys=True) */
 function serializeGenome(genome) {
   return pyDumps(genome, { sortKeys: true });
@@ -185,5 +202,5 @@ function compactGenomeJson(genome) {
 
 module.exports = {
   GENE_SPACE, spaceOf, floatSteps, randomGeneValue, FLOAT_GENE_KEYS,
-  pyJsonStr, pyDumps, serializeGenome, deserializeGenome, compactGenomeJson,
+  pyJsonStr, pyDumps, parsePyJson, serializeGenome, deserializeGenome, compactGenomeJson,
 };
