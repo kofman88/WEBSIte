@@ -70,6 +70,57 @@ describe('volume profile: one NaN / inf volume empties HVN and LVN (numpy 0·NaN
   });
 });
 
+describe('live zone cache (`_zone_cache`, TTL by TIMEFRAME, pre-filter) of a persistent indicator', () => {
+  // scratchpad chk_cache2.py: Config.LEVELS_REGIME_GATE="off"; indicator.time = fake clock; ic = _cfg_to_ind(TradeCfg(**LOOSE, max_dist_pct=md))
+  // ind = CHMIndicator(ic); clock=0: ind.analyze(sym, df_1h[:i0+1]); clock=1799: cached = ind.analyze(sym, df_1h[:j+1])
+  // fresh = CHMIndicator(ic).analyze(sym, df_1h[:j+1])   (LOOSE = make_levels_probe.LOOSE)
+  const LOOSE = { max_dist_pct: 3.0, zone_pct: 0.3, vol_mult: 0.7, use_volume: false, use_rsi: false, max_risk_pct: 3.0, min_rr: 1.0 };
+  const ENV_OFF = { ...L.LEVELS_ENV, LEVELS_REGIME_GATE: 'off' };
+  const VECTORS = [
+    ['SYNRG05-USDT-SWAP', 3.0, 280, 318, 'zones', 'SIG SHORT SFP (Ложный пробой вверх) q=5'],
+    ['SYNRG05-USDT-SWAP', 3.0, 230, 238, 'rr', 'signal'],
+    ['SYNRG05-USDT-SWAP', 0.5, 230, 254, 'signal', 'zones'],
+    ['SYNLV06-USDT-SWAP', 3.0, 230, 250, 'SIG SHORT Ретест пробитой поддержки q=7', 'SIG SHORT Ретест пробитой поддержки q=9'],
+    ['SYNLV06-USDT-SWAP', 3.0, 330, 335, 'SIG LONG Отскок от поддержки q=0', 'SIG LONG Отскок от поддержки q=1'],
+  ];
+  const fmt = (r) => (r.signal ? `SIG ${r.signal.direction} ${r.signal.breakout_type} q=${r.signal.quality}` : r.rejectReason);
+  it.each(VECTORS)('%s max_dist %s: zones of bar %i reused at bar %i → %s (fresh: %s)', (sym, md, i0, j, cached, fresh) => {
+    const cfg = L.cfgToInd(L.tradeCfg({ ...LOOSE, max_dist_pct: md }), false, ENV_OFF);
+    const base = load.loadFrame(sym, '1h');
+    let now = 0;
+    const ind = L.createIndicator(cfg, { env: ENV_OFF, clock: () => now });
+    ind.analyze(sym, base.prefix(i0));
+    now = 1799;                                                  // TTL "1h" = 1800 s: still fresh
+    expect(fmt(ind.analyze(sym, base.prefix(j)))).toBe(cached);
+    expect(fmt(L.analyze(sym, base.prefix(j), null, null, null, cfg, { env: ENV_OFF }))).toBe(fresh);
+    now = 1800;                                                  // entry stored at 0: 1800 − 0 is not < 1800 → stale
+    expect(fmt(ind.analyze(sym, base.prefix(j)))).toBe(fresh);   // recomputed = the fresh result
+  });
+  it('the pre-filter rejects from the cache with "zones" when every cached zone is > 2·MAX_DIST_PCT away', () => {
+    const Z = L.zones;
+    const z = (price) => ({ price });
+    expect(Z.preFilterSkip([z(100)], [z(110)], 103.1, 1.5)).toBe(true);    // 3.1 % > 3 %
+    expect(Z.preFilterSkip([z(100)], [z(110)], 102.9, 1.5)).toBe(false);
+    expect(Z.preFilterSkip([], [], 100, 1.5)).toBe(false);
+    expect(Z.zoneCacheTtl('15m')).toBe(600);
+    expect(Z.zoneCacheTtl('4H')).toBe(900);                      // unknown key → 900 (only lowercase keys in _TF_TTL_MAP)
+  });
+  it('eviction over _ZONE_CACHE_MAX: TTL-expired entries first, then the oldest', () => {
+    // scratchpad chk_evict.py: ind = CHMIndicator(_cfg_to_ind(TradeCfg())); ind._ZONE_CACHE_MAX = 2; clock = t;
+    // ind.analyze(sym, df_1h[:300]) → list(ind._zone_cache) after each call
+    const STEPS = [['A', 0, ['A']], ['B', 100, ['A', 'B']], ['C', 2000, ['C']], ['D', 2100, ['C', 'D']],
+      ['B', 2200, ['D', 'B']], ['E', 2300, ['B', 'E']], ['F', 5000, ['F']]];
+    const df = load.loadFrame('SYNRG05-USDT-SWAP', '1h').slice(0, 300);
+    let now = 0;
+    const ind = L.createIndicator(L.cfgToInd(L.tradeCfg({})), { clock: () => now, cacheMax: 2 });
+    for (const [sym, t, keys] of STEPS) {
+      now = t;
+      ind.analyze(sym, df);
+      expect([sym, t, [...ind.zoneCache.map.keys()]]).toEqual([sym, t, keys]);
+    }
+  });
+});
+
 describe('createIndicator reject counters in relaxed mode (ATR-breakout fallback)', () => {
   // make_levels_probe.apply_env(case(relaxed=True)); md._last_breakout_alert.clear(); reset_analyze_stats()
   // CHMIndicator(_cfg_to_ind(TradeCfg())).analyze("SYNVL03-USDT-SWAP", df_1h.iloc[:i+1]) → "ATR Breakout" signal and
