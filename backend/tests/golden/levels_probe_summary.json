@@ -1,20 +1,20 @@
 {
  "probe": "levels",
- "cases": 149,
- "bars": 86880,
- "signals": 1036,
- "null_bars": 85844,
+ "cases": 154,
+ "bars": 89920,
+ "signals": 1096,
+ "null_bars": 88824,
  "errors": 0,
  "reject_reasons": {
   "levels_filter": 226,
   "none": 330,
   "quality_hwr": 54,
-  "rr": 2173,
+  "rr": 2293,
   "rsi": 105,
-  "signal": 45098,
-  "sl_risk": 364,
+  "signal": 46824,
+  "sl_risk": 372,
   "volume": 9000,
-  "zones": 28494
+  "zones": 29620
  },
  "per_case": {
   "cls_meme": {
@@ -337,6 +337,22 @@
    "signals": 15,
    "bars": 1200
   },
+  "deg_zero_vol_all": {
+   "signals": 15,
+   "bars": 640
+  },
+  "deg_htf_short": {
+   "signals": 15,
+   "bars": 640
+  },
+  "deg_htf_21": {
+   "signals": 15,
+   "bars": 640
+  },
+  "deg_on_demand_50_p20": {
+   "signals": 0,
+   "bars": 480
+  },
   "deg_nan_vol_novolfilter": {
    "signals": 17,
    "bars": 720
@@ -404,6 +420,10 @@
   "live_cache_1d": {
    "signals": 12,
    "bars": 720
+  },
+  "live_htf_evict": {
+   "signals": 15,
+   "bars": 640
   },
   "live_htf_cache": {
    "signals": 12,
@@ -615,7 +635,7 @@
   }
  },
  "sha256": {
-  "levels_probe.json": "d8012b702e5ba6f982310fd550bdd44fec83c3ae8df298962e45dcc53b362a50"
+  "levels_probe.json": "4eab97eb00938d7c5c64cab2a0a03852d2d2b79347e65cb9d2575818e1561ca4"
  },
- "elapsed_s": 210.5
+ "elapsed_s": 196.0
 }

@@ -209,6 +209,13 @@ CASES["deg_drop"] = case(sweep=160, symbols=_same(MIX), trade_cfg=dict(LOOSE, em
 CASES["deg_nan_flat"] = case(sweep=180, symbols=_same(MIX), trade_cfg=LOOSE, env=OFF_ENV, mutate=dict(nan_flat_every=60))
 CASES["deg_nan_flat_15m"] = case(tf="15m", window=299, sweep=300, symbols=_TF_SYMS, trade_cfg=LOOSE, env=OFF_ENV,
                                  mutate=dict(nan_flat_every=250))
+CASES["deg_zero_vol_all"] = case(sweep=160, symbols=_same(MIX), trade_cfg=LOOSE, env=OFF_ENV, mutate=dict(zero_vol_every=1))
+CASES["deg_htf_short"] = case(sweep=160, symbols=_same(MIX), trade_cfg=dict(LOOSE, use_htf=True, htf_ema_period=20), env=OFF_ENV,
+                              htf_window=15)
+CASES["deg_htf_21"] = case(sweep=160, symbols=_same(MIX), trade_cfg=dict(LOOSE, use_htf=True, htf_ema_period=50), env=OFF_ENV,
+                           htf_window=21)
+CASES["deg_on_demand_50_p20"] = case(window=50, sweep=120, symbols=_same(MIX), trade_cfg=dict(LOOSE, pivot_strength=20, ema_slow=100),
+                                     env=OFF_ENV, call="on_demand")
 CASES["deg_nan_vol_novolfilter"] = case(sweep=180, symbols=_same(MIX), trade_cfg=dict(LOOSE, use_volume=False), env=OFF_ENV,
                                         mutate=dict(nan_vol_every=5))
 CASES["deg_nan_vol_relaxed"] = case(sweep=150, symbols=_same(MIX), trade_cfg=LOOSE_VOL, relaxed=True, mutate=dict(nan_vol_every=6))
@@ -258,6 +265,8 @@ CASES["live_cache_15m"] = case(tf="15m", window=299, sweep=200, symbols=_TF_SYMS
                                mode="live", clock_step=250)
 CASES["live_cache_1d"] = case(tf="1d", sweep=180, symbols=_same(MIX), trade_cfg=dict(LOOSE, cooldown_bars=1, use_htf=True),
                               env=OFF_ENV, mode="live", clock_step=3000)
+CASES["live_htf_evict"] = case(sweep=160, symbols=_same(MIX), trade_cfg=dict(LOOSE, use_htf=True, cooldown_bars=1), env=OFF_ENV,
+                               mode="live", clock_step=900, cache_max=2)
 CASES["live_htf_cache"] = case(sweep=150, symbols=_same(MIX), trade_cfg=dict(LOOSE, use_htf=True, cooldown_bars=2), env=OFF_ENV,
                                mode="live", clock_step=3600)
 CASES["live_relaxed_15m"] = case(tf="15m", window=299, sweep=200, symbols=_TF_SYMS, relaxed=True, mode="live", clock_step=900,
