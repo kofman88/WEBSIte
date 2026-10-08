@@ -224,6 +224,15 @@ for st_ in ("TP1", "TP2", "TP1"):
                    "result": "", "result_rr": 0, "order_id": "", "signal_msg_id": 4, "progress_stage": st_,
                    "skip_reason": "", "user_note": ""})
 USERS.append((109, "pro"))
+# never-delivered signals (ghost branch a) and an undelivered exchange-less row with a NULL msg id
+for k, (age_h, msg) in enumerate(((1, 0), (30, 0), (100, 0), (200, None), (5, 3))):
+    seq += 1
+    trades.append({"trade_id": f"t{seq:04d}_105g", "user_id": 105, "symbol": "LTC-USDT-SWAP", "direction": "LONG",
+                   "entry": 80.0, "sl": 78.0, "original_sl": 78.0, "tp1": 84.0, "tp2": 86.0, "tp3": 90.0,
+                   "created_at": NOW - age_h * 3600, "strategy": "LEVELS", "timeframe": "1h", "quality": 5,
+                   "trend_ctx": "", "mtf_aligned": 0, "is_counter_trend": 0, "breakout_type": "",
+                   "result": "", "result_rr": 0, "order_id": "", "signal_msg_id": msg, "progress_stage": "",
+                   "skip_reason": "", "user_note": ""})
 rng.shuffle(trades)     # insertion order ≠ created_at order (natural scan order matters)
 
 con = sqlite3.connect(DBP)
@@ -290,6 +299,29 @@ async def collect():
     return res
 
 out.update(LOOP.run_until_complete(collect()))
+
+
+# ── 2b. ghost cleanup (bot.py _ghost_cleanup_loop → db_cleanup_ghost_trades_all(3)) and the
+#        cache_gc trades GC, on the same seeded DB, AFTER every read above ─────────────────
+async def ghost():
+    from db import trades as dbt
+    snap = lambda: [dict(zip(("trade_id", "result", "state", "skip_reason", "state_changed_at"), r)) for r in  # noqa: E731
+                    sqlite3.connect(DBP).execute(
+                        "SELECT trade_id, result, state, skip_reason, state_changed_at FROM trades ORDER BY trade_id").fetchall()]
+    res = {}
+    res["one_user"] = list(await dbt.db_cleanup_ghost_trades(103, max_age_days=30))
+    res["after_one_user"] = snap()
+    res["all"] = list(await dbt.db_cleanup_ghost_trades_all(max_age_days=3))
+    res["after_all"] = snap()
+    con2 = sqlite3.connect(DBP)
+    cur = con2.execute("DELETE FROM trades WHERE result IN ('SKIP','ORPHAN') AND created_at < ?", (NOW - 30 * 86400,))
+    res["gc_deleted"] = cur.rowcount
+    con2.commit()
+    res["after_gc"] = [r[0] for r in con2.execute("SELECT trade_id FROM trades ORDER BY trade_id").fetchall()]
+    con2.close()
+    return res
+
+out["ghost"] = LOOP.run_until_complete(ghost())
 
 # ── 3. pure helpers on synthetic inputs ─────────────────────────────────────
 out["normalize"] = {str(v): dbs.normalize_strategy(v) for v in

@@ -45672,6 +45672,306 @@
 "line": "🎯 TP2 достигнут · +5.0R",
 "text": "<b>BTC LONG</b>\nвход 100\n\n📌 🎯 TP2 достигнут · +5.0R",
 "text_len": 51
+},
+{
+"name": "card is a list",
+"trade": {
+"trade_id": "t1",
+"signal_msg_id": 55,
+"user_id": 7,
+"signal_card_json": "[1, 2]",
+"direction": "LONG",
+"entry": 100.0,
+"sl": 95.0,
+"tp1": 110.0,
+"tp2": 120.0,
+"tp3": 130.0,
+"original_sl": 96.0,
+"expire_rr": 1.23
+},
+"stage": "TP1",
+"lang": "ru",
+"mode": "ok",
+"result": "error",
+"rr": 2.5,
+"line": "🎯 TP1 достигнут · +2.5R (стоп → безубыток)",
+"text": null,
+"text_len": null
+},
+{
+"name": "card is null",
+"trade": {
+"trade_id": "t1",
+"signal_msg_id": 55,
+"user_id": 7,
+"signal_card_json": "null",
+"direction": "LONG",
+"entry": 100.0,
+"sl": 95.0,
+"tp1": 110.0,
+"tp2": 120.0,
+"tp3": 130.0,
+"original_sl": 96.0,
+"expire_rr": 1.23
+},
+"stage": "TP1",
+"lang": "ru",
+"mode": "ok",
+"result": "error",
+"rr": 2.5,
+"line": "🎯 TP1 достигнут · +2.5R (стоп → безубыток)",
+"text": null,
+"text_len": null
+},
+{
+"name": "card is a number",
+"trade": {
+"trade_id": "t1",
+"signal_msg_id": 55,
+"user_id": 7,
+"signal_card_json": "5",
+"direction": "LONG",
+"entry": 100.0,
+"sl": 95.0,
+"tp1": 110.0,
+"tp2": 120.0,
+"tp3": 130.0,
+"original_sl": 96.0,
+"expire_rr": 1.23
+},
+"stage": "TP1",
+"lang": "ru",
+"mode": "ok",
+"result": "error",
+"rr": 2.5,
+"line": "🎯 TP1 достигнут · +2.5R (стоп → безубыток)",
+"text": null,
+"text_len": null
+},
+{
+"name": "card is a string",
+"trade": {
+"trade_id": "t1",
+"signal_msg_id": 55,
+"user_id": 7,
+"signal_card_json": "\"<b>x</b>\"",
+"direction": "LONG",
+"entry": 100.0,
+"sl": 95.0,
+"tp1": 110.0,
+"tp2": 120.0,
+"tp3": 130.0,
+"original_sl": 96.0,
+"expire_rr": 1.23
+},
+"stage": "TP1",
+"lang": "ru",
+"mode": "ok",
+"result": "error",
+"rr": 2.5,
+"line": "🎯 TP1 достигнут · +2.5R (стоп → безубыток)",
+"text": null,
+"text_len": null
+},
+{
+"name": "html is a number",
+"trade": {
+"trade_id": "t1",
+"signal_msg_id": 55,
+"user_id": 7,
+"signal_card_json": "{\"html\": 5}",
+"direction": "LONG",
+"entry": 100.0,
+"sl": 95.0,
+"tp1": 110.0,
+"tp2": 120.0,
+"tp3": 130.0,
+"original_sl": 96.0,
+"expire_rr": 1.23
+},
+"stage": "SL",
+"lang": "ru",
+"mode": "ok",
+"result": "ok",
+"rr": -1.0,
+"line": "❌ Стоп · -1.0R",
+"text": "5\n\n📌 ❌ Стоп · -1.0R",
+"text_len": 19
+},
+{
+"name": "uid str",
+"trade": {
+"trade_id": "t1",
+"signal_msg_id": 55,
+"user_id": "7",
+"signal_card_json": "{\"html\": \"<b>BTC LONG</b>\\nвход 100\\n\", \"kb\": {\"inline_keyboard\": [[{\"text\": \"x\", \"callback_data\": \"y\"}]]}}",
+"direction": "LONG",
+"entry": 100.0,
+"sl": 95.0,
+"tp1": 110.0,
+"tp2": 120.0,
+"tp3": 130.0,
+"original_sl": 96.0,
+"expire_rr": 1.23
+},
+"stage": "SL",
+"lang": "en",
+"mode": "ok",
+"result": "ok",
+"rr": -1.0,
+"line": "❌ Stopped out · -1.0R",
+"text": "<b>BTC LONG</b>\nвход 100\n\n📌 ❌ Stopped out · -1.0R",
+"text_len": 49
+},
+{
+"name": "uid bad",
+"trade": {
+"trade_id": "t1",
+"signal_msg_id": 55,
+"user_id": "u7",
+"signal_card_json": "{\"html\": \"<b>BTC LONG</b>\\nвход 100\\n\", \"kb\": {\"inline_keyboard\": [[{\"text\": \"x\", \"callback_data\": \"y\"}]]}}",
+"direction": "LONG",
+"entry": 100.0,
+"sl": 95.0,
+"tp1": 110.0,
+"tp2": 120.0,
+"tp3": 130.0,
+"original_sl": 96.0,
+"expire_rr": 1.23
+},
+"stage": "SL",
+"lang": "en",
+"mode": "ok",
+"result": "error",
+"rr": -1.0,
+"line": "❌ Stopped out · -1.0R",
+"text": null,
+"text_len": null
+},
+{
+"name": "unknown stage",
+"trade": {
+"trade_id": "t1",
+"signal_msg_id": 55,
+"user_id": 7,
+"signal_card_json": "{\"html\": \"<b>BTC LONG</b>\\nвход 100\\n\", \"kb\": {\"inline_keyboard\": [[{\"text\": \"x\", \"callback_data\": \"y\"}]]}}",
+"direction": "LONG",
+"entry": 100.0,
+"sl": 95.0,
+"tp1": 110.0,
+"tp2": 120.0,
+"tp3": 130.0,
+"original_sl": 96.0,
+"expire_rr": 1.23
+},
+"stage": "WEIRD",
+"lang": "ru",
+"mode": "ok",
+"result": "skip",
+"rr": null,
+"line": "",
+"text": null,
+"text_len": null
+},
+{
+"name": "prototype-ish stage",
+"trade": {
+"trade_id": "t1",
+"signal_msg_id": 55,
+"user_id": 7,
+"signal_card_json": "{\"html\": \"<b>BTC LONG</b>\\nвход 100\\n\", \"kb\": {\"inline_keyboard\": [[{\"text\": \"x\", \"callback_data\": \"y\"}]]}}",
+"direction": "LONG",
+"entry": 100.0,
+"sl": 95.0,
+"tp1": 110.0,
+"tp2": 120.0,
+"tp3": 130.0,
+"original_sl": 96.0,
+"expire_rr": 1.23
+},
+"stage": "toString",
+"lang": "ru",
+"mode": "ok",
+"result": "skip",
+"rr": null,
+"line": "",
+"text": null,
+"text_len": null
+},
+{
+"name": "trailing unicode ws",
+"trade": {
+"trade_id": "t1",
+"signal_msg_id": 55,
+"user_id": 7,
+"signal_card_json": "{\"html\": \"<b>x</b> \\t\\n\\u00a0\\u2003\"}",
+"direction": "LONG",
+"entry": 100.0,
+"sl": 95.0,
+"tp1": 110.0,
+"tp2": 120.0,
+"tp3": 130.0,
+"original_sl": 96.0,
+"expire_rr": 1.23
+},
+"stage": "BE",
+"lang": "ru",
+"mode": "ok",
+"result": "ok",
+"rr": 0.0,
+"line": "⚖️ Закрыт в безубыток · 0R",
+"text": "<b>x</b>\n\n📌 ⚖️ Закрыт в безубыток · 0R",
+"text_len": 38
+},
+{
+"name": "bom is not whitespace",
+"trade": {
+"trade_id": "t1",
+"signal_msg_id": 55,
+"user_id": 7,
+"signal_card_json": "{\"html\": \"<b>x</b>\\ufeff\"}",
+"direction": "LONG",
+"entry": 100.0,
+"sl": 95.0,
+"tp1": 110.0,
+"tp2": 120.0,
+"tp3": 130.0,
+"original_sl": 96.0,
+"expire_rr": 1.23
+},
+"stage": "BE",
+"lang": "ru",
+"mode": "ok",
+"result": "ok",
+"rr": 0.0,
+"line": "⚖️ Закрыт в безубыток · 0R",
+"text": "<b>x</b>﻿\n\n📌 ⚖️ Закрыт в безубыток · 0R",
+"text_len": 39
+},
+{
+"name": "x1c is whitespace",
+"trade": {
+"trade_id": "t1",
+"signal_msg_id": 55,
+"user_id": 7,
+"signal_card_json": "{\"html\": \"<b>x</b>\\u001c\\u001f\\u0085\"}",
+"direction": "LONG",
+"entry": 100.0,
+"sl": 95.0,
+"tp1": 110.0,
+"tp2": 120.0,
+"tp3": 130.0,
+"original_sl": 96.0,
+"expire_rr": 1.23
+},
+"stage": "BE",
+"lang": "ru",
+"mode": "ok",
+"result": "ok",
+"rr": 0.0,
+"line": "⚖️ Закрыт в безубыток · 0R",
+"text": "<b>x</b>\n\n📌 ⚖️ Закрыт в безубыток · 0R",
+"text_len": 38
 }
 ],
 "process_trade": [
@@ -45751,7 +46051,12 @@
 1766026800.0
 ]
 ],
-"rest_left": 20
+"rest_left": 20,
+"log": [
+"[SIGNAL-PROGRESS] tid=tid_A_tp1_tp2 uid=7 BTC-USDT-SWAP LONG - → TP2 events=TP1,TP2 tf=15m",
+"[CARD-OUTCOME] tid=tid_A_tp1_tp2 uid=7 TP2 → ok",
+"[SIGNAL-PROGRESS-SEND] tid=tid_A_tp1_tp2 uid=7 event=TP2 chart=False → ok"
+]
 },
 {
 "name": "A_silent_lag",
@@ -45822,7 +46127,12 @@
 1766026800.0
 ]
 ],
-"rest_left": 20
+"rest_left": 20,
+"log": [
+"[SIGNAL-PROGRESS] tid=tid_A_silent_lag uid=7 BTC-USDT-SWAP LONG - → TP2 events=TP1,TP2 tf=15m",
+"[CARD-OUTCOME] tid=tid_A_silent_lag uid=7 TP2 → ok",
+"[SIGNAL-PROGRESS] tid=tid_A_silent_lag event TP2 is 7.8h old — silent"
+]
 },
 {
 "name": "A_notify_off",
@@ -45893,7 +46203,11 @@
 1766026800.0
 ]
 ],
-"rest_left": 20
+"rest_left": 20,
+"log": [
+"[SIGNAL-PROGRESS] tid=tid_A_notify_off uid=7 BTC-USDT-SWAP LONG - → TP2 events=TP1,TP2 tf=15m",
+"[CARD-OUTCOME] tid=tid_A_notify_off uid=7 TP2 → ok"
+]
 },
 {
 "name": "A_user_none_edit_only",
@@ -45933,15 +46247,8 @@
 1766034000.0
 ]
 },
-"user": {
-"lang": "ru",
-"progress_notify_enabled": true,
-"send_chart_enabled": false,
-"sub_plan": "pro",
-"quiet_start": -1,
-"quiet_end": -1
-},
-"result": "TP2",
+"user": null,
+"result": null,
 "advanced": [
 [
 "tid_A_user_none_edit_only",
@@ -45955,13 +46262,6 @@
 "edit": "<b>BTC LONG</b>\nкарточка\n\n📌 🎯 TP2 достигнут · +3.0R",
 "mid": 123,
 "chat": 7
-},
-{
-"uid": 7,
-"text": "🎯 <b>BTC LONG</b> — TP2 достигнут (+3R)\n🛡 Стоп в безубытке\n\nLEVELS · 15m · вход 56728.1 · SL 56160.8\n📍 Вход → ✅ TP1 → ✅ TP2\n⏱ через 3ч после сигнала\n<i>Отслеживание по цене сигнала, не позиция на бирже</i>",
-"parse_mode": "HTML",
-"protect_content": true,
-"reply_parameters": "message_id=123 chat_id=None allow_sending_without_reply=True quote=None quote_parse_mode=<Default('parse_mode')> quote_entities=None quote_position=None checklist_task_id=None poll_option_id=None ephemeral_message_id=None"
 }
 ],
 "src_calls": [
@@ -45971,7 +46271,11 @@
 1766026800.0
 ]
 ],
-"rest_left": 20
+"rest_left": 20,
+"log": [
+"[SIGNAL-PROGRESS] tid=tid_A_user_none_edit_only uid=7 BTC-USDT-SWAP LONG - → TP2 events=TP1,TP2 tf=15m",
+"[CARD-OUTCOME] tid=tid_A_user_none_edit_only uid=7 TP2 → ok"
+]
 },
 {
 "name": "A_en_quiet",
@@ -46050,7 +46354,12 @@
 1766026800.0
 ]
 ],
-"rest_left": 20
+"rest_left": 20,
+"log": [
+"[SIGNAL-PROGRESS] tid=tid_A_en_quiet uid=7 BTC-USDT-SWAP LONG - → TP2 events=TP1,TP2 tf=15m",
+"[CARD-OUTCOME] tid=tid_A_en_quiet uid=7 TP2 → ok",
+"[SIGNAL-PROGRESS-SEND] tid=tid_A_en_quiet uid=7 event=TP2 chart=False → ok"
+]
 },
 {
 "name": "A_blocked_user",
@@ -46123,7 +46432,11 @@
 1766026800.0
 ]
 ],
-"rest_left": 20
+"rest_left": 20,
+"log": [
+"[SIGNAL-PROGRESS] tid=tid_A_blocked_user uid=0 BTC-USDT-SWAP LONG - → TP2 events=TP1,TP2 tf=15m",
+"[SIGNAL-PROGRESS-SEND] tid=tid_A_blocked_user uid=0 event=TP2 chart=False → ok"
+]
 },
 {
 "name": "A_from_tp1",
@@ -46194,7 +46507,12 @@
 1766027700.0
 ]
 ],
-"rest_left": 20
+"rest_left": 20,
+"log": [
+"[SIGNAL-PROGRESS] tid=tid_A_from_tp1 uid=7 BTC-USDT-SWAP LONG TP1 → BE events=BE tf=15m",
+"[CARD-OUTCOME] tid=tid_A_from_tp1 uid=7 BE → ok",
+"[SIGNAL-PROGRESS] tid=tid_A_from_tp1 event BE is 9.3h old — silent"
+]
 },
 {
 "name": "A_cas_fail",
@@ -46259,7 +46577,8 @@
 1766026800.0
 ]
 ],
-"rest_left": 20
+"rest_left": 20,
+"log": []
 },
 {
 "name": "A_order_id",
@@ -46311,7 +46630,8 @@
 "advanced": [],
 "sent": [],
 "src_calls": [],
-"rest_left": 20
+"rest_left": 20,
+"log": []
 },
 {
 "name": "A_final_stage",
@@ -46363,7 +46683,8 @@
 "advanced": [],
 "sent": [],
 "src_calls": [],
-"rest_left": 20
+"rest_left": 20,
+"log": []
 },
 {
 "name": "A_scale_mismatch",
@@ -46421,7 +46742,8 @@
 1766026800.0
 ]
 ],
-"rest_left": 20
+"rest_left": 20,
+"log": []
 },
 {
 "name": "A_no_cover",
@@ -46479,7 +46801,8 @@
 1766026800.0
 ]
 ],
-"rest_left": 20
+"rest_left": 20,
+"log": []
 },
 {
 "name": "A_1h_fallback",
@@ -46550,7 +46873,12 @@
 1766026800.0
 ]
 ],
-"rest_left": 20
+"rest_left": 20,
+"log": [
+"[SIGNAL-PROGRESS] tid=tid_A_1h_fallback uid=7 BTC-USDT-SWAP LONG - → TP2 events=TP1,TP2 tf=1H",
+"[CARD-OUTCOME] tid=tid_A_1h_fallback uid=7 TP2 → ok",
+"[SIGNAL-PROGRESS] tid=tid_A_1h_fallback event TP2 is 8.3h old — silent"
+]
 },
 {
 "name": "A_invalid_levels",
@@ -46602,7 +46930,8 @@
 "advanced": [],
 "sent": [],
 "src_calls": [],
-"rest_left": 20
+"rest_left": 20,
+"log": []
 },
 {
 "name": "A_nothing_yet",
@@ -46660,7 +46989,8 @@
 1766026800.0
 ]
 ],
-"rest_left": 20
+"rest_left": 20,
+"log": []
 },
 {
 "name": "B_short_sl",
@@ -46738,7 +47068,12 @@
 1766026800.0
 ]
 ],
-"rest_left": 20
+"rest_left": 20,
+"log": [
+"[SIGNAL-PROGRESS] tid=tid_B_short_sl uid=7 BTC-USDT-SWAP SHORT - → SL events=SL tf=15m",
+"[CARD-OUTCOME] tid=tid_B_short_sl uid=7 SL → ok",
+"[SIGNAL-PROGRESS-SEND] tid=tid_B_short_sl uid=7 event=SL chart=False → ok"
+]
 },
 {
 "name": "B_short_sl_en",
@@ -46816,7 +47151,12 @@
 1766026800.0
 ]
 ],
-"rest_left": 20
+"rest_left": 20,
+"log": [
+"[SIGNAL-PROGRESS] tid=tid_B_short_sl_en uid=7 BTC-USDT-SWAP SHORT - → SL events=SL tf=15m",
+"[CARD-OUTCOME] tid=tid_B_short_sl_en uid=7 SL → ok",
+"[SIGNAL-PROGRESS-SEND] tid=tid_B_short_sl_en uid=7 event=SL chart=False → ok"
+]
 },
 {
 "name": "C_be_after_tp1",
@@ -46894,7 +47234,12 @@
 1766027700.0
 ]
 ],
-"rest_left": 20
+"rest_left": 20,
+"log": [
+"[SIGNAL-PROGRESS] tid=tid_C_be_after_tp1 uid=7 BTC-USDT-SWAP LONG - → BE events=TP1,BE tf=15m",
+"[CARD-OUTCOME] tid=tid_C_be_after_tp1 uid=7 BE → ok",
+"[SIGNAL-PROGRESS-SEND] tid=tid_C_be_after_tp1 uid=7 event=BE chart=False → ok"
+]
 },
 {
 "name": "D_zone_entry",
@@ -46959,7 +47304,10 @@
 1766026800.0
 ]
 ],
-"rest_left": 20
+"rest_left": 20,
+"log": [
+"[SIGNAL-PROGRESS] tid=tid_D_zone_entry uid=7 BTC-USDT-SWAP LONG - → ENTRY events=ENTRY tf=15m"
+]
 },
 {
 "name": "D_zone_full",
@@ -47030,7 +47378,12 @@
 1766026800.0
 ]
 ],
-"rest_left": 20
+"rest_left": 20,
+"log": [
+"[SIGNAL-PROGRESS] tid=tid_D_zone_full uid=7 BTC-USDT-SWAP LONG - → TP2 events=ENTRY,TP1,TP2 tf=15m",
+"[CARD-OUTCOME] tid=tid_D_zone_full uid=7 TP2 → ok",
+"[SIGNAL-PROGRESS] tid=tid_D_zone_full event TP2 is 8.0h old — silent"
+]
 }
 ],
 "golden": {
@@ -47370,6 +47723,660 @@
 "mid": 9,
 "chat": 7
 }
+]
+},
+"forbidden": {
+"trade": {
+"trade_id": "tid_forbidden",
+"user_id": 7,
+"symbol": "BTC-USDT-SWAP",
+"timeframe": "15m",
+"strategy": "LEVELS",
+"created_at": 1766026800.0,
+"progress_stage": "",
+"progress_ts": 0.0,
+"order_id": "",
+"signal_msg_id": 123,
+"signal_card_json": "{\"html\": \"<b>BTC LONG</b>\\n\\u043a\\u0430\\u0440\\u0442\\u043e\\u0447\\u043a\\u0430\"}",
+"entry_lo": 0,
+"entry_hi": 0,
+"direction": "LONG",
+"entry": 56728.09641,
+"sl": 56160.8154459,
+"original_sl": 56160.8154459,
+"tp1": 57862.6583382,
+"tp2": 58429.9393023,
+"tp3": 59280.860748449995
+},
+"now": 1766037630.0,
+"frames": {
+"15m": [
+618,
+680
+]
+},
+"result": null,
+"blocked": [
+7
+],
+"advanced": [
+[
+"tid_forbidden",
+"",
+"TP2",
+1766034900.0
+]
+],
+"sent": [
+{
+"edit": "<b>BTC LONG</b>\nкарточка\n\n📌 🎯 TP2 достигнут · +3.0R",
+"mid": 123,
+"chat": 7
+}
+],
+"log": [
+"[SIGNAL-PROGRESS] tid=tid_forbidden uid=7 BTC-USDT-SWAP LONG - → TP2 events=TP1,TP2 tf=15m",
+"[CARD-OUTCOME] tid=tid_forbidden uid=7 TP2 → ok",
+"[SIGNAL-PROGRESS-SEND] tid=tid_forbidden uid=7 event=TP2 chart=False → blocked"
+]
+},
+"run_cycle": {
+"now": 1766043030.0,
+"rows": [
+{
+"trade_id": "c5_missed_zone",
+"user_id": 7,
+"symbol": "BTC-USDT-SWAP",
+"timeframe": "15m",
+"strategy": "SMC",
+"created_at": 1766031300.0,
+"progress_stage": "",
+"progress_ts": 0.0,
+"order_id": "",
+"signal_msg_id": 57,
+"signal_card_json": "{\"html\": \"<b>card</b>\\nтекст\"}",
+"entry_lo": 56991.929558760006,
+"entry_hi": 57106.371184380005,
+"result": "",
+"expire_rr": null,
+"direction": "LONG",
+"entry": 57049.15037157001,
+"sl": 56534.163056280006,
+"original_sl": 56534.163056280006,
+"tp1": 58365.2290662,
+"tp2": 58937.43719430001,
+"tp3": 59795.74938645
+},
+{
+"trade_id": "c1_tp_ru",
+"user_id": 7,
+"symbol": "BTC-USDT-SWAP",
+"timeframe": "15m",
+"strategy": "LEVELS",
+"created_at": 1766026800.0,
+"progress_stage": "",
+"progress_ts": 0.0,
+"order_id": "",
+"signal_msg_id": 57,
+"signal_card_json": "{\"html\": \"<b>card</b>\\nтекст\"}",
+"entry_lo": 0,
+"entry_hi": 0,
+"result": "",
+"expire_rr": null,
+"direction": "LONG",
+"entry": 56728.09641,
+"sl": 56160.8154459,
+"original_sl": 56160.8154459,
+"tp1": 57862.6583382,
+"tp2": 58429.9393023,
+"tp3": 59280.860748449995
+},
+{
+"trade_id": "c2_tp_en_quiet",
+"user_id": 8,
+"symbol": "BTC-USDT-SWAP",
+"timeframe": "15m",
+"strategy": "VOLUME",
+"created_at": 1766026800.0,
+"progress_stage": "",
+"progress_ts": 0.0,
+"order_id": "",
+"signal_msg_id": 58,
+"signal_card_json": "{\"html\": \"<b>card</b>\\nтекст\"}",
+"entry_lo": 0,
+"entry_hi": 0,
+"result": "",
+"expire_rr": null,
+"direction": "LONG",
+"entry": 56728.09641,
+"sl": 56160.8154459,
+"original_sl": 56160.8154459,
+"tp1": 57862.6583382,
+"tp2": 58429.9393023,
+"tp3": 59280.860748449995
+},
+{
+"trade_id": "c3_notify_off",
+"user_id": 9,
+"symbol": "BTC-USDT-SWAP",
+"timeframe": "15m",
+"strategy": "LEVELS",
+"created_at": 1766026800.0,
+"progress_stage": "",
+"progress_ts": 0.0,
+"order_id": "",
+"signal_msg_id": 59,
+"signal_card_json": "{\"html\": \"<b>card</b>\\nтекст\"}",
+"entry_lo": 0,
+"entry_hi": 0,
+"result": "",
+"expire_rr": null,
+"direction": "LONG",
+"entry": 56728.09641,
+"sl": 56160.8154459,
+"original_sl": 56160.8154459,
+"tp1": 57862.6583382,
+"tp2": 58429.9393023,
+"tp3": 59280.860748449995
+},
+{
+"trade_id": "c4_user_none",
+"user_id": 10,
+"symbol": "BTC-USDT-SWAP",
+"timeframe": "15m",
+"strategy": "LEVELS",
+"created_at": 1766026800.0,
+"progress_stage": "",
+"progress_ts": 0.0,
+"order_id": "",
+"signal_msg_id": 60,
+"signal_card_json": "{\"html\": \"<b>card</b>\\nтекст\"}",
+"entry_lo": 0,
+"entry_hi": 0,
+"result": "",
+"expire_rr": null,
+"direction": "SHORT",
+"entry": 56728.09641,
+"sl": 57295.3773741,
+"original_sl": 57295.3773741,
+"tp1": 55593.534481799994,
+"tp2": 55026.253517699995,
+"tp3": 54175.332071549994
+},
+{
+"trade_id": "c6_zone_entry",
+"user_id": 11,
+"symbol": "BTC-USDT-SWAP",
+"timeframe": "15m",
+"strategy": "SMC",
+"created_at": 1766026800.0,
+"progress_stage": "",
+"progress_ts": 0.0,
+"order_id": "",
+"signal_msg_id": 61,
+"signal_card_json": "{\"html\": \"<b>card</b>\\nтекст\"}",
+"entry_lo": 56671.36831359,
+"entry_hi": 56784.82450640999,
+"result": "",
+"expire_rr": null,
+"direction": "LONG",
+"entry": 56728.09641,
+"sl": 56160.8154459,
+"original_sl": 56160.8154459,
+"tp1": 57862.6583382,
+"tp2": 58429.9393023,
+"tp3": 59280.860748449995
+},
+{
+"trade_id": "c7_order",
+"user_id": 7,
+"symbol": "BTC-USDT-SWAP",
+"timeframe": "15m",
+"strategy": "LEVELS",
+"created_at": 1766026800.0,
+"progress_stage": "",
+"progress_ts": 0.0,
+"order_id": "ord1",
+"signal_msg_id": 57,
+"signal_card_json": "{\"html\": \"<b>card</b>\\nтекст\"}",
+"entry_lo": 0,
+"entry_hi": 0,
+"result": "",
+"expire_rr": null,
+"direction": "LONG",
+"entry": 56728.09641,
+"sl": 56160.8154459,
+"original_sl": 56160.8154459,
+"tp1": 57862.6583382,
+"tp2": 58429.9393023,
+"tp3": 59280.860748449995
+},
+{
+"trade_id": "c8_cas_fail",
+"user_id": 7,
+"symbol": "BTC-USDT-SWAP",
+"timeframe": "15m",
+"strategy": "LEVELS",
+"created_at": 1766026800.0,
+"progress_stage": "",
+"progress_ts": 0.0,
+"order_id": "",
+"signal_msg_id": 57,
+"signal_card_json": "{\"html\": \"<b>card</b>\\nтекст\"}",
+"entry_lo": 0,
+"entry_hi": 0,
+"result": "",
+"expire_rr": null,
+"direction": "LONG",
+"entry": 56728.09641,
+"sl": 56160.8154459,
+"original_sl": 56160.8154459,
+"tp1": 57862.6583382,
+"tp2": 58429.9393023,
+"tp3": 59280.860748449995
+},
+{
+"trade_id": "c9_final",
+"user_id": 7,
+"symbol": "BTC-USDT-SWAP",
+"timeframe": "15m",
+"strategy": "LEVELS",
+"created_at": 1766026800.0,
+"progress_stage": "SL",
+"progress_ts": 1766027700.0,
+"order_id": "",
+"signal_msg_id": 57,
+"signal_card_json": "{\"html\": \"<b>card</b>\\nтекст\"}",
+"entry_lo": 0,
+"entry_hi": 0,
+"result": "",
+"expire_rr": null,
+"direction": "LONG",
+"entry": 56728.09641,
+"sl": 56160.8154459,
+"original_sl": 56160.8154459,
+"tp1": 57862.6583382,
+"tp2": 58429.9393023,
+"tp3": 59280.860748449995
+},
+{
+"trade_id": "c11_from_tp1",
+"user_id": 7,
+"symbol": "BTC-USDT-SWAP",
+"timeframe": "15m",
+"strategy": "LEVELS",
+"created_at": 1766026800.0,
+"progress_stage": "TP1",
+"progress_ts": 1766034900.0,
+"order_id": "",
+"signal_msg_id": 57,
+"signal_card_json": "{\"html\": \"<b>card</b>\\nтекст\"}",
+"entry_lo": 0,
+"entry_hi": 0,
+"result": "",
+"expire_rr": null,
+"direction": "LONG",
+"entry": 56728.09641,
+"sl": 56160.8154459,
+"original_sl": 56160.8154459,
+"tp1": 57862.6583382,
+"tp2": 58429.9393023,
+"tp3": 59280.860748449995
+},
+{
+"trade_id": "c12_nocover",
+"user_id": 7,
+"symbol": "SOL-USDT-SWAP",
+"timeframe": "15m",
+"strategy": "LEVELS",
+"created_at": 1766026800.0,
+"progress_stage": "",
+"progress_ts": 0.0,
+"order_id": "",
+"signal_msg_id": 57,
+"signal_card_json": "{\"html\": \"<b>card</b>\\nтекст\"}",
+"entry_lo": 0,
+"entry_hi": 0,
+"result": "",
+"expire_rr": null,
+"direction": "LONG",
+"entry": 56728.09641,
+"sl": 56160.8154459,
+"original_sl": 56160.8154459,
+"tp1": 57862.6583382,
+"tp2": 58429.9393023,
+"tp3": 59280.860748449995
+},
+{
+"trade_id": "c10_eth_rest",
+"user_id": 11,
+"symbol": "ETH-USDT-SWAP",
+"timeframe": "15m",
+"strategy": "LEVELS",
+"created_at": 1765933200.0,
+"progress_stage": "",
+"progress_ts": 0.0,
+"order_id": "",
+"signal_msg_id": 61,
+"signal_card_json": "{\"html\": \"<b>card</b>\\nтекст\"}",
+"entry_lo": 0,
+"entry_hi": 0,
+"result": "",
+"expire_rr": null,
+"direction": "LONG",
+"entry": 4661.153369,
+"sl": 4614.541835309999,
+"original_sl": 4614.541835309999,
+"tp1": 4707.76490269,
+"tp2": 4754.37643638,
+"tp3": 4847.59950376
+}
+],
+"expire_rows": [
+{
+"trade_id": "x1_exp",
+"user_id": 7,
+"symbol": "BTC-USDT-SWAP",
+"direction": "LONG",
+"entry": 57812.5295352,
+"sl": 56644.5996456,
+"original_sl": 56644.5996456,
+"tp1": 59564.424369600005,
+"tp2": 60732.3542592,
+"tp3": 61900.284148800005,
+"timeframe": "1h",
+"strategy": "LEVELS",
+"created_at": 1765755030.0,
+"signal_msg_id": 70,
+"progress_stage": "TP1",
+"progress_ts": 1765758630.0,
+"result": "",
+"order_id": "",
+"signal_card_json": "{\"html\": \"<b>card</b>\\nтекст\"}",
+"expire_rr": null
+},
+{
+"trade_id": "x2_exp_short_eth",
+"user_id": 8,
+"symbol": "ETH-USDT-SWAP",
+"direction": "SHORT",
+"entry": 3000.0,
+"sl": 3100.0,
+"original_sl": 3100.0,
+"tp1": 2800.0,
+"tp2": 2700.0,
+"tp3": 2500.0,
+"timeframe": "1h",
+"strategy": "SMC",
+"created_at": 1765719030.0,
+"signal_msg_id": 71,
+"progress_stage": "",
+"progress_ts": 0.0,
+"result": "",
+"order_id": "",
+"signal_card_json": "{\"html\": \"<b>card</b>\\nтекст\"}",
+"expire_rr": null
+}
+],
+"prices": {
+"BTC-USDT-SWAP": 58396.49448
+},
+"cache": {
+"BTC-USDT-SWAP|15m": [
+1765972800.0,
+1766042100.0
+],
+"BTC-USDT-SWAP|1H": [
+1765785600.0,
+1766037600.0
+]
+},
+"rest": {
+"ETH-USDT-SWAP|1H": [
+1765785600.0,
+1766037600.0
+]
+},
+"users": {
+"7": {
+"lang": "ru",
+"progress_notify_enabled": true,
+"send_chart_enabled": false,
+"sub_plan": "pro",
+"quiet_start": -1,
+"quiet_end": -1
+},
+"8": {
+"lang": "en",
+"progress_notify_enabled": true,
+"send_chart_enabled": false,
+"sub_plan": "free",
+"quiet_start": 0,
+"quiet_end": 23
+},
+"9": {
+"lang": "ru",
+"progress_notify_enabled": false,
+"send_chart_enabled": false,
+"sub_plan": "pro",
+"quiet_start": -1,
+"quiet_end": -1
+},
+"11": {
+"lang": "en",
+"progress_notify_enabled": true,
+"send_chart_enabled": false,
+"sub_plan": "pro",
+"quiet_start": -1,
+"quiet_end": -1
+}
+},
+"sent_count": 4,
+"advanced": [
+[
+"c5_missed_zone",
+"",
+"MISSED",
+1766043030.0
+],
+[
+"c1_tp_ru",
+"",
+"TP2",
+1766034900.0
+],
+[
+"c2_tp_en_quiet",
+"",
+"TP2",
+1766034900.0
+],
+[
+"c3_notify_off",
+"",
+"TP2",
+1766034900.0
+],
+[
+"c4_user_none",
+"",
+"SL",
+1766031300.0
+],
+[
+"c6_zone_entry",
+"",
+"TP2",
+1766034900.0
+],
+[
+"c8_cas_fail",
+"",
+"TP2",
+1766034900.0
+],
+[
+"c11_from_tp1",
+"TP1",
+"TP2",
+1766034900.0
+],
+[
+"c10_eth_rest",
+"",
+"SL",
+1765936800.0
+]
+],
+"marked": [
+[
+"x1_exp",
+"TP1",
+0.5,
+1766043030.0
+],
+[
+"x2_exp_short_eth",
+"",
+-1.0,
+1766043030.0
+]
+],
+"sent": [
+{
+"edit": "<b>card</b>\nтекст\n\n📌 ⏱ Закрыт по времени (72ч) · +0.5R",
+"mid": 70,
+"chat": 7
+},
+{
+"edit": "<b>card</b>\nтекст\n\n📌 ⏱ Closed on time (72h) · -1.0R",
+"mid": 71,
+"chat": 8
+},
+{
+"edit": "<b>card</b>\nтекст\n\n📌 ⛔ Не входить — цена ушла без отката (+2.6R без входа)",
+"mid": 57,
+"chat": 7
+},
+{
+"edit": "<b>card</b>\nтекст\n\n📌 🎯 TP2 достигнут · +3.0R",
+"mid": 57,
+"chat": 7
+},
+{
+"uid": 7,
+"text": "🎯 <b>BTC LONG</b> — TP2 достигнут (+3R)\n🛡 Стоп в безубытке\n\nLEVELS · 15m · вход 56728.1 · SL 56160.8\n📍 Вход → ✅ TP1 → ✅ TP2\n⏱ через 4ч 30м после сигнала\n<i>Отслеживание по цене сигнала, не позиция на бирже</i>",
+"parse_mode": "HTML",
+"protect_content": true,
+"reply_parameters": "message_id=57 chat_id=None allow_sending_without_reply=True quote=None quote_parse_mode=<Default('parse_mode')> quote_entities=None quote_position=None checklist_task_id=None poll_option_id=None ephemeral_message_id=None"
+},
+{
+"edit": "<b>card</b>\nтекст\n\n📌 🎯 TP2 hit · +3.0R",
+"mid": 58,
+"chat": 8
+},
+{
+"uid": 8,
+"text": "🎯 <b>BTC LONG</b> — TP2 reached (+3R)\n🛡 Stop at breakeven\n\nVOLUME · 15m · entry 56728.1 · SL 56160.8\n📍 Entry → ✅ TP1 → ✅ TP2\n⏱ 4h 30m after the signal\n<i>Tracked by signal price, not an exchange position</i>",
+"parse_mode": "HTML",
+"protect_content": true,
+"disable_notification": true,
+"reply_parameters": "message_id=58 chat_id=None allow_sending_without_reply=True quote=None quote_parse_mode=<Default('parse_mode')> quote_entities=None quote_position=None checklist_task_id=None poll_option_id=None ephemeral_message_id=None"
+},
+{
+"edit": "<b>card</b>\nтекст\n\n📌 🎯 TP2 достигнут · +3.0R",
+"mid": 59,
+"chat": 9
+},
+{
+"edit": "<b>card</b>\nтекст\n\n📌 ❌ Стоп · -1.0R",
+"mid": 60,
+"chat": 10
+},
+{
+"edit": "<b>card</b>\nтекст\n\n📌 🎯 TP2 hit · +3.0R",
+"mid": 61,
+"chat": 11
+},
+{
+"uid": 11,
+"text": "🎯 <b>BTC LONG</b> — TP2 reached (+3R)\n🛡 Stop at breakeven\n\nSMC · 15m · entry 56728.1 · SL 56160.8\n📍 Entry → ✅ TP1 → ✅ TP2\n⏱ 4h 30m after the signal\n<i>Tracked by signal price, not an exchange position</i>",
+"parse_mode": "HTML",
+"protect_content": true,
+"reply_parameters": "message_id=61 chat_id=None allow_sending_without_reply=True quote=None quote_parse_mode=<Default('parse_mode')> quote_entities=None quote_position=None checklist_task_id=None poll_option_id=None ephemeral_message_id=None"
+},
+{
+"edit": "<b>card</b>\nтекст\n\n📌 🎯 TP2 достигнут · +3.0R",
+"mid": 57,
+"chat": 7
+},
+{
+"uid": 7,
+"text": "🎯 <b>BTC LONG</b> — TP2 достигнут (+3R)\n🛡 Стоп в безубытке\n\nLEVELS · 15m · вход 56728.1 · SL 56160.8\n📍 Вход → ✅ TP1 → ✅ TP2\n⏱ через 4ч 30м после сигнала\n<i>Отслеживание по цене сигнала, не позиция на бирже</i>",
+"parse_mode": "HTML",
+"protect_content": true,
+"reply_parameters": "message_id=57 chat_id=None allow_sending_without_reply=True quote=None quote_parse_mode=<Default('parse_mode')> quote_entities=None quote_position=None checklist_task_id=None poll_option_id=None ephemeral_message_id=None"
+},
+{
+"edit": "<b>card</b>\nтекст\n\n📌 ❌ Stopped out · -1.0R",
+"mid": 61,
+"chat": 11
+}
+],
+"rest_calls": [
+[
+"ETH-USDT-SWAP",
+"1H",
+300
+],
+[
+"SOL-USDT-SWAP",
+"15m",
+300
+],
+[
+"SOL-USDT-SWAP",
+"1H",
+300
+],
+[
+"ETH-USDT-SWAP",
+"15m",
+300
+]
+],
+"trackable_calls": [
+[
+1765783830.0,
+20000
+]
+],
+"log": [
+"[SIGNAL-EXPIRE] tid=x1_exp uid=7 BTC-USDT-SWAP LONG rr=+0.50",
+"[SIGNAL-EXPIRE] tid=x2_exp_short_eth uid=8 ETH-USDT-SWAP SHORT rr=-1.00",
+"[SIGNAL-EXPIRE-CYCLE] closed on time: 2",
+"[SIGNAL-MISSED] tid=c5_missed_zone uid=7 BTC-USDT-SWAP LONG ran +2.62R without entry (tf=15m)",
+"[SIGNAL-MISSED-CYCLE] marked: 1",
+"[SIGNAL-PROGRESS] tid=c1_tp_ru uid=7 BTC-USDT-SWAP LONG - → TP2 events=TP1,TP2 tf=15m",
+"[CARD-OUTCOME] tid=c1_tp_ru uid=7 TP2 → ok",
+"[SIGNAL-PROGRESS-SEND] tid=c1_tp_ru uid=7 event=TP2 chart=False → ok",
+"[SIGNAL-PROGRESS] tid=c2_tp_en_quiet uid=8 BTC-USDT-SWAP LONG - → TP2 events=TP1,TP2 tf=15m",
+"[CARD-OUTCOME] tid=c2_tp_en_quiet uid=8 TP2 → ok",
+"[SIGNAL-PROGRESS-SEND] tid=c2_tp_en_quiet uid=8 event=TP2 chart=False → ok",
+"[SIGNAL-PROGRESS] tid=c3_notify_off uid=9 BTC-USDT-SWAP LONG - → TP2 events=TP1,TP2 tf=15m",
+"[CARD-OUTCOME] tid=c3_notify_off uid=9 TP2 → ok",
+"[SIGNAL-PROGRESS] tid=c4_user_none uid=10 BTC-USDT-SWAP SHORT - → SL events=SL tf=15m",
+"[CARD-OUTCOME] tid=c4_user_none uid=10 SL → ok",
+"[SIGNAL-PROGRESS] tid=c6_zone_entry uid=11 BTC-USDT-SWAP LONG - → TP2 events=ENTRY,TP1,TP2 tf=15m",
+"[CARD-OUTCOME] tid=c6_zone_entry uid=11 TP2 → ok",
+"[SIGNAL-PROGRESS-SEND] tid=c6_zone_entry uid=11 event=TP2 chart=False → ok",
+"[SIGNAL-PROGRESS] tid=c11_from_tp1 uid=7 BTC-USDT-SWAP LONG TP1 → TP2 events=TP2 tf=15m",
+"[CARD-OUTCOME] tid=c11_from_tp1 uid=7 TP2 → ok",
+"[SIGNAL-PROGRESS-SEND] tid=c11_from_tp1 uid=7 event=TP2 chart=False → ok",
+"[SIGNAL-PROGRESS] tid=c10_eth_rest uid=11 ETH-USDT-SWAP LONG - → SL events=SL tf=1H",
+"[CARD-OUTCOME] tid=c10_eth_rest uid=11 SL → ok",
+"[SIGNAL-PROGRESS] tid=c10_eth_rest event SL is 29.5h old — silent",
+"[SIGNAL-PROGRESS-CYCLE] tracked=11 sent=4 rest_used=4"
 ]
 }
 }
