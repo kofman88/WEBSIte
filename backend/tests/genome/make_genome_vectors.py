@@ -9,6 +9,7 @@ hand. Re-run:
   rm -f /home/user/MAIN_BOT/CHM_BREAKER_V4/signal_registry.json
 
 Sections (default: all): gene_space constraints operators fitness evaluate simulate backtests db
+coins handlers optimizer
 
 How the parity is made exact where Python and JS cannot share an RNG:
   * operators — `genome.random` is replaced by a shim drawing from mulberry32 with the same
@@ -47,7 +48,8 @@ REAL_RANDOM = pyrandom.Random
 REAL_GENOME_TIME = genome.time
 
 NOW = 1_790_000_000.0          # frozen clock for the DB / kv sections
-SECTIONS = sys.argv[1:] or ["gene_space", "constraints", "operators", "fitness", "evaluate", "simulate", "backtests", "db"]
+SECTIONS = sys.argv[1:] or ["gene_space", "constraints", "operators", "fitness", "evaluate", "simulate", "backtests", "db",
+                           "coins", "handlers", "optimizer"]
 
 
 class FrozenTime:
@@ -1181,6 +1183,159 @@ def section_handlers():
     asyncio.run(dp.handlers["cb_genome_evolve"](_FakeCB("adv_g_ev_SMC_1h", 42, log)))
     out["locked"] = log
     emit("handlers.json", out)
+
+
+# ─────────────────────────────────────────────────────────────────────────────
+# optimizer — optimizer._normalize_regime / params_for_regime (the real functions) and the two
+# scanner consumers of optimizer_params, copied verbatim from scanner_mid.py (_run_job, ШАГ 9)
+# and smc/scanner.py (the per-user hoist + the per-signal filter); `load_params` = json.loads of
+# the stored row, `get_cached_regime()` = the given regime ("__RAISE__" → raises).
+# ─────────────────────────────────────────────────────────────────────────────
+
+def _regime_or_raise(regime):
+    if regime == "__RAISE__":
+        raise RuntimeError("regime cache broken")
+    return regime
+
+
+def _levels_consume(flags, stored, regime, min_rr, min_quality):
+    import optimizer as _o
+
+    class _Cfg:
+        pass
+    cfg = _Cfg()
+    cfg.min_rr = min_rr
+    cfg.min_quality = min_quality
+    err = None
+    if flags.get("optimizer_enabled", False) or flags.get("genome_auto_apply", False):
+        try:
+            _opt = json.loads(stored) if stored else None
+            if _opt:
+                try:
+                    _cur_regime = _regime_or_raise(regime)
+                    _opt = _o.params_for_regime(_opt, _cur_regime) or _opt
+                except Exception:
+                    pass
+            if _opt:
+                if _opt.get("min_rr", 0) > 0:
+                    cfg.min_rr = float(_opt["min_rr"])
+                if _opt.get("min_quality", 0) > 0:
+                    cfg.min_quality = max(cfg.min_quality, int(_opt["min_quality"]))
+        except Exception as _oe:
+            err = type(_oe).__name__
+    return {"min_rr": cfg.min_rr, "min_quality": cfg.min_quality, "err": err}
+
+
+def _smc_consume(flags, stored, regime):
+    import optimizer as _o
+    _u_min_rr_filter = 0.0
+    _u_min_q_filter = 0
+    err = None
+    if flags.get("optimizer_enabled", False) or flags.get("genome_auto_apply", False):
+        try:
+            _opt = json.loads(stored) if stored else None
+            if _opt:
+                try:
+                    _cur_regime = _regime_or_raise(regime)
+                    _opt = _o.params_for_regime(_opt, _cur_regime) or _opt
+                except Exception:
+                    pass
+                _u_min_rr_filter = float(_opt.get("min_rr", 0) or 0)
+                _u_min_q_filter = int(_opt.get("min_quality", 0) or 0)
+        except Exception as _oe:
+            err = type(_oe).__name__
+    return {"min_rr_filter": _u_min_rr_filter, "min_q_filter": _u_min_q_filter, "err": err}
+
+
+def _smc_passes(uc, rr, score):
+    _min_rr_smc = uc.get("min_rr_filter", 0.0)
+    _min_q_smc = uc.get("min_q_filter", 0)
+    if _min_rr_smc > 0 and rr < _min_rr_smc:
+        return False
+    if _min_q_smc > 0 and score < _min_q_smc:
+        return False
+    return True
+
+
+def section_optimizer():
+    import optimizer as _o
+    out = {"normalize": [], "regime": [], "levels": [], "smc": [], "smc_pass": []}
+    for v in (None, "", "  ", 0, 1, 0.0, True, False, "trending_up", "TRENDING_UP ", " Trend_Up",
+              "uptrend", "trend_down", "downtrend", "range", "sideways", "volatile",
+              "high_volatility", "high_vol", "ranging", "trending_down", "\tranging\n", "bull",
+              "Trending-Up", "HIGH_VOL", [], ["ranging"]):
+        out["normalize"].append([v, _o._normalize_regime(v)])
+
+    base = {"min_rr": 2.0, "min_quality": 3, "_meta": {"v": 1}, "tp1_rr": 1.5}
+    regmap = {"trending_up": {"min_rr": 3.0, "min_quality": 5}, "ranging": {"min_rr": 1.6},
+              "high_vol": "not-a-dict", "trending_down": {}}
+    bay = {"symbol": "BTC-USDT-SWAP", "params": {"min_rr": 2.2, "pivot_strength": 4}}
+    params_list = [
+        None, {}, [], "x", 0, [1, 2],
+        {"min_rr": 2.0},
+        dict(base),
+        dict(base, _regime={}),
+        dict(base, _regime=regmap),
+        dict(base, _regime="nope"),
+        dict(base, _bayesian=bay),
+        dict(base, _bayesian={"params": {"min_quality": 4}}),
+        dict(base, _bayesian={"params": "x", "symbol": "ETH"}),
+        dict(base, _bayesian="x"),
+        dict(base, _bayesian=bay, _regime=regmap),
+        {"_regime": regmap},
+        {"_bayesian": {"params": {}}},
+        {"_regime": {"ranging": {"_active_regime": "zzz", "min_rr": 1.1}}},
+        {"z": 1, "_regime": {"ranging": {"a": 2, "z": 3}}, "b": 4},
+    ]
+    regimes = [None, "", "trending_up", "uptrend", "ranging", "high_vol", "trending_down", "bull", "RANGE "]
+    for p in params_list:
+        for r in regimes:
+            res = _o.params_for_regime(copy.deepcopy(p), r)
+            out["regime"].append({"params": p, "regime": r, "out": res,
+                                  "keys": list(res.keys()) if isinstance(res, dict) else None})
+
+    stored_list = [
+        None, "", "null", "{}", "[]", "[1]", "\"x\"", "3",
+        json.dumps({"min_rr": 2.4, "min_quality": 4}),
+        json.dumps({"min_rr": 2, "min_quality": 3.7}),
+        json.dumps({"min_rr": 0, "min_quality": 0}),
+        json.dumps({"min_rr": -1.5, "min_quality": -2}),
+        json.dumps({"min_rr": None, "min_quality": 5}),
+        json.dumps({"min_rr": 2.5, "min_quality": None}),
+        json.dumps({"min_rr": "2.5", "min_quality": 5}),
+        json.dumps({"min_rr": 2.5, "min_quality": "5"}),
+        json.dumps({"min_rr": True, "min_quality": True}),
+        json.dumps({"min_rr": False, "min_quality": False}),
+        json.dumps({"min_rr": [1], "min_quality": 2}),
+        json.dumps({"min_quality": 9}),
+        json.dumps({"min_rr": 1e-9}),
+        '{"min_rr": Infinity, "min_quality": 4}',
+        '{"min_rr": 2.0, "min_quality": Infinity}',
+        '{"min_rr": NaN, "min_quality": NaN}',
+        json.dumps(dict(base, _regime=regmap)),
+        json.dumps(dict(base, _bayesian=bay, _regime=regmap)),
+        json.dumps({"_regime": {"trending_up": {"min_rr": 3.5, "min_quality": 6}}}),
+        json.dumps({"_regime": {"ranging": {}}}),
+        json.dumps({"min_rr": 2.0, "_regime": {"ranging": {"min_rr": "bad"}}}),
+        json.dumps({"min_rr": 2.0, "min_quality": 2, "_regime": {"trending_up": {"min_quality": 8}}}),
+    ]
+    flag_sets = [{}, {"optimizer_enabled": True}, {"genome_auto_apply": True},
+                 {"optimizer_enabled": 0, "genome_auto_apply": 1}]
+    for stored in stored_list:
+        for fl in flag_sets:
+            for regime in (None, "trending_up", "__RAISE__", "range"):
+                for (mr, mq) in ((1.8, 3), (2.6, 6)):
+                    out["levels"].append({"flags": fl, "stored": stored, "regime": regime,
+                                          "cfg": [mr, mq],
+                                          "out": _levels_consume(fl, stored, regime, mr, mq)})
+                out["smc"].append({"flags": fl, "stored": stored, "regime": regime,
+                                   "out": _smc_consume(fl, stored, regime)})
+    for uc in ({}, {"min_rr_filter": 0.0, "min_q_filter": 0}, {"min_rr_filter": 2.0, "min_q_filter": 0},
+               {"min_rr_filter": 0.0, "min_q_filter": 4}, {"min_rr_filter": 2.0, "min_q_filter": 4},
+               {"min_rr_filter": float("nan"), "min_q_filter": 0}, {"min_rr_filter": float("inf"), "min_q_filter": 1}):
+        for (rr, score) in ((1.5, 3), (2.0, 4), (2.5, 5), (1.99, 4), (3.0, 3)):
+            out["smc_pass"].append({"uc": uc, "rr": rr, "score": score, "out": _smc_passes(uc, rr, score)})
+    emit("optimizer.json", out)
 
 
 if __name__ == "__main__":

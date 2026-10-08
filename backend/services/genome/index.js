@@ -20,6 +20,7 @@
  *   store         genome_population / genome_history / optimizer_params / engine_kv I/O
  *   runner        the main-thread host of workers/genomeWorker.js
  *   regime        the cached market-regime provider hook
+ *   optimizerParams  params_for_regime + the LEVELS / SMC scanner consumers of optimizer_params
  */
 
 module.exports = {
@@ -41,4 +42,5 @@ module.exports = {
   store: require('./store'),
   runner: require('./runner'),
   regime: require('./regime'),
+  optimizerParams: require('./optimizerParams'),
 };

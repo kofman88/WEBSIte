@@ -76,6 +76,21 @@ function evalDaysForTf(tf, strategy = '') {
   return 30;
 }
 
+/**
+ * get_dynamic_eval_days(strategy) — 45 days in a trending BTC regime, else EVAL_DAYS. Not called
+ * by the bot's evolution (kept for parity); getRegime defaults to regime.getCachedRegime and a
+ * throwing provider falls back to EVAL_DAYS like the bot's `except Exception`.
+ */
+function getDynamicEvalDays(_strategy, getRegime = null) {
+  try {
+    const regime = (getRegime || require('./regime').getCachedRegime)();
+    if (regime && (regime === 'trending_up' || regime === 'trending_down')) return 45;
+    return EVAL_DAYS;
+  } catch (_e) {
+    return EVAL_DAYS;
+  }
+}
+
 /** _eval_timeout_for_tf(tf) seconds. */
 function evalTimeoutForTf(tf) {
   const t = String(tf || '').toLowerCase();
@@ -201,7 +216,7 @@ module.exports = {
   POP_SIZE, ELITE_FRACTION, MUTATION_RATE, TOURNAMENT_SIZE,
   STRATEGIES, STRATEGY_TFS, DEFAULT_TF, STRATEGY_TF, getTfs, getDefaultTf,
   EVAL_TOP_N, EVAL_TOP_N_BY_STRATEGY, EVAL_DAYS, EVAL_MIN_TRADES, EVAL_MIN_TRADES_BY_STRATEGY,
-  OOS_SPLIT, OOS_SPLIT_BY_STRATEGY, evalTopN, evalMinTrades, oosSplit, evalDaysForTf, evalTimeoutForTf,
+  OOS_SPLIT, OOS_SPLIT_BY_STRATEGY, evalTopN, evalMinTrades, oosSplit, evalDaysForTf, evalTimeoutForTf, getDynamicEvalDays,
   FEE_ROUND_TRIP_PCT, SLIPPAGE_PCT, LIVE_PF_DISCOUNT,
   STALE_RESET_AFTER_GENS, MAX_STALE_RESETS, FITNESS_DECAY_PER_DAY, CROSS_STRATEGY_RATE, ENSEMBLE_TOP_N,
   DRIFT_THRESHOLD_WR, DRIFT_MIN_TRADES, DRIFT_THRESHOLD_BY_REGIME, PF_THRESHOLD_BY_REGIME, PF_THRESHOLD_DEFAULT,

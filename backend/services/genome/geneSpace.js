@@ -179,6 +179,39 @@ function parsePyJson(text) {
   return { value, floatKeys };
 }
 
+/**
+ * json.loads(text): JSON.parse plus the NaN / Infinity / -Infinity literals Python's json module
+ * reads (and json.dumps writes for non-finite floats). Throws SyntaxError on anything else
+ * JSON.parse rejects.
+ */
+function pyJsonLoads(text) {
+  const src = String(text);
+  if (!/NaN|Infinity/.test(src)) return JSON.parse(src);
+  const tag = `\u0001pyjson${Math.random().toString(36).slice(2)}\u0001`;
+  const lit = { NaN: NaN, Infinity: Infinity, '-Infinity': -Infinity };
+  let out = '';
+  let i = 0;
+  while (i < src.length) {
+    const ch = src[i];
+    if (ch === '"') {                                  // copy a string literal untouched
+      let j = i + 1;
+      while (j < src.length && src[j] !== '"') j += src[j] === '\\' ? 2 : 1;
+      out += src.slice(i, j + 1);
+      i = j + 1;
+      continue;
+    }
+    const m = /^(-Infinity|Infinity|NaN)/.exec(src.slice(i, i + 9));
+    if (m) {
+      out += JSON.stringify(tag + m[1]);
+      i += m[1].length;
+      continue;
+    }
+    out += ch;
+    i += 1;
+  }
+  return JSON.parse(out, (_k, v) => (typeof v === 'string' && v.startsWith(tag) ? lit[v.slice(tag.length)] : v));
+}
+
 /** serialize_genome(genome) = json.dumps(genome, sort_keys=True) */
 function serializeGenome(genome) {
   return pyDumps(genome, { sortKeys: true });
@@ -202,5 +235,5 @@ function compactGenomeJson(genome) {
 
 module.exports = {
   GENE_SPACE, spaceOf, floatSteps, randomGeneValue, FLOAT_GENE_KEYS,
-  pyJsonStr, pyDumps, parsePyJson, serializeGenome, deserializeGenome, compactGenomeJson,
+  pyJsonStr, pyDumps, parsePyJson, pyJsonLoads, serializeGenome, deserializeGenome, compactGenomeJson,
 };

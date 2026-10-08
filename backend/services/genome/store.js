@@ -18,7 +18,7 @@
  */
 
 const { pySum } = require('../../strategies/common/series');
-const { serializeGenome, deserializeGenome, pyDumps } = require('./geneSpace');
+const { serializeGenome, deserializeGenome, pyDumps, pyJsonLoads } = require('./geneSpace');
 const C = require('./config');
 
 let _db = null;
@@ -174,29 +174,45 @@ function getLastMutationInfo(strategy, tf = null, { now = nowSec() } = {}) {
 
 function _clearMutationInfoCache() { _mutationInfoCache.clear(); }
 
-// ── optimizer_params (optimizer._save_params / load_params) ──
+// ── optimizer_params (optimizer._save_params / load_params + optimizer_cache) ──
+// optimizer_cache: {(uid, S): {"params": dict(params), "ts"}} with a 4 h TTL; set_cached_params
+// fails (and caches nothing) for a value dict() rejects — None / a list / a scalar.
+const PARAMS_CACHE_TTL_S = 4 * 3600;
 const _paramsCache = new Map();
+const isDict = (v) => v !== null && typeof v === 'object' && !Array.isArray(v);
 
+function _cacheParams(k, params, now) {
+  if (isDict(params)) _paramsCache.set(k, { params: { ...params }, ts: now });
+}
+
+/** _save_params: INSERT OR REPLACE json.dumps(params); never raises (log.warning). */
 function saveOptimizerParams(userId, strategy, params, { now = nowSec, log = null } = {}) {
   try {
     getDb().prepare('INSERT OR REPLACE INTO optimizer_params (user_id, strategy, params, updated_at) VALUES (?, ?, ?, ?)')
       .run(Number(userId), strategy, pyDumps(params), now());
-    _paramsCache.set(`${userId}|${strategy}`, { ...params });
+    _cacheParams(`${userId}|${strategy}`, params, now());
   } catch (e) {
     if (log) log.warn(`_save_params uid=${userId} strat=${strategy}: ${e.message}`);
-    throw e;
   }
 }
 
-function loadOptimizerParams(userId, strategy) {
+/**
+ * load_params: the cached dict (≤ 4 h old) or json.loads of the row — any JSON value comes back
+ * as-is (a list / scalar too); no row / empty text / a DB or JSON error → null.
+ */
+function loadOptimizerParams(userId, strategy, { now = nowSec } = {}) {
   const k = `${userId}|${strategy}`;
-  if (_paramsCache.has(k)) return { ..._paramsCache.get(k) };
+  const hit = _paramsCache.get(k);
+  if (hit) {
+    if (now() - hit.ts > PARAMS_CACHE_TTL_S) _paramsCache.delete(k);
+    else return { ...hit.params };
+  }
   try {
     const row = getDb().prepare('SELECT params FROM optimizer_params WHERE user_id=? AND strategy=?').get(Number(userId), strategy);
-    if (!row) return null;
-    const p = JSON.parse(row.params || '{}');
-    _paramsCache.set(k, p);
-    return { ...p };
+    if (!row || !row.params) return null;
+    const p = pyJsonLoads(row.params);
+    _cacheParams(k, p, now());
+    return isDict(p) ? { ...p } : p;
   } catch (_e) {
     return null;
   }
