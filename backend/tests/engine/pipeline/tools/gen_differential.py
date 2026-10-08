@@ -99,7 +99,12 @@ class Capture(logging.Handler):
         self.lines = []
 
     def emit(self, record):
-        self.lines.append([record.levelname, record.getMessage()])
+        # [SKIP-AFTER-TP-PLACED] ends with traceback.format_stack(): absolute paths of this checkout and of the
+        # interpreter, not bot data (differential.test.js compares the text before the marker) — dropped so the
+        # fixture does not depend on where it is generated
+        msg = record.getMessage()
+        head, sep, _ = msg.partition(" — logging call stack:")
+        self.lines.append([record.levelname, head + sep if sep else msg])
 
 
 def capture(*names):

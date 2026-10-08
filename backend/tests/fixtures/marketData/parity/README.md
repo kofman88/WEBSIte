@@ -13,13 +13,14 @@ compare value for value.
 | `ws_state.json` | `gen/gen_ws_state.py` | `ws_feed_bingx.BingXWebSocketFeed._on_kline/_close_stale_bars/_handle_message` + `ws_feed._update_cache/_initial_load/_fire_bar_close` | `bingxWsFeed` |
 | `candle_store.json` | `gen/gen_candle_store.py` | `candle_store.ensure_candles/_adaptive_freshness_ms/prefetch_top_coins/cleanup`, `backtest.BingXHistoryLoader.load/get_top_coins` | `candleStore` |
 
-Regenerate (bot venv, any cwd — the scripts chdir into the bot):
+Regenerate with the production interpreter (CPython 3.11 venv with the bot's pinned requirements; any cwd —
+the scripts chdir into the bot). A re-run reproduces every file byte for byte:
 
 ```
 cd backend/tests/fixtures/marketData/parity
 for g in rows_to_df symbols ttl_cache ws_state candle_store; do
   BOT_TOKEN_CHM=test:token ADMIN_IDS=123 BOT_DIR=/home/user/MAIN_BOT/CHM_BREAKER_V4 \
-    /path/to/bot/venv/bin/python gen/gen_$g.py > $g.json
+    /path/to/python3.11-venv/bin/python gen/gen_$g.py > $g.json
 done
 rm -f /home/user/MAIN_BOT/CHM_BREAKER_V4/signal_registry.json   # side effect of importing the bot
 ```

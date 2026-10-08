@@ -3,7 +3,9 @@ for backend/tests/engine/stats/reports.test.js.
 
 Run with the bot's venv after gen_stats_vectors.py (it reads that fixture for the per-user
 stats the bot computed on the seeded DB):
-  BOT_TOKEN_CHM=test:token ADMIN_IDS=123 <venv>/bin/python gen_reports_vectors.py STATS.json OUT.json
+  BOT_TOKEN_CHM=test:token ADMIN_IDS=123 <venv>/bin/python gen_reports_vectors.py [STATS [OUT]]
+  (STATS / OUT default to the shipped stats_vectors.json / reports_vectors.json; relative paths resolve
+   against the caller's cwd)
 (afterwards: rm -f <bot>/signal_registry.json)
 """
 from __future__ import annotations
@@ -17,6 +19,7 @@ from datetime import datetime as _dt, timezone
 from types import SimpleNamespace
 
 BOT = "/home/user/MAIN_BOT/CHM_BREAKER_V4"
+_CWD = os.getcwd()   # caller cwd: relative paths below resolve against it, not against the bot dir
 os.chdir(BOT)
 sys.path.insert(0, BOT)
 os.environ.setdefault("BOT_TOKEN_CHM", "test:token")
@@ -26,8 +29,8 @@ os.environ.pop("MINIAPP_URL", None)
 import daily_summary as dsm  # noqa: E402
 import weekly_digest as wd  # noqa: E402
 
-STATS = json.load(open(sys.argv[1]))
-OUT = sys.argv[2]
+STATS = json.load(open(os.path.join(_CWD, sys.argv[1]) if len(sys.argv) > 1 else os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "fixtures", "stats_vectors.json")))
+OUT = os.path.join(_CWD, sys.argv[2]) if len(sys.argv) > 2 else os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "fixtures", "reports_vectors.json")
 out: dict = {}
 
 LOG_LINES: list = []

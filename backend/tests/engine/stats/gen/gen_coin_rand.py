@@ -4,7 +4,8 @@ bars at the cut, like a REST call), and the bot's REAL miniapp_api.h_analyze on 
 request bodies (symbol / strategy parsing, bad_symbol, the parsed symbol and the fetch calls),
 for backend/tests/engine/stats/coinRand.test.js.
 
-  BOT_TOKEN_CHM=test:token ADMIN_IDS=123 <venv>/bin/python gen_coin_rand.py /abs/coin_rand.json
+  BOT_TOKEN_CHM=test:token ADMIN_IDS=123 <venv>/bin/python gen_coin_rand.py [OUT]
+  ([OUT] defaults to the shipped fixture; a relative path resolves against the caller's cwd)
   (afterwards: rm -f <bot>/signal_registry.json)
 """
 from __future__ import annotations
@@ -21,7 +22,7 @@ import pandas as pd
 
 BOT = "/home/user/MAIN_BOT/CHM_BREAKER_V4"
 GOLDEN = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "..", "..", "golden", "candles")
-OUT = sys.argv[1]
+OUT = os.path.abspath(sys.argv[1]) if len(sys.argv) > 1 else os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "fixtures", "coin_rand.json")
 os.chdir(BOT)
 sys.path.insert(0, BOT)
 os.environ.setdefault("BOT_TOKEN_CHM", "test:token")

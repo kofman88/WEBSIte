@@ -5,7 +5,8 @@ backend/tests/engine/stats/reportsRand.test.js. time.time and the modules' datet
 pinned; telegram_safe.safe_send_message is captured (one user's send returns False, one
 raises); asyncio.sleep is short-circuited and the second scheduler sleep ends the loop.
 
-  BOT_TOKEN_CHM=test:token ADMIN_IDS=123 <venv>/bin/python gen_reports_rand.py /abs/reports_rand.json
+  BOT_TOKEN_CHM=test:token ADMIN_IDS=123 <venv>/bin/python gen_reports_rand.py [OUT]
+  ([OUT] defaults to the shipped fixture; a relative path resolves against the caller's cwd)
   (afterwards: rm -f <bot>/signal_registry.json)
 """
 from __future__ import annotations
@@ -23,6 +24,7 @@ from datetime import datetime as _dt, timezone
 from types import SimpleNamespace
 
 BOT = "/home/user/MAIN_BOT/CHM_BREAKER_V4"
+_CWD = os.getcwd()   # caller cwd: relative paths below resolve against it, not against the bot dir
 os.chdir(BOT)
 sys.path.insert(0, BOT)
 os.environ.setdefault("BOT_TOKEN_CHM", "test:token")
@@ -34,7 +36,7 @@ import database  # noqa: E402
 import telegram_safe  # noqa: E402
 import weekly_digest as wd  # noqa: E402
 
-OUT = sys.argv[1] if len(sys.argv) > 1 else "reports_rand.json"
+OUT = os.path.join(_CWD, sys.argv[1]) if len(sys.argv) > 1 else os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "fixtures", "reports_rand.json")
 rng = random.Random(1010)
 
 NOW_D = 1_769_903_700.0          # 2026-01-31 23:55:00 UTC (Saturday)

@@ -6,7 +6,8 @@ The candles are the golden fixtures (backend/tests/golden/candles): for a cut at
 "fetch" returns what a REST call at the close of bar i would: the last 300 CLOSED bars of 1h /
 4h / 15m.
 
-  BOT_TOKEN_CHM=test:token ADMIN_IDS=123 <venv>/bin/python gen_coin_analysis_vectors.py OUT.json [STRIDE]
+  BOT_TOKEN_CHM=test:token ADMIN_IDS=123 <venv>/bin/python gen_coin_analysis_vectors.py [OUT [STRIDE]]
+  ([OUT] defaults to the shipped fixture; a relative path resolves against the caller's cwd)
   (afterwards: rm -f <bot>/signal_registry.json)
 """
 from __future__ import annotations
@@ -22,7 +23,7 @@ import pandas as pd
 
 BOT = "/home/user/MAIN_BOT/CHM_BREAKER_V4"
 GOLDEN = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "..", "..", "golden", "candles")
-OUT = sys.argv[1]
+OUT = os.path.abspath(sys.argv[1]) if len(sys.argv) > 1 else os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "fixtures", "coin_analysis_vectors.json")
 STRIDE = int(sys.argv[2]) if len(sys.argv) > 2 else 45
 os.chdir(BOT)
 sys.path.insert(0, BOT)

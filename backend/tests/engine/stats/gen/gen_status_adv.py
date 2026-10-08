@@ -4,7 +4,8 @@ lowercase results and stages, the 72 h boundary) through the bot's db/signal_out
 signal_status, signal_rr for the real status and for every status, has_card,
 is_exchange_trade. For backend/tests/engine/stats/statusAdv.test.js.
 
-  BOT_TOKEN_CHM=test:token ADMIN_IDS=123 <venv>/bin/python gen_status_adv.py /abs/status_adv.json
+  BOT_TOKEN_CHM=test:token ADMIN_IDS=123 <venv>/bin/python gen_status_adv.py [OUT]
+  ([OUT] defaults to the shipped fixture; a relative path resolves against the caller's cwd)
 """
 from __future__ import annotations
 
@@ -15,12 +16,13 @@ import random
 import sys
 
 BOT = "/home/user/MAIN_BOT/CHM_BREAKER_V4"
+_CWD = os.getcwd()   # caller cwd: relative paths below resolve against it, not against the bot dir
 os.chdir(BOT)
 sys.path.insert(0, BOT)
 
 from db import signal_outcome as so  # noqa: E402
 
-OUT = sys.argv[1] if len(sys.argv) > 1 else "status_adv.json"
+OUT = os.path.join(_CWD, sys.argv[1]) if len(sys.argv) > 1 else os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "fixtures", "status_adv.json")
 rng = random.Random(30030)
 NOW = 1_766_000_000.0
 STATUSES = ("tp1", "tp2", "tp3", "sl", "be", "missed", "expired", "open", "closed", "skip", "", "x")

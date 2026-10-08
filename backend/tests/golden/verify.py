@@ -1,6 +1,16 @@
 """Sanity checks on the generated golden set (structure, counts, alignment, samples)."""
-import json, os, glob, math
+import json, os, glob, gzip, math
 G = os.path.dirname(os.path.abspath(__file__))
+
+
+def _expected(name):
+    """expected/<name>.json, or the committed expected/<name>.json.gz (smc / smc_analysis) → (doc, path)."""
+    p = os.path.join(G, "expected", f"{name}.json")
+    if os.path.exists(p):
+        return json.load(open(p)), p
+    return json.load(gzip.open(p + ".gz", "rt", encoding="utf-8")), p + ".gz"
+
+
 TF_MS = {"15m": 900_000, "1h": 3_600_000, "4h": 14_400_000, "1d": 86_400_000}
 T_END = 1767225600000  # 2026-01-01T00:00:00Z
 files = sorted(glob.glob(os.path.join(G, "candles", "*_*.json")))
@@ -22,7 +32,7 @@ idx = json.load(open(os.path.join(G, "candles", "index.json")))
 print("fixtures:", len(idx["fixtures"]), "regimes:", sorted({f["regime"] for f in idx["fixtures"]}))
 tot = {}
 for strat in ("levels", "smc", "volume"):
-    d = json.load(open(os.path.join(G, "expected", f"{strat}.json")))
+    d, path = _expected(strat)
     n_sig = 0; n_err = 0; n_warn = 0; swept = set()
     for sym, fx in d["fixtures"].items():
         for v, r in fx.items():
@@ -39,7 +49,7 @@ for strat in ("levels", "smc", "volume"):
                     assert s["sl"] > s["entry"] > s["tp1"] > s["tp2"] > s["tp3"], (strat, sym, v, s["i"])
     tot[strat] = n_sig
     print(f"{strat:7s} signals={n_sig:5d} errors={n_err} warnings={n_warn} swept={sorted(swept)} "
-          f"size={os.path.getsize(os.path.join(G, 'expected', f'{strat}.json')) // 1024} KB variants={list(d['variants'])}")
+          f"size={os.path.getsize(path) // 1024} KB variants={list(d['variants'])}")
     # one sample
     for sym, fx in d["fixtures"].items():
         if fx["default"]["signals"]:
@@ -47,9 +57,9 @@ for strat in ("levels", "smc", "volume"):
             keys = [k for k in s if k not in ("reasons", "human_explanation", "narrative", "confirmations")]
             print("   sample", sym, {k: s[k] for k in keys[:14]})
             break
-sa = json.load(open(os.path.join(G, "expected", "smc_analysis.json")))
+sa, path = _expected("smc_analysis")
 print("smc_analysis fixtures:", len(sa["fixtures"]), "bars/fixture:", len(next(iter(sa["fixtures"].values()))),
-      "size KB:", os.path.getsize(os.path.join(G, "expected", "smc_analysis.json")) // 1024)
+      "size KB:", os.path.getsize(path) // 1024)
 summ = json.load(open(os.path.join(G, "summary.json")))
 print("summary:", {k: summ["strategies"][k]["signals"] for k in summ["strategies"]}, "determinism:", summ.get("determinism_check"))
 assert all(v >= 20 for v in tot.values()), tot

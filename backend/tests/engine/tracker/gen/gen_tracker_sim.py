@@ -16,8 +16,9 @@ expire_rr), card edits (text, keyboard kept), progress sends (text, silent, repl
 photo), chart windows (len + first bar of _chart_df), the INFO/WARNING log lines and the
 run_cycle return value.
 
-Run with the bot's venv (the script chdirs into the bot checkout itself; OUT absolute):
-  BOT_TOKEN_CHM=test:token ADMIN_IDS=123 <venv>/bin/python gen_tracker_sim.py /abs/tracker_sim.json
+Run with the bot's venv (the script chdirs into the bot checkout itself):
+  BOT_TOKEN_CHM=test:token ADMIN_IDS=123 <venv>/bin/python gen_tracker_sim.py [OUT]
+  ([OUT] defaults to the shipped fixture; a relative path resolves against the caller's cwd)
   (afterwards: rm -f <bot>/signal_registry.json)
 """
 from __future__ import annotations
@@ -33,6 +34,7 @@ import time as _time
 from types import SimpleNamespace
 
 BOT = "/home/user/MAIN_BOT/CHM_BREAKER_V4"
+_CWD = os.getcwd()   # caller cwd: relative paths below resolve against it, not against the bot dir
 os.chdir(BOT)
 sys.path.insert(0, BOT)
 os.environ.setdefault("BOT_TOKEN_CHM", "test:token")
@@ -45,7 +47,7 @@ import database  # noqa: E402
 import signal_freshness  # noqa: E402
 import signal_tracker as st  # noqa: E402
 
-OUT = sys.argv[1] if len(sys.argv) > 1 else "tracker_sim.json"
+OUT = os.path.join(_CWD, sys.argv[1]) if len(sys.argv) > 1 else os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "fixtures", "tracker_sim.json")
 
 # ── deterministic generator shared with the JS test (MINSTD, exact in doubles) ──
 

@@ -3,7 +3,8 @@ db/stats.py and the Mini App stats / signals helpers for the JS parity tests
 (backend/tests/engine/stats/*.test.js).
 
 Run with the bot's venv (cwd = the bot checkout is set by the script itself):
-  BOT_TOKEN_CHM=test:token ADMIN_IDS=123 <venv>/bin/python gen_stats_vectors.py OUT.json
+  BOT_TOKEN_CHM=test:token ADMIN_IDS=123 <venv>/bin/python gen_stats_vectors.py [OUT]
+  ([OUT] defaults to the shipped fixture; a relative path resolves against the caller's cwd)
 (afterwards: rm -f <bot>/signal_registry.json)
 
 time.time() is pinned to NOW so every function that reads the clock sees the same instant
@@ -23,6 +24,7 @@ import time as _time
 from types import SimpleNamespace
 
 BOT = "/home/user/MAIN_BOT/CHM_BREAKER_V4"
+_CWD = os.getcwd()   # caller cwd: relative paths below resolve against it, not against the bot dir
 os.chdir(BOT)
 sys.path.insert(0, BOT)
 os.environ.setdefault("BOT_TOKEN_CHM", "test:token")
@@ -40,7 +42,7 @@ from db import signal_outcome as so  # noqa: E402
 from db import signal_stats as ss  # noqa: E402
 from db import stats as dbs  # noqa: E402
 
-OUT = sys.argv[1] if len(sys.argv) > 1 else "stats_vectors.json"
+OUT = os.path.join(_CWD, sys.argv[1]) if len(sys.argv) > 1 else os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "fixtures", "stats_vectors.json")
 rng = random.Random(20261008)
 out: dict = {"now": NOW}
 
