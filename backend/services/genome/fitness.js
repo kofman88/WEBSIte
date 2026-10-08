@@ -31,6 +31,17 @@ const { pySum } = require('../../strategies/common/series');
 const { createRng } = require('./rng');
 const C = require('./config');
 
+/**
+ * CPython math.log1p (glibc) for the integer trade counts compute_fitness sees. V8's fdlibm
+ * log1p is bit-identical except at n = 175 and n = 184 (1 ulp; checked for every n in
+ * 0..20000 with `[math.log1p(n) for n in range(20001)]`), so those two are pinned.
+ */
+const LOG1P_GLIBC = Object.freeze({ 175: 5.170483995038151, 184: 5.220355825078325 });
+function pyLog1p(x) {
+  if (Number.isInteger(x) && Object.prototype.hasOwnProperty.call(LOG1P_GLIBC, x)) return LOG1P_GLIBC[x];
+  return Math.log1p(x);
+}
+
 /** compute_fitness(winrate, profit_factor, trades, drawdown) */
 function computeFitness(winrate, profitFactor, trades, drawdown) {
   if (trades <= 0) return 0.0;
@@ -38,7 +49,7 @@ function computeFitness(winrate, profitFactor, trades, drawdown) {
   if (wr < 0.35) wr = wr * 0.5;
   let pf = pyMax2(0.0, profitFactor);           // [PHASE3-FIX 3D-7] no PF cap
   if (pf < 1.2) pf = pf * 0.7;
-  let size = Math.log1p(trades);
+  let size = pyLog1p(trades);
   if (trades < 8) size = size * (trades / 8.0);   // [GENOME-LOW-N-FIX]
   if (trades > 50) size = size * 0.8;
   const ddPenalty = drawdown > 1 ? pyMax2(0.0, drawdown) / 100.0 : pyMax2(0.0, drawdown);
@@ -253,5 +264,5 @@ function coinFitness(wr, pf, trades, dd) {
 }
 
 module.exports = {
-  computeFitness, wilsonCi, maxDrawdown, monteCarloP95Dd, mcMultiplier, oosTestTrades, scoreTrades, coinFitness,
+  pyLog1p, computeFitness, wilsonCi, maxDrawdown, monteCarloP95Dd, mcMultiplier, oosTestTrades, scoreTrades, coinFitness,
 };

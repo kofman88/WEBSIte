@@ -46,6 +46,58 @@ const own = (o, k) => Object.prototype.hasOwnProperty.call(o, k);
 const pget = (p, k, d) => (own(p, k) && p[k] !== undefined ? p[k] : d);
 const pyBoolOf = (x) => pyTruthy(x);
 
+/**
+ * numpy's round for a float64 scalar (`round(np.float64(x), k)` → np.round): rint(x × 10^k) / 10^k —
+ * NOT Python's correctly-rounded round(): round(np.float64(0.6695), 3) = 0.67, round(0.6695, 3) = 0.669.
+ */
+function rint(y) {
+  if (!Number.isFinite(y)) return y;
+  const f = Math.floor(y);
+  const d = y - f;
+  if (d < 0.5) return f;
+  if (d > 0.5) return f + 1;
+  return f % 2 === 0 ? f : f + 1;
+}
+
+function npRound(x, k) {
+  const f = 10 ** k;
+  return rint(x * f) / f;
+}
+
+/**
+ * CPython 3.12 builtin sum() over a mix of exact Python floats and numpy float64 scalars
+ * (`items` = [[value, isNumpy]]): exact floats are Neumaier-compensated; the first numpy item
+ * leaves the fast path (the pending compensation is added) and the rest is plain left-to-right
+ * addition. Returns [sum, isNumpy].
+ */
+function cpySum(items) {
+  if (!items.length) return [0, false];
+  let k = 1;
+  let res = 0 + items[0][0];
+  if (items[0][1]) {
+    for (; k < items.length; k++) res += items[k][0];
+    return [res, true];
+  }
+  let f = res;
+  let c = 0.0;
+  for (; k < items.length; k++) {
+    const [x, isNp] = items[k];
+    if (!isNp) {
+      const t = f + x;
+      if (Math.abs(f) >= Math.abs(x)) c += (f - t) + x;
+      else c += (x - t) + f;
+      f = t;
+      continue;
+    }
+    if (c && Number.isFinite(c)) f += c;
+    res = f + x;
+    for (k += 1; k < items.length; k++) res += items[k][0];
+    return [res, true];
+  }
+  if (c && Number.isFinite(c)) f += c;
+  return [f, false];
+}
+
 /** pandas str(Timestamp(ms, unit="ms")) for a naive UTC index: "2025-12-23 16:00:00[.ffffff]". */
 function tsString(ms) {
   const iso = new Date(ms).toISOString();          // 2025-12-23T16:00:00.000Z
@@ -141,6 +193,10 @@ function simulateTrade(sig, symbol, df, entryBarIdx, ctx = {}) {
   const entryTime = tsString(df.t[entryBarIdx]);
   let maxAdverse = 0.0;
   let maxFavorable = 0.0;
+  // _max_adverse / _max_favorable become numpy float64 once a bar value updates them
+  // (bar["low"] is np.float64) → numpy rounding for mae / mfe from then on.
+  let advNp = false;
+  let favNp = false;
   let j = entryBarIdx;
 
   const make = (result, exitIdx, exitPrice, rr) => {
@@ -148,10 +204,13 @@ function simulateTrade(sig, symbol, df, entryBarIdx, ctx = {}) {
       symbol, direction, entry, sl, tp1, tp2, tp3,
       entry_time: entryTime, exit_time: tsString(df.t[exitIdx]), exit_price: exitPrice, result,
       rr_realized: rr, strategy,
-      mae: pyRound(maxAdverse, 3), mfe: pyRound(maxFavorable, 3),
+      mae: advNp ? npRound(maxAdverse, 3) : pyRound(maxAdverse, 3),
+      mfe: favNp ? npRound(maxFavorable, 3) : pyRound(maxFavorable, 3),
       duration_bars: j - entryBarIdx, slippage_applied: pyRound(slippageR, 4),
     });
     Object.defineProperty(t, '_exitIdx', { value: exitIdx, enumerable: false, writable: true });
+    Object.defineProperty(t, '_maeNp', { value: advNp, enumerable: false });
+    Object.defineProperty(t, '_mfeNp', { value: favNp, enumerable: false });
     return t;
   };
   const remainingOpen = () => (ptp2Hit ? wRest : (ptp1Hit ? w2 + wRest : 1.0));
@@ -169,8 +228,8 @@ function simulateTrade(sig, symbol, df, entryBarIdx, ctx = {}) {
       adv = risk > 0 ? (barHigh - entry) / risk : 0;
       fav = risk > 0 ? (entry - barLow) / risk : 0;
     }
-    if (adv > maxAdverse) maxAdverse = adv;
-    if (fav > maxFavorable) maxFavorable = fav;
+    if (adv > maxAdverse) { maxAdverse = adv; advNp = true; }
+    if (fav > maxFavorable) { maxFavorable = fav; favNp = true; }
 
     if (direction === 'LONG') {
       // SL first (worst case: SL and TP on the same bar → SL)
@@ -331,8 +390,11 @@ function buildResult(trades, signals, { strategy = '', timeframe = '', days = 0,
   const lossT = trades.filter((t) => t.rr_realized < 0);
   const avgWin = winT.length ? pySum(winT.map((t) => t.rr_realized)) / winT.length : 0;
   const avgLoss = lossT.length ? pySum(lossT.map((t) => t.rr_realized)) / lossT.length : 0;
-  const avgMae = n ? pySum(trades.map((t) => t.mae)) / n : 0;
-  const avgMfe = n ? pySum(trades.map((t) => t.mfe)) / n : 0;
+  // sum(t.mae for t in trades) mixes Python floats (0.0, never updated) and numpy float64
+  const [maeSum, maeNp] = cpySum(trades.map((t) => [t.mae, Boolean(t._maeNp)]));
+  const [mfeSum, mfeNp] = cpySum(trades.map((t) => [t.mfe, Boolean(t._mfeNp)]));
+  const avgMae = n ? maeSum / n : 0;
+  const avgMfe = n ? mfeSum / n : 0;
   const avgDur = n ? trades.reduce((s, t) => s + t.duration_bars, 0) / n : 0;   // sum of ints is exact
 
   // fast_mode: no compound equity / monthly breakdown / Monte Carlo
@@ -385,8 +447,8 @@ function buildResult(trades, signals, { strategy = '', timeframe = '', days = 0,
     avg_win_rr: pyRound(avgWin, 3),
     avg_loss_rr: pyRound(avgLoss, 3),
     avg_duration_bars: pyRound(avgDur, 1),
-    avg_mae: pyRound(avgMae, 3),
-    avg_mfe: pyRound(avgMfe, 3),
+    avg_mae: n && maeNp ? npRound(avgMae, 3) : pyRound(avgMae, 3),
+    avg_mfe: n && mfeNp ? npRound(avgMfe, 3) : pyRound(avgMfe, 3),
     monthly_breakdown: monthly,
     equity_curve: eqCurve,
     monte_carlo: mc,
@@ -628,5 +690,5 @@ function createBacktester(strategy, params = {}, { env = process.env, onError = 
 
 module.exports = {
   TAKER_FEE_RT, MAX_HOLD_BARS, LOOKBACK, ANALYZE_WINDOW, MAX_TRADES_PER_COIN,
-  tsString, simulateTrade, applyFees, buildResult, levelsIndConfig, smcBacktestConfig, backtestCoinSync, createBacktester,
+  rint, npRound, cpySum, tsString, simulateTrade, applyFees, buildResult, levelsIndConfig, smcBacktestConfig, backtestCoinSync, createBacktester,
 };

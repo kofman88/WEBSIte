@@ -339,7 +339,7 @@ def section_fitness():
         dd = rng.choice([rng.uniform(0, 1), rng.uniform(0, 30), round(rng.uniform(0, 5), 2), 1.0])
         cases.append({"winrate": wr, "profit_factor": pf, "trades": n, "drawdown": dd,
                       "out": genome.compute_fitness(wr, pf, n, dd)})
-    log1p = {str(n): math.log1p(n) for n in range(0, 401)}
+    log1p = {str(n): math.log1p(n) for n in range(0, 2001)}
     wil = []
     for n in list(range(0, 61)) + [80, 100, 150, 200, 333]:
         for wins in sorted({0, n // 3, n // 2, n, max(0, n - 1), min(n, 1)}):
@@ -515,7 +515,7 @@ def section_simulate():
     flat = [(100, 100.2, 99.8, 100)] * 3
     paths = {
         "sl_first_long": flat + [(100, 103, 97, 100)] + flat,
-        "tp1_then_be_long": flat + [(100, 102.5, 99.9, 102)] + [(102, 102.1, 99.5, 100)] + flat,
+        "tp1_then_be_long": flat + [(100, 102.5, 99.9, 102)] + [(102, 102.1, 98.0, 98.5)] + flat,
         "ptp_chain_long": flat + [(100, 101.2, 99.9, 101)] + [(101, 101.8, 100.5, 101.5)] + [(101, 104.5, 100.6, 104)] + flat,
         "ptp_be_long": flat + [(100, 101.3, 99.9, 101)] + [(101, 101.1, 99.0, 99.5)] + flat,
         "tp3_gap_long": flat + [(100, 110, 99.95, 109)] + flat,
