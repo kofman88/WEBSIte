@@ -18,13 +18,13 @@
  * Numbers are compared strictly (Object.is — the sign of zero shows in the texts), except in
  * HTTP bodies where JSON itself drops it.
  */
-import { describe, it, expect, beforeAll } from 'vitest';
+import { describe, it, expect, beforeAll, vi } from 'vitest';
 import fs from 'fs';
 import path from 'path';
 import zlib from 'zlib';
 import request from 'supertest';
 import { createRequire } from 'module';
-import { setupEnv, insertUser, insertTrade, quietLog, captureLog } from './helpers.js';
+import { setupEnv, insertUser, insertTrade, quietLog } from './helpers.js';
 
 const nodeRequire = createRequire(import.meta.url);
 setupEnv('verify');
@@ -74,6 +74,14 @@ function etype(e) {
 }
 
 const errOf = (e) => ({ ok: false, etype: etype(e), msg: String(e && e.message) });
+
+/** [level, message] lines at INFO / WARNING like the Python capture (warn = WARNING); take() drains. */
+function lineLog() {
+  const lines = [];
+  const rec = (lvl) => (m) => { lines.push([lvl, String(m)]); };
+  return { lines, info: rec('info'), warn: rec('warning'), error: rec('error'), debug() {}, take: () => lines.splice(0) };
+}
+const sortLines = (ls) => ls.map((l) => JSON.stringify(l)).sort();
 const short = (x) => { const s = JSON.stringify(x); return s && s.length > 300 ? `${s.slice(0, 300)}…` : s; };
 
 beforeAll(() => {
@@ -167,7 +175,7 @@ describe('C. discipline', () => {
 describe('D. gate on signal_trades + engine_kv', () => {
   it('200 users: fail-open on a broken / unreadable record, block reasons otherwise', () => {
     C.resetDeps();
-    const log = captureLog();
+    const log = lineLog();
     let clock = V.t0;
     C.configure({ log, clock: () => clock });
     db.prepare("DELETE FROM engine_kv WHERE key LIKE 'challenge%'").run();
@@ -175,12 +183,13 @@ describe('D. gate on signal_trades + engine_kv', () => {
     for (const c of V.gate) {
       if (c.kv !== null) kvSvc.set(C.key(c.uid), c.kv);
       clock = c.wall;
+      log.take();
       const g = C.gate(c.uid, c.now);
-      if (g !== c.gate) bad.push({ uid: c.uid, kind: c.kind, got: g, want: c.gate });
+      const d = diff({ g, logs: log.take() }, { g: c.gate, logs: c.logs });
+      if (d) bad.push({ uid: c.uid, kind: c.kind, d });
     }
     expect(bad).toEqual([]);
-    const broken = V.gate.filter((c) => c.kind === 'broken' && c.kv && c.kv.startsWith('{"user_id"')).length;
-    expect(log.lines.filter((l) => l.includes('[CHALLENGE-GATE]') && l.includes('kv read failed')).length).toBe(broken);
+    expect(V.gate.some((c) => c.logs.length && c.logs[0][1].startsWith('[CHALLENGE-GATE]'))).toBe(true);
     db.prepare("DELETE FROM engine_kv WHERE key LIKE 'challenge%'").run();
   });
 });
@@ -194,9 +203,10 @@ describe('E. tick: 30 days, 10 challenges', () => {
     const sent = [];
     const cards = [];
     const langs = V.tick.langs;
+    const log = lineLog();
     C.configure({
       clock: () => clock,
-      log: quietLog,
+      log,
       getUser: async (uid) => {
         if (uid === 5006 && failUm) throw new Error('user lookup failed');
         return { user_id: uid, lang: langs[String(uid)] };
@@ -211,6 +221,7 @@ describe('E. tick: 30 days, 10 challenges', () => {
     const bad = [];
     const byUid = (msgs) => { const m = {}; for (const [u, t] of msgs) (m[u] = m[u] || []).push(t); return m; };
     for (const e of V.tick.timeline) {
+      log.take();
       for (const op of e.ops) {
         const [kind] = op;
         if (kind === 'start') { clock = op[2]; C.save(C.build(op[1], op[3], op[2])); }
@@ -235,8 +246,9 @@ describe('E. tick: 30 days, 10 challenges', () => {
       // per user: the order of the challenges inside one pass is the kv scan order (the bot's
       // INSERT OR REPLACE moves a saved key to the end of the table), which no user can observe
       const cardsBy = (cs) => byUid(cs.map((c) => [c.uid, c]));
-      const d = diff({ st, sent: byUid(sent), cards: cardsBy(cards), kv: changed, gates },
-        { st: e.stats, sent: byUid(e.sent), cards: cardsBy(e.cards), kv: e.kv, gates: e.gates });
+      const logs = sortLines(log.take());
+      const d = diff({ st, sent: byUid(sent), cards: cardsBy(cards), kv: changed, gates, logs },
+        { st: e.stats, sent: byUid(e.sent), cards: cardsBy(e.cards), kv: e.kv, gates: e.gates, logs: sortLines(e.logs) });
       if (d) bad.push({ t: e.t, d });
       if (bad.length > 5) break;
     }
@@ -326,8 +338,9 @@ describe('G. entry advisor', () => {
       const kvm = new Map();
       if (c.kv0 !== null) kvm.set(`${EA.KV_PREFIX}${c.uid}`, c.kv0);
       const sent = [];
+      const log = lineLog();
       EA.configure({
-        db, clock: () => now, log: quietLog,
+        db, clock: () => c.wall, log,
         kv: {
           get: (k) => { const v = kvm.has(k) ? kvm.get(k) : null; if (v === 'RAISE') throw new Error('kv down'); return v; },
           set: (k, v) => kvm.set(k, v),
@@ -340,8 +353,8 @@ describe('G. entry advisor', () => {
       const ms = EA.missedStats(c.uid);
       const user = { ...ts.defaults(c.uid), ...c.attrs };
       const ret = await EA.adviseUser(user, now);
-      const d = diff({ ms, pick: EA.pickAdvice(ms), ret, sent, kv: Object.fromEntries(kvm) },
-        { ms: c.missed, pick: c.pick, ret: c.ret, sent: c.sent, kv: c.kv });
+      const d = diff({ ms, pick: EA.pickAdvice(ms), ret, sent, kv: Object.fromEntries(kvm), logs: log.take() },
+        { ms: c.missed, pick: c.pick, ret: c.ret, sent: c.sent, kv: c.kv, logs: c.logs });
       if (d) bad.push({ uid: c.uid, d });
     }
     expect(bad).toEqual([]);
@@ -406,7 +419,10 @@ describe('I. Mini App routes', () => {
     C.resetDeps();
     let clock = V.t0;
     appRouter.setClock(() => clock);
-    C.configure({ clock: () => clock, log: quietLog, hasKeys: (u) => Object.prototype.hasOwnProperty.call(R.keys, String(u.user_id)) });
+    const log = lineLog();
+    const logger = nodeRequire('../../utils/logger');
+    const spy = vi.spyOn(logger, 'info').mockImplementation((m) => { if (String(m).startsWith('[MINIAPP] [CHALLENGE]')) log.info(m); });
+    C.configure({ clock: () => clock, log, hasKeys: (u) => Object.prototype.hasOwnProperty.call(R.keys, String(u.user_id)) });
     const URL = {
       'GET challenge': ['get', '/api/app/challenge'], 'POST challenge': ['post', '/api/app/challenge'],
       'POST challenge/topup': ['post', '/api/app/challenge/topup'], 'POST challenge/finish': ['post', '/api/app/challenge/finish'],
@@ -416,19 +432,25 @@ describe('I. Mini App routes', () => {
     for (const [i, s] of R.steps.entries()) {
       clock = s.now;
       const [method, url] = URL[s.route];
+      log.take();
       let req = request(app)[method](url).set('Authorization', `Bearer ${authService._signAccessToken(s.uid)}`);
       if (method === 'post' && s.body !== null) req = req.send(s.body);
       const res = await req;
       const kv = db.prepare('SELECT value FROM engine_kv WHERE key = ?').get(`challenge_${s.uid}`);
       const u = ts.get(s.uid);
-      const got = { status: res.status, json: JSON.parse(JSON.stringify(res.body)), kv: kv ? kv.value : null, user: Object.fromEntries(fields.map((k) => [k, u[k]])) };
-      const want = { status: s.status, json: JSON.parse(JSON.stringify(s.json)), kv: s.kv, user: s.user };
+      const got = {
+        status: res.status, json: JSON.parse(JSON.stringify(res.body)), kv: kv ? kv.value : null,
+        user: Object.fromEntries(fields.map((k) => [k, u[k]])), logs: log.take(),
+      };
+      const want = { status: s.status, json: JSON.parse(JSON.stringify(s.json)), kv: s.kv, user: s.user, logs: s.logs };
       const d = diff(got, want, '$', true);
       if (d) bad.push({ i, uid: s.uid, route: s.route, body: short(s.body), d });
       if (bad.length > 8) break;
     }
+    spy.mockRestore();
     appRouter.setClock(null);
     appRouter.resetRateLimits();
     expect(bad).toEqual([]);
+    expect(R.steps.some((x) => x.logs.some(([, m]) => m.includes(' apply applied=')))).toBe(true);
   });
 });

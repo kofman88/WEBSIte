@@ -26,6 +26,7 @@ from __future__ import annotations
 import asyncio
 import importlib
 import json
+import logging
 import os
 import random
 import re
@@ -80,6 +81,29 @@ run = LOOP.run_until_complete
 
 def err(e):
     return {"ok": False, "etype": type(e).__name__, "msg": str(e)}
+
+
+class _Cap(logging.Handler):
+    """INFO / WARNING lines of the challenge, Mini App and advisor loggers (the log markers)."""
+
+    def __init__(self):
+        super().__init__(logging.INFO)
+        self.lines: list = []
+
+    def emit(self, record):
+        self.lines.append([record.levelname.lower(), record.getMessage()])
+
+    def take(self):
+        out, self.lines = self.lines, []
+        return out
+
+
+CAP = _Cap()
+for _name in ("CHM.Challenge", "CHM.MiniApp", "CHM.EntryAdvisor"):
+    _lg = logging.getLogger(_name)
+    _lg.addHandler(CAP)
+    _lg.setLevel(logging.INFO)
+    _lg.propagate = False
 
 
 tmp = tempfile.mkdtemp(prefix="m17a_verify_")
@@ -397,8 +421,9 @@ for i in range(200):
             r.update(result="", order_id="", progress_stage=rng.choice(["SL", "SL", "", "TP1", "BE", "MISSED"]))
         db_insert(uid, r)
     FAKE[0] = now + rng.choice([0.0, 1.5])
+    CAP.take()
     g = run(C.gate(uid, now=now))
-    gate_cases.append({"uid": uid, "kind": kind, "kv": kv_snapshot(C._key(uid)).get(C._key(uid)), "now": now,
+    gate_cases.append({"logs": CAP.take(), "uid": uid, "kind": kind, "kv": kv_snapshot(C._key(uid)).get(C._key(uid)), "now": now,
                        "wall": FAKE[0], "gate": g})
 out["gate"] = gate_cases
 _con.execute("DELETE FROM kv WHERE key LIKE 'challenge%'")   # the next sections start from an empty kv
@@ -481,6 +506,7 @@ prev_kv: dict = {}
 started_users: set = set()
 prev_t = TS
 for t in ticks:
+    CAP.take()
     ops = []
     # start the challenges whose start time has come (5007 starts on day 5)
     for uid, (st0, a) in TICK_USERS.items():
@@ -548,7 +574,7 @@ for t in ticks:
         if ch is not None and ch.status == C.STATUS_ACTIVE:
             run(C.finish(ch, C.STATUS_CANCELLED, now=t - 1))
             ops.append(["finish", 5008, t - 1])
-    wall = t + rng.choice([0.0, 0.0, 0.25, 2.0])
+    wall = t + rng.choice([0.0, 0.0, 0.25, 2.0, 0.0, 0.0, 0.25, 2.0, 43200.0, -7200.5])
     FAKE[0] = wall
     SENT.clear()
     CARDS.clear()
@@ -560,7 +586,7 @@ for t in ticks:
     for uid in sorted(started_users):
         gates[uid] = run(C.gate(uid, now=t))
     timeline.append({"t": t, "wall": wall, "ops": ops, "stats": st, "sent": list(SENT), "cards": list(CARDS),
-                     "kv": changed, "gates": gates})
+                     "kv": changed, "gates": gates, "logs": CAP.take()})
     prev_t = t
 # a broken record aborts the whole pass (the loop logs it); removing it heals the next tick
 FAKE[0] = TS + 30 * D_ + 10
@@ -683,6 +709,7 @@ importlib.reload(EA)
 out["advisor_env"] = env_cases
 
 FAKE[0] = T0 + 50 * D_ + 777.125
+ADV_NOW = FAKE[0]
 cut = FAKE[0] - EA.DAYS * 86400
 ADV_KV: dict = {}
 ADV_SENT: list = []
@@ -738,6 +765,8 @@ for i in range(50):
         if msg is None:
             r.pop("signal_msg_id")
         db_insert(uid, r)
+    wall = ADV_NOW + rng.choice([0.0, 0.0, 0.0, 3 * D_, -2 * D_, 0.5])
+    FAKE[0] = wall
     ms = run(EA.missed_stats(uid))
     pick = EA.pick_advice(ms)
     attrs = {}
@@ -746,8 +775,9 @@ for i in range(50):
     attrs["lang"] = rng.choice(["ru", "en", "de", "", "ru", "en"])
     if rng.random() < 0.3:
         attrs["quiet_start"], attrs["quiet_end"] = rng.choice([(0, 23), (22, 1), (5, 6), (-1, -1), (23, 23), (1, 0)])
-    kv0 = rng.choice([None, None, str(int(FAKE[0] - 6 * D_)), str(int(FAKE[0] - 7 * D_)), str(int(FAKE[0] - 8 * D_)),
-                      "garbage", "RAISE", f"{FAKE[0] - 7 * D_ + 0.5:.3f}", "nan", "inf", "-inf", "", "1e3", " 12 "])
+    kv0 = rng.choice([None, None, str(int(ADV_NOW - 6 * D_)), str(int(ADV_NOW - 7 * D_)), str(int(ADV_NOW - 8 * D_)),
+                      "garbage", "RAISE", f"{ADV_NOW - 7 * D_ + 0.5:.3f}", "nan", "inf", "-inf", "", "1e3", " 12 ",
+                      "\U00000661\U00000662", "\xa0" + str(int(ADV_NOW - 9 * D_))])
     ADV_KV.clear()
     ADV_SENT.clear()
     if kv0 is not None:
@@ -756,10 +786,11 @@ for i in range(50):
     u = UserSettings(user_id=uid)
     for k, v in attrs.items():
         setattr(u, k, v)
-    ret = run(EA.advise_user(None, u, now=FAKE[0]))
-    adv.append({"uid": uid, "missed": ms, "pick": pick, "attrs": attrs, "kv0": kv0, "send_ok": SEND_OK[0], "ret": ret,
+    CAP.take()
+    ret = run(EA.advise_user(None, u, now=ADV_NOW))
+    adv.append({"logs": CAP.take(), "uid": uid, "wall": wall, "missed": ms, "pick": pick, "attrs": attrs, "kv0": kv0, "send_ok": SEND_OK[0], "ret": ret,
                 "sent": list(ADV_SENT), "kv": dict(ADV_KV)})
-out["advisor"] = {"now": FAKE[0], "cases": adv}
+out["advisor"] = {"now": ADV_NOW, "cases": adv}
 pick_cases = []
 for _ in range(100):
     st = {}
@@ -902,12 +933,13 @@ for i in range(220):
         FAKE[0] = clock
         CUR["uid"] = uid
         method = route.split(" ")[0]
+        CAP.take()
         try:
             resp = run(HANDLERS[route](Req(method, body)))
             status, payload = resp.status, json.loads(resp.body)
         except web.HTTPException as e:
             status, payload = e.status, json.loads(e.text)
-        steps.append({"uid": uid, "route": route, "body": body, "now": clock, "status": status, "json": payload,
+        steps.append({"logs": CAP.take(), "uid": uid, "route": route, "body": body, "now": clock, "status": status, "json": payload,
                       "kv": kv_snapshot(C._key(uid)).get(C._key(uid)),
                       "user": {k: getattr(ROUTE_USERS[uid], k) for k in USER_FIELDS}})
 out["routes"] = {"init": ROUTE_INIT, "plans": {u: x.sub_plan for u, x in ROUTE_USERS.items()},
