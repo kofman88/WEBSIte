@@ -102,9 +102,12 @@ class BingxRest {
         return null;
       }
       if ((resp.json === null || resp.json === undefined) && String(resp.text ?? '').trim() !== 'null') {
-        // aiohttp's resp.json() raised on a non-JSON body → the caller's except → _fail
-        this._fail(`invalid JSON from ${url}: ${JSON.stringify(String(resp.text ?? '').slice(0, 200))}`);
-        return null;
+        // aiohttp's `resp.json()` raises json.JSONDecodeError on a non-JSON body; the bot's
+        // callers handle it in their own `except Exception` branches (get_candles: _fail +
+        // retry, check_symbol: False, get_all_usdt_pairs: [], get_24h_change: None) — so raise.
+        const err = new SyntaxError(`Expecting value: ${JSON.stringify(String(resp.text ?? '').slice(0, 200))}`);
+        err.name = 'JSONDecodeError';
+        throw err;
       }
       return { data: resp.json === undefined ? null : resp.json };
     });

@@ -91,7 +91,10 @@ describe('getCandles', () => {
     // an unparsable 200 body (aiohttp resp.json() raising) and a literal JSON null
     const { rest: r2 } = mk(() => ({ status: 200, json: null, text: '<html>maintenance</html>' }));
     expect(await r2.getCandles('BTC-USDT-SWAP', '1h', 300, 1)).toBe(null);
-    expect(r2.lastError).toContain('invalid JSON');
+    expect(r2.lastError).toMatch(/^BTC-USDT-SWAP JSONDecodeError: Expecting value: .* \(попытка 1\)$/);
+    expect(await r2.checkSymbol('BTC-USDT-SWAP')).toBe(false);
+    expect(await r2.getAllUsdtPairs(0)).toEqual([]);           // the bot's gather raises → log.error → []
+    expect(await r2.get24hChange('BTC-USDT-SWAP')).toBe(null);
     const { rest: r3 } = mk(() => ({ status: 200, json: null, text: 'null' }));
     expect(await r3.getCandles('BTC-USDT-SWAP', '1h', 300, 1)).toBe(null);
     expect(r3.lastError).toContain('non-dict JSON');

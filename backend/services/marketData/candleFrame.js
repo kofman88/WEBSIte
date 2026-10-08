@@ -67,6 +67,34 @@ function tfMsBingx(tfBingx) { return TF_MS[tfBingx] ?? DEFAULT_TF_MS; }
 
 class PyValueError extends Error {}
 
+// Python's `int()` / `float()` string grammar: optional sign, decimal digits of ANY Unicode
+// script (category Nd — fullwidth, Arabic-Indic, …), single underscores only BETWEEN digits
+// ("1_0" ok, "1__0" / "_10" / "10_" raise), surrounding whitespace ignored; floats add the
+// fraction / exponent (underscores allowed inside each digit run) and the inf / nan words.
+const ND_RE = /\p{Nd}/u;
+const INT_RE = /^[+-]?\d(?:_?\d)*$/;
+const FLOAT_RE = /^[+-]?(?:\d(?:_?\d)*(?:\.(?:\d(?:_?\d)*)?)?|\.\d(?:_?\d)*)(?:e[+-]?\d(?:_?\d)*)?$/;
+
+/**
+ * Every Unicode decimal digit → its ASCII digit. Nd characters are encoded in contiguous
+ * runs 0…9 (Unicode stability policy), so the offset inside the run modulo 10 is the value.
+ */
+function asciiDigits(s) {
+  let out = '';
+  for (const ch of s) {
+    if (ch >= '0' && ch <= '9') { out += ch; continue; }
+    if (ND_RE.test(ch)) {
+      const cp = ch.codePointAt(0);
+      let start = cp;
+      while (start > 0 && ND_RE.test(String.fromCodePoint(start - 1))) start -= 1;
+      out += String((cp - start) % 10);
+    } else {
+      out += ch;
+    }
+  }
+  return out;
+}
+
 /** Python `int(x)`: ints, floats (truncated), integer strings; anything else throws. */
 function pyInt(x) {
   if (typeof x === 'number') {
@@ -76,11 +104,11 @@ function pyInt(x) {
   if (typeof x === 'boolean') return x ? 1 : 0;
   if (typeof x === 'bigint') return Number(x);
   if (typeof x === 'string') {
-    const s = x.trim().replace(/_/g, '');
-    if (!/^[+-]?\d+$/.test(s)) throw new PyValueError(`invalid literal for int(): ${x}`);
-    return Number(s);
+    const s = asciiDigits(x.trim());
+    if (!INT_RE.test(s)) throw new PyValueError(`invalid literal for int() with base 10: ${JSON.stringify(x)}`);
+    return Number(s.replace(/_/g, ''));
   }
-  throw new PyValueError(`int() argument must be a number, not ${typeof x}`);
+  throw new PyValueError(`int() argument must be a number, not ${x === null ? 'NoneType' : typeof x}`);
 }
 
 /** Python `float(x)`: numbers, numeric strings incl. inf/nan; '' / None / objects throw. */
@@ -89,13 +117,13 @@ function pyFloat(x) {
   if (typeof x === 'boolean') return x ? 1 : 0;
   if (typeof x === 'bigint') return Number(x);
   if (typeof x === 'string') {
-    const s = x.trim().replace(/_/g, '').toLowerCase();
+    const s = asciiDigits(x.trim()).toLowerCase();
     if (s === '') throw new PyValueError('could not convert string to float: \'\'');
     if (s === 'inf' || s === '+inf' || s === 'infinity' || s === '+infinity') return Infinity;
     if (s === '-inf' || s === '-infinity') return -Infinity;
     if (s === 'nan' || s === '+nan' || s === '-nan') return NaN;
-    if (!/^[+-]?(\d+\.?\d*|\.\d+)(e[+-]?\d+)?$/.test(s)) throw new PyValueError(`could not convert string to float: ${x}`);
-    return Number(s);
+    if (!FLOAT_RE.test(s)) throw new PyValueError(`could not convert string to float: ${JSON.stringify(x)}`);
+    return Number(s.replace(/_/g, ''));
   }
   throw new PyValueError(`float() argument must be a string or a real number, not ${x === null ? 'NoneType' : typeof x}`);
 }
@@ -229,6 +257,6 @@ function frameTrim(frame, n = 300) {
 module.exports = {
   TF_TO_BINGX, TF_MS, DEFAULT_TF_MS, MAX_KLINES, TF_NORM, TTL_MAP, CACHE_TTL,
   TF_NORM_TO_BINGX, BINGX_TO_TF_NORM, tfNorm, tfMsBingx,
-  pyInt, pyFloat, pyFalsy, PyValueError, parseRow, rowsToFrame,
+  pyInt, pyFloat, pyFalsy, asciiDigits, PyValueError, parseRow, rowsToFrame,
   frameIndexOf, frameSetRow, frameAppendRow, frameTrim,
 };
