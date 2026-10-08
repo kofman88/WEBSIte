@@ -1,6 +1,6 @@
 'use strict';
 /**
- * glibcPow.js — glibc (x86-64, Python 3.12 venv of the golden fixtures) results of
+ * glibcPow.js — glibc (x86-64, Python 3.11 venv of the golden fixtures) results of
  * `n ** -0.2` for n = 1..2048 as little-endian IEEE-754 hex. The KDE bandwidth factor
  * of LEVELS is `1.06 * std_bucket/1000 * n ** -0.2` (indicator._kde_bw_cached_impl);
  * V8's Math.pow differs from glibc's pow in the last bit for ~13% of these n, so the

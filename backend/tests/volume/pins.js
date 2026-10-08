@@ -3,7 +3,7 @@
  * pins.js — the Python-verified expectations of the VOLUME unit tests (pins.json).
  *
  * pins.json was produced by running the bot's own volume_strategy.py / volume_scanner.py
- * (pinned venv: python 3.12.3, pandas 2.3.3, numpy 1.26.4) on the frames of frames.js
+ * (pinned venv: python 3.11.17 like production, pandas 2.3.3, numpy 1.26.4) on the frames of frames.js
  * with scratchpad/port/verify/volume_verify.py and volume_verify2.py; every float was
  * repr()-ed and parsed back, so each number is the identical double. "inf"/"-inf" are
  * kept as strings (JSON has no infinity) — see pinNum().

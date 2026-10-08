@@ -1,5 +1,5 @@
 {
- "_provenance": "Produced by the bot code (volume_strategy.py / volume_scanner.py, python 3.12.3, pandas 2.3.3, numpy 1.26.4) on the frames of frames.js — scratchpad/port/verify/volume_verify.py + volume_verify2.py; floats were repr()-ed and parsed back, so every number is the identical double.",
+ "_provenance": "Produced by the bot code (volume_strategy.py / volume_scanner.py, python 3.11.17, pandas 2.3.3, numpy 1.26.4) on the frames of frames.js — scratchpad/port/verify/volume_verify.py + volume_verify2.py; floats were repr()-ed and parsed back, so every number is the identical double.",
  "scenarios": {
   "cross_long": {
    "n": 90,

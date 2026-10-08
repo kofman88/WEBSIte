@@ -1,8 +1,9 @@
 /**
  * series.js — pandas 2.3.3 / numpy 1.26.4 semantics pinned with reference vectors.
  *
- * Every expected vector below was produced by the exact Python/pandas/numpy versions
- * the golden fixtures were made with (python 3.12.3, pandas 2.3.3, numpy 1.26.4); the
+ * Every expected vector below was produced by the exact pandas/numpy versions the golden
+ * fixtures are made with (pandas 2.3.3, numpy 1.26.4; recorded under python 3.12.3, spot-
+ * checked under the bot's python 3.11.17 — the pandas/numpy kernels do not depend on it); the
  * one-liner that produced it is quoted above each block. Values are repr() (shortest
  * round-trip) so the JS literals are the identical doubles → comparisons are EXACT
  * (Object.is), not approximate. NaN is written as null in the Python output.
@@ -194,8 +195,8 @@ describe('quantile (numpy linear / pandas Series.quantile)', () => {
 
 describe('numpy reductions (pairwise summation) and pandas means', () => {
   // np.sum([0.1]*10) == 1.0 ; functools.reduce(operator.add, [0.1]*10) == 0.9999999999999999
-  // (python 3.12's builtin sum() is Neumaier-compensated for exact floats and gives 1.0; the
-  //  bot only feeds numpy scalars to sum(), which take the plain sequential path = seqSum)
+  // (the bot's CPython 3.11 builtin sum([0.1]*10) is sequential too = seqSum = pySum; 3.12's
+  //  Neumaier-compensated sum would give 1.0)
   it('npSum uses pairwise summation (differs from a sequential sum)', () => {
     const v = new Array(10).fill(0.1);
     expect(S.npSum(v)).toBe(1.0);
