@@ -20,7 +20,9 @@ golden/
     └── volume.json           volume_strategy.analyze_volume()           per bar, 3 variants
 ```
 
-Versions used: python 3.12.3, pandas 2.3.3, numpy 1.26.4, scipy 1.17.1. Elapsed for the full run: 632.0 s on 4 cores.
+Versions used: python 3.11.17 (the production interpreter, see "Re-running"), pandas 2.3.3, numpy 1.26.4,
+scipy 1.17.1. Elapsed for the full run: 2880.7 s with `--workers 2` on 4 shared cores. The candle files are
+seeded and came out byte-identical to the earlier 3.12.3 run; every expected value too (only `python` changed).
 
 ## Re-running
 
@@ -29,6 +31,11 @@ cd /home/user/MAIN_BOT/CHM_BREAKER_V4            # the script chdir()s there its
 BOT_TOKEN_CHM=test:token ADMIN_IDS=123 \         # config.py reads these two env vars at import time
   /path/to/venv/bin/python /path/to/golden/make_golden.py --workers 4 --step 1 --check
 ```
+
+The venv must be CPython 3.11 with the bot's pinned requirements — the interpreter production runs
+(deploy.sh virtualenv `…/3.11`, Dockerfile `python:3.11-slim`). 3.12 is not interchangeable: its builtin
+`sum()` over floats is Neumaier-compensated (3.11 adds left to right) and it ships unicodedata 15.0.0
+(3.11: 14.0.0). `golden.test.js` asserts `python` 3.11.x in `summary.json` and every expected file.
 
 * `GOLDEN_BOT_DIR` (default `/home/user/MAIN_BOT/CHM_BREAKER_V4`) and `GOLDEN_OUT_DIR` (default: the
   script's directory) override the paths.

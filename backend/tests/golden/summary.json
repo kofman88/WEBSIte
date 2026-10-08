@@ -535,7 +535,7 @@
   "Config.LEVELS_REGIME_GATE": "enforce"
  },
  "versions": {
-  "python": "3.12.3",
+  "python": "3.11.17",
   "pandas": "2.3.3",
   "numpy": "1.26.4",
   "scipy": "1.17.1"
@@ -547,12 +547,12 @@
   "smc_analysis": "expected/smc_analysis.json"
  },
  "sha256": {
-  "expected/levels.json": "947bcb050c2b4ee41c0e078725340f55e1c584b40ff39e3c3fcbdfaf12a2a97e",
-  "expected/smc.json": "3a60844d8c73ed752ab68911b9eb5734f0ac0b0a2e166b8788d94afd7da6a12c",
-  "expected/volume.json": "bda02a3bc9f36c474cfda17fd4ecb20fb680b83a2b6a7b1c382db92c8b90a9e8",
-  "expected/smc_analysis.json": "bb8b975e54d420799f5bc9d762068c65c846ecad23a790b8b124df21abde39df"
+  "expected/levels.json": "b39e8e22aa5404c113bdcd873d8ccb3fdd96b1357731027975b8658bbe22986b",
+  "expected/smc.json": "ea25a29cf8d84dc45bca3ddebbb2548e17904040988ff40066c2e2cd736d5222",
+  "expected/volume.json": "039a0e1d699269428e32a6222458a7476ed41e88ac8c9b3023c2611021b46295",
+  "expected/smc_analysis.json": "972457e53d5a8d4861003339e822744f170280632308c96cbd7e36a79ab25f58"
  },
- "elapsed_s": 632.0,
+ "elapsed_s": 2880.7,
  "notes": [
   "LEVELS: analyze() is called on a FRESH CHMIndicator per bar → no zone cache (TTL < bar duration in production anyway) and no COOLDOWN_BARS state (production marks cooldown only after Telegram delivery).",
   "LEVELS: momentum_detector relaxed mode OFF, market_regime cache empty (regime SL multiplier 1.0), SL_V2 flags off, LEVELS_REGIME_GATE=enforce (config default) → levels_filters/market_regime.detect_regime(df, tf='1h') runs inside _do_analyze and rejects trending markets (reject reason 'levels_filter').",

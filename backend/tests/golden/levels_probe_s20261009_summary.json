@@ -3,14 +3,14 @@
  "probe": "levels",
  "cases": 308,
  "bars": 140740,
- "signals": 1286,
- "null_bars": 139454,
+ "signals": 1274,
+ "null_bars": 139466,
  "errors": 0,
  "reject_reasons": {
-  "levels_filter": 280,
+  "levels_filter": 279,
   "none": 558,
-  "quality_hwr": 81,
-  "rr": 2394,
+  "quality_hwr": 80,
+  "rr": 2408,
   "rsi": 293,
   "signal": 63885,
   "sl_risk": 307,
@@ -23,11 +23,11 @@
    "bars": 1000
   },
   "cls_meme2": {
-   "signals": 13,
+   "signals": 12,
    "bars": 1000
   },
   "cls_major": {
-   "signals": 19,
+   "signals": 17,
    "bars": 1000
   },
   "cls_alt": {
@@ -115,7 +115,7 @@
    "bars": 640
   },
   "corr_btc_only": {
-   "signals": 16,
+   "signals": 14,
    "bars": 640
   },
   "corr_short": {
@@ -243,7 +243,7 @@
    "bars": 720
   },
   "cfg_vol_len": {
-   "signals": 4,
+   "signals": 2,
    "bars": 600
   },
   "cfg_loose_vol": {
@@ -327,7 +327,7 @@
    "bars": 600
   },
   "deg_drop": {
-   "signals": 9,
+   "signals": 6,
    "bars": 640
   },
   "deg_nan_flat": {
@@ -355,7 +355,7 @@
    "bars": 480
   },
   "deg_nan_vol_novolfilter": {
-   "signals": 12,
+   "signals": 10,
    "bars": 720
   },
   "deg_nan_vol_relaxed": {
@@ -1252,7 +1252,7 @@
   }
  },
  "sha256": {
-  "levels_probe_s20261009.json": "b1923e2893dfb0f674180ed565e476d70cea4ac6519bf576ad04ed954a3f2e08"
+  "levels_probe_s20261009.json": "94dee7c4c7ad0eabb1fcef83f3e8e885d182f026dbf513713e7bdb18083662cd"
  },
  "seed": 20261009,
  "n_random": 198

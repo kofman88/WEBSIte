@@ -22,9 +22,14 @@ import compare from '../golden/compare.js';
 import { Frame } from '../../strategies/common/frame.js';
 import F from '../../strategies/common/pyfmt.js';
 import L from '../../strategies/levels/index.js';
+import prodPython from '../common/prodPython.js';
 
 const FIX = path.join(path.dirname(new URL(import.meta.url).pathname), 'fixtures', 'part2_expected.json');
 const EXP = JSON.parse(fs.readFileSync(FIX, 'utf8'));
+
+it('fixtures/part2_expected.json comes from the production interpreter (CPython 3.11)', () => {
+  expect(EXP.python).toMatch(prodPython.PROD_PYTHON);
+});
 const { loadFrames, loadFrame, barInputs, loadExpected } = load;
 const { numbersClose } = compare;
 const { r10 } = F;

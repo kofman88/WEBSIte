@@ -15,10 +15,15 @@ import path from 'path';
 import { Frame } from '../../strategies/common/frame.js';
 import S from '../../strategies/common/series.js';
 import P from '../../strategies/levels/patterns.js';
+import prodPython from '../common/prodPython.js';
 
 const FIX = path.join(path.dirname(new URL(import.meta.url).pathname), 'fixtures');
 const FX = JSON.parse(fs.readFileSync(path.join(FIX, 'frames.json'), 'utf8'));
 const EXP = JSON.parse(fs.readFileSync(path.join(FIX, 'expected.json'), 'utf8'));
+
+it('fixtures/expected.json comes from the production interpreter (CPython 3.11)', () => {
+  expect(EXP.python).toMatch(prodPython.PROD_PYTHON);
+});
 const F = (name) => Frame.fromBars(FX.frames[name]);
 const { PATTERN, INST, APPROACH } = P;
 

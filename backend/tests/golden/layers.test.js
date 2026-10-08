@@ -18,6 +18,7 @@ import load from './load.js';
 import S from '../../strategies/common/series.js';
 import K from '../../strategies/common/kde.js';
 import F from '../../strategies/common/pyfmt.js';
+import prodPython from '../common/prodPython.js';
 
 const { loadFrames, barInputs, GOLDEN_DIR } = load;
 const { r10 } = F;
@@ -88,6 +89,13 @@ describe('M1 primitives vs bot layer dumps', () => {
   const sq = loadDump('squeeze');
   const vc = loadDump('volume_ctx');
   const zn = loadDump('zones');
+
+  it('the three dumps ship and come from the production interpreter (CPython 3.11)', () => {
+    for (const [name, d] of [['squeeze', sq], ['volume_ctx', vc], ['zones', zn]]) {
+      expect(d, name).not.toBeNull();
+      expect(d.python, name).toMatch(prodPython.PROD_PYTHON);
+    }
+  });
 
   (sq ? it : it.skip)('squeeze detector internals (bbw, quantiles, SMA ATR, score) are r10-identical', () => {
     const failures = [];

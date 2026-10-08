@@ -87,23 +87,14 @@ function fractalPivots(highs, lows, strength) {
 }
 
 /**
- * indicator._volume_profile(df, n_bins=50) with numpy's NaN propagation. The bot sums
- * `mask2d * (volume / spans)[:, None]` over the bars: a False cell contributes 0·share, which is
- * NaN when the bar's volume is NaN or ±inf. So ONE non-finite volume anywhere in the frame turns
- * every bin NaN and HVN/LVN come out empty — even when that bar spans no bin centre (spans = 0
- * → clipped to 1, all cells False), where common/kde.volumeProfile (sum over the True cells
- * only) would still report nodes. Finite volumes are passed through unchanged.
+ * indicator._volume_profile(df, n_bins=50) with numpy's NaN propagation — common/kde.volumeProfile,
+ * which is numpy-exact itself: the bot sums `mask2d * (volume / spans)[:, None]` over the bars, a
+ * False cell contributes 0·share = NaN for a NaN / ±inf volume, so ONE non-finite volume anywhere
+ * in the frame (even on a bar that spans no bin centre) leaves HVN/LVN empty.
  * Python: lo=[100+i*.5 …]; lo[7],hi[7]=100.01,100.02; vol[7]=nan → _volume_profile → hvn=[], lvn=[].
  */
 function volumeProfileNp(low, high, volume, nBins = 50) {
-  const vp = K.volumeProfile(low, high, volume, nBins);
-  if (!vp.binEdges.length) return vp;            // the len < 10 / high ≤ low guards: already empty
-  for (let i = 0; i < volume.length; i++) {
-    if (!Number.isFinite(volume[i])) {
-      return { ...vp, hvn: [], lvn: [], volumes: new Float64Array(nBins).fill(NaN) };
-    }
-  }
-  return vp;
+  return K.volumeProfile(low, high, volume, nBins);
 }
 
 /** Attach the `lvn_checker` closure as a non-enumerable property (keeps zones JSON-comparable). */
@@ -168,8 +159,8 @@ function getZones(df, strength, atrNow, zoneBuffer) {
   };
 
   const makeZone = (group) => {
-    // Python: sum(x[0] for x in group) / len(group) — CPython 3.12 builtin sum() is Neumaier
-    // compensated (series.pySum); a plain sequential sum is 1 ulp off on some groups
+    // Python: sum(x[0] for x in group) / len(group) — builtin sum() of the bot's CPython 3.11
+    // (series.pySum: sequential; 3.12's compensated sum would be 1 ulp off on some groups)
     const prices = new Float64Array(group.length);
     let minAge = Infinity;
     for (let i = 0; i < group.length; i++) { prices[i] = group[i][0]; if (group[i][1] < minAge) minAge = group[i][1]; }

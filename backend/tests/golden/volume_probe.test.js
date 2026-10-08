@@ -15,8 +15,10 @@ import load from './load.js';
 import compare from './compare.js';
 import V from '../../strategies/volume/index.js';
 import frameMod from '../../strategies/common/frame.js';
+import prodPython from '../common/prodPython.js';
 
 const { Frame, TF_MS } = frameMod;
+const { PROD_PYTHON } = prodPython;
 const { compareSignal, formatDiffs, ROUNDED_FIELDS_BY_STRATEGY } = compare;
 const HERE = path.dirname(new URL(import.meta.url).pathname);
 const HTF_OF = { '15m': '1h', '1h': '4h', '4h': '1d' };
@@ -92,17 +94,13 @@ function sweepCase(c, cfg, symbol, fx, htfWindow) {
   return { failures, bars: indices.length, signals };
 }
 
-const PROBE_PRESENT = fs.existsSync(path.join(HERE, 'expected', 'volume_probe.json.gz')) && fs.existsSync(path.join(HERE, 'probe_summary.json'));
-
 describe('golden volume probe (make_volume_probe.py)', () => {
-  if (!PROBE_PRESENT) {
-    it.todo('expected/volume_probe.json.gz not generated yet (run make_volume_probe.py with the pinned venv) — probe sweep skipped');
-    return;
-  }
+  // the probe ships with the repo (expected/volume_probe.json.gz + probe_summary.json): a missing file fails loudly
   let probe, summary;
   beforeAll(() => { ({ probe, summary } = loadProbe()); });
 
   it('probe file is intact and the summary counts match', () => {
+    expect(probe.python).toMatch(PROD_PYTHON);
     expect(Object.keys(probe.cases).length).toBe(summary.cases);
     let signals = 0, bars = 0;
     for (const c of Object.values(probe.cases)) for (const fx of Object.values(c.fixtures)) { signals += fx.n_signals; bars += fx.n_swept; }

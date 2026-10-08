@@ -179,14 +179,18 @@ function kdeLevels(pivotPrices, priceRange, nPoints = 500, opts = {}) {
 /**
  * indicator._volume_profile(df, n_bins=50): bar volume spread equally over the
  * bins whose centre lies in [low, high]; HVN > 1.5·avg, LVN < 0.5·avg.
- * Column sums are sequential over bars (numpy axis-0 reduction), avg = np.mean.
+ * numpy-exact: vols = (mask2d * share[:, None]).sum(axis=0) — a False cell adds
+ * 0·share (NaN for a NaN / ±inf share, so one non-finite volume leaves no HVN/LVN),
+ * column sums are sequential over bars from +0.0 (axis-0 reduction), avg = np.mean;
+ * lo/hi skip NaN and an all-NaN column (NaN) passes the `hi <= lo` guard like Python.
+ * Pinned by tests/common/fixtures/volume_profile_expected.json (gen_volume_profile.py).
  */
 function volumeProfile(low, high, volume, nBins = 50) {
   const result = { hvn: [], lvn: [], binEdges: new Float64Array(0), volumes: new Float64Array(0) };
   const n = low.length;
   if (n < 10) return result;
   const lo = seriesMin(low), hi = seriesMax(high);
-  if (!(hi > lo)) return result;
+  if (hi <= lo) return result;
   const bins = linspace(lo, hi, nBins + 1);
   const mid = new Float64Array(nBins);
   for (let b = 0; b < nBins; b++) mid[b] = (bins[b] + bins[b + 1]) / 2;
@@ -196,8 +200,9 @@ function volumeProfile(low, high, volume, nBins = 50) {
     let spans = 0;
     for (let b = 0; b < nBins; b++) if (mid[b] >= l && mid[b] <= h) spans++;
     const share = volume[i] / Math.max(spans, 1);
+    const off = 0 * share;                       // False cell: 0.0 * share (NaN when share is not finite)
     for (let b = 0; b < nBins; b++) {
-      vols[b] += (mid[b] >= l && mid[b] <= h) ? share : 0.0;
+      vols[b] += (mid[b] >= l && mid[b] <= h) ? share : off;
     }
   }
   const avg = npMean(vols);

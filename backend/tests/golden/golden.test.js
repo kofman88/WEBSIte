@@ -18,6 +18,7 @@ import { describe, it, expect, beforeAll } from 'vitest';
 import load from './load.js';
 import compare from './compare.js';
 import registry from './engines.js';
+import prodPython from '../common/prodPython.js';
 
 const { SWEEP, STRATEGIES, VARIANTS, loadExpected, loadFrames, listSymbols, sweepIndices, barInputs, tsString, verifyAll } = load;
 const { compareSignal, compareValue, compareDigest, formatDiffs, ROUNDED_FIELDS_BY_STRATEGY } = compare;
@@ -125,6 +126,11 @@ describe('golden fixtures', () => {
     const rep = verifyAll();
     expect(rep.candles).toBe(42 * 4);
     expect(Object.keys(rep.expected).sort()).toEqual(['levels', 'smc', 'smc_analysis', 'volume']);
+  });
+
+  it('summary.json and every expected file come from the production interpreter (CPython 3.11)', () => {
+    expect(load.loadSummary().versions.python).toMatch(prodPython.PROD_PYTHON);
+    for (const name of ['levels', 'smc', 'smc_analysis', 'volume']) expect(load.loadExpected(name).python, name).toMatch(prodPython.PROD_PYTHON);
   });
 
   it('frames follow the generator conventions (aligned, closed-bar prefix rule)', () => {

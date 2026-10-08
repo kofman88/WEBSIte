@@ -1,7 +1,7 @@
 /**
  * pyround.js — CPython round() semantics (round-half-even on the exact binary value).
  *
- * Reference values from python 3.12.3:
+ * Reference values from python 3.11.17 (the bot's CPython 3.11; unchanged from 3.12.3):
  *   python3 -c "print([round(x, 2) for x in (2.675, 0.125, 0.375, 1.005, -0.125, -2.675)])"
  *     → [2.67, 0.12, 0.38, 1.0, -0.12, -2.67]
  *   python3 -c "print([round(x) for x in (2.5, 3.5, -2.5, -3.5, 0.5, 1.5)])"

@@ -24,6 +24,7 @@ import compare from '../golden/compare.js';
 import frameMod from '../../strategies/common/frame.js';
 import pyfmt from '../../strategies/common/pyfmt.js';
 import Lmain from '../../strategies/levels/index.js';
+import prodPython from '../common/prodPython.js';
 
 // LEVELS_PROBE_ENGINE=<abs path of a levels/index.js> replays the probe against another engine
 // build (e.g. a snapshot of an older commit, to count mismatches before a fix)
@@ -254,6 +255,7 @@ export function defineProbeSuite(stem, { title = stem, minCases = 1, extra = nul
     beforeAll(() => { ({ probe, summary } = loadProbe(stem)); });
 
     it('probe file is intact and the summary counts match', () => {
+      expect(probe.python).toMatch(prodPython.PROD_PYTHON);
       expect(Object.keys(probe.cases).length).toBe(summary.cases);
       let signals = 0, bars = 0, nulls = 0, errors = 0;
       for (const c of Object.values(probe.cases)) {

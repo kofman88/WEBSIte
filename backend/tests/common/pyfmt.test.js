@@ -1,7 +1,7 @@
 /**
  * pyfmt.js — CPython float formatting (correctly rounded, half-even on exact ties).
  *
- * Reference strings from python 3.12.3:
+ * Reference strings from python 3.11.17 (the bot's CPython 3.11; unchanged from 3.12.3):
  *   python3 -c "print([f'{x:.2f}' for x in (0.125, 0.375, 2.675, 1.005, -0.001, -0.0, 2.345, 1e22)])"
  *     → ['0.12', '0.38', '2.67', '1.00', '-0.00', '-0.00', '2.35', '10000000000000000000000.00']
  *   python3 -c "print(f'{2.5:.0f}', f'{3.5:.0f}', f'{0.5:.0f}', f'{1.5:.0f}', f'{1234567.891:,.1f}', f'{12345.678:,.0f}', f'{-1234.5:,.2f}')"

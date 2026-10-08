@@ -2,14 +2,14 @@
  "probe": "levels",
  "cases": 154,
  "bars": 89920,
- "signals": 1096,
- "null_bars": 88824,
+ "signals": 1095,
+ "null_bars": 88825,
  "errors": 0,
  "reject_reasons": {
   "levels_filter": 226,
   "none": 330,
   "quality_hwr": 54,
-  "rr": 2293,
+  "rr": 2294,
   "rsi": 105,
   "signal": 46824,
   "sl_risk": 372,
@@ -66,7 +66,7 @@
    "bars": 1200
   },
   "tf30m_loose_off": {
-   "signals": 19,
+   "signals": 18,
    "bars": 1200
   },
   "tf30m_htf": {
@@ -226,7 +226,7 @@
    "bars": 720
   },
   "cfg_pivot15": {
-   "signals": 6,
+   "signals": 5,
    "bars": 720
   },
   "cfg_ema500_15m": {
@@ -486,7 +486,7 @@
    "bars": 320
   },
   "rand07": {
-   "signals": 1,
+   "signals": 2,
    "bars": 360
   },
   "rand08": {
@@ -635,6 +635,6 @@
   }
  },
  "sha256": {
-  "levels_probe.json": "4eab97eb00938d7c5c64cab2a0a03852d2d2b79347e65cb9d2575818e1561ca4"
+  "levels_probe.json": "eb8e3d49b7d9661abd546422f3536a0241249477457e84900becb12ad1fe2ed7"
  }
 }
