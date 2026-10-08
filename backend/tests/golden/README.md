@@ -19,7 +19,10 @@ tests/golden/
 ├── engines.js             pluggable engine registry (null until M2–M6 register the engines)
 ├── runners/               per-engine adapters (volume.js = M2: fromParams → analyzeVolume → scanner post-steps)
 ├── golden.test.js         the sweep
-└── layers.test.js         M1 primitives vs the layer dumps (squeeze / VOLUME context / LEVELS zone layers)
+├── layers.test.js         M1 primitives vs the layer dumps (squeeze / VOLUME context / LEVELS zone layers)
+├── make_volume_probe.py   VOLUME differential probe generator (configs / windows / random genome configs / mutations)
+├── probe_summary.json     counts + sha256 of expected/volume_probe.json.gz (asserted at load)
+└── volume_probe.test.js   the probe sweep (same rules as golden.test.js)
 ```
 
 `layers.test.js` recomputes every value of `dumps/*.json` (3 fixtures × 200 bars) from the
@@ -43,6 +46,20 @@ Registered: **volume** (M2, `strategies/volume`, 162/151/197 signals bit-for-bit
 `GOLDEN_STRICT=1`). The pyRound field map of `compare.js` is per strategy
 (`ROUNDED_FIELDS_BY_STRATEGY`): VOLUME rounds `rr`/`rsi`/`vol_ratio` only — its `risk_pct` is an
 unrounded property and goes through the 1e-9 tolerance rule.
+
+## VOLUME differential probe (`volume_probe.test.js`)
+
+`expected/volume.json` sweeps three variants of the 1h growing prefix, so some engine paths are
+rare or absent there (SMA-mode cross/turn/golden, HTF state ±1, squeeze score 2, quality 1–2,
+counter-trend, the climax/extension/RSI gates as the deciding filter, other base timeframes,
+live-like trailing frames). `make_volume_probe.py` runs the bot's `analyze_volume` on exactly those
+inputs — 13 hand-picked configs incl. 15m/4h base frames, trailing windows of 300 bars and of
+exactly `min_bars` rows, 24 seeded random configs from `genome.GENE_SPACE["VOLUME"]`, and 15
+deterministic candle-mutation cases (zero-volume bars, flat bars, 40× volume spikes, ±4 % price
+steps) — and `volume_probe.test.js` replays them with the JS engine under the compare.js rules
+(`GOLDEN_PROBE_CASES=rand03,gap__` filters cases). The file lives next to the main expected set
+but is NOT part of `summary.json`: its sha256 is in `probe_summary.json`. Regenerate it like
+`make_golden.py` (bot repo cwd, pinned venv, `GOLDEN_OUT_DIR` = this directory).
 
 ## Running a subset
 
