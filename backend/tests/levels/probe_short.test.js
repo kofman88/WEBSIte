@@ -19,6 +19,9 @@ import compare from '../golden/compare.js';
 import { Frame } from '../../strategies/common/frame.js';
 import L from '../../strategies/levels/index.js';
 import { GOLDEN } from './probeReplay.js';
+import prodPython from '../common/prodPython.js';
+
+const { PROD_PYTHON } = prodPython;
 
 const STEM = 'levels_probe_short';
 const FILE = path.join(GOLDEN, `${STEM}.json.gz`);
@@ -41,6 +44,7 @@ describe('LEVELS _do_analyze on 1..60-bar frames with precomputed zones (make_le
 
   it('fuzz file is intact and covers signals, rejects and exceptions', () => {
     expect(load.sha256(raw)).toBe(summary.sha256[`${STEM}.json`]);
+    expect(doc.python).toMatch(PROD_PYTHON);
     expect(doc.cases.length).toBe(summary.cases);
     expect(doc.cases.some((c) => c.error === 'IndexError')).toBe(true);
     expect(doc.cases.filter((c) => c.signal).length).toBeGreaterThan(100);

@@ -15,8 +15,10 @@ import load from './load.js';
 import compare from './compare.js';
 import V from '../../strategies/volume/index.js';
 import frameMod from '../../strategies/common/frame.js';
+import prodPython from '../common/prodPython.js';
 
 const { Frame, TF_MS } = frameMod;
+const { PROD_PYTHON } = prodPython;
 const { compareSignal, formatDiffs, ROUNDED_FIELDS_BY_STRATEGY } = compare;
 const HERE = path.dirname(new URL(import.meta.url).pathname);
 const HTF_OF = { '15m': '1h', '1h': '4h', '4h': '1d' };
@@ -98,6 +100,7 @@ describe('golden volume probe (make_volume_probe.py)', () => {
   beforeAll(() => { ({ probe, summary } = loadProbe()); });
 
   it('probe file is intact and the summary counts match', () => {
+    expect(probe.python).toMatch(PROD_PYTHON);
     expect(Object.keys(probe.cases).length).toBe(summary.cases);
     let signals = 0, bars = 0;
     for (const c of Object.values(probe.cases)) for (const fx of Object.values(c.fixtures)) { signals += fx.n_signals; bars += fx.n_swept; }

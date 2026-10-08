@@ -19,6 +19,9 @@ import { Frame } from '../../strategies/common/frame.js';
 import S from '../../strategies/common/series.js';
 import P from '../../strategies/levels/patterns.js';
 import { GOLDEN } from './probeReplay.js';
+import prodPython from '../common/prodPython.js';
+
+const { PROD_PYTHON } = prodPython;
 
 const STEM = 'levels_probe_patterns';
 const FILE = path.join(GOLDEN, `${STEM}.json.gz`);
@@ -53,6 +56,7 @@ describe('LEVELS pattern layer: lattice fuzz vs the bot (make_levels_probe.py --
   const frames = doc.frames.map((r) => ({ ...r, df: frameOf(r.bars) }));
 
   it('fuzz file is intact', () => {
+    expect(doc.python).toMatch(PROD_PYTHON);
     expect(frames.length).toBe(summary.frames);
     expect(frames.length).toBeGreaterThanOrEqual(4000);
   });
