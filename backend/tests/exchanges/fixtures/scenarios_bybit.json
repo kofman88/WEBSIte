@@ -284,7 +284,11 @@
     },
     "delisted": [],
     "fail_count": {},
-    "bybit_offset": 250
+    "bybit_offset": 250,
+    "binance_base": "https://fapi.binance.com",
+    "binance_offset": 0,
+    "bingx_offset": 0,
+    "okx_offset": 0
    }
   }
  },
@@ -523,7 +527,11 @@
     },
     "delisted": [],
     "fail_count": {},
-    "bybit_offset": 250
+    "bybit_offset": 250,
+    "binance_base": "https://fapi.binance.com",
+    "binance_offset": 0,
+    "bingx_offset": 0,
+    "okx_offset": 0
    }
   }
  },
@@ -787,7 +795,11 @@
     },
     "delisted": [],
     "fail_count": {},
-    "bybit_offset": 250
+    "bybit_offset": 250,
+    "binance_base": "https://fapi.binance.com",
+    "binance_offset": 0,
+    "bingx_offset": 0,
+    "okx_offset": 0
    }
   }
  },
@@ -1076,7 +1088,11 @@
     },
     "delisted": [],
     "fail_count": {},
-    "bybit_offset": 250
+    "bybit_offset": 250,
+    "binance_base": "https://fapi.binance.com",
+    "binance_offset": 0,
+    "bingx_offset": 0,
+    "okx_offset": 0
    }
   }
  },
@@ -1214,7 +1230,11 @@
     },
     "delisted": [],
     "fail_count": {},
-    "bybit_offset": 250
+    "bybit_offset": 250,
+    "binance_base": "https://fapi.binance.com",
+    "binance_offset": 0,
+    "bingx_offset": 0,
+    "okx_offset": 0
    }
   }
  },
@@ -1456,7 +1476,11 @@
     },
     "delisted": [],
     "fail_count": {},
-    "bybit_offset": 250
+    "bybit_offset": 250,
+    "binance_base": "https://fapi.binance.com",
+    "binance_offset": 0,
+    "bingx_offset": 0,
+    "okx_offset": 0
    }
   }
  },
@@ -1712,7 +1736,11 @@
     },
     "delisted": [],
     "fail_count": {},
-    "bybit_offset": 250
+    "bybit_offset": 250,
+    "binance_base": "https://fapi.binance.com",
+    "binance_offset": 0,
+    "bingx_offset": 0,
+    "okx_offset": 0
    }
   }
  },
@@ -1821,7 +1849,11 @@
     "account_type": {},
     "delisted": [],
     "fail_count": {},
-    "bybit_offset": 250
+    "bybit_offset": 250,
+    "binance_base": "https://fapi.binance.com",
+    "binance_offset": 0,
+    "bingx_offset": 0,
+    "okx_offset": 0
    }
   }
  },
@@ -2008,7 +2040,11 @@
     },
     "delisted": [],
     "fail_count": {},
-    "bybit_offset": 250
+    "bybit_offset": 250,
+    "binance_base": "https://fapi.binance.com",
+    "binance_offset": 0,
+    "bingx_offset": 0,
+    "okx_offset": 0
    }
   }
  },
@@ -2200,7 +2236,11 @@
      "LUNA2USDT"
     ],
     "fail_count": {},
-    "bybit_offset": 250
+    "bybit_offset": 250,
+    "binance_base": "https://fapi.binance.com",
+    "binance_offset": 0,
+    "bingx_offset": 0,
+    "okx_offset": 0
    }
   }
  },
@@ -2385,7 +2425,11 @@
     },
     "delisted": [],
     "fail_count": {},
-    "bybit_offset": 250
+    "bybit_offset": 250,
+    "binance_base": "https://fapi.binance.com",
+    "binance_offset": 0,
+    "bingx_offset": 0,
+    "okx_offset": 0
    }
   }
  },
@@ -2692,7 +2736,11 @@
     },
     "delisted": [],
     "fail_count": {},
-    "bybit_offset": 250
+    "bybit_offset": 250,
+    "binance_base": "https://fapi.binance.com",
+    "binance_offset": 0,
+    "bingx_offset": 0,
+    "okx_offset": 0
    }
   }
  },
@@ -3034,7 +3082,11 @@
     },
     "delisted": [],
     "fail_count": {},
-    "bybit_offset": 250
+    "bybit_offset": 250,
+    "binance_base": "https://fapi.binance.com",
+    "binance_offset": 0,
+    "bingx_offset": 0,
+    "okx_offset": 0
    }
   }
  },
@@ -3184,7 +3236,11 @@
     },
     "delisted": [],
     "fail_count": {},
-    "bybit_offset": 250
+    "bybit_offset": 250,
+    "binance_base": "https://fapi.binance.com",
+    "binance_offset": 0,
+    "bingx_offset": 0,
+    "okx_offset": 0
    }
   }
  },
@@ -3334,7 +3390,11 @@
     },
     "delisted": [],
     "fail_count": {},
-    "bybit_offset": 250
+    "bybit_offset": 250,
+    "binance_base": "https://fapi.binance.com",
+    "binance_offset": 0,
+    "bingx_offset": 0,
+    "okx_offset": 0
    }
   }
  },
@@ -3486,7 +3546,11 @@
     },
     "delisted": [],
     "fail_count": {},
-    "bybit_offset": 250
+    "bybit_offset": 250,
+    "binance_base": "https://fapi.binance.com",
+    "binance_offset": 0,
+    "bingx_offset": 0,
+    "okx_offset": 0
    }
   }
  },
@@ -3716,7 +3780,11 @@
     "account_type": {},
     "delisted": [],
     "fail_count": {},
-    "bybit_offset": 250
+    "bybit_offset": 250,
+    "binance_base": "https://fapi.binance.com",
+    "binance_offset": 0,
+    "bingx_offset": 0,
+    "okx_offset": 0
    }
   }
  },
@@ -4051,7 +4119,11 @@
     },
     "delisted": [],
     "fail_count": {},
-    "bybit_offset": 250
+    "bybit_offset": 250,
+    "binance_base": "https://fapi.binance.com",
+    "binance_offset": 0,
+    "bingx_offset": 0,
+    "okx_offset": 0
    }
   }
  },
@@ -4241,7 +4313,11 @@
     },
     "delisted": [],
     "fail_count": {},
-    "bybit_offset": 250
+    "bybit_offset": 250,
+    "binance_base": "https://fapi.binance.com",
+    "binance_offset": 0,
+    "bingx_offset": 0,
+    "okx_offset": 0
    }
   }
  },
@@ -4292,7 +4368,11 @@
     "account_type": {},
     "delisted": [],
     "fail_count": {},
-    "bybit_offset": 0
+    "bybit_offset": 0,
+    "binance_base": "https://fapi.binance.com",
+    "binance_offset": 0,
+    "bingx_offset": 0,
+    "okx_offset": 0
    }
   }
  },
@@ -4351,7 +4431,11 @@
     "account_type": {},
     "delisted": [],
     "fail_count": {},
-    "bybit_offset": 0
+    "bybit_offset": 0,
+    "binance_base": "https://fapi.binance.com",
+    "binance_offset": 0,
+    "bingx_offset": 0,
+    "okx_offset": 0
    }
   }
  },
@@ -4500,7 +4584,11 @@
     "account_type": {},
     "delisted": [],
     "fail_count": {},
-    "bybit_offset": 250
+    "bybit_offset": 250,
+    "binance_base": "https://fapi.binance.com",
+    "binance_offset": 0,
+    "bingx_offset": 0,
+    "okx_offset": 0
    }
   }
  },
@@ -4648,7 +4736,11 @@
     "account_type": {},
     "delisted": [],
     "fail_count": {},
-    "bybit_offset": 250
+    "bybit_offset": 250,
+    "binance_base": "https://fapi.binance.com",
+    "binance_offset": 0,
+    "bingx_offset": 0,
+    "okx_offset": 0
    }
   }
  },
@@ -4910,7 +5002,11 @@
     },
     "delisted": [],
     "fail_count": {},
-    "bybit_offset": 250
+    "bybit_offset": 250,
+    "binance_base": "https://fapi.binance.com",
+    "binance_offset": 0,
+    "bingx_offset": 0,
+    "okx_offset": 0
    }
   }
  },
@@ -5409,7 +5505,11 @@
     },
     "delisted": [],
     "fail_count": {},
-    "bybit_offset": 250
+    "bybit_offset": 250,
+    "binance_base": "https://fapi.binance.com",
+    "binance_offset": 0,
+    "bingx_offset": 0,
+    "okx_offset": 0
    }
   }
  },
@@ -5714,7 +5814,11 @@
     },
     "delisted": [],
     "fail_count": {},
-    "bybit_offset": 0
+    "bybit_offset": 0,
+    "binance_base": "https://fapi.binance.com",
+    "binance_offset": 0,
+    "bingx_offset": 0,
+    "okx_offset": 0
    }
   }
  },
@@ -5982,7 +6086,11 @@
     },
     "delisted": [],
     "fail_count": {},
-    "bybit_offset": 0
+    "bybit_offset": 0,
+    "binance_base": "https://fapi.binance.com",
+    "binance_offset": 0,
+    "bingx_offset": 0,
+    "okx_offset": 0
    }
   }
  },
@@ -6084,7 +6192,11 @@
     "account_type": {},
     "delisted": [],
     "fail_count": {},
-    "bybit_offset": 0
+    "bybit_offset": 0,
+    "binance_base": "https://fapi.binance.com",
+    "binance_offset": 0,
+    "bingx_offset": 0,
+    "okx_offset": 0
    }
   }
  },
@@ -6187,7 +6299,11 @@
     "account_type": {},
     "delisted": [],
     "fail_count": {},
-    "bybit_offset": 0
+    "bybit_offset": 0,
+    "binance_base": "https://fapi.binance.com",
+    "binance_offset": 0,
+    "bingx_offset": 0,
+    "okx_offset": 0
    }
   }
  },
@@ -6268,7 +6384,11 @@
     "account_type": {},
     "delisted": [],
     "fail_count": {},
-    "bybit_offset": 0
+    "bybit_offset": 0,
+    "binance_base": "https://fapi.binance.com",
+    "binance_offset": 0,
+    "bingx_offset": 0,
+    "okx_offset": 0
    }
   }
  },
@@ -6396,7 +6516,11 @@
     "account_type": {},
     "delisted": [],
     "fail_count": {},
-    "bybit_offset": 0
+    "bybit_offset": 0,
+    "binance_base": "https://fapi.binance.com",
+    "binance_offset": 0,
+    "bingx_offset": 0,
+    "okx_offset": 0
    }
   }
  },
@@ -6510,7 +6634,11 @@
     "account_type": {},
     "delisted": [],
     "fail_count": {},
-    "bybit_offset": 0
+    "bybit_offset": 0,
+    "binance_base": "https://fapi.binance.com",
+    "binance_offset": 0,
+    "bingx_offset": 0,
+    "okx_offset": 0
    }
   }
  },
@@ -6595,7 +6723,11 @@
     "account_type": {},
     "delisted": [],
     "fail_count": {},
-    "bybit_offset": 0
+    "bybit_offset": 0,
+    "binance_base": "https://fapi.binance.com",
+    "binance_offset": 0,
+    "bingx_offset": 0,
+    "okx_offset": 0
    }
   }
  },
@@ -6681,7 +6813,11 @@
     "account_type": {},
     "delisted": [],
     "fail_count": {},
-    "bybit_offset": 0
+    "bybit_offset": 0,
+    "binance_base": "https://fapi.binance.com",
+    "binance_offset": 0,
+    "bingx_offset": 0,
+    "okx_offset": 0
    }
   }
  },
@@ -6768,7 +6904,11 @@
     "account_type": {},
     "delisted": [],
     "fail_count": {},
-    "bybit_offset": 0
+    "bybit_offset": 0,
+    "binance_base": "https://fapi.binance.com",
+    "binance_offset": 0,
+    "bingx_offset": 0,
+    "okx_offset": 0
    }
   }
  },
@@ -6833,7 +6973,11 @@
     "account_type": {},
     "delisted": [],
     "fail_count": {},
-    "bybit_offset": 0
+    "bybit_offset": 0,
+    "binance_base": "https://fapi.binance.com",
+    "binance_offset": 0,
+    "bingx_offset": 0,
+    "okx_offset": 0
    }
   }
  },
@@ -6878,7 +7022,11 @@
     "account_type": {},
     "delisted": [],
     "fail_count": {},
-    "bybit_offset": 0
+    "bybit_offset": 0,
+    "binance_base": "https://fapi.binance.com",
+    "binance_offset": 0,
+    "bingx_offset": 0,
+    "okx_offset": 0
    }
   }
  },
@@ -6944,7 +7092,11 @@
     "account_type": {},
     "delisted": [],
     "fail_count": {},
-    "bybit_offset": 0
+    "bybit_offset": 0,
+    "binance_base": "https://fapi.binance.com",
+    "binance_offset": 0,
+    "bingx_offset": 0,
+    "okx_offset": 0
    }
   }
  },
@@ -7041,7 +7193,11 @@
     "account_type": {},
     "delisted": [],
     "fail_count": {},
-    "bybit_offset": 0
+    "bybit_offset": 0,
+    "binance_base": "https://fapi.binance.com",
+    "binance_offset": 0,
+    "bingx_offset": 0,
+    "okx_offset": 0
    }
   }
  },
@@ -7108,7 +7264,11 @@
     "account_type": {},
     "delisted": [],
     "fail_count": {},
-    "bybit_offset": 0
+    "bybit_offset": 0,
+    "binance_base": "https://fapi.binance.com",
+    "binance_offset": 0,
+    "bingx_offset": 0,
+    "okx_offset": 0
    }
   }
  },
@@ -7181,7 +7341,11 @@
     "account_type": {},
     "delisted": [],
     "fail_count": {},
-    "bybit_offset": 0
+    "bybit_offset": 0,
+    "binance_base": "https://fapi.binance.com",
+    "binance_offset": 0,
+    "bingx_offset": 0,
+    "okx_offset": 0
    }
   }
  },
@@ -7251,7 +7415,11 @@
     "account_type": {},
     "delisted": [],
     "fail_count": {},
-    "bybit_offset": 0
+    "bybit_offset": 0,
+    "binance_base": "https://fapi.binance.com",
+    "binance_offset": 0,
+    "bingx_offset": 0,
+    "okx_offset": 0
    }
   }
  },
@@ -7319,7 +7487,11 @@
     "account_type": {},
     "delisted": [],
     "fail_count": {},
-    "bybit_offset": 0
+    "bybit_offset": 0,
+    "binance_base": "https://fapi.binance.com",
+    "binance_offset": 0,
+    "bingx_offset": 0,
+    "okx_offset": 0
    }
   }
  },
@@ -7387,7 +7559,11 @@
     "account_type": {},
     "delisted": [],
     "fail_count": {},
-    "bybit_offset": 0
+    "bybit_offset": 0,
+    "binance_base": "https://fapi.binance.com",
+    "binance_offset": 0,
+    "bingx_offset": 0,
+    "okx_offset": 0
    }
   }
  },
@@ -7451,7 +7627,11 @@
     },
     "delisted": [],
     "fail_count": {},
-    "bybit_offset": 0
+    "bybit_offset": 0,
+    "binance_base": "https://fapi.binance.com",
+    "binance_offset": 0,
+    "bingx_offset": 0,
+    "okx_offset": 0
    }
   }
  },
@@ -7532,7 +7712,11 @@
     },
     "delisted": [],
     "fail_count": {},
-    "bybit_offset": 0
+    "bybit_offset": 0,
+    "binance_base": "https://fapi.binance.com",
+    "binance_offset": 0,
+    "bingx_offset": 0,
+    "okx_offset": 0
    }
   }
  },
@@ -7624,7 +7808,11 @@
     },
     "delisted": [],
     "fail_count": {},
-    "bybit_offset": 0
+    "bybit_offset": 0,
+    "binance_base": "https://fapi.binance.com",
+    "binance_offset": 0,
+    "bingx_offset": 0,
+    "okx_offset": 0
    }
   }
  },
@@ -7688,7 +7876,11 @@
     "account_type": {},
     "delisted": [],
     "fail_count": {},
-    "bybit_offset": 0
+    "bybit_offset": 0,
+    "binance_base": "https://fapi.binance.com",
+    "binance_offset": 0,
+    "bingx_offset": 0,
+    "okx_offset": 0
    }
   }
  },
@@ -7855,7 +8047,11 @@
     },
     "delisted": [],
     "fail_count": {},
-    "bybit_offset": 250
+    "bybit_offset": 250,
+    "binance_base": "https://fapi.binance.com",
+    "binance_offset": 0,
+    "bingx_offset": 0,
+    "okx_offset": 0
    }
   }
  },
@@ -7942,7 +8138,11 @@
     },
     "delisted": [],
     "fail_count": {},
-    "bybit_offset": 0
+    "bybit_offset": 0,
+    "binance_base": "https://fapi.binance.com",
+    "binance_offset": 0,
+    "bingx_offset": 0,
+    "okx_offset": 0
    }
   }
  },
@@ -8075,7 +8275,11 @@
     },
     "delisted": [],
     "fail_count": {},
-    "bybit_offset": 0
+    "bybit_offset": 0,
+    "binance_base": "https://fapi.binance.com",
+    "binance_offset": 0,
+    "bingx_offset": 0,
+    "okx_offset": 0
    }
   }
  },
@@ -8143,7 +8347,11 @@
     "account_type": {},
     "delisted": [],
     "fail_count": {},
-    "bybit_offset": 0
+    "bybit_offset": 0,
+    "binance_base": "https://fapi.binance.com",
+    "binance_offset": 0,
+    "bingx_offset": 0,
+    "okx_offset": 0
    }
   }
  },
@@ -8328,7 +8536,11 @@
     "account_type": {},
     "delisted": [],
     "fail_count": {},
-    "bybit_offset": 0
+    "bybit_offset": 0,
+    "binance_base": "https://fapi.binance.com",
+    "binance_offset": 0,
+    "bingx_offset": 0,
+    "okx_offset": 0
    }
   }
  },
@@ -8621,7 +8833,11 @@
     },
     "delisted": [],
     "fail_count": {},
-    "bybit_offset": 250
+    "bybit_offset": 250,
+    "binance_base": "https://fapi.binance.com",
+    "binance_offset": 0,
+    "bingx_offset": 0,
+    "okx_offset": 0
    }
   }
  },
@@ -8877,7 +9093,11 @@
     },
     "delisted": [],
     "fail_count": {},
-    "bybit_offset": 250
+    "bybit_offset": 250,
+    "binance_base": "https://fapi.binance.com",
+    "binance_offset": 0,
+    "bingx_offset": 0,
+    "okx_offset": 0
    }
   }
  },
@@ -9137,7 +9357,11 @@
     },
     "delisted": [],
     "fail_count": {},
-    "bybit_offset": 250
+    "bybit_offset": 250,
+    "binance_base": "https://fapi.binance.com",
+    "binance_offset": 0,
+    "bingx_offset": 0,
+    "okx_offset": 0
    }
   }
  },
@@ -9356,7 +9580,11 @@
     },
     "delisted": [],
     "fail_count": {},
-    "bybit_offset": 250
+    "bybit_offset": 250,
+    "binance_base": "https://fapi.binance.com",
+    "binance_offset": 0,
+    "bingx_offset": 0,
+    "okx_offset": 0
    }
   }
  },
@@ -9558,7 +9786,11 @@
     },
     "delisted": [],
     "fail_count": {},
-    "bybit_offset": 250
+    "bybit_offset": 250,
+    "binance_base": "https://fapi.binance.com",
+    "binance_offset": 0,
+    "bingx_offset": 0,
+    "okx_offset": 0
    }
   }
  },
@@ -9739,7 +9971,11 @@
     "fail_count": {
      "BTCUSDT": 1
     },
-    "bybit_offset": 250
+    "bybit_offset": 250,
+    "binance_base": "https://fapi.binance.com",
+    "binance_offset": 0,
+    "bingx_offset": 0,
+    "okx_offset": 0
    }
   }
  },
@@ -9931,7 +10167,11 @@
     "fail_count": {
      "BTCUSDT": 1
     },
-    "bybit_offset": 250
+    "bybit_offset": 250,
+    "binance_base": "https://fapi.binance.com",
+    "binance_offset": 0,
+    "bingx_offset": 0,
+    "okx_offset": 0
    }
   }
  },
@@ -10111,7 +10351,11 @@
      "BTCUSDT"
     ],
     "fail_count": {},
-    "bybit_offset": 250
+    "bybit_offset": 250,
+    "binance_base": "https://fapi.binance.com",
+    "binance_offset": 0,
+    "bingx_offset": 0,
+    "okx_offset": 0
    }
   }
  },
@@ -10286,7 +10530,11 @@
     "fail_count": {
      "BTCUSDT": 1
     },
-    "bybit_offset": 250
+    "bybit_offset": 250,
+    "binance_base": "https://fapi.binance.com",
+    "binance_offset": 0,
+    "bingx_offset": 0,
+    "okx_offset": 0
    }
   }
  },
@@ -10371,7 +10619,11 @@
     "account_type": {},
     "delisted": [],
     "fail_count": {},
-    "bybit_offset": 0
+    "bybit_offset": 0,
+    "binance_base": "https://fapi.binance.com",
+    "binance_offset": 0,
+    "bingx_offset": 0,
+    "okx_offset": 0
    }
   }
  },
@@ -10469,7 +10721,11 @@
     "account_type": {},
     "delisted": [],
     "fail_count": {},
-    "bybit_offset": 0
+    "bybit_offset": 0,
+    "binance_base": "https://fapi.binance.com",
+    "binance_offset": 0,
+    "bingx_offset": 0,
+    "okx_offset": 0
    }
   }
  },
@@ -10730,7 +10986,11 @@
     },
     "delisted": [],
     "fail_count": {},
-    "bybit_offset": 0
+    "bybit_offset": 0,
+    "binance_base": "https://fapi.binance.com",
+    "binance_offset": 0,
+    "bingx_offset": 0,
+    "okx_offset": 0
    }
   }
  }

@@ -41,7 +41,7 @@ describe('bingx_trader replay parity', () => {
   for (const { scenario: sc, expected: exp } of ROWS) {
     it(sc.name, async () => {
       SYM._setLive((sc.state && sc.state.live_bingx) || []);
-      const { out } = await runScenario(sc, (o) => BX.createBingxTrader(o), (t, s) => {
+      const { out, trader } = await runScenario(sc, (o) => BX.createBingxTrader(o), (t, s) => {
         const fn = CALLS[s.call];
         if (!fn) throw new Error(`no JS mapping for ${s.call}`);
         return fn(t, s.args, s.kwargs);
@@ -52,6 +52,7 @@ describe('bingx_trader replay parity', () => {
       expect(out.sleeps, 'sleeps').toEqual(exp.sleeps);
       expect(out.markers, 'log markers').toEqual(exp.markers);
       expect(out.saved.metrics, 'metrics').toEqual(exp.saved.metrics);
+      expect(trader._state.timeOffsetMs, 'time offset').toBe(exp.final.bingx_offset);
     });
   }
 });

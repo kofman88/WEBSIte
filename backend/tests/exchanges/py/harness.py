@@ -245,6 +245,12 @@ class FakeAioSession:
     async def close(self):
         pass
 
+    async def __aenter__(self):
+        return self
+
+    async def __aexit__(self, *a):
+        return False
+
 
 def install_requests_fake(router: Router):
     def _send(self, request, **kwargs):
@@ -328,6 +334,9 @@ def reset_state(clock: Clock):
     bx._rate_sleep_s = 0.0
     bn._binance_time_offset_ms = 0
     bn.BASE_URL = "https://fapi.binance.com"
+    bn._active_base_url = bn._BINANCE_FALLBACK_URLS[0]
+    bn._binance_time_synced_at = 0.0
+    bn._sync_warn_at = 0.0
     ok._okx_time_offset_ms = 0
     exchange_breaker.breaker._states.clear()
     fetcher_bingx._LIVE = set()
@@ -357,6 +366,10 @@ def run_scenario(sc: dict) -> dict:
         return fake
     for mod in (by, bx, bn, ok):
         mod._get_http_session = _gs
+    # binance _find_working_binance_url opens its own `aiohttp.ClientSession(...)`
+    aio_ns = types.SimpleNamespace(**{k: getattr(aiohttp, k) for k in dir(aiohttp) if not k.startswith("__")})
+    aio_ns.ClientSession = lambda *a, **k: fake
+    bn.aiohttp = aio_ns
 
     async def _reset():
         return None
@@ -423,6 +436,8 @@ def run_scenario(sc: dict) -> dict:
     out = {"name": sc["name"]}
     # functions that do `import time as _time` locally (bybit dashboard / summary) get the proxy too
     sys.modules["time"] = tp
+    if sc["call"] == "_find_working_binance_url":
+        sys.modules["asyncio"] = ap  # local `import asyncio` inside the probe loop
     try:
         res = fn(*sc.get("args", []), **sc.get("kwargs", {}))
         if asyncio.iscoroutine(res):
@@ -432,6 +447,7 @@ def run_scenario(sc: dict) -> dict:
         out["raised"] = {"type": type(e).__name__, "msg": str(e)}
     finally:
         sys.modules["time"] = real_time
+        sys.modules["asyncio"] = real_asyncio
         for lg in loggers:
             lg.removeHandler(cap)
     out["requests"] = router.log
@@ -445,6 +461,10 @@ def run_scenario(sc: dict) -> dict:
         "delisted": sorted(by._delisted_symbols.keys()),
         "fail_count": dict(by._symbol_fail_count),
         "bybit_offset": by._bybit_time_offset_ms,
+        "binance_base": bn.BASE_URL,
+        "binance_offset": bn._binance_time_offset_ms,
+        "bingx_offset": bx._bingx_time_offset_ms,
+        "okx_offset": ok._okx_time_offset_ms,
     }
     return out
 
