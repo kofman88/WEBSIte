@@ -14,7 +14,7 @@ Every pure function is pinned by vectors that the bot's own Python computes
 | `config.js` | genome constants, `get_tfs`, `get_default_tf`, `_eval_days_for_tf`, `_eval_timeout_for_tf`, drift / PF / age-window tables, `[GENOME-CPU-BUDGET]`, `get_dynamic_eval_days` | `genomeCpuShare(env, nCpu)`: `GENOME_CPU_SHARE`, clamped to 0.05–1. The default is 0.15 on a 1-CPU host and 0.35 otherwise. |
 | `rng.js` | `random` (subset) | mulberry32, seedable. It implements `random`, `randbelow`, `randint`, `choice`, `sample` and `shuffle` with CPython's algorithms. |
 | `geneSpace.js` | `GENE_SPACE`, `random_gene_value`, `serialize_genome`, `json.dumps` | Keeps the float-step truncation quirk. `pyDumps` gives Python float/int formatting. `parsePyJson` keeps int/float literal kinds. `pyJsonLoads` reads `NaN`/`Infinity`. |
-| `constraints.js` | `_fix_constraints` | Same rules, in the same order, including random filling of missing VOLUME genes. |
+| `constraints.js` | `_fix_constraints` | Same rules, in the same order, including random filling of missing VOLUME genes. Ordered comparisons raise TypeError for a None / str operand like CPython. |
 | `operators.js` | `random_genome`, `crossover`, `mutate`, `tournament_select`, `bayesian_mutate`, cross-strategy hint, fitness decay | |
 | `backtester.js` | `Backtester` (genome subset) | Runs over the site engines (LEVELS `doAnalyze`, SMC `analyze` + `buildSmcSignal`, VOLUME context/mask/signal). Fees, MAE/MFE and the numpy rounding/summation of averages are emulated (`npRound`, `cpySum`). |
 | `fitness.js` | `compute_fitness`, Wilson CI, Monte Carlo DD, the `evaluate_genome` multipliers | `pyLog1p` pins glibc `log1p` at n = 175 and 184, where V8 differs by 1 ulp. |
@@ -55,6 +55,22 @@ rm -f /home/user/MAIN_BOT/CHM_BREAKER_V4/signal_registry.json
 
 Sections: `gene_space constraints operators fitness evaluate simulate backtests db coins handlers optimizer`.
 The bot repo is only read. Temporary SQLite files go to a temp dir that the generator removes.
+An all-sections run restores the real `database.db_kv_get` / `db_kv_set` after `evaluate` and
+`backtests` (which install a fake kv), so the DB sections see the real kv.
+
+The adversarial verification vectors (fresh inputs, never those above) come from
+`backend/tests/genome/make_genome_verify_vectors.py` and are replayed by `verifyPure.test.js` /
+`verifyDb.test.js`:
+
+```
+BOT_TOKEN_CHM=test:token ADMIN_IDS=123 $VENV backend/tests/genome/make_genome_verify_vectors.py [section …]
+GENOME_VERIFY_ONLY=LEVELS $VENV …/make_genome_verify_vectors.py backtests   # one strategy per process (LEVELS 15m ≈ 12 min)
+```
+
+Sections: `constraints` (500 genomes per strategy), `fitness` (200 trade lists + compute_fitness
+edges), `backtests` (6 golden coins × 15m × 5 genomes per strategy, + evaluate_genome), `wide`
+(the same genomes on 1h / 4h over 12 coins), `apply` (20 apply_best_to_user scenarios per
+strategy), `routes` (the real `miniapp_api.h_genome` / `h_genome_apply`).
 
 ## Known gaps (outside this folder's ownership)
 
@@ -63,3 +79,19 @@ The bot repo is only read. Temporary SQLite files go to a temp dir that the gene
 - **Regime provider.** The engine worker must install `regime.setRegimeProvider(() => cachedBtcRegime)`. Without it, drift, paper validation and `params_for_regime` all see `null` (the "unknown" defaults).
 - **Schedulers.** The 6 h evolution cycle (`evolve.genomeEvolutionLoop` / `runner.triggerEvolution(..., {mode: 'cycle'})`) and `maintenance.runGenomeMaintenanceLoop` are deliberately not started. The scheduler process has to wire them.
 - **Admin route.** No admin route for evolution was added. The user-facing D10 route is `/api/app/genome/evolve`.
+- **Malformed request bodies.** The global `express.json()` in `server.js` answers a body that is
+  not a JSON object/array (`not json`, `"LEVELS"`) with 400 `{error: <parse message>}` before the
+  router runs. The bot's `_read_body()` reads such a body as `{}`, so `POST /genome/apply` answers
+  `pro_required` (free) or 400 `bad_strategy` (Pro). Well-formed bodies are identical.
+
+## Not reproducible by design
+
+- **int/float kind of out-of-kind numbers.** JS numbers do not carry Python's int/float kind, so
+  `serialize_genome` infers it from the gene (`FLOAT_GENE_KEYS`). An int in a float gene (`"min_rr": 2`)
+  or an integral float in an int gene (`"min_quality": 4.0`) serialises differently. The bot's
+  operators never produce such values; the repaired VALUES are identical in every case.
+- **Bot-only `users` columns.** LEVELS apply writes every genome key that is a column of the bot's
+  `users` table. Columns the site keeps elsewhere or not at all (`username`, exchange API keys,
+  `watch_coin`, `copy_*`, …) are not gene names, so a genome never carries them.
+- **`smc_cfg` NULL.** `trader_settings.smc_cfg` is `NOT NULL DEFAULT '{}'`; the bot reads a NULL
+  `smc_cfg` as `"{}"`, so the two states behave the same.
