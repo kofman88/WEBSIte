@@ -30,10 +30,14 @@ let nextEventId = 1;
 
 function key(userId) { return String(userId); }
 
-/** `data:` lines for a payload (strings as is, everything else JSON). */
+/**
+ * `data:` lines for a payload (strings as is, everything else JSON). CRLF, LF and a lone CR
+ * all end a line in an event stream (WHATWG HTML §9.2.6), so each of them starts a new
+ * `data:` line — a bare CR left inside one line would cut the payload on the client.
+ */
 function dataLines(data) {
   const text = typeof data === 'string' ? data : JSON.stringify(data === undefined ? null : data);
-  return text.split(/\r?\n/).map((l) => `data: ${l}`).join('\n');
+  return text.split(/\r\n|\r|\n/).map((l) => `data: ${l}`).join('\n');
 }
 
 /** One SSE frame. */
