@@ -790,6 +790,24 @@ for name, uid, attrs, kv0, ok in ADV_CASES:
                     "sent": list(ADV_SENT), "kv": dict(ADV_KV)})
 out["advisor_advise"] = {"now": FAKE[0], "cases": adv_out}
 
+# ════════════════════════════════════════════════════════════════════════
+# 11. signal_rows_since / signal_stats SQL (COUNTABLE_SQL) on a rich row set (uid 701)
+# ════════════════════════════════════════════════════════════════════════
+FAKE[0] = T0 + 80 * D_
+for k in range(90):
+    created = FAKE[0] - rng.choice([rng.uniform(0, 29.9 * D_), rng.uniform(30.1 * D_, 60 * D_), 30 * D_, 0.0])
+    r = mk_row(created)
+    r["result"] = rng.choice([r["result"], "ORPHAN", "SKIP", None, "", "LIQ"])
+    r["signal_msg_id"] = rng.choice([r["signal_msg_id"], 0, None])
+    r["order_id"] = rng.choice([r["order_id"], "", None, "o9"])
+    r["result_rr"] = rng.choice([r["result_rr"], None, 1.25])
+    db_insert(701, r)
+since = FAKE[0] - 20 * D_
+out["sql"] = {"now": FAKE[0], "since": since,
+              "rows_since": run(SS.signal_rows_since(701, since)),
+              "stats30": run(SS.signal_stats(701, 30)),
+              "stats7": run(SS.signal_stats(701, 7))}
+
 out["db_rows"] = DB_ROWS
 with open(OUT, "w", encoding="utf-8") as f:
     json.dump(out, f, ensure_ascii=False, indent=0, sort_keys=False)

@@ -48,6 +48,7 @@ const { pyInt: coerceInt, pyFloat: coerceFloat, PyValueError, PyTypeError } = re
 const { pyRound, pyRoundInt, pyMax, pyMin } = require('../strategies/common/pyround');
 const { pyRepr, fmtFixed, fmtComma } = require('../strategies/common/pyfmt');
 const { pySum } = require('../strategies/common/series');
+const { pyJsonDumps } = require('./engine/pyjson');
 
 // ═══════════════════════════════════════════════════════════════════════
 //  constants (challenge.py)
@@ -537,7 +538,6 @@ const FIELDS = Object.freeze([
   ['term', 'str', 'none'],
 ]);
 const FIELD_NAMES = Object.freeze(FIELDS.map((f) => f[0]));
-const FIELD_TYPES = Object.freeze(Object.fromEntries(FIELDS.map(([n, t]) => [n, t])));
 
 function missingArgsMessage(missing) {
   const q = missing.map((m) => `'${m}'`);
@@ -631,60 +631,24 @@ function fromJson(raw) {
   return new Challenge(known);           // missing required fields → TypeError like the dataclass
 }
 
-// ── json.dumps(..., ensure_ascii=False) with Python float repr ───────────
-function escapeNoAscii(s) {
-  let out = '"';
-  for (let i = 0; i < s.length; i++) {
-    const ch = s[i];
-    const code = s.charCodeAt(i);
-    if (ch === '"') out += '\\"';
-    else if (ch === '\\') out += '\\\\';
-    else if (ch === '\n') out += '\\n';
-    else if (ch === '\r') out += '\\r';
-    else if (ch === '\t') out += '\\t';
-    else if (ch === '\b') out += '\\b';
-    else if (ch === '\f') out += '\\f';
-    else if (code < 0x20) out += `\\u${code.toString(16).padStart(4, '0')}`;
-    else out += ch;
-  }
-  return `${out}"`;
-}
+// ── json.dumps(asdict(ch), ensure_ascii=False) ───────────────────────────
+// services/engine/pyjson.js is the bot's json.dumps (separators, insertion order, Python float
+// repr for the named float keys) with ensure_ascii=True; the challenge is written with
+// ensure_ascii=False, so the \uXXXX escapes of non-ASCII characters (≥ 0x7f — DEL included,
+// surrogate halves re-join) are turned back into the characters. Control characters keep
+// their escapes, an escaped backslash is never the start of an escape.
+const FLOAT_KEYS = Object.freeze([...FIELDS.filter(([, t]) => t === 'float').map(([n]) => n), 'ts', 'amount']);
 
-function dumpNumber(n, isFloat) {
-  if (!Number.isFinite(n)) {
-    if (Number.isNaN(n)) return 'NaN';
-    return n > 0 ? 'Infinity' : '-Infinity';
-  }
-  if (isFloat || !Number.isInteger(n)) return pyRepr(n);
-  return String(n);
+function unescapeNonAscii(s) {
+  return s.replace(/\\\\|\\u([0-9a-f]{4})/g, (m, hex) => {
+    if (hex === undefined) return m;
+    const code = parseInt(hex, 16);
+    return code >= 0x7f ? String.fromCharCode(code) : m;
+  });
 }
-
-/** Generic json.dumps value; `floatKeys` = dict keys whose numbers are Python floats. */
-function dumpValue(v, floatKeys = null, key = null) {
-  if (isNone(v)) return 'null';
-  if (typeof v === 'boolean') return v ? 'true' : 'false';
-  if (typeof v === 'number') return dumpNumber(v, Boolean(floatKeys && key !== null && floatKeys.has(key)));
-  if (typeof v === 'string') return escapeNoAscii(v);
-  if (Array.isArray(v)) return `[${v.map((x) => dumpValue(x, floatKeys, null)).join(', ')}]`;
-  if (typeof v === 'object') {
-    return `{${Object.keys(v).map((k) => `${escapeNoAscii(k)}: ${dumpValue(v[k], floatKeys, k)}`).join(', ')}}`;
-  }
-  return escapeNoAscii(String(v));
-}
-
-const TOPUP_FLOATS = new Set(['ts', 'amount']);
 
 function dumpChallenge(ch) {
-  const parts = [];
-  for (const n of FIELD_NAMES) {
-    const v = ch[n];
-    let s;
-    if (FIELD_TYPES[n] === 'float' && typeof v === 'number') s = dumpNumber(v, true);
-    else if (n === 'topups') s = dumpValue(v, TOPUP_FLOATS);
-    else s = dumpValue(v);
-    parts.push(`${escapeNoAscii(n)}: ${s}`);
-  }
-  return `{${parts.join(', ')}}`;
+  return unescapeNonAscii(pyJsonDumps(ch.asdict(), FLOAT_KEYS));
 }
 
 // ═══════════════════════════════════════════════════════════════════════
