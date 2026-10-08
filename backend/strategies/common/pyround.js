@@ -129,4 +129,19 @@ function pyFloorDiv(a, b) {
   return (q < 0 || Object.is(q, -0)) ? -0 : 0;
 }
 
-module.exports = { exactDecimal, roundHalfEvenDiv, pyRound, pyRoundInt, pyInt, pyFloor, pyMod, pyFloorDiv };
+/**
+ * Python builtin max(a, b) for two numbers: the FIRST argument wins unless the second is
+ * strictly greater (`b > a`), so a NaN first argument stays, a NaN second argument is
+ * ignored and max(0.0, -0.0) keeps the first zero — unlike Math.max, which propagates NaN
+ * and prefers +0.
+ */
+function pyMax(a, b) {
+  return b > a ? b : a;
+}
+
+/** Python builtin min(a, b): the first argument wins unless `b < a`. */
+function pyMin(a, b) {
+  return b < a ? b : a;
+}
+
+module.exports = { exactDecimal, roundHalfEvenDiv, pyRound, pyRoundInt, pyInt, pyFloor, pyMod, pyFloorDiv, pyMax, pyMin };

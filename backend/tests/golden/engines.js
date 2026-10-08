@@ -2,8 +2,9 @@
 /**
  * engines.js — pluggable engine registry for the golden harness.
  *
- * M2–M6 register their pure engines here; until then every entry is `null` and
- * golden.test.js marks the corresponding sweeps as todo (never failing).
+ * M2–M6 register their pure engines here (adapters live in ./runners/*.js); until
+ * then an entry is `null` and golden.test.js marks the corresponding sweep as todo
+ * (never failing).
  *
  * Contract (every runner is synchronous and pure; `ctx` comes from load.barInputs
  * plus the variant config stored in the expected file):
@@ -31,14 +32,23 @@
  *     `signal` = VolumeSignal fields + tp, risk_pct, volume_ratio, squeeze_score,
  *     quality_after_squeeze, passes_ctx_gate.
  *
+ *   smc_analysis.run(ctx) → { digest: Object, analysis: Object }      (M3, analysis layer only)
+ *     ctx = { symbol, i, closeMs, dfHtf (4h), dfMtf (1h prefix), dfLtf (15m),
+ *             variant: { name: 'default', analysis_key: [FVG, CHOCH, BREAKER, OB_MAX_AGE, SWEEP_CLOSE, VOL_LEN] } }
+ *     `digest` = make_golden._smc_digest(analysis) with squeeze_score injected, compared
+ *     bar by bar against expected/smc_analysis.json (default key; golden.test.js
+ *     "golden smc_analysis"). The smc engine (M4) reuses strategies/smc/analyzer.smcDigest
+ *     for its own `digest`.
+ *
  * Optional per-engine `prepare(frames, variant)` may precompute per-fixture state
  * (e.g. full-series indicators) and is passed back as ctx.prepared.
  */
 
 const engines = {
-  levels: null,
+  levels: require('./runners/levels'),   // M6
   smc: null,
-  volume: null,
+  smc_analysis: null,
+  volume: require('./runners/volume'),   // M2
 };
 
 /** Register an engine runner (used by M2–M6 and by tests with dummy runners). */
@@ -50,5 +60,11 @@ function register(name, runner) {
 function get(name) {
   return engines[name];
 }
+
+// M3 — SMC analysis layer (structure / liquidity / OB / FVG / PD / ATR / volume / squeeze)
+register('smc_analysis', require('./runners/smcAnalysis'));
+
+// M4 — SMC signal builder on top of the analysis layer (3 variants, digest for default)
+register('smc', require('./runners/smc'));
 
 module.exports = { engines, register, get };
