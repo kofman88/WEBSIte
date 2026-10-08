@@ -42,8 +42,13 @@ function cleanupGhostTrades(db, userId, { maxAgeDays = 30, now = null } = {}) {
   return tx();
 }
 
-/** db_cleanup_ghost_trades_all(max_age_days=30) → [no_order, old] (the loop passes 3) */
-function cleanupGhostTradesAll(db, { maxAgeDays = 30, now = null } = {}) {
+/**
+ * db_cleanup_ghost_trades_all(max_age_days=30) → [no_order, old] (the loop passes 3).
+ * `protectDelivered: true` (NOT the bot's behaviour, off by default) also keeps branch (b) away
+ * from delivered cards (`COALESCE(signal_msg_id, 0) = 0`), so no row with signal_msg_id > 0 is
+ * ever rewritten — for deployments that want the [SIGNAL-STATS] intent applied to old rows too.
+ */
+function cleanupGhostTradesAll(db, { maxAgeDays = 30, now = null, protectDelivered = false } = {}) {
   const t = now === null || now === undefined ? nowSec() : now;
   const cutoff = t - maxAgeDays * 86400;
   const tx = db.transaction(() => {
@@ -57,7 +62,8 @@ function cleanupGhostTradesAll(db, { maxAgeDays = 30, now = null } = {}) {
     const b = db.prepare(
       "UPDATE signal_trades SET result='SKIP', state='FAILED', skip_reason='ghost', "
       + 'state_changed_at=? '
-      + "WHERE result='' AND created_at < ?",
+      + "WHERE result='' AND created_at < ?"
+      + (protectDelivered ? ' AND COALESCE(signal_msg_id, 0) = 0' : ''),
     ).run(t, cutoff).changes;
     return [a, b];
   });
@@ -72,10 +78,10 @@ function purgeOldSkips(db, { now = null, days = 30 } = {}) {
 }
 
 /** One pass of _ghost_cleanup_loop (max_age_days=3) with its log line. */
-function runGhostCleanup(db, { log = null, now = null, maxAgeDays = 3 } = {}) {
+function runGhostCleanup(db, { log = null, now = null, maxAgeDays = 3, protectDelivered = false } = {}) {
   const L = log || require('../../utils/logger');
   try {
-    const [totalNo, totalOld] = cleanupGhostTradesAll(db, { maxAgeDays, now });
+    const [totalNo, totalOld] = cleanupGhostTradesAll(db, { maxAgeDays, now, protectDelivered });
     if (totalNo || totalOld) L.info(`ghost_cleanup: SKIP'd ${totalNo} no-order + ${totalOld} old trades`);
     return [totalNo, totalOld];
   } catch (e) {
@@ -98,12 +104,12 @@ function runTradesGc(db, { log = null, now = null } = {}) {
 }
 
 /** _ghost_cleanup_loop: first pass after 300 s, then every 6 h. Returns { stop }. */
-function startGhostCleanupLoop(db, { log = null, firstDelayMs = 300_000, intervalMs = 6 * 3600 * 1000 } = {}) {
+function startGhostCleanupLoop(db, { log = null, firstDelayMs = 300_000, intervalMs = 6 * 3600 * 1000, protectDelivered = false } = {}) {
   let timer = null;
   let stopped = false;
   const tick = () => {
     if (stopped) return;
-    runGhostCleanup(db, { log });
+    runGhostCleanup(db, { log, protectDelivered });
     timer = setTimeout(tick, intervalMs);
   };
   timer = setTimeout(tick, firstDelayMs);

@@ -66,6 +66,18 @@ describe('ghost cleanup — same rows as the bot', () => {
     }
   });
 
+  it('opt-in protectDelivered: no row with signal_msg_id > 0 is rewritten by either branch', () => {
+    const db = seeded();
+    const before = new Map(db.prepare('SELECT * FROM signal_trades').all().map((r) => [r.trade_id, r]));
+    const [a, b] = GC.cleanupGhostTradesAll(db, { maxAgeDays: 3, now: NOW, protectDelivered: true });
+    expect(a).toBe(V.ghost.all[0]);
+    expect(b).toBeLessThan(V.ghost.all[1]);
+    for (const r of db.prepare('SELECT * FROM signal_trades').all()) {
+      const was = before.get(r.trade_id);
+      if (Number(was.signal_msg_id || 0) > 0) expect([r.result, r.state, r.skip_reason]).toEqual([was.result, was.state, was.skip_reason]);
+    }
+  });
+
   it('runGhostCleanup / runTradesGc log lines; the loop runs after 300 s, then every 6 h', () => {
     const db = seeded();
     const lines = [];
