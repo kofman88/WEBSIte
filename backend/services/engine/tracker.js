@@ -15,7 +15,7 @@
  */
 
 const { pyFloat, pyInt } = require('./pycoerce');
-const { pyRound, pyRoundInt } = require('../../strategies/common/pyround');
+const { pyRound, pyRoundInt, pyFloorDiv, pyMax, pyMin } = require('../../strategies/common/pyround');
 const { fmtFixed, fmtSigned, smartFormat } = require('../../strategies/common/pyfmt');
 const { signalRr } = require('./signalOutcome');
 
@@ -309,13 +309,24 @@ function pickTfs(ageS) {
   return ['1H'];
 }
 
-/** _chart_df window size: ~40 bars before the signal + everything after, 30..160; null = whole frame. */
-function chartWindow(bars, createdAt, tfSec) {
-  if (!bars || !bars.length) return null;
+/**
+ * _chart_df(df, created_at, tf_sec): the chart window — ~40 bars before the signal plus
+ * everything after, n_keep = max(30, min(160, #bars opening ≥ created − 40·tf)), then
+ * df.tail(n_keep). Returns the kept bars; no bars → the input as is (the bot returns df).
+ */
+function chartTail(bars, createdAt, tfSec) {
+  if (!bars || !bars.length) return bars;
   const start = createdAt - 40 * tfSec;
   let nKeep = 0;
   for (const b of bars) if (b[0] >= start) nKeep++;
-  return Math.max(30, Math.min(160, nKeep));
+  nKeep = Math.max(30, Math.min(160, nKeep));
+  return bars.slice(Math.max(0, bars.length - nKeep));
+}
+
+/** len(_chart_df(...)); null when there are no bars. */
+function chartWindow(bars, createdAt, tfSec) {
+  if (!bars || !bars.length) return null;
+  return chartTail(bars, createdAt, tfSec).length;
 }
 
 /** Mask of §11.6 step 4: bars after the signal (stage '') or overlapping the transition bar. */
@@ -346,7 +357,7 @@ function fmtR(r) {
 
 /** _ago(seconds, lang): "{d}д {h}ч {m}м" / "{d}d {h}h {m}m", zero parts omitted, minutes shown when nothing else. */
 function ago(seconds, lang) {
-  let m = Math.max(0, Math.floor(seconds / 60));
+  let m = Math.max(0, Math.trunc(pyFloorDiv(Number(seconds), 60)));
   let h = Math.floor(m / 60); m -= h * 60;
   const d = Math.floor(h / 24); h -= d * 24;
   const parts = lang === 'en'
@@ -397,7 +408,7 @@ function buildText(trade, L, event, hit, lang = 'ru', now = null) {
   const info = `${strat}${tf ? ' · ' + tf : ''} · ${en ? 'entry' : 'вход'} ${fmtPrice(L.entry)} · SL ${fmtPrice(L.sl)}`;
   const lines = [line, '', info, steps.join(' → ')];
   if (created) {
-    const t = now === null || now === undefined ? Date.now() / 1000 : now;
+    const t = falsy(now) ? Date.now() / 1000 : now;               // (now or time.time())
     const a = ago(t - created, en ? 'en' : 'ru');
     lines.push(en ? `⏱ ${a} after the signal` : `⏱ через ${a} после сигнала`);
   }
@@ -414,9 +425,11 @@ function fmtOutcomeR(rr) {
   return `${fmtSigned(rr, 1)}R`.replace('+0.0R', '0R').replace('-0.0R', '0R');
 }
 
+const hasOwn = (o, k) => Object.prototype.hasOwnProperty.call(o, k);
+
 function outcomeLine(stage, rr, lang = 'ru') {
-  const table = OUTCOME_LINE[lang in OUTCOME_LINE ? lang : 'ru'];
-  const tpl = table[stage];
+  const table = OUTCOME_LINE[hasOwn(OUTCOME_LINE, lang) ? lang : 'ru'];
+  const tpl = hasOwn(table, stage) ? table[stage] : '';
   return tpl ? tpl.replace('{rr}', fmtOutcomeR(rr)) : '';
 }
 
@@ -426,29 +439,52 @@ function cardTextWithOutcome(html, line) {
 }
 
 /**
- * The pure part of update_signal_card: the outcome line and the edited text for a
- * trade at `stage`, or null when the bot would answer "skip" (no delivered card,
- * no user, unparsable / empty snapshot, unknown stage, text > 4000 chars).
- * `trade.missed_rr` carries the MISSED distance; otherwise rr = signal_rr(§12.2).
+ * The pure part of update_signal_card(bot, trade, stage, lang) up to the edit call:
+ *   { result: 'skip' }  — no delivered card / no user / no or unparsable snapshot / empty
+ *                          html / unknown stage / edited text > 4000 chars;
+ *   { result: 'error' } — where the bot's outer `except Exception` fires before the edit
+ *                          (int() of a non-numeric signal_msg_id / user_id, a snapshot that
+ *                          parses to something without .get());
+ *   { result: 'ok', line, rr, text, card } — what the bot would send to edit_message_text.
+ * `trade.missed_rr` carries the MISSED distance; otherwise rr = signal_rr(§12.2) with the
+ * stage forced and `result` blanked.
  */
 function cardOutcome(trade, stage, lang = 'ru') {
   let mid; let uid;
-  try { mid = pyInt(falsy(trade.signal_msg_id) ? 0 : trade.signal_msg_id); } catch (_e) { mid = 0; }
-  try { uid = pyInt(falsy(trade.user_id) ? 0 : trade.user_id); } catch (_e) { uid = 0; }
-  const raw = trade.signal_card_json || '';
-  if (!mid || !uid || !raw || !(stage in OUTCOME_LINE.ru)) return null;
+  try {
+    mid = pyInt(falsy(trade.signal_msg_id) ? 0 : trade.signal_msg_id);
+    uid = pyInt(falsy(trade.user_id) ? 0 : trade.user_id);
+  } catch (_e) {
+    return { result: 'error' };
+  }
+  const raw = falsy(trade.signal_card_json) ? '' : trade.signal_card_json;
+  if (!mid || !uid || !raw || !hasOwn(OUTCOME_LINE.ru, stage)) return { result: 'skip' };
+  if (typeof raw !== 'string') return { result: 'skip' };          // json.loads(non-str) → TypeError
   let card;
-  try { card = typeof raw === 'string' ? JSON.parse(raw) : raw; } catch (_e) { return null; }
-  if (!card || typeof card !== 'object') return null;
+  try { card = JSON.parse(raw); } catch (_e) { return { result: 'skip' }; }
+  if (card === null || typeof card !== 'object' || Array.isArray(card)) return { result: 'error' };
   const html = sOr(card.html);
-  if (!html) return null;
+  if (!html) return { result: 'skip' };
   const rr = stage === MISSED
     ? (trade.missed_rr === undefined ? null : trade.missed_rr)
     : signalRr({ ...trade, progress_stage: stage, result: '' }, stage.toLowerCase());
   const line = outcomeLine(stage, rr, lang);
   const text = cardTextWithOutcome(html, line);
-  if (pyLen(text) > CARD_MAX_TEXT) return null;
-  return { line, rr, text, card };
+  if (pyLen(text) > CARD_MAX_TEXT) return { result: 'skip' };
+  return { result: 'ok', line, rr, text, card };
+}
+
+/**
+ * process_trade step 12: TPs reached before (stage0 ∈ TPs ⇒ TP1..stage0) followed by the
+ * TPs among the new events; hit levels for the chart add the final SL / BE stage.
+ */
+function hitFor(stage0, events) {
+  const prev = TP_ORDER.includes(stage0) ? TP_ORDER.slice(0, TP_ORDER.indexOf(stage0) + 1) : [];
+  return prev.concat(events.filter((e) => TP_ORDER.includes(e)));
+}
+
+function hitLevelsFor(hit, stage) {
+  return hit.concat(stage === SL || stage === BE ? [stage] : []);
 }
 
 // ── EXPIRED / MISSED arithmetic (§11.9, §11.10) ─────────────────────────────
@@ -464,7 +500,7 @@ function markToMarketRr(trade, price) {
     const rr = sign * (pyFloat(price) - entry) / rsk;
     const tp3 = fOr0(trade.tp3);
     const cap = tp3 > 0 ? Math.abs(tp3 - entry) / rsk : 10.0;
-    return pyRound(Math.max(-1.0, Math.min(cap, rr)), 2);
+    return pyRound(pyMax(-1.0, pyMin(cap, rr)), 2);
   } catch (_e) {
     return null;
   }
@@ -497,7 +533,8 @@ module.exports = {
   NONE, ENTRY, TP1, TP2, TP3, SL, BE, EXPIRED, MISSED, FINAL, TP_ORDER, TF_SEC, TF_NORM,
   CARD_MARK, CARD_MAX_JSON, CARD_MAX_TEXT, OUTCOME_LINE,
   makeLevels, levelsFromTrade, isLong, tpOf, valid, risk, rOf,
-  processBar, replay, couldChange, barsFromFrame, covers, pickTfs, chartWindow, extremesAfter,
+  processBar, replay, couldChange, barsFromFrame, covers, pickTfs, chartTail, chartWindow, extremesAfter,
+  hitFor, hitLevelsFor,
   fmtPrice, fmtR, ago, buildText, fmtOutcomeR, outcomeLine, cardTextWithOutcome, cardOutcome,
   markToMarketRr, missedR, htmlEscape, pyLen, falsy, fOr0, sOr,
 };

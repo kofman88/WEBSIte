@@ -157,10 +157,13 @@ describe('card outcome (§11.8)', () => {
   it(`cardOutcome reproduces update_signal_card's skip rules and edited text (${V.update_card.length} cases)`, () => {
     for (const c of V.update_card) {
       const got = T.cardOutcome(c.trade, c.stage, c.lang);
-      if (c.mode === 'ok' && c.result === 'skip') {
-        expect(got, c.name).toBe(null);
+      if (c.text === null) {
+        // the bot never reached edit_message_text: skip / error decided before the edit
+        expect(got.result, c.name).toBe(c.result);
       } else {
-        expect(got, c.name).not.toBe(null);
+        // the edit was attempted; its own outcome (ok / not modified / blocked / error) is the
+        // delivery layer's business — the pure part must produce exactly the edited text
+        expect(got.result, c.name).toBe('ok');
         expect(got.text, c.name).toBe(c.text);
         expect(got.line, c.name).toBe(c.line);
         expect(got.rr, c.name).toBe(c.rr);
