@@ -1,0 +1,5874 @@
+{
+ "t_end_utc": "2026-01-01 00:00:00",
+ "tf_ms": {
+  "15m": 900000,
+  "1h": 3600000,
+  "4h": 14400000,
+  "1d": 86400000
+ },
+ "bars_stored": {
+  "15m": 2000,
+  "1h": 400,
+  "4h": 400,
+  "1d": 400
+ },
+ "format": "{symbol, tf, bars: [[open_time_ms, open, high, low, close, volume], ...]}; all series end at t_end (last bar closes exactly at t_end); open_time aligned to the TF; 1h/4h/1d are OHLCV resamples of the same 15m path, so the TFs are mutually consistent",
+ "fixtures": [
+  {
+   "symbol": "BTC-USDT-SWAP",
+   "regime": "market",
+   "seed": 1000,
+   "beta": 0.0,
+   "price_scale": 90000.0,
+   "base_vol": 40000000.0,
+   "memcoin": false,
+   "segments": [
+    [
+     0,
+     1536,
+     "ranging"
+    ],
+    [
+     1536,
+     4992,
+     "volatile"
+    ],
+    [
+     4992,
+     8352,
+     "ranging"
+    ],
+    [
+     8352,
+     9888,
+     "trending_down"
+    ],
+    [
+     9888,
+     12288,
+     "ranging"
+    ],
+    [
+     12288,
+     14112,
+     "trending_up"
+    ],
+    [
+     14112,
+     16512,
+     "trending_down"
+    ],
+    [
+     16512,
+     18240,
+     "volatile"
+    ],
+    [
+     18240,
+     19680,
+     "ranging"
+    ],
+    [
+     19680,
+     20640,
+     "low_volume"
+    ],
+    [
+     20640,
+     24192,
+     "low_volume"
+    ],
+    [
+     24192,
+     27168,
+     "trending_down"
+    ],
+    [
+     27168,
+     30432,
+     "trending_up"
+    ],
+    [
+     30432,
+     33216,
+     "low_volume"
+    ],
+    [
+     33216,
+     34560,
+     "volatile"
+    ],
+    [
+     34560,
+     35520,
+     "trending_down"
+    ],
+    [
+     35520,
+     36576,
+     "trending_down"
+    ],
+    [
+     36576,
+     38016,
+     "volatile"
+    ],
+    [
+     38016,
+     38400,
+     "volatile"
+    ]
+   ],
+   "events": [],
+   "legs_last_1h_window": [
+    [
+     35,
+     "vol_impulse 1"
+    ],
+    [
+     99,
+     "vol_impulse 1"
+    ],
+    [
+     113,
+     "vol_impulse -1"
+    ],
+    [
+     151,
+     "vol_impulse -1"
+    ],
+    [
+     164,
+     "vol_impulse 1"
+    ],
+    [
+     189,
+     "vol_impulse 1"
+    ],
+    [
+     220,
+     "vol_impulse 1"
+    ],
+    [
+     235,
+     "vol_impulse -1"
+    ],
+    [
+     265,
+     "vol_impulse 1"
+    ],
+    [
+     289,
+     "vol_impulse -1"
+    ],
+    [
+     304,
+     "vol_impulse 1"
+    ],
+    [
+     368,
+     "vol_impulse 1"
+    ],
+    [
+     392,
+     "vol_impulse 1"
+    ]
+   ],
+   "files": {
+    "15m": "candles/BTC-USDT-SWAP_15m.json",
+    "1h": "candles/BTC-USDT-SWAP_1h.json",
+    "4h": "candles/BTC-USDT-SWAP_4h.json",
+    "1d": "candles/BTC-USDT-SWAP_1d.json"
+   },
+   "close_last": 73458.52026
+  },
+  {
+   "symbol": "ETH-USDT-SWAP",
+   "regime": "market",
+   "seed": 1001,
+   "beta": 0.9,
+   "price_scale": 3100.0,
+   "base_vol": 15000000.0,
+   "memcoin": false,
+   "segments": [
+    [
+     0,
+     3648,
+     "volatile"
+    ],
+    [
+     3648,
+     7008,
+     "trending_up"
+    ],
+    [
+     7008,
+     9408,
+     "trending_up"
+    ],
+    [
+     9408,
+     12576,
+     "low_volume"
+    ],
+    [
+     12576,
+     14016,
+     "trending_up"
+    ],
+    [
+     14016,
+     16224,
+     "trending_down"
+    ],
+    [
+     16224,
+     18624,
+     "volatile"
+    ],
+    [
+     18624,
+     19776,
+     "trending_up"
+    ],
+    [
+     19776,
+     22752,
+     "trending_up"
+    ],
+    [
+     22752,
+     24000,
+     "trending_up"
+    ],
+    [
+     24000,
+     27744,
+     "trending_up"
+    ],
+    [
+     27744,
+     31104,
+     "low_volume"
+    ],
+    [
+     31104,
+     33312,
+     "volatile"
+    ],
+    [
+     33312,
+     35424,
+     "trending_down"
+    ],
+    [
+     35424,
+     35520,
+     "ranging"
+    ],
+    [
+     35520,
+     36960,
+     "trending_down"
+    ],
+    [
+     36960,
+     37920,
+     "trending_down"
+    ],
+    [
+     37920,
+     38400,
+     "low_volume"
+    ]
+   ],
+   "events": [],
+   "legs_last_1h_window": [
+    [
+     25,
+     "trend_impulse"
+    ],
+    [
+     40,
+     "trend_impulse"
+    ],
+    [
+     138,
+     "trend_impulse"
+    ],
+    [
+     245,
+     "trend_impulse"
+    ],
+    [
+     280,
+     "quiet_sfp side=1"
+    ],
+    [
+     304,
+     "sweep k=0 extra=0.0"
+    ],
+    [
+     331,
+     "sweep k=1 extra=0.0"
+    ],
+    [
+     361,
+     "sweep k=2 extra=0.0"
+    ],
+    [
+     399,
+     "sweep k=3 extra=0.008"
+    ]
+   ],
+   "files": {
+    "15m": "candles/ETH-USDT-SWAP_15m.json",
+    "1h": "candles/ETH-USDT-SWAP_1h.json",
+    "4h": "candles/ETH-USDT-SWAP_4h.json",
+    "1d": "candles/ETH-USDT-SWAP_1d.json"
+   },
+   "close_last": 5245.660744
+  },
+  {
+   "symbol": "SYNUP01-USDT-SWAP",
+   "regime": "trending_up",
+   "seed": 100,
+   "beta": 0.0,
+   "price_scale": 0.00012,
+   "base_vol": 300000.0,
+   "memcoin": false,
+   "segments": [
+    [
+     0,
+     3168,
+     "low_volume"
+    ],
+    [
+     3168,
+     4416,
+     "ranging"
+    ],
+    [
+     4416,
+     5568,
+     "trending_down"
+    ],
+    [
+     5568,
+     7776,
+     "trending_up"
+    ],
+    [
+     7776,
+     10464,
+     "low_volume"
+    ],
+    [
+     10464,
+     14208,
+     "ranging"
+    ],
+    [
+     14208,
+     16320,
+     "volatile"
+    ],
+    [
+     16320,
+     19968,
+     "low_volume"
+    ],
+    [
+     19968,
+     20928,
+     "volatile"
+    ],
+    [
+     20928,
+     24000,
+     "trending_up"
+    ],
+    [
+     24000,
+     26400,
+     "low_volume"
+    ],
+    [
+     26400,
+     29376,
+     "trending_down"
+    ],
+    [
+     29376,
+     31200,
+     "volatile"
+    ],
+    [
+     31200,
+     32544,
+     "ranging"
+    ],
+    [
+     32544,
+     35136,
+     "ranging"
+    ],
+    [
+     35136,
+     35520,
+     "ranging"
+    ],
+    [
+     35520,
+     38400,
+     "trending_up"
+    ]
+   ],
+   "events": [],
+   "legs_last_1h_window": [
+    [
+     59,
+     "trend_impulse"
+    ],
+    [
+     124,
+     "trend_impulse"
+    ],
+    [
+     215,
+     "trend_impulse"
+    ],
+    [
+     299,
+     "trend_impulse"
+    ]
+   ],
+   "files": {
+    "15m": "candles/SYNUP01-USDT-SWAP_15m.json",
+    "1h": "candles/SYNUP01-USDT-SWAP_1h.json",
+    "4h": "candles/SYNUP01-USDT-SWAP_4h.json",
+    "1d": "candles/SYNUP01-USDT-SWAP_1d.json"
+   },
+   "close_last": 0.0001805844336
+  },
+  {
+   "symbol": "SYNUP02-USDT-SWAP",
+   "regime": "trending_up",
+   "seed": 101,
+   "beta": 0.4,
+   "price_scale": 0.045,
+   "base_vol": 800000.0,
+   "memcoin": false,
+   "segments": [
+    [
+     0,
+     1824,
+     "low_volume"
+    ],
+    [
+     1824,
+     4800,
+     "trending_down"
+    ],
+    [
+     4800,
+     6144,
+     "volatile"
+    ],
+    [
+     6144,
+     8256,
+     "ranging"
+    ],
+    [
+     8256,
+     11040,
+     "trending_down"
+    ],
+    [
+     11040,
+     13056,
+     "low_volume"
+    ],
+    [
+     13056,
+     16320,
+     "low_volume"
+    ],
+    [
+     16320,
+     17664,
+     "trending_down"
+    ],
+    [
+     17664,
+     18816,
+     "low_volume"
+    ],
+    [
+     18816,
+     21696,
+     "trending_down"
+    ],
+    [
+     21696,
+     25056,
+     "low_volume"
+    ],
+    [
+     25056,
+     26880,
+     "volatile"
+    ],
+    [
+     26880,
+     28128,
+     "ranging"
+    ],
+    [
+     28128,
+     30720,
+     "trending_up"
+    ],
+    [
+     30720,
+     33888,
+     "low_volume"
+    ],
+    [
+     33888,
+     35520,
+     "ranging"
+    ],
+    [
+     35520,
+     38400,
+     "trending_up"
+    ]
+   ],
+   "events": [],
+   "legs_last_1h_window": [
+    [
+     7,
+     "trend_impulse"
+    ],
+    [
+     117,
+     "trend_impulse"
+    ],
+    [
+     160,
+     "trend_impulse"
+    ],
+    [
+     225,
+     "trend_impulse"
+    ],
+    [
+     312,
+     "trend_impulse"
+    ]
+   ],
+   "files": {
+    "15m": "candles/SYNUP02-USDT-SWAP_15m.json",
+    "1h": "candles/SYNUP02-USDT-SWAP_1h.json",
+    "4h": "candles/SYNUP02-USDT-SWAP_4h.json",
+    "1d": "candles/SYNUP02-USDT-SWAP_1d.json"
+   },
+   "close_last": 0.02496722373
+  },
+  {
+   "symbol": "SYNUP03-USDT-SWAP",
+   "regime": "trending_up",
+   "seed": 102,
+   "beta": 0.8,
+   "price_scale": 0.85,
+   "base_vol": 2000000.0,
+   "memcoin": false,
+   "segments": [
+    [
+     0,
+     2208,
+     "trending_up"
+    ],
+    [
+     2208,
+     4704,
+     "ranging"
+    ],
+    [
+     4704,
+     6336,
+     "low_volume"
+    ],
+    [
+     6336,
+     8064,
+     "trending_down"
+    ],
+    [
+     8064,
+     9216,
+     "volatile"
+    ],
+    [
+     9216,
+     12096,
+     "ranging"
+    ],
+    [
+     12096,
+     14016,
+     "low_volume"
+    ],
+    [
+     14016,
+     17280,
+     "ranging"
+    ],
+    [
+     17280,
+     19968,
+     "low_volume"
+    ],
+    [
+     19968,
+     21024,
+     "trending_down"
+    ],
+    [
+     21024,
+     22464,
+     "trending_up"
+    ],
+    [
+     22464,
+     24672,
+     "trending_down"
+    ],
+    [
+     24672,
+     28032,
+     "volatile"
+    ],
+    [
+     28032,
+     31872,
+     "ranging"
+    ],
+    [
+     31872,
+     34176,
+     "low_volume"
+    ],
+    [
+     34176,
+     35520,
+     "low_volume"
+    ],
+    [
+     35520,
+     38400,
+     "trending_up"
+    ]
+   ],
+   "events": [],
+   "legs_last_1h_window": [
+    [
+     42,
+     "trend_impulse"
+    ],
+    [
+     151,
+     "trend_impulse"
+    ],
+    [
+     296,
+     "trend_impulse"
+    ],
+    [
+     375,
+     "trend_impulse"
+    ]
+   ],
+   "files": {
+    "15m": "candles/SYNUP03-USDT-SWAP_15m.json",
+    "1h": "candles/SYNUP03-USDT-SWAP_1h.json",
+    "4h": "candles/SYNUP03-USDT-SWAP_4h.json",
+    "1d": "candles/SYNUP03-USDT-SWAP_1d.json"
+   },
+   "close_last": 0.9435227241
+  },
+  {
+   "symbol": "SYNUP04-USDT-SWAP",
+   "regime": "trending_up",
+   "seed": 103,
+   "beta": 0.0,
+   "price_scale": 3.2,
+   "base_vol": 5000000.0,
+   "memcoin": false,
+   "segments": [
+    [
+     0,
+     2592,
+     "trending_down"
+    ],
+    [
+     2592,
+     3744,
+     "trending_down"
+    ],
+    [
+     3744,
+     6816,
+     "trending_up"
+    ],
+    [
+     6816,
+     9312,
+     "low_volume"
+    ],
+    [
+     9312,
+     11808,
+     "low_volume"
+    ],
+    [
+     11808,
+     13632,
+     "trending_up"
+    ],
+    [
+     13632,
+     14880,
+     "trending_down"
+    ],
+    [
+     14880,
+     17568,
+     "volatile"
+    ],
+    [
+     17568,
+     20256,
+     "volatile"
+    ],
+    [
+     20256,
+     23616,
+     "ranging"
+    ],
+    [
+     23616,
+     24960,
+     "ranging"
+    ],
+    [
+     24960,
+     27456,
+     "volatile"
+    ],
+    [
+     27456,
+     28416,
+     "ranging"
+    ],
+    [
+     28416,
+     29376,
+     "low_volume"
+    ],
+    [
+     29376,
+     32928,
+     "trending_down"
+    ],
+    [
+     32928,
+     34752,
+     "trending_up"
+    ],
+    [
+     34752,
+     35520,
+     "trending_down"
+    ],
+    [
+     35520,
+     38400,
+     "trending_up"
+    ]
+   ],
+   "events": [],
+   "legs_last_1h_window": [
+    [
+     20,
+     "trend_impulse"
+    ],
+    [
+     122,
+     "trend_impulse"
+    ],
+    [
+     217,
+     "trend_impulse"
+    ],
+    [
+     316,
+     "trend_impulse"
+    ],
+    [
+     380,
+     "trend_impulse"
+    ]
+   ],
+   "files": {
+    "15m": "candles/SYNUP04-USDT-SWAP_15m.json",
+    "1h": "candles/SYNUP04-USDT-SWAP_1h.json",
+    "4h": "candles/SYNUP04-USDT-SWAP_4h.json",
+    "1d": "candles/SYNUP04-USDT-SWAP_1d.json"
+   },
+   "close_last": 4.163358724
+  },
+  {
+   "symbol": "SYNUP05-USDT-SWAP",
+   "regime": "trending_up",
+   "seed": 104,
+   "beta": 0.4,
+   "price_scale": 27.0,
+   "base_vol": 1200000.0,
+   "memcoin": false,
+   "segments": [
+    [
+     0,
+     2976,
+     "low_volume"
+    ],
+    [
+     2976,
+     4896,
+     "volatile"
+    ],
+    [
+     4896,
+     6624,
+     "trending_down"
+    ],
+    [
+     6624,
+     8064,
+     "trending_up"
+    ],
+    [
+     8064,
+     10944,
+     "trending_down"
+    ],
+    [
+     10944,
+     12384,
+     "volatile"
+    ],
+    [
+     12384,
+     14208,
+     "volatile"
+    ],
+    [
+     14208,
+     16224,
+     "ranging"
+    ],
+    [
+     16224,
+     20064,
+     "volatile"
+    ],
+    [
+     20064,
+     21600,
+     "low_volume"
+    ],
+    [
+     21600,
+     23616,
+     "trending_up"
+    ],
+    [
+     23616,
+     25632,
+     "ranging"
+    ],
+    [
+     25632,
+     28800,
+     "volatile"
+    ],
+    [
+     28800,
+     32256,
+     "low_volume"
+    ],
+    [
+     32256,
+     35424,
+     "trending_down"
+    ],
+    [
+     35424,
+     35520,
+     "ranging"
+    ],
+    [
+     35520,
+     38400,
+     "trending_up"
+    ]
+   ],
+   "events": [],
+   "legs_last_1h_window": [
+    [
+     47,
+     "trend_impulse"
+    ],
+    [
+     133,
+     "trend_impulse"
+    ],
+    [
+     246,
+     "trend_impulse"
+    ],
+    [
+     334,
+     "trend_impulse"
+    ],
+    [
+     363,
+     "trend_impulse"
+    ]
+   ],
+   "files": {
+    "15m": "candles/SYNUP05-USDT-SWAP_15m.json",
+    "1h": "candles/SYNUP05-USDT-SWAP_1h.json",
+    "4h": "candles/SYNUP05-USDT-SWAP_4h.json",
+    "1d": "candles/SYNUP05-USDT-SWAP_1d.json"
+   },
+   "close_last": 39.61721009
+  },
+  {
+   "symbol": "SYNUP06-USDT-SWAP",
+   "regime": "trending_up",
+   "seed": 105,
+   "beta": 0.8,
+   "price_scale": 150.0,
+   "base_vol": 3000000.0,
+   "memcoin": false,
+   "segments": [
+    [
+     0,
+     1728,
+     "volatile"
+    ],
+    [
+     1728,
+     5568,
+     "low_volume"
+    ],
+    [
+     5568,
+     8544,
+     "trending_up"
+    ],
+    [
+     8544,
+     11328,
+     "ranging"
+    ],
+    [
+     11328,
+     13632,
+     "trending_down"
+    ],
+    [
+     13632,
+     15360,
+     "trending_down"
+    ],
+    [
+     15360,
+     18336,
+     "low_volume"
+    ],
+    [
+     18336,
+     19680,
+     "ranging"
+    ],
+    [
+     19680,
+     22272,
+     "volatile"
+    ],
+    [
+     22272,
+     23904,
+     "trending_down"
+    ],
+    [
+     23904,
+     25920,
+     "ranging"
+    ],
+    [
+     25920,
+     29376,
+     "volatile"
+    ],
+    [
+     29376,
+     30912,
+     "trending_up"
+    ],
+    [
+     30912,
+     32544,
+     "trending_down"
+    ],
+    [
+     32544,
+     35520,
+     "trending_down"
+    ],
+    [
+     35520,
+     38400,
+     "trending_up"
+    ]
+   ],
+   "events": [],
+   "legs_last_1h_window": [
+    [
+     81,
+     "trend_impulse"
+    ],
+    [
+     190,
+     "trend_impulse"
+    ],
+    [
+     312,
+     "trend_impulse"
+    ]
+   ],
+   "files": {
+    "15m": "candles/SYNUP06-USDT-SWAP_15m.json",
+    "1h": "candles/SYNUP06-USDT-SWAP_1h.json",
+    "4h": "candles/SYNUP06-USDT-SWAP_4h.json",
+    "1d": "candles/SYNUP06-USDT-SWAP_1d.json"
+   },
+   "close_last": 47.84658183
+  },
+  {
+   "symbol": "SYNUP07-USDT-SWAP",
+   "regime": "trending_up",
+   "seed": 106,
+   "beta": 0.0,
+   "price_scale": 2400.0,
+   "base_vol": 700000.0,
+   "memcoin": false,
+   "segments": [
+    [
+     0,
+     2592,
+     "low_volume"
+    ],
+    [
+     2592,
+     4800,
+     "trending_up"
+    ],
+    [
+     4800,
+     6336,
+     "trending_up"
+    ],
+    [
+     6336,
+     9600,
+     "ranging"
+    ],
+    [
+     9600,
+     11136,
+     "low_volume"
+    ],
+    [
+     11136,
+     12768,
+     "trending_up"
+    ],
+    [
+     12768,
+     13920,
+     "trending_down"
+    ],
+    [
+     13920,
+     15648,
+     "trending_up"
+    ],
+    [
+     15648,
+     18624,
+     "trending_down"
+    ],
+    [
+     18624,
+     21696,
+     "trending_up"
+    ],
+    [
+     21696,
+     25440,
+     "volatile"
+    ],
+    [
+     25440,
+     27072,
+     "trending_up"
+    ],
+    [
+     27072,
+     28608,
+     "low_volume"
+    ],
+    [
+     28608,
+     30240,
+     "trending_up"
+    ],
+    [
+     30240,
+     31968,
+     "trending_down"
+    ],
+    [
+     31968,
+     34848,
+     "trending_up"
+    ],
+    [
+     34848,
+     35520,
+     "volatile"
+    ],
+    [
+     35520,
+     38400,
+     "trending_up"
+    ]
+   ],
+   "events": [],
+   "legs_last_1h_window": [
+    [
+     94,
+     "trend_impulse"
+    ],
+    [
+     146,
+     "trend_impulse"
+    ],
+    [
+     211,
+     "trend_impulse"
+    ],
+    [
+     343,
+     "trend_impulse"
+    ],
+    [
+     394,
+     "trend_impulse"
+    ]
+   ],
+   "files": {
+    "15m": "candles/SYNUP07-USDT-SWAP_15m.json",
+    "1h": "candles/SYNUP07-USDT-SWAP_1h.json",
+    "4h": "candles/SYNUP07-USDT-SWAP_4h.json",
+    "1d": "candles/SYNUP07-USDT-SWAP_1d.json"
+   },
+   "close_last": 8058.701376
+  },
+  {
+   "symbol": "SYNUP08-USDT-SWAP",
+   "regime": "trending_up",
+   "seed": 107,
+   "beta": 0.4,
+   "price_scale": 65000.0,
+   "base_vol": 2500000.0,
+   "memcoin": false,
+   "segments": [
+    [
+     0,
+     1248,
+     "volatile"
+    ],
+    [
+     1248,
+     4896,
+     "ranging"
+    ],
+    [
+     4896,
+     8256,
+     "ranging"
+    ],
+    [
+     8256,
+     9984,
+     "volatile"
+    ],
+    [
+     9984,
+     12480,
+     "ranging"
+    ],
+    [
+     12480,
+     14688,
+     "trending_up"
+    ],
+    [
+     14688,
+     15744,
+     "ranging"
+    ],
+    [
+     15744,
+     17184,
+     "low_volume"
+    ],
+    [
+     17184,
+     21024,
+     "trending_up"
+    ],
+    [
+     21024,
+     23232,
+     "low_volume"
+    ],
+    [
+     23232,
+     25056,
+     "trending_down"
+    ],
+    [
+     25056,
+     27072,
+     "trending_down"
+    ],
+    [
+     27072,
+     30240,
+     "trending_up"
+    ],
+    [
+     30240,
+     33216,
+     "trending_up"
+    ],
+    [
+     33216,
+     35520,
+     "volatile"
+    ],
+    [
+     35520,
+     38400,
+     "trending_up"
+    ]
+   ],
+   "events": [],
+   "legs_last_1h_window": [
+    [
+     62,
+     "trend_impulse"
+    ],
+    [
+     174,
+     "trend_impulse"
+    ],
+    [
+     243,
+     "trend_impulse"
+    ],
+    [
+     347,
+     "trend_impulse"
+    ]
+   ],
+   "files": {
+    "15m": "candles/SYNUP08-USDT-SWAP_15m.json",
+    "1h": "candles/SYNUP08-USDT-SWAP_1h.json",
+    "4h": "candles/SYNUP08-USDT-SWAP_4h.json",
+    "1d": "candles/SYNUP08-USDT-SWAP_1d.json"
+   },
+   "close_last": 99019.25685
+  },
+  {
+   "symbol": "SYNDN01-USDT-SWAP",
+   "regime": "trending_down",
+   "seed": 200,
+   "beta": 0.0,
+   "price_scale": 0.00012,
+   "base_vol": 300000.0,
+   "memcoin": false,
+   "segments": [
+    [
+     0,
+     1056,
+     "volatile"
+    ],
+    [
+     1056,
+     2688,
+     "volatile"
+    ],
+    [
+     2688,
+     4608,
+     "trending_up"
+    ],
+    [
+     4608,
+     7104,
+     "trending_up"
+    ],
+    [
+     7104,
+     10656,
+     "ranging"
+    ],
+    [
+     10656,
+     12864,
+     "ranging"
+    ],
+    [
+     12864,
+     15168,
+     "ranging"
+    ],
+    [
+     15168,
+     17472,
+     "trending_down"
+    ],
+    [
+     17472,
+     20448,
+     "trending_up"
+    ],
+    [
+     20448,
+     23328,
+     "trending_down"
+    ],
+    [
+     23328,
+     25536,
+     "trending_down"
+    ],
+    [
+     25536,
+     28512,
+     "trending_down"
+    ],
+    [
+     28512,
+     31296,
+     "trending_up"
+    ],
+    [
+     31296,
+     32256,
+     "low_volume"
+    ],
+    [
+     32256,
+     35424,
+     "ranging"
+    ],
+    [
+     35424,
+     35520,
+     "trending_up"
+    ],
+    [
+     35520,
+     38400,
+     "trending_down"
+    ]
+   ],
+   "events": [],
+   "legs_last_1h_window": [
+    [
+     115,
+     "trend_impulse"
+    ],
+    [
+     178,
+     "trend_impulse"
+    ],
+    [
+     208,
+     "trend_impulse"
+    ],
+    [
+     264,
+     "trend_impulse"
+    ],
+    [
+     367,
+     "trend_impulse"
+    ]
+   ],
+   "files": {
+    "15m": "candles/SYNDN01-USDT-SWAP_15m.json",
+    "1h": "candles/SYNDN01-USDT-SWAP_1h.json",
+    "4h": "candles/SYNDN01-USDT-SWAP_4h.json",
+    "1d": "candles/SYNDN01-USDT-SWAP_1d.json"
+   },
+   "close_last": 7.350640576e-05
+  },
+  {
+   "symbol": "SYNDN02-USDT-SWAP",
+   "regime": "trending_down",
+   "seed": 201,
+   "beta": 0.4,
+   "price_scale": 0.045,
+   "base_vol": 800000.0,
+   "memcoin": false,
+   "segments": [
+    [
+     0,
+     1824,
+     "low_volume"
+    ],
+    [
+     1824,
+     3168,
+     "ranging"
+    ],
+    [
+     3168,
+     6720,
+     "ranging"
+    ],
+    [
+     6720,
+     9984,
+     "ranging"
+    ],
+    [
+     9984,
+     13440,
+     "volatile"
+    ],
+    [
+     13440,
+     16800,
+     "ranging"
+    ],
+    [
+     16800,
+     19392,
+     "trending_up"
+    ],
+    [
+     19392,
+     22272,
+     "ranging"
+    ],
+    [
+     22272,
+     25920,
+     "low_volume"
+    ],
+    [
+     25920,
+     28704,
+     "low_volume"
+    ],
+    [
+     28704,
+     30240,
+     "ranging"
+    ],
+    [
+     30240,
+     32256,
+     "ranging"
+    ],
+    [
+     32256,
+     35520,
+     "trending_up"
+    ],
+    [
+     35520,
+     38400,
+     "trending_down"
+    ]
+   ],
+   "events": [],
+   "legs_last_1h_window": [
+    [
+     0,
+     "trend_impulse"
+    ],
+    [
+     74,
+     "trend_impulse"
+    ],
+    [
+     118,
+     "trend_impulse"
+    ],
+    [
+     213,
+     "trend_impulse"
+    ],
+    [
+     266,
+     "trend_impulse"
+    ],
+    [
+     386,
+     "trend_impulse"
+    ]
+   ],
+   "files": {
+    "15m": "candles/SYNDN02-USDT-SWAP_15m.json",
+    "1h": "candles/SYNDN02-USDT-SWAP_1h.json",
+    "4h": "candles/SYNDN02-USDT-SWAP_4h.json",
+    "1d": "candles/SYNDN02-USDT-SWAP_1d.json"
+   },
+   "close_last": 0.04139194803
+  },
+  {
+   "symbol": "SYNDN03-USDT-SWAP",
+   "regime": "trending_down",
+   "seed": 202,
+   "beta": 0.8,
+   "price_scale": 0.85,
+   "base_vol": 2000000.0,
+   "memcoin": false,
+   "segments": [
+    [
+     0,
+     1440,
+     "trending_down"
+    ],
+    [
+     1440,
+     3648,
+     "ranging"
+    ],
+    [
+     3648,
+     5280,
+     "low_volume"
+    ],
+    [
+     5280,
+     6912,
+     "volatile"
+    ],
+    [
+     6912,
+     8160,
+     "trending_down"
+    ],
+    [
+     8160,
+     9984,
+     "ranging"
+    ],
+    [
+     9984,
+     11808,
+     "ranging"
+    ],
+    [
+     11808,
+     14016,
+     "low_volume"
+    ],
+    [
+     14016,
+     17760,
+     "trending_down"
+    ],
+    [
+     17760,
+     21408,
+     "low_volume"
+    ],
+    [
+     21408,
+     24864,
+     "trending_down"
+    ],
+    [
+     24864,
+     26592,
+     "volatile"
+    ],
+    [
+     26592,
+     29472,
+     "ranging"
+    ],
+    [
+     29472,
+     33120,
+     "trending_down"
+    ],
+    [
+     33120,
+     35328,
+     "ranging"
+    ],
+    [
+     35328,
+     35520,
+     "ranging"
+    ],
+    [
+     35520,
+     38400,
+     "trending_down"
+    ]
+   ],
+   "events": [],
+   "legs_last_1h_window": [
+    [
+     83,
+     "trend_impulse"
+    ],
+    [
+     174,
+     "trend_impulse"
+    ],
+    [
+     243,
+     "trend_impulse"
+    ],
+    [
+     345,
+     "trend_impulse"
+    ]
+   ],
+   "files": {
+    "15m": "candles/SYNDN03-USDT-SWAP_15m.json",
+    "1h": "candles/SYNDN03-USDT-SWAP_1h.json",
+    "4h": "candles/SYNDN03-USDT-SWAP_4h.json",
+    "1d": "candles/SYNDN03-USDT-SWAP_1d.json"
+   },
+   "close_last": 0.1336116798
+  },
+  {
+   "symbol": "SYNDN04-USDT-SWAP",
+   "regime": "trending_down",
+   "seed": 203,
+   "beta": 0.0,
+   "price_scale": 3.2,
+   "base_vol": 5000000.0,
+   "memcoin": false,
+   "segments": [
+    [
+     0,
+     1824,
+     "volatile"
+    ],
+    [
+     1824,
+     5568,
+     "trending_down"
+    ],
+    [
+     5568,
+     9408,
+     "trending_up"
+    ],
+    [
+     9408,
+     11616,
+     "trending_down"
+    ],
+    [
+     11616,
+     14400,
+     "trending_down"
+    ],
+    [
+     14400,
+     15456,
+     "low_volume"
+    ],
+    [
+     15456,
+     18912,
+     "volatile"
+    ],
+    [
+     18912,
+     22464,
+     "ranging"
+    ],
+    [
+     22464,
+     23808,
+     "volatile"
+    ],
+    [
+     23808,
+     27168,
+     "low_volume"
+    ],
+    [
+     27168,
+     30912,
+     "trending_up"
+    ],
+    [
+     30912,
+     33216,
+     "trending_up"
+    ],
+    [
+     33216,
+     35136,
+     "volatile"
+    ],
+    [
+     35136,
+     35520,
+     "low_volume"
+    ],
+    [
+     35520,
+     38400,
+     "trending_down"
+    ]
+   ],
+   "events": [],
+   "legs_last_1h_window": [
+    [
+     82,
+     "trend_impulse"
+    ],
+    [
+     185,
+     "trend_impulse"
+    ],
+    [
+     248,
+     "trend_impulse"
+    ],
+    [
+     331,
+     "trend_impulse"
+    ],
+    [
+     381,
+     "trend_impulse"
+    ]
+   ],
+   "files": {
+    "15m": "candles/SYNDN04-USDT-SWAP_15m.json",
+    "1h": "candles/SYNDN04-USDT-SWAP_1h.json",
+    "4h": "candles/SYNDN04-USDT-SWAP_4h.json",
+    "1d": "candles/SYNDN04-USDT-SWAP_1d.json"
+   },
+   "close_last": 1.963627634
+  },
+  {
+   "symbol": "SYNDN05-USDT-SWAP",
+   "regime": "trending_down",
+   "seed": 204,
+   "beta": 0.4,
+   "price_scale": 27.0,
+   "base_vol": 1200000.0,
+   "memcoin": false,
+   "segments": [
+    [
+     0,
+     3072,
+     "ranging"
+    ],
+    [
+     3072,
+     6624,
+     "low_volume"
+    ],
+    [
+     6624,
+     8160,
+     "volatile"
+    ],
+    [
+     8160,
+     10848,
+     "trending_down"
+    ],
+    [
+     10848,
+     13152,
+     "trending_up"
+    ],
+    [
+     13152,
+     15552,
+     "trending_down"
+    ],
+    [
+     15552,
+     17472,
+     "trending_up"
+    ],
+    [
+     17472,
+     19680,
+     "trending_down"
+    ],
+    [
+     19680,
+     22848,
+     "low_volume"
+    ],
+    [
+     22848,
+     25632,
+     "volatile"
+    ],
+    [
+     25632,
+     29184,
+     "ranging"
+    ],
+    [
+     29184,
+     31392,
+     "trending_up"
+    ],
+    [
+     31392,
+     34560,
+     "trending_up"
+    ],
+    [
+     34560,
+     35520,
+     "trending_down"
+    ],
+    [
+     35520,
+     38400,
+     "trending_down"
+    ]
+   ],
+   "events": [],
+   "legs_last_1h_window": [
+    [
+     47,
+     "trend_impulse"
+    ],
+    [
+     96,
+     "trend_impulse"
+    ],
+    [
+     184,
+     "trend_impulse"
+    ],
+    [
+     270,
+     "trend_impulse"
+    ],
+    [
+     315,
+     "trend_impulse"
+    ],
+    [
+     351,
+     "trend_impulse"
+    ],
+    [
+     390,
+     "trend_impulse"
+    ]
+   ],
+   "files": {
+    "15m": "candles/SYNDN05-USDT-SWAP_15m.json",
+    "1h": "candles/SYNDN05-USDT-SWAP_1h.json",
+    "4h": "candles/SYNDN05-USDT-SWAP_4h.json",
+    "1d": "candles/SYNDN05-USDT-SWAP_1d.json"
+   },
+   "close_last": 27.51907925
+  },
+  {
+   "symbol": "SYNDN06-USDT-SWAP",
+   "regime": "trending_down",
+   "seed": 205,
+   "beta": 0.8,
+   "price_scale": 150.0,
+   "base_vol": 3000000.0,
+   "memcoin": false,
+   "segments": [
+    [
+     0,
+     2496,
+     "low_volume"
+    ],
+    [
+     2496,
+     4992,
+     "trending_down"
+    ],
+    [
+     4992,
+     7104,
+     "low_volume"
+    ],
+    [
+     7104,
+     10656,
+     "trending_up"
+    ],
+    [
+     10656,
+     11808,
+     "ranging"
+    ],
+    [
+     11808,
+     13632,
+     "trending_up"
+    ],
+    [
+     13632,
+     15456,
+     "ranging"
+    ],
+    [
+     15456,
+     18144,
+     "trending_up"
+    ],
+    [
+     18144,
+     19680,
+     "trending_down"
+    ],
+    [
+     19680,
+     22656,
+     "low_volume"
+    ],
+    [
+     22656,
+     24000,
+     "low_volume"
+    ],
+    [
+     24000,
+     26496,
+     "volatile"
+    ],
+    [
+     26496,
+     27840,
+     "ranging"
+    ],
+    [
+     27840,
+     30048,
+     "low_volume"
+    ],
+    [
+     30048,
+     33696,
+     "low_volume"
+    ],
+    [
+     33696,
+     34848,
+     "low_volume"
+    ],
+    [
+     34848,
+     35520,
+     "ranging"
+    ],
+    [
+     35520,
+     38400,
+     "trending_down"
+    ]
+   ],
+   "events": [],
+   "legs_last_1h_window": [
+    [
+     68,
+     "trend_impulse"
+    ],
+    [
+     151,
+     "trend_impulse"
+    ],
+    [
+     239,
+     "trend_impulse"
+    ],
+    [
+     329,
+     "trend_impulse"
+    ],
+    [
+     393,
+     "trend_impulse"
+    ]
+   ],
+   "files": {
+    "15m": "candles/SYNDN06-USDT-SWAP_15m.json",
+    "1h": "candles/SYNDN06-USDT-SWAP_1h.json",
+    "4h": "candles/SYNDN06-USDT-SWAP_4h.json",
+    "1d": "candles/SYNDN06-USDT-SWAP_1d.json"
+   },
+   "close_last": 145.2816068
+  },
+  {
+   "symbol": "SYNDN07-USDT-SWAP",
+   "regime": "trending_down",
+   "seed": 206,
+   "beta": 0.0,
+   "price_scale": 2400.0,
+   "base_vol": 700000.0,
+   "memcoin": false,
+   "segments": [
+    [
+     0,
+     2496,
+     "low_volume"
+    ],
+    [
+     2496,
+     5472,
+     "trending_down"
+    ],
+    [
+     5472,
+     6912,
+     "low_volume"
+    ],
+    [
+     6912,
+     7968,
+     "trending_down"
+    ],
+    [
+     7968,
+     11328,
+     "low_volume"
+    ],
+    [
+     11328,
+     14208,
+     "trending_up"
+    ],
+    [
+     14208,
+     15552,
+     "low_volume"
+    ],
+    [
+     15552,
+     16704,
+     "low_volume"
+    ],
+    [
+     16704,
+     20448,
+     "volatile"
+    ],
+    [
+     20448,
+     23808,
+     "low_volume"
+    ],
+    [
+     23808,
+     25632,
+     "volatile"
+    ],
+    [
+     25632,
+     28512,
+     "low_volume"
+    ],
+    [
+     28512,
+     30528,
+     "low_volume"
+    ],
+    [
+     30528,
+     33696,
+     "trending_up"
+    ],
+    [
+     33696,
+     35520,
+     "low_volume"
+    ],
+    [
+     35520,
+     38400,
+     "trending_down"
+    ]
+   ],
+   "events": [],
+   "legs_last_1h_window": [
+    [
+     72,
+     "trend_impulse"
+    ],
+    [
+     156,
+     "trend_impulse"
+    ],
+    [
+     206,
+     "trend_impulse"
+    ],
+    [
+     271,
+     "trend_impulse"
+    ],
+    [
+     347,
+     "trend_impulse"
+    ]
+   ],
+   "files": {
+    "15m": "candles/SYNDN07-USDT-SWAP_15m.json",
+    "1h": "candles/SYNDN07-USDT-SWAP_1h.json",
+    "4h": "candles/SYNDN07-USDT-SWAP_4h.json",
+    "1d": "candles/SYNDN07-USDT-SWAP_1d.json"
+   },
+   "close_last": 2002.636544
+  },
+  {
+   "symbol": "SYNDN08-USDT-SWAP",
+   "regime": "trending_down",
+   "seed": 207,
+   "beta": 0.4,
+   "price_scale": 65000.0,
+   "base_vol": 2500000.0,
+   "memcoin": false,
+   "segments": [
+    [
+     0,
+     1248,
+     "trending_down"
+    ],
+    [
+     1248,
+     2880,
+     "ranging"
+    ],
+    [
+     2880,
+     6144,
+     "low_volume"
+    ],
+    [
+     6144,
+     9504,
+     "ranging"
+    ],
+    [
+     9504,
+     12480,
+     "low_volume"
+    ],
+    [
+     12480,
+     14400,
+     "ranging"
+    ],
+    [
+     14400,
+     16992,
+     "low_volume"
+    ],
+    [
+     16992,
+     19008,
+     "trending_down"
+    ],
+    [
+     19008,
+     20160,
+     "volatile"
+    ],
+    [
+     20160,
+     21504,
+     "low_volume"
+    ],
+    [
+     21504,
+     24480,
+     "ranging"
+    ],
+    [
+     24480,
+     28320,
+     "ranging"
+    ],
+    [
+     28320,
+     30240,
+     "volatile"
+    ],
+    [
+     30240,
+     33696,
+     "ranging"
+    ],
+    [
+     33696,
+     35520,
+     "trending_up"
+    ],
+    [
+     35520,
+     38400,
+     "trending_down"
+    ]
+   ],
+   "events": [],
+   "legs_last_1h_window": [
+    [
+     63,
+     "trend_impulse"
+    ],
+    [
+     205,
+     "trend_impulse"
+    ],
+    [
+     306,
+     "trend_impulse"
+    ],
+    [
+     387,
+     "trend_impulse"
+    ]
+   ],
+   "files": {
+    "15m": "candles/SYNDN08-USDT-SWAP_15m.json",
+    "1h": "candles/SYNDN08-USDT-SWAP_1h.json",
+    "4h": "candles/SYNDN08-USDT-SWAP_4h.json",
+    "1d": "candles/SYNDN08-USDT-SWAP_1d.json"
+   },
+   "close_last": 32632.26422
+  },
+  {
+   "symbol": "SYNRG01-USDT-SWAP",
+   "regime": "ranging",
+   "seed": 300,
+   "beta": 0.0,
+   "price_scale": 0.00012,
+   "base_vol": 300000.0,
+   "memcoin": false,
+   "segments": [
+    [
+     0,
+     1056,
+     "volatile"
+    ],
+    [
+     1056,
+     4224,
+     "ranging"
+    ],
+    [
+     4224,
+     7392,
+     "trending_down"
+    ],
+    [
+     7392,
+     11040,
+     "trending_down"
+    ],
+    [
+     11040,
+     13920,
+     "volatile"
+    ],
+    [
+     13920,
+     17376,
+     "low_volume"
+    ],
+    [
+     17376,
+     21024,
+     "ranging"
+    ],
+    [
+     21024,
+     22368,
+     "volatile"
+    ],
+    [
+     22368,
+     24480,
+     "ranging"
+    ],
+    [
+     24480,
+     27552,
+     "ranging"
+    ],
+    [
+     27552,
+     29280,
+     "trending_down"
+    ],
+    [
+     29280,
+     32928,
+     "ranging"
+    ],
+    [
+     32928,
+     35520,
+     "low_volume"
+    ],
+    [
+     35520,
+     38400,
+     "ranging"
+    ]
+   ],
+   "events": [],
+   "legs_last_1h_window": [
+    [
+     10,
+     "quiet_sfp side=-1"
+    ],
+    [
+     44,
+     "sweep k=0 extra=0.0"
+    ],
+    [
+     80,
+     "sweep k=1 extra=0.0"
+    ],
+    [
+     109,
+     "sweep k=2 extra=0.0"
+    ],
+    [
+     145,
+     "sweep k=3 extra=0.0"
+    ],
+    [
+     183,
+     "sweep k=4 extra=0.008"
+    ],
+    [
+     220,
+     "sweep k=5 extra=0.0"
+    ],
+    [
+     257,
+     "sweep k=6 extra=0.0"
+    ],
+    [
+     292,
+     "sweep k=7 extra=0.0"
+    ],
+    [
+     322,
+     "sweep k=8 extra=0.0"
+    ],
+    [
+     363,
+     "range_leg to L"
+    ]
+   ],
+   "files": {
+    "15m": "candles/SYNRG01-USDT-SWAP_15m.json",
+    "1h": "candles/SYNRG01-USDT-SWAP_1h.json",
+    "4h": "candles/SYNRG01-USDT-SWAP_4h.json",
+    "1d": "candles/SYNRG01-USDT-SWAP_1d.json"
+   },
+   "close_last": 6.460504474e-05
+  },
+  {
+   "symbol": "SYNRG02-USDT-SWAP",
+   "regime": "ranging",
+   "seed": 301,
+   "beta": 0.4,
+   "price_scale": 0.045,
+   "base_vol": 800000.0,
+   "memcoin": false,
+   "segments": [
+    [
+     0,
+     1632,
+     "ranging"
+    ],
+    [
+     1632,
+     2976,
+     "trending_down"
+    ],
+    [
+     2976,
+     5184,
+     "trending_down"
+    ],
+    [
+     5184,
+     7200,
+     "low_volume"
+    ],
+    [
+     7200,
+     10080,
+     "low_volume"
+    ],
+    [
+     10080,
+     12480,
+     "volatile"
+    ],
+    [
+     12480,
+     14976,
+     "trending_up"
+    ],
+    [
+     14976,
+     18240,
+     "trending_up"
+    ],
+    [
+     18240,
+     21888,
+     "trending_up"
+    ],
+    [
+     21888,
+     24384,
+     "ranging"
+    ],
+    [
+     24384,
+     28128,
+     "trending_down"
+    ],
+    [
+     28128,
+     29760,
+     "ranging"
+    ],
+    [
+     29760,
+     31968,
+     "low_volume"
+    ],
+    [
+     31968,
+     35520,
+     "volatile"
+    ],
+    [
+     35520,
+     38400,
+     "ranging"
+    ]
+   ],
+   "events": [],
+   "legs_last_1h_window": [
+    [
+     14,
+     "sweep k=9 extra=0.004"
+    ],
+    [
+     55,
+     "range_leg to H"
+    ],
+    [
+     117,
+     "range_leg to L"
+    ],
+    [
+     199,
+     "range_leg to H"
+    ],
+    [
+     237,
+     "range_leg to L"
+    ],
+    [
+     288,
+     "range_leg to H"
+    ],
+    [
+     350,
+     "quiet_sfp side=1"
+    ],
+    [
+     371,
+     "sweep k=0 extra=0.0"
+    ]
+   ],
+   "files": {
+    "15m": "candles/SYNRG02-USDT-SWAP_15m.json",
+    "1h": "candles/SYNRG02-USDT-SWAP_1h.json",
+    "4h": "candles/SYNRG02-USDT-SWAP_4h.json",
+    "1d": "candles/SYNRG02-USDT-SWAP_1d.json"
+   },
+   "close_last": 0.04210606828
+  },
+  {
+   "symbol": "SYNRG03-USDT-SWAP",
+   "regime": "ranging",
+   "seed": 302,
+   "beta": 0.8,
+   "price_scale": 0.85,
+   "base_vol": 2000000.0,
+   "memcoin": false,
+   "segments": [
+    [
+     0,
+     3264,
+     "volatile"
+    ],
+    [
+     3264,
+     6720,
+     "volatile"
+    ],
+    [
+     6720,
+     8256,
+     "low_volume"
+    ],
+    [
+     8256,
+     11040,
+     "ranging"
+    ],
+    [
+     11040,
+     14304,
+     "trending_up"
+    ],
+    [
+     14304,
+     16416,
+     "trending_down"
+    ],
+    [
+     16416,
+     18720,
+     "volatile"
+    ],
+    [
+     18720,
+     20640,
+     "volatile"
+    ],
+    [
+     20640,
+     22176,
+     "low_volume"
+    ],
+    [
+     22176,
+     24576,
+     "low_volume"
+    ],
+    [
+     24576,
+     27072,
+     "trending_up"
+    ],
+    [
+     27072,
+     29280,
+     "low_volume"
+    ],
+    [
+     29280,
+     31200,
+     "trending_down"
+    ],
+    [
+     31200,
+     33984,
+     "trending_up"
+    ],
+    [
+     33984,
+     35136,
+     "ranging"
+    ],
+    [
+     35136,
+     35520,
+     "trending_down"
+    ],
+    [
+     35520,
+     38400,
+     "ranging"
+    ]
+   ],
+   "events": [],
+   "legs_last_1h_window": [
+    [
+     19,
+     "sweep k=5 extra=0.008"
+    ],
+    [
+     49,
+     "sweep k=6 extra=0.0"
+    ],
+    [
+     76,
+     "sweep k=7 extra=0.0"
+    ],
+    [
+     122,
+     "quiet_sfp side=1"
+    ],
+    [
+     154,
+     "sweep k=0 extra=0.0"
+    ],
+    [
+     185,
+     "sweep k=1 extra=0.0"
+    ],
+    [
+     222,
+     "sweep k=2 extra=0.0"
+    ],
+    [
+     254,
+     "sweep k=3 extra=0.0"
+    ],
+    [
+     293,
+     "sweep k=4 extra=0.0"
+    ],
+    [
+     326,
+     "sweep k=5 extra=0.004"
+    ],
+    [
+     364,
+     "sweep k=6 extra=0.0"
+    ],
+    [
+     395,
+     "sweep k=7 extra=0.0"
+    ]
+   ],
+   "files": {
+    "15m": "candles/SYNRG03-USDT-SWAP_15m.json",
+    "1h": "candles/SYNRG03-USDT-SWAP_1h.json",
+    "4h": "candles/SYNRG03-USDT-SWAP_4h.json",
+    "1d": "candles/SYNRG03-USDT-SWAP_1d.json"
+   },
+   "close_last": 0.6256949879
+  },
+  {
+   "symbol": "SYNRG04-USDT-SWAP",
+   "regime": "ranging",
+   "seed": 303,
+   "beta": 0.0,
+   "price_scale": 3.2,
+   "base_vol": 5000000.0,
+   "memcoin": false,
+   "segments": [
+    [
+     0,
+     2112,
+     "trending_down"
+    ],
+    [
+     2112,
+     5664,
+     "ranging"
+    ],
+    [
+     5664,
+     7968,
+     "low_volume"
+    ],
+    [
+     7968,
+     9696,
+     "trending_down"
+    ],
+    [
+     9696,
+     12960,
+     "low_volume"
+    ],
+    [
+     12960,
+     16800,
+     "trending_up"
+    ],
+    [
+     16800,
+     19680,
+     "ranging"
+    ],
+    [
+     19680,
+     23232,
+     "low_volume"
+    ],
+    [
+     23232,
+     25536,
+     "trending_up"
+    ],
+    [
+     25536,
+     28128,
+     "trending_down"
+    ],
+    [
+     28128,
+     29088,
+     "trending_down"
+    ],
+    [
+     29088,
+     32064,
+     "trending_down"
+    ],
+    [
+     32064,
+     35136,
+     "low_volume"
+    ],
+    [
+     35136,
+     35520,
+     "ranging"
+    ],
+    [
+     35520,
+     38400,
+     "ranging"
+    ]
+   ],
+   "events": [],
+   "legs_last_1h_window": [
+    [
+     35,
+     "quiet_sfp side=-1"
+    ],
+    [
+     62,
+     "sweep k=0 extra=0.0"
+    ],
+    [
+     97,
+     "sweep k=1 extra=0.0"
+    ],
+    [
+     122,
+     "sweep k=2 extra=0.0"
+    ],
+    [
+     149,
+     "sweep k=3 extra=0.0"
+    ],
+    [
+     176,
+     "sweep k=4 extra=0.004"
+    ],
+    [
+     205,
+     "sweep k=5 extra=0.0"
+    ],
+    [
+     231,
+     "sweep k=6 extra=0.0"
+    ],
+    [
+     260,
+     "sweep k=7 extra=0.0"
+    ],
+    [
+     291,
+     "sweep k=8 extra=0.004"
+    ],
+    [
+     334,
+     "range_leg to L"
+    ],
+    [
+     365,
+     "quiet_sfp side=-1"
+    ],
+    [
+     395,
+     "sweep k=0 extra=0.0"
+    ]
+   ],
+   "files": {
+    "15m": "candles/SYNRG04-USDT-SWAP_15m.json",
+    "1h": "candles/SYNRG04-USDT-SWAP_1h.json",
+    "4h": "candles/SYNRG04-USDT-SWAP_4h.json",
+    "1d": "candles/SYNRG04-USDT-SWAP_1d.json"
+   },
+   "close_last": 1.704046351
+  },
+  {
+   "symbol": "SYNRG05-USDT-SWAP",
+   "regime": "ranging",
+   "seed": 304,
+   "beta": 0.4,
+   "price_scale": 27.0,
+   "base_vol": 1200000.0,
+   "memcoin": false,
+   "segments": [
+    [
+     0,
+     3168,
+     "ranging"
+    ],
+    [
+     3168,
+     6624,
+     "low_volume"
+    ],
+    [
+     6624,
+     9504,
+     "trending_down"
+    ],
+    [
+     9504,
+     10848,
+     "volatile"
+    ],
+    [
+     10848,
+     12000,
+     "trending_down"
+    ],
+    [
+     12000,
+     14592,
+     "volatile"
+    ],
+    [
+     14592,
+     16512,
+     "trending_up"
+    ],
+    [
+     16512,
+     19488,
+     "trending_up"
+    ],
+    [
+     19488,
+     21408,
+     "trending_down"
+    ],
+    [
+     21408,
+     24672,
+     "trending_up"
+    ],
+    [
+     24672,
+     26688,
+     "trending_down"
+    ],
+    [
+     26688,
+     28800,
+     "trending_up"
+    ],
+    [
+     28800,
+     31680,
+     "trending_down"
+    ],
+    [
+     31680,
+     34560,
+     "trending_up"
+    ],
+    [
+     34560,
+     35520,
+     "ranging"
+    ],
+    [
+     35520,
+     38400,
+     "ranging"
+    ]
+   ],
+   "events": [],
+   "legs_last_1h_window": [
+    [
+     1,
+     "range_leg to H"
+    ],
+    [
+     49,
+     "range_leg to L"
+    ],
+    [
+     119,
+     "quiet_sfp side=1"
+    ],
+    [
+     144,
+     "sweep k=0 extra=0.0"
+    ],
+    [
+     175,
+     "sweep k=1 extra=0.0"
+    ],
+    [
+     209,
+     "sweep k=2 extra=0.0"
+    ],
+    [
+     236,
+     "sweep k=3 extra=0.0"
+    ],
+    [
+     267,
+     "sweep k=4 extra=0.008"
+    ],
+    [
+     291,
+     "sweep k=5 extra=0.004"
+    ],
+    [
+     320,
+     "sweep k=6 extra=0.0"
+    ],
+    [
+     346,
+     "sweep k=7 extra=0.0"
+    ],
+    [
+     382,
+     "sweep k=8 extra=0.0"
+    ]
+   ],
+   "files": {
+    "15m": "candles/SYNRG05-USDT-SWAP_15m.json",
+    "1h": "candles/SYNRG05-USDT-SWAP_1h.json",
+    "4h": "candles/SYNRG05-USDT-SWAP_4h.json",
+    "1d": "candles/SYNRG05-USDT-SWAP_1d.json"
+   },
+   "close_last": 29.65204464
+  },
+  {
+   "symbol": "SYNRG06-USDT-SWAP",
+   "regime": "ranging",
+   "seed": 305,
+   "beta": 0.8,
+   "price_scale": 150.0,
+   "base_vol": 3000000.0,
+   "memcoin": false,
+   "segments": [
+    [
+     0,
+     1824,
+     "volatile"
+    ],
+    [
+     1824,
+     4992,
+     "volatile"
+    ],
+    [
+     4992,
+     6048,
+     "ranging"
+    ],
+    [
+     6048,
+     8736,
+     "ranging"
+    ],
+    [
+     8736,
+     11328,
+     "trending_up"
+    ],
+    [
+     11328,
+     14304,
+     "volatile"
+    ],
+    [
+     14304,
+     16512,
+     "low_volume"
+    ],
+    [
+     16512,
+     18336,
+     "ranging"
+    ],
+    [
+     18336,
+     19392,
+     "trending_up"
+    ],
+    [
+     19392,
+     23040,
+     "volatile"
+    ],
+    [
+     23040,
+     24000,
+     "volatile"
+    ],
+    [
+     24000,
+     25536,
+     "trending_down"
+    ],
+    [
+     25536,
+     26880,
+     "trending_down"
+    ],
+    [
+     26880,
+     28416,
+     "trending_up"
+    ],
+    [
+     28416,
+     30816,
+     "trending_up"
+    ],
+    [
+     30816,
+     31968,
+     "trending_up"
+    ],
+    [
+     31968,
+     33600,
+     "ranging"
+    ],
+    [
+     33600,
+     34656,
+     "volatile"
+    ],
+    [
+     34656,
+     35520,
+     "trending_up"
+    ],
+    [
+     35520,
+     38400,
+     "ranging"
+    ]
+   ],
+   "events": [],
+   "legs_last_1h_window": [
+    [
+     2,
+     "range_leg to L"
+    ],
+    [
+     31,
+     "quiet_sfp side=-1"
+    ],
+    [
+     59,
+     "sweep k=0 extra=0.0"
+    ],
+    [
+     85,
+     "sweep k=1 extra=0.0"
+    ],
+    [
+     109,
+     "sweep k=2 extra=0.0"
+    ],
+    [
+     141,
+     "sweep k=3 extra=0.004"
+    ],
+    [
+     170,
+     "sweep k=4 extra=0.0"
+    ],
+    [
+     209,
+     "sweep k=5 extra=0.004"
+    ],
+    [
+     239,
+     "sweep k=6 extra=0.008"
+    ],
+    [
+     266,
+     "sweep k=7 extra=0.0"
+    ],
+    [
+     306,
+     "sweep k=8 extra=0.0"
+    ],
+    [
+     340,
+     "range_leg to H"
+    ],
+    [
+     384,
+     "range_leg to L"
+    ]
+   ],
+   "files": {
+    "15m": "candles/SYNRG06-USDT-SWAP_15m.json",
+    "1h": "candles/SYNRG06-USDT-SWAP_1h.json",
+    "4h": "candles/SYNRG06-USDT-SWAP_4h.json",
+    "1d": "candles/SYNRG06-USDT-SWAP_1d.json"
+   },
+   "close_last": 789.8895811
+  },
+  {
+   "symbol": "SYNRG07-USDT-SWAP",
+   "regime": "ranging",
+   "seed": 306,
+   "beta": 0.0,
+   "price_scale": 2400.0,
+   "base_vol": 700000.0,
+   "memcoin": false,
+   "segments": [
+    [
+     0,
+     3360,
+     "trending_up"
+    ],
+    [
+     3360,
+     4512,
+     "trending_down"
+    ],
+    [
+     4512,
+     6720,
+     "trending_up"
+    ],
+    [
+     6720,
+     9888,
+     "low_volume"
+    ],
+    [
+     9888,
+     10848,
+     "low_volume"
+    ],
+    [
+     10848,
+     13632,
+     "low_volume"
+    ],
+    [
+     13632,
+     14688,
+     "low_volume"
+    ],
+    [
+     14688,
+     16416,
+     "trending_up"
+    ],
+    [
+     16416,
+     20160,
+     "trending_up"
+    ],
+    [
+     20160,
+     22944,
+     "ranging"
+    ],
+    [
+     22944,
+     24960,
+     "trending_down"
+    ],
+    [
+     24960,
+     26976,
+     "low_volume"
+    ],
+    [
+     26976,
+     28992,
+     "ranging"
+    ],
+    [
+     28992,
+     32832,
+     "trending_up"
+    ],
+    [
+     32832,
+     35040,
+     "ranging"
+    ],
+    [
+     35040,
+     35520,
+     "trending_up"
+    ],
+    [
+     35520,
+     38400,
+     "ranging"
+    ]
+   ],
+   "events": [],
+   "legs_last_1h_window": [
+    [
+     0,
+     "sweep k=4 extra=0.0"
+    ],
+    [
+     35,
+     "sweep k=5 extra=0.0"
+    ],
+    [
+     66,
+     "sweep k=6 extra=0.0"
+    ],
+    [
+     100,
+     "sweep k=7 extra=0.008"
+    ],
+    [
+     147,
+     "quiet_sfp side=-1"
+    ],
+    [
+     173,
+     "sweep k=0 extra=0.0"
+    ],
+    [
+     208,
+     "sweep k=1 extra=0.0"
+    ],
+    [
+     238,
+     "sweep k=2 extra=0.0"
+    ],
+    [
+     274,
+     "sweep k=3 extra=0.008"
+    ],
+    [
+     312,
+     "sweep k=4 extra=0.004"
+    ],
+    [
+     350,
+     "sweep k=5 extra=0.008"
+    ],
+    [
+     377,
+     "sweep k=6 extra=0.0"
+    ]
+   ],
+   "files": {
+    "15m": "candles/SYNRG07-USDT-SWAP_15m.json",
+    "1h": "candles/SYNRG07-USDT-SWAP_1h.json",
+    "4h": "candles/SYNRG07-USDT-SWAP_4h.json",
+    "1d": "candles/SYNRG07-USDT-SWAP_1d.json"
+   },
+   "close_last": 5573.060983
+  },
+  {
+   "symbol": "SYNRG08-USDT-SWAP",
+   "regime": "ranging",
+   "seed": 307,
+   "beta": 0.4,
+   "price_scale": 65000.0,
+   "base_vol": 2500000.0,
+   "memcoin": false,
+   "segments": [
+    [
+     0,
+     3840,
+     "volatile"
+    ],
+    [
+     3840,
+     6048,
+     "volatile"
+    ],
+    [
+     6048,
+     7200,
+     "volatile"
+    ],
+    [
+     7200,
+     10464,
+     "low_volume"
+    ],
+    [
+     10464,
+     12288,
+     "trending_down"
+    ],
+    [
+     12288,
+     15168,
+     "trending_up"
+    ],
+    [
+     15168,
+     17952,
+     "ranging"
+    ],
+    [
+     17952,
+     21312,
+     "low_volume"
+    ],
+    [
+     21312,
+     24672,
+     "trending_down"
+    ],
+    [
+     24672,
+     27456,
+     "trending_up"
+    ],
+    [
+     27456,
+     28704,
+     "ranging"
+    ],
+    [
+     28704,
+     32448,
+     "low_volume"
+    ],
+    [
+     32448,
+     35520,
+     "ranging"
+    ],
+    [
+     35520,
+     38400,
+     "ranging"
+    ]
+   ],
+   "events": [],
+   "legs_last_1h_window": [
+    [
+     0,
+     "sweep k=6 extra=0.008"
+    ],
+    [
+     38,
+     "sweep k=7 extra=0.0"
+    ],
+    [
+     73,
+     "sweep k=8 extra=0.008"
+    ],
+    [
+     124,
+     "range_leg to H"
+    ],
+    [
+     180,
+     "quiet_sfp side=1"
+    ],
+    [
+     216,
+     "sweep k=0 extra=0.0"
+    ],
+    [
+     252,
+     "sweep k=1 extra=0.0"
+    ],
+    [
+     278,
+     "sweep k=2 extra=0.0"
+    ],
+    [
+     308,
+     "sweep k=3 extra=0.0"
+    ],
+    [
+     334,
+     "sweep k=4 extra=0.0"
+    ],
+    [
+     362,
+     "sweep k=5 extra=0.008"
+    ]
+   ],
+   "files": {
+    "15m": "candles/SYNRG08-USDT-SWAP_15m.json",
+    "1h": "candles/SYNRG08-USDT-SWAP_1h.json",
+    "4h": "candles/SYNRG08-USDT-SWAP_4h.json",
+    "1d": "candles/SYNRG08-USDT-SWAP_1d.json"
+   },
+   "close_last": 46282.05707
+  },
+  {
+   "symbol": "SYNVL01-USDT-SWAP",
+   "regime": "volatile",
+   "seed": 400,
+   "beta": 0.0,
+   "price_scale": 0.00012,
+   "base_vol": 300000.0,
+   "memcoin": false,
+   "segments": [
+    [
+     0,
+     3264,
+     "trending_up"
+    ],
+    [
+     3264,
+     5088,
+     "volatile"
+    ],
+    [
+     5088,
+     6912,
+     "low_volume"
+    ],
+    [
+     6912,
+     8064,
+     "trending_down"
+    ],
+    [
+     8064,
+     9696,
+     "trending_down"
+    ],
+    [
+     9696,
+     11904,
+     "trending_up"
+    ],
+    [
+     11904,
+     14592,
+     "ranging"
+    ],
+    [
+     14592,
+     17280,
+     "trending_down"
+    ],
+    [
+     17280,
+     20640,
+     "low_volume"
+    ],
+    [
+     20640,
+     22848,
+     "ranging"
+    ],
+    [
+     22848,
+     24288,
+     "trending_down"
+    ],
+    [
+     24288,
+     25920,
+     "trending_up"
+    ],
+    [
+     25920,
+     26880,
+     "trending_up"
+    ],
+    [
+     26880,
+     30240,
+     "trending_up"
+    ],
+    [
+     30240,
+     32544,
+     "trending_up"
+    ],
+    [
+     32544,
+     35520,
+     "trending_down"
+    ],
+    [
+     35520,
+     38400,
+     "volatile"
+    ]
+   ],
+   "events": [],
+   "legs_last_1h_window": [
+    [
+     7,
+     "vol_impulse -1"
+    ],
+    [
+     34,
+     "vol_impulse 1"
+    ],
+    [
+     64,
+     "vol_impulse 1"
+    ],
+    [
+     85,
+     "vol_impulse 1"
+    ],
+    [
+     102,
+     "vol_impulse 1"
+    ],
+    [
+     137,
+     "vol_impulse 1"
+    ],
+    [
+     201,
+     "vol_impulse -1"
+    ],
+    [
+     215,
+     "vol_impulse 1"
+    ],
+    [
+     238,
+     "vol_impulse -1"
+    ],
+    [
+     268,
+     "vol_impulse 1"
+    ],
+    [
+     289,
+     "vol_impulse 1"
+    ],
+    [
+     298,
+     "vol_impulse -1"
+    ],
+    [
+     328,
+     "vol_impulse 1"
+    ],
+    [
+     338,
+     "vol_impulse -1"
+    ],
+    [
+     362,
+     "vol_impulse 1"
+    ],
+    [
+     383,
+     "vol_impulse -1"
+    ]
+   ],
+   "files": {
+    "15m": "candles/SYNVL01-USDT-SWAP_15m.json",
+    "1h": "candles/SYNVL01-USDT-SWAP_1h.json",
+    "4h": "candles/SYNVL01-USDT-SWAP_4h.json",
+    "1d": "candles/SYNVL01-USDT-SWAP_1d.json"
+   },
+   "close_last": 0.0001883386376
+  },
+  {
+   "symbol": "SYNVL02-USDT-SWAP",
+   "regime": "volatile",
+   "seed": 401,
+   "beta": 0.4,
+   "price_scale": 0.045,
+   "base_vol": 800000.0,
+   "memcoin": false,
+   "segments": [
+    [
+     0,
+     2208,
+     "volatile"
+    ],
+    [
+     2208,
+     3744,
+     "trending_down"
+    ],
+    [
+     3744,
+     7488,
+     "trending_up"
+    ],
+    [
+     7488,
+     10464,
+     "low_volume"
+    ],
+    [
+     10464,
+     12864,
+     "low_volume"
+    ],
+    [
+     12864,
+     14304,
+     "ranging"
+    ],
+    [
+     14304,
+     16800,
+     "low_volume"
+    ],
+    [
+     16800,
+     18048,
+     "low_volume"
+    ],
+    [
+     18048,
+     19776,
+     "ranging"
+    ],
+    [
+     19776,
+     21120,
+     "trending_down"
+    ],
+    [
+     21120,
+     23904,
+     "low_volume"
+    ],
+    [
+     23904,
+     26400,
+     "low_volume"
+    ],
+    [
+     26400,
+     28512,
+     "trending_up"
+    ],
+    [
+     28512,
+     30528,
+     "low_volume"
+    ],
+    [
+     30528,
+     33216,
+     "trending_up"
+    ],
+    [
+     33216,
+     35520,
+     "volatile"
+    ],
+    [
+     35520,
+     38400,
+     "volatile"
+    ]
+   ],
+   "events": [],
+   "legs_last_1h_window": [
+    [
+     14,
+     "vol_impulse 1"
+    ],
+    [
+     54,
+     "vol_impulse 1"
+    ],
+    [
+     100,
+     "vol_impulse 1"
+    ],
+    [
+     118,
+     "vol_impulse 1"
+    ],
+    [
+     159,
+     "vol_impulse 1"
+    ],
+    [
+     187,
+     "vol_impulse -1"
+    ],
+    [
+     248,
+     "vol_impulse 1"
+    ],
+    [
+     309,
+     "vol_impulse 1"
+    ],
+    [
+     336,
+     "vol_impulse 1"
+    ],
+    [
+     362,
+     "vol_impulse -1"
+    ],
+    [
+     389,
+     "vol_impulse 1"
+    ]
+   ],
+   "files": {
+    "15m": "candles/SYNVL02-USDT-SWAP_15m.json",
+    "1h": "candles/SYNVL02-USDT-SWAP_1h.json",
+    "4h": "candles/SYNVL02-USDT-SWAP_4h.json",
+    "1d": "candles/SYNVL02-USDT-SWAP_1d.json"
+   },
+   "close_last": 0.1040127135
+  },
+  {
+   "symbol": "SYNVL03-USDT-SWAP",
+   "regime": "volatile",
+   "seed": 402,
+   "beta": 0.8,
+   "price_scale": 0.85,
+   "base_vol": 2000000.0,
+   "memcoin": false,
+   "segments": [
+    [
+     0,
+     3072,
+     "trending_down"
+    ],
+    [
+     3072,
+     4416,
+     "low_volume"
+    ],
+    [
+     4416,
+     8064,
+     "trending_down"
+    ],
+    [
+     8064,
+     11232,
+     "trending_down"
+    ],
+    [
+     11232,
+     14496,
+     "low_volume"
+    ],
+    [
+     14496,
+     15744,
+     "trending_up"
+    ],
+    [
+     15744,
+     19200,
+     "trending_up"
+    ],
+    [
+     19200,
+     22176,
+     "volatile"
+    ],
+    [
+     22176,
+     26016,
+     "trending_down"
+    ],
+    [
+     26016,
+     29664,
+     "ranging"
+    ],
+    [
+     29664,
+     30720,
+     "low_volume"
+    ],
+    [
+     30720,
+     33216,
+     "volatile"
+    ],
+    [
+     33216,
+     35520,
+     "trending_down"
+    ],
+    [
+     35520,
+     38400,
+     "volatile"
+    ]
+   ],
+   "events": [],
+   "legs_last_1h_window": [
+    [
+     0,
+     "vol_impulse 1"
+    ],
+    [
+     48,
+     "vol_impulse 1"
+    ],
+    [
+     92,
+     "vol_impulse -1"
+    ],
+    [
+     109,
+     "vol_impulse -1"
+    ],
+    [
+     133,
+     "vol_impulse -1"
+    ],
+    [
+     154,
+     "vol_impulse -1"
+    ],
+    [
+     224,
+     "vol_impulse 1"
+    ],
+    [
+     248,
+     "vol_impulse 1"
+    ],
+    [
+     272,
+     "vol_impulse 1"
+    ],
+    [
+     305,
+     "vol_impulse -1"
+    ],
+    [
+     332,
+     "vol_impulse -1"
+    ],
+    [
+     368,
+     "vol_impulse -1"
+    ]
+   ],
+   "files": {
+    "15m": "candles/SYNVL03-USDT-SWAP_15m.json",
+    "1h": "candles/SYNVL03-USDT-SWAP_1h.json",
+    "4h": "candles/SYNVL03-USDT-SWAP_4h.json",
+    "1d": "candles/SYNVL03-USDT-SWAP_1d.json"
+   },
+   "close_last": 0.322662703
+  },
+  {
+   "symbol": "SYNVL04-USDT-SWAP",
+   "regime": "volatile",
+   "seed": 403,
+   "beta": 0.0,
+   "price_scale": 3.2,
+   "base_vol": 5000000.0,
+   "memcoin": false,
+   "segments": [
+    [
+     0,
+     2880,
+     "trending_up"
+    ],
+    [
+     2880,
+     4032,
+     "low_volume"
+    ],
+    [
+     4032,
+     7104,
+     "trending_down"
+    ],
+    [
+     7104,
+     10752,
+     "low_volume"
+    ],
+    [
+     10752,
+     11808,
+     "volatile"
+    ],
+    [
+     11808,
+     15072,
+     "trending_down"
+    ],
+    [
+     15072,
+     16320,
+     "low_volume"
+    ],
+    [
+     16320,
+     18144,
+     "low_volume"
+    ],
+    [
+     18144,
+     20832,
+     "trending_up"
+    ],
+    [
+     20832,
+     24384,
+     "trending_down"
+    ],
+    [
+     24384,
+     26400,
+     "volatile"
+    ],
+    [
+     26400,
+     28800,
+     "trending_down"
+    ],
+    [
+     28800,
+     30624,
+     "ranging"
+    ],
+    [
+     30624,
+     34368,
+     "volatile"
+    ],
+    [
+     34368,
+     35520,
+     "trending_down"
+    ],
+    [
+     35520,
+     38400,
+     "volatile"
+    ]
+   ],
+   "events": [],
+   "legs_last_1h_window": [
+    [
+     21,
+     "vol_impulse -1"
+    ],
+    [
+     48,
+     "vol_impulse -1"
+    ],
+    [
+     89,
+     "vol_impulse -1"
+    ],
+    [
+     108,
+     "vol_impulse -1"
+    ],
+    [
+     131,
+     "vol_impulse 1"
+    ],
+    [
+     157,
+     "vol_impulse -1"
+    ],
+    [
+     166,
+     "vol_impulse -1"
+    ],
+    [
+     217,
+     "vol_impulse 1"
+    ],
+    [
+     239,
+     "vol_impulse 1"
+    ],
+    [
+     294,
+     "vol_impulse -1"
+    ],
+    [
+     313,
+     "vol_impulse -1"
+    ],
+    [
+     362,
+     "vol_impulse 1"
+    ],
+    [
+     376,
+     "vol_impulse 1"
+    ],
+    [
+     394,
+     "vol_impulse -1"
+    ]
+   ],
+   "files": {
+    "15m": "candles/SYNVL04-USDT-SWAP_15m.json",
+    "1h": "candles/SYNVL04-USDT-SWAP_1h.json",
+    "4h": "candles/SYNVL04-USDT-SWAP_4h.json",
+    "1d": "candles/SYNVL04-USDT-SWAP_1d.json"
+   },
+   "close_last": 1.557953439
+  },
+  {
+   "symbol": "SYNVL05-USDT-SWAP",
+   "regime": "volatile",
+   "seed": 404,
+   "beta": 0.4,
+   "price_scale": 27.0,
+   "base_vol": 1200000.0,
+   "memcoin": false,
+   "segments": [
+    [
+     0,
+     3648,
+     "trending_down"
+    ],
+    [
+     3648,
+     6336,
+     "ranging"
+    ],
+    [
+     6336,
+     9600,
+     "trending_down"
+    ],
+    [
+     9600,
+     12672,
+     "ranging"
+    ],
+    [
+     12672,
+     14016,
+     "ranging"
+    ],
+    [
+     14016,
+     15168,
+     "trending_down"
+    ],
+    [
+     15168,
+     18816,
+     "trending_up"
+    ],
+    [
+     18816,
+     22368,
+     "ranging"
+    ],
+    [
+     22368,
+     25536,
+     "trending_up"
+    ],
+    [
+     25536,
+     27456,
+     "trending_up"
+    ],
+    [
+     27456,
+     31296,
+     "trending_up"
+    ],
+    [
+     31296,
+     33408,
+     "low_volume"
+    ],
+    [
+     33408,
+     35424,
+     "low_volume"
+    ],
+    [
+     35424,
+     35520,
+     "ranging"
+    ],
+    [
+     35520,
+     38400,
+     "volatile"
+    ]
+   ],
+   "events": [],
+   "legs_last_1h_window": [
+    [
+     12,
+     "vol_impulse 1"
+    ],
+    [
+     24,
+     "vol_impulse 1"
+    ],
+    [
+     49,
+     "vol_impulse -1"
+    ],
+    [
+     117,
+     "vol_impulse 1"
+    ],
+    [
+     135,
+     "vol_impulse 1"
+    ],
+    [
+     161,
+     "vol_impulse 1"
+    ],
+    [
+     194,
+     "vol_impulse -1"
+    ],
+    [
+     209,
+     "vol_impulse 1"
+    ],
+    [
+     260,
+     "vol_impulse 1"
+    ],
+    [
+     278,
+     "vol_impulse 1"
+    ],
+    [
+     342,
+     "vol_impulse -1"
+    ],
+    [
+     374,
+     "vol_impulse -1"
+    ]
+   ],
+   "files": {
+    "15m": "candles/SYNVL05-USDT-SWAP_15m.json",
+    "1h": "candles/SYNVL05-USDT-SWAP_1h.json",
+    "4h": "candles/SYNVL05-USDT-SWAP_4h.json",
+    "1d": "candles/SYNVL05-USDT-SWAP_1d.json"
+   },
+   "close_last": 39.94417523
+  },
+  {
+   "symbol": "SYNVL06-USDT-SWAP",
+   "regime": "volatile",
+   "seed": 405,
+   "beta": 0.8,
+   "price_scale": 150.0,
+   "base_vol": 3000000.0,
+   "memcoin": false,
+   "segments": [
+    [
+     0,
+     1920,
+     "low_volume"
+    ],
+    [
+     1920,
+     3360,
+     "trending_down"
+    ],
+    [
+     3360,
+     4704,
+     "volatile"
+    ],
+    [
+     4704,
+     7392,
+     "low_volume"
+    ],
+    [
+     7392,
+     9888,
+     "volatile"
+    ],
+    [
+     9888,
+     12000,
+     "ranging"
+    ],
+    [
+     12000,
+     14304,
+     "trending_up"
+    ],
+    [
+     14304,
+     16128,
+     "ranging"
+    ],
+    [
+     16128,
+     17088,
+     "trending_up"
+    ],
+    [
+     17088,
+     18048,
+     "trending_up"
+    ],
+    [
+     18048,
+     21120,
+     "ranging"
+    ],
+    [
+     21120,
+     24864,
+     "low_volume"
+    ],
+    [
+     24864,
+     27168,
+     "low_volume"
+    ],
+    [
+     27168,
+     28992,
+     "trending_down"
+    ],
+    [
+     28992,
+     32352,
+     "trending_down"
+    ],
+    [
+     32352,
+     34752,
+     "low_volume"
+    ],
+    [
+     34752,
+     35520,
+     "trending_down"
+    ],
+    [
+     35520,
+     38400,
+     "volatile"
+    ]
+   ],
+   "events": [],
+   "legs_last_1h_window": [
+    [
+     52,
+     "vol_impulse 1"
+    ],
+    [
+     75,
+     "vol_impulse -1"
+    ],
+    [
+     119,
+     "vol_impulse -1"
+    ],
+    [
+     139,
+     "vol_impulse -1"
+    ],
+    [
+     157,
+     "vol_impulse -1"
+    ],
+    [
+     175,
+     "vol_impulse -1"
+    ],
+    [
+     227,
+     "vol_impulse -1"
+    ],
+    [
+     236,
+     "vol_impulse 1"
+    ],
+    [
+     248,
+     "vol_impulse 1"
+    ],
+    [
+     272,
+     "vol_impulse -1"
+    ],
+    [
+     300,
+     "vol_impulse -1"
+    ],
+    [
+     324,
+     "vol_impulse 1"
+    ],
+    [
+     348,
+     "vol_impulse 1"
+    ],
+    [
+     370,
+     "vol_impulse -1"
+    ],
+    [
+     399,
+     "vol_impulse 1"
+    ]
+   ],
+   "files": {
+    "15m": "candles/SYNVL06-USDT-SWAP_15m.json",
+    "1h": "candles/SYNVL06-USDT-SWAP_1h.json",
+    "4h": "candles/SYNVL06-USDT-SWAP_4h.json",
+    "1d": "candles/SYNVL06-USDT-SWAP_1d.json"
+   },
+   "close_last": 105.5689973
+  },
+  {
+   "symbol": "PEPEVL07-USDT-SWAP",
+   "regime": "volatile",
+   "seed": 406,
+   "beta": 0.0,
+   "price_scale": 2400.0,
+   "base_vol": 700000.0,
+   "memcoin": true,
+   "segments": [
+    [
+     0,
+     3360,
+     "trending_up"
+    ],
+    [
+     3360,
+     6624,
+     "trending_up"
+    ],
+    [
+     6624,
+     9024,
+     "low_volume"
+    ],
+    [
+     9024,
+     11040,
+     "ranging"
+    ],
+    [
+     11040,
+     12192,
+     "low_volume"
+    ],
+    [
+     12192,
+     13440,
+     "volatile"
+    ],
+    [
+     13440,
+     15936,
+     "low_volume"
+    ],
+    [
+     15936,
+     19008,
+     "low_volume"
+    ],
+    [
+     19008,
+     22848,
+     "volatile"
+    ],
+    [
+     22848,
+     25824,
+     "ranging"
+    ],
+    [
+     25824,
+     28608,
+     "ranging"
+    ],
+    [
+     28608,
+     30912,
+     "trending_down"
+    ],
+    [
+     30912,
+     32064,
+     "volatile"
+    ],
+    [
+     32064,
+     33696,
+     "ranging"
+    ],
+    [
+     33696,
+     34752,
+     "volatile"
+    ],
+    [
+     34752,
+     35520,
+     "trending_up"
+    ],
+    [
+     35520,
+     38400,
+     "volatile"
+    ]
+   ],
+   "events": [],
+   "legs_last_1h_window": [
+    [
+     56,
+     "vol_impulse 1"
+    ],
+    [
+     71,
+     "vol_impulse -1"
+    ],
+    [
+     117,
+     "vol_impulse 1"
+    ],
+    [
+     165,
+     "vol_impulse -1"
+    ],
+    [
+     180,
+     "vol_impulse -1"
+    ],
+    [
+     219,
+     "vol_impulse -1"
+    ],
+    [
+     249,
+     "vol_impulse 1"
+    ],
+    [
+     306,
+     "vol_impulse 1"
+    ],
+    [
+     371,
+     "vol_impulse -1"
+    ],
+    [
+     398,
+     "vol_impulse 1"
+    ]
+   ],
+   "files": {
+    "15m": "candles/PEPEVL07-USDT-SWAP_15m.json",
+    "1h": "candles/PEPEVL07-USDT-SWAP_1h.json",
+    "4h": "candles/PEPEVL07-USDT-SWAP_4h.json",
+    "1d": "candles/PEPEVL07-USDT-SWAP_1d.json"
+   },
+   "close_last": 8551.710009
+  },
+  {
+   "symbol": "DOGEVL08-USDT-SWAP",
+   "regime": "volatile",
+   "seed": 407,
+   "beta": 0.4,
+   "price_scale": 65000.0,
+   "base_vol": 2500000.0,
+   "memcoin": true,
+   "segments": [
+    [
+     0,
+     1440,
+     "trending_up"
+    ],
+    [
+     1440,
+     4416,
+     "trending_down"
+    ],
+    [
+     4416,
+     7296,
+     "low_volume"
+    ],
+    [
+     7296,
+     9696,
+     "ranging"
+    ],
+    [
+     9696,
+     11136,
+     "trending_up"
+    ],
+    [
+     11136,
+     12384,
+     "trending_down"
+    ],
+    [
+     12384,
+     15648,
+     "volatile"
+    ],
+    [
+     15648,
+     19104,
+     "low_volume"
+    ],
+    [
+     19104,
+     21984,
+     "trending_up"
+    ],
+    [
+     21984,
+     25824,
+     "ranging"
+    ],
+    [
+     25824,
+     27360,
+     "volatile"
+    ],
+    [
+     27360,
+     30144,
+     "low_volume"
+    ],
+    [
+     30144,
+     33600,
+     "low_volume"
+    ],
+    [
+     33600,
+     35520,
+     "ranging"
+    ],
+    [
+     35520,
+     38400,
+     "volatile"
+    ]
+   ],
+   "events": [],
+   "legs_last_1h_window": [
+    [
+     17,
+     "vol_impulse -1"
+    ],
+    [
+     71,
+     "vol_impulse -1"
+    ],
+    [
+     97,
+     "vol_impulse -1"
+    ],
+    [
+     125,
+     "vol_impulse -1"
+    ],
+    [
+     157,
+     "vol_impulse 1"
+    ],
+    [
+     177,
+     "vol_impulse 1"
+    ],
+    [
+     188,
+     "vol_impulse -1"
+    ],
+    [
+     223,
+     "vol_impulse -1"
+    ],
+    [
+     247,
+     "vol_impulse 1"
+    ],
+    [
+     294,
+     "vol_impulse -1"
+    ],
+    [
+     370,
+     "vol_impulse -1"
+    ]
+   ],
+   "files": {
+    "15m": "candles/DOGEVL08-USDT-SWAP_15m.json",
+    "1h": "candles/DOGEVL08-USDT-SWAP_1h.json",
+    "4h": "candles/DOGEVL08-USDT-SWAP_4h.json",
+    "1d": "candles/DOGEVL08-USDT-SWAP_1d.json"
+   },
+   "close_last": 53205.45396
+  },
+  {
+   "symbol": "SYNLV01-USDT-SWAP",
+   "regime": "low_volume",
+   "seed": 500,
+   "beta": 0.0,
+   "price_scale": 0.00012,
+   "base_vol": 300000.0,
+   "memcoin": false,
+   "segments": [
+    [
+     0,
+     2880,
+     "ranging"
+    ],
+    [
+     2880,
+     4992,
+     "low_volume"
+    ],
+    [
+     4992,
+     7008,
+     "volatile"
+    ],
+    [
+     7008,
+     8256,
+     "ranging"
+    ],
+    [
+     8256,
+     9600,
+     "ranging"
+    ],
+    [
+     9600,
+     13344,
+     "low_volume"
+    ],
+    [
+     13344,
+     14496,
+     "trending_down"
+    ],
+    [
+     14496,
+     17472,
+     "volatile"
+    ],
+    [
+     17472,
+     20640,
+     "ranging"
+    ],
+    [
+     20640,
+     21888,
+     "trending_down"
+    ],
+    [
+     21888,
+     24288,
+     "ranging"
+    ],
+    [
+     24288,
+     26112,
+     "low_volume"
+    ],
+    [
+     26112,
+     27456,
+     "ranging"
+    ],
+    [
+     27456,
+     30048,
+     "ranging"
+    ],
+    [
+     30048,
+     33792,
+     "trending_down"
+    ],
+    [
+     33792,
+     35520,
+     "low_volume"
+    ],
+    [
+     35520,
+     38400,
+     "low_volume"
+    ]
+   ],
+   "events": [],
+   "legs_last_1h_window": [
+    [
+     12,
+     "quiet_sfp side=-1"
+    ],
+    [
+     37,
+     "sweep k=0 extra=0.0"
+    ],
+    [
+     63,
+     "sweep k=1 extra=0.0"
+    ],
+    [
+     96,
+     "sweep k=2 extra=0.0"
+    ],
+    [
+     136,
+     "sweep k=3 extra=0.008"
+    ],
+    [
+     168,
+     "sweep k=4 extra=0.0"
+    ],
+    [
+     191,
+     "sweep k=5 extra=0.008"
+    ],
+    [
+     217,
+     "sweep k=6 extra=0.008"
+    ],
+    [
+     252,
+     "sweep k=7 extra=0.0"
+    ],
+    [
+     286,
+     "sweep k=8 extra=0.008"
+    ],
+    [
+     342,
+     "range_leg to L"
+    ],
+    [
+     373,
+     "quiet_sfp side=-1"
+    ]
+   ],
+   "files": {
+    "15m": "candles/SYNLV01-USDT-SWAP_15m.json",
+    "1h": "candles/SYNLV01-USDT-SWAP_1h.json",
+    "4h": "candles/SYNLV01-USDT-SWAP_4h.json",
+    "1d": "candles/SYNLV01-USDT-SWAP_1d.json"
+   },
+   "close_last": 0.0001219361863
+  },
+  {
+   "symbol": "SYNLV02-USDT-SWAP",
+   "regime": "low_volume",
+   "seed": 501,
+   "beta": 0.0,
+   "price_scale": 0.045,
+   "base_vol": 800000.0,
+   "memcoin": false,
+   "segments": [
+    [
+     0,
+     3552,
+     "low_volume"
+    ],
+    [
+     3552,
+     5760,
+     "volatile"
+    ],
+    [
+     5760,
+     7968,
+     "ranging"
+    ],
+    [
+     7968,
+     8928,
+     "ranging"
+    ],
+    [
+     8928,
+     12096,
+     "low_volume"
+    ],
+    [
+     12096,
+     14304,
+     "low_volume"
+    ],
+    [
+     14304,
+     16128,
+     "trending_up"
+    ],
+    [
+     16128,
+     17472,
+     "low_volume"
+    ],
+    [
+     17472,
+     19584,
+     "trending_up"
+    ],
+    [
+     19584,
+     21120,
+     "volatile"
+    ],
+    [
+     21120,
+     24096,
+     "ranging"
+    ],
+    [
+     24096,
+     27936,
+     "low_volume"
+    ],
+    [
+     27936,
+     30528,
+     "trending_down"
+    ],
+    [
+     30528,
+     32832,
+     "trending_down"
+    ],
+    [
+     32832,
+     35520,
+     "trending_down"
+    ],
+    [
+     35520,
+     38400,
+     "low_volume"
+    ]
+   ],
+   "events": [],
+   "legs_last_1h_window": [
+    [
+     26,
+     "sweep k=0 extra=0.0"
+    ],
+    [
+     62,
+     "sweep k=1 extra=0.0"
+    ],
+    [
+     90,
+     "sweep k=2 extra=0.0"
+    ],
+    [
+     121,
+     "sweep k=3 extra=0.0"
+    ],
+    [
+     151,
+     "sweep k=4 extra=0.0"
+    ],
+    [
+     176,
+     "sweep k=5 extra=0.008"
+    ],
+    [
+     212,
+     "sweep k=6 extra=0.0"
+    ],
+    [
+     245,
+     "sweep k=7 extra=0.008"
+    ],
+    [
+     270,
+     "sweep k=8 extra=0.004"
+    ],
+    [
+     294,
+     "sweep k=9 extra=0.0"
+    ],
+    [
+     335,
+     "range_leg to H"
+    ],
+    [
+     365,
+     "quiet_sfp side=1"
+    ],
+    [
+     395,
+     "sweep k=0 extra=0.0"
+    ]
+   ],
+   "files": {
+    "15m": "candles/SYNLV02-USDT-SWAP_15m.json",
+    "1h": "candles/SYNLV02-USDT-SWAP_1h.json",
+    "4h": "candles/SYNLV02-USDT-SWAP_4h.json",
+    "1d": "candles/SYNLV02-USDT-SWAP_1d.json"
+   },
+   "close_last": 0.03815998179
+  },
+  {
+   "symbol": "SYNLV03-USDT-SWAP",
+   "regime": "low_volume",
+   "seed": 502,
+   "beta": 0.0,
+   "price_scale": 0.85,
+   "base_vol": 2000000.0,
+   "memcoin": false,
+   "segments": [
+    [
+     0,
+     1536,
+     "trending_up"
+    ],
+    [
+     1536,
+     3456,
+     "trending_down"
+    ],
+    [
+     3456,
+     7104,
+     "low_volume"
+    ],
+    [
+     7104,
+     9696,
+     "ranging"
+    ],
+    [
+     9696,
+     11808,
+     "ranging"
+    ],
+    [
+     11808,
+     13344,
+     "trending_up"
+    ],
+    [
+     13344,
+     15552,
+     "volatile"
+    ],
+    [
+     15552,
+     16512,
+     "low_volume"
+    ],
+    [
+     16512,
+     20064,
+     "volatile"
+    ],
+    [
+     20064,
+     22560,
+     "ranging"
+    ],
+    [
+     22560,
+     26016,
+     "trending_down"
+    ],
+    [
+     26016,
+     29472,
+     "ranging"
+    ],
+    [
+     29472,
+     32640,
+     "trending_down"
+    ],
+    [
+     32640,
+     35520,
+     "trending_up"
+    ],
+    [
+     35520,
+     38400,
+     "low_volume"
+    ]
+   ],
+   "events": [],
+   "legs_last_1h_window": [
+    [
+     19,
+     "sweep k=0 extra=0.0"
+    ],
+    [
+     52,
+     "sweep k=1 extra=0.0"
+    ],
+    [
+     84,
+     "sweep k=2 extra=0.0"
+    ],
+    [
+     118,
+     "sweep k=3 extra=0.004"
+    ],
+    [
+     154,
+     "sweep k=4 extra=0.0"
+    ],
+    [
+     178,
+     "sweep k=5 extra=0.0"
+    ],
+    [
+     203,
+     "sweep k=6 extra=0.004"
+    ],
+    [
+     227,
+     "sweep k=7 extra=0.008"
+    ],
+    [
+     259,
+     "sweep k=8 extra=0.004"
+    ],
+    [
+     313,
+     "quiet_sfp side=-1"
+    ],
+    [
+     337,
+     "sweep k=0 extra=0.0"
+    ],
+    [
+     371,
+     "sweep k=1 extra=0.0"
+    ]
+   ],
+   "files": {
+    "15m": "candles/SYNLV03-USDT-SWAP_15m.json",
+    "1h": "candles/SYNLV03-USDT-SWAP_1h.json",
+    "4h": "candles/SYNLV03-USDT-SWAP_4h.json",
+    "1d": "candles/SYNLV03-USDT-SWAP_1d.json"
+   },
+   "close_last": 0.6835543459
+  },
+  {
+   "symbol": "SYNLV04-USDT-SWAP",
+   "regime": "low_volume",
+   "seed": 503,
+   "beta": 0.0,
+   "price_scale": 3.2,
+   "base_vol": 5000000.0,
+   "memcoin": false,
+   "segments": [
+    [
+     0,
+     1728,
+     "ranging"
+    ],
+    [
+     1728,
+     4800,
+     "trending_down"
+    ],
+    [
+     4800,
+     6528,
+     "volatile"
+    ],
+    [
+     6528,
+     9504,
+     "ranging"
+    ],
+    [
+     9504,
+     11616,
+     "low_volume"
+    ],
+    [
+     11616,
+     14784,
+     "trending_up"
+    ],
+    [
+     14784,
+     16608,
+     "low_volume"
+    ],
+    [
+     16608,
+     20064,
+     "trending_down"
+    ],
+    [
+     20064,
+     22272,
+     "low_volume"
+    ],
+    [
+     22272,
+     26016,
+     "volatile"
+    ],
+    [
+     26016,
+     29184,
+     "trending_down"
+    ],
+    [
+     29184,
+     30528,
+     "volatile"
+    ],
+    [
+     30528,
+     34368,
+     "low_volume"
+    ],
+    [
+     34368,
+     35424,
+     "trending_up"
+    ],
+    [
+     35424,
+     35520,
+     "trending_down"
+    ],
+    [
+     35520,
+     38400,
+     "low_volume"
+    ]
+   ],
+   "events": [],
+   "legs_last_1h_window": [
+    [
+     17,
+     "quiet_sfp side=-1"
+    ],
+    [
+     45,
+     "sweep k=0 extra=0.0"
+    ],
+    [
+     81,
+     "sweep k=1 extra=0.0"
+    ],
+    [
+     105,
+     "sweep k=2 extra=0.0"
+    ],
+    [
+     135,
+     "sweep k=3 extra=0.008"
+    ],
+    [
+     173,
+     "sweep k=4 extra=0.0"
+    ],
+    [
+     201,
+     "sweep k=5 extra=0.008"
+    ],
+    [
+     224,
+     "sweep k=6 extra=0.004"
+    ],
+    [
+     262,
+     "sweep k=7 extra=0.008"
+    ],
+    [
+     305,
+     "quiet_sfp side=-1"
+    ],
+    [
+     334,
+     "sweep k=0 extra=0.0"
+    ],
+    [
+     374,
+     "sweep k=1 extra=0.0"
+    ]
+   ],
+   "files": {
+    "15m": "candles/SYNLV04-USDT-SWAP_15m.json",
+    "1h": "candles/SYNLV04-USDT-SWAP_1h.json",
+    "4h": "candles/SYNLV04-USDT-SWAP_4h.json",
+    "1d": "candles/SYNLV04-USDT-SWAP_1d.json"
+   },
+   "close_last": 3.576201162
+  },
+  {
+   "symbol": "SYNLV05-USDT-SWAP",
+   "regime": "low_volume",
+   "seed": 504,
+   "beta": 0.0,
+   "price_scale": 27.0,
+   "base_vol": 1200000.0,
+   "memcoin": false,
+   "segments": [
+    [
+     0,
+     3552,
+     "trending_up"
+    ],
+    [
+     3552,
+     4608,
+     "trending_up"
+    ],
+    [
+     4608,
+     7008,
+     "ranging"
+    ],
+    [
+     7008,
+     8544,
+     "volatile"
+    ],
+    [
+     8544,
+     11712,
+     "low_volume"
+    ],
+    [
+     11712,
+     14112,
+     "low_volume"
+    ],
+    [
+     14112,
+     17856,
+     "low_volume"
+    ],
+    [
+     17856,
+     19872,
+     "low_volume"
+    ],
+    [
+     19872,
+     22848,
+     "volatile"
+    ],
+    [
+     22848,
+     25056,
+     "low_volume"
+    ],
+    [
+     25056,
+     28128,
+     "volatile"
+    ],
+    [
+     28128,
+     29568,
+     "volatile"
+    ],
+    [
+     29568,
+     33024,
+     "ranging"
+    ],
+    [
+     33024,
+     35520,
+     "volatile"
+    ],
+    [
+     35520,
+     38400,
+     "low_volume"
+    ]
+   ],
+   "events": [],
+   "legs_last_1h_window": [
+    [
+     21,
+     "range_leg to H"
+    ],
+    [
+     87,
+     "quiet_sfp side=-1"
+    ],
+    [
+     119,
+     "sweep k=0 extra=0.0"
+    ],
+    [
+     152,
+     "sweep k=1 extra=0.0"
+    ],
+    [
+     178,
+     "sweep k=2 extra=0.0"
+    ],
+    [
+     215,
+     "sweep k=3 extra=0.0"
+    ],
+    [
+     251,
+     "sweep k=4 extra=0.004"
+    ],
+    [
+     287,
+     "sweep k=5 extra=0.0"
+    ],
+    [
+     311,
+     "sweep k=6 extra=0.0"
+    ],
+    [
+     347,
+     "sweep k=7 extra=0.008"
+    ],
+    [
+     398,
+     "quiet_sfp side=-1"
+    ]
+   ],
+   "files": {
+    "15m": "candles/SYNLV05-USDT-SWAP_15m.json",
+    "1h": "candles/SYNLV05-USDT-SWAP_1h.json",
+    "4h": "candles/SYNLV05-USDT-SWAP_4h.json",
+    "1d": "candles/SYNLV05-USDT-SWAP_1d.json"
+   },
+   "close_last": 40.28605361
+  },
+  {
+   "symbol": "SYNLV06-USDT-SWAP",
+   "regime": "low_volume",
+   "seed": 505,
+   "beta": 0.0,
+   "price_scale": 150.0,
+   "base_vol": 3000000.0,
+   "memcoin": false,
+   "segments": [
+    [
+     0,
+     3360,
+     "low_volume"
+    ],
+    [
+     3360,
+     5184,
+     "volatile"
+    ],
+    [
+     5184,
+     8352,
+     "trending_up"
+    ],
+    [
+     8352,
+     10176,
+     "low_volume"
+    ],
+    [
+     10176,
+     11712,
+     "volatile"
+    ],
+    [
+     11712,
+     13824,
+     "ranging"
+    ],
+    [
+     13824,
+     16704,
+     "trending_up"
+    ],
+    [
+     16704,
+     18240,
+     "trending_down"
+    ],
+    [
+     18240,
+     19968,
+     "low_volume"
+    ],
+    [
+     19968,
+     23712,
+     "volatile"
+    ],
+    [
+     23712,
+     25152,
+     "low_volume"
+    ],
+    [
+     25152,
+     26976,
+     "low_volume"
+    ],
+    [
+     26976,
+     30240,
+     "ranging"
+    ],
+    [
+     30240,
+     33120,
+     "trending_down"
+    ],
+    [
+     33120,
+     35040,
+     "trending_down"
+    ],
+    [
+     35040,
+     35520,
+     "low_volume"
+    ],
+    [
+     35520,
+     38400,
+     "low_volume"
+    ]
+   ],
+   "events": [],
+   "legs_last_1h_window": [
+    [
+     32,
+     "quiet_sfp side=-1"
+    ],
+    [
+     69,
+     "sweep k=0 extra=0.0"
+    ],
+    [
+     96,
+     "sweep k=1 extra=0.0"
+    ],
+    [
+     125,
+     "sweep k=2 extra=0.0"
+    ],
+    [
+     159,
+     "sweep k=3 extra=0.0"
+    ],
+    [
+     189,
+     "sweep k=4 extra=0.004"
+    ],
+    [
+     221,
+     "sweep k=5 extra=0.0"
+    ],
+    [
+     251,
+     "sweep k=6 extra=0.008"
+    ],
+    [
+     287,
+     "sweep k=7 extra=0.008"
+    ],
+    [
+     328,
+     "quiet_sfp side=-1"
+    ],
+    [
+     356,
+     "sweep k=0 extra=0.0"
+    ],
+    [
+     383,
+     "sweep k=1 extra=0.0"
+    ]
+   ],
+   "files": {
+    "15m": "candles/SYNLV06-USDT-SWAP_15m.json",
+    "1h": "candles/SYNLV06-USDT-SWAP_1h.json",
+    "4h": "candles/SYNLV06-USDT-SWAP_4h.json",
+    "1d": "candles/SYNLV06-USDT-SWAP_1d.json"
+   },
+   "close_last": 90.62878789
+  },
+  {
+   "symbol": "SYNLV07-USDT-SWAP",
+   "regime": "low_volume",
+   "seed": 506,
+   "beta": 0.0,
+   "price_scale": 2400.0,
+   "base_vol": 700000.0,
+   "memcoin": false,
+   "segments": [
+    [
+     0,
+     2688,
+     "trending_down"
+    ],
+    [
+     2688,
+     4992,
+     "trending_down"
+    ],
+    [
+     4992,
+     8736,
+     "ranging"
+    ],
+    [
+     8736,
+     11520,
+     "trending_down"
+    ],
+    [
+     11520,
+     13056,
+     "ranging"
+    ],
+    [
+     13056,
+     14976,
+     "ranging"
+    ],
+    [
+     14976,
+     18336,
+     "low_volume"
+    ],
+    [
+     18336,
+     19296,
+     "trending_down"
+    ],
+    [
+     19296,
+     22080,
+     "ranging"
+    ],
+    [
+     22080,
+     25728,
+     "ranging"
+    ],
+    [
+     25728,
+     27648,
+     "ranging"
+    ],
+    [
+     27648,
+     31008,
+     "ranging"
+    ],
+    [
+     31008,
+     33024,
+     "low_volume"
+    ],
+    [
+     33024,
+     35136,
+     "trending_down"
+    ],
+    [
+     35136,
+     35520,
+     "volatile"
+    ],
+    [
+     35520,
+     38400,
+     "low_volume"
+    ]
+   ],
+   "events": [],
+   "legs_last_1h_window": [
+    [
+     19,
+     "range_leg to H"
+    ],
+    [
+     92,
+     "quiet_sfp side=1"
+    ],
+    [
+     121,
+     "sweep k=0 extra=0.0"
+    ],
+    [
+     144,
+     "sweep k=1 extra=0.0"
+    ],
+    [
+     171,
+     "sweep k=2 extra=0.0"
+    ],
+    [
+     205,
+     "sweep k=3 extra=0.004"
+    ],
+    [
+     240,
+     "sweep k=4 extra=0.008"
+    ],
+    [
+     275,
+     "sweep k=5 extra=0.0"
+    ],
+    [
+     307,
+     "sweep k=6 extra=0.008"
+    ],
+    [
+     347,
+     "sweep k=7 extra=0.0"
+    ],
+    [
+     382,
+     "sweep k=8 extra=0.008"
+    ]
+   ],
+   "files": {
+    "15m": "candles/SYNLV07-USDT-SWAP_15m.json",
+    "1h": "candles/SYNLV07-USDT-SWAP_1h.json",
+    "4h": "candles/SYNLV07-USDT-SWAP_4h.json",
+    "1d": "candles/SYNLV07-USDT-SWAP_1d.json"
+   },
+   "close_last": 1131.231031
+  },
+  {
+   "symbol": "SYNLV08-USDT-SWAP",
+   "regime": "low_volume",
+   "seed": 507,
+   "beta": 0.0,
+   "price_scale": 65000.0,
+   "base_vol": 2500000.0,
+   "memcoin": false,
+   "segments": [
+    [
+     0,
+     3072,
+     "trending_down"
+    ],
+    [
+     3072,
+     4128,
+     "trending_down"
+    ],
+    [
+     4128,
+     5760,
+     "ranging"
+    ],
+    [
+     5760,
+     8640,
+     "ranging"
+    ],
+    [
+     8640,
+     12288,
+     "trending_up"
+    ],
+    [
+     12288,
+     15648,
+     "trending_up"
+    ],
+    [
+     15648,
+     19392,
+     "ranging"
+    ],
+    [
+     19392,
+     22464,
+     "trending_up"
+    ],
+    [
+     22464,
+     24096,
+     "low_volume"
+    ],
+    [
+     24096,
+     25440,
+     "trending_down"
+    ],
+    [
+     25440,
+     28512,
+     "volatile"
+    ],
+    [
+     28512,
+     30144,
+     "low_volume"
+    ],
+    [
+     30144,
+     33600,
+     "trending_up"
+    ],
+    [
+     33600,
+     34752,
+     "ranging"
+    ],
+    [
+     34752,
+     35520,
+     "trending_up"
+    ],
+    [
+     35520,
+     38400,
+     "low_volume"
+    ]
+   ],
+   "events": [],
+   "legs_last_1h_window": [
+    [
+     32,
+     "quiet_sfp side=1"
+    ],
+    [
+     56,
+     "sweep k=0 extra=0.0"
+    ],
+    [
+     91,
+     "sweep k=1 extra=0.0"
+    ],
+    [
+     117,
+     "sweep k=2 extra=0.0"
+    ],
+    [
+     144,
+     "sweep k=3 extra=0.0"
+    ],
+    [
+     180,
+     "sweep k=4 extra=0.008"
+    ],
+    [
+     209,
+     "sweep k=5 extra=0.008"
+    ],
+    [
+     241,
+     "sweep k=6 extra=0.008"
+    ],
+    [
+     272,
+     "sweep k=7 extra=0.004"
+    ],
+    [
+     300,
+     "sweep k=8 extra=0.008"
+    ],
+    [
+     348,
+     "quiet_sfp side=1"
+    ],
+    [
+     375,
+     "sweep k=0 extra=0.0"
+    ]
+   ],
+   "files": {
+    "15m": "candles/SYNLV08-USDT-SWAP_15m.json",
+    "1h": "candles/SYNLV08-USDT-SWAP_1h.json",
+    "4h": "candles/SYNLV08-USDT-SWAP_4h.json",
+    "1d": "candles/SYNLV08-USDT-SWAP_1d.json"
+   },
+   "close_last": 99700.41543
+  }
+ ]
+}

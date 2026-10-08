@@ -95,6 +95,7 @@ const NODE_GLOBALS = {
   setTimeout: 'readonly', setInterval: 'readonly',
   clearTimeout: 'readonly', clearInterval: 'readonly', setImmediate: 'readonly',
   URL: 'readonly', URLSearchParams: 'readonly', fetch: 'readonly',
+  AbortController: 'readonly',
 };
 
 const TEST_GLOBALS = {
@@ -157,6 +158,8 @@ module.exports = [
     files: ['backend/tests/**/*.js', 'backend/**/*.test.js'],
     languageOptions: {
       ecmaVersion: 2022,
+      // vitest test files are ESM (`import { describe } from 'vitest'`); helper modules under
+      // tests/ that use require/module.exports still parse because `module` is also accepted.
       sourceType: 'module',
       globals: { ...NODE_GLOBALS, ...TEST_GLOBALS },
     },

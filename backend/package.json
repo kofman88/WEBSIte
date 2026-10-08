@@ -9,6 +9,7 @@
     "test": "vitest",
     "test:run": "vitest run",
     "test:e2e": "vitest run tests/e2e",
+    "golden": "vitest run tests/golden",
     "lint": "eslint . --ext .js",
     "db:reset": "node utils/db-reset.js",
     "db:seed": "node utils/db-seed.js",
