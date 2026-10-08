@@ -4,12 +4,13 @@ The JS traders in `backend/services/exchanges/` are verified against the bot's o
 (`/home/user/MAIN_BOT/CHM_BREAKER_V4`, read-only). These scripts run the bot modules offline and
 write the fixtures under `../fixtures/`; the vitest suites replay them.
 
-Run from the bot checkout with the parity venv (no network is used — every HTTP call is scripted):
+Run from the bot checkout with the production interpreter (CPython 3.11 + the bot's pinned requirements;
+no network is used — every HTTP call is scripted):
 
 ```sh
 cd /home/user/MAIN_BOT/CHM_BREAKER_V4
 export BOT_TOKEN_CHM=test:token ADMIN_IDS=123
-PY=<scratchpad>/venv/bin/python
+PY=<python3.11 venv>/bin/python
 $PY /path/to/backend/tests/exchanges/py/gen_pure_vectors.py              # → pure_vectors.json
 $PY /path/to/backend/tests/exchanges/py/gen_trader_scenarios.py          # → scenarios_{bybit,bingx,binance,okx}.json
 $PY /path/to/backend/tests/exchanges/py/gen_balance_cache.py             # → balance_cache.json
