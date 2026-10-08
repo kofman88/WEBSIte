@@ -34,6 +34,7 @@ by, bx, bn, ok = harness.by, harness.bx, harness.bn, harness.ok
 SEED = 20261008
 N_ORDER = 30
 N_ERROR = 10
+EXTREME = False   # --extreme: wider exploratory ranges (not used for the committed fixtures)
 
 SYMS = [
     ("BTC-USDT-SWAP", 87000.0), ("ETH-USDT-SWAP", 3000.0), ("SOL-USDT-SWAP", 150.0), ("XRP-USDT-SWAP", 2.5),
@@ -65,8 +66,10 @@ class Gen:
         return round(1767225600.0 + self.r.uniform(0, 86400 * 60), self.r.choice([0, 3, 4, 6]))
 
     def price(self, base):
-        p = base * self.r.uniform(0.9, 1.1)
-        sig = self.r.randint(3, 9)
+        p = base * (self.r.uniform(0.9, 1.1) if not EXTREME else 10 ** self.r.uniform(-1.5, 1.5))
+        if EXTREME and self.chance(0.15):
+            return float(int(p) or 1), 0          # integral float (Python "87000.0")
+        sig = self.r.randint(3, 9) if not EXTREME else self.r.randint(1, 15)
         nd = max(0, sig - int(math.floor(math.log10(p))) - 1)
         return round(p, nd), nd
 
@@ -74,7 +77,7 @@ class Gen:
         sym, base = symbol or self.choice(SYMS)
         direction = self.choice(["LONG", "SHORT"])
         entry, nd = self.price(base)
-        d = self.choice(SL_DIST)
+        d = self.choice(SL_DIST) if not EXTREME else self.choice(SL_DIST + [0.00001, 0.0001, 0.2, 0.5, self.r.uniform(0.0001, 0.3)])
         sgn = 1 if direction == "LONG" else -1
         sl = round(entry * (1 - sgn * d), nd + 1)
         tp1 = round(entry * (1 + sgn * d * self.choice([0.5, 1.0, 1.5, 2.0])), nd + 1)
@@ -82,7 +85,8 @@ class Gen:
         tp3 = round(entry * (1 + sgn * d * self.choice([4.0, 5.0])), nd + 1) if (tp2 and self.chance(0.6)) or self.chance(0.1) else 0.0
         return {
             "symbol": sym, "direction": direction, "entry": entry, "sl": sl, "tp1": tp1, "tp2": tp2, "tp3": tp3,
-            "risk_pct": self.choice(RISKS), "leverage": self.choice(LEVS),
+            "risk_pct": self.choice(RISKS) if not EXTREME else self.choice(RISKS + [0.01, 25.0, 100.0, round(self.r.uniform(0.05, 20), self.r.randint(0, 6))]),
+            "leverage": self.choice(LEVS) if not EXTREME else self.choice(LEVS + [0, 200, 1000, self.r.randint(1, 300)]),
             "risk_mode": self.r.choices(["risk", "notional", "margin"], [70, 15, 15])[0],
             "order_type": self.choice(["Limit", "Market"]),
             "trade_id": self.choice(["", "", f"t-{self.r.randrange(10**6)}", f"{self.r.randrange(10**12)}"]),
@@ -115,7 +119,10 @@ class Gen:
             bal = target * dist * 100.0 / p["risk_pct"]
             if 20.0 <= bal <= 5e6:
                 return float(repr(bal)), True
-        return self.choice([25.0, 80.5, 150.0, 500.0, 1234.56, 5000.0, 20000.0, 98765.4321]), False
+        pool = [25.0, 80.5, 150.0, 500.0, 1234.56, 5000.0, 20000.0, 98765.4321]
+        if EXTREME:
+            pool += [1.0, 0.99, 3.3, 1e7, 123456789.123, round(self.r.uniform(1, 1e6), self.r.randint(0, 8))]
+        return self.choice(pool), False
 
 
 def _safe(p, lev=10):
@@ -233,8 +240,9 @@ def bybit_rows(g: Gen):
             state["time_offset_ms"] = g.r.randint(-2500, 2500)
         return routes, state, {"edge": edge, "step": step, "tick": tick}
 
-    n_split = 5
-    n_mgmt = 9
+    k = max(1, N_ORDER // 30)
+    n_split = 5 * k
+    n_mgmt = 9 * k
     for i in range(N_ORDER - n_split - n_mgmt):
         p = g.order_params()
         clock = g.clock()
@@ -253,7 +261,7 @@ def bybit_rows(g: Gen):
         S(f"rnd_split_{i:02d}_{p['symbol']}_{p['direction']}", "place_trade_split",
           [KEY, SEC, p["symbol"], p["direction"], lo, hi, p["sl"], p["tp1"], p["risk_pct"], p["leverage"]],
           {"tp2": p["tp2"], "tp3": p["tp3"], "user_id": p["user_id"]}, routes, state, clock)
-    mg = ["close", "close", "close", "cancel_all", "cancel_all", "trail", "trail", "trail", "breakeven"]
+    mg = ["close", "close", "close", "cancel_all", "cancel_all", "trail", "trail", "trail", "breakeven"] * k
     for i, kind in enumerate(mg):
         p = g.order_params()
         bb = by.to_bybit_symbol(p["symbol"])
@@ -393,8 +401,8 @@ def bingx_rows(g: Gen):
             R("GET", "/openApi/swap/v2/user/balance", bal(_fmt(bal_v))),
             R("POST", "/openApi/swap/v2/trade/leverage", *([] if hedge else [err(109400, "In One-way mode, side should be BOTH")]),
               ok_({"leverage": 10, "symbol": sym})),
-            R("POST", "/openApi/swap/v2/trade/batchOrders", g.choice([err(100001, "Signature verification failed"),
-                                                                     ok_({"orders": [{"orderId": oid()} for _ in range(5)]})])),
+            R("POST", "/openApi/swap/v2/trade/batchOrders", err(100001, "Signature verification failed") if safe else g.choice([
+                err(100001, "Signature verification failed"), ok_({"orders": [{"orderId": oid()} for _ in range(5)]})])),
             R("GET", "/openApi/swap/v2/quote/price", ok_({"symbol": sym, "price": _fmt(price_now), "time": 1767225600000})),
             R("POST", "/openApi/swap/v2/trade/order", *[order() for _ in range(8)]),
             R("GET", "/openApi/swap/v2/user/positions", *([ok_([])] if g.chance(0.3) else []), pos(sym, amt, ps, _fmt(p["entry"] * mult))),
@@ -409,7 +417,8 @@ def bingx_rows(g: Gen):
             state["live_bingx"] = [sym, "BTC-USDT", "ETH-USDT"]
         return routes, state, edge, sym, step, prec
 
-    n_mgmt = 12
+    k = max(1, N_ORDER // 30)
+    n_mgmt = 12 * k
     for i in range(N_ORDER - n_mgmt):
         p = g.order_params()
         routes, state, edge, sym, _, _ = flow(p)
@@ -417,7 +426,7 @@ def bingx_rows(g: Gen):
               "trade_id": p["trade_id"], "user_id": p["user_id"], "allow_low_notional_boost": p["boost"]}
         S(f"rnd_pt_{i:02d}_{sym}_{p['direction']}_{p['order_type']}_{p['risk_mode']}{'_edge' if edge else ''}", "place_trade",
           [KEY, SEC, p["symbol"], p["direction"], p["entry"], p["sl"], p["tp1"], p["risk_pct"], p["leverage"]], kw, routes, state)
-    mg = ["close", "close", "close", "cancel_all", "cancel_all", "trail", "trail", "trail", "breakeven", "breakeven", "sltp", "cancel_tp"]
+    mg = ["close", "close", "close", "cancel_all", "cancel_all", "trail", "trail", "trail", "breakeven", "breakeven", "sltp", "cancel_tp"] * k
     for i, kind in enumerate(mg):
         p = g.order_params()
         routes, state, _, sym, step, _ = flow(p)
@@ -532,7 +541,7 @@ def binance_rows(g: Gen):
         close_side = "SELL" if p["direction"] == "LONG" else "BUY"
         dual_resp = {"ok": {"code": 200, "msg": "success"}, "4059": err(-4059, "No need to change position side."),
                      "4061": err(-4061, "Position side cannot be changed if there exists position.")}[dual]
-        batch = g.choice(["sig", "ok", "partial"])
+        batch = "sig" if safe else g.choice(["sig", "ok", "partial"])
         batch_resp = {"sig": err(-1022, "Signature for this request is not valid."),
                       "ok": [order(), order(type="STOP_MARKET"), order(type="TAKE_PROFIT_MARKET"), order(type="TAKE_PROFIT_MARKET"), order(type="TAKE_PROFIT_MARKET")],
                       "partial": [order(), err(-2021, "Order would immediately trigger.")]}[batch]
@@ -555,7 +564,8 @@ def binance_rows(g: Gen):
             state["binance_offset_ms"] = g.r.randint(-3000, 3000)
         return routes, state, edge, sym, step
 
-    n_mgmt = 12
+    k = max(1, N_ORDER // 30)
+    n_mgmt = 12 * k
     for i in range(N_ORDER - n_mgmt):
         p = g.order_params()
         routes, state, edge, sym, _ = flow(p)
@@ -563,7 +573,7 @@ def binance_rows(g: Gen):
               "trade_id": p["trade_id"], "user_id": p["user_id"], "allow_low_notional_boost": p["boost"]}
         S(f"rnd_pt_{i:02d}_{sym}_{p['direction']}_{p['order_type']}_{p['risk_mode']}{'_edge' if edge else ''}", "place_trade",
           [KEY, SEC, p["symbol"], p["direction"], p["entry"], p["sl"], p["tp1"], p["risk_pct"], p["leverage"]], kw, routes, state)
-    mg = ["close", "close", "close", "cancel_all", "cancel_all", "trail", "trail", "trail", "breakeven", "breakeven", "sltp", "cancel_tp"]
+    mg = ["close", "close", "close", "cancel_all", "cancel_all", "trail", "trail", "trail", "breakeven", "breakeven", "sltp", "cancel_tp"] * k
     for i, kind in enumerate(mg):
         p = g.order_params()
         routes, state, _, sym, step = flow(p)
@@ -679,7 +689,8 @@ def okx_rows(g: Gen):
             state["okx_offset_ms"] = g.r.randint(-3000, 3000)
         return routes, state, edge, inst_id, lot
 
-    n_mgmt = 12
+    k = max(1, N_ORDER // 30)
+    n_mgmt = 12 * k
     for i in range(N_ORDER - n_mgmt):
         p = g.order_params()
         routes, state, edge, inst_id, _ = flow(p)
@@ -687,7 +698,7 @@ def okx_rows(g: Gen):
               "trade_id": p["trade_id"], "user_id": p["user_id"], "allow_low_notional_boost": p["boost"], "passphrase": PP}
         S(f"rnd_pt_{i:02d}_{inst_id}_{p['direction']}_{p['order_type']}_{p['risk_mode']}{'_edge' if edge else ''}", "place_trade",
           [KEY, SEC, p["symbol"], p["direction"], p["entry"], p["sl"], p["tp1"], p["risk_pct"], p["leverage"]], kw, routes, state)
-    mg = ["close", "close", "close", "cancel_all", "cancel_all", "trail", "trail", "trail", "breakeven", "breakeven", "sltp", "sltp"]
+    mg = ["close", "close", "close", "cancel_all", "cancel_all", "trail", "trail", "trail", "breakeven", "breakeven", "sltp", "sltp"] * k
     for i, kind in enumerate(mg):
         p = g.order_params()
         routes, state, _, inst_id, lot = flow(p)
@@ -781,11 +792,11 @@ def _capture_payloads():
     return run
 
 
-def main(which):
+def main(which, out_dir=None):
     wire.install()
     run = _capture_payloads()
     for ex in which:
-        g = Gen(f"{SEED}:{ex}")
+        g = Gen(f"{SEED}:{ex}" + (":x" if EXTREME else ""))
         rows = []
         for sc in BUILDERS[ex](g):
             frozen = _freeze_routes(sc)
@@ -797,11 +808,20 @@ def main(which):
             r0 = res.get("result")
             status = "raised" if "raised" in res else ("ok" if isinstance(r0, dict) and r0.get("ok") else ("fail" if isinstance(r0, dict) else "value"))
             print(f"{ex:8s} {sc['name']:60s} {status:6s} reqs={len(res['requests'])}")
-        path = os.path.join(HERE, "..", "fixtures", f"adversarial_{ex}.json")
+        path = os.path.join(out_dir or os.path.join(HERE, "..", "fixtures"), f"adversarial_{ex}.json")
         with open(path, "w", encoding="utf-8") as f:
             json.dump(rows, f, ensure_ascii=False, indent=0)
         print("wrote", path, len(rows))
 
 
 if __name__ == "__main__":
-    main(sys.argv[1:] or ["bybit", "bingx", "binance", "okx"])
+    import argparse
+    ap = argparse.ArgumentParser()
+    ap.add_argument("exchanges", nargs="*", default=["bybit", "bingx", "binance", "okx"])
+    ap.add_argument("--seed", type=int, default=SEED)
+    ap.add_argument("--orders", type=int, default=N_ORDER)
+    ap.add_argument("--extreme", action="store_true")
+    ap.add_argument("--out", default=None, help="output dir (default: ../fixtures)")
+    a = ap.parse_args()
+    SEED, N_ORDER, EXTREME = a.seed, a.orders, a.extreme
+    main(a.exchanges, a.out)

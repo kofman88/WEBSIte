@@ -1,0 +1,480 @@
+{
+ "bases": {
+  "dns": "https://exchange-host-that-does-not-exist.invalid",
+  "refused": "https://127.0.0.1:53905",
+  "close": "http://127.0.0.1:43403",
+  "reset": "http://127.0.0.1:44253",
+  "truncated": "http://127.0.0.1:35471",
+  "chunked": "http://127.0.0.1:46801",
+  "silent": "http://127.0.0.1:39439",
+  "html": "http://127.0.0.1:42247"
+ },
+ "client": [
+  {
+   "mode": "dns",
+   "url": "https://exchange-host-that-does-not-exist.invalid/v5/market/time?category=linear&symbol=BTCUSDT",
+   "client": "aiohttp",
+   "timeout": 1,
+   "got": {
+    "type": "ClientConnectorDNSError",
+    "str": "Cannot connect to host exchange-host-that-does-not-exist.invalid:443 ssl:default [Name or service not known]"
+   }
+  },
+  {
+   "mode": "dns",
+   "url": "https://exchange-host-that-does-not-exist.invalid/v5/market/time?category=linear&symbol=BTCUSDT",
+   "client": "requests",
+   "timeout": 1,
+   "got": {
+    "type": "ConnectionError",
+    "str": "HTTPSConnectionPool(host='exchange-host-that-does-not-exist.invalid', port=443): Max retries exceeded with url: /v5/market/time?category=linear&symbol=BTCUSDT (Caused by NameResolutionError(\"HTTPSConnection(host='exchange-host-that-does-not-exist.invalid', port=443): Failed to resolve 'exchange-host-that-does-not-exist.invalid' ([Errno -2] Name or service not known)\"))"
+   }
+  },
+  {
+   "mode": "refused",
+   "url": "https://127.0.0.1:53905/v5/market/time?category=linear&symbol=BTCUSDT",
+   "client": "aiohttp",
+   "timeout": 1,
+   "got": {
+    "type": "ClientConnectorError",
+    "str": "Cannot connect to host 127.0.0.1:53905 ssl:default [Connect call failed ('127.0.0.1', 53905)]"
+   }
+  },
+  {
+   "mode": "refused",
+   "url": "https://127.0.0.1:53905/v5/market/time?category=linear&symbol=BTCUSDT",
+   "client": "requests",
+   "timeout": 1,
+   "got": {
+    "type": "ConnectionError",
+    "str": "HTTPSConnectionPool(host='127.0.0.1', port=53905): Max retries exceeded with url: /v5/market/time?category=linear&symbol=BTCUSDT (Caused by NewConnectionError(\"HTTPSConnection(host='127.0.0.1', port=53905): Failed to establish a new connection: [Errno 111] Connection refused\"))"
+   }
+  },
+  {
+   "mode": "close",
+   "url": "http://127.0.0.1:43403/v5/market/time",
+   "client": "aiohttp",
+   "timeout": 1,
+   "got": {
+    "type": "ServerDisconnectedError",
+    "str": "Server disconnected"
+   }
+  },
+  {
+   "mode": "close",
+   "url": "http://127.0.0.1:43403/v5/market/time",
+   "client": "requests",
+   "timeout": 1,
+   "got": {
+    "type": "ConnectionError",
+    "str": "('Connection aborted.', RemoteDisconnected('Remote end closed connection without response'))"
+   }
+  },
+  {
+   "mode": "reset",
+   "url": "http://127.0.0.1:44253/v5/market/time",
+   "client": "aiohttp",
+   "timeout": 1,
+   "got": {
+    "type": "ClientOSError",
+    "str": "[Errno 104] Connection reset by peer"
+   }
+  },
+  {
+   "mode": "reset",
+   "url": "http://127.0.0.1:44253/v5/market/time",
+   "client": "requests",
+   "timeout": 1,
+   "got": {
+    "type": "ConnectionError",
+    "str": "('Connection aborted.', ConnectionResetError(104, 'Connection reset by peer'))"
+   }
+  },
+  {
+   "mode": "truncated",
+   "url": "http://127.0.0.1:35471/v5/market/time",
+   "client": "aiohttp",
+   "timeout": 1,
+   "got": {
+    "type": "ClientPayloadError",
+    "str": "Response payload is not completed: <ContentLengthError: 400, message='Not enough data to satisfy content length header (received 8 of 100 bytes).'>"
+   }
+  },
+  {
+   "mode": "truncated",
+   "url": "http://127.0.0.1:35471/v5/market/time",
+   "client": "requests",
+   "timeout": 1,
+   "got": {
+    "type": "ChunkedEncodingError",
+    "str": "('Connection broken: IncompleteRead(8 bytes read, 92 more expected)', IncompleteRead(8 bytes read, 92 more expected))"
+   }
+  },
+  {
+   "mode": "chunked",
+   "url": "http://127.0.0.1:46801/v5/market/time",
+   "client": "aiohttp",
+   "timeout": 1,
+   "got": {
+    "type": "ClientPayloadError",
+    "str": "Response payload is not completed: <TransferEncodingError: 400, message='Not enough data to satisfy transfer length header.'>"
+   }
+  },
+  {
+   "mode": "chunked",
+   "url": "http://127.0.0.1:46801/v5/market/time",
+   "client": "requests",
+   "timeout": 1,
+   "got": {
+    "type": "ChunkedEncodingError",
+    "str": "Response ended prematurely"
+   }
+  },
+  {
+   "mode": "silent",
+   "url": "http://127.0.0.1:39439/v5/market/time",
+   "client": "aiohttp",
+   "timeout": 1,
+   "got": {
+    "type": "TimeoutError",
+    "str": ""
+   }
+  },
+  {
+   "mode": "silent",
+   "url": "http://127.0.0.1:39439/v5/market/time",
+   "client": "requests",
+   "timeout": 1,
+   "got": {
+    "type": "ReadTimeout",
+    "str": "HTTPConnectionPool(host='127.0.0.1', port=39439): Read timed out. (read timeout=1)"
+   }
+  }
+ ],
+ "trader": [
+  {
+   "exchange": "bingx",
+   "mode": "dns",
+   "base": "https://exchange-host-that-does-not-exist.invalid",
+   "path": "/openApi/swap/v2/user/balance",
+   "got": {
+    "result": {
+     "code": -1,
+     "msg": "network: Cannot connect to host exchange-host-that-does-not-exist.invalid:443 ssl:default [Name or service not known]"
+    }
+   }
+  },
+  {
+   "exchange": "binance",
+   "mode": "dns",
+   "base": "https://exchange-host-that-does-not-exist.invalid",
+   "path": "/fapi/v2/balance",
+   "got": {
+    "result": {
+     "code": -1,
+     "msg": "Cannot connect to host exchange-host-that-does-not-exist.invalid:443 ssl:default [Name or service not known]"
+    }
+   }
+  },
+  {
+   "exchange": "okx",
+   "mode": "dns",
+   "base": "https://exchange-host-that-does-not-exist.invalid",
+   "path": "/api/v5/account/balance",
+   "got": {
+    "result": {
+     "code": "-1",
+     "msg": "Cannot connect to host exchange-host-that-does-not-exist.invalid:443 ssl:default [Name or service not known]"
+    }
+   }
+  },
+  {
+   "exchange": "bybit",
+   "mode": "dns",
+   "base": "https://exchange-host-that-does-not-exist.invalid",
+   "path": "/v5/account/wallet-balance",
+   "got": {
+    "raised": {
+     "type": "ConnectionError",
+     "str": "HTTPSConnectionPool(host='exchange-host-that-does-not-exist.invalid', port=443): Max retries exceeded with url: /v5/account/wallet-balance?accountType=UNIFIED&coin=USDT (Caused by NameResolutionError(\"HTTPSConnection(host='exchange-host-that-does-not-exist.invalid', port=443): Failed to resolve 'exchange-host-that-does-not-exist.invalid' ([Errno -2] Name or service not known)\"))"
+    }
+   }
+  },
+  {
+   "exchange": "bingx",
+   "mode": "refused",
+   "base": "https://127.0.0.1:53905",
+   "path": "/openApi/swap/v2/user/balance",
+   "got": {
+    "result": {
+     "code": -1,
+     "msg": "network: Cannot connect to host 127.0.0.1:53905 ssl:default [Connect call failed ('127.0.0.1', 53905)]"
+    }
+   }
+  },
+  {
+   "exchange": "binance",
+   "mode": "refused",
+   "base": "https://127.0.0.1:53905",
+   "path": "/fapi/v2/balance",
+   "got": {
+    "result": {
+     "code": -1,
+     "msg": "Cannot connect to host 127.0.0.1:53905 ssl:default [Connect call failed ('127.0.0.1', 53905)]"
+    }
+   }
+  },
+  {
+   "exchange": "okx",
+   "mode": "refused",
+   "base": "https://127.0.0.1:53905",
+   "path": "/api/v5/account/balance",
+   "got": {
+    "result": {
+     "code": "-1",
+     "msg": "Cannot connect to host 127.0.0.1:53905 ssl:default [Connect call failed ('127.0.0.1', 53905)]"
+    }
+   }
+  },
+  {
+   "exchange": "bybit",
+   "mode": "refused",
+   "base": "https://127.0.0.1:53905",
+   "path": "/v5/account/wallet-balance",
+   "got": {
+    "raised": {
+     "type": "ConnectionError",
+     "str": "HTTPSConnectionPool(host='127.0.0.1', port=53905): Max retries exceeded with url: /v5/account/wallet-balance?accountType=UNIFIED&coin=USDT (Caused by NewConnectionError(\"HTTPSConnection(host='127.0.0.1', port=53905): Failed to establish a new connection: [Errno 111] Connection refused\"))"
+    }
+   }
+  },
+  {
+   "exchange": "bingx",
+   "mode": "close",
+   "base": "http://127.0.0.1:43403",
+   "path": "/openApi/swap/v2/user/balance",
+   "got": {
+    "result": {
+     "code": -1,
+     "msg": "Server disconnected"
+    }
+   }
+  },
+  {
+   "exchange": "binance",
+   "mode": "close",
+   "base": "http://127.0.0.1:43403",
+   "path": "/fapi/v2/balance",
+   "got": {
+    "result": {
+     "code": -1,
+     "msg": "Server disconnected"
+    }
+   }
+  },
+  {
+   "exchange": "okx",
+   "mode": "close",
+   "base": "http://127.0.0.1:43403",
+   "path": "/api/v5/account/balance",
+   "got": {
+    "result": {
+     "code": "-1",
+     "msg": "Server disconnected"
+    }
+   }
+  },
+  {
+   "exchange": "bybit",
+   "mode": "close",
+   "base": "http://127.0.0.1:43403",
+   "path": "/v5/account/wallet-balance",
+   "got": {
+    "raised": {
+     "type": "ConnectionError",
+     "str": "('Connection aborted.', RemoteDisconnected('Remote end closed connection without response'))"
+    }
+   }
+  },
+  {
+   "exchange": "bingx",
+   "mode": "reset",
+   "base": "http://127.0.0.1:44253",
+   "path": "/openApi/swap/v2/user/balance",
+   "got": {
+    "result": {
+     "code": -1,
+     "msg": "[Errno 104] Connection reset by peer"
+    }
+   }
+  },
+  {
+   "exchange": "binance",
+   "mode": "reset",
+   "base": "http://127.0.0.1:44253",
+   "path": "/fapi/v2/balance",
+   "got": {
+    "result": {
+     "code": -1,
+     "msg": "[Errno 104] Connection reset by peer"
+    }
+   }
+  },
+  {
+   "exchange": "okx",
+   "mode": "reset",
+   "base": "http://127.0.0.1:44253",
+   "path": "/api/v5/account/balance",
+   "got": {
+    "result": {
+     "code": "-1",
+     "msg": "[Errno 104] Connection reset by peer"
+    }
+   }
+  },
+  {
+   "exchange": "bybit",
+   "mode": "reset",
+   "base": "http://127.0.0.1:44253",
+   "path": "/v5/account/wallet-balance",
+   "got": {
+    "raised": {
+     "type": "ConnectionError",
+     "str": "('Connection aborted.', ConnectionResetError(104, 'Connection reset by peer'))"
+    }
+   }
+  },
+  {
+   "exchange": "bingx",
+   "mode": "truncated",
+   "base": "http://127.0.0.1:35471",
+   "path": "/openApi/swap/v2/user/balance",
+   "got": {
+    "result": {
+     "code": -1,
+     "msg": "Response payload is not completed: <ContentLengthError: 400, message='Not enough data to satisfy content length header (received 8 of 100 bytes).'>"
+    }
+   }
+  },
+  {
+   "exchange": "binance",
+   "mode": "truncated",
+   "base": "http://127.0.0.1:35471",
+   "path": "/fapi/v2/balance",
+   "got": {
+    "result": {
+     "code": -1,
+     "msg": "Response payload is not completed: <ContentLengthError: 400, message='Not enough data to satisfy content length header (received 8 of 100 bytes).'>"
+    }
+   }
+  },
+  {
+   "exchange": "okx",
+   "mode": "truncated",
+   "base": "http://127.0.0.1:35471",
+   "path": "/api/v5/account/balance",
+   "got": {
+    "result": {
+     "code": "-1",
+     "msg": "Response payload is not completed: <ContentLengthError: 400, message='Not enough data to satisfy content length header (received 8 of 100 bytes).'>"
+    }
+   }
+  },
+  {
+   "exchange": "bybit",
+   "mode": "truncated",
+   "base": "http://127.0.0.1:35471",
+   "path": "/v5/account/wallet-balance",
+   "got": {
+    "raised": {
+     "type": "ChunkedEncodingError",
+     "str": "('Connection broken: IncompleteRead(8 bytes read, 92 more expected)', IncompleteRead(8 bytes read, 92 more expected))"
+    }
+   }
+  },
+  {
+   "exchange": "bingx",
+   "mode": "chunked",
+   "base": "http://127.0.0.1:46801",
+   "path": "/openApi/swap/v2/user/balance",
+   "got": {
+    "result": {
+     "code": -1,
+     "msg": "Response payload is not completed: <TransferEncodingError: 400, message='Not enough data to satisfy transfer length header.'>"
+    }
+   }
+  },
+  {
+   "exchange": "binance",
+   "mode": "chunked",
+   "base": "http://127.0.0.1:46801",
+   "path": "/fapi/v2/balance",
+   "got": {
+    "result": {
+     "code": -1,
+     "msg": "Response payload is not completed: <TransferEncodingError: 400, message='Not enough data to satisfy transfer length header.'>"
+    }
+   }
+  },
+  {
+   "exchange": "okx",
+   "mode": "chunked",
+   "base": "http://127.0.0.1:46801",
+   "path": "/api/v5/account/balance",
+   "got": {
+    "result": {
+     "code": "-1",
+     "msg": "Response payload is not completed: <TransferEncodingError: 400, message='Not enough data to satisfy transfer length header.'>"
+    }
+   }
+  },
+  {
+   "exchange": "bybit",
+   "mode": "chunked",
+   "base": "http://127.0.0.1:46801",
+   "path": "/v5/account/wallet-balance",
+   "got": {
+    "raised": {
+     "type": "ChunkedEncodingError",
+     "str": "Response ended prematurely"
+    }
+   }
+  },
+  {
+   "exchange": "bingx",
+   "mode": "html",
+   "base": "http://127.0.0.1:42247",
+   "path": "/openApi/swap/v2/user/balance",
+   "got": {
+    "result": {
+     "code": -1,
+     "msg": "http=502; body=<html>502 Bad Gateway</html>"
+    }
+   }
+  },
+  {
+   "exchange": "binance",
+   "mode": "html",
+   "base": "http://127.0.0.1:42247",
+   "path": "/fapi/v2/balance",
+   "got": {
+    "result": {
+     "code": -1,
+     "msg": "http=502; body=<html>502 Bad Gateway</html>"
+    }
+   }
+  },
+  {
+   "exchange": "okx",
+   "mode": "html",
+   "base": "http://127.0.0.1:42247",
+   "path": "/api/v5/account/balance",
+   "got": {
+    "result": {
+     "code": "-1",
+     "msg": "Expecting value: line 1 column 1 (char 0)"
+    }
+   }
+  }
+ ]
+}

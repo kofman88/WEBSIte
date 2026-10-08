@@ -77,6 +77,11 @@ class FailedRequestError extends PyError {
  */
 function requestsError(e, url, timeout) {
   if (!(e instanceof TransportError)) return e;
+  // production transport: the exact requests 2.x flavour of the failure (transport.fetchError)
+  if (e.requestsMessage !== undefined) {
+    return new PyError(e.requestsType || (e.kind === 'timeout' ? 'ReadTimeout' : 'ConnectionError'), e.requestsMessage);
+  }
+  // scripted transports (replay fixtures) carry the requests text as the message itself
   let host = '';
   let path = '';
   try { const u = new URL(url); host = u.host; path = u.pathname + u.search; } catch (_x) { /* ignore */ }

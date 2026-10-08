@@ -20,6 +20,17 @@ const { runScenario } = req('./replay.js');
 const { loadFixture } = req('./helpers.js');
 const { EXCHANGES } = req('./callMaps.js');
 const { fetchTransport } = req('../../services/exchanges/transport.js');
+const fs = req('fs');
+const path = req('path');
+const { revive } = req('./helpers.js');
+
+// ADV_FIXTURES=<dir> replays an exploratory sweep (gen_adversarial.py --out <dir> --orders N --extreme)
+const EXPLORE_DIR = process.env.ADV_FIXTURES || '';
+function loadRows(ex) {
+  if (!EXPLORE_DIR) return loadFixture(`adversarial_${ex}.json`);
+  const reviver = (_k, v, ctx) => (typeof v === 'number' && Number.isInteger(v) && !Number.isSafeInteger(v) && ctx && /^-?\d+$/.test(ctx.source || '') ? ctx.source : v);
+  return revive(JSON.parse(fs.readFileSync(path.join(EXPLORE_DIR, `adversarial_${ex}.json`), 'utf8'), reviver));
+}
 
 // transport-level fields neither trader sets (py/wire.py TRANSPORT_HEADERS) + undici-only defaults
 const DROP = new Set(['host', 'user-agent', 'accept-encoding', 'connection', 'content-length', 'accept-language', 'sec-fetch-mode']);
@@ -53,10 +64,10 @@ function wireSend(r) {
 
 for (const ex of ['bybit', 'bingx', 'binance', 'okx']) {
   const X = EXCHANGES[ex];
-  const ROWS = loadFixture(`adversarial_${ex}.json`);
+  const ROWS = loadRows(ex);
 
   describe(`${ex} adversarial parity (${ROWS.length} scenarios)`, () => {
-    it('fixture covers 30 random orders + 10 error replays', () => {
+    it.skipIf(Boolean(EXPLORE_DIR))('fixture covers 30 random orders + 10 error replays', () => {
       expect(ROWS.filter((r) => r.scenario.name.startsWith('rnd_')).length).toBe(30);
       expect(ROWS.filter((r) => r.scenario.name.startsWith('err_')).length).toBe(10);
     });
