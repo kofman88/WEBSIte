@@ -1,0 +1,6406 @@
+{
+ "note": "Signal objects of the JS engines on golden fixtures (tools/dumpCardSignals.js). Rendered by gen_cards.py with the bot.",
+ "levels": [
+  {
+   "source": "default/SYNUP05-USDT-SWAP/324",
+   "signal": {
+    "symbol": "SYNUP05-USDT-SWAP",
+    "direction": "LONG",
+    "entry": 34.38206288,
+    "sl": 33.8663319368,
+    "tp1": 35.413524766399995,
+    "tp2": 35.92925570959999,
+    "tp3": 36.70285212439999,
+    "risk_pct": 1.4999999999999933,
+    "quality": 5,
+    "reasons": [
+     "✅ Отскок от поддержки",
+     "⚠️ [BOUNCE_PLAIN] — паттерн класса D",
+     "✅ Уровень класса 1 (Абсолютный)",
+     "✅ По локальному тренду",
+     "✅ Volume Profile узел (HVN)",
+     "✅ ✅ Затухающий импульс",
+     "✅ Тест #1 уровня (оптимально)"
+    ],
+    "rsi": 26.68180931242614,
+    "volume_ratio": 0.7927548264702754,
+    "trend_local": "↔️ Боковик",
+    "trend_htf": "",
+    "pattern": "BOUNCE_PLAIN",
+    "breakout_type": "Отскок от поддержки",
+    "is_counter_trend": false,
+    "human_explanation": "Абсолютный уровень 33.9475 (1 касания). Цена подошла к уровню поддержки и показывает признаки разворота. Отскок от ключевой зоны. 🇺🇸 Нью-Йорк сессия 〰️ Слабая корреляция с рынком Стоп за структуру 33.8663 (риск 1.5%). TP1: 35.4135 (R:R 1:2.0), TP2: 35.9293 (R:R 1:3.0).",
+    "level_class": 1,
+    "test_count": 1,
+    "rr_score": 2.8,
+    "corr_label": "〰️ Слабая корреляция с рынком",
+    "session": "🇺🇸 Нью-Йорк сессия",
+    "btc_corr": 0,
+    "eth_corr": 0,
+    "tp1_close_pct": 0.4,
+    "tp2_close_pct": 0.3,
+    "tp3_close_pct": 0.3,
+    "move_sl_to_be_after_tp1": true,
+    "squeeze_score": 0,
+    "quality_after_squeeze": 5,
+    "passes_min_quality": true
+   }
+  },
+  {
+   "source": "default/SYNDN04-USDT-SWAP/339",
+   "signal": {
+    "symbol": "SYNDN04-USDT-SWAP",
+    "direction": "LONG",
+    "entry": 2.087281675,
+    "sl": 2.055972449875,
+    "tp1": 2.1975788125908333,
+    "tp2": 2.2485037619119,
+    "tp3": 2.2954675995994,
+    "risk_pct": 1.4999999999999898,
+    "quality": 5,
+    "reasons": [
+     "✅ Отскок от поддержки",
+     "✅ [ENGULFING_AT_LEVEL] — паттерн класса B",
+     "✅ Уровень класса 2 (Сильный)",
+     "⚠️ Контртренд",
+     "✅ Объём x1.2",
+     "✅ Чистый путь к цели (LVN)",
+     "✅ RSI выходит из перепроданности",
+     "✅ Независимое движение (corr < 0.4)",
+     "✅ Тест #2 уровня (оптимально)"
+    ],
+    "rsi": 42.96158401531867,
+    "volume_ratio": 1.21411810487794,
+    "trend_local": "📉 Медвежий",
+    "trend_htf": "",
+    "pattern": "ENGULFING_AT_LEVEL",
+    "breakout_type": "Отскок от поддержки",
+    "is_counter_trend": true,
+    "human_explanation": "Сильный уровень 2.0954 (2 касания). Цена подошла к уровню поддержки и показывает признаки разворота. Отскок от ключевой зоны. 🇬🇧 Лондон открытие 🚀 Независимое движение Стоп за структуру 2.056 (риск 1.5%). TP1: 2.1976 (R:R 1:3.5), TP2: 2.2485 (R:R 1:5.1).",
+    "level_class": 2,
+    "test_count": 2,
+    "rr_score": 4.636089817277707,
+    "corr_label": "🚀 Независимое движение",
+    "session": "🇬🇧 Лондон открытие",
+    "btc_corr": 0,
+    "eth_corr": 0,
+    "tp1_close_pct": 0.4,
+    "tp2_close_pct": 0.3,
+    "tp3_close_pct": 0.3,
+    "move_sl_to_be_after_tp1": true,
+    "squeeze_score": 0,
+    "quality_after_squeeze": 5,
+    "passes_min_quality": true
+   }
+  },
+  {
+   "source": "default/SYNRG01-USDT-SWAP/211",
+   "signal": {
+    "symbol": "SYNRG01-USDT-SWAP",
+    "direction": "SHORT",
+    "entry": 0.00006532066485,
+    "sl": 0.00006624516417129872,
+    "tp1": 0.00006347166620740255,
+    "tp2": 0.00006296319158068824,
+    "tp3": 0.00006178445494603237,
+    "risk_pct": 1.4153244205669235,
+    "quality": 4,
+    "reasons": [
+     "✅ Отскок от сопротивления",
+     "⚠️ [BREAKOUT_RETEST] — паттерн класса D",
+     "✅ Уровень класса 1 (Абсолютный)",
+     "✅ По локальному тренду",
+     "✅ Объём x1.7",
+     "✅ Чистый путь к цели (LVN)",
+     "✅ Независимое движение (corr < 0.4)",
+     "✅ Тест #2 уровня (оптимально)",
+     "⚠️ 🌏 Азиатская сессия — низкая ликвидность"
+    ],
+    "rsi": 75.25093019323143,
+    "volume_ratio": 1.7126140062802027,
+    "trend_local": "↔️ Боковик",
+    "trend_htf": "",
+    "pattern": "BREAKOUT_RETEST",
+    "breakout_type": "Отскок от сопротивления",
+    "is_counter_trend": false,
+    "human_explanation": "Абсолютный уровень 0.00006571 (4 касания) — каждый раз давал уверенную реакцию. Цена подошла к уровню сопротивления и теряет импульс. Ожидается отказ и разворот вниз. 🌏 Азиатская сессия 🚀 Независимое движение Стоп за структуру 0.00006625 (риск 1.4%). TP1: 0.00006347 (R:R 1:2.0), TP2: 0.00006296 (R:R 1:2.6).",
+    "level_class": 1,
+    "test_count": 2,
+    "rr_score": 2.5300000000000016,
+    "corr_label": "🚀 Независимое движение",
+    "session": "🌏 Азиатская сессия",
+    "btc_corr": 0,
+    "eth_corr": 0,
+    "tp1_close_pct": 0.4,
+    "tp2_close_pct": 0.3,
+    "tp3_close_pct": 0.3,
+    "move_sl_to_be_after_tp1": true,
+    "squeeze_score": 0,
+    "quality_after_squeeze": 4,
+    "passes_min_quality": true
+   }
+  },
+  {
+   "source": "default/SYNRG01-USDT-SWAP/321",
+   "signal": {
+    "symbol": "SYNRG01-USDT-SWAP",
+    "direction": "SHORT",
+    "entry": 0.00006522843495,
+    "sl": 0.00006620686147425,
+    "tp1": 0.00006327158190149999,
+    "tp2": 0.00006273344731316249,
+    "tp3": 0.00006148595349474373,
+    "risk_pct": 1.5000000000000064,
+    "quality": 7,
+    "reasons": [
+     "✅ Отскок от сопротивления",
+     "✅ [INSTITUTIONAL_ORDERBLOCK] — паттерн класса A",
+     "✅ Уровень класса 1 (Абсолютный)",
+     "⚠️ Контртренд",
+     "✅ Объём x19.8",
+     "✅ Volume Profile узел (HVN)",
+     "✅ Чистый путь к цели (LVN)",
+     "✅ Тест #1 уровня (оптимально)"
+    ],
+    "rsi": 71.12707841647646,
+    "volume_ratio": 19.79482505946269,
+    "trend_local": "📈 Бычий",
+    "trend_htf": "",
+    "pattern": "INSTITUTIONAL_ORDERBLOCK",
+    "breakout_type": "Отскок от сопротивления",
+    "is_counter_trend": true,
+    "human_explanation": "Абсолютный уровень 0.00006571 (5 касаний) — каждый раз давал уверенную реакцию. Цена подошла к уровню сопротивления и теряет импульс. Ожидается отказ и разворот вниз. 🇺🇸 Нью-Йорк сессия 〰️ Слабая корреляция с рынком Стоп за структуру 0.00006621 (риск 1.5%). TP1: 0.00006327 (R:R 1:2.0), TP2: 0.00006273 (R:R 1:2.6).",
+    "level_class": 1,
+    "test_count": 1,
+    "rr_score": 2.530000000000002,
+    "corr_label": "〰️ Слабая корреляция с рынком",
+    "session": "🇺🇸 Нью-Йорк сессия",
+    "btc_corr": 0,
+    "eth_corr": 0,
+    "tp1_close_pct": 0.4,
+    "tp2_close_pct": 0.3,
+    "tp3_close_pct": 0.3,
+    "move_sl_to_be_after_tp1": true,
+    "squeeze_score": 0,
+    "quality_after_squeeze": 7,
+    "passes_min_quality": true
+   }
+  },
+  {
+   "source": "default/SYNRG04-USDT-SWAP/202",
+   "signal": {
+    "symbol": "SYNRG04-USDT-SWAP",
+    "direction": "SHORT",
+    "entry": 1.755679473,
+    "sl": 1.782014665095,
+    "tp1": 1.7030090888100002,
+    "tp2": 1.6885247331577502,
+    "tp3": 1.6549473632366254,
+    "risk_pct": 1.4999999999999947,
+    "quality": 6,
+    "reasons": [
+     "✅ Отскок от сопротивления",
+     "⚠️ [BOUNCE_PLAIN] — паттерн класса D",
+     "✅ Уровень класса 2 (Сильный)",
+     "✅ По локальному тренду",
+     "✅ Объём x1.3",
+     "✅ Чистый путь к цели (LVN)",
+     "✅ ✅ Затухающий импульс",
+     "✅ Независимое движение (corr < 0.4)",
+     "✅ Тест #1 уровня (оптимально)"
+    ],
+    "rsi": 53.718931544984024,
+    "volume_ratio": 1.2721999370838404,
+    "trend_local": "↔️ Боковик",
+    "trend_htf": "",
+    "pattern": "BOUNCE_PLAIN",
+    "breakout_type": "Отскок от сопротивления",
+    "is_counter_trend": false,
+    "human_explanation": "Сильный уровень 1.7735 (2 касания). Цена подошла к уровню сопротивления и теряет импульс. Ожидается отказ и разворот вниз. 🇺🇸 Нью-Йорк сессия 🚀 Независимое движение Стоп за структуру 1.782 (риск 1.5%). TP1: 1.703 (R:R 1:2.0), TP2: 1.6885 (R:R 1:2.6).",
+    "level_class": 2,
+    "test_count": 1,
+    "rr_score": 2.530000000000001,
+    "corr_label": "🚀 Независимое движение",
+    "session": "🇺🇸 Нью-Йорк сессия",
+    "btc_corr": 0,
+    "eth_corr": 0,
+    "tp1_close_pct": 0.4,
+    "tp2_close_pct": 0.3,
+    "tp3_close_pct": 0.3,
+    "move_sl_to_be_after_tp1": true,
+    "squeeze_score": 1,
+    "quality_after_squeeze": 7,
+    "passes_min_quality": true
+   }
+  },
+  {
+   "source": "default/SYNRG04-USDT-SWAP/204",
+   "signal": {
+    "symbol": "SYNRG04-USDT-SWAP",
+    "direction": "SHORT",
+    "entry": 1.755739264,
+    "sl": 1.78207535296,
+    "tp1": 1.7030670860800001,
+    "tp2": 1.688582237152,
+    "tp3": 1.6550037237280002,
+    "risk_pct": 1.499999999999997,
+    "quality": 10,
+    "reasons": [
+     "✅ Ложный пробой (Fakeout)",
+     "✅ [LIQUIDITY_SWEEP] — паттерн класса A",
+     "✅ Уровень класса 1 (Абсолютный)",
+     "✅ По локальному тренду",
+     "✅ Объём x19.8",
+     "✅ Volume Profile узел (HVN)",
+     "✅ Чистый путь к цели (LVN)",
+     "✅ RSI выходит из перекупленности",
+     "✅ Независимое движение (corr < 0.4)",
+     "✅ Тест #2 уровня (оптимально)"
+    ],
+    "rsi": 56.85041683133757,
+    "volume_ratio": 19.813074313407146,
+    "trend_local": "↔️ Боковик",
+    "trend_htf": "",
+    "pattern": "LIQUIDITY_SWEEP",
+    "breakout_type": "Ложный пробой (Fakeout)",
+    "is_counter_trend": false,
+    "human_explanation": "Абсолютный уровень 1.7735 (4 касания) — каждый раз давал уверенную реакцию. Цена пробила уровень вверх, но не закрепилась — ложный пробой, ловушка для покупателей. 🇺🇸 Нью-Йорк сессия 🚀 Независимое движение Стоп за структуру 1.7821 (риск 1.5%). TP1: 1.7031 (R:R 1:2.0), TP2: 1.6886 (R:R 1:2.6).",
+    "level_class": 1,
+    "test_count": 2,
+    "rr_score": 2.530000000000001,
+    "corr_label": "🚀 Независимое движение",
+    "session": "🇺🇸 Нью-Йорк сессия",
+    "btc_corr": 0,
+    "eth_corr": 0,
+    "tp1_close_pct": 0.4,
+    "tp2_close_pct": 0.3,
+    "tp3_close_pct": 0.3,
+    "move_sl_to_be_after_tp1": true,
+    "squeeze_score": 1,
+    "quality_after_squeeze": 10,
+    "passes_min_quality": true
+   }
+  },
+  {
+   "source": "default/SYNLV01-USDT-SWAP/216",
+   "signal": {
+    "symbol": "SYNLV01-USDT-SWAP",
+    "direction": "SHORT",
+    "entry": 0.0001243924584,
+    "sl": 0.000126258345276,
+    "tp1": 0.000120660684648,
+    "tp2": 0.0001196344468662,
+    "tp3": 0.00011725544109929999,
+    "risk_pct": 1.500000000000003,
+    "quality": 10,
+    "reasons": [
+     "✅ SFP (Ложный пробой вверх)",
+     "✅ [LIQUIDITY_SWEEP] — паттерн класса A",
+     "✅ Уровень класса 1 (Абсолютный)",
+     "✅ По локальному тренду",
+     "✅ Объём x12.4",
+     "✅ Volume Profile узел (HVN)",
+     "✅ Чистый путь к цели (LVN)",
+     "✅ Независимое движение (corr < 0.4)",
+     "✅ Тест #2 уровня (оптимально)"
+    ],
+    "rsi": 45.41526374510709,
+    "volume_ratio": 12.400054569148235,
+    "trend_local": "📉 Медвежий",
+    "trend_htf": "",
+    "pattern": "LIQUIDITY_SWEEP",
+    "breakout_type": "SFP (Ложный пробой вверх)",
+    "is_counter_trend": false,
+    "human_explanation": "Абсолютный уровень 0.0001257 (4 касания) — каждый раз давал уверенную реакцию. Цена пробила уровень вверх, но не закрепилась — ложный пробой, ловушка для покупателей. 🇬🇧 Лондон открытие 🚀 Независимое движение Стоп за структуру 0.0001263 (риск 1.5%). TP1: 0.0001207 (R:R 1:2.0), TP2: 0.0001196 (R:R 1:2.5).",
+    "level_class": 1,
+    "test_count": 2,
+    "rr_score": 2.5299999999999994,
+    "corr_label": "🚀 Независимое движение",
+    "session": "🇬🇧 Лондон открытие",
+    "btc_corr": 0,
+    "eth_corr": 0,
+    "tp1_close_pct": 0.4,
+    "tp2_close_pct": 0.3,
+    "tp3_close_pct": 0.3,
+    "move_sl_to_be_after_tp1": true,
+    "squeeze_score": 0,
+    "quality_after_squeeze": 10,
+    "passes_min_quality": true
+   }
+  },
+  {
+   "source": "default/SYNLV01-USDT-SWAP/285",
+   "signal": {
+    "symbol": "SYNLV01-USDT-SWAP",
+    "direction": "SHORT",
+    "entry": 0.0001244743426,
+    "sl": 0.00012687383045003331,
+    "tp1": 0.00011967536689993339,
+    "tp2": 0.00011835564858241507,
+    "tp3": 0.0001152963015736226,
+    "risk_pct": 1.9276967444962494,
+    "quality": 8,
+    "reasons": [
+     "✅ Отскок от сопротивления",
+     "✅ [INSTITUTIONAL_ORDERBLOCK] — паттерн класса A",
+     "✅ Уровень класса 1 (Абсолютный)",
+     "✅ По локальному тренду",
+     "✅ Объём x19.7",
+     "✅ Volume Profile узел (HVN)",
+     "✅ Чистый путь к цели (LVN)",
+     "✅ Независимое движение (corr < 0.4)",
+     "✅ Тест #1 уровня (оптимально)",
+     "⚠️ 🌏 Азиатская сессия — низкая ликвидность"
+    ],
+    "rsi": 53.044189486029815,
+    "volume_ratio": 19.73975662622473,
+    "trend_local": "📉 Медвежий",
+    "trend_htf": "",
+    "pattern": "INSTITUTIONAL_ORDERBLOCK",
+    "breakout_type": "Отскок от сопротивления",
+    "is_counter_trend": false,
+    "human_explanation": "Абсолютный уровень 0.0001257 (4 касания) — каждый раз давал уверенную реакцию. Цена подошла к уровню сопротивления и теряет импульс. Ожидается отказ и разворот вниз. 🌏 Азиатская сессия 🚀 Независимое движение Стоп за структуру 0.0001269 (риск 1.9%). TP1: 0.0001197 (R:R 1:2.0), TP2: 0.0001184 (R:R 1:2.5).",
+    "level_class": 1,
+    "test_count": 1,
+    "rr_score": 2.5300000000000002,
+    "corr_label": "🚀 Независимое движение",
+    "session": "🌏 Азиатская сессия",
+    "btc_corr": 0,
+    "eth_corr": 0,
+    "tp1_close_pct": 0.4,
+    "tp2_close_pct": 0.3,
+    "tp3_close_pct": 0.3,
+    "move_sl_to_be_after_tp1": true,
+    "squeeze_score": 1,
+    "quality_after_squeeze": 9,
+    "passes_min_quality": true
+   }
+  },
+  {
+   "source": "default/SYNLV02-USDT-SWAP/203",
+   "signal": {
+    "symbol": "SYNLV02-USDT-SWAP",
+    "direction": "SHORT",
+    "entry": 0.0366413355,
+    "sl": 0.03716900234054927,
+    "tp1": 0.03558600181890145,
+    "tp2": 0.03529578505659935,
+    "tp3": 0.03462300983489903,
+    "risk_pct": 1.440086266913694,
+    "quality": 4,
+    "reasons": [
+     "✅ Отскок от сопротивления",
+     "✅ [ENGULFING_AT_LEVEL] — паттерн класса B",
+     "✅ Уровень класса 2 (Сильный)",
+     "⚠️ Контртренд",
+     "✅ Чистый путь к цели (LVN)",
+     "✅ RSI выходит из перекупленности",
+     "✅ Независимое движение (corr < 0.4)",
+     "✅ Тест #1 уровня (оптимально)"
+    ],
+    "rsi": 56.85540068893443,
+    "volume_ratio": 0.7726043940983941,
+    "trend_local": "📈 Бычий",
+    "trend_htf": "",
+    "pattern": "ENGULFING_AT_LEVEL",
+    "breakout_type": "Отскок от сопротивления",
+    "is_counter_trend": true,
+    "human_explanation": "Сильный уровень 0.03691 (2 касания). Цена подошла к уровню сопротивления и теряет импульс. Ожидается отказ и разворот вниз. 🇺🇸 Нью-Йорк сессия 🚀 Независимое движение Стоп за структуру 0.03717 (риск 1.4%). TP1: 0.03559 (R:R 1:2.0), TP2: 0.0353 (R:R 1:2.5).",
+    "level_class": 2,
+    "test_count": 1,
+    "rr_score": 2.5300000000000007,
+    "corr_label": "🚀 Независимое движение",
+    "session": "🇺🇸 Нью-Йорк сессия",
+    "btc_corr": 0,
+    "eth_corr": 0,
+    "tp1_close_pct": 0.4,
+    "tp2_close_pct": 0.3,
+    "tp3_close_pct": 0.3,
+    "move_sl_to_be_after_tp1": true,
+    "squeeze_score": 2,
+    "quality_after_squeeze": 5,
+    "passes_min_quality": true
+   }
+  },
+  {
+   "source": "default/SYNLV02-USDT-SWAP/211",
+   "signal": {
+    "symbol": "SYNLV02-USDT-SWAP",
+    "direction": "SHORT",
+    "entry": 0.03664529713,
+    "sl": 0.03719497658695,
+    "tp1": 0.03554593821609999,
+    "tp2": 0.03524361451477749,
+    "tp3": 0.034542773207166234,
+    "risk_pct": 1.5000000000000082,
+    "quality": 8,
+    "reasons": [
+     "✅ SFP (Ложный пробой вверх)",
+     "✅ [LIQUIDITY_SWEEP] — паттерн класса A",
+     "✅ Уровень класса 1 (Абсолютный)",
+     "✅ По локальному тренду",
+     "✅ Объём x12.3",
+     "✅ Volume Profile узел (HVN)",
+     "✅ Чистый путь к цели (LVN)",
+     "✅ Независимое движение (corr < 0.4)",
+     "✅ Тест #1 уровня (оптимально)",
+     "⚠️ 🌏 Азиатская сессия — низкая ликвидность"
+    ],
+    "rsi": 45.4648604320899,
+    "volume_ratio": 12.297494167759186,
+    "trend_local": "↔️ Боковик",
+    "trend_htf": "",
+    "pattern": "LIQUIDITY_SWEEP",
+    "breakout_type": "SFP (Ложный пробой вверх)",
+    "is_counter_trend": false,
+    "human_explanation": "Абсолютный уровень 0.03691 (5 касаний) — каждый раз давал уверенную реакцию. Цена пробила уровень вверх, но не закрепилась — ложный пробой, ловушка для покупателей. 🌏 Азиатская сессия 🚀 Независимое движение Стоп за структуру 0.03719 (риск 1.5%). TP1: 0.03555 (R:R 1:2.0), TP2: 0.03524 (R:R 1:2.5).",
+    "level_class": 1,
+    "test_count": 1,
+    "rr_score": 2.53,
+    "corr_label": "🚀 Независимое движение",
+    "session": "🌏 Азиатская сессия",
+    "btc_corr": 0,
+    "eth_corr": 0,
+    "tp1_close_pct": 0.4,
+    "tp2_close_pct": 0.3,
+    "tp3_close_pct": 0.3,
+    "move_sl_to_be_after_tp1": true,
+    "squeeze_score": 0,
+    "quality_after_squeeze": 8,
+    "passes_min_quality": true
+   }
+  },
+  {
+   "source": "default/SYNLV03-USDT-SWAP/202",
+   "signal": {
+    "symbol": "SYNLV03-USDT-SWAP",
+    "direction": "SHORT",
+    "entry": 0.6900291569,
+    "sl": 0.7003795942535,
+    "tp1": 0.6693282821929999,
+    "tp2": 0.6636355416485749,
+    "tp3": 0.6504387340228623,
+    "risk_pct": 1.5000000000000075,
+    "quality": 9,
+    "reasons": [
+     "✅ Отскок от сопротивления",
+     "✅ [INSTITUTIONAL_ORDERBLOCK] — паттерн класса A",
+     "✅ Уровень класса 1 (Абсолютный)",
+     "✅ По локальному тренду",
+     "✅ Объём x12.1",
+     "✅ Volume Profile узел (HVN)",
+     "✅ Чистый путь к цели (LVN)",
+     "✅ Тест #2 уровня (оптимально)"
+    ],
+    "rsi": 45.64797704810153,
+    "volume_ratio": 12.062231594202192,
+    "trend_local": "↔️ Боковик",
+    "trend_htf": "",
+    "pattern": "INSTITUTIONAL_ORDERBLOCK",
+    "breakout_type": "Отскок от сопротивления",
+    "is_counter_trend": false,
+    "human_explanation": "Абсолютный уровень 0.697 (4 касания) — каждый раз давал уверенную реакцию. Цена подошла к уровню сопротивления и теряет импульс. Ожидается отказ и разворот вниз. 🇺🇸 Нью-Йорк сессия 〰️ Слабая корреляция с рынком Стоп за структуру 0.7004 (риск 1.5%). TP1: 0.6693 (R:R 1:2.0), TP2: 0.6636 (R:R 1:2.6).",
+    "level_class": 1,
+    "test_count": 2,
+    "rr_score": 2.5299999999999994,
+    "corr_label": "〰️ Слабая корреляция с рынком",
+    "session": "🇺🇸 Нью-Йорк сессия",
+    "btc_corr": 0,
+    "eth_corr": 0,
+    "tp1_close_pct": 0.4,
+    "tp2_close_pct": 0.3,
+    "tp3_close_pct": 0.3,
+    "move_sl_to_be_after_tp1": true,
+    "squeeze_score": 0,
+    "quality_after_squeeze": 9,
+    "passes_min_quality": true
+   }
+  },
+  {
+   "source": "default/SYNLV03-USDT-SWAP/226",
+   "signal": {
+    "symbol": "SYNLV03-USDT-SWAP",
+    "direction": "SHORT",
+    "entry": 0.6904329258,
+    "sl": 0.700789419687,
+    "tp1": 0.669719938026,
+    "tp2": 0.66402386638815,
+    "tp3": 0.650819336682225,
+    "risk_pct": 1.4999999999999993,
+    "quality": 8,
+    "reasons": [
+     "✅ Ложный пробой (Fakeout)",
+     "✅ [LIQUIDITY_SWEEP] — паттерн класса A",
+     "✅ Уровень класса 1 (Абсолютный)",
+     "⚠️ Контртренд",
+     "✅ Объём x19.9",
+     "✅ Volume Profile узел (HVN)",
+     "✅ Чистый путь к цели (LVN)",
+     "✅ RSI выходит из перекупленности",
+     "✅ Независимое движение (corr < 0.4)",
+     "✅ Тест #2 уровня (оптимально)"
+    ],
+    "rsi": 55.41761163801246,
+    "volume_ratio": 19.892303895530336,
+    "trend_local": "📈 Бычий",
+    "trend_htf": "",
+    "pattern": "LIQUIDITY_SWEEP",
+    "breakout_type": "Ложный пробой (Fakeout)",
+    "is_counter_trend": true,
+    "human_explanation": "Абсолютный уровень 0.697 (5 касаний) — каждый раз давал уверенную реакцию. Цена пробила уровень вверх, но не закрепилась — ложный пробой, ловушка для покупателей. 🇺🇸 Нью-Йорк сессия 🚀 Независимое движение Стоп за структуру 0.7008 (риск 1.5%). TP1: 0.6697 (R:R 1:2.0), TP2: 0.664 (R:R 1:2.6).",
+    "level_class": 1,
+    "test_count": 2,
+    "rr_score": 2.530000000000001,
+    "corr_label": "🚀 Независимое движение",
+    "session": "🇺🇸 Нью-Йорк сессия",
+    "btc_corr": 0,
+    "eth_corr": 0,
+    "tp1_close_pct": 0.4,
+    "tp2_close_pct": 0.3,
+    "tp3_close_pct": 0.3,
+    "move_sl_to_be_after_tp1": true,
+    "squeeze_score": 0,
+    "quality_after_squeeze": 8,
+    "passes_min_quality": true
+   }
+  },
+  {
+   "source": "default/SYNLV03-USDT-SWAP/290",
+   "signal": {
+    "symbol": "SYNLV03-USDT-SWAP",
+    "direction": "SHORT",
+    "entry": 0.6911544952,
+    "sl": 0.7015218126280001,
+    "tp1": 0.670419860344,
+    "tp2": 0.6647178357586,
+    "tp3": 0.6514995060379,
+    "risk_pct": 1.5000000000000016,
+    "quality": 6,
+    "reasons": [
+     "✅ Отскок от сопротивления",
+     "✅ [INSTITUTIONAL_ORDERBLOCK] — паттерн класса A",
+     "✅ Уровень класса 2 (Сильный)",
+     "⚠️ Контртренд",
+     "✅ Объём x19.9",
+     "✅ Volume Profile узел (HVN)",
+     "✅ Чистый путь к цели (LVN)",
+     "✅ Тест #1 уровня (оптимально)"
+    ],
+    "rsi": 75.65662932880673,
+    "volume_ratio": 19.88616527168648,
+    "trend_local": "📈 Бычий",
+    "trend_htf": "",
+    "pattern": "INSTITUTIONAL_ORDERBLOCK",
+    "breakout_type": "Отскок от сопротивления",
+    "is_counter_trend": true,
+    "human_explanation": "Сильный уровень 0.6998 (2 касания). Цена подошла к уровню сопротивления и теряет импульс. Ожидается отказ и разворот вниз. 🇬🇧 Лондон открытие 🔗 Ходит за BTC и ETH Стоп за структуру 0.7015 (риск 1.5%). TP1: 0.6704 (R:R 1:2.0), TP2: 0.6647 (R:R 1:2.6).",
+    "level_class": 2,
+    "test_count": 1,
+    "rr_score": 2.5300000000000016,
+    "corr_label": "🔗 Ходит за BTC и ETH",
+    "session": "🇬🇧 Лондон открытие",
+    "btc_corr": 0,
+    "eth_corr": 0,
+    "tp1_close_pct": 0.4,
+    "tp2_close_pct": 0.3,
+    "tp3_close_pct": 0.3,
+    "move_sl_to_be_after_tp1": true,
+    "squeeze_score": 0,
+    "quality_after_squeeze": 6,
+    "passes_min_quality": true
+   }
+  },
+  {
+   "source": "default/SYNLV04-USDT-SWAP/200",
+   "signal": {
+    "symbol": "SYNLV04-USDT-SWAP",
+    "direction": "SHORT",
+    "entry": 3.616481737,
+    "sl": 3.670728963055,
+    "tp1": 3.5079872848899996,
+    "tp2": 3.4781513105597495,
+    "tp3": 3.408986097339624,
+    "risk_pct": 1.5000000000000058,
+    "quality": 9,
+    "reasons": [
+     "✅ Отскок от сопротивления",
+     "✅ [INSTITUTIONAL_ORDERBLOCK] — паттерн класса A",
+     "✅ Уровень класса 1 (Абсолютный)",
+     "✅ По локальному тренду",
+     "✅ Объём x11.7",
+     "✅ Volume Profile узел (HVN)",
+     "✅ Чистый путь к цели (LVN)",
+     "✅ Тест #2 уровня (оптимально)"
+    ],
+    "rsi": 45.39663427631803,
+    "volume_ratio": 11.672944020726746,
+    "trend_local": "📉 Медвежий",
+    "trend_htf": "",
+    "pattern": "INSTITUTIONAL_ORDERBLOCK",
+    "breakout_type": "Отскок от сопротивления",
+    "is_counter_trend": false,
+    "human_explanation": "Абсолютный уровень 3.6565 (3 касания) — каждый раз давал уверенную реакцию. Цена подошла к уровню сопротивления и теряет импульс. Ожидается отказ и разворот вниз. 🇺🇸 Нью-Йорк сессия 〰️ Слабая корреляция с рынком Стоп за структуру 3.6707 (риск 1.5%). TP1: 3.508 (R:R 1:2.0), TP2: 3.4782 (R:R 1:2.5).",
+    "level_class": 1,
+    "test_count": 2,
+    "rr_score": 2.5300000000000002,
+    "corr_label": "〰️ Слабая корреляция с рынком",
+    "session": "🇺🇸 Нью-Йорк сессия",
+    "btc_corr": 0,
+    "eth_corr": 0,
+    "tp1_close_pct": 0.4,
+    "tp2_close_pct": 0.3,
+    "tp3_close_pct": 0.3,
+    "move_sl_to_be_after_tp1": true,
+    "squeeze_score": 0,
+    "quality_after_squeeze": 9,
+    "passes_min_quality": true
+   }
+  },
+  {
+   "source": "default/SYNLV04-USDT-SWAP/223",
+   "signal": {
+    "symbol": "SYNLV04-USDT-SWAP",
+    "direction": "SHORT",
+    "entry": 3.617572424,
+    "sl": 3.67183601036,
+    "tp1": 3.5090452512800003,
+    "tp2": 3.479200278782,
+    "tp3": 3.4100142061730008,
+    "risk_pct": 1.4999999999999953,
+    "quality": 10,
+    "reasons": [
+     "✅ SFP (Ложный пробой вверх)",
+     "✅ [LIQUIDITY_SWEEP] — паттерн класса A",
+     "✅ Уровень класса 1 (Абсолютный)",
+     "✅ По локальному тренду",
+     "✅ Объём x19.9",
+     "✅ Volume Profile узел (HVN)",
+     "✅ Чистый путь к цели (LVN)",
+     "✅ Независимое движение (corr < 0.4)",
+     "✅ Тест #2 уровня (оптимально)"
+    ],
+    "rsi": 50.28462847519802,
+    "volume_ratio": 19.92853970965551,
+    "trend_local": "↔️ Боковик",
+    "trend_htf": "",
+    "pattern": "LIQUIDITY_SWEEP",
+    "breakout_type": "SFP (Ложный пробой вверх)",
+    "is_counter_trend": false,
+    "human_explanation": "Абсолютный уровень 3.6564 (4 касания) — каждый раз давал уверенную реакцию. Цена пробила уровень вверх, но не закрепилась — ложный пробой, ловушка для покупателей. 🌍 Европа + США пересечение 🚀 Независимое движение Стоп за структуру 3.6718 (риск 1.5%). TP1: 3.509 (R:R 1:2.0), TP2: 3.4792 (R:R 1:2.6).",
+    "level_class": 1,
+    "test_count": 2,
+    "rr_score": 2.5300000000000007,
+    "corr_label": "🚀 Независимое движение",
+    "session": "🌍 Европа + США пересечение",
+    "btc_corr": 0,
+    "eth_corr": 0,
+    "tp1_close_pct": 0.4,
+    "tp2_close_pct": 0.3,
+    "tp3_close_pct": 0.3,
+    "move_sl_to_be_after_tp1": true,
+    "squeeze_score": 0,
+    "quality_after_squeeze": 10,
+    "passes_min_quality": true
+   }
+  },
+  {
+   "source": "default/SYNLV04-USDT-SWAP/261",
+   "signal": {
+    "symbol": "SYNLV04-USDT-SWAP",
+    "direction": "SHORT",
+    "entry": 3.618628992,
+    "sl": 3.6892373838319994,
+    "tp1": 3.4774122083360015,
+    "tp2": 3.438577592828402,
+    "tp3": 3.348551893242603,
+    "risk_pct": 1.951247060367312,
+    "quality": 8,
+    "reasons": [
+     "✅ Ложный пробой (Fakeout)",
+     "✅ [LIQUIDITY_SWEEP] — паттерн класса A",
+     "✅ Уровень класса 1 (Абсолютный)",
+     "✅ По локальному тренду",
+     "✅ Объём x13.6",
+     "✅ Volume Profile узел (HVN)",
+     "✅ Чистый путь к цели (LVN)",
+     "✅ Независимое движение (corr < 0.4)",
+     "✅ Тест #1 уровня (оптимально)",
+     "⚠️ 🌏 Азиатская сессия — низкая ликвидность"
+    ],
+    "rsi": 45.413208546799,
+    "volume_ratio": 13.646286527093947,
+    "trend_local": "↔️ Боковик",
+    "trend_htf": "",
+    "pattern": "LIQUIDITY_SWEEP",
+    "breakout_type": "Ложный пробой (Fakeout)",
+    "is_counter_trend": false,
+    "human_explanation": "Абсолютный уровень 3.6564 (4 касания) — каждый раз давал уверенную реакцию. Цена пробила уровень вверх, но не закрепилась — ложный пробой, ловушка для покупателей. 🌏 Азиатская сессия 🚀 Независимое движение Стоп за структуру 3.6892 (риск 2.0%). TP1: 3.4774 (R:R 1:2.0), TP2: 3.4386 (R:R 1:2.5).",
+    "level_class": 1,
+    "test_count": 1,
+    "rr_score": 2.5299999999999994,
+    "corr_label": "🚀 Независимое движение",
+    "session": "🌏 Азиатская сессия",
+    "btc_corr": 0,
+    "eth_corr": 0,
+    "tp1_close_pct": 0.4,
+    "tp2_close_pct": 0.3,
+    "tp3_close_pct": 0.3,
+    "move_sl_to_be_after_tp1": true,
+    "squeeze_score": 0,
+    "quality_after_squeeze": 8,
+    "passes_min_quality": true
+   }
+  },
+  {
+   "source": "default/SYNLV04-USDT-SWAP/373",
+   "signal": {
+    "symbol": "SYNLV04-USDT-SWAP",
+    "direction": "SHORT",
+    "entry": 3.57477723,
+    "sl": 3.62839888845,
+    "tp1": 3.4675339131,
+    "tp2": 3.4380420009525,
+    "tp3": 3.36967438642875,
+    "risk_pct": 1.5,
+    "quality": 8,
+    "reasons": [
+     "✅ Ретест пробитой поддержки",
+     "✅ [INSTITUTIONAL_ORDERBLOCK] — паттерн класса A",
+     "✅ Уровень класса 1 (Абсолютный)",
+     "✅ По локальному тренду",
+     "✅ Объём x11.0",
+     "✅ Volume Profile узел (HVN)",
+     "✅ Чистый путь к цели (LVN)",
+     "✅ Независимое движение (corr < 0.4)",
+     "✅ Тест #1 уровня (оптимально)",
+     "⚠️ 🌙 Мёртвая зона — низкая ликвидность"
+    ],
+    "rsi": 45.53755753903948,
+    "volume_ratio": 11.010261494365231,
+    "trend_local": "📉 Медвежий",
+    "trend_htf": "",
+    "pattern": "INSTITUTIONAL_ORDERBLOCK",
+    "breakout_type": "Ретест пробитой поддержки",
+    "is_counter_trend": false,
+    "human_explanation": "Абсолютный уровень 3.6166 (2 касания). Уровень пробит сверху вниз и сменил роль — бывшая поддержка стала сопротивлением. Ретест подтверждает смену тренда. 🌙 Мёртвая зона 🚀 Независимое движение Стоп за структуру 3.6284 (риск 1.5%). TP1: 3.4675 (R:R 1:2.0), TP2: 3.438 (R:R 1:2.5).",
+    "level_class": 1,
+    "test_count": 1,
+    "rr_score": 2.5299999999999994,
+    "corr_label": "🚀 Независимое движение",
+    "session": "🌙 Мёртвая зона",
+    "btc_corr": 0,
+    "eth_corr": 0,
+    "tp1_close_pct": 0.4,
+    "tp2_close_pct": 0.3,
+    "tp3_close_pct": 0.3,
+    "move_sl_to_be_after_tp1": true,
+    "squeeze_score": 0,
+    "quality_after_squeeze": 8,
+    "passes_min_quality": true
+   }
+  },
+  {
+   "source": "default/SYNLV08-USDT-SWAP/208",
+   "signal": {
+    "symbol": "SYNLV08-USDT-SWAP",
+    "direction": "LONG",
+    "entry": 98347.69802,
+    "sl": 96872.4825497,
+    "tp1": 101298.12896059999,
+    "tp2": 102109.49746926498,
+    "tp3": 103990.39719389749,
+    "risk_pct": 1.4999999999999978,
+    "quality": 8,
+    "reasons": [
+     "✅ SFP (Захват ликвидности)",
+     "✅ [LIQUIDITY_SWEEP] — паттерн класса A",
+     "✅ Уровень класса 1 (Абсолютный)",
+     "✅ По локальному тренду",
+     "✅ Объём x14.2",
+     "✅ Volume Profile узел (HVN)",
+     "✅ Чистый путь к цели (LVN)",
+     "✅ Независимое движение (corr < 0.4)",
+     "✅ Тест #2 уровня (оптимально)",
+     "⚠️ 🌏 Азиатская сессия — низкая ликвидность"
+    ],
+    "rsi": 54.46835183441571,
+    "volume_ratio": 14.186595878996732,
+    "trend_local": "📈 Бычий",
+    "trend_htf": "",
+    "pattern": "LIQUIDITY_SWEEP",
+    "breakout_type": "SFP (Захват ликвидности)",
+    "is_counter_trend": false,
+    "human_explanation": "Абсолютный уровень 97,652 (4 касания) — каждый раз давал уверенную реакцию. Захват ликвидности снизу (SFP): пробой ниже уровня со быстрым возвратом — бычья ловушка медвежьих стопов. 🌏 Азиатская сессия 🚀 Независимое движение Стоп за структуру 96,872 (риск 1.5%). TP1: 101,298 (R:R 1:2.0), TP2: 102,109 (R:R 1:2.5).",
+    "level_class": 1,
+    "test_count": 2,
+    "rr_score": 2.5299999999999985,
+    "corr_label": "🚀 Независимое движение",
+    "session": "🌏 Азиатская сессия",
+    "btc_corr": 0,
+    "eth_corr": 0,
+    "tp1_close_pct": 0.4,
+    "tp2_close_pct": 0.3,
+    "tp3_close_pct": 0.3,
+    "move_sl_to_be_after_tp1": true,
+    "squeeze_score": 0,
+    "quality_after_squeeze": 8,
+    "passes_min_quality": true
+   }
+  },
+  {
+   "source": "conservative/SYNRG04-USDT-SWAP/202",
+   "signal": {
+    "symbol": "SYNRG04-USDT-SWAP",
+    "direction": "SHORT",
+    "entry": 1.755679473,
+    "sl": 1.782014665095,
+    "tp1": 1.7161766848575002,
+    "tp2": 1.6885247331577502,
+    "tp3": 1.6503387046200004,
+    "risk_pct": 1.4999999999999947,
+    "quality": 7,
+    "reasons": [
+     "✅ Отскок от сопротивления",
+     "⚠️ [BOUNCE_PLAIN] — паттерн класса D",
+     "✅ Уровень класса 2 (Сильный)",
+     "✅ HTF тренд подтверждает",
+     "✅ По локальному тренду",
+     "✅ Объём x1.3",
+     "✅ Чистый путь к цели (LVN)",
+     "✅ ✅ Затухающий импульс",
+     "✅ Независимое движение (corr < 0.4)",
+     "✅ Тест #1 уровня (оптимально)"
+    ],
+    "rsi": 53.718931544984024,
+    "volume_ratio": 1.2721999370838404,
+    "trend_local": "↔️ Боковик",
+    "trend_htf": "",
+    "pattern": "BOUNCE_PLAIN",
+    "breakout_type": "Отскок от сопротивления",
+    "is_counter_trend": false,
+    "human_explanation": "Сильный уровень 1.7735 (2 касания). Цена подошла к уровню сопротивления и теряет импульс. Ожидается отказ и разворот вниз. 🇺🇸 Нью-Йорк сессия 🚀 Независимое движение Стоп за структуру 1.782 (риск 1.5%). TP1: 1.7162 (R:R 1:1.5), TP2: 1.6885 (R:R 1:2.6).",
+    "level_class": 2,
+    "test_count": 1,
+    "rr_score": 2.530000000000001,
+    "corr_label": "🚀 Независимое движение",
+    "session": "🇺🇸 Нью-Йорк сессия",
+    "btc_corr": 0,
+    "eth_corr": 0,
+    "tp1_close_pct": 0.4,
+    "tp2_close_pct": 0.3,
+    "tp3_close_pct": 0.3,
+    "move_sl_to_be_after_tp1": true,
+    "squeeze_score": 1,
+    "quality_after_squeeze": 8,
+    "passes_min_quality": true
+   }
+  },
+  {
+   "source": "conservative/SYNRG04-USDT-SWAP/204",
+   "signal": {
+    "symbol": "SYNRG04-USDT-SWAP",
+    "direction": "SHORT",
+    "entry": 1.755739264,
+    "sl": 1.78207535296,
+    "tp1": 1.71623513056,
+    "tp2": 1.688582237152,
+    "tp3": 1.6503949081600002,
+    "risk_pct": 1.499999999999997,
+    "quality": 10,
+    "reasons": [
+     "✅ Ложный пробой (Fakeout)",
+     "✅ [LIQUIDITY_SWEEP] — паттерн класса A",
+     "✅ Уровень класса 1 (Абсолютный)",
+     "✅ HTF тренд подтверждает",
+     "✅ По локальному тренду",
+     "✅ Объём x19.8",
+     "✅ Volume Profile узел (HVN)",
+     "✅ Чистый путь к цели (LVN)",
+     "✅ RSI выходит из перекупленности",
+     "✅ Независимое движение (corr < 0.4)",
+     "✅ Тест #2 уровня (оптимально)"
+    ],
+    "rsi": 56.85041683133757,
+    "volume_ratio": 19.813074313407146,
+    "trend_local": "↔️ Боковик",
+    "trend_htf": "",
+    "pattern": "LIQUIDITY_SWEEP",
+    "breakout_type": "Ложный пробой (Fakeout)",
+    "is_counter_trend": false,
+    "human_explanation": "Абсолютный уровень 1.7735 (4 касания) — каждый раз давал уверенную реакцию. Цена пробила уровень вверх, но не закрепилась — ложный пробой, ловушка для покупателей. 🇺🇸 Нью-Йорк сессия 🚀 Независимое движение Стоп за структуру 1.7821 (риск 1.5%). TP1: 1.7162 (R:R 1:1.5), TP2: 1.6886 (R:R 1:2.6).",
+    "level_class": 1,
+    "test_count": 2,
+    "rr_score": 2.530000000000001,
+    "corr_label": "🚀 Независимое движение",
+    "session": "🇺🇸 Нью-Йорк сессия",
+    "btc_corr": 0,
+    "eth_corr": 0,
+    "tp1_close_pct": 0.4,
+    "tp2_close_pct": 0.3,
+    "tp3_close_pct": 0.3,
+    "move_sl_to_be_after_tp1": true,
+    "squeeze_score": 1,
+    "quality_after_squeeze": 10,
+    "passes_min_quality": true
+   }
+  },
+  {
+   "source": "conservative/SYNLV01-USDT-SWAP/216",
+   "signal": {
+    "symbol": "SYNLV01-USDT-SWAP",
+    "direction": "SHORT",
+    "entry": 0.0001243924584,
+    "sl": 0.000126258345276,
+    "tp1": 0.000121593628086,
+    "tp2": 0.0001196344468662,
+    "tp3": 0.00011692891089599999,
+    "risk_pct": 1.500000000000003,
+    "quality": 10,
+    "reasons": [
+     "✅ SFP (Ложный пробой вверх)",
+     "✅ [LIQUIDITY_SWEEP] — паттерн класса A",
+     "✅ Уровень класса 1 (Абсолютный)",
+     "✅ HTF тренд подтверждает",
+     "✅ По локальному тренду",
+     "✅ Объём x12.4",
+     "✅ Volume Profile узел (HVN)",
+     "✅ Чистый путь к цели (LVN)",
+     "✅ Независимое движение (corr < 0.4)",
+     "✅ Тест #2 уровня (оптимально)"
+    ],
+    "rsi": 45.41526374510709,
+    "volume_ratio": 12.400054569148235,
+    "trend_local": "📉 Медвежий",
+    "trend_htf": "",
+    "pattern": "LIQUIDITY_SWEEP",
+    "breakout_type": "SFP (Ложный пробой вверх)",
+    "is_counter_trend": false,
+    "human_explanation": "Абсолютный уровень 0.0001257 (4 касания) — каждый раз давал уверенную реакцию. Цена пробила уровень вверх, но не закрепилась — ложный пробой, ловушка для покупателей. 🇬🇧 Лондон открытие 🚀 Независимое движение Стоп за структуру 0.0001263 (риск 1.5%). TP1: 0.0001216 (R:R 1:1.5), TP2: 0.0001196 (R:R 1:2.5).",
+    "level_class": 1,
+    "test_count": 2,
+    "rr_score": 2.5299999999999994,
+    "corr_label": "🚀 Независимое движение",
+    "session": "🇬🇧 Лондон открытие",
+    "btc_corr": 0,
+    "eth_corr": 0,
+    "tp1_close_pct": 0.4,
+    "tp2_close_pct": 0.3,
+    "tp3_close_pct": 0.3,
+    "move_sl_to_be_after_tp1": true,
+    "squeeze_score": 0,
+    "quality_after_squeeze": 10,
+    "passes_min_quality": true
+   }
+  },
+  {
+   "source": "conservative/SYNLV03-USDT-SWAP/202",
+   "signal": {
+    "symbol": "SYNLV03-USDT-SWAP",
+    "direction": "SHORT",
+    "entry": 0.6900291569,
+    "sl": 0.7003795942535,
+    "tp1": 0.67450350086975,
+    "tp2": 0.6636355416485749,
+    "tp3": 0.6486274074859998,
+    "risk_pct": 1.5000000000000075,
+    "quality": 9,
+    "reasons": [
+     "✅ Отскок от сопротивления",
+     "✅ [INSTITUTIONAL_ORDERBLOCK] — паттерн класса A",
+     "✅ Уровень класса 1 (Абсолютный)",
+     "✅ По локальному тренду",
+     "✅ Объём x12.1",
+     "✅ Volume Profile узел (HVN)",
+     "✅ Чистый путь к цели (LVN)",
+     "✅ Тест #2 уровня (оптимально)"
+    ],
+    "rsi": 45.64797704810153,
+    "volume_ratio": 12.062231594202192,
+    "trend_local": "↔️ Боковик",
+    "trend_htf": "",
+    "pattern": "INSTITUTIONAL_ORDERBLOCK",
+    "breakout_type": "Отскок от сопротивления",
+    "is_counter_trend": false,
+    "human_explanation": "Абсолютный уровень 0.697 (4 касания) — каждый раз давал уверенную реакцию. Цена подошла к уровню сопротивления и теряет импульс. Ожидается отказ и разворот вниз. 🇺🇸 Нью-Йорк сессия 〰️ Слабая корреляция с рынком Стоп за структуру 0.7004 (риск 1.5%). TP1: 0.6745 (R:R 1:1.5), TP2: 0.6636 (R:R 1:2.6).",
+    "level_class": 1,
+    "test_count": 2,
+    "rr_score": 2.5299999999999994,
+    "corr_label": "〰️ Слабая корреляция с рынком",
+    "session": "🇺🇸 Нью-Йорк сессия",
+    "btc_corr": 0,
+    "eth_corr": 0,
+    "tp1_close_pct": 0.4,
+    "tp2_close_pct": 0.3,
+    "tp3_close_pct": 0.3,
+    "move_sl_to_be_after_tp1": true,
+    "squeeze_score": 0,
+    "quality_after_squeeze": 9,
+    "passes_min_quality": true
+   }
+  },
+  {
+   "source": "conservative/SYNLV04-USDT-SWAP/200",
+   "signal": {
+    "symbol": "SYNLV04-USDT-SWAP",
+    "direction": "SHORT",
+    "entry": 3.616481737,
+    "sl": 3.670728963055,
+    "tp1": 3.5351108979175,
+    "tp2": 3.4781513105597495,
+    "tp3": 3.399492832779999,
+    "risk_pct": 1.5000000000000058,
+    "quality": 10,
+    "reasons": [
+     "✅ Отскок от сопротивления",
+     "✅ [INSTITUTIONAL_ORDERBLOCK] — паттерн класса A",
+     "✅ Уровень класса 1 (Абсолютный)",
+     "✅ HTF тренд подтверждает",
+     "✅ По локальному тренду",
+     "✅ Объём x11.7",
+     "✅ Volume Profile узел (HVN)",
+     "✅ Чистый путь к цели (LVN)",
+     "✅ Тест #2 уровня (оптимально)"
+    ],
+    "rsi": 45.39663427631803,
+    "volume_ratio": 11.672944020726746,
+    "trend_local": "📉 Медвежий",
+    "trend_htf": "",
+    "pattern": "INSTITUTIONAL_ORDERBLOCK",
+    "breakout_type": "Отскок от сопротивления",
+    "is_counter_trend": false,
+    "human_explanation": "Абсолютный уровень 3.6565 (3 касания) — каждый раз давал уверенную реакцию. Цена подошла к уровню сопротивления и теряет импульс. Ожидается отказ и разворот вниз. 🇺🇸 Нью-Йорк сессия 〰️ Слабая корреляция с рынком Стоп за структуру 3.6707 (риск 1.5%). TP1: 3.5351 (R:R 1:1.5), TP2: 3.4782 (R:R 1:2.5).",
+    "level_class": 1,
+    "test_count": 2,
+    "rr_score": 2.5300000000000002,
+    "corr_label": "〰️ Слабая корреляция с рынком",
+    "session": "🇺🇸 Нью-Йорк сессия",
+    "btc_corr": 0,
+    "eth_corr": 0,
+    "tp1_close_pct": 0.4,
+    "tp2_close_pct": 0.3,
+    "tp3_close_pct": 0.3,
+    "move_sl_to_be_after_tp1": true,
+    "squeeze_score": 0,
+    "quality_after_squeeze": 10,
+    "passes_min_quality": true
+   }
+  },
+  {
+   "source": "conservative/SYNLV04-USDT-SWAP/223",
+   "signal": {
+    "symbol": "SYNLV04-USDT-SWAP",
+    "direction": "SHORT",
+    "entry": 3.617572424,
+    "sl": 3.67183601036,
+    "tp1": 3.5361770444600005,
+    "tp2": 3.479200278782,
+    "tp3": 3.4005180785600007,
+    "risk_pct": 1.4999999999999953,
+    "quality": 10,
+    "reasons": [
+     "✅ SFP (Ложный пробой вверх)",
+     "✅ [LIQUIDITY_SWEEP] — паттерн класса A",
+     "✅ Уровень класса 1 (Абсолютный)",
+     "✅ HTF тренд подтверждает",
+     "✅ По локальному тренду",
+     "✅ Объём x19.9",
+     "✅ Volume Profile узел (HVN)",
+     "✅ Чистый путь к цели (LVN)",
+     "✅ Независимое движение (corr < 0.4)",
+     "✅ Тест #2 уровня (оптимально)"
+    ],
+    "rsi": 50.28462847519802,
+    "volume_ratio": 19.92853970965551,
+    "trend_local": "↔️ Боковик",
+    "trend_htf": "",
+    "pattern": "LIQUIDITY_SWEEP",
+    "breakout_type": "SFP (Ложный пробой вверх)",
+    "is_counter_trend": false,
+    "human_explanation": "Абсолютный уровень 3.6564 (4 касания) — каждый раз давал уверенную реакцию. Цена пробила уровень вверх, но не закрепилась — ложный пробой, ловушка для покупателей. 🌍 Европа + США пересечение 🚀 Независимое движение Стоп за структуру 3.6718 (риск 1.5%). TP1: 3.5362 (R:R 1:1.5), TP2: 3.4792 (R:R 1:2.6).",
+    "level_class": 1,
+    "test_count": 2,
+    "rr_score": 2.5300000000000007,
+    "corr_label": "🚀 Независимое движение",
+    "session": "🌍 Европа + США пересечение",
+    "btc_corr": 0,
+    "eth_corr": 0,
+    "tp1_close_pct": 0.4,
+    "tp2_close_pct": 0.3,
+    "tp3_close_pct": 0.3,
+    "move_sl_to_be_after_tp1": true,
+    "squeeze_score": 0,
+    "quality_after_squeeze": 10,
+    "passes_min_quality": true
+   }
+  },
+  {
+   "source": "conservative/SYNLV04-USDT-SWAP/373",
+   "signal": {
+    "symbol": "SYNLV04-USDT-SWAP",
+    "direction": "SHORT",
+    "entry": 3.57477723,
+    "sl": 3.62839888845,
+    "tp1": 3.494344742325,
+    "tp2": 3.4380420009525,
+    "tp3": 3.3602905962,
+    "risk_pct": 1.5,
+    "quality": 9,
+    "reasons": [
+     "✅ Ретест пробитой поддержки",
+     "✅ [INSTITUTIONAL_ORDERBLOCK] — паттерн класса A",
+     "✅ Уровень класса 1 (Абсолютный)",
+     "✅ HTF тренд подтверждает",
+     "✅ По локальному тренду",
+     "✅ Объём x11.0",
+     "✅ Volume Profile узел (HVN)",
+     "✅ Чистый путь к цели (LVN)",
+     "✅ Независимое движение (corr < 0.4)",
+     "✅ Тест #1 уровня (оптимально)",
+     "⚠️ 🌙 Мёртвая зона — низкая ликвидность"
+    ],
+    "rsi": 45.53755753903948,
+    "volume_ratio": 11.010261494365231,
+    "trend_local": "📉 Медвежий",
+    "trend_htf": "",
+    "pattern": "INSTITUTIONAL_ORDERBLOCK",
+    "breakout_type": "Ретест пробитой поддержки",
+    "is_counter_trend": false,
+    "human_explanation": "Абсолютный уровень 3.6166 (2 касания). Уровень пробит сверху вниз и сменил роль — бывшая поддержка стала сопротивлением. Ретест подтверждает смену тренда. 🌙 Мёртвая зона 🚀 Независимое движение Стоп за структуру 3.6284 (риск 1.5%). TP1: 3.4943 (R:R 1:1.5), TP2: 3.438 (R:R 1:2.5).",
+    "level_class": 1,
+    "test_count": 1,
+    "rr_score": 2.5299999999999994,
+    "corr_label": "🚀 Независимое движение",
+    "session": "🌙 Мёртвая зона",
+    "btc_corr": 0,
+    "eth_corr": 0,
+    "tp1_close_pct": 0.4,
+    "tp2_close_pct": 0.3,
+    "tp3_close_pct": 0.3,
+    "move_sl_to_be_after_tp1": true,
+    "squeeze_score": 0,
+    "quality_after_squeeze": 9,
+    "passes_min_quality": true
+   }
+  },
+  {
+   "source": "active/SYNUP05-USDT-SWAP/324",
+   "signal": {
+    "symbol": "SYNUP05-USDT-SWAP",
+    "direction": "LONG",
+    "entry": 34.38206288,
+    "sl": 33.8663319368,
+    "tp1": 35.413524766399995,
+    "tp2": 35.92925570959999,
+    "tp3": 36.70285212439999,
+    "risk_pct": 1.4999999999999933,
+    "quality": 6,
+    "reasons": [
+     "✅ Отскок от поддержки",
+     "⚠️ [BOUNCE_PLAIN] — паттерн класса D",
+     "✅ Уровень класса 1 (Абсолютный)",
+     "✅ HTF тренд подтверждает",
+     "✅ По локальному тренду",
+     "✅ Volume Profile узел (HVN)",
+     "✅ ✅ Затухающий импульс",
+     "✅ Тест #2 уровня (оптимально)"
+    ],
+    "rsi": 26.68180931242614,
+    "volume_ratio": 0.7927548264702754,
+    "trend_local": "↔️ Боковик",
+    "trend_htf": "",
+    "pattern": "BOUNCE_PLAIN",
+    "breakout_type": "Отскок от поддержки",
+    "is_counter_trend": false,
+    "human_explanation": "Абсолютный уровень 33.9475 (1 касания). Цена подошла к уровню поддержки и показывает признаки разворота. Отскок от ключевой зоны. 🇺🇸 Нью-Йорк сессия 〰️ Слабая корреляция с рынком Стоп за структуру 33.8663 (риск 1.5%). TP1: 35.4135 (R:R 1:2.0), TP2: 35.9293 (R:R 1:3.0).",
+    "level_class": 1,
+    "test_count": 2,
+    "rr_score": 2.8,
+    "corr_label": "〰️ Слабая корреляция с рынком",
+    "session": "🇺🇸 Нью-Йорк сессия",
+    "btc_corr": 0,
+    "eth_corr": 0,
+    "tp1_close_pct": 0.4,
+    "tp2_close_pct": 0.3,
+    "tp3_close_pct": 0.3,
+    "move_sl_to_be_after_tp1": true,
+    "squeeze_score": 0,
+    "quality_after_squeeze": 6,
+    "passes_min_quality": true
+   }
+  },
+  {
+   "source": "active/SYNUP08-USDT-SWAP/312",
+   "signal": {
+    "symbol": "SYNUP08-USDT-SWAP",
+    "direction": "SHORT",
+    "entry": 92972.99493,
+    "sl": 94367.58985395,
+    "tp1": 89235.62369408998,
+    "tp2": 83612.6372926,
+    "tp3": 80004.766982295,
+    "risk_pct": 1.5000000000000044,
+    "quality": 3,
+    "reasons": [
+     "✅ Отскок от сопротивления",
+     "⚠️ [BOUNCE_PLAIN] — паттерн класса D",
+     "✅ Уровень класса 1 (Абсолютный)",
+     "⚠️ Контртренд",
+     "✅ Чистый путь к цели (LVN)",
+     "✅ ✅ Затухающий импульс",
+     "✅ Тест #2 уровня (оптимально)"
+    ],
+    "rsi": 78.97680358556778,
+    "volume_ratio": 0.5773792652615144,
+    "trend_local": "📈 Бычий",
+    "trend_htf": "",
+    "pattern": "BOUNCE_PLAIN",
+    "breakout_type": "Отскок от сопротивления",
+    "is_counter_trend": true,
+    "human_explanation": "Абсолютный уровень 93,579 (2 касания). Цена подошла к уровню сопротивления и теряет импульс. Ожидается отказ и разворот вниз. 🇬🇧 Лондон открытие 🔗 Ходит за BTC Стоп за структуру 94,368 (риск 1.5%). TP1: 89,236 (R:R 1:2.7), TP2: 83,613 (R:R 1:6.7).",
+    "level_class": 1,
+    "test_count": 2,
+    "rr_score": 5.213297692295811,
+    "corr_label": "🔗 Ходит за BTC",
+    "session": "🇬🇧 Лондон открытие",
+    "btc_corr": 0,
+    "eth_corr": 0,
+    "tp1_close_pct": 0.4,
+    "tp2_close_pct": 0.3,
+    "tp3_close_pct": 0.3,
+    "move_sl_to_be_after_tp1": true,
+    "squeeze_score": 1,
+    "quality_after_squeeze": 4,
+    "passes_min_quality": false
+   }
+  },
+  {
+   "source": "active/SYNDN04-USDT-SWAP/339",
+   "signal": {
+    "symbol": "SYNDN04-USDT-SWAP",
+    "direction": "LONG",
+    "entry": 2.087281675,
+    "sl": 2.055972449875,
+    "tp1": 2.1975788125908333,
+    "tp2": 2.2485037619119,
+    "tp3": 2.2954675995994,
+    "risk_pct": 1.4999999999999898,
+    "quality": 5,
+    "reasons": [
+     "✅ Отскок от поддержки",
+     "✅ [ENGULFING_AT_LEVEL] — паттерн класса B",
+     "✅ Уровень класса 2 (Сильный)",
+     "⚠️ Контртренд",
+     "✅ Объём x1.2",
+     "✅ Чистый путь к цели (LVN)",
+     "✅ RSI выходит из перепроданности",
+     "✅ Независимое движение (corr < 0.4)",
+     "✅ Тест #2 уровня (оптимально)"
+    ],
+    "rsi": 42.96158401531867,
+    "volume_ratio": 1.21411810487794,
+    "trend_local": "📉 Медвежий",
+    "trend_htf": "",
+    "pattern": "ENGULFING_AT_LEVEL",
+    "breakout_type": "Отскок от поддержки",
+    "is_counter_trend": true,
+    "human_explanation": "Сильный уровень 2.0954 (2 касания). Цена подошла к уровню поддержки и показывает признаки разворота. Отскок от ключевой зоны. 🇬🇧 Лондон открытие 🚀 Независимое движение Стоп за структуру 2.056 (риск 1.5%). TP1: 2.1976 (R:R 1:3.5), TP2: 2.2485 (R:R 1:5.1).",
+    "level_class": 2,
+    "test_count": 2,
+    "rr_score": 4.636089817277707,
+    "corr_label": "🚀 Независимое движение",
+    "session": "🇬🇧 Лондон открытие",
+    "btc_corr": 0,
+    "eth_corr": 0,
+    "tp1_close_pct": 0.4,
+    "tp2_close_pct": 0.3,
+    "tp3_close_pct": 0.3,
+    "move_sl_to_be_after_tp1": true,
+    "squeeze_score": 0,
+    "quality_after_squeeze": 5,
+    "passes_min_quality": true
+   }
+  },
+  {
+   "source": "active/SYNDN07-USDT-SWAP/267",
+   "signal": {
+    "symbol": "SYNDN07-USDT-SWAP",
+    "direction": "LONG",
+    "entry": 2111.735479,
+    "sl": 2068.679340909,
+    "tp1": 2234.3210696055,
+    "tp2": 2245.018767081,
+    "tp3": 2346.2174494275,
+    "risk_pct": 2.0388982672862443,
+    "quality": 7,
+    "reasons": [
+     "✅ Отскок от поддержки",
+     "✅ [ENGULFING_AT_LEVEL] — паттерн класса B",
+     "✅ Уровень класса 1 (Абсолютный)",
+     "⚠️ Контртренд",
+     "✅ Объём x1.0",
+     "✅ Чистый путь к цели (LVN)",
+     "✅ ✅ Снижение объёма на подходе",
+     "✅ RSI выходит из перепроданности",
+     "✅ Независимое движение (corr < 0.4)",
+     "✅ Тест #1 уровня (оптимально)"
+    ],
+    "rsi": 44.80663934070189,
+    "volume_ratio": 1.0262246332653209,
+    "trend_local": "📉 Медвежий",
+    "trend_htf": "",
+    "pattern": "ENGULFING_AT_LEVEL",
+    "breakout_type": "Отскок от поддержки",
+    "is_counter_trend": true,
+    "human_explanation": "Абсолютный уровень 2,070.8 (1 касания). Цена подошла к уровню поддержки и показывает признаки разворота. Отскок от ключевой зоны. 🇬🇧 Лондон открытие 🚀 Независимое движение Стоп за структуру 2,068.7 (риск 2.0%). TP1: 2,234.3 (R:R 1:2.8), TP2: 2,245.0 (R:R 1:3.1).",
+    "level_class": 1,
+    "test_count": 1,
+    "rr_score": 3.441418166659104,
+    "corr_label": "🚀 Независимое движение",
+    "session": "🇬🇧 Лондон открытие",
+    "btc_corr": 0,
+    "eth_corr": 0,
+    "tp1_close_pct": 0.4,
+    "tp2_close_pct": 0.3,
+    "tp3_close_pct": 0.3,
+    "move_sl_to_be_after_tp1": true,
+    "squeeze_score": 1,
+    "quality_after_squeeze": 8,
+    "passes_min_quality": true
+   }
+  },
+  {
+   "source": "active/SYNRG04-USDT-SWAP/202",
+   "signal": {
+    "symbol": "SYNRG04-USDT-SWAP",
+    "direction": "SHORT",
+    "entry": 1.755679473,
+    "sl": 1.782014665095,
+    "tp1": 1.7082761272290001,
+    "tp2": 1.6885247331577502,
+    "tp3": 1.6549473632366254,
+    "risk_pct": 1.4999999999999947,
+    "quality": 7,
+    "reasons": [
+     "✅ Отскок от сопротивления",
+     "⚠️ [BOUNCE_PLAIN] — паттерн класса D",
+     "✅ Уровень класса 2 (Сильный)",
+     "✅ HTF тренд подтверждает",
+     "✅ По локальному тренду",
+     "✅ Объём x1.3",
+     "✅ Чистый путь к цели (LVN)",
+     "✅ ✅ Затухающий импульс",
+     "✅ Независимое движение (corr < 0.4)",
+     "✅ Тест #1 уровня (оптимально)"
+    ],
+    "rsi": 53.718931544984024,
+    "volume_ratio": 1.2721999370838404,
+    "trend_local": "↔️ Боковик",
+    "trend_htf": "",
+    "pattern": "BOUNCE_PLAIN",
+    "breakout_type": "Отскок от сопротивления",
+    "is_counter_trend": false,
+    "human_explanation": "Сильный уровень 1.7735 (2 касания). Цена подошла к уровню сопротивления и теряет импульс. Ожидается отказ и разворот вниз. 🇺🇸 Нью-Йорк сессия 🚀 Независимое движение Стоп за структуру 1.782 (риск 1.5%). TP1: 1.7083 (R:R 1:1.8), TP2: 1.6885 (R:R 1:2.6).",
+    "level_class": 2,
+    "test_count": 1,
+    "rr_score": 2.430000000000003,
+    "corr_label": "🚀 Независимое движение",
+    "session": "🇺🇸 Нью-Йорк сессия",
+    "btc_corr": 0,
+    "eth_corr": 0,
+    "tp1_close_pct": 0.4,
+    "tp2_close_pct": 0.3,
+    "tp3_close_pct": 0.3,
+    "move_sl_to_be_after_tp1": true,
+    "squeeze_score": 1,
+    "quality_after_squeeze": 8,
+    "passes_min_quality": true
+   }
+  },
+  {
+   "source": "active/SYNLV01-USDT-SWAP/216",
+   "signal": {
+    "symbol": "SYNLV01-USDT-SWAP",
+    "direction": "SHORT",
+    "entry": 0.0001243924584,
+    "sl": 0.000126258345276,
+    "tp1": 0.00012103386202319999,
+    "tp2": 0.0001196344468662,
+    "tp3": 0.00011725544109929999,
+    "risk_pct": 1.500000000000003,
+    "quality": 10,
+    "reasons": [
+     "✅ Ложный пробой (Fakeout)",
+     "✅ [LIQUIDITY_SWEEP] — паттерн класса A",
+     "✅ Уровень класса 1 (Абсолютный)",
+     "✅ HTF тренд подтверждает",
+     "✅ По локальному тренду",
+     "✅ Объём x12.4",
+     "✅ Volume Profile узел (HVN)",
+     "✅ Чистый путь к цели (LVN)",
+     "✅ Независимое движение (corr < 0.4)",
+     "✅ Тест #2 уровня (оптимально)"
+    ],
+    "rsi": 45.41526374510709,
+    "volume_ratio": 12.400054569148235,
+    "trend_local": "📉 Медвежий",
+    "trend_htf": "",
+    "pattern": "LIQUIDITY_SWEEP",
+    "breakout_type": "Ложный пробой (Fakeout)",
+    "is_counter_trend": false,
+    "human_explanation": "Абсолютный уровень 0.0001257 (4 касания) — каждый раз давал уверенную реакцию. Цена пробила уровень вверх, но не закрепилась — ложный пробой, ловушка для покупателей. 🇬🇧 Лондон открытие 🚀 Независимое движение Стоп за структуру 0.0001263 (риск 1.5%). TP1: 0.000121 (R:R 1:1.8), TP2: 0.0001196 (R:R 1:2.5).",
+    "level_class": 1,
+    "test_count": 2,
+    "rr_score": 2.430000000000001,
+    "corr_label": "🚀 Независимое движение",
+    "session": "🇬🇧 Лондон открытие",
+    "btc_corr": 0,
+    "eth_corr": 0,
+    "tp1_close_pct": 0.4,
+    "tp2_close_pct": 0.3,
+    "tp3_close_pct": 0.3,
+    "move_sl_to_be_after_tp1": true,
+    "squeeze_score": 0,
+    "quality_after_squeeze": 10,
+    "passes_min_quality": true
+   }
+  },
+  {
+   "source": "active/SYNLV01-USDT-SWAP/285",
+   "signal": {
+    "symbol": "SYNLV01-USDT-SWAP",
+    "direction": "SHORT",
+    "entry": 0.0001244743426,
+    "sl": 0.00012687383045003331,
+    "tp1": 0.00012015526446994005,
+    "tp2": 0.00011835564858241507,
+    "tp3": 0.0001152963015736226,
+    "risk_pct": 1.9276967444962494,
+    "quality": 9,
+    "reasons": [
+     "✅ Отскок от сопротивления",
+     "✅ [INSTITUTIONAL_ORDERBLOCK] — паттерн класса A",
+     "✅ Уровень класса 1 (Абсолютный)",
+     "✅ HTF тренд подтверждает",
+     "✅ По локальному тренду",
+     "✅ Объём x19.7",
+     "✅ Volume Profile узел (HVN)",
+     "✅ Чистый путь к цели (LVN)",
+     "✅ Независимое движение (corr < 0.4)",
+     "✅ Тест #1 уровня (оптимально)",
+     "⚠️ 🌏 Азиатская сессия — низкая ликвидность"
+    ],
+    "rsi": 53.044189486029815,
+    "volume_ratio": 19.73975662622473,
+    "trend_local": "📉 Медвежий",
+    "trend_htf": "",
+    "pattern": "INSTITUTIONAL_ORDERBLOCK",
+    "breakout_type": "Отскок от сопротивления",
+    "is_counter_trend": false,
+    "human_explanation": "Абсолютный уровень 0.0001267 (3 касания) — каждый раз давал уверенную реакцию. Цена подошла к уровню сопротивления и теряет импульс. Ожидается отказ и разворот вниз. 🌏 Азиатская сессия 🚀 Независимое движение Стоп за структуру 0.0001269 (риск 1.9%). TP1: 0.0001202 (R:R 1:1.8), TP2: 0.0001184 (R:R 1:2.5).",
+    "level_class": 1,
+    "test_count": 1,
+    "rr_score": 2.43,
+    "corr_label": "🚀 Независимое движение",
+    "session": "🌏 Азиатская сессия",
+    "btc_corr": 0,
+    "eth_corr": 0,
+    "tp1_close_pct": 0.4,
+    "tp2_close_pct": 0.3,
+    "tp3_close_pct": 0.3,
+    "move_sl_to_be_after_tp1": true,
+    "squeeze_score": 1,
+    "quality_after_squeeze": 10,
+    "passes_min_quality": true
+   }
+  },
+  {
+   "source": "active/SYNLV03-USDT-SWAP/290",
+   "signal": {
+    "symbol": "SYNLV03-USDT-SWAP",
+    "direction": "SHORT",
+    "entry": 0.6911544952,
+    "sl": 0.7015218126280001,
+    "tp1": 0.6724933238296,
+    "tp2": 0.6647178357586,
+    "tp3": 0.6514995060379,
+    "risk_pct": 1.5000000000000016,
+    "quality": 6,
+    "reasons": [
+     "✅ Отскок от сопротивления",
+     "✅ [INSTITUTIONAL_ORDERBLOCK] — паттерн класса A",
+     "✅ Уровень класса 2 (Сильный)",
+     "⚠️ Контртренд",
+     "✅ Объём x19.9",
+     "✅ Volume Profile узел (HVN)",
+     "✅ Чистый путь к цели (LVN)",
+     "✅ Тест #1 уровня (оптимально)"
+    ],
+    "rsi": 75.65662932880673,
+    "volume_ratio": 19.88616527168648,
+    "trend_local": "📈 Бычий",
+    "trend_htf": "",
+    "pattern": "INSTITUTIONAL_ORDERBLOCK",
+    "breakout_type": "Отскок от сопротивления",
+    "is_counter_trend": true,
+    "human_explanation": "Сильный уровень 0.6998 (2 касания). Цена подошла к уровню сопротивления и теряет импульс. Ожидается отказ и разворот вниз. 🇬🇧 Лондон открытие 🔗 Ходит за BTC и ETH Стоп за структуру 0.7015 (риск 1.5%). TP1: 0.6725 (R:R 1:1.8), TP2: 0.6647 (R:R 1:2.6).",
+    "level_class": 2,
+    "test_count": 1,
+    "rr_score": 2.4300000000000015,
+    "corr_label": "🔗 Ходит за BTC и ETH",
+    "session": "🇬🇧 Лондон открытие",
+    "btc_corr": 0,
+    "eth_corr": 0,
+    "tp1_close_pct": 0.4,
+    "tp2_close_pct": 0.3,
+    "tp3_close_pct": 0.3,
+    "move_sl_to_be_after_tp1": true,
+    "squeeze_score": 0,
+    "quality_after_squeeze": 6,
+    "passes_min_quality": true
+   }
+  },
+  {
+   "source": "active/SYNLV04-USDT-SWAP/200",
+   "signal": {
+    "symbol": "SYNLV04-USDT-SWAP",
+    "direction": "SHORT",
+    "entry": 3.616481737,
+    "sl": 3.670728963055,
+    "tp1": 3.5188367301009995,
+    "tp2": 3.4781513105597495,
+    "tp3": 3.408986097339624,
+    "risk_pct": 1.5000000000000058,
+    "quality": 10,
+    "reasons": [
+     "✅ Отскок от сопротивления",
+     "✅ [INSTITUTIONAL_ORDERBLOCK] — паттерн класса A",
+     "✅ Уровень класса 1 (Абсолютный)",
+     "✅ HTF тренд подтверждает",
+     "✅ По локальному тренду",
+     "✅ Объём x11.7",
+     "✅ Volume Profile узел (HVN)",
+     "✅ Чистый путь к цели (LVN)",
+     "✅ Тест #2 уровня (оптимально)"
+    ],
+    "rsi": 45.39663427631803,
+    "volume_ratio": 11.672944020726746,
+    "trend_local": "📉 Медвежий",
+    "trend_htf": "",
+    "pattern": "INSTITUTIONAL_ORDERBLOCK",
+    "breakout_type": "Отскок от сопротивления",
+    "is_counter_trend": false,
+    "human_explanation": "Абсолютный уровень 3.6565 (3 касания) — каждый раз давал уверенную реакцию. Цена подошла к уровню сопротивления и теряет импульс. Ожидается отказ и разворот вниз. 🇺🇸 Нью-Йорк сессия 〰️ Слабая корреляция с рынком Стоп за структуру 3.6707 (риск 1.5%). TP1: 3.5188 (R:R 1:1.8), TP2: 3.4782 (R:R 1:2.5).",
+    "level_class": 1,
+    "test_count": 2,
+    "rr_score": 2.430000000000001,
+    "corr_label": "〰️ Слабая корреляция с рынком",
+    "session": "🇺🇸 Нью-Йорк сессия",
+    "btc_corr": 0,
+    "eth_corr": 0,
+    "tp1_close_pct": 0.4,
+    "tp2_close_pct": 0.3,
+    "tp3_close_pct": 0.3,
+    "move_sl_to_be_after_tp1": true,
+    "squeeze_score": 0,
+    "quality_after_squeeze": 10,
+    "passes_min_quality": true
+   }
+  },
+  {
+   "source": "active/SYNLV04-USDT-SWAP/223",
+   "signal": {
+    "symbol": "SYNLV04-USDT-SWAP",
+    "direction": "SHORT",
+    "entry": 3.617572424,
+    "sl": 3.67183601036,
+    "tp1": 3.519897968552,
+    "tp2": 3.479200278782,
+    "tp3": 3.4100142061730008,
+    "risk_pct": 1.4999999999999953,
+    "quality": 10,
+    "reasons": [
+     "✅ Ложный пробой (Fakeout)",
+     "✅ [LIQUIDITY_SWEEP] — паттерн класса A",
+     "✅ Уровень класса 1 (Абсолютный)",
+     "✅ HTF тренд подтверждает",
+     "✅ По локальному тренду",
+     "✅ Объём x19.9",
+     "✅ Volume Profile узел (HVN)",
+     "✅ Чистый путь к цели (LVN)",
+     "✅ Независимое движение (corr < 0.4)",
+     "✅ Тест #2 уровня (оптимально)"
+    ],
+    "rsi": 50.28462847519802,
+    "volume_ratio": 19.92853970965551,
+    "trend_local": "↔️ Боковик",
+    "trend_htf": "",
+    "pattern": "LIQUIDITY_SWEEP",
+    "breakout_type": "Ложный пробой (Fakeout)",
+    "is_counter_trend": false,
+    "human_explanation": "Абсолютный уровень 3.6564 (4 касания) — каждый раз давал уверенную реакцию. Цена пробила уровень вверх, но не закрепилась — ложный пробой, ловушка для покупателей. 🌍 Европа + США пересечение 🚀 Независимое движение Стоп за структуру 3.6718 (риск 1.5%). TP1: 3.5199 (R:R 1:1.8), TP2: 3.4792 (R:R 1:2.6).",
+    "level_class": 1,
+    "test_count": 2,
+    "rr_score": 2.4300000000000015,
+    "corr_label": "🚀 Независимое движение",
+    "session": "🌍 Европа + США пересечение",
+    "btc_corr": 0,
+    "eth_corr": 0,
+    "tp1_close_pct": 0.4,
+    "tp2_close_pct": 0.3,
+    "tp3_close_pct": 0.3,
+    "move_sl_to_be_after_tp1": true,
+    "squeeze_score": 0,
+    "quality_after_squeeze": 10,
+    "passes_min_quality": true
+   }
+  },
+  {
+   "source": "active/SYNLV08-USDT-SWAP/399",
+   "signal": {
+    "symbol": "SYNLV08-USDT-SWAP",
+    "direction": "LONG",
+    "entry": 99700.41543,
+    "sl": 98204.90919855,
+    "tp1": 102392.32664660999,
+    "tp2": 103513.95632019748,
+    "tp3": 105420.72676529623,
+    "risk_pct": 1.4999999999999956,
+    "quality": 5,
+    "reasons": [
+     "✅ Отскок от поддержки",
+     "✅ [ENGULFING_AT_LEVEL] — паттерн класса B",
+     "✅ Уровень класса 2 (Сильный)",
+     "✅ HTF тренд подтверждает",
+     "✅ По локальному тренду",
+     "✅ Чистый путь к цели (LVN)",
+     "✅ Независимое движение (corr < 0.4)",
+     "✅ Тест #0 уровня (оптимально)",
+     "⚠️ 🌙 Мёртвая зона — низкая ликвидность"
+    ],
+    "rsi": 20.150788106320363,
+    "volume_ratio": 0.5842160693277313,
+    "trend_local": "📈 Бычий",
+    "trend_htf": "",
+    "pattern": "ENGULFING_AT_LEVEL",
+    "breakout_type": "Отскок от поддержки",
+    "is_counter_trend": false,
+    "human_explanation": "Сильный уровень 98,223 (1 касания). Цена подошла к уровню поддержки и показывает признаки разворота. Отскок от ключевой зоны. 🌙 Мёртвая зона 🚀 Независимое движение Стоп за структуру 98,205 (риск 1.5%). TP1: 102,392 (R:R 1:1.8), TP2: 103,514 (R:R 1:2.5).",
+    "level_class": 2,
+    "test_count": 0,
+    "rr_score": 2.430000000000002,
+    "corr_label": "🚀 Независимое движение",
+    "session": "🌙 Мёртвая зона",
+    "btc_corr": 0,
+    "eth_corr": 0,
+    "tp1_close_pct": 0.4,
+    "tp2_close_pct": 0.3,
+    "tp3_close_pct": 0.3,
+    "move_sl_to_be_after_tp1": true,
+    "squeeze_score": 2,
+    "quality_after_squeeze": 6,
+    "passes_min_quality": true
+   }
+  }
+ ],
+ "smc": [
+  {
+   "source": "default/BTC-USDT-SWAP/274",
+   "signal": {
+    "symbol": "BTC-USDT-SWAP",
+    "direction": "SHORT",
+    "score": 4,
+    "grade": "✅ A",
+    "entry_low": 62896.92057,
+    "entry_high": 66989.98803,
+    "entry": 64943.4543,
+    "sl": 67224.452988105,
+    "tp1": 62206.255874274,
+    "tp2": 59240.9575797375,
+    "tp3": 55819.45954758,
+    "rr": 2.5,
+    "risk_pct": 3.512,
+    "confirmations": [
+     [
+      "HTF структура: медвежья / CHoCH вниз",
+      false
+     ],
+     [
+      "Liquidity Sweep: ликвидность снята сверху",
+      false
+     ],
+     [
+      "Order Block: медвежий OB митигирован",
+      true
+     ],
+     [
+      "FVG/IFVG: дисбаланс в зоне входа",
+      true
+     ],
+     [
+      "Premium Zone: цена в верхних 50%",
+      true
+     ],
+     [
+      "Объём: 0.76× ≥ 1.2× среднего",
+      false
+     ],
+     [
+      "Retrace: возврат к OB50% или FVG",
+      true
+     ],
+     [
+      "BB Squeeze: компрессия волатильности",
+      false
+     ]
+    ],
+    "narrative": "На 4H рынок находится в боковике без чёткой структуры. Явного sweep ликвидности на данном таймфрейме не зафиксировано. Цена поднялась в медвежий ордер-блок 62,897–66,990 на 1H — зону предложения, откуда начался последний медвежий импульс. Перевёрнутый FVG 64,441–64,608 выступает как усиленный уровень сопротивления после смены роли. Стоп размещён над верхним экстремумом OB с буфером 0.35% на уровне 67,224 — выше этого уровня медвежий контекст нарушен. Первая цель — закрытие FVG (62,206), финальная цель — следующая зона ликвидности 55,819 (+14.0%). Сетап теряет силу, если 15m-свеча закроется выше 67,224 — медвежья структура будет нарушена.",
+    "session": "",
+    "tf_htf": "4H",
+    "tf_mtf": "1H",
+    "tf_ltf": "15m",
+    "mode_tag": "⚡ Aggressive",
+    "squeeze_score": 0,
+    "passes_ctx_gate": true,
+    "rr_ladder": [
+     1.2,
+     2.5,
+     4
+    ]
+   }
+  },
+  {
+   "source": "default/BTC-USDT-SWAP/293",
+   "signal": {
+    "symbol": "BTC-USDT-SWAP",
+    "direction": "LONG",
+    "score": 5,
+    "grade": "🔥 A+",
+    "entry_low": 59518.09566,
+    "entry_high": 63121.26106,
+    "entry": 61319.67836,
+    "sl": 59309.782325190004,
+    "tp1": 64334.52241221499,
+    "tp2": 65416.54273,
+    "tp3": 71160.84519923996,
+    "rr": 2.04,
+    "risk_pct": 3.278,
+    "confirmations": [
+     [
+      "HTF структура: бычья / CHoCH вверх",
+      true
+     ],
+     [
+      "Liquidity Sweep: ликвидность снята снизу",
+      false
+     ],
+     [
+      "Order Block: бычий OB митигирован",
+      true
+     ],
+     [
+      "FVG/IFVG: дисбаланс в зоне входа",
+      true
+     ],
+     [
+      "Discount Zone: цена в нижних 50%",
+      true
+     ],
+     [
+      "Объём: 4.03× ≥ 1.2× среднего",
+      true
+     ],
+     [
+      "Retrace: возврат к OB50% или FVG",
+      true
+     ],
+     [
+      "BB Squeeze: компрессия волатильности",
+      false
+     ]
+    ],
+    "narrative": "На 4H рынок находится в устойчивом восходящем тренде с чёткой HH/HL структурой. Явного sweep ликвидности на данном таймфрейме не зафиксировано. Цена вернулась в бычий ордер-блок 59,518–63,121 на 1H — зону, где институционалы формировали позицию перед последним бычьим импульсом с BOS. Перевёрнутый FVG 61,104–61,180 выступает как усиленный уровень поддержки после смены роли. Стоп размещён под нижним экстремумом OB с буфером 0.35% на уровне 59,310 — ниже этого уровня бычий контекст теряется. Первая цель — закрытие FVG (64,335), финальная цель — следующая зона ликвидности 71,161 (+16.0%). Сетап теряет силу, если 15m-свеча закроется ниже 59,310 — это полная митигация OB и потеря бычьей структуры.",
+    "session": "",
+    "tf_htf": "4H",
+    "tf_mtf": "1H",
+    "tf_ltf": "15m",
+    "mode_tag": "⚡ Aggressive",
+    "squeeze_score": 0,
+    "passes_ctx_gate": true,
+    "rr_ladder": [
+     1.5,
+     2.04,
+     4.9
+    ]
+   }
+  },
+  {
+   "source": "default/BTC-USDT-SWAP/301",
+   "signal": {
+    "symbol": "BTC-USDT-SWAP",
+    "direction": "LONG",
+    "score": 3,
+    "grade": "⚡ B",
+    "entry_low": 61026.53084,
+    "entry_high": 62642.38217,
+    "entry": 61834.456504999995,
+    "sl": 60812.93798206,
+    "tp1": 63383.75756,
+    "tp2": 65416.54273,
+    "tp3": 66728.45626175997,
+    "rr": 3.51,
+    "risk_pct": 1.652,
+    "confirmations": [
+     [
+      "HTF структура: бычья / CHoCH вверх",
+      true
+     ],
+     [
+      "Liquidity Sweep: ликвидность снята снизу",
+      false
+     ],
+     [
+      "Order Block: бычий OB митигирован",
+      false
+     ],
+     [
+      "FVG/IFVG: дисбаланс в зоне входа",
+      true
+     ],
+     [
+      "Discount Zone: цена в нижних 50%",
+      false
+     ],
+     [
+      "Объём: 0.14× ≥ 1.2× среднего",
+      false
+     ],
+     [
+      "Retrace: возврат к OB50% или FVG",
+      true
+     ],
+     [
+      "BB Squeeze: компрессия волатильности",
+      false
+     ]
+    ],
+    "narrative": "На 4H рынок находится в устойчивом восходящем тренде с чёткой HH/HL структурой. Явного sweep ликвидности на данном таймфрейме не зафиксировано. Цена вернулась в бычий ордер-блок 61,027–62,642 на 1H — зону, где институционалы формировали позицию перед последним бычьим импульсом с BOS. Перевёрнутый FVG 63,311–63,384 выступает как усиленный уровень поддержки после смены роли. Стоп размещён под нижним экстремумом OB с буфером 0.35% на уровне 60,813 — ниже этого уровня бычий контекст теряется. Первая цель — закрытие FVG (63,384), финальная цель — следующая зона ликвидности 66,728 (+7.9%). Сетап теряет силу, если 15m-свеча закроется ниже 60,813 — это полная митигация OB и потеря бычьей структуры.",
+    "session": "",
+    "tf_htf": "4H",
+    "tf_mtf": "1H",
+    "tf_ltf": "15m",
+    "mode_tag": "⚡ Aggressive",
+    "squeeze_score": 0,
+    "passes_ctx_gate": true,
+    "rr_ladder": [
+     1.52,
+     3.51,
+     4.79
+    ]
+   }
+  },
+  {
+   "source": "default/BTC-USDT-SWAP/308",
+   "signal": {
+    "symbol": "BTC-USDT-SWAP",
+    "direction": "SHORT",
+    "score": 5,
+    "grade": "🔥 A+",
+    "entry_low": 62896.92057,
+    "entry_high": 66989.98803,
+    "entry": 64943.4543,
+    "sl": 67224.452988105,
+    "tp1": 61521.9562678425,
+    "tp2": 57872.25299,
+    "tp3": 53772.925817580006,
+    "rr": 3.1,
+    "risk_pct": 3.512,
+    "confirmations": [
+     [
+      "HTF структура: медвежья / CHoCH вниз",
+      false
+     ],
+     [
+      "Liquidity Sweep: ликвидность снята сверху",
+      false
+     ],
+     [
+      "Order Block: медвежий OB митигирован",
+      true
+     ],
+     [
+      "FVG/IFVG: дисбаланс в зоне входа",
+      true
+     ],
+     [
+      "Premium Zone: цена в верхних 50%",
+      true
+     ],
+     [
+      "Объём: 0.43× ≥ 1.2× среднего",
+      false
+     ],
+     [
+      "Retrace: возврат к OB50% или FVG",
+      true
+     ],
+     [
+      "BB Squeeze: компрессия волатильности",
+      true
+     ]
+    ],
+    "narrative": "На 4H рынок находится в устойчивом восходящем тренде с чёткой HH/HL структурой. Явного sweep ликвидности на данном таймфрейме не зафиксировано. Цена поднялась в медвежий ордер-блок 62,897–66,990 на 1H — зону предложения, откуда начался последний медвежий импульс. Перевёрнутый FVG 65,512–66,297 выступает как усиленный уровень сопротивления после смены роли. Стоп размещён над верхним экстремумом OB с буфером 0.35% на уровне 67,224 — выше этого уровня медвежий контекст нарушен. Первая цель — закрытие FVG (61,522), финальная цель — следующая зона ликвидности 53,773 (+17.2%). Сетап теряет силу, если 15m-свеча закроется выше 67,224 — медвежья структура будет нарушена.",
+    "session": "",
+    "tf_htf": "4H",
+    "tf_mtf": "1H",
+    "tf_ltf": "15m",
+    "mode_tag": "⚡ Aggressive",
+    "squeeze_score": 1,
+    "passes_ctx_gate": true,
+    "rr_ladder": [
+     1.5,
+     3.1,
+     4.9
+    ]
+   }
+  },
+  {
+   "source": "default/BTC-USDT-SWAP/316",
+   "signal": {
+    "symbol": "BTC-USDT-SWAP",
+    "direction": "SHORT",
+    "score": 3,
+    "grade": "⚡ B",
+    "entry_low": 67684.01638,
+    "entry_high": 70543.03713,
+    "entry": 69113.526755,
+    "sl": 70789.937759955,
+    "tp1": 67101.83354905399,
+    "tp2": 64922.49924261248,
+    "tp3": 62407.88273517997,
+    "rr": 2.5,
+    "risk_pct": 2.426,
+    "confirmations": [
+     [
+      "HTF структура: медвежья / CHoCH вниз",
+      false
+     ],
+     [
+      "Liquidity Sweep: ликвидность снята сверху",
+      false
+     ],
+     [
+      "Order Block: медвежий OB митигирован",
+      true
+     ],
+     [
+      "FVG/IFVG: дисбаланс в зоне входа",
+      true
+     ],
+     [
+      "Premium Zone: цена в верхних 50%",
+      true
+     ],
+     [
+      "Объём: 0.26× ≥ 1.2× среднего",
+      false
+     ],
+     [
+      "Retrace: возврат к OB50% или FVG",
+      false
+     ],
+     [
+      "BB Squeeze: компрессия волатильности",
+      false
+     ]
+    ],
+    "narrative": "На 4H рынок находится в устойчивом восходящем тренде с чёткой HH/HL структурой. Явного sweep ликвидности на данном таймфрейме не зафиксировано. Цена поднялась в медвежий ордер-блок 67,684–70,543 на 1H — зону предложения, откуда начался последний медвежий импульс. Внутри зоны присутствует bearish FVG 68,476–68,778 — дисбаланс, который рынок стремится заполнить, добавляя магнетизм к точке входа. Стоп размещён над верхним экстремумом OB с буфером 0.35% на уровне 70,790 — выше этого уровня медвежий контекст нарушен. Первая цель — закрытие FVG (67,102), финальная цель — следующая зона ликвидности 62,408 (+9.7%). Сетап теряет силу, если 15m-свеча закроется выше 70,790 — медвежья структура будет нарушена.",
+    "session": "",
+    "tf_htf": "4H",
+    "tf_mtf": "1H",
+    "tf_ltf": "15m",
+    "mode_tag": "⚡ Aggressive",
+    "squeeze_score": 0,
+    "passes_ctx_gate": true,
+    "rr_ladder": [
+     1.2,
+     2.5,
+     4
+    ]
+   }
+  },
+  {
+   "source": "default/BTC-USDT-SWAP/325",
+   "signal": {
+    "symbol": "BTC-USDT-SWAP",
+    "direction": "LONG",
+    "score": 4,
+    "grade": "✅ A",
+    "entry_low": 61026.53084,
+    "entry_high": 62642.38217,
+    "entry": 61834.456504999995,
+    "sl": 60812.93798206,
+    "tp1": 63060.278732527986,
+    "tp2": 64388.25281234998,
+    "tp3": 65920.53059675997,
+    "rr": 2.5,
+    "risk_pct": 1.652,
+    "confirmations": [
+     [
+      "HTF структура: бычья / CHoCH вверх",
+      true
+     ],
+     [
+      "Liquidity Sweep: ликвидность снята снизу",
+      false
+     ],
+     [
+      "Order Block: бычий OB митигирован",
+      false
+     ],
+     [
+      "FVG/IFVG: дисбаланс в зоне входа",
+      true
+     ],
+     [
+      "Discount Zone: цена в нижних 50%",
+      false
+     ],
+     [
+      "Объём: 0.33× ≥ 1.2× среднего",
+      false
+     ],
+     [
+      "Retrace: возврат к OB50% или FVG",
+      true
+     ],
+     [
+      "BB Squeeze: компрессия волатильности",
+      true
+     ]
+    ],
+    "narrative": "На 4H рынок находится в устойчивом восходящем тренде с чёткой HH/HL структурой. Явного sweep ликвидности на данном таймфрейме не зафиксировано. Цена вернулась в бычий ордер-блок 61,027–62,642 на 1H — зону, где институционалы формировали позицию перед последним бычьим импульсом с BOS. Перевёрнутый FVG 65,193–66,502 выступает как усиленный уровень поддержки после смены роли. Стоп размещён под нижним экстремумом OB с буфером 0.35% на уровне 60,813 — ниже этого уровня бычий контекст теряется. Первая цель — закрытие FVG (63,060), финальная цель — следующая зона ликвидности 65,921 (+6.6%). Сетап теряет силу, если 15m-свеча закроется ниже 60,813 — это полная митигация OB и потеря бычьей структуры.",
+    "session": "",
+    "tf_htf": "4H",
+    "tf_mtf": "1H",
+    "tf_ltf": "15m",
+    "mode_tag": "⚡ Aggressive",
+    "squeeze_score": 1,
+    "passes_ctx_gate": true,
+    "rr_ladder": [
+     1.2,
+     2.5,
+     4
+    ]
+   }
+  },
+  {
+   "source": "default/ETH-USDT-SWAP/263",
+   "signal": {
+    "symbol": "ETH-USDT-SWAP",
+    "direction": "SHORT",
+    "score": 5,
+    "grade": "🔥 A+",
+    "entry_low": 4313.277384,
+    "entry_high": 4388.280729,
+    "entry": 4350.7790565,
+    "sl": 4403.6397115515,
+    "tp1": 4287.346270438199,
+    "tp2": 4218.627418871249,
+    "tp3": 4139.336436293997,
+    "rr": 2.5,
+    "risk_pct": 1.215,
+    "confirmations": [
+     [
+      "HTF структура: медвежья / CHoCH вниз",
+      true
+     ],
+     [
+      "Liquidity Sweep: ликвидность снята сверху",
+      false
+     ],
+     [
+      "Order Block: медвежий OB митигирован",
+      true
+     ],
+     [
+      "FVG/IFVG: дисбаланс в зоне входа",
+      true
+     ],
+     [
+      "Premium Zone: цена в верхних 50%",
+      true
+     ],
+     [
+      "Объём: 0.31× ≥ 1.2× среднего",
+      false
+     ],
+     [
+      "Retrace: возврат к OB50% или FVG",
+      true
+     ],
+     [
+      "BB Squeeze: компрессия волатильности",
+      true
+     ]
+    ],
+    "narrative": "На 4H рынок находится в нисходящем тренде (LH/LL). Явного sweep ликвидности на данном таймфрейме не зафиксировано. Цена поднялась в медвежий ордер-блок 4,313.3–4,388.3 на 1H — зону предложения, откуда начался последний медвежий импульс. Перевёрнутый FVG 4,336.6–4,351.6 выступает как усиленный уровень сопротивления после смены роли. Стоп размещён над верхним экстремумом OB с буфером 0.35% на уровне 4,403.6 — выше этого уровня медвежий контекст нарушен. Первая цель — закрытие FVG (4,287.3), финальная цель — следующая зона ликвидности 4,139.3 (+4.9%). Сетап теряет силу, если 15m-свеча закроется выше 4,403.6 — медвежья структура будет нарушена.",
+    "session": "",
+    "tf_htf": "4H",
+    "tf_mtf": "1H",
+    "tf_ltf": "15m",
+    "mode_tag": "⚡ Aggressive",
+    "squeeze_score": 1,
+    "passes_ctx_gate": true,
+    "rr_ladder": [
+     1.2,
+     2.5,
+     4
+    ]
+   }
+  },
+  {
+   "source": "default/ETH-USDT-SWAP/275",
+   "signal": {
+    "symbol": "ETH-USDT-SWAP",
+    "direction": "SHORT",
+    "score": 4,
+    "grade": "✅ A",
+    "entry_low": 4501.489772,
+    "entry_high": 4757.130654,
+    "entry": 4629.310213,
+    "sl": 4773.780611289,
+    "tp1": 4455.945735053199,
+    "tp2": 4268.1342172774985,
+    "tp3": 4051.4286198439977,
+    "rr": 2.5,
+    "risk_pct": 3.121,
+    "confirmations": [
+     [
+      "HTF структура: медвежья / CHoCH вниз",
+      false
+     ],
+     [
+      "Liquidity Sweep: ликвидность снята сверху",
+      false
+     ],
+     [
+      "Order Block: медвежий OB митигирован",
+      true
+     ],
+     [
+      "FVG/IFVG: дисбаланс в зоне входа",
+      true
+     ],
+     [
+      "Premium Zone: цена в верхних 50%",
+      true
+     ],
+     [
+      "Объём: 0.74× ≥ 1.2× среднего",
+      false
+     ],
+     [
+      "Retrace: возврат к OB50% или FVG",
+      true
+     ],
+     [
+      "BB Squeeze: компрессия волатильности",
+      false
+     ]
+    ],
+    "narrative": "На 4H рынок находится в боковике без чёткой структуры. Явного sweep ликвидности на данном таймфрейме не зафиксировано. Цена поднялась в медвежий ордер-блок 4,501.5–4,757.1 на 1H — зону предложения, откуда начался последний медвежий импульс. Перевёрнутый FVG 4,594.3–4,609.2 выступает как усиленный уровень сопротивления после смены роли. Стоп размещён над верхним экстремумом OB с буфером 0.35% на уровне 4,773.8 — выше этого уровня медвежий контекст нарушен. Первая цель — закрытие FVG (4,455.9), финальная цель — следующая зона ликвидности 4,051.4 (+12.5%). Сетап теряет силу, если 15m-свеча закроется выше 4,773.8 — медвежья структура будет нарушена.",
+    "session": "",
+    "tf_htf": "4H",
+    "tf_mtf": "1H",
+    "tf_ltf": "15m",
+    "mode_tag": "⚡ Aggressive",
+    "squeeze_score": 0,
+    "passes_ctx_gate": true,
+    "rr_ladder": [
+     1.2,
+     2.5,
+     4
+    ]
+   }
+  },
+  {
+   "source": "default/ETH-USDT-SWAP/300",
+   "signal": {
+    "symbol": "ETH-USDT-SWAP",
+    "direction": "LONG",
+    "score": 4,
+    "grade": "✅ A",
+    "entry_low": 4465.916646,
+    "entry_high": 4565.382833,
+    "entry": 4515.6497395,
+    "sl": 4450.285937739,
+    "tp1": 4597.485082,
+    "tp2": 4775.492299,
+    "tp3": 4826.838040044,
+    "rr": 3.98,
+    "risk_pct": 1.447,
+    "confirmations": [
+     [
+      "HTF структура: бычья / CHoCH вверх",
+      true
+     ],
+     [
+      "Liquidity Sweep: ликвидность снята снизу",
+      false
+     ],
+     [
+      "Order Block: бычий OB митигирован",
+      true
+     ],
+     [
+      "FVG/IFVG: дисбаланс в зоне входа",
+      true
+     ],
+     [
+      "Discount Zone: цена в нижних 50%",
+      false
+     ],
+     [
+      "Объём: 0.27× ≥ 1.2× среднего",
+      false
+     ],
+     [
+      "Retrace: возврат к OB50% или FVG",
+      true
+     ],
+     [
+      "BB Squeeze: компрессия волатильности",
+      false
+     ]
+    ],
+    "narrative": "На 4H рынок находится в устойчивом восходящем тренде с чёткой HH/HL структурой. Явного sweep ликвидности на данном таймфрейме не зафиксировано. Цена вернулась в бычий ордер-блок 4,465.9–4,565.4 на 1H — зону, где институционалы формировали позицию перед последним бычьим импульсом с BOS. Перевёрнутый FVG 4,571.6–4,597.5 выступает как усиленный уровень поддержки после смены роли. Стоп размещён под нижним экстремумом OB с буфером 0.35% на уровне 4,450.3 — ниже этого уровня бычий контекст теряется. Первая цель — закрытие FVG (4,597.5), финальная цель — следующая зона ликвидности 4,826.8 (+6.9%). Сетап теряет силу, если 15m-свеча закроется ниже 4,450.3 — это полная митигация OB и потеря бычьей структуры.",
+    "session": "",
+    "tf_htf": "4H",
+    "tf_mtf": "1H",
+    "tf_ltf": "15m",
+    "mode_tag": "⚡ Aggressive",
+    "squeeze_score": 0,
+    "passes_ctx_gate": true,
+    "rr_ladder": [
+     1.25,
+     3.98,
+     4.76
+    ]
+   }
+  },
+  {
+   "source": "default/ETH-USDT-SWAP/301",
+   "signal": {
+    "symbol": "ETH-USDT-SWAP",
+    "direction": "LONG",
+    "score": 3,
+    "grade": "⚡ B",
+    "entry_low": 4465.916646,
+    "entry_high": 4565.382833,
+    "entry": 4515.6497395,
+    "sl": 4450.285937739,
+    "tp1": 4609.229194,
+    "tp2": 4775.492299,
+    "tp3": 4826.838040044,
+    "rr": 3.98,
+    "risk_pct": 1.447,
+    "confirmations": [
+     [
+      "HTF структура: бычья / CHoCH вверх",
+      true
+     ],
+     [
+      "Liquidity Sweep: ликвидность снята снизу",
+      false
+     ],
+     [
+      "Order Block: бычий OB митигирован",
+      false
+     ],
+     [
+      "FVG/IFVG: дисбаланс в зоне входа",
+      true
+     ],
+     [
+      "Discount Zone: цена в нижних 50%",
+      false
+     ],
+     [
+      "Объём: 0.18× ≥ 1.2× среднего",
+      false
+     ],
+     [
+      "Retrace: возврат к OB50% или FVG",
+      true
+     ],
+     [
+      "BB Squeeze: компрессия волатильности",
+      false
+     ]
+    ],
+    "narrative": "На 4H рынок находится в устойчивом восходящем тренде с чёткой HH/HL структурой. Явного sweep ликвидности на данном таймфрейме не зафиксировано. Цена вернулась в бычий ордер-блок 4,465.9–4,565.4 на 1H — зону, где институционалы формировали позицию перед последним бычьим импульсом с BOS. Перевёрнутый FVG 4,599.5–4,609.2 выступает как усиленный уровень поддержки после смены роли. Стоп размещён под нижним экстремумом OB с буфером 0.35% на уровне 4,450.3 — ниже этого уровня бычий контекст теряется. Первая цель — закрытие FVG (4,609.2), финальная цель — следующая зона ликвидности 4,826.8 (+6.9%). Сетап теряет силу, если 15m-свеча закроется ниже 4,450.3 — это полная митигация OB и потеря бычьей структуры.",
+    "session": "",
+    "tf_htf": "4H",
+    "tf_mtf": "1H",
+    "tf_ltf": "15m",
+    "mode_tag": "⚡ Aggressive",
+    "squeeze_score": 0,
+    "passes_ctx_gate": true,
+    "rr_ladder": [
+     1.43,
+     3.98,
+     4.76
+    ]
+   }
+  },
+  {
+   "source": "default/ETH-USDT-SWAP/346",
+   "signal": {
+    "symbol": "ETH-USDT-SWAP",
+    "direction": "LONG",
+    "score": 5,
+    "grade": "🔥 A+",
+    "entry_low": 4465.916646,
+    "entry_high": 4565.382833,
+    "entry": 4515.6497395,
+    "sl": 4450.285937739,
+    "tp1": 4594.0863016132,
+    "tp2": 4679.0592439025,
+    "tp3": 4777.104946544,
+    "rr": 2.5,
+    "risk_pct": 1.447,
+    "confirmations": [
+     [
+      "HTF структура: бычья / CHoCH вверх",
+      true
+     ],
+     [
+      "Liquidity Sweep: ликвидность снята снизу",
+      false
+     ],
+     [
+      "Order Block: бычий OB митигирован",
+      false
+     ],
+     [
+      "FVG/IFVG: дисбаланс в зоне входа",
+      true
+     ],
+     [
+      "Discount Zone: цена в нижних 50%",
+      false
+     ],
+     [
+      "Объём: 2.48× ≥ 1.2× среднего",
+      true
+     ],
+     [
+      "Retrace: возврат к OB50% или FVG",
+      true
+     ],
+     [
+      "BB Squeeze: компрессия волатильности",
+      true
+     ]
+    ],
+    "narrative": "На 4H рынок находится в устойчивом восходящем тренде с чёткой HH/HL структурой. Явного sweep ликвидности на данном таймфрейме не зафиксировано. Цена вернулась в бычий ордер-блок 4,465.9–4,565.4 на 1H — зону, где институционалы формировали позицию перед последним бычьим импульсом с BOS. Перевёрнутый FVG 4,718.1–4,799.6 выступает как усиленный уровень поддержки после смены роли. Стоп размещён под нижним экстремумом OB с буфером 0.35% на уровне 4,450.3 — ниже этого уровня бычий контекст теряется. Первая цель — закрытие FVG (4,594.1), финальная цель — следующая зона ликвидности 4,777.1 (+5.8%). Сетап теряет силу, если 15m-свеча закроется ниже 4,450.3 — это полная митигация OB и потеря бычьей структуры.",
+    "session": "",
+    "tf_htf": "4H",
+    "tf_mtf": "1H",
+    "tf_ltf": "15m",
+    "mode_tag": "⚡ Aggressive",
+    "squeeze_score": 2,
+    "passes_ctx_gate": true,
+    "rr_ladder": [
+     1.2,
+     2.5,
+     4
+    ]
+   }
+  },
+  {
+   "source": "default/SYNUP01-USDT-SWAP/206",
+   "signal": {
+    "symbol": "SYNUP01-USDT-SWAP",
+    "direction": "SHORT",
+    "score": 3,
+    "grade": "⚡ B",
+    "entry_low": 0.0001709641094,
+    "entry_high": 0.0001723515365,
+    "entry": 0.00017165782295,
+    "sl": 0.00017295476687775,
+    "tp1": 0.0001701014902367,
+    "tp2": 0.000168415463130625,
+    "tp3": 0.00016647004723899998,
+    "rr": 2.5,
+    "risk_pct": 0.756,
+    "confirmations": [
+     [
+      "HTF структура: медвежья / CHoCH вниз",
+      false
+     ],
+     [
+      "Liquidity Sweep: ликвидность снята сверху",
+      false
+     ],
+     [
+      "Order Block: медвежий OB митигирован",
+      true
+     ],
+     [
+      "FVG/IFVG: дисбаланс в зоне входа",
+      true
+     ],
+     [
+      "Premium Zone: цена в верхних 50%",
+      false
+     ],
+     [
+      "Объём: 0.76× ≥ 1.2× среднего",
+      false
+     ],
+     [
+      "Retrace: возврат к OB50% или FVG",
+      false
+     ],
+     [
+      "BB Squeeze: компрессия волатильности",
+      true
+     ]
+    ],
+    "narrative": "На 4H рынок находится в устойчивом восходящем тренде с чёткой HH/HL структурой. Явного sweep ликвидности на данном таймфрейме не зафиксировано. Цена поднялась в медвежий ордер-блок 0.000171–0.0001724 на 1H — зону предложения, откуда начался последний медвежий импульс. Перевёрнутый FVG 0.0001711–0.0001716 выступает как усиленный уровень сопротивления после смены роли. Стоп размещён над верхним экстремумом OB с буфером 0.35% на уровне 0.000173 — выше этого уровня медвежий контекст нарушен. Первая цель — закрытие FVG (0.0001701), финальная цель — следующая зона ликвидности 0.0001665 (+3.0%). Сетап теряет силу, если 15m-свеча закроется выше 0.000173 — медвежья структура будет нарушена.",
+    "session": "",
+    "tf_htf": "4H",
+    "tf_mtf": "1H",
+    "tf_ltf": "15m",
+    "mode_tag": "⚡ Aggressive",
+    "squeeze_score": 1,
+    "passes_ctx_gate": true,
+    "rr_ladder": [
+     1.2,
+     2.5,
+     4
+    ]
+   }
+  },
+  {
+   "source": "conservative/BTC-USDT-SWAP/362",
+   "signal": {
+    "symbol": "BTC-USDT-SWAP",
+    "direction": "LONG",
+    "score": 5,
+    "grade": "🔥 A+",
+    "entry_low": 62405.62766,
+    "entry_high": 66519.56623,
+    "entry": 64462.596945,
+    "sl": 62187.207963190005,
+    "tp1": 67875.68041771499,
+    "tp2": 70543.03713,
+    "tp3": 75621.12215723997,
+    "rr": 2.67,
+    "risk_pct": 3.53,
+    "confirmations": [
+     [
+      "HTF структура: бычья / CHoCH вверх",
+      true
+     ],
+     [
+      "Liquidity Sweep: ликвидность снята снизу",
+      false
+     ],
+     [
+      "Order Block: бычий OB митигирован",
+      true
+     ],
+     [
+      "FVG/IFVG: дисбаланс в зоне входа",
+      true
+     ],
+     [
+      "Discount Zone: цена в нижних 50%",
+      true
+     ],
+     [
+      "Объём: 1.64× ≥ 1.2× среднего",
+      true
+     ],
+     [
+      "Retrace: возврат к OB50% или FVG",
+      true
+     ],
+     [
+      "BB Squeeze: компрессия волатильности",
+      false
+     ]
+    ],
+    "narrative": "На 4H рынок находится в устойчивом восходящем тренде с чёткой HH/HL структурой. Явного sweep ликвидности на данном таймфрейме не зафиксировано. Цена вернулась в бычий ордер-блок 62,406–66,520 на 1H — зону, где институционалы формировали позицию перед последним бычьим импульсом с BOS. Перевёрнутый FVG 63,311–63,384 выступает как усиленный уровень поддержки после смены роли. Стоп размещён под нижним экстремумом OB с буфером 0.35% на уровне 62,187 — ниже этого уровня бычий контекст теряется. Первая цель — закрытие FVG (67,876), финальная цель — следующая зона ликвидности 75,621 (+17.3%). Сетап теряет силу, если 15m-свеча закроется ниже 62,187 — это полная митигация OB и потеря бычьей структуры.",
+    "session": "",
+    "tf_htf": "4H",
+    "tf_mtf": "1H",
+    "tf_ltf": "15m",
+    "mode_tag": "🎯 Conservative",
+    "squeeze_score": 0,
+    "passes_ctx_gate": true,
+    "rr_ladder": [
+     1.5,
+     2.67,
+     4.9
+    ]
+   }
+  },
+  {
+   "source": "conservative/ETH-USDT-SWAP/274",
+   "signal": {
+    "symbol": "ETH-USDT-SWAP",
+    "direction": "SHORT",
+    "score": 5,
+    "grade": "🔥 A+",
+    "entry_low": 4501.489772,
+    "entry_high": 4757.130654,
+    "entry": 4629.310213,
+    "sl": 4773.780611289,
+    "tp1": 4455.945735053199,
+    "tp2": 4268.1342172774985,
+    "tp3": 4051.4286198439977,
+    "rr": 2.5,
+    "risk_pct": 3.121,
+    "confirmations": [
+     [
+      "HTF структура: медвежья / CHoCH вниз",
+      false
+     ],
+     [
+      "Liquidity Sweep: ликвидность снята сверху",
+      false
+     ],
+     [
+      "Order Block: медвежий OB митигирован",
+      true
+     ],
+     [
+      "FVG/IFVG: дисбаланс в зоне входа",
+      true
+     ],
+     [
+      "Premium Zone: цена в верхних 50%",
+      true
+     ],
+     [
+      "Объём: 5.21× ≥ 1.2× среднего",
+      true
+     ],
+     [
+      "Retrace: возврат к OB50% или FVG",
+      true
+     ],
+     [
+      "BB Squeeze: компрессия волатильности",
+      false
+     ]
+    ],
+    "narrative": "На 4H рынок находится в боковике без чёткой структуры. Явного sweep ликвидности на данном таймфрейме не зафиксировано. Цена поднялась в медвежий ордер-блок 4,501.5–4,757.1 на 1H — зону предложения, откуда начался последний медвежий импульс. Внутри зоны присутствует bearish FVG 4,621.1–4,629.5 — дисбаланс, который рынок стремится заполнить, добавляя магнетизм к точке входа. Стоп размещён над верхним экстремумом OB с буфером 0.35% на уровне 4,773.8 — выше этого уровня медвежий контекст нарушен. Первая цель — закрытие FVG (4,455.9), финальная цель — следующая зона ликвидности 4,051.4 (+12.5%). Сетап теряет силу, если 15m-свеча закроется выше 4,773.8 — медвежья структура будет нарушена.",
+    "session": "",
+    "tf_htf": "4H",
+    "tf_mtf": "1H",
+    "tf_ltf": "15m",
+    "mode_tag": "🎯 Conservative",
+    "squeeze_score": 0,
+    "passes_ctx_gate": true,
+    "rr_ladder": [
+     1.2,
+     2.5,
+     4
+    ]
+   }
+  },
+  {
+   "source": "conservative/ETH-USDT-SWAP/364",
+   "signal": {
+    "symbol": "ETH-USDT-SWAP",
+    "direction": "LONG",
+    "score": 5,
+    "grade": "🔥 A+",
+    "entry_low": 4534.331812,
+    "entry_high": 4789.169791,
+    "entry": 4661.7508015,
+    "sl": 4518.4616506580005,
+    "tp1": 4876.684527763,
+    "tp2": 5061.998788,
+    "tp3": 5362.3263943679995,
+    "rr": 2.79,
+    "risk_pct": 3.074,
+    "confirmations": [
+     [
+      "HTF структура: бычья / CHoCH вверх",
+      true
+     ],
+     [
+      "Liquidity Sweep: ликвидность снята снизу",
+      false
+     ],
+     [
+      "Order Block: бычий OB митигирован",
+      true
+     ],
+     [
+      "FVG/IFVG: дисбаланс в зоне входа",
+      true
+     ],
+     [
+      "Discount Zone: цена в нижних 50%",
+      true
+     ],
+     [
+      "Объём: 3.04× ≥ 1.2× среднего",
+      true
+     ],
+     [
+      "Retrace: возврат к OB50% или FVG",
+      true
+     ],
+     [
+      "BB Squeeze: компрессия волатильности",
+      false
+     ]
+    ],
+    "narrative": "На 4H рынок находится в устойчивом восходящем тренде с чёткой HH/HL структурой. Явного sweep ликвидности на данном таймфрейме не зафиксировано. Цена вернулась в бычий ордер-блок 4,534.3–4,789.2 на 1H — зону, где институционалы формировали позицию перед последним бычьим импульсом с BOS. Перевёрнутый FVG 4,620.5–4,624.9 выступает как усиленный уровень поддержки после смены роли. Стоп размещён под нижним экстремумом OB с буфером 0.35% на уровне 4,518.5 — ниже этого уровня бычий контекст теряется. Первая цель — закрытие FVG (4,876.7), финальная цель — следующая зона ликвидности 5,362.3 (+15.0%). Сетап теряет силу, если 15m-свеча закроется ниже 4,518.5 — это полная митигация OB и потеря бычьей структуры.",
+    "session": "",
+    "tf_htf": "4H",
+    "tf_mtf": "1H",
+    "tf_ltf": "15m",
+    "mode_tag": "🎯 Conservative",
+    "squeeze_score": 0,
+    "passes_ctx_gate": true,
+    "rr_ladder": [
+     1.5,
+     2.79,
+     4.89
+    ]
+   }
+  },
+  {
+   "source": "conservative/SYNUP01-USDT-SWAP/299",
+   "signal": {
+    "symbol": "SYNUP01-USDT-SWAP",
+    "direction": "SHORT",
+    "score": 5,
+    "grade": "🔥 A+",
+    "entry_low": 0.0001737344003,
+    "entry_high": 0.0001748970282,
+    "entry": 0.00017431571425,
+    "sl": 0.00017550916779870003,
+    "tp1": 0.00017288356999155995,
+    "tp2": 0.0001713320803782499,
+    "tp3": 0.00016954190005519985,
+    "rr": 2.5,
+    "risk_pct": 0.685,
+    "confirmations": [
+     [
+      "HTF структура: медвежья / CHoCH вниз",
+      false
+     ],
+     [
+      "Liquidity Sweep: ликвидность снята сверху",
+      false
+     ],
+     [
+      "Order Block: медвежий OB митигирован",
+      true
+     ],
+     [
+      "FVG/IFVG: дисбаланс в зоне входа",
+      true
+     ],
+     [
+      "Premium Zone: цена в верхних 50%",
+      true
+     ],
+     [
+      "Объём: 2.48× ≥ 1.2× среднего",
+      true
+     ],
+     [
+      "Retrace: возврат к OB50% или FVG",
+      true
+     ],
+     [
+      "BB Squeeze: компрессия волатильности",
+      false
+     ]
+    ],
+    "narrative": "На 4H рынок находится в боковике без чёткой структуры. Явного sweep ликвидности на данном таймфрейме не зафиксировано. Цена поднялась в медвежий ордер-блок 0.0001737–0.0001749 на 1H — зону предложения, откуда начался последний медвежий импульс. Перевёрнутый FVG 0.0001737–0.0001739 выступает как усиленный уровень сопротивления после смены роли. Стоп размещён над верхним экстремумом OB с буфером 0.35% на уровне 0.0001755 — выше этого уровня медвежий контекст нарушен. Первая цель — закрытие FVG (0.0001729), финальная цель — следующая зона ликвидности 0.0001695 (+2.7%). Сетап теряет силу, если 15m-свеча закроется выше 0.0001755 — медвежья структура будет нарушена.",
+    "session": "",
+    "tf_htf": "4H",
+    "tf_mtf": "1H",
+    "tf_ltf": "15m",
+    "mode_tag": "🎯 Conservative",
+    "squeeze_score": 0,
+    "passes_ctx_gate": true,
+    "rr_ladder": [
+     1.2,
+     2.5,
+     4
+    ]
+   }
+  },
+  {
+   "source": "conservative/SYNDN01-USDT-SWAP/264",
+   "signal": {
+    "symbol": "SYNDN01-USDT-SWAP",
+    "direction": "LONG",
+    "score": 4,
+    "grade": "✅ A",
+    "entry_low": 0.0000771478141,
+    "entry_high": 0.00007754341486,
+    "entry": 0.00007734561448,
+    "sl": 0.00007687779675065001,
+    "tp1": 0.00007781343220935,
+    "tp2": 0.00008723824369,
+    "tp3": 0.00009729596786,
+    "rr": 21.15,
+    "risk_pct": 0.605,
+    "confirmations": [
+     [
+      "HTF структура: бычья / CHoCH вверх",
+      false
+     ],
+     [
+      "Liquidity Sweep: ликвидность снята снизу",
+      false
+     ],
+     [
+      "Order Block: бычий OB митигирован",
+      false
+     ],
+     [
+      "FVG/IFVG: дисбаланс в зоне входа",
+      true
+     ],
+     [
+      "Discount Zone: цена в нижних 50%",
+      true
+     ],
+     [
+      "Объём: 1.57× ≥ 1.2× среднего",
+      true
+     ],
+     [
+      "Retrace: возврат к OB50% или FVG",
+      true
+     ],
+     [
+      "BB Squeeze: компрессия волатильности",
+      false
+     ]
+    ],
+    "narrative": "На 4H рынок находится в боковике без чёткой структуры. Явного sweep ликвидности на данном таймфрейме не зафиксировано. Цена вернулась в бычий ордер-блок 0.00007715–0.00007754 на 1H — зону, где институционалы формировали позицию перед последним бычьим импульсом с BOS. Перевёрнутый FVG 0.00007772–0.0000778 выступает как усиленный уровень поддержки после смены роли. Стоп размещён под нижним экстремумом OB с буфером 0.35% на уровне 0.00007688 — ниже этого уровня бычий контекст теряется. Первая цель — закрытие FVG (0.00007781), финальная цель — следующая зона ликвидности 0.0000973 (+25.8%). Сетап теряет силу, если 15m-свеча закроется ниже 0.00007688 — это полная митигация OB и потеря бычьей структуры.",
+    "session": "",
+    "tf_htf": "4H",
+    "tf_mtf": "1H",
+    "tf_ltf": "15m",
+    "mode_tag": "🎯 Conservative",
+    "squeeze_score": 0,
+    "passes_ctx_gate": true,
+    "rr_ladder": [
+     1,
+     21.15,
+     42.65
+    ]
+   }
+  },
+  {
+   "source": "conservative/SYNVL06-USDT-SWAP/203",
+   "signal": {
+    "symbol": "SYNVL06-USDT-SWAP",
+    "direction": "LONG",
+    "score": 4,
+    "grade": "✅ A",
+    "entry_low": 84.835099,
+    "entry_high": 86.03329788,
+    "entry": 85.43419844,
+    "sl": 84.34264044748501,
+    "tp1": 86.74406803101799,
+    "tp2": 88.16309342128748,
+    "tp3": 89.80043041005997,
+    "rr": 2.5,
+    "risk_pct": 1.278,
+    "confirmations": [
+     [
+      "HTF структура: бычья / CHoCH вверх",
+      false
+     ],
+     [
+      "Liquidity Sweep: ликвидность снята снизу",
+      false
+     ],
+     [
+      "Order Block: бычий OB митигирован",
+      false
+     ],
+     [
+      "FVG/IFVG: дисбаланс в зоне входа",
+      true
+     ],
+     [
+      "Discount Zone: цена в нижних 50%",
+      true
+     ],
+     [
+      "Объём: 1.40× ≥ 1.2× среднего",
+      true
+     ],
+     [
+      "Retrace: возврат к OB50% или FVG",
+      true
+     ],
+     [
+      "BB Squeeze: компрессия волатильности",
+      false
+     ]
+    ],
+    "narrative": "На 4H рынок находится в боковике без чёткой структуры. Явного sweep ликвидности на данном таймфрейме не зафиксировано. Цена вернулась в бычий ордер-блок 84.8351–86.0333 на 1H — зону, где институционалы формировали позицию перед последним бычьим импульсом с BOS. Перевёрнутый FVG 87.065–87.2039 выступает как усиленный уровень поддержки после смены роли. Стоп размещён под нижним экстремумом OB с буфером 0.35% на уровне 84.3426 — ниже этого уровня бычий контекст теряется. Первая цель — закрытие FVG (86.7441), финальная цель — следующая зона ликвидности 89.8004 (+5.1%). Сетап теряет силу, если 15m-свеча закроется ниже 84.3426 — это полная митигация OB и потеря бычьей структуры.",
+    "session": "",
+    "tf_htf": "4H",
+    "tf_mtf": "1H",
+    "tf_ltf": "15m",
+    "mode_tag": "🎯 Conservative",
+    "squeeze_score": 0,
+    "passes_ctx_gate": true,
+    "rr_ladder": [
+     1.2,
+     2.5,
+     4
+    ]
+   }
+  },
+  {
+   "source": "conservative/SYNVL06-USDT-SWAP/361",
+   "signal": {
+    "symbol": "SYNVL06-USDT-SWAP",
+    "direction": "SHORT",
+    "score": 4,
+    "grade": "✅ A",
+    "entry_low": 100.0938239,
+    "entry_high": 105.6562617,
+    "entry": 102.8750428,
+    "sl": 106.02605861595,
+    "tp1": 95.09052034,
+    "tp2": 85.71670641,
+    "tp3": 84.427067515,
+    "rr": 5.45,
+    "risk_pct": 3.063,
+    "confirmations": [
+     [
+      "HTF структура: медвежья / CHoCH вниз",
+      false
+     ],
+     [
+      "Liquidity Sweep: ликвидность снята сверху",
+      false
+     ],
+     [
+      "Order Block: медвежий OB митигирован",
+      false
+     ],
+     [
+      "FVG/IFVG: дисбаланс в зоне входа",
+      true
+     ],
+     [
+      "Premium Zone: цена в верхних 50%",
+      true
+     ],
+     [
+      "Объём: 2.73× ≥ 1.2× среднего",
+      true
+     ],
+     [
+      "Retrace: возврат к OB50% или FVG",
+      true
+     ],
+     [
+      "BB Squeeze: компрессия волатильности",
+      false
+     ]
+    ],
+    "narrative": "На 4H рынок находится в боковике без чёткой структуры. Явного sweep ликвидности на данном таймфрейме не зафиксировано. Цена поднялась в медвежий ордер-блок 100.1–105.7 на 1H — зону предложения, откуда начался последний медвежий импульс. Перевёрнутый FVG 95.0905–95.4457 выступает как усиленный уровень сопротивления после смены роли. Стоп размещён над верхним экстремумом OB с буфером 0.35% на уровне 106.0 — выше этого уровня медвежий контекст нарушен. Первая цель — закрытие FVG (95.0905), финальная цель — следующая зона ликвидности 84.4271 (+17.9%). Сетап теряет силу, если 15m-свеча закроется выше 106.0 — медвежья структура будет нарушена.",
+    "session": "",
+    "tf_htf": "4H",
+    "tf_mtf": "1H",
+    "tf_ltf": "15m",
+    "mode_tag": "🎯 Conservative",
+    "squeeze_score": 0,
+    "passes_ctx_gate": true,
+    "rr_ladder": [
+     2.47,
+     5.45,
+     5.85
+    ]
+   }
+  },
+  {
+   "source": "conservative/PEPEVL07-USDT-SWAP/217",
+   "signal": {
+    "symbol": "PEPEVL07-USDT-SWAP",
+    "direction": "LONG",
+    "score": 3,
+    "grade": "⚡ B",
+    "entry_low": 8525.477107,
+    "entry_high": 8930.374309,
+    "entry": 8727.925708,
+    "sl": 8495.6379371255,
+    "tp1": 9076.35736431175,
+    "tp2": 9764.703553,
+    "tp3": 9859.525392498,
+    "rr": 4.46,
+    "risk_pct": 2.661,
+    "confirmations": [
+     [
+      "HTF структура: бычья / CHoCH вверх",
+      false
+     ],
+     [
+      "Liquidity Sweep: ликвидность снята снизу",
+      false
+     ],
+     [
+      "Order Block: бычий OB митигирован",
+      true
+     ],
+     [
+      "FVG/IFVG: дисбаланс в зоне входа",
+      true
+     ],
+     [
+      "Discount Zone: цена в нижних 50%",
+      true
+     ],
+     [
+      "Объём: 2.11× ≥ 1.2× среднего",
+      true
+     ],
+     [
+      "Retrace: возврат к OB50% или FVG",
+      true
+     ],
+     [
+      "BB Squeeze: компрессия волатильности",
+      false
+     ]
+    ],
+    "narrative": "На 4H рынок находится в боковике без чёткой структуры. Явного sweep ликвидности на данном таймфрейме не зафиксировано. Цена вернулась в бычий ордер-блок 8,525.5–8,930.4 на 1H — зону, где институционалы формировали позицию перед последним бычьим импульсом с BOS. Перевёрнутый FVG 8,693.0–8,704.7 выступает как усиленный уровень поддержки после смены роли. Стоп размещён под нижним экстремумом OB с буфером 0.35% на уровне 8,495.6 — ниже этого уровня бычий контекст теряется. Первая цель — закрытие FVG (9,076.4), финальная цель — следующая зона ликвидности 9,859.5 (+13.0%). Сетап теряет силу, если 15m-свеча закроется ниже 8,495.6 — это полная митигация OB и потеря бычьей структуры.",
+    "session": "",
+    "tf_htf": "4H",
+    "tf_mtf": "1H",
+    "tf_ltf": "15m",
+    "mode_tag": "🎯 Conservative",
+    "squeeze_score": 0,
+    "passes_ctx_gate": false,
+    "rr_ladder": [
+     1.5,
+     4.46,
+     4.87
+    ]
+   }
+  },
+  {
+   "source": "conservative/PEPEVL07-USDT-SWAP/255",
+   "signal": {
+    "symbol": "PEPEVL07-USDT-SWAP",
+    "direction": "SHORT",
+    "score": 3,
+    "grade": "⚡ B",
+    "entry_low": 9149.520639,
+    "entry_high": 9553.312736,
+    "entry": 9351.416687500001,
+    "sl": 9586.749330576,
+    "tp1": 9103.393303,
+    "tp2": 8190.321638,
+    "tp3": 4619.0758375000005,
+    "rr": 4.93,
+    "risk_pct": 2.517,
+    "confirmations": [
+     [
+      "HTF структура: медвежья / CHoCH вниз",
+      true
+     ],
+     [
+      "Liquidity Sweep: ликвидность снята сверху",
+      false
+     ],
+     [
+      "Order Block: медвежий OB митигирован",
+      true
+     ],
+     [
+      "FVG/IFVG: дисбаланс в зоне входа",
+      true
+     ],
+     [
+      "Premium Zone: цена в верхних 50%",
+      true
+     ],
+     [
+      "Объём: 1.70× ≥ 1.2× среднего",
+      true
+     ],
+     [
+      "Retrace: возврат к OB50% или FVG",
+      true
+     ],
+     [
+      "BB Squeeze: компрессия волатильности",
+      false
+     ]
+    ],
+    "narrative": "На 4H рынок находится в нисходящем тренде (LH/LL). Явного sweep ликвидности на данном таймфрейме не зафиксировано. Цена поднялась в медвежий ордер-блок 9,149.5–9,553.3 на 1H — зону предложения, откуда начался последний медвежий импульс. Перевёрнутый FVG 9,103.4–9,116.7 выступает как усиленный уровень сопротивления после смены роли. Стоп размещён над верхним экстремумом OB с буфером 0.35% на уровне 9,586.7 — выше этого уровня медвежий контекст нарушен. Первая цель — закрытие FVG (9,103.4), финальная цель — следующая зона ликвидности 4,619.1 (+50.6%). Сетап теряет силу, если 15m-свеча закроется выше 9,586.7 — медвежья структура будет нарушена.",
+    "session": "",
+    "tf_htf": "4H",
+    "tf_mtf": "1H",
+    "tf_ltf": "15m",
+    "mode_tag": "🎯 Conservative",
+    "squeeze_score": 0,
+    "passes_ctx_gate": false,
+    "rr_ladder": [
+     1.05,
+     4.93,
+     20.11
+    ]
+   }
+  },
+  {
+   "source": "conservative/DOGEVL08-USDT-SWAP/216",
+   "signal": {
+    "symbol": "DOGEVL08-USDT-SWAP",
+    "direction": "SHORT",
+    "score": 3,
+    "grade": "⚡ B",
+    "entry_low": 51396.86428,
+    "entry_high": 51998.58468,
+    "entry": 51697.724480000004,
+    "sl": 52180.579726380005,
+    "tp1": 51118.29818434401,
+    "tp2": 50490.58636405,
+    "tp3": 49766.30349448,
+    "rr": 2.5,
+    "risk_pct": 0.934,
+    "confirmations": [
+     [
+      "HTF структура: медвежья / CHoCH вниз",
+      true
+     ],
+     [
+      "Liquidity Sweep: ликвидность снята сверху",
+      false
+     ],
+     [
+      "Order Block: медвежий OB митигирован",
+      true
+     ],
+     [
+      "FVG/IFVG: дисбаланс в зоне входа",
+      true
+     ],
+     [
+      "Premium Zone: цена в верхних 50%",
+      true
+     ],
+     [
+      "Объём: 1.63× ≥ 1.2× среднего",
+      true
+     ],
+     [
+      "Retrace: возврат к OB50% или FVG",
+      true
+     ],
+     [
+      "BB Squeeze: компрессия волатильности",
+      true
+     ]
+    ],
+    "narrative": "На 4H рынок находится в нисходящем тренде (LH/LL). Явного sweep ликвидности на данном таймфрейме не зафиксировано. Цена поднялась в медвежий ордер-блок 51,397–51,999 на 1H — зону предложения, откуда начался последний медвежий импульс. Перевёрнутый FVG 51,628–51,731 выступает как усиленный уровень сопротивления после смены роли. Стоп размещён над верхним экстремумом OB с буфером 0.35% на уровне 52,181 — выше этого уровня медвежий контекст нарушен. Первая цель — закрытие FVG (51,118), финальная цель — следующая зона ликвидности 49,766 (+3.7%). Сетап теряет силу, если 15m-свеча закроется выше 52,181 — медвежья структура будет нарушена.",
+    "session": "",
+    "tf_htf": "4H",
+    "tf_mtf": "1H",
+    "tf_ltf": "15m",
+    "mode_tag": "🎯 Conservative",
+    "squeeze_score": 1,
+    "passes_ctx_gate": false,
+    "rr_ladder": [
+     1.2,
+     2.5,
+     4
+    ]
+   }
+  },
+  {
+   "source": "conservative/DOGEVL08-USDT-SWAP/294",
+   "signal": {
+    "symbol": "DOGEVL08-USDT-SWAP",
+    "direction": "LONG",
+    "score": 3,
+    "grade": "⚡ B",
+    "entry_low": 50861.92411,
+    "entry_high": 52212.58871,
+    "entry": 51537.25641,
+    "sl": 50683.907375615,
+    "tp1": 52817.2799615775,
+    "tp2": 55303.6704,
+    "tp3": 56645.72628,
+    "rr": 4.41,
+    "risk_pct": 1.656,
+    "confirmations": [
+     [
+      "HTF структура: бычья / CHoCH вверх",
+      false
+     ],
+     [
+      "Liquidity Sweep: ликвидность снята снизу",
+      false
+     ],
+     [
+      "Order Block: бычий OB митигирован",
+      true
+     ],
+     [
+      "FVG/IFVG: дисбаланс в зоне входа",
+      true
+     ],
+     [
+      "Discount Zone: цена в нижних 50%",
+      true
+     ],
+     [
+      "Объём: 7.86× ≥ 1.2× среднего",
+      true
+     ],
+     [
+      "Retrace: возврат к OB50% или FVG",
+      true
+     ],
+     [
+      "BB Squeeze: компрессия волатильности",
+      false
+     ]
+    ],
+    "narrative": "На 4H рынок находится в боковике без чёткой структуры. Явного sweep ликвидности на данном таймфрейме не зафиксировано. Цена вернулась в бычий ордер-блок 50,862–52,213 на 1H — зону, где институционалы формировали позицию перед последним бычьим импульсом с BOS. Перевёрнутый FVG 52,122–52,205 выступает как усиленный уровень поддержки после смены роли. Стоп размещён под нижним экстремумом OB с буфером 0.35% на уровне 50,684 — ниже этого уровня бычий контекст теряется. Первая цель — закрытие FVG (52,817), финальная цель — следующая зона ликвидности 56,646 (+9.9%). Сетап теряет силу, если 15m-свеча закроется ниже 50,684 — это полная митигация OB и потеря бычьей структуры.",
+    "session": "",
+    "tf_htf": "4H",
+    "tf_mtf": "1H",
+    "tf_ltf": "15m",
+    "mode_tag": "🎯 Conservative",
+    "squeeze_score": 0,
+    "passes_ctx_gate": false,
+    "rr_ladder": [
+     1.5,
+     4.41,
+     5.99
+    ]
+   }
+  },
+  {
+   "source": "conservative/SYNLV02-USDT-SWAP/265",
+   "signal": {
+    "symbol": "SYNLV02-USDT-SWAP",
+    "direction": "SHORT",
+    "score": 4,
+    "grade": "✅ A",
+    "entry_low": 0.03667065293,
+    "entry_high": 0.03667159789,
+    "entry": 0.03667112541,
+    "sl": 0.036944168771509994,
+    "tp1": 0.036343473376188005,
+    "tp2": 0.035988517006225004,
+    "tp3": 0.035578951963960014,
+    "rr": 2.5,
+    "risk_pct": 0.745,
+    "confirmations": [
+     [
+      "HTF структура: медвежья / CHoCH вниз",
+      false
+     ],
+     [
+      "Liquidity Sweep: ликвидность снята сверху",
+      false
+     ],
+     [
+      "Order Block: медвежий OB митигирован",
+      false
+     ],
+     [
+      "FVG/IFVG: дисбаланс в зоне входа",
+      true
+     ],
+     [
+      "Premium Zone: цена в верхних 50%",
+      true
+     ],
+     [
+      "Объём: 2.10× ≥ 1.2× среднего",
+      true
+     ],
+     [
+      "Retrace: возврат к OB50% или FVG",
+      true
+     ],
+     [
+      "BB Squeeze: компрессия волатильности",
+      false
+     ]
+    ],
+    "narrative": "На 4H рынок находится в боковике без чёткой структуры. Явного sweep ликвидности на данном таймфрейме не зафиксировано. Цена поднялась в медвежий ордер-блок 0.03667–0.03667 на 1H — зону предложения, откуда начался последний медвежий импульс. Внутри зоны присутствует bearish FVG 0.03647–0.03667 — дисбаланс, который рынок стремится заполнить, добавляя магнетизм к точке входа. Стоп размещён над верхним экстремумом OB с буфером 0.35% на уровне 0.03694 — выше этого уровня медвежий контекст нарушен. Первая цель — закрытие FVG (0.03634), финальная цель — следующая зона ликвидности 0.03558 (+3.0%). Сетап теряет силу, если 15m-свеча закроется выше 0.03694 — медвежья структура будет нарушена.",
+    "session": "",
+    "tf_htf": "4H",
+    "tf_mtf": "1H",
+    "tf_ltf": "15m",
+    "mode_tag": "🎯 Conservative",
+    "squeeze_score": 0,
+    "passes_ctx_gate": true,
+    "rr_ladder": [
+     1.2,
+     2.5,
+     4
+    ]
+   }
+  },
+  {
+   "source": "active/BTC-USDT-SWAP/274",
+   "signal": {
+    "symbol": "BTC-USDT-SWAP",
+    "direction": "SHORT",
+    "score": 4,
+    "grade": "✅ A",
+    "entry_low": 62896.92057,
+    "entry_high": 66989.98803,
+    "entry": 64943.4543,
+    "sl": 67224.452988105,
+    "tp1": 62206.255874274,
+    "tp2": 59240.9575797375,
+    "tp3": 55819.45954758,
+    "rr": 2.5,
+    "risk_pct": 3.512,
+    "confirmations": [
+     [
+      "HTF структура: медвежья / CHoCH вниз",
+      false
+     ],
+     [
+      "Liquidity Sweep: ликвидность снята сверху",
+      false
+     ],
+     [
+      "Order Block: медвежий OB митигирован",
+      true
+     ],
+     [
+      "FVG/IFVG: дисбаланс в зоне входа",
+      true
+     ],
+     [
+      "Premium Zone: цена в верхних 50%",
+      true
+     ],
+     [
+      "Объём: 0.76× ≥ 1.0× среднего",
+      false
+     ],
+     [
+      "Retrace: возврат к OB50% или FVG",
+      true
+     ],
+     [
+      "BB Squeeze: компрессия волатильности",
+      false
+     ]
+    ],
+    "narrative": "На 4H рынок находится в боковике без чёткой структуры. Явного sweep ликвидности на данном таймфрейме не зафиксировано. Цена поднялась в медвежий ордер-блок 62,897–66,990 на 1H — зону предложения, откуда начался последний медвежий импульс. Перевёрнутый FVG 64,441–64,608 выступает как усиленный уровень сопротивления после смены роли. Стоп размещён над верхним экстремумом OB с буфером 0.35% на уровне 67,224 — выше этого уровня медвежий контекст нарушен. Первая цель — закрытие FVG (62,206), финальная цель — следующая зона ликвидности 55,819 (+14.0%). Сетап теряет силу, если 15m-свеча закроется выше 67,224 — медвежья структура будет нарушена.",
+    "session": "",
+    "tf_htf": "4H",
+    "tf_mtf": "1H",
+    "tf_ltf": "15m",
+    "mode_tag": "⚡ Aggressive",
+    "squeeze_score": 0,
+    "passes_ctx_gate": true,
+    "rr_ladder": [
+     1.2,
+     2.5,
+     4
+    ]
+   }
+  },
+  {
+   "source": "active/BTC-USDT-SWAP/290",
+   "signal": {
+    "symbol": "BTC-USDT-SWAP",
+    "direction": "LONG",
+    "score": 5,
+    "grade": "🔥 A+",
+    "entry_low": 62829.76466,
+    "entry_high": 64193.94269,
+    "entry": 63511.853675000006,
+    "sl": 62609.860483690005,
+    "tp1": 64864.84346196501,
+    "tp2": 65416.54273,
+    "tp3": 67801.91545524,
+    "rr": 2.11,
+    "risk_pct": 1.42,
+    "confirmations": [
+     [
+      "HTF структура: бычья / CHoCH вверх",
+      true
+     ],
+     [
+      "Liquidity Sweep: ликвидность снята снизу",
+      false
+     ],
+     [
+      "Order Block: бычий OB митигирован",
+      true
+     ],
+     [
+      "FVG/IFVG: дисбаланс в зоне входа",
+      true
+     ],
+     [
+      "Discount Zone: цена в нижних 50%",
+      false
+     ],
+     [
+      "Объём: 2.11× ≥ 1.0× среднего",
+      true
+     ],
+     [
+      "Retrace: возврат к OB50% или FVG",
+      true
+     ],
+     [
+      "BB Squeeze: компрессия волатильности",
+      true
+     ]
+    ],
+    "narrative": "На 4H рынок находится в устойчивом восходящем тренде с чёткой HH/HL структурой. Явного sweep ликвидности на данном таймфрейме не зафиксировано. Цена вернулась в бычий ордер-блок 62,830–64,194 на 1H — зону, где институционалы формировали позицию перед последним бычьим импульсом с BOS. Перевёрнутый FVG 63,103–63,520 выступает как усиленный уровень поддержки после смены роли. Стоп размещён под нижним экстремумом OB с буфером 0.35% на уровне 62,610 — ниже этого уровня бычий контекст теряется. Первая цель — закрытие FVG (64,865), финальная цель — следующая зона ликвидности 67,802 (+6.8%). Сетап теряет силу, если 15m-свеча закроется ниже 62,610 — это полная митигация OB и потеря бычьей структуры.",
+    "session": "",
+    "tf_htf": "4H",
+    "tf_mtf": "1H",
+    "tf_ltf": "15m",
+    "mode_tag": "⚡ Aggressive",
+    "squeeze_score": 1,
+    "passes_ctx_gate": true,
+    "rr_ladder": [
+     1.5,
+     2.11,
+     4.76
+    ]
+   }
+  },
+  {
+   "source": "active/BTC-USDT-SWAP/301",
+   "signal": {
+    "symbol": "BTC-USDT-SWAP",
+    "direction": "LONG",
+    "score": 3,
+    "grade": "⚡ B",
+    "entry_low": 61026.53084,
+    "entry_high": 62642.38217,
+    "entry": 61834.456504999995,
+    "sl": 60812.93798206,
+    "tp1": 63383.75756,
+    "tp2": 65416.54273,
+    "tp3": 66728.45626175997,
+    "rr": 3.51,
+    "risk_pct": 1.652,
+    "confirmations": [
+     [
+      "HTF структура: бычья / CHoCH вверх",
+      true
+     ],
+     [
+      "Liquidity Sweep: ликвидность снята снизу",
+      false
+     ],
+     [
+      "Order Block: бычий OB митигирован",
+      false
+     ],
+     [
+      "FVG/IFVG: дисбаланс в зоне входа",
+      true
+     ],
+     [
+      "Discount Zone: цена в нижних 50%",
+      false
+     ],
+     [
+      "Объём: 0.14× ≥ 1.0× среднего",
+      false
+     ],
+     [
+      "Retrace: возврат к OB50% или FVG",
+      true
+     ],
+     [
+      "BB Squeeze: компрессия волатильности",
+      false
+     ]
+    ],
+    "narrative": "На 4H рынок находится в устойчивом восходящем тренде с чёткой HH/HL структурой. Явного sweep ликвидности на данном таймфрейме не зафиксировано. Цена вернулась в бычий ордер-блок 61,027–62,642 на 1H — зону, где институционалы формировали позицию перед последним бычьим импульсом с BOS. Перевёрнутый FVG 63,311–63,384 выступает как усиленный уровень поддержки после смены роли. Стоп размещён под нижним экстремумом OB с буфером 0.35% на уровне 60,813 — ниже этого уровня бычий контекст теряется. Первая цель — закрытие FVG (63,384), финальная цель — следующая зона ликвидности 66,728 (+7.9%). Сетап теряет силу, если 15m-свеча закроется ниже 60,813 — это полная митигация OB и потеря бычьей структуры.",
+    "session": "",
+    "tf_htf": "4H",
+    "tf_mtf": "1H",
+    "tf_ltf": "15m",
+    "mode_tag": "⚡ Aggressive",
+    "squeeze_score": 0,
+    "passes_ctx_gate": true,
+    "rr_ladder": [
+     1.52,
+     3.51,
+     4.79
+    ]
+   }
+  },
+  {
+   "source": "active/BTC-USDT-SWAP/302",
+   "signal": {
+    "symbol": "BTC-USDT-SWAP",
+    "direction": "LONG",
+    "score": 2,
+    "grade": "⚡ 2/5",
+    "entry_low": 61026.53084,
+    "entry_high": 62642.38217,
+    "entry": 61834.456504999995,
+    "sl": 60812.93798206,
+    "tp1": 63383.75756,
+    "tp2": 65416.54273,
+    "tp3": 66728.45626175997,
+    "rr": 3.51,
+    "risk_pct": 1.652,
+    "confirmations": [
+     [
+      "HTF структура: бычья / CHoCH вверх",
+      true
+     ],
+     [
+      "Liquidity Sweep: ликвидность снята снизу",
+      false
+     ],
+     [
+      "Order Block: бычий OB митигирован",
+      false
+     ],
+     [
+      "FVG/IFVG: дисбаланс в зоне входа",
+      true
+     ],
+     [
+      "Discount Zone: цена в нижних 50%",
+      false
+     ],
+     [
+      "Объём: 0.26× ≥ 1.0× среднего",
+      false
+     ],
+     [
+      "Retrace: возврат к OB50% или FVG",
+      false
+     ],
+     [
+      "BB Squeeze: компрессия волатильности",
+      false
+     ]
+    ],
+    "narrative": "На 4H рынок находится в устойчивом восходящем тренде с чёткой HH/HL структурой. Явного sweep ликвидности на данном таймфрейме не зафиксировано. Цена вернулась в бычий ордер-блок 61,027–62,642 на 1H — зону, где институционалы формировали позицию перед последним бычьим импульсом с BOS. Перевёрнутый FVG 63,311–63,384 выступает как усиленный уровень поддержки после смены роли. Стоп размещён под нижним экстремумом OB с буфером 0.35% на уровне 60,813 — ниже этого уровня бычий контекст теряется. Первая цель — закрытие FVG (63,384), финальная цель — следующая зона ликвидности 66,728 (+7.9%). Сетап теряет силу, если 15m-свеча закроется ниже 60,813 — это полная митигация OB и потеря бычьей структуры.",
+    "session": "",
+    "tf_htf": "4H",
+    "tf_mtf": "1H",
+    "tf_ltf": "15m",
+    "mode_tag": "⚡ Aggressive",
+    "squeeze_score": 0,
+    "passes_ctx_gate": true,
+    "rr_ladder": [
+     1.52,
+     3.51,
+     4.79
+    ]
+   }
+  },
+  {
+   "source": "active/BTC-USDT-SWAP/308",
+   "signal": {
+    "symbol": "BTC-USDT-SWAP",
+    "direction": "SHORT",
+    "score": 5,
+    "grade": "🔥 A+",
+    "entry_low": 62896.92057,
+    "entry_high": 66989.98803,
+    "entry": 64943.4543,
+    "sl": 67224.452988105,
+    "tp1": 61521.9562678425,
+    "tp2": 57872.25299,
+    "tp3": 53772.925817580006,
+    "rr": 3.1,
+    "risk_pct": 3.512,
+    "confirmations": [
+     [
+      "HTF структура: медвежья / CHoCH вниз",
+      false
+     ],
+     [
+      "Liquidity Sweep: ликвидность снята сверху",
+      false
+     ],
+     [
+      "Order Block: медвежий OB митигирован",
+      true
+     ],
+     [
+      "FVG/IFVG: дисбаланс в зоне входа",
+      true
+     ],
+     [
+      "Premium Zone: цена в верхних 50%",
+      true
+     ],
+     [
+      "Объём: 0.43× ≥ 1.0× среднего",
+      false
+     ],
+     [
+      "Retrace: возврат к OB50% или FVG",
+      true
+     ],
+     [
+      "BB Squeeze: компрессия волатильности",
+      true
+     ]
+    ],
+    "narrative": "На 4H рынок находится в устойчивом восходящем тренде с чёткой HH/HL структурой. Явного sweep ликвидности на данном таймфрейме не зафиксировано. Цена поднялась в медвежий ордер-блок 62,897–66,990 на 1H — зону предложения, откуда начался последний медвежий импульс. Перевёрнутый FVG 65,512–66,297 выступает как усиленный уровень сопротивления после смены роли. Стоп размещён над верхним экстремумом OB с буфером 0.35% на уровне 67,224 — выше этого уровня медвежий контекст нарушен. Первая цель — закрытие FVG (61,522), финальная цель — следующая зона ликвидности 53,773 (+17.2%). Сетап теряет силу, если 15m-свеча закроется выше 67,224 — медвежья структура будет нарушена.",
+    "session": "",
+    "tf_htf": "4H",
+    "tf_mtf": "1H",
+    "tf_ltf": "15m",
+    "mode_tag": "⚡ Aggressive",
+    "squeeze_score": 1,
+    "passes_ctx_gate": true,
+    "rr_ladder": [
+     1.5,
+     3.1,
+     4.9
+    ]
+   }
+  },
+  {
+   "source": "active/BTC-USDT-SWAP/316",
+   "signal": {
+    "symbol": "BTC-USDT-SWAP",
+    "direction": "SHORT",
+    "score": 3,
+    "grade": "⚡ B",
+    "entry_low": 67684.01638,
+    "entry_high": 70543.03713,
+    "entry": 69113.526755,
+    "sl": 70789.937759955,
+    "tp1": 67101.83354905399,
+    "tp2": 64922.49924261248,
+    "tp3": 62407.88273517997,
+    "rr": 2.5,
+    "risk_pct": 2.426,
+    "confirmations": [
+     [
+      "HTF структура: медвежья / CHoCH вниз",
+      false
+     ],
+     [
+      "Liquidity Sweep: ликвидность снята сверху",
+      false
+     ],
+     [
+      "Order Block: медвежий OB митигирован",
+      true
+     ],
+     [
+      "FVG/IFVG: дисбаланс в зоне входа",
+      true
+     ],
+     [
+      "Premium Zone: цена в верхних 50%",
+      true
+     ],
+     [
+      "Объём: 0.26× ≥ 1.0× среднего",
+      false
+     ],
+     [
+      "Retrace: возврат к OB50% или FVG",
+      false
+     ],
+     [
+      "BB Squeeze: компрессия волатильности",
+      false
+     ]
+    ],
+    "narrative": "На 4H рынок находится в устойчивом восходящем тренде с чёткой HH/HL структурой. Явного sweep ликвидности на данном таймфрейме не зафиксировано. Цена поднялась в медвежий ордер-блок 67,684–70,543 на 1H — зону предложения, откуда начался последний медвежий импульс. Внутри зоны присутствует bearish FVG 68,476–68,778 — дисбаланс, который рынок стремится заполнить, добавляя магнетизм к точке входа. Стоп размещён над верхним экстремумом OB с буфером 0.35% на уровне 70,790 — выше этого уровня медвежий контекст нарушен. Первая цель — закрытие FVG (67,102), финальная цель — следующая зона ликвидности 62,408 (+9.7%). Сетап теряет силу, если 15m-свеча закроется выше 70,790 — медвежья структура будет нарушена.",
+    "session": "",
+    "tf_htf": "4H",
+    "tf_mtf": "1H",
+    "tf_ltf": "15m",
+    "mode_tag": "⚡ Aggressive",
+    "squeeze_score": 0,
+    "passes_ctx_gate": true,
+    "rr_ladder": [
+     1.2,
+     2.5,
+     4
+    ]
+   }
+  },
+  {
+   "source": "active/BTC-USDT-SWAP/325",
+   "signal": {
+    "symbol": "BTC-USDT-SWAP",
+    "direction": "LONG",
+    "score": 4,
+    "grade": "✅ A",
+    "entry_low": 61026.53084,
+    "entry_high": 62642.38217,
+    "entry": 61834.456504999995,
+    "sl": 60812.93798206,
+    "tp1": 63060.278732527986,
+    "tp2": 64388.25281234998,
+    "tp3": 65920.53059675997,
+    "rr": 2.5,
+    "risk_pct": 1.652,
+    "confirmations": [
+     [
+      "HTF структура: бычья / CHoCH вверх",
+      true
+     ],
+     [
+      "Liquidity Sweep: ликвидность снята снизу",
+      false
+     ],
+     [
+      "Order Block: бычий OB митигирован",
+      false
+     ],
+     [
+      "FVG/IFVG: дисбаланс в зоне входа",
+      true
+     ],
+     [
+      "Discount Zone: цена в нижних 50%",
+      false
+     ],
+     [
+      "Объём: 0.33× ≥ 1.0× среднего",
+      false
+     ],
+     [
+      "Retrace: возврат к OB50% или FVG",
+      true
+     ],
+     [
+      "BB Squeeze: компрессия волатильности",
+      true
+     ]
+    ],
+    "narrative": "На 4H рынок находится в устойчивом восходящем тренде с чёткой HH/HL структурой. Явного sweep ликвидности на данном таймфрейме не зафиксировано. Цена вернулась в бычий ордер-блок 61,027–62,642 на 1H — зону, где институционалы формировали позицию перед последним бычьим импульсом с BOS. Перевёрнутый FVG 65,193–66,502 выступает как усиленный уровень поддержки после смены роли. Стоп размещён под нижним экстремумом OB с буфером 0.35% на уровне 60,813 — ниже этого уровня бычий контекст теряется. Первая цель — закрытие FVG (63,060), финальная цель — следующая зона ликвидности 65,921 (+6.6%). Сетап теряет силу, если 15m-свеча закроется ниже 60,813 — это полная митигация OB и потеря бычьей структуры.",
+    "session": "",
+    "tf_htf": "4H",
+    "tf_mtf": "1H",
+    "tf_ltf": "15m",
+    "mode_tag": "⚡ Aggressive",
+    "squeeze_score": 1,
+    "passes_ctx_gate": true,
+    "rr_ladder": [
+     1.2,
+     2.5,
+     4
+    ]
+   }
+  },
+  {
+   "source": "active/ETH-USDT-SWAP/210",
+   "signal": {
+    "symbol": "ETH-USDT-SWAP",
+    "direction": "LONG",
+    "score": 4,
+    "grade": "✅ A",
+    "entry_low": 4330.791755,
+    "entry_high": 4387.872502,
+    "entry": 4359.3321285,
+    "sl": 4315.6339838575,
+    "tp1": 4416.69206,
+    "tp2": 4437.480212,
+    "tp3": 4562.665080569999,
+    "rr": 1.79,
+    "risk_pct": 1.002,
+    "confirmations": [
+     [
+      "HTF структура: бычья / CHoCH вверх",
+      false
+     ],
+     [
+      "Liquidity Sweep: ликвидность снята снизу",
+      false
+     ],
+     [
+      "Order Block: бычий OB митигирован",
+      true
+     ],
+     [
+      "FVG/IFVG: дисбаланс в зоне входа",
+      true
+     ],
+     [
+      "Discount Zone: цена в нижних 50%",
+      false
+     ],
+     [
+      "Объём: 0.35× ≥ 1.0× среднего",
+      false
+     ],
+     [
+      "Retrace: возврат к OB50% или FVG",
+      true
+     ],
+     [
+      "BB Squeeze: компрессия волатильности",
+      true
+     ]
+    ],
+    "narrative": "На 4H рынок находится в нисходящем тренде (LH/LL). Явного sweep ликвидности на данном таймфрейме не зафиксировано. Цена вернулась в бычий ордер-блок 4,330.8–4,387.9 на 1H — зону, где институционалы формировали позицию перед последним бычьим импульсом с BOS. Перевёрнутый FVG 4,400.7–4,416.7 выступает как усиленный уровень поддержки после смены роли. Стоп размещён под нижним экстремумом OB с буфером 0.35% на уровне 4,315.6 — ниже этого уровня бычий контекст теряется. Первая цель — закрытие FVG (4,416.7), финальная цель — следующая зона ликвидности 4,562.7 (+4.7%). Сетап теряет силу, если 15m-свеча закроется ниже 4,315.6 — это полная митигация OB и потеря бычьей структуры.",
+    "session": "",
+    "tf_htf": "4H",
+    "tf_mtf": "1H",
+    "tf_ltf": "15m",
+    "mode_tag": "⚡ Aggressive",
+    "squeeze_score": 1,
+    "passes_ctx_gate": true,
+    "rr_ladder": [
+     1.31,
+     1.79,
+     4.65
+    ]
+   }
+  },
+  {
+   "source": "active/ETH-USDT-SWAP/211",
+   "signal": {
+    "symbol": "ETH-USDT-SWAP",
+    "direction": "LONG",
+    "score": 3,
+    "grade": "⚡ B",
+    "entry_low": 4330.791755,
+    "entry_high": 4387.872502,
+    "entry": 4359.3321285,
+    "sl": 4315.6339838575,
+    "tp1": 4408.573233,
+    "tp2": 4437.480212,
+    "tp3": 4562.665080569999,
+    "rr": 1.79,
+    "risk_pct": 1.002,
+    "confirmations": [
+     [
+      "HTF структура: бычья / CHoCH вверх",
+      false
+     ],
+     [
+      "Liquidity Sweep: ликвидность снята снизу",
+      false
+     ],
+     [
+      "Order Block: бычий OB митигирован",
+      false
+     ],
+     [
+      "FVG/IFVG: дисбаланс в зоне входа",
+      true
+     ],
+     [
+      "Discount Zone: цена в нижних 50%",
+      false
+     ],
+     [
+      "Объём: 0.48× ≥ 1.0× среднего",
+      false
+     ],
+     [
+      "Retrace: возврат к OB50% или FVG",
+      true
+     ],
+     [
+      "BB Squeeze: компрессия волатильности",
+      true
+     ]
+    ],
+    "narrative": "На 4H рынок находится в нисходящем тренде (LH/LL). Явного sweep ликвидности на данном таймфрейме не зафиксировано. Цена вернулась в бычий ордер-блок 4,330.8–4,387.9 на 1H — зону, где институционалы формировали позицию перед последним бычьим импульсом с BOS. Перевёрнутый FVG 4,402.7–4,408.6 выступает как усиленный уровень поддержки после смены роли. Стоп размещён под нижним экстремумом OB с буфером 0.35% на уровне 4,315.6 — ниже этого уровня бычий контекст теряется. Первая цель — закрытие FVG (4,408.6), финальная цель — следующая зона ликвидности 4,562.7 (+4.7%). Сетап теряет силу, если 15m-свеча закроется ниже 4,315.6 — это полная митигация OB и потеря бычьей структуры.",
+    "session": "",
+    "tf_htf": "4H",
+    "tf_mtf": "1H",
+    "tf_ltf": "15m",
+    "mode_tag": "⚡ Aggressive",
+    "squeeze_score": 1,
+    "passes_ctx_gate": true,
+    "rr_ladder": [
+     1.13,
+     1.79,
+     4.65
+    ]
+   }
+  },
+  {
+   "source": "active/ETH-USDT-SWAP/249",
+   "signal": {
+    "symbol": "ETH-USDT-SWAP",
+    "direction": "SHORT",
+    "score": 5,
+    "grade": "🔥 A+",
+    "entry_low": 4304.030293,
+    "entry_high": 4436.445596,
+    "entry": 4370.2379445,
+    "sl": 4451.973155586,
+    "tp1": 4272.155691196799,
+    "tp2": 4165.899916785,
+    "tp3": 4043.297100155999,
+    "rr": 2.5,
+    "risk_pct": 1.87,
+    "confirmations": [
+     [
+      "HTF структура: медвежья / CHoCH вниз",
+      true
+     ],
+     [
+      "Liquidity Sweep: ликвидность снята сверху",
+      false
+     ],
+     [
+      "Order Block: медвежий OB митигирован",
+      true
+     ],
+     [
+      "FVG/IFVG: дисбаланс в зоне входа",
+      true
+     ],
+     [
+      "Premium Zone: цена в верхних 50%",
+      true
+     ],
+     [
+      "Объём: 0.33× ≥ 1.0× среднего",
+      false
+     ],
+     [
+      "Retrace: возврат к OB50% или FVG",
+      true
+     ],
+     [
+      "BB Squeeze: компрессия волатильности",
+      false
+     ]
+    ],
+    "narrative": "На 4H рынок находится в нисходящем тренде (LH/LL). Явного sweep ликвидности на данном таймфрейме не зафиксировано. Цена поднялась в медвежий ордер-блок 4,304.0–4,436.4 на 1H — зону предложения, откуда начался последний медвежий импульс. Перевёрнутый FVG 4,372.1–4,376.2 выступает как усиленный уровень сопротивления после смены роли. Стоп размещён над верхним экстремумом OB с буфером 0.35% на уровне 4,452.0 — выше этого уровня медвежий контекст нарушен. Первая цель — закрытие FVG (4,272.2), финальная цель — следующая зона ликвидности 4,043.3 (+7.5%). Сетап теряет силу, если 15m-свеча закроется выше 4,452.0 — медвежья структура будет нарушена.",
+    "session": "",
+    "tf_htf": "4H",
+    "tf_mtf": "1H",
+    "tf_ltf": "15m",
+    "mode_tag": "⚡ Aggressive",
+    "squeeze_score": 0,
+    "passes_ctx_gate": true,
+    "rr_ladder": [
+     1.2,
+     2.5,
+     4
+    ]
+   }
+  },
+  {
+   "source": "active/ETH-USDT-SWAP/275",
+   "signal": {
+    "symbol": "ETH-USDT-SWAP",
+    "direction": "SHORT",
+    "score": 4,
+    "grade": "✅ A",
+    "entry_low": 4501.489772,
+    "entry_high": 4757.130654,
+    "entry": 4629.310213,
+    "sl": 4773.780611289,
+    "tp1": 4455.945735053199,
+    "tp2": 4268.1342172774985,
+    "tp3": 4051.4286198439977,
+    "rr": 2.5,
+    "risk_pct": 3.121,
+    "confirmations": [
+     [
+      "HTF структура: медвежья / CHoCH вниз",
+      false
+     ],
+     [
+      "Liquidity Sweep: ликвидность снята сверху",
+      false
+     ],
+     [
+      "Order Block: медвежий OB митигирован",
+      true
+     ],
+     [
+      "FVG/IFVG: дисбаланс в зоне входа",
+      true
+     ],
+     [
+      "Premium Zone: цена в верхних 50%",
+      true
+     ],
+     [
+      "Объём: 0.74× ≥ 1.0× среднего",
+      false
+     ],
+     [
+      "Retrace: возврат к OB50% или FVG",
+      true
+     ],
+     [
+      "BB Squeeze: компрессия волатильности",
+      false
+     ]
+    ],
+    "narrative": "На 4H рынок находится в боковике без чёткой структуры. Явного sweep ликвидности на данном таймфрейме не зафиксировано. Цена поднялась в медвежий ордер-блок 4,501.5–4,757.1 на 1H — зону предложения, откуда начался последний медвежий импульс. Перевёрнутый FVG 4,594.3–4,609.2 выступает как усиленный уровень сопротивления после смены роли. Стоп размещён над верхним экстремумом OB с буфером 0.35% на уровне 4,773.8 — выше этого уровня медвежий контекст нарушен. Первая цель — закрытие FVG (4,455.9), финальная цель — следующая зона ликвидности 4,051.4 (+12.5%). Сетап теряет силу, если 15m-свеча закроется выше 4,773.8 — медвежья структура будет нарушена.",
+    "session": "",
+    "tf_htf": "4H",
+    "tf_mtf": "1H",
+    "tf_ltf": "15m",
+    "mode_tag": "⚡ Aggressive",
+    "squeeze_score": 0,
+    "passes_ctx_gate": true,
+    "rr_ladder": [
+     1.2,
+     2.5,
+     4
+    ]
+   }
+  },
+  {
+   "source": "active/ETH-USDT-SWAP/289",
+   "signal": {
+    "symbol": "ETH-USDT-SWAP",
+    "direction": "LONG",
+    "score": 5,
+    "grade": "🔥 A+",
+    "entry_low": 4680.430821,
+    "entry_high": 4804.058084,
+    "entry": 4742.2444525,
+    "sl": 4664.0493131265,
+    "tp1": 4859.53716156025,
+    "tp2": 4960.448362747,
+    "tp3": 5116.838641494,
+    "rr": 2.79,
+    "risk_pct": 1.649,
+    "confirmations": [
+     [
+      "HTF структура: бычья / CHoCH вверх",
+      true
+     ],
+     [
+      "Liquidity Sweep: ликвидность снята снизу",
+      false
+     ],
+     [
+      "Order Block: бычий OB митигирован",
+      true
+     ],
+     [
+      "FVG/IFVG: дисбаланс в зоне входа",
+      true
+     ],
+     [
+      "Discount Zone: цена в нижних 50%",
+      false
+     ],
+     [
+      "Объём: 9.35× ≥ 1.0× среднего",
+      true
+     ],
+     [
+      "Retrace: возврат к OB50% или FVG",
+      true
+     ],
+     [
+      "BB Squeeze: компрессия волатильности",
+      true
+     ]
+    ],
+    "narrative": "На 4H рынок находится в устойчивом восходящем тренде с чёткой HH/HL структурой. Явного sweep ликвидности на данном таймфрейме не зафиксировано. Цена вернулась в бычий ордер-блок 4,680.4–4,804.1 на 1H — зону, где институционалы формировали позицию перед последним бычьим импульсом с BOS. Перевёрнутый FVG 4,711.9–4,747.4 выступает как усиленный уровень поддержки после смены роли. Стоп размещён под нижним экстремумом OB с буфером 0.35% на уровне 4,664.0 — ниже этого уровня бычий контекст теряется. Первая цель — закрытие FVG (4,859.5), финальная цель — следующая зона ликвидности 5,116.8 (+7.9%). Сетап теряет силу, если 15m-свеча закроется ниже 4,664.0 — это полная митигация OB и потеря бычьей структуры.",
+    "session": "",
+    "tf_htf": "4H",
+    "tf_mtf": "1H",
+    "tf_ltf": "15m",
+    "mode_tag": "⚡ Aggressive",
+    "squeeze_score": 1,
+    "passes_ctx_gate": true,
+    "rr_ladder": [
+     1.5,
+     2.79,
+     4.79
+    ]
+   }
+  },
+  {
+   "source": "active/ETH-USDT-SWAP/303",
+   "signal": {
+    "symbol": "ETH-USDT-SWAP",
+    "direction": "LONG",
+    "score": 2,
+    "grade": "⚡ 2/5",
+    "entry_low": 4465.916646,
+    "entry_high": 4565.382833,
+    "entry": 4515.6497395,
+    "sl": 4450.285937739,
+    "tp1": 4629.484349,
+    "tp2": 4775.492299,
+    "tp3": 4826.838040044,
+    "rr": 3.98,
+    "risk_pct": 1.447,
+    "confirmations": [
+     [
+      "HTF структура: бычья / CHoCH вверх",
+      true
+     ],
+     [
+      "Liquidity Sweep: ликвидность снята снизу",
+      false
+     ],
+     [
+      "Order Block: бычий OB митигирован",
+      false
+     ],
+     [
+      "FVG/IFVG: дисбаланс в зоне входа",
+      true
+     ],
+     [
+      "Discount Zone: цена в нижних 50%",
+      false
+     ],
+     [
+      "Объём: 0.11× ≥ 1.0× среднего",
+      false
+     ],
+     [
+      "Retrace: возврат к OB50% или FVG",
+      false
+     ],
+     [
+      "BB Squeeze: компрессия волатильности",
+      false
+     ]
+    ],
+    "narrative": "На 4H рынок находится в устойчивом восходящем тренде с чёткой HH/HL структурой. Явного sweep ликвидности на данном таймфрейме не зафиксировано. Цена вернулась в бычий ордер-блок 4,465.9–4,565.4 на 1H — зону, где институционалы формировали позицию перед последним бычьим импульсом с BOS. Перевёрнутый FVG 4,621.1–4,629.5 выступает как усиленный уровень поддержки после смены роли. Стоп размещён под нижним экстремумом OB с буфером 0.35% на уровне 4,450.3 — ниже этого уровня бычий контекст теряется. Первая цель — закрытие FVG (4,629.5), финальная цель — следующая зона ликвидности 4,826.8 (+6.9%). Сетап теряет силу, если 15m-свеча закроется ниже 4,450.3 — это полная митигация OB и потеря бычьей структуры.",
+    "session": "",
+    "tf_htf": "4H",
+    "tf_mtf": "1H",
+    "tf_ltf": "15m",
+    "mode_tag": "⚡ Aggressive",
+    "squeeze_score": 0,
+    "passes_ctx_gate": true,
+    "rr_ladder": [
+     1.74,
+     3.98,
+     4.76
+    ]
+   }
+  },
+  {
+   "source": "active/SYNUP01-USDT-SWAP/206",
+   "signal": {
+    "symbol": "SYNUP01-USDT-SWAP",
+    "direction": "SHORT",
+    "score": 3,
+    "grade": "⚡ B",
+    "entry_low": 0.0001709641094,
+    "entry_high": 0.0001723515365,
+    "entry": 0.00017165782295,
+    "sl": 0.00017295476687775,
+    "tp1": 0.0001701014902367,
+    "tp2": 0.000168415463130625,
+    "tp3": 0.00016647004723899998,
+    "rr": 2.5,
+    "risk_pct": 0.756,
+    "confirmations": [
+     [
+      "HTF структура: медвежья / CHoCH вниз",
+      false
+     ],
+     [
+      "Liquidity Sweep: ликвидность снята сверху",
+      false
+     ],
+     [
+      "Order Block: медвежий OB митигирован",
+      true
+     ],
+     [
+      "FVG/IFVG: дисбаланс в зоне входа",
+      true
+     ],
+     [
+      "Premium Zone: цена в верхних 50%",
+      false
+     ],
+     [
+      "Объём: 0.76× ≥ 1.0× среднего",
+      false
+     ],
+     [
+      "Retrace: возврат к OB50% или FVG",
+      false
+     ],
+     [
+      "BB Squeeze: компрессия волатильности",
+      true
+     ]
+    ],
+    "narrative": "На 4H рынок находится в устойчивом восходящем тренде с чёткой HH/HL структурой. Явного sweep ликвидности на данном таймфрейме не зафиксировано. Цена поднялась в медвежий ордер-блок 0.000171–0.0001724 на 1H — зону предложения, откуда начался последний медвежий импульс. Перевёрнутый FVG 0.0001711–0.0001716 выступает как усиленный уровень сопротивления после смены роли. Стоп размещён над верхним экстремумом OB с буфером 0.35% на уровне 0.000173 — выше этого уровня медвежий контекст нарушен. Первая цель — закрытие FVG (0.0001701), финальная цель — следующая зона ликвидности 0.0001665 (+3.0%). Сетап теряет силу, если 15m-свеча закроется выше 0.000173 — медвежья структура будет нарушена.",
+    "session": "",
+    "tf_htf": "4H",
+    "tf_mtf": "1H",
+    "tf_ltf": "15m",
+    "mode_tag": "⚡ Aggressive",
+    "squeeze_score": 1,
+    "passes_ctx_gate": true,
+    "rr_ladder": [
+     1.2,
+     2.5,
+     4
+    ]
+   }
+  },
+  {
+   "source": "active/SYNUP01-USDT-SWAP/231",
+   "signal": {
+    "symbol": "SYNUP01-USDT-SWAP",
+    "direction": "SHORT",
+    "score": 2,
+    "grade": "⚡ 2/5",
+    "entry_low": 0.0001765186261,
+    "entry_high": 0.000178458181,
+    "entry": 0.00017748840355,
+    "sl": 0.00017908278463350002,
+    "tp1": 0.0001755751462498,
+    "tp2": 0.00017350245084125,
+    "tp3": 0.00017111087921599995,
+    "rr": 2.5,
+    "risk_pct": 0.898,
+    "confirmations": [
+     [
+      "HTF структура: медвежья / CHoCH вниз",
+      false
+     ],
+     [
+      "Liquidity Sweep: ликвидность снята сверху",
+      false
+     ],
+     [
+      "Order Block: медвежий OB митигирован",
+      false
+     ],
+     [
+      "FVG/IFVG: дисбаланс в зоне входа",
+      true
+     ],
+     [
+      "Premium Zone: цена в верхних 50%",
+      true
+     ],
+     [
+      "Объём: 0.17× ≥ 1.0× среднего",
+      false
+     ],
+     [
+      "Retrace: возврат к OB50% или FVG",
+      false
+     ],
+     [
+      "BB Squeeze: компрессия волатильности",
+      false
+     ]
+    ],
+    "narrative": "На 4H рынок находится в устойчивом восходящем тренде с чёткой HH/HL структурой. Явного sweep ликвидности на данном таймфрейме не зафиксировано. Цена поднялась в медвежий ордер-блок 0.0001765–0.0001785 на 1H — зону предложения, откуда начался последний медвежий импульс. Перевёрнутый FVG 0.0001758–0.0001761 выступает как усиленный уровень сопротивления после смены роли. Стоп размещён над верхним экстремумом OB с буфером 0.35% на уровне 0.0001791 — выше этого уровня медвежий контекст нарушен. Первая цель — закрытие FVG (0.0001756), финальная цель — следующая зона ликвидности 0.0001711 (+3.6%). Сетап теряет силу, если 15m-свеча закроется выше 0.0001791 — медвежья структура будет нарушена.",
+    "session": "",
+    "tf_htf": "4H",
+    "tf_mtf": "1H",
+    "tf_ltf": "15m",
+    "mode_tag": "⚡ Aggressive",
+    "squeeze_score": 0,
+    "passes_ctx_gate": true,
+    "rr_ladder": [
+     1.2,
+     2.5,
+     4
+    ]
+   }
+  },
+  {
+   "source": "active/SYNUP02-USDT-SWAP/331",
+   "signal": {
+    "symbol": "SYNUP02-USDT-SWAP",
+    "direction": "SHORT",
+    "score": 2,
+    "grade": "⚡ 2/5",
+    "entry_low": 0.02485598613,
+    "entry_high": 0.02509199454,
+    "entry": 0.024973990335,
+    "sl": 0.025179816520890002,
+    "tp1": 0.02472453201,
+    "tp2": 0.01835079195,
+    "tp3": 0.017172031485000003,
+    "rr": 32.18,
+    "risk_pct": 0.824,
+    "confirmations": [
+     [
+      "HTF структура: медвежья / CHoCH вниз",
+      false
+     ],
+     [
+      "Liquidity Sweep: ликвидность снята сверху",
+      false
+     ],
+     [
+      "Order Block: медвежий OB митигирован",
+      false
+     ],
+     [
+      "FVG/IFVG: дисбаланс в зоне входа",
+      true
+     ],
+     [
+      "Premium Zone: цена в верхних 50%",
+      true
+     ],
+     [
+      "Объём: 0.13× ≥ 1.0× среднего",
+      false
+     ],
+     [
+      "Retrace: возврат к OB50% или FVG",
+      false
+     ],
+     [
+      "BB Squeeze: компрессия волатильности",
+      false
+     ]
+    ],
+    "narrative": "На 4H рынок находится в устойчивом восходящем тренде с чёткой HH/HL структурой. Явного sweep ликвидности на данном таймфрейме не зафиксировано. Цена поднялась в медвежий ордер-блок 0.02486–0.02509 на 1H — зону предложения, откуда начался последний медвежий импульс. Перевёрнутый FVG 0.02472–0.02475 выступает как усиленный уровень сопротивления после смены роли. Стоп размещён над верхним экстремумом OB с буфером 0.35% на уровне 0.02518 — выше этого уровня медвежий контекст нарушен. Первая цель — закрытие FVG (0.02472), финальная цель — следующая зона ликвидности 0.01717 (+31.2%). Сетап теряет силу, если 15m-свеча закроется выше 0.02518 — медвежья структура будет нарушена.",
+    "session": "",
+    "tf_htf": "4H",
+    "tf_mtf": "1H",
+    "tf_ltf": "15m",
+    "mode_tag": "⚡ Aggressive",
+    "squeeze_score": 0,
+    "passes_ctx_gate": true,
+    "rr_ladder": [
+     1.21,
+     32.18,
+     37.91
+    ]
+   }
+  }
+ ],
+ "volume": [
+  {
+   "source": "default/BTC-USDT-SWAP/240",
+   "signal": {
+    "symbol": "BTC-USDT-SWAP",
+    "direction": "LONG",
+    "entry": 59732.93045,
+    "sl": 57918.79352,
+    "tp1": 61547.06738,
+    "tp2": 63361.20431,
+    "tp3": 65175.34124,
+    "rr": 2,
+    "quality": 5,
+    "signal_type": "EMA200 Bounce",
+    "rsi": 43.2,
+    "vol_ratio": 1.78,
+    "ema_fast": 61186.823199,
+    "ema_slow": 61873.889054499996,
+    "ema_trend": 58587.328756276824,
+    "atr": 1295.2252935628576,
+    "timeframe": "1h",
+    "is_counter_trend": false,
+    "reasons": [
+     "отскок от EMA200: бычье поглощение",
+     "объём ×1.8 от среднего",
+     "RSI 43 — здоровая зона",
+     "старший ТФ 4h: по тренду EMA50"
+    ],
+    "setup": "bounce",
+    "ma_label": "EMA200",
+    "ma_value": 58587.328756276824,
+    "ma_slow": 60695.816184799995,
+    "ema_mid": 60448.79469980036,
+    "aligned": false,
+    "squeeze": 0,
+    "alignment": "",
+    "htf_tf": "4h",
+    "htf_state": 2,
+    "confluence": [],
+    "pattern": "engulfing",
+    "ma_names": "SMA 10/20/50",
+    "ema_names": "EMA 50/200",
+    "tp": 61547.06738,
+    "risk_pct": 3.037080076823856,
+    "volume_ratio": 1.78,
+    "squeeze_score": 0,
+    "quality_after_squeeze": 5,
+    "passes_ctx_gate": true
+   }
+  },
+  {
+   "source": "default/BTC-USDT-SWAP/289",
+   "signal": {
+    "symbol": "BTC-USDT-SWAP",
+    "direction": "LONG",
+    "entry": 64363.30157,
+    "sl": 62771.95603083333,
+    "tp1": 65954.64710916668,
+    "tp2": 67545.99264833334,
+    "tp3": 69137.33818750002,
+    "rr": 2,
+    "quality": 5,
+    "signal_type": "Ribbon Pullback",
+    "rsi": 51.6,
+    "vol_ratio": 3.29,
+    "ema_fast": 64987.73027099999,
+    "ema_slow": 64907.649676500005,
+    "ema_trend": 60420.65731493132,
+    "atr": 913.2204678597639,
+    "timeframe": "1h",
+    "is_counter_trend": false,
+    "reasons": [
+     "откат к ленте EMA 5…55: лента выстроена на 100%, возврат над EMA5",
+     "объём на откате затухал (VSA)",
+     "объём ×3.3 от среднего",
+     "MA выстроены: SMA10 > SMA20 > SMA50",
+     "RSI 52 — здоровая зона",
+     "старший ТФ 4h: по тренду EMA50"
+    ],
+    "setup": "ribbon",
+    "ma_label": "EMA 5–55",
+    "ma_value": 64349.94342313101,
+    "ma_slow": 62764.443848,
+    "ema_mid": 63240.68598127495,
+    "aligned": true,
+    "squeeze": 0,
+    "alignment": "SMA10 > SMA20 > SMA50",
+    "htf_tf": "4h",
+    "htf_state": 2,
+    "confluence": [],
+    "pattern": "ribbon",
+    "ma_names": "SMA 10/20/50",
+    "ema_names": "EMA 50/200",
+    "tp": 65954.64710916668,
+    "risk_pct": 2.472442370651174,
+    "volume_ratio": 3.29,
+    "squeeze_score": 0,
+    "quality_after_squeeze": 5,
+    "passes_ctx_gate": true
+   }
+  },
+  {
+   "source": "default/BTC-USDT-SWAP/347",
+   "signal": {
+    "symbol": "BTC-USDT-SWAP",
+    "direction": "LONG",
+    "entry": 66423.68649,
+    "sl": 65322.7999025,
+    "tp1": 67524.57307749998,
+    "tp2": 68625.45966499997,
+    "tp3": 69726.34625249996,
+    "rr": 2,
+    "quality": 4,
+    "signal_type": "Ribbon Pullback",
+    "rsi": 48.3,
+    "vol_ratio": 1.15,
+    "ema_fast": 66591.638603,
+    "ema_slow": 66752.8325275,
+    "ema_trend": 62961.59976524817,
+    "atr": 634.7916950702511,
+    "timeframe": "1h",
+    "is_counter_trend": false,
+    "reasons": [
+     "откат к ленте EMA 5…55: лента выстроена на 100%, возврат над EMA5",
+     "объём ×1.1 от среднего",
+     "RSI 48 — здоровая зона",
+     "старший ТФ 4h: по тренду EMA50"
+    ],
+    "setup": "ribbon",
+    "ma_label": "EMA 5–55",
+    "ma_value": 66418.02846361279,
+    "ma_slow": 66402.6714504,
+    "ema_mid": 66136.2861551835,
+    "aligned": false,
+    "squeeze": 0,
+    "alignment": "",
+    "htf_tf": "4h",
+    "htf_state": 2,
+    "confluence": [],
+    "pattern": "ribbon",
+    "ma_names": "SMA 10/20/50",
+    "ema_names": "EMA 50/200",
+    "tp": 67524.57307749998,
+    "risk_pct": 1.6573705039176458,
+    "volume_ratio": 1.15,
+    "squeeze_score": 0,
+    "quality_after_squeeze": 4,
+    "passes_ctx_gate": true
+   }
+  },
+  {
+   "source": "default/SYNUP03-USDT-SWAP/288",
+   "signal": {
+    "symbol": "SYNUP03-USDT-SWAP",
+    "direction": "LONG",
+    "entry": 0.789480261,
+    "sl": 0.7810903798266667,
+    "tp1": 0.7978701421733333,
+    "tp2": 0.8062600233466667,
+    "tp3": 0.81464990452,
+    "rr": 2,
+    "quality": 5,
+    "signal_type": "EMA50 Bounce",
+    "rsi": 44.7,
+    "vol_ratio": 1.22,
+    "ema_fast": 0.8060856979300001,
+    "ema_slow": 0.80386274502,
+    "ema_trend": 0.7620291198320353,
+    "atr": 0.008909499203517518,
+    "timeframe": "1h",
+    "is_counter_trend": false,
+    "reasons": [
+     "отскок от EMA50: молот / пин-бар",
+     "объём ×1.2 от среднего",
+     "MA выстроены: SMA10 > SMA20 > SMA50",
+     "RSI 45 — здоровая зона",
+     "старший ТФ 4h: по тренду EMA50"
+    ],
+    "setup": "bounce",
+    "ma_label": "EMA50",
+    "ma_value": 0.7894232727594866,
+    "ma_slow": 0.783497802588,
+    "ema_mid": 0.7894232727594866,
+    "aligned": true,
+    "squeeze": 0,
+    "alignment": "SMA10 > SMA20 > SMA50",
+    "htf_tf": "4h",
+    "htf_state": 2,
+    "confluence": [],
+    "pattern": "hammer",
+    "ma_names": "SMA 10/20/50",
+    "ema_names": "EMA 50/200",
+    "tp": 0.7978701421733333,
+    "risk_pct": 1.06270942894838,
+    "volume_ratio": 1.22,
+    "squeeze_score": 0,
+    "quality_after_squeeze": 5,
+    "passes_ctx_gate": true
+   }
+  },
+  {
+   "source": "default/SYNUP04-USDT-SWAP/291",
+   "signal": {
+    "symbol": "SYNUP04-USDT-SWAP",
+    "direction": "SHORT",
+    "entry": 3.751892123,
+    "sl": 3.8219220350833334,
+    "tp1": 3.681862210916667,
+    "tp2": 3.611832298833334,
+    "tp3": 3.5418023867500006,
+    "rr": 2,
+    "quality": 5,
+    "signal_type": "EMA200 Bounce",
+    "rsi": 44.4,
+    "vol_ratio": 1.23,
+    "ema_fast": 3.7756938090999994,
+    "ema_slow": 3.77157181385,
+    "ema_trend": 3.7969734737729897,
+    "atr": 0.03731034035010473,
+    "timeframe": "1h",
+    "is_counter_trend": false,
+    "reasons": [
+     "отскок от EMA200: медвежье поглощение",
+     "объём на откате затухал (VSA)",
+     "объём ×1.2 от среднего",
+     "RSI 44 — здоровая зона",
+     "старший ТФ 4h: по тренду EMA50"
+    ],
+    "setup": "bounce",
+    "ma_label": "EMA200",
+    "ma_value": 3.7969734737729897,
+    "ma_slow": 3.8005876186400003,
+    "ema_mid": 3.7938961507765843,
+    "aligned": false,
+    "squeeze": 0,
+    "alignment": "",
+    "htf_tf": "4h",
+    "htf_state": -2,
+    "confluence": [],
+    "pattern": "engulfing",
+    "ma_names": "SMA 10/20/50",
+    "ema_names": "EMA 50/200",
+    "tp": 3.681862210916667,
+    "risk_pct": 1.8665225381623585,
+    "volume_ratio": 1.23,
+    "squeeze_score": 0,
+    "quality_after_squeeze": 5,
+    "passes_ctx_gate": true
+   }
+  },
+  {
+   "source": "default/SYNUP05-USDT-SWAP/225",
+   "signal": {
+    "symbol": "SYNUP05-USDT-SWAP",
+    "direction": "LONG",
+    "entry": 34.00230308,
+    "sl": 33.32299720333334,
+    "tp1": 34.68160895666666,
+    "tp2": 35.36091483333332,
+    "tp3": 36.04022070999998,
+    "rr": 2,
+    "quality": 5,
+    "signal_type": "MA Turn SMA20",
+    "rsi": 62.4,
+    "vol_ratio": 3.22,
+    "ema_fast": 33.617621497,
+    "ema_slow": 33.636233621500004,
+    "ema_trend": 32.95070084570304,
+    "atr": 0.2080275225043653,
+    "timeframe": "1h",
+    "is_counter_trend": false,
+    "reasons": [
+     "SMA20 развернулась вверх после 5+ свечей",
+     "цена выше SMA50",
+     "объём ×3.2 от среднего",
+     "RSI 62 — здоровая зона",
+     "старший ТФ 4h: по тренду EMA50"
+    ],
+    "setup": "turn",
+    "ma_label": "SMA20",
+    "ma_value": 33.636233621500004,
+    "ma_slow": 33.6381433588,
+    "ema_mid": 33.58211991499474,
+    "aligned": false,
+    "squeeze": 0,
+    "alignment": "",
+    "htf_tf": "4h",
+    "htf_state": 2,
+    "confluence": [],
+    "pattern": "",
+    "ma_names": "SMA 10/20/50",
+    "ema_names": "EMA 50/200",
+    "tp": 34.68160895666666,
+    "risk_pct": 1.99782313294603,
+    "volume_ratio": 3.22,
+    "squeeze_score": 0,
+    "quality_after_squeeze": 5,
+    "passes_ctx_gate": true
+   }
+  },
+  {
+   "source": "default/SYNDN01-USDT-SWAP/242",
+   "signal": {
+    "symbol": "SYNDN01-USDT-SWAP",
+    "direction": "SHORT",
+    "entry": 0.00007775126167,
+    "sl": 0.0000783141891175,
+    "tp1": 0.00007718833422249998,
+    "tp2": 0.00007662540677499997,
+    "tp3": 0.00007606247932749996,
+    "rr": 2,
+    "quality": 5,
+    "signal_type": "Ribbon Pullback",
+    "rsi": 41.5,
+    "vol_ratio": 1.53,
+    "ema_fast": 0.00007781251226399998,
+    "ema_slow": 0.000077981936318,
+    "ema_trend": 0.00008230158397556141,
+    "atr": 4.81517537683681e-7,
+    "timeframe": "1h",
+    "is_counter_trend": false,
+    "reasons": [
+     "откат к ленте EMA 5…55: лента выстроена на 100%, возврат под EMA5",
+     "объём на откате затухал (VSA)",
+     "объём ×1.5 от среднего",
+     "MA выстроены: SMA10 < SMA20 < SMA50",
+     "RSI 42 — здоровая зона",
+     "старший ТФ 4h: по тренду EMA50"
+    ],
+    "setup": "ribbon",
+    "ma_label": "EMA 5–55",
+    "ma_value": 0.00007784529576428655,
+    "ma_slow": 0.0000790906664302,
+    "ema_mid": 0.00007925117514399402,
+    "aligned": true,
+    "squeeze": 0,
+    "alignment": "SMA10 < SMA20 < SMA50",
+    "htf_tf": "4h",
+    "htf_state": -2,
+    "confluence": [],
+    "pattern": "ribbon",
+    "ma_names": "SMA 10/20/50",
+    "ema_names": "EMA 50/200",
+    "tp": 0.00007718833422249998,
+    "risk_pct": 0.7240106917997615,
+    "volume_ratio": 1.53,
+    "squeeze_score": 0,
+    "quality_after_squeeze": 5,
+    "passes_ctx_gate": true
+   }
+  },
+  {
+   "source": "default/SYNDN01-USDT-SWAP/247",
+   "signal": {
+    "symbol": "SYNDN01-USDT-SWAP",
+    "direction": "SHORT",
+    "entry": 0.00007781739335,
+    "sl": 0.00007828087125842449,
+    "tp1": 0.0000773539154415755,
+    "tp2": 0.00007689043753315102,
+    "tp3": 0.00007642695962472653,
+    "rr": 2,
+    "quality": 5,
+    "signal_type": "Ribbon Pullback",
+    "rsi": 43.2,
+    "vol_ratio": 1.73,
+    "ema_fast": 0.000077887344306,
+    "ema_slow": 0.00007784873598549999,
+    "ema_trend": 0.00008206794232901088,
+    "atr": 4.2633591369791564e-7,
+    "timeframe": "1h",
+    "is_counter_trend": false,
+    "reasons": [
+     "откат к ленте EMA 5…55: лента выстроена на 100%, возврат под EMA5",
+     "объём ×1.7 от среднего",
+     "RSI 43 — здоровая зона",
+     "старший ТФ 4h: по тренду EMA50"
+    ],
+    "setup": "ribbon",
+    "ma_label": "EMA 5–55",
+    "ma_value": 0.00007787810400282786,
+    "ma_slow": 0.000078811179832,
+    "ema_mid": 0.00007900802048887027,
+    "aligned": false,
+    "squeeze": 0,
+    "alignment": "",
+    "htf_tf": "4h",
+    "htf_state": -2,
+    "confluence": [],
+    "pattern": "ribbon",
+    "ma_names": "SMA 10/20/50",
+    "ema_names": "EMA 50/200",
+    "tp": 0.0000773539154415755,
+    "risk_pct": 0.5955968048684189,
+    "volume_ratio": 1.73,
+    "squeeze_score": 0,
+    "quality_after_squeeze": 5,
+    "passes_ctx_gate": true
+   }
+  },
+  {
+   "source": "default/SYNDN03-USDT-SWAP/390",
+   "signal": {
+    "symbol": "SYNDN03-USDT-SWAP",
+    "direction": "SHORT",
+    "entry": 0.1254095159,
+    "sl": 0.12853838130833334,
+    "tp1": 0.12228065049166664,
+    "tp2": 0.1191517850833333,
+    "tp3": 0.11602291967499995,
+    "rr": 2,
+    "quality": 4,
+    "signal_type": "MA Turn SMA20",
+    "rsi": 44.2,
+    "vol_ratio": 2.77,
+    "ema_fast": 0.1266424786,
+    "ema_slow": 0.12768478828000002,
+    "ema_trend": 0.1261610368696394,
+    "atr": 0.001566682969985666,
+    "timeframe": "1h",
+    "is_counter_trend": false,
+    "reasons": [
+     "SMA20 развернулась вниз после 5+ свечей",
+     "цена ниже SMA50",
+     "объём ×2.8 от среднего",
+     "RSI 44 — здоровая зона"
+    ],
+    "setup": "turn",
+    "ma_label": "SMA20",
+    "ma_value": 0.12768478828000002,
+    "ma_slow": 0.126222700456,
+    "ema_mid": 0.12695856159842736,
+    "aligned": false,
+    "squeeze": 0,
+    "alignment": "",
+    "htf_tf": "4h",
+    "htf_state": -1,
+    "confluence": [],
+    "pattern": "",
+    "ma_names": "SMA 10/20/50",
+    "ema_names": "EMA 50/200",
+    "tp": 0.12228065049166664,
+    "risk_pct": 2.4949186557966354,
+    "volume_ratio": 2.77,
+    "squeeze_score": 1,
+    "quality_after_squeeze": 5,
+    "passes_ctx_gate": true
+   }
+  },
+  {
+   "source": "default/SYNDN05-USDT-SWAP/389",
+   "signal": {
+    "symbol": "SYNDN05-USDT-SWAP",
+    "direction": "SHORT",
+    "entry": 28.2583353,
+    "sl": 28.519090247211338,
+    "tp1": 27.99758035278866,
+    "tp2": 27.73682540557732,
+    "tp3": 27.47607045836598,
+    "rr": 2,
+    "quality": 5,
+    "signal_type": "EMA50 Bounce",
+    "rsi": 49,
+    "vol_ratio": 1.64,
+    "ema_fast": 28.247673852,
+    "ema_slow": 28.333601349500004,
+    "ema_trend": 29.57255197300999,
+    "atr": 0.19010497906627694,
+    "timeframe": "1h",
+    "is_counter_trend": false,
+    "reasons": [
+     "отскок от EMA50: касание EMA и закрытие ниже",
+     "объём ×1.6 от среднего",
+     "MA выстроены: SMA10 < SMA20 < SMA50",
+     "RSI 49 — здоровая зона",
+     "старший ТФ 4h: по тренду EMA50",
+     "совпадение: Ribbon Pullback"
+    ],
+    "setup": "bounce",
+    "ma_label": "EMA50",
+    "ma_value": 28.47156400244477,
+    "ma_slow": 28.3476341182,
+    "ema_mid": 28.47156400244477,
+    "aligned": true,
+    "squeeze": 0,
+    "alignment": "SMA10 < SMA20 < SMA50",
+    "htf_tf": "4h",
+    "htf_state": -2,
+    "confluence": [
+     "Ribbon Pullback"
+    ],
+    "pattern": "touch",
+    "ma_names": "SMA 10/20/50",
+    "ema_names": "EMA 50/200",
+    "tp": 27.99758035278866,
+    "risk_pct": 0.9227540987219409,
+    "volume_ratio": 1.64,
+    "squeeze_score": 0,
+    "quality_after_squeeze": 5,
+    "passes_ctx_gate": true
+   }
+  },
+  {
+   "source": "default/SYNRG04-USDT-SWAP/366",
+   "signal": {
+    "symbol": "SYNRG04-USDT-SWAP",
+    "direction": "SHORT",
+    "entry": 1.730053582,
+    "sl": 1.740110935273207,
+    "tp1": 1.7199962287267931,
+    "tp2": 1.7099388754535862,
+    "tp3": 1.6998815221803794,
+    "rr": 2,
+    "quality": 5,
+    "signal_type": "MA Turn SMA20",
+    "rsi": 44.4,
+    "vol_ratio": 5.72,
+    "ema_fast": 1.7374977910999998,
+    "ema_slow": 1.7333727221,
+    "ema_trend": 1.7504419277282113,
+    "atr": 0.007628213092827233,
+    "timeframe": "1h",
+    "is_counter_trend": false,
+    "reasons": [
+     "SMA20 развернулась вниз после 5+ свечей",
+     "цена ниже SMA50",
+     "объём ×5.7 от среднего",
+     "RSI 44 — здоровая зона",
+     "старший ТФ 4h: по тренду EMA50"
+    ],
+    "setup": "turn",
+    "ma_label": "SMA20",
+    "ma_value": 1.7333727221,
+    "ma_slow": 1.7412339086200002,
+    "ema_mid": 1.7402392787847405,
+    "aligned": false,
+    "squeeze": 0,
+    "alignment": "",
+    "htf_tf": "4h",
+    "htf_state": -2,
+    "confluence": [],
+    "pattern": "",
+    "ma_names": "SMA 10/20/50",
+    "ema_names": "EMA 50/200",
+    "tp": 1.7199962287267931,
+    "risk_pct": 0.5813318950260635,
+    "volume_ratio": 5.72,
+    "squeeze_score": 1,
+    "quality_after_squeeze": 5,
+    "passes_ctx_gate": true
+   }
+  },
+  {
+   "source": "default/SYNVL02-USDT-SWAP/336",
+   "signal": {
+    "symbol": "SYNVL02-USDT-SWAP",
+    "direction": "LONG",
+    "entry": 0.09418712622,
+    "sl": 0.09177560083583333,
+    "tp1": 0.09659865160416667,
+    "tp2": 0.09901017698833334,
+    "tp3": 0.1014217023725,
+    "rr": 2,
+    "quality": 5,
+    "signal_type": "MA Cross 10/20",
+    "rsi": 60.7,
+    "vol_ratio": 2.27,
+    "ema_fast": 0.09300571927500001,
+    "ema_slow": 0.0925949028475,
+    "ema_trend": 0.0865010276714428,
+    "atr": 0.0010817594815354743,
+    "timeframe": "1h",
+    "is_counter_trend": false,
+    "reasons": [
+     "SMA10 пересекла SMA20 снизу вверх",
+     "цена выше SMA50",
+     "объём ×2.3 от среднего",
+     "MA выстроены: SMA10 > SMA20 > SMA50",
+     "RSI 61 — здоровая зона",
+     "старший ТФ 4h: по тренду EMA50"
+    ],
+    "setup": "cross",
+    "ma_label": "SMA10/SMA20",
+    "ma_value": 0.0925949028475,
+    "ma_slow": 0.0917915736932,
+    "ema_mid": 0.09193628849084404,
+    "aligned": true,
+    "squeeze": 0,
+    "alignment": "SMA10 > SMA20 > SMA50",
+    "htf_tf": "4h",
+    "htf_state": 2,
+    "confluence": [],
+    "pattern": "",
+    "ma_names": "SMA 10/20/50",
+    "ema_names": "EMA 50/200",
+    "tp": 0.09659865160416667,
+    "risk_pct": 2.560355624965015,
+    "volume_ratio": 2.27,
+    "squeeze_score": 1,
+    "quality_after_squeeze": 5,
+    "passes_ctx_gate": true
+   }
+  },
+  {
+   "source": "default/SYNVL04-USDT-SWAP/292",
+   "signal": {
+    "symbol": "SYNVL04-USDT-SWAP",
+    "direction": "SHORT",
+    "entry": 1.651069913,
+    "sl": 1.6705464291666667,
+    "tp1": 1.6315933968333332,
+    "tp2": 1.6121168806666664,
+    "tp3": 1.5926403644999996,
+    "rr": 2,
+    "quality": 5,
+    "signal_type": "MA Cross 10/20",
+    "rsi": 44.7,
+    "vol_ratio": 1.67,
+    "ema_fast": 1.6632117826000001,
+    "ema_slow": 1.66558947445,
+    "ema_trend": 1.6777551406816322,
+    "atr": 0.0178871773006458,
+    "timeframe": "1h",
+    "is_counter_trend": false,
+    "reasons": [
+     "SMA10 пересекла SMA20 сверху вниз",
+     "цена ниже SMA50",
+     "объём ×1.7 от среднего",
+     "MA выстроены: SMA10 < SMA20 < SMA50",
+     "RSI 45 — здоровая зона",
+     "старший ТФ 4h: по тренду EMA50"
+    ],
+    "setup": "cross",
+    "ma_label": "SMA10/SMA20",
+    "ma_value": 1.66558947445,
+    "ma_slow": 1.67701478538,
+    "ema_mid": 1.6672814749276033,
+    "aligned": true,
+    "squeeze": 0,
+    "alignment": "SMA10 < SMA20 < SMA50",
+    "htf_tf": "4h",
+    "htf_state": -2,
+    "confluence": [],
+    "pattern": "",
+    "ma_names": "SMA 10/20/50",
+    "ema_names": "EMA 50/200",
+    "tp": 1.6315933968333332,
+    "risk_pct": 1.179630009202814,
+    "volume_ratio": 1.67,
+    "squeeze_score": 0,
+    "quality_after_squeeze": 5,
+    "passes_ctx_gate": true
+   }
+  },
+  {
+   "source": "default/SYNVL05-USDT-SWAP/367",
+   "signal": {
+    "symbol": "SYNVL05-USDT-SWAP",
+    "direction": "SHORT",
+    "entry": 37.8041436,
+    "sl": 38.840017735,
+    "tp1": 36.768269465,
+    "tp2": 35.73239533,
+    "tp3": 34.696521195,
+    "rr": 2,
+    "quality": 5,
+    "signal_type": "Death Cross",
+    "rsi": 36.6,
+    "vol_ratio": 1.04,
+    "ema_fast": 38.656269343000005,
+    "ema_slow": 38.9461488545,
+    "ema_trend": 40.04893717013125,
+    "atr": 0.6571289058470058,
+    "timeframe": "1h",
+    "is_counter_trend": false,
+    "reasons": [
+     "EMA50 пересекла EMA200 сверху вниз (крест смерти)",
+     "объём ×1.0 от среднего",
+     "MA выстроены: SMA10 < SMA20 < SMA50",
+     "RSI 37 — здоровая зона",
+     "старший ТФ 4h: по тренду EMA50"
+    ],
+    "setup": "golden",
+    "ma_label": "EMA50/EMA200",
+    "ma_value": 40.04893717013125,
+    "ma_slow": 40.456347289200004,
+    "ema_mid": 40.02199061790398,
+    "aligned": true,
+    "squeeze": 0,
+    "alignment": "SMA10 < SMA20 < SMA50",
+    "htf_tf": "4h",
+    "htf_state": -2,
+    "confluence": [],
+    "pattern": "",
+    "ma_names": "SMA 10/20/50",
+    "ema_names": "EMA 50/200",
+    "tp": 36.768269465,
+    "risk_pct": 2.740107396587077,
+    "volume_ratio": 1.04,
+    "squeeze_score": 0,
+    "quality_after_squeeze": 5,
+    "passes_ctx_gate": true
+   }
+  },
+  {
+   "source": "conservative/BTC-USDT-SWAP/240",
+   "signal": {
+    "symbol": "BTC-USDT-SWAP",
+    "direction": "LONG",
+    "entry": 59732.93045,
+    "sl": 57918.79352,
+    "tp1": 61547.06738,
+    "tp2": 63361.20431,
+    "tp3": 65175.34124,
+    "rr": 2,
+    "quality": 5,
+    "signal_type": "EMA200 Bounce",
+    "rsi": 43.2,
+    "vol_ratio": 1.78,
+    "ema_fast": 61186.823199,
+    "ema_slow": 61873.889054499996,
+    "ema_trend": 58587.328756276824,
+    "atr": 1295.2252935628576,
+    "timeframe": "1h",
+    "is_counter_trend": false,
+    "reasons": [
+     "отскок от EMA200: бычье поглощение",
+     "объём ×1.8 от среднего",
+     "RSI 43 — здоровая зона",
+     "старший ТФ 4h: по тренду EMA50"
+    ],
+    "setup": "bounce",
+    "ma_label": "EMA200",
+    "ma_value": 58587.328756276824,
+    "ma_slow": 60695.816184799995,
+    "ema_mid": 60448.79469980036,
+    "aligned": false,
+    "squeeze": 0,
+    "alignment": "",
+    "htf_tf": "4h",
+    "htf_state": 2,
+    "confluence": [],
+    "pattern": "engulfing",
+    "ma_names": "SMA 10/20/50",
+    "ema_names": "EMA 50/200",
+    "tp": 61547.06738,
+    "risk_pct": 3.037080076823856,
+    "volume_ratio": 1.78,
+    "squeeze_score": 0,
+    "quality_after_squeeze": 5,
+    "passes_ctx_gate": true
+   }
+  },
+  {
+   "source": "conservative/BTC-USDT-SWAP/289",
+   "signal": {
+    "symbol": "BTC-USDT-SWAP",
+    "direction": "LONG",
+    "entry": 64363.30157,
+    "sl": 62771.95603083333,
+    "tp1": 65954.64710916668,
+    "tp2": 67545.99264833334,
+    "tp3": 69137.33818750002,
+    "rr": 2,
+    "quality": 5,
+    "signal_type": "Ribbon Pullback",
+    "rsi": 51.6,
+    "vol_ratio": 3.29,
+    "ema_fast": 64987.73027099999,
+    "ema_slow": 64907.649676500005,
+    "ema_trend": 60420.65731493132,
+    "atr": 913.2204678597639,
+    "timeframe": "1h",
+    "is_counter_trend": false,
+    "reasons": [
+     "откат к ленте EMA 5…55: лента выстроена на 100%, возврат над EMA5",
+     "объём на откате затухал (VSA)",
+     "объём ×3.3 от среднего",
+     "MA выстроены: SMA10 > SMA20 > SMA50",
+     "RSI 52 — здоровая зона",
+     "старший ТФ 4h: по тренду EMA50"
+    ],
+    "setup": "ribbon",
+    "ma_label": "EMA 5–55",
+    "ma_value": 64349.94342313101,
+    "ma_slow": 62764.443848,
+    "ema_mid": 63240.68598127495,
+    "aligned": true,
+    "squeeze": 0,
+    "alignment": "SMA10 > SMA20 > SMA50",
+    "htf_tf": "4h",
+    "htf_state": 2,
+    "confluence": [],
+    "pattern": "ribbon",
+    "ma_names": "SMA 10/20/50",
+    "ema_names": "EMA 50/200",
+    "tp": 65954.64710916668,
+    "risk_pct": 2.472442370651174,
+    "volume_ratio": 3.29,
+    "squeeze_score": 0,
+    "quality_after_squeeze": 5,
+    "passes_ctx_gate": true
+   }
+  },
+  {
+   "source": "conservative/BTC-USDT-SWAP/347",
+   "signal": {
+    "symbol": "BTC-USDT-SWAP",
+    "direction": "LONG",
+    "entry": 66423.68649,
+    "sl": 65322.7999025,
+    "tp1": 67524.57307749998,
+    "tp2": 68625.45966499997,
+    "tp3": 69726.34625249996,
+    "rr": 2,
+    "quality": 4,
+    "signal_type": "Ribbon Pullback",
+    "rsi": 48.3,
+    "vol_ratio": 1.15,
+    "ema_fast": 66591.638603,
+    "ema_slow": 66752.8325275,
+    "ema_trend": 62961.59976524817,
+    "atr": 634.7916950702511,
+    "timeframe": "1h",
+    "is_counter_trend": false,
+    "reasons": [
+     "откат к ленте EMA 5…55: лента выстроена на 100%, возврат над EMA5",
+     "объём ×1.1 от среднего",
+     "RSI 48 — здоровая зона",
+     "старший ТФ 4h: по тренду EMA50"
+    ],
+    "setup": "ribbon",
+    "ma_label": "EMA 5–55",
+    "ma_value": 66418.02846361279,
+    "ma_slow": 66402.6714504,
+    "ema_mid": 66136.2861551835,
+    "aligned": false,
+    "squeeze": 0,
+    "alignment": "",
+    "htf_tf": "4h",
+    "htf_state": 2,
+    "confluence": [],
+    "pattern": "ribbon",
+    "ma_names": "SMA 10/20/50",
+    "ema_names": "EMA 50/200",
+    "tp": 67524.57307749998,
+    "risk_pct": 1.6573705039176458,
+    "volume_ratio": 1.15,
+    "squeeze_score": 0,
+    "quality_after_squeeze": 4,
+    "passes_ctx_gate": true
+   }
+  },
+  {
+   "source": "conservative/SYNUP03-USDT-SWAP/288",
+   "signal": {
+    "symbol": "SYNUP03-USDT-SWAP",
+    "direction": "LONG",
+    "entry": 0.789480261,
+    "sl": 0.7810903798266667,
+    "tp1": 0.7978701421733333,
+    "tp2": 0.8062600233466667,
+    "tp3": 0.81464990452,
+    "rr": 2,
+    "quality": 5,
+    "signal_type": "EMA50 Bounce",
+    "rsi": 44.7,
+    "vol_ratio": 1.22,
+    "ema_fast": 0.8060856979300001,
+    "ema_slow": 0.80386274502,
+    "ema_trend": 0.7620291198320353,
+    "atr": 0.008909499203517518,
+    "timeframe": "1h",
+    "is_counter_trend": false,
+    "reasons": [
+     "отскок от EMA50: молот / пин-бар",
+     "объём ×1.2 от среднего",
+     "MA выстроены: SMA10 > SMA20 > SMA50",
+     "RSI 45 — здоровая зона",
+     "старший ТФ 4h: по тренду EMA50"
+    ],
+    "setup": "bounce",
+    "ma_label": "EMA50",
+    "ma_value": 0.7894232727594866,
+    "ma_slow": 0.783497802588,
+    "ema_mid": 0.7894232727594866,
+    "aligned": true,
+    "squeeze": 0,
+    "alignment": "SMA10 > SMA20 > SMA50",
+    "htf_tf": "4h",
+    "htf_state": 2,
+    "confluence": [],
+    "pattern": "hammer",
+    "ma_names": "SMA 10/20/50",
+    "ema_names": "EMA 50/200",
+    "tp": 0.7978701421733333,
+    "risk_pct": 1.06270942894838,
+    "volume_ratio": 1.22,
+    "squeeze_score": 0,
+    "quality_after_squeeze": 5,
+    "passes_ctx_gate": true
+   }
+  },
+  {
+   "source": "conservative/SYNUP04-USDT-SWAP/291",
+   "signal": {
+    "symbol": "SYNUP04-USDT-SWAP",
+    "direction": "SHORT",
+    "entry": 3.751892123,
+    "sl": 3.8219220350833334,
+    "tp1": 3.681862210916667,
+    "tp2": 3.611832298833334,
+    "tp3": 3.5418023867500006,
+    "rr": 2,
+    "quality": 5,
+    "signal_type": "EMA200 Bounce",
+    "rsi": 44.4,
+    "vol_ratio": 1.23,
+    "ema_fast": 3.7756938090999994,
+    "ema_slow": 3.77157181385,
+    "ema_trend": 3.7969734737729897,
+    "atr": 0.03731034035010473,
+    "timeframe": "1h",
+    "is_counter_trend": false,
+    "reasons": [
+     "отскок от EMA200: медвежье поглощение",
+     "объём на откате затухал (VSA)",
+     "объём ×1.2 от среднего",
+     "RSI 44 — здоровая зона",
+     "старший ТФ 4h: по тренду EMA50"
+    ],
+    "setup": "bounce",
+    "ma_label": "EMA200",
+    "ma_value": 3.7969734737729897,
+    "ma_slow": 3.8005876186400003,
+    "ema_mid": 3.7938961507765843,
+    "aligned": false,
+    "squeeze": 0,
+    "alignment": "",
+    "htf_tf": "4h",
+    "htf_state": -2,
+    "confluence": [],
+    "pattern": "engulfing",
+    "ma_names": "SMA 10/20/50",
+    "ema_names": "EMA 50/200",
+    "tp": 3.681862210916667,
+    "risk_pct": 1.8665225381623585,
+    "volume_ratio": 1.23,
+    "squeeze_score": 0,
+    "quality_after_squeeze": 5,
+    "passes_ctx_gate": true
+   }
+  },
+  {
+   "source": "conservative/SYNUP05-USDT-SWAP/225",
+   "signal": {
+    "symbol": "SYNUP05-USDT-SWAP",
+    "direction": "LONG",
+    "entry": 34.00230308,
+    "sl": 33.32299720333334,
+    "tp1": 34.68160895666666,
+    "tp2": 35.36091483333332,
+    "tp3": 36.04022070999998,
+    "rr": 2,
+    "quality": 5,
+    "signal_type": "MA Turn SMA20",
+    "rsi": 62.4,
+    "vol_ratio": 3.22,
+    "ema_fast": 33.617621497,
+    "ema_slow": 33.636233621500004,
+    "ema_trend": 32.95070084570304,
+    "atr": 0.2080275225043653,
+    "timeframe": "1h",
+    "is_counter_trend": false,
+    "reasons": [
+     "SMA20 развернулась вверх после 5+ свечей",
+     "цена выше SMA50",
+     "объём ×3.2 от среднего",
+     "RSI 62 — здоровая зона",
+     "старший ТФ 4h: по тренду EMA50"
+    ],
+    "setup": "turn",
+    "ma_label": "SMA20",
+    "ma_value": 33.636233621500004,
+    "ma_slow": 33.6381433588,
+    "ema_mid": 33.58211991499474,
+    "aligned": false,
+    "squeeze": 0,
+    "alignment": "",
+    "htf_tf": "4h",
+    "htf_state": 2,
+    "confluence": [],
+    "pattern": "",
+    "ma_names": "SMA 10/20/50",
+    "ema_names": "EMA 50/200",
+    "tp": 34.68160895666666,
+    "risk_pct": 1.99782313294603,
+    "volume_ratio": 3.22,
+    "squeeze_score": 0,
+    "quality_after_squeeze": 5,
+    "passes_ctx_gate": true
+   }
+  },
+  {
+   "source": "conservative/SYNDN01-USDT-SWAP/242",
+   "signal": {
+    "symbol": "SYNDN01-USDT-SWAP",
+    "direction": "SHORT",
+    "entry": 0.00007775126167,
+    "sl": 0.0000783141891175,
+    "tp1": 0.00007718833422249998,
+    "tp2": 0.00007662540677499997,
+    "tp3": 0.00007606247932749996,
+    "rr": 2,
+    "quality": 5,
+    "signal_type": "Ribbon Pullback",
+    "rsi": 41.5,
+    "vol_ratio": 1.53,
+    "ema_fast": 0.00007781251226399998,
+    "ema_slow": 0.000077981936318,
+    "ema_trend": 0.00008230158397556141,
+    "atr": 4.81517537683681e-7,
+    "timeframe": "1h",
+    "is_counter_trend": false,
+    "reasons": [
+     "откат к ленте EMA 5…55: лента выстроена на 100%, возврат под EMA5",
+     "объём на откате затухал (VSA)",
+     "объём ×1.5 от среднего",
+     "MA выстроены: SMA10 < SMA20 < SMA50",
+     "RSI 42 — здоровая зона",
+     "старший ТФ 4h: по тренду EMA50"
+    ],
+    "setup": "ribbon",
+    "ma_label": "EMA 5–55",
+    "ma_value": 0.00007784529576428655,
+    "ma_slow": 0.0000790906664302,
+    "ema_mid": 0.00007925117514399402,
+    "aligned": true,
+    "squeeze": 0,
+    "alignment": "SMA10 < SMA20 < SMA50",
+    "htf_tf": "4h",
+    "htf_state": -2,
+    "confluence": [],
+    "pattern": "ribbon",
+    "ma_names": "SMA 10/20/50",
+    "ema_names": "EMA 50/200",
+    "tp": 0.00007718833422249998,
+    "risk_pct": 0.7240106917997615,
+    "volume_ratio": 1.53,
+    "squeeze_score": 0,
+    "quality_after_squeeze": 5,
+    "passes_ctx_gate": true
+   }
+  },
+  {
+   "source": "conservative/SYNDN01-USDT-SWAP/247",
+   "signal": {
+    "symbol": "SYNDN01-USDT-SWAP",
+    "direction": "SHORT",
+    "entry": 0.00007781739335,
+    "sl": 0.00007828087125842449,
+    "tp1": 0.0000773539154415755,
+    "tp2": 0.00007689043753315102,
+    "tp3": 0.00007642695962472653,
+    "rr": 2,
+    "quality": 5,
+    "signal_type": "Ribbon Pullback",
+    "rsi": 43.2,
+    "vol_ratio": 1.73,
+    "ema_fast": 0.000077887344306,
+    "ema_slow": 0.00007784873598549999,
+    "ema_trend": 0.00008206794232901088,
+    "atr": 4.2633591369791564e-7,
+    "timeframe": "1h",
+    "is_counter_trend": false,
+    "reasons": [
+     "откат к ленте EMA 5…55: лента выстроена на 100%, возврат под EMA5",
+     "объём ×1.7 от среднего",
+     "RSI 43 — здоровая зона",
+     "старший ТФ 4h: по тренду EMA50"
+    ],
+    "setup": "ribbon",
+    "ma_label": "EMA 5–55",
+    "ma_value": 0.00007787810400282786,
+    "ma_slow": 0.000078811179832,
+    "ema_mid": 0.00007900802048887027,
+    "aligned": false,
+    "squeeze": 0,
+    "alignment": "",
+    "htf_tf": "4h",
+    "htf_state": -2,
+    "confluence": [],
+    "pattern": "ribbon",
+    "ma_names": "SMA 10/20/50",
+    "ema_names": "EMA 50/200",
+    "tp": 0.0000773539154415755,
+    "risk_pct": 0.5955968048684189,
+    "volume_ratio": 1.73,
+    "squeeze_score": 0,
+    "quality_after_squeeze": 5,
+    "passes_ctx_gate": true
+   }
+  },
+  {
+   "source": "conservative/SYNDN05-USDT-SWAP/389",
+   "signal": {
+    "symbol": "SYNDN05-USDT-SWAP",
+    "direction": "SHORT",
+    "entry": 28.2583353,
+    "sl": 28.519090247211338,
+    "tp1": 27.99758035278866,
+    "tp2": 27.73682540557732,
+    "tp3": 27.47607045836598,
+    "rr": 2,
+    "quality": 5,
+    "signal_type": "EMA50 Bounce",
+    "rsi": 49,
+    "vol_ratio": 1.64,
+    "ema_fast": 28.247673852,
+    "ema_slow": 28.333601349500004,
+    "ema_trend": 29.57255197300999,
+    "atr": 0.19010497906627694,
+    "timeframe": "1h",
+    "is_counter_trend": false,
+    "reasons": [
+     "отскок от EMA50: касание EMA и закрытие ниже",
+     "объём ×1.6 от среднего",
+     "MA выстроены: SMA10 < SMA20 < SMA50",
+     "RSI 49 — здоровая зона",
+     "старший ТФ 4h: по тренду EMA50",
+     "совпадение: Ribbon Pullback"
+    ],
+    "setup": "bounce",
+    "ma_label": "EMA50",
+    "ma_value": 28.47156400244477,
+    "ma_slow": 28.3476341182,
+    "ema_mid": 28.47156400244477,
+    "aligned": true,
+    "squeeze": 0,
+    "alignment": "SMA10 < SMA20 < SMA50",
+    "htf_tf": "4h",
+    "htf_state": -2,
+    "confluence": [
+     "Ribbon Pullback"
+    ],
+    "pattern": "touch",
+    "ma_names": "SMA 10/20/50",
+    "ema_names": "EMA 50/200",
+    "tp": 27.99758035278866,
+    "risk_pct": 0.9227540987219409,
+    "volume_ratio": 1.64,
+    "squeeze_score": 0,
+    "quality_after_squeeze": 5,
+    "passes_ctx_gate": true
+   }
+  },
+  {
+   "source": "conservative/SYNRG04-USDT-SWAP/366",
+   "signal": {
+    "symbol": "SYNRG04-USDT-SWAP",
+    "direction": "SHORT",
+    "entry": 1.730053582,
+    "sl": 1.740110935273207,
+    "tp1": 1.7199962287267931,
+    "tp2": 1.7099388754535862,
+    "tp3": 1.6998815221803794,
+    "rr": 2,
+    "quality": 5,
+    "signal_type": "MA Turn SMA20",
+    "rsi": 44.4,
+    "vol_ratio": 5.72,
+    "ema_fast": 1.7374977910999998,
+    "ema_slow": 1.7333727221,
+    "ema_trend": 1.7504419277282113,
+    "atr": 0.007628213092827233,
+    "timeframe": "1h",
+    "is_counter_trend": false,
+    "reasons": [
+     "SMA20 развернулась вниз после 5+ свечей",
+     "цена ниже SMA50",
+     "объём ×5.7 от среднего",
+     "RSI 44 — здоровая зона",
+     "старший ТФ 4h: по тренду EMA50"
+    ],
+    "setup": "turn",
+    "ma_label": "SMA20",
+    "ma_value": 1.7333727221,
+    "ma_slow": 1.7412339086200002,
+    "ema_mid": 1.7402392787847405,
+    "aligned": false,
+    "squeeze": 0,
+    "alignment": "",
+    "htf_tf": "4h",
+    "htf_state": -2,
+    "confluence": [],
+    "pattern": "",
+    "ma_names": "SMA 10/20/50",
+    "ema_names": "EMA 50/200",
+    "tp": 1.7199962287267931,
+    "risk_pct": 0.5813318950260635,
+    "volume_ratio": 5.72,
+    "squeeze_score": 1,
+    "quality_after_squeeze": 5,
+    "passes_ctx_gate": true
+   }
+  },
+  {
+   "source": "conservative/SYNVL02-USDT-SWAP/336",
+   "signal": {
+    "symbol": "SYNVL02-USDT-SWAP",
+    "direction": "LONG",
+    "entry": 0.09418712622,
+    "sl": 0.09177560083583333,
+    "tp1": 0.09659865160416667,
+    "tp2": 0.09901017698833334,
+    "tp3": 0.1014217023725,
+    "rr": 2,
+    "quality": 5,
+    "signal_type": "MA Cross 10/20",
+    "rsi": 60.7,
+    "vol_ratio": 2.27,
+    "ema_fast": 0.09300571927500001,
+    "ema_slow": 0.0925949028475,
+    "ema_trend": 0.0865010276714428,
+    "atr": 0.0010817594815354743,
+    "timeframe": "1h",
+    "is_counter_trend": false,
+    "reasons": [
+     "SMA10 пересекла SMA20 снизу вверх",
+     "цена выше SMA50",
+     "объём ×2.3 от среднего",
+     "MA выстроены: SMA10 > SMA20 > SMA50",
+     "RSI 61 — здоровая зона",
+     "старший ТФ 4h: по тренду EMA50"
+    ],
+    "setup": "cross",
+    "ma_label": "SMA10/SMA20",
+    "ma_value": 0.0925949028475,
+    "ma_slow": 0.0917915736932,
+    "ema_mid": 0.09193628849084404,
+    "aligned": true,
+    "squeeze": 0,
+    "alignment": "SMA10 > SMA20 > SMA50",
+    "htf_tf": "4h",
+    "htf_state": 2,
+    "confluence": [],
+    "pattern": "",
+    "ma_names": "SMA 10/20/50",
+    "ema_names": "EMA 50/200",
+    "tp": 0.09659865160416667,
+    "risk_pct": 2.560355624965015,
+    "volume_ratio": 2.27,
+    "squeeze_score": 1,
+    "quality_after_squeeze": 5,
+    "passes_ctx_gate": true
+   }
+  },
+  {
+   "source": "conservative/SYNVL05-USDT-SWAP/367",
+   "signal": {
+    "symbol": "SYNVL05-USDT-SWAP",
+    "direction": "SHORT",
+    "entry": 37.8041436,
+    "sl": 38.840017735,
+    "tp1": 36.768269465,
+    "tp2": 35.73239533,
+    "tp3": 34.696521195,
+    "rr": 2,
+    "quality": 5,
+    "signal_type": "Death Cross",
+    "rsi": 36.6,
+    "vol_ratio": 1.04,
+    "ema_fast": 38.656269343000005,
+    "ema_slow": 38.9461488545,
+    "ema_trend": 40.04893717013125,
+    "atr": 0.6571289058470058,
+    "timeframe": "1h",
+    "is_counter_trend": false,
+    "reasons": [
+     "EMA50 пересекла EMA200 сверху вниз (крест смерти)",
+     "объём ×1.0 от среднего",
+     "MA выстроены: SMA10 < SMA20 < SMA50",
+     "RSI 37 — здоровая зона",
+     "старший ТФ 4h: по тренду EMA50"
+    ],
+    "setup": "golden",
+    "ma_label": "EMA50/EMA200",
+    "ma_value": 40.04893717013125,
+    "ma_slow": 40.456347289200004,
+    "ema_mid": 40.02199061790398,
+    "aligned": true,
+    "squeeze": 0,
+    "alignment": "SMA10 < SMA20 < SMA50",
+    "htf_tf": "4h",
+    "htf_state": -2,
+    "confluence": [],
+    "pattern": "",
+    "ma_names": "SMA 10/20/50",
+    "ema_names": "EMA 50/200",
+    "tp": 36.768269465,
+    "risk_pct": 2.740107396587077,
+    "volume_ratio": 1.04,
+    "squeeze_score": 0,
+    "quality_after_squeeze": 5,
+    "passes_ctx_gate": true
+   }
+  },
+  {
+   "source": "active/BTC-USDT-SWAP/240",
+   "signal": {
+    "symbol": "BTC-USDT-SWAP",
+    "direction": "LONG",
+    "entry": 59732.93045,
+    "sl": 57918.79352,
+    "tp1": 61547.06738,
+    "tp2": 63361.20431,
+    "tp3": 65175.34124,
+    "rr": 2,
+    "quality": 4,
+    "signal_type": "EMA200 Bounce",
+    "rsi": 43.2,
+    "vol_ratio": 1.78,
+    "ema_fast": 60459.15846970619,
+    "ema_slow": 61080.12628680372,
+    "ema_trend": 58587.328756276824,
+    "atr": 1295.2252935628576,
+    "timeframe": "1h",
+    "is_counter_trend": false,
+    "reasons": [
+     "отскок от EMA200: бычье поглощение",
+     "объём ×1.8 от среднего",
+     "RSI 43 — здоровая зона"
+    ],
+    "setup": "bounce",
+    "ma_label": "EMA200",
+    "ma_value": 58587.328756276824,
+    "ma_slow": 60448.79469980036,
+    "ema_mid": 60448.79469980036,
+    "aligned": false,
+    "squeeze": 0,
+    "alignment": "",
+    "htf_tf": "",
+    "htf_state": 0,
+    "confluence": [],
+    "pattern": "engulfing",
+    "ma_names": "EMA 9/21/50",
+    "ema_names": "EMA 50/200",
+    "tp": 61547.06738,
+    "risk_pct": 3.037080076823856,
+    "volume_ratio": 1.78,
+    "squeeze_score": 0,
+    "quality_after_squeeze": 4,
+    "passes_ctx_gate": true
+   }
+  },
+  {
+   "source": "active/BTC-USDT-SWAP/265",
+   "signal": {
+    "symbol": "BTC-USDT-SWAP",
+    "direction": "LONG",
+    "entry": 61313.39633,
+    "sl": 60543.960132609085,
+    "tp1": 62082.83252739092,
+    "tp2": 62852.26872478185,
+    "tp3": 63621.704922172765,
+    "rr": 2,
+    "quality": 5,
+    "signal_type": "EMA50 Bounce",
+    "rsi": 50.6,
+    "vol_ratio": 2.02,
+    "ema_fast": 61286.342052962966,
+    "ema_slow": 61272.363926212536,
+    "ema_trend": 59207.41369193932,
+    "atr": 961.7952467386515,
+    "timeframe": "1h",
+    "is_counter_trend": false,
+    "reasons": [
+     "отскок от EMA50: касание EMA и закрытие выше",
+     "объём на откате затухал (VSA)",
+     "объём ×2.0 от среднего",
+     "MA выстроены: EMA9 > EMA21 > EMA50",
+     "RSI 51 — здоровая зона",
+     "совпадение: Ribbon Pullback"
+    ],
+    "setup": "bounce",
+    "ma_label": "EMA50",
+    "ma_value": 60950.3082635988,
+    "ma_slow": 60950.3082635988,
+    "ema_mid": 60950.3082635988,
+    "aligned": true,
+    "squeeze": 0,
+    "alignment": "EMA9 > EMA21 > EMA50",
+    "htf_tf": "",
+    "htf_state": 0,
+    "confluence": [
+     "Ribbon Pullback"
+    ],
+    "pattern": "touch",
+    "ma_names": "EMA 9/21/50",
+    "ema_names": "EMA 50/200",
+    "tp": 62082.83252739092,
+    "risk_pct": 1.254923464441067,
+    "volume_ratio": 2.02,
+    "squeeze_score": 0,
+    "quality_after_squeeze": 5,
+    "passes_ctx_gate": true
+   }
+  },
+  {
+   "source": "active/BTC-USDT-SWAP/289",
+   "signal": {
+    "symbol": "BTC-USDT-SWAP",
+    "direction": "LONG",
+    "entry": 64363.30157,
+    "sl": 62771.95603083333,
+    "tp1": 65954.64710916668,
+    "tp2": 67545.99264833334,
+    "tp3": 69137.33818750002,
+    "rr": 2,
+    "quality": 5,
+    "signal_type": "Ribbon Pullback",
+    "rsi": 51.6,
+    "vol_ratio": 3.29,
+    "ema_fast": 64580.57874052938,
+    "ema_slow": 64371.69227809215,
+    "ema_trend": 60420.65731493132,
+    "atr": 913.2204678597639,
+    "timeframe": "1h",
+    "is_counter_trend": false,
+    "reasons": [
+     "откат к ленте EMA 5…55: лента выстроена на 100%, возврат над EMA5",
+     "объём на откате затухал (VSA)",
+     "объём ×3.3 от среднего",
+     "MA выстроены: EMA9 > EMA21 > EMA50",
+     "RSI 52 — здоровая зона"
+    ],
+    "setup": "ribbon",
+    "ma_label": "EMA 5–55",
+    "ma_value": 64349.94342313101,
+    "ma_slow": 63240.68598127495,
+    "ema_mid": 63240.68598127495,
+    "aligned": true,
+    "squeeze": 0,
+    "alignment": "EMA9 > EMA21 > EMA50",
+    "htf_tf": "",
+    "htf_state": 0,
+    "confluence": [],
+    "pattern": "ribbon",
+    "ma_names": "EMA 9/21/50",
+    "ema_names": "EMA 50/200",
+    "tp": 65954.64710916668,
+    "risk_pct": 2.472442370651174,
+    "volume_ratio": 3.29,
+    "squeeze_score": 0,
+    "quality_after_squeeze": 5,
+    "passes_ctx_gate": true
+   }
+  },
+  {
+   "source": "active/BTC-USDT-SWAP/345",
+   "signal": {
+    "symbol": "BTC-USDT-SWAP",
+    "direction": "LONG",
+    "entry": 66721.49954,
+    "sl": 66261.24306443187,
+    "tp1": 67181.75601556814,
+    "tp2": 67642.01249113628,
+    "tp3": 68102.26896670442,
+    "rr": 2,
+    "quality": 3,
+    "signal_type": "Ribbon Pullback",
+    "rsi": 50.7,
+    "vol_ratio": 1.25,
+    "ema_fast": 66736.4860876038,
+    "ema_slow": 66736.70421201781,
+    "ema_trend": 62895.157662661164,
+    "atr": 575.3205944601735,
+    "timeframe": "1h",
+    "is_counter_trend": false,
+    "reasons": [
+     "откат к ленте EMA 5…55: лента выстроена на 100%, возврат над EMA5",
+     "объём ×1.3 от среднего",
+     "RSI 51 — здоровая зона"
+    ],
+    "setup": "ribbon",
+    "ma_label": "EMA 5–55",
+    "ma_value": 66688.83338562878,
+    "ma_slow": 66135.02997495818,
+    "ema_mid": 66135.02997495818,
+    "aligned": false,
+    "squeeze": 0,
+    "alignment": "",
+    "htf_tf": "",
+    "htf_state": 0,
+    "confluence": [],
+    "pattern": "ribbon",
+    "ma_names": "EMA 9/21/50",
+    "ema_names": "EMA 50/200",
+    "tp": 67181.75601556814,
+    "risk_pct": 0.6898173433470435,
+    "volume_ratio": 1.25,
+    "squeeze_score": 0,
+    "quality_after_squeeze": 3,
+    "passes_ctx_gate": true
+   }
+  },
+  {
+   "source": "active/SYNUP01-USDT-SWAP/294",
+   "signal": {
+    "symbol": "SYNUP01-USDT-SWAP",
+    "direction": "SHORT",
+    "entry": 0.0001721416945,
+    "sl": 0.00017438088514166666,
+    "tp1": 0.00016990250385833333,
+    "tp2": 0.00016766331321666666,
+    "tp3": 0.000165424122575,
+    "rr": 2,
+    "quality": 4,
+    "signal_type": "EMA Cross 9/21",
+    "rsi": 45.8,
+    "vol_ratio": 1.55,
+    "ema_fast": 0.00017265875878659143,
+    "ema_slow": 0.0001726910904262333,
+    "ema_trend": 0.00017302848060935544,
+    "atr": 0.000001025981066206844,
+    "timeframe": "1h",
+    "is_counter_trend": false,
+    "reasons": [
+     "EMA9 пересекла EMA21 сверху вниз",
+     "цена ниже EMA50",
+     "объём ×1.6 от среднего",
+     "MA выстроены: EMA9 < EMA21 < EMA50",
+     "RSI 46 — здоровая зона"
+    ],
+    "setup": "cross",
+    "ma_label": "EMA9/EMA21",
+    "ma_value": 0.0001726910904262333,
+    "ma_slow": 0.00017296626398658247,
+    "ema_mid": 0.00017296626398658247,
+    "aligned": true,
+    "squeeze": 0,
+    "alignment": "EMA9 < EMA21 < EMA50",
+    "htf_tf": "",
+    "htf_state": 0,
+    "confluence": [],
+    "pattern": "",
+    "ma_names": "EMA 9/21/50",
+    "ema_names": "EMA 50/200",
+    "tp": 0.00016990250385833333,
+    "risk_pct": 1.3007834320270784,
+    "volume_ratio": 1.55,
+    "squeeze_score": 0,
+    "quality_after_squeeze": 4,
+    "passes_ctx_gate": true
+   }
+  },
+  {
+   "source": "active/SYNUP01-USDT-SWAP/369",
+   "signal": {
+    "symbol": "SYNUP01-USDT-SWAP",
+    "direction": "SHORT",
+    "entry": 0.0001794637456,
+    "sl": 0.00018147231590833333,
+    "tp1": 0.00017745517529166665,
+    "tp2": 0.00017544660498333331,
+    "tp3": 0.00017343803467499997,
+    "rr": 2,
+    "quality": 3,
+    "signal_type": "EMA Cross 9/21",
+    "rsi": 40.2,
+    "vol_ratio": 2.9,
+    "ema_fast": 0.00018021164334532108,
+    "ema_slow": 0.000180396189191763,
+    "ema_trend": 0.00017691325261555681,
+    "atr": 9.82238306563592e-7,
+    "timeframe": "1h",
+    "is_counter_trend": true,
+    "reasons": [
+     "EMA9 пересекла EMA21 сверху вниз",
+     "цена ниже EMA50",
+     "объём ×2.9 от среднего",
+     "RSI 40 — здоровая зона",
+     "против EMA200"
+    ],
+    "setup": "cross",
+    "ma_label": "EMA9/EMA21",
+    "ma_value": 0.000180396189191763,
+    "ma_slow": 0.00018008380694127226,
+    "ema_mid": 0.00018008380694127226,
+    "aligned": false,
+    "squeeze": 0,
+    "alignment": "",
+    "htf_tf": "",
+    "htf_state": 0,
+    "confluence": [],
+    "pattern": "",
+    "ma_names": "EMA 9/21/50",
+    "ema_names": "EMA 50/200",
+    "tp": 0.00017745517529166665,
+    "risk_pct": 1.1192067242428823,
+    "volume_ratio": 2.9,
+    "squeeze_score": 1,
+    "quality_after_squeeze": 4,
+    "passes_ctx_gate": true
+   }
+  },
+  {
+   "source": "active/SYNUP03-USDT-SWAP/267",
+   "signal": {
+    "symbol": "SYNUP03-USDT-SWAP",
+    "direction": "LONG",
+    "entry": 0.7774120932,
+    "sl": 0.7598773301666667,
+    "tp1": 0.7949468562333334,
+    "tp2": 0.8124816192666667,
+    "tp3": 0.8300163823000001,
+    "rr": 2,
+    "quality": 4,
+    "signal_type": "EMA Cross 9/21",
+    "rsi": 54.4,
+    "vol_ratio": 1.39,
+    "ema_fast": 0.7716061181810093,
+    "ema_slow": 0.7715667086439272,
+    "ema_trend": 0.7517112979215164,
+    "atr": 0.009457564091245757,
+    "timeframe": "1h",
+    "is_counter_trend": false,
+    "reasons": [
+     "EMA9 пересекла EMA21 снизу вверх",
+     "цена выше EMA50",
+     "объём ×1.4 от среднего",
+     "MA выстроены: EMA9 > EMA21 > EMA50",
+     "RSI 54 — здоровая зона"
+    ],
+    "setup": "cross",
+    "ma_label": "EMA9/EMA21",
+    "ma_value": 0.7715667086439272,
+    "ma_slow": 0.7708528962616363,
+    "ema_mid": 0.7708528962616363,
+    "aligned": true,
+    "squeeze": 0,
+    "alignment": "EMA9 > EMA21 > EMA50",
+    "htf_tf": "",
+    "htf_state": 0,
+    "confluence": [],
+    "pattern": "",
+    "ma_names": "EMA 9/21/50",
+    "ema_names": "EMA 50/200",
+    "tp": 0.7949468562333334,
+    "risk_pct": 2.255530006120227,
+    "volume_ratio": 1.39,
+    "squeeze_score": 1,
+    "quality_after_squeeze": 5,
+    "passes_ctx_gate": true
+   }
+  },
+  {
+   "source": "active/SYNUP04-USDT-SWAP/291",
+   "signal": {
+    "symbol": "SYNUP04-USDT-SWAP",
+    "direction": "SHORT",
+    "entry": 3.751892123,
+    "sl": 3.8219220350833334,
+    "tp1": 3.681862210916667,
+    "tp2": 3.611832298833334,
+    "tp3": 3.5418023867500006,
+    "rr": 2,
+    "quality": 5,
+    "signal_type": "EMA200 Bounce",
+    "rsi": 44.4,
+    "vol_ratio": 1.23,
+    "ema_fast": 3.773787181327272,
+    "ema_slow": 3.7770051192576797,
+    "ema_trend": 3.7969734737729897,
+    "atr": 0.03731034035010473,
+    "timeframe": "1h",
+    "is_counter_trend": false,
+    "reasons": [
+     "отскок от EMA200: медвежье поглощение",
+     "объём на откате затухал (VSA)",
+     "объём ×1.2 от среднего",
+     "MA выстроены: EMA9 < EMA21 < EMA50",
+     "RSI 44 — здоровая зона"
+    ],
+    "setup": "bounce",
+    "ma_label": "EMA200",
+    "ma_value": 3.7969734737729897,
+    "ma_slow": 3.7938961507765843,
+    "ema_mid": 3.7938961507765843,
+    "aligned": true,
+    "squeeze": 0,
+    "alignment": "EMA9 < EMA21 < EMA50",
+    "htf_tf": "",
+    "htf_state": 0,
+    "confluence": [],
+    "pattern": "engulfing",
+    "ma_names": "EMA 9/21/50",
+    "ema_names": "EMA 50/200",
+    "tp": 3.681862210916667,
+    "risk_pct": 1.8665225381623585,
+    "volume_ratio": 1.23,
+    "squeeze_score": 0,
+    "quality_after_squeeze": 5,
+    "passes_ctx_gate": true
+   }
+  },
+  {
+   "source": "active/SYNUP05-USDT-SWAP/248",
+   "signal": {
+    "symbol": "SYNUP05-USDT-SWAP",
+    "direction": "LONG",
+    "entry": 33.96122498,
+    "sl": 33.2028983,
+    "tp1": 34.71955165999999,
+    "tp2": 35.47787833999999,
+    "tp3": 36.236205019999986,
+    "rr": 2,
+    "quality": 4,
+    "signal_type": "MA Turn EMA20",
+    "rsi": 56.5,
+    "vol_ratio": 4.42,
+    "ema_fast": 33.54532134175676,
+    "ema_slow": 33.60457244241317,
+    "ema_trend": 33.133036682196135,
+    "atr": 0.31119544165129254,
+    "timeframe": "1h",
+    "is_counter_trend": false,
+    "reasons": [
+     "EMA20 развернулась вверх после 5+ свечей",
+     "цена выше EMA50",
+     "объём ×4.4 от среднего",
+     "RSI 56 — здоровая зона"
+    ],
+    "setup": "turn",
+    "ma_label": "EMA20",
+    "ma_value": 33.59875115908179,
+    "ma_slow": 33.648728372913595,
+    "ema_mid": 33.648728372913595,
+    "aligned": false,
+    "squeeze": 0,
+    "alignment": "",
+    "htf_tf": "",
+    "htf_state": 0,
+    "confluence": [],
+    "pattern": "",
+    "ma_names": "EMA 9/21/50",
+    "ema_names": "EMA 50/200",
+    "tp": 34.71955165999999,
+    "risk_pct": 2.2329191024369117,
+    "volume_ratio": 4.42,
+    "squeeze_score": 0,
+    "quality_after_squeeze": 4,
+    "passes_ctx_gate": true
+   }
+  },
+  {
+   "source": "active/SYNDN01-USDT-SWAP/242",
+   "signal": {
+    "symbol": "SYNDN01-USDT-SWAP",
+    "direction": "SHORT",
+    "entry": 0.00007775126167,
+    "sl": 0.0000783141891175,
+    "tp1": 0.00007718833422249998,
+    "tp2": 0.00007662540677499997,
+    "tp3": 0.00007606247932749996,
+    "rr": 2,
+    "quality": 5,
+    "signal_type": "Ribbon Pullback",
+    "rsi": 41.5,
+    "vol_ratio": 1.53,
+    "ema_fast": 0.00007785474834862572,
+    "ema_slow": 0.00007808634741874117,
+    "ema_trend": 0.00008230158397556141,
+    "atr": 4.81517537683681e-7,
+    "timeframe": "1h",
+    "is_counter_trend": false,
+    "reasons": [
+     "откат к ленте EMA 5…55: лента выстроена на 100%, возврат под EMA5",
+     "объём на откате затухал (VSA)",
+     "объём ×1.5 от среднего",
+     "MA выстроены: EMA9 < EMA21 < EMA50",
+     "RSI 42 — здоровая зона"
+    ],
+    "setup": "ribbon",
+    "ma_label": "EMA 5–55",
+    "ma_value": 0.00007784529576428655,
+    "ma_slow": 0.00007925117514399402,
+    "ema_mid": 0.00007925117514399402,
+    "aligned": true,
+    "squeeze": 0,
+    "alignment": "EMA9 < EMA21 < EMA50",
+    "htf_tf": "",
+    "htf_state": 0,
+    "confluence": [],
+    "pattern": "ribbon",
+    "ma_names": "EMA 9/21/50",
+    "ema_names": "EMA 50/200",
+    "tp": 0.00007718833422249998,
+    "risk_pct": 0.7240106917997615,
+    "volume_ratio": 1.53,
+    "squeeze_score": 0,
+    "quality_after_squeeze": 5,
+    "passes_ctx_gate": true
+   }
+  },
+  {
+   "source": "active/SYNDN01-USDT-SWAP/264",
+   "signal": {
+    "symbol": "SYNDN01-USDT-SWAP",
+    "direction": "SHORT",
+    "entry": 0.00007778258315,
+    "sl": 0.00007851824420473736,
+    "tp1": 0.00007704692209526265,
+    "tp2": 0.00007631126104052529,
+    "tp3": 0.00007557559998578793,
+    "rr": 2,
+    "quality": 4,
+    "signal_type": "Ribbon Pullback",
+    "rsi": 48.3,
+    "vol_ratio": 1.57,
+    "ema_fast": 0.0000778810008543343,
+    "ema_slow": 0.0000778163140567449,
+    "ema_trend": 0.00008132529950784222,
+    "atr": 3.8949097894946674e-7,
+    "timeframe": "1h",
+    "is_counter_trend": false,
+    "reasons": [
+     "откат к ленте EMA 5…55: лента выстроена на 100%, возврат под EMA5",
+     "объём на откате затухал (VSA)",
+     "объём ×1.6 от среднего",
+     "RSI 48 — здоровая зона"
+    ],
+    "setup": "ribbon",
+    "ma_label": "EMA 5–55",
+    "ma_value": 0.00007792951046332198,
+    "ma_slow": 0.00007836009875089795,
+    "ema_mid": 0.00007836009875089795,
+    "aligned": false,
+    "squeeze": 0,
+    "alignment": "",
+    "htf_tf": "",
+    "htf_state": 0,
+    "confluence": [],
+    "pattern": "ribbon",
+    "ma_names": "EMA 9/21/50",
+    "ema_names": "EMA 50/200",
+    "tp": 0.00007704692209526265,
+    "risk_pct": 0.9457914933458423,
+    "volume_ratio": 1.57,
+    "squeeze_score": 0,
+    "quality_after_squeeze": 4,
+    "passes_ctx_gate": true
+   }
+  },
+  {
+   "source": "active/SYNDN01-USDT-SWAP/312",
+   "signal": {
+    "symbol": "SYNDN01-USDT-SWAP",
+    "direction": "SHORT",
+    "entry": 0.00007485799747,
+    "sl": 0.00007585019805166667,
+    "tp1": 0.00007386579688833331,
+    "tp2": 0.00007287359630666663,
+    "tp3": 0.00007188139572499995,
+    "rr": 2,
+    "quality": 3,
+    "signal_type": "MA Turn EMA20",
+    "rsi": 42.9,
+    "vol_ratio": 1.26,
+    "ema_fast": 0.00007523136197202807,
+    "ema_slow": 0.00007522750875563895,
+    "ema_trend": 0.00007888402665474717,
+    "atr": 4.187241788355245e-7,
+    "timeframe": "1h",
+    "is_counter_trend": false,
+    "reasons": [
+     "EMA20 развернулась вниз после 5+ свечей",
+     "цена ниже EMA50",
+     "объём ×1.3 от среднего",
+     "RSI 43 — здоровая зона"
+    ],
+    "setup": "turn",
+    "ma_label": "EMA20",
+    "ma_value": 0.0000752243538855693,
+    "ma_slow": 0.00007564711461846185,
+    "ema_mid": 0.00007564711461846185,
+    "aligned": false,
+    "squeeze": 0,
+    "alignment": "",
+    "htf_tf": "",
+    "htf_state": 0,
+    "confluence": [],
+    "pattern": "",
+    "ma_names": "EMA 9/21/50",
+    "ema_names": "EMA 50/200",
+    "tp": 0.00007386579688833331,
+    "risk_pct": 1.3254436602639728,
+    "volume_ratio": 1.26,
+    "squeeze_score": 0,
+    "quality_after_squeeze": 3,
+    "passes_ctx_gate": true
+   }
+  },
+  {
+   "source": "active/SYNDN04-USDT-SWAP/248",
+   "signal": {
+    "symbol": "SYNDN04-USDT-SWAP",
+    "direction": "SHORT",
+    "entry": 2.175369105,
+    "sl": 2.184916838879308,
+    "tp1": 2.165821371120692,
+    "tp2": 2.156273637241384,
+    "tp3": 2.1467259033620762,
+    "rr": 2,
+    "quality": 4,
+    "signal_type": "EMA200 Bounce",
+    "rsi": 49.3,
+    "vol_ratio": 4.48,
+    "ema_fast": 2.176171898643602,
+    "ema_slow": 2.1767447182281257,
+    "ema_trend": 2.18214767647817,
+    "atr": 0.011076649604552945,
+    "timeframe": "1h",
+    "is_counter_trend": false,
+    "reasons": [
+     "отскок от EMA200: перевёрнутый пин-бар",
+     "объём ×4.5 от среднего",
+     "RSI 49 — здоровая зона"
+    ],
+    "setup": "bounce",
+    "ma_label": "EMA200",
+    "ma_value": 2.18214767647817,
+    "ma_slow": 2.1741865696165887,
+    "ema_mid": 2.1741865696165887,
+    "aligned": false,
+    "squeeze": 0,
+    "alignment": "",
+    "htf_tf": "",
+    "htf_state": 0,
+    "confluence": [],
+    "pattern": "hammer",
+    "ma_names": "EMA 9/21/50",
+    "ema_names": "EMA 50/200",
+    "tp": 2.165821371120692,
+    "risk_pct": 0.4389017871662732,
+    "volume_ratio": 4.48,
+    "squeeze_score": 0,
+    "quality_after_squeeze": 4,
+    "passes_ctx_gate": true
+   }
+  },
+  {
+   "source": "active/SYNVL05-USDT-SWAP/367",
+   "signal": {
+    "symbol": "SYNVL05-USDT-SWAP",
+    "direction": "SHORT",
+    "entry": 37.8041436,
+    "sl": 38.840017735,
+    "tp1": 36.768269465,
+    "tp2": 35.73239533,
+    "tp3": 34.696521195,
+    "rr": 2,
+    "quality": 5,
+    "signal_type": "Death Cross",
+    "rsi": 36.6,
+    "vol_ratio": 1.04,
+    "ema_fast": 38.501334035322884,
+    "ema_slow": 39.10347709739955,
+    "ema_trend": 40.04893717013125,
+    "atr": 0.6571289058470058,
+    "timeframe": "1h",
+    "is_counter_trend": false,
+    "reasons": [
+     "EMA50 пересекла EMA200 сверху вниз (крест смерти)",
+     "объём ×1.0 от среднего",
+     "MA выстроены: EMA9 < EMA21 < EMA50",
+     "RSI 37 — здоровая зона"
+    ],
+    "setup": "golden",
+    "ma_label": "EMA50/EMA200",
+    "ma_value": 40.04893717013125,
+    "ma_slow": 40.02199061790398,
+    "ema_mid": 40.02199061790398,
+    "aligned": true,
+    "squeeze": 0,
+    "alignment": "EMA9 < EMA21 < EMA50",
+    "htf_tf": "",
+    "htf_state": 0,
+    "confluence": [],
+    "pattern": "",
+    "ma_names": "EMA 9/21/50",
+    "ema_names": "EMA 50/200",
+    "tp": 36.768269465,
+    "risk_pct": 2.740107396587077,
+    "volume_ratio": 1.04,
+    "squeeze_score": 0,
+    "quality_after_squeeze": 5,
+    "passes_ctx_gate": true
+   }
+  },
+  {
+   "source": "active/DOGEVL08-USDT-SWAP/252",
+   "signal": {
+    "symbol": "DOGEVL08-USDT-SWAP",
+    "direction": "LONG",
+    "entry": 53113.69828,
+    "sl": 52157.5655909503,
+    "tp1": 54069.8309690497,
+    "tp2": 55025.9636580994,
+    "tp3": 55982.0963471491,
+    "rr": 2,
+    "quality": 5,
+    "signal_type": "Golden Cross",
+    "rsi": 66.1,
+    "vol_ratio": 3.31,
+    "ema_fast": 51733.51679940747,
+    "ema_slow": 51113.35831047793,
+    "ema_trend": 51071.025709307374,
+    "atr": 829.349196198805,
+    "timeframe": "1h",
+    "is_counter_trend": false,
+    "reasons": [
+     "EMA50 пересекла EMA200 снизу вверх (золотой крест)",
+     "объём ×3.3 от среднего",
+     "MA выстроены: EMA9 > EMA21 > EMA50"
+    ],
+    "setup": "golden",
+    "ma_label": "EMA50/EMA200",
+    "ma_value": 51071.025709307374,
+    "ma_slow": 51074.434099471524,
+    "ema_mid": 51074.434099471524,
+    "aligned": true,
+    "squeeze": 0,
+    "alignment": "EMA9 > EMA21 > EMA50",
+    "htf_tf": "",
+    "htf_state": 0,
+    "confluence": [],
+    "pattern": "",
+    "ma_names": "EMA 9/21/50",
+    "ema_names": "EMA 50/200",
+    "tp": 54069.8309690497,
+    "risk_pct": 1.8001621427475194,
+    "volume_ratio": 3.31,
+    "squeeze_score": 0,
+    "quality_after_squeeze": 5,
+    "passes_ctx_gate": true
+   }
+  },
+  {
+   "source": "active/DOGEVL08-USDT-SWAP/340",
+   "signal": {
+    "symbol": "DOGEVL08-USDT-SWAP",
+    "direction": "LONG",
+    "entry": 50477.94173,
+    "sl": 49341.8073697032,
+    "tp1": 51614.076090296796,
+    "tp2": 52750.21045059359,
+    "tp3": 53886.34481089039,
+    "rr": 2,
+    "quality": 2,
+    "signal_type": "EMA Cross 9/21",
+    "rsi": 55,
+    "vol_ratio": 1.66,
+    "ema_fast": 49804.63152624147,
+    "ema_slow": 49655.72139932888,
+    "ema_trend": 51027.86864238869,
+    "atr": 924.2444411871776,
+    "timeframe": "1h",
+    "is_counter_trend": true,
+    "reasons": [
+     "EMA9 пересекла EMA21 снизу вверх",
+     "цена выше EMA50",
+     "объём ×1.7 от среднего",
+     "RSI 55 — здоровая зона",
+     "против EMA200"
+    ],
+    "setup": "cross",
+    "ma_label": "EMA9/EMA21",
+    "ma_value": 49655.72139932888,
+    "ma_slow": 50171.093152940775,
+    "ema_mid": 50171.093152940775,
+    "aligned": false,
+    "squeeze": 0,
+    "alignment": "",
+    "htf_tf": "",
+    "htf_state": 0,
+    "confluence": [],
+    "pattern": "",
+    "ma_names": "EMA 9/21/50",
+    "ema_names": "EMA 50/200",
+    "tp": 51614.076090296796,
+    "risk_pct": 2.250754134100462,
+    "volume_ratio": 1.66,
+    "squeeze_score": 0,
+    "quality_after_squeeze": 2,
+    "passes_ctx_gate": true
+   }
+  }
+ ]
+}
