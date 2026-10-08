@@ -1,0 +1,1706 @@
+{
+ "users": [
+  {
+   "user_id": 11,
+   "lang": "ru",
+   "quiet_start": -1,
+   "quiet_end": -1
+  },
+  {
+   "user_id": 12,
+   "lang": "en",
+   "quiet_start": 0,
+   "quiet_end": 23
+  },
+  {
+   "user_id": 13,
+   "lang": null,
+   "quiet_start": 22,
+   "quiet_end": 7
+  },
+  {
+   "user_id": 14,
+   "lang": "ru"
+  },
+  {
+   "user_id": "x",
+   "lang": "ru"
+  },
+  {
+   "user_id": 0,
+   "lang": "en"
+  },
+  {
+   "user_id": "15",
+   "lang": "en"
+  }
+ ],
+ "opted_out": [
+  14
+ ],
+ "initial_kv": {
+  "trend_aligned_v1": "{\"dir\": \"SHORT\", \"since\": 1.0}"
+ },
+ "steps": [
+  {
+   "t": 1800000000.0,
+   "ws": {
+    "15m": "up",
+    "1H": "up",
+    "4H": "range"
+   },
+   "rest_plan": {
+    "1D": "up",
+    "1W": "none",
+    "1M": "raise"
+   },
+   "changes": [
+    [
+     "15m",
+     "LONG",
+     null
+    ],
+    [
+     "1H",
+     "LONG",
+     null
+    ],
+    [
+     "4H",
+     "LONG",
+     null
+    ],
+    [
+     "1D",
+     "LONG",
+     null
+    ]
+   ],
+   "sends": [
+    {
+     "uid": 11,
+     "text": "🎯🎯 <b>РЫНОК ВЫСТРОИЛСЯ — BTC 15m · 1H · 4H: ЛОНГ</b> · сила 100%\n\n✅ <b>В ПРИОРИТЕТЕ ЛОНГИ</b> · шорты — против тренда на всех ТФ, автотрейд режет им риск вдвое или пропускает.",
+     "silent": false,
+     "kb": [
+      [
+       {
+        "text": "🔕 Не присылать смену тренда",
+        "callback_data": "trend_notify_off"
+       }
+      ]
+     ]
+    },
+    {
+     "uid": 12,
+     "text": "🎯🎯 <b>MARKET ALIGNED — BTC 15m · 1H · 4H: LONG</b> · strength 100%\n\n✅ <b>LONGS HAVE PRIORITY</b> · shorts are against the trend on every timeframe — auto-trade halves their risk or skips them.",
+     "silent": true,
+     "kb": [
+      [
+       {
+        "text": "🔕 Stop trend alerts",
+        "callback_data": "trend_notify_off"
+       }
+      ]
+     ]
+    },
+    {
+     "uid": 13,
+     "text": "🎯🎯 <b>РЫНОК ВЫСТРОИЛСЯ — BTC 15m · 1H · 4H: ЛОНГ</b> · сила 100%\n\n✅ <b>В ПРИОРИТЕТЕ ЛОНГИ</b> · шорты — против тренда на всех ТФ, автотрейд режет им риск вдвое или пропускает.",
+     "silent": false,
+     "kb": [
+      [
+       {
+        "text": "🔕 Не присылать смену тренда",
+        "callback_data": "trend_notify_off"
+       }
+      ]
+     ]
+    },
+    {
+     "uid": 15,
+     "text": "🎯🎯 <b>MARKET ALIGNED — BTC 15m · 1H · 4H: LONG</b> · strength 100%\n\n✅ <b>LONGS HAVE PRIORITY</b> · shorts are against the trend on every timeframe — auto-trade halves their risk or skips them.",
+     "silent": false,
+     "kb": [
+      [
+       {
+        "text": "🔕 Stop trend alerts",
+        "callback_data": "trend_notify_off"
+       }
+      ]
+     ]
+    }
+   ],
+   "rest_calls": [
+    [
+     "BTC-USDT-SWAP",
+     "1D",
+     300,
+     1800000000.0
+    ],
+    [
+     "BTC-USDT-SWAP",
+     "1W",
+     300,
+     1800000000.0
+    ],
+    [
+     "BTC-USDT-SWAP",
+     "1M",
+     120,
+     1800000000.0
+    ]
+   ],
+   "cache_sets": [
+    [
+     "BTC-USDT-SWAP",
+     "1D",
+     260,
+     {
+      "1D": 1800
+     }
+    ]
+   ],
+   "kv_writes": [
+    [
+     "trend_state_v1",
+     "{\"15m\": {\"trend\": \"LONG\", \"since\": 1800000000.0, \"price\": 207.99788982536253}, \"1H\": {\"trend\": \"LONG\", \"since\": 1800000000.0, \"price\": 207.99788982536253}, \"4H\": {\"trend\": \"LONG\", \"since\": 1800000000.0, \"price\": 100.96444842652976}, \"1D\": {\"trend\": \"LONG\", \"since\": 1800000000.0, \"price\": 207.99788982536253}}"
+    ],
+    [
+     "trend_aligned_v1",
+     "{\"dir\": \"LONG\", \"since\": 1800000000.0}"
+    ]
+   ],
+   "get_all": {
+    "15m": {
+     "trend": "LONG",
+     "since": 1800000000.0,
+     "price": 207.99788982536253,
+     "ema": "50/200",
+     "strength": 100
+    },
+    "1H": {
+     "trend": "LONG",
+     "since": 1800000000.0,
+     "price": 207.99788982536253,
+     "ema": "50/200",
+     "strength": 100
+    },
+    "4H": {
+     "trend": "LONG",
+     "since": 1800000000.0,
+     "price": 100.96444842652976,
+     "ema": "50/200",
+     "strength": 100
+    },
+    "1D": {
+     "trend": "LONG",
+     "since": 1800000000.0,
+     "price": 207.99788982536253,
+     "ema": "50/200",
+     "strength": 100
+    }
+   },
+   "rest_next": {
+    "1D": 1800001800.0,
+    "1W": 1800000300.0,
+    "1M": 1800000300.0
+   },
+   "logs": [
+    [
+     "INFO",
+     "[TREND-CHANGE] BTC 15m: - → LONG (price=207.998)"
+    ],
+    [
+     "INFO",
+     "[TREND-CHANGE] BTC 1H: - → LONG (price=207.998)"
+    ],
+    [
+     "INFO",
+     "[TREND-CHANGE] BTC 4H: - → LONG (price=100.964)"
+    ],
+    [
+     "INFO",
+     "[TREND-CHANGE] BTC 1D: - → LONG (price=207.998)"
+    ],
+    [
+     "INFO",
+     "[TREND-ALIGNED] BTC 15m/1H/4H выстроились: LONG (сила 15m 100%)"
+    ],
+    [
+     "INFO",
+     "[TREND-ALIGNED] notified 4 users"
+    ]
+   ]
+  },
+  {
+   "t": 1800000060.0,
+   "ws": {
+    "15m": "up",
+    "1H": "up",
+    "4H": "up"
+   },
+   "rest_plan": {
+    "1D": "up",
+    "1W": "down",
+    "1M": "up"
+   },
+   "changes": [],
+   "sends": [],
+   "rest_calls": [],
+   "cache_sets": [],
+   "kv_writes": [],
+   "get_all": {
+    "15m": {
+     "trend": "LONG",
+     "since": 1800000000.0,
+     "price": 207.99788982536253,
+     "ema": "50/200",
+     "strength": 100
+    },
+    "1H": {
+     "trend": "LONG",
+     "since": 1800000000.0,
+     "price": 207.99788982536253,
+     "ema": "50/200",
+     "strength": 100
+    },
+    "4H": {
+     "trend": "LONG",
+     "since": 1800000000.0,
+     "price": 100.96444842652976,
+     "ema": "50/200",
+     "strength": 100
+    },
+    "1D": {
+     "trend": "LONG",
+     "since": 1800000000.0,
+     "price": 207.99788982536253,
+     "ema": "50/200",
+     "strength": 100
+    }
+   },
+   "rest_next": {
+    "1D": 1800001800.0,
+    "1W": 1800000300.0,
+    "1M": 1800000300.0
+   },
+   "logs": []
+  },
+  {
+   "t": 1800000300.0,
+   "ws": {
+    "15m": "up",
+    "1H": "up",
+    "4H": "up"
+   },
+   "rest_plan": {
+    "1W": "down",
+    "1M": "up"
+   },
+   "changes": [
+    [
+     "1W",
+     "SHORT",
+     null
+    ],
+    [
+     "1M",
+     "LONG",
+     null
+    ]
+   ],
+   "sends": [],
+   "rest_calls": [
+    [
+     "BTC-USDT-SWAP",
+     "1W",
+     300,
+     1800000300.0
+    ],
+    [
+     "BTC-USDT-SWAP",
+     "1M",
+     120,
+     1800000300.0
+    ]
+   ],
+   "cache_sets": [
+    [
+     "BTC-USDT-SWAP",
+     "1W",
+     260,
+     {
+      "1W": 1800
+     }
+    ],
+    [
+     "BTC-USDT-SWAP",
+     "1M",
+     120,
+     {
+      "1M": 1800
+     }
+    ]
+   ],
+   "kv_writes": [
+    [
+     "trend_state_v1",
+     "{\"15m\": {\"trend\": \"LONG\", \"since\": 1800000000.0, \"price\": 207.99788982536253}, \"1H\": {\"trend\": \"LONG\", \"since\": 1800000000.0, \"price\": 207.99788982536253}, \"4H\": {\"trend\": \"LONG\", \"since\": 1800000000.0, \"price\": 100.96444842652976}, \"1D\": {\"trend\": \"LONG\", \"since\": 1800000000.0, \"price\": 207.99788982536253}, \"1W\": {\"trend\": \"SHORT\", \"since\": 1800000300.0, \"price\": 46.89081841312427}, \"1M\": {\"trend\": \"LONG\", \"since\": 1800000300.0, \"price\": 207.99788982536253}}"
+    ]
+   ],
+   "get_all": {
+    "15m": {
+     "trend": "LONG",
+     "since": 1800000000.0,
+     "price": 207.99788982536253,
+     "ema": "50/200",
+     "strength": 100
+    },
+    "1H": {
+     "trend": "LONG",
+     "since": 1800000000.0,
+     "price": 207.99788982536253,
+     "ema": "50/200",
+     "strength": 100
+    },
+    "4H": {
+     "trend": "LONG",
+     "since": 1800000000.0,
+     "price": 100.96444842652976,
+     "ema": "50/200",
+     "strength": 100
+    },
+    "1D": {
+     "trend": "LONG",
+     "since": 1800000000.0,
+     "price": 207.99788982536253,
+     "ema": "50/200",
+     "strength": 100
+    },
+    "1W": {
+     "trend": "SHORT",
+     "since": 1800000300.0,
+     "price": 46.89081841312427,
+     "ema": "20/50",
+     "strength": 100
+    },
+    "1M": {
+     "trend": "LONG",
+     "since": 1800000300.0,
+     "price": 207.99788982536253,
+     "ema": "10/20",
+     "strength": 100
+    }
+   },
+   "rest_next": {
+    "1D": 1800001800.0,
+    "1W": 1800002100.0,
+    "1M": 1800002100.0
+   },
+   "logs": [
+    [
+     "INFO",
+     "[TREND-CHANGE] BTC 1W: - → SHORT (price=46.8908)"
+    ],
+    [
+     "INFO",
+     "[TREND-CHANGE] BTC 1M: - → LONG (price=207.998)"
+    ]
+   ]
+  },
+  {
+   "t": 1800000360.0,
+   "ws": {
+    "15m": "up_flip1",
+    "1H": "up",
+    "4H": "up"
+   },
+   "rest_plan": {},
+   "changes": [],
+   "sends": [],
+   "rest_calls": [],
+   "cache_sets": [],
+   "kv_writes": [],
+   "get_all": {
+    "15m": {
+     "trend": "LONG",
+     "since": 1800000000.0,
+     "price": 207.99788982536253,
+     "ema": "50/200",
+     "strength": 56
+    },
+    "1H": {
+     "trend": "LONG",
+     "since": 1800000000.0,
+     "price": 207.99788982536253,
+     "ema": "50/200",
+     "strength": 100
+    },
+    "4H": {
+     "trend": "LONG",
+     "since": 1800000000.0,
+     "price": 100.96444842652976,
+     "ema": "50/200",
+     "strength": 100
+    },
+    "1D": {
+     "trend": "LONG",
+     "since": 1800000000.0,
+     "price": 207.99788982536253,
+     "ema": "50/200",
+     "strength": 100
+    },
+    "1W": {
+     "trend": "SHORT",
+     "since": 1800000300.0,
+     "price": 46.89081841312427,
+     "ema": "20/50",
+     "strength": 100
+    },
+    "1M": {
+     "trend": "LONG",
+     "since": 1800000300.0,
+     "price": 207.99788982536253,
+     "ema": "10/20",
+     "strength": 100
+    }
+   },
+   "rest_next": {
+    "1D": 1800001800.0,
+    "1W": 1800002100.0,
+    "1M": 1800002100.0
+   },
+   "logs": []
+  },
+  {
+   "t": 1800000420.0,
+   "ws": {
+    "15m": "up_flip2",
+    "1H": "up",
+    "4H": "up"
+   },
+   "rest_plan": {},
+   "changes": [
+    [
+     "15m",
+     "RANGE",
+     "LONG"
+    ]
+   ],
+   "sends": [
+    {
+     "uid": 11,
+     "text": "🚨🚨 <b>ТРЕНД ПОМЕНЯЛСЯ — BTC 15m</b>\n\n↔️ Сейчас: <b>боковик</b>\n⚠️ Чёткого тренда нет — торгуем от уровней, размер меньше\n\n<i>Было: ЛОНГ · держался 7 мин</i>",
+     "silent": false,
+     "kb": [
+      [
+       {
+        "text": "🔕 Не присылать смену тренда",
+        "callback_data": "trend_notify_off"
+       }
+      ]
+     ]
+    },
+    {
+     "uid": 12,
+     "text": "🚨🚨 <b>TREND CHANGED — BTC 15m</b>\n\n↔️ Now: <b>range</b>\n⚠️ No clear trend — trade levels, cut size\n\n<i>Before: LONG · held 7 min</i>",
+     "silent": true,
+     "kb": [
+      [
+       {
+        "text": "🔕 Stop trend alerts",
+        "callback_data": "trend_notify_off"
+       }
+      ]
+     ]
+    },
+    {
+     "uid": 13,
+     "text": "🚨🚨 <b>ТРЕНД ПОМЕНЯЛСЯ — BTC 15m</b>\n\n↔️ Сейчас: <b>боковик</b>\n⚠️ Чёткого тренда нет — торгуем от уровней, размер меньше\n\n<i>Было: ЛОНГ · держался 7 мин</i>",
+     "silent": false,
+     "kb": [
+      [
+       {
+        "text": "🔕 Не присылать смену тренда",
+        "callback_data": "trend_notify_off"
+       }
+      ]
+     ]
+    },
+    {
+     "uid": 15,
+     "text": "🚨🚨 <b>TREND CHANGED — BTC 15m</b>\n\n↔️ Now: <b>range</b>\n⚠️ No clear trend — trade levels, cut size\n\n<i>Before: LONG · held 7 min</i>",
+     "silent": false,
+     "kb": [
+      [
+       {
+        "text": "🔕 Stop trend alerts",
+        "callback_data": "trend_notify_off"
+       }
+      ]
+     ]
+    }
+   ],
+   "rest_calls": [],
+   "cache_sets": [],
+   "kv_writes": [
+    [
+     "trend_state_v1",
+     "{\"15m\": {\"trend\": \"RANGE\", \"since\": 1800000420.0, \"price\": 122.49478288714258}, \"1H\": {\"trend\": \"LONG\", \"since\": 1800000000.0, \"price\": 207.99788982536253}, \"4H\": {\"trend\": \"LONG\", \"since\": 1800000000.0, \"price\": 100.96444842652976}, \"1D\": {\"trend\": \"LONG\", \"since\": 1800000000.0, \"price\": 207.99788982536253}, \"1W\": {\"trend\": \"SHORT\", \"since\": 1800000300.0, \"price\": 46.89081841312427}, \"1M\": {\"trend\": \"LONG\", \"since\": 1800000300.0, \"price\": 207.99788982536253}}"
+    ],
+    [
+     "trend_aligned_v1",
+     "{\"dir\": \"\", \"since\": 1800000420.0}"
+    ]
+   ],
+   "get_all": {
+    "15m": {
+     "trend": "RANGE",
+     "since": 1800000420.0,
+     "price": 122.49478288714258,
+     "ema": "50/200",
+     "strength": 59
+    },
+    "1H": {
+     "trend": "LONG",
+     "since": 1800000000.0,
+     "price": 207.99788982536253,
+     "ema": "50/200",
+     "strength": 100
+    },
+    "4H": {
+     "trend": "LONG",
+     "since": 1800000000.0,
+     "price": 100.96444842652976,
+     "ema": "50/200",
+     "strength": 100
+    },
+    "1D": {
+     "trend": "LONG",
+     "since": 1800000000.0,
+     "price": 207.99788982536253,
+     "ema": "50/200",
+     "strength": 100
+    },
+    "1W": {
+     "trend": "SHORT",
+     "since": 1800000300.0,
+     "price": 46.89081841312427,
+     "ema": "20/50",
+     "strength": 100
+    },
+    "1M": {
+     "trend": "LONG",
+     "since": 1800000300.0,
+     "price": 207.99788982536253,
+     "ema": "10/20",
+     "strength": 100
+    }
+   },
+   "rest_next": {
+    "1D": 1800001800.0,
+    "1W": 1800002100.0,
+    "1M": 1800002100.0
+   },
+   "logs": [
+    [
+     "INFO",
+     "[TREND-CHANGE] BTC 15m: LONG → RANGE (price=122.495)"
+    ],
+    [
+     "INFO",
+     "[TREND-CHANGE] BTC 15m notified 4 users"
+    ],
+    [
+     "INFO",
+     "[TREND-ALIGNED] BTC 15m/1H/4H разошлись (было LONG)"
+    ]
+   ]
+  },
+  {
+   "t": 1800002220.0,
+   "ws": {
+    "15m": "down",
+    "1H": "down",
+    "4H": "down"
+   },
+   "rest_plan": {
+    "1D": "down",
+    "1W": "up",
+    "1M": "empty"
+   },
+   "changes": [
+    [
+     "15m",
+     "SHORT",
+     "RANGE"
+    ],
+    [
+     "1H",
+     "SHORT",
+     "LONG"
+    ],
+    [
+     "4H",
+     "SHORT",
+     "LONG"
+    ],
+    [
+     "1D",
+     "SHORT",
+     "LONG"
+    ],
+    [
+     "1W",
+     "LONG",
+     "SHORT"
+    ]
+   ],
+   "sends": [
+    {
+     "uid": 11,
+     "text": "🚨🚨 <b>ТРЕНД ПОМЕНЯЛСЯ — BTC 15m</b>\n\n📉 Сейчас: <b>ШОРТ</b>\n✅ <b>В ПРИОРИТЕТЕ ШОРТЫ</b> · лонги — против тренда ⚠️\n\n<i>Было: боковик · держался 30 мин</i>",
+     "silent": false,
+     "kb": [
+      [
+       {
+        "text": "🔕 Не присылать смену тренда",
+        "callback_data": "trend_notify_off"
+       }
+      ]
+     ]
+    },
+    {
+     "uid": 12,
+     "text": "🚨🚨 <b>TREND CHANGED — BTC 15m</b>\n\n📉 Now: <b>SHORT</b>\n✅ <b>SHORTS HAVE PRIORITY</b> · longs are against the trend ⚠️\n\n<i>Before: range · held 30 min</i>",
+     "silent": true,
+     "kb": [
+      [
+       {
+        "text": "🔕 Stop trend alerts",
+        "callback_data": "trend_notify_off"
+       }
+      ]
+     ]
+    },
+    {
+     "uid": 13,
+     "text": "🚨🚨 <b>ТРЕНД ПОМЕНЯЛСЯ — BTC 15m</b>\n\n📉 Сейчас: <b>ШОРТ</b>\n✅ <b>В ПРИОРИТЕТЕ ШОРТЫ</b> · лонги — против тренда ⚠️\n\n<i>Было: боковик · держался 30 мин</i>",
+     "silent": false,
+     "kb": [
+      [
+       {
+        "text": "🔕 Не присылать смену тренда",
+        "callback_data": "trend_notify_off"
+       }
+      ]
+     ]
+    },
+    {
+     "uid": 15,
+     "text": "🚨🚨 <b>TREND CHANGED — BTC 15m</b>\n\n📉 Now: <b>SHORT</b>\n✅ <b>SHORTS HAVE PRIORITY</b> · longs are against the trend ⚠️\n\n<i>Before: range · held 30 min</i>",
+     "silent": false,
+     "kb": [
+      [
+       {
+        "text": "🔕 Stop trend alerts",
+        "callback_data": "trend_notify_off"
+       }
+      ]
+     ]
+    },
+    {
+     "uid": 11,
+     "text": "🚨🚨 <b>ТРЕНД ПОМЕНЯЛСЯ — BTC 1H</b>\n\n📉 Сейчас: <b>ШОРТ</b>\n✅ <b>В ПРИОРИТЕТЕ ШОРТЫ</b> · лонги — против тренда ⚠️\n\n<i>Было: ЛОНГ · держался 37 мин</i>",
+     "silent": false,
+     "kb": [
+      [
+       {
+        "text": "🔕 Не присылать смену тренда",
+        "callback_data": "trend_notify_off"
+       }
+      ]
+     ]
+    },
+    {
+     "uid": 12,
+     "text": "🚨🚨 <b>TREND CHANGED — BTC 1H</b>\n\n📉 Now: <b>SHORT</b>\n✅ <b>SHORTS HAVE PRIORITY</b> · longs are against the trend ⚠️\n\n<i>Before: LONG · held 37 min</i>",
+     "silent": true,
+     "kb": [
+      [
+       {
+        "text": "🔕 Stop trend alerts",
+        "callback_data": "trend_notify_off"
+       }
+      ]
+     ]
+    },
+    {
+     "uid": 13,
+     "text": "🚨🚨 <b>ТРЕНД ПОМЕНЯЛСЯ — BTC 1H</b>\n\n📉 Сейчас: <b>ШОРТ</b>\n✅ <b>В ПРИОРИТЕТЕ ШОРТЫ</b> · лонги — против тренда ⚠️\n\n<i>Было: ЛОНГ · держался 37 мин</i>",
+     "silent": false,
+     "kb": [
+      [
+       {
+        "text": "🔕 Не присылать смену тренда",
+        "callback_data": "trend_notify_off"
+       }
+      ]
+     ]
+    },
+    {
+     "uid": 15,
+     "text": "🚨🚨 <b>TREND CHANGED — BTC 1H</b>\n\n📉 Now: <b>SHORT</b>\n✅ <b>SHORTS HAVE PRIORITY</b> · longs are against the trend ⚠️\n\n<i>Before: LONG · held 37 min</i>",
+     "silent": false,
+     "kb": [
+      [
+       {
+        "text": "🔕 Stop trend alerts",
+        "callback_data": "trend_notify_off"
+       }
+      ]
+     ]
+    },
+    {
+     "uid": 11,
+     "text": "🚨🚨 <b>ТРЕНД ПОМЕНЯЛСЯ — BTC 4H</b>\n\n📉 Сейчас: <b>ШОРТ</b>\n✅ <b>В ПРИОРИТЕТЕ ШОРТЫ</b> · лонги — против тренда ⚠️\n\n<i>Было: ЛОНГ · держался 37 мин</i>",
+     "silent": false,
+     "kb": [
+      [
+       {
+        "text": "🔕 Не присылать смену тренда",
+        "callback_data": "trend_notify_off"
+       }
+      ]
+     ]
+    },
+    {
+     "uid": 12,
+     "text": "🚨🚨 <b>TREND CHANGED — BTC 4H</b>\n\n📉 Now: <b>SHORT</b>\n✅ <b>SHORTS HAVE PRIORITY</b> · longs are against the trend ⚠️\n\n<i>Before: LONG · held 37 min</i>",
+     "silent": true,
+     "kb": [
+      [
+       {
+        "text": "🔕 Stop trend alerts",
+        "callback_data": "trend_notify_off"
+       }
+      ]
+     ]
+    },
+    {
+     "uid": 13,
+     "text": "🚨🚨 <b>ТРЕНД ПОМЕНЯЛСЯ — BTC 4H</b>\n\n📉 Сейчас: <b>ШОРТ</b>\n✅ <b>В ПРИОРИТЕТЕ ШОРТЫ</b> · лонги — против тренда ⚠️\n\n<i>Было: ЛОНГ · держался 37 мин</i>",
+     "silent": false,
+     "kb": [
+      [
+       {
+        "text": "🔕 Не присылать смену тренда",
+        "callback_data": "trend_notify_off"
+       }
+      ]
+     ]
+    },
+    {
+     "uid": 15,
+     "text": "🚨🚨 <b>TREND CHANGED — BTC 4H</b>\n\n📉 Now: <b>SHORT</b>\n✅ <b>SHORTS HAVE PRIORITY</b> · longs are against the trend ⚠️\n\n<i>Before: LONG · held 37 min</i>",
+     "silent": false,
+     "kb": [
+      [
+       {
+        "text": "🔕 Stop trend alerts",
+        "callback_data": "trend_notify_off"
+       }
+      ]
+     ]
+    },
+    {
+     "uid": 11,
+     "text": "🚨🚨 <b>ТРЕНД ПОМЕНЯЛСЯ — BTC 1D (дневной)</b>\n\n📉 Сейчас: <b>ШОРТ</b>\n✅ <b>В ПРИОРИТЕТЕ ШОРТЫ</b> · лонги — против тренда ⚠️\n\n<i>Было: ЛОНГ · держался 37 мин</i>",
+     "silent": false,
+     "kb": [
+      [
+       {
+        "text": "🔕 Не присылать смену тренда",
+        "callback_data": "trend_notify_off"
+       }
+      ]
+     ]
+    },
+    {
+     "uid": 12,
+     "text": "🚨🚨 <b>TREND CHANGED — BTC 1D (daily)</b>\n\n📉 Now: <b>SHORT</b>\n✅ <b>SHORTS HAVE PRIORITY</b> · longs are against the trend ⚠️\n\n<i>Before: LONG · held 37 min</i>",
+     "silent": true,
+     "kb": [
+      [
+       {
+        "text": "🔕 Stop trend alerts",
+        "callback_data": "trend_notify_off"
+       }
+      ]
+     ]
+    },
+    {
+     "uid": 13,
+     "text": "🚨🚨 <b>ТРЕНД ПОМЕНЯЛСЯ — BTC 1D (дневной)</b>\n\n📉 Сейчас: <b>ШОРТ</b>\n✅ <b>В ПРИОРИТЕТЕ ШОРТЫ</b> · лонги — против тренда ⚠️\n\n<i>Было: ЛОНГ · держался 37 мин</i>",
+     "silent": false,
+     "kb": [
+      [
+       {
+        "text": "🔕 Не присылать смену тренда",
+        "callback_data": "trend_notify_off"
+       }
+      ]
+     ]
+    },
+    {
+     "uid": 15,
+     "text": "🚨🚨 <b>TREND CHANGED — BTC 1D (daily)</b>\n\n📉 Now: <b>SHORT</b>\n✅ <b>SHORTS HAVE PRIORITY</b> · longs are against the trend ⚠️\n\n<i>Before: LONG · held 37 min</i>",
+     "silent": false,
+     "kb": [
+      [
+       {
+        "text": "🔕 Stop trend alerts",
+        "callback_data": "trend_notify_off"
+       }
+      ]
+     ]
+    },
+    {
+     "uid": 11,
+     "text": "🚨🚨 <b>ТРЕНД ПОМЕНЯЛСЯ — BTC 1W (недельный)</b>\n\n📈 Сейчас: <b>ЛОНГ</b>\n✅ <b>В ПРИОРИТЕТЕ ЛОНГИ</b> · шорты — против тренда ⚠️\n\n<i>Было: ШОРТ · держался 32 мин</i>",
+     "silent": false,
+     "kb": [
+      [
+       {
+        "text": "🔕 Не присылать смену тренда",
+        "callback_data": "trend_notify_off"
+       }
+      ]
+     ]
+    },
+    {
+     "uid": 12,
+     "text": "🚨🚨 <b>TREND CHANGED — BTC 1W (weekly)</b>\n\n📈 Now: <b>LONG</b>\n✅ <b>LONGS HAVE PRIORITY</b> · shorts are against the trend ⚠️\n\n<i>Before: SHORT · held 32 min</i>",
+     "silent": true,
+     "kb": [
+      [
+       {
+        "text": "🔕 Stop trend alerts",
+        "callback_data": "trend_notify_off"
+       }
+      ]
+     ]
+    },
+    {
+     "uid": 13,
+     "text": "🚨🚨 <b>ТРЕНД ПОМЕНЯЛСЯ — BTC 1W (недельный)</b>\n\n📈 Сейчас: <b>ЛОНГ</b>\n✅ <b>В ПРИОРИТЕТЕ ЛОНГИ</b> · шорты — против тренда ⚠️\n\n<i>Было: ШОРТ · держался 32 мин</i>",
+     "silent": false,
+     "kb": [
+      [
+       {
+        "text": "🔕 Не присылать смену тренда",
+        "callback_data": "trend_notify_off"
+       }
+      ]
+     ]
+    },
+    {
+     "uid": 15,
+     "text": "🚨🚨 <b>TREND CHANGED — BTC 1W (weekly)</b>\n\n📈 Now: <b>LONG</b>\n✅ <b>LONGS HAVE PRIORITY</b> · shorts are against the trend ⚠️\n\n<i>Before: SHORT · held 32 min</i>",
+     "silent": false,
+     "kb": [
+      [
+       {
+        "text": "🔕 Stop trend alerts",
+        "callback_data": "trend_notify_off"
+       }
+      ]
+     ]
+    },
+    {
+     "uid": 11,
+     "text": "🎯🎯 <b>РЫНОК ВЫСТРОИЛСЯ — BTC 15m · 1H · 4H: ШОРТ</b> · сила 100%\n\n✅ <b>В ПРИОРИТЕТЕ ШОРТЫ</b> · лонги — против тренда на всех ТФ, автотрейд режет им риск вдвое или пропускает.",
+     "silent": false,
+     "kb": [
+      [
+       {
+        "text": "🔕 Не присылать смену тренда",
+        "callback_data": "trend_notify_off"
+       }
+      ]
+     ]
+    },
+    {
+     "uid": 12,
+     "text": "🎯🎯 <b>MARKET ALIGNED — BTC 15m · 1H · 4H: SHORT</b> · strength 100%\n\n✅ <b>SHORTS HAVE PRIORITY</b> · longs are against the trend on every timeframe — auto-trade halves their risk or skips them.",
+     "silent": true,
+     "kb": [
+      [
+       {
+        "text": "🔕 Stop trend alerts",
+        "callback_data": "trend_notify_off"
+       }
+      ]
+     ]
+    },
+    {
+     "uid": 13,
+     "text": "🎯🎯 <b>РЫНОК ВЫСТРОИЛСЯ — BTC 15m · 1H · 4H: ШОРТ</b> · сила 100%\n\n✅ <b>В ПРИОРИТЕТЕ ШОРТЫ</b> · лонги — против тренда на всех ТФ, автотрейд режет им риск вдвое или пропускает.",
+     "silent": false,
+     "kb": [
+      [
+       {
+        "text": "🔕 Не присылать смену тренда",
+        "callback_data": "trend_notify_off"
+       }
+      ]
+     ]
+    },
+    {
+     "uid": 15,
+     "text": "🎯🎯 <b>MARKET ALIGNED — BTC 15m · 1H · 4H: SHORT</b> · strength 100%\n\n✅ <b>SHORTS HAVE PRIORITY</b> · longs are against the trend on every timeframe — auto-trade halves their risk or skips them.",
+     "silent": false,
+     "kb": [
+      [
+       {
+        "text": "🔕 Stop trend alerts",
+        "callback_data": "trend_notify_off"
+       }
+      ]
+     ]
+    }
+   ],
+   "rest_calls": [
+    [
+     "BTC-USDT-SWAP",
+     "1D",
+     300,
+     1800002220.0
+    ],
+    [
+     "BTC-USDT-SWAP",
+     "1W",
+     300,
+     1800002220.0
+    ],
+    [
+     "BTC-USDT-SWAP",
+     "1M",
+     120,
+     1800002220.0
+    ]
+   ],
+   "cache_sets": [
+    [
+     "BTC-USDT-SWAP",
+     "1D",
+     260,
+     {
+      "1D": 1800
+     }
+    ],
+    [
+     "BTC-USDT-SWAP",
+     "1W",
+     260,
+     {
+      "1W": 1800
+     }
+    ]
+   ],
+   "kv_writes": [
+    [
+     "trend_state_v1",
+     "{\"15m\": {\"trend\": \"SHORT\", \"since\": 1800002220.0, \"price\": 46.89081841312427}, \"1H\": {\"trend\": \"SHORT\", \"since\": 1800002220.0, \"price\": 46.89081841312427}, \"4H\": {\"trend\": \"SHORT\", \"since\": 1800002220.0, \"price\": 46.89081841312427}, \"1D\": {\"trend\": \"SHORT\", \"since\": 1800002220.0, \"price\": 46.89081841312427}, \"1W\": {\"trend\": \"LONG\", \"since\": 1800002220.0, \"price\": 207.99788982536253}, \"1M\": {\"trend\": \"LONG\", \"since\": 1800000300.0, \"price\": 207.99788982536253}}"
+    ],
+    [
+     "trend_aligned_v1",
+     "{\"dir\": \"SHORT\", \"since\": 1800002220.0}"
+    ]
+   ],
+   "get_all": {
+    "15m": {
+     "trend": "SHORT",
+     "since": 1800002220.0,
+     "price": 46.89081841312427,
+     "ema": "50/200",
+     "strength": 100
+    },
+    "1H": {
+     "trend": "SHORT",
+     "since": 1800002220.0,
+     "price": 46.89081841312427,
+     "ema": "50/200",
+     "strength": 100
+    },
+    "4H": {
+     "trend": "SHORT",
+     "since": 1800002220.0,
+     "price": 46.89081841312427,
+     "ema": "50/200",
+     "strength": 100
+    },
+    "1D": {
+     "trend": "SHORT",
+     "since": 1800002220.0,
+     "price": 46.89081841312427,
+     "ema": "50/200",
+     "strength": 100
+    },
+    "1W": {
+     "trend": "LONG",
+     "since": 1800002220.0,
+     "price": 207.99788982536253,
+     "ema": "20/50",
+     "strength": 100
+    },
+    "1M": {
+     "trend": "LONG",
+     "since": 1800000300.0,
+     "price": 207.99788982536253,
+     "ema": "10/20",
+     "strength": 100
+    }
+   },
+   "rest_next": {
+    "1D": 1800004020.0,
+    "1W": 1800004020.0,
+    "1M": 1800002520.0
+   },
+   "logs": [
+    [
+     "INFO",
+     "[TREND-CHANGE] BTC 15m: RANGE → SHORT (price=46.8908)"
+    ],
+    [
+     "INFO",
+     "[TREND-CHANGE] BTC 15m notified 4 users"
+    ],
+    [
+     "INFO",
+     "[TREND-CHANGE] BTC 1H: LONG → SHORT (price=46.8908)"
+    ],
+    [
+     "INFO",
+     "[TREND-CHANGE] BTC 1H notified 4 users"
+    ],
+    [
+     "INFO",
+     "[TREND-CHANGE] BTC 4H: LONG → SHORT (price=46.8908)"
+    ],
+    [
+     "INFO",
+     "[TREND-CHANGE] BTC 4H notified 4 users"
+    ],
+    [
+     "INFO",
+     "[TREND-CHANGE] BTC 1D: LONG → SHORT (price=46.8908)"
+    ],
+    [
+     "INFO",
+     "[TREND-CHANGE] BTC 1D notified 4 users"
+    ],
+    [
+     "INFO",
+     "[TREND-CHANGE] BTC 1W: SHORT → LONG (price=207.998)"
+    ],
+    [
+     "INFO",
+     "[TREND-CHANGE] BTC 1W notified 4 users"
+    ],
+    [
+     "INFO",
+     "[TREND-ALIGNED] BTC 15m/1H/4H выстроились: SHORT (сила 15m 100%)"
+    ],
+    [
+     "INFO",
+     "[TREND-ALIGNED] notified 4 users"
+    ]
+   ]
+  },
+  {
+   "t": 1800002280.0,
+   "ws": {
+    "15m": "range",
+    "1H": "down",
+    "4H": "down"
+   },
+   "rest_plan": {},
+   "changes": [
+    [
+     "15m",
+     "LONG",
+     "SHORT"
+    ]
+   ],
+   "sends": [
+    {
+     "uid": 11,
+     "text": "🚨🚨 <b>ТРЕНД ПОМЕНЯЛСЯ — BTC 15m</b>\n\n📈 Сейчас: <b>ЛОНГ</b>\n✅ <b>В ПРИОРИТЕТЕ ЛОНГИ</b> · шорты — против тренда ⚠️\n\n<i>Было: ШОРТ · держался 1 мин</i>",
+     "silent": false,
+     "kb": [
+      [
+       {
+        "text": "🔕 Не присылать смену тренда",
+        "callback_data": "trend_notify_off"
+       }
+      ]
+     ]
+    },
+    {
+     "uid": 12,
+     "text": "🚨🚨 <b>TREND CHANGED — BTC 15m</b>\n\n📈 Now: <b>LONG</b>\n✅ <b>LONGS HAVE PRIORITY</b> · shorts are against the trend ⚠️\n\n<i>Before: SHORT · held 1 min</i>",
+     "silent": true,
+     "kb": [
+      [
+       {
+        "text": "🔕 Stop trend alerts",
+        "callback_data": "trend_notify_off"
+       }
+      ]
+     ]
+    },
+    {
+     "uid": 13,
+     "text": "🚨🚨 <b>ТРЕНД ПОМЕНЯЛСЯ — BTC 15m</b>\n\n📈 Сейчас: <b>ЛОНГ</b>\n✅ <b>В ПРИОРИТЕТЕ ЛОНГИ</b> · шорты — против тренда ⚠️\n\n<i>Было: ШОРТ · держался 1 мин</i>",
+     "silent": false,
+     "kb": [
+      [
+       {
+        "text": "🔕 Не присылать смену тренда",
+        "callback_data": "trend_notify_off"
+       }
+      ]
+     ]
+    },
+    {
+     "uid": 15,
+     "text": "🚨🚨 <b>TREND CHANGED — BTC 15m</b>\n\n📈 Now: <b>LONG</b>\n✅ <b>LONGS HAVE PRIORITY</b> · shorts are against the trend ⚠️\n\n<i>Before: SHORT · held 1 min</i>",
+     "silent": false,
+     "kb": [
+      [
+       {
+        "text": "🔕 Stop trend alerts",
+        "callback_data": "trend_notify_off"
+       }
+      ]
+     ]
+    }
+   ],
+   "rest_calls": [],
+   "cache_sets": [],
+   "kv_writes": [
+    [
+     "trend_state_v1",
+     "{\"15m\": {\"trend\": \"LONG\", \"since\": 1800002280.0, \"price\": 100.96444842652976}, \"1H\": {\"trend\": \"SHORT\", \"since\": 1800002220.0, \"price\": 46.89081841312427}, \"4H\": {\"trend\": \"SHORT\", \"since\": 1800002220.0, \"price\": 46.89081841312427}, \"1D\": {\"trend\": \"SHORT\", \"since\": 1800002220.0, \"price\": 46.89081841312427}, \"1W\": {\"trend\": \"LONG\", \"since\": 1800002220.0, \"price\": 207.99788982536253}, \"1M\": {\"trend\": \"LONG\", \"since\": 1800000300.0, \"price\": 207.99788982536253}}"
+    ],
+    [
+     "trend_aligned_v1",
+     "{\"dir\": \"\", \"since\": 1800002280.0}"
+    ]
+   ],
+   "get_all": {
+    "15m": {
+     "trend": "LONG",
+     "since": 1800002280.0,
+     "price": 100.96444842652976,
+     "ema": "50/200",
+     "strength": 100
+    },
+    "1H": {
+     "trend": "SHORT",
+     "since": 1800002220.0,
+     "price": 46.89081841312427,
+     "ema": "50/200",
+     "strength": 100
+    },
+    "4H": {
+     "trend": "SHORT",
+     "since": 1800002220.0,
+     "price": 46.89081841312427,
+     "ema": "50/200",
+     "strength": 100
+    },
+    "1D": {
+     "trend": "SHORT",
+     "since": 1800002220.0,
+     "price": 46.89081841312427,
+     "ema": "50/200",
+     "strength": 100
+    },
+    "1W": {
+     "trend": "LONG",
+     "since": 1800002220.0,
+     "price": 207.99788982536253,
+     "ema": "20/50",
+     "strength": 100
+    },
+    "1M": {
+     "trend": "LONG",
+     "since": 1800000300.0,
+     "price": 207.99788982536253,
+     "ema": "10/20",
+     "strength": 100
+    }
+   },
+   "rest_next": {
+    "1D": 1800004020.0,
+    "1W": 1800004020.0,
+    "1M": 1800002520.0
+   },
+   "logs": [
+    [
+     "INFO",
+     "[TREND-CHANGE] BTC 15m: SHORT → LONG (price=100.964)"
+    ],
+    [
+     "INFO",
+     "[TREND-CHANGE] BTC 15m notified 4 users"
+    ],
+    [
+     "INFO",
+     "[TREND-ALIGNED] BTC 15m/1H/4H разошлись (было SHORT)"
+    ]
+   ]
+  },
+  {
+   "t": 1800005880.0,
+   "ws": {
+    "15m": "down",
+    "1H": "down",
+    "4H": "down"
+   },
+   "rest_plan": {
+    "1D": "range",
+    "1W": "up",
+    "1M": "down"
+   },
+   "changes": [
+    [
+     "15m",
+     "SHORT",
+     "LONG"
+    ],
+    [
+     "1D",
+     "LONG",
+     "SHORT"
+    ],
+    [
+     "1M",
+     "SHORT",
+     "LONG"
+    ]
+   ],
+   "sends": [
+    {
+     "uid": 11,
+     "text": "🚨🚨 <b>ТРЕНД ПОМЕНЯЛСЯ — BTC 15m</b>\n\n📉 Сейчас: <b>ШОРТ</b>\n✅ <b>В ПРИОРИТЕТЕ ШОРТЫ</b> · лонги — против тренда ⚠️\n\n<i>Было: ЛОНГ · держался 1 ч</i>",
+     "silent": false,
+     "kb": [
+      [
+       {
+        "text": "🔕 Не присылать смену тренда",
+        "callback_data": "trend_notify_off"
+       }
+      ]
+     ]
+    },
+    {
+     "uid": 12,
+     "text": "🚨🚨 <b>TREND CHANGED — BTC 15m</b>\n\n📉 Now: <b>SHORT</b>\n✅ <b>SHORTS HAVE PRIORITY</b> · longs are against the trend ⚠️\n\n<i>Before: LONG · held 1 h</i>",
+     "silent": true,
+     "kb": [
+      [
+       {
+        "text": "🔕 Stop trend alerts",
+        "callback_data": "trend_notify_off"
+       }
+      ]
+     ]
+    },
+    {
+     "uid": 13,
+     "text": "🚨🚨 <b>ТРЕНД ПОМЕНЯЛСЯ — BTC 15m</b>\n\n📉 Сейчас: <b>ШОРТ</b>\n✅ <b>В ПРИОРИТЕТЕ ШОРТЫ</b> · лонги — против тренда ⚠️\n\n<i>Было: ЛОНГ · держался 1 ч</i>",
+     "silent": false,
+     "kb": [
+      [
+       {
+        "text": "🔕 Не присылать смену тренда",
+        "callback_data": "trend_notify_off"
+       }
+      ]
+     ]
+    },
+    {
+     "uid": 15,
+     "text": "🚨🚨 <b>TREND CHANGED — BTC 15m</b>\n\n📉 Now: <b>SHORT</b>\n✅ <b>SHORTS HAVE PRIORITY</b> · longs are against the trend ⚠️\n\n<i>Before: LONG · held 1 h</i>",
+     "silent": false,
+     "kb": [
+      [
+       {
+        "text": "🔕 Stop trend alerts",
+        "callback_data": "trend_notify_off"
+       }
+      ]
+     ]
+    },
+    {
+     "uid": 11,
+     "text": "🚨🚨 <b>ТРЕНД ПОМЕНЯЛСЯ — BTC 1D (дневной)</b>\n\n📈 Сейчас: <b>ЛОНГ</b>\n✅ <b>В ПРИОРИТЕТЕ ЛОНГИ</b> · шорты — против тренда ⚠️\n\n<i>Было: ШОРТ · держался 1 ч</i>",
+     "silent": false,
+     "kb": [
+      [
+       {
+        "text": "🔕 Не присылать смену тренда",
+        "callback_data": "trend_notify_off"
+       }
+      ]
+     ]
+    },
+    {
+     "uid": 12,
+     "text": "🚨🚨 <b>TREND CHANGED — BTC 1D (daily)</b>\n\n📈 Now: <b>LONG</b>\n✅ <b>LONGS HAVE PRIORITY</b> · shorts are against the trend ⚠️\n\n<i>Before: SHORT · held 1 h</i>",
+     "silent": true,
+     "kb": [
+      [
+       {
+        "text": "🔕 Stop trend alerts",
+        "callback_data": "trend_notify_off"
+       }
+      ]
+     ]
+    },
+    {
+     "uid": 13,
+     "text": "🚨🚨 <b>ТРЕНД ПОМЕНЯЛСЯ — BTC 1D (дневной)</b>\n\n📈 Сейчас: <b>ЛОНГ</b>\n✅ <b>В ПРИОРИТЕТЕ ЛОНГИ</b> · шорты — против тренда ⚠️\n\n<i>Было: ШОРТ · держался 1 ч</i>",
+     "silent": false,
+     "kb": [
+      [
+       {
+        "text": "🔕 Не присылать смену тренда",
+        "callback_data": "trend_notify_off"
+       }
+      ]
+     ]
+    },
+    {
+     "uid": 15,
+     "text": "🚨🚨 <b>TREND CHANGED — BTC 1D (daily)</b>\n\n📈 Now: <b>LONG</b>\n✅ <b>LONGS HAVE PRIORITY</b> · shorts are against the trend ⚠️\n\n<i>Before: SHORT · held 1 h</i>",
+     "silent": false,
+     "kb": [
+      [
+       {
+        "text": "🔕 Stop trend alerts",
+        "callback_data": "trend_notify_off"
+       }
+      ]
+     ]
+    },
+    {
+     "uid": 11,
+     "text": "🚨🚨 <b>ТРЕНД ПОМЕНЯЛСЯ — BTC 1M (месячный)</b>\n\n📉 Сейчас: <b>ШОРТ</b>\n✅ <b>В ПРИОРИТЕТЕ ШОРТЫ</b> · лонги — против тренда ⚠️\n\n<i>Было: ЛОНГ · держался 2 ч</i>",
+     "silent": false,
+     "kb": [
+      [
+       {
+        "text": "🔕 Не присылать смену тренда",
+        "callback_data": "trend_notify_off"
+       }
+      ]
+     ]
+    },
+    {
+     "uid": 12,
+     "text": "🚨🚨 <b>TREND CHANGED — BTC 1M (monthly)</b>\n\n📉 Now: <b>SHORT</b>\n✅ <b>SHORTS HAVE PRIORITY</b> · longs are against the trend ⚠️\n\n<i>Before: LONG · held 2 h</i>",
+     "silent": true,
+     "kb": [
+      [
+       {
+        "text": "🔕 Stop trend alerts",
+        "callback_data": "trend_notify_off"
+       }
+      ]
+     ]
+    },
+    {
+     "uid": 13,
+     "text": "🚨🚨 <b>ТРЕНД ПОМЕНЯЛСЯ — BTC 1M (месячный)</b>\n\n📉 Сейчас: <b>ШОРТ</b>\n✅ <b>В ПРИОРИТЕТЕ ШОРТЫ</b> · лонги — против тренда ⚠️\n\n<i>Было: ЛОНГ · держался 2 ч</i>",
+     "silent": false,
+     "kb": [
+      [
+       {
+        "text": "🔕 Не присылать смену тренда",
+        "callback_data": "trend_notify_off"
+       }
+      ]
+     ]
+    },
+    {
+     "uid": 15,
+     "text": "🚨🚨 <b>TREND CHANGED — BTC 1M (monthly)</b>\n\n📉 Now: <b>SHORT</b>\n✅ <b>SHORTS HAVE PRIORITY</b> · longs are against the trend ⚠️\n\n<i>Before: LONG · held 2 h</i>",
+     "silent": false,
+     "kb": [
+      [
+       {
+        "text": "🔕 Stop trend alerts",
+        "callback_data": "trend_notify_off"
+       }
+      ]
+     ]
+    },
+    {
+     "uid": 11,
+     "text": "🎯🎯 <b>РЫНОК ВЫСТРОИЛСЯ — BTC 15m · 1H · 4H: ШОРТ</b> · сила 100%\n\n✅ <b>В ПРИОРИТЕТЕ ШОРТЫ</b> · лонги — против тренда на всех ТФ, автотрейд режет им риск вдвое или пропускает.",
+     "silent": false,
+     "kb": [
+      [
+       {
+        "text": "🔕 Не присылать смену тренда",
+        "callback_data": "trend_notify_off"
+       }
+      ]
+     ]
+    },
+    {
+     "uid": 12,
+     "text": "🎯🎯 <b>MARKET ALIGNED — BTC 15m · 1H · 4H: SHORT</b> · strength 100%\n\n✅ <b>SHORTS HAVE PRIORITY</b> · longs are against the trend on every timeframe — auto-trade halves their risk or skips them.",
+     "silent": true,
+     "kb": [
+      [
+       {
+        "text": "🔕 Stop trend alerts",
+        "callback_data": "trend_notify_off"
+       }
+      ]
+     ]
+    },
+    {
+     "uid": 13,
+     "text": "🎯🎯 <b>РЫНОК ВЫСТРОИЛСЯ — BTC 15m · 1H · 4H: ШОРТ</b> · сила 100%\n\n✅ <b>В ПРИОРИТЕТЕ ШОРТЫ</b> · лонги — против тренда на всех ТФ, автотрейд режет им риск вдвое или пропускает.",
+     "silent": false,
+     "kb": [
+      [
+       {
+        "text": "🔕 Не присылать смену тренда",
+        "callback_data": "trend_notify_off"
+       }
+      ]
+     ]
+    },
+    {
+     "uid": 15,
+     "text": "🎯🎯 <b>MARKET ALIGNED — BTC 15m · 1H · 4H: SHORT</b> · strength 100%\n\n✅ <b>SHORTS HAVE PRIORITY</b> · longs are against the trend on every timeframe — auto-trade halves their risk or skips them.",
+     "silent": false,
+     "kb": [
+      [
+       {
+        "text": "🔕 Stop trend alerts",
+        "callback_data": "trend_notify_off"
+       }
+      ]
+     ]
+    }
+   ],
+   "rest_calls": [
+    [
+     "BTC-USDT-SWAP",
+     "1D",
+     300,
+     1800005880.0
+    ],
+    [
+     "BTC-USDT-SWAP",
+     "1W",
+     300,
+     1800005880.0
+    ],
+    [
+     "BTC-USDT-SWAP",
+     "1M",
+     120,
+     1800005880.0
+    ]
+   ],
+   "cache_sets": [
+    [
+     "BTC-USDT-SWAP",
+     "1D",
+     260,
+     {
+      "1D": 1800
+     }
+    ],
+    [
+     "BTC-USDT-SWAP",
+     "1W",
+     260,
+     {
+      "1W": 1800
+     }
+    ],
+    [
+     "BTC-USDT-SWAP",
+     "1M",
+     120,
+     {
+      "1M": 1800
+     }
+    ]
+   ],
+   "kv_writes": [
+    [
+     "trend_state_v1",
+     "{\"15m\": {\"trend\": \"SHORT\", \"since\": 1800005880.0, \"price\": 46.89081841312427}, \"1H\": {\"trend\": \"SHORT\", \"since\": 1800002220.0, \"price\": 46.89081841312427}, \"4H\": {\"trend\": \"SHORT\", \"since\": 1800002220.0, \"price\": 46.89081841312427}, \"1D\": {\"trend\": \"LONG\", \"since\": 1800005880.0, \"price\": 100.96444842652976}, \"1W\": {\"trend\": \"LONG\", \"since\": 1800002220.0, \"price\": 207.99788982536253}, \"1M\": {\"trend\": \"SHORT\", \"since\": 1800005880.0, \"price\": 46.89081841312427}}"
+    ],
+    [
+     "trend_aligned_v1",
+     "{\"dir\": \"SHORT\", \"since\": 1800005880.0}"
+    ]
+   ],
+   "get_all": {
+    "15m": {
+     "trend": "SHORT",
+     "since": 1800005880.0,
+     "price": 46.89081841312427,
+     "ema": "50/200",
+     "strength": 100
+    },
+    "1H": {
+     "trend": "SHORT",
+     "since": 1800002220.0,
+     "price": 46.89081841312427,
+     "ema": "50/200",
+     "strength": 100
+    },
+    "4H": {
+     "trend": "SHORT",
+     "since": 1800002220.0,
+     "price": 46.89081841312427,
+     "ema": "50/200",
+     "strength": 100
+    },
+    "1D": {
+     "trend": "LONG",
+     "since": 1800005880.0,
+     "price": 100.96444842652976,
+     "ema": "50/200",
+     "strength": 100
+    },
+    "1W": {
+     "trend": "LONG",
+     "since": 1800002220.0,
+     "price": 207.99788982536253,
+     "ema": "20/50",
+     "strength": 100
+    },
+    "1M": {
+     "trend": "SHORT",
+     "since": 1800005880.0,
+     "price": 46.89081841312427,
+     "ema": "10/20",
+     "strength": 100
+    }
+   },
+   "rest_next": {
+    "1D": 1800007680.0,
+    "1W": 1800007680.0,
+    "1M": 1800007680.0
+   },
+   "logs": [
+    [
+     "INFO",
+     "[TREND-CHANGE] BTC 15m: LONG → SHORT (price=46.8908)"
+    ],
+    [
+     "INFO",
+     "[TREND-CHANGE] BTC 15m notified 4 users"
+    ],
+    [
+     "INFO",
+     "[TREND-CHANGE] BTC 1D: SHORT → LONG (price=100.964)"
+    ],
+    [
+     "INFO",
+     "[TREND-CHANGE] BTC 1D notified 4 users"
+    ],
+    [
+     "INFO",
+     "[TREND-CHANGE] BTC 1M: LONG → SHORT (price=46.8908)"
+    ],
+    [
+     "INFO",
+     "[TREND-CHANGE] BTC 1M notified 4 users"
+    ],
+    [
+     "INFO",
+     "[TREND-ALIGNED] BTC 15m/1H/4H выстроились: SHORT (сила 15m 100%)"
+    ],
+    [
+     "INFO",
+     "[TREND-ALIGNED] notified 4 users"
+    ]
+   ]
+  },
+  {
+   "t": 1800006480.0,
+   "ws": {},
+   "rest_plan": {},
+   "changes": [],
+   "sends": [],
+   "rest_calls": [],
+   "cache_sets": [],
+   "kv_writes": [],
+   "get_all": {
+    "15m": {
+     "trend": "SHORT",
+     "since": 1800005880.0,
+     "price": 46.89081841312427,
+     "ema": "50/200",
+     "strength": 100
+    },
+    "1H": {
+     "trend": "SHORT",
+     "since": 1800002220.0,
+     "price": 46.89081841312427,
+     "ema": "50/200",
+     "strength": 100
+    },
+    "4H": {
+     "trend": "SHORT",
+     "since": 1800002220.0,
+     "price": 46.89081841312427,
+     "ema": "50/200",
+     "strength": 100
+    },
+    "1D": {
+     "trend": "LONG",
+     "since": 1800005880.0,
+     "price": 100.96444842652976,
+     "ema": "50/200",
+     "strength": 100
+    },
+    "1W": {
+     "trend": "LONG",
+     "since": 1800002220.0,
+     "price": 207.99788982536253,
+     "ema": "20/50",
+     "strength": 100
+    },
+    "1M": {
+     "trend": "SHORT",
+     "since": 1800005880.0,
+     "price": 46.89081841312427,
+     "ema": "10/20",
+     "strength": 100
+    }
+   },
+   "rest_next": {
+    "1D": 1800007680.0,
+    "1W": 1800007680.0,
+    "1M": 1800007680.0
+   },
+   "logs": []
+  }
+ ]
+}

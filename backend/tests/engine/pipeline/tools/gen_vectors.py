@@ -630,7 +630,350 @@ def confluence_vectors():
     write("confluence", {"steps": steps})
 
 
+# ── trend monitor ──────────────────────────────────────────────────────────
+def trend_series(kind, n, seed, start=100.0):
+    rnd = random.Random(seed)
+    closes = []
+    p = start
+    for i in range(n):
+        if kind == "up":
+            p *= 1 + 0.003 + rnd.gauss(0, 0.002)
+        elif kind == "down":
+            p *= 1 - 0.003 + rnd.gauss(0, 0.002)
+        elif kind == "range":
+            p = start * (1 + 0.01 * math.sin(i / 5.0)) * (1 + rnd.gauss(0, 0.001))
+        elif kind == "up_flip1":       # up, last bar crashes below the slow EMA
+            p = p * (1 + 0.003 + rnd.gauss(0, 0.001)) if i < n - 1 else p * 0.55
+        elif kind == "up_flip2":       # up, last two bars crash
+            p = p * (1 + 0.003 + rnd.gauss(0, 0.001)) if i < n - 2 else p * 0.75
+        elif kind == "down_flip2":
+            p = p * (1 - 0.003 + rnd.gauss(0, 0.001)) if i < n - 2 else p * 1.6
+        elif kind == "mixed":
+            p *= 1 + rnd.gauss(0, 0.01)
+        closes.append(p)
+    rows = []
+    prev = closes[0]
+    for c in closes:
+        o = prev
+        rows.append([o, max(o, c) * 1.001, min(o, c) * 0.999, c, 1000.0])
+        prev = c
+    return rows
+
+
+def kb_rows_tm(markup):
+    if markup is None:
+        return None
+    return [[{"text": b.text, "callback_data": b.callback_data} for b in row] for row in markup.inline_keyboard]
+
+
+def trend_vectors():
+    import importlib
+    import quiet_hours
+    import trend_monitor as tm0
+    env_keys = ["TREND_REST_REFRESH_S", "TREND_MTF_BONUS", "TREND_STRONG_PCT", "TREND_STRONG_COUNTER_PENALTY",
+                "TREND_MONITOR_INTERVAL_S", "TREND_NOTIFY_TFS", "TREND_MONITOR_ENABLED", "TREND_ALIGNED_NOTIFY", "TREND_CTX_RISK"]
+
+    def reload(env):
+        for k in env_keys:
+            os.environ.pop(k, None)
+        os.environ.update(env)
+        return importlib.reload(tm0)
+
+    def consts(tm):
+        return {"REST_REFRESH_S": tm.REST_REFRESH_S, "MTF_BONUS": tm.MTF_BONUS, "STRONG_TREND": tm.STRONG_TREND,
+                "STRONG_COUNTER_PENALTY": tm.STRONG_COUNTER_PENALTY, "INTERVAL_S": tm.INTERVAL_S,
+                "NOTIFY_TFS": list(tm.NOTIFY_TFS), "ENABLED": tm.ENABLED, "ALIGNED_NOTIFY": tm.ALIGNED_NOTIFY,
+                "CTX_RISK": tm.CTX_RISK}
+
+    env_cases = [{}, {"TREND_MTF_BONUS": "", "TREND_STRONG_COUNTER_PENALTY": "", "TREND_NOTIFY_TFS": "", "TREND_STRONG_PCT": "",
+                      "TREND_MONITOR_INTERVAL_S": "", "TREND_REST_REFRESH_S": ""},
+                 {"TREND_MTF_BONUS": "2", "TREND_STRONG_PCT": "150", "TREND_STRONG_COUNTER_PENALTY": "-3", "TREND_MONITOR_INTERVAL_S": "5",
+                  "TREND_REST_REFRESH_S": "60", "TREND_NOTIFY_TFS": " 15m , 1D,,", "TREND_MONITOR_ENABLED": "false",
+                  "TREND_ALIGNED_NOTIFY": " off "},
+                 {"TREND_MONITOR_ENABLED": "FALSE", "TREND_ALIGNED_NOTIFY": "0", "TREND_STRONG_PCT": " 55 ", "TREND_MTF_BONUS": "1_0",
+                  "TREND_CTX_RISK": "aligned=1.5, with = 0.8 ,counter=abc,strong_counter=-1,unknown=3,=,counter"},
+                 {"TREND_CTX_RISK": "counter=5,strong_counter=0.25,aligned=nan,with=inf"},
+                 {"TREND_CTX_RISK": "counter=0.5=1,aligned= 2 "}]
+    env_out = [{"env": e, "consts": consts(reload(e))} for e in env_cases]
+    tm = reload({})
+
+    # compute_trend / ribbon_strength
+    series = {}
+    for seed, kind in enumerate(["up", "down", "range", "up_flip1", "up_flip2", "down_flip2", "mixed"]):
+        series[kind] = trend_series(kind, 260, 500 + seed)
+    compute = []
+    lengths = {"15m": [206, 207, 260], "1H": [207, 260], "4H": [260], "1D": [205, 206, 260], "1W": [55, 56, 80], "1M": [25, 26, 40]}
+    for tf, lens in lengths.items():
+        for kind, rows in series.items():
+            for n in lens:
+                df = make_df(rows[-n:])
+                for prev in [None, "LONG", "SHORT", "RANGE"]:
+                    compute.append([tf, kind, n, prev, tm.compute_trend(df, prev, tf)])
+    compute.append(["15m", "none", 0, "LONG", tm.compute_trend(None, "LONG", "15m")])
+    ribbon = []
+    for kind, rows in series.items():
+        for n in [59, 60, 61, 120]:
+            df = make_df(rows[-n:])
+            for trend in ["LONG", "SHORT", "RANGE", None]:
+                ribbon.append([kind, n, trend, tm.ribbon_strength(df, trend)])
+
+    # state-dependent helpers
+    scenarios = [
+        {"trend": {}, "strength": {}},
+        {"trend": {"15m": "LONG"}, "strength": {"15m": 70}},
+        {"trend": {"15m": "LONG", "1H": "LONG", "4H": "LONG"}, "strength": {"15m": 69}},
+        {"trend": {"15m": "SHORT", "1H": "SHORT", "4H": "SHORT", "1D": "SHORT", "1W": "LONG", "1M": "RANGE"}, "strength": {"15m": 91, "1W": 12}},
+        {"trend": {"15m": "RANGE", "1H": "RANGE", "4H": "RANGE"}, "strength": {"15m": 100}},
+        {"trend": {"15m": "LONG", "1H": "SHORT", "4H": "LONG", "1D": "LONG"}, "strength": {"15m": 85}},
+        {"trend": {"1H": "LONG", "4H": "LONG"}, "strength": {}},
+    ]
+    directions = ["LONG", "SHORT", "long", "", "BOTH", None]
+    tfs = ["15m", "1h", "1H", "4h", "30m", "1d", "1W", "1w", "1M", "1m", "2h", "", "xx", None]
+    helpers = []
+    for si, sc in enumerate(scenarios):
+        tm._state.clear()
+        tm._strength.clear()
+        for tf, t in sc["trend"].items():
+            tm._state[tf] = {"trend": t, "since": 1_800_000_000.0, "price": 123.5}
+        tm._strength.update(sc["strength"])
+        row = {"scenario": si, "aligned_direction": tm.aligned_direction(), "get_all": tm.get_all(),
+               "strength": {tf: tm.trend_strength(tf) for tf in ["15m", "1h", "4H", "1W", "x"]},
+               "is_strong": {tf: tm.is_strong(tf) for tf in ["15m", "1W", "1H"]}, "per_dir": []}
+        for d in directions:
+            ent = {"direction": d, "mtf_aligned": tm.mtf_aligned(d), "trend_context": tm.trend_context(d),
+                   "trend_context_given": [tm.trend_context(d, a, s) for a in (None, True, False) for s in (None, True, False)],
+                   "is_counter": {str(tf): tm.is_counter(d, tf) for tf in ["15m", "1H", "4h", "1M", None]},
+                   "card_line": {f"{tf}|{lang}": tm.card_line(d, tf, lang) for tf in tfs for lang in ("ru", "en", "de")}}
+            row["per_dir"].append(ent)
+        helpers.append(row)
+
+    # apply_mtf_bonus (+ the SMC scanner grade recompute; D6 also after the penalty)
+    from smc.signal_builder import GRADES
+    bonus = []
+    sig_inits = [
+        ("quality", 10, {"direction": "LONG", "quality": 7}),
+        ("quality", 10, {"direction": "LONG", "quality": 10}),
+        ("quality", 10, {"direction": "SHORT", "quality": 1}),
+        ("quality", 10, {"direction": "SHORT", "quality": 0}),
+        ("quality", 10, {"direction": "LONG", "quality": "6"}),
+        ("quality", 10, {"direction": "LONG", "quality": 5.9}),
+        ("quality", 10, {"direction": "LONG", "quality": None}),
+        ("quality", 10, {"direction": "LONG", "quality": 5, "mtf_aligned": False}),
+        ("quality", 10, {"direction": "LONG", "quality": 5, "mtf_aligned": True}),
+        ("quality", 10, {"direction": "long", "quality": 5}),
+        ("quality", 10, {"quality": 5}),
+        ("score", 5, {"direction": "LONG", "score": 4, "grade": "✅ A"}),
+        ("score", 5, {"direction": "SHORT", "score": 4, "grade": "✅ A"}),
+        ("score", 5, {"direction": "LONG", "score": 5, "grade": "🔥 A+"}),
+        ("score", 5, {"direction": "SHORT", "score": 3, "grade": "⚡ B"}),
+        ("score", 5, {"direction": "LONG", "score": 2, "grade": "⚡ 2/5"}),
+        ("score", 5, {"direction": "SHORT", "score": 2, "grade": "⚡ 2/5"}),
+        ("quality", 5, {"direction": "SHORT", "quality": 5}),
+        ("quality", 5, {"direction": "LONG", "quality": 5}),
+        ("quality", 5, {"direction": "LONG", "quality": 3}),
+    ]
+    bonus_envs = [{}, {"TREND_MTF_BONUS": "0"}, {"TREND_STRONG_COUNTER_PENALTY": "2"}, {"TREND_STRONG_COUNTER_PENALTY": "0", "TREND_MTF_BONUS": "3"}]
+    for env in bonus_envs:
+        tm = reload(env)
+        for si, sc in enumerate(scenarios):
+            tm._state.clear()
+            tm._strength.clear()
+            for tf, t in sc["trend"].items():
+                tm._state[tf] = {"trend": t, "since": 0.0, "price": 0.0}
+            tm._strength.update(sc["strength"])
+            for attr, cap, init in sig_inits:
+                sig = types.SimpleNamespace(**init)
+                runs = []
+                for _ in range(2):
+                    ok = tm.apply_mtf_bonus(sig, attr=attr, cap=cap)
+                    bot_grade = d6_grade = getattr(sig, "grade", None)
+                    if attr == "score":
+                        if ok:
+                            sig.grade = GRADES.get(int(sig.score), sig.grade)
+                        bot_grade = sig.grade
+                        penalised = (not ok) and getattr(sig, "strong_counter", False) and tm.STRONG_COUNTER_PENALTY > 0
+                        d6_grade = GRADES.get(int(sig.score), sig.grade) if (ok or penalised) else sig.grade
+                    runs.append({"ok": ok, "fields": {k: getattr(sig, k, None) for k in ("mtf_aligned", "strong_counter", "trend_ctx", attr)},
+                                 "bot_grade": bot_grade, "d6_grade": d6_grade})
+                bonus.append({"env": env, "scenario": si, "attr": attr, "cap": cap, "init": init, "runs": runs})
+    tm = reload({})
+
+    ctx = {"mult": {str(c): tm.ctx_risk_mult(c) for c in ["aligned", "with", "counter", "strong_counter", "", None, "x", 0]},
+           "label": {f"{c}|{l}": tm.ctx_label(c, l) for c in ["aligned", "with", "counter", "strong_counter", "", None, "x"] for l in ("ru", "en", "de")}}
+
+    # texts
+    clk = Clock(1_800_000_000.0)
+    tm.time = clk
+    texts = []
+    for tf in ["15m", "1H", "4H", "1D", "1W", "1M", "1h"]:
+        for new, prev in [("LONG", "SHORT"), ("SHORT", "LONG"), ("RANGE", "LONG"), ("LONG", None), ("SHORT", "RANGE"), ("RANGE", None)]:
+            for since in [0.0, clk.t - 1800, clk.t - 3599, clk.t - 3600, clk.t - 5400, clk.t - 86400 * 3 - 17, clk.t + 100, clk.t - 89.9]:
+                for lang in ("ru", "en", "de"):
+                    texts.append([tf, new, prev, since, lang, tm.change_text(tf, new, prev, since, lang)])
+    aligned_texts = [[d, s, l, tm.aligned_text(d, s, l)] for d in ("LONG", "SHORT") for s in (None, 85, 0) for l in ("ru", "en", "de")]
+    labels = [[tf, l, tm.tf_label(tf, l)] for tf in ["15m", "1D", "1W", "1M", "x"] for l in ("ru", "en", "de")]
+    norm = [[str(x), tm.norm_tf(x)] for x in ["15m", "30m", "1h", "1H", "2h", "4h", "4H", "1d", "1D", "1w", "1W", "1M", "1m", "", None, "15M", "2H", "xx", "1Y"]]
+
+    # load_state
+    kv = FakeKV()
+    install_kv(kv)
+    load_cases = []
+    raws = [
+        json.dumps({"15m": {"trend": "LONG", "since": 1.5, "price": 2}, "1H": {"trend": "SHORT"}, "5m": {"trend": "LONG"},
+                    "4H": {"trend": ""}, "1D": "x", "1W": {"trend": 3, "since": None, "price": "4.5"}}),
+        json.dumps({"15m": {"trend": "LONG", "since": 1.0}, "1H": {"trend": "SHORT", "since": "abc"}, "4H": {"trend": "RANGE"}}),
+        json.dumps(["15m"]),
+        "{broken",
+        "",
+        json.dumps({"1M": {"trend": True, "since": True, "price": False}}),
+    ]
+    for raw in raws:
+        tm._state.clear()
+        tm._loaded = False
+        kv.d.clear()
+        if raw:
+            kv.d["trend_state_v1"] = raw
+        asyncio.run(tm.load_state())
+        load_cases.append({"raw": raw, "state": dict(tm._state)})
+    aligned_loads = []
+    for raw in [json.dumps({"dir": "LONG", "since": 5}), json.dumps({"dir": "", "since": "7.5"}), json.dumps({"dir": None}),
+                json.dumps([1]), "{bad", json.dumps({"dir": "SHORT", "since": "x"}), ""]:
+        tm._aligned.clear()
+        tm._aligned.update({"dir": None, "since": 0.0, "loaded": False})
+        kv.d.clear()
+        if raw:
+            kv.d["trend_aligned_v1"] = raw
+        asyncio.run(tm._load_aligned())
+        aligned_loads.append({"raw": raw, "aligned": {k: tm._aligned.get(k) for k in ("dir", "since", "had_kv")}})
+
+    write("trend", {"env": env_out, "series": series, "compute": compute, "ribbon": ribbon, "ribbon_lengths": list(tm.RIBBON_LENGTHS),
+                    "scenarios": scenarios, "helpers": helpers, "bonus": bonus, "ctx": ctx, "texts": texts,
+                    "aligned_texts": aligned_texts, "labels": labels, "norm": norm, "load_state": load_cases,
+                    "aligned_loads": aligned_loads, "tables": {"EMA_BY_TF": {k: list(v) for k, v in tm.EMA_BY_TF.items()},
+                                                              "CONFIRM_BY_TF": tm.CONFIRM_BY_TF, "REST_LIMIT": tm.REST_LIMIT,
+                                                              "TFS": list(tm.TFS), "REST_TFS": list(tm.REST_TFS), "MTF_TFS": list(tm.MTF_TFS)}})
+    trend_refresh_vectors(series)
+
+
+def trend_refresh_vectors(series):
+    """refresh() end to end: WS cache for 15m/1H/4H, REST (throttled) for 1D/1W/1M, kv
+    state + aligned dedup, change broadcasts with opt-out / quiet hours / keyboard."""
+    import importlib
+    import quiet_hours
+    import telegram_safe
+    import trend_monitor as tm0
+    tm = importlib.reload(tm0)
+    clk = Clock(1_800_000_000.0)
+    tm.time = clk
+    quiet_hours.time = clk
+    kv = FakeKV()
+    install_kv(kv)
+    users = [
+        {"user_id": 11, "lang": "ru", "quiet_start": -1, "quiet_end": -1},
+        {"user_id": 12, "lang": "en", "quiet_start": 0, "quiet_end": 23},
+        {"user_id": 13, "lang": None, "quiet_start": 22, "quiet_end": 7},
+        {"user_id": 14, "lang": "ru"},
+        {"user_id": "x", "lang": "ru"},
+        {"user_id": 0, "lang": "en"},
+        {"user_id": "15", "lang": "en"},
+    ]
+    kv.d["trend_notify_off_14"] = "1"
+
+    async def active_users():
+        return users
+    database.db_get_active_users = active_users
+    sends = []
+
+    async def fake_send(bot, uid, text, parse_mode=None, reply_markup=None, disable_notification=None, **kw):
+        sends.append({"uid": uid, "text": text, "silent": disable_notification, "kb": kb_rows_tm(reply_markup)})
+        return uid != 12 or len(sends) % 2 == 0
+    telegram_safe.safe_send_message = fake_send
+    real_sleep = asyncio.sleep
+
+    async def no_sleep(*_a, **_k):
+        return None
+    tm.asyncio = types.SimpleNamespace(sleep=no_sleep)
+
+    ws = {}
+    rest_store = {}
+    rest_calls = []
+    cache_sets = []
+    rest_plan = {}
+
+    async def get_candles(sym, tf):
+        if tf in ws:
+            return ws[tf]
+        e = rest_store.get(tf)
+        if e and clk.t < e[1]:
+            return e[0]
+        return None
+
+    async def set_candles(sym, tf, df, ttl_map):
+        cache_sets.append([sym, tf, len(df), ttl_map])
+        rest_store[tf] = (df, clk.t + list(ttl_map.values())[0])
+    import cache as _cache
+    _cache.get_candles = get_candles
+    _cache.set_candles = set_candles
+
+    class Fetcher:
+        async def get_candles(self, sym, tf, limit=300):
+            rest_calls.append([sym, tf, limit, clk.t])
+            p = rest_plan.get(tf, "none")
+            if p == "raise":
+                raise RuntimeError("boom")
+            if p == "none":
+                return None
+            if p == "empty":
+                return make_df([])
+            return make_df(series[p][-limit:] if limit < len(series[p]) else series[p])
+
+    cap = capture("CHM.TrendMonitor")
+    plan = [
+        # (advance, ws {tf: series kind or None}, rest_plan {tf: kind|none|raise|empty})
+        (0, {"15m": "up", "1H": "up", "4H": "range"}, {"1D": "up", "1W": "none", "1M": "raise"}),
+        (60, {"15m": "up", "1H": "up", "4H": "up"}, {"1D": "up", "1W": "down", "1M": "up"}),
+        (240, {"15m": "up", "1H": "up", "4H": "up"}, {"1W": "down", "1M": "up"}),
+        (60, {"15m": "up_flip1", "1H": "up", "4H": "up"}, {}),
+        (60, {"15m": "up_flip2", "1H": "up", "4H": "up"}, {}),
+        (1800, {"15m": "down", "1H": "down", "4H": "down"}, {"1D": "down", "1W": "up", "1M": "empty"}),
+        (60, {"15m": "range", "1H": "down", "4H": "down"}, {}),
+        (3600, {"15m": "down", "1H": "down", "4H": "down"}, {"1D": "range", "1W": "up", "1M": "down"}),
+        (600, {}, {}),
+    ]
+    steps = []
+    tm._state.clear()
+    tm._strength.clear()
+    tm._rest_next.clear()
+    tm._aligned.clear()
+    tm._aligned.update({"dir": None, "since": 0.0, "loaded": False})
+    tm._loaded = False
+    kv.d["trend_aligned_v1"] = json.dumps({"dir": "SHORT", "since": 1.0})
+    asyncio.run(tm.load_state())
+    for adv, wsplan, rplan in plan:
+        clk.t += adv
+        ws.clear()
+        for tf, kind in wsplan.items():
+            ws[tf] = make_df(series[kind])
+        rest_plan.clear()
+        rest_plan.update(rplan)
+        del sends[:]
+        del rest_calls[:]
+        del cache_sets[:]
+        kv.writes.clear()
+        cap.lines.clear()
+        changes = asyncio.run(tm.refresh(bot=object(), fetcher=Fetcher()))
+        steps.append({"t": clk.t, "ws": wsplan, "rest_plan": rplan, "changes": [list(c) for c in changes],
+                      "sends": list(sends), "rest_calls": list(rest_calls), "cache_sets": list(cache_sets),
+                      "kv_writes": [w for w in kv.writes if w[0] in ("trend_state_v1", "trend_aligned_v1")],
+                      "get_all": tm.get_all(), "rest_next": dict(tm._rest_next),
+                      "logs": [l for l in cap.lines if l[0] in ("INFO", "WARNING")]})
+    asyncio.sleep = real_sleep
+    write("trend_refresh", {"users": users, "opted_out": [14], "initial_kv": {"trend_aligned_v1": json.dumps({"dir": "SHORT", "since": 1.0})},
+                            "steps": steps})
+
+
 SECTIONS = {
+    "trend": trend_vectors,
     "registry": registry_vectors,
     "freshness": freshness_vectors,
     "momentum": momentum_vectors,
