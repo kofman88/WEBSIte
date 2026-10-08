@@ -2,8 +2,9 @@
 /**
  * engines.js — pluggable engine registry for the golden harness.
  *
- * M2–M6 register their pure engines here; until then every entry is `null` and
- * golden.test.js marks the corresponding sweeps as todo (never failing).
+ * M2–M6 register their pure engines here (adapters live in ./runners/*.js); until
+ * then an entry is `null` and golden.test.js marks the corresponding sweep as todo
+ * (never failing).
  *
  * Contract (every runner is synchronous and pure; `ctx` comes from load.barInputs
  * plus the variant config stored in the expected file):
@@ -38,7 +39,7 @@
 const engines = {
   levels: null,
   smc: null,
-  volume: null,
+  volume: require('./runners/volume'),   // M2
 };
 
 /** Register an engine runner (used by M2–M6 and by tests with dummy runners). */
