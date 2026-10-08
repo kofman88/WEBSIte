@@ -851,8 +851,137 @@ def _sha(path: str) -> str:
     return h.hexdigest()
 
 
+# ────────────────────────────────────────────────────────────────────────────
+# Layer dumps (PLAN §3 — localise a divergence to a layer instead of a final signal)
+#   --dump-zones       LEVELS indicator._get_zones() per swept bar (default variant IndConfig):
+#                      pivots, KDE peaks, HVN/LVN, atr_now, sup/res zone dicts without `lvn_checker`
+#   --dump-volume-ctx  VOLUME VolumeContext columns at the last bar (default VolumeConfig, HTF 4h)
+#   --dump-squeeze     squeeze_detector internals: bbw[-1], thr_strong, thr_some, atr_ratio, score
+# Written to <out_dir>/dumps/{zones,volume_ctx,squeeze}.json; all additive, bar-level, pure.
+# ────────────────────────────────────────────────────────────────────────────
+def _zone_public(z: dict) -> dict:
+    return {k: v for k, v in z.items() if k != "lvn_checker"}
+
+
+def dump_zones(symbol: str, frames: dict, variants: dict, step: int) -> dict:
+    from indicator import CHMIndicator
+    from scanner_mid import _cfg_to_ind
+    from user_manager import TradeCfg
+    v = variants["levels"]["default"]
+    ic = _cfg_to_ind(TradeCfg(**v["trade_cfg"]), high_wr_mode=v["high_wr_mode"])
+    df1h = frames["1h"]
+    out = {}
+    for i in _sweep_indices(len(df1h), step):
+        df = df1h.iloc[:i + 1]
+        ind = CHMIndicator(ic)
+        atr = ind._atr(df, ic.ATR_PERIOD)
+        atr_now = float(atr.iloc[-1]) if len(atr) >= 2 else float(df["close"].mean() * 0.01)
+        highs, lows, n = df["high"].values, df["low"].values, len(df)
+        s = ic.PIVOT_STRENGTH
+        res_pts = [(float(highs[k]), n - 1 - k) for k in range(s, n - s) if highs[k] == max(highs[k - s:k + s + 1])]
+        sup_pts = [(float(lows[k]), n - 1 - k) for k in range(s, n - s) if lows[k] == min(lows[k - s:k + s + 1])]
+        price_range = (float(df["low"].min()), float(df["high"].max()))
+        kde_prices = ind._kde_levels([p for p, _ in res_pts + sup_pts], price_range)
+        vp = ind._volume_profile(df)
+        sup, res = ind._get_zones(df, ic.PIVOT_STRENGTH, atr_now)
+        out[str(i)] = r10(dict(atr_now=atr_now, price_range=list(price_range), n_pivots=len(res_pts) + len(sup_pts),
+                               pivots_res=res_pts, pivots_sup=sup_pts, kde_peaks=kde_prices,
+                               hvn=vp["hvn"], lvn=vp["lvn"], vp_volumes=list(vp["volumes"]),
+                               sup=[_zone_public(z) for z in sup], res=[_zone_public(z) for z in res]))
+    return out
+
+
+def dump_volume_ctx(symbol: str, frames: dict, variants: dict, step: int) -> dict:
+    import volume_strategy as vs
+    cfg = vs.VolumeConfig.from_params(variants["volume"]["default"]["params"])
+    df1h, df4h = frames["1h"], frames["4h"]
+    oms = open_ms(df1h)
+    out = {}
+    for i in _sweep_indices(len(df1h), step):
+        df = df1h.iloc[:i + 1]
+        close_ms = int(oms[i]) + TF_MS["1h"]
+        df_htf = aligned_prefix(df4h, "4h", close_ms, VOLUME_HTF_WINDOW) if cfg.use_htf else None
+        st = int(vs.htf_state(df_htf, cfg)) if (cfg.use_htf and df_htf is not None) else 0
+        htf_arr = None
+        if st != 0:
+            htf_arr = np.zeros(len(df), dtype=np.int8)
+            htf_arr[-1] = st
+        ctx = vs.VolumeContext(df, cfg, htf_arr, vs.htf_for(SWEEP_TF) if st != 0 else "")
+        last = -1
+        rec = dict(n=ctx.n, min_bars=int(vs.min_bars(cfg)), e50=float(ctx.e50[last]), e200=float(ctx.e200[last]),
+                   maF=float(ctx.maF[last]), maM=float(ctx.maM[last]), maS=float(ctx.maS[last]), turn=float(ctx.turn[last]),
+                   rsi=float(ctx.rsi[last]), atr=float(ctx.atr[last]), tr=float(ctx.tr[last]),
+                   vavg=float(ctx.vavg[last]), vr=float(ctx.vr[last]),
+                   rib=[float(x) for x in ctx.rib[:, last]] if ctx.rib is not None else None,
+                   htf_state=st, htf_tf=ctx.htf_tf, n_htf_bars=(len(df_htf) if df_htf is not None else 0),
+                   candidate=bool(ctx.candidate_mask()[last]))
+        out[str(i)] = r10(rec)
+    return out
+
+
+def dump_squeeze(symbol: str, frames: dict, step: int) -> dict:
+    import squeeze_detector as sq
+    df1h = frames["1h"]
+    out = {}
+    n_look = 50
+    for i in _sweep_indices(len(df1h), step):
+        df = df1h.iloc[:i + 1]
+        rec = dict(n=len(df), score=int(sq.compute_squeeze_score(df) or 0), bbw_last=None, thr_strong=None, thr_some=None,
+                   atr14=None, atr50=None, atr_ratio=None)
+        if len(df) >= max(n_look + 21, 51):
+            bbw = sq._bb_width(df).dropna()
+            if len(bbw) >= n_look:
+                recent = bbw.iloc[-n_look:]
+                rec["bbw_last"] = float(bbw.iloc[-1])
+                rec["thr_strong"] = float(recent.quantile(0.15))
+                rec["thr_some"] = float(recent.quantile(0.30))
+                rec["bbw_recent"] = [float(x) for x in recent]
+            atr14 = sq._atr(df, 14).dropna()
+            atr50 = sq._atr(df, 50).dropna()
+            if len(atr14) and len(atr50):
+                rec["atr14"] = float(atr14.iloc[-1]); rec["atr50"] = float(atr50.iloc[-1])
+                rec["atr_ratio"] = float(atr14.iloc[-1]) / max(float(atr50.iloc[-1]), 1e-9)
+        out[str(i)] = r10(rec)
+    return out
+
+
+def run_dumps(symbols: list[str], out_dir: str, args, variants: dict) -> None:
+    os.makedirs(os.path.join(out_dir, "dumps"), exist_ok=True)
+    common = dict(python=sys.version.split()[0], pandas=pd.__version__, numpy=np.__version__,
+                  sweep=dict(tf=SWEEP_TF, warmup_index=WARMUP, step=args.dump_step), symbols=symbols)
+    todo = []
+    if args.dump_zones:
+        todo.append(("zones", "LEVELS indicator._get_zones() layers per swept bar (default variant IndConfig); "
+                              "zone dicts without lvn_checker; pivots as [price, age_bars]", dump_zones))
+    if args.dump_volume_ctx:
+        todo.append(("volume_ctx", "VOLUME VolumeContext columns at the last bar (default VolumeConfig, HTF 4h aligned prefix)",
+                     dump_volume_ctx))
+    if args.dump_squeeze:
+        todo.append(("squeeze", "squeeze_detector.compute_squeeze_score internals per swept bar", dump_squeeze))
+    for name, note, fn in todo:
+        t0 = time.time()
+        fixtures = {}
+        for sym in symbols:
+            frames = {tf: load_df(out_dir, sym, tf) for tf in ("1h", "4h")}
+            fixtures[sym] = fn(sym, frames, variants, args.dump_step) if fn is not dump_squeeze else fn(sym, frames, args.dump_step)
+        path = os.path.join(out_dir, "dumps", f"{name}.json")
+        doc = dict(dump=name, note=note, **common)
+        if name == "zones":
+            doc["ind_config"] = variants["levels"]["default"]["ind_config"]
+        if name == "volume_ctx":
+            doc["volume_config"] = variants["volume"]["default"]["volume_config"]
+        doc["fixtures"] = fixtures
+        with open(path, "w") as fh:
+            json.dump(doc, fh, ensure_ascii=False, separators=(",", ":"))
+        print(f"  dump {name:<11} {len(symbols)} fixtures → {os.path.relpath(path, out_dir)} ({time.time() - t0:.1f}s)", flush=True)
+
+
 def main() -> int:
     ap = argparse.ArgumentParser()
+    ap.add_argument("--dump-zones", action="store_true", help="write dumps/zones.json (LEVELS zone layers) and exit")
+    ap.add_argument("--dump-volume-ctx", action="store_true", help="write dumps/volume_ctx.json (VOLUME context columns) and exit")
+    ap.add_argument("--dump-squeeze", action="store_true", help="write dumps/squeeze.json (squeeze detector internals) and exit")
+    ap.add_argument("--dump-step", type=int, default=1, help="sweep step for the dumps (default every bar)")
     ap.add_argument("--fixtures", type=int, default=None, help="only the first N fixtures (debug)")
     ap.add_argument("--workers", type=int, default=4)
     ap.add_argument("--step", type=int, default=1, help="sweep every k-th bar (1 = every bar)")
@@ -892,6 +1021,11 @@ def main() -> int:
         pref = tuple(x.strip() for x in args.symbols.split(",") if x.strip())
         symbols = [s for s in symbols if s.startswith(pref)]
     only = tuple(x.strip() for x in args.only.split(","))
+    if args.dump_zones or args.dump_volume_ctx or args.dump_squeeze:
+        _attach_capture()
+        run_dumps(symbols, out_dir, args, variants)
+        print(f"dumps done in {time.time() - t_all:.1f}s", flush=True)
+        return 0
     jobs = [(s, out_dir, args.step, only) for s in symbols]
     print(f"running {len(symbols)} fixtures × 3 strategies × 3 variants (step={args.step}, workers={args.workers}) ...", flush=True)
     import multiprocessing as mp

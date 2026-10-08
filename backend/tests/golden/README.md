@@ -17,8 +17,17 @@ tests/golden/
 ├── load.js                fixture loader (sha256 check, Frame cache, sweep inputs per bar)
 ├── compare.js             tolerance rules (PLAN §3): 1e-9 relative, exact ints/strings/bools, pyRound fields
 ├── engines.js             pluggable engine registry (null until M2–M6 register the engines)
-└── golden.test.js         the sweep
+├── golden.test.js         the sweep
+└── layers.test.js         M1 primitives vs the layer dumps (squeeze / VOLUME context / LEVELS zone layers)
 ```
+
+`layers.test.js` recomputes every value of `dumps/*.json` (3 fixtures × 200 bars) from the
+candle prefixes with `strategies/common/{series,kde}.js` and requires equality after the
+fixture rounding (`r10`): BB width + `Series.quantile` + SMA-ATR + squeeze score; the VOLUME
+`VolumeContext` columns (EMA adjust=True, SMA, Wilder RSI/ATR, TR, shifted volume mean,
+ribbon EMAs, HTF state); the LEVELS zone layers (EMA ATR, strict-window pivots, scipy KDE
+peaks, volume-profile HVN/LVN). It is the end-to-end proof that the numeric foundation
+matches pandas/numpy/scipy on real engine inputs.
 
 ## Engine contract
 
