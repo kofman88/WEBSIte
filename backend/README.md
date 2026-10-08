@@ -104,6 +104,40 @@ curl -X POST http://localhost:3000/api/auth/login \
 curl http://localhost:3000/api/exchanges/keys -H "Authorization: Bearer YOUR_TOKEN"
 ```
 
+## 🧪 Тесты веб-приложения `/app/` (M11)
+
+Экраны бота (`frontend/app/`) проверяются против контрактного стаба
+`backend/utils/app-stub.js` — in-memory Express без БД: `/api/app/*` по
+`miniapp/API.md` в форме M7 (`settings/all` с секциями D9 `levels.shared / long /
+short`, `smc.advanced`, `risk.advanced`, `ptp`, `options.choices`, валидация по
+схеме `appSettingsService` → `bad_request "<секция>.<ключ>"`), срез `/api/auth`
+(login / 2FA / register / refresh с ротацией / logout / `me` / providers /
+telegram) и раздача `frontend/` как в `server.js` (`/app/` → `frontend/app/index.html`).
+Учётки: `demo@chm.local` (Free), `pro@chm.local` (Pro), `2fa@chm.local` (код
+`000000`), `empty@chm.local` (без сигналов), пароль `demo1234`; заголовок
+`X-Demo-Plan: pro|free` показывает другой тариф тому же аккаунту. Тестовые хуки:
+`POST /api/auth/__stub/expire-access` (протухшие access-токены → приложение
+обязано обновиться один раз), `__stub/disable {email, disabled}` (403
+`ACCOUNT_DISABLED`), `__stub/reset` (исходное состояние).
+
+```bash
+cd backend
+npx vitest run tests/e2e                 # контракт стаба + статическая обвязка (supertest)
+node tests/e2e/serve-stub.js 3199        # ручной QA: http://127.0.0.1:3199/app/
+python tests/e2e/app.e2e.py              # Playwright, 390×844 и 1280×900: вход (ошибка пароля,
+                                         # 2FA), все вкладки и 12 разделов настроек без
+                                         # «Раздел недоступен», деталь сигнала + Back браузера,
+                                         # POST strategy с телом Mini App (+ Free-мьютекс),
+                                         # bad_request settings/all → тост бота, вложенное
+                                         # сохранение D9, refresh после 401, 403 → экран входа,
+                                         # logout, session-only вход, ?demo=pro без бэкенда
+python tests/e2e/app_smoke.py            # короткий smoke тех же экранов (один viewport)
+```
+
+Playwright-скрипты не входят в `vitest run` (нужны Chromium и Playwright для
+Python: `pip install playwright && playwright install chromium`; свой бинарь —
+`--chromium /path/to/chromium`, скриншоты — `--shots DIR`, порт — `--port`).
+
 ## 📁 Структура проекта
 
 ```
@@ -120,8 +154,8 @@ backend/
 │                    # adminService, supportService, notifier, emailService,
 │                    # telegramService, pushService, exchangeService, …
 ├── workers/         # paymentWatcher (крипто-платежи)
-├── utils/           # logger, metrics, sentry, crypto, validation, db-*
-├── tests/           # vitest
+├── utils/           # logger, metrics, sentry, crypto, validation, db-*, app-stub (контракт /api/app)
+├── tests/           # vitest; tests/e2e — стаб-контракт + Playwright (app.e2e.py, app_smoke.py)
 ├── data/            # SQLite база данных + бэкапы (создаётся автоматически)
 ├── .env.example
 ├── package.json

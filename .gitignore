@@ -45,3 +45,7 @@ full_project_context.txt
 
 # harness worktrees of parallel agents
 .claude/worktrees/
+# Python (Playwright E2E scripts)
+__pycache__/
+*.pyc
+backend/node_modules
