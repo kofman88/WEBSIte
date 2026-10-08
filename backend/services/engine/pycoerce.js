@@ -10,22 +10,23 @@
 class PyValueError extends Error {}
 class PyTypeError extends Error {}
 
-// PEP 515: single underscores are allowed between digits ("1_000", "1_0.5_5", "1e1_0").
-const DIGITS = '\\d(?:_?\\d)*';
-const INT_RE = new RegExp(`^\\s*[+-]?${DIGITS}\\s*$`);
-// float(): decimal / exponent forms (with PEP 515 underscores), inf / nan spellings (case-insensitive)
-const FLOAT_RE = new RegExp(`^\\s*[+-]?(?:(?:${DIGITS}(?:\\.(?:${DIGITS})?)?|\\.${DIGITS})(?:e[+-]?${DIGITS})?|inf|infinity|nan)\\s*$`, 'i');
+// int() / float() of a str: CPython 3.11 (Unicode digits and spaces of unicodedata 14.0.0, PEP 515,
+// the 4300-digit limit) — strategies/common/pynum.js.
+const N = require('../../strategies/common/pynum');
 
-/** int(v): bool → 0/1; number → truncated (finite only); numeric string; else raises. */
+/** int(v): bool → 0/1; number → truncated (finite only, never -0); numeric string; else raises. */
 function pyInt(v) {
   if (typeof v === 'boolean') return v ? 1 : 0;
   if (typeof v === 'number') {
-    if (!Number.isFinite(v)) throw new PyValueError('cannot convert float to integer');
-    return Math.trunc(v);
+    const t = N.intFromFloat(v);
+    if (t === null) throw new PyValueError(N.floatToIntErrorText(v));
+    return t;
   }
   if (typeof v === 'string') {
-    if (!INT_RE.test(v)) throw new PyValueError(`invalid literal for int() with base 10: '${v}'`);
-    return parseInt(v.trim().replace(/_/g, ''), 10);
+    const lit = N.intLiteral(v);
+    if (lit === null) throw new PyValueError(N.intErrorText(v));
+    if (lit.limit !== undefined) throw new PyValueError(N.intLimitText(lit.limit));
+    return N.intFromLiteral(lit);
   }
   throw new PyTypeError(`int() argument must be a string, a bytes-like object or a real number, not '${v === null ? 'NoneType' : typeof v}'`);
 }
@@ -35,11 +36,9 @@ function pyFloat(v) {
   if (typeof v === 'boolean') return v ? 1 : 0;
   if (typeof v === 'number') return v;
   if (typeof v === 'string') {
-    if (!FLOAT_RE.test(v)) throw new PyValueError(`could not convert string to float: '${v}'`);
-    const t = v.trim().toLowerCase().replace(/_/g, '');
-    if (t.endsWith('inf') || t.endsWith('infinity')) return t.startsWith('-') ? -Infinity : Infinity;
-    if (t.endsWith('nan')) return NaN;
-    return Number(t);
+    const x = N.floatFromStr(v);
+    if (x === undefined) throw new PyValueError(N.floatErrorText(v));
+    return x;
   }
   throw new PyTypeError(`float() argument must be a string or a real number, not '${v === null ? 'NoneType' : typeof v}'`);
 }

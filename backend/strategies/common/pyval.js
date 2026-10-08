@@ -33,17 +33,16 @@ function pyGet(obj, key, dflt) {
   return Object.prototype.hasOwnProperty.call(obj, key) ? obj[key] : dflt;
 }
 
-const FLOAT_RE = /^\s*[+-]?(\d+\.?\d*(e[+-]?\d+)?|\.\d+(e[+-]?\d+)?|inf|infinity|nan)\s*$/i;
+// float(str): CPython 3.11 (Unicode digits and spaces, PEP 515 underscores) — common/pynum.js.
+const N = require('./pynum');
 
 function pyFloat(x) {
   if (typeof x === 'number') return x;
   if (typeof x === 'boolean') return x ? 1 : 0;
   if (typeof x === 'string') {
-    if (!FLOAT_RE.test(x)) throw new RangeError(`could not convert string to float: '${x}'`);
-    const t = x.trim().toLowerCase();
-    if (t.endsWith('inf') || t.endsWith('infinity')) return t.startsWith('-') ? -Infinity : Infinity;
-    if (t.endsWith('nan')) return NaN;
-    return Number(t);
+    const v = N.floatFromStr(x);
+    if (v === undefined) throw new RangeError(N.floatErrorText(x));
+    return v;
   }
   throw new TypeError(`float() argument must be a string or a real number, not '${x === null ? 'NoneType' : typeof x}'`);
 }

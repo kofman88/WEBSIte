@@ -23,7 +23,7 @@
 
 const { levelsStars } = require('../../strategies/levels/stars');
 const { fmtFixed, fmtSigned, fmtPriceDisplay } = require('../../strategies/common/pyfmt');
-const { PY_SPACE } = require('./pyUnicode');
+const { pyStrip, pyUpper } = require('./pyUnicode');   // CPython 3.11 str.strip() (str.isspace() characters)
 
 const STRATEGIES = Object.freeze(['LEVELS', 'SMC', 'VOLUME']);
 const LABELS = Object.freeze({
@@ -36,8 +36,6 @@ const MIN_BARS = 220;
 const ANALYZE_COOLDOWN_S = 10.0;
 const SYMBOL_RE = /^[A-Z0-9]{2,15}$/;
 
-// PY_SPACE: the str.isspace() code points of the bot's CPython 3.11 (engine/pyUnicode.js).
-
 /** str.lstrip(chars) for a set of code points. */
 function lstripChars(s, chars) {
   const set = new Set(Array.from(chars));
@@ -45,15 +43,6 @@ function lstripChars(s, chars) {
   let i = 0;
   while (i < arr.length && set.has(arr[i])) i++;
   return arr.slice(i).join('');
-}
-
-/** str.strip() (Python whitespace). */
-function pyStrip(s) {
-  const str = String(s);
-  let a = 0; let b = str.length;
-  while (a < b && PY_SPACE.has(str.charCodeAt(a))) a++;
-  while (b > a && PY_SPACE.has(str.charCodeAt(b - 1))) b--;
-  return str.slice(a, b);
 }
 
 const toNum = (v) => Number(v);
@@ -211,7 +200,7 @@ function pickBest(candidates) {
  * strategy: LEVELS | SMC | VOLUME | AUTO (any case). Fetch failures become null frames.
  */
 async function analyzeCoin(symbol, strategy, fetch, opts = {}) {
-  const strat = String(strategy).toUpperCase();
+  const strat = pyUpper(String(strategy));
   const needSmc = strat === 'SMC' || strat === 'AUTO';
   const call = (tf) => Promise.resolve().then(() => fetch(symbol, tf, 300));   // gather(return_exceptions=True)
   const tasks = [call('1h')];
@@ -321,9 +310,9 @@ function bodyGet(body, key, dflt) {
  * stripped, U+FEFF is not) minus "/USDT" and "USDT"; str(body.get("strategy", "AUTO")).upper().
  */
 function parseAnalyzeBody(body) {
-  const symbol = pyStrip(pyStrJson(bodyGet(body, 'symbol', '')).toUpperCase())
+  const symbol = pyStrip(pyUpper(pyStrJson(bodyGet(body, 'symbol', ''))))
     .split('/USDT').join('').split('USDT').join('');
-  let strategy = pyStrJson(bodyGet(body, 'strategy', 'AUTO')).toUpperCase();
+  let strategy = pyUpper(pyStrJson(bodyGet(body, 'strategy', 'AUTO')));
   if (!SYMBOL_RE.test(symbol || '')) return { error: 'bad_symbol' };
   if (!STRATEGIES.includes(strategy) && strategy !== 'AUTO') strategy = 'AUTO';
   return { symbol, strategy };

@@ -37,6 +37,11 @@ const { callWithRetry } = require('./apiRetry');
 const sym = require('../marketData/symbolMap');
 const crypto = require('crypto');
 const { safeKeyId, killswitchGate, planGateDeny, recordPlaced, aioQuery } = require('./traderCommon');
+const { pyLower, pyStrip, pyUpper } = require('../../strategies/common/pyUnicode');   // CPython 3.11 str case / whitespace methods
+const { pyRegExp } = require('../../strategies/common/pyre');
+// The bot's `re` patterns with CPython 3.11 \d \s (common/pyre.js), not JS's ASCII classes.
+const JSON_CODE_RE = pyRegExp(String.raw`"code"\s*:\s*(-?\d+)`);
+const JSON_MSG_RE = pyRegExp(String.raw`"msg"\s*:\s*"([^"]+)"`);
 
 const FALLBACK_URLS = Object.freeze([
   'https://fapi.binance.com',
@@ -79,14 +84,14 @@ const BINANCE_ERROR_MAP = Object.freeze({
 function humanizeBinanceError(raw) {
   if (!pyTruthy(raw)) return 'Неизвестная ошибка Binance.';
   raw = String(raw);
-  const m = /"code"\s*:\s*(-?\d+)/.exec(raw);
-  const code = m ? parseInt(m[1], 10) : null;
+  const m = JSON_CODE_RE.exec(raw);
+  const code = m ? pyInt(m[1]) : null;        // int() of Unicode digits too
   if (code && Object.prototype.hasOwnProperty.call(BINANCE_ERROR_MAP, String(code))) return BINANCE_ERROR_MAP[String(code)];
-  const mm = /"msg"\s*:\s*"([^"]+)"/.exec(raw);
+  const mm = JSON_MSG_RE.exec(raw);
   if (mm) {
     const msg = mm[1];
     const first = String.fromCodePoint(msg.codePointAt(0));
-    return first.toUpperCase() + msg.slice(first.length) + (msg.endsWith('.') ? '' : '.');
+    return pyUpper(first) + msg.slice(first.length) + (msg.endsWith('.') ? '' : '.');
   }
   return code ? `Ошибка Binance (код ${code}).` : 'Неизвестная ошибка Binance.';
 }
@@ -103,7 +108,7 @@ const EMPTY_SUMMARY = () => ({ equity: 0.0, unrealized_pnl: 0.0, available: 0.0,
 function createBinanceTrader(overrides = {}) {
   const rt = makeRuntime(overrides);
   const log = rt.log;
-  const disabled = ['1', 'true', 'yes'].includes(String(rt.env.DISABLE_BINANCE || '').trim());
+  const disabled = ['1', 'true', 'yes'].includes(pyStrip(String(rt.env.DISABLE_BINANCE || '')));
   const st = {
     baseUrl: overrides.baseUrl || FALLBACK_URLS[0],
     activeBaseUrl: overrides.baseUrl || FALLBACK_URLS[0],
@@ -285,7 +290,7 @@ function createBinanceTrader(overrides = {}) {
     if (deny) return deny;
     try {
       const bs = toBinanceSymbol(symbol);
-      const side = ['LONG', 'BUY'].includes(String(direction).toUpperCase()) ? 'BUY' : 'SELL';
+      const side = ['LONG', 'BUY'].includes(pyUpper(String(direction))) ? 'BUY' : 'SELL';
       const posSide = side === 'BUY' ? 'LONG' : 'SHORT';
       const closeSide = side === 'BUY' ? 'SELL' : 'BUY';
       const pmult = binancePriceMultiplier(symbol);
@@ -313,7 +318,7 @@ function createBinanceTrader(overrides = {}) {
       let hedgeMode = true;
       const dualResp = await _request('POST', '/fapi/v1/positionSide/dual', apiKey, secret, { dualSidePosition: 'true' });
       if (pyGet(dualResp, 'code') === -4059 || pyGet(dualResp, 'code') === -4061) {
-        const ml = pyStr(pyGet(dualResp, 'msg', '')).toLowerCase();
+        const ml = pyLower(pyStr(pyGet(dualResp, 'msg', '')));
         if (ml.includes('existing') || ml.includes('position side cannot be changed')) {
           hedgeMode = false;
           log.info('Binance hedge mode unavailable (existing positions) — using one-way');
@@ -476,7 +481,7 @@ function createBinanceTrader(overrides = {}) {
       }
       const resp = await _request('POST', '/fapi/v1/order', apiKey, secret, orderParams);
       const respCode = pyGet(resp, 'code', 0);
-      const respMsgL = pyStr(pyGet(resp, 'msg', '')).toLowerCase();
+      const respMsgL = pyLower(pyStr(pyGet(resp, 'msg', '')));
       const isDup = cidEntry && (respCode === -4015 || (respMsgL.includes('client order id') && (respMsgL.includes('already') || respMsgL.includes('exists'))));
       if (isDup) {
         log.info(`Duplicate order rejected by exchange (idempotency works): ${bs} cid=${cidEntry} — assuming prior attempt succeeded`);
@@ -499,7 +504,7 @@ function createBinanceTrader(overrides = {}) {
         const slResp = await _request('POST', '/fapi/v1/order', apiKey, secret, slParams);
         if (pyTruthy(pyGet(slResp, 'orderId'))) { slPlaced = true; break; }
         const slCode = pyGet(slResp, 'code', 0);
-        const slMsgL = pyStr(pyGet(slResp, 'msg', '')).toLowerCase();
+        const slMsgL = pyLower(pyStr(pyGet(slResp, 'msg', '')));
         if (cidSl && (slCode === -4015 || (slMsgL.includes('client order id') && slMsgL.includes('already')))) {
           log.info(`SL duplicate rejected (idempotency works): ${bs} cid=${cidSl}`);
           slPlaced = true;
@@ -568,7 +573,7 @@ function createBinanceTrader(overrides = {}) {
           if (pyTruthy(pyGet(tpResp, 'orderId'))) { tpOk = true; break; }
           lastTpErr = pySlice(pyStr(tpResp), 200);
           const code = pyGet(tpResp, 'code', 0);
-          const tpMsgL = pyStr(pyGet(tpResp, 'msg', '')).toLowerCase();
+          const tpMsgL = pyLower(pyStr(pyGet(tpResp, 'msg', '')));
           if (tpCid && (code === -4015 || (tpMsgL.includes('client order id') && tpMsgL.includes('already')))) {
             log.info(`TP duplicate rejected (idempotency works): ${bs} cid=${tpCid}`);
             tpOk = true;
@@ -659,8 +664,8 @@ function createBinanceTrader(overrides = {}) {
   async function closePosition(apiKey, secret, symbol, side, size, posIdx = 0) {
     try {
       const bs = toBinanceSymbol(symbol);
-      const closeSide = pyStr(side).toUpperCase() === 'LONG' ? 'SELL' : 'BUY';
-      const posSide = pyStr(side).toUpperCase();
+      const closeSide = pyUpper(pyStr(side)) === 'LONG' ? 'SELL' : 'BUY';
+      const posSide = pyUpper(pyStr(side));
       const [qtyStep] = await _getInstrumentFilters(bs);
       const qtyStr = PP.roundQty(size, qtyStep);
       if (pyFloat(qtyStr) <= 0) {
@@ -718,7 +723,7 @@ function createBinanceTrader(overrides = {}) {
       const resp = await _request('GET', '/fapi/v1/openOrders', apiKey, secret, { symbol: bs });
       const ordersRaw = isDict(resp) ? pyGet(resp, 'data', resp) : resp;
       if (!Array.isArray(ordersRaw)) return { ok: true, cancelled: 0, total_tp: 0 };
-      const tpOrders = pyIter(ordersRaw).filter((x) => pyStr(pyGet(x, 'type', '')).toUpperCase() === 'TAKE_PROFIT_MARKET');
+      const tpOrders = pyIter(ordersRaw).filter((x) => pyUpper(pyStr(pyGet(x, 'type', ''))) === 'TAKE_PROFIT_MARKET');
       let cancelled = 0;
       const errors = [];
       for (const x of pyIter(tpOrders)) {
@@ -740,7 +745,7 @@ function createBinanceTrader(overrides = {}) {
     const ordData = await _request('GET', '/fapi/v1/openOrders', apiKey, secret, { symbol: bs });
     if (!Array.isArray(ordData)) return;
     for (const x of pyIter(ordData)) {
-      if (pyGet(x, 'type') === 'STOP_MARKET' && pyStr(pyGet(x, 'side', '')).toUpperCase() === closeSide.toUpperCase()) {
+      if (pyGet(x, 'type') === 'STOP_MARKET' && pyUpper(pyStr(pyGet(x, 'side', ''))) === pyUpper(closeSide)) {
         await _request('DELETE', '/fapi/v1/order', apiKey, secret, { symbol: bs, orderId: pyStr(pyGet(x, 'orderId', '')) });
       }
     }
@@ -754,7 +759,7 @@ function createBinanceTrader(overrides = {}) {
       const [qtyStep, tickSize] = await _getInstrumentFilters(bs);
       await _cancelSlOrders(apiKey, secret, bs, closeSide);
       const positions = await getPositions(apiKey, secret, symbol);
-      const pos = positions.find((p) => pyStr(p.side).toUpperCase() === posSide) || null;
+      const pos = positions.find((p) => pyUpper(pyStr(p.side)) === posSide) || null;
       if (!pos) return { ok: true };
       const qtyStr = PP.roundQty(pos.size, qtyStep);
       if (pyFloat(qtyStr) <= 0) {
@@ -788,7 +793,7 @@ function createBinanceTrader(overrides = {}) {
       const [qtyStep, tickSize] = await _getInstrumentFilters(bs);
       await _cancelSlOrders(apiKey, secret, bs, closeSide);
       const positions = await getPositions(apiKey, secret, symbol);
-      const pos = positions.find((p) => pyStr(p.side).toUpperCase() === posSide) || null;
+      const pos = positions.find((p) => pyUpper(pyStr(p.side)) === posSide) || null;
       if (!pos) return { ok: true };
       const qtyStr = PP.roundQty(pos.size, qtyStep);
       if (pyFloat(qtyStr) <= 0) {
@@ -841,7 +846,7 @@ function createBinanceTrader(overrides = {}) {
         const ordData = await _request('GET', '/fapi/v1/openOrders', apiKey, secret, { symbol: bs });
         if (Array.isArray(ordData)) {
           for (const x of pyIter(ordData)) {
-            if (pyStr(pyGet(x, 'side', '')).toUpperCase() !== closeSide) continue;
+            if (pyUpper(pyStr(pyGet(x, 'side', ''))) !== closeSide) continue;
             if (!['STOP_MARKET', 'TAKE_PROFIT_MARKET'].includes(pyGet(x, 'type'))) continue;
             const oid = pyStr(pyGet(x, 'orderId', ''));
             if (slPlaced && oid === pyStr(pyGet(slResp, 'orderId', ''))) continue;
@@ -898,8 +903,8 @@ function createBinanceTrader(overrides = {}) {
           let liveTp = 0;
           if (Array.isArray(od)) {
             for (const x of pyIter(od)) {
-              if (pyStr(pyGet(x, 'type', '')) === 'TAKE_PROFIT_MARKET' && pyStr(pyGet(x, 'side', '')).toUpperCase() === closeSide
-                && pyStr(pyGet(x, 'positionSide', '')).toUpperCase() === posSide) liveTp += 1;
+              if (pyStr(pyGet(x, 'type', '')) === 'TAKE_PROFIT_MARKET' && pyUpper(pyStr(pyGet(x, 'side', ''))) === closeSide
+                && pyUpper(pyStr(pyGet(x, 'positionSide', ''))) === posSide) liveTp += 1;
             }
           }
           if (liveTp < tpExpected) {
@@ -941,7 +946,7 @@ function createBinanceTrader(overrides = {}) {
           if (e && (e.pyType === 'TypeError' || e.pyType === 'ValueError')) realized = null; else throw e;
         }
         result.push({
-          side: pyStr(side).toUpperCase() === 'BUY' ? 'Buy' : 'Sell',
+          side: pyUpper(pyStr(side)) === 'BUY' ? 'Buy' : 'Sell',
           avgExitPrice: price,
           updatedTime: ts,
           closedPnl: realized,
@@ -1010,7 +1015,7 @@ function createBinanceTrader(overrides = {}) {
 
 function formatTradeResult(result, direction, symbol, entry, sl, tp1, riskPct, leverage, tp2 = 0.0, tp3 = 0.0) {
   const fp = PP.fmtPriceDisplay;
-  const dirEmoji = ['LONG', 'BUY'].includes(String(direction).toUpperCase()) ? '🟢 LONG' : '🔴 SHORT';
+  const dirEmoji = ['LONG', 'BUY'].includes(pyUpper(String(direction))) ? '🟢 LONG' : '🔴 SHORT';
   const bs = toBinanceSymbol(symbol);
   if (pyTruthy(pyGet(result, 'ok'))) {
     const orderId = htmlEscape(pyStr(pyGet(result, 'order_id', '—')));

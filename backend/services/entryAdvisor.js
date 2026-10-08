@@ -30,6 +30,7 @@ const { pyRoundInt, pyMax, pyMin } = require('../strategies/common/pyround');
 // CPython's int() / float() / str.strip() (its Unicode digits and spaces, PEP 515, the
 // 4300-digit limit, the exact error messages) — shared with the challenge port.
 const { pyInt: coerceInt, pyFloat: coerceFloat, pyIntStr, pyStrip } = require('./challengeService');
+const { pyUpper } = require('../strategies/common/pyUnicode');   // CPython 3.11 str case / whitespace methods
 
 const KV_PREFIX = 'entry_advice_';
 const STRATS = Object.freeze(['LEVELS', 'SMC', 'VOLUME']);
@@ -143,7 +144,7 @@ function missedStats(userId, days = null) {
     + 'AND COALESCE(signal_msg_id, 0) > 0 GROUP BY s',
   ).all(coerceInt(userId), cutoff);
   for (const row of rows) {
-    const s = String(row.s || '').toUpperCase();
+    const s = pyUpper(String(row.s || ''));
     if (Object.prototype.hasOwnProperty.call(out, s)) out[s] = { missed: Math.trunc(Number(row.missed || 0)), total: Math.trunc(Number(row.total || 0)) };
   }
   return out;

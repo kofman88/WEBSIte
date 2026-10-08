@@ -12,22 +12,17 @@
  */
 
 const { pyMax, pyMin } = require('../common/pyround');
+const N = require('../common/pynum');
 
 /**
- * CPython float(str): whitespace stripped, underscores allowed between digits,
- * "nan" / "inf" / "infinity" with an optional sign (case-insensitive); hex/octal/binary
- * prefixes and anything else raise. Returns NaN-free numbers or throws.
+ * CPython float(str) (common/pynum.js: Unicode digits and spaces of unicodedata 14.0.0,
+ * underscores between digits, "nan" / "inf" / "infinity" with an optional sign in any case);
+ * hex/octal/binary prefixes and anything else raise.
  */
 function pyFloatStr(s) {
-  const t = String(s).trim().replace(/(?<=\d)_(?=\d)/g, '');
-  if (t === '') throw new Error('could not convert string to float');
-  const m = /^([+-]?)(nan|inf|infinity)$/i.exec(t);
-  if (m) {
-    if (m[2].toLowerCase() === 'nan') return NaN;
-    return m[1] === '-' ? -Infinity : Infinity;
-  }
-  if (!/^[+-]?(\d+\.?\d*|\.\d+)([eE][+-]?\d+)?$/.test(t)) throw new Error('could not convert string to float');
-  return Number(t);
+  const v = N.floatFromStr(String(s));
+  if (v === undefined) throw new Error(N.floatErrorText(String(s)));
+  return v;
 }
 
 /** Python `float(x or 0)` for the inputs levels_stars sees (None/0/""/False → 0; parse errors → 0.0). */
@@ -58,8 +53,8 @@ function starsStr(n) {
   else if (typeof n === 'number') k = Number.isFinite(n) ? Math.trunc(n) : 0;
   else if (typeof n === 'boolean') k = 1;
   else {
-    const t = String(n).trim().replace(/(?<=\d)_(?=\d)/g, '');
-    k = /^[+-]?\d+$/.test(t) ? Number(t) : 0;   // int("2.9") raises → 0
+    const lit = N.intLiteral(String(n));          // int("2.9") raises → 0
+    k = lit && lit.limit === undefined ? N.intFromLiteral(lit) : 0;
   }
   k = Math.max(0, Math.min(5, k));
   return '⭐'.repeat(k) + '☆'.repeat(5 - k);

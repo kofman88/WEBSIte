@@ -9,15 +9,16 @@
  */
 
 const { pyFloat, pyInt } = require('./pycoerce');
-const { pyRound } = require('../../strategies/common/pyround');
+const { pyRound, pyMax } = require('../../strategies/common/pyround');
+const { pyLower, pyStrip, pyUpper } = require('../../strategies/common/pyUnicode');   // CPython 3.11 str case / whitespace methods
 
 const WIN_STAGES = Object.freeze(['TP1', 'TP2', 'TP3']);
 const FINAL = Object.freeze(['TP1', 'TP2', 'TP3', 'SL', 'BE']);
 
 function envHours(name, dflt, env = process.env) {
   const raw = env[name];
-  if (raw === undefined || raw === null || raw === '') return Math.max(1.0, dflt);
-  try { return Math.max(1.0, pyFloat(raw)); } catch (_e) { return dflt; }
+  if (raw === undefined || raw === null || raw === '') return pyMax(1.0, dflt);
+  try { return pyMax(1.0, pyFloat(raw)); } catch (_e) { return dflt; }
 }
 
 /** The tracker window: that long a signal counts as "in progress", afterwards "no outcome". */
@@ -45,7 +46,7 @@ function hasCard(row) {
 
 function isExchangeTrade(row) {
   const v = _g(row, 'order_id', '');
-  return Boolean(String(pyFalsy(v) ? '' : v).trim());
+  return Boolean(pyStrip(String(pyFalsy(v) ? '' : v)));
 }
 
 /**
@@ -54,14 +55,14 @@ function isExchangeTrade(row) {
  */
 function signalStatus(row, now = null) {
   const resRaw = _g(row, 'result', '');
-  const res = String(pyFalsy(resRaw) ? '' : resRaw).toUpperCase();
+  const res = pyUpper(String(pyFalsy(resRaw) ? '' : resRaw));
   const stageRaw = _g(row, 'progress_stage', '');
-  const stage = String(pyFalsy(stageRaw) ? '' : stageRaw).toUpperCase();
-  if (FINAL.includes(res)) return res.toLowerCase();                                      // 1
+  const stage = pyUpper(String(pyFalsy(stageRaw) ? '' : stageRaw));
+  if (FINAL.includes(res)) return pyLower(res);                                      // 1
   if (res === 'MANUAL' || res === 'TRAIL') return 'closed';                                // 2
   const skipReason = _g(row, 'skip_reason', '');
   if (res === 'SKIP' && String(pyFalsy(skipReason) ? '' : skipReason) === 'manual') return 'skip'; // 3
-  if (FINAL.includes(stage)) return stage.toLowerCase();                                   // 4
+  if (FINAL.includes(stage)) return pyLower(stage);                                   // 4
   if (stage === 'EXPIRED') return 'expired';                                               // 5
   if (stage === 'MISSED') return 'missed';                                                 // 6
   if (res === 'ORPHAN') return 'skip';                                                     // 7
@@ -84,7 +85,7 @@ function signalStatus(row, now = null) {
  */
 function signalRr(row, status) {
   const resRaw = _g(row, 'result', '');
-  const res = String(pyFalsy(resRaw) ? '' : resRaw).toUpperCase();
+  const res = pyUpper(String(pyFalsy(resRaw) ? '' : resRaw));
   const rrRaw = _g(row, 'result_rr', null);
   if (res && res !== 'SKIP' && res !== 'ORPHAN' && rrRaw !== null && rrRaw !== '') {
     try { return pyFloat(rrRaw); } catch (_e) { /* fall through like the bot */ }
@@ -131,6 +132,6 @@ function countableSql(prefix = '') {
 }
 
 module.exports = {
-  WIN_STAGES, FINAL, MAX_AGE_S, COUNTABLE_SQL, countableSql,
+  WIN_STAGES, FINAL, MAX_AGE_S, COUNTABLE_SQL, countableSql, envHours,
   _g, hasCard, isExchangeTrade, signalStatus, signalRr,
 };

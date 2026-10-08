@@ -5,6 +5,9 @@
  */
 
 const os = require('os');
+const { pyLower, pyUpper } = require('../../strategies/common/pyUnicode');   // CPython 3.11 str case / whitespace methods
+const { pyMax, pyMin } = require('../../strategies/common/pyround');   // builtin max()/min(): a NaN 2nd argument is ignored
+const { floatFromStr } = require('../../strategies/common/pynum');
 
 // ── population ──
 const POP_SIZE = 10;                 // AUDIT-FIX-C33: 15→10 for 1 CPU
@@ -41,7 +44,7 @@ const EVAL_MIN_TRADES_BY_STRATEGY = Object.freeze({ SMC: 3, LEVELS: 10, VOLUME: 
 const OOS_SPLIT = 0.50;              // display only (dashboard footer)
 const OOS_SPLIT_BY_STRATEGY = Object.freeze({ SMC: 0.50, LEVELS: 0.30 });
 
-const up = (s) => String(s || '').toUpperCase();
+const up = (s) => pyUpper(String(s || ''));
 const own = (o, k) => Object.prototype.hasOwnProperty.call(o, k);
 
 /** _eval_top_n(strategy) */
@@ -64,7 +67,7 @@ function oosSplit(strategy = '') {
 
 /** _eval_days_for_tf(tf, strategy) — history window per TF (low density = LEVELS / VOLUME). */
 function evalDaysForTf(tf, strategy = '') {
-  const t = String(tf || '').toLowerCase();
+  const t = pyLower(String(tf || ''));
   const low = ['LEVELS', 'VOLUME'].includes(up(strategy));
   if (['1m', '3m', '5m'].includes(t)) return 10;
   if (t === '15m') return low ? 25 : 15;
@@ -93,7 +96,7 @@ function getDynamicEvalDays(_strategy, getRegime = null) {
 
 /** _eval_timeout_for_tf(tf) seconds. */
 function evalTimeoutForTf(tf) {
-  const t = String(tf || '').toLowerCase();
+  const t = pyLower(String(tf || ''));
   if (['15m', '5m', '3m', '1m'].includes(t)) return 240.0;
   if (t === '30m') return 200.0;
   return 180.0;
@@ -197,19 +200,21 @@ function defaultCpuShare(n = cpuAllowed()) {
 }
 
 /**
- * _GENOME_CPU_SHARE = clamp(float(env GENOME_CPU_SHARE or default), 0.05, 1.0).
+ * _GENOME_CPU_SHARE = max(0.05, min(1.0, float(os.getenv("GENOME_CPU_SHARE", "") or default))): CPython
+ * float() of the text ("1_0", "inf", "nan" are floats; nan clamps to 1.0 like builtin min/max).
  * The bot crashes at import on an unparsable value; the site falls back to the default.
  */
 function genomeCpuShare(env = process.env, n = undefined) {
   const raw = env.GENOME_CPU_SHARE;
-  let v = raw === undefined || raw === null || String(raw) === '' ? defaultCpuShare(n === undefined ? cpuAllowed() : n) : Number(raw);
-  if (!Number.isFinite(v)) v = defaultCpuShare(n === undefined ? cpuAllowed() : n);
-  return Math.max(0.05, Math.min(1.0, v));
+  const dflt = () => defaultCpuShare(n === undefined ? cpuAllowed() : n);
+  let v = raw === undefined || raw === null || String(raw) === '' ? dflt() : floatFromStr(String(raw));
+  if (v === undefined) v = dflt();
+  return pyMax(0.05, pyMin(1.0, v));
 }
 
 /** The per-coin CPU-budget pause: min(20, elapsed × (1/share − 1)) seconds. */
 function cpuPauseS(elapsedS, share) {
-  return Math.min(20.0, elapsedS * (1.0 / share - 1.0));
+  return pyMin(20.0, elapsedS * (1.0 / share - 1.0));
 }
 
 module.exports = {

@@ -13,10 +13,11 @@
  */
 
 const { fmtFixed } = require('../../strategies/common/pyfmt');
-const { pyRound } = require('../../strategies/common/pyround');
+const { pyRound, pyMax, pyMin } = require('../../strategies/common/pyround');
 const { pySum } = require('../../strategies/common/series');
 const { GENE_SPACE, FLOAT_GENE_KEYS } = require('./geneSpace');
 const C = require('./config');
+const { pyUpper } = require('../../strategies/common/pyUnicode');   // CPython 3.11 str case / whitespace methods
 
 const SEP = '━━━━━━━━━━━━━━━━━━━━━━━━━━━━';
 const BIRTH_ICON = Object.freeze({ random: '🎲', crossover: '🧬', mutation: '⚡', elite: '👑' });
@@ -69,7 +70,7 @@ const fitOf = (g) => (g && g.fitness !== undefined && g.fitness !== null ? g.fit
 /** genome_ui.format_genome_dashboard(strategy, tf) */
 function formatGenomeDashboard(strategy = 'LEVELS', tf = '', { store = null } = {}) {
   const st = store || require('./store');
-  let S = String(strategy || '').toUpperCase();
+  let S = pyUpper(String(strategy || ''));
   if (!Object.prototype.hasOwnProperty.call(GENE_SPACE, S)) S = 'LEVELS';
   const tfs = C.getTfs(S);
   let T = tf;
@@ -156,7 +157,7 @@ function formatGenomeDashboard(strategy = 'LEVELS', tf = '', { store = null } = 
     if (maxFit <= 0) maxFit = 1.0;
     const width = 20;
     for (const h of history) {
-      const ratio = Math.max(0.0, Math.min(1.0, h.best_fitness / maxFit));
+      const ratio = pyMax(0.0, pyMin(1.0, h.best_fitness / maxFit));
       const filled = Math.trunc(ratio * width);
       const bar = '█'.repeat(filled) + '░'.repeat(width - filled);
       lines.push(`  gen#${String(h.generation).padEnd(3)} ${bar} ${fmtFixed(h.best_fitness, 2)}  (avg ${fmtFixed(h.avg_fitness, 2)})`);

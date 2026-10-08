@@ -34,10 +34,12 @@ const { defaultSleep } = require('./rateGate');
 const sym = require('./symbolMap');
 const candleCache = require('./candleCache');
 const { parseContracts } = require('./bingxRest');
+const { intOrUndefined } = require('../../strategies/common/pynum');
 const {
   TF_NORM, TTL_MAP, TF_NORM_TO_BINGX, BINGX_TO_TF_NORM, TF_MS,
   pyInt, pyFloat, pyFalsy, frameIndexOf, frameSetRow, frameAppendRow, frameTrim,
 } = require('./candleFrame');
+const { pyLower, pyStrip } = require('../../strategies/common/pyUnicode');   // CPython 3.11 str case / whitespace methods
 
 const BINGX_WS_SWAP = 'wss://open-api-swap.bingx.com/swap-market';
 const BINGX_CONTRACTS_URL = 'https://open-api.bingx.com/openApi/swap/v2/quote/contracts';
@@ -55,8 +57,8 @@ const WS_TF_MS = TF_MS; // bar lengths per BingX interval (1M excluded in the bo
 
 function maxSubsPerConn(env = process.env) {
   const raw = env.BINGX_WS_MAX_SUBS_PER_CONN;
-  const n = parseInt(raw === undefined || raw === '' ? '200' : raw, 10);
-  if (!Number.isFinite(n)) return 200;
+  const n = intOrUndefined(raw === undefined || raw === '' ? '200' : String(raw));   // int(os.getenv(…, "200") or "200")
+  if (n === undefined) return 200;
   return Math.max(1, n);
 }
 
@@ -93,7 +95,7 @@ function parseChannel(dataType) {
   const i = String(dataType).indexOf('@kline_');
   const s = String(dataType).slice(0, i);
   const iv = String(dataType).slice(i + '@kline_'.length);
-  const tfNorm = BINGX_TO_TF_NORM[iv.trim().toLowerCase()];
+  const tfNorm = BINGX_TO_TF_NORM[pyLower(pyStrip(iv))];
   const canon = sym.fromBingx(s);
   if (!tfNorm || !canon) return null;
   return [canon, tfNorm];
@@ -535,7 +537,7 @@ class BingxWsFeed {
     this._lastMsgTs = this._nowS();
     const text = decodeFrame(raw);
     if (!text) return;
-    const stripped = text.trim();
+    const stripped = pyStrip(text);
     if (stripped === 'Ping' || stripped === 'ping') {
       this._pingsReceived += 1;
       if (this._sendText('Pong')) this._pongsSent += 1;

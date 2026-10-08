@@ -88,13 +88,9 @@ const sleepMs = (ms) => new Promise((r) => { const h = setTimeout(r, ms); if (h.
 const intOr0 = (v) => (pyTruthy(v) ? pyInt(v) : 0);   // int(x or 0)
 const attr = (o, k, d) => (o && Object.prototype.hasOwnProperty.call(o, k) ? o[k] : d);   // getattr(o, k, d)
 
-/** UTC "YYYY-MM-DD" of a unix-seconds timestamp. */
-function utcDate(ts) {
-  return new Date(Math.floor(ts * 1000)).toISOString().slice(0, 10);
-}
-function utcHour(ts) {
-  return new Date(Math.floor(ts * 1000)).getUTCHours();
-}
+// datetime.fromtimestamp(ts, tz=utc).strftime("%Y-%m-%d") / .hour — the fraction rounds to whole
+// microseconds half-even (common/pytime.js), so …23:59:59.9999996 is already the next day.
+const { utcDate, utcHour } = require('../../strategies/common/pytime');
 
 /**
  * json.dumps of a uid-keyed dict in the bot's insertion order: a plain JS object would

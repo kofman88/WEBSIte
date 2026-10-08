@@ -13,6 +13,7 @@ const { REJECT } = require('./config');
 const { CLASS_NAMES } = require('./zones');
 const { APPROACH } = require('./patterns');
 const { fmtFixed } = require('../common/pyfmt');
+const { pyMax, pyMin } = require('../common/pyround');   // builtin max()/min(): a NaN 2nd argument is ignored
 
 const REASON = Object.freeze({
   setup: (sType) => `✅ ${sType}`,
@@ -122,7 +123,7 @@ function accumulateQuality(p) {
   if (p.rrScore < 1.8) { quality -= 1; reasons.push(REASON.rrScoreLow(p.rrScore)); }
 
   // Зажим в [0, 10]
-  quality = Math.max(0, Math.min(10, quality));
+  quality = pyMax(0, pyMin(10, quality));
 
   // Мемкоин: ограничение (но не блокируем при min_quality=4)
   if (p.memcoin && quality > 5) quality = 5;

@@ -28,7 +28,7 @@
 const { pyTruthy, pyFloat, pyMax2 } = require('../../strategies/common/pyval');
 const { pyIntOf } = require('./constraints');
 const regimeHook = require('./regime');
-const { PY_SPACE: PY_WS } = require('../engine/pyUnicode');
+const { pyStrip, pyLower } = require('../engine/pyUnicode');   // CPython 3.11 str.strip() (str.isspace() characters)
 
 const REGIME_NAMES = Object.freeze(['trending_up', 'trending_down', 'ranging', 'high_vol']);
 const REGIME_ALIASES = Object.freeze({
@@ -41,22 +41,11 @@ const REGIME_ALIASES = Object.freeze({
 const own = (o, k) => Object.prototype.hasOwnProperty.call(o, k);
 const isDict = (v) => v !== null && typeof v === 'object' && !Array.isArray(v);
 
-// PY_WS: the str.isspace() code points of the bot's CPython 3.11 (engine/pyUnicode.js) —
-// str.strip() removes exactly these (all in the BMP, so one UTF-16 unit each).
-
-function pyStrip(s) {
-  let a = 0;
-  let b = s.length;
-  while (a < b && PY_WS.has(s.charCodeAt(a))) a++;
-  while (b > a && PY_WS.has(s.charCodeAt(b - 1))) b--;
-  return s.slice(a, b);
-}
-
 /** optimizer._normalize_regime — str() of a non-string never names a regime, so it maps to "". */
 function normalizeRegime(value) {
   if (!pyTruthy(value)) return '';
   if (typeof value !== 'string') return '';
-  const s = pyStrip(value.toLowerCase());
+  const s = pyStrip(pyLower(value));
   if (REGIME_NAMES.includes(s)) return s;
   return own(REGIME_ALIASES, s) ? REGIME_ALIASES[s] : '';
 }

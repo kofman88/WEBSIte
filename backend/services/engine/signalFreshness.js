@@ -15,6 +15,7 @@ const { fmtG, fmtFixed } = require('../../strategies/common/pyfmt');
 const { pyFloat } = require('./pycoerce');
 const { pyMax, pyMin } = require('../../strategies/common/pyround');
 const { log: defaultLog } = require('../marketData/mdLog');
+const { pyUpper } = require('../../strategies/common/pyUnicode');   // CPython 3.11 str case / whitespace methods
 
 const EMA_ALPHA = 0.3;
 const PRICE_TFS = Object.freeze(['15m', '1H', '4H']);   // [NO-5M] 5m/1m больше не в кэше
@@ -62,7 +63,7 @@ function createFreshness(deps = {}) {
     /** report_cycle_time(strategy, seconds): first value seeds, then ema = 0.3·s + 0.7·prev. */
     reportCycleTime(strategy, seconds) {
       if (!strategy || seconds <= 0) return;   // NaN passes like in Python
-      const key = String(strategy).toUpperCase();
+      const key = pyUpper(String(strategy));
       const prev = cycleEma.get(key);
       if (prev === undefined) cycleEma.set(key, Number(seconds));
       else cycleEma.set(key, EMA_ALPHA * Number(seconds) + (1.0 - EMA_ALPHA) * prev);
@@ -70,7 +71,7 @@ function createFreshness(deps = {}) {
 
     getCycleEma(strategy) {
       if (!strategy) return 0.0;
-      const v = cycleEma.get(String(strategy).toUpperCase());
+      const v = cycleEma.get(pyUpper(String(strategy)));
       return v === undefined ? 0.0 : v;
     },
 
@@ -104,7 +105,7 @@ function createFreshness(deps = {}) {
       const current = opts.current !== undefined ? opts.current : f.getCurrentPrice(symbol);
       if (current === null || current === undefined) return true;   // fail-open
 
-      const directionUp = String(direction || '').toUpperCase();
+      const directionUp = pyUpper(String(direction || ''));
       const isLong = directionUp === 'LONG';
       const isShort = directionUp === 'SHORT';
 

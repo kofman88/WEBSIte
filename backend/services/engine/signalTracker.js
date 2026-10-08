@@ -32,6 +32,7 @@ const T = require('./tracker');
 const { pyFloat, pyInt } = require('./pycoerce');
 const { fmtFixed, fmtSigned, fmtG } = require('../../strategies/common/pyfmt');
 const quietHours = require('./quietHours');
+const { pyLower, pyStrip, pyUpper } = require('../../strategies/common/pyUnicode');   // CPython 3.11 str case / whitespace methods
 
 // ═══════════════════════════════════════════════════════════════════════
 //  db/signal_progress.py on signal_trades
@@ -320,7 +321,7 @@ function createSignalTracker(deps = {}) {
     return {
       symbol: sOr(trade.symbol), timeframe, candle_tf: tf, direction: L.direction,
       entry: L.entry, sl: L.sl, tp1: L.tp1, tp2: L.tp2, tp3: L.tp3,
-      strategy: sOr(trade.strategy, 'LEVELS').toUpperCase(), event: stage, hit_levels: hitLevels,
+      strategy: pyUpper(sOr(trade.strategy, 'LEVELS')), event: stage, hit_levels: hitLevels,
       be_price: hitLevels.some((h) => T.TP_ORDER.includes(h)) ? L.entry : null,
       entry_time: created > 0 ? created : null, tier, lang,
       from_ts: win.length ? win[0][0] : null, bars: win.length,
@@ -330,7 +331,7 @@ function createSignalTracker(deps = {}) {
   /** process_trade(bot, trade, user, src, now, png_cache) → sent stage | null */
   async function processTrade(trade, user, src, now = null) {
     const t = now || clock();
-    if (sOr(trade.order_id).trim()) return null;                         // exchange-managed
+    if (pyStrip(sOr(trade.order_id))) return null;                         // exchange-managed
     const L = T.levelsFromTrade(trade);
     if (!T.valid(L)) return null;
     const created = fOr0(trade.created_at);
@@ -395,7 +396,7 @@ function createSignalTracker(deps = {}) {
 
     let chart = null;
     if (user.send_chart_enabled === undefined ? true : Boolean(user.send_chart_enabled)) {
-      const tier = sOr(user.sub_plan).toLowerCase() === 'free' ? 'free' : 'pro';
+      const tier = pyLower(sOr(user.sub_plan)) === 'free' ? 'free' : 'pro';
       chart = chartDescriptor(trade, L, stage, hitLevels, tier, lang, tf, bars, created, tfSec);
     }
     let silent = false;
@@ -417,7 +418,7 @@ function createSignalTracker(deps = {}) {
         const stage0 = sOr(row.progress_stage, T.NONE);
         const created = fOr0(row.created_at);
         if (stage0 !== T.NONE || created <= 0 || t - created < config.MISSED_MIN_AGE_S) continue;
-        if (sOr(row.order_id).trim()) continue;
+        if (pyStrip(sOr(row.order_id))) continue;
         const L = T.levelsFromTrade(row);
         if (!T.valid(L)) continue;
         const symbol = sOr(row.symbol);

@@ -17,7 +17,7 @@
  * result is the same per-key distribution, deterministic under a seed.
  */
 
-const { pyRound } = require('../../strategies/common/pyround');
+const { pyRound, pyMax, pyMin } = require('../../strategies/common/pyround');
 const { pyFloat } = require('../../strategies/common/pyval');
 const { pySum } = require('../../strategies/common/series');
 const { GENE_SPACE, spaceOf, randomGeneValue } = require('./geneSpace');
@@ -135,7 +135,7 @@ function bayesianMutate(genome, strategy, population, rng = defaultRng()) {
   let changed = false;
   for (const [name, def] of Object.entries(space)) {
     const imp = (own(importance, name) ? importance[name] : 1.0) / total;
-    const mutRate = Math.min(0.8, C.MUTATION_RATE + imp * 2);
+    const mutRate = pyMin(0.8, C.MUTATION_RATE + imp * 2);
     if (rng.random() < mutRate) {
       const nv = randomGeneValue(def, rng);
       if (pyNe(nv, own(mutated, name) ? mutated[name] : null)) {
@@ -210,7 +210,7 @@ function getCrossStrategyHint(target, rng = defaultRng(), store = null) {
 /** apply_fitness_decay(fitness, created_at): round(fitness × max(0.1, 1 − 0.02 × age_days), 4) */
 function applyFitnessDecay(fitness, createdAt, now = Date.now() / 1000) {
   const ageDays = (now - createdAt) / 86400;
-  const decay = Math.max(0.1, 1.0 - C.FITNESS_DECAY_PER_DAY * ageDays);
+  const decay = pyMax(0.1, 1.0 - C.FITNESS_DECAY_PER_DAY * ageDays);
   return pyRound(fitness * decay, 4);
 }
 

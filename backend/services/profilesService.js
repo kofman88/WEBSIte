@@ -19,6 +19,7 @@ const tradeCfg = require('./engine/tradeCfg');
 const quietHours = require('./engine/quietHours');
 const strategySet = require('./engine/strategySet');
 const logger = require('../utils/logger');
+const { pyLower } = require('../strategies/common/pyUnicode');   // CPython 3.11 str case / whitespace methods
 
 const PROFILES = Object.freeze({
   conservative: {
@@ -84,7 +85,7 @@ function enableStrategy(user, s, { admin } = {}) {
 
 /** profiles.apply_profile(user, name, um) */
 function applyProfile(user, name, { admin, save = true } = {}) {
-  const key = String(name || '').toLowerCase();
+  const key = pyLower(String(name || ''));
   const p = PROFILES[key];
   if (!p) return { ok: false, error: 'unknown_profile' };
   const applied = [];

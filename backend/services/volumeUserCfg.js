@@ -15,6 +15,7 @@ const kv = require('./engineKvService');
 const shim = require('./engine/volumeCfgShim');
 const { pyJsonDumps } = require('./engine/pyjson');
 const logger = require('../utils/logger');
+const { pyLower } = require('../strategies/common/pyUnicode');   // CPython 3.11 str case / whitespace methods
 
 const KV_CFG_PREFIX = 'volume_cfg_';          // kv: volume_cfg_<uid> → JSON of the full config
 const ALLOWED_TFS = Object.freeze(['15m', '1h', '4h']);
@@ -26,7 +27,7 @@ function impl() {
 
 /** volume_scanner.user_tf(user) */
 function userTf(user) {
-  const tf = String((user && user.vol_timeframe) || DEFAULT_TF).toLowerCase();
+  const tf = pyLower(String((user && user.vol_timeframe) || DEFAULT_TF));
   return ALLOWED_TFS.includes(tf) ? tf : DEFAULT_TF;
 }
 

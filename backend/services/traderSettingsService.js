@@ -24,6 +24,7 @@ const pf = require('../config/planFeatures');
 const access = require('./engine/userAccess');
 const { pyJsonDumps } = require('./engine/pyjson');
 const logger = require('../utils/logger');
+const { pyLower, pyStrip } = require('../strategies/common/pyUnicode');   // CPython 3.11 str case / whitespace methods
 
 const USERS_TTL_S = 30;                                    // user_manager._USERS_TTL
 const STRATS = ['LEVELS', 'SMC', 'VOLUME'];
@@ -132,7 +133,7 @@ function fromDb(row) {
     if (name === 'sub_plan') v = pf.normalizePlan(v);
     switch (fieldType(name)) {
       case 'json':
-        if (typeof v === 'string' && v.trim()) {
+        if (typeof v === 'string' && pyStrip(v)) {
           try { v = JSON.parse(v); } catch (_e) { v = u[name]; }
         } else if (!v || typeof v !== 'object') {
           v = u[name];
@@ -222,7 +223,7 @@ function getOrCreate(userId, { now = null } = {}) {
     throw err;
   }
   const t = now === null || now === undefined ? nowSec() : now;
-  const lang = ['ru', 'uk', 'be'].includes(String(site.locale || 'ru').toLowerCase()) ? 'ru' : 'en';
+  const lang = ['ru', 'uk', 'be'].includes(pyLower(String(site.locale || 'ru'))) ? 'ru' : 'en';
   db.prepare('INSERT OR IGNORE INTO trader_settings (user_id, created_at, updated_at, lang) VALUES (?, ?, ?, ?)')
     .run(Number(userId), t, t, lang);
   invalidateCache();

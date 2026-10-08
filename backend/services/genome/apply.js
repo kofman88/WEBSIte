@@ -23,6 +23,7 @@ const { pyDumps, parsePyJson, FLOAT_GENE_KEYS } = require('./geneSpace');
 const C = require('./config');
 
 const defaultLog = () => require('../../utils/logger');
+const { pyLower, pyUpper } = require('../../strategies/common/pyUnicode');   // CPython 3.11 str case / whitespace methods
 const own = (o, k) => Object.prototype.hasOwnProperty.call(o || {}, k);
 const f0 = (x) => (pyTruthy(x) ? pyFloat(x) : 0);
 const i0 = (x) => (pyTruthy(x) ? pyIntOf(x) : 0);
@@ -43,7 +44,7 @@ function resolve(deps = {}) {
 
 /** _user_tfs_for_strategy(row, strategy) → Set of lower-case TFs. */
 function userTfsForStrategy(row, strategy) {
-  const S = String(strategy || '').toUpperCase();
+  const S = pyUpper(String(strategy || ''));
   if (S === 'SMC') {
     let tfKey = '1H';
     try {
@@ -53,14 +54,14 @@ function userTfsForStrategy(row, strategy) {
     } catch (_e) {
       tfKey = '1H';
     }
-    return new Set([tfKey.toLowerCase()]);
+    return new Set([pyLower(tfKey)]);
   }
   let keys = [];
   if (pyTruthy(row.long_active)) keys.push('long_tf');
   if (pyTruthy(row.short_active)) keys.push('short_tf');
   if (pyTruthy(row.active) && String(row.scan_mode || '') === 'both') keys.push('timeframe');
   if (!keys.length) keys = ['long_tf', 'short_tf'];
-  const tfs = new Set(keys.map((k) => String(row[k] || '').toLowerCase()));
+  const tfs = new Set(keys.map((k) => pyLower(String(row[k] || ''))));
   tfs.delete('');
   return tfs.size ? tfs : new Set(['1h']);
 }
@@ -86,7 +87,7 @@ function autoApplyBestGenome(strategy, tf, best, deps = {}) {
   const genome = best.genome || {};
   if (!Object.keys(genome).length) return { applied: 0, reason: 'empty_genome' };
 
-  const S = String(strategy).toUpperCase();
+  const S = pyUpper(String(strategy));
   const tail = `(fit=${fitness.toFixed(3)} WR=${wr.toFixed(1)}% PF=${pf.toFixed(2)} N=${nTrd})`;
   if (S === 'VOLUME') {
     try {
@@ -119,7 +120,7 @@ function autoApplyBestGenome(strategy, tf, best, deps = {}) {
       'SELECT user_id, timeframe, long_tf, short_tf, long_active, short_active, active, scan_mode, smc_cfg '
       + 'FROM trader_settings WHERE genome_auto_apply=1',
     ).all();
-    uids = rows.filter((r) => userTfsForStrategy(r, S).has(String(tf).toLowerCase())).map((r) => Number(r.user_id));
+    uids = rows.filter((r) => userTfsForStrategy(r, S).has(pyLower(String(tf)))).map((r) => Number(r.user_id));
   } catch (e) {
     d.log.warn(`🧬 auto_apply fetch users (${strategy}/${tf}): ${e.message}`);
     return { applied: 0, reason: 'error' };

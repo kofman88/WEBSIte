@@ -11,8 +11,8 @@
  *     the keys that hold Python *floats* (`floatKeys`); every other integral
  *     number prints as an int, non-integral numbers always print as floats.
  *
- * Also the inverse helper `pyJsonLoads` (= JSON.parse that never throws for
- * callers that want the bot's "on any error → {}" behaviour).
+ * Also the inverse helpers `pyJsonParse` (json.loads: NaN / Infinity literals, `-0` is the int 0)
+ * and `pyJsonLoads` (the same, never throwing, for the bot's "on any error → {}" behaviour).
  */
 
 'use strict';
@@ -72,11 +72,16 @@ function pyJsonDumps(value, floatKeys = null) {
 /**
  * json.loads(text) for a str: JSON.parse plus the NaN / Infinity / -Infinity literals Python's
  * json module reads where a value is expected. Throws SyntaxError wherever json.loads raises
- * (a literal used as an object key, `-NaN`, `1NaN`, … stay errors).
+ * (a literal used as an object key, `-NaN`, `1NaN`, … stay errors). The int literal `-0` is the
+ * int 0 in Python (only `-0.0` is a negative zero); JSON.parse gives -0 for both, so the reviver
+ * reads the literal's source text (Node ≥ 21) to tell them apart.
  */
+const NEG_ZERO_INT_RE = /-0(?![.\deE])/;
+const intZero = (v, ctx) => (Object.is(v, -0) && ctx && ctx.source === '-0' ? 0 : v);
+
 function pyJsonParse(text) {
   const src = String(text);
-  if (!/NaN|Infinity/.test(src)) return JSON.parse(src);
+  if (!/NaN|Infinity/.test(src)) return NEG_ZERO_INT_RE.test(src) ? JSON.parse(src, (k, v, ctx) => intZero(v, ctx)) : JSON.parse(src);
   const tag = `\u0001pyjson${Math.random().toString(36).slice(2)}\u0001`;
   const lit = { NaN: NaN, Infinity: Infinity, '-Infinity': -Infinity };
   let out = '';
@@ -99,17 +104,17 @@ function pyJsonParse(text) {
     out += ch;
     i += 1;
   }
-  return JSON.parse(out, (k, v) => {
+  return JSON.parse(out, (k, v, ctx) => {
     if (k.startsWith(tag)) throw new SyntaxError('Expecting property name enclosed in double quotes');
-    return typeof v === 'string' && v.startsWith(tag) ? lit[v.slice(tag.length)] : v;
+    return typeof v === 'string' && v.startsWith(tag) ? lit[v.slice(tag.length)] : intZero(v, ctx);
   });
 }
 
-/** JSON.parse with the bot's tolerance: not a string / empty / invalid → fallback. */
+/** json.loads with the bot's tolerance (`except Exception: return fallback`): not a string / empty / invalid → fallback. */
 function pyJsonLoads(text, fallback = {}) {
   if (text === null || text === undefined || text === '') return fallback;
   try {
-    return JSON.parse(String(text));
+    return pyJsonParse(String(text));     // NaN / Infinity literals like json.loads
   } catch (_e) {
     return fallback;
   }

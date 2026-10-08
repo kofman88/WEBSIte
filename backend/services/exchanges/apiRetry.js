@@ -17,6 +17,7 @@
 const { log: defaultLog } = require('../marketData/mdLog');
 const { pyGet, pyStr, pyTruthy, errStr, pySlice, isDict, pyRepr } = require('./pyCompat');
 const { breaker: defaultBreaker, isTransientError } = require('./exchangeBreaker');
+const { pyLower, pyStrip } = require('../../strategies/common/pyUnicode');   // CPython 3.11 str case / whitespace methods
 
 /** Default sleep — seconds, like asyncio.sleep (every injected `sleep` in services/exchanges takes seconds). */
 const sleepS = (s) => new Promise((r) => setTimeout(r, Math.max(0, s) * 1000));
@@ -36,7 +37,7 @@ const NON_RETRYABLE_ERROR_SUBSTRINGS = Object.freeze([
 
 function isRetryableError(error) {
   if (!pyTruthy(error)) return false;
-  const errLower = pyStr(error).toLowerCase();
+  const errLower = pyLower(pyStr(error));
   for (const m of NON_RETRYABLE_ERROR_SUBSTRINGS) if (errLower.includes(m)) return false;
   for (const m of RETRYABLE_ERROR_SUBSTRINGS) if (errLower.includes(m)) return true;
   return false;
@@ -52,13 +53,13 @@ function resultIsRetryable(result) {
     const rc = pyGet(result, 'retCode');
     if (!(rc === null || rc === 0 || rc === false)) {
       const msg = pyStr(pyGet(result, 'retMsg', '') || pyGet(result, 'error', '') || '');
-      const err = `${pyStr(rc)} ${msg}`.trim();
+      const err = pyStrip(`${pyStr(rc)} ${msg}`);
       return [isRetryableError(err), err];
     }
     const bc = pyGet(result, 'code');
     if (bc !== null && (typeof bc === 'number' || typeof bc === 'boolean') && Number.isInteger(Number(bc)) && Number(bc) < 0) {
       const msg = pyStr(pyGet(result, 'msg', '') || pyGet(result, 'error', '') || '');
-      const err = `${pyStr(bc)} ${msg}`.trim();
+      const err = pyStrip(`${pyStr(bc)} ${msg}`);
       return [isRetryableError(err), err];
     }
     return [false, ''];

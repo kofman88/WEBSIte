@@ -11,6 +11,7 @@
 const S = require('../common/series');
 const { fmtFixed } = require('../common/pyfmt');
 const { RIBBON_SPANS, RIBBON_LOOKBACK, RIBBON_MIN_ORDER, BOUNCE_LOOKBACK, GOLDEN_VOL_MIN } = require('./config');
+const { pyMax } = require('../common/pyround');   // builtin max()/min(): a NaN 2nd argument is ignored
 
 /** `_f(x)`: not None and finite. */
 function isF(x) {
@@ -77,7 +78,7 @@ function setupTurn(ctx, i, s) {
   // trade and at most one "flat" transition bar (slope < threshold)
   const a = ctx.atr[i];
   const minUp = isF(a) ? cfg.turn_min_slope_atr * a : 0.0;
-  const thr = Math.max(0.0, minUp);
+  const thr = pyMax(0.0, minUp);
   if (slope[N] <= thr) return null;
   for (let j = 0; j < N - 1; j++) if (!(slope[j] < 0)) return null;     // np.all(_prev[:-1] < 0)
   if (!(slope[N - 1] < thr)) return null;                                // _prev[-1] < thr

@@ -18,6 +18,7 @@
 
 const { computeSqueezeScore } = require('../common/squeeze');
 const config = require('./config');
+const { pyLower } = require('../common/pyUnicode');   // CPython 3.11 str case / whitespace methods
 const { VolumeConfig, minBars } = config;
 const { VolumeContext, prepareContext } = require('./context');
 const htf = require('./htf');
@@ -68,7 +69,7 @@ const TF_SECONDS = Object.freeze({ '15m': 900, '1h': 3600, '4h': 14400, '1d': 86
 
 /** [VOLUME-TTL 2026-10] anti-duplicate per (coin, direction) = 4 bars of the TF, at least an hour. */
 function dedupTtlS(tf) {
-  const sec = TF_SECONDS[String(tf || '').toLowerCase()];
+  const sec = TF_SECONDS[pyLower(String(tf || ''))];
   return Math.max(3600, 4 * (sec === undefined ? 3600 : sec));
 }
 

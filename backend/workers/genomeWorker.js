@@ -23,6 +23,7 @@
 const os = require('os');
 const { parentPort, isMainThread } = require('worker_threads');
 const { performance } = require('perf_hooks');
+const { pyUpper } = require('../strategies/common/pyUnicode');   // CPython 3.11 str case / whitespace methods
 
 function lowerPriority() {
   try { os.setPriority(19); } catch (_e) { /* not permitted → ignore (bot: os.nice(10) best effort) */ }
@@ -43,7 +44,7 @@ async function handleMessage(msg, post) {
   const { DeadlineError } = require('../services/genome/evaluate');
   const { createRng } = require('../services/genome/rng');
   const id = msg.id;
-  const strategy = String(msg.strategy || 'LEVELS').toUpperCase();
+  const strategy = pyUpper(String(msg.strategy || 'LEVELS'));
   const tf = msg.tf || C.getDefaultTf(strategy);
   const mono = () => performance.now();
   const deps = {

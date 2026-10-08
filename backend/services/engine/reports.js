@@ -24,7 +24,8 @@
 
 const { pyInt, pyFloat } = require('./pycoerce');
 const { fmtFixed, fmtSigned, pyRepr } = require('../../strategies/common/pyfmt');
-const { pyRoundInt } = require('../../strategies/common/pyround');
+const { pyRoundInt, pyMax } = require('../../strategies/common/pyround');
+const { pyLower, pyStrip } = require('../../strategies/common/pyUnicode');   // CPython 3.11 str case / whitespace methods
 
 const pyBoolStr = (b) => (b ? 'True' : 'False');
 const falsy = (v) => v === null || v === undefined || v === false || v === 0 || v === '';
@@ -39,7 +40,7 @@ const replaceAll = (s, a, b) => String(s).split(a).join(b);
 
 const DAILY_SUMMARY_HOUR_UTC = 23;
 const DAILY_SUMMARY_MINUTE_UTC = 55;
-const dailyEnabled = (env = process.env) => String(env.DAILY_SUMMARY_ENABLED === undefined ? '1' : env.DAILY_SUMMARY_ENABLED).trim() !== '0';
+const dailyEnabled = (env = process.env) => pyStrip(String(env.DAILY_SUMMARY_ENABLED === undefined ? '1' : env.DAILY_SUMMARY_ENABLED)) !== '0';
 
 const EN_MONTHS = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
 const RU_MONTHS = Object.freeze({
@@ -121,7 +122,7 @@ function envInt(env, name, dflt) {
 function readWeeklyConfig(env = process.env) {
   const mod = (a, n) => ((a % n) + n) % n;
   return Object.freeze({
-    ENABLED: String(env.WEEKLY_DIGEST_ENABLED === undefined ? '1' : env.WEEKLY_DIGEST_ENABLED).trim() !== '0',
+    ENABLED: pyStrip(String(env.WEEKLY_DIGEST_ENABLED === undefined ? '1' : env.WEEKLY_DIGEST_ENABLED)) !== '0',
     WEEKDAY: mod(envInt(env, 'WEEKLY_DIGEST_WEEKDAY', 0), 7),
     HOUR_UTC: mod(envInt(env, 'WEEKLY_DIGEST_HOUR_UTC', 9), 24),
     MINUTE_UTC: mod(envInt(env, 'WEEKLY_DIGEST_MINUTE_UTC', 5), 60),
@@ -211,7 +212,7 @@ function secondsUntilNext(now, cfg = readWeeklyConfig()) {
   const wd = (new Date(target * 1000).getUTCDay() + 6) % 7;
   target += (((cfg.WEEKDAY - wd) % 7) + 7) % 7 * 86400;
   if (target <= now) target += 7 * 86400;
-  return Math.max(1.0, target - now);
+  return pyMax(1.0, target - now);
 }
 
 /** format_digest(stats, lang, plan, pro, now) → text | null (no signals this week). */
@@ -242,7 +243,7 @@ function formatDigest(stats, lang = 'ru', plan = 'pro', pro = null, now = null) 
     if (intOr0(getOr(b, 'signals', 0))) parts.push(`${name} ${r(pyFloat(getOr(b, 'total_rr', 0.0)))} (${pyInt(getOr(b, 'trades', 0))})`);
   }
   if (parts.length > 1) lines.push(fmt(t.by_strat, { parts: parts.join(' · ') }));
-  if (String(plan || '').toLowerCase() === 'free' && pro && intOr0(getOr(pro, 'pro_users', 0)) > 0) {
+  if (pyLower(String(plan || '')) === 'free' && pro && intOr0(getOr(pro, 'pro_users', 0)) > 0) {
     lines.push('');
     lines.push(fmt(t.pro, {
       avg: pyStrNum(getOr(pro, 'avg_signals', 0)), rr: r(pyFloat(getOr(pro, 'unique_rr', 0.0))),

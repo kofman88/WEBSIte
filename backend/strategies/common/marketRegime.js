@@ -17,6 +17,7 @@
  */
 
 const S = require('./series');
+const { pyLower, pyStrip } = require('./pyUnicode');   // CPython 3.11 str case / whitespace methods
 
 const EMA_PERIOD = 50;
 const ATR_PERIOD = 14;
@@ -103,7 +104,7 @@ const LEVELS_REGIME_MULT = Object.freeze({
 /** sl_v2.levels_regime_multiplier(regime) → [multiplier, normalised_regime]; falsy → [1.0, "unknown"]. */
 function levelsRegimeMultiplier(regime) {
   if (!regime) return [1.0, 'unknown'];
-  const r = String(regime).toLowerCase().trim();
+  const r = pyStrip(pyLower(String(regime)));
   return [Object.prototype.hasOwnProperty.call(LEVELS_REGIME_MULT, r) ? LEVELS_REGIME_MULT[r] : 1.0, r];
 }
 

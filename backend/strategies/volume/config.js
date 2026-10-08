@@ -18,7 +18,8 @@
  * float fields use `float(v)`; the str field uses `str(v).strip().lower()`.
  */
 
-const { pyRound } = require('../common/pyround');
+const { pyRound, pyMax, pyMin } = require('../common/pyround');
+const { pyLower, pyStrip } = require('../common/pyUnicode');
 
 const STRATEGY_NAME = 'VOLUME';
 const SETUP_KEYS = Object.freeze(['cross', 'turn', 'bounce', 'golden', 'ribbon']);
@@ -106,7 +107,7 @@ class PyOverflowError extends Error {}
 
 /** Python bool(v) for a non-string value; strings follow the from_params rule. */
 function pyBool(v) {
-  if (typeof v === 'string') return ['1', 'true', 'yes', 'on'].includes(v.trim().toLowerCase());
+  if (typeof v === 'string') return ['1', 'true', 'yes', 'on'].includes(pyLower(pyStrip(v)));   // v.strip().lower()
   if (typeof v === 'number') return v !== 0;          // bool(nan) is True, bool(0.0) False
   if (typeof v === 'bigint') return v !== 0n;
   if (Array.isArray(v)) return v.length > 0;
@@ -115,25 +116,24 @@ function pyBool(v) {
   return Boolean(v);
 }
 
-const INT_RE = /^[+-]?\d+(?:_\d+)*$/;
-const FLOAT_RE = /^[+-]?(?:\d+(?:_\d+)*(?:\.(?:\d+(?:_\d+)*)?)?|\.\d+(?:_\d+)*)(?:[eE][+-]?\d+(?:_\d+)*)?$/;
-const FLOAT_SPECIAL_RE = /^([+-]?)(inf|infinity|nan)$/i;
+// int() / float() of a str: CPython 3.11 (Unicode digits and spaces, PEP 515) — common/pynum.js.
+const N = require('../common/pynum');
 
 /** Python int(v): bool → 0/1, float → trunc (nan → ValueError, inf → OverflowError), str → base-10 literal. */
 function pyInt(v) {
   if (typeof v === 'boolean') return v ? 1 : 0;
   if (typeof v === 'number') {
-    if (Number.isNaN(v)) throw new PyValueError('cannot convert float NaN to integer');
-    if (!Number.isFinite(v)) throw new PyOverflowError('cannot convert float infinity to integer');
-    const t = Math.trunc(v);
-    return t === 0 ? 0 : t;
+    const t = N.intFromFloat(v);
+    if (t !== null) return t;
+    if (Number.isNaN(v)) throw new PyValueError(N.floatToIntErrorText(v));
+    throw new PyOverflowError(N.floatToIntErrorText(v));
   }
   if (typeof v === 'bigint') return Number(v);
   if (typeof v === 'string') {
-    const s = v.trim();
-    if (!INT_RE.test(s)) throw new PyValueError(`invalid literal for int() with base 10: ${JSON.stringify(v)}`);
-    const n = Number(s.replace(/_/g, ''));
-    return n === 0 ? 0 : n;
+    const lit = N.intLiteral(v);
+    if (lit === null) throw new PyValueError(N.intErrorText(v));
+    if (lit.limit !== undefined) throw new PyValueError(N.intLimitText(lit.limit));
+    return N.intFromLiteral(lit);
   }
   throw new PyValueError(`int() argument must be a string, a bytes-like object or a real number, not '${typeof v}'`);
 }
@@ -144,15 +144,9 @@ function pyFloat(v) {
   if (typeof v === 'number') return v;
   if (typeof v === 'bigint') return Number(v);
   if (typeof v === 'string') {
-    const s = v.trim();
-    const sp = FLOAT_SPECIAL_RE.exec(s);
-    if (sp) {
-      const word = sp[2].toLowerCase();
-      if (word === 'nan') return Number.NaN;
-      return sp[1] === '-' ? -Infinity : Infinity;
-    }
-    if (!FLOAT_RE.test(s)) throw new PyValueError(`could not convert string to float: ${JSON.stringify(v)}`);
-    return Number(s.replace(/_/g, ''));
+    const x = N.floatFromStr(v);
+    if (x === undefined) throw new PyValueError(N.floatErrorText(v));
+    return x;
   }
   throw new PyValueError(`float() argument must be a string or a real number, not '${typeof v}'`);
 }
@@ -199,7 +193,7 @@ class VolumeConfig {
         if (type === 'bool') cfg[k] = pyBool(v);
         else if (type === 'int') cfg[k] = pyInt(v);
         else if (type === 'float') cfg[k] = pyFloat(v);
-        else if (type === 'str') cfg[k] = pyStr(v).trim().toLowerCase();
+        else if (type === 'str') cfg[k] = pyLower(pyStrip(pyStr(v)));   // str(v).strip().lower()
       } catch (e) {
         if (e instanceof PyValueError) continue;
         throw e;
@@ -212,30 +206,30 @@ class VolumeConfig {
   /** `_fix()` — protection against invalid combinations (same 25 steps, same order). */
   fix() {
     if (this.ma_type !== 'sma' && this.ma_type !== 'ema') this.ma_type = 'sma';          // (1)
-    this.ma_fast = Math.max(2, this.ma_fast);                                               // (2)
+    this.ma_fast = pyMax(2, this.ma_fast);                                               // (2)
     if (this.ma_mid <= this.ma_fast) this.ma_mid = this.ma_fast * 2;                        // (3)
-    if (this.ma_slow <= this.ma_mid) this.ma_slow = Math.max(50, this.ma_mid * 2);          // (4)
-    this.ema_mid = Math.max(5, this.ema_mid);                                               // (5)
-    if (this.ema_trend <= this.ema_mid) this.ema_trend = Math.max(200, this.ema_mid * 2);   // (6)
-    if (this.ma_slow >= this.ema_trend) this.ema_trend = Math.max(200, this.ma_slow * 2);   // (7)
-    this.cross_lookback = Math.min(5, Math.max(1, this.cross_lookback));                    // (8)
-    this.turn_period = Math.max(3, this.turn_period);                                       // (9)
-    this.turn_lookback = Math.max(2, this.turn_lookback);                                   // (10)
-    this.turn_slope_bars = Math.min(5, Math.max(1, this.turn_slope_bars));                  // (11)
-    this.turn_min_slope_atr = Math.max(0.0, this.turn_min_slope_atr);                       // (12)
-    this.bounce_tol_atr = Math.max(0.0, this.bounce_tol_atr);                               // (13)
-    this.vol_len = Math.max(3, this.vol_len);                                               // (14)
-    this.vol_mult = Math.max(0.5, this.vol_mult);                                           // (15)
-    this.bounce_vol_mult = Math.max(0.3, this.bounce_vol_mult);                             // (16)
+    if (this.ma_slow <= this.ma_mid) this.ma_slow = pyMax(50, this.ma_mid * 2);          // (4)
+    this.ema_mid = pyMax(5, this.ema_mid);                                               // (5)
+    if (this.ema_trend <= this.ema_mid) this.ema_trend = pyMax(200, this.ema_mid * 2);   // (6)
+    if (this.ma_slow >= this.ema_trend) this.ema_trend = pyMax(200, this.ma_slow * 2);   // (7)
+    this.cross_lookback = pyMin(5, pyMax(1, this.cross_lookback));                    // (8)
+    this.turn_period = pyMax(3, this.turn_period);                                       // (9)
+    this.turn_lookback = pyMax(2, this.turn_lookback);                                   // (10)
+    this.turn_slope_bars = pyMin(5, pyMax(1, this.turn_slope_bars));                  // (11)
+    this.turn_min_slope_atr = pyMax(0.0, this.turn_min_slope_atr);                       // (12)
+    this.bounce_tol_atr = pyMax(0.0, this.bounce_tol_atr);                               // (13)
+    this.vol_len = pyMax(3, this.vol_len);                                               // (14)
+    this.vol_mult = pyMax(0.5, this.vol_mult);                                           // (15)
+    this.bounce_vol_mult = pyMax(0.3, this.bounce_vol_mult);                             // (16)
     if (this.climax_mult <= this.vol_mult) this.climax_mult = pyRound(this.vol_mult + 2.0, 2); // (17)
-    this.extension_atr = Math.max(0.5, this.extension_atr);                                 // (18)
-    this.htf_ema = Math.max(5, this.htf_ema);                                               // (19)
-    this.swing_lookback = Math.max(2, this.swing_lookback);                                 // (20)
-    this.sl_buffer_atr = Math.max(0.0, this.sl_buffer_atr);                                 // (21)
-    this.tp1_rr = Math.max(1.0, this.tp1_rr);                                               // (22) [VOL-TP1-FLOOR]
+    this.extension_atr = pyMax(0.5, this.extension_atr);                                 // (18)
+    this.htf_ema = pyMax(5, this.htf_ema);                                               // (19)
+    this.swing_lookback = pyMax(2, this.swing_lookback);                                 // (20)
+    this.sl_buffer_atr = pyMax(0.0, this.sl_buffer_atr);                                 // (21)
+    this.tp1_rr = pyMax(1.0, this.tp1_rr);                                               // (22) [VOL-TP1-FLOOR]
     if (this.tp2_rr <= this.tp1_rr) this.tp2_rr = pyRound(this.tp1_rr + 0.5, 2);            // (23)
     if (this.tp3_rr <= this.tp2_rr) this.tp3_rr = pyRound(this.tp2_rr + 0.5, 2);            // (24)
-    this.min_quality = Math.min(5, Math.max(1, this.min_quality));                          // (25)
+    this.min_quality = pyMin(5, pyMax(1, this.min_quality));                          // (25)
   }
 
   /** dataclasses.replace(cfg, **overrides): a copy with the overrides, no fix. */

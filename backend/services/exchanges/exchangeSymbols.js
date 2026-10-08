@@ -23,6 +23,7 @@ const { fetchJson } = require('../marketData/httpClient');
 const { defaultSleep } = require('../marketData/rateGate');
 const { log: defaultLog } = require('../marketData/mdLog');
 const sym = require('../marketData/symbolMap');
+const { pyLower, pyStrip, pyUpper } = require('../../strategies/common/pyUnicode');   // CPython 3.11 str case / whitespace methods
 
 const TTL = 14400;
 const STALE_THRESHOLD_SEC = 2 * TTL;
@@ -62,7 +63,7 @@ function _metric(name, tags) {
 const _host = (url) => url.split('//')[1].split('/')[0];
 
 function binanceDisabled(env = process.env) {
-  return ['1', 'true', 'yes'].includes(String(env.DISABLE_BINANCE ?? '').trim());
+  return ['1', 'true', 'yes'].includes(pyStrip(String(env.DISABLE_BINANCE ?? '')));
 }
 
 // ── fetchers ────────────────────────────────────────────────────────────────
@@ -95,7 +96,7 @@ async function fetchBybit({ http = fetchJson, sleep = defaultSleep, log = defaul
         await sleep(100);
         break;
       } catch (e) {
-        const err = String(e && (e.message || e.code) || e).toLowerCase();
+        const err = pyLower(String(e && (e.message || e.code) || e));
         const isDns = DNS_MARKERS.some((m) => err.includes(m));
         if (isDns && attempt < 2) {
           const backoff = (attempt + 1) * 2 * (0.7 + random() * 0.6);
@@ -223,24 +224,24 @@ async function refresh({
       const prevCount = (state.symbols[name] || new Set()).size;
       const age = state.updatedAt ? Math.trunc(now() - state.updatedAt) : -1;
       if (result instanceof Set) {
-        log.warning(`${name.toUpperCase()} refresh returned 0 — keeping previous cache (${prevCount} symbols, age ${age}s)`);
+        log.warning(`${pyUpper(name)} refresh returned 0 — keeping previous cache (${prevCount} symbols, age ${age}s)`);
       } else {
-        log.warning(`${name.toUpperCase()} refresh raised — keeping previous cache (${prevCount} symbols, age ${age}s): ${result && result.message ? result.message : result}`);
+        log.warning(`${pyUpper(name)} refresh raised — keeping previous cache (${prevCount} symbols, age ${age}s): ${result && result.message ? result.message : result}`);
       }
       if (!retryFetcher) continue;
-      log.warning(`⚠️ ${name.toUpperCase()}: retry через 10с...`);
+      log.warning(`⚠️ ${pyUpper(name)}: retry через 10с...`);
       await sleep(10_000);
       try {
         const retry = await retryFetcher();
         if (retry && retry.size) {
           state.symbols[name] = retry;
           succeeded += 1;
-          log.info(`✅ ${name.toUpperCase()} retry: ${retry.size} символов`);
+          log.info(`✅ ${pyUpper(name)} retry: ${retry.size} символов`);
         } else {
-          log.warning(`${name.toUpperCase()} retry still returned 0 — cache preserved (${prevCount} symbols)`);
+          log.warning(`${pyUpper(name)} retry still returned 0 — cache preserved (${prevCount} symbols)`);
         }
       } catch (re) {
-        log.warning(`${name.toUpperCase()} retry failed — cache preserved (${prevCount} symbols): ${re && re.message}`);
+        log.warning(`${pyUpper(name)} retry failed — cache preserved (${prevCount} symbols): ${re && re.message}`);
       }
     }
 
@@ -266,7 +267,7 @@ async function refresh({
         log.debug('Binance disabled/paused — filter off');
         continue;
       }
-      log.warning(`⚠️ ${ex.toUpperCase()}: 0 символов — фильтрация ОТКЛЮЧЕНА (fail-open). Сигналы будут идти без проверки доступности на бирже.`);
+      log.warning(`⚠️ ${pyUpper(ex)}: 0 символов — фильтрация ОТКЛЮЧЕНА (fail-open). Сигналы будут идти без проверки доступности на бирже.`);
       if (ex === 'bybit' || ex === 'binance') criticalFailed = true;
     }
     if (criticalFailed) {
@@ -304,7 +305,7 @@ function _nativeFor(exchange, symbol) {
  */
 function isAvailable(okxSymbol, exchange, opts = false, { now = () => Date.now() / 1000 } = {}) {
   const strict = _strictOf(opts);
-  const ex = String(exchange || '').toLowerCase();
+  const ex = pyLower(String(exchange || ''));
   _metric('symbol_check_total', { exchange: ex });
   const set = state.symbols[ex];
   if (!set || !set.size) {
@@ -329,7 +330,7 @@ function isAvailable(okxSymbol, exchange, opts = false, { now = () => Date.now()
 /** Same check with the rotated signature; accepts native names as-is. */
 function isSymbolAvailable(exchange, symbol, opts = false, { now = () => Date.now() / 1000, log = defaultLog } = {}) {
   const strict = _strictOf(opts);
-  const ex = String(exchange || '').toLowerCase();
+  const ex = pyLower(String(exchange || ''));
   _metric('symbol_check_total', { exchange: ex });
   const set = state.symbols[ex];
   if (!set || !set.size) {
@@ -360,7 +361,7 @@ function isSymbolAvailable(exchange, symbol, opts = false, { now = () => Date.no
 }
 
 function recordSkip(exchange, symbol) {
-  const ex = String(exchange || '').toLowerCase();
+  const ex = pyLower(String(exchange || ''));
   state.skipCounter += 1;
   const key = `${ex}/${symbol}`;
   state.skipSamples[key] = (state.skipSamples[key] || 0) + 1;
@@ -410,7 +411,7 @@ async function startBackgroundRefresh(opts = {}) {
 
 /** Tests: seed / inspect / reset the module state. */
 function _setSymbols(exchange, symbols, { updatedAt } = {}) {
-  state.symbols[String(exchange).toLowerCase()] = new Set(symbols);
+  state.symbols[pyLower(String(exchange))] = new Set(symbols);
   if (updatedAt !== undefined) state.updatedAt = updatedAt;
 }
 function _getState() { return state; }

@@ -14,6 +14,7 @@
  * (OKX units); traders multiply back when sending orders.
  */
 
+const { pyUpper } = require('../../strategies/common/pyUnicode');   // CPython 3.11 str case / whitespace methods
 // ── BingX static maps (bingx_trader.py) ─────────────────────────────────────
 const BINGX_MULTIPLIER = Object.freeze({
   BONK: 1000, PEPE: 1000, LUNC: 1000, XEC: 1000, CATS: 1000,
@@ -43,19 +44,19 @@ const BINANCE_NAME_ALIAS = Object.freeze({ LUNA: 'LUNA2' });
 let _LIVE = new Set();
 
 function isNonCrypto(bingxSymbol) {
-  const base = String(bingxSymbol || '').toUpperCase().split('-')[0];
+  const base = pyUpper(String(bingxSymbol || '')).split('-')[0];
   return NON_CRYPTO_PREFIXES.some((p) => base.startsWith(p)) || base.includes('2USD');
 }
 
 /** Update the live contract set (after loading /quote/contracts). Empty input keeps the old set. */
 function rememberLive(bingxSymbols) {
   const next = new Set();
-  for (const s of bingxSymbols || []) if (s) next.add(String(s).toUpperCase());
+  for (const s of bingxSymbols || []) if (s) next.add(pyUpper(String(s)));
   if (next.size) _LIVE = next;
 }
 
 function getLive() { return _LIVE; }
-function _setLive(set) { _LIVE = new Set(Array.from(set || [], (s) => String(s).toUpperCase())); }
+function _setLive(set) { _LIVE = new Set(Array.from(set || [], (s) => pyUpper(String(s)))); }
 
 /** `fetcher.OKXFetcher._to_okx`: BTCUSDT → BTC-USDT-SWAP; everything else unchanged. */
 function toOkx(symbol) {
@@ -66,7 +67,7 @@ function toOkx(symbol) {
 
 /** `fetcher_bingx._base_of`: strip spaces, upper, strip -USDT-SWAP / -USDT / USDT; else part before '-'. */
 function baseOf(symbol) {
-  const s = String(symbol || '').replace(/ /g, '').toUpperCase();
+  const s = pyUpper(String(symbol || '').replace(/ /g, ''));
   if (s.endsWith('-USDT-SWAP')) return s.slice(0, -10);
   if (s.endsWith('-USDT')) return s.slice(0, -5);
   if (s.endsWith('USDT')) return s.slice(0, -4);
@@ -104,7 +105,7 @@ function toBingx(symbol) { return resolve(symbol)[0]; }
 
 /** BingX (1000PEPE-USDT) → canonical (PEPE-USDT-SWAP); null when not a USDT contract. */
 function fromBingx(bingxSymbol) {
-  const s = String(bingxSymbol || '').toUpperCase();
+  const s = pyUpper(String(bingxSymbol || ''));
   if (!s.endsWith('-USDT')) return null;
   let base = s.slice(0, -5);
   for (const p of MULT_PREFIXES) {
@@ -126,7 +127,7 @@ function priceMultiplier(symbol) { return Number(resolve(symbol)[1]); }
 
 function _requireString(symbol) {
   if (typeof symbol !== 'string') throw new TypeError(`'${symbol === null ? 'NoneType' : typeof symbol}' object has no attribute 'upper'`);
-  return symbol.toUpperCase();
+  return pyUpper(symbol);
 }
 
 function _stripOkxSuffixBingx(symbol) {

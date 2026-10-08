@@ -20,6 +20,7 @@
 const { pySum } = require('../../strategies/common/series');
 const { serializeGenome, deserializeGenome, pyDumps, pyJsonLoads } = require('./geneSpace');
 const C = require('./config');
+const { pyUpper } = require('../../strategies/common/pyUnicode');   // CPython 3.11 str case / whitespace methods
 
 let _db = null;
 function setDb(db) { _db = db; }
@@ -143,7 +144,7 @@ const _mutationInfoCache = new Map();
 
 function getLastMutationInfo(strategy, tf = null, { now = nowSec() } = {}) {
   if (!strategy) return null;
-  const S = String(strategy).toUpperCase();
+  const S = pyUpper(String(strategy));
   let t = tf;
   if (!C.getTfs(S).includes(t)) t = C.getDefaultTf(S);
   const key = `${S}|${t}`;
@@ -159,10 +160,10 @@ function getLastMutationInfo(strategy, tf = null, { now = nowSec() } = {}) {
   if (rows.length) {
     const r0 = rows[0];
     const prevWr = rows.length > 1 ? rows[1].best_wr : r0.best_wr;
-    const { pyRound } = require('../../strategies/common/pyround');
+    const { pyRound, pyMax } = require('../../strategies/common/pyround');
     info = {
       generation: Math.trunc(Number(r0.generation || 0)),
-      hours_since_mutation: Math.max(0.0, (now - Number(r0.created_at || 0)) / 3600),
+      hours_since_mutation: pyMax(0.0, (now - Number(r0.created_at || 0)) / 3600),
       improvement_pct: pyRound(Number(r0.best_wr || 0) - Number(prevWr || 0), 2),
       best_wr: Number(r0.best_wr || 0),
       best_fitness: Number(r0.best_fitness || 0),

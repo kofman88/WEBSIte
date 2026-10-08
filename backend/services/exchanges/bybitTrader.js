@@ -49,6 +49,9 @@ const { computeClientOrderId } = require('./orderIdUtils');
 const { callWithRetry } = require('./apiRetry');
 const sym = require('../marketData/symbolMap');
 const { safeKeyId, apiKeyHash, pyDiv, killswitchGate, planGateDeny, recordPlaced, aioQuery, firstKey, sha256hex } = require('./traderCommon');
+const { pyLower, pyStrip, pyUpper } = require('../../strategies/common/pyUnicode');   // CPython 3.11 str case / whitespace methods
+const { pyRegExp } = require('../../strategies/common/pyre');
+const { intOrUndefined } = require('../../strategies/common/pynum');
 
 const MIN_NOTIONAL = 5.0;
 const MAX_LEVERAGE = 50;
@@ -63,7 +66,11 @@ const PYBIT_SESSION_MAX = 600;
 const TIME_STALE_WARN_S = 60.0;
 const TIME_STALE_RESET_S = 600.0;
 const TIME_EXTREME_DRIFT_MS = 2000;
-const LEV_GT_MAX_RE = /maxLeverage\s*\[(\d+)\]/i;
+// The bot's `re` patterns with CPython 3.11 \d \s \b and IGNORECASE (common/pyre.js), not JS's ASCII classes.
+const LEV_GT_MAX_RE = pyRegExp(String.raw`maxLeverage\s*\[(\d+)\]`, { ignoreCase: true });
+const CODE_RE = pyRegExp(String.raw`\b(ErrCode|retCode|status_code)[:\s]+(\d+)`, { ignoreCase: true });
+const PAREN_CODE_RE = pyRegExp(String.raw`\((\d{3,6})\)`);
+const SUFFIX_RE = pyRegExp(String.raw`\s*\(ErrCode:\s*\d+\)\s*|\s*\(ErrTime:\s*[\d:]+\)\s*`, { ignoreCase: true, global: true });
 
 const BYBIT_ERROR_MAP = Object.freeze({
   401: 'Ошибка авторизации API (401). Проверьте: ключ/секрет, mainnet/testnet, IP whitelist и права ключа.',
@@ -119,7 +126,7 @@ const toBybitSymbol = sym.toBybitSymbol;
 const bybitPriceMultiplier = sym.bybitPriceMultiplier;
 
 function isNetworkError(err) {
-  const low = String(err).toLowerCase();
+  const low = pyLower(String(err));
   return NETWORK_ERR_MARKERS.some((m) => low.includes(m));
 }
 
@@ -128,24 +135,24 @@ function humanizeBybitError(raw) {
   if (!pyTruthy(raw)) return 'Неизвестная ошибка Bybit.';
   raw = String(raw);
   let code = null;
-  let m = /\b(ErrCode|retCode|status_code)[:\s]+(\d+)/i.exec(raw);
+  let m = CODE_RE.exec(raw);
   if (!m) {
-    m = /\((\d{3,6})\)/.exec(raw);
-    code = m ? parseInt(m[1], 10) : null;
+    m = PAREN_CODE_RE.exec(raw);
+    code = m ? pyInt(m[1]) : null;          // int() of Unicode digits too
   } else {
-    code = parseInt(m[2], 10);
+    code = pyInt(m[2]);
   }
   if (code && Object.prototype.hasOwnProperty.call(BYBIT_ERROR_MAP, code)) return BYBIT_ERROR_MAP[code];
-  const low = raw.toLowerCase();
+  const low = pyLower(raw);
   if (low.includes('not live') || low.includes('contract is not')) return 'Эта монета не торгуется на Bybit Futures. Сигнал пропущен.';
   if (low.includes('auth failed') || (low.includes('retryable') && low.includes('auth'))) {
     return 'Ошибка авторизации API. Проверьте: ключ/секрет, mainnet/testnet, IP whitelist и права ключа (Contract - Trade).';
   }
   if (low.includes('retryable')) return 'Ошибка соединения с Bybit (сервер временно недоступен). Проверьте ключи и попробуйте ещё раз.';
-  const clean = raw.replace(/\s*\(ErrCode:\s*\d+\)\s*|\s*\(ErrTime:\s*[\d:]+\)\s*/gi, '').trim().replace(/\.+$/, '');
+  const clean = pyStrip(raw.replace(SUFFIX_RE, '')).replace(/\.+$/, '');
   if (Array.from(clean).length < 5) return code ? `Ошибка Bybit (код ${code}).` : 'Неизвестная ошибка Bybit.';
   const first = String.fromCodePoint(clean.codePointAt(0));
-  return first.toUpperCase() + clean.slice(first.length) + (clean.endsWith('.') ? '' : '.');
+  return pyUpper(first) + clean.slice(first.length) + (clean.endsWith('.') ? '' : '.');
 }
 
 /** _split_tp_qtys → [[price, qtyStr, label], …] */
@@ -218,7 +225,8 @@ class TokenBucket {
 function createBybitTrader(overrides = {}) {
   const rt = makeRuntime(overrides);
   const log = rt.log;
-  const SAFETY_MARGIN_MS = parseInt(String(rt.env.BYBIT_TIME_SAFETY_MARGIN_MS || '500') || '500', 10);
+  // int(os.environ.get("BYBIT_TIME_SAFETY_MARGIN_MS", "500") or "500") — CPython int() (PEP 515, Unicode digits)
+  const SAFETY_MARGIN_MS = intOrUndefined(String(rt.env.BYBIT_TIME_SAFETY_MARGIN_MS || '500') || '500') ?? 500;
   const sessionFactory = overrides.sessionFactory
     || ((apiKey, apiSecret, demo) => createPybitSession({ apiKey, apiSecret, demo, recvWindow: 15000, rt }));
 
@@ -480,7 +488,7 @@ function createBybitTrader(overrides = {}) {
     }
     const m = LEV_GT_MAX_RE.exec(msg);
     if (m) {
-      const maxScaled = parseInt(m[1], 10);
+      const maxScaled = pyInt(m[1]);
       const maxLev = Math.max(1, Math.floor(maxScaled / 100));
       if (maxLev < lev) {
         log.info(`set_leverage ${bbSymbol} ×${lev}: bybit risk_limit max=×${maxLev} → retry with ×${maxLev}`);
@@ -607,7 +615,7 @@ function createBybitTrader(overrides = {}) {
           } catch (e0) {
             const e = asRequestsError(e0);
             lastErr = errStr(e);
-            const low = lastErr.toLowerCase();
+            const low = pyLower(lastErr);
             const isNet = WALLET_NETWORK_KWS.some((kw) => low.includes(kw));
             lastWasNetwork = isNet;
             if (isNet && attempt < BACKOFFS.length - 1) {
@@ -689,7 +697,7 @@ function createBybitTrader(overrides = {}) {
         return await _getBalanceSync(apiKey, apiSecret, demo);
       } catch (e0) {
         const e = asRequestsError(e0);
-        const s = errStr(e).toLowerCase();
+        const s = pyLower(errStr(e));
         if (attempt === 0 && (s.includes('494') || s.includes('10002') || s.includes('retryable'))) {
           st.timeSyncedAt = 0.0;
           await _getTimestamp();
@@ -1227,7 +1235,7 @@ function createBybitTrader(overrides = {}) {
     const entryStr = PP.roundPrice(entry, tickSize);
     let isUnified = (st.accountTypeCache.has(apiKey) ? st.accountTypeCache.get(apiKey) : 'UNIFIED') === 'UNIFIED';
     const cidEntry = tradeId ? computeClientOrderId(tradeId, userId, 'bybit', 'entry') : '';
-    const isMarket = String(orderType).toLowerCase() === 'market';
+    const isMarket = pyLower(String(orderType)) === 'market';
     let atomicTpsl = {};
     const qtyForAtomic = pyFloat(qtyStr);
     if (tp1 > 0 && sl > 0) {
@@ -1266,7 +1274,7 @@ function createBybitTrader(overrides = {}) {
     try {
       let resp = await doPlace(startIdx, hasAtomic());
       if (hasAtomic() && pyGet(resp, 'retCode') === 10001) {
-        const lm = pyStr(pyGet(resp, 'retMsg', '')).toLowerCase();
+        const lm = pyLower(pyStr(pyGet(resp, 'retMsg', '')));
         if (['takeprofit', 'tpslmode', 'tpsize', 'tplimitprice', 'tporder', 'slorder', 'slsize', 'trigger'].some((k) => lm.includes(k))) {
           log.warning(`[ATOMIC-FALLBACK] ${bbSymbol}: Bybit rejected atomic TP/SL (${pySlice(pyStr(pyGet(resp, 'retMsg', '')), 120)}) — retrying without atomic params (legacy flow)`);
           resp = await doPlace(startIdx, false);
@@ -1274,7 +1282,7 @@ function createBybitTrader(overrides = {}) {
         }
       }
       const retCode = pyGet(resp, 'retCode');
-      const retMsgLower = pyStr(pyGet(resp, 'retMsg', '')).toLowerCase();
+      const retMsgLower = pyLower(pyStr(pyGet(resp, 'retMsg', '')));
       const isDupLink = retCode === 110072
         || (retMsgLower.includes('order link') && retMsgLower.includes('exist'))
         || (retMsgLower.includes('orderlinkid') && retMsgLower.includes('duplicat'));
@@ -1758,7 +1766,7 @@ function createBybitTrader(overrides = {}) {
       } catch (e0) {
         const e = asRequestsError(e0);
         lastExc = e;
-        const es = errStr(e).toLowerCase();
+        const es = pyLower(errStr(e));
         if (attempt === 0 && (es.includes('retryable') || es.includes('10002') || es.includes('494'))) {
           // quirk: the bot assigns a *local* `_bybit_time_synced_at = 0.0` here, so this
           // resync is a no-op unless the last sync is older than 10 s.
@@ -1832,7 +1840,7 @@ function createBybitTrader(overrides = {}) {
         const markRaw = pyFloat(pyOr(pyGet(pyIndex(lst, 0), 'markPrice', 0), 0));
         const mark = (markRaw > 0 && pyTruthy(pmult) && pmult !== 1.0) ? markRaw / pmult : markRaw;
         if (mark > 0) {
-          const d = String(direction || '').toUpperCase();
+          const d = pyUpper(String(direction || ''));
           if (d === 'LONG' && newSl >= mark) return { ok: false, error: `new_sl ${pyFloatStr(newSl)} >= mark ${pyFloatStr(mark)} for LONG (would trigger immediate)` };
           if (d === 'SHORT' && newSl <= mark) return { ok: false, error: `new_sl ${pyFloatStr(newSl)} <= mark ${pyFloatStr(mark)} for SHORT (would trigger immediate)` };
         }
@@ -1864,7 +1872,7 @@ function createBybitTrader(overrides = {}) {
               const m2Raw = pyFloat(pyOr(pyGet(pyIndex(pyGet(pyGet(t2, 'result', {}), 'list', [{}]), 0), 'markPrice', 0), 0));
               const m2 = (pyTruthy(pmult) && pmult !== 1.0) ? m2Raw / pmult : m2Raw;
               if (m2 > 0) {
-                const d = String(direction || '').toUpperCase();
+                const d = pyUpper(String(direction || ''));
                 if (d === 'LONG' && newSl >= m2) return { ok: false, error: `new_sl ${pyFloatStr(newSl)} >= re-fetched mark ${pyFloatStr(m2)} for LONG (price moved, abort retry)` };
                 if (d === 'SHORT' && newSl <= m2) return { ok: false, error: `new_sl ${pyFloatStr(newSl)} <= re-fetched mark ${pyFloatStr(m2)} for SHORT (price moved, abort retry)` };
               }
@@ -1892,7 +1900,7 @@ function createBybitTrader(overrides = {}) {
     } catch (e0) {
       const e = asRequestsError(e0);
       const es = errStr(e);
-      if (es.includes('34040') || es.toLowerCase().includes('not modified')) {
+      if (es.includes('34040') || pyLower(es).includes('not modified')) {
         log.debug(`set_trailing_sl ${bb}: already at target (benign: ${pySlice(es, 80)})`);
         return { ok: true, already_at_target: true };
       }
@@ -2004,7 +2012,7 @@ function createBybitTrader(overrides = {}) {
   async function _closePositionSync(apiKey, apiSecret, symbol, side, size, posIdx = 0, demo = false) {
     const session = _getSession(apiKey, apiSecret, demo);
     const bb = toBybitSymbol(symbol);
-    const s = pyStr(side).trim().toUpperCase();
+    const s = pyUpper(pyStrip(pyStr(side)));
     let closeSide;
     if (s === 'LONG' || s === 'BUY') closeSide = 'Sell';
     else if (s === 'SHORT' || s === 'SELL') closeSide = 'Buy';
@@ -2037,7 +2045,7 @@ function createBybitTrader(overrides = {}) {
       if (pyGet(resp, 'retCode', -1) === 0) return { ok: true, order_id: pyGet(pyIndex(resp, 'result'), 'orderId', '') };
       const retCode = pyGet(resp, 'retCode', -1);
       const retMsg = pyOr(pyGet(resp, 'retMsg', 'close error'), '');
-      if (retCode === 10001 && pyStr(retMsg).toLowerCase().includes('qty invalid')) {
+      if (retCode === 10001 && pyLower(pyStr(retMsg)).includes('qty invalid')) {
         log.warning(`close_position ${symbol}: ${pyStr(retMsg)} (code=${pyStr(retCode)}) — позиция вероятно уже закрыта (race)`);
         return { ok: false, error: retMsg, benign: true };
       }
@@ -2045,7 +2053,7 @@ function createBybitTrader(overrides = {}) {
     } catch (e0) {
       const e = asRequestsError(e0);
       const es = errStr(e);
-      if (es.includes('10001') && es.toLowerCase().includes('qty invalid')) {
+      if (es.includes('10001') && pyLower(es).includes('qty invalid')) {
         log.warning(`close_position ${symbol}: qty=${roundedQty} rejected (10001 Qty invalid) — позиция вероятно уже закрыта (race)`);
         return { ok: false, error: es, benign: true };
       }
@@ -2192,7 +2200,7 @@ function formatTradeResult(result, direction, symbol, entry, sl, tp1, riskPct, l
     if (pyTruthy(tp3)) tpLines += `🏆 TP3: <code>${fp(tp3)}</code>  (25% позиции)\n`;
     const beNote = pyTruthy(tp2) ? '\n♻️ <i>После TP1 — стоп автоматически перенесётся в БУ</i>' : '';
     const notionalPct = balance > 0 ? notional / balance * 100 : 0;
-    const isMarket = pyStr(pyGet(result, 'order_type', 'Limit')).toLowerCase() === 'market';
+    const isMarket = pyLower(pyStr(pyGet(result, 'order_type', 'Limit'))) === 'market';
     if (isMarket) {
       const avgRaw = pyOr(pyGet(result, 'avg_price', 0), 0);
       const avg = tryFloat(avgRaw, 0.0);

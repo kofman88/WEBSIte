@@ -8,6 +8,7 @@
  * key.startswith("_")`); unknown and lower-case keys are silently ignored.
  */
 
+const { pyIsupper } = require('../common/pyUnicode');   // CPython 3.11 str.isupper()
 const SMC_CONFIG_DEFAULTS = Object.freeze({
   // Structure
   SWING_LOOKBACK: 10,
@@ -43,9 +44,9 @@ const SMC_CONFIG_DEFAULTS = Object.freeze({
   USE_VOLUME_FILTER: false,
 });
 
-/** Python str.isupper() (+ the no-underscore-prefix rule of SMCConfig.__init__). */
+/** `key.isupper() and not key.startswith("_")` of SMCConfig.__init__ (str.isupper() of CPython 3.11). */
 function isUpperKey(key) {
-  return typeof key === 'string' && !key.startsWith('_') && /[A-Z]/.test(key) && key === key.toUpperCase();
+  return typeof key === 'string' && pyIsupper(key) && !key.startsWith('_');
 }
 
 /** SMCConfig(**kwargs): class defaults + UPPER-CASE overrides, unknown keys ignored. */

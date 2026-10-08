@@ -17,6 +17,7 @@
 
 const { REJECT } = require('./config');
 const { pyMax, pyMin } = require('../common/pyround');
+const { pyUpper } = require('../common/pyUnicode');   // CPython 3.11 str case / whitespace methods
 
 /** _MEMCOIN_KW (indicator.py) */
 const MEMCOIN_KW = Object.freeze(['FLOKI', 'PEPE', 'SHIB', 'DOGE', 'WIF', 'BONK', 'NEIRO',
@@ -24,14 +25,14 @@ const MEMCOIN_KW = Object.freeze(['FLOKI', 'PEPE', 'SHIB', 'DOGE', 'WIF', 'BONK'
 
 /** `any(k in symbol.upper() for k in _MEMCOIN_KW)` */
 function isMemcoin(symbol) {
-  const s = String(symbol).toUpperCase();
+  const s = pyUpper(String(symbol));
   for (const k of MEMCOIN_KW) if (s.includes(k)) return true;
   return false;
 }
 
 /** `"BTC" in sym.upper() or "ETH" in sym.upper()` — substring (QUIRK(spec §10.4): ETHFI, BTCDOM … count). */
 function isMajor(symbol) {
-  const s = String(symbol).toUpperCase();
+  const s = pyUpper(String(symbol));
   return s.includes('BTC') || s.includes('ETH');
 }
 

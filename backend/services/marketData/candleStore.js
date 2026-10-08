@@ -22,6 +22,7 @@ const sym = require('./symbolMap');
 const { Frame } = require('../../strategies/common/frame');
 const { TF_TO_BINGX, TF_MS, rowsToFrame, pyInt, pyFloat, pyFalsy } = require('./candleFrame');
 const { BINGX_KLINES, BINGX_TICKER, BINGX_CONTRACTS, codeOk, isPlainObject, parseContracts } = require('./bingxRest');
+const { pyStrip } = require('../../strategies/common/pyUnicode');   // CPython 3.11 str case / whitespace methods
 
 const EXCHANGE = 'bingx';
 const FETCH_CONCURRENCY = 3;
@@ -114,7 +115,7 @@ function adaptiveFreshnessMs(frame, tf, env = process.env, { log = defaultLog } 
   const baseSec = TTL_BASE_BY_TF[tf] ?? 7200;
   const baseMs = baseSec * 1000;
   const legacyFloorMs = 2 * 3600 * 1000;
-  if (String(env.ADAPTIVE_CACHE_TTL_ENABLED ?? '0').trim() !== '1') return legacyFloorMs;
+  if (pyStrip(String(env.ADAPTIVE_CACHE_TTL_ENABLED ?? '0')) !== '1') return legacyFloorMs;
   if (!frame || frame.length < 50) return Math.max(baseMs, legacyFloorMs);
   try {
     const n = frame.length;

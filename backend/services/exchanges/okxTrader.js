@@ -41,6 +41,7 @@ const { pyJsonDumps } = require('../engine/pyjson');
 const PP = require('./pricePrecision');
 const { callWithRetry } = require('./apiRetry');
 const { killswitchGate, planGateDeny, recordPlaced, aioQuery } = require('./traderCommon');
+const { pyLower, pyUpper } = require('../../strategies/common/pyUnicode');   // CPython 3.11 str case / whitespace methods
 
 const BASE_URL = 'https://www.okx.com';
 const MIN_NOTIONAL = 5.0;
@@ -82,7 +83,7 @@ function okxPriceMultiplier(_symbol) { return 1.0; }
 
 /** _sign: base64(HMAC-SHA256(secret, ts + METHOD + path + body)). */
 function okxSign(timestamp, method, path, body, secret) {
-  const msg = `${timestamp}${String(method).toUpperCase()}${path}${body}`;
+  const msg = `${timestamp}${pyUpper(String(method))}${path}${body}`;
   return crypto.createHmac('sha256', Buffer.from(String(secret), 'utf8')).update(Buffer.from(msg, 'utf8')).digest('base64');
 }
 
@@ -281,7 +282,7 @@ function createOkxTrader(overrides = {}) {
     if (deny) return deny;
     try {
       const instId = toOkxSymbol(symbol);
-      const side = ['LONG', 'BUY'].includes(String(direction).toUpperCase()) ? 'buy' : 'sell';
+      const side = ['LONG', 'BUY'].includes(pyUpper(String(direction))) ? 'buy' : 'sell';
       const posSide = side === 'buy' ? 'long' : 'short';
       const [qtyStep, tickSize, found, maxLev] = await _getInstrumentFilters(instId);
       if (!found) return { ok: false, order_id: '', error: `Инструмент ${instId} не найден на OKX.` };
@@ -374,7 +375,7 @@ function createOkxTrader(overrides = {}) {
       const respCode = pyStr(pyGet(resp, 'code', ''));
       const respMsg = pyOr(pyGet(firstData(resp), 'sMsg', ''), pyGet(resp, 'msg', ''));
       const atomicOk = respCode === '0';
-      const attachUnsupported = !atomicOk && (respCode === '51000' || respCode === '51001' || pyStr(pyOr(respMsg, '')).toLowerCase().includes('attachalgo'));
+      const attachUnsupported = !atomicOk && (respCode === '51000' || respCode === '51001' || pyLower(pyStr(pyOr(respMsg, ''))).includes('attachalgo'));
 
       let orderId;
       let atomicTp1Placed;
@@ -544,7 +545,7 @@ function createOkxTrader(overrides = {}) {
     try {
       const instId = toOkxSymbol(symbol);
       const [qtyStep, tickSize] = await _getInstrumentFilters(instId);
-      const isLong = String(direction).toUpperCase() === 'LONG';
+      const isLong = pyUpper(String(direction)) === 'LONG';
       const closeSide = isLong ? 'sell' : 'buy';
       const posSide = isLong ? 'long' : 'short';
       let slPlaced = false;
@@ -611,7 +612,7 @@ function createOkxTrader(overrides = {}) {
 
   async function closePosition(apiKey, secret, symbol, direction, passphrase = '') {
     const instId = toOkxSymbol(symbol);
-    const posSide = String(direction).toUpperCase() === 'LONG' ? 'long' : 'short';
+    const posSide = pyUpper(String(direction)) === 'LONG' ? 'long' : 'short';
     const resp = await _request('POST', '/api/v5/trade/close-position', apiKey, secret, passphrase, null, { instId, mgnMode: 'cross', posSide });
     const ok = pyGet(resp, 'code') === '0';
     try {
@@ -628,7 +629,7 @@ function createOkxTrader(overrides = {}) {
       const data = await _request('GET', '/api/v5/account/positions-history', apiKey, secret, passphrase, { instType: 'SWAP', instId, limit: '20' });
       const out = [];
       for (const rec of pyIter(pyGet(data, 'data', []))) {
-        const okxSide = pyOr(pyStr(pyGet(rec, 'direction', '')).toLowerCase(), pyStr(pyGet(rec, 'posSide', '')).toLowerCase());
+        const okxSide = pyOr(pyLower(pyStr(pyGet(rec, 'direction', ''))), pyLower(pyStr(pyGet(rec, 'posSide', ''))));
         let normSide;
         if (okxSide === 'long') normSide = 'Buy';
         else if (okxSide === 'short') normSide = 'Sell';
@@ -663,7 +664,7 @@ function createOkxTrader(overrides = {}) {
 
   async function setTrailingSl(apiKey, secret, symbol, slPrice, direction, posIdx = 0, passphrase = '') {
     const instId = toOkxSymbol(symbol);
-    const isLong = String(direction).toUpperCase() === 'LONG';
+    const isLong = pyUpper(String(direction)) === 'LONG';
     const [, tick] = await _getInstrumentFilters(instId);
     const slBody = {
       instId, tdMode: 'cross', side: isLong ? 'sell' : 'buy', posSide: isLong ? 'long' : 'short', ordType: 'conditional',

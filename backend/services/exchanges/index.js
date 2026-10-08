@@ -32,6 +32,7 @@ const binance = require('./binanceTrader');
 const okx = require('./okxTrader');
 const { log: mdLog } = require('../marketData/mdLog');
 const { pyFloatStr } = require('./pyCompat');
+const { pyLower, pyUpper } = require('../../strategies/common/pyUnicode');   // CPython 3.11 str case / whitespace methods
 
 const EXCHANGES = Object.freeze(['bybit', 'bingx', 'binance', 'okx']);
 const BINANCE_TESTNET_URL = 'https://testnet.binancefuture.com';
@@ -45,12 +46,12 @@ const FACTORIES = {
 };
 
 function isSupportedExchange(exchange) {
-  return EXCHANGES.includes(String(exchange || '').toLowerCase());
+  return EXCHANGES.includes(pyLower(String(exchange || '')));
 }
 
 /** auto_trade._get_trader_module: bingx / binance / okx, anything else → bybit. */
 function resolveExchange(exchange) {
-  const ex = String(exchange || '').toLowerCase();
+  const ex = pyLower(String(exchange || ''));
   return EXCHANGES.includes(ex) ? ex : 'bybit';
 }
 
@@ -112,7 +113,7 @@ function getTrader(exchange, opts = {}) {
       });
     }
     // FIX-B4 (auto_trade): split entry is Bybit-only → midpoint through place_trade
-    log.warning(`auto_trade: split-entry не поддерживается ${ex.toUpperCase()} (uid=${p.userId ?? 0} sym=${p.symbol}) — используем midpoint`);
+    log.warning(`auto_trade: split-entry не поддерживается ${pyUpper(ex)} (uid=${p.userId ?? 0} sym=${p.symbol}) — используем midpoint`);
     return placeTrade(creds, { ...p, entry: (p.entryLo + p.entryHi) / 2 });
   }
 

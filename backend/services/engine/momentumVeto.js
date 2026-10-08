@@ -17,10 +17,11 @@ const { fmtFixed } = require('../../strategies/common/pyfmt');
 const { pySum } = require('../../strategies/common/series');
 const { pyMaxList } = require('../../strategies/common/pyval');
 const { pyFloat, pyInt } = require('./pycoerce');
+const { pyLower, pyStrip } = require('../../strategies/common/pyUnicode');   // CPython 3.11 str case / whitespace methods
 
 function envRaw(env, key) {
   const v = env[key];
-  return v === undefined || v === null ? '' : String(v).trim();
+  return v === undefined || v === null ? '' : pyStrip(String(v));
 }
 /** _env_float: float(os.environ.get(key, "").strip() or default); ValueError / TypeError → default */
 function envFloat(env, key, dflt) {
@@ -36,7 +37,7 @@ function envInt(env, key, dflt) {
 }
 /** _env_bool: empty → default, else value in (1, true, yes, on) */
 function envBool(env, key, dflt) {
-  const raw = envRaw(env, key).toLowerCase();
+  const raw = pyLower(envRaw(env, key));
   if (!raw) return dflt;
   return ['1', 'true', 'yes', 'on'].includes(raw);
 }

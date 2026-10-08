@@ -21,6 +21,7 @@
 
 const { TextDecoder } = require('util');
 const { pyJsonParse } = require('./pyjson');
+const { pyLower, isAlnumChar } = require('../../strategies/common/pyUnicode');   // CPython 3.11 str.lower() / isalnum()
 
 // encodings.aliases for the codecs below (Python 3.11), keys after normalisation
 const UTF8 = new Set(['utf_8', 'utf8', 'u8', 'utf', 'cp65001', 'utf8_ucs2', 'utf8_ucs4']);
@@ -30,9 +31,24 @@ const LATIN1 = new Set(['latin_1', 'iso8859_1', '8859', 'cp819', 'csisolatin1', 
 const ASCII = new Set(['ascii', '646', 'ansi_x3.4_1968', 'ansi_x3.4_1986', 'ansi_x3_4_1968', 'cp367',
   'csascii', 'ibm367', 'iso646_us', 'iso_646.irv_1991', 'iso_ir_6', 'us', 'us_ascii']);
 
-/** encodings.normalize_encoding after lower(): runs of chars other than [a-z0-9.] → one '_', trimmed. */
+/**
+ * encodings.normalize_encoding after lower(): runs of punctuation (not str.isalnum(), not '.') between
+ * kept characters → one '_'; a non-ASCII alphanumeric is dropped without counting as punctuation.
+ */
 function normalizeEncoding(name) {
-  return String(name).toLowerCase().replace(/[^a-z0-9.]+/g, '_').replace(/^_+|_+$/g, '');
+  let out = '';
+  let punct = false;
+  for (const c of pyLower(String(name))) {
+    const cp = c.codePointAt(0);
+    if (c === '.' || isAlnumChar(cp)) {
+      if (punct && out) out += '_';
+      if (cp < 0x80) out += c;
+      punct = false;
+    } else {
+      punct = true;
+    }
+  }
+  return out;
 }
 
 /** request.charset: the `charset` parameter of Content-Type, or null. */

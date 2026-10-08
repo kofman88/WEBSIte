@@ -14,19 +14,20 @@
 const { pyRound } = require('../common/pyround');
 const { pyTruthy, pyOr, pyGet, pyMax2, pyMin2, pyMinList, pyMaxList } = require('../common/pyval');
 const { adjustSlForLiquidity } = require('../common/liquiditySl');
+const { pyUpper } = require('../common/pyUnicode');   // CPython 3.11 str case / whitespace methods
 
 const MEMCOIN_KW = Object.freeze(['FLOKI', 'PEPE', 'SHIB', 'DOGE', 'WIF', 'BONK', 'NEIRO',
   'MEME', 'SATS', 'TURBO', 'CATS', 'ACT', 'BOME', 'BOOK']);
 
 /** `any(k in symbol.upper() for k in _MEMCOIN_KW)` */
 function isMemcoin(symbol) {
-  const s = String(symbol === null || symbol === undefined ? '' : symbol).toUpperCase();
+  const s = pyUpper(String(symbol === null || symbol === undefined ? '' : symbol));
   return MEMCOIN_KW.some((k) => s.includes(k));
 }
 
 /** `"BTC" in sym or "ETH" in sym` (so e.g. ETHFI counts as a major). */
 function isMajor(symbol) {
-  const s = String(symbol === null || symbol === undefined ? '' : symbol).toUpperCase();
+  const s = pyUpper(String(symbol === null || symbol === undefined ? '' : symbol));
   return s.includes('BTC') || s.includes('ETH');
 }
 
@@ -68,7 +69,7 @@ function calculateLevels(analysis, direction, cfg) {
   if (risk <= 0) return null;
 
   // ── minimum stop by coin class (ATR + per-type floor) ──
-  const symUp = String(pyGet(analysis, 'symbol', '')).toUpperCase();
+  const symUp = pyUpper(String(pyGet(analysis, 'symbol', '')));
   const memcoin = isMemcoin(symUp);
   const major = isMajor(symUp);
 

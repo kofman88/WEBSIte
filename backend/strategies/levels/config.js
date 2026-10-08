@@ -1,3 +1,4 @@
+const { pyMax, pyMin } = require('../common/pyround');   // builtin max()/min(): a NaN 2nd argument is ignored
 'use strict';
 /**
  * config.js — LEVELS configuration objects, one-to-one with the bot:
@@ -67,8 +68,8 @@ function tradeCfgPostInit(cfg) {
   if (cfg.tp3_rr <= cfg.tp2_rr) cfg.tp3_rr = cfg.tp2_rr + 1.5;
   if (cfg.scan_interval < 60) cfg.scan_interval = 60;
   if (cfg.scan_interval > 86400) cfg.scan_interval = 86400;
-  cfg.min_quality = Math.max(0, Math.min(10, cfg.min_quality));
-  cfg.vol_mult = Math.max(0.1, Math.min(5.0, cfg.vol_mult));
+  cfg.min_quality = pyMax(0, pyMin(10, cfg.min_quality));
+  cfg.vol_mult = pyMax(0.1, pyMin(5.0, cfg.vol_mult));
   return cfg;
 }
 
@@ -147,7 +148,7 @@ function cfgToInd(cfg, highWrMode = false, env = LEVELS_ENV) {
     USE_HTF_FILTER: cfg.use_htf,
     ZONE_PCT: cfg.zone_pct,
     MAX_DIST_PCT: cfg.max_dist_pct,
-    MIN_RR: Math.max(cfg.min_rr, env.LEVELS_MIN_RR),
+    MIN_RR: pyMax(cfg.min_rr, env.LEVELS_MIN_RR),
     MAX_LEVEL_TESTS: cfg.max_level_tests,
     HIGH_WR_MODE: Boolean(highWrMode),
   };

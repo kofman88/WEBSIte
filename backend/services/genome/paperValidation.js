@@ -15,6 +15,7 @@ const { pySum } = require('../../strategies/common/series');
 const { GENE_SPACE, pyDumps } = require('./geneSpace');
 const C = require('./config');
 const regime = require('./regime');
+const { pyUpper } = require('../../strategies/common/pyUnicode');   // CPython 3.11 str case / whitespace methods
 
 /** strategy → regime at the last validation (genome._last_paper_regime). */
 const LAST_PAPER_REGIME = new Map();
@@ -46,7 +47,7 @@ function validateViaPaper(genome, strategy, tf, {
     else if (own(GENE_SPACE[strategy], 'min_rr')) minRr = 2.0;
     else minRr = 0.0;
     // [GENOME-PAPER-SMC-FIX] SMC's MIN_RR is measured to TP2, LEVELS to TP1
-    const rrKey = String(strategy).toUpperCase() === 'SMC' ? 'tp2' : 'tp1';
+    const rrKey = pyUpper(String(strategy)) === 'SMC' ? 'tp2' : 'tp1';
     const passed = [];
     for (const t of trades) {
       const entry = f0(t.entry);

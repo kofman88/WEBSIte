@@ -14,11 +14,12 @@
  */
 
 const { pyMax } = require('../../strategies/common/pyround');
+const { pyLower } = require('../../strategies/common/pyUnicode');   // CPython 3.11 str case / whitespace methods
 
 const EXCHANGE_MIN_NOTIONAL = Object.freeze({ bybit: 5.0, bingx: 5.0, binance: 5.0, okx: 5.0 });
 
 function getMinNotional(exchange) {
-  const k = String(exchange || '').toLowerCase();
+  const k = pyLower(String(exchange || ''));
   return Object.prototype.hasOwnProperty.call(EXCHANGE_MIN_NOTIONAL, k) ? EXCHANGE_MIN_NOTIONAL[k] : 5.0;
 }
 

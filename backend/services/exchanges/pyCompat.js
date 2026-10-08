@@ -21,15 +21,18 @@
  *   pyQuote / pyQuotePlus / pyUrlencode   urllib.parse
  *   htmlEscape            html.escape(s, quote=True)
  *   pyCapitalize          str.capitalize()
- *   pyStrftimeHMS(t)      datetime.fromtimestamp(t, utc).strftime('%H:%M:%S')
+ *   pyStrftimeHMS(t)      datetime.now(timezone.utc).strftime('%H:%M:%S') at clock value t (floor)
  *
  * Python exceptions are JS Errors with `pyType` and `message` = str(e).
  */
 
 const { pyRepr: floatRepr } = require('../../strategies/common/pyfmt');
-// str.isprintable() of the bot's Unicode database (CPython 3.11: unicodedata 14.0.0), not Node's
-// \p{…} classes (Unicode 16): a character assigned after 14.0 is Cn for the bot, so repr() escapes it.
-const { isPrintable } = require('../engine/pyUnicode');
+// repr() / str.capitalize() / int() / float() of the bot's Unicode database (CPython 3.11:
+// unicodedata 14.0.0), not Node's (Unicode 16): a character assigned after 14.0 is Cn for the bot,
+// so repr() escapes it, it has no case mapping and is no digit.
+const U = require('../../strategies/common/pyUnicode');
+const N = require('../../strategies/common/pynum');
+const { pyUpper } = require('../../strategies/common/pyUnicode');   // CPython 3.11 str case / whitespace methods
 
 class PyError extends Error {
   constructor(pyType, message) {
@@ -114,29 +117,8 @@ function pyIndex(d, key) {
 
 // ── repr ────────────────────────────────────────────────────────────────────
 
-function hex(n, width) { return n.toString(16).padStart(width, '0'); }
-
 /** repr(str) — CPython unicode_repr. */
-function pyStrRepr(s) {
-  s = String(s);
-  const quote = s.includes("'") && !s.includes('"') ? '"' : "'";
-  let out = quote;
-  for (const ch of s) {
-    const cp = ch.codePointAt(0);
-    if (ch === quote || ch === '\\') out += '\\' + ch;
-    else if (ch === '\t') out += '\\t';
-    else if (ch === '\n') out += '\\n';
-    else if (ch === '\r') out += '\\r';
-    else if (cp < 0x20 || cp === 0x7f) out += '\\x' + hex(cp, 2);
-    else if (cp < 0x7f) out += ch;
-    else if (!isPrintable(cp)) {
-      if (cp <= 0xff) out += '\\x' + hex(cp, 2);
-      else if (cp <= 0xffff) out += '\\u' + hex(cp, 4);
-      else out += '\\U' + hex(cp, 8);
-    } else out += ch;
-  }
-  return out + quote;
-}
+const pyStrRepr = U.pyStrRepr;
 
 /** repr() of a JSON-shaped JS value (integral numbers print as int). */
 function pyRepr(v) {
@@ -262,38 +244,38 @@ function reprFromJsonText(text) {
 
 // ── float() / int() ─────────────────────────────────────────────────────────
 
-const FLOAT_RE = /^[+-]?(?:(?:\d(?:_?\d)*)?\.?\d(?:_?\d)*(?:[eE][+-]?\d(?:_?\d)*)?|\d(?:_?\d)*\.|inf(?:inity)?|nan)$/i;
-
 /** float(v) */
 function pyFloat(v) {
   if (typeof v === 'number') return v;
   if (typeof v === 'boolean') return v ? 1 : 0;
   if (typeof v === 'string') {
-    const t = v.trim();
-    if (!FLOAT_RE.test(t)) throw ValueError(`could not convert string to float: ${pyStrRepr(v)}`);
-    const low = t.toLowerCase().replace(/^\+/, '');
-    if (low === 'inf' || low === 'infinity') return Infinity;
-    if (low === '-inf' || low === '-infinity') return -Infinity;
-    if (low === 'nan' || low === '-nan') return NaN;
-    return Number(t.replace(/_/g, ''));
+    const x = N.floatFromStr(v);
+    if (x === undefined) throw ValueError(N.floatErrorText(v));
+    return x;
   }
   throw TypeError_(`float() argument must be a string or a real number, not '${pyTypeName(v)}'`);
+}
+
+/** The int literal of a str (ValueError like CPython otherwise). */
+function intLit(v) {
+  const lit = N.intLiteral(v);
+  if (lit === null) throw ValueError(N.intErrorText(v));
+  if (lit.limit !== undefined) throw ValueError(N.intLimitText(lit.limit));
+  return lit;
 }
 
 /** int(v) */
 function pyInt(v) {
   if (typeof v === 'boolean') return v ? 1 : 0;
   if (typeof v === 'number') {
-    if (Number.isNaN(v)) throw ValueError('cannot convert float NaN to integer');
-    if (!Number.isFinite(v)) throw OverflowError('cannot convert float infinity to integer');
-    const t = Math.trunc(v);
-    return t === 0 ? 0 : t;
+    const t = N.intFromFloat(v);
+    if (t === null) {
+      if (Number.isNaN(v)) throw ValueError(N.floatToIntErrorText(v));
+      throw OverflowError(N.floatToIntErrorText(v));
+    }
+    return t;
   }
-  if (typeof v === 'string') {
-    const t = v.trim();
-    if (!/^[+-]?\d(?:_?\d)*$/.test(t)) throw ValueError(`invalid literal for int() with base 10: ${pyStrRepr(v)}`);
-    return Number(t.replace(/_/g, ''));
-  }
+  if (typeof v === 'string') return N.intFromLiteral(intLit(v));
   throw TypeError_(`int() argument must be a string, a bytes-like object or a real number, not '${pyTypeName(v)}'`);
 }
 
@@ -302,11 +284,7 @@ function pyBigInt(v) {
   if (typeof v === 'bigint') return v;
   if (typeof v === 'boolean') return v ? 1n : 0n;
   if (typeof v === 'number') return BigInt(pyInt(v));
-  if (typeof v === 'string') {
-    const t = v.trim();
-    if (!/^[+-]?\d(?:_?\d)*$/.test(t)) throw ValueError(`invalid literal for int() with base 10: ${pyStrRepr(v)}`);
-    return BigInt(t.replace(/_/g, '').replace(/^\+/, ''));
-  }
+  if (typeof v === 'string') return N.bigIntFromLiteral(intLit(v));
   throw TypeError_(`int() argument must be a string, a bytes-like object or a real number, not '${pyTypeName(v)}'`);
 }
 
@@ -366,7 +344,7 @@ function pyQuote(s, safe = '') {
   for (const b of bytes) {
     const ch = String.fromCharCode(b);
     if (b < 0x80 && (ALWAYS_SAFE.test(ch) || safe.includes(ch))) out += ch;
-    else out += '%' + b.toString(16).toUpperCase().padStart(2, '0');
+    else out += '%' + pyUpper(b.toString(16)).padStart(2, '0');
   }
   return out;
 }
@@ -442,7 +420,7 @@ function yarlQuote(val, { safe = '', protected: prot = '', qs = false, requote =
     if (qs && ch === 0x20) { ret += '+'; continue; }
     const c = String.fromCharCode(ch);
     if (ch < 0x80 && safeSet.includes(c)) { ret += c; continue; }
-    ret += '%' + ch.toString(16).toUpperCase().padStart(2, '0');
+    ret += '%' + pyUpper(ch.toString(16)).padStart(2, '0');
   }
   return ret;
 }
@@ -477,13 +455,8 @@ function htmlEscape(s) {
     .replace(/'/g, '&#x27;');
 }
 
-/** str.capitalize() */
-function pyCapitalize(s) {
-  s = String(s);
-  if (!s) return s;
-  const first = String.fromCodePoint(s.codePointAt(0));
-  return first.toUpperCase() + s.slice(first.length).toLowerCase();
-}
+/** str.capitalize(): title case of the first character, lower() of the rest (CPython 3.11 case tables). */
+const pyCapitalize = (s) => U.pyCapitalize(String(s));
 
 /** datetime.now(timezone.utc).strftime("%H:%M:%S") for a unix-seconds clock value. */
 function pyStrftimeHMS(t) {

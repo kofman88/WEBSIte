@@ -20,6 +20,7 @@
 
 const { fmtFixed, fmtPriceDisplay: _fmtPriceDisplay, pyRepr: floatRepr } = require('../../strategies/common/pyfmt');
 const { ValueError, OverflowError, ZeroDivisionError } = require('./pyCompat');
+const { pyUpper } = require('../../strategies/common/pyUnicode');   // CPython 3.11 str case / whitespace methods
 
 const PREC = 28;
 const TEN = 10n;
@@ -167,7 +168,7 @@ function roundPrice(price, tickSize) {
   return _decRound(price, tickSize, 'half_up', (p, f) => pyFloorF(p * f + 0.5));
 }
 
-function _isLong(direction) { return String(direction).toUpperCase() === 'LONG'; }
+function _isLong(direction) { return pyUpper(String(direction)) === 'LONG'; }
 
 function roundPriceSl(price, tickSize, direction) {
   price = Number(price);

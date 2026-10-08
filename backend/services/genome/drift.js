@@ -9,7 +9,7 @@
  * the engine worker installs the provider — null until then, i.e. "unknown" → base 15 pp).
  */
 
-const { pyRound } = require('../../strategies/common/pyround');
+const { pyRound, pyMax } = require('../../strategies/common/pyround');
 const C = require('./config');
 const regime = require('./regime');
 
@@ -49,7 +49,7 @@ function checkDrift(strategy, tf, { store = null, db = null, now = Date.now() / 
     const liveWr = liveWins / rows.length * 100;
 
     const predicted = backtestWr * C.LIVE_WR_DISCOUNT;
-    const delta = Math.max(0.0, predicted - liveWr);
+    const delta = pyMax(0.0, predicted - liveWr);
     let reg = null;
     try { reg = (getRegime || regime.getCachedRegime)(); } catch (_e) { reg = null; }
     const threshold = C.driftThresholdForRegime(reg);

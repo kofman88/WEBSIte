@@ -8,10 +8,11 @@
  * `utils/logger` (which opens file transports and reads the env at import time).
  */
 
+const { pyLower } = require('../../strategies/common/pyUnicode');   // CPython 3.11 str case / whitespace methods
 const LEVELS = { debug: 10, info: 20, warning: 30, warn: 30, error: 40, silent: 100 };
 
 let _impl = null;
-let _level = LEVELS[(process.env.MARKET_LOG_LEVEL || (process.env.VITEST ? 'silent' : 'info')).toLowerCase()] ?? LEVELS.info;
+let _level = LEVELS[pyLower(process.env.MARKET_LOG_LEVEL || (process.env.VITEST ? 'silent' : 'info'))] ?? LEVELS.info;
 
 function _emit(level, args) {
   if (_impl) {
@@ -34,7 +35,7 @@ const log = {
 
 /** Plug an external logger (winston-like: debug/info/warn/error). `null` restores the console one. */
 function setLogger(impl) { _impl = impl || null; }
-function setLevel(name) { _level = LEVELS[String(name).toLowerCase()] ?? _level; }
+function setLevel(name) { _level = LEVELS[pyLower(String(name))] ?? _level; }
 /** A logger that swallows everything (tests). */
 const silent = { debug() {}, info() {}, warning() {}, warn() {}, error() {} };
 

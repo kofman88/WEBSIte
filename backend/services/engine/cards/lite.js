@@ -10,13 +10,14 @@ const { pyMax, pyMin } = require('../../../strategies/common/pyround');
 const { pyFloat, pyInt } = require('../pycoerce');
 const { escape, pyTruthy, repeat, cardFp: fp } = require('./html');
 const { levelsStars } = require('./qualityScale');
+const { pyUpper } = require('../../../strategies/common/pyUnicode');   // CPython 3.11 str case / whitespace methods
 
 /**
  * format_signal_lite(symbol, direction, quality, entry, sl, tp1, tp2, tp3, strategy, lang, quality_scale)
  * quality_scale 10 (or strategy LEVELS) → levels_stars; otherwise clamp(int(q), 0, 5).
  */
 function formatSignalLite({ symbol, direction, quality, entry, sl, tp1, tp2 = null, tp3 = null, strategy = '', lang = 'ru', qualityScale = 5 }) {
-  const directionUp = String(direction || '').toUpperCase();
+  const directionUp = pyUpper(String(direction || ''));
   const arrow = directionUp === 'LONG' ? '📈' : '📉';
   const symClean = escape(symbol);
 
@@ -25,7 +26,7 @@ function formatSignalLite({ symbol, direction, quality, entry, sl, tp1, tp2 = nu
   try { q = pyFloat(quality); } catch (_e) { q = 0.0; }
 
   let q5;
-  if (pyInt(pyTruthy(qualityScale) ? qualityScale : 5) === 10 || String(strategy || '').toUpperCase() === 'LEVELS') {
+  if (pyInt(pyTruthy(qualityScale) ? qualityScale : 5) === 10 || pyUpper(String(strategy || '')) === 'LEVELS') {
     q5 = levelsStars(q);                      // [QUALITY-SCALE] 0..10 → 1..5
   } else {
     q5 = pyMax(0, pyMin(pyInt(q), 5));        // int(nan) raises like the bot

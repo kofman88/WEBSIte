@@ -14,6 +14,8 @@
 
 const { log: defaultLog } = require('./mdLog');
 const { ewmSpan } = require('../../strategies/common/series');
+const { intOrUndefined } = require('../../strategies/common/pynum');
+const { pyLower } = require('../../strategies/common/pyUnicode');   // CPython 3.11 str case / whitespace methods
 
 const TREND_MARK = Object.freeze({ LONG: '🟢', SHORT: '🔴', RANGE: '⚪' });
 const UNKNOWN_MARK = '❓';
@@ -33,7 +35,7 @@ const DEFAULT_INTERVAL_S = 900;
 function normTf(tf) {
   const s = String(tf ?? '');
   if (Object.prototype.hasOwnProperty.call(TF_ALIAS, s)) return TF_ALIAS[s];
-  const l = s.toLowerCase();
+  const l = pyLower(s);
   return Object.prototype.hasOwnProperty.call(TF_ALIAS, l) ? TF_ALIAS[l] : '15m';
 }
 
@@ -75,9 +77,10 @@ function globalTrendMark(name, tf, frame, { getMonitorTrend = null, log = defaul
   }
 }
 
+/** Config.TREND_UPDATE_INTERVAL = int(os.environ.get("TREND_UPDATE_INTERVAL", "900")) — CPython int() of the text. */
 function resolveInterval(env = process.env) {
-  const n = parseInt(env.TREND_UPDATE_INTERVAL ?? '', 10);
-  return Number.isFinite(n) ? n : DEFAULT_INTERVAL_S;
+  const n = intOrUndefined(String(env.TREND_UPDATE_INTERVAL ?? ''));
+  return n === undefined ? DEFAULT_INTERVAL_S : n;
 }
 
 /**

@@ -30,6 +30,7 @@
 const { SIGNAL_TRADES_ALLOWED_COLS } = require('../../models/engineSchema');
 const { pyRepr } = require('../../strategies/common/pyfmt');
 const { log: defaultLog } = require('../marketData/mdLog');
+const { pyStrip, pyUpper } = require('../../strategies/common/pyUnicode');   // CPython 3.11 str case / whitespace methods
 
 const ALLOWED_TRADE_COLS = Object.freeze(new Set(SIGNAL_TRADES_ALLOWED_COLS));
 const TRADE_STATES = Object.freeze(['PENDING', 'PLACING', 'OPEN', 'CLOSING', 'CLOSED', 'FAILED']);
@@ -286,7 +287,7 @@ function pyLoads(text, { mapDepth = 0 } = {}) {
 function pyTypeName(v, literal = '') {
   if (v === null || v === undefined) return 'NoneType';
   if (typeof v === 'boolean') return 'bool';
-  if (typeof v === 'number') return Number.isFinite(v) && !/[.eEnN]/.test(String(literal).trim()) ? 'int' : 'float';
+  if (typeof v === 'number') return Number.isFinite(v) && !/[.eEnN]/.test(pyStrip(String(literal))) ? 'int' : 'float';
   if (typeof v === 'string') return 'str';
   if (Array.isArray(v)) return 'list';
   return 'dict';
@@ -349,7 +350,7 @@ function createSignalTradesRepo(deps = {}) {
           const existing = repo.getTrade(tid);
           if (existing && Number(existing.tp_placed || 0) > 0) {
             // the bot appends "".join(traceback.format_stack(limit=8)[:-1]) — here the JS call stack
-            const stack = String(new Error().stack || '').split('\n').slice(2, 9).map((l) => `  ${l.trim()}\n`).join('');
+            const stack = String(new Error().stack || '').split('\n').slice(2, 9).map((l) => `  ${pyStrip(l)}\n`).join('');
             log.warning(`[SKIP-AFTER-TP-PLACED] trade_id=${tid} tp_placed=${existing.tp_placed} result_was=${existing.result || ''} `
               + `reason=${skipReason || ''} — logging call stack:\n${stack}`);
           }
@@ -523,7 +524,7 @@ function createSignalTradesRepo(deps = {}) {
     // ── db/signals.py ──────────────────────────────────────────────────
     getSignal(signalId) { return repo.getTrade(String(signalId)); },
     getSignalRecords(signalId) { const t = repo.getTrade(String(signalId)); return t ? [t] : []; },
-    addTradeRecord(_userId, signalId, result, rr) { return repo.setTradeResult(String(signalId), String(result).toUpperCase(), rr); },
+    addTradeRecord(_userId, signalId, result, rr) { return repo.setTradeResult(String(signalId), pyUpper(String(result)), rr); },
     getUserRecords(userId, limit = 50) {
       const trades = repo.getUserTrades(userId);
       return trades.length > limit ? trades.slice(-limit) : trades;

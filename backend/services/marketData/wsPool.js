@@ -22,6 +22,7 @@ const { defaultSleep } = require('./rateGate');
 const candleCache = require('./candleCache');
 const { TF_NORM } = require('./candleFrame');
 const { BingxWsFeed, maxSubsPerConn } = require('./bingxWsFeed');
+const { intOrUndefined } = require('../../strategies/common/pynum');
 
 const DEFAULT_TIMEFRAMES = Object.freeze(['15m', '1H', '4H', '1D']);
 const DEFAULT_MAX_SYMBOLS = 150;
@@ -30,8 +31,8 @@ const DEFAULT_MIN_VOL_USDT = 500_000;
 function _envInt(env, name, dflt) {
   const raw = env[name];
   if (raw === undefined || raw === '') return dflt;
-  const n = parseInt(raw, 10);
-  return Number.isFinite(n) ? n : dflt;
+  const n = intOrUndefined(String(raw));   // int(os.getenv(name, …)) — CPython int() of the text
+  return n === undefined ? dflt : n;
 }
 
 /** Connections needed so that num_symbols × num_tfs channels fit `perConn` subscriptions each. */

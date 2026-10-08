@@ -37,6 +37,8 @@ const { pySum } = require('../../strategies/common/series');
 const { levelsStars } = require('../../strategies/levels/stars');
 const { pyFloat, pyInt } = require('./pycoerce');
 const { pyRepr } = require('../../strategies/common/pyfmt');
+const { utcDatetime } = require('../../strategies/common/pytime');
+const { pyLower, pyStrip, pyUpper, pyRstrip } = require('../../strategies/common/pyUnicode');   // CPython 3.11 str case / whitespace methods
 
 const STRATS = Object.freeze(['LEVELS', 'SMC', 'VOLUME']);
 const COLS = 'result, result_rr, progress_stage, entry, sl, original_sl, tp1, tp2, tp3, '
@@ -92,7 +94,7 @@ function aggregate(rows, days = 30, now = null) {
   let cum = 0.0;
   const sorted = rows.slice().sort((a, b) => fOr0(a.created_at) - fOr0(b.created_at));   // stable like sorted()
   for (const r of sorted) {
-    const strat = sOr(r.strategy).toUpperCase();
+    const strat = pyUpper(sOr(r.strategy));
     const buckets = [out].concat(Object.prototype.hasOwnProperty.call(perStrategy, strat) ? [perStrategy[strat]] : []);
     for (const b of buckets) b.signals += 1;
     const st = signalStatus(r, t);
@@ -113,7 +115,7 @@ function aggregate(rows, days = 30, now = null) {
     if (out.best_rr === null || rr > out.best_rr) {
       out.best_rr = pyRound(rr, 2);
       out.best_symbol = replaceAll(sOr(r.symbol), '-USDT-SWAP', '');
-      out.best_direction = sOr(r.direction).toUpperCase();
+      out.best_direction = pyUpper(sOr(r.direction));
       out.best_strategy = strat;
     }
     cum += rr;
@@ -153,7 +155,7 @@ function hourBucket(r) { return Math.trunc(pyFloorDiv(fOr0(r.created_at), 3600))
  */
 function proOverview(db, days = 7, now = null) {
   const t = isNone(now) ? nowSec() : now;
-  const cols = COLS.split(',').map((c) => `t.${c.trim()}`).join(', ');
+  const cols = COLS.split(',').map((c) => `t.${pyStrip(c)}`).join(', ');
   const rows = db.prepare(
     `SELECT t.user_id, ${cols} FROM signal_trades t JOIN trader_settings u ON u.user_id = t.user_id `
     + `WHERE u.sub_plan='pro' AND t.created_at > ? AND ${countableSql('t.')}`,
@@ -166,7 +168,7 @@ function proOverviewFromRows(rows, days = 7, now = null) {
   const users = new Set(rows.map((r) => Math.trunc(Number(r.user_id))));
   const uniq = new Map();
   for (const r of rows) {
-    const key = JSON.stringify([pyStr(r.symbol), pyStr(r.direction).toUpperCase(), pyStr(r.strategy).toUpperCase(), hourBucket(r)]);
+    const key = JSON.stringify([pyStr(r.symbol), pyUpper(pyStr(r.direction)), pyUpper(pyStr(r.strategy)), hourBucket(r)]);
     const rr = signalRr(r, signalStatus(r, t));
     if (!uniq.has(key) || (rr !== null && uniq.get(key) === null)) uniq.set(key, rr);
   }
@@ -189,9 +191,9 @@ function ratingFromRows(rows, now = null) {
   const t = isNone(now) ? nowSec() : now;
   const uniq = new Map();      // key → { strat, rr }
   for (const r of rows) {
-    const strat = sOr(r.strategy).toUpperCase();
+    const strat = pyUpper(sOr(r.strategy));
     if (!STRATS.includes(strat)) continue;
-    const key = JSON.stringify([strat, pyStr(r.symbol), pyStr(r.direction).toUpperCase(), hourBucket(r)]);
+    const key = JSON.stringify([strat, pyStr(r.symbol), pyUpper(pyStr(r.direction)), hourBucket(r)]);
     const rr = signalRr(r, signalStatus(r, t));
     if (!uniq.has(key) || (rr !== null && uniq.get(key).rr === null)) uniq.set(key, { strat, rr });
   }
@@ -247,7 +249,7 @@ const LEGACY_ALIASES = Object.freeze({ ГЕРЧИК: 'GERCHIK', GERCH: 'GERCHIK'
 /** normalize_strategy(value): empty → LEVELS, canonical → itself, legacy (+aliases) → LEGACY, else LEVELS. */
 function normalizeStrategy(value) {
   if (falsy(value)) return 'LEVELS';
-  let s = String(value).trim().toUpperCase();
+  let s = pyUpper(pyStrip(String(value)));
   if (VALID_STRATEGIES.includes(s)) return s;
   if (Object.prototype.hasOwnProperty.call(LEGACY_ALIASES, s)) s = LEGACY_ALIASES[s];
   if (LEGACY_STRATEGIES.includes(s)) return 'LEGACY';
@@ -618,7 +620,7 @@ function formatEvShort(stats) {
   if (isNone(ev)) return 'EV: — (мало данных)';
   const sign = ev >= 0 ? '+' : '';
   const emoji = { positive: '✅', negative: '❌', breakeven: '〰️' }[status] || '';
-  return `EV: <b>${sign}${pyNum(ev)}R</b> ${emoji}`.replace(/\s+$/u, '');
+  return pyRstrip(`EV: <b>${sign}${pyNum(ev)}R</b> ${emoji}`);   // .rstrip()
 }
 
 const STATS_HELP_TEXT_RU = `ℹ️ <b>Объяснение метрик</b>
@@ -736,18 +738,18 @@ function sessionForHour(h) {
  */
 function statsPayload(rows, { days = 30, strategy = '', tf = '', now = null } = {}) {
   const t = isNone(now) ? nowSec() : now;
-  let fStrat = sOr(strategy).toUpperCase();
+  let fStrat = pyUpper(sOr(strategy));
   fStrat = STRATS.includes(fStrat) ? fStrat : '';
-  const fTf = sOr(tf).toLowerCase();
+  const fTf = pyLower(sOr(tf));
   const tradesAll = [];
   for (const row of rows) {
     const r = { ...row };
     const st = signalStatus(r, t);
     const rr = signalRr(r, st);
     if (rr === null) continue;
-    if (!CLOSED_RESULTS.includes(sOr(r.result).toUpperCase())) r.result = st.toUpperCase();
+    if (!CLOSED_RESULTS.includes(pyUpper(sOr(r.result)))) r.result = pyUpper(st);
     r.result_rr = Number(rr);
-    r._tf = sOr(r.timeframe).toLowerCase();
+    r._tf = pyLower(sOr(r.timeframe));
     if (fTf && r._tf !== fTf) continue;
     tradesAll.push(r);
   }
@@ -774,7 +776,7 @@ function statsPayload(rows, { days = 30, strategy = '', tf = '', now = null } = 
       if (!byTf.has(r._tf)) byTf.set(r._tf, []);
       byTf.get(r._tf).push(r);
     }
-    bySrc[sOr(r.order_id).trim() ? 'exchange' : 'signals'].push(r);
+    bySrc[pyStrip(sOr(r.order_id)) ? 'exchange' : 'signals'].push(r);
     const ctx = trendCtx(r);
     if (Object.prototype.hasOwnProperty.call(byCtx, ctx)) byCtx[ctx].push(r);
   }
@@ -792,7 +794,7 @@ function statsPayload(rows, { days = 30, strategy = '', tf = '', now = null } = 
     const rr = r.result_rr;
     const res = sOr(r.result);
     const win = res.startsWith('TP') || rr > 0;
-    const d = new Date(ts * 1000);
+    const d = utcDatetime(ts);            // datetime.fromtimestamp(ts, tz=utc): half-even microseconds
     const weekday = (d.getUTCDay() + 6) % 7;
     for (const b of [sessions[sessionForHour(d.getUTCHours())], weekdays[weekday]]) {
       b.trades += 1;
@@ -841,15 +843,15 @@ function signalView(row, now = null) {
   let rr = signalRr(row, status);
   rr = rr !== null ? pyRound(Number(rr), 2) : null;
   let q = Math.trunc(fOr0(row.quality));
-  if (sOr(row.strategy).toUpperCase() === 'LEVELS') q = levelsStars(q);
-  const res = sOr(row.result).toUpperCase();
+  if (pyUpper(sOr(row.strategy)) === 'LEVELS') q = levelsStars(q);
+  const res = pyUpper(sOr(row.result));
   const orderId = sOr(row.order_id);
   const osl = fOr0(row.original_sl);
   return {
     id: sOr(row.trade_id),
     symbol: base, pair: `${base}/USDT`,
-    direction: sOr(row.direction, 'LONG').toUpperCase(),
-    strategy: sOr(row.strategy, 'LEVELS').toUpperCase(),
+    direction: pyUpper(sOr(row.direction, 'LONG')),
+    strategy: pyUpper(sOr(row.strategy, 'LEVELS')),
     timeframe: sOr(row.timeframe, '1h'),
     entry, sl,
     sl0: osl !== 0 ? osl : sl,                         // Python `or`: a NaN stop is truthy
@@ -869,7 +871,7 @@ function signalView(row, now = null) {
 /** _user_signals(user_id, status, limit, strategy) — newest first, open = open/tp1/tp2. */
 function userSignals(db, userId, { status = 'all', limit = 50, strategy = '', now = null } = {}) {
   const lim = Math.max(1, Math.min(Math.trunc(Number(limit)), 200));
-  const strat = sOr(strategy).toUpperCase();
+  const strat = pyUpper(sOr(strategy));
   let where = 'user_id=?';
   const params = [userId];
   if (STRATS.includes(strat)) {

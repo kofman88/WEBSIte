@@ -97,111 +97,50 @@ function pyTypeName(v) {
 // int() / float() / repr() / re `\d` / str.isspace() follow the interpreter's own Unicode
 // database (CPython 3.11: unicodedata 14.0.0), not the one Node ships (Node 22 = Unicode 16:
 // new digit scripts, newly assigned characters that CPython still repr()-escapes as
-// unassigned). The tables live in engine/pyUnicode.js (tests/challenge/gen/gen_unicode_tables.py).
-const { ND_DIGIT, PY_SPACE, isPrintable, ND_CLASS } = require('./engine/pyUnicode');
+// unassigned). The tables live in strategies/common/pyUnicode.js and the int()/float() parser in
+// strategies/common/pynum.js (tests/challenge/gen/gen_unicode_tables.py).
+const { isPrintable, ND_CLASS, pyStrRepr, pyStrip, pyLower, pyUpper } = require('./engine/pyUnicode');
+const N = require('../strategies/common/pynum');
 
-const hex = (c, n) => c.toString(16).padStart(n, '0');
-
-/** repr(str) — CPython's unicode_repr: quote choice, \\ \t \n \r, \xhh / \uhhhh / \Uhhhhhhhh for non-printables. */
-function pyStrRepr(s) {
-  const q = s.includes("'") && !s.includes('"') ? '"' : "'";
-  let out = q;
-  for (const ch of s) {
-    const c = ch.codePointAt(0);
-    if (ch === q || ch === '\\') out += `\\${ch}`;
-    else if (ch === '\t') out += '\\t';
-    else if (ch === '\n') out += '\\n';
-    else if (ch === '\r') out += '\\r';
-    else if (c < 0x20 || c === 0x7f) out += `\\x${hex(c, 2)}`;
-    else if (c < 0x7f || isPrintable(c)) out += ch;
-    else if (c <= 0xff) out += `\\x${hex(c, 2)}`;
-    else if (c <= 0xffff) out += `\\u${hex(c, 4)}`;
-    else out += `\\U${hex(c, 8)}`;
-  }
-  return out + q;
-}
-
-/** `%.200R` — the repr cut to 200 code points (int()'s "invalid literal" message). */
-const repr200 = (s) => Array.from(pyStrRepr(s)).slice(0, 200).join('');
-
-/** str.strip() with no argument (Unicode whitespace as CPython defines it). */
-function pyStrip(s) {
-  const cps = Array.from(s);
-  let a = 0;
-  let b = cps.length;
-  while (a < b && PY_SPACE.has(cps[a].codePointAt(0))) a += 1;
-  while (b > a && PY_SPACE.has(cps[b - 1].codePointAt(0))) b -= 1;
-  return cps.slice(a, b).join('');
-}
-
-/**
- * _PyUnicode_TransformDecimalAndSpaceToASCII: ASCII (< 127) is kept, a non-ASCII space
- * becomes ' ', a decimal digit its ASCII digit; anything else ends the text with '?'
- * (never a number). int() / float() then only strip the ASCII whitespace " \t\n\v\f\r".
- */
-function pyNumText(s) {
-  let out = '';
-  for (const ch of s) {
-    const c = ch.codePointAt(0);
-    if (c < 127) out += ch;
-    else if (PY_SPACE.has(c)) out += ' ';
-    else if (ND_DIGIT.has(c)) out += String(ND_DIGIT.get(c));
-    else return `${out}?`;
-  }
-  return out;
-}
-
-const WS = '[ \\t\\n\\v\\f\\r]*';
-const DIG = '[0-9](?:_?[0-9])*';                      // PEP 515: one '_' between two digits
-const PY_FLOAT_RE = new RegExp(`^${WS}([+-]?)(?:((?:${DIG}(?:\\.(?:${DIG})?)?|\\.${DIG})(?:[eE][+-]?${DIG})?)|(inf|infinity)|(nan))${WS}$`, 'i');
-const PY_INT_RE = new RegExp(`^${WS}([+-]?)(${DIG})${WS}$`);
-const INT_MAX_STR_DIGITS = 4300;                        // sys.get_int_max_str_digits()
+/** _PyUnicode_TransformDecimalAndSpaceToASCII (the text int() / float() parse). */
+const pyNumText = N.numText;
 
 /** float(v) with CPython's exception classes and messages. */
 function pyFloat(v) {
   if (typeof v === 'boolean') return v ? 1.0 : 0.0;
   if (typeof v === 'number') return v;
   if (typeof v === 'string') {
-    const m = PY_FLOAT_RE.exec(pyNumText(v));
-    if (!m) throw new PyValueError(`could not convert string to float: ${pyStrRepr(v)}`);
-    const neg = m[1] === '-';
-    if (m[3]) return neg ? -Infinity : Infinity;
-    if (m[4]) return NaN;
-    return Number(`${m[1]}${m[2].split('_').join('')}`);
+    const x = N.floatFromStr(v);
+    if (x === undefined) throw new PyValueError(N.floatErrorText(v));
+    return x;
   }
   throw new PyTypeError(`float() argument must be a string or a real number, not '${pyTypeName(v)}'`);
 }
 
 /** The exact decimal digits int(v) parses for a str, or null when it is no int literal. */
 function intLiteral(s) {
-  const m = PY_INT_RE.exec(pyNumText(s));
-  if (!m) return null;
-  const digits = m[2].split('_').join('');
-  if (digits.length > INT_MAX_STR_DIGITS) {
-    throw new PyValueError(`Exceeds the limit (${INT_MAX_STR_DIGITS} digits) for integer string conversion: `
-      + `value has ${digits.length} digits; use sys.set_int_max_str_digits() to increase the limit`);
-  }
-  return { neg: m[1] === '-', digits };
+  const lit = N.intLiteral(s);
+  if (lit && lit.limit !== undefined) throw new PyValueError(N.intLimitText(lit.limit));
+  return lit;
 }
 
 /** int(v) with CPython's exception classes and messages. */
 function pyInt(v) {
   if (typeof v === 'boolean') return v ? 1 : 0;
   if (typeof v === 'number') {
-    if (Number.isNaN(v)) throw new PyValueError('cannot convert float NaN to integer');
-    if (!Number.isFinite(v)) {
-      const e = new Error('cannot convert float infinity to integer');
+    const t = N.intFromFloat(v);
+    if (t === null) {
+      if (Number.isNaN(v)) throw new PyValueError(N.floatToIntErrorText(v));
+      const e = new Error(N.floatToIntErrorText(v));
       e.pyType = 'OverflowError';
       throw e;
     }
-    const t = Math.trunc(v);
-    return t === 0 ? 0 : t;
+    return t;
   }
   if (typeof v === 'string') {
     const lit = intLiteral(v);
-    if (lit === null) throw new PyValueError(`invalid literal for int() with base 10: ${repr200(v)}`);
-    const n = Number(lit.digits);
-    return lit.neg && n !== 0 ? -n : n;
+    if (lit === null) throw new PyValueError(N.intErrorText(v));
+    return N.intFromLiteral(lit);
   }
   throw new PyTypeError(`int() argument must be a string, a bytes-like object or a real number, not '${pyTypeName(v)}'`);
 }
@@ -210,9 +149,8 @@ function pyInt(v) {
 function pyIntStr(v) {
   if (typeof v !== 'string') return String(pyInt(v));
   const lit = intLiteral(v);
-  if (lit === null) throw new PyValueError(`invalid literal for int() with base 10: ${repr200(v)}`);
-  const d = lit.digits.replace(/^0+(?=.)/, '');
-  return lit.neg && d !== '0' ? `-${d}` : d;
+  if (lit === null) throw new PyValueError(N.intErrorText(v));
+  return N.intStrFromLiteral(lit);
 }
 
 const floatOr0 = (v) => (truthy(v) ? pyFloat(v) : 0.0);       // float(x or 0)
@@ -246,21 +184,8 @@ function pyDictRepr(d) {
 /** str(float) for a value the bot holds as a Python float. */
 const fstr = (x) => pyRepr(x);
 
-// ── UTC calendar (datetime.fromtimestamp(ts, tz=utc), ROUND_HALF_EVEN microseconds) ──
-function halfEven(x) {
-  const r = Math.sign(x) * Math.round(Math.abs(x));      // C round(): half away from zero
-  if (Math.abs(x - r) === 0.5) return 2.0 * (Math.sign(x / 2) * Math.round(Math.abs(x / 2)));
-  return r;
-}
-
-/** _PyTime_DoubleToDenominator(ts, 1e6, HALF_EVEN) → whole seconds of the datetime. */
-function wholeSeconds(ts) {
-  let intpart = Math.trunc(ts);
-  let us = halfEven((ts - intpart) * 1e6);
-  if (us >= 1e6) intpart += 1;
-  else if (us < 0) { us += 1e6; intpart -= 1; }
-  return intpart;
-}
+// ── UTC calendar (datetime.fromtimestamp(ts, tz=utc), ROUND_HALF_EVEN microseconds: common/pytime.js) ──
+const { wholeSeconds } = require('../strategies/common/pytime');
 
 /** _day_start(ts): UTC midnight of ts as a float timestamp. */
 function dayStart(ts) {
@@ -449,20 +374,20 @@ function hasCard(row) {
 
 function isExchangeTrade(row) {
   const v = _g(row, 'order_id', '');
-  return Boolean(String(pyFalsy(v) ? '' : v).trim());
+  return Boolean(pyStrip(String(pyFalsy(v) ? '' : v)));
 }
 
 /** signal_status(row, now) → tp1|tp2|tp3|sl|be|closed|open|expired|missed|skip (the 10 rules in order). */
 function signalStatus(row, now = null) {
   const resRaw = _g(row, 'result', '');
-  const res = String(pyFalsy(resRaw) ? '' : resRaw).toUpperCase();
+  const res = pyUpper(String(pyFalsy(resRaw) ? '' : resRaw));
   const stageRaw = _g(row, 'progress_stage', '');
-  const stage = String(pyFalsy(stageRaw) ? '' : stageRaw).toUpperCase();
-  if (FINAL.includes(res)) return res.toLowerCase();
+  const stage = pyUpper(String(pyFalsy(stageRaw) ? '' : stageRaw));
+  if (FINAL.includes(res)) return pyLower(res);
   if (res === 'MANUAL' || res === 'TRAIL') return 'closed';
   const skipReason = _g(row, 'skip_reason', '');
   if (res === 'SKIP' && String(pyFalsy(skipReason) ? '' : skipReason) === 'manual') return 'skip';
-  if (FINAL.includes(stage)) return stage.toLowerCase();
+  if (FINAL.includes(stage)) return pyLower(stage);
   if (stage === 'EXPIRED') return 'expired';
   if (stage === 'MISSED') return 'missed';
   if (res === 'ORPHAN') return 'skip';
@@ -482,7 +407,7 @@ function signalStatus(row, now = null) {
 /** signal_rr(row, status): real result_rr, else TPn → planned R from the ORIGINAL stop, SL −1, BE 0. */
 function signalRr(row, status) {
   const resRaw = _g(row, 'result', '');
-  const res = String(pyFalsy(resRaw) ? '' : resRaw).toUpperCase();
+  const res = pyUpper(String(pyFalsy(resRaw) ? '' : resRaw));
   const rrRaw = _g(row, 'result_rr', null);
   if (res && res !== 'SKIP' && res !== 'ORPHAN' && rrRaw !== null && rrRaw !== '') {
     try { return pyFloat(rrRaw); } catch (e) { pyCatch(e); /* fall through like the bot */ }
@@ -535,7 +460,7 @@ function aggregate(rows, days = 30, now = null) {
   let cum = 0.0;
   const sorted = rows.slice().sort((a, b) => fOr0(a.created_at) - fOr0(b.created_at));     // stable like sorted()
   for (const r of sorted) {
-    const strat = sOr(r.strategy).toUpperCase();
+    const strat = pyUpper(sOr(r.strategy));
     const buckets = [out].concat(Object.prototype.hasOwnProperty.call(perStrategy, strat) ? [perStrategy[strat]] : []);
     for (const b of buckets) b.signals += 1;
     const st = signalStatus(r, t);
@@ -556,7 +481,7 @@ function aggregate(rows, days = 30, now = null) {
     if (out.best_rr === null || rr > out.best_rr) {
       out.best_rr = pyRound(rr, 2);
       out.best_symbol = sOr(r.symbol).split('-USDT-SWAP').join('');
-      out.best_direction = sOr(r.direction).toUpperCase();
+      out.best_direction = pyUpper(sOr(r.direction));
       out.best_strategy = strat;
     }
     cum += rr;

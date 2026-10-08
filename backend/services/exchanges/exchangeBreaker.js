@@ -13,6 +13,7 @@
  */
 
 const { log: defaultLog } = require('../marketData/mdLog');
+const { pyLower } = require('../../strategies/common/pyUnicode');   // CPython 3.11 str case / whitespace methods
 
 const DEFAULT_FAIL_THRESHOLD = 10;
 const DEFAULT_OPEN_DURATION_S = 300;
@@ -113,9 +114,9 @@ const breaker = new ExchangeBreaker();
 function isTransientError(err) {
   if (err instanceof Error) {
     if (err.pyType === 'TimeoutError' || err.name === 'TimeoutError' || err.code === 'ETIMEDOUT') return true;
-    return TRANSIENT_HINTS.some((h) => String(err.message).toLowerCase().includes(h));
+    return TRANSIENT_HINTS.some((h) => pyLower(String(err.message)).includes(h));
   }
-  const msg = String(err).toLowerCase();
+  const msg = pyLower(String(err));
   return TRANSIENT_HINTS.some((h) => msg.includes(h));
 }
 

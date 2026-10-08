@@ -35,6 +35,7 @@ const { prepareContext } = require('../../strategies/volume/context');
 const volHtf = require('../../strategies/volume/htf');
 const { signalAt } = require('../../strategies/volume/signal');
 const { pyIntOf } = require('./constraints');
+const { pyStrip } = require('../../strategies/common/pyUnicode');   // CPython 3.11 str case / whitespace methods
 
 const TAKER_FEE_RT = 0.0012;      // 0.12 % round-trip taker fee, in R inside _simulate_trade
 const MAX_HOLD_BARS = 100;
@@ -154,7 +155,7 @@ function simulateTrade(sig, symbol, df, entryBarIdx, ctx = {}) {
   const ptp1Pct = pyFloat(pget(p, 'partial_tp1_pct', 40.0));
   const ptp2R = pyFloat(pget(p, 'partial_tp2_r', 1.5));
   const ptp2Pct = pyFloat(pget(p, 'partial_tp2_pct', 30.0));
-  const beOverrideOff = ['1', 'true'].includes(String(env.BACKTEST_DISABLE_BE_MOVE === undefined ? '0' : env.BACKTEST_DISABLE_BE_MOVE).trim());
+  const beOverrideOff = ['1', 'true'].includes(pyStrip(String(env.BACKTEST_DISABLE_BE_MOVE === undefined ? '0' : env.BACKTEST_DISABLE_BE_MOVE)));
   const ptpMoveSl = pyBoolOf(pget(p, 'partial_tp_move_sl', true)) && !beOverrideOff;
   const sign = direction === 'LONG' ? 1 : -1;
 

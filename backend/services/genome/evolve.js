@@ -32,6 +32,7 @@ const coinBasket = require('./coinBasket');
 const { checkDrift } = require('./drift');
 const { validateViaPaper } = require('./paperValidation');
 const { autoApplyBestGenome } = require('./apply');
+const { pyMax, pyMin } = require('../../strategies/common/pyround');   // builtin max()/min(): a NaN 2nd argument is ignored
 
 const STATE = {
   staleResetCounts: new Map(),     // "S|tf" → consecutive stale resets
@@ -140,7 +141,7 @@ function buildPopulation(strategy, tf, lastGen, forceReset, d) {
     if (mx - mn < 0.1 && mx > 0) {
       stagnation = true;
       const orig = mutRate;
-      mutRate = Math.min(0.6, mutRate * 2.5);
+      mutRate = pyMin(0.6, mutRate * 2.5);
       log.warn(`🧬 [${strategy}/${tf}] STAGNATION DETECTED — last 3 gens fitness variance < 0.1 (best=${f3(fits[fits.length - 1])}). Injecting diversity: mut_rate ${f2(orig)} → ${f2(mutRate)} for offspring.`);
     }
   }
@@ -489,7 +490,7 @@ function secondsUntilNextEvolution(store, now) {
     const raw = store.kvGet(C.EVOLUTION_LAST_KV);
     const last = raw ? Number(raw) : 0;
     if (!(last > 0)) return 0.0;
-    return Math.max(0.0, C.EVOLUTION_INTERVAL - (now - last));
+    return pyMax(0.0, C.EVOLUTION_INTERVAL - (now - last));
   } catch (_e) {
     return 0.0;
   }

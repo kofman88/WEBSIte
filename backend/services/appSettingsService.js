@@ -43,8 +43,9 @@ const quietHours = require('./engine/quietHours');
 const volumeUserCfg = require('./volumeUserCfg');
 const volumeCfg = require('./engine/volumeCfgShim');
 const exchangeService = require('./exchangeService');
-const { isClose, pyFloat } = require('./engine/pycoerce');
+const { isClose, pyFloat, pyInt } = require('./engine/pycoerce');
 const logger = require('../utils/logger');
+const { pyLower, pyStrip, pyUpper, pyIsdigit } = require('../strategies/common/pyUnicode');   // CPython 3.11 str case / whitespace methods
 
 // ── constants (miniapp_api.py) ───────────────────────────────────────────
 const TF_LEVELS = Object.freeze(['15m', '30m', '1h', '4h', '1d']);
@@ -229,7 +230,7 @@ function toNumber(v) {
   // `float(v)` after the Mini App's own guards: bools and blank strings are rejected.
   if (typeof v === 'boolean') throw new BadRequest('bool');
   if (typeof v === 'string') {
-    if (!v.trim()) throw new BadRequest('blank');
+    if (!pyStrip(v)) throw new BadRequest('blank');
     try {
       return pyFloat(v);          // QUIRK: Python float() accepts "1_0" (PEP 515), "inf", "nan"
     } catch (_e) {
@@ -253,7 +254,7 @@ function coerce(spec, v) {
     if (typeof v === 'boolean') return v;
     if (typeof v === 'number' && (v === 0 || v === 1)) return Boolean(v);
     if (typeof v === 'string') {
-      const t = v.trim().toLowerCase();
+      const t = pyLower(pyStrip(v));
       if (['true', 'false', '1', '0', 'on', 'off'].includes(t)) return ['true', '1', 'on'].includes(t);
     }
     throw new BadRequest('bool');
@@ -263,7 +264,7 @@ function coerce(spec, v) {
     throw new BadRequest('enum');
   }
   if (kind === 'days') {
-    const raw = Array.isArray(v) ? v : (typeof v === 'string' ? v.split(',').filter((x) => x.trim()) : null);
+    const raw = Array.isArray(v) ? v : (typeof v === 'string' ? v.split(',').filter((x) => pyStrip(x)) : null);
     if (!raw) throw new BadRequest('days');
     const out = new Set();
     for (const d of raw) {
@@ -281,7 +282,7 @@ function coerce(spec, v) {
     const out = [];
     for (const s of raw) {
       if (typeof s !== 'string') throw new BadRequest('strats');
-      const t = s.trim().toUpperCase();
+      const t = pyUpper(pyStrip(s));
       if (!t) continue;
       if (!spec[1].includes(t)) throw new BadRequest('strats');
       if (!out.includes(t)) out.push(t);
@@ -427,8 +428,15 @@ function directionBlock(cfg, interval, rawJson) {
   return out;
 }
 
-const disabledDays = (user) => String(user.autotrade_disabled_days || '').split(',')
-  .filter((d) => /^\d+$/.test(d.trim())).map((d) => parseInt(d, 10)).sort((a, b) => a - b);
+/**
+ * kb_disabled_days: `{int(d) for d in raw.split(",") if d.strip().isdigit()}` → sorted. A set (duplicates
+ * collapse); isdigit() / int() of CPython 3.11 — '١' counts as 1, '²' passes isdigit() and int() raises.
+ */
+function disabledDays(user) {
+  const out = new Set();
+  for (const d of String(user.autotrade_disabled_days || '').split(',')) if (pyIsdigit(pyStrip(d))) out.add(pyInt(d));
+  return [...out].sort((a, b) => a - b);
+}
 
 /** `_settings_all(user)` + the D9 blocks. */
 function settingsAll(user) {
@@ -712,5 +720,5 @@ module.exports = {
   TF_LEVELS, TF_SMC, TF_VOLUME, EXCHANGES, INTERVALS, OPTIONS, LEVELS_CHOICES, SCHEMA, TOP_SCHEMA,
   TRADING_FREE_KEYS, BadRequest,
   coerce, validateSections, keyHint, exchangeKeys, exchangesState, lockedKeys, choices, options,
-  settingsAll, applySettings,
+  settingsAll, applySettings, disabledDays,
 };

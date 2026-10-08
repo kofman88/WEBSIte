@@ -28,6 +28,7 @@ const { pyJsonDumps } = require('./pyjson');
 const { pyInt, pyFloat } = require('./pycoerce');
 const { pyLoads } = require('./signalTradesRepo');
 const { log: defaultLog } = require('../marketData/mdLog');
+const { pyLower, pyStrip, pyUpper } = require('../../strategies/common/pyUnicode');   // CPython 3.11 str case / whitespace methods
 
 const SYMBOL = 'BTC-USDT-SWAP';
 const TFS = Object.freeze(['15m', '1H', '4H', '1D', '1W', '1M']);
@@ -79,7 +80,7 @@ function envNum(env, name, dfltStr, orFallback, parse) {
   try { return parse(raw); } catch (_e) { return parse(dfltStr); }
 }
 function envOn(env, name) {
-  return !['0', 'false', 'off'].includes((envGet(env, name, '1') || '1').trim());
+  return !['0', 'false', 'off'].includes(pyStrip(envGet(env, name, '1') || '1'));
 }
 
 /**
@@ -92,7 +93,7 @@ function parseCtxRisk(env = process.env) {
   for (const part of raw.split(',')) {
     if (!part.includes('=')) continue;
     const idx = part.indexOf('=');
-    const k = part.slice(0, idx).trim();
+    const k = pyStrip(part.slice(0, idx));
     const v = part.slice(idx + 1);
     if (!Object.prototype.hasOwnProperty.call(out, k)) continue;
     let f;
@@ -110,7 +111,7 @@ function readConfig(env = process.env) {
     STRONG_TREND: pyMax(0, pyMin(100, envNum(env, 'TREND_STRONG_PCT', '70', 70, pyInt))),
     STRONG_COUNTER_PENALTY: pyMax(0, envNum(env, 'TREND_STRONG_COUNTER_PENALTY', '1', 0, pyInt)),
     INTERVAL_S: pyMax(20.0, envNum(env, 'TREND_MONITOR_INTERVAL_S', '60', 60, pyFloat)),
-    NOTIFY_TFS: (envGet(env, 'TREND_NOTIFY_TFS', '15m,1H,4H,1D,1W,1M') || '').split(',').map((t) => t.trim()).filter(Boolean),
+    NOTIFY_TFS: (envGet(env, 'TREND_NOTIFY_TFS', '15m,1H,4H,1D,1W,1M') || '').split(',').map((t) => pyStrip(t)).filter(Boolean),
     ENABLED: envOn(env, 'TREND_MONITOR_ENABLED'),
     ALIGNED_NOTIFY: envOn(env, 'TREND_ALIGNED_NOTIFY'),
     CTX_RISK: parseCtxRisk(env),
@@ -125,7 +126,7 @@ function confirmBars(tf) { return Object.prototype.hasOwnProperty.call(CONFIRM_B
 function normTf(tf) {
   const s = String(tf == null ? '' : tf);
   if (Object.prototype.hasOwnProperty.call(TF_ALIAS, s)) return TF_ALIAS[s];
-  const l = s.toLowerCase();
+  const l = pyLower(s);
   return Object.prototype.hasOwnProperty.call(TF_ALIAS, l) ? TF_ALIAS[l] : '15m';
 }
 
@@ -209,12 +210,12 @@ function alignedText(direction, strength, lang = 'ru') {
   if (lang === 'en') {
     const opp = direction === 'LONG' ? 'shorts' : 'longs';
     return `🎯🎯 <b>MARKET ALIGNED — BTC 15m · 1H · 4H: ${w[direction]}</b>${st}\n\n`
-      + `✅ <b>${w.prio[direction].toUpperCase()}</b> · ${opp} are against the trend on every `
+      + `✅ <b>${pyUpper(w.prio[direction])}</b> · ${opp} are against the trend on every `
       + 'timeframe — auto-trade halves their risk or skips them.';
   }
   const opp = direction === 'LONG' ? 'шорты' : 'лонги';
   return `🎯🎯 <b>РЫНОК ВЫСТРОИЛСЯ — BTC 15m · 1H · 4H: ${w[direction]}</b>${st}\n\n`
-    + `✅ <b>${w.prio[direction].toUpperCase()}</b> · ${opp} — против тренда на всех ТФ, `
+    + `✅ <b>${pyUpper(w.prio[direction])}</b> · ${opp} — против тренда на всех ТФ, `
     + 'автотрейд режет им риск вдвое или пропускает.';
 }
 
@@ -223,7 +224,7 @@ function changeText(tf, newTrend, prev, since, lang = 'ru', now = Date.now() / 1
   const w = WORD[lang === 'en' ? 'en' : 'ru'];
   let held = '';
   if (since > 0) {
-    const hours = Math.max(0.0, (now - since) / 3600.0);
+    const hours = pyMax(0.0, (now - since) / 3600.0);
     held = lang !== 'en'
       ? (hours >= 1 ? `${fmtFixed(hours, 0)} ч` : `${fmtFixed(hours * 60, 0)} мин`)
       : (hours >= 1 ? `${fmtFixed(hours, 0)} h` : `${fmtFixed(hours * 60, 0)} min`);
@@ -234,7 +235,7 @@ function changeText(tf, newTrend, prev, since, lang = 'ru', now = Date.now() / 1
     let head = `🚨🚨 <b>TREND CHANGED — BTC ${tfl}</b>\n\n${icon} Now: <b>${w[newTrend]}</b>`;
     if (newTrend === 'LONG' || newTrend === 'SHORT') {
       const opp = newTrend === 'LONG' ? 'shorts' : 'longs';
-      head += `\n✅ <b>${w.prio[newTrend].toUpperCase()}</b> · ${opp} are against the trend ⚠️`;
+      head += `\n✅ <b>${pyUpper(w.prio[newTrend])}</b> · ${opp} are against the trend ⚠️`;
     } else {
       head += '\n⚠️ No clear trend — trade levels, cut size';
     }
@@ -244,7 +245,7 @@ function changeText(tf, newTrend, prev, since, lang = 'ru', now = Date.now() / 1
   let head = `🚨🚨 <b>ТРЕНД ПОМЕНЯЛСЯ — BTC ${tfl}</b>\n\n${icon} Сейчас: <b>${w[newTrend]}</b>`;
   if (newTrend === 'LONG' || newTrend === 'SHORT') {
     const opp = newTrend === 'LONG' ? 'шорты' : 'лонги';
-    head += `\n✅ <b>${w.prio[newTrend].toUpperCase()}</b> · ${opp} — против тренда ⚠️`;
+    head += `\n✅ <b>${pyUpper(w.prio[newTrend])}</b> · ${opp} — против тренда ⚠️`;
   } else {
     head += '\n⚠️ Чёткого тренда нет — торгуем от уровней, размер меньше';
   }
@@ -350,7 +351,7 @@ function createTrendMonitor(deps = {}) {
 
     /** True — all MTF_TFS in the signal's direction; False — not; null — a TF unknown / bad direction. */
     mtfAligned(direction) {
-      const d = String(direction == null ? '' : direction).toUpperCase();
+      const d = pyUpper(String(direction == null ? '' : direction));
       if (d !== 'LONG' && d !== 'SHORT') return null;
       const ts = MTF_TFS.map((tf) => m.getTrend(tf));
       if (ts.some((t) => t === null)) return null;
@@ -361,7 +362,7 @@ function createTrendMonitor(deps = {}) {
     isCounter(direction, tf = '15m') {
       const t = m.getTrend(tf);
       if (t !== 'LONG' && t !== 'SHORT') return null;
-      return String(direction == null ? '' : direction).toUpperCase() !== t;
+      return pyUpper(String(direction == null ? '' : direction)) !== t;
     },
 
     ctxRiskMult(ctx) {
@@ -373,7 +374,7 @@ function createTrendMonitor(deps = {}) {
 
     /** 'aligned' | 'with' | 'counter' | 'strong_counter' | '' */
     trendContext(direction, alignedFlag = null, strongCounter = null) {
-      const d = String(direction == null ? '' : direction).toUpperCase();
+      const d = pyUpper(String(direction == null ? '' : direction));
       let al = alignedFlag;
       if (al === null || al === undefined) al = Boolean(m.mtfAligned(d));
       if (al) return 'aligned';
@@ -439,7 +440,7 @@ function createTrendMonitor(deps = {}) {
       if (t15 === 'RANGE') {
         return lang !== 'en' ? `↔️ BTC 15m: боковик — тренда нет${extra}` : `↔️ BTC 15m: range — no trend${extra}`;
       }
-      const ct = String(direction == null ? '' : direction).toUpperCase() !== t15;
+      const ct = pyUpper(String(direction == null ? '' : direction)) !== t15;
       if (ct) {
         if (m.isStrong('15m')) {   // [RIBBON-STRENGTH] против сильного тренда — отдельно и громче
           const s15 = m.trendStrength('15m');

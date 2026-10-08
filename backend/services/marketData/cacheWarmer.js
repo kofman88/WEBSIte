@@ -19,6 +19,8 @@ const { log: defaultLog } = require('./mdLog');
 const { defaultSleep } = require('./rateGate');
 const candleCache = require('./candleCache');
 const { TTL_MAP } = require('./candleFrame');
+const { floatFromStr } = require('../../strategies/common/pynum');
+const { pyMax } = require('../../strategies/common/pyround');   // builtin max()/min(): a NaN 2nd argument is ignored
 
 class CacheWarmer {
   constructor(wsFeed, fetcher, {
@@ -28,8 +30,8 @@ class CacheWarmer {
   } = {}) {
     this._wsFeed = wsFeed;
     this._fetcher = fetcher;
-    this._rate = Math.max(0.5, ratePerSec);
-    this._cycleInterval = Math.max(5.0, cycleIntervalS);
+    this._rate = pyMax(0.5, ratePerSec);
+    this._cycleInterval = pyMax(5.0, cycleIntervalS);
     this._cache = cache;
     this._sleep = sleep;
     this._now = now;
@@ -46,12 +48,13 @@ class CacheWarmer {
 
   static fromEnv(wsFeed, fetcher, opts = {}) {
     const env = opts.env || process.env;
-    const rate = parseFloat(env.CACHE_WARMER_RATE ?? '5.0');
-    const interval = parseFloat(env.CACHE_WARMER_INTERVAL ?? '30.0');
+    // float(os.getenv("CACHE_WARMER_RATE", "5.0")) — CPython float() of the text (PEP 515, Unicode digits, inf/nan)
+    const rate = floatFromStr(String(env.CACHE_WARMER_RATE ?? '5.0'));
+    const interval = floatFromStr(String(env.CACHE_WARMER_INTERVAL ?? '30.0'));
     return new CacheWarmer(wsFeed, fetcher, {
       ...opts, env,
-      ratePerSec: Number.isFinite(rate) ? rate : 5.0,
-      cycleIntervalS: Number.isFinite(interval) ? interval : 30.0,
+      ratePerSec: rate === undefined ? 5.0 : rate,
+      cycleIntervalS: interval === undefined ? 30.0 : interval,
     });
   }
 

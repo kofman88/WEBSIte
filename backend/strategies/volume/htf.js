@@ -11,6 +11,7 @@
 const S = require('../common/series');
 const { Frame, TF_MS, resample } = require('../common/frame');
 const { HTF_SLOPE_BARS } = require('./config');
+const { pyLower } = require('../common/pyUnicode');   // CPython 3.11 str case / whitespace methods
 
 /** Higher timeframe for the confirmation filter. */
 const HTF_MAP = Object.freeze({ '15m': '1h', '1h': '4h', '4h': '1d' });
@@ -21,7 +22,7 @@ const RESAMPLE_RULE = Object.freeze({ '1h': '1h', '4h': '4h', '1d': '1D' });
 
 /** `HTF_MAP.get((timeframe or "").lower(), "")` */
 function htfFor(timeframe) {
-  return HTF_MAP[String(timeframe || '').toLowerCase()] || '';
+  return HTF_MAP[pyLower(String(timeframe || ''))] || '';
 }
 
 /**
@@ -80,7 +81,7 @@ function dropNaRows(frame) {
 function resampleHtf(df, timeframe) {
   const htf = htfFor(timeframe);
   const rule = RESAMPLE_RULE[htf];
-  const ltfD = TF_DELTA_MS[String(timeframe || '').toLowerCase()];
+  const ltfD = TF_DELTA_MS[pyLower(String(timeframe || ''))];
   if (!rule || ltfD === undefined || !df || df.length === 0) return null;
   const agg = dropNaRows(resample(df, TF_MS[htf]));
   const htfD = TF_DELTA_MS[htf];
@@ -128,7 +129,7 @@ function searchsortedRight(a, v) {
 function htfStateSeries(df, timeframe, cfg) {
   const htf = htfFor(timeframe);
   const rule = RESAMPLE_RULE[htf];
-  const ltfD = TF_DELTA_MS[String(timeframe || '').toLowerCase()];
+  const ltfD = TF_DELTA_MS[pyLower(String(timeframe || ''))];
   if (!rule || ltfD === undefined || !df) return null;
   const agg = resampleClose(df, TF_MS[htf]);
   if (agg.c.length < 3) return null;

@@ -22,6 +22,7 @@
  *   okx     — (code "0" only)
  */
 
+const { pyLower } = require('../../strategies/common/pyUnicode');   // CPython 3.11 str case / whitespace methods
 const USER_FACING_ERR_PATTERNS = Object.freeze([
   'api key is invalid',
   'api key пов',
@@ -84,8 +85,8 @@ const AUTH_FAILURE_PATTERNS = Object.freeze([
 ]);
 
 function _lower(err) {
-  if (err instanceof Error) return String(err.message).toLowerCase();
-  return String(err === null || err === undefined ? 'None' : err).toLowerCase();
+  if (err instanceof Error) return pyLower(String(err.message));
+  return pyLower(String(err === null || err === undefined ? 'None' : err));
 }
 
 /** True when the error is an expected user-side error (not a bug for Sentry). */

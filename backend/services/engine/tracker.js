@@ -18,7 +18,7 @@ const { pyFloat, pyInt } = require('./pycoerce');
 const { pyRound, pyRoundInt, pyFloorDiv, pyMax, pyMin } = require('../../strategies/common/pyround');
 const { fmtFixed, fmtSigned, smartFormat } = require('../../strategies/common/pyfmt');
 const { signalRr } = require('./signalOutcome');
-const { PY_SPACE } = require('./pyUnicode');
+const { pyLower, pyStrip, pyUpper, pyRstrip } = require('./pyUnicode');
 
 // ── env & constants (§11.1) ─────────────────────────────────────────────────
 
@@ -28,20 +28,28 @@ function envFloat(env, name, dflt) {
   try { return pyFloat(raw); } catch (_e) { return dflt; }
 }
 
+/**
+ * int(max(lo, x)) of an env float: int(inf) raises OverflowError at the bot's import (the bot
+ * does not start); the site keeps the default instead, like its other malformed-env fallbacks.
+ */
+function intClamp(x, dflt) {
+  return Number.isFinite(x) ? Math.trunc(x) : dflt;
+}
+
 /** signal_tracker module constants read from the environment (bot defaults). */
 function readConfig(env = process.env) {
   const rawEnabled = env.SIGNAL_TRACKER_ENABLED;
-  const enabledRaw = String(rawEnabled === undefined || rawEnabled === null || rawEnabled === '' ? '1' : rawEnabled).trim();
+  const enabledRaw = pyStrip(String(rawEnabled === undefined || rawEnabled === null || rawEnabled === '' ? '1' : rawEnabled));
   return Object.freeze({
     ENABLED: !['0', 'false', 'off'].includes(enabledRaw),
-    INTERVAL_S: Math.max(15.0, envFloat(env, 'SIGNAL_TRACKER_INTERVAL_S', 60.0)),
-    MAX_AGE_H: Math.max(1.0, envFloat(env, 'SIGNAL_TRACKER_MAX_AGE_H', 72.0)),
-    SEND_DELAY_S: Math.max(0.0, envFloat(env, 'SIGNAL_TRACKER_SEND_DELAY_S', 0.05)),
-    REST_PER_CYCLE: Math.trunc(Math.max(0.0, envFloat(env, 'SIGNAL_TRACKER_REST_PER_CYCLE', 20.0))),
-    MAX_ROWS: Math.trunc(Math.max(100.0, envFloat(env, 'SIGNAL_TRACKER_MAX_ROWS', 20000.0))),
-    MAX_EVENT_LAG_H: Math.max(0.5, envFloat(env, 'SIGNAL_TRACKER_MAX_EVENT_LAG_H', 6.0)),
-    MISSED_R: Math.max(0.3, envFloat(env, 'SIGNAL_MISSED_R', 1.0)),
-    MISSED_MIN_AGE_S: Math.max(60.0, envFloat(env, 'SIGNAL_MISSED_MIN_AGE_S', 900.0)),
+    INTERVAL_S: pyMax(15.0, envFloat(env, 'SIGNAL_TRACKER_INTERVAL_S', 60.0)),
+    MAX_AGE_H: pyMax(1.0, envFloat(env, 'SIGNAL_TRACKER_MAX_AGE_H', 72.0)),
+    SEND_DELAY_S: pyMax(0.0, envFloat(env, 'SIGNAL_TRACKER_SEND_DELAY_S', 0.05)),
+    REST_PER_CYCLE: intClamp(pyMax(0.0, envFloat(env, 'SIGNAL_TRACKER_REST_PER_CYCLE', 20.0)), 20),
+    MAX_ROWS: intClamp(pyMax(100.0, envFloat(env, 'SIGNAL_TRACKER_MAX_ROWS', 20000.0)), 20000),
+    MAX_EVENT_LAG_H: pyMax(0.5, envFloat(env, 'SIGNAL_TRACKER_MAX_EVENT_LAG_H', 6.0)),
+    MISSED_R: pyMax(0.3, envFloat(env, 'SIGNAL_MISSED_R', 1.0)),
+    MISSED_MIN_AGE_S: pyMax(60.0, envFloat(env, 'SIGNAL_MISSED_MIN_AGE_S', 900.0)),
   });
 }
 
@@ -118,16 +126,8 @@ function htmlEscape(s) {
     .replace(/"/g, '&quot;').replace(/'/g, '&#x27;');
 }
 
-// PY_SPACE: the str.isspace() code points of the bot's CPython 3.11 (engine/pyUnicode.js) —
-// note U+FEFF is NOT one, unlike JS \s; U+001C..U+001F and U+0085 are. All are in the BMP.
-
-/** Python str.rstrip() (whitespace). */
-function rstrip(s) {
-  const str = String(s);
-  let end = str.length;
-  while (end > 0 && PY_SPACE.has(str.charCodeAt(end - 1))) end--;
-  return str.slice(0, end);
-}
+/** Python str.rstrip(): the str.isspace() characters of CPython 3.11 (not JS \s: U+FEFF is none, \x1c–\x1f / U+0085 are). */
+const rstrip = (s) => pyRstrip(String(s));
 
 /** len(str) in code points, like Python. */
 function pyLen(s) {
@@ -138,7 +138,7 @@ function pyLen(s) {
 
 // ── Levels model (§11.4) ────────────────────────────────────────────────────
 
-function isLong(L) { return String(L.direction).toUpperCase() === 'LONG'; }
+function isLong(L) { return pyUpper(String(L.direction)) === 'LONG'; }
 
 function tpOf(L, stage) {
   if (stage === TP1) return L.tp1;
@@ -179,7 +179,7 @@ function levelsFromTrade(t) {
   if (lo > hi) { const tmp = lo; lo = hi; hi = tmp; }
   const needsFill = lo > 0 && hi > 0 && hi > lo;
   return makeLevels({
-    direction: sOr(t.direction, 'LONG').toUpperCase(),
+    direction: pyUpper(sOr(t.direction, 'LONG')),
     entry: fOr0(t.entry), sl,
     tp1: fOr0(t.tp1), tp2: fOr0(t.tp2), tp3: fOr0(t.tp3),
     needs_fill: needsFill, fill_lo: lo, fill_hi: hi,
@@ -378,7 +378,7 @@ function buildText(trade, L, event, hit, lang = 'ru', now = null) {
   const en = (lang || 'ru') === 'en';
   const sym = sOr(trade.symbol).replace(/-USDT-SWAP/g, '').replace(/-USDT/g, '');
   const head = `<b>${htmlEscape(sym)} ${htmlEscape(L.direction)}</b>`;
-  const strat = htmlEscape(sOr(trade.strategy).toUpperCase() || '—');
+  const strat = htmlEscape(pyUpper(sOr(trade.strategy)) || '—');
   const tf = htmlEscape(sOr(trade.timeframe));
   const tps = hit.filter((h) => TP_ORDER.includes(h));
   const rTxt = (st) => fmtR(rOf(L, tpOf(L, st)));
@@ -474,7 +474,7 @@ function cardOutcome(trade, stage, lang = 'ru') {
   if (!html) return { result: 'skip' };
   const rr = stage === MISSED
     ? (trade.missed_rr === undefined ? null : trade.missed_rr)
-    : signalRr({ ...trade, progress_stage: stage, result: '' }, stage.toLowerCase());
+    : signalRr({ ...trade, progress_stage: stage, result: '' }, pyLower(stage));
   const line = outcomeLine(stage, rr, lang);
   const text = cardTextWithOutcome(html, line);
   if (pyLen(text) > CARD_MAX_TEXT) return { result: 'skip' };
@@ -504,7 +504,7 @@ function markToMarketRr(trade, price) {
     if (sl0 === 0) sl0 = fOr0(trade.sl);           // Python `a or b`: lazy, NaN truthy, ±0.0 falsy
     const rsk = Math.abs(entry - sl0);
     if (entry <= 0 || rsk <= 0 || falsy(price)) return null;
-    const sign = sOr(trade.direction, 'LONG').toUpperCase() === 'LONG' ? 1.0 : -1.0;
+    const sign = pyUpper(sOr(trade.direction, 'LONG')) === 'LONG' ? 1.0 : -1.0;
     const rr = sign * (pyFloat(price) - entry) / rsk;
     const tp3 = fOr0(trade.tp3);
     const cap = tp3 > 0 ? Math.abs(tp3 - entry) / rsk : 10.0;

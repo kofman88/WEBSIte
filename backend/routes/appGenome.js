@@ -28,13 +28,14 @@ const texts = require('../services/genome/texts');
 const runner = require('../services/genome/runner');
 const { pyRound } = require('../strategies/common/pyround');
 const logger = require('../utils/logger');
+const { pyUpper } = require('../strategies/common/pyUnicode');   // CPython 3.11 str case / whitespace methods
 
 const router = express.Router();
 const STRATS = C.STRATEGIES;
 
 const body = (req) => (req.body && typeof req.body === 'object' && !Array.isArray(req.body) ? req.body : {});
 // Python str(v).upper(): only a real string can ever name a strategy
-const upper = (v) => (typeof v === 'string' ? v.toUpperCase() : '');
+const upper = (v) => (typeof v === 'string' ? pyUpper(v) : '');
 
 function loadUser(req) {
   const user = ts.getOrCreate(req.userId);

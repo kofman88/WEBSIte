@@ -10,7 +10,7 @@
  */
 
 const { Frame } = require('../../strategies/common/frame');
-const { ND_DIGIT, PY_SPACE } = require('../engine/pyUnicode');
+const { ND_DIGIT } = require('../engine/pyUnicode');
 
 // BingX interval strings — all lower-case except 1M.
 const TF_TO_BINGX = Object.freeze({
@@ -68,14 +68,11 @@ function tfMsBingx(tfBingx) { return TF_MS[tfBingx] ?? DEFAULT_TF_MS; }
 
 class PyValueError extends Error {}
 
-// Python's `int()` / `float()` string grammar: optional sign, decimal digits of ANY Unicode
-// script (category Nd of the bot's Unicode database, CPython 3.11 = unicodedata 14.0.0:
-// fullwidth, Arabic-Indic, … but not the Kawi / Nag Mundari digits of Unicode 15), single
-// underscores only BETWEEN digits ("1_0" ok, "1__0" / "_10" / "10_" raise), surrounding
-// whitespace ignored; floats add the fraction / exponent (underscores allowed inside each
-// digit run) and the inf / nan words.
-const INT_RE = /^[+-]?\d(?:_?\d)*$/;
-const FLOAT_RE = /^[+-]?(?:\d(?:_?\d)*(?:\.(?:\d(?:_?\d)*)?)?|\.\d(?:_?\d)*)(?:e[+-]?\d(?:_?\d)*)?$/;
+// Python's `int()` / `float()` of a str: strategies/common/pynum.js (CPython 3.11 — decimal digits
+// of ANY Unicode script of unicodedata 14.0.0: fullwidth, Arabic-Indic, … but not the Kawi / Nag
+// Mundari digits of Unicode 15; a non-ASCII str.isspace() character reads as ' ', then only
+// " \t\n\v\f\r" is stripped; single underscores only BETWEEN digits; inf / nan words).
+const N = require('../../strategies/common/pynum');
 
 /** Every Unicode decimal digit (the bot's Nd table) → its ASCII digit; anything else is kept. */
 function asciiDigits(s) {
@@ -87,32 +84,20 @@ function asciiDigits(s) {
   return out;
 }
 
-/**
- * The text int() / float() parse (_PyUnicode_TransformDecimalAndSpaceToASCII): a non-ASCII
- * str.isspace() character reads as ' ', a decimal digit as its ASCII digit, then only the ASCII
- * whitespace " \t\n\v\f\r" is stripped (U+FEFF and \x1c–\x1f are no number whitespace).
- */
-function numText(s) {
-  let out = '';
-  for (const ch of s) {
-    const c = ch.codePointAt(0);
-    out += c >= 0x80 && PY_SPACE.has(c) ? ' ' : ch;
-  }
-  return asciiDigits(out).replace(/^[ \t\n\v\f\r]+|[ \t\n\v\f\r]+$/g, '');
-}
-
-/** Python `int(x)`: ints, floats (truncated), integer strings; anything else throws. */
+/** Python `int(x)`: ints, floats (truncated, never -0), integer strings; anything else throws. */
 function pyInt(x) {
   if (typeof x === 'number') {
-    if (!Number.isFinite(x)) throw new PyValueError(`cannot convert ${x} to int`);
-    return Math.trunc(x);
+    const t = N.intFromFloat(x);
+    if (t === null) throw new PyValueError(N.floatToIntErrorText(x));
+    return t;
   }
   if (typeof x === 'boolean') return x ? 1 : 0;
   if (typeof x === 'bigint') return Number(x);
   if (typeof x === 'string') {
-    const s = numText(x);
-    if (!INT_RE.test(s)) throw new PyValueError(`invalid literal for int() with base 10: ${JSON.stringify(x)}`);
-    return Number(s.replace(/_/g, ''));
+    const lit = N.intLiteral(x);
+    if (lit === null) throw new PyValueError(N.intErrorText(x));
+    if (lit.limit !== undefined) throw new PyValueError(N.intLimitText(lit.limit));
+    return N.intFromLiteral(lit);
   }
   throw new PyValueError(`int() argument must be a number, not ${x === null ? 'NoneType' : typeof x}`);
 }
@@ -123,13 +108,9 @@ function pyFloat(x) {
   if (typeof x === 'boolean') return x ? 1 : 0;
   if (typeof x === 'bigint') return Number(x);
   if (typeof x === 'string') {
-    const s = numText(x).toLowerCase();
-    if (s === '') throw new PyValueError('could not convert string to float: \'\'');
-    if (s === 'inf' || s === '+inf' || s === 'infinity' || s === '+infinity') return Infinity;
-    if (s === '-inf' || s === '-infinity') return -Infinity;
-    if (s === 'nan' || s === '+nan' || s === '-nan') return NaN;
-    if (!FLOAT_RE.test(s)) throw new PyValueError(`could not convert string to float: ${JSON.stringify(x)}`);
-    return Number(s.replace(/_/g, ''));
+    const v = N.floatFromStr(x);
+    if (v === undefined) throw new PyValueError(N.floatErrorText(x));
+    return v;
   }
   throw new PyValueError(`float() argument must be a string or a real number, not ${x === null ? 'NoneType' : typeof x}`);
 }

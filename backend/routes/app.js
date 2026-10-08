@@ -33,11 +33,14 @@ const quietHours = require('../services/engine/quietHours');
 const { pyBool } = require('../services/engine/pycoerce');
 const help = require('../content/help');
 const logger = require('../utils/logger');
+const { intOrUndefined } = require('../strategies/common/pynum');
+const { pyLower, pyStrip, pyUpper } = require('../strategies/common/pyUnicode');   // CPython 3.11 str case / whitespace methods
 
 const router = express.Router();
 
 // ── rate limiter (miniapp_api._rate_ok) ──────────────────────────────────
-const POST_RATE_LIMIT = [parseInt(process.env.MINIAPP_POST_PER_MIN || '30', 10) || 30, 60.0];
+// (int(os.getenv("MINIAPP_POST_PER_MIN", "30") or 30), 60.0): "0" is a 0 limit, an unset / empty value 30.
+const POST_RATE_LIMIT = [process.env.MINIAPP_POST_PER_MIN ? (intOrUndefined(process.env.MINIAPP_POST_PER_MIN) ?? 30) : 30, 60.0];
 const PLAN_RATE_LIMIT = [10, 60.0];
 const _RATE = new Map();
 let _clock = () => Date.now() / 1000;
@@ -162,7 +165,7 @@ router.get('/me', wrap((req, res) => {
 router.post('/strategy', wrap((req, res) => {
   const { user, opts } = loadUser(req);
   const b = body(req);
-  const s = pyStr(b.strategy).toUpperCase();
+  const s = pyUpper(pyStr(b.strategy));
   if (!STRATS.includes(s)) return res.status(400).json({ ok: false, error: 'bad_strategy' });
   const wantLong = pyBool(b.long);
   const wantShort = pyBool(b.short);
@@ -225,7 +228,7 @@ router.post('/settings/all', wrap((req, res) => {
 // ── POST profile {name} ──────────────────────────────────────────────────
 router.post('/profile', wrap((req, res) => {
   const { user, opts } = loadUser(req);
-  const name = pyStr(body(req).name).toLowerCase();
+  const name = pyLower(pyStr(body(req).name));
   if (!profilesService.PROFILES[name]) return bad(res, 'name');
   const r = profilesService.applyProfile(user, name, opts);
   logger.info(`[MINIAPP] [PROFILE] uid=${user.user_id} ${JSON.stringify(r)}`);
@@ -235,7 +238,7 @@ router.post('/profile', wrap((req, res) => {
 // ── POST lang {lang} ─────────────────────────────────────────────────────
 router.post('/lang', wrap((req, res) => {
   const { user } = loadUser(req);
-  const lang = pyStr(body(req).lang).toLowerCase().trim();
+  const lang = pyStrip(pyLower(pyStr(body(req).lang)));
   if (!['ru', 'en'].includes(lang)) return bad(res, 'lang');
   const before = user.lang || '?';
   user.lang = lang;

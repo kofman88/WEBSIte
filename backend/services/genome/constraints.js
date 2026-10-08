@@ -16,6 +16,7 @@ const { pyRound } = require('../../strategies/common/pyround');
 const { pyTruthy, pyOr, pyFloat, pyMax2 } = require('../../strategies/common/pyval');
 const { GENE_SPACE, randomGeneValue } = require('./geneSpace');
 const { defaultRng } = require('./rng');
+const N = require('../../strategies/common/pynum');
 
 const own = (o, k) => Object.prototype.hasOwnProperty.call(o, k);
 
@@ -27,7 +28,10 @@ function pyIntOf(x) {
     const t = Math.trunc(x);
     return t === 0 ? 0 : t;
   }
-  if (typeof x === 'string' && /^\s*[+-]?\d+\s*$/.test(x)) return parseInt(x, 10);
+  if (typeof x === 'string') {
+    const lit = N.intLiteral(x);                       // CPython 3.11 int(str): common/pynum.js
+    if (lit && lit.limit === undefined) return N.intFromLiteral(lit);
+  }
   throw new TypeError(`int() argument: ${x}`);
 }
 

@@ -17,6 +17,8 @@
 'use strict';
 
 const { pyInt, pyFloat, pyBool } = require('./pycoerce');
+const { pyLower, pyStrip } = require('../../strategies/common/pyUnicode');   // CPython 3.11 str case / whitespace methods
+const { pyMax, pyMin } = require('../../strategies/common/pyround');   // builtin max()/min(): a NaN 2nd argument is ignored
 
 const SETUP_KEYS = Object.freeze(['cross', 'turn', 'bounce', 'golden', 'ribbon']);
 // UI preferences — genome / reset never touch them (keep_prefs).
@@ -82,30 +84,30 @@ function round2(x) {
 /** VolumeConfig._fix() — exact order (strategy-volume.md §3.1 steps 1–25). */
 function fix(cfg) {
   if (cfg.ma_type !== 'sma' && cfg.ma_type !== 'ema') cfg.ma_type = 'sma';
-  cfg.ma_fast = Math.max(2, cfg.ma_fast);
+  cfg.ma_fast = pyMax(2, cfg.ma_fast);
   if (cfg.ma_mid <= cfg.ma_fast) cfg.ma_mid = cfg.ma_fast * 2;
-  if (cfg.ma_slow <= cfg.ma_mid) cfg.ma_slow = Math.max(50, cfg.ma_mid * 2);
-  cfg.ema_mid = Math.max(5, cfg.ema_mid);
-  if (cfg.ema_trend <= cfg.ema_mid) cfg.ema_trend = Math.max(200, cfg.ema_mid * 2);
-  if (cfg.ma_slow >= cfg.ema_trend) cfg.ema_trend = Math.max(200, cfg.ma_slow * 2);
-  cfg.cross_lookback = Math.min(5, Math.max(1, cfg.cross_lookback));
-  cfg.turn_period = Math.max(3, cfg.turn_period);
-  cfg.turn_lookback = Math.max(2, cfg.turn_lookback);
-  cfg.turn_slope_bars = Math.min(5, Math.max(1, cfg.turn_slope_bars));
-  cfg.turn_min_slope_atr = Math.max(0.0, cfg.turn_min_slope_atr);
-  cfg.bounce_tol_atr = Math.max(0.0, cfg.bounce_tol_atr);
-  cfg.vol_len = Math.max(3, cfg.vol_len);
-  cfg.vol_mult = Math.max(0.5, cfg.vol_mult);
-  cfg.bounce_vol_mult = Math.max(0.3, cfg.bounce_vol_mult);
+  if (cfg.ma_slow <= cfg.ma_mid) cfg.ma_slow = pyMax(50, cfg.ma_mid * 2);
+  cfg.ema_mid = pyMax(5, cfg.ema_mid);
+  if (cfg.ema_trend <= cfg.ema_mid) cfg.ema_trend = pyMax(200, cfg.ema_mid * 2);
+  if (cfg.ma_slow >= cfg.ema_trend) cfg.ema_trend = pyMax(200, cfg.ma_slow * 2);
+  cfg.cross_lookback = pyMin(5, pyMax(1, cfg.cross_lookback));
+  cfg.turn_period = pyMax(3, cfg.turn_period);
+  cfg.turn_lookback = pyMax(2, cfg.turn_lookback);
+  cfg.turn_slope_bars = pyMin(5, pyMax(1, cfg.turn_slope_bars));
+  cfg.turn_min_slope_atr = pyMax(0.0, cfg.turn_min_slope_atr);
+  cfg.bounce_tol_atr = pyMax(0.0, cfg.bounce_tol_atr);
+  cfg.vol_len = pyMax(3, cfg.vol_len);
+  cfg.vol_mult = pyMax(0.5, cfg.vol_mult);
+  cfg.bounce_vol_mult = pyMax(0.3, cfg.bounce_vol_mult);
   if (cfg.climax_mult <= cfg.vol_mult) cfg.climax_mult = round2(cfg.vol_mult + 2.0);
-  cfg.extension_atr = Math.max(0.5, cfg.extension_atr);
-  cfg.htf_ema = Math.max(5, cfg.htf_ema);
-  cfg.swing_lookback = Math.max(2, cfg.swing_lookback);
-  cfg.sl_buffer_atr = Math.max(0.0, cfg.sl_buffer_atr);
-  cfg.tp1_rr = Math.max(1.0, cfg.tp1_rr);
+  cfg.extension_atr = pyMax(0.5, cfg.extension_atr);
+  cfg.htf_ema = pyMax(5, cfg.htf_ema);
+  cfg.swing_lookback = pyMax(2, cfg.swing_lookback);
+  cfg.sl_buffer_atr = pyMax(0.0, cfg.sl_buffer_atr);
+  cfg.tp1_rr = pyMax(1.0, cfg.tp1_rr);
   if (cfg.tp2_rr <= cfg.tp1_rr) cfg.tp2_rr = round2(cfg.tp1_rr + 0.5);
   if (cfg.tp3_rr <= cfg.tp2_rr) cfg.tp3_rr = round2(cfg.tp2_rr + 0.5);
-  cfg.min_quality = Math.min(5, Math.max(1, cfg.min_quality));
+  cfg.min_quality = pyMin(5, pyMax(1, cfg.min_quality));
   return cfg;
 }
 
@@ -124,7 +126,7 @@ function fromParams(params) {
     try {
       switch (FIELD_TYPES[k]) {
         case 'bool':
-          cfg[k] = typeof v === 'string' ? ['1', 'true', 'yes', 'on'].includes(v.trim().toLowerCase()) : pyBool(v);
+          cfg[k] = typeof v === 'string' ? ['1', 'true', 'yes', 'on'].includes(pyLower(pyStrip(v))) : pyBool(v);
           break;
         case 'int':
           cfg[k] = pyInt(v);
@@ -133,7 +135,7 @@ function fromParams(params) {
           cfg[k] = pyFloat(v);
           break;
         default:
-          cfg[k] = String(v).trim().toLowerCase();
+          cfg[k] = pyLower(pyStrip(String(v)));
       }
     } catch (_e) {
       // Python: `except (TypeError, ValueError): continue`

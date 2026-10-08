@@ -22,6 +22,7 @@ const { pyFloat } = require('./pycoerce');
 const { fmtFixed, fmtSigned } = require('../../strategies/common/pyfmt');
 const { pyMax } = require('../../strategies/common/pyround');
 const { log: defaultLog } = require('../marketData/mdLog');
+const { pyUpper } = require('../../strategies/common/pyUnicode');   // CPython 3.11 str case / whitespace methods
 
 const KV_KEY = 'coin_blacklist_v1';
 const MIN_TRADES = 10;               // минимум закрытых trades для решения
@@ -56,7 +57,7 @@ function createCoinQualityLearner(deps = {}) {
     /** is_blacklisted(symbol, strategy): upper-cased lookup, expired entries dropped lazily. */
     isBlacklisted(symbol, strategy) {
       if (!symbol || !strategy) return false;
-      const key = keyOf(String(symbol).toUpperCase(), String(strategy).toUpperCase());
+      const key = keyOf(pyUpper(String(symbol)), pyUpper(String(strategy)));
       const until = blacklist.has(key) ? blacklist.get(key) : 0.0;
       if (until <= 0) return false;
       if (now() > until) {
@@ -127,8 +128,8 @@ function createCoinQualityLearner(deps = {}) {
       let pairs;
       try {
         pairs = repoOf().coinQualityPairs(cutoff).map((row) => ({
-          sym: String(row.symbol).toUpperCase(),
-          strat: String(row.strategy).toUpperCase(),
+          sym: pyUpper(String(row.symbol)),
+          strat: pyUpper(String(row.strategy)),
           wins_rr: Number(row.wins_rr || 0),
           losses_rr: Number(row.losses_rr || 0),
           n: Math.trunc(Number(row.n || 0)),

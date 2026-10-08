@@ -11,6 +11,7 @@
  */
 
 const { kahanSum } = require('./series');
+const { pyStrip } = require('./pyUnicode');   // CPython 3.11 str case / whitespace methods
 
 const TF_MS = Object.freeze({
   '1m': 60_000, '3m': 180_000, '5m': 300_000, '15m': 900_000, '30m': 1_800_000,
@@ -21,7 +22,7 @@ const TF_MS = Object.freeze({
 /** '1h' / '1H' / '4H' / '1D' / '15m' → ms (case of the unit letter ignored). */
 function tfToMs(tf) {
   if (typeof tf === 'number') return tf;
-  const key = String(tf).trim().replace(/H$/, 'h').replace(/D$/, 'd').replace(/W$/, 'w').replace(/M$/, 'm');
+  const key = pyStrip(String(tf)).replace(/H$/, 'h').replace(/D$/, 'd').replace(/W$/, 'w').replace(/M$/, 'm');
   const ms = TF_MS[key];
   if (!ms) throw new Error(`unknown timeframe: ${tf}`);
   return ms;

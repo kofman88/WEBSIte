@@ -21,6 +21,7 @@
  */
 
 const { attachRepr, reprFromJsonText, PyError } = require('./pyCompat');
+const { pyLower, pyStrip, pyUpper, pyStrRepr } = require('../../strategies/common/pyUnicode');   // CPython 3.11 str methods / repr(str)
 
 class TransportError extends Error {
   /**
@@ -43,7 +44,7 @@ const JSON_CT_RE = /^application\/(?:[\w.+-]+?\+)?json/;
 
 function headerGet(resp, name) {
   const h = resp.headers || {};
-  const v = h[name.toLowerCase()];
+  const v = h[pyLower(name)];
   return v === undefined ? null : v;
 }
 
@@ -71,12 +72,12 @@ function parseJsonPy(text) {
 function aiohttpJson(resp, { checkContentType = true } = {}) {
   if (checkContentType) {
     // aiohttp 3.14: the whole Content-Type header, lower-cased ('' when missing)
-    const ct = String(headerGet(resp, 'content-type') || '').toLowerCase();
+    const ct = pyLower(String(headerGet(resp, 'content-type') || ''));
     if (!JSON_CT_RE.test(ct)) {
       throw new PyError('ContentTypeError', `${resp.status}, message='Attempt to decode JSON with unexpected mimetype: ${ct}', url='${resp.url || ''}'`);
     }
   }
-  const stripped = String(resp.text ?? '').trim();
+  const stripped = pyStrip(String(resp.text ?? ''));
   if (!stripped) return null;
   try {
     return parseJsonPy(stripped);
@@ -99,8 +100,8 @@ const AIOHTTP_POST_METHODS = new Set(['PATCH', 'POST', 'PUT']);
  */
 function wireHeaders(method, headers) {
   const out = { ...(headers || {}) };
-  if (AIOHTTP_POST_METHODS.has(String(method).toUpperCase())
-      && !Object.keys(out).some((k) => k.toLowerCase() === 'content-type')) {
+  if (AIOHTTP_POST_METHODS.has(pyUpper(String(method)))
+      && !Object.keys(out).some((k) => pyLower(k) === 'content-type')) {
     out['Content-Type'] = 'application/octet-stream';
   }
   return out;
@@ -135,12 +136,6 @@ function urlParts(url) {
 /** Python repr of a socket address tuple (asyncio "Connect call failed (...)"). */
 function pyAddr(address, port) {
   return String(address).includes(':') ? `('${address}', ${port}, 0, 0)` : `('${address}', ${port})`;
-}
-
-/** Python repr of a short str (single quotes unless the text holds one and no double quote). */
-function pyStrRepr(s) {
-  if (s.includes("'") && !s.includes('"')) return `"${s.replace(/\\/g, '\\\\')}"`;
-  return `'${s.replace(/\\/g, '\\\\').replace(/'/g, "\\'")}'`;
 }
 
 /** str() of the timeout in seconds as the bot passes it (pybit: int 10 -> "10"). */
@@ -254,7 +249,7 @@ function fetchTransport({ fetchImpl = globalThis.fetch } = {}) {
     }
     const text = Buffer.concat(chunks).toString('utf8'); // Python bytes.decode('utf-8'): a BOM is kept
     const hdrs = {};
-    res.headers.forEach((v, k) => { hdrs[k.toLowerCase()] = v; });
+    res.headers.forEach((v, k) => { hdrs[pyLower(k)] = v; });
     return { status: res.status, headers: hdrs, text, url };
   };
 }

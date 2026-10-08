@@ -41,6 +41,12 @@ const { callWithRetry } = require('./apiRetry');
 const sym = require('../marketData/symbolMap');
 const crypto = require('crypto');
 const { safeKeyId, killswitchGate, planGateDeny, recordPlaced } = require('./traderCommon');
+const { pyLower, pyUpper } = require('../../strategies/common/pyUnicode');   // CPython 3.11 str case / whitespace methods
+const { pyRegExp } = require('../../strategies/common/pyre');
+// The bot's `re` patterns with CPython 3.11 \d \s \b (common/pyre.js), not JS's ASCII classes.
+const JSON_CODE_RE = pyRegExp(String.raw`"code"\s*:\s*(-?\d+)`);
+const BARE_CODE_RE = pyRegExp(String.raw`\b(\d{5,6})\b`);
+const JSON_MSG_RE = pyRegExp(String.raw`"msg"\s*:\s*"([^"]+)"`);
 
 const BASE_URL = 'https://open-api.bingx.com';
 const MIN_NOTIONAL = 5.0;
@@ -79,19 +85,19 @@ function humanizeBingxError(raw) {
   if (!pyTruthy(raw)) return 'Неизвестная ошибка BingX.';
   raw = String(raw);
   let code = null;
-  let m = /"code"\s*:\s*(-?\d+)/.exec(raw);
+  let m = JSON_CODE_RE.exec(raw);
   if (!m) {
-    m = /\b(\d{5,6})\b/.exec(raw);
-    code = m ? parseInt(m[1], 10) : null;
+    m = BARE_CODE_RE.exec(raw);
+    code = m ? pyInt(m[1]) : null;          // int() of Unicode digits too
   } else {
-    code = parseInt(m[1], 10);
+    code = pyInt(m[1]);
   }
   if (code && Object.prototype.hasOwnProperty.call(BINGX_ERROR_MAP, code)) return BINGX_ERROR_MAP[code];
-  const mm = /"msg"\s*:\s*"([^"]+)"/.exec(raw);
+  const mm = JSON_MSG_RE.exec(raw);
   if (mm) {
     const msg = mm[1];
     const first = String.fromCodePoint(msg.codePointAt(0));
-    return first.toUpperCase() + msg.slice(first.length) + (msg.endsWith('.') ? '' : '.');
+    return pyUpper(first) + msg.slice(first.length) + (msg.endsWith('.') ? '' : '.');
   }
   return code ? `Ошибка BingX (код ${code}).` : 'Неизвестная ошибка BingX.';
 }
@@ -208,7 +214,7 @@ function createBingxTrader(overrides = {}) {
         }
         if (e instanceof TransportError && e.kind === 'timeout') return { code: -1, msg: 'timeout' };
         const es = errStr(e);
-        const low = es.toLowerCase();
+        const low = pyLower(es);
         if (low.includes('429') || low.includes('503') || low.includes('too many')) {
           st.ratePenaltyUntil = rt.now() + 30.0;
           st.rateSleepS = Math.min(st.rateSleepS + 1.0, 10.0);
@@ -281,7 +287,7 @@ function createBingxTrader(overrides = {}) {
     if (deny) return deny;
     try {
       const bingxSymbol = toBingxSymbol(symbol);
-      const side = ['LONG', 'BUY'].includes(String(direction).toUpperCase()) ? 'BUY' : 'SELL';
+      const side = ['LONG', 'BUY'].includes(pyUpper(String(direction))) ? 'BUY' : 'SELL';
       const posSide = side === 'BUY' ? 'LONG' : 'SHORT';
       const pmult = bingxPriceMultiplier(symbol);
       if (pmult !== 1.0) {
@@ -421,7 +427,7 @@ function createBingxTrader(overrides = {}) {
           }
           const batchResp = await _request('POST', '/openApi/swap/v2/trade/batchOrders', apiKey, secret, { batchOrders: pyJsonDumps(batch) });
           const bcode = pyGet(batchResp, 'code', -1);
-          const bmsg = pyStr(pyGet(batchResp, 'msg', '')).toLowerCase();
+          const bmsg = pyLower(pyStr(pyGet(batchResp, 'msg', '')));
           const endpointMissing = bcode === -1 || bcode === 101400 || bcode === 100404
             || bmsg.includes('not found') || bmsg.includes('not support') || bmsg.includes('404');
           if (endpointMissing) {
@@ -490,7 +496,7 @@ function createBingxTrader(overrides = {}) {
         resp = await _request('POST', '/openApi/swap/v2/trade/order', apiKey, secret, orderParams);
       }
       const respCode = pyGet(resp, 'code');
-      const respMsgL = pyStr(pyGet(resp, 'msg', '')).toLowerCase();
+      const respMsgL = pyLower(pyStr(pyGet(resp, 'msg', '')));
       const isDup = cidEntry && (respCode === 101204 || respCode === 101404 || respMsgL.includes('duplicate')
         || (respMsgL.includes('clientorder') && respMsgL.includes('exist')));
       if (isDup) {
@@ -557,7 +563,7 @@ function createBingxTrader(overrides = {}) {
         if (pyGet(slResp, 'code') === 0) { slPlaced = true; break; }
         lastSlErr = pyStr(slResp);
         const code = pyGet(slResp, 'code');
-        const msg = pyStr(pyGet(slResp, 'msg', '')).toLowerCase();
+        const msg = pyLower(pyStr(pyGet(slResp, 'msg', '')));
         if (code === 109400) {
           log.warning(`[BINGX-SL-DEBUG] ${bingxSymbol} qty=${pyRepr(pyGet(slParams, 'quantity'))} sl=${pyRepr(pyGet(slParams, 'stopPrice'))} side=${pyStr(pyGet(slParams, 'side'))} posSide=${pyStr(pyGet(slParams, 'positionSide'))} type=${pyStr(pyGet(slParams, 'type'))} wt=${pyStr(pyGet(slParams, 'workingType'))} attempt=${a + 1}`);
         }
@@ -645,7 +651,7 @@ function createBingxTrader(overrides = {}) {
           if (pyGet(tpResp, 'code') === 0) { tpOk = true; break; }
           lastTpErr = pyStr(tpResp);
           const code = pyGet(tpResp, 'code');
-          const tpMsgL = pyStr(pyGet(tpResp, 'msg', '')).toLowerCase();
+          const tpMsgL = pyLower(pyStr(pyGet(tpResp, 'msg', '')));
           if (code === 109400 || code === 110424) {
             log.warning(`[BINGX-TP-DEBUG] ${bingxSymbol} qty=${pyRepr(pyGet(tpParams, 'quantity'))} sl=${pyRepr(pyGet(tpParams, 'stopPrice'))} side=${pyStr(pyGet(tpParams, 'side'))} posSide=${pyStr(pyGet(tpParams, 'positionSide'))} code=${pyStr(code)} msg=${pyRepr(pyGet(tpResp, 'msg'))} attempt=${a + 1}`);
           }
@@ -693,7 +699,7 @@ function createBingxTrader(overrides = {}) {
           await rt.sleep(2.0);
           const verifyData = await _request('GET', '/openApi/swap/v2/trade/openOrders', apiKey, secret, { symbol: bingxSymbol });
           const liveOrders = pyGet(verifyData, 'code') === 0 ? pyGet(pyGet(verifyData, 'data', {}), 'orders', []) : [];
-          const liveTp = pyIter(liveOrders).filter((x) => pyGet(x, 'type') === 'TAKE_PROFIT_MARKET' && pyStr(pyGet(x, 'side', '')).toUpperCase() === closeSide).length;
+          const liveTp = pyIter(liveOrders).filter((x) => pyGet(x, 'type') === 'TAKE_PROFIT_MARKET' && pyUpper(pyStr(pyGet(x, 'side', ''))) === closeSide).length;
           const missing = tpExpected.length - liveTp;
           if (missing > 0) {
             log.warning(`[TP-PHANTOM] BingX ${bingxSymbol}: expected ${tpExpected.length} TP orders, only ${liveTp} on exchange — retrying missing ${missing}`);
@@ -805,8 +811,8 @@ function createBingxTrader(overrides = {}) {
   async function closePosition(apiKey, secret, symbol, side, size, posIdx = 0) {
     try {
       const bingxSymbol = toBingxSymbol(symbol);
-      const closeSide = pyStr(side).toUpperCase() === 'LONG' ? 'SELL' : 'BUY';
-      const posSide = pyStr(side).toUpperCase();
+      const closeSide = pyUpper(pyStr(side)) === 'LONG' ? 'SELL' : 'BUY';
+      const posSide = pyUpper(pyStr(side));
       let roundedQty = fstr(size);
       try {
         const [qtyStep] = await _getInstrumentFilters(bingxSymbol);
@@ -890,7 +896,7 @@ function createBingxTrader(overrides = {}) {
       const resp = await _request('GET', '/openApi/swap/v2/trade/openOrders', apiKey, secret, { symbol: bingxSymbol });
       if (pyGet(resp, 'code') !== 0) return { ok: false, cancelled: 0, error: humanizeBingxError(pyStr(resp)) };
       const orders = pyOr(pyGet(pyGet(resp, 'data', {}), 'orders', []), []);
-      const tpOrders = pyIter(orders).filter((x) => pyStr(pyGet(x, 'type', '')).toUpperCase() === 'TAKE_PROFIT_MARKET');
+      const tpOrders = pyIter(orders).filter((x) => pyUpper(pyStr(pyGet(x, 'type', ''))) === 'TAKE_PROFIT_MARKET');
       let cancelled = 0;
       const errors = [];
       for (const x of pyIter(tpOrders)) {
@@ -917,20 +923,20 @@ function createBingxTrader(overrides = {}) {
       const ordData = await _request('GET', '/openApi/swap/v2/trade/openOrders', apiKey, secret, { symbol: bingxSymbol });
       if (pyGet(ordData, 'code') === 0) {
         for (const x of pyIter(pyGet(pyGet(ordData, 'data', {}), 'orders', []))) {
-          if (pyGet(x, 'type') === 'STOP_MARKET' && pyStr(pyGet(x, 'side', '')).toUpperCase() === closeSide) {
+          if (pyGet(x, 'type') === 'STOP_MARKET' && pyUpper(pyStr(pyGet(x, 'side', ''))) === closeSide) {
             await _request('DELETE', '/openApi/swap/v2/trade/order', apiKey, secret, { symbol: bingxSymbol, orderId: pyStr(pyGet(x, 'orderId', '')) });
           }
         }
       }
       const positions = await getPositions(apiKey, secret, symbol);
-      const pos = positions.find((p) => [posSide, 'BOTH'].includes(pyStr(p.side).toUpperCase())) || null;
+      const pos = positions.find((p) => [posSide, 'BOTH'].includes(pyUpper(pyStr(p.side)))) || null;
       if (!pos) return { ok: true };
       const posSizeS = PP.roundQty(pos.size, qtyStep);
       if (pyFloat(posSizeS) <= 0) {
         log.info(`BingX set_breakeven ${bingxSymbol}: qty rounded to 0 (pos_size=${pyFloatStr(pos.size)} qty_step=${pyFloatStr(qtyStep)}) — skip; original SL остаётся действовать`);
         return { ok: false, error: 'position smaller than minimum step (BE skipped)', skipped: true };
       }
-      const actualPosSide = pyStr(pos.side).toUpperCase() === 'BOTH' ? pyStr(pos.side).toUpperCase() : posSide;
+      const actualPosSide = pyUpper(pyStr(pos.side)) === 'BOTH' ? pyUpper(pyStr(pos.side)) : posSide;
       const pmult = bingxPriceMultiplier(symbol);
       const slParams = {
         symbol: bingxSymbol, side: closeSide, type: 'STOP_MARKET', quantity: posSizeS,
@@ -962,7 +968,7 @@ function createBingxTrader(overrides = {}) {
       for (let i = 0; i < 3; i++) {
         try {
           const positions = await getPositions(apiKey, secret, symbol);
-          pos = positions.find((p) => [posSide, 'BOTH'].includes(pyStr(p.side).toUpperCase())) || null;
+          pos = positions.find((p) => [posSide, 'BOTH'].includes(pyUpper(pyStr(p.side)))) || null;
           if (pos) break;
           posLastErr = 'empty positions';
         } catch (e) {
@@ -976,7 +982,7 @@ function createBingxTrader(overrides = {}) {
         return { ok: false, error: 'position not confirmed' };
       }
       const posSizeS = PP.roundQty(pos.size, qtyStep);
-      const actualPosSide = pyStr(pos.side).toUpperCase() === 'BOTH' ? pyStr(pos.side).toUpperCase() : posSide;
+      const actualPosSide = pyUpper(pyStr(pos.side)) === 'BOTH' ? pyUpper(pyStr(pos.side)) : posSide;
       const pmult = bingxPriceMultiplier(symbol);
       let posSizeFloat;
       try { posSizeFloat = pyFloat(posSizeS); } catch (_e) { posSizeFloat = 0.0; }
@@ -1017,7 +1023,7 @@ function createBingxTrader(overrides = {}) {
         if (pyGet(ordData, 'code') === 0) {
           for (const x of pyIter(pyGet(pyGet(ordData, 'data', {}), 'orders', []))) {
             const oid = pyStr(pyGet(x, 'orderId', ''));
-            if (pyGet(x, 'type') === 'STOP_MARKET' && pyStr(pyGet(x, 'side', '')).toUpperCase() === closeSide && oid !== newSlId) {
+            if (pyGet(x, 'type') === 'STOP_MARKET' && pyUpper(pyStr(pyGet(x, 'side', ''))) === closeSide && oid !== newSlId) {
               try {
                 const delResp = await _request('DELETE', '/openApi/swap/v2/trade/order', apiKey, secret, { symbol: bingxSymbol, orderId: oid });
                 const delCode = pyGet(delResp, 'code');
@@ -1072,7 +1078,7 @@ function createBingxTrader(overrides = {}) {
         const ordData = await _request('GET', '/openApi/swap/v2/trade/openOrders', apiKey, secret, { symbol: bingxSymbol });
         if (pyGet(ordData, 'code') === 0) {
           for (const x of pyIter(pyGet(pyGet(ordData, 'data', {}), 'orders', []))) {
-            if (pyStr(pyGet(x, 'side', '')).toUpperCase() !== closeSide) continue;
+            if (pyUpper(pyStr(pyGet(x, 'side', ''))) !== closeSide) continue;
             if (!['STOP_MARKET', 'TAKE_PROFIT_MARKET'].includes(pyGet(x, 'type'))) continue;
             const oid = pyStr(pyGet(x, 'orderId', ''));
             if (newSlId && oid === newSlId) continue;
@@ -1131,7 +1137,7 @@ function createBingxTrader(overrides = {}) {
           await rt.sleep(2.0);
           const vd = await _request('GET', '/openApi/swap/v2/trade/openOrders', apiKey, secret, { symbol: bingxSymbol });
           const liveO = pyGet(vd, 'code') === 0 ? pyGet(pyGet(vd, 'data', {}), 'orders', []) : [];
-          const liveTp = pyIter(liveO).filter((x) => pyGet(x, 'type') === 'TAKE_PROFIT_MARKET' && pyStr(pyGet(x, 'side', '')).toUpperCase() === closeSide).length;
+          const liveTp = pyIter(liveO).filter((x) => pyGet(x, 'type') === 'TAKE_PROFIT_MARKET' && pyUpper(pyStr(pyGet(x, 'side', ''))) === closeSide).length;
           if (liveTp < tpExpectedCount) {
             log.warning(`[TP-PHANTOM] BingX ${bingxSymbol} (post-fill): expected ${tpExpectedCount} TP, only ${liveTp} on exchange`);
             tpPlaced = false;
@@ -1191,7 +1197,7 @@ function createBingxTrader(overrides = {}) {
           if (e && (e.pyType === 'TypeError' || e.pyType === 'ValueError')) profit = null; else throw e;
         }
         result.push({
-          side: pyStr(side).toUpperCase().includes('BUY') ? 'Buy' : 'Sell',
+          side: pyUpper(pyStr(side)).includes('BUY') ? 'Buy' : 'Sell',
           avgExitPrice: avgPrice,
           updatedTime,
           closedPnl: profit,
@@ -1215,7 +1221,7 @@ function createBingxTrader(overrides = {}) {
 
 function formatTradeResult(result, direction, symbol, entry, sl, tp1, riskPct, leverage, tp2 = 0.0, tp3 = 0.0) {
   const fp = PP.fmtPriceDisplay;
-  const dirEmoji = ['LONG', 'BUY'].includes(String(direction).toUpperCase()) ? '🟢 LONG' : '🔴 SHORT';
+  const dirEmoji = ['LONG', 'BUY'].includes(pyUpper(String(direction))) ? '🟢 LONG' : '🔴 SHORT';
   const bingxSym = toBingxSymbol(symbol);
   if (pyTruthy(pyGet(result, 'ok'))) {
     const orderId = htmlEscape(pyStr(pyGet(result, 'order_id', '—')));
