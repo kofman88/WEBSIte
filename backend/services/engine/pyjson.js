@@ -69,45 +69,91 @@ function pyJsonDumps(value, floatKeys = null) {
   return walk(value, null);
 }
 
+// JSON number grammar (RFC 8259); sticky so it matches exactly at the scan position.
+const NUM_TOKEN_RE = /-?(?:0|[1-9]\d*)(?:\.\d+)?(?:[eE][+-]?\d+)?/y;
+
+/**
+ * One pass over JSON text that works on every Node version (no reviver source-text access,
+ * which only Node >= 21 has). String literals are copied untouched; each bare token that can
+ * start a value — a JSON number token or NaN / Infinity / -Infinity — is offered to
+ * `pick(token)`, and a picked token is replaced by the string literal `tag + token`. Every
+ * replacement takes the syntactic slot of a value, so the text stays valid exactly when it was
+ * valid, except for a token used as an object key, which reviveTagged rejects.
+ * Returns null when nothing was picked.
+ */
+function tagJsonTokens(src, pick) {
+  const tag = `\u0001pyjson${Math.random().toString(36).slice(2)}\u0001`;
+  let out = '';
+  let last = 0;
+  let n = 0;
+  let i = 0;
+  while (i < src.length) {
+    const c = src.charCodeAt(i);
+    if (c === 34) {                                    // '"': skip the string literal untouched
+      let j = i + 1;
+      while (j < src.length && src[j] !== '"') j += src[j] === '\\' ? 2 : 1;
+      i = j + 1;
+      continue;
+    }
+    if (c === 78 || c === 73 || c === 45 || (c >= 48 && c <= 57)) {   // N I - 0-9
+      let tok = null;
+      if (src.startsWith('NaN', i)) tok = 'NaN';
+      else if (src.startsWith('Infinity', i)) tok = 'Infinity';
+      else if (src.startsWith('-Infinity', i)) tok = '-Infinity';
+      else {
+        NUM_TOKEN_RE.lastIndex = i;
+        const m = NUM_TOKEN_RE.exec(src);
+        if (m) tok = m[0];
+      }
+      if (tok !== null) {
+        if (pick(tok)) {
+          out += src.slice(last, i) + JSON.stringify(tag + tok);
+          last = i + tok.length;
+          n += 1;
+        }
+        i += tok.length;
+        continue;
+      }
+    }
+    i += 1;
+  }
+  return n ? { text: out + src.slice(last), tag } : null;
+}
+
+/** JSON.parse of a tagJsonTokens result; `map(token)` gives the value of a picked token. */
+function reviveTagged(r, map) {
+  return JSON.parse(r.text, (k, v) => {
+    if (k.startsWith(r.tag)) throw new SyntaxError('Expecting property name enclosed in double quotes');
+    return typeof v === 'string' && v.startsWith(r.tag) ? map(v.slice(r.tag.length)) : v;
+  });
+}
+
+const PY_LITERALS = { NaN: NaN, Infinity: Infinity, '-Infinity': -Infinity, '-0': 0 };
+const PY_LITERAL_HINT = /NaN|Infinity|-0(?![.\deE])/;
+const INT_TOKEN_RE = /^-?\d+$/;
+const isBigIntToken = (t) => INT_TOKEN_RE.test(t) && !Number.isSafeInteger(Number(t));
+
 /**
  * json.loads(text) for a str: JSON.parse plus the NaN / Infinity / -Infinity literals Python's
  * json module reads where a value is expected. Throws SyntaxError wherever json.loads raises
  * (a literal used as an object key, `-NaN`, `1NaN`, … stay errors). The int literal `-0` is the
- * int 0 in Python (only `-0.0` is a negative zero); JSON.parse gives -0 for both, so the reviver
- * reads the literal's source text (Node ≥ 21) to tell them apart.
+ * int 0 in Python (only `-0.0` / `-0e0` are a negative zero); JSON.parse gives -0 for both.
+ * With `exactInts`, integer literals beyond 2^53 become their exact decimal STRING (Python keeps
+ * the exact int); without it they are the nearest double. Independent of the Node version.
  */
-const NEG_ZERO_INT_RE = /-0(?![.\deE])/;
-const intZero = (v, ctx) => (Object.is(v, -0) && ctx && ctx.source === '-0' ? 0 : v);
-
-function pyJsonParse(text) {
+function pyJsonParse(text, { exactInts = false } = {}) {
   const src = String(text);
-  if (!/NaN|Infinity/.test(src)) return NEG_ZERO_INT_RE.test(src) ? JSON.parse(src, (k, v, ctx) => intZero(v, ctx)) : JSON.parse(src);
-  const tag = `\u0001pyjson${Math.random().toString(36).slice(2)}\u0001`;
-  const lit = { NaN: NaN, Infinity: Infinity, '-Infinity': -Infinity };
-  let out = '';
-  let i = 0;
-  while (i < src.length) {
-    const ch = src[i];
-    if (ch === '"') {                                  // copy a string literal untouched
-      let j = i + 1;
-      while (j < src.length && src[j] !== '"') j += src[j] === '\\' ? 2 : 1;
-      out += src.slice(i, j + 1);
-      i = j + 1;
-      continue;
-    }
-    const m = /^(-Infinity|Infinity|NaN)/.exec(src.slice(i, i + 9));
-    if (m) {
-      out += JSON.stringify(tag + m[1]);
-      i += m[1].length;
-      continue;
-    }
-    out += ch;
-    i += 1;
-  }
-  return JSON.parse(out, (k, v, ctx) => {
-    if (k.startsWith(tag)) throw new SyntaxError('Expecting property name enclosed in double quotes');
-    return typeof v === 'string' && v.startsWith(tag) ? lit[v.slice(tag.length)] : intZero(v, ctx);
-  });
+  const wantLit = PY_LITERAL_HINT.test(src);
+  const wantBig = exactInts && /\d{16}/.test(src);
+  if (!wantLit && !wantBig) return JSON.parse(src);
+  const pick = (t) => (wantLit && Object.prototype.hasOwnProperty.call(PY_LITERALS, t)) || (wantBig && isBigIntToken(t));
+  const r = tagJsonTokens(src, pick);
+  return r ? reviveTagged(r, (t) => (Object.prototype.hasOwnProperty.call(PY_LITERALS, t) ? PY_LITERALS[t] : t)) : JSON.parse(src);
+}
+
+/** json.loads for exchange payloads: pyJsonParse with int64 order ids kept exact (as strings). */
+function parseJsonExactInts(text) {
+  return pyJsonParse(text, { exactInts: true });
 }
 
 /** json.loads with the bot's tolerance (`except Exception: return fallback`): not a string / empty / invalid → fallback. */
@@ -120,4 +166,4 @@ function pyJsonLoads(text, fallback = {}) {
   }
 }
 
-module.exports = { pyJsonDumps, pyJsonLoads, pyJsonParse };
+module.exports = { pyJsonDumps, pyJsonLoads, pyJsonParse, parseJsonExactInts, tagJsonTokens };

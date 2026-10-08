@@ -24,15 +24,12 @@ function revive(o) {
   return o;
 }
 
-/** Same int64 policy as transport.parseJsonPy: integers beyond 2^53 → exact decimal strings. */
-function bigIntReviver(_k, v, ctx) {
-  if (typeof v === 'number' && Number.isInteger(v) && !Number.isSafeInteger(v) && ctx && /^-?\d+$/.test(ctx.source || '')) return ctx.source;
-  return v;
-}
+// Same int64 policy as transport.parseJsonPy: integers beyond 2^53 → exact decimal strings.
+const { parseJsonExactInts } = require('../../services/engine/pyjson');
 
 function loadFixture(name) {
   const p = path.join(__dirname, 'fixtures', name);
-  return revive(JSON.parse(fs.readFileSync(p, 'utf8'), bigIntReviver));
+  return revive(parseJsonExactInts(fs.readFileSync(p, 'utf8')));
 }
 
 /** Fake clock: time.time()/time.monotonic() only advance on sleep (like the Python harness). */

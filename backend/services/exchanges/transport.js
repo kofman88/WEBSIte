@@ -21,6 +21,7 @@
  */
 
 const { attachRepr, reprFromJsonText, PyError } = require('./pyCompat');
+const { parseJsonExactInts } = require('../engine/pyjson');
 const { pyLower, pyStrip, pyUpper, pyStrRepr } = require('../../strategies/common/pyUnicode');   // CPython 3.11 str methods / repr(str)
 
 class TransportError extends Error {
@@ -51,17 +52,11 @@ function headerGet(resp, name) {
 /**
  * json.loads → JS value with the Python repr attached (null for 'null').
  * Integers beyond 2^53 (BingX int64 order ids) become their exact decimal STRING: Python
- * keeps them as exact ints and the traders only ever str() / compare them.
+ * keeps them as exact ints and the traders only ever str() / compare them
+ * (pyjson.parseJsonExactInts, independent of the Node version).
  */
-function bigIntReviver(_k, v, ctx) {
-  if (typeof v === 'number' && !Number.isSafeInteger(v) && Number.isInteger(v) && ctx && typeof ctx.source === 'string' && /^-?\d+$/.test(ctx.source)) {
-    return ctx.source;
-  }
-  return v;
-}
-
 function parseJsonPy(text) {
-  const value = JSON.parse(text, bigIntReviver);
+  const value = parseJsonExactInts(text);
   try { attachRepr(value, reprFromJsonText(text)); } catch (_e) { /* keep generic repr */ }
   return value;
 }

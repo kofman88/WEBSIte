@@ -23,13 +23,13 @@ const { fetchTransport } = req('../../services/exchanges/transport.js');
 const fs = req('fs');
 const path = req('path');
 const { revive } = req('./helpers.js');
+const { parseJsonExactInts } = req('../../services/engine/pyjson.js');
 
 // ADV_FIXTURES=<dir> replays an exploratory sweep (gen_adversarial.py --out <dir> --orders N --extreme)
 const EXPLORE_DIR = process.env.ADV_FIXTURES || '';
 function loadRows(ex) {
   if (!EXPLORE_DIR) return loadFixture(`adversarial_${ex}.json`);
-  const reviver = (_k, v, ctx) => (typeof v === 'number' && Number.isInteger(v) && !Number.isSafeInteger(v) && ctx && /^-?\d+$/.test(ctx.source || '') ? ctx.source : v);
-  return revive(JSON.parse(fs.readFileSync(path.join(EXPLORE_DIR, `adversarial_${ex}.json`), 'utf8'), reviver));
+  return revive(parseJsonExactInts(fs.readFileSync(path.join(EXPLORE_DIR, `adversarial_${ex}.json`), 'utf8')));
 }
 
 // transport-level fields neither trader sets (py/wire.py TRANSPORT_HEADERS) + undici-only defaults
