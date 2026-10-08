@@ -221,9 +221,10 @@ class FakeAioSession:
         self.router = router
 
     def _do(self, method, url, headers=None, params=None, data=None, **k):
-        u = yarl.URL(str(url), encoded=True) if not isinstance(url, yarl.URL) else url
+        # aiohttp: URL(str) requotes (encoded=False); a yarl.URL(encoded=True) is sent verbatim
+        u = url if isinstance(url, yarl.URL) else yarl.URL(str(url))
         if params:
-            u = u.update_query(params)
+            u = u.extend_query(params)
         full = str(u)
         body = data if isinstance(data, str) else (data.decode() if isinstance(data, bytes) else None)
         self.router.record(method, full, headers, body)

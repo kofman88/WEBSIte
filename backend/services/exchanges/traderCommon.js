@@ -12,7 +12,7 @@
  */
 
 const crypto = require('crypto');
-const { PyError, errStr, pyQuote } = require('./pyCompat');
+const { PyError, errStr, yarlQueryFromParams } = require('./pyCompat');
 
 function sha256hex(s) {
   return crypto.createHash('sha256').update(Buffer.from(String(s), 'utf8')).digest('hex');
@@ -65,11 +65,9 @@ async function recordPlaced(rt, { symbol, direction, exchange, t0, tpPlaced }) {
   }
 }
 
-/** Query string aiohttp builds from `params=` for the plain ASCII values the traders pass. */
+/** Query string aiohttp/yarl builds from `params={...}` (QUERY_PART_QUOTER per key/value). */
 function aioQuery(params) {
-  return Object.keys(params)
-    .map((k) => `${pyQuote(k, "-._~!$'()*,;:@/?")}=${pyQuote(String(params[k]), "-._~!$'()*,;:@/?")}`)
-    .join('&');
+  return yarlQueryFromParams(params);
 }
 
 /** First key of a Map (Python `next(iter(d))`). */

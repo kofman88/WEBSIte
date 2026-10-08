@@ -329,6 +329,84 @@ function pyUrlencode(params) {
   return parts.join('&');
 }
 
+// ── yarl (aiohttp URL normalisation) ───────────────────────────────────────
+
+const YARL_ALLOWED = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-._~!$'()*,";
+
+/**
+ * yarl `_Quoter.__call__` (pure-Python implementation, yarl 1.25):
+ * bytes in safe+ALLOWED(+QS unless qs)+protected pass, ' ' → '+' in qs mode, valid %XX escapes
+ * are uppercased and DECODED when the char is safe (kept when protected / unsafe),
+ * a stray '%' becomes %25, everything else is %XX.
+ */
+function yarlQuote(val, { safe = '', protected: prot = '', qs = false, requote = true } = {}) {
+  if (!val) return '';
+  const b = Buffer.from(String(val), 'utf8');
+  let safeSet = safe + YARL_ALLOWED;
+  if (!qs) safeSet += '+&=;';
+  safeSet += prot;
+  let ret = '';
+  let pct = '';
+  let idx = 0;
+  const isHex = (s) => /^[A-Z0-9][A-Z0-9]$/.test(s);
+  while (idx < b.length) {
+    let ch = b[idx];
+    idx += 1;
+    if (pct) {
+      if (ch >= 0x61 && ch <= 0x7a) ch -= 32;
+      pct += String.fromCharCode(ch);
+      if (pct.length === 3) {
+        const buf = pct.slice(1);
+        const code = isHex(buf) ? parseInt(buf, 16) : NaN;
+        if (!isHex(buf) || Number.isNaN(code) || !/^[0-9A-F]{2}$/.test(buf)) {
+          ret += '%25';
+          pct = '';
+          idx -= 2;
+          continue;
+        }
+        const unq = String.fromCharCode(code);
+        if (prot.includes(unq)) ret += pct;
+        else if (safeSet.includes(unq)) ret += unq;
+        else ret += pct;
+        pct = '';
+      } else if (pct.length === 2 && idx === b.length) {
+        ret += '%25';
+        pct = '';
+        idx -= 1;
+      }
+      continue;
+    }
+    if (ch === 0x25 && requote) {
+      pct = '%';
+      if (idx === b.length) ret += '%25';
+      continue;
+    }
+    if (qs && ch === 0x20) { ret += '+'; continue; }
+    const c = String.fromCharCode(ch);
+    if (ch < 0x80 && safeSet.includes(c)) { ret += c; continue; }
+    ret += '%' + ch.toString(16).toUpperCase().padStart(2, '0');
+  }
+  return ret;
+}
+
+/** QUERY_REQUOTER — what aiohttp does to the query of a str URL. */
+function yarlRequoteQuery(q) {
+  return yarlQuote(q, { safe: '?/:@', protected: '=+&;', qs: true, requote: true });
+}
+
+/** `URL(str)` for an absolute URL: requote the query part (paths here are plain). */
+function yarlUrl(url) {
+  const i = String(url).indexOf('?');
+  if (i < 0) return String(url);
+  return String(url).slice(0, i + 1) + yarlRequoteQuery(String(url).slice(i + 1));
+}
+
+/** QUERY_PART_QUOTER per key / value — aiohttp `params={...}`. */
+function yarlQueryFromParams(params) {
+  const q = (v) => yarlQuote(pyStr(v), { safe: '?/:@', qs: true, requote: false });
+  return Object.keys(params).map((k) => `${q(k)}=${q(params[k])}`).join('&');
+}
+
 // ── misc ────────────────────────────────────────────────────────────────────
 
 /** html.escape(s, quote=True) */
@@ -372,6 +450,6 @@ module.exports = {
   errStr, isDict, pyTypeName, pyTruthy, pyOr, pyGet, pyIndex,
   pyStrRepr, pyRepr, pyStr, pyFloatStr, attachRepr, reprFromJsonText,
   pyFloat, pyInt, pyFloatOr0,
-  pyQuote, pyQuotePlus, pyUrlencode,
+  pyQuote, pyQuotePlus, pyUrlencode, yarlQuote, yarlRequoteQuery, yarlUrl, yarlQueryFromParams,
   htmlEscape, pyCapitalize, pyStrftimeHMS, pySlice, pyIn,
 };
