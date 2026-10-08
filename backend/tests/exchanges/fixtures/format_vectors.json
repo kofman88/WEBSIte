@@ -1,0 +1,1394 @@
+[
+ {
+  "args": [
+   {
+    "ok": true,
+    "order_id": "1234567890",
+    "qty": 0.011,
+    "tp_placed": true,
+    "notional": 957.25,
+    "balance": 1000.5,
+    "symbol": "BTCUSDT"
+   },
+   "LONG",
+   "BTC-USDT-SWAP",
+   87000.5,
+   86000.0,
+   88500.0,
+   1.0,
+   10,
+   89500.0,
+   90500.0
+  ],
+  "bybit": "✅ <b>ЛИМИТНЫЙ ОРДЕР ВЫСТАВЛЕН на Bybit</b>\n\n💎 <b>BTCUSDT</b>   🟢 LONG   x10\n\n🎯 Лимитный вход: <code>87000.5</code>\n🛑 Стоп:          <code>86000</code>\n\n🎯 TP1: <code>88500</code>  (50% позиции)\n🎯 TP2: <code>89500</code>  (25% позиции)\n🏆 TP3: <code>90500</code>  (25% позиции)\n\n♻️ <i>После TP1 — стоп автоматически перенесётся в БУ</i>\n\n📦 <b>Размер позиции:</b> <code>0.011</code>  (~$957.25 = 95.7% баланса)\n⚠️ <b>Макс. убыток при SL:</b> <code>$10.01</code> (1.0% от $1000.50)\n<i>💡 Размер ≠ риск. Размер — сумма позиции, риск — реальный $ убыток при SL.</i>\n\n🆔 Order ID: <code>1234567890</code>",
+  "bingx": "✅ <b>BingX: сделка открыта</b>\n━━━━━━━━━━━━━━━━━━━━━━\n🟢 LONG  <b>BTC-USDT</b>  x10\n💵 Вход: <code>87000.5</code>\n🛑 SL:   <code>86000</code>\n🎯 TP1: <code>88500</code>  (50% позиции)\n🎯 TP2: <code>89500</code>  (25% позиции)\n🏆 TP3: <code>90500</code>  (25% позиции)\n♻️ <i>После TP1 — стоп перенесётся в БУ</i>\n📊 Qty: 0.011  (~$957.01)\n⚖️ Риск: 1.0%\n🆔 <code>1234567890</code>",
+  "binance": "✅ <b>Binance: сделка открыта</b>\n━━━━━━━━━━━━━━━━━━━━━━\n🟢 LONG  <b>BTCUSDT</b>  x10\n💵 Вход: <code>87000.5</code>\n🛑 SL:   <code>86000</code>\n🎯 TP1: <code>88500</code>  (50% позиции)\n🎯 TP2: <code>89500</code>  (25% позиции)\n🏆 TP3: <code>90500</code>  (25% позиции)\n♻️ <i>После TP1 — стоп перенесётся в БУ</i>\n📊 Qty: 0.011  (~$957.01)\n⚖️ Риск: 1.0%\n🆔 <code>1234567890</code>",
+  "okx": "📈 <b>OKX LONG</b>  BTC  ×10\n\n💰 Entry: <code>87000.5</code>\n🛑 SL: <code>86000</code>\n🎯 TP1: <code>88500</code>  |  TP2: <code>89500</code>  |  TP3: <code>90500</code>\n📊 Qty: 0.011  |  Risk: 1.00%\n🆔 <code>1234567890</code>",
+  "bybit_split": "✅ <b>SMC СПЛИТ-ВХОД выставлен на Bybit</b> (0/2 ордеров выставлено)\n\n💎 <b>BTCUSDT</b>   🟢 LONG   x10\n\n🎯 Лимит 1 (50%): <code>86565.4975</code>\n🎯 Лимит 2 (50%): <code>87435.5025</code>\n🛑 Стоп:          <code>86000</code>\n\n🎯 TP1: <code>88500</code>  (50% позиции)\n🎯 TP2: <code>89500</code>  (25% позиции)\n🏆 TP3: <code>90500</code>  (25% позиции)\n\n♻️ <i>После TP1 — стоп автоматически перенесётся в БУ</i>\n\n📦 <b>Размер позиции (суммарно):</b> <code>0.011</code>  (~$957.25 = 95.7% баланса)\n⚠️ <b>Макс. убыток при SL:</b> <code>$10.01</code> (1.0% от $1000.50)\n<i>💡 Размер ≠ риск. Размер — сумма позиции, риск — реальный $ убыток при SL.</i>\n\n🆔 Order IDs: <code>1234567890</code>",
+  "split_args": [
+   {
+    "ok": true,
+    "order_id": "1234567890",
+    "qty": 0.011,
+    "tp_placed": true,
+    "notional": 957.25,
+    "balance": 1000.5,
+    "symbol": "BTCUSDT"
+   },
+   "LONG",
+   "BTC-USDT-SWAP",
+   86565.4975,
+   87435.50249999999,
+   86000.0,
+   88500.0,
+   1.0,
+   10,
+   89500.0,
+   90500.0
+  ]
+ },
+ {
+  "args": [
+   {
+    "ok": true,
+    "order_id": "1234567890",
+    "qty": 0.011,
+    "tp_placed": true,
+    "notional": 957.25,
+    "balance": 1000.5,
+    "symbol": "BTCUSDT"
+   },
+   "SHORT",
+   "ETH-USDT-SWAP",
+   3000.25,
+   3060.0,
+   2900.0,
+   2.5,
+   20,
+   0.0,
+   0.0
+  ],
+  "bybit": "✅ <b>ЛИМИТНЫЙ ОРДЕР ВЫСТАВЛЕН на Bybit</b>\n\n💎 <b>BTCUSDT</b>   🔴 SHORT   x20\n\n🎯 Лимитный вход: <code>3000.25</code>\n🛑 Стоп:          <code>3060</code>\n\n🎯 TP1: <code>2900</code>  (50% позиции)\n\n\n📦 <b>Размер позиции:</b> <code>0.011</code>  (~$957.25 = 95.7% баланса)\n⚠️ <b>Макс. убыток при SL:</b> <code>$25.01</code> (2.5% от $1000.50)\n<i>💡 Размер ≠ риск. Размер — сумма позиции, риск — реальный $ убыток при SL.</i>\n\n🆔 Order ID: <code>1234567890</code>",
+  "bingx": "✅ <b>BingX: сделка открыта</b>\n━━━━━━━━━━━━━━━━━━━━━━\n🔴 SHORT  <b>ETH-USDT</b>  x20\n💵 Вход: <code>3000.25</code>\n🛑 SL:   <code>3060</code>\n🎯 TP1: <code>2900</code>\n📊 Qty: 0.011  (~$33.00)\n⚖️ Риск: 2.5%\n🆔 <code>1234567890</code>",
+  "binance": "✅ <b>Binance: сделка открыта</b>\n━━━━━━━━━━━━━━━━━━━━━━\n🔴 SHORT  <b>ETHUSDT</b>  x20\n💵 Вход: <code>3000.25</code>\n🛑 SL:   <code>3060</code>\n🎯 TP1: <code>2900</code>\n📊 Qty: 0.011  (~$33.00)\n⚖️ Риск: 2.5%\n🆔 <code>1234567890</code>",
+  "okx": "📉 <b>OKX SHORT</b>  ETH  ×20\n\n💰 Entry: <code>3000.25</code>\n🛑 SL: <code>3060</code>\n🎯 TP1: <code>2900</code>\n📊 Qty: 0.011  |  Risk: 2.50%\n🆔 <code>1234567890</code>",
+  "bybit_split": "✅ <b>SMC СПЛИТ-ВХОД выставлен на Bybit</b> (0/2 ордеров выставлено)\n\n💎 <b>BTCUSDT</b>   🔴 SHORT   x20\n\n🎯 Лимит 1 (50%): <code>2985.24875</code>\n🎯 Лимит 2 (50%): <code>3015.25125</code>\n🛑 Стоп:          <code>3060</code>\n\n🎯 TP1: <code>2900</code>  (50% позиции)\n\n\n📦 <b>Размер позиции (суммарно):</b> <code>0.011</code>  (~$957.25 = 95.7% баланса)\n⚠️ <b>Макс. убыток при SL:</b> <code>$25.01</code> (2.5% от $1000.50)\n<i>💡 Размер ≠ риск. Размер — сумма позиции, риск — реальный $ убыток при SL.</i>\n\n🆔 Order IDs: <code>1234567890</code>",
+  "split_args": [
+   {
+    "ok": true,
+    "order_id": "1234567890",
+    "qty": 0.011,
+    "tp_placed": true,
+    "notional": 957.25,
+    "balance": 1000.5,
+    "symbol": "BTCUSDT"
+   },
+   "SHORT",
+   "ETH-USDT-SWAP",
+   2985.24875,
+   3015.25125,
+   3060.0,
+   2900.0,
+   2.5,
+   20,
+   0.0,
+   0.0
+  ]
+ },
+ {
+  "args": [
+   {
+    "ok": true,
+    "order_id": "1234567890",
+    "qty": 0.011,
+    "tp_placed": true,
+    "notional": 957.25,
+    "balance": 1000.5,
+    "symbol": "BTCUSDT"
+   },
+   "LONG",
+   "PEPE-USDT-SWAP",
+   1.23e-05,
+   1.18e-05,
+   1.31e-05,
+   0.5,
+   5,
+   1.39e-05,
+   0.0
+  ],
+  "bybit": "✅ <b>ЛИМИТНЫЙ ОРДЕР ВЫСТАВЛЕН на Bybit</b>\n\n💎 <b>BTCUSDT</b>   🟢 LONG   x5\n\n🎯 Лимитный вход: <code>0.0000123</code>\n🛑 Стоп:          <code>0.0000118</code>\n\n🎯 TP1: <code>0.0000131</code>  (50% позиции)\n🎯 TP2: <code>0.0000139</code>  (25% позиции)\n\n♻️ <i>После TP1 — стоп автоматически перенесётся в БУ</i>\n\n📦 <b>Размер позиции:</b> <code>0.011</code>  (~$957.25 = 95.7% баланса)\n⚠️ <b>Макс. убыток при SL:</b> <code>$5.00</code> (0.5% от $1000.50)\n<i>💡 Размер ≠ риск. Размер — сумма позиции, риск — реальный $ убыток при SL.</i>\n\n🆔 Order ID: <code>1234567890</code>",
+  "bingx": "✅ <b>BingX: сделка открыта</b>\n━━━━━━━━━━━━━━━━━━━━━━\n🟢 LONG  <b>1000PEPE-USDT</b>  x5\n💵 Вход: <code>0.0000123</code>\n🛑 SL:   <code>0.0000118</code>\n🎯 TP1: <code>0.0000131</code>  (50% позиции)\n🎯 TP2: <code>0.0000139</code>  (25% позиции)\n♻️ <i>После TP1 — стоп перенесётся в БУ</i>\n📊 Qty: 0.011  (~$0.00)\n⚖️ Риск: 0.5%\n🆔 <code>1234567890</code>",
+  "binance": "✅ <b>Binance: сделка открыта</b>\n━━━━━━━━━━━━━━━━━━━━━━\n🟢 LONG  <b>1000PEPEUSDT</b>  x5\n💵 Вход: <code>0.0000123</code>\n🛑 SL:   <code>0.0000118</code>\n🎯 TP1: <code>0.0000131</code>  (50% позиции)\n🎯 TP2: <code>0.0000139</code>  (25% позиции)\n♻️ <i>После TP1 — стоп перенесётся в БУ</i>\n📊 Qty: 0.011  (~$0.00)\n⚖️ Риск: 0.5%\n🆔 <code>1234567890</code>",
+  "okx": "📈 <b>OKX LONG</b>  PEPE  ×5\n\n💰 Entry: <code>0.0000123</code>\n🛑 SL: <code>0.0000118</code>\n🎯 TP1: <code>0.0000131</code>  |  TP2: <code>0.0000139</code>\n📊 Qty: 0.011  |  Risk: 0.50%\n🆔 <code>1234567890</code>",
+  "bybit_split": "✅ <b>SMC СПЛИТ-ВХОД выставлен на Bybit</b> (0/2 ордеров выставлено)\n\n💎 <b>BTCUSDT</b>   🟢 LONG   x5\n\n🎯 Лимит 1 (50%): <code>0.0000122385</code>\n🎯 Лимит 2 (50%): <code>0.0000123615</code>\n🛑 Стоп:          <code>0.0000118</code>\n\n🎯 TP1: <code>0.0000131</code>  (50% позиции)\n🎯 TP2: <code>0.0000139</code>  (25% позиции)\n\n♻️ <i>После TP1 — стоп автоматически перенесётся в БУ</i>\n\n📦 <b>Размер позиции (суммарно):</b> <code>0.011</code>  (~$957.25 = 95.7% баланса)\n⚠️ <b>Макс. убыток при SL:</b> <code>$5.00</code> (0.5% от $1000.50)\n<i>💡 Размер ≠ риск. Размер — сумма позиции, риск — реальный $ убыток при SL.</i>\n\n🆔 Order IDs: <code>1234567890</code>",
+  "split_args": [
+   {
+    "ok": true,
+    "order_id": "1234567890",
+    "qty": 0.011,
+    "tp_placed": true,
+    "notional": 957.25,
+    "balance": 1000.5,
+    "symbol": "BTCUSDT"
+   },
+   "LONG",
+   "PEPE-USDT-SWAP",
+   1.2238500000000001e-05,
+   1.23615e-05,
+   1.18e-05,
+   1.31e-05,
+   0.5,
+   5,
+   1.39e-05,
+   0.0
+  ]
+ },
+ {
+  "args": [
+   {
+    "ok": true,
+    "order_id": "1234567890",
+    "qty": 0.011,
+    "tp_placed": true,
+    "notional": 957.25,
+    "balance": 1000.5,
+    "symbol": "BTCUSDT"
+   },
+   "BUY",
+   "SOLUSDT",
+   150.123456789,
+   145.0,
+   160.0,
+   1.25,
+   3,
+   165.5,
+   170.75
+  ],
+  "bybit": "✅ <b>ЛИМИТНЫЙ ОРДЕР ВЫСТАВЛЕН на Bybit</b>\n\n💎 <b>BTCUSDT</b>   🔴 SHORT   x3\n\n🎯 Лимитный вход: <code>150.123457</code>\n🛑 Стоп:          <code>145</code>\n\n🎯 TP1: <code>160</code>  (50% позиции)\n🎯 TP2: <code>165.5</code>  (25% позиции)\n🏆 TP3: <code>170.75</code>  (25% позиции)\n\n♻️ <i>После TP1 — стоп автоматически перенесётся в БУ</i>\n\n📦 <b>Размер позиции:</b> <code>0.011</code>  (~$957.25 = 95.7% баланса)\n⚠️ <b>Макс. убыток при SL:</b> <code>$12.51</code> (1.25% от $1000.50)\n<i>💡 Размер ≠ риск. Размер — сумма позиции, риск — реальный $ убыток при SL.</i>\n\n🆔 Order ID: <code>1234567890</code>",
+  "bingx": "✅ <b>BingX: сделка открыта</b>\n━━━━━━━━━━━━━━━━━━━━━━\n🟢 LONG  <b>SOL-USDT</b>  x3\n💵 Вход: <code>150.123457</code>\n🛑 SL:   <code>145</code>\n🎯 TP1: <code>160</code>  (50% позиции)\n🎯 TP2: <code>165.5</code>  (25% позиции)\n🏆 TP3: <code>170.75</code>  (25% позиции)\n♻️ <i>После TP1 — стоп перенесётся в БУ</i>\n📊 Qty: 0.011  (~$1.65)\n⚖️ Риск: 1.25%\n🆔 <code>1234567890</code>",
+  "binance": "✅ <b>Binance: сделка открыта</b>\n━━━━━━━━━━━━━━━━━━━━━━\n🟢 LONG  <b>SOLUSDT</b>  x3\n💵 Вход: <code>150.123457</code>\n🛑 SL:   <code>145</code>\n🎯 TP1: <code>160</code>  (50% позиции)\n🎯 TP2: <code>165.5</code>  (25% позиции)\n🏆 TP3: <code>170.75</code>  (25% позиции)\n♻️ <i>После TP1 — стоп перенесётся в БУ</i>\n📊 Qty: 0.011  (~$1.65)\n⚖️ Риск: 1.25%\n🆔 <code>1234567890</code>",
+  "okx": "📉 <b>OKX BUY</b>  SOLUSDT  ×3\n\n💰 Entry: <code>150.123457</code>\n🛑 SL: <code>145</code>\n🎯 TP1: <code>160</code>  |  TP2: <code>165.5</code>  |  TP3: <code>170.75</code>\n📊 Qty: 0.011  |  Risk: 1.25%\n🆔 <code>1234567890</code>",
+  "bybit_split": "✅ <b>SMC СПЛИТ-ВХОД выставлен на Bybit</b> (0/2 ордеров выставлено)\n\n💎 <b>BTCUSDT</b>   🔴 SHORT   x3\n\n🎯 Лимит 1 (50%): <code>149.37284</code>\n🎯 Лимит 2 (50%): <code>150.874074</code>\n🛑 Стоп:          <code>145</code>\n\n🎯 TP1: <code>160</code>  (50% позиции)\n🎯 TP2: <code>165.5</code>  (25% позиции)\n🏆 TP3: <code>170.75</code>  (25% позиции)\n\n♻️ <i>После TP1 — стоп автоматически перенесётся в БУ</i>\n\n📦 <b>Размер позиции (суммарно):</b> <code>0.011</code>  (~$957.25 = 95.7% баланса)\n⚠️ <b>Макс. убыток при SL:</b> <code>$12.51</code> (1.25% от $1000.50)\n<i>💡 Размер ≠ риск. Размер — сумма позиции, риск — реальный $ убыток при SL.</i>\n\n🆔 Order IDs: <code>1234567890</code>",
+  "split_args": [
+   {
+    "ok": true,
+    "order_id": "1234567890",
+    "qty": 0.011,
+    "tp_placed": true,
+    "notional": 957.25,
+    "balance": 1000.5,
+    "symbol": "BTCUSDT"
+   },
+   "BUY",
+   "SOLUSDT",
+   149.372839505055,
+   150.87407407294498,
+   145.0,
+   160.0,
+   1.25,
+   3,
+   165.5,
+   170.75
+  ]
+ },
+ {
+  "args": [
+   {
+    "ok": true,
+    "order_id": "abc<&>",
+    "qty": "0.010",
+    "tp_placed": false,
+    "notional": 870.1,
+    "balance": 250.75,
+    "order_type": "Market",
+    "avg_price": 87012.3
+   },
+   "LONG",
+   "BTC-USDT-SWAP",
+   87000.5,
+   86000.0,
+   88500.0,
+   1.0,
+   10,
+   89500.0,
+   90500.0
+  ],
+  "bybit": "✅ <b>ПОЗИЦИЯ ОТКРЫТА (Market) на Bybit</b>\n\n💎 <b>BTCUSDT</b>   🟢 LONG   x10\n\n🎯 Вход: <code>87012.3</code> <i>(сигнал: 87000.5)</i>\n🛑 Стоп:          <code>86000</code>\n📊 Slippage: <code>+0.01%</code>\n\n🎯 TP1: <code>88500</code>  (50% позиции)\n🎯 TP2: <code>89500</code>  (25% позиции)\n🏆 TP3: <code>90500</code>  (25% позиции)\n\n♻️ <i>После TP1 — стоп автоматически перенесётся в БУ</i>\n⏳ <i>TP-ордера ставятся сразу после открытия позиции (≤1 цикл BE-монитора)</i>\n\n📦 <b>Размер позиции:</b> <code>0.010</code>  (~$870.10 = 347.0% баланса)\n⚠️ <b>Макс. убыток при SL:</b> <code>$2.51</code> (1.0% от $250.75)\n<i>💡 Размер ≠ риск. Размер — сумма позиции, риск — реальный $ убыток при SL.</i>\n\n🆔 Order ID: <code>abc&lt;&amp;&gt;</code>",
+  "bingx": "✅ <b>BingX: сделка открыта</b>\n━━━━━━━━━━━━━━━━━━━━━━\n🟢 LONG  <b>BTC-USDT</b>  x10\n💵 Вход: <code>87000.5</code>\n🛑 SL:   <code>86000</code>\n🎯 TP1: <code>88500</code>  (50% позиции)\n🎯 TP2: <code>89500</code>  (25% позиции)\n🏆 TP3: <code>90500</code>  (25% позиции)\n♻️ <i>После TP1 — стоп перенесётся в БУ</i>\n📊 Qty: 0.010  (~$870.00)\n⚖️ Риск: 1.0%\n🆔 <code>abc&lt;&amp;&gt;</code>",
+  "binance": "✅ <b>Binance: сделка открыта</b>\n━━━━━━━━━━━━━━━━━━━━━━\n🟢 LONG  <b>BTCUSDT</b>  x10\n💵 Вход: <code>87000.5</code>\n🛑 SL:   <code>86000</code>\n🎯 TP1: <code>88500</code>  (50% позиции)\n🎯 TP2: <code>89500</code>  (25% позиции)\n🏆 TP3: <code>90500</code>  (25% позиции)\n♻️ <i>После TP1 — стоп перенесётся в БУ</i>\n📊 Qty: 0.010  (~$870.00)\n⚖️ Риск: 1.0%\n🆔 <code>abc&lt;&amp;&gt;</code>",
+  "okx": "📈 <b>OKX LONG</b>  BTC  ×10\n\n💰 Entry: <code>87000.5</code>\n🛑 SL: <code>86000</code>\n🎯 TP1: <code>88500</code>  |  TP2: <code>89500</code>  |  TP3: <code>90500</code>\n📊 Qty: 0.010  |  Risk: 1.00%\n🆔 <code>abc<&></code>",
+  "bybit_split": "✅ <b>SMC СПЛИТ-ВХОД выставлен на Bybit</b> (0/2 ордеров выставлено)\n\n💎 <b>BTCUSDT</b>   🟢 LONG   x10\n\n🎯 Лимит 1 (50%): <code>86565.4975</code>\n🎯 Лимит 2 (50%): <code>87435.5025</code>\n🛑 Стоп:          <code>86000</code>\n\n🎯 TP1: <code>88500</code>  (50% позиции)\n🎯 TP2: <code>89500</code>  (25% позиции)\n🏆 TP3: <code>90500</code>  (25% позиции)\n\n♻️ <i>После TP1 — стоп автоматически перенесётся в БУ</i>\n⏳ <i>TP-ордера будут выставлены автоматически после исполнения входа</i>\n\n📦 <b>Размер позиции (суммарно):</b> <code>0.010</code>  (~$870.10 = 347.0% баланса)\n⚠️ <b>Макс. убыток при SL:</b> <code>$2.51</code> (1.0% от $250.75)\n<i>💡 Размер ≠ риск. Размер — сумма позиции, риск — реальный $ убыток при SL.</i>\n\n🆔 Order IDs: <code>abc&lt;&amp;&gt;</code>",
+  "split_args": [
+   {
+    "ok": true,
+    "order_id": "abc<&>",
+    "qty": "0.010",
+    "tp_placed": false,
+    "notional": 870.1,
+    "balance": 250.75,
+    "order_type": "Market",
+    "avg_price": 87012.3
+   },
+   "LONG",
+   "BTC-USDT-SWAP",
+   86565.4975,
+   87435.50249999999,
+   86000.0,
+   88500.0,
+   1.0,
+   10,
+   89500.0,
+   90500.0
+  ]
+ },
+ {
+  "args": [
+   {
+    "ok": true,
+    "order_id": "abc<&>",
+    "qty": "0.010",
+    "tp_placed": false,
+    "notional": 870.1,
+    "balance": 250.75,
+    "order_type": "Market",
+    "avg_price": 87012.3
+   },
+   "SHORT",
+   "ETH-USDT-SWAP",
+   3000.25,
+   3060.0,
+   2900.0,
+   2.5,
+   20,
+   0.0,
+   0.0
+  ],
+  "bybit": "✅ <b>ПОЗИЦИЯ ОТКРЫТА (Market) на Bybit</b>\n\n💎 <b>ETHUSDT</b>   🔴 SHORT   x20\n\n🎯 Вход: <code>87012.3</code> <i>(сигнал: 3000.25)</i>\n🛑 Стоп:          <code>3060</code>\n📊 Slippage: <code>+2800.17%</code>\n\n🎯 TP1: <code>2900</code>  (50% позиции)\n\n⏳ <i>TP-ордера ставятся сразу после открытия позиции (≤1 цикл BE-монитора)</i>\n\n📦 <b>Размер позиции:</b> <code>0.010</code>  (~$870.10 = 347.0% баланса)\n⚠️ <b>Макс. убыток при SL:</b> <code>$6.27</code> (2.5% от $250.75)\n<i>💡 Размер ≠ риск. Размер — сумма позиции, риск — реальный $ убыток при SL.</i>\n\n🆔 Order ID: <code>abc&lt;&amp;&gt;</code>",
+  "bingx": "✅ <b>BingX: сделка открыта</b>\n━━━━━━━━━━━━━━━━━━━━━━\n🔴 SHORT  <b>ETH-USDT</b>  x20\n💵 Вход: <code>3000.25</code>\n🛑 SL:   <code>3060</code>\n🎯 TP1: <code>2900</code>\n📊 Qty: 0.010  (~$30.00)\n⚖️ Риск: 2.5%\n🆔 <code>abc&lt;&amp;&gt;</code>",
+  "binance": "✅ <b>Binance: сделка открыта</b>\n━━━━━━━━━━━━━━━━━━━━━━\n🔴 SHORT  <b>ETHUSDT</b>  x20\n💵 Вход: <code>3000.25</code>\n🛑 SL:   <code>3060</code>\n🎯 TP1: <code>2900</code>\n📊 Qty: 0.010  (~$30.00)\n⚖️ Риск: 2.5%\n🆔 <code>abc&lt;&amp;&gt;</code>",
+  "okx": "📉 <b>OKX SHORT</b>  ETH  ×20\n\n💰 Entry: <code>3000.25</code>\n🛑 SL: <code>3060</code>\n🎯 TP1: <code>2900</code>\n📊 Qty: 0.010  |  Risk: 2.50%\n🆔 <code>abc<&></code>",
+  "bybit_split": "✅ <b>SMC СПЛИТ-ВХОД выставлен на Bybit</b> (0/2 ордеров выставлено)\n\n💎 <b>ETHUSDT</b>   🔴 SHORT   x20\n\n🎯 Лимит 1 (50%): <code>2985.24875</code>\n🎯 Лимит 2 (50%): <code>3015.25125</code>\n🛑 Стоп:          <code>3060</code>\n\n🎯 TP1: <code>2900</code>  (50% позиции)\n\n⏳ <i>TP-ордера будут выставлены автоматически после исполнения входа</i>\n\n📦 <b>Размер позиции (суммарно):</b> <code>0.010</code>  (~$870.10 = 347.0% баланса)\n⚠️ <b>Макс. убыток при SL:</b> <code>$6.27</code> (2.5% от $250.75)\n<i>💡 Размер ≠ риск. Размер — сумма позиции, риск — реальный $ убыток при SL.</i>\n\n🆔 Order IDs: <code>abc&lt;&amp;&gt;</code>",
+  "split_args": [
+   {
+    "ok": true,
+    "order_id": "abc<&>",
+    "qty": "0.010",
+    "tp_placed": false,
+    "notional": 870.1,
+    "balance": 250.75,
+    "order_type": "Market",
+    "avg_price": 87012.3
+   },
+   "SHORT",
+   "ETH-USDT-SWAP",
+   2985.24875,
+   3015.25125,
+   3060.0,
+   2900.0,
+   2.5,
+   20,
+   0.0,
+   0.0
+  ]
+ },
+ {
+  "args": [
+   {
+    "ok": true,
+    "order_id": "abc<&>",
+    "qty": "0.010",
+    "tp_placed": false,
+    "notional": 870.1,
+    "balance": 250.75,
+    "order_type": "Market",
+    "avg_price": 87012.3
+   },
+   "LONG",
+   "PEPE-USDT-SWAP",
+   1.23e-05,
+   1.18e-05,
+   1.31e-05,
+   0.5,
+   5,
+   1.39e-05,
+   0.0
+  ],
+  "bybit": "✅ <b>ПОЗИЦИЯ ОТКРЫТА (Market) на Bybit</b>\n\n💎 <b>1000PEPEUSDT</b>   🟢 LONG   x5\n\n🎯 Вход: <code>87012.3</code> <i>(сигнал: 0.0000123)</i>\n🛑 Стоп:          <code>0.0000118</code>\n📊 Slippage: <code>+707417073070.73%</code>\n\n🎯 TP1: <code>0.0000131</code>  (50% позиции)\n🎯 TP2: <code>0.0000139</code>  (25% позиции)\n\n♻️ <i>После TP1 — стоп автоматически перенесётся в БУ</i>\n⏳ <i>TP-ордера ставятся сразу после открытия позиции (≤1 цикл BE-монитора)</i>\n\n📦 <b>Размер позиции:</b> <code>0.010</code>  (~$870.10 = 347.0% баланса)\n⚠️ <b>Макс. убыток при SL:</b> <code>$1.25</code> (0.5% от $250.75)\n<i>💡 Размер ≠ риск. Размер — сумма позиции, риск — реальный $ убыток при SL.</i>\n\n🆔 Order ID: <code>abc&lt;&amp;&gt;</code>",
+  "bingx": "✅ <b>BingX: сделка открыта</b>\n━━━━━━━━━━━━━━━━━━━━━━\n🟢 LONG  <b>1000PEPE-USDT</b>  x5\n💵 Вход: <code>0.0000123</code>\n🛑 SL:   <code>0.0000118</code>\n🎯 TP1: <code>0.0000131</code>  (50% позиции)\n🎯 TP2: <code>0.0000139</code>  (25% позиции)\n♻️ <i>После TP1 — стоп перенесётся в БУ</i>\n📊 Qty: 0.010  (~$0.00)\n⚖️ Риск: 0.5%\n🆔 <code>abc&lt;&amp;&gt;</code>",
+  "binance": "✅ <b>Binance: сделка открыта</b>\n━━━━━━━━━━━━━━━━━━━━━━\n🟢 LONG  <b>1000PEPEUSDT</b>  x5\n💵 Вход: <code>0.0000123</code>\n🛑 SL:   <code>0.0000118</code>\n🎯 TP1: <code>0.0000131</code>  (50% позиции)\n🎯 TP2: <code>0.0000139</code>  (25% позиции)\n♻️ <i>После TP1 — стоп перенесётся в БУ</i>\n📊 Qty: 0.010  (~$0.00)\n⚖️ Риск: 0.5%\n🆔 <code>abc&lt;&amp;&gt;</code>",
+  "okx": "📈 <b>OKX LONG</b>  PEPE  ×5\n\n💰 Entry: <code>0.0000123</code>\n🛑 SL: <code>0.0000118</code>\n🎯 TP1: <code>0.0000131</code>  |  TP2: <code>0.0000139</code>\n📊 Qty: 0.010  |  Risk: 0.50%\n🆔 <code>abc<&></code>",
+  "bybit_split": "✅ <b>SMC СПЛИТ-ВХОД выставлен на Bybit</b> (0/2 ордеров выставлено)\n\n💎 <b>1000PEPEUSDT</b>   🟢 LONG   x5\n\n🎯 Лимит 1 (50%): <code>0.0000122385</code>\n🎯 Лимит 2 (50%): <code>0.0000123615</code>\n🛑 Стоп:          <code>0.0000118</code>\n\n🎯 TP1: <code>0.0000131</code>  (50% позиции)\n🎯 TP2: <code>0.0000139</code>  (25% позиции)\n\n♻️ <i>После TP1 — стоп автоматически перенесётся в БУ</i>\n⏳ <i>TP-ордера будут выставлены автоматически после исполнения входа</i>\n\n📦 <b>Размер позиции (суммарно):</b> <code>0.010</code>  (~$870.10 = 347.0% баланса)\n⚠️ <b>Макс. убыток при SL:</b> <code>$1.25</code> (0.5% от $250.75)\n<i>💡 Размер ≠ риск. Размер — сумма позиции, риск — реальный $ убыток при SL.</i>\n\n🆔 Order IDs: <code>abc&lt;&amp;&gt;</code>",
+  "split_args": [
+   {
+    "ok": true,
+    "order_id": "abc<&>",
+    "qty": "0.010",
+    "tp_placed": false,
+    "notional": 870.1,
+    "balance": 250.75,
+    "order_type": "Market",
+    "avg_price": 87012.3
+   },
+   "LONG",
+   "PEPE-USDT-SWAP",
+   1.2238500000000001e-05,
+   1.23615e-05,
+   1.18e-05,
+   1.31e-05,
+   0.5,
+   5,
+   1.39e-05,
+   0.0
+  ]
+ },
+ {
+  "args": [
+   {
+    "ok": true,
+    "order_id": "abc<&>",
+    "qty": "0.010",
+    "tp_placed": false,
+    "notional": 870.1,
+    "balance": 250.75,
+    "order_type": "Market",
+    "avg_price": 87012.3
+   },
+   "BUY",
+   "SOLUSDT",
+   150.123456789,
+   145.0,
+   160.0,
+   1.25,
+   3,
+   165.5,
+   170.75
+  ],
+  "bybit": "✅ <b>ПОЗИЦИЯ ОТКРЫТА (Market) на Bybit</b>\n\n💎 <b>SOLUSDT</b>   🔴 SHORT   x3\n\n🎯 Вход: <code>87012.3</code> <i>(сигнал: 150.123457)</i>\n🛑 Стоп:          <code>145</code>\n📊 Slippage: <code>+57860.50%</code>\n\n🎯 TP1: <code>160</code>  (50% позиции)\n🎯 TP2: <code>165.5</code>  (25% позиции)\n🏆 TP3: <code>170.75</code>  (25% позиции)\n\n♻️ <i>После TP1 — стоп автоматически перенесётся в БУ</i>\n⏳ <i>TP-ордера ставятся сразу после открытия позиции (≤1 цикл BE-монитора)</i>\n\n📦 <b>Размер позиции:</b> <code>0.010</code>  (~$870.10 = 347.0% баланса)\n⚠️ <b>Макс. убыток при SL:</b> <code>$3.13</code> (1.25% от $250.75)\n<i>💡 Размер ≠ риск. Размер — сумма позиции, риск — реальный $ убыток при SL.</i>\n\n🆔 Order ID: <code>abc&lt;&amp;&gt;</code>",
+  "bingx": "✅ <b>BingX: сделка открыта</b>\n━━━━━━━━━━━━━━━━━━━━━━\n🟢 LONG  <b>SOL-USDT</b>  x3\n💵 Вход: <code>150.123457</code>\n🛑 SL:   <code>145</code>\n🎯 TP1: <code>160</code>  (50% позиции)\n🎯 TP2: <code>165.5</code>  (25% позиции)\n🏆 TP3: <code>170.75</code>  (25% позиции)\n♻️ <i>После TP1 — стоп перенесётся в БУ</i>\n📊 Qty: 0.010  (~$1.50)\n⚖️ Риск: 1.25%\n🆔 <code>abc&lt;&amp;&gt;</code>",
+  "binance": "✅ <b>Binance: сделка открыта</b>\n━━━━━━━━━━━━━━━━━━━━━━\n🟢 LONG  <b>SOLUSDT</b>  x3\n💵 Вход: <code>150.123457</code>\n🛑 SL:   <code>145</code>\n🎯 TP1: <code>160</code>  (50% позиции)\n🎯 TP2: <code>165.5</code>  (25% позиции)\n🏆 TP3: <code>170.75</code>  (25% позиции)\n♻️ <i>После TP1 — стоп перенесётся в БУ</i>\n📊 Qty: 0.010  (~$1.50)\n⚖️ Риск: 1.25%\n🆔 <code>abc&lt;&amp;&gt;</code>",
+  "okx": "📉 <b>OKX BUY</b>  SOLUSDT  ×3\n\n💰 Entry: <code>150.123457</code>\n🛑 SL: <code>145</code>\n🎯 TP1: <code>160</code>  |  TP2: <code>165.5</code>  |  TP3: <code>170.75</code>\n📊 Qty: 0.010  |  Risk: 1.25%\n🆔 <code>abc<&></code>",
+  "bybit_split": "✅ <b>SMC СПЛИТ-ВХОД выставлен на Bybit</b> (0/2 ордеров выставлено)\n\n💎 <b>SOLUSDT</b>   🔴 SHORT   x3\n\n🎯 Лимит 1 (50%): <code>149.37284</code>\n🎯 Лимит 2 (50%): <code>150.874074</code>\n🛑 Стоп:          <code>145</code>\n\n🎯 TP1: <code>160</code>  (50% позиции)\n🎯 TP2: <code>165.5</code>  (25% позиции)\n🏆 TP3: <code>170.75</code>  (25% позиции)\n\n♻️ <i>После TP1 — стоп автоматически перенесётся в БУ</i>\n⏳ <i>TP-ордера будут выставлены автоматически после исполнения входа</i>\n\n📦 <b>Размер позиции (суммарно):</b> <code>0.010</code>  (~$870.10 = 347.0% баланса)\n⚠️ <b>Макс. убыток при SL:</b> <code>$3.13</code> (1.25% от $250.75)\n<i>💡 Размер ≠ риск. Размер — сумма позиции, риск — реальный $ убыток при SL.</i>\n\n🆔 Order IDs: <code>abc&lt;&amp;&gt;</code>",
+  "split_args": [
+   {
+    "ok": true,
+    "order_id": "abc<&>",
+    "qty": "0.010",
+    "tp_placed": false,
+    "notional": 870.1,
+    "balance": 250.75,
+    "order_type": "Market",
+    "avg_price": 87012.3
+   },
+   "BUY",
+   "SOLUSDT",
+   149.372839505055,
+   150.87407407294498,
+   145.0,
+   160.0,
+   1.25,
+   3,
+   165.5,
+   170.75
+  ]
+ },
+ {
+  "args": [
+   {
+    "ok": true,
+    "order_id": "x",
+    "qty": 12000.5,
+    "tp_placed": true,
+    "order_type": "market",
+    "avg_price": 0
+   },
+   "LONG",
+   "BTC-USDT-SWAP",
+   87000.5,
+   86000.0,
+   88500.0,
+   1.0,
+   10,
+   89500.0,
+   90500.0
+  ],
+  "bybit": "✅ <b>ПОЗИЦИЯ ОТКРЫТА (Market) на Bybit</b>\n\n💎 <b>BTCUSDT</b>   🟢 LONG   x10\n\n🎯 Вход: <code>87000.5</code> <i>(сигнал: 87000.5)</i>\n🛑 Стоп:          <code>86000</code>\n\n🎯 TP1: <code>88500</code>  (50% позиции)\n🎯 TP2: <code>89500</code>  (25% позиции)\n🏆 TP3: <code>90500</code>  (25% позиции)\n\n♻️ <i>После TP1 — стоп автоматически перенесётся в БУ</i>\n\n📦 <b>Размер позиции:</b> <code>12000.5</code>  (~$0.00 = 0.0% баланса)\n⚠️ <b>Макс. убыток при SL:</b> <code>$0.00</code> (1.0% от $0.00)\n<i>💡 Размер ≠ риск. Размер — сумма позиции, риск — реальный $ убыток при SL.</i>\n\n🆔 Order ID: <code>x</code>",
+  "bingx": "✅ <b>BingX: сделка открыта</b>\n━━━━━━━━━━━━━━━━━━━━━━\n🟢 LONG  <b>BTC-USDT</b>  x10\n💵 Вход: <code>87000.5</code>\n🛑 SL:   <code>86000</code>\n🎯 TP1: <code>88500</code>  (50% позиции)\n🎯 TP2: <code>89500</code>  (25% позиции)\n🏆 TP3: <code>90500</code>  (25% позиции)\n♻️ <i>После TP1 — стоп перенесётся в БУ</i>\n📊 Qty: 12000.5  (~$1,044,049,500.25)\n⚖️ Риск: 1.0%\n🆔 <code>x</code>",
+  "binance": "✅ <b>Binance: сделка открыта</b>\n━━━━━━━━━━━━━━━━━━━━━━\n🟢 LONG  <b>BTCUSDT</b>  x10\n💵 Вход: <code>87000.5</code>\n🛑 SL:   <code>86000</code>\n🎯 TP1: <code>88500</code>  (50% позиции)\n🎯 TP2: <code>89500</code>  (25% позиции)\n🏆 TP3: <code>90500</code>  (25% позиции)\n♻️ <i>После TP1 — стоп перенесётся в БУ</i>\n📊 Qty: 12000.5  (~$1,044,049,500.25)\n⚖️ Риск: 1.0%\n🆔 <code>x</code>",
+  "okx": "📈 <b>OKX LONG</b>  BTC  ×10\n\n💰 Entry: <code>87000.5</code>\n🛑 SL: <code>86000</code>\n🎯 TP1: <code>88500</code>  |  TP2: <code>89500</code>  |  TP3: <code>90500</code>\n📊 Qty: 12000.5  |  Risk: 1.00%\n🆔 <code>x</code>",
+  "bybit_split": "✅ <b>SMC СПЛИТ-ВХОД выставлен на Bybit</b> (0/2 ордеров выставлено)\n\n💎 <b>BTCUSDT</b>   🟢 LONG   x10\n\n🎯 Лимит 1 (50%): <code>86565.4975</code>\n🎯 Лимит 2 (50%): <code>87435.5025</code>\n🛑 Стоп:          <code>86000</code>\n\n🎯 TP1: <code>88500</code>  (50% позиции)\n🎯 TP2: <code>89500</code>  (25% позиции)\n🏆 TP3: <code>90500</code>  (25% позиции)\n\n♻️ <i>После TP1 — стоп автоматически перенесётся в БУ</i>\n\n📦 <b>Размер позиции (суммарно):</b> <code>12000.5</code>  (~$0.00 = 0.0% баланса)\n⚠️ <b>Макс. убыток при SL:</b> <code>$0.00</code> (1.0% от $0.00)\n<i>💡 Размер ≠ риск. Размер — сумма позиции, риск — реальный $ убыток при SL.</i>\n\n🆔 Order IDs: <code>x</code>",
+  "split_args": [
+   {
+    "ok": true,
+    "order_id": "x",
+    "qty": 12000.5,
+    "tp_placed": true,
+    "order_type": "market",
+    "avg_price": 0
+   },
+   "LONG",
+   "BTC-USDT-SWAP",
+   86565.4975,
+   87435.50249999999,
+   86000.0,
+   88500.0,
+   1.0,
+   10,
+   89500.0,
+   90500.0
+  ]
+ },
+ {
+  "args": [
+   {
+    "ok": true,
+    "order_id": "x",
+    "qty": 12000.5,
+    "tp_placed": true,
+    "order_type": "market",
+    "avg_price": 0
+   },
+   "SHORT",
+   "ETH-USDT-SWAP",
+   3000.25,
+   3060.0,
+   2900.0,
+   2.5,
+   20,
+   0.0,
+   0.0
+  ],
+  "bybit": "✅ <b>ПОЗИЦИЯ ОТКРЫТА (Market) на Bybit</b>\n\n💎 <b>ETHUSDT</b>   🔴 SHORT   x20\n\n🎯 Вход: <code>3000.25</code> <i>(сигнал: 3000.25)</i>\n🛑 Стоп:          <code>3060</code>\n\n🎯 TP1: <code>2900</code>  (50% позиции)\n\n\n📦 <b>Размер позиции:</b> <code>12000.5</code>  (~$0.00 = 0.0% баланса)\n⚠️ <b>Макс. убыток при SL:</b> <code>$0.00</code> (2.5% от $0.00)\n<i>💡 Размер ≠ риск. Размер — сумма позиции, риск — реальный $ убыток при SL.</i>\n\n🆔 Order ID: <code>x</code>",
+  "bingx": "✅ <b>BingX: сделка открыта</b>\n━━━━━━━━━━━━━━━━━━━━━━\n🔴 SHORT  <b>ETH-USDT</b>  x20\n💵 Вход: <code>3000.25</code>\n🛑 SL:   <code>3060</code>\n🎯 TP1: <code>2900</code>\n📊 Qty: 12000.5  (~$36,004,500.12)\n⚖️ Риск: 2.5%\n🆔 <code>x</code>",
+  "binance": "✅ <b>Binance: сделка открыта</b>\n━━━━━━━━━━━━━━━━━━━━━━\n🔴 SHORT  <b>ETHUSDT</b>  x20\n💵 Вход: <code>3000.25</code>\n🛑 SL:   <code>3060</code>\n🎯 TP1: <code>2900</code>\n📊 Qty: 12000.5  (~$36,004,500.12)\n⚖️ Риск: 2.5%\n🆔 <code>x</code>",
+  "okx": "📉 <b>OKX SHORT</b>  ETH  ×20\n\n💰 Entry: <code>3000.25</code>\n🛑 SL: <code>3060</code>\n🎯 TP1: <code>2900</code>\n📊 Qty: 12000.5  |  Risk: 2.50%\n🆔 <code>x</code>",
+  "bybit_split": "✅ <b>SMC СПЛИТ-ВХОД выставлен на Bybit</b> (0/2 ордеров выставлено)\n\n💎 <b>ETHUSDT</b>   🔴 SHORT   x20\n\n🎯 Лимит 1 (50%): <code>2985.24875</code>\n🎯 Лимит 2 (50%): <code>3015.25125</code>\n🛑 Стоп:          <code>3060</code>\n\n🎯 TP1: <code>2900</code>  (50% позиции)\n\n\n📦 <b>Размер позиции (суммарно):</b> <code>12000.5</code>  (~$0.00 = 0.0% баланса)\n⚠️ <b>Макс. убыток при SL:</b> <code>$0.00</code> (2.5% от $0.00)\n<i>💡 Размер ≠ риск. Размер — сумма позиции, риск — реальный $ убыток при SL.</i>\n\n🆔 Order IDs: <code>x</code>",
+  "split_args": [
+   {
+    "ok": true,
+    "order_id": "x",
+    "qty": 12000.5,
+    "tp_placed": true,
+    "order_type": "market",
+    "avg_price": 0
+   },
+   "SHORT",
+   "ETH-USDT-SWAP",
+   2985.24875,
+   3015.25125,
+   3060.0,
+   2900.0,
+   2.5,
+   20,
+   0.0,
+   0.0
+  ]
+ },
+ {
+  "args": [
+   {
+    "ok": true,
+    "order_id": "x",
+    "qty": 12000.5,
+    "tp_placed": true,
+    "order_type": "market",
+    "avg_price": 0
+   },
+   "LONG",
+   "PEPE-USDT-SWAP",
+   1.23e-05,
+   1.18e-05,
+   1.31e-05,
+   0.5,
+   5,
+   1.39e-05,
+   0.0
+  ],
+  "bybit": "✅ <b>ПОЗИЦИЯ ОТКРЫТА (Market) на Bybit</b>\n\n💎 <b>1000PEPEUSDT</b>   🟢 LONG   x5\n\n🎯 Вход: <code>0.0000123</code> <i>(сигнал: 0.0000123)</i>\n🛑 Стоп:          <code>0.0000118</code>\n\n🎯 TP1: <code>0.0000131</code>  (50% позиции)\n🎯 TP2: <code>0.0000139</code>  (25% позиции)\n\n♻️ <i>После TP1 — стоп автоматически перенесётся в БУ</i>\n\n📦 <b>Размер позиции:</b> <code>12000.5</code>  (~$0.00 = 0.0% баланса)\n⚠️ <b>Макс. убыток при SL:</b> <code>$0.00</code> (0.5% от $0.00)\n<i>💡 Размер ≠ риск. Размер — сумма позиции, риск — реальный $ убыток при SL.</i>\n\n🆔 Order ID: <code>x</code>",
+  "bingx": "✅ <b>BingX: сделка открыта</b>\n━━━━━━━━━━━━━━━━━━━━━━\n🟢 LONG  <b>1000PEPE-USDT</b>  x5\n💵 Вход: <code>0.0000123</code>\n🛑 SL:   <code>0.0000118</code>\n🎯 TP1: <code>0.0000131</code>  (50% позиции)\n🎯 TP2: <code>0.0000139</code>  (25% позиции)\n♻️ <i>После TP1 — стоп перенесётся в БУ</i>\n📊 Qty: 12000.5  (~$0.15)\n⚖️ Риск: 0.5%\n🆔 <code>x</code>",
+  "binance": "✅ <b>Binance: сделка открыта</b>\n━━━━━━━━━━━━━━━━━━━━━━\n🟢 LONG  <b>1000PEPEUSDT</b>  x5\n💵 Вход: <code>0.0000123</code>\n🛑 SL:   <code>0.0000118</code>\n🎯 TP1: <code>0.0000131</code>  (50% позиции)\n🎯 TP2: <code>0.0000139</code>  (25% позиции)\n♻️ <i>После TP1 — стоп перенесётся в БУ</i>\n📊 Qty: 12000.5  (~$0.15)\n⚖️ Риск: 0.5%\n🆔 <code>x</code>",
+  "okx": "📈 <b>OKX LONG</b>  PEPE  ×5\n\n💰 Entry: <code>0.0000123</code>\n🛑 SL: <code>0.0000118</code>\n🎯 TP1: <code>0.0000131</code>  |  TP2: <code>0.0000139</code>\n📊 Qty: 12000.5  |  Risk: 0.50%\n🆔 <code>x</code>",
+  "bybit_split": "✅ <b>SMC СПЛИТ-ВХОД выставлен на Bybit</b> (0/2 ордеров выставлено)\n\n💎 <b>1000PEPEUSDT</b>   🟢 LONG   x5\n\n🎯 Лимит 1 (50%): <code>0.0000122385</code>\n🎯 Лимит 2 (50%): <code>0.0000123615</code>\n🛑 Стоп:          <code>0.0000118</code>\n\n🎯 TP1: <code>0.0000131</code>  (50% позиции)\n🎯 TP2: <code>0.0000139</code>  (25% позиции)\n\n♻️ <i>После TP1 — стоп автоматически перенесётся в БУ</i>\n\n📦 <b>Размер позиции (суммарно):</b> <code>12000.5</code>  (~$0.00 = 0.0% баланса)\n⚠️ <b>Макс. убыток при SL:</b> <code>$0.00</code> (0.5% от $0.00)\n<i>💡 Размер ≠ риск. Размер — сумма позиции, риск — реальный $ убыток при SL.</i>\n\n🆔 Order IDs: <code>x</code>",
+  "split_args": [
+   {
+    "ok": true,
+    "order_id": "x",
+    "qty": 12000.5,
+    "tp_placed": true,
+    "order_type": "market",
+    "avg_price": 0
+   },
+   "LONG",
+   "PEPE-USDT-SWAP",
+   1.2238500000000001e-05,
+   1.23615e-05,
+   1.18e-05,
+   1.31e-05,
+   0.5,
+   5,
+   1.39e-05,
+   0.0
+  ]
+ },
+ {
+  "args": [
+   {
+    "ok": true,
+    "order_id": "x",
+    "qty": 12000.5,
+    "tp_placed": true,
+    "order_type": "market",
+    "avg_price": 0
+   },
+   "BUY",
+   "SOLUSDT",
+   150.123456789,
+   145.0,
+   160.0,
+   1.25,
+   3,
+   165.5,
+   170.75
+  ],
+  "bybit": "✅ <b>ПОЗИЦИЯ ОТКРЫТА (Market) на Bybit</b>\n\n💎 <b>SOLUSDT</b>   🔴 SHORT   x3\n\n🎯 Вход: <code>150.123457</code> <i>(сигнал: 150.123457)</i>\n🛑 Стоп:          <code>145</code>\n\n🎯 TP1: <code>160</code>  (50% позиции)\n🎯 TP2: <code>165.5</code>  (25% позиции)\n🏆 TP3: <code>170.75</code>  (25% позиции)\n\n♻️ <i>После TP1 — стоп автоматически перенесётся в БУ</i>\n\n📦 <b>Размер позиции:</b> <code>12000.5</code>  (~$0.00 = 0.0% баланса)\n⚠️ <b>Макс. убыток при SL:</b> <code>$0.00</code> (1.25% от $0.00)\n<i>💡 Размер ≠ риск. Размер — сумма позиции, риск — реальный $ убыток при SL.</i>\n\n🆔 Order ID: <code>x</code>",
+  "bingx": "✅ <b>BingX: сделка открыта</b>\n━━━━━━━━━━━━━━━━━━━━━━\n🟢 LONG  <b>SOL-USDT</b>  x3\n💵 Вход: <code>150.123457</code>\n🛑 SL:   <code>145</code>\n🎯 TP1: <code>160</code>  (50% позиции)\n🎯 TP2: <code>165.5</code>  (25% позиции)\n🏆 TP3: <code>170.75</code>  (25% позиции)\n♻️ <i>После TP1 — стоп перенесётся в БУ</i>\n📊 Qty: 12000.5  (~$1,801,556.54)\n⚖️ Риск: 1.25%\n🆔 <code>x</code>",
+  "binance": "✅ <b>Binance: сделка открыта</b>\n━━━━━━━━━━━━━━━━━━━━━━\n🟢 LONG  <b>SOLUSDT</b>  x3\n💵 Вход: <code>150.123457</code>\n🛑 SL:   <code>145</code>\n🎯 TP1: <code>160</code>  (50% позиции)\n🎯 TP2: <code>165.5</code>  (25% позиции)\n🏆 TP3: <code>170.75</code>  (25% позиции)\n♻️ <i>После TP1 — стоп перенесётся в БУ</i>\n📊 Qty: 12000.5  (~$1,801,556.54)\n⚖️ Риск: 1.25%\n🆔 <code>x</code>",
+  "okx": "📉 <b>OKX BUY</b>  SOLUSDT  ×3\n\n💰 Entry: <code>150.123457</code>\n🛑 SL: <code>145</code>\n🎯 TP1: <code>160</code>  |  TP2: <code>165.5</code>  |  TP3: <code>170.75</code>\n📊 Qty: 12000.5  |  Risk: 1.25%\n🆔 <code>x</code>",
+  "bybit_split": "✅ <b>SMC СПЛИТ-ВХОД выставлен на Bybit</b> (0/2 ордеров выставлено)\n\n💎 <b>SOLUSDT</b>   🔴 SHORT   x3\n\n🎯 Лимит 1 (50%): <code>149.37284</code>\n🎯 Лимит 2 (50%): <code>150.874074</code>\n🛑 Стоп:          <code>145</code>\n\n🎯 TP1: <code>160</code>  (50% позиции)\n🎯 TP2: <code>165.5</code>  (25% позиции)\n🏆 TP3: <code>170.75</code>  (25% позиции)\n\n♻️ <i>После TP1 — стоп автоматически перенесётся в БУ</i>\n\n📦 <b>Размер позиции (суммарно):</b> <code>12000.5</code>  (~$0.00 = 0.0% баланса)\n⚠️ <b>Макс. убыток при SL:</b> <code>$0.00</code> (1.25% от $0.00)\n<i>💡 Размер ≠ риск. Размер — сумма позиции, риск — реальный $ убыток при SL.</i>\n\n🆔 Order IDs: <code>x</code>",
+  "split_args": [
+   {
+    "ok": true,
+    "order_id": "x",
+    "qty": 12000.5,
+    "tp_placed": true,
+    "order_type": "market",
+    "avg_price": 0
+   },
+   "BUY",
+   "SOLUSDT",
+   149.372839505055,
+   150.87407407294498,
+   145.0,
+   160.0,
+   1.25,
+   3,
+   165.5,
+   170.75
+  ]
+ },
+ {
+  "args": [
+   {
+    "ok": true,
+    "order_id": "777",
+    "qty": "1500",
+    "symbol": "1000PEPE-USDT",
+    "order_id_lo": "lo1",
+    "order_id_hi": "hi2",
+    "tp_placed": true,
+    "notional": 18.45,
+    "balance": 99.99
+   },
+   "LONG",
+   "BTC-USDT-SWAP",
+   87000.5,
+   86000.0,
+   88500.0,
+   1.0,
+   10,
+   89500.0,
+   90500.0
+  ],
+  "bybit": "✅ <b>ЛИМИТНЫЙ ОРДЕР ВЫСТАВЛЕН на Bybit</b>\n\n💎 <b>1000PEPE-USDT</b>   🟢 LONG   x10\n\n🎯 Лимитный вход: <code>87000.5</code>\n🛑 Стоп:          <code>86000</code>\n\n🎯 TP1: <code>88500</code>  (50% позиции)\n🎯 TP2: <code>89500</code>  (25% позиции)\n🏆 TP3: <code>90500</code>  (25% позиции)\n\n♻️ <i>После TP1 — стоп автоматически перенесётся в БУ</i>\n\n📦 <b>Размер позиции:</b> <code>1500</code>  (~$18.45 = 18.5% баланса)\n⚠️ <b>Макс. убыток при SL:</b> <code>$1.00</code> (1.0% от $99.99)\n<i>💡 Размер ≠ риск. Размер — сумма позиции, риск — реальный $ убыток при SL.</i>\n\n🆔 Order ID: <code>777</code>",
+  "bingx": "✅ <b>BingX: сделка открыта</b>\n━━━━━━━━━━━━━━━━━━━━━━\n🟢 LONG  <b>BTC-USDT</b>  x10\n💵 Вход: <code>87000.5</code>\n🛑 SL:   <code>86000</code>\n🎯 TP1: <code>88500</code>  (50% позиции)\n🎯 TP2: <code>89500</code>  (25% позиции)\n🏆 TP3: <code>90500</code>  (25% позиции)\n♻️ <i>После TP1 — стоп перенесётся в БУ</i>\n📊 Qty: 1500  (~$130,500,750.00)\n⚖️ Риск: 1.0%\n🆔 <code>777</code>",
+  "binance": "✅ <b>Binance: сделка открыта</b>\n━━━━━━━━━━━━━━━━━━━━━━\n🟢 LONG  <b>BTCUSDT</b>  x10\n💵 Вход: <code>87000.5</code>\n🛑 SL:   <code>86000</code>\n🎯 TP1: <code>88500</code>  (50% позиции)\n🎯 TP2: <code>89500</code>  (25% позиции)\n🏆 TP3: <code>90500</code>  (25% позиции)\n♻️ <i>После TP1 — стоп перенесётся в БУ</i>\n📊 Qty: 1500  (~$130,500,750.00)\n⚖️ Риск: 1.0%\n🆔 <code>777</code>",
+  "okx": "📈 <b>OKX LONG</b>  BTC  ×10\n\n💰 Entry: <code>87000.5</code>\n🛑 SL: <code>86000</code>\n🎯 TP1: <code>88500</code>  |  TP2: <code>89500</code>  |  TP3: <code>90500</code>\n📊 Qty: 1500  |  Risk: 1.00%\n🆔 <code>777</code>",
+  "bybit_split": "✅ <b>SMC СПЛИТ-ВХОД выставлен на Bybit</b> \n\n💎 <b>1000PEPE-USDT</b>   🟢 LONG   x10\n\n🎯 Лимит 1 (50%): <code>86565.4975</code>\n🎯 Лимит 2 (50%): <code>87435.5025</code>\n🛑 Стоп:          <code>86000</code>\n\n🎯 TP1: <code>88500</code>  (50% позиции)\n🎯 TP2: <code>89500</code>  (25% позиции)\n🏆 TP3: <code>90500</code>  (25% позиции)\n\n♻️ <i>После TP1 — стоп автоматически перенесётся в БУ</i>\n\n📦 <b>Размер позиции (суммарно):</b> <code>1500</code>  (~$18.45 = 18.5% баланса)\n⚠️ <b>Макс. убыток при SL:</b> <code>$1.00</code> (1.0% от $99.99)\n<i>💡 Размер ≠ риск. Размер — сумма позиции, риск — реальный $ убыток при SL.</i>\n\n🆔 Order IDs: <code>777</code>",
+  "split_args": [
+   {
+    "ok": true,
+    "order_id": "777",
+    "qty": "1500",
+    "symbol": "1000PEPE-USDT",
+    "order_id_lo": "lo1",
+    "order_id_hi": "hi2",
+    "tp_placed": true,
+    "notional": 18.45,
+    "balance": 99.99
+   },
+   "LONG",
+   "BTC-USDT-SWAP",
+   86565.4975,
+   87435.50249999999,
+   86000.0,
+   88500.0,
+   1.0,
+   10,
+   89500.0,
+   90500.0
+  ]
+ },
+ {
+  "args": [
+   {
+    "ok": true,
+    "order_id": "777",
+    "qty": "1500",
+    "symbol": "1000PEPE-USDT",
+    "order_id_lo": "lo1",
+    "order_id_hi": "hi2",
+    "tp_placed": true,
+    "notional": 18.45,
+    "balance": 99.99
+   },
+   "SHORT",
+   "ETH-USDT-SWAP",
+   3000.25,
+   3060.0,
+   2900.0,
+   2.5,
+   20,
+   0.0,
+   0.0
+  ],
+  "bybit": "✅ <b>ЛИМИТНЫЙ ОРДЕР ВЫСТАВЛЕН на Bybit</b>\n\n💎 <b>1000PEPE-USDT</b>   🔴 SHORT   x20\n\n🎯 Лимитный вход: <code>3000.25</code>\n🛑 Стоп:          <code>3060</code>\n\n🎯 TP1: <code>2900</code>  (50% позиции)\n\n\n📦 <b>Размер позиции:</b> <code>1500</code>  (~$18.45 = 18.5% баланса)\n⚠️ <b>Макс. убыток при SL:</b> <code>$2.50</code> (2.5% от $99.99)\n<i>💡 Размер ≠ риск. Размер — сумма позиции, риск — реальный $ убыток при SL.</i>\n\n🆔 Order ID: <code>777</code>",
+  "bingx": "✅ <b>BingX: сделка открыта</b>\n━━━━━━━━━━━━━━━━━━━━━━\n🔴 SHORT  <b>ETH-USDT</b>  x20\n💵 Вход: <code>3000.25</code>\n🛑 SL:   <code>3060</code>\n🎯 TP1: <code>2900</code>\n📊 Qty: 1500  (~$4,500,375.00)\n⚖️ Риск: 2.5%\n🆔 <code>777</code>",
+  "binance": "✅ <b>Binance: сделка открыта</b>\n━━━━━━━━━━━━━━━━━━━━━━\n🔴 SHORT  <b>ETHUSDT</b>  x20\n💵 Вход: <code>3000.25</code>\n🛑 SL:   <code>3060</code>\n🎯 TP1: <code>2900</code>\n📊 Qty: 1500  (~$4,500,375.00)\n⚖️ Риск: 2.5%\n🆔 <code>777</code>",
+  "okx": "📉 <b>OKX SHORT</b>  ETH  ×20\n\n💰 Entry: <code>3000.25</code>\n🛑 SL: <code>3060</code>\n🎯 TP1: <code>2900</code>\n📊 Qty: 1500  |  Risk: 2.50%\n🆔 <code>777</code>",
+  "bybit_split": "✅ <b>SMC СПЛИТ-ВХОД выставлен на Bybit</b> \n\n💎 <b>1000PEPE-USDT</b>   🔴 SHORT   x20\n\n🎯 Лимит 1 (50%): <code>2985.24875</code>\n🎯 Лимит 2 (50%): <code>3015.25125</code>\n🛑 Стоп:          <code>3060</code>\n\n🎯 TP1: <code>2900</code>  (50% позиции)\n\n\n📦 <b>Размер позиции (суммарно):</b> <code>1500</code>  (~$18.45 = 18.5% баланса)\n⚠️ <b>Макс. убыток при SL:</b> <code>$2.50</code> (2.5% от $99.99)\n<i>💡 Размер ≠ риск. Размер — сумма позиции, риск — реальный $ убыток при SL.</i>\n\n🆔 Order IDs: <code>777</code>",
+  "split_args": [
+   {
+    "ok": true,
+    "order_id": "777",
+    "qty": "1500",
+    "symbol": "1000PEPE-USDT",
+    "order_id_lo": "lo1",
+    "order_id_hi": "hi2",
+    "tp_placed": true,
+    "notional": 18.45,
+    "balance": 99.99
+   },
+   "SHORT",
+   "ETH-USDT-SWAP",
+   2985.24875,
+   3015.25125,
+   3060.0,
+   2900.0,
+   2.5,
+   20,
+   0.0,
+   0.0
+  ]
+ },
+ {
+  "args": [
+   {
+    "ok": true,
+    "order_id": "777",
+    "qty": "1500",
+    "symbol": "1000PEPE-USDT",
+    "order_id_lo": "lo1",
+    "order_id_hi": "hi2",
+    "tp_placed": true,
+    "notional": 18.45,
+    "balance": 99.99
+   },
+   "LONG",
+   "PEPE-USDT-SWAP",
+   1.23e-05,
+   1.18e-05,
+   1.31e-05,
+   0.5,
+   5,
+   1.39e-05,
+   0.0
+  ],
+  "bybit": "✅ <b>ЛИМИТНЫЙ ОРДЕР ВЫСТАВЛЕН на Bybit</b>\n\n💎 <b>1000PEPE-USDT</b>   🟢 LONG   x5\n\n🎯 Лимитный вход: <code>0.0000123</code>\n🛑 Стоп:          <code>0.0000118</code>\n\n🎯 TP1: <code>0.0000131</code>  (50% позиции)\n🎯 TP2: <code>0.0000139</code>  (25% позиции)\n\n♻️ <i>После TP1 — стоп автоматически перенесётся в БУ</i>\n\n📦 <b>Размер позиции:</b> <code>1500</code>  (~$18.45 = 18.5% баланса)\n⚠️ <b>Макс. убыток при SL:</b> <code>$0.50</code> (0.5% от $99.99)\n<i>💡 Размер ≠ риск. Размер — сумма позиции, риск — реальный $ убыток при SL.</i>\n\n🆔 Order ID: <code>777</code>",
+  "bingx": "✅ <b>BingX: сделка открыта</b>\n━━━━━━━━━━━━━━━━━━━━━━\n🟢 LONG  <b>1000PEPE-USDT</b>  x5\n💵 Вход: <code>0.0000123</code>\n🛑 SL:   <code>0.0000118</code>\n🎯 TP1: <code>0.0000131</code>  (50% позиции)\n🎯 TP2: <code>0.0000139</code>  (25% позиции)\n♻️ <i>После TP1 — стоп перенесётся в БУ</i>\n📊 Qty: 1500  (~$0.02)\n⚖️ Риск: 0.5%\n🆔 <code>777</code>",
+  "binance": "✅ <b>Binance: сделка открыта</b>\n━━━━━━━━━━━━━━━━━━━━━━\n🟢 LONG  <b>1000PEPEUSDT</b>  x5\n💵 Вход: <code>0.0000123</code>\n🛑 SL:   <code>0.0000118</code>\n🎯 TP1: <code>0.0000131</code>  (50% позиции)\n🎯 TP2: <code>0.0000139</code>  (25% позиции)\n♻️ <i>После TP1 — стоп перенесётся в БУ</i>\n📊 Qty: 1500  (~$0.02)\n⚖️ Риск: 0.5%\n🆔 <code>777</code>",
+  "okx": "📈 <b>OKX LONG</b>  PEPE  ×5\n\n💰 Entry: <code>0.0000123</code>\n🛑 SL: <code>0.0000118</code>\n🎯 TP1: <code>0.0000131</code>  |  TP2: <code>0.0000139</code>\n📊 Qty: 1500  |  Risk: 0.50%\n🆔 <code>777</code>",
+  "bybit_split": "✅ <b>SMC СПЛИТ-ВХОД выставлен на Bybit</b> \n\n💎 <b>1000PEPE-USDT</b>   🟢 LONG   x5\n\n🎯 Лимит 1 (50%): <code>0.0000122385</code>\n🎯 Лимит 2 (50%): <code>0.0000123615</code>\n🛑 Стоп:          <code>0.0000118</code>\n\n🎯 TP1: <code>0.0000131</code>  (50% позиции)\n🎯 TP2: <code>0.0000139</code>  (25% позиции)\n\n♻️ <i>После TP1 — стоп автоматически перенесётся в БУ</i>\n\n📦 <b>Размер позиции (суммарно):</b> <code>1500</code>  (~$18.45 = 18.5% баланса)\n⚠️ <b>Макс. убыток при SL:</b> <code>$0.50</code> (0.5% от $99.99)\n<i>💡 Размер ≠ риск. Размер — сумма позиции, риск — реальный $ убыток при SL.</i>\n\n🆔 Order IDs: <code>777</code>",
+  "split_args": [
+   {
+    "ok": true,
+    "order_id": "777",
+    "qty": "1500",
+    "symbol": "1000PEPE-USDT",
+    "order_id_lo": "lo1",
+    "order_id_hi": "hi2",
+    "tp_placed": true,
+    "notional": 18.45,
+    "balance": 99.99
+   },
+   "LONG",
+   "PEPE-USDT-SWAP",
+   1.2238500000000001e-05,
+   1.23615e-05,
+   1.18e-05,
+   1.31e-05,
+   0.5,
+   5,
+   1.39e-05,
+   0.0
+  ]
+ },
+ {
+  "args": [
+   {
+    "ok": true,
+    "order_id": "777",
+    "qty": "1500",
+    "symbol": "1000PEPE-USDT",
+    "order_id_lo": "lo1",
+    "order_id_hi": "hi2",
+    "tp_placed": true,
+    "notional": 18.45,
+    "balance": 99.99
+   },
+   "BUY",
+   "SOLUSDT",
+   150.123456789,
+   145.0,
+   160.0,
+   1.25,
+   3,
+   165.5,
+   170.75
+  ],
+  "bybit": "✅ <b>ЛИМИТНЫЙ ОРДЕР ВЫСТАВЛЕН на Bybit</b>\n\n💎 <b>1000PEPE-USDT</b>   🔴 SHORT   x3\n\n🎯 Лимитный вход: <code>150.123457</code>\n🛑 Стоп:          <code>145</code>\n\n🎯 TP1: <code>160</code>  (50% позиции)\n🎯 TP2: <code>165.5</code>  (25% позиции)\n🏆 TP3: <code>170.75</code>  (25% позиции)\n\n♻️ <i>После TP1 — стоп автоматически перенесётся в БУ</i>\n\n📦 <b>Размер позиции:</b> <code>1500</code>  (~$18.45 = 18.5% баланса)\n⚠️ <b>Макс. убыток при SL:</b> <code>$1.25</code> (1.25% от $99.99)\n<i>💡 Размер ≠ риск. Размер — сумма позиции, риск — реальный $ убыток при SL.</i>\n\n🆔 Order ID: <code>777</code>",
+  "bingx": "✅ <b>BingX: сделка открыта</b>\n━━━━━━━━━━━━━━━━━━━━━━\n🟢 LONG  <b>SOL-USDT</b>  x3\n💵 Вход: <code>150.123457</code>\n🛑 SL:   <code>145</code>\n🎯 TP1: <code>160</code>  (50% позиции)\n🎯 TP2: <code>165.5</code>  (25% позиции)\n🏆 TP3: <code>170.75</code>  (25% позиции)\n♻️ <i>После TP1 — стоп перенесётся в БУ</i>\n📊 Qty: 1500  (~$225,185.19)\n⚖️ Риск: 1.25%\n🆔 <code>777</code>",
+  "binance": "✅ <b>Binance: сделка открыта</b>\n━━━━━━━━━━━━━━━━━━━━━━\n🟢 LONG  <b>SOLUSDT</b>  x3\n💵 Вход: <code>150.123457</code>\n🛑 SL:   <code>145</code>\n🎯 TP1: <code>160</code>  (50% позиции)\n🎯 TP2: <code>165.5</code>  (25% позиции)\n🏆 TP3: <code>170.75</code>  (25% позиции)\n♻️ <i>После TP1 — стоп перенесётся в БУ</i>\n📊 Qty: 1500  (~$225,185.19)\n⚖️ Риск: 1.25%\n🆔 <code>777</code>",
+  "okx": "📉 <b>OKX BUY</b>  SOLUSDT  ×3\n\n💰 Entry: <code>150.123457</code>\n🛑 SL: <code>145</code>\n🎯 TP1: <code>160</code>  |  TP2: <code>165.5</code>  |  TP3: <code>170.75</code>\n📊 Qty: 1500  |  Risk: 1.25%\n🆔 <code>777</code>",
+  "bybit_split": "✅ <b>SMC СПЛИТ-ВХОД выставлен на Bybit</b> \n\n💎 <b>1000PEPE-USDT</b>   🔴 SHORT   x3\n\n🎯 Лимит 1 (50%): <code>149.37284</code>\n🎯 Лимит 2 (50%): <code>150.874074</code>\n🛑 Стоп:          <code>145</code>\n\n🎯 TP1: <code>160</code>  (50% позиции)\n🎯 TP2: <code>165.5</code>  (25% позиции)\n🏆 TP3: <code>170.75</code>  (25% позиции)\n\n♻️ <i>После TP1 — стоп автоматически перенесётся в БУ</i>\n\n📦 <b>Размер позиции (суммарно):</b> <code>1500</code>  (~$18.45 = 18.5% баланса)\n⚠️ <b>Макс. убыток при SL:</b> <code>$1.25</code> (1.25% от $99.99)\n<i>💡 Размер ≠ риск. Размер — сумма позиции, риск — реальный $ убыток при SL.</i>\n\n🆔 Order IDs: <code>777</code>",
+  "split_args": [
+   {
+    "ok": true,
+    "order_id": "777",
+    "qty": "1500",
+    "symbol": "1000PEPE-USDT",
+    "order_id_lo": "lo1",
+    "order_id_hi": "hi2",
+    "tp_placed": true,
+    "notional": 18.45,
+    "balance": 99.99
+   },
+   "BUY",
+   "SOLUSDT",
+   149.372839505055,
+   150.87407407294498,
+   145.0,
+   160.0,
+   1.25,
+   3,
+   165.5,
+   170.75
+  ]
+ },
+ {
+  "args": [
+   {
+    "ok": false,
+    "error": "Недостаточно средств <b>&</b> (110007)"
+   },
+   "LONG",
+   "BTC-USDT-SWAP",
+   87000.5,
+   86000.0,
+   88500.0,
+   1.0,
+   10,
+   89500.0,
+   90500.0
+  ],
+  "bybit": "❌ <b>Не удалось открыть сделку</b>\n\n⚠️ Недостаточно свободного баланса для открытия позиции. Пополните счёт или уменьшите объём.",
+  "bingx": "❌ <b>BingX: ошибка открытия сделки</b>\n🟢 LONG  <b>BTC-USDT</b>\n⚠️ Недостаточно средств &lt;b&gt;&amp;&lt;/b&gt; (110007)",
+  "binance": "❌ <b>Binance: ошибка открытия сделки</b>\n🟢 LONG  <b>BTCUSDT</b>\n⚠️ Недостаточно средств &lt;b&gt;&amp;&lt;/b&gt; (110007)",
+  "okx": "❌ <b>OKX ордер не выполнен</b>\nBTC LONG\n\n<code>Недостаточно средств &lt;b&gt;&amp;&lt;/b&gt; (110007)</code>",
+  "bybit_split": "❌ <b>Не удалось открыть сделку</b>\n\n⚠️ Недостаточно свободного баланса для открытия позиции. Пополните счёт или уменьшите объём.",
+  "split_args": [
+   {
+    "ok": false,
+    "error": "Недостаточно средств <b>&</b> (110007)"
+   },
+   "LONG",
+   "BTC-USDT-SWAP",
+   86565.4975,
+   87435.50249999999,
+   86000.0,
+   88500.0,
+   1.0,
+   10,
+   89500.0,
+   90500.0
+  ]
+ },
+ {
+  "args": [
+   {
+    "ok": false,
+    "error": "Недостаточно средств <b>&</b> (110007)"
+   },
+   "SHORT",
+   "ETH-USDT-SWAP",
+   3000.25,
+   3060.0,
+   2900.0,
+   2.5,
+   20,
+   0.0,
+   0.0
+  ],
+  "bybit": "❌ <b>Не удалось открыть сделку</b>\n\n⚠️ Недостаточно свободного баланса для открытия позиции. Пополните счёт или уменьшите объём.",
+  "bingx": "❌ <b>BingX: ошибка открытия сделки</b>\n🔴 SHORT  <b>ETH-USDT</b>\n⚠️ Недостаточно средств &lt;b&gt;&amp;&lt;/b&gt; (110007)",
+  "binance": "❌ <b>Binance: ошибка открытия сделки</b>\n🔴 SHORT  <b>ETHUSDT</b>\n⚠️ Недостаточно средств &lt;b&gt;&amp;&lt;/b&gt; (110007)",
+  "okx": "❌ <b>OKX ордер не выполнен</b>\nETH SHORT\n\n<code>Недостаточно средств &lt;b&gt;&amp;&lt;/b&gt; (110007)</code>",
+  "bybit_split": "❌ <b>Не удалось открыть сделку</b>\n\n⚠️ Недостаточно свободного баланса для открытия позиции. Пополните счёт или уменьшите объём.",
+  "split_args": [
+   {
+    "ok": false,
+    "error": "Недостаточно средств <b>&</b> (110007)"
+   },
+   "SHORT",
+   "ETH-USDT-SWAP",
+   2985.24875,
+   3015.25125,
+   3060.0,
+   2900.0,
+   2.5,
+   20,
+   0.0,
+   0.0
+  ]
+ },
+ {
+  "args": [
+   {
+    "ok": false,
+    "error": "Недостаточно средств <b>&</b> (110007)"
+   },
+   "LONG",
+   "PEPE-USDT-SWAP",
+   1.23e-05,
+   1.18e-05,
+   1.31e-05,
+   0.5,
+   5,
+   1.39e-05,
+   0.0
+  ],
+  "bybit": "❌ <b>Не удалось открыть сделку</b>\n\n⚠️ Недостаточно свободного баланса для открытия позиции. Пополните счёт или уменьшите объём.",
+  "bingx": "❌ <b>BingX: ошибка открытия сделки</b>\n🟢 LONG  <b>1000PEPE-USDT</b>\n⚠️ Недостаточно средств &lt;b&gt;&amp;&lt;/b&gt; (110007)",
+  "binance": "❌ <b>Binance: ошибка открытия сделки</b>\n🟢 LONG  <b>1000PEPEUSDT</b>\n⚠️ Недостаточно средств &lt;b&gt;&amp;&lt;/b&gt; (110007)",
+  "okx": "❌ <b>OKX ордер не выполнен</b>\nPEPE LONG\n\n<code>Недостаточно средств &lt;b&gt;&amp;&lt;/b&gt; (110007)</code>",
+  "bybit_split": "❌ <b>Не удалось открыть сделку</b>\n\n⚠️ Недостаточно свободного баланса для открытия позиции. Пополните счёт или уменьшите объём.",
+  "split_args": [
+   {
+    "ok": false,
+    "error": "Недостаточно средств <b>&</b> (110007)"
+   },
+   "LONG",
+   "PEPE-USDT-SWAP",
+   1.2238500000000001e-05,
+   1.23615e-05,
+   1.18e-05,
+   1.31e-05,
+   0.5,
+   5,
+   1.39e-05,
+   0.0
+  ]
+ },
+ {
+  "args": [
+   {
+    "ok": false,
+    "error": "Недостаточно средств <b>&</b> (110007)"
+   },
+   "BUY",
+   "SOLUSDT",
+   150.123456789,
+   145.0,
+   160.0,
+   1.25,
+   3,
+   165.5,
+   170.75
+  ],
+  "bybit": "❌ <b>Не удалось открыть сделку</b>\n\n⚠️ Недостаточно свободного баланса для открытия позиции. Пополните счёт или уменьшите объём.",
+  "bingx": "❌ <b>BingX: ошибка открытия сделки</b>\n🟢 LONG  <b>SOL-USDT</b>\n⚠️ Недостаточно средств &lt;b&gt;&amp;&lt;/b&gt; (110007)",
+  "binance": "❌ <b>Binance: ошибка открытия сделки</b>\n🟢 LONG  <b>SOLUSDT</b>\n⚠️ Недостаточно средств &lt;b&gt;&amp;&lt;/b&gt; (110007)",
+  "okx": "❌ <b>OKX ордер не выполнен</b>\nSOLUSDT BUY\n\n<code>Недостаточно средств &lt;b&gt;&amp;&lt;/b&gt; (110007)</code>",
+  "bybit_split": "❌ <b>Не удалось открыть сделку</b>\n\n⚠️ Недостаточно свободного баланса для открытия позиции. Пополните счёт или уменьшите объём.",
+  "split_args": [
+   {
+    "ok": false,
+    "error": "Недостаточно средств <b>&</b> (110007)"
+   },
+   "BUY",
+   "SOLUSDT",
+   149.372839505055,
+   150.87407407294498,
+   145.0,
+   160.0,
+   1.25,
+   3,
+   165.5,
+   170.75
+  ]
+ },
+ {
+  "args": [
+   {
+    "ok": false,
+    "error": "Retryable error occurred, retrying... xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+   },
+   "LONG",
+   "BTC-USDT-SWAP",
+   87000.5,
+   86000.0,
+   88500.0,
+   1.0,
+   10,
+   89500.0,
+   90500.0
+  ],
+  "bybit": "❌ <b>Не удалось открыть сделку</b>\n\n⚠️ Ошибка соединения с Bybit (сервер временно недоступен). Проверьте ключи и попробуйте ещё раз.",
+  "bingx": "❌ <b>BingX: ошибка открытия сделки</b>\n🟢 LONG  <b>BTC-USDT</b>\n⚠️ Retryable error occurred, retrying... xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+  "binance": "❌ <b>Binance: ошибка открытия сделки</b>\n🟢 LONG  <b>BTCUSDT</b>\n⚠️ Retryable error occurred, retrying... xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+  "okx": "❌ <b>OKX ордер не выполнен</b>\nBTC LONG\n\n<code>Retryable error occurred, retrying... xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx</code>",
+  "bybit_split": "❌ <b>Не удалось открыть сделку</b>\n\n⚠️ Ошибка соединения с Bybit (сервер временно недоступен). Проверьте ключи и попробуйте ещё раз.",
+  "split_args": [
+   {
+    "ok": false,
+    "error": "Retryable error occurred, retrying... xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+   },
+   "LONG",
+   "BTC-USDT-SWAP",
+   86565.4975,
+   87435.50249999999,
+   86000.0,
+   88500.0,
+   1.0,
+   10,
+   89500.0,
+   90500.0
+  ]
+ },
+ {
+  "args": [
+   {
+    "ok": false,
+    "error": "Retryable error occurred, retrying... xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+   },
+   "SHORT",
+   "ETH-USDT-SWAP",
+   3000.25,
+   3060.0,
+   2900.0,
+   2.5,
+   20,
+   0.0,
+   0.0
+  ],
+  "bybit": "❌ <b>Не удалось открыть сделку</b>\n\n⚠️ Ошибка соединения с Bybit (сервер временно недоступен). Проверьте ключи и попробуйте ещё раз.",
+  "bingx": "❌ <b>BingX: ошибка открытия сделки</b>\n🔴 SHORT  <b>ETH-USDT</b>\n⚠️ Retryable error occurred, retrying... xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+  "binance": "❌ <b>Binance: ошибка открытия сделки</b>\n🔴 SHORT  <b>ETHUSDT</b>\n⚠️ Retryable error occurred, retrying... xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+  "okx": "❌ <b>OKX ордер не выполнен</b>\nETH SHORT\n\n<code>Retryable error occurred, retrying... xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx</code>",
+  "bybit_split": "❌ <b>Не удалось открыть сделку</b>\n\n⚠️ Ошибка соединения с Bybit (сервер временно недоступен). Проверьте ключи и попробуйте ещё раз.",
+  "split_args": [
+   {
+    "ok": false,
+    "error": "Retryable error occurred, retrying... xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+   },
+   "SHORT",
+   "ETH-USDT-SWAP",
+   2985.24875,
+   3015.25125,
+   3060.0,
+   2900.0,
+   2.5,
+   20,
+   0.0,
+   0.0
+  ]
+ },
+ {
+  "args": [
+   {
+    "ok": false,
+    "error": "Retryable error occurred, retrying... xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+   },
+   "LONG",
+   "PEPE-USDT-SWAP",
+   1.23e-05,
+   1.18e-05,
+   1.31e-05,
+   0.5,
+   5,
+   1.39e-05,
+   0.0
+  ],
+  "bybit": "❌ <b>Не удалось открыть сделку</b>\n\n⚠️ Ошибка соединения с Bybit (сервер временно недоступен). Проверьте ключи и попробуйте ещё раз.",
+  "bingx": "❌ <b>BingX: ошибка открытия сделки</b>\n🟢 LONG  <b>1000PEPE-USDT</b>\n⚠️ Retryable error occurred, retrying... xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+  "binance": "❌ <b>Binance: ошибка открытия сделки</b>\n🟢 LONG  <b>1000PEPEUSDT</b>\n⚠️ Retryable error occurred, retrying... xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+  "okx": "❌ <b>OKX ордер не выполнен</b>\nPEPE LONG\n\n<code>Retryable error occurred, retrying... xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx</code>",
+  "bybit_split": "❌ <b>Не удалось открыть сделку</b>\n\n⚠️ Ошибка соединения с Bybit (сервер временно недоступен). Проверьте ключи и попробуйте ещё раз.",
+  "split_args": [
+   {
+    "ok": false,
+    "error": "Retryable error occurred, retrying... xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+   },
+   "LONG",
+   "PEPE-USDT-SWAP",
+   1.2238500000000001e-05,
+   1.23615e-05,
+   1.18e-05,
+   1.31e-05,
+   0.5,
+   5,
+   1.39e-05,
+   0.0
+  ]
+ },
+ {
+  "args": [
+   {
+    "ok": false,
+    "error": "Retryable error occurred, retrying... xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+   },
+   "BUY",
+   "SOLUSDT",
+   150.123456789,
+   145.0,
+   160.0,
+   1.25,
+   3,
+   165.5,
+   170.75
+  ],
+  "bybit": "❌ <b>Не удалось открыть сделку</b>\n\n⚠️ Ошибка соединения с Bybit (сервер временно недоступен). Проверьте ключи и попробуйте ещё раз.",
+  "bingx": "❌ <b>BingX: ошибка открытия сделки</b>\n🟢 LONG  <b>SOL-USDT</b>\n⚠️ Retryable error occurred, retrying... xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+  "binance": "❌ <b>Binance: ошибка открытия сделки</b>\n🟢 LONG  <b>SOLUSDT</b>\n⚠️ Retryable error occurred, retrying... xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+  "okx": "❌ <b>OKX ордер не выполнен</b>\nSOLUSDT BUY\n\n<code>Retryable error occurred, retrying... xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx</code>",
+  "bybit_split": "❌ <b>Не удалось открыть сделку</b>\n\n⚠️ Ошибка соединения с Bybit (сервер временно недоступен). Проверьте ключи и попробуйте ещё раз.",
+  "split_args": [
+   {
+    "ok": false,
+    "error": "Retryable error occurred, retrying... xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+   },
+   "BUY",
+   "SOLUSDT",
+   149.372839505055,
+   150.87407407294498,
+   145.0,
+   160.0,
+   1.25,
+   3,
+   165.5,
+   170.75
+  ]
+ },
+ {
+  "args": [
+   {
+    "ok": false
+   },
+   "LONG",
+   "BTC-USDT-SWAP",
+   87000.5,
+   86000.0,
+   88500.0,
+   1.0,
+   10,
+   89500.0,
+   90500.0
+  ],
+  "bybit": "❌ <b>Не удалось открыть сделку</b>\n\n⚠️ Неизвестная ошибка Bybit.",
+  "bingx": "❌ <b>BingX: ошибка открытия сделки</b>\n🟢 LONG  <b>BTC-USDT</b>\n⚠️ Неизвестная ошибка",
+  "binance": "❌ <b>Binance: ошибка открытия сделки</b>\n🟢 LONG  <b>BTCUSDT</b>\n⚠️ Неизвестная ошибка",
+  "okx": "❌ <b>OKX ордер не выполнен</b>\nBTC LONG\n\n<code>Unknown</code>",
+  "bybit_split": "❌ <b>Не удалось открыть сделку</b>\n\n⚠️ Неизвестная ошибка Bybit.",
+  "split_args": [
+   {
+    "ok": false
+   },
+   "LONG",
+   "BTC-USDT-SWAP",
+   86565.4975,
+   87435.50249999999,
+   86000.0,
+   88500.0,
+   1.0,
+   10,
+   89500.0,
+   90500.0
+  ]
+ },
+ {
+  "args": [
+   {
+    "ok": false
+   },
+   "SHORT",
+   "ETH-USDT-SWAP",
+   3000.25,
+   3060.0,
+   2900.0,
+   2.5,
+   20,
+   0.0,
+   0.0
+  ],
+  "bybit": "❌ <b>Не удалось открыть сделку</b>\n\n⚠️ Неизвестная ошибка Bybit.",
+  "bingx": "❌ <b>BingX: ошибка открытия сделки</b>\n🔴 SHORT  <b>ETH-USDT</b>\n⚠️ Неизвестная ошибка",
+  "binance": "❌ <b>Binance: ошибка открытия сделки</b>\n🔴 SHORT  <b>ETHUSDT</b>\n⚠️ Неизвестная ошибка",
+  "okx": "❌ <b>OKX ордер не выполнен</b>\nETH SHORT\n\n<code>Unknown</code>",
+  "bybit_split": "❌ <b>Не удалось открыть сделку</b>\n\n⚠️ Неизвестная ошибка Bybit.",
+  "split_args": [
+   {
+    "ok": false
+   },
+   "SHORT",
+   "ETH-USDT-SWAP",
+   2985.24875,
+   3015.25125,
+   3060.0,
+   2900.0,
+   2.5,
+   20,
+   0.0,
+   0.0
+  ]
+ },
+ {
+  "args": [
+   {
+    "ok": false
+   },
+   "LONG",
+   "PEPE-USDT-SWAP",
+   1.23e-05,
+   1.18e-05,
+   1.31e-05,
+   0.5,
+   5,
+   1.39e-05,
+   0.0
+  ],
+  "bybit": "❌ <b>Не удалось открыть сделку</b>\n\n⚠️ Неизвестная ошибка Bybit.",
+  "bingx": "❌ <b>BingX: ошибка открытия сделки</b>\n🟢 LONG  <b>1000PEPE-USDT</b>\n⚠️ Неизвестная ошибка",
+  "binance": "❌ <b>Binance: ошибка открытия сделки</b>\n🟢 LONG  <b>1000PEPEUSDT</b>\n⚠️ Неизвестная ошибка",
+  "okx": "❌ <b>OKX ордер не выполнен</b>\nPEPE LONG\n\n<code>Unknown</code>",
+  "bybit_split": "❌ <b>Не удалось открыть сделку</b>\n\n⚠️ Неизвестная ошибка Bybit.",
+  "split_args": [
+   {
+    "ok": false
+   },
+   "LONG",
+   "PEPE-USDT-SWAP",
+   1.2238500000000001e-05,
+   1.23615e-05,
+   1.18e-05,
+   1.31e-05,
+   0.5,
+   5,
+   1.39e-05,
+   0.0
+  ]
+ },
+ {
+  "args": [
+   {
+    "ok": false
+   },
+   "BUY",
+   "SOLUSDT",
+   150.123456789,
+   145.0,
+   160.0,
+   1.25,
+   3,
+   165.5,
+   170.75
+  ],
+  "bybit": "❌ <b>Не удалось открыть сделку</b>\n\n⚠️ Неизвестная ошибка Bybit.",
+  "bingx": "❌ <b>BingX: ошибка открытия сделки</b>\n🟢 LONG  <b>SOL-USDT</b>\n⚠️ Неизвестная ошибка",
+  "binance": "❌ <b>Binance: ошибка открытия сделки</b>\n🟢 LONG  <b>SOLUSDT</b>\n⚠️ Неизвестная ошибка",
+  "okx": "❌ <b>OKX ордер не выполнен</b>\nSOLUSDT BUY\n\n<code>Unknown</code>",
+  "bybit_split": "❌ <b>Не удалось открыть сделку</b>\n\n⚠️ Неизвестная ошибка Bybit.",
+  "split_args": [
+   {
+    "ok": false
+   },
+   "BUY",
+   "SOLUSDT",
+   149.372839505055,
+   150.87407407294498,
+   145.0,
+   160.0,
+   1.25,
+   3,
+   165.5,
+   170.75
+  ]
+ },
+ {
+  "args": [
+   {
+    "ok": false,
+    "error": "SL-ордер не выставлен после 3 попыток.",
+    "insufficient_margin": true
+   },
+   "LONG",
+   "BTC-USDT-SWAP",
+   87000.5,
+   86000.0,
+   88500.0,
+   1.0,
+   10,
+   89500.0,
+   90500.0
+  ],
+  "bybit": "❌ <b>Не удалось открыть сделку</b>\n\n⚠️ SL-ордер не выставлен после 3 попыток.",
+  "bingx": "❌ <b>BingX: ошибка открытия сделки</b>\n🟢 LONG  <b>BTC-USDT</b>\n⚠️ SL-ордер не выставлен после 3 попыток.",
+  "binance": "❌ <b>Binance: ошибка открытия сделки</b>\n🟢 LONG  <b>BTCUSDT</b>\n⚠️ SL-ордер не выставлен после 3 попыток.",
+  "okx": "❌ <b>OKX ордер не выполнен</b>\nBTC LONG\n\n<code>SL-ордер не выставлен после 3 попыток.</code>",
+  "bybit_split": "❌ <b>Не удалось открыть сделку</b>\n\n⚠️ SL-ордер не выставлен после 3 попыток.",
+  "split_args": [
+   {
+    "ok": false,
+    "error": "SL-ордер не выставлен после 3 попыток.",
+    "insufficient_margin": true
+   },
+   "LONG",
+   "BTC-USDT-SWAP",
+   86565.4975,
+   87435.50249999999,
+   86000.0,
+   88500.0,
+   1.0,
+   10,
+   89500.0,
+   90500.0
+  ]
+ },
+ {
+  "args": [
+   {
+    "ok": false,
+    "error": "SL-ордер не выставлен после 3 попыток.",
+    "insufficient_margin": true
+   },
+   "SHORT",
+   "ETH-USDT-SWAP",
+   3000.25,
+   3060.0,
+   2900.0,
+   2.5,
+   20,
+   0.0,
+   0.0
+  ],
+  "bybit": "❌ <b>Не удалось открыть сделку</b>\n\n⚠️ SL-ордер не выставлен после 3 попыток.",
+  "bingx": "❌ <b>BingX: ошибка открытия сделки</b>\n🔴 SHORT  <b>ETH-USDT</b>\n⚠️ SL-ордер не выставлен после 3 попыток.",
+  "binance": "❌ <b>Binance: ошибка открытия сделки</b>\n🔴 SHORT  <b>ETHUSDT</b>\n⚠️ SL-ордер не выставлен после 3 попыток.",
+  "okx": "❌ <b>OKX ордер не выполнен</b>\nETH SHORT\n\n<code>SL-ордер не выставлен после 3 попыток.</code>",
+  "bybit_split": "❌ <b>Не удалось открыть сделку</b>\n\n⚠️ SL-ордер не выставлен после 3 попыток.",
+  "split_args": [
+   {
+    "ok": false,
+    "error": "SL-ордер не выставлен после 3 попыток.",
+    "insufficient_margin": true
+   },
+   "SHORT",
+   "ETH-USDT-SWAP",
+   2985.24875,
+   3015.25125,
+   3060.0,
+   2900.0,
+   2.5,
+   20,
+   0.0,
+   0.0
+  ]
+ },
+ {
+  "args": [
+   {
+    "ok": false,
+    "error": "SL-ордер не выставлен после 3 попыток.",
+    "insufficient_margin": true
+   },
+   "LONG",
+   "PEPE-USDT-SWAP",
+   1.23e-05,
+   1.18e-05,
+   1.31e-05,
+   0.5,
+   5,
+   1.39e-05,
+   0.0
+  ],
+  "bybit": "❌ <b>Не удалось открыть сделку</b>\n\n⚠️ SL-ордер не выставлен после 3 попыток.",
+  "bingx": "❌ <b>BingX: ошибка открытия сделки</b>\n🟢 LONG  <b>1000PEPE-USDT</b>\n⚠️ SL-ордер не выставлен после 3 попыток.",
+  "binance": "❌ <b>Binance: ошибка открытия сделки</b>\n🟢 LONG  <b>1000PEPEUSDT</b>\n⚠️ SL-ордер не выставлен после 3 попыток.",
+  "okx": "❌ <b>OKX ордер не выполнен</b>\nPEPE LONG\n\n<code>SL-ордер не выставлен после 3 попыток.</code>",
+  "bybit_split": "❌ <b>Не удалось открыть сделку</b>\n\n⚠️ SL-ордер не выставлен после 3 попыток.",
+  "split_args": [
+   {
+    "ok": false,
+    "error": "SL-ордер не выставлен после 3 попыток.",
+    "insufficient_margin": true
+   },
+   "LONG",
+   "PEPE-USDT-SWAP",
+   1.2238500000000001e-05,
+   1.23615e-05,
+   1.18e-05,
+   1.31e-05,
+   0.5,
+   5,
+   1.39e-05,
+   0.0
+  ]
+ },
+ {
+  "args": [
+   {
+    "ok": false,
+    "error": "SL-ордер не выставлен после 3 попыток.",
+    "insufficient_margin": true
+   },
+   "BUY",
+   "SOLUSDT",
+   150.123456789,
+   145.0,
+   160.0,
+   1.25,
+   3,
+   165.5,
+   170.75
+  ],
+  "bybit": "❌ <b>Не удалось открыть сделку</b>\n\n⚠️ SL-ордер не выставлен после 3 попыток.",
+  "bingx": "❌ <b>BingX: ошибка открытия сделки</b>\n🟢 LONG  <b>SOL-USDT</b>\n⚠️ SL-ордер не выставлен после 3 попыток.",
+  "binance": "❌ <b>Binance: ошибка открытия сделки</b>\n🟢 LONG  <b>SOLUSDT</b>\n⚠️ SL-ордер не выставлен после 3 попыток.",
+  "okx": "❌ <b>OKX ордер не выполнен</b>\nSOLUSDT BUY\n\n<code>SL-ордер не выставлен после 3 попыток.</code>",
+  "bybit_split": "❌ <b>Не удалось открыть сделку</b>\n\n⚠️ SL-ордер не выставлен после 3 попыток.",
+  "split_args": [
+   {
+    "ok": false,
+    "error": "SL-ордер не выставлен после 3 попыток.",
+    "insufficient_margin": true
+   },
+   "BUY",
+   "SOLUSDT",
+   149.372839505055,
+   150.87407407294498,
+   145.0,
+   160.0,
+   1.25,
+   3,
+   165.5,
+   170.75
+  ]
+ }
+]
