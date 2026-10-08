@@ -42,3 +42,8 @@ tmp/
 
 # Context (large file, not needed in deploy)
 full_project_context.txt
+
+# Python (Playwright E2E scripts)
+__pycache__/
+*.pyc
+backend/node_modules
