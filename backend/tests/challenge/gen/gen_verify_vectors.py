@@ -435,7 +435,7 @@ class FakeBot:
 
 TS = T0 + 7 * H_ + 123.456
 LANGS = {5001: "ru", 5002: "en", 5003: "de", 5004: "ru", 5005: "en", 5006: "ru", 5007: None, 5008: "ru",
-         5009: "en", 5010: ""}
+         5009: "en", 5010: "", 5011: "en"}
 FAIL_UM = {"on": False}
 
 
@@ -462,6 +462,7 @@ TICK_USERS = {
     5008: (TS + 120, dict(BASE, term="1m", goal_value=300)),
     5009: (TS + 400, dict(BASE, term="none", goal_value=60, topup_monthly=200)),
     5010: (TS + 900, dict(BASE, goal_kind="usd", goal_value=1500, max_trades_day=1, risk_pct=0.5, daily_loss_pct=0.25)),
+    5011: (TS + 2 * D_ + 0.75, dict(BASE, term="2w")),          # never a signal: expires without a card
 }
 STAGES_WIN = ["TP1", "TP2", "TP3"]
 open_rows: dict = {}          # trade_id → uid
@@ -490,6 +491,8 @@ for t in ticks:
             ops.append(["start", uid, st0, a])
     # new signals between the previous tick and this one
     for uid in TICK_USERS:
+        if uid == 5011:
+            continue
         n = 0
         span = t - prev_t
         while rng.random() < min(0.8, span / (6 * H_)) and n < 3:
@@ -923,6 +926,36 @@ def _sanitize(x):
         return [_sanitize(v) for v in x]
     return x
 
+
+# ════════════════════════════════════════════════════════════════════════
+# J. module constants from the environment (challenge.py, db/signal_outcome.py)
+# ════════════════════════════════════════════════════════════════════════
+import db.signal_outcome as SO  # noqa: E402
+cenv = []
+CENV_VALS = ["", " ", "0", "59", "60", "61.5", "600", "-5", "abc", "1e3", "nan", "inf", "-inf", "1_200", "\U00000661\U00000662",
+             "\xa030\xa0", "\U0000feff30", "\x1c30", "24", "23", "-1", "7.5", "20", "9" * 40, "  21  ", "0x10", "1" * 4301]
+for _ in range(60):
+    env = {}
+    for k in ("CHALLENGE_LOOP_INTERVAL_S", "CHALLENGE_DAILY_HOUR_UTC", "SIGNAL_TRACKER_MAX_AGE_H"):
+        if rng.random() < 0.5:
+            env[k] = rng.choice(CENV_VALS)
+    for k in ("CHALLENGE_LOOP_INTERVAL_S", "CHALLENGE_DAILY_HOUR_UTC", "SIGNAL_TRACKER_MAX_AGE_H"):
+        os.environ.pop(k, None)
+    os.environ.update(env)
+    rec = {"env": env}
+    try:
+        importlib.reload(C)
+        rec.update(ok=True, cfg={"LOOP_INTERVAL_S": C.LOOP_INTERVAL_S, "DAILY_HOUR_UTC": C.DAILY_HOUR_UTC})
+    except Exception as e:  # noqa: BLE001
+        rec.update(err(e))
+    importlib.reload(SO)
+    rec["max_age_s"] = SO.MAX_AGE_S
+    cenv.append(rec)
+    for k in env:
+        os.environ.pop(k, None)
+importlib.reload(C)
+importlib.reload(SO)
+out["challenge_env"] = cenv
 
 out["db_rows"] = [r for r in DB_ROWS if r["user_id"] not in TICK_USERS]   # tick rows travel in its ops
 out["uids"] = sorted(UIDS | set(TICK_USERS))

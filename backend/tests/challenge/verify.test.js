@@ -376,6 +376,20 @@ describe('H. questionnaire helpers', () => {
   });
 });
 
+describe('J. module constants from the environment', () => {
+  it('CHALLENGE_LOOP_INTERVAL_S / CHALLENGE_DAILY_HOUR_UTC (import error included), SIGNAL_TRACKER_MAX_AGE_H', () => {
+    const bad = [];
+    for (const c of V.challenge_env) {
+      let got;
+      try { got = { ok: true, cfg: C.readConfig(c.env) }; } catch (e) { got = errOf(e); }
+      const want = c.ok ? { ok: true, cfg: c.cfg } : { ok: false, etype: c.etype, msg: c.msg };
+      const d = diff(got, want) || diff(C.envHours('SIGNAL_TRACKER_MAX_AGE_H', 72.0, c.env) * 3600.0, c.max_age_s);
+      if (d) bad.push({ env: c.env, d });
+    }
+    expect(bad).toEqual([]);
+  });
+});
+
 describe('I. Mini App routes', () => {
   it(`replays ${V.routes.steps.length} requests through /api/app/challenge*`, async () => {
     const app = (await import('../../server.js')).default;
