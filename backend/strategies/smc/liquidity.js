@@ -5,6 +5,7 @@
  */
 
 const { pyRound } = require('../common/pyround');
+const { pySum } = require('../common/series');
 
 function nBars(frame) {
   return frame.length !== undefined ? frame.length : frame.c.length;
@@ -23,9 +24,8 @@ function findEqualLevels(levels, thresholdPct = 0.05) {
   let group = [sorted[0]];
   const emit = () => {
     if (group.length >= 2) {
-      // Python sum() over floats: sequential left-to-right from 0
-      let s = 0.0;
-      for (const x of group) s += x.price;
+      // Python sum() over floats as the production interpreter computes it (series.pySum)
+      const s = pySum(group.map((x) => x.price));
       groups.push({
         price: s / group.length,
         count: group.length,

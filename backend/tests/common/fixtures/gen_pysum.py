@@ -1,8 +1,9 @@
 #!/usr/bin/env python3
-"""gen_pysum.py — CPython 3.12 builtin sum() over floats (Neumaier compensated since 3.12)
+"""gen_pysum.py — CPython builtin sum() over floats with the production interpreter (3.11: a plain
+left-to-right float addition from the int start 0; 3.12+ would be Neumaier-compensated)
 on random lists shaped like LEVELS pivot groups + edge cases → pysum_expected.json.
 
-    <pinned venv>/bin/python backend/tests/common/fixtures/gen_pysum.py
+    <prod-like venv, python 3.11>/bin/python backend/tests/common/fixtures/gen_pysum.py
 """
 import json
 import math
