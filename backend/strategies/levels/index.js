@@ -23,7 +23,9 @@
  * injected through `opts`:
  *   { relaxed = false, regime = null, env = LEVELS_ENV, slV2Enabled = env.SL_V2_LEVELS_ENABLED,
  *     relax = env.LEVELS_RELAX_ENABLED, minQualityOverride = null, precomputedZones = null,
- *     htfZoneCache = null, cooldown = null, nowSec = 0, breakoutState = null, triggerReason = '' }
+ *     zoneCache = null (zones.ZoneCache: the live `_zone_cache`, keyed on `nowSec`),
+ *     htfZoneCache = null, cacheMax = 350, cooldown = null, nowSec = 0, breakoutState = null,
+ *     triggerReason = '' }
  */
 
 const config = require('./config');
@@ -42,9 +44,10 @@ const atrBreakout = require('./atrBreakout');
 const result = require('./result');
 const squeeze = require('../common/squeeze');
 const { levelsRegimeMultiplier } = require('../common/marketRegime');
-const { pyMax } = require('../common/pyround');
+const { pyMax, pyRoundInt } = require('../common/pyround');
 
-const { REJECT, LEVELS_ENV, minBars } = config;
+const { REJECT, LEVELS_ENV, minBars, ZONE_CACHE_MAX } = config;
+const { ZoneCache } = zones;
 const { signalResult } = result;
 
 /** `_last_signal` of a CHMIndicator instance: symbol → open_time ms of the last delivered signal bar. */
@@ -66,14 +69,20 @@ class CooldownState {
     }
   }
 
-  /** bars_since_signal(symbol, df): round((index[-1] − last) / (index[-1] − index[-2])), 1_000_000 when unknown. */
+  /**
+   * bars_since_signal(symbol, df): int(round((index[-1] − last) / (index[-1] − index[-2]))),
+   * 1_000_000 when unknown. Python round() is half-to-EVEN: after a missing bar the step is
+   * 2 bars and 5 h / 2 h = 2.5 → 2 (Math.round would give 3 and end a 3-bar cooldown early).
+   * A non-finite ratio raises in Python and is swallowed → 1_000_000.
+   */
   barsSinceSignal(symbol, df) {
     const last = this.map.get(symbol);
     if (last === undefined || !df || df.length < 2) return 1_000_000;
     const n = df.length;
     const step = df.t[n - 1] - df.t[n - 2];
     if (!step) return 1_000_000;
-    return Math.round((df.t[n - 1] - last) / step);
+    const ratio = (df.t[n - 1] - last) / step;
+    return Number.isFinite(ratio) ? pyRoundInt(ratio) : 1_000_000;
   }
 }
 
@@ -87,7 +96,9 @@ function resolveOpts(opts) {
     relax: opts.relax === undefined ? Boolean(env.LEVELS_RELAX_ENABLED) : Boolean(opts.relax),
     minQualityOverride: opts.minQualityOverride === undefined ? null : opts.minQualityOverride,
     precomputedZones: opts.precomputedZones || null,
+    zoneCache: opts.zoneCache || null,
     htfZoneCache: opts.htfZoneCache || null,
+    cacheMax: opts.cacheMax === undefined || opts.cacheMax === null ? ZONE_CACHE_MAX : opts.cacheMax,
     cooldown: opts.cooldown || null,
     nowSec: opts.nowSec || 0,
     breakoutState: opts.breakoutState || null,
@@ -105,7 +116,8 @@ function doAnalyze(symbol, df, dfHtf, dfBtc, dfEth, cfg, opts = {}) {
 
   // ── Part 1: indicators, zones, setup, pattern, approach, tests, RSI ──
   const p1 = setups.analyzePart1(symbol, df, dfHtf, cfg, {
-    relax: o.relax, precomputedZones: o.precomputedZones, htfZoneCache: o.htfZoneCache, symbolForCache: symbol, skipGuard: true,
+    relax: o.relax, precomputedZones: o.precomputedZones, zoneCache: o.zoneCache, nowSec: o.nowSec,
+    htfZoneCache: o.htfZoneCache, cacheMax: o.cacheMax, symbolForCache: symbol, skipGuard: true,
   });
   if (p1.reject) return none(p1.reject, 'part1', { reason: p1.reason, part1: p1 });
 
@@ -256,25 +268,42 @@ function analyzeOnDemand(symbol, df, dfHtf, dfBtc, dfEth, cfg, opts = {}) {
 }
 
 /**
- * A CHMIndicator-like stateful wrapper: holds cfg, the cooldown map, the HTF zone cache and
- * the per-instance reject counters (`_ANALYZE_STATS` is module-global in the bot; here one
- * map per indicator, reset by `resetAnalyzeStats()` at job boundaries like the scanner does).
+ * A CHMIndicator-like stateful wrapper: holds cfg, the cooldown map (`_last_signal`), the live
+ * zone cache (`_zone_cache`, TTL by cfg.TIMEFRAME, pre-filter), the HTF zone cache and the
+ * per-instance reject counters (`_ANALYZE_STATS` is module-global in the bot; here one map per
+ * indicator, reset by `resetAnalyzeStats()` at job boundaries like the scanner does).
+ *
+ * opts (besides the analyze() opts):
+ *   clock     () → seconds; the zone-cache clock when a call passes no `nowSec` (default wall
+ *             clock, like the bot's time.time()); a call's `extra.nowSec` always wins
+ *   zoneCache false → no live zone cache (zones recomputed on every call)
+ *   cacheMax  `_ZONE_CACHE_MAX` of both zone caches (default 350)
+ * The ATR-breakout cooldown map is module-global in the bot (`_last_breakout_alert`): pass the
+ * same `breakoutState` Map to every indicator that should share it.
  */
 function createIndicator(cfg, opts = {}) {
+  const cacheMax = opts.cacheMax === undefined || opts.cacheMax === null ? ZONE_CACHE_MAX : opts.cacheMax;
   const cooldown = new CooldownState();
   const htfZoneCache = new Map();
+  const zoneCache = opts.zoneCache === false ? null : new ZoneCache({ max: cacheMax });
+  const clock = typeof opts.clock === 'function' ? opts.clock : () => Date.now() / 1000;
   const stats = new Map();
+  // `_none_stat` fires inside _do_analyze, so the bucket is counted even when the relaxed-mode
+  // ATR-breakout fallback then returns a signal (rejectReason stays set on that result; a regular
+  // signal has rejectReason null)
   const bump = (res) => {
-    if (res.signal === null && res.rejectReason && res.rejectReason !== REJECT.NONE) stats.set(res.rejectReason, (stats.get(res.rejectReason) || 0) + 1);
+    if (res.rejectReason && res.rejectReason !== REJECT.NONE) stats.set(res.rejectReason, (stats.get(res.rejectReason) || 0) + 1);
     return res;
   };
-  const base = { ...opts, cooldown, htfZoneCache };
+  const base = { ...opts, cooldown, htfZoneCache, zoneCache, cacheMax };
+  const withClock = (extra) => ({ ...base, ...extra, nowSec: extra && extra.nowSec !== undefined ? extra.nowSec : clock() });
   return {
     cfg,
     cooldown,
     htfZoneCache,
-    analyze: (symbol, df, dfHtf = null, dfBtc = null, dfEth = null, extra = {}) => bump(analyze(symbol, df, dfHtf, dfBtc, dfEth, cfg, { ...base, ...extra })),
-    analyzeOnDemand: (symbol, df, dfHtf = null, dfBtc = null, dfEth = null, extra = {}) => bump(analyzeOnDemand(symbol, df, dfHtf, dfBtc, dfEth, cfg, { ...base, ...extra })),
+    zoneCache,
+    analyze: (symbol, df, dfHtf = null, dfBtc = null, dfEth = null, extra = {}) => bump(analyze(symbol, df, dfHtf, dfBtc, dfEth, cfg, withClock(extra))),
+    analyzeOnDemand: (symbol, df, dfHtf = null, dfBtc = null, dfEth = null, extra = {}) => bump(analyzeOnDemand(symbol, df, dfHtf, dfBtc, dfEth, cfg, withClock(extra))),
     markSignal: (symbol, df) => cooldown.markSignal(symbol, df),
     barsSinceSignal: (symbol, df) => cooldown.barsSinceSignal(symbol, df),
     getAnalyzeStats: () => Object.fromEntries(stats),
