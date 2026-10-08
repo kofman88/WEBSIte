@@ -298,6 +298,7 @@ router.post('/volume/reset', wrap((req, res) => {
 }));
 
 router.use('/genome', require('./appGenome'));    // M16: GET genome, POST genome/apply, POST genome/evolve (D10)
+router.use(require('./appChallenge'));       // M17: challenge + entry-advisor buttons
 
 module.exports = router;
 module.exports.rateOk = rateOk;
