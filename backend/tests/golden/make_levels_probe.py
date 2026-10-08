@@ -41,6 +41,19 @@ Re-running (bot repo + pinned venv, exactly like make_golden.py — see FIXTURES
     rm -f /home/user/MAIN_BOT/CHM_BREAKER_V4/signal_registry.json
 writes levels_probe.json.gz and levels_probe_summary.json next to this file (counts + sha256 asserted
 by the test). Options: --cases prefix1,prefix2 (debug subset, does not write), --workers N.
+
+Suites (--suite; each writes <stem>.json.gz + <stem>_summary.json, replayed by tests/levels/probe*.test.js):
+  main      (default) the sections above. --seed S ≠ 20261008 / --n-random N = an independent re-check run →
+            levels_probe_s<S>: every structured case on redrawn fixture sources (redraw_sources) + N random
+            cases that also draw mutations, the live path, on-demand windows, short HTF frames, corr self/tf1h.
+            levels_probe_s20261009 = --seed 20261009 --n-random 198 (308 cases, 2× the default suite).
+            The default seed still reproduces levels_probe.json.gz byte for byte.
+  setups    hand-constructed frames that hit every setup block of _do_analyze (SFP, Fakeout, Bounce with
+            every institutional tier, weak-pattern bounce, Retest, Breakout/Breakdown + 6 threshold edges)
+            × LONG/SHORT × 15m/4h, swept under 17 configs; the generator asserts the designed outcomes.
+  patterns  lattice fuzz of _detect_pattern / _detect_institutional_pattern / _assess_approach_quality /
+            _check_fakeout / _count_recent_tests (exceptions recorded).
+  short     _do_analyze(_precomputed_zones=...) on 1..60-bar frames (the backtest path, no length guard).
 """
 import argparse
 import dataclasses as dc
