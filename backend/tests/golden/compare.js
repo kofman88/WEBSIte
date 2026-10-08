@@ -10,7 +10,8 @@
  *   rounded   fields the bot produces with Python round(x, k) (rr 2 dp, risk_pct 3 dp,
  *             rsi 1 dp, vol_ratio 2 dp, gap_pct 3 dp, position_pct 1 dp, rr_structural
  *             2 dp, wick_ratio 2 dp, rr_ladder 2 dp) go through pyRound before an EXACT
- *             compare — a mismatch there is a pyround/engine bug, never tolerance;
+ *             compare — a mismatch there is a pyround/engine bug, never tolerance. The map
+ *             is PER STRATEGY (ROUNDED_FIELDS_BY_STRATEGY): LEVELS rounds nothing;
  *   strict    GOLDEN_STRICT=1 additionally requires r10(engine value) === fixture value
  *             for every float (true bit-for-bit after the fixture rounding).
  */
@@ -24,6 +25,19 @@ const REL_TOL = 1e-9;
 const ROUNDED_FIELDS = Object.freeze({
   rr: 2, risk_pct: 3, rsi: 1, vol_ratio: 2, gap_pct: 3, position_pct: 1,
   rr_structural: 2, wick_ratio: 2, rr_ladder: 2, rr_score: 2, btc_corr: 2, eth_corr: 2,
+});
+
+/**
+ * Per-strategy overrides of ROUNDED_FIELDS (the fields a strategy's signal object really
+ * rounds). LEVELS: indicator.SignalResult rounds NOTHING — risk_pct, rsi, volume_ratio and
+ * rr_score are raw float64 (the fixtures carry them with 9–10 significant digits) and
+ * btc_corr / eth_corr are the constant 0.0 (the scanner's 2-dp correlation is not part of
+ * the pure function), so every LEVELS float falls under the tolerance rule.
+ */
+const ROUNDED_FIELDS_BY_STRATEGY = Object.freeze({
+  levels: Object.freeze({}),
+  smc: ROUNDED_FIELDS,
+  volume: ROUNDED_FIELDS,
 });
 
 /** Fields compared exactly even though JSON carries them as numbers. */
@@ -51,7 +65,7 @@ function numbersClose(actual, expected, relTol = REL_TOL) {
  * Compare an engine value against a fixture value under the rules above.
  * Returns an array of diffs {path, actual, expected, rule}; empty = match.
  */
-function compareValue(actual, expected, pathStr = '', diffs = [], key = '') {
+function compareValue(actual, expected, pathStr = '', diffs = [], key = '', roundedFields = ROUNDED_FIELDS) {
   // null in the fixture: NaN/±Inf/None from Python
   if (expected === null) {
     if (actual === null || actual === undefined || (isNum(actual) && !Number.isFinite(actual))) return diffs;
@@ -68,7 +82,7 @@ function compareValue(actual, expected, pathStr = '', diffs = [], key = '') {
   }
   if (isNum(expected)) {
     if (!isNum(actual)) { diffs.push({ path: pathStr, actual, expected, rule: 'number' }); return diffs; }
-    const k = ROUNDED_FIELDS[key];
+    const k = roundedFields[key];
     if (k !== undefined) {
       const rounded = pyRound(actual, k);
       if (!(Object.is(rounded, expected) || rounded === expected)) {
@@ -95,14 +109,14 @@ function compareValue(actual, expected, pathStr = '', diffs = [], key = '') {
       diffs.push({ path: pathStr, actual: actual.length, expected: expected.length, rule: 'array-length', actualValue: actual, expectedValue: expected });
       return diffs;
     }
-    for (let i = 0; i < expected.length; i++) compareValue(actual[i], expected[i], `${pathStr}[${i}]`, diffs, key);
+    for (let i = 0; i < expected.length; i++) compareValue(actual[i], expected[i], `${pathStr}[${i}]`, diffs, key, roundedFields);
     return diffs;
   }
   if (typeof expected === 'object') {
     if (actual === null || typeof actual !== 'object') { diffs.push({ path: pathStr, actual, expected, rule: 'object' }); return diffs; }
     for (const k of Object.keys(expected)) {
       if (!(k in actual)) { diffs.push({ path: `${pathStr}.${k}`, actual: undefined, expected: expected[k], rule: 'missing-key' }); continue; }
-      compareValue(actual[k], expected[k], `${pathStr}.${k}`, diffs, k);
+      compareValue(actual[k], expected[k], `${pathStr}.${k}`, diffs, k, roundedFields);
     }
     return diffs;
   }
@@ -112,9 +126,10 @@ function compareValue(actual, expected, pathStr = '', diffs = [], key = '') {
 
 /**
  * Compare a signal object field by field. `ignoreKeys` are fixture-only keys
- * (e.g. harness-provided i/ts) that the engine is not expected to produce.
+ * (e.g. harness-provided i/ts) that the engine is not expected to produce;
+ * `roundedFields` selects the strategy's pyRound map (default ROUNDED_FIELDS).
  */
-function compareSignal(actual, expected, { ignoreKeys = [], pathStr = 'signal' } = {}) {
+function compareSignal(actual, expected, { ignoreKeys = [], pathStr = 'signal', roundedFields = ROUNDED_FIELDS } = {}) {
   const diffs = [];
   if (actual === null || actual === undefined) {
     diffs.push({ path: pathStr, actual: null, expected: '<signal>', rule: 'missing-signal' });
@@ -123,7 +138,7 @@ function compareSignal(actual, expected, { ignoreKeys = [], pathStr = 'signal' }
   for (const k of Object.keys(expected)) {
     if (ignoreKeys.includes(k)) continue;
     if (!(k in actual)) { diffs.push({ path: `${pathStr}.${k}`, actual: undefined, expected: expected[k], rule: 'missing-key' }); continue; }
-    compareValue(actual[k], expected[k], `${pathStr}.${k}`, diffs, k);
+    compareValue(actual[k], expected[k], `${pathStr}.${k}`, diffs, k, roundedFields);
   }
   return diffs;
 }
@@ -140,4 +155,4 @@ function formatDiffs(diffs, max = 8) {
   return lines.join('\n');
 }
 
-module.exports = { REL_TOL, ROUNDED_FIELDS, INTEGER_FIELDS, STRICT, numbersClose, compareValue, compareSignal, formatDiffs };
+module.exports = { REL_TOL, ROUNDED_FIELDS, ROUNDED_FIELDS_BY_STRATEGY, INTEGER_FIELDS, STRICT, numbersClose, compareValue, compareSignal, formatDiffs };
