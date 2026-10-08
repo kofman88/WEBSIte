@@ -297,6 +297,8 @@ router.post('/volume/reset', wrap((req, res) => {
   res.json({ ok: true, settings: appSettings.settingsAll(user) });
 }));
 
+router.use(require('./appChallenge'));       // M17: challenge + entry-advisor buttons
+
 module.exports = router;
 module.exports.rateOk = rateOk;
 module.exports.resetRateLimits = resetRateLimits;
