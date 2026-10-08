@@ -155,7 +155,7 @@
   }
  },
  "sha256": {
-  "levels_probe_setups.json": "5c377962ca1f73c10b89b5f95b246bdec4a7209cfd6407de8ba6249cace12b2c"
+  "levels_probe_setups.json": "9f220b9f40a27b5d7d76541c54c22857f01e80c7a40fe4473c632a88a35f9cdf"
  },
  "setup_signals": {
   "LONG SFP (Захват ликвидности) / LIQUIDITY_SWEEP": 22,
