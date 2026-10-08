@@ -112,4 +112,21 @@ function formatSqueezeLog(symbol, tf, diag) {
     + `bbw_pctile=${fmtFixed(diag.bbwidth_pctile, 1)}% atr_ratio=${fmtFixed(diag.atr_ratio, 2)}`;
 }
 
-module.exports = { DEFAULTS, bbWidth, internals, computeSqueezeScore, isSqueezeActive, squeezeDiagnostics, formatSqueezeLog };
+/** Aliases used by the SMC port (same production values, env names of squeeze_detector.py). */
+const SQUEEZE_DEFAULTS = Object.freeze({
+  bbLookback: DEFAULTS.lookback,
+  bbPctileStrong: DEFAULTS.pctileStrong,
+  bbPctileSome: DEFAULTS.pctileSome,
+  atrRatioStrong: DEFAULTS.atrRatioStrong,
+  atrRatioSome: DEFAULTS.atrRatioSome,
+});
+
+/** squeeze_detector._atr: rolling(period).mean() of the true range. */
+function atrSimple(frame, period = 14) {
+  return S.atrSma(frame.h, frame.l, frame.c, period);
+}
+
+module.exports = {
+  DEFAULTS, SQUEEZE_DEFAULTS, bbWidth, atrSimple, internals,
+  computeSqueezeScore, isSqueezeActive, squeezeDiagnostics, formatSqueezeLog,
+};

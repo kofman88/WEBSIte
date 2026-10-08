@@ -9,10 +9,11 @@
  *             narrative, confirmation labels, …): EXACT;
  *   rounded   fields the bot produces with Python round(x, k) (rr 2 dp, risk_pct 3 dp,
  *             rsi 1 dp, vol_ratio 2 dp, gap_pct 3 dp, position_pct 1 dp, rr_structural
- *             2 dp, wick_ratio 2 dp, rr_ladder 2 dp) go through pyRound before an EXACT
- *             compare — a mismatch there is a pyround/engine bug, never tolerance. The map
- *             is PER STRATEGY (ROUNDED_FIELDS_BY_STRATEGY): VOLUME's `risk_pct` is an
- *             unrounded property, so it falls under the tolerance rule there;
+ *             2 dp, wick_ratio 3 dp (smc/liquidity.py round(wr, 3)), rr_ladder 2 dp) go through
+ *             pyRound before an EXACT compare — a mismatch there is a pyround/engine bug,
+ *             never tolerance. The map is PER STRATEGY (ROUNDED_FIELDS_BY_STRATEGY):
+ *             VOLUME's `risk_pct` is an unrounded property, so it falls under the tolerance
+ *             rule there; the SMC analysis digest uses DIGEST_ROUNDED_FIELDS;
  *   strict    GOLDEN_STRICT=1 additionally requires r10(engine value) === fixture value
  *             for every float (true bit-for-bit after the fixture rounding).
  */
@@ -25,7 +26,7 @@ const REL_TOL = 1e-9;
 /** Python round(x, k) decimals the bot applies to signal fields (per field name). */
 const ROUNDED_FIELDS = Object.freeze({
   rr: 2, risk_pct: 3, rsi: 1, vol_ratio: 2, gap_pct: 3, position_pct: 1,
-  rr_structural: 2, wick_ratio: 2, rr_ladder: 2, rr_score: 2, btc_corr: 2, eth_corr: 2,
+  rr_structural: 2, wick_ratio: 3, rr_ladder: 2, rr_score: 2, btc_corr: 2, eth_corr: 2,
 });
 
 /**
@@ -38,6 +39,13 @@ const ROUNDED_FIELDS_BY_STRATEGY = Object.freeze({
   smc: ROUNDED_FIELDS,
   volume: Object.freeze({ rr: 2, rsi: 1, vol_ratio: 2, volume_ratio: 2 }),
 });
+
+/**
+ * Python round(x, k) fields inside the SMC analysis digest (expected/smc_analysis.json).
+ * The digest's `vol_ratio` is the RAW analyzer ratio (the 2-dp rule above belongs to the
+ * VOLUME signal field of the same name), so digests use this map instead.
+ */
+const DIGEST_ROUNDED_FIELDS = Object.freeze({ position_pct: 1, wick_ratio: 3 });
 
 /** Fields compared exactly even though JSON carries them as numbers. */
 const INTEGER_FIELDS = Object.freeze(new Set([
@@ -63,6 +71,8 @@ function numbersClose(actual, expected, relTol = REL_TOL) {
 /**
  * Compare an engine value against a fixture value under the rules above.
  * Returns an array of diffs {path, actual, expected, rule}; empty = match.
+ * `rounded` is the Python-round field map (ROUNDED_FIELDS for signals,
+ * DIGEST_ROUNDED_FIELDS for the SMC analysis digest).
  */
 function compareValue(actual, expected, pathStr = '', diffs = [], key = '', roundedFields = ROUNDED_FIELDS) {
   // null in the fixture: NaN/±Inf/None from Python
@@ -123,6 +133,11 @@ function compareValue(actual, expected, pathStr = '', diffs = [], key = '', roun
   return diffs;
 }
 
+/** Compare an SMC analysis digest (make_golden._smc_digest record) with the digest rounding map. */
+function compareDigest(actual, expected, pathStr = 'digest') {
+  return compareValue(actual, expected, pathStr, [], '', DIGEST_ROUNDED_FIELDS);
+}
+
 /**
  * Compare a signal object field by field. `ignoreKeys` are fixture-only keys
  * (e.g. harness-provided i/ts) that the engine is not expected to produce;
@@ -154,4 +169,7 @@ function formatDiffs(diffs, max = 8) {
   return lines.join('\n');
 }
 
-module.exports = { REL_TOL, ROUNDED_FIELDS, ROUNDED_FIELDS_BY_STRATEGY, INTEGER_FIELDS, STRICT, numbersClose, compareValue, compareSignal, formatDiffs };
+module.exports = {
+  REL_TOL, ROUNDED_FIELDS, ROUNDED_FIELDS_BY_STRATEGY, DIGEST_ROUNDED_FIELDS, INTEGER_FIELDS, STRICT,
+  numbersClose, compareValue, compareSignal, compareDigest, formatDiffs,
+};
