@@ -28,7 +28,7 @@
 const crypto = require('crypto');
 const { pyJsonDumps } = require('../engine/pyjson');
 const { PyError, pyStr, pyCapitalize, pyStrftimeHMS, isDict, pyGet, pyIndex, pyTruthy, KeyError, ValueError } = require('./pyCompat');
-const { parseJsonPy, headerGet } = require('./transport');
+const { parseJsonPy, headerGet, TransportError } = require('./transport');
 
 const HTTP_MAINNET = 'https://api.bybit.com';
 const HTTP_DEMO = 'https://api-demo.bybit.com';
@@ -68,6 +68,22 @@ class FailedRequestError extends PyError {
     this.status_code = statusCode;
     this.time = time;
   }
+}
+
+/**
+ * Transport failure → the requests exception pybit lets through (force_retry=False):
+ * ReadTimeout for timeouts, ConnectionError otherwise; str(e) = the transport message or
+ * a urllib3-style text when the transport gave none.
+ */
+function requestsError(e, url, timeout) {
+  if (!(e instanceof TransportError)) return e;
+  let host = '';
+  let path = '';
+  try { const u = new URL(url); host = u.host; path = u.pathname + u.search; } catch (_x) { /* ignore */ }
+  if (e.kind === 'timeout') {
+    return new PyError('ReadTimeout', e.message || `HTTPSConnectionPool(host='${host}', port=443): Read timed out. (read timeout=${timeout})`);
+  }
+  return new PyError('ConnectionError', e.message || `HTTPSConnectionPool(host='${host}', port=443): Max retries exceeded with url: ${path}`);
 }
 
 /** HMAC-SHA256 hex — pybit generate_signature (HMAC mode). */
@@ -136,10 +152,15 @@ function createPybitSession({ apiKey, apiSecret, demo = false, recvWindow = 1500
     }
     const url = method === 'GET' && reqParams ? `${path}?${reqParams}` : path;
     const requestDesc = `${method} ${path}: ${reqParams}`;
-    // network errors propagate (force_retry=False)
-    const resp = await rt.transport({
-      method, url, headers, body: method === 'GET' ? undefined : reqParams, timeoutMs: timeout * 1000,
-    });
+    // network errors propagate (force_retry=False) as requests exceptions
+    let resp;
+    try {
+      resp = await rt.transport({
+        method, url, headers, body: method === 'GET' ? undefined : reqParams, timeoutMs: timeout * 1000,
+      });
+    } catch (e) {
+      throw requestsError(e, url, timeout);
+    }
     const errTime = () => pyStrftimeHMS(rt.now());
     if (resp.status !== 200) {
       const msg = resp.status === 403
@@ -183,6 +204,6 @@ function createPybitSession({ apiKey, apiSecret, demo = false, recvWindow = 1500
 }
 
 module.exports = {
-  createPybitSession, bybitSign, preparePayload, InvalidRequestError, FailedRequestError,
+  createPybitSession, bybitSign, preparePayload, requestsError, InvalidRequestError, FailedRequestError,
   HTTP_MAINNET, HTTP_DEMO, RETRY_CODES, METHODS, isDict,
 };

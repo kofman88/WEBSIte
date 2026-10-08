@@ -47,7 +47,8 @@ function parseJsonPy(text) {
  */
 function aiohttpJson(resp, { checkContentType = true } = {}) {
   if (checkContentType) {
-    const ct = String(headerGet(resp, 'content-type') || 'application/octet-stream').split(';')[0].trim().toLowerCase();
+    // aiohttp 3.14: the whole Content-Type header, lower-cased ('' when missing)
+    const ct = String(headerGet(resp, 'content-type') || '').toLowerCase();
     if (!JSON_CT_RE.test(ct)) {
       throw new PyError('ContentTypeError', `${resp.status}, message='Attempt to decode JSON with unexpected mimetype: ${ct}', url='${resp.url || ''}'`);
     }
@@ -70,7 +71,7 @@ function fetchTransport({ fetchImpl = globalThis.fetch } = {}) {
         method,
         headers,
         body: body === undefined || body === null ? undefined : body,
-        signal: AbortSignal.timeout(timeoutMs),
+        signal: globalThis.AbortSignal.timeout(timeoutMs),
       });
     } catch (e) {
       if (e && (e.name === 'TimeoutError' || e.name === 'AbortError')) throw new TransportError('timeout', '');
