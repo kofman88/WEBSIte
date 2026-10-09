@@ -50,11 +50,21 @@ function setTrack(inst) { _track = inst; _limiter = null; }
 function setClock(fn) { _clock = fn || (() => Date.now() / 1000); _limiter = null; }
 function resetRateLimits() { if (_limiter) _limiter.reset(); }
 
+/**
+ * An error answer: JSON, `Cache-Control: no-store` and no ETag (res.json would add one, so a
+ * client could revalidate an error as if it were the payload).
+ */
+function sendError(res, status, body) {
+  res.status(status).set('Cache-Control', 'no-store').set('Content-Type', 'application/json; charset=utf-8');
+  res.removeHeader('ETag');
+  return res.end(JSON.stringify(body));
+}
+
 router.use(['/trend', '/stats', '/feed'], (req, res, next) => {
   const r = limiter().hit(req.ip || (req.socket && req.socket.remoteAddress) || '?');
   if (r.ok) return next();
-  res.set('Retry-After', String(r.retryS)).set('Cache-Control', 'no-store');
-  return res.status(429).json({ error: 'Too many requests, please try again later', code: 'RATE_LIMITED' });
+  res.set('Retry-After', String(r.retryS));
+  return sendError(res, 429, { error: 'Too many requests, please try again later', code: 'RATE_LIMITED' });
 });
 
 /** { body, etag } → 200 (or 304 when If-None-Match matches). */
@@ -70,7 +80,7 @@ function send(req, res, packed) {
 
 function fail(res, where, e) {
   logger.warn(`[PUBLIC-API] ${where}: ${e && e.message}`);
-  return res.status(503).set('Cache-Control', 'no-store').json({ error: 'unavailable', code: 'PUBLIC_UNAVAILABLE' });
+  return sendError(res, 503, { error: 'unavailable', code: 'PUBLIC_UNAVAILABLE' });
 }
 
 router.get('/trend', async (req, res) => {
@@ -94,9 +104,7 @@ router.get('/feed', (req, res) => {
   try {
     return send(req, res, track().feed(after === undefined ? undefined : after));
   } catch (e) {
-    if (e && e.code === 'bad_cursor') {
-      return res.status(400).set('Cache-Control', 'no-store').json({ error: 'bad_cursor' });
-    }
+    if (e && e.code === 'bad_cursor') return sendError(res, 400, { error: 'bad_cursor' });
     return fail(res, 'feed', e);
   }
 });
