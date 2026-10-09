@@ -11,7 +11,7 @@
  * and volume/reset (decision D10: the Telegram-only factory / VOLUME resets).
  * Mounted: appGenome (M16), appChallenge (M17), appTrend (trend, trend/notify)
  * and appData (M10b: dashboard, signals, chart, result, stats, analyze, share,
- * feedback, events). Exchange keys / positions arrive with M13b.
+ * feedback, events) and appTrade (M13b: exchange keys, positions, the trade buttons).
  *
  * Router-level answers as aiohttp, before auth: 404 / 405 text (routeMethods, on the RAW path:
  * case-sensitive, no trailing-slash or '//' folding); a handler exception → aiohttp's 500 page.
@@ -174,6 +174,7 @@ const MOUNTS = [
   ['', require('./appChallenge')],         // M17: challenge + entry-advisor buttons
   ['', require('./appTrend')],             // M10 (D10): GET trend (the /trend command), POST trend/notify (opt-out)
   ['', require('./appData')],              // M10b: dashboard, signals, chart, result, stats, analyze, share, feedback, events
+  ['', require('./appTrade')],             // M13b: exchange/keys(/remove), positions, trades/{id}/exec|qc/*|progress
 ];
 
 /** `_load_user`: the trader_settings row (created on first contact) + the admin bypass. */
