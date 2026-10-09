@@ -113,18 +113,34 @@ function createExecutor(deps) {
   /** asyncio.wait_for around one trader call — the Bybit pybit calls are thread-pool work (shield). */
   const call = (exchange, fn, timeoutS, thunk) => waitFor(thunk, timeoutS, { shield: isThreadCall(exchange, fn), timers });
   const spawn = (name, fn, onError) => tasks.create(name, fn, { onError });
+  /**
+   * db.trade_events.emit_bg: the bot appends the row from a task (evt_<type>_<tid16>) that
+   * runs before any later event task (FIFO). The site's insert is a synchronous, never-throwing
+   * better-sqlite3 write, so it is done in place: same rows, same order.
+   */
   const emitEvt = (tid, evt, data, floatKeys = null) => {
     try {
       if (!tid || !evt) return;
-      spawn(`evt_${evt}_${String(tid).slice(0, 16)}`, () => db.addTradeEvent(String(tid), evt, data, floatKeys ? { floatKeys } : {}));
+      db.addTradeEvent(String(tid), evt, data, floatKeys ? { floatKeys } : {});
     } catch (e) {
       log.debug(pf('[EVT-EMIT-SKIP] %s: %s', evt, errText(e)));
     }
   };
+  /** trade_result["qty"]: a Python float for BingX / Binance (a str for Bybit / OKX). */
+  const qtyFloatKeys = (r) => (r !== null && typeof r === 'object' && typeof r.qty === 'number' ? ['qty'] : null);
+  /**
+   * _price_multiplier(exchange, symbol). QUIRK (pinned): bybit / okx / unknown read the trader
+   * module's `bybit_price_multiplier` — okx_trader has none, so every OKX lookup logs the
+   * "not found" warning and returns 1.0 (the OKX value anyway).
+   */
   const priceMultiplier = (exchange, symbol) => {
     try {
-      const v = Number(traderFor(exchange).priceMultiplier(symbol));
-      return v;
+      const h = traderFor(exchange);
+      if (h.exchange === 'okx') {
+        log.warning(pf('price_multiplier: %s.*_price_multiplier not found, pmult=1.0', exchange));
+        return 1.0;
+      }
+      return pyFloat(h.priceMultiplier(symbol));
     } catch (e) {
       log.error(pf('_price_multiplier(%s, %s) failed, falling back to 1.0', exchange, symbol));
       return 1.0;
@@ -857,6 +873,11 @@ function createExecutor(deps) {
           await safeSkipTrade(tradeId, 'prop_balance_fetch_fail');
           return result;
         }
+        if (propBalance === null || propBalance === undefined || (typeof propBalance !== 'number' && typeof propBalance !== 'boolean')) {
+          // `_prop_balance <= 0` on a non-number raises TypeError → the fail-closed handler below
+          const tn = propBalance === null || propBalance === undefined ? 'NoneType' : (typeof propBalance === 'string' ? 'str' : (Array.isArray(propBalance) ? 'list' : 'dict'));
+          throw Object.assign(new TypeError(`'<=' not supported between instances of '${tn}' and 'int'`), { pyType: 'TypeError' });
+        }
         if (propBalance <= 0) {
           log.warning(pf('[PROP-FAILSAFE] uid=%s sym=%s: get_balance вернул %.2f (без ошибки) — blocking trade (cannot verify DD limits)', userId, symbol, propBalance));
           if (bot) {
@@ -1255,7 +1276,7 @@ function createExecutor(deps) {
                 low_notional_skip: truthy(pyGet(tradeResult, 'low_notional_skip', null)),
                 insufficient_margin: truthy(pyGet(tradeResult, 'insufficient_margin', null)),
                 qty: pyGet(tradeResult, 'qty', 0),
-              });
+              }, qtyFloatKeys(tradeResult));
               break;
             } catch (e) {
               if (!isTimeoutError(e)) throw e;
@@ -1378,7 +1399,8 @@ function createExecutor(deps) {
             can(featureKey) {
               try {
                 const plan = or(rget(row, 'sub_plan', null), 'free');
-                return Boolean((PLAN_FEATURES[plan] || {})[featureKey]);
+                const feat = own(PLAN_FEATURES, plan) ? PLAN_FEATURES[plan] : {};
+                return Boolean(own(feat, featureKey) ? feat[featureKey] : false);
               } catch (_e) {
                 return false;
               }
@@ -1416,16 +1438,10 @@ function createExecutor(deps) {
             const blocking = ai.blocking_layers.join(',');
             const agreeN = ai.layers.filter((r) => r.verdict === AGREE).length;
             log.info(pf('[AI-FILTER-INFO] uid=%s sym=%s strategy=%s blocking=%s agree=%d/%d (информационно — trade продолжается)', userId, symbol, strategy, blocking, agreeN, ai.layers.length));
-            try {
-              const { pyDumps } = require('../engine/signalTradesRepo');
-              const dump = pyDumps({
-                passed: false, blocking: ai.blocking_layers, score: ai.confidence_score,
-                layers: ai.layers.map((r) => ({ name: r.layer_name, verdict: r.verdict, reason: r.reason })),
-              }, { ensureAscii: true, floatKeys: ['score'] });
-              if (tradeId) await db.exec('UPDATE signal_trades SET ai_filter_json=? WHERE trade_id=?', [dump, tradeId]);
-            } catch (je) {
-              log.debug(`ai_filter_json persist: ${errText(je)}`);
-            }
+            // QUIRK (pinned): the bot persists the verdict with `db.db_exec("UPDATE trades SET
+            // ai_filter_json=...")`, but `database` has no db_exec (AttributeError, swallowed at
+            // DEBUG): ai_filter_json is never written. The site leaves the column untouched too.
+            log.debug("ai_filter_json persist: module 'database' has no attribute 'db_exec'");
           }
           result.ai_filter_result = ai;
           try {
@@ -1454,7 +1470,7 @@ function createExecutor(deps) {
         emitEvt(tradeId, 'fill_confirmed', {
           exchange, order_id: pySlice(pyStr(or(pyGet(tradeResult, 'order_id', ''), '')), 128),
           pos_idx: pyGet(tradeResult, 'pos_idx', 0), qty: pyGet(tradeResult, 'qty', 0),
-        });
+        }, qtyFloatKeys(tradeResult));
         if (tpVal) emitEvt(tradeId, 'tp_placement', { source: 'atomic', tp_placed: true, tp1, tp2, tp3 }, ['tp1', 'tp2', 'tp3']);
         try {
           await db.setTradeState(tradeId, 'OPEN');
@@ -1546,6 +1562,9 @@ function createExecutor(deps) {
         if (truthy(pyGet(tradeResult, 'low_notional_skip', null)) && bot) {
           const langLn = rget(row, 'lang', 'ru');
           const reqRisk = own(tradeResult, 'requested_risk_pct') ? tradeResult.requested_risk_pct : riskPct;
+          // the trader's requested_risk_pct / risk_pct are Python floats; required_balance is round(x, 2)
+          // when present, the int 0 default otherwise
+          const reqRiskV = typeof reqRisk === 'number' ? F(reqRisk) : reqRisk;
           const reqBal = own(tradeResult, 'required_balance') ? tradeResult.required_balance : 0;
           const strat = pyUpper(String(or(strategy, '?')));
           const lnNow = now();
@@ -1554,7 +1573,7 @@ function createExecutor(deps) {
             lowNotionalNotifyTs.set(Math.trunc(userId), lnNow);
             try {
               await send(bot, userId, t('low_notional_skip_notif', langLn, {
-                symbol: symShort(symbol || ''), strategy: strat, requested_risk: F(reqRisk), required_balance: pyIntStrict(reqBal),
+                symbol: symShort(symbol || ''), strategy: strat, requested_risk: reqRiskV, required_balance: pyIntStrict(reqBal),
               }));
             } catch (e) {
               log.debug(pf('low_notional notif uid=%s: %s', userId, errText(e)));
@@ -1563,7 +1582,8 @@ function createExecutor(deps) {
             log.debug(pf('[LOW-NOTIONAL-THROTTLE] uid=%s skip notif (last sent %.0fs ago)', userId, lnNow - lnLast));
           }
           log.info(pf('[FILTER-BLOCK] uid=%s sym=%s strategy=%s gate=%s reason=%r value=%.2f threshold=%s',
-            userId, symbol, strategy, 'low_notional_skip', `notional<$10, requested_risk=${pf('%s', F(reqRisk))}%`, reqRisk, F(reqBal)));
+            userId, symbol, strategy, 'low_notional_skip', `notional<$10, requested_risk=${pf('%s', reqRiskV)}%`, reqRisk,
+            own(tradeResult, 'required_balance') ? F(reqBal) : reqBal));
         }
         const lower = pyLower(errTxt);
         const isZeroBalance = lower.includes('недостаточно средств') || lower.includes('insufficient') || errTxt.includes('$0.00');

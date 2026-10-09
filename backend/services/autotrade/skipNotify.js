@@ -124,7 +124,7 @@ function createSkipNotify({
     return (userUnfilled.get(userId) || []).length;
   }
 
-  return { notifySkipToUser, recordUnfilled, getUnfilledCount, _dedup: dedup };
+  return { notifySkipToUser, recordUnfilled, getUnfilledCount, _dedup: dedup, _userUnfilled: userUnfilled, _lastNotified: lastNotified };
 }
 
 module.exports = { SKIP_NOTIFY_KEYS, createSkipNotify };

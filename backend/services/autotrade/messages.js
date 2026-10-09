@@ -5,6 +5,7 @@
  *
  *   t(key, lang='ru', kwargs)  MESSAGES[key][lang] or [ru] or key; `.format(**kwargs)` when
  *                              kwargs is non-empty; a formatting error returns the raw text.
+ *   regimeWarningText(regime, direction, lang)   market_regime.regime_warning_text
  *
  * Values follow services/autotrade/pyfmt (wrap integral Python floats with F()).
  */
@@ -30,4 +31,10 @@ function t(key, lang = 'ru', kwargs = null) {
   }
 }
 
-module.exports = { t, MESSAGES: DATA };
+/** market_regime.regime_warning_text: the counter-trend warning appended to the open message. */
+function regimeWarningText(regime, direction, lang = 'ru') {
+  const label = t(`regime_${regime}`, lang);
+  return t('counter_trend', lang, { regime: label, direction });
+}
+
+module.exports = { t, regimeWarningText, MESSAGES: DATA };

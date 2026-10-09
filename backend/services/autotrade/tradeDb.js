@@ -27,7 +27,14 @@ const { createSignalTradesRepo } = require('../engine/signalTradesRepo');
 
 const TRADER_COLS = new Set(engineSchema.TRADER_SETTINGS_COLUMNS.map((c) => c[0]));
 
-function createTradeDb({ db = null, now = () => Date.now() / 1000, log = null, repo = null } = {}) {
+function createTradeDb({ db = null, now = () => Date.now() / 1000, log = null, repo = null, invalidateUserCache = null } = {}) {
+  /** the scanners' settings cache (traderSettingsService) after a users-row write */
+  const invalidate = () => {
+    try {
+      if (invalidateUserCache) invalidateUserCache();
+      else require('../traderSettingsService').invalidateCache();
+    } catch (_e) { /* best effort */ }
+  };
   const dbOf = () => (db ? db : require('../../models/database'));
   const logger = log || require('../marketData/mdLog').log;
   const trades = repo || createSignalTradesRepo({ db: db || undefined, now, log: logger });
@@ -59,7 +66,7 @@ function createTradeDb({ db = null, now = () => Date.now() / 1000, log = null, r
       const sql = `INSERT INTO trader_settings (${cols.join(', ')}) VALUES (${cols.map(() => '?').join(', ')}) `
         + `ON CONFLICT(user_id) DO UPDATE SET ${updates}`;
       dbOf().prepare(sql).run(...vals);
-      try { require('../traderSettingsService').invalidateCache(); } catch (_e) { /* tests without the service */ }
+      invalidate();
     },
 
     async updatePropPeak(uid, currentBalance) {
@@ -74,7 +81,7 @@ function createTradeDb({ db = null, now = () => Date.now() / 1000, log = null, r
 
     async setAutoTrade(uid, enabled) {
       dbOf().prepare('UPDATE trader_settings SET auto_trade=? WHERE user_id=?').run(enabled ? 1 : 0, Number(uid));
-      try { require('../traderSettingsService').invalidateCache(); } catch (_e) { /* tests */ }
+      invalidate();
     },
 
     async setTradeResult(tid, result, rr, opts = {}) {
