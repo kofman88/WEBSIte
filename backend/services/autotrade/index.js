@@ -149,8 +149,14 @@ function createTraderHooks(deps = {}) {
 function createTradeOpsRegistry(deps = {}) {
   const { createRegistry } = require('../exchanges');
   const h = createTraderHooks(deps);
+  // deps.overrides (tests) win over the hooks; transport / sleep stay cancellable and the pybit work
+  // runs as a thread (productionOverrides) — the bot's asyncio semantics under the routes' wait_for
+  const { transport = null, sleep = null, ...extra } = deps.overrides || {};
   return createRegistry({
-    overrides: { killswitch: h.killswitch, planGate: h.planGate, events: h.events, onAuthReset: h.onAuthReset, ...(deps.overrides || {}) },
+    overrides: productionOverrides({
+      killswitch: extra.killswitch || h.killswitch, planGate: extra.planGate || h.planGate, events: extra.events || h.events,
+      onAuthReset: extra.onAuthReset || h.onAuthReset, transport, sleep, extra,
+    }),
   });
 }
 

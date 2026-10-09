@@ -59,6 +59,19 @@ function createVClock(wall0, mono0 = 1000.0) {
     timers: api,
     sleep: (s) => new Promise((r) => api.setTimeout(r, Number(s) * 1000)),
     pending: () => timers.size,
+    /** Fire the earliest timer (the clock jumps to it); false when none is pending. For drivers with real I/O. */
+    fireNext() {
+      if (!timers.size) return false;
+      let next = null;
+      for (const h of timers) if (!next || h.at < next.at || (h.at === next.at && h.seq < next.seq)) next = h;
+      timers.delete(next);
+      if (next.at > st.mono) {
+        st.wall += next.at - st.mono;
+        st.mono = next.at;
+      }
+      next.fn();
+      return true;
+    },
     run,
     state: st,
   };

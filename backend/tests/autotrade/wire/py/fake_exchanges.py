@@ -61,8 +61,11 @@ def parse_qs(qs):
 
 
 class Account:
-    def __init__(self, ex, key, secret, passphrase="", balance=1000.0, hedge=None, perms=None, avail=None, bx_batch=None):
+    def __init__(self, ex, key, secret, passphrase="", balance=1000.0, hedge=None, perms=None, avail=None, bx_batch=None,
+                 bybit_host=None):
         self.ex, self.key, self.secret, self.passphrase = ex, key, secret, passphrase
+        # Bybit: the host the key exists on — None both, "live" api.bybit.com only, "demo" api-demo only
+        self.bybit_host = bybit_host
         # BingX /trade/batchOrders: None = what the bot's own notes report from production (code
         # 100001 on every symbol); "ok" / "list" = processed item by item (data.orders / data as a
         # list); "partial" = the SL item comes back without an orderId; "missing" = 100404
@@ -88,6 +91,7 @@ class Sim:
         self.faults = [dict(f, _seen=0) for f in (faults or [])]
         self.next_id = 7000
         self.lenient = []
+        self.errors = []         # simulator crashes (a scaffolding bug, never an exchange answer) — the driver fails on any
         # price moves: [abs_ts, ex, native, new_price] applied when the clock passes abs_ts
         self.moves = sorted([list(m) for m in (moves or [])], key=lambda m: m[0])
 
@@ -277,7 +281,12 @@ class Sim:
             return out
         fn = {"bybit": self.bybit, "bingx": self.bingx, "binance": self.binance, "okx": self.okx}[ex]
         self._batch_fault = f if f and f["kind"] == "batch_item" else None
-        out = fn(method, host, path, query, parsed, hl, raw_qs, raw_body, url)
+        try:
+            out = fn(method, host, path, query, parsed, hl, raw_qs, raw_body, url)
+        except Exception as e:  # noqa: BLE001
+            import traceback
+            self.errors.append([ex, method, path, f"{type(e).__name__}: {e}", traceback.format_exc()[-800:]])
+            out = {"status": 500, "headers": {"Content-Type": "text/plain"}, "text": "simulator error"}
         self._batch_fault = None
         if out is None:
             out = {"status": 404, "headers": {"Content-Type": "text/plain"}, "text": "no route", "unhandled": True}
@@ -351,6 +360,8 @@ class Sim:
                 "symbol": q.get("symbol"), "lastPrice": fmt(p), "markPrice": fmt(p), "indexPrice": fmt(p),
                 "bid1Price": fmt(p - sp / 2), "ask1Price": fmt(p + sp / 2), "fundingRate": fmt(i.get("funding", 0.0001), 8)}]})
         a = self._account("bybit", hl)
+        if a is not None and a.bybit_host and (a.bybit_host == "demo") != (host == "api-demo.bybit.com"):
+            a = None
         if a is None:
             return err(10003, "API key is invalid.")
         if self._sig_ok("bybit", method, path, raw_qs, raw_body, hl) is False:
@@ -702,7 +713,7 @@ class Sim:
             if i.get("status", "Trading") != "Trading":
                 return {"code": -4140, "msg": "Invalid symbol status for opening position."}
             ps = p.get("positionSide")
-            if a.hedge and not ps or (not a.hedge and ps not in (None, "", "BOTH")):
+            if a.hedge and not ps or (not a.hedge and ps not in (None, "", "BOTH")) or ps not in (None, "", "BOTH", "LONG", "SHORT"):
                 return {"code": -4061, "msg": "Order's position side does not match user's setting."}
             typ = {"STOP_MARKET": "STOP", "TAKE_PROFIT_MARKET": "TP"}.get(p.get("type"), p.get("type"))
             side = p.get("side")

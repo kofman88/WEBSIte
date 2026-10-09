@@ -49,7 +49,7 @@ describe('balance_cache replay', () => {
       },
     });
     // asyncio.wait_for(…, 5.0): a never-settling call times out
-    const withTimeout = (p, s) => Promise.race([p, new Promise((_r, rej) => setTimeout(() => rej(new BC.BalanceTimeout()), s === 5.0 ? 1 : 0))]);
+    const withTimeout = (work, s) => Promise.race([typeof work === 'function' ? work() : work, new Promise((_r, rej) => setTimeout(() => rej(new BC.BalanceTimeout()), s === 5.0 ? 1 : 0))]);
     const cache = BC.createBalanceCache({ getTrader: fake, now: () => t, withTimeout, log: makeLog() });
     for (const row of ROWS) {
       const st = row.step;

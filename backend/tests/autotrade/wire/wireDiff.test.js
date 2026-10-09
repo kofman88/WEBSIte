@@ -73,6 +73,8 @@ describe(`wire differential — ${FX.vectors.length} scenarios replayed against 
     for (const t of ['call', 'partial_tp', 'limit_unfilled_guard', 'reconcile_ptp', 'reconcile_sl']) expect(tasks.has(t), t).toBe(true);
     expect(orders).toBeGreaterThan(300);
     expect(hangs).toBeGreaterThan(10);
+    // the simulator never crashed (a crash would masquerade as an exchange answer)
+    expect(FX.vectors.filter((v) => (v.expected.sim_errors || []).length).map((v) => v.case.name)).toEqual([]);
     // the only requests the exchange cannot verify are the two pinned bot quirks below
     expect([...badSig].sort()).toEqual(['GET /api/v5/account/balance', 'POST /fapi/v1/batchOrders']);
   });

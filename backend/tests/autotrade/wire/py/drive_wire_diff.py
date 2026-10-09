@@ -194,6 +194,28 @@ def inflight(d):
         INFLIGHT[0] += d
 
 
+IDLE_WAITERS: list = []
+
+
+def _notify_idle():
+    """(loop thread) wake the waiters of wait_threads_idle once nothing is in flight and no thread lives."""
+    if INFLIGHT[0] == 0 and LIVE_THREADS[0] == 0:
+        while IDLE_WAITERS:
+            f = IDLE_WAITERS.pop()
+            if not f.done():
+                f.set_result(None)
+
+
+async def wait_threads_idle():
+    """Wait for the executor threads a wait_for abandoned — exactly until the last one ends (no polling
+    step: the clock moves only to the threads' own timers)."""
+    loop = asyncio.get_running_loop()
+    while INFLIGHT[0] > 0 or LIVE_THREADS[0] > 0:
+        f = loop.create_future()
+        IDLE_WAITERS.append(f)
+        await f
+
+
 def _track(fut, what):
     inflight(+1)
     PENDING_IO[id(fut)] = what
@@ -201,6 +223,7 @@ def _track(fut, what):
     def _done(_f):
         inflight(-1)
         PENDING_IO.pop(id(fut), None)
+        _notify_idle()
     fut.add_done_callback(_done)
 
 
@@ -320,6 +343,7 @@ class VLoop(asyncio.SelectorEventLoop):
                 with _IF_LOCK:
                     LIVE_THREADS[0] -= 1
                 PENDING_IO.pop(id(key), None)
+                _notify_idle()
             try:
                 self.call_soon_threadsafe(_dec)
             except RuntimeError:
@@ -403,6 +427,7 @@ def rec(kind, data):
 
 TRADER_LOGGERS = ("CHM.Bybit", "CHM.BingX", "CHM.Binance", "CHM.OKX.Trader", "CHM.ApiRetry", "CHM.ExchangeBreaker")
 MARKER_RE = re.compile(r"\[[A-Z][A-Z0-9_-]*[A-Z0-9]\]")
+LOG_ALLOW = [None]       # routes mode: the handler loggers whose lines are recorded (None = every logger)
 
 
 class Cap(logging.Handler):
@@ -422,7 +447,7 @@ class Cap(logging.Handler):
                 ms = MARKER_RE.findall(msg)
                 if ms:
                     RECS.append([task_name(), "tlog", [r.levelname, ms]])
-            else:
+            elif LOG_ALLOW[0] is None or r.name in LOG_ALLOW[0]:
                 RECS.append([task_name(), "log", [r.levelname, msg]])
 
 
@@ -1606,8 +1631,7 @@ async def run_case(c):
         if CLK.wall - t_end > 7200:
             raise RuntimeError(f"{c['name']}: background tasks still pending: {[t.get_name() for t in pend]}")
     # executor threads still running after the last task (a wait_for abandoned pybit call)
-    while INFLIGHT[0] > 0 or LIVE_THREADS[0] > 0:
-        await asyncio.sleep(1.0)
+    await wait_threads_idle()
     CAPTURE[0] = False
     SIM[0] = None
     for k, v in env_saved.items():
@@ -1616,7 +1640,7 @@ async def run_case(c):
         else:
             os.environ[k] = v
     out = {"results": results, "recs": copy.deepcopy(RECS), "clock_end": CLK.wall, "sim": jsonable(sim.snapshot()),
-           "lenient": sim.lenient}
+           "lenient": sim.lenient, "sim_errors": sim.errors}
     out.update(dump_db())
     return out
 
@@ -1626,6 +1650,19 @@ async def main():
     con = db_conn()
     USER_COLS.extend(r[1] for r in con.execute("PRAGMA table_info(users)"))
     con.close()
+    if os.environ.get("WIRE_MODE") == "routes":
+        import wire_routes
+        out = OUT if len(sys.argv) > 1 else os.path.join(HERE, "..", "fixtures", "wire_routes.json.gz")
+        only = [x for x in os.environ.get("WIRE_ONLY", "").split(",") if x]
+        per_ex = int(os.environ.get("WIRE_SESSIONS", "16"))
+        vectors = await wire_routes.main(out, SEED + 1, per_ex, only)
+        payload = {"meta": {"seed": SEED + 1, "sessions_per_exchange": per_ex, "python": sys.version.split()[0],
+                            "d15_path": wire_routes.D15_PATH, "trade_cols": wire_routes.TRADE_COLS},
+                   "vectors": vectors}
+        with gzip.open(out, "wt", encoding="utf-8") as f:
+            json.dump(payload, f, ensure_ascii=False)
+        print(f"wrote {len(vectors)} route sessions → {out}", file=sys.stderr)
+        return
     gen_targeted()
     gen_random(SEED, N_USERS)
     only = [x for x in os.environ.get("WIRE_ONLY", "").split(",") if x]
