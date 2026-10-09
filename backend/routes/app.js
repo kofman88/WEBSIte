@@ -92,31 +92,46 @@ function appAuth(req, res, next) {
 }
 
 /**
- * Whether a handler of this router (its own routes, the mounted routers, the data dispatcher of
- * appData.js) takes `method` on this request's path. The bot counts the POST bucket inside
- * `_load_user`, i.e. only once aiohttp's router matched a handler: a POST to an unknown path (404)
- * or to a known path with another method (405) is neither counted nor answered 429.
+ * aiohttp's resolve() over this router: the methods registered for the request's path — this
+ * router's routes, the mounted routers (genome, challenge) and the data dispatcher of appData.js
+ * (its yarl view of the target). Express route methods are lower case; GET implies HEAD.
  */
-function handledHere(stack, method, path, url) {
+function routeMethods(stack, path, url, out = new Set()) {
   for (const layer of stack) {
     if (layer.route) {
-      if (layer.route._handles_method(method) && layer.match(path)) return true;
+      if (layer.match(path)) {
+        for (const [m, on] of Object.entries(layer.route.methods)) if (on && m !== '_all') out.add(m.toUpperCase());
+      }
       continue;
     }
     const h = layer.handle;
-    if (!h || (typeof h.handles !== 'function' && !Array.isArray(h.stack)) || !layer.match(path)) continue;
+    if (!h || (typeof h.methods !== 'function' && !Array.isArray(h.stack)) || !layer.match(path)) continue;
     const strip = (p) => { const r = p.slice(layer.path.length) || '/'; return r.startsWith('/') ? r : `/${r}`; };
-    if (typeof h.handles === 'function' ? h.handles(method, strip(url)) : handledHere(h.stack, method, strip(path), strip(url))) return true;
+    if (typeof h.methods === 'function') for (const m of h.methods(strip(url))) out.add(m);
+    else routeMethods(h.stack, strip(path), strip(url), out);
   }
-  return false;
+  if (out.has('GET')) out.add('HEAD');
+  return out;
 }
 
+// The router-level answers come first, as in aiohttp (before any handler, so before the initData /
+// JWT check, and never counted in a rate bucket): no route → 404 "404: Not Found", a route without
+// this method → 405 "405: Method Not Allowed" + Allow (sorted, GET with HEAD) — the bodies of
+// web.HTTPNotFound / HTTPMethodNotAllowed. The generic POST bucket below therefore only counts the
+// requests a handler takes, like the bot's `_load_user`.
+router.use((req, res, next) => {
+  let ms;
+  try { ms = routeMethods(router.stack, req.path, req.url); } catch (_e) { ms = new Set(); }
+  if (!ms.size) return res.status(404).type('text/plain').send('404: Not Found');
+  if (!ms.has(req.method)) {
+    return res.status(405).set('Allow', Array.from(ms).sort().join(',')).type('text/plain').send('405: Method Not Allowed');
+  }
+  return next();
+});
 router.use(appAuth);
 router.use((req, res, next) => {
   res.set('Cache-Control', 'no-store');
-  if (req.method === 'POST' && handledHere(router.stack, 'POST', req.path, req.url) && !rateOk(req.userId, 'post', ...POST_RATE_LIMIT)) {
-    return rateLimited(res, 10);
-  }
+  if (req.method === 'POST' && !rateOk(req.userId, 'post', ...POST_RATE_LIMIT)) return rateLimited(res, 10);
   next();
 });
 
@@ -326,6 +341,20 @@ router.post('/volume/reset', wrap((req, res) => {
 router.use('/genome', require('./appGenome'));    // M16: GET genome, POST genome/apply, POST genome/evolve (D10)
 router.use(require('./appChallenge'));       // M17: challenge + entry-advisor buttons
 router.use(require('./appData'));            // M10b: dashboard, signals, chart, result, stats, analyze, share, feedback, events
+
+// An exception in a handler: aiohttp's web_protocol.handle_error answer — 500 with the status line
+// and "Server got itself in trouble" (an HTML page when the client accepts text/html), the
+// traceback in the log ("Error handling request").
+router.use((err, req, res, _next) => {
+  logger.error(`Error handling request ${req.method} ${req.originalUrl}: ${(err && err.stack) || err}`);
+  if (res.headersSent) return res.end();
+  const title = '500 Internal Server Error';
+  const msg = 'Server got itself in trouble';
+  if (String(req.headers.accept || '').includes('text/html')) {
+    return res.status(500).type('text/html').send(`<html><head><title>${title}</title></head><body><h1>${title}</h1>${msg}</body></html>`);
+  }
+  return res.status(500).type('text/plain').send(`${title}\n\n${msg}`);
+});
 
 module.exports = router;
 module.exports.rateOk = rateOk;

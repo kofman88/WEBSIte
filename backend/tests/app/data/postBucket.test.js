@@ -4,7 +4,9 @@
  * router dispatched to a handler is counted: a POST to an unknown path (404) or to a known path
  * with another method (405) is never counted and keeps its 404 / 405 even when the bucket is
  * exhausted. Routes of routes/app.js itself, of the mounted routers (genome, challenge) and of
- * the data dispatcher (appData.js, its yarl view of the target) all count.
+ * the data dispatcher (appData.js, its yarl view of the target) all count. The router-level
+ * answers (404 / 405 text) come before the JWT check, as aiohttp resolves before any handler, and
+ * an exception in a handler is aiohttp's 500 (text, or HTML for a browser's Accept).
  */
 import { describe, it, expect, beforeAll, afterAll, beforeEach } from 'vitest';
 import http from 'http';
@@ -73,6 +75,27 @@ describe('POST bucket counts only the requests a handler takes', () => {
     expect([c.status, c.headers.allow]).toEqual([405, 'GET,HEAD']);
     expect((await post('/nope')).status).toBe(404);
     expect((await post('/signals/a%7Bb/result')).status).toBe(404);
+  });
+
+  it('router-level answers come before auth, like aiohttp: 404 / 405 text without a token; a handler exception → aiohttp 500', async () => {
+    const anon = (method, target, headers = {}) => rawRequest(port, { method, target: `/api/app${target}`, headers, body: method === 'POST' ? '{}' : null });
+    const nf = await anon('GET', '/nope');
+    expect([nf.status, nf.headers['content-type'], nf.text]).toEqual([404, 'text/plain; charset=utf-8', '404: Not Found']);
+    const na = await anon('POST', '/dashboard');
+    expect([na.status, na.headers.allow, na.text]).toEqual([405, 'GET,HEAD', '405: Method Not Allowed']);
+    const m7 = await anon('GET', '/strategy');                                  // an M7 route: POST only
+    expect([m7.status, m7.headers.allow]).toEqual([405, 'POST']);
+    const g = await anon('POST', '/genome');                                     // mounted router: GET only
+    expect([g.status, g.headers.allow]).toEqual([405, 'GET,HEAD']);
+    expect((await anon('GET', '/dashboard')).status).toBe(401);                 // a handler takes it → auth
+    // share {"days": 1e400}: int(inf) raises OverflowError in the bot → aiohttp's 500 (text, or HTML for a browser)
+    const h = { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' };
+    const t = await rawRequest(port, { method: 'POST', target: '/api/app/share', headers: h, body: '{"days": 1e400}' });
+    expect([t.status, t.headers['content-type'], t.text]).toEqual([500, 'text/plain; charset=utf-8', '500 Internal Server Error\n\nServer got itself in trouble']);
+    appRouter.resetRateLimits();
+    const html = await rawRequest(port, { method: 'POST', target: '/api/app/share', headers: { ...h, Accept: 'text/html,application/xhtml+xml' }, body: '{"days": 1e400}' });
+    expect([html.status, html.headers['content-type'], html.text]).toEqual([500, 'text/html; charset=utf-8',
+      '<html><head><title>500 Internal Server Error</title></head><body><h1>500 Internal Server Error</h1>Server got itself in trouble</body></html>']);
   });
 
   it('every kind of handler counts: own routes, mounted routers, the data dispatcher (yarl view of the id)', async () => {

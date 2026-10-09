@@ -13,8 +13,8 @@
  * Where the site answers by decision D3 instead of a PNG the expectation is derived from what the
  * bot's renderer got: the chart / analyze payload = the renderer's inputs run through the renderer's
  * own data steps (driver's mirror_chart, cross-checked there against the real render's None),
- * share = the stats the card was drawn from. Router-level answers (404 / 405 text, 500) compare the
- * status (and Allow).
+ * share = the stats the card was drawn from. Router-level answers (aiohttp's 404 / 405 text, the
+ * 500 of an exception in a handler) compare status, Allow, Content-Type and the body byte for byte.
  *
  * Regenerate: py/drive_app_data.py (see its docstring).
  */
@@ -128,7 +128,7 @@ describe(`Mini App data routes — ${FX.steps.length} requests replayed against 
   it('every step: status, JSON, DB writes, log markers', async () => {
     const bad = [];
     const tokens = {};
-    const seen = { json: 0, chartPayload: 0, analyzeChart: 0, share: 0, trade: 0, kv: 0, tickets: 0, logs: 0 };
+    const seen = { json: 0, text: 0, chartPayload: 0, analyzeChart: 0, share: 0, trade: 0, kv: 0, tickets: 0, logs: 0 };
     for (const s of FX.steps) {
       clock.now = s.now;
       const st = s.set || {};
@@ -160,6 +160,12 @@ describe(`Mini App data routes — ${FX.steps.length} requests replayed against 
         if (want.candles && want.overlays) seen[s.path.endsWith('/analyze') ? 'analyzeChart' : 'chartPayload'] += 1;
         if (want.sent === false) seen.share += 1;
       }
+      const botType = s.headers['content-type'] || '';
+      if (res.status === s.status && botType.startsWith('text/plain')) {
+        seen.text += 1;
+        if (res.text !== s.text) problems.push(`text ${JSON.stringify(res.text)} vs ${JSON.stringify(s.text)}`);
+        if (res.headers['content-type'] !== botType) problems.push(`content-type ${res.headers['content-type']} vs ${botType}`);
+      }
       if (s.status === 429 && res.headers['retry-after'] !== s.headers['retry-after']) problems.push(`retry-after ${res.headers['retry-after']}`);
       if (s.status === 405 && res.headers.allow !== s.headers.allow) problems.push(`allow ${res.headers.allow} vs ${s.headers.allow}`);
       if (s.uid !== null && s.kv && !same(kvRows(s.uid), s.kv)) problems.push(`kv ${JSON.stringify(kvRows(s.uid))} vs ${JSON.stringify(s.kv)}`);
@@ -184,6 +190,8 @@ describe(`Mini App data routes — ${FX.steps.length} requests replayed against 
     expect(bad).toEqual([]);
     // the comparison really ran over the interesting answers
     expect(seen.json).toBeGreaterThanOrEqual(280);
+    expect(seen.text).toBe(FX.steps.filter((s) => (s.headers['content-type'] || '').startsWith('text/plain')).length);
+    expect(seen.text).toBeGreaterThanOrEqual(16);                // router 404 / 405 text + the two 500s
     expect(seen.chartPayload).toBeGreaterThanOrEqual(40);
     expect(seen.analyzeChart).toBeGreaterThanOrEqual(5);
     expect(seen.share).toBeGreaterThanOrEqual(15);

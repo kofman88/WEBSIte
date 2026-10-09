@@ -500,10 +500,13 @@ function resolve(url) {
   return null;
 }
 
-/** True when `method` on `url` reaches one of these handlers (not a 404 / 405 of the router). */
-function handles(method, url) {
+/** The methods of the route `url` resolves to ([] → not one of these routes); app.js answers 404 / 405 from them. */
+function methods(url) {
   const r = resolve(url);
-  return Boolean(r && r.entry[method === 'HEAD' ? 'GET' : method]);
+  if (!r) return [];
+  const m = Object.keys(r.entry);
+  if (m.includes('GET')) m.push('HEAD');
+  return m;
 }
 
 router.use((req, res, next) => {
@@ -527,7 +530,7 @@ router.use((req, res, next) => {
 module.exports = router;
 module.exports.configure = configure;
 module.exports.resetState = resetState;
-module.exports.handles = handles;
+module.exports.methods = methods;
 module.exports.trendWords = trendWords;
 module.exports.CHART_RATE_LIMIT = CHART_RATE_LIMIT;
 module.exports.SHARE_RATE_LIMIT = SHARE_RATE_LIMIT;
