@@ -1205,6 +1205,17 @@ async def main():
     print("mirror mismatches:", bad)
 
 
-asyncio.run(main())
+# Not asyncio.run: its shutdown joins the default executor, and the bot's
+# to_thread / aiosqlite workers never return (the run finished, the process hung).
+_loop = asyncio.new_event_loop()
+asyncio.set_event_loop(_loop)
+_rc = 0
+try:
+    _loop.run_until_complete(main())
+except BaseException:  # noqa: BLE001 - report, then still skip the hanging shutdown
+    import traceback
+    traceback.print_exc()
+    _rc = 1
 sys.stdout.flush()
-os._exit(0)      # aiosqlite's reader threads would keep the interpreter alive
+sys.stderr.flush()
+os._exit(_rc)    # skip interpreter shutdown: the reader threads would keep it alive
