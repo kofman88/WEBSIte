@@ -127,6 +127,9 @@ function createQueryClient(post, { setTimer = (fn, ms) => setTimeout(fn, ms), cl
 /** Installed by startEngine: (method, args, timeoutMs) → Promise. null = no worker. */
 function setRemote(fn) { remote = typeof fn === 'function' ? fn : null; }
 
+/** True while a running engine worker answers the queries (startEngine installed its query). */
+function hasRemote() { return remote !== null; }
+
 /** Tests: per-method fakes { currentPrices(symbols), cachedCandles(symbol, tf), globalTrend(), marketTrend() }. */
 function setOverrides(o) { overrides = o || null; }
 
@@ -167,6 +170,6 @@ async function marketTrend(timeoutMs = DEFAULT_TIMEOUT_MS) {
 
 module.exports = {
   METHODS, DEFAULT_TIMEOUT_MS,
-  answer, handleQueryMessage, createQueryClient, setRemote, setOverrides,
+  answer, handleQueryMessage, createQueryClient, setRemote, hasRemote, setOverrides,
   currentPrices, cachedCandles, globalTrend, marketTrend, frameToColumns, columnsToFrame,
 };

@@ -488,17 +488,28 @@ function allowHeader(entry) {
   return m.sort().join(',');
 }
 
-router.use((req, res, next) => {
-  const safe = Y.pathSafe(Y.rawPath(req.url));
-  let entry = PLAIN.get(safe) || null;
-  let params = [];
-  if (!entry) {
-    for (const [re, e] of DYNAMIC) {
-      const m = Y.matchDynamic(safe, re);
-      if (m) { entry = e; params = m; break; }
-    }
+/** The route of a request target (relative to /api/app): { entry, params } or null (→ the site's 404). */
+function resolve(url) {
+  const safe = Y.pathSafe(Y.rawPath(url));
+  const plain = PLAIN.get(safe);
+  if (plain) return { entry: plain, params: [] };
+  for (const [re, e] of DYNAMIC) {
+    const m = Y.matchDynamic(safe, re);
+    if (m) return { entry: e, params: m };
   }
-  if (!entry) return next();
+  return null;
+}
+
+/** True when `method` on `url` reaches one of these handlers (not a 404 / 405 of the router). */
+function handles(method, url) {
+  const r = resolve(url);
+  return Boolean(r && r.entry[method === 'HEAD' ? 'GET' : method]);
+}
+
+router.use((req, res, next) => {
+  const r = resolve(req.url);
+  if (!r) return next();
+  const { entry, params } = r;
   const method = req.method === 'HEAD' ? 'GET' : req.method;
   const handler = entry[method];
   if (!handler) {
@@ -516,6 +527,7 @@ router.use((req, res, next) => {
 module.exports = router;
 module.exports.configure = configure;
 module.exports.resetState = resetState;
+module.exports.handles = handles;
 module.exports.trendWords = trendWords;
 module.exports.CHART_RATE_LIMIT = CHART_RATE_LIMIT;
 module.exports.SHARE_RATE_LIMIT = SHARE_RATE_LIMIT;

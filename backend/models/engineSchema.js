@@ -434,6 +434,37 @@ const LEGACY_TABLES = Object.freeze([
 // users columns of the retired paper book / public profile (PLAN §2.1)
 const LEGACY_USER_COLUMNS = Object.freeze(['paper_starting_balance', 'public_profile']);
 
+// The landing's public paper track archive (services/publicTrack/store.js; site only, the bot has no
+// public endpoints): one row per track signal with its stage history and published state, plus the
+// archive epoch and change counter of the feed cursor. Migration v13.
+const PUBLIC_TRACK_DDL = `
+  CREATE TABLE IF NOT EXISTS public_track (
+    trade_id   TEXT PRIMARY KEY,
+    pub_id     TEXT NOT NULL UNIQUE,
+    user_id    INTEGER NOT NULL,
+    bot_id     TEXT NOT NULL,
+    strategy   TEXT NOT NULL,
+    pair       TEXT NOT NULL,
+    side       TEXT NOT NULL,
+    tf         TEXT NOT NULL,
+    created_at REAL NOT NULL,
+    stages     TEXT NOT NULL DEFAULT '[]',
+    status     TEXT,
+    path       TEXT,
+    r          REAL,
+    appear_seq INTEGER,
+    seq        INTEGER,
+    updated_at REAL NOT NULL
+  );
+  CREATE INDEX IF NOT EXISTS idx_public_track_seq ON public_track(seq);
+  CREATE INDEX IF NOT EXISTS idx_public_track_created ON public_track(created_at);
+  CREATE INDEX IF NOT EXISTS idx_public_track_user ON public_track(user_id, created_at);
+  CREATE TABLE IF NOT EXISTS public_track_meta (
+    key   TEXT PRIMARY KEY,
+    value TEXT NOT NULL
+  );
+`;
+
 module.exports = {
   TRADER_SETTINGS_COLUMNS,
   TRADER_SETTINGS_EXCLUDED,
@@ -446,6 +477,7 @@ module.exports = {
   TRADE_EVENTS_DDL,
   PLAN_CHANGES_DDL,
   GENOME_DDL,
+  PUBLIC_TRACK_DDL,
   LEGACY_TABLES,
   LEGACY_USER_COLUMNS,
 };

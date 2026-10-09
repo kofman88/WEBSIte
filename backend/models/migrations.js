@@ -438,6 +438,16 @@ const MIGRATIONS = [
       }
     },
   },
+  {
+    version: 13,
+    name: 'public_track',
+    // The landing's public paper track (GET /api/public/{stats,feed}): public_track (one row per
+    // signal of the PUBLIC_TRACK_USER_IDS accounts: stage history, published state, change
+    // counter) + public_track_meta (archive epoch, counter). services/publicTrack/store.js.
+    up(db) {
+      db.exec(engineSchema.PUBLIC_TRACK_DDL);
+    },
+  },
 ];
 
 function ensureTable(db) {

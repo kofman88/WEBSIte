@@ -91,10 +91,32 @@ function appAuth(req, res, next) {
   });
 }
 
+/**
+ * Whether a handler of this router (its own routes, the mounted routers, the data dispatcher of
+ * appData.js) takes `method` on this request's path. The bot counts the POST bucket inside
+ * `_load_user`, i.e. only once aiohttp's router matched a handler: a POST to an unknown path (404)
+ * or to a known path with another method (405) is neither counted nor answered 429.
+ */
+function handledHere(stack, method, path, url) {
+  for (const layer of stack) {
+    if (layer.route) {
+      if (layer.route._handles_method(method) && layer.match(path)) return true;
+      continue;
+    }
+    const h = layer.handle;
+    if (!h || (typeof h.handles !== 'function' && !Array.isArray(h.stack)) || !layer.match(path)) continue;
+    const strip = (p) => { const r = p.slice(layer.path.length) || '/'; return r.startsWith('/') ? r : `/${r}`; };
+    if (typeof h.handles === 'function' ? h.handles(method, strip(url)) : handledHere(h.stack, method, strip(path), strip(url))) return true;
+  }
+  return false;
+}
+
 router.use(appAuth);
 router.use((req, res, next) => {
   res.set('Cache-Control', 'no-store');
-  if (req.method === 'POST' && !rateOk(req.userId, 'post', ...POST_RATE_LIMIT)) return rateLimited(res, 10);
+  if (req.method === 'POST' && handledHere(router.stack, 'POST', req.path, req.url) && !rateOk(req.userId, 'post', ...POST_RATE_LIMIT)) {
+    return rateLimited(res, 10);
+  }
   next();
 });
 

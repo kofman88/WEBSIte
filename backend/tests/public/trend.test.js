@@ -163,3 +163,62 @@ describe('REST cadence', () => {
     expect(b.tfs['15m'].strength).not.toBeNull();
   });
 });
+
+describe('the running engine worker (engine bridge) as the source', () => {
+  const bridge = require('../../services/engine/engineBridge.js');
+  /** the worker monitor's get_all() for SEED with strengths on some TFs */
+  function workerAll(strengths) {
+    const w = tm.createTrendMonitor({ kv: { get: () => null, set() {}, del() {}, has: () => false }, env: {}, log: { debug() {}, info() {}, warning() {} } });
+    w._seed(SEED, strengths);
+    return w.getAll();
+  }
+
+  it('trend / since / strength come from the worker get_all(); REST bars only for a TF without a strength yet', async () => {
+    const all = workerAll({ '15m': 83.7, '1H': 41, '4H': 0, '1D': 100, '1W': 12.5 });     // 1M: not measured yet
+    const rest = fakeRest();
+    const kvGet = () => { throw new Error('kv must not be read while the worker answers'); };
+    const src = createTrendSource({ kvGet, rest, now: () => T0, live: async () => all });
+    const p = await src.compute();
+    expect(Object.keys(p.tfs)).toEqual(tm.TFS);
+    expect(p.tfs['15m']).toEqual({ trend: 'LONG', strength: 83, since: (T0 - 3 * 3600) * 1000 });
+    expect(p.tfs['4H']).toEqual({ trend: 'RANGE', strength: 0, since: (T0 - 50 * 3600) * 1000 });
+    expect(p.tfs['1W'].strength).toBe(12);
+    expect(rest.calls.candles.map((c) => c[1])).toEqual(['1M']);
+    expect(p.tfs['1M'].strength).toBe(tm.ribbonStrength(frame(300, 0.05), 'LONG'));
+    expect(p.tfs['1M'].since).toBeNull();
+    expect(all['1M'].strength).toBeUndefined();                                // the worker's answer is not mutated
+    expect(p.change_24h).toEqual({ BTC: 1.23, ETH: -0.39 });
+  });
+
+  it('no 15m / 1H / 4H on the worker yet, an error or a non-object → the persisted state (kv) as before', async () => {
+    const { kvGet } = kvFromMonitor(SEED);
+    for (const live of [async () => ({ '15m': { trend: 'LONG', since: 1 } }), async () => { throw new Error('gone'); }, async () => null, async () => 'x', null]) {
+      const rest = fakeRest();
+      const p = await createTrendSource({ kvGet, rest, now: () => T0, live }).compute();
+      expect(p.tfs['1H']).toMatchObject({ trend: 'LONG', since: (T0 - 11 * 3600) * 1000 });
+      expect(rest.calls.candles).toHaveLength(6);
+    }
+  });
+
+  it('default live(): the bridge only while startEngine installed the worker query, else the kv path', async () => {
+    const { kvGet } = kvFromMonitor(SEED);
+    const calls = [];
+    try {
+      bridge.setRemote(async (method) => { calls.push(method); return workerAll({ '15m': 50, '1H': 50, '4H': 50, '1D': 50, '1W': 50, '1M': 50 }); });
+      expect(bridge.hasRemote()).toBe(true);
+      const rest = fakeRest();
+      const p = await createTrendSource({ kvGet: () => null, rest, now: () => T0 }).compute();
+      expect(calls).toEqual(['marketTrend']);
+      expect(p.tfs['15m']).toEqual({ trend: 'LONG', strength: 50, since: (T0 - 3 * 3600) * 1000 });
+      expect(rest.calls.candles).toHaveLength(0);
+    } finally {
+      bridge.setRemote(null);
+    }
+    expect(bridge.hasRemote()).toBe(false);
+    const rest = fakeRest();
+    const p = await createTrendSource({ kvGet, rest, now: () => T0 }).compute();
+    expect(rest.calls.candles).toHaveLength(6);
+    expect(p.tfs['15m'].trend).toBe('LONG');
+    expect(calls).toEqual(['marketTrend']);
+  });
+});

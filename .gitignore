@@ -13,6 +13,8 @@ backend/.env
 *.db-shm
 backend/data/
 data/
+# test sources that live in a folder named data/ (not runtime data)
+!backend/tests/app/data/
 
 # Build
 dist/

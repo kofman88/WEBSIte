@@ -158,6 +158,24 @@ describe('the SPA\'s requests against the real routes', () => {
     expect([nf.status, nf.d]).toEqual([404, { ok: false, error: 'not_found' }]);
   });
 
+  it('chart.js names each MA line by the payload label (VOLUME: SMA 10/20/50 + EMA 200), a bare map as EMA', () => {
+    const n = 40;
+    const candles = Array.from({ length: n }, (_, i) => [i * 3600000, 100 + i, 102 + i, 99 + i, 101 + i, 1]);
+    const line = (k) => Array.from({ length: n }, (_, i) => 100 + i + k);
+    const emas = [
+      { name: '10', label: 'SMA 10', kind: 'SMA', period: 10, values: line(0.1) },
+      { name: '20', label: 'SMA 20', kind: 'SMA', period: 20, values: line(0.2) },
+      { name: '50', label: 'SMA 50', kind: 'SMA', period: 50, values: line(0.3) },
+      { name: '200', label: 'EMA 200', kind: 'EMA', period: 200, values: line(0.4) },
+    ];
+    const ov = { entry: 120, sl: 110, tps: [125, 130, 135], be: null, ob: [], fvg: [], pivots: [], hvn: [], lvn: [] };
+    const vol = renderChart({ candles, overlays: { ...ov, emas } }, { pair: 'SOL/USDT', timeframe: '1h' }).texts;
+    expect(vol).toEqual(expect.arrayContaining(['SMA 10', 'SMA 20', 'SMA 50', 'EMA 200']));
+    expect(vol.filter((t) => /^EMA (10|20|50)$/.test(t))).toEqual([]);
+    const bare = renderChart({ candles, overlays: { ...ov, emas: { 50: line(0.1), 200: line(0.2) } } }, {}).texts;
+    expect(bare).toEqual(expect.arrayContaining(['EMA 50', 'EMA 200']));
+  });
+
   it('manual result + note: d.signal merged into the card; a second result is already_set', async () => {
     const r = await api(`signals/${encodeURIComponent('fw-1')}/result`, { method: 'POST', body: { result: 'TP1' } });
     expect(r.status).toBe(200);

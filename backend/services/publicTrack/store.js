@@ -1,7 +1,7 @@
 'use strict';
 /**
  * publicTrack/store.js — the public track's own archive (tables `public_track`,
- * `public_track_meta`, created here, idempotently).
+ * `public_track_meta`: migration v13 'public_track', and idempotently here).
  *
  * Why an archive and not signal_trades alone: the bot's ghost cleanup marks every paper signal
  * SKIP after 3 days and its trades GC deletes SKIP rows after 30 days (services/engine/
@@ -21,33 +21,9 @@
 
 const crypto = require('crypto');
 
-const DDL = `
-  CREATE TABLE IF NOT EXISTS public_track (
-    trade_id   TEXT PRIMARY KEY,
-    pub_id     TEXT NOT NULL UNIQUE,
-    user_id    INTEGER NOT NULL,
-    bot_id     TEXT NOT NULL,
-    strategy   TEXT NOT NULL,
-    pair       TEXT NOT NULL,
-    side       TEXT NOT NULL,
-    tf         TEXT NOT NULL,
-    created_at REAL NOT NULL,
-    stages     TEXT NOT NULL DEFAULT '[]',
-    status     TEXT,
-    path       TEXT,
-    r          REAL,
-    appear_seq INTEGER,
-    seq        INTEGER,
-    updated_at REAL NOT NULL
-  );
-  CREATE INDEX IF NOT EXISTS idx_public_track_seq ON public_track(seq);
-  CREATE INDEX IF NOT EXISTS idx_public_track_created ON public_track(created_at);
-  CREATE INDEX IF NOT EXISTS idx_public_track_user ON public_track(user_id, created_at);
-  CREATE TABLE IF NOT EXISTS public_track_meta (
-    key   TEXT PRIMARY KEY,
-    value TEXT NOT NULL
-  );
-`;
+// the archive's DDL lives with the engine schema (models/engineSchema.js PUBLIC_TRACK_DDL, migration v13
+// 'public_track'); it is re-run here (IF NOT EXISTS) so a DB opened without the migration runner works too
+const { PUBLIC_TRACK_DDL: DDL } = require('../../models/engineSchema');
 
 const COLS = 'trade_id, pub_id, user_id, bot_id, strategy, pair, side, tf, created_at, stages, status, path, r, appear_seq, seq';
 
