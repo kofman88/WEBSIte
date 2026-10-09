@@ -415,7 +415,7 @@ i.mk-x{display:inline-block;width:10px;height:10px;margin-right:6px;vertical-ali
 .sc-track{list-style:none;margin:0 calc(var(--gut) * -1);padding:4px var(--gut) 20px;display:flex;gap:16px;overflow-x:auto;scroll-snap-type:x mandatory;scroll-padding:0 var(--gut);scrollbar-width:thin;scrollbar-color:rgba(255,255,255,.2) transparent}
 .sc-card{flex:0 0 348px;height:656px;scroll-snap-align:start;perspective:1400px}
 @media (max-width:420px){.sc-card{flex-basis:calc(100vw - 2 * var(--gut) - 14px)}}
-@media (max-width:360px){.sc-card{height:756px}.sc-view{min-height:776px}.sc-res{grid-template-columns:1fr 100px}.sc-big{font-size:26px}.sc-big small{display:block;margin:4px 0 0}#pl-bot{font-size:12px;padding:0 28px 0 10px}}
+@media (max-width:360px){.sc-card{height:796px}.sc-view{min-height:816px}.sc-res{grid-template-columns:1fr 100px}.sc-big{font-size:26px}.sc-big small{display:block;margin:4px 0 0}#pl-bot{font-size:12px;padding:0 28px 0 10px}.tbl th,.tbl td{padding:8px 5px}}
 .sc-in{position:relative;height:100%;transform-style:preserve-3d;transition:transform .7s var(--ease)}
 .sc-card.flip .sc-in{transform:rotateY(180deg)}
 .sc-face{position:absolute;inset:0;display:flex;flex-direction:column;backface-visibility:hidden;-webkit-backface-visibility:hidden}

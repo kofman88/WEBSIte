@@ -33,7 +33,13 @@
 .lg .st b{min-width:64px;text-align:right;font-weight:500}
 .lg tfoot td{border-top:1px solid var(--line);color:var(--text)}
 .lg tfoot small{display:block}
-@media (max-width:560px){.lg th:nth-child(3),.lg td:nth-child(3){display:none}.lg td,.lg th{padding:7px 6px}}
+.lg tfoot td{white-space:normal}
+@media (max-width:560px){.lg th:nth-child(3),.lg td:nth-child(3){display:none}.lg td,.lg th{padding:7px 6px}.lg .st{gap:4px}.lg .st b{min-width:44px}.cmp-tbl td,.cmp-tbl th{padding:8px 6px}}
+@media (max-width:360px){.lg td,.lg th{padding:7px 4px}.lg th{letter-spacing:0}.lg .st button{width:24px;height:24px}.lg .st b{min-width:36px}
+.cmp-tbl thead{display:none}.cmp-tbl tr{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:4px 8px;padding:10px 6px;border-bottom:1px solid var(--hair)}
+.cmp-tbl td{padding:0;border:0;font-size:13px}.cmp-tbl td:not(:first-child){text-align:left}.cmp-tbl td:first-child{grid-column:1/-1;font-weight:500}
+.cmp-tbl td:not(:first-child)::before{display:block;font:500 10.5px/1.5 var(--f-mono);color:var(--muted);text-transform:uppercase}
+.cmp-tbl td:nth-child(2)::before{content:"Free"}.cmp-tbl td:nth-child(3)::before{content:"Pro"}.cmp-tbl td:nth-child(4)::before{content:"За результат"}}
 .pr-hero{padding-top:44px}
 .pr-sum{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:0;margin-top:26px;max-width:900px;border:1px solid var(--hair);border-radius:14px;overflow:hidden}
 .pr-sum div{padding:14px 16px;border-right:1px solid var(--hair)}
