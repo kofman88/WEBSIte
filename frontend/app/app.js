@@ -595,6 +595,7 @@
     }).finally(function () { if (timer) clearTimeout(timer); });
   }
   function resetState() {
+    Live.stop();
     if (S.detail) closeDetail(true);
     S.me = null; S.dash = null; S.dashAt = 0; S.dashLoading = false;
     S.sigs = {}; S.sec = {}; S.genome = null; S.sigById = {}; S.sub = null;
@@ -3398,6 +3399,7 @@
       if (!S.dash) S.dash = { stats: {}, market: {}, recent: [], trend: {} };
     }).then(function () {
       if (S.me && !S.detail && view.querySelector(".fatal") === null) render();
+      if (S.me) Live.start();
     });
   }
 
@@ -3407,6 +3409,94 @@
       if (d && d.ok) { S.dash = d; S.dashAt = Date.now(); if (S.tab === "home") rerender("home"); }
     }).catch(function () {});
   }
+
+  // ---------------------------------------------------------------------------
+  // LIVE EVENTS — GET /api/app/events (SSE). Read with fetch() so the JWT travels in the
+  // Authorization header (EventSource cannot send one). The Mini App polling stays the
+  // baseline (decision D2: 30 s caches + visibilitychange): an event only drops those caches
+  // and refreshes the screen on view, so a buffered or dropped stream never loses anything.
+  // Reconnects after the server's `retry:` (10 s); a 401 refreshes the token once, then stops.
+  // ---------------------------------------------------------------------------
+  var Live = (function () {
+    var ctrl = null, timer = null, gen = 0, retryMs = 10000, kick = null;
+    var REFRESH_ON = { signal: 1, progress: 1, trade: 1 };
+    function supported() {
+      return typeof fetch === "function" && typeof AbortController !== "undefined" && typeof TextDecoder !== "undefined";
+    }
+    function stop() {
+      gen++;
+      if (timer) { clearTimeout(timer); timer = null; }
+      if (kick) { clearTimeout(kick); kick = null; }
+      if (ctrl) { try { ctrl.abort(); } catch (e) { /* gone */ } ctrl = null; }
+    }
+    function later(ms) {
+      if (timer) clearTimeout(timer);
+      timer = setTimeout(function () { timer = null; start(); }, ms);
+    }
+    // several frames arrive together (card edit + notification + notice): one refresh for all
+    function refreshSoon() {
+      if (kick) return;
+      kick = setTimeout(function () {
+        kick = null;
+        S.dashAt = 0;
+        Object.keys(S.sigs).forEach(function (k) { if (S.sigs[k]) S.sigs[k].at = 0; });
+        if (document.hidden || S.detail || !S.me) return;   // visibilitychange / closing the detail reloads
+        if (S.tab === "home") refreshDash();
+        else if (S.tab === "signals") loadSignals(false);
+      }, 1200);
+    }
+    function onBlock(block) {
+      var name = "message", data = [];
+      block.split(/\r\n|\r|\n/).forEach(function (line) {
+        if (!line || line.charAt(0) === ":") return;           // heartbeat comment
+        var i = line.indexOf(":");
+        var field = i < 0 ? line : line.slice(0, i);
+        var val = i < 0 ? "" : line.slice(i + 1).replace(/^ /, "");
+        if (field === "event") name = val;
+        else if (field === "data") data.push(val);
+        else if (field === "retry" && /^\d+$/.test(val)) retryMs = Math.max(1000, Number(val));
+      });
+      if (data.length && REFRESH_ON[name]) refreshSoon();
+    }
+    function start() {
+      if (DEMO || ctrl || !supported() || !Auth.access()) return;
+      var my = ++gen;
+      ctrl = new AbortController();
+      var wait = retryMs;
+      fetch(API_BASE + "events", {
+        headers: { "Accept": "text/event-stream", "Authorization": "Bearer " + Auth.access() },
+        signal: ctrl.signal, credentials: "same-origin", cache: "no-store"
+      }).then(function (res) {
+        if (res.status === 401) {
+          wait = -1;
+          return tryRefresh().then(function (ok) { if (ok) wait = 0; });
+        }
+        var type = (res.headers && res.headers.get("Content-Type")) || "";
+        if (!res.ok || !res.body || !res.body.getReader || type.indexOf("text/event-stream") !== 0) { wait = 60000; return; }
+        var reader = res.body.getReader(), dec = new TextDecoder(), buf = "";
+        function pump() {
+          return reader.read().then(function (r) {
+            if (my !== gen) { try { reader.cancel(); } catch (e) { /* gone */ } return; }
+            if (r.done) return;
+            buf += dec.decode(r.value, { stream: true });
+            var m;
+            while ((m = /\r\n\r\n|\n\n|\r\r/.exec(buf))) {
+              onBlock(buf.slice(0, m.index));
+              buf = buf.slice(m.index + m[0].length);
+            }
+            return pump();
+          });
+        }
+        return pump();
+      }).catch(function () { /* dropped / aborted: reconnect below */ })
+        .then(function () {
+          if (my !== gen) return;
+          ctrl = null;
+          if (wait >= 0) later(wait);
+        });
+    }
+    return { start: start, stop: stop };
+  })();
 
   function boot() {
     setPlanBadge();

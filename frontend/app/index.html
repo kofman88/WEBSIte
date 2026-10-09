@@ -11,8 +11,10 @@
   <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <!-- [AUDIT F-3] шрифты не блокируют отрисовку: при недоступном Google экран не пустой -->
-  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&family=Oswald:wght@500;600;700&display=swap" media="print" onload="this.media='all'">
+  <!-- [AUDIT F-3] шрифты не блокируют отрисовку: при недоступном Google экран не пустой.
+       media="print" → "all" после загрузки делает splash.js: CSP сайта (helmet, script-src-attr 'none')
+       запрещает inline-обработчик onload -->
+  <link id="app-fonts" rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&family=Oswald:wght@500;600;700&display=swap" media="print">
   <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&family=Oswald:wght@500;600;700&display=swap"></noscript>
   <!-- ?v= bumps the 30-day immutable cache of the static middleware; raise it with every release -->
   <link rel="stylesheet" href="./app.css?v=m11">
@@ -69,8 +71,8 @@
   </div>
 
   <noscript><p class="noscript">Включите JavaScript, чтобы открыть приложение.</p></noscript>
-  <script src="./splash.js?v=m11"></script>
-  <script src="./chart.js?v=m11"></script>
-  <script src="./app.js?v=m11"></script>
+  <script src="./splash.js?v=m10b"></script>
+  <script src="./chart.js?v=m10b"></script>
+  <script src="./app.js?v=m10b"></script>
 </body>
 </html>

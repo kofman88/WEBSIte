@@ -335,3 +335,55 @@ describe('/api/app contract (miniapp/API.md one-to-one)', () => {
     expect(r.body).toEqual({ ok: false, error: 'not_found' });
   });
 });
+
+describe('CSP: the shell works under the site\'s helmet policy (script-src-attr \'none\')', () => {
+  it('index.html has no inline event handler; splash.js switches the font stylesheet to media=all', () => {
+    const html = fs.readFileSync(path.join(APP_DIR, 'index.html'), 'utf8');
+    expect(html).not.toMatch(/<[^>]*\son[a-z]+\s*=/i);
+    expect(html).toMatch(/<link id="app-fonts" rel="stylesheet" href="https:\/\/fonts\.googleapis\.com\/[^"]+" media="print">/);
+    const splash = fs.readFileSync(path.join(APP_DIR, 'splash.js'), 'utf8');
+    expect(splash).toContain('document.getElementById("app-fonts")');
+    expect(splash).toContain('fonts.addEventListener("load", function () { fonts.media = "all"; });');
+  });
+});
+
+describe('live events: the SPA subscribes to GET /api/app/events with its JWT', () => {
+  it('app.js reads the SSE stream with fetch() + Bearer (EventSource cannot send the header) and only refreshes caches', () => {
+    const js = fs.readFileSync(path.join(APP_DIR, 'app.js'), 'utf8');
+    expect(js).toContain('fetch(API_BASE + "events", {');
+    expect(js).toContain('"Authorization": "Bearer " + Auth.access()');
+    expect(js).not.toContain('new EventSource');
+    expect(js).toContain('var REFRESH_ON = { signal: 1, progress: 1, trade: 1 };');
+    expect(js).toContain('if (S.me) Live.start();');
+    expect(js).toMatch(/function resetState\(\) \{\n {4}Live\.stop\(\);/);
+  });
+
+  it('the stub answers the handshake (event-stream, retry, hello) for a bearer and 401 without one', async () => {
+    const http = await import('http');
+    const { accessToken } = await login();
+    const server = http.createServer(app);
+    await new Promise((r) => server.listen(0, '127.0.0.1', r));
+    const { port } = server.address();
+    try {
+      const got = await new Promise((resolve, reject) => {
+        const rq = http.get({ host: '127.0.0.1', port, path: '/api/app/events', headers: bearer(accessToken) }, (res) => {
+          let buf = '';
+          res.setEncoding('utf8');
+          res.on('data', (c) => {
+            buf += c;
+            if (buf.includes('event: hello')) { rq.destroy(); resolve({ status: res.statusCode, type: res.headers['content-type'], buf }); }
+          });
+        });
+        rq.on('error', (e) => { if (e.code !== 'ECONNRESET') reject(e); });
+      });
+      expect(got.status).toBe(200);
+      expect(got.type).toMatch(/^text\/event-stream/);
+      expect(got.buf).toContain('retry: 10000');
+      expect(got.buf).toMatch(/event: hello\ndata: \{"user_id":\d+,"heartbeat_s":25\}/);
+      const r = await request(app).get('/api/app/events');
+      expect(r.status).toBe(401);
+    } finally {
+      await new Promise((r) => server.close(r));
+    }
+  });
+});

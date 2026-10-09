@@ -185,7 +185,7 @@ module.exports = [
         ...BROWSER_GLOBALS,
         Node: 'readonly', AbortController: 'readonly', Blob: 'readonly', File: 'readonly',
         Image: 'readonly', screen: 'readonly', prompt: 'readonly', devicePixelRatio: 'readonly',
-        AudioContext: 'readonly', webkitAudioContext: 'readonly',
+        AudioContext: 'readonly', webkitAudioContext: 'readonly', TextDecoder: 'readonly',
         CHMFX: 'readonly', CHMChart: 'readonly',
       },
     },
