@@ -35,6 +35,13 @@
  * tracker progress notices / card edits           dispatch(uid, opts) / broadcast(uid, event, data)
  *                                                   pass-throughs (signalTracker's notifier / sse).
  *
+ * Commit callbacks: deliver() answers the bot's `safe_send_message` boolean, and that answer
+ * drives the scanner-side commits exactly like the bot — the signal registry lives in the worker,
+ * so `_send_smc_card_bg` (and the LEVELS / VOLUME senders) call commit_send / commit_send_multi
+ * after a delivered card (or an executed trade) and mark an undelivered, untraded row SKIP
+ * (`not_delivered`); the on_sent part (signal_msg_id + card snapshot) is done here, before the
+ * answer goes back, so a committed slot always has its feed row.
+ *
  * Telegram-only parameters: `reply_markup` → action descriptors (in-app buttons; the Telegram
  * mirror has no keyboard — telegramService.send takes text only); `protect_content` has no
  * site equivalent; `disable_notification` (quiet hours) → `silent`: in-app + SSE only, no
