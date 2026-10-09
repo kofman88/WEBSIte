@@ -92,4 +92,73 @@ describe('report loops in startEngine', () => {
       await eng.stop();
     }
   });
+
+  it('challenge_loop and entry_advisor_loop: started like the bot, selectable with only, replaceable, stopped by stop()', async () => {
+    vi.useFakeTimers({ now: MONDAY_0900 * 1000, toFake: ['setTimeout', 'clearTimeout', 'setInterval', 'clearInterval', 'Date'] });
+    const calls = [];
+    const loop = (name) => () => { calls.push(`start:${name}`); return () => calls.push(`stop:${name}`); };
+    const none = { startDaily() {}, startWeekly() {}, stop() {} };
+    let eng = EW.startEngine({ log: silent, delivery, spawn: () => new FakeWorker(),
+      mainDeps: { only: [], log: silent, reports: none, challengeLoop: loop('challenge'), entryAdvisorLoop: loop('advisor') } });
+    expect(calls).toEqual([]);
+    await eng.stop();
+    expect(calls).toEqual([]);
+    eng = EW.startEngine({ log: silent, delivery, spawn: () => new FakeWorker(),
+      mainDeps: { only: ['challenge', 'entry_advisor'], log: silent, reports: none, challengeLoop: loop('challenge'), entryAdvisorLoop: loop('advisor') } });
+    expect(calls).toEqual(['start:challenge', 'start:advisor']);
+    await eng.stop();
+    expect(calls).toEqual(['start:challenge', 'start:advisor', 'stop:challenge', 'stop:advisor']);
+  });
+
+  it('the default challenge loop ticks after the bot\'s 90 s delay, then every LOOP_INTERVAL_S, and stops with the engine', async () => {
+    vi.useFakeTimers({ now: MONDAY_0900 * 1000, toFake: ['setTimeout', 'clearTimeout', 'setInterval', 'clearInterval', 'Date'] });
+    const cs = req('../../../services/challengeService.js');
+    // tick() starts with kv.itemsWithPrefix('challenge_') (loadAllActive): each call is one pass
+    const passes = [];
+    cs.configure({ kv: { itemsWithPrefix: (p) => { passes.push([Date.now() / 1000 - MONDAY_0900, p]); return []; } } });
+    const eng = EW.startEngine({ log: silent, delivery, spawn: () => new FakeWorker(), mainDeps: { only: ['challenge'], log: silent, reports: null } });
+    try {
+      await vi.advanceTimersByTimeAsync(89 * 1000);
+      expect(passes).toEqual([]);
+      await vi.advanceTimersByTimeAsync(1000);
+      expect(passes).toEqual([[90, 'challenge_']]);
+      await vi.advanceTimersByTimeAsync(cs.CONFIG.LOOP_INTERVAL_S * 1000);
+      expect(passes.map((x) => x[0])).toEqual([90, 90 + cs.CONFIG.LOOP_INTERVAL_S]);
+    } finally {
+      await eng.stop();
+      cs.resetDeps();
+    }
+    await vi.advanceTimersByTimeAsync(10 * cs.CONFIG.LOOP_INTERVAL_S * 1000);
+    expect(passes.length).toBe(2);                     // no pass after stop()
+  });
+
+  it('the default entry advisor loop: first cycle after 600 s, then every INTERVAL_S; ENTRY_ADVISOR_ENABLED=0 → no loop', async () => {
+    vi.useFakeTimers({ now: MONDAY_0900 * 1000, toFake: ['setTimeout', 'clearTimeout', 'setInterval', 'clearInterval', 'Date'] });
+    const ea = req('../../../services/entryAdvisor.js');
+    const cycles = [];
+    ea.configure({ activeUsers: () => { cycles.push(Date.now() / 1000 - MONDAY_0900); return []; }, log: silent });
+    let eng = EW.startEngine({ log: silent, delivery, spawn: () => new FakeWorker(), mainDeps: { only: ['entry_advisor'], log: silent, reports: null } });
+    try {
+      await vi.advanceTimersByTimeAsync(599 * 1000);
+      expect(cycles).toEqual([]);
+      await vi.advanceTimersByTimeAsync(1000);
+      expect(cycles).toEqual([600]);
+      await vi.advanceTimersByTimeAsync(ea.config().INTERVAL_S * 1000);
+      expect(cycles).toEqual([600, 600 + ea.config().INTERVAL_S]);
+    } finally {
+      await eng.stop();
+    }
+    await vi.advanceTimersByTimeAsync(3 * ea.config().INTERVAL_S * 1000);
+    expect(cycles.length).toBe(2);
+    cycles.length = 0;
+    ea.configure({ config: { ENABLED: false } });
+    eng = EW.startEngine({ log: silent, delivery, spawn: () => new FakeWorker(), mainDeps: { only: ['entry_advisor'], log: silent, reports: null } });
+    try {
+      await vi.advanceTimersByTimeAsync(2 * ea.config().INTERVAL_S * 1000);
+      expect(cycles).toEqual([]);
+    } finally {
+      await eng.stop();
+      ea.resetDeps();
+    }
+  });
 });

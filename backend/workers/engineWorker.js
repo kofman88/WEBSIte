@@ -495,6 +495,19 @@ function startEngine({ log = null, env = process.env, spawn = null, delivery = n
     if (want('daily_summary')) reports.startDaily();
     if (want('weekly_digest')) reports.startWeekly();
   }
+  // bot.py's challenge_loop (90 s, then tick() every LOOP_INTERVAL_S) and entry_advisor_loop
+  // (600 s, then INTERVAL_S; off with ENTRY_ADVISOR_ENABLED=0) — the verified M17a ports, run on
+  // this thread and delivering through the notifier; `mainDeps.challengeLoop` /
+  // `mainDeps.entryAdvisorLoop` replace them (each returns its stop function)
+  const retentionStops = [];
+  if (want('challenge')) {
+    const start = mainDeps.challengeLoop || require('../services/challengeService').startLoop;
+    retentionStops.push(start());
+  }
+  if (want('entry_advisor')) {
+    const start = mainDeps.entryAdvisorLoop || require('../services/entryAdvisor').startLoop;
+    retentionStops.push(start());
+  }
   // the app routes (routes/appData.js) read the worker's memory through the bridge
   const bridge = require('../services/engine/engineBridge');
   bridge.setRemote((method, args, timeoutMs) => supervisor.query(method, args, timeoutMs));
@@ -508,6 +521,7 @@ function startEngine({ log = null, env = process.env, spawn = null, delivery = n
     async stop() {
       bridge.setRemote(null);
       if (reports) reports.stop();
+      for (const stopLoop of retentionStops) { try { stopLoop(); } catch (_e) { /* already stopped */ } }
       const [r1, r2] = await Promise.all([scheduler.stop(), supervisor.stop()]);
       return { main: r1, worker: r2 };
     },
