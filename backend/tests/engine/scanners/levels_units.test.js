@@ -93,6 +93,7 @@ async function run() {
   let regimeNow = null;
   const atCalls = [];
   const charts = [];
+  let atResultOf = () => ({ executed: false, show_trade_btn: true, limit_msg: null });
   LS._resetModuleStateForTests();
   const scanner = new LS.MidScanner({ SCAN_WORKERS: 1, PAYMENT_ADDRESS: FIX.cfg.PAYMENT_ADDRESS }, bot, um, null, {
     clock, sleep: (ms) => sleepHook(ms), timers, random: rand, env,
@@ -103,7 +104,7 @@ async function run() {
     regime: { getCachedRegime: () => regimeNow },
     veto: createMomentumVeto({}),
     repo: createSignalTradesRepo({ db, now: () => clock.now(), log: quiet }),
-    executeAutoTrade: async (kw) => { const k = { ...kw }; delete k.bot; atCalls.push(k); return { executed: false, show_trade_btn: true, limit_msg: null }; },
+    executeAutoTrade: async (kw) => { const k = { ...kw }; delete k.bot; atCalls.push(k); return atResultOf(kw); },
     getApiKeys: (user, exchange) => {
       const k = FIX.api_keys[String(user.user_id)];
       return k && k[0] === exchange ? { apiKey: k[1], apiSecret: k[2] } : null;
@@ -345,6 +346,29 @@ async function run() {
   J.hint_throttle.persist_t = clock.t;
   J.hint_throttle.persisted = hkv.get(LS.KV_HINT_LAST_TS);
   J.hint_throttle.after_persist = Array.from(LS._userHintLastTs);
+
+  // _send with the three execute_auto_trade results that have no show_trade_btn / limit_msg
+  rand.k = E.at_dict_quirk.rand_k0;
+  J.at_dict_quirk = { cases: [] };
+  for (const c of E.at_dict_quirk.cases) {
+    clock.t = c.t;
+    atResultOf = () => ({ ok: false, executed: false, skip: c.skip });
+    const user = ts.get(3204);
+    const sig = globalThis.structuredClone(baseSig);
+    n0 = cap.lines.length;
+    const sb = bot.sent.length;
+    const a0 = atCalls.length;
+    let ok = null;
+    let error = null;
+    try {
+      ok = await scanner._send(user, sig, tradeCfg.getLongCfg(user));
+    } catch (e) {
+      error = [e.pyType || e.name, e.message];
+    }
+    J.at_dict_quirk.cases.push({ skip: c.skip, t: c.t, ok, error, sent: bot.sent.slice(sb), at_calls: atCalls.slice(a0), logs: since(n0) });
+  }
+  const QCOLS = Object.keys(E.at_dict_quirk.trades[0]);
+  J.at_dict_quirk.trades = db.prepare('SELECT * FROM signal_trades ORDER BY rowid').all().map((r) => Object.fromEntries(QCOLS.map((k) => [k, r[k] === undefined ? null : r[k]])));
   return { candleCache, keyboards };
 }
 
@@ -449,6 +473,18 @@ describe('MidScanner units vs the bot (levels_units.py)', () => {
       .toEqual(E.ct_gate.trades.map((r) => ({ ...r, signal_card_json: cardOf(r.signal_card_json, false) })));
     expect(H.norm(J.ct_gate.trade_events)).toEqual(E.ct_gate.trade_events);
     expect(J.ct_gate.users).toEqual(E.ct_gate.users);
+  });
+
+  it('_send: execute_auto_trade results without show_trade_btn (hour_of_day_levels / min_quality / trending_only) → KeyError before the card, like scanner_mid', () => {
+    expect(J.at_dict_quirk.cases.length).toBe(3);
+    J.at_dict_quirk.cases.forEach((c, i) => {
+      expect(c.error).toEqual(['KeyError', "'show_trade_btn'"]);
+      expect(c.sent).toEqual([]);
+      expect(H.norm(c)).toEqual(E.at_dict_quirk.cases[i]);
+    });
+    const cardOf = (json) => (json ? JSON.parse(json).html : null);
+    expect(H.norm(J.at_dict_quirk.trades).map((r) => ({ ...r, signal_card_json: cardOf(r.signal_card_json) })))
+      .toEqual(E.at_dict_quirk.trades.map((r) => ({ ...r, signal_card_json: cardOf(r.signal_card_json) })));
   });
 
   it('hint throttle kv: int(k) / float(v) coercions, 2 × 4 h window, NaN / inf kept, dict order, json.dumps on persist', () => {

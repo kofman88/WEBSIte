@@ -59,6 +59,15 @@
  * site equivalent; `disable_notification` (quiet hours) → `silent`: in-app + SSE only, no
  * e-mail / Telegram mirror / web push (notifier, M10a).
  *
+ * Trade buttons (the bot's callback_data on a card / trade notice) → the site route the client calls
+ * (`actionRoute`; every client-facing `actions` row carries `api: {method, path}` for them, the
+ * stored card snapshot keeps the bot's descriptors):
+ *   exec_trade_<id>      POST trades/<id>/exec       (handlers/trading.exec_trade — confirm mode)
+ *   qc_half_<id>         POST trades/<id>/qc/half    qc_full_<id>        POST trades/<id>/qc/full
+ *   qc_full_force_<id>   POST trades/<id>/qc/force   qc_be_<id>          POST trades/<id>/qc/be
+ *   qc_refresh_<id>      GET  trades/<id>/progress   qc_holdlock_wait    POST trades/<trade>/qc/wait
+ * (routes/appTrade.js: D16 owner + "the button is on the delivered card" checks before any work).
+ *
  * Worker ↔ main RPC (structured-clone payloads):
  *   worker → main  { type: 'rpc', id, method, args }        answered by
  *   main → worker  { type: 'rpc-result', id, ok: true, result } | { …, ok: false, error }
@@ -67,6 +76,38 @@
  */
 
 const { noticeTitle, signalLink } = require('./signalTracker');
+
+const ACTION_ROUTES = Object.freeze([
+  [/^exec_trade_(.+)$/, 'POST', 'exec'],
+  [/^qc_half_(.+)$/, 'POST', 'qc/half'],
+  [/^qc_full_force_(.+)$/, 'POST', 'qc/force'],
+  [/^qc_full_(.+)$/, 'POST', 'qc/full'],
+  [/^qc_be_(.+)$/, 'POST', 'qc/be'],
+  [/^qc_refresh_(.+)$/, 'GET', 'progress'],
+]);
+
+/** A trade button's callback_data → {method, path} of its /api/app route (path relative to /api/app/), else null. */
+function actionRoute(action, tradeId = null) {
+  const a = String(action === null || action === undefined ? '' : action);
+  if (a === 'qc_holdlock_wait') {
+    return tradeId ? { method: 'POST', path: `trades/${encodeURIComponent(String(tradeId))}/qc/wait` } : null;
+  }
+  for (const [re, method, tail] of ACTION_ROUTES) {
+    const m = re.exec(a);
+    if (m) return { method, path: `trades/${encodeURIComponent(m[1])}/${tail}` };
+  }
+  return null;
+}
+
+/** keyboard rows → a copy whose trade buttons carry `api` (the rows the client gets); other buttons as they are. */
+function withActionRoutes(rows, tradeId = null) {
+  if (!Array.isArray(rows)) return rows === undefined ? null : rows;
+  return rows.map((row) => (Array.isArray(row) ? row.map((b) => {
+    if (!b || typeof b !== 'object' || b.kind === 'url') return b;
+    const api = actionRoute(b.action, tradeId);
+    return api ? { ...b, api } : b;
+  }) : row));
+}
 
 const RPC_METHODS = Object.freeze(['deliver', 'deliverChart', 'sendText', 'sendMessage', 'alertAdmins', 'dispatch', 'broadcast', 'broadcastAll']);
 const PLAN_LINK = '/app/?tab=settings&sec=plan';
@@ -161,7 +202,7 @@ function createSignalDelivery(deps = {}) {
         silent: Boolean(msg.silent),
         data: {
           kind: 'card', trade_id: tradeId, strategy: msg.strategy || null, symbol: msg.symbol || null,
-          direction: msg.direction || null, html: text, actions: msg.keyboard || null, lang, silent: Boolean(msg.silent),
+          direction: msg.direction || null, html: text, actions: withActionRoutes(msg.keyboard || null, tradeId), lang, silent: Boolean(msg.silent),
         },
       };
     } else if (kind === 'preview') {
@@ -174,7 +215,7 @@ function createSignalDelivery(deps = {}) {
       opts = {
         type, title: noticeTitle(text), body: text, tgText: text, link: tradeId ? signalLink(tradeId) : null,
         silent: Boolean(msg.silent),
-        data: { kind: 'notice', trade_id: tradeId, strategy: msg.strategy || null, html: text, actions: msg.keyboard || null, lang },
+        data: { kind: 'notice', trade_id: tradeId, strategy: msg.strategy || null, html: text, actions: withActionRoutes(msg.keyboard || null, tradeId), lang },
       };
     }
     let res;
@@ -261,7 +302,7 @@ function createSignalDelivery(deps = {}) {
       try {
         const res = await notifierOf().dispatch(uid, {
           type, title: noticeTitle(body), body, tgText: body, link: opts.link || null, silent: Boolean(opts.silent),
-          data: { kind: opts.kind || type, html: body, actions: opts.keyboard || null, lang: opts.lang || 'ru' },
+          data: { kind: opts.kind || type, html: body, actions: withActionRoutes(opts.keyboard || null, opts.tradeId || null), lang: opts.lang || 'ru' },
         });
         const ok = Boolean(res && res.dispatched);
         if (!ok && opts.safe) logNotSent(uid, (res && res.error) || 'error');
@@ -428,4 +469,7 @@ function localFacade(delivery) {
   };
 }
 
-module.exports = { RPC_METHODS, PLAN_LINK, ADMIN_LINK, TG_ERRORS, telegramError, createSignalDelivery, createRemoteDelivery, localFacade };
+module.exports = {
+  RPC_METHODS, PLAN_LINK, ADMIN_LINK, TG_ERRORS, telegramError, createSignalDelivery, createRemoteDelivery, localFacade,
+  actionRoute, withActionRoutes,
+};

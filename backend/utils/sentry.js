@@ -14,6 +14,57 @@
 const config = require('../config');
 const logger = require('./logger');
 
+/**
+ * Sentry beforeSend: scrub sensitive headers + body + query fields (also the `extra` context).
+ * Defence-in-depth: we still never pass plaintext secrets into log.info / error with these keys,
+ * but this makes key / PII leakage through captured request state much harder.
+ */
+const REDACT_KEYS = new Set([
+  'password', 'password2', 'currentPassword', 'newPassword',
+  'apiKey', 'apiSecret', 'exchangeSecret', 'exchangePassphrase',
+  // the app's exchange-key bodies (bot field names) and the traders' signed requests
+  'api_key', 'api_secret', 'passphrase', 'okx_passphrase', 'signature', 'sign',
+  'token', 'refreshToken', 'accessToken', 'pendingToken',
+  'jwt', 'secret', 'tvSecret', 'privateKey',
+  'totpSecret', 'code', 'recoveryCode',
+  'email', 'phone', // PII
+]);
+const REDACT_HEADERS = ['authorization', 'cookie', 'x-forwarded-for', 'x-bapi-api-key', 'x-bapi-sign', 'x-bx-apikey', 'x-mbx-apikey',
+  'ok-access-key', 'ok-access-sign', 'ok-access-passphrase'];
+function scrub(o, seen = new Set()) {
+  if (!o || typeof o !== 'object' || seen.has(o)) return;
+  seen.add(o);
+  for (const k of Object.keys(o)) {
+    if (REDACT_KEYS.has(k)) { o[k] = '[REDACTED]'; continue; }
+    if (typeof o[k] === 'object') scrub(o[k], seen);
+  }
+}
+function scrubEvent(event) {
+  if (!event || typeof event !== 'object') return event;
+  if (event.request) {
+    if (event.request.headers) {
+      for (const h of Object.keys(event.request.headers)) if (REDACT_HEADERS.includes(h.toLowerCase())) delete event.request.headers[h];
+    }
+    scrub(event.request.data);
+    scrub(event.request.query_string);
+    scrub(event.request.env);
+  }
+  scrub(event.extra);
+  scrub(event.contexts);
+  // Redact file paths in stack frames (leak less about server layout)
+  if (event.exception && event.exception.values) {
+    for (const ex of event.exception.values) {
+      if (!ex.stacktrace || !ex.stacktrace.frames) continue;
+      for (const f of ex.stacktrace.frames) {
+        if (f.filename) f.filename = f.filename.replace(/^\/home\/[^/]+/, '~');
+        if (f.abs_path) f.abs_path = f.abs_path.replace(/^\/home\/[^/]+/, '~');
+        if (f.vars) scrub(f.vars);
+      }
+    }
+  }
+  return event;
+}
+
 let Sentry = null;
 let enabled = false;
 
@@ -35,48 +86,7 @@ let enabled = false;
       // traces are sampled — 10% in prod, 100% in dev.
       sampleRate: 1.0,
       tracesSampleRate: config.isProd ? 0.1 : 1.0,
-      beforeSend(event) {
-        // Scrub sensitive headers + body + query fields. Defence-in-depth:
-        // we still never pass plaintext secrets into log.info / error with
-        // these keys, but this makes PII leakage through stack traces +
-        // captured request state much harder.
-        const REDACT_KEYS = new Set([
-          'password', 'password2', 'currentPassword', 'newPassword',
-          'apiKey', 'apiSecret', 'exchangeSecret', 'exchangePassphrase',
-          'token', 'refreshToken', 'accessToken', 'pendingToken',
-          'jwt', 'secret', 'tvSecret', 'privateKey',
-          'totpSecret', 'code', 'recoveryCode',
-          'email', 'phone', // PII
-        ]);
-        const scrub = (o) => {
-          if (!o || typeof o !== 'object') return;
-          for (const k of Object.keys(o)) {
-            if (REDACT_KEYS.has(k)) { o[k] = '[REDACTED]'; continue; }
-            if (typeof o[k] === 'object') scrub(o[k]);
-          }
-        };
-        if (event.request) {
-          if (event.request.headers) {
-            delete event.request.headers.authorization;
-            delete event.request.headers.cookie;
-            delete event.request.headers['x-forwarded-for'];
-          }
-          scrub(event.request.data);
-          scrub(event.request.query_string);
-          scrub(event.request.env);
-        }
-        // Redact file paths in stack frames (leak less about server layout)
-        if (event.exception && event.exception.values) {
-          for (const ex of event.exception.values) {
-            if (!ex.stacktrace || !ex.stacktrace.frames) continue;
-            for (const f of ex.stacktrace.frames) {
-              if (f.filename) f.filename = f.filename.replace(/^\/home\/[^/]+/, '~');
-              if (f.abs_path) f.abs_path = f.abs_path.replace(/^\/home\/[^/]+/, '~');
-            }
-          }
-        }
-        return event;
-      },
+      beforeSend: scrubEvent,
     });
     enabled = true;
     logger.info('Sentry error tracking enabled');
@@ -111,4 +121,4 @@ function errorHandler() {
   return Sentry.Handlers ? Sentry.Handlers.errorHandler() : ((err, _req, _res, next) => next(err));
 }
 
-module.exports = { captureException, captureMessage, setUser, requestHandler, errorHandler, isEnabled: () => enabled };
+module.exports = { captureException, captureMessage, setUser, requestHandler, errorHandler, isEnabled: () => enabled, scrubEvent, REDACT_KEYS };

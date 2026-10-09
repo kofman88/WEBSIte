@@ -45,6 +45,10 @@ const HEARTBEAT_MS = 15_000;
 const HEARTBEAT_TIMEOUT_MS = 120_000;
 const WATCHDOG_EVERY_MS = 30_000;
 const SHUTDOWN_GRACE_MS = 6_000;
+// D18: a graceful stop lets an auto-trade placement in flight finish (≤ 15 s) — server.js gives the
+// engine 18 s inside the bot's 22 s shutdown deadline, like the trade-ops queue
+const AUTOTRADE_DRAIN_MS = 15_000;
+const SHUTDOWN_GRACE_WITH_DRAIN_MS = 18_000;
 const RESTART_BASE_S = 10;
 const RESTART_MAX_S = 300;
 const RESTART_HEALTHY_S = 300;
@@ -100,6 +104,27 @@ function softExit(port) {
 }
 
 /**
+ * The thread's auto-trade executor (services/autotrade, M13b) — only with AUTOTRADE_ENABLED=1
+ * (docs/PORT_DECISIONS.md D5), so a deploy never starts trading by itself. bot.py start-up order:
+ * the idempotency registry and the zero-balance cooldowns are restored before any scanner runs.
+ * A failure to build it leaves the engine without auto-trade (no keys → no trade), never half-wired.
+ */
+async function workerAutoTrade(bot, env) {
+  const L = require('../services/marketData/mdLog').log;
+  try {
+    const at = require('../services/autotrade');
+    if (!at.autoTradeEnabled(env)) return null;
+    const inst = at.createAutoTrade({ bot, env });
+    await inst.restore();
+    L.info(`[AUTO-TRADE] enabled, exchanges=${inst.exchanges().join(',') || '-'}`);
+    return inst;
+  } catch (e) {
+    L.error(`[AUTO-TRADE] not started: ${e && e.message}`);
+    return null;
+  }
+}
+
+/**
  * Run the worker half on `port` ({postMessage, on('message')}). Returns a handle for tests:
  * { scheduler(), remote, stop() }.
  *   deps          extra scheduler deps (tests: fakes for rest / cache / wsPool / …)
@@ -109,6 +134,7 @@ function softExit(port) {
 function runWorker(port, {
   deps = {}, heartbeatMs = HEARTBEAT_MS, logs = true, exit = null,
   setEvery = (fn, ms) => setInterval(fn, ms), clearEvery = (h) => clearInterval(h),
+  autoTradeDrainMs = AUTOTRADE_DRAIN_MS,
 } = {}) {
   const { createRemoteDelivery } = require('../services/engine/signalDelivery');
   const post = (m) => { try { port.postMessage(m); } catch (_e) { /* port closed */ } };
@@ -123,12 +149,16 @@ function runWorker(port, {
   };
   const beat = () => post({ type: 'heartbeat', ts: Date.now() / 1000, regime: regimeNow() });
 
+  let starting = false;
   async function start(options = {}) {
-    if (scheduler) return;
+    if (scheduler || starting) return;
+    starting = true;   // the auto-trade restore awaits: a second 'start' must not build a second scheduler
     try {
       const { createScheduler } = require('../services/engine/scheduler');
       const sd = { ...deps, bot: remote };
       if (options.only) sd.only = options.only;
+      if (sd.autoTrade === undefined) sd.autoTrade = await workerAutoTrade(remote, deps.env || process.env);
+      if (stopping) return;
       scheduler = createScheduler({ side: 'worker', deps: sd });
       scheduler.ctx.health.onHeartbeat = (name, ts) => post({ type: 'health', name, ts });
       // bot.py main() before the gather: the candle cache, the exchange symbol lists
@@ -142,6 +172,7 @@ function runWorker(port, {
       if (hb && typeof hb.unref === 'function') hb.unref();
       post({ type: 'ready', tasks, scanners });
     } catch (e) {
+      if (!scheduler) starting = false;
       post({ type: 'fatal', error: String(e && e.stack ? e.stack : e) });
     }
   }
@@ -150,8 +181,24 @@ function runWorker(port, {
     if (stopping) return stopping;
     stopping = (async () => {
       let res = { pending: 0, saved: null };
+      // D18: no new auto placement from here on; the scheduler's loops stop; then a placement in
+      // flight (entry → SL → TP of one place_trade) is let finish before the thread closes its DB
+      const at = scheduler && scheduler.ctx ? scheduler.ctx.autoTrade : null;
+      if (at && typeof at.beginShutdown === 'function') {
+        try { at.beginShutdown(); } catch (_e) { /* best effort */ }
+      }
       if (scheduler) {
         try { res = await scheduler.stop(); } catch (_e) { /* best effort */ }
+      }
+      if (at && typeof at.waitIdle === 'function') {
+        try {
+          const left = await at.waitIdle(autoTradeDrainMs);
+          const L = require('../services/marketData/mdLog').log;
+          if (left > 0) L.warning(`[D18-SHUTDOWN] ${left} auto-trade placement(s) still in flight after ${Math.round(autoTradeDrainMs / 1000)}s — stopping anyway`);
+          // the scanners' registry commits of those signals happened after the scheduler's save
+          const reg = deps.registry || require('../services/engine/signalRegistry').defaultRegistry;
+          if (typeof reg.forceSave === 'function') res.saved = reg.forceSave();
+        } catch (_e) { /* best effort */ }
       }
       if (hb !== null) clearEvery(hb);
       hb = null;
@@ -169,11 +216,31 @@ function runWorker(port, {
     // the app routes' reads of the engine memory (engineBridge: prices, cached candles, trends)
     if (require('../services/engine/engineBridge').handleQueryMessage(msg, post, scheduler ? scheduler.ctx : null)) return;
     if (msg.type === 'start') start(msg.options || {});
+    else if (msg.type === 'autotrade') autoTradeControl(msg);
     else if (msg.type === 'shutdown') stop();
     else if (msg.type === 'ping') post({ type: 'pong', id: msg.id, ts: Date.now() / 1000 });
   });
 
-  return { scheduler: () => scheduler, remote, stop, start };
+  /**
+   * The main thread's hand-offs to this thread's auto-trade module state (fire-and-forget, like the
+   * bot's in-process call): {op: 'reset_auth_failures', userId, exchange}. Before the executor is
+   * built (or with auto-trade off) there is nothing to reset.
+   */
+  function autoTradeControl(msg) {
+    const at = scheduler && scheduler.ctx ? scheduler.ctx.autoTrade : null;
+    if (!at) return false;
+    try {
+      if (msg.op === 'reset_auth_failures' && typeof at.resetAuthFailures === 'function') {
+        at.resetAuthFailures(Number(msg.userId), String(msg.exchange || 'bybit'));
+        return true;
+      }
+    } catch (e) {
+      try { require('../services/marketData/mdLog').log.debug(`[AUTO-TRADE] control ${msg.op}: ${e && e.message}`); } catch (_e) { /* */ }
+    }
+    return false;
+  }
+
+  return { scheduler: () => scheduler, remote, stop, start, autoTradeControl };
 }
 
 // ═══════════════════════════════════════════════════════════════════════
@@ -367,6 +434,12 @@ function createSupervisor({
       return { stopped, terminated };
     },
     ping(id = 1) { post({ type: 'ping', id }); },
+    /** auto_trade.reset_auth_failures in the worker (which owns the auto-trade registries); no worker → nothing to reset. */
+    resetAuthFailures(userId, exchange) {
+      if (!state.worker) return false;
+      post({ type: 'autotrade', op: 'reset_auth_failures', userId: Number(userId), exchange: String(exchange || 'bybit') });
+      return true;
+    },
     /** engineBridge query → the worker's answer (rejects without a worker / after timeoutMs). */
     query(method, args = [], timeoutMs = undefined) {
       if (!state.worker) return Promise.reject(new Error('engine worker not running'));
@@ -427,6 +500,7 @@ function startEngine({ log = null, env = process.env, spawn = null, delivery = n
   bridge.setRemote((method, args, timeoutMs) => supervisor.query(method, args, timeoutMs));
   return {
     supervisor, scheduler, regime, reports,
+    resetAuthFailures: (userId, exchange) => supervisor.resetAuthFailures(userId, exchange),
     /**
      * Both halves at once, like the bot cancelling every gather task together and waiting ≤ 4 s:
      * the main-side loops (≤ 4 s) and the worker (its own ≤ 4 s + the registry save, ≤ 6 s grace).
@@ -451,7 +525,8 @@ if (!isMainThread && parentPort && require.main === module) {
 }
 
 module.exports = {
-  WORKER_PATH, HEARTBEAT_MS, HEARTBEAT_TIMEOUT_MS, WATCHDOG_EVERY_MS, SHUTDOWN_GRACE_MS,
+  WORKER_PATH, HEARTBEAT_MS, HEARTBEAT_TIMEOUT_MS, WATCHDOG_EVERY_MS, SHUTDOWN_GRACE_MS, AUTOTRADE_DRAIN_MS, SHUTDOWN_GRACE_WITH_DRAIN_MS,
   RESTART_BASE_S, RESTART_MAX_S, RESTART_HEALTHY_S,
   runWorker, createSupervisor, startEngine, forwardLogs, softExit, engineLog, installTaskExceptionHandlers,
+  workerAutoTrade,
 };

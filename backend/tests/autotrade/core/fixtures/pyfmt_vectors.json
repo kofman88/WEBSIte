@@ -1,0 +1,1521 @@
+{
+ "python": "3.11.17",
+ "cases": [
+  {
+   "kind": "pf",
+   "fmt": "%s",
+   "args": [
+    1
+   ],
+   "out": "1"
+  },
+  {
+   "kind": "pf",
+   "fmt": "%s",
+   "args": [
+    {
+     "f": 1.0
+    }
+   ],
+   "out": "1.0"
+  },
+  {
+   "kind": "pf",
+   "fmt": "%s",
+   "args": [
+    {
+     "f": 1.5
+    }
+   ],
+   "out": "1.5"
+  },
+  {
+   "kind": "pf",
+   "fmt": "%s",
+   "args": [
+    "x"
+   ],
+   "out": "x"
+  },
+  {
+   "kind": "pf",
+   "fmt": "%s",
+   "args": [
+    null
+   ],
+   "out": "None"
+  },
+  {
+   "kind": "pf",
+   "fmt": "%s",
+   "args": [
+    true
+   ],
+   "out": "True"
+  },
+  {
+   "kind": "pf",
+   "fmt": "%s",
+   "args": [
+    [
+     1,
+     "a",
+     {
+      "f": 2.0
+     },
+     null
+    ]
+   ],
+   "out": "[1, 'a', 2.0, None]"
+  },
+  {
+   "kind": "pf",
+   "fmt": "%s",
+   "args": [
+    {
+     "d": [
+      [
+       "a",
+       1
+      ],
+      [
+       "b",
+       {
+        "f": 2.5
+       }
+      ],
+      [
+       "c",
+       "x"
+      ]
+     ]
+    }
+   ],
+   "out": "{'a': 1, 'b': 2.5, 'c': 'x'}"
+  },
+  {
+   "kind": "pf",
+   "fmt": "%s",
+   "args": [
+    {
+     "f": 0.30000000000000004
+    }
+   ],
+   "out": "0.30000000000000004"
+  },
+  {
+   "kind": "pf",
+   "fmt": "%s",
+   "args": [
+    {
+     "f": 1e+16
+    }
+   ],
+   "out": "1e+16"
+  },
+  {
+   "kind": "pf",
+   "fmt": "%s",
+   "args": [
+    {
+     "f": 1e-05
+    }
+   ],
+   "out": "1e-05"
+  },
+  {
+   "kind": "pf",
+   "fmt": "%s",
+   "args": [
+    {
+     "f": 123456789.0
+    }
+   ],
+   "out": "123456789.0"
+  },
+  {
+   "kind": "pf",
+   "fmt": "%s",
+   "args": [
+    {
+     "f": -0.0
+    }
+   ],
+   "out": "-0.0"
+  },
+  {
+   "kind": "pf",
+   "fmt": "%s",
+   "args": [
+    {
+     "f": "nan"
+    }
+   ],
+   "out": "nan"
+  },
+  {
+   "kind": "pf",
+   "fmt": "%s",
+   "args": [
+    {
+     "f": "inf"
+    }
+   ],
+   "out": "inf"
+  },
+  {
+   "kind": "pf",
+   "fmt": "%s",
+   "args": [
+    [
+     4,
+     18,
+     19,
+     20,
+     22
+    ]
+   ],
+   "out": "[4, 18, 19, 20, 22]"
+  },
+  {
+   "kind": "pf",
+   "fmt": "%s",
+   "args": [
+    "привет"
+   ],
+   "out": "привет"
+  },
+  {
+   "kind": "pf",
+   "fmt": "%d",
+   "args": [
+    {
+     "f": 3.7
+    }
+   ],
+   "out": "3"
+  },
+  {
+   "kind": "pf",
+   "fmt": "%d",
+   "args": [
+    true
+   ],
+   "out": "1"
+  },
+  {
+   "kind": "pf",
+   "fmt": "%d",
+   "args": [
+    {
+     "f": -2.5
+    }
+   ],
+   "out": "-2"
+  },
+  {
+   "kind": "pf",
+   "fmt": "%d",
+   "args": [
+    10
+   ],
+   "out": "10"
+  },
+  {
+   "kind": "pf",
+   "fmt": "%i",
+   "args": [
+    7
+   ],
+   "out": "7"
+  },
+  {
+   "kind": "pf",
+   "fmt": "%.2f",
+   "args": [
+    1
+   ],
+   "out": "1.00"
+  },
+  {
+   "kind": "pf",
+   "fmt": "%.2f",
+   "args": [
+    {
+     "f": 2.675
+    }
+   ],
+   "out": "2.67"
+  },
+  {
+   "kind": "pf",
+   "fmt": "%.2f",
+   "args": [
+    {
+     "f": 1e-07
+    }
+   ],
+   "out": "0.00"
+  },
+  {
+   "kind": "pf",
+   "fmt": "%.2f",
+   "args": [
+    {
+     "f": -0.0
+    }
+   ],
+   "out": "-0.00"
+  },
+  {
+   "kind": "pf",
+   "fmt": "%.2f",
+   "args": [
+    true
+   ],
+   "out": "1.00"
+  },
+  {
+   "kind": "pf",
+   "fmt": "%.4f%%",
+   "args": [
+    {
+     "f": 1.23456
+    }
+   ],
+   "out": "1.2346%"
+  },
+  {
+   "kind": "pf",
+   "fmt": "%.1f%%",
+   "args": [
+    {
+     "f": 99.95
+    }
+   ],
+   "out": "100.0%"
+  },
+  {
+   "kind": "pf",
+   "fmt": "%.0f",
+   "args": [
+    {
+     "f": 0.5
+    }
+   ],
+   "out": "0"
+  },
+  {
+   "kind": "pf",
+   "fmt": "%.0f",
+   "args": [
+    {
+     "f": 1.5
+    }
+   ],
+   "out": "2"
+  },
+  {
+   "kind": "pf",
+   "fmt": "%.0f",
+   "args": [
+    {
+     "f": 2.5
+    }
+   ],
+   "out": "2"
+  },
+  {
+   "kind": "pf",
+   "fmt": "%.6f",
+   "args": [
+    {
+     "f": 0.000123456789
+    }
+   ],
+   "out": "0.000123"
+  },
+  {
+   "kind": "pf",
+   "fmt": "%.3f",
+   "args": [
+    {
+     "f": 1234567.0005
+    }
+   ],
+   "out": "1234567.001"
+  },
+  {
+   "kind": "pf",
+   "fmt": "%f",
+   "args": [
+    {
+     "f": 1.0
+    }
+   ],
+   "out": "1.000000"
+  },
+  {
+   "kind": "pf",
+   "fmt": "%.8f",
+   "args": [
+    {
+     "f": 0.1
+    }
+   ],
+   "out": "0.10000000"
+  },
+  {
+   "kind": "pf",
+   "fmt": "%r",
+   "args": [
+    "a'b"
+   ],
+   "out": "\"a'b\""
+  },
+  {
+   "kind": "pf",
+   "fmt": "%r",
+   "args": [
+    "a\"b"
+   ],
+   "out": "'a\"b'"
+  },
+  {
+   "kind": "pf",
+   "fmt": "%r",
+   "args": [
+    "a'b\"c"
+   ],
+   "out": "'a\\'b\"c'"
+  },
+  {
+   "kind": "pf",
+   "fmt": "%r",
+   "args": [
+    "привет"
+   ],
+   "out": "'привет'"
+  },
+  {
+   "kind": "pf",
+   "fmt": "%r",
+   "args": [
+    null
+   ],
+   "out": "None"
+  },
+  {
+   "kind": "pf",
+   "fmt": "%r",
+   "args": [
+    {
+     "f": 3.0
+    }
+   ],
+   "out": "3.0"
+  },
+  {
+   "kind": "pf",
+   "fmt": "%r",
+   "args": [
+    [
+     1,
+     2
+    ]
+   ],
+   "out": "[1, 2]"
+  },
+  {
+   "kind": "pf",
+   "fmt": "%r",
+   "args": [
+    "hour_utc=4 in bad_hours=[4, 18]"
+   ],
+   "out": "'hour_utc=4 in bad_hours=[4, 18]'"
+  },
+  {
+   "kind": "pf",
+   "fmt": "%r",
+   "args": [
+    ""
+   ],
+   "out": "''"
+  },
+  {
+   "kind": "pf",
+   "fmt": "%5.1f|%-6s|%06.2f",
+   "args": [
+    {
+     "f": 3.14159
+    },
+    "ab",
+    {
+     "f": 3.14159
+    }
+   ],
+   "out": "  3.1|ab    |003.14"
+  },
+  {
+   "kind": "pf",
+   "fmt": "%3d|%-3d|%03d",
+   "args": [
+    5,
+    5,
+    5
+   ],
+   "out": "  5|5  |005"
+  },
+  {
+   "kind": "pf",
+   "fmt": "%+d",
+   "args": [
+    5
+   ],
+   "out": "+5"
+  },
+  {
+   "kind": "pf",
+   "fmt": "% d",
+   "args": [
+    5
+   ],
+   "out": " 5"
+  },
+  {
+   "kind": "pf",
+   "fmt": "%+.2f",
+   "args": [
+    {
+     "f": -1.5
+    }
+   ],
+   "out": "-1.50"
+  },
+  {
+   "kind": "pf",
+   "fmt": "%10s|",
+   "args": [
+    "abc"
+   ],
+   "out": "       abc|"
+  },
+  {
+   "kind": "pf",
+   "fmt": "%-10s|",
+   "args": [
+    "abc"
+   ],
+   "out": "abc       |"
+  },
+  {
+   "kind": "pf",
+   "fmt": "%.3s",
+   "args": [
+    "abcdef"
+   ],
+   "out": "abc"
+  },
+  {
+   "kind": "pf",
+   "fmt": "%x",
+   "args": [
+    255
+   ],
+   "out": "ff"
+  },
+  {
+   "kind": "pf",
+   "fmt": "%e",
+   "args": [
+    {
+     "f": 12345.678
+    }
+   ],
+   "out": "1.234568e+04"
+  },
+  {
+   "kind": "pf",
+   "fmt": "%.2e",
+   "args": [
+    {
+     "f": 0.000123
+    }
+   ],
+   "out": "1.23e-04"
+  },
+  {
+   "kind": "pf",
+   "fmt": "%g",
+   "args": [
+    {
+     "f": 0.0001234
+    }
+   ],
+   "out": "0.0001234"
+  },
+  {
+   "kind": "pf",
+   "fmt": "%g",
+   "args": [
+    {
+     "f": 1e+20
+    }
+   ],
+   "out": "1e+20"
+  },
+  {
+   "kind": "pf",
+   "fmt": "%.3g",
+   "args": [
+    {
+     "f": 1234.5
+    }
+   ],
+   "out": "1.23e+03"
+  },
+  {
+   "kind": "pf",
+   "fmt": "%g",
+   "args": [
+    {
+     "f": 100.0
+    }
+   ],
+   "out": "100"
+  },
+  {
+   "kind": "pf",
+   "fmt": "%g",
+   "args": [
+    {
+     "f": 1.5
+    }
+   ],
+   "out": "1.5"
+  },
+  {
+   "kind": "pf",
+   "fmt": "%G",
+   "args": [
+    {
+     "f": 1e-10
+    }
+   ],
+   "out": "1E-10"
+  },
+  {
+   "kind": "pf",
+   "fmt": "100%%",
+   "args": [],
+   "out": "100%"
+  },
+  {
+   "kind": "pf",
+   "fmt": "%s %s %s",
+   "args": [
+    1,
+    {
+     "f": 2.0
+    },
+    "3"
+   ],
+   "out": "1 2.0 3"
+  },
+  {
+   "kind": "pf",
+   "fmt": "uid=%s sym=%s: %.2f%% capped to %.2f%%",
+   "args": [
+    501,
+    "SOL-USDT-SWAP",
+    {
+     "f": 3.0
+    },
+    {
+     "f": 2.0
+    }
+   ],
+   "out": "uid=501 sym=SOL-USDT-SWAP: 3.00% capped to 2.00%"
+  },
+  {
+   "kind": "pf",
+   "fmt": "[RISK-CAP] uid=%d sym=%s: trade_risk=%.2f%% capped",
+   "args": [
+    {
+     "f": 501.0
+    },
+    "BTC",
+    5
+   ],
+   "out": "[RISK-CAP] uid=501 sym=BTC: trade_risk=5.00% capped"
+  },
+  {
+   "kind": "pf",
+   "fmt": "%s",
+   "args": [
+    9007199254740992
+   ],
+   "out": "9007199254740992"
+  },
+  {
+   "kind": "pf",
+   "fmt": "%d",
+   "args": [
+    9007199254740991
+   ],
+   "out": "9007199254740991"
+  },
+  {
+   "kind": "pf",
+   "fmt": "%.2f",
+   "args": [
+    {
+     "f": 1e+22
+    }
+   ],
+   "out": "10000000000000000000000.00"
+  },
+  {
+   "kind": "pf",
+   "fmt": "%s",
+   "args": [
+    {
+     "f": 1e+22
+    }
+   ],
+   "out": "1e+22"
+  },
+  {
+   "kind": "pf",
+   "fmt": "%d",
+   "args": [
+    {
+     "f": 1e+22
+    }
+   ],
+   "out": "10000000000000000000000"
+  },
+  {
+   "kind": "pf",
+   "fmt": "%d",
+   "args": [
+    {
+     "f": "nan"
+    }
+   ],
+   "err": [
+    "ValueError",
+    "cannot convert float NaN to integer"
+   ]
+  },
+  {
+   "kind": "pf",
+   "fmt": "%d",
+   "args": [
+    {
+     "f": "inf"
+    }
+   ],
+   "err": [
+    "OverflowError",
+    "cannot convert float infinity to integer"
+   ]
+  },
+  {
+   "kind": "pf",
+   "fmt": "%G",
+   "args": [
+    {
+     "f": 1.5e-10
+    }
+   ],
+   "out": "1.5E-10"
+  },
+  {
+   "kind": "pf",
+   "fmt": "%E",
+   "args": [
+    {
+     "f": 12345.678
+    }
+   ],
+   "out": "1.234568E+04"
+  },
+  {
+   "kind": "pf",
+   "fmt": "%d",
+   "args": [
+    "x"
+   ],
+   "err": [
+    "TypeError",
+    "%d format: a real number is required, not str"
+   ]
+  },
+  {
+   "kind": "pf",
+   "fmt": "%.2f",
+   "args": [
+    "x"
+   ],
+   "err": [
+    "TypeError",
+    "must be real number, not str"
+   ]
+  },
+  {
+   "kind": "pf",
+   "fmt": "%.2f",
+   "args": [
+    null
+   ],
+   "err": [
+    "TypeError",
+    "must be real number, not NoneType"
+   ]
+  },
+  {
+   "kind": "pf",
+   "fmt": "%s %s",
+   "args": [
+    1
+   ],
+   "err": [
+    "TypeError",
+    "not enough arguments for format string"
+   ]
+  },
+  {
+   "kind": "pf",
+   "fmt": "%s",
+   "args": [
+    1,
+    2
+   ],
+   "err": [
+    "TypeError",
+    "not all arguments converted during string formatting"
+   ]
+  },
+  {
+   "kind": "sf",
+   "tpl": "{a}",
+   "kwargs": {
+    "d": [
+     [
+      "a",
+      {
+       "f": 1.0
+      }
+     ]
+    ]
+   },
+   "out": "1.0"
+  },
+  {
+   "kind": "sf",
+   "tpl": "{a}",
+   "kwargs": {
+    "d": [
+     [
+      "a",
+      1
+     ]
+    ]
+   },
+   "out": "1"
+  },
+  {
+   "kind": "sf",
+   "tpl": "{a}",
+   "kwargs": {
+    "d": [
+     [
+      "a",
+      {
+       "f": 2.5
+      }
+     ]
+    ]
+   },
+   "out": "2.5"
+  },
+  {
+   "kind": "sf",
+   "tpl": "{a}",
+   "kwargs": {
+    "d": [
+     [
+      "a",
+      null
+     ]
+    ]
+   },
+   "out": "None"
+  },
+  {
+   "kind": "sf",
+   "tpl": "{a}",
+   "kwargs": {
+    "d": [
+     [
+      "a",
+      true
+     ]
+    ]
+   },
+   "out": "True"
+  },
+  {
+   "kind": "sf",
+   "tpl": "{a}",
+   "kwargs": {
+    "d": [
+     [
+      "a",
+      [
+       1,
+       {
+        "f": 2.0
+       }
+      ]
+     ]
+    ]
+   },
+   "out": "[1, 2.0]"
+  },
+  {
+   "kind": "sf",
+   "tpl": "{a}",
+   "kwargs": {
+    "d": [
+     [
+      "a",
+      "текст"
+     ]
+    ]
+   },
+   "out": "текст"
+  },
+  {
+   "kind": "sf",
+   "tpl": "{a:.2f}",
+   "kwargs": {
+    "d": [
+     [
+      "a",
+      {
+       "f": 2.5
+      }
+     ]
+    ]
+   },
+   "out": "2.50"
+  },
+  {
+   "kind": "sf",
+   "tpl": "{a:.2f}",
+   "kwargs": {
+    "d": [
+     [
+      "a",
+      3
+     ]
+    ]
+   },
+   "out": "3.00"
+  },
+  {
+   "kind": "sf",
+   "tpl": "{a:.1f}",
+   "kwargs": {
+    "d": [
+     [
+      "a",
+      {
+       "f": 0.05
+      }
+     ]
+    ]
+   },
+   "out": "0.1"
+  },
+  {
+   "kind": "sf",
+   "tpl": "{a:.0f}",
+   "kwargs": {
+    "d": [
+     [
+      "a",
+      {
+       "f": 2.5
+      }
+     ]
+    ]
+   },
+   "out": "2"
+  },
+  {
+   "kind": "sf",
+   "tpl": "{a:,}",
+   "kwargs": {
+    "d": [
+     [
+      "a",
+      1234567
+     ]
+    ]
+   },
+   "out": "1,234,567"
+  },
+  {
+   "kind": "sf",
+   "tpl": "{a:,.2f}",
+   "kwargs": {
+    "d": [
+     [
+      "a",
+      {
+       "f": 1234567.891
+      }
+     ]
+    ]
+   },
+   "out": "1,234,567.89"
+  },
+  {
+   "kind": "sf",
+   "tpl": "{a:,.0f}",
+   "kwargs": {
+    "d": [
+     [
+      "a",
+      {
+       "f": 999.5
+      }
+     ]
+    ]
+   },
+   "out": "1,000"
+  },
+  {
+   "kind": "sf",
+   "tpl": "{a:>5}",
+   "kwargs": {
+    "d": [
+     [
+      "a",
+      "x"
+     ]
+    ]
+   },
+   "out": "    x"
+  },
+  {
+   "kind": "sf",
+   "tpl": "{a:<5}|",
+   "kwargs": {
+    "d": [
+     [
+      "a",
+      "x"
+     ]
+    ]
+   },
+   "out": "x    |"
+  },
+  {
+   "kind": "sf",
+   "tpl": "{a:^7}|",
+   "kwargs": {
+    "d": [
+     [
+      "a",
+      "ab"
+     ]
+    ]
+   },
+   "out": "  ab   |"
+  },
+  {
+   "kind": "sf",
+   "tpl": "{a:5}|",
+   "kwargs": {
+    "d": [
+     [
+      "a",
+      42
+     ]
+    ]
+   },
+   "out": "   42|"
+  },
+  {
+   "kind": "sf",
+   "tpl": "{a:5}|",
+   "kwargs": {
+    "d": [
+     [
+      "a",
+      "ab"
+     ]
+    ]
+   },
+   "out": "ab   |"
+  },
+  {
+   "kind": "sf",
+   "tpl": "{a:+.1f}",
+   "kwargs": {
+    "d": [
+     [
+      "a",
+      3
+     ]
+    ]
+   },
+   "out": "+3.0"
+  },
+  {
+   "kind": "sf",
+   "tpl": "{a:+.1f}",
+   "kwargs": {
+    "d": [
+     [
+      "a",
+      -3
+     ]
+    ]
+   },
+   "out": "-3.0"
+  },
+  {
+   "kind": "sf",
+   "tpl": "{a:d}",
+   "kwargs": {
+    "d": [
+     [
+      "a",
+      7
+     ]
+    ]
+   },
+   "out": "7"
+  },
+  {
+   "kind": "sf",
+   "tpl": "{a:,d}",
+   "kwargs": {
+    "d": [
+     [
+      "a",
+      1234567
+     ]
+    ]
+   },
+   "out": "1,234,567"
+  },
+  {
+   "kind": "sf",
+   "tpl": "{a:.0%}",
+   "kwargs": {
+    "d": [
+     [
+      "a",
+      {
+       "f": 0.256
+      }
+     ]
+    ]
+   },
+   "out": "26%"
+  },
+  {
+   "kind": "sf",
+   "tpl": "{a:.1%}",
+   "kwargs": {
+    "d": [
+     [
+      "a",
+      {
+       "f": 0.0125
+      }
+     ]
+    ]
+   },
+   "out": "1.2%"
+  },
+  {
+   "kind": "sf",
+   "tpl": "{a:05.1f}",
+   "kwargs": {
+    "d": [
+     [
+      "a",
+      {
+       "f": 3.14159
+      }
+     ]
+    ]
+   },
+   "out": "003.1"
+  },
+  {
+   "kind": "sf",
+   "tpl": "{a:05.1f}",
+   "kwargs": {
+    "d": [
+     [
+      "a",
+      {
+       "f": -3.14159
+      }
+     ]
+    ]
+   },
+   "out": "-03.1"
+  },
+  {
+   "kind": "sf",
+   "tpl": "{a:g}",
+   "kwargs": {
+    "d": [
+     [
+      "a",
+      {
+       "f": 1e-05
+      }
+     ]
+    ]
+   },
+   "out": "1e-05"
+  },
+  {
+   "kind": "sf",
+   "tpl": "{a:g}",
+   "kwargs": {
+    "d": [
+     [
+      "a",
+      {
+       "f": 123.0
+      }
+     ]
+    ]
+   },
+   "out": "123"
+  },
+  {
+   "kind": "sf",
+   "tpl": "{a:e}",
+   "kwargs": {
+    "d": [
+     [
+      "a",
+      {
+       "f": 12345.678
+      }
+     ]
+    ]
+   },
+   "out": "1.234568e+04"
+  },
+  {
+   "kind": "sf",
+   "tpl": "{a:.3}",
+   "kwargs": {
+    "d": [
+     [
+      "a",
+      "abcdef"
+     ]
+    ]
+   },
+   "out": "abc"
+  },
+  {
+   "kind": "sf",
+   "tpl": "{a:.3}",
+   "kwargs": {
+    "d": [
+     [
+      "a",
+      {
+       "f": 3.14159
+      }
+     ]
+    ]
+   },
+   "out": "3.14"
+  },
+  {
+   "kind": "sf",
+   "tpl": "{a:.2}",
+   "kwargs": {
+    "d": [
+     [
+      "a",
+      {
+       "f": 1234.5
+      }
+     ]
+    ]
+   },
+   "out": "1.2e+03"
+  },
+  {
+   "kind": "sf",
+   "tpl": "{{lit}} {a}",
+   "kwargs": {
+    "d": [
+     [
+      "a",
+      1
+     ]
+    ]
+   },
+   "out": "{lit} 1"
+  },
+  {
+   "kind": "sf",
+   "tpl": "{a}{b}",
+   "kwargs": {
+    "d": [
+     [
+      "a",
+      "x"
+     ],
+     [
+      "b",
+      {
+       "f": 2.0
+      }
+     ]
+    ]
+   },
+   "out": "x2.0"
+  },
+  {
+   "kind": "sf",
+   "tpl": "{a:.2f}$",
+   "kwargs": {
+    "d": [
+     [
+      "a",
+      {
+       "f": 1e-07
+      }
+     ]
+    ]
+   },
+   "out": "0.00$"
+  },
+  {
+   "kind": "sf",
+   "tpl": "{missing}",
+   "kwargs": {
+    "d": [
+     [
+      "a",
+      1
+     ]
+    ]
+   },
+   "err": [
+    "KeyError",
+    "'missing'"
+   ]
+  },
+  {
+   "kind": "sf",
+   "tpl": "{a:d}",
+   "kwargs": {
+    "d": [
+     [
+      "a",
+      {
+       "f": 1.5
+      }
+     ]
+    ]
+   },
+   "err": [
+    "ValueError",
+    "Unknown format code 'd' for object of type 'float'"
+   ]
+  },
+  {
+   "kind": "sf",
+   "tpl": "{a:d}",
+   "kwargs": {
+    "d": [
+     [
+      "a",
+      {
+       "f": 1.0
+      }
+     ]
+    ]
+   },
+   "err": [
+    "ValueError",
+    "Unknown format code 'd' for object of type 'float'"
+   ]
+  },
+  {
+   "kind": "sf",
+   "tpl": "x { y",
+   "kwargs": {
+    "d": []
+   },
+   "err": [
+    "ValueError",
+    "expected '}' before end of string"
+   ]
+  },
+  {
+   "kind": "sf",
+   "tpl": "x } y",
+   "kwargs": {
+    "d": []
+   },
+   "err": [
+    "ValueError",
+    "Single '}' encountered in format string"
+   ]
+  },
+  {
+   "kind": "sf",
+   "tpl": "{}",
+   "kwargs": {
+    "d": [
+     [
+      "a",
+      1
+     ]
+    ]
+   },
+   "err": [
+    "IndexError",
+    "Replacement index 0 out of range for positional args tuple"
+   ]
+  },
+  {
+   "kind": "sf",
+   "tpl": "{a:.2f}",
+   "kwargs": {
+    "d": [
+     [
+      "a",
+      "x"
+     ]
+    ]
+   },
+   "err": [
+    "ValueError",
+    "Unknown format code 'f' for object of type 'str'"
+   ]
+  },
+  {
+   "kind": "sf",
+   "tpl": "{a:d}",
+   "kwargs": {
+    "d": [
+     [
+      "a",
+      "x"
+     ]
+    ]
+   },
+   "err": [
+    "ValueError",
+    "Unknown format code 'd' for object of type 'str'"
+   ]
+  },
+  {
+   "kind": "sf",
+   "tpl": "{a:.2f}",
+   "kwargs": {
+    "d": [
+     [
+      "a",
+      null
+     ]
+    ]
+   },
+   "err": [
+    "TypeError",
+    "unsupported format string passed to NoneType.__format__"
+   ]
+  },
+  {
+   "kind": "sf",
+   "tpl": "{a:,}",
+   "kwargs": {
+    "d": [
+     [
+      "a",
+      {
+       "f": 1234567.5
+      }
+     ]
+    ]
+   },
+   "out": "1,234,567.5"
+  },
+  {
+   "kind": "sf",
+   "tpl": "{a:,}",
+   "kwargs": {
+    "d": [
+     [
+      "a",
+      {
+       "f": -1234.25
+      }
+     ]
+    ]
+   },
+   "out": "-1,234.25"
+  },
+  {
+   "kind": "sf",
+   "tpl": "x {",
+   "kwargs": {
+    "d": []
+   },
+   "err": [
+    "ValueError",
+    "Single '{' encountered in format string"
+   ]
+  },
+  {
+   "kind": "sf",
+   "tpl": "{a:>8.2f}|",
+   "kwargs": {
+    "d": [
+     [
+      "a",
+      {
+       "f": 3.14159
+      }
+     ]
+    ]
+   },
+   "out": "    3.14|"
+  },
+  {
+   "kind": "sf",
+   "tpl": "{a:<8,}|",
+   "kwargs": {
+    "d": [
+     [
+      "a",
+      1234
+     ]
+    ]
+   },
+   "out": "1,234   |"
+  }
+ ]
+}

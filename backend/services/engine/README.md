@@ -390,7 +390,7 @@ thread's wiring (`ctx.scannerDeps(S)`):
 | `ws_feed.register_on_bar_close(cb)` | `marketData/bingxWsFeed.registerOnBarClose`; one stable callback per scanner, so a restart does not add a second one (bound-method equality in the bot) |
 | `asyncio.sleep`, `time.time` | the scheduler's abortable sleep and clock |
 | `candle_store` + `HistoryLoader` (LEVELS warm-up) | `marketData/candleStore` |
-| `execute_auto_trade`, the user's API keys | `deps.autoTrade` (M13b); until then none: no keys, so no trade and no counter-trend notice, for all three scanners |
+| `execute_auto_trade`, the user's API keys | `deps.autoTrade` = `services/autotrade` `createAutoTrade` (M13b), wired by the engine worker only with `AUTOTRADE_ENABLED=1`; without it none: no keys, so no trade and no counter-trend notice, for all three scanners |
 
 ### What a Telegram call becomes
 
@@ -506,9 +506,10 @@ Every Python generator runs the bot's own code with CPython 3.11 from the bot ch
 
 ### Not wired yet (later milestones)
 
-* Auto-trade (`execute_auto_trade`, API keys, balances for the position line): M13b, through
-  `deps.autoTrade`; the BE-monitor body of `MidScanner._be_monitor_loop` (only its hint-throttle
-  restore runs): M15.
+* Auto-trade (`execute_auto_trade`, API keys, balances for the position line) is `deps.autoTrade`
+  (services/autotrade, M13b; the worker wires it with `AUTOTRADE_ENABLED=1`, its registries are
+  cleaned by `cacheGcOnce`). Not yet: the BE-monitor body of `MidScanner._be_monitor_loop` (only
+  its hint-throttle restore runs) and `auto_trade.state_reconciliation_loop`: M15.
 * The cancellation is cooperative: a cycle stops at its next checkpoint (between symbols / steps),
   not inside an in-flight REST call or an analysis; the analysis runs inline in the worker thread,
   so the LEVELS 10 s analyze timeout applies only to an `analysisExecutor` that returns a promise.

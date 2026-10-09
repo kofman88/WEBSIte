@@ -107,6 +107,7 @@ const volumeFilter = require('./volumeFilter');
 const optimizerParams = require('../genome/optimizerParams');
 const { computeClientOrderId } = require('../exchanges/orderIdUtils');
 const { regimeAllowsDirection } = require('../../strategies/common/marketRegime');
+const { pyIndex } = require('../exchanges/pyCompat');
 const { log: defaultLog } = require('../marketData/mdLog');
 
 // ── config.Config values the scanner reads ───────────────────────────────────────────
@@ -1616,8 +1617,12 @@ class MidScanner {
           atResult = { executed: false, show_trade_btn: false, limit_msg: null };
         }
       }
-      showTradeBtn = atResult.show_trade_btn;
-      if (atResult.limit_msg) {
+      // QUIRK (spec autotrade §0.2): scanner_mid reads at_result["show_trade_btn"] / ["limit_msg"]
+      // directly. The three gates that replace the result with {ok, executed, skip}
+      // (hour_of_day_levels, min_quality, trending_only) make this a KeyError: it leaves _send
+      // before the card, and the worker logs [WORKER-FAILED] for the rest of the (user, tf) job.
+      showTradeBtn = pyIndex(atResult, 'show_trade_btn');
+      if (pyIndex(atResult, 'limit_msg')) {
         try {
           await this._safeSend(user.user_id, atResult.limit_msg, { siteType: 'trade' });
         } catch (e) {

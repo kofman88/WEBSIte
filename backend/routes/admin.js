@@ -374,4 +374,97 @@ router.get('/audit', (req, res, next) => {
   } catch (err) { handleErr(err, res, next); }
 });
 
+// ── Engine killswitch (the bot's /ks_status, /halt, /halt_all <reason> CONFIRM, /resume <token>) ──
+// handlers/admin.py: any admin; HALTED_NEW / HALTED_ALL block every new-trade entry point
+// (execute_auto_trade + the traders' place_trade / place_trade_split — also the app's confirm exec);
+// closing and SL→BE keep working. A halt issues a one-shot resume token, only that token resumes.
+// The engine and trade-ops threads read the state from engine_kv with the bot's 5 s cache.
+let _ks = null;
+function killswitch() {
+  if (!_ks) {
+    const { createKillswitch } = require('../services/autotrade/killswitch');
+    const db = require('../models/database');
+    _ks = createKillswitch({
+      log: { debug() {}, info: (m) => require('../utils/logger').info(m), warning: (m) => require('../utils/logger').warn(m) },
+      // metrics.mutation_log → audit_log (like services/autotrade createTraderHooks)
+      emitMutation: async (type, { actor = '', target = '', before = '', after = '', context = null } = {}) => {
+        const uid = Number(String(actor).replace(/^admin:/, '')) || null;
+        db.prepare('INSERT INTO audit_log (user_id, action, entity_type, entity_id, metadata) VALUES (?, ?, ?, ?, ?)')
+          .run(uid, String(type), 'autotrade', null, JSON.stringify({ actor, target, before, after, context }));
+        return true;
+      },
+    });
+  }
+  return _ks;
+}
+/** Tests: a killswitch over their own store (null → the default). */
+router._setKillswitch = (ks) => { _ks = ks; };
+
+function ksView(info) {
+  return {
+    state: info.state, reason: info.reason || '', actor_uid: info.actor_uid || 0, changed_at: info.changed_at || 0,
+    has_resume_token: Boolean(info.has_resume_token), ...(info.db_error ? { db_error: info.db_error } : {}),
+  };
+}
+
+router.get('/engine/killswitch', async (_req, res, next) => {
+  try { res.json({ ok: true, ...ksView(await killswitch().currentStatus()) }); } catch (err) { handleErr(err, res, next); }
+});
+
+router.post('/engine/killswitch/halt', async (req, res, next) => {
+  try {
+    const body = z.object({ reason: z.string().max(500).optional() }).parse(req.body || {});
+    const reason = (body.reason || '').trim();
+    const ks = killswitch();
+    const { STATE_HALTED_NEW } = require('../services/autotrade/killswitch');
+    const info = await ks.currentStatus();
+    if (info.state === STATE_HALTED_NEW) {
+      return res.status(409).json({ ok: false, error: 'already_halted', message: 'Already HALTED_NEW. To return to ACTIVE use resume.', ...ksView(info) });
+    }
+    const token = await ks.setState(STATE_HALTED_NEW, { reason, actorUid: req.userId });
+    return res.json({ ok: true, state: STATE_HALTED_NEW, reason, resume_token: token, message: 'HALTED_NEW — new trade opens are blocked.' });
+  } catch (err) { return handleErr(err, res, next); }
+});
+
+router.post('/engine/killswitch/halt-all', async (req, res, next) => {
+  try {
+    const body = z.object({ reason: z.string().max(500).optional(), confirm: z.string().max(16).optional() }).parse(req.body || {});
+    // /halt_all requires the explicit CONFIRM keyword (no accidental panic button)
+    if (body.confirm !== 'CONFIRM') {
+      return res.status(400).json({
+        ok: false, error: 'confirm_required',
+        message: 'HALTED_ALL is the emergency freeze. Resend with confirm: "CONFIRM". In v1 HALTED_ALL blocks the same new-trade gates as HALTED_NEW — lifecycle (trailing / partial TP / BE) still runs.',
+      });
+    }
+    const reason = (body.reason || '').trim();
+    const ks = killswitch();
+    const { STATE_HALTED_ALL } = require('../services/autotrade/killswitch');
+    const info = await ks.currentStatus();
+    if (info.state === STATE_HALTED_ALL) {
+      return res.status(409).json({ ok: false, error: 'already_halted', message: 'Already HALTED_ALL.', ...ksView(info) });
+    }
+    const token = await ks.setState(STATE_HALTED_ALL, { reason, actorUid: req.userId });
+    return res.json({ ok: true, state: STATE_HALTED_ALL, reason, resume_token: token, message: 'HALTED_ALL — emergency halt.' });
+  } catch (err) { return handleErr(err, res, next); }
+});
+
+router.post('/engine/killswitch/resume', async (req, res, next) => {
+  try {
+    const body = z.object({ token: z.string().max(64).optional() }).parse(req.body || {});
+    const token = (body.token || '').trim();
+    const ks = killswitch();
+    const { STATE_ACTIVE } = require('../services/autotrade/killswitch');
+    if (!token) {
+      const info = await ks.currentStatus();
+      if (info.state === STATE_ACTIVE) return res.json({ ok: true, state: STATE_ACTIVE, message: 'Already ACTIVE.' });
+      return res.status(400).json({ ok: false, error: 'token_required', message: 'Resume requires the token issued at halt / halt-all.', ...ksView(info) });
+    }
+    if (!(await ks.validateAndConsumeResumeToken(token))) {
+      return res.status(403).json({ ok: false, error: 'invalid_token', message: 'Invalid or already-used token.' });
+    }
+    await ks.setState(STATE_ACTIVE, { reason: 'resume', actorUid: req.userId });
+    return res.json({ ok: true, state: STATE_ACTIVE, message: 'State restored to ACTIVE.' });
+  } catch (err) { return handleErr(err, res, next); }
+});
+
 module.exports = router;
