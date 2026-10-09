@@ -589,8 +589,10 @@ function createPartialTp({ traderFor, log = null, sleep = null, sendMessage = nu
           strategyName, symbol, direction, entry, sl, totalQty, posIdx));
         return anyPlaced;
       }
-      logger.error(pf('Partial TP ALL FAILED [%s %s %s]: exchange=%s entry=%.6g sl=%.6g qty=%.6g pos_idx=%s — position open without partial TP, manual review required',
-        strategyName, symbol, direction, exchange, entry, sl, totalQty, posIdx));
+      const allFailed = pf('Partial TP ALL FAILED [%s %s %s]: exchange=%s entry=%.6g sl=%.6g qty=%.6g pos_idx=%s — position open without partial TP, manual review required',
+        strategyName, symbol, direction, exchange, entry, sl, totalQty, posIdx);
+      if (typeof logger.critical === 'function') logger.critical(allFailed);   // log.critical in the bot
+      else logger.error(allFailed);
       if (bot !== null && bot !== undefined) {
         try {
           if (adminAlert) {
