@@ -58,8 +58,11 @@ function createTrendSource({ kvGet = null, rest = null, now = () => Date.now() /
     } catch (_e) {
       frame = null;
     }
-    if (frame && frame.length) frames.set(tf, { at: t, frame });
-    return frame || (hit ? hit.frame : null);
+    if (frame && frame.length) {
+      frames.set(tf, { at: t, frame });
+      return frame;
+    }
+    return hit ? hit.frame : null;                 // a failed / empty refetch keeps the last bars
   }
 
   async function changeOf(coin) {

@@ -85,6 +85,7 @@ function createPublicTrack({ db = null, now = () => Date.now() / 1000, env = pro
       + `AND COALESCE(order_id, '') = '' AND ${COUNTABLE_SQL} ORDER BY created_at ASC, trade_id ASC`,
     ).all(...ids, since);
     let published = 0;
+    // BEGIN IMMEDIATE: a second process refreshing at the same time waits instead of failing on the upgrade
     d.transaction(() => {
       const live = st.liveRows(ids, since - 86400);   // older rows are final: only a first import reads them
       let seq = st.seq();
@@ -121,7 +122,7 @@ function createPublicTrack({ db = null, now = () => Date.now() / 1000, env = pro
         }
       }
       if (published) st.setSeq(seq);
-    })();
+    }).immediate();
     if (published) L.debug(`[PUBLIC-TRACK] refresh: rows=${src.length} published=${published}`);
     return { rows: src.length, published };
   }
