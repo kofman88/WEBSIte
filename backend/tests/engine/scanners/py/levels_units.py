@@ -535,6 +535,34 @@ async def main() -> int:
                             "persisted": await database.db_kv_get(scanner_mid._KV_HINT_LAST_TS),
                             "after_persist": [[k, v] for k, v in scanner_mid._user_hint_last_ts.items()]}
 
+    # ── _send: the three execute_auto_trade results without show_trade_btn / limit_msg ──
+    # (hour_of_day_levels / min_quality / trending_only replace the dict); scanner_mid reads
+    # at_result["show_trade_btn"] directly → KeyError out of _send, before the card
+    quirk = []
+    quirk_k0 = F.RAND.k
+    for i, skip in enumerate(("hour_of_day_levels", "min_quality_below_threshold", "trending_only_ranging_skip")):
+        F.CLK.t = T0 + 600 + 60 * i
+
+        async def fake_quirk(_skip=skip, **kw):
+            kw = dict(kw)
+            kw.pop("bot", None)
+            at_calls.append(kw)
+            return {"ok": False, "executed": False, "skip": _skip}
+        auto_trade.execute_auto_trade = fake_quirk
+        user = await um.get(3204)
+        sig = copy.deepcopy(base_sig)
+        n0, s0, a0 = len(cap.lines), len(bot.sent), len(at_calls)
+        try:
+            ok = await scanner._send(user, sig, user.get_long_cfg())
+            err = None
+        except Exception as e:  # the KeyError the worker would log as [WORKER-FAILED]
+            ok = None
+            err = [type(e).__name__, str(e)]
+        await F.drain()
+        quirk.append({"skip": skip, "t": F.CLK.t, "ok": ok, "error": err, "sent": bot.sent[s0:],
+                      "at_calls": at_calls[a0:], "logs": logs_since(n0)})
+    out["at_dict_quirk"] = {"rand_k0": quirk_k0, "cases": quirk, "trades": F.trades_snapshot()}
+
     doc = {"meta": {"generator": "tests/engine/scanners/py/levels_units.py", "python": sys.version.split()[0]},
            "t0": T0, "users": init_rows, "bot_fail": sorted(BOT_FAIL),
            "api_keys": {str(k): list(v) for k, v in CT_KEYS.items()}, "symbols": SYMBOLS, "volumes": volumes,
