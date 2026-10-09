@@ -68,6 +68,8 @@ const _onBarCloseCallbacks = [];
 /** cb(instId, tfNorm) sync or async; errors are swallowed per callback. */
 function registerOnBarClose(cb) { if (!_onBarCloseCallbacks.includes(cb)) _onBarCloseCallbacks.push(cb); }
 function unregisterOnBarClose(cb) { const i = _onBarCloseCallbacks.indexOf(cb); if (i >= 0) _onBarCloseCallbacks.splice(i, 1); }
+/** How many callbacks the bus holds (tests: a scanner restart must not add a second one). */
+function _barCloseCallbackCount() { return _onBarCloseCallbacks.length; }
 async function fireBarClose(instId, tfNorm, log = defaultLog) {
   for (const cb of _onBarCloseCallbacks.slice()) {
     try {
@@ -733,7 +735,7 @@ function makeFeed(opts = {}) { return new BingxWsFeed(opts); }
 
 module.exports = {
   BingxWsFeed, makeFeed, decodeFrame, encodeFrame, barOpenMs, channelName, parseChannel, keyOf,
-  registerOnBarClose, unregisterOnBarClose, fireBarClose, _resetBarCloseCallbacks, maxSubsPerConn,
+  registerOnBarClose, unregisterOnBarClose, fireBarClose, _resetBarCloseCallbacks, _barCloseCallbackCount, maxSubsPerConn,
   BINGX_WS_SWAP, BINGX_CONTRACTS_URL, SUB_BATCH, SUB_PAUSE_MS, CLOSE_GRACE_S, FORMING_SYNC_S,
   REFILL_MIN_GAP_S, WATCHDOG_SILENCE_THRESHOLD_S, WATCHDOG_CHECK_INTERVAL_S, CACHE_DEPTH,
 };
