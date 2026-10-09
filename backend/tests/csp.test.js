@@ -32,10 +32,10 @@ const EXPECTED = [
   "script-src-attr 'unsafe-hashes' 'sha256-MhtPZXr7+LpJUY5qtMutB+qWfQtMaPccfe7QXtCcEYc='",
   "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
   "img-src 'self' data: https:",
-  "font-src 'self' https://fonts.gstatic.com data:",
+  "font-src 'self' https://fonts.gstatic.com",
   "connect-src 'self' wss: https:",
-  "frame-src 'self' blob: https://mc.yandex.ru https://mc.yandex.com",
-  "child-src 'self' blob: https://mc.yandex.ru https://mc.yandex.com",
+  'frame-src blob: https://mc.yandex.ru https://mc.yandex.com',
+  "child-src 'self' blob:",
   'upgrade-insecure-requests',
 ].join(';');
 
@@ -89,8 +89,9 @@ describe('config/csp.js: the production policy, exactly', () => {
 
   it('Yandex Metrika: exact origins only (script, frames / workers incl. blob:), no wildcard hosts', () => {
     expect(POLICY['script-src']).toEqual(["'self'", "'unsafe-inline'", 'https://mc.yandex.ru', 'https://mc.yandex.com', 'https://yastatic.net']);
-    expect(POLICY['frame-src']).toEqual(["'self'", 'blob:', 'https://mc.yandex.ru', 'https://mc.yandex.com']);
-    expect(POLICY['child-src']).toEqual(POLICY['frame-src']);
+    expect(POLICY['frame-src']).toEqual(['blob:', 'https://mc.yandex.ru', 'https://mc.yandex.com']);
+    // child-src only backs worker-src here (frame-src is set): sw.js + Metrika's blob: worker
+    expect(POLICY['child-src']).toEqual(["'self'", 'blob:']);
     expect(EXPECTED).not.toMatch(/\*/);
     // the counter's hits (img / connect) are within img-src / connect-src
     expect(POLICY['img-src']).toContain('https:');
@@ -169,6 +170,65 @@ describe('pages: what the policy allows is what they use', () => {
       expect(html).toContain('img[data-hide-on-error]');
     }
     expect(fs.existsSync(path.join(FRONTEND, 'assets', 'vendor', 'lucide-LICENSE.txt'))).toBe(true);
+  });
+
+  // The sources config/csp.js leaves out on purpose stay unneeded.
+  it("font-src has no data: — no font on the site (vendored libraries included) is a data: URL", () => {
+    expect(POLICY['font-src']).toEqual(["'self'", 'https://fonts.gstatic.com']);
+    const all = [];
+    const walk = (d) => {
+      for (const e of fs.readdirSync(d, { withFileTypes: true })) {
+        if (e.name === 'node_modules') continue;
+        const p = path.join(d, e.name);
+        if (e.isDirectory()) walk(p);
+        else if (/\.(css|html|js)$/.test(e.name)) all.push(p);
+      }
+    };
+    walk(FRONTEND);
+    const hits = all.filter((f) => /data:(font\/|application\/(x-)?font|application\/vnd\.ms-fontobject)/i.test(fs.readFileSync(f, 'utf8'))).map(rel);
+    expect(hits).toEqual([]);
+  });
+
+  it("frame-src has no 'self' (frame-ancestors 'none' refuses every same-origin frame) and the site frames nothing itself", () => {
+    expect(POLICY['frame-ancestors']).toEqual(["'none'"]);
+    expect(POLICY['frame-src']).not.toContain("'self'");
+    const hits = [];
+    for (const f of frontendFiles(['.html', '.js'])) {
+      const t = fs.readFileSync(f, 'utf8');
+      if (/<iframe\b|createElement\(\s*['"]iframe['"]\s*\)/i.test(t)) hits.push(rel(f));
+    }
+    expect(hits).toEqual([]);
+  });
+
+  it("child-src is the worker fallback: 'self' for /sw.js, blob: for Metrika — no host (workers are same-origin or blob:)", () => {
+    expect(POLICY['worker-src']).toBeUndefined();
+    expect(POLICY['child-src']).toEqual(["'self'", 'blob:']);
+    const regs = [];
+    for (const f of frontendFiles(['.html', '.js'])) {
+      const t = fs.readFileSync(f, 'utf8');
+      for (const m of t.matchAll(/serviceWorker\.register\(\s*['"]([^'"]+)['"]/g)) regs.push(`${rel(f)} ${m[1]}`);
+      if (/new\s+(Shared)?Worker\(/.test(t)) regs.push(`${rel(f)} new Worker`);
+    }
+    expect(regs).toEqual(['settings.html /sw.js']);
+    expect(fs.existsSync(path.join(FRONTEND, 'sw.js'))).toBe(true);
+  });
+
+  // server.js serves every .js with `max-age=2592000, immutable`: the handlers moved out of the
+  // legacy pages' inline on* attributes live in app.js / ops.js, so those files ship under a
+  // versioned URL — a browser holding the old copy would otherwise run new HTML with old JS
+  // (dead sign-out and ops drawer buttons) for up to 30 days.
+  it('the legacy pages load app.js / ops.js under one cache-busting version', () => {
+    expect(fs.readFileSync(path.join(BACKEND, 'server.js'), 'utf8')).toMatch(/\.\(css\|js\|[^)]*\)\$\/i\.test\(filePath\)\) \{\s*res\.setHeader\('Cache-Control', 'public, max-age=2592000, immutable'\)/);
+    const refs = [];
+    for (const f of fs.readdirSync(FRONTEND).filter((n) => n.endsWith('.html'))) {
+      const html = fs.readFileSync(path.join(FRONTEND, f), 'utf8');
+      for (const m of html.matchAll(/<script\b[^>]*\bsrc="((?:\.\/|\/)?(app|ops)\.js(?:\?v=([\w.-]+))?)"/g)) refs.push({ page: f, file: m[2], v: m[3] || null });
+    }
+    expect(refs.map((r) => `${r.page} ${r.file}`).sort()).toEqual([
+      'admin.html app', 'ops.html app', 'ops.html ops', 'settings.html app', 'status.html app', 'subscriptions.html app',
+    ]);
+    expect(refs.filter((r) => !r.v)).toEqual([]);
+    expect(new Set(refs.map((r) => r.v)).size).toBe(1);
   });
 });
 

@@ -336,7 +336,7 @@ describe('/api/app contract (miniapp/API.md one-to-one)', () => {
   });
 });
 
-describe('CSP: the shell works under the site\'s helmet policy (script-src-attr \'none\')', () => {
+describe('CSP: the shell works under the site\'s helmet policy (script-src-attr allows only the landing\'s hashed font switch, config/csp.js)', () => {
   it('index.html has no inline event handler; splash.js switches the font stylesheet to media=all', () => {
     const html = fs.readFileSync(path.join(APP_DIR, 'index.html'), 'utf8');
     expect(html).not.toMatch(/<[^>]*\son[a-z]+\s*=/i);
