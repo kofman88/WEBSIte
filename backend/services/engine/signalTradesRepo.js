@@ -7,7 +7,7 @@
  *   addTrade(data)                    db_add_trade — _ALLOWED_TRADE_COLS whitelist, INSERT OR IGNORE
  *   getTrade(id) / getUserTrades(uid) db_get_trade / db_get_user_trades
  *   setTradeNote(id, {note, skipReason})               db_set_trade_note
- *   setTradeResult(id, result, rr, {closedPnlUsd, skipReason, allowOverwriteSkip})
+ *   setTradeResult(id, result, rr, {closedPnlUsd, skipReason, allowOverwriteSkip, regime}) (+ the trade_feedback row)
  *                                     db_set_trade_result — state CLOSED/FAILED from the result,
  *                                     state_changed_at = now on every transition (L8), skip_reason[:64]
  *                                     in a second UPDATE only when the first changed a row, a
@@ -296,8 +296,9 @@ function pyTypeName(v, literal = '') {
 /**
  * createSignalTradesRepo({ db, now, log, onClosed })
  *   db       — better-sqlite3 handle (default models/database, lazily)
- *   onClosed — optional (trade, result, rr) hook after a real result transition with a
- *              non-SKIP result (the bot's trade_feedback.record_feedback point, M16)
+ *   onClosed — the (trade, result, rr) hook after a real result transition with a non-SKIP result
+ *              (the bot's trade_feedback.record_feedback point); default: the trade_feedback row of
+ *              tradeFeedback.js, null = none
  */
 function createSignalTradesRepo(deps = {}) {
   const dbOf = () => (deps.db ? deps.db : require('../../models/database'));
@@ -342,7 +343,7 @@ function createSignalTradesRepo(deps = {}) {
      * db_set_trade_result(trade_id, result, result_rr, closed_pnl_usd, skip_reason,
      * allow_overwrite_skip) → the row after the write (null when the trade is missing).
      */
-    setTradeResult(tradeId, result, resultRr, { closedPnlUsd = null, skipReason = null, allowOverwriteSkip = false } = {}) {
+    setTradeResult(tradeId, result, resultRr, { closedPnlUsd = null, skipReason = null, allowOverwriteSkip = false, regime = null } = {}) {
       const db = dbOf();
       const tid = String(tradeId);
       if (result === 'SKIP') {
@@ -381,8 +382,13 @@ function createSignalTradesRepo(deps = {}) {
         repo.addTradeEvent(tid, EVT.POSITION_CLOSED, { result, result_rr: resultRr, new_state: newState }, { floatKeys: ['result_rr'] });
       }
       const trade = repo.getTrade(tid);
-      if (updated > 0 && trade && result && result !== 'SKIP' && typeof deps.onClosed === 'function') {
-        try { deps.onClosed(trade, result, resultRr); } catch (e) { log.debug(`auto record_feedback failed trade=${tid}: ${e && e.message}`); }
+      if (updated > 0 && trade && result && result !== 'SKIP') {
+        if (typeof deps.onClosed === 'function') {
+          try { deps.onClosed(trade, result, resultRr); } catch (e) { log.debug(`auto record_feedback failed trade=${tid}: ${e && e.message}`); }
+        } else if (deps.onClosed === undefined) {
+          // SELF-LEARNING FIX #1: the bot's trade_feedback row (services/engine/tradeFeedback.js)
+          require('./tradeFeedback').recordFromTrade(db, trade, tid, result, resultRr, { regime: regime === null ? undefined : regime, now, log });
+        }
       }
       return trade;
     },

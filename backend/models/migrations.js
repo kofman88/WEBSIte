@@ -448,6 +448,15 @@ const MIGRATIONS = [
       db.exec(engineSchema.PUBLIC_TRACK_DDL);
     },
   },
+  {
+    version: 14,
+    name: 'trade_feedback',
+    // The bot's trade_feedback table (db/schema.py) — the row every real result transition writes
+    // (signalTradesRepo.setTradeResult → services/engine/tradeFeedback.js).
+    up(db) {
+      db.exec(engineSchema.TRADE_FEEDBACK_DDL);
+    },
+  },
 ];
 
 function ensureTable(db) {

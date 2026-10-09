@@ -38,7 +38,7 @@ const { positionLine } = req('../../../services/engine/positionLine.js');
 const { wmInject } = req('../../../services/engine/watermark.js');
 const pf = req('../../../config/planFeatures.js');
 const Database = req('better-sqlite3');
-const { signalTradesDDL, TRADE_EVENTS_DDL } = req('../../../models/engineSchema.js');
+const { signalTradesDDL, TRADE_EVENTS_DDL, TRADE_FEEDBACK_DDL } = req('../../../models/engineSchema.js');
 const { load, clock, memKv, captureLog, frameOf } = req('./vectors.js');
 
 const quiet = { debug() {}, info() {}, warning() {}, error() {} };
@@ -400,6 +400,7 @@ describe('signalTradesRepo random op sequences (bot table after every step)', ()
     db.pragma('foreign_keys = OFF');
     db.exec(signalTradesDDL());
     db.exec(TRADE_EVENTS_DDL);
+    db.exec(TRADE_FEEDBACK_DDL);       // db_set_trade_result writes the trade_feedback row (bot schema)
     const c = clock(seq.t0);
     const log = captureLog();
     const r = Repo.createSignalTradesRepo({ db, now: c.now, log });

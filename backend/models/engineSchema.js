@@ -411,6 +411,31 @@ const GENOME_DDL = `
   );
 `;
 
+// ── trade_feedback (v14) ──────────────────────────────────────────────
+// The bot's db/schema.py trade_feedback, verbatim: one row per (user, trade) written by every real
+// result transition (db_set_trade_result → trade_feedback.record_feedback; services/engine/
+// tradeFeedback.js). Read by the ML filter / adaptive optimizer of D11.
+const TRADE_FEEDBACK_DDL = `
+  CREATE TABLE IF NOT EXISTS trade_feedback (
+    id        INTEGER PRIMARY KEY AUTOINCREMENT,
+    user_id   INTEGER NOT NULL,
+    trade_id  TEXT    NOT NULL,
+    symbol    TEXT    NOT NULL,
+    strategy  TEXT    NOT NULL DEFAULT 'LEVELS',
+    direction TEXT    NOT NULL DEFAULT 'LONG',
+    entry     REAL    NOT NULL DEFAULT 0,
+    sl        REAL    NOT NULL DEFAULT 0,
+    tp1       REAL    NOT NULL DEFAULT 0,
+    result    TEXT    NOT NULL DEFAULT '',
+    pnl_pct   REAL    DEFAULT 0,
+    regime    TEXT    DEFAULT '',
+    features  TEXT    DEFAULT '{}',
+    ts        REAL    DEFAULT 0,
+    UNIQUE(user_id, trade_id)
+  );
+  CREATE INDEX IF NOT EXISTS idx_feedback_user_strat ON trade_feedback(user_id, strategy);
+`;
+
 // ── legacy site tables retired by v12 (PLAN §2.1) — children first ────
 const LEGACY_TABLES = Object.freeze([
   'trade_fills',
@@ -478,6 +503,7 @@ module.exports = {
   PLAN_CHANGES_DDL,
   GENOME_DDL,
   PUBLIC_TRACK_DDL,
+  TRADE_FEEDBACK_DDL,
   LEGACY_TABLES,
   LEGACY_USER_COLUMNS,
 };
