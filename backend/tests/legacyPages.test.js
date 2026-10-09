@@ -55,27 +55,43 @@ const MATRIX = [
   [`/?verify_email=1&reset=${TOKEN}`, `/auth/#reset=${TOKEN}`], [`/?reset=${'a'.repeat(256)}`, `/auth/#reset=${'a'.repeat(256)}`],
   ['/?reset=abc123', '/auth/'], ['/?reset=', '/auth/'], [`/?reset=${TOKEN}%3E`, '/auth/'], [`/?reset=${TOKEN}?x=1`, '/auth/'],
   [`/?reset=${'a'.repeat(257)}`, '/auth/'], ['/?reset=a%20b', '/auth/'], [`/?reset=${TOKEN};x`, '/auth/'], ['/?login=1&reset=x', '/auth/'],
+  // the shapes an old link can come back in (a mail client, a link checker, a copy): the key in any
+  // case, its '=' percent-encoded, after an encoded '&' / '?', ';' or '?'; repeated leading slashes
+  [`/?RESET=${TOKEN}`, `/auth/#reset=${TOKEN}`], [`/?Reset%3D${TOKEN}`, `/auth/#reset=${TOKEN}`], [`/?reset%3d${TOKEN}`, `/auth/#reset=${TOKEN}`],
+  [`/?q=a%26reset=${TOKEN}`, `/auth/#reset=${TOKEN}`], [`/?q=a%3Freset%3D${TOKEN}`, `/auth/#reset=${TOKEN}`], [`/?a=b;reset=${TOKEN}`, `/auth/#reset=${TOKEN}`],
+  [`/?x=1?reset=${TOKEN}`, `/auth/#reset=${TOKEN}`], [`//?reset=${TOKEN}`, `/auth/#reset=${TOKEN}`], [`///index.html?reset=${TOKEN}`, `/auth/#reset=${TOKEN}`],
+  ['/?RESET=abc', '/auth/'], ['/?q=a%26reset=x', '/auth/'], [`/?reset%3D${TOKEN}%26x`, '/auth/'], ['/?Verify=x', '/auth/'],
+  // /?verify=<token> (never sent, but the same kind of secret) → /auth/#verify=<token>
+  [`/?verify=${TOKEN}`, `/auth/#verify=${TOKEN}`], [`/index.html?a=1&VERIFY%3D${TOKEN}`, `/auth/#verify=${TOKEN}`],
+  [`/?verify=${TOKEN}&reset=${TOKEN}`, `/auth/#reset=${TOKEN}`], ['/?verify=1', '/auth/'],
   // /?verify_email=1 → /auth/?verify_email=1
   ['/?verify_email=1', '/auth/?verify_email=1'], ['/index.html?a=b&verify_email=1', '/auth/?verify_email=1'],
   ['/?verify_email=1&login=1', '/auth/?verify_email=1'], ['/?login=1&verify_email=1&next=/x', '/auth/?verify_email=1'],
   // served as before
   ...['/', '/?data=empty', '/?login=0', '/?login=10', '/?xlogin=1', '/?login=1x', '/?login', '/about.html?login=1', '/pricing/?login=1',
     '/app/?login=1', '/app/', '/?login=', '/?LOGIN=1', '/?login%3D1', '/?foo=login=1', '/?q=a%26login=1', '/?login=1;x=2',
-    '/settings.html?login=1', '/?verify_email=0', '/?verify_email=10', '/?xverify_email=1', '/?xreset=abc', '/?RESET=abc',
-    `/about.html?reset=${TOKEN}`, `/pricing/?reset=${TOKEN}`, `/app/?reset=${TOKEN}`, '/auth/?verify_email=1', '/?q=a%26reset=x'].map((u) => [u, null]),
+    '/settings.html?login=1', '/?verify_email=0', '/?verify_email=10', '/?xverify_email=1', '/?xreset=abc', '/?resets=abc', '/?preset=abc',
+    '/?verifyx=1', `/about.html?reset=${TOKEN}`, `/pricing/?reset=${TOKEN}`, `/app/?reset=${TOKEN}`, '/auth/?verify_email=1'].map((u) => [u, null]),
+];
+// Unknown paths: Apache has no file for them and hands them to Passenger, whose SPA fallback answers
+// the landing — with the same redirects first (server.js only, so not in the .htaccess matrix).
+const SPA_MATRIX = [
+  [`/dashboard.html?reset=${TOKEN}`, `/auth/#reset=${TOKEN}`], [`/no/such/page?RESET%3D${TOKEN}`, `/auth/#reset=${TOKEN}`],
+  [`/x?verify=${TOKEN}`, `/auth/#verify=${TOKEN}`], ['/x?reset=abc', '/auth/'], ['/dashboard.html?verify_email=1', '/auth/?verify_email=1'],
+  ['/dashboard.html?login=1', '/app/'], ['/dashboard.html', null], ['/dashboard.html?paid=1', null], ['/no/such/page', null],
 ];
 
 // mod_rewrite as frontend/.htaccess configures it: per-directory context (the path without its
 // leading slash), %{QUERY_STRING} raw, each RewriteRule with the RewriteConds right above it (all
 // must match, %N = the last one's groups), rules in order, [L] ends. A substitution with "?" replaces
 // the query (a trailing "?" drops it), QSD drops it, otherwise it is appended; without NE a "#" is
-// escaped to %23.
+// escaped to %23. [NC] on a RewriteCond: case-insensitive.
 function htaccessRules() {
   const rules = [];
   let conds = [];
   for (const line of read('.htaccess').split('\n')) {
-    let m = /^RewriteCond %\{QUERY_STRING\} (\S+)$/.exec(line);
-    if (m) { conds.push(new RegExp(m[1])); continue; }
+    let m = /^RewriteCond %\{QUERY_STRING\} (\S+)(?: \[(NC)\])?$/.exec(line);
+    if (m) { conds.push(new RegExp(m[1], m[2] ? 'i' : '')); continue; }
     m = /^RewriteRule (\S+) (\S+) \[([^\]]+)\]$/.exec(line);
     if (m) { rules.push({ conds, path: new RegExp(m[1]), target: m[2], flags: m[3].split(',') }); conds = []; continue; }
     expect(line, 'a rewrite line this emulation does not know').not.toMatch(/^Rewrite(?!Engine On$)/);
@@ -85,7 +101,8 @@ function htaccessRules() {
 }
 function apacheRedirect(url) {
   const qs = url.includes('?') ? url.slice(url.indexOf('?') + 1) : '';
-  const p = new URL(url, 'https://chmup.top').pathname.slice(1);
+  // Apache merges repeated slashes (MergeSlashes On) before the per-directory rules see the path
+  const p = new URL(url.replace(/^\/+/, '/'), 'https://chmup.top').pathname.slice(1);
   for (const r of htaccessRules()) {
     let last = null;
     if (!r.conds.every((c) => (last = c.exec(qs)))) continue;
@@ -107,6 +124,19 @@ describe('the landing\'s old query URLs (reset links, e-mail check, sign-in) nev
     if (to === null) {
       expect(r.status === 302 && /^\/(app|auth)\//.test(r.headers.location || '')).toBe(false);
       expect([200, 301]).toContain(r.status);
+      return;
+    }
+    expect(r.status).toBe(302);
+    expect(r.headers.location).toBe(to);
+    expect(r.headers['cache-control']).toBe('no-store');
+    expect(r.headers['referrer-policy']).toBe('no-referrer');
+  });
+
+  it.each(SPA_MATRIX)('unknown path %s → %s (the SPA fallback)', async (url, to) => {
+    const r = await request(app).get(url).redirects(0);
+    if (to === null) {
+      expect(r.status).toBe(200);
+      expect(r.text).toBe(read('index.html'));
       return;
     }
     expect(r.status).toBe(302);
@@ -150,11 +180,12 @@ describe('the landing\'s old query URLs (reset links, e-mail check, sign-in) nev
       'PassengerAppType node',
       'PassengerStartupFile server.js',
     ]);
-    // guarded (no 500 without mod_rewrite), four rules, each an external 302 that ends rewriting
-    expect(text).toMatch(/<IfModule mod_rewrite\.c>\nRewriteEngine On\n(RewriteCond [^\n]+\nRewriteRule [^\n]+\n){4}<\/IfModule>/);
+    // guarded (no 500 without mod_rewrite), five rules, each an external 302 that ends rewriting
+    expect(text).toMatch(/<IfModule mod_rewrite\.c>\nRewriteEngine On\n(RewriteCond [^\n]+\nRewriteRule [^\n]+\n){5}<\/IfModule>/);
     const rules = htaccessRules();
     expect(rules.map((r) => [r.target, r.flags.slice().sort().join(',')])).toEqual([
       ['/auth/#reset=%1', 'L,NE,QSD,R=302'],
+      ['/auth/#verify=%1', 'L,NE,QSD,R=302'],
       ['/auth/?', 'L,R=302'],
       ['/auth/?verify_email=1', 'L,R=302'],
       ['/app/?', 'L,R=302'],

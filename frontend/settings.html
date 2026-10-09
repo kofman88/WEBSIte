@@ -369,7 +369,7 @@
 .co-body{text-align:center}
 </style>
 
-<script src="app.js?v=5"></script>
+<script src="app.js?v=6"></script>
 <script src="plan-gate.js"></script>
 <script src="shell.js?v=7" defer></script>
 <script src="help-tips.js" defer></script>
@@ -765,7 +765,7 @@ async function loadTg() {
         document.getElementById('tgLinkUrl').href = r.url;
         document.getElementById('tgLinkUrl').textContent = r.url;
         box.classList.remove('hidden');
-        window.open(r.url, '_blank');
+        window.open(r.url, '_blank', 'noopener,noreferrer');   // Telegram gets the code, not a handle on this tab
         // Poll for linked status every 3s
         const iv = setInterval(async () => {
           const st2 = await apiRequest('GET', '/telegram/status').catch(() => null);
@@ -1072,6 +1072,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
 
 </script>
-<script src="support-widget.js?v=5" defer></script>
+<script src="support-widget.js?v=6" defer></script>
 </body>
 </html>

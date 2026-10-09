@@ -388,7 +388,7 @@ for (const [mount, sub] of MOUNTS) {
 // and "Server got itself in trouble" (an HTML page when the client accepts text/html), the
 // traceback in the log ("Error handling request").
 router.use((err, req, res, _next) => {
-  logger.error(`Error handling request ${req.method} ${req.originalUrl}: ${(err && err.stack) || err}`);
+  logger.error(`Error handling request ${req.method} ${require('../utils/redact').redact(req.originalUrl)}: ${(err && err.stack) || err}`);
   if (res.headersSent) return res.end();
   res.removeHeader('Cache-Control');            // aiohttp's error page is not a _json() answer
   const title = '500 Internal Server Error';

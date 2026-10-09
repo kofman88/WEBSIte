@@ -28,6 +28,9 @@
  *                the account e-mail as the site sends it (authService → emailService → the outbox; for
  *                verify the address is first marked unconfirmed again): the link of its button is
  *                written to a file in --dir (mode 600; never printed), answered `mail-link ok <file>`
+ *   oauth-link <email> <returnTo>
+ *                what the Google callback answers for that account (oauthService.issueHandoff): the
+ *                /auth/#oauth=<one-time code> link, into a file the same way, `oauth-link ok <file>`
  */
 
 const fs = require('fs');
@@ -191,6 +194,17 @@ function mailLink(kind, email) {
   return file;
 }
 
+function oauthLink(email, returnTo) {
+  const db = require('../../models/database');
+  const user = db.prepare('SELECT id FROM users WHERE email = ?').get(email);
+  if (!user) throw new Error('no such user');
+  const code = require('../../services/oauthService').issueHandoff(user.id, returnTo);
+  mailN += 1;
+  const file = path.join(DIR, `oauth-${mailN}.txt`);
+  fs.writeFileSync(file, `http://127.0.0.1:${PORT}/auth/#oauth=${code}`, { mode: 0o600 });
+  return file;
+}
+
 (async () => {
   const S = await seed();
   require('../../routes/appData').configure({ rest });
@@ -213,6 +227,13 @@ function mailLink(kind, email) {
           process.stdout.write(`mail-link ok ${mailLink(kind, email)}\n`);
         } catch (e) {
           process.stdout.write(`mail-link failed ${e.message}\n`);
+        }
+      } else if (/^oauth-link \S+@\S+ \/\S*$/.test(cmd)) {
+        const [, email, returnTo] = cmd.split(' ');
+        try {
+          process.stdout.write(`oauth-link ok ${oauthLink(email, returnTo)}\n`);
+        } catch (e) {
+          process.stdout.write(`oauth-link failed ${e.message}\n`);
         }
       } else if (cmd) {
         process.stdout.write(`unknown ${cmd}\n`);

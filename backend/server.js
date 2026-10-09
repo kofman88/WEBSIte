@@ -118,10 +118,11 @@ app.use((req, res, next) => {
 });
 
 // Request logging (skip static/health). The token of an old e-mail confirmation link
-// (GET /api/auth/verify-email/<token>) never reaches the log.
+// (GET /api/auth/verify-email/<token>) never reaches the log (utils/redact.js).
+const { redact } = require('./utils/redact');
 app.use((req, _res, next) => {
   if (req.path.startsWith('/api/') && req.path !== '/api/health') {
-    (req.log || logger).debug('→ ' + req.method + ' ' + req.path.replace(/^(\/api\/auth\/verify-email\/)[^/]+/, '$1[redacted]'));
+    (req.log || logger).debug('→ ' + req.method + ' ' + redact(req.path));
   }
   next();
 });
@@ -272,31 +273,43 @@ app.get('/api/health/deep', (_req, res) => {
 // starts an account flow must never render it. These run before express.static; frontend/.htaccess
 // has the same rules for when Apache serves / (index.html) from public_html without asking Passenger
 // (tests/legacyPages.test.js checks both against one URL matrix). Matched on the raw query string,
-// like mod_rewrite's %{QUERY_STRING}; only / and /index.html.
+// like mod_rewrite's %{QUERY_STRING}, on / and /index.html (any number of leading slashes: Apache
+// merges them, express.static would serve the landing for //) and on the SPA fallback below, which
+// answers the landing for every other unknown path (Apache hands those to Passenger).
 //   /?reset=<token>   password reset e-mails sent before /auth/#reset=<token> → /auth/#reset=<token>:
 //                     the token moves into the fragment (never sent to a server again, never in a
 //                     Referer) of the page that completes the reset (frontend/auth/: no counter, takes
-//                     it out of the address bar first). Any other reset= value → /auth/ without it.
+//                     it out of the address bar first). /?verify=<token> likewise → /auth/#verify=.
+//                     The key matches in any case and with its '=' percent-encoded, after '&', '?',
+//                     ';' or an encoded '&' / '?' — the shapes a mail client, a link checker or a
+//                     user's copy can hand an old link back in. Any other reset= / verify= value →
+//                     /auth/ without it.
 //   /?verify_email=1  the old app.js redirect for a session whose e-mail is unconfirmed → /auth/
 //   /?login=1         the legacy pages without a session → the web app's sign-in /app/; the query
 //                     is dropped (the pages now send /app/?next=<their path> themselves)
-const RESET_TOKEN_QS = /(?:^|&)reset=([A-Za-z0-9_-]{16,256})(?:&|$)/;
+const QS_KEY_START = '(?:^|[&?;]|%26|%3F)';
+const TOKEN_QS = { reset: new RegExp(QS_KEY_START + 'reset(?:=|%3D)([A-Za-z0-9_-]{16,256})(?:&|$)', 'i'),
+  verify: new RegExp(QS_KEY_START + 'verify(?:=|%3D)([A-Za-z0-9_-]{16,256})(?:&|$)', 'i') };
+const ANY_TOKEN_KEY = new RegExp(QS_KEY_START + '(?:reset|verify)(?:=|%3D)', 'i');
 function landingRedirect(qs) {
-  const m = RESET_TOKEN_QS.exec(qs);
-  if (m) return '/auth/#reset=' + m[1];
-  if (/(?:^|&)reset=/.test(qs)) return '/auth/';
+  for (const key of ['reset', 'verify']) {
+    const m = TOKEN_QS[key].exec(qs);
+    if (m) return '/auth/#' + key + '=' + m[1];
+  }
+  if (ANY_TOKEN_KEY.test(qs)) return '/auth/';
   if (/(^|&)verify_email=1(&|$)/.test(qs)) return '/auth/?verify_email=1';
   if (/(^|&)login=1(&|$)/.test(qs)) return '/app/';
   return null;
 }
-app.get(['/', '/index.html'], (req, res, next) => {
+function landingRedirects(req, res, next) {
   const url = req.originalUrl;
   const to = url.includes('?') ? landingRedirect(url.slice(url.indexOf('?') + 1)) : null;
   if (!to) return next();
   res.setHeader('Cache-Control', 'no-store');
   res.setHeader('Referrer-Policy', 'no-referrer');
   res.redirect(302, to);
-});
+}
+app.get(/^\/+(?:index\.html)?$/, landingRedirects);
 
 // ── Static files (Passenger serves everything) ────────────────────────
 const publicPath = path.join(require('os').homedir(), 'public_html');
@@ -317,10 +330,13 @@ app.use(express.static(publicPath, {
 }));
 
 // SPA fallback — non-API routes serve index.html (also gets short cache)
-app.get('*', (req, res) => {
+app.get('*', (req, res, next) => {
   if (!req.path.startsWith('/api/')) {
-    res.setHeader('Cache-Control', 'public, max-age=300, must-revalidate');
-    res.sendFile(path.join(publicPath, 'index.html'));
+    // the landing again (Metrika + Session Replay): the old query URLs never render it here either
+    landingRedirects(req, res, () => {
+      res.setHeader('Cache-Control', 'public, max-age=300, must-revalidate');
+      res.sendFile(path.join(publicPath, 'index.html'), (err) => err && next(err));
+    });
   } else {
     res.status(404).json({ error: 'Route not found', code: 'NOT_FOUND' });
   }
@@ -345,12 +361,12 @@ app.use((err, req, res, _next) => {
     });
   }
   logger.error('unhandled server error', {
-    path: req.path,
+    path: redact(req.path),
     method: req.method,
-    err: err && err.message,
-    stack: err && err.stack,
+    err: err && redact(err.message),
+    stack: err && redact(err.stack),
   });
-  sentry.captureException(err, { path: req.path, method: req.method, userId: req.userId });
+  sentry.captureException(err, { path: redact(req.path), method: req.method, userId: req.userId });
   res.status(500).json({
     error: config.isProd ? 'Internal server error' : (err && err.message) || 'Internal server error',
     code: 'INTERNAL_ERROR',

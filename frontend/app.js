@@ -569,7 +569,8 @@ const Notifications = (function () {
           const id = +el.getAttribute('data-notif-id');
           const link = el.getAttribute('data-link');
           await API.markNotificationRead(id).catch(() => {});
-          if (link) location.href = link;
+          // only a path of this site (never //host, a backslash form or javascript:)
+          if (link && /^\/(?![/\\])[^\s\\]*$/.test(link)) location.href = link;
         });
       });
     } catch (err) {

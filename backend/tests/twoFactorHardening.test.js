@@ -97,7 +97,7 @@ describe('2FA attempt limiter: per sign-in subject and per IP', () => {
     expect(routes).toContain("router.post('/2fa/verify-login', twoFactorLimiter,");
     expect(routes).toContain("router.post('/2fa/confirm', authMiddleware, twoFactorLimiter,");
     const src = fs.readFileSync(path.join(process.cwd(), 'middleware', 'auth.js'), 'utf8');
-    expect(src).toContain('const twoFactorLimiter = TESTING ? noop : createTwoFactorLimiter();');
+    expect(src).toContain('const twoFactorLimiter = TESTING ? noop : createTwoFactorLimiter({ shared: true });');
     expect(src).not.toContain('String(tok).slice(0, 16)');
   });
 });

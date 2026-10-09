@@ -202,9 +202,14 @@ function upsertOAuthUser({
   let linked = false;
 
   if (!user && email) {
-    // Link by email if the address is already registered — avoid duplicates
-    user = db.prepare('SELECT * FROM users WHERE email = ?').get(email);
-    if (user) linked = true;
+    // Link by email if the address is already registered — avoid duplicates. Only an address the
+    // provider has verified: an unverified one proves nothing about who owns the existing account
+    // (linking on it would hand that account to whoever typed its address into their Google profile).
+    const existing = db.prepare('SELECT * FROM users WHERE email = ?').get(email);
+    if (existing && !emailVerified) {
+      throw Object.assign(new Error('This e-mail is registered; the provider has not verified it'), { statusCode: 409, code: 'OAUTH_EMAIL_UNVERIFIED' });
+    }
+    if (existing) { user = existing; linked = true; }
   }
 
   if (!user) {
@@ -283,6 +288,41 @@ function verifyState(state) {
   return sig === expected;
 }
 
+// ── Hand-off of an OAuth sign-in to the browser ─────────────────────────
+// The Google callback (routes/auth.js) answers a redirect to /auth/#oauth=<code>: a one-time,
+// 60-second code — never the session's tokens (they used to ride in the fragment of the return
+// page, by default /dashboard.html, i.e. the landing with Metrika + Session Replay). frontend/auth/
+// takes the code out of the address bar first and trades it by POST /api/auth/oauth/redeem; the
+// session is issued only then. Only the code's sha256 is stored (system_kv, like the Telegram link
+// codes), a DELETE … RETURNING claims it, so it works once. returnTo is one of the site's own pages.
+const OAUTH_HANDOFF_SEC = 60;
+const OAUTH_CODE_RE = /^[A-Za-z0-9_-]{43}$/;
+const RETURN_PATHS = ['/app/', '/settings.html', '/subscriptions.html', '/ops.html', '/admin.html'];
+const DEFAULT_RETURN = '/app/';
+/** A ?redirect= / stored return address if it is exactly one of the site's pages, else the web app. */
+function safeReturnTo(raw) {
+  return typeof raw === 'string' && RETURN_PATHS.includes(raw) ? raw : DEFAULT_RETURN;
+}
+const handoffKey = (code) => 'oauth_handoff:' + crypto.createHash('sha256').update(code).digest('hex');
+function issueHandoff(userId, returnTo, nowMs = Date.now()) {
+  db.prepare("DELETE FROM system_kv WHERE key LIKE 'oauth_handoff:%' AND CAST(json_extract(value, '$.exp') AS INTEGER) < ?").run(nowMs);
+  const code = crypto.randomBytes(32).toString('base64url');
+  db.prepare('INSERT INTO system_kv (key, value, updated_at) VALUES (?, ?, CURRENT_TIMESTAMP)')
+    .run(handoffKey(code), JSON.stringify({ userId, returnTo: safeReturnTo(returnTo), exp: nowMs + OAUTH_HANDOFF_SEC * 1000 }));
+  return code;
+}
+/** { userId, returnTo } for a live code, once; throws 400 INVALID_HANDOFF otherwise. */
+function redeemHandoff(code, nowMs = Date.now()) {
+  const invalid = () => Object.assign(new Error('Invalid or expired sign-in code'), { statusCode: 400, code: 'INVALID_HANDOFF' });
+  if (typeof code !== 'string' || !OAUTH_CODE_RE.test(code)) throw invalid();
+  const row = db.prepare('DELETE FROM system_kv WHERE key = ? RETURNING value').get(handoffKey(code));
+  if (!row) throw invalid();
+  let v = null;
+  try { v = JSON.parse(row.value); } catch (_e) { v = null; }
+  if (!v || !Number.isInteger(v.userId) || !(Number(v.exp) > nowMs)) throw invalid();
+  return { userId: v.userId, returnTo: safeReturnTo(v.returnTo) };
+}
+
 module.exports = {
   providers,
   googleAuthUrl,
@@ -292,4 +332,9 @@ module.exports = {
   upsertOAuthUser,
   issueState,
   verifyState,
+  safeReturnTo,
+  issueHandoff,
+  redeemHandoff,
+  RETURN_PATHS,
+  OAUTH_HANDOFF_SEC,
 };

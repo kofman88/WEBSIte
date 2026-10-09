@@ -477,6 +477,23 @@ const MIGRATIONS = [
       }
     },
   },
+  {
+    version: 16,
+    name: 'rate_limit_store',
+    // rate_limit_hits: the counters of the 2FA code limiters (middleware/rateLimitStore.js), in the
+    // DB so every Passenger process shares one budget and a process restart (Passenger stops idle
+    // ones) does not reset it. key = limiter prefix + 'u:<user id>' / 'ip:<address>' — no secret.
+    up(db) {
+      db.exec(`
+        CREATE TABLE IF NOT EXISTS rate_limit_hits (
+          key      TEXT PRIMARY KEY,
+          hits     INTEGER NOT NULL,
+          reset_at INTEGER NOT NULL
+        );
+        CREATE INDEX IF NOT EXISTS idx_rate_limit_reset ON rate_limit_hits(reset_at);
+      `);
+    },
+  },
 ];
 
 function ensureTable(db) {

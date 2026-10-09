@@ -127,12 +127,19 @@ afterAll(() => {
 });
 
 // ── (a) fresh DB ──────────────────────────────────────────────────────
-describe('fresh DB → v15', () => {
-  it('is at version 15, re-running is a no-op', () => {
-    expect(migrations.currentVersion(db)).toBe(15);
-    expect(migrations.MIGRATIONS.map((m) => m.version)).toEqual([1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]);
-    expect(migrations.MIGRATIONS.slice(9).map((m) => m.name)).toEqual(['engine_core', 'genome', 'retire_bots', 'public_track', 'trade_feedback', 'auth_hardening']);
-    expect(migrations.run(db)).toEqual({ ran: 0, current: 15 });
+describe('fresh DB → v16', () => {
+  it('is at version 16, re-running is a no-op', () => {
+    expect(migrations.currentVersion(db)).toBe(16);
+    expect(migrations.MIGRATIONS.map((m) => m.version)).toEqual([1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16]);
+    expect(migrations.MIGRATIONS.slice(9).map((m) => m.name)).toEqual(['engine_core', 'genome', 'retire_bots', 'public_track', 'trade_feedback', 'auth_hardening', 'rate_limit_store']);
+    expect(migrations.run(db)).toEqual({ ran: 0, current: 16 });
+  });
+
+  it('v16 creates the shared rate-limit counters (re-run safe)', () => {
+    const cols = db.prepare("PRAGMA table_info('rate_limit_hits')").all().map((c) => [c.name, c.type, c.notnull, c.pk]);
+    expect(cols).toEqual([['key', 'TEXT', 0, 1], ['hits', 'INTEGER', 1, 0], ['reset_at', 'INTEGER', 1, 0]]);
+    expect(db.prepare("SELECT name FROM sqlite_master WHERE type = 'index' AND name = 'idx_rate_limit_reset'").get()).toBeTruthy();
+    expect(() => migrations.MIGRATIONS[15].up(db)).not.toThrow();
   });
 
   it('v14 creates the bot\'s trade_feedback table verbatim (UNIQUE(user_id, trade_id), idx_feedback_user_strat)', () => {
@@ -442,14 +449,14 @@ function buildLegacyDb(file) {
   return { legacy, ids: { alice, bob, carol, dave, eve, frank, grace } };
 }
 
-describe('legacy DB (per-bot product) → v15', () => {
+describe('legacy DB (per-bot product) → v16', () => {
   let legacy, ids, exportFile, exported;
 
   beforeAll(() => {
     process.env.LEGACY_BACKUP_DIR = LEGACY_BACKUPS;
     ({ legacy, ids } = buildLegacyDb(LEGACY_DB));
     const out = migrations.run(legacy);
-    expect(out).toEqual({ ran: 15, current: 15 });
+    expect(out).toEqual({ ran: 16, current: 16 });
     const files = fs.readdirSync(LEGACY_BACKUPS).filter((f) => /^legacy-.*\.json$/.test(f));
     expect(files).toHaveLength(1);
     exportFile = path.join(LEGACY_BACKUPS, files[0]);
@@ -459,8 +466,8 @@ describe('legacy DB (per-bot product) → v15', () => {
   afterAll(() => { try { legacy.close(); } catch (_e) {} });
 
   it('runs the whole chain (v9 still seeded the system bot on the legacy schema)', () => {
-    expect(migrations.currentVersion(legacy)).toBe(15);
-    expect(migrations.run(legacy)).toEqual({ ran: 0, current: 15 });
+    expect(migrations.currentVersion(legacy)).toBe(16);
+    expect(migrations.run(legacy)).toEqual({ ran: 0, current: 16 });
     expect(exported.tables.trading_bots.rows).toBe(3);   // b1, b2 + v9 "CHM Public Signals"
     expect(exported.tables.trading_bots.data.some((b) => b.is_system === 1 && b.name === 'CHM Public Signals')).toBe(true);
   });

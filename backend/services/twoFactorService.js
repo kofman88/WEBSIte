@@ -21,7 +21,9 @@
  * once (shoulder-surfed, phished, logged by a proxy) could be used again within ~90 s. Every accepted
  * code moves two_factor_secrets.last_used_step forward to its step (one conditional UPDATE, so two
  * concurrent requests cannot both win); a code of that step or an earlier one is refused. Confirming
- * the setup counts as a use too.
+ * the setup counts as a use too. A recovery code is single-use the same way: its hash leaves the
+ * stored list by a compare-and-swap UPDATE (the list as read must still be the stored one), so two
+ * Passenger processes verifying the same code at once cannot both accept it.
  */
 
 const crypto = require('crypto');
@@ -119,14 +121,26 @@ function verifyCode(userId, code) {
   const step = matchStep(clean, secret);
   if (step !== null) return claimStep(userId, step);   // a valid code of a step already used: replay
   // Fallback: try recovery code
-  const h = crypto.createHash('sha256').update(clean.toLowerCase()).digest('hex');
-  const codes = (row.recovery_codes_hash || '').split(',').filter(Boolean);
-  const idx = codes.indexOf(h);
-  if (idx >= 0) {
+  return consumeRecoveryCode(userId, crypto.createHash('sha256').update(clean.toLowerCase()).digest('hex'));
+}
+
+// Take one recovery code's hash out of the stored list, once. Compare-and-swap on the whole list:
+// the UPDATE only applies to the list this call read, so of two processes holding the same code
+// only one succeeds; a lost race on a different code is retried with the new list.
+function consumeRecoveryCode(userId, hash) {
+  for (let attempt = 0; attempt < 5; attempt += 1) {
+    const cur = db.prepare('SELECT recovery_codes_hash FROM two_factor_secrets WHERE user_id = ? AND enabled = 1').get(userId);
+    if (!cur || !cur.recovery_codes_hash) return false;
+    const codes = cur.recovery_codes_hash.split(',').filter(Boolean);
+    const idx = codes.indexOf(hash);
+    if (idx < 0) return false;
     codes.splice(idx, 1);
-    db.prepare('UPDATE two_factor_secrets SET recovery_codes_hash = ? WHERE user_id = ?').run(codes.join(','), userId);
-    logger.info('2FA recovery code used', { userId, remaining: codes.length });
-    return true;
+    const info = db.prepare('UPDATE two_factor_secrets SET recovery_codes_hash = ? WHERE user_id = ? AND recovery_codes_hash = ?')
+      .run(codes.join(','), userId, cur.recovery_codes_hash);
+    if (info.changes === 1) {
+      logger.info('2FA recovery code used', { userId, remaining: codes.length });
+      return true;
+    }
   }
   return false;
 }

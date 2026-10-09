@@ -9,37 +9,57 @@
  *   #reset=<token>    the password reset e-mail (services/emailService.js), also the target of the
  *                     server's redirect for the old /?reset=<token> links (server.js, .htaccess)
  *   #verify=<token>   the e-mail confirmation e-mail
+ *   #oauth=<code>     a sign-in with Google: the callback's one-time 60-second code (routes/auth.js),
+ *                     traded here for the session, which goes to the site's storage like any sign-in
  * and plain flags: ?verified=1|0&code=…  (GET /api/auth/verify-email/:token of older e-mails),
- * ?verify_email=1 (the legacy pages, frontend/app.js, for a session whose e-mail is not confirmed).
+ * ?verify_email=1 (the legacy pages, frontend/app.js, for a session whose e-mail is not confirmed),
+ * ?oauth_error=<code> (a Google sign-in that failed).
  * This script is the first thing on the page: it reads the address, takes it out of the address bar
  * (history.replaceState) and keeps the token only in this closure, before any other request leaves
- * the page. No analytics counter on this page, no third-party request at all (system fonts, inline
- * CSS, the favicon is local); Referrer-Policy no-referrer (meta below + the server's header).
+ * the page — also when a new link is pasted into this tab later (hashchange). No analytics counter
+ * on this page, no third-party request at all (system fonts, inline CSS, the favicon is local);
+ * Referrer-Policy no-referrer (meta below + the server's header).
  */
 (function () {
   'use strict';
-  var WANTED = { reset: 1, verify: 1, verified: 1, code: 1, verify_email: 1 };
-  var P = {};
-  function take(part) {
-    String(part || '').replace(/^[#?]/, '').split('&').forEach(function (kv) {
-      var i = kv.indexOf('=');
-      var k = i < 0 ? kv : kv.slice(0, i);
-      if (!Object.prototype.hasOwnProperty.call(WANTED, k) || Object.prototype.hasOwnProperty.call(P, k)) return;
-      var v = i < 0 ? '' : kv.slice(i + 1);
-      try { P[k] = decodeURIComponent(v.replace(/\+/g, ' ')); } catch (e) { P[k] = ''; }
+  var WANTED = { reset: 1, verify: 1, oauth: 1, verified: 1, code: 1, verify_email: 1, oauth_error: 1 };
+  var has = function (o, k) { return Object.prototype.hasOwnProperty.call(o, k); };
+  // the address's parameters (fragment first), the address bar cleaned at once
+  function takeAddress() {
+    var P = {};
+    [location.hash, location.search].forEach(function (part) {
+      String(part || '').replace(/^[#?]/, '').split('&').forEach(function (kv) {
+        var i = kv.indexOf('=');
+        var k = i < 0 ? kv : kv.slice(0, i);
+        if (!has(WANTED, k) || has(P, k)) return;
+        var v = i < 0 ? '' : kv.slice(i + 1);
+        try { P[k] = decodeURIComponent(v.replace(/\+/g, ' ')); } catch (e) { P[k] = ''; }
+      });
+    });
+    if (location.hash || location.search) {
+      try { history.replaceState(null, '', location.pathname); } catch (e) { /* the page still works */ }
+    }
+    return P;
+  }
+  var TOKEN_RE = /^[A-Za-z0-9_-]{16,256}$/;
+  var resetToken = null, verifyToken = null, oauthCode = null, flags = {};
+  function adopt(P) {
+    resetToken = has(P, 'reset') ? P.reset : null;
+    verifyToken = has(P, 'verify') ? P.verify : null;
+    oauthCode = has(P, 'oauth') ? P.oauth : null;
+    flags = { verified: P.verified, verify_email: P.verify_email, oauth_error: P.oauth_error };
+  }
+  adopt(takeAddress());
+  var main = null;
+  // a link pasted into this tab later only changes the fragment (no reload): take it the same way
+  if (typeof window !== 'undefined' && window.addEventListener) {
+    window.addEventListener('hashchange', function () {
+      var P = takeAddress();
+      if (!has(P, 'reset') && !has(P, 'verify') && !has(P, 'oauth')) return;
+      adopt(P);
+      if (main) route();
     });
   }
-  take(location.hash);
-  take(location.search);
-  if (location.hash || location.search) {
-    try { history.replaceState(null, '', location.pathname); } catch (e) { /* the page still works */ }
-  }
-
-  var TOKEN_RE = /^[A-Za-z0-9_-]{16,256}$/;
-  var resetToken = Object.prototype.hasOwnProperty.call(P, 'reset') ? P.reset : null;
-  var verifyToken = Object.prototype.hasOwnProperty.call(P, 'verify') ? P.verify : null;
-  var flags = { verified: P.verified, verify_email: P.verify_email };
-  P = null;
 
   // ── texts ────────────────────────────────────────────────────────────────
   var T = {
@@ -64,6 +84,10 @@
       needFor: 'Адрес аккаунта: {email}.',
       resend: 'Отправить письмо ещё раз', resent: 'Письмо отправлено на {email}. Ссылка действует 24 часа.', resentAny: 'Письмо отправлено. Ссылка действует 24 часа.',
       needSignIn: 'Войдите в аккаунт, чтобы отправить письмо ещё раз.',
+      oauthH: 'Входим…', oauthP: 'Секунду.', oauthBadH: 'Вход не выполнен', oauthBad: 'Не удалось войти через Google: ссылка входа устарела или уже использована. Попробуйте ещё раз.',
+      oauthUnverified: 'Этот e-mail уже зарегистрирован, а Google не подтвердил его. Войдите с паролем.',
+      oauthDisabled: 'Аккаунт заблокирован. Напишите в поддержку.',
+      tfaH: 'Код подтверждения', tfaP: 'Введите код из приложения-аутентификатора или резервный код.', tfaCode: 'Код', tfaGo: 'Подтвердить', eCode: 'Неверный код. Попробуйте ещё раз.',
       eEmail: 'Введите e-mail, например you@example.com.',
       eShort: 'Пароль: минимум 8 символов.', eLong: 'Пароль: максимум 128 символов.', eLetter: 'Пароль должен содержать букву.', eDigit: 'Пароль должен содержать цифру.',
       eMatch: 'Пароли не совпадают.',
@@ -92,6 +116,10 @@
       needFor: 'Account address: {email}.',
       resend: 'Send the e-mail again', resent: 'Sent to {email}. The link is valid for 24 hours.', resentAny: 'Sent. The link is valid for 24 hours.',
       needSignIn: 'Sign in to send the e-mail again.',
+      oauthH: 'Signing you in…', oauthP: 'One moment.', oauthBadH: 'Sign-in failed', oauthBad: 'Signing in with Google did not work: the sign-in link has expired or was already used. Please try again.',
+      oauthUnverified: 'This e-mail is already registered and Google has not verified it. Sign in with your password.',
+      oauthDisabled: 'This account is disabled. Please contact support.',
+      tfaH: 'Confirmation code', tfaP: 'Enter the code from your authenticator app or a recovery code.', tfaCode: 'Code', tfaGo: 'Confirm', eCode: 'Wrong code. Please try again.',
       eEmail: 'Enter an e-mail such as you@example.com.',
       eShort: 'Password: at least 8 characters.', eLong: 'Password: at most 128 characters.', eLetter: 'The password needs a letter.', eDigit: 'The password needs a digit.',
       eMatch: 'The passwords do not match.',
@@ -150,7 +178,6 @@
   }
 
   // ── tiny DOM helpers; every text node is re-rendered on a language switch ──
-  var main = null;
   function el(tag, attrs) {
     var n = document.createElement(tag);
     for (var k in attrs || {}) {
@@ -341,15 +368,58 @@
     return { id: 'verify-needed', node: c };
   }
 
-  function start() {
-    main = document.getElementById('main');
-    var lb = document.getElementById('lang');
-    lb.addEventListener('click', function () {
-      lang = lang === 'ru' ? 'en' : 'ru';
-      try { localStorage.setItem('chm_lang', lang); } catch (e) { /* not remembered */ }
-      paint(document);
+  // ── a sign-in with Google: the one-time code → the session (the site's storage, like a password
+  // sign-in on /app/) → the page the sign-in started from (one of the site's own pages only) ──
+  var RETURN_PATHS = ['/app/', '/settings.html', '/subscriptions.html', '/ops.html', '/admin.html'];
+  function signedIn(d) {
+    try {
+      ['chm_access', 'chm_refresh', 'chm_user'].forEach(function (k) { sessionStorage.removeItem(k); });
+      localStorage.setItem('chm_access', d.accessToken);
+      localStorage.setItem('chm_refresh', d.refreshToken);
+      if (d.user) localStorage.setItem('chm_user', JSON.stringify(d.user));
+    } catch (e) { /* storage blocked: the app asks for a sign-in */ }
+    location.replace(RETURN_PATHS.indexOf(d.returnTo) >= 0 ? d.returnTo : '/app/');
+  }
+  function oauthBadView(key) {
+    var c = card('oauth-bad', 'oauthBadH', { key: key || 'oauthBad' });
+    c.appendChild(links(btnLink('/app/', 'signIn', true)));
+    return { id: 'oauth-bad', node: c };
+  }
+  function tfaView(pending, returnTo) {
+    var c = card('tfa', 'tfaH', { key: 'tfaP' });
+    var input = el('input', { class: 'inp', type: 'text', name: 'code', inputmode: 'numeric', autocomplete: 'one-time-code', maxlength: '16', 'data-autofocus': '1', id: 'tfa-code' });
+    var m = msg('err');
+    var btn = el('button', { class: 'btn btn-red btn-block', type: 'submit', text: 'tfaGo' });
+    var form = el('form', { class: 'form', novalidate: 'novalidate', id: 'tfa-form' }, field('tfaCode', input), m, btn);
+    form.addEventListener('submit', function (ev) {
+      ev.preventDefault();
+      var code = String(input.value || '').trim();
+      if (code.length < 6) { setMsg(m, 'eCode'); input.focus(); return; }
+      setMsg(m, ''); busy(btn, true);
+      api('2fa/verify-login', { pendingToken: pending, code: code }).then(function (d) {
+        pending = null;
+        signedIn({ accessToken: d.accessToken, refreshToken: d.refreshToken, user: d.user, returnTo: returnTo });
+      }).catch(function (e) {
+        busy(btn, false);
+        if (e.status === 401) { pending = null; show(oauthBadView()); return; }
+        setMsg(m, e.code === 'INVALID_2FA' || e.status === 400 ? 'eCode' : errKey(e));
+      });
     });
-    paint(document);
+    c.appendChild(form);
+    return { id: 'tfa', node: c };
+  }
+  function oauthView(code) {
+    var c = card('oauth', 'oauthH', { key: 'oauthP' });
+    c.appendChild(el('div', { class: 'spin', 'aria-hidden': 'true' }));
+    api('oauth/redeem', { code: code }).then(function (d) {
+      if (d && d.twoFactorRequired && d.pendingToken) { show(tfaView(d.pendingToken, d.returnTo)); return; }
+      if (!d || !d.accessToken) throw new Error('no session');
+      signedIn(d);
+    }).catch(function (e) { show(oauthBadView(e && e.code === 'ACCOUNT_DISABLED' ? 'oauthDisabled' : 'oauthBad')); });
+    return { id: 'oauth', node: c };
+  }
+
+  function route() {
     if (resetToken !== null) {
       show(TOKEN_RE.test(resetToken) ? resetView() : badResetView('badReset'));
       if (!TOKEN_RE.test(resetToken)) resetToken = null;
@@ -361,6 +431,12 @@
       api('verify-email/confirm', { token: tok }).then(function (d) {
         show(verifiedView(Boolean(d && d.alreadyVerified)));
       }).catch(function () { show(verifyBadView()); });
+    } else if (oauthCode !== null) {
+      var oc = oauthCode;
+      oauthCode = null;
+      show(TOKEN_RE.test(oc) ? oauthView(oc) : oauthBadView());
+    } else if (flags.oauth_error) {
+      show(oauthBadView(flags.oauth_error === 'OAUTH_EMAIL_UNVERIFIED' ? 'oauthUnverified' : flags.oauth_error === 'ACCOUNT_DISABLED' ? 'oauthDisabled' : 'oauthBad'));
     } else if (flags.verified === '1') {
       show(verifiedView(false));
     } else if (flags.verified === '0') {
@@ -370,6 +446,18 @@
     } else {
       show(forgotView(''));
     }
+  }
+
+  function start() {
+    main = document.getElementById('main');
+    var lb = document.getElementById('lang');
+    lb.addEventListener('click', function () {
+      lang = lang === 'ru' ? 'en' : 'ru';
+      try { localStorage.setItem('chm_lang', lang); } catch (e) { /* not remembered */ }
+      paint(document);
+    });
+    paint(document);
+    route();
   }
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', start);
   else start();

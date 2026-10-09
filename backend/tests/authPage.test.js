@@ -162,6 +162,47 @@ describe('account e-mails link to /auth/ with the token in the fragment', () => 
   });
 });
 
+// ── expired / reused links: the codes the page turns into its views ─────────────
+describe('expired and reused account links', () => {
+  async function resetToken(email) {
+    authService.requestPasswordReset({ email });
+    const html = db.prepare('SELECT html FROM email_outbox WHERE to_addr = ? ORDER BY id DESC LIMIT 1').get(email).html;
+    return /#reset=([A-Za-z0-9_-]+)/.exec(html)[1];
+  }
+  const confirm = (token) => request(app).post('/api/auth/password-reset/confirm').send({ token, newPassword: 'Newpass123' });
+
+  it('reset: used → RESET_TOKEN_USED, expired → RESET_TOKEN_EXPIRED, superseded by a newer request → RESET_TOKEN_USED, made up → INVALID_RESET_TOKEN', async () => {
+    await authService.register({ email: 'links@x.com', password: 'Abcdef123' });
+    const t1 = await resetToken('links@x.com');
+    expect((await confirm(t1)).status).toBe(200);
+    expect((await confirm(t1)).body.code).toBe('RESET_TOKEN_USED');
+    const t2 = await resetToken('links@x.com');
+    db.prepare("UPDATE password_resets SET expires_at = ? WHERE token_hash = ?").run(new Date(Date.now() - 1000).toISOString(), emailService.hashToken(t2));
+    expect((await confirm(t2)).body.code).toBe('RESET_TOKEN_EXPIRED');
+    const t3 = await resetToken('links@x.com');
+    await resetToken('links@x.com');
+    expect((await confirm(t3)).body.code).toBe('RESET_TOKEN_USED');
+    expect((await confirm(TOKEN)).body.code).toBe('INVALID_RESET_TOKEN');
+    // the page: used / unknown → «link does not work», expired → «expired», both with the request form
+    expect(PAGE).toContain("if (e.code === 'INVALID_RESET_TOKEN' || e.code === 'RESET_TOKEN_USED') { resetToken = null; show(badResetView('badReset')); return; }");
+    expect(PAGE).toContain("if (e.code === 'RESET_TOKEN_EXPIRED') { resetToken = null; show(badResetView('expReset')); return; }");
+  });
+
+  it('confirmation: expired → VERIFY_TOKEN_EXPIRED (POST) and /auth/?verified=0 (old GET link); reused → alreadyVerified, never an error page', async () => {
+    const reg = await authService.register({ email: 'vlinks@x.com', password: 'Abcdef123' });
+    await new Promise((r) => setTimeout(r, 20));
+    const token = /#verify=([A-Za-z0-9_-]+)/.exec(db.prepare('SELECT html FROM email_outbox WHERE to_addr = ? ORDER BY id DESC LIMIT 1').get('vlinks@x.com').html)[1];
+    db.prepare('UPDATE email_verifications SET expires_at = ? WHERE user_id = ?').run(new Date(Date.now() - 1000).toISOString(), reg.user.id);
+    const exp = await request(app).post('/api/auth/verify-email/confirm').send({ token });
+    expect([exp.status, exp.body.code]).toEqual([400, 'VERIFY_TOKEN_EXPIRED']);
+    const old = await request(app).get('/api/auth/verify-email/' + token).redirects(0);
+    expect(old.headers.location).toBe('/auth/?verified=0&code=VERIFY_TOKEN_EXPIRED');
+    db.prepare('UPDATE email_verifications SET expires_at = ? WHERE user_id = ?').run(new Date(Date.now() + 3600_000).toISOString(), reg.user.id);
+    expect((await request(app).post('/api/auth/verify-email/confirm').send({ token })).body).toMatchObject({ verified: true });
+    expect((await request(app).post('/api/auth/verify-email/confirm').send({ token })).body).toEqual({ alreadyVerified: true });
+  });
+});
+
 // ── the page ───────────────────────────────────────────────────────────────
 describe('frontend/auth/: no counter, no Referer, the token out of the address bar first', () => {
   it('served with Referrer-Policy no-referrer and no-store (and the same headers from .htaccess for Apache)', async () => {
@@ -199,24 +240,28 @@ describe('frontend/auth/: no counter, no Referer, the token out of the address b
   function runHead({ hash = '', search = '' } = {}) {
     const script = PAGE.slice(PAGE.indexOf('<script>') + 8, PAGE.indexOf('</script>'));
     const calls = [];
+    const winListeners = {};
     const loc = { hash, search, pathname: '/auth/' };
     const store = () => ({ getItem: () => null, setItem: (k) => calls.push(['setItem', k]), removeItem: () => {} });
     const ctx = {
       location: loc,
       history: { replaceState: (_s, _t, url) => { calls.push(['replaceState', url]); loc.hash = ''; loc.search = ''; } },
       document: { readyState: 'loading', addEventListener: (ev) => calls.push(['listen', ev]) },
+      window: { addEventListener: (ev, fn) => { winListeners[ev] = fn; } },
       navigator: { language: 'ru-RU', languages: ['ru-RU'] },
       localStorage: store(), sessionStorage: store(),
       fetch: (u) => { calls.push(['fetch', u]); return new Promise(() => {}); },
       JSON, Object, String, Array, Error, Promise,
     };
     vm.runInNewContext(script, ctx);
-    return { calls, loc, ctx };
+    return { calls, loc, ctx, winListeners };
   }
 
   it.each([
     [{ hash: `#reset=${TOKEN}` }],
     [{ hash: `#verify=${TOKEN}` }],
+    [{ hash: `#oauth=${TOKEN}` }],
+    [{ search: '?oauth_error=bad_state' }],
     [{ search: `?reset=${TOKEN}` }],
     [{ search: '?verified=1' }],
     [{ search: '?verify_email=1&x=2', hash: '#y' }],
@@ -233,6 +278,21 @@ describe('frontend/auth/: no counter, no Referer, the token out of the address b
     expect(calls.filter((c) => c[0] === 'replaceState')).toEqual([]);
   });
 
+  it('a link pasted into the open tab (only the fragment changes, no reload) is taken out of the bar the same way', () => {
+    const { calls, loc, ctx, winListeners } = runHead();
+    expect(typeof winListeners.hashchange).toBe('function');
+    for (const h of [`#reset=${TOKEN}`, `#verify=${TOKEN}`, `#oauth=${TOKEN}`]) {
+      calls.length = 0;
+      loc.hash = h;
+      winListeners.hashchange();
+      expect(calls[0]).toEqual(['replaceState', '/auth/']);
+      expect(loc.hash).toBe('');
+      // before DOMContentLoaded nothing is sent; the token waits in the closure only
+      expect(calls.filter((c) => c[0] === 'fetch' || c[0] === 'setItem')).toEqual([]);
+      expect(JSON.stringify(Object.keys(ctx))).not.toContain(TOKEN);
+    }
+  });
+
   it('ru / en: the same set of texts in both languages; the API calls it makes are the auth routes', () => {
     const keys = (lang) => {
       const m = new RegExp(`\\n {4}${lang}: \\{\\n([\\s\\S]*?)\\n {4}\\}`).exec(PAGE);
@@ -242,7 +302,7 @@ describe('frontend/auth/: no counter, no Referer, the token out of the address b
     expect(keys('ru').length).toBeGreaterThan(40);
     expect(keys('en')).toEqual(keys('ru'));
     const calls = [...PAGE.matchAll(/api\('([^']+)'/g)].map((m) => m[1]).sort();
-    expect(calls).toEqual(['password-reset/confirm', 'password-reset/request', 'verify-email/confirm', 'verify-email/request']);
+    expect(calls).toEqual(['2fa/verify-login', 'oauth/redeem', 'password-reset/confirm', 'password-reset/request', 'verify-email/confirm', 'verify-email/request']);
     const routes = fs.readFileSync(path.join(BACKEND, 'routes', 'auth.js'), 'utf8');
     for (const c of calls) expect(routes).toContain(`router.post('/${c}'`);
   });

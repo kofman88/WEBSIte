@@ -148,8 +148,17 @@ enable it later:
 
 | Symptom | Fix |
 |---|---|
-| `?oauth_error=bad_state` after Google click | Cookie was dropped — make sure `NODE_ENV=production` set `secure:true` only under HTTPS |
-| `?oauth_error=disabled&provider=google` | `GOOGLE_OAUTH_CLIENT_ID` not set or empty — verify `.env` and that Passenger restarted |
+| `/auth/?oauth_error=bad_state` after Google click | Cookie was dropped — make sure `NODE_ENV=production` set `secure:true` only under HTTPS |
+| `/auth/?oauth_error=disabled` | `GOOGLE_OAUTH_CLIENT_ID` not set or empty — verify `.env` and that Passenger restarted |
+| `/auth/?oauth_error=OAUTH_EMAIL_UNVERIFIED` | Google says the e-mail is not verified and an account with it exists: it is never linked on an unverified address |
+| "Вход не выполнен" on `/auth/` after the callback | The one-time code (`/auth/#oauth=…`) lives 60 s and works once; the session is issued only when `/auth/` trades it |
+
+How a Google sign-in ends: the callback never puts the session's tokens into a URL. It answers
+302 → `/auth/#oauth=<one-time code>` (no analytics counter on that page, the code is taken out of the
+address bar first), the page trades it by `POST /api/auth/oauth/redeem` — the session, or the 2FA
+step for an account with 2FA on — and returns to the `?redirect=` page of `/oauth/google/start`,
+which is one of `/app/`, `/settings.html`, `/subscriptions.html`, `/ops.html`, `/admin.html` (anything
+else → `/app/`).
 | "redirect_uri_mismatch" from Google | The URL in step 1.3 must match EXACTLY what the backend uses — including scheme and trailing path |
 | Telegram popup says "please set a domain" | Step 2 BotFather domain not set |
 | Tests using `GOOGLE_OAUTH_CLIENT_ID` env — remove from CI | Not needed — tests mock the providers() return |

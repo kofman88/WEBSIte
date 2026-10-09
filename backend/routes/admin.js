@@ -199,7 +199,9 @@ router.post('/users/:id/notify', requireCapability('user.notify'), (req, res, ne
       type: z.enum(['security', 'payment', 'trade', 'referral', 'support', 'system']).default('system'),
       title: z.string().min(1).max(200),
       body: z.string().min(1).max(5000),
-      link: z.string().max(500).optional(),
+      // a path of this site only: the bell (frontend/app.js) and the push click (sw.js) navigate to it,
+      // so an absolute URL, //host, a backslash form or javascript: would be an open redirect / script
+      link: z.string().max(500).regex(/^\/(?![/\\])[^\s\\]*$/, 'link must be a path of this site').optional(),
     }).parse(req.body);
     const notifier = require('../services/notifier');
     notifier.dispatch(id, body);

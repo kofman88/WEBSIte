@@ -15,7 +15,7 @@
 
 Деплой:
 - `backend/server.js` отдаёт `.css`/`.js` с `Cache-Control: immutable` на 30 дней, поэтому файлы подключены как
-  `landing.css?v=5`, `landing.js?v=5`, `data/mock-api.js?v=5` (и `/support-widget.js?v=5` из `landing.js`). При любом
+  `landing.css?v=6`, `landing.js?v=6`, `data/mock-api.js?v=6` (и `/support-widget.js?v=6` из `landing.js`). При любом
   изменении поднять `v` во всех местах (`../index.html`, `../pricing/index.html`, строки `mock-api.js` и
   `support-widget.js` в `landing.js`); `backend/tests/public/landing.test.js` проверяет, что версия везде одна.
 - Тарифы лежат в папке: `/pricing` → `express.static` отвечает 301 на `/pricing/` и отдаёт `pricing/index.html`

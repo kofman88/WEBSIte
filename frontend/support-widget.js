@@ -4,11 +4,16 @@
  * Self-contained: injects its own CSS and markup, no dependencies.
  * Works on every page that includes this script; no need to touch HTML.
  *
- *   <script src="support-widget.js?v=4" defer></script>
+ *   <script src="support-widget.js?v=6" defer></script>
  *
  * server.js serves .js with `immutable` for 30 days: on any change raise the ?v= in every page
  * that loads this file (the legacy pages, with app.js / ops.js — one version, pinned by
  * tests/csp.test.js — and landing.js with the landing's version, tests/public/landing.test.js).
+ *
+ * Metrika: the public pages run Yandex Metrika with Session Replay (Webvisor), which records the
+ * page's text and what is typed. A support thread is the user's own conversation (they paste order
+ * ids, e-mails, sometimes keys), so the panel carries ym-hide-content (Webvisor shows it masked) and
+ * every field ym-disable-keys (its keystrokes / value are not recorded).
  *
  * Identity: if window.Auth and Auth.isLoggedIn() returns true, the widget
  * posts to the authenticated /api/support/tickets endpoints and shows the
@@ -291,7 +296,7 @@
       SVG.chat +
       '<span class="chm-sup-badge" id="chmSupBadge">0</span>' +
     '</button>' +
-    '<div class="chm-sup-panel" id="chmSupPanel" role="dialog" aria-label="Поддержка CHM Finance">' +
+    '<div class="chm-sup-panel ym-hide-content" id="chmSupPanel" role="dialog" aria-label="Поддержка CHM Finance">' +
       '<div class="chm-sup-hdr">' +
         '<h3>Привет 👋</h3>' +
         '<p>Обычно отвечаем в течение 2–4 часов</p>' +
@@ -464,7 +469,7 @@
           '<div class="chm-sup-compose">' +
             '<div id="chmSupAttachPreview" style="display:flex;gap:4px;margin-bottom:6px;flex-wrap:wrap"></div>' +
             '<div class="chm-sup-compose-row">' +
-              '<textarea id="chmSupInput" placeholder="Ответить…" rows="2"></textarea>' +
+              '<textarea id="chmSupInput" class="ym-disable-keys" placeholder="Ответить…" rows="2"></textarea>' +
               '<button class="chm-sup-send" id="chmSupSend" aria-label="Отправить">' + SVG.send + '</button>' +
             '</div>' +
             '<div style="display:flex;justify-content:space-between;margin-top:4px;font-size:10px;color:rgba(255,255,255,.45)">' +
@@ -518,7 +523,7 @@
       '<div class="chm-sup-empty">Опишите вопрос — мы ответим в этом окне</div>' +
       '<div class="chm-sup-compose">' +
         '<div class="chm-sup-compose-row">' +
-          '<textarea id="chmSupInput" placeholder="Ваше сообщение…" rows="3"></textarea>' +
+          '<textarea id="chmSupInput" class="ym-disable-keys" placeholder="Ваше сообщение…" rows="3"></textarea>' +
           '<button class="chm-sup-send" id="chmSupSend" aria-label="Отправить">' + SVG.send + '</button>' +
         '</div>' +
         '<div class="chm-sup-hint">Первое сообщение создаст тикет. Ответы придут сюда и на email.</div>' +
@@ -538,9 +543,9 @@
     body.innerHTML =
       '<div class="chm-sup-empty">Залогиньтесь, чтобы получить ответ в этом окне,<br/>или оставьте email — ответим туда</div>' +
       '<div class="chm-sup-compose">' +
-        '<input type="email" id="chmSupGuestEmail" placeholder="your@email.com" autocomplete="email"/>' +
+        '<input type="email" id="chmSupGuestEmail" class="ym-disable-keys" placeholder="your@email.com" autocomplete="email"/>' +
         '<div class="chm-sup-compose-row">' +
-          '<textarea id="chmSupInput" placeholder="Ваше сообщение…" rows="3"></textarea>' +
+          '<textarea id="chmSupInput" class="ym-disable-keys" placeholder="Ваше сообщение…" rows="3"></textarea>' +
           '<button class="chm-sup-send" id="chmSupSend" aria-label="Отправить">' + SVG.send + '</button>' +
         '</div>' +
         '<div class="chm-sup-hint">Мы не пришлём спам. Ответ на email в течение 4–24 часов.</div>' +

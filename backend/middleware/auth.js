@@ -189,6 +189,9 @@ const passwordResetLimiter = TESTING ? noop : rateLimit({
 // (The key used to be IP + the first 16 characters of the pending JWT — its constant header — so
 // everyone behind an IP shared 10 attempts and nothing tied the budget to the sign-in.) The key
 // never holds the token itself, only the user id it verifies to.
+// In production both count in the DB (middleware/rateLimitStore.js): Passenger runs several
+// processes and stops idle ones, so in-memory counters would multiply the budget by the process
+// count and reset on every restart.
 function twoFactorSubjectKey(req) {
   if (req.userId) return 'u:' + req.userId;
   const tok = req.body && req.body.pendingToken;
@@ -197,19 +200,20 @@ function twoFactorSubjectKey(req) {
   }
   return 'bad:' + req.ip;
 }
-function createTwoFactorLimiter({ windowMs = 15 * 60 * 1000, perSubject = 10, perIp = 50 } = {}) {
+function createTwoFactorLimiter({ windowMs = 15 * 60 * 1000, perSubject = 10, perIp = 50, shared = false, prefix = '2fa:' } = {}) {
   const common = {
     windowMs,
     message: { error: 'Too many 2FA attempts. Try again in 15 minutes.', code: 'RATE_LIMITED' },
     standardHeaders: true,
     legacyHeaders: false,
   };
+  const store = (name) => (shared ? { store: new (require('./rateLimitStore').SqliteRateLimitStore)({ prefix: prefix + name + ':' }) } : {});
   return [
-    rateLimit({ ...common, max: perIp, keyGenerator: (req) => 'ip:' + req.ip }),
-    rateLimit({ ...common, max: perSubject, keyGenerator: twoFactorSubjectKey }),
+    rateLimit({ ...common, ...store('ip'), max: perIp, keyGenerator: (req) => 'ip:' + req.ip }),
+    rateLimit({ ...common, ...store('subject'), max: perSubject, keyGenerator: twoFactorSubjectKey }),
   ];
 }
-const twoFactorLimiter = TESTING ? noop : createTwoFactorLimiter();
+const twoFactorLimiter = TESTING ? noop : createTwoFactorLimiter({ shared: true });
 
 // POST /auth/impersonation/redeem — a code is 256 random bits and lives 60 s; this only stops floods.
 const impersonationRedeemLimiter = TESTING ? noop : rateLimit({

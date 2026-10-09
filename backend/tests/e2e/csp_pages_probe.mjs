@@ -72,6 +72,7 @@ function freePort() {
 }
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 let mailLink = null;   // set in main(): the link of a fresh account e-mail (serve-app.js mail-link)
+let oauthLink = null;  // set in main(): the /auth/#oauth=<code> link a Google sign-in ends on (serve-app.js oauth-link)
 let loginApi = null;   // set in main(): POST /api/auth/login
 // a session whose access token has expired (signed with serve-app.js's scratch JWT secret) next to a
 // fresh refresh token, put into the page's localStorage before it loads
@@ -472,7 +473,7 @@ async function appNextHostile(page) {
 // The page with a one-time token: no counter, no request to any other host, no Referer, the address
 // bar clean, the token in no request URL (but the old link's own first request), the landing never
 // loaded on the way.
-const sanitize = (s) => String(s).replace(/((?:reset|verify)=|verify-email\/)[A-Za-z0-9_-]{16,}/g, '$1<token>');
+const sanitize = (s) => String(s).replace(/((?:reset|verify|oauth)(?:=|%3D)|verify-email\/)[A-Za-z0-9_-]{16,}/gi, '$1<token>');
 async function authClean(page, ctx) {
   const fails = [];
   const st = await page.evaluate(() => ({
@@ -573,6 +574,64 @@ async function authVerifyResend(page, ctx) {
   await page.click('#resend-btn');
   await page.waitForFunction(() => { const m = document.querySelector('#main .msg'); return m && !m.hidden && /Письмо отправлено/.test(m.textContent); }, null, { timeout: 6000 })
     .catch(() => fails.push('resend: no confirmation shown'));
+  return fails;
+}
+
+// an old link in another shape (key case, an encoded '=', the SPA fallback): straight to /auth/ too
+async function authResetVariant(page, ctx) {
+  const fails = [...await authClean(page, ctx)];
+  await waitView(page, 'reset', fails);
+  const first = ctx.requests[0] ? new URL(ctx.requests[0]) : null;
+  if (!first || !first.search.toLowerCase().includes('reset')) fails.push(`first request not the old link: ${sanitize(ctx.requests[0])}`);
+  return fails;
+}
+// a reset link pasted into an open /auth/ tab: only the fragment changes (no reload) — the page takes it
+// all the same, the address bar is cleaned, nothing leaves with the token
+async function authPaste(page, ctx) {
+  const fails = [];
+  await waitView(page, 'forgot', fails);
+  const link = await mailLink(ctx, 'reset', RESET_EMAIL);
+  await page.evaluate((h) => { location.hash = h; }, new URL(link, ctx.base).hash);
+  await waitView(page, 'reset', fails);
+  fails.push(...await authClean(page, ctx));
+  return fails;
+}
+// a Google sign-in ends on /auth/#oauth=<one-time code>: traded by POST for the session, which lands in
+// the site's storage; then the page the sign-in started from. The code never reaches a request URL
+// or a page with a counter, and it works once.
+async function authOauth(page, ctx) {
+  const fails = [];
+  await page.waitForURL((u) => u.pathname === '/settings.html', { timeout: 10000 }).catch(() => fails.push(`not on /settings.html after the sign-in (${sanitize(page.url())})`));
+  await page.waitForSelector('.stab[data-stab="security"]', { state: 'visible', timeout: 10000 }).catch(() => fails.push('settings not rendered'));
+  const me = await page.evaluate(async () => {
+    const t = localStorage.getItem('chm_access');
+    const r = t ? await fetch('/api/auth/me', { headers: { Authorization: 'Bearer ' + t } }).then((x) => x.json()).catch(() => null) : null;
+    return r && r.user && r.user.email;
+  });
+  if (me !== USER_EMAIL) fails.push(`the session is ${me}, not ${USER_EMAIL}`);
+  const leaked = ctx.requests.filter((u) => u.includes(ctx.token));
+  if (leaked.length) fails.push(`the code in request URLs: ${leaked.map(sanitize).join(', ')}`);
+  if (ctx.navigations.some((u) => u.includes(ctx.token))) fails.push('the code in a navigation');
+  if (!ctx.navigations.some((u) => u === '/auth/')) fails.push(`/auth/ not cleaned before leaving (${ctx.navigations.join(' → ')})`);
+  const again = await fetch(ctx.base + '/api/auth/oauth/redeem', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ code: ctx.token }) });
+  if (again.status !== 400) fails.push(`the code worked twice (${again.status})`);
+  return fails;
+}
+// the public pages run Session Replay: the support thread and its fields are masked from it
+async function supportMasked(page) {
+  await page.waitForSelector('#chmSupPanel', { state: 'attached', timeout: 5000 }).catch(() => {});
+  await page.evaluate(() => document.getElementById('chmSupBtn')?.click());
+  await page.evaluate(() => document.querySelector('.chm-sup-tab[data-tab="chat"]')?.click());
+  await page.waitForSelector('#chmSupInput', { timeout: 5000 }).catch(() => {});
+  const r = await page.evaluate(() => {
+    const p = document.getElementById('chmSupPanel');
+    return { panel: !!p && p.classList.contains('ym-hide-content'),
+      fields: [...(p ? p.querySelectorAll('textarea, input:not([type=file])') : [])].map((f) => `${f.id}:${f.classList.contains('ym-disable-keys')}`) };
+  });
+  await page.evaluate(() => document.getElementById('chmSupClose')?.click());
+  const fails = [];
+  if (!r.panel) fails.push('support panel without ym-hide-content');
+  if (!r.fields.length || r.fields.some((f) => f.endsWith(':false'))) fails.push(`support fields not masked: ${r.fields.join(', ')}`);
   return fails;
 }
 
@@ -821,13 +880,18 @@ const SCENARIOS = [
   { name: 'auth-forgot', path: '/auth/', checks: [authForgot], narrow: true },
   { name: 'auth-reset', label: '/auth/#reset=<token> (e-mail)', path: (c) => mailLink(c, 'reset', RESET_EMAIL), checks: [authReset], narrow: true },
   { name: 'auth-reset-old', label: '/?reset=<token> (old e-mail)', path: async (c) => { await mailLink(c, 'reset', RESET_EMAIL); c.firstRequestMayCarryToken = true; return '/?reset=' + c.token; }, checks: [authResetLegacy] },
+  { name: 'auth-reset-case', label: '/?RESET%3D<token> (an old link, reshaped)', path: async (c) => { await mailLink(c, 'reset', RESET_EMAIL); c.firstRequestMayCarryToken = true; return '/?RESET%3D' + c.token; }, checks: [authResetVariant] },
+  { name: 'auth-reset-spa', label: '/dashboard.html?reset=<token> (SPA fallback)', path: async (c) => { await mailLink(c, 'reset', RESET_EMAIL); c.firstRequestMayCarryToken = true; return '/dashboard.html?reset=' + c.token; }, checks: [authResetVariant] },
+  { name: 'auth-paste', label: '/auth/ then a reset link pasted into the tab', path: '/auth/', checks: [authPaste] },
+  { name: 'auth-oauth', label: '/auth/#oauth=<code> (Google sign-in → /settings.html)', path: async (c) => { const p = await oauthLink(c, USER_EMAIL, '/settings.html'); return p; }, checks: [authOauth], settle: 3000 },
   { name: 'auth-verify', label: '/auth/#verify=<token> (e-mail)', path: (c) => mailLink(c, 'verify', VERIFY_EMAIL), checks: [authVerify], narrow: true },
   { name: 'auth-verify-old', label: '/api/auth/verify-email/<token> (old e-mail)', path: async (c) => { await mailLink(c, 'verify', VERIFY_EMAIL); c.firstRequestMayCarryToken = true; return '/api/auth/verify-email/' + c.token; }, checks: [authVerifyOld] },
   { name: 'auth-verify-needed', path: '/?verify_email=1', checks: [authVerifyNeeded] },
   { name: 'auth-verify-resend', label: '/?verify_email=1 (unconfirmed session)', path: async (c) => { await mailLink(c, 'verify', VERIFY_EMAIL); c.token = null; return '/?verify_email=1'; }, auth: 'verify', checks: [authVerifyResend] },
-  { name: 'about', path: '/about.html', checks: [checkMetrika, noHScroll, iconsServed, supportWidget, supportWidgetWidePage] },
+  { name: 'about', path: '/about.html', checks: [checkMetrika, noHScroll, iconsServed, supportWidget, supportWidgetWidePage, supportMasked] },
   { name: 'api-docs', path: '/api-docs.html', checks: [noHScroll, supportWidget], narrow: true },
-  { name: 'status', path: '/status.html', checks: [noHScroll, supportWidget] },
+  { name: 'status', path: '/status.html', checks: [noHScroll, supportWidget, supportMasked] },
+  { name: 'status-signed-in', path: '/status.html', auth: 'user', checks: [checkMetrika, supportMasked] },
   // the legal pages at 320px too: a flex <li> (one column per text run / <strong>) and a long heading
   // word made them wider than the screen, and the burger at the nav's right edge went off-screen
   { name: 'terms', path: '/terms.html', checks: [checkIcons, checkMetrika, noHScroll, legalMenu, supportWidget], narrow: true },
@@ -880,6 +944,15 @@ async function main() {
     fs.unlinkSync(m[2]);
     const u = new URL(link);
     if (u.origin !== base) throw new Error(`e-mail link to another origin: ${u.origin}`);
+    c.token = u.hash.split('=')[1] || null;
+    return u.pathname + u.search + u.hash;
+  };
+  oauthLink = async (c, email, returnTo) => {
+    const m = await serve(`oauth-link ${email} ${returnTo}`, /oauth-link (ok (\S+)|failed .*)\n/);
+    if (!m[2]) throw new Error(`oauth-link: ${m[1]}`);
+    const link = fs.readFileSync(m[2], 'utf8').trim();
+    fs.unlinkSync(m[2]);
+    const u = new URL(link);
     c.token = u.hash.split('=')[1] || null;
     return u.pathname + u.search + u.hash;
   };

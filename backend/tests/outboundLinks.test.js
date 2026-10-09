@@ -38,7 +38,7 @@ describe('Metrika link tracking never sees a secret', () => {
     expect(uses).toBe(3);
     expect(html).toContain("document.getElementById('tgLinkUrl').href = r.url;");
     expect(html).toContain("document.getElementById('tgLinkUrl').textContent = r.url;");
-    expect(html).toContain("window.open(r.url, '_blank');");
+    expect(html).toContain("window.open(r.url, '_blank', 'noopener,noreferrer');");
     const svc = fs.readFileSync(path.join(BACKEND, 'services', 'telegramService.js'), 'utf8');
     expect(svc).toContain("const url = 'https://t.me/' + botUsername() + '?start=' + token;");
   });
@@ -50,6 +50,20 @@ describe('Metrika link tracking never sees a secret', () => {
       expect(links.length, f).toBe(1);
       expect(links[0], f).toContain('class="ym-disable-tracklink"');
       expect(js, f).toMatch(/data:image\\\/\(\?:png\|jpe\?g\|gif\|webp\|bmp\|avif\|heic\|heif\);base64,\[A-Za-z0-9\+\\?\/\]\+=\{0,2\}\$/);
+    }
+  });
+
+  it('support widget: Session Replay (public pages) sees neither the thread nor what is typed', () => {
+    const js = read('support-widget.js');
+    expect(js).toContain(`'<div class="chm-sup-panel ym-hide-content" id="chmSupPanel"`);
+    const fields = js.match(/'<(?:textarea|input)\b[^']*'/g).filter((f) => !/type="file"/.test(f));
+    expect(fields.length).toBe(4);
+    for (const f of fields) expect(f).toContain('class="ym-disable-keys"');
+    // the public pages that load it run Webvisor (no ?webvisor=0): the masking is what protects them
+    for (const page of ['about.html', 'status.html', 'terms.html']) {
+      const html = read(page);
+      expect(html, page).toContain('support-widget.js?v=');
+      expect(html, page).toContain('<script src="/yandex-metrika.js" async>');
     }
   });
 
@@ -94,5 +108,34 @@ describe('POST support replies: an attachment is a base64 image data: URL or a 4
   it('accepts a PNG / JPEG data: URL', async () => {
     expect((await reply('data:image/png;base64,iVBORw0KGgo=')).status).toBe(200);
     expect((await reply('data:image/jpeg;base64,/9j/4AAQSkZJRg==')).status).toBe(200);
+  });
+});
+
+// The bell (frontend/app.js) navigates to a notification's link, the push click (sw.js) too. The
+// links the server writes are its own paths; the one input is the ops "notify" action — an admin
+// with user.notify could set //host (open redirect) or javascript: (script in the user's session).
+describe('notification links: a path of this site only', () => {
+  let app, db, admin, target;
+  beforeAll(async () => {
+    app = (await import('../server.js')).default;
+    db = (await import('../models/database.js')).default;
+    const a = await request(app).post('/api/auth/register').send({ email: 'notify-admin@x.com', password: 'Abcdef123' });
+    db.prepare("UPDATE users SET is_admin = 1, admin_role = 'superadmin' WHERE id = ?").run(a.body.user.id);
+    admin = a.body.accessToken;
+    target = (await request(app).post('/api/auth/register').send({ email: 'notify-target@x.com', password: 'Abcdef123' })).body.user.id;
+  });
+  const notify = (link) => request(app).post(`/api/admin/users/${target}/notify`).set('Authorization', 'Bearer ' + admin).send({ title: 'Hi', body: 'x', link });
+
+  it.each(['//evil.example', '///evil.example', '/\\evil.example', '\\\\evil.example', 'https://evil.example/', 'javascript:alert(1)',
+    'JavaScript:alert(1)', 'data:text/html,x', 'settings.html', '/a b', '/x\\y', ' /settings.html'])('refuses %j', async (link) => {
+    expect((await notify(link)).status).toBe(400);
+  });
+
+  it.each(['/settings.html', '/app/?tab=signals&id=7_1', '/ops.html#users', undefined])('accepts %j', async (link) => {
+    expect((await notify(link)).status).toBe(200);
+  });
+
+  it('the bell follows only such a path', () => {
+    expect(read('app.js')).toContain("if (link && /^\\/(?![/\\\\])[^\\s\\\\]*$/.test(link)) location.href = link;");
   });
 });
