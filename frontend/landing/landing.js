@@ -1,10 +1,10 @@
 /* CHM Breaker — общий скрипт лендинга (/) и тарифов (/pricing). Без сборки и без зависимостей.
- DATA_SOURCE: 'mock' — data/mock-api.js (все числа тестовые), 'api' — GET /api/public/*; параметры ?data= — в README.md. */
+ DATA_SOURCE: 'api' (GET /api/public/*) или 'mock' по эндпоинтам, ?data= — README.md. */
 (() => {
 'use strict';
-const DATA_SOURCE = 'mock';
+const DATA_SOURCE = { trend: 'api', stats: 'api', feed: 'api', showcase: 'mock', sandbox: 'mock', genome: 'mock' };
 const D = document, QS = new URLSearchParams(location.search);
-const MODE = { empty: 'empty', api: 'api', mock: 'mock' }[QS.get('data')] || DATA_SOURCE;
+const MODE = { empty: 'empty', api: 'api', mock: 'mock' }[QS.get('data')], SRC = (p) => MODE || DATA_SOURCE[p], ALL_API = Object.keys(DATA_SOURCE).every((p) => SRC(p) === 'api');
 const $ = (s, r) => (r || D).querySelector(s), $$ = (s, r) => [...(r || D).querySelectorAll(s)];
 const on = (el, ev, f) => el && el.addEventListener(ev, f);
 const RM = matchMedia('(prefers-reduced-motion: reduce)').matches, FINE = matchMedia('(hover: hover) and (pointer: fine)').matches;
@@ -16,10 +16,10 @@ const EMPTY = 'Статистика появится после 30 закрыт�
 const NO = { sandbox: 'Предрасчёт бэктеста появится после первого ночного прогона', genome: 'История эволюции появится после первого прогона Genome', trend: 'Тренд BTC появится после запуска монитора' };
 let mockP;
 function api(path, q) {
- const none = { empty: true, reason: NO[path] || EMPTY };
- if (MODE === 'empty') return Promise.resolve(none);
- if (MODE === 'mock') {
-  mockP = mockP || new Promise((ok, no) => { const s = D.createElement('script'); s.src = '/landing/data/mock-api.js?v=2'; s.onload = ok; s.onerror = no; D.head.appendChild(s); });
+ const none = { empty: true, reason: NO[path] || EMPTY }, m = SRC(path);
+ if (m === 'empty') return Promise.resolve(none);
+ if (m === 'mock') {
+  mockP = mockP || new Promise((ok, no) => { const s = D.createElement('script'); s.src = '/landing/data/mock-api.js?v=3'; s.onload = ok; s.onerror = no; D.head.appendChild(s); });
   return mockP.then(() => window.CHM_MOCK.get(path, q && Object.fromEntries(new URLSearchParams(q)))).catch(() => none);
  }
  return fetch('/api/public/' + path + (q ? '?' + new URLSearchParams(q) : ''), { headers: { Accept: 'application/json' } })
@@ -179,7 +179,7 @@ const vis = (el, cb, m) => { if (!el) return; if (!window.IntersectionObserver) 
 const SEC = {};
 
 SEC.header = () => {
- if (MODE === 'api') { $$('#proto, #ftr-src').forEach((e) => { e.hidden = true; }); }
+ if (ALL_API) { $$('#proto, #ftr-src').forEach((e) => { e.hidden = true; }); }
  const b = $('#burger'), l = $('#nav-links'), sc = $('#scrim');
  if (b) {
   const set = (o) => { l.classList.toggle('open', o); b.setAttribute('aria-expanded', o); sc.hidden = !o; D.documentElement.style.overflow = o ? 'hidden' : ''; };
@@ -205,8 +205,8 @@ SEC.ticker = () => {
  on(pp, 'click', () => { const o = pp.getAttribute('aria-pressed') !== 'true'; pp.setAttribute('aria-pressed', o); row.classList.toggle('paused', o); });
  const cells = (t) => Object.keys(TFN).map((k) => {
   const s = t.tfs[k] || {}, c = s.trend === 'LONG' ? 'long' : s.trend === 'SHORT' ? 'short' : 'flat';
-  return `<span class="tc"><span>${TFN[k]}</span><span class="dir ${c}">${c === 'long' ? '▲' : c === 'short' ? '▼' : '↔'} ${TW[s.trend] || '—'}</span><span class="str ${c}"><b style="width:${s.strength}%"></b></span><span class="val">${s.strength}%</span></span>`;
- }).join('') + ['BTC', 'ETH'].map((k) => `<span class="tc"><span>${k} 24Ч</span><span class="val ${t.change_24h[k] >= 0 ? 'up' : 'loss'}">${fP(t.change_24h[k], 2)}</span></span>`).join('');
+  return `<span class="tc"><span>${TFN[k]}</span><span class="dir ${c}">${c === 'long' ? '▲' : c === 'short' ? '▼' : '↔'} ${TW[s.trend] || '—'}</span><span class="str ${c}"><b style="width:${s.strength || 0}%"></b></span><span class="val">${s.strength == null ? '—' : s.strength + '%'}</span></span>`;
+ }).join('') + ['BTC', 'ETH'].map((k) => { const x = t.change_24h[k]; return `<span class="tc"><span>${k} 24Ч</span><span class="val ${x == null ? '' : x >= 0 ? 'up' : 'loss'}">${x == null ? '—' : fP(x, 2)}</span></span>`; }).join('');
  const fit = () => {
   if (!TREND) return;
   const one = cells(TREND); row.classList.remove('marq'); row.innerHTML = one;
@@ -222,7 +222,7 @@ SEC.ticker = () => {
   txt('#tick-upd', 'обн. ' + hm(t.updated_at));
  };
  api('trend').then(render);
- setInterval(() => { if (!D.hidden && TREND) api('trend', { tick: 1 }).then(render); }, MODE === 'mock' ? 5000 : 30000);
+ setInterval(() => { if (!D.hidden && TREND) api('trend', { tick: 1 }).then(render); }, SRC('trend') === 'mock' ? 5000 : 30000);
  let w = innerWidth; on(window, 'resize', () => { if (Math.abs(innerWidth - w) > 30) { w = innerWidth; fit(); } });
 };
 
@@ -267,7 +267,6 @@ SEC.sandbox = () => {
   const lo = Math.min(0, ...vals.map((x) => x.v)), hi = Math.max(0, ...vals.map((x) => x.v)), X = (v) => 3 + (v - lo) / (hi - lo || 1) * 94, lanes = [], sw = strip.clientWidth / 100 || 3;
   const C = parseFloat(getComputedStyle(strip).getPropertyValue('--sc')) || 48, LN = [0, -14, 14, -28, 28];
   let h = `<i class="st-zero" style="left:${X(0)}%"></i><span class="st-zl" style="left:${X(0)}%">0R</span><i class="st-med" style="left:${X(m)}%"></i><span class="st-ml" style="left:${X(m)}%">медиана</span>`;
-  // пять дорожек по 14 px: точки не перекрываются (выбор монеты дублируют чипы)
   vals.slice().sort((a, b) => a.v - b.v).forEach((x) => {
    const p = X(x.v), o = x.s === S.coin; let ln = LN.findIndex((_, k) => lanes[k] == null || (p - lanes[k]) * sw >= 14);
    if (ln < 0) ln = lanes.indexOf(Math.min(...lanes));
@@ -297,18 +296,18 @@ SEC.sandbox = () => {
  });
 };
 
-const PTH = { open: ['ВХОД', ''], tp1: ['TP1', 'tp'], tp2: ['TP2', 'tp'], tp3: ['TP3', 'tp'], be: ['БУ', 'be'], sl: ['СТОП', 'sl'], exp: ['ИСТЁК', 'be'] };
+const PTH = { open: ['ВХОД', ''], tp1: ['TP1', 'tp'], tp2: ['TP2', 'tp'], tp3: ['TP3', 'tp'], be: ['БУ', 'be'], sl: ['СТОП', 'sl'], exp: ['ИСТЁК', 'be'], missed: ['БЕЗ ВХОДА', 'be'] };
 SEC.feed = () => {
  const list = $('#feed-list'); if (!list) return;
  const F = { f: 'all', paused: false, items: [], cur: null, vis: false, t: 0 }, MAX = 8, pb = $('#feed-pause');
  const live = (it) => it.status === 'open' || it.status === 'tp1';
  const chain = (it) => it.path.map((p, i) => (i ? '<i></i>' : '') + `<span class="pth ${live(it) && i === it.path.length - 1 ? 'live' : PTH[p][1]}">${PTH[p][0]}</span>`).join('');
- const res = (it) => [it.r == null ? 'amber' : it.r > 0 ? 'up' : it.r < 0 ? 'loss' : '', it.r == null ? (it.status === 'tp1' ? 'стоп в БУ' : 'в сделке') : fR(it.r, 2)];
+ const res = (it) => (it.r != null ? [it.r > 0 ? 'up' : it.r < 0 ? 'loss' : '', fR(it.r, 2)] : live(it) ? ['amber', it.status === 'tp1' ? 'стоп в БУ' : 'в сделке'] : ['', '—']);
  const sr = (it) => `${hm(it.t)}, ${it.pair} ${it.side}, ${it.strategy_name}: ${it.path.map((p) => PTH[p][0]).join(' → ')}${it.r != null ? ', ' + fR(it.r, 2) : ''}`;
  const row = (it) => { const r = res(it); return `<li class="fi" data-id="${it.id}"><span class="sr">${esc(sr(it))}</span><span class="ft" aria-hidden="true">${hm(it.t)}</span><span class="fp" aria-hidden="true"><b>${it.pair} <em class="${it.side === 'LONG' ? 'up' : 'loss'}">${it.side}</em></b><span>${esc(it.strategy_name)} · ${it.tf}</span></span><span class="chain" aria-hidden="true">${chain(it)}</span><span class="fr ${r[0]}" aria-hidden="true">${r[1]}</span></li>`; };
  const render = () => { const l = F.items.filter((x) => F.f === 'all' || x.strategy === F.f).slice(0, MAX); list.innerHTML = l.length ? l.map(row).join('') : '<li class="fi-empty">Нет сигналов этой стратегии за последний час</li>'; };
  radio($('#feed-f'), (v) => { F.f = v; render(); });
- const sched = () => { clearTimeout(F.t); if (!F.paused && F.vis && !D.hidden && F.cur) F.t = setTimeout(poll, MODE === 'mock' ? 7000 : 30000); };
+ const sched = () => { clearTimeout(F.t); if (!F.paused && F.vis && !D.hidden && F.cur) F.t = setTimeout(poll, SRC('feed') === 'mock' ? 7000 : 30000); };
  on(pb, 'click', () => { F.paused = !F.paused; pb.setAttribute('aria-pressed', F.paused); pb.innerHTML = F.paused ? '<span aria-hidden="true">▶</span> Дальше' : '<span aria-hidden="true">❚❚</span> Пауза'; sched(); });
  const poll = () => api('feed', { after: F.cur }).then((d) => {
   if (ok(d)) {
@@ -834,7 +833,7 @@ SEC.misc = () => {
   const s = e.target.closest('[data-support]');
   if (s) {
    if (window.ChmSupport) return window.ChmSupport.open();
-   const el = D.createElement('script'); el.src = '/support-widget.js?v=2'; el.onload = () => window.ChmSupport && window.ChmSupport.open(); el.onerror = () => { location.href = 'https://t.me/chmbotsignal'; }; D.body.appendChild(el);
+   const el = D.createElement('script'); el.src = '/support-widget.js?v=3'; el.onload = () => window.ChmSupport && window.ChmSupport.open(); el.onerror = () => { location.href = 'https://t.me/chmbotsignal'; }; D.body.appendChild(el);
   }
  });
  D.body.insertAdjacentHTML('beforeend', '<svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs><linearGradient id="ga-pos" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#3df2a0" stop-opacity=".2"/><stop offset="1" stop-color="#3df2a0" stop-opacity="0"/></linearGradient><linearGradient id="ga-neg" x1="0" y1="1" x2="0" y2="0"><stop offset="0" stop-color="#ff7a8f" stop-opacity=".18"/><stop offset="1" stop-color="#ff7a8f" stop-opacity="0"/></linearGradient><pattern id="hatch" width="5" height="5" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><rect width="5" height="5" fill="rgba(255,122,143,.08)"/><line x1="0" y1="0" x2="0" y2="5" stroke="rgba(255,122,143,.55)" stroke-width="1.4"/></pattern></defs></svg>');
