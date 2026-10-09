@@ -114,3 +114,33 @@ describe('dispatch', () => {
     expect(await notifier.dispatch(uid, { type: 'signal' })).toEqual({ error: 'invalid_args' });
   });
 });
+
+describe('e-mail of engine notifications (the bot\'s Telegram HTML)', () => {
+  it('tgText → formatting and line breaks kept, not shown as tags; no tgText → the generic escaped body', async () => {
+    const uid = makeUser();
+    await notifier.dispatch(uid, { type: 'report', title: 'Итоги', body: 'x', link: '/app/?tab=stats',
+      tgText: '📊 <b>Итоги недели</b>\n\nСигналов: <code>5</code> · a &amp; b' });
+    const mail = emailSpy.mock.calls[0][0];
+    expect(mail.subject).toBe('Итоги');
+    expect(mail.html).toContain('📊 <b>Итоги недели</b><br><br>Сигналов: <code>5</code> · a &amp; b');
+    expect(mail.html).not.toContain('&lt;b&gt;');
+    expect(mail.html).toContain('https://chmup.top/app/?tab=stats');
+    expect(mail.text).toContain('Итоги недели\n\nСигналов: 5 · a & b');
+    await notifier.dispatch(uid, { type: 'security', title: 'Вход', body: '<b>не HTML</b>' });
+    expect(emailSpy.mock.calls[1][0].html).toContain('&lt;b&gt;не HTML&lt;/b&gt;');
+  });
+
+  it('telegramHtml keeps only Telegram\'s subset: attributes dropped, an <a> keeps an http(s) href, anything else escaped', () => {
+    const tpl = nodeRequire('../../../services/emailTemplates.js');
+    expect(tpl.telegramHtml('<b onclick="x">b</b> <i>i</i> <u>u</u> <s>s</s> <code>c</code> <pre>p</pre> <tg-spoiler>t</tg-spoiler>'))
+      .toBe('<b>b</b> <i>i</i> <u>u</u> <s>s</s> <code>c</code> <pre>p</pre> <span>t</span>');
+    expect(tpl.telegramHtml('<a href="https://t.me/crypto_chm?a=1&amp;b=2" onclick="x">канал</a>'))
+      .toBe('<a href="https://t.me/crypto_chm?a=1&amp;b=2" style="color:#5C80E3;text-decoration:none">канал</a>');
+    expect(tpl.telegramHtml('<a href="javascript:alert(1)">x</a> <a href=\'data:text/html,1\'>y</a>')).toBe('<a>x</a> <a>y</a>');
+    expect(tpl.telegramHtml('<script>alert(1)</script><img src=x onerror=1><style>*{}</style>'))
+      .toBe('&lt;script&gt;alert(1)&lt;/script&gt;&lt;img src=x onerror=1&gt;&lt;style&gt;*{}&lt;/style&gt;');
+    expect(tpl.telegramHtml('5 > 3 & 2 < 4 &lt;ok&gt; &#128512; "q"')).toBe('5 &gt; 3 &amp; 2 &lt; 4 &lt;ok&gt; &#128512; &quot;q&quot;');
+    expect(tpl.telegramHtml('<a href="https://x.test/">a</a><a href="https://x.test/" title="a>b">c</a>'))
+      .toBe('<a href="https://x.test/" style="color:#5C80E3;text-decoration:none">a</a><a href="https://x.test/" style="color:#5C80E3;text-decoration:none">b&quot;&gt;c</a>');
+  });
+});

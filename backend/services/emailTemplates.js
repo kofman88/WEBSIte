@@ -179,6 +179,55 @@ function generic({ title, body, link }) {
   return { subject, html, text: toPlaintext(html) };
 }
 
+// Telegram's HTML subset (core.telegram.org/bots/api#html-style): the formatting the bot's texts use.
+const TG_TAGS = new Set(['b', 'strong', 'i', 'em', 'u', 'ins', 's', 'strike', 'del', 'code', 'pre', 'blockquote', 'tg-spoiler', 'span']);
+const TAG_RE = /<(\/?)([a-zA-Z][a-zA-Z0-9-]*)([^<>]*)>/g;
+
+/** Text between tags: entities kept (the bot already escaped its text), any other & < > " escaped. */
+function tgText(s) {
+  return s.replace(/&(?!(?:[a-zA-Z][a-zA-Z0-9]{1,31}|#[0-9]{1,7}|#x[0-9a-fA-F]{1,6});)/g, '&amp;')
+    .replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+}
+
+/**
+ * The bot's Telegram HTML as e-mail HTML: the subset's tags without attributes (an <a> keeps an
+ * http(s) href; tg-spoiler becomes a span), every other tag escaped as text, line breaks → <br>.
+ */
+function telegramHtml(src) {
+  const s = String(src == null ? '' : src);
+  let out = '';
+  let last = 0;
+  for (const m of s.matchAll(TAG_RE)) {
+    out += tgText(s.slice(last, m.index));
+    last = m.index + m[0].length;
+    const close = m[1] === '/';
+    const name = m[2].toLowerCase();
+    if (name === 'a') {
+      if (close) { out += '</a>'; continue; }
+      const href = /\bhref\s*=\s*(?:"([^"]*)"|'([^']*)')/i.exec(m[3]);
+      const url = href ? (href[1] !== undefined ? href[1] : href[2]).replace(/&amp;/g, '&') : '';
+      out += /^https?:\/\//i.test(url) ? `<a href="${escAttr(url)}" style="color:#5C80E3;text-decoration:none">` : '<a>';
+    } else if (TG_TAGS.has(name)) {
+      const tag = name === 'tg-spoiler' ? 'span' : name;
+      out += close ? `</${tag}>` : `<${tag}>`;
+    } else {
+      out += escHtml(m[0]);
+    }
+  }
+  out += tgText(s.slice(last));
+  return out.split('\n').join('<br>');
+}
+
+/** An engine notification (the bot's Telegram HTML) in the branded shell: formatting and line breaks kept. */
+function telegram({ title, html, link }) {
+  const subject = title;
+  const out = shell(subject, `
+    <div style="margin:0 0 16px">${telegramHtml(html)}</div>
+    ${link ? cta('Открыть →', absolute(link)) : ''}
+  `);
+  return { subject, html: out, text: toPlaintext(out) };
+}
+
 // Dunning — sent from webhook handler when Stripe reports invoice.payment_failed.
 // Tells the user the charge failed and gives a one-click link to the Stripe
 // billing portal where they can update their card before the next retry.
@@ -214,6 +263,6 @@ module.exports = {
   emailVerify, passwordReset,
   paymentConfirmed, paymentRefunded, paymentFailed, subscriptionCancelled,
   securityAlert, tradeClosed, signalFired,
-  generic,
+  generic, telegram, telegramHtml,
   _toPlaintext: toPlaintext, _shell: shell,
 };

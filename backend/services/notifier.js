@@ -120,9 +120,13 @@ async function dispatch(userId, opts) {
   if (emailOn && user.email_verified && prefs.email[type] !== false) {
     // Caller may override with a fully-rendered template via opts.template.
     // Otherwise fall back to the generic branded shell.
+    // An engine notification carries the bot's Telegram HTML (tgText): the e-mail keeps its
+    // formatting and line breaks instead of showing the tags as text (generic escapes the body).
     let emailPayload;
     if (opts.template) {
       emailPayload = opts.template;
+    } else if (tgText) {
+      emailPayload = require('./emailTemplates').telegram({ title, html: tgText, link });
     } else {
       const tpl = require('./emailTemplates');
       emailPayload = tpl.generic({ title, body, link });
