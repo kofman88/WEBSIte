@@ -26,9 +26,12 @@
  *  17  trend_monitor      worker  _guarded               90 s, then every INTERVAL_S (60 s)
  *  18  signal_tracker     worker  _guarded               120 s, then every INTERVAL_S (60 s)
  *
+ * daily_summary / weekly_digest run on the main thread from workers/engineWorker.js startEngine()
+ * (services/engine/reports.js, own timers: 23:55 UTC / Monday 09:05 UTC).
+ *
  * Not carried over (no site equivalent or a later milestone): polling, turso_sync, subs_backup,
- * notification_drainer, daily_summary / weekly_digest / engagement / challenge / entry_advisor
- * (report and retention loops, M10b / M17), hour_filter_monitor, plan_audit_monitor,
+ * notification_drainer, engagement / challenge / entry_advisor (retention loops, M17),
+ * hour_filter_monitor, plan_audit_monitor,
  * sub_reminder (planService.startExpiryLoop), time_sync, health_server, metrics_*, mem_trim,
  * log_monitor_*, drip_campaign, ton_subscription_checker, feedback / optimizer / retrain loops
  * (the ML optimizer is not ported), state_reconcile / trade_state_cleanup / anomaly_detector /

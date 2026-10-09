@@ -23,6 +23,7 @@ const supportRoutes = require('./routes/support');
 const pushRoutes = require('./routes/push');
 const appRoutes = require('./routes/app');
 const { readBotBody } = require('./services/engine/botBody');
+const botTransport = require('./services/engine/botTransport');
 const planService = require('./services/planService');
 const maintenanceService = require('./services/maintenanceService');
 const paymentWatcher = require('./workers/paymentWatcher');
@@ -65,7 +66,11 @@ app.use((req, res, next) => (req.path === '/api/app' || req.path.startsWith('/ap
 
 app.use(compression());
 
-// Global per-IP rate-limit across /api (skipped in tests)
+// Global per-IP rate-limit across /api (skipped in tests). An authenticated /api/app request is
+// not counted: that surface has the bot's own per-user buckets (routes/app.js — POST 30 / 60 s,
+// chart, plan, challenge, share, feedback, analyze) and the bot has no per-IP cap on it; users
+// behind one NAT / carrier IP must not share 300 requests per 15 min of the app's polling. Requests
+// without a valid access token (scans, floods, expired tokens) still count per IP.
 if (process.env.NODE_ENV !== 'test' && process.env.VITEST !== 'true') {
   const globalLimiter = rateLimit({
     windowMs: 15 * 60 * 1000,
@@ -73,6 +78,7 @@ if (process.env.NODE_ENV !== 'test' && process.env.VITEST !== 'true') {
     message: { error: 'Too many requests, please try again later', code: 'RATE_LIMITED' },
     standardHeaders: true,
     legacyHeaders: false,
+    skip: (req) => require('./middleware/auth').isAuthenticatedAppRequest(req),
   });
   app.use('/api/', globalLimiter);
 }
@@ -85,20 +91,14 @@ app.use('/api/payments/webhooks/stripe', express.raw({ type: 'application/json',
 // /api/app/* reads its body like the bot's miniapp_api._read_body() on aiohttp (botBody.js):
 // Content-Type ignored, strict decode by its charset (utf-8 by default), json.loads; malformed
 // JSON, a BOM, invalid bytes or a top level that is not an object reach the route as {}, so it
-// answers with its own business error instead of a 400 from the strict parser.
-// A body over 1 MiB is aiohttp's client_max_size: request.json() raises HTTPRequestEntityTooLarge INSIDE
-// _read_body's try → {} (never a 413; a handler that reads no body never notices). body-parser drains
-// the rest of the request before it reports the limit.
-const appRawBody = express.raw({ type: () => true, limit: '1mb' });
-app.use('/api/app', (req, res, next) => appRawBody(req, res, (err) => {
-  if (err && err.type === 'entity.too.large') {
-    req.body = {};
-    return next();
-  }
-  if (err) return next(err);
+// answers with its own business error instead of a 400 from the strict parser. The transport in
+// front of it is aiohttp's too (botTransport.js): the 1 MiB client_max_size, gzip / deflate
+// request bodies; an oversized or undecodable body is {} for the route (never a 413 / 415 JSON),
+// br / zstd and a cut deflate stream are aiohttp's transport 400.
+app.use('/api/app', botTransport.middleware(), (req, _res, next) => {
   req.body = readBotBody(req.body, req.headers['content-type']);
-  return next();
-}));
+  next();
+});
 app.use(express.json({ limit: '1mb' }));
 app.use(express.urlencoded({ extended: true, limit: '1mb' }));
 

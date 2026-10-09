@@ -67,9 +67,10 @@ function setUserActive(userId, isActive, { adminId } = {}) {
   const info = db.prepare('UPDATE users SET is_active = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?')
     .run(isActive ? 1 : 0, userId);
   if (info.changes === 0) { const err = new Error('User not found'); err.statusCode = 404; throw err; }
-  // If disabling, also revoke all refresh tokens
+  // If disabling, also revoke all refresh tokens and end the account's live event streams
   if (!isActive) {
     db.prepare('UPDATE refresh_tokens SET revoked_at = CURRENT_TIMESTAMP WHERE user_id = ? AND revoked_at IS NULL').run(userId);
+    try { require('./sseService').closeUser(userId); } catch (_e) { /* best effort */ }
   }
   db.prepare(`
     INSERT INTO audit_log (user_id, action, entity_type, entity_id, metadata)

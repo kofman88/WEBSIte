@@ -627,6 +627,30 @@ fvg, pivots, hvn, lvn, emas}, event, hit_levels, entry_index, last_close}`, draw
   random per process; the site keeps their first appearance and the replay compares that tail as a
   set.
 
+### Transport, limits and the live stream
+
+* **Request bodies (`botTransport.js`, in front of `botBody.js`)** — aiohttp's transport as the bot
+  runs it (`web.Application()`, client_max_size 1 MiB, the C parser, no Brotli / zstandard): more than
+  1 MiB of (decoded) body is a read error, i.e. `{}` for the handler — a business error, a 401 without
+  auth, a 404 on an unknown path, never a 413; gzip / deflate (zlib or raw) bodies are decoded with
+  concatenated members (≤ 1024), gzip without an end-of-stream check; `br` / `zstd` answer the
+  transport 400 (`Can not decode content-encoding: …`) and a cut deflate stream 400 `deflate`; any
+  other Content-Encoding is used as sent. JSON nested deeper than 980 levels is `{}` (json.loads'
+  RecursionError at the bot's stack depth). An oversized upload is answered while it flows and is
+  discarded past the cap.
+* **Rate limits** — exactly the bot's per-user buckets (POST 30 / 60 s, chart 10 / 60 s with
+  Retry-After 6, plan and challenge GET 10 / 60 s, share 3 / 600 s with HTTP 200, feedback 5 a day,
+  analyze 10 s + the daily quota); `keys` 1 / 30 s and `positions` 6 / 60 s come with their routes
+  (M13b). The site's global per-IP limiter (server.js, 300 / 15 min) skips an `/api/app` request with
+  a valid access token (`middleware/auth.isAuthenticatedAppRequest`); requests without one still count.
+* **SSE** — `services/sseService.js`: 10 streams per user (the oldest ends), `SSE_MAX_CLIENTS`
+  (1000) per process (503 + Retry-After 30 for a new user), a stream ends when the access token that
+  opened it expires (`req.authExp`) and at once when an admin disables the account; HEAD answers the
+  headers only; `X-Accel-Buffering: no`, `Cache-Control: no-cache, no-transform` (compression and
+  proxies leave it alone), a flush after every frame.
+* **Reports** — bot.py's `daily_summary_loop` / `weekly_digest_loop` run from `startEngine()` on the
+  main thread (`reports.js`, notifier type `report`); `mainDeps.only` selects them.
+
 ### Tests and fixtures
 
 | test | what | regenerate |
@@ -641,6 +665,11 @@ fvg, pivots, hvn, lvn, emas}, event, hit_levels, entry_index, last_close}`, draw
 | `tests/app/data/engineBridge.test.js` | worker answers, query RPC (answer, error, timeout, exit, no worker), a real worker half over a MessageChannel, facade fallbacks | — |
 | `tests/app/data/events.test.js` | SSE handshake, heartbeat, per-user channel, delivery events, cleanup | — |
 | `tests/app/data/frontendWiring.test.js` | the SPA's call sites vs the routes, a chart answer drawn by `chart.js` | — |
+| `tests/app/bodyTransport.test.js` | 133 body-transport cases of the bot's aiohttp server (size cap, encodings, members, cut / corrupt streams, fuzz, JSON nesting depth) replayed byte for byte | `gen/gen_body_transport.py` |
+| `tests/app/data/rateLimits.test.js` | the bot's bucket numbers and 429 bodies, the sliding window on its trace, the global limiter skip | `gen/gen_rate_limits.py` |
+| `tests/app/data/sseSecurity.test.js` | gzip / buffering, HEAD, 401 / 403, token expiry, account disable, both caps, 10 000 unit + 10 000 HTTP connect / disconnect cycles without leaks | — |
+| `tests/app/data/isolation.test.js` | IDOR between two users over every read and write, SQL injection through every parameter, no SQL / stack in a 500 | — |
+| `tests/engine/worker/reportsWiring.test.js` | the report loops in `startEngine` (selection, stop, the Monday digest on the site DB) | — |
 
 `py/drive_app_data.py` runs the bot's aiohttp app (CPython 3.11, bot checkout read-only,
 `time.time` pinned per step, the PNG renderers spied: the real render plus the driver's mirror of
