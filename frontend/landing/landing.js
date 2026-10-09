@@ -1,6 +1,5 @@
 /* CHM Breaker — общий скрипт лендинга (/) и тарифов (/pricing). Без сборки и без зависимостей.
- DATA_SOURCE: 'mock' — data/mock-api.js (все числа тестовые), 'api' — GET /api/public/* (README.md).
- ?data=empty — честные заглушки «данных пока нет» при той же раскладке; ?data=api — проверить настоящие пути. */
+ DATA_SOURCE: 'mock' — data/mock-api.js (все числа тестовые), 'api' — GET /api/public/*; параметры ?data= — в README.md. */
 (() => {
 'use strict';
 const DATA_SOURCE = 'mock';
@@ -454,9 +453,9 @@ SEC.showcase = () => {
   if (!ok(d)) { txt('#sc-empty b', d.reason); $('#sc-reset').hidden = true; $('#sc-empty').hidden = false; txt('#sc-pos', '0 ботов'); txt('#sc-arch-sum', 'пока пусто'); html('#arch-tbl tbody', `<tr><td colspan="6">${esc(d.reason)}</td></tr>`); return; }
   S.d = d; render();
   // реестр всех кандидатов с даты запуска (К3 #5)
-  const g = d.registry, RS = (a) => (a.status === 'published' ? 'на витрине' : a.status === 'waiting' ? 'набирает: ' + (a.n < 30 ? `${a.n} из 30 сигналов, ` + (a.days < 30 ? `${a.days} из 30 дн.` : 'срок 30 дн. пройден') : `${a.days} из 30 дн., сигналов уже ${a.n}`) : 'снят ' + dmy(a.to) + ': ' + esc(a.reason));
+  const g = d.registry, RS = (a) => (a.status === 'published' ? 'на витрине' : a.status === 'waiting' ? 'набирает: ' + (a.n < 30 ? `${a.n} из 30 сигналов, ` + (a.days < 30 ? `${a.days} из 30 дн.` : 'срок 30 дн. пройден') : `${a.days} из 30 дн., сигналов уже ${a.n}`) : 'снят ' + dmy(a.to) + ': ' + esc(a.reason));
   txt('#sc-arch-sum', `реестр ${g.candidates} · на витрине ${g.published} · ждут ${g.waiting} · архив ${g.archived}`);
-  html('#arch-tbl tbody', g.items.map((a) => `<tr><td>${STR[a.strategy][0]} · ${esc(a.coins)} · ${a.tf} · v${a.v}</td><td>${dmy(a.launched_at)}</td><td>${RS(a)}</td><td>${a.n}</td><td class="${a.r_total < 0 ? 'loss' : 'up'}">${fR(a.r_total)}</td><td class="loss">${fR(-a.max_dd_r)}</td></tr>`).join(''));
+  html('#arch-tbl tbody', g.items.map((a) => `<tr><td>${STR[a.strategy][0]} · ${esc(a.coins)} · ${a.tf} · v${a.v}</td><td data-l="запущен">${dmy(a.launched_at)}</td><td>${RS(a)}</td><td data-l="сигналов">${a.n}</td><td data-l="итог" class="${a.r_total < 0 ? 'loss' : 'up'}">${fR(a.r_total)}</td><td data-l="просадка" class="loss">${fR(-a.max_dd_r)}</td></tr>`).join(''));
  });
  api1('stats').then((s) => { if (ok(s)) { const b = s.bots_30d; txt('#sc-med', `Медиана витрины за 30 дн.: ${fR(b.median_r)}, в плюсе ${b.positive} из ${b.total}`); } });
  setTimeout(() => { if (S.d) txt('#sc-regime-now', `(сейчас ${TW[regNow()].toLowerCase()} на 4H)`); }, 1500);
@@ -759,7 +758,7 @@ SEC.planner = () => {
   const bs = ok(d) ? d.bots.filter((b) => b.status === 'published') : [], M = (f) => median(bs.map(f));
   S.bots = bs.map((b) => ({ n: `${b.strategy_name} · ${b.coins.join(' ')}${b.coins_extra ? ' +' + b.coins_extra : ''} · ${b.tf}`, pace: b.stats.r_total / b.track_days, lbl: b.track_days + ' дн. трека, бумажный', dd: b.stats.max_dd_r, streak: b.stats.max_loss_streak, ws: 'Худшая серия этого бота' }));
   if (bs.length) S.bots.unshift({ n: `Медиана витрины, ${bs.length} ботов`, pace: M((b) => b.stats.r_total / b.track_days), lbl: 'медиана витрины, бумажный трек', dd: M((b) => b.stats.max_dd_r), streak: Math.round(M((b) => b.stats.max_loss_streak)), ws: 'Медиана худших серий витрины' });
-  bot.innerHTML = S.bots.length ? S.bots.map((b, i) => `<option value="${i}">${esc(b.n)} · ${fR(b.pace, 2)}/день</option>`).join('') : '<option value="">нет ботов с треком</option>';
+  bot.innerHTML = S.bots.length ? S.bots.map((b, i) => `<option value="${i}">${esc(b.n)}</option>`).join('') : '<option value="">нет ботов с треком</option>';
   render();
  });
  render();
