@@ -454,7 +454,7 @@ SEC.showcase = () => {
   if (!ok(d)) { txt('#sc-empty b', d.reason); $('#sc-reset').hidden = true; $('#sc-empty').hidden = false; txt('#sc-pos', '0 ботов'); txt('#sc-arch-sum', 'пока пусто'); html('#arch-tbl tbody', `<tr><td colspan="6">${esc(d.reason)}</td></tr>`); return; }
   S.d = d; render();
   // реестр всех кандидатов с даты запуска (К3 #5)
-  const g = d.registry, RS = (a) => (a.status === 'published' ? 'на витрине' : a.status === 'waiting' ? `набирает: ${a.n} из 30 сигналов, ${a.days} из 30 дн.` : 'снят ' + dmy(a.to) + ': ' + esc(a.reason));
+  const g = d.registry, RS = (a) => (a.status === 'published' ? 'на витрине' : a.status === 'waiting' ? 'набирает: ' + (a.n < 30 ? `${a.n} из 30 сигналов, ` + (a.days < 30 ? `${a.days} из 30 дн.` : 'срок 30 дн. пройден') : `${a.days} из 30 дн., сигналов уже ${a.n}`) : 'снят ' + dmy(a.to) + ': ' + esc(a.reason));
   txt('#sc-arch-sum', `реестр ${g.candidates} · на витрине ${g.published} · ждут ${g.waiting} · архив ${g.archived}`);
   html('#arch-tbl tbody', g.items.map((a) => `<tr><td>${STR[a.strategy][0]} · ${esc(a.coins)} · ${a.tf} · v${a.v}</td><td>${dmy(a.launched_at)}</td><td>${RS(a)}</td><td>${a.n}</td><td class="${a.r_total < 0 ? 'loss' : 'up'}">${fR(a.r_total)}</td><td class="loss">${fR(-a.max_dd_r)}</td></tr>`).join(''));
  });
@@ -495,7 +495,7 @@ SEC.backtest = () => {
   let t, p, ch = '';
   if (!ok(d)) { t = 'Данных пока нет'; p = d.reason; }
   else if (d.reason === 'no_archive') { t = 'Истории нет — результат не показываем'; p = `Свечи хранятся 365 дней, а отдельного архива для старых стресс-окон пока нет. Поэтому за «${w.label}» истории нет ни для одной монеты. Подставлять похожий период или «примерный» прогон мы не будем.`; ch = chip('per', '2025-10', 'Смотреть 10–11 октября 2025'); }
-  else if (d.reason === 'expired') { t = 'Окно выпало из хранилища'; p = `Свечи за «${w.label}» удалены из 365-дневного хранилища ${dmy(w.expires_at)}. Результат больше не показываем.`; }
+  else if (d.reason === 'expired') { t = 'Окно выпало из хранилища'; txt('#bt-period input[value="2025-10"] + span i', 'выпало из хранилища ' + dmy(w.expires_at)); p = `Свечи за «${w.label}» удалены из 365-дневного хранилища ${dmy(w.expires_at)}. Результат больше не показываем.`; }
   else { t = 'Истории нет — результат не показываем'; p = `Для ${d.coin} это окно не предрассчитано: стресс-окно считаем только для ${(d.available_for || []).join(', ')}.`; ch = (d.available_for || []).map((c) => chip('coin', c, 'Смотреть ' + c)).join(''); }
   na.innerHTML = `<b>${esc(t)}</b><p>${esc(p)}</p>${ch ? `<div class="chips">${ch}</div>` : ''}`; na.hidden = false;
   txt('#bt-src', 'Бэктест · нет данных');
@@ -560,12 +560,12 @@ SEC.backtest = () => {
    marks: tr.map((t, i) => (t.gap ? { x: i + 1, y: eq[i + 1][1], cls: 'loss gapm', r: 5 } : null)).filter(Boolean), yFmt: (v) => fR(v, v % 1 ? 1 : 0),
    xl: [[0, '0'], [n / 2, 'сделка №'], [n, String(n)]], tip: (i, p) => (i ? `сделка ${i} · ${KIND[tr[i - 1].kind]}<br><b>${fR(p[1], 2)}</b> накоплено` : 'старт') });
   $('#st-eq').setAttribute('aria-label', `Бот в стресс-окне: ${n} сделок, итог ${fR(st.r_total)}`);
-  html('#st-trades', tr.map((t) => `<li><span${t.gap ? ' class="gap"' : ''}>${utc(t.t)} · ${t.side === 'L' ? 'LONG' : 'SHORT'} · ${t.kind === 'SL' && t.r < -1.2 ? 'SL, исполнен хуже уровня' : KIND[t.kind]}</span><b class="${t.r < 0 ? 'loss' : 'up'}">${fR(t.r, 2)}</b></li>`).join(''));
+  html('#st-trades', tr.map((t) => `<li><span${t.gap ? ' class="gap"' : ''}>${utc(t.t)} · ${t.side === 'L' ? 'LONG' : 'SHORT'} · ${t.kind === 'SL' && (t.g != null ? t.g : t.r) < -1.2 ? 'SL, исполнен хуже уровня' : KIND[t.kind]}</span><b class="${t.r < 0 ? 'loss' : 'up'}">${fR(t.r, 2)}</b></li>`).join(''));
   const sl = tr.filter((t) => t.kind === 'SL'), avg = sl.length ? sl.reduce((a, t) => a + t.r, 0) / sl.length : null;
   txt('#bt-upd', dmy(d.updated_at) + ' ' + hm(d.updated_at));
   html('#st-sum', `<dt>Итог окна</dt><dd class="big ${st.r_total < 0 ? 'loss' : 'up'}">${fR(st.r_total)}</dd><dt>Сделок</dt><dd>${n}</dd><dt>Макс. просадка</dt><dd class="loss">${fR(-st.max_dd_r)}</dd><dt>Средний стоп в окне</dt><dd class="loss">${avg == null ? '—' : fR(avg, 2)}</dd><dt>Обычный стоп (отложенный)</dt><dd>${d.normal_sl_r == null ? '—' : fR(d.normal_sl_r, 2)}</dd><dt>Комиссии</dt><dd>${S.fees ? 'учтены' : 'выключены'}</dd><dt>Окно выпадет из хранилища</dt><dd class="amber">${dmy(w.expires_at)}</dd>`);
   const tg = [];
-  if (avg != null && avg < -1.25) tg.push(['warn', `стопы исполнялись хуже уровня: в среднем ${fR(avg, 2)}`]);
+  if (avg != null && d.normal_sl_r != null && avg < d.normal_sl_r - 0.1) tg.push(['warn', `стопы в окне в среднем ${fR(avg, 2)} против ${fR(d.normal_sl_r, 2)} обычно`]);
   if (n < 30) tg.push(['warn', `мало сделок: ${n} — это проверка поведения, не статистика`]);
   tg.push(['warn', 'окно выпадет из хранилища ' + dmy(w.expires_at)]);
   if (S.pess) tg.push(['info', 'пессимистичный режим: касание фитилём = стоп']);
@@ -661,7 +661,7 @@ SEC.compare = () => {
   bd.setAttribute('aria-label', 'DCA-бот: итог ' + fP(a.fin) + ' депозита'); $('#cmp-chm').setAttribute('aria-label', 'Бот CHM: итог ' + fP(b.fin) + ' депозита');
   const dW = a.fin > b.fin + 0.1, cW = b.fin > a.fin + 0.1, lev = S.lev > 1 ? ' С плечом 3× всё это втрое больше в процентах депозита.' : '';
   let w = dW ? 'Здесь выиграла сетка' : cW ? 'Выиграл стоп' : 'Ничья', t;
-  if (S.sc === 'drop') t = S.x < 3 ? 'Цена почти не упала: стоп CHM не задет, сетка открыла один-два ордера.' : a.stop ? `Сетка исполнила все 6 ордеров и закрылась по своему стопу: <b>${fP(a.fin)}</b> депозита за одну сделку. У CHM один стоп: <b>${fP(b.fin)}</b>.${lev}` : `Сетка держит позицию на ${Math.round(a.maxM)}% депозита и ждёт отскока, минус сейчас <b>${fP(a.fin)}</b>. CHM вышел по стопу: <b>${fP(b.fin)}</b>.${S.gstop ? '' : ' Без стопа убыток сетки ничем не ограничен.'}${lev}`;
+  if (S.sc === 'drop') t = S.x < 3 ? 'Цена почти не упала: стоп CHM не задет, сетка открыла один-два ордера.' : a.stop ? `Сетка исполнила все 6 ордеров и закрылась по своему стопу: <b>${fP(a.fin)}</b> депозита за одну сделку. У CHM один стоп: <b>${fP(b.fin)}</b>.${lev}` : `Сетка держит позицию на ${Math.round(a.maxM)}% депозита и ждёт отскока, сейчас у неё <b>${fP(a.fin)}</b>. CHM вышел по стопу: <b>${fP(b.fin)}</b>.${S.gstop ? '' : ' Без стопа убыток сетки ничем не ограничен.'}${lev}`;
   else if (S.sc === 'bounce') t = dW ? `Средняя цена подтянулась, отскок закрыл сетку в плюс: <b>${fP(a.fin)}</b>. CHM поймал стоп <b>${fP(b.fin)}</b> и без нового сигнала на отскоке не входил. Это честная цена стопа: мелкие убытки случаются чаще.` : 'Отскок слишком слабый, чтобы сетка вышла в плюс.';
   else if (S.sc === 'chop') t = `В пиле бот CHM получил серию стопов: ${b.tr.length} ${plural(b.tr.length, 'вход', 'входа', 'входов')}, итог <b>${fP(b.fin)}</b>. Сетка закрыла ${a.tps} ${plural(a.tps, 'цикл', 'цикла', 'циклов')} с тейком: <b>${fP(a.fin)}</b>. Серии стопов — главный риск торговли со стопом, поэтому на витрине есть худшая серия, а в челлендже пауза после серии стопов.`;
   else t = `Гэп пролетел через стоп CHM: он исполнился ниже уровня, <b>${fR(b.slip, 2)}</b> вместо −1R. Ордера сетки собрали падение, отскок вывел её в <b>${fP(a.fin)}</b>. Стоп ограничивает убыток, но цену исполнения не гарантирует.`;

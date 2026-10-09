@@ -189,7 +189,8 @@ var WAIT = [['SMC', 'ETH', '4H', 12, 9, 0.8, 1.6], ['VOLUME', 'SUI DOGE', '1H', 
 var ARCH = [
 ['SMC', 'DOGE PEPE WIF', '15m', 1, 151, 104, 162, -8.7, 11.2, 'итог трека ниже −8R'],
 ['LEVELS', 'ARB OP', '1H', 1, 118, 60, 74, 2.1, 4.6, 'правка параметров, v2 ведёт свой трек'],
-['VOLUME', 'LTC', '4H', 1, 97, 18, 11, -0.9, 3.1, 'меньше одного сигнала в неделю']
+['VOLUME', 'LTC', '4H', 1, 97, 18, 11, -0.9, 3.1, 'меньше одного сигнала в неделю'],
+['SMC', 'BTC ETH', '15m', 1, 190, 71, 96, -1.4, 7.9, 'правка параметров, v2 ведёт свой трек']
 ];
 var scC = null;
 function showcase() {
@@ -198,12 +199,12 @@ var REG = ['up', 'down', 'range'];
 var bots = BOTS.map((b) => {
 var sp = ST[b[3]], r = rng(hash('bot:' + b[0] + ':' + b[2])), from = T0 - b[8] * DAY + 9 * HOUR;
 var spx = Object.assign({}, sp, { n90: b[9] * HOLD_DAYS / b[8], fee: b[7] === '15m' ? 0.2 : b[7] === '4H' ? 0.06 : sp.fee });
-var tr = genTrades(r, spx, from, NOW - 65 * MIN, b[10], 1), st = stats(tr, hash(b[0]), b[8]), t30 = tr.filter((x) => x.t > NOW - 30 * DAY);
+var tr = genTrades(r, spx, from, NOW - 65 * MIN, b[10], 1), pub = Math.max(from + 30 * DAY, tr[29].t + 6 * HOUR), st = stats(tr, hash(b[0]), b[8]), t30 = tr.filter((x) => x.t > NOW - 30 * DAY);
 var bt = stats(genTrades(r, spx, from - HOLD_DAYS * DAY, from, b[10] - 0.01, 1), 5);
 var rr = { up: 0, down: 0, range: 0 };
 tr.forEach((x) => { var u = r(), pref = b[14]; var reg = x.r > 0 ? (u < 0.55 ? pref : REG[Math.floor(r() * 3)]) : (u < 0.3 ? pref : REG[Math.floor(r() * 3)]); rr[reg] += x.r; });
 return { id: b[0], version: b[1], status: 'published', strategy: b[3], strategy_name: sp.name, short: sp.short, coins: b[4], coins_extra: b[5], dir: b[6], tf: b[7],
-leverage_max: b[13], source: 'paper', published_at: from, track_days: b[8], params_frozen: true,
+leverage_max: b[13], source: 'paper', launched_at: from, published_at: pub, track_days: b[8], params_frozen: true,
 stats: Object.assign(st, { r_30d: rd(t30.reduce((s, x) => s + x.r, 0), 2), n_30d: t30.length, dd_30d: rd(maxDD(t30.map((x) => x.r)), 2) }),
 curve: curve(tr, from), trades_tail: tr.slice(-24).map((x) => x.kind),
 backtest_holdout: { r_total: rd(bt.r_total, 1), pf: bt.pf, n: bt.n, max_dd_r: rd(bt.max_dd_r, 1), period_days: HOLD_DAYS },
@@ -211,8 +212,8 @@ exchange_copies: { median_r: b[12][0], n: b[12][1], liquidations: b[12][2], medi
 regime_r: { up: rd(rr.up, 1), down: rd(rr.down, 1), range: rd(rr.range, 1) }, how: b[15], params: b[16], weak: b[17],
 min_deposit_usd: b[7] === '15m' ? 300 : 150, updated_at: NOW - 11 * MIN };
 });
-var archive = ARCH.map((a) => ({ strategy: a[0], coins: a[1], tf: a[2], v: a[3], launched_at: T0 - a[4] * DAY, from: T0 - a[4] * DAY, to: T0 - a[5] * DAY, n: a[6], r_total: a[7], max_dd_r: a[8], reason: a[9], status: 'archived', source: 'paper' }));
-var items = bots.map((b) => ({ strategy: b.strategy, coins: b.coins.join(' ') + (b.coins_extra ? ' +' + b.coins_extra : ''), tf: b.tf, v: b.version, launched_at: b.published_at - 34 * DAY, status: 'published', n: b.stats.n, days: b.track_days, r_total: b.stats.r_total, max_dd_r: b.stats.max_dd_r }))
+var archive = ARCH.map((a) => ({ strategy: a[0], coins: a[1], tf: a[2], v: a[3], launched_at: T0 - a[4] * DAY, from: T0 - a[4] * DAY, to: T0 - a[5] * DAY, published_at: a[6] < 30 ? null : T0 - (a[4] - Math.max(30, 30 / a[6] * (a[4] - a[5]))) * DAY, n: a[6], r_total: a[7], max_dd_r: a[8], reason: a[9], status: 'archived', source: 'paper' }));
+var items = bots.map((b) => ({ strategy: b.strategy, coins: b.coins.join(' ') + (b.coins_extra ? ' +' + b.coins_extra : ''), tf: b.tf, v: b.version, launched_at: b.launched_at, status: 'published', n: b.stats.n, days: b.track_days, r_total: b.stats.r_total, max_dd_r: b.stats.max_dd_r }))
 .concat(WAIT.map((w) => ({ strategy: w[0], coins: w[1], tf: w[2], v: w[7] || 1, launched_at: T0 - w[3] * DAY, status: 'waiting', n: w[4], days: w[3], r_total: w[5], max_dd_r: w[6] })), archive)
 .sort((a, b) => a.launched_at - b.launched_at);
 return (scC = { updated_at: NOW - 11 * MIN, rules: { min_signals: 30, min_days: 30, top_window_days: 90, copies_min_days: 7 }, bots: bots, archive: archive,
@@ -224,7 +225,7 @@ sc.bots.forEach((b) => { sig += b.stats.n + 1; cl += b.stats.n; b.trades_tail.fo
 sc.archive.forEach((a) => { sig += a.n; cl += a.n; });
 var r30 = pub.map((b) => b.stats.r_30d).sort((a, b) => a - b), m = r30.length;
 var dd30 = pub.map((b) => b.stats.dd_30d).sort((a, b) => a - b), n30 = pub.reduce((s, b) => s + b.stats.n_30d, 0);
-var first = Math.min.apply(null, pub.map((b) => b.published_at)), u = NOW - 3 * MIN;
+var first = Math.min.apply(null, pub.concat(sc.archive).map((b) => b.published_at || NOW)), u = NOW - 3 * MIN;
 return { source: 'paper', tracked_signals: { value: sig, updated_at: u }, closed_signals: { value: cl, updated_at: u }, open_signals: { value: sig - cl, updated_at: u },
 showcase_days: { value: Math.round((NOW - first) / DAY), since: first, updated_at: T0 },
 bots_30d: { median_r: rd(m % 2 ? r30[(m - 1) / 2] : (r30[m / 2 - 1] + r30[m / 2]) / 2, 1), positive: r30.filter((x) => x > 0).length, total: m, worst_r: rd(r30[0], 1), best_r: rd(r30[m - 1], 1), n: n30, median_dd_r: rd(m % 2 ? dd30[(m - 1) / 2] : (dd30[m / 2 - 1] + dd30[m / 2]) / 2, 1), updated_at: NOW - 11 * MIN },
