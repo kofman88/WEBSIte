@@ -82,4 +82,8 @@ module.exports = {
   // Monitoring
   sentryDsn: process.env.SENTRY_DSN || '',
   logLevel: process.env.LOG_LEVEL || (IS_PROD ? 'info' : 'debug'),
+
+  // Signal engine (workers/engineWorker.js): scanners / feeds / tracker in a worker thread.
+  // ENGINE_WORKER=1 starts it with the server; default on in production, off elsewhere.
+  engineWorker: (process.env.ENGINE_WORKER || (IS_PROD ? '1' : '0')).trim() === '1',
 };

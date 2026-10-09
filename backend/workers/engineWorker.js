@@ -63,11 +63,26 @@ function forwardLogs(post) {
 }
 
 /**
+ * The thread's own end after 'stopped': close its SQLite connection (when this thread opened
+ * one) and the port, so the thread drains and exits by itself. Not process.exit(): ending a
+ * worker thread that way while better-sqlite3 / the file loggers still hold native resources
+ * crashed the whole process now and then (SIGSEGV in about 1 of 4 runs); the supervisor
+ * terminates a thread that does not drain within the grace period anyway.
+ */
+function softExit(port) {
+  try {
+    const p = require.resolve('../models/database');
+    if (require.cache[p]) require(p).close();
+  } catch (_e) { /* not loaded / already closed */ }
+  try { port.close(); } catch (_e) { /* closed */ }
+}
+
+/**
  * Run the worker half on `port` ({postMessage, on('message')}). Returns a handle for tests:
  * { scheduler(), remote, stop() }.
  *   deps          extra scheduler deps (tests: fakes for rest / cache / wsPool / …)
  *   heartbeatMs   liveness period; setTimer / clearTimer / setEvery / clearEvery injectable
- *   exit(code)    called after the shutdown answer (process.exit in a real worker thread)
+ *   exit(code)    called after the shutdown answer (the thread entry: softExit)
  */
 function runWorker(port, {
   deps = {}, heartbeatMs = HEARTBEAT_MS, logs = true, exit = null,
@@ -280,19 +295,28 @@ function createSupervisor({
       state.watchdog = null;
       const w = state.worker;
       if (!w) return { stopped: true, terminated: false };
-      let resolveDone;
-      const done = new Promise((r) => { resolveDone = r; });
-      const onMsg = (m) => { if (m && m.type === 'stopped') resolveDone('stopped'); };
-      w.on('message', onMsg);
-      w.on('exit', () => resolveDone('exit'));
+      let stopped = false;
+      let exited = false;
+      let wake = null;
+      const changed = () => { if (wake) { const f = wake; wake = null; f(); } };
+      w.on('message', (m) => { if (m && m.type === 'stopped') { stopped = true; changed(); } });
+      w.on('exit', () => { exited = true; changed(); });
       post({ type: 'shutdown' });
+      // wait for 'stopped' and then for the thread to drain and exit by itself (softExit); a
+      // thread still alive after the grace period is terminated
       let t = null;
-      const how = await Promise.race([done, new Promise((r) => { t = setTimer(() => r('timeout'), graceMs); })]);
+      const deadline = new Promise((r) => { t = setTimer(() => r('timeout'), graceMs); });
+      while (!exited) {
+        const how = await Promise.race([new Promise((r) => { wake = r; }), deadline]);
+        if (how === 'timeout') break;
+      }
       clearTimer(t);
       let terminated = false;
-      try { await w.terminate(); terminated = true; } catch (_e) { /* */ }
+      if (!exited) {
+        try { await w.terminate(); terminated = true; } catch (_e) { /* */ }
+      }
       state.worker = null;
-      return { stopped: how !== 'timeout', terminated };
+      return { stopped, terminated };
     },
     ping(id = 1) { post({ type: 'ping', id }); },
     get worker() { return state.worker; },
@@ -303,8 +327,22 @@ function createSupervisor({
  * startEngine(): what server.js calls outside tests when ENGINE_WORKER=1 — the supervised
  * worker + the main-thread loops + the genome regime provider. Returns { supervisor, scheduler, stop() }.
  */
+/** A winston-style logger (debug / info / warn / error) with the engine's warning / critical names. */
+function engineLog(log) {
+  const call = (name, fallback) => (...a) => {
+    const fn = log[name] || log[fallback] || log.info;
+    try { return fn.apply(log, a); } catch (_e) { return undefined; }
+  };
+  return {
+    debug: call('debug', 'info'), info: call('info', 'info'), warn: call('warn', 'warning'), warning: call('warn', 'warning'),
+    error: call('error', 'error'), critical: call('error', 'error'),
+  };
+}
+
 function startEngine({ log = null, env = process.env, spawn = null, delivery = null, mainDeps = {} } = {}) {
-  const L = log || require('../services/marketData/mdLog').log;
+  const L = log ? engineLog(log) : require('../services/marketData/mdLog').log;
+  // the engine modules of the main thread (genome, ghost cleanup …) log through mdLog → the site logger
+  if (log) require('../services/marketData/mdLog').setLogger(L);
   const regimeHook = require('../services/genome/regime');
   const { CACHE_TTL } = require('../services/engine/regimeLoop');
   const regime = { value: null, at: 0 };
@@ -329,12 +367,16 @@ function startEngine({ log = null, env = process.env, spawn = null, delivery = n
   };
 }
 
-if (!isMainThread && parentPort) {
-  runWorker(parentPort, { exit: (code) => process.exit(code) });
+// Only as the entry script of a worker thread (never when another thread merely requires the module).
+if (!isMainThread && parentPort && require.main === module) {
+  // the thread's own SQLite connection first (WAL, busy_timeout 15 s; the idempotent migrations
+  // are a no-op once the main thread ran them) — opened at start, not lazily mid-shutdown
+  try { require('../models/database'); } catch (e) { parentPort.postMessage({ type: 'fatal', error: String(e && e.stack ? e.stack : e) }); }
+  runWorker(parentPort, { exit: () => softExit(parentPort) });
 }
 
 module.exports = {
   WORKER_PATH, HEARTBEAT_MS, HEARTBEAT_TIMEOUT_MS, WATCHDOG_EVERY_MS, SHUTDOWN_GRACE_MS,
   RESTART_BASE_S, RESTART_MAX_S, RESTART_HEALTHY_S,
-  runWorker, createSupervisor, startEngine, forwardLogs,
+  runWorker, createSupervisor, startEngine, forwardLogs, softExit, engineLog,
 };
