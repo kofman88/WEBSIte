@@ -1206,15 +1206,31 @@ function defaultScanner(deps) {
   return _default;
 }
 
-/** run_smc_scanner(bot, um, fetcher, interval_sec, health) with the default instance. */
-function runSmcScanner(opts = {}) {
-  return defaultScanner().runSmcScanner(opts);
+/** The module state if a scanner exists (cache_gc reads _tf_cache / _SMC_LAST_SCAN), else null. */
+function currentScanner() {
+  return _default;
+}
+
+/**
+ * run_smc_scanner(bot, um, fetcher, interval_sec=300, health=None) with the module instance.
+ * `bot` is the delivery facade ({deliver, deliverChart}); `opts.deps` are extra createSmcScanner
+ * deps. The instance is created on the first call and survives a _guarded_restart (the bot's
+ * module globals _SMC_LAST_SCAN / _tf_cache do), so a restart keeps the per-user interval gate.
+ */
+function runSmcScanner(bot = null, um = null, fetcher = null, opts = {}) {
+  const { deps = null, ...loopOpts } = opts || {};
+  const d = { ...(deps || {}) };
+  if (bot && typeof bot.deliver === 'function') d.deliver = (m) => bot.deliver(m);
+  if (bot && typeof bot.deliverChart === 'function') d.deliverChart = (m) => bot.deliverChart(m);
+  if (um) d.um = um;
+  if (fetcher) d.fetcher = fetcher;
+  return defaultScanner(d).runSmcScanner(loopOpts);
 }
 
 module.exports = {
   SMC_TF_MAP, SMC_ANALYZERS_MAX, OKX_SEM_SIZE, HTF_TTL_S, MTF_TTL_S, LTF_TTL_S, TF_CACHE_MAX,
   SEND_CONCURRENCY, REVERSAL_OVERRIDE_MIN, SMC_FLOOR, SMC_CAP, VOL_GATE_LOG_CAP, GATHER_TIMEOUT_S,
   DEFAULT_INTERVAL_S, Semaphore, WakeEvent, detectReversalSetup, createSmcScanner, defaultScanner,
-  runSmcScanner,
+  currentScanner, runSmcScanner,
   _resetDefault: () => { _default = null; },
 };
