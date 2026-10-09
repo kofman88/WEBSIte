@@ -33,6 +33,8 @@ function authMiddleware(req, res, next) {
     req.isAdmin = Boolean(row.is_admin);
     req.adminRole = row.is_admin ? (row.admin_role || 'superadmin') : null;
     req.user = row;
+    // the token's expiry (unix s): a long-lived response (the app's SSE stream) ends with it
+    req.authExp = Number.isFinite(decoded.exp) ? decoded.exp : null;
     // Impersonation: when an admin issued this token via /admin/users/:id/
     // impersonate, decoded.imp holds the original admin id. The target
     // user is still used for authz (req.userId = target.id), but any
@@ -274,8 +276,26 @@ function tierLimiter(caps, windowStr = '1m') {
   };
 }
 
+/**
+ * An /api/app/* request carrying a valid access token (signature + expiry; the route's own auth
+ * re-checks the user row). server.js keeps such requests out of the global per-IP limiter: the
+ * Mini App surface has the bot's per-user buckets instead.
+ */
+function isAuthenticatedAppRequest(req) {
+  if (!String(req.originalUrl || '').startsWith('/api/app/')) return false;
+  const h = req.headers && req.headers.authorization;
+  if (!h || !h.startsWith('Bearer ')) return false;
+  try {
+    const d = authService.verifyAccessToken(h.slice(7).trim());
+    return Boolean(d && d.uid);
+  } catch (_e) {
+    return false;
+  }
+}
+
 module.exports = {
   authMiddleware,
+  isAuthenticatedAppRequest,
   requireTier,
   requireFeature,
   requireAdmin,

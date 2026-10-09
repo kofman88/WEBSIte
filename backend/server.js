@@ -63,7 +63,11 @@ app.use(cors({
 
 app.use(compression());
 
-// Global per-IP rate-limit across /api (skipped in tests)
+// Global per-IP rate-limit across /api (skipped in tests). An authenticated /api/app request is
+// not counted: that surface has the bot's own per-user buckets (routes/app.js — POST 30 / 60 s,
+// chart, plan, challenge, share, feedback, analyze) and the bot has no per-IP cap on it; users
+// behind one NAT / carrier IP must not share 300 requests per 15 min of the app's polling. Requests
+// without a valid access token (scans, floods, expired tokens) still count per IP.
 if (process.env.NODE_ENV !== 'test' && process.env.VITEST !== 'true') {
   const globalLimiter = rateLimit({
     windowMs: 15 * 60 * 1000,
@@ -71,6 +75,7 @@ if (process.env.NODE_ENV !== 'test' && process.env.VITEST !== 'true') {
     message: { error: 'Too many requests, please try again later', code: 'RATE_LIMITED' },
     standardHeaders: true,
     legacyHeaders: false,
+    skip: (req) => require('./middleware/auth').isAuthenticatedAppRequest(req),
   });
   app.use('/api/', globalLimiter);
 }
