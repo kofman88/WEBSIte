@@ -117,7 +117,7 @@ const ROW_EXTRA = ['username', 'okx_passphrase'];
  * (services/autotrade/index.js createAutoTrade, every exchange enabled) instead of createExecutor.
  */
 /** The bot's behaviour for the D18 site guards (docs/PORT_DECISIONS.md D18). */
-const BOT_D18 = Object.freeze({ inflightGuard: false, okxNoBlindRetry: false, reconcileFailedRetry: false });
+const BOT_D18 = Object.freeze({ inflightGuard: false, reconcileFailedRetry: false });
 
 function buildEnv(c, fx, { d6 = { executedOnReject: true, fixedAmountPercent: false }, via = 'executor', indexDeps = {}, d18 = BOT_D18 } = {}) {
   const clk = createVClock(c.clock);

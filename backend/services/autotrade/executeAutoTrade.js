@@ -108,10 +108,10 @@ function createExecutor(deps) {
   // D17 (site): record the exchange of a placed order on the trade row (the bot never writes it, so
   // its quick close / SL→BE read 'bybit' for every trade) — bot mode {recordExchange: false}
   const d17 = { recordExchange: true, ...(deps.d17 || {}) };
-  // D18 (site, docs/PORT_DECISIONS.md): the in-flight placement guard and the OKX retry rule —
-  // and the reconcile of a failed retry — `d18: {inflightGuard: false, okxNoBlindRetry: false,
-  // reconcileFailedRetry: false}` is the bot
-  const d18 = { inflightGuard: true, okxNoBlindRetry: true, reconcileFailedRetry: true, ...(deps.d18 || {}) };
+  // D18 (site, docs/PORT_DECISIONS.md): the in-flight placement guard and the reconcile of a failed
+  // retry — `d18: {inflightGuard: false, reconcileFailedRetry: false}` is the bot (the OKX no-blind-retry
+  // rule is the bot's own since 2026-10, [OKX-NO-BLIND-RETRY])
+  const d18 = { inflightGuard: true, reconcileFailedRetry: true, ...(deps.d18 || {}) };
   let shuttingDown = false;
   const stopping = () => shuttingDown;
   async function recordExchange(tid, ex) {
@@ -1369,13 +1369,12 @@ function createExecutor(deps) {
                   log.warning(pf('[TIMEOUT-FIRST-ATTEMPT] uid=%s %s: order found on exchange after first-attempt timeout — handing over to timeout reconcile', userId, symbol));
                   throw e;
                 }
-                if (exchange === 'okx' && d18.okxNoBlindRetry) {
-                  // D18 (site): an OKX entry carries no client order id, so a second send is a second
-                  // order whenever the first one got through — and okx_trader answers a failed read with
-                  // an empty list, so "nothing found" cannot tell "not there" from "not read". No blind
-                  // retry: the timeout reconcile reads the position once more (found → recorded + SL,
-                  // none → pending orders cancelled, SKIP) — fail-closed
-                  log.warning(pf('[D18-OKX-NO-RETRY] uid=%s %s: no client order id on OKX — no blind retry, handing over to timeout reconcile', userId, symbol));
+                if (exchange === 'okx') {
+                  // [OKX-NO-BLIND-RETRY 2026-10] (auto_trade.py) okx_trader answers a failed read with an empty
+                  // list — "nothing found" cannot tell "not there" from "not read", and OKX rejects a duplicate
+                  // clOrdId only while that order is pending: a second market entry could open a second
+                  // position. No retry — the timeout reconcile below (position → recorded + SL, none → SKIP)
+                  log.warning(pf('[OKX-NO-BLIND-RETRY] uid=%s %s: OKX entry state unknown after a timeout — no blind retry, handing over to timeout reconcile', userId, symbol));
                   throw e;
                 }
                 log.warning(pf('[C78-IDEM] %s: no existing order — retry in 5s', symbol));

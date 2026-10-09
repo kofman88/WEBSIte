@@ -542,6 +542,12 @@ function createFakeExchanges({ clock, instruments = {}, prices = {}, duplicateCl
       if (b.px !== undefined && tick > 0 && Math.abs(Number(b.px) / tick - Math.round(Number(b.px) / tick)) > 1e-6) lenientNote('okx', '/api/v5/trade/order', `px ${b.px} off tick ${tick}`);
       return { base, side, posSide, qty: Number(b.sz) * ctv(base), reduceOnly: reducing };
     };
+    if (path === '/api/v5/trade/order' && method === 'GET') {
+      // order details by clOrdId ([OKX-ENTRY-TIMEOUT]: the entry looked up after a lost answer)
+      const rec = (a.okxClOrders || new Map()).get(query.clOrdId || '');
+      if (!rec || rec.instId !== query.instId) return err(51603, 'Order does not exist');
+      return ok([{ ...rec }]);
+    }
     switch (path) {
       case '/api/v5/account/config':
         return ok([{ uid: '1', acctLv: '2', posMode: 'long_short_mode', perm: a.perms || 'read_only,trade', label: 'autotrade' }]);
@@ -556,6 +562,13 @@ function createFakeExchanges({ clock, instruments = {}, prices = {}, duplicateCl
         if (seenClientId(a, body.clOrdId)) return err(1, 'All operations failed', [{ ordId: '', clOrdId: body.clOrdId, sCode: '51016', sMsg: 'Duplicated clOrdId' }]);
         const r = place(a, { ...o, type: body.ordType === 'market' ? 'MARKET' : 'LIMIT', price: body.px === undefined ? 0 : Number(body.px) });
         if (!r.ok) return err(1, 'All operations failed', [{ ordId: '', sCode: '51169', sMsg: "Order failed because you don't have any positions in this direction for this contract to reduce or close." }]);
+        if (body.clOrdId) {
+          if (!a.okxClOrders) a.okxClOrders = new Map();
+          a.okxClOrders.set(body.clOrdId, {
+            ordId: String(r.id), clOrdId: body.clOrdId, instId: body.instId, state: r.filled ? 'filled' : 'live', accFillSz: r.filled ? String(body.sz) : '0',
+            attachAlgoOrds: (body.attachAlgoOrds || []).map((att) => ({ attachAlgoClOrdId: att.attachAlgoClOrdId || '', slTriggerPx: att.slTriggerPx || '', tpTriggerPx: att.tpTriggerPx || '' })),
+          });
+        }
         if (r.filled && !o.reduceOnly) {
           for (const att of body.attachAlgoOrds || []) {
             const closeSide = o.side === 'BUY' ? 'SELL' : 'BUY';
@@ -568,9 +581,11 @@ function createFakeExchanges({ clock, instruments = {}, prices = {}, duplicateCl
       }
       case '/api/v5/trade/order-algo': {
         const o = orderFrom(body, true);
-        if (!posOf(a, o.base, o.posSide)) return err(1, 'Operation failed', [{ algoId: '', sCode: '51169', sMsg: 'no position' }]);
+        const cur = posOf(a, o.base, o.posSide);
+        if (!cur) return err(1, 'Operation failed', [{ algoId: '', sCode: '51169', sMsg: 'no position' }]);
+        const closeAll = String(body.closeFraction || '') === '1';   // OKX closeFraction "1": the whole position
         const id = newId();
-        a.orders.push({ id, base: o.base, side: o.side, posSide: o.posSide, type: body.slTriggerPx ? 'STOP' : 'TP', qty: o.qty, trigger: Number(body.slTriggerPx || body.tpTriggerPx), reduceOnly: true, cond: true, algo: true, ts: now() });
+        a.orders.push({ id, base: o.base, side: o.side, posSide: o.posSide, type: body.slTriggerPx ? 'STOP' : 'TP', qty: closeAll ? cur.size : o.qty, closeAll, trigger: Number(body.slTriggerPx || body.tpTriggerPx), reduceOnly: true, cond: true, algo: true, ts: now() });
         return ok([{ algoId: String(id), sCode: '0', sMsg: '' }]);
       }
       case '/api/v5/account/positions':
@@ -590,7 +605,7 @@ function createFakeExchanges({ clock, instruments = {}, prices = {}, duplicateCl
         return n === a.orders.length ? err(1, 'failed', [{ ordId: body.ordId, sCode: '51400', sMsg: 'Order cancellation failed' }]) : ok([{ ordId: body.ordId, sCode: '0', sMsg: '' }]);
       }
       case '/api/v5/trade/orders-algo-pending':
-        return ok(a.orders.filter((o) => o.algo && (!query.instId || nativeOf('okx', o.base) === query.instId)).map((o) => ({ algoId: String(o.id), instId: nativeOf('okx', o.base), side: o.side.toLowerCase(), posSide: o.posSide.toLowerCase(), ordType: 'conditional', slTriggerPx: o.type === 'STOP' ? fmt(o.trigger) : '', tpTriggerPx: o.type === 'TP' ? fmt(o.trigger) : '', sz: fmt(o.qty / ctv(o.base)) })));
+        return ok(a.orders.filter((o) => o.algo && (!query.instId || nativeOf('okx', o.base) === query.instId)).map((o) => ({ algoId: String(o.id), instId: nativeOf('okx', o.base), side: o.side.toLowerCase(), posSide: o.posSide.toLowerCase(), ordType: 'conditional', slTriggerPx: o.type === 'STOP' ? fmt(o.trigger) : '', tpTriggerPx: o.type === 'TP' ? fmt(o.trigger) : '', sz: o.closeAll ? '' : fmt(o.qty / ctv(o.base)), closeFraction: o.closeAll ? '1' : '' })));
       case '/api/v5/trade/cancel-algos': {
         const ids = new Set((Array.isArray(body) ? body : []).map((x) => String(x.algoId)));
         a.orders = a.orders.filter((o) => !(o.algo && ids.has(String(o.id))));

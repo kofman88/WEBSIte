@@ -284,7 +284,12 @@ function createPartialTp({ traderFor, log = null, sleep = null, sendMessage = nu
 
     if (exchange === 'bingx') {
       const bx = traderFor('bingx');
-      const side = d === 'LONG' ? 'Sell' : 'Buy';
+      // [BINGX-PTP-POSSIDE 2026-10] upper-case side + the position's positionSide, like
+      // bingx_trader.place_trade. It used to send "Sell"/"Buy" without positionSide: on a hedge
+      // account BingX assumes LONG, and a short's TP (BUY + LONG) would open a long instead of
+      // closing the short. One-way account (109400) → BOTH + reduceOnly.
+      const side = d === 'LONG' ? 'SELL' : 'BUY';
+      const bxPosSide = d === 'LONG' ? 'LONG' : 'SHORT';
       const bingxSym = toBingxSymbol(symbol);
       const [bxStep, bxTick] = await bx.inst._getInstrumentFilters(bingxSym);
       const bxPmult = bingxPriceMultiplier(symbol);
@@ -311,11 +316,25 @@ function createPartialTp({ traderFor, log = null, sleep = null, sendMessage = nu
             continue;
           }
           const priceStr = PP.roundPrice(price * bxPmult, bxTick);
-          const body = { symbol: bingxSym, side, type: 'TAKE_PROFIT_MARKET', quantity: qtyStr, stopPrice: priceStr, workingType: 'MARK_PRICE' };
+          const body = {
+            symbol: bingxSym, side, type: 'TAKE_PROFIT_MARKET', quantity: qtyStr, stopPrice: priceStr, workingType: 'MARK_PRICE',
+            positionSide: bxPosSide,
+          };
           let ok = false;
           let last = {};
+          let tries = 0;
+          let first109400 = null;
           for (let attempt = 0; attempt < 3; attempt++) {
-            const result = await bx.inst._request('POST', '/openApi/swap/v2/trade/order', apiKey, apiSecret, body);
+            tries += 1;
+            let result = await bx.inst._request('POST', '/openApi/swap/v2/trade/order', apiKey, apiSecret, body);
+            if (pyGet(result, 'code') === 109400 && body.positionSide !== 'BOTH') {
+              // [BINGX-PTP-POSSIDE] one-way account: BOTH + reduceOnly (a TP without reduceOnly could open the other side)
+              first109400 = result;   // 109400 is also a generic parameter error — keep it for the log
+              body.positionSide = 'BOTH';
+              body.reduceOnly = 'true';
+              tries += 1;
+              result = await bx.inst._request('POST', '/openApi/swap/v2/trade/order', apiKey, apiSecret, body);
+            }
             if (pyGet(result, 'code') === 0) { ok = true; break; }
             last = result;
             const code = pyGet(result, 'code');
@@ -336,7 +355,10 @@ function createPartialTp({ traderFor, log = null, sleep = null, sendMessage = nu
             break;
           }
           if (ok) anyPlaced = true;
-          else logger.warning(pf('Partial %s failed [%s %s] after 3 attempts: %s', label, strategyName, symbol, last));
+          else {
+            logger.warning(pf('Partial %s failed [%s %s] after %d request(s): %s%s', label, strategyName, symbol, tries, last,
+              first109400 ? pf(' (first, %s: %s)', bxPosSide, first109400) : ''));
+          }
         } catch (e) {
           if (isCancelledError(e)) throw e;
           logger.warning(pf('Partial %s failed [%s %s]: %s', label, strategyName, symbol, errText(e)));
@@ -387,8 +409,21 @@ function createPartialTp({ traderFor, log = null, sleep = null, sendMessage = nu
     } else if (exchange === 'okx') {
       const ok = traderFor('okx');
       const closeSide = d === 'LONG' ? 'sell' : 'buy';
+      // [OKX-PTP-POSSIDE 2026-10] posSide is mandatory on a long/short account (the bot works in
+      // that mode everywhere) — without it the limit TP was refused (51000) and the fallback
+      // place_sl_tp_for_position ran every time.
+      const okxPosSide = d === 'LONG' ? 'long' : 'short';
       const okxSym = toOkxSymbol(symbol);
       const pp = (kwargs.passphrase ? String(kwargs.passphrase) : String(getattr(user, 'okx_passphrase', '') || ''));
+      // [OKX-PTP-POSSIDE] px on the tickSz grid, toward the entry (like the TPs of place_trade)
+      let okxTick = 0.0;
+      try {
+        const [, tick, found] = await ok.inst._getInstrumentFilters(okxSym);
+        okxTick = found ? tick : 0.0;
+      } catch (e) {
+        if (isCancelledError(e)) throw e;
+        okxTick = 0.0;
+      }
       const RETRIES = 3;
       try {
         const okxPmult = okxPriceMultiplier(symbol);
@@ -413,7 +448,8 @@ function createPartialTp({ traderFor, log = null, sleep = null, sendMessage = nu
         for (let attempt = 0; attempt < RETRIES; attempt++) {
           try {
             const resp = await ok.inst._request('POST', '/api/v5/trade/order', apiKey, apiSecret, pp, null, {
-              instId: okxSym, tdMode: 'cross', side: closeSide, ordType: 'limit', sz, px: pyFloatStr(pyRound(price, 8)), reduceOnly: true,
+              instId: okxSym, tdMode: 'cross', side: closeSide, posSide: okxPosSide, ordType: 'limit', sz,
+              px: okxTick > 0 ? PP.roundPriceTp(price, okxTick, d) : pyFloatStr(pyRound(price, 8)), reduceOnly: true,
             });
             if (pyGet(resp, 'code') === '0') { anyPlaced = true; placed = true; break; }
             lastErr = pf('%s', resp);

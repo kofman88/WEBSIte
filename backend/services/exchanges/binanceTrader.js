@@ -11,7 +11,7 @@
  * place_trade (spec §14.3): exchangeInfo filters (4 h cache), USDT balance, dual-side
  * position mode (`-4059`/`-4061` + "existing" → one-way, positionSide omitted), leverage
  * with halving on -4028/-4060 (≤ 3 tries), sizing + low-notional skip/boost, deterministic
- * newClientOrderIds, ATOMIC batchOrders with [BINANCE-ATOMIC-OK|FALLBACK], legacy flow:
+ * newClientOrderIds, ATOMIC batchOrders with [BINANCE-ATOMIC-OK|FALLBACK] (off: [BINANCE-BATCH-OFF]), legacy flow:
  * LIMIT within 0.3 % of last price else MARKET (order_type ignored, no fill wait),
  * duplicate -4015 → ok, SL by orderId check ×3 then cancel + [SL-SAFETY-CLOSE-BINANCE*],
  * TPs ×5 with -2021 adaptive re-pricing, all-TP-success rule.
@@ -51,6 +51,14 @@ const FALLBACK_URLS = Object.freeze([
   'https://fapi3.binance.com',
   'https://fapi4.binance.com',
 ]);
+// [BINANCE-BATCH-OFF 2026-10] the batched entry /fapi/v1/batchOrders is off (binance_trader.
+// _BINANCE_ATOMIC_BATCH). It never worked in production: yarl requotes the signed batchOrders value
+// (%3A → ':'), the signature does not match → -1022 → [BINANCE-ATOMIC-FALLBACK] and the sequential
+// flow every time. Fixing the signature alone is unsafe: Binance runs the batch items independently
+// (not atomic), and on «entry accepted, SL refused» the sequential flow re-sends the entry with the
+// same clientOrderId → duplicate → ok without an SL. The working path is the sequential one.
+// `overrides.atomicBatch` exists for the replay suites only.
+const BINANCE_ATOMIC_BATCH = false;
 const MIN_NOTIONAL = 5.0;
 const MAX_LEVERAGE = 125;
 const RECV_WINDOW = 5000;
@@ -118,6 +126,7 @@ function createBinanceTrader(overrides = {}) {
     syncWarnAt: 0.0,
     instrumentFilterCache: new Map(),
   };
+  const atomicBatch = overrides.atomicBatch === undefined ? BINANCE_ATOMIC_BATCH : Boolean(overrides.atomicBatch);
 
   async function findWorkingBinanceUrl() {
     for (const url of FALLBACK_URLS) {
@@ -400,7 +409,7 @@ function createBinanceTrader(overrides = {}) {
       let atomicOk = false;
       let atomicOrderId = '';
       let atomicTpPlaced = false;
-      if (cidEntry && cidSl && tp1 > 0 && sl > 0) {
+      if (atomicBatch && cidEntry && cidSl && tp1 > 0 && sl > 0) {
         try {
           let qTp1;
           let qTp2;

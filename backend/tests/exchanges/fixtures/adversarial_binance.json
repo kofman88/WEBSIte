@@ -541,10 +541,9 @@
 "name": "rnd_pt_01_1000FLOKIUSDT_SHORT_Market_risk_edge",
 "result": {
 "ok": true,
-"order_id": "2365521394",
+"order_id": "7196970050",
 "error": "",
 "tp_placed": true,
-"atomic": true,
 "qty": 15000000.0
 },
 "requests": [
@@ -626,8 +625,23 @@
 }
 },
 {
+"method": "GET",
+"url": "https://fapi.binance.com/fapi/v1/ticker/price?symbol=1000FLOKIUSDT",
+"headers": {},
+"body": null,
+"hdrs": {},
+"wire": {
+"method": "GET",
+"target": "/fapi/v1/ticker/price?symbol=1000FLOKIUSDT",
+"headers": {
+"accept": "*/*"
+},
+"body": null
+}
+},
+{
 "method": "POST",
-"url": "https://fapi.binance.com/fapi/v1/batchOrders?batchOrders=%5B%7B%22symbol%22:+%221000FLOKIUSDT%22,+%22side%22:+%22SELL%22,+%22positionSide%22:+%22SHORT%22,+%22type%22:+%22MARKET%22,+%22quantity%22:+%2215000000%22,+%22newClientOrderId%22:+%22chm_3b6e8634601a%22%7D,+%7B%22symbol%22:+%221000FLOKIUSDT%22,+%22side%22:+%22BUY%22,+%22positionSide%22:+%22SHORT%22,+%22type%22:+%22STOP_MARKET%22,+%22stopPrice%22:+%220.15086%22,+%22quantity%22:+%2215000000%22,+%22workingType%22:+%22MARK_PRICE%22,+%22timeInForce%22:+%22GTC%22,+%22newClientOrderId%22:+%22chm_fec8bdbb28e7%22%7D,+%7B%22symbol%22:+%221000FLOKIUSDT%22,+%22side%22:+%22BUY%22,+%22positionSide%22:+%22SHORT%22,+%22type%22:+%22TAKE_PROFIT_MARKET%22,+%22stopPrice%22:+%220.15041%22,+%22quantity%22:+%229000000%22,+%22workingType%22:+%22MARK_PRICE%22,+%22timeInForce%22:+%22GTC%22,+%22newClientOrderId%22:+%22chm_a88944ff9f9f%22%7D,+%7B%22symbol%22:+%221000FLOKIUSDT%22,+%22side%22:+%22BUY%22,+%22positionSide%22:+%22SHORT%22,+%22type%22:+%22TAKE_PROFIT_MARKET%22,+%22stopPrice%22:+%220.15033%22,+%22quantity%22:+%223000000%22,+%22workingType%22:+%22MARK_PRICE%22,+%22timeInForce%22:+%22GTC%22,+%22newClientOrderId%22:+%22chm_56ec259c5010%22%7D,+%7B%22symbol%22:+%221000FLOKIUSDT%22,+%22side%22:+%22BUY%22,+%22positionSide%22:+%22SHORT%22,+%22type%22:+%22TAKE_PROFIT_MARKET%22,+%22stopPrice%22:+%220.15011%22,+%22quantity%22:+%223000000%22,+%22workingType%22:+%22MARK_PRICE%22,+%22timeInForce%22:+%22GTC%22,+%22newClientOrderId%22:+%22chm_18412bb92649%22%7D%5D&timestamp=1768034511000&recvWindow=5000&signature=56b0cf5ff3078d27c81ac95a123162c8ae0f5cca8b3b74ee4a8f9ba147bf7cb6",
+"url": "https://fapi.binance.com/fapi/v1/order?symbol=1000FLOKIUSDT&side=SELL&quantity=15000000&positionSide=SHORT&newClientOrderId=chm_3b6e8634601a&type=LIMIT&price=0.15071&timeInForce=GTC&timestamp=1768034511000&recvWindow=5000&signature=1b8211c3cbc195d7a19c72d3592d75ef14930f5a5f507497776beceaf86f0a99",
 "headers": {
 "X-MBX-APIKEY": "BN6Wqp9hg1fpjTntnv"
 },
@@ -637,7 +651,91 @@
 },
 "wire": {
 "method": "POST",
-"target": "/fapi/v1/batchOrders?batchOrders=%5B%7B%22symbol%22:+%221000FLOKIUSDT%22,+%22side%22:+%22SELL%22,+%22positionSide%22:+%22SHORT%22,+%22type%22:+%22MARKET%22,+%22quantity%22:+%2215000000%22,+%22newClientOrderId%22:+%22chm_3b6e8634601a%22%7D,+%7B%22symbol%22:+%221000FLOKIUSDT%22,+%22side%22:+%22BUY%22,+%22positionSide%22:+%22SHORT%22,+%22type%22:+%22STOP_MARKET%22,+%22stopPrice%22:+%220.15086%22,+%22quantity%22:+%2215000000%22,+%22workingType%22:+%22MARK_PRICE%22,+%22timeInForce%22:+%22GTC%22,+%22newClientOrderId%22:+%22chm_fec8bdbb28e7%22%7D,+%7B%22symbol%22:+%221000FLOKIUSDT%22,+%22side%22:+%22BUY%22,+%22positionSide%22:+%22SHORT%22,+%22type%22:+%22TAKE_PROFIT_MARKET%22,+%22stopPrice%22:+%220.15041%22,+%22quantity%22:+%229000000%22,+%22workingType%22:+%22MARK_PRICE%22,+%22timeInForce%22:+%22GTC%22,+%22newClientOrderId%22:+%22chm_a88944ff9f9f%22%7D,+%7B%22symbol%22:+%221000FLOKIUSDT%22,+%22side%22:+%22BUY%22,+%22positionSide%22:+%22SHORT%22,+%22type%22:+%22TAKE_PROFIT_MARKET%22,+%22stopPrice%22:+%220.15033%22,+%22quantity%22:+%223000000%22,+%22workingType%22:+%22MARK_PRICE%22,+%22timeInForce%22:+%22GTC%22,+%22newClientOrderId%22:+%22chm_56ec259c5010%22%7D,+%7B%22symbol%22:+%221000FLOKIUSDT%22,+%22side%22:+%22BUY%22,+%22positionSide%22:+%22SHORT%22,+%22type%22:+%22TAKE_PROFIT_MARKET%22,+%22stopPrice%22:+%220.15011%22,+%22quantity%22:+%223000000%22,+%22workingType%22:+%22MARK_PRICE%22,+%22timeInForce%22:+%22GTC%22,+%22newClientOrderId%22:+%22chm_18412bb92649%22%7D%5D&timestamp=1768034511000&recvWindow=5000&signature=56b0cf5ff3078d27c81ac95a123162c8ae0f5cca8b3b74ee4a8f9ba147bf7cb6",
+"target": "/fapi/v1/order?symbol=1000FLOKIUSDT&side=SELL&quantity=15000000&positionSide=SHORT&newClientOrderId=chm_3b6e8634601a&type=LIMIT&price=0.15071&timeInForce=GTC&timestamp=1768034511000&recvWindow=5000&signature=1b8211c3cbc195d7a19c72d3592d75ef14930f5a5f507497776beceaf86f0a99",
+"headers": {
+"x-mbx-apikey": "BN6Wqp9hg1fpjTntnv",
+"accept": "*/*",
+"content-type": "application/octet-stream"
+},
+"body": null
+}
+},
+{
+"method": "POST",
+"url": "https://fapi.binance.com/fapi/v1/order?symbol=1000FLOKIUSDT&side=BUY&type=STOP_MARKET&quantity=15000000&stopPrice=0.15086&workingType=MARK_PRICE&timeInForce=GTC&positionSide=SHORT&newClientOrderId=chm_fec8bdbb28e7&timestamp=1768034511000&recvWindow=5000&signature=b157fbb1e14df897fd78132b9d63f947e34cac6174a10b302529c78f8066b82c",
+"headers": {
+"X-MBX-APIKEY": "BN6Wqp9hg1fpjTntnv"
+},
+"body": null,
+"hdrs": {
+"x-mbx-apikey": "BN6Wqp9hg1fpjTntnv"
+},
+"wire": {
+"method": "POST",
+"target": "/fapi/v1/order?symbol=1000FLOKIUSDT&side=BUY&type=STOP_MARKET&quantity=15000000&stopPrice=0.15086&workingType=MARK_PRICE&timeInForce=GTC&positionSide=SHORT&newClientOrderId=chm_fec8bdbb28e7&timestamp=1768034511000&recvWindow=5000&signature=b157fbb1e14df897fd78132b9d63f947e34cac6174a10b302529c78f8066b82c",
+"headers": {
+"x-mbx-apikey": "BN6Wqp9hg1fpjTntnv",
+"accept": "*/*",
+"content-type": "application/octet-stream"
+},
+"body": null
+}
+},
+{
+"method": "POST",
+"url": "https://fapi.binance.com/fapi/v1/order?symbol=1000FLOKIUSDT&side=BUY&type=TAKE_PROFIT_MARKET&quantity=9000000&stopPrice=0.15041&workingType=MARK_PRICE&timeInForce=GTC&positionSide=SHORT&newClientOrderId=chm_a88944ff9f9f&timestamp=1768034511000&recvWindow=5000&signature=a6ebe101a6bfc57fb2cd0d7f5d212ace632f920669362e5b224c3fb4019b07bf",
+"headers": {
+"X-MBX-APIKEY": "BN6Wqp9hg1fpjTntnv"
+},
+"body": null,
+"hdrs": {
+"x-mbx-apikey": "BN6Wqp9hg1fpjTntnv"
+},
+"wire": {
+"method": "POST",
+"target": "/fapi/v1/order?symbol=1000FLOKIUSDT&side=BUY&type=TAKE_PROFIT_MARKET&quantity=9000000&stopPrice=0.15041&workingType=MARK_PRICE&timeInForce=GTC&positionSide=SHORT&newClientOrderId=chm_a88944ff9f9f&timestamp=1768034511000&recvWindow=5000&signature=a6ebe101a6bfc57fb2cd0d7f5d212ace632f920669362e5b224c3fb4019b07bf",
+"headers": {
+"x-mbx-apikey": "BN6Wqp9hg1fpjTntnv",
+"accept": "*/*",
+"content-type": "application/octet-stream"
+},
+"body": null
+}
+},
+{
+"method": "POST",
+"url": "https://fapi.binance.com/fapi/v1/order?symbol=1000FLOKIUSDT&side=BUY&type=TAKE_PROFIT_MARKET&quantity=3000000&stopPrice=0.15033&workingType=MARK_PRICE&timeInForce=GTC&positionSide=SHORT&newClientOrderId=chm_56ec259c5010&timestamp=1768034511000&recvWindow=5000&signature=d14bf8f66e4ae74214c40240635acadd93982901a061b34803f1f74eca04a154",
+"headers": {
+"X-MBX-APIKEY": "BN6Wqp9hg1fpjTntnv"
+},
+"body": null,
+"hdrs": {
+"x-mbx-apikey": "BN6Wqp9hg1fpjTntnv"
+},
+"wire": {
+"method": "POST",
+"target": "/fapi/v1/order?symbol=1000FLOKIUSDT&side=BUY&type=TAKE_PROFIT_MARKET&quantity=3000000&stopPrice=0.15033&workingType=MARK_PRICE&timeInForce=GTC&positionSide=SHORT&newClientOrderId=chm_56ec259c5010&timestamp=1768034511000&recvWindow=5000&signature=d14bf8f66e4ae74214c40240635acadd93982901a061b34803f1f74eca04a154",
+"headers": {
+"x-mbx-apikey": "BN6Wqp9hg1fpjTntnv",
+"accept": "*/*",
+"content-type": "application/octet-stream"
+},
+"body": null
+}
+},
+{
+"method": "POST",
+"url": "https://fapi.binance.com/fapi/v1/order?symbol=1000FLOKIUSDT&side=BUY&type=TAKE_PROFIT_MARKET&quantity=3000000&stopPrice=0.15011&workingType=MARK_PRICE&timeInForce=GTC&positionSide=SHORT&newClientOrderId=chm_18412bb92649&timestamp=1768034511000&recvWindow=5000&signature=912e66535e1c99521657262844b688d672ebf8a7040961cdf2f9dcb884602b20",
+"headers": {
+"X-MBX-APIKEY": "BN6Wqp9hg1fpjTntnv"
+},
+"body": null,
+"hdrs": {
+"x-mbx-apikey": "BN6Wqp9hg1fpjTntnv"
+},
+"wire": {
+"method": "POST",
+"target": "/fapi/v1/order?symbol=1000FLOKIUSDT&side=BUY&type=TAKE_PROFIT_MARKET&quantity=3000000&stopPrice=0.15011&workingType=MARK_PRICE&timeInForce=GTC&positionSide=SHORT&newClientOrderId=chm_18412bb92649&timestamp=1768034511000&recvWindow=5000&signature=912e66535e1c99521657262844b688d672ebf8a7040961cdf2f9dcb884602b20",
 "headers": {
 "x-mbx-apikey": "BN6Wqp9hg1fpjTntnv",
 "accept": "*/*",
@@ -649,17 +747,16 @@
 ],
 "sleeps": [],
 "clock_end": 1768034511.0,
-"markers": [
-[
-"INFO",
-"[BINANCE-ATOMIC-OK]"
-]
-],
+"markers": [],
 "saved": {
 "hedge_saved": [],
 "auth_reset": [],
 "events": [],
-"metrics": []
+"metrics": [
+"trade_placed",
+"trade_placement_latency_ms",
+"sl_tp_attached"
+]
 },
 "final": {
 "hedge": {},
@@ -672,7 +769,35 @@
 "bingx_offset": 0,
 "okx_offset": 0
 },
-"full_metrics": [],
+"full_metrics": [
+[
+"trade_placed",
+1.0,
+{
+"symbol": "FLOKI-USDT-SWAP",
+"direction": "SHORT",
+"exchange": "binance"
+}
+],
+[
+"trade_placement_latency_ms",
+0.0,
+{
+"symbol": "FLOKI-USDT-SWAP",
+"direction": "SHORT",
+"exchange": "binance"
+}
+],
+[
+"sl_tp_attached",
+1.0,
+{
+"symbol": "FLOKI-USDT-SWAP",
+"direction": "SHORT",
+"exchange": "binance"
+}
+]
+],
 "full_events": []
 }
 },
@@ -1344,27 +1469,6 @@
 }
 },
 {
-"method": "POST",
-"url": "https://fapi.binance.com/fapi/v1/batchOrders?batchOrders=%5B%7B%22symbol%22:+%221000BONKUSDT%22,+%22side%22:+%22BUY%22,+%22positionSide%22:+%22LONG%22,+%22type%22:+%22MARKET%22,+%22quantity%22:+%2240000%22,+%22newClientOrderId%22:+%22chm_f0f1a3df5a1d%22%7D,+%7B%22symbol%22:+%221000BONKUSDT%22,+%22side%22:+%22SELL%22,+%22positionSide%22:+%22LONG%22,+%22type%22:+%22STOP_MARKET%22,+%22stopPrice%22:+%220.02833%22,+%22quantity%22:+%2240000%22,+%22workingType%22:+%22MARK_PRICE%22,+%22timeInForce%22:+%22GTC%22,+%22newClientOrderId%22:+%22chm_814c1b712d15%22%7D,+%7B%22symbol%22:+%221000BONKUSDT%22,+%22side%22:+%22SELL%22,+%22positionSide%22:+%22LONG%22,+%22type%22:+%22TAKE_PROFIT_MARKET%22,+%22stopPrice%22:+%220.02840%22,+%22quantity%22:+%2230000%22,+%22workingType%22:+%22MARK_PRICE%22,+%22timeInForce%22:+%22GTC%22,+%22newClientOrderId%22:+%22chm_1a7de31de8d5%22%7D,+%7B%22symbol%22:+%221000BONKUSDT%22,+%22side%22:+%22SELL%22,+%22positionSide%22:+%22LONG%22,+%22type%22:+%22TAKE_PROFIT_MARKET%22,+%22stopPrice%22:+%220.02843%22,+%22quantity%22:+%2210000%22,+%22workingType%22:+%22MARK_PRICE%22,+%22timeInForce%22:+%22GTC%22,+%22newClientOrderId%22:+%22chm_b62861ab2d9d%22%7D%5D&timestamp=1769337733952&recvWindow=5000&signature=d644a4ca48bfb6c18683c92d6013149fdd78674db2dd400af6e6a39914341c74",
-"headers": {
-"X-MBX-APIKEY": "BN6Wqp9hg1fpjTntnv"
-},
-"body": null,
-"hdrs": {
-"x-mbx-apikey": "BN6Wqp9hg1fpjTntnv"
-},
-"wire": {
-"method": "POST",
-"target": "/fapi/v1/batchOrders?batchOrders=%5B%7B%22symbol%22:+%221000BONKUSDT%22,+%22side%22:+%22BUY%22,+%22positionSide%22:+%22LONG%22,+%22type%22:+%22MARKET%22,+%22quantity%22:+%2240000%22,+%22newClientOrderId%22:+%22chm_f0f1a3df5a1d%22%7D,+%7B%22symbol%22:+%221000BONKUSDT%22,+%22side%22:+%22SELL%22,+%22positionSide%22:+%22LONG%22,+%22type%22:+%22STOP_MARKET%22,+%22stopPrice%22:+%220.02833%22,+%22quantity%22:+%2240000%22,+%22workingType%22:+%22MARK_PRICE%22,+%22timeInForce%22:+%22GTC%22,+%22newClientOrderId%22:+%22chm_814c1b712d15%22%7D,+%7B%22symbol%22:+%221000BONKUSDT%22,+%22side%22:+%22SELL%22,+%22positionSide%22:+%22LONG%22,+%22type%22:+%22TAKE_PROFIT_MARKET%22,+%22stopPrice%22:+%220.02840%22,+%22quantity%22:+%2230000%22,+%22workingType%22:+%22MARK_PRICE%22,+%22timeInForce%22:+%22GTC%22,+%22newClientOrderId%22:+%22chm_1a7de31de8d5%22%7D,+%7B%22symbol%22:+%221000BONKUSDT%22,+%22side%22:+%22SELL%22,+%22positionSide%22:+%22LONG%22,+%22type%22:+%22TAKE_PROFIT_MARKET%22,+%22stopPrice%22:+%220.02843%22,+%22quantity%22:+%2210000%22,+%22workingType%22:+%22MARK_PRICE%22,+%22timeInForce%22:+%22GTC%22,+%22newClientOrderId%22:+%22chm_b62861ab2d9d%22%7D%5D&timestamp=1769337733952&recvWindow=5000&signature=d644a4ca48bfb6c18683c92d6013149fdd78674db2dd400af6e6a39914341c74",
-"headers": {
-"x-mbx-apikey": "BN6Wqp9hg1fpjTntnv",
-"accept": "*/*",
-"content-type": "application/octet-stream"
-},
-"body": null
-}
-},
-{
 "method": "GET",
 "url": "https://fapi.binance.com/fapi/v1/ticker/price?symbol=1000BONKUSDT",
 "headers": {},
@@ -1466,12 +1570,7 @@
 ],
 "sleeps": [],
 "clock_end": 1769337733.9526,
-"markers": [
-[
-"WARNING",
-"[BINANCE-ATOMIC-FALLBACK]"
-]
-],
+"markers": [],
 "saved": {
 "hedge_saved": [],
 "auth_reset": [],
@@ -2920,10 +3019,9 @@
 "name": "rnd_pt_07_1000LUNCUSDT_LONG_Limit_margin",
 "result": {
 "ok": true,
-"order_id": "1339689864",
+"order_id": "6606619721",
 "error": "",
 "tp_placed": true,
-"atomic": true,
 "qty": 240000.0
 },
 "requests": [
@@ -3005,8 +3103,23 @@
 }
 },
 {
+"method": "GET",
+"url": "https://fapi.binance.com/fapi/v1/ticker/price?symbol=1000LUNCUSDT",
+"headers": {},
+"body": null,
+"hdrs": {},
+"wire": {
+"method": "GET",
+"target": "/fapi/v1/ticker/price?symbol=1000LUNCUSDT",
+"headers": {
+"accept": "*/*"
+},
+"body": null
+}
+},
+{
 "method": "POST",
-"url": "https://fapi.binance.com/fapi/v1/batchOrders?batchOrders=%5B%7B%22symbol%22:+%221000LUNCUSDT%22,+%22side%22:+%22BUY%22,+%22positionSide%22:+%22LONG%22,+%22type%22:+%22MARKET%22,+%22quantity%22:+%22240000%22,+%22newClientOrderId%22:+%22chm_458e989aed5b%22%7D,+%7B%22symbol%22:+%221000LUNCUSDT%22,+%22side%22:+%22SELL%22,+%22positionSide%22:+%22LONG%22,+%22type%22:+%22STOP_MARKET%22,+%22stopPrice%22:+%220.08964000%22,+%22quantity%22:+%22240000%22,+%22workingType%22:+%22MARK_PRICE%22,+%22timeInForce%22:+%22GTC%22,+%22newClientOrderId%22:+%22chm_4b961375da48%22%7D,+%7B%22symbol%22:+%221000LUNCUSDT%22,+%22side%22:+%22SELL%22,+%22positionSide%22:+%22LONG%22,+%22type%22:+%22TAKE_PROFIT_MARKET%22,+%22stopPrice%22:+%220.11952000%22,+%22quantity%22:+%22180000%22,+%22workingType%22:+%22MARK_PRICE%22,+%22timeInForce%22:+%22GTC%22,+%22newClientOrderId%22:+%22chm_366c8658167b%22%7D,+%7B%22symbol%22:+%221000LUNCUSDT%22,+%22side%22:+%22SELL%22,+%22positionSide%22:+%22LONG%22,+%22type%22:+%22TAKE_PROFIT_MARKET%22,+%22stopPrice%22:+%220.12948000%22,+%22quantity%22:+%2260000%22,+%22workingType%22:+%22MARK_PRICE%22,+%22timeInForce%22:+%22GTC%22,+%22newClientOrderId%22:+%22chm_f1d8a1eb88d8%22%7D%5D&timestamp=1767803122764&recvWindow=5000&signature=06c060876c4c0b1322240362782a65d3184e5d4d314fa2c79949683f91609d42",
+"url": "https://fapi.binance.com/fapi/v1/order?symbol=1000LUNCUSDT&side=BUY&quantity=240000&positionSide=LONG&newClientOrderId=chm_458e989aed5b&type=LIMIT&price=0.09960000&timeInForce=GTC&timestamp=1767803122764&recvWindow=5000&signature=c3430a8c91e9357f72039a89b5c5d9c35b77921a4218f9c89b72147efcc6c591",
 "headers": {
 "X-MBX-APIKEY": "BN6Wqp9hg1fpjTntnv"
 },
@@ -3016,7 +3129,70 @@
 },
 "wire": {
 "method": "POST",
-"target": "/fapi/v1/batchOrders?batchOrders=%5B%7B%22symbol%22:+%221000LUNCUSDT%22,+%22side%22:+%22BUY%22,+%22positionSide%22:+%22LONG%22,+%22type%22:+%22MARKET%22,+%22quantity%22:+%22240000%22,+%22newClientOrderId%22:+%22chm_458e989aed5b%22%7D,+%7B%22symbol%22:+%221000LUNCUSDT%22,+%22side%22:+%22SELL%22,+%22positionSide%22:+%22LONG%22,+%22type%22:+%22STOP_MARKET%22,+%22stopPrice%22:+%220.08964000%22,+%22quantity%22:+%22240000%22,+%22workingType%22:+%22MARK_PRICE%22,+%22timeInForce%22:+%22GTC%22,+%22newClientOrderId%22:+%22chm_4b961375da48%22%7D,+%7B%22symbol%22:+%221000LUNCUSDT%22,+%22side%22:+%22SELL%22,+%22positionSide%22:+%22LONG%22,+%22type%22:+%22TAKE_PROFIT_MARKET%22,+%22stopPrice%22:+%220.11952000%22,+%22quantity%22:+%22180000%22,+%22workingType%22:+%22MARK_PRICE%22,+%22timeInForce%22:+%22GTC%22,+%22newClientOrderId%22:+%22chm_366c8658167b%22%7D,+%7B%22symbol%22:+%221000LUNCUSDT%22,+%22side%22:+%22SELL%22,+%22positionSide%22:+%22LONG%22,+%22type%22:+%22TAKE_PROFIT_MARKET%22,+%22stopPrice%22:+%220.12948000%22,+%22quantity%22:+%2260000%22,+%22workingType%22:+%22MARK_PRICE%22,+%22timeInForce%22:+%22GTC%22,+%22newClientOrderId%22:+%22chm_f1d8a1eb88d8%22%7D%5D&timestamp=1767803122764&recvWindow=5000&signature=06c060876c4c0b1322240362782a65d3184e5d4d314fa2c79949683f91609d42",
+"target": "/fapi/v1/order?symbol=1000LUNCUSDT&side=BUY&quantity=240000&positionSide=LONG&newClientOrderId=chm_458e989aed5b&type=LIMIT&price=0.09960000&timeInForce=GTC&timestamp=1767803122764&recvWindow=5000&signature=c3430a8c91e9357f72039a89b5c5d9c35b77921a4218f9c89b72147efcc6c591",
+"headers": {
+"x-mbx-apikey": "BN6Wqp9hg1fpjTntnv",
+"accept": "*/*",
+"content-type": "application/octet-stream"
+},
+"body": null
+}
+},
+{
+"method": "POST",
+"url": "https://fapi.binance.com/fapi/v1/order?symbol=1000LUNCUSDT&side=SELL&type=STOP_MARKET&quantity=240000&stopPrice=0.08964000&workingType=MARK_PRICE&timeInForce=GTC&positionSide=LONG&newClientOrderId=chm_4b961375da48&timestamp=1767803122764&recvWindow=5000&signature=b326882ba17625af9bfe6b93f5770dd9661575945c5c6c76f12e135cda73a5ac",
+"headers": {
+"X-MBX-APIKEY": "BN6Wqp9hg1fpjTntnv"
+},
+"body": null,
+"hdrs": {
+"x-mbx-apikey": "BN6Wqp9hg1fpjTntnv"
+},
+"wire": {
+"method": "POST",
+"target": "/fapi/v1/order?symbol=1000LUNCUSDT&side=SELL&type=STOP_MARKET&quantity=240000&stopPrice=0.08964000&workingType=MARK_PRICE&timeInForce=GTC&positionSide=LONG&newClientOrderId=chm_4b961375da48&timestamp=1767803122764&recvWindow=5000&signature=b326882ba17625af9bfe6b93f5770dd9661575945c5c6c76f12e135cda73a5ac",
+"headers": {
+"x-mbx-apikey": "BN6Wqp9hg1fpjTntnv",
+"accept": "*/*",
+"content-type": "application/octet-stream"
+},
+"body": null
+}
+},
+{
+"method": "POST",
+"url": "https://fapi.binance.com/fapi/v1/order?symbol=1000LUNCUSDT&side=SELL&type=TAKE_PROFIT_MARKET&quantity=180000&stopPrice=0.11952000&workingType=MARK_PRICE&timeInForce=GTC&positionSide=LONG&newClientOrderId=chm_366c8658167b&timestamp=1767803122764&recvWindow=5000&signature=5dc5794e1f89fdbc082a28a398b4b4b9d7d58d3338a051a0566d97260e7d72e1",
+"headers": {
+"X-MBX-APIKEY": "BN6Wqp9hg1fpjTntnv"
+},
+"body": null,
+"hdrs": {
+"x-mbx-apikey": "BN6Wqp9hg1fpjTntnv"
+},
+"wire": {
+"method": "POST",
+"target": "/fapi/v1/order?symbol=1000LUNCUSDT&side=SELL&type=TAKE_PROFIT_MARKET&quantity=180000&stopPrice=0.11952000&workingType=MARK_PRICE&timeInForce=GTC&positionSide=LONG&newClientOrderId=chm_366c8658167b&timestamp=1767803122764&recvWindow=5000&signature=5dc5794e1f89fdbc082a28a398b4b4b9d7d58d3338a051a0566d97260e7d72e1",
+"headers": {
+"x-mbx-apikey": "BN6Wqp9hg1fpjTntnv",
+"accept": "*/*",
+"content-type": "application/octet-stream"
+},
+"body": null
+}
+},
+{
+"method": "POST",
+"url": "https://fapi.binance.com/fapi/v1/order?symbol=1000LUNCUSDT&side=SELL&type=TAKE_PROFIT_MARKET&quantity=60000&stopPrice=0.12948000&workingType=MARK_PRICE&timeInForce=GTC&positionSide=LONG&newClientOrderId=chm_f1d8a1eb88d8&timestamp=1767803122764&recvWindow=5000&signature=daf14be2232edcebc3828b8da38f24ef9c7609701fc65ea1aada9064cc7a156c",
+"headers": {
+"X-MBX-APIKEY": "BN6Wqp9hg1fpjTntnv"
+},
+"body": null,
+"hdrs": {
+"x-mbx-apikey": "BN6Wqp9hg1fpjTntnv"
+},
+"wire": {
+"method": "POST",
+"target": "/fapi/v1/order?symbol=1000LUNCUSDT&side=SELL&type=TAKE_PROFIT_MARKET&quantity=60000&stopPrice=0.12948000&workingType=MARK_PRICE&timeInForce=GTC&positionSide=LONG&newClientOrderId=chm_f1d8a1eb88d8&timestamp=1767803122764&recvWindow=5000&signature=daf14be2232edcebc3828b8da38f24ef9c7609701fc65ea1aada9064cc7a156c",
 "headers": {
 "x-mbx-apikey": "BN6Wqp9hg1fpjTntnv",
 "accept": "*/*",
@@ -3028,17 +3204,16 @@
 ],
 "sleeps": [],
 "clock_end": 1767803122.764,
-"markers": [
-[
-"INFO",
-"[BINANCE-ATOMIC-OK]"
-]
-],
+"markers": [],
 "saved": {
 "hedge_saved": [],
 "auth_reset": [],
 "events": [],
-"metrics": []
+"metrics": [
+"trade_placed",
+"trade_placement_latency_ms",
+"sl_tp_attached"
+]
 },
 "final": {
 "hedge": {},
@@ -3051,7 +3226,35 @@
 "bingx_offset": 0,
 "okx_offset": 0
 },
-"full_metrics": [],
+"full_metrics": [
+[
+"trade_placed",
+1.0,
+{
+"symbol": "LUNC-USDT-SWAP",
+"direction": "LONG",
+"exchange": "binance"
+}
+],
+[
+"trade_placement_latency_ms",
+0.0,
+{
+"symbol": "LUNC-USDT-SWAP",
+"direction": "LONG",
+"exchange": "binance"
+}
+],
+[
+"sl_tp_attached",
+1.0,
+{
+"symbol": "LUNC-USDT-SWAP",
+"direction": "LONG",
+"exchange": "binance"
+}
+]
+],
 "full_events": []
 }
 },
@@ -3301,27 +3504,6 @@
 }
 },
 {
-"method": "POST",
-"url": "https://fapi.binance.com/fapi/v1/batchOrders?batchOrders=%5B%7B%22symbol%22:+%221000FLOKIUSDT%22,+%22side%22:+%22BUY%22,+%22positionSide%22:+%22LONG%22,+%22type%22:+%22MARKET%22,+%22quantity%22:+%228300%22,+%22newClientOrderId%22:+%22chm_773a35fabd78%22%7D,+%7B%22symbol%22:+%221000FLOKIUSDT%22,+%22side%22:+%22SELL%22,+%22positionSide%22:+%22LONG%22,+%22type%22:+%22STOP_MARKET%22,+%22stopPrice%22:+%220.14698%22,+%22quantity%22:+%228300%22,+%22workingType%22:+%22MARK_PRICE%22,+%22timeInForce%22:+%22GTC%22,+%22newClientOrderId%22:+%22chm_421920df3e31%22%7D,+%7B%22symbol%22:+%221000FLOKIUSDT%22,+%22side%22:+%22SELL%22,+%22positionSide%22:+%22LONG%22,+%22type%22:+%22TAKE_PROFIT_MARKET%22,+%22stopPrice%22:+%220.15598%22,+%22quantity%22:+%224300%22,+%22workingType%22:+%22MARK_PRICE%22,+%22timeInForce%22:+%22GTC%22,+%22newClientOrderId%22:+%22chm_25fe5d7d0824%22%7D,+%7B%22symbol%22:+%221000FLOKIUSDT%22,+%22side%22:+%22SELL%22,+%22positionSide%22:+%22LONG%22,+%22type%22:+%22TAKE_PROFIT_MARKET%22,+%22stopPrice%22:+%220.15748%22,+%22quantity%22:+%222000%22,+%22workingType%22:+%22MARK_PRICE%22,+%22timeInForce%22:+%22GTC%22,+%22newClientOrderId%22:+%22chm_ecc4600c3269%22%7D,+%7B%22symbol%22:+%221000FLOKIUSDT%22,+%22side%22:+%22SELL%22,+%22positionSide%22:+%22LONG%22,+%22type%22:+%22TAKE_PROFIT_MARKET%22,+%22stopPrice%22:+%220.16198%22,+%22quantity%22:+%222000%22,+%22workingType%22:+%22MARK_PRICE%22,+%22timeInForce%22:+%22GTC%22,+%22newClientOrderId%22:+%22chm_65305a4fafe7%22%7D%5D&timestamp=1769629028159&recvWindow=5000&signature=1d9ca9ea0310bed1a6c32b4a07b96adb170bfae405e48c615f7fa39b61d02d71",
-"headers": {
-"X-MBX-APIKEY": "BN6Wqp9hg1fpjTntnv"
-},
-"body": null,
-"hdrs": {
-"x-mbx-apikey": "BN6Wqp9hg1fpjTntnv"
-},
-"wire": {
-"method": "POST",
-"target": "/fapi/v1/batchOrders?batchOrders=%5B%7B%22symbol%22:+%221000FLOKIUSDT%22,+%22side%22:+%22BUY%22,+%22positionSide%22:+%22LONG%22,+%22type%22:+%22MARKET%22,+%22quantity%22:+%228300%22,+%22newClientOrderId%22:+%22chm_773a35fabd78%22%7D,+%7B%22symbol%22:+%221000FLOKIUSDT%22,+%22side%22:+%22SELL%22,+%22positionSide%22:+%22LONG%22,+%22type%22:+%22STOP_MARKET%22,+%22stopPrice%22:+%220.14698%22,+%22quantity%22:+%228300%22,+%22workingType%22:+%22MARK_PRICE%22,+%22timeInForce%22:+%22GTC%22,+%22newClientOrderId%22:+%22chm_421920df3e31%22%7D,+%7B%22symbol%22:+%221000FLOKIUSDT%22,+%22side%22:+%22SELL%22,+%22positionSide%22:+%22LONG%22,+%22type%22:+%22TAKE_PROFIT_MARKET%22,+%22stopPrice%22:+%220.15598%22,+%22quantity%22:+%224300%22,+%22workingType%22:+%22MARK_PRICE%22,+%22timeInForce%22:+%22GTC%22,+%22newClientOrderId%22:+%22chm_25fe5d7d0824%22%7D,+%7B%22symbol%22:+%221000FLOKIUSDT%22,+%22side%22:+%22SELL%22,+%22positionSide%22:+%22LONG%22,+%22type%22:+%22TAKE_PROFIT_MARKET%22,+%22stopPrice%22:+%220.15748%22,+%22quantity%22:+%222000%22,+%22workingType%22:+%22MARK_PRICE%22,+%22timeInForce%22:+%22GTC%22,+%22newClientOrderId%22:+%22chm_ecc4600c3269%22%7D,+%7B%22symbol%22:+%221000FLOKIUSDT%22,+%22side%22:+%22SELL%22,+%22positionSide%22:+%22LONG%22,+%22type%22:+%22TAKE_PROFIT_MARKET%22,+%22stopPrice%22:+%220.16198%22,+%22quantity%22:+%222000%22,+%22workingType%22:+%22MARK_PRICE%22,+%22timeInForce%22:+%22GTC%22,+%22newClientOrderId%22:+%22chm_65305a4fafe7%22%7D%5D&timestamp=1769629028159&recvWindow=5000&signature=1d9ca9ea0310bed1a6c32b4a07b96adb170bfae405e48c615f7fa39b61d02d71",
-"headers": {
-"x-mbx-apikey": "BN6Wqp9hg1fpjTntnv",
-"accept": "*/*",
-"content-type": "application/octet-stream"
-},
-"body": null
-}
-},
-{
 "method": "GET",
 "url": "https://fapi.binance.com/fapi/v1/ticker/price?symbol=1000FLOKIUSDT",
 "headers": {},
@@ -3444,12 +3626,7 @@
 ],
 "sleeps": [],
 "clock_end": 1769629028.159981,
-"markers": [
-[
-"WARNING",
-"[BINANCE-ATOMIC-FALLBACK]"
-]
-],
+"markers": [],
 "saved": {
 "hedge_saved": [],
 "auth_reset": [],
@@ -3667,10 +3844,9 @@
 "name": "rnd_pt_09_ETHUSDT_LONG_Limit_risk_edge",
 "result": {
 "ok": true,
-"order_id": "5852056440",
+"order_id": "6933173270",
 "error": "",
 "tp_placed": true,
-"atomic": true,
 "qty": 1.5
 },
 "requests": [
@@ -3752,8 +3928,23 @@
 }
 },
 {
+"method": "GET",
+"url": "https://fapi.binance.com/fapi/v1/ticker/price?symbol=ETHUSDT",
+"headers": {},
+"body": null,
+"hdrs": {},
+"wire": {
+"method": "GET",
+"target": "/fapi/v1/ticker/price?symbol=ETHUSDT",
+"headers": {
+"accept": "*/*"
+},
+"body": null
+}
+},
+{
 "method": "POST",
-"url": "https://fapi.binance.com/fapi/v1/batchOrders?batchOrders=%5B%7B%22symbol%22:+%22ETHUSDT%22,+%22side%22:+%22BUY%22,+%22positionSide%22:+%22LONG%22,+%22type%22:+%22MARKET%22,+%22quantity%22:+%221.5%22,+%22newClientOrderId%22:+%22chm_c9870047f834%22%7D,+%7B%22symbol%22:+%22ETHUSDT%22,+%22side%22:+%22SELL%22,+%22positionSide%22:+%22LONG%22,+%22type%22:+%22STOP_MARKET%22,+%22stopPrice%22:+%223070%22,+%22quantity%22:+%221.5%22,+%22workingType%22:+%22MARK_PRICE%22,+%22timeInForce%22:+%22GTC%22,+%22newClientOrderId%22:+%22chm_36ecd826034e%22%7D,+%7B%22symbol%22:+%22ETHUSDT%22,+%22side%22:+%22SELL%22,+%22positionSide%22:+%22LONG%22,+%22type%22:+%22TAKE_PROFIT_MARKET%22,+%22stopPrice%22:+%223410%22,+%22quantity%22:+%220.9%22,+%22workingType%22:+%22MARK_PRICE%22,+%22timeInForce%22:+%22GTC%22,+%22newClientOrderId%22:+%22chm_76d4b4f4d13e%22%7D,+%7B%22symbol%22:+%22ETHUSDT%22,+%22side%22:+%22SELL%22,+%22positionSide%22:+%22LONG%22,+%22type%22:+%22TAKE_PROFIT_MARKET%22,+%22stopPrice%22:+%223460%22,+%22quantity%22:+%220.3%22,+%22workingType%22:+%22MARK_PRICE%22,+%22timeInForce%22:+%22GTC%22,+%22newClientOrderId%22:+%22chm_a3560ed2fb5e%22%7D,+%7B%22symbol%22:+%22ETHUSDT%22,+%22side%22:+%22SELL%22,+%22positionSide%22:+%22LONG%22,+%22type%22:+%22TAKE_PROFIT_MARKET%22,+%22stopPrice%22:+%223740%22,+%22quantity%22:+%220.3%22,+%22workingType%22:+%22MARK_PRICE%22,+%22timeInForce%22:+%22GTC%22,+%22newClientOrderId%22:+%22chm_81a5aaf32d4d%22%7D%5D&timestamp=1768337018615&recvWindow=5000&signature=a3c7feb6285b4271c2223c0f6473d47f9d8628e42b733b2a614bec6230fa42fb",
+"url": "https://fapi.binance.com/fapi/v1/order?symbol=ETHUSDT&side=BUY&quantity=1.5&newClientOrderId=chm_c9870047f834&type=LIMIT&price=3190&timeInForce=GTC&timestamp=1768337018615&recvWindow=5000&signature=383984d5b0b181375779f22fc5d115e2cf1e2a35f731a25feea08b212935fc86",
 "headers": {
 "X-MBX-APIKEY": "BN6Wqp9hg1fpjTntnv"
 },
@@ -3763,7 +3954,91 @@
 },
 "wire": {
 "method": "POST",
-"target": "/fapi/v1/batchOrders?batchOrders=%5B%7B%22symbol%22:+%22ETHUSDT%22,+%22side%22:+%22BUY%22,+%22positionSide%22:+%22LONG%22,+%22type%22:+%22MARKET%22,+%22quantity%22:+%221.5%22,+%22newClientOrderId%22:+%22chm_c9870047f834%22%7D,+%7B%22symbol%22:+%22ETHUSDT%22,+%22side%22:+%22SELL%22,+%22positionSide%22:+%22LONG%22,+%22type%22:+%22STOP_MARKET%22,+%22stopPrice%22:+%223070%22,+%22quantity%22:+%221.5%22,+%22workingType%22:+%22MARK_PRICE%22,+%22timeInForce%22:+%22GTC%22,+%22newClientOrderId%22:+%22chm_36ecd826034e%22%7D,+%7B%22symbol%22:+%22ETHUSDT%22,+%22side%22:+%22SELL%22,+%22positionSide%22:+%22LONG%22,+%22type%22:+%22TAKE_PROFIT_MARKET%22,+%22stopPrice%22:+%223410%22,+%22quantity%22:+%220.9%22,+%22workingType%22:+%22MARK_PRICE%22,+%22timeInForce%22:+%22GTC%22,+%22newClientOrderId%22:+%22chm_76d4b4f4d13e%22%7D,+%7B%22symbol%22:+%22ETHUSDT%22,+%22side%22:+%22SELL%22,+%22positionSide%22:+%22LONG%22,+%22type%22:+%22TAKE_PROFIT_MARKET%22,+%22stopPrice%22:+%223460%22,+%22quantity%22:+%220.3%22,+%22workingType%22:+%22MARK_PRICE%22,+%22timeInForce%22:+%22GTC%22,+%22newClientOrderId%22:+%22chm_a3560ed2fb5e%22%7D,+%7B%22symbol%22:+%22ETHUSDT%22,+%22side%22:+%22SELL%22,+%22positionSide%22:+%22LONG%22,+%22type%22:+%22TAKE_PROFIT_MARKET%22,+%22stopPrice%22:+%223740%22,+%22quantity%22:+%220.3%22,+%22workingType%22:+%22MARK_PRICE%22,+%22timeInForce%22:+%22GTC%22,+%22newClientOrderId%22:+%22chm_81a5aaf32d4d%22%7D%5D&timestamp=1768337018615&recvWindow=5000&signature=a3c7feb6285b4271c2223c0f6473d47f9d8628e42b733b2a614bec6230fa42fb",
+"target": "/fapi/v1/order?symbol=ETHUSDT&side=BUY&quantity=1.5&newClientOrderId=chm_c9870047f834&type=LIMIT&price=3190&timeInForce=GTC&timestamp=1768337018615&recvWindow=5000&signature=383984d5b0b181375779f22fc5d115e2cf1e2a35f731a25feea08b212935fc86",
+"headers": {
+"x-mbx-apikey": "BN6Wqp9hg1fpjTntnv",
+"accept": "*/*",
+"content-type": "application/octet-stream"
+},
+"body": null
+}
+},
+{
+"method": "POST",
+"url": "https://fapi.binance.com/fapi/v1/order?symbol=ETHUSDT&side=SELL&type=STOP_MARKET&quantity=1.5&stopPrice=3070&workingType=MARK_PRICE&timeInForce=GTC&newClientOrderId=chm_36ecd826034e&timestamp=1768337018615&recvWindow=5000&signature=bfe9b26cb1bc58bbd8b606389c6df546d0d8dbad3584b4060c81301b29158ce3",
+"headers": {
+"X-MBX-APIKEY": "BN6Wqp9hg1fpjTntnv"
+},
+"body": null,
+"hdrs": {
+"x-mbx-apikey": "BN6Wqp9hg1fpjTntnv"
+},
+"wire": {
+"method": "POST",
+"target": "/fapi/v1/order?symbol=ETHUSDT&side=SELL&type=STOP_MARKET&quantity=1.5&stopPrice=3070&workingType=MARK_PRICE&timeInForce=GTC&newClientOrderId=chm_36ecd826034e&timestamp=1768337018615&recvWindow=5000&signature=bfe9b26cb1bc58bbd8b606389c6df546d0d8dbad3584b4060c81301b29158ce3",
+"headers": {
+"x-mbx-apikey": "BN6Wqp9hg1fpjTntnv",
+"accept": "*/*",
+"content-type": "application/octet-stream"
+},
+"body": null
+}
+},
+{
+"method": "POST",
+"url": "https://fapi.binance.com/fapi/v1/order?symbol=ETHUSDT&side=SELL&type=TAKE_PROFIT_MARKET&quantity=0.9&stopPrice=3410&workingType=MARK_PRICE&timeInForce=GTC&newClientOrderId=chm_76d4b4f4d13e&timestamp=1768337018615&recvWindow=5000&signature=bbf6337f7c47cfbdccd8959c2907c6af39b9180db5312f76b6a42b186856a34e",
+"headers": {
+"X-MBX-APIKEY": "BN6Wqp9hg1fpjTntnv"
+},
+"body": null,
+"hdrs": {
+"x-mbx-apikey": "BN6Wqp9hg1fpjTntnv"
+},
+"wire": {
+"method": "POST",
+"target": "/fapi/v1/order?symbol=ETHUSDT&side=SELL&type=TAKE_PROFIT_MARKET&quantity=0.9&stopPrice=3410&workingType=MARK_PRICE&timeInForce=GTC&newClientOrderId=chm_76d4b4f4d13e&timestamp=1768337018615&recvWindow=5000&signature=bbf6337f7c47cfbdccd8959c2907c6af39b9180db5312f76b6a42b186856a34e",
+"headers": {
+"x-mbx-apikey": "BN6Wqp9hg1fpjTntnv",
+"accept": "*/*",
+"content-type": "application/octet-stream"
+},
+"body": null
+}
+},
+{
+"method": "POST",
+"url": "https://fapi.binance.com/fapi/v1/order?symbol=ETHUSDT&side=SELL&type=TAKE_PROFIT_MARKET&quantity=0.3&stopPrice=3460&workingType=MARK_PRICE&timeInForce=GTC&newClientOrderId=chm_a3560ed2fb5e&timestamp=1768337018615&recvWindow=5000&signature=6a2add79fe6ee03c3f7e862085fa4d024d3d671fec1b6de72186e1d25b23d30e",
+"headers": {
+"X-MBX-APIKEY": "BN6Wqp9hg1fpjTntnv"
+},
+"body": null,
+"hdrs": {
+"x-mbx-apikey": "BN6Wqp9hg1fpjTntnv"
+},
+"wire": {
+"method": "POST",
+"target": "/fapi/v1/order?symbol=ETHUSDT&side=SELL&type=TAKE_PROFIT_MARKET&quantity=0.3&stopPrice=3460&workingType=MARK_PRICE&timeInForce=GTC&newClientOrderId=chm_a3560ed2fb5e&timestamp=1768337018615&recvWindow=5000&signature=6a2add79fe6ee03c3f7e862085fa4d024d3d671fec1b6de72186e1d25b23d30e",
+"headers": {
+"x-mbx-apikey": "BN6Wqp9hg1fpjTntnv",
+"accept": "*/*",
+"content-type": "application/octet-stream"
+},
+"body": null
+}
+},
+{
+"method": "POST",
+"url": "https://fapi.binance.com/fapi/v1/order?symbol=ETHUSDT&side=SELL&type=TAKE_PROFIT_MARKET&quantity=0.3&stopPrice=3740&workingType=MARK_PRICE&timeInForce=GTC&newClientOrderId=chm_81a5aaf32d4d&timestamp=1768337018615&recvWindow=5000&signature=258e2e104dce6faf1c04de4ca97dcb0139b925e523dcf4caa691bf63c832b737",
+"headers": {
+"X-MBX-APIKEY": "BN6Wqp9hg1fpjTntnv"
+},
+"body": null,
+"hdrs": {
+"x-mbx-apikey": "BN6Wqp9hg1fpjTntnv"
+},
+"wire": {
+"method": "POST",
+"target": "/fapi/v1/order?symbol=ETHUSDT&side=SELL&type=TAKE_PROFIT_MARKET&quantity=0.3&stopPrice=3740&workingType=MARK_PRICE&timeInForce=GTC&newClientOrderId=chm_81a5aaf32d4d&timestamp=1768337018615&recvWindow=5000&signature=258e2e104dce6faf1c04de4ca97dcb0139b925e523dcf4caa691bf63c832b737",
 "headers": {
 "x-mbx-apikey": "BN6Wqp9hg1fpjTntnv",
 "accept": "*/*",
@@ -3775,17 +4050,16 @@
 ],
 "sleeps": [],
 "clock_end": 1768337017.2986,
-"markers": [
-[
-"INFO",
-"[BINANCE-ATOMIC-OK]"
-]
-],
+"markers": [],
 "saved": {
 "hedge_saved": [],
 "auth_reset": [],
 "events": [],
-"metrics": []
+"metrics": [
+"trade_placed",
+"trade_placement_latency_ms",
+"sl_tp_attached"
+]
 },
 "final": {
 "hedge": {},
@@ -3798,7 +4072,35 @@
 "bingx_offset": 0,
 "okx_offset": 0
 },
-"full_metrics": [],
+"full_metrics": [
+[
+"trade_placed",
+1.0,
+{
+"symbol": "ETH-USDT-SWAP",
+"direction": "LONG",
+"exchange": "binance"
+}
+],
+[
+"trade_placement_latency_ms",
+0.0,
+{
+"symbol": "ETH-USDT-SWAP",
+"direction": "LONG",
+"exchange": "binance"
+}
+],
+[
+"sl_tp_attached",
+1.0,
+{
+"symbol": "ETH-USDT-SWAP",
+"direction": "LONG",
+"exchange": "binance"
+}
+]
+],
 "full_events": []
 }
 },
@@ -4050,27 +4352,6 @@
 }
 },
 {
-"method": "POST",
-"url": "https://fapi.binance.com/fapi/v1/batchOrders?batchOrders=%5B%7B%22symbol%22:+%221000SHIBUSDT%22,+%22side%22:+%22SELL%22,+%22positionSide%22:+%22SHORT%22,+%22type%22:+%22MARKET%22,+%22quantity%22:+%2244000%22,+%22newClientOrderId%22:+%22chm_116dd39884b7%22%7D,+%7B%22symbol%22:+%221000SHIBUSDT%22,+%22side%22:+%22BUY%22,+%22positionSide%22:+%22SHORT%22,+%22type%22:+%22STOP_MARKET%22,+%22stopPrice%22:+%220.02471%22,+%22quantity%22:+%2244000%22,+%22workingType%22:+%22MARK_PRICE%22,+%22timeInForce%22:+%22GTC%22,+%22newClientOrderId%22:+%22chm_36bfcbe231af%22%7D,+%7B%22symbol%22:+%221000SHIBUSDT%22,+%22side%22:+%22BUY%22,+%22positionSide%22:+%22SHORT%22,+%22type%22:+%22TAKE_PROFIT_MARKET%22,+%22stopPrice%22:+%220.02220%22,+%22quantity%22:+%2244000%22,+%22workingType%22:+%22MARK_PRICE%22,+%22timeInForce%22:+%22GTC%22,+%22newClientOrderId%22:+%22chm_d714c31c54fd%22%7D%5D&timestamp=1771018888457&recvWindow=5000&signature=f12e5afd47c127e9ab66ff8f70bbfff452aa4bfa18ea42eec5deab3a779f889a",
-"headers": {
-"X-MBX-APIKEY": "BN6Wqp9hg1fpjTntnv"
-},
-"body": null,
-"hdrs": {
-"x-mbx-apikey": "BN6Wqp9hg1fpjTntnv"
-},
-"wire": {
-"method": "POST",
-"target": "/fapi/v1/batchOrders?batchOrders=%5B%7B%22symbol%22:+%221000SHIBUSDT%22,+%22side%22:+%22SELL%22,+%22positionSide%22:+%22SHORT%22,+%22type%22:+%22MARKET%22,+%22quantity%22:+%2244000%22,+%22newClientOrderId%22:+%22chm_116dd39884b7%22%7D,+%7B%22symbol%22:+%221000SHIBUSDT%22,+%22side%22:+%22BUY%22,+%22positionSide%22:+%22SHORT%22,+%22type%22:+%22STOP_MARKET%22,+%22stopPrice%22:+%220.02471%22,+%22quantity%22:+%2244000%22,+%22workingType%22:+%22MARK_PRICE%22,+%22timeInForce%22:+%22GTC%22,+%22newClientOrderId%22:+%22chm_36bfcbe231af%22%7D,+%7B%22symbol%22:+%221000SHIBUSDT%22,+%22side%22:+%22BUY%22,+%22positionSide%22:+%22SHORT%22,+%22type%22:+%22TAKE_PROFIT_MARKET%22,+%22stopPrice%22:+%220.02220%22,+%22quantity%22:+%2244000%22,+%22workingType%22:+%22MARK_PRICE%22,+%22timeInForce%22:+%22GTC%22,+%22newClientOrderId%22:+%22chm_d714c31c54fd%22%7D%5D&timestamp=1771018888457&recvWindow=5000&signature=f12e5afd47c127e9ab66ff8f70bbfff452aa4bfa18ea42eec5deab3a779f889a",
-"headers": {
-"x-mbx-apikey": "BN6Wqp9hg1fpjTntnv",
-"accept": "*/*",
-"content-type": "application/octet-stream"
-},
-"body": null
-}
-},
-{
 "method": "GET",
 "url": "https://fapi.binance.com/fapi/v1/ticker/price?symbol=1000SHIBUSDT",
 "headers": {},
@@ -4151,12 +4432,7 @@
 ],
 "sleeps": [],
 "clock_end": 1771018886.347,
-"markers": [
-[
-"WARNING",
-"[BINANCE-ATOMIC-FALLBACK]"
-]
-],
+"markers": [],
 "saved": {
 "hedge_saved": [],
 "auth_reset": [],
@@ -4458,27 +4734,6 @@
 }
 },
 {
-"method": "POST",
-"url": "https://fapi.binance.com/fapi/v1/batchOrders?batchOrders=%5B%7B%22symbol%22:+%22WIFUSDT%22,+%22side%22:+%22BUY%22,+%22positionSide%22:+%22LONG%22,+%22type%22:+%22MARKET%22,+%22quantity%22:+%22196%22,+%22newClientOrderId%22:+%22chm_7d05280a8e87%22%7D,+%7B%22symbol%22:+%22WIFUSDT%22,+%22side%22:+%22SELL%22,+%22positionSide%22:+%22LONG%22,+%22type%22:+%22STOP_MARKET%22,+%22stopPrice%22:+%221.968%22,+%22quantity%22:+%22196%22,+%22workingType%22:+%22MARK_PRICE%22,+%22timeInForce%22:+%22GTC%22,+%22newClientOrderId%22:+%22chm_1f222b1b6f97%22%7D,+%7B%22symbol%22:+%22WIFUSDT%22,+%22side%22:+%22SELL%22,+%22positionSide%22:+%22LONG%22,+%22type%22:+%22TAKE_PROFIT_MARKET%22,+%22stopPrice%22:+%222.182%22,+%22quantity%22:+%22148%22,+%22workingType%22:+%22MARK_PRICE%22,+%22timeInForce%22:+%22GTC%22,+%22newClientOrderId%22:+%22chm_a29860cb5b56%22%7D,+%7B%22symbol%22:+%22WIFUSDT%22,+%22side%22:+%22SELL%22,+%22positionSide%22:+%22LONG%22,+%22type%22:+%22TAKE_PROFIT_MARKET%22,+%22stopPrice%22:+%222.253%22,+%22quantity%22:+%2248%22,+%22workingType%22:+%22MARK_PRICE%22,+%22timeInForce%22:+%22GTC%22,+%22newClientOrderId%22:+%22chm_ca29eb3f7829%22%7D%5D&timestamp=1769357329859&recvWindow=5000&signature=358e84edef9c9ebb40063b1eb494b0482da4d38dca7574a4278b86ac3fbcd3ef",
-"headers": {
-"X-MBX-APIKEY": "BN6Wqp9hg1fpjTntnv"
-},
-"body": null,
-"hdrs": {
-"x-mbx-apikey": "BN6Wqp9hg1fpjTntnv"
-},
-"wire": {
-"method": "POST",
-"target": "/fapi/v1/batchOrders?batchOrders=%5B%7B%22symbol%22:+%22WIFUSDT%22,+%22side%22:+%22BUY%22,+%22positionSide%22:+%22LONG%22,+%22type%22:+%22MARKET%22,+%22quantity%22:+%22196%22,+%22newClientOrderId%22:+%22chm_7d05280a8e87%22%7D,+%7B%22symbol%22:+%22WIFUSDT%22,+%22side%22:+%22SELL%22,+%22positionSide%22:+%22LONG%22,+%22type%22:+%22STOP_MARKET%22,+%22stopPrice%22:+%221.968%22,+%22quantity%22:+%22196%22,+%22workingType%22:+%22MARK_PRICE%22,+%22timeInForce%22:+%22GTC%22,+%22newClientOrderId%22:+%22chm_1f222b1b6f97%22%7D,+%7B%22symbol%22:+%22WIFUSDT%22,+%22side%22:+%22SELL%22,+%22positionSide%22:+%22LONG%22,+%22type%22:+%22TAKE_PROFIT_MARKET%22,+%22stopPrice%22:+%222.182%22,+%22quantity%22:+%22148%22,+%22workingType%22:+%22MARK_PRICE%22,+%22timeInForce%22:+%22GTC%22,+%22newClientOrderId%22:+%22chm_a29860cb5b56%22%7D,+%7B%22symbol%22:+%22WIFUSDT%22,+%22side%22:+%22SELL%22,+%22positionSide%22:+%22LONG%22,+%22type%22:+%22TAKE_PROFIT_MARKET%22,+%22stopPrice%22:+%222.253%22,+%22quantity%22:+%2248%22,+%22workingType%22:+%22MARK_PRICE%22,+%22timeInForce%22:+%22GTC%22,+%22newClientOrderId%22:+%22chm_ca29eb3f7829%22%7D%5D&timestamp=1769357329859&recvWindow=5000&signature=358e84edef9c9ebb40063b1eb494b0482da4d38dca7574a4278b86ac3fbcd3ef",
-"headers": {
-"x-mbx-apikey": "BN6Wqp9hg1fpjTntnv",
-"accept": "*/*",
-"content-type": "application/octet-stream"
-},
-"body": null
-}
-},
-{
 "method": "GET",
 "url": "https://fapi.binance.com/fapi/v1/ticker/price?symbol=WIFUSDT",
 "headers": {},
@@ -4580,12 +4835,7 @@
 ],
 "sleeps": [],
 "clock_end": 1769357330.632,
-"markers": [
-[
-"WARNING",
-"[BINANCE-ATOMIC-FALLBACK]"
-]
-],
+"markers": [],
 "saved": {
 "hedge_saved": [],
 "auth_reset": [],
@@ -4885,27 +5135,6 @@
 }
 },
 {
-"method": "POST",
-"url": "https://fapi.binance.com/fapi/v1/batchOrders?batchOrders=%5B%7B%22symbol%22:+%221000LUNCUSDT%22,+%22side%22:+%22BUY%22,+%22positionSide%22:+%22LONG%22,+%22type%22:+%22MARKET%22,+%22quantity%22:+%221000%22,+%22newClientOrderId%22:+%22chm_ebc249afc149%22%7D,+%7B%22symbol%22:+%221000LUNCUSDT%22,+%22side%22:+%22SELL%22,+%22positionSide%22:+%22LONG%22,+%22type%22:+%22STOP_MARKET%22,+%22stopPrice%22:+%220.09285%22,+%22quantity%22:+%221000%22,+%22workingType%22:+%22MARK_PRICE%22,+%22timeInForce%22:+%22GTC%22,+%22newClientOrderId%22:+%22chm_0622963a9f4b%22%7D,+%7B%22symbol%22:+%221000LUNCUSDT%22,+%22side%22:+%22SELL%22,+%22positionSide%22:+%22LONG%22,+%22type%22:+%22TAKE_PROFIT_MARKET%22,+%22stopPrice%22:+%220.09355%22,+%22quantity%22:+%221000%22,+%22workingType%22:+%22MARK_PRICE%22,+%22timeInForce%22:+%22GTC%22,+%22newClientOrderId%22:+%22chm_a1b063bf8366%22%7D%5D&timestamp=1770992689000&recvWindow=5000&signature=113259a24bc2618fc1b5bd8421a718a41f5fff24e482d751650de309f3343d8b",
-"headers": {
-"X-MBX-APIKEY": "BN6Wqp9hg1fpjTntnv"
-},
-"body": null,
-"hdrs": {
-"x-mbx-apikey": "BN6Wqp9hg1fpjTntnv"
-},
-"wire": {
-"method": "POST",
-"target": "/fapi/v1/batchOrders?batchOrders=%5B%7B%22symbol%22:+%221000LUNCUSDT%22,+%22side%22:+%22BUY%22,+%22positionSide%22:+%22LONG%22,+%22type%22:+%22MARKET%22,+%22quantity%22:+%221000%22,+%22newClientOrderId%22:+%22chm_ebc249afc149%22%7D,+%7B%22symbol%22:+%221000LUNCUSDT%22,+%22side%22:+%22SELL%22,+%22positionSide%22:+%22LONG%22,+%22type%22:+%22STOP_MARKET%22,+%22stopPrice%22:+%220.09285%22,+%22quantity%22:+%221000%22,+%22workingType%22:+%22MARK_PRICE%22,+%22timeInForce%22:+%22GTC%22,+%22newClientOrderId%22:+%22chm_0622963a9f4b%22%7D,+%7B%22symbol%22:+%221000LUNCUSDT%22,+%22side%22:+%22SELL%22,+%22positionSide%22:+%22LONG%22,+%22type%22:+%22TAKE_PROFIT_MARKET%22,+%22stopPrice%22:+%220.09355%22,+%22quantity%22:+%221000%22,+%22workingType%22:+%22MARK_PRICE%22,+%22timeInForce%22:+%22GTC%22,+%22newClientOrderId%22:+%22chm_a1b063bf8366%22%7D%5D&timestamp=1770992689000&recvWindow=5000&signature=113259a24bc2618fc1b5bd8421a718a41f5fff24e482d751650de309f3343d8b",
-"headers": {
-"x-mbx-apikey": "BN6Wqp9hg1fpjTntnv",
-"accept": "*/*",
-"content-type": "application/octet-stream"
-},
-"body": null
-}
-},
-{
 "method": "GET",
 "url": "https://fapi.binance.com/fapi/v1/ticker/price?symbol=1000LUNCUSDT",
 "headers": {},
@@ -4986,12 +5215,7 @@
 ],
 "sleeps": [],
 "clock_end": 1770992689.0,
-"markers": [
-[
-"WARNING",
-"[BINANCE-ATOMIC-FALLBACK]"
-]
-],
+"markers": [],
 "saved": {
 "hedge_saved": [],
 "auth_reset": [],
@@ -5671,27 +5895,6 @@
 }
 },
 {
-"method": "POST",
-"url": "https://fapi.binance.com/fapi/v1/batchOrders?batchOrders=%5B%7B%22symbol%22:+%22DOGEUSDT%22,+%22side%22:+%22SELL%22,+%22positionSide%22:+%22SHORT%22,+%22type%22:+%22MARKET%22,+%22quantity%22:+%227000%22,+%22newClientOrderId%22:+%22chm_54afe2c46f85%22%7D,+%7B%22symbol%22:+%22DOGEUSDT%22,+%22side%22:+%22BUY%22,+%22positionSide%22:+%22SHORT%22,+%22type%22:+%22STOP_MARKET%22,+%22stopPrice%22:+%220.165%22,+%22quantity%22:+%227000%22,+%22workingType%22:+%22MARK_PRICE%22,+%22timeInForce%22:+%22GTC%22,+%22newClientOrderId%22:+%22chm_582a4b18ab2d%22%7D,+%7B%22symbol%22:+%22DOGEUSDT%22,+%22side%22:+%22BUY%22,+%22positionSide%22:+%22SHORT%22,+%22type%22:+%22TAKE_PROFIT_MARKET%22,+%22stopPrice%22:+%220.161%22,+%22quantity%22:+%227000%22,+%22workingType%22:+%22MARK_PRICE%22,+%22timeInForce%22:+%22GTC%22,+%22newClientOrderId%22:+%22chm_63408237223f%22%7D%5D&timestamp=1768224205653&recvWindow=5000&signature=c1262f0ca88edca76995965d50d8e8df3126369327420e1cb455fcb9daf80340",
-"headers": {
-"X-MBX-APIKEY": "BN6Wqp9hg1fpjTntnv"
-},
-"body": null,
-"hdrs": {
-"x-mbx-apikey": "BN6Wqp9hg1fpjTntnv"
-},
-"wire": {
-"method": "POST",
-"target": "/fapi/v1/batchOrders?batchOrders=%5B%7B%22symbol%22:+%22DOGEUSDT%22,+%22side%22:+%22SELL%22,+%22positionSide%22:+%22SHORT%22,+%22type%22:+%22MARKET%22,+%22quantity%22:+%227000%22,+%22newClientOrderId%22:+%22chm_54afe2c46f85%22%7D,+%7B%22symbol%22:+%22DOGEUSDT%22,+%22side%22:+%22BUY%22,+%22positionSide%22:+%22SHORT%22,+%22type%22:+%22STOP_MARKET%22,+%22stopPrice%22:+%220.165%22,+%22quantity%22:+%227000%22,+%22workingType%22:+%22MARK_PRICE%22,+%22timeInForce%22:+%22GTC%22,+%22newClientOrderId%22:+%22chm_582a4b18ab2d%22%7D,+%7B%22symbol%22:+%22DOGEUSDT%22,+%22side%22:+%22BUY%22,+%22positionSide%22:+%22SHORT%22,+%22type%22:+%22TAKE_PROFIT_MARKET%22,+%22stopPrice%22:+%220.161%22,+%22quantity%22:+%227000%22,+%22workingType%22:+%22MARK_PRICE%22,+%22timeInForce%22:+%22GTC%22,+%22newClientOrderId%22:+%22chm_63408237223f%22%7D%5D&timestamp=1768224205653&recvWindow=5000&signature=c1262f0ca88edca76995965d50d8e8df3126369327420e1cb455fcb9daf80340",
-"headers": {
-"x-mbx-apikey": "BN6Wqp9hg1fpjTntnv",
-"accept": "*/*",
-"content-type": "application/octet-stream"
-},
-"body": null
-}
-},
-{
 "method": "GET",
 "url": "https://fapi.binance.com/fapi/v1/ticker/price?symbol=DOGEUSDT",
 "headers": {},
@@ -5772,12 +5975,7 @@
 ],
 "sleeps": [],
 "clock_end": 1768224205.653527,
-"markers": [
-[
-"WARNING",
-"[BINANCE-ATOMIC-FALLBACK]"
-]
-],
+"markers": [],
 "saved": {
 "hedge_saved": [],
 "auth_reset": [],
@@ -6480,27 +6678,6 @@
 }
 },
 {
-"method": "POST",
-"url": "https://fapi.binance.com/fapi/v1/batchOrders?batchOrders=%5B%7B%22symbol%22:+%221000PEPEUSDT%22,+%22side%22:+%22SELL%22,+%22positionSide%22:+%22SHORT%22,+%22type%22:+%22MARKET%22,+%22quantity%22:+%2218000%22,+%22newClientOrderId%22:+%22chm_25789cfdd8d2%22%7D,+%7B%22symbol%22:+%221000PEPEUSDT%22,+%22side%22:+%22BUY%22,+%22positionSide%22:+%22SHORT%22,+%22type%22:+%22STOP_MARKET%22,+%22stopPrice%22:+%220.0130031%22,+%22quantity%22:+%2218000%22,+%22workingType%22:+%22MARK_PRICE%22,+%22timeInForce%22:+%22GTC%22,+%22newClientOrderId%22:+%22chm_4912bab934ac%22%7D,+%7B%22symbol%22:+%221000PEPEUSDT%22,+%22side%22:+%22BUY%22,+%22positionSide%22:+%22SHORT%22,+%22type%22:+%22TAKE_PROFIT_MARKET%22,+%22stopPrice%22:+%220.0128091%22,+%22quantity%22:+%2210000%22,+%22workingType%22:+%22MARK_PRICE%22,+%22timeInForce%22:+%22GTC%22,+%22newClientOrderId%22:+%22chm_e9c9d27a4cd6%22%7D,+%7B%22symbol%22:+%221000PEPEUSDT%22,+%22side%22:+%22BUY%22,+%22positionSide%22:+%22SHORT%22,+%22type%22:+%22TAKE_PROFIT_MARKET%22,+%22stopPrice%22:+%220.0127767%22,+%22quantity%22:+%224000%22,+%22workingType%22:+%22MARK_PRICE%22,+%22timeInForce%22:+%22GTC%22,+%22newClientOrderId%22:+%22chm_904332cbdd5b%22%7D,+%7B%22symbol%22:+%221000PEPEUSDT%22,+%22side%22:+%22BUY%22,+%22positionSide%22:+%22SHORT%22,+%22type%22:+%22TAKE_PROFIT_MARKET%22,+%22stopPrice%22:+%220.0126797%22,+%22quantity%22:+%224000%22,+%22workingType%22:+%22MARK_PRICE%22,+%22timeInForce%22:+%22GTC%22,+%22newClientOrderId%22:+%22chm_bb30b00c642f%22%7D%5D&timestamp=1769716847585&recvWindow=5000&signature=1d9fd2e75f25beddddf7c7f9cfa82e196eea69b436faafe9ef82cda7e60b6f00",
-"headers": {
-"X-MBX-APIKEY": "BN6Wqp9hg1fpjTntnv"
-},
-"body": null,
-"hdrs": {
-"x-mbx-apikey": "BN6Wqp9hg1fpjTntnv"
-},
-"wire": {
-"method": "POST",
-"target": "/fapi/v1/batchOrders?batchOrders=%5B%7B%22symbol%22:+%221000PEPEUSDT%22,+%22side%22:+%22SELL%22,+%22positionSide%22:+%22SHORT%22,+%22type%22:+%22MARKET%22,+%22quantity%22:+%2218000%22,+%22newClientOrderId%22:+%22chm_25789cfdd8d2%22%7D,+%7B%22symbol%22:+%221000PEPEUSDT%22,+%22side%22:+%22BUY%22,+%22positionSide%22:+%22SHORT%22,+%22type%22:+%22STOP_MARKET%22,+%22stopPrice%22:+%220.0130031%22,+%22quantity%22:+%2218000%22,+%22workingType%22:+%22MARK_PRICE%22,+%22timeInForce%22:+%22GTC%22,+%22newClientOrderId%22:+%22chm_4912bab934ac%22%7D,+%7B%22symbol%22:+%221000PEPEUSDT%22,+%22side%22:+%22BUY%22,+%22positionSide%22:+%22SHORT%22,+%22type%22:+%22TAKE_PROFIT_MARKET%22,+%22stopPrice%22:+%220.0128091%22,+%22quantity%22:+%2210000%22,+%22workingType%22:+%22MARK_PRICE%22,+%22timeInForce%22:+%22GTC%22,+%22newClientOrderId%22:+%22chm_e9c9d27a4cd6%22%7D,+%7B%22symbol%22:+%221000PEPEUSDT%22,+%22side%22:+%22BUY%22,+%22positionSide%22:+%22SHORT%22,+%22type%22:+%22TAKE_PROFIT_MARKET%22,+%22stopPrice%22:+%220.0127767%22,+%22quantity%22:+%224000%22,+%22workingType%22:+%22MARK_PRICE%22,+%22timeInForce%22:+%22GTC%22,+%22newClientOrderId%22:+%22chm_904332cbdd5b%22%7D,+%7B%22symbol%22:+%221000PEPEUSDT%22,+%22side%22:+%22BUY%22,+%22positionSide%22:+%22SHORT%22,+%22type%22:+%22TAKE_PROFIT_MARKET%22,+%22stopPrice%22:+%220.0126797%22,+%22quantity%22:+%224000%22,+%22workingType%22:+%22MARK_PRICE%22,+%22timeInForce%22:+%22GTC%22,+%22newClientOrderId%22:+%22chm_bb30b00c642f%22%7D%5D&timestamp=1769716847585&recvWindow=5000&signature=1d9fd2e75f25beddddf7c7f9cfa82e196eea69b436faafe9ef82cda7e60b6f00",
-"headers": {
-"x-mbx-apikey": "BN6Wqp9hg1fpjTntnv",
-"accept": "*/*",
-"content-type": "application/octet-stream"
-},
-"body": null
-}
-},
-{
 "method": "GET",
 "url": "https://fapi.binance.com/fapi/v1/ticker/price?symbol=1000PEPEUSDT",
 "headers": {},
@@ -6623,12 +6800,7 @@
 ],
 "sleeps": [],
 "clock_end": 1769716847.585,
-"markers": [
-[
-"WARNING",
-"[BINANCE-ATOMIC-FALLBACK]"
-]
-],
+"markers": [],
 "saved": {
 "hedge_saved": [],
 "auth_reset": [],
@@ -6930,27 +7102,6 @@
 }
 },
 {
-"method": "POST",
-"url": "https://fapi.binance.com/fapi/v1/batchOrders?batchOrders=%5B%7B%22symbol%22:+%221000LUNCUSDT%22,+%22side%22:+%22BUY%22,+%22positionSide%22:+%22LONG%22,+%22type%22:+%22MARKET%22,+%22quantity%22:+%22280000%22,+%22newClientOrderId%22:+%22chm_4d7563612cf3%22%7D,+%7B%22symbol%22:+%221000LUNCUSDT%22,+%22side%22:+%22SELL%22,+%22positionSide%22:+%22LONG%22,+%22type%22:+%22STOP_MARKET%22,+%22stopPrice%22:+%220.09657%22,+%22quantity%22:+%22280000%22,+%22workingType%22:+%22MARK_PRICE%22,+%22timeInForce%22:+%22GTC%22,+%22newClientOrderId%22:+%22chm_5273054f9b48%22%7D,+%7B%22symbol%22:+%221000LUNCUSDT%22,+%22side%22:+%22SELL%22,+%22positionSide%22:+%22LONG%22,+%22type%22:+%22TAKE_PROFIT_MARKET%22,+%22stopPrice%22:+%220.10150%22,+%22quantity%22:+%22140000%22,+%22workingType%22:+%22MARK_PRICE%22,+%22timeInForce%22:+%22GTC%22,+%22newClientOrderId%22:+%22chm_5eaed5126c63%22%7D,+%7B%22symbol%22:+%221000LUNCUSDT%22,+%22side%22:+%22SELL%22,+%22positionSide%22:+%22LONG%22,+%22type%22:+%22TAKE_PROFIT_MARKET%22,+%22stopPrice%22:+%220.10347%22,+%22quantity%22:+%2270000%22,+%22workingType%22:+%22MARK_PRICE%22,+%22timeInForce%22:+%22GTC%22,+%22newClientOrderId%22:+%22chm_7e9afc167729%22%7D,+%7B%22symbol%22:+%221000LUNCUSDT%22,+%22side%22:+%22SELL%22,+%22positionSide%22:+%22LONG%22,+%22type%22:+%22TAKE_PROFIT_MARKET%22,+%22stopPrice%22:+%220.10643%22,+%22quantity%22:+%2270000%22,+%22workingType%22:+%22MARK_PRICE%22,+%22timeInForce%22:+%22GTC%22,+%22newClientOrderId%22:+%22chm_76fe18ac127d%22%7D%5D&timestamp=1772235297876&recvWindow=5000&signature=539a3906dbd85562c03f51b5bb9759500b72b2fb322c4ed16f016eb25b8d6213",
-"headers": {
-"X-MBX-APIKEY": "BN6Wqp9hg1fpjTntnv"
-},
-"body": null,
-"hdrs": {
-"x-mbx-apikey": "BN6Wqp9hg1fpjTntnv"
-},
-"wire": {
-"method": "POST",
-"target": "/fapi/v1/batchOrders?batchOrders=%5B%7B%22symbol%22:+%221000LUNCUSDT%22,+%22side%22:+%22BUY%22,+%22positionSide%22:+%22LONG%22,+%22type%22:+%22MARKET%22,+%22quantity%22:+%22280000%22,+%22newClientOrderId%22:+%22chm_4d7563612cf3%22%7D,+%7B%22symbol%22:+%221000LUNCUSDT%22,+%22side%22:+%22SELL%22,+%22positionSide%22:+%22LONG%22,+%22type%22:+%22STOP_MARKET%22,+%22stopPrice%22:+%220.09657%22,+%22quantity%22:+%22280000%22,+%22workingType%22:+%22MARK_PRICE%22,+%22timeInForce%22:+%22GTC%22,+%22newClientOrderId%22:+%22chm_5273054f9b48%22%7D,+%7B%22symbol%22:+%221000LUNCUSDT%22,+%22side%22:+%22SELL%22,+%22positionSide%22:+%22LONG%22,+%22type%22:+%22TAKE_PROFIT_MARKET%22,+%22stopPrice%22:+%220.10150%22,+%22quantity%22:+%22140000%22,+%22workingType%22:+%22MARK_PRICE%22,+%22timeInForce%22:+%22GTC%22,+%22newClientOrderId%22:+%22chm_5eaed5126c63%22%7D,+%7B%22symbol%22:+%221000LUNCUSDT%22,+%22side%22:+%22SELL%22,+%22positionSide%22:+%22LONG%22,+%22type%22:+%22TAKE_PROFIT_MARKET%22,+%22stopPrice%22:+%220.10347%22,+%22quantity%22:+%2270000%22,+%22workingType%22:+%22MARK_PRICE%22,+%22timeInForce%22:+%22GTC%22,+%22newClientOrderId%22:+%22chm_7e9afc167729%22%7D,+%7B%22symbol%22:+%221000LUNCUSDT%22,+%22side%22:+%22SELL%22,+%22positionSide%22:+%22LONG%22,+%22type%22:+%22TAKE_PROFIT_MARKET%22,+%22stopPrice%22:+%220.10643%22,+%22quantity%22:+%2270000%22,+%22workingType%22:+%22MARK_PRICE%22,+%22timeInForce%22:+%22GTC%22,+%22newClientOrderId%22:+%22chm_76fe18ac127d%22%7D%5D&timestamp=1772235297876&recvWindow=5000&signature=539a3906dbd85562c03f51b5bb9759500b72b2fb322c4ed16f016eb25b8d6213",
-"headers": {
-"x-mbx-apikey": "BN6Wqp9hg1fpjTntnv",
-"accept": "*/*",
-"content-type": "application/octet-stream"
-},
-"body": null
-}
-},
-{
 "method": "GET",
 "url": "https://fapi.binance.com/fapi/v1/ticker/price?symbol=1000LUNCUSDT",
 "headers": {},
@@ -7073,12 +7224,7 @@
 ],
 "sleeps": [],
 "clock_end": 1772235295.0095,
-"markers": [
-[
-"WARNING",
-"[BINANCE-ATOMIC-FALLBACK]"
-]
-],
+"markers": [],
 "saved": {
 "hedge_saved": [],
 "auth_reset": [],
@@ -11253,27 +11399,6 @@
 }
 },
 {
-"method": "POST",
-"url": "https://fapi.binance.com/fapi/v1/batchOrders?batchOrders=%5B%7B%22symbol%22:+%22BTCUSDT%22,+%22side%22:+%22SELL%22,+%22positionSide%22:+%22SHORT%22,+%22type%22:+%22MARKET%22,+%22quantity%22:+%220.015%22,+%22newClientOrderId%22:+%22chm_76de5018e24d%22%7D,+%7B%22symbol%22:+%22BTCUSDT%22,+%22side%22:+%22BUY%22,+%22positionSide%22:+%22SHORT%22,+%22type%22:+%22STOP_MARKET%22,+%22stopPrice%22:+%2294015.7%22,+%22quantity%22:+%220.015%22,+%22workingType%22:+%22MARK_PRICE%22,+%22timeInForce%22:+%22GTC%22,+%22newClientOrderId%22:+%22chm_bda87fc34ba4%22%7D,+%7B%22symbol%22:+%22BTCUSDT%22,+%22side%22:+%22BUY%22,+%22positionSide%22:+%22SHORT%22,+%22type%22:+%22TAKE_PROFIT_MARKET%22,+%22stopPrice%22:+%2284477.8%22,+%22quantity%22:+%220.009%22,+%22workingType%22:+%22MARK_PRICE%22,+%22timeInForce%22:+%22GTC%22,+%22newClientOrderId%22:+%22chm_9963f204fa07%22%7D,+%7B%22symbol%22:+%22BTCUSDT%22,+%22side%22:+%22BUY%22,+%22positionSide%22:+%22SHORT%22,+%22type%22:+%22TAKE_PROFIT_MARKET%22,+%22stopPrice%22:+%2282888.2%22,+%22quantity%22:+%220.003%22,+%22workingType%22:+%22MARK_PRICE%22,+%22timeInForce%22:+%22GTC%22,+%22newClientOrderId%22:+%22chm_6b2810e3bb9e%22%7D,+%7B%22symbol%22:+%22BTCUSDT%22,+%22side%22:+%22BUY%22,+%22positionSide%22:+%22SHORT%22,+%22type%22:+%22TAKE_PROFIT_MARKET%22,+%22stopPrice%22:+%2278119.3%22,+%22quantity%22:+%220.003%22,+%22workingType%22:+%22MARK_PRICE%22,+%22timeInForce%22:+%22GTC%22,+%22newClientOrderId%22:+%22chm_4317121c0873%22%7D%5D&timestamp=1771918660971&recvWindow=5000&signature=0ca7b61f06ac7e32b1f9456b7696ec190764cd6352e141a8def16096cea2ef17",
-"headers": {
-"X-MBX-APIKEY": "BN6Wqp9hg1fpjTntnv"
-},
-"body": null,
-"hdrs": {
-"x-mbx-apikey": "BN6Wqp9hg1fpjTntnv"
-},
-"wire": {
-"method": "POST",
-"target": "/fapi/v1/batchOrders?batchOrders=%5B%7B%22symbol%22:+%22BTCUSDT%22,+%22side%22:+%22SELL%22,+%22positionSide%22:+%22SHORT%22,+%22type%22:+%22MARKET%22,+%22quantity%22:+%220.015%22,+%22newClientOrderId%22:+%22chm_76de5018e24d%22%7D,+%7B%22symbol%22:+%22BTCUSDT%22,+%22side%22:+%22BUY%22,+%22positionSide%22:+%22SHORT%22,+%22type%22:+%22STOP_MARKET%22,+%22stopPrice%22:+%2294015.7%22,+%22quantity%22:+%220.015%22,+%22workingType%22:+%22MARK_PRICE%22,+%22timeInForce%22:+%22GTC%22,+%22newClientOrderId%22:+%22chm_bda87fc34ba4%22%7D,+%7B%22symbol%22:+%22BTCUSDT%22,+%22side%22:+%22BUY%22,+%22positionSide%22:+%22SHORT%22,+%22type%22:+%22TAKE_PROFIT_MARKET%22,+%22stopPrice%22:+%2284477.8%22,+%22quantity%22:+%220.009%22,+%22workingType%22:+%22MARK_PRICE%22,+%22timeInForce%22:+%22GTC%22,+%22newClientOrderId%22:+%22chm_9963f204fa07%22%7D,+%7B%22symbol%22:+%22BTCUSDT%22,+%22side%22:+%22BUY%22,+%22positionSide%22:+%22SHORT%22,+%22type%22:+%22TAKE_PROFIT_MARKET%22,+%22stopPrice%22:+%2282888.2%22,+%22quantity%22:+%220.003%22,+%22workingType%22:+%22MARK_PRICE%22,+%22timeInForce%22:+%22GTC%22,+%22newClientOrderId%22:+%22chm_6b2810e3bb9e%22%7D,+%7B%22symbol%22:+%22BTCUSDT%22,+%22side%22:+%22BUY%22,+%22positionSide%22:+%22SHORT%22,+%22type%22:+%22TAKE_PROFIT_MARKET%22,+%22stopPrice%22:+%2278119.3%22,+%22quantity%22:+%220.003%22,+%22workingType%22:+%22MARK_PRICE%22,+%22timeInForce%22:+%22GTC%22,+%22newClientOrderId%22:+%22chm_4317121c0873%22%7D%5D&timestamp=1771918660971&recvWindow=5000&signature=0ca7b61f06ac7e32b1f9456b7696ec190764cd6352e141a8def16096cea2ef17",
-"headers": {
-"x-mbx-apikey": "BN6Wqp9hg1fpjTntnv",
-"accept": "*/*",
-"content-type": "application/octet-stream"
-},
-"body": null
-}
-},
-{
 "method": "GET",
 "url": "https://fapi.binance.com/fapi/v1/ticker/price?symbol=BTCUSDT",
 "headers": {},
@@ -11312,12 +11437,7 @@
 ],
 "sleeps": [],
 "clock_end": 1771918659.228456,
-"markers": [
-[
-"WARNING",
-"[BINANCE-ATOMIC-FALLBACK]"
-]
-],
+"markers": [],
 "saved": {
 "hedge_saved": [],
 "auth_reset": [],
@@ -11569,27 +11689,6 @@
 }
 },
 {
-"method": "POST",
-"url": "https://fapi.binance.com/fapi/v1/batchOrders?batchOrders=%5B%7B%22symbol%22:+%22BTCUSDT%22,+%22side%22:+%22BUY%22,+%22positionSide%22:+%22LONG%22,+%22type%22:+%22MARKET%22,+%22quantity%22:+%220.545%22,+%22newClientOrderId%22:+%22chm_f6b8be4e325f%22%7D,+%7B%22symbol%22:+%22BTCUSDT%22,+%22side%22:+%22SELL%22,+%22positionSide%22:+%22LONG%22,+%22type%22:+%22STOP_MARKET%22,+%22stopPrice%22:+%2291597.3%22,+%22quantity%22:+%220.545%22,+%22workingType%22:+%22MARK_PRICE%22,+%22timeInForce%22:+%22GTC%22,+%22newClientOrderId%22:+%22chm_9e5f6e5fa289%22%7D,+%7B%22symbol%22:+%22BTCUSDT%22,+%22side%22:+%22SELL%22,+%22positionSide%22:+%22LONG%22,+%22type%22:+%22TAKE_PROFIT_MARKET%22,+%22stopPrice%22:+%2291734.8%22,+%22quantity%22:+%220.545%22,+%22workingType%22:+%22MARK_PRICE%22,+%22timeInForce%22:+%22GTC%22,+%22newClientOrderId%22:+%22chm_d9b9d0db2c4c%22%7D%5D&timestamp=1770687642143&recvWindow=5000&signature=b5a53782fb6aacff8dcaddb200e1a44cc6a5b78086bed84fce8fb3a21ea95c55",
-"headers": {
-"X-MBX-APIKEY": "BN6Wqp9hg1fpjTntnv"
-},
-"body": null,
-"hdrs": {
-"x-mbx-apikey": "BN6Wqp9hg1fpjTntnv"
-},
-"wire": {
-"method": "POST",
-"target": "/fapi/v1/batchOrders?batchOrders=%5B%7B%22symbol%22:+%22BTCUSDT%22,+%22side%22:+%22BUY%22,+%22positionSide%22:+%22LONG%22,+%22type%22:+%22MARKET%22,+%22quantity%22:+%220.545%22,+%22newClientOrderId%22:+%22chm_f6b8be4e325f%22%7D,+%7B%22symbol%22:+%22BTCUSDT%22,+%22side%22:+%22SELL%22,+%22positionSide%22:+%22LONG%22,+%22type%22:+%22STOP_MARKET%22,+%22stopPrice%22:+%2291597.3%22,+%22quantity%22:+%220.545%22,+%22workingType%22:+%22MARK_PRICE%22,+%22timeInForce%22:+%22GTC%22,+%22newClientOrderId%22:+%22chm_9e5f6e5fa289%22%7D,+%7B%22symbol%22:+%22BTCUSDT%22,+%22side%22:+%22SELL%22,+%22positionSide%22:+%22LONG%22,+%22type%22:+%22TAKE_PROFIT_MARKET%22,+%22stopPrice%22:+%2291734.8%22,+%22quantity%22:+%220.545%22,+%22workingType%22:+%22MARK_PRICE%22,+%22timeInForce%22:+%22GTC%22,+%22newClientOrderId%22:+%22chm_d9b9d0db2c4c%22%7D%5D&timestamp=1770687642143&recvWindow=5000&signature=b5a53782fb6aacff8dcaddb200e1a44cc6a5b78086bed84fce8fb3a21ea95c55",
-"headers": {
-"x-mbx-apikey": "BN6Wqp9hg1fpjTntnv",
-"accept": "*/*",
-"content-type": "application/octet-stream"
-},
-"body": null
-}
-},
-{
 "method": "GET",
 "url": "https://fapi.binance.com/fapi/v1/ticker/price?symbol=BTCUSDT",
 "headers": {},
@@ -11628,12 +11727,7 @@
 ],
 "sleeps": [],
 "clock_end": 1770687642.143364,
-"markers": [
-[
-"WARNING",
-"[BINANCE-ATOMIC-FALLBACK]"
-]
-],
+"markers": [],
 "saved": {
 "hedge_saved": [],
 "auth_reset": [],
@@ -12860,27 +12954,6 @@
 }
 },
 {
-"method": "POST",
-"url": "https://fapi.binance.com/fapi/v1/batchOrders?batchOrders=%5B%7B%22symbol%22:+%22BTCUSDT%22,+%22side%22:+%22SELL%22,+%22positionSide%22:+%22SHORT%22,+%22type%22:+%22MARKET%22,+%22quantity%22:+%220.015%22,+%22newClientOrderId%22:+%22chm_e65345bad585%22%7D,+%7B%22symbol%22:+%22BTCUSDT%22,+%22side%22:+%22BUY%22,+%22positionSide%22:+%22SHORT%22,+%22type%22:+%22STOP_MARKET%22,+%22stopPrice%22:+%2298287.9%22,+%22quantity%22:+%220.015%22,+%22workingType%22:+%22MARK_PRICE%22,+%22timeInForce%22:+%22GTC%22,+%22newClientOrderId%22:+%22chm_061f9309530e%22%7D,+%7B%22symbol%22:+%22BTCUSDT%22,+%22side%22:+%22BUY%22,+%22positionSide%22:+%22SHORT%22,+%22type%22:+%22TAKE_PROFIT_MARKET%22,+%22stopPrice%22:+%2288316.7%22,+%22quantity%22:+%220.009%22,+%22workingType%22:+%22MARK_PRICE%22,+%22timeInForce%22:+%22GTC%22,+%22newClientOrderId%22:+%22chm_e282c708356c%22%7D,+%7B%22symbol%22:+%22BTCUSDT%22,+%22side%22:+%22BUY%22,+%22positionSide%22:+%22SHORT%22,+%22type%22:+%22TAKE_PROFIT_MARKET%22,+%22stopPrice%22:+%2286654.8%22,+%22quantity%22:+%220.003%22,+%22workingType%22:+%22MARK_PRICE%22,+%22timeInForce%22:+%22GTC%22,+%22newClientOrderId%22:+%22chm_af9720af9fa9%22%7D,+%7B%22symbol%22:+%22BTCUSDT%22,+%22side%22:+%22BUY%22,+%22positionSide%22:+%22SHORT%22,+%22type%22:+%22TAKE_PROFIT_MARKET%22,+%22stopPrice%22:+%2278345.4%22,+%22quantity%22:+%220.003%22,+%22workingType%22:+%22MARK_PRICE%22,+%22timeInForce%22:+%22GTC%22,+%22newClientOrderId%22:+%22chm_d99cabb04417%22%7D%5D&timestamp=1768571392801&recvWindow=5000&signature=f5f2f43cbcff0e6e5c2e5be2c014b2a23c3a4f69e070e41ea5c6565c8fe69d9b",
-"headers": {
-"X-MBX-APIKEY": "BN6Wqp9hg1fpjTntnv"
-},
-"body": null,
-"hdrs": {
-"x-mbx-apikey": "BN6Wqp9hg1fpjTntnv"
-},
-"wire": {
-"method": "POST",
-"target": "/fapi/v1/batchOrders?batchOrders=%5B%7B%22symbol%22:+%22BTCUSDT%22,+%22side%22:+%22SELL%22,+%22positionSide%22:+%22SHORT%22,+%22type%22:+%22MARKET%22,+%22quantity%22:+%220.015%22,+%22newClientOrderId%22:+%22chm_e65345bad585%22%7D,+%7B%22symbol%22:+%22BTCUSDT%22,+%22side%22:+%22BUY%22,+%22positionSide%22:+%22SHORT%22,+%22type%22:+%22STOP_MARKET%22,+%22stopPrice%22:+%2298287.9%22,+%22quantity%22:+%220.015%22,+%22workingType%22:+%22MARK_PRICE%22,+%22timeInForce%22:+%22GTC%22,+%22newClientOrderId%22:+%22chm_061f9309530e%22%7D,+%7B%22symbol%22:+%22BTCUSDT%22,+%22side%22:+%22BUY%22,+%22positionSide%22:+%22SHORT%22,+%22type%22:+%22TAKE_PROFIT_MARKET%22,+%22stopPrice%22:+%2288316.7%22,+%22quantity%22:+%220.009%22,+%22workingType%22:+%22MARK_PRICE%22,+%22timeInForce%22:+%22GTC%22,+%22newClientOrderId%22:+%22chm_e282c708356c%22%7D,+%7B%22symbol%22:+%22BTCUSDT%22,+%22side%22:+%22BUY%22,+%22positionSide%22:+%22SHORT%22,+%22type%22:+%22TAKE_PROFIT_MARKET%22,+%22stopPrice%22:+%2286654.8%22,+%22quantity%22:+%220.003%22,+%22workingType%22:+%22MARK_PRICE%22,+%22timeInForce%22:+%22GTC%22,+%22newClientOrderId%22:+%22chm_af9720af9fa9%22%7D,+%7B%22symbol%22:+%22BTCUSDT%22,+%22side%22:+%22BUY%22,+%22positionSide%22:+%22SHORT%22,+%22type%22:+%22TAKE_PROFIT_MARKET%22,+%22stopPrice%22:+%2278345.4%22,+%22quantity%22:+%220.003%22,+%22workingType%22:+%22MARK_PRICE%22,+%22timeInForce%22:+%22GTC%22,+%22newClientOrderId%22:+%22chm_d99cabb04417%22%7D%5D&timestamp=1768571392801&recvWindow=5000&signature=f5f2f43cbcff0e6e5c2e5be2c014b2a23c3a4f69e070e41ea5c6565c8fe69d9b",
-"headers": {
-"x-mbx-apikey": "BN6Wqp9hg1fpjTntnv",
-"accept": "*/*",
-"content-type": "application/octet-stream"
-},
-"body": null
-}
-},
-{
 "method": "GET",
 "url": "https://fapi.binance.com/fapi/v1/ticker/price?symbol=BTCUSDT",
 "headers": {},
@@ -13003,12 +13076,7 @@
 ],
 "sleeps": [],
 "clock_end": 1768571392.801614,
-"markers": [
-[
-"WARNING",
-"[BINANCE-ATOMIC-FALLBACK]"
-]
-],
+"markers": [],
 "saved": {
 "hedge_saved": [],
 "auth_reset": [],
@@ -14997,27 +15065,6 @@
 }
 },
 {
-"method": "POST",
-"url": "https://fapi.binance.com/fapi/v1/batchOrders?batchOrders=%5B%7B%22symbol%22:+%22BTCUSDT%22,+%22side%22:+%22BUY%22,+%22positionSide%22:+%22LONG%22,+%22type%22:+%22MARKET%22,+%22quantity%22:+%220.010%22,+%22newClientOrderId%22:+%22chm_c11a32f12b1a%22%7D,+%7B%22symbol%22:+%22BTCUSDT%22,+%22side%22:+%22SELL%22,+%22positionSide%22:+%22LONG%22,+%22type%22:+%22STOP_MARKET%22,+%22stopPrice%22:+%2286000.0%22,+%22quantity%22:+%220.010%22,+%22workingType%22:+%22MARK_PRICE%22,+%22timeInForce%22:+%22GTC%22,+%22newClientOrderId%22:+%22chm_5c8b8e025baa%22%7D,+%7B%22symbol%22:+%22BTCUSDT%22,+%22side%22:+%22SELL%22,+%22positionSide%22:+%22LONG%22,+%22type%22:+%22TAKE_PROFIT_MARKET%22,+%22stopPrice%22:+%2288500.0%22,+%22quantity%22:+%220.006%22,+%22workingType%22:+%22MARK_PRICE%22,+%22timeInForce%22:+%22GTC%22,+%22newClientOrderId%22:+%22chm_17b3fc6be39a%22%7D,+%7B%22symbol%22:+%22BTCUSDT%22,+%22side%22:+%22SELL%22,+%22positionSide%22:+%22LONG%22,+%22type%22:+%22TAKE_PROFIT_MARKET%22,+%22stopPrice%22:+%2289500.0%22,+%22quantity%22:+%220.002%22,+%22workingType%22:+%22MARK_PRICE%22,+%22timeInForce%22:+%22GTC%22,+%22newClientOrderId%22:+%22chm_52591fe886a7%22%7D,+%7B%22symbol%22:+%22BTCUSDT%22,+%22side%22:+%22SELL%22,+%22positionSide%22:+%22LONG%22,+%22type%22:+%22TAKE_PROFIT_MARKET%22,+%22stopPrice%22:+%2290500.0%22,+%22quantity%22:+%220.002%22,+%22workingType%22:+%22MARK_PRICE%22,+%22timeInForce%22:+%22GTC%22,+%22newClientOrderId%22:+%22chm_f07c2799feb5%22%7D%5D&timestamp=1767225600000&recvWindow=5000&signature=ddc2c3a26e717ba03865dec8efcf827a781f056e8bf7bd9fd907ca5acc080174",
-"headers": {
-"X-MBX-APIKEY": "BNKEY-abc123"
-},
-"body": null,
-"hdrs": {
-"x-mbx-apikey": "BNKEY-abc123"
-},
-"wire": {
-"method": "POST",
-"target": "/fapi/v1/batchOrders?batchOrders=%5B%7B%22symbol%22:+%22BTCUSDT%22,+%22side%22:+%22BUY%22,+%22positionSide%22:+%22LONG%22,+%22type%22:+%22MARKET%22,+%22quantity%22:+%220.010%22,+%22newClientOrderId%22:+%22chm_c11a32f12b1a%22%7D,+%7B%22symbol%22:+%22BTCUSDT%22,+%22side%22:+%22SELL%22,+%22positionSide%22:+%22LONG%22,+%22type%22:+%22STOP_MARKET%22,+%22stopPrice%22:+%2286000.0%22,+%22quantity%22:+%220.010%22,+%22workingType%22:+%22MARK_PRICE%22,+%22timeInForce%22:+%22GTC%22,+%22newClientOrderId%22:+%22chm_5c8b8e025baa%22%7D,+%7B%22symbol%22:+%22BTCUSDT%22,+%22side%22:+%22SELL%22,+%22positionSide%22:+%22LONG%22,+%22type%22:+%22TAKE_PROFIT_MARKET%22,+%22stopPrice%22:+%2288500.0%22,+%22quantity%22:+%220.006%22,+%22workingType%22:+%22MARK_PRICE%22,+%22timeInForce%22:+%22GTC%22,+%22newClientOrderId%22:+%22chm_17b3fc6be39a%22%7D,+%7B%22symbol%22:+%22BTCUSDT%22,+%22side%22:+%22SELL%22,+%22positionSide%22:+%22LONG%22,+%22type%22:+%22TAKE_PROFIT_MARKET%22,+%22stopPrice%22:+%2289500.0%22,+%22quantity%22:+%220.002%22,+%22workingType%22:+%22MARK_PRICE%22,+%22timeInForce%22:+%22GTC%22,+%22newClientOrderId%22:+%22chm_52591fe886a7%22%7D,+%7B%22symbol%22:+%22BTCUSDT%22,+%22side%22:+%22SELL%22,+%22positionSide%22:+%22LONG%22,+%22type%22:+%22TAKE_PROFIT_MARKET%22,+%22stopPrice%22:+%2290500.0%22,+%22quantity%22:+%220.002%22,+%22workingType%22:+%22MARK_PRICE%22,+%22timeInForce%22:+%22GTC%22,+%22newClientOrderId%22:+%22chm_f07c2799feb5%22%7D%5D&timestamp=1767225600000&recvWindow=5000&signature=ddc2c3a26e717ba03865dec8efcf827a781f056e8bf7bd9fd907ca5acc080174",
-"headers": {
-"x-mbx-apikey": "BNKEY-abc123",
-"accept": "*/*",
-"content-type": "application/octet-stream"
-},
-"body": null
-}
-},
-{
 "method": "GET",
 "url": "https://fapi.binance.com/fapi/v1/ticker/price?symbol=BTCUSDT",
 "headers": {},
@@ -15140,12 +15187,7 @@
 ],
 "sleeps": [],
 "clock_end": 1767225600.0,
-"markers": [
-[
-"WARNING",
-"[BINANCE-ATOMIC-FALLBACK]"
-]
-],
+"markers": [],
 "saved": {
 "hedge_saved": [],
 "auth_reset": [],

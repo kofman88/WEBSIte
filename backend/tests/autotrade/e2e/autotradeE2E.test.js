@@ -358,20 +358,16 @@ describe('auto-trade end to end on fake exchanges (Bybit, BingX, Binance, OKX)',
       const tps = orders.filter((o) => o.reduceOnly && o.type !== 'STOP');
       expect(tps.length, 'partial TP orders').toBe(2);
       expect(tps.every((o) => o.side === 'SELL' && o.posSide === 'LONG')).toBe(true);
-      expect(tps.map((o) => Math.round((o.price || o.trigger) * 100) / 100)).toEqual([7912.23, 7923.61]);
+      // OKX limit TPs are on the tick, toward the entry ([OKX-PTP-POSSIDE]: LONG → floor 7912.226 → 7912.22)
+      expect(tps.map((o) => Math.round((o.price || o.trigger) * 100) / 100)).toEqual(ex === 'okx' ? [7912.22, 7923.61] : [7912.23, 7923.61]);
       expect(S.fake.unhandled).toEqual([]);
     });
   }
 
-  it('auto: the partial-TP requests the bot sends that a live exchange might refuse (pinned; served leniently)', () => {
-    // partial_tp.py: BingX side "Sell" (Bybit casing) without positionSide; OKX limit TPs without
-    // posSide on a long/short account and px = round(price, 8) (not on the tick). Live acceptance unverified.
-    expect(S.fake.lenient.map((l) => `${l.ex} ${l.what}`)).toEqual([
-      'bingx side Sell', 'bingx no positionSide (TAKE_PROFIT_MARKET)',
-      'bingx side Sell', 'bingx no positionSide (TAKE_PROFIT_MARKET)',
-      'okx no posSide (limit, reduceOnly)', 'okx px 7912.22640387 off tick 0.01',
-      'okx no posSide (limit, reduceOnly)', 'okx px 7923.61468173 off tick 0.01',
-    ]);
+  it('auto: every partial-TP request is one a live exchange accepts — nothing served leniently', () => {
+    // [BINGX-PTP-POSSIDE] side SELL/BUY + positionSide; [OKX-PTP-POSSIDE] posSide + px on the tick.
+    // Before the fix: BingX "Sell" without positionSide, OKX limit TPs without posSide and off the tick.
+    expect(S.fake.lenient.map((l) => `${l.ex} ${l.what}`)).toEqual([]);
   });
 
   for (const ex of EXCHANGES) {

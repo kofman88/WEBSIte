@@ -34,7 +34,7 @@ const { TransportError, aiohttpJson } = require('./transport');
 const {
   errStr, pyGet, pyIndex, pyFloat, pyInt, pyStr, pyFloatStr, pyTruthy, pyOr, pyUrlencode, yarlUrl, htmlEscape, pySlice, isDict,
   pyIter, pyRepr,
-  rethrowCancelled,
+  rethrowCancelled, PyError,
 } = require('./pyCompat');
 const { fmtFixed, fmtG } = require('../../strategies/common/pyfmt');
 const { pyRound, pyRoundInt } = require('../../strategies/common/pyround');
@@ -73,6 +73,32 @@ function humanizeOkxError(raw) {
 }
 
 /** to_okx_symbol: "-SWAP" kept; "...USDT" → base (every "USDT" removed) + "-USDT-SWAP". */
+/**
+ * [OKX-CLORDID-ALNUM 2026-10] clOrdId / attachAlgoClOrdId of OKX: letters and digits only, ≤ 32
+ * (okx_trader._okx_cl_id). It used to send "sl_<id>" / "tp1_<id>" with "_" and "-" (OKX: 51000), so
+ * every atomic entry fell back to the legacy flow (entry and SL as separate requests).
+ */
+function okxClId(prefix, tradeId) {
+  const body = Array.from(pyStr(pyOr(tradeId, ''))).filter((ch) => /^[A-Za-z0-9]$/.test(ch)).join('');
+  let out = prefix + body;
+  if (out.length > 32) {
+    out = prefix + crypto.createHash('sha1').update(Buffer.from(pyStr(tradeId), 'utf8')).digest('hex').slice(0, 32 - prefix.length);
+  }
+  return out;
+}
+
+/**
+ * [OKX-ENTRY-TIMEOUT 2026-10] the answer to the entry order was lost and the lookup by clOrdId did not
+ * answer either: the order may have been accepted. A TimeoutError (pyType) — auto-trade handles it as a
+ * timeout (position check, [TIMEOUT-FIRST-ATTEMPT] → the position is adopted). okx_trader.OkxEntryStateUnknown
+ */
+class OkxEntryStateUnknown extends PyError {
+  constructor(message) {
+    super('OkxEntryStateUnknown', message);
+    this.name = 'TimeoutError';   // a subclass of asyncio.TimeoutError: asyncio.isTimeoutError() holds
+  }
+}
+
 function toOkxSymbol(symbol) {
   symbol = String(symbol);
   if (symbol.endsWith('-SWAP')) return symbol;
@@ -317,6 +343,35 @@ function createOkxTrader(overrides = {}) {
 
   const firstData = (resp) => pyIndex(pyGet(resp, 'data', [{}]), 0);
 
+  /** [OKX-ENTRY-TIMEOUT] the entry order by clOrdId → ['found', order] | ['absent', {}] | ['unknown', {}]
+   *  (okx_trader._query_entry_by_cl_id); «found» — it traded (live / partially_filled / filled or a fill).
+   *  1 s before every lookup (the order may not have reached OKX yet); «absent» only after two 51603 in a row. */
+  async function _queryEntryByClId(apiKey, secret, passphrase, instId, clId) {
+    let absent = 0;
+    for (let i = 0; i < 3; i++) {
+      await rt.sleep(1.0);
+      const r = await _request('GET', '/api/v5/trade/order', apiKey, secret, passphrase, { instId, clOrdId: clId });
+      const code = pyStr(pyGet(r, 'code', ''));
+      if (code === '51603') {
+        absent += 1;
+        if (absent >= 2) return ['absent', {}];
+        continue;
+      }
+      absent = 0;
+      if (code === '0') {
+        const d = pyOr(pyIndex(pyOr(pyGet(r, 'data'), [{}]), 0), {});
+        if (pyTruthy(pyGet(d, 'ordId'))) {
+          let filled;
+          try { filled = pyFloat(pyOr(pyGet(d, 'accFillSz'), 0)) > 0; } catch (_e) { filled = false; }
+          const state = pyStr(pyGet(d, 'state', ''));
+          if (state === 'live' || state === 'partially_filled' || state === 'filled' || filled) return ['found', d];
+          return ['absent', {}];
+        }
+      }
+    }
+    return ['unknown', {}];
+  }
+
   async function placeTrade(apiKey, secret, symbol, direction, entry, sl, tp1, riskPct, leverage, o = {}) {
     const {
       tp2 = 0.0, tp3 = 0.0, riskMode = 'risk', passphrase = '', allowLowNotionalBoost = false, userId = 0, tradeId = null,
@@ -416,9 +471,10 @@ function createOkxTrader(overrides = {}) {
         nTp3 = 0;
       }
       const szTp = { 1: _lotsSz(nTp1, qtyStep), 2: _lotsSz(nTp2, qtyStep), 3: _lotsSz(nTp3, qtyStep) };
-      const tidShort = pySlice(pyStr(pyTruthy(tradeId) ? tradeId : `t${Math.trunc(rt.now() * 1000) % 1e10}`), 10);
+      const tidSrc = pyStr(pyTruthy(tradeId) ? tradeId : `t${Math.trunc(rt.now() * 1000) % 1e10}`);
+      const entryClId = okxClId('e', tidSrc);   // [OKX-ENTRY-TIMEOUT]
       const attach = [{
-        attachAlgoClOrdId: `sl_${tidShort}`,
+        attachAlgoClOrdId: okxClId('sl', tidSrc),   // [OKX-CLORDID-ALNUM]
         slTriggerPx: slStr,
         slOrdPx: '-1',
         triggerPxType: 'mark',
@@ -426,7 +482,7 @@ function createOkxTrader(overrides = {}) {
       }];
       if (pyTruthy(tp1) && tp1 > 0 && nTp1 > 0) {
         attach.push({
-          attachAlgoClOrdId: `tp1_${tidShort}`,
+          attachAlgoClOrdId: okxClId('tp1', tidSrc),
           tpTriggerPx: PP.roundPrice(tp1, tickSize),
           tpOrdPx: '-1',
           triggerPxType: 'mark',
@@ -434,13 +490,44 @@ function createOkxTrader(overrides = {}) {
         });
       }
       const entryBody = {
-        instId, tdMode: 'cross', side, posSide, ordType: 'market', sz: szStr, attachAlgoOrds: attach,
+        instId, tdMode: 'cross', side, posSide, ordType: 'market', sz: szStr, clOrdId: entryClId, attachAlgoOrds: attach,
+      };
+      // [OKX-ENTRY-TIMEOUT 2026-10] the transport failed (-1: timeout / broken) or OKX reports a duplicate
+      // clOrdId (51016, also in data[0].sCode): the entry may have been accepted. It used to be «timeout»
+      // → SKIP while the position (with its attached SL) lived untracked. Now the order is looked up by
+      // clOrdId: found → it is taken; absent → the error as before; unclear → OkxEntryStateUnknown.
+      const entryLostAnswer = async (r) => {
+        const code = pyStr(pyGet(r, 'code', ''));
+        let sCode;
+        try { sCode = pyStr(pyGet(pyOr(pyIndex(pyOr(pyGet(r, 'data'), [{}]), 0), {}), 'sCode', '')); } catch (_e) { sCode = ''; }
+        if (code !== '-1' && code !== '51016' && sCode !== '51016') return r;
+        const [st, ord] = await _queryEntryByClId(apiKey, secret, passphrase, instId, entryClId);
+        if (st === 'found') {
+          // the stop is attached only if attachAlgoOrds of the found order carries one (a legacy entry
+          // without attachAlgoOrds, or an answer without the field → the SL is placed separately)
+          const att = pyOr(pyGet(ord, 'attachAlgoOrds'), []);
+          const hasSl = Array.isArray(att) && att.some((x) => isDict(x) && Boolean(pyStr(pyOr(pyGet(x, 'slTriggerPx', ''), ''))));
+          log.warning(`[OKX-ENTRY-TIMEOUT] ${instId}: entry ${pyStr(pyGet(ord, 'ordId', ''))} found by clOrdId after ${pyStr(pyOr(pyGet(r, 'msg', ''), pyGet(r, 'code', '')))} — adopted (attached SL: ${hasSl ? 'True' : 'False'})`);
+          return {
+            code: '0', msg: '', _adopted: true, _attached_sl: hasSl,
+            data: [{ ordId: pyStr(pyGet(ord, 'ordId', '')), clOrdId: entryClId, sCode: '0', sMsg: '' }],
+          };
+        }
+        if (st === 'unknown') {
+          log.error(`[OKX-ENTRY-TIMEOUT] ${instId}: entry state unknown (clOrdId=${entryClId}) — reconcile`);
+          throw new OkxEntryStateUnknown(`OKX не ответил на ордер ${instId}: состояние входа неизвестно — проверьте позицию на бирже`);
+        }
+        return r;
       };
       let resp = await _request('POST', '/api/v5/trade/order', apiKey, secret, passphrase, null, entryBody);
+      resp = await entryLostAnswer(resp);
       const respCode = pyStr(pyGet(resp, 'code', ''));
       const respMsg = pyOr(pyGet(firstData(resp), 'sMsg', ''), pyGet(resp, 'msg', ''));
-      const atomicOk = respCode === '0';
-      const attachUnsupported = !atomicOk && (respCode === '51000' || respCode === '51001' || pyLower(pyStr(pyOr(respMsg, ''))).includes('attachalgo'));
+      // [OKX-ENTRY-TIMEOUT] an entry found by clOrdId without an attached SL — the SL goes separately (legacy)
+      const adoptedNoSl = Boolean(pyGet(resp, '_adopted')) && !pyTruthy(pyGet(resp, '_attached_sl'));
+      const atomicOk = respCode === '0' && !adoptedNoSl;
+      const attachUnsupported = !atomicOk && !adoptedNoSl
+        && (respCode === '51000' || respCode === '51001' || pyLower(pyStr(pyOr(respMsg, ''))).includes('attachalgo'));
 
       let orderId;
       let atomicTp1Placed;
@@ -449,14 +536,19 @@ function createOkxTrader(overrides = {}) {
         atomicTp1Placed = Boolean(pyTruthy(tp1) && tp1 > 0 && nTp1 > 0);
         log.info(`[OKX-ATOMIC-OK] ${instId}: entry+SL${atomicTp1Placed ? '+TP1' : ''} in single request`);
       } else {
-        if (!attachUnsupported) return { ok: false, order_id: '', error: humanizeOkxError(pyOr(respMsg, 'unknown error')) };
-        log.warning(`[OKX-ATOMIC-FALLBACK] ${instId}: attachAlgoOrds не поддерживается (${pySlice(respMsg, 120)}) — legacy flow`);
-        const legacyBody = {};
-        for (const k of Object.keys(entryBody)) if (k !== 'attachAlgoOrds') legacyBody[k] = entryBody[k];
-        resp = await _request('POST', '/api/v5/trade/order', apiKey, secret, passphrase, null, legacyBody);
-        if (pyGet(resp, 'code') !== '0') {
-          const err = pyOr(pyGet(firstData(resp), 'sMsg', ''), pyGet(resp, 'msg', ''));
-          return { ok: false, order_id: '', error: humanizeOkxError(err) };
+        if (!attachUnsupported && !adoptedNoSl) return { ok: false, order_id: '', error: humanizeOkxError(pyOr(respMsg, 'unknown error')) };
+        if (adoptedNoSl) {
+          log.warning(`[OKX-ENTRY-TIMEOUT] ${instId}: adopted entry has no attached SL — SL placed separately`);
+        } else {
+          log.warning(`[OKX-ATOMIC-FALLBACK] ${instId}: attachAlgoOrds не поддерживается (${pySlice(respMsg, 120)}) — legacy flow`);
+          const legacyBody = {};
+          for (const k of Object.keys(entryBody)) if (k !== 'attachAlgoOrds') legacyBody[k] = entryBody[k];
+          resp = await _request('POST', '/api/v5/trade/order', apiKey, secret, passphrase, null, legacyBody);
+          resp = await entryLostAnswer(resp);
+          if (pyGet(resp, 'code') !== '0') {
+            const err = pyOr(pyGet(firstData(resp), 'sMsg', ''), pyGet(resp, 'msg', ''));
+            return { ok: false, order_id: '', error: humanizeOkxError(err) };
+          }
         }
         orderId = pyGet(firstData(resp), 'ordId', '');
         const slBody = {
@@ -527,6 +619,7 @@ function createOkxTrader(overrides = {}) {
       return { ok: true, order_id: orderId, error: '', tp_placed: tpPlaced, qty: qtyStr, symbol: instId };
     } catch (e) {
       rethrowCancelled(e);
+      if (e instanceof OkxEntryStateUnknown) throw e;   // [OKX-ENTRY-TIMEOUT] the caller reconciles (auto-trade: timeout branch)
       if (e instanceof TransportError && e.kind === 'timeout') return { ok: false, order_id: '', error: 'Таймаут OKX.' };
       log.error(`OKX place_trade ${pyStr(symbol)}: ${errStr(e)}`);
       return { ok: false, order_id: '', error: errStr(e) };
@@ -565,6 +658,27 @@ function createOkxTrader(overrides = {}) {
     return pyIter(pyGet(data, 'data', [])).map((x) => ({
       orderId: pyGet(x, 'ordId', ''), symbol: pyGet(x, 'instId', ''), side: pyGet(x, 'side', ''), type: pyGet(x, 'ordType', ''),
     }));
+  }
+
+  /** [OKX-SLV-ALGO 2026-10] pending stops (conditional algos with slTriggerPx) of the symbol in the
+   *  get_open_orders shape + triggerPrice / reduceOnly — for the SL verifier (/orders-pending does not list
+   *  algos). null — OKX did not answer. okx_trader.get_algo_sl_orders */
+  async function getAlgoSlOrders(apiKey, secret, symbol, passphrase = '') {
+    const instId = toOkxSymbol(symbol);
+    const data = await _request('GET', '/api/v5/trade/orders-algo-pending', apiKey, secret, passphrase,
+      { instType: 'SWAP', instId, ordType: 'conditional' });
+    if (pyStr(pyGet(data, 'code', '')) !== '0') return null;
+    const out = [];
+    for (const x of pyIter(pyOr(pyGet(data, 'data', []), []))) {
+      let trig;
+      try { trig = pyFloat(pyOr(pyStr(pyOr(pyGet(x, 'slTriggerPx', ''), '')), 0)); } catch (_e) { continue; }
+      if (trig <= 0) continue;
+      out.push({
+        orderId: pyStr(pyOr(pyGet(x, 'algoId', ''), '')), symbol: pyStr(pyOr(pyGet(x, 'instId', ''), instId)),
+        side: pyGet(x, 'side', ''), type: 'STOP', triggerPrice: trig, reduceOnly: true, posSide: pyGet(x, 'posSide', ''),
+      });
+    }
+    return out;
   }
 
   async function _cancelOrderInner(apiKey, secret, symbol, orderId, passphrase = '') {
@@ -609,6 +723,83 @@ function createOkxTrader(overrides = {}) {
     return { ok: true, cancelled };
   }
 
+  /** [OKX-SLTP-REPLACE 2026-10] pending conditional algos of THIS position side (okx_trader._side_conditional_algos):
+   *  [[[algoId, slTriggerPx, closeFraction], …] stops, [algoId, …] take-profits]. ordType is mandatory (50014
+   *  without it); the other side of a hedge account is left out. An error → empty lists. */
+  async function _sideConditionalAlgos(apiKey, secret, passphrase, instId, posSide) {
+    const sls = [];
+    const tps = [];
+    try {
+      const r = await _request('GET', '/api/v5/trade/orders-algo-pending', apiKey, secret, passphrase,
+        { instType: 'SWAP', instId, ordType: 'conditional' });
+      if (pyGet(r, 'code') === '0') {
+        for (const x of pyIter(pyOr(pyGet(r, 'data', []), []))) {
+          const aid = pyStr(pyOr(pyGet(x, 'algoId', ''), ''));
+          if (!aid) continue;
+          const aps = pyLower(pyStr(pyOr(pyGet(x, 'posSide', ''), '')));
+          if (aps && aps !== posSide && aps !== 'net') continue;   // the other side of a hedge account
+          const slpx = pyStr(pyOr(pyGet(x, 'slTriggerPx', ''), ''));
+          if (slpx) sls.push([aid, slpx, pyStr(pyOr(pyGet(x, 'closeFraction', ''), ''))]);
+          else tps.push(aid);
+        }
+      }
+    } catch (ce) {
+      rethrowCancelled(ce);
+      log.debug(`OKX orders-algo-pending ${instId}: ${errStr(ce)}`);
+    }
+    return [sls, tps];
+  }
+
+  async function _cancelAlgoIds(apiKey, secret, passphrase, instId, ids) {
+    if (!ids.length) return;
+    try {
+      await _request('POST', '/api/v5/trade/cancel-algos', apiKey, secret, passphrase, null, ids.map((i) => ({ algoId: i, instId })));
+    } catch (ce) {
+      rethrowCancelled(ce);
+      log.debug(`OKX cancel-algos ${instId}: ${errStr(ce)}`);
+    }
+  }
+
+  const _samePx = (a, b) => {
+    try { return pyFloat(a) === pyFloat(b); } catch (_e) { return false; }
+  };
+
+  /**
+   * [OKX-SLTP-REPLACE 2026-10] a stop on the whole `posSide` position at `slPx` → [placed, error]
+   * (okx_trader._full_position_sl). OKX keeps ONE full-close (closeFraction "1") TP/SL per position:
+   * there already at that price → nothing is sent; elsewhere → amend-algos; none → a new
+   * closeFraction "1". The other stops of the side go only AFTER the stop is in place; otherwise
+   * they stay (it used to cancel everything first and send the new SL with sz "0" — not an OKX size).
+   */
+  async function _fullPositionSl(apiKey, secret, passphrase, instId, posSide, closeSide, slPx, oldSl, tries = 3) {
+    const full = oldSl.filter((x) => x[2] === '1');
+    const keep = full.length ? full[0][0] : '';
+    let placed = false;
+    let last = '';
+    if (full.length && _samePx(full[0][1], slPx)) {
+      placed = true;
+    } else {
+      const [path, body] = full.length
+        ? ['/api/v5/trade/amend-algos', { instId, algoId: keep, newSlTriggerPx: slPx, newSlOrdPx: '-1', newSlTriggerPxType: 'mark' }]
+        : ['/api/v5/trade/order-algo', {
+          instId, tdMode: 'cross', side: closeSide, posSide, ordType: 'conditional', closeFraction: '1',
+          slTriggerPx: slPx, slOrdPx: '-1', triggerPxType: 'mark',
+        }];
+      for (let t = 0; t < tries; t++) {
+        const r = await _request('POST', path, apiKey, secret, passphrase, null, body);
+        if (pyGet(r, 'code') === '0') { placed = true; break; }
+        try {
+          last = pyStr(pyOr(pyGet(pyIndex(pyOr(pyGet(r, 'data'), [{}]), 0), 'sMsg', ''), pyGet(r, 'msg', '')));
+        } catch (_e) {
+          last = pyStr(pyGet(r, 'msg', ''));
+        }
+        if (t < tries - 1) await rt.sleep(1.0);
+      }
+    }
+    if (placed) await _cancelAlgoIds(apiKey, secret, passphrase, instId, oldSl.filter((x) => x[0] !== keep).map((x) => x[0]));
+    return [placed, last];
+  }
+
   async function placeSlTpForPosition(apiKey, secret, symbol, direction, posSize, sl, tp1, tp2 = 0.0, tp3 = 0.0, passphrase = '') {
     try {
       const instId = toOkxSymbol(symbol);
@@ -618,50 +809,40 @@ function createOkxTrader(overrides = {}) {
       const posSide = isLong ? 'long' : 'short';
       let slPlaced = false;
       let tpPlaced = false;
-      try {
-        const pending = await _request('GET', '/api/v5/trade/orders-algo-pending', apiKey, secret, passphrase, { instType: 'SWAP', instId });
-        if (pyGet(pending, 'code') === '0') {
-          const algos = pyOr(pyGet(pending, 'data', []), []);
-          const payload = pyIter(algos).filter((a) => pyTruthy(pyGet(a, 'algoId'))).map((a) => ({ algoId: pyGet(a, 'algoId', ''), instId }));
-          if (payload.length) await _request('POST', '/api/v5/trade/cancel-algos', apiKey, secret, passphrase, null, payload);
-        }
-      } catch (ce) {
-        rethrowCancelled(ce);
-        log.debug(`OKX cancel-algos ${instId}: ${errStr(ce)}`);
-      }
+      const [oldSl, oldTpIds] = await _sideConditionalAlgos(apiKey, secret, passphrase, instId, posSide);
+      // step 2: a stop on the whole position ([OKX-SLTP-REPLACE])
       if (pyTruthy(sl) && sl > 0) {
-        const slBody = {
-          instId, tdMode: 'cross', side: closeSide, posSide, ordType: 'conditional', sz: '0',
-          slTriggerPx: PP.roundPrice(sl, tickSize), slOrdPx: '-1', triggerPxType: 'mark',
-        };
-        for (let a = 0; a < 3; a++) {
-          const r = await _request('POST', '/api/v5/trade/order-algo', apiKey, secret, passphrase, null, slBody);
-          if (pyGet(r, 'code') === '0') { slPlaced = true; break; }
-          await rt.sleep(1.0);
-        }
-        if (!slPlaced) log.warning(`OKX place_sl_tp_for_position SL ${instId} failed 3x`);
+        let slErr;
+        [slPlaced, slErr] = await _fullPositionSl(apiKey, secret, passphrase, instId, posSide, closeSide, PP.roundPrice(sl, tickSize), oldSl);
+        if (!slPlaced) log.warning(`OKX place_sl_tp_for_position SL ${instId} failed — previous SL kept (${oldSl.length}): ${slErr}`);
       }
+      // step 3: TP — 50 / 25 / 25 % (no TP2 — all on TP1); [OKX-SLTP-REPLACE] the shares in whole lots like
+      // place_trade: a leg below minSz goes to TP1 (coin shares used to be floored one by one — a
+      // 1–3 lot position lost its TPs altogether)
       if (pyTruthy(tp1) && tp1 > 0 && posSize > 0) {
+        const nTotal = _floorLots(posSize / okxCtVal(instId), qtyStep);
+        const minSz = okxMinSz(instId, qtyStep);
         let tpList = [];
         if (pyTruthy(tp2) && tp2 > 0) {
-          const q2 = posSize * 0.25;
-          const q3 = (pyTruthy(tp3) && tp3 > 0) ? posSize * 0.25 : 0.0;
-          const q1 = Math.max(posSize - q2 - q3, 0.0);
-          tpList.push([tp1, q1], [tp2, q2]);
-          if (q3 > 0) tpList.push([tp3, q3]);
+          let n2 = Math.trunc(nTotal * 0.25);
+          let n3 = (pyTruthy(tp3) && tp3 > 0) ? Math.trunc(nTotal * 0.25) : 0;
+          if (n2 * qtyStep < minSz) n2 = 0;
+          if (n3 * qtyStep < minSz) n3 = 0;
+          tpList.push([tp1, nTotal - n2 - n3], [tp2, n2]);
+          if (pyTruthy(tp3) && tp3 > 0) tpList.push([tp3, n3]);
         } else {
-          tpList = [[tp1, posSize]];
+          tpList = [[tp1, nTotal]];
         }
         let expected = 0;
         let okCount = 0;
-        for (const [tpPrice, tpQty] of tpList) {
-          if (tpQty <= 0 || tpPrice <= 0) continue;
-          const tpSz = _toContracts(instId, tpQty, qtyStep);
-          if (pyFloat(tpSz) <= 0) {
+        for (const [tpPrice, tpLots] of tpList) {
+          if (tpPrice <= 0) continue;
+          if (tpLots <= 0) {
             // [OKX-LOT-CONTRACTS] a share below one lot — no sz "0" is sent
-            log.info(`[OKX-TP-SKIP-LOT] ${instId} TP@${pyFloatStr(tpPrice)} qty=${pyFloatStr(tpQty)} < 1 lot — skipped`);
+            log.info(`[OKX-TP-SKIP-LOT] ${instId} TP@${pyFloatStr(tpPrice)} < 1 lot — skipped`);
             continue;
           }
+          const tpSz = _lotsSz(tpLots, qtyStep);
           expected += 1;
           const tpBody = {
             instId, tdMode: 'cross', side: closeSide, posSide, ordType: 'conditional',
@@ -676,6 +857,8 @@ function createOkxTrader(overrides = {}) {
           if (!tpOk) log.warning(`OKX place_sl_tp_for_position TP@${fmtG(tpPrice, 6)} [${instId}] failed 3x`);
         }
         tpPlaced = expected > 0 && okCount === expected;
+        // [OKX-SLTP-REPLACE] the old TPs go only once every new one is on
+        if (tpPlaced) await _cancelAlgoIds(apiKey, secret, passphrase, instId, oldTpIds);
       }
       return { sl_placed: slPlaced, tp_placed: tpPlaced, error: (slPlaced && tpPlaced) ? '' : 'partial failure' };
     } catch (e) {
@@ -833,16 +1016,17 @@ function createOkxTrader(overrides = {}) {
     }
   }
 
+  /** [OKX-SLTP-REPLACE 2026-10] places / moves the stop on the whole position (_fullPositionSl) — it used
+   *  to send a new algo with sz "0" (not an OKX size) on top of the old stop. okx_trader.set_trailing_sl */
   async function setTrailingSl(apiKey, secret, symbol, slPrice, direction, posIdx = 0, passphrase = '') {
     const instId = toOkxSymbol(symbol);
     const isLong = pyUpper(String(direction)) === 'LONG';
+    const posSide = isLong ? 'long' : 'short';
     const [, tick] = await _getInstrumentFilters(instId);
-    const slBody = {
-      instId, tdMode: 'cross', side: isLong ? 'sell' : 'buy', posSide: isLong ? 'long' : 'short', ordType: 'conditional',
-      sz: '0', slTriggerPx: PP.roundPrice(slPrice, tick), slOrdPx: '-1', triggerPxType: 'mark',
-    };
-    const resp = await _request('POST', '/api/v5/trade/order-algo', apiKey, secret, passphrase, null, slBody);
-    return { ok: pyGet(resp, 'code') === '0', error: pyGet(resp, 'msg', '') };
+    const [oldSl] = await _sideConditionalAlgos(apiKey, secret, passphrase, instId, posSide);
+    const [ok, err] = await _fullPositionSl(apiKey, secret, passphrase, instId, posSide, isLong ? 'sell' : 'buy',
+      PP.roundPrice(slPrice, tick), oldSl, 1);
+    return { ok, error: ok ? '' : err };
   }
 
   async function setBreakeven(apiKey, secret, symbol, entryPrice, direction, posIdx = 0, passphrase = '') {
@@ -876,7 +1060,7 @@ function createOkxTrader(overrides = {}) {
     rt, _state: st,
     placeTrade, getPositions, getOpenOrders, closePosition, closePositionPartial, cancelOrder, cancelAllOrders, placeSlTpForPosition,
     setTrailingSl, setBreakeven, getClosedPnl, getAccountSummary, getDashboard, getBalance, getLastPrice, testConnection,
-    syncTime, okxSz, okxCtVal, okxMinSz,
+    syncTime, okxSz, okxCtVal, okxMinSz, getAlgoSlOrders,
     _request, _getInstrumentFilters, _toContracts, _cancelOrderInner, _isoTimestamp: isoTs, _livePosSides, _cleanupSideOrders,
   };
 }
@@ -911,4 +1095,5 @@ function defaultTrader() {
 module.exports = {
   createOkxTrader, defaultTrader, BASE_URL, MIN_NOTIONAL, MAX_LEVERAGE, TAKER_FEE, MAKER_FEE, OKX_ERROR_MAP,
   humanizeOkxError, toOkxSymbol, okxPriceMultiplier, okxSign, isoTimestamp, formatTradeResult,
+  okxClId, OkxEntryStateUnknown,
 };

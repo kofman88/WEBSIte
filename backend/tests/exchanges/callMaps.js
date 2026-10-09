@@ -107,6 +107,7 @@ const EXCHANGES = {
       sync_time: (t) => t.syncTime(),
       okx_sz: (t, a) => t.okxSz(...a),
       close_position_partial: (t, a) => t.closePositionPartial(...a),
+      get_algo_sl_orders: (t, a) => t.getAlgoSlOrders(...a),
     },
     prepare(t, sc) {
       if (sc.state && sc.state.okx_offset_ms !== undefined) t._state.timeOffsetMs = sc.state.okx_offset_ms;

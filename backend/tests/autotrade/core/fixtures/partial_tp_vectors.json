@@ -4378,7 +4378,7 @@
     },
     {
      "method": "POST",
-     "url": "https://open-api.bingx.com/openApi/swap/v2/trade/order?quantity=0.0100&recvWindow=15000&side=Sell&stopPrice=88000.5&symbol=BTC-USDT&timestamp=1767225600000&type=TAKE_PROFIT_MARKET&workingType=MARK_PRICE&signature=a841fe6f835fba58f8c90b2e5a9bfafbf4901034d0e96b03fc8bc137830e454c",
+     "url": "https://open-api.bingx.com/openApi/swap/v2/trade/order?positionSide=LONG&quantity=0.0100&recvWindow=15000&side=SELL&stopPrice=88000.5&symbol=BTC-USDT&timestamp=1767225600000&type=TAKE_PROFIT_MARKET&workingType=MARK_PRICE&signature=4c96af7e20baf317ff1f8d27e3c728eb12a2b17e10e7b0b586b577d044b3a314",
      "headers": {
       "X-BX-APIKEY": "BXKEY-abc123"
      },
@@ -4386,7 +4386,7 @@
     },
     {
      "method": "POST",
-     "url": "https://open-api.bingx.com/openApi/swap/v2/trade/order?quantity=0.0060&recvWindow=15000&side=Sell&stopPrice=89000.5&symbol=BTC-USDT&timestamp=1767225600000&type=TAKE_PROFIT_MARKET&workingType=MARK_PRICE&signature=ade9af6fac709e9b4a2f982a1b5e7815a172681429829c233989d1d431c12354",
+     "url": "https://open-api.bingx.com/openApi/swap/v2/trade/order?positionSide=LONG&quantity=0.0060&recvWindow=15000&side=SELL&stopPrice=89000.5&symbol=BTC-USDT&timestamp=1767225600000&type=TAKE_PROFIT_MARKET&workingType=MARK_PRICE&signature=82948c52a951b336605db21955c299940140383fc109b0b36389ae47f4cfccb2",
      "headers": {
       "X-BX-APIKEY": "BXKEY-abc123"
      },
@@ -4532,7 +4532,7 @@
     },
     {
      "method": "POST",
-     "url": "https://open-api.bingx.com/openApi/swap/v2/trade/order?quantity=0.0100&recvWindow=15000&side=Sell&stopPrice=88000.5&symbol=BTC-USDT&timestamp=1767225600000&type=TAKE_PROFIT_MARKET&workingType=MARK_PRICE&signature=a841fe6f835fba58f8c90b2e5a9bfafbf4901034d0e96b03fc8bc137830e454c",
+     "url": "https://open-api.bingx.com/openApi/swap/v2/trade/order?positionSide=LONG&quantity=0.0100&recvWindow=15000&side=SELL&stopPrice=88000.5&symbol=BTC-USDT&timestamp=1767225600000&type=TAKE_PROFIT_MARKET&workingType=MARK_PRICE&signature=4c96af7e20baf317ff1f8d27e3c728eb12a2b17e10e7b0b586b577d044b3a314",
      "headers": {
       "X-BX-APIKEY": "BXKEY-abc123"
      },
@@ -4548,7 +4548,7 @@
     },
     {
      "method": "POST",
-     "url": "https://open-api.bingx.com/openApi/swap/v2/trade/order?quantity=0.0100&recvWindow=15000&side=Sell&stopPrice=89421.5&symbol=BTC-USDT&timestamp=1767225600000&type=TAKE_PROFIT_MARKET&workingType=MARK_PRICE&signature=a32f68c7660aaf55d7fc0edcc8fe7c712aa8c8bef83f65be5e7fa933157257b1",
+     "url": "https://open-api.bingx.com/openApi/swap/v2/trade/order?positionSide=LONG&quantity=0.0100&recvWindow=15000&side=SELL&stopPrice=89421.5&symbol=BTC-USDT&timestamp=1767225600000&type=TAKE_PROFIT_MARKET&workingType=MARK_PRICE&signature=89f4e3a6711db44d61dbc8871d1e29bb98caf91ae9cf8689ff3a2ad383596a66",
      "headers": {
       "X-BX-APIKEY": "BXKEY-abc123"
      },
@@ -4556,7 +4556,7 @@
     },
     {
      "method": "POST",
-     "url": "https://open-api.bingx.com/openApi/swap/v2/trade/order?quantity=0.0060&recvWindow=15000&side=Sell&stopPrice=89000.5&symbol=BTC-USDT&timestamp=1767225600000&type=TAKE_PROFIT_MARKET&workingType=MARK_PRICE&signature=ade9af6fac709e9b4a2f982a1b5e7815a172681429829c233989d1d431c12354",
+     "url": "https://open-api.bingx.com/openApi/swap/v2/trade/order?positionSide=LONG&quantity=0.0060&recvWindow=15000&side=SELL&stopPrice=89000.5&symbol=BTC-USDT&timestamp=1767225600000&type=TAKE_PROFIT_MARKET&workingType=MARK_PRICE&signature=82948c52a951b336605db21955c299940140383fc109b0b36389ae47f4cfccb2",
      "headers": {
       "X-BX-APIKEY": "BXKEY-abc123"
      },
@@ -4678,11 +4678,11 @@
      ],
      [
       "WARNING",
-      "Partial TP1 failed [LEVELS BTC-USDT-SWAP] after 3 attempts: {'code': 110414, 'msg': 'TP price should be lower', 'data': {}}"
+      "Partial TP1 failed [LEVELS BTC-USDT-SWAP] after 3 request(s): {'code': 110414, 'msg': 'TP price should be lower', 'data': {}}"
      ],
      [
       "WARNING",
-      "Partial TP2 failed [LEVELS BTC-USDT-SWAP] after 3 attempts: {'code': 110414, 'msg': 'TP price should be lower', 'data': {}}"
+      "Partial TP2 failed [LEVELS BTC-USDT-SWAP] after 3 request(s): {'code': 110414, 'msg': 'TP price should be lower', 'data': {}}"
      ],
      [
       "CRITICAL",
@@ -4717,7 +4717,7 @@
     },
     {
      "method": "POST",
-     "url": "https://open-api.bingx.com/openApi/swap/v2/trade/order?quantity=0.0100&recvWindow=15000&side=Sell&stopPrice=88000.5&symbol=BTC-USDT&timestamp=1767225600000&type=TAKE_PROFIT_MARKET&workingType=MARK_PRICE&signature=a841fe6f835fba58f8c90b2e5a9bfafbf4901034d0e96b03fc8bc137830e454c",
+     "url": "https://open-api.bingx.com/openApi/swap/v2/trade/order?positionSide=LONG&quantity=0.0100&recvWindow=15000&side=SELL&stopPrice=88000.5&symbol=BTC-USDT&timestamp=1767225600000&type=TAKE_PROFIT_MARKET&workingType=MARK_PRICE&signature=4c96af7e20baf317ff1f8d27e3c728eb12a2b17e10e7b0b586b577d044b3a314",
      "headers": {
       "X-BX-APIKEY": "BXKEY-abc123"
      },
@@ -4733,7 +4733,7 @@
     },
     {
      "method": "POST",
-     "url": "https://open-api.bingx.com/openApi/swap/v2/trade/order?quantity=0.0100&recvWindow=15000&side=Sell&stopPrice=87560.5&symbol=BTC-USDT&timestamp=1767225600000&type=TAKE_PROFIT_MARKET&workingType=MARK_PRICE&signature=b4bdfa887820eda41b5f4d8aa45b48a4be98b422cdc0285700211311fc9a1abe",
+     "url": "https://open-api.bingx.com/openApi/swap/v2/trade/order?positionSide=LONG&quantity=0.0100&recvWindow=15000&side=SELL&stopPrice=87560.5&symbol=BTC-USDT&timestamp=1767225600000&type=TAKE_PROFIT_MARKET&workingType=MARK_PRICE&signature=56b2480c3b6f00b72e952ea411d956ff37828b9e17caa7952bafa520143a670c",
      "headers": {
       "X-BX-APIKEY": "BXKEY-abc123"
      },
@@ -4749,7 +4749,7 @@
     },
     {
      "method": "POST",
-     "url": "https://open-api.bingx.com/openApi/swap/v2/trade/order?quantity=0.0100&recvWindow=15000&side=Sell&stopPrice=86684.9&symbol=BTC-USDT&timestamp=1767225600000&type=TAKE_PROFIT_MARKET&workingType=MARK_PRICE&signature=fbf1486704f5b212d718fbc8674386bed4285688ef81cb4acd6d6f1662d0ecad",
+     "url": "https://open-api.bingx.com/openApi/swap/v2/trade/order?positionSide=LONG&quantity=0.0100&recvWindow=15000&side=SELL&stopPrice=86684.9&symbol=BTC-USDT&timestamp=1767225600000&type=TAKE_PROFIT_MARKET&workingType=MARK_PRICE&signature=3d3875789b74d953b7a236950f28374bb54114922cc5a2620783088beae80efa",
      "headers": {
       "X-BX-APIKEY": "BXKEY-abc123"
      },
@@ -4757,7 +4757,7 @@
     },
     {
      "method": "POST",
-     "url": "https://open-api.bingx.com/openApi/swap/v2/trade/order?quantity=0.0060&recvWindow=15000&side=Sell&stopPrice=89000.5&symbol=BTC-USDT&timestamp=1767225600000&type=TAKE_PROFIT_MARKET&workingType=MARK_PRICE&signature=ade9af6fac709e9b4a2f982a1b5e7815a172681429829c233989d1d431c12354",
+     "url": "https://open-api.bingx.com/openApi/swap/v2/trade/order?positionSide=LONG&quantity=0.0060&recvWindow=15000&side=SELL&stopPrice=89000.5&symbol=BTC-USDT&timestamp=1767225600000&type=TAKE_PROFIT_MARKET&workingType=MARK_PRICE&signature=82948c52a951b336605db21955c299940140383fc109b0b36389ae47f4cfccb2",
      "headers": {
       "X-BX-APIKEY": "BXKEY-abc123"
      },
@@ -4773,7 +4773,7 @@
     },
     {
      "method": "POST",
-     "url": "https://open-api.bingx.com/openApi/swap/v2/trade/order?quantity=0.0060&recvWindow=15000&side=Sell&stopPrice=88555.5&symbol=BTC-USDT&timestamp=1767225600000&type=TAKE_PROFIT_MARKET&workingType=MARK_PRICE&signature=7922cacd57f468ec5bfb8fdca98a898c546dc210f1015689f48f24655103b56a",
+     "url": "https://open-api.bingx.com/openApi/swap/v2/trade/order?positionSide=LONG&quantity=0.0060&recvWindow=15000&side=SELL&stopPrice=88555.5&symbol=BTC-USDT&timestamp=1767225600000&type=TAKE_PROFIT_MARKET&workingType=MARK_PRICE&signature=3278ffe239956e2f798469f9be296c3131bdef5766ae34e7f9af7af86dad2379",
      "headers": {
       "X-BX-APIKEY": "BXKEY-abc123"
      },
@@ -4789,7 +4789,7 @@
     },
     {
      "method": "POST",
-     "url": "https://open-api.bingx.com/openApi/swap/v2/trade/order?quantity=0.0060&recvWindow=15000&side=Sell&stopPrice=87669.9&symbol=BTC-USDT&timestamp=1767225600000&type=TAKE_PROFIT_MARKET&workingType=MARK_PRICE&signature=bd36497ae880faeb10044c0583b9a895ff99db13ae8f3fdc8e3f6488c6d8aed2",
+     "url": "https://open-api.bingx.com/openApi/swap/v2/trade/order?positionSide=LONG&quantity=0.0060&recvWindow=15000&side=SELL&stopPrice=87669.9&symbol=BTC-USDT&timestamp=1767225600000&type=TAKE_PROFIT_MARKET&workingType=MARK_PRICE&signature=6ecd1d8257cfdc00771f5392f6449539ba7e4e60f423b6125bb1f570447e995e",
      "headers": {
       "X-BX-APIKEY": "BXKEY-abc123"
      },
@@ -4941,7 +4941,7 @@
     },
     {
      "method": "POST",
-     "url": "https://open-api.bingx.com/openApi/swap/v2/trade/order?quantity=4&recvWindow=15000&side=Sell&stopPrice=3.2000&symbol=TONCOIN-USDT&timestamp=1767225600000&type=TAKE_PROFIT_MARKET&workingType=MARK_PRICE&signature=946dfd345acf68e1b7aa2c42ae459b5f8d7a07e8249442005629ab328009143a",
+     "url": "https://open-api.bingx.com/openApi/swap/v2/trade/order?positionSide=LONG&quantity=4&recvWindow=15000&side=SELL&stopPrice=3.2000&symbol=TONCOIN-USDT&timestamp=1767225600000&type=TAKE_PROFIT_MARKET&workingType=MARK_PRICE&signature=b564c0e703e1d2db53ac44cd2c9780099857aeff7280cf31c9ebe3b7a5099dc5",
      "headers": {
       "X-BX-APIKEY": "BXKEY-abc123"
      },
@@ -5093,7 +5093,7 @@
     },
     {
      "method": "POST",
-     "url": "https://open-api.bingx.com/openApi/swap/v2/trade/order?quantity=4&recvWindow=15000&side=Sell&stopPrice=3.2000&symbol=TONCOIN-USDT&timestamp=1767225600000&type=TAKE_PROFIT_MARKET&workingType=MARK_PRICE&signature=946dfd345acf68e1b7aa2c42ae459b5f8d7a07e8249442005629ab328009143a",
+     "url": "https://open-api.bingx.com/openApi/swap/v2/trade/order?positionSide=LONG&quantity=4&recvWindow=15000&side=SELL&stopPrice=3.2000&symbol=TONCOIN-USDT&timestamp=1767225600000&type=TAKE_PROFIT_MARKET&workingType=MARK_PRICE&signature=b564c0e703e1d2db53ac44cd2c9780099857aeff7280cf31c9ebe3b7a5099dc5",
      "headers": {
       "X-BX-APIKEY": "BXKEY-abc123"
      },
@@ -5200,11 +5200,11 @@
      ],
      [
       "WARNING",
-      "Partial TP1 failed [LEVELS BTC-USDT-SWAP] after 3 attempts: {'code': 80001, 'msg': 'request failed', 'data': {}}"
+      "Partial TP1 failed [LEVELS BTC-USDT-SWAP] after 1 request(s): {'code': 80001, 'msg': 'request failed', 'data': {}}"
      ],
      [
       "WARNING",
-      "Partial TP2 failed [LEVELS BTC-USDT-SWAP] after 3 attempts: {'code': 80001, 'msg': 'request failed', 'data': {}}"
+      "Partial TP2 failed [LEVELS BTC-USDT-SWAP] after 1 request(s): {'code': 80001, 'msg': 'request failed', 'data': {}}"
      ],
      [
       "CRITICAL",
@@ -5239,7 +5239,7 @@
     },
     {
      "method": "POST",
-     "url": "https://open-api.bingx.com/openApi/swap/v2/trade/order?quantity=0.0100&recvWindow=15000&side=Sell&stopPrice=88000.5&symbol=BTC-USDT&timestamp=1767225600000&type=TAKE_PROFIT_MARKET&workingType=MARK_PRICE&signature=a841fe6f835fba58f8c90b2e5a9bfafbf4901034d0e96b03fc8bc137830e454c",
+     "url": "https://open-api.bingx.com/openApi/swap/v2/trade/order?positionSide=LONG&quantity=0.0100&recvWindow=15000&side=SELL&stopPrice=88000.5&symbol=BTC-USDT&timestamp=1767225600000&type=TAKE_PROFIT_MARKET&workingType=MARK_PRICE&signature=4c96af7e20baf317ff1f8d27e3c728eb12a2b17e10e7b0b586b577d044b3a314",
      "headers": {
       "X-BX-APIKEY": "BXKEY-abc123"
      },
@@ -5247,7 +5247,7 @@
     },
     {
      "method": "POST",
-     "url": "https://open-api.bingx.com/openApi/swap/v2/trade/order?quantity=0.0060&recvWindow=15000&side=Sell&stopPrice=89000.5&symbol=BTC-USDT&timestamp=1767225600000&type=TAKE_PROFIT_MARKET&workingType=MARK_PRICE&signature=ade9af6fac709e9b4a2f982a1b5e7815a172681429829c233989d1d431c12354",
+     "url": "https://open-api.bingx.com/openApi/swap/v2/trade/order?positionSide=LONG&quantity=0.0060&recvWindow=15000&side=SELL&stopPrice=89000.5&symbol=BTC-USDT&timestamp=1767225600000&type=TAKE_PROFIT_MARKET&workingType=MARK_PRICE&signature=82948c52a951b336605db21955c299940140383fc109b0b36389ae47f4cfccb2",
      "headers": {
       "X-BX-APIKEY": "BXKEY-abc123"
      },
@@ -5362,11 +5362,11 @@
      ],
      [
       "WARNING",
-      "Partial TP1 failed [LEVELS BTC-USDT-SWAP] after 3 attempts: {'code': 80001, 'msg': 'request failed', 'data': {}}"
+      "Partial TP1 failed [LEVELS BTC-USDT-SWAP] after 1 request(s): {'code': 80001, 'msg': 'request failed', 'data': {}}"
      ],
      [
       "WARNING",
-      "Partial TP2 failed [LEVELS BTC-USDT-SWAP] after 3 attempts: {'code': 80001, 'msg': 'request failed', 'data': {}}"
+      "Partial TP2 failed [LEVELS BTC-USDT-SWAP] after 1 request(s): {'code': 80001, 'msg': 'request failed', 'data': {}}"
      ],
      [
       "CRITICAL",
@@ -5394,7 +5394,7 @@
     },
     {
      "method": "POST",
-     "url": "https://open-api.bingx.com/openApi/swap/v2/trade/order?quantity=0.0100&recvWindow=15000&side=Sell&stopPrice=88000.5&symbol=BTC-USDT&timestamp=1767225600000&type=TAKE_PROFIT_MARKET&workingType=MARK_PRICE&signature=a841fe6f835fba58f8c90b2e5a9bfafbf4901034d0e96b03fc8bc137830e454c",
+     "url": "https://open-api.bingx.com/openApi/swap/v2/trade/order?positionSide=LONG&quantity=0.0100&recvWindow=15000&side=SELL&stopPrice=88000.5&symbol=BTC-USDT&timestamp=1767225600000&type=TAKE_PROFIT_MARKET&workingType=MARK_PRICE&signature=4c96af7e20baf317ff1f8d27e3c728eb12a2b17e10e7b0b586b577d044b3a314",
      "headers": {
       "X-BX-APIKEY": "BXKEY-abc123"
      },
@@ -5402,7 +5402,7 @@
     },
     {
      "method": "POST",
-     "url": "https://open-api.bingx.com/openApi/swap/v2/trade/order?quantity=0.0060&recvWindow=15000&side=Sell&stopPrice=89000.5&symbol=BTC-USDT&timestamp=1767225600000&type=TAKE_PROFIT_MARKET&workingType=MARK_PRICE&signature=ade9af6fac709e9b4a2f982a1b5e7815a172681429829c233989d1d431c12354",
+     "url": "https://open-api.bingx.com/openApi/swap/v2/trade/order?positionSide=LONG&quantity=0.0060&recvWindow=15000&side=SELL&stopPrice=89000.5&symbol=BTC-USDT&timestamp=1767225600000&type=TAKE_PROFIT_MARKET&workingType=MARK_PRICE&signature=82948c52a951b336605db21955c299940140383fc109b0b36389ae47f4cfccb2",
      "headers": {
       "X-BX-APIKEY": "BXKEY-abc123"
      },
@@ -6134,24 +6134,24 @@
      "url": "https://www.okx.com/api/v5/trade/order",
      "headers": {
       "OK-ACCESS-KEY": "OKKEY-abc123",
-      "OK-ACCESS-SIGN": "f21mgqzrEDbmV4yRL1RJFTvT7QFHBpkyERC6bc0E+sY=",
+      "OK-ACCESS-SIGN": "AJremavYz5vE32NWfKfVI87ZeL5SJG7v7g48wO0rJ9E=",
       "OK-ACCESS-TIMESTAMP": "2026-01-01T00:00:00.000Z",
       "OK-ACCESS-PASSPHRASE": "Pass-phrase#1",
       "Content-Type": "application/json"
      },
-     "body": "{\"instId\": \"BTC-USDT-SWAP\", \"tdMode\": \"cross\", \"side\": \"sell\", \"ordType\": \"limit\", \"sz\": \"0.99\", \"px\": \"88000.5\", \"reduceOnly\": true}"
+     "body": "{\"instId\": \"BTC-USDT-SWAP\", \"tdMode\": \"cross\", \"side\": \"sell\", \"posSide\": \"long\", \"ordType\": \"limit\", \"sz\": \"0.99\", \"px\": \"88000.5\", \"reduceOnly\": true}"
     },
     {
      "method": "POST",
      "url": "https://www.okx.com/api/v5/trade/order",
      "headers": {
       "OK-ACCESS-KEY": "OKKEY-abc123",
-      "OK-ACCESS-SIGN": "KK9MQoGrQ/DfSFS4W5PNGVmtTUmJQXeQjTgKadP+nMY=",
+      "OK-ACCESS-SIGN": "PyK06J16OQMXV2N0EyJj2QLuaMTHlAK/wK5gXYB/CCU=",
       "OK-ACCESS-TIMESTAMP": "2026-01-01T00:00:00.000Z",
       "OK-ACCESS-PASSPHRASE": "Pass-phrase#1",
       "Content-Type": "application/json"
      },
-     "body": "{\"instId\": \"BTC-USDT-SWAP\", \"tdMode\": \"cross\", \"side\": \"sell\", \"ordType\": \"limit\", \"sz\": \"0.60\", \"px\": \"89000.5\", \"reduceOnly\": true}"
+     "body": "{\"instId\": \"BTC-USDT-SWAP\", \"tdMode\": \"cross\", \"side\": \"sell\", \"posSide\": \"long\", \"ordType\": \"limit\", \"sz\": \"0.60\", \"px\": \"89000.5\", \"reduceOnly\": true}"
     }
    ],
    "sleeps": [],
@@ -6325,72 +6325,72 @@
      "url": "https://www.okx.com/api/v5/trade/order",
      "headers": {
       "OK-ACCESS-KEY": "OKKEY-abc123",
-      "OK-ACCESS-SIGN": "f21mgqzrEDbmV4yRL1RJFTvT7QFHBpkyERC6bc0E+sY=",
+      "OK-ACCESS-SIGN": "AJremavYz5vE32NWfKfVI87ZeL5SJG7v7g48wO0rJ9E=",
       "OK-ACCESS-TIMESTAMP": "2026-01-01T00:00:00.000Z",
       "OK-ACCESS-PASSPHRASE": "Pass-phrase#1",
       "Content-Type": "application/json"
      },
-     "body": "{\"instId\": \"BTC-USDT-SWAP\", \"tdMode\": \"cross\", \"side\": \"sell\", \"ordType\": \"limit\", \"sz\": \"0.99\", \"px\": \"88000.5\", \"reduceOnly\": true}"
+     "body": "{\"instId\": \"BTC-USDT-SWAP\", \"tdMode\": \"cross\", \"side\": \"sell\", \"posSide\": \"long\", \"ordType\": \"limit\", \"sz\": \"0.99\", \"px\": \"88000.5\", \"reduceOnly\": true}"
     },
     {
      "method": "POST",
      "url": "https://www.okx.com/api/v5/trade/order",
      "headers": {
       "OK-ACCESS-KEY": "OKKEY-abc123",
-      "OK-ACCESS-SIGN": "4O5t8DrVvM6jlZ/hcuCSObYpaU+r9sJRvIQ4hz9N+k4=",
+      "OK-ACCESS-SIGN": "ZG40kQUqCFf9GLY2C3JMY1+VDYm3xesnoVIpxYukWMw=",
       "OK-ACCESS-TIMESTAMP": "2026-01-01T00:00:01.000Z",
       "OK-ACCESS-PASSPHRASE": "Pass-phrase#1",
       "Content-Type": "application/json"
      },
-     "body": "{\"instId\": \"BTC-USDT-SWAP\", \"tdMode\": \"cross\", \"side\": \"sell\", \"ordType\": \"limit\", \"sz\": \"0.99\", \"px\": \"88000.5\", \"reduceOnly\": true}"
+     "body": "{\"instId\": \"BTC-USDT-SWAP\", \"tdMode\": \"cross\", \"side\": \"sell\", \"posSide\": \"long\", \"ordType\": \"limit\", \"sz\": \"0.99\", \"px\": \"88000.5\", \"reduceOnly\": true}"
     },
     {
      "method": "POST",
      "url": "https://www.okx.com/api/v5/trade/order",
      "headers": {
       "OK-ACCESS-KEY": "OKKEY-abc123",
-      "OK-ACCESS-SIGN": "B1pG2BDTjzr983smPjQLFr1u1Fa41F7Vd8U2Lm929v8=",
+      "OK-ACCESS-SIGN": "5GowTY3C0yCv++kPViZwXHRI6rlAiM8ms8ist/NP84g=",
       "OK-ACCESS-TIMESTAMP": "2026-01-01T00:00:02.000Z",
       "OK-ACCESS-PASSPHRASE": "Pass-phrase#1",
       "Content-Type": "application/json"
      },
-     "body": "{\"instId\": \"BTC-USDT-SWAP\", \"tdMode\": \"cross\", \"side\": \"sell\", \"ordType\": \"limit\", \"sz\": \"0.99\", \"px\": \"88000.5\", \"reduceOnly\": true}"
+     "body": "{\"instId\": \"BTC-USDT-SWAP\", \"tdMode\": \"cross\", \"side\": \"sell\", \"posSide\": \"long\", \"ordType\": \"limit\", \"sz\": \"0.99\", \"px\": \"88000.5\", \"reduceOnly\": true}"
     },
     {
      "method": "POST",
      "url": "https://www.okx.com/api/v5/trade/order",
      "headers": {
       "OK-ACCESS-KEY": "OKKEY-abc123",
-      "OK-ACCESS-SIGN": "mbXme9o4qRlcNk3E4uOnB4GXst2ODZHA+zO2UfpiR5U=",
+      "OK-ACCESS-SIGN": "Sp0yONCdjfybHvwqZmxP7OPNK7o1J237yjSAYlO/HMY=",
       "OK-ACCESS-TIMESTAMP": "2026-01-01T00:00:02.000Z",
       "OK-ACCESS-PASSPHRASE": "Pass-phrase#1",
       "Content-Type": "application/json"
      },
-     "body": "{\"instId\": \"BTC-USDT-SWAP\", \"tdMode\": \"cross\", \"side\": \"sell\", \"ordType\": \"limit\", \"sz\": \"0.60\", \"px\": \"89000.5\", \"reduceOnly\": true}"
+     "body": "{\"instId\": \"BTC-USDT-SWAP\", \"tdMode\": \"cross\", \"side\": \"sell\", \"posSide\": \"long\", \"ordType\": \"limit\", \"sz\": \"0.60\", \"px\": \"89000.5\", \"reduceOnly\": true}"
     },
     {
      "method": "POST",
      "url": "https://www.okx.com/api/v5/trade/order",
      "headers": {
       "OK-ACCESS-KEY": "OKKEY-abc123",
-      "OK-ACCESS-SIGN": "IsFcLtWzwaUTrrQUhNfaEl3LN8N0S4feT/qUVjKx7os=",
+      "OK-ACCESS-SIGN": "ZJekC78BULgtUeFCRqYxkfp3nVypj7IiWa54ZhF32X0=",
       "OK-ACCESS-TIMESTAMP": "2026-01-01T00:00:03.000Z",
       "OK-ACCESS-PASSPHRASE": "Pass-phrase#1",
       "Content-Type": "application/json"
      },
-     "body": "{\"instId\": \"BTC-USDT-SWAP\", \"tdMode\": \"cross\", \"side\": \"sell\", \"ordType\": \"limit\", \"sz\": \"0.60\", \"px\": \"89000.5\", \"reduceOnly\": true}"
+     "body": "{\"instId\": \"BTC-USDT-SWAP\", \"tdMode\": \"cross\", \"side\": \"sell\", \"posSide\": \"long\", \"ordType\": \"limit\", \"sz\": \"0.60\", \"px\": \"89000.5\", \"reduceOnly\": true}"
     },
     {
      "method": "POST",
      "url": "https://www.okx.com/api/v5/trade/order",
      "headers": {
       "OK-ACCESS-KEY": "OKKEY-abc123",
-      "OK-ACCESS-SIGN": "7Nd/50p7Pb602qY5zDZ4q1hBBUvKfKAwifjnzrmvppE=",
+      "OK-ACCESS-SIGN": "fwZQc389wnip9InBm6xjQYccRWsU8Q7YH2AoPVwYdnQ=",
       "OK-ACCESS-TIMESTAMP": "2026-01-01T00:00:04.000Z",
       "OK-ACCESS-PASSPHRASE": "Pass-phrase#1",
       "Content-Type": "application/json"
      },
-     "body": "{\"instId\": \"BTC-USDT-SWAP\", \"tdMode\": \"cross\", \"side\": \"sell\", \"ordType\": \"limit\", \"sz\": \"0.60\", \"px\": \"89000.5\", \"reduceOnly\": true}"
+     "body": "{\"instId\": \"BTC-USDT-SWAP\", \"tdMode\": \"cross\", \"side\": \"sell\", \"posSide\": \"long\", \"ordType\": \"limit\", \"sz\": \"0.60\", \"px\": \"89000.5\", \"reduceOnly\": true}"
     },
     {
      "method": "GET",
@@ -6542,24 +6542,24 @@
      "url": "https://www.okx.com/api/v5/trade/order",
      "headers": {
       "OK-ACCESS-KEY": "OKKEY-abc123",
-      "OK-ACCESS-SIGN": "f21mgqzrEDbmV4yRL1RJFTvT7QFHBpkyERC6bc0E+sY=",
+      "OK-ACCESS-SIGN": "AJremavYz5vE32NWfKfVI87ZeL5SJG7v7g48wO0rJ9E=",
       "OK-ACCESS-TIMESTAMP": "2026-01-01T00:00:00.000Z",
       "OK-ACCESS-PASSPHRASE": "Pass-phrase#1",
       "Content-Type": "application/json"
      },
-     "body": "{\"instId\": \"BTC-USDT-SWAP\", \"tdMode\": \"cross\", \"side\": \"sell\", \"ordType\": \"limit\", \"sz\": \"0.99\", \"px\": \"88000.5\", \"reduceOnly\": true}"
+     "body": "{\"instId\": \"BTC-USDT-SWAP\", \"tdMode\": \"cross\", \"side\": \"sell\", \"posSide\": \"long\", \"ordType\": \"limit\", \"sz\": \"0.99\", \"px\": \"88000.5\", \"reduceOnly\": true}"
     },
     {
      "method": "POST",
      "url": "https://www.okx.com/api/v5/trade/order",
      "headers": {
       "OK-ACCESS-KEY": "OKKEY-abc123",
-      "OK-ACCESS-SIGN": "KK9MQoGrQ/DfSFS4W5PNGVmtTUmJQXeQjTgKadP+nMY=",
+      "OK-ACCESS-SIGN": "PyK06J16OQMXV2N0EyJj2QLuaMTHlAK/wK5gXYB/CCU=",
       "OK-ACCESS-TIMESTAMP": "2026-01-01T00:00:00.000Z",
       "OK-ACCESS-PASSPHRASE": "Pass-phrase#1",
       "Content-Type": "application/json"
      },
-     "body": "{\"instId\": \"BTC-USDT-SWAP\", \"tdMode\": \"cross\", \"side\": \"sell\", \"ordType\": \"limit\", \"sz\": \"0.60\", \"px\": \"89000.5\", \"reduceOnly\": true}"
+     "body": "{\"instId\": \"BTC-USDT-SWAP\", \"tdMode\": \"cross\", \"side\": \"sell\", \"posSide\": \"long\", \"ordType\": \"limit\", \"sz\": \"0.60\", \"px\": \"89000.5\", \"reduceOnly\": true}"
     }
    ],
    "sleeps": [],

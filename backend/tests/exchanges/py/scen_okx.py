@@ -175,7 +175,42 @@ S("pt_low_notional_boost_too_small", PT, [KEY, SEC, "BTC-USDT-SWAP", "LONG", 187
   {"allow_low_notional_boost": True}, [I, R("GET", "/api/v5/account/balance", ok({"totalEq": "100"})), L])
 S("pt_margin_mode", PT, LONG, {"risk_mode": "margin", "tp2": 89000.0}, [I, B, L, R("POST", O, ORDER_OK), R("POST", A, algo_ok())])
 S("pt_notional_mode_tp3_without_tp2", PT, LONG, {"risk_mode": "notional", "tp3": 91000.0}, [I, B, L, R("POST", O, ORDER_OK)])
-S("pt_entry_timeout", PT, LONG, {"passphrase": PP}, [I, B, L, R("POST", O, {"raise": "timeout"})])
+S("pt_entry_timeout", PT, LONG, {"passphrase": PP}, [I, B, L, R("POST", O, {"raise": "timeout"}),
+                                                      R("GET", O, {"raise": "timeout"})])
+# ── [OKX-ENTRY-TIMEOUT 2026-10] a lost entry answer is resolved by clOrdId ──
+FOUND = ok({"ordId": "o-77", "clOrdId": "eokxtrade12345", "state": "filled", "accFillSz": "0.58"})
+FOUND_ATT = ok({"ordId": "o-90", "clOrdId": "eokxtrade12345", "state": "filled", "accFillSz": "0.58",
+               "attachAlgoOrds": [{"attachAlgoClOrdId": "slokxtrade12345", "slTriggerPx": "86000.0"},
+                                  {"attachAlgoClOrdId": "tp1okxtrade12345", "tpTriggerPx": "88500.0"}]})
+S("pt_entry_lost_found_attached_sl", PT, LONG, LADDER,
+  [I, B, L, R("POST", O, {"raise": "timeout"}), R("GET", O, err("51603", "Order does not exist"), FOUND_ATT),
+   R("POST", A, algo_ok("a2"), algo_ok("a3"))])
+S("pt_entry_lost_found_ladder", PT, LONG, LADDER,
+  [I, B, L, R("POST", O, {"raise": "timeout"}), R("GET", O, FOUND), R("POST", A, algo_ok("a2"), algo_ok("a3"))])
+S("pt_entry_lost_absent", PT, LONG, LADDER,
+  [I, B, L, R("POST", O, {"raise": "timeout"}), R("GET", O, err("51603", "Order does not exist"))])
+S("pt_entry_lost_canceled_unfilled", PT, LONG, LADDER,
+  [I, B, L, R("POST", O, {"raise": "connect", "message": "Server disconnected"}),
+   R("GET", O, ok({"ordId": "o-78", "state": "canceled", "accFillSz": "0"}))])
+S("pt_entry_lost_query_flaky_then_found", PT, LONG, LADDER,
+  [I, B, L, R("POST", O, {"raise": "timeout"}), R("GET", O, {"raise": "timeout"}, err("50011", "Too Many Requests"), FOUND),
+   R("POST", A, algo_ok("a2"), algo_ok("a3"))])
+S("pt_entry_lost_unknown_raises", PT, LONG, LADDER,
+  [I, B, L, R("POST", O, {"raise": "timeout"}), R("GET", O, {"raise": "timeout"}, ok(), {"status": 502, "text": "<html>502</html>",
+                                                                                       "headers": {"Content-Type": "text/html"}})])
+S("pt_entry_dup_clordid_scode", PT, LONG, LADDER,
+  [I, B, L, R("POST", O, err("1", "Operation failed.", [{"ordId": "", "clOrdId": "eokxtrade12345", "sCode": "51016",
+                                                        "sMsg": "Duplicated clOrdId"}])),
+   R("GET", O, FOUND), R("POST", A, algo_ok("a2"), algo_ok("a3"))])
+S("pt_entry_dup_clordid_top_code_absent", PT, LONG, {"passphrase": PP},
+  [I, B, L, R("POST", O, err("51016", "Duplicated clOrdId")), R("GET", O, err("51603", "Order does not exist"))])
+S("pt_entry_other_refusal_not_looked_up", PT, LONG, {"passphrase": PP},
+  [I, B, L, R("POST", O, err("1", "Operation failed.", [{"ordId": "", "sCode": "51008", "sMsg": "Insufficient USDT margin"}]))])
+S("pt_legacy_entry_lost_found", PT, LONG, LADDER,
+  [I, B, L, R("POST", O, ATTACH_ERR, {"raise": "timeout"}), R("GET", O, FOUND),
+   R("POST", A, algo_ok("sl"), algo_ok("t1"), algo_ok("t2"), algo_ok("t3"))])
+S("pt_long_trade_id_hashed_client_ids", PT, LONG, {"passphrase": PP, "trade_id": "user-123456789_signal-987654321_extra-long"},
+  [I, B, L, R("POST", O, ORDER_OK)])
 S("pt_entry_connect_redacted", PT, LONG, {"passphrase": PP},
   [I, B, L, R("POST", O, {"raise": "connect", "message": "Cannot connect to host www.okx.com:443 ssl:default [Pass-phrase#1 leaked]"})])
 S("pt_entry_html", PT, LONG, {"passphrase": PP}, [I, B, L, R("POST", O, {"status": 502, "text": "<html>502</html>", "headers": {"Content-Type": "text/html"}})])
@@ -285,6 +320,59 @@ S("sltp_failures", "place_sl_tp_for_position", [KEY, SEC, "BTC-USDT-SWAP", "shor
    R("POST", A, ALGO_ERR, ALGO_ERR, ALGO_ERR, algo_ok(), ALGO_ERR, ALGO_ERR, ALGO_ERR)])
 S("sltp_no_tp", "place_sl_tp_for_position", [KEY, SEC, "BTC-USDT-SWAP", "LONG", 0.5, 86000.0, 0.0], {},
   [I, R("GET", "/api/v5/trade/orders-algo-pending", ok()), R("POST", A, algo_ok())])
+# ── [OKX-SLTP-REPLACE 2026-10] old SL off only after the new one, other side untouched ──
+PENDING_MIX = ok({"algoId": "old-sl", "posSide": "long", "slTriggerPx": "85000", "tpTriggerPx": ""},
+                 {"algoId": "old-tp", "posSide": "long", "slTriggerPx": "", "tpTriggerPx": "88000"},
+                 {"algoId": "other-sl", "posSide": "short", "slTriggerPx": "90000", "tpTriggerPx": ""},
+                 {"algoId": "net-tp", "posSide": "net", "slTriggerPx": None, "tpTriggerPx": "89000"},
+                 {"algoId": "", "posSide": "long", "slTriggerPx": "1"})
+S("sltp_replace_ok", "place_sl_tp_for_position", [KEY, SEC, "BTC-USDT-SWAP", "LONG", 0.02, 86000.0, 88500.0, 89500.0, 0.0, PP], {},
+  [I, R("GET", "/api/v5/trade/orders-algo-pending", PENDING_MIX), R("POST", "/api/v5/trade/cancel-algos", ok(), ok()),
+   R("POST", A, algo_ok("new-sl"), algo_ok("t1"), algo_ok("t2"))])
+S("sltp_replace_sl_refused_keeps_old", "place_sl_tp_for_position",
+  [KEY, SEC, "BTC-USDT-SWAP", "LONG", 0.02, 86000.0, 88500.0, 0.0, 0.0, PP], {},
+  [I, R("GET", "/api/v5/trade/orders-algo-pending", PENDING_MIX), R("POST", "/api/v5/trade/cancel-algos", ok()),
+   R("POST", A, ALGO_ERR, ALGO_ERR, ALGO_ERR, algo_ok("t1"))])
+S("sltp_replace_no_sl_no_tp", "place_sl_tp_for_position", [KEY, SEC, "BTC-USDT-SWAP", "short", 0.02, 0.0, 0.0], {},
+  [I, R("GET", "/api/v5/trade/orders-algo-pending", PENDING_MIX)])
+S("sltp_replace_cancel_raises", "place_sl_tp_for_position", [KEY, SEC, "BTC-USDT-SWAP", "LONG", 0.02, 86000.0, 88500.0, 0.0, 0.0, PP], {},
+  [I, R("GET", "/api/v5/trade/orders-algo-pending", PENDING_MIX), R("POST", "/api/v5/trade/cancel-algos", {"raise": "timeout"}),
+   R("POST", A, algo_ok("new-sl"), algo_ok("t1"))])
+FULL_SL = {"algoId": "full-sl", "posSide": "long", "slTriggerPx": "86000.0", "tpTriggerPx": "", "closeFraction": "1"}
+S("sltp_full_sl_same_price_untouched", "place_sl_tp_for_position", [KEY, SEC, "BTC-USDT-SWAP", "LONG", 0.02, 86000.0, 0.0], {},
+  [I, R("GET", "/api/v5/trade/orders-algo-pending", ok(FULL_SL, {"algoId": "att-sl", "posSide": "long", "slTriggerPx": "86000",
+                                                              "closeFraction": ""})),
+   R("POST", "/api/v5/trade/cancel-algos", ok())])
+S("sltp_full_sl_moved_by_amend", "place_sl_tp_for_position", [KEY, SEC, "BTC-USDT-SWAP", "LONG", 0.02, 86500.0, 0.0], {},
+  [I, R("GET", "/api/v5/trade/orders-algo-pending", ok(FULL_SL)), R("POST", "/api/v5/trade/amend-algos", ok({"algoId": "full-sl", "sCode": "0"}))])
+S("sltp_full_sl_amend_refused", "place_sl_tp_for_position", [KEY, SEC, "BTC-USDT-SWAP", "LONG", 0.02, 88500.0, 0.0], {},
+  [I, R("GET", "/api/v5/trade/orders-algo-pending", ok(FULL_SL)),
+   R("POST", "/api/v5/trade/amend-algos", err("1", "Operation failed.", [{"algoId": "full-sl", "sCode": "51280", "sMsg": "SL trigger price must be lower than the last price"}]))])
+S("sltp_doge_one_lot_full_tp1", "place_sl_tp_for_position",
+  [KEY, SEC, "DOGE-USDT-SWAP", "LONG", 1000.0, 0.17851, 0.19111, 0.2, 0.21, PP], {},
+  [DOGE_I, R("GET", "/api/v5/trade/orders-algo-pending", ok({"algoId": "att-tp1", "posSide": "long", "tpTriggerPx": "0.19"})),
+   R("POST", A, algo_ok("sl"), algo_ok("t1")), R("POST", "/api/v5/trade/cancel-algos", ok())])
+S("sltp_doge_ten_lots_ladder", "place_sl_tp_for_position",
+  [KEY, SEC, "DOGE-USDT-SWAP", "SHORT", 10000.0, 0.19111, 0.17851, 0.17, 0.16, PP], {},
+  [DOGE_I, R("GET", "/api/v5/trade/orders-algo-pending", ok()), R("POST", A, algo_ok("sl"), algo_ok("t1"), ALGO_ERR, ALGO_ERR, ALGO_ERR,
+                                                                     algo_ok("t3"))])
+S("trail_moves_full_sl_by_amend", "set_trailing_sl", [KEY, SEC, "BTC-USDT-SWAP", 87100.04, "LONG", 0, PP], {},
+  [I, R("GET", "/api/v5/trade/orders-algo-pending", ok(FULL_SL, {"algoId": "att-sl", "posSide": "long", "slTriggerPx": "86000"})),
+   R("POST", "/api/v5/trade/amend-algos", ok({"algoId": "full-sl", "sCode": "0"})), R("POST", "/api/v5/trade/cancel-algos", ok())])
+S("trail_new_full_sl_then_old_off", "set_breakeven", [KEY, SEC, "BTC-USDT-SWAP", 87000.5, "SHORT", 0, PP], {},
+  [I, R("GET", "/api/v5/trade/orders-algo-pending", ok({"algoId": "att-sl", "posSide": "short", "slTriggerPx": "88000"},
+                                                       {"algoId": "long-sl", "posSide": "long", "slTriggerPx": "86000"})),
+   R("POST", A, algo_ok("be")), R("POST", "/api/v5/trade/cancel-algos", ok())])
+S("trail_refused_keeps_old", "set_trailing_sl", [KEY, SEC, "BTC-USDT-SWAP", 87100.0, "LONG", 0, PP], {},
+  [I, R("GET", "/api/v5/trade/orders-algo-pending", ok({"algoId": "att-sl", "posSide": "long", "slTriggerPx": "86000"})),
+   R("POST", A, ALGO_ERR)])
+S("algo_sl_orders_listing", "get_algo_sl_orders", [KEY, SEC, "BTCUSDT", PP], {},
+  [R("GET", "/api/v5/trade/orders-algo-pending", ok({"algoId": "s1", "instId": "BTC-USDT-SWAP", "slTriggerPx": "86000", "posSide": "long",
+                                                     "side": "sell"},
+                                                    {"algoId": "t1", "instId": "BTC-USDT-SWAP", "slTriggerPx": "", "tpTriggerPx": "88000"},
+                                                    {"algoId": "bad", "slTriggerPx": "n/a"}, {"algoId": "zero", "slTriggerPx": "0"}))])
+S("algo_sl_orders_error", "get_algo_sl_orders", [KEY, SEC, "BTCUSDT", PP], {},
+  [R("GET", "/api/v5/trade/orders-algo-pending", err("50001", "Service temporarily unavailable"))])
 S("sltp_crash", "place_sl_tp_for_position", [KEY, SEC, "BTC-USDT-SWAP", "LONG", 0.5, 86000.0, 88000.0], {},
   [I, R("GET", "/api/v5/trade/orders-algo-pending", ok()), R("POST", A, {"status": 200, "text": ""})])
 

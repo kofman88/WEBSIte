@@ -40,7 +40,7 @@ process.env.VITEST = 'true';
 const req = createRequire(import.meta.url);
 const W = req('./world.js');
 
-const BOT_D18 = { inflightGuard: false, okxNoBlindRetry: false, reconcileFailedRetry: false };
+const BOT_D18 = { inflightGuard: false, reconcileFailedRetry: false };
 // 1 % of 10 000 over a 1.95 stop; OKX in whole contracts ([OKX-LOT-CONTRACTS]: ctVal 0.01, lotSz 1 → 5128 contracts)
 const QTY = { bybit: 51.282, bingx: 51.282, binance: 51.282, okx: 51.28 };
 const settle = async (n = 30) => { for (let i = 0; i < n; i++) await new Promise((r) => setImmediate(r)); };
@@ -151,7 +151,7 @@ describe('A — auto-trade entry: idempotent under retry and timeout-after-accep
       expect(w.msgs.some((m) => m.uid === u.uid && m.text.includes('биржа отвечала с задержкой'))).toBe(true);
     });
 
-    it(`${ex}: the entry never reached the exchange (dead link) → ${ex === 'okx' ? 'D18: no blind OKX retry — reconciled, nothing placed' : 'one retry after 5 s places it once'}`, async () => {
+    it(`${ex}: the entry never reached the exchange (dead link) → ${ex === 'okx' ? 'no blind OKX retry ([OKX-NO-BLIND-RETRY]) — reconciled, nothing placed' : 'one retry after 5 s places it once'}`, async () => {
       const at = w.autoTrade();
       const u = newUser(ex);
       const r = w.signal(u);
@@ -163,7 +163,7 @@ describe('A — auto-trade entry: idempotent under retry and timeout-after-accep
         expect(w.entries(u).length).toBe(0);
         expect(longSize(u)).toBe(0);
         expect(row.result).toBe('SKIP');
-        expect(w.logs.some((l) => l.includes('[D18-OKX-NO-RETRY]'))).toBe(true);
+        expect(w.logs.some((l) => l.includes('[OKX-NO-BLIND-RETRY]'))).toBe(true);
       } else {
         expect(w.entries(u).length).toBe(1);
         expect(near(longSize(u), QTY[ex])).toBe(true);
@@ -191,17 +191,19 @@ describe('A — auto-trade entry: idempotent under retry and timeout-after-accep
     });
   }
 
-  it('bot mode pins (D18 off): OKX re-sends blindly → TWO entries for one signal; Binance -4116 → the row is SKIP while the position lives', async () => {
+  it('bot mode pins (D18 off): OKX — one entry, found by clOrdId ([OKX-ENTRY-TIMEOUT], it used to re-send blindly); Binance -4116 → the row is SKIP while the position lives', async () => {
     const at = w.autoTrade({ d18: BOT_D18 });
-    // OKX: the entry has no client order id; the bot retries after a "nothing found" double-check
+    // OKX: the bot itself (2026-10) sends the entry with a clOrdId and looks it up after a lost answer —
+    // no second entry, the position is recorded
     const uo = newUser('okx');
     const ro = w.signal(uo);
     w.faults.add({ on: 'entry', kind: 'lost-after', key: uo.key });
     w.faults.add({ on: 'read', kind: 'reset-after', key: uo.key, afterEntry: true, times: 2 });
     await w.run(at.executeAutoTrade(w.kw(uo, ro)));
     await w.run(at.drain());
-    expect(w.entriesSent(uo).length).toBe(2);
-    expect(near(longSize(uo), 2 * QTY.okx)).toBe(true);
+    expect(w.entriesSent(uo).length).toBe(1);
+    expect(near(longSize(uo), QTY.okx)).toBe(true);
+    expect(w.row(ro.trade_id).order_id).not.toBe('');
     // Binance: the retry carries the same newClientOrderId, the exchange answers -4116 (duplicate),
     // the bot reads only -4015 as a duplicate → ok:false → SKIP, the first position stays untracked
     const ub = newUser('binance');

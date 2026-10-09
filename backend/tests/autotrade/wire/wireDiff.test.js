@@ -75,8 +75,9 @@ describe(`wire differential — ${FX.vectors.length} scenarios replayed against 
     expect(hangs).toBeGreaterThan(10);
     // the simulator never crashed (a crash would masquerade as an exchange answer)
     expect(FX.vectors.filter((v) => (v.expected.sim_errors || []).length).map((v) => v.case.name)).toEqual([]);
-    // the only requests the exchange cannot verify are the two pinned bot quirks below
-    expect([...badSig].sort()).toEqual(['GET /api/v5/account/balance', 'POST /fapi/v1/batchOrders']);
+    // the only request the exchange cannot verify is the pinned bot quirk below (the Binance batch, whose
+    // signature never matched, is off — [BINANCE-BATCH-OFF])
+    expect([...badSig].sort()).toEqual(['GET /api/v5/account/balance']);
   });
 
   it('every scenario: results, per-task requests / messages / logs / markers / metrics / effects, trades, users, kv, events, hedge', async () => {
@@ -104,14 +105,14 @@ describe(`wire differential — ${FX.vectors.length} scenarios replayed against 
     const markers = (got) => got.recs.filter(([, k]) => k === 'tlog').flatMap(([, , d]) => d[1]);
     const trade = (got, uid) => got.trades.find((t) => t.trade_id === `W${uid}-0`);
 
-    it('Binance batchOrders: aiohttp/yarl re-quotes the signed urlencoded JSON (%3A → :, %20 → +) → -1022 every time → sequential fallback', async () => {
-      const v = vec('tgt_binance_precision');
-      const got = await replay(v);
-      const [b] = reqs(got, /^POST \/fapi\/v1\/batchOrders/);
-      expect(b.target).toContain('%22symbol%22:+%22');
-      expect(b.sig_ok).toBe(false);
-      expect(markers(got)).toContain('[BINANCE-ATOMIC-FALLBACK]');
-      expect(reqs(got, /^POST \/fapi\/v1\/order\?/).length).toBeGreaterThan(0);
+    it('[BINANCE-BATCH-OFF] no batchOrders: the entry, SL and TPs go one by one through /fapi/v1/order', async () => {
+      // the batch never worked (yarl re-quoted the signed JSON → -1022) and is not atomic (items run on their own)
+      const sent = FX.vectors.flatMap((v) => v.expected.recs).filter(([, k, d]) => k === 'req' && /batchOrders/.test(d.req.target) && /fapi/.test(d.req.target));
+      expect(sent).toEqual([]);
+      const got = await replay(vec('tgt_binance_precision'));
+      expect(reqs(got, /^POST \/fapi\/v1\/batchOrders/)).toEqual([]);
+      expect(markers(got)).not.toContain('[BINANCE-ATOMIC-FALLBACK]');
+      expect(reqs(got, /^POST \/fapi\/v1\/order\?/).length).toBe(1);
     });
 
     it('OKX fixed-amount balance check: get_balance without the passphrase → 50105 → «баланс нулевой», trade skipped', async () => {
@@ -123,14 +124,27 @@ describe(`wire differential — ${FX.vectors.length} scenarios replayed against 
       expect(trade(got, v.case.uid)).toMatchObject({ result: 'SKIP', state: 'FAILED', order_id: '' });
     });
 
-    it('OKX timeout after the exchange accepted: {"error": "timeout"} → SKIP while the position (with its attached SL) is open', async () => {
+    it('[OKX-ENTRY-TIMEOUT] OKX timeout after the exchange accepted: the entry is found by clOrdId and recorded with its attached SL', async () => {
       const v = vec('tgt_okx_timeout_after_accept');
       const got = await replay(v);
       const sim = Object.values(v.expected.sim)[0];
       expect(sim.positions.length).toBe(1);
-      expect(sim.orders.some((o) => o.type === 'STOP')).toBe(true);
+      expect(sim.orders.filter((o) => o.type === 'STOP').length).toBe(1);        // the attached SL, no second one
+      const [q] = reqs(got, /^GET \/api\/v5\/trade\/order\?/);
+      expect(q.target).toMatch(/clOrdId=eW80920$/);
+      expect(reqs(got, /^POST \/api\/v5\/trade\/order$/).filter((r) => JSON.parse(r.body).attachAlgoOrds).length).toBe(1);   // never re-sent
+      expect(trade(got, v.case.uid)).toMatchObject({ result: '', state: 'OPEN' });
+      expect(trade(got, v.case.uid).order_id).not.toBe('');
+      expect(msgs(got).some((m) => m.startsWith('📉 <b>OKX SHORT</b>'))).toBe(true);
+    });
+
+    it('[OKX-ENTRY-TIMEOUT] OKX timeout before the exchange got the entry: two 51603 → a plain failure, nothing re-sent', async () => {
+      const v = vec('tgt_okx_timeout_before_accept');
+      const got = await replay(v);
+      expect(Object.values(v.expected.sim)[0].positions).toEqual([]);
+      expect(reqs(got, /^GET \/api\/v5\/trade\/order\?/).length).toBe(2);
+      expect(reqs(got, /^POST \/api\/v5\/trade\/order$/).length).toBe(1);
       expect(trade(got, v.case.uid)).toMatchObject({ result: 'SKIP', state: 'FAILED', order_id: '' });
-      expect(msgs(got).some((m) => m.startsWith('❌ <b>OKX ордер не выполнен</b>') && m.includes('<code>timeout</code>'))).toBe(true);
     });
 
     it('[BINGX-DUP-VERIFY] 101204 «Insufficient margin» on a clientOrderId order: the cid is looked up, not found → a real refusal, no phantom OPEN', async () => {

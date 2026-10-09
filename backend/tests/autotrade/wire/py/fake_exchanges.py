@@ -127,7 +127,8 @@ class Sim:
         a.orders = keep
         for o in fired:
             if o["cond"] or o["reduce"]:
-                self.reduce(a, native, o["pos_side"], o["qty"])
+                # OKX closeFraction "1": the whole position at trigger time
+                self.reduce(a, native, o["pos_side"], float("inf") if o.get("close_all") else o["qty"])
             else:
                 p = self.open(a, native, o["pos_side"], o["qty"], o["price"])
                 if o.get("attached_sl"):
@@ -870,7 +871,7 @@ class Sim:
                 return err(51000, "Parameter lever error")
             a.leverage[n] = float(body.get("lever") or 0)
             return ok([{"instId": n, "lever": str(body.get("lever")), "mgnMode": body.get("mgnMode") or "cross", "posSide": ""}])
-        if path == "/api/v5/trade/order":
+        if path == "/api/v5/trade/order" and method == "POST":
             o = order_from(body, False)
             i = inst.get(o["native"])
             if not i:
@@ -894,6 +895,12 @@ class Sim:
                                                          "sMsg": "Order failed because you don't have any positions in this direction for this contract to reduce or close."}])
             if body.get("clOrdId"):
                 a.__dict__.setdefault("_links", set()).add(body["clOrdId"])
+                # GET /api/v5/trade/order?clOrdId= ([OKX-ENTRY-TIMEOUT])
+                a.__dict__.setdefault("_cid_orders", {})[body["clOrdId"]] = {
+                    "ordId": str(r["id"]), "clOrdId": body["clOrdId"], "instId": o["native"],
+                    "state": "filled" if r["filled"] else "live", "accFillSz": fmt(sz) if r["filled"] else "0",
+                    "attachAlgoOrds": [{k: att.get(k, "") for k in ("attachAlgoClOrdId", "slTriggerPx", "tpTriggerPx")}
+                                       for att in (body.get("attachAlgoOrds") or [])]}
             if r["filled"] and not o["reduce"]:
                 for att in body.get("attachAlgoOrds") or []:
                     close_side = "SELL" if o["side"] == "BUY" else "BUY"
@@ -907,15 +914,23 @@ class Sim:
                                          "qty": sz, "trigger": float(att["tpTriggerPx"]), "reduce": True, "cond": True, "algo": True, "ts": self.now(),
                                          "price": 0.0, "cid": att.get("attachAlgoClOrdId") or ""})
             return ok([{"ordId": str(r["id"]), "clOrdId": body.get("clOrdId") or "", "tag": "", "sCode": "0", "sMsg": "Order placed"}])
+        if path == "/api/v5/trade/order" and method == "GET":   # order details by clOrdId
+            cid = q.get("clOrdId") or ""
+            rec = (getattr(a, "_cid_orders", {}) or {}).get(cid) if cid else None
+            if not rec or rec["instId"] != q.get("instId"):
+                return err(51603, "Order does not exist")
+            return ok([dict(rec)])
         if path == "/api/v5/trade/order-algo":
             o = order_from(body, True)
-            if not self.pos(a, o["native"], o["pos_side"]):
+            cur = self.pos(a, o["native"], o["pos_side"])
+            if not cur:
                 return err(1, "Operation failed", [{"algoId": "", "sCode": "51169", "sMsg": "no position"}])
+            close_all = str(body.get("closeFraction") or "") == "1"
             oid = self.new_id()
             a.orders.append({"id": oid, "native": o["native"], "side": o["side"], "pos_side": o["pos_side"],
-                             "type": "STOP" if body.get("slTriggerPx") else "TP", "qty": o["qty"],
+                             "type": "STOP" if body.get("slTriggerPx") else "TP", "qty": cur["size"] if close_all else o["qty"],
                              "trigger": float(body.get("slTriggerPx") or body.get("tpTriggerPx") or 0), "reduce": True, "cond": True,
-                             "algo": True, "ts": self.now(), "price": 0.0, "cid": ""})
+                             "algo": True, "ts": self.now(), "price": 0.0, "cid": "", "close_all": close_all})
             return ok([{"algoId": str(oid), "sCode": "0", "sMsg": ""}])
         if path == "/api/v5/account/positions":
             iid = q.get("instId")
@@ -942,7 +957,9 @@ class Sim:
         if path == "/api/v5/trade/orders-algo-pending":
             return ok([{"algoId": str(o["id"]), "instId": o["native"], "side": o["side"].lower(), "posSide": o["pos_side"].lower(),
                         "ordType": "conditional", "slTriggerPx": fmt(o["trigger"]) if o["type"] == "STOP" else "",
-                        "tpTriggerPx": fmt(o["trigger"]) if o["type"] == "TP" else "", "sz": fmt(o["qty"] / ctv(o["native"]))}
+                        "tpTriggerPx": fmt(o["trigger"]) if o["type"] == "TP" else "",
+                        "sz": "" if o.get("close_all") else fmt(o["qty"] / ctv(o["native"])),
+                        "closeFraction": "1" if o.get("close_all") else ""}
                        for o in a.orders if o.get("algo") and (not q.get("instId") or o["native"] == q.get("instId"))])
         if path == "/api/v5/trade/cancel-algos":
             ids = {str(x.get("algoId")) for x in (body if isinstance(body, list) else [])}

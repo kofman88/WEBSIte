@@ -77,12 +77,9 @@
   "expected": {
    "name": "pt_atomic_ok_ladder",
    "result": {
-    "ok": true,
-    "order_id": "4001",
-    "error": "",
-    "tp_placed": true,
-    "atomic": true,
-    "qty": 0.01
+    "ok": false,
+    "order_id": "",
+    "error": "Неизвестная ошибка Binance."
    },
    "requests": [
     {
@@ -116,8 +113,14 @@
      "body": null
     },
     {
+     "method": "GET",
+     "url": "https://fapi.binance.com/fapi/v1/ticker/price?symbol=BTCUSDT",
+     "headers": {},
+     "body": null
+    },
+    {
      "method": "POST",
-     "url": "https://fapi.binance.com/fapi/v1/batchOrders?batchOrders=%5B%7B%22symbol%22:+%22BTCUSDT%22,+%22side%22:+%22BUY%22,+%22positionSide%22:+%22LONG%22,+%22type%22:+%22MARKET%22,+%22quantity%22:+%220.010%22,+%22newClientOrderId%22:+%22chm_c11a32f12b1a%22%7D,+%7B%22symbol%22:+%22BTCUSDT%22,+%22side%22:+%22SELL%22,+%22positionSide%22:+%22LONG%22,+%22type%22:+%22STOP_MARKET%22,+%22stopPrice%22:+%2286000.0%22,+%22quantity%22:+%220.010%22,+%22workingType%22:+%22MARK_PRICE%22,+%22timeInForce%22:+%22GTC%22,+%22newClientOrderId%22:+%22chm_5c8b8e025baa%22%7D,+%7B%22symbol%22:+%22BTCUSDT%22,+%22side%22:+%22SELL%22,+%22positionSide%22:+%22LONG%22,+%22type%22:+%22TAKE_PROFIT_MARKET%22,+%22stopPrice%22:+%2288500.0%22,+%22quantity%22:+%220.006%22,+%22workingType%22:+%22MARK_PRICE%22,+%22timeInForce%22:+%22GTC%22,+%22newClientOrderId%22:+%22chm_17b3fc6be39a%22%7D,+%7B%22symbol%22:+%22BTCUSDT%22,+%22side%22:+%22SELL%22,+%22positionSide%22:+%22LONG%22,+%22type%22:+%22TAKE_PROFIT_MARKET%22,+%22stopPrice%22:+%2289500.0%22,+%22quantity%22:+%220.002%22,+%22workingType%22:+%22MARK_PRICE%22,+%22timeInForce%22:+%22GTC%22,+%22newClientOrderId%22:+%22chm_52591fe886a7%22%7D,+%7B%22symbol%22:+%22BTCUSDT%22,+%22side%22:+%22SELL%22,+%22positionSide%22:+%22LONG%22,+%22type%22:+%22TAKE_PROFIT_MARKET%22,+%22stopPrice%22:+%2290500.0%22,+%22quantity%22:+%220.002%22,+%22workingType%22:+%22MARK_PRICE%22,+%22timeInForce%22:+%22GTC%22,+%22newClientOrderId%22:+%22chm_f07c2799feb5%22%7D%5D&timestamp=1767225599650&recvWindow=5000&signature=c30a2e5856b5f67cddfd30cda4c8033ee4823c46440aa3501b3c73e3f99234d7",
+     "url": "https://fapi.binance.com/fapi/v1/order?symbol=BTCUSDT&side=BUY&quantity=0.010&positionSide=LONG&newClientOrderId=chm_c11a32f12b1a&type=MARKET&timestamp=1767225599650&recvWindow=5000&signature=800db505c16283f20b41a6d5527e5f69224563712c136a100208aa4caf8e1419",
      "headers": {
       "X-MBX-APIKEY": "BNKEY-abc123"
      },
@@ -126,12 +129,7 @@
    ],
    "sleeps": [],
    "clock_end": 1767225600.0,
-   "markers": [
-    [
-     "INFO",
-     "[BINANCE-ATOMIC-OK]"
-    ]
-   ],
+   "markers": [],
    "saved": {
     "hedge_saved": [],
     "auth_reset": [],
@@ -225,12 +223,9 @@
   "expected": {
    "name": "pt_atomic_ok_tp1_only",
    "result": {
-    "ok": true,
-    "order_id": "5001",
-    "error": "",
-    "tp_placed": false,
-    "atomic": true,
-    "qty": 0.01
+    "ok": false,
+    "order_id": "",
+    "error": "Неизвестная ошибка Binance."
    },
    "requests": [
     {
@@ -264,8 +259,14 @@
      "body": null
     },
     {
+     "method": "GET",
+     "url": "https://fapi.binance.com/fapi/v1/ticker/price?symbol=BTCUSDT",
+     "headers": {},
+     "body": null
+    },
+    {
      "method": "POST",
-     "url": "https://fapi.binance.com/fapi/v1/batchOrders?batchOrders=%5B%7B%22symbol%22:+%22BTCUSDT%22,+%22side%22:+%22BUY%22,+%22positionSide%22:+%22LONG%22,+%22type%22:+%22MARKET%22,+%22quantity%22:+%220.010%22,+%22newClientOrderId%22:+%22chm_2cc34ed2b223%22%7D,+%7B%22symbol%22:+%22BTCUSDT%22,+%22side%22:+%22SELL%22,+%22positionSide%22:+%22LONG%22,+%22type%22:+%22STOP_MARKET%22,+%22stopPrice%22:+%2286000.0%22,+%22quantity%22:+%220.010%22,+%22workingType%22:+%22MARK_PRICE%22,+%22timeInForce%22:+%22GTC%22,+%22newClientOrderId%22:+%22chm_9441a74dcdd0%22%7D,+%7B%22symbol%22:+%22BTCUSDT%22,+%22side%22:+%22SELL%22,+%22positionSide%22:+%22LONG%22,+%22type%22:+%22TAKE_PROFIT_MARKET%22,+%22stopPrice%22:+%2288500.0%22,+%22quantity%22:+%220.010%22,+%22workingType%22:+%22MARK_PRICE%22,+%22timeInForce%22:+%22GTC%22,+%22newClientOrderId%22:+%22chm_133f6cc3c7e2%22%7D%5D&timestamp=1767225600000&recvWindow=5000&signature=2deed0fe636d3c288688689aa3ed9ffb2cbbb03cf90e722a72f3cc5543a7c340",
+     "url": "https://fapi.binance.com/fapi/v1/order?symbol=BTCUSDT&side=BUY&quantity=0.010&positionSide=LONG&newClientOrderId=chm_2cc34ed2b223&type=MARKET&timestamp=1767225600000&recvWindow=5000&signature=86ef96232299552258d25815bbbd1f4ffa0967b32ac63bafe21bc59797e5c01f",
      "headers": {
       "X-MBX-APIKEY": "BNKEY-abc123"
      },
@@ -274,12 +275,7 @@
    ],
    "sleeps": [],
    "clock_end": 1767225600.0,
-   "markers": [
-    [
-     "INFO",
-     "[BINANCE-ATOMIC-OK]"
-    ]
-   ],
+   "markers": [],
    "saved": {
     "hedge_saved": [],
     "auth_reset": [],
@@ -374,12 +370,9 @@
   "expected": {
    "name": "pt_atomic_entry_ok_no_tp",
    "result": {
-    "ok": true,
-    "order_id": "5101",
-    "error": "",
-    "tp_placed": false,
-    "atomic": true,
-    "qty": 0.01
+    "ok": false,
+    "order_id": "",
+    "error": "Неизвестная ошибка Binance."
    },
    "requests": [
     {
@@ -413,8 +406,14 @@
      "body": null
     },
     {
+     "method": "GET",
+     "url": "https://fapi.binance.com/fapi/v1/ticker/price?symbol=BTCUSDT",
+     "headers": {},
+     "body": null
+    },
+    {
      "method": "POST",
-     "url": "https://fapi.binance.com/fapi/v1/batchOrders?batchOrders=%5B%7B%22symbol%22:+%22BTCUSDT%22,+%22side%22:+%22BUY%22,+%22positionSide%22:+%22LONG%22,+%22type%22:+%22MARKET%22,+%22quantity%22:+%220.010%22,+%22newClientOrderId%22:+%22chm_ffc53a89c4f5%22%7D,+%7B%22symbol%22:+%22BTCUSDT%22,+%22side%22:+%22SELL%22,+%22positionSide%22:+%22LONG%22,+%22type%22:+%22STOP_MARKET%22,+%22stopPrice%22:+%2286000.0%22,+%22quantity%22:+%220.010%22,+%22workingType%22:+%22MARK_PRICE%22,+%22timeInForce%22:+%22GTC%22,+%22newClientOrderId%22:+%22chm_f4e6694b0ac7%22%7D,+%7B%22symbol%22:+%22BTCUSDT%22,+%22side%22:+%22SELL%22,+%22positionSide%22:+%22LONG%22,+%22type%22:+%22TAKE_PROFIT_MARKET%22,+%22stopPrice%22:+%2288500.0%22,+%22quantity%22:+%220.008%22,+%22workingType%22:+%22MARK_PRICE%22,+%22timeInForce%22:+%22GTC%22,+%22newClientOrderId%22:+%22chm_2ac2ce15d7b4%22%7D,+%7B%22symbol%22:+%22BTCUSDT%22,+%22side%22:+%22SELL%22,+%22positionSide%22:+%22LONG%22,+%22type%22:+%22TAKE_PROFIT_MARKET%22,+%22stopPrice%22:+%2289500.0%22,+%22quantity%22:+%220.002%22,+%22workingType%22:+%22MARK_PRICE%22,+%22timeInForce%22:+%22GTC%22,+%22newClientOrderId%22:+%22chm_c77457a63742%22%7D%5D&timestamp=1767225600000&recvWindow=5000&signature=6fe710a3c5047f0821ee156bc4c83a230fbbb0cc4fc3e2569912380fa9badd79",
+     "url": "https://fapi.binance.com/fapi/v1/order?symbol=BTCUSDT&side=BUY&quantity=0.010&positionSide=LONG&newClientOrderId=chm_ffc53a89c4f5&type=MARKET&timestamp=1767225600000&recvWindow=5000&signature=fcbae4fa5f02793139300124dd81933da85ecae74624b82f9cb32977c5f7b6ce",
      "headers": {
       "X-MBX-APIKEY": "BNKEY-abc123"
      },
@@ -423,12 +422,7 @@
    ],
    "sleeps": [],
    "clock_end": 1767225600.0,
-   "markers": [
-    [
-     "INFO",
-     "[BINANCE-ATOMIC-OK]"
-    ]
-   ],
+   "markers": [],
    "saved": {
     "hedge_saved": [],
     "auth_reset": [],
@@ -592,14 +586,6 @@
      "body": null
     },
     {
-     "method": "POST",
-     "url": "https://fapi.binance.com/fapi/v1/batchOrders?batchOrders=%5B%7B%22symbol%22:+%22BTCUSDT%22,+%22side%22:+%22BUY%22,+%22positionSide%22:+%22LONG%22,+%22type%22:+%22MARKET%22,+%22quantity%22:+%220.010%22,+%22newClientOrderId%22:+%22chm_c11a32f12b1a%22%7D,+%7B%22symbol%22:+%22BTCUSDT%22,+%22side%22:+%22SELL%22,+%22positionSide%22:+%22LONG%22,+%22type%22:+%22STOP_MARKET%22,+%22stopPrice%22:+%2286000.0%22,+%22quantity%22:+%220.010%22,+%22workingType%22:+%22MARK_PRICE%22,+%22timeInForce%22:+%22GTC%22,+%22newClientOrderId%22:+%22chm_5c8b8e025baa%22%7D,+%7B%22symbol%22:+%22BTCUSDT%22,+%22side%22:+%22SELL%22,+%22positionSide%22:+%22LONG%22,+%22type%22:+%22TAKE_PROFIT_MARKET%22,+%22stopPrice%22:+%2288500.0%22,+%22quantity%22:+%220.006%22,+%22workingType%22:+%22MARK_PRICE%22,+%22timeInForce%22:+%22GTC%22,+%22newClientOrderId%22:+%22chm_17b3fc6be39a%22%7D,+%7B%22symbol%22:+%22BTCUSDT%22,+%22side%22:+%22SELL%22,+%22positionSide%22:+%22LONG%22,+%22type%22:+%22TAKE_PROFIT_MARKET%22,+%22stopPrice%22:+%2289500.0%22,+%22quantity%22:+%220.002%22,+%22workingType%22:+%22MARK_PRICE%22,+%22timeInForce%22:+%22GTC%22,+%22newClientOrderId%22:+%22chm_52591fe886a7%22%7D,+%7B%22symbol%22:+%22BTCUSDT%22,+%22side%22:+%22SELL%22,+%22positionSide%22:+%22LONG%22,+%22type%22:+%22TAKE_PROFIT_MARKET%22,+%22stopPrice%22:+%2290500.0%22,+%22quantity%22:+%220.002%22,+%22workingType%22:+%22MARK_PRICE%22,+%22timeInForce%22:+%22GTC%22,+%22newClientOrderId%22:+%22chm_f07c2799feb5%22%7D%5D&timestamp=1767225600000&recvWindow=5000&signature=ddc2c3a26e717ba03865dec8efcf827a781f056e8bf7bd9fd907ca5acc080174",
-     "headers": {
-      "X-MBX-APIKEY": "BNKEY-abc123"
-     },
-     "body": null
-    },
-    {
      "method": "GET",
      "url": "https://fapi.binance.com/fapi/v1/ticker/price?symbol=BTCUSDT",
      "headers": {},
@@ -648,12 +634,7 @@
    ],
    "sleeps": [],
    "clock_end": 1767225600.0,
-   "markers": [
-    [
-     "WARNING",
-     "[BINANCE-ATOMIC-FALLBACK]"
-    ]
-   ],
+   "markers": [],
    "saved": {
     "hedge_saved": [],
     "auth_reset": [],
@@ -821,14 +802,6 @@
      "body": null
     },
     {
-     "method": "POST",
-     "url": "https://fapi.binance.com/fapi/v1/batchOrders?batchOrders=%5B%7B%22symbol%22:+%22BTCUSDT%22,+%22side%22:+%22BUY%22,+%22positionSide%22:+%22LONG%22,+%22type%22:+%22MARKET%22,+%22quantity%22:+%220.010%22,+%22newClientOrderId%22:+%22chm_c11a32f12b1a%22%7D,+%7B%22symbol%22:+%22BTCUSDT%22,+%22side%22:+%22SELL%22,+%22positionSide%22:+%22LONG%22,+%22type%22:+%22STOP_MARKET%22,+%22stopPrice%22:+%2286000.0%22,+%22quantity%22:+%220.010%22,+%22workingType%22:+%22MARK_PRICE%22,+%22timeInForce%22:+%22GTC%22,+%22newClientOrderId%22:+%22chm_5c8b8e025baa%22%7D,+%7B%22symbol%22:+%22BTCUSDT%22,+%22side%22:+%22SELL%22,+%22positionSide%22:+%22LONG%22,+%22type%22:+%22TAKE_PROFIT_MARKET%22,+%22stopPrice%22:+%2288500.0%22,+%22quantity%22:+%220.006%22,+%22workingType%22:+%22MARK_PRICE%22,+%22timeInForce%22:+%22GTC%22,+%22newClientOrderId%22:+%22chm_17b3fc6be39a%22%7D,+%7B%22symbol%22:+%22BTCUSDT%22,+%22side%22:+%22SELL%22,+%22positionSide%22:+%22LONG%22,+%22type%22:+%22TAKE_PROFIT_MARKET%22,+%22stopPrice%22:+%2289500.0%22,+%22quantity%22:+%220.002%22,+%22workingType%22:+%22MARK_PRICE%22,+%22timeInForce%22:+%22GTC%22,+%22newClientOrderId%22:+%22chm_52591fe886a7%22%7D,+%7B%22symbol%22:+%22BTCUSDT%22,+%22side%22:+%22SELL%22,+%22positionSide%22:+%22LONG%22,+%22type%22:+%22TAKE_PROFIT_MARKET%22,+%22stopPrice%22:+%2290500.0%22,+%22quantity%22:+%220.002%22,+%22workingType%22:+%22MARK_PRICE%22,+%22timeInForce%22:+%22GTC%22,+%22newClientOrderId%22:+%22chm_f07c2799feb5%22%7D%5D&timestamp=1767225600000&recvWindow=5000&signature=ddc2c3a26e717ba03865dec8efcf827a781f056e8bf7bd9fd907ca5acc080174",
-     "headers": {
-      "X-MBX-APIKEY": "BNKEY-abc123"
-     },
-     "body": null
-    },
-    {
      "method": "GET",
      "url": "https://fapi.binance.com/fapi/v1/ticker/price?symbol=BTCUSDT",
      "headers": {},
@@ -877,12 +850,7 @@
    ],
    "sleeps": [],
    "clock_end": 1767225600.0,
-   "markers": [
-    [
-     "WARNING",
-     "[BINANCE-ATOMIC-FALLBACK]"
-    ]
-   ],
+   "markers": [],
    "saved": {
     "hedge_saved": [],
     "auth_reset": [],
@@ -1050,14 +1018,6 @@
      "body": null
     },
     {
-     "method": "POST",
-     "url": "https://fapi.binance.com/fapi/v1/batchOrders?batchOrders=%5B%7B%22symbol%22:+%22BTCUSDT%22,+%22side%22:+%22BUY%22,+%22positionSide%22:+%22LONG%22,+%22type%22:+%22MARKET%22,+%22quantity%22:+%220.010%22,+%22newClientOrderId%22:+%22chm_c11a32f12b1a%22%7D,+%7B%22symbol%22:+%22BTCUSDT%22,+%22side%22:+%22SELL%22,+%22positionSide%22:+%22LONG%22,+%22type%22:+%22STOP_MARKET%22,+%22stopPrice%22:+%2286000.0%22,+%22quantity%22:+%220.010%22,+%22workingType%22:+%22MARK_PRICE%22,+%22timeInForce%22:+%22GTC%22,+%22newClientOrderId%22:+%22chm_5c8b8e025baa%22%7D,+%7B%22symbol%22:+%22BTCUSDT%22,+%22side%22:+%22SELL%22,+%22positionSide%22:+%22LONG%22,+%22type%22:+%22TAKE_PROFIT_MARKET%22,+%22stopPrice%22:+%2288500.0%22,+%22quantity%22:+%220.006%22,+%22workingType%22:+%22MARK_PRICE%22,+%22timeInForce%22:+%22GTC%22,+%22newClientOrderId%22:+%22chm_17b3fc6be39a%22%7D,+%7B%22symbol%22:+%22BTCUSDT%22,+%22side%22:+%22SELL%22,+%22positionSide%22:+%22LONG%22,+%22type%22:+%22TAKE_PROFIT_MARKET%22,+%22stopPrice%22:+%2289500.0%22,+%22quantity%22:+%220.002%22,+%22workingType%22:+%22MARK_PRICE%22,+%22timeInForce%22:+%22GTC%22,+%22newClientOrderId%22:+%22chm_52591fe886a7%22%7D,+%7B%22symbol%22:+%22BTCUSDT%22,+%22side%22:+%22SELL%22,+%22positionSide%22:+%22LONG%22,+%22type%22:+%22TAKE_PROFIT_MARKET%22,+%22stopPrice%22:+%2290500.0%22,+%22quantity%22:+%220.002%22,+%22workingType%22:+%22MARK_PRICE%22,+%22timeInForce%22:+%22GTC%22,+%22newClientOrderId%22:+%22chm_f07c2799feb5%22%7D%5D&timestamp=1767225600000&recvWindow=5000&signature=ddc2c3a26e717ba03865dec8efcf827a781f056e8bf7bd9fd907ca5acc080174",
-     "headers": {
-      "X-MBX-APIKEY": "BNKEY-abc123"
-     },
-     "body": null
-    },
-    {
      "method": "GET",
      "url": "https://fapi.binance.com/fapi/v1/ticker/price?symbol=BTCUSDT",
      "headers": {},
@@ -1106,12 +1066,7 @@
    ],
    "sleeps": [],
    "clock_end": 1767225600.0,
-   "markers": [
-    [
-     "WARNING",
-     "[BINANCE-ATOMIC-FALLBACK]"
-    ]
-   ],
+   "markers": [],
    "saved": {
     "hedge_saved": [],
     "auth_reset": [],
@@ -1280,14 +1235,6 @@
      "body": null
     },
     {
-     "method": "POST",
-     "url": "https://fapi.binance.com/fapi/v1/batchOrders?batchOrders=%5B%7B%22symbol%22:+%22BTCUSDT%22,+%22side%22:+%22BUY%22,+%22positionSide%22:+%22LONG%22,+%22type%22:+%22MARKET%22,+%22quantity%22:+%220.010%22,+%22newClientOrderId%22:+%22chm_c11a32f12b1a%22%7D,+%7B%22symbol%22:+%22BTCUSDT%22,+%22side%22:+%22SELL%22,+%22positionSide%22:+%22LONG%22,+%22type%22:+%22STOP_MARKET%22,+%22stopPrice%22:+%2286000.0%22,+%22quantity%22:+%220.010%22,+%22workingType%22:+%22MARK_PRICE%22,+%22timeInForce%22:+%22GTC%22,+%22newClientOrderId%22:+%22chm_5c8b8e025baa%22%7D,+%7B%22symbol%22:+%22BTCUSDT%22,+%22side%22:+%22SELL%22,+%22positionSide%22:+%22LONG%22,+%22type%22:+%22TAKE_PROFIT_MARKET%22,+%22stopPrice%22:+%2288500.0%22,+%22quantity%22:+%220.006%22,+%22workingType%22:+%22MARK_PRICE%22,+%22timeInForce%22:+%22GTC%22,+%22newClientOrderId%22:+%22chm_17b3fc6be39a%22%7D,+%7B%22symbol%22:+%22BTCUSDT%22,+%22side%22:+%22SELL%22,+%22positionSide%22:+%22LONG%22,+%22type%22:+%22TAKE_PROFIT_MARKET%22,+%22stopPrice%22:+%2289500.0%22,+%22quantity%22:+%220.002%22,+%22workingType%22:+%22MARK_PRICE%22,+%22timeInForce%22:+%22GTC%22,+%22newClientOrderId%22:+%22chm_52591fe886a7%22%7D,+%7B%22symbol%22:+%22BTCUSDT%22,+%22side%22:+%22SELL%22,+%22positionSide%22:+%22LONG%22,+%22type%22:+%22TAKE_PROFIT_MARKET%22,+%22stopPrice%22:+%2290500.0%22,+%22quantity%22:+%220.002%22,+%22workingType%22:+%22MARK_PRICE%22,+%22timeInForce%22:+%22GTC%22,+%22newClientOrderId%22:+%22chm_f07c2799feb5%22%7D%5D&timestamp=1767225600000&recvWindow=5000&signature=ddc2c3a26e717ba03865dec8efcf827a781f056e8bf7bd9fd907ca5acc080174",
-     "headers": {
-      "X-MBX-APIKEY": "BNKEY-abc123"
-     },
-     "body": null
-    },
-    {
      "method": "GET",
      "url": "https://fapi.binance.com/fapi/v1/ticker/price?symbol=BTCUSDT",
      "headers": {},
@@ -1336,12 +1283,7 @@
    ],
    "sleeps": [],
    "clock_end": 1767225600.0,
-   "markers": [
-    [
-     "WARNING",
-     "[BINANCE-ATOMIC-FALLBACK]"
-    ]
-   ],
+   "markers": [],
    "saved": {
     "hedge_saved": [],
     "auth_reset": [],
@@ -1510,14 +1452,6 @@
      "body": null
     },
     {
-     "method": "POST",
-     "url": "https://fapi.binance.com/fapi/v1/batchOrders?batchOrders=%5B%7B%22symbol%22:+%22BTCUSDT%22,+%22side%22:+%22BUY%22,+%22positionSide%22:+%22LONG%22,+%22type%22:+%22MARKET%22,+%22quantity%22:+%220.010%22,+%22newClientOrderId%22:+%22chm_c11a32f12b1a%22%7D,+%7B%22symbol%22:+%22BTCUSDT%22,+%22side%22:+%22SELL%22,+%22positionSide%22:+%22LONG%22,+%22type%22:+%22STOP_MARKET%22,+%22stopPrice%22:+%2286000.0%22,+%22quantity%22:+%220.010%22,+%22workingType%22:+%22MARK_PRICE%22,+%22timeInForce%22:+%22GTC%22,+%22newClientOrderId%22:+%22chm_5c8b8e025baa%22%7D,+%7B%22symbol%22:+%22BTCUSDT%22,+%22side%22:+%22SELL%22,+%22positionSide%22:+%22LONG%22,+%22type%22:+%22TAKE_PROFIT_MARKET%22,+%22stopPrice%22:+%2288500.0%22,+%22quantity%22:+%220.006%22,+%22workingType%22:+%22MARK_PRICE%22,+%22timeInForce%22:+%22GTC%22,+%22newClientOrderId%22:+%22chm_17b3fc6be39a%22%7D,+%7B%22symbol%22:+%22BTCUSDT%22,+%22side%22:+%22SELL%22,+%22positionSide%22:+%22LONG%22,+%22type%22:+%22TAKE_PROFIT_MARKET%22,+%22stopPrice%22:+%2289500.0%22,+%22quantity%22:+%220.002%22,+%22workingType%22:+%22MARK_PRICE%22,+%22timeInForce%22:+%22GTC%22,+%22newClientOrderId%22:+%22chm_52591fe886a7%22%7D,+%7B%22symbol%22:+%22BTCUSDT%22,+%22side%22:+%22SELL%22,+%22positionSide%22:+%22LONG%22,+%22type%22:+%22TAKE_PROFIT_MARKET%22,+%22stopPrice%22:+%2290500.0%22,+%22quantity%22:+%220.002%22,+%22workingType%22:+%22MARK_PRICE%22,+%22timeInForce%22:+%22GTC%22,+%22newClientOrderId%22:+%22chm_f07c2799feb5%22%7D%5D&timestamp=1767225600000&recvWindow=5000&signature=ddc2c3a26e717ba03865dec8efcf827a781f056e8bf7bd9fd907ca5acc080174",
-     "headers": {
-      "X-MBX-APIKEY": "BNKEY-abc123"
-     },
-     "body": null
-    },
-    {
      "method": "GET",
      "url": "https://fapi.binance.com/fapi/v1/ticker/price?symbol=BTCUSDT",
      "headers": {},
@@ -1566,12 +1500,7 @@
    ],
    "sleeps": [],
    "clock_end": 1767225600.0,
-   "markers": [
-    [
-     "WARNING",
-     "[BINANCE-ATOMIC-FALLBACK]"
-    ]
-   ],
+   "markers": [],
    "saved": {
     "hedge_saved": [],
     "auth_reset": [],
@@ -1739,14 +1668,6 @@
      "body": null
     },
     {
-     "method": "POST",
-     "url": "https://fapi.binance.com/fapi/v1/batchOrders?batchOrders=%5B%7B%22symbol%22:+%22BTCUSDT%22,+%22side%22:+%22BUY%22,+%22positionSide%22:+%22LONG%22,+%22type%22:+%22MARKET%22,+%22quantity%22:+%220.010%22,+%22newClientOrderId%22:+%22chm_c11a32f12b1a%22%7D,+%7B%22symbol%22:+%22BTCUSDT%22,+%22side%22:+%22SELL%22,+%22positionSide%22:+%22LONG%22,+%22type%22:+%22STOP_MARKET%22,+%22stopPrice%22:+%2286000.0%22,+%22quantity%22:+%220.010%22,+%22workingType%22:+%22MARK_PRICE%22,+%22timeInForce%22:+%22GTC%22,+%22newClientOrderId%22:+%22chm_5c8b8e025baa%22%7D,+%7B%22symbol%22:+%22BTCUSDT%22,+%22side%22:+%22SELL%22,+%22positionSide%22:+%22LONG%22,+%22type%22:+%22TAKE_PROFIT_MARKET%22,+%22stopPrice%22:+%2288500.0%22,+%22quantity%22:+%220.006%22,+%22workingType%22:+%22MARK_PRICE%22,+%22timeInForce%22:+%22GTC%22,+%22newClientOrderId%22:+%22chm_17b3fc6be39a%22%7D,+%7B%22symbol%22:+%22BTCUSDT%22,+%22side%22:+%22SELL%22,+%22positionSide%22:+%22LONG%22,+%22type%22:+%22TAKE_PROFIT_MARKET%22,+%22stopPrice%22:+%2289500.0%22,+%22quantity%22:+%220.002%22,+%22workingType%22:+%22MARK_PRICE%22,+%22timeInForce%22:+%22GTC%22,+%22newClientOrderId%22:+%22chm_52591fe886a7%22%7D,+%7B%22symbol%22:+%22BTCUSDT%22,+%22side%22:+%22SELL%22,+%22positionSide%22:+%22LONG%22,+%22type%22:+%22TAKE_PROFIT_MARKET%22,+%22stopPrice%22:+%2290500.0%22,+%22quantity%22:+%220.002%22,+%22workingType%22:+%22MARK_PRICE%22,+%22timeInForce%22:+%22GTC%22,+%22newClientOrderId%22:+%22chm_f07c2799feb5%22%7D%5D&timestamp=1767225600000&recvWindow=5000&signature=ddc2c3a26e717ba03865dec8efcf827a781f056e8bf7bd9fd907ca5acc080174",
-     "headers": {
-      "X-MBX-APIKEY": "BNKEY-abc123"
-     },
-     "body": null
-    },
-    {
      "method": "GET",
      "url": "https://fapi.binance.com/fapi/v1/ticker/price?symbol=BTCUSDT",
      "headers": {},
@@ -1795,12 +1716,7 @@
    ],
    "sleeps": [],
    "clock_end": 1767225600.0,
-   "markers": [
-    [
-     "WARNING",
-     "[BINANCE-ATOMIC-FALLBACK]"
-    ]
-   ],
+   "markers": [],
    "saved": {
     "hedge_saved": [],
     "auth_reset": [],
@@ -5060,14 +4976,6 @@
      "body": null
     },
     {
-     "method": "POST",
-     "url": "https://fapi.binance.com/fapi/v1/batchOrders?batchOrders=%5B%7B%22symbol%22:+%22BTCUSDT%22,+%22side%22:+%22BUY%22,+%22positionSide%22:+%22LONG%22,+%22type%22:+%22MARKET%22,+%22quantity%22:+%220.010%22,+%22newClientOrderId%22:+%22chm_c11a32f12b1a%22%7D,+%7B%22symbol%22:+%22BTCUSDT%22,+%22side%22:+%22SELL%22,+%22positionSide%22:+%22LONG%22,+%22type%22:+%22STOP_MARKET%22,+%22stopPrice%22:+%2286000.0%22,+%22quantity%22:+%220.010%22,+%22workingType%22:+%22MARK_PRICE%22,+%22timeInForce%22:+%22GTC%22,+%22newClientOrderId%22:+%22chm_5c8b8e025baa%22%7D,+%7B%22symbol%22:+%22BTCUSDT%22,+%22side%22:+%22SELL%22,+%22positionSide%22:+%22LONG%22,+%22type%22:+%22TAKE_PROFIT_MARKET%22,+%22stopPrice%22:+%2288500.0%22,+%22quantity%22:+%220.006%22,+%22workingType%22:+%22MARK_PRICE%22,+%22timeInForce%22:+%22GTC%22,+%22newClientOrderId%22:+%22chm_17b3fc6be39a%22%7D,+%7B%22symbol%22:+%22BTCUSDT%22,+%22side%22:+%22SELL%22,+%22positionSide%22:+%22LONG%22,+%22type%22:+%22TAKE_PROFIT_MARKET%22,+%22stopPrice%22:+%2289500.0%22,+%22quantity%22:+%220.002%22,+%22workingType%22:+%22MARK_PRICE%22,+%22timeInForce%22:+%22GTC%22,+%22newClientOrderId%22:+%22chm_52591fe886a7%22%7D,+%7B%22symbol%22:+%22BTCUSDT%22,+%22side%22:+%22SELL%22,+%22positionSide%22:+%22LONG%22,+%22type%22:+%22TAKE_PROFIT_MARKET%22,+%22stopPrice%22:+%2290500.0%22,+%22quantity%22:+%220.002%22,+%22workingType%22:+%22MARK_PRICE%22,+%22timeInForce%22:+%22GTC%22,+%22newClientOrderId%22:+%22chm_f07c2799feb5%22%7D%5D&timestamp=1767225600000&recvWindow=5000&signature=ddc2c3a26e717ba03865dec8efcf827a781f056e8bf7bd9fd907ca5acc080174",
-     "headers": {
-      "X-MBX-APIKEY": "BNKEY-abc123"
-     },
-     "body": null
-    },
-    {
      "method": "GET",
      "url": "https://fapi.binance.com/fapi/v1/ticker/price?symbol=BTCUSDT",
      "headers": {},
@@ -5084,12 +4992,7 @@
    ],
    "sleeps": [],
    "clock_end": 1767225600.0,
-   "markers": [
-    [
-     "WARNING",
-     "[BINANCE-ATOMIC-FALLBACK]"
-    ]
-   ],
+   "markers": [],
    "saved": {
     "hedge_saved": [],
     "auth_reset": [],
@@ -5242,14 +5145,6 @@
      "body": null
     },
     {
-     "method": "POST",
-     "url": "https://fapi.binance.com/fapi/v1/batchOrders?batchOrders=%5B%7B%22symbol%22:+%22BTCUSDT%22,+%22side%22:+%22BUY%22,+%22positionSide%22:+%22LONG%22,+%22type%22:+%22MARKET%22,+%22quantity%22:+%220.010%22,+%22newClientOrderId%22:+%22chm_c11a32f12b1a%22%7D,+%7B%22symbol%22:+%22BTCUSDT%22,+%22side%22:+%22SELL%22,+%22positionSide%22:+%22LONG%22,+%22type%22:+%22STOP_MARKET%22,+%22stopPrice%22:+%2286000.0%22,+%22quantity%22:+%220.010%22,+%22workingType%22:+%22MARK_PRICE%22,+%22timeInForce%22:+%22GTC%22,+%22newClientOrderId%22:+%22chm_5c8b8e025baa%22%7D,+%7B%22symbol%22:+%22BTCUSDT%22,+%22side%22:+%22SELL%22,+%22positionSide%22:+%22LONG%22,+%22type%22:+%22TAKE_PROFIT_MARKET%22,+%22stopPrice%22:+%2288500.0%22,+%22quantity%22:+%220.006%22,+%22workingType%22:+%22MARK_PRICE%22,+%22timeInForce%22:+%22GTC%22,+%22newClientOrderId%22:+%22chm_17b3fc6be39a%22%7D,+%7B%22symbol%22:+%22BTCUSDT%22,+%22side%22:+%22SELL%22,+%22positionSide%22:+%22LONG%22,+%22type%22:+%22TAKE_PROFIT_MARKET%22,+%22stopPrice%22:+%2289500.0%22,+%22quantity%22:+%220.002%22,+%22workingType%22:+%22MARK_PRICE%22,+%22timeInForce%22:+%22GTC%22,+%22newClientOrderId%22:+%22chm_52591fe886a7%22%7D,+%7B%22symbol%22:+%22BTCUSDT%22,+%22side%22:+%22SELL%22,+%22positionSide%22:+%22LONG%22,+%22type%22:+%22TAKE_PROFIT_MARKET%22,+%22stopPrice%22:+%2290500.0%22,+%22quantity%22:+%220.002%22,+%22workingType%22:+%22MARK_PRICE%22,+%22timeInForce%22:+%22GTC%22,+%22newClientOrderId%22:+%22chm_f07c2799feb5%22%7D%5D&timestamp=1767225600000&recvWindow=5000&signature=ddc2c3a26e717ba03865dec8efcf827a781f056e8bf7bd9fd907ca5acc080174",
-     "headers": {
-      "X-MBX-APIKEY": "BNKEY-abc123"
-     },
-     "body": null
-    },
-    {
      "method": "GET",
      "url": "https://fapi.binance.com/fapi/v1/ticker/price?symbol=BTCUSDT",
      "headers": {},
@@ -5266,12 +5161,7 @@
    ],
    "sleeps": [],
    "clock_end": 1767225600.0,
-   "markers": [
-    [
-     "WARNING",
-     "[BINANCE-ATOMIC-FALLBACK]"
-    ]
-   ],
+   "markers": [],
    "saved": {
     "hedge_saved": [],
     "auth_reset": [],
@@ -5743,14 +5633,6 @@
      "body": null
     },
     {
-     "method": "POST",
-     "url": "https://fapi.binance.com/fapi/v1/batchOrders?batchOrders=%5B%7B%22symbol%22:+%22BTCUSDT%22,+%22side%22:+%22BUY%22,+%22positionSide%22:+%22LONG%22,+%22type%22:+%22MARKET%22,+%22quantity%22:+%220.010%22,+%22newClientOrderId%22:+%22chm_c11a32f12b1a%22%7D,+%7B%22symbol%22:+%22BTCUSDT%22,+%22side%22:+%22SELL%22,+%22positionSide%22:+%22LONG%22,+%22type%22:+%22STOP_MARKET%22,+%22stopPrice%22:+%2286000.0%22,+%22quantity%22:+%220.010%22,+%22workingType%22:+%22MARK_PRICE%22,+%22timeInForce%22:+%22GTC%22,+%22newClientOrderId%22:+%22chm_5c8b8e025baa%22%7D,+%7B%22symbol%22:+%22BTCUSDT%22,+%22side%22:+%22SELL%22,+%22positionSide%22:+%22LONG%22,+%22type%22:+%22TAKE_PROFIT_MARKET%22,+%22stopPrice%22:+%2288500.0%22,+%22quantity%22:+%220.006%22,+%22workingType%22:+%22MARK_PRICE%22,+%22timeInForce%22:+%22GTC%22,+%22newClientOrderId%22:+%22chm_17b3fc6be39a%22%7D,+%7B%22symbol%22:+%22BTCUSDT%22,+%22side%22:+%22SELL%22,+%22positionSide%22:+%22LONG%22,+%22type%22:+%22TAKE_PROFIT_MARKET%22,+%22stopPrice%22:+%2289500.0%22,+%22quantity%22:+%220.002%22,+%22workingType%22:+%22MARK_PRICE%22,+%22timeInForce%22:+%22GTC%22,+%22newClientOrderId%22:+%22chm_52591fe886a7%22%7D,+%7B%22symbol%22:+%22BTCUSDT%22,+%22side%22:+%22SELL%22,+%22positionSide%22:+%22LONG%22,+%22type%22:+%22TAKE_PROFIT_MARKET%22,+%22stopPrice%22:+%2290500.0%22,+%22quantity%22:+%220.002%22,+%22workingType%22:+%22MARK_PRICE%22,+%22timeInForce%22:+%22GTC%22,+%22newClientOrderId%22:+%22chm_f07c2799feb5%22%7D%5D&timestamp=1767225600000&recvWindow=5000&signature=ddc2c3a26e717ba03865dec8efcf827a781f056e8bf7bd9fd907ca5acc080174",
-     "headers": {
-      "X-MBX-APIKEY": "BNKEY-abc123"
-     },
-     "body": null
-    },
-    {
      "method": "GET",
      "url": "https://fapi.binance.com/fapi/v1/ticker/price?symbol=BTCUSDT",
      "headers": {},
@@ -5799,12 +5681,7 @@
    ],
    "sleeps": [],
    "clock_end": 1767225600.0,
-   "markers": [
-    [
-     "WARNING",
-     "[BINANCE-ATOMIC-FALLBACK]"
-    ]
-   ],
+   "markers": [],
    "saved": {
     "hedge_saved": [],
     "auth_reset": [],
@@ -7411,14 +7288,6 @@
      "body": null
     },
     {
-     "method": "POST",
-     "url": "https://fapi.binance.com/fapi/v1/batchOrders?batchOrders=%5B%7B%22symbol%22:+%22BTCUSDT%22,+%22side%22:+%22BUY%22,+%22positionSide%22:+%22LONG%22,+%22type%22:+%22MARKET%22,+%22quantity%22:+%220.010%22,+%22newClientOrderId%22:+%22chm_c11a32f12b1a%22%7D,+%7B%22symbol%22:+%22BTCUSDT%22,+%22side%22:+%22SELL%22,+%22positionSide%22:+%22LONG%22,+%22type%22:+%22STOP_MARKET%22,+%22stopPrice%22:+%2286000.0%22,+%22quantity%22:+%220.010%22,+%22workingType%22:+%22MARK_PRICE%22,+%22timeInForce%22:+%22GTC%22,+%22newClientOrderId%22:+%22chm_5c8b8e025baa%22%7D,+%7B%22symbol%22:+%22BTCUSDT%22,+%22side%22:+%22SELL%22,+%22positionSide%22:+%22LONG%22,+%22type%22:+%22TAKE_PROFIT_MARKET%22,+%22stopPrice%22:+%2288500.0%22,+%22quantity%22:+%220.006%22,+%22workingType%22:+%22MARK_PRICE%22,+%22timeInForce%22:+%22GTC%22,+%22newClientOrderId%22:+%22chm_17b3fc6be39a%22%7D,+%7B%22symbol%22:+%22BTCUSDT%22,+%22side%22:+%22SELL%22,+%22positionSide%22:+%22LONG%22,+%22type%22:+%22TAKE_PROFIT_MARKET%22,+%22stopPrice%22:+%2289500.0%22,+%22quantity%22:+%220.002%22,+%22workingType%22:+%22MARK_PRICE%22,+%22timeInForce%22:+%22GTC%22,+%22newClientOrderId%22:+%22chm_52591fe886a7%22%7D,+%7B%22symbol%22:+%22BTCUSDT%22,+%22side%22:+%22SELL%22,+%22positionSide%22:+%22LONG%22,+%22type%22:+%22TAKE_PROFIT_MARKET%22,+%22stopPrice%22:+%2290500.0%22,+%22quantity%22:+%220.002%22,+%22workingType%22:+%22MARK_PRICE%22,+%22timeInForce%22:+%22GTC%22,+%22newClientOrderId%22:+%22chm_f07c2799feb5%22%7D%5D&timestamp=1767225600000&recvWindow=5000&signature=ddc2c3a26e717ba03865dec8efcf827a781f056e8bf7bd9fd907ca5acc080174",
-     "headers": {
-      "X-MBX-APIKEY": "BNKEY-abc123"
-     },
-     "body": null
-    },
-    {
      "method": "GET",
      "url": "https://fapi.binance.com/fapi/v1/ticker/price?symbol=BTCUSDT",
      "headers": {},
@@ -7467,12 +7336,7 @@
    ],
    "sleeps": [],
    "clock_end": 1767225600.0,
-   "markers": [
-    [
-     "WARNING",
-     "[BINANCE-ATOMIC-FALLBACK]"
-    ]
-   ],
+   "markers": [],
    "saved": {
     "hedge_saved": [],
     "auth_reset": [],
