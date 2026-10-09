@@ -47,7 +47,11 @@ describe(`engine soak — ${HOURS} simulated hours, 42 symbols, every worker loo
       snapshotHours: String(process.env.ENGINE_SOAK_SNAPSHOTS || '').split(',').filter(Boolean).map(Number),
       snapshotDir: process.env.ENGINE_SOAK_SNAPSHOT_DIR || null,
     });
-    if (VERBOSE) console.log(JSON.stringify({ cpu: R.cpu, cycles: R.cycles, rpcs: R.rpcs, restCalls: R.restCalls, barCloses: R.barCloses }));
+    if (VERBOSE) {
+      const byLevel = {};
+      for (const [k, n] of R.counts) { const l = k.split(':')[0]; byLevel[l] = (byLevel[l] || 0) + n; }
+      console.log(JSON.stringify({ cpu: R.cpu, cycles: R.cycles, rpcs: R.rpcs, restCalls: R.restCalls, barCloses: R.barCloses, logLines: byLevel }));
+    }
   }, 900_000);
   afterAll(() => { vi.useRealTimers(); });
 
