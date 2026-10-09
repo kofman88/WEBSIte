@@ -55,7 +55,9 @@ describe('Mini App analyze body parsing vs h_analyze', () => {
       const at = JSON.stringify(p.body);
       expect(r.status, at).toBe(p.status);
       const { png: _png, ...want } = p.resp;
-      const { chart: _chart, ...got } = r.body;
+      // D3: png is always null and the chart (when there is one) travels as data next to it
+      const { png: _gotPng, timeframe: _tf, meta: _m, candles: _c, overlays: _o, event: _ev, hit_levels: _hl,
+        entry_index: _ei, last_close: _lc, ...got } = r.body;
       expect(got, at).toEqual(want);
       const key = (c) => c.join('|');
       expect(calls.map(key).sort(), at).toEqual(p.calls.map(key).sort());

@@ -80,7 +80,8 @@ function appAuth(req, res, next) {
   res.json = (body) => {
     res.json = origJson;
     if (res.statusCode === 401 || res.statusCode === 403) {
-      return origJson({ ok: false, error: 'unauthorized', ...(body && body.code ? { code: body.code } : {}) });
+      // the bot's _unauthorized() body for a 401; a 403 (ACCOUNT_DISABLED) keeps the site's `code` for the app's login screen
+      return origJson({ ok: false, error: 'unauthorized', ...(res.statusCode === 403 && body && body.code ? { code: body.code } : {}) });
     }
     return origJson(body);
   };
@@ -302,6 +303,7 @@ router.post('/volume/reset', wrap((req, res) => {
 
 router.use('/genome', require('./appGenome'));    // M16: GET genome, POST genome/apply, POST genome/evolve (D10)
 router.use(require('./appChallenge'));       // M17: challenge + entry-advisor buttons
+router.use(require('./appData'));            // M10b: dashboard, signals, chart, result, stats, analyze, share, feedback, events
 
 module.exports = router;
 module.exports.rateOk = rateOk;
