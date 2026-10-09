@@ -352,6 +352,7 @@ if (!IS_TEST) {
 // monitor, tracker … in a worker thread + ghost cleanup / Genome loops here) starts when
 // config.engineWorker (ENGINE_WORKER=1, default on in production); never under tests.
 let engine = null;
+let tradeOps = null;
 function startBackground() {
   maintenanceService.start();
   securityMonitor.start();
@@ -364,8 +365,22 @@ function startBackground() {
     try {
       engine = require('./workers/engineWorker').startEngine({ log: logger });
       logger.info('engine worker started');
+      // auto_trade.reset_auth_failures (keys saved / auto-trade switched on in the app): the auto-trade
+      // registries live in the engine worker, so the app routes hand the reset to it
+      const eng = engine;
+      require('./services/exchangeKeysService').configure({ resetAuthFailures: async (uid, ex) => eng.resetAuthFailures(uid, ex) });
     } catch (err) {
       logger.error('engine worker start failed', { err: err.message });
+    }
+  }
+  // the trade-ops queue (confirm exec, quick close, SL→BE) in its own supervised worker thread
+  // (TRADE_OPS_WORKER=0 keeps it in this thread); never under tests
+  if (!IS_TEST && String(process.env.TRADE_OPS_WORKER || '1').trim() !== '0') {
+    try {
+      tradeOps = require('./workers/tradeOpsWorker').startTradeOps({ log: logger });
+      logger.info('trade-ops worker started');
+    } catch (err) {
+      logger.error('trade-ops worker start failed', { err: err.message });
     }
   }
 }
@@ -379,10 +394,20 @@ async function shutdownSteps() {
   if (httpServer) {
     try { httpServer.close(); } catch (_e) { /* */ }
   }
-  if (engine) {
-    try { await engine.stop(); } catch (_e) { /* */ }
-    engine = null;
+  // the engine and the trade-ops queue stop together (inside the 22 s deadline): a placement in
+  // flight gets up to 18 s to finish before the trade-ops thread is terminated
+  const stops = [];
+  if (tradeOps) {
+    const t = tradeOps;
+    tradeOps = null;
+    stops.push(t.stop({ graceMs: 18000 }).catch(() => {}));
   }
+  if (engine) {
+    const e = engine;
+    engine = null;
+    stops.push(e.stop().catch(() => {}));
+  }
+  await Promise.all(stops);
   try { maintenanceService.stop(); } catch (_e) { /* */ }
   try { planService.stopExpiryLoop(); } catch (_e) { /* */ }
   try { require('./services/publicTrack').defaultTrack().stop(); } catch (_e) { /* */ }

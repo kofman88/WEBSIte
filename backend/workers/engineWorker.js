@@ -195,11 +195,31 @@ function runWorker(port, {
     // the app routes' reads of the engine memory (engineBridge: prices, cached candles, trends)
     if (require('../services/engine/engineBridge').handleQueryMessage(msg, post, scheduler ? scheduler.ctx : null)) return;
     if (msg.type === 'start') start(msg.options || {});
+    else if (msg.type === 'autotrade') autoTradeControl(msg);
     else if (msg.type === 'shutdown') stop();
     else if (msg.type === 'ping') post({ type: 'pong', id: msg.id, ts: Date.now() / 1000 });
   });
 
-  return { scheduler: () => scheduler, remote, stop, start };
+  /**
+   * The main thread's hand-offs to this thread's auto-trade module state (fire-and-forget, like the
+   * bot's in-process call): {op: 'reset_auth_failures', userId, exchange}. Before the executor is
+   * built (or with auto-trade off) there is nothing to reset.
+   */
+  function autoTradeControl(msg) {
+    const at = scheduler && scheduler.ctx ? scheduler.ctx.autoTrade : null;
+    if (!at) return false;
+    try {
+      if (msg.op === 'reset_auth_failures' && typeof at.resetAuthFailures === 'function') {
+        at.resetAuthFailures(Number(msg.userId), String(msg.exchange || 'bybit'));
+        return true;
+      }
+    } catch (e) {
+      try { require('../services/marketData/mdLog').log.debug(`[AUTO-TRADE] control ${msg.op}: ${e && e.message}`); } catch (_e) { /* */ }
+    }
+    return false;
+  }
+
+  return { scheduler: () => scheduler, remote, stop, start, autoTradeControl };
 }
 
 // ═══════════════════════════════════════════════════════════════════════
@@ -393,6 +413,12 @@ function createSupervisor({
       return { stopped, terminated };
     },
     ping(id = 1) { post({ type: 'ping', id }); },
+    /** auto_trade.reset_auth_failures in the worker (which owns the auto-trade registries); no worker → nothing to reset. */
+    resetAuthFailures(userId, exchange) {
+      if (!state.worker) return false;
+      post({ type: 'autotrade', op: 'reset_auth_failures', userId: Number(userId), exchange: String(exchange || 'bybit') });
+      return true;
+    },
     /** engineBridge query → the worker's answer (rejects without a worker / after timeoutMs). */
     query(method, args = [], timeoutMs = undefined) {
       if (!state.worker) return Promise.reject(new Error('engine worker not running'));
@@ -453,6 +479,7 @@ function startEngine({ log = null, env = process.env, spawn = null, delivery = n
   bridge.setRemote((method, args, timeoutMs) => supervisor.query(method, args, timeoutMs));
   return {
     supervisor, scheduler, regime, reports,
+    resetAuthFailures: (userId, exchange) => supervisor.resetAuthFailures(userId, exchange),
     /**
      * Both halves at once, like the bot cancelling every gather task together and waiting ≤ 4 s:
      * the main-side loops (≤ 4 s) and the worker (its own ≤ 4 s + the registry save, ≤ 6 s grace).

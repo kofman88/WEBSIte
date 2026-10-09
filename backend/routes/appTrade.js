@@ -23,11 +23,14 @@
  *        str(e)[:200] (QUIRK: OKX get_dashboard returns (summary, positions), so the bot's
  *        three-way unpack always fails there: "not enough values to unpack (expected 3, got 2)") ·
  *        each position normalised like _build_positions_text → {ok, exchange, positions, orders_count}
+ *        (D17: the site reads OKX get_positions + get_open_orders instead — see D17_SITE)
  *   POST trades/{trade_id}/exec                                          exec_trade_<id>
  *   POST trades/{trade_id}/qc/half | full | force | be | wait            qc_half_ / qc_full_ /
  *                                                                        qc_full_force_ / qc_be_ /
  *                                                                        qc_holdlock_wait
  *   GET  trades/{trade_id}/progress                                      qc_refresh_<id>
+ *   GET  trades/{trade_id}/card      (site) the delivered card now + its buttons, the trade ones with
+ *                                    their route (signalDelivery.actionRoute) — what the app shows
  *
  * The button routes answer what the bot's callback did to the chat: {ok, outcome, error?,
  * message, alert, card, effects} — `effects` the ordered list (answer / edit / send / delete),
@@ -81,9 +84,17 @@ const EXCHANGES = keysSvc.EXCHANGES;
 const QC_BUTTON = Object.freeze({ half: 'qc_half_', full: 'qc_full_', force: 'qc_full_', be: 'qc_be_' });
 const QC_OK = Object.freeze(['closed_half', 'closed', 'be_set', 'wait']);
 
+/**
+ * D17 (docs/PORT_DECISIONS.md), positions: the bot unpacks OKX get_dashboard (which returns
+ * (summary, positions), its get_positions call with the passphrase in the symbol slot) into three
+ * names, so OKX positions are always "unavailable"; the site reads OKX get_positions (all) +
+ * get_open_orders. `configure({d17: {okxPositions: false}})` is the bot.
+ */
+const D17_SITE = Object.freeze({ okxPositions: true });
+
 const D = {
   clock: () => Date.now() / 1000, log: null, registry: null, candles: null, tradeOps: null, execWaitS: EXEC_WAIT_S,
-  testTimeoutS: null, permissionTimeoutS: null, dashboardTimeoutS: null,
+  testTimeoutS: null, permissionTimeoutS: null, dashboardTimeoutS: null, d17: null,
 };
 let _winston = null;
 /** The route / service logger: D.log, else the site's winston logger with the engine's `warning` name. */
@@ -97,7 +108,7 @@ function log() {
 }
 const now = () => D.clock();
 
-/** Tests: { clock, log, registry, candles, tradeOps, execWaitS, testTimeoutS, permissionTimeoutS, dashboardTimeoutS } (null → the default). */
+/** Tests: { clock, log, registry, candles, tradeOps, execWaitS, testTimeoutS, permissionTimeoutS, dashboardTimeoutS, d17 } (null → the default). */
 function configure(o = {}) {
   for (const k of Object.keys(D)) if (Object.prototype.hasOwnProperty.call(o, k)) D[k] = o[k];
   if (!D.clock) D.clock = () => Date.now() / 1000;
@@ -235,9 +246,15 @@ async function hPositions(req, res) {
   const [key, secret, pp] = keysSvc.exchangeKeys(user.user_id, ex);
   if (!key || !secret || (ex === 'okx' && !pp)) return send(res, 200, { ok: true, exchange: ex, positions: [], orders_count: 0 });
   const t = exchanges.getTrader(ex, { registry: D.registry || undefined }).instance({ demo: false });
-  const dash = () => {
+  const d17 = { ...D17_SITE, ...(D.d17 || {}) };
+  const dash = async () => {
     if (ex === 'bingx' || ex === 'binance') return t.getDashboard(key, secret);
-    if (ex === 'okx') return t.getDashboard(key, secret, pp);
+    if (ex === 'okx') {
+      if (!d17.okxPositions) return t.getDashboard(key, secret, pp);   // the bot: a 2-tuple → ValueError below
+      const pos = await t.getPositions(key, secret, null, pp);
+      const ords = await t.getOpenOrders(key, secret, pp);
+      return [pos, ords, null];
+    }
     return t.getDashboard(key, secret, Boolean(user.bybit_demo));
   };
   let positions;
@@ -324,6 +341,26 @@ function hQc(action) {
   };
 }
 
+/**
+ * GET trades/{id}/card — the card as the user's chat would show it now (the delivered signal card
+ * after every edit: signal_card_json) with its buttons, the trade ones carrying their route
+ * (signalDelivery.withActionRoutes) — what the app renders as the trade buttons of a signal. D16:
+ * another user's trade (or no such trade) → 404.
+ */
+function hCard(req, res, [tradeId]) {
+  loadUser(req);
+  const row = tradeRow(tradeId);
+  if (!owned(row, req)) return notFound(res);
+  let card = null;
+  try { card = row.signal_card_json ? JSON.parse(String(row.signal_card_json)) : null; } catch (_e) { card = null; }
+  const { withActionRoutes } = require('../services/engine/signalDelivery');
+  const actions = card && Array.isArray(card.actions) ? withActionRoutes(card.actions, String(row.trade_id)) : [];
+  return send(res, 200, {
+    ok: true, trade_id: String(row.trade_id), html: card && card.html ? String(card.html) : null, actions,
+    lang: card && card.lang === 'en' ? 'en' : 'ru', on_exchange: Boolean(row.order_id), result: row.result || '',
+  });
+}
+
 async function hProgress(req, res, [tradeId]) {
   const user = loadUser(req);
   const row = tradeRow(tradeId);
@@ -350,6 +387,7 @@ const DYNAMIC = [
   [/^\/trades\/([^{}/]+)\/qc\/be$/, { POST: hQc('be') }],
   [/^\/trades\/([^{}/]+)\/qc\/wait$/, { POST: hQc('wait') }],
   [/^\/trades\/([^{}/]+)\/progress$/, { GET: hProgress }],
+  [/^\/trades\/([^{}/]+)\/card$/, { GET: hCard }],
 ];
 
 function allowHeader(entry) {
@@ -404,3 +442,4 @@ module.exports.KEYS_RATE_LIMIT = KEYS_RATE_LIMIT;
 module.exports.POSITIONS_RATE_LIMIT = POSITIONS_RATE_LIMIT;
 module.exports.DASHBOARD_TIMEOUT_S = DASHBOARD_TIMEOUT_S;
 module.exports.EXEC_WAIT_S = EXEC_WAIT_S;
+module.exports.D17_SITE = D17_SITE;

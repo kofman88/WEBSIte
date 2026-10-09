@@ -21,7 +21,8 @@
  * it inverts again — Bybit gets a reduce-only "Buy" for a LONG, BingX / Binance positionSide=SELL
  * (orders the exchanges reject); OKX full close of a LONG asks posSide "short" and the trader
  * cancels every order / algo order (SL, TP) of the symbol afterwards even when that close failed —
- * see docs/PORT_DECISIONS.md D16 (needs an owner decision); the hold-lock lets the close through when
+ * the site fixes the side (D17, below; `deps.d17 = {positionSide: false}` replays the bot, and the
+ * trade row's exchange is written at placement); the hold-lock lets the close through when
  * the cache has no price (fail-open); the progress sign follows the R, so "+-1.50%" happens when
  * there is no stop; progress is shown for a closed trade too; close / SL calls have no timeout.
  *
@@ -43,6 +44,16 @@ const {
 
 const TRADERS = Object.freeze(['bybit', 'bingx', 'binance', 'okx']);
 const POSITIONS_TIMEOUT_S = 10.0;
+/**
+ * D17 (docs/PORT_DECISIONS.md) — the site's fix of the bot's quick close: close_position gets the
+ * POSITION direction (LONG / SHORT), which every trader's close_position expects (bybit_trader's
+ * AUDIT-FIX-C30 note: "LONG"/"SHORT" = направление позиции), instead of the close side the bot
+ * passes (inverted twice → the exchanges reject it; on OKX the failed close is followed by the
+ * cancel of every SL / TP algo). Together with signal_trades.exchange written at placement (D17)
+ * the buttons act on the exchange the order went to. `deps.d17 = {positionSide: false}` is the bot.
+ */
+const D17_SITE = Object.freeze({ positionSide: true });
+const d17Of = (deps) => ({ ...D17_SITE, ...((deps && deps.d17) || {}) });
 
 const g = (o, k, d) => (o && Object.prototype.hasOwnProperty.call(o, k) ? o[k] : d);
 
@@ -105,7 +116,8 @@ async function closeWith(user, trade, deps, half) {
     if (!apiKey || !apiSecret) return { ok: false, msg: 'API-ключи не настроены' };
     const posSize = await getPositionSize(user, exchange, symbol, deps);
     if (posSize <= 0) return { ok: false, msg: 'Позиция уже закрыта' };
-    const closeSide = direction === 'LONG' ? 'Sell' : 'Buy';
+    // the bot: close_side = "Sell" if LONG else "Buy" (QUIRK, see D17); the site: the position direction
+    const closeSide = d17Of(deps).positionSide ? direction : (direction === 'LONG' ? 'Sell' : 'Buy');
     const qty = half ? posSize / 2.0 : posSize;
     const t = inst(exchange, deps);
     let res;
@@ -429,7 +441,7 @@ async function cbQcRefresh(user, tradeId, deps = {}) {
 }
 
 module.exports = {
-  POSITIONS_TIMEOUT_S, HOLD_LOCK_KEYBOARD,
+  POSITIONS_TIMEOUT_S, HOLD_LOCK_KEYBOARD, D17_SITE,
   traderFor, getPositionSize, quickCloseHalf, quickCloseFull, quickMoveSlToBe, getCurrentPnl, formatProgressText,
   cbQcHalf, cbQcFull, cbQcFullForce, cbHoldlockWait, cbQcBe, cbQcRefresh,
 };

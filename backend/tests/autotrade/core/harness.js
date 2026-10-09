@@ -311,6 +311,7 @@ function buildEnv(c, fx, { d6 = { executedOnReject: true, fixedAmountPercent: fa
       },
     },
     d6,
+    d17: { recordExchange: false },   // the bot never writes trades.exchange
   });
 
   for (const [uid, ts] of st.low_notional || []) exec._lowNotionalNotifyTs.set(uid, ts);

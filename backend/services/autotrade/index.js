@@ -18,6 +18,9 @@
  *     restore()                  bot.py start-up: restore_idempotency_registry +
  *                                load_zero_balance_cooldowns_from_db (same log lines).
  *     gc                         cache_gc._cleanup_once's auto-trade entries (scheduler.cacheGcOnce).
+ *     resetAuthFailures(uid, ex) auto_trade.reset_auth_failures (keys saved / auto-trade switched on in
+ *                                the app: the main thread sends it to the engine worker, which owns
+ *                                this module state — workers/engineWorker.js 'autotrade' message).
  *     drain()                    wait for the executor's background tasks (shutdown / tests).
  *   }
  *
@@ -87,7 +90,70 @@ function autoTradeEnabled(env = process.env) {
 
 const errText = (e) => (e && e.message !== undefined ? String(e.message) : String(e));
 
-// eslint-disable-next-line complexity
+/**
+ * The trader runtime hooks of every money path (the bot's module state behind each trader call):
+ *   killswitch   defense.killswitch.require_active — checked by every place_trade / place_trade_split
+ *   planGate     plan_gate.deny_reason — the traders' last-mile plan check
+ *   events       db.trade_events.emit_bg (best effort)
+ *   onAuthReset  bybit_trader._reset_auto_trade_for_key (10003 / 10004): every holder of the key gets
+ *                auto_trade=0 → their uids. Keys are encrypted non-deterministically, so the candidates
+ *                are decrypted and compared in memory (never logged).
+ * Each one can be replaced through deps (tests); the executor and the trade-ops queue build theirs here.
+ */
+function createTraderHooks(deps = {}) {
+  const log = deps.log || require('../marketData/mdLog').log;
+  const now = deps.now || (() => Date.now() / 1000);
+  const dbOf = () => (deps.db ? deps.db : require('../../models/database'));
+  const isAdmin = deps.isAdmin || ((uid) => {
+    try { return Boolean(require('../traderSettingsService').isAdmin(uid)); } catch (_e) { return false; }
+  });
+  const tdb = deps.tradeDb || createTradeDb({ db: deps.db || null, now, log, repo: deps.repo || null, invalidateUserCache: deps.invalidateUserCache || null });
+
+  /** metrics.mutation_log.emit_mutation → audit_log (best effort; the bot's no-op filter kept). */
+  const emitMutation = deps.emitMutation || (async (type, { actor = '', target = '', before = '', after = '', context = null } = {}) => {
+    if (JSON.stringify(before) === JSON.stringify(after)) return false;
+    try {
+      const uid = context && Number.isInteger(Number(context.user_id)) && Number(context.user_id) > 0 ? Number(context.user_id) : null;
+      dbOf().prepare('INSERT INTO audit_log (user_id, action, entity_type, entity_id, metadata) VALUES (?, ?, ?, ?, ?)')
+        .run(uid, String(type), 'autotrade', null, JSON.stringify({ actor, target, before, after, context }));
+      return true;
+    } catch (e) {
+      log.debug(`mutation_log ${type}: ${errText(e)}`);
+      return false;
+    }
+  });
+  const killswitch = deps.killswitch || createKillswitch({ log, emitMutation });
+  const planGate = deps.planGate || createPlanGate({ isAdmin: async (uid) => isAdmin(uid), log });
+  const events = deps.events || { emit: (tid, type, payload) => tdb.addTradeEvent(tid, type, payload) };
+  const onAuthReset = deps.onAuthReset || (async (exchange, apiKey) => {
+    if (!apiKey) return [];
+    const rows = dbOf().prepare('SELECT id, user_id FROM exchange_keys WHERE exchange = ? ORDER BY user_id, id').all(String(exchange));
+    const getCredentials = deps.getCredentials || ((id, uid) => require('../exchangeService').getCredentials(id, uid));
+    const uids = [];
+    for (const r of rows) {
+      let k = null;
+      try { k = getCredentials(r.id, r.user_id).apiKey; } catch (_e) { k = null; }
+      if (k === apiKey && !uids.includes(Number(r.user_id))) uids.push(Number(r.user_id));
+    }
+    for (const uid of uids) await tdb.setAutoTrade(uid, false);
+    return uids;
+  });
+  return { tdb, emitMutation, killswitch, planGate, events, onAuthReset };
+}
+
+/**
+ * The exchange registry of the trade-ops queue (workers/tradeOpsWorker.js: confirm exec, quick
+ * close, SL→BE): the site's default trader runtime plus the bot's hooks — without them a confirm
+ * exec would place an order while the killswitch is halted (the bot's place_trade refuses).
+ */
+function createTradeOpsRegistry(deps = {}) {
+  const { createRegistry } = require('../exchanges');
+  const h = createTraderHooks(deps);
+  return createRegistry({
+    overrides: { killswitch: h.killswitch, planGate: h.planGate, events: h.events, onAuthReset: h.onAuthReset, ...(deps.overrides || {}) },
+  });
+}
+
 function createAutoTrade(deps = {}) {
   const env = deps.env || process.env;
   const log = deps.log || require('../marketData/mdLog').log;
@@ -104,22 +170,9 @@ function createAutoTrade(deps = {}) {
     try { return Boolean(require('../traderSettingsService').isAdmin(uid)); } catch (_e) { return false; }
   });
 
-  // ── storage ──
-  const tdb = deps.tradeDb || createTradeDb({ db: deps.db || null, now, log, repo: deps.repo || null, invalidateUserCache: deps.invalidateUserCache || null });
-
-  /** metrics.mutation_log.emit_mutation → audit_log (best effort; the bot's no-op filter kept). */
-  const emitMutation = deps.emitMutation || (async (type, { actor = '', target = '', before = '', after = '', context = null } = {}) => {
-    if (JSON.stringify(before) === JSON.stringify(after)) return false;
-    try {
-      const uid = context && Number.isInteger(Number(context.user_id)) && Number(context.user_id) > 0 ? Number(context.user_id) : null;
-      dbOf().prepare('INSERT INTO audit_log (user_id, action, entity_type, entity_id, metadata) VALUES (?, ?, ?, ?, ?)')
-        .run(uid, String(type), 'autotrade', null, JSON.stringify({ actor, target, before, after, context }));
-      return true;
-    } catch (e) {
-      log.debug(`mutation_log ${type}: ${errText(e)}`);
-      return false;
-    }
-  });
+  // ── storage + the trader runtime hooks (shared with the trade-ops registry) ──
+  const hooks = createTraderHooks({ ...deps, env, log, now, isAdmin });
+  const { tdb, emitMutation } = hooks;
 
   // ── delivery ──
   const msSleep = (ms) => sleep(Math.max(0, Number(ms) || 0) / 1000);
@@ -133,8 +186,7 @@ function createAutoTrade(deps = {}) {
 
   // ── module state of the bot ──
   const tasks = deps.tasks || asyncio.createTaskGroup({ log });
-  const killswitch = deps.killswitch || createKillswitch({ log, emitMutation });
-  const planGate = deps.planGate || createPlanGate({ isAdmin: async (uid) => isAdmin(uid), log });
+  const { killswitch, planGate } = hooks;
   const adminAlerts = deps.adminAlerts || createAdminAlerts({ now, kvGet: tdb.kvGet, kvSet: tdb.kvSet, log });
   const cooldowns = deps.cooldowns || createCooldowns({
     now, kvSet: tdb.kvSet, kvItemsWithPrefix: tdb.kvItemsWithPrefix, tasks, log,
@@ -146,31 +198,10 @@ function createAutoTrade(deps = {}) {
     now, kvGet: tdb.kvGet, kvSet: tdb.kvSet, kvKeysWithPrefix: tdb.kvKeysWithPrefix, tasks, log,
   });
 
-  /**
-   * bybit_trader._reset_auto_trade_for_key (auth errors 10003 / 10004): every user holding this
-   * key gets auto_trade=0 → their uids (the trader logs `[BYBIT-AUTH-RESET]` per uid). Keys are
-   * encrypted non-deterministically, so the candidates are decrypted and compared in memory.
-   */
-  const onAuthReset = deps.onAuthReset || (async (exchange, apiKey) => {
-    if (!apiKey) return [];
-    const rows = dbOf().prepare('SELECT id, user_id FROM exchange_keys WHERE exchange = ? ORDER BY user_id, id').all(String(exchange));
-    const getCredentials = deps.getCredentials || ((id, uid) => require('../exchangeService').getCredentials(id, uid));
-    const uids = [];
-    for (const r of rows) {
-      let k = null;
-      try { k = getCredentials(r.id, r.user_id).apiKey; } catch (_e) { k = null; }
-      if (k === apiKey && !uids.includes(Number(r.user_id))) uids.push(Number(r.user_id));
-    }
-    for (const uid of uids) await tdb.setAutoTrade(uid, false);
-    return uids;
-  });
+  const { onAuthReset } = hooks;
 
   const traderFor = deps.traderFor || createTraderSet({
-    overrides: productionOverrides({
-      killswitch, planGate,
-      events: { emit: (tid, type, payload) => tdb.addTradeEvent(tid, type, payload) },
-      onAuthReset,
-    }),
+    overrides: productionOverrides({ killswitch, planGate, events: hooks.events, onAuthReset }),
   });
   const reconcile = deps.reconcile || createReconcile({ traderFor, log, sleep, timers });
   const cache = deps.cache || require('../marketData/candleCache');
@@ -253,7 +284,7 @@ function createAutoTrade(deps = {}) {
       const fn = confirmHook();
       if (typeof fn === 'function') await fn(info);
     },
-    d6: deps.d6,
+    d6: deps.d6, d17: deps.d17,
   });
 
   /** auto_trade.execute_auto_trade as the scanners call it. */
@@ -335,8 +366,13 @@ function createAutoTrade(deps = {}) {
     skipNotify: () => skipNotify.gcState(),
   };
 
+  /** auto_trade.reset_auth_failures(uid, exchange): the auth breaker forgets the user's failures (keys re-saved / auto-trade re-enabled). */
+  function resetAuthFailures(uid, exchange) {
+    cooldowns.resetAuthFailures(Number(uid), String(exchange === undefined || exchange === null ? 'bybit' : exchange));
+  }
+
   return {
-    executeAutoTrade, getApiKeys, getBalance, restore, gc,
+    executeAutoTrade, getApiKeys, getBalance, restore, gc, resetAuthFailures,
     drain: () => tasks.drain(),
     exchanges: () => Array.from(exchanges),
     _exec: exec,
@@ -347,4 +383,6 @@ function createAutoTrade(deps = {}) {
   };
 }
 
-module.exports = { ALL_EXCHANGES, D5_DEFAULT_EXCHANGES, enabledExchanges, autoTradeEnabled, createAutoTrade };
+module.exports = {
+  ALL_EXCHANGES, D5_DEFAULT_EXCHANGES, enabledExchanges, autoTradeEnabled, createAutoTrade, createTraderHooks, createTradeOpsRegistry,
+};

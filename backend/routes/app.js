@@ -298,10 +298,33 @@ router.get('/settings/all', wrap((req, res) => {
   res.json({ ok: true, settings: appSettings.settingsAll(user), options: appSettings.options(user, opts) });
 }));
 
-router.post('/settings/all', wrap((req, res) => {
+/**
+ * h_settings_all's side effects after the save, best effort like the bot: `bybit_demo` in the payload
+ * with a Bybit key → bybit_trader.invalidate_pybit_session(key) (this thread's session cache; the
+ * session key carries demo/live, so another thread's cached session never serves the other host);
+ * `trading.auto_trade` on → auto_trade.reset_auth_failures(uid, trade_exchange) (the engine worker's
+ * registry, through exchangeKeysService's hook).
+ */
+async function settingsSideEffects(user, effects) {
+  for (const fx of effects || []) {
+    try {
+      if (fx === 'invalidate_bybit_session') {
+        const key = appSettings.exchangeKeys(user.user_id, 'bybit')[0];
+        if (key) require('../services/exchanges').getTrader('bybit').instance({ demo: false }).invalidatePybitSession(key);
+      } else if (fx.startsWith('reset_auth_failures:')) {
+        await require('../services/exchangeKeysService').resetAuthFailures(user.user_id, fx.slice('reset_auth_failures:'.length));
+      }
+    } catch (e) {
+      logger.debug(`[MINIAPP] ${fx.split(':')[0]}: ${e && e.message}`);
+    }
+  }
+}
+
+router.post('/settings/all', wrap(async (req, res) => {
   const { user, opts } = loadUser(req);
   const out = appSettings.applySettings(user, body(req), opts);
   if (!out.ok) return res.json(out);
+  await settingsSideEffects(user, out._side_effects);
   res.json({ ok: true, settings: out.settings });     // no `options` (quirk 3)
 }));
 

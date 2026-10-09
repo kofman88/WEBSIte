@@ -41,6 +41,39 @@ const RESTART_MAX_S = 300;
 const KINDS = Object.freeze(['exec', 'qc', 'reset_auth_failures']);
 const QC_ACTIONS = Object.freeze(['half', 'full', 'force', 'wait', 'be']);
 
+/**
+ * The site's rollout switches on the confirm-mode exec (decision D5, docs/PORT_DECISIONS.md): the
+ * engine places auto-trades only with AUTOTRADE_ENABLED=1 and only on AUTOTRADE_EXCHANGES, so the
+ * «✅ Открыть сделку» button of a card delivered earlier must not open a position once an operator
+ * switched auto-trade off (or on an exchange outside the list — the user may have changed
+ * trade_exchange since). Checked before the handler: no card edit, no exchange call, no write.
+ * Closing / SL→BE stay available (they only reduce the risk of a position that exists).
+ */
+const EXEC_GATE_MESSAGES = Object.freeze({
+  autotrade_disabled: {
+    ru: '⛔ Автоторговля на сайте сейчас выключена — сделка не открыта.',
+    en: '⛔ Auto-trading is switched off on the site — the trade was not opened.',
+  },
+  exchange_not_enabled: {
+    ru: '⛔ Автоторговля на {exch} на сайте пока не включена — сделка не открыта.',
+    en: '⛔ Auto-trading on {exch} is not enabled on the site yet — the trade was not opened.',
+  },
+});
+const EXCH_LABEL = Object.freeze({ bybit: 'Bybit', bingx: 'BingX', binance: 'Binance', okx: 'OKX' });
+
+/** → null when the exec may run, else {outcome, text} (the user's trade exchange as exec_trade picks it). */
+function execGate(user, env) {
+  const at = require('../services/autotrade');
+  const lang = user && user.lang === 'en' ? 'en' : 'ru';
+  if (!at.autoTradeEnabled(env)) return { outcome: 'autotrade_disabled', text: EXEC_GATE_MESSAGES.autotrade_disabled[lang] };
+  const ex = user ? user.trade_exchange : 'bybit';
+  const keyEx = ['bingx', 'binance', 'okx'].includes(ex) ? ex : 'bybit';
+  if (!at.enabledExchanges(env).has(keyEx)) {
+    return { outcome: 'exchange_not_enabled', text: EXEC_GATE_MESSAGES.exchange_not_enabled[lang].replace('{exch}', EXCH_LABEL[keyEx]) };
+  }
+  return null;
+}
+
 // ═══════════════════════════════════════════════════════════════════════
 //  per-user lock (asyncio.Lock semantics: FIFO, not re-entrant)
 // ═══════════════════════════════════════════════════════════════════════
@@ -82,14 +115,25 @@ function createUserLocks() {
 /**
  * createTradeOps(deps) — the job runner.
  *   deps.delivery  signalDelivery facade (sendText, broadcast | sse.broadcast) for the effects
- *   deps.registry  exchanges registry (tests: scripted transports); deps.db; deps.log; deps.now
- *   deps.resetAuthFailures(uid, ex)  the auto-trade auth breaker (M13b core); no-op until wired
+ *   deps.registry  exchanges registry (tests: scripted transports); default: the production one with
+ *                  the bot's trader hooks (killswitch / plan gate / trade events / Bybit auth reset —
+ *                  services/autotrade createTradeOpsRegistry); deps.db; deps.log; deps.now
+ *   deps.env       AUTOTRADE_ENABLED / AUTOTRADE_EXCHANGES for the exec gate (default process.env)
+ *   deps.d17       the D17 switches of quickClose / confirmMode (tests replay the bot with them off)
+ *   deps.resetAuthFailures(uid, ex)  the auto-trade auth breaker; no-op unless wired
  * submit(kind, payload) → Promise<result>; payload {userId, admin, tradeId, action}.
  */
 function createTradeOps(deps = {}) {
   const locks = createUserLocks();
   const state = { running: 0, done: 0, failed: 0, lastBeat: 0, stopping: false };
   const log = () => deps.log || require('../services/marketData/mdLog').log;
+  const env = deps.env || process.env;
+  let prodRegistry = null;
+  const registryOf = () => {
+    if (deps.registry) return deps.registry;
+    if (!prodRegistry) prodRegistry = require('../services/autotrade').createTradeOpsRegistry({ log: log(), db: deps.db || null });
+    return prodRegistry;
+  };
 
   const ts = () => require('../services/traderSettingsService');
   const keys = () => require('../services/exchangeKeysService');
@@ -98,8 +142,8 @@ function createTradeOps(deps = {}) {
 
   function handlerDeps(user, admin) {
     return {
-      db: deps.db, registry: deps.registry, log: deps.log,
-      now: deps.now,
+      db: deps.db, registry: registryOf(), log: deps.log,
+      now: deps.now, d17: deps.d17,
       keysOf: (uid, ex) => keys().exchangeKeys(uid, ex),
       checkAccess: (u) => ts().checkAccess(u, { admin: Boolean(admin), now: deps.now ? deps.now() : undefined }),
       userLock: (uid) => locks.lockFor(uid),
@@ -123,7 +167,13 @@ function createTradeOps(deps = {}) {
     let r;
     try {
       if (kind === 'exec') {
-        r = await CM().execTrade(user, String(payload.tradeId), hd);
+        const gate = deps.execGate === false ? null : execGate(user, env);
+        if (gate) {
+          log().warning(`[TRADE-OPS] exec uid=${uid} tid=${payload.tradeId}: ${gate.outcome} — not placed (D5)`);
+          r = { outcome: gate.outcome, effects: [{ op: 'answer', text: gate.text, show_alert: true }], result: null };
+        } else {
+          r = await CM().execTrade(user, String(payload.tradeId), hd);
+        }
       } else if (kind === 'qc') {
         const q = QC();
         const fn = { half: q.cbQcHalf, full: q.cbQcFull, force: q.cbQcFullForce, be: q.cbQcBe, wait: q.cbHoldlockWait }[payload.action];
@@ -380,6 +430,6 @@ if (!isMainThread && parentPort && require.main === module) {
 }
 
 module.exports = {
-  WORKER_PATH, HEARTBEAT_MS, HEARTBEAT_TIMEOUT_MS, SHUTDOWN_GRACE_MS, KINDS, QC_ACTIONS,
+  WORKER_PATH, HEARTBEAT_MS, HEARTBEAT_TIMEOUT_MS, SHUTDOWN_GRACE_MS, KINDS, QC_ACTIONS, EXEC_GATE_MESSAGES, execGate,
   createUserLocks, createTradeOps, runWorker, createSupervisor, startTradeOps, client, configureLocal,
 };

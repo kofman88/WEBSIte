@@ -11,6 +11,7 @@
  *   setAutoTrade(uid, on)                 db_set_auto_trade
  *   setTradeResult / setTradeState        db_set_trade_result / db_set_trade_state (signalTradesRepo)
  *   updateTradeBybit(tid, oid, posIdx, qty)  db_update_trade_bybit
+ *   updateTradeExchange(tid, ex)          D17: signal_trades.exchange = where the order went (site)
  *   updateTradeTpPlaced(tid, v)           db_update_trade_tp_placed
  *   hasOpenTradeForSymbol(uid, sym)       db_has_open_trade_for_symbol
  *   countOpenTrades(uid, excludeTid)      db_count_open_trades
@@ -99,6 +100,11 @@ function createTradeDb({ db = null, now = () => Date.now() / 1000, log = null, r
       } else {
         dbOf().prepare('UPDATE signal_trades SET order_id=?, pos_idx=? WHERE trade_id=?').run(orderId, posIdx, String(tid));
       }
+    },
+
+    /** D17 (site): the exchange the order went to (the bot leaves trades.exchange empty → quick close reads bybit). */
+    async updateTradeExchange(tid, exchange) {
+      dbOf().prepare('UPDATE signal_trades SET exchange=? WHERE trade_id=?').run(String(exchange), String(tid));
     },
 
     async updateTradeTpPlaced(tid, value = 1) {

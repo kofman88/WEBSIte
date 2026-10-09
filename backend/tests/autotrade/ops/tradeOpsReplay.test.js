@@ -65,7 +65,7 @@ beforeAll(async () => {
 
 afterAll(async () => {
   appRouter.setClock(null);
-  appTrade.configure({ clock: null, log: null, registry: null, candles: null, tradeOps: null, execWaitS: null, testTimeoutS: null, dashboardTimeoutS: null });
+  appTrade.configure({ clock: null, log: null, registry: null, candles: null, tradeOps: null, execWaitS: null, testTimeoutS: null, dashboardTimeoutS: null, d17: null });
   keysSvc.configure({ log: null, registry: null, resetAuthFailures: null });
   tradeOps.configureLocal(null);
   await new Promise((r) => server.close(r));
@@ -73,6 +73,8 @@ afterAll(async () => {
 
 const SITE = '/api/app';
 const BOT = '/miniapp/api';
+const BOT_D17 = { positionSide: false, recordExchange: false, okxPositions: false };
+const ALL_ON = { AUTOTRADE_ENABLED: '1', AUTOTRADE_EXCHANGES: 'bybit,bingx,binance,okx' };
 const ROUTE_OF = {
   exec_trade: ['POST', 'exec'], cb_qc_half: ['POST', 'qc/half'], cb_qc_full: ['POST', 'qc/full'], cb_qc_full_force: ['POST', 'qc/force'],
   cb_holdlock_wait: ['POST', 'qc/wait'], cb_qc_be: ['POST', 'qc/be'], cb_qc_refresh: ['GET', 'progress'],
@@ -198,12 +200,15 @@ describe(`trade ops — ${FX.steps.length} steps replayed against the bot`, () =
       const opsLog = makeLog();
       const delivery = makeDelivery();
       const resets = [];
+      // the bot replay: D17 off (the bot's close side / OKX dashboard unpack / no trades.exchange write),
+      // and the D5 rollout switches open for every exchange
       appTrade.configure({
         clock: () => clock.now, log: opsLog, registry: world.registry, candles, execWaitS: 60,
         testTimeoutS: s.force_timeout === 'test' ? 0 : null, dashboardTimeoutS: s.force_timeout === 'dashboard' ? 0 : null,
+        d17: BOT_D17,
       });
       keysSvc.configure({ log: opsLog, registry: world.registry, resetAuthFailures: async (uid, ex) => { resets.push([uid, ex]); } });
-      tradeOps.configureLocal({ registry: world.registry, log: opsLog, now: () => clock.now, candles, delivery });
+      tradeOps.configureLocal({ registry: world.registry, log: opsLog, now: () => clock.now, candles, delivery, d17: BOT_D17, env: ALL_ON });
 
       const headers = {};
       if (s.uid !== null) {

@@ -16,7 +16,9 @@
  * Site decisions (docs/PORT_DECISIONS.md D6, `deps.d6`): (a) result.executed is false when the
  * exchange rejected the order (bot: true); (d) fixed_amount is a percent of the balance (bot:
  * divided by the balance as USD). `d6: {executedOnReject: true, fixedAmountPercent: false}`
- * reproduces the bot byte for byte (the differential tests run that way).
+ * reproduces the bot byte for byte (the differential tests run that way). D17 (`deps.d17`): a placed
+ * order's exchange is written to signal_trades.exchange (the quick-close / SL→BE buttons read it);
+ * `d17: {recordExchange: false}` is the bot.
  *
  * Not ported, by decision: the ML signal_filter gate (D11 — no XGBoost models on the site: the
  * gate's `has_model` is always false); the WS staleness branch (dead in the bot: ws_feed has no
@@ -103,6 +105,17 @@ function createExecutor(deps) {
   const recordLeverageCap = deps.recordLeverageCap || (() => {});
   const sentryCapture = deps.sentryCapture || (() => {});
   const d6 = { executedOnReject: false, fixedAmountPercent: true, ...(deps.d6 || {}) };
+  // D17 (site): record the exchange of a placed order on the trade row (the bot never writes it, so
+  // its quick close / SL→BE read 'bybit' for every trade) — bot mode {recordExchange: false}
+  const d17 = { recordExchange: true, ...(deps.d17 || {}) };
+  async function recordExchange(tid, ex) {
+    if (!d17.recordExchange || typeof db.updateTradeExchange !== 'function') return;
+    try {
+      await db.updateTradeExchange(tid, ex);
+    } catch (e) {
+      log.debug(`record exchange tid=${tid}: ${errText(e)}`);
+    }
+  }
 
   const tradeLocks = new Map();
   const disabledDaysNotified = new Map();   // `${uid}|${ordinal}` → true
@@ -1465,6 +1478,7 @@ function createExecutor(deps) {
       // ── trade_result["ok"] ──
       async function onSuccess() {
         await db.updateTradeBybit(tradeId, pyGet(tradeResult, 'order_id', ''), pyGet(tradeResult, 'pos_idx', 0), pyFloat(or(pyGet(tradeResult, 'qty', 0), 0)));
+        await recordExchange(tradeId, exchange);
         const tpVal = truthy(pyGet(tradeResult, 'tp_placed', null)) ? 1 : 0;
         await db.updateTradeTpPlaced(tradeId, tpVal);
         emitEvt(tradeId, 'fill_confirmed', {
@@ -1725,6 +1739,7 @@ function createExecutor(deps) {
           } catch (de) {
             log.debug(`reconcile update_trade: ${errText(de)}`);
           }
+          await recordExchange(tradeId, exchange);
           const recoSl = pyFloat(or(reco.stopLoss, 0));
           if (recoSl === 0 && sl > 0) {
             log.warning(pf('[TIMEOUT-RECONCILE-SL] uid=%s %s: position open with NO SL on exchange — scheduling set_trailing_sl(%.6g) fallback', userId, symbol, sl));

@@ -37,7 +37,7 @@ function recorded(resp) {
 }
 const checker = (resp) => {
   const r = recorded(resp);
-  return { ...r, c: KP.createKeyPermissionChecker({ transport: r.tx, now: () => T0, log: quietLog }) };
+  return { ...r, c: KP.createKeyPermissionChecker({ transport: r.tx, now: () => T0, log: quietLog, sleep: async () => {} }) };
 };
 
 const BYBIT_PERMS = {
@@ -69,25 +69,31 @@ const okxBody = (perm) => ({
 });
 const bingxBody = (perms) => ({ code: 0, msg: '', debugMsg: '', data: { ipAddresses: ['120.255.24.182'], note: 'autotrade', permissions: perms } });
 
-describe('D15 requests — host, path, auth, signature', () => {
+describe('D15 requests — host, path, auth, signature (the trader\'s own signing, checked with an independent HMAC)', () => {
+  const query = (url) => url.split('?')[1] || '';
+  const unsigned = (url) => query(url).split('&signature=')[0];
+  const sigOf = (url) => (query(url).split('&signature=')[1] || '');
+
   it('bybit: GET /v5/user/query-api with V5 auth headers (demo key → api-demo)', async () => {
     const { c, seen } = checker({ body: bybitBody(BYBIT_PERMS) });
     await c.check({ exchange: 'bybit', apiKey: KEY, apiSecret: SEC });
     await c.check({ exchange: 'bybit', apiKey: KEY, apiSecret: SEC, testnet: true });
-    const ts = String(Math.trunc(T0 * 1000));
-    expect(seen[0]).toMatchObject({ method: 'GET', url: 'https://api.bybit.com/v5/user/query-api' });
-    expect(seen[0].headers).toMatchObject({
-      'X-BAPI-API-KEY': KEY, 'X-BAPI-TIMESTAMP': ts, 'X-BAPI-RECV-WINDOW': '5000', 'X-BAPI-SIGN-TYPE': '2',
-      'X-BAPI-SIGN': hmacHex(ts + KEY + '5000'),
-    });
-    expect(seen[1].url).toBe('https://api-demo.bybit.com/v5/user/query-api');
+    expect(seen).toHaveLength(2);
+    expect(seen[0]).toMatchObject({ method: 'GET' });
+    expect(seen[0].url.split('?')[0]).toBe('https://api.bybit.com/v5/user/query-api');
+    const h = seen[0].headers;
+    expect(h).toMatchObject({ 'X-BAPI-API-KEY': KEY, 'X-BAPI-SIGN-TYPE': '2' });
+    expect(h['X-BAPI-SIGN']).toBe(hmacHex(h['X-BAPI-TIMESTAMP'] + KEY + h['X-BAPI-RECV-WINDOW'] + query(seen[0].url)));
+    expect(seen[1].url.split('?')[0]).toBe('https://api-demo.bybit.com/v5/user/query-api');
   });
 
   it('binance: signed GET /sapi/v1/account/apiRestrictions on api.binance.com', async () => {
     const { c, seen } = checker({ body: binanceBody(false) });
     await c.check({ exchange: 'binance', apiKey: KEY, apiSecret: SEC });
-    const qs = `timestamp=${Math.trunc(T0 * 1000)}&recvWindow=5000`;
-    expect(seen[0].url).toBe(`https://api.binance.com/sapi/v1/account/apiRestrictions?${qs}&signature=${hmacHex(qs)}`);
+    expect(seen).toHaveLength(1);
+    expect(seen[0].url.split('?')[0]).toBe('https://api.binance.com/sapi/v1/account/apiRestrictions');
+    expect(unsigned(seen[0].url)).toContain(`timestamp=${Math.trunc(T0 * 1000)}`);
+    expect(sigOf(seen[0].url)).toBe(hmacHex(unsigned(seen[0].url)));
     expect(seen[0].headers).toEqual({ 'X-MBX-APIKEY': KEY });
   });
 
@@ -95,22 +101,22 @@ describe('D15 requests — host, path, auth, signature', () => {
     const { c, seen } = checker({ body: okxBody('read_only,trade') });
     await c.check({ exchange: 'okx', apiKey: KEY, apiSecret: SEC, passphrase: PP });
     await c.check({ exchange: 'okx', apiKey: KEY, apiSecret: SEC, passphrase: PP, testnet: true });
-    const ts = '2026-01-01T00:00:00.250Z';
     expect(seen[0].url).toBe('https://www.okx.com/api/v5/account/config');
-    expect(seen[0].headers).toMatchObject({
-      'OK-ACCESS-KEY': KEY, 'OK-ACCESS-PASSPHRASE': PP, 'OK-ACCESS-TIMESTAMP': ts,
-      'OK-ACCESS-SIGN': hmacB64(`${ts}GET/api/v5/account/config`),
-    });
-    expect(seen[0].headers['x-simulated-trading']).toBeUndefined();
+    const h = seen[0].headers;
+    expect(h).toMatchObject({ 'OK-ACCESS-KEY': KEY, 'OK-ACCESS-PASSPHRASE': PP });
+    expect(h['OK-ACCESS-SIGN']).toBe(hmacB64(`${h['OK-ACCESS-TIMESTAMP']}GET/api/v5/account/config`));
+    expect(h['x-simulated-trading']).toBeUndefined();
     expect(seen[1].headers['x-simulated-trading']).toBe('1');
   });
 
   it('bingx: signed GET /openApi/v1/account/apiPermissions', async () => {
     const { c, seen } = checker({ body: bingxBody([1, 2, 3]) });
     await c.check({ exchange: 'bingx', apiKey: KEY, apiSecret: SEC });
-    const qs = `recvWindow=5000&timestamp=${Math.trunc(T0 * 1000)}`;
-    expect(seen[0].url).toBe(`https://open-api.bingx.com/openApi/v1/account/apiPermissions?${qs}&signature=${hmacHex(qs)}`);
-    expect(seen[0].headers).toEqual({ 'X-BX-APIKEY': KEY });
+    expect(seen).toHaveLength(1);
+    expect(seen[0].url.split('?')[0]).toBe('https://open-api.bingx.com/openApi/v1/account/apiPermissions');
+    expect(unsigned(seen[0].url)).toContain(`timestamp=${Math.trunc(T0 * 1000)}`);
+    expect(sigOf(seen[0].url)).toBe(hmacHex(unsigned(seen[0].url)));
+    expect(seen[0].headers).toMatchObject({ 'X-BX-APIKEY': KEY });
   });
 
   it('never sends a request without key + secret (+ passphrase on OKX)', async () => {
@@ -119,6 +125,13 @@ describe('D15 requests — host, path, auth, signature', () => {
     expect((await c.check({ exchange: 'okx', apiKey: KEY, apiSecret: SEC })).verdict).toBe('unknown');
     expect((await c.check({ exchange: 'kraken', apiKey: KEY, apiSecret: SEC })).verdict).toBe('unknown');
     expect(seen).toHaveLength(0);
+  });
+
+  it('one implementation behind both key-add paths: the app route\'s service reads through this module', () => {
+    const keysSvc = nodeRequire('../../../services/exchangeKeysService.js');
+    expect(keysSvc.D15_MESSAGES).toBe(KP.MESSAGES);
+    expect(keysSvc._verdicts).toBe(KP.verdicts);
+    expect(keysSvc.PERMISSION_TIMEOUT_S).toBe(KP.PERMISSION_TIMEOUT_S);
   });
 });
 
@@ -182,7 +195,7 @@ describe('D15 verdicts on recorded responses', () => {
     const lines = [];
     const log = { ...quietLog, info: (m) => lines.push(String(m)), warning: (m) => lines.push(String(m)) };
     const r = recorded({ body: okxBody('read_only,withdraw') });
-    const c = KP.createKeyPermissionChecker({ transport: r.tx, now: () => T0, log });
+    const c = KP.createKeyPermissionChecker({ transport: r.tx, now: () => T0, log, sleep: async () => {} });
     await expect(c.assertKeyCanBeAdded({ exchange: 'okx', apiKey: KEY, apiSecret: SEC, passphrase: PP })).rejects.toThrow();
     const text = lines.join('\n');
     expect(text).toContain('verdict=withdraw');
@@ -190,8 +203,10 @@ describe('D15 verdicts on recorded responses', () => {
   });
 
   it('under vitest the default transport refuses to connect', async () => {
-    const c = KP.createKeyPermissionChecker({ log: quietLog });
-    expect(await c.check({ exchange: 'bybit', apiKey: KEY, apiSecret: SEC })).toEqual({ verdict: 'unknown', reason: 'transport connect' });
+    const c = KP.createKeyPermissionChecker({ log: quietLog, sleep: async () => {} });
+    for (const ex of ['bybit', 'binance', 'okx', 'bingx']) {
+      expect((await c.check({ exchange: ex, apiKey: KEY, apiSecret: SEC, passphrase: PP })).verdict, ex).toBe('unknown');
+    }
   });
 });
 

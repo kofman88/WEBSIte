@@ -29,6 +29,8 @@
  * trader (no deterministic client order ids, plan gate fail-open on uid 0); Bybit is called
  * WITHOUT `demo` (a Bybit-demo user's confirm trades go to the live host); qty is not stored;
  * BingX / Binance / OKX never write tp_placed; the button says "Bybit" for every exchange.
+ * D17 (site): the exchange of the placed order is written to signal_trades.exchange (the bot leaves it
+ * empty, so its quick close reads 'bybit'); `deps.d17 = {recordExchange: false}` is the bot.
  *
  * Site additions (decision D16, docs/PORT_DECISIONS.md), applied by routes/appTrade.js before
  * this handler runs: the trade must belong to the JWT user and its delivered card must still
@@ -46,6 +48,7 @@
 
 const { makeT } = require('../engine/cards/html');
 const { bindValue, pyDumps } = require('../engine/signalTradesRepo');
+const { withActionRoutes } = require('../engine/signalDelivery');
 const exchanges = require('../exchanges');
 const { pyFloat, pyGet, pyTruthy, pyCapitalize, errStr, isDict } = require('../exchanges/pyCompat');
 
@@ -147,6 +150,14 @@ function updateTradeBybit(deps, tradeId, orderId, posIdx, qty = null) {
   } else {
     d.prepare('UPDATE signal_trades SET order_id=?, pos_idx=? WHERE trade_id=?').run(bindValue(orderId), bindValue(posIdx), bindValue(tradeId));
   }
+}
+
+/** D17 (site): signal_trades.exchange = the exchange the order went to (the quick-close / SL→BE buttons read it). */
+function updateTradeExchange(deps, tradeId, exchange) {
+  if (deps.d17 && deps.d17.recordExchange === false) return;
+  try {
+    dbOf(deps).prepare('UPDATE signal_trades SET exchange=? WHERE trade_id=?').run(String(exchange), bindValue(tradeId));
+  } catch (_e) { /* best effort: the order is placed either way */ }
 }
 
 /** db_update_trade_tp_placed(trade_id, value=1) */
@@ -284,7 +295,10 @@ async function execTradeLocked(user, tradeId, fx, deps, log) {
       const kw = { tp2: tp2(), tp3: tp3() };
       if (exchange === 'okx') kw.passphrase = passphrase;
       result = await inst.placeTrade(...args, kw);
-      if (pyTruthy(pyGet(result, 'ok'))) updateTradeBybit(deps, tradeId, pyGet(result, 'order_id', ''), pyGet(result, 'pos_idx', 0));
+      if (pyTruthy(pyGet(result, 'ok'))) {
+        updateTradeBybit(deps, tradeId, pyGet(result, 'order_id', ''), pyGet(result, 'pos_idx', 0));
+        updateTradeExchange(deps, tradeId, exchange);
+      }
       text = trader.formatTradeResult(result, trade.direction, trade.symbol, pyFloat(trade.entry), pyFloat(trade.sl), pyFloat(trade.tp1),
         riskPct, leverage, tp2(), tp3());
     } else if (isSmc && entryLo > 0 && entryHi > 0) {
@@ -294,6 +308,7 @@ async function execTradeLocked(user, tradeId, fx, deps, log) {
       if (pyTruthy(pyGet(result, 'ok'))) {
         updateTradeBybit(deps, tradeId, pyGet(result, 'order_id', ''), pyGet(result, 'pos_idx', 0));
         updateTradeTpPlaced(deps, tradeId, pyTruthy(pyGet(result, 'tp_placed')) ? 1 : 0);
+        updateTradeExchange(deps, tradeId, 'bybit');
       }
       text = exchanges.bybit.formatTradeResultSplit(result, trade.direction, trade.symbol, entryLo, entryHi, pyFloat(trade.sl), pyFloat(trade.tp1),
         riskPct, leverage, tp2(), tp3());
@@ -304,6 +319,7 @@ async function execTradeLocked(user, tradeId, fx, deps, log) {
       if (pyTruthy(pyGet(result, 'ok'))) {
         updateTradeBybit(deps, tradeId, pyGet(result, 'order_id', ''), pyGet(result, 'pos_idx', 0));
         updateTradeTpPlaced(deps, tradeId, pyTruthy(pyGet(result, 'tp_placed')) ? 1 : 0);
+        updateTradeExchange(deps, tradeId, 'bybit');
       }
       text = exchanges.bybit.formatTradeResult(result, trade.direction, trade.symbol, pyFloat(trade.entry), pyFloat(trade.sl), pyFloat(trade.tp1),
         riskPct, leverage, tp2(), tp3());
@@ -338,9 +354,12 @@ async function applyEffects(effects, { userId, tradeId, lang = 'ru', delivery = 
         (db || require('../../models/database')).prepare('UPDATE signal_trades SET signal_card_json=? WHERE trade_id=? AND user_id=?')
           .run(card, String(tradeId), bindValue(userId));
         const bc = dl && (typeof dl.broadcast === 'function' ? dl.broadcast.bind(dl) : (dl.sse && dl.sse.broadcast));
-        if (bc) bc(userId, 'trade', { kind: 'card', trade_id: tradeId, html: e.text, actions: e.keyboard || null });
+        if (bc) bc(userId, 'trade', { kind: 'card', trade_id: tradeId, html: e.text, actions: withActionRoutes(e.keyboard || null, tradeId) });
       } else if (e.op === 'send' && !deleted.has(i) && dl) {
-        await dl.sendText(userId, e.text, { type: 'trade', kind: 'trade', link: tradeId ? `/app/?tab=signals&id=${encodeURIComponent(tradeId)}` : null, keyboard: e.keyboard || null, lang });
+        await dl.sendText(userId, e.text, {
+          type: 'trade', kind: 'trade', link: tradeId ? `/app/?tab=signals&id=${encodeURIComponent(tradeId)}` : null, keyboard: e.keyboard || null, lang,
+          tradeId: tradeId || null,
+        });
       }
     } catch (err) {
       L.debug(`[TRADE-OPS] effect ${e.op} uid=${userId}: ${err && err.message}`);
@@ -359,6 +378,6 @@ function defaultDelivery() {
 
 module.exports = {
   MESSAGES, t, createEffects, summarize, cardOffers, execTrade, applyEffects,
-  getTrade, countOpenTrades, hasOpenTradeForSymbol, updateTradeBybit, updateTradeTpPlaced,
+  getTrade, countOpenTrades, hasOpenTradeForSymbol, updateTradeBybit, updateTradeTpPlaced, updateTradeExchange,
   _execTradeLocks,
 };

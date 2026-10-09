@@ -1,56 +1,186 @@
 'use strict';
 /**
- * keyPermissions.js — SITE DECISION D15 (docs/PORT_DECISIONS.md): an exchange API key that can
- * WITHDRAW funds is never stored. On key add the exchange's own key-permission endpoint is asked;
- * a withdrawal-capable key is refused, and so is a key whose permissions could not be determined
- * (fail-closed: network error, timeout, non-200, unparsable / unexpected body, API error code).
+ * keyPermissions.js — SITE DECISION D15 (docs/PORT_DECISIONS.md; the landing's security section
+ * promises it): an exchange API key that can WITHDRAW funds is never stored. On every key add the
+ * exchange's own key-permission endpoint is asked; a withdrawal-capable key is refused, and so is a
+ * key whose permissions could not be determined (fail-closed: network error, timeout, HTTP error,
+ * unparsable / unexpected body, API error code). The bot only warns in its setup texts ("Без
+ * Withdraw!") and stores any key that tests OK.
  *
- *   Bybit    GET  https://api.bybit.com/v5/user/query-api            (demo key: api-demo.bybit.com)
- *            V5 auth (X-BAPI-*); result.permissions.{Wallet,…}: any entry "Withdraw" → withdraw
- *   Binance  GET  https://api.binance.com/sapi/v1/account/apiRestrictions  (SIGNED, X-MBX-APIKEY)
+ * The one implementation behind both key-add paths — POST /api/app/exchange/keys
+ * (services/exchangeKeysService.connectKeys, after the bot's test_connection) and the account page's
+ * POST /api/exchanges/keys (routes/exchanges.js). Each read is signed by the trader's own request
+ * code, i.e. byte for byte what the bot's signing builds for that endpoint
+ * (tests/autotrade/ops/d15.test.js pins the wire against the bot):
+ *
+ *   bybit    GET  <api|api-demo>.bybit.com/v5/user/query-api   (pybit get_api_key_information)
+ *            result.permissions {group: [names]} — any name /withdraw/i (Wallet: "Withdraw") → withdraw;
+ *            a group that is null counts as empty; a group that is not a list, or a non-string name → unknown
+ *   bingx    GET  open-api.bingx.com/openApi/v1/account/apiPermissions (signed like every BingX call)
+ *            data.permissions [codes]: 5 = Withdraw (also "5" / names /withdraw/i); other entry types → unknown
+ *   binance  GET  api.binance.com/sapi/v1/account/apiRestrictions (HMAC query, X-MBX-APIKEY); HTTP 200 only
  *            enableWithdrawals: true → withdraw, false → ok, anything else → unknown
- *   OKX      GET  https://www.okx.com/api/v5/account/config           (OK-ACCESS-* + passphrase;
- *            demo key: x-simulated-trading: 1) data[0].perm "read_only,trade,withdraw"
- *   BingX    GET  https://open-api.bingx.com/openApi/v1/account/apiPermissions  (signed, X-BX-APIKEY)
- *            data.permissions: codes (5 = withdraw) or names containing "withdraw"
+ *   okx      GET  www.okx.com/api/v5/account/config (demo key: x-simulated-trading) — code "0" and
+ *            data[0].perm a non-empty string "read_only,trade[,withdraw]"; any part containing "withdraw" → withdraw
  *
- *   createKeyPermissionChecker({transport, now, log}) → {
- *     check({exchange, apiKey, apiSecret, passphrase, testnet}) → {verdict: 'ok'|'withdraw'|'unknown', reason}
- *     assertKeyCanBeAdded(input, {lang}) → throws {statusCode, code, message (ru|en)} unless 'ok'
+ *   checkPermissions(exchange, {apiKey, apiSecret, passphrase, demo}, {registry, timeoutS, log})
+ *       → {verdict: 'ok' | 'withdraw' | 'unknown', reason}   (never throws; 8 s budget)
+ *   createKeyPermissionChecker({transport, now, sleep, log, registry}) → {
+ *     check({exchange, apiKey, apiSecret, passphrase, testnet}) → the verdict
+ *     assertKeyCanBeAdded(input, {lang}) → throws {statusCode 400 KEY_CAN_WITHDRAW | 503 KEY_PERMISSIONS_UNVERIFIED,
+ *                                          message (ru | en)} unless 'ok'
  *   }
+ *   MESSAGES — the refusal texts (ru / en) of both paths.
  *
- * Secrets never leave this module except inside the signed request; nothing here logs a key,
- * a secret, a passphrase or a signature. Under NODE_ENV=test / vitest the default transport refuses
- * to open connections (tests inject recorded responses), which makes every check `unknown`.
+ * No request goes out without a key and a secret (and the OKX passphrase). Secrets never leave this
+ * module except inside the signed request; nothing here logs a key, a secret, a passphrase or a
+ * signature. Under NODE_ENV=test / vitest the default transport refuses to open connections (tests
+ * inject recorded responses), which makes every check `unknown`.
  */
 
-const { TransportError, fetchTransport } = require('../exchanges/transport');
-const { bybitSign } = require('../exchanges/bybitHttp');
-const { binanceSign } = require('../exchanges/binanceTrader');
-const { bingxSign, bingxQueryString } = require('../exchanges/bingxTrader');
-const { okxSign, isoTimestamp } = require('../exchanges/okxTrader');
+const { TransportError, fetchTransport, parseJsonPy } = require('../exchanges/transport');
 
-const TIMEOUT_MS = 10000;
-const RECV_WINDOW = 5000;
-const HOSTS = Object.freeze({
-  bybit: 'https://api.bybit.com',
-  bybitDemo: 'https://api-demo.bybit.com',
-  binance: 'https://api.binance.com',
-  okx: 'https://www.okx.com',
-  bingx: 'https://open-api.bingx.com',
-});
-const BINGX_WITHDRAW_CODE = 5;
+const PERMISSION_TIMEOUT_S = 8;          // keeps the app's key-add request under its 30 s client timeout
+const BINANCE_SAPI_URL = 'https://api.binance.com';
+const BINGX_WITHDRAW_CODE = 5;           // BingX api permission codes: 1 spot, 2 read, 3 perpetual, 4 universal transfer, 5 withdraw
+const EXCHANGES = Object.freeze(['bybit', 'bingx', 'binance', 'okx']);
 
 const MESSAGES = Object.freeze({
-  withdraw: {
-    ru: 'У этого API-ключа включено право на вывод средств. Создайте на бирже ключ без вывода (только чтение и торговля) и добавьте его снова.',
-    en: 'This API key is allowed to withdraw funds. Create a key without withdrawals on the exchange (read + trade only) and add it again.',
-  },
-  unknown: {
-    ru: 'Не удалось проверить права API-ключа на бирже. Попробуйте ещё раз через минуту.',
-    en: 'Could not verify the API key permissions with the exchange. Please try again in a minute.',
-  },
+  withdraw: Object.freeze({
+    ru: 'Ключ с правом вывода средств не принимается. Создайте на бирже новый API-ключ без права вывода (только торговля фьючерсами) и подключите его.',
+    en: 'A key with withdrawal permission is not accepted. Create a new API key on the exchange without withdrawal permission (futures trading only) and connect it.',
+  }),
+  unknown: Object.freeze({
+    ru: 'Не удалось проверить права ключа на бирже — ключ не сохранён. Попробуйте ещё раз через минуту.',
+    en: 'Could not check the key permissions on the exchange — the key was not saved. Try again in a minute.',
+  }),
 });
+
+const isObj = (v) => v !== null && typeof v === 'object' && !Array.isArray(v);
+const WITHDRAW_RE = /withdraw/i;
+
+// ── verdicts (anything but a clear "no withdrawals" is unknown) ──────────
+
+/** Bybit /v5/user/query-api answer → verdict. */
+function bybitVerdict(resp) {
+  if (!isObj(resp) || resp.retCode !== 0) return { verdict: 'unknown', reason: 'retCode' };
+  const res = resp.result;
+  if (!isObj(res) || !isObj(res.permissions)) return { verdict: 'unknown', reason: 'no permissions' };
+  for (const names of Object.values(res.permissions)) {
+    if (names === null) continue;   // an empty group
+    if (!Array.isArray(names) || names.some((n) => typeof n !== 'string')) return { verdict: 'unknown', reason: 'permissions shape' };
+    if (names.some((n) => WITHDRAW_RE.test(n))) return { verdict: 'withdraw', reason: 'Withdraw' };
+  }
+  return { verdict: 'ok', reason: '' };
+}
+
+/** BingX /openApi/v1/account/apiPermissions answer → verdict. */
+function bingxVerdict(resp) {
+  if (!isObj(resp) || resp.code !== 0) return { verdict: 'unknown', reason: 'code' };
+  const data = resp.data;
+  if (!isObj(data) || !Array.isArray(data.permissions)) return { verdict: 'unknown', reason: 'no permissions' };
+  for (const p of data.permissions) {
+    if (typeof p === 'number') {
+      if (p === BINGX_WITHDRAW_CODE) return { verdict: 'withdraw', reason: '5' };
+    } else if (typeof p === 'string') {
+      if (p.trim() === String(BINGX_WITHDRAW_CODE) || WITHDRAW_RE.test(p)) return { verdict: 'withdraw', reason: 'withdraw' };
+    } else {
+      return { verdict: 'unknown', reason: 'permissions shape' };
+    }
+  }
+  return { verdict: 'ok', reason: '' };
+}
+
+/** Binance /sapi/v1/account/apiRestrictions answer → verdict. */
+function binanceVerdict(resp) {
+  if (!isObj(resp)) return { verdict: 'unknown', reason: 'shape' };
+  if (resp.enableWithdrawals === true) return { verdict: 'withdraw', reason: 'enableWithdrawals' };
+  if (resp.enableWithdrawals === false) return { verdict: 'ok', reason: '' };
+  return { verdict: 'unknown', reason: 'no enableWithdrawals' };
+}
+
+/** OKX /api/v5/account/config answer → verdict. */
+function okxVerdict(resp) {
+  if (!isObj(resp) || resp.code !== '0' || !Array.isArray(resp.data) || !resp.data.length) return { verdict: 'unknown', reason: 'code' };
+  const perm = isObj(resp.data[0]) ? resp.data[0].perm : undefined;
+  if (typeof perm !== 'string' || !perm.trim()) return { verdict: 'unknown', reason: 'no perm' };
+  const parts = perm.split(',').map((s) => s.trim().toLowerCase());
+  if (parts.some((p) => p.includes('withdraw'))) return { verdict: 'withdraw', reason: 'withdraw' };
+  return { verdict: 'ok', reason: '' };
+}
+
+const verdicts = Object.freeze({ bybitVerdict, bingxVerdict, binanceVerdict, okxVerdict });
+
+// ── the reads (the trader's own signing) ─────────────────────────────────
+
+function timeoutError() {
+  const e = new Error('');
+  e.name = 'TimeoutError';
+  e.isTimeout = true;
+  return e;
+}
+
+/** asyncio.wait_for(work(), timeout): timeout <= 0 never starts the work (no request goes out). */
+function waitFor(work, timeoutS) {
+  if (!(timeoutS > 0)) return Promise.reject(timeoutError());
+  return new Promise((resolve, reject) => {
+    let done = false;
+    const h = setTimeout(() => { if (!done) { done = true; reject(timeoutError()); } }, timeoutS * 1000);
+    if (h && h.unref) h.unref();
+    Promise.resolve().then(work).then(
+      (v) => { if (!done) { done = true; clearTimeout(h); resolve(v); } },
+      (e) => { if (!done) { done = true; clearTimeout(h); reject(e); } },
+    );
+  });
+}
+
+/** Binance: a signed GET on the spot API host with the trader's own signing (timestamp offset, recvWindow). */
+async function binanceRestrictions(inst, key, secret, timeoutS) {
+  const [qs, headers] = inst._buildQuery(key, secret, {});
+  const resp = await inst.rt.transport({
+    method: 'GET', url: `${BINANCE_SAPI_URL}/sapi/v1/account/apiRestrictions?${qs}`, headers, timeoutMs: timeoutS * 1000,
+  });
+  // fail-closed: only a 200 answer counts (an error page never reads as "no withdrawals")
+  if (Number(resp.status) !== 200) {
+    const e = new Error(`HTTP ${resp.status}`);
+    e.pyType = 'HTTPError';
+    throw e;
+  }
+  return parseJsonPy(resp.text);
+}
+
+/**
+ * checkPermissions(ex, {apiKey, apiSecret, passphrase, demo}, {registry, timeoutS}) → {verdict, reason}.
+ * Any error, timeout or unexpected answer → 'unknown' (the caller refuses the key).
+ */
+async function checkPermissions(exchange, creds = {}, deps = {}) {
+  const ex = String(exchange || '').toLowerCase();
+  if (!EXCHANGES.includes(ex)) return { verdict: 'unknown', reason: 'exchange' };
+  const key = creds.apiKey ? String(creds.apiKey) : '';
+  const secret = creds.apiSecret ? String(creds.apiSecret) : '';
+  const passphrase = creds.passphrase ? String(creds.passphrase) : '';
+  if (!key || !secret) return { verdict: 'unknown', reason: 'missing key or secret' };
+  if (ex === 'okx' && !passphrase) return { verdict: 'unknown', reason: 'missing passphrase' };
+  const timeoutS = deps.timeoutS === undefined || deps.timeoutS === null ? PERMISSION_TIMEOUT_S : deps.timeoutS;
+  const exchanges = require('../exchanges');
+  const inst = (demo) => exchanges.getTrader(ex, { registry: deps.registry || undefined }).instance({ demo });
+  const run = async () => {
+    if (ex === 'bybit') {
+      const session = inst(false)._getSession(key, secret, Boolean(creds.demo));
+      return bybitVerdict(await session._submit('GET', `${session.endpoint}/v5/user/query-api`, {}, true));
+    }
+    if (ex === 'bingx') return bingxVerdict(await inst(false)._request('GET', '/openApi/v1/account/apiPermissions', key, secret));
+    if (ex === 'binance') return binanceVerdict(await binanceRestrictions(inst(false), key, secret, timeoutS));
+    return okxVerdict(await inst(Boolean(creds.demo))._request('GET', '/api/v5/account/config', key, secret, passphrase));
+  };
+  try {
+    return await waitFor(run, timeoutS);
+  } catch (e) {
+    return { verdict: 'unknown', reason: e && e.isTimeout ? 'timeout' : String((e && (e.pyType || e.name)) || 'error') };
+  }
+}
+
+// ── the account page's checker (routes/exchanges.js) ─────────────────────
 
 function networkDisabledTransport() {
   return async () => { throw new TransportError('connect', 'network disabled under NODE_ENV=test'); };
@@ -62,139 +192,22 @@ function defaultPermissionTransport() {
   return testing ? networkDisabledTransport() : fetchTransport();
 }
 
-function parseJson(text) {
-  try {
-    return JSON.parse(String(text));
-  } catch (_e) {
-    return undefined;
-  }
-}
-
-const isObj = (v) => v !== null && typeof v === 'object' && !Array.isArray(v);
-const mentionsWithdraw = (v) => typeof v === 'string' && /withdraw/i.test(v);
-
-// ── per-exchange requests + verdicts ─────────────────────────────────────
-
-function bybitRequest({ apiKey, apiSecret, testnet }, nowS) {
-  const ts = String(Math.trunc(nowS * 1000));
-  const sign = bybitSign(apiSecret, ts + apiKey + String(RECV_WINDOW));
-  return {
-    method: 'GET',
-    url: `${testnet ? HOSTS.bybitDemo : HOSTS.bybit}/v5/user/query-api`,
-    headers: {
-      'Content-Type': 'application/json',
-      'X-BAPI-API-KEY': apiKey,
-      'X-BAPI-SIGN': sign,
-      'X-BAPI-SIGN-TYPE': '2',
-      'X-BAPI-TIMESTAMP': ts,
-      'X-BAPI-RECV-WINDOW': String(RECV_WINDOW),
-    },
-  };
-}
-
-function bybitVerdict(j) {
-  if (!isObj(j) || j.retCode !== 0) return { verdict: 'unknown', reason: `retCode=${isObj(j) ? j.retCode : 'n/a'}` };
-  const perms = isObj(j.result) ? j.result.permissions : undefined;
-  if (!isObj(perms)) return { verdict: 'unknown', reason: 'no permissions object' };
-  for (const [group, list] of Object.entries(perms)) {
-    if (!Array.isArray(list)) return { verdict: 'unknown', reason: `permissions.${group} is not a list` };
-    if (list.some(mentionsWithdraw)) return { verdict: 'withdraw', reason: `permissions.${group}` };
-  }
-  return { verdict: 'ok', reason: 'no Withdraw permission' };
-}
-
-function binanceRequest({ apiKey, apiSecret }, nowS) {
-  const qs = `timestamp=${Math.trunc(nowS * 1000)}&recvWindow=${RECV_WINDOW}`;
-  return {
-    method: 'GET',
-    url: `${HOSTS.binance}/sapi/v1/account/apiRestrictions?${qs}&signature=${binanceSign(qs, apiSecret)}`,
-    headers: { 'X-MBX-APIKEY': apiKey },
-  };
-}
-
-function binanceVerdict(j) {
-  if (!isObj(j)) return { verdict: 'unknown', reason: 'not an object' };
-  if (j.enableWithdrawals === true) return { verdict: 'withdraw', reason: 'enableWithdrawals' };
-  if (j.enableWithdrawals === false) return { verdict: 'ok', reason: 'enableWithdrawals=false' };
-  return { verdict: 'unknown', reason: j.code !== undefined ? `code=${j.code}` : 'no enableWithdrawals' };
-}
-
-function okxRequest({ apiKey, apiSecret, passphrase, testnet }, nowS) {
-  const ts = isoTimestamp(nowS);
-  const path = '/api/v5/account/config';
-  const headers = {
-    'OK-ACCESS-KEY': apiKey,
-    'OK-ACCESS-SIGN': okxSign(ts, 'GET', path, '', apiSecret),
-    'OK-ACCESS-TIMESTAMP': ts,
-    'OK-ACCESS-PASSPHRASE': passphrase || '',
-    'Content-Type': 'application/json',
-  };
-  if (testnet) headers['x-simulated-trading'] = '1';
-  return { method: 'GET', url: `${HOSTS.okx}${path}`, headers };
-}
-
-function okxVerdict(j) {
-  if (!isObj(j) || String(j.code) !== '0' || !Array.isArray(j.data) || !isObj(j.data[0])) {
-    return { verdict: 'unknown', reason: `code=${isObj(j) ? j.code : 'n/a'}` };
-  }
-  const perm = j.data[0].perm;
-  if (typeof perm !== 'string' || !perm.trim()) return { verdict: 'unknown', reason: 'no perm' };
-  const parts = perm.split(',').map((p) => p.trim().toLowerCase());
-  if (parts.some((p) => p.includes('withdraw'))) return { verdict: 'withdraw', reason: 'perm' };
-  return { verdict: 'ok', reason: `perm=${parts.join(',')}` };
-}
-
-function bingxRequest({ apiKey, apiSecret }, nowS) {
-  const params = { timestamp: Math.trunc(nowS * 1000), recvWindow: RECV_WINDOW };
-  return {
-    method: 'GET',
-    url: `${HOSTS.bingx}/openApi/v1/account/apiPermissions?${bingxQueryString(params)}&signature=${bingxSign(params, apiSecret)}`,
-    headers: { 'X-BX-APIKEY': apiKey },
-  };
-}
-
-function bingxVerdict(j) {
-  if (!isObj(j) || j.code !== 0 || !isObj(j.data)) return { verdict: 'unknown', reason: `code=${isObj(j) ? j.code : 'n/a'}` };
-  const perms = j.data.permissions;
-  if (!Array.isArray(perms)) return { verdict: 'unknown', reason: 'no permissions list' };
-  for (const p of perms) {
-    if (Number(p) === BINGX_WITHDRAW_CODE || mentionsWithdraw(p)) return { verdict: 'withdraw', reason: 'permissions' };
-    if (typeof p !== 'number' && typeof p !== 'string') return { verdict: 'unknown', reason: 'unexpected permission entry' };
-  }
-  return { verdict: 'ok', reason: `permissions=${perms.join(',')}` };
-}
-
-const EXCHANGES = Object.freeze({
-  bybit: { request: bybitRequest, verdict: bybitVerdict },
-  binance: { request: binanceRequest, verdict: binanceVerdict },
-  okx: { request: okxRequest, verdict: okxVerdict },
-  bingx: { request: bingxRequest, verdict: bingxVerdict },
-});
-
-function createKeyPermissionChecker({ transport = null, now = () => Date.now() / 1000, log = null } = {}) {
-  const tx = transport || defaultPermissionTransport();
+function createKeyPermissionChecker({ transport = null, now = null, sleep = null, log = null, registry = null } = {}) {
   const logger = log || require('../marketData/mdLog').log;
+  let reg = registry;
+  const registryOf = () => {
+    if (!reg) {
+      const overrides = { transport: transport || defaultPermissionTransport(), log: logger };
+      if (now) overrides.now = now;
+      if (sleep) overrides.sleep = sleep;
+      reg = require('../exchanges').createRegistry({ overrides });
+    }
+    return reg;
+  };
 
+  /** input: the key-add body {exchange, apiKey, apiSecret, passphrase, testnet} (testnet → the demo host). */
   async function check({ exchange, apiKey, apiSecret, passphrase = null, testnet = false } = {}) {
-    const ex = EXCHANGES[String(exchange || '').toLowerCase()];
-    if (!ex) return { verdict: 'unknown', reason: 'unsupported exchange' };
-    if (!apiKey || !apiSecret) return { verdict: 'unknown', reason: 'missing key or secret' };
-    if (exchange === 'okx' && !passphrase) return { verdict: 'unknown', reason: 'missing passphrase' };
-    let resp;
-    try {
-      const req = ex.request({ apiKey: String(apiKey), apiSecret: String(apiSecret), passphrase, testnet: Boolean(testnet) }, now());
-      resp = await tx({ ...req, timeoutMs: TIMEOUT_MS });
-    } catch (e) {
-      return { verdict: 'unknown', reason: `transport ${e && e.kind ? e.kind : 'error'}` };
-    }
-    if (!resp || resp.status !== 200) return { verdict: 'unknown', reason: `http ${resp ? resp.status : 'n/a'}` };
-    const j = parseJson(resp.text);
-    if (j === undefined) return { verdict: 'unknown', reason: 'invalid json' };
-    try {
-      return ex.verdict(j);
-    } catch (_e) {
-      return { verdict: 'unknown', reason: 'unexpected body' };
-    }
+    return checkPermissions(exchange, { apiKey, apiSecret, passphrase, demo: Boolean(testnet) }, { registry: registryOf() });
   }
 
   /** D15 gate of the key-add path. Throws a route error unless the key provably cannot withdraw. */
@@ -224,7 +237,8 @@ function setDefaultKeyPermissionChecker(checker) {
 }
 
 module.exports = {
-  createKeyPermissionChecker, defaultKeyPermissionChecker, setDefaultKeyPermissionChecker, networkDisabledTransport, MESSAGES, HOSTS,
-  BINGX_WITHDRAW_CODE, _verdicts: { bybitVerdict, binanceVerdict, okxVerdict, bingxVerdict },
-  _requests: { bybitRequest, binanceRequest, okxRequest, bingxRequest },
+  PERMISSION_TIMEOUT_S, BINANCE_SAPI_URL, BINGX_WITHDRAW_CODE, MESSAGES, verdicts,
+  checkPermissions, createKeyPermissionChecker, defaultKeyPermissionChecker, setDefaultKeyPermissionChecker,
+  networkDisabledTransport, waitFor,
+  _verdicts: verdicts,
 };

@@ -437,7 +437,7 @@ describe('applyEffects — the site\'s channels for what the callback did', () =
     expect(card).toBe('{"html": "⏳ Открываю сделку...", "actions": null, "lang": "ru"}');
     expect(CM.cardOffers({ signal_card_json: card }, 'exec_trade_u-fx')).toBe(false);
     expect(dl.broadcasts).toEqual([{ uid: UID, event: 'trade', data: { kind: 'card', trade_id: 'u-fx', html: '⏳ Открываю сделку...', actions: null } }]);
-    expect(dl.sent).toEqual([{ uid: UID, text: '✅ <b>done</b>', opts: { type: 'trade', kind: 'trade', link: '/app/?tab=signals&id=u-fx', keyboard: null, lang: 'ru' } }]);
+    expect(dl.sent).toEqual([{ uid: UID, text: '✅ <b>done</b>', opts: { type: 'trade', kind: 'trade', link: '/app/?tab=signals&id=u-fx', keyboard: null, lang: 'ru', tradeId: 'u-fx' } }]);
     expect(CM.summarize(fx.list)).toEqual({ message: '✅ <b>done</b>', alert: null, card: '⏳ Открываю сделку...' });
   });
 

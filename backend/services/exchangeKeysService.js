@@ -20,15 +20,10 @@
  *
  * Decision D15 (docs/PORT_DECISIONS.md; the landing's security section promises it): after a
  * successful test_connection the site asks the exchange for the key's own permissions and
- * refuses a key that can withdraw — and, fail-closed, a key whose permissions cannot be read:
- *   bybit    GET  <api|api-demo>.bybit.com/v5/user/query-api   (pybit get_api_key_information)
- *            result.permissions{group: [names]} — any name /withdraw/i (Wallet: "Withdraw")
- *   bingx    GET  open-api.bingx.com/openApi/v1/account/apiPermissions (signed like every
- *            BingX call) — data.permissions [codes]; 5 = Withdraw (also "5" / /withdraw/i)
- *   binance  GET  api.binance.com/sapi/v1/account/apiRestrictions (HMAC query, X-MBX-APIKEY)
- *            enableWithdrawals must be exactly false
- *   okx      GET  www.okx.com/api/v5/account/config — data[0].perm "read_only,trade[,withdraw]"
- * The bot only warns in its setup texts ("Без Withdraw!") and stores any key that tests OK.
+ * refuses a key that can withdraw — and, fail-closed, a key whose permissions cannot be read.
+ * The reads and verdicts are services/autotrade/keyPermissions.js (the same code the account
+ * page's POST /api/exchanges/keys uses). The bot only warns in its setup texts ("Без Withdraw!")
+ * and stores any key that tests OK.
  *
  * Keys are never logged or returned (only the 4+2 hint); the bot's `[MINIAPP] exchange keys …`
  * log lines are kept verbatim.
@@ -40,25 +35,15 @@ const ts = require('./traderSettingsService');
 const { encrypt } = require('../utils/crypto');
 const exchangeService = require('./exchangeService');
 const exchanges = require('./exchanges');
+const KP = require('./autotrade/keyPermissions');
 const { PyError, pyGet, pyTruthy, isDict, pyFloat, errStr, pySlice, pyStr } = require('./exchanges/pyCompat');
 const { pyRound } = require('../strategies/common/pyround');
 
 const EXCHANGES = Object.freeze(['bybit', 'bingx', 'binance', 'okx']);   // miniapp_api._EXCHANGES
 const TEST_TIMEOUT_S = 20;              // asyncio.wait_for(_test_exchange(...), 20)
-const PERMISSION_TIMEOUT_S = 8;         // D15: the permission read (keeps the request under the app's 30 s)
-const BINANCE_SAPI_URL = 'https://api.binance.com';
-const BINGX_WITHDRAW_CODE = 5;          // BingX api permission codes: 1 spot, 2 read, 3 perpetual, 4 universal transfer, 5 withdraw
-
-const D15_MESSAGES = Object.freeze({
-  withdraw: {
-    ru: 'Ключ с правом вывода средств не принимается. Создайте на бирже новый API-ключ без права вывода (только торговля фьючерсами) и подключите его.',
-    en: 'A key with withdrawal permission is not accepted. Create a new API key on the exchange without withdrawal permission (futures trading only) and connect it.',
-  },
-  unknown: {
-    ru: 'Не удалось проверить права ключа на бирже — ключ не сохранён. Попробуйте ещё раз через минуту.',
-    en: 'Could not check the key permissions on the exchange — the key was not saved. Try again in a minute.',
-  },
-});
+const PERMISSION_TIMEOUT_S = KP.PERMISSION_TIMEOUT_S;   // D15: the permission read (keeps the request under the app's 30 s)
+const BINANCE_SAPI_URL = KP.BINANCE_SAPI_URL;
+const D15_MESSAGES = KP.MESSAGES;
 
 const D = { log: null, registry: null, resetAuthFailures: null };
 const log = () => D.log || require('../utils/logger');
@@ -171,94 +156,15 @@ async function testExchange(ex, key, secret, passphrase, demo, deps = {}) {
   return instanceOf('okx', deps).testConnection(key, secret, passphrase);
 }
 
-// ── D15: the key's own permissions ───────────────────────────────────────
-
-const WITHDRAW_RE = /withdraw/i;
-
-/** Bybit /v5/user/query-api answer → verdict. */
-function bybitVerdict(resp) {
-  if (!isDict(resp) || resp.retCode !== 0) return { verdict: 'unknown', reason: 'retCode' };
-  const res = resp.result;
-  if (!isDict(res) || !isDict(res.permissions)) return { verdict: 'unknown', reason: 'no permissions' };
-  for (const names of Object.values(res.permissions)) {
-    if (names === null) continue;
-    if (!Array.isArray(names)) return { verdict: 'unknown', reason: 'permissions shape' };
-    if (names.some((n) => typeof n !== 'string')) return { verdict: 'unknown', reason: 'permissions shape' };
-    if (names.some((n) => WITHDRAW_RE.test(n))) return { verdict: 'withdraw', reason: 'Withdraw' };
-  }
-  return { verdict: 'ok', reason: '' };
-}
-
-/** BingX /openApi/v1/account/apiPermissions answer → verdict. */
-function bingxVerdict(resp) {
-  if (!isDict(resp) || resp.code !== 0) return { verdict: 'unknown', reason: 'code' };
-  const data = resp.data;
-  if (!isDict(data) || !Array.isArray(data.permissions)) return { verdict: 'unknown', reason: 'no permissions' };
-  for (const p of data.permissions) {
-    if (typeof p === 'number') {
-      if (p === BINGX_WITHDRAW_CODE) return { verdict: 'withdraw', reason: '5' };
-    } else if (typeof p === 'string') {
-      if (p.trim() === String(BINGX_WITHDRAW_CODE) || WITHDRAW_RE.test(p)) return { verdict: 'withdraw', reason: p };
-    } else {
-      return { verdict: 'unknown', reason: 'permissions shape' };
-    }
-  }
-  return { verdict: 'ok', reason: '' };
-}
-
-/** Binance /sapi/v1/account/apiRestrictions answer → verdict. */
-function binanceVerdict(resp) {
-  if (!isDict(resp)) return { verdict: 'unknown', reason: 'shape' };
-  if (resp.enableWithdrawals === true) return { verdict: 'withdraw', reason: 'enableWithdrawals' };
-  if (resp.enableWithdrawals === false) return { verdict: 'ok', reason: '' };
-  return { verdict: 'unknown', reason: 'no enableWithdrawals' };
-}
-
-/** OKX /api/v5/account/config answer → verdict. */
-function okxVerdict(resp) {
-  if (!isDict(resp) || resp.code !== '0' || !Array.isArray(resp.data) || !resp.data.length) return { verdict: 'unknown', reason: 'code' };
-  const perm = isDict(resp.data[0]) ? resp.data[0].perm : undefined;
-  if (typeof perm !== 'string') return { verdict: 'unknown', reason: 'no perm' };
-  const parts = perm.split(',').map((s) => s.trim().toLowerCase());
-  if (parts.includes('withdraw')) return { verdict: 'withdraw', reason: 'withdraw' };
-  return { verdict: 'ok', reason: '' };
-}
-
-/** Binance: a signed GET on the spot API host with the trader's own signing (timestamp offset, recvWindow). */
-async function binanceRestrictions(inst, key, secret) {
-  const [qs, headers] = inst._buildQuery(key, secret, {});
-  const resp = await inst.rt.transport({
-    method: 'GET', url: `${BINANCE_SAPI_URL}/sapi/v1/account/apiRestrictions?${qs}`, headers, timeoutMs: PERMISSION_TIMEOUT_S * 1000,
-  });
-  // fail-closed: only a 200 answer counts (an error page never reads as "no withdrawals")
-  if (Number(resp.status) !== 200) throw new PyError('HTTPError', `HTTP ${resp.status}`);
-  const { parseJsonPy } = require('./exchanges/transport');
-  return parseJsonPy(resp.text);
-}
+// ── D15: the key's own permissions (one implementation: services/autotrade/keyPermissions.js) ──
 
 /**
  * checkWithdrawPermission(ex, {apiKey, apiSecret, passphrase, demo}) → {verdict: 'ok'|'withdraw'|'unknown', reason}.
  * Any error, timeout or unexpected answer → 'unknown' (the caller refuses the key).
  */
-async function checkWithdrawPermission(ex, creds, deps = {}) {
+function checkWithdrawPermission(ex, creds, deps = {}) {
   const timeoutS = deps.permissionTimeoutS === undefined || deps.permissionTimeoutS === null ? PERMISSION_TIMEOUT_S : deps.permissionTimeoutS;
-  const key = creds.apiKey;
-  const secret = creds.apiSecret;
-  const run = async () => {
-    if (ex === 'bybit') {
-      const session = instanceOf('bybit', deps)._getSession(key, secret, Boolean(creds.demo));
-      return bybitVerdict(await session._submit('GET', `${session.endpoint}/v5/user/query-api`, {}, true));
-    }
-    if (ex === 'bingx') return bingxVerdict(await instanceOf('bingx', deps)._request('GET', '/openApi/v1/account/apiPermissions', key, secret));
-    if (ex === 'binance') return binanceVerdict(await binanceRestrictions(instanceOf('binance', deps), key, secret));
-    if (ex === 'okx') return okxVerdict(await instanceOf('okx', deps)._request('GET', '/api/v5/account/config', key, secret, creds.passphrase || ''));
-    return { verdict: 'unknown', reason: 'exchange' };
-  };
-  try {
-    return await waitFor(run, timeoutS);
-  } catch (e) {
-    return { verdict: 'unknown', reason: e && e.isTimeout ? 'timeout' : String((e && (e.pyType || e.name)) || 'error') };
-  }
+  return KP.checkPermissions(ex, creds, { registry: registryOf(deps), timeoutS });
 }
 
 /** auto_trade.reset_auth_failures(uid, ex): the auth breaker of the auto-trade registry (best effort, like the bot). */
@@ -348,6 +254,6 @@ function removeKeys(user, ex, deps = {}) {
 module.exports = {
   EXCHANGES, TEST_TIMEOUT_S, PERMISSION_TIMEOUT_S, BINANCE_SAPI_URL, D15_MESSAGES,
   configure, keyHint, exchangeKeys, okxPassphrase, writeKeys, clearKeys, testExchange, checkWithdrawPermission,
-  connectKeys, removeKeys, waitFor,
-  _verdicts: { bybitVerdict, bingxVerdict, binanceVerdict, okxVerdict },
+  connectKeys, removeKeys, waitFor, resetAuthFailures,
+  _verdicts: KP.verdicts,
 };
