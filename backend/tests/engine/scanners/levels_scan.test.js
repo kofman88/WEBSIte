@@ -1,6 +1,6 @@
 /**
  * LEVELS scanner differential replay: the bot's REAL MidScanner._cycle() (scanner_mid.py) ran
- * 12 consecutive cycles over the golden candles with 14 users (py/levels_scan.py →
+ * 12 consecutive cycles over the golden candles with 15 users (py/levels_scan.py →
  * levels_fixtures/scan.json.gz); the JS MidScanner replays the same script (users, clock,
  * trend / regime / momentum / WS cache seeds, bar-close triggers, settings mutations) on the
  * site's trader_settings / signal_trades tables and must reproduce, cycle by cycle:
@@ -188,7 +188,7 @@ async function replay() {
     for (const sym of FIX.symbols) {
       if (FIX.ws_missing.includes(sym)) continue;
       for (const tf of FIX.meta.ws_tfs) {
-        const f = H.frameAt(sym, tf, cyc.ts, 300);
+        const f = H.frameAt(sym, tf, cyc.ts, Object.prototype.hasOwnProperty.call(FIX.ws_short || {}, sym) ? FIX.ws_short[sym] : 300);
         if (f) candleCache.setCandles(sym, tf, f, FIX.cache_ttl);
       }
     }

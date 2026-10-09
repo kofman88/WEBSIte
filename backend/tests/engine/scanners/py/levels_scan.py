@@ -3,7 +3,7 @@ backend/tests/engine/scanners/levels_scan.test.js.
 
 The REAL MidScanner._cycle() runs over consecutive cycles on the golden candles
 (tests/golden/candles) with the fakes of levels_fakes.py: a pinned clock, a fake REST fetcher,
-a fake Telegram bot, a fresh bot-schema SQLite (database.init_db) holding 12 users of different
+a fake Telegram bot, a fresh bot-schema SQLite (database.init_db) holding 15 users of different
 plans and settings (free / Pro / admin, LONG / SHORT / BOTH jobs, 15m / 1h / 4h, min_quality,
 quiet hours, lite cards, multi-strategy, auto-trade on/off with a canned execute_auto_trade,
 genome optimizer params, HTF filter, high-WR mode, notify off, a legacy BOTH job that gets the
@@ -129,6 +129,13 @@ USERS = [
     (1014, dict(PRO, strategy="LEVELS", long_active=True, short_active=True, long_tf="15m", short_tf="15m",
                 long_interval=900, short_interval=900, lang="en", min_quality=4, quiet_start=22, quiet_end=7,
                 long_cfg='{"tp1_rr": 2.5, "tp2_rr": 4.0, "tp3_rr": 6.0, "_sparse": true}')),
+    # 1015: 1001 on BingX, where DOGEVL08 is not listed (sym_unavail)
+    (1015, dict(PRO, strategy="LEVELS", long_active=True, short_active=True, long_tf="1h", short_tf="1h",
+                long_interval=3600, short_interval=3600, lang="ru", send_chart_enabled=False, trade_exchange="bingx")),
+    # 1016: 1014 with trend_only (the counter-trend candidates are rejected)
+    (1016, dict(PRO, strategy="LEVELS", long_active=True, short_active=True, long_tf="15m", short_tf="15m",
+                long_interval=900, short_interval=900, lang="en", min_quality=4, trend_only=True,
+                long_cfg='{"tp1_rr": 2.5, "tp2_rr": 4.0, "tp3_rr": 6.0, "_sparse": true}')),
 ]
 
 TREND_UP = {"15m": "LONG", "1H": "LONG", "4H": "LONG", "1D": "RANGE"}
@@ -152,7 +159,7 @@ CYCLES = [
          momentum={"relaxed_for": 5400, "symbol": "BTC", "reason": "BTC pump +2.40% за 1H"}),
     dict(t="2025-12-31T14:00:20", trend=TREND_DN, strength={"15m": 66}, regime="trending_down", fund="",
          ws=[["BTC-USDT-SWAP", "1H"]], momentum=None,
-         mutate=[[1001, "long_cfg", '{"max_dist_pct": 3.0, "_sparse": true}']]),
+         mutate=[[1001, "long_cfg", '{"max_dist_pct": 3.0, "_sparse": true}'], [1015, "long_cfg", '{"max_dist_pct": 3.0, "_sparse": true}']]),
     dict(t="2025-12-31T14:45:20", trend=TREND_UP, strength={"15m": 90, "1H": 80, "4H": 71}, regime="trending_up",
          fund="", ws=[["BTC-USDT-SWAP", "15m"]], momentum=None),
     dict(t="2025-12-31T16:15:20", trend=TREND_UP, strength={"15m": 55}, regime="high_vol", fund="",
@@ -171,7 +178,8 @@ WS_MISSING = {"SYNRG08-USDT-SWAP", "SYNVL06-USDT-SWAP"}   # never in the WS cach
 REST_MISSING = {"SYNRG08-USDT-SWAP"}                       # REST returns nothing either
 BLACKLIST = [["SYNUP03-USDT-SWAP", "LEVELS", T("2026-01-10T00:00:00")]]
 BOT_FAIL = {1012, 1014}   # TelegramForbiddenError on send (1014: a signal card → SKIP not_delivered)
-UNAVAIL = {"bingx": {"SYNDN02-USDT-SWAP", "SYNRG05-USDT-SWAP"}, "bybit": {"SYNUP06-USDT-SWAP"}}
+UNAVAIL = {"bingx": {"SYNDN02-USDT-SWAP", "SYNRG05-USDT-SWAP", "DOGEVL08-USDT-SWAP"}, "bybit": {"SYNUP06-USDT-SWAP"}}
+WS_SHORT = {"SYNRG07-USDT-SWAP": 60}   # a short WS frame (≥ 50 bars, too short for the indicator)
 
 
 async def main():
@@ -290,7 +298,7 @@ async def main():
             if sym in F_WS_MISSING:
                 continue
             for tf in WS_TFS:
-                df = F.frame_at(sym, tf, cyc["ts"], 300)
+                df = F.frame_at(sym, tf, cyc["ts"], WS_SHORT.get(sym, 300))
                 if df is not None:
                     await cache.set_candles(sym, "1D" if tf == "1D" else tf, df, Config.CACHE_TTL)
         for inst, tf in cyc["ws"]:
@@ -344,7 +352,7 @@ async def main():
         "at_result": {str(k): v for k, v in AT_RESULT.items()}, "balances": {str(k): v for k, v in BALANCES.items()},
         "opt_params": [[k[0], k[1], v] for k, v in OPT_PARAMS.items()],
         "exchange_symbols": natives, "blacklist": BLACKLIST, "bot_fail": sorted(BOT_FAIL),
-        "ws_missing": sorted(F_WS_MISSING), "rest_missing": sorted(REST_MISSING),
+        "ws_missing": sorted(F_WS_MISSING), "rest_missing": sorted(REST_MISSING), "ws_short": WS_SHORT,
         "cache_ttl": Config.CACHE_TTL, "cache_max_keys": Config.CACHE_MAX_KEYS,
         "start_t": CYCLES[0]["ts"] - 600,
         "kv_baseline": kv_baseline,
