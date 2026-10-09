@@ -193,11 +193,13 @@ const SMC_CT_BUTTON = '✅ Разрешить контр-тренд (на сво
  *   userApiKeys(user, exchange) → {apiKey, apiSecret}; getBalance(user, exchange) → Promise<number|null>;
  *   fundBlock() → Promise<string>; smartPromptQuota(uid); metrics { record(name, value, tags) };
  *   isQuiet(user, now); orderLinkId(tradeId, uid, exchange); randint(a, b);
- *   now() (unix s), mono() (ms), sleep(ms), log, builderLog (smc/signal_builder lines; default log), env.
+ *   now() (unix s), mono() (ms), sleep(ms), log, builderLog / analyzerLog (smc/signal_builder /
+ *   smc/analyzer lines; default log), env.
  */
 function createSmcScanner(deps = {}) {
   const log = deps.log || defaultLog;
   const builderLog = deps.builderLog || log;     // smc/signal_builder's module logger
+  const analyzerLog = deps.analyzerLog || log;   // smc/analyzer's module logger
   const now = deps.now || nowSec;
   const mono = deps.mono || monoMs;
   const sleep = deps.sleep || realSleep;
@@ -754,7 +756,7 @@ function createSmcScanner(deps = {}) {
           const tA = mono();
           let analysis;
           try {
-            analysis = engineOf().analyze(symbol, dfHtf, dfMtf, dfLtf, analyzerFor(key));
+            analysis = engineOf().analyze(symbol, dfHtf, dfMtf, dfLtf, analyzerFor(key), analyzerLog);
             try {
               analysis.squeeze_score = engineOf().computeSqueezeScore(dfMtf);
             } catch (e) {

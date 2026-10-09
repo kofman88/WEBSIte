@@ -40,8 +40,11 @@ function last(arr, n) {
  * SMCAnalyzer(config).analyze(symbol, df_htf, df_mtf, df_ltf=None) → analysis dict:
  * {symbol, structure, liquidity, ob, fvg, pd_zone, error, atr, current_price,
  *  current_high, current_low, volume_ok, vol_ratio, vol_last, vol_avg}.
+ * `log` (optional, not a bot parameter): logging.getLogger("CHM.SMC.Analyzer") — the bot's
+ * WARNING of a failed ATR / volume step and ERROR "{symbol}: SMC analyze error: {e}" (the
+ * error text is the JS exception's). Silent without it (golden, backtests).
  */
-function analyze(symbol, dfHtf, dfMtf, dfLtf = null, cfg = smcConfig()) {
+function analyze(symbol, dfHtf, dfMtf, dfLtf = null, cfg = smcConfig(), log = null) {
   const result = {
     symbol,
     structure: {},
@@ -85,6 +88,7 @@ function analyze(symbol, dfHtf, dfMtf, dfLtf = null, cfg = smcConfig()) {
       const atr = S.atrEmaSpan(dfMtf.h, dfMtf.l, dfMtf.c, 14);
       result.atr = atr.length > 0 ? atr[atr.length - 1] : 0.0;
     } catch {
+      if (log) log.warning('analyzer.analyze() unhandled exception');   // exc_info: the traceback only
       result.atr = 0.0;
     }
 
@@ -107,6 +111,7 @@ function analyze(symbol, dfHtf, dfMtf, dfLtf = null, cfg = smcConfig()) {
         result.volume_ok = ratio >= volMultDefault;
       }
     } catch {
+      if (log) log.warning('analyzer.analyze() unhandled exception');
       result.volume_ok = false;
     }
 
@@ -131,6 +136,7 @@ function analyze(symbol, dfHtf, dfMtf, dfLtf = null, cfg = smcConfig()) {
     result.pd_zone = pdZone;
   } catch (e) {
     result.error = e && e.message !== undefined ? String(e.message) : String(e);
+    if (log) log.error(`${symbol}: SMC analyze error: ${result.error}`);
   }
   return result;
 }

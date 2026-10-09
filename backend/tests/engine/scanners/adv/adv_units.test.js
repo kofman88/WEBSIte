@@ -92,6 +92,21 @@ describe('config parsers vs the bot (adv_units.py)', () => {
     });
   });
 
+  describe('smc analyze: the "CHM.SMC.Analyzer" lines', () => {
+    const { analyze } = req('../../../../strategies/smc/analyzer.js');
+    it('a failing analysis logs ERROR "{symbol}: SMC analyze error: …" (the text after is the JS exception) and sets error', () => {
+      const alog = recorder('CHM.SMC.Analyzer');
+      const a = analyze('SYNX-USDT-SWAP', null, null, null, smcConfig(), alog);
+      expect(typeof a.error).toBe('string');
+      expect(alog.lines.length).toBe(1);
+      expect(alog.lines[0].slice(0, 2)).toEqual(['CHM.SMC.Analyzer', 'ERROR']);
+      expect(alog.lines[0][2].startsWith('SYNX-USDT-SWAP: SMC analyze error: ')).toBe(true);
+    });
+    it('silent without a logger (golden / backtests)', () => {
+      expect(() => analyze('SYNX-USDT-SWAP', null, null, null, smcConfig())).not.toThrow();
+    });
+  });
+
   for (const v of FIX.vectors) {
     describe(`input ${JSON.stringify(v.input)}`, () => {
       it('_sparse_merge(TradeCfg(), s)', () => {
