@@ -431,3 +431,15 @@ re-raise, [SMC-RESTART-ON-STOP]). A loop stopped while it waits ends at once and
 Every Python generator runs the bot's own code with CPython 3.11 from the bot checkout
 (read-only): `cd <bot> && PYTHONDONTWRITEBYTECODE=1 BOT_TOKEN_CHM=test:token ADMIN_IDS=123
 <py311> <site>/backend/tests/engine/…/<generator>`, then `rm -f <bot>/signal_registry.json`.
+
+### Not wired yet (later milestones)
+
+* Auto-trade (`execute_auto_trade`, API keys, balances for the position line): M13b, through
+  `deps.autoTrade`; the BE-monitor body of `MidScanner._be_monitor_loop` (only its hint-throttle
+  restore runs): M15.
+* The cancellation is cooperative: a cycle stops at its next checkpoint (between symbols / steps),
+  not inside an in-flight REST call or an analysis; the analysis runs inline in the worker thread,
+  so the LEVELS 10 s analyze timeout applies only to an `analysisExecutor` that returns a promise.
+* The scanners' `@username` in logs falls back to the user id (trader_settings has no Telegram
+  username); the LEVELS expiry notice keeps the bot's text (payment address from
+  `PAYMENT_ADDRESS`), which the site's billing (M18) is expected to replace.
