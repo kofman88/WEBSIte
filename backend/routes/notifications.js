@@ -42,6 +42,13 @@ router.post('/:id/read', (req, res, next) => {
   } catch (err) { handleErr(err, res, next); }
 });
 
+router.delete('/:id/actions', (req, res, next) => {
+  try {
+    const id = z.coerce.number().int().positive().parse(req.params.id);
+    res.json(notifications.clearActions(req.userId, id));
+  } catch (err) { handleErr(err, res, next); }
+});
+
 router.delete('/:id', (req, res, next) => {
   try {
     const id = z.coerce.number().int().positive().parse(req.params.id);

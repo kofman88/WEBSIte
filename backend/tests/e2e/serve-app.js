@@ -24,6 +24,10 @@
  *
  * stdin commands (one per line), answered on stdout:
  *   new-signal   a new delivered BTC signal (row + `signal` notification → SSE `notification` + `signal`)
+ *   reminder     the engagement 3d reminder of the smoke user through services/retention/engagement
+ *                (a `reminder` notification with the pay link and the opt-out button → SSE
+ *                `notification`), answered `reminder ok <sent> optout=<reminders_optout>`;
+ *                `optout?` answers `optout <reminders_optout>` only
  *   mail-link reset|verify <email>
  *                the account e-mail as the site sends it (authService → emailService → the outbox; for
  *                verify the address is first marked unconfirmed again): the link of its button is
@@ -221,6 +225,18 @@ function oauthLink(email, returnTo) {
       if (cmd === 'new-signal') {
         const id = await S.deliver({ sym: 'BTC-USDT-SWAP', dir: 'SHORT', ageH: 0 });
         process.stdout.write(`new-signal ok ${id}\n`);
+      } else if (cmd === 'reminder' || cmd === 'optout?') {
+        const ts = require('../../services/traderSettingsService');
+        ts.invalidateCache();
+        const u = ts.get(S.uid);
+        if (cmd === 'reminder') {
+          Object.assign(u, { sub_status: 'active', sub_expires: Date.now() / 1000 + 2 * 86400, reminder_3d_sent: false, last_reminder_at: 0 });
+          ts.save(u);
+          const sent = await require('../../services/retention/engagement').sendReminder(u, '3d');
+          process.stdout.write(`reminder ok ${sent} optout=${u.reminders_optout}\n`);
+        } else {
+          process.stdout.write(`optout ${u.reminders_optout}\n`);
+        }
       } else if (/^mail-link (reset|verify) \S+@\S+$/.test(cmd)) {
         const [, kind, email] = cmd.split(' ');
         try {

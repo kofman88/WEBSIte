@@ -354,7 +354,9 @@ describe('live events: the SPA subscribes to GET /api/app/events with its JWT', 
     expect(js).toContain('"Authorization": "Bearer " + Auth.access()');
     expect(js).not.toContain('new EventSource');
     expect(js).toContain('var REFRESH_ON = { signal: 1, progress: 1, trade: 1 };');
-    expect(js).toContain('if (S.me) Live.start();');
+    expect(js).toContain('if (S.me) { Live.start(); refreshUnread(); }');
+    // a `notification` event refreshes the inbox badge (or the open inbox) — M12b
+    expect(js).toContain('if (data.length && name === "notification") { if (IB.open) loadInbox(false); else refreshUnread(); }');
     expect(js).toMatch(/function resetState\(\) \{\n {4}Live\.stop\(\);/);
   });
 

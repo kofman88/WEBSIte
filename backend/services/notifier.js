@@ -99,7 +99,8 @@ async function dispatch(userId, opts) {
 
   // 1. In-app (always)
   let notificationId = null;
-  try { notificationId = Number(notifications.create(userId, { type, title, body, link })); }
+  const actions = data && typeof data === 'object' ? data.actions : null;   // the bot's keyboard (M12b inbox)
+  try { notificationId = Number(notifications.create(userId, { type, title, body, link, actions })); }
   catch (err) { logger.warn('in-app notification failed', { userId, type, err: err.message }); }
 
   // 1b. Live push to open SSE streams (best-effort; polling is the baseline — D2)

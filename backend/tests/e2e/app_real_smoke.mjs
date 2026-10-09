@@ -12,7 +12,10 @@
  * Steps (390×844 phone viewport): login screen → wrong password → login (JWT) → Home → the SSE
  * stream GET /api/app/events opens with the Bearer token → Signals list → a new delivered signal
  * (serve-app `new-signal`) reaches the open list through SSE without a reload → Detail with the
- * server chart drawn on the canvas → browser Back → Analyze BTC (chart) → Profile.
+ * server chart drawn on the canvas → browser Back → Analyze BTC (chart) → Profile → the inbox (M12b):
+ * the bell counts the unread notifications, an engagement reminder (serve-app `reminder`) reaches
+ * the badge through SSE, opening the inbox marks everything read, the opt-out button answers with
+ * the bot's text and flips reminders_optout, browser Back closes the inbox.
  * Fails on any console error, page error, failed request or unexpected HTTP error. Requests to other
  * hosts (Google Fonts) are answered locally with an empty body, so nothing leaves the machine.
  */
@@ -168,6 +171,42 @@ async function main() {
     ok((await genome).status() === 200, 'GET genome');
     await page.waitForSelector('.genome', { timeout: 8000 });     // the screen's last request has landed
     await shot('06-profile');
+
+    // 7. Inbox (M12b): bell + unread badge, a reminder through SSE, read-all, the opt-out button, Back
+    await page.waitForSelector('#inbox-btn:not([hidden])', { timeout: 8000 });
+    await page.waitForSelector('#inbox-count:not([hidden])', { timeout: 8000 });
+    const unread0 = Number(await page.innerText('#inbox-count'));
+    ok(unread0 === 5, `bell counts the 5 delivered signal cards (got ${unread0})`);
+    srv.stdin.write('reminder\n');
+    ok(/^reminder ok true optout=false$/.test(await waitLine(/^reminder ok/)), 'engagement reminder sent');
+    await page.waitForFunction((n) => document.querySelector('#inbox-count').textContent === String(n + 1), unread0, { timeout: 15000 });
+    ok(true, 'SSE `notification` raised the badge without a reload');
+    const readAll = page.waitForResponse((r) => r.url().endsWith('/api/notifications/read-all'), { timeout: 10000 });
+    await page.click('#inbox-btn');
+    await page.waitForSelector('#inbox .inbox-item', { timeout: 10000 });
+    ok((await readAll).status() === 200, 'opening the inbox marks everything read');
+    await page.waitForSelector('#inbox-count', { state: 'hidden', timeout: 8000 });
+    ok(await page.locator('#inbox .inbox-item').count() === unread0 + 1, 'inbox lists every notification');
+    const first = page.locator('#inbox .inbox-item').first();
+    ok((await first.locator('.inbox-title').innerText()).includes('Через 3 дня закончится твой доступ'), 'newest first: the reminder');
+    ok((await first.locator('.inbox-body').innerText()).includes('🆔 '), 'reminder body as text');
+    ok(await first.locator('button', { hasText: 'Оплатить — Написать админу' }).count() === 1, 'pay link button');
+    ok(await page.evaluate(() => history.state && history.state.chm) === 'inbox', 'inbox pushed a history entry');
+    await shot('07-inbox');
+    const optReq = page.waitForResponse((r) => r.url().endsWith('/api/app/engagement/optout'), { timeout: 10000 });
+    await first.locator('button', { hasText: 'Не присылать напоминания' }).click();
+    const optRes = await optReq;
+    ok(optRes.status() === 200 && (await optRes.json()).ok === true, 'opt-out route answers ok');
+    const optBody = JSON.parse(optRes.request().postData() || '{}');
+    ok(/^engagement_optout:\d+$/.test(optBody.action || ''), 'the button sends its callback data');
+    await page.waitForSelector('#inbox .inbox-item .trade-answer', { timeout: 8000 });
+    ok((await first.locator('.trade-answer').innerText()).includes('Напоминания отключены'), "the bot's answer under the message");
+    srv.stdin.write('optout?\n');
+    ok(/^optout true$/.test(await waitLine(/^optout (true|false)$/)), 'reminders_optout saved');
+    await shot('08-inbox-optout');
+    await page.goBack();
+    await page.waitForSelector('#inbox', { state: 'hidden', timeout: 8000 });
+    ok(await page.locator('.user-card').count() === 1, 'Back closed the inbox, Profile restored');
 
     ok(errors.length === 0, `0 console / page / request errors (got ${errors.length})`);
     for (const e of errors) console.error(`  ${e}`);

@@ -294,6 +294,7 @@
   // of ours to go back to (deep links start with none → step back in place).
   var NAV = { depth: 0, applying: false };
   function navState() {
+    if (IB.open) return { chm: "inbox", tab: S.tab, sub: S.sub, d: NAV.depth };
     if (S.detail) return { chm: "detail", id: S.detail.id, tab: S.tab, sub: S.sub, d: NAV.depth };
     if (S.sub) return { chm: "sub", sub: S.sub, d: NAV.depth };
     return { chm: "tab", tab: S.tab, d: NAV.depth };
@@ -322,6 +323,8 @@
     try {
       st = st && st.chm ? st : { chm: "tab", tab: S.tab, d: 0 };
       NAV.depth = num(st.d) || 0;
+      if (st.chm === "inbox") { if (!IB.open) openInbox(true); return; }
+      if (IB.open) { closeInbox(true); render(); }
       if (st.chm === "detail") {
         var sig = S.sigById[st.id];
         if (sig) { if (st.sub) { S.tab = "profile"; S.sub = st.sub; syncTabs(); } openDetail(sig); return; }
@@ -337,6 +340,7 @@
   }
   function goBack() {
     if (NAV.depth > 0) { hap("light"); history.back(); return; }
+    if (IB.open) { closeInbox(); navReplace(); return; }
     // Deep link (no history entry of ours yet): step back in place.
     if (S.detail) { closeDetail(); navReplace(); return; }
     if (S.sub && S.sub !== "settings") { openSub("settings", true); return; }
@@ -428,7 +432,7 @@
     var tok = Auth.access();
     if (tok) headers["Authorization"] = "Bearer " + tok;
     if (opts.body) headers["Content-Type"] = "application/json";
-    return fetch(API_BASE + path, {
+    return fetch((opts.base || API_BASE) + path, {
       method: opts.method || (opts.body ? "POST" : "GET"),
       headers: headers,
       body: opts.body ? JSON.stringify(opts.body) : undefined,
@@ -524,6 +528,7 @@
 
   function setTab(tab, opts) {
     if (S.detail) closeDetail(true);
+    if (IB.open) closeInbox(true);
     if (S.tab !== tab || S.sub) hap("select");
     S.tab = tab;
     S.sub = null;
@@ -609,6 +614,8 @@
   function resetState() {
     Live.stop();
     if (S.detail) closeDetail(true);
+    if (IB.open) closeInbox(true);
+    IB.list = []; IB.answers = {};
     S.me = null; S.dash = null; S.dashAt = 0; S.dashLoading = false;
     S.sigs = {}; S.sec = {}; S.genome = null; S.sigById = {}; S.sub = null;
     S.an = { symbol: "", strategy: "AUTO", loading: false, startedAt: 0, result: null, error: null };
@@ -616,6 +623,7 @@
     S.exForm = null; S.exRemoveArm = null;
     chForm = null;
     NAV.depth = 0;
+    setUnread(0);
   }
   function showLogin(notice) {
     if (!S.auth) S.auth = { mode: "login", busy: false, pending: null, remember: true, email: "", err: null, notice: null };
@@ -3504,7 +3512,7 @@
       if (!S.dash) S.dash = { stats: {}, market: {}, recent: [], trend: {} };
     }).then(function () {
       if (S.me && !S.detail && view.querySelector(".fatal") === null) render();
-      if (S.me) Live.start();
+      if (S.me) { Live.start(); refreshUnread(); }
     });
   }
 
@@ -3562,6 +3570,7 @@
         else if (field === "retry" && /^\d+$/.test(val)) retryMs = Math.max(1000, Number(val));
       });
       if (data.length && REFRESH_ON[name]) refreshSoon();
+      if (data.length && name === "notification") { if (IB.open) loadInbox(false); else refreshUnread(); }
     }
     function start() {
       if (DEMO || ctrl || !supported() || !Auth.access()) return;
@@ -3603,21 +3612,201 @@
     return { start: start, stop: stop };
   })();
 
+  // ---------------------------------------------------------------------------
+  // INBOX (M12b) — the bot's chat for a site user: every engine message (reports, challenge,
+  // advice, reminders, drip, upgrade prompts, trend, trades) with its buttons. GET
+  // /api/notifications (newest first, 30 a page); opening the inbox marks everything read. A
+  // button is a site path / https link or a callback the server stored with its route
+  // (services/notificationsService.normalizeActions: engagement/optout, entry-advice/on|keep);
+  // the answer is the bot's alert text. Bodies are the bot's HTML, shown as text (textContent).
+  // ---------------------------------------------------------------------------
+  var INBOX_PAGE = 30;
+  var INBOX_ROUTES = [/^engagement\/optout$/, /^entry-advice\/(?:on|keep)$/];
+  var IB = { open: false, list: [], loading: false, err: null, more: false, unread: 0, answers: {}, busy: false };
+  var inboxEl = $("#inbox");
+  var siteApi = function (path, opts) { opts = opts || {}; opts.base = "/api/"; return api(path, opts); };
+
+  function setUnread(n) {
+    IB.unread = Math.max(0, num(n) || 0);
+    var b = $("#inbox-count"), btn = $("#inbox-btn");
+    if (!b || !btn) return;
+    btn.hidden = !S.me;
+    b.hidden = IB.unread === 0;
+    b.textContent = IB.unread > 99 ? "99+" : String(IB.unread);
+    btn.setAttribute("aria-label", IB.unread ? "Уведомления: " + IB.unread + " новых" : "Уведомления");
+  }
+  function refreshUnread() {
+    if (!S.me) return;
+    siteApi("notifications/unread-count", { timeout: 15000 }).then(function (d) {
+      setUnread(d && d.count);
+    }).catch(function () { /* the badge waits for the next event */ });
+  }
+  function noteTime(n) {
+    var raw = String((n && n.createdAt) || "");
+    var t = Date.parse(/[zZ]|[+-]\d\d:?\d\d$/.test(raw) ? raw : raw.replace(" ", "T") + "Z");
+    return isFinite(t) ? t / 1000 : null;
+  }
+  function loadInbox(append) {
+    if (IB.loading) return;
+    IB.loading = true; IB.err = null;
+    if (!append) drawInbox();
+    var offset = append ? IB.list.length : 0;
+    siteApi("notifications?limit=" + INBOX_PAGE + "&offset=" + offset, { timeout: 15000 }).then(function (d) {
+      var rows = d && Array.isArray(d.notifications) ? d.notifications : [];
+      IB.list = append ? IB.list.concat(rows) : rows;
+      IB.more = rows.length === INBOX_PAGE;
+      if (!append && IB.list.some(function (n) { return !n.readAt; })) {
+        siteApi("notifications/read-all", { method: "POST", body: {} }).then(function () { setUnread(0); }).catch(function () { /* stays unread */ });
+      } else if (!append) setUnread(0);
+    }).catch(function (e) {
+      IB.err = (e && e.code) || "network";
+    }).then(function () {
+      IB.loading = false;
+      drawInbox();
+    });
+  }
+  function openInbox(fromNav) {
+    if (IB.open) return;
+    if (S.detail) closeDetail(true);
+    IB.open = true; IB.answers = {};
+    S.savedScroll = window.scrollY || 0;
+    view.hidden = true;
+    $("#tabbar").hidden = true;
+    inboxEl.hidden = false;
+    window.scrollTo(0, 0);
+    hap("light");
+    if (!fromNav) navPush();
+    loadInbox(false);
+  }
+  function closeInbox(silent) {
+    if (!IB.open) return;
+    IB.open = false;
+    inboxEl.hidden = true;
+    clear(inboxEl);
+    view.hidden = false;
+    $("#tabbar").hidden = false;
+    if (!silent) { hap("light"); render(); window.scrollTo(0, S.savedScroll); }
+  }
+  // a site path or https link of a notification (its link or a url button)
+  function openNoteLink(url) {
+    if (typeof url !== "string" || !url) return;
+    if (/^https:\/\//i.test(url)) { openExternal(url); return; }
+    if (url.charAt(0) !== "/" || url.charAt(1) === "/" || url.charAt(1) === "\\" || /^\/api(?:\/|$)/i.test(url)) return;
+    var m = /^\/app\/?(?:\?(.*))?$/.exec(url.split("#")[0]);
+    if (!m) { location.href = url; return; }
+    var q = new URLSearchParams(m[1] || "");
+    var tab = q.get("tab") || "home", sec = q.get("sec"), id = q.get("id");
+    if (!sec && tab !== "settings" && SECTION_IDS.indexOf(tab) >= 0) sec = tab;   // ?tab=stats → the Statistics section
+    closeInbox(true);
+    if (tab === "settings" || (sec && SECTION_IDS.indexOf(sec) >= 0)) {
+      S.tab = "profile"; syncTabs();
+      openSub(sec && SECTION_IDS.indexOf(sec) >= 0 ? sec : "settings", true);
+      return;
+    }
+    setTab(/^(home|signals|analyze|profile)$/.test(tab) ? tab : "home");
+    if (id && S.sigById[id]) openDetail(S.sigById[id]);
+  }
+  function pressNoteButton(n, b) {
+    if (IB.busy) return;
+    if (b.kind === "url") { openNoteLink(b.url); return; }
+    var route = b.api && typeof b.api.path === "string" ? b.api.path : "";
+    if (!INBOX_ROUTES.some(function (re) { return re.test(route); })) return;
+    IB.busy = true; hap("light");
+    drawInbox();
+    api(route, { method: "POST", body: { action: String(b.action || "") }, timeout: 20000 }).then(function (d) {
+      var text = d && (d.message || d.text || (d.alert && d.alert.text));
+      IB.answers[n.id] = { text: text ? htmlText(text) : (d && d.ok ? "Готово" : errText(d && d.error)), err: !(d && d.ok) };
+      if (d && d.ok && d.remove_keyboard) {
+        n.actions = null;
+        siteApi("notifications/" + encodeURIComponent(n.id) + "/actions", { method: "DELETE" }).catch(function () { /* shown again next time */ });
+      }
+      hap(d && d.ok ? "success" : "error");
+    }).catch(function (e) {
+      IB.answers[n.id] = { text: errText(e && e.code), err: true };
+    }).then(function () {
+      IB.busy = false;
+      drawInbox();
+    });
+  }
+  function noteBody(n) {
+    var title = String(n.title || "");
+    var text = htmlText(n.body || "").replace(/\s+$/, "");
+    var lines = text.split("\n");
+    if (lines.length && htmlText(lines[0]).trim() === title.trim()) lines.shift();
+    return lines.join("\n").replace(/^\s*\n/, "");
+  }
+  function noteCard(n) {
+    var t = noteTime(n);
+    var card = h("div", { class: "card pad inbox-item" + (n.readAt ? "" : " is-new") },
+      h("div", { class: "inbox-meta" },
+        h("span", { class: "inbox-time", text: t ? fmtDateTime(t) + " · " + ago(t) : "" }),
+        n.readAt ? null : h("span", { class: "inbox-dot", "aria-label": "новое" })),
+      h("div", { class: "inbox-title", text: n.title || "" }));
+    var body = noteBody(n);
+    if (body) card.appendChild(h("p", { class: "inbox-body", text: body }));
+    var btns = [];
+    (Array.isArray(n.actions) ? n.actions : []).forEach(function (row) {
+      (Array.isArray(row) ? row : []).forEach(function (b) {
+        if (!b || !b.label) return;
+        if (b.kind === "url" || (b.kind === "callback" && b.api)) btns.push(b);
+      });
+    });
+    if (!btns.length && n.link) btns.push({ label: "Открыть", kind: "url", url: n.link });
+    if (btns.length) {
+      var wrap = h("div", { class: "stack inbox-actions" });
+      btns.forEach(function (b) {
+        wrap.appendChild(h("button", { class: "btn btn-dark btn-block", type: "button", disabled: IB.busy ? "disabled" : null,
+          onclick: function () { pressNoteButton(n, b); } }, b.label));
+      });
+      card.appendChild(wrap);
+    }
+    var ans = IB.answers[n.id];
+    if (ans) card.appendChild(h("p", { class: "trade-answer" + (ans.err ? " err" : ""), text: ans.text }));
+    return card;
+  }
+  function drawInbox() {
+    if (!IB.open) return;
+    clear(inboxEl);
+    var inner = h("div", { class: "detail-inner" },
+      h("button", { class: "back", type: "button", onclick: goBack }, icon("back"), "Назад"),
+      h("div", { class: "detail-title" }, h("div", { class: "h1", text: "Уведомления" })));
+    if (IB.loading && !IB.list.length) inner.appendChild(h("p", { class: "muted mt16", text: "Загрузка…" }));
+    else if (IB.err && !IB.list.length) {
+      inner.appendChild(h("p", { class: "muted mt16", text: errText(IB.err) }));
+      inner.appendChild(h("button", { class: "btn btn-dark mt16", type: "button", onclick: function () { loadInbox(false); } }, "Повторить", icon("refresh")));
+    } else if (!IB.list.length) {
+      inner.appendChild(h("p", { class: "muted mt16", text: "Здесь появятся отчёты, челлендж, советы и сообщения о сделках — всё, что бот присылает в чат." }));
+    } else {
+      var list = h("div", { class: "stack mt16" });
+      IB.list.forEach(function (n) { list.appendChild(noteCard(n)); });
+      inner.appendChild(list);
+      if (IB.more) {
+        inner.appendChild(h("button", { class: "btn btn-dark btn-block mt16", type: "button", disabled: IB.loading ? "disabled" : null,
+          onclick: function () { loadInbox(true); } }, IB.loading ? "Загрузка…" : "Показать ещё"));
+      }
+    }
+    inboxEl.appendChild(inner);
+  }
+
   function boot() {
     setPlanBadge();
     var tabs = document.querySelectorAll(".tab");
     for (var i = 0; i < tabs.length; i++) {
       tabs[i].addEventListener("click", function (e) { setTab(e.currentTarget.getAttribute("data-tab")); });
     }
-    document.addEventListener("keydown", function (e) { if (e.key === "Escape" && S.detail) goBack(); });
+    document.addEventListener("keydown", function (e) { if (e.key === "Escape" && (S.detail || IB.open)) goBack(); });
     document.addEventListener("visibilitychange", function () {
       if (!document.hidden && S.me && Date.now() - S.dashAt > 60000) refreshDash();
+      if (!document.hidden && S.me && !IB.open) refreshUnread();
     });
+    var ib = $("#inbox-btn");
+    if (ib) ib.addEventListener("click", function () { openInbox(false); });
     window.addEventListener("popstate", function (e) { applyNav(e.state); });
     window.addEventListener("message", onTgMessage);
     var start = QS.get("tab");
     if (start && /^(home|signals|analyze|profile)$/.test(start)) S.tab = start;
     if (start === "settings") { S.tab = "profile"; S.sub = "settings"; }
+    else if (start && SECTION_IDS.indexOf(start) >= 0) { S.tab = "profile"; S.sub = start; }   // the engine's ?tab=stats
     var sec = QS.get("sec");
     if (sec && SECTION_IDS.indexOf(sec) >= 0) { S.tab = "profile"; S.sub = sec; }
     syncTabs();
@@ -3971,11 +4160,36 @@
     }
 
     var mockCh = null;   // [CHALLENGE] демо-состояние
+    // [INBOX] демо-лента: отчёт, совет по входу, напоминание с отпиской, drip
+    function sqlTime(sec) { return new Date(sec * 1000).toISOString().replace("T", " ").slice(0, 19); }
+    var notes = demoEmpty ? [] : [
+      { id: 4, type: "advice", title: "🎯 Тип входа: Уровни", body: "🎯 <b>Тип входа: Уровни</b>\n\nЗа 14 дней <b>6 из 15</b> сигналов Уровни (40%) ушли к цели без отката к входу — лимитный ордер не исполнился бы. Рыночный вход берёт такие движения по чуть худшей цене.\n\nВключить вход по рынку? Действует для автотрейда; выключить можно в Настройки → Риск-менеджмент.", link: "/app/?tab=settings&sec=risk",
+        actions: [[{ label: "Включить вход по рынку", kind: "callback", action: "entry_market_on", api: { method: "POST", path: "entry-advice/on" } }], [{ label: "Оставить лимитный", kind: "callback", action: "entry_market_keep", api: { method: "POST", path: "entry-advice/keep" } }]],
+        readAt: null, createdAt: sqlTime(now - 1500) },
+      { id: 3, type: "report", title: "📊 Итоги недели · 29.09 – 05.10", body: "📊 <b>Итоги недели · 29.09 – 05.10</b>\n\nСигналов: <b>12</b> · закрыто 9\nTP: 6 · SL: 3 · винрейт 66.7%\nИтог: <b>+7.4R</b>", link: "/app/?tab=stats",
+        actions: [[{ label: "📊 Подробнее в приложении", kind: "url", url: "/app/?tab=stats" }]], readAt: null, createdAt: sqlTime(now - 7200) },
+      { id: 2, type: "reminder", title: "⏰ Через 3 дня закончится твой доступ", body: "⏰ <b>Через 3 дня закончится твой доступ</b>\n\nТы пользуешься CHM BREAKER уже несколько недель. Чтобы не потерять сигналы и автотрейд — оформи подписку.\n\n🆔 <code>7107654772</code>", link: "/app/?tab=settings&sec=plan",
+        actions: [[{ label: "✍️ Оплатить — Написать админу", kind: "url", url: "https://t.me/crypto_chm" }], [{ label: "🔕 Не присылать напоминания", kind: "callback", action: "engagement_optout:7107654772", api: { method: "POST", path: "engagement/optout" } }]],
+        readAt: sqlTime(now - 80000), createdAt: sqlTime(now - 86400) },
+      { id: 1, type: "promo", title: "👋 Прошёл первый день в CHM Breaker.", body: "👋 <b>Прошёл первый день в CHM Breaker.</b>\n\nЗа эти сутки бот:\n  • Просканировал 150+ монет\n  • Применил стратегии LEVELS / SMC", link: "/app/?tab=stats",
+        actions: [[{ label: "📊 Мои результаты", kind: "url", url: "/app/?tab=stats" }]], readAt: sqlTime(now - 170000), createdAt: sqlTime(now - 3 * 86400) }
+    ];
     function handle(path, opts) {
       var body = opts.body || {};
       var p = path.split("?")[0];
       var q = new URLSearchParams(path.split("?")[1] || "");
       if (p === "me") return delay(clone(me), 250);
+      if (p === "notifications") {
+        var off = +q.get("offset") || 0, lim = +q.get("limit") || 30;
+        return delay({ notifications: clone(notes.slice(off, off + lim)), unreadCount: notes.filter(function (n) { return !n.readAt; }).length }, 300);
+      }
+      if (p === "notifications/unread-count") return delay({ count: notes.filter(function (n) { return !n.readAt; }).length }, 150);
+      if (p === "notifications/read-all") { notes.forEach(function (n) { if (!n.readAt) n.readAt = sqlTime(Math.floor(Date.now() / 1000)); }); return delay({ updated: 1 }, 150); }
+      var nm = /^notifications\/(\d+)\/actions$/.exec(p);
+      if (nm) { notes.forEach(function (n) { if (String(n.id) === nm[1]) n.actions = null; }); return delay({ updated: 1 }, 150); }
+      if (p === "engagement/optout") return delay({ ok: true, show_alert: true, message: "🔕 Напоминания отключены. Если передумаешь — напиши админу." }, 300);
+      if (p === "entry-advice/on") return delay({ ok: true, prefer_market_entry: true, show_alert: true, remove_keyboard: true, message: "🎯 Вход по рынку включён" }, 300);
+      if (p === "entry-advice/keep") return delay({ ok: true, show_alert: false, remove_keyboard: true, message: "Оставляем лимитный вход" }, 300);
       if (p === "challenge") {                                   // [CHALLENGE] демо
         if (opts.body && !opts.body.preview) { mockCh = { ok: true, available: demoPro, active: true, challenge: { deposit: opts.body.deposit, goal_usd: opts.body.deposit * (1 + (opts.body.goal_kind === "pct" ? opts.body.goal_value / 100 : 0)), goal_profit_usd: opts.body.deposit * 0.25, r_needed: 25, risk_pct: opts.body.risk_pct, leverage: opts.body.leverage, max_trades_day: opts.body.max_trades_day, mode: opts.body.mode, term: opts.body.term, topups_total: 0 },
           plan: { profit_usd: opts.body.deposit * 0.25, r_needed: 25, risk_usd: opts.body.deposit / 100, margin_pct: 13.3, verdict: "ok", warnings: [], days_forecast: 20, hist_r_per_day: 1.2, r_per_day_needed: 0.8 },

@@ -154,6 +154,14 @@ db.exec(`
     if (!cols.includes('admin_read_at')) db.exec("ALTER TABLE support_tickets ADD COLUMN admin_read_at DATETIME");
   } catch (_) {}
 })();
+// M12b: the buttons of an engine notification (the bot's inline keyboard), normalised by
+// notificationsService.normalizeActions — the in-app inbox shows them under the message.
+(function migrateNotificationActions(){
+  try {
+    const cols = db.prepare("PRAGMA table_info('notifications')").all().map((c) => c.name);
+    if (cols.length && !cols.includes('actions')) db.exec('ALTER TABLE notifications ADD COLUMN actions TEXT');
+  } catch (_) {}
+})();
 // Phase B of support: internal notes + canned-response templates +
 // attachments for file uploads. All idempotent.
 (function migrateSupportPhaseB(){
@@ -428,6 +436,7 @@ db.exec(`
     title        TEXT NOT NULL,
     body         TEXT,
     link         TEXT,
+    actions      TEXT,
     read_at      DATETIME,
     created_at   DATETIME DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
