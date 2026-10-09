@@ -173,8 +173,11 @@ function chartPayload(frame, opts = {}, log = null) {
 
   let nBars = feats.bars;
   let entryPosFull = null;
-  if (progress && !isNone(entryTime) && haveTimes) {
-    const etMs = Number(entryTime) * 1000;
+  // pd.Timestamp(created_at, unit="s") outside the ns range (before 1677-09-21 / after 2262-04-11): the
+  // renderer's searchsorted raises OutOfBoundsDatetime, a ValueError it catches → no entry bar
+  const etS = isNone(entryTime) ? NaN : Number(entryTime);
+  if (progress && !isNone(entryTime) && haveTimes && etS >= -9223372036 && etS <= 9223372036) {
+    const etMs = etS * 1000;
     let cnt = 0;
     while (cnt < N && full.t[cnt] <= etMs) cnt++;       // searchsorted(et, side="right")
     entryPosFull = Math.max(0, Math.min(cnt - 1, N - 1));

@@ -25,7 +25,13 @@
 const { levelsStars } = require('../../strategies/levels/stars');
 const { fmtFixed, fmtSigned, fmtPriceDisplay } = require('../../strategies/common/pyfmt');
 const { pyStrip, pyUpper } = require('./pyUnicode');   // CPython 3.11 str.strip() (str.isspace() characters)
-const { pyInt: pyIntStrict } = require('./pycoerce');
+const { pyInt: pyIntStrict, pyFloat } = require('./pycoerce');
+
+const pyFalsy = (v) => v === null || v === undefined || v === false || v === 0 || v === '';
+/** float(x or 0) */
+const floatOr0 = (v) => (pyFalsy(v) ? 0.0 : pyFloat(v));
+/** bool(d) of the ticker answer: None / {} are falsy (a non-dict value counts by its own truthiness). */
+const pyTruthyDict = (d) => (d && typeof d === 'object' ? Object.keys(d).length > 0 : !pyFalsy(d));
 
 const STRATEGIES = Object.freeze(['LEVELS', 'SMC', 'VOLUME']);
 const LABELS = Object.freeze({
@@ -422,7 +428,8 @@ function createAnalyzeShell(deps = {}) {
       status: 200,
       body: {
         ok: true, symbol,
-        price: price ? { price: Number(price.last || 0), change_pct: pyRound(Number(price.change_pct || 0), 2) } : null,
+        // `... if price else None`: an empty dict is falsy; float(x or 0) with Python's float() of a str ("1_000.5")
+        price: pyTruthyDict(price) ? { price: floatOr0(price.last), change_pct: pyRound(floatOr0(price.change_pct), 2) } : null,
         signal, tried: out.tried || [], png: null, ...(chart || {}),
       },
     };

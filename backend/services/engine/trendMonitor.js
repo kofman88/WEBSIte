@@ -325,7 +325,7 @@ function createTrendMonitor(deps = {}) {
           const st = { ...state[tf] };
           const [f, s] = emaPeriods(tf);
           st.ema = `${f}/${s}`;
-          if (Object.prototype.hasOwnProperty.call(strength, tf)) st.strength = Math.trunc(strength[tf]);
+          if (Object.prototype.hasOwnProperty.call(strength, tf)) st.strength = pyInt(strength[tf]);   // int(): nan / inf raise
           out[tf] = st;
         }
       }
