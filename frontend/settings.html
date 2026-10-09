@@ -15,7 +15,7 @@
   <link rel="icon" type="image/svg+xml" href="/favicon.svg"/>
   <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32.png"/>
   <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png"/>
-<script src="/yandex-metrika.js" async></script><noscript><div><img src="https://mc.yandex.ru/watch/108973987" style="position:absolute;left:-9999px" alt=""/></div></noscript>
+<script src="/yandex-metrika.js?webvisor=0" async></script><noscript><div><img src="https://mc.yandex.ru/watch/108973987" style="position:absolute;left:-9999px" alt=""/></div></noscript>
 </head>
 <body>
 <aside class="sidebar" id="sidebar">
@@ -82,7 +82,7 @@
     </div>
     <div class="card max-w-2xl mb-6">
       <h3 class="font-bold mb-4">Промо-код</h3>
-      <div class="flex gap-3"><input placeholder="Введите промо-код" class="flex-1 bg-slate-800/50 border border-slate-700 rounded-xl px-4 py-3 text-white outline-none"/><button type="button" class="px-6 py-3 rounded-xl font-semibold text-white text-sm" style="background:linear-gradient(180deg,#FF7840 0%,#FF5A1F 60%,#C44610 100%);box-shadow:inset 0 1px 1px rgba(255,255,255,.28),inset 0 -1px 3px rgba(0,0,0,.6),0 4px 8px -2px rgba(0,0,0,.6),0 0 0 1px rgba(255,90,31,.35)">Применить</button></div>
+      <div class="flex gap-3"><input placeholder="Введите промо-код" class="flex-1 bg-slate-800/50 border border-slate-700 rounded-xl px-4 py-3 text-white outline-none" style="min-width:0"/><button type="button" class="px-6 py-3 rounded-xl font-semibold text-white text-sm" style="background:linear-gradient(180deg,#FF7840 0%,#FF5A1F 60%,#C44610 100%);box-shadow:inset 0 1px 1px rgba(255,255,255,.28),inset 0 -1px 3px rgba(0,0,0,.6),0 4px 8px -2px rgba(0,0,0,.6),0 0 0 1px rgba(255,90,31,.35)">Применить</button></div>
     </div>
     <div class="card max-w-2xl">
       <h3 class="font-bold mb-4">Реферальная программа</h3>
@@ -206,7 +206,7 @@
           <div class="text-xs text-slate-500 font-mono break-all flex-1"><span class="text-slate-400">Или ключ вручную:</span><div id="tfaSecret" class="mt-1"></div></div>
         </div>
         <div class="text-sm text-slate-300 mb-2">2. Введи 6-значный код из приложения:</div>
-        <div class="flex gap-2 mb-4">
+        <div class="flex flex-wrap gap-2 mb-4">
           <input id="tfaCode" type="text" inputmode="numeric" maxlength="6" placeholder="000000" class="w-32 bg-slate-800/50 border border-slate-700 rounded-xl px-4 py-3 text-white outline-none font-mono tracking-widest text-center"/>
           <button id="tfaConfirmBtn" class="px-6 py-3 rounded-xl font-semibold text-white text-sm" style="background:linear-gradient(180deg,#FF7840 0%,#FF5A1F 60%,#C44610 100%)">Подтвердить</button>
         </div>

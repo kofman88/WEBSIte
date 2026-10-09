@@ -117,7 +117,8 @@ mkdir -p ~/chmup_backend/data
 > правило mod_rewrite: `/?login=1` → 302 на `/app/` (экран входа веб-приложения; туда ведут
 > страницы, требующие входа). То же правило есть в `backend/server.js`, но `/` Apache отдаёт из
 > `public_html` сам, не спрашивая Passenger. Если cPanel перезапишет `.htaccess` своим блоком
-> Passenger, блок `<IfModule mod_rewrite.c>` из репозитория нужно сохранить.
+> Passenger, блок `<IfModule mod_rewrite.c>` из репозитория нужно сохранить. Проверка после деплоя:
+> `curl -sI 'https://chmup.top/?login=1'` → `302`, `Location: …/app/`; `curl -sI 'https://chmup.top/?login=10'` → `200`.
 
 ### Вариант A: .htaccess (Apache + mod_proxy)
 Добавьте в `~/public_html/.htaccess`:

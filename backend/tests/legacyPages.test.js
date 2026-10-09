@@ -4,6 +4,7 @@ import os from 'os';
 import path from 'path';
 import request from 'supertest';
 import { fileURLToPath } from 'url';
+import vm from 'vm';
 
 // Follow-ups of the CSP audit on the legacy pages (frontend/*.html) and the sign-in redirect.
 // What a browser has to show (menus opening, the widget fitting a phone) is checked in Chromium by
@@ -37,8 +38,11 @@ afterAll(() => { fs.rmSync(HOME, { recursive: true, force: true }); });
 
 // ── /?login=1 → the web app's sign-in ─────────────────────────────────────
 // The URL matrix both the Express route and the .htaccess rule are checked against.
-const REDIRECTED = ['/?login=1', '/?login=1&next=/ops.html', '/?next=%2Fops.html&login=1', '/?a=b&login=1&c=d', '/index.html?login=1'];
-const NOT_REDIRECTED = ['/', '/?data=empty', '/?login=0', '/?login=10', '/?xlogin=1', '/?login=1x', '/?login', '/?verify_email=1', '/about.html?login=1', '/pricing/?login=1', '/app/?login=1', '/app/'];
+// (Both lists were also sent to a real Apache 2.4.58 running the .htaccess block: same answers.)
+const REDIRECTED = ['/?login=1', '/?login=1&next=/ops.html', '/?next=%2Fops.html&login=1', '/?a=b&login=1&c=d', '/index.html?login=1',
+  '/?login=1&return=/settings.html', '/?&login=1', '/?login=2&login=1'];
+const NOT_REDIRECTED = ['/', '/?data=empty', '/?login=0', '/?login=10', '/?xlogin=1', '/?login=1x', '/?login', '/?verify_email=1', '/about.html?login=1', '/pricing/?login=1', '/app/?login=1', '/app/',
+  '/?login=', '/?LOGIN=1', '/?login%3D1', '/?foo=login=1', '/?q=a%26login=1', '/?login=1;x=2', '/?reset=abc123', '/settings.html?login=1'];
 
 // mod_rewrite as frontend/.htaccess configures it (per-directory context: the path without its
 // leading slash; %{QUERY_STRING} raw), evaluated with the file's own patterns.
@@ -175,5 +179,83 @@ describe('settings.html: the phone hamburger and the icons', () => {
     const html = read('settings.html');
     // the seven former iconify icons: Telegram, push, e-mail, 2 × wallet, 2 × chevron
     expect(html.match(/<svg aria-hidden="true" viewBox="0 0 24 24" width="\d+" height="\d+" fill="none" stroke="currentColor"[^>]*>/g)).toHaveLength(7);
+  });
+});
+
+// ── Metrika Session Replay (Webvisor) off behind the sign-in ─────────────
+// Webvisor records the text of the page and sends it to Yandex. settings.html shows the TOTP secret,
+// its otpauth QR and the recovery codes during 2FA setup and the deposit address at checkout; ops /
+// admin list every user's e-mail and IPs. Those pages load the counter as /yandex-metrika.js?webvisor=0
+// (also a URL of its own, so a browser holding the old file in its 30-day cache fetches this one).
+const METRIKA_TAG = /<script src="(\/yandex-metrika\.js[^"]*)" async><\/script>/;
+const SIGNED_IN = ['admin.html', 'ops.html', 'settings.html', 'subscriptions.html'];
+
+function metrikaInit(scriptSrcs) {
+  const scripts = scriptSrcs.map((src) => ({ src, parentNode: { insertBefore() {} } }));
+  const document = {
+    scripts,
+    querySelector(sel) {
+      const m = /^script\[src\*="([^"]+)"\]$/.exec(sel);
+      if (!m) throw new Error(`unexpected selector ${sel}`);
+      return scripts.find((s) => s.src.includes(m[1])) || null;
+    },
+    createElement: () => ({}),
+    getElementsByTagName: () => scripts,
+    addEventListener() {},
+  };
+  const sandbox = { document, Date };
+  sandbox.window = sandbox;
+  vm.runInNewContext(read('yandex-metrika.js'), sandbox);
+  return sandbox.ym.a.filter((a) => a[1] === 'init').map((a) => a[2]);
+}
+
+describe('Metrika: no Session Replay on the pages behind the sign-in', () => {
+  it('the auth-gated pages (and only they) load /yandex-metrika.js?webvisor=0', () => {
+    const gated = LEGACY.filter((f) => /Auth\.requireAuth\(\)|src="ops\.js|location\.replace\('\/ops\.html'/.test(read(f)));
+    expect(gated).toEqual(SIGNED_IN);
+    for (const f of [...LEGACY, 'pricing/index.html']) {
+      const m = METRIKA_TAG.exec(read(f));
+      if (!m) continue;                                 // the search-console verification stubs carry no counter
+      expect(m[1], f).toBe(SIGNED_IN.includes(f) ? '/yandex-metrika.js?webvisor=0' : '/yandex-metrika.js');
+    }
+    // what must not be recorded is on those pages
+    const settings = read('settings.html');
+    for (const id of ['tfaSecret', 'tfaRecoveryList', 'tfaQr', 'coAddr', 'coQr']) expect(settings).toContain(`id="${id}"`);
+  });
+
+  it('yandex-metrika.js: webvisor off when loaded as ?webvisor=0, on otherwise (landing / public pages)', () => {
+    const priv = metrikaInit(['https://example.test/yandex-metrika.js?webvisor=0']);
+    const pub = metrikaInit(['https://example.test/yandex-metrika.js']);
+    expect(priv).toHaveLength(1);
+    expect(pub).toHaveLength(1);
+    expect(priv[0].webvisor).toBe(false);
+    expect(pub[0].webvisor).toBe(true);
+    // the rest of the counter's options are the same on both
+    expect({ ...priv[0], webvisor: null }).toEqual({ ...pub[0], webvisor: null });
+  });
+});
+
+// ── narrow phones (320px): nothing makes the page wider than the screen ──
+// A page wider than the screen widens the layout viewport position:fixed boxes are placed in: the
+// legal pages' burger (at the nav's right edge) and the checkout modal of settings went off-screen at
+// 320px. Chromium checks the widths (tests/e2e/csp_pages_probe.mjs, 320 / 390 / 1440); these pin the CSS.
+describe('narrow phones: the legal lists, headings and the settings rows wrap', () => {
+  it.each(['terms.html', 'privacy.html', 'risk.html'])('%s: one block per list item (a flex <li> split it into columns), headings break', (page) => {
+    const html = read(page);
+    expect(html).toContain('.legal-section ul li{position:relative;padding-left:25px}');
+    expect(html).toContain(".legal-section ul li::before{content:'→';color:var(--gold);position:absolute;left:0;top:2px}");
+    expect(html).not.toMatch(/\.legal-section ul li\{display:flex/);
+    expect(html).toContain('.legal-hero h1{font-size:clamp(2rem,4vw,3.2rem);margin-bottom:12px;overflow-wrap:break-word}');
+    expect(html).toContain('.footer-bottom-links{display:flex;flex-wrap:wrap;gap:8px 20px}');
+  });
+
+  it('privacy.html: the long word of the heading may break (with a hyphen) on a narrow phone', () => {
+    expect(read('privacy.html')).toContain('<h1>Политика конфиденци&shy;альности</h1>');
+  });
+
+  it('settings.html: the promo-code input may shrink, the 2FA code row wraps its button', () => {
+    const html = read('settings.html');
+    expect(html).toContain('<input placeholder="Введите промо-код" class="flex-1 bg-slate-800/50 border border-slate-700 rounded-xl px-4 py-3 text-white outline-none" style="min-width:0"/>');
+    expect(html).toMatch(/<div class="flex flex-wrap gap-2 mb-4">\s*<input id="tfaCode" /);
   });
 });

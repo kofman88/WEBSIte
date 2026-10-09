@@ -76,7 +76,7 @@ a:hover{text-decoration:underline}
 .legal-page{position:relative;z-index:1;max-width:860px;margin:0 auto;padding:calc(var(--nav-h) + 48px) clamp(16px,5vw,48px) 80px}
 .legal-hero{margin-bottom:48px;padding-bottom:32px;border-bottom:1px solid var(--border)}
 .legal-badge{display:inline-flex;align-items:center;gap:8px;background:rgba(255,90,31,.1);border:1px solid rgba(255,140,90,.25);border-radius:20px;padding:5px 14px;font-size:12px;font-weight:600;letter-spacing:.1em;color:var(--gold);text-transform:uppercase;margin-bottom:20px}
-.legal-hero h1{font-size:clamp(2rem,4vw,3.2rem);margin-bottom:12px}
+.legal-hero h1{font-size:clamp(2rem,4vw,3.2rem);margin-bottom:12px;overflow-wrap:break-word}
 .legal-hero p{color:var(--text2);font-size:1rem}
 .legal-meta{display:flex;gap:20px;margin-top:16px;flex-wrap:wrap}
 .legal-meta span{font-size:13px;color:var(--text3);display:flex;align-items:center;gap:6px}
@@ -91,8 +91,10 @@ a:hover{text-decoration:underline}
 .legal-section p{color:var(--text2);margin-bottom:12px;font-size:15px;line-height:1.75}
 .legal-section p:last-child{margin-bottom:0}
 .legal-section ul{list-style:none;display:flex;flex-direction:column;gap:8px;color:var(--text2);font-size:15px}
-.legal-section ul li{display:flex;gap:10px;align-items:flex-start}
-.legal-section ul li::before{content:'→';color:var(--gold);flex-shrink:0;margin-top:2px}
+/* one block per item with a hanging arrow: a flex <li> made each text run / <strong> / <a> its own column
+   (at least its longest word wide), which split the sentence and widened a 320px page past the screen */
+.legal-section ul li{position:relative;padding-left:25px}
+.legal-section ul li::before{content:'→';color:var(--gold);position:absolute;left:0;top:2px}
 
 /* HIGHLIGHT BOXES */
 .info-box{background:rgba(255,90,31,.08);border:1px solid rgba(255,140,90,.22);border-radius:14px;padding:20px 24px;margin:20px 0;font-size:14px;color:var(--text2);line-height:1.65}
@@ -109,7 +111,7 @@ a:hover{text-decoration:underline}
 /* FOOTER */
 .footer{border-top:1px solid var(--border);position:relative;z-index:1;padding:clamp(32px,5vw,64px) clamp(16px,5vw,80px) 28px}
 .footer-bottom{max-width:1200px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;font-size:12px;color:var(--text3);flex-wrap:wrap;gap:12px}
-.footer-bottom-links{display:flex;gap:20px}
+.footer-bottom-links{display:flex;flex-wrap:wrap;gap:8px 20px}
 .footer-bottom-links a{color:var(--text3);text-decoration:none}
 .footer-bottom-links a:hover{color:var(--text2)}
 
@@ -164,7 +166,7 @@ a:hover{text-decoration:underline}
 
   <div class="legal-hero">
     <div class="legal-badge"><i data-lucide="shield"></i> Конфиденциальность</div>
-    <h1>Политика конфиденциальности</h1>
+    <h1>Политика конфиденци&shy;альности</h1>
     <p>Мы серьёзно относимся к вашим персональным данным и обязуемся защищать вашу конфиденциальность.</p>
     <div class="legal-meta">
       <span><i data-lucide="calendar"></i> Последнее обновление: 7 апреля 2026</span>

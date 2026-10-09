@@ -34,6 +34,7 @@ router.post('/crypto/create', authMiddleware, requireVerifiedEmail, async (req, 
     const out = paymentService.createCryptoPayment(req.userId, input);
     let qrUrl = null;
     try { qrUrl = await qrDataUrl(out.address); } catch (err) { logger.warn('payment QR not drawn', { paymentId: out.paymentId, err: err.message }); }
+    res.set('Cache-Control', 'no-store');
     res.json({ ...out, qrUrl });
   } catch (err) { handleErr(err, res, next); }
 });

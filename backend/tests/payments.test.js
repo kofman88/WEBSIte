@@ -247,6 +247,7 @@ describe('POST /api/payments/crypto/create', () => {
       expect(r.body.qrUrl).toMatch(/^data:image\/png;base64,/);
       expect(decodeQrDataUrl(r.body.qrUrl)).toBe(address);
       expect(JSON.stringify(r.body)).not.toMatch(/https?:\/\//);
+      expect(r.headers['cache-control'], 'the invoice is not stored by any cache').toBe('no-store');
     }
   });
 });

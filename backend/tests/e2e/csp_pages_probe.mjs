@@ -7,16 +7,18 @@
  * Server: tests/e2e/serve-app.js --admin — the real server.js with NODE_ENV=production (helmet CSP as
  * deployed) on a seeded scratch DB, frontend/ of this checkout as ~/public_html. Every page — the
  * landing (/ and /?data=empty), /pricing/, /app/, the SPA fallback and each legacy *.html — at
- * 1440×900 and 390×844, anonymous and, where a page needs one, with a user / admin session.
+ * 1440×900 and 390×844 (the pages whose layout broke on a narrow phone also at 320×640), anonymous
+ * and, where a page needs one, with a user / admin session.
  *
  * Recorded per page: `securitypolicyviolation` events (exposed binding, so they survive redirects),
  * console errors, page errors, failed requests and HTTP errors, plus functional checks of what the
  * policy used to break or could break (the landing font switch and the face Chromium renders, the
- * Metrika queue and channels, the landing dialogs and on-demand support widget, the web app's
+ * Metrika queue and channels — Session Replay on for public pages, off behind the sign-in —, the landing dialogs and on-demand support widget, the web app's
  * sign-in, settings tabs / toggles / modals and its /sw.js registration — service workers are on —,
  * the 2FA / checkout QR codes drawn by the server as data: URLs, the settings / subscriptions
  * hamburger, the support widget fitting the screen (also on a page wider than a phone), the ops
- * drawer actions, the legal pages' icons, logo and phone menu, /?login=1 → the web app's sign-in).
+ * drawer actions, the legal pages' icons, logo and phone menu, no page wider than the screen,
+ * /?login=1 → the web app's sign-in).
  * Any violation, error or failed check → exit 1.
  *
  * No request leaves the machine: Google Fonts, mc.yandex.ru / mc.yandex.com / yastatic.net are
@@ -52,9 +54,11 @@ const { chromium } = require(process.env.PLAYWRIGHT_CORE || '/opt/node-tools/nod
 const PASSWORD = 'smoke-pass-123';
 const USER_EMAIL = 'smoke@chm.local';
 const ADMIN_EMAIL = 'admin@chm.local';
+// narrow: a 320px phone, only for the scenarios marked `narrow` (the pages whose layout broke there)
 const VIEWPORTS = [
   { name: 'desktop', width: 1440, height: 900 },
-  { name: 'phone', width: 390, height: 844 },
+  { name: 'phone', width: 390, height: 844, mobile: true },
+  { name: 'narrow', width: 320, height: 640, mobile: true, narrowOnly: true },
 ];
 
 function freePort() {
@@ -182,14 +186,27 @@ async function checkMetrika(page) {
   if (!r) return ['Metrika tag.js never ran (window.__ymStub missing)'];
   const fails = [];
   // yandex-metrika.js: the ym() queue holds the init of the counter, tag.js is requested once
-  const q = await page.evaluate(() => ({
-    ym: typeof window.ym,
-    init: (window.ym && window.ym.a || []).some((a) => a[0] === 108973987 && a[1] === 'init'),
-    tags: [...document.scripts].filter((s) => s.src.startsWith('https://mc.yandex.ru/metrika/tag.js')).length,
-  }));
-  if (q.ym !== 'function' || !q.init) fails.push(`Metrika queue not initialised (ym ${q.ym}, init ${q.init})`);
+  const q = await metrikaQueue(page);
+  if (q.ym !== 'function' || q.inits.length !== 1) fails.push(`Metrika queue not initialised (ym ${q.ym}, ${q.inits.length} init)`);
   if (q.tags !== 1) fails.push(`tag.js <script> count ${q.tags}`);
+  // public pages keep Session Replay (Webvisor); the signed-in ones turn it off (metrikaPrivate)
+  if (q.inits.length && q.inits[0].webvisor !== true) fails.push(`Webvisor off on a public page (${JSON.stringify(q.inits[0].webvisor)})`);
   for (const k of ['img', 'fetch', 'frame', 'blobFrame', 'worker', 'mc.yandex.com', 'yastatic.net']) if (r[k] !== 'ok') fails.push(`Metrika channel ${k}: ${r[k]}`);
+  return fails;
+}
+const metrikaQueue = (page) => page.evaluate(() => ({
+  ym: typeof window.ym,
+  inits: (window.ym && window.ym.a || []).filter((a) => a[0] === 108973987 && a[1] === 'init').map((a) => a[2]),
+  tags: [...document.scripts].filter((s) => s.src.startsWith('https://mc.yandex.ru/metrika/tag.js')).length,
+  src: [...document.scripts].map((s) => s.getAttribute('src') || '').filter((s) => s.startsWith('/yandex-metrika.js')),
+}));
+// Signed-in pages (2FA secret / recovery codes / deposit address on settings, users' e-mails on ops):
+// the counter runs without Session Replay, which would send the page's text to Yandex
+async function metrikaPrivate(page) {
+  const q = await metrikaQueue(page);
+  const fails = [];
+  if (q.src.join() !== '/yandex-metrika.js?webvisor=0') fails.push(`Metrika loaded as ${JSON.stringify(q.src)}`);
+  if (q.inits.length !== 1 || q.inits[0].webvisor !== false) fails.push(`Webvisor not off: ${JSON.stringify(q.inits.map((i) => i.webvisor))}`);
   return fails;
 }
 async function checkIcons(page) {
@@ -333,6 +350,13 @@ async function settingsQr(page) {
     const uri = decodeQrDataUrl(t.src) || '';
     if (!uri.startsWith('otpauth://totp/') || !secret || !uri.includes(`secret=${secret}&`)) fails.push(`2FA QR does not read back as the otpauth URI with the printed secret (${uri.slice(0, 15)}…)`);
   }
+  // the code field and its button stay on the screen (at 320px the row wraps the button)
+  const row = await page.evaluate(() => {
+    const W = document.documentElement.clientWidth;
+    const r = (id) => { const b = document.getElementById(id).getBoundingClientRect(); return b.left >= 0 && b.right <= W + 0.5; };
+    return { code: r('tfaCode'), button: r('tfaConfirmBtn'), sw: document.documentElement.scrollWidth, W };
+  });
+  if (!row.code || !row.button || row.sw > row.W) fails.push(`2FA code row off-screen: ${JSON.stringify(row)}`);
   const address = '0x00000000000000000000000000000000c5f0be01';
   const invoice = { paymentId: 1, network: 'bep20', address, amountUsdt: 69.42, expiresAt: new Date(Date.now() + 3600_000).toISOString(), plan: 'pro', billingCycle: 'monthly', qrUrl: await qrDataUrl(address) };
   await page.route('**/api/payments/crypto/create', (r) => r.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify(invoice) }));
@@ -348,11 +372,33 @@ async function settingsQr(page) {
   await page.unroute('**/api/payments/crypto/create');
   return fails;
 }
+// settings.html: every tab and the open checkout fit the screen. A wider page widens the layout
+// viewport the fixed checkout modal is placed in (at 320px the promo-code row did, and the modal's
+// right side with the address's copy button went off-screen).
+async function settingsFits(page) {
+  const fails = [];
+  const width = () => page.evaluate(() => ({ sw: document.documentElement.scrollWidth, W: document.documentElement.clientWidth }));
+  for (const t of ['subscription', 'trading', 'notifications', 'security', 'support', 'profile']) {
+    await page.evaluate((x) => window.stab && window.stab(x), t);
+    await sleep(250);
+    const w = await width();
+    if (w.sw > w.W) fails.push(`tab ${t}: page ${w.sw}px wide on a ${w.W}px screen`);
+  }
+  await page.evaluate(() => window.stab && window.stab('subscription'));
+  await page.evaluate(() => { if (typeof window.openCheckout === 'function') window.openCheckout(); else document.getElementById('upgradeBtn').click(); });
+  await sleep(250);
+  const card = await page.evaluate(() => { const c = document.querySelector('#checkoutModal > .card').getBoundingClientRect(); return { l: c.left, r: c.right, W: document.documentElement.clientWidth }; });
+  if (card.l < 0 || card.r > card.W + 0.5) fails.push(`checkout card off-screen: ${JSON.stringify(card)}`);
+  await page.evaluate(() => { document.getElementById('checkoutModal').style.display = 'none'; });
+  return fails;
+}
 // /?login=1 (where the auth-gated legacy pages send a visitor without a session): the server's 302
 // lands on the web app with its sign-in form
 async function appSignInShown(page) {
   const fails = [];
-  if (new URL(page.url()).pathname !== '/app/') fails.push(`not on /app/: ${page.url()}`);
+  // the query (next= / return=) is dropped: the web app reads none, and its own switches (demo=, api=) must not ride along
+  const u = new URL(page.url());
+  if (u.pathname !== '/app/' || u.search) fails.push(`not on /app/: ${page.url()}`);
   await page.waitForSelector('form.login-form', { timeout: 8000 }).catch(() => fails.push('web app sign-in form not shown'));
   return fails;
 }
@@ -524,27 +570,28 @@ async function appHome(page) {
 const SCENARIOS = [
   { name: 'landing', path: '/', checks: [checkFonts, checkMetrika, landingUi] },
   { name: 'login-redirect', path: '/?login=1&next=/ops.html', checks: [appSignInShown] },
+  { name: 'login-return', path: '/?return=%2Fsettings.html&login=1', checks: [appSignInShown], narrow: true },
   { name: 'landing-empty', path: '/?data=empty', checks: [checkFonts, checkMetrika] },
   { name: 'pricing', path: '/pricing/', checks: [checkFonts, checkMetrika] },
   { name: 'spa-fallback', path: '/no/such/page', checks: [checkFonts] },
   { name: 'app-login', path: '/app/', checks: [appLogin] },
   { name: 'app', path: '/app/', auth: 'user', checks: [appHome], settle: 2500 },
   { name: 'about', path: '/about.html', checks: [checkMetrika, noHScroll, supportWidget, supportWidgetWidePage] },
-  { name: 'api-docs', path: '/api-docs.html', checks: [noHScroll, supportWidget] },
+  { name: 'api-docs', path: '/api-docs.html', checks: [noHScroll, supportWidget], narrow: true },
   { name: 'status', path: '/status.html', checks: [noHScroll, supportWidget] },
-  // (no noHScroll on the legal pages: with the wide DejaVu stand-in for Inter a list item of terms.html
-  // runs 2px past 390px; with Inter it fits. The menu and the widget are placed to the screen anyway.)
-  { name: 'terms', path: '/terms.html', checks: [checkIcons, checkMetrika, legalMenu, supportWidget] },
-  { name: 'privacy', path: '/privacy.html', checks: [checkIcons, legalMenu] },
-  { name: 'risk', path: '/risk.html', checks: [checkIcons, legalMenu] },
+  // the legal pages at 320px too: a flex <li> (one column per text run / <strong>) and a long heading
+  // word made them wider than the screen, and the burger at the nav's right edge went off-screen
+  { name: 'terms', path: '/terms.html', checks: [checkIcons, checkMetrika, noHScroll, legalMenu, supportWidget], narrow: true },
+  { name: 'privacy', path: '/privacy.html', checks: [checkIcons, noHScroll, legalMenu], narrow: true },
+  { name: 'risk', path: '/risk.html', checks: [checkIcons, noHScroll, legalMenu], narrow: true },
   { name: 'subscriptions-anon', path: '/subscriptions.html', anonRedirect: '/app/', checks: [appSignInShown] },
-  { name: 'subscriptions', path: '/subscriptions.html', auth: 'user', checks: [sidebarToggle, supportWidget, logoutOnly] },
+  { name: 'subscriptions', path: '/subscriptions.html', auth: 'user', checks: [metrikaPrivate, sidebarToggle, supportWidget, logoutOnly] },
   { name: 'settings-anon', path: '/settings.html', anonRedirect: '/app/', checks: [appSignInShown] },
-  { name: 'settings', path: '/settings.html', auth: 'user', checks: [serviceWorker, sidebarToggle, settingsQr, settingsActions] },
+  { name: 'settings', path: '/settings.html', auth: 'user', checks: [metrikaPrivate, serviceWorker, sidebarToggle, settingsQr, settingsFits, settingsActions], narrow: true },
   { name: 'admin-anon', path: '/admin.html', anonRedirect: '/app/', checks: [appSignInShown] },
   { name: 'admin', path: '/admin.html', auth: 'admin', checks: [adminRedirect] },
   { name: 'ops-anon', path: '/ops.html', anonRedirect: '/app/', checks: [appSignInShown] },
-  { name: 'ops', path: '/ops.html', auth: 'admin', checks: [opsActions] },
+  { name: 'ops', path: '/ops.html', auth: 'admin', checks: [metrikaPrivate, opsActions] },
   { name: 'google-verify', path: '/google42f82fe571b31093.html' },
   { name: 'yandex-verify', path: '/yandex_dad10d6013fe454c.html' },
 ];
@@ -579,9 +626,10 @@ async function main() {
     for (const vp of VIEWPORTS) {
       for (const sc of SCENARIOS) {
         if (ONLY && !ONLY.has(sc.name)) continue;
+        if (vp.narrowOnly && !sc.narrow) continue;
         // service workers allowed: settings registers /sw.js (it has no fetch handler, so the routes still see every request)
         const ctxOpts = { viewport: { width: vp.width, height: vp.height }, locale: 'ru-RU' };
-        if (vp.name === 'phone') Object.assign(ctxOpts, { deviceScaleFactor: 2, isMobile: true, hasTouch: true });
+        if (vp.mobile) Object.assign(ctxOpts, { deviceScaleFactor: 2, isMobile: true, hasTouch: true });
         const ctx = await browser.newContext(ctxOpts);
         await ctx.route((url) => url.hostname !== '127.0.0.1', stubRoute);
         const violations = [];

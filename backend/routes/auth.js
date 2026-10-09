@@ -220,6 +220,7 @@ router.get('/2fa/status', authMiddleware, (req, res, next) => {
 router.post('/2fa/setup', authMiddleware, async (req, res, next) => {
   try {
     const out = await twoFactorService.setup(req.userId, req.userEmail);
+    res.set('Cache-Control', 'no-store');   // the TOTP secret, its QR and the recovery codes
     res.json(out);
   } catch (err) { handleServiceError(err, res, next); }
 });

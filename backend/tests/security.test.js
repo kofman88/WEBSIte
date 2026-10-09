@@ -69,26 +69,64 @@ describe('2FA flow', () => {
     expect(decodeQrDataUrl(res.body.qrUrl)).toBe(res.body.otpauth);
     expect(res.body.otpauth).toContain('secret=');
     expect(JSON.stringify(res.body)).not.toMatch(/https?:\/\//);
+    // the secret and the recovery codes are not kept by any cache
+    expect(res.headers['cache-control']).toBe('no-store');
     // the service itself (used without the route) gives the same
     const direct = await twoFA.setup(u.user.id, u.user.email);
     expect(decodeQrDataUrl(direct.qrUrl)).toBe(direct.otpauth);
     expect(direct.otpauth).not.toBe(res.body.otpauth);
   });
 
-  it('no QR service anywhere in the backend or the pages (the secrets and addresses stay here)', () => {
-    const roots = [BACKEND, path.resolve(BACKEND, '..', 'frontend')];
-    const QR_SERVICES = /qrserver\.com|create-qr-code|chart\.googleapis\.com\/chart|quickchart\.io\/qr|goqr\.me|qr-code-generator\.com/i;
+  it('no QR service anywhere in the backend, the pages or the docs (the secrets and addresses stay here)', () => {
+    const REPO = path.resolve(BACKEND, '..');
+    const roots = [BACKEND, path.join(REPO, 'frontend'), path.join(REPO, 'docs'), path.join(REPO, 'scripts')];
+    const QR_SERVICES = /qrserver\.com|create-qr-code|chart\.googleapis\.com\/chart|chart\.apis\.google\.com|quickchart\.io|goqr\.me|qr-code-generator\.com|image-charts\.com|qrickit\.com|api\.qrcode-monkey\.com/i;
+    const TEXT = /\.(js|mjs|cjs|html|css|md|sh|json)$/;
     const hits = [];
+    const scan = (p) => { if (p !== THIS_FILE && !p.endsWith('package-lock.json') && QR_SERVICES.test(fs.readFileSync(p, 'utf8'))) hits.push(p); };
     const walk = (d) => {
+      if (!fs.existsSync(d)) return;
       for (const e of fs.readdirSync(d, { withFileTypes: true })) {
-        if (e.name === 'node_modules' || e.name === 'data' || e.name === 'logs' || e.name.startsWith('.')) continue;
+        if (e.name === 'node_modules' || e.name === 'data' || e.name === 'logs' || e.name === 'vendor' || e.name.startsWith('.')) continue;
         const p = path.join(d, e.name);
         if (e.isDirectory()) walk(p);
-        else if (/\.(js|mjs|cjs|html|css)$/.test(e.name) && p !== THIS_FILE && QR_SERVICES.test(fs.readFileSync(p, 'utf8'))) hits.push(p);
+        else if (TEXT.test(e.name)) scan(p);
       }
     };
     roots.forEach(walk);
+    for (const e of fs.readdirSync(REPO, { withFileTypes: true })) if (e.isFile() && /\.(md|sh)$/.test(e.name)) scan(path.join(REPO, e.name));
+    scan(path.join(REPO, 'frontend', '.htaccess'));
     expect(hits).toEqual([]);
+  });
+
+  it('utils/qr.js: black on white with the 4-module quiet zone of ISO/IEC 18004 inside the image', async () => {
+    const { qrDataUrl, QR_OPTIONS } = require('../utils/qr');
+    const QRCode = require('qrcode');
+    const { PNG } = require('pngjs');
+    expect(QR_OPTIONS.margin).toBe(4);
+    for (const text of ['otpauth://totp/CHM%20Finance:a%40b.co?secret=JBSWY3DPEHPK3PXP&period=30&digits=6&algorithm=SHA1&issuer=CHM%20Finance',
+      '0x9f3c5e0b7d2a41c8e6f0a1b2c3d4e5f60718293a', 'TQn9Y2khEsLJW1ChVWFMSMeRDow5KcbLSE']) {
+      const url = await qrDataUrl(text);
+      expect(decodeQrDataUrl(url)).toBe(text);
+      const png = PNG.sync.read(Buffer.from(url.split(',')[1], 'base64'));
+      expect([png.width, png.height]).toEqual([QR_OPTIONS.width, QR_OPTIONS.width]);
+      const modules = QRCode.create(text, { errorCorrectionLevel: QR_OPTIONS.errorCorrectionLevel }).modules.size;
+      const zone = Math.floor((QR_OPTIONS.width / (modules + 2 * QR_OPTIONS.margin)) * QR_OPTIONS.margin);
+      let dark = 0; let other = 0;
+      for (let y = 0; y < png.height; y += 1) {
+        for (let x = 0; x < png.width; x += 1) {
+          const i = (y * png.width + x) * 4;
+          const [r, g, b, a] = png.data.subarray(i, i + 4);
+          const black = r === 0 && g === 0 && b === 0; const white = r === 255 && g === 255 && b === 255;
+          if (a !== 255 || (!black && !white)) other += 1;
+          const inZone = x < zone || y < zone || x >= png.width - zone || y >= png.height - zone;
+          if (inZone && black) dark += 1;
+        }
+      }
+      expect(other, 'only opaque black / white pixels').toBe(0);
+      expect(dark, `quiet zone (${zone}px) is white`).toBe(0);
+    }
+    await expect(qrDataUrl('')).rejects.toThrow(/text required/);
   });
 
   it('confirm with valid code flips enabled=1', async () => {

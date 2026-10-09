@@ -1,13 +1,13 @@
 /**
  * yandex-metrika.js — Метрика + цели (events) для CHM Finance.
  *
- * Loaded once on every page; the inline counter snippet below is the
- * official one Yandex generates for counter 108973987 (Webvisor + click
- * map + scroll map + form analytics). Then we wire delegated listeners
- * for the 8 product events so any new button matching the selectors
- * automatically gets tracked without touching markup.
+ * On every page: Yandex's snippet for counter 108973987 (Webvisor, click
+ * map, form analytics), then delegated listeners for the product goals.
+ * Webvisor records the page's text, so the pages behind the sign-in load
+ * /yandex-metrika.js?webvisor=0 (settings: the 2FA key, QR and recovery
+ * codes, the deposit address; ops: users' e-mails / IPs): no replay there.
  *
- * Goals (visible in Метрика → Цели as JS-event goals):
+ * Goals (Метрика → Цели, JS events):
  *   cta_hero_click       — клик главного CTA «Начать бесплатно» в hero
  *   cta_pricing_click    — клик «Начать / Выбрать» под планом (с params: plan)
  *   cta_telegram_click   — клик любой TG-кнопки  (params: target=bot|community, placement=hero|pricing|community|footer)
@@ -30,7 +30,7 @@
 
   ym(108973987, "init", {
     ssr:true,
-    webvisor:true,
+    webvisor:!document.querySelector('script[src*="yandex-metrika.js?webvisor=0"]'),
     clickmap:true,
     ecommerce:"dataLayer",
     accurateTrackBounce:true,
@@ -38,9 +38,8 @@
     triggerEvent:true
   });
 
-  // Helper: send a goal with optional params. Wrap in try so a single
-  // error never breaks the page. params shows up in Метрика → Параметры
-  // визитов / целей as nested keys.
+  // A goal with optional params (Метрика → Параметры визитов); never throws.
+  // window.chmTrack lets page scripts send register_success / login_success.
   function track(goal, params){
     try { ym(108973987, 'reachGoal', goal, params || {}); } catch (_) {}
   }
@@ -88,9 +87,4 @@
     if (t.closest('#cbAccept'))  track('cookies_accept');
     if (t.closest('#cbDecline')) track('cookies_decline');
   }, true);
-
-  // Form submits — we hook into the inline auth-form submit handlers in
-  // index.html via window.chmTrack(). They fire register_success /
-  // login_success after Toast.success(). We expose chmTrack globally
-  // above so those handlers can call it without re-importing.
 })();
