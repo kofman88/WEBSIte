@@ -30,6 +30,7 @@ const {
   htmlEscape, pySlice, isDict,
   pyLen,
   pyIter,
+  rethrowCancelled,
 } = require('./pyCompat');
 const { fmtFixed, fmtComma, fmtG } = require('../../strategies/common/pyfmt');
 const { pyRound } = require('../../strategies/common/pyround');
@@ -147,6 +148,7 @@ function createBingxTrader(overrides = {}) {
       }
       return pyInt(serverTime);
     } catch (e) {
+      rethrowCancelled(e);
       if (e instanceof TransportError && e.kind === 'timeout') log.warning('BingX server_time: timeout 5s — using local time');
       else if (e instanceof TransportError || (e && e.pyType === 'ContentTypeError')) log.warning(`BingX server_time: network error (${e.pyType || e.name}) — using local time`);
       else log.warning(`BingX server_time: unexpected error ${e && (e.pyType || e.name)}: ${pySlice(errStr(e), 100)} — using local time`);
@@ -162,6 +164,7 @@ function createBingxTrader(overrides = {}) {
       st.timeSyncedAt = rt.now();
       log.info(`BingX time sync: offset=${st.timeOffsetMs}ms`);
     } catch (e) {
+      rethrowCancelled(e);
       log.warning(`BingX time sync failed (используем offset=${st.timeOffsetMs}ms): ${errStr(e)}`);
     }
     return st.timeOffsetMs;
@@ -199,10 +202,12 @@ function createBingxTrader(overrides = {}) {
         try {
           return aiohttpJson(resp);
         } catch (_je) {
+          rethrowCancelled(_je);
           log.error('bingx_trader._request() unhandled exception');
           return { code: -1, msg: `http=${resp.status}; body=${pySlice(resp.text || '', 300)}` };
         }
       } catch (e) {
+        rethrowCancelled(e);
         if (e instanceof TransportError && e.kind === 'connect') {
           lastNetErr = e;
           if (attempt < 2) {
@@ -247,6 +252,7 @@ function createBingxTrader(overrides = {}) {
         }
       }
     } catch (e) {
+      rethrowCancelled(e);
       if (e instanceof TransportError && e.kind === 'timeout') log.warning(`BingX get_instrument_filters ${symbol}: timeout 30s — using defaults`);
       else log.debug(`BingX get_instrument_filters ${symbol}: ${errStr(e)}`);
     }
@@ -271,6 +277,7 @@ function createBingxTrader(overrides = {}) {
       }
       return { ok: false, balance: 0.0, error: pyOr(lastErr, 'Не удалось получить баланс BingX.') };
     } catch (e) {
+      rethrowCancelled(e);
       if (e instanceof TransportError && e.kind === 'timeout') return { ok: false, balance: 0.0, error: 'Таймаут соединения с BingX. Попробуйте позже.' };
       log.error(`BingX test_connection: ${errStr(e)}`);
       return { ok: false, balance: 0.0, error: errStr(e) };
@@ -463,6 +470,7 @@ function createBingxTrader(overrides = {}) {
             }
           }
         } catch (be) {
+          rethrowCancelled(be);
           log.warning(`[BINGX-ATOMIC-FALLBACK] ${bingxSymbol}: batch exception (${errStr(be)}) — legacy flow`);
         }
       }
@@ -485,6 +493,7 @@ function createBingxTrader(overrides = {}) {
           orderParams.type = 'MARKET';
         }
       } catch (pe) {
+        rethrowCancelled(pe);
         log.debug(`BingX price check failed (${errStr(pe)}), using MARKET`);
         orderParams.type = 'MARKET';
       }
@@ -532,6 +541,7 @@ function createBingxTrader(overrides = {}) {
           }
           if (posReady) break;
         } catch (pe) {
+          rethrowCancelled(pe);
           log.debug(`BingX pos-check ${bingxSymbol}: ${errStr(pe)}`);
         }
         await rt.sleep(0.2);
@@ -543,7 +553,7 @@ function createBingxTrader(overrides = {}) {
       }
       if (!posReady && isLimit) {
         log.warning(`BingX LIMIT ${bingxSymbol} не исполнился за ${waitBudget}с — отменяем ордер ${orderId}`);
-        try { await cancelAllOrders(apiKey, secret, symbol); } catch (_e) { log.error('bingx_trader.place_trade() unhandled exception'); }
+        try { await cancelAllOrders(apiKey, secret, symbol); } catch (_e) { rethrowCancelled(_e); log.error('bingx_trader.place_trade() unhandled exception'); }
         return {
           ok: false,
           error: `Лимитный ордер на ${bingxSymbol} не исполнился за 10 сек (цена ушла). Ордер отменён. Попробуйте ещё раз.`,
@@ -588,6 +598,7 @@ function createBingxTrader(overrides = {}) {
           await cancelAllOrders(apiKey, secret, symbol);
           log.info(`FIX-AUDIT-38: BingX ордер ${orderId} отменён после провала SL.`);
         } catch (ce) {
+          rethrowCancelled(ce);
           log.error(`FIX-AUDIT-38: не удалось отменить BingX ордер ${orderId}: ${errStr(ce)} — пользователь должен закрыть позицию вручную!`);
         }
         try {
@@ -604,6 +615,7 @@ function createBingxTrader(overrides = {}) {
             else log.error(`[SL-SAFETY-CLOSE-BINGX-FAIL] ${bingxSymbol}: emergency close rejected: ${pyStr(pyGet(clResp, 'error', 'unknown'))} — BE-monitor takes over`);
           }
         } catch (se) {
+          rethrowCancelled(se);
           log.error(`[SL-SAFETY-CLOSE-BINGX-EXC] ${bingxSymbol}: ${errStr(se)} — BE-monitor takes over`);
         }
         return {
@@ -670,6 +682,7 @@ function createBingxTrader(overrides = {}) {
                 log.info(`[TP-ADAPTIVE-SHIFT] BingX ${bingxSymbol} code=${pyStr(code)} tp=${pyStr(tpParams.stopPrice)} → ${fmtG(newTp, 6)} (current=${fmtG(cur, 6)}, gap=1.5%)`);
               }
             } catch (ge) {
+              rethrowCancelled(ge);
               log.debug(`BingX adaptive TP fetch price: ${errStr(ge)}`);
             }
             if (newTp === null) {
@@ -716,12 +729,14 @@ function createBingxTrader(overrides = {}) {
             log.debug(`[TP-VERIFIED] BingX ${bingxSymbol}: ${liveTp}/${tpExpected.length} TPs on exchange`);
           }
         } catch (ve) {
+          rethrowCancelled(ve);
           log.debug(`TP verify ${bingxSymbol}: ${errStr(ve)}`);
         }
       }
       await recordPlaced(rt, { symbol, direction, exchange: 'bingx', t0, tpPlaced });
       return { ok: true, order_id: orderId, error: '', tp_placed: tpPlaced, qty: pyFloat(qtyStr) };
     } catch (e) {
+      rethrowCancelled(e);
       if (e instanceof TransportError && e.kind === 'timeout') return { ok: false, order_id: '', error: 'Таймаут соединения с BingX. Попробуйте позже.' };
       log.error(`BingX place_trade ${symbol}: ${errStr(e)}`);
       return { ok: false, order_id: '', error: errStr(e) };
@@ -755,6 +770,7 @@ function createBingxTrader(overrides = {}) {
       }
       return positions;
     } catch (e) {
+      rethrowCancelled(e);
       if (e instanceof TransportError && e.kind === 'timeout') { log.warning('BingX get_positions: таймаут'); return []; }
       log.error(`BingX get_positions: ${errStr(e)}`);
       return [];
@@ -802,6 +818,7 @@ function createBingxTrader(overrides = {}) {
       }
       return [positions, orders, summary];
     } catch (e) {
+      rethrowCancelled(e);
       if (e instanceof TransportError && e.kind === 'timeout') { log.warning('BingX get_dashboard: таймаут'); return [[], [], EMPTY_SUMMARY()]; }
       log.error(`BingX get_dashboard: ${errStr(e)}`);
       return [[], [], EMPTY_SUMMARY()];
@@ -828,6 +845,7 @@ function createBingxTrader(overrides = {}) {
           }
         }
       } catch (er) {
+        rethrowCancelled(er);
         log.debug(`BingX close_position ${symbol}: qty rounding failed (${errStr(er)}) — sending raw ${fstr(size)}`);
       }
       const params = { symbol: bingxSymbol, side: closeSide, type: 'MARKET', quantity: roundedQty, positionSide: posSide };
@@ -842,6 +860,7 @@ function createBingxTrader(overrides = {}) {
       }
       return { ok: false, order_id: '', error: humanizeBingxError(pyStr(resp)) };
     } catch (e) {
+      rethrowCancelled(e);
       if (e instanceof TransportError && e.kind === 'timeout') return { ok: false, order_id: '', error: 'Таймаут соединения с BingX.' };
       log.error(`BingX close_position: ${errStr(e)}`);
       return { ok: false, order_id: '', error: errStr(e) };
@@ -853,6 +872,7 @@ function createBingxTrader(overrides = {}) {
       const data = await _request('GET', '/openApi/swap/v2/trade/openOrders', apiKey, secret, {});
       if (pyGet(data, 'code') === 0) return pyOr(pyGet(pyGet(data, 'data', {}), 'orders', []), []);
     } catch (e) {
+      rethrowCancelled(e);
       log.error(`BingX get_open_orders: ${errStr(e)}`);
     }
     return [];
@@ -865,6 +885,7 @@ function createBingxTrader(overrides = {}) {
       if (pyGet(resp, 'code') === 0) return { ok: true };
       return { ok: false, error: humanizeBingxError(pyStr(resp)) };
     } catch (e) {
+      rethrowCancelled(e);
       if (e instanceof TransportError && e.kind === 'timeout') return { ok: false, error: 'Таймаут соединения с BingX.' };
       log.error(`BingX cancel_order ${symbol} ${pyStr(orderId)}: ${errStr(e)}`);
       return { ok: false, error: errStr(e) };
@@ -878,6 +899,7 @@ function createBingxTrader(overrides = {}) {
       if (pyGet(resp, 'code') === 0) return { ok: true, cancelled: pyLen(pyOr(pyGet(pyGet(resp, 'data', {}), 'orders', []), [])) };
       return { ok: false, cancelled: 0, error: humanizeBingxError(pyStr(resp)) };
     } catch (e) {
+      rethrowCancelled(e);
       if (e instanceof TransportError && e.kind === 'timeout') return { ok: false, cancelled: 0, error: 'Таймаут соединения с BingX.' };
       log.error(`BingX cancel_all_orders: ${errStr(e)}`);
       return { ok: false, cancelled: 0, error: errStr(e) };
@@ -908,6 +930,7 @@ function createBingxTrader(overrides = {}) {
       }
       return { ok: true, cancelled, total_tp: tpOrders.length, errors };
     } catch (e) {
+      rethrowCancelled(e);
       if (e instanceof TransportError && e.kind === 'timeout') return { ok: false, cancelled: 0, error: 'Таймаут соединения с BingX.' };
       log.error(`BingX cancel_tp_orders_only: ${errStr(e)}`);
       return { ok: false, cancelled: 0, error: errStr(e) };
@@ -951,6 +974,7 @@ function createBingxTrader(overrides = {}) {
       log.warning(`BingX set_breakeven ${bingxSymbol}: ${pyStr(resp)}`);
       return { ok: false, error: humanizeBingxError(pyStr(resp)) };
     } catch (e) {
+      rethrowCancelled(e);
       if (e instanceof TransportError && e.kind === 'timeout') return { ok: false, error: 'Таймаут соединения с BingX.' };
       log.error(`BingX set_breakeven ${symbol}: ${errStr(e)}`);
       return { ok: false, error: errStr(e) };
@@ -972,6 +996,7 @@ function createBingxTrader(overrides = {}) {
           if (pos) break;
           posLastErr = 'empty positions';
         } catch (e) {
+          rethrowCancelled(e);
           log.error('bingx_trader.set_trailing_sl() unhandled exception');
           posLastErr = pySlice(errStr(e), 100);
         }
@@ -985,7 +1010,7 @@ function createBingxTrader(overrides = {}) {
       const actualPosSide = pyUpper(pyStr(pos.side)) === 'BOTH' ? pyUpper(pyStr(pos.side)) : posSide;
       const pmult = bingxPriceMultiplier(symbol);
       let posSizeFloat;
-      try { posSizeFloat = pyFloat(posSizeS); } catch (_e) { posSizeFloat = 0.0; }
+      try { posSizeFloat = pyFloat(posSizeS); } catch (_e) { rethrowCancelled(_e); posSizeFloat = 0.0; }
       if (posSizeFloat <= 0) {
         log.debug(`BingX set_trailing_sl ${bingxSymbol}: qty rounded to 0 (pos_size=${pyFloatStr(pos.size)} qty_step=${pyFloatStr(qtyStep)}) — trail update skipped; оригинальный SL со стороны биржи продолжает действовать`);
         return { ok: false, error: 'position smaller than minimum step (trail skipped)', skipped: true };
@@ -1008,7 +1033,7 @@ function createBingxTrader(overrides = {}) {
           break;
         }
         newErr = pySlice(pyStr(resp), 200);
-        try { lastCode = pyInt(pyOr(pyGet(resp, 'code'), 0)); } catch (_e) { lastCode = 0; }
+        try { lastCode = pyInt(pyOr(pyGet(resp, 'code'), 0)); } catch (_e) { rethrowCancelled(_e); lastCode = 0; }
         if (lastCode === 110424) break;
         if (lastCode === 109500) { await rt.sleep(3.0); continue; }
         await rt.sleep(1.5);
@@ -1030,16 +1055,19 @@ function createBingxTrader(overrides = {}) {
                 if (delCode === 109400) log.debug(`BingX set_trailing_sl ${bingxSymbol}: old SL id=${oid} already gone (109400 'order not exist') — benign race, treating as success`);
                 else if (!(delCode === 0 || delCode === null)) log.warning(`BingX set_trailing_sl ${bingxSymbol}: cancel old SL id=${oid} failed: ${pyStr(delResp)}`);
               } catch (de) {
+                rethrowCancelled(de);
                 log.warning(`BingX set_trailing_sl ${bingxSymbol}: cancel old SL id=${oid}: ${errStr(de)}`);
               }
             }
           }
         }
       } catch (ce) {
+        rethrowCancelled(ce);
         log.warning(`BingX set_trailing_sl ${bingxSymbol}: list openOrders: ${errStr(ce)}`);
       }
       return { ok: true };
     } catch (e) {
+      rethrowCancelled(e);
       if (e instanceof TransportError && e.kind === 'timeout') return { ok: false, error: 'Таймаут соединения с BingX.' };
       log.error(`BingX set_trailing_sl ${symbol}: ${errStr(e)}`);
       return { ok: false, error: errStr(e) };
@@ -1085,11 +1113,13 @@ function createBingxTrader(overrides = {}) {
             try {
               await _request('DELETE', '/openApi/swap/v2/trade/order', apiKey, secret, { symbol: bingxSymbol, orderId: oid });
             } catch (de) {
+              rethrowCancelled(de);
               log.warning(`BingX cancel old SL/TP ${bingxSymbol} id=${oid}: ${errStr(de)}`);
             }
           }
         }
       } catch (le) {
+        rethrowCancelled(le);
         log.warning(`BingX list open orders ${bingxSymbol}: ${errStr(le)}`);
       }
       let tpList;
@@ -1145,11 +1175,13 @@ function createBingxTrader(overrides = {}) {
             log.debug(`[TP-VERIFIED] BingX ${bingxSymbol} (post-fill): ${liveTp}/${tpExpectedCount}`);
           }
         } catch (ve) {
+          rethrowCancelled(ve);
           log.debug(`BingX post-fill TP verify ${bingxSymbol}: ${errStr(ve)}`);
         }
       }
       return { sl_placed: slPlaced, tp_placed: tpPlaced };
     } catch (e) {
+      rethrowCancelled(e);
       if (e instanceof TransportError && e.kind === 'timeout') { log.warning(`BingX place_sl_tp_for_position ${symbol}: таймаут`); return { sl_placed: false, tp_placed: false }; }
       log.error(`BingX place_sl_tp_for_position ${symbol}: ${errStr(e)}`);
       return { sl_placed: false, tp_placed: false };
@@ -1166,6 +1198,7 @@ function createBingxTrader(overrides = {}) {
       log.warning(`BingX get_balance: ${pyStr(data)}`);
       return 0.0;
     } catch (e) {
+      rethrowCancelled(e);
       log.error(`BingX get_balance: ${errStr(e)}`);
       return 0.0;
     }
@@ -1176,6 +1209,7 @@ function createBingxTrader(overrides = {}) {
       const data = await _request('GET', '/openApi/swap/v2/quote/price', apiKey, secret, { symbol: toBingxSymbol(symbol) });
       return pyFloat(pyOr(pyGet(pyGet(data, 'data', {}), 'price', 0), 0));
     } catch (e) {
+      rethrowCancelled(e);
       log.debug(`get_last_price BingX ${symbol}: ${errStr(e)}`);
     }
     return 0.0;
@@ -1194,6 +1228,7 @@ function createBingxTrader(overrides = {}) {
         const profitRaw = pyGet(o, 'profit');
         let profit;
         try { profit = (profitRaw === null || profitRaw === '') ? null : pyFloat(profitRaw); } catch (e) {
+          rethrowCancelled(e);
           if (e && (e.pyType === 'TypeError' || e.pyType === 'ValueError')) profit = null; else throw e;
         }
         result.push({
@@ -1206,6 +1241,7 @@ function createBingxTrader(overrides = {}) {
       }
       return result;
     } catch (e) {
+      rethrowCancelled(e);
       log.debug(`get_closed_pnl BingX ${symbol}: ${errStr(e)}`);
     }
     return [];

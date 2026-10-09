@@ -36,6 +36,7 @@ const { encrypt } = require('../utils/crypto');
 const exchangeService = require('./exchangeService');
 const exchanges = require('./exchanges');
 const KP = require('./autotrade/keyPermissions');
+const asyncio = require('./autotrade/asyncio');
 const { PyError, pyGet, pyTruthy, isDict, pyFloat, errStr, pySlice, pyStr } = require('./exchanges/pyCompat');
 const { pyRound } = require('../strategies/common/pyround');
 
@@ -45,10 +46,10 @@ const PERMISSION_TIMEOUT_S = KP.PERMISSION_TIMEOUT_S;   // D15: the permission r
 const BINANCE_SAPI_URL = KP.BINANCE_SAPI_URL;
 const D15_MESSAGES = KP.MESSAGES;
 
-const D = { log: null, registry: null, resetAuthFailures: null };
+const D = { log: null, registry: null, resetAuthFailures: null, timers: null };
 const log = () => D.log || require('../utils/logger');
 
-/** Tests / wiring: { log, registry, resetAuthFailures } (null → the default). */
+/** Tests / wiring: { log, registry, resetAuthFailures, timers } (null → the default). */
 function configure(o = {}) {
   for (const k of Object.keys(D)) if (Object.prototype.hasOwnProperty.call(o, k)) D[k] = o[k];
 }
@@ -112,36 +113,18 @@ function timeoutError() {
 /**
  * asyncio.wait_for(coro, timeout) — `work` is a function starting the coroutine (or a promise).
  * Rejects with a TimeoutError (str() ''). timeout <= 0: wait_for cancels the task before its first
- * step, so the work is never started (no request goes out). A timed-out call cannot be cancelled in
- * JS: its (read-only) result is dropped.
+ * step, so the work is never started (no request goes out). On the timeout the work's cancel scope
+ * is cancelled (services/autotrade/asyncio.waitFor): an in-flight aiohttp request is abandoned and no
+ * further request, retry or fallback starts — a Bybit pybit call (rt.runInThread) runs on in its
+ * thread, its result dropped — exactly like the bot's wait_for around _test_exchange / _dash /
+ * get_positions. The timer is D.timers (tests: the virtual clock).
  */
 function waitFor(work, timeoutS) {
   if (!(timeoutS > 0)) return Promise.reject(timeoutError());
-  return new Promise((resolve, reject) => {
-    let done = false;
-    const h = setTimeout(() => {
-      if (done) return;
-      done = true;
-      reject(timeoutError());
-    }, timeoutS * 1000);
-    if (h && h.unref) h.unref();
-    let p;
-    try {
-      p = Promise.resolve(typeof work === 'function' ? work() : work);
-    } catch (e) {
-      p = Promise.reject(e);
-    }
-    p.then((v) => {
-      if (done) return;
-      done = true;
-      clearTimeout(h);
-      resolve(v);
-    }, (e) => {
-      if (done) return;
-      done = true;
-      clearTimeout(h);
-      reject(e);
-    });
+  const fn = typeof work === 'function' ? work : () => work;
+  return asyncio.waitFor(fn, timeoutS, D.timers ? { timers: D.timers } : {}).catch((e) => {
+    if (asyncio.isTimeoutError(e) && !e.isTimeout) throw timeoutError();
+    throw e;
   });
 }
 

@@ -40,6 +40,7 @@ const {
   PyError, errStr, pyGet, pyIndex, pyFloat, pyInt, pyStr, pyRepr, pyFloatStr, pyTruthy, pyOr,
   htmlEscape, pySlice, isDict, pyBigInt, pyLen,
   pyIter,
+  rethrowCancelled,
 } = require('./pyCompat');
 const { fmtFixed, fmtSigned } = require('../../strategies/common/pyfmt');
 const { pyRound, pyMax } = require('../../strategies/common/pyround');
@@ -179,6 +180,7 @@ function wantsTpOrders(tp1, tp2, tp3) {
 /** float(x) where Python wraps in try/except (ValueError, TypeError). */
 function tryFloat(v, dflt) {
   try { return pyFloat(v); } catch (e) {
+    rethrowCancelled(e);
     if (e && (e.pyType === 'ValueError' || e.pyType === 'TypeError')) return dflt;
     throw e;
   }
@@ -263,7 +265,7 @@ function createBybitTrader(overrides = {}) {
   }
   function isSymbolDelisted(symbol) {
     let bb;
-    try { bb = toBybitSymbol(symbol); } catch (_e) { log.error('bybit_trader.is_symbol_delisted() unhandled exception'); bb = symbol; }
+    try { bb = toBybitSymbol(symbol); } catch (_e) { rethrowCancelled(_e); log.error('bybit_trader.is_symbol_delisted() unhandled exception'); bb = symbol; }
     return _isDelisted(bb);
   }
 
@@ -301,19 +303,40 @@ function createBybitTrader(overrides = {}) {
     return st.perKeyLocks.get(short);
   }
 
-  /** bybit_call(fn, kwargs, {timeout, apiKey}) — async bucket + call; errors re-raised with a log. */
-  async function bybitCall(fn, kwargs, { apiKey = '', fnName = 'fn' } = {}) {
+  /**
+   * bybit_call(fn, kwargs, {timeout, apiKey}) — async bucket, then
+   * `asyncio.wait_for(asyncio.to_thread(fn, **kwargs), timeout)`: on the hard timeout the thread runs
+   * on (its result is dropped) and asyncio.TimeoutError (str '') is raised with the bot's log line.
+   */
+  async function bybitCall(fn, kwargs, { apiKey = '', fnName = 'fn', timeout = 10.0 } = {}) {
     const bucket = apiKey ? _getAsyncKeyBucket(apiKey) : st.asyncApiBucket;
     if (!(await bucket.acquire(8.0))) log.warning(`bybit_call ${fnName}: rate bucket acquire timeout (proceeding anyway)`);
     try {
-      return await fn(kwargs);
+      return await _hardTimeout(rt.runInThread(() => fn(kwargs)), timeout);
     } catch (e) {
+      rethrowCancelled(e);
+      if (e && e.pyType === 'TimeoutError' && e.hardTimeout) {
+        log.error(`bybit_call ${fnName} hard timeout=${fmtFixed(timeout, 1)}s`);
+        throw e;
+      }
       const err = asRequestsError(e);
       if (err instanceof InvalidRequestError) log.warning(`bybit_call ${fnName} InvalidRequestError: ${err.message}`);
       else if (err instanceof FailedRequestError) log.warning(`bybit_call ${fnName} FailedRequestError: ${err.message}`);
       else log.error(`bybit_call ${fnName} unexpected exception`);
       throw err;
     }
+  }
+
+  /** wait_for(<thread>, timeoutS): the thread is not interrupted; the timer is cleared when it settles. */
+  function _hardTimeout(promise, timeoutS) {
+    return new Promise((resolve, reject) => {
+      const h = rt.timers.setTimeout(() => {
+        const err = new PyError('TimeoutError', '');
+        err.hardTimeout = true;
+        reject(err);
+      }, Math.max(0, Number(timeoutS) * 1000));
+      promise.then((v) => { rt.timers.clearTimeout(h); resolve(v); }, (e) => { rt.timers.clearTimeout(h); reject(e); });
+    });
   }
 
   // ── time sync ──
@@ -330,6 +353,7 @@ function createBybitTrader(overrides = {}) {
       }
       return pyInt(pyIndex(result, 'timeSecond')) * 1000;
     } catch (e) {
+      rethrowCancelled(e);
       log.error('bybit_trader._get_bybit_server_time() unhandled exception');
       return Math.trunc(rt.now() * 1000);
     }
@@ -352,6 +376,7 @@ function createBybitTrader(overrides = {}) {
           log.info(`Bybit time sync: offset=${st.timeOffsetMs}ms (Δ from last: ${d >= 0 ? '+' : ''}${d}ms)`);
         }
       } catch (syncErr) {
+        rethrowCancelled(syncErr);
         const staleFor = st.timeSyncedAt > 0 ? now - st.timeSyncedAt : 0;
         if (staleFor > TIME_STALE_WARN_S && (now - st.timeLastWarnAt) > 60) {
           log.warning(`⚠️ Bybit time sync FAIL for ${staleFor.toFixed(0)}s (offset=${st.timeOffsetMs}ms, err=${pySlice(errStr(syncErr), 100)}) — orders may be rejected as 'timestamp out of range'`);
@@ -393,6 +418,7 @@ function createBybitTrader(overrides = {}) {
         }
       }
     } catch (e) {
+      rethrowCancelled(e);
       log.debug(`get_instruments_info ${symbol}: ${errStr(asRequestsError(e))}`);
     }
     return [0.001, 0.0001];
@@ -429,7 +455,7 @@ function createBybitTrader(overrides = {}) {
 
   function isDelisted(symbol) {
     let bb;
-    try { bb = toBybitSymbol(symbol); } catch (_e) { log.error('bybit_trader.is_delisted() unhandled exception'); bb = symbol; }
+    try { bb = toBybitSymbol(symbol); } catch (_e) { rethrowCancelled(_e); log.error('bybit_trader.is_delisted() unhandled exception'); bb = symbol; }
     return _isDelisted(bb) || (st.symbolFailCount.get(symbol) || 0) >= AUTO_BLACKLIST_THRESHOLD;
   }
   function recordSymbolFailure(symbol) {
@@ -453,6 +479,7 @@ function createBybitTrader(overrides = {}) {
         const r = await session.set_leverage({ category: 'linear', symbol: bbSymbol, buyLeverage: String(l), sellLeverage: String(l) });
         return [isDict(r) ? pyInt(pyGet(r, 'retCode', -1)) : -1, isDict(r) ? pyStr(pyGet(r, 'retMsg', '')) : ''];
       } catch (e0) {
+        rethrowCancelled(e0);
         const e = asRequestsError(e0);
         if (e instanceof InvalidRequestError) {
           const es = e.message;
@@ -574,6 +601,7 @@ function createBybitTrader(overrides = {}) {
         log.debug(`Bybit cached acct type ${cached} failed, re-detecting (key=${safeKeyId(apiKey)})`);
         st.accountTypeCache.delete(apiKey);
       } catch (e) {
+        rethrowCancelled(e);
         log.debug(`Bybit cached acct type ${cached} raised: ${errStr(asRequestsError(e))}, re-detecting`);
         st.accountTypeCache.delete(apiKey);
       }
@@ -613,6 +641,7 @@ function createBybitTrader(overrides = {}) {
             }
             break;
           } catch (e0) {
+            rethrowCancelled(e0);
             const e = asRequestsError(e0);
             lastErr = errStr(e);
             const low = pyLower(lastErr);
@@ -651,6 +680,7 @@ function createBybitTrader(overrides = {}) {
         if (v !== null && v > 0) return v;
       }
     } catch (e) {
+      rethrowCancelled(e);
       if (!(e && ['KeyError', 'IndexError', 'TypeError'].includes(e.pyType))) throw e;
     }
     const coins = pyIndex(pyIndex(pyIndex(pyIndex(resp, 'result'), 'list'), 0), 'coin');
@@ -671,6 +701,7 @@ function createBybitTrader(overrides = {}) {
     try {
       coins = pyIndex(pyIndex(pyIndex(pyIndex(resp, 'result'), 'list'), 0), 'coin');
     } catch (e) {
+      rethrowCancelled(e);
       if (e && ['KeyError', 'IndexError', 'TypeError'].includes(e.pyType)) return 0.0;
       throw e;
     }
@@ -678,6 +709,7 @@ function createBybitTrader(overrides = {}) {
     try {
       acctTotalAvail = pyGet(pyIndex(pyIndex(pyIndex(resp, 'result'), 'list'), 0), 'totalAvailableBalance');
     } catch (e) {
+      rethrowCancelled(e);
       if (!(e && ['KeyError', 'IndexError', 'TypeError'].includes(e.pyType))) throw e;
       acctTotalAvail = null;
     }
@@ -694,8 +726,9 @@ function createBybitTrader(overrides = {}) {
   async function getBalance(apiKey, apiSecret, demo = false) {
     for (let attempt = 0; attempt < 2; attempt++) {
       try {
-        return await _getBalanceSync(apiKey, apiSecret, demo);
+        return await rt.runInThread(() => _getBalanceSync(apiKey, apiSecret, demo));
       } catch (e0) {
+        rethrowCancelled(e0);
         const e = asRequestsError(e0);
         const s = pyLower(errStr(e));
         if (attempt === 0 && (s.includes('494') || s.includes('10002') || s.includes('retryable'))) {
@@ -724,6 +757,7 @@ function createBybitTrader(overrides = {}) {
       const lst = await _ticker(symbol);
       if (pyTruthy(lst)) return pyFloat(pyOr(pyGet(lst[0], 'lastPrice', 0), 0));
     } catch (e) {
+      rethrowCancelled(e);
       log.debug(`get_last_price ${symbol}: ${errStr(e)}`);
     }
     return 0.0;
@@ -741,6 +775,7 @@ function createBybitTrader(overrides = {}) {
         }
       }
     } catch (e) {
+      rethrowCancelled(e);
       log.debug(`get_spread_pct ${symbol}: ${errStr(e)}`);
     }
     return 0.0;
@@ -751,6 +786,7 @@ function createBybitTrader(overrides = {}) {
       const lst = await _ticker(symbol);
       if (pyTruthy(lst)) return pyFloat(pyOr(pyGet(lst[0], 'fundingRate', 0), 0));
     } catch (e) {
+      rethrowCancelled(e);
       log.debug(`get_funding_rate ${symbol}: ${errStr(e)}`);
     }
     return 0.0;
@@ -775,6 +811,7 @@ function createBybitTrader(overrides = {}) {
         serverMs = pyInt(pyIndex(pyIndex(data, 'result'), 'timeSecond')) * 1000;
         break;
       } catch (e) {
+        rethrowCancelled(e);
         connErr = e;
         const es = errStr(e);
         const isNet = isNetworkError(es);
@@ -826,6 +863,7 @@ function createBybitTrader(overrides = {}) {
               }
             }
           } catch (_e) {
+            rethrowCancelled(_e);
             log.error('bybit_trader._test_connection_single() unhandled exception');
             balance = 0.0;
           }
@@ -840,7 +878,7 @@ function createBybitTrader(overrides = {}) {
         log.info('test_connection: direct HTTP failed for demo, trying pybit fallback...');
         try {
           const session = _getSession(apiKey, apiSecret, true);
-          const resp = await bybitCall(session.get_wallet_balance, { accountType: 'UNIFIED', coin: 'USDT' }, { apiKey, fnName: 'get_wallet_balance' });
+          const resp = await bybitCall(session.get_wallet_balance, { accountType: 'UNIFIED', coin: 'USDT' }, { apiKey, fnName: 'get_wallet_balance', timeout: 8.0 });
           if (pyGet(resp, 'retCode') === 0) {
             const coins = pyIndex(pyIndex(pyIndex(pyIndex(resp, 'result'), 'list'), 0), 'coin');
             let balance = 0.0;
@@ -849,7 +887,7 @@ function createBybitTrader(overrides = {}) {
             }
             return { ok: true, balance };
           }
-          const resp2 = await bybitCall(session.get_wallet_balance, { accountType: 'CONTRACT', coin: 'USDT' }, { apiKey, fnName: 'get_wallet_balance' });
+          const resp2 = await bybitCall(session.get_wallet_balance, { accountType: 'CONTRACT', coin: 'USDT' }, { apiKey, fnName: 'get_wallet_balance', timeout: 8.0 });
           if (pyGet(resp2, 'retCode') === 0) {
             const coins = pyIndex(pyIndex(pyIndex(pyIndex(resp2, 'result'), 'list'), 0), 'coin');
             let balance = 0.0;
@@ -860,6 +898,7 @@ function createBybitTrader(overrides = {}) {
           }
           lastErr = `pybit: ${pyStr(pyGet(resp, 'retMsg', ''))} / ${pyStr(pyGet(resp2, 'retMsg', ''))}`;
         } catch (pybitErr) {
+          rethrowCancelled(pybitErr);
           lastErr = `pybit fallback: ${errStr(pybitErr)}`;
           log.warning(`test_connection pybit fallback failed: ${errStr(pybitErr)}`);
         }
@@ -867,6 +906,7 @@ function createBybitTrader(overrides = {}) {
       log.warning(`test_connection failed: both UNIFIED and CONTRACT failed, last error: ${pyRepr(lastErr)} key=${safeKeyId(apiKey)}...`);
       return { ok: false, error: humanizeBybitError(lastErr) };
     } catch (e) {
+      rethrowCancelled(e);
       log.error(`test_connection direct request error: ${errStr(e)}`);
       return { ok: false, error: humanizeBybitError(errStr(e)) };
     }
@@ -911,6 +951,7 @@ function createBybitTrader(overrides = {}) {
       }
       return pyFloat(pyOr(pyGet(matching[0], 'size', '0'), '0'));
     } catch (_e) {
+      rethrowCancelled(_e);
       log.debug(`_get_current_position_size ${bbSymbol}: query error`);
     }
     return 0.0;
@@ -938,6 +979,7 @@ function createBybitTrader(overrides = {}) {
         }
         if (ready) break;
       } catch (e) {
+        rethrowCancelled(e);
         log.debug(`position poll ${bbSymbol}: ${errStr(asRequestsError(e))}`);
       }
       await rt.sleep(POLL_INTERVAL);
@@ -1000,6 +1042,7 @@ function createBybitTrader(overrides = {}) {
             try {
               retryPos = await _getCurrentPositionSize(session, bbSymbol, apiKey, posIdx);
             } catch (rpE) {
+              rethrowCancelled(rpE);
               log.debug(`110017 position recheck failed: ${errStr(rpE)}`);
               retryPos = -1.0;
             }
@@ -1013,6 +1056,7 @@ function createBybitTrader(overrides = {}) {
           }
           break;
         } catch (e0) {
+          rethrowCancelled(e0);
           const e = asRequestsError(e0);
           const es = errStr(e);
           lastErr = pySlice(es, 120);
@@ -1052,7 +1096,7 @@ function createBybitTrader(overrides = {}) {
   }
 
   async function placeTpOrders(apiKey, apiSecret, symbol, direction, posSize, tp1, tp2, tp3, posIdx = 0, demo = false) {
-    const ok = await _placeTpOrdersSync(apiKey, apiSecret, symbol, direction, posSize, tp1, tp2, tp3, posIdx, demo);
+    const ok = await rt.runInThread(() => _placeTpOrdersSync(apiKey, apiSecret, symbol, direction, posSize, tp1, tp2, tp3, posIdx, demo));
     if (!ok) return false;
     try {
       await rt.sleep(2.0);
@@ -1070,6 +1114,7 @@ function createBybitTrader(overrides = {}) {
       }
       log.debug(`[TP-VERIFIED] Bybit ${bb}: ${live}/${expected} TPs on exchange`);
     } catch (e) {
+      rethrowCancelled(e);
       log.debug(`TP verify ${symbol}: ${errStr(e)}`);
     }
     return true;
@@ -1100,6 +1145,7 @@ function createBybitTrader(overrides = {}) {
       await _getKeyBucket(apiKey).acquire();
       await session.switch_margin_mode({ category: 'linear', symbol: bbSymbol, tradeMode: 1 });
     } catch (mmErr) {
+      rethrowCancelled(mmErr);
       const s = errStr(asRequestsError(mmErr));
       if (!s.includes('110026')) log.debug(`switch_margin_mode ${bbSymbol}: ${s}`);
     }
@@ -1208,6 +1254,7 @@ function createBybitTrader(overrides = {}) {
     try {
       available = await _getAvailableMarginSync(apiKey, apiSecret, demo);
     } catch (amE) {
+      rethrowCancelled(amE);
       log.warning(`[MARGIN-PRECHECK] sym=${bbSymbol}: could not fetch available margin: ${errStr(asRequestsError(amE))} — skipping pre-check, proceeding to placement (Bybit will reject with 110007 if insufficient)`);
       available = null;
     }
@@ -1307,6 +1354,7 @@ function createBybitTrader(overrides = {}) {
             };
           }
         } catch (ve) {
+          rethrowCancelled(ve);
           log.debug(`dup-verify get_positions ${bbSymbol}: ${errStr(asRequestsError(ve))}`);
         }
         return { ok: false, error: 'Ордер уже существует на бирже (idempotency-protected duplicate).' };
@@ -1363,6 +1411,7 @@ function createBybitTrader(overrides = {}) {
               }
             }
           } catch (ape) {
+            rethrowCancelled(ape);
             log.debug(`avg_price fetch ${bbSymbol}: ${errStr(asRequestsError(ape))}`);
           }
         }
@@ -1384,6 +1433,7 @@ function createBybitTrader(overrides = {}) {
                 slLastErr = pySlice(pyStr(pyOr(pyGet(slResp, 'retMsg', ''), '')), 150);
                 log.warning(`${bbSymbol}: CONTRACT SL attempt ${a + 1}/3 failed: ${slLastErr}`);
               } catch (slE) {
+                rethrowCancelled(slE);
                 slLastErr = pySlice(errStr(asRequestsError(slE)), 150);
                 log.warning(`${bbSymbol}: CONTRACT SL attempt ${a + 1}/3 exception: ${slLastErr}`);
               }
@@ -1403,6 +1453,7 @@ function createBybitTrader(overrides = {}) {
                 log.error(`[SL-SAFETY-CLOSE-FAIL] ${bbSymbol}: emergency close rejected: ${pyStr(pyGet(closeResp, 'error', 'unknown'))} — BE-monitor takes over`);
               }
             } catch (safetyE) {
+              rethrowCancelled(safetyE);
               log.error(`[SL-SAFETY-CLOSE-EXC] ${bbSymbol}: emergency close exception: ${errStr(safetyE)} — BE-monitor takes over`);
             }
             if (!safetyClosed) log.error(`[SL-RETRY-FAIL] ${bbSymbol}: trade_anomaly_detector will emit missing_sl alert on next poll (≤60s)`);
@@ -1496,10 +1547,11 @@ function createBybitTrader(overrides = {}) {
         return { ok: false, error: pyGet(resp, 'retMsg', 'Неизвестная ошибка Bybit') };
       }
     } catch (e0) {
+      rethrowCancelled(e0);
       const e = asRequestsError(e0);
       const es = errStr(e);
       if (es.includes('30228') || es.includes('110074')) {
-        try { _markDelisted(toBybitSymbol(symbol)); } catch (_x) { log.error('bybit_trader._do_place_no_sl() unhandled exception'); }
+        try { _markDelisted(toBybitSymbol(symbol)); } catch (_x) { rethrowCancelled(_x); log.error('bybit_trader._do_place_no_sl() unhandled exception'); }
         log.warning(`place_order ${symbol}: delisted (cached) — ${pySlice(es, 120)}`);
         return { ok: false, error: humanizeBybitError(es) };
       }
@@ -1529,6 +1581,7 @@ function createBybitTrader(overrides = {}) {
       await _getKeyBucket(apiKey).acquire();
       await session.switch_margin_mode({ category: 'linear', symbol: bbSymbol, tradeMode: 1 });
     } catch (mmErr) {
+      rethrowCancelled(mmErr);
       const s = errStr(asRequestsError(mmErr));
       if (!s.includes('110026')) log.debug(`switch_margin_mode split ${bbSymbol}: ${s}`);
     }
@@ -1591,6 +1644,7 @@ function createBybitTrader(overrides = {}) {
     try {
       available = await _getAvailableMarginSync(apiKey, apiSecret, demo);
     } catch (amE) {
+      rethrowCancelled(amE);
       log.warning(`[MARGIN-PRECHECK] split sym=${bbSymbol}: could not fetch available margin: ${errStr(asRequestsError(amE))} — skipping pre-check, proceeding to placement`);
       available = null;
     }
@@ -1658,6 +1712,7 @@ function createBybitTrader(overrides = {}) {
         log.warning(`split entry_lo ${bbSymbol}: retCode=${pyStr(pyGet(resp, 'retCode'))} ${pyStr(pyGet(resp, 'retMsg', ''))}`);
       }
     } catch (e) {
+      rethrowCancelled(e);
       log.warning(`split entry_lo ${bbSymbol}: ${errStr(asRequestsError(e))}`);
     }
     try {
@@ -1667,6 +1722,7 @@ function createBybitTrader(overrides = {}) {
         log.warning(`split entry_hi ${bbSymbol}: retCode=${pyStr(pyGet(resp, 'retCode'))} ${pyStr(pyGet(resp, 'retMsg', ''))}`);
       }
     } catch (e) {
+      rethrowCancelled(e);
       log.warning(`split entry_hi ${bbSymbol}: ${errStr(asRequestsError(e))}`);
     }
     if (!anyOk) return { ok: false, error: 'Не удалось выставить ни один из сплит-ордеров' };
@@ -1719,7 +1775,7 @@ function createBybitTrader(overrides = {}) {
     if (deny) return deny;
     await _warmHedgeCache(apiKey);
     const before = st.hedgeModeCache.has(apiKey) ? st.hedgeModeCache.get(apiKey) : null;
-    const result = await _placeTradeSplitSync(apiKey, apiSecret, symbol, direction, entryLo, entryHi, sl, tp1, riskPct, leverage, { tp2, tp3, demo });
+    const result = await rt.runInThread(() => _placeTradeSplitSync(apiKey, apiSecret, symbol, direction, entryLo, entryHi, sl, tp1, riskPct, leverage, { tp2, tp3, demo }));
     const after = st.hedgeModeCache.has(apiKey) ? st.hedgeModeCache.get(apiKey) : null;
     if (after !== null && after !== before) await _saveHedgeMode(apiKey, after);
     if (pyTruthy(pyGet(result, 'ok')) && pyTruthy(pyGet(result, 'order_id'))) {
@@ -1743,6 +1799,7 @@ function createBybitTrader(overrides = {}) {
         tp2, tp3, riskMode, demo, orderType, tradeId, userId, allowLowNotionalBoost, t0,
       });
     } catch (e) {
+      rethrowCancelled(e);
       // `except asyncio.TimeoutError` around the whole body (aiohttp-side timeouts only)
       if (e instanceof TransportError && e.kind === 'timeout') return { ok: false, error: 'Таймаут соединения с биржей. Попробуйте позже.' };
       throw e;
@@ -1758,12 +1815,13 @@ function createBybitTrader(overrides = {}) {
     let lastExc = null;
     for (let attempt = 0; attempt < 2; attempt++) {
       try {
-        result = await _placeTradeSync(apiKey, apiSecret, symbol, direction, entry, sl, tp1, riskPct, leverage, {
+        result = await rt.runInThread(() => _placeTradeSync(apiKey, apiSecret, symbol, direction, entry, sl, tp1, riskPct, leverage, {
           tp2, tp3, riskMode, demo, orderType, tradeId, userId, allowLowNotionalBoost,
-        });
+        }));
         lastExc = null;
         break;
       } catch (e0) {
+        rethrowCancelled(e0);
         const e = asRequestsError(e0);
         lastExc = e;
         const es = pyLower(errStr(e));
@@ -1789,7 +1847,7 @@ function createBybitTrader(overrides = {}) {
           order_id: pyGet(result, 'order_id', ''),
           error: pySlice(pyStr(pyGet(result, 'error', '')), 200),
         });
-      } catch (e) { log.debug(`emit bybit SL events: ${errStr(e)}`); }
+      } catch (e) { rethrowCancelled(e); log.debug(`emit bybit SL events: ${errStr(e)}`); }
     }
     if (!pyTruthy(pyGet(result, 'ok'))) {
       const err = pyStr(pyGet(result, 'error', ''));
@@ -1798,7 +1856,7 @@ function createBybitTrader(overrides = {}) {
         try {
           const uids = await rt.onAuthReset('bybit', apiKey);
           for (const uid of uids || []) log.warning(`[BYBIT-AUTH-RESET] uid=${uid} auto_trade=0 (invalid API key)`);
-        } catch (e) { log.warning(`reset auto_trade by key failed: ${errStr(e)}`); }
+        } catch (e) { rethrowCancelled(e); log.warning(`reset auto_trade by key failed: ${errStr(e)}`); }
       }
     }
     if (pyTruthy(pyGet(result, 'ok')) && pyTruthy(pyGet(result, 'order_id'))) {
@@ -1808,7 +1866,7 @@ function createBybitTrader(overrides = {}) {
   }
 
   // ── breakeven / trailing ──
-  async function setBreakeven(apiKey, apiSecret, symbol, entry, direction, posIdx = 0, demo = false) {
+  async function _setBreakevenSync(apiKey, apiSecret, symbol, entry, direction, posIdx = 0, demo = false) {
     const session = _getSession(apiKey, apiSecret, demo);
     const bb = toBybitSymbol(symbol);
     try {
@@ -1821,13 +1879,14 @@ function createBybitTrader(overrides = {}) {
       if (pyGet(resp, 'retCode', -1) === 0) return { ok: true };
       return { ok: false, error: pyGet(resp, 'retMsg', 'BE error') };
     } catch (e0) {
+      rethrowCancelled(e0);
       const e = asRequestsError(e0);
       log.error(`set_breakeven ${symbol}: ${errStr(e)}`);
       return { ok: false, error: errStr(e) };
     }
   }
 
-  async function setTrailingSl(apiKey, apiSecret, symbol, newSl, direction, posIdx = 0, demo = false) {
+  async function _setTrailingSlSync(apiKey, apiSecret, symbol, newSl, direction, posIdx = 0, demo = false) {
     const session = _getSession(apiKey, apiSecret, demo);
     const bb = toBybitSymbol(symbol);
     try {
@@ -1845,6 +1904,7 @@ function createBybitTrader(overrides = {}) {
           if (d === 'SHORT' && newSl <= mark) return { ok: false, error: `new_sl ${pyFloatStr(newSl)} <= mark ${pyFloatStr(mark)} for SHORT (would trigger immediate)` };
         }
       } catch (vt) {
+        rethrowCancelled(vt);
         log.debug(`set_trailing_sl pre-check ${bb}: ${errStr(asRequestsError(vt))}`);
       }
       let lastErr = '';
@@ -1856,6 +1916,7 @@ function createBybitTrader(overrides = {}) {
             category: 'linear', symbol: bb, stopLoss: PP.roundPrice(newSl * pmult, tickSize), slTriggerBy: 'MarkPrice', positionIdx: posIdx,
           });
         } catch (pe0) {
+          rethrowCancelled(pe0);
           const pe = asRequestsError(pe0);
           if (!(pe instanceof InvalidRequestError)) throw pe;
           const es = pe.message;
@@ -1877,6 +1938,7 @@ function createBybitTrader(overrides = {}) {
                 if (d === 'SHORT' && newSl <= m2) return { ok: false, error: `new_sl ${pyFloatStr(newSl)} <= re-fetched mark ${pyFloatStr(m2)} for SHORT (price moved, abort retry)` };
               }
             } catch (rf) {
+              rethrowCancelled(rf);
               log.debug(`110010-retry mark re-fetch ${bb}: ${errStr(asRequestsError(rf))}`);
             }
             log.warning(`set_trailing_sl ${bb} 110010 attempt ${a + 1}/3 — retry after mark re-fetch`);
@@ -1898,6 +1960,7 @@ function createBybitTrader(overrides = {}) {
       }
       return { ok: false, error: `110010 after 3 retries: ${pySlice(lastErr, 200)}` };
     } catch (e0) {
+      rethrowCancelled(e0);
       const e = asRequestsError(e0);
       const es = errStr(e);
       if (es.includes('34040') || pyLower(es).includes('not modified')) {
@@ -1910,7 +1973,7 @@ function createBybitTrader(overrides = {}) {
   }
 
   // ── positions / orders ──
-  async function getPositions(apiKey, apiSecret, symbol = '', demo = false) {
+  async function _getPositionsSync(apiKey, apiSecret, symbol = '', demo = false) {
     const session = _getSession(apiKey, apiSecret, demo);
     try {
       const kwargs = { category: 'linear', settleCoin: 'USDT' };
@@ -1919,6 +1982,7 @@ function createBybitTrader(overrides = {}) {
       const resp = await session.get_positions(kwargs);
       if (pyGet(resp, 'retCode', -1) === 0) return pyGet(pyIndex(resp, 'result'), 'list', []);
     } catch (e) {
+      rethrowCancelled(e);
       log.debug(`get_positions: ${errStr(asRequestsError(e))}`);
     }
     return [];
@@ -1933,6 +1997,7 @@ function createBybitTrader(overrides = {}) {
       if (pyGet(resp, 'retCode', -1) === 0) return { ok: true, cancelled: pyLen(pyGet(pyGet(resp, 'result', {}), 'list', [])) };
       return { ok: false, error: pyGet(resp, 'retMsg', 'cancel error') };
     } catch (e0) {
+      rethrowCancelled(e0);
       const e = asRequestsError(e0);
       log.debug(`cancel_all_orders ${symbol}: ${errStr(e)}`);
       return { ok: false, error: errStr(e) };
@@ -1940,11 +2005,11 @@ function createBybitTrader(overrides = {}) {
   }
 
   async function cancelAllOrders(apiKey, apiSecret, symbol, demo = false) {
-    const _do = () => _cancelAllOrdersSync(apiKey, apiSecret, symbol, demo);
+    const _do = () => rt.runInThread(() => _cancelAllOrdersSync(apiKey, apiSecret, symbol, demo));
     return callWithRetry(_do, { maxAttempts: 3, baseBackoff: 0.3, opName: `bybit_cancel_all_${symbol}`, sleep: rt.sleep, random: rt.random, log });
   }
 
-  async function getClosedPnl(apiKey, apiSecret, symbol, demo = false) {
+  async function _getClosedPnlSync(apiKey, apiSecret, symbol, demo = false) {
     const session = _getSession(apiKey, apiSecret, demo);
     const bb = toBybitSymbol(symbol);
     try {
@@ -1958,37 +2023,40 @@ function createBybitTrader(overrides = {}) {
       }
       log.warning(`[GET-CLOSED-PNL-FAIL] sym=${symbol} bb=${bb} retCode=${pyStr(retCode)} retMsg=${pySlice(pyStr(pyOr(pyGet(resp, 'retMsg', ''), '')), 200)}`);
     } catch (e0) {
+      rethrowCancelled(e0);
       const e = asRequestsError(e0);
       log.warning(`[GET-CLOSED-PNL-EXC] sym=${symbol} bb=${bb} exc_type=${e.pyType || e.name} err=${pySlice(errStr(e), 300)}`);
     }
     return [];
   }
 
-  async function getAllClosedPnl(apiKey, apiSecret, limit = 50, demo = false) {
+  async function _getAllClosedPnlSync(apiKey, apiSecret, limit = 50, demo = false) {
     const session = _getSession(apiKey, apiSecret, demo);
     try {
       await _getKeyBucket(apiKey).acquire();
       const resp = await session.get_closed_pnl({ category: 'linear', limit: pyInt(limit) });
       if (pyGet(resp, 'retCode', -1) === 0) return pyOr(pyGet(pyIndex(resp, 'result'), 'list', []), []);
     } catch (e) {
+      rethrowCancelled(e);
       log.debug(`get_all_closed_pnl: ${errStr(asRequestsError(e))}`);
     }
     return [];
   }
 
-  async function getOpenOrders(apiKey, apiSecret, demo = false) {
+  async function _getOpenOrdersSync(apiKey, apiSecret, demo = false) {
     const session = _getSession(apiKey, apiSecret, demo);
     try {
       await _getKeyBucket(apiKey).acquire();
       const resp = await session.get_open_orders({ category: 'linear', settleCoin: 'USDT', limit: 50 });
       if (pyGet(resp, 'retCode', -1) === 0) return pyGet(pyIndex(resp, 'result'), 'list', []);
     } catch (e) {
+      rethrowCancelled(e);
       log.debug(`get_open_orders: ${errStr(asRequestsError(e))}`);
     }
     return [];
   }
 
-  async function cancelOrder(apiKey, apiSecret, symbol, orderId, demo = false) {
+  async function _cancelOrderSync(apiKey, apiSecret, symbol, orderId, demo = false) {
     const session = _getSession(apiKey, apiSecret, demo);
     const bb = toBybitSymbol(symbol);
     try {
@@ -2001,6 +2069,7 @@ function createBybitTrader(overrides = {}) {
       else log.warning(`cancel_order ${symbol} ${orderId}: ${pyStr(retMsg)} (code=${pyStr(retCode)})`);
       return { ok: false, error: retMsg };
     } catch (e0) {
+      rethrowCancelled(e0);
       const e = asRequestsError(e0);
       const es = errStr(e);
       if (es.includes('110001')) log.debug(`cancel_order ${symbol} ${orderId}: already gone (${es})`);
@@ -2035,6 +2104,7 @@ function createBybitTrader(overrides = {}) {
         }
       }
     } catch (eRound) {
+      rethrowCancelled(eRound);
       log.debug(`close_position ${symbol}: qty rounding failed (${errStr(eRound)}) — sending raw ${pyStr(size)}`);
     }
     try {
@@ -2051,6 +2121,7 @@ function createBybitTrader(overrides = {}) {
       }
       return { ok: false, error: retMsg };
     } catch (e0) {
+      rethrowCancelled(e0);
       const e = asRequestsError(e0);
       const es = errStr(e);
       if (es.includes('10001') && pyLower(es).includes('qty invalid')) {
@@ -2063,7 +2134,7 @@ function createBybitTrader(overrides = {}) {
   }
 
   async function closePosition(apiKey, apiSecret, symbol, side, size, posIdx = 0, demo = false) {
-    return _closePositionSync(apiKey, apiSecret, symbol, side, size, posIdx, demo);
+    return await rt.runInThread(() => _closePositionSync(apiKey, apiSecret, symbol, side, size, posIdx, demo));
   }
 
   async function _summaryInto(session, apiKey, result, { reraiseIfNoPositions = null } = {}) {
@@ -2079,6 +2150,7 @@ function createBybitTrader(overrides = {}) {
         }
       }
     } catch (e0) {
+      rethrowCancelled(e0);
       const e = asRequestsError(e0);
       if (reraiseIfNoPositions !== null) {
         if (!reraiseIfNoPositions.length) throw e;
@@ -2101,11 +2173,12 @@ function createBybitTrader(overrides = {}) {
         }
       }
     } catch (e) {
+      rethrowCancelled(e);
       log.debug(`${reraiseIfNoPositions !== null ? 'dashboard' : 'account_summary'} 24h: ${errStr(asRequestsError(e))}`);
     }
   }
 
-  async function getAccountSummary(apiKey, apiSecret, demo = false) {
+  async function _getAccountSummarySync(apiKey, apiSecret, demo = false) {
     const session = _getSession(apiKey, apiSecret, demo);
     const result = {
       equity: 0.0, wallet_balance: 0.0, unrealized_pnl: 0.0, available: 0.0,
@@ -2117,6 +2190,10 @@ function createBybitTrader(overrides = {}) {
 
   async function getDashboard(apiKey, apiSecret, demo = false) {
     await _getTimestamp();
+    return await rt.runInThread(() => _getDashboardSync(apiKey, apiSecret, demo));
+  }
+
+  async function _getDashboardSync(apiKey, apiSecret, demo = false) {
     const session = _getSession(apiKey, apiSecret, demo);
     let positions = [];
     try {
@@ -2124,6 +2201,7 @@ function createBybitTrader(overrides = {}) {
       const resp = await session.get_positions({ category: 'linear', settleCoin: 'USDT' });
       if (pyGet(resp, 'retCode', -1) === 0) positions = pyIter(pyGet(pyIndex(resp, 'result'), 'list', [])).filter((p) => pyFloat(pyGet(p, 'size', 0)) > 0);
     } catch (e) {
+      rethrowCancelled(e);
       log.debug(`dashboard positions: ${errStr(asRequestsError(e))}`);
     }
     let orders = [];
@@ -2132,6 +2210,7 @@ function createBybitTrader(overrides = {}) {
       const resp = await session.get_open_orders({ category: 'linear', settleCoin: 'USDT', limit: 50 });
       if (pyGet(resp, 'retCode', -1) === 0) orders = pyGet(pyIndex(resp, 'result'), 'list', []);
     } catch (e) {
+      rethrowCancelled(e);
       log.debug(`dashboard orders: ${errStr(asRequestsError(e))}`);
     }
     const summary = {
@@ -2142,7 +2221,7 @@ function createBybitTrader(overrides = {}) {
     return [positions, orders, summary];
   }
 
-  async function getExecutionExitPrice(apiKey, apiSecret, symbol, createdMs, demo = false) {
+  async function _getExecutionExitPriceSync(apiKey, apiSecret, symbol, createdMs, demo = false) {
     const session = _getSession(apiKey, apiSecret, demo);
     const bb = toBybitSymbol(symbol);
     try {
@@ -2164,9 +2243,47 @@ function createBybitTrader(overrides = {}) {
       const vwap = pySum(prices.map((p, i) => p * qtys[i])) / totalQty;
       return pyRound(vwap, 8);
     } catch (e) {
+      rethrowCancelled(e);
       log.debug(`get_execution_exit_price ${symbol}: ${errStr(asRequestsError(e))}`);
       return null;
     }
+  }
+
+  // ── async wrappers: `return await loop.run_in_executor(None, lambda: _x_sync(...))` ──
+  async function setBreakeven(apiKey, apiSecret, symbol, entry, direction, posIdx = 0, demo = false) {
+    return await rt.runInThread(() => _setBreakevenSync(apiKey, apiSecret, symbol, entry, direction, posIdx, demo));
+  }
+
+  async function setTrailingSl(apiKey, apiSecret, symbol, newSl, direction, posIdx = 0, demo = false) {
+    return await rt.runInThread(() => _setTrailingSlSync(apiKey, apiSecret, symbol, newSl, direction, posIdx, demo));
+  }
+
+  async function getPositions(apiKey, apiSecret, symbol = '', demo = false) {
+    return await rt.runInThread(() => _getPositionsSync(apiKey, apiSecret, symbol, demo));
+  }
+
+  async function getClosedPnl(apiKey, apiSecret, symbol, demo = false) {
+    return await rt.runInThread(() => _getClosedPnlSync(apiKey, apiSecret, symbol, demo));
+  }
+
+  async function getAllClosedPnl(apiKey, apiSecret, limit = 50, demo = false) {
+    return await rt.runInThread(() => _getAllClosedPnlSync(apiKey, apiSecret, limit, demo));
+  }
+
+  async function getOpenOrders(apiKey, apiSecret, demo = false) {
+    return await rt.runInThread(() => _getOpenOrdersSync(apiKey, apiSecret, demo));
+  }
+
+  async function cancelOrder(apiKey, apiSecret, symbol, orderId, demo = false) {
+    return await rt.runInThread(() => _cancelOrderSync(apiKey, apiSecret, symbol, orderId, demo));
+  }
+
+  async function getAccountSummary(apiKey, apiSecret, demo = false) {
+    return await rt.runInThread(() => _getAccountSummarySync(apiKey, apiSecret, demo));
+  }
+
+  async function getExecutionExitPrice(apiKey, apiSecret, symbol, createdMs, demo = false) {
+    return await rt.runInThread(() => _getExecutionExitPriceSync(apiKey, apiSecret, symbol, createdMs, demo));
   }
 
   return {

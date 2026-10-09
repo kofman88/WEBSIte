@@ -10,10 +10,11 @@
  *                          placeSlTpForPosition, placeTpOrders, placeTradeSplit, getFundingRate,
  *                          getSpreadPct, closePosition)
  *     handle.formatTradeResult / formatTradeResultSplit / priceMultiplier(sym)   module statics
- *   isThreadCall(exchange, fn)  the pybit run_in_executor calls (Bybit) — a wait_for timeout does not
- *                          interrupt them (asyncio.waitFor `shield`)
- *   productionOverrides({...})  trader runtime with cancellable transport / sleep + the auto-trade
- *                          hooks (killswitch, plan gate, events, auth reset)
+ *   BYBIT_THREAD_FNS       the bybit_trader.py coroutines that `await loop.run_in_executor(...)` the pybit
+ *                          work — services/exchanges/bybitTrader.js runs that work through rt.runInThread
+ *   productionOverrides({...})  trader runtime with cancellable transport / sleep, runInThread (a wait_for
+ *                          timeout cancels the coroutine at the executor await, the thread runs on) + the
+ *                          auto-trade hooks (killswitch, plan gate, events, auth reset)
  *
  * Unknown exchange names resolve to bybit, like the bot.
  */
@@ -25,7 +26,7 @@ const okx = require('../exchanges/okxTrader');
 const { createRegistry, resolveExchange } = require('../exchanges');
 const { defaultTransport } = require('../exchanges/transport');
 const { realSleep } = require('../exchanges/runtime');
-const { cancellableTransport, cancellableSleep } = require('./asyncio');
+const { cancellableTransport, cancellableSleep, runInThread } = require('./asyncio');
 
 const MODULES = { bybit, bingx, binance, okx };
 const PMULT = {
@@ -36,11 +37,8 @@ const PMULT = {
 const BYBIT_THREAD_FNS = new Set([
   'getBalance', 'placeTpOrders', 'placeTradeSplit', 'setTrailingSl', 'getPositions', 'cancelAllOrders',
   'getOpenOrders', 'cancelOrder', 'closePosition', 'getAllClosedPnl', 'getAccountSummary', 'placeTrade',
+  'setBreakeven', 'getClosedPnl', 'getDashboard', 'getExecutionExitPrice',
 ]);
-
-function isThreadCall(exchange, fn) {
-  return resolveExchange(exchange) === 'bybit' && BYBIT_THREAD_FNS.has(fn);
-}
 
 const METHODS = [
   'placeTrade', 'placeTradeSplit', 'placeTpOrders', 'getBalance', 'getPositions', 'getOpenOrders', 'cancelAllOrders',
@@ -69,6 +67,7 @@ function productionOverrides({ killswitch = null, planGate = null, events = null
   const o = { ...(extra || {}) };
   o.transport = cancellableTransport(transport || defaultTransport());
   o.sleep = cancellableSleep(sleep || realSleep);
+  o.runInThread = runInThread;
   if (killswitch) o.killswitch = killswitch;
   if (planGate) o.planGate = planGate;
   if (events) o.events = events;
@@ -87,4 +86,4 @@ function createTraderSet({ registry = null, overrides = {}, instances = null } =
   };
 }
 
-module.exports = { MODULES, PMULT, BYBIT_THREAD_FNS, isThreadCall, makeHandle, productionOverrides, createTraderSet };
+module.exports = { MODULES, PMULT, BYBIT_THREAD_FNS, makeHandle, productionOverrides, createTraderSet };

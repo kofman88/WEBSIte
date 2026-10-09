@@ -24,11 +24,17 @@ class BalanceTimeout extends Error {
   constructor() { super(''); this.name = 'TimeoutError'; this.pyType = 'TimeoutError'; }
 }
 
-/** asyncio.wait_for(promise, s) on a real timer. */
-function realWithTimeout(promise, s) {
-  let timer;
-  const t = new Promise((_r, reject) => { timer = setTimeout(() => reject(new BalanceTimeout()), s * 1000); });
-  return Promise.race([promise, t]).finally(() => clearTimeout(timer));
+/**
+ * asyncio.wait_for(work(), s): `work` starts inside a cancel scope (services/autotrade/asyncio), so
+ * on the timeout the balance call's in-flight request is abandoned and no retry / fallback request
+ * follows (a Bybit pybit call runs on in its thread) — BalanceTimeout ('') like the bot's.
+ */
+function realWithTimeout(work, s) {
+  const asyncio = require('../autotrade/asyncio');
+  return asyncio.waitFor(typeof work === 'function' ? work : () => work, s).catch((e) => {
+    if (asyncio.isTimeoutError(e)) throw new BalanceTimeout();
+    throw e;
+  });
 }
 
 function createBalanceCache({
@@ -54,11 +60,11 @@ function createBalanceCache({
     try {
       let call;
       if (exchange === 'bybit') {
-        call = getTrader('bybit').getBalance({ apiKey, apiSecret, demo: Boolean(user.bybit_demo) });
+        call = () => getTrader('bybit').getBalance({ apiKey, apiSecret, demo: Boolean(user.bybit_demo) });
       } else if (exchange === 'bingx' || exchange === 'binance') {
-        call = getTrader(exchange).getBalance({ apiKey, apiSecret });
+        call = () => getTrader(exchange).getBalance({ apiKey, apiSecret });
       } else if (exchange === 'okx') {
-        call = getTrader('okx').getBalance({ apiKey, apiSecret, passphrase: pyOr(user.okx_passphrase, '') });
+        call = () => getTrader('okx').getBalance({ apiKey, apiSecret, passphrase: pyOr(user.okx_passphrase, '') });
       } else {
         return null;
       }

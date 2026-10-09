@@ -26,7 +26,6 @@
  */
 
 const { waitFor, isTimeoutError, isCancelledError, makeLock, currentTaskName } = require('./asyncio');
-const { isThreadCall } = require('./traders');
 const { pf, F } = require('./pyfmt');
 const { t: i18n } = require('./messages');
 const { isUserFacingError, isAuthFailure, ZERO_BAL_COOLDOWN_SEC } = require('./cooldowns');
@@ -130,8 +129,9 @@ function createExecutor(deps) {
   let cbWarned = false;
 
   const send = (bot, uid, text, opts = {}) => sendMessage(bot, uid, text, { parseMode: 'HTML', siteType: 'trade', ...opts });
-  /** asyncio.wait_for around one trader call — the Bybit pybit calls are thread-pool work (shield). */
-  const call = (exchange, fn, timeoutS, thunk) => waitFor(thunk, timeoutS, { shield: isThreadCall(exchange, fn), timers });
+  // asyncio.wait_for around one trader call. A Bybit pybit call is `await loop.run_in_executor(...)`
+  // inside the trader (rt.runInThread): the timeout cancels the coroutine at that await, the thread runs on.
+  const call = (_exchange, _fn, timeoutS, thunk) => waitFor(thunk, timeoutS, { timers });
   const spawn = (name, fn, onError) => tasks.create(name, fn, { onError });
   /**
    * db.trade_events.emit_bg: the bot appends the row from a task (evt_<type>_<tid16>) that
@@ -441,6 +441,8 @@ function createExecutor(deps) {
       if (fixed > 0) {
         try {
           const tr = traderFor(exchange);
+          // QUIRK (pinned, tests/autotrade/wire): `_bal_kw` carries only Bybit's demo flag — OKX is asked
+          // WITHOUT the passphrase → 50105 → balance 0 → «баланс нулевой» skip for every OKX fixed-amount user
           const balance = await call(exchange, 'getBalance', 20.0, () => (exchange === 'bybit'
             ? tr.getBalance(apiKey, apiSecret, bybitDemo)
             : tr.getBalance(apiKey, apiSecret)));

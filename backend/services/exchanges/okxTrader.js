@@ -34,6 +34,7 @@ const { TransportError, aiohttpJson } = require('./transport');
 const {
   errStr, pyGet, pyIndex, pyFloat, pyInt, pyStr, pyFloatStr, pyTruthy, pyOr, pyUrlencode, yarlUrl, htmlEscape, pySlice, isDict,
   pyIter,
+  rethrowCancelled,
 } = require('./pyCompat');
 const { fmtFixed, fmtG } = require('../../strategies/common/pyfmt');
 const { pyRound, pyRoundInt } = require('../../strategies/common/pyround');
@@ -123,6 +124,7 @@ function createOkxTrader(overrides = {}) {
         return st.timeOffsetMs;
       }
     } catch (e) {
+      rethrowCancelled(e);
       log.debug(`OKX sync_time: ${errStr(e)}`);
     }
     return 0;
@@ -158,6 +160,7 @@ function createOkxTrader(overrides = {}) {
       }
       return null;
     } catch (e) {
+      rethrowCancelled(e);
       if (e instanceof TransportError && e.kind === 'timeout') return { code: '-1', msg: 'timeout' };
       log.error('okx_trader._request() unhandled exception');
       let err = errStr(e);
@@ -186,6 +189,7 @@ function createOkxTrader(overrides = {}) {
         try {
           ctVal = pyOr(pyFloat(pyOr(pyGet(inst, 'ctVal'), 1.0)), 1.0);
         } catch (e) {
+          rethrowCancelled(e);
           if (!isPyErr(e, ['TypeError', 'ValueError'])) throw e;
           ctVal = 1.0;
         }
@@ -193,6 +197,7 @@ function createOkxTrader(overrides = {}) {
         return [lot, tick, true, lev];
       }
     } catch (_e) {
+      rethrowCancelled(_e);
       log.error('okx_trader._get_instrument_filters() unhandled exception');
     }
     return [1.0, 0.01, false, 125];
@@ -204,6 +209,7 @@ function createOkxTrader(overrides = {}) {
     try {
       v = pyFloat(pyOr(c.ctVal === undefined ? 1.0 : c.ctVal, 1.0));
     } catch (e) {
+      rethrowCancelled(e);
       if (!isPyErr(e, ['TypeError', 'ValueError'])) throw e;
       v = 1.0;
     }
@@ -230,6 +236,7 @@ function createOkxTrader(overrides = {}) {
         if (v > 0) return v;
       }
     } catch (e) {
+      rethrowCancelled(e);
       if (!isPyErr(e, ['KeyError', 'IndexError', 'ValueError', 'TypeError'])) throw e;
     }
     try {
@@ -241,6 +248,7 @@ function createOkxTrader(overrides = {}) {
         }
       }
     } catch (_e) {
+      rethrowCancelled(_e);
       log.error('okx_trader.get_balance() unhandled exception');
     }
     return 0.0;
@@ -253,6 +261,7 @@ function createOkxTrader(overrides = {}) {
       const data = aiohttpJson(resp, { checkContentType: false });
       return pyFloat(pyIndex(pyIndex(pyIndex(data, 'data'), 0), 'last'));
     } catch (_e) {
+      rethrowCancelled(_e);
       log.error('okx_trader.get_last_price() unhandled exception');
       return 0.0;
     }
@@ -264,6 +273,7 @@ function createOkxTrader(overrides = {}) {
       if (balance >= 0) return { ok: true, balance };
       return { ok: false, error: 'Не удалось получить баланс OKX.' };
     } catch (e) {
+      rethrowCancelled(e);
       log.error('okx_trader.test_connection() unhandled exception');
       return { ok: false, error: humanizeOkxError(errStr(e)) };
     }
@@ -296,6 +306,7 @@ function createOkxTrader(overrides = {}) {
         const levCode = pyGet(levResp, 'code', '-1');
         if (pyStr(levCode) !== '0') log.warning(`OKX set-leverage ${instId} ×${Math.trunc(lev)} FAILED: ${pyStr(pyGet(levResp, 'msg', ''))}`);
       } catch (le) {
+        rethrowCancelled(le);
         log.warning(`OKX set-leverage ${instId} ×${Math.trunc(lev)} ERROR: ${errStr(le)}`);
       }
 
@@ -422,6 +433,7 @@ function createOkxTrader(overrides = {}) {
               else log.error(`[SL-SAFETY-CLOSE-OKX-FAIL] ${instId}: ${pyStr(pyGet(cl, 'error', 'unknown'))} — BE-monitor takes over`);
             }
           } catch (se) {
+            rethrowCancelled(se);
             log.error(`[SL-SAFETY-CLOSE-OKX-EXC] ${instId}: ${errStr(se)} — BE-monitor takes over`);
           }
         }
@@ -460,6 +472,7 @@ function createOkxTrader(overrides = {}) {
       await recordPlaced(rt, { symbol, direction, exchange: 'okx', t0, tpPlaced });
       return { ok: true, order_id: orderId, error: '', tp_placed: tpPlaced, qty: qtyStr, symbol: instId };
     } catch (e) {
+      rethrowCancelled(e);
       if (e instanceof TransportError && e.kind === 'timeout') return { ok: false, order_id: '', error: 'Таймаут OKX.' };
       log.error(`OKX place_trade ${pyStr(symbol)}: ${errStr(e)}`);
       return { ok: false, order_id: '', error: errStr(e) };
@@ -475,7 +488,7 @@ function createOkxTrader(overrides = {}) {
       const pos = pyFloat(pyOr(pyGet(p, 'pos', 0), 0));
       if (pos === 0) continue;
       const inst = pyStr(pyOr(pyGet(p, 'instId', ''), ''));
-      try { await _getInstrumentFilters(inst); } catch (_e) { /* pass */ }
+      try { await _getInstrumentFilters(inst); } catch (_e) { rethrowCancelled(_e); /* pass */ }
       positions.push({
         symbol: inst,
         side: pyGet(p, 'posSide', ''),
@@ -536,6 +549,7 @@ function createOkxTrader(overrides = {}) {
         }
       }
     } catch (ae) {
+      rethrowCancelled(ae);
       log.debug(`OKX cancel_all_orders algo: ${errStr(ae)}`);
     }
     return { ok: true, cancelled };
@@ -558,6 +572,7 @@ function createOkxTrader(overrides = {}) {
           if (payload.length) await _request('POST', '/api/v5/trade/cancel-algos', apiKey, secret, passphrase, null, payload);
         }
       } catch (ce) {
+        rethrowCancelled(ce);
         log.debug(`OKX cancel-algos ${instId}: ${errStr(ce)}`);
       }
       if (pyTruthy(sl) && sl > 0) {
@@ -604,6 +619,7 @@ function createOkxTrader(overrides = {}) {
       }
       return { sl_placed: slPlaced, tp_placed: tpPlaced, error: (slPlaced && tpPlaced) ? '' : 'partial failure' };
     } catch (e) {
+      rethrowCancelled(e);
       if (e instanceof TransportError && e.kind === 'timeout') return { sl_placed: false, tp_placed: false, error: 'OKX timeout' };
       log.error(`OKX place_sl_tp_for_position ${pyStr(symbol)}: ${errStr(e)}`);
       return { sl_placed: false, tp_placed: false, error: errStr(e) };
@@ -618,6 +634,7 @@ function createOkxTrader(overrides = {}) {
     try {
       await cancelAllOrders(apiKey, secret, symbol, passphrase);
     } catch (ce) {
+      rethrowCancelled(ce);
       log.debug(`OKX close_position algo cleanup: ${errStr(ce)}`);
     }
     return { ok, error: pyGet(resp, 'msg', '') };
@@ -646,6 +663,7 @@ function createOkxTrader(overrides = {}) {
           sz = pyFloat(pyOr(pyGet(rec, 'closeTotalPos', 0), 0));
           pnl = pyFloat(pyOr(pyGet(rec, 'realizedPnl', 0), 0));
         } catch (_e) {
+          rethrowCancelled(_e);
           log.error('okx_trader.get_closed_pnl() unhandled exception');
           continue;
         }
@@ -657,6 +675,7 @@ function createOkxTrader(overrides = {}) {
       }
       return out;
     } catch (e) {
+      rethrowCancelled(e);
       log.debug(`OKX get_closed_pnl ${instId}: ${errStr(e)}`);
       return [];
     }
@@ -688,6 +707,7 @@ function createOkxTrader(overrides = {}) {
         unrealised_pnl: pyFloat(pyOr(pyGet(acct, 'upl', 0), 0)),
       };
     } catch (_e) {
+      rethrowCancelled(_e);
       log.error('okx_trader.get_account_summary() unhandled exception');
       return { equity: 0, available: 0, unrealised_pnl: 0 };
     }

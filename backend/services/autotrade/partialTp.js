@@ -19,7 +19,6 @@
  */
 
 const { waitFor, isCancelledError } = require('./asyncio');
-const { isThreadCall } = require('./traders');
 const { pf } = require('./pyfmt');
 const { t } = require('./messages');
 const { fitPartialSplit, getMinNotional } = require('../exchanges/tpLadderFit');
@@ -90,7 +89,9 @@ function calcPartialTpQty(totalQty, tp1Pct = 40.0, tp2Pct = 30.0, log = null) {
 function createPartialTp({ traderFor, log = null, sleep = null, sendMessage = null, enqueueCritical = null, adminAlert = null, timers = undefined } = {}) {
   const logger = log || require('../marketData/mdLog').log;
   const asleep = sleep || ((s) => new Promise((r) => setTimeout(r, s * 1000)));
-  const call = (exchange, fn, timeoutS, thunk) => waitFor(thunk, timeoutS, { shield: isThreadCall(exchange, fn), timers });
+  // asyncio.wait_for around one trader call. A Bybit pybit call is `await loop.run_in_executor(...)`
+  // inside the trader (rt.runInThread): the timeout cancels the coroutine at that await, the thread runs on.
+  const call = (_exchange, _fn, timeoutS, thunk) => waitFor(thunk, timeoutS, { timers });
 
   const calculatePartialTpQty = (totalQty, tp1Pct = 40.0, tp2Pct = 30.0) => calcPartialTpQty(totalQty, tp1Pct, tp2Pct, logger);
 
@@ -503,13 +504,12 @@ function createPartialTp({ traderFor, log = null, sleep = null, sendMessage = nu
           for (let attempt = 0; attempt < 3; attempt++) {
             try {
               const sess = session;
-              const r = await waitFor(() => by.inst.bybitCall((k) => sess.place_order(k), {
+              // bybit_trader.bybit_call(session.place_order, ..., timeout=8.0): wait_for(to_thread(...)) — the
+              // hard-timeout line is the trader's log (CHM.Bybit), the thread runs on
+              const r = await by.inst.bybitCall((k) => sess.place_order(k), {
                 category: 'linear', symbol: bbSym, side: closeSide, orderType: 'Limit', qty: qtyStr, price: priceStr,
                 reduceOnly: true, timeInForce: 'GTC', positionIdx: posIdx,
-              }, { apiKey, fnName: 'place_order' }), 8.0, { shield: true, timers }).catch((e) => {
-                if (e && e.pyType === 'TimeoutError') logger.error(pf('bybit_call %s hard timeout=%.1fs', 'place_order', 8.0));
-                throw e;
-              });
+              }, { apiKey, fnName: 'place_order', timeout: 8.0 });
               if (pyGet(r, 'retCode', -1) === 0) { anyPlaced = true; tpOk = true; break; }
               lastMsg = `retCode=${pf('%s', pyGet(r, 'retCode'))} ${pf('%s', pyGet(r, 'retMsg', ''))}`;
               if (pyGet(r, 'retCode') === 110017 && attempt < 2) {

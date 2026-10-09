@@ -78,8 +78,13 @@ function createRegistry({ overrides = {}, instances = {} } = {}) {
 }
 
 let _defaultRegistry = null;
+/**
+ * The process-wide traders: the production runtime with asyncio semantics (cancellable transport /
+ * sleep, pybit work as a non-interruptible thread — services/autotrade/traders.productionOverrides),
+ * so a route's wait_for stops the call's further requests the way the bot's does.
+ */
 function defaultRegistry() {
-  if (!_defaultRegistry) _defaultRegistry = createRegistry();
+  if (!_defaultRegistry) _defaultRegistry = createRegistry({ overrides: require('../autotrade/traders').productionOverrides() });
   return _defaultRegistry;
 }
 
