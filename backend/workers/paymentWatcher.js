@@ -16,6 +16,14 @@
  *   - Идемпотентность: confirmCryptoPayment делает status='confirmed' и
  *     дальше игнорирует вторые вызовы. Безопасно если watcher тиктнет
  *     второй раз пока tx ещё в pending.
+ *   - Одна транзакция — один инвойс: tx, чей hash уже записан в payments.provider_tx_id, больше
+ *     ничего не подтверждает (раньше каждая pending-строка искала себе tx в последних 50 переводах
+ *     сама, и один платёж мог активировать несколько инвойсов — в т.ч. чужих).
+ *   - Однозначность: инвойсы различаются только центами (paymentService._uniqueAmount), а ±1% —
+ *     это ±0.69 USDT на месячном и ±6.6 USDT на годовом (69 × 12 × 0.8 = 662.4): весь диапазон
+ *     центов годовых инвойсов. Поэтому сначала точное совпадение суммы (до цента); допуск ±1%
+ *     применяется, только если в окне ровно один подходящий инвойс этой сети. Неоднозначный перевод
+ *     не подтверждает ничего — его разбирает админ (лог «ambiguous»).
  *   - Окно валидности: payments.expires_at = created_at + 1 час
  *     (PENDING_TOLERANCE_SEC). Транзакции старше — игнорируем.
  *   - Только USDT. Получили нативный BNB или TRX без token-transfer —
@@ -131,29 +139,25 @@ async function tickOnce() {
       try { recent.trc20 = await _tronRecent(config.paymentTrc20Address); }
       catch (err) { logger.warn('tron explorer fetch failed', { err: err.message }); }
     }
-    for (const p of pending) {
-      const net = p.method === 'usdt_bep20' ? 'bep20' : 'trc20';
-      const txs = recent[net];
-      if (!txs.length) continue;
-      const invoiced = Number(p.amount_usd);
-      // Match by amount within 1% AND timestamp >= invoice creation.
-      const createdMs = new Date(p.created_at + 'Z').getTime() || Date.now() - 3600_000;
-      const match = txs.find((t) => _within(t.value, invoiced) && t.timestamp >= createdMs - 60_000);
-      if (!match) continue;
-      try {
-        paymentService.confirmCryptoPayment(p.id, {
-          txHash: match.txHash,
-          fromAddress: match.from,
-          amountUsdt: match.value,
-        });
-        logger.info('crypto payment auto-confirmed', {
-          paymentId: p.id, userId: p.user_id, plan: p.plan, network: net,
-          txHash: match.txHash, amountUsdt: match.value,
-        });
-      } catch (err) {
-        // confirmCryptoPayment throws UNDERPAID/OVERPAID etc — log and
-        // leave pending (admin can resolve manually).
-        logger.warn('auto-confirm failed', { paymentId: p.id, err: err.message });
+    for (const net of ['bep20', 'trc20']) {
+      const invoices = pending.filter((p) => p.method === 'usdt_' + net);
+      const txs = (recent[net] || []).filter((t) => t && t.txHash && Number.isFinite(t.value) && t.value > 0);
+      for (const { payment: p, tx: match } of matchTransfers(invoices, txs)) {
+        try {
+          paymentService.confirmCryptoPayment(p.id, {
+            txHash: match.txHash,
+            fromAddress: match.from,
+            amountUsdt: match.value,
+          });
+          logger.info('crypto payment auto-confirmed', {
+            paymentId: p.id, userId: p.user_id, plan: p.plan, network: net,
+            txHash: match.txHash, amountUsdt: match.value,
+          });
+        } catch (err) {
+          // confirmCryptoPayment throws UNDERPAID/OVERPAID etc — log and
+          // leave pending (admin can resolve manually).
+          logger.warn('auto-confirm failed', { paymentId: p.id, err: err.message });
+        }
       }
     }
   } catch (err) {
@@ -161,6 +165,42 @@ async function tickOnce() {
   } finally {
     inflight = false;
   }
+}
+
+const createdMsOf = (p) => new Date(String(p.created_at).replace(' ', 'T') + 'Z').getTime() || Date.now() - 3600_000;
+const sameCents = (a, b) => Math.abs(Math.round(a * 100) - Math.round(b * 100)) === 0;
+const usedTx = (hash) => Boolean(db.prepare('SELECT 1 FROM payments WHERE provider_tx_id = ? LIMIT 1').get(hash));
+
+/**
+ * Pairs { payment, tx } to confirm: each transfer pays at most one invoice and each invoice is paid
+ * by at most one transfer; a transfer already recorded on a payment pays nothing again. A transfer
+ * matches an invoice of its network created at most 60 s after it was sent: the one with exactly its
+ * amount (to the cent) — or, when no invoice has that amount, the only invoice within ±1%. Two or
+ * more candidates either way → ambiguous, nothing is confirmed.
+ */
+function matchTransfers(invoices, txs) {
+  const out = [];
+  const taken = new Set();
+  const ordered = txs.slice().sort((a, b) => (a.timestamp || 0) - (b.timestamp || 0));
+  const seen = new Set();
+  for (const t of ordered) {
+    if (seen.has(t.txHash)) continue;
+    seen.add(t.txHash);
+    if (usedTx(t.txHash)) continue;
+    const open = invoices.filter((p) => !taken.has(p.id) && t.timestamp >= createdMsOf(p) - 60_000);
+    const exact = open.filter((p) => sameCents(t.value, Number(p.amount_usd)));
+    let pick = null;
+    if (exact.length === 1) pick = exact[0];
+    else if (exact.length === 0) {
+      const near = open.filter((p) => _within(t.value, Number(p.amount_usd)));
+      if (near.length === 1) pick = near[0];
+      else if (near.length > 1) logger.warn('crypto transfer ambiguous: several invoices within tolerance', { txHash: t.txHash, amountUsdt: t.value, invoices: near.map((p) => p.id) });
+    } else {
+      logger.warn('crypto transfer ambiguous: several invoices with this exact amount', { txHash: t.txHash, amountUsdt: t.value, invoices: exact.map((p) => p.id) });
+    }
+    if (pick) { taken.add(pick.id); out.push({ payment: pick, tx: t }); }
+  }
+  return out;
 }
 
 function start() {
@@ -175,4 +215,4 @@ function stop() {
   if (timer) { clearInterval(timer); timer = null; }
 }
 
-module.exports = { start, stop, _tickOnce: tickOnce };
+module.exports = { start, stop, _tickOnce: tickOnce, matchTransfers };
