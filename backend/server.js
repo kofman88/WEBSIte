@@ -23,6 +23,7 @@ const supportRoutes = require('./routes/support');
 const pushRoutes = require('./routes/push');
 const appRoutes = require('./routes/app');
 const { readBotBody } = require('./services/engine/botBody');
+const botTransport = require('./services/engine/botTransport');
 const planService = require('./services/planService');
 const maintenanceService = require('./services/maintenanceService');
 const paymentWatcher = require('./workers/paymentWatcher');
@@ -82,8 +83,11 @@ app.use('/api/payments/webhooks/stripe', express.raw({ type: 'application/json',
 // /api/app/* reads its body like the bot's miniapp_api._read_body() on aiohttp (botBody.js):
 // Content-Type ignored, strict decode by its charset (utf-8 by default), json.loads; malformed
 // JSON, a BOM, invalid bytes or a top level that is not an object reach the route as {}, so it
-// answers with its own business error instead of a 400 from the strict parser.
-app.use('/api/app', express.raw({ type: () => true, limit: '1mb' }), (req, _res, next) => {
+// answers with its own business error instead of a 400 from the strict parser. The transport in
+// front of it is aiohttp's too (botTransport.js): the 1 MiB client_max_size, gzip / deflate
+// request bodies; an oversized or undecodable body is {} for the route (never a 413 / 415 JSON),
+// br / zstd and a cut deflate stream are aiohttp's transport 400.
+app.use('/api/app', botTransport.middleware(), (req, _res, next) => {
   req.body = readBotBody(req.body, req.headers['content-type']);
   next();
 });
