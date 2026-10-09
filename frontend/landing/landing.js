@@ -13,7 +13,6 @@ const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&l
 const txt = (s, v) => { const e = $(s); if (e) e.textContent = v; };
 const html = (s, v) => { const e = $(s); if (e) e.innerHTML = v; };
 
-// ---------- данные ----------
 const EMPTY = 'Статистика появится после 30 закрытых сигналов';
 const NO = { sandbox: 'Предрасчёт бэктеста появится после первого ночного прогона', genome: 'История эволюции появится после первого прогона Genome', trend: 'Тренд BTC появится после запуска монитора' };
 let mockP;
@@ -21,7 +20,7 @@ function api(path, q) {
  const none = { empty: true, reason: NO[path] || EMPTY };
  if (MODE === 'empty') return Promise.resolve(none);
  if (MODE === 'mock') {
-  mockP = mockP || new Promise((ok, no) => { const s = D.createElement('script'); s.src = '/landing/data/mock-api.js?v=1'; s.onload = ok; s.onerror = no; D.head.appendChild(s); });
+  mockP = mockP || new Promise((ok, no) => { const s = D.createElement('script'); s.src = '/landing/data/mock-api.js?v=2'; s.onload = ok; s.onerror = no; D.head.appendChild(s); });
   return mockP.then(() => window.CHM_MOCK.get(path, q && Object.fromEntries(new URLSearchParams(q)))).catch(() => none);
  }
  return fetch('/api/public/' + path + (q ? '?' + new URLSearchParams(q) : ''), { headers: { Accept: 'application/json' } })
@@ -31,7 +30,6 @@ const memo = {};
 const api1 = (p) => memo[p] || (memo[p] = api(p));
 const ok = (d) => d && !d.empty;
 
-// ---------- числа и даты по-русски ----------
 const MI = '−', NB = ' ';
 const num = (x, d) => { const p = Math.abs(x).toFixed(d || 0).split('.'); p[0] = p[0].replace(/\B(?=(\d{3})+(?!\d))/g, NB); return p.join(','); };
 const sgn = (x, d, s) => (+Math.abs(x).toFixed(d || 0) ? (x > 0 ? '+' : MI) : '') + num(x, d) + (s || '');
@@ -45,9 +43,7 @@ const dmy = (t) => dm(t) + '.' + new Date(t).getFullYear();
 const utc = (t) => { const d = new Date(t); return p2(d.getUTCDate()) + '.' + p2(d.getUTCMonth() + 1) + ' ' + p2(d.getUTCHours()) + ':00'; };
 const plural = (n, a, b, c) => { n = Math.abs(n) % 100; const k = n % 10; return n > 10 && n < 20 ? c : k === 1 ? a : k > 1 && k < 5 ? b : c; };
 
-// ---------- статистика ----------
 const wilson = (k, n) => { if (!n) return [0, 0]; const z2 = 3.8416, p = k / n, den = 1 + z2 / n, c = p + z2 / (2 * n), m = 1.96 * Math.sqrt(p * (1 - p) / n + z2 / (4 * n * n)); return [Math.max(0, (c - m) / den * 100), Math.min(100, (c + m) / den * 100)]; };
-// шкала риска §3.4 под риск посетителя: p95 просадки за месяц (Монте-Карло) в % депозита
 const riskLvl = (p95m, r, lev) => { const d = p95m * r; return lev >= 10 ? 5 : d <= 5 ? 1 : d <= 8 ? 2 : d <= 12 ? 3 : d <= 18 ? 4 : 5; };
 const RW = ['', 'низкий', 'умеренный', 'заметный', 'высокий', 'очень высокий'];
 const median = (a) => { const s = a.slice().sort((x, y) => x - y), n = s.length; return n ? (n % 2 ? s[(n - 1) / 2] : (s[n / 2 - 1] + s[n / 2]) / 2) : 0; };
@@ -63,7 +59,6 @@ function baseTags(s) {
 }
 const tagsH = (t) => t.map((x) => `<span class="tag ${x[0]}">${esc(x[1])}</span>`).join('');
 
-// одометр: первый показ — сразу итоговое значение, прокрутка цифр только при смене
 let DIG = ''; for (let i = 0; i < 10; i++) DIG += '<i>' + i + '</i>';
 function odo(el, t) {
  if (!el) return;
@@ -80,7 +75,6 @@ function odo(el, t) {
  requestAnimationFrame(() => requestAnimationFrame(() => $$('.od>span', el).forEach((s) => { s.style.transform = `translateY(${-s.dataset.d * 10}%)`; })));
 }
 
-// ---------- SVG-графики с осями: слева R, справа % при выбранном риске ----------
 function ticks(lo, hi, n) {
  if (lo === hi) { lo -= 1; hi += 1; }
  const raw = (hi - lo) / (n || 4), mag = Math.pow(10, Math.floor(Math.log10(raw))), st = [1, 2, 2.5, 5, 10].map((m) => m * mag).find((s) => s >= raw), out = [];
@@ -168,7 +162,6 @@ function autoSize(box, fn) {
  new ResizeObserver(() => { if (Math.abs(box.clientWidth - w) < 2) return; w = box.clientWidth; clearTimeout(t); t = setTimeout(fn, 80); }).observe(box);
 }
 
-// ---------- элементы управления ----------
 function radio(g, cb) {
  if (!g) return { set() {} };
  const bs = () => $$('button[data-v]', g);
@@ -186,7 +179,6 @@ const fill = (r) => r.style.setProperty('--p', (r.value - r.min) / (r.max - r.mi
 const vis = (el, cb, m) => { if (!el) return; if (!window.IntersectionObserver) return cb(); const io = new IntersectionObserver((es) => { if (es.some((e) => e.isIntersecting)) { io.disconnect(); cb(); } }, { rootMargin: m || '200px' }); io.observe(el); };
 const SEC = {};
 
-// ---------- шапка, меню, липкая кнопка ----------
 SEC.header = () => {
  if (MODE === 'api') { $$('#proto, #ftr-src').forEach((e) => { e.hidden = true; }); }
  const b = $('#burger'), l = $('#nav-links'), sc = $('#scrim');
@@ -205,12 +197,13 @@ SEC.header = () => {
  Object.keys(map).forEach((id) => { const s = D.getElementById(id); if (s) io.observe(s); });
 };
 
-// ---------- 0. лента тренда BTC ----------
 const TFN = { '15m': '15M', '1H': '1H', '4H': '4H', '1D': 'ДЕНЬ', '1W': 'НЕДЕЛЯ', '1M': 'МЕСЯЦ' }, TW = { LONG: 'ЛОНГ', SHORT: 'ШОРТ', RANGE: 'БОКОВИК' };
 let TREND = null;
 SEC.ticker = () => {
  const row = $('#tick-row'); if (!row) return;
- const tr = row.parentNode;
+ const tr = row.parentNode, pp = $('#tick-pp');
+ // WCAG 2.2.2: кнопка паузы бегущей строки
+ on(pp, 'click', () => { const o = pp.getAttribute('aria-pressed') !== 'true'; pp.setAttribute('aria-pressed', o); row.classList.toggle('paused', o); });
  const cells = (t) => Object.keys(TFN).map((k) => {
   const s = t.tfs[k] || {}, c = s.trend === 'LONG' ? 'long' : s.trend === 'SHORT' ? 'short' : 'flat';
   return `<span class="tc"><span>${TFN[k]}</span><span class="dir ${c}">${c === 'long' ? '▲' : c === 'short' ? '▼' : '↔'} ${TW[s.trend] || '—'}</span><span class="str ${c}"><b style="width:${s.strength}%"></b></span><span class="val">${s.strength}%</span></span>`;
@@ -218,8 +211,9 @@ SEC.ticker = () => {
  const fit = () => {
   if (!TREND) return;
   const one = cells(TREND); row.classList.remove('marq'); row.innerHTML = one;
-  // бегущая строка: копия для бесшовной прокрутки скрыта от экранных дикторов
+  // копия для бесшовной прокрутки скрыта от дикторов
   if (!RM && row.scrollWidth > tr.clientWidth + 4) { row.innerHTML = one + one.replace(/<span class="tc">/g, '<span class="tc" aria-hidden="true">'); row.classList.add('marq'); }
+  pp.hidden = !row.classList.contains('marq');
  };
  const render = (t) => {
   if (!ok(t)) { row.innerHTML = `<span class="tc">${esc(t.reason)}</span>`; txt('#tick-upd', 'нет данных'); return; }
@@ -233,7 +227,6 @@ SEC.ticker = () => {
  let w = innerWidth; on(window, 'resize', () => { if (Math.abs(innerWidth - w) > 30) { w = innerWidth; fit(); } });
 };
 
-// ---------- 1. hero: песочница бота ----------
 SEC.sandbox = () => {
  const box = $('#sbx-chart'); if (!box) return;
  const S = { st: 'LEVELS', coin: 'BTC', dir: 'both', risk: 1, g: null }, ri = $('#sbx-risk'), cw = $('#sbx-coins'), strip = $('#sbx-strip');
@@ -251,7 +244,6 @@ SEC.sandbox = () => {
   txt('#sbx-title', `${S.coin} · ${st[0]} · ${st[1]} · ${DIRN[S.dir]}`);
   txt('#sbx-period', `отложенный период ${dm(P.from)}–${dmy(P.to)} · ${P.days} дн.`);
   txt('#sbx-risk-out', rTxt(r)); txt('#sbx-leg', S.coin); txt('#sbx-axis', 'справа % при риске ' + rTxt(r));
-  // пунктир — медиана по всем 20 монетам на тех же датах
   const all = g.coins.map((x) => cell(x.sym)), med = [], idx = all.map(() => 0);
   for (let k = 0; k <= 60; k++) {
    const t = P.from + (P.to - P.from) * k / 60;
@@ -269,18 +261,19 @@ SEC.sandbox = () => {
   odo($('#m-dd'), fR(-c.max_dd_r)); txt('#m-ddp', `= ${fP(-c.max_dd_r * r)} депозита`);
   const ci = wilson(c.wins, c.n); odo($('#m-wr'), Math.round(c.wins / c.n * 100) + '%'); txt('#m-wrci', `Уилсон ${Math.round(ci[0])}–${Math.round(ci[1])}%`);
   odo($('#m-pf'), c.pf == null ? '—' : num(c.pf, 2)); txt('#m-n', `сделок ${c.n}${c.n < 30 ? ' · мало' : ''}`);
-  const lv = riskLvl(c.p95_month_r, r); $('#m-risk .rbar').dataset.l = lv; txt('#m-risk span', lv + ' из 5'); txt('#m-riskl', `${RW[lv]} при риске ${rTxt(r)}`);
-  html('#sbx-honest', `При риске <b>${rTxt(r)}</b>: результат <b>${fP(c.r_total * r)}</b>, худшая просадка <b>${fP(-c.max_dd_r * r)}</b> депозита. В худших 5% месяцев (Монте-Карло) просадка до <b>${fP(-c.p95_month_r * r)}</b>. Риск выше — шире оба края.`);
-  // те же настройки на 20 монетах: точки — кнопки выбора монеты
+  const lv = riskLvl(c.p95_month_r, r); $('#m-risk .rbar').dataset.l = lv; txt('#m-risk span', lv + ' из 5'); txt('#m-riskl', `${RW[lv]} при риске ${rTxt(r)}${c.n < 30 ? ', мало данных' : ''}`);
+  html('#sbx-honest', `При риске <b>${rTxt(r)}</b> на сделку, без реинвеста: результат <b>${fP(c.r_total * r)}</b>, худшая просадка <b>${fP(-c.max_dd_r * r)}</b> депозита. В худших 5% месяцев (Монте-Карло) просадка до <b>${fP(-c.p95_month_r * r)}</b>. Риск выше — шире оба края.`);
   const vals = g.coins.map((x) => ({ s: x.sym, v: cell(x.sym).r_total })), m = median(vals.map((x) => x.v)), nn = vals.filter((x) => x.v < 0).length;
   html('#sbx-median', `медиана <b>${fR(m)}</b> · в минусе ${nn} из 20 · ${S.coin} <b>${fR(c.r_total)}</b>`);
-  const lo = Math.min(0, ...vals.map((x) => x.v)), hi = Math.max(0, ...vals.map((x) => x.v)), X = (v) => 3 + (v - lo) / (hi - lo || 1) * 94, lanes = [];
+  const lo = Math.min(0, ...vals.map((x) => x.v)), hi = Math.max(0, ...vals.map((x) => x.v)), X = (v) => 3 + (v - lo) / (hi - lo || 1) * 94, lanes = [], sw = strip.clientWidth / 100 || 3;
+  const C = parseFloat(getComputedStyle(strip).getPropertyValue('--sc')) || 48, LN = [0, -14, 14, -28, 28];
   let h = `<i class="st-zero" style="left:${X(0)}%"></i><span class="st-zl" style="left:${X(0)}%">0R</span><i class="st-med" style="left:${X(m)}%"></i><span class="st-ml" style="left:${X(m)}%">медиана</span>`;
+  // пять дорожек по 14 px: точки не перекрываются (выбор монеты дублируют чипы)
   vals.slice().sort((a, b) => a.v - b.v).forEach((x) => {
-   const p = X(x.v), o = x.s === S.coin; let ln = 0;
-   while (lanes[ln] != null && p - lanes[ln] < 3.4) ln++;
+   const p = X(x.v), o = x.s === S.coin; let ln = LN.findIndex((_, k) => lanes[k] == null || (p - lanes[k]) * sw >= 14);
+   if (ln < 0) ln = lanes.indexOf(Math.min(...lanes));
    lanes[ln] = p;
-   h += `<button class="st-dot${o ? ' on' : ''}" data-v="${x.s}" role="radio" aria-checked="${o}" tabindex="${o ? 0 : -1}" aria-label="${x.s}: ${fR(x.v)}" title="${x.s} ${fR(x.v)}" style="left:${p}%;top:${26 + [0, -11, 11, -20, 20][ln % 5]}px;--c:var(--${x.v < 0 ? 'loss' : 'green'})"></button>`;
+   h += `<button class="st-dot${o ? ' on' : ''}" data-v="${x.s}" role="radio" aria-checked="${o}" tabindex="${o ? 0 : -1}" aria-label="${x.s}: ${fR(x.v)}" title="${x.s} ${fR(x.v)}" style="left:${p}%;top:${C + LN[ln]}px;--c:var(--${x.v < 0 ? 'loss' : 'green'})"></button>`;
   });
   strip.innerHTML = h;
   const tg = baseTags(c);
@@ -305,7 +298,6 @@ SEC.sandbox = () => {
  });
 };
 
-// ---------- 2. лента сигналов и счётчики ----------
 const PTH = { open: ['ВХОД', ''], tp1: ['TP1', 'tp'], tp2: ['TP2', 'tp'], tp3: ['TP3', 'tp'], be: ['БУ', 'be'], sl: ['СТОП', 'sl'], exp: ['ИСТЁК', 'be'] };
 SEC.feed = () => {
  const list = $('#feed-list'); if (!list) return;
@@ -319,7 +311,6 @@ SEC.feed = () => {
  radio($('#feed-f'), (v) => { F.f = v; render(); });
  const sched = () => { clearTimeout(F.t); if (!F.paused && F.vis && !D.hidden && F.cur) F.t = setTimeout(poll, MODE === 'mock' ? 7000 : 30000); };
  on(pb, 'click', () => { F.paused = !F.paused; pb.setAttribute('aria-pressed', F.paused); pb.innerHTML = F.paused ? '<span aria-hidden="true">▶</span> Дальше' : '<span aria-hidden="true">❚❚</span> Пауза'; sched(); });
- // новые строки объявляются (aria-relevant="additions"), смена статуса меняет только скрытые от диктора узлы и текст
  const poll = () => api('feed', { after: F.cur }).then((d) => {
   if (ok(d)) {
    F.cur = d.cursor || F.cur;
@@ -358,7 +349,7 @@ SEC.counters = () => {
   if (!ok(s)) { set('signals-s', s.reason); set('median-s', 'нет данных'); set('cand-s', 'реестр появится с первым кандидатом'); txt('#mix-leg', s.reason); return; }
   set('signals', num(s.tracked_signals.value)); set('signals-s', `закрыто ${num(s.closed_signals.value)} · открыто ${s.open_signals.value}`); up('signals', s.tracked_signals.updated_at);
   set('days', s.showcase_days.value); set('days-s', 'дней, с ' + dmy(s.showcase_days.since)); up('days', s.showcase_days.updated_at);
-  const b = s.bots_30d; set('median', fR(b.median_r)); set('median-s', `в плюсе ${b.positive} из ${b.total} ботов`); up('median', b.updated_at);
+  const b = s.bots_30d; set('median', fR(b.median_r)); set('median-s', `в плюсе ${b.positive} из ${b.total} ботов · ${b.n} сделок · медиана просадки ${fR(-b.median_dd_r)}`); up('median', b.updated_at);
   set('worst', fR(b.worst_r)); set('best', fR(b.best_r)); up('median2', b.updated_at);
   const g = s.registry; set('cand', g.candidates); set('cand-s', `на витрине ${g.published} · ждут ${g.waiting} · архив ${g.archived}`); up('cand', s.tracked_signals.updated_at);
   const o = s.outcomes_recent, tot = o.tp2plus + o.tp1be + o.sl + o.exp, P = [['m-tp2', o.tp2plus, 'TP2 и выше'], ['m-tp1', o.tp1be, 'TP1 → БУ'], ['m-sl', o.sl, 'Стоп'], ['m-exp', o.exp, 'Истекли']], pc = (v) => Math.round(v / tot * 100) + '%';
@@ -367,7 +358,6 @@ SEC.counters = () => {
  });
 };
 
-// ---------- 3. витрина ----------
 const REG = { LONG: 'up', SHORT: 'down', RANGE: 'range' };
 SEC.showcase = () => {
  const track = $('#sc-track'); if (!track) return;
@@ -384,25 +374,20 @@ SEC.showcase = () => {
  const regNow = () => (TREND ? TREND.tfs['4H'].trend : 'RANGE');
  const ro = (k, v, s, c) => `<div class="ro"><span class="ro-k">${k}</span><b class="ro-v ${c || ''}">${v}</b><span class="ro-s">${s}</span></div>`;
  function card(b) {
-  const r = S.my, s = b.stats, nw = b.status === 'new', coins = b.coins.join(' ') + (b.coins_extra ? ' +' + b.coins_extra : '');
+  const r = S.my, s = b.stats, coins = b.coins.join(' ') + (b.coins_extra ? ' +' + b.coins_extra : '');
   const btns = `<div class="row"><a class="btn btn-g" href="#backtest" data-bt="${b.strategy}:${b.coins[0]}">Тест на моих монетах</a><a class="btn btn-red" href="/app/?copy=${b.id}&amp;mode=demo">Копировать</a></div>`;
-  let f = `<div class="inst-hd">${nw ? '<span class="src src-new">Новый · мало данных</span>' : `<span class="src src-paper" title="Трек сигналов по ценам уровней, без реальных исполнений">Трек (бумажный) · ${b.track_days} дн.</span>`}<span title="${esc(b.copies_rule)}">копий ${b.copies}</span></div>
+  const lv = riskLvl(s.p95_month_r, r, b.leverage_max), ci = wilson(s.wins, s.n), ex = b.exchange_copies, bh = b.backtest_holdout;
+  let f = `<div class="inst-hd"><span class="src src-paper" title="Сигналы по ценам уровней, без реальных исполнений">Трек сигналов (бумажный)</span><span title="${esc(b.copies_rule)}">копий ${b.copies}</span></div>
 <div class="sc-head"><b class="glyph">${STR[b.strategy][2]}</b><div class="sc-name"><b>${esc(b.strategy_name)} · ${esc(coins)}</b><span>${DIRN[b.dir]} · ${b.tf} · плечо до ${b.leverage_max}× · v${b.version}, параметры заморожены</span></div></div>`;
-  if (nw) {
-   f += `<div class="sc-new"><p>Статистику покажем после 30 закрытых сигналов и 30 дней трека: так на витрину не попадает бот, которому просто повезло на старте.</p>
-<div><span class="lbl">Сигналов ${s.n} из 30</span><div class="bar"><b style="width:${Math.min(100, s.n / 30 * 100)}%"></b></div></div><div><span class="lbl">Дней ${b.track_days} из 30</span><div class="bar"><b style="width:${Math.min(100, b.track_days / 30 * 100)}%"></b></div></div><p>Опубликован ${dmy(b.published_at)}. До порога бот виден только здесь, с этой пометкой.</p></div>`;
-  } else {
-   const lv = riskLvl(s.p95_month_r, r, b.leverage_max), ci = wilson(s.wins, s.n), ex = b.exchange_copies;
-   f += `<div class="sc-res"><div><div class="sc-big ${s.r_total < 0 ? 'loss' : ''}">${fR(s.r_total)}<small>за ${b.track_days} дн.</small></div><div class="sc-pct">= ${fP(s.r_total * r)} при риске ${rTxt(r)} на сделку, без реинвеста</div></div><div class="chart spark" data-spark="${b.id}"></div></div>
+  f += `<div class="sc-res"><div><div class="sc-big ${s.r_total < 0 ? 'loss' : ''}">${fR(s.r_total)}<small>за ${b.track_days} дн.</small></div><div class="sc-pct">= ${fP(s.r_total * r)} при риске ${rTxt(r)} на сделку, без реинвеста</div></div><div class="chart spark" data-spark="${b.id}"></div></div>
 <div class="sc-m">${ro('Просадка', fR(-s.max_dd_r), 'макс. ' + fP(-s.max_dd_r * r), 'loss')}${ro('Винрейт', Math.round(s.wins / s.n * 100) + '%', `Уилсон ${Math.round(ci[0])}–${Math.round(ci[1])}%`)}${ro('PF', num(s.pf, 2), 'после комиссий')}${ro('Сигналов', s.n, 'все исходы')}${ro('В сделке', '~' + Math.round(s.avg_hold_h) + ' ч', 'в среднем')}${ro('За 30 дн.', fR(s.r_30d), fP(s.r_30d * r), s.r_30d < 0 ? 'loss' : '')}</div>
 <div class="sc-risk"><div class="rr"><i class="rbar" data-l="${lv}" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i></i>Риск ${lv} из 5 · ${RW[lv]}</div><div class="rs">при риске ${rTxt(r)} худший месяц ≈ ${fP(-s.p95_month_r * r)} депозита (p95 Монте-Карло)${b.leverage_max >= 10 ? ', плечо от 10× — сразу 5' : ''}</div></div>
-<div class="sc-src"><div><span class="src src-bt src-xs">Бэктест</span><span>отложенный: <b>${fR(b.backtest_holdout.r_total)}</b> · PF ${num(b.backtest_holdout.pf, 2)} · ${b.backtest_holdout.n} сд.</span></div><div><span class="src src-ex src-xs">Биржа</span><span>${ex.n >= 20 ? `медиана копий <b class="${ex.median_r < 0 ? 'loss' : ''}">${fR(ex.median_r)}</b> (n=${ex.n})${ex.liquidations ? ` · ликвидаций ${ex.liquidations}` : ''}` : `копий от 7 дней мало (n=${ex.n}), медиану не считаем`}</span></div></div>`;
-  }
+<div class="sc-src"><div><span class="src src-bt src-xs">Бэктест</span><span>отложенный, ${bh.period_days} дн.: <b>${fR(bh.r_total)}</b> · PF ${num(bh.pf, 2)} · ${bh.n} сд. · просадка ${fR(-bh.max_dd_r)}</span></div><div><span class="src src-ex src-xs">Биржа</span><span>${ex.n >= 20 ? `медиана копий <b class="${ex.median_r < 0 ? 'loss' : ''}">${fR(ex.median_r)}</b>, просадка ${fR(-ex.median_dd_r)} (n=${ex.n})${ex.liquidations ? ` · ликвидаций ${ex.liquidations}` : ''}` : `копий от 7 дней мало (n=${ex.n}), медиану не считаем`}</span></div></div>`;
   f += `<div class="sc-foot"><div class="sc-meta"><span>обн. ${hm(b.updated_at)} · оценка</span><button class="btn-g flip-btn" data-flip="1" aria-pressed="false" aria-label="Как торгует бот, подробнее">↻ Как торгует</button></div>${btns}</div>`;
   const rg = b.regime_r, rb = (k, v) => `<div>${k}<b class="${v > 0 ? 'up' : v < 0 ? 'loss' : ''}">${fR(v)}</b></div>`;
   const back = `<div class="inst-hd"><span class="inst-id">Как торгует</span><span>v${b.version} · параметры заморожены</span></div><p class="how">${esc(b.how)}</p>
 <div class="tbl-wrap"><table class="tbl"><tbody>${b.params.concat([['Частичный TP', '40 / 30 / 30'], ['Мин. депозит', '≈ $' + b.min_deposit_usd]]).map((p) => `<tr><td>${esc(p[0])}</td><td>${esc(p[1])}</td></tr>`).join('')}</tbody></table></div>
-${nw ? '' : `<div class="regime" aria-label="Результат по режиму рынка BTC">${rb('Рост BTC', rg.up)}${rb('Падение', rg.down)}${rb('Боковик', rg.range)}</div>`}<p class="weak"><b>Где не работает:</b> ${esc(b.weak)}</p>
+<div class="regime" aria-label="Результат по режиму рынка BTC">${rb('Рост BTC', rg.up)}${rb('Падение', rg.down)}${rb('Боковик', rg.range)}</div><p class="weak"><b>Где не работает:</b> ${esc(b.weak)}</p>
 <div class="sc-foot"><div class="sc-meta"><span>опубликован ${dmy(b.published_at)}</span><button class="btn-g flip-btn" data-flip="0">↺ Статистика</button></div>${btns}</div>`;
   return `<li class="sc-card" data-id="${b.id}"><div class="sc-in"><div class="sc-face sc-front inst">${f}</div><div class="sc-face sc-back inst" inert>${back}</div></div></li>`;
  }
@@ -415,11 +400,11 @@ ${nw ? '' : `<div class="regime" aria-label="Результат по режим�
    if (S.dir !== 'all' && b.dir !== S.dir) return false;
    if (S.tf !== 'all' && b.tf !== S.tf) return false;
    if (S.coin && b.coins.indexOf(S.coin) < 0 && !(b.coins_extra >= 10)) return false;
-   if (b.status === 'new') return S.risk >= 5 && !S.regime;
    if (S.regime && !(b.regime_r[REG[reg]] > 0)) return false;
    return riskLvl(b.stats.p95_month_r, my, b.leverage_max) <= S.risk;
   });
-  const sc = (b) => (b.status === 'new' ? -1e9 : (b.track_days >= 90 ? 1e6 : 0) + b.stats.r_total / Math.max(1, b.stats.max_dd_r));
+  // «Топ» — только на окне от 90 дней, остальные после них
+  const sc = (b) => (b.track_days >= 90 ? 1e6 : 0) + b.stats.r_total / Math.max(1, b.stats.max_dd_r);
   bots.sort(S.sort === 'top' ? (a, b) => sc(b) - sc(a) : S.sort === 'new' ? (a, b) => b.published_at - a.published_at : (a, b) => b.copies - a.copies);
   track.innerHTML = bots.map(card).join('');
   $('#sc-empty').hidden = bots.length > 0;
@@ -452,27 +437,31 @@ ${nw ? '' : `<div class="regime" aria-label="Результат по режим�
  on(track, 'click', (e) => {
   const fb = e.target.closest('[data-flip]');
   if (fb) {
-   const c = fb.closest('.sc-card'), f = fb.dataset.flip === '1' || !c._pin; flip(c, f, f);
+   // после возврата кликом наведение не переворачивает карточку, пока курсор не покинет её
+   const c = fb.closest('.sc-card'), f = fb.dataset.flip === '1' || !c._pin; flip(c, f, f); c._nh = !f;
    const t = $(f ? '.sc-back [data-flip]' : '.sc-front [data-flip]', c); if (t && e.detail === 0) t.focus({ preventScroll: true }); return;
   }
   const bt = e.target.closest('[data-bt]'); if (bt && SEC.btPreset) { const p = bt.dataset.bt.split(':'); SEC.btPreset(p[0], p[1]); }
  });
  if (FINE) {
-  on(track, 'pointerover', (e) => { const fb = e.target.closest('.sc-front [data-flip]'), c = fb && fb.closest('.sc-card'); if (c && !c.classList.contains('flip')) flip(c, true, false); });
-  on(track, 'pointerout', (e) => { const c = e.target.closest('.sc-card'); if (c && !c._pin && c.classList.contains('flip') && !c.contains(e.relatedTarget)) flip(c, false, false); });
+  on(track, 'pointerover', (e) => { const fb = e.target.closest('.sc-front [data-flip]'), c = fb && fb.closest('.sc-card'); if (c && !c._nh && !c.classList.contains('flip')) flip(c, true, false); });
+  on(track, 'pointerout', (e) => {
+   const c = e.target.closest('.sc-card'); if (!c || c.contains(e.relatedTarget)) return;
+   c._nh = 0; if (!c._pin && c.classList.contains('flip')) flip(c, false, false);
+  });
  }
  api1('showcase').then((d) => {
-  if (!ok(d)) { txt('#sc-empty b', d.reason); $('#sc-reset').hidden = true; $('#sc-empty').hidden = false; txt('#sc-pos', '0 ботов'); txt('#sc-arch-sum', 'пока пусто'); return; }
+  if (!ok(d)) { txt('#sc-empty b', d.reason); $('#sc-reset').hidden = true; $('#sc-empty').hidden = false; txt('#sc-pos', '0 ботов'); txt('#sc-arch-sum', 'пока пусто'); html('#arch-tbl tbody', `<tr><td colspan="6">${esc(d.reason)}</td></tr>`); return; }
   S.d = d; render();
-  const g = d.registry;
-  txt('#sc-arch-sum', `архив ${d.archive.length} · реестр ${g.candidates} с ${dmy(g.launched_since)}`);
-  html('#arch-tbl tbody', d.archive.map((a) => `<tr><td>${STR[a.strategy][0]} · ${esc(a.coins)} · ${a.tf} · v${a.v}</td><td>${dmy(a.from)}–${dmy(a.to)}</td><td>${a.n}</td><td class="${a.r_total < 0 ? 'loss' : 'up'}">${fR(a.r_total)}</td><td class="loss">${fR(-a.max_dd_r)}</td><td>${esc(a.reason)}</td></tr>`).join('') +
-   `<tr><td colspan="6">Ещё ${g.waiting} ${plural(g.waiting, 'кандидат набирает', 'кандидата набирают', 'кандидатов набирают')} 30 сигналов и 30 дней. Опубликовано ${g.published} из ${g.candidates} запущенных.</td></tr>`);
+  // реестр всех кандидатов с даты запуска (К3 #5)
+  const g = d.registry, RS = (a) => (a.status === 'published' ? 'на витрине' : a.status === 'waiting' ? `набирает: ${a.n} из 30 сигналов, ${a.days} из 30 дн.` : 'снят ' + dmy(a.to) + ': ' + esc(a.reason));
+  txt('#sc-arch-sum', `реестр ${g.candidates} · на витрине ${g.published} · ждут ${g.waiting} · архив ${g.archived}`);
+  html('#arch-tbl tbody', g.items.map((a) => `<tr><td>${STR[a.strategy][0]} · ${esc(a.coins)} · ${a.tf} · v${a.v}</td><td>${dmy(a.launched_at)}</td><td>${RS(a)}</td><td>${a.n}</td><td class="${a.r_total < 0 ? 'loss' : 'up'}">${fR(a.r_total)}</td><td class="loss">${fR(-a.max_dd_r)}</td></tr>`).join(''));
  });
+ api1('stats').then((s) => { if (ok(s)) { const b = s.bots_30d; txt('#sc-med', `Медиана витрины за 30 дн.: ${fR(b.median_r)}, в плюсе ${b.positive} из ${b.total}`); } });
  setTimeout(() => { if (S.d) txt('#sc-regime-now', `(сейчас ${TW[regNow()].toLowerCase()} на 4H)`); }, 1500);
 };
 
-// ---------- 4. история при прокрутке ----------
 SEC.story = () => {
  const steps = $$('#steps .step'), scrs = $$('#story-phone .scr'); if (!steps.length) return;
  steps.forEach((st, i) => { const b = $('.step-scr', st); if (b && scrs[i]) { const c = scrs[i].cloneNode(true); c.classList.add('on'); b.appendChild(c); } });
@@ -480,7 +469,6 @@ SEC.story = () => {
  if (window.IntersectionObserver) { const io = new IntersectionObserver((es) => es.forEach((e) => { if (e.isIntersecting) set(steps.indexOf(e.target)); }), { rootMargin: '-45% 0px -45% 0px' }); steps.forEach((s) => io.observe(s)); }
 };
 
-// ---------- 5. площадка бэктеста ----------
 const ZN = { hold: 'Отложенный период', sel: 'Данные отбора', early: 'Ранняя история', stress: 'Стресс-окно' };
 const KIND = { SL: 'SL', TP1: 'TP1 → безубыток', TP2: 'TP2', TP3: 'TP3', EXP: 'истекла' };
 SEC.backtest = () => {
@@ -502,7 +490,7 @@ SEC.backtest = () => {
  const view = (stress) => { $('#bt-norm').hidden = stress; $('#bt-stress').hidden = !stress; };
  function noData(d) {
   view(false); $('#bt-leg').hidden = true;
-  chart(box, { x0: 0, x1: 1, series: [], yMin: -4, yMax: 4, ticks: [-4, 0, 4], yFmt: (v) => fR(v, 0) });
+  chart(box, { x0: 0, x1: 1, series: [], yMin: -4, yMax: 4, ticks: [-4, 0, 4] });
   const w = d.window || {}, chip = (a, v, t) => `<button class="chip" data-${a}="${v}">${t}</button>`;
   let t, p, ch = '';
   if (!ok(d)) { t = 'Данных пока нет'; p = d.reason; }
@@ -531,7 +519,8 @@ SEC.backtest = () => {
    if (z.id === 'hold' && d.mc) band = [[z.from, b0, b0]].concat(z.trades.map((t, i) => [t.t, b0 + d.mc.p5[i], b0 + d.mc.p95[i]]));
   });
   const x0 = zones[0].from, x1 = main.to, xl = [];
-  for (let k = 0; k <= 3; k++) { const t = x0 + (x1 - x0) * k / 3; xl.push([t, S.per === 'year' ? dmy(t).slice(0, 8) : dm(t)]); }
+  const nx = box.clientWidth < 480 ? 2 : 3, yy = (t) => dmy(t).slice(0, 6) + dmy(t).slice(8);
+  for (let k = 0; k <= nx; k++) { const t = x0 + (x1 - x0) * k / nx; xl.push([t, S.per === 'year' ? yy(t) : dm(t)]); }
   chart(box, { x0, x1, series, band, draw: !soft, yFmt: (v) => fR(v, Math.abs(v) < 10 && v % 1 ? 1 : 0), xl, tipPts: tp,
    shades: selZ ? [{ from: selZ.from, to: selZ.to, label: 'данные отбора — завышено' }] : [], vl: selZ ? [{ x: d.selection_end, label: 'дата отбора ' + dm(d.selection_end), dy: 16 }] : [],
    tip: (i, p) => `${dm(p[0])} · ${ZN[tz[i]].toLowerCase()}<br><b>${fR(p[1])}</b> накоплено` });
@@ -540,7 +529,9 @@ SEC.backtest = () => {
   txt('#bt-src', S.per === 'year' ? 'Бэктест · год, отбор затенён' : 'Бэктест · отложенный период');
   const order = zones.slice().sort((a, b) => ['hold', 'sel', 'early'].indexOf(a.id) - ['hold', 'sel', 'early'].indexOf(b.id));
   const row = (k, f, c) => `<tr><td>${k}</td>${order.map((z, i) => `<td class="${i ? 'z-off' : 'z-on'} ${c ? c(z) : ''}">${f(z)}</td>`).join('')}</tr>`;
-  $('#bt-zones thead').innerHTML = `<tr><th>Показатель</th>${order.map((z) => `<th>${ZN[z.id]}<br><small>${dm(z.from)}–${dm(z.to)}</small></th>`).join('')}</tr>`;
+  const dy = (t) => (selZ ? yy(t) : dm(t));
+  txt('#bt-upd', dmy(d.updated_at) + ' ' + hm(d.updated_at));
+  $('#bt-zones thead').innerHTML = `<tr><th>Показатель</th>${order.map((z) => `<th>${ZN[z.id]}<br><small>${dy(z.from)}–${dy(z.to)}</small></th>`).join('')}</tr>`;
   $('#bt-zones tbody').innerHTML = row('Сделок', (z) => z.stats.n) + row('Результат', (z) => fR(z.stats.r_total), (z) => (z.stats.r_total < 0 ? 'loss' : '')) +
    row('Винрейт (Уилсон)', (z) => { const c = wilson(z.stats.wins, z.stats.n); return `${Math.round(z.stats.wins / Math.max(1, z.stats.n) * 100)}% (${Math.round(c[0])}–${Math.round(c[1])})`; }) +
    row('PF', (z) => (z.stats.pf == null ? '—' : num(z.stats.pf, 2))) + (selZ ? row('PF × 0,6 (поправка Genome)', (z) => (z.id === 'sel' && z.stats.pf ? num(z.stats.pf * 0.6, 2) : '—')) : '') +
@@ -571,7 +562,8 @@ SEC.backtest = () => {
   $('#st-eq').setAttribute('aria-label', `Бот в стресс-окне: ${n} сделок, итог ${fR(st.r_total)}`);
   html('#st-trades', tr.map((t) => `<li><span${t.gap ? ' class="gap"' : ''}>${utc(t.t)} · ${t.side === 'L' ? 'LONG' : 'SHORT'} · ${t.kind === 'SL' && t.r < -1.2 ? 'SL, исполнен хуже уровня' : KIND[t.kind]}</span><b class="${t.r < 0 ? 'loss' : 'up'}">${fR(t.r, 2)}</b></li>`).join(''));
   const sl = tr.filter((t) => t.kind === 'SL'), avg = sl.length ? sl.reduce((a, t) => a + t.r, 0) / sl.length : null;
-  html('#st-sum', `<dt>Итог окна</dt><dd class="big ${st.r_total < 0 ? 'loss' : 'up'}">${fR(st.r_total)}</dd><dt>Сделок</dt><dd>${n}</dd><dt>Средний стоп в окне</dt><dd class="loss">${avg == null ? '—' : fR(avg, 2)}</dd><dt>Обычный стоп (отложенный)</dt><dd>${d.normal_sl_r == null ? '—' : fR(d.normal_sl_r, 2)}</dd><dt>Комиссии</dt><dd>${S.fees ? 'учтены' : 'выключены'}</dd><dt>Окно выпадет из хранилища</dt><dd class="amber">${dmy(w.expires_at)}</dd>`);
+  txt('#bt-upd', dmy(d.updated_at) + ' ' + hm(d.updated_at));
+  html('#st-sum', `<dt>Итог окна</dt><dd class="big ${st.r_total < 0 ? 'loss' : 'up'}">${fR(st.r_total)}</dd><dt>Сделок</dt><dd>${n}</dd><dt>Макс. просадка</dt><dd class="loss">${fR(-st.max_dd_r)}</dd><dt>Средний стоп в окне</dt><dd class="loss">${avg == null ? '—' : fR(avg, 2)}</dd><dt>Обычный стоп (отложенный)</dt><dd>${d.normal_sl_r == null ? '—' : fR(d.normal_sl_r, 2)}</dd><dt>Комиссии</dt><dd>${S.fees ? 'учтены' : 'выключены'}</dd><dt>Окно выпадет из хранилища</dt><dd class="amber">${dmy(w.expires_at)}</dd>`);
   const tg = [];
   if (avg != null && avg < -1.25) tg.push(['warn', `стопы исполнялись хуже уровня: в среднем ${fR(avg, 2)}`]);
   if (n < 30) tg.push(['warn', `мало сделок: ${n} — это проверка поведения, не статистика`]);
@@ -587,7 +579,6 @@ SEC.backtest = () => {
  autoSize(box, () => { if (last) render(last, 1); });
 };
 
-// ---------- 6. стоп или усреднение: один ценовой путь, два бота ----------
 SEC.compare = () => {
  const bd = $('#cmp-dca'); if (!bd) return;
  const S = { sc: 'drop', x: 12, lev: 1, gstop: true }, xr = $('#cmp-x'), DEP = 1000, FEE = 0.0006, STEPS = [1, 1.2, 1.44, 1.728, 2.0736, 2.48832], SUMW = 9.93;
@@ -624,7 +615,6 @@ SEC.compare = () => {
   }
   let un = 0;
   if (cy) { un = cy.q * p[p.length - 1] - cy.c; fills = cy.n; avgs.push({ y: cy.c / cy.q, x0: cy.ia, x1: p.length - 1 }); if (S.lev > 1) { const lp = (cy.c - DEP - real) / (cy.q * 0.995); liq = lp > 0 ? (1 - lp / cy.e) * 100 : null; } }
-  // худший случай одной сделки заранее: вся сетка + стоп
   let q = 0; STEPS.forEach((w, k) => { q += base * w / (100 * (1 - 0.03 * k)); });
   const full = (q * 80.75 * 0.999 - base * SUMW) - base * SUMW * FEE * 2;
   return { fin: (real + un) / DEP * 100, open: !!cy, tps, stop, maxM, worst: Math.min(worst, real + un) / DEP * 100, mk, avgs, fills, liq, full: full / DEP * 100, liqFull: S.lev > 1 ? (1 - (base * SUMW - DEP) / (q * 0.995) / 100) * 100 : null };
@@ -673,14 +663,13 @@ SEC.compare = () => {
   let w = dW ? 'Здесь выиграла сетка' : cW ? 'Выиграл стоп' : 'Ничья', t;
   if (S.sc === 'drop') t = S.x < 3 ? 'Цена почти не упала: стоп CHM не задет, сетка открыла один-два ордера.' : a.stop ? `Сетка исполнила все 6 ордеров и закрылась по своему стопу: <b>${fP(a.fin)}</b> депозита за одну сделку. У CHM один стоп: <b>${fP(b.fin)}</b>.${lev}` : `Сетка держит позицию на ${Math.round(a.maxM)}% депозита и ждёт отскока, минус сейчас <b>${fP(a.fin)}</b>. CHM вышел по стопу: <b>${fP(b.fin)}</b>.${S.gstop ? '' : ' Без стопа убыток сетки ничем не ограничен.'}${lev}`;
   else if (S.sc === 'bounce') t = dW ? `Средняя цена подтянулась, отскок закрыл сетку в плюс: <b>${fP(a.fin)}</b>. CHM поймал стоп <b>${fP(b.fin)}</b> и без нового сигнала на отскоке не входил. Это честная цена стопа: мелкие убытки случаются чаще.` : 'Отскок слишком слабый, чтобы сетка вышла в плюс.';
-  else if (S.sc === 'chop') t = `В пиле бот CHM получил серию стопов: ${b.tr.length} ${plural(b.tr.length, 'вход', 'входа', 'входов')}, итог <b>${fP(b.fin)}</b>. Сетка закрыла ${a.tps} ${plural(a.tps, 'цикл', 'цикла', 'циклов')} с тейком: <b>${fP(a.fin)}</b>. Серии стопов — главный риск стратегии со стопом, поэтому на витрине есть худшая серия, а в челлендже пауза после серии стопов.`;
+  else if (S.sc === 'chop') t = `В пиле бот CHM получил серию стопов: ${b.tr.length} ${plural(b.tr.length, 'вход', 'входа', 'входов')}, итог <b>${fP(b.fin)}</b>. Сетка закрыла ${a.tps} ${plural(a.tps, 'цикл', 'цикла', 'циклов')} с тейком: <b>${fP(a.fin)}</b>. Серии стопов — главный риск торговли со стопом, поэтому на витрине есть худшая серия, а в челлендже пауза после серии стопов.`;
   else t = `Гэп пролетел через стоп CHM: он исполнился ниже уровня, <b>${fR(b.slip, 2)}</b> вместо −1R. Ордера сетки собрали падение, отскок вывел её в <b>${fP(a.fin)}</b>. Стоп ограничивает убыток, но цену исполнения не гарантирует.`;
   html('#cmp-verdict', `<b class="vw ${dW ? 'grid' : cW ? 'ok' : 'none'}">${w}</b><span>${t}</span>`);
  }
  render(); autoSize(bd, render);
 };
 
-// ---------- 7. Genome: фитнес по поколениям ----------
 SEC.genome = () => {
  const box = $('#gn-chart'); if (!box) return;
  const S = { st: 'LEVELS', g: 0, t: 0, d: null }, G = () => S.d.strategies.find((x) => x.id === S.st);
@@ -704,7 +693,7 @@ SEC.genome = () => {
   const I = G(), b = I.best, h = I.holdout, kv = (k, v, c) => `<dt>${k}</dt><dd class="${c || ''}">${v}</dd>`;
   txt('#gn-when', `${dmy(I.last_run)} ${hm(I.last_run)} · ${I.generations} × ${I.population} · ${I.genes} генов`);
   html('#gn-sel', kv('Фитнес', num(b.fitness, 2)) + kv('WR', Math.round(b.wr * 100) + '%') + kv('PF', num(b.pf, 2)) + kv('Сделок', b.n) + kv('Окно отбора', b.selection_days + ' дн.'));
-  html('#gn-hold', kv('WR', Math.round(h.wr * 100) + '%') + kv('PF', num(h.pf, 2), h.pf < 1 ? 'loss' : '') + kv('Сделок', h.n + (h.n < 30 ? ' · мало' : ''), h.n < 30 ? 'amber' : '') + kv('Итог', fR(h.sum_r), h.sum_r < 0 ? 'loss' : 'up') + kv('Период', h.days + ' дн.'));
+  html('#gn-hold', kv('WR', Math.round(h.wr * 100) + '%') + kv('PF', num(h.pf, 2), h.pf < 1 ? 'loss' : '') + kv('Сделок', h.n + (h.n < 30 ? ' · мало' : ''), h.n < 30 ? 'amber' : '') + kv('Итог', fR(h.sum_r), h.sum_r < 0 ? 'loss' : 'up') + kv('Макс. просадка', fR(-h.max_dd_r), 'loss') + kv('Период', h.days + ' дн.'));
   html('#gn-live', `На данных отбора результат всегда лучше, чем будет. Genome сам делает поправку для реальной торговли: PF × ${num(S.d.live_pf_factor, 1)} = <b>${num(b.pf * S.d.live_pf_factor, 2)}</b>. Применять параметры предлагаем только после проверки на отложенном периоде и только с вашим подтверждением.`);
  }
  function play() {
@@ -726,7 +715,6 @@ SEC.genome = () => {
  autoSize(box, () => { if (S.d) draw(); });
 };
 
-// ---------- 8. планировщик челленджа: без цели по умолчанию, сверка с ботом витрины ----------
 SEC.planner = () => {
  const dep = $('#pl-dep'); if (!dep) return;
  const S = { term: 30, lev: 3, bots: [] }, goal = $('#pl-goal'), risk = $('#pl-risk'), bot = $('#pl-bot'), trs = $('#pl-trades'), lim = $('#pl-limit');
@@ -737,48 +725,51 @@ SEC.planner = () => {
  function render() {
   const r = +risk.value, d = Math.max(0, parseFloat(dep.value) || 0), gv = goal.value.trim(), g = gv === '' ? null : Math.max(0, parseFloat(gv.replace(',', '.')) || 0);
   fill(risk); txt('#pl-risk-out', rTxt(r));
-  const R1 = (d || 1000) * r / 100, b = S.bots[+bot.value], pace = b ? b.stats.r_total / b.track_days : null, term = S.term;
+  const R1 = (d || 1000) * r / 100, b = S.bots[+bot.value], pace = b ? b.pace : null, term = S.term;
   let w, wc, sub;
-  odo($('#pl-o-bot'), pace == null ? '—' : fR(pace, 2)); txt('#pl-o-bot-s', b ? `в день · ${b.track_days} дн. трека, бумажный` : 'нет бота с треком');
+  odo($('#pl-o-bot'), pace == null ? '—' : fR(pace, 2)); txt('#pl-o-bot-s', b ? `в день · ${b.lbl} · просадка ${fR(-b.dd)}` : 'нет бота с треком');
   if (!g) {
    w = 'Цель не задана'; wc = 'none';
-   sub = `Мы не подставляем цель за вас. Введите свою — посчитаем, сколько это R в день, и сверим с треком бота${b ? ` (${fR(pace, 2)} в день)` : ''}.`;
+   sub = `Мы не подставляем цель за вас. Введите свою — посчитаем, сколько это R в день, и сверим с треком${b ? ` (${fR(pace, 2)} в день)` : ''}.`;
    txt('#pl-o-goal', '—'); txt('#pl-o-goal-s', 'введите цель'); txt('#pl-o-day', '—'); txt('#pl-o-day-s', term + ' дн.');
   } else {
    const profit = (d || 1000) * g / 100, need = profit / R1, day = need / term;
    odo($('#pl-o-goal'), num(need, need < 10 ? 1 : 0) + 'R'); txt('#pl-o-goal-s', `${usd(profit)} = ${fP(g, g % 1 ? 1 : 0)} депозита`);
    odo($('#pl-o-day'), fR(day, 2)); txt('#pl-o-day-s', `≈ ${usd(day * R1, 2)} в день · ${term} дн.`);
    if (!b) { w = 'Нет данных'; wc = 'none'; sub = 'Без трека бота вердикт не выносим: сравнить план не с чем.'; }
-   else if (pace <= 0) { w = 'Бот в минусе'; wc = 'bad'; sub = `На треке бот теряет ${fR(pace, 2)} в день. План на прибыль с ним нереалистичен.`; }
+   else if (pace <= 0) { w = 'Трек в минусе'; wc = 'bad'; sub = `На треке ${fR(pace, 2)} в день. План на прибыль по нему нереалистичен.`; }
    else {
     const k = day / pace; w = k <= 1 ? 'Реально' : k <= 1.6 ? 'Напряжённо' : 'Нереально'; wc = k <= 1 ? 'ok' : k <= 1.6 ? 'tight' : 'bad';
-    sub = `Нужно ${fR(day, 2)} в день, бот на треке делал ${fR(pace, 2)}. В его темпе цель займёт ≈ ${Math.ceil(need / pace)} дн., если трек повторится, а это не гарантировано.${k > 1 ? ' Уменьшите цель или увеличьте срок, а не риск.' : ''}`;
+    sub = `Нужно ${fR(day, 2)} в день, на треке было ${fR(pace, 2)}. В этом темпе цель займёт ≈ ${Math.ceil(need / pace)} дн., если трек повторится, а это не гарантировано.${k > 1 ? ' Уменьшите цель или увеличьте срок, а не риск.' : ''}`;
    }
   }
   html('#pl-verdict', `<b class="vw ${wc}">${w}</b><span>${esc(sub)}</span>`);
   const W = [], five = 5 * r, notional = R1 / 0.02, margin = notional / S.lev, l = parseFloat(lim.value);
-  W.push([r >= 3 ? 'b' : '', `Пять стопов подряд = ${fP(-five, five % 1 ? 1 : 0)} депозита${r >= 3 ? ': риск от 3% — это уже ставка, а не дисциплина' : ''}.${b ? ` Худшая серия выбранного бота — ${b.stats.max_loss_streak} стопов подряд.` : ''}`]);
+  W.push([r >= 3 ? 'b' : '', `Пять стопов подряд = ${fP(-five, five % 1 ? 1 : 0)} депозита${r >= 3 ? ': риск от 3% — это уже ставка, а не дисциплина' : ''}.${b ? ` ${b.ws} — ${b.streak} стопов подряд.` : ''}`]);
   if (d && margin > d) W.push(['b', `Позиция по плану не влезает в депозит: при стопе 2% и плече ${S.lev}× нужна маржа ${usd(margin)}.`]);
   else if (d && margin * 3 > d) W.push(['w', `Три сделки одновременно займут ${Math.round(margin * 3 / d * 100)}% депозита в марже.`]);
   if (100 / S.lev <= 4) W.push(['b', `Ликвидация ближе двух стопов: при плече ${S.lev}× она примерно в ${num(100 / S.lev, 1)}% от входа, а типичный стоп — 2%.`]);
   if (l > 0 && l < 1) W.push(['w', 'Дневной лимит убытка меньше одного стопа.']);
   W.push(['', `Дисциплина: не больше ${parseInt(trs.value, 10) || 0} сделок и ${fR(-(l || 0), 1)} (${usd(-(l || 0) * R1)}) убытка в день, дальше новые входы закрыты до завтра.`]);
   html('#pl-warns', W.map((x) => `<li class="${x[0]}">${esc(x[1])}</li>`).join(''));
-  txt('#pl-rexp', `1R — убыток одной сделки по стопу. При депозите ${usd(d || 1000)}${d ? '' : ' (пример)'} и риске ${rTxt(r)} это ${usd(R1, R1 < 10 ? 2 : 0)}. Цель +10% за ${term} дн. — это ${num(10 / r, 1)}R, или ${num(10 / r / term, 2)}R в день. Цель в R не зависит от депозита: она показывает, сколько стопов должна перекрыть прибыль.`);
+  txt('#pl-rexp', `1R — убыток одной сделки по стопу. При депозите ${usd(d || 1000)}${d ? '' : ' (пример)'} и риске ${rTxt(r)} это ${usd(R1, R1 < 10 ? 2 : 0)}. Каждый 1% депозита при этом риске — ${num(1 / r, (1 / r) % 1 ? 2 : 0)}R. Цель в R не зависит от депозита: она показывает, сколько стопов должна перекрыть прибыль.`);
  }
+ // по умолчанию сверяем с медианой витрины, а не с лучшим ботом
  api1('showcase').then((d) => {
-  const sc = (b) => b.stats.r_total / Math.max(1, b.stats.max_dd_r);
-  S.bots = ok(d) ? d.bots.filter((b) => b.status === 'published').sort((a, b) => sc(b) - sc(a)) : [];
-  bot.innerHTML = S.bots.length ? S.bots.map((b, i) => `<option value="${i}">${esc(b.strategy_name)} · ${esc(b.coins.join(' '))}${b.coins_extra ? ' +' + b.coins_extra : ''} · ${b.tf} · ${fR(b.stats.r_total / b.track_days, 2)}/день</option>`).join('') : '<option value="">нет ботов с треком</option>';
+  const bs = ok(d) ? d.bots.filter((b) => b.status === 'published') : [], M = (f) => median(bs.map(f));
+  S.bots = bs.map((b) => ({ n: `${b.strategy_name} · ${b.coins.join(' ')}${b.coins_extra ? ' +' + b.coins_extra : ''} · ${b.tf}`, pace: b.stats.r_total / b.track_days, lbl: b.track_days + ' дн. трека, бумажный', dd: b.stats.max_dd_r, streak: b.stats.max_loss_streak, ws: 'Худшая серия этого бота' }));
+  if (bs.length) S.bots.unshift({ n: `Медиана витрины, ${bs.length} ботов`, pace: M((b) => b.stats.r_total / b.track_days), lbl: 'медиана витрины, бумажный трек', dd: M((b) => b.stats.max_dd_r), streak: Math.round(M((b) => b.stats.max_loss_streak)), ws: 'Медиана худших серий витрины' });
+  bot.innerHTML = S.bots.length ? S.bots.map((b, i) => `<option value="${i}">${esc(b.n)} · ${fR(b.pace, 2)}/день</option>`).join('') : '<option value="">нет ботов с треком</option>';
   render();
  });
  render();
 };
 
-// ---------- 9. калькулятор оплаты и перенос убытка по месяцам ----------
 SEC.pricing = () => {
  const inp = $('#pr-profit'); if (!inp) return;
- const rng = $('#pr-range'), carry = $('#pr-carry'), CAP = 69, M = [-120, 80, 400, -60];
+ // перенос по месяцам с нуля, пример — по кнопке
+ const rng = $('#pr-range'), carry = $('#pr-carry'), CAP = 69, M = [0, 0, 0, 0];
+ on($('[data-lg-ex]'), 'click', () => { M.splice(0, 4, -120, 80, 400, -60); render(); });
  fill(rng);
  on(inp, 'input', render); on(carry, 'input', render);
  on(rng, 'input', () => { inp.value = rng.value; render(); });
@@ -807,7 +798,6 @@ SEC.pricing = () => {
  render();
 };
 
-// ---------- 10. проверка прав API-ключа ----------
 SEC.key = () => {
  const box = $('#key'); if (!box) return;
  const K = {}, v = $('#key-v');
@@ -823,7 +813,6 @@ SEC.key = () => {
  on(box, 'change', upd); upd();
 };
 
-// ---------- 11–12. приложение, QR, FAQ, диалоги, поддержка, блик ----------
 SEC.app = () => {
  const tabs = $$('#app-tabs [role="tab"]'); if (!tabs.length) return;
  const set = (b) => { tabs.forEach((x) => { const o = x === b; x.classList.toggle('on', o); x.setAttribute('aria-selected', o); x.tabIndex = o ? 0 : -1; }); $$('#app-dev .app-scr').forEach((s) => s.classList.toggle('on', s.dataset.app === b.dataset.app)); };
@@ -846,7 +835,7 @@ SEC.misc = () => {
   const s = e.target.closest('[data-support]');
   if (s) {
    if (window.ChmSupport) return window.ChmSupport.open();
-   const el = D.createElement('script'); el.src = '/support-widget.js'; el.onload = () => window.ChmSupport && window.ChmSupport.open(); el.onerror = () => { location.href = 'https://t.me/chmbotsignal'; }; D.body.appendChild(el);
+   const el = D.createElement('script'); el.src = '/support-widget.js?v=2'; el.onload = () => window.ChmSupport && window.ChmSupport.open(); el.onerror = () => { location.href = 'https://t.me/chmbotsignal'; }; D.body.appendChild(el);
   }
  });
  D.body.insertAdjacentHTML('beforeend', '<svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs><linearGradient id="ga-pos" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#3df2a0" stop-opacity=".2"/><stop offset="1" stop-color="#3df2a0" stop-opacity="0"/></linearGradient><linearGradient id="ga-neg" x1="0" y1="1" x2="0" y2="0"><stop offset="0" stop-color="#ff7a8f" stop-opacity=".18"/><stop offset="1" stop-color="#ff7a8f" stop-opacity="0"/></linearGradient><pattern id="hatch" width="5" height="5" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><rect width="5" height="5" fill="rgba(255,122,143,.08)"/><line x1="0" y1="0" x2="0" y2="5" stroke="rgba(255,122,143,.55)" stroke-width="1.4"/></pattern></defs></svg>');

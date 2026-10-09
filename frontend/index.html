@@ -15,7 +15,7 @@
 <meta property="og:type" content="website"/>
 <meta property="og:site_name" content="CHM Breaker"/>
 <meta property="og:title" content="Боты со стопом в каждой сделке · CHM Breaker"/>
-<meta property="og:description" content="Проверь бота на истории, подбери параметры генетикой, запусти в демо или на своей бирже. У каждой цифры указаны источник и дата."/>
+<meta property="og:description" content="Проверьте бота на истории, подберите параметры генетическим алгоритмом, запустите в демо или на своей бирже. У каждой цифры указаны источник и дата."/>
 <meta property="og:url" content="https://chmup.top/"/>
 <meta property="og:image" content="https://chmup.top/og-cover.png"/>
 <meta property="og:image:width" content="1200"/>
@@ -28,16 +28,9 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&amp;family=JetBrains+Mono:wght@400;500&amp;family=Oswald:wght@500;600;700&amp;display=swap" media="print" onload="this.media='all'"/>
 <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&amp;family=JetBrains+Mono:wght@400;500&amp;family=Oswald:wght@500;600;700&amp;display=swap"/></noscript>
-<link rel="stylesheet" href="/landing/landing.css?v=1"/>
+<link rel="stylesheet" href="/landing/landing.css?v=2"/>
 <script type="application/ld+json">{"@context":"https://schema.org","@type":"Organization","name":"CHM Breaker","alternateName":"CHM","url":"https://chmup.top","logo":"https://chmup.top/logo.png","sameAs":["https://t.me/crypto_chm"]}</script>
-<script type="application/ld+json">{"@context":"https://schema.org","@type":"SoftwareApplication","name":"CHM Breaker","applicationCategory":"FinanceApplication","operatingSystem":"Web, Telegram","url":"https://chmup.top","description":"Торговые боты на стратегиях Уровни, SMC и Объём + MA для Bybit и BingX: стоп в каждой сделке, бэктест с комиссиями, подбор параметров генетическим алгоритмом, демо-счёт.","offers":[{"@type":"Offer","name":"Free","price":"0","priceCurrency":"USD"},{"@type":"Offer","name":"Pro, 30 дней","price":"69","priceCurrency":"USD"}]}</script>
-<script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[
-{"@type":"Question","name":"Гарантирует ли CHM Breaker доход?","acceptedAnswer":{"@type":"Answer","text":"Нет. Торговля фьючерсами связана с риском потери денег. Стоп ограничивает убыток сделки, но не гарантирует цену исполнения. Результаты прошлого не гарантируют будущих."}},
-{"@type":"Question","name":"Чем бот CHM отличается от DCA-ботов?","acceptedAnswer":{"@type":"Answer","text":"DCA-бот докупает при падении, и риск сделки растёт с каждым ордером. Бот CHM входит один раз и сразу ставит стоп; размер позиции считается от риска в процентах депозита."}},
-{"@type":"Question","name":"Что такое R?","acceptedAnswer":{"@type":"Answer","text":"1R — убыток одной сделки по стопу. При депозите 1000 $ и риске 1% это 10 $. Результат +5R при риске 1% — около +5% депозита без реинвеста."}},
-{"@type":"Question","name":"Что будет с позициями, если я не оплачу?","acceptedAnswer":{"@type":"Answer","text":"После льготного периода новые входы встанут на паузу. Открытые позиции бот не закрывает: стопы и тейки остаются на бирже."}},
-{"@type":"Question","name":"Безопасно ли подключать биржу?","acceptedAnswer":{"@type":"Answer","text":"Нужен API-ключ с правом торговли и без права вывода. Ключ хранится зашифрованным (AES-GCM), деньги остаются на вашем счёте биржи. Ключ с правом вывода мы не принимаем."}}
-]}</script>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"SoftwareApplication","name":"CHM Breaker","applicationCategory":"FinanceApplication","operatingSystem":"Web, Telegram","url":"https://chmup.top","description":"Торговые боты для Bybit и BingX со стопом в каждой сделке, бэктестом и демо-счётом.","offers":[{"@type":"Offer","name":"Free","price":"0","priceCurrency":"USD"},{"@type":"Offer","name":"Pro, 30 дней","price":"69","priceCurrency":"USD"}]}</script>
 </head>
 <body>
 <div class="bg" aria-hidden="true"></div>
@@ -45,7 +38,7 @@
 
 <header class="hdr" id="top">
 <div class="tick" role="region" aria-label="Тренд BTC по шести таймфреймам и изменение BTC и ETH за 24 часа">
-<div class="tick-lead"><i class="hb-dot" aria-hidden="true"></i><span class="tick-k">Тренд BTC</span></div>
+<div class="tick-lead"><i class="hb-dot" aria-hidden="true"></i><span class="tick-k">Тренд BTC</span><button class="tick-pp" id="tick-pp" aria-pressed="false" aria-label="Остановить бегущую строку" hidden></button></div>
 <div class="tick-track"><div class="tick-row" id="tick-row"><span class="tc tc-sk"></span><span class="tc tc-sk"></span><span class="tc tc-sk"></span><span class="tc tc-sk"></span><span class="tc tc-sk"></span><span class="tc tc-sk"></span></div></div>
 <div class="tick-meta" id="tick-upd">обн. --:--</div>
 </div>
@@ -71,12 +64,12 @@
 <div class="hero-head">
 <div class="hero-mark" aria-hidden="true">
 <svg viewBox="0 0 600 240" preserveAspectRatio="none"><path class="tr" pathLength="1" d="M0 70 L46 56 L78 82 L120 46 L160 74 L196 60 L238 108 L270 94 L310 136 L344 120 L388 166 L420 152 L462 196 L494 186 L528 228"/><line class="sl" x1="250" x2="600" y1="228" y2="228"/></svg>
-<i class="sl-dot"></i><span class="sl-tag">SL · −1R · −1% депозита</span>
+<i class="sl-dot"></i><span class="sl-tag">SL · −1R = −1% при риске 1%</span>
 </div>
 <p class="eyebrow"><span class="idx">01</span>Боты для фьючерсов Bybit и BingX</p>
 <h1 id="h1" class="h1">Боты со&nbsp;<span class="red">стопом</span><br/>в&nbsp;каждой сделке<sup><a href="#stop-note" aria-label="Примечание о стопе">*</a></sup></h1>
 </div>
-<p class="lead">Проверь бота на истории, подбери параметры генетикой, запусти в демо или на своей бирже. Риск сделки задаёте вы: от&nbsp;0,25 до&nbsp;3% депозита.</p>
+<p class="lead">Проверьте бота на истории, подберите параметры генетическим алгоритмом, запустите в демо или на своей бирже. Риск сделки задаёте вы: от&nbsp;0,25 до&nbsp;3% депозита.</p>
 <div class="cta">
 <a class="btn btn-red" id="hero-launch" href="/app/?from=sandbox" data-open-modal="register">Запустить такого бота <span aria-hidden="true">→</span></a>
 <a class="btn btn-g" href="#showcase">Смотреть витрину</a>
@@ -116,7 +109,7 @@
 </div>
 <p class="honest" id="sbx-honest">Риск выше — шире оба края: и результат, и просадка в процентах.</p>
 <div class="strip">
-<div class="strip-hd"><span class="lbl">Та же стратегия на 20 монетах</span><span id="sbx-median">медиана —</span></div>
+<div class="strip-hd"><span class="lbl">Тот же бот на 20 монетах</span><span id="sbx-median">медиана —</span></div>
 <div class="strip-track" id="sbx-strip" role="radiogroup" aria-label="Результат по монетам, выбор монеты"></div>
 </div>
 <div class="tags" id="sbx-tags" aria-live="polite"></div>
@@ -143,10 +136,10 @@
 <div class="mix-bar" id="mix-bar" role="img" aria-label="Доли исходов"></div>
 <div class="mix-leg" id="mix-leg"></div>
 </div>
-<div class="inst-ft"><span>Задержка 60 мин · полная лента без задержки в приложении</span><span class="mono" id="feed-clock"></span></div>
+<div class="inst-ft"><span>Задержка 60 мин · R после комиссий, оценка · полная лента без задержки в приложении</span><span class="mono" id="feed-clock"></span></div>
 </div>
 <div class="inst cnt">
-<div class="inst-hd"><span class="inst-id">Счётчики трекера</span><span class="src src-paper">Бумажный трек</span></div>
+<div class="inst-hd"><span class="inst-id">Счётчики трекера</span><span class="src src-paper">Трек сигналов (бумажный)</span></div>
 <div class="cnt-grid">
 <div class="ro"><span class="ro-k">Сигналов витрины</span><b class="ro-v" data-c="signals">—</b><span class="ro-s" data-c="signals-s">закрыто — · открыто —</span><span class="upd" data-u="signals"></span></div>
 <div class="ro"><span class="ro-k">Витрина работает</span><b class="ro-v" data-c="days">—</b><span class="ro-s" data-c="days-s">дней</span><span class="upd" data-u="days"></span></div>
@@ -154,7 +147,7 @@
 <div class="ro"><span class="ro-k">Худший и лучший бот, 30 дн.</span><b class="ro-v ro-pair"><span class="loss" data-c="worst">—</span><span class="sep">/</span><span data-c="best">—</span></b><span class="ro-s">рядом всегда оба края</span><span class="upd" data-u="median2"></span></div>
 <div class="ro ro-w"><span class="ro-k">Реестр кандидатов</span><b class="ro-v" data-c="cand">—</b><span class="ro-s" data-c="cand-s">на витрине — · ждут — · архив —</span><span class="upd" data-u="cand"></span></div>
 </div>
-<p class="note">Сумму R по всей платформе не показываем: она ничего не говорит о результате одного счёта. Вместо неё медиана, доля ботов в плюсе и худший бот рядом с лучшим.</p>
+<p class="note">Сумму R по всей платформе не показываем: она ничего не говорит о результате одного счёта. Вместо неё медиана, доля ботов в плюсе и худший бот рядом с лучшим. R после комиссий, оценка.</p>
 </div>
 </div>
 </div>
@@ -163,7 +156,7 @@
 <section class="sec" id="showcase" aria-labelledby="h-sc">
 <div class="wrap">
 <div class="sec-hd"><p class="eyebrow"><span class="idx">03</span>Витрина</p><h2 class="h2" id="h-sc">Боты с&nbsp;открытой статистикой</h2>
-<p class="sub">На витрину бот попадает после 30 закрытых сигналов и 30 дней трека. Параметры заморожены: правка становится новой версией со своим треком. Снятые боты уходят в архив, а не пропадают.</p></div>
+<p class="sub">На витрину бот попадает после 30 закрытых сигналов и 30 дней трека, до этого он виден только в реестре кандидатов. Параметры заморожены: правка становится новой версией со своим треком. Снятые боты уходят в архив, а не пропадают.</p></div>
 <ul class="legend-src">
 <li><span class="src src-paper">Трек сигналов (бумажный)</span>сигналы по ценам уровней, без реальных исполнений</li>
 <li><span class="src src-bt">Бэктест</span>только отложенный период, в подборе не участвовал</li>
@@ -180,6 +173,7 @@
 <div class="sc-row">
 <div class="fg"><span class="lbl">Ваш риск на сделку</span><div class="seg seg-sm" role="radiogroup" aria-label="Ваш риск на сделку" id="sc-risk"><button data-v="0.5">0,5%</button><button class="on" data-v="1">1%</button><button data-v="2">2%</button><button data-v="3">3%</button></div></div>
 <div class="fg"><span class="lbl">Сортировка</span><div class="seg seg-sm" role="radiogroup" aria-label="Сортировка" id="sc-sort"><button class="on" data-v="top" title="R, делённый на макс. просадку, окно не меньше 90 дней">Топ: R / просадка</button><button data-v="new">Новые</button><button data-v="copies">Больше копий</button></div></div>
+<p class="sc-med" id="sc-med"></p>
 <div class="sc-nav"><span id="sc-pos" aria-live="polite">—</span><button class="icon-btn" id="sc-prev" aria-label="Предыдущие боты">‹</button><button class="icon-btn" id="sc-next" aria-label="Следующие боты">›</button></div>
 </div>
 </div>
@@ -197,17 +191,17 @@
 <div class="story">
 <div class="story-dev" aria-hidden="true">
 <div class="phone" id="story-phone">
-<div class="phone-bar"><span>Пример экрана</span><span class="mono" id="story-n">1 / 5</span></div>
+<div class="phone-bar"><span>Пример · числа условные</span><span class="mono" id="story-n">1 / 5</span></div>
 <div class="phone-scr">
 <div class="scr on">
 <div class="m-card">
-<div class="m-row"><b class="m-glyph">УР</b><span class="m-t">Уровни · BTC ETH SOL +7</span></div>
-<div class="m-row"><span class="src src-paper src-xs">Трек (бум.) · 94 дн.</span><span class="m-dim">копий 312</span></div>
+<div class="m-row"><b class="m-glyph">УР</b><span class="m-t">Уровни · BTC ETH</span></div>
+<div class="m-row"><span class="src src-paper src-xs">Трек сигналов (бумажный)</span><span class="m-dim">94 дн.</span></div>
 <div class="m-big up">+8,8R</div><div class="m-dim">= +8,8% при риске 1%, без реинвеста</div>
 <svg class="m-curve" viewBox="0 0 220 60" preserveAspectRatio="none"><path class="ax" d="M0 46H220"/><path class="ln" d="M0 46 L20 48 L35 43 L52 47 L70 39 L88 42 L104 35 L122 38 L140 30 L158 34 L176 26 L196 29 L220 21"/></svg>
 <div class="m-kv"><span>WR 42% (31–55)</span><span>PF 1,31</span><span class="loss">DD −5,9R</span></div>
 <div class="m-kv"><span><i class="rbar" data-l="3"><i></i><i></i><i></i><i></i><i></i></i> риск 3 из 5</span><span class="m-dim">сигналов 59</span></div>
-<div class="m-src"><span class="src src-bt src-xs">Бэктест</span><span>отложенный +16,1R · PF 1,54</span></div>
+<div class="m-src"><span class="src src-bt src-xs">Бэктест</span><span>отложенный +16,1R · PF 1,54 · 41 сд.</span></div>
 <div class="m-btns"><span class="m-btn">Тест на моих монетах</span><span class="m-btn red">Копировать</span></div>
 </div>
 </div>
@@ -242,11 +236,11 @@
 </div>
 </div>
 <ol class="steps" id="steps">
-<li class="step on"><span class="step-n">01</span><h3>Выбери бота</h3><p>Возьми бота с витрины или собери свой: стратегия, монеты, таймфрейм, направление. Новый бот сначала работает в демо.</p><ul class="facts"><li>3 стратегии: Уровни, SMC, Объём + MA</li><li>до 3 ботов, по одному на стратегию</li></ul><div class="step-scr" aria-hidden="true"></div></li>
-<li class="step"><span class="step-n">02</span><h3>Проверь на истории</h3><p>Бэктест на ваших монетах с комиссиями и проскальзыванием. Автотеги сразу говорят, что не так: мало сделок, комиссии съедают прибыль, результат держится на одном периоде.</p><ul class="facts"><li>комиссия 0,12% за круг + проскальзывание 0,1%</li><li>стоп проверяется первым на каждой свече</li></ul><div class="step-scr" aria-hidden="true"></div></li>
-<li class="step"><span class="step-n">03</span><h3>Подбери параметры</h3><p>Genome перебирает поколения настроек и оставляет устойчивые. Изменения приходят черновиком: было → станет, проверка на отложенном периоде, решение за вами.</p><ul class="facts"><li>для ботов автоприменение выключено</li><li>сравнение только на данных, которых подбор не видел</li></ul><div class="step-scr" aria-hidden="true"></div></li>
-<li class="step"><span class="step-n">04</span><h3>Запусти: демо или биржа</h3><p>Подключи API-ключ Bybit или BingX с правом торговли и без права вывода. Или начни на Bybit Demo. Деньги остаются на вашем счёте биржи.</p><ul class="facts"><li>ключ без права вывода</li><li>режимы: только сигналы, с подтверждением, авто</li></ul><div class="step-scr" aria-hidden="true"></div></li>
-<li class="step"><span class="step-n">05</span><h3>Держи дисциплину</h3><p>Челлендж задаёт дневной лимит убытка и число сделок. Достиг лимита — новые входы на паузе до завтра. Серия стопов тоже ставит паузу.</p><ul class="facts"><li>дневной лимит убытка в R</li><li>пауза после серии стопов</li></ul><div class="step-scr" aria-hidden="true"></div></li>
+<li class="step on"><span class="step-n">01</span><h3>Выберите бота</h3><p>Возьмите бота с витрины или соберите свой: стратегия, монеты, таймфрейм, направление. Новый бот сначала работает в демо.</p><ul class="facts"><li>3 стратегии: Уровни, SMC, Объём + MA</li><li>до 3 ботов, по одному на стратегию</li></ul><div class="step-scr" aria-hidden="true"></div></li>
+<li class="step"><span class="step-n">02</span><h3>Проверьте на истории</h3><p>Бэктест на ваших монетах с комиссиями и проскальзыванием. Автотеги сразу говорят, что не так: мало сделок, комиссии съедают прибыль, результат держится на одном периоде.</p><ul class="facts"><li>комиссия 0,12% за круг + проскальзывание 0,1%</li><li>стоп проверяется первым на каждой свече</li></ul><div class="step-scr" aria-hidden="true"></div></li>
+<li class="step"><span class="step-n">03</span><h3>Подберите параметры</h3><p>Genome перебирает поколения настроек и оставляет устойчивые. Изменения приходят черновиком: было → станет, проверка на отложенном периоде, решение за вами.</p><ul class="facts"><li>для ботов автоприменение выключено</li><li>сравнение только на данных, которых подбор не видел</li></ul><div class="step-scr" aria-hidden="true"></div></li>
+<li class="step"><span class="step-n">04</span><h3>Запустите: демо или биржа</h3><p>Подключите API-ключ Bybit или BingX с правом торговли и без права вывода. Или начните на Bybit Demo. Деньги остаются на вашем счёте биржи.</p><ul class="facts"><li>ключ без права вывода</li><li>режимы: только сигналы, с подтверждением, авто</li><li>демо обычно выглядит лучше реальной торговли: в нём нет пропущенных входов</li></ul><div class="step-scr" aria-hidden="true"></div></li>
+<li class="step"><span class="step-n">05</span><h3>Держите дисциплину</h3><p>Челлендж задаёт дневной лимит убытка и число сделок. Лимит достигнут — новые входы на паузе до завтра. Серия стопов тоже ставит паузу.</p><ul class="facts"><li>дневной лимит убытка в R</li><li>пауза после серии стопов</li></ul><div class="step-scr" aria-hidden="true"></div></li>
 </ol>
 </div>
 </div>
@@ -292,7 +286,7 @@
 <div class="tags" id="bt-tags" aria-live="polite"></div>
 </div>
 </div>
-<div class="inst-ft"><span>Комиссия 0,12% за круг и проскальзывание 0,1% вычтены. Свечи хранятся 365 дней: окно старше года выпадает из хранилища, и тогда мы честно пишем «нет истории».</span></div>
+<div class="inst-ft"><span>Комиссия 0,12% за круг и проскальзывание 0,1% вычтены, оценка. Свечи хранятся 365 дней: окно старше года выпадает из хранилища, и тогда мы честно пишем «нет истории». Обновлено <span id="bt-upd">—</span>.</span></div>
 </div>
 </div>
 </section>
@@ -395,7 +389,7 @@
 <div class="ro-grid ro3 pl-ro">
 <div class="ro"><span class="ro-k">Цель</span><b class="ro-v" id="pl-o-goal">—</b><span class="ro-s" id="pl-o-goal-s">введите цель</span></div>
 <div class="ro"><span class="ro-k">Нужно в день</span><b class="ro-v" id="pl-o-day">—</b><span class="ro-s" id="pl-o-day-s">—</span></div>
-<div class="ro"><span class="ro-k">Бот на треке</span><b class="ro-v" id="pl-o-bot">—</b><span class="ro-s" id="pl-o-bot-s">R в день, бумажный трек</span></div>
+<div class="ro"><span class="ro-k">Трек для сверки</span><b class="ro-v" id="pl-o-bot">—</b><span class="ro-s" id="pl-o-bot-s">R в день, бумажный трек</span></div>
 </div>
 <ul class="warns" id="pl-warns"></ul>
 <div class="pl-r"><span class="lbl">Что такое R</span><p id="pl-rexp">1R — убыток одной сделки по стопу. При депозите $1 000 и риске 1% это $10.</p></div>
@@ -409,7 +403,7 @@
 <section class="sec" id="pricing" aria-labelledby="h-pr">
 <div class="wrap">
 <div class="sec-hd"><p class="eyebrow"><span class="idx">09</span>Цены</p><h2 class="h2" id="h-pr">Подписка или процент с&nbsp;результата</h2>
-<p class="sub">Платите фиксированно или процент с чистой прибыли ботов. Режим «За результат» никогда не дороже подписки и стоит $0 в минусовый месяц. <a href="/pricing">Все условия тарифов →</a></p></div>
+<p class="sub">Платите фиксированно или процент с чистой прибыли ботов. Режим «За результат» никогда не дороже подписки и стоит $0 в минусовый месяц. <a href="/pricing/">Все условия тарифов →</a></p></div>
 <div class="pr-grid">
 <article class="inst plan"><div class="inst-hd"><span class="inst-id">Free</span></div><div class="plan-price"><b>$0</b><span>навсегда</span></div>
 <ul class="plan-list"><li>Стратегия Уровни, одно направление</li><li>2 сигнала в день</li><li>Демо-счёт на трекере</li><li>Песочница и витрина</li></ul><a class="btn btn-g" href="/app/" data-pick-plan="free">Начать бесплатно</a></article>
@@ -436,8 +430,7 @@
 <p class="calc-say" id="pr-say" aria-live="polite"></p>
 </div>
 </div>
-<div class="ledger"><div class="lbl-row"><span class="lbl">Перенос убытка по месяцам — меняйте итог кнопками ±</span><span class="lbl" id="lg-sum"></span></div>
-<div class="tbl-wrap"><table class="tbl tbl-num lg"><thead><tr><th>Месяц</th><th>Итог ботов</th><th>Перенос</th><th>База</th><th>Начислено</th></tr></thead><tbody id="lg-body"></tbody><tfoot id="lg-foot"></tfoot></table></div></div>
+
 </div>
 </div>
 </section>
@@ -502,6 +495,7 @@
 <div class="push"><b>CHM · SMC 15m</b><span>ETH SHORT: стоп −1,1R</span><em>12 мин</em></div>
 <div class="push"><b>CHM · Челлендж</b><span>Дневной лимит −3R достигнут, новые входы завтра</span><em>1 ч</em></div>
 </div>
+<p class="ex-cap">Пример экрана, числа условные</p>
 </div>
 </div>
 </section>
@@ -533,7 +527,7 @@
 <div class="ftr-brand"><a class="brand" href="/"><svg class="brand-mark" viewBox="0 0 24 24" aria-hidden="true"><path d="M13.5 2L5 13.5h6L9.5 22 19 9.5h-6.2L13.5 2z"/></svg><span class="brand-name">CHM<b>Breaker</b></span></a><p>Боты со стопом и открытой статистикой для фьючерсов Bybit и BingX.</p></div>
 <nav class="ftr-col" aria-label="Боты по монетам"><h4>Боты по монетам</h4><a href="/?coin=BTC#showcase">Боты для BTC</a><a href="/?coin=ETH#showcase">Боты для ETH</a><a href="/?coin=SOL#showcase">Боты для SOL</a><a href="/?coin=XRP#showcase">Боты для XRP</a><a href="/?coin=DOGE#showcase">Боты для DOGE</a></nav>
 <nav class="ftr-col" aria-label="Боты по биржам"><h4>Боты по биржам</h4><a href="#trust">Bybit и Bybit Demo</a><a href="#trust">BingX</a><span>Binance — после проверки</span><span>OKX — после проверки</span></nav>
-<nav class="ftr-col" aria-label="Стратегии"><h4>Стратегии</h4><a href="/?strategy=LEVELS#showcase">Уровни</a><a href="/?strategy=SMC#showcase">SMC</a><a href="/?strategy=VOLUME#showcase">Объём + MA</a><button class="link-btn" data-dlg="dlg-method">Как мы считаем</button><a href="/pricing">Тарифы</a></nav>
+<nav class="ftr-col" aria-label="Стратегии"><h4>Стратегии</h4><a href="/?strategy=LEVELS#showcase">Уровни</a><a href="/?strategy=SMC#showcase">SMC</a><a href="/?strategy=VOLUME#showcase">Объём + MA</a><button class="link-btn" data-dlg="dlg-method">Как мы считаем</button><a href="/pricing/">Тарифы</a></nav>
 <nav class="ftr-col" aria-label="Компания и документы"><h4>Компания</h4><a href="/about.html">О компании</a><a href="/status.html">Статус</a><a href="/api-docs.html">API</a><a href="https://t.me/crypto_chm" target="_blank" rel="noopener">Telegram</a><button class="link-btn" data-support>Поддержка</button><a href="/privacy.html">Политика конфиденциальности</a><a href="/terms.html">Условия использования</a><a href="/risk.html">Предупреждение о рисках</a><a href="/about.html#jurisdictions">Юрисдикции</a></nav>
 </div>
 <div class="risk-box"><b>Предупреждение о рисках.</b> Торговля криптовалютными фьючерсами связана с высоким риском и может привести к потере всего депозита, а с плечом — быстро. Бэктест, бумажный трек сигналов и результаты копий описывают прошлое и не гарантируют будущих результатов. Стоп не гарантирует цену исполнения. CHM Breaker не управляет вашими деньгами и не даёт индивидуальных инвестиционных рекомендаций. Подробнее — <a href="/risk.html">предупреждение о рисках</a>.</div>
@@ -545,8 +539,8 @@
 
 <dialog class="dlg" id="dlg-arch" aria-labelledby="dlg-arch-h">
 <div class="dlg-hd"><h3 id="dlg-arch-h">Архив и реестр кандидатов</h3><button class="icon-btn" data-close aria-label="Закрыть">✕</button></div>
-<p class="note">В реестре все боты, которых мы запускали кандидатами на витрину, с даты запуска, включая неопубликованных. Так видно, что на витрине не только выжившие.</p>
-<div class="tbl-wrap"><table class="tbl" id="arch-tbl"><thead><tr><th>Бот</th><th>Период</th><th>Сигналов</th><th>Итог</th><th>Макс. просадка</th><th>Причина</th></tr></thead><tbody></tbody></table></div>
+<p class="note">В реестре все боты, которых мы запускали кандидатами на витрину, с даты запуска, включая неопубликованных. Так видно, что на витрине не только выжившие. Трек сигналов (бумажный), R после комиссий, оценка.</p>
+<div class="tbl-wrap"><table class="tbl" id="arch-tbl"><thead><tr><th>Бот</th><th>Запущен</th><th>Статус</th><th>Сигналов</th><th>Итог</th><th>Макс. просадка</th></tr></thead><tbody></tbody></table></div>
 </dialog>
 <dialog class="dlg" id="dlg-method" aria-labelledby="dlg-m-h">
 <div class="dlg-hd"><h3 id="dlg-m-h">Как мы считаем</h3><button class="icon-btn" data-close aria-label="Закрыть">✕</button></div>
@@ -564,6 +558,6 @@
 </dialog>
 
 <script src="/yandex-metrika.js" async></script><noscript><div><img src="https://mc.yandex.ru/watch/108973987" style="position:absolute;left:-9999px" alt=""/></div></noscript>
-<script src="/landing/landing.js?v=1" defer></script>
+<script src="/landing/landing.js?v=2" defer></script>
 </body>
 </html>
