@@ -119,7 +119,7 @@ describe('createSignalDelivery — the bot calls on the site', () => {
 
   it('RPC router: whitelisted methods only; rpc → rpc-result ok / error; call → no answer', async () => {
     const { d } = setup();
-    expect(RPC_METHODS).toEqual(['deliver', 'deliverChart', 'sendText', 'alertAdmins', 'dispatch', 'broadcast', 'broadcastAll']);
+    expect(RPC_METHODS).toEqual(['deliver', 'deliverChart', 'sendText', 'sendMessage', 'alertAdmins', 'dispatch', 'broadcast', 'broadcastAll']);
     await expect(d.handleRpc('constructor', [])).rejects.toThrow('unknown delivery method: constructor');
     const replies = [];
     expect(d.handleWorkerMessage({ type: 'rpc', id: 4, method: 'broadcastAll', args: ['trend', { a: 1 }] }, (m) => replies.push(m))).toBe(true);
@@ -130,6 +130,81 @@ describe('createSignalDelivery — the bot calls on the site', () => {
     expect(replies).toEqual([
       { type: 'rpc-result', id: 4, ok: true, result: 2 },
       { type: 'rpc-result', id: 5, ok: false, error: 'unknown delivery method: eval' },
+    ]);
+  });
+});
+
+describe('sendMessage — aiogram bot.send_message for the LEVELS / VOLUME safe_send_message port', () => {
+  it('a card (site.tradeId): the signal_trades row names strategy / symbol / direction; lang from trader_settings; the Message answer', async () => {
+    const { d, calls, repo, tdb } = setup();
+    tdb.exec("CREATE TABLE trader_settings (user_id INTEGER PRIMARY KEY, lang TEXT)");
+    tdb.prepare("INSERT INTO trader_settings (user_id, lang) VALUES (9, 'en')").run();
+    const kb = [[{ id: 'sig_records', label: '📋', action: 'sig_records_9_1767006000000_123', kind: 'callback' }]];
+    const res = await d.sendMessage(9, '🟢 <b>ETH LONG</b>', { parseMode: 'HTML', replyMarkup: kb, protectContent: true, disableNotification: true, site: { tradeId: '9_1767006000000_123' } });
+    expect(res).toEqual({ ok: true, message: { message_id: 501, html: '🟢 <b>ETH LONG</b>', actions: kb, lang: 'en' } });
+    expect(calls[0][1]).toMatchObject({ type: 'signal', silent: true, link: '/app/?tab=signals&id=9_1767006000000_123',
+      data: { kind: 'card', trade_id: '9_1767006000000_123', strategy: 'SMC', symbol: 'ETH-USDT-SWAP', direction: 'LONG', actions: kb, lang: 'en', silent: true } });
+    const row = repo.getTrade('9_1767006000000_123');
+    expect(row.signal_msg_id).toBe(501);
+    expect(JSON.parse(row.signal_card_json)).toEqual({ html: '🟢 <b>ETH LONG</b>', actions: kb, lang: 'en' });
+  });
+
+  it('a notice: site.type trade / report (default report); no trader_settings row → ru', async () => {
+    const { d, calls } = setup();
+    expect((await d.sendMessage(9, '🚫 <b>Авто-трейд: сделка не открыта</b>', { site: { type: 'trade' } })).ok).toBe(true);
+    expect((await d.sendMessage(9, '💡 hint', { replyMarkup: [[{ id: 'a', label: 'a', action: 'a', kind: 'callback' }]] })).ok).toBe(true);
+    expect((await d.sendMessage(9, 'x', { site: { type: 'nope' } })).ok).toBe(true);
+    expect(calls.map((c) => [c[1].type, c[1].data.kind, c[1].data.lang, c[1].link])).toEqual([['trade', 'notice', 'ru', null], ['report', 'notice', 'ru', null], ['report', 'notice', 'ru', null]]);
+  });
+
+  it('failures carry the aiogram exception names safe_send_message branches on', async () => {
+    const { d } = setup({ notFound: [9], throws: [7] });
+    expect(await d.sendMessage(9, 'x', {})).toEqual({ ok: false, error: { name: 'TelegramForbiddenError', message: 'Telegram server says - Forbidden: user is deactivated' } });
+    expect(await d.sendMessage(7, 'x', {})).toEqual({ ok: false, error: { name: 'TelegramBadRequest', message: 'Telegram server says - Bad Request: notification not stored' } });
+    expect(await d.sendMessage(9, '', {})).toEqual({ ok: false, error: { name: 'TelegramBadRequest', message: 'Telegram server says - Bad Request: message text is empty' } });
+  });
+
+  it('remote / local facades: the Message, or the named error thrown; an unanswered request = TelegramNetworkError', async () => {
+    const { MessageChannel } = req('worker_threads');
+    const { d } = setup({ notFound: [5] });
+    const f = localFacade(d);
+    expect(await f.sendMessage(9, 'x', {})).toEqual({ message_id: 501, html: 'x', actions: null, lang: 'ru' });
+    await expect(f.sendMessage(5, 'x', {})).rejects.toMatchObject({ name: 'TelegramForbiddenError' });
+    const ch = new MessageChannel();
+    ch.port2.on('message', (m) => d.handleWorkerMessage(m, (x) => ch.port2.postMessage(x)));
+    const remote = createRemoteDelivery((m) => ch.port1.postMessage(m));
+    ch.port1.on('message', (m) => remote.handleMessage(m));
+    try {
+      expect(await remote.sendMessage(9, 'y', { site: { type: 'trade' } })).toEqual({ message_id: 502, html: 'y', actions: null, lang: 'ru' });
+      await expect(remote.sendMessage(5, 'y', {})).rejects.toMatchObject({ name: 'TelegramForbiddenError', message: 'Telegram server says - Forbidden: user is deactivated' });
+    } finally {
+      ch.port1.close();
+      ch.port2.close();
+    }
+    vi.useFakeTimers({ toFake: ['setTimeout', 'clearTimeout'] });
+    const silent = createRemoteDelivery(() => {}, { timeoutMs: 60_000 });
+    const p = silent.sendMessage(1, 'x', {});
+    const caught = p.catch((e) => e);
+    await vi.advanceTimersByTimeAsync(60_000);
+    expect(await caught).toMatchObject({ name: 'TelegramNetworkError', message: 'HTTP Client says - Request timeout error' });
+  });
+
+  it('through the bot safe_send_message: Forbidden → False (logged, no retry), a network timeout → retries 1 s / 2 s then False', async () => {
+    const { safeSendMessage } = req('../../../services/engine/levelsScanner.js');
+    const { d } = setup({ notFound: [5] });
+    const f = localFacade(d);
+    const lines = [];
+    const tg = { debug() {}, info: (m) => lines.push(['INFO', m]), warning: (m) => lines.push(['WARNING', m]), error: (m) => lines.push(['ERROR', m]) };
+    const sleeps = [];
+    expect(await safeSendMessage(f, 5, 'x', {}, { log: tg, sleep: async (ms) => { sleeps.push(ms); } })).toBe(false);
+    const stalled = { sendMessage: () => Promise.reject(Object.assign(new Error('HTTP Client says - Request timeout error'), { name: 'TelegramNetworkError' })) };
+    expect(await safeSendMessage(stalled, 9, 'x', {}, { log: tg, sleep: async (ms) => { sleeps.push(ms); } })).toBe(false);
+    expect(sleeps).toEqual([1000, 2000]);
+    expect(lines).toEqual([
+      ['INFO', '[TG-SAFE] uid=5 blocked bot — notification lost'],
+      ['WARNING', '[TG-SAFE] uid=9 network err attempt 1/3: HTTP Client says - Request timeout error — backoff 1.0s'],
+      ['WARNING', '[TG-SAFE] uid=9 network err attempt 2/3: HTTP Client says - Request timeout error — backoff 2.0s'],
+      ['ERROR', '[TG-SAFE] uid=9 network err — all 3 attempts exhausted: HTTP Client says - Request timeout error'],
     ]);
   });
 });
@@ -185,7 +260,7 @@ describe('createRemoteDelivery — the worker side of the protocol', () => {
     remote.failAll();
     const { d } = setup();
     const f = localFacade(d);
-    expect(Object.keys(f).sort()).toEqual(['alertAdmins', 'deliver', 'deliverChart', 'failAll', 'handleMessage', 'notifier', 'sendText', 'sse']);
+    expect(Object.keys(f).sort()).toEqual(['alertAdmins', 'deliver', 'deliverChart', 'failAll', 'handleMessage', 'notifier', 'sendMessage', 'sendText', 'sse']);
     expect(await f.sendText(9, 'x', { type: 'trend' })).toBe(true);
   });
 });

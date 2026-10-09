@@ -34,6 +34,18 @@
  *   _guarded_restart, HealthMonitor)                admin (users.is_admin = 1) → number sent.
  * tracker progress notices / card edits           dispatch(uid, opts) / broadcast(uid, event, data)
  *                                                   pass-throughs (signalTracker's notifier / sse).
+ * bot.send_message(uid, text, parse_mode=…,       sendMessage(uid, text, {parseMode, replyMarkup, protectContent,
+ *   reply_markup=…, …) inside telegram_safe         disableNotification, disableWebPagePreview, site}) — the aiogram
+ *   (the LEVELS / VOLUME scanners call it through   contract of scanner_mid / volume_scanner: the delivered Message
+ *   their safe_send_message port)                   {message_id (= notifications.id), html, actions, lang}, or an
+ *                                                   Error named like aiogram's (TelegramForbiddenError for a
+ *                                                   deleted / inactive user, TelegramBadRequest for an empty text
+ *                                                   or a failed dispatch, TelegramNetworkError when the main
+ *                                                   thread did not answer). `site` = how the site files it:
+ *                                                   {tradeId} → a card (deliver kind 'card': strategy / symbol /
+ *                                                   direction from the signal_trades row, signal_msg_id + snapshot),
+ *                                                   else a notice of type site.type ('trade' | 'report', default
+ *                                                   'report'). The scheduler sets it (scheduler.siteSafeSend).
  *
  * Commit callbacks: deliver() answers the bot's `safe_send_message` boolean, and that answer
  * drives the scanner-side commits exactly like the bot — the signal registry lives in the worker,
@@ -51,15 +63,36 @@
  *   worker → main  { type: 'rpc', id, method, args }        answered by
  *   main → worker  { type: 'rpc-result', id, ok: true, result } | { …, ok: false, error }
  *   worker → main  { type: 'call', method, args }            fire-and-forget (no answer)
- *   methods: deliver, deliverChart, sendText, alertAdmins, dispatch, broadcast, broadcastAll.
+ *   methods: deliver, deliverChart, sendText, sendMessage, alertAdmins, dispatch, broadcast, broadcastAll.
  */
 
 const { noticeTitle, signalLink } = require('./signalTracker');
 
-const RPC_METHODS = Object.freeze(['deliver', 'deliverChart', 'sendText', 'alertAdmins', 'dispatch', 'broadcast', 'broadcastAll']);
+const RPC_METHODS = Object.freeze(['deliver', 'deliverChart', 'sendText', 'sendMessage', 'alertAdmins', 'dispatch', 'broadcast', 'broadcastAll']);
 const PLAN_LINK = '/app/?tab=settings&sec=plan';
 const ADMIN_LINK = '/ops.html';
 const ENGINE_TYPES = Object.freeze(['signal', 'progress', 'trend', 'report', 'trade']);
+/** sendMessage failure answers: the aiogram exception names telegram_safe.safe_send_message classifies. */
+const TG_ERRORS = Object.freeze({
+  forbidden: Object.freeze({ name: 'TelegramForbiddenError', message: 'Telegram server says - Forbidden: user is deactivated' }),
+  empty: Object.freeze({ name: 'TelegramBadRequest', message: 'Telegram server says - Bad Request: message text is empty' }),
+  failed: Object.freeze({ name: 'TelegramBadRequest', message: 'Telegram server says - Bad Request: notification not stored' }),
+  timeout: Object.freeze({ name: 'TelegramNetworkError', message: 'HTTP Client says - Request timeout error' }),
+});
+
+/** An Error carrying an aiogram exception name (what safe_send_message branches on). */
+function telegramError(err) {
+  const e = new Error(String((err && err.message) || 'Telegram error'));
+  e.name = String((err && err.name) || 'TelegramBadRequest');
+  if (err && err.retry_after !== undefined) e.retry_after = err.retry_after;
+  return e;
+}
+
+/** {ok, message} | {ok: false, error} → the Message, or throw the named error (aiogram's bot.send_message). */
+function unwrapSent(res) {
+  if (res && res.ok) return res.message;
+  throw telegramError(res && res.error ? res.error : TG_ERRORS.failed);
+}
 
 function fallbackLog() {
   return require('../marketData/mdLog').log;
@@ -85,56 +118,102 @@ function createSignalDelivery(deps = {}) {
     try { return s.broadcast(userId, event, data); } catch (e) { log.debug(`[DELIVERY] sse ${event}: ${e && e.message}`); return 0; }
   }
 
+  /** trader_settings.lang of a user ('ru' when unknown) — the lang of a card the scanner did not name. */
+  function langOf(uid) {
+    try {
+      const row = dbOf().prepare('SELECT lang FROM trader_settings WHERE user_id = ?').get(uid);
+      return row && row.lang === 'en' ? 'en' : 'ru';
+    } catch (_e) {
+      return 'ru';
+    }
+  }
+
+  /** One delivery → {ok, notificationId, reason}: the notifier answer behind deliver() and sendMessage(). */
+  async function send(msg = {}) {
+    const uid = Number(msg.userId);
+    const text = String(msg.text || '');
+    if (!uid || !text) return { ok: false, notificationId: null, reason: 'empty' };
+    const kind = msg.kind || 'card';
+    const lang = msg.lang || 'ru';
+    const tradeId = msg.tradeId || null;
+    let opts;
+    if (kind === 'card') {
+      opts = {
+        type: 'signal', title: noticeTitle(text), body: text, tgText: text, link: signalLink(tradeId),
+        silent: Boolean(msg.silent),
+        data: {
+          kind: 'card', trade_id: tradeId, strategy: msg.strategy || null, symbol: msg.symbol || null,
+          direction: msg.direction || null, html: text, actions: msg.keyboard || null, lang, silent: Boolean(msg.silent),
+        },
+      };
+    } else if (kind === 'preview') {
+      opts = {
+        type: 'signal', title: noticeTitle(text), body: text, tgText: text, link: PLAN_LINK, silent: false,
+        data: { kind: 'preview', strategy: msg.strategy || null, symbol: msg.symbol || null, direction: msg.direction || null, html: text, lang },
+      };
+    } else {
+      const type = ENGINE_TYPES.includes(msg.type) ? msg.type : 'trade';
+      opts = {
+        type, title: noticeTitle(text), body: text, tgText: text, link: tradeId ? signalLink(tradeId) : null,
+        silent: Boolean(msg.silent),
+        data: { kind: 'notice', trade_id: tradeId, strategy: msg.strategy || null, html: text, actions: msg.keyboard || null, lang },
+      };
+    }
+    let res;
+    try {
+      res = await notifierOf().dispatch(uid, opts);
+    } catch (e) {
+      log.warning(`[DELIVERY] ${kind} uid=${uid}: ${e && e.message}`);
+      return { ok: false, notificationId: null, reason: 'error' };
+    }
+    if (!res || !res.dispatched) return { ok: false, notificationId: null, reason: (res && res.error) || 'error' };
+    if (kind === 'card' && tradeId && res.notificationId) {
+      // on_sent=remember_signal_message(trade_id): the delivered card is now trackable
+      try {
+        const repo = repoOf();
+        repo.setSignalMsgId(tradeId, res.notificationId, repo.cardSnapshot({ html: text, actions: msg.keyboard || null, lang }));
+      } catch (e) {
+        log.debug(`[SIGNAL-PROGRESS] remember msg tid=${tradeId}: ${e && e.message}`);
+      }
+    }
+    return { ok: true, notificationId: res.notificationId === undefined ? null : res.notificationId, reason: null };
+  }
+
   const d = {
     /** safe_send_message(...) of a card / preview / notice → Promise<bool> */
     async deliver(msg = {}) {
-      const uid = Number(msg.userId);
-      const text = String(msg.text || '');
-      if (!uid || !text) return false;
-      const kind = msg.kind || 'card';
-      const lang = msg.lang || 'ru';
-      const tradeId = msg.tradeId || null;
-      let opts;
-      if (kind === 'card') {
-        opts = {
-          type: 'signal', title: noticeTitle(text), body: text, tgText: text, link: signalLink(tradeId),
-          silent: Boolean(msg.silent),
-          data: {
-            kind: 'card', trade_id: tradeId, strategy: msg.strategy || null, symbol: msg.symbol || null,
-            direction: msg.direction || null, html: text, actions: msg.keyboard || null, lang, silent: Boolean(msg.silent),
-          },
-        };
-      } else if (kind === 'preview') {
-        opts = {
-          type: 'signal', title: noticeTitle(text), body: text, tgText: text, link: PLAN_LINK, silent: false,
-          data: { kind: 'preview', strategy: msg.strategy || null, symbol: msg.symbol || null, direction: msg.direction || null, html: text, lang },
+      return (await send(msg)).ok;
+    },
+
+    /**
+     * aiogram `bot.send_message(uid, text, **kwargs)` for the scanners' safe_send_message port →
+     * {ok: true, message: {message_id, html, actions, lang}} | {ok: false, error: {name, message}}
+     * (the remote / local facades turn the latter into the thrown error). `kw.site.tradeId` → the
+     * signal card of that signal_trades row; otherwise a notice of type `kw.site.type`.
+     */
+    async sendMessage(userId, text, kw = {}) {
+      const uid = Number(userId);
+      const body = String(text || '');
+      if (!uid || !body) return { ok: false, error: { ...TG_ERRORS.empty } };
+      const site = (kw && kw.site) || {};
+      const keyboard = (kw && kw.replyMarkup) || null;
+      const silent = Boolean(kw && kw.disableNotification);
+      const lang = site.lang || langOf(uid);
+      let msg;
+      if (site.tradeId) {
+        let row = null;
+        try { row = repoOf().getTrade(String(site.tradeId)); } catch (e) { log.debug(`[DELIVERY] card row ${site.tradeId}: ${e && e.message}`); }
+        msg = {
+          kind: 'card', type: 'signal', userId: uid, tradeId: String(site.tradeId),
+          strategy: (row && row.strategy) || site.strategy || null, symbol: (row && row.symbol) || null,
+          direction: (row && row.direction) || null, text: body, keyboard, lang, silent,
         };
       } else {
-        const type = ENGINE_TYPES.includes(msg.type) ? msg.type : 'trade';
-        opts = {
-          type, title: noticeTitle(text), body: text, tgText: text, link: tradeId ? signalLink(tradeId) : null,
-          silent: Boolean(msg.silent),
-          data: { kind: 'notice', trade_id: tradeId, strategy: msg.strategy || null, html: text, actions: msg.keyboard || null, lang },
-        };
+        msg = { kind: 'notice', type: ENGINE_TYPES.includes(site.type) ? site.type : 'report', userId: uid, text: body, keyboard, lang, silent };
       }
-      let res;
-      try {
-        res = await notifierOf().dispatch(uid, opts);
-      } catch (e) {
-        log.warning(`[DELIVERY] ${kind} uid=${uid}: ${e && e.message}`);
-        return false;
-      }
-      if (!res || !res.dispatched) return false;
-      if (kind === 'card' && tradeId && res.notificationId) {
-        // on_sent=remember_signal_message(trade_id): the delivered card is now trackable
-        try {
-          const repo = repoOf();
-          repo.setSignalMsgId(tradeId, res.notificationId, repo.cardSnapshot({ html: text, actions: msg.keyboard || null, lang }));
-        } catch (e) {
-          log.debug(`[SIGNAL-PROGRESS] remember msg tid=${tradeId}: ${e && e.message}`);
-        }
-      }
-      return true;
+      const r = await send(msg);
+      if (!r.ok) return { ok: false, error: { ...(r.reason === 'user_not_found' ? TG_ERRORS.forbidden : TG_ERRORS.failed) } };
+      return { ok: true, message: { message_id: r.notificationId, html: body, actions: keyboard, lang } };
     },
 
     /** send_signal_chart_bg → the chart descriptor over SSE (the client draws it, D3). */
@@ -268,6 +347,8 @@ function createRemoteDelivery(post, { timeoutMs = 60_000, setTimer = setTimeout,
     deliver: (msg) => rpc('deliver', [msg], false).then(Boolean),
     deliverChart: (msg) => { call('deliverChart', [msg]); return true; },
     sendText: (uid, text, opts = {}) => rpc('sendText', [uid, text, opts], false).then(Boolean),
+    /** aiogram bot.send_message: the Message, or throws the named error (an unanswered request = network error). */
+    sendMessage: (uid, text, kw = {}) => rpc('sendMessage', [uid, text, kw], { ok: false, error: { ...TG_ERRORS.timeout } }).then(unwrapSent),
     alertAdmins: (text) => rpc('alertAdmins', [text], 0),
     notifier: { dispatch: (uid, opts) => rpc('dispatch', [uid, opts], { error: 'timeout' }) },
     sse: {
@@ -303,6 +384,7 @@ function localFacade(delivery) {
     deliver: (msg) => delivery.deliver(msg),
     deliverChart: (msg) => delivery.deliverChart(msg),
     sendText: (uid, text, opts) => delivery.sendText(uid, text, opts),
+    sendMessage: async (uid, text, kw) => unwrapSent(await delivery.sendMessage(uid, text, kw)),
     alertAdmins: (text) => delivery.alertAdmins(text),
     notifier: { dispatch: (uid, opts) => delivery.dispatch(uid, opts) },
     sse: { broadcast: (uid, e, data) => delivery.broadcast(uid, e, data), broadcastAll: (e, data) => delivery.broadcastAll(e, data) },
@@ -311,4 +393,4 @@ function localFacade(delivery) {
   };
 }
 
-module.exports = { RPC_METHODS, PLAN_LINK, ADMIN_LINK, createSignalDelivery, createRemoteDelivery, localFacade };
+module.exports = { RPC_METHODS, PLAN_LINK, ADMIN_LINK, TG_ERRORS, telegramError, createSignalDelivery, createRemoteDelivery, localFacade };
