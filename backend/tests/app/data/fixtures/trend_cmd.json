@@ -1,0 +1,648 @@
+{
+ "trend": [
+  {
+   "name": "empty",
+   "state": {},
+   "strength": {},
+   "get_all": {},
+   "sent": [
+    {
+     "text": "Тренд ещё считается — подождите пару минут.",
+     "parse_mode": null
+    }
+   ]
+  },
+  {
+   "name": "15m long only",
+   "state": {
+    "15m": {
+     "trend": "LONG",
+     "since": 1767000000.0,
+     "price": 87000.5
+    }
+   },
+   "strength": {},
+   "get_all": {
+    "15m": {
+     "trend": "LONG",
+     "since": 1767000000.0,
+     "price": 87000.5,
+     "ema": "50/200"
+    }
+   },
+   "sent": [
+    {
+     "text": "📊 <b>Тренд BTC</b>\n15m: <b>📈 ЛОНГ</b> <i>(EMA 50/200)</i>\n\n✅ В приоритете лонги",
+     "parse_mode": "HTML"
+    }
+   ]
+  },
+  {
+   "name": "all, strengths",
+   "state": {
+    "15m": {
+     "trend": "LONG",
+     "since": 1767000000.0,
+     "price": 1.0
+    },
+    "1H": {
+     "trend": "SHORT",
+     "since": 1766990000.0,
+     "price": 1.0
+    },
+    "4H": {
+     "trend": "RANGE",
+     "since": 1766900000.0,
+     "price": 1.0
+    },
+    "1D": {
+     "trend": "LONG",
+     "since": 1766000000.0,
+     "price": 1.0
+    },
+    "1W": {
+     "trend": "SHORT",
+     "since": 1765000000.0,
+     "price": 1.0
+    },
+    "1M": {
+     "trend": "LONG",
+     "since": 0.0,
+     "price": 1.0
+    }
+   },
+   "strength": {
+    "15m": 83.7,
+    "1H": 0,
+    "4H": 41,
+    "1D": 100,
+    "1W": 12.5
+   },
+   "get_all": {
+    "15m": {
+     "trend": "LONG",
+     "since": 1767000000.0,
+     "price": 1.0,
+     "ema": "50/200",
+     "strength": 83
+    },
+    "1H": {
+     "trend": "SHORT",
+     "since": 1766990000.0,
+     "price": 1.0,
+     "ema": "50/200",
+     "strength": 0
+    },
+    "4H": {
+     "trend": "RANGE",
+     "since": 1766900000.0,
+     "price": 1.0,
+     "ema": "50/200",
+     "strength": 41
+    },
+    "1D": {
+     "trend": "LONG",
+     "since": 1766000000.0,
+     "price": 1.0,
+     "ema": "50/200",
+     "strength": 100
+    },
+    "1W": {
+     "trend": "SHORT",
+     "since": 1765000000.0,
+     "price": 1.0,
+     "ema": "20/50",
+     "strength": 12
+    },
+    "1M": {
+     "trend": "LONG",
+     "since": 0.0,
+     "price": 1.0,
+     "ema": "10/20"
+    }
+   },
+   "sent": [
+    {
+     "text": "📊 <b>Тренд BTC</b>\n15m: <b>📈 ЛОНГ</b> · сила 83% <i>(EMA 50/200)</i>\n1H: <b>📉 ШОРТ</b> · сила 0% <i>(EMA 50/200)</i>\n4H: <b>↔️ боковик</b> · сила 41% <i>(EMA 50/200)</i>\n1D (дневной): <b>📈 ЛОНГ</b> · сила 100% <i>(EMA 50/200)</i>\n1W (недельный): <b>📉 ШОРТ</b> · сила 12% <i>(EMA 20/50)</i>\n1M (месячный): <b>📈 ЛОНГ</b> <i>(EMA 10/20)</i>\n\n✅ В приоритете лонги",
+     "parse_mode": "HTML"
+    }
+   ]
+  },
+  {
+   "name": "15m short, odd words",
+   "state": {
+    "15m": {
+     "trend": "SHORT",
+     "since": 1.0,
+     "price": 1.0
+    },
+    "4H": {
+     "trend": "WEIRD",
+     "since": 1.0,
+     "price": 1.0
+    },
+    "1W": {
+     "trend": "None",
+     "since": 1.0,
+     "price": 1.0
+    }
+   },
+   "strength": {
+    "4H": 55
+   },
+   "get_all": {
+    "15m": {
+     "trend": "SHORT",
+     "since": 1.0,
+     "price": 1.0,
+     "ema": "50/200"
+    },
+    "4H": {
+     "trend": "WEIRD",
+     "since": 1.0,
+     "price": 1.0,
+     "ema": "50/200",
+     "strength": 55
+    },
+    "1W": {
+     "trend": "None",
+     "since": 1.0,
+     "price": 1.0,
+     "ema": "20/50"
+    }
+   },
+   "sent": [
+    {
+     "text": "📊 <b>Тренд BTC</b>\n15m: <b>📉 ШОРТ</b> <i>(EMA 50/200)</i>\n4H: <b>WEIRD</b> · сила 55% <i>(EMA 50/200)</i>\n1W (недельный): <b>None</b> <i>(EMA 20/50)</i>\n\n✅ В приоритете шорты",
+     "parse_mode": "HTML"
+    }
+   ]
+  },
+  {
+   "name": "15m range",
+   "state": {
+    "15m": {
+     "trend": "RANGE",
+     "since": 1.0,
+     "price": 1.0
+    },
+    "1H": {
+     "trend": "LONG",
+     "since": 1.0,
+     "price": 1.0
+    }
+   },
+   "strength": {
+    "15m": 7
+   },
+   "get_all": {
+    "15m": {
+     "trend": "RANGE",
+     "since": 1.0,
+     "price": 1.0,
+     "ema": "50/200",
+     "strength": 7
+    },
+    "1H": {
+     "trend": "LONG",
+     "since": 1.0,
+     "price": 1.0,
+     "ema": "50/200"
+    }
+   },
+   "sent": [
+    {
+     "text": "📊 <b>Тренд BTC</b>\n15m: <b>↔️ боковик</b> · сила 7% <i>(EMA 50/200)</i>\n1H: <b>📈 ЛОНГ</b> <i>(EMA 50/200)</i>",
+     "parse_mode": "HTML"
+    }
+   ]
+  },
+  {
+   "name": "no 15m",
+   "state": {
+    "1H": {
+     "trend": "LONG",
+     "since": 1.0,
+     "price": 1.0
+    },
+    "1D": {
+     "trend": "SHORT",
+     "since": 1.0,
+     "price": 1.0
+    }
+   },
+   "strength": {
+    "1D": 66.6
+   },
+   "get_all": {
+    "1H": {
+     "trend": "LONG",
+     "since": 1.0,
+     "price": 1.0,
+     "ema": "50/200"
+    },
+    "1D": {
+     "trend": "SHORT",
+     "since": 1.0,
+     "price": 1.0,
+     "ema": "50/200",
+     "strength": 66
+    }
+   },
+   "sent": [
+    {
+     "text": "📊 <b>Тренд BTC</b>\n1H: <b>📈 ЛОНГ</b> <i>(EMA 50/200)</i>\n1D (дневной): <b>📉 ШОРТ</b> · сила 66% <i>(EMA 50/200)</i>",
+     "parse_mode": "HTML"
+    }
+   ]
+  }
+ ],
+ "off": [
+  {
+   "lang": "ru",
+   "setter": "ok",
+   "um_fail": false,
+   "alerts": [
+    {
+     "text": "🔕 Смена тренда больше не присылается. Включить: /trend_on",
+     "show_alert": true
+    }
+   ],
+   "calls": [
+    [
+     42,
+     true
+    ]
+   ]
+  },
+  {
+   "lang": "ru",
+   "setter": "ok",
+   "um_fail": true,
+   "alerts": [
+    {
+     "text": "🔕 Смена тренда больше не присылается. Включить: /trend_on",
+     "show_alert": true
+    }
+   ],
+   "calls": [
+    [
+     42,
+     true
+    ]
+   ]
+  },
+  {
+   "lang": "ru",
+   "setter": "fail",
+   "um_fail": false,
+   "alerts": [
+    {
+     "text": "Ошибка, попробуйте позже",
+     "show_alert": true
+    }
+   ],
+   "calls": []
+  },
+  {
+   "lang": "ru",
+   "setter": "fail",
+   "um_fail": true,
+   "alerts": [
+    {
+     "text": "Ошибка, попробуйте позже",
+     "show_alert": true
+    }
+   ],
+   "calls": []
+  },
+  {
+   "lang": "en",
+   "setter": "ok",
+   "um_fail": false,
+   "alerts": [
+    {
+     "text": "🔕 Trend alerts are off. Turn on: /trend_on",
+     "show_alert": true
+    }
+   ],
+   "calls": [
+    [
+     42,
+     true
+    ]
+   ]
+  },
+  {
+   "lang": "en",
+   "setter": "ok",
+   "um_fail": true,
+   "alerts": [
+    {
+     "text": "🔕 Смена тренда больше не присылается. Включить: /trend_on",
+     "show_alert": true
+    }
+   ],
+   "calls": [
+    [
+     42,
+     true
+    ]
+   ]
+  },
+  {
+   "lang": "en",
+   "setter": "fail",
+   "um_fail": false,
+   "alerts": [
+    {
+     "text": "Error, try later",
+     "show_alert": true
+    }
+   ],
+   "calls": []
+  },
+  {
+   "lang": "en",
+   "setter": "fail",
+   "um_fail": true,
+   "alerts": [
+    {
+     "text": "Ошибка, попробуйте позже",
+     "show_alert": true
+    }
+   ],
+   "calls": []
+  },
+  {
+   "lang": null,
+   "setter": "ok",
+   "um_fail": false,
+   "alerts": [
+    {
+     "text": "🔕 Смена тренда больше не присылается. Включить: /trend_on",
+     "show_alert": true
+    }
+   ],
+   "calls": [
+    [
+     42,
+     true
+    ]
+   ]
+  },
+  {
+   "lang": null,
+   "setter": "ok",
+   "um_fail": true,
+   "alerts": [
+    {
+     "text": "🔕 Смена тренда больше не присылается. Включить: /trend_on",
+     "show_alert": true
+    }
+   ],
+   "calls": [
+    [
+     42,
+     true
+    ]
+   ]
+  },
+  {
+   "lang": null,
+   "setter": "fail",
+   "um_fail": false,
+   "alerts": [
+    {
+     "text": "Ошибка, попробуйте позже",
+     "show_alert": true
+    }
+   ],
+   "calls": []
+  },
+  {
+   "lang": null,
+   "setter": "fail",
+   "um_fail": true,
+   "alerts": [
+    {
+     "text": "Ошибка, попробуйте позже",
+     "show_alert": true
+    }
+   ],
+   "calls": []
+  },
+  {
+   "lang": "",
+   "setter": "ok",
+   "um_fail": false,
+   "alerts": [
+    {
+     "text": "🔕 Смена тренда больше не присылается. Включить: /trend_on",
+     "show_alert": true
+    }
+   ],
+   "calls": [
+    [
+     42,
+     true
+    ]
+   ]
+  },
+  {
+   "lang": "",
+   "setter": "ok",
+   "um_fail": true,
+   "alerts": [
+    {
+     "text": "🔕 Смена тренда больше не присылается. Включить: /trend_on",
+     "show_alert": true
+    }
+   ],
+   "calls": [
+    [
+     42,
+     true
+    ]
+   ]
+  },
+  {
+   "lang": "",
+   "setter": "fail",
+   "um_fail": false,
+   "alerts": [
+    {
+     "text": "Ошибка, попробуйте позже",
+     "show_alert": true
+    }
+   ],
+   "calls": []
+  },
+  {
+   "lang": "",
+   "setter": "fail",
+   "um_fail": true,
+   "alerts": [
+    {
+     "text": "Ошибка, попробуйте позже",
+     "show_alert": true
+    }
+   ],
+   "calls": []
+  },
+  {
+   "lang": "de",
+   "setter": "ok",
+   "um_fail": false,
+   "alerts": [
+    {
+     "text": "🔕 Смена тренда больше не присылается. Включить: /trend_on",
+     "show_alert": true
+    }
+   ],
+   "calls": [
+    [
+     42,
+     true
+    ]
+   ]
+  },
+  {
+   "lang": "de",
+   "setter": "ok",
+   "um_fail": true,
+   "alerts": [
+    {
+     "text": "🔕 Смена тренда больше не присылается. Включить: /trend_on",
+     "show_alert": true
+    }
+   ],
+   "calls": [
+    [
+     42,
+     true
+    ]
+   ]
+  },
+  {
+   "lang": "de",
+   "setter": "fail",
+   "um_fail": false,
+   "alerts": [
+    {
+     "text": "Ошибка, попробуйте позже",
+     "show_alert": true
+    }
+   ],
+   "calls": []
+  },
+  {
+   "lang": "de",
+   "setter": "fail",
+   "um_fail": true,
+   "alerts": [
+    {
+     "text": "Ошибка, попробуйте позже",
+     "show_alert": true
+    }
+   ],
+   "calls": []
+  },
+  {
+   "lang": "<absent>",
+   "setter": "ok",
+   "um_fail": false,
+   "alerts": [
+    {
+     "text": "🔕 Смена тренда больше не присылается. Включить: /trend_on",
+     "show_alert": true
+    }
+   ],
+   "calls": [
+    [
+     42,
+     true
+    ]
+   ]
+  },
+  {
+   "lang": "<absent>",
+   "setter": "ok",
+   "um_fail": true,
+   "alerts": [
+    {
+     "text": "🔕 Смена тренда больше не присылается. Включить: /trend_on",
+     "show_alert": true
+    }
+   ],
+   "calls": [
+    [
+     42,
+     true
+    ]
+   ]
+  },
+  {
+   "lang": "<absent>",
+   "setter": "fail",
+   "um_fail": false,
+   "alerts": [
+    {
+     "text": "Ошибка, попробуйте позже",
+     "show_alert": true
+    }
+   ],
+   "calls": []
+  },
+  {
+   "lang": "<absent>",
+   "setter": "fail",
+   "um_fail": true,
+   "alerts": [
+    {
+     "text": "Ошибка, попробуйте позже",
+     "show_alert": true
+    }
+   ],
+   "calls": []
+  }
+ ],
+ "on": [
+  {
+   "setter": "ok",
+   "sent": [
+    {
+     "text": "🔔 Уведомления о смене тренда включены.",
+     "parse_mode": null
+    }
+   ],
+   "calls": [
+    [
+     42,
+     false
+    ]
+   ]
+  },
+  {
+   "setter": "fail",
+   "sent": [
+    {
+     "text": "Ошибка, попробуйте позже",
+     "parse_mode": null
+    }
+   ],
+   "calls": []
+  }
+ ],
+ "meta": {
+  "python": "3.11.17",
+  "tfs": [
+   "15m",
+   "1H",
+   "4H",
+   "1D",
+   "1W",
+   "1M"
+  ]
+ }
+}

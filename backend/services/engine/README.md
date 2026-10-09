@@ -522,7 +522,7 @@ Every Python generator runs the bot's own code with CPython 3.11 from the bot ch
 from `routes/app.js` after its JWT auth, `Cache-Control: no-store` and the generic POST bucket
 30 / 60 s). Limits, kv keys and error strings are listed in the file header; the JWT user
 replaces the Telegram initData user, and another user's trade is `404 not_found` like a missing
-one.
+one. `routes/appTrend.js` adds the bot's Telegram-only trend commands (D10).
 
 | route | bot handler | site specifics |
 |---|---|---|
@@ -534,14 +534,20 @@ one.
 | `POST analyze` | `h_analyze` | `coinAnalysisShell`; the chart as data next to `png: null` |
 | `POST share` | `h_share` | D3: `{ok, sent: false, days, stats}`, the client draws the card |
 | `POST feedback` | `h_feedback` | the bot's `feedback` row is a site support ticket (`id` = ticket id) |
-| `GET events` | — (site only) | SSE: `services/sseService.js`, events from `signalDelivery` / the tracker |
+| `GET events` | — (site only) | SSE: `services/sseService.js`, events from `signalDelivery` / the tracker; the SPA reads it with `fetch` + Bearer (`Live` in `frontend/app/app.js`) |
+| `GET trend` | `/trend` command (`handlers/trend.cmd_trend`) | `{ok, trend: get_all(), text, parse_mode, notify}`: the reply verbatim; the worker's monitor via the bridge, else the persisted `trend_state_v1` |
+| `POST trend/notify {on}` | `trend_notify_off` button / `/trend_on` | kv `trend_notify_off_<uid>` (read by the trend broadcast), the alert / reply text by lang, `unavailable` + the warning line on a failed write |
 
 **Reading requests like aiohttp.** `yarlUrl.js` ports what yarl 1.25 / aiohttp 3.14 do with the
 raw request target: the path is matched in its PATH_SAFE form (`%2F` and `%25` stay encoded until
 the match, so `a%2Fb` is the id `a/b`; `{id}` never spans `/` or braces; dot segments are not
 folded, `/x/../dashboard` is 404), the query is `parse_qsl(keep_blank_values=True)` (`+` = space,
-`;` is no separator, bad UTF-8 → U+FFFD, the first value of a repeated key wins). A known path
-with another method is 405 with the bot's `Allow`. `pyBody.js` keeps the Python type of every
+`;` is no separator, bad UTF-8 → U+FFFD, the first value of a repeated key wins). `routes/app.js`
+resolves every `/api/app` request like aiohttp's router before any handler and before the JWT
+check: no route → 404 `404: Not Found`, a route without the method → 405 `405: Method Not Allowed`
+with the bot's `Allow` (text/plain), so only requests a handler takes count in the POST bucket
+(the bot's `_load_user`); an exception in a handler is aiohttp's `handle_error` 500 (`500 Internal
+Server Error\n\nServer got itself in trouble`, an HTML page for `Accept: text/html`). `pyBody.js` keeps the Python type of every
 JSON body value (int vs float literal, big ints, NaN / Infinity, nested `repr`), so `str()`,
 `int()` and truthiness give the bot's answers; `botBody.js` reads a body with an int literal over
 4300 digits as `{}` (json.loads refuses it). Answers are written by `pyJsonDumps` (key order,
@@ -587,7 +593,10 @@ fvg, pivots, hvn, lvn, emas}, event, hit_levels, entry_index, last_close}`, draw
 
 | test | what | regenerate |
 |---|---|---|
-| `tests/app/data/appDataReplay.test.js` | 320 raw requests (17 users, 332 trades, trade_events, hostile kv) against the bot's handlers: status, JSON with key order, Retry-After / Allow, trade row + trade_events, kv counters, tickets, `[MINIAPP]` / `[MANUAL-RESULT]` lines | `py/drive_app_data.py` |
+| `tests/app/data/appDataReplay.test.js` | 320 raw requests (17 users, 332 trades, trade_events, hostile kv) against the bot's handlers: status, JSON with key order, Retry-After / Allow, the router-level 404 / 405 / 500 bodies byte for byte, trade row + trade_events, kv counters, tickets, `[MINIAPP]` / `[MANUAL-RESULT]` lines | `py/drive_app_data.py` |
+| `tests/app/data/postBucket.test.js` | the POST bucket counts only handled requests; router-level answers before auth; the 500 page | — |
+| `tests/app/data/trend.test.js` | `get_all()` and the `/trend` reply for 6 monitor states, the opt-out texts by lang / failure, the routes | `py/drive_trend_cmd.py` |
+| `tests/engine/worker/engine.app.e2e.test.js` | engine harness signals → dashboard / signals / chart (bridge RPC to the worker) → tracker TP1 → notification + SSE → public feed after 60 min, levels hidden | — |
 | `tests/app/data/units.test.js` | yarl / aiohttp target vectors, Python `str` / `bool` / `int` of body values | `py/drive_app_data.py` (`units`) |
 | `tests/app/data/engineBridge.test.js` | worker answers, query RPC (answer, error, timeout, exit, no worker), a real worker half over a MessageChannel, facade fallbacks | — |
 | `tests/app/data/events.test.js` | SSE handshake, heartbeat, per-user channel, delivery events, cleanup | — |
@@ -595,14 +604,14 @@ fvg, pivots, hvn, lvn, emas}, event, hit_levels, entry_index, last_close}`, draw
 
 `py/drive_app_data.py` runs the bot's aiohttp app (CPython 3.11, bot checkout read-only,
 `time.time` pinned per step, the PNG renderers spied: the real render plus the driver's mirror of
-its data steps, which must agree on None). The repo's `.gitignore` rule `data/` also matches
-`tests/app/data`; its files are tracked (`git add -f`).
+its data steps, which must agree on None). `py/drive_trend_cmd.py` calls `handlers/trend.py`'s
+handlers with stand-in Message / CallbackQuery objects (`PYTHONDONTWRITEBYTECODE=1`, `-B`). The
+`.gitignore` rule `data/` is negated for `backend/tests/app/data/`.
 
 ### Not wired yet
 
-* The bot also writes a `trade_feedback` learning row on a manual result (the `on_closed` hook);
-  the site's counterpart belongs to Genome (M16).
-* `chart.js` labels every MA line `EMA <name>` (VOLUME's SMA 10 / 20 / 50 too); the payload
-  carries `label` / `kind` for the UI.
-* `GET events` needs the Authorization header (EventSource cannot send one); the SPA does not
-  subscribe yet.
+* The bot also writes a `trade_feedback` learning row on a manual result
+  (`db_set_trade_result` → `trade_feedback.record_feedback`); `signalTradesRepo` has the
+  `onClosed` hook for it, the consumer is the adaptive optimizer (decision D11), not ported yet.
+* The `[MINIAPP] share` line: the bot logs it after sending the photo to the chat; the site has no
+  photo (D3) and logs it for every successful share answer (pinned in the replay).

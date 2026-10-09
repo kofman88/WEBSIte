@@ -9,8 +9,12 @@
  * M7 routes: me, strategy, settings, settings/all GET/POST, profile, lang,
  * plan (no TON — the site's payment methods instead), help, settings/reset
  * and volume/reset (decision D10: the Telegram-only factory / VOLUME resets).
- * Signals / dashboard / analyze / genome / exchange keys / positions /
- * feedback / stats / share / challenge arrive with M10–M17.
+ * Mounted: appGenome (M16), appChallenge (M17), appTrend (trend, trend/notify)
+ * and appData (M10b: dashboard, signals, chart, result, stats, analyze, share,
+ * feedback, events). Exchange keys / positions arrive with M13b.
+ *
+ * Router-level answers as aiohttp, before auth: 404 / 405 text (routeMethods);
+ * a handler exception → aiohttp's 500 page.
  *
  * Rate buckets (`_rate_ok`, in-memory sliding window per "<bucket>:<uid>",
  * map pruned above 5000 keys): post 30 / 60 s (MINIAPP_POST_PER_MIN),
@@ -340,6 +344,7 @@ router.post('/volume/reset', wrap((req, res) => {
 
 router.use('/genome', require('./appGenome'));    // M16: GET genome, POST genome/apply, POST genome/evolve (D10)
 router.use(require('./appChallenge'));       // M17: challenge + entry-advisor buttons
+router.use(require('./appTrend'));           // M10 (D10): GET trend (the /trend command), POST trend/notify (opt-out)
 router.use(require('./appData'));            // M10b: dashboard, signals, chart, result, stats, analyze, share, feedback, events
 
 // An exception in a handler: aiohttp's web_protocol.handle_error answer — 500 with the status line
