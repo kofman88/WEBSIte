@@ -66,11 +66,13 @@ class FakeFetcher {
     this.globalTrend = globalTrend || {};
     this.volBySym = {};
     this.calls = [];
-    this.missing = new Set();
+    this.missing = new Set();      // symbols whose REST call returns null
+    this.raiseOn = new Set();      // "symbol|tf" whose REST call throws
   }
 
   async getCandles(symbol, tf, limit = 300) {
     this.calls.push(['candles', symbol, tf, Math.trunc(limit)]);
+    if (this.raiseOn.has(`${symbol}|${tf}`)) throw new Error('rest down');
     if (this.missing.has(symbol)) return null;
     return frameAt(symbol, tf, this.clock.now(), Math.trunc(limit));
   }
