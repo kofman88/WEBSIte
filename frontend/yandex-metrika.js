@@ -68,7 +68,7 @@
     if (tgLink) {
       var href = tgLink.getAttribute('href') || '';
       var handle = (href.match(/t\.me\/([\w_]+)/) || [])[1] || '';
-      var target = handle === 'chmbotsignal' ? 'bot' : 'community';
+      var target = handle.toLowerCase() === 'chm_signals_bot' ? 'bot' : 'community';
       var placement = 'unknown';
       if (tgLink.classList.contains('hero-tg')) placement = 'hero';
       else if (tgLink.classList.contains('price-tg-btn')) placement = 'pricing';
