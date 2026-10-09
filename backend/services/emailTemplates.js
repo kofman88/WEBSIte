@@ -84,6 +84,8 @@ function passwordReset({ displayName, resetUrl, ipAddress }) {
     <h2 style="margin:0 0 14px;font-size:20px;font-weight:600;color:#fff;letter-spacing:-.015em">Сброс пароля</h2>
     <p style="margin:0 0 16px">Привет${displayName ? ', ' + escHtml(displayName) : ''}. По вашему запросу можно установить новый пароль. Ссылка действительна 1 час.</p>
     ${cta('Задать новый пароль →', resetUrl)}
+    ${mutedP('Если кнопка не работает, скопируйте ссылку в адресную строку:')}
+    <p style="margin:0 0 14px;font-family:monospace;font-size:12px;word-break:break-all;color:#5C80E3">${escHtml(resetUrl)}</p>
     ${ipAddress ? mutedP('Запрос пришёл с IP ' + ipAddress + '.') : ''}
     ${mutedP('Если вы не запрашивали сброс — проигнорируйте письмо, пароль не изменится. Если таких писем много — возможно, кто-то пытается войти. Срочно включите 2FA в настройках.')}
   `, { preheader: 'Ссылка для сброса пароля CHM Finance' });

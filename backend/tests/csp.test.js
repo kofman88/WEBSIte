@@ -300,7 +300,7 @@ describe('server.js with NODE_ENV=production sends the policy', () => {
     if (dir) fs.rmSync(dir, { recursive: true, force: true });
   });
 
-  it.each(['/', '/?data=empty', '/pricing/', '/app/', '/settings.html', '/terms.html', '/ops.html', '/landing/landing.js', '/no/such/page', '/api/health', '/api/public/stats'])('%s', async (p) => {
+  it.each(['/', '/?data=empty', '/pricing/', '/app/', '/auth/', '/settings.html', '/terms.html', '/ops.html', '/landing/landing.js', '/no/such/page', '/api/health', '/api/public/stats'])('%s', async (p) => {
     const r = await fetch(base + p, { redirect: 'manual' });
     expect(r.headers.get('content-security-policy')).toBe(EXPECTED);
     expect(r.headers.get('x-frame-options')).toBe('DENY');

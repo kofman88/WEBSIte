@@ -1,6 +1,10 @@
 /** @type {import('tailwindcss').Config} */
 module.exports = {
-  content: ['./*.html'],
+  // The legacy pages (top-level *.html) and the markup ops.js renders into ops.html (its tables and
+  // panels use utilities no page names, e.g. py-8, md:grid-cols-3). Nothing else: the other scripts
+  // build no utility classes, and scanning them only adds rules for words in their code (container,
+  // ring, static, …). Rebuild: npm ci && npm run build (in frontend/), commit tailwind.css.
+  content: ['./*.html', './ops.js'],
   theme: {
     extend: {
       colors: {

@@ -18,7 +18,11 @@
  * the 2FA / checkout QR codes drawn by the server as data: URLs, the settings / subscriptions
  * hamburger, the support widget fitting the screen (also on a page wider than a phone), the ops
  * drawer actions, the legal pages' icons, logo and phone menu, no page wider than the screen,
- * /?login=1 → the web app's sign-in).
+ * /?login=1 → the web app's sign-in, the legacy pages' sign-in with next= and the way back, the
+ * /auth/ page — reset / confirmation links from the account e-mails as serve-app.js queues them, the
+ * old /?reset= / /?verify_email= / GET verify links: no counter, no other host, the token out of the
+ * address bar and of every request —, ops → Impersonate (the session reaches the new tab without any
+ * URL), the Telegram link out of Metrika's link tracking, the site icons).
  * Any violation, error or failed check → exit 1.
  *
  * No request leaves the machine: Google Fonts, mc.yandex.ru / mc.yandex.com / yastatic.net are
@@ -54,6 +58,8 @@ const { chromium } = require(process.env.PLAYWRIGHT_CORE || '/opt/node-tools/nod
 const PASSWORD = 'smoke-pass-123';
 const USER_EMAIL = 'smoke@chm.local';
 const ADMIN_EMAIL = 'admin@chm.local';
+const RESET_EMAIL = 'reset@chm.local';     // serve-app.js --admin: verified, for the reset flows
+const VERIFY_EMAIL = 'verify@chm.local';   // serve-app.js --admin: unconfirmed, for the confirmation flows
 // narrow: a 320px phone, only for the scenarios marked `narrow` (the pages whose layout broke there)
 const VIEWPORTS = [
   { name: 'desktop', width: 1440, height: 900 },
@@ -65,6 +71,27 @@ function freePort() {
   return new Promise((resolve) => { const s = net.createServer(); s.listen(0, '127.0.0.1', () => { const p = s.address().port; s.close(() => resolve(p)); }); });
 }
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
+let mailLink = null;   // set in main(): the link of a fresh account e-mail (serve-app.js mail-link)
+let oauthLink = null;  // set in main(): the /auth/#oauth=<code> link a Google sign-in ends on (serve-app.js oauth-link)
+let loginApi = null;   // set in main(): POST /api/auth/login
+// a session whose access token has expired (signed with serve-app.js's scratch JWT secret) next to a
+// fresh refresh token, put into the page's localStorage before it loads
+async function expiredSession(c) {
+  const jwt = require('jsonwebtoken');
+  const s = await loginApi(RESET_EMAIL);
+  const access = jwt.sign({ uid: s.user.id, exp: Math.floor(Date.now() / 1000) - 60 }, 'smoke_jwt_secret_that_is_at_least_32_chars_long', { algorithm: 'HS256' });
+  await c.context.addInitScript((x) => {
+    try {
+      if (!sessionStorage.getItem('__probeSeeded')) {
+        sessionStorage.setItem('__probeSeeded', '1');
+        localStorage.setItem('chm_access', x.access);
+        localStorage.setItem('chm_refresh', x.refresh);
+        localStorage.setItem('chm_user', JSON.stringify(x.user));
+      }
+    } catch (_e) { /* opaque origin */ }
+  }, { access, refresh: s.refreshToken, user: s.user });
+  return '/settings.html';
+}
 
 // ── stubs for the hosts outside the machine ─────────────────────────────
 // A stand-in for the Google Fonts files: a font with Latin + Cyrillic glyphs (the pages are Russian),
@@ -392,15 +419,286 @@ async function settingsFits(page) {
   await page.evaluate(() => { document.getElementById('checkoutModal').style.display = 'none'; });
   return fails;
 }
-// /?login=1 (where the auth-gated legacy pages send a visitor without a session): the server's 302
-// lands on the web app with its sign-in form
-async function appSignInShown(page) {
+// /?login=1 (old sign-in links: the server's 302 drops the query) and the auth-gated legacy pages
+// opened without a session (they send /app/?next=<their path>): the web app with its sign-in form
+const signInShown = (search) => async function appSignInShown(page) {
   const fails = [];
-  // the query (next= / return=) is dropped: the web app reads none, and its own switches (demo=, api=) must not ride along
+  // the server-side /?login=1 redirect drops the query (the app's own switches, demo= / api=, must not ride along)
   const u = new URL(page.url());
-  if (u.pathname !== '/app/' || u.search) fails.push(`not on /app/: ${page.url()}`);
+  if (u.pathname !== '/app/' || u.search !== search) fails.push(`not on /app/${search}: ${page.url()}`);
   await page.waitForSelector('form.login-form', { timeout: 8000 }).catch(() => fails.push('web app sign-in form not shown'));
   return fails;
+};
+// …and after signing in there the visitor is back on the page that sent them (the app's ?next=)
+const signInReturns = (email, wantPath, readySel) => async function signInReturnsTo(page) {
+  const fails = [];
+  await page.waitForSelector('form.login-form input[name=email]', { timeout: 8000 }).catch(() => fails.push('sign-in form not shown'));
+  await page.waitForLoadState('networkidle').catch(() => {});
+  await page.fill('input[name=email]', email);
+  await page.fill('input[name=password]', PASSWORD);
+  await Promise.all([
+    page.waitForURL((u) => u.pathname === wantPath, { timeout: 10000 }).catch(() => fails.push(`sign-in did not return to ${wantPath} (${page.url()})`)),
+    page.click('form.login-form button[type=submit]'),
+  ]);
+  await page.waitForSelector(readySel, { state: 'visible', timeout: 10000 }).catch(() => fails.push(`${wantPath} not rendered after the sign-in (${readySel})`));
+  return fails;
+};
+// a legacy page whose access token ran out (refresh token still good): requireAuth() → /app/?next=,
+// the app refreshes the session and goes straight back
+async function expiredReturns(page, ctx) {
+  const fails = [];
+  await page.waitForURL((u) => u.pathname === '/settings.html', { timeout: 10000 }).catch(() => fails.push(`not back on /settings.html (${page.url()})`));
+  await page.waitForSelector('.stab[data-stab="security"]', { state: 'visible', timeout: 10000 }).catch(() => fails.push('settings not rendered'));
+  if (!ctx.navigations.some((u) => u.endsWith('/app/?next=%2Fsettings.html'))) fails.push(`never went through /app/?next= (${ctx.navigations.join(' → ')})`);
+  const live = await page.evaluate(() => { try { return JSON.parse(atob(localStorage.getItem('chm_access').split('.')[1])).exp * 1000 > Date.now(); } catch (_e) { return false; } });
+  if (!live) fails.push('the session was not refreshed');
+  return fails;
+}
+// a next= that is not one of the app's site paths is ignored: the sign-in opens the app itself
+async function appNextHostile(page) {
+  const fails = [];
+  await page.waitForSelector('form.login-form input[name=email]', { timeout: 8000 }).catch(() => fails.push('sign-in form not shown'));
+  await page.waitForLoadState('networkidle').catch(() => {});
+  await page.fill('input[name=email]', RESET_EMAIL);
+  await page.fill('input[name=password]', PASSWORD);
+  await page.click('form.login-form button[type=submit]');
+  await page.waitForFunction(() => !document.querySelector('form.login-form') && !document.getElementById('tabbar').hidden, null, { timeout: 10000 }).catch(() => fails.push('sign-in did not open the app'));
+  await sleep(500);
+  const u = new URL(page.url());
+  if (u.hostname !== '127.0.0.1' || u.pathname !== '/app/') fails.push(`left the app for ${page.url()}`);
+  return fails;
+}
+
+// ── /auth/ (password reset, e-mail confirmation) ───────────────────────────
+// The page with a one-time token: no counter, no request to any other host, no Referer, the address
+// bar clean, the token in no request URL (but the old link's own first request), the landing never
+// loaded on the way.
+const sanitize = (s) => String(s).replace(/((?:reset|verify|oauth)(?:=|%3D)|verify-email\/)[A-Za-z0-9_-]{16,}/gi, '$1<token>');
+async function authClean(page, ctx) {
+  const fails = [];
+  const st = await page.evaluate(() => ({
+    hash: location.hash, search: location.search, path: location.pathname, ym: typeof window.ym, stub: typeof window.__ymStub,
+    scripts: [...document.scripts].map((s) => s.src).filter(Boolean), referrer: (document.querySelector('meta[name="referrer"]') || {}).content,
+  }));
+  if (st.path !== '/auth/' || st.hash || st.search) fails.push(`address not clean: ${sanitize(st.path + st.search + st.hash)}`);
+  if (st.ym !== 'undefined' || st.stub !== 'undefined' || st.scripts.length) fails.push(`a counter / external script on /auth/: ${st.ym} ${st.stub} ${st.scripts.join(',')}`);
+  if (st.referrer !== 'no-referrer') fails.push(`meta referrer ${st.referrer}`);
+  const foreign = ctx.requests.filter((u) => new URL(u).hostname !== '127.0.0.1');
+  if (foreign.length) fails.push(`requests to other hosts: ${foreign.map(sanitize).join(', ')}`);
+  const landing = ctx.requests.filter((u) => /\/landing\/|yandex-metrika\.js|\/index\.html$/.test(new URL(u).pathname));
+  if (landing.length) fails.push(`the landing was loaded on the way: ${landing.map(sanitize).join(', ')}`);
+  if (ctx.token) {
+    const leaked = ctx.requests.slice(ctx.firstRequestMayCarryToken ? 1 : 0).filter((u) => u.includes(ctx.token));
+    if (leaked.length) fails.push(`the token in request URLs: ${leaked.map(sanitize).join(', ')}`);
+  }
+  const r = await fetch(ctx.base + '/auth/');
+  if (r.headers.get('referrer-policy') !== 'no-referrer' || r.headers.get('cache-control') !== 'no-store') fails.push(`/auth/ headers: ${r.headers.get('referrer-policy')} ${r.headers.get('cache-control')}`);
+  return fails;
+}
+const authView = (page) => page.evaluate(() => document.getElementById('main').getAttribute('data-view'));
+const waitView = (page, view, fails) => page.waitForFunction((v) => document.getElementById('main').getAttribute('data-view') === v, view, { timeout: 8000 })
+  .catch(async () => fails.push(`view ${view} not shown (${await authView(page).catch(() => '?')})`));
+// default view: «forgot password» → the request → «check your inbox»; RU ⇄ EN
+async function authForgot(page, ctx) {
+  const fails = [...await authClean(page, ctx)];
+  await waitView(page, 'forgot', fails);
+  const h1 = () => page.textContent('#main h1');
+  if ((await h1()) !== 'Восстановление пароля') fails.push(`ru heading: ${await h1()}`);
+  await page.click('#lang');
+  if ((await h1()) !== 'Reset your password' || (await page.getAttribute('html', 'lang')) !== 'en') fails.push(`en heading: ${await h1()}`);
+  await page.click('#lang');
+  await page.fill('#forgot-form input[name=email]', 'not-a-mail');
+  await page.click('#forgot-form button[type=submit]');
+  if (!(await page.isVisible('#forgot-form .msg.err'))) fails.push('invalid e-mail: no error shown');
+  await page.fill('#forgot-form input[name=email]', 'nobody@chm.local');
+  await page.click('#forgot-form button[type=submit]');
+  await waitView(page, 'sent', fails);
+  if (!(await page.textContent('#main')).includes('nobody@chm.local')) fails.push('sent view without the address');
+  fails.push(...await noHScroll(page));
+  return fails;
+}
+// the e-mail's link: the reset form, a new password, then the new password signs in
+async function authReset(page, ctx) {
+  const fails = [...await authClean(page, ctx)];
+  await waitView(page, 'reset', fails);
+  await page.fill('#pw1', 'short1');
+  await page.fill('#pw2', 'short1');
+  await page.click('#reset-form button[type=submit]');
+  if (!(await page.isVisible('#reset-form .msg.err'))) fails.push('a short password: no error shown');
+  await page.click('#reset-form .eye');
+  if ((await page.getAttribute('#pw1', 'type')) !== 'text') fails.push('show-password toggle dead');
+  await page.fill('#pw1', PASSWORD);
+  await page.fill('#pw2', PASSWORD);
+  await page.click('#reset-form button[type=submit]');
+  await waitView(page, 'done', fails);
+  const login = await fetch(ctx.base + '/api/auth/login', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ email: RESET_EMAIL, password: PASSWORD }) });
+  if (login.status !== 200) fails.push(`sign-in with the new password: ${login.status}`);
+  fails.push(...await authClean(page, ctx));
+  fails.push(...await noHScroll(page));
+  return fails;
+}
+// the old /?reset=<token> link: the server's 302 goes straight to /auth/ with the token in the fragment
+async function authResetLegacy(page, ctx) {
+  const fails = [...await authClean(page, ctx)];
+  await waitView(page, 'reset', fails);
+  const first = ctx.requests[0] ? new URL(ctx.requests[0]) : null;
+  if (!first || first.pathname !== '/' || !first.search.startsWith('?reset=')) fails.push(`first request not the old link: ${sanitize(ctx.requests[0])}`);
+  return fails;
+}
+async function authVerify(page, ctx) {
+  const fails = [...await authClean(page, ctx)];
+  await waitView(page, 'verified', fails);
+  const login = await fetch(ctx.base + '/api/auth/login', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ email: VERIFY_EMAIL, password: PASSWORD }) });
+  const j = await login.json().catch(() => ({}));
+  if (!(j.user && j.user.emailVerified === true)) fails.push(`e-mail not confirmed after the link (${login.status})`);
+  return fails;
+}
+// the old GET link (/api/auth/verify-email/<token>): confirmed by the server, the result on /auth/
+async function authVerifyOld(page, ctx) {
+  const fails = [...await authClean(page, ctx)];
+  await waitView(page, 'verified', fails);
+  return fails;
+}
+// /?verify_email=1 (the old app.js e-mail check) → /auth/: «confirm your e-mail»; without a session a sign-in link
+async function authVerifyNeeded(page, ctx) {
+  const fails = [...await authClean(page, ctx)];
+  await waitView(page, 'verify-needed', fails);
+  if (!(await page.isVisible('#main a[href="/app/"]'))) fails.push('no sign-in link without a session');
+  return fails;
+}
+// …with a session of an unconfirmed account: «send again» → POST /auth/verify-email/request
+async function authVerifyResend(page, ctx) {
+  const fails = [...await authClean(page, ctx)];
+  await waitView(page, 'verify-needed', fails);
+  if (!(await page.textContent('#main')).includes(VERIFY_EMAIL)) fails.push('the account address not shown');
+  await page.click('#resend-btn');
+  await page.waitForFunction(() => { const m = document.querySelector('#main .msg'); return m && !m.hidden && /Письмо отправлено/.test(m.textContent); }, null, { timeout: 6000 })
+    .catch(() => fails.push('resend: no confirmation shown'));
+  return fails;
+}
+
+// an old link in another shape (key case, an encoded '=', the SPA fallback): straight to /auth/ too
+async function authResetVariant(page, ctx) {
+  const fails = [...await authClean(page, ctx)];
+  await waitView(page, 'reset', fails);
+  const first = ctx.requests[0] ? new URL(ctx.requests[0]) : null;
+  if (!first || !first.search.toLowerCase().includes('reset')) fails.push(`first request not the old link: ${sanitize(ctx.requests[0])}`);
+  return fails;
+}
+// a reset link pasted into an open /auth/ tab: only the fragment changes (no reload) — the page takes it
+// all the same, the address bar is cleaned, nothing leaves with the token
+async function authPaste(page, ctx) {
+  const fails = [];
+  await waitView(page, 'forgot', fails);
+  const link = await mailLink(ctx, 'reset', RESET_EMAIL);
+  await page.evaluate((h) => { location.hash = h; }, new URL(link, ctx.base).hash);
+  await waitView(page, 'reset', fails);
+  fails.push(...await authClean(page, ctx));
+  return fails;
+}
+// a Google sign-in ends on /auth/#oauth=<one-time code>: traded by POST for the session, which lands in
+// the site's storage; then the page the sign-in started from. The code never reaches a request URL
+// or a page with a counter, and it works once.
+async function authOauth(page, ctx) {
+  const fails = [];
+  await page.waitForURL((u) => u.pathname === '/settings.html', { timeout: 10000 }).catch(() => fails.push(`not on /settings.html after the sign-in (${sanitize(page.url())})`));
+  await page.waitForSelector('.stab[data-stab="security"]', { state: 'visible', timeout: 10000 }).catch(() => fails.push('settings not rendered'));
+  const me = await page.evaluate(async () => {
+    const t = localStorage.getItem('chm_access');
+    const r = t ? await fetch('/api/auth/me', { headers: { Authorization: 'Bearer ' + t } }).then((x) => x.json()).catch(() => null) : null;
+    return r && r.user && r.user.email;
+  });
+  if (me !== USER_EMAIL) fails.push(`the session is ${me}, not ${USER_EMAIL}`);
+  const leaked = ctx.requests.filter((u) => u.includes(ctx.token));
+  if (leaked.length) fails.push(`the code in request URLs: ${leaked.map(sanitize).join(', ')}`);
+  if (ctx.navigations.some((u) => u.includes(ctx.token))) fails.push('the code in a navigation');
+  if (!ctx.navigations.some((u) => u === '/auth/')) fails.push(`/auth/ not cleaned before leaving (${ctx.navigations.join(' → ')})`);
+  const again = await fetch(ctx.base + '/api/auth/oauth/redeem', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ code: ctx.token }) });
+  if (again.status !== 400) fails.push(`the code worked twice (${again.status})`);
+  return fails;
+}
+// the public pages run Session Replay: the support thread and its fields are masked from it
+async function supportMasked(page) {
+  await page.waitForSelector('#chmSupPanel', { state: 'attached', timeout: 5000 }).catch(() => {});
+  await page.evaluate(() => document.getElementById('chmSupBtn')?.click());
+  await page.evaluate(() => document.querySelector('.chm-sup-tab[data-tab="chat"]')?.click());
+  await page.waitForSelector('#chmSupInput', { timeout: 5000 }).catch(() => {});
+  const r = await page.evaluate(() => {
+    const p = document.getElementById('chmSupPanel');
+    return { panel: !!p && p.classList.contains('ym-hide-content'),
+      fields: [...(p ? p.querySelectorAll('textarea, input:not([type=file])') : [])].map((f) => `${f.id}:${f.classList.contains('ym-disable-keys')}`) };
+  });
+  await page.evaluate(() => document.getElementById('chmSupClose')?.click());
+  const fails = [];
+  if (!r.panel) fails.push('support panel without ym-hide-content');
+  if (!r.fields.length || r.fields.some((f) => f.endsWith(':false'))) fails.push(`support fields not masked: ${r.fields.join(', ')}`);
+  return fails;
+}
+
+// ── ops → Impersonate: the session reaches the new tab without any URL ────────
+async function opsImpersonate(page, ctx) {
+  const fails = [];
+  await page.click('.ops-tab[data-tab="users"]');
+  const row = page.locator(`#usersTb tr[data-uid="${ctx.userId}"]`);
+  await row.waitFor({ timeout: 5000 }).catch(() => fails.push('user row not listed'));
+  await row.click();
+  await page.waitForSelector('#drawerBody [data-ops="impersonate"]', { timeout: 5000 }).catch(() => fails.push('impersonate action missing'));
+  const adminSession = await page.evaluate(() => localStorage.getItem('chm_access'));
+  ctx.dialogAnswer = 'CSP probe: support check';
+  const popupP = page.context().waitForEvent('page', { timeout: 8000 });
+  await page.click('#drawerBody [data-ops="impersonate"]');
+  const popup = await popupP.catch(() => null);
+  ctx.dialogAnswer = null;
+  if (!popup) return [...fails, 'no tab opened'];
+  ctx.watch(popup, { holdsPage: true });
+  const urls = [popup.url()];
+  popup.on('framenavigated', (f) => { if (f === popup.mainFrame()) urls.push(f.url()); });
+  await popup.waitForSelector('#impBanner', { timeout: 10000 }).catch(() => fails.push('impersonation banner not shown'));
+  await popup.waitForLoadState('networkidle').catch(() => {});
+  const st = await popup.evaluate(async () => {
+    const tok = sessionStorage.getItem('chm_imp_access');
+    const me = tok ? await fetch('/api/auth/me', { headers: { Authorization: 'Bearer ' + tok } }).then((r) => r.json()).catch(() => null) : null;
+    return { href: location.href, banner: (document.getElementById('impBanner') || {}).textContent || '', me: me && me.user && me.user.email,
+      handoffs: Object.keys(localStorage).filter((k) => k.startsWith('chm_imp_handoff:')), admin: localStorage.getItem('chm_access') };
+  });
+  if (st.me !== USER_EMAIL) fails.push(`the tab's session is ${st.me}, not ${USER_EMAIL}`);
+  if (!st.banner.includes(USER_EMAIL)) fails.push(`banner: ${st.banner}`);
+  if (st.handoffs.length) fails.push(`hand-off left in storage: ${st.handoffs.length}`);
+  if (st.admin !== adminSession) fails.push('the admin session in localStorage changed');
+  for (const u of [...urls, st.href]) {
+    const x = new URL(u);
+    if (x.pathname !== '/settings.html' || x.search || !(x.hash === '' || /^#impersonate=[a-f0-9]{32}$/.test(x.hash))) fails.push(`the tab's address carried more than a slot key: ${x.pathname}${x.search}${x.hash.slice(0, 14)}…`);
+  }
+  if (urls.some((u) => /eyJ|code=|imp=/.test(u))) fails.push('a token / code in the tab URL');
+  const redeem = ctx.requests.filter((u) => u.includes('/api/auth/impersonation/redeem'));
+  if (redeem.length !== 1 || redeem[0] !== ctx.base + '/api/auth/impersonation/redeem') fails.push(`redeem requests: ${redeem.length}`);
+  await popup.close().catch(() => {});
+  return fails;
+}
+
+// settings: the Telegram link (t.me/<bot>?start=<one-time code>) is out of Metrika's link tracking;
+// the «e-mail not confirmed» card stays hidden for a confirmed account (it showed for everyone)
+async function tgLinkExcluded(page) {
+  const fails = [];
+  const ok = await page.evaluate(() => { const a = document.getElementById('tgLinkUrl'); return !!a && a.classList.contains('ym-disable-tracklink'); });
+  if (!ok) fails.push('#tgLinkUrl without ym-disable-tracklink');
+  await page.evaluate(() => window.stab && window.stab('security'));
+  await page.waitForFunction(() => document.getElementById('tfaBtn')?.textContent.trim() === 'Включить', null, { timeout: 6000 }).catch(() => {});
+  if (await visible(page, '#emailVerifyCard')) fails.push('«e-mail not confirmed» card shown for a confirmed account');
+  await page.evaluate(() => window.stab && window.stab('profile'));
+  return fails;
+}
+// the icons the pages and sw.js name are served as images (no SPA-fallback HTML)
+async function iconsServed(page) {
+  const r = await page.evaluate(async () => {
+    const out = {};
+    for (const p of ['/favicon.svg', '/favicon-32.png', '/assets/img/icon-192.png', '/assets/img/badge.png', '/apple-touch-icon.png']) {
+      const res = await fetch(p);
+      out[p] = `${res.status} ${res.headers.get('content-type')}`;
+    }
+    return out;
+  });
+  return Object.entries(r).filter(([, v]) => !/^200 image\/(png|svg\+xml)/.test(v)).map(([k, v]) => `${k}: ${v}`);
 }
 // the sign-out button sits in the sidebar, which is off-canvas at phone width: dispatch the click
 // there (the check is the data-logout wiring, not the layout)
@@ -569,29 +867,45 @@ async function appHome(page) {
 
 const SCENARIOS = [
   { name: 'landing', path: '/', checks: [checkFonts, checkMetrika, landingUi] },
-  { name: 'login-redirect', path: '/?login=1&next=/ops.html', checks: [appSignInShown] },
-  { name: 'login-return', path: '/?return=%2Fsettings.html&login=1', checks: [appSignInShown], narrow: true },
+  { name: 'login-redirect', path: '/?login=1&next=/ops.html', checks: [signInShown('')] },
+  { name: 'login-return', path: '/?return=%2Fsettings.html&login=1', checks: [signInShown('')], narrow: true },
   { name: 'landing-empty', path: '/?data=empty', checks: [checkFonts, checkMetrika] },
   { name: 'pricing', path: '/pricing/', checks: [checkFonts, checkMetrika] },
   { name: 'spa-fallback', path: '/no/such/page', checks: [checkFonts] },
   { name: 'app-login', path: '/app/', checks: [appLogin] },
   { name: 'app', path: '/app/', auth: 'user', checks: [appHome], settle: 2500 },
-  { name: 'about', path: '/about.html', checks: [checkMetrika, noHScroll, supportWidget, supportWidgetWidePage] },
+  { name: 'app-next-hostile', path: '/app/?next=https%3A%2F%2Fevil.example%2F', checks: [appNextHostile] },
+  { name: 'settings-expired', label: '/settings.html (access token expired, refresh token good)', path: expiredSession, checks: [expiredReturns], settle: 3000, leaves: true },
+  // /auth/: the default view, the e-mails' links (queued by the site, read from the outbox) and the old addresses
+  { name: 'auth-forgot', path: '/auth/', checks: [authForgot], narrow: true },
+  { name: 'auth-reset', label: '/auth/#reset=<token> (e-mail)', path: (c) => mailLink(c, 'reset', RESET_EMAIL), checks: [authReset], narrow: true },
+  { name: 'auth-reset-old', label: '/?reset=<token> (old e-mail)', path: async (c) => { await mailLink(c, 'reset', RESET_EMAIL); c.firstRequestMayCarryToken = true; return '/?reset=' + c.token; }, checks: [authResetLegacy] },
+  { name: 'auth-reset-case', label: '/?RESET%3D<token> (an old link, reshaped)', path: async (c) => { await mailLink(c, 'reset', RESET_EMAIL); c.firstRequestMayCarryToken = true; return '/?RESET%3D' + c.token; }, checks: [authResetVariant] },
+  { name: 'auth-reset-spa', label: '/dashboard.html?reset=<token> (SPA fallback)', path: async (c) => { await mailLink(c, 'reset', RESET_EMAIL); c.firstRequestMayCarryToken = true; return '/dashboard.html?reset=' + c.token; }, checks: [authResetVariant] },
+  { name: 'auth-paste', label: '/auth/ then a reset link pasted into the tab', path: '/auth/', checks: [authPaste] },
+  { name: 'auth-oauth', label: '/auth/#oauth=<code> (Google sign-in → /settings.html)', path: async (c) => { const p = await oauthLink(c, USER_EMAIL, '/settings.html'); return p; }, checks: [authOauth], settle: 3000 },
+  { name: 'auth-verify', label: '/auth/#verify=<token> (e-mail)', path: (c) => mailLink(c, 'verify', VERIFY_EMAIL), checks: [authVerify], narrow: true },
+  { name: 'auth-verify-old', label: '/api/auth/verify-email/<token> (old e-mail)', path: async (c) => { await mailLink(c, 'verify', VERIFY_EMAIL); c.firstRequestMayCarryToken = true; return '/api/auth/verify-email/' + c.token; }, checks: [authVerifyOld] },
+  { name: 'auth-verify-needed', path: '/?verify_email=1', checks: [authVerifyNeeded] },
+  { name: 'auth-verify-resend', label: '/?verify_email=1 (unconfirmed session)', path: async (c) => { await mailLink(c, 'verify', VERIFY_EMAIL); c.token = null; return '/?verify_email=1'; }, auth: 'verify', checks: [authVerifyResend] },
+  { name: 'about', path: '/about.html', checks: [checkMetrika, noHScroll, iconsServed, supportWidget, supportWidgetWidePage, supportMasked] },
   { name: 'api-docs', path: '/api-docs.html', checks: [noHScroll, supportWidget], narrow: true },
-  { name: 'status', path: '/status.html', checks: [noHScroll, supportWidget] },
+  { name: 'status', path: '/status.html', checks: [noHScroll, supportWidget, supportMasked] },
+  { name: 'status-signed-in', path: '/status.html', auth: 'user', checks: [checkMetrika, supportMasked] },
   // the legal pages at 320px too: a flex <li> (one column per text run / <strong>) and a long heading
   // word made them wider than the screen, and the burger at the nav's right edge went off-screen
   { name: 'terms', path: '/terms.html', checks: [checkIcons, checkMetrika, noHScroll, legalMenu, supportWidget], narrow: true },
   { name: 'privacy', path: '/privacy.html', checks: [checkIcons, noHScroll, legalMenu], narrow: true },
   { name: 'risk', path: '/risk.html', checks: [checkIcons, noHScroll, legalMenu], narrow: true },
-  { name: 'subscriptions-anon', path: '/subscriptions.html', anonRedirect: '/app/', checks: [appSignInShown] },
+  { name: 'subscriptions-anon', path: '/subscriptions.html', anonRedirect: '/app/', checks: [signInShown('?next=%2Fsubscriptions.html')] },
   { name: 'subscriptions', path: '/subscriptions.html', auth: 'user', checks: [metrikaPrivate, sidebarToggle, supportWidget, logoutOnly] },
-  { name: 'settings-anon', path: '/settings.html', anonRedirect: '/app/', checks: [appSignInShown] },
-  { name: 'settings', path: '/settings.html', auth: 'user', checks: [metrikaPrivate, serviceWorker, sidebarToggle, settingsQr, settingsFits, settingsActions], narrow: true },
-  { name: 'admin-anon', path: '/admin.html', anonRedirect: '/app/', checks: [appSignInShown] },
+  { name: 'settings-anon', path: '/settings.html', anonRedirect: '/app/', checks: [signInShown('?next=%2Fsettings.html'), signInReturns(USER_EMAIL, '/settings.html', '.stab[data-stab="security"]')] },
+  { name: 'settings', path: '/settings.html', auth: 'user', checks: [metrikaPrivate, tgLinkExcluded, serviceWorker, sidebarToggle, settingsQr, settingsFits, settingsActions], narrow: true },
+  // admin.html is a redirect stub to the ops console, whose gate sends the visitor to the sign-in for /ops.html
+  { name: 'admin-anon', path: '/admin.html', anonRedirect: '/app/', checks: [signInShown('?next=%2Fops.html')] },
   { name: 'admin', path: '/admin.html', auth: 'admin', checks: [adminRedirect] },
-  { name: 'ops-anon', path: '/ops.html', anonRedirect: '/app/', checks: [appSignInShown] },
-  { name: 'ops', path: '/ops.html', auth: 'admin', checks: [metrikaPrivate, opsActions] },
+  { name: 'ops-anon', path: '/ops.html', anonRedirect: '/app/', checks: [signInShown('?next=%2Fops.html'), signInReturns(ADMIN_EMAIL, '/ops.html', '#opsApp')] },
+  { name: 'ops', path: '/ops.html', auth: 'admin', checks: [metrikaPrivate, opsActions, opsImpersonate] },
   { name: 'google-verify', path: '/google42f82fe571b31093.html' },
   { name: 'yandex-verify', path: '/yandex_dad10d6013fe454c.html' },
 ];
@@ -609,6 +923,39 @@ async function main() {
     if (Date.now() - t0 > 30000) throw new Error(`serve-app timeout: ${out}`);
     await sleep(50);
   }
+  // serve-app.js stdin commands (mail-link …): one at a time, answered by a line on its stdout
+  let srvQueue = Promise.resolve();
+  const serve = (cmd, re) => (srvQueue = srvQueue.then(async () => {
+    const from = out.length;
+    srv.stdin.write(cmd + '\n');
+    const t = Date.now();
+    for (;;) {
+      const m = re.exec(out.slice(from));
+      if (m) return m;
+      if (Date.now() - t > 10000) throw new Error(`serve-app: no answer to ${cmd.split(' ')[0]}`);
+      await sleep(20);
+    }
+  }));
+  // the link of the account e-mail the site queues (reset / verify), read from serve-app's private file
+  mailLink = async (c, kind, email) => {
+    const m = await serve(`mail-link ${kind} ${email}`, /mail-link (ok (\S+)|failed .*)\n/);
+    if (!m[2]) throw new Error(`mail-link ${kind}: ${m[1]}`);
+    const link = fs.readFileSync(m[2], 'utf8').trim();
+    fs.unlinkSync(m[2]);
+    const u = new URL(link);
+    if (u.origin !== base) throw new Error(`e-mail link to another origin: ${u.origin}`);
+    c.token = u.hash.split('=')[1] || null;
+    return u.pathname + u.search + u.hash;
+  };
+  oauthLink = async (c, email, returnTo) => {
+    const m = await serve(`oauth-link ${email} ${returnTo}`, /oauth-link (ok (\S+)|failed .*)\n/);
+    if (!m[2]) throw new Error(`oauth-link: ${m[1]}`);
+    const link = fs.readFileSync(m[2], 'utf8').trim();
+    fs.unlinkSync(m[2]);
+    const u = new URL(link);
+    c.token = u.hash.split('=')[1] || null;
+    return u.pathname + u.search + u.hash;
+  };
   const results = [];
   let browser = null;
   try {
@@ -618,7 +965,8 @@ async function main() {
       if (!r.ok) throw new Error(`login ${email}: ${r.status} ${await r.text()}`);
       return r.json();
     };
-    const sessions = { user: await login(USER_EMAIL), admin: await login(ADMIN_EMAIL) };
+    const sessions = { user: await login(USER_EMAIL), admin: await login(ADMIN_EMAIL), verify: await login(VERIFY_EMAIL) };
+    loginApi = login;
     const tr = await fetch(base + '/api/support/tickets', { method: 'POST', headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${sessions.user.accessToken}` }, body: JSON.stringify({ subject: 'CSP probe ticket', body: 'hello from the CSP probe' }) });
     const tj = await tr.json();
     const ticketId = (tj.ticket && tj.ticket.id) || tj.id;
@@ -632,6 +980,11 @@ async function main() {
         if (vp.mobile) Object.assign(ctxOpts, { deviceScaleFactor: 2, isMobile: true, hasTouch: true });
         const ctx = await browser.newContext(ctxOpts);
         await ctx.route((url) => url.hostname !== '127.0.0.1', stubRoute);
+        // each scenario × viewport is its own visitor (server.js trusts one proxy hop, so X-Forwarded-For
+        // is the client address): the per-IP /api limiter as deployed (300 per 15 min) would otherwise
+        // count the whole probe as one visitor. Same-origin requests only (no CORS effect elsewhere).
+        const clientIp = `10.${VIEWPORTS.indexOf(vp) + 1}.${SCENARIOS.indexOf(sc) + 1}.7`;
+        await ctx.route((url) => url.hostname === '127.0.0.1', (route) => route.continue({ headers: { ...route.request().headers(), 'x-forwarded-for': clientIp } }));
         const violations = [];
         const errors = [];
         const dialogs = [];
@@ -655,31 +1008,47 @@ async function main() {
             } catch (_e) { /* opaque origin */ }
           }, s);
         }
+        const requests = [];
+        ctx.on('request', (r) => requests.push(r.url()));
+        const navigations = [];
+        const cctx = { ticketId, userId: sessions.user.user.id, dialogs, auth: sc.auth || '', expect401: false, base, requests, navigations, context: ctx, token: null, firstRequestMayCarryToken: false, dialogAnswer: null };
+        // console errors, page errors, failed requests and HTTP errors of a page (also a tab a check opens)
+        cctx.watch = (p, { holdsPage = false } = {}) => {
+          p.on('console', (m) => {
+            if (m.type() !== 'error') return;
+            // Chrome's user-activation intervention for the web app's haptics (frontend/app, not the CSP)
+            if (/^Blocked call to navigator\.vibrate/.test(m.text())) { notes.push(`console: ${m.text().slice(0, 90)}`); return; }
+            errors.push(`console: ${m.text()}`);
+          });
+          p.on('pageerror', (e) => {
+            // the impersonation tab: requireAuth() holds settings.html until the hand-off reloads it
+            // (its inline script stops with `throw new Error('noauth')`, as without a session)
+            if (holdsPage && e.message === 'noauth') { notes.push(`pageerror: ${e.message} (impersonation tab, before its reload)`); return; }
+            errors.push(`pageerror: ${e.message}`);
+          });
+          p.on('requestfailed', (r) => {
+            const f = (r.failure() && r.failure().errorText) || '';
+            // navigation (redirect stubs, logout) / context close abort in-flight loads and SSE streams;
+            // a request the CSP blocks fails with "csp", never ERR_ABORTED
+            if (/ERR_ABORTED/.test(f)) return;
+            errors.push(`requestfailed: ${r.url()} ${f}`);
+          });
+          p.on('response', (r) => { if (r.status() >= 400) errors.push(`http ${r.status()}: ${r.request().method()} ${r.url()}`); });
+        };
         const page = await ctx.newPage();
         page.setDefaultTimeout(5000);
-        page.on('dialog', (d) => { dialogs.push(d.message()); d.dismiss().catch(() => {}); });
-        page.on('console', (m) => {
-          if (m.type() !== 'error') return;
-          // Chrome's user-activation intervention for the web app's haptics (frontend/app, not the CSP)
-          if (/^Blocked call to navigator\.vibrate/.test(m.text())) { notes.push(`console: ${m.text().slice(0, 90)}`); return; }
-          errors.push(`console: ${m.text()}`);
-        });
-        page.on('pageerror', (e) => errors.push(`pageerror: ${e.message}`));
-        page.on('requestfailed', (r) => {
-          const f = (r.failure() && r.failure().errorText) || '';
-          // navigation (redirect stubs, logout) / context close abort in-flight loads and SSE streams;
-          // a request the CSP blocks fails with "csp", never ERR_ABORTED
-          if (/ERR_ABORTED/.test(f)) return;
-          errors.push(`requestfailed: ${r.url()} ${f}`);
-        });
-        page.on('response', (r) => { if (r.status() >= 400) errors.push(`http ${r.status()}: ${r.request().method()} ${r.url()}`); });
+        page.on('framenavigated', (f) => { if (f === page.mainFrame()) navigations.push(sanitize(f.url().replace(base, ''))); });
+        page.on('dialog', (d) => { dialogs.push(d.message()); (cctx.dialogAnswer != null ? d.accept(cctx.dialogAnswer) : d.dismiss()).catch(() => {}); });
+        cctx.watch(page);
         const fails = [];
-        const cctx = { ticketId, userId: sessions.user.user.id, dialogs, auth: sc.auth || '', expect401: false };
         let finalUrl = '';
+        let landedUrl = '';
         try {
-          await page.goto(base + sc.path, { waitUntil: 'load', timeout: 20000 });
+          const target = typeof sc.path === 'function' ? await sc.path(cctx) : sc.path;
+          await page.goto(base + target, { waitUntil: 'load', timeout: 20000 });
           await Promise.race([page.waitForLoadState('networkidle').catch(() => {}), sleep(sc.settle || 4000)]);
           await sleep(400);
+          landedUrl = page.url().replace(base, '');
           if (SHOTS) {
             fs.mkdirSync(SHOTS, { recursive: true });
             await page.screenshot({ path: path.join(SHOTS, `${sc.name}-${vp.name}.png`), fullPage: false });
@@ -696,11 +1065,11 @@ async function main() {
             if (/^(http 401: POST .*\/api\/auth\/login$|console: Failed to load resource: the server responded with a status of 401)/.test(errors[i])) notes.push(errors.splice(i, 1)[0]);
           }
         }
-        if (sc.anonRedirect) {
-          // an auth-gated legacy page opened without a session: requireAuth() sends it to the login
+        if (sc.anonRedirect || sc.leaves) {
+          // an auth-gated legacy page opened without a (live) session: requireAuth() sends it to the login
           // and its inline script stops with `throw new Error('noauth')`; calls already in flight get a 401,
           // and a blob: frame the Metrika stub opened in the page being left can lose its blob mid-load
-          if (!finalUrl.startsWith(sc.anonRedirect)) fails.push(`expected a redirect to ${sc.anonRedirect}, got ${finalUrl}`);
+          if (sc.anonRedirect && !landedUrl.startsWith(sc.anonRedirect)) fails.push(`expected a redirect to ${sc.anonRedirect}, got ${landedUrl}`);
           for (let i = errors.length - 1; i >= 0; i -= 1) {
             if (/^(pageerror: noauth|http 401: GET .*\/api\/|console: Failed to load resource: the server responded with a status of 401|requestfailed: blob:\S+ net::ERR_BLOCKED_BY_RESPONSE)/.test(errors[i])) notes.push(errors.splice(i, 1)[0]);
           }
@@ -708,13 +1077,14 @@ async function main() {
         await ctx.close();
         const uniq = (a) => [...new Set(a)];
         const vs = uniq(violations.map((v) => `${v.directive} ${v.blocked || ''} ${v.sample ? JSON.stringify(v.sample) : ''} @${v.page}`.replace(/\s+/g, ' ').trim()));
-        const res = { page: sc.name, path: sc.path, auth: sc.auth || '', viewport: vp.name, finalUrl, violations: vs, errors: uniq(errors), fails, notes: uniq(notes) };
+        // no token of the e-mail links in what the probe prints or writes
+        const res = { page: sc.name, path: sc.label || sc.path, auth: sc.auth || '', viewport: vp.name, finalUrl: sanitize(finalUrl), violations: vs.map(sanitize), errors: uniq(errors).map(sanitize), fails: fails.map(sanitize), notes: uniq(notes).map(sanitize) };
         results.push(res);
         const okLine = !vs.length && !res.errors.length && !fails.length;
-        console.log(`${okLine ? 'ok  ' : 'FAIL'} ${vp.name.padEnd(7)} ${sc.name.padEnd(20)} violations ${vs.length} errors ${res.errors.length} checks-failed ${fails.length}${finalUrl && finalUrl !== sc.path ? ` → ${finalUrl}` : ''}`);
-        for (const v of vs) console.log(`       csp: ${v}`);
+        console.log(`${okLine ? 'ok  ' : 'FAIL'} ${vp.name.padEnd(7)} ${sc.name.padEnd(20)} violations ${vs.length} errors ${res.errors.length} checks-failed ${fails.length}${res.finalUrl && res.finalUrl !== sc.path ? ` → ${res.finalUrl}` : ''}`);
+        for (const v of res.violations) console.log(`       csp: ${v}`);
         for (const e of res.errors) console.log(`       err: ${e}`);
-        for (const f of fails) console.log(`       chk: ${f}`);
+        for (const f of res.fails) console.log(`       chk: ${f}`);
         for (const n of res.notes) console.log(`       note (not counted): ${n}`);
       }
     }

@@ -375,9 +375,16 @@ async function confirmPasswordReset({ token, newPassword, ipAddress, userAgent }
   // bcrypt.hash off-loads to threadpool — see register() comment.
   const passwordHash = await bcrypt.hash(newPassword, BCRYPT_COST);
   db.transaction(() => {
+    // Claim the token first: the checks above ran before the await, so a second confirm with the same
+    // token (or a newer reset request, which marks it used) may have got there meanwhile — only one
+    // of them sets a password.
+    const claim = db.prepare('UPDATE password_resets SET used_at = CURRENT_TIMESTAMP WHERE id = ? AND used_at IS NULL').run(row.id);
+    if (claim.changes !== 1) {
+      const err = new Error('Reset token already used');
+      err.statusCode = 400; err.code = 'RESET_TOKEN_USED'; throw err;
+    }
     db.prepare('UPDATE users SET password_hash = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?')
       .run(passwordHash, row.user_id);
-    db.prepare('UPDATE password_resets SET used_at = CURRENT_TIMESTAMP WHERE id = ?').run(row.id);
     revokeAllForUser(row.user_id);
   })();
   audit(row.user_id, 'auth.password_reset_confirmed', null, ipAddress, userAgent);
@@ -471,7 +478,7 @@ function verifyEmail({ token, ipAddress, userAgent }) {
     const e = new Error('Verification token expired'); e.statusCode = 400; e.code = 'VERIFY_TOKEN_EXPIRED'; throw e;
   }
   db.transaction(() => {
-    db.prepare('UPDATE email_verifications SET verified_at = CURRENT_TIMESTAMP WHERE id = ?').run(row.id);
+    db.prepare('UPDATE email_verifications SET verified_at = CURRENT_TIMESTAMP WHERE id = ? AND verified_at IS NULL').run(row.id);
     db.prepare('UPDATE users SET email_verified = 1, updated_at = CURRENT_TIMESTAMP WHERE id = ?').run(row.user_id);
   })();
   audit(row.user_id, 'auth.email_verified', null, ipAddress, userAgent);

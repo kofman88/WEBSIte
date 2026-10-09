@@ -1,0 +1,542 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8"/>
+<script>
+/*
+ * /auth/ — password reset and e-mail confirmation (backend/routes/auth.js /password-reset/*,
+ * /verify-email/*). The address bar of this page can carry a one-time secret:
+ *   #reset=<token>    the password reset e-mail (services/emailService.js), also the target of the
+ *                     server's redirect for the old /?reset=<token> links (server.js, .htaccess)
+ *   #verify=<token>   the e-mail confirmation e-mail
+ *   #oauth=<code>     a sign-in with Google: the callback's one-time 60-second code (routes/auth.js),
+ *                     traded here for the session, which goes to the site's storage like any sign-in
+ * and plain flags: ?verified=1|0&code=…  (GET /api/auth/verify-email/:token of older e-mails),
+ * ?verify_email=1 (the legacy pages, frontend/app.js, for a session whose e-mail is not confirmed),
+ * ?oauth_error=<code> (a Google sign-in that failed).
+ * This script is the first thing on the page: it reads the address, takes it out of the address bar
+ * (history.replaceState) and keeps the token only in this closure, before any other request leaves
+ * the page — also when a new link is pasted into this tab later (hashchange). No analytics counter
+ * on this page, no third-party request at all (system fonts, inline CSS, the favicon is local);
+ * Referrer-Policy no-referrer (meta below + the server's header).
+ */
+(function () {
+  'use strict';
+  var WANTED = { reset: 1, verify: 1, oauth: 1, verified: 1, code: 1, verify_email: 1, oauth_error: 1 };
+  var has = function (o, k) { return Object.prototype.hasOwnProperty.call(o, k); };
+  // the address's parameters (fragment first), the address bar cleaned at once
+  function takeAddress() {
+    var P = {};
+    [location.hash, location.search].forEach(function (part) {
+      String(part || '').replace(/^[#?]/, '').split('&').forEach(function (kv) {
+        var i = kv.indexOf('=');
+        var k = i < 0 ? kv : kv.slice(0, i);
+        if (!has(WANTED, k) || has(P, k)) return;
+        var v = i < 0 ? '' : kv.slice(i + 1);
+        try { P[k] = decodeURIComponent(v.replace(/\+/g, ' ')); } catch (e) { P[k] = ''; }
+      });
+    });
+    if (location.hash || location.search) {
+      try { history.replaceState(null, '', location.pathname); } catch (e) { /* the page still works */ }
+    }
+    return P;
+  }
+  var TOKEN_RE = /^[A-Za-z0-9_-]{16,256}$/;
+  var resetToken = null, verifyToken = null, oauthCode = null, flags = {};
+  function adopt(P) {
+    resetToken = has(P, 'reset') ? P.reset : null;
+    verifyToken = has(P, 'verify') ? P.verify : null;
+    oauthCode = has(P, 'oauth') ? P.oauth : null;
+    flags = { verified: P.verified, verify_email: P.verify_email, oauth_error: P.oauth_error };
+  }
+  adopt(takeAddress());
+  var main = null;
+  // a link pasted into this tab later only changes the fragment (no reload): take it the same way
+  if (typeof window !== 'undefined' && window.addEventListener) {
+    window.addEventListener('hashchange', function () {
+      var P = takeAddress();
+      if (!has(P, 'reset') && !has(P, 'verify') && !has(P, 'oauth')) return;
+      adopt(P);
+      if (main) route();
+    });
+  }
+
+  // ── texts ────────────────────────────────────────────────────────────────
+  var T = {
+    ru: {
+      title: 'Аккаунт · CHM Breaker', site: 'На сайт', app: 'Открыть приложение', signIn: 'Войти', settings: 'Настройки аккаунта',
+      langBtn: 'EN', langAria: 'Switch to English',
+      forgotH: 'Восстановление пароля', forgotP: 'Укажите e-mail аккаунта — пришлём ссылку для нового пароля. Ссылка действует 1 час.',
+      email: 'E-mail', emailPh: 'you@example.com', send: 'Отправить ссылку',
+      sentH: 'Проверьте почту', sentP: 'Если аккаунт с адресом {email} существует, мы отправили на него письмо со ссылкой. Ссылка действует 1 час. Нет письма — проверьте «Спам».',
+      again: 'Отправить ещё раз',
+      resetH: 'Новый пароль', resetP: 'Придумайте новый пароль. После смены все сеансы на других устройствах завершатся.',
+      pass: 'Новый пароль', pass2: 'Повторите пароль', passHint: 'Минимум 8 символов, буквы и цифры.', show: 'Показать пароль', hide: 'Скрыть пароль',
+      save: 'Сохранить пароль',
+      doneH: 'Пароль изменён', doneP: 'Готово. Войдите с новым паролем — на других устройствах сеансы завершены.',
+      badH: 'Ссылка не работает', badReset: 'Ссылка для сброса пароля недействительна или уже использована. Запросите новую — она действует 1 час.',
+      expReset: 'Срок ссылки истёк (она действует 1 час). Запросите новую.',
+      verifyingH: 'Подтверждаем e-mail…', verifyingP: 'Секунду.',
+      verifiedH: 'E-mail подтверждён', verifiedP: 'Спасибо! Адрес подтверждён — все функции аккаунта доступны.',
+      already: 'Этот адрес уже был подтверждён раньше.',
+      vbadH: 'Ссылка не работает', vbadP: 'Ссылка подтверждения недействительна или устарела (она действует 24 часа). Отправьте письмо ещё раз.',
+      needH: 'Подтвердите e-mail', needP: 'Чтобы пользоваться оплатой и автоторговлей, подтвердите адрес почты — откройте ссылку из письма, которое мы отправили при регистрации.',
+      needFor: 'Адрес аккаунта: {email}.',
+      resend: 'Отправить письмо ещё раз', resent: 'Письмо отправлено на {email}. Ссылка действует 24 часа.', resentAny: 'Письмо отправлено. Ссылка действует 24 часа.',
+      needSignIn: 'Войдите в аккаунт, чтобы отправить письмо ещё раз.',
+      oauthH: 'Входим…', oauthP: 'Секунду.', oauthBadH: 'Вход не выполнен', oauthBad: 'Не удалось войти через Google: ссылка входа устарела или уже использована. Попробуйте ещё раз.',
+      oauthUnverified: 'Этот e-mail уже зарегистрирован, а Google не подтвердил его. Войдите с паролем.',
+      oauthDisabled: 'Аккаунт заблокирован. Напишите в поддержку.',
+      tfaH: 'Код подтверждения', tfaP: 'Введите код из приложения-аутентификатора или резервный код.', tfaCode: 'Код', tfaGo: 'Подтвердить', eCode: 'Неверный код. Попробуйте ещё раз.',
+      eEmail: 'Введите e-mail, например you@example.com.',
+      eShort: 'Пароль: минимум 8 символов.', eLong: 'Пароль: максимум 128 символов.', eLetter: 'Пароль должен содержать букву.', eDigit: 'Пароль должен содержать цифру.',
+      eMatch: 'Пароли не совпадают.',
+      eRate: 'Слишком много попыток. Подождите и попробуйте снова.', eNet: 'Нет связи с сервером. Проверьте интернет и попробуйте снова.',
+      eServer: 'Что-то пошло не так. Попробуйте позже.', eSession: 'Сеанс истёк — войдите снова.',
+      wait: 'Секунду…'
+    },
+    en: {
+      title: 'Account · CHM Breaker', site: 'To the site', app: 'Open the app', signIn: 'Sign in', settings: 'Account settings',
+      langBtn: 'RU', langAria: 'Переключить на русский',
+      forgotH: 'Reset your password', forgotP: 'Enter the e-mail of your account and we will send a link to set a new password. The link is valid for 1 hour.',
+      email: 'E-mail', emailPh: 'you@example.com', send: 'Send the link',
+      sentH: 'Check your inbox', sentP: 'If an account with {email} exists, we have sent it an e-mail with a link. The link is valid for 1 hour. Nothing arrived? Check the spam folder.',
+      again: 'Send again',
+      resetH: 'New password', resetP: 'Choose a new password. Changing it signs you out on every other device.',
+      pass: 'New password', pass2: 'Repeat the password', passHint: 'At least 8 characters, letters and digits.', show: 'Show password', hide: 'Hide password',
+      save: 'Save the password',
+      doneH: 'Password changed', doneP: 'Done. Sign in with the new password — every other session has been signed out.',
+      badH: 'This link does not work', badReset: 'This password reset link is invalid or has already been used. Request a new one — it is valid for 1 hour.',
+      expReset: 'This link has expired (links are valid for 1 hour). Request a new one.',
+      verifyingH: 'Confirming your e-mail…', verifyingP: 'One moment.',
+      verifiedH: 'E-mail confirmed', verifiedP: 'Thank you! Your address is confirmed and every feature of the account is available.',
+      already: 'This address had already been confirmed.',
+      vbadH: 'This link does not work', vbadP: 'This confirmation link is invalid or has expired (links are valid for 24 hours). Send the e-mail again.',
+      needH: 'Confirm your e-mail', needP: 'To use payments and auto-trading, confirm your e-mail address: open the link from the e-mail we sent when you signed up.',
+      needFor: 'Account address: {email}.',
+      resend: 'Send the e-mail again', resent: 'Sent to {email}. The link is valid for 24 hours.', resentAny: 'Sent. The link is valid for 24 hours.',
+      needSignIn: 'Sign in to send the e-mail again.',
+      oauthH: 'Signing you in…', oauthP: 'One moment.', oauthBadH: 'Sign-in failed', oauthBad: 'Signing in with Google did not work: the sign-in link has expired or was already used. Please try again.',
+      oauthUnverified: 'This e-mail is already registered and Google has not verified it. Sign in with your password.',
+      oauthDisabled: 'This account is disabled. Please contact support.',
+      tfaH: 'Confirmation code', tfaP: 'Enter the code from your authenticator app or a recovery code.', tfaCode: 'Code', tfaGo: 'Confirm', eCode: 'Wrong code. Please try again.',
+      eEmail: 'Enter an e-mail such as you@example.com.',
+      eShort: 'Password: at least 8 characters.', eLong: 'Password: at most 128 characters.', eLetter: 'The password needs a letter.', eDigit: 'The password needs a digit.',
+      eMatch: 'The passwords do not match.',
+      eRate: 'Too many attempts. Wait a little and try again.', eNet: 'No connection to the server. Check the internet and try again.',
+      eServer: 'Something went wrong. Please try again later.', eSession: 'Your session has expired — sign in again.',
+      wait: 'One moment…'
+    }
+  };
+  var lang = 'ru';
+  try {
+    var stored = localStorage.getItem('chm_lang');
+    if (stored === 'ru' || stored === 'en') lang = stored;
+    else if (/^en\b/i.test((navigator.languages && navigator.languages[0]) || navigator.language || '')) lang = 'en';
+  } catch (e) { /* storage blocked: ru */ }
+  function t(key, args) {
+    var s = (T[lang] && T[lang][key]) || T.ru[key] || key;
+    return args ? s.replace(/\{(\w+)\}/g, function (_m, k) { return args[k] != null ? String(args[k]) : ''; }) : s;
+  }
+
+  // ── session (the site's keys, frontend/app.js Auth) — only to resend the confirmation e-mail ──
+  function store(key) {
+    try { return localStorage.getItem(key) || sessionStorage.getItem(key) || ''; } catch (e) { return ''; }
+  }
+  function sessionEmail() {
+    try { var u = JSON.parse(store('chm_user') || 'null'); return u && typeof u.email === 'string' ? u.email : ''; } catch (e) { return ''; }
+  }
+
+  // ── API (same origin; nothing in a URL) ────────────────────────────────────
+  function api(path, body, auth) {
+    var headers = { 'Content-Type': 'application/json', 'Accept': 'application/json' };
+    if (auth) headers.Authorization = 'Bearer ' + auth;
+    return fetch('/api/auth/' + path, {
+      method: 'POST', headers: headers, body: JSON.stringify(body || {}),
+      credentials: 'same-origin', cache: 'no-store', referrerPolicy: 'no-referrer'
+    }).then(function (res) {
+      return res.json().catch(function () { return {}; }).then(function (d) {
+        if (res.ok) return d || {};
+        var e = new Error('http'); e.status = res.status; e.code = (d && d.code) || (res.status === 429 ? 'RATE_LIMITED' : ''); e.issues = d && d.issues;
+        throw e;
+      });
+    }, function () { var e = new Error('network'); e.code = 'NETWORK'; throw e; });
+  }
+  function errKey(e) {
+    if (!e) return 'eServer';
+    if (e.code === 'NETWORK') return 'eNet';
+    if (e.code === 'RATE_LIMITED' || e.status === 429) return 'eRate';
+    if (e.status === 401) return 'eSession';
+    return 'eServer';
+  }
+  function passwordProblem(p) {
+    if (p.length < 8) return 'eShort';
+    if (p.length > 128) return 'eLong';
+    if (!/[a-zA-Z]/.test(p)) return 'eLetter';
+    if (!/\d/.test(p)) return 'eDigit';
+    return '';
+  }
+
+  // ── tiny DOM helpers; every text node is re-rendered on a language switch ──
+  function el(tag, attrs) {
+    var n = document.createElement(tag);
+    for (var k in attrs || {}) {
+      if (!Object.prototype.hasOwnProperty.call(attrs, k) || attrs[k] == null) continue;
+      if (k === 'text') { n.setAttribute('data-t', attrs.text); if (attrs.args) n.setAttribute('data-args', JSON.stringify(attrs.args)); }
+      else if (k === 'args') continue;
+      else if (k === 'ph') n.setAttribute('data-t-ph', attrs.ph);
+      else if (k === 'aria') n.setAttribute('data-t-aria', attrs.aria);
+      else n.setAttribute(k, attrs[k]);
+    }
+    for (var i = 2; i < arguments.length; i++) if (arguments[i]) n.appendChild(arguments[i]);
+    return n;
+  }
+  function paint(root) {
+    var all = (root || document).querySelectorAll('[data-t],[data-t-ph],[data-t-aria]');
+    for (var i = 0; i < all.length; i++) {
+      var n = all[i];
+      if (n.hasAttribute('data-t')) {
+        var args = null;
+        try { args = JSON.parse(n.getAttribute('data-args') || 'null'); } catch (e) { args = null; }
+        n.textContent = t(n.getAttribute('data-t'), args);
+      }
+      if (n.hasAttribute('data-t-ph')) n.setAttribute('placeholder', t(n.getAttribute('data-t-ph')));
+      if (n.hasAttribute('data-t-aria')) n.setAttribute('aria-label', t(n.getAttribute('data-t-aria')));
+    }
+    document.documentElement.lang = lang;
+    document.title = t('title');
+  }
+  function show(view) {
+    main.innerHTML = '';
+    main.setAttribute('data-view', view.id);
+    main.appendChild(view.node);
+    paint(main);
+    var focus = main.querySelector('[data-autofocus]') || main.querySelector('h1');
+    if (focus) try { focus.focus({ preventScroll: true }); } catch (e) { /* old browser */ }
+  }
+  function card(id, h, p) {
+    var c = el('section', { class: 'card', 'aria-labelledby': 'h-' + id });
+    c.appendChild(el('h1', { id: 'h-' + id, tabindex: '-1', text: h }));
+    if (p) c.appendChild(el('p', { class: 'lead', text: p.key, args: p.args }));
+    return c;
+  }
+  function msg(kind) { return el('p', { class: 'msg ' + (kind || ''), role: kind === 'err' ? 'alert' : 'status', hidden: 'hidden' }); }
+  function setMsg(node, key, args) {
+    if (!key) { node.hidden = true; node.removeAttribute('data-t'); node.textContent = ''; return; }
+    node.setAttribute('data-t', key);
+    if (args) node.setAttribute('data-args', JSON.stringify(args)); else node.removeAttribute('data-args');
+    node.textContent = t(key, args);
+    node.hidden = false;
+  }
+  function busy(btn, on) {
+    btn.disabled = !!on;
+    if (on) { btn.setAttribute('data-t-was', btn.getAttribute('data-t')); btn.setAttribute('data-t', 'wait'); }
+    else if (btn.getAttribute('data-t-was')) { btn.setAttribute('data-t', btn.getAttribute('data-t-was')); btn.removeAttribute('data-t-was'); }
+    btn.textContent = t(btn.getAttribute('data-t'));
+  }
+  function links() {
+    var row = el('div', { class: 'row' });
+    for (var i = 0; i < arguments.length; i++) row.appendChild(arguments[i]);
+    return row;
+  }
+  function btnLink(href, key, primary) { return el('a', { class: 'btn ' + (primary ? 'btn-red' : 'btn-g'), href: href, text: key }); }
+  function field(label, input) { return el('label', { class: 'field' }, el('span', { class: 'label', text: label }), input); }
+
+  // ── views ────────────────────────────────────────────────────────────────
+  function forgotView(prefill) {
+    var c = card('forgot', 'forgotH', { key: 'forgotP' });
+    var input = el('input', { class: 'inp', type: 'email', name: 'email', autocomplete: 'email', autocapitalize: 'off', spellcheck: 'false', required: 'required', maxlength: '254', ph: 'emailPh', 'data-autofocus': '1' });
+    if (prefill) input.value = prefill;
+    var m = msg('err');
+    var btn = el('button', { class: 'btn btn-red btn-block', type: 'submit', text: 'send' });
+    var form = el('form', { class: 'form', novalidate: 'novalidate', id: 'forgot-form' }, field('email', input), m, btn);
+    form.addEventListener('submit', function (ev) {
+      ev.preventDefault();
+      var email = String(input.value || '').trim().toLowerCase();
+      if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email) || email.length > 254) { setMsg(m, 'eEmail'); input.focus(); return; }
+      setMsg(m, ''); busy(btn, true);
+      api('password-reset/request', { email: email }).then(function () { show(sentView(email)); })
+        .catch(function (e) { busy(btn, false); setMsg(m, e.status === 400 ? 'eEmail' : errKey(e)); });
+    });
+    c.appendChild(form);
+    c.appendChild(links(btnLink('/app/', 'signIn')));
+    return { id: 'forgot', node: c };
+  }
+  function sentView(email) {
+    var c = card('sent', 'sentH', { key: 'sentP', args: { email: email } });
+    var again = el('button', { class: 'btn btn-g', type: 'button', text: 'again' });
+    again.addEventListener('click', function () { show(forgotView(email)); });
+    c.appendChild(links(again, btnLink('/app/', 'signIn', true)));
+    return { id: 'sent', node: c };
+  }
+  function resetView() {
+    var c = card('reset', 'resetH', { key: 'resetP' });
+    var p1 = el('input', { class: 'inp', type: 'password', name: 'new-password', autocomplete: 'new-password', maxlength: '128', 'aria-describedby': 'pw-hint', 'data-autofocus': '1', id: 'pw1' });
+    var p2 = el('input', { class: 'inp', type: 'password', name: 'confirm-password', autocomplete: 'new-password', maxlength: '128', id: 'pw2' });
+    var eye = el('button', { class: 'eye', type: 'button', aria: 'show', 'aria-pressed': 'false' });
+    eye.innerHTML = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/></svg>';
+    eye.addEventListener('click', function () {
+      var on = p1.type === 'password';
+      p1.type = p2.type = on ? 'text' : 'password';
+      eye.setAttribute('aria-pressed', String(on));
+      eye.setAttribute('data-t-aria', on ? 'hide' : 'show');
+      paint(eye.parentNode);
+    });
+    var m = msg('err');
+    var btn = el('button', { class: 'btn btn-red btn-block', type: 'submit', text: 'save' });
+    var form = el('form', { class: 'form', novalidate: 'novalidate', id: 'reset-form' },
+      el('label', { class: 'field' }, el('span', { class: 'label', text: 'pass' }), el('span', { class: 'inp-wrap' }, p1, eye), el('span', { class: 'hint', id: 'pw-hint', text: 'passHint' })),
+      field('pass2', p2), m, btn);
+    form.addEventListener('submit', function (ev) {
+      ev.preventDefault();
+      var a = String(p1.value || ''), b = String(p2.value || '');
+      var bad = passwordProblem(a) || (a !== b ? 'eMatch' : '');
+      if (bad) { setMsg(m, bad); (bad === 'eMatch' ? p2 : p1).focus(); return; }
+      setMsg(m, ''); busy(btn, true);
+      api('password-reset/confirm', { token: resetToken, newPassword: a }).then(function () {
+        resetToken = null;
+        p1.value = p2.value = '';
+        show(doneView());
+      }).catch(function (e) {
+        busy(btn, false);
+        if (e.code === 'INVALID_RESET_TOKEN' || e.code === 'RESET_TOKEN_USED') { resetToken = null; show(badResetView('badReset')); return; }
+        if (e.code === 'RESET_TOKEN_EXPIRED') { resetToken = null; show(badResetView('expReset')); return; }
+        if (e.code === 'VALIDATION_ERROR') {
+          var issue = (e.issues || []).filter(function (i) { return i.path === 'newPassword'; })[0];
+          setMsg(m, issue ? (passwordProblem(a) || 'eShort') : 'badReset');
+          if (!issue) { resetToken = null; show(badResetView('badReset')); }
+          return;
+        }
+        setMsg(m, errKey(e));
+      });
+    });
+    c.appendChild(form);
+    return { id: 'reset', node: c };
+  }
+  function doneView() {
+    var c = card('done', 'doneH', { key: 'doneP' });
+    c.appendChild(links(btnLink('/app/', 'signIn', true)));
+    return { id: 'done', node: c };
+  }
+  function badResetView(key) {
+    var v = forgotView('');
+    var c = card('bad', 'badH', { key: key });
+    c.appendChild(v.node.querySelector('form'));
+    c.appendChild(links(btnLink('/app/', 'signIn')));
+    return { id: 'reset-bad', node: c };
+  }
+  function verifyingView() {
+    var c = card('verifying', 'verifyingH', { key: 'verifyingP' });
+    c.appendChild(el('div', { class: 'spin', 'aria-hidden': 'true' }));
+    return { id: 'verifying', node: c };
+  }
+  function verifiedView(already) {
+    var c = card('verified', 'verifiedH', { key: already ? 'already' : 'verifiedP' });
+    c.appendChild(links(btnLink('/app/', 'app', true), btnLink('/settings.html', 'settings')));
+    return { id: 'verified', node: c };
+  }
+  function resendBlock(c) {
+    var token = store('chm_access');
+    var email = sessionEmail();
+    if (email) c.appendChild(el('p', { class: 'note', text: 'needFor', args: { email: email } }));
+    var m = msg();
+    if (!token) {
+      c.appendChild(el('p', { class: 'note', text: 'needSignIn' }));
+      c.appendChild(links(btnLink('/app/', 'signIn', true)));
+      return;
+    }
+    var btn = el('button', { class: 'btn btn-red', type: 'button', text: 'resend', id: 'resend-btn' });
+    btn.addEventListener('click', function () {
+      setMsg(m, ''); m.className = 'msg'; busy(btn, true);
+      api('verify-email/request', {}, token).then(function (d) {
+        if (d && d.alreadyVerified) { show(verifiedView(true)); return; }
+        busy(btn, false);
+        setMsg(m, email ? 'resent' : 'resentAny', email ? { email: email } : null);
+      }).catch(function (e) { busy(btn, false); m.className = 'msg err'; setMsg(m, errKey(e)); });
+    });
+    c.appendChild(m);
+    c.appendChild(links(btn, btnLink('/app/', 'app')));
+  }
+  function verifyBadView() {
+    var c = card('vbad', 'vbadH', { key: 'vbadP' });
+    resendBlock(c);
+    return { id: 'verify-bad', node: c };
+  }
+  function verifyNeededView() {
+    var c = card('need', 'needH', { key: 'needP' });
+    resendBlock(c);
+    return { id: 'verify-needed', node: c };
+  }
+
+  // ── a sign-in with Google: the one-time code → the session (the site's storage, like a password
+  // sign-in on /app/) → the page the sign-in started from (one of the site's own pages only) ──
+  var RETURN_PATHS = ['/app/', '/settings.html', '/subscriptions.html', '/ops.html', '/admin.html'];
+  function signedIn(d) {
+    try {
+      ['chm_access', 'chm_refresh', 'chm_user'].forEach(function (k) { sessionStorage.removeItem(k); });
+      localStorage.setItem('chm_access', d.accessToken);
+      localStorage.setItem('chm_refresh', d.refreshToken);
+      if (d.user) localStorage.setItem('chm_user', JSON.stringify(d.user));
+    } catch (e) { /* storage blocked: the app asks for a sign-in */ }
+    location.replace(RETURN_PATHS.indexOf(d.returnTo) >= 0 ? d.returnTo : '/app/');
+  }
+  function oauthBadView(key) {
+    var c = card('oauth-bad', 'oauthBadH', { key: key || 'oauthBad' });
+    c.appendChild(links(btnLink('/app/', 'signIn', true)));
+    return { id: 'oauth-bad', node: c };
+  }
+  function tfaView(pending, returnTo) {
+    var c = card('tfa', 'tfaH', { key: 'tfaP' });
+    var input = el('input', { class: 'inp', type: 'text', name: 'code', inputmode: 'numeric', autocomplete: 'one-time-code', maxlength: '16', 'data-autofocus': '1', id: 'tfa-code' });
+    var m = msg('err');
+    var btn = el('button', { class: 'btn btn-red btn-block', type: 'submit', text: 'tfaGo' });
+    var form = el('form', { class: 'form', novalidate: 'novalidate', id: 'tfa-form' }, field('tfaCode', input), m, btn);
+    form.addEventListener('submit', function (ev) {
+      ev.preventDefault();
+      var code = String(input.value || '').trim();
+      if (code.length < 6) { setMsg(m, 'eCode'); input.focus(); return; }
+      setMsg(m, ''); busy(btn, true);
+      api('2fa/verify-login', { pendingToken: pending, code: code }).then(function (d) {
+        pending = null;
+        signedIn({ accessToken: d.accessToken, refreshToken: d.refreshToken, user: d.user, returnTo: returnTo });
+      }).catch(function (e) {
+        busy(btn, false);
+        if (e.status === 401) { pending = null; show(oauthBadView()); return; }
+        setMsg(m, e.code === 'INVALID_2FA' || e.status === 400 ? 'eCode' : errKey(e));
+      });
+    });
+    c.appendChild(form);
+    return { id: 'tfa', node: c };
+  }
+  function oauthView(code) {
+    var c = card('oauth', 'oauthH', { key: 'oauthP' });
+    c.appendChild(el('div', { class: 'spin', 'aria-hidden': 'true' }));
+    api('oauth/redeem', { code: code }).then(function (d) {
+      if (d && d.twoFactorRequired && d.pendingToken) { show(tfaView(d.pendingToken, d.returnTo)); return; }
+      if (!d || !d.accessToken) throw new Error('no session');
+      signedIn(d);
+    }).catch(function (e) { show(oauthBadView(e && e.code === 'ACCOUNT_DISABLED' ? 'oauthDisabled' : 'oauthBad')); });
+    return { id: 'oauth', node: c };
+  }
+
+  function route() {
+    if (resetToken !== null) {
+      show(TOKEN_RE.test(resetToken) ? resetView() : badResetView('badReset'));
+      if (!TOKEN_RE.test(resetToken)) resetToken = null;
+    } else if (verifyToken !== null) {
+      var tok = verifyToken;
+      verifyToken = null;
+      if (!TOKEN_RE.test(tok)) { show(verifyBadView()); return; }
+      show(verifyingView());
+      api('verify-email/confirm', { token: tok }).then(function (d) {
+        show(verifiedView(Boolean(d && d.alreadyVerified)));
+      }).catch(function () { show(verifyBadView()); });
+    } else if (oauthCode !== null) {
+      var oc = oauthCode;
+      oauthCode = null;
+      show(TOKEN_RE.test(oc) ? oauthView(oc) : oauthBadView());
+    } else if (flags.oauth_error) {
+      show(oauthBadView(flags.oauth_error === 'OAUTH_EMAIL_UNVERIFIED' ? 'oauthUnverified' : flags.oauth_error === 'ACCOUNT_DISABLED' ? 'oauthDisabled' : 'oauthBad'));
+    } else if (flags.verified === '1') {
+      show(verifiedView(false));
+    } else if (flags.verified === '0') {
+      show(verifyBadView());
+    } else if (flags.verify_email === '1') {
+      show(verifyNeededView());
+    } else {
+      show(forgotView(''));
+    }
+  }
+
+  function start() {
+    main = document.getElementById('main');
+    var lb = document.getElementById('lang');
+    lb.addEventListener('click', function () {
+      lang = lang === 'ru' ? 'en' : 'ru';
+      try { localStorage.setItem('chm_lang', lang); } catch (e) { /* not remembered */ }
+      paint(document);
+    });
+    paint(document);
+    route();
+  }
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', start);
+  else start();
+})();
+</script>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<meta name="referrer" content="no-referrer"/>
+<meta name="robots" content="noindex,nofollow"/>
+<meta name="theme-color" content="#060204"/>
+<meta name="color-scheme" content="dark"/>
+<title>Аккаунт · CHM Breaker</title>
+<link rel="icon" type="image/svg+xml" href="/favicon.svg"/>
+<style>
+:root{
+--bg-0:#060204;--bg-1:#0a0305;--line:rgba(255,255,255,.11);--line-2:rgba(255,255,255,.2);
+--text:#f6eef0;--muted:rgba(246,238,240,.68);--dim:rgba(246,238,240,.42);
+--red:#ff2a4d;--btn-1:#d0193b;--btn-2:#a90f2a;--green:#3df2a0;--loss:#ff7a8f;
+--f-head:"Oswald","Arial Narrow",Impact,sans-serif;
+--f-body:"Inter",system-ui,-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;
+--gut:16px;--ease:cubic-bezier(.2,.7,.2,1);
+}
+*{box-sizing:border-box}
+html{background:var(--bg-0);-webkit-text-size-adjust:100%}
+body{margin:0;min-height:100vh;color:var(--text);font:15px/1.55 var(--f-body);-webkit-font-smoothing:antialiased;display:flex;flex-direction:column;
+background:radial-gradient(130% 70% at 50% 108%,rgba(150,22,48,.34),transparent 62%),radial-gradient(60% 40% at 85% 0%,rgba(255,42,77,.1),transparent 70%),linear-gradient(180deg,#040203,var(--bg-1) 24%,#140308);background-attachment:fixed}
+a{color:inherit}
+[hidden]{display:none !important}
+:focus-visible{outline:2px solid var(--text);outline-offset:2px;border-radius:6px}
+h1:focus{outline:none}
+.hdr{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:14px var(--gut);max-width:560px;width:100%;margin:0 auto}
+.brand{display:flex;align-items:center;gap:8px;text-decoration:none;min-width:0}
+.brand svg{width:22px;height:22px;flex:none;fill:var(--red);filter:drop-shadow(0 0 8px rgba(255,42,77,.55))}
+.brand span{font:600 17px/1 var(--f-head);letter-spacing:.06em;text-transform:uppercase;white-space:nowrap}
+.brand b{color:var(--red);font-weight:600;margin-left:.25em}
+.lang{font:600 12px/1 var(--f-body);letter-spacing:.08em;color:var(--muted);background:rgba(255,255,255,.04);border:1px solid var(--line);border-radius:999px;padding:8px 12px;cursor:pointer;flex:none}
+.lang:hover{color:var(--text);border-color:var(--line-2)}
+main{flex:1;width:100%;max-width:560px;margin:0 auto;padding:12px var(--gut) 32px}
+.card{background:linear-gradient(180deg,rgba(255,255,255,.07),rgba(255,255,255,.025));border:1px solid var(--line);border-radius:20px;padding:24px 20px;box-shadow:0 30px 60px -30px rgba(0,0,0,.8),inset 0 1px 0 rgba(255,255,255,.08);backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px)}
+@media (min-width:480px){.card{padding:32px 28px}}
+h1{margin:0 0 10px;font:600 26px/1.15 var(--f-head);letter-spacing:.01em;text-transform:uppercase;overflow-wrap:anywhere}
+.lead{margin:0 0 20px;color:var(--muted);overflow-wrap:anywhere}
+.note{margin:0 0 14px;color:var(--muted);font-size:14px;overflow-wrap:anywhere}
+.form{display:flex;flex-direction:column;gap:14px;margin:0 0 16px}
+.field{display:flex;flex-direction:column;gap:6px;min-width:0}
+.label{font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
+.hint{font-size:13px;color:var(--muted)}
+.inp{width:100%;min-width:0;font:inherit;color:var(--text);background:rgba(0,0,0,.35);border:1px solid var(--line-2);border-radius:12px;padding:12px 14px;outline:none;transition:border-color .2s var(--ease)}
+.inp:focus{border-color:var(--red)}
+.inp::placeholder{color:var(--dim)}
+.inp-wrap{position:relative;display:block}
+.inp-wrap .inp{padding-right:48px}
+.eye{position:absolute;right:4px;top:50%;transform:translateY(-50%);width:40px;height:40px;border:0;background:none;color:var(--muted);cursor:pointer;border-radius:10px;display:flex;align-items:center;justify-content:center}
+.eye svg{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:1.8}
+.eye[aria-pressed="true"]{color:var(--text)}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:46px;padding:12px 20px;border-radius:999px;font:600 15px/1.2 var(--f-body);text-decoration:none;cursor:pointer;border:1px solid transparent;text-align:center}
+.btn[disabled]{opacity:.6;cursor:progress}
+.btn-red{color:#fff;background:linear-gradient(180deg,var(--btn-1),var(--btn-2));box-shadow:0 10px 30px -10px rgba(255,42,77,.6),inset 0 1px 0 rgba(255,255,255,.25)}
+.btn-red:hover{filter:brightness(1.08)}
+.btn-g{color:var(--text);background:rgba(255,255,255,.05);border-color:var(--line-2)}
+.btn-g:hover{background:rgba(255,255,255,.09)}
+.btn-block{width:100%}
+.row{display:flex;flex-wrap:wrap;gap:10px}
+.row .btn{flex:1 1 180px}
+.msg{margin:0;font-size:14px;color:var(--green);overflow-wrap:anywhere}
+.msg.err{color:var(--loss)}
+.spin{width:28px;height:28px;border-radius:50%;border:3px solid rgba(255,255,255,.15);border-top-color:var(--red);animation:spin .9s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+@media (prefers-reduced-motion:reduce){.spin{animation:none}}
+.ftr{padding:16px var(--gut) 24px;text-align:center;font-size:13px;color:var(--dim)}
+.ftr a{color:var(--muted);text-decoration:none;margin:0 8px}
+.ftr a:hover{color:var(--text)}
+</style>
+</head>
+<body>
+<header class="hdr">
+<a class="brand" href="/" aria-label="CHM Breaker"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M13.5 2L5 13.5h6L9.5 22 19 9.5h-6.2L13.5 2z"/></svg><span>CHM<b>Breaker</b></span></a>
+<button class="lang" id="lang" type="button" data-t="langBtn" data-t-aria="langAria">EN</button>
+</header>
+<main id="main" aria-live="polite"><noscript><p>Включите JavaScript, чтобы сменить пароль или подтвердить e-mail. · Enable JavaScript to reset your password or confirm your e-mail.</p></noscript></main>
+<footer class="ftr"><a href="/" data-t="site">На сайт</a><a href="/app/" data-t="app">Открыть приложение</a></footer>
+</body>
+</html>

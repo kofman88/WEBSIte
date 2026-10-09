@@ -233,9 +233,18 @@ async function handleStripeWebhook(rawBody, signature) {
 
 const PENDING_TOLERANCE_SEC = 3600; // pending crypto valid for 1h
 
-function _uniqueAmount(base) {
-  // Generate unique amount: base + random cents (0.01 - 0.99) for identification
-  const suffix = (Math.floor(Math.random() * 99) + 1) / 100;
+function _uniqueAmount(base, method) {
+  // Generate unique amount: base + random cents (0.01 - 0.99) for identification. The cents are the
+  // only thing that tells two invoices of one network apart (workers/paymentWatcher.js matches a
+  // transfer by its exact amount first), so an amount still pending on that network is not reused.
+  const taken = new Set(db.prepare(`
+    SELECT amount_usd FROM payments
+     WHERE status = 'pending' AND method = ? AND created_at > datetime('now', '-2 hours')
+  `).all(method || '').map((r) => Math.round(Number(r.amount_usd) * 100)));
+  const free = [];
+  for (let c = 1; c <= 99; c += 1) if (!taken.has(Math.round(base * 100) + c)) free.push(c);
+  const pool = free.length ? free : Array.from({ length: 99 }, (_v, i) => i + 1);
+  const suffix = pool[Math.floor(Math.random() * pool.length)] / 100;
   return Number((base + suffix).toFixed(2));
 }
 
@@ -250,7 +259,7 @@ function createCryptoPayment(userId, { plan, network, billingCycle = 'monthly' }
   }
   const basePrice = planPrice(plan, billingCycle);
   plan = plans.normalizePlan(plan);   // legacy ids (elite/beginner) are stored as 'pro'
-  const amountUsdt = _uniqueAmount(basePrice);
+  const amountUsdt = _uniqueAmount(basePrice, 'usdt_' + network);
 
   const info = db.prepare(`
     INSERT INTO payments (user_id, amount_usd, currency, method, plan, duration_days, status, metadata)
@@ -274,6 +283,10 @@ function createCryptoPayment(userId, { plan, network, billingCycle = 'monthly' }
 function confirmCryptoPayment(paymentId, { txHash, fromAddress, amountUsdt }) {
   const payment = db.prepare('SELECT * FROM payments WHERE id = ? AND status = ?').get(paymentId, 'pending');
   if (!payment) { const err = new Error('Payment not found or already processed'); err.statusCode = 404; throw err; }
+  // one on-chain transfer pays one invoice
+  if (txHash && db.prepare('SELECT 1 FROM payments WHERE provider_tx_id = ? AND id != ? LIMIT 1').get(txHash, paymentId)) {
+    const err = new Error('This transaction already paid another invoice'); err.statusCode = 409; err.code = 'TX_ALREADY_USED'; throw err;
+  }
   // Accept ±1% tolerance (network fee absorption on underside, rounding
   // on overside). Outside that window — reject with a specific code so
   // the frontend can route the user to support for manual handling.

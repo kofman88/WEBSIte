@@ -82,14 +82,21 @@ const addKeySchema = z.object({
 });
 
 // ── Payments ────────────────────────────────────────────────────────────
+// monthly = 30 days at the plan price, yearly = 365 days at 12 × price − 20%
+// (services/paymentService.js planPrice / BILLING_DAYS). Both checkouts carry it to the invoice.
+const billingCycle = z.enum(['monthly', 'yearly']).default('monthly');
+
 const stripeCheckoutSchema = z.object({
   plan: plan.exclude(['free']),
-  billingCycle: z.enum(['monthly', 'yearly']).default('monthly'),
+  billingCycle,
 });
 
+// billingCycle used to be missing here: zod strips unknown keys, so the settings checkout's
+// «Год −20%» reached paymentService as monthly (a 30-day invoice at the monthly price).
 const cryptoPaymentSchema = z.object({
   plan: plan.exclude(['free']),
   network: z.enum(['bep20', 'trc20']),
+  billingCycle,
 });
 
 const promoRedeemSchema = z.object({
@@ -100,7 +107,7 @@ module.exports = {
   // enums
   EXCHANGES, TIMEFRAMES, STRATEGIES, SIDES, DIRECTIONS, PLANS,
   // primitives
-  email, password, symbol, exchange, timeframe, strategy, side, direction, plan,
+  email, password, symbol, exchange, timeframe, strategy, side, direction, plan, billingCycle,
   positiveNumber, nonNegativeNumber, priceNumber, pctNumber, dateString,
   // schemas
   registerSchema, loginSchema, refreshSchema,

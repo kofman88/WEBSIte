@@ -169,8 +169,10 @@ describe('2FA flow', () => {
     const u = await registerAndLogin('twofa2@x.com');
     const setup = await request(app).post('/api/auth/2fa/setup').set('Authorization', 'Bearer ' + u.accessToken);
     const secret = setup.body.otpauth.match(/secret=([A-Z2-7]+)/i)[1];
+    // confirmed with the previous step's code (inside the ±1 window): the current one stays unused
+    // (a used step is never accepted again — tests/twoFactorHardening.test.js)
     await request(app).post('/api/auth/2fa/confirm').set('Authorization', 'Bearer ' + u.accessToken)
-      .send({ code: authenticator.generate(secret) });
+      .send({ code: authenticator.clone({ epoch: Date.now() - 30_000 }).generate(secret) });
 
     const login = await request(app).post('/api/auth/login').send({ email: 'twofa2@x.com', password: 'Abcdef123' });
     const verify = await request(app).post('/api/auth/2fa/verify-login').send({

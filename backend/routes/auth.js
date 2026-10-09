@@ -8,6 +8,7 @@ const {
   registerLimiter,
   passwordResetLimiter,
   twoFactorLimiter,
+  impersonationRedeemLimiter,
 } = require('../middleware/auth');
 const { geoBlock } = require('../middleware/geoBlock');
 const validation = require('../utils/validation');
@@ -191,15 +192,18 @@ router.post('/verify-email/request', authMiddleware, (req, res, next) => {
   } catch (err) { handleServiceError(err, res, next); }
 });
 
-// GET or POST — click from email
+// GET — the link of e-mails sent before /auth/#verify=<token> (services/emailService.js). The result
+// page is frontend/auth/ (no analytics counter), never the landing.
 router.get('/verify-email/:token', (req, res, next) => {
+  res.set('Cache-Control', 'no-store');
   try {
     const token = z.string().min(16).max(256).parse(req.params.token);
     authService.verifyEmail({ token, ipAddress: getIp(req), userAgent: getUA(req) });
-    // Redirect to frontend confirmation page instead of JSON
-    res.redirect('/?verified=1');
+    res.redirect('/auth/?verified=1');
   } catch (err) {
-    if (err && err.statusCode) return res.redirect('/?verified=0&code=' + encodeURIComponent(err.code || 'ERR'));
+    if (err && (err.statusCode || err instanceof z.ZodError)) {
+      return res.redirect('/auth/?verified=0&code=' + encodeURIComponent((err && err.code) || 'INVALID_VERIFY_TOKEN'));
+    }
     return handleServiceError(err, res, next);
   }
 });
@@ -261,6 +265,19 @@ router.post('/2fa/verify-login', twoFactorLimiter, (req, res, next) => {
   } catch (err) { handleServiceError(err, res, next); }
 });
 
+// ── Admin impersonation hand-off ─────────────────────────────────────
+// The tab ops.js opens for "Impersonate" trades the one-time 60-second code (handed over through
+// same-origin storage, never a URL) for the impersonated session's access token
+// (services/impersonationService.js). No session needed: the admin's may be in another tab only.
+router.post('/impersonation/redeem', impersonationRedeemLimiter, (req, res, next) => {
+  try {
+    const input = z.object({ code: z.string().min(16).max(128) }).parse(req.body);
+    const out = require('../services/impersonationService').redeem(input.code);
+    res.set('Cache-Control', 'no-store');
+    res.json(out);
+  } catch (err) { handleServiceError(err, res, next); }
+});
+
 // ── Sessions / history ──────────────────────────────────────────────
 router.get('/sessions', authMiddleware, (req, res, next) => {
   try { res.json({ sessions: authService.listSessions(req.userId) }); }
@@ -308,19 +325,26 @@ router.get('/oauth/providers', (_req, res) => {
   try { res.json(oauth.providers()); } catch (_e) { res.json({}); }
 });
 
+// The OAuth redirects end on frontend/auth/ (no analytics counter, Referrer-Policy no-referrer):
+// errors as /auth/?oauth_error=<code>, a sign-in as /auth/#oauth=<one-time code>.
+function oauthError(res, code) {
+  res.set('Cache-Control', 'no-store');
+  res.redirect('/auth/?oauth_error=' + encodeURIComponent(String(code || 'ERR').replace(/[^A-Za-z0-9_]/g, '').slice(0, 40) || 'ERR'));
+}
+
 // Google: step 1 — redirect the browser to the Google consent screen.
 router.get('/oauth/google/start', (req, res) => {
   try {
     const state = oauth.issueState();
-    // Remember where to send the user back to (passed as ?redirect=/dashboard.html)
-    const returnTo = typeof req.query.redirect === 'string' && req.query.redirect.startsWith('/')
-      ? req.query.redirect : '/dashboard.html';
+    // Where to send the user back to (?redirect=/settings.html): exactly one of the site's pages
+    // (oauthService.RETURN_PATHS), else the web app. It used to take anything starting with '/', so
+    // //evil.example received the session's tokens in its URL fragment.
+    const returnTo = oauth.safeReturnTo(req.query.redirect);
     res.cookie('oauth_state', state, { httpOnly: true, sameSite: 'lax', maxAge: 10 * 60 * 1000, secure: process.env.NODE_ENV === 'production' });
     res.cookie('oauth_return', returnTo, { httpOnly: true, sameSite: 'lax', maxAge: 10 * 60 * 1000, secure: process.env.NODE_ENV === 'production' });
     res.redirect(oauth.googleAuthUrl(state));
   } catch (err) {
-    if (err.statusCode === 503) return res.redirect('/?oauth_error=disabled&provider=google');
-    res.redirect('/?oauth_error=start_failed');
+    oauthError(res, err.statusCode === 503 ? 'disabled' : 'start_failed');
   }
 });
 
@@ -330,10 +354,8 @@ router.get('/oauth/google/callback', async (req, res) => {
     const code = String(req.query.code || '');
     const state = String(req.query.state || '');
     const cookieState = readCookie(req, 'oauth_state');
-    if (!code) return res.redirect('/?oauth_error=no_code');
-    if (!state || state !== cookieState || !oauth.verifyState(state)) {
-      return res.redirect('/?oauth_error=bad_state');
-    }
+    if (!code) return oauthError(res, 'no_code');
+    if (!state || state !== cookieState || !oauth.verifyState(state)) return oauthError(res, 'bad_state');
     const tok = await oauth.googleExchangeCode(code);
     const profile = await oauth.googleFetchProfile(tok.access_token);
     const user = oauth.upsertOAuthUser({
@@ -345,20 +367,35 @@ router.get('/oauth/google/callback', async (req, res) => {
       familyName: profile.familyName,
       avatarUrl: profile.picture,
     });
-    const session = authService.issueSessionForUser(user.id, { ipAddress: getIp(req), userAgent: getUA(req) });
-    const returnTo = readCookie(req, 'oauth_return') || '/dashboard.html';
+    if (!user.is_active) return oauthError(res, 'ACCOUNT_DISABLED');
+    // No tokens in any URL: a one-time 60-second code for frontend/auth/, which trades it by POST
+    // (/oauth/redeem below; the session is issued there). The tokens used to ride in the fragment of
+    // the return page — by default /dashboard.html, i.e. the landing with Metrika + Session Replay.
+    const handoff = oauth.issueHandoff(user.id, oauth.safeReturnTo(readCookie(req, 'oauth_return')));
     res.clearCookie('oauth_state'); res.clearCookie('oauth_return');
-    // URL fragment — tokens never hit server logs / referrer headers
-    const frag = new URLSearchParams({
-      access_token: session.accessToken,
-      refresh_token: session.refreshToken,
-      provider: 'google',
-    }).toString();
-    res.redirect(returnTo + '#' + frag);
+    res.set('Cache-Control', 'no-store');
+    res.set('Referrer-Policy', 'no-referrer');
+    res.redirect('/auth/#oauth=' + handoff);
   } catch (err) {
-    const code = err && err.code ? err.code : 'ERR';
-    res.redirect('/?oauth_error=' + encodeURIComponent(code));
+    oauthError(res, err && err.code ? err.code : 'ERR');
   }
+});
+
+// The OAuth hand-off (frontend/auth/): the one-time code → the session, or — for an account with 2FA
+// on — the second step (POST /2fa/verify-login with the pending token), like a password sign-in.
+router.post('/oauth/redeem', impersonationRedeemLimiter, (req, res, next) => {
+  res.set('Cache-Control', 'no-store');
+  try {
+    const input = z.object({ code: z.string().min(16).max(128) }).parse(req.body);
+    const { userId, returnTo } = oauth.redeemHandoff(input.code);
+    const db = require('../models/database');
+    const u = db.prepare('SELECT is_active FROM users WHERE id = ?').get(userId);
+    if (!u || !u.is_active) return res.status(403).json({ error: 'Account disabled', code: 'ACCOUNT_DISABLED' });
+    if (twoFactorService.isEnabled(userId)) {
+      return res.json({ twoFactorRequired: true, pendingToken: authService._signPending(userId), returnTo });
+    }
+    res.json({ ...authService.issueSessionForUser(userId, { ipAddress: getIp(req), userAgent: getUA(req) }), returnTo });
+  } catch (err) { handleServiceError(err, res, next); }
 });
 
 // Telegram: POST with the Login Widget payload {id, first_name, username, photo_url, auth_date, hash}

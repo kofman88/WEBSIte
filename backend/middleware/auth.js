@@ -179,19 +179,49 @@ const passwordResetLimiter = TESTING ? noop : rateLimit({
   legacyHeaders: false,
 });
 
-// 2FA verify — prevent brute-forcing 6-digit TOTP (1M combos otherwise
-// testable in seconds without a limit). Keyed by IP + login-token so the
-// attacker can't just rotate IPs against one target.
-const twoFactorLimiter = TESTING ? noop : rateLimit({
+// 2FA code checks (POST /auth/2fa/verify-login, /auth/2fa/confirm) — a 6-digit TOTP has 10^6
+// values (3 valid at a time with the ±1 step window), so guesses are capped twice, both must pass:
+//   • per sign-in subject: 10 per 15 min for the account the pending token (verify-login) or the
+//     session (confirm) belongs to, from whatever IPs the guesses come; a pending token that does
+//     not verify (forged, expired) gets no bucket of its own: they share one per IP;
+//   • per IP: 50 per 15 min across all accounts, so one address cannot sweep many accounts, while
+//     users behind one NAT / carrier IP no longer share one account's budget.
+// (The key used to be IP + the first 16 characters of the pending JWT — its constant header — so
+// everyone behind an IP shared 10 attempts and nothing tied the budget to the sign-in.) The key
+// never holds the token itself, only the user id it verifies to.
+// In production both count in the DB (middleware/rateLimitStore.js): Passenger runs several
+// processes and stops idle ones, so in-memory counters would multiply the budget by the process
+// count and reset on every restart.
+function twoFactorSubjectKey(req) {
+  if (req.userId) return 'u:' + req.userId;
+  const tok = req.body && req.body.pendingToken;
+  if (typeof tok === 'string' && tok) {
+    try { return 'u:' + authService.verifyPending(tok); } catch (_e) { /* falls through */ }
+  }
+  return 'bad:' + req.ip;
+}
+function createTwoFactorLimiter({ windowMs = 15 * 60 * 1000, perSubject = 10, perIp = 50, shared = false, prefix = '2fa:' } = {}) {
+  const common = {
+    windowMs,
+    message: { error: 'Too many 2FA attempts. Try again in 15 minutes.', code: 'RATE_LIMITED' },
+    standardHeaders: true,
+    legacyHeaders: false,
+  };
+  const store = (name) => (shared ? { store: new (require('./rateLimitStore').SqliteRateLimitStore)({ prefix: prefix + name + ':' }) } : {});
+  return [
+    rateLimit({ ...common, ...store('ip'), max: perIp, keyGenerator: (req) => 'ip:' + req.ip }),
+    rateLimit({ ...common, ...store('subject'), max: perSubject, keyGenerator: twoFactorSubjectKey }),
+  ];
+}
+const twoFactorLimiter = TESTING ? noop : createTwoFactorLimiter({ shared: true });
+
+// POST /auth/impersonation/redeem — a code is 256 random bits and lives 60 s; this only stops floods.
+const impersonationRedeemLimiter = TESTING ? noop : rateLimit({
   windowMs: 15 * 60 * 1000,
-  max: 10,
-  message: { error: 'Too many 2FA attempts. Try again in 15 minutes.', code: 'RATE_LIMITED' },
+  max: 30,
+  message: { error: 'Too many attempts. Try again later.', code: 'RATE_LIMITED' },
   standardHeaders: true,
   legacyHeaders: false,
-  keyGenerator: (req) => {
-    const tok = (req.body && req.body.pendingToken) || '';
-    return req.ip + ':' + String(tok).slice(0, 16);
-  },
 });
 
 // Exchange API key operations — brute-forcing credential validation is
@@ -307,6 +337,9 @@ module.exports = {
   registerLimiter,
   passwordResetLimiter,
   twoFactorLimiter,
+  createTwoFactorLimiter,
+  twoFactorSubjectKey,
+  impersonationRedeemLimiter,
   exchangeKeyLimiter,
   tierLimiter,
 };

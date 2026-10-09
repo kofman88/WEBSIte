@@ -457,6 +457,43 @@ const MIGRATIONS = [
       db.exec(engineSchema.TRADE_FEEDBACK_DDL);
     },
   },
+  {
+    version: 15,
+    name: 'auth_hardening',
+    // two_factor_secrets.last_used_step: the TOTP time step (unix s / 30) of the last code accepted
+    // for the user; a code of that step or an earlier one is a replay (services/twoFactorService.js).
+    // impersonation_tokens.handoff_*: the one-time 60-second code ops.js hands to the tab it opens
+    // (same-origin storage, never a URL), traded for the access token by
+    // POST /api/auth/impersonation/redeem (services/impersonationService.js). Only its sha256 is kept.
+    up(db) {
+      if (tableExists(db, 'two_factor_secrets') && !columnExists(db, 'two_factor_secrets', 'last_used_step')) {
+        db.exec('ALTER TABLE two_factor_secrets ADD COLUMN last_used_step INTEGER');
+      }
+      if (tableExists(db, 'impersonation_tokens')) {
+        for (const [col, type] of [['handoff_hash', 'TEXT'], ['handoff_expires_at', 'DATETIME'], ['handoff_used_at', 'DATETIME']]) {
+          if (!columnExists(db, 'impersonation_tokens', col)) db.exec(`ALTER TABLE impersonation_tokens ADD COLUMN ${col} ${type}`);
+        }
+        db.exec('CREATE UNIQUE INDEX IF NOT EXISTS idx_imp_handoff ON impersonation_tokens(handoff_hash)');
+      }
+    },
+  },
+  {
+    version: 16,
+    name: 'rate_limit_store',
+    // rate_limit_hits: the counters of the 2FA code limiters (middleware/rateLimitStore.js), in the
+    // DB so every Passenger process shares one budget and a process restart (Passenger stops idle
+    // ones) does not reset it. key = limiter prefix + 'u:<user id>' / 'ip:<address>' — no secret.
+    up(db) {
+      db.exec(`
+        CREATE TABLE IF NOT EXISTS rate_limit_hits (
+          key      TEXT PRIMARY KEY,
+          hits     INTEGER NOT NULL,
+          reset_at INTEGER NOT NULL
+        );
+        CREATE INDEX IF NOT EXISTS idx_rate_limit_reset ON rate_limit_hits(reset_at);
+      `);
+    },
+  },
 ];
 
 function ensureTable(db) {

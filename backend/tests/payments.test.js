@@ -251,3 +251,72 @@ describe('POST /api/payments/crypto/create', () => {
     }
   });
 });
+
+// ── billing cycle end to end (the settings checkout's «Год −20%») ────────────
+// validation.cryptoPaymentSchema used to strip billingCycle, so a yearly checkout was invoiced and
+// activated as a month. Pinned for both cycles × both networks: the route's answer, the invoice row,
+// the price and the activation length after the deposit is confirmed.
+describe('POST /api/payments/crypto/create keeps the billing cycle: price, invoice, activation', () => {
+  const CASES = [];
+  for (const network of ['bep20', 'trc20']) {
+    CASES.push({ network, billingCycle: 'monthly', base: 69, days: 30 });
+    CASES.push({ network, billingCycle: 'yearly', base: 662.4, days: 365 });   // 69 × 12 × 0.8
+  }
+  const bearerFor = (uid) => 'Bearer ' + jwt.sign({ uid }, process.env.JWT_SECRET, { algorithm: 'HS256', expiresIn: '5m' });
+
+  it.each(CASES)('$network $billingCycle → $base USDT + cents, $days days', async ({ network, billingCycle, base, days }) => {
+    const app = (await import('../server.js')).default;
+    const uid = makeUser();
+    const r = await request(app).post('/api/payments/crypto/create').set('Authorization', bearerFor(uid)).send({ plan: 'pro', network, billingCycle });
+    expect(r.status).toBe(200);
+    expect(r.body).toMatchObject({ plan: 'pro', network, billingCycle });
+    // the unique-cents invoice amount on top of the cycle's price
+    expect(r.body.amountUsdt).toBeGreaterThan(base);
+    expect(r.body.amountUsdt).toBeLessThan(base + 1);
+    expect(Number(r.body.amountUsdt.toFixed(2))).toBe(r.body.amountUsdt);
+    const row = db.prepare('SELECT * FROM payments WHERE id = ?').get(r.body.paymentId);
+    expect(row).toMatchObject({ user_id: uid, plan: 'pro', duration_days: days, status: 'pending', method: 'usdt_' + network, amount_usd: r.body.amountUsdt });
+    expect(JSON.parse(row.metadata)).toMatchObject({ network, billingCycle });
+    // the deposit arrives → the plan runs for the cycle's length
+    const t0 = Date.now();
+    paymentService.default.confirmCryptoPayment(r.body.paymentId, { txHash: '0x' + network + billingCycle, amountUsdt: r.body.amountUsdt });
+    const sub = db.prepare('SELECT plan, status, expires_at FROM subscriptions WHERE user_id = ?').get(uid);
+    expect(sub).toMatchObject({ plan: 'pro', status: 'active' });
+    const got = (Date.parse(sub.expires_at) - t0) / 86400_000;
+    expect(got).toBeGreaterThan(days - 0.01);
+    expect(got).toBeLessThan(days + 0.01);
+    expect(paymentService.default.getUserPayments(uid)[0]).toMatchObject({ durationDays: days, status: 'confirmed', metadata: { billingCycle } });
+  });
+
+  it('no cycle → monthly (old clients); an unknown cycle → 400, nothing invoiced', async () => {
+    const app = (await import('../server.js')).default;
+    const uid = makeUser();
+    const plain = await request(app).post('/api/payments/crypto/create').set('Authorization', bearerFor(uid)).send({ plan: 'pro', network: 'bep20' });
+    expect(plain.body.billingCycle).toBe('monthly');
+    expect(db.prepare('SELECT duration_days FROM payments WHERE id = ?').get(plain.body.paymentId).duration_days).toBe(30);
+    const before = db.prepare('SELECT COUNT(*) n FROM payments').get().n;
+    for (const billingCycle of ['weekly', 'YEARLY', '', 12]) {
+      const r = await request(app).post('/api/payments/crypto/create').set('Authorization', bearerFor(uid)).send({ plan: 'pro', network: 'trc20', billingCycle });
+      expect(r.status, String(billingCycle)).toBe(400);
+    }
+    expect(db.prepare('SELECT COUNT(*) n FROM payments').get().n).toBe(before);
+  });
+
+  it('the schema itself keeps it (it used to strip it), the Stripe one the same way', () => {
+    const v = require('../utils/validation');
+    expect(v.cryptoPaymentSchema.parse({ plan: 'pro', network: 'trc20', billingCycle: 'yearly' })).toEqual({ plan: 'pro', network: 'trc20', billingCycle: 'yearly' });
+    expect(v.cryptoPaymentSchema.parse({ plan: 'pro', network: 'bep20' })).toEqual({ plan: 'pro', network: 'bep20', billingCycle: 'monthly' });
+    expect(v.stripeCheckoutSchema.parse({ plan: 'pro', billingCycle: 'yearly' }).billingCycle).toBe('yearly');
+  });
+
+  it('settings.html sends the chosen cycle, shows the invoice\'s own, and preselects the one subscriptions.html passes', () => {
+    const front = path.join(process.cwd(), '..', 'frontend');
+    const html = fs.readFileSync(path.join(front, 'settings.html'), 'utf8');
+    expect(html).toContain("const billingCycle = document.querySelector('input[name=\"coCycle\"]:checked')?.value || 'monthly';");
+    expect(html).toContain('await API.createCryptoPayment({ plan, network, billingCycle });');
+    expect(html).toContain("const cycle = out.billingCycle === 'yearly' ? 'год' : 'месяц';");
+    expect(html).toContain("const cycle = new URLSearchParams(location.search).get('cycle');");
+    const subs = fs.readFileSync(path.join(front, 'subscriptions.html'), 'utf8');
+    expect(subs).toContain("+ '&cycle=' + encodeURIComponent(currentCycle)");
+  });
+});

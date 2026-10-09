@@ -62,7 +62,7 @@ async function send({ to, subject, html, text }) {
   const from = process.env.SMTP_FROM || 'CHM Finance <no-reply@chmup.top>';
   const t = transport();
   if (!t) {
-    logger.info('[email-dryrun]', { to, subject, preview: (text || html || '').slice(0, 300) });
+    logger.info('[email-dryrun]', { to, subject, preview: redactLinks((text || html || '').slice(0, 300)) });
     return { delivered: false, dryRun: true };
   }
   try {
@@ -82,6 +82,12 @@ async function send({ to, subject, html, text }) {
     } catch (_e) {}
     return { delivered: false, error: err.message };
   }
+}
+
+// The one-time tokens of the account e-mails never reach a log: /auth/#reset=… / #verify=… and the
+// older /?reset=… / /api/auth/verify-email/… links lose their token in anything logged.
+function redactLinks(s) {
+  return String(s).replace(/([#?&](?:reset|verify)=|\/verify-email\/)[^\s"'<>&#]+/g, '$1[redacted]');
 }
 
 // ── Templates ──────────────────────────────────────────────────────────
@@ -106,21 +112,24 @@ function escape(s){return String(s).replace(/[&<>"']/g,c=>({ '&':'&amp;','<':'&l
 // Verification + reset go through the durable outbox — losing one of these
 // to a transient SMTP error would lock the user out of the account flow.
 // Wrapped in Promise.resolve so legacy callers can still .catch() it.
+//
+// Both link to frontend/auth/ — a page without an analytics counter that takes the token out of the
+// address bar before anything else runs and completes the flow by POST. The token sits in the URL
+// fragment: a browser never sends it to a server (no access log, no Referer). (Reset links used to
+// open the landing, /?reset=<token>, which runs Metrika with Session Replay; server.js and
+// frontend/.htaccess now redirect those old links to /auth/#reset=<token> before any page loads.)
+function verifyUrl(token) { return `${appUrl()}/auth/#verify=${encodeURIComponent(token)}`; }
+function resetUrl(token) { return `${appUrl()}/auth/#reset=${encodeURIComponent(token)}`; }
+
 async function sendVerification(to, token, { displayName } = {}) {
   const templates = require('./emailTemplates');
-  const t = templates.emailVerify({
-    displayName,
-    verifyUrl: `${appUrl()}/api/auth/verify-email/${encodeURIComponent(token)}`,
-  });
+  const t = templates.emailVerify({ displayName, verifyUrl: verifyUrl(token) });
   return sendDurable({ to, subject: t.subject, text: t.text, html: t.html });
 }
 
 async function sendPasswordReset(to, token, { displayName, ipAddress } = {}) {
   const templates = require('./emailTemplates');
-  const t = templates.passwordReset({
-    displayName, ipAddress,
-    resetUrl: `${appUrl()}/?reset=${encodeURIComponent(token)}`,
-  });
+  const t = templates.passwordReset({ displayName, ipAddress, resetUrl: resetUrl(token) });
   return sendDurable({ to, subject: t.subject, text: t.text, html: t.html });
 }
 
@@ -251,7 +260,7 @@ if (process.env.NODE_ENV !== 'test' && process.env.VITEST !== 'true') startOutbo
 
 module.exports = {
   send, sendDurable, sendVerification, sendPasswordReset, sendTradeAlert,
-  randomToken, hashToken, appUrl,
+  randomToken, hashToken, appUrl, verifyUrl, resetUrl, redactLinks,
   logBounce, isSuppressed,
   _transport: () => transport(),
   _tickOnce: async () => { /* test hook: drain once */

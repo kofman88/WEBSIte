@@ -13,52 +13,76 @@
 
 const config = require('../config');
 const logger = require('./logger');
+const { redact, redactDeep } = require('./redact');
 
-/**
- * Sentry beforeSend: scrub sensitive headers + body + query fields (also the `extra` context).
- * Defence-in-depth: we still never pass plaintext secrets into log.info / error with these keys,
- * but this makes key / PII leakage through captured request state much harder.
- */
+// Body / query / extra fields whose value is a secret or PII, wherever they sit in an event.
 const REDACT_KEYS = new Set([
   'password', 'password2', 'currentPassword', 'newPassword',
   'apiKey', 'apiSecret', 'exchangeSecret', 'exchangePassphrase',
   // the app's exchange-key bodies (bot field names) and the traders' signed requests
   'api_key', 'api_secret', 'passphrase', 'okx_passphrase', 'signature', 'sign',
-  'token', 'refreshToken', 'accessToken', 'pendingToken',
+  'token', 'refreshToken', 'accessToken', 'pendingToken', 'handoffCode',
   'jwt', 'secret', 'tvSecret', 'privateKey',
-  'totpSecret', 'code', 'recoveryCode',
+  'totpSecret', 'otpauth', 'code', 'recoveryCode', 'recoveryCodes',
   'email', 'phone', // PII
 ]);
-const REDACT_HEADERS = ['authorization', 'cookie', 'x-forwarded-for', 'x-bapi-api-key', 'x-bapi-sign', 'x-bx-apikey', 'x-mbx-apikey',
-  'ok-access-key', 'ok-access-sign', 'ok-access-passphrase'];
-function scrub(o, seen = new Set()) {
-  if (!o || typeof o !== 'object' || seen.has(o)) return;
+// Headers dropped from a captured request: auth/cookies plus the exchanges' key and signature headers.
+const REDACT_HEADERS = new Set(['authorization', 'cookie', 'x-forwarded-for', 'x-bapi-api-key', 'x-bapi-sign',
+  'x-bx-apikey', 'x-mbx-apikey', 'ok-access-key', 'ok-access-sign', 'ok-access-passphrase']);
+function scrubKeys(o, depth = 0, seen = new Set()) {
+  if (!o || typeof o !== 'object' || depth > 8 || seen.has(o)) return;
   seen.add(o);
   for (const k of Object.keys(o)) {
     if (REDACT_KEYS.has(k)) { o[k] = '[REDACTED]'; continue; }
-    if (typeof o[k] === 'object') scrub(o[k], seen);
+    if (typeof o[k] === 'object') scrubKeys(o[k], depth + 1, seen);
   }
 }
+// URLs (an e-mail link's token, the Telegram bot token in a Bot API path, a hand-off code …) out of
+// a breadcrumb: outgoing-request breadcrumbs carry the full URL in data.url.
+function scrubBreadcrumb(b) {
+  if (!b || typeof b !== 'object') return b;
+  if (typeof b.message === 'string') b.message = redact(b.message);
+  if (b.data && typeof b.data === 'object') b.data = redactDeep(b.data);
+  return b;
+}
+/** The event Sentry is about to send, with secrets out of headers, bodies, URLs, breadcrumbs, spans. */
 function scrubEvent(event) {
   if (!event || typeof event !== 'object') return event;
   if (event.request) {
-    if (event.request.headers) {
-      for (const h of Object.keys(event.request.headers)) if (REDACT_HEADERS.includes(h.toLowerCase())) delete event.request.headers[h];
+    const h = event.request.headers;
+    if (h) {
+      for (const k of Object.keys(h)) {
+        if (REDACT_HEADERS.has(k.toLowerCase())) delete h[k];
+        else if (/^referer$/i.test(k)) h[k] = redact(h[k]);
+      }
     }
-    scrub(event.request.data);
-    scrub(event.request.query_string);
-    scrub(event.request.env);
+    delete event.request.cookies;
+    if (typeof event.request.url === 'string') event.request.url = redact(event.request.url);
+    if (typeof event.request.query_string === 'string') event.request.query_string = redact('?' + event.request.query_string).slice(1);
+    scrubKeys(event.request.data);
+    scrubKeys(event.request.query_string);
+    scrubKeys(event.request.env);
   }
-  scrub(event.extra);
-  scrub(event.contexts);
-  // Redact file paths in stack frames (leak less about server layout)
-  if (event.exception && event.exception.values) {
+  if (typeof event.transaction === 'string') event.transaction = redact(event.transaction);
+  if (typeof event.message === 'string') event.message = redact(event.message);
+  if (event.extra) { scrubKeys(event.extra); event.extra = redactDeep(event.extra); }
+  if (event.contexts) event.contexts = redactDeep(event.contexts);
+  if (Array.isArray(event.breadcrumbs)) event.breadcrumbs = event.breadcrumbs.map(scrubBreadcrumb);
+  else if (event.breadcrumbs && Array.isArray(event.breadcrumbs.values)) event.breadcrumbs.values = event.breadcrumbs.values.map(scrubBreadcrumb);
+  if (Array.isArray(event.spans)) {
+    for (const sp of event.spans) {
+      if (typeof sp.description === 'string') sp.description = redact(sp.description);
+      if (sp.data) sp.data = redactDeep(sp.data);
+    }
+  }
+  if (event.exception && Array.isArray(event.exception.values)) {
     for (const ex of event.exception.values) {
+      if (typeof ex.value === 'string') ex.value = redact(ex.value);
+      // Redact file paths in stack frames (leak less about server layout)
       if (!ex.stacktrace || !ex.stacktrace.frames) continue;
       for (const f of ex.stacktrace.frames) {
         if (f.filename) f.filename = f.filename.replace(/^\/home\/[^/]+/, '~');
         if (f.abs_path) f.abs_path = f.abs_path.replace(/^\/home\/[^/]+/, '~');
-        if (f.vars) scrub(f.vars);
       }
     }
   }
@@ -86,7 +110,12 @@ let enabled = false;
       // traces are sampled — 10% in prod, 100% in dev.
       sampleRate: 1.0,
       tracesSampleRate: config.isProd ? 0.1 : 1.0,
+      // Scrub sensitive headers + body + query fields + every URL. Defence-in-depth: we still never
+      // pass plaintext secrets into log.info / error with these keys, but this makes PII and secret
+      // leakage through stack traces, captured request state, breadcrumbs and spans much harder.
       beforeSend: scrubEvent,
+      beforeSendTransaction: scrubEvent,
+      beforeBreadcrumb: scrubBreadcrumb,
     });
     enabled = true;
     logger.info('Sentry error tracking enabled');
@@ -97,12 +126,12 @@ let enabled = false;
 
 function captureException(err, context = {}) {
   if (!enabled) return;
-  try { Sentry.captureException(err, { extra: context }); } catch (_e) {}
+  try { Sentry.captureException(err, { extra: redactDeep(context) }); } catch (_e) {}
 }
 
 function captureMessage(msg, level = 'info', context = {}) {
   if (!enabled) return;
-  try { Sentry.captureMessage(msg, { level, extra: context }); } catch (_e) {}
+  try { Sentry.captureMessage(redact(msg), { level, extra: redactDeep(context) }); } catch (_e) {}
 }
 
 function setUser(user) {
@@ -121,4 +150,4 @@ function errorHandler() {
   return Sentry.Handlers ? Sentry.Handlers.errorHandler() : ((err, _req, _res, next) => next(err));
 }
 
-module.exports = { captureException, captureMessage, setUser, requestHandler, errorHandler, isEnabled: () => enabled, scrubEvent, REDACT_KEYS };
+module.exports = { captureException, captureMessage, setUser, requestHandler, errorHandler, isEnabled: () => enabled, scrubEvent, scrubBreadcrumb, REDACT_KEYS };

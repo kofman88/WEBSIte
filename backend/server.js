@@ -117,10 +117,12 @@ app.use((req, res, next) => {
   next();
 });
 
-// Request logging (skip static/health)
+// Request logging (skip static/health). The token of an old e-mail confirmation link
+// (GET /api/auth/verify-email/<token>) never reaches the log (utils/redact.js).
+const { redact } = require('./utils/redact');
 app.use((req, _res, next) => {
   if (req.path.startsWith('/api/') && req.path !== '/api/health') {
-    (req.log || logger).debug('→ ' + req.method + ' ' + req.path);
+    (req.log || logger).debug('→ ' + req.method + ' ' + redact(req.path));
   }
   next();
 });
@@ -266,17 +268,48 @@ app.get('/api/health/deep', (_req, res) => {
   res.status(statusCode).json(out);
 });
 
-// ── Sign-in redirect ──────────────────────────────────────────────────
-// The legacy pages send a visitor without a session to /?login=1 (app.js requireAuth, ops.js); the
-// landing at / has no login form (and no byte budget left for one), the web app's start screen
-// /app/ has. The app reads no return address, so the query string is dropped. frontend/.htaccess
-// has the same rule for when Apache serves / from public_html without asking Passenger.
-const LOGIN_REDIRECT = '/app/';
-app.get(['/', '/index.html'], (req, res, next) => {
-  if (!/(^|&)login=1(&|$)/.test(req.originalUrl.split('?')[1] || '')) return next();
+// ── Redirects of the landing's old query URLs ─────────────────────────
+// The landing at / runs Yandex Metrika with Session Replay: an address that carries a secret or
+// starts an account flow must never render it. These run before express.static; frontend/.htaccess
+// has the same rules for when Apache serves / (index.html) from public_html without asking Passenger
+// (tests/legacyPages.test.js checks both against one URL matrix). Matched on the raw query string,
+// like mod_rewrite's %{QUERY_STRING}, on / and /index.html (any number of leading slashes: Apache
+// merges them, express.static would serve the landing for //) and on the SPA fallback below, which
+// answers the landing for every other unknown path (Apache hands those to Passenger).
+//   /?reset=<token>   password reset e-mails sent before /auth/#reset=<token> → /auth/#reset=<token>:
+//                     the token moves into the fragment (never sent to a server again, never in a
+//                     Referer) of the page that completes the reset (frontend/auth/: no counter, takes
+//                     it out of the address bar first). /?verify=<token> likewise → /auth/#verify=.
+//                     The key matches in any case and with its '=' percent-encoded, after '&', '?',
+//                     ';' or an encoded '&' / '?' — the shapes a mail client, a link checker or a
+//                     user's copy can hand an old link back in. Any other reset= / verify= value →
+//                     /auth/ without it.
+//   /?verify_email=1  the old app.js redirect for a session whose e-mail is unconfirmed → /auth/
+//   /?login=1         the legacy pages without a session → the web app's sign-in /app/; the query
+//                     is dropped (the pages now send /app/?next=<their path> themselves)
+const QS_KEY_START = '(?:^|[&?;]|%26|%3F)';
+const TOKEN_QS = { reset: new RegExp(QS_KEY_START + 'reset(?:=|%3D)([A-Za-z0-9_-]{16,256})(?:&|$)', 'i'),
+  verify: new RegExp(QS_KEY_START + 'verify(?:=|%3D)([A-Za-z0-9_-]{16,256})(?:&|$)', 'i') };
+const ANY_TOKEN_KEY = new RegExp(QS_KEY_START + '(?:reset|verify)(?:=|%3D)', 'i');
+function landingRedirect(qs) {
+  for (const key of ['reset', 'verify']) {
+    const m = TOKEN_QS[key].exec(qs);
+    if (m) return '/auth/#' + key + '=' + m[1];
+  }
+  if (ANY_TOKEN_KEY.test(qs)) return '/auth/';
+  if (/(^|&)verify_email=1(&|$)/.test(qs)) return '/auth/?verify_email=1';
+  if (/(^|&)login=1(&|$)/.test(qs)) return '/app/';
+  return null;
+}
+function landingRedirects(req, res, next) {
+  const url = req.originalUrl;
+  const to = url.includes('?') ? landingRedirect(url.slice(url.indexOf('?') + 1)) : null;
+  if (!to) return next();
   res.setHeader('Cache-Control', 'no-store');
-  res.redirect(302, LOGIN_REDIRECT);
-});
+  res.setHeader('Referrer-Policy', 'no-referrer');
+  res.redirect(302, to);
+}
+app.get(/^\/+(?:index\.html)?$/, landingRedirects);
 
 // ── Static files (Passenger serves everything) ────────────────────────
 const publicPath = path.join(require('os').homedir(), 'public_html');
@@ -287,6 +320,9 @@ app.use(express.static(publicPath, {
   setHeaders(res, filePath) {
     if (/\.(css|js|woff2?|ttf|eot|png|jpe?g|webp|svg|ico)$/i.test(filePath)) {
       res.setHeader('Cache-Control', 'public, max-age=2592000, immutable');
+    } else if (path.relative(publicPath, filePath) === path.join('auth', 'index.html')) {
+      // /auth/ (password reset, e-mail confirmation): no copy in any cache, like frontend/auth/.htaccess
+      res.setHeader('Cache-Control', 'no-store');
     } else if (/\.html?$/i.test(filePath)) {
       res.setHeader('Cache-Control', 'public, max-age=300, must-revalidate');
     }
@@ -294,10 +330,13 @@ app.use(express.static(publicPath, {
 }));
 
 // SPA fallback — non-API routes serve index.html (also gets short cache)
-app.get('*', (req, res) => {
+app.get('*', (req, res, next) => {
   if (!req.path.startsWith('/api/')) {
-    res.setHeader('Cache-Control', 'public, max-age=300, must-revalidate');
-    res.sendFile(path.join(publicPath, 'index.html'));
+    // the landing again (Metrika + Session Replay): the old query URLs never render it here either
+    landingRedirects(req, res, () => {
+      res.setHeader('Cache-Control', 'public, max-age=300, must-revalidate');
+      res.sendFile(path.join(publicPath, 'index.html'), (err) => err && next(err));
+    });
   } else {
     res.status(404).json({ error: 'Route not found', code: 'NOT_FOUND' });
   }
@@ -322,12 +361,12 @@ app.use((err, req, res, _next) => {
     });
   }
   logger.error('unhandled server error', {
-    path: req.path,
+    path: redact(req.path),
     method: req.method,
-    err: err && err.message,
-    stack: err && err.stack,
+    err: err && redact(err.message),
+    stack: err && redact(err.stack),
   });
-  sentry.captureException(err, { path: req.path, method: req.method, userId: req.userId });
+  sentry.captureException(err, { path: redact(req.path), method: req.method, userId: req.userId });
   res.status(500).json({
     error: config.isProd ? 'Internal server error' : (err && err.message) || 'Internal server error',
     code: 'INTERNAL_ERROR',

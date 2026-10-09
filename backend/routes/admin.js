@@ -199,7 +199,9 @@ router.post('/users/:id/notify', requireCapability('user.notify'), (req, res, ne
       type: z.enum(['security', 'payment', 'trade', 'referral', 'support', 'system']).default('system'),
       title: z.string().min(1).max(200),
       body: z.string().min(1).max(5000),
-      link: z.string().max(500).optional(),
+      // a path of this site only: the bell (frontend/app.js) and the push click (sw.js) navigate to it,
+      // so an absolute URL, //host, a backslash form or javascript: would be an open redirect / script
+      link: z.string().max(500).regex(/^\/(?![/\\])[^\s\\]*$/, 'link must be a path of this site').optional(),
     }).parse(req.body);
     const notifier = require('../services/notifier');
     notifier.dispatch(id, body);
@@ -212,41 +214,43 @@ router.post('/users/:id/notify', requireCapability('user.notify'), (req, res, ne
   } catch (err) { handleErr(err, res, next); }
 });
 
-// Admin → impersonate user. Returns a short-lived access token (30 min, no
-// refresh) that carries { uid: <target>, imp: <adminId> } — middleware sees
-// the target userId as normal, but downstream code + audit entries can read
-// req.impersonatedBy to flag the trail. The admin's own session is
-// unchanged — they keep it in a parallel tab / localStorage entry.
-const jwt = require('jsonwebtoken');
-const config = require('../config');
+// Admin → impersonate user. Registers a 30-minute session (no refresh) whose access token carries
+// { uid: <target>, imp: <adminId>, jti } — middleware sees the target userId as normal, but
+// downstream code + audit entries can read req.impersonatedBy to flag the trail. The admin's own
+// session is unchanged — they keep it in a parallel tab / localStorage entry.
+// The answer holds no token: a one-time 60-second code (services/impersonationService.js) that
+// ops.js hands to the new tab through same-origin storage; the tab trades it for the token at
+// POST /api/auth/impersonation/redeem. (The token used to travel in the new tab's URL,
+// /settings.html#imp=<token>, readable by an async analytics tag before app.js stripped it.)
+const impersonation = require('../services/impersonationService');
 router.post('/users/:id/impersonate', requireCapability('impersonate'), (req, res, next) => {
   try {
     const id = z.coerce.number().int().positive().parse(req.params.id);
     const body = z.object({ reason: z.string().min(3).max(500) }).parse(req.body);
     const db = require('../models/database');
-    const target = db.prepare(`SELECT id, email, is_active FROM users WHERE id = ?`).get(id);
+    const target = db.prepare(`SELECT id, email, is_active, is_admin FROM users WHERE id = ?`).get(id);
     if (!target)           return res.status(404).json({ error: 'User not found' });
     if (target.is_admin)   return res.status(403).json({ error: 'Cannot impersonate another admin' });
     // jti = unique token id stored in impersonation_tokens for revocation.
     // Without it, a compromised/leaked impersonation JWT stays valid for
     // its full 30 minutes even after the admin logs out or gets demoted.
     const jti = require('crypto').randomBytes(16).toString('base64url');
-    const expiresInSec = 30 * 60;
+    const expiresInSec = impersonation.SESSION_SEC;
     const expiresAt = new Date(Date.now() + expiresInSec * 1000).toISOString();
+    const handoff = impersonation.newHandoff();
     db.prepare(`
-      INSERT INTO impersonation_tokens (jti, admin_id, target_id, reason, ip_address, user_agent, expires_at)
-      VALUES (?, ?, ?, ?, ?, ?, ?)
-    `).run(jti, req.userId, target.id, body.reason, req.ip, req.get('user-agent'), expiresAt);
-    const token = jwt.sign(
-      { uid: target.id, imp: req.userId, jti },
-      config.jwtSecret,
-      { expiresIn: expiresInSec, algorithm: 'HS256' },
-    );
+      INSERT INTO impersonation_tokens (jti, admin_id, target_id, reason, ip_address, user_agent, expires_at, handoff_hash, handoff_expires_at)
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+    `).run(jti, req.userId, target.id, body.reason, req.ip, req.get('user-agent'), expiresAt, handoff.hash, handoff.expiresAt);
     db.prepare(`
       INSERT INTO audit_log (user_id, action, entity_type, entity_id, metadata, ip_address, user_agent)
       VALUES (?, 'admin.user.impersonate', 'user', ?, ?, ?, ?)
     `).run(req.userId, target.id, JSON.stringify({ reason: body.reason, jti }), req.ip, req.get('user-agent'));
-    res.json({ accessToken: token, expiresIn: expiresInSec, targetEmail: target.email, reason: body.reason, jti });
+    res.set('Cache-Control', 'no-store');
+    res.json({
+      handoffCode: handoff.code, handoffExpiresIn: impersonation.HANDOFF_SEC,
+      expiresIn: expiresInSec, targetEmail: target.email, reason: body.reason, jti,
+    });
   } catch (err) { handleErr(err, res, next); }
 });
 

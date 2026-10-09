@@ -19,10 +19,18 @@
  * TP1, BTC stopped, ETH TP3) whose cards are notification rows, like the engine leaves them.
  * --admin (the CSP page probe, tests/e2e/csp_pages_probe.mjs) also seeds admin@chm.local (same
  * password, is_admin) and marks both e-mails verified, so the legacy pages (settings / admin / ops)
- * render instead of redirecting to the e-mail check.
+ * render instead of redirecting to the e-mail check; plus reset@chm.local (verified) and
+ * verify@chm.local (unconfirmed), same password, for the /auth/ page's flows.
  *
  * stdin commands (one per line), answered on stdout:
  *   new-signal   a new delivered BTC signal (row + `signal` notification → SSE `notification` + `signal`)
+ *   mail-link reset|verify <email>
+ *                the account e-mail as the site sends it (authService → emailService → the outbox; for
+ *                verify the address is first marked unconfirmed again): the link of its button is
+ *                written to a file in --dir (mode 600; never printed), answered `mail-link ok <file>`
+ *   oauth-link <email> <returnTo>
+ *                what the Google callback answers for that account (oauthService.issueHandoff): the
+ *                /auth/#oauth=<one-time code> link, into a file the same way, `oauth-link ok <file>`
  */
 
 const fs = require('fs');
@@ -55,6 +63,7 @@ Object.assign(process.env, {
   JWT_REFRESH_SECRET: 'smoke_refresh_secret_that_is_at_least_32_chars',
   WALLET_ENCRYPTION_KEY: '00112233445566778899aabbccddeeff00112233445566778899aabbccddeeff',
   CORS_ORIGIN: `http://127.0.0.1:${PORT}`,
+  APP_URL: `http://127.0.0.1:${PORT}`,   // the links of the account e-mails point here
   ENGINE_WORKER: '0',
   MAINTENANCE_DISABLED: '1',
   SECURITY_MONITOR_DISABLED: '1',
@@ -126,7 +135,9 @@ async function seed() {
   if (WITH_ADMIN) {
     await authService.register({ email: ADMIN_EMAIL, password: PASSWORD, displayName: 'Smoke Admin' });
     db.prepare("UPDATE users SET is_admin = 1, admin_role = 'superadmin' WHERE email = ?").run(ADMIN_EMAIL);
-    db.prepare('UPDATE users SET email_verified = 1 WHERE email IN (?, ?)').run(EMAIL, ADMIN_EMAIL);
+    await authService.register({ email: 'reset@chm.local', password: PASSWORD, displayName: 'Reset Probe' });
+    await authService.register({ email: 'verify@chm.local', password: PASSWORD, displayName: 'Verify Probe' });
+    db.prepare('UPDATE users SET email_verified = 1 WHERE email IN (?, ?, ?)').run(EMAIL, ADMIN_EMAIL, 'reset@chm.local');
   }
 
   const top = MARKET_NOW;
@@ -159,6 +170,41 @@ async function seed() {
   return { uid, deliver };
 }
 
+// The link of the newest account e-mail to `email` (reset / verify), from the outbox like SMTP would
+// send it, into a private file: the probe reads it from there.
+let mailN = 0;
+function mailLink(kind, email) {
+  const db = require('../../models/database');
+  const authService = require('../../services/authService');
+  const user = db.prepare('SELECT id FROM users WHERE email = ?').get(email);
+  if (!user) throw new Error('no such user');
+  const before = db.prepare('SELECT COALESCE(MAX(id), 0) AS n FROM email_outbox').get().n;
+  if (kind === 'reset') authService.requestPasswordReset({ email });
+  else {
+    db.prepare('UPDATE users SET email_verified = 0 WHERE id = ?').run(user.id);
+    authService.requestEmailVerification({ userId: user.id, email });
+  }
+  const row = db.prepare('SELECT html FROM email_outbox WHERE to_addr = ? AND id > ? ORDER BY id DESC LIMIT 1').get(email, before);
+  if (!row) throw new Error('no e-mail queued');
+  const m = /<a href="([^"]+)" style="display:inline-block;background:#1D4ED8/.exec(row.html);
+  if (!m) throw new Error('no button link in the e-mail');
+  mailN += 1;
+  const file = path.join(DIR, `mail-${mailN}.txt`);
+  fs.writeFileSync(file, m[1].replace(/&amp;/g, '&'), { mode: 0o600 });
+  return file;
+}
+
+function oauthLink(email, returnTo) {
+  const db = require('../../models/database');
+  const user = db.prepare('SELECT id FROM users WHERE email = ?').get(email);
+  if (!user) throw new Error('no such user');
+  const code = require('../../services/oauthService').issueHandoff(user.id, returnTo);
+  mailN += 1;
+  const file = path.join(DIR, `oauth-${mailN}.txt`);
+  fs.writeFileSync(file, `http://127.0.0.1:${PORT}/auth/#oauth=${code}`, { mode: 0o600 });
+  return file;
+}
+
 (async () => {
   const S = await seed();
   require('../../routes/appData').configure({ rest });
@@ -175,6 +221,20 @@ async function seed() {
       if (cmd === 'new-signal') {
         const id = await S.deliver({ sym: 'BTC-USDT-SWAP', dir: 'SHORT', ageH: 0 });
         process.stdout.write(`new-signal ok ${id}\n`);
+      } else if (/^mail-link (reset|verify) \S+@\S+$/.test(cmd)) {
+        const [, kind, email] = cmd.split(' ');
+        try {
+          process.stdout.write(`mail-link ok ${mailLink(kind, email)}\n`);
+        } catch (e) {
+          process.stdout.write(`mail-link failed ${e.message}\n`);
+        }
+      } else if (/^oauth-link \S+@\S+ \/\S*$/.test(cmd)) {
+        const [, email, returnTo] = cmd.split(' ');
+        try {
+          process.stdout.write(`oauth-link ok ${oauthLink(email, returnTo)}\n`);
+        } catch (e) {
+          process.stdout.write(`oauth-link failed ${e.message}\n`);
+        }
       } else if (cmd) {
         process.stdout.write(`unknown ${cmd}\n`);
       }

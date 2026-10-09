@@ -205,7 +205,10 @@ describe('(b) the killswitch and the risk gates cannot be bypassed', () => {
     const { u, r } = await openPosition('bybit');
     const imp = await post(admin.uid, `/api/admin/users/${u.uid}/impersonate`, { reason: 'support ticket 1' });
     expect(imp.status).toBe(200);
-    const H = { Authorization: `Bearer ${imp.body.accessToken}` };
+    // the support session token comes from the one-time hand-off code (never from the admin answer)
+    const red = await request(app).post('/api/auth/impersonation/redeem').send({ code: imp.body.handoffCode });
+    expect(red.status).toBe(200);
+    const H = { Authorization: `Bearer ${red.body.accessToken}` };
     const tid = encodeURIComponent(r.trade_id);
     const before = w.fake.requests.length;
     for (const a of ['exec', 'qc/half', 'qc/full', 'qc/force', 'qc/be']) {
