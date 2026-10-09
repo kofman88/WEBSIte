@@ -266,7 +266,29 @@ async def main():
     server = TestServer(app, host="127.0.0.1")
     await server.start_server()
     out = []
+    depth_ok = {}
     try:
+        # json.loads inside the handler raises RecursionError past a nesting depth set by the Python
+        # stack at that point (sys.getrecursionlimit() 1000 minus the frames of aiohttp, the
+        # middleware and the handler): find it on the real route, then pin both sides of it
+        async def lang_ok(body):
+            api._RATE.clear()
+            r = await send(server.host, server.port, "POST", "/lang", [], body, True, "length")
+            return (r["json"] or {}).get("ok") is True
+        nest = {"array": ("[", "]"), "object": ('{"a":', "}"), "mixed": ('[{"a":', "}]")}
+        for kind, (o, c) in nest.items():
+            lo, hi = 1, 4000
+            while lo < hi:
+                mid = (lo + hi + 1) // 2
+                inner = "1" if kind != "array" else ""
+                if await lang_ok(('{"lang":"en","x":' + o * mid + inner + c * mid + "}").encode()):
+                    lo = mid
+                else:
+                    hi = mid - 1
+            depth_ok[kind] = lo
+            for d in (lo - 1, lo, lo + 1, lo + 50):
+                inner = "1" if kind != "array" else ""
+                CASES.append((f"json_depth_{kind}_{d}", "POST", "/lang", [], ('{"lang":"en","x":' + o * d + inner + c * d + "}").encode(), True, "length"))
         for name, method, path, headers, body, auth, transfer in CASES:
             api._RATE.clear()
             res = await send(server.host, server.port, method, path, headers, body, auth, transfer)
@@ -278,7 +300,8 @@ async def main():
             })
     finally:
         await server.close()
-    doc = {"python": sys.version.split()[0], "aiohttp": aiohttp.__version__, "client_max_size": MiB, "cases": out}
+    doc = {"python": sys.version.split()[0], "aiohttp": aiohttp.__version__, "client_max_size": MiB,
+           "recursion_limit": sys.getrecursionlimit(), "json_nested_ok_max": depth_ok, "cases": out}
     dst = os.path.abspath(sys.argv[1]) if len(sys.argv) > 1 else os.path.join(HERE, "..", "fixtures", "body_transport.json")
     with open(dst, "w", encoding="utf-8") as f:
         json.dump(doc, f, ensure_ascii=True, indent=1)

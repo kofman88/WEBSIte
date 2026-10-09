@@ -17,7 +17,11 @@
  * TextDecoder; an unknown name raises there as LookupError does in Python, so the body is {}.
  *
  * json.loads also raises on an int literal longer than 4300 digits (CPython 3.11's
- * int-from-str limit), so such a body is {} too. The decoded text is pinned on the result
+ * int-from-str limit), so such a body is {} too, and RecursionError on containers nested deeper
+ * than the Python stack allows at that point: sys.getrecursionlimit() 1000 minus the frames of
+ * aiohttp, the bot's middleware and the handler leaves 980 levels counting the top-level object
+ * (MAX_JSON_DEPTH, measured on the bot's own route by tests/app/gen/gen_body_transport.py) — a
+ * deeper body is {} (and never reaches a recursive walk on the site). The decoded text is pinned on the result
  * (pyBody.BODY_TEXT, non-enumerable) for the routes that need the Python types of the values
  * (str(10.0) = '10.0', int(1e400) raises) — services/engine/pyBody.js.
  */
@@ -78,11 +82,33 @@ function decodeStrict(buf, encoding) {
   return new TextDecoder(encoding, { fatal: true, ignoreBOM: true }).decode(buf);
 }
 
+const MAX_JSON_DEPTH = 980;
+
+/** The deepest container nesting of JSON text (string literals skipped). */
+function jsonDepth(text) {
+  let depth = 0;
+  let max = 0;
+  for (let i = 0; i < text.length; i++) {
+    const c = text.charCodeAt(i);
+    if (c === 34) {                                      // '"': skip the string literal
+      i += 1;
+      while (i < text.length && text.charCodeAt(i) !== 34) i += text.charCodeAt(i) === 92 ? 2 : 1;
+    } else if (c === 91 || c === 123) {                  // '[' '{'
+      depth += 1;
+      if (depth > max) max = depth;
+    } else if (c === 93 || c === 125) {                  // ']' '}'
+      depth -= 1;
+    }
+  }
+  return max;
+}
+
 /** _read_body(): the parsed JSON object, or {} on any error or a non-object top level. */
 function readBotBody(buf, contentType) {
   if (!Buffer.isBuffer(buf) || buf.length === 0) return {};
   try {
     const text = decodeStrict(buf, charsetOf(contentType) || 'utf-8');
+    if (jsonDepth(text) > MAX_JSON_DEPTH) return {};     // json.loads: RecursionError
     const v = pyJsonParse(text);
     if (!(v && typeof v === 'object' && !Array.isArray(v))) return {};
     if (intDigitsExceeded(text)) return {};
@@ -92,4 +118,4 @@ function readBotBody(buf, contentType) {
   }
 }
 
-module.exports = { readBotBody, decodeStrict, charsetOf, normalizeEncoding };
+module.exports = { readBotBody, decodeStrict, charsetOf, normalizeEncoding, jsonDepth, MAX_JSON_DEPTH };

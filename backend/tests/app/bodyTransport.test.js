@@ -154,6 +154,17 @@ describe('transport bounds', () => {
     expect(Number(process.hrtime.bigint() - t0) / 1e6).toBeLessThan(2000);
   });
 
+  it('JSON nesting: the depth json.loads reaches on the bot\'s route (RecursionError past it → {})', () => {
+    const { MAX_JSON_DEPTH, jsonDepth } = nodeRequire('../../services/engine/botBody.js');
+    expect(FIX.recursion_limit).toBe(1000);
+    expect(MAX_JSON_DEPTH).toBe(FIX.json_nested_ok_max.array + 1);      // + the top-level object
+    expect(MAX_JSON_DEPTH).toBe(FIX.json_nested_ok_max.object + 1);
+    expect(2 * FIX.json_nested_ok_max.mixed + 1).toBeLessThanOrEqual(MAX_JSON_DEPTH);
+    expect(2 * (FIX.json_nested_ok_max.mixed + 1) + 1).toBeGreaterThan(MAX_JSON_DEPTH);
+    expect(jsonDepth('{"a":"[[[[{{{{","b":[{"c":"\\\\\\"[["}]}')).toBe(3);
+    expect(jsonDepth('[]{}')).toBe(1);
+  });
+
   it('crc32 is zlib\'s', () => {
     const T = nodeRequire('../../services/engine/botTransport.js');
     expect(T.crc32(Buffer.from('123456789'))).toBe(0xcbf43926);
