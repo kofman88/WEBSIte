@@ -62,7 +62,9 @@ const DATA_SOURCE = { trend: 'api', stats: 'api', feed: 'api', showcase: 'mock',
 только чтение, ничего персонального: ни id пользователей, ни email, ни id сделок, ни уровней, ни биржи.
 Каждый ответ считается не чаще раза в минуту (кэш в памяти), отдаётся со слабым `ETag` (`If-None-Match` → 304)
 и `Cache-Control: public, max-age=30`. Лимит — `PUBLIC_API_RATE_PER_MIN` (60) запросов с IP за 60 с на три пути →
-429 + `Retry-After`. Сбой → 503, кривой курсор → 400 `{ "error": "bad_cursor" }`. Время — Unix ms.
+429 + `Retry-After`. Сбой → 503, кривой курсор → 400 `{ "error": "bad_cursor" }` (ответы-ошибки — `no-store`,
+без `ETag`). Время — Unix ms. Задержку не сдвигает ни один параметр и ни один курсор (`backend/tests/public/adversarial.test.js`,
+`delay.test.js`).
 
 **Трек.** Источник ленты и счётчиков — бумажный трек системных («витринных») аккаунтов из `PUBLIC_TRACK_USER_IDS`
 (`12,15` или `12:majors,15:alts`; псевдоним — публичный `bot_id` = `<псевдоним>-<стратегия>`, по умолчанию `sys1`…).

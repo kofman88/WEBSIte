@@ -410,17 +410,30 @@ function startEngine({ log = null, env = process.env, spawn = null, delivery = n
   const dl = delivery || require('../services/engine/signalDelivery').createSignalDelivery({ log: L });
   const scheduler = createScheduler({ side: 'main', deps: { log: L, env, bot: require('../services/engine/signalDelivery').localFacade(dl), ...mainDeps } });
   scheduler.start();
+  // bot.py's daily_summary_loop (23:55 UTC) and weekly_digest_loop (Monday 09:05 UTC) — reports.js
+  // on this thread: they deliver through the notifier (in-app feed + SSE, e-mail, Telegram mirror)
+  // as the bot's loops send through `bot`; `mainDeps.only` selects them like the scheduler's tasks
+  const want = (name) => !Array.isArray(mainDeps.only) || mainDeps.only.includes(name);
+  const reports = mainDeps.reports !== undefined ? mainDeps.reports : require('../services/engine/reports').createReports({
+    db: require('../models/database'), log: L, env,
+    challengeLine: (user, now) => require('../services/challengeService').dailySummaryLine(user, now),
+  });
+  if (reports) {
+    if (want('daily_summary')) reports.startDaily();
+    if (want('weekly_digest')) reports.startWeekly();
+  }
   // the app routes (routes/appData.js) read the worker's memory through the bridge
   const bridge = require('../services/engine/engineBridge');
   bridge.setRemote((method, args, timeoutMs) => supervisor.query(method, args, timeoutMs));
   return {
-    supervisor, scheduler, regime,
+    supervisor, scheduler, regime, reports,
     /**
      * Both halves at once, like the bot cancelling every gather task together and waiting ≤ 4 s:
      * the main-side loops (≤ 4 s) and the worker (its own ≤ 4 s + the registry save, ≤ 6 s grace).
      */
     async stop() {
       bridge.setRemote(null);
+      if (reports) reports.stop();
       const [r1, r2] = await Promise.all([scheduler.stop(), supervisor.stop()]);
       return { main: r1, worker: r2 };
     },
