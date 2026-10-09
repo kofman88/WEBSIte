@@ -160,11 +160,13 @@ async function main() {
     await shot('05-analyze');
 
     // 6. Profile
+    const genome = page.waitForResponse((r) => r.url().endsWith('/api/app/genome'), { timeout: 10000 });
     await page.click('#tabbar .tab[data-tab=profile]');
     await page.waitForSelector('.user-card', { timeout: 8000 });
     ok(await page.locator('button', { hasText: 'Выйти' }).count() === 1, 'logout button');
     ok(await page.locator('a', { hasText: 'Аккаунт и безопасность' }).count() === 1, 'account link');
-    await page.waitForTimeout(1500);   // late requests of the screen (genome, challenge) land before the error check
+    ok((await genome).status() === 200, 'GET genome');
+    await page.waitForSelector('.genome', { timeout: 8000 });     // the screen's last request has landed
     await shot('06-profile');
 
     ok(errors.length === 0, `0 console / page / request errors (got ${errors.length})`);
