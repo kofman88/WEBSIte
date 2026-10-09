@@ -34,6 +34,7 @@ const FIX = H.loadFixture(path.join(__dirname, 'volume_fixtures', 'scan.json.gz'
 
 let run = null;
 let cfgKv = null;
+const VS_MAX = 3;   // volume_scanner.MAX_SIGNALS_PER_USER_CYCLE
 
 const SITE_TRADE_COLS = [
   'trade_id', 'user_id', 'symbol', 'direction', 'entry', 'sl', 'tp1', 'tp2', 'tp3', 'tp1_rr', 'tp2_rr',
@@ -236,6 +237,21 @@ describe('volume_scanner differential replay (volume_scanner.py)', () => {
     const py = {};
     for (const [k, v] of Object.entries(FIX.kv_init)) if (k.startsWith('volume_cfg_')) py[k] = v;
     expect(cfgKv).toEqual(py);
+  });
+
+  it('QUIRK pins: an undelivered card still counts toward the per-user cap and stays in _sent_bars', () => {
+    const c0 = FIX.expected[0];
+    const t2008 = c0.trades.filter((t) => t.user_id === 2008);
+    expect(t2008.length).toBe(VS_MAX);
+    expect(t2008.every((t) => t.skip_reason === 'not_delivered')).toBe(true);
+    // the same group's other users got exactly the same 3 coins (cap 3, found 6)
+    const t2001 = c0.trades.filter((t) => t.user_id === 2001).map((t) => t.symbol);
+    expect(t2008.map((t) => t.symbol)).toEqual(t2001);
+    expect(Object.keys(c0.sent_bars).filter((k) => k.startsWith('2008|')).length).toBe(VS_MAX);
+    // next cycle (same bars): _sent_bars dedups them (no new row), the 4th coin is delivered instead
+    const c1 = FIX.expected[1];
+    const new2008 = c1.trades.filter((t) => t.user_id === 2008).slice(t2008.length);
+    expect(new2008.map((t) => t.symbol)).not.toContain(t2008[0].symbol);
   });
 
   const N = FIX.cycles.length;

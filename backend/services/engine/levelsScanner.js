@@ -309,6 +309,12 @@ function defaultTimers() {
 /** asyncio.wait_for(promise, timeout) — rejects with TimeoutError; the timer is always cleared. */
 function waitFor(promise, timeoutS, timers) {
   return new Promise((resolve, reject) => {
+    if (!(timeoutS > 0)) {
+      // wait_for(timeout <= 0): the coroutine is not done yet → TimeoutError at once
+      Promise.resolve(promise).catch(() => {});
+      reject(new TimeoutError());
+      return;
+    }
     let done = false;
     const h = timers.setTimeout(() => {
       if (done) return;
@@ -402,22 +408,48 @@ class CancelToken {
 const TG_TEXT_LIMIT = 4096;
 const TG_SPLIT_SOFT = 3900;
 
-/** _split_for_telegram(text, limit): split on '\n', a single over-long line hard-cut. */
+/** str[:n] / len(str) of Python: code points, not UTF-16 units (an emoji is one character). */
+function cpSlice(s, n) {
+  const str = String(s);
+  return str.length <= n ? str : Array.from(str).slice(0, n).join('');
+}
+function cpLen(s) {
+  let n = 0;
+  for (let i = 0; i < s.length; i++) {
+    const c = s.charCodeAt(i);
+    if (c >= 0xd800 && c <= 0xdbff && i + 1 < s.length) {
+      const d = s.charCodeAt(i + 1);
+      if (d >= 0xdc00 && d <= 0xdfff) i++;
+    }
+    n++;
+  }
+  return n;
+}
+
+/** _split_for_telegram(text, limit): split on '\n', a single over-long line hard-cut (lengths in code points). */
 function splitForTelegram(text, limit = TG_SPLIT_SOFT) {
-  if (text.length <= limit) return [text];
+  if (cpLen(text) <= limit) return [text];
   const parts = [];
   let buf = '';
-  for (let line of text.split('\n')) {
+  let bufLen = 0;
+  for (const raw of text.split('\n')) {
+    let line = Array.from(raw);
     while (line.length > limit) {
-      if (buf) { parts.push(buf); buf = ''; }
-      parts.push(line.slice(0, limit));
+      if (buf) { parts.push(buf); buf = ''; bufLen = 0; }
+      parts.push(line.slice(0, limit).join(''));
       line = line.slice(limit);
     }
-    if (buf && buf.length + 1 + line.length > limit) {
+    const str = line.join('');
+    if (buf && bufLen + 1 + line.length > limit) {
       parts.push(buf);
-      buf = line;
+      buf = str;
+      bufLen = line.length;
+    } else if (buf) {
+      buf = `${buf}\n${str}`;
+      bufLen += 1 + line.length;
     } else {
-      buf = buf ? `${buf}\n${line}` : line;
+      buf = str;
+      bufLen = line.length;
     }
   }
   if (buf) parts.push(buf);
@@ -438,7 +470,7 @@ async function safeSendMessage(bot, userId, text, opts = {}, ctx = {}) {
     retries = 3, onSent = null, disableNotification = false,
   } = opts;
   if (bot === null || bot === undefined || !userId) return false;
-  if (text && text.length > TG_TEXT_LIMIT) {
+  if (text && cpLen(text) > TG_TEXT_LIMIT) {
     const parts = splitForTelegram(text);
     let allOk = true;
     for (let i = 0; i < parts.length; i++) {
@@ -474,20 +506,20 @@ async function safeSendMessage(bot, userId, text, opts = {}, ctx = {}) {
       } else if (name === 'TelegramNetworkError') {
         if (attempt < retries - 1) {
           const backoff = 2 ** attempt;
-          log.warning(`[TG-SAFE] uid=${userId} network err attempt ${attempt + 1}/${retries}: ${errMsg(e).slice(0, 100)} — backoff ${fmtFixed(backoff, 1)}s`);
+          log.warning(`[TG-SAFE] uid=${userId} network err attempt ${attempt + 1}/${retries}: ${cpSlice(errMsg(e), 100)} — backoff ${fmtFixed(backoff, 1)}s`);
           await sleep(backoff * 1000);
         } else {
-          log.error(`[TG-SAFE] uid=${userId} network err — all ${retries} attempts exhausted: ${errMsg(e).slice(0, 150)}`);
+          log.error(`[TG-SAFE] uid=${userId} network err — all ${retries} attempts exhausted: ${cpSlice(errMsg(e), 150)}`);
           return false;
         }
       } else if (name === 'TelegramForbiddenError') {
         log.info(`[TG-SAFE] uid=${userId} blocked bot — notification lost`);
         return false;
       } else if (name === 'TelegramBadRequest') {
-        log.warning(`[TG-SAFE] uid=${userId} BadRequest: ${errMsg(e).slice(0, 150)} — message dropped`);
+        log.warning(`[TG-SAFE] uid=${userId} BadRequest: ${cpSlice(errMsg(e), 150)} — message dropped`);
         return false;
       } else {
-        log.warning(`[TG-SAFE] uid=${userId} unexpected ${(e && e.constructor && e.constructor.name) || 'Error'}: ${errMsg(e).slice(0, 150)}`);
+        log.warning(`[TG-SAFE] uid=${userId} unexpected ${(e && e.constructor && e.constructor.name) || 'Error'}: ${cpSlice(errMsg(e), 150)}`);
         return false;
       }
     }
@@ -1467,7 +1499,7 @@ class MidScanner {
         volume_ratio: Number(getattr(sig, 'volume_ratio', 1.0) || 1.0),
         is_counter_trend: isCounter ? 1 : 0,
         mtf_aligned: getattr(sig, 'mtf_aligned', false) ? 1 : 0,
-        trend_ctx: String(getattr(sig, 'trend_ctx', '') || '').slice(0, 16),
+        trend_ctx: cpSlice(String(getattr(sig, 'trend_ctx', '') || ''), 16),
         btc_corr: Number(getattr(sig, 'btc_corr', 0.0) || 0.0),
         session: String(getattr(sig, 'session', '') || ''),
         preset_name: null,
@@ -1719,7 +1751,7 @@ class MidScanner {
           this.log.warning(`[WORKER-CANCELLED] wid=${wid} uid=${job.user ? job.user.user_id : 'None'} tf=${pyS(job.tf)} — task_done OK`);
           throw e;
         }
-        this.log.error(`[WORKER-FAILED] wid=${wid} uid=${job.user ? job.user.user_id : '?'} tf=${pyS(job.tf)}: ${errMsg(e).slice(0, 200)} — сигналы для этого (user,tf) пропущены в текущем цикле`);
+        this.log.error(`[WORKER-FAILED] wid=${wid} uid=${job.user ? job.user.user_id : '?'} tf=${pyS(job.tf)}: ${cpSlice(errMsg(e), 200)} — сигналы для этого (user,tf) пропущены в текущем цикле`);
         this._captureException(e);
       } finally {
         if (jobStarted) {
@@ -1981,9 +2013,10 @@ class MidScanner {
   }
 
   async _scanLoop() {
+    // int(os.getenv("LEVELS_CYCLE_TIMEOUT_S", "480") or 480): "" → 480, "0" → 0 (every cycle
+    // times out), a non-integer raises out of the loop like the bot's ValueError
     const raw = this.deps.env.LEVELS_CYCLE_TIMEOUT_S;
-    let cycleTimeoutS;
-    try { cycleTimeoutS = pyInt(raw === undefined || raw === '' ? '480' : raw) || 480; } catch (_e) { cycleTimeoutS = 480; }
+    const cycleTimeoutS = pyInt(raw === undefined ? '480' : (raw === '' ? 480 : raw));
     while (!this._stopped()) {
       const t0 = this._now();
       const mono0 = this.deps.clock.monotonic();
@@ -2109,7 +2142,7 @@ class MidScanner {
       if (!pyTruthy(coins)) return;
       const top = coins.slice(0, 30);
       const tfs = ['15m', '1h', '4h'];
-      let loadedFromStore = 0;
+      const loadedFromStore = 0;   // QUIRK: never incremented — see the TypeError below
       const store = this.deps.candleStore;
       if (store && store.ensureCandles && store.HistoryLoader) {
         const loader = new store.HistoryLoader();
@@ -2139,7 +2172,6 @@ class MidScanner {
       }
       const elapsed = this._now() - t0;
       this.log.info(`🔥 Scanner warmup done in ${fmtFixed(elapsed, 1)}s: ${top.length} coins × ${tfs.length} TFs loaded`);
-      loadedFromStore += 0;
     } catch (e) {
       this.log.warning(`warmup failed: ${errMsg(e)}`);
     }
@@ -2216,11 +2248,11 @@ module.exports = {
   HINT_MIN_SCANNED, HINT_DOMINANT_RATIO, HINT_THROTTLE_S, KV_HINT_LAST_TS, HINT_MESSAGES, HINT_I18N,
   ANALYZE_TIMEOUT_S, QUEUE_JOIN_TIMEOUT_S,
   ScanJob, MidScanner, CancelledError, TimeoutError, CancelToken, AsyncQueue, Semaphore, waitFor,
-  safeSendMessage, splitForTelegram, computeCorrelation, computeCorrelationBatch, staleThresholdS, dominantStage,
+  safeSendMessage, splitForTelegram, cpSlice, cpLen, computeCorrelation, computeCorrelationBatch, staleThresholdS, dominantStage,
   cfgToInd, hintText, signalText, getAnalyzeStats, resetAnalyzeStats, restoreHintThrottle, persistHintThrottle,
   signalCompactKeyboard: keyboards.signalCompactKeyboard, tradeRecordsKeyboard: keyboards.tradeRecordsKeyboard,
   tvUrl: keyboards.tvUrl, corrLabel: cardsLevels.corrLabel,
-  _userHintLastTs: userHintLastTs, _ANALYZE_STATS: ANALYZE_STATS,
+  _userHintLastTs: userHintLastTs, _ANALYZE_STATS: ANALYZE_STATS, _shadow: shadow,
   _resetModuleStateForTests() {
     userHintLastTs.clear();
     ANALYZE_STATS.clear();

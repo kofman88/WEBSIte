@@ -260,6 +260,20 @@ describe('MidScanner differential replay (scanner_mid.py)', () => {
     expect(all.some((c) => c.at_calls.length > 0)).toBe(true);
   });
 
+  it('QUIRK pins (bot behaviour the replay reproduces)', () => {
+    const last = FIX.expected[FIX.expected.length - 1];
+    // signals_received is bumped and saved even when the card was not delivered (blocked bot):
+    const u1014 = last.users.find((u) => u.user_id === 1014);
+    const t1014 = last.trades.filter((t) => t.user_id === 1014);
+    expect(t1014.length).toBe(3);
+    expect(t1014.every((t) => t.result === 'SKIP' && t.skip_reason === 'not_delivered')).toBe(true);
+    expect(u1014.signals_received).toBe(3);
+    // the not-delivered card is not committed to the registry, so the next cycle re-sends it
+    expect(new Set(t1014.map((t) => t.symbol)).size).toBe(1);
+    // the counter-trend auto-trade block still delivers the card (+ the 🚫 notice)
+    expect(FIX.expected.some((c) => c.logs.some((l) => l[2].startsWith('[FILTER-BLOCK]') && l[2].includes('gate=counter_trend_scanner')))).toBe(true);
+  });
+
   const N = FIX.cycles.length;
   const base = FIX.kv_baseline || {};
   for (let ci = 0; ci < N; ci++) {
