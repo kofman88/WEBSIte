@@ -95,7 +95,8 @@ describe('POST bucket counts only the requests a handler takes', () => {
     appRouter.resetRateLimits();
     const html = await rawRequest(port, { method: 'POST', target: '/api/app/share', headers: { ...h, Accept: 'text/html,application/xhtml+xml' }, body: '{"days": 1e400}' });
     expect([html.status, html.headers['content-type'], html.text]).toEqual([500, 'text/html; charset=utf-8',
-      '<html><head><title>500 Internal Server Error</title></head><body><h1>500 Internal Server Error</h1>Server got itself in trouble</body></html>']);
+      // aiohttp's page byte for byte (tests/app/diff fixture "headers 500 page as HTML"): newlines included
+      '<html><head><title>500 Internal Server Error</title></head><body>\n<h1>500 Internal Server Error</h1>\nServer got itself in trouble\n</body></html>\n']);
   });
 
   it('every kind of handler counts: own routes, mounted routers, the data dispatcher (yarl view of the id)', async () => {

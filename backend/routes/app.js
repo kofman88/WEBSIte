@@ -13,8 +13,11 @@
  * and appData (M10b: dashboard, signals, chart, result, stats, analyze, share,
  * feedback, events). Exchange keys / positions arrive with M13b.
  *
- * Router-level answers as aiohttp, before auth: 404 / 405 text (routeMethods);
- * a handler exception → aiohttp's 500 page.
+ * Router-level answers as aiohttp, before auth: 404 / 405 text (routeMethods, on the RAW path:
+ * case-sensitive, no trailing-slash or '//' folding); a handler exception → aiohttp's 500 page.
+ * The envelope is written as the bot writes it (aioResponse.js: no ETag / 304): the 401 is the
+ * json.dumps bytes of _unauthorized() with Cache-Control: no-store, the 429 of the POST / plan
+ * buckets the json.dumps bytes of _rate_limited_response (an HTTPException: no Cache-Control).
  *
  * Rate buckets (`_rate_ok`, in-memory sliding window per "<bucket>:<uid>",
  * map pruned above 5000 keys): post 30 / 60 s (MINIAPP_POST_PER_MIN),
@@ -35,6 +38,9 @@ const volumeUserCfg = require('../services/volumeUserCfg');
 const strategySet = require('../services/engine/strategySet');
 const quietHours = require('../services/engine/quietHours');
 const { pyBool } = require('../services/engine/pycoerce');
+const { pyJsonDumps } = require('../services/engine/pyjson');
+const Y = require('../services/engine/yarlUrl');
+const { writeResponse, JSON_UTF8, TEXT_UTF8, HTML_UTF8 } = require('../services/engine/aioResponse');
 const help = require('../content/help');
 const logger = require('../utils/logger');
 const { intOrUndefined } = require('../strategies/common/pynum');
@@ -73,9 +79,16 @@ function setClock(fn) {
   _clock = fn || (() => Date.now() / 1000);
 }
 
+/**
+ * _rate_limited_response(retry_s): web.HTTPTooManyRequests(text=json.dumps({...}), content_type=
+ * "application/json", Retry-After) — json.dumps bytes (", " / ": ", the Cyrillic message \u-escaped);
+ * an HTTPException is not a _json() answer, so no Cache-Control.
+ */
 function rateLimited(res, retryS) {
-  return res.status(429).set('Retry-After', String(retryS))
-    .json({ ok: false, error: 'rate_limited', message: `Слишком часто. Повторите через ${retryS} с` });
+  res.removeHeader('Cache-Control');
+  return writeResponse(res, 429, JSON_UTF8,
+    pyJsonDumps({ ok: false, error: 'rate_limited', message: `Слишком часто. Повторите через ${retryS} с` }),
+    { 'Retry-After': String(retryS) });
 }
 
 // ── auth: reuse authMiddleware, answer with the Mini App envelope ────────
@@ -84,8 +97,10 @@ function appAuth(req, res, next) {
   res.json = (body) => {
     res.json = origJson;
     if (res.statusCode === 401 || res.statusCode === 403) {
-      // the bot's _unauthorized() body for a 401; a 403 (ACCOUNT_DISABLED) keeps the site's `code` for the app's login screen
-      return origJson({ ok: false, error: 'unauthorized', ...(res.statusCode === 403 && body && body.code ? { code: body.code } : {}) });
+      // the bot's _unauthorized() = _json({"ok": False, "error": "unauthorized"}, 401): json.dumps bytes +
+      // Cache-Control: no-store; a 403 (ACCOUNT_DISABLED) keeps the site's `code` for the app's login screen
+      const out = { ok: false, error: 'unauthorized', ...(res.statusCode === 403 && body && body.code ? { code: body.code } : {}) };
+      return writeResponse(res, res.statusCode, JSON_UTF8, pyJsonDumps(out), { 'Cache-Control': 'no-store' });
     }
     return origJson(body);
   };
@@ -96,26 +111,33 @@ function appAuth(req, res, next) {
 }
 
 /**
- * aiohttp's resolve() over this router: the methods registered for the request's path — this
- * router's routes, the mounted routers (genome, challenge) and the data dispatcher of appData.js
- * (its yarl view of the target). Express route methods are lower case; GET implies HEAD.
+ * aiohttp's resolve() over this router: the methods registered for the request's RAW path relative to
+ * /api/app — aiohttp compares a plain resource with URL.path_safe exactly (case-sensitive, a trailing
+ * or doubled slash is another path, %XX of anything but '/' and '%' decoded), so Express' own
+ * matching (case-insensitive, optional trailing slash, '//' folded at the mount) is not used. Plain
+ * routes: this router's and the mounted routers' (MOUNTS); the data routes answer through appData's
+ * yarl dispatcher. GET implies HEAD.
  */
-function routeMethods(stack, path, url, out = new Set()) {
-  for (const layer of stack) {
-    if (layer.route) {
-      if (layer.match(path)) {
-        for (const [m, on] of Object.entries(layer.route.methods)) if (on && m !== '_all') out.add(m.toUpperCase());
-      }
-      continue;
+function routeMethods(rawRel) {
+  const safe = Y.pathSafe(rawRel);
+  const out = new Set();
+  let plainHit = false;
+  const plain = (stack, mount) => {
+    for (const layer of stack) {
+      if (!layer.route || typeof layer.route.path !== 'string') continue;
+      const full = layer.route.path === '/' && mount ? mount : mount + layer.route.path;
+      if (full !== safe) continue;
+      plainHit = true;
+      for (const [m, on] of Object.entries(layer.route.methods)) if (on && m !== '_all') out.add(m.toUpperCase());
     }
-    const h = layer.handle;
-    if (!h || (typeof h.methods !== 'function' && !Array.isArray(h.stack)) || !layer.match(path)) continue;
-    const strip = (p) => { const r = p.slice(layer.path.length) || '/'; return r.startsWith('/') ? r : `/${r}`; };
-    if (typeof h.methods === 'function') for (const m of h.methods(strip(url))) out.add(m);
-    else routeMethods(h.stack, strip(path), strip(url), out);
+  };
+  plain(router.stack, '');
+  for (const [mount, sub] of MOUNTS) {
+    if (typeof sub.methods === 'function') for (const m of sub.methods(rawRel)) out.add(m);
+    else plain(sub.stack, mount);
   }
   if (out.has('GET')) out.add('HEAD');
-  return out;
+  return { methods: out, plainHit, safe };
 }
 
 // The router-level answers come first, as in aiohttp (before any handler, so before the initData /
@@ -124,11 +146,18 @@ function routeMethods(stack, path, url, out = new Set()) {
 // web.HTTPNotFound / HTTPMethodNotAllowed. The generic POST bucket below therefore only counts the
 // requests a handler takes, like the bot's `_load_user`.
 router.use((req, res, next) => {
-  let ms;
-  try { ms = routeMethods(router.stack, req.path, req.url); } catch (_e) { ms = new Set(); }
-  if (!ms.size) return res.status(404).type('text/plain').send('404: Not Found');
+  let r;
+  const rawRel = Y.rawPath(req.originalUrl).slice(req.baseUrl.length) || '/';
+  try { r = routeMethods(rawRel); } catch (_e) { r = { methods: new Set(), plainHit: false, safe: rawRel }; }
+  const ms = r.methods;
+  if (!ms.size) return writeResponse(res, 404, TEXT_UTF8, '404: Not Found');
   if (!ms.has(req.method)) {
-    return res.status(405).set('Allow', Array.from(ms).sort().join(',')).type('text/plain').send('405: Method Not Allowed');
+    return writeResponse(res, 405, TEXT_UTF8, '405: Method Not Allowed', { Allow: Array.from(ms).sort().join(',') });
+  }
+  // a plain route reached through %XX (e.g. /m%65): dispatch Express on the decoded path, as aiohttp does
+  if (r.plainHit && r.safe !== rawRel) {
+    const q = req.url.indexOf('?');
+    req.url = r.safe + (q === -1 ? '' : req.url.slice(q));
   }
   return next();
 });
@@ -138,6 +167,14 @@ router.use((req, res, next) => {
   if (req.method === 'POST' && !rateOk(req.userId, 'post', ...POST_RATE_LIMIT)) return rateLimited(res, 10);
   next();
 });
+
+// The routers mounted after the M7 routes: [mount path, router] (routeMethods reads the same list)
+const MOUNTS = [
+  ['/genome', require('./appGenome')],     // M16: GET genome, POST genome/apply, POST genome/evolve (D10)
+  ['', require('./appChallenge')],         // M17: challenge + entry-advisor buttons
+  ['', require('./appTrend')],             // M10 (D10): GET trend (the /trend command), POST trend/notify (opt-out)
+  ['', require('./appData')],              // M10b: dashboard, signals, chart, result, stats, analyze, share, feedback, events
+];
 
 /** `_load_user`: the trader_settings row (created on first contact) + the admin bypass. */
 function loadUser(req) {
@@ -342,10 +379,10 @@ router.post('/volume/reset', wrap((req, res) => {
   res.json({ ok: true, settings: appSettings.settingsAll(user) });
 }));
 
-router.use('/genome', require('./appGenome'));    // M16: GET genome, POST genome/apply, POST genome/evolve (D10)
-router.use(require('./appChallenge'));       // M17: challenge + entry-advisor buttons
-router.use(require('./appTrend'));           // M10 (D10): GET trend (the /trend command), POST trend/notify (opt-out)
-router.use(require('./appData'));            // M10b: dashboard, signals, chart, result, stats, analyze, share, feedback, events
+for (const [mount, sub] of MOUNTS) {
+  if (mount) router.use(mount, sub);
+  else router.use(sub);
+}
 
 // An exception in a handler: aiohttp's web_protocol.handle_error answer — 500 with the status line
 // and "Server got itself in trouble" (an HTML page when the client accepts text/html), the
@@ -353,17 +390,21 @@ router.use(require('./appData'));            // M10b: dashboard, signals, chart,
 router.use((err, req, res, _next) => {
   logger.error(`Error handling request ${req.method} ${req.originalUrl}: ${(err && err.stack) || err}`);
   if (res.headersSent) return res.end();
+  res.removeHeader('Cache-Control');            // aiohttp's error page is not a _json() answer
   const title = '500 Internal Server Error';
   const msg = 'Server got itself in trouble';
   if (String(req.headers.accept || '').includes('text/html')) {
-    return res.status(500).type('text/html').send(`<html><head><title>${title}</title></head><body><h1>${title}</h1>${msg}</body></html>`);
+    // web_protocol.handle_error's page, newlines included
+    return writeResponse(res, 500, HTML_UTF8, `<html><head><title>${title}</title></head><body>\n<h1>${title}</h1>\n${msg}\n</body></html>\n`);
   }
-  return res.status(500).type('text/plain').send(`${title}\n\n${msg}`);
+  return writeResponse(res, 500, TEXT_UTF8, `${title}\n\n${msg}`);
 });
 
 module.exports = router;
 module.exports.rateOk = rateOk;
 module.exports.resetRateLimits = resetRateLimits;
+/** Tests: the stored hits of one bucket ("<bucket>:<uid>", as kept — not re-filtered by the window). */
+module.exports._rateHits = (bucket, uid) => (_RATE.get(`${bucket}:${uid}`) || []).length;
 module.exports.setClock = setClock;
 module.exports.POST_RATE_LIMIT = POST_RATE_LIMIT;
 module.exports.PLAN_RATE_LIMIT = PLAN_RATE_LIMIT;

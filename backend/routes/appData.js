@@ -39,8 +39,12 @@
  * stay in the id until the match, `{` / `}` never match an id), the query split on '&' with '+' as
  * space and U+FFFD for bad UTF-8, the first value of a repeated key; a known path with another
  * method → 405 (Allow) like the bot's router, an unknown one falls through to the site's 404.
- * Bodies keep their Python types (pyBody.js). Responses are written with json.dumps semantics
- * (pyjson.pyJsonDumps: NaN / Infinity literals like the bot's web.json_response).
+ * Bodies keep their Python types (pyBody.js). Responses are the bytes of the bot's web.json_response:
+ * json.dumps with the Python type of every number by path (TYPES → pyJsonDumpsTyped: float repr
+ * `0.0` / `1e+300`, NaN / Infinity literals, ensure_ascii, dict order; data-keyed dicts as pyDict),
+ * written without ETag / 304 (aioResponse.js). The poison rows of the bot's DB are its crashes too
+ * (int() / float() / datetime of a TEXT or infinite value → 500), and a real result transition
+ * writes the bot's trade_feedback row (signalTradesRepo → tradeFeedback.js).
  *
  * Engine memory (WS candle cache, last prices, the LEVELS scanner's trend, the trend monitor) is read
  * through services/engine/engineBridge.js — the worker thread holds it on the site.
@@ -57,7 +61,8 @@ const charts = require('../services/engine/chartPayload');
 const Y = require('../services/engine/yarlUrl');
 const PB = require('../services/engine/pyBody');
 const CA = require('../services/engine/coinAnalysisShell');
-const { pyJsonDumps } = require('../services/engine/pyjson');
+const { pyJsonDumpsTyped, FLOAT, pyDict, pyDictSet } = require('../services/engine/pyjson');
+const { writeResponse, JSON_UTF8, TEXT_UTF8 } = require('../services/engine/aioResponse');
 const { pyInt, pyFloat, PyValueError, PyTypeError } = require('../services/engine/pycoerce');
 const { pyRound } = require('../strategies/common/pyround');
 const { intOrUndefined } = require('../strategies/common/pynum');
@@ -140,15 +145,45 @@ function resetState() {
 }
 
 // ── helpers ──────────────────────────────────────────────────────────────
-/** web.json_response(data, status) with json.dumps semantics (NaN / Infinity literals). */
-function send(res, status, body) {
-  return res.status(status).set('Content-Type', 'application/json; charset=utf-8').send(pyJsonDumps(body));
+// ── the Python types of the answers (json.dumps prints a float 0.0 / 1767232800.0 / 1e+16 as such) ──
+// Every float the bot's handlers put into a response, by path; every other number is an int there
+// (counts, ids, created_at / equity t, quality, days, periods, the candle time, entry_index, strength).
+const F = FLOAT;
+const SIGNAL_T = Object.freeze({ entry: F, sl: F, sl0: F, tp1: F, tp2: F, tp3: F, rr: F, price: F, r_now: F });
+const BLANK_T = Object.freeze({ win_rate: F, total_rr: F, rr_7d: F });
+const AGG_T = Object.freeze({ ...BLANK_T, best_rr: F, equity: [{ r: F }], per_strategy: { '*': BLANK_T } });
+const BUCKET_T = Object.freeze({ win_rate: F, avg_rr: F, total_rr: F, profit_factor: F, ev: F, pnl_usd: F });
+const CHART_T = Object.freeze({
+  meta: { score: F }, candles: [{ $tuple: [null, F, F, F, F, F] }],
+  overlays: { entry: F, sl: F, tps: [F], be: F, emas: [{ values: [F] }] }, last_close: F,
+});
+const TYPES = Object.freeze({
+  dashboard: {
+    stats: AGG_T, market: { '*': { price: F, change_pct: F } }, recent: [SIGNAL_T],
+    rating: { by_strategy: { '*': { win_rate: F, total_rr: F } } }, market_trend: { '*': { since: F, price: F } },
+  },
+  signals: { signals: [SIGNAL_T] },
+  chart: CHART_T,
+  result: { signal: SIGNAL_T },
+  stats: {
+    summary: BUCKET_T, by_strategy: { '*': BUCKET_T }, by_session: { '*': { total_rr: F, win_rate: F } },
+    by_weekday: [{ total_rr: F, win_rate: F }], equity: [{ r: F }], by_symbol: { best: [BUCKET_T], worst: [BUCKET_T] },
+    by_timeframe: { '*': BUCKET_T }, by_source: { '*': BUCKET_T }, by_context: { '*': BUCKET_T },
+  },
+  analyze: { ...CHART_T, price: { price: F, change_pct: F }, signal: { entry: F, sl: F, tp1: F, tp2: F, tp3: F } },
+  share: { stats: AGG_T },
+});
+
+/** web.json_response(data, status): json.dumps with the Python types of `types` (NaN / Infinity literals). */
+function send(res, status, body, types = null) {
+  return writeResponse(res, status, JSON_UTF8, pyJsonDumpsTyped(body, types));    // no ETag / 304 (aioResponse.js)
 }
 
 const bad = (res, key) => send(res, 200, { ok: false, error: 'bad_request', message: key });
 
 /** _rate_limited_response(retry_s): HTTPTooManyRequests with the JSON text and Retry-After. */
 function rateLimited(res, retryS) {
+  res.removeHeader('Cache-Control');            // an HTTPException, not a _json() answer
   res.set('Retry-After', String(retryS));
   return send(res, 429, { ok: false, error: 'rate_limited', message: `Слишком часто. Повторите через ${retryS} с` });
 }
@@ -214,13 +249,13 @@ function trendWords(raw) {
     const c = Object.prototype.hasOwnProperty.call(r, coin) && truthy(r[coin]) ? r[coin] : {};
     const tt = c && typeof c === 'object' && Object.prototype.hasOwnProperty.call(c, 'trend_text') ? c.trend_text : null;
     const text = truthy(tt) ? pyStrValue(tt) : '';
-    const tfs = {};
+    const tfs = pyDict();       // a dict: "60" / "1" keep their place, "__proto__" is a key like any other
     for (const part of text.split('|')) {
       if (!part.includes(':')) continue;
       const k = part.indexOf(':');
       const tf = pyStrip(part.slice(0, k));
       const mark = pyStrip(part.slice(k + 1));
-      tfs[tf] = Object.prototype.hasOwnProperty.call(TREND_WORD, mark) ? TREND_WORD[mark] : 'unknown';
+      pyDictSet(tfs, tf, Object.prototype.hasOwnProperty.call(TREND_WORD, mark) ? TREND_WORD[mark] : 'unknown');
     }
     if (Object.keys(tfs).length) out[coin] = tfs;
   }
@@ -258,8 +293,17 @@ async function hDashboard(req, res) {
   } catch (e) {
     log().warn(`[MINIAPP] dashboard stats: ${e && e.message}`);
   }
-  const recent = SS.userSignals(db, user.user_id, { status: 'all', limit: 6, now: t });
-  const mkt = await market();
+  // asyncio.gather(_user_signals(…, 6), _market()): both run; when the signals read raises (→ 500) the
+  // market task still finishes in the background and refreshes the 60 s cache
+  const mktP = market();
+  let recent;
+  try {
+    recent = SS.userSignals(db, user.user_id, { status: 'all', limit: 6, now: t });
+  } catch (e) {
+    mktP.catch(() => {});
+    throw e;
+  }
+  const mkt = await mktP;
   await attachLive(recent);
   let rating = null;
   try {
@@ -274,7 +318,7 @@ async function hDashboard(req, res) {
     log().debug(`[MINIAPP] market trend: ${e && e.message}`);
   }
   const trend = trendWords(await bridge.globalTrend());
-  return send(res, 200, { ok: true, stats, market: mkt, recent, trend, rating, market_trend: marketTrend });
+  return send(res, 200, { ok: true, stats, market: mkt, recent, trend, rating, market_trend: marketTrend }, TYPES.dashboard);
 }
 
 async function hSignals(req, res) {
@@ -293,7 +337,7 @@ async function hSignals(req, res) {
   if (!STRATS.includes(strategy)) strategy = '';
   const sigs = SS.userSignals(db, user.user_id, { status, limit, strategy, now: now() });
   await attachLive(sigs);
-  return send(res, 200, { ok: true, signals: sigs, strategy: strategy || 'ALL' });
+  return send(res, 200, { ok: true, signals: sigs, strategy: strategy || 'ALL' }, TYPES.signals);
 }
 
 async function hSignalChart(req, res, [tradeId]) {
@@ -313,7 +357,7 @@ async function hSignalChart(req, res, [tradeId]) {
     payload = null;
   }
   if (!payload) return send(res, 200, { ok: false, error: 'no_data' });
-  return send(res, 200, { ok: true, png: null, ...payload });
+  return send(res, 200, { ok: true, png: null, ...payload }, TYPES.chart);
 }
 
 /** chart_renderer's logger: warning lines ([CHART-PMULT-MISMATCH]). */
@@ -360,12 +404,17 @@ async function hSignalResult(req, res, [tradeId]) {
   }
   if (note !== null) {
     if (note.t !== 'str' || Array.from(note.v).length > 500) return bad(res, 'note');
-    trades.setTradeNote(tid, { note: pyStrip(note.v) });
+    const stripped = pyStrip(note.v);
+    // sqlite3 cannot bind a str with a lone surrogate (json.loads keeps "\ud800"): the bot's
+    // db_set_trade_note raises UnicodeEncodeError → HTTP 500, nothing written
+    const enc = surrogateError(stripped);
+    if (enc) throw new Error(enc);
+    trades.setTradeNote(tid, { note: stripped });
   }
   const row = trades.getTrade(tid);
   const sig = row ? SS.signalView(row, now()) : null;
   if (sig) await attachLive([sig]);
-  return send(res, 200, { ok: true, signal: sig });
+  return send(res, 200, { ok: true, signal: sig }, TYPES.result);
 }
 
 async function hStats(req, res) {
@@ -377,7 +426,7 @@ async function hStats(req, res) {
     tf: Y.queryGet(q, 'tf', '') || '',
     now: now(),
   });
-  return send(res, 200, out);
+  return send(res, 200, out, TYPES.stats);
 }
 
 async function hAnalyze(req, res) {
@@ -389,7 +438,7 @@ async function hAnalyze(req, res) {
     if (n !== undefined) b[k] = PB.pyStr(n);
   }
   const r = await shell().analyze(user, b, now());
-  return send(res, r.status, r.body);
+  return send(res, r.status, r.body, TYPES.analyze);
 }
 
 async function hShare(req, res) {
@@ -408,7 +457,7 @@ async function hShare(req, res) {
   if (intOr0(stats.signals) <= 0) return send(res, 200, { ok: false, error: 'no_data' });
   // [SHARE-CARD] D3: the card is drawn by the client from these numbers (no bot chat to send to)
   log().info(`[MINIAPP] share uid=${user.user_id} days=${days} signals=${stats.signals}`);
-  return send(res, 200, { ok: true, sent: false, days, stats });
+  return send(res, 200, { ok: true, sent: false, days, stats }, TYPES.share);
 }
 
 /**
@@ -516,7 +565,7 @@ router.use((req, res, next) => {
   const method = req.method === 'HEAD' ? 'GET' : req.method;
   const handler = entry[method];
   if (!handler) {
-    return res.status(405).set('Allow', allowHeader(entry)).type('text/plain').send('405: Method Not Allowed');
+    return writeResponse(res, 405, TEXT_UTF8, '405: Method Not Allowed', { Allow: allowHeader(entry) });
   }
   try {
     const r = handler(req, res, params);
@@ -532,6 +581,14 @@ module.exports.configure = configure;
 module.exports.resetState = resetState;
 module.exports.methods = methods;
 module.exports.trendWords = trendWords;
+module.exports.TYPES = TYPES;
+/** Tests: _analyze_last.get(uid) (null when the user never passed the cooldown). */
+module.exports._analyzeLast = (uid) => {
+  const v = analyzeShell ? analyzeShell._last.get(uid) : undefined;
+  return v === undefined ? null : v;
+};
+/** Tests: the _market_cache (its ts and the coins it holds). */
+module.exports._marketState = () => ({ ts: marketCache.ts, coins: Object.keys(marketCache.data).sort() });
 module.exports.CHART_RATE_LIMIT = CHART_RATE_LIMIT;
 module.exports.SHARE_RATE_LIMIT = SHARE_RATE_LIMIT;
 module.exports.FEEDBACK_PER_DAY = FEEDBACK_PER_DAY;
