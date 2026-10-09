@@ -7,7 +7,7 @@
  *   SMC_HOUR_FILTER_MODE     "shadow" | "enforce" (default) | "off"; unknown → "off"
  *   BAD_HOURS_UTC            {SMC: [4, 18, 19, 20, 22]}; SMC_BAD_HOURS_UTC="h,h,…" overrides when
  *                            every token is a digit string 0..23 (any bad token → default kept)
- *   DAILY_MAX_LOSS_R         float(env, default "0.0")
+ *   DAILY_MAX_LOSS_R         float(env, default "0.0"); unparsable → throws (the bot fails at import)
  */
 
 const { pyFloat } = require('../exchanges/pyCompat');
@@ -33,12 +33,10 @@ function readConfig(env = process.env) {
     }
     if (ok) smcBad = parsed;
   }
-  let dailyMax = 0.0;
-  try {
-    dailyMax = pyFloat(get('DAILY_MAX_LOSS_R', '0.0'));
-  } catch (_e) {
-    dailyMax = 0.0; // the bot would fail to import; the site keeps the circuit breaker off
-  }
+  // float(os.environ.get(...)): an unparsable value stops the bot at import. Fail-closed the same
+  // way: the error propagates, the executor is not built and the engine runs without auto-trade
+  // (workers/engineWorker.js workerAutoTrade) — never a silently disabled circuit breaker.
+  const dailyMax = pyFloat(get('DAILY_MAX_LOSS_R', '0.0'));
   return {
     SMC_HOUR_FILTER_ENABLED: smcEnabled,
     SMC_HOUR_FILTER_MODE: mode,

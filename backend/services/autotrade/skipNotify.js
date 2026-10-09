@@ -124,7 +124,29 @@ function createSkipNotify({
     return (userUnfilled.get(userId) || []).length;
   }
 
-  return { notifySkipToUser, recordUnfilled, getUnfilledCount, _dedup: dedup, _userUnfilled: userUnfilled, _lastNotified: lastNotified };
+  /**
+   * cache_gc's skip_notify block: prune every window, drop users with an empty window and no
+   * escalation for 24 h, drop escalation stamps older than 7 days → {userUnfilled, lastNotified}.
+   */
+  function gcState() {
+    const nowTs = now();
+    const cutoff = nowTs - SKIP_WINDOW_S;
+    const staleU = [];
+    for (const [uid, dq] of Array.from(userUnfilled.entries())) {
+      while (dq.length && dq[0] < cutoff) dq.shift();
+      const lastTs = lastNotified.has(uid) ? lastNotified.get(uid) : 0.0;
+      if (!dq.length && (nowTs - lastTs) > 24 * 3600) staleU.push(uid);
+    }
+    for (const uid of staleU) userUnfilled.delete(uid);
+    const cut7 = nowTs - 7 * 24 * 3600;
+    const staleN = Array.from(lastNotified.entries()).filter(([, ts]) => typeof ts === 'number' && ts < cut7).map(([u]) => u);
+    for (const u of staleN) lastNotified.delete(u);
+    return { userUnfilled: staleU.length, lastNotified: staleN.length };
+  }
+
+  return {
+    notifySkipToUser, recordUnfilled, getUnfilledCount, gcState, _dedup: dedup, _userUnfilled: userUnfilled, _lastNotified: lastNotified,
+  };
 }
 
 module.exports = { SKIP_NOTIFY_KEYS, createSkipNotify };

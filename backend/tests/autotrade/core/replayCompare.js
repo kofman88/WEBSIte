@@ -78,7 +78,7 @@ async function main() {
     if (only.length && !only.includes(v.case.name)) continue;
     let diffs;
     try {
-      diffs = compare(v, await replay(v, fx));
+      diffs = compare(v, await replay(v, fx, { via: process.env.REPLAY_VIA || 'executor' }));
     } catch (e) {
       diffs = [`THREW ${e && e.stack}`];
     }

@@ -36,3 +36,14 @@ describe('execute_auto_trade — bot vs site replay', () => {
     });
   }
 });
+
+// The same vectors through the production entry point (services/autotrade/index.js
+// createAutoTrade with every exchange enabled): the wrapper the scanners call is transparent.
+describe('execute_auto_trade — bot vs site replay through createAutoTrade', () => {
+  for (const v of FX.vectors) {
+    it(v.case.name, async () => {
+      const got = await replay(v, FX, { via: 'index' });
+      expect(compare(v, got)).toEqual([]);
+    });
+  }
+});

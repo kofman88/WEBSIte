@@ -16,7 +16,10 @@
  */
 
 const { pyRepr: floatRepr, fmtFixed, fmtComma, fmtG } = require('../../strategies/common/pyfmt');
-const { pyRepr: valueRepr, pyStrRepr } = require('../exchanges/pyCompat');
+const { pyRepr: valueRepr, pyStrRepr, pyTypeName } = require('../exchanges/pyCompat');
+
+/** type(v).__name__ on the value model (a PyFloat is a float). */
+const typeName = (v) => (v instanceof PyFloat ? 'float' : pyTypeName(v));
 
 class PyFloat {
   constructor(v) { this.v = Number(v); }
@@ -53,7 +56,8 @@ function pyStr(v) {
 function toIntStr(v) {
   const x = num(v);
   if (typeof x === 'boolean') return x ? '1' : '0';
-  if (typeof x !== 'number' || Number.isNaN(x)) throw new PyFormatError('TypeError', `%d format: a real number is required, not ${typeof x}`);
+  if (typeof x !== 'number') throw new PyFormatError('TypeError', `%d format: a real number is required, not ${typeName(x)}`);
+  if (Number.isNaN(x)) throw new PyFormatError('ValueError', 'cannot convert float NaN to integer');
   if (!Number.isFinite(x)) throw new PyFormatError('OverflowError', 'cannot convert float infinity to integer');
   const t = Math.trunc(x);
   return Object.is(t, -0) ? '0' : (Math.abs(t) >= 1e21 ? BigInt(t).toString() : String(t));
@@ -62,7 +66,7 @@ function toIntStr(v) {
 function toNum(v, conv) {
   const x = num(v);
   if (typeof x === 'boolean') return x ? 1 : 0;
-  if (typeof x !== 'number') throw new PyFormatError('TypeError', `must be real number, not ${x === null ? 'NoneType' : typeof x}`);
+  if (typeof x !== 'number') throw new PyFormatError('TypeError', `must be real number, not ${typeName(x)}`);
   void conv;
   return x;
 }
@@ -91,10 +95,15 @@ function convert(v, { flags = '', width = null, prec = null, conv, comma = false
     case 'g': case 'G': {
       const x = toNum(v, conv);
       body = fmtG(x, prec === null ? 6 : prec);
+      if (conv === 'G') body = body.toUpperCase();
       isNum = true;
       break;
     }
-    case 'e': case 'E': body = fmtExp(toNum(v, conv), prec === null ? 6 : prec); isNum = true; break;
+    case 'e': case 'E':
+      body = fmtExp(toNum(v, conv), prec === null ? 6 : prec);
+      if (conv === 'E') body = body.toUpperCase();
+      isNum = true;
+      break;
     case 'x': body = BigInt(toIntStr(v)).toString(16); isNum = true; break;
     default: throw new PyFormatError('ValueError', `unsupported format character '${conv}'`);
   }
@@ -139,8 +148,18 @@ function formatSpec(v, spec) {
   if (!m) throw new PyFormatError('ValueError', `Invalid format specifier '${spec}'`);
   const [, align, sign, zero, width, comma, prec, type] = m;
   const p = prec === undefined ? null : Number(prec);
+  if (v === null || v === undefined) throw new PyFormatError('TypeError', 'unsupported format string passed to NoneType.__format__');
+  if (typeof v === 'string' && type && type !== 's') throw new PyFormatError('ValueError', `Unknown format code '${type}' for object of type 'str'`);
   let body;
-  if (type === 's' || (!type && typeof v === 'string')) {
+  if (!type && comma && typeof num(v) === 'number') {
+    // format(x, ',') — int: thousands groups; float: repr with grouped integer digits
+    if (!isFloatVal(v)) body = fmtComma(num(v), 0);
+    else {
+      const r = floatRepr(num(v));
+      const mm = /^(-?)(\d+)(.*)$/.exec(r);
+      body = mm ? mm[1] + mm[2].replace(/\B(?=(\d{3})+(?!\d))/g, ',') + mm[3] : r;
+    }
+  } else if (type === 's' || (!type && typeof v === 'string')) {
     if (typeof v !== 'string') throw new PyFormatError('ValueError', `Unknown format code 's' for object of type '${typeof v}'`);
     body = p === null ? v : Array.from(v).slice(0, p).join('');
   } else if (type === 'd') {
@@ -184,7 +203,9 @@ function sformat(tpl, kwargs = {}) {
     if (c === '{') {
       if (tpl[i + 1] === '{') { out += '{'; i += 1; continue; }
       const end = tpl.indexOf('}', i);
-      if (end < 0) throw new PyFormatError('ValueError', "Single '{' encountered in format string");
+      if (end < 0) {
+        throw new PyFormatError('ValueError', i === tpl.length - 1 ? "Single '{' encountered in format string" : "expected '}' before end of string");
+      }
       const field = tpl.slice(i + 1, end);
       const colon = field.indexOf(':');
       const name = colon < 0 ? field : field.slice(0, colon);

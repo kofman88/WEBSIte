@@ -100,6 +100,27 @@ function softExit(port) {
 }
 
 /**
+ * The thread's auto-trade executor (services/autotrade, M13b) — only with AUTOTRADE_ENABLED=1
+ * (docs/PORT_DECISIONS.md D5), so a deploy never starts trading by itself. bot.py start-up order:
+ * the idempotency registry and the zero-balance cooldowns are restored before any scanner runs.
+ * A failure to build it leaves the engine without auto-trade (no keys → no trade), never half-wired.
+ */
+async function workerAutoTrade(bot, env) {
+  const L = require('../services/marketData/mdLog').log;
+  try {
+    const at = require('../services/autotrade');
+    if (!at.autoTradeEnabled(env)) return null;
+    const inst = at.createAutoTrade({ bot, env });
+    await inst.restore();
+    L.info(`[AUTO-TRADE] enabled, exchanges=${inst.exchanges().join(',') || '-'}`);
+    return inst;
+  } catch (e) {
+    L.error(`[AUTO-TRADE] not started: ${e && e.message}`);
+    return null;
+  }
+}
+
+/**
  * Run the worker half on `port` ({postMessage, on('message')}). Returns a handle for tests:
  * { scheduler(), remote, stop() }.
  *   deps          extra scheduler deps (tests: fakes for rest / cache / wsPool / …)
@@ -123,12 +144,16 @@ function runWorker(port, {
   };
   const beat = () => post({ type: 'heartbeat', ts: Date.now() / 1000, regime: regimeNow() });
 
+  let starting = false;
   async function start(options = {}) {
-    if (scheduler) return;
+    if (scheduler || starting) return;
+    starting = true;   // the auto-trade restore awaits: a second 'start' must not build a second scheduler
     try {
       const { createScheduler } = require('../services/engine/scheduler');
       const sd = { ...deps, bot: remote };
       if (options.only) sd.only = options.only;
+      if (sd.autoTrade === undefined) sd.autoTrade = await workerAutoTrade(remote, deps.env || process.env);
+      if (stopping) return;
       scheduler = createScheduler({ side: 'worker', deps: sd });
       scheduler.ctx.health.onHeartbeat = (name, ts) => post({ type: 'health', name, ts });
       // bot.py main() before the gather: the candle cache, the exchange symbol lists
@@ -142,6 +167,7 @@ function runWorker(port, {
       if (hb && typeof hb.unref === 'function') hb.unref();
       post({ type: 'ready', tasks, scanners });
     } catch (e) {
+      if (!scheduler) starting = false;
       post({ type: 'fatal', error: String(e && e.stack ? e.stack : e) });
     }
   }
@@ -454,4 +480,5 @@ module.exports = {
   WORKER_PATH, HEARTBEAT_MS, HEARTBEAT_TIMEOUT_MS, WATCHDOG_EVERY_MS, SHUTDOWN_GRACE_MS,
   RESTART_BASE_S, RESTART_MAX_S, RESTART_HEALTHY_S,
   runWorker, createSupervisor, startEngine, forwardLogs, softExit, engineLog, installTaskExceptionHandlers,
+  workerAutoTrade,
 };

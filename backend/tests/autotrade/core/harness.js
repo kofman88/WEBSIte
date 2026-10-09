@@ -26,6 +26,7 @@ const { createSkipNotify } = require('../../../services/autotrade/skipNotify');
 const { createAdminAlerts } = require('../../../services/autotrade/adminAlerts');
 const { createAiFilter } = require('../../../services/autotrade/aiFilter');
 const { createExecutor } = require('../../../services/autotrade/executeAutoTrade');
+const { createAutoTrade, ALL_EXCHANGES } = require('../../../services/autotrade');
 const { readConfig } = require('../../../services/autotrade/config');
 const { regimeWarningText } = require('../../../services/autotrade/messages');
 const asyncio = require('../../../services/autotrade/asyncio');
@@ -111,7 +112,11 @@ function engineDb() {
 const TS_COLS = new Set(['user_id', ...schema.TRADER_SETTINGS_COLUMNS.map((c) => c[0])]);
 const ROW_EXTRA = ['username', 'okx_passphrase'];
 
-function buildEnv(c, fx, { d6 = { executedOnReject: true, fixedAmountPercent: false } } = {}) {
+/**
+ * opts.via = 'index' runs the case through the production entry point
+ * (services/autotrade/index.js createAutoTrade, every exchange enabled) instead of createExecutor.
+ */
+function buildEnv(c, fx, { d6 = { executedOnReject: true, fixedAmountPercent: false }, via = 'executor', indexDeps = {} } = {}) {
   const clk = createVClock(c.clock);
   const now = clk.now;
   const recs = [];
@@ -255,7 +260,13 @@ function buildEnv(c, fx, { d6 = { executedOnReject: true, fixedAmountPercent: fa
   for (const [uid, ex, bal, exp] of st.balance_cache || []) balanceCache._cache.set(`${uid}|${ex}`, [bal, exp]);
   for (const [uid, tss] of st.unfilled || []) skipNotify._userUnfilled.set(uid, tss.slice());
 
-  const exec = createExecutor({
+  const make = via === 'index'
+    ? (deps) => {
+      const at = createAutoTrade({ ...deps, tradeDb: tdb, exchanges: ALL_EXCHANGES, bot: null, onConfirmPending: null, ...indexDeps });
+      return { ...at._exec, executeAutoTrade: at.executeAutoTrade, _autoTrade: at };
+    }
+    : createExecutor;
+  const exec = make({
     db: tdb, traderFor, killswitch, cooldowns, idempotency, reconcile, tasks, correlationCap, adaptiveSizing,
     tiltDetector, skipNotify, adminAlerts, aiFilter, balanceCache, log, now, sleep: clk.sleep, timers: clk.timers,
     env: c.env || {}, config,

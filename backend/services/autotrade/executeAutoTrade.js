@@ -1817,6 +1817,12 @@ function createExecutor(deps) {
       for (const [k, lk] of Array.from(tradeLocks.entries())) if (!lk.locked()) { tradeLocks.delete(k); n += 1; }
       return n;
     },
+    /** cache_gc: _disabled_days_notified entries older than two days (key ordinal < today - 2). */
+    gcDisabledDaysNotified(todayOrd) {
+      const stale = Array.from(disabledDaysNotified.keys()).filter((k) => Number(String(k).split('|')[1]) < todayOrd - 2);
+      for (const k of stale) disabledDaysNotified.delete(k);
+      return stale.length;
+    },
     currentTaskName,
   };
 }
