@@ -16,9 +16,12 @@
  * Kept quirks (pinned by tests/autotrade/ops): the trader and the keys come from the TRADE row's
  * `exchange` column (default 'bybit' — the SMC scanner never sets it), not from the user's
  * trade_exchange; OKX half-close raises `close_position() got an unexpected keyword argument
- * 'size'` (OKX close_position has no size) → «❌ Ошибка: …», nothing is closed; OKX full close
- * passes "Sell"/"Buy" as the direction, so a LONG closes posSide "short" (and the trader still
- * cancels every algo order of the symbol afterwards); the hold-lock lets the close through when
+ * 'size'` (OKX close_position has no size) → «❌ Ошибка: …», nothing is closed; the close side
+ * ("Sell" for a LONG) goes where every trader's close_position expects the POSITION side, which
+ * it inverts again — Bybit gets a reduce-only "Buy" for a LONG, BingX / Binance positionSide=SELL
+ * (orders the exchanges reject); OKX full close of a LONG asks posSide "short" and the trader
+ * cancels every order / algo order (SL, TP) of the symbol afterwards even when that close failed —
+ * see docs/PORT_DECISIONS.md D16 (needs an owner decision); the hold-lock lets the close through when
  * the cache has no price (fail-open); the progress sign follows the R, so "+-1.50%" happens when
  * there is no stop; progress is shown for a closed trade too; close / SL calls have no timeout.
  *
@@ -30,7 +33,7 @@
 
 const exchanges = require('../exchanges');
 const { createEffects } = require('./confirmMode');
-const { bindValue } = require('../engine/signalTradesRepo');
+const { bindValue, pyTypeName } = require('../engine/signalTradesRepo');
 const { fmtG, fmtFixed, fmtSigned } = require('../../strategies/common/pyfmt');
 const { pyRound } = require('../../strategies/common/pyround');
 const { pyLower, pyUpper } = require('../../strategies/common/pyUnicode');
@@ -46,7 +49,7 @@ const g = (o, k, d) => (o && Object.prototype.hasOwnProperty.call(o, k) ? o[k] :
 /** str.upper() of a trade field — AttributeError for None like `trade.get("direction", "").upper()`. */
 function upperOf(v) {
   if (typeof v === 'string') return pyUpper(v);
-  throw AttributeError(`'${v === null || v === undefined ? 'NoneType' : typeof v}' object has no attribute 'upper'`);
+  throw AttributeError(`'${pyTypeName(v)}' object has no attribute 'upper'`);
 }
 
 /** `_trader_for(exchange)` → [exchange name | null, exchange]. */
@@ -231,15 +234,14 @@ async function getCurrentPnl(user, trade, deps = {}) {
 /** str.replace on a trade field — AttributeError for a non-str like the bot. */
 function strField(trade, k) {
   const v = g(trade, k, '');
-  if (typeof v !== 'string') throw AttributeError(`'${v === null || v === undefined ? 'NoneType' : typeof v}' object has no attribute 'replace'`);
+  if (typeof v !== 'string') throw AttributeError(`'${pyTypeName(v)}' object has no attribute 'replace'`);
   return v;
 }
 
 /** format_progress_text(trade, pnl) — the HTML progress card. */
 function formatProgressText(trade, pnl) {
   const symbol = htmlEscape(strField(trade, 'symbol').split('-USDT-SWAP').join('').split('-USDT').join(''));
-  const dirRaw = g(trade, 'direction', '');
-  const direction = htmlEscape(typeof dirRaw === 'string' ? dirRaw : pyStr(dirRaw));
+  const direction = htmlEscape(strField(trade, 'direction'));       // html.escape(non-str) → AttributeError (.replace)
   const f0 = (k) => pyFloat(pyTruthy(g(trade, k, 0)) ? g(trade, k, 0) : 0);
   const entry = f0('entry');
   const sl = f0('sl');

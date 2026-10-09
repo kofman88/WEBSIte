@@ -230,6 +230,8 @@ async function binanceRestrictions(inst, key, secret) {
   const resp = await inst.rt.transport({
     method: 'GET', url: `${BINANCE_SAPI_URL}/sapi/v1/account/apiRestrictions?${qs}`, headers, timeoutMs: PERMISSION_TIMEOUT_S * 1000,
   });
+  // fail-closed: only a 200 answer counts (an error page never reads as "no withdrawals")
+  if (Number(resp.status) !== 200) throw new PyError('HTTPError', `HTTP ${resp.status}`);
   const { parseJsonPy } = require('./exchanges/transport');
   return parseJsonPy(resp.text);
 }
