@@ -133,14 +133,15 @@ describe(`wire differential — ${FX.vectors.length} scenarios replayed against 
       expect(msgs(got).some((m) => m.startsWith('❌ <b>OKX ордер не выполнен</b>') && m.includes('<code>timeout</code>'))).toBe(true);
     });
 
-    it('BingX 101204 «Insufficient margin» on a clientOrderId order is taken as the duplicate success: OPEN without a position', async () => {
+    it('[BINGX-DUP-VERIFY] 101204 «Insufficient margin» on a clientOrderId order: the cid is looked up, not found → a real refusal, no phantom OPEN', async () => {
       const v = vec('tgt_bingx_insufficient_margin');
       const got = await replay(v);
       expect(Object.values(v.expected.sim)[0].positions).toEqual([]);
-      const t = trade(got, v.case.uid);
-      expect(t.state).toBe('OPEN');
-      expect(t.order_id).toMatch(/^chm_[0-9a-f]{12}$/);
-      expect(msgs(got).some((m) => m.startsWith('✅ <b>BingX: сделка открыта</b>'))).toBe(true);
+      const [q] = reqs(got, /^GET \/openApi\/swap\/v2\/trade\/order\?clientOrderId=chm_[0-9a-f]{12}&recvWindow=\d+&symbol=SOL-USDT$/);
+      expect(q).toBeTruthy();
+      expect(trade(got, v.case.uid)).toMatchObject({ result: 'SKIP', state: 'FAILED', order_id: '' });
+      expect(msgs(got).some((m) => m.startsWith('❌ <b>BingX: ошибка открытия сделки</b>') && m.includes('Недостаточно средств'))).toBe(true);
+      expect(msgs(got).some((m) => m.startsWith('✅'))).toBe(false);
     });
 
     it('Binance -4015 «Client order id is not valid» is taken as the duplicate success (order_id = the client id)', async () => {
@@ -156,10 +157,19 @@ describe(`wire differential — ${FX.vectors.length} scenarios replayed against 
       expect(msgs(got).some((m) => m.endsWith('⚠️ Неверный API ключ.'))).toBe(true);
     });
 
-    it('OKX: a size below one contract is sent as sz "0.0" (51121 from the exchange)', async () => {
-      const got = await replay(vec('edge_okx_doge_9_boost'));
+    it('[OKX-LOT-CONTRACTS] below one lot: skipped without opt-in (no order), with opt-in boost the exchange minimum (1 lot = 0.1 contract = 100 DOGE)', async () => {
+      const skip = await replay(vec('edge_okx_doge_9'));
+      expect(reqs(skip, /^POST \/api\/v5\/trade\/order$/)).toEqual([]);
+      expect(trade(skip, vec('edge_okx_doge_9').case.uid)).toMatchObject({ result: 'SKIP', state: 'FAILED' });
+      const v = vec('edge_okx_doge_9_boost');
+      const got = await replay(v);
       const [o] = reqs(got, /^POST \/api\/v5\/trade\/order$/);
-      expect(JSON.parse(o.body).sz).toBe('0.0');
+      const body = JSON.parse(o.body);
+      expect(body.sz).toBe('0.1');
+      expect(body.attachAlgoOrds[0].sz).toBe('0.1');
+      expect(trade(got, v.case.uid)).toMatchObject({ state: 'OPEN', qty: 100 });
+      // partial-TP legs (60 / 40 DOGE) are below one lot: skipped, never sent as sz "0"
+      expect(reqs(got, /^POST \/api\/v5\/trade\/order$/).length).toBe(1);
     });
 
     it('D6: execute_auto_trade answers executed=True although the exchange refused the order', async () => {

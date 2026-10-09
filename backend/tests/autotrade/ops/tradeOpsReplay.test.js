@@ -73,7 +73,7 @@ afterAll(async () => {
 
 const SITE = '/api/app';
 const BOT = '/miniapp/api';
-const BOT_D17 = { positionSide: false, recordExchange: false, okxPositions: false };
+const BOT_D17 = { recordExchange: false, okxPositions: false };
 const ALL_ON = { AUTOTRADE_ENABLED: '1', AUTOTRADE_EXCHANGES: 'bybit,bingx,binance,okx' };
 const ROUTE_OF = {
   exec_trade: ['POST', 'exec'], cb_qc_half: ['POST', 'qc/half'], cb_qc_full: ['POST', 'qc/full'], cb_qc_full_force: ['POST', 'qc/force'],
@@ -399,12 +399,12 @@ describe(`trade ops — ${FX.steps.length} steps replayed against the bot`, () =
     expect(seen.d15).toBe(9);
     expect(seen.d16).toBe(FX.steps.filter((s) => s.site === 'not_found').length);
     expect(seen.effects).toBe(FX.steps.filter((s) => s.kind === 'cb' && s.site !== 'not_found').length);
-    expect(seen.requests).toBe(64);
-    expect(seen.trade).toBe(73);
-    expect(seen.user).toBe(153);
-    expect(seen.logs).toBe(55);
-    expect(seen.cards).toBe(20);
-    expect(seen.sent).toBe(45);
+    expect(seen.requests).toBe(70);
+    expect(seen.trade).toBe(85);
+    expect(seen.user).toBe(165);
+    expect(seen.logs).toBe(65);
+    expect(seen.cards).toBe(26);
+    expect(seen.sent).toBe(52);
     expect(seen.progress).toBe(8);
   }, 180_000);
 });

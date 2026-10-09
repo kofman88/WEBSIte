@@ -9681,8 +9681,553 @@
   "expected": {
    "name": "close_position_no_order_id",
    "result": {
+    "ok": false,
+    "order_id": "",
+    "error": "unexpected response: {'status': 'NEW'}"
+   },
+   "requests": [
+    {
+     "method": "GET",
+     "url": "https://fapi.binance.com/fapi/v1/exchangeInfo",
+     "headers": {},
+     "body": null
+    },
+    {
+     "method": "POST",
+     "url": "https://fapi.binance.com/fapi/v1/order?symbol=BTCUSDT&side=SELL&positionSide=LONG&type=MARKET&quantity=0.011&timestamp=1767225600000&recvWindow=5000&signature=61809d7ea6b955337a9f763ec2e3e34f8653a8195fef0cde61ef03e66eaafe0e",
+     "headers": {
+      "X-MBX-APIKEY": "BNKEY-abc123"
+     },
+     "body": null
+    }
+   ],
+   "sleeps": [],
+   "clock_end": 1767225600.0,
+   "markers": [],
+   "saved": {
+    "hedge_saved": [],
+    "auth_reset": [],
+    "events": [],
+    "metrics": []
+   },
+   "final": {
+    "hedge": {},
+    "account_type": {},
+    "delisted": [],
+    "fail_count": {},
+    "bybit_offset": 0,
+    "binance_base": "https://fapi.binance.com",
+    "binance_offset": 0,
+    "bingx_offset": 0,
+    "okx_offset": 0
+   }
+  }
+ },
+ {
+  "scenario": {
+   "name": "close_position_oneway_4061_retry",
+   "exchange": "binance",
+   "call": "close_position",
+   "args": [
+    "BNKEY-abc123",
+    "bn-secret-456",
+    "BTC-USDT-SWAP",
+    "LONG",
+    0.0115
+   ],
+   "kwargs": {},
+   "routes": [
+    {
+     "method": "GET",
+     "path": "/fapi/v1/exchangeInfo",
+     "responses": [
+      {
+       "text": "{\"timezone\": \"UTC\", \"serverTime\": 1767225600000, \"symbols\": [{\"symbol\": \"BTCUSDT\", \"status\": \"TRADING\", \"filters\": [{\"filterType\": \"PRICE_FILTER\", \"minPrice\": \"556.80\", \"maxPrice\": \"4529764\", \"tickSize\": \"0.10\"}, {\"filterType\": \"LOT_SIZE\", \"stepSize\": \"0.001\", \"maxQty\": \"1000\", \"minQty\": \"0.001\"}, {\"filterType\": \"MIN_NOTIONAL\", \"notional\": \"100\"}]}, {\"symbol\": \"ETHUSDT\", \"status\": \"TRADING\", \"leverageBracket\": [{\"initialLeverage\": 20}], \"filters\": [{\"filterType\": \"PRICE_FILTER\", \"tickSize\": \"0.01\"}, {\"filterType\": \"LOT_SIZE\", \"stepSize\": \"0.001\"}]}, {\"symbol\": \"1000PEPEUSDT\", \"status\": \"TRADING\", \"filters\": [{\"filterType\": \"PRICE_FILTER\", \"tickSize\": \"0.0000001\"}, {\"filterType\": \"LOT_SIZE\", \"stepSize\": \"1\"}]}, {\"symbol\": \"SOLUSDT\", \"status\": \"SETTLING\", \"filters\": []}, {\"symbol\": \"DOGEUSDT\", \"status\": \"TRADING\", \"filters\": [{\"filterType\": \"PRICE_FILTER\", \"tickSize\": \"\"}, {\"filterType\": \"LOT_SIZE\", \"stepSize\": \"1\"}]}]}"
+      }
+     ]
+    },
+    {
+     "method": "POST",
+     "path": "/fapi/v1/order",
+     "responses": [
+      {
+       "text": "{\"code\": -4061, \"msg\": \"Order's position side does not match user's setting.\"}"
+      },
+      {
+       "text": "{\"orderId\": 56, \"symbol\": \"BTCUSDT\", \"status\": \"NEW\", \"clientOrderId\": \"x\", \"price\": \"0\", \"avgPrice\": \"0.00000\", \"origQty\": \"0.011\", \"executedQty\": \"0\", \"type\": \"MARKET\"}"
+      }
+     ]
+    }
+   ],
+   "state": {},
+   "random": [],
+   "clock": 1767225600.0
+  },
+  "expected": {
+   "name": "close_position_oneway_4061_retry",
+   "result": {
     "ok": true,
-    "order_id": ""
+    "order_id": "56"
+   },
+   "requests": [
+    {
+     "method": "GET",
+     "url": "https://fapi.binance.com/fapi/v1/exchangeInfo",
+     "headers": {},
+     "body": null
+    },
+    {
+     "method": "POST",
+     "url": "https://fapi.binance.com/fapi/v1/order?symbol=BTCUSDT&side=SELL&positionSide=LONG&type=MARKET&quantity=0.011&timestamp=1767225600000&recvWindow=5000&signature=61809d7ea6b955337a9f763ec2e3e34f8653a8195fef0cde61ef03e66eaafe0e",
+     "headers": {
+      "X-MBX-APIKEY": "BNKEY-abc123"
+     },
+     "body": null
+    },
+    {
+     "method": "POST",
+     "url": "https://fapi.binance.com/fapi/v1/order?symbol=BTCUSDT&side=SELL&positionSide=BOTH&type=MARKET&quantity=0.011&reduceOnly=true&timestamp=1767225600000&recvWindow=5000&signature=3b29915ba195417f8176acd3361a15992ee01ead81ff6859daf02cc634d6eb86",
+     "headers": {
+      "X-MBX-APIKEY": "BNKEY-abc123"
+     },
+     "body": null
+    }
+   ],
+   "sleeps": [],
+   "clock_end": 1767225600.0,
+   "markers": [],
+   "saved": {
+    "hedge_saved": [],
+    "auth_reset": [],
+    "events": [],
+    "metrics": []
+   },
+   "final": {
+    "hedge": {},
+    "account_type": {},
+    "delisted": [],
+    "fail_count": {},
+    "bybit_offset": 0,
+    "binance_base": "https://fapi.binance.com",
+    "binance_offset": 0,
+    "bingx_offset": 0,
+    "okx_offset": 0
+   }
+  }
+ },
+ {
+  "scenario": {
+   "name": "close_position_oneway_4061_twice",
+   "exchange": "binance",
+   "call": "close_position",
+   "args": [
+    "BNKEY-abc123",
+    "bn-secret-456",
+    "ETH-USDT-SWAP",
+    "SHORT",
+    1.5
+   ],
+   "kwargs": {},
+   "routes": [
+    {
+     "method": "GET",
+     "path": "/fapi/v1/exchangeInfo",
+     "responses": [
+      {
+       "text": "{\"timezone\": \"UTC\", \"serverTime\": 1767225600000, \"symbols\": [{\"symbol\": \"BTCUSDT\", \"status\": \"TRADING\", \"filters\": [{\"filterType\": \"PRICE_FILTER\", \"minPrice\": \"556.80\", \"maxPrice\": \"4529764\", \"tickSize\": \"0.10\"}, {\"filterType\": \"LOT_SIZE\", \"stepSize\": \"0.001\", \"maxQty\": \"1000\", \"minQty\": \"0.001\"}, {\"filterType\": \"MIN_NOTIONAL\", \"notional\": \"100\"}]}, {\"symbol\": \"ETHUSDT\", \"status\": \"TRADING\", \"leverageBracket\": [{\"initialLeverage\": 20}], \"filters\": [{\"filterType\": \"PRICE_FILTER\", \"tickSize\": \"0.01\"}, {\"filterType\": \"LOT_SIZE\", \"stepSize\": \"0.001\"}]}, {\"symbol\": \"1000PEPEUSDT\", \"status\": \"TRADING\", \"filters\": [{\"filterType\": \"PRICE_FILTER\", \"tickSize\": \"0.0000001\"}, {\"filterType\": \"LOT_SIZE\", \"stepSize\": \"1\"}]}, {\"symbol\": \"SOLUSDT\", \"status\": \"SETTLING\", \"filters\": []}, {\"symbol\": \"DOGEUSDT\", \"status\": \"TRADING\", \"filters\": [{\"filterType\": \"PRICE_FILTER\", \"tickSize\": \"\"}, {\"filterType\": \"LOT_SIZE\", \"stepSize\": \"1\"}]}]}"
+      }
+     ]
+    },
+    {
+     "method": "POST",
+     "path": "/fapi/v1/order",
+     "responses": [
+      {
+       "text": "{\"code\": -4061, \"msg\": \"Order's position side does not match user's setting.\"}"
+      }
+     ]
+    }
+   ],
+   "state": {},
+   "random": [],
+   "clock": 1767225600.0
+  },
+  "expected": {
+   "name": "close_position_oneway_4061_twice",
+   "result": {
+    "ok": false,
+    "order_id": "",
+    "error": "Неизвестная ошибка Binance."
+   },
+   "requests": [
+    {
+     "method": "GET",
+     "url": "https://fapi.binance.com/fapi/v1/exchangeInfo",
+     "headers": {},
+     "body": null
+    },
+    {
+     "method": "POST",
+     "url": "https://fapi.binance.com/fapi/v1/order?symbol=ETHUSDT&side=BUY&positionSide=SHORT&type=MARKET&quantity=1.500&timestamp=1767225600000&recvWindow=5000&signature=01f35efebdb658ddab469833dea8ab51807cc166b1b447a34fa9d73b00da8c87",
+     "headers": {
+      "X-MBX-APIKEY": "BNKEY-abc123"
+     },
+     "body": null
+    },
+    {
+     "method": "POST",
+     "url": "https://fapi.binance.com/fapi/v1/order?symbol=ETHUSDT&side=BUY&positionSide=BOTH&type=MARKET&quantity=1.500&reduceOnly=true&timestamp=1767225600000&recvWindow=5000&signature=09e32c6fa062021a7f31e8df048d3b8d813ecf8f70285d3d16c48b605bc68347",
+     "headers": {
+      "X-MBX-APIKEY": "BNKEY-abc123"
+     },
+     "body": null
+    }
+   ],
+   "sleeps": [],
+   "clock_end": 1767225600.0,
+   "markers": [],
+   "saved": {
+    "hedge_saved": [],
+    "auth_reset": [],
+    "events": [],
+    "metrics": []
+   },
+   "final": {
+    "hedge": {},
+    "account_type": {},
+    "delisted": [],
+    "fail_count": {},
+    "bybit_offset": 0,
+    "binance_base": "https://fapi.binance.com",
+    "binance_offset": 0,
+    "bingx_offset": 0,
+    "okx_offset": 0
+   }
+  }
+ },
+ {
+  "scenario": {
+   "name": "close_position_sell_alias",
+   "exchange": "binance",
+   "call": "close_position",
+   "args": [
+    "BNKEY-abc123",
+    "bn-secret-456",
+    "BTC-USDT-SWAP",
+    " Sell ",
+    0.0115
+   ],
+   "kwargs": {},
+   "routes": [
+    {
+     "method": "GET",
+     "path": "/fapi/v1/exchangeInfo",
+     "responses": [
+      {
+       "text": "{\"timezone\": \"UTC\", \"serverTime\": 1767225600000, \"symbols\": [{\"symbol\": \"BTCUSDT\", \"status\": \"TRADING\", \"filters\": [{\"filterType\": \"PRICE_FILTER\", \"minPrice\": \"556.80\", \"maxPrice\": \"4529764\", \"tickSize\": \"0.10\"}, {\"filterType\": \"LOT_SIZE\", \"stepSize\": \"0.001\", \"maxQty\": \"1000\", \"minQty\": \"0.001\"}, {\"filterType\": \"MIN_NOTIONAL\", \"notional\": \"100\"}]}, {\"symbol\": \"ETHUSDT\", \"status\": \"TRADING\", \"leverageBracket\": [{\"initialLeverage\": 20}], \"filters\": [{\"filterType\": \"PRICE_FILTER\", \"tickSize\": \"0.01\"}, {\"filterType\": \"LOT_SIZE\", \"stepSize\": \"0.001\"}]}, {\"symbol\": \"1000PEPEUSDT\", \"status\": \"TRADING\", \"filters\": [{\"filterType\": \"PRICE_FILTER\", \"tickSize\": \"0.0000001\"}, {\"filterType\": \"LOT_SIZE\", \"stepSize\": \"1\"}]}, {\"symbol\": \"SOLUSDT\", \"status\": \"SETTLING\", \"filters\": []}, {\"symbol\": \"DOGEUSDT\", \"status\": \"TRADING\", \"filters\": [{\"filterType\": \"PRICE_FILTER\", \"tickSize\": \"\"}, {\"filterType\": \"LOT_SIZE\", \"stepSize\": \"1\"}]}]}"
+      }
+     ]
+    },
+    {
+     "method": "POST",
+     "path": "/fapi/v1/order",
+     "responses": [
+      {
+       "text": "{\"orderId\": 57, \"symbol\": \"BTCUSDT\", \"status\": \"NEW\", \"clientOrderId\": \"x\", \"price\": \"0\", \"avgPrice\": \"0.00000\", \"origQty\": \"0.011\", \"executedQty\": \"0\", \"type\": \"MARKET\"}"
+      }
+     ]
+    }
+   ],
+   "state": {},
+   "random": [],
+   "clock": 1767225600.0
+  },
+  "expected": {
+   "name": "close_position_sell_alias",
+   "result": {
+    "ok": true,
+    "order_id": "57"
+   },
+   "requests": [
+    {
+     "method": "GET",
+     "url": "https://fapi.binance.com/fapi/v1/exchangeInfo",
+     "headers": {},
+     "body": null
+    },
+    {
+     "method": "POST",
+     "url": "https://fapi.binance.com/fapi/v1/order?symbol=BTCUSDT&side=BUY&positionSide=SHORT&type=MARKET&quantity=0.011&timestamp=1767225600000&recvWindow=5000&signature=12a488d08fc1c606acf6f654dcf5713f9b94f371cbead3b7e46c749e422a3134",
+     "headers": {
+      "X-MBX-APIKEY": "BNKEY-abc123"
+     },
+     "body": null
+    }
+   ],
+   "sleeps": [],
+   "clock_end": 1767225600.0,
+   "markers": [],
+   "saved": {
+    "hedge_saved": [],
+    "auth_reset": [],
+    "events": [],
+    "metrics": []
+   },
+   "final": {
+    "hedge": {},
+    "account_type": {},
+    "delisted": [],
+    "fail_count": {},
+    "bybit_offset": 0,
+    "binance_base": "https://fapi.binance.com",
+    "binance_offset": 0,
+    "bingx_offset": 0,
+    "okx_offset": 0
+   }
+  }
+ },
+ {
+  "scenario": {
+   "name": "close_position_unknown_side",
+   "exchange": "binance",
+   "call": "close_position",
+   "args": [
+    "BNKEY-abc123",
+    "bn-secret-456",
+    "BTC-USDT-SWAP",
+    "FLAT",
+    0.0115
+   ],
+   "kwargs": {},
+   "routes": [
+    {
+     "method": "GET",
+     "path": "/fapi/v1/exchangeInfo",
+     "responses": [
+      {
+       "text": "{\"timezone\": \"UTC\", \"serverTime\": 1767225600000, \"symbols\": [{\"symbol\": \"BTCUSDT\", \"status\": \"TRADING\", \"filters\": [{\"filterType\": \"PRICE_FILTER\", \"minPrice\": \"556.80\", \"maxPrice\": \"4529764\", \"tickSize\": \"0.10\"}, {\"filterType\": \"LOT_SIZE\", \"stepSize\": \"0.001\", \"maxQty\": \"1000\", \"minQty\": \"0.001\"}, {\"filterType\": \"MIN_NOTIONAL\", \"notional\": \"100\"}]}, {\"symbol\": \"ETHUSDT\", \"status\": \"TRADING\", \"leverageBracket\": [{\"initialLeverage\": 20}], \"filters\": [{\"filterType\": \"PRICE_FILTER\", \"tickSize\": \"0.01\"}, {\"filterType\": \"LOT_SIZE\", \"stepSize\": \"0.001\"}]}, {\"symbol\": \"1000PEPEUSDT\", \"status\": \"TRADING\", \"filters\": [{\"filterType\": \"PRICE_FILTER\", \"tickSize\": \"0.0000001\"}, {\"filterType\": \"LOT_SIZE\", \"stepSize\": \"1\"}]}, {\"symbol\": \"SOLUSDT\", \"status\": \"SETTLING\", \"filters\": []}, {\"symbol\": \"DOGEUSDT\", \"status\": \"TRADING\", \"filters\": [{\"filterType\": \"PRICE_FILTER\", \"tickSize\": \"\"}, {\"filterType\": \"LOT_SIZE\", \"stepSize\": \"1\"}]}]}"
+      }
+     ]
+    }
+   ],
+   "state": {},
+   "random": [],
+   "clock": 1767225600.0
+  },
+  "expected": {
+   "name": "close_position_unknown_side",
+   "result": {
+    "ok": false,
+    "order_id": "",
+    "error": "unknown side: 'FLAT'"
+   },
+   "requests": [],
+   "sleeps": [],
+   "clock_end": 1767225600.0,
+   "markers": [],
+   "saved": {
+    "hedge_saved": [],
+    "auth_reset": [],
+    "events": [],
+    "metrics": []
+   },
+   "final": {
+    "hedge": {},
+    "account_type": {},
+    "delisted": [],
+    "fail_count": {},
+    "bybit_offset": 0,
+    "binance_base": "https://fapi.binance.com",
+    "binance_offset": 0,
+    "bingx_offset": 0,
+    "okx_offset": 0
+   }
+  }
+ },
+ {
+  "scenario": {
+   "name": "close_position_none_side",
+   "exchange": "binance",
+   "call": "close_position",
+   "args": [
+    "BNKEY-abc123",
+    "bn-secret-456",
+    "BTC-USDT-SWAP",
+    null,
+    0.0115
+   ],
+   "kwargs": {},
+   "routes": [
+    {
+     "method": "GET",
+     "path": "/fapi/v1/exchangeInfo",
+     "responses": [
+      {
+       "text": "{\"timezone\": \"UTC\", \"serverTime\": 1767225600000, \"symbols\": [{\"symbol\": \"BTCUSDT\", \"status\": \"TRADING\", \"filters\": [{\"filterType\": \"PRICE_FILTER\", \"minPrice\": \"556.80\", \"maxPrice\": \"4529764\", \"tickSize\": \"0.10\"}, {\"filterType\": \"LOT_SIZE\", \"stepSize\": \"0.001\", \"maxQty\": \"1000\", \"minQty\": \"0.001\"}, {\"filterType\": \"MIN_NOTIONAL\", \"notional\": \"100\"}]}, {\"symbol\": \"ETHUSDT\", \"status\": \"TRADING\", \"leverageBracket\": [{\"initialLeverage\": 20}], \"filters\": [{\"filterType\": \"PRICE_FILTER\", \"tickSize\": \"0.01\"}, {\"filterType\": \"LOT_SIZE\", \"stepSize\": \"0.001\"}]}, {\"symbol\": \"1000PEPEUSDT\", \"status\": \"TRADING\", \"filters\": [{\"filterType\": \"PRICE_FILTER\", \"tickSize\": \"0.0000001\"}, {\"filterType\": \"LOT_SIZE\", \"stepSize\": \"1\"}]}, {\"symbol\": \"SOLUSDT\", \"status\": \"SETTLING\", \"filters\": []}, {\"symbol\": \"DOGEUSDT\", \"status\": \"TRADING\", \"filters\": [{\"filterType\": \"PRICE_FILTER\", \"tickSize\": \"\"}, {\"filterType\": \"LOT_SIZE\", \"stepSize\": \"1\"}]}]}"
+      }
+     ]
+    }
+   ],
+   "state": {},
+   "random": [],
+   "clock": 1767225600.0
+  },
+  "expected": {
+   "name": "close_position_none_side",
+   "result": {
+    "ok": false,
+    "order_id": "",
+    "error": "unknown side: None"
+   },
+   "requests": [],
+   "sleeps": [],
+   "clock_end": 1767225600.0,
+   "markers": [],
+   "saved": {
+    "hedge_saved": [],
+    "auth_reset": [],
+    "events": [],
+    "metrics": []
+   },
+   "final": {
+    "hedge": {},
+    "account_type": {},
+    "delisted": [],
+    "fail_count": {},
+    "bybit_offset": 0,
+    "binance_base": "https://fapi.binance.com",
+    "binance_offset": 0,
+    "bingx_offset": 0,
+    "okx_offset": 0
+   }
+  }
+ },
+ {
+  "scenario": {
+   "name": "close_position_empty_answer",
+   "exchange": "binance",
+   "call": "close_position",
+   "args": [
+    "BNKEY-abc123",
+    "bn-secret-456",
+    "BTC-USDT-SWAP",
+    "LONG",
+    0.0115
+   ],
+   "kwargs": {},
+   "routes": [
+    {
+     "method": "GET",
+     "path": "/fapi/v1/exchangeInfo",
+     "responses": [
+      {
+       "text": "{\"timezone\": \"UTC\", \"serverTime\": 1767225600000, \"symbols\": [{\"symbol\": \"BTCUSDT\", \"status\": \"TRADING\", \"filters\": [{\"filterType\": \"PRICE_FILTER\", \"minPrice\": \"556.80\", \"maxPrice\": \"4529764\", \"tickSize\": \"0.10\"}, {\"filterType\": \"LOT_SIZE\", \"stepSize\": \"0.001\", \"maxQty\": \"1000\", \"minQty\": \"0.001\"}, {\"filterType\": \"MIN_NOTIONAL\", \"notional\": \"100\"}]}, {\"symbol\": \"ETHUSDT\", \"status\": \"TRADING\", \"leverageBracket\": [{\"initialLeverage\": 20}], \"filters\": [{\"filterType\": \"PRICE_FILTER\", \"tickSize\": \"0.01\"}, {\"filterType\": \"LOT_SIZE\", \"stepSize\": \"0.001\"}]}, {\"symbol\": \"1000PEPEUSDT\", \"status\": \"TRADING\", \"filters\": [{\"filterType\": \"PRICE_FILTER\", \"tickSize\": \"0.0000001\"}, {\"filterType\": \"LOT_SIZE\", \"stepSize\": \"1\"}]}, {\"symbol\": \"SOLUSDT\", \"status\": \"SETTLING\", \"filters\": []}, {\"symbol\": \"DOGEUSDT\", \"status\": \"TRADING\", \"filters\": [{\"filterType\": \"PRICE_FILTER\", \"tickSize\": \"\"}, {\"filterType\": \"LOT_SIZE\", \"stepSize\": \"1\"}]}]}"
+      }
+     ]
+    },
+    {
+     "method": "POST",
+     "path": "/fapi/v1/order",
+     "responses": [
+      {
+       "text": "{}"
+      }
+     ]
+    }
+   ],
+   "state": {},
+   "random": [],
+   "clock": 1767225600.0
+  },
+  "expected": {
+   "name": "close_position_empty_answer",
+   "result": {
+    "ok": false,
+    "order_id": "",
+    "error": "unexpected response: {}"
+   },
+   "requests": [
+    {
+     "method": "GET",
+     "url": "https://fapi.binance.com/fapi/v1/exchangeInfo",
+     "headers": {},
+     "body": null
+    },
+    {
+     "method": "POST",
+     "url": "https://fapi.binance.com/fapi/v1/order?symbol=BTCUSDT&side=SELL&positionSide=LONG&type=MARKET&quantity=0.011&timestamp=1767225600000&recvWindow=5000&signature=61809d7ea6b955337a9f763ec2e3e34f8653a8195fef0cde61ef03e66eaafe0e",
+     "headers": {
+      "X-MBX-APIKEY": "BNKEY-abc123"
+     },
+     "body": null
+    }
+   ],
+   "sleeps": [],
+   "clock_end": 1767225600.0,
+   "markers": [],
+   "saved": {
+    "hedge_saved": [],
+    "auth_reset": [],
+    "events": [],
+    "metrics": []
+   },
+   "final": {
+    "hedge": {},
+    "account_type": {},
+    "delisted": [],
+    "fail_count": {},
+    "bybit_offset": 0,
+    "binance_base": "https://fapi.binance.com",
+    "binance_offset": 0,
+    "bingx_offset": 0,
+    "okx_offset": 0
+   }
+  }
+ },
+ {
+  "scenario": {
+   "name": "close_position_network_error",
+   "exchange": "binance",
+   "call": "close_position",
+   "args": [
+    "BNKEY-abc123",
+    "bn-secret-456",
+    "BTC-USDT-SWAP",
+    "LONG",
+    0.0115
+   ],
+   "kwargs": {},
+   "routes": [
+    {
+     "method": "GET",
+     "path": "/fapi/v1/exchangeInfo",
+     "responses": [
+      {
+       "text": "{\"timezone\": \"UTC\", \"serverTime\": 1767225600000, \"symbols\": [{\"symbol\": \"BTCUSDT\", \"status\": \"TRADING\", \"filters\": [{\"filterType\": \"PRICE_FILTER\", \"minPrice\": \"556.80\", \"maxPrice\": \"4529764\", \"tickSize\": \"0.10\"}, {\"filterType\": \"LOT_SIZE\", \"stepSize\": \"0.001\", \"maxQty\": \"1000\", \"minQty\": \"0.001\"}, {\"filterType\": \"MIN_NOTIONAL\", \"notional\": \"100\"}]}, {\"symbol\": \"ETHUSDT\", \"status\": \"TRADING\", \"leverageBracket\": [{\"initialLeverage\": 20}], \"filters\": [{\"filterType\": \"PRICE_FILTER\", \"tickSize\": \"0.01\"}, {\"filterType\": \"LOT_SIZE\", \"stepSize\": \"0.001\"}]}, {\"symbol\": \"1000PEPEUSDT\", \"status\": \"TRADING\", \"filters\": [{\"filterType\": \"PRICE_FILTER\", \"tickSize\": \"0.0000001\"}, {\"filterType\": \"LOT_SIZE\", \"stepSize\": \"1\"}]}, {\"symbol\": \"SOLUSDT\", \"status\": \"SETTLING\", \"filters\": []}, {\"symbol\": \"DOGEUSDT\", \"status\": \"TRADING\", \"filters\": [{\"filterType\": \"PRICE_FILTER\", \"tickSize\": \"\"}, {\"filterType\": \"LOT_SIZE\", \"stepSize\": \"1\"}]}]}"
+      }
+     ]
+    },
+    {
+     "method": "POST",
+     "path": "/fapi/v1/order",
+     "responses": [
+      {
+       "raise": "connect",
+       "message": "Cannot connect to host fapi.binance.com:443 ssl:default [Connection reset by peer]"
+      }
+     ]
+    }
+   ],
+   "state": {},
+   "random": [],
+   "clock": 1767225600.0
+  },
+  "expected": {
+   "name": "close_position_network_error",
+   "result": {
+    "ok": false,
+    "order_id": "",
+    "error": "Неизвестная ошибка Binance."
    },
    "requests": [
     {

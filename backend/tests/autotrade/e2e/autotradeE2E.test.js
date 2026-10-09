@@ -13,7 +13,7 @@
  *             orders, signal_trades OPEN (+ D17: the exchange recorded), the open message = the bot's
  *             format_trade_result (CPython 3.11, gen/gen_e2e_messages.py: fixtures/e2e_messages.json),
  *             the card carries the quick-close buttons, GET positions shows the position, quick close
- *             closes it (50 % then 100 %; OKX 50 % is the bot's TypeError — nothing sent)
+ *             closes it (50 % then 100 %; OKX 50 % through close_position_partial — [QC-SIDE-FIX])
  *   confirm   mode confirm → no order, the card offers «✅ Открыть сделку…» (exec_trade_<id>), the row
  *             PENDING; POST trades/<id>/exec → placed with SL / TP, the card edited without buttons,
  *             the message = format_trade_result (kept quirks: the row stays PENDING, qty 0); a second
@@ -21,8 +21,8 @@
  *   expiry    mode confirm → the tracker closes the signal on time (EXPIRED; the card keeps its
  *             keyboard like the bot's), the 3-day ghost cleanup marks the row SKIP, the exec button
  *             answers «ℹ️ Сделка уже была открыта ранее.» — no order request ever reaches an exchange.
- *             Pinned bot quirk: between the tracker's EXPIRED and the ghost pass an exec still places
- *             (no age check in exec_trade) — the `window` user
+ *             Between the tracker's EXPIRED and the ghost pass an exec is refused as stale
+ *             ([EXEC-STALE-GUARD] — the bot used to place it) — the `window` user
  *   D5 / killswitch  an exec while AUTOTRADE_ENABLED is off / the exchange is not enabled → the
  *             site's gate, nothing sent; the killswitch HALTED → the trader's killswitch_halted dict
  *             (format_trade_result of it), nothing sent
@@ -348,9 +348,9 @@ describe('auto-trade end to end on fake exchanges (Bybit, BingX, Binance, OKX)',
       expect(pos).toHaveLength(1);
       expect(pos[0]).toMatchObject({ base: BASE, side: 'LONG' });
       expect(Number(row.qty)).toBeCloseTo(pos[0].size, 9);
-      // risk 0.5 % of $10 000 over a 7.44 stop = 6.72 coins; kept OKX quirk (okx_trader.place_trade):
-      // the coin size is rounded to lotSz — a CONTRACT step — before the ctVal conversion → 6 coins (600 contracts)
-      expect(Number(row.qty)).toBe(ex === 'okx' ? 6 : 6.722);
+      // risk 0.5 % of $10 000 over a 7.44 stop = 6.722 coins; OKX sizes in whole lots of contracts
+      // ([OKX-LOT-CONTRACTS]: lotSz 1, ctVal 0.01 → 672.2 contracts → 672 → 6.72 coins)
+      expect(Number(row.qty)).toBe(ex === 'okx' ? 6.72 : 6.722);
       const orders = S.fake.orders(ex, keyOf('auto', ex));
       const sl = ex === 'bybit' ? pos[0].sl : orders.filter((o) => o.type === 'STOP').map((o) => o.trigger)[0];
       expect(sl, 'stop-loss on the exchange').toBeGreaterThan(7889);
@@ -415,16 +415,11 @@ describe('auto-trade end to end on fake exchanges (Bybit, BingX, Binance, OKX)',
       const sentBefore = orderRequests('auto', ex).length;
       const half = await api('post', `trades/${tid(uid)}/qc/half`, uid, {});
       expect(half.status).toBe(200);
-      if (ex === 'okx') {
-        // quick_close.py: OKX close_position has no `size` → TypeError before any request (kept)
-        expect(half.body).toMatchObject({ ok: false, outcome: 'failed', message: "❌ Ошибка: close_position() got an unexpected keyword argument 'size'" });
-        expect(orderRequests('auto', ex).length).toBe(sentBefore);
-        expect(positionsOf('auto', ex)[0].size).toBe(before);
-      } else {
-        expect(half.body).toMatchObject({ ok: true, outcome: 'closed_half' });
-        expect(half.body.message).toMatch(/^✅ Закрыта половина: /);
-        expect(positionsOf('auto', ex)[0].size).toBeCloseTo(before / 2, 2);
-      }
+      // [QC-SIDE-FIX 2026-10]: OKX 50 % is a market order on the same posSide (the bot's TypeError before the fix)
+      expect(half.body).toMatchObject({ ok: true, outcome: 'closed_half' });
+      expect(half.body.message).toMatch(/^✅ Закрыта половина: /);
+      expect(orderRequests('auto', ex).length).toBe(sentBefore + 1);
+      expect(positionsOf('auto', ex)[0].size).toBeCloseTo(before / 2, 2);
       const full = await api('post', `trades/${tid(uid)}/qc/full`, uid, {});
       expect(full.status).toBe(200);
       expect(full.body).toMatchObject({ ok: true, outcome: 'closed', message: '✅ Позиция закрыта полностью' });
@@ -562,14 +557,14 @@ describe('auto-trade end to end on fake exchanges (Bybit, BingX, Binance, OKX)',
     }
   });
 
-  it('expiry: pinned bot quirk — an exec between the tracker\'s EXPIRED and the ghost pass still places (no age check)', async () => {
+  it('expiry: an exec between the tracker\'s EXPIRED and the ghost pass is refused — nothing sent ([EXEC-STALE-GUARD])', async () => {
     const uid = uidOf('window', 'bybit');
-    S.ctx = 'window';
+    const n = S.fake.requests.length;
     const r = await api('post', `trades/${tid(uid)}/exec`, uid, {});
-    S.ctx = null;
-    expect(r.body).toMatchObject({ ok: true, outcome: 'opened' });
-    expect(r.body.message).toBe(MSG['window:bybit'].text);
-    expect(positionsOf('window', 'bybit')).toHaveLength(1);
+    expect(r.status).toBe(200);
+    expect(r.body).toMatchObject({ ok: false, outcome: 'stale', card: MSG.i18n.exec_signal_stale });
+    expect(S.fake.requests.length).toBe(n);
+    expect(positionsOf('window', 'bybit')).toEqual([]);
   });
 
   it('expiry: the 3-day ghost cleanup marks the pending rows SKIP — exec answers «уже была открыта», nothing ever sent', async () => {

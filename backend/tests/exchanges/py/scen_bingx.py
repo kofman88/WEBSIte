@@ -109,6 +109,38 @@ S("pt_tp_110413_adaptive", PT, LONG, {"tp2": 89500.0},
 S("pt_duplicate_entry", PT, LONG, {"trade_id": "bx-5", "user_id": 3},
   [C, B, L, R("POST", "/openApi/swap/v2/trade/batchOrders", BATCH_SIG), R("GET", "/openApi/swap/v2/quote/price", price("87000")),
    R("POST", "/openApi/swap/v2/trade/order", err(101404, "duplicate clientOrderID"))])
+# [BINGX-DUP-VERIFY 2026-10] 101204 = insufficient margin: a duplicate only when the order with the cid is found
+S("pt_101204_cid_not_found", PT, LONG, {"trade_id": "bx-6", "user_id": 3},
+  [C, B, L, R("POST", "/openApi/swap/v2/trade/batchOrders", BATCH_SIG), R("GET", "/openApi/swap/v2/quote/price", price("87000")),
+   R("POST", "/openApi/swap/v2/trade/order", err(101204, "Insufficient margin")),
+   R("GET", "/openApi/swap/v2/trade/order", err(109414, "order not exist"))])
+S("pt_101204_cid_found", PT, LONG, {"trade_id": "bx-7", "user_id": 3},
+  [C, B, L, R("POST", "/openApi/swap/v2/trade/batchOrders", BATCH_SIG), R("GET", "/openApi/swap/v2/quote/price", price("87000")),
+   R("POST", "/openApi/swap/v2/trade/order", err(101204, "Insufficient margin")),
+   R("GET", "/openApi/swap/v2/trade/order", {"code": 0, "msg": "", "data": {"order": {"orderId": 1700000000000000001, "status": "FILLED"}}})])
+S("pt_101204_cid_lookup_fails", PT, LONG, {"trade_id": "bx-8", "user_id": 3},
+  [C, B, L, R("POST", "/openApi/swap/v2/trade/batchOrders", BATCH_SIG), R("GET", "/openApi/swap/v2/quote/price", price("87000")),
+   R("POST", "/openApi/swap/v2/trade/order", err(101204, "Insufficient margin")),
+   R("GET", "/openApi/swap/v2/trade/order", {"raise": "timeout"})])
+S("pt_101404_cid_empty_order", PT, LONG, {"trade_id": "bx-9", "user_id": 3},
+  [C, B, L, R("POST", "/openApi/swap/v2/trade/batchOrders", BATCH_SIG), R("GET", "/openApi/swap/v2/quote/price", price("87000")),
+   R("POST", "/openApi/swap/v2/trade/order", err(101404, "order rejected")),
+   R("GET", "/openApi/swap/v2/trade/order", {"code": 0, "msg": "", "data": {"order": None}})])
+S("pt_clientorder_exists_text", PT, LONG, {"trade_id": "bx-10", "user_id": 3},
+  [C, B, L, R("POST", "/openApi/swap/v2/trade/batchOrders", BATCH_SIG), R("GET", "/openApi/swap/v2/quote/price", price("87000")),
+   R("POST", "/openApi/swap/v2/trade/order", err(80001, "ClientOrderID already EXISTS"))])
+S("pt_sl_101204_verified", PT, LONG, {"trade_id": "bx-11", "user_id": 3},
+  [C, B, L, R("POST", "/openApi/swap/v2/trade/batchOrders", BATCH_SIG), R("GET", "/openApi/swap/v2/quote/price", price("87000")),
+   R("POST", "/openApi/swap/v2/trade/order", order(), err(101204, "Insufficient margin"), order(3), order(4)),
+   R("GET", "/openApi/swap/v2/trade/order", {"code": 0, "msg": "", "data": {"order": {"orderId": 5, "status": "NEW"}}}),
+   R("GET", "/openApi/swap/v2/user/positions", pos()),
+   R("GET", "/openApi/swap/v2/trade/openOrders", oo({"type": "TAKE_PROFIT_MARKET", "side": "SELL"}))])
+S("pt_sl_101204_not_found", PT, LONG, {"trade_id": "bx-12", "user_id": 3},
+  [C, B, L, R("POST", "/openApi/swap/v2/trade/batchOrders", BATCH_SIG), R("GET", "/openApi/swap/v2/quote/price", price("87000")),
+   R("POST", "/openApi/swap/v2/trade/order", order(), err(101204, "Insufficient margin")),
+   R("GET", "/openApi/swap/v2/trade/order", err(109414, "order not exist")),
+   R("GET", "/openApi/swap/v2/user/positions", pos()),
+   R("DELETE", "/openApi/swap/v2/trade/allOpenOrders", {"code": 0, "msg": "", "data": {"orders": []}})])
 S("pt_symbol_missing", PT, [KEY, SEC, "NOPE-USDT-SWAP", "LONG", 1.0, 0.9, 1.2, 1.0, 5], {}, [C])
 S("pt_balance_error", PT, LONG, {}, [C, R("GET", "/openApi/swap/v2/user/balance", err(100413, "Incorrect apiKey"))])
 S("pt_low_notional_skip", PT, LONG, {}, [C, R("GET", "/openApi/swap/v2/user/balance", bal("20.0")), L])

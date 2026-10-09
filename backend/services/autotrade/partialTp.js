@@ -402,11 +402,16 @@ function createPartialTp({ traderFor, log = null, sleep = null, sendMessage = nu
       }
       for (const [label, qty, price] of [['TP1', qty1, tp1Price], ['TP2', qty2, tp2Price]]) {
         if (qty <= 0) continue;
+        // [OKX-LOT-CONTRACTS 2026-10] a share below one lot — no sz "0" is sent
+        const sz = await ok.inst.okxSz(okxSym, qty);
+        if (pyFloat(sz) <= 0) {
+          logger.info(pf('[OKX-PTP-SKIP-LOT] %s [%s %s] qty=%.6g < 1 lot — skipped', label, strategyName, symbol, qty));
+          continue;
+        }
         let placed = false;
         let lastErr = null;
         for (let attempt = 0; attempt < RETRIES; attempt++) {
           try {
-            const sz = await ok.inst.okxSz(okxSym, qty);
             const resp = await ok.inst._request('POST', '/api/v5/trade/order', apiKey, apiSecret, pp, null, {
               instId: okxSym, tdMode: 'cross', side: closeSide, ordType: 'limit', sz, px: pyFloatStr(pyRound(price, 8)), reduceOnly: true,
             });

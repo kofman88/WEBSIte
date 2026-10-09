@@ -10,10 +10,13 @@
  *                                           wins: «Подписка истекла!») + empty answer
  *   keys of user.trade_exchange           → message exec_api_not_setup (HTML) + empty answer
  *   card edit exec_opening
- *   db_get_trade                          missing → card exec_signal_stale (the text says "older
- *                                           than 4 hours"; nothing checks the age — quirk)
+ *   db_get_trade                          missing → card exec_signal_stale
  *   result set                            → card exec_already_opened
  *   order_id set                          → card + alert exec_already_on_exchange
+ *   [EXEC-STALE-GUARD 2026-10] progress_stage not '' / ENTRY (the tracker closed the signal: SL /
+ *   TP / BE / MISSED / EXPIRED) or older than SIGNAL_TRACKER_MAX_AGE_H → card + alert
+ *                                           exec_signal_stale, log [EXEC-STALE] (the bot's fix: it
+ *                                           used to place a GTC limit at the old entry)
  *   max_trades_limit > 0 and open ≥ max   → card + alert exec_limit_reached (open counts rows
  *                                           with result='' AND order_id!='' except this one)
  *   open trade on the symbol              → card exec_dup_symbol
@@ -50,7 +53,12 @@ const { makeT } = require('../engine/cards/html');
 const { bindValue, pyDumps } = require('../engine/signalTradesRepo');
 const { withActionRoutes } = require('../engine/signalDelivery');
 const exchanges = require('../exchanges');
-const { pyFloat, pyGet, pyTruthy, pyCapitalize, errStr, isDict } = require('../exchanges/pyCompat');
+const { pyFloat, pyGet, pyTruthy, pyCapitalize, errStr, isDict, pyOr, pyStr } = require('../exchanges/pyCompat');
+const { pyStrip, pyUpper } = require('../../strategies/common/pyUnicode');
+const { fmtFixed } = require('../../strategies/common/pyfmt');
+
+/** [EXEC-STALE-GUARD 2026-10] handlers/trading._EXEC_MAX_AGE_S: the tracker horizon (72 h by default). */
+const EXEC_MAX_AGE_S = require('../engine/signalOutcome').envHours('SIGNAL_TRACKER_MAX_AGE_H', 72.0) * 3600.0;
 
 // ── i18n.py (exec_trade callback) ─────────────────────────────────────────
 const MESSAGES = Object.freeze({
@@ -61,8 +69,8 @@ const MESSAGES = Object.freeze({
   exec_opening: { ru: '⏳ Открываю сделку...', en: '⏳ Opening trade...' },
   exec_placing_order: { ru: '⏳ Выставляю ордер на {exch}...', en: '⏳ Placing order on {exch}...' },
   exec_signal_stale: {
-    ru: '⚠️ Сигнал устарел (старше 4 часов). Сделка не открыта.',
-    en: '⚠️ Signal is stale (older than 4 hours). Trade not opened.',
+    ru: '⚠️ Сигнал устарел или уже отработал. Сделка не открыта.',
+    en: '⚠️ The signal is stale or has already played out. Trade not opened.',
   },
   exec_already_opened: { ru: 'ℹ️ Сделка уже была открыта ранее.', en: 'ℹ️ This trade was already opened.' },
   exec_already_on_exchange: { ru: '⚠️ Сделка уже была открыта на бирже!', en: '⚠️ Trade was already opened on the exchange!' },
@@ -306,6 +314,17 @@ async function execTradeLocked(user, tradeId, fx, deps, log) {
     fx.edit(t('exec_already_on_exchange', ul));
     fx.answer(t('exec_already_on_exchange', ul), true);
     return out('already_on_exchange');
+  }
+  // [EXEC-STALE-GUARD 2026-10] the button stays on the card after the tracker's outcome: only a
+  // signal at stage '' / ENTRY within the tracker horizon is placed
+  const stage = pyUpper(pyStrip(pyStr(pyOr(g(trade, 'progress_stage', ''), ''))));
+  const created = pyFloat(pyOr(g(trade, 'created_at', 0), 0));
+  const ageS = created > 0 ? (deps.now ? deps.now() : Date.now() / 1000) - created : 0.0;
+  if ((stage !== '' && stage !== 'ENTRY') || ageS > EXEC_MAX_AGE_S) {
+    log.info(`[EXEC-STALE] uid=${user.user_id} tid=${tradeId} stage=${stage || '-'} age=${fmtFixed(ageS, 0)}s — not placed`);
+    fx.edit(t('exec_signal_stale', ul));
+    fx.answer(t('exec_signal_stale', ul), true);
+    return out('stale');
   }
   const maxTrades = g(user, 'max_trades_limit', 5);
   const openCount = countOpenTrades(deps, user.user_id, tradeId);

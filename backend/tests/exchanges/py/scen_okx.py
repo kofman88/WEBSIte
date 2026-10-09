@@ -91,6 +91,39 @@ S("pt_max_lev_cap_and_bad_ctval", PT, [KEY, SEC, "ETH-USDT-SWAP", "LONG", 3000.0
 S("pt_no_ctval_field", PT, [KEY, SEC, "ETH-USDT-SWAP", "LONG", 3000.0, 2950.0, 3100.0, 1.0, 5], {},
   [R("GET", "/api/v5/public/instruments", inst("ETH-USDT-SWAP", "0.1", "0.01", "20", None)), B, L, R("POST", O, ORDER_OK)])
 
+# ── [OKX-LOT-CONTRACTS 2026-10] size in contracts (lotSz / minSz are contracts) ──
+def bal(eq):
+    return ok({"totalEq": eq, "upl": "0", "details": [{"ccy": "USDT", "eq": eq, "cashBal": eq, "availBal": eq}]})
+
+
+BTC_I = R("GET", "/api/v5/public/instruments", inst("BTC-USDT-SWAP", "0.01", "0.1", "100", "0.01"))
+DOGE_I = R("GET", "/api/v5/public/instruments", inst("DOGE-USDT-SWAP", "1", "0.00001", "75", "1000"))
+S("pt_lot_btc_fractional_ladder", PT, [KEY, SEC, "BTC-USDT-SWAP", "LONG", 100000.0, 98000.0, 104000.0, 1.0, 10],
+  {"tp2": 106000.0, "tp3": 108000.0, "passphrase": PP},
+  [BTC_I, R("GET", "/api/v5/account/balance", bal("3000")), L, R("POST", O, ORDER_OK), R("POST", A, algo_ok("a2"), algo_ok("a3"))])
+S("pt_lot_btc_small_account_quarter_contract", PT, [KEY, SEC, "BTC-USDT-SWAP", "LONG", 100000.0, 98000.0, 104000.0, 1.0, 10],
+  {"passphrase": PP}, [BTC_I, R("GET", "/api/v5/account/balance", bal("500")), L, R("POST", O, ORDER_OK)])
+S("pt_lot_doge_below_min_skip", PT, [KEY, SEC, "DOGE-USDT-SWAP", "LONG", 0.1, 0.098, 0.104, 1.0, 10],
+  {"passphrase": PP}, [DOGE_I, R("GET", "/api/v5/account/balance", bal("100")), L])
+S("pt_lot_doge_below_min_opt_in", PT, [KEY, SEC, "DOGE-USDT-SWAP", "LONG", 0.1, 0.098, 0.104, 1.0, 10],
+  {"passphrase": PP, "allow_low_notional_boost": True},
+  [DOGE_I, R("GET", "/api/v5/account/balance", bal("100")), L, R("POST", O, ORDER_OK)])
+S("pt_lot_min_sz_above_lot_leg_to_tp1", PT, [KEY, SEC, "ETH-USDT-SWAP", "LONG", 3000.0, 2970.0, 3060.0, 1.0, 10],
+  {"tp2": 3090.0, "tp3": 3120.0, "passphrase": PP},
+  [R("GET", "/api/v5/public/instruments", ok({"instType": "SWAP", "instId": "ETH-USDT-SWAP", "ctType": "linear", "ctValCcy": "ETH",
+                                               "lotSz": "0.01", "tickSz": "0.01", "lever": "100", "minSz": "0.05", "state": "live",
+                                               "ctVal": "0.1"})),
+   R("GET", "/api/v5/account/balance", bal("50")), L, R("POST", O, ORDER_OK), R("POST", A, algo_ok("a2"))])
+S("pt_lot_bad_min_sz", PT, [KEY, SEC, "ETH-USDT-SWAP", "LONG", 3000.0, 2970.0, 3060.0, 1.0, 10], {"passphrase": PP},
+  [R("GET", "/api/v5/public/instruments", ok({"instId": "ETH-USDT-SWAP", "lotSz": "0.01", "tickSz": "0.01", "lever": "100",
+                                               "minSz": "n/a", "ctVal": "0.1"})),
+   R("GET", "/api/v5/account/balance", bal("1000")), L, R("POST", O, ORDER_OK)])
+S("close_partial_float_noise", "close_position_partial", [KEY, SEC, "BTC-USDT-SWAP", "LONG", 0.0029, PP], {},
+  [BTC_I, R("POST", O, ORDER_OK)])
+S("sltp_tiny_position_tp_legs_below_lot", "place_sl_tp_for_position",
+  [KEY, SEC, "DOGE-USDT-SWAP", "LONG", 1500.0, 0.17851, 0.19111, 0.2, 0.21, PP], {},
+  [DOGE_I, R("GET", "/api/v5/trade/orders-algo-pending", ok()), R("POST", A, algo_ok("sl"), algo_ok("t1"))])
+
 # ── fallback / legacy ────────────────────────────────────────────────────────
 S("pt_fallback_sMsg_legacy_full", PT, LONG, LADDER,
   [I, B, L, R("POST", O, ATTACH_ERR, ORDER_OK), R("POST", A, algo_ok("sl"), algo_ok("t1"), algo_ok("t2"), algo_ok("t3"))])
@@ -205,6 +238,40 @@ S("close_position_ok", "close_position", [KEY, SEC, "BTC-USDT-SWAP", "LONG", PP]
 S("close_position_fail_cleanup_raises", "close_position", [KEY, SEC, "BTC-USDT-SWAP", "short", PP], {},
   [R("POST", "/api/v5/trade/close-position", err("51023", "Position does not exist")),
    R("GET", "/api/v5/trade/orders-pending", {"status": 200, "text": ""})])
+# [OKX-CLOSE-CLEANUP 2026-10] / [QC-SIDE-FIX 2026-10]
+S("close_position_fail_position_gone", "close_position", [KEY, SEC, "BTC-USDT-SWAP", "LONG", PP], {},
+  [R("POST", "/api/v5/trade/close-position", err("51023", "Position does not exist")),
+   R("GET", "/api/v5/account/positions", ok()), *CLEAN])
+S("close_position_fail_position_alive", "close_position", [KEY, SEC, "BTC-USDT-SWAP", "LONG", PP], {},
+  [R("POST", "/api/v5/trade/close-position", err("50001", "Service temporarily unavailable")),
+   R("GET", "/api/v5/account/positions", pos())])
+S("close_position_fail_positions_unknown", "close_position", [KEY, SEC, "BTC-USDT-SWAP", "SHORT", PP], {},
+  [R("POST", "/api/v5/trade/close-position", {"raise": "timeout"}),
+   R("GET", "/api/v5/account/positions", err("50011", "Too Many Requests"))])
+S("close_position_buy_alias_hedge_other_side_alive", "close_position", [KEY, SEC, "BTC-USDT-SWAP", "Buy", PP], {},
+  [R("POST", "/api/v5/trade/close-position", ok({"instId": "BTC-USDT-SWAP", "posSide": "long"})),
+   R("GET", "/api/v5/account/positions", pos(p="2", side="short")),
+   R("GET", "/api/v5/trade/orders-pending", ok({"ordId": "7", "posSide": "long"}, {"ordId": "8", "posSide": "short"}, {"ordId": "", "posSide": "long"})),
+   R("POST", "/api/v5/trade/cancel-order", ok({"ordId": "7", "sCode": "0", "sMsg": ""})),
+   R("GET", "/api/v5/trade/orders-algo-pending", ok({"algoId": "a-long", "posSide": "long"}, {"algoId": "a-short", "posSide": "short"}, {"algoId": "a-net", "posSide": "net"})),
+   R("POST", "/api/v5/trade/cancel-algos", ok())])
+S("close_position_hedge_no_long_leftovers", "close_position", [KEY, SEC, "BTC-USDT-SWAP", "sell", PP], {},
+  [R("POST", "/api/v5/trade/close-position", ok({"instId": "BTC-USDT-SWAP", "posSide": "short"})),
+   R("GET", "/api/v5/account/positions", pos()),
+   R("GET", "/api/v5/trade/orders-pending", err("50011", "Too Many Requests")),
+   R("GET", "/api/v5/trade/orders-algo-pending", ok({"algoId": "a-long", "posSide": "long"}))])
+S("close_position_unknown_direction", "close_position", [KEY, SEC, "BTC-USDT-SWAP", "FLAT", PP], {}, [])
+S("close_position_none_direction", "close_position", [KEY, SEC, "BTC-USDT-SWAP", None, PP], {}, [])
+S("close_partial_long_ok", "close_position_partial", [KEY, SEC, "BTC-USDT-SWAP", "LONG", 0.015, PP], {},
+  [I, R("POST", "/api/v5/trade/order", ORDER_OK)])
+S("close_partial_short_lower_case", "close_position_partial", [KEY, SEC, "ETH-USDT-SWAP", " short ", 0.37, PP], {},
+  [R("GET", "/api/v5/public/instruments", inst("ETH-USDT-SWAP", "0.1", "0.01", "100", "0.1")), R("POST", "/api/v5/trade/order", ORDER_OK)])
+S("close_partial_below_lot", "close_position_partial", [KEY, SEC, "BTC-USDT-SWAP", "LONG", 0.00005, PP], {}, [I])
+S("close_partial_rejected", "close_position_partial", [KEY, SEC, "BTC-USDT-SWAP", "LONG", 0.02, PP], {},
+  [I, R("POST", "/api/v5/trade/order", err("1", "Operation failed.", [{"ordId": "", "sCode": "51169", "sMsg": "Order failed because you don't have any positions in this direction"}]))])
+S("close_partial_rejected_no_data", "close_position_partial", [KEY, SEC, "BTC-USDT-SWAP", "LONG", 0.02, PP], {},
+  [I, R("POST", "/api/v5/trade/order", err("50113", "Invalid Sign"))])
+S("close_partial_unknown_direction", "close_position_partial", [KEY, SEC, "BTC-USDT-SWAP", "Buy", 0.02, PP], {}, [])
 S("trail_ok", "set_trailing_sl", [KEY, SEC, "BTC-USDT-SWAP", 86500.07, "LONG", 0, PP], {}, [I, R("POST", A, algo_ok())])
 S("trail_err", "set_trailing_sl", [KEY, SEC, "BTC-USDT-SWAP", 88500.04, "SHORT", 0, PP], {}, [I, R("POST", A, ALGO_ERR)])
 S("breakeven", "set_breakeven", [KEY, SEC, "BTC-USDT-SWAP", 87000.5, "LONG", 0, PP], {}, [I, R("POST", A, algo_ok())])

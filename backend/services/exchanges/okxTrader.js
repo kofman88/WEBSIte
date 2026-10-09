@@ -33,7 +33,7 @@ const { makeRuntime } = require('./runtime');
 const { TransportError, aiohttpJson } = require('./transport');
 const {
   errStr, pyGet, pyIndex, pyFloat, pyInt, pyStr, pyFloatStr, pyTruthy, pyOr, pyUrlencode, yarlUrl, htmlEscape, pySlice, isDict,
-  pyIter,
+  pyIter, pyRepr,
   rethrowCancelled,
 } = require('./pyCompat');
 const { fmtFixed, fmtG } = require('../../strategies/common/pyfmt');
@@ -42,7 +42,7 @@ const { pyJsonDumps } = require('../engine/pyjson');
 const PP = require('./pricePrecision');
 const { callWithRetry } = require('./apiRetry');
 const { killswitchGate, planGateDeny, recordPlaced, aioQuery } = require('./traderCommon');
-const { pyLower, pyUpper } = require('../../strategies/common/pyUnicode');   // CPython 3.11 str case / whitespace methods
+const { pyLower, pyUpper, pyStrip } = require('../../strategies/common/pyUnicode');   // CPython 3.11 str case / whitespace methods
 
 const BASE_URL = 'https://www.okx.com';
 const MIN_NOTIONAL = 5.0;
@@ -193,7 +193,16 @@ function createOkxTrader(overrides = {}) {
           if (!isPyErr(e, ['TypeError', 'ValueError'])) throw e;
           ctVal = 1.0;
         }
-        st.instrumentCache.set(instId, { lot, tick, lev, ctVal });
+        // [OKX-LOT-CONTRACTS 2026-10] minSz — the minimum order size in contracts
+        let minSz;
+        try {
+          minSz = pyFloat(pyOr(pyGet(inst, 'minSz'), lot));
+        } catch (e) {
+          rethrowCancelled(e);
+          if (!isPyErr(e, ['TypeError', 'ValueError'])) throw e;
+          minSz = lot;
+        }
+        st.instrumentCache.set(instId, { lot, tick, lev, ctVal, minSz });
         return [lot, tick, true, lev];
       }
     } catch (_e) {
@@ -216,8 +225,35 @@ function createOkxTrader(overrides = {}) {
     return v > 0 ? v : 1.0;
   }
 
+  /** [OKX-LOT-CONTRACTS] okx_min_sz: the instrument's minSz in contracts (lotSz when unknown). */
+  function okxMinSz(instId, lot) {
+    const c = st.instrumentCache.get(instId) || {};
+    let v;
+    try {
+      v = pyFloat(pyOr(c.minSz === undefined ? lot : c.minSz, lot));
+    } catch (e) {
+      rethrowCancelled(e);
+      if (!isPyErr(e, ['TypeError', 'ValueError'])) throw e;
+      v = lot;
+    }
+    return v > 0 ? v : lot;
+  }
+
+  /** [OKX-LOT-CONTRACTS] _lots_sz: sz = n lots × lotSz with the decimals of lotSz. */
+  const _lotsSz = (nLots, lot) => fmtFixed(nLots * lot, PP.stepDecimals(lot));
+
+  /**
+   * [OKX-LOT-CONTRACTS] _floor_lots: whole lots ≤ contracts; the quotient is rounded to 1e-9 of a
+   * lot first (0.29 / 0.01 = 28.999999999999996 used to give 28 lots instead of 29).
+   */
+  function _floorLots(contracts, lot) {
+    if (lot <= 0 || contracts <= 0) return 0;
+    return Math.floor(pyRound(contracts / lot, 9));
+  }
+
   function _toContracts(instId, qtyCoins, qtyStep) {
-    return PP.roundQty(pyFloat(qtyCoins) / okxCtVal(instId), qtyStep);
+    if (qtyStep <= 0) return PP.roundQty(pyFloat(qtyCoins) / okxCtVal(instId), qtyStep);
+    return _lotsSz(_floorLots(pyFloat(qtyCoins) / okxCtVal(instId), qtyStep), qtyStep);
   }
 
   /** okx_sz: coins → `sz` string in contracts (loads the instrument filters first). */
@@ -317,14 +353,21 @@ function createOkxTrader(overrides = {}) {
       if (riskMode === 'notional') qtyRaw = entry > 0 ? riskUsd / entry : 0;
       else if (riskMode === 'margin') qtyRaw = entry > 0 ? (equity * (riskPct / 100.0) * lev) / entry : 0;
       else qtyRaw = riskUsd / slDist;
-      let qtyStr = PP.roundQty(qtyRaw, qtyStep);
-      let qtyFloat = pyFloat(qtyStr);
-      if (qtyFloat <= 0 && qtyStep > 0) {
-        qtyFloat = qtyStep;
-        qtyStr = PP.roundQty(qtyStep, qtyStep);
-      }
+      // [OKX-LOT-CONTRACTS 2026-10] lotSz / minSz of an OKX swap are in CONTRACTS (1 contract =
+      // ctVal coins): the size is computed in contracts; below minSz there is no position (no
+      // bump without the opt-in), qty = sz × ctVal (the coins actually sent)
+      const ctVal = okxCtVal(instId);
+      const minSz = okxMinSz(instId, qtyStep);
+      const szFor = (coins) => {
+        const n = _floorLots(coins / ctVal, qtyStep);
+        if (n * qtyStep < minSz || n <= 0) return [_lotsSz(0, qtyStep), 0.0];
+        return [_lotsSz(n, qtyStep), n * qtyStep * ctVal];
+      };
+      const coinDec = PP.stepDecimals(qtyStep * ctVal);
+      let [szStr, qtyFloat] = szFor(qtyRaw);
+      let qtyStr = fmtFixed(qtyFloat, coinDec);
       let notional = qtyFloat * entry;
-      const minPos = Math.max(MIN_NOTIONAL, 10.0);
+      const minPos = Math.max(MIN_NOTIONAL, 10.0, minSz * ctVal * entry);
       if (notional < minPos) {
         if (!allowLowNotionalBoost) {
           const requiredBalance = riskPct > 0 ? minPos / (riskPct / 100.0) : 0.0;
@@ -341,8 +384,14 @@ function createOkxTrader(overrides = {}) {
           };
         }
         qtyRaw = entry > 0 ? minPos / entry : 0;
-        qtyStr = PP.roundQty(qtyRaw, qtyStep);
-        qtyFloat = pyFloat(qtyStr);
+        [szStr, qtyFloat] = szFor(qtyRaw);
+        if (qtyFloat <= 0) {
+          // [OKX-LOT-CONTRACTS] opt-in: at least the exchange's minimum order
+          const nMin = Math.max(1, Math.ceil(pyRound(minSz / qtyStep, 9)));
+          szStr = _lotsSz(nMin, qtyStep);
+          qtyFloat = nMin * qtyStep * ctVal;
+        }
+        qtyStr = fmtFixed(qtyFloat, coinDec);
         notional = qtyFloat * entry;
         if (notional < MIN_NOTIONAL) return { ok: false, order_id: '', error: `Объём слишком мал (${fmtFixed(notional, 2)} USDT).` };
         log.warning(`[AUDIT-FIX] ⚠️ Volume boosted to min (OKX user opt-in) ${instId}: qty=${qtyStr} notional=${fmtFixed(notional, 2)}`);
@@ -350,37 +399,42 @@ function createOkxTrader(overrides = {}) {
 
       const slStr = PP.roundPrice(sl, tickSize);
       const closeSide = side === 'buy' ? 'sell' : 'buy';
-      let qTp1;
-      let qTp2;
-      let qTp3;
+      // [OKX-LOT-CONTRACTS] the TP shares in whole lots; a leg below minSz goes to TP1
+      const nTotal = _floorLots(pyFloat(szStr), qtyStep);
+      let nTp1;
+      let nTp2;
+      let nTp3;
       if (pyTruthy(tp2) && tp2 > 0) {
-        qTp2 = pyFloat(PP.roundQty(qtyFloat * 0.25, qtyStep));
-        qTp3 = pyTruthy(tp3) ? pyFloat(PP.roundQty(qtyFloat * 0.25, qtyStep)) : 0.0;
-        qTp1 = pyFloat(PP.roundQty(qtyFloat - qTp2 - qTp3, qtyStep));
+        nTp2 = Math.trunc(nTotal * 0.25);
+        nTp3 = pyTruthy(tp3) ? Math.trunc(nTotal * 0.25) : 0;
+        if (nTp2 * qtyStep < minSz) nTp2 = 0;
+        if (nTp3 * qtyStep < minSz) nTp3 = 0;
+        nTp1 = nTotal - nTp2 - nTp3;
       } else {
-        qTp2 = 0.0;
-        qTp3 = 0.0;
-        qTp1 = qtyFloat;
+        nTp1 = nTotal;
+        nTp2 = 0;
+        nTp3 = 0;
       }
+      const szTp = { 1: _lotsSz(nTp1, qtyStep), 2: _lotsSz(nTp2, qtyStep), 3: _lotsSz(nTp3, qtyStep) };
       const tidShort = pySlice(pyStr(pyTruthy(tradeId) ? tradeId : `t${Math.trunc(rt.now() * 1000) % 1e10}`), 10);
       const attach = [{
         attachAlgoClOrdId: `sl_${tidShort}`,
         slTriggerPx: slStr,
         slOrdPx: '-1',
         triggerPxType: 'mark',
-        sz: _toContracts(instId, qtyFloat, qtyStep),
+        sz: szStr,
       }];
-      if (pyTruthy(tp1) && tp1 > 0 && qTp1 > 0) {
+      if (pyTruthy(tp1) && tp1 > 0 && nTp1 > 0) {
         attach.push({
           attachAlgoClOrdId: `tp1_${tidShort}`,
           tpTriggerPx: PP.roundPrice(tp1, tickSize),
           tpOrdPx: '-1',
           triggerPxType: 'mark',
-          sz: _toContracts(instId, qTp1, qtyStep),
+          sz: szTp[1],
         });
       }
       const entryBody = {
-        instId, tdMode: 'cross', side, posSide, ordType: 'market', sz: _toContracts(instId, qtyFloat, qtyStep), attachAlgoOrds: attach,
+        instId, tdMode: 'cross', side, posSide, ordType: 'market', sz: szStr, attachAlgoOrds: attach,
       };
       let resp = await _request('POST', '/api/v5/trade/order', apiKey, secret, passphrase, null, entryBody);
       const respCode = pyStr(pyGet(resp, 'code', ''));
@@ -392,7 +446,7 @@ function createOkxTrader(overrides = {}) {
       let atomicTp1Placed;
       if (atomicOk) {
         orderId = pyGet(firstData(resp), 'ordId', '');
-        atomicTp1Placed = Boolean(pyTruthy(tp1) && tp1 > 0 && qTp1 > 0);
+        atomicTp1Placed = Boolean(pyTruthy(tp1) && tp1 > 0 && nTp1 > 0);
         log.info(`[OKX-ATOMIC-OK] ${instId}: entry+SL${atomicTp1Placed ? '+TP1' : ''} in single request`);
       } else {
         if (!attachUnsupported) return { ok: false, order_id: '', error: humanizeOkxError(pyOr(respMsg, 'unknown error')) };
@@ -407,7 +461,7 @@ function createOkxTrader(overrides = {}) {
         orderId = pyGet(firstData(resp), 'ordId', '');
         const slBody = {
           instId, tdMode: 'cross', side: closeSide, posSide, ordType: 'conditional',
-          sz: _toContracts(instId, qtyFloat, qtyStep), slTriggerPx: slStr, slOrdPx: '-1', triggerPxType: 'mark',
+          sz: szStr, slTriggerPx: slStr, slOrdPx: '-1', triggerPxType: 'mark',
         };
         let slPlaced = false;
         let slLast = '';
@@ -442,20 +496,20 @@ function createOkxTrader(overrides = {}) {
 
       let tpList = [];
       if (pyTruthy(tp2) && tp2 > 0) {
-        if (!atomicTp1Placed) tpList.push([tp1, qTp1]);
-        tpList.push([tp2, qTp2]);
-        if (pyTruthy(tp3) && qTp3 > 0) tpList.push([tp3, qTp3]);
+        if (!atomicTp1Placed) tpList.push([tp1, nTp1, szTp[1]]);
+        tpList.push([tp2, nTp2, szTp[2]]);
+        if (pyTruthy(tp3) && nTp3 > 0) tpList.push([tp3, nTp3, szTp[3]]);
       } else {
-        tpList = atomicTp1Placed ? [] : [[tp1, qtyFloat]];
+        tpList = atomicTp1Placed ? [] : [[tp1, nTp1, szTp[1]]];
       }
       let tpCountOk = atomicTp1Placed ? 1 : 0;
       let tpCountExpected = atomicTp1Placed ? 1 : 0;
-      for (const [tpPrice, tpQty] of tpList) {
-        if (tpQty <= 0 || tpPrice <= 0) continue;
+      for (const [tpPrice, tpLots, tpSz] of tpList) {
+        if (tpLots <= 0 || tpPrice <= 0) continue;
         tpCountExpected += 1;
         const tpBody = {
           instId, tdMode: 'cross', side: closeSide, posSide, ordType: 'conditional',
-          sz: _toContracts(instId, tpQty, qtyStep), tpTriggerPx: PP.roundPrice(tpPrice, tickSize), tpOrdPx: '-1', triggerPxType: 'mark',
+          sz: tpSz, tpTriggerPx: PP.roundPrice(tpPrice, tickSize), tpOrdPx: '-1', triggerPxType: 'mark',
         };
         let tpOk = false;
         let tpLast = '';
@@ -602,10 +656,16 @@ function createOkxTrader(overrides = {}) {
         let okCount = 0;
         for (const [tpPrice, tpQty] of tpList) {
           if (tpQty <= 0 || tpPrice <= 0) continue;
+          const tpSz = _toContracts(instId, tpQty, qtyStep);
+          if (pyFloat(tpSz) <= 0) {
+            // [OKX-LOT-CONTRACTS] a share below one lot — no sz "0" is sent
+            log.info(`[OKX-TP-SKIP-LOT] ${instId} TP@${pyFloatStr(tpPrice)} qty=${pyFloatStr(tpQty)} < 1 lot — skipped`);
+            continue;
+          }
           expected += 1;
           const tpBody = {
             instId, tdMode: 'cross', side: closeSide, posSide, ordType: 'conditional',
-            sz: _toContracts(instId, tpQty, qtyStep), tpTriggerPx: PP.roundPrice(tpPrice, tickSize), tpOrdPx: '-1', triggerPxType: 'mark',
+            sz: tpSz, tpTriggerPx: PP.roundPrice(tpPrice, tickSize), tpOrdPx: '-1', triggerPxType: 'mark',
           };
           let tpOk = false;
           for (let a = 0; a < 3; a++) {
@@ -626,18 +686,110 @@ function createOkxTrader(overrides = {}) {
     }
   }
 
+  /** posSide of the open positions of an instrument (Set), null when OKX did not answer (okx_trader._live_pos_sides). */
+  async function _livePosSides(apiKey, secret, instId, passphrase = '') {
+    const data = await _request('GET', '/api/v5/account/positions', apiKey, secret, passphrase, { instType: 'SWAP', instId });
+    if (pyStr(pyGet(data, 'code', '')) !== '0') return null;
+    const sides = new Set();
+    for (const p of pyIter(pyOr(pyGet(data, 'data', []), []))) {
+      let pos;
+      try { pos = pyFloat(pyOr(pyGet(p, 'pos', 0), 0)); } catch (_e) { continue; }
+      if (pos !== 0) sides.add(pyLower(pyStr(pyOr(pyGet(p, 'posSide', ''), 'net'))));
+    }
+    return sides;
+  }
+
+  /**
+   * [OKX-CLOSE-CLEANUP 2026-10] (okx_trader._cleanup_side_orders): the closed side's leftovers. With
+   * a live position of the other side (hedge long / short) its SL / TP stay: only this posSide's
+   * orders and algo orders go; otherwise everything of the symbol, as before (cancelAllOrders).
+   */
+  async function _cleanupSideOrders(apiKey, secret, symbol, posSide, passphrase = '') {
+    const instId = toOkxSymbol(symbol);
+    const sides = await _livePosSides(apiKey, secret, instId, passphrase);
+    const other = posSide === 'long' ? 'short' : 'long';
+    if (sides !== null && !sides.has(other)) {
+      const r = await cancelAllOrders(apiKey, secret, symbol, passphrase);
+      return pyInt(pyOr(pyGet(r, 'cancelled', 0), 0));
+    }
+    let cancelled = 0;
+    const orders = await _request('GET', '/api/v5/trade/orders-pending', apiKey, secret, passphrase, { instType: 'SWAP', instId });
+    if (pyStr(pyGet(orders, 'code', '')) === '0') {
+      for (const o of pyIter(pyOr(pyGet(orders, 'data', []), []))) {
+        if (pyTruthy(pyGet(o, 'ordId')) && pyLower(pyStr(pyOr(pyGet(o, 'posSide', ''), ''))) === posSide) {
+          const r = await cancelOrder(apiKey, secret, symbol, pyGet(o, 'ordId'), passphrase);
+          if (pyTruthy(pyGet(r, 'ok'))) cancelled += 1;
+        }
+      }
+    }
+    const algoResp = await _request('GET', '/api/v5/trade/orders-algo-pending', apiKey, secret, passphrase,
+      { instType: 'SWAP', instId, ordType: 'conditional' });
+    if (pyStr(pyGet(algoResp, 'code', '')) !== '0') return cancelled;
+    const payload = pyIter(pyOr(pyGet(algoResp, 'data', []), []))
+      .filter((a) => pyTruthy(pyGet(a, 'algoId')) && pyLower(pyStr(pyOr(pyGet(a, 'posSide', ''), ''))) === posSide)
+      .map((a) => ({ algoId: pyGet(a, 'algoId'), instId }));
+    if (!payload.length) return cancelled;
+    const r = await _request('POST', '/api/v5/trade/cancel-algos', apiKey, secret, passphrase, null, payload);
+    return cancelled + (pyStr(pyGet(r, 'code', '')) === '0' ? payload.length : 0);
+  }
+
+  /**
+   * close_position(direction): the whole position of "LONG" / "SHORT" ("Buy" / "Sell" as position
+   * sides too). [OKX-CLOSE-CLEANUP 2026-10] the leftovers (SL / TP algos) go only when the close
+   * went through or OKX confirms the position of this side is gone; an unknown state keeps them —
+   * the bot used to cancel them after a failed close too, leaving the position without its stop.
+   */
   async function closePosition(apiKey, secret, symbol, direction, passphrase = '') {
     const instId = toOkxSymbol(symbol);
-    const posSide = pyUpper(String(direction)) === 'LONG' ? 'long' : 'short';
+    const d = pyUpper(pyStrip(pyStr(pyOr(direction, ''))));
+    let posSide;
+    if (d === 'LONG' || d === 'BUY') posSide = 'long';
+    else if (d === 'SHORT' || d === 'SELL') posSide = 'short';
+    else return { ok: false, error: `unknown direction: ${pyRepr(direction)}` };
     const resp = await _request('POST', '/api/v5/trade/close-position', apiKey, secret, passphrase, null, { instId, mgnMode: 'cross', posSide });
-    const ok = pyGet(resp, 'code') === '0';
-    try {
-      await cancelAllOrders(apiKey, secret, symbol, passphrase);
-    } catch (ce) {
-      rethrowCancelled(ce);
-      log.debug(`OKX close_position algo cleanup: ${errStr(ce)}`);
+    const ok = pyStr(pyGet(resp, 'code', '')) === '0';
+    let cleanup = ok;
+    if (!ok) {
+      try {
+        const sides = await _livePosSides(apiKey, secret, instId, passphrase);
+        cleanup = sides !== null && !sides.has(posSide);
+        if (cleanup) log.info(`[OKX-CLOSE-CLEANUP] ${instId} ${posSide}: close failed (${pyStr(pyGet(resp, 'msg', ''))}) but the position is gone — removing residual orders`);
+        else log.warning(`[OKX-CLOSE-CLEANUP] ${instId} ${posSide}: close failed (${pyStr(pyGet(resp, 'msg', ''))}) — SL/TP kept (position alive or unknown)`);
+      } catch (pe) {
+        rethrowCancelled(pe);
+        cleanup = false;
+        log.debug(`OKX close_position position check: ${errStr(pe)}`);
+      }
+    }
+    if (cleanup) {
+      try {
+        await _cleanupSideOrders(apiKey, secret, symbol, posSide, passphrase);
+      } catch (ce) {
+        rethrowCancelled(ce);
+        log.debug(`OKX close_position algo cleanup: ${errStr(ce)}`);
+      }
     }
     return { ok, error: pyGet(resp, 'msg', '') };
+  }
+
+  /**
+   * [QC-SIDE-FIX 2026-10] close_position_partial: part of a position with a market order of the
+   * opposite side on the same posSide (OKX close-position closes only the whole). qty in coins,
+   * sz in contracts rounded down to lotSz; 0 after rounding → nothing is sent.
+   */
+  async function closePositionPartial(apiKey, secret, symbol, direction, qtyCoins, passphrase = '') {
+    const d = pyUpper(pyStrip(pyStr(pyOr(direction, ''))));
+    if (d !== 'LONG' && d !== 'SHORT') return { ok: false, error: `unknown direction: ${pyRepr(direction)}` };
+    const instId = toOkxSymbol(symbol);
+    const sz = await okxSz(instId, pyFloat(pyOr(qtyCoins, 0)));
+    if (pyFloat(sz) <= 0) return { ok: false, error: 'qty rounded to 0 (below lot size)', skipped: true };
+    const body = { instId, tdMode: 'cross', side: d === 'LONG' ? 'sell' : 'buy', posSide: d === 'LONG' ? 'long' : 'short', ordType: 'market', sz };
+    const resp = await _request('POST', '/api/v5/trade/order', apiKey, secret, passphrase, null, body);
+    const ok = pyStr(pyGet(resp, 'code', '')) === '0';
+    const data = pyGet(resp, 'data');
+    const row = Array.isArray(data) && data.length ? data[0] : {};
+    const err = ok ? '' : (pyTruthy(pyGet(row, 'sMsg')) ? pyGet(row, 'sMsg') : pyGet(resp, 'msg', ''));
+    return { ok, order_id: pyStr(pyOr(pyGet(row, 'ordId', ''), '')), error: err };
   }
 
   async function getClosedPnl(apiKey, secret, symbol, passphrase = '') {
@@ -722,10 +874,10 @@ function createOkxTrader(overrides = {}) {
 
   return {
     rt, _state: st,
-    placeTrade, getPositions, getOpenOrders, closePosition, cancelOrder, cancelAllOrders, placeSlTpForPosition,
+    placeTrade, getPositions, getOpenOrders, closePosition, closePositionPartial, cancelOrder, cancelAllOrders, placeSlTpForPosition,
     setTrailingSl, setBreakeven, getClosedPnl, getAccountSummary, getDashboard, getBalance, getLastPrice, testConnection,
-    syncTime, okxSz, okxCtVal,
-    _request, _getInstrumentFilters, _toContracts, _cancelOrderInner, _isoTimestamp: isoTs,
+    syncTime, okxSz, okxCtVal, okxMinSz,
+    _request, _getInstrumentFilters, _toContracts, _cancelOrderInner, _isoTimestamp: isoTs, _livePosSides, _cleanupSideOrders,
   };
 }
 

@@ -114,7 +114,7 @@ describe('card trade buttons → /api/app routes', () => {
 
 describe('D17 defaults', () => {
   it('the site\'s fixes are the defaults; bot mode is an explicit switch', () => {
-    expect(QC.D17_SITE).toEqual({ positionSide: true });
+    expect(QC.D17_SITE).toBeUndefined();       // [QC-SIDE-FIX 2026-10]: the bot passes the position direction too
     expect(appTrade.D17_SITE).toEqual({ okxPositions: true });
   });
 });

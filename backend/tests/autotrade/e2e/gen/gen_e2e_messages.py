@@ -11,7 +11,7 @@ Output per key: {"inputs": {"args"}, "text"} where text is what the bot would se
            none here) + the [W1.2 RISK-PREVIEW] block run as the bot runs it (balance_cache with a
            SimpleNamespace(user_id) — a cold cache answers None, so no line is appended)
   confirm / halt / window   handlers/trading.py exec_trade: the trader's format_trade_result(...)
-and "i18n": the card texts of exec_trade (exec_opening, exec_already_opened, RU).
+and "i18n": the card texts of exec_trade (exec_opening, exec_already_opened, exec_signal_stale, RU).
 
 Types: JSON loses int / float; the bot passes entry / sl / tp1 / tp2 / tp3 / risk_pct as float
 (trade rows and trader_settings REAL columns) and leverage as int — restored here; the trader's
@@ -91,7 +91,7 @@ async def main():
         else:
             text = exec_message(exchange, args)
         out[key] = {"inputs": {"args": args}, "text": text}
-    out["i18n"] = {k: i18n_t(k, "ru") for k in ("exec_opening", "exec_already_opened")}
+    out["i18n"] = {k: i18n_t(k, "ru") for k in ("exec_opening", "exec_already_opened", "exec_signal_stale")}
     with open(OUT, "w", encoding="utf-8") as f:
         json.dump(out, f, ensure_ascii=False, indent=1, sort_keys=True)
         f.write("\n")

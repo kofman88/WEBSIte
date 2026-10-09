@@ -118,7 +118,7 @@ USERS = [  # uid, sub_plan, sub_status, sub_expires (rel), lang, extra fields, k
 # ── trades ───────────────────────────────────────────────────────────────────
 TRADE_COLS = ["trade_id", "user_id", "symbol", "direction", "entry", "sl", "tp1", "tp2", "tp3", "created_at", "strategy",
               "breakout_type", "timeframe", "result", "result_rr", "order_id", "pos_idx", "tp_placed", "be_set", "qty",
-              "entry_lo", "entry_hi", "exchange", "state", "original_sl"]
+              "entry_lo", "entry_hi", "exchange", "state", "original_sl", "progress_stage"]
 EXEC_BTN = "exec"
 QC_BTNS = "qc"
 
@@ -152,6 +152,13 @@ TRADES = [
     T("ex-locked", 204, sym="DOT-USDT-SWAP"),
     T("ex-foreign", 205, sym="LTC-USDT-SWAP"),          # 204 presses 205's button: the bot opens it with 204's keys
     T("ex-nobtn", 204, sym="NEAR-USDT-SWAP", card=None),
+    # [EXEC-STALE-GUARD 2026-10]: the tracker's outcome / the tracker horizon
+    T("ex-st-sl", 204, sym="FIL-USDT-SWAP", progress_stage="SL"),
+    T("ex-st-tp1", 204, sym="FIL-USDT-SWAP", progress_stage="TP1"),
+    T("ex-st-missed", 204, sym="FIL-USDT-SWAP", progress_stage="MISSED"),
+    T("ex-st-expired", 204, sym="FIL-USDT-SWAP", progress_stage="EXPIRED"),
+    T("ex-st-old", 204, sym="FIL-USDT-SWAP", age=72 * 3600 + 120),
+    T("ex-st-entry", 204, sym="APT-USDT-SWAP", progress_stage="ENTRY"),
     # quick close
     T("qc-by-1", 219, order_id="ord-q1", state="OPEN", card=QC_BTNS, pos_idx=0),
     T("qc-by-short", 219, sym="ETH-USDT-SWAP", direction="SHORT", entry=3000.0, sl=3060.0, tp1=2900.0, order_id="ord-q2",
@@ -579,6 +586,12 @@ cb("exec foreign trade (bot opens it!) → site 404", 204, "exec_trade", "exec_t
 cb("exec card without the button → site 404", 204, "exec_trade", "exec_trade_ex-nobtn", "ex-nobtn", routes=PT_BY_OK, site="not_found")
 cb("exec missing trade (bot: stale) → site 404", 204, "exec_trade", "exec_trade_nope", "nope", site="not_found")
 cb("exec hostile id a/b → site 404", 204, "exec_trade", "exec_trade_../x", "../x", site="not_found")
+cb("exec stage SL → stale (EXEC-STALE-GUARD)", 204, "exec_trade", "exec_trade_ex-st-sl", "ex-st-sl", routes=PT_BY_OK)
+cb("exec stage TP1 → stale", 204, "exec_trade", "exec_trade_ex-st-tp1", "ex-st-tp1", routes=PT_BY_OK)
+cb("exec stage MISSED → stale", 204, "exec_trade", "exec_trade_ex-st-missed", "ex-st-missed", routes=PT_BY_OK)
+cb("exec stage EXPIRED → stale", 204, "exec_trade", "exec_trade_ex-st-expired", "ex-st-expired", routes=PT_BY_OK)
+cb("exec older than the tracker horizon → stale", 204, "exec_trade", "exec_trade_ex-st-old", "ex-st-old", routes=PT_BY_OK)
+cb("exec stage ENTRY → placed", 204, "exec_trade", "exec_trade_ex-st-entry", "ex-st-entry", routes=PT_BY_FAIL)
 
 # quick close
 POS_BY_1 = R("GET", "/v5/position/list", by_pos([by_p(size="0.0125")]))
@@ -594,12 +607,21 @@ cb("qc half bingx", 220, "cb_qc_half", "qc_half_qc-bx-1", "qc-bx-1",
 cb("qc half binance", 221, "cb_qc_half", "qc_half_qc-bn-1", "qc-bn-1",
    routes=[R("GET", "/fapi/v2/positionRisk", bn_pos("0.022")), R("GET", "/fapi/v1/exchangeInfo", BN_INFO),
            R("GET", "/fapi/v1/positionSide/dual", {"dualSidePosition": True}), R("POST", "/fapi/v1/order", bn_order(77))])
-cb("qc half okx → TypeError (no size kwarg)", 222, "cb_qc_half", "qc_half_qc-ok-1", "qc-ok-1", routes=[R("GET", "/api/v5/account/positions", ok_pos())])
+cb("qc half okx → partial market order (QC-SIDE-FIX)", 222, "cb_qc_half", "qc_half_qc-ok-1", "qc-ok-1",
+   routes=[R("GET", "/api/v5/account/positions", ok_pos("BTC-USDT-SWAP", "3")), R("GET", "/api/v5/public/instruments", ok_inst()),
+           R("POST", "/api/v5/trade/order", OK_ORDER)])
+cb("qc half okx below one lot → nothing sent", 222, "cb_qc_half", "qc_half_qc-ok-1", "qc-ok-1",
+   routes=[R("GET", "/api/v5/account/positions", ok_pos("BTC-USDT-SWAP", "0.01")), R("GET", "/api/v5/public/instruments", ok_inst())])
+cb("qc half bybit hedge → the LONG's size, not the first position", 219, "cb_qc_half", "qc_half_qc-by-1", "qc-by-1",
+   routes=[R("GET", "/v5/position/list", by_pos([by_p(size="0.5", idx=2, side="Sell"), by_p(size="0.0125", idx=1, side="Buy")]))] + CLOSE_BY_OK)
+cb("qc half bingx hedge → the LONG's size", 220, "cb_qc_half", "qc_half_qc-bx-1", "qc-bx-1",
+   routes=[R("GET", "/openApi/swap/v2/user/positions", {"code": 0, "msg": "", "data": bx_pos(amt="0.3", side="SHORT")["data"] + bx_pos(amt="0.0116")["data"]}),
+           R("GET", "/openApi/swap/v2/quote/contracts", BX_CONTRACTS), R("POST", "/openApi/swap/v2/trade/order", bx_order(63))])
 cb("qc half kraken → not supported", 219, "cb_qc_half", "qc_half_qc-kraken", "qc-kraken")
 cb("qc half SMC row (NULL exchange → bybit, no bybit keys)", 222, "cb_qc_half", "qc_half_qc-smc-null-ex", "qc-smc-null-ex")
 cb("qc half closed trade", 219, "cb_qc_half", "qc_half_qc-closed", "qc-closed")
 cb("qc half pos_idx NULL → int(None)", 219, "cb_qc_half", "qc_half_qc-posidx-null", "qc-posidx-null")
-cb("qc half direction empty → Buy side", 219, "cb_qc_half", "qc_half_qc-dir-empty", "qc-dir-empty", routes=[POS_BY_1] + CLOSE_BY_OK)
+cb("qc half direction empty → refused before any request", 219, "cb_qc_half", "qc_half_qc-dir-empty", "qc-dir-empty", routes=[POS_BY_1] + CLOSE_BY_OK)
 cb("qc half positions timeout", 219, "cb_qc_half", "qc_half_qc-by-1", "qc-by-1", routes=[R("GET", "/v5/position/list", {"raise": "timeout"})])
 cb("qc half foreign → site 404", 205, "cb_qc_half", "qc_half_qc-by-1", "qc-by-1", site="not_found")
 cb("qc half missing → site 404", 219, "cb_qc_half", "qc_half_nope", "nope", site="not_found")
@@ -612,7 +634,21 @@ OK_CLOSE = [R("GET", "/api/v5/account/positions", ok_pos()), R("POST", "/api/v5/
             R("GET", "/api/v5/trade/orders-pending", ok_ok({"ordId": "9", "instId": "BTC-USDT-SWAP", "side": "sell", "ordType": "limit"})),
             R("POST", "/api/v5/trade/cancel-order", ok_ok({"ordId": "9", "sCode": "0", "sMsg": ""})),
             R("GET", "/api/v5/trade/orders-algo-pending", ok_ok({"algoId": "sl-1"})), R("POST", "/api/v5/trade/cancel-algos", ok_ok())]
-cb("qc full okx LONG → posSide short + algo cancel (quirk)", 222, "cb_qc_full", "qc_full_qc-ok-1", "qc-ok-1", routes=OK_CLOSE)
+cb("qc full okx LONG failed close → SL/TP kept", 222, "cb_qc_full", "qc_full_qc-ok-1", "qc-ok-1", routes=OK_CLOSE)
+cb("qc full okx LONG failed close, position gone → leftovers cancelled", 222, "cb_qc_full", "qc_full_qc-ok-1", "qc-ok-1",
+   routes=[R("GET", "/api/v5/account/positions", ok_pos(), ok_ok())] + OK_CLOSE[1:])
+cb("qc full okx LONG closed → leftovers cancelled", 222, "cb_qc_full", "qc_full_qc-ok-1", "qc-ok-1",
+   routes=[R("GET", "/api/v5/account/positions", ok_pos(), ok_ok()),
+           R("POST", "/api/v5/trade/close-position", ok_ok({"instId": "BTC-USDT-SWAP", "posSide": "long"}))] + OK_CLOSE[2:])
+cb("qc full okx LONG closed, hedge SHORT alive → only the long side's orders go", 222, "cb_qc_full", "qc_full_qc-ok-1", "qc-ok-1",
+   routes=[R("GET", "/api/v5/account/positions", ok_ok(ok_pos()["data"][0], ok_pos(p="2", side="short")["data"][0]), ok_pos(p="2", side="short")),
+           R("POST", "/api/v5/trade/close-position", ok_ok({"instId": "BTC-USDT-SWAP", "posSide": "long"})),
+           R("GET", "/api/v5/trade/orders-pending",
+             ok_ok({"ordId": "9", "instId": "BTC-USDT-SWAP", "side": "buy", "posSide": "long", "ordType": "limit"},
+                   {"ordId": "10", "instId": "BTC-USDT-SWAP", "side": "sell", "posSide": "short", "ordType": "limit"})),
+           R("POST", "/api/v5/trade/cancel-order", ok_ok({"ordId": "9", "sCode": "0", "sMsg": ""})),
+           R("GET", "/api/v5/trade/orders-algo-pending", ok_ok({"algoId": "sl-long", "posSide": "long"}, {"algoId": "sl-short", "posSide": "short"})),
+           R("POST", "/api/v5/trade/cancel-algos", ok_ok())])
 cb("qc full okx SHORT", 222, "cb_qc_full", "qc_full_qc-ok-short", "qc-ok-short",
    routes=[R("GET", "/api/v5/account/positions", ok_pos("ETH-USDT-SWAP", "3", "short")),
            R("POST", "/api/v5/trade/close-position", ok_ok({"instId": "ETH-USDT-SWAP", "posSide": "short"})),

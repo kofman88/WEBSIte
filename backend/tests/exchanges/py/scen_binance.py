@@ -287,6 +287,17 @@ S("close_position_short_error", "close_position", [KEY, SEC, "ETH-USDT-SWAP", "s
   [I, R("POST", "/fapi/v1/order", err(-2022, "ReduceOnly Order is rejected."))])
 S("close_position_zero_qty", "close_position", [KEY, SEC, "BTC-USDT-SWAP", "LONG", 0.0004], {}, [I])
 S("close_position_no_order_id", "close_position", [KEY, SEC, "BTC-USDT-SWAP", "LONG", 0.011], {}, [I, R("POST", "/fapi/v1/order", {"status": "NEW"})])
+# [BINANCE-CLOSE-ONEWAY 2026-10]
+S("close_position_oneway_4061_retry", "close_position", [KEY, SEC, "BTC-USDT-SWAP", "LONG", 0.0115], {},
+  [I, R("POST", "/fapi/v1/order", err(-4061, "Order's position side does not match user's setting."), order(56))])
+S("close_position_oneway_4061_twice", "close_position", [KEY, SEC, "ETH-USDT-SWAP", "SHORT", 1.5], {},
+  [I, R("POST", "/fapi/v1/order", err(-4061, "Order's position side does not match user's setting."))])
+S("close_position_sell_alias", "close_position", [KEY, SEC, "BTC-USDT-SWAP", " Sell ", 0.0115], {}, [I, R("POST", "/fapi/v1/order", order(57))])
+S("close_position_unknown_side", "close_position", [KEY, SEC, "BTC-USDT-SWAP", "FLAT", 0.0115], {}, [I])
+S("close_position_none_side", "close_position", [KEY, SEC, "BTC-USDT-SWAP", None, 0.0115], {}, [I])
+S("close_position_empty_answer", "close_position", [KEY, SEC, "BTC-USDT-SWAP", "LONG", 0.0115], {}, [I, R("POST", "/fapi/v1/order", {})])
+S("close_position_network_error", "close_position", [KEY, SEC, "BTC-USDT-SWAP", "LONG", 0.0115], {},
+  [I, R("POST", "/fapi/v1/order", {"raise": "connect", "message": "Cannot connect to host fapi.binance.com:443 ssl:default [Connection reset by peer]"})])
 S("cancel_order_ok", "cancel_order", [KEY, SEC, "BTC-USDT-SWAP", "283194212"], {}, [R("DELETE", "/fapi/v1/order", order(283194212, status="CANCELED"))])
 S("cancel_order_err", "cancel_order", [KEY, SEC, "BTC-USDT-SWAP", 12], {}, [R("DELETE", "/fapi/v1/order", err(-2011, "Unknown order sent."))])
 S("cancel_all_ok", "cancel_all_orders", [KEY, SEC, "BTC-USDT-SWAP"], {}, [R("DELETE", "/fapi/v1/allOpenOrders", {"code": 200, "msg": "done"})])

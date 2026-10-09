@@ -96,7 +96,7 @@
      "error": "",
      "ok": true,
      "order_id": "7012",
-     "qty": "6",
+     "qty": "6.72",
      "risk_applied_pct": 0.5,
      "risk_capped": false,
      "risk_requested_pct": 0.5,
@@ -114,7 +114,7 @@
     7935.0029595999995
    ]
   },
-  "text": "📈 <b>OKX LONG</b>  SYNUP07  ×25\n\n💰 Entry: <code>7896.887707</code>\n🛑 SL: <code>7889.449848</code>\n🎯 TP1: <code>7912.226404</code>  |  TP2: <code>7923.614682</code>  |  TP3: <code>7935.00296</code>\n📊 Qty: 6  |  Risk: 0.50%\n🆔 <code>7012</code>"
+  "text": "📈 <b>OKX LONG</b>  SYNUP07  ×25\n\n💰 Entry: <code>7896.887707</code>\n🛑 SL: <code>7889.449848</code>\n🎯 TP1: <code>7912.226404</code>  |  TP2: <code>7923.614682</code>  |  TP3: <code>7935.00296</code>\n📊 Qty: 6.72  |  Risk: 0.50%\n🆔 <code>7012</code>"
  },
  "confirm:binance": {
   "inputs": {
@@ -122,7 +122,7 @@
     {
      "error": "",
      "ok": true,
-     "order_id": "7030",
+     "order_id": "7031",
      "qty": 8.78,
      "tp_placed": true
     },
@@ -137,7 +137,7 @@
     7935.0029595999995
    ]
   },
-  "text": "✅ <b>Binance: сделка открыта</b>\n━━━━━━━━━━━━━━━━━━━━━━\n🟢 LONG  <b>SYNUP07USDT</b>  x25\n💵 Вход: <code>7900.838126</code>\n🛑 SL:   <code>7889.449848</code>\n🎯 TP1: <code>7912.226404</code>  (50% позиции)\n🎯 TP2: <code>7923.614682</code>  (25% позиции)\n🏆 TP3: <code>7935.00296</code>  (25% позиции)\n♻️ <i>После TP1 — стоп перенесётся в БУ</i>\n📊 Qty: 8.78  (~$69,369.36)\n⚖️ Риск: 1.0%\n🆔 <code>7030</code>"
+  "text": "✅ <b>Binance: сделка открыта</b>\n━━━━━━━━━━━━━━━━━━━━━━\n🟢 LONG  <b>SYNUP07USDT</b>  x25\n💵 Вход: <code>7900.838126</code>\n🛑 SL:   <code>7889.449848</code>\n🎯 TP1: <code>7912.226404</code>  (50% позиции)\n🎯 TP2: <code>7923.614682</code>  (25% позиции)\n🏆 TP3: <code>7935.00296</code>  (25% позиции)\n♻️ <i>После TP1 — стоп перенесётся в БУ</i>\n📊 Qty: 8.78  (~$69,369.36)\n⚖️ Риск: 1.0%\n🆔 <code>7031</code>"
  },
  "confirm:bingx": {
   "inputs": {
@@ -145,7 +145,7 @@
     {
      "error": "",
      "ok": true,
-     "order_id": "7025",
+     "order_id": "7026",
      "qty": 8.78,
      "tp_placed": true
     },
@@ -160,7 +160,7 @@
     7935.0029595999995
    ]
   },
-  "text": "✅ <b>BingX: сделка открыта</b>\n━━━━━━━━━━━━━━━━━━━━━━\n🟢 LONG  <b>SYNUP07-USDT</b>  x25\n💵 Вход: <code>7900.838126</code>\n🛑 SL:   <code>7889.449848</code>\n🎯 TP1: <code>7912.226404</code>  (50% позиции)\n🎯 TP2: <code>7923.614682</code>  (25% позиции)\n🏆 TP3: <code>7935.00296</code>  (25% позиции)\n♻️ <i>После TP1 — стоп перенесётся в БУ</i>\n📊 Qty: 8.78  (~$69,369.36)\n⚖️ Риск: 1.0%\n🆔 <code>7025</code>"
+  "text": "✅ <b>BingX: сделка открыта</b>\n━━━━━━━━━━━━━━━━━━━━━━\n🟢 LONG  <b>SYNUP07-USDT</b>  x25\n💵 Вход: <code>7900.838126</code>\n🛑 SL:   <code>7889.449848</code>\n🎯 TP1: <code>7912.226404</code>  (50% позиции)\n🎯 TP2: <code>7923.614682</code>  (25% позиции)\n🏆 TP3: <code>7935.00296</code>  (25% позиции)\n♻️ <i>После TP1 — стоп перенесётся в БУ</i>\n📊 Qty: 8.78  (~$69,369.36)\n⚖️ Риск: 1.0%\n🆔 <code>7026</code>"
  },
  "confirm:bybit": {
   "inputs": {
@@ -174,7 +174,7 @@
      "leverage_requested": 25,
      "notional": 69369.35874627999,
      "ok": true,
-     "order_id": "by-7022",
+     "order_id": "by-7023",
      "order_type": "Limit",
      "pos_idx": 0,
      "qty": "8.780",
@@ -196,7 +196,7 @@
     7935.0029595999995
    ]
   },
-  "text": "✅ <b>ЛИМИТНЫЙ ОРДЕР ВЫСТАВЛЕН на Bybit</b>\n\n💎 <b>SYNUP07USDT</b>   🟢 LONG   x25\n\n🎯 Лимитный вход: <code>7900.838126</code>\n🛑 Стоп:          <code>7889.449848</code>\n\n🎯 TP1: <code>7912.226404</code>  (50% позиции)\n🎯 TP2: <code>7923.614682</code>  (25% позиции)\n🏆 TP3: <code>7935.00296</code>  (25% позиции)\n\n♻️ <i>После TP1 — стоп автоматически перенесётся в БУ</i>\n\n📦 <b>Размер позиции:</b> <code>8.780</code>  (~$69369.36 = 693.7% баланса)\n⚠️ <b>Макс. убыток при SL:</b> <code>$100.00</code> (1.0% от $10000.00)\n<i>💡 Размер ≠ риск. Размер — сумма позиции, риск — реальный $ убыток при SL.</i>\n\n🆔 Order ID: <code>by-7022</code>"
+  "text": "✅ <b>ЛИМИТНЫЙ ОРДЕР ВЫСТАВЛЕН на Bybit</b>\n\n💎 <b>SYNUP07USDT</b>   🟢 LONG   x25\n\n🎯 Лимитный вход: <code>7900.838126</code>\n🛑 Стоп:          <code>7889.449848</code>\n\n🎯 TP1: <code>7912.226404</code>  (50% позиции)\n🎯 TP2: <code>7923.614682</code>  (25% позиции)\n🏆 TP3: <code>7935.00296</code>  (25% позиции)\n\n♻️ <i>После TP1 — стоп автоматически перенесётся в БУ</i>\n\n📦 <b>Размер позиции:</b> <code>8.780</code>  (~$69369.36 = 693.7% баланса)\n⚠️ <b>Макс. убыток при SL:</b> <code>$100.00</code> (1.0% от $10000.00)\n<i>💡 Размер ≠ риск. Размер — сумма позиции, риск — реальный $ убыток при SL.</i>\n\n🆔 Order ID: <code>by-7023</code>"
  },
  "confirm:okx": {
   "inputs": {
@@ -204,8 +204,8 @@
     {
      "error": "",
      "ok": true,
-     "order_id": "7035",
-     "qty": "8",
+     "order_id": "7036",
+     "qty": "8.78",
      "symbol": "SYNUP07-USDT-SWAP",
      "tp_placed": true
     },
@@ -220,7 +220,7 @@
     7935.0029595999995
    ]
   },
-  "text": "📈 <b>OKX LONG</b>  SYNUP07  ×25\n\n💰 Entry: <code>7900.838126</code>\n🛑 SL: <code>7889.449848</code>\n🎯 TP1: <code>7912.226404</code>  |  TP2: <code>7923.614682</code>  |  TP3: <code>7935.00296</code>\n📊 Qty: 8  |  Risk: 1.00%\n🆔 <code>7035</code>"
+  "text": "📈 <b>OKX LONG</b>  SYNUP07  ×25\n\n💰 Entry: <code>7900.838126</code>\n🛑 SL: <code>7889.449848</code>\n🎯 TP1: <code>7912.226404</code>  |  TP2: <code>7923.614682</code>  |  TP3: <code>7935.00296</code>\n📊 Qty: 8.78  |  Risk: 1.00%\n🆔 <code>7036</code>"
  },
  "halt:binance": {
   "inputs": {
@@ -308,42 +308,7 @@
  },
  "i18n": {
   "exec_already_opened": "ℹ️ Сделка уже была открыта ранее.",
-  "exec_opening": "⏳ Открываю сделку..."
- },
- "window:bybit": {
-  "inputs": {
-   "args": [
-    {
-     "avg_price": 0,
-     "balance": 10000,
-     "leverage": 25,
-     "leverage_applied": 25,
-     "leverage_downgraded": false,
-     "leverage_requested": 25,
-     "notional": 34684.679373139996,
-     "ok": true,
-     "order_id": "by-7040",
-     "order_type": "Limit",
-     "pos_idx": 0,
-     "qty": "4.390",
-     "risk_actual_pct": 0.5,
-     "risk_boosted": false,
-     "risk_requested_pct": 0.5,
-     "side": "Buy",
-     "symbol": "SYNUP07USDT",
-     "tp_placed": true
-    },
-    "LONG",
-    "SYNUP07-USDT-SWAP",
-    7900.838126,
-    7889.449848133333,
-    7912.226403866666,
-    0.5,
-    25,
-    7923.614681733333,
-    7935.0029595999995
-   ]
-  },
-  "text": "✅ <b>ЛИМИТНЫЙ ОРДЕР ВЫСТАВЛЕН на Bybit</b>\n\n💎 <b>SYNUP07USDT</b>   🟢 LONG   x25\n\n🎯 Лимитный вход: <code>7900.838126</code>\n🛑 Стоп:          <code>7889.449848</code>\n\n🎯 TP1: <code>7912.226404</code>  (50% позиции)\n🎯 TP2: <code>7923.614682</code>  (25% позиции)\n🏆 TP3: <code>7935.00296</code>  (25% позиции)\n\n♻️ <i>После TP1 — стоп автоматически перенесётся в БУ</i>\n\n📦 <b>Размер позиции:</b> <code>4.390</code>  (~$34684.68 = 346.8% баланса)\n⚠️ <b>Макс. убыток при SL:</b> <code>$50.00</code> (0.5% от $10000.00)\n<i>💡 Размер ≠ риск. Размер — сумма позиции, риск — реальный $ убыток при SL.</i>\n\n🆔 Order ID: <code>by-7040</code>"
+  "exec_opening": "⏳ Открываю сделку...",
+  "exec_signal_stale": "⚠️ Сигнал устарел или уже отработал. Сделка не открыта."
  }
 }

@@ -26,6 +26,7 @@ const CALLS = {
   set_breakeven: (t, a) => t.setBreakeven(...a),
   place_sl_tp_for_position: (t, a) => t.placeSlTpForPosition(...a),
   close_position: (t, a) => t.closePosition(...a),
+  close_position_partial: (t, a) => t.closePositionPartial(...a),
   cancel_all_orders: (t, a) => t.cancelAllOrders(...a),
   cancel_order: (t, a) => t.cancelOrder(...a),
   get_positions: (t, a) => t.getPositions(...a),

@@ -14,7 +14,9 @@
  *           close_position 10001 + "qty invalid" → {ok:false, benign:true},
  *           cancel_order 110001 (already gone, logged at debug), place_order 110072 duplicate
  *           orderLinkId → verify position → ok (duplicate:true)
- *   bingx   leverage 80014 (already set), duplicate clientOrderId 101204/101404/"duplicate",
+ *   bingx   leverage 80014 (already set), duplicate clientOrderId: the "duplicate" / "clientOrderId
+ *           exist" text, or 101204/101404 confirmed by the order found by its clientOrderId
+ *           ([BINGX-DUP-VERIFY] — 101204 alone is «Insufficient margin», an error),
  *           trailing-SL cancel of the old SL 109400 ("order not exist"), 110424 (size >
  *           available: original SL stays, logged at info)
  *   binance positionSide/dual -4059 (no need to change), duplicate -4015 /
@@ -112,7 +114,7 @@ const BENIGN = Object.freeze({
   }),
   bingx: Object.freeze({
     set_leverage: [80014],
-    duplicate: [101204, 101404],
+    duplicate: [101204, 101404],              // only with the order found by clientOrderId ([BINGX-DUP-VERIFY])
     trailing_cancel_old_sl: [109400],
     trailing_size_gt_available: [110424],
   }),

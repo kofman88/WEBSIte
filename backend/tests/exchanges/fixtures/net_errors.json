@@ -1,13 +1,13 @@
 {
  "bases": {
   "dns": "https://exchange-host-that-does-not-exist.invalid",
-  "refused": "https://127.0.0.1:46103",
-  "close": "http://127.0.0.1:33127",
-  "reset": "http://127.0.0.1:33785",
-  "truncated": "http://127.0.0.1:32905",
-  "chunked": "http://127.0.0.1:46621",
-  "silent": "http://127.0.0.1:33597",
-  "html": "http://127.0.0.1:33927"
+  "refused": "https://127.0.0.1:47687",
+  "close": "http://127.0.0.1:36479",
+  "reset": "http://127.0.0.1:36531",
+  "truncated": "http://127.0.0.1:33213",
+  "chunked": "http://127.0.0.1:33565",
+  "silent": "http://127.0.0.1:34513",
+  "html": "http://127.0.0.1:33701"
  },
  "client": [
   {
@@ -32,27 +32,27 @@
   },
   {
    "mode": "refused",
-   "url": "https://127.0.0.1:46103/v5/market/time?category=linear&symbol=BTCUSDT",
+   "url": "https://127.0.0.1:47687/v5/market/time?category=linear&symbol=BTCUSDT",
    "client": "aiohttp",
    "timeout": 1,
    "got": {
     "type": "ClientConnectorError",
-    "str": "Cannot connect to host 127.0.0.1:46103 ssl:default [Connect call failed ('127.0.0.1', 46103)]"
+    "str": "Cannot connect to host 127.0.0.1:47687 ssl:default [Connect call failed ('127.0.0.1', 47687)]"
    }
   },
   {
    "mode": "refused",
-   "url": "https://127.0.0.1:46103/v5/market/time?category=linear&symbol=BTCUSDT",
+   "url": "https://127.0.0.1:47687/v5/market/time?category=linear&symbol=BTCUSDT",
    "client": "requests",
    "timeout": 1,
    "got": {
     "type": "ConnectionError",
-    "str": "HTTPSConnectionPool(host='127.0.0.1', port=46103): Max retries exceeded with url: /v5/market/time?category=linear&symbol=BTCUSDT (Caused by NewConnectionError(\"HTTPSConnection(host='127.0.0.1', port=46103): Failed to establish a new connection: [Errno 111] Connection refused\"))"
+    "str": "HTTPSConnectionPool(host='127.0.0.1', port=47687): Max retries exceeded with url: /v5/market/time?category=linear&symbol=BTCUSDT (Caused by NewConnectionError(\"HTTPSConnection(host='127.0.0.1', port=47687): Failed to establish a new connection: [Errno 111] Connection refused\"))"
    }
   },
   {
    "mode": "close",
-   "url": "http://127.0.0.1:33127/v5/market/time",
+   "url": "http://127.0.0.1:36479/v5/market/time",
    "client": "aiohttp",
    "timeout": 1,
    "got": {
@@ -62,7 +62,7 @@
   },
   {
    "mode": "close",
-   "url": "http://127.0.0.1:33127/v5/market/time",
+   "url": "http://127.0.0.1:36479/v5/market/time",
    "client": "requests",
    "timeout": 1,
    "got": {
@@ -72,7 +72,7 @@
   },
   {
    "mode": "reset",
-   "url": "http://127.0.0.1:33785/v5/market/time",
+   "url": "http://127.0.0.1:36531/v5/market/time",
    "client": "aiohttp",
    "timeout": 1,
    "got": {
@@ -82,7 +82,7 @@
   },
   {
    "mode": "reset",
-   "url": "http://127.0.0.1:33785/v5/market/time",
+   "url": "http://127.0.0.1:36531/v5/market/time",
    "client": "requests",
    "timeout": 1,
    "got": {
@@ -92,7 +92,7 @@
   },
   {
    "mode": "truncated",
-   "url": "http://127.0.0.1:32905/v5/market/time",
+   "url": "http://127.0.0.1:33213/v5/market/time",
    "client": "aiohttp",
    "timeout": 1,
    "got": {
@@ -102,7 +102,7 @@
   },
   {
    "mode": "truncated",
-   "url": "http://127.0.0.1:32905/v5/market/time",
+   "url": "http://127.0.0.1:33213/v5/market/time",
    "client": "requests",
    "timeout": 1,
    "got": {
@@ -112,7 +112,7 @@
   },
   {
    "mode": "chunked",
-   "url": "http://127.0.0.1:46621/v5/market/time",
+   "url": "http://127.0.0.1:33565/v5/market/time",
    "client": "aiohttp",
    "timeout": 1,
    "got": {
@@ -122,7 +122,7 @@
   },
   {
    "mode": "chunked",
-   "url": "http://127.0.0.1:46621/v5/market/time",
+   "url": "http://127.0.0.1:33565/v5/market/time",
    "client": "requests",
    "timeout": 1,
    "got": {
@@ -132,7 +132,7 @@
   },
   {
    "mode": "silent",
-   "url": "http://127.0.0.1:33597/v5/market/time",
+   "url": "http://127.0.0.1:34513/v5/market/time",
    "client": "aiohttp",
    "timeout": 1,
    "got": {
@@ -142,12 +142,12 @@
   },
   {
    "mode": "silent",
-   "url": "http://127.0.0.1:33597/v5/market/time",
+   "url": "http://127.0.0.1:34513/v5/market/time",
    "client": "requests",
    "timeout": 1,
    "got": {
     "type": "ReadTimeout",
-    "str": "HTTPConnectionPool(host='127.0.0.1', port=33597): Read timed out. (read timeout=1)"
+    "str": "HTTPConnectionPool(host='127.0.0.1', port=34513): Read timed out. (read timeout=1)"
    }
   }
  ],
@@ -203,55 +203,55 @@
   {
    "exchange": "bingx",
    "mode": "refused",
-   "base": "https://127.0.0.1:46103",
+   "base": "https://127.0.0.1:47687",
    "path": "/openApi/swap/v2/user/balance",
    "got": {
     "result": {
      "code": -1,
-     "msg": "network: Cannot connect to host 127.0.0.1:46103 ssl:default [Connect call failed ('127.0.0.1', 46103)]"
+     "msg": "network: Cannot connect to host 127.0.0.1:47687 ssl:default [Connect call failed ('127.0.0.1', 47687)]"
     }
    }
   },
   {
    "exchange": "binance",
    "mode": "refused",
-   "base": "https://127.0.0.1:46103",
+   "base": "https://127.0.0.1:47687",
    "path": "/fapi/v2/balance",
    "got": {
     "result": {
      "code": -1,
-     "msg": "Cannot connect to host 127.0.0.1:46103 ssl:default [Connect call failed ('127.0.0.1', 46103)]"
+     "msg": "Cannot connect to host 127.0.0.1:47687 ssl:default [Connect call failed ('127.0.0.1', 47687)]"
     }
    }
   },
   {
    "exchange": "okx",
    "mode": "refused",
-   "base": "https://127.0.0.1:46103",
+   "base": "https://127.0.0.1:47687",
    "path": "/api/v5/account/balance",
    "got": {
     "result": {
      "code": "-1",
-     "msg": "Cannot connect to host 127.0.0.1:46103 ssl:default [Connect call failed ('127.0.0.1', 46103)]"
+     "msg": "Cannot connect to host 127.0.0.1:47687 ssl:default [Connect call failed ('127.0.0.1', 47687)]"
     }
    }
   },
   {
    "exchange": "bybit",
    "mode": "refused",
-   "base": "https://127.0.0.1:46103",
+   "base": "https://127.0.0.1:47687",
    "path": "/v5/account/wallet-balance",
    "got": {
     "raised": {
      "type": "ConnectionError",
-     "str": "HTTPSConnectionPool(host='127.0.0.1', port=46103): Max retries exceeded with url: /v5/account/wallet-balance?accountType=UNIFIED&coin=USDT (Caused by NewConnectionError(\"HTTPSConnection(host='127.0.0.1', port=46103): Failed to establish a new connection: [Errno 111] Connection refused\"))"
+     "str": "HTTPSConnectionPool(host='127.0.0.1', port=47687): Max retries exceeded with url: /v5/account/wallet-balance?accountType=UNIFIED&coin=USDT (Caused by NewConnectionError(\"HTTPSConnection(host='127.0.0.1', port=47687): Failed to establish a new connection: [Errno 111] Connection refused\"))"
     }
    }
   },
   {
    "exchange": "bingx",
    "mode": "close",
-   "base": "http://127.0.0.1:33127",
+   "base": "http://127.0.0.1:36479",
    "path": "/openApi/swap/v2/user/balance",
    "got": {
     "result": {
@@ -263,7 +263,7 @@
   {
    "exchange": "binance",
    "mode": "close",
-   "base": "http://127.0.0.1:33127",
+   "base": "http://127.0.0.1:36479",
    "path": "/fapi/v2/balance",
    "got": {
     "result": {
@@ -275,7 +275,7 @@
   {
    "exchange": "okx",
    "mode": "close",
-   "base": "http://127.0.0.1:33127",
+   "base": "http://127.0.0.1:36479",
    "path": "/api/v5/account/balance",
    "got": {
     "result": {
@@ -287,7 +287,7 @@
   {
    "exchange": "bybit",
    "mode": "close",
-   "base": "http://127.0.0.1:33127",
+   "base": "http://127.0.0.1:36479",
    "path": "/v5/account/wallet-balance",
    "got": {
     "raised": {
@@ -299,7 +299,7 @@
   {
    "exchange": "bingx",
    "mode": "reset",
-   "base": "http://127.0.0.1:33785",
+   "base": "http://127.0.0.1:36531",
    "path": "/openApi/swap/v2/user/balance",
    "got": {
     "result": {
@@ -311,7 +311,7 @@
   {
    "exchange": "binance",
    "mode": "reset",
-   "base": "http://127.0.0.1:33785",
+   "base": "http://127.0.0.1:36531",
    "path": "/fapi/v2/balance",
    "got": {
     "result": {
@@ -323,7 +323,7 @@
   {
    "exchange": "okx",
    "mode": "reset",
-   "base": "http://127.0.0.1:33785",
+   "base": "http://127.0.0.1:36531",
    "path": "/api/v5/account/balance",
    "got": {
     "result": {
@@ -335,7 +335,7 @@
   {
    "exchange": "bybit",
    "mode": "reset",
-   "base": "http://127.0.0.1:33785",
+   "base": "http://127.0.0.1:36531",
    "path": "/v5/account/wallet-balance",
    "got": {
     "raised": {
@@ -347,7 +347,7 @@
   {
    "exchange": "bingx",
    "mode": "truncated",
-   "base": "http://127.0.0.1:32905",
+   "base": "http://127.0.0.1:33213",
    "path": "/openApi/swap/v2/user/balance",
    "got": {
     "result": {
@@ -359,7 +359,7 @@
   {
    "exchange": "binance",
    "mode": "truncated",
-   "base": "http://127.0.0.1:32905",
+   "base": "http://127.0.0.1:33213",
    "path": "/fapi/v2/balance",
    "got": {
     "result": {
@@ -371,7 +371,7 @@
   {
    "exchange": "okx",
    "mode": "truncated",
-   "base": "http://127.0.0.1:32905",
+   "base": "http://127.0.0.1:33213",
    "path": "/api/v5/account/balance",
    "got": {
     "result": {
@@ -383,7 +383,7 @@
   {
    "exchange": "bybit",
    "mode": "truncated",
-   "base": "http://127.0.0.1:32905",
+   "base": "http://127.0.0.1:33213",
    "path": "/v5/account/wallet-balance",
    "got": {
     "raised": {
@@ -395,7 +395,7 @@
   {
    "exchange": "bingx",
    "mode": "chunked",
-   "base": "http://127.0.0.1:46621",
+   "base": "http://127.0.0.1:33565",
    "path": "/openApi/swap/v2/user/balance",
    "got": {
     "result": {
@@ -407,7 +407,7 @@
   {
    "exchange": "binance",
    "mode": "chunked",
-   "base": "http://127.0.0.1:46621",
+   "base": "http://127.0.0.1:33565",
    "path": "/fapi/v2/balance",
    "got": {
     "result": {
@@ -419,7 +419,7 @@
   {
    "exchange": "okx",
    "mode": "chunked",
-   "base": "http://127.0.0.1:46621",
+   "base": "http://127.0.0.1:33565",
    "path": "/api/v5/account/balance",
    "got": {
     "result": {
@@ -431,7 +431,7 @@
   {
    "exchange": "bybit",
    "mode": "chunked",
-   "base": "http://127.0.0.1:46621",
+   "base": "http://127.0.0.1:33565",
    "path": "/v5/account/wallet-balance",
    "got": {
     "raised": {
@@ -443,7 +443,7 @@
   {
    "exchange": "bingx",
    "mode": "html",
-   "base": "http://127.0.0.1:33927",
+   "base": "http://127.0.0.1:33701",
    "path": "/openApi/swap/v2/user/balance",
    "got": {
     "result": {
@@ -455,7 +455,7 @@
   {
    "exchange": "binance",
    "mode": "html",
-   "base": "http://127.0.0.1:33927",
+   "base": "http://127.0.0.1:33701",
    "path": "/fapi/v2/balance",
    "got": {
     "result": {
@@ -467,7 +467,7 @@
   {
    "exchange": "okx",
    "mode": "html",
-   "base": "http://127.0.0.1:33927",
+   "base": "http://127.0.0.1:33701",
    "path": "/api/v5/account/balance",
    "got": {
     "result": {

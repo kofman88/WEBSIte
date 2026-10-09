@@ -106,6 +106,7 @@ const EXCHANGES = {
       get_account_summary: (t, a) => t.getAccountSummary(...a),
       sync_time: (t) => t.syncTime(),
       okx_sz: (t, a) => t.okxSz(...a),
+      close_position_partial: (t, a) => t.closePositionPartial(...a),
     },
     prepare(t, sc) {
       if (sc.state && sc.state.okx_offset_ms !== undefined) t._state.timeOffsetMs = sc.state.okx_offset_ms;

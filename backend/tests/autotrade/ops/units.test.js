@@ -82,11 +82,6 @@ describe('kept bot quirks — each one is a replayed step (the site must match i
   const QUIRKS = [
     ['OKX positions: get_dashboard returns (summary, positions) → the 3-way unpack always fails', 'positions okx (3-way unpack of a 2-tuple)',
       (s) => s.text === '{"ok": false, "error": "unavailable", "message": "not enough values to unpack (expected 3, got 2)"}'],
-    ['OKX quick 50 %: close_position has no size → TypeError, no order sent', 'qc half okx → TypeError (no size kwarg)',
-      (s) => sends(s)[0].startsWith("❌ Ошибка: close_position() got an unexpected keyword argument 'size'") && s.requests.every((r) => r.method === 'GET')],
-    ['OKX quick 100 %: "Sell"/"Buy" passed as the direction → a LONG closes posSide "short", then every order / algo of the symbol is cancelled',
-      'qc full okx LONG → posSide short + algo cancel (quirk)',
-      (s) => s.requests.some((r) => r.url.endsWith('/close-position') && r.body.includes('"posSide": "short"')) && s.requests.some((r) => r.url.endsWith('/cancel-algos'))],
     ['confirm exec calls Bybit without demo: a demo user\'s trade goes to the live host', 'exec bybit demo user → live host (quirk)',
       (s) => s.requests.length > 0 && s.requests.every((r) => r.url.startsWith('https://api.bybit.com/'))],
     ['confirm exec: no orderLinkId (no idempotency key / trade id to the trader)', 'exec bybit opened',
@@ -100,8 +95,14 @@ describe('kept bot quirks — each one is a replayed step (the site must match i
     ['exec: an empty trade_exchange → "на ..." and Bybit', 'exec empty trade_exchange', (s) => sends(s)[0] === '⏳ Выставляю ордер на ...'],
     ['exec: OKX keys missing → "Okx API не настроен" (the not-set-up map has no okx)', 'exec okx no keys (Okx label)', (s) => sends(s)[0].startsWith('❌ <b>Okx API не настроен</b>')],
     ['sub_expired is defined twice in i18n.py: the later «Подписка истекла!» wins', 'exec banned → sub_expired', (s) => sends(s)[0] === 'Подписка истекла!'],
-    ['exec: a missing trade says "older than 4 hours" (nothing checks the age)', 'exec missing trade (bot: stale) → site 404',
+    ['exec: a missing trade answers exec_signal_stale', 'exec missing trade (bot: stale) → site 404',
       (s) => s.effects[1].text === FX.i18n.exec_signal_stale.ru],
+    // [EXEC-STALE-GUARD 2026-10]
+    ['exec: a signal the tracker closed (SL) is refused, nothing sent', 'exec stage SL → stale (EXEC-STALE-GUARD)',
+      (s) => s.requests.length === 0 && answers(s)[0] === FX.i18n.exec_signal_stale.ru],
+    ['… TP1 / MISSED / EXPIRED too', 'exec stage EXPIRED → stale', (s) => s.requests.length === 0],
+    ['… a signal older than the tracker horizon too', 'exec older than the tracker horizon → stale', (s) => s.requests.length === 0],
+    ['… stage ENTRY passes the guard', 'exec stage ENTRY → placed', (s) => !JSON.stringify(s.effects).includes(FX.i18n.exec_signal_stale.ru)],
     ['exec: check_access passes an expired Pro (free access) — the placement is attempted', 'exec expired pro (free access passes)', (s) => s.requests.length > 0],
     ['exec: the open-trade limit counts rows with an order (this one excluded)', 'exec limit reached', (s) => answers(s)[0].startsWith('⛔ Лимит сделок достигнут (1/1)')],
     ['quick close uses the trade row\'s exchange column, not trade_exchange', 'qc force okx row of the hold user',
@@ -109,17 +110,32 @@ describe('kept bot quirks — each one is a replayed step (the site must match i
     ['… a NULL exchange column (SMC rows) is bybit', 'qc half SMC row (NULL exchange → bybit, no bybit keys)', (s) => sends(s)[0] === 'API-ключи не настроены'],
     ['quick close: pos_idx NULL → int(None) TypeError text', 'qc half pos_idx NULL → int(None)',
       (s) => sends(s)[0].startsWith('❌ Ошибка: int() argument must be a string, a bytes-like object')],
-    // quick_close.py hands close_position the CLOSING side ("Sell" for a LONG) while every trader's
-    // close_position takes the POSITION side and inverts it again: a LONG sends a reduce-only "Buy"
-    // (Bybit), side=BUY positionSide=SELL (BingX / Binance) — the exchanges reject those orders
-    ['quick close double inversion — Bybit LONG → reduce-only Buy', 'qc half bybit',
-      (s) => s.requests.some((r) => r.url.endsWith('/order/create') && r.body.includes('"side": "Buy"') && r.body.includes('"reduceOnly": true'))],
-    ['… BingX LONG → side=BUY positionSide=SELL', 'qc half bingx',
-      (s) => s.requests.some((r) => r.method === 'POST' && r.url.includes('positionSide=SELL') && r.url.includes('side=BUY'))],
-    ['… Binance LONG → side=BUY positionSide=SELL', 'qc half binance',
-      (s) => s.requests.some((r) => r.method === 'POST' && r.url.includes('side=BUY&positionSide=SELL'))],
-    ['… an empty direction is treated like a SHORT (close side "Buy" → Bybit "Sell")', 'qc half direction empty → Buy side',
-      (s) => s.requests.some((r) => r.url.endsWith('/order/create') && r.body.includes('"side": "Sell"'))],
+    // [QC-SIDE-FIX 2026-10] (bot and site): close_position gets the POSITION direction — a LONG
+    // closes with a reduce-only Sell (Bybit), side=SELL positionSide=LONG (BingX / Binance)
+    ['quick close — Bybit LONG → reduce-only Sell', 'qc half bybit',
+      (s) => s.requests.some((r) => r.url.endsWith('/order/create') && r.body.includes('"side": "Sell"') && r.body.includes('"reduceOnly": true'))],
+    ['… BingX LONG → side=SELL positionSide=LONG', 'qc half bingx',
+      (s) => s.requests.some((r) => r.method === 'POST' && r.url.includes('positionSide=LONG') && r.url.includes('side=SELL'))],
+    ['… Binance LONG → side=SELL positionSide=LONG', 'qc half binance',
+      (s) => s.requests.some((r) => r.method === 'POST' && r.url.includes('side=SELL&positionSide=LONG'))],
+    ['… a trade without LONG / SHORT is refused before any request', 'qc half direction empty → refused before any request',
+      (s) => sends(s)[0] === 'Направление сделки неизвестно' && s.requests.length === 0],
+    ['… hedge: the size is the trade direction\'s position, not the first one', 'qc half bybit hedge → the LONG\'s size, not the first position',
+      (s) => s.requests.some((r) => r.url.endsWith('/order/create') && r.body.includes('"qty": "0.006"') && r.body.includes('"side": "Sell"'))],
+    ['… OKX 50 % → a market order of the opposite side on the same posSide', 'qc half okx → partial market order (QC-SIDE-FIX)',
+      (s) => sends(s)[0].startsWith('✅ Закрыта половина') && s.requests.some((r) => r.url.endsWith('/api/v5/trade/order')
+        && r.body.includes('"side": "sell"') && r.body.includes('"posSide": "long"') && r.body.includes('"ordType": "market"'))],
+    ['… OKX 50 % below one lot sends nothing', 'qc half okx below one lot → nothing sent',
+      (s) => s.requests.every((r) => r.method === 'GET')],
+    // [OKX-CLOSE-CLEANUP 2026-10]: a failed close keeps the SL / TP while the position may be alive
+    ['OKX: a failed close with the position alive cancels nothing', 'qc full okx LONG failed close → SL/TP kept',
+      (s) => s.requests.some((r) => r.url.endsWith('/close-position') && r.body.includes('"posSide": "long"'))
+        && !s.requests.some((r) => /cancel-(order|algos)$/.test(r.url))],
+    ['… a failed close with the position gone removes the leftovers', 'qc full okx LONG failed close, position gone → leftovers cancelled',
+      (s) => s.requests.some((r) => r.url.endsWith('/cancel-algos'))],
+    ['… a closed LONG with a live hedge SHORT cancels only the long side', 'qc full okx LONG closed, hedge SHORT alive → only the long side\'s orders go',
+      (s) => s.requests.some((r) => r.url.endsWith('/cancel-algos') && r.body.includes('sl-long') && !r.body.includes('sl-short'))
+        && s.requests.filter((r) => r.url.endsWith('/cancel-order')).every((r) => r.body.includes('"9"'))],
     ['quick close: a timed-out position read is "already closed"', 'qc half positions timeout', (s) => sends(s)[0] === 'Позиция уже закрыта'],
     ['hold-lock lets the close through when the cache has no price (fail-open)', 'qc full hold-lock, no cache price → closes (fail-open)',
       (s) => sends(s)[0] === '✅ Позиция закрыта полностью'],

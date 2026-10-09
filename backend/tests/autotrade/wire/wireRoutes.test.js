@@ -49,7 +49,7 @@ const { memoryKv } = nodeRequire('../../../services/exchanges/runtime.js');
 
 const SITE = '/api/app';
 const BOT = '/miniapp/api';
-const BOT_D17 = { positionSide: false, recordExchange: false, okxPositions: false };
+const BOT_D17 = { recordExchange: false, okxPositions: false };
 const ALL_ON = { AUTOTRADE_ENABLED: '1', AUTOTRADE_EXCHANGES: 'bybit,bingx,binance,okx' };
 const ROUTE_OF = {
   exec_trade: ['POST', 'exec'], cb_qc_half: ['POST', 'qc/half'], cb_qc_full: ['POST', 'qc/full'], cb_qc_full_force: ['POST', 'qc/force'],

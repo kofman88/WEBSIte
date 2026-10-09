@@ -681,8 +681,14 @@ function createBinanceTrader(overrides = {}) {
   async function closePosition(apiKey, secret, symbol, side, size, posIdx = 0) {
     try {
       const bs = toBinanceSymbol(symbol);
-      const closeSide = pyUpper(pyStr(side)) === 'LONG' ? 'SELL' : 'BUY';
-      const posSide = pyUpper(pyStr(side));
+      // side = the POSITION direction ("LONG" / "SHORT"); "Buy" / "Sell" (Bybit-style position
+      // sides) are taken the same way as bybitTrader does (C30)
+      const s = pyUpper(pyStrip(pyStr(pyOr(side, ''))));
+      let posSide;
+      if (s === 'LONG' || s === 'BUY') posSide = 'LONG';
+      else if (s === 'SHORT' || s === 'SELL') posSide = 'SHORT';
+      else return { ok: false, order_id: '', error: `unknown side: ${pyRepr(side)}` };
+      const closeSide = posSide === 'LONG' ? 'SELL' : 'BUY';
       const [qtyStep] = await _getInstrumentFilters(bs);
       const qtyStr = PP.roundQty(size, qtyStep);
       if (pyFloat(qtyStr) <= 0) {
@@ -690,10 +696,22 @@ function createBinanceTrader(overrides = {}) {
         return { ok: false, order_id: '', error: 'qty rounded to 0 (below lot step)', skipped: true };
       }
       const params = { symbol: bs, side: closeSide, positionSide: posSide, type: 'MARKET', quantity: qtyStr };
-      const resp = await _request('POST', '/fapi/v1/order', apiKey, secret, params);
+      let resp = await _request('POST', '/fapi/v1/order', apiKey, secret, params);
+      if (pyGet(resp, 'code') === -4061) {
+        // [BINANCE-CLOSE-ONEWAY 2026-10] -4061 "Order's position side does not match user's
+        // setting": a one-way account (placeTrade stays in it when hedge cannot be switched on
+        // over open positions). The close (quick, partial, panic) always failed there. One-way:
+        // positionSide=BOTH + reduceOnly — the order only reduces and never flips the position.
+        log.info(`Binance close_position ${pyStr(symbol)}: -4061 → one-way retry (BOTH, reduceOnly)`);
+        params.positionSide = 'BOTH';
+        params.reduceOnly = 'true';
+        resp = await _request('POST', '/fapi/v1/order', apiKey, secret, params);
+      }
       if (pyTruthy(pyGet(resp, 'orderId'))) return { ok: true, order_id: pyStr(pyIndex(resp, 'orderId')) };
-      if (pyTruthy(pyGet(resp, 'code')) && pyInt(pyIndex(resp, 'code')) < 0) return { ok: false, order_id: '', error: humanizeBinanceError(pyStr(resp)) };
-      return { ok: true, order_id: pyStr(pyGet(resp, 'orderId', '')) };
+      if (pyGet(resp, 'code') !== null && pyInt(pyIndex(resp, 'code')) < 0) return { ok: false, order_id: '', error: humanizeBinanceError(pyStr(resp)) };
+      // [BINANCE-CLOSE-ONEWAY 2026-10] neither an orderId nor an error code (an empty / unknown
+      // answer, e.g. after a failed _request) is not a success
+      return { ok: false, order_id: '', error: `unexpected response: ${pySlice(pyStr(resp), 200)}` };
     } catch (e) {
       rethrowCancelled(e);
       if (e instanceof TransportError && e.kind === 'timeout') return { ok: false, order_id: '', error: 'Таймаут соединения с Binance.' };

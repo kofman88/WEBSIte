@@ -3,8 +3,9 @@
  * quickClose — the bot's [QUICK-CLOSE] buttons under an auto-traded signal card
  * (quick_close.py + handlers/quick_close.py), one to one:
  *
- *   qc_half_<id>        cb_qc_half        quick_close_half: live size (get_positions, 10 s) → close
- *                                         size / 2 market reduce-only («✅ Закрыта половина: {q:.6g}»)
+ *   qc_half_<id>        cb_qc_half        quick_close_half: live size of the trade's direction
+ *                                         (get_positions, 10 s) → close size / 2 market reduce-only
+ *                                         («✅ Закрыта половина: {q:.6g}»; OKX: close_position_partial)
  *   qc_full_<id>        cb_qc_full        hold-lock (hold_lock_enabled and the 5m→15m cache PnL <
  *                                         hold_lock_min_rr) → the «⏸ Hold-Lock сработал» dialog with
  *                                         «❌ Всё равно закрыть» / «✅ Подождать»; else close 100 %
@@ -13,18 +14,19 @@
  *   qc_be_<id>          cb_qc_be          quick_move_sl_to_be: set_trailing_sl(entry) → be_set = 1
  *   qc_refresh_<id>     cb_qc_refresh     get_current_pnl + format_progress_text
  *
+ * [QC-SIDE-FIX 2026-10] (the bot's fix, ported): close_position gets the POSITION direction
+ * ("LONG" / "SHORT") every trader expects — the bot used to pass the close side ("Sell" for a
+ * LONG), which the traders inverted again (Bybit 110017, BingX / Binance positionSide=SELL, OKX
+ * posSide "short"); the live size is that of the trade's direction (hedge accounts hold both);
+ * a trade without a LONG / SHORT direction is refused before any request; OKX 50 % goes through
+ * close_position_partial (OKX close-position closes only the whole position).
+ *
  * Kept quirks (pinned by tests/autotrade/ops): the trader and the keys come from the TRADE row's
  * `exchange` column (default 'bybit' — the SMC scanner never sets it), not from the user's
- * trade_exchange; OKX half-close raises `close_position() got an unexpected keyword argument
- * 'size'` (OKX close_position has no size) → «❌ Ошибка: …», nothing is closed; the close side
- * ("Sell" for a LONG) goes where every trader's close_position expects the POSITION side, which
- * it inverts again — Bybit gets a reduce-only "Buy" for a LONG, BingX / Binance positionSide=SELL
- * (orders the exchanges reject); OKX full close of a LONG asks posSide "short" and the trader
- * cancels every order / algo order (SL, TP) of the symbol afterwards even when that close failed —
- * the site fixes the side (D17, below; `deps.d17 = {positionSide: false}` replays the bot, and the
- * trade row's exchange is written at placement); the hold-lock lets the close through when
- * the cache has no price (fail-open); the progress sign follows the R, so "+-1.50%" happens when
- * there is no stop; progress is shown for a closed trade too; close / SL calls have no timeout.
+ * trade_exchange (the site writes the row's exchange at placement — D17; `deps.d17 =
+ * {recordExchange: false}` replays the bot); the hold-lock lets the close through when the cache
+ * has no price (fail-open); the progress sign follows the R, so "+-1.50%" happens when there is no
+ * stop; progress is shown for a closed trade too; close / SL calls have no timeout.
  *
  * Site additions (D16, applied by routes/appTrade.js before these handlers): the trade must
  * belong to the JWT user, and the money actions need the button on the delivered card
@@ -37,23 +39,26 @@ const { createEffects } = require('./confirmMode');
 const { bindValue, pyTypeName } = require('../engine/signalTradesRepo');
 const { fmtG, fmtFixed, fmtSigned } = require('../../strategies/common/pyfmt');
 const { pyRound } = require('../../strategies/common/pyround');
-const { pyLower, pyUpper } = require('../../strategies/common/pyUnicode');
+const { pyLower, pyUpper, pyStrip } = require('../../strategies/common/pyUnicode');
 const {
-  PyError, pyFloat, pyInt, pyGet, pyTruthy, pyStr, pyFloatStr, pySlice, errStr, htmlEscape, AttributeError,
+  pyFloat, pyInt, pyGet, pyTruthy, pyStr, pyFloatStr, pySlice, errStr, htmlEscape, AttributeError, pyOr,
 } = require('../exchanges/pyCompat');
 
 const TRADERS = Object.freeze(['bybit', 'bingx', 'binance', 'okx']);
 const POSITIONS_TIMEOUT_S = 10.0;
 /**
- * D17 (docs/PORT_DECISIONS.md) — the site's fix of the bot's quick close: close_position gets the
- * POSITION direction (LONG / SHORT), which every trader's close_position expects (bybit_trader's
- * AUDIT-FIX-C30 note: "LONG"/"SHORT" = направление позиции), instead of the close side the bot
- * passes (inverted twice → the exchanges reject it; on OKX the failed close is followed by the
- * cancel of every SL / TP algo). Together with signal_trades.exchange written at placement (D17)
- * the buttons act on the exchange the order went to. `deps.d17 = {positionSide: false}` is the bot.
+ * [QC-SIDE-FIX 2026-10] _POS_SIDE: the position side of each exchange's get_positions — Bybit
+ * "Buy" / "Sell", BingX / Binance "LONG" / "SHORT" (Binance one-way BOTH already mapped by the
+ * sign), OKX "long" / "short" ("net" = no side).
  */
-const D17_SITE = Object.freeze({ positionSide: true });
-const d17Of = (deps) => ({ ...D17_SITE, ...((deps && deps.d17) || {}) });
+const POS_SIDE = Object.freeze({ BUY: 'LONG', LONG: 'LONG', SELL: 'SHORT', SHORT: 'SHORT' });
+
+/** _side_matches(pos, direction): same direction as the trade; a position without a side (net / empty) is kept. */
+function sideMatches(pos, direction) {
+  const raw = pyUpper(pyStrip(pyStr(pyOr(pyGet(pos, 'side', ''), ''))));
+  const mapped = Object.prototype.hasOwnProperty.call(POS_SIDE, raw) ? POS_SIDE[raw] : null;
+  return mapped === null || !direction || mapped === direction;
+}
 
 const g = (o, k, d) => (o && Object.prototype.hasOwnProperty.call(o, k) ? o[k] : d);
 
@@ -77,8 +82,11 @@ function logOf(deps) { return deps.log || require('../marketData/mdLog').log; }
 // the trade-ops registry (killswitch / plan-gate hooks) — confirmMode.registryOf, never the hookless default
 const inst = (ex, deps) => exchanges.getTrader(ex, { registry: require('./confirmMode').registryOf(deps) }).instance({ demo: false });
 
-/** `_get_position_size(user, trader, symbol, exchange)` → abs(size) of the first non-zero position, 0.0 otherwise. */
-async function getPositionSize(user, ex, symbol, deps) {
+/**
+ * `_get_position_size(user, trader, symbol, exchange, direction)` → abs(size) of the first non-zero
+ * position of the trade's direction (a hedge account can hold LONG and SHORT), 0.0 otherwise.
+ */
+async function getPositionSize(user, ex, symbol, deps, direction = '') {
   try {
     const [key, secret, pp] = deps.keysOf(user.user_id, ex);
     const t = inst(ex, deps);
@@ -89,6 +97,7 @@ async function getPositionSize(user, ex, symbol, deps) {
     };
     const positions = await waitFor(call, deps.positionsTimeoutS === undefined || deps.positionsTimeoutS === null ? POSITIONS_TIMEOUT_S : deps.positionsTimeoutS);
     for (const p of (pyTruthy(positions) ? positions : [])) {
+      if (!sideMatches(p, direction)) continue;
       const sz = pyFloat(pyTruthy(pyGet(p, 'size', 0)) ? pyGet(p, 'size', 0) : 0);
       if (sz !== 0) return Math.abs(sz);
     }
@@ -115,21 +124,23 @@ async function closeWith(user, trade, deps, half) {
     if (trader === null) return { ok: false, msg: `Exchange ${exchange} не поддержан` };
     const [apiKey, apiSecret, pp] = deps.keysOf(user.user_id, exchange);
     if (!apiKey || !apiSecret) return { ok: false, msg: 'API-ключи не настроены' };
-    const posSize = await getPositionSize(user, exchange, symbol, deps);
+    if (direction !== 'LONG' && direction !== 'SHORT') return { ok: false, msg: 'Направление сделки неизвестно' };
+    const posSize = await getPositionSize(user, exchange, symbol, deps, direction);
     if (posSize <= 0) return { ok: false, msg: 'Позиция уже закрыта' };
-    // the bot: close_side = "Sell" if LONG else "Buy" (QUIRK, see D17); the site: the position direction
-    const closeSide = d17Of(deps).positionSide ? direction : (direction === 'LONG' ? 'Sell' : 'Buy');
+    // [QC-SIDE-FIX 2026-10] the POSITION direction, not the close side — every trader places the
+    // opposite reduce order itself (AUDIT-FIX-C30)
     const qty = half ? posSize / 2.0 : posSize;
     const t = inst(exchange, deps);
     let res;
     if (exchange === 'bybit') {
-      res = await t.closePosition(apiKey, apiSecret, symbol, closeSide, pyFloatStr(qty), posIdx, Boolean(g(user, 'bybit_demo', false)));
+      res = await t.closePosition(apiKey, apiSecret, symbol, direction, pyFloatStr(qty), posIdx, Boolean(g(user, 'bybit_demo', false)));
     } else if (exchange === 'okx') {
-      // OKX close-position не принимает size: the bot's half call raises TypeError before any request
-      if (half) throw new PyError('TypeError', "close_position() got an unexpected keyword argument 'size'");
-      res = await t.closePosition(apiKey, apiSecret, symbol, closeSide, pp || '');
+      // OKX close-position closes the whole position: half is a market order of the opposite side on the same posSide
+      res = half
+        ? await t.closePositionPartial(apiKey, apiSecret, symbol, direction, qty, pp || '')
+        : await t.closePosition(apiKey, apiSecret, symbol, direction, pp || '');
     } else {
-      res = await t.closePosition(apiKey, apiSecret, symbol, closeSide, qty, posIdx);
+      res = await t.closePosition(apiKey, apiSecret, symbol, direction, qty, posIdx);
     }
     const ok = pyTruthy(pyGet(res, 'ok', false));
     L.info(`[${half ? 'QC-50' : 'QC-100'}] uid=${user.user_id} sym=${pyStr(symbol)} dir=${direction} qty=${fmtG(qty, 6)} → ok=${ok ? 'True' : 'False'}`);
@@ -442,7 +453,7 @@ async function cbQcRefresh(user, tradeId, deps = {}) {
 }
 
 module.exports = {
-  POSITIONS_TIMEOUT_S, HOLD_LOCK_KEYBOARD, D17_SITE,
-  traderFor, getPositionSize, quickCloseHalf, quickCloseFull, quickMoveSlToBe, getCurrentPnl, formatProgressText,
+  POSITIONS_TIMEOUT_S, HOLD_LOCK_KEYBOARD, POS_SIDE,
+  traderFor, sideMatches, getPositionSize, quickCloseHalf, quickCloseFull, quickMoveSlToBe, getCurrentPnl, formatProgressText,
   cbQcHalf, cbQcFull, cbQcFullForce, cbHoldlockWait, cbQcBe, cbQcRefresh,
 };

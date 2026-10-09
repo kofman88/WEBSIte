@@ -620,6 +620,12 @@ class Sim:
                 n = len(a.orders)
                 a.orders = [o for o in a.orders if str(o["id"]) != str(q.get("orderId"))]
                 return err(109400, "order not exist") if n == len(a.orders) else ok({"order": {"orderId": int(q.get("orderId"))}})
+            if method == "GET":
+                # query by clientOrderId ([BINGX-DUP-VERIFY]): an order accepted with this cid exists
+                cid = q.get("clientOrderId") or ""
+                if cid and cid in getattr(a, "_links", set()):
+                    return ok({"order": {"symbol": q.get("symbol"), "clientOrderId": cid, "status": "NEW"}})
+                return err(109400, "order not exist")
             r = one(q)
             return err(r[0], r[1]) if isinstance(r, tuple) else ok(r)
         if path == "/openApi/swap/v2/user/positions":

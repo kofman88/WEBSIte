@@ -41,7 +41,8 @@ const req = createRequire(import.meta.url);
 const W = req('./world.js');
 
 const BOT_D18 = { inflightGuard: false, okxNoBlindRetry: false, reconcileFailedRetry: false };
-const QTY = { bybit: 51.282, bingx: 51.282, binance: 51.282, okx: 51 };   // 1 % of 10 000 over a 1.95 stop
+// 1 % of 10 000 over a 1.95 stop; OKX in whole contracts ([OKX-LOT-CONTRACTS]: ctVal 0.01, lotSz 1 → 5128 contracts)
+const QTY = { bybit: 51.282, bingx: 51.282, binance: 51.282, okx: 51.28 };
 const settle = async (n = 30) => { for (let i = 0; i < n; i++) await new Promise((r) => setImmediate(r)); };
 /** Let a call run (microtasks only — the virtual clock does not move) until `cond`. */
 async function pumpUntil(cond, max = 3000) {
@@ -669,19 +670,14 @@ describe('B / C — confirm exec and quick close through the routes and the trad
       expect(near(w.maxLong(u), QTY[ex])).toBe(true);
     });
 
-    it(`${ex} C: «50 %» pressed twice at once → 50 % then 25 % (never 50 % + 50 % on one stale read)${ex === 'okx' ? ' — OKX: the bot\'s TypeError, nothing sent' : ''}`, async () => {
+    it(`${ex} C: «50 %» pressed twice at once → 50 % then 25 % (never 50 % + 50 % on one stale read)`, async () => {
       freshOps();
       const { u, r } = await openPosition(ex);
       const tid = encodeURIComponent(r.trade_id);
-      const closesBefore = w.allReqs(u).filter((q) => W.isClose(q)).length;
       await Promise.all([post(u.uid, `trades/${tid}/qc/half`), post(u.uid, `trades/${tid}/qc/half`)]);
-      if (ex === 'okx') {
-        expect(w.allReqs(u).filter((q) => W.isClose(q)).length).toBe(closesBefore);
-        expect(near(longSize(u), QTY.okx)).toBe(true);
-      } else {
-        expect(longSize(u)).toBeGreaterThan(QTY[ex] * 0.2);
-        expect(longSize(u)).toBeLessThan(QTY[ex] * 0.3);
-      }
+      // [QC-SIDE-FIX 2026-10]: OKX 50 % is a market order on the same posSide (it used to be the bot's TypeError)
+      expect(longSize(u)).toBeGreaterThan(QTY[ex] * 0.2);
+      expect(longSize(u)).toBeLessThan(QTY[ex] * 0.3);
       expect(shortSize(u)).toBe(0);
     });
 

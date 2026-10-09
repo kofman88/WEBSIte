@@ -16,7 +16,7 @@
  * deterministic clientOrderIds, ATOMIC batchOrders (MARKET + STOP_MARKET + TP1..3; known to
  * fail server-side → [BINGX-ATOMIC-FALLBACK]) then the legacy flow: LIMIT only within
  * 0.3 % of the last price else MARKET (order_type ignored), 109400 → retry without
- * positionSide, duplicate (101204/101404) → ok, fill wait polling every 0.2 s (10 s LIMIT /
+ * positionSide, duplicate (verified: the "duplicate" text, or 101204/101404 + the order found by clientOrderId) → ok, fill wait polling every 0.2 s (10 s LIMIT /
  * 3 s MARKET, [BINGX-LEGACY-GAP], [BINGX-GAP-WARN]), unfilled LIMIT → cancel + RU error,
  * SL ×5 (109400 drop positionSide, price msg → CONTRACT_PRICE) or cancel + emergency close
  * ([SL-SAFETY-CLOSE-BINGX*]), TPs ×5 with 110413/110414 adaptive re-pricing
@@ -229,6 +229,47 @@ function createBingxTrader(overrides = {}) {
       }
     }
     return { code: -1, msg: `network: ${lastNetErr ? lastNetErr.message : 'None'}` };
+  }
+
+  // [BINGX-DUP-VERIFY 2026-10] (the bot's fix, bingx_trader._is_duplicate_cid): 101204 is BingX's
+  // «Insufficient margin», not a duplicate clientOrderId. A rejection counts as a duplicate only when
+  // the exchange says so (duplicate / clientOrderId exists) or the order with that clientOrderId is
+  // really there (GET order by clientOrderId); a failed lookup is not a duplicate.
+  function _dupText(msg) {
+    const m = pyLower(pyStr(pyOr(msg, '')));
+    return m.includes('duplicate') || (m.includes('clientorder') && m.includes('exist'));
+  }
+
+  /** true — the order is on the exchange, false — BingX says there is none, null — unknown. */
+  async function _orderExistsByCid(apiKey, secret, bingxSymbol, clientOrderId) {
+    if (!clientOrderId) return false;
+    let resp;
+    try {
+      resp = await _request('GET', '/openApi/swap/v2/trade/order', apiKey, secret, { symbol: bingxSymbol, clientOrderId });
+    } catch (e) {
+      rethrowCancelled(e);
+      log.debug(`[BINGX-DUP-VERIFY] ${bingxSymbol} cid=${clientOrderId} query failed: ${errStr(e)}`);
+      return null;
+    }
+    const code = pyGet(resp, 'code');
+    if (code === 0) {
+      const data = pyGet(resp, 'data');
+      return isDict(data) && pyTruthy(pyGet(data, 'order'));
+    }
+    if (code === -1) return null;
+    return false;
+  }
+
+  async function _isDuplicateCid(apiKey, secret, bingxSymbol, clientOrderId, code, msg) {
+    if (!clientOrderId) return false;
+    if (_dupText(msg)) return true;
+    if (code === 101204 || code === 101404) {
+      const exists = await _orderExistsByCid(apiKey, secret, bingxSymbol, clientOrderId);
+      const what = exists ? 'exists (duplicate)' : (exists === false ? 'not found — real error' : 'unknown — treated as error');
+      log.info(`[BINGX-DUP-VERIFY] ${bingxSymbol} cid=${clientOrderId} code=${pyStr(code)} → order ${what}`);
+      return exists === true;
+    }
+    return false;
   }
 
   async function _getInstrumentFilters(symbol) {
@@ -505,9 +546,8 @@ function createBingxTrader(overrides = {}) {
         resp = await _request('POST', '/openApi/swap/v2/trade/order', apiKey, secret, orderParams);
       }
       const respCode = pyGet(resp, 'code');
-      const respMsgL = pyLower(pyStr(pyGet(resp, 'msg', '')));
-      const isDup = cidEntry && (respCode === 101204 || respCode === 101404 || respMsgL.includes('duplicate')
-        || (respMsgL.includes('clientorder') && respMsgL.includes('exist')));
+      const isDup = Boolean(cidEntry) && respCode !== 0
+        && await _isDuplicateCid(apiKey, secret, bingxSymbol, cidEntry, respCode, pyGet(resp, 'msg', ''));
       if (isDup) {
         log.info(`Duplicate order rejected by exchange (idempotency works): ${bingxSymbol} cid=${cidEntry} — assuming prior attempt succeeded`);
         return { ok: true, order_id: cidEntry, error: '', tp_placed: false, duplicate: true, qty: pyFloat(qtyStr) };
@@ -577,7 +617,7 @@ function createBingxTrader(overrides = {}) {
         if (code === 109400) {
           log.warning(`[BINGX-SL-DEBUG] ${bingxSymbol} qty=${pyRepr(pyGet(slParams, 'quantity'))} sl=${pyRepr(pyGet(slParams, 'stopPrice'))} side=${pyStr(pyGet(slParams, 'side'))} posSide=${pyStr(pyGet(slParams, 'positionSide'))} type=${pyStr(pyGet(slParams, 'type'))} wt=${pyStr(pyGet(slParams, 'workingType'))} attempt=${a + 1}`);
         }
-        if (cidSl && (code === 101204 || code === 101404 || msg.includes('duplicate'))) {
+        if (cidSl && await _isDuplicateCid(apiKey, secret, bingxSymbol, cidSl, code, msg)) {
           log.info(`SL duplicate rejected (idempotency works): ${bingxSymbol} cid=${cidSl} — assuming already placed`);
           slPlaced = true;
           break;
@@ -667,7 +707,7 @@ function createBingxTrader(overrides = {}) {
           if (code === 109400 || code === 110424) {
             log.warning(`[BINGX-TP-DEBUG] ${bingxSymbol} qty=${pyRepr(pyGet(tpParams, 'quantity'))} sl=${pyRepr(pyGet(tpParams, 'stopPrice'))} side=${pyStr(pyGet(tpParams, 'side'))} posSide=${pyStr(pyGet(tpParams, 'positionSide'))} code=${pyStr(code)} msg=${pyRepr(pyGet(tpResp, 'msg'))} attempt=${a + 1}`);
           }
-          if (tpCid && (code === 101204 || code === 101404 || tpMsgL.includes('duplicate'))) {
+          if (tpCid && await _isDuplicateCid(apiKey, secret, bingxSymbol, tpCid, code, tpMsgL)) {
             log.info(`TP duplicate rejected (idempotency works): ${bingxSymbol} cid=${tpCid}`);
             tpOk = true;
             break;
