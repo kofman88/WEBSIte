@@ -372,6 +372,47 @@ describe('per-user gates', () => {
   });
 });
 
+describe('[SMC-GATHER-TIMEOUT]: wait_for(gather(*_fetch_symbol), 90) cancels the fetch tasks', () => {
+  it('queued symbols never start their REST calls, late answers write no _tf_cache entry, the cycle goes on at 90 s', async () => {
+    const { vi } = await import('vitest');
+    vi.useFakeTimers({ toFake: ['setTimeout', 'clearTimeout'] });
+    try {
+      const plan = {};
+      for (let i = 0; i < 40; i++) plan[`C${i}-USDT-SWAP`] = ['LONG', 4];
+      const calls = [];
+      const hung = [];
+      const h = harness({
+        users: [user(42)], plan,
+        extraDeps: {
+          // the WS cache is cold → every TF goes to REST, and REST hangs
+          cache: { getCandles: () => null, getCoins: () => Object.keys(plan) },
+          fetcher: {
+            volBySym: Object.fromEntries(Object.keys(plan).map((s) => [s, 50e6])),
+            getAllUsdtPairs: async () => Object.keys(plan),
+            getCandles: (sym, tf) => { calls.push([sym, tf]); return new Promise((r) => hung.push(() => r(frame()))); },
+          },
+        },
+      });
+      const cyc = h.run();
+      for (let i = 0; i < 50 && calls.length < S.OKX_SEM_SIZE * 3; i++) await new Promise((r) => setImmediate(r));
+      // 16 symbols under the semaphore, 3 TFs each
+      expect(calls.length).toBe(S.OKX_SEM_SIZE * 3);
+      await vi.advanceTimersByTimeAsync(S.GATHER_TIMEOUT_S * 1000);
+      await cyc;
+      expect(lines(h.log, '[SMC-GATHER-TIMEOUT]')).toEqual(['[SMC-GATHER-TIMEOUT] candle_fetch exceeded 90s — skipping cycle, n_coins=40 tf_group=1H']);
+      expect(h.rows()).toEqual([]);
+      // the requests on the wire answer now: dropped, and the 24 queued symbols never fetch
+      for (const r of hung.splice(0)) r();
+      for (let i = 0; i < 50; i++) await new Promise((r) => setImmediate(r));
+      expect(calls.length).toBe(S.OKX_SEM_SIZE * 3);
+      expect(h.scanner._tfCache.size).toBe(0);
+      expect(h.scanner._state.okxSem.available).toBe(S.OKX_SEM_SIZE);    // every slot released
+    } finally {
+      vi.useRealTimers();
+    }
+  });
+});
+
 describe('run loop', () => {
   it('cycles every interval, wakes early on the bar-close event, heartbeats, stops on abort', async () => {
     const u = user(40);

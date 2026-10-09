@@ -280,8 +280,12 @@ function createSmcScanner(deps = {}) {
   }
 
   // ── candles ───────────────────────────────────────────────────────────
-  /** _fetch_with_retry(fetcher, symbol, tf, limit=200, retries=3) */
-  async function fetchWithRetry(fetcher, symbol, tf, limit = 200, retries = 3) {
+  /**
+   * _fetch_with_retry(fetcher, symbol, tf, limit=200, retries=3). `cancel` = the cycle's fetch
+   * group ({cancelled}): a cancelled task (the [SMC-GATHER-TIMEOUT] wait_for) makes no further
+   * attempt — in the bot the CancelledError ends the retry loop at its await.
+   */
+  async function fetchWithRetry(fetcher, symbol, tf, limit = 200, retries = 3, cancel = null) {
     try {
       const cache = cacheOf();
       const tfN = tf && 'hd'.includes(pyLower(tf[tf.length - 1])) ? pyUpper(tf) : tf;
@@ -310,6 +314,7 @@ function createSmcScanner(deps = {}) {
       }
     }
     for (let attempt = 0; attempt < retries; attempt++) {
+      if (cancel && cancel.cancelled) return null;
       try {
         return await fetcher.getCandles(symbol, tf, limit);
       } catch (e) {
@@ -327,11 +332,15 @@ function createSmcScanner(deps = {}) {
     return null;
   }
 
-  /** _fetch_with_cache(fetcher, symbol, tf, ttl): ttl ≤ 0 → always fetch (LTF / MTF path). */
-  async function fetchWithCache(fetcher, symbol, tf, ttl) {
+  /**
+   * _fetch_with_cache(fetcher, symbol, tf, ttl): ttl ≤ 0 → always fetch (LTF / MTF path). A task
+   * of a cancelled fetch group writes nothing (the bot's task is cancelled at its await, before
+   * `_tf_cache[key] = …`).
+   */
+  async function fetchWithCache(fetcher, symbol, tf, ttl, cancel = null) {
     if (ttl <= 0) {
       tfCacheStats.ltf_bypass += 1;
-      return fetchWithRetry(fetcher, symbol, tf);
+      return fetchWithRetry(fetcher, symbol, tf, 200, 3, cancel);
     }
     const key = `${symbol}\u0000${tf}`;
     const t = now();
@@ -341,7 +350,8 @@ function createSmcScanner(deps = {}) {
       return hit[1];
     }
     tfCacheStats.misses += 1;
-    const df = await fetchWithRetry(fetcher, symbol, tf);
+    const df = await fetchWithRetry(fetcher, symbol, tf, 200, 3, cancel);
+    if (cancel && cancel.cancelled) return null;
     if (df !== null && df !== undefined) {
       tfCache.set(key, [t, df]);
       tfCacheStats.saved += 1;
@@ -680,11 +690,17 @@ function createSmcScanner(deps = {}) {
       log.info(`SMC tf=${tfKey} (${tfHtf}/${tfMtf}/${tfLtf}): ${groupUsers.length} users`);
       const sem = okxSem();
 
+      // asyncio.wait_for(gather(*_fetch_symbol…), 90) cancels every task on timeout: one still
+      // waiting for the (module-wide) semaphore never starts its REST calls, one inside a fetch
+      // writes no _tf_cache entry and retries no more. Requests already on the wire finish in the
+      // background (no cooperative point inside them) and are dropped.
+      const fetchGroup = { cancelled: false };
       const fetchSymbol = (sym) => sem.run(async () => {
+        if (fetchGroup.cancelled) return [sym, null, null, null];
         const rs = await Promise.allSettled([
-          fetchWithCache(fetcher, sym, tfHtf, HTF_TTL_S),
-          fetchWithCache(fetcher, sym, tfMtf, MTF_TTL_S),
-          fetchWithCache(fetcher, sym, tfLtf, LTF_TTL_S),
+          fetchWithCache(fetcher, sym, tfHtf, HTF_TTL_S, fetchGroup),
+          fetchWithCache(fetcher, sym, tfMtf, MTF_TTL_S, fetchGroup),
+          fetchWithCache(fetcher, sym, tfLtf, LTF_TTL_S, fetchGroup),
         ]);
         const v = rs.map((r) => (r.status === 'fulfilled' && r.value !== undefined ? r.value : null));
         return [sym, v[0], v[1], v[2]];
@@ -699,6 +715,7 @@ function createSmcScanner(deps = {}) {
         const gather = Promise.allSettled(coins.map((s) => fetchSymbol(s)));
         const race = await Promise.race([gather, new Promise((r) => { timer = setTimeout(() => r(timedOut), GATHER_TIMEOUT_S * 1000); })]);
         if (race === timedOut) {
+          fetchGroup.cancelled = true;
           log.warning(`[SMC-GATHER-TIMEOUT] candle_fetch exceeded 90s — skipping cycle, n_coins=${coins.length} tf_group=${tfKey}`);
           allResults = [];
         } else {
