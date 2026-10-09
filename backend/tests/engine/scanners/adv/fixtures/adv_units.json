@@ -1,0 +1,6564 @@
+{
+ "meta": {
+  "generator": "tests/engine/scanners/adv/py/adv_units.py",
+  "python": "3.11.17"
+ },
+ "vectors": [
+  {
+   "input": "",
+   "sparse_merge": {
+    "ok": {
+     "timeframe": "1h",
+     "scan_interval": 300,
+     "pivot_strength": 7,
+     "max_level_age": 100,
+     "max_retest_bars": 30,
+     "zone_buffer": 0.3,
+     "ema_fast": 50,
+     "ema_slow": 200,
+     "htf_ema_period": 50,
+     "rsi_period": 14,
+     "rsi_ob": 65,
+     "rsi_os": 35,
+     "vol_mult": 1.0,
+     "vol_len": 20,
+     "use_rsi": true,
+     "use_volume": true,
+     "use_pattern": false,
+     "use_htf": false,
+     "atr_period": 14,
+     "atr_mult": 1.0,
+     "max_risk_pct": 1.5,
+     "tp1_rr": 2.0,
+     "tp2_rr": 3.0,
+     "tp3_rr": 4.5,
+     "min_volume_usdt": 300000,
+     "min_quality": 3,
+     "cooldown_bars": 5,
+     "trend_only": false,
+     "zone_pct": 0.7,
+     "max_dist_pct": 1.5,
+     "min_rr": 2.0,
+     "max_level_tests": 4
+    },
+    "logs": []
+   },
+   "trade_from_json": {
+    "ok": {
+     "timeframe": "1h",
+     "scan_interval": 300,
+     "pivot_strength": 7,
+     "max_level_age": 100,
+     "max_retest_bars": 30,
+     "zone_buffer": 0.3,
+     "ema_fast": 50,
+     "ema_slow": 200,
+     "htf_ema_period": 50,
+     "rsi_period": 14,
+     "rsi_ob": 65,
+     "rsi_os": 35,
+     "vol_mult": 1.0,
+     "vol_len": 20,
+     "use_rsi": true,
+     "use_volume": true,
+     "use_pattern": false,
+     "use_htf": false,
+     "atr_period": 14,
+     "atr_mult": 1.0,
+     "max_risk_pct": 1.5,
+     "tp1_rr": 2.0,
+     "tp2_rr": 3.0,
+     "tp3_rr": 4.5,
+     "min_volume_usdt": 300000,
+     "min_quality": 3,
+     "cooldown_bars": 5,
+     "trend_only": false,
+     "zone_pct": 0.7,
+     "max_dist_pct": 1.5,
+     "min_rr": 2.0,
+     "max_level_tests": 4
+    },
+    "logs": []
+   },
+   "smc_from_json": {
+    "ok": {
+     "tf_key": "1H",
+     "scan_interval": 300,
+     "direction": "BOTH",
+     "min_confirmations": 3,
+     "min_rr": 2.0,
+     "sl_buffer_pct": 0.35,
+     "min_volume_usdt": 300000,
+     "fvg_enabled": true,
+     "choch_enabled": true,
+     "ob_use_breaker": true,
+     "ob_max_age": 80,
+     "sweep_close_req": true,
+     "smc_conf_type": "BODY_CLOSE",
+     "smc_pd_filter": false,
+     "smc_retrace_depth": 0.2,
+     "smc_mtf_check": false,
+     "smc_use_volume_filter": false,
+     "smc_vol_mult": 1.2,
+     "smc_vol_len": 20
+    },
+    "logs": []
+   },
+   "load_sparse": {
+    "ok": {},
+    "logs": []
+   }
+  },
+  {
+   "input": "{}",
+   "sparse_merge": {
+    "ok": {
+     "timeframe": "1h",
+     "scan_interval": 300,
+     "pivot_strength": 7,
+     "max_level_age": 100,
+     "max_retest_bars": 30,
+     "zone_buffer": 0.3,
+     "ema_fast": 50,
+     "ema_slow": 200,
+     "htf_ema_period": 50,
+     "rsi_period": 14,
+     "rsi_ob": 65,
+     "rsi_os": 35,
+     "vol_mult": 1.0,
+     "vol_len": 20,
+     "use_rsi": true,
+     "use_volume": true,
+     "use_pattern": false,
+     "use_htf": false,
+     "atr_period": 14,
+     "atr_mult": 1.0,
+     "max_risk_pct": 1.5,
+     "tp1_rr": 2.0,
+     "tp2_rr": 3.0,
+     "tp3_rr": 4.5,
+     "min_volume_usdt": 300000,
+     "min_quality": 3,
+     "cooldown_bars": 5,
+     "trend_only": false,
+     "zone_pct": 0.7,
+     "max_dist_pct": 1.5,
+     "min_rr": 2.0,
+     "max_level_tests": 4
+    },
+    "logs": []
+   },
+   "trade_from_json": {
+    "ok": {
+     "timeframe": "1h",
+     "scan_interval": 300,
+     "pivot_strength": 7,
+     "max_level_age": 100,
+     "max_retest_bars": 30,
+     "zone_buffer": 0.3,
+     "ema_fast": 50,
+     "ema_slow": 200,
+     "htf_ema_period": 50,
+     "rsi_period": 14,
+     "rsi_ob": 65,
+     "rsi_os": 35,
+     "vol_mult": 1.0,
+     "vol_len": 20,
+     "use_rsi": true,
+     "use_volume": true,
+     "use_pattern": false,
+     "use_htf": false,
+     "atr_period": 14,
+     "atr_mult": 1.0,
+     "max_risk_pct": 1.5,
+     "tp1_rr": 2.0,
+     "tp2_rr": 3.0,
+     "tp3_rr": 4.5,
+     "min_volume_usdt": 300000,
+     "min_quality": 3,
+     "cooldown_bars": 5,
+     "trend_only": false,
+     "zone_pct": 0.7,
+     "max_dist_pct": 1.5,
+     "min_rr": 2.0,
+     "max_level_tests": 4
+    },
+    "logs": []
+   },
+   "smc_from_json": {
+    "ok": {
+     "tf_key": "1H",
+     "scan_interval": 300,
+     "direction": "BOTH",
+     "min_confirmations": 3,
+     "min_rr": 2.0,
+     "sl_buffer_pct": 0.35,
+     "min_volume_usdt": 300000,
+     "fvg_enabled": true,
+     "choch_enabled": true,
+     "ob_use_breaker": true,
+     "ob_max_age": 80,
+     "sweep_close_req": true,
+     "smc_conf_type": "BODY_CLOSE",
+     "smc_pd_filter": false,
+     "smc_retrace_depth": 0.2,
+     "smc_mtf_check": false,
+     "smc_use_volume_filter": false,
+     "smc_vol_mult": 1.2,
+     "smc_vol_len": 20
+    },
+    "logs": []
+   },
+   "load_sparse": {
+    "ok": {},
+    "logs": []
+   }
+  },
+  {
+   "input": "{bad json",
+   "sparse_merge": {
+    "ok": {
+     "timeframe": "1h",
+     "scan_interval": 300,
+     "pivot_strength": 7,
+     "max_level_age": 100,
+     "max_retest_bars": 30,
+     "zone_buffer": 0.3,
+     "ema_fast": 50,
+     "ema_slow": 200,
+     "htf_ema_period": 50,
+     "rsi_period": 14,
+     "rsi_ob": 65,
+     "rsi_os": 35,
+     "vol_mult": 1.0,
+     "vol_len": 20,
+     "use_rsi": true,
+     "use_volume": true,
+     "use_pattern": false,
+     "use_htf": false,
+     "atr_period": 14,
+     "atr_mult": 1.0,
+     "max_risk_pct": 1.5,
+     "tp1_rr": 2.0,
+     "tp2_rr": 3.0,
+     "tp3_rr": 4.5,
+     "min_volume_usdt": 300000,
+     "min_quality": 3,
+     "cooldown_bars": 5,
+     "trend_only": false,
+     "zone_pct": 0.7,
+     "max_dist_pct": 1.5,
+     "min_rr": 2.0,
+     "max_level_tests": 4
+    },
+    "logs": [
+     [
+      "CHM.Users",
+      "WARNING",
+      "user_manager._val_eq() unhandled exception"
+     ]
+    ]
+   },
+   "trade_from_json": {
+    "ok": {
+     "timeframe": "1h",
+     "scan_interval": 300,
+     "pivot_strength": 7,
+     "max_level_age": 100,
+     "max_retest_bars": 30,
+     "zone_buffer": 0.3,
+     "ema_fast": 50,
+     "ema_slow": 200,
+     "htf_ema_period": 50,
+     "rsi_period": 14,
+     "rsi_ob": 65,
+     "rsi_os": 35,
+     "vol_mult": 1.0,
+     "vol_len": 20,
+     "use_rsi": true,
+     "use_volume": true,
+     "use_pattern": false,
+     "use_htf": false,
+     "atr_period": 14,
+     "atr_mult": 1.0,
+     "max_risk_pct": 1.5,
+     "tp1_rr": 2.0,
+     "tp2_rr": 3.0,
+     "tp3_rr": 4.5,
+     "min_volume_usdt": 300000,
+     "min_quality": 3,
+     "cooldown_bars": 5,
+     "trend_only": false,
+     "zone_pct": 0.7,
+     "max_dist_pct": 1.5,
+     "min_rr": 2.0,
+     "max_level_tests": 4
+    },
+    "logs": [
+     [
+      "CHM.Users",
+      "WARNING",
+      "user_manager.from_json() unhandled exception"
+     ]
+    ]
+   },
+   "smc_from_json": {
+    "ok": {
+     "tf_key": "1H",
+     "scan_interval": 300,
+     "direction": "BOTH",
+     "min_confirmations": 3,
+     "min_rr": 2.0,
+     "sl_buffer_pct": 0.35,
+     "min_volume_usdt": 300000,
+     "fvg_enabled": true,
+     "choch_enabled": true,
+     "ob_use_breaker": true,
+     "ob_max_age": 80,
+     "sweep_close_req": true,
+     "smc_conf_type": "BODY_CLOSE",
+     "smc_pd_filter": false,
+     "smc_retrace_depth": 0.2,
+     "smc_mtf_check": false,
+     "smc_use_volume_filter": false,
+     "smc_vol_mult": 1.2,
+     "smc_vol_len": 20
+    },
+    "logs": [
+     [
+      "CHM.Users",
+      "WARNING",
+      "user_manager.from_json() unhandled exception"
+     ]
+    ]
+   },
+   "load_sparse": {
+    "ok": {},
+    "logs": []
+   }
+  },
+  {
+   "input": "[1, 2]",
+   "sparse_merge": {
+    "error": [
+     "AttributeError",
+     "'list' object has no attribute 'get'"
+    ],
+    "logs": []
+   },
+   "trade_from_json": {
+    "ok": {
+     "timeframe": "1h",
+     "scan_interval": 300,
+     "pivot_strength": 7,
+     "max_level_age": 100,
+     "max_retest_bars": 30,
+     "zone_buffer": 0.3,
+     "ema_fast": 50,
+     "ema_slow": 200,
+     "htf_ema_period": 50,
+     "rsi_period": 14,
+     "rsi_ob": 65,
+     "rsi_os": 35,
+     "vol_mult": 1.0,
+     "vol_len": 20,
+     "use_rsi": true,
+     "use_volume": true,
+     "use_pattern": false,
+     "use_htf": false,
+     "atr_period": 14,
+     "atr_mult": 1.0,
+     "max_risk_pct": 1.5,
+     "tp1_rr": 2.0,
+     "tp2_rr": 3.0,
+     "tp3_rr": 4.5,
+     "min_volume_usdt": 300000,
+     "min_quality": 3,
+     "cooldown_bars": 5,
+     "trend_only": false,
+     "zone_pct": 0.7,
+     "max_dist_pct": 1.5,
+     "min_rr": 2.0,
+     "max_level_tests": 4
+    },
+    "logs": [
+     [
+      "CHM.Users",
+      "WARNING",
+      "user_manager.from_json() unhandled exception"
+     ]
+    ]
+   },
+   "smc_from_json": {
+    "ok": {
+     "tf_key": "1H",
+     "scan_interval": 300,
+     "direction": "BOTH",
+     "min_confirmations": 3,
+     "min_rr": 2.0,
+     "sl_buffer_pct": 0.35,
+     "min_volume_usdt": 300000,
+     "fvg_enabled": true,
+     "choch_enabled": true,
+     "ob_use_breaker": true,
+     "ob_max_age": 80,
+     "sweep_close_req": true,
+     "smc_conf_type": "BODY_CLOSE",
+     "smc_pd_filter": false,
+     "smc_retrace_depth": 0.2,
+     "smc_mtf_check": false,
+     "smc_use_volume_filter": false,
+     "smc_vol_mult": 1.2,
+     "smc_vol_len": 20
+    },
+    "logs": [
+     [
+      "CHM.Users",
+      "WARNING",
+      "user_manager.from_json() unhandled exception"
+     ]
+    ]
+   },
+   "load_sparse": {
+    "error": [
+     "AttributeError",
+     "'list' object has no attribute 'get'"
+    ],
+    "logs": []
+   }
+  },
+  {
+   "input": "null",
+   "sparse_merge": {
+    "error": [
+     "AttributeError",
+     "'NoneType' object has no attribute 'get'"
+    ],
+    "logs": []
+   },
+   "trade_from_json": {
+    "ok": {
+     "timeframe": "1h",
+     "scan_interval": 300,
+     "pivot_strength": 7,
+     "max_level_age": 100,
+     "max_retest_bars": 30,
+     "zone_buffer": 0.3,
+     "ema_fast": 50,
+     "ema_slow": 200,
+     "htf_ema_period": 50,
+     "rsi_period": 14,
+     "rsi_ob": 65,
+     "rsi_os": 35,
+     "vol_mult": 1.0,
+     "vol_len": 20,
+     "use_rsi": true,
+     "use_volume": true,
+     "use_pattern": false,
+     "use_htf": false,
+     "atr_period": 14,
+     "atr_mult": 1.0,
+     "max_risk_pct": 1.5,
+     "tp1_rr": 2.0,
+     "tp2_rr": 3.0,
+     "tp3_rr": 4.5,
+     "min_volume_usdt": 300000,
+     "min_quality": 3,
+     "cooldown_bars": 5,
+     "trend_only": false,
+     "zone_pct": 0.7,
+     "max_dist_pct": 1.5,
+     "min_rr": 2.0,
+     "max_level_tests": 4
+    },
+    "logs": [
+     [
+      "CHM.Users",
+      "WARNING",
+      "user_manager.from_json() unhandled exception"
+     ]
+    ]
+   },
+   "smc_from_json": {
+    "ok": {
+     "tf_key": "1H",
+     "scan_interval": 300,
+     "direction": "BOTH",
+     "min_confirmations": 3,
+     "min_rr": 2.0,
+     "sl_buffer_pct": 0.35,
+     "min_volume_usdt": 300000,
+     "fvg_enabled": true,
+     "choch_enabled": true,
+     "ob_use_breaker": true,
+     "ob_max_age": 80,
+     "sweep_close_req": true,
+     "smc_conf_type": "BODY_CLOSE",
+     "smc_pd_filter": false,
+     "smc_retrace_depth": 0.2,
+     "smc_mtf_check": false,
+     "smc_use_volume_filter": false,
+     "smc_vol_mult": 1.2,
+     "smc_vol_len": 20
+    },
+    "logs": [
+     [
+      "CHM.Users",
+      "WARNING",
+      "user_manager.from_json() unhandled exception"
+     ]
+    ]
+   },
+   "load_sparse": {
+    "error": [
+     "AttributeError",
+     "'NoneType' object has no attribute 'get'"
+    ],
+    "logs": []
+   }
+  },
+  {
+   "input": "1",
+   "sparse_merge": {
+    "error": [
+     "AttributeError",
+     "'int' object has no attribute 'get'"
+    ],
+    "logs": []
+   },
+   "trade_from_json": {
+    "ok": {
+     "timeframe": "1h",
+     "scan_interval": 300,
+     "pivot_strength": 7,
+     "max_level_age": 100,
+     "max_retest_bars": 30,
+     "zone_buffer": 0.3,
+     "ema_fast": 50,
+     "ema_slow": 200,
+     "htf_ema_period": 50,
+     "rsi_period": 14,
+     "rsi_ob": 65,
+     "rsi_os": 35,
+     "vol_mult": 1.0,
+     "vol_len": 20,
+     "use_rsi": true,
+     "use_volume": true,
+     "use_pattern": false,
+     "use_htf": false,
+     "atr_period": 14,
+     "atr_mult": 1.0,
+     "max_risk_pct": 1.5,
+     "tp1_rr": 2.0,
+     "tp2_rr": 3.0,
+     "tp3_rr": 4.5,
+     "min_volume_usdt": 300000,
+     "min_quality": 3,
+     "cooldown_bars": 5,
+     "trend_only": false,
+     "zone_pct": 0.7,
+     "max_dist_pct": 1.5,
+     "min_rr": 2.0,
+     "max_level_tests": 4
+    },
+    "logs": [
+     [
+      "CHM.Users",
+      "WARNING",
+      "user_manager.from_json() unhandled exception"
+     ]
+    ]
+   },
+   "smc_from_json": {
+    "ok": {
+     "tf_key": "1H",
+     "scan_interval": 300,
+     "direction": "BOTH",
+     "min_confirmations": 3,
+     "min_rr": 2.0,
+     "sl_buffer_pct": 0.35,
+     "min_volume_usdt": 300000,
+     "fvg_enabled": true,
+     "choch_enabled": true,
+     "ob_use_breaker": true,
+     "ob_max_age": 80,
+     "sweep_close_req": true,
+     "smc_conf_type": "BODY_CLOSE",
+     "smc_pd_filter": false,
+     "smc_retrace_depth": 0.2,
+     "smc_mtf_check": false,
+     "smc_use_volume_filter": false,
+     "smc_vol_mult": 1.2,
+     "smc_vol_len": 20
+    },
+    "logs": [
+     [
+      "CHM.Users",
+      "WARNING",
+      "user_manager.from_json() unhandled exception"
+     ]
+    ]
+   },
+   "load_sparse": {
+    "error": [
+     "AttributeError",
+     "'int' object has no attribute 'get'"
+    ],
+    "logs": []
+   }
+  },
+  {
+   "input": "1.5",
+   "sparse_merge": {
+    "error": [
+     "AttributeError",
+     "'float' object has no attribute 'get'"
+    ],
+    "logs": []
+   },
+   "trade_from_json": {
+    "ok": {
+     "timeframe": "1h",
+     "scan_interval": 300,
+     "pivot_strength": 7,
+     "max_level_age": 100,
+     "max_retest_bars": 30,
+     "zone_buffer": 0.3,
+     "ema_fast": 50,
+     "ema_slow": 200,
+     "htf_ema_period": 50,
+     "rsi_period": 14,
+     "rsi_ob": 65,
+     "rsi_os": 35,
+     "vol_mult": 1.0,
+     "vol_len": 20,
+     "use_rsi": true,
+     "use_volume": true,
+     "use_pattern": false,
+     "use_htf": false,
+     "atr_period": 14,
+     "atr_mult": 1.0,
+     "max_risk_pct": 1.5,
+     "tp1_rr": 2.0,
+     "tp2_rr": 3.0,
+     "tp3_rr": 4.5,
+     "min_volume_usdt": 300000,
+     "min_quality": 3,
+     "cooldown_bars": 5,
+     "trend_only": false,
+     "zone_pct": 0.7,
+     "max_dist_pct": 1.5,
+     "min_rr": 2.0,
+     "max_level_tests": 4
+    },
+    "logs": [
+     [
+      "CHM.Users",
+      "WARNING",
+      "user_manager.from_json() unhandled exception"
+     ]
+    ]
+   },
+   "smc_from_json": {
+    "ok": {
+     "tf_key": "1H",
+     "scan_interval": 300,
+     "direction": "BOTH",
+     "min_confirmations": 3,
+     "min_rr": 2.0,
+     "sl_buffer_pct": 0.35,
+     "min_volume_usdt": 300000,
+     "fvg_enabled": true,
+     "choch_enabled": true,
+     "ob_use_breaker": true,
+     "ob_max_age": 80,
+     "sweep_close_req": true,
+     "smc_conf_type": "BODY_CLOSE",
+     "smc_pd_filter": false,
+     "smc_retrace_depth": 0.2,
+     "smc_mtf_check": false,
+     "smc_use_volume_filter": false,
+     "smc_vol_mult": 1.2,
+     "smc_vol_len": 20
+    },
+    "logs": [
+     [
+      "CHM.Users",
+      "WARNING",
+      "user_manager.from_json() unhandled exception"
+     ]
+    ]
+   },
+   "load_sparse": {
+    "error": [
+     "AttributeError",
+     "'float' object has no attribute 'get'"
+    ],
+    "logs": []
+   }
+  },
+  {
+   "input": "\"x\"",
+   "sparse_merge": {
+    "error": [
+     "AttributeError",
+     "'str' object has no attribute 'get'"
+    ],
+    "logs": []
+   },
+   "trade_from_json": {
+    "ok": {
+     "timeframe": "1h",
+     "scan_interval": 300,
+     "pivot_strength": 7,
+     "max_level_age": 100,
+     "max_retest_bars": 30,
+     "zone_buffer": 0.3,
+     "ema_fast": 50,
+     "ema_slow": 200,
+     "htf_ema_period": 50,
+     "rsi_period": 14,
+     "rsi_ob": 65,
+     "rsi_os": 35,
+     "vol_mult": 1.0,
+     "vol_len": 20,
+     "use_rsi": true,
+     "use_volume": true,
+     "use_pattern": false,
+     "use_htf": false,
+     "atr_period": 14,
+     "atr_mult": 1.0,
+     "max_risk_pct": 1.5,
+     "tp1_rr": 2.0,
+     "tp2_rr": 3.0,
+     "tp3_rr": 4.5,
+     "min_volume_usdt": 300000,
+     "min_quality": 3,
+     "cooldown_bars": 5,
+     "trend_only": false,
+     "zone_pct": 0.7,
+     "max_dist_pct": 1.5,
+     "min_rr": 2.0,
+     "max_level_tests": 4
+    },
+    "logs": [
+     [
+      "CHM.Users",
+      "WARNING",
+      "user_manager.from_json() unhandled exception"
+     ]
+    ]
+   },
+   "smc_from_json": {
+    "ok": {
+     "tf_key": "1H",
+     "scan_interval": 300,
+     "direction": "BOTH",
+     "min_confirmations": 3,
+     "min_rr": 2.0,
+     "sl_buffer_pct": 0.35,
+     "min_volume_usdt": 300000,
+     "fvg_enabled": true,
+     "choch_enabled": true,
+     "ob_use_breaker": true,
+     "ob_max_age": 80,
+     "sweep_close_req": true,
+     "smc_conf_type": "BODY_CLOSE",
+     "smc_pd_filter": false,
+     "smc_retrace_depth": 0.2,
+     "smc_mtf_check": false,
+     "smc_use_volume_filter": false,
+     "smc_vol_mult": 1.2,
+     "smc_vol_len": 20
+    },
+    "logs": [
+     [
+      "CHM.Users",
+      "WARNING",
+      "user_manager.from_json() unhandled exception"
+     ]
+    ]
+   },
+   "load_sparse": {
+    "error": [
+     "AttributeError",
+     "'str' object has no attribute 'get'"
+    ],
+    "logs": []
+   }
+  },
+  {
+   "input": "true",
+   "sparse_merge": {
+    "error": [
+     "AttributeError",
+     "'bool' object has no attribute 'get'"
+    ],
+    "logs": []
+   },
+   "trade_from_json": {
+    "ok": {
+     "timeframe": "1h",
+     "scan_interval": 300,
+     "pivot_strength": 7,
+     "max_level_age": 100,
+     "max_retest_bars": 30,
+     "zone_buffer": 0.3,
+     "ema_fast": 50,
+     "ema_slow": 200,
+     "htf_ema_period": 50,
+     "rsi_period": 14,
+     "rsi_ob": 65,
+     "rsi_os": 35,
+     "vol_mult": 1.0,
+     "vol_len": 20,
+     "use_rsi": true,
+     "use_volume": true,
+     "use_pattern": false,
+     "use_htf": false,
+     "atr_period": 14,
+     "atr_mult": 1.0,
+     "max_risk_pct": 1.5,
+     "tp1_rr": 2.0,
+     "tp2_rr": 3.0,
+     "tp3_rr": 4.5,
+     "min_volume_usdt": 300000,
+     "min_quality": 3,
+     "cooldown_bars": 5,
+     "trend_only": false,
+     "zone_pct": 0.7,
+     "max_dist_pct": 1.5,
+     "min_rr": 2.0,
+     "max_level_tests": 4
+    },
+    "logs": [
+     [
+      "CHM.Users",
+      "WARNING",
+      "user_manager.from_json() unhandled exception"
+     ]
+    ]
+   },
+   "smc_from_json": {
+    "ok": {
+     "tf_key": "1H",
+     "scan_interval": 300,
+     "direction": "BOTH",
+     "min_confirmations": 3,
+     "min_rr": 2.0,
+     "sl_buffer_pct": 0.35,
+     "min_volume_usdt": 300000,
+     "fvg_enabled": true,
+     "choch_enabled": true,
+     "ob_use_breaker": true,
+     "ob_max_age": 80,
+     "sweep_close_req": true,
+     "smc_conf_type": "BODY_CLOSE",
+     "smc_pd_filter": false,
+     "smc_retrace_depth": 0.2,
+     "smc_mtf_check": false,
+     "smc_use_volume_filter": false,
+     "smc_vol_mult": 1.2,
+     "smc_vol_len": 20
+    },
+    "logs": [
+     [
+      "CHM.Users",
+      "WARNING",
+      "user_manager.from_json() unhandled exception"
+     ]
+    ]
+   },
+   "load_sparse": {
+    "error": [
+     "AttributeError",
+     "'bool' object has no attribute 'get'"
+    ],
+    "logs": []
+   }
+  },
+  {
+   "input": "[]",
+   "sparse_merge": {
+    "error": [
+     "AttributeError",
+     "'list' object has no attribute 'get'"
+    ],
+    "logs": []
+   },
+   "trade_from_json": {
+    "ok": {
+     "timeframe": "1h",
+     "scan_interval": 300,
+     "pivot_strength": 7,
+     "max_level_age": 100,
+     "max_retest_bars": 30,
+     "zone_buffer": 0.3,
+     "ema_fast": 50,
+     "ema_slow": 200,
+     "htf_ema_period": 50,
+     "rsi_period": 14,
+     "rsi_ob": 65,
+     "rsi_os": 35,
+     "vol_mult": 1.0,
+     "vol_len": 20,
+     "use_rsi": true,
+     "use_volume": true,
+     "use_pattern": false,
+     "use_htf": false,
+     "atr_period": 14,
+     "atr_mult": 1.0,
+     "max_risk_pct": 1.5,
+     "tp1_rr": 2.0,
+     "tp2_rr": 3.0,
+     "tp3_rr": 4.5,
+     "min_volume_usdt": 300000,
+     "min_quality": 3,
+     "cooldown_bars": 5,
+     "trend_only": false,
+     "zone_pct": 0.7,
+     "max_dist_pct": 1.5,
+     "min_rr": 2.0,
+     "max_level_tests": 4
+    },
+    "logs": [
+     [
+      "CHM.Users",
+      "WARNING",
+      "user_manager.from_json() unhandled exception"
+     ]
+    ]
+   },
+   "smc_from_json": {
+    "ok": {
+     "tf_key": "1H",
+     "scan_interval": 300,
+     "direction": "BOTH",
+     "min_confirmations": 3,
+     "min_rr": 2.0,
+     "sl_buffer_pct": 0.35,
+     "min_volume_usdt": 300000,
+     "fvg_enabled": true,
+     "choch_enabled": true,
+     "ob_use_breaker": true,
+     "ob_max_age": 80,
+     "sweep_close_req": true,
+     "smc_conf_type": "BODY_CLOSE",
+     "smc_pd_filter": false,
+     "smc_retrace_depth": 0.2,
+     "smc_mtf_check": false,
+     "smc_use_volume_filter": false,
+     "smc_vol_mult": 1.2,
+     "smc_vol_len": 20
+    },
+    "logs": [
+     [
+      "CHM.Users",
+      "WARNING",
+      "user_manager.from_json() unhandled exception"
+     ]
+    ]
+   },
+   "load_sparse": {
+    "error": [
+     "AttributeError",
+     "'list' object has no attribute 'get'"
+    ],
+    "logs": []
+   }
+  },
+  {
+   "input": "{\"min_rr\": NaN, \"_sparse\": true}",
+   "sparse_merge": {
+    "ok": {
+     "timeframe": "1h",
+     "scan_interval": 300,
+     "pivot_strength": 7,
+     "max_level_age": 100,
+     "max_retest_bars": 30,
+     "zone_buffer": 0.3,
+     "ema_fast": 50,
+     "ema_slow": 200,
+     "htf_ema_period": 50,
+     "rsi_period": 14,
+     "rsi_ob": 65,
+     "rsi_os": 35,
+     "vol_mult": 1.0,
+     "vol_len": 20,
+     "use_rsi": true,
+     "use_volume": true,
+     "use_pattern": false,
+     "use_htf": false,
+     "atr_period": 14,
+     "atr_mult": 1.0,
+     "max_risk_pct": 1.5,
+     "tp1_rr": 2.0,
+     "tp2_rr": 3.0,
+     "tp3_rr": 4.5,
+     "min_volume_usdt": 300000,
+     "min_quality": 3,
+     "cooldown_bars": 5,
+     "trend_only": false,
+     "zone_pct": 0.7,
+     "max_dist_pct": 1.5,
+     "min_rr": {
+      "$f": "nan"
+     },
+     "max_level_tests": 4
+    },
+    "logs": []
+   },
+   "trade_from_json": {
+    "ok": {
+     "timeframe": "1h",
+     "scan_interval": 300,
+     "pivot_strength": 7,
+     "max_level_age": 100,
+     "max_retest_bars": 30,
+     "zone_buffer": 0.3,
+     "ema_fast": 50,
+     "ema_slow": 200,
+     "htf_ema_period": 50,
+     "rsi_period": 14,
+     "rsi_ob": 65,
+     "rsi_os": 35,
+     "vol_mult": 1.0,
+     "vol_len": 20,
+     "use_rsi": true,
+     "use_volume": true,
+     "use_pattern": false,
+     "use_htf": false,
+     "atr_period": 14,
+     "atr_mult": 1.0,
+     "max_risk_pct": 1.5,
+     "tp1_rr": 2.0,
+     "tp2_rr": 3.0,
+     "tp3_rr": 4.5,
+     "min_volume_usdt": 300000,
+     "min_quality": 3,
+     "cooldown_bars": 5,
+     "trend_only": false,
+     "zone_pct": 0.7,
+     "max_dist_pct": 1.5,
+     "min_rr": {
+      "$f": "nan"
+     },
+     "max_level_tests": 4
+    },
+    "logs": []
+   },
+   "smc_from_json": {
+    "ok": {
+     "tf_key": "1H",
+     "scan_interval": 300,
+     "direction": "BOTH",
+     "min_confirmations": 3,
+     "min_rr": {
+      "$f": "nan"
+     },
+     "sl_buffer_pct": 0.35,
+     "min_volume_usdt": 300000,
+     "fvg_enabled": true,
+     "choch_enabled": true,
+     "ob_use_breaker": true,
+     "ob_max_age": 80,
+     "sweep_close_req": true,
+     "smc_conf_type": "BODY_CLOSE",
+     "smc_pd_filter": false,
+     "smc_retrace_depth": 0.2,
+     "smc_mtf_check": false,
+     "smc_use_volume_filter": false,
+     "smc_vol_mult": 1.2,
+     "smc_vol_len": 20
+    },
+    "logs": []
+   },
+   "load_sparse": {
+    "ok": {
+     "min_rr": {
+      "$f": "nan"
+     }
+    },
+    "logs": []
+   }
+  },
+  {
+   "input": "{\"min_rr\": Infinity, \"_sparse\": true}",
+   "sparse_merge": {
+    "ok": {
+     "timeframe": "1h",
+     "scan_interval": 300,
+     "pivot_strength": 7,
+     "max_level_age": 100,
+     "max_retest_bars": 30,
+     "zone_buffer": 0.3,
+     "ema_fast": 50,
+     "ema_slow": 200,
+     "htf_ema_period": 50,
+     "rsi_period": 14,
+     "rsi_ob": 65,
+     "rsi_os": 35,
+     "vol_mult": 1.0,
+     "vol_len": 20,
+     "use_rsi": true,
+     "use_volume": true,
+     "use_pattern": false,
+     "use_htf": false,
+     "atr_period": 14,
+     "atr_mult": 1.0,
+     "max_risk_pct": 1.5,
+     "tp1_rr": {
+      "$f": "inf"
+     },
+     "tp2_rr": {
+      "$f": "inf"
+     },
+     "tp3_rr": {
+      "$f": "inf"
+     },
+     "min_volume_usdt": 300000,
+     "min_quality": 3,
+     "cooldown_bars": 5,
+     "trend_only": false,
+     "zone_pct": 0.7,
+     "max_dist_pct": 1.5,
+     "min_rr": {
+      "$f": "inf"
+     },
+     "max_level_tests": 4
+    },
+    "logs": []
+   },
+   "trade_from_json": {
+    "ok": {
+     "timeframe": "1h",
+     "scan_interval": 300,
+     "pivot_strength": 7,
+     "max_level_age": 100,
+     "max_retest_bars": 30,
+     "zone_buffer": 0.3,
+     "ema_fast": 50,
+     "ema_slow": 200,
+     "htf_ema_period": 50,
+     "rsi_period": 14,
+     "rsi_ob": 65,
+     "rsi_os": 35,
+     "vol_mult": 1.0,
+     "vol_len": 20,
+     "use_rsi": true,
+     "use_volume": true,
+     "use_pattern": false,
+     "use_htf": false,
+     "atr_period": 14,
+     "atr_mult": 1.0,
+     "max_risk_pct": 1.5,
+     "tp1_rr": {
+      "$f": "inf"
+     },
+     "tp2_rr": {
+      "$f": "inf"
+     },
+     "tp3_rr": {
+      "$f": "inf"
+     },
+     "min_volume_usdt": 300000,
+     "min_quality": 3,
+     "cooldown_bars": 5,
+     "trend_only": false,
+     "zone_pct": 0.7,
+     "max_dist_pct": 1.5,
+     "min_rr": {
+      "$f": "inf"
+     },
+     "max_level_tests": 4
+    },
+    "logs": []
+   },
+   "smc_from_json": {
+    "ok": {
+     "tf_key": "1H",
+     "scan_interval": 300,
+     "direction": "BOTH",
+     "min_confirmations": 3,
+     "min_rr": {
+      "$f": "inf"
+     },
+     "sl_buffer_pct": 0.35,
+     "min_volume_usdt": 300000,
+     "fvg_enabled": true,
+     "choch_enabled": true,
+     "ob_use_breaker": true,
+     "ob_max_age": 80,
+     "sweep_close_req": true,
+     "smc_conf_type": "BODY_CLOSE",
+     "smc_pd_filter": false,
+     "smc_retrace_depth": 0.2,
+     "smc_mtf_check": false,
+     "smc_use_volume_filter": false,
+     "smc_vol_mult": 1.2,
+     "smc_vol_len": 20
+    },
+    "logs": []
+   },
+   "load_sparse": {
+    "ok": {
+     "min_rr": {
+      "$f": "inf"
+     }
+    },
+    "logs": []
+   }
+  },
+  {
+   "input": "{\"tp1_rr\": 2.0, \"min_rr\": 2.0, \"pivot_strength\": 5}",
+   "sparse_merge": {
+    "ok": {
+     "timeframe": "1h",
+     "scan_interval": 300,
+     "pivot_strength": 5,
+     "max_level_age": 100,
+     "max_retest_bars": 30,
+     "zone_buffer": 0.3,
+     "ema_fast": 50,
+     "ema_slow": 200,
+     "htf_ema_period": 50,
+     "rsi_period": 14,
+     "rsi_ob": 65,
+     "rsi_os": 35,
+     "vol_mult": 1.0,
+     "vol_len": 20,
+     "use_rsi": true,
+     "use_volume": true,
+     "use_pattern": false,
+     "use_htf": false,
+     "atr_period": 14,
+     "atr_mult": 1.0,
+     "max_risk_pct": 1.5,
+     "tp1_rr": 2.0,
+     "tp2_rr": 3.0,
+     "tp3_rr": 4.5,
+     "min_volume_usdt": 300000,
+     "min_quality": 3,
+     "cooldown_bars": 5,
+     "trend_only": false,
+     "zone_pct": 0.7,
+     "max_dist_pct": 1.5,
+     "min_rr": 2.0,
+     "max_level_tests": 4
+    },
+    "logs": []
+   },
+   "trade_from_json": {
+    "ok": {
+     "timeframe": "1h",
+     "scan_interval": 300,
+     "pivot_strength": 5,
+     "max_level_age": 100,
+     "max_retest_bars": 30,
+     "zone_buffer": 0.3,
+     "ema_fast": 50,
+     "ema_slow": 200,
+     "htf_ema_period": 50,
+     "rsi_period": 14,
+     "rsi_ob": 65,
+     "rsi_os": 35,
+     "vol_mult": 1.0,
+     "vol_len": 20,
+     "use_rsi": true,
+     "use_volume": true,
+     "use_pattern": false,
+     "use_htf": false,
+     "atr_period": 14,
+     "atr_mult": 1.0,
+     "max_risk_pct": 1.5,
+     "tp1_rr": 2.0,
+     "tp2_rr": 3.0,
+     "tp3_rr": 4.5,
+     "min_volume_usdt": 300000,
+     "min_quality": 3,
+     "cooldown_bars": 5,
+     "trend_only": false,
+     "zone_pct": 0.7,
+     "max_dist_pct": 1.5,
+     "min_rr": 2.0,
+     "max_level_tests": 4
+    },
+    "logs": []
+   },
+   "smc_from_json": {
+    "ok": {
+     "tf_key": "1H",
+     "scan_interval": 300,
+     "direction": "BOTH",
+     "min_confirmations": 3,
+     "min_rr": 2.0,
+     "sl_buffer_pct": 0.35,
+     "min_volume_usdt": 300000,
+     "fvg_enabled": true,
+     "choch_enabled": true,
+     "ob_use_breaker": true,
+     "ob_max_age": 80,
+     "sweep_close_req": true,
+     "smc_conf_type": "BODY_CLOSE",
+     "smc_pd_filter": false,
+     "smc_retrace_depth": 0.2,
+     "smc_mtf_check": false,
+     "smc_use_volume_filter": false,
+     "smc_vol_mult": 1.2,
+     "smc_vol_len": 20
+    },
+    "logs": []
+   },
+   "load_sparse": {
+    "ok": {
+     "pivot_strength": 5
+    },
+    "logs": []
+   }
+  },
+  {
+   "input": "{\"tp1_rr\": 2.0000001, \"min_volume_usdt\": 300000.0, \"zone_pct\": 0.70000001}",
+   "sparse_merge": {
+    "ok": {
+     "timeframe": "1h",
+     "scan_interval": 300,
+     "pivot_strength": 7,
+     "max_level_age": 100,
+     "max_retest_bars": 30,
+     "zone_buffer": 0.3,
+     "ema_fast": 50,
+     "ema_slow": 200,
+     "htf_ema_period": 50,
+     "rsi_period": 14,
+     "rsi_ob": 65,
+     "rsi_os": 35,
+     "vol_mult": 1.0,
+     "vol_len": 20,
+     "use_rsi": true,
+     "use_volume": true,
+     "use_pattern": false,
+     "use_htf": false,
+     "atr_period": 14,
+     "atr_mult": 1.0,
+     "max_risk_pct": 1.5,
+     "tp1_rr": 2.0,
+     "tp2_rr": 3.0,
+     "tp3_rr": 4.5,
+     "min_volume_usdt": 300000,
+     "min_quality": 3,
+     "cooldown_bars": 5,
+     "trend_only": false,
+     "zone_pct": 0.7,
+     "max_dist_pct": 1.5,
+     "min_rr": 2.0,
+     "max_level_tests": 4
+    },
+    "logs": []
+   },
+   "trade_from_json": {
+    "ok": {
+     "timeframe": "1h",
+     "scan_interval": 300,
+     "pivot_strength": 7,
+     "max_level_age": 100,
+     "max_retest_bars": 30,
+     "zone_buffer": 0.3,
+     "ema_fast": 50,
+     "ema_slow": 200,
+     "htf_ema_period": 50,
+     "rsi_period": 14,
+     "rsi_ob": 65,
+     "rsi_os": 35,
+     "vol_mult": 1.0,
+     "vol_len": 20,
+     "use_rsi": true,
+     "use_volume": true,
+     "use_pattern": false,
+     "use_htf": false,
+     "atr_period": 14,
+     "atr_mult": 1.0,
+     "max_risk_pct": 1.5,
+     "tp1_rr": 2.0000001,
+     "tp2_rr": 3.0,
+     "tp3_rr": 4.5,
+     "min_volume_usdt": 300000.0,
+     "min_quality": 3,
+     "cooldown_bars": 5,
+     "trend_only": false,
+     "zone_pct": 0.70000001,
+     "max_dist_pct": 1.5,
+     "min_rr": 2.0,
+     "max_level_tests": 4
+    },
+    "logs": []
+   },
+   "smc_from_json": {
+    "ok": {
+     "tf_key": "1H",
+     "scan_interval": 300,
+     "direction": "BOTH",
+     "min_confirmations": 3,
+     "min_rr": 2.0,
+     "sl_buffer_pct": 0.35,
+     "min_volume_usdt": 300000.0,
+     "fvg_enabled": true,
+     "choch_enabled": true,
+     "ob_use_breaker": true,
+     "ob_max_age": 80,
+     "sweep_close_req": true,
+     "smc_conf_type": "BODY_CLOSE",
+     "smc_pd_filter": false,
+     "smc_retrace_depth": 0.2,
+     "smc_mtf_check": false,
+     "smc_use_volume_filter": false,
+     "smc_vol_mult": 1.2,
+     "smc_vol_len": 20
+    },
+    "logs": []
+   },
+   "load_sparse": {
+    "ok": {},
+    "logs": []
+   }
+  },
+  {
+   "input": "{\"min_volume_usdt\": 300000.15, \"cooldown_bars\": 5}",
+   "sparse_merge": {
+    "ok": {
+     "timeframe": "1h",
+     "scan_interval": 300,
+     "pivot_strength": 7,
+     "max_level_age": 100,
+     "max_retest_bars": 30,
+     "zone_buffer": 0.3,
+     "ema_fast": 50,
+     "ema_slow": 200,
+     "htf_ema_period": 50,
+     "rsi_period": 14,
+     "rsi_ob": 65,
+     "rsi_os": 35,
+     "vol_mult": 1.0,
+     "vol_len": 20,
+     "use_rsi": true,
+     "use_volume": true,
+     "use_pattern": false,
+     "use_htf": false,
+     "atr_period": 14,
+     "atr_mult": 1.0,
+     "max_risk_pct": 1.5,
+     "tp1_rr": 2.0,
+     "tp2_rr": 3.0,
+     "tp3_rr": 4.5,
+     "min_volume_usdt": 300000.15,
+     "min_quality": 3,
+     "cooldown_bars": 5,
+     "trend_only": false,
+     "zone_pct": 0.7,
+     "max_dist_pct": 1.5,
+     "min_rr": 2.0,
+     "max_level_tests": 4
+    },
+    "logs": []
+   },
+   "trade_from_json": {
+    "ok": {
+     "timeframe": "1h",
+     "scan_interval": 300,
+     "pivot_strength": 7,
+     "max_level_age": 100,
+     "max_retest_bars": 30,
+     "zone_buffer": 0.3,
+     "ema_fast": 50,
+     "ema_slow": 200,
+     "htf_ema_period": 50,
+     "rsi_period": 14,
+     "rsi_ob": 65,
+     "rsi_os": 35,
+     "vol_mult": 1.0,
+     "vol_len": 20,
+     "use_rsi": true,
+     "use_volume": true,
+     "use_pattern": false,
+     "use_htf": false,
+     "atr_period": 14,
+     "atr_mult": 1.0,
+     "max_risk_pct": 1.5,
+     "tp1_rr": 2.0,
+     "tp2_rr": 3.0,
+     "tp3_rr": 4.5,
+     "min_volume_usdt": 300000.15,
+     "min_quality": 3,
+     "cooldown_bars": 5,
+     "trend_only": false,
+     "zone_pct": 0.7,
+     "max_dist_pct": 1.5,
+     "min_rr": 2.0,
+     "max_level_tests": 4
+    },
+    "logs": []
+   },
+   "smc_from_json": {
+    "ok": {
+     "tf_key": "1H",
+     "scan_interval": 300,
+     "direction": "BOTH",
+     "min_confirmations": 3,
+     "min_rr": 2.0,
+     "sl_buffer_pct": 0.35,
+     "min_volume_usdt": 300000.15,
+     "fvg_enabled": true,
+     "choch_enabled": true,
+     "ob_use_breaker": true,
+     "ob_max_age": 80,
+     "sweep_close_req": true,
+     "smc_conf_type": "BODY_CLOSE",
+     "smc_pd_filter": false,
+     "smc_retrace_depth": 0.2,
+     "smc_mtf_check": false,
+     "smc_use_volume_filter": false,
+     "smc_vol_mult": 1.2,
+     "smc_vol_len": 20
+    },
+    "logs": []
+   },
+   "load_sparse": {
+    "ok": {
+     "min_volume_usdt": 300000.15
+    },
+    "logs": []
+   }
+  },
+  {
+   "input": "{\"min_rr\": 1.5, \"max_dist_pct\": 3.0, \"_sparse\": true}",
+   "sparse_merge": {
+    "ok": {
+     "timeframe": "1h",
+     "scan_interval": 300,
+     "pivot_strength": 7,
+     "max_level_age": 100,
+     "max_retest_bars": 30,
+     "zone_buffer": 0.3,
+     "ema_fast": 50,
+     "ema_slow": 200,
+     "htf_ema_period": 50,
+     "rsi_period": 14,
+     "rsi_ob": 65,
+     "rsi_os": 35,
+     "vol_mult": 1.0,
+     "vol_len": 20,
+     "use_rsi": true,
+     "use_volume": true,
+     "use_pattern": false,
+     "use_htf": false,
+     "atr_period": 14,
+     "atr_mult": 1.0,
+     "max_risk_pct": 1.5,
+     "tp1_rr": 2.0,
+     "tp2_rr": 3.0,
+     "tp3_rr": 4.5,
+     "min_volume_usdt": 300000,
+     "min_quality": 3,
+     "cooldown_bars": 5,
+     "trend_only": false,
+     "zone_pct": 0.7,
+     "max_dist_pct": 3.0,
+     "min_rr": 1.5,
+     "max_level_tests": 4
+    },
+    "logs": []
+   },
+   "trade_from_json": {
+    "ok": {
+     "timeframe": "1h",
+     "scan_interval": 300,
+     "pivot_strength": 7,
+     "max_level_age": 100,
+     "max_retest_bars": 30,
+     "zone_buffer": 0.3,
+     "ema_fast": 50,
+     "ema_slow": 200,
+     "htf_ema_period": 50,
+     "rsi_period": 14,
+     "rsi_ob": 65,
+     "rsi_os": 35,
+     "vol_mult": 1.0,
+     "vol_len": 20,
+     "use_rsi": true,
+     "use_volume": true,
+     "use_pattern": false,
+     "use_htf": false,
+     "atr_period": 14,
+     "atr_mult": 1.0,
+     "max_risk_pct": 1.5,
+     "tp1_rr": 2.0,
+     "tp2_rr": 3.0,
+     "tp3_rr": 4.5,
+     "min_volume_usdt": 300000,
+     "min_quality": 3,
+     "cooldown_bars": 5,
+     "trend_only": false,
+     "zone_pct": 0.7,
+     "max_dist_pct": 3.0,
+     "min_rr": 1.5,
+     "max_level_tests": 4
+    },
+    "logs": []
+   },
+   "smc_from_json": {
+    "ok": {
+     "tf_key": "1H",
+     "scan_interval": 300,
+     "direction": "BOTH",
+     "min_confirmations": 3,
+     "min_rr": 1.5,
+     "sl_buffer_pct": 0.35,
+     "min_volume_usdt": 300000,
+     "fvg_enabled": true,
+     "choch_enabled": true,
+     "ob_use_breaker": true,
+     "ob_max_age": 80,
+     "sweep_close_req": true,
+     "smc_conf_type": "BODY_CLOSE",
+     "smc_pd_filter": false,
+     "smc_retrace_depth": 0.2,
+     "smc_mtf_check": false,
+     "smc_use_volume_filter": false,
+     "smc_vol_mult": 1.2,
+     "smc_vol_len": 20
+    },
+    "logs": []
+   },
+   "load_sparse": {
+    "ok": {
+     "min_rr": 1.5,
+     "max_dist_pct": 3.0
+    },
+    "logs": []
+   }
+  },
+  {
+   "input": "{\"min_rr\": 1.5, \"min_rr\": 2.5, \"_sparse\": true}",
+   "sparse_merge": {
+    "ok": {
+     "timeframe": "1h",
+     "scan_interval": 300,
+     "pivot_strength": 7,
+     "max_level_age": 100,
+     "max_retest_bars": 30,
+     "zone_buffer": 0.3,
+     "ema_fast": 50,
+     "ema_slow": 200,
+     "htf_ema_period": 50,
+     "rsi_period": 14,
+     "rsi_ob": 65,
+     "rsi_os": 35,
+     "vol_mult": 1.0,
+     "vol_len": 20,
+     "use_rsi": true,
+     "use_volume": true,
+     "use_pattern": false,
+     "use_htf": false,
+     "atr_period": 14,
+     "atr_mult": 1.0,
+     "max_risk_pct": 1.5,
+     "tp1_rr": 2.5,
+     "tp2_rr": 3.0,
+     "tp3_rr": 4.5,
+     "min_volume_usdt": 300000,
+     "min_quality": 3,
+     "cooldown_bars": 5,
+     "trend_only": false,
+     "zone_pct": 0.7,
+     "max_dist_pct": 1.5,
+     "min_rr": 2.5,
+     "max_level_tests": 4
+    },
+    "logs": []
+   },
+   "trade_from_json": {
+    "ok": {
+     "timeframe": "1h",
+     "scan_interval": 300,
+     "pivot_strength": 7,
+     "max_level_age": 100,
+     "max_retest_bars": 30,
+     "zone_buffer": 0.3,
+     "ema_fast": 50,
+     "ema_slow": 200,
+     "htf_ema_period": 50,
+     "rsi_period": 14,
+     "rsi_ob": 65,
+     "rsi_os": 35,
+     "vol_mult": 1.0,
+     "vol_len": 20,
+     "use_rsi": true,
+     "use_volume": true,
+     "use_pattern": false,
+     "use_htf": false,
+     "atr_period": 14,
+     "atr_mult": 1.0,
+     "max_risk_pct": 1.5,
+     "tp1_rr": 2.5,
+     "tp2_rr": 3.0,
+     "tp3_rr": 4.5,
+     "min_volume_usdt": 300000,
+     "min_quality": 3,
+     "cooldown_bars": 5,
+     "trend_only": false,
+     "zone_pct": 0.7,
+     "max_dist_pct": 1.5,
+     "min_rr": 2.5,
+     "max_level_tests": 4
+    },
+    "logs": []
+   },
+   "smc_from_json": {
+    "ok": {
+     "tf_key": "1H",
+     "scan_interval": 300,
+     "direction": "BOTH",
+     "min_confirmations": 3,
+     "min_rr": 2.5,
+     "sl_buffer_pct": 0.35,
+     "min_volume_usdt": 300000,
+     "fvg_enabled": true,
+     "choch_enabled": true,
+     "ob_use_breaker": true,
+     "ob_max_age": 80,
+     "sweep_close_req": true,
+     "smc_conf_type": "BODY_CLOSE",
+     "smc_pd_filter": false,
+     "smc_retrace_depth": 0.2,
+     "smc_mtf_check": false,
+     "smc_use_volume_filter": false,
+     "smc_vol_mult": 1.2,
+     "smc_vol_len": 20
+    },
+    "logs": []
+   },
+   "load_sparse": {
+    "ok": {
+     "min_rr": 2.5
+    },
+    "logs": []
+   }
+  },
+  {
+   "input": "{\"_sparse\": false, \"rsi_ob\": 65, \"rsi_os\": 30}",
+   "sparse_merge": {
+    "ok": {
+     "timeframe": "1h",
+     "scan_interval": 300,
+     "pivot_strength": 7,
+     "max_level_age": 100,
+     "max_retest_bars": 30,
+     "zone_buffer": 0.3,
+     "ema_fast": 50,
+     "ema_slow": 200,
+     "htf_ema_period": 50,
+     "rsi_period": 14,
+     "rsi_ob": 65,
+     "rsi_os": 30,
+     "vol_mult": 1.0,
+     "vol_len": 20,
+     "use_rsi": true,
+     "use_volume": true,
+     "use_pattern": false,
+     "use_htf": false,
+     "atr_period": 14,
+     "atr_mult": 1.0,
+     "max_risk_pct": 1.5,
+     "tp1_rr": 2.0,
+     "tp2_rr": 3.0,
+     "tp3_rr": 4.5,
+     "min_volume_usdt": 300000,
+     "min_quality": 3,
+     "cooldown_bars": 5,
+     "trend_only": false,
+     "zone_pct": 0.7,
+     "max_dist_pct": 1.5,
+     "min_rr": 2.0,
+     "max_level_tests": 4
+    },
+    "logs": []
+   },
+   "trade_from_json": {
+    "ok": {
+     "timeframe": "1h",
+     "scan_interval": 300,
+     "pivot_strength": 7,
+     "max_level_age": 100,
+     "max_retest_bars": 30,
+     "zone_buffer": 0.3,
+     "ema_fast": 50,
+     "ema_slow": 200,
+     "htf_ema_period": 50,
+     "rsi_period": 14,
+     "rsi_ob": 65,
+     "rsi_os": 30,
+     "vol_mult": 1.0,
+     "vol_len": 20,
+     "use_rsi": true,
+     "use_volume": true,
+     "use_pattern": false,
+     "use_htf": false,
+     "atr_period": 14,
+     "atr_mult": 1.0,
+     "max_risk_pct": 1.5,
+     "tp1_rr": 2.0,
+     "tp2_rr": 3.0,
+     "tp3_rr": 4.5,
+     "min_volume_usdt": 300000,
+     "min_quality": 3,
+     "cooldown_bars": 5,
+     "trend_only": false,
+     "zone_pct": 0.7,
+     "max_dist_pct": 1.5,
+     "min_rr": 2.0,
+     "max_level_tests": 4
+    },
+    "logs": []
+   },
+   "smc_from_json": {
+    "ok": {
+     "tf_key": "1H",
+     "scan_interval": 300,
+     "direction": "BOTH",
+     "min_confirmations": 3,
+     "min_rr": 2.0,
+     "sl_buffer_pct": 0.35,
+     "min_volume_usdt": 300000,
+     "fvg_enabled": true,
+     "choch_enabled": true,
+     "ob_use_breaker": true,
+     "ob_max_age": 80,
+     "sweep_close_req": true,
+     "smc_conf_type": "BODY_CLOSE",
+     "smc_pd_filter": false,
+     "smc_retrace_depth": 0.2,
+     "smc_mtf_check": false,
+     "smc_use_volume_filter": false,
+     "smc_vol_mult": 1.2,
+     "smc_vol_len": 20
+    },
+    "logs": []
+   },
+   "load_sparse": {
+    "ok": {
+     "rsi_os": 30
+    },
+    "logs": []
+   }
+  },
+  {
+   "input": "{\"_sparse\": 1, \"unknown\": 5, \"timeframe\": \"4h\"}",
+   "sparse_merge": {
+    "ok": {
+     "timeframe": "4h",
+     "scan_interval": 300,
+     "pivot_strength": 7,
+     "max_level_age": 100,
+     "max_retest_bars": 30,
+     "zone_buffer": 0.3,
+     "ema_fast": 50,
+     "ema_slow": 200,
+     "htf_ema_period": 50,
+     "rsi_period": 14,
+     "rsi_ob": 65,
+     "rsi_os": 35,
+     "vol_mult": 1.0,
+     "vol_len": 20,
+     "use_rsi": true,
+     "use_volume": true,
+     "use_pattern": false,
+     "use_htf": false,
+     "atr_period": 14,
+     "atr_mult": 1.0,
+     "max_risk_pct": 1.5,
+     "tp1_rr": 2.0,
+     "tp2_rr": 3.0,
+     "tp3_rr": 4.5,
+     "min_volume_usdt": 300000,
+     "min_quality": 3,
+     "cooldown_bars": 5,
+     "trend_only": false,
+     "zone_pct": 0.7,
+     "max_dist_pct": 1.5,
+     "min_rr": 2.0,
+     "max_level_tests": 4
+    },
+    "logs": []
+   },
+   "trade_from_json": {
+    "ok": {
+     "timeframe": "4h",
+     "scan_interval": 300,
+     "pivot_strength": 7,
+     "max_level_age": 100,
+     "max_retest_bars": 30,
+     "zone_buffer": 0.3,
+     "ema_fast": 50,
+     "ema_slow": 200,
+     "htf_ema_period": 50,
+     "rsi_period": 14,
+     "rsi_ob": 65,
+     "rsi_os": 35,
+     "vol_mult": 1.0,
+     "vol_len": 20,
+     "use_rsi": true,
+     "use_volume": true,
+     "use_pattern": false,
+     "use_htf": false,
+     "atr_period": 14,
+     "atr_mult": 1.0,
+     "max_risk_pct": 1.5,
+     "tp1_rr": 2.0,
+     "tp2_rr": 3.0,
+     "tp3_rr": 4.5,
+     "min_volume_usdt": 300000,
+     "min_quality": 3,
+     "cooldown_bars": 5,
+     "trend_only": false,
+     "zone_pct": 0.7,
+     "max_dist_pct": 1.5,
+     "min_rr": 2.0,
+     "max_level_tests": 4
+    },
+    "logs": []
+   },
+   "smc_from_json": {
+    "ok": {
+     "tf_key": "1H",
+     "scan_interval": 300,
+     "direction": "BOTH",
+     "min_confirmations": 3,
+     "min_rr": 2.0,
+     "sl_buffer_pct": 0.35,
+     "min_volume_usdt": 300000,
+     "fvg_enabled": true,
+     "choch_enabled": true,
+     "ob_use_breaker": true,
+     "ob_max_age": 80,
+     "sweep_close_req": true,
+     "smc_conf_type": "BODY_CLOSE",
+     "smc_pd_filter": false,
+     "smc_retrace_depth": 0.2,
+     "smc_mtf_check": false,
+     "smc_use_volume_filter": false,
+     "smc_vol_mult": 1.2,
+     "smc_vol_len": 20
+    },
+    "logs": []
+   },
+   "load_sparse": {
+    "ok": {
+     "timeframe": "4h"
+    },
+    "logs": []
+   }
+  },
+  {
+   "input": " {\"pivot_strength\": 3, \"_sparse\": true} ",
+   "sparse_merge": {
+    "ok": {
+     "timeframe": "1h",
+     "scan_interval": 300,
+     "pivot_strength": 3,
+     "max_level_age": 100,
+     "max_retest_bars": 30,
+     "zone_buffer": 0.3,
+     "ema_fast": 50,
+     "ema_slow": 200,
+     "htf_ema_period": 50,
+     "rsi_period": 14,
+     "rsi_ob": 65,
+     "rsi_os": 35,
+     "vol_mult": 1.0,
+     "vol_len": 20,
+     "use_rsi": true,
+     "use_volume": true,
+     "use_pattern": false,
+     "use_htf": false,
+     "atr_period": 14,
+     "atr_mult": 1.0,
+     "max_risk_pct": 1.5,
+     "tp1_rr": 2.0,
+     "tp2_rr": 3.0,
+     "tp3_rr": 4.5,
+     "min_volume_usdt": 300000,
+     "min_quality": 3,
+     "cooldown_bars": 5,
+     "trend_only": false,
+     "zone_pct": 0.7,
+     "max_dist_pct": 1.5,
+     "min_rr": 2.0,
+     "max_level_tests": 4
+    },
+    "logs": []
+   },
+   "trade_from_json": {
+    "ok": {
+     "timeframe": "1h",
+     "scan_interval": 300,
+     "pivot_strength": 3,
+     "max_level_age": 100,
+     "max_retest_bars": 30,
+     "zone_buffer": 0.3,
+     "ema_fast": 50,
+     "ema_slow": 200,
+     "htf_ema_period": 50,
+     "rsi_period": 14,
+     "rsi_ob": 65,
+     "rsi_os": 35,
+     "vol_mult": 1.0,
+     "vol_len": 20,
+     "use_rsi": true,
+     "use_volume": true,
+     "use_pattern": false,
+     "use_htf": false,
+     "atr_period": 14,
+     "atr_mult": 1.0,
+     "max_risk_pct": 1.5,
+     "tp1_rr": 2.0,
+     "tp2_rr": 3.0,
+     "tp3_rr": 4.5,
+     "min_volume_usdt": 300000,
+     "min_quality": 3,
+     "cooldown_bars": 5,
+     "trend_only": false,
+     "zone_pct": 0.7,
+     "max_dist_pct": 1.5,
+     "min_rr": 2.0,
+     "max_level_tests": 4
+    },
+    "logs": []
+   },
+   "smc_from_json": {
+    "ok": {
+     "tf_key": "1H",
+     "scan_interval": 300,
+     "direction": "BOTH",
+     "min_confirmations": 3,
+     "min_rr": 2.0,
+     "sl_buffer_pct": 0.35,
+     "min_volume_usdt": 300000,
+     "fvg_enabled": true,
+     "choch_enabled": true,
+     "ob_use_breaker": true,
+     "ob_max_age": 80,
+     "sweep_close_req": true,
+     "smc_conf_type": "BODY_CLOSE",
+     "smc_pd_filter": false,
+     "smc_retrace_depth": 0.2,
+     "smc_mtf_check": false,
+     "smc_use_volume_filter": false,
+     "smc_vol_mult": 1.2,
+     "smc_vol_len": 20
+    },
+    "logs": []
+   },
+   "load_sparse": {
+    "ok": {
+     "pivot_strength": 3
+    },
+    "logs": []
+   }
+  },
+  {
+   "input": "{\"tf_key\": \"4H\", \"min_confirmations\": 2}",
+   "sparse_merge": {
+    "ok": {
+     "timeframe": "1h",
+     "scan_interval": 300,
+     "pivot_strength": 7,
+     "max_level_age": 100,
+     "max_retest_bars": 30,
+     "zone_buffer": 0.3,
+     "ema_fast": 50,
+     "ema_slow": 200,
+     "htf_ema_period": 50,
+     "rsi_period": 14,
+     "rsi_ob": 65,
+     "rsi_os": 35,
+     "vol_mult": 1.0,
+     "vol_len": 20,
+     "use_rsi": true,
+     "use_volume": true,
+     "use_pattern": false,
+     "use_htf": false,
+     "atr_period": 14,
+     "atr_mult": 1.0,
+     "max_risk_pct": 1.5,
+     "tp1_rr": 2.0,
+     "tp2_rr": 3.0,
+     "tp3_rr": 4.5,
+     "min_volume_usdt": 300000,
+     "min_quality": 3,
+     "cooldown_bars": 5,
+     "trend_only": false,
+     "zone_pct": 0.7,
+     "max_dist_pct": 1.5,
+     "min_rr": 2.0,
+     "max_level_tests": 4
+    },
+    "logs": []
+   },
+   "trade_from_json": {
+    "ok": {
+     "timeframe": "1h",
+     "scan_interval": 300,
+     "pivot_strength": 7,
+     "max_level_age": 100,
+     "max_retest_bars": 30,
+     "zone_buffer": 0.3,
+     "ema_fast": 50,
+     "ema_slow": 200,
+     "htf_ema_period": 50,
+     "rsi_period": 14,
+     "rsi_ob": 65,
+     "rsi_os": 35,
+     "vol_mult": 1.0,
+     "vol_len": 20,
+     "use_rsi": true,
+     "use_volume": true,
+     "use_pattern": false,
+     "use_htf": false,
+     "atr_period": 14,
+     "atr_mult": 1.0,
+     "max_risk_pct": 1.5,
+     "tp1_rr": 2.0,
+     "tp2_rr": 3.0,
+     "tp3_rr": 4.5,
+     "min_volume_usdt": 300000,
+     "min_quality": 3,
+     "cooldown_bars": 5,
+     "trend_only": false,
+     "zone_pct": 0.7,
+     "max_dist_pct": 1.5,
+     "min_rr": 2.0,
+     "max_level_tests": 4
+    },
+    "logs": []
+   },
+   "smc_from_json": {
+    "ok": {
+     "tf_key": "4H",
+     "scan_interval": 300,
+     "direction": "BOTH",
+     "min_confirmations": 2,
+     "min_rr": 2.0,
+     "sl_buffer_pct": 0.35,
+     "min_volume_usdt": 300000,
+     "fvg_enabled": true,
+     "choch_enabled": true,
+     "ob_use_breaker": true,
+     "ob_max_age": 80,
+     "sweep_close_req": true,
+     "smc_conf_type": "BODY_CLOSE",
+     "smc_pd_filter": false,
+     "smc_retrace_depth": 0.2,
+     "smc_mtf_check": false,
+     "smc_use_volume_filter": false,
+     "smc_vol_mult": 1.2,
+     "smc_vol_len": 20
+    },
+    "logs": []
+   },
+   "load_sparse": {
+    "ok": {},
+    "logs": []
+   }
+  },
+  {
+   "input": "{\"tf_key\": \"15m\", \"scan_interval\": 900, \"direction\": \"LONG\", \"min_rr\": NaN}",
+   "sparse_merge": {
+    "ok": {
+     "timeframe": "1h",
+     "scan_interval": 900,
+     "pivot_strength": 7,
+     "max_level_age": 100,
+     "max_retest_bars": 30,
+     "zone_buffer": 0.3,
+     "ema_fast": 50,
+     "ema_slow": 200,
+     "htf_ema_period": 50,
+     "rsi_period": 14,
+     "rsi_ob": 65,
+     "rsi_os": 35,
+     "vol_mult": 1.0,
+     "vol_len": 20,
+     "use_rsi": true,
+     "use_volume": true,
+     "use_pattern": false,
+     "use_htf": false,
+     "atr_period": 14,
+     "atr_mult": 1.0,
+     "max_risk_pct": 1.5,
+     "tp1_rr": 2.0,
+     "tp2_rr": 3.0,
+     "tp3_rr": 4.5,
+     "min_volume_usdt": 300000,
+     "min_quality": 3,
+     "cooldown_bars": 5,
+     "trend_only": false,
+     "zone_pct": 0.7,
+     "max_dist_pct": 1.5,
+     "min_rr": {
+      "$f": "nan"
+     },
+     "max_level_tests": 4
+    },
+    "logs": []
+   },
+   "trade_from_json": {
+    "ok": {
+     "timeframe": "1h",
+     "scan_interval": 900,
+     "pivot_strength": 7,
+     "max_level_age": 100,
+     "max_retest_bars": 30,
+     "zone_buffer": 0.3,
+     "ema_fast": 50,
+     "ema_slow": 200,
+     "htf_ema_period": 50,
+     "rsi_period": 14,
+     "rsi_ob": 65,
+     "rsi_os": 35,
+     "vol_mult": 1.0,
+     "vol_len": 20,
+     "use_rsi": true,
+     "use_volume": true,
+     "use_pattern": false,
+     "use_htf": false,
+     "atr_period": 14,
+     "atr_mult": 1.0,
+     "max_risk_pct": 1.5,
+     "tp1_rr": 2.0,
+     "tp2_rr": 3.0,
+     "tp3_rr": 4.5,
+     "min_volume_usdt": 300000,
+     "min_quality": 3,
+     "cooldown_bars": 5,
+     "trend_only": false,
+     "zone_pct": 0.7,
+     "max_dist_pct": 1.5,
+     "min_rr": {
+      "$f": "nan"
+     },
+     "max_level_tests": 4
+    },
+    "logs": []
+   },
+   "smc_from_json": {
+    "ok": {
+     "tf_key": "15m",
+     "scan_interval": 900,
+     "direction": "LONG",
+     "min_confirmations": 3,
+     "min_rr": {
+      "$f": "nan"
+     },
+     "sl_buffer_pct": 0.35,
+     "min_volume_usdt": 300000,
+     "fvg_enabled": true,
+     "choch_enabled": true,
+     "ob_use_breaker": true,
+     "ob_max_age": 80,
+     "sweep_close_req": true,
+     "smc_conf_type": "BODY_CLOSE",
+     "smc_pd_filter": false,
+     "smc_retrace_depth": 0.2,
+     "smc_mtf_check": false,
+     "smc_use_volume_filter": false,
+     "smc_vol_mult": 1.2,
+     "smc_vol_len": 20
+    },
+    "logs": []
+   },
+   "load_sparse": {
+    "ok": {
+     "scan_interval": 900,
+     "min_rr": {
+      "$f": "nan"
+     }
+    },
+    "logs": []
+   }
+  },
+  {
+   "input": "{\"min_volume_usdt\": 0, \"foo\": 1}",
+   "sparse_merge": {
+    "ok": {
+     "timeframe": "1h",
+     "scan_interval": 300,
+     "pivot_strength": 7,
+     "max_level_age": 100,
+     "max_retest_bars": 30,
+     "zone_buffer": 0.3,
+     "ema_fast": 50,
+     "ema_slow": 200,
+     "htf_ema_period": 50,
+     "rsi_period": 14,
+     "rsi_ob": 65,
+     "rsi_os": 35,
+     "vol_mult": 1.0,
+     "vol_len": 20,
+     "use_rsi": true,
+     "use_volume": true,
+     "use_pattern": false,
+     "use_htf": false,
+     "atr_period": 14,
+     "atr_mult": 1.0,
+     "max_risk_pct": 1.5,
+     "tp1_rr": 2.0,
+     "tp2_rr": 3.0,
+     "tp3_rr": 4.5,
+     "min_volume_usdt": 0,
+     "min_quality": 3,
+     "cooldown_bars": 5,
+     "trend_only": false,
+     "zone_pct": 0.7,
+     "max_dist_pct": 1.5,
+     "min_rr": 2.0,
+     "max_level_tests": 4
+    },
+    "logs": []
+   },
+   "trade_from_json": {
+    "ok": {
+     "timeframe": "1h",
+     "scan_interval": 300,
+     "pivot_strength": 7,
+     "max_level_age": 100,
+     "max_retest_bars": 30,
+     "zone_buffer": 0.3,
+     "ema_fast": 50,
+     "ema_slow": 200,
+     "htf_ema_period": 50,
+     "rsi_period": 14,
+     "rsi_ob": 65,
+     "rsi_os": 35,
+     "vol_mult": 1.0,
+     "vol_len": 20,
+     "use_rsi": true,
+     "use_volume": true,
+     "use_pattern": false,
+     "use_htf": false,
+     "atr_period": 14,
+     "atr_mult": 1.0,
+     "max_risk_pct": 1.5,
+     "tp1_rr": 2.0,
+     "tp2_rr": 3.0,
+     "tp3_rr": 4.5,
+     "min_volume_usdt": 0,
+     "min_quality": 3,
+     "cooldown_bars": 5,
+     "trend_only": false,
+     "zone_pct": 0.7,
+     "max_dist_pct": 1.5,
+     "min_rr": 2.0,
+     "max_level_tests": 4
+    },
+    "logs": []
+   },
+   "smc_from_json": {
+    "ok": {
+     "tf_key": "1H",
+     "scan_interval": 300,
+     "direction": "BOTH",
+     "min_confirmations": 3,
+     "min_rr": 2.0,
+     "sl_buffer_pct": 0.35,
+     "min_volume_usdt": 0,
+     "fvg_enabled": true,
+     "choch_enabled": true,
+     "ob_use_breaker": true,
+     "ob_max_age": 80,
+     "sweep_close_req": true,
+     "smc_conf_type": "BODY_CLOSE",
+     "smc_pd_filter": false,
+     "smc_retrace_depth": 0.2,
+     "smc_mtf_check": false,
+     "smc_use_volume_filter": false,
+     "smc_vol_mult": 1.2,
+     "smc_vol_len": 20
+    },
+    "logs": []
+   },
+   "load_sparse": {
+    "ok": {
+     "min_volume_usdt": 0
+    },
+    "logs": []
+   }
+  },
+  {
+   "input": "{\"scan_interval\": \"300\"}",
+   "sparse_merge": {
+    "error": [
+     "TypeError",
+     "'<' not supported between instances of 'str' and 'int'"
+    ],
+    "logs": []
+   },
+   "trade_from_json": {
+    "ok": {
+     "timeframe": "1h",
+     "scan_interval": 300,
+     "pivot_strength": 7,
+     "max_level_age": 100,
+     "max_retest_bars": 30,
+     "zone_buffer": 0.3,
+     "ema_fast": 50,
+     "ema_slow": 200,
+     "htf_ema_period": 50,
+     "rsi_period": 14,
+     "rsi_ob": 65,
+     "rsi_os": 35,
+     "vol_mult": 1.0,
+     "vol_len": 20,
+     "use_rsi": true,
+     "use_volume": true,
+     "use_pattern": false,
+     "use_htf": false,
+     "atr_period": 14,
+     "atr_mult": 1.0,
+     "max_risk_pct": 1.5,
+     "tp1_rr": 2.0,
+     "tp2_rr": 3.0,
+     "tp3_rr": 4.5,
+     "min_volume_usdt": 300000,
+     "min_quality": 3,
+     "cooldown_bars": 5,
+     "trend_only": false,
+     "zone_pct": 0.7,
+     "max_dist_pct": 1.5,
+     "min_rr": 2.0,
+     "max_level_tests": 4
+    },
+    "logs": [
+     [
+      "CHM.Users",
+      "WARNING",
+      "user_manager.from_json() unhandled exception"
+     ]
+    ]
+   },
+   "smc_from_json": {
+    "ok": {
+     "tf_key": "1H",
+     "scan_interval": "300",
+     "direction": "BOTH",
+     "min_confirmations": 3,
+     "min_rr": 2.0,
+     "sl_buffer_pct": 0.35,
+     "min_volume_usdt": 300000,
+     "fvg_enabled": true,
+     "choch_enabled": true,
+     "ob_use_breaker": true,
+     "ob_max_age": 80,
+     "sweep_close_req": true,
+     "smc_conf_type": "BODY_CLOSE",
+     "smc_pd_filter": false,
+     "smc_retrace_depth": 0.2,
+     "smc_mtf_check": false,
+     "smc_use_volume_filter": false,
+     "smc_vol_mult": 1.2,
+     "smc_vol_len": 20
+    },
+    "logs": []
+   },
+   "load_sparse": {
+    "ok": {
+     "scan_interval": "300"
+    },
+    "logs": []
+   }
+  },
+  {
+   "input": "{\"tp1_rr\": \"x\"}",
+   "sparse_merge": {
+    "error": [
+     "TypeError",
+     "'<' not supported between instances of 'str' and 'float'"
+    ],
+    "logs": []
+   },
+   "trade_from_json": {
+    "ok": {
+     "timeframe": "1h",
+     "scan_interval": 300,
+     "pivot_strength": 7,
+     "max_level_age": 100,
+     "max_retest_bars": 30,
+     "zone_buffer": 0.3,
+     "ema_fast": 50,
+     "ema_slow": 200,
+     "htf_ema_period": 50,
+     "rsi_period": 14,
+     "rsi_ob": 65,
+     "rsi_os": 35,
+     "vol_mult": 1.0,
+     "vol_len": 20,
+     "use_rsi": true,
+     "use_volume": true,
+     "use_pattern": false,
+     "use_htf": false,
+     "atr_period": 14,
+     "atr_mult": 1.0,
+     "max_risk_pct": 1.5,
+     "tp1_rr": 2.0,
+     "tp2_rr": 3.0,
+     "tp3_rr": 4.5,
+     "min_volume_usdt": 300000,
+     "min_quality": 3,
+     "cooldown_bars": 5,
+     "trend_only": false,
+     "zone_pct": 0.7,
+     "max_dist_pct": 1.5,
+     "min_rr": 2.0,
+     "max_level_tests": 4
+    },
+    "logs": [
+     [
+      "CHM.Users",
+      "WARNING",
+      "user_manager.from_json() unhandled exception"
+     ]
+    ]
+   },
+   "smc_from_json": {
+    "ok": {
+     "tf_key": "1H",
+     "scan_interval": 300,
+     "direction": "BOTH",
+     "min_confirmations": 3,
+     "min_rr": 2.0,
+     "sl_buffer_pct": 0.35,
+     "min_volume_usdt": 300000,
+     "fvg_enabled": true,
+     "choch_enabled": true,
+     "ob_use_breaker": true,
+     "ob_max_age": 80,
+     "sweep_close_req": true,
+     "smc_conf_type": "BODY_CLOSE",
+     "smc_pd_filter": false,
+     "smc_retrace_depth": 0.2,
+     "smc_mtf_check": false,
+     "smc_use_volume_filter": false,
+     "smc_vol_mult": 1.2,
+     "smc_vol_len": 20
+    },
+    "logs": []
+   },
+   "load_sparse": {
+    "ok": {
+     "tp1_rr": "x"
+    },
+    "logs": []
+   }
+  },
+  {
+   "input": "{\"tp2_rr\": \"x\", \"tp1_rr\": 2, \"_sparse\": true}",
+   "sparse_merge": {
+    "error": [
+     "TypeError",
+     "'<=' not supported between instances of 'str' and 'int'"
+    ],
+    "logs": []
+   },
+   "trade_from_json": {
+    "ok": {
+     "timeframe": "1h",
+     "scan_interval": 300,
+     "pivot_strength": 7,
+     "max_level_age": 100,
+     "max_retest_bars": 30,
+     "zone_buffer": 0.3,
+     "ema_fast": 50,
+     "ema_slow": 200,
+     "htf_ema_period": 50,
+     "rsi_period": 14,
+     "rsi_ob": 65,
+     "rsi_os": 35,
+     "vol_mult": 1.0,
+     "vol_len": 20,
+     "use_rsi": true,
+     "use_volume": true,
+     "use_pattern": false,
+     "use_htf": false,
+     "atr_period": 14,
+     "atr_mult": 1.0,
+     "max_risk_pct": 1.5,
+     "tp1_rr": 2.0,
+     "tp2_rr": 3.0,
+     "tp3_rr": 4.5,
+     "min_volume_usdt": 300000,
+     "min_quality": 3,
+     "cooldown_bars": 5,
+     "trend_only": false,
+     "zone_pct": 0.7,
+     "max_dist_pct": 1.5,
+     "min_rr": 2.0,
+     "max_level_tests": 4
+    },
+    "logs": [
+     [
+      "CHM.Users",
+      "WARNING",
+      "user_manager.from_json() unhandled exception"
+     ]
+    ]
+   },
+   "smc_from_json": {
+    "ok": {
+     "tf_key": "1H",
+     "scan_interval": 300,
+     "direction": "BOTH",
+     "min_confirmations": 3,
+     "min_rr": 2.0,
+     "sl_buffer_pct": 0.35,
+     "min_volume_usdt": 300000,
+     "fvg_enabled": true,
+     "choch_enabled": true,
+     "ob_use_breaker": true,
+     "ob_max_age": 80,
+     "sweep_close_req": true,
+     "smc_conf_type": "BODY_CLOSE",
+     "smc_pd_filter": false,
+     "smc_retrace_depth": 0.2,
+     "smc_mtf_check": false,
+     "smc_use_volume_filter": false,
+     "smc_vol_mult": 1.2,
+     "smc_vol_len": 20
+    },
+    "logs": []
+   },
+   "load_sparse": {
+    "ok": {
+     "tp2_rr": "x",
+     "tp1_rr": 2
+    },
+    "logs": []
+   }
+  },
+  {
+   "input": "{\"tp2_rr\": \"x\", \"tp1_rr\": 2.0, \"_sparse\": true}",
+   "sparse_merge": {
+    "error": [
+     "TypeError",
+     "'<=' not supported between instances of 'str' and 'float'"
+    ],
+    "logs": []
+   },
+   "trade_from_json": {
+    "ok": {
+     "timeframe": "1h",
+     "scan_interval": 300,
+     "pivot_strength": 7,
+     "max_level_age": 100,
+     "max_retest_bars": 30,
+     "zone_buffer": 0.3,
+     "ema_fast": 50,
+     "ema_slow": 200,
+     "htf_ema_period": 50,
+     "rsi_period": 14,
+     "rsi_ob": 65,
+     "rsi_os": 35,
+     "vol_mult": 1.0,
+     "vol_len": 20,
+     "use_rsi": true,
+     "use_volume": true,
+     "use_pattern": false,
+     "use_htf": false,
+     "atr_period": 14,
+     "atr_mult": 1.0,
+     "max_risk_pct": 1.5,
+     "tp1_rr": 2.0,
+     "tp2_rr": 3.0,
+     "tp3_rr": 4.5,
+     "min_volume_usdt": 300000,
+     "min_quality": 3,
+     "cooldown_bars": 5,
+     "trend_only": false,
+     "zone_pct": 0.7,
+     "max_dist_pct": 1.5,
+     "min_rr": 2.0,
+     "max_level_tests": 4
+    },
+    "logs": [
+     [
+      "CHM.Users",
+      "WARNING",
+      "user_manager.from_json() unhandled exception"
+     ]
+    ]
+   },
+   "smc_from_json": {
+    "ok": {
+     "tf_key": "1H",
+     "scan_interval": 300,
+     "direction": "BOTH",
+     "min_confirmations": 3,
+     "min_rr": 2.0,
+     "sl_buffer_pct": 0.35,
+     "min_volume_usdt": 300000,
+     "fvg_enabled": true,
+     "choch_enabled": true,
+     "ob_use_breaker": true,
+     "ob_max_age": 80,
+     "sweep_close_req": true,
+     "smc_conf_type": "BODY_CLOSE",
+     "smc_pd_filter": false,
+     "smc_retrace_depth": 0.2,
+     "smc_mtf_check": false,
+     "smc_use_volume_filter": false,
+     "smc_vol_mult": 1.2,
+     "smc_vol_len": 20
+    },
+    "logs": []
+   },
+   "load_sparse": {
+    "ok": {
+     "tp2_rr": "x",
+     "tp1_rr": 2.0
+    },
+    "logs": []
+   }
+  },
+  {
+   "input": "{\"tp3_rr\": null, \"_sparse\": true}",
+   "sparse_merge": {
+    "error": [
+     "TypeError",
+     "'<=' not supported between instances of 'NoneType' and 'float'"
+    ],
+    "logs": []
+   },
+   "trade_from_json": {
+    "ok": {
+     "timeframe": "1h",
+     "scan_interval": 300,
+     "pivot_strength": 7,
+     "max_level_age": 100,
+     "max_retest_bars": 30,
+     "zone_buffer": 0.3,
+     "ema_fast": 50,
+     "ema_slow": 200,
+     "htf_ema_period": 50,
+     "rsi_period": 14,
+     "rsi_ob": 65,
+     "rsi_os": 35,
+     "vol_mult": 1.0,
+     "vol_len": 20,
+     "use_rsi": true,
+     "use_volume": true,
+     "use_pattern": false,
+     "use_htf": false,
+     "atr_period": 14,
+     "atr_mult": 1.0,
+     "max_risk_pct": 1.5,
+     "tp1_rr": 2.0,
+     "tp2_rr": 3.0,
+     "tp3_rr": 4.5,
+     "min_volume_usdt": 300000,
+     "min_quality": 3,
+     "cooldown_bars": 5,
+     "trend_only": false,
+     "zone_pct": 0.7,
+     "max_dist_pct": 1.5,
+     "min_rr": 2.0,
+     "max_level_tests": 4
+    },
+    "logs": [
+     [
+      "CHM.Users",
+      "WARNING",
+      "user_manager.from_json() unhandled exception"
+     ]
+    ]
+   },
+   "smc_from_json": {
+    "ok": {
+     "tf_key": "1H",
+     "scan_interval": 300,
+     "direction": "BOTH",
+     "min_confirmations": 3,
+     "min_rr": 2.0,
+     "sl_buffer_pct": 0.35,
+     "min_volume_usdt": 300000,
+     "fvg_enabled": true,
+     "choch_enabled": true,
+     "ob_use_breaker": true,
+     "ob_max_age": 80,
+     "sweep_close_req": true,
+     "smc_conf_type": "BODY_CLOSE",
+     "smc_pd_filter": false,
+     "smc_retrace_depth": 0.2,
+     "smc_mtf_check": false,
+     "smc_use_volume_filter": false,
+     "smc_vol_mult": 1.2,
+     "smc_vol_len": 20
+    },
+    "logs": []
+   },
+   "load_sparse": {
+    "ok": {
+     "tp3_rr": null
+    },
+    "logs": []
+   }
+  },
+  {
+   "input": "{\"tp1_rr\": \"a\", \"min_rr\": \"b\", \"_sparse\": true}",
+   "sparse_merge": {
+    "error": [
+     "TypeError",
+     "'<' not supported between instances of 'str' and 'float'"
+    ],
+    "logs": []
+   },
+   "trade_from_json": {
+    "ok": {
+     "timeframe": "1h",
+     "scan_interval": 300,
+     "pivot_strength": 7,
+     "max_level_age": 100,
+     "max_retest_bars": 30,
+     "zone_buffer": 0.3,
+     "ema_fast": 50,
+     "ema_slow": 200,
+     "htf_ema_period": 50,
+     "rsi_period": 14,
+     "rsi_ob": 65,
+     "rsi_os": 35,
+     "vol_mult": 1.0,
+     "vol_len": 20,
+     "use_rsi": true,
+     "use_volume": true,
+     "use_pattern": false,
+     "use_htf": false,
+     "atr_period": 14,
+     "atr_mult": 1.0,
+     "max_risk_pct": 1.5,
+     "tp1_rr": 2.0,
+     "tp2_rr": 3.0,
+     "tp3_rr": 4.5,
+     "min_volume_usdt": 300000,
+     "min_quality": 3,
+     "cooldown_bars": 5,
+     "trend_only": false,
+     "zone_pct": 0.7,
+     "max_dist_pct": 1.5,
+     "min_rr": 2.0,
+     "max_level_tests": 4
+    },
+    "logs": [
+     [
+      "CHM.Users",
+      "WARNING",
+      "user_manager.from_json() unhandled exception"
+     ]
+    ]
+   },
+   "smc_from_json": {
+    "ok": {
+     "tf_key": "1H",
+     "scan_interval": 300,
+     "direction": "BOTH",
+     "min_confirmations": 3,
+     "min_rr": "b",
+     "sl_buffer_pct": 0.35,
+     "min_volume_usdt": 300000,
+     "fvg_enabled": true,
+     "choch_enabled": true,
+     "ob_use_breaker": true,
+     "ob_max_age": 80,
+     "sweep_close_req": true,
+     "smc_conf_type": "BODY_CLOSE",
+     "smc_pd_filter": false,
+     "smc_retrace_depth": 0.2,
+     "smc_mtf_check": false,
+     "smc_use_volume_filter": false,
+     "smc_vol_mult": 1.2,
+     "smc_vol_len": 20
+    },
+    "logs": []
+   },
+   "load_sparse": {
+    "ok": {
+     "tp1_rr": "a",
+     "min_rr": "b"
+    },
+    "logs": []
+   }
+  },
+  {
+   "input": "{\"tp1_rr\": \"b\", \"min_rr\": \"a\", \"tp2_rr\": 9.0, \"_sparse\": true}",
+   "sparse_merge": {
+    "error": [
+     "TypeError",
+     "'<' not supported between instances of 'str' and 'float'"
+    ],
+    "logs": []
+   },
+   "trade_from_json": {
+    "ok": {
+     "timeframe": "1h",
+     "scan_interval": 300,
+     "pivot_strength": 7,
+     "max_level_age": 100,
+     "max_retest_bars": 30,
+     "zone_buffer": 0.3,
+     "ema_fast": 50,
+     "ema_slow": 200,
+     "htf_ema_period": 50,
+     "rsi_period": 14,
+     "rsi_ob": 65,
+     "rsi_os": 35,
+     "vol_mult": 1.0,
+     "vol_len": 20,
+     "use_rsi": true,
+     "use_volume": true,
+     "use_pattern": false,
+     "use_htf": false,
+     "atr_period": 14,
+     "atr_mult": 1.0,
+     "max_risk_pct": 1.5,
+     "tp1_rr": 2.0,
+     "tp2_rr": 3.0,
+     "tp3_rr": 4.5,
+     "min_volume_usdt": 300000,
+     "min_quality": 3,
+     "cooldown_bars": 5,
+     "trend_only": false,
+     "zone_pct": 0.7,
+     "max_dist_pct": 1.5,
+     "min_rr": 2.0,
+     "max_level_tests": 4
+    },
+    "logs": [
+     [
+      "CHM.Users",
+      "WARNING",
+      "user_manager.from_json() unhandled exception"
+     ]
+    ]
+   },
+   "smc_from_json": {
+    "ok": {
+     "tf_key": "1H",
+     "scan_interval": 300,
+     "direction": "BOTH",
+     "min_confirmations": 3,
+     "min_rr": "a",
+     "sl_buffer_pct": 0.35,
+     "min_volume_usdt": 300000,
+     "fvg_enabled": true,
+     "choch_enabled": true,
+     "ob_use_breaker": true,
+     "ob_max_age": 80,
+     "sweep_close_req": true,
+     "smc_conf_type": "BODY_CLOSE",
+     "smc_pd_filter": false,
+     "smc_retrace_depth": 0.2,
+     "smc_mtf_check": false,
+     "smc_use_volume_filter": false,
+     "smc_vol_mult": 1.2,
+     "smc_vol_len": 20
+    },
+    "logs": []
+   },
+   "load_sparse": {
+    "ok": {
+     "tp1_rr": "b",
+     "min_rr": "a",
+     "tp2_rr": 9.0
+    },
+    "logs": []
+   }
+  },
+  {
+   "input": "{\"min_quality\": \"5\", \"_sparse\": true}",
+   "sparse_merge": {
+    "error": [
+     "TypeError",
+     "'<' not supported between instances of 'str' and 'int'"
+    ],
+    "logs": []
+   },
+   "trade_from_json": {
+    "ok": {
+     "timeframe": "1h",
+     "scan_interval": 300,
+     "pivot_strength": 7,
+     "max_level_age": 100,
+     "max_retest_bars": 30,
+     "zone_buffer": 0.3,
+     "ema_fast": 50,
+     "ema_slow": 200,
+     "htf_ema_period": 50,
+     "rsi_period": 14,
+     "rsi_ob": 65,
+     "rsi_os": 35,
+     "vol_mult": 1.0,
+     "vol_len": 20,
+     "use_rsi": true,
+     "use_volume": true,
+     "use_pattern": false,
+     "use_htf": false,
+     "atr_period": 14,
+     "atr_mult": 1.0,
+     "max_risk_pct": 1.5,
+     "tp1_rr": 2.0,
+     "tp2_rr": 3.0,
+     "tp3_rr": 4.5,
+     "min_volume_usdt": 300000,
+     "min_quality": 3,
+     "cooldown_bars": 5,
+     "trend_only": false,
+     "zone_pct": 0.7,
+     "max_dist_pct": 1.5,
+     "min_rr": 2.0,
+     "max_level_tests": 4
+    },
+    "logs": [
+     [
+      "CHM.Users",
+      "WARNING",
+      "user_manager.from_json() unhandled exception"
+     ]
+    ]
+   },
+   "smc_from_json": {
+    "ok": {
+     "tf_key": "1H",
+     "scan_interval": 300,
+     "direction": "BOTH",
+     "min_confirmations": 3,
+     "min_rr": 2.0,
+     "sl_buffer_pct": 0.35,
+     "min_volume_usdt": 300000,
+     "fvg_enabled": true,
+     "choch_enabled": true,
+     "ob_use_breaker": true,
+     "ob_max_age": 80,
+     "sweep_close_req": true,
+     "smc_conf_type": "BODY_CLOSE",
+     "smc_pd_filter": false,
+     "smc_retrace_depth": 0.2,
+     "smc_mtf_check": false,
+     "smc_use_volume_filter": false,
+     "smc_vol_mult": 1.2,
+     "smc_vol_len": 20
+    },
+    "logs": []
+   },
+   "load_sparse": {
+    "ok": {
+     "min_quality": "5"
+    },
+    "logs": []
+   }
+  },
+  {
+   "input": "{\"min_quality\": true, \"vol_mult\": false, \"_sparse\": true}",
+   "sparse_merge": {
+    "ok": {
+     "timeframe": "1h",
+     "scan_interval": 300,
+     "pivot_strength": 7,
+     "max_level_age": 100,
+     "max_retest_bars": 30,
+     "zone_buffer": 0.3,
+     "ema_fast": 50,
+     "ema_slow": 200,
+     "htf_ema_period": 50,
+     "rsi_period": 14,
+     "rsi_ob": 65,
+     "rsi_os": 35,
+     "vol_mult": 0.1,
+     "vol_len": 20,
+     "use_rsi": true,
+     "use_volume": true,
+     "use_pattern": false,
+     "use_htf": false,
+     "atr_period": 14,
+     "atr_mult": 1.0,
+     "max_risk_pct": 1.5,
+     "tp1_rr": 2.0,
+     "tp2_rr": 3.0,
+     "tp3_rr": 4.5,
+     "min_volume_usdt": 300000,
+     "min_quality": true,
+     "cooldown_bars": 5,
+     "trend_only": false,
+     "zone_pct": 0.7,
+     "max_dist_pct": 1.5,
+     "min_rr": 2.0,
+     "max_level_tests": 4
+    },
+    "logs": []
+   },
+   "trade_from_json": {
+    "ok": {
+     "timeframe": "1h",
+     "scan_interval": 300,
+     "pivot_strength": 7,
+     "max_level_age": 100,
+     "max_retest_bars": 30,
+     "zone_buffer": 0.3,
+     "ema_fast": 50,
+     "ema_slow": 200,
+     "htf_ema_period": 50,
+     "rsi_period": 14,
+     "rsi_ob": 65,
+     "rsi_os": 35,
+     "vol_mult": 0.1,
+     "vol_len": 20,
+     "use_rsi": true,
+     "use_volume": true,
+     "use_pattern": false,
+     "use_htf": false,
+     "atr_period": 14,
+     "atr_mult": 1.0,
+     "max_risk_pct": 1.5,
+     "tp1_rr": 2.0,
+     "tp2_rr": 3.0,
+     "tp3_rr": 4.5,
+     "min_volume_usdt": 300000,
+     "min_quality": true,
+     "cooldown_bars": 5,
+     "trend_only": false,
+     "zone_pct": 0.7,
+     "max_dist_pct": 1.5,
+     "min_rr": 2.0,
+     "max_level_tests": 4
+    },
+    "logs": []
+   },
+   "smc_from_json": {
+    "ok": {
+     "tf_key": "1H",
+     "scan_interval": 300,
+     "direction": "BOTH",
+     "min_confirmations": 3,
+     "min_rr": 2.0,
+     "sl_buffer_pct": 0.35,
+     "min_volume_usdt": 300000,
+     "fvg_enabled": true,
+     "choch_enabled": true,
+     "ob_use_breaker": true,
+     "ob_max_age": 80,
+     "sweep_close_req": true,
+     "smc_conf_type": "BODY_CLOSE",
+     "smc_pd_filter": false,
+     "smc_retrace_depth": 0.2,
+     "smc_mtf_check": false,
+     "smc_use_volume_filter": false,
+     "smc_vol_mult": 1.2,
+     "smc_vol_len": 20
+    },
+    "logs": []
+   },
+   "load_sparse": {
+    "ok": {
+     "min_quality": true,
+     "vol_mult": false
+    },
+    "logs": []
+   }
+  },
+  {
+   "input": "{\"vol_mult\": [1], \"_sparse\": true}",
+   "sparse_merge": {
+    "error": [
+     "TypeError",
+     "'<' not supported between instances of 'list' and 'float'"
+    ],
+    "logs": []
+   },
+   "trade_from_json": {
+    "ok": {
+     "timeframe": "1h",
+     "scan_interval": 300,
+     "pivot_strength": 7,
+     "max_level_age": 100,
+     "max_retest_bars": 30,
+     "zone_buffer": 0.3,
+     "ema_fast": 50,
+     "ema_slow": 200,
+     "htf_ema_period": 50,
+     "rsi_period": 14,
+     "rsi_ob": 65,
+     "rsi_os": 35,
+     "vol_mult": 1.0,
+     "vol_len": 20,
+     "use_rsi": true,
+     "use_volume": true,
+     "use_pattern": false,
+     "use_htf": false,
+     "atr_period": 14,
+     "atr_mult": 1.0,
+     "max_risk_pct": 1.5,
+     "tp1_rr": 2.0,
+     "tp2_rr": 3.0,
+     "tp3_rr": 4.5,
+     "min_volume_usdt": 300000,
+     "min_quality": 3,
+     "cooldown_bars": 5,
+     "trend_only": false,
+     "zone_pct": 0.7,
+     "max_dist_pct": 1.5,
+     "min_rr": 2.0,
+     "max_level_tests": 4
+    },
+    "logs": [
+     [
+      "CHM.Users",
+      "WARNING",
+      "user_manager.from_json() unhandled exception"
+     ]
+    ]
+   },
+   "smc_from_json": {
+    "ok": {
+     "tf_key": "1H",
+     "scan_interval": 300,
+     "direction": "BOTH",
+     "min_confirmations": 3,
+     "min_rr": 2.0,
+     "sl_buffer_pct": 0.35,
+     "min_volume_usdt": 300000,
+     "fvg_enabled": true,
+     "choch_enabled": true,
+     "ob_use_breaker": true,
+     "ob_max_age": 80,
+     "sweep_close_req": true,
+     "smc_conf_type": "BODY_CLOSE",
+     "smc_pd_filter": false,
+     "smc_retrace_depth": 0.2,
+     "smc_mtf_check": false,
+     "smc_use_volume_filter": false,
+     "smc_vol_mult": 1.2,
+     "smc_vol_len": 20
+    },
+    "logs": []
+   },
+   "load_sparse": {
+    "ok": {
+     "vol_mult": [
+      1
+     ]
+    },
+    "logs": []
+   }
+  },
+  {
+   "input": "{\"vol_mult\": NaN, \"min_quality\": -Infinity, \"_sparse\": true}",
+   "sparse_merge": {
+    "ok": {
+     "timeframe": "1h",
+     "scan_interval": 300,
+     "pivot_strength": 7,
+     "max_level_age": 100,
+     "max_retest_bars": 30,
+     "zone_buffer": 0.3,
+     "ema_fast": 50,
+     "ema_slow": 200,
+     "htf_ema_period": 50,
+     "rsi_period": 14,
+     "rsi_ob": 65,
+     "rsi_os": 35,
+     "vol_mult": 5.0,
+     "vol_len": 20,
+     "use_rsi": true,
+     "use_volume": true,
+     "use_pattern": false,
+     "use_htf": false,
+     "atr_period": 14,
+     "atr_mult": 1.0,
+     "max_risk_pct": 1.5,
+     "tp1_rr": 2.0,
+     "tp2_rr": 3.0,
+     "tp3_rr": 4.5,
+     "min_volume_usdt": 300000,
+     "min_quality": 0,
+     "cooldown_bars": 5,
+     "trend_only": false,
+     "zone_pct": 0.7,
+     "max_dist_pct": 1.5,
+     "min_rr": 2.0,
+     "max_level_tests": 4
+    },
+    "logs": []
+   },
+   "trade_from_json": {
+    "ok": {
+     "timeframe": "1h",
+     "scan_interval": 300,
+     "pivot_strength": 7,
+     "max_level_age": 100,
+     "max_retest_bars": 30,
+     "zone_buffer": 0.3,
+     "ema_fast": 50,
+     "ema_slow": 200,
+     "htf_ema_period": 50,
+     "rsi_period": 14,
+     "rsi_ob": 65,
+     "rsi_os": 35,
+     "vol_mult": 5.0,
+     "vol_len": 20,
+     "use_rsi": true,
+     "use_volume": true,
+     "use_pattern": false,
+     "use_htf": false,
+     "atr_period": 14,
+     "atr_mult": 1.0,
+     "max_risk_pct": 1.5,
+     "tp1_rr": 2.0,
+     "tp2_rr": 3.0,
+     "tp3_rr": 4.5,
+     "min_volume_usdt": 300000,
+     "min_quality": 0,
+     "cooldown_bars": 5,
+     "trend_only": false,
+     "zone_pct": 0.7,
+     "max_dist_pct": 1.5,
+     "min_rr": 2.0,
+     "max_level_tests": 4
+    },
+    "logs": []
+   },
+   "smc_from_json": {
+    "ok": {
+     "tf_key": "1H",
+     "scan_interval": 300,
+     "direction": "BOTH",
+     "min_confirmations": 3,
+     "min_rr": 2.0,
+     "sl_buffer_pct": 0.35,
+     "min_volume_usdt": 300000,
+     "fvg_enabled": true,
+     "choch_enabled": true,
+     "ob_use_breaker": true,
+     "ob_max_age": 80,
+     "sweep_close_req": true,
+     "smc_conf_type": "BODY_CLOSE",
+     "smc_pd_filter": false,
+     "smc_retrace_depth": 0.2,
+     "smc_mtf_check": false,
+     "smc_use_volume_filter": false,
+     "smc_vol_mult": 1.2,
+     "smc_vol_len": 20
+    },
+    "logs": []
+   },
+   "load_sparse": {
+    "ok": {
+     "vol_mult": {
+      "$f": "nan"
+     },
+     "min_quality": {
+      "$f": "-inf"
+     }
+    },
+    "logs": []
+   }
+  },
+  {
+   "input": "{\"max_risk_pct\": {}, \"_sparse\": true}",
+   "sparse_merge": {
+    "error": [
+     "TypeError",
+     "'>' not supported between instances of 'dict' and 'float'"
+    ],
+    "logs": []
+   },
+   "trade_from_json": {
+    "ok": {
+     "timeframe": "1h",
+     "scan_interval": 300,
+     "pivot_strength": 7,
+     "max_level_age": 100,
+     "max_retest_bars": 30,
+     "zone_buffer": 0.3,
+     "ema_fast": 50,
+     "ema_slow": 200,
+     "htf_ema_period": 50,
+     "rsi_period": 14,
+     "rsi_ob": 65,
+     "rsi_os": 35,
+     "vol_mult": 1.0,
+     "vol_len": 20,
+     "use_rsi": true,
+     "use_volume": true,
+     "use_pattern": false,
+     "use_htf": false,
+     "atr_period": 14,
+     "atr_mult": 1.0,
+     "max_risk_pct": 1.5,
+     "tp1_rr": 2.0,
+     "tp2_rr": 3.0,
+     "tp3_rr": 4.5,
+     "min_volume_usdt": 300000,
+     "min_quality": 3,
+     "cooldown_bars": 5,
+     "trend_only": false,
+     "zone_pct": 0.7,
+     "max_dist_pct": 1.5,
+     "min_rr": 2.0,
+     "max_level_tests": 4
+    },
+    "logs": [
+     [
+      "CHM.Users",
+      "WARNING",
+      "user_manager.from_json() unhandled exception"
+     ]
+    ]
+   },
+   "smc_from_json": {
+    "ok": {
+     "tf_key": "1H",
+     "scan_interval": 300,
+     "direction": "BOTH",
+     "min_confirmations": 3,
+     "min_rr": 2.0,
+     "sl_buffer_pct": 0.35,
+     "min_volume_usdt": 300000,
+     "fvg_enabled": true,
+     "choch_enabled": true,
+     "ob_use_breaker": true,
+     "ob_max_age": 80,
+     "sweep_close_req": true,
+     "smc_conf_type": "BODY_CLOSE",
+     "smc_pd_filter": false,
+     "smc_retrace_depth": 0.2,
+     "smc_mtf_check": false,
+     "smc_use_volume_filter": false,
+     "smc_vol_mult": 1.2,
+     "smc_vol_len": 20
+    },
+    "logs": []
+   },
+   "load_sparse": {
+    "ok": {
+     "max_risk_pct": {}
+    },
+    "logs": []
+   }
+  },
+  {
+   "input": "{\"cooldown_bars\": \"x\", \"_sparse\": true}",
+   "sparse_merge": {
+    "error": [
+     "TypeError",
+     "'<' not supported between instances of 'str' and 'int'"
+    ],
+    "logs": []
+   },
+   "trade_from_json": {
+    "ok": {
+     "timeframe": "1h",
+     "scan_interval": 300,
+     "pivot_strength": 7,
+     "max_level_age": 100,
+     "max_retest_bars": 30,
+     "zone_buffer": 0.3,
+     "ema_fast": 50,
+     "ema_slow": 200,
+     "htf_ema_period": 50,
+     "rsi_period": 14,
+     "rsi_ob": 65,
+     "rsi_os": 35,
+     "vol_mult": 1.0,
+     "vol_len": 20,
+     "use_rsi": true,
+     "use_volume": true,
+     "use_pattern": false,
+     "use_htf": false,
+     "atr_period": 14,
+     "atr_mult": 1.0,
+     "max_risk_pct": 1.5,
+     "tp1_rr": 2.0,
+     "tp2_rr": 3.0,
+     "tp3_rr": 4.5,
+     "min_volume_usdt": 300000,
+     "min_quality": 3,
+     "cooldown_bars": 5,
+     "trend_only": false,
+     "zone_pct": 0.7,
+     "max_dist_pct": 1.5,
+     "min_rr": 2.0,
+     "max_level_tests": 4
+    },
+    "logs": [
+     [
+      "CHM.Users",
+      "WARNING",
+      "user_manager.from_json() unhandled exception"
+     ]
+    ]
+   },
+   "smc_from_json": {
+    "ok": {
+     "tf_key": "1H",
+     "scan_interval": 300,
+     "direction": "BOTH",
+     "min_confirmations": 3,
+     "min_rr": 2.0,
+     "sl_buffer_pct": 0.35,
+     "min_volume_usdt": 300000,
+     "fvg_enabled": true,
+     "choch_enabled": true,
+     "ob_use_breaker": true,
+     "ob_max_age": 80,
+     "sweep_close_req": true,
+     "smc_conf_type": "BODY_CLOSE",
+     "smc_pd_filter": false,
+     "smc_retrace_depth": 0.2,
+     "smc_mtf_check": false,
+     "smc_use_volume_filter": false,
+     "smc_vol_mult": 1.2,
+     "smc_vol_len": 20
+    },
+    "logs": []
+   },
+   "load_sparse": {
+    "ok": {
+     "cooldown_bars": "x"
+    },
+    "logs": []
+   }
+  },
+  {
+   "input": "{\"scan_interval\": 30.0, \"min_rr\": 0, \"_sparse\": true}",
+   "sparse_merge": {
+    "ok": {
+     "timeframe": "1h",
+     "scan_interval": 60,
+     "pivot_strength": 7,
+     "max_level_age": 100,
+     "max_retest_bars": 30,
+     "zone_buffer": 0.3,
+     "ema_fast": 50,
+     "ema_slow": 200,
+     "htf_ema_period": 50,
+     "rsi_period": 14,
+     "rsi_ob": 65,
+     "rsi_os": 35,
+     "vol_mult": 1.0,
+     "vol_len": 20,
+     "use_rsi": true,
+     "use_volume": true,
+     "use_pattern": false,
+     "use_htf": false,
+     "atr_period": 14,
+     "atr_mult": 1.0,
+     "max_risk_pct": 1.5,
+     "tp1_rr": 2.0,
+     "tp2_rr": 3.0,
+     "tp3_rr": 4.5,
+     "min_volume_usdt": 300000,
+     "min_quality": 3,
+     "cooldown_bars": 5,
+     "trend_only": false,
+     "zone_pct": 0.7,
+     "max_dist_pct": 1.5,
+     "min_rr": 1.0,
+     "max_level_tests": 4
+    },
+    "logs": []
+   },
+   "trade_from_json": {
+    "ok": {
+     "timeframe": "1h",
+     "scan_interval": 60,
+     "pivot_strength": 7,
+     "max_level_age": 100,
+     "max_retest_bars": 30,
+     "zone_buffer": 0.3,
+     "ema_fast": 50,
+     "ema_slow": 200,
+     "htf_ema_period": 50,
+     "rsi_period": 14,
+     "rsi_ob": 65,
+     "rsi_os": 35,
+     "vol_mult": 1.0,
+     "vol_len": 20,
+     "use_rsi": true,
+     "use_volume": true,
+     "use_pattern": false,
+     "use_htf": false,
+     "atr_period": 14,
+     "atr_mult": 1.0,
+     "max_risk_pct": 1.5,
+     "tp1_rr": 2.0,
+     "tp2_rr": 3.0,
+     "tp3_rr": 4.5,
+     "min_volume_usdt": 300000,
+     "min_quality": 3,
+     "cooldown_bars": 5,
+     "trend_only": false,
+     "zone_pct": 0.7,
+     "max_dist_pct": 1.5,
+     "min_rr": 1.0,
+     "max_level_tests": 4
+    },
+    "logs": []
+   },
+   "smc_from_json": {
+    "ok": {
+     "tf_key": "1H",
+     "scan_interval": 30.0,
+     "direction": "BOTH",
+     "min_confirmations": 3,
+     "min_rr": 0,
+     "sl_buffer_pct": 0.35,
+     "min_volume_usdt": 300000,
+     "fvg_enabled": true,
+     "choch_enabled": true,
+     "ob_use_breaker": true,
+     "ob_max_age": 80,
+     "sweep_close_req": true,
+     "smc_conf_type": "BODY_CLOSE",
+     "smc_pd_filter": false,
+     "smc_retrace_depth": 0.2,
+     "smc_mtf_check": false,
+     "smc_use_volume_filter": false,
+     "smc_vol_mult": 1.2,
+     "smc_vol_len": 20
+    },
+    "logs": []
+   },
+   "load_sparse": {
+    "ok": {
+     "scan_interval": 30.0,
+     "min_rr": 0
+    },
+    "logs": []
+   }
+  },
+  {
+   "input": "{\"min_rr\": 1, \"tp1_rr\": \"z\", \"_sparse\": true}",
+   "sparse_merge": {
+    "error": [
+     "TypeError",
+     "'<' not supported between instances of 'str' and 'int'"
+    ],
+    "logs": []
+   },
+   "trade_from_json": {
+    "ok": {
+     "timeframe": "1h",
+     "scan_interval": 300,
+     "pivot_strength": 7,
+     "max_level_age": 100,
+     "max_retest_bars": 30,
+     "zone_buffer": 0.3,
+     "ema_fast": 50,
+     "ema_slow": 200,
+     "htf_ema_period": 50,
+     "rsi_period": 14,
+     "rsi_ob": 65,
+     "rsi_os": 35,
+     "vol_mult": 1.0,
+     "vol_len": 20,
+     "use_rsi": true,
+     "use_volume": true,
+     "use_pattern": false,
+     "use_htf": false,
+     "atr_period": 14,
+     "atr_mult": 1.0,
+     "max_risk_pct": 1.5,
+     "tp1_rr": 2.0,
+     "tp2_rr": 3.0,
+     "tp3_rr": 4.5,
+     "min_volume_usdt": 300000,
+     "min_quality": 3,
+     "cooldown_bars": 5,
+     "trend_only": false,
+     "zone_pct": 0.7,
+     "max_dist_pct": 1.5,
+     "min_rr": 2.0,
+     "max_level_tests": 4
+    },
+    "logs": [
+     [
+      "CHM.Users",
+      "WARNING",
+      "user_manager.from_json() unhandled exception"
+     ]
+    ]
+   },
+   "smc_from_json": {
+    "ok": {
+     "tf_key": "1H",
+     "scan_interval": 300,
+     "direction": "BOTH",
+     "min_confirmations": 3,
+     "min_rr": 1,
+     "sl_buffer_pct": 0.35,
+     "min_volume_usdt": 300000,
+     "fvg_enabled": true,
+     "choch_enabled": true,
+     "ob_use_breaker": true,
+     "ob_max_age": 80,
+     "sweep_close_req": true,
+     "smc_conf_type": "BODY_CLOSE",
+     "smc_pd_filter": false,
+     "smc_retrace_depth": 0.2,
+     "smc_mtf_check": false,
+     "smc_use_volume_filter": false,
+     "smc_vol_mult": 1.2,
+     "smc_vol_len": 20
+    },
+    "logs": []
+   },
+   "load_sparse": {
+    "ok": {
+     "min_rr": 1,
+     "tp1_rr": "z"
+    },
+    "logs": []
+   }
+  },
+  {
+   "input": "﻿{}",
+   "sparse_merge": {
+    "ok": {
+     "timeframe": "1h",
+     "scan_interval": 300,
+     "pivot_strength": 7,
+     "max_level_age": 100,
+     "max_retest_bars": 30,
+     "zone_buffer": 0.3,
+     "ema_fast": 50,
+     "ema_slow": 200,
+     "htf_ema_period": 50,
+     "rsi_period": 14,
+     "rsi_ob": 65,
+     "rsi_os": 35,
+     "vol_mult": 1.0,
+     "vol_len": 20,
+     "use_rsi": true,
+     "use_volume": true,
+     "use_pattern": false,
+     "use_htf": false,
+     "atr_period": 14,
+     "atr_mult": 1.0,
+     "max_risk_pct": 1.5,
+     "tp1_rr": 2.0,
+     "tp2_rr": 3.0,
+     "tp3_rr": 4.5,
+     "min_volume_usdt": 300000,
+     "min_quality": 3,
+     "cooldown_bars": 5,
+     "trend_only": false,
+     "zone_pct": 0.7,
+     "max_dist_pct": 1.5,
+     "min_rr": 2.0,
+     "max_level_tests": 4
+    },
+    "logs": [
+     [
+      "CHM.Users",
+      "WARNING",
+      "user_manager._val_eq() unhandled exception"
+     ]
+    ]
+   },
+   "trade_from_json": {
+    "ok": {
+     "timeframe": "1h",
+     "scan_interval": 300,
+     "pivot_strength": 7,
+     "max_level_age": 100,
+     "max_retest_bars": 30,
+     "zone_buffer": 0.3,
+     "ema_fast": 50,
+     "ema_slow": 200,
+     "htf_ema_period": 50,
+     "rsi_period": 14,
+     "rsi_ob": 65,
+     "rsi_os": 35,
+     "vol_mult": 1.0,
+     "vol_len": 20,
+     "use_rsi": true,
+     "use_volume": true,
+     "use_pattern": false,
+     "use_htf": false,
+     "atr_period": 14,
+     "atr_mult": 1.0,
+     "max_risk_pct": 1.5,
+     "tp1_rr": 2.0,
+     "tp2_rr": 3.0,
+     "tp3_rr": 4.5,
+     "min_volume_usdt": 300000,
+     "min_quality": 3,
+     "cooldown_bars": 5,
+     "trend_only": false,
+     "zone_pct": 0.7,
+     "max_dist_pct": 1.5,
+     "min_rr": 2.0,
+     "max_level_tests": 4
+    },
+    "logs": [
+     [
+      "CHM.Users",
+      "WARNING",
+      "user_manager.from_json() unhandled exception"
+     ]
+    ]
+   },
+   "smc_from_json": {
+    "ok": {
+     "tf_key": "1H",
+     "scan_interval": 300,
+     "direction": "BOTH",
+     "min_confirmations": 3,
+     "min_rr": 2.0,
+     "sl_buffer_pct": 0.35,
+     "min_volume_usdt": 300000,
+     "fvg_enabled": true,
+     "choch_enabled": true,
+     "ob_use_breaker": true,
+     "ob_max_age": 80,
+     "sweep_close_req": true,
+     "smc_conf_type": "BODY_CLOSE",
+     "smc_pd_filter": false,
+     "smc_retrace_depth": 0.2,
+     "smc_mtf_check": false,
+     "smc_use_volume_filter": false,
+     "smc_vol_mult": 1.2,
+     "smc_vol_len": 20
+    },
+    "logs": [
+     [
+      "CHM.Users",
+      "WARNING",
+      "user_manager.from_json() unhandled exception"
+     ]
+    ]
+   },
+   "load_sparse": {
+    "ok": {},
+    "logs": []
+   }
+  },
+  {
+   "input": "{\"a\": 1} x",
+   "sparse_merge": {
+    "ok": {
+     "timeframe": "1h",
+     "scan_interval": 300,
+     "pivot_strength": 7,
+     "max_level_age": 100,
+     "max_retest_bars": 30,
+     "zone_buffer": 0.3,
+     "ema_fast": 50,
+     "ema_slow": 200,
+     "htf_ema_period": 50,
+     "rsi_period": 14,
+     "rsi_ob": 65,
+     "rsi_os": 35,
+     "vol_mult": 1.0,
+     "vol_len": 20,
+     "use_rsi": true,
+     "use_volume": true,
+     "use_pattern": false,
+     "use_htf": false,
+     "atr_period": 14,
+     "atr_mult": 1.0,
+     "max_risk_pct": 1.5,
+     "tp1_rr": 2.0,
+     "tp2_rr": 3.0,
+     "tp3_rr": 4.5,
+     "min_volume_usdt": 300000,
+     "min_quality": 3,
+     "cooldown_bars": 5,
+     "trend_only": false,
+     "zone_pct": 0.7,
+     "max_dist_pct": 1.5,
+     "min_rr": 2.0,
+     "max_level_tests": 4
+    },
+    "logs": [
+     [
+      "CHM.Users",
+      "WARNING",
+      "user_manager._val_eq() unhandled exception"
+     ]
+    ]
+   },
+   "trade_from_json": {
+    "ok": {
+     "timeframe": "1h",
+     "scan_interval": 300,
+     "pivot_strength": 7,
+     "max_level_age": 100,
+     "max_retest_bars": 30,
+     "zone_buffer": 0.3,
+     "ema_fast": 50,
+     "ema_slow": 200,
+     "htf_ema_period": 50,
+     "rsi_period": 14,
+     "rsi_ob": 65,
+     "rsi_os": 35,
+     "vol_mult": 1.0,
+     "vol_len": 20,
+     "use_rsi": true,
+     "use_volume": true,
+     "use_pattern": false,
+     "use_htf": false,
+     "atr_period": 14,
+     "atr_mult": 1.0,
+     "max_risk_pct": 1.5,
+     "tp1_rr": 2.0,
+     "tp2_rr": 3.0,
+     "tp3_rr": 4.5,
+     "min_volume_usdt": 300000,
+     "min_quality": 3,
+     "cooldown_bars": 5,
+     "trend_only": false,
+     "zone_pct": 0.7,
+     "max_dist_pct": 1.5,
+     "min_rr": 2.0,
+     "max_level_tests": 4
+    },
+    "logs": [
+     [
+      "CHM.Users",
+      "WARNING",
+      "user_manager.from_json() unhandled exception"
+     ]
+    ]
+   },
+   "smc_from_json": {
+    "ok": {
+     "tf_key": "1H",
+     "scan_interval": 300,
+     "direction": "BOTH",
+     "min_confirmations": 3,
+     "min_rr": 2.0,
+     "sl_buffer_pct": 0.35,
+     "min_volume_usdt": 300000,
+     "fvg_enabled": true,
+     "choch_enabled": true,
+     "ob_use_breaker": true,
+     "ob_max_age": 80,
+     "sweep_close_req": true,
+     "smc_conf_type": "BODY_CLOSE",
+     "smc_pd_filter": false,
+     "smc_retrace_depth": 0.2,
+     "smc_mtf_check": false,
+     "smc_use_volume_filter": false,
+     "smc_vol_mult": 1.2,
+     "smc_vol_len": 20
+    },
+    "logs": [
+     [
+      "CHM.Users",
+      "WARNING",
+      "user_manager.from_json() unhandled exception"
+     ]
+    ]
+   },
+   "load_sparse": {
+    "ok": {},
+    "logs": []
+   }
+  }
+ ],
+ "levels": [
+  {
+   "analysis": {
+    "ob": {
+     "bull_ob": {
+      "found": true,
+      "ob_low": 100.0,
+      "ob_high": 101.0
+     },
+     "bear_ob": {
+      "found": true,
+      "ob_low": 104.0,
+      "ob_high": 105.0
+     }
+    },
+    "fvg": {},
+    "structure": {},
+    "atr": 0.2,
+    "current_price": 102.5,
+    "symbol": "SYNX-USDT-SWAP",
+    "liquidity": {
+     "equal_lows": [
+      {
+       "price": 99.55
+      }
+     ],
+     "equal_highs": [
+      {
+       "price": 105.5
+      }
+     ]
+    }
+   },
+   "direction": "LONG",
+   "ok": {
+    "ladder_fallback": false,
+    "rr_structural": 2.5,
+    "entry_low": 100.0,
+    "entry_high": 101.0,
+    "entry_mid": 100.5,
+    "sl": 99.5,
+    "tp1": 102.0,
+    "tp2": 103.0,
+    "tp3": 105.5,
+    "rr": 2.5,
+    "risk_pct": 0.995
+   },
+   "logs": []
+  },
+  {
+   "analysis": {
+    "ob": {
+     "bull_ob": {
+      "found": true,
+      "ob_low": 100.0,
+      "ob_high": 101.0
+     },
+     "bear_ob": {
+      "found": true,
+      "ob_low": 104.0,
+      "ob_high": 105.0
+     }
+    },
+    "fvg": {},
+    "structure": {},
+    "atr": 0.2,
+    "current_price": 102.5,
+    "symbol": "SYNX-USDT-SWAP",
+    "liquidity": {
+     "equal_lows": [
+      {
+       "price": 99.55
+      }
+     ],
+     "equal_highs": [
+      {
+       "price": 105.5
+      }
+     ]
+    }
+   },
+   "direction": "SHORT",
+   "ok": {
+    "ladder_fallback": false,
+    "rr_structural": 2.49,
+    "entry_low": 104.0,
+    "entry_high": 105.0,
+    "entry_mid": 104.5,
+    "sl": 105.52499999999999,
+    "tp1": 102.9625,
+    "tp2": 101.95000000000002,
+    "tp3": 99.55,
+    "rr": 2.49,
+    "risk_pct": 0.981
+   },
+   "logs": []
+  },
+  {
+   "analysis": {
+    "ob": {
+     "bull_ob": {
+      "found": true,
+      "ob_low": 100.0,
+      "ob_high": 101.0
+     },
+     "bear_ob": {
+      "found": true,
+      "ob_low": 104.0,
+      "ob_high": 105.0
+     }
+    },
+    "fvg": {},
+    "structure": {},
+    "atr": 0.2,
+    "current_price": 102.5,
+    "symbol": "SYNX-USDT-SWAP",
+    "liquidity": {
+     "equal_lows": [
+      {
+       "price": 99.2
+      },
+      {
+       "price": 99.6
+      }
+     ],
+     "equal_highs": [
+      {
+       "price": 105.3
+      },
+      {
+       "price": 105.9
+      }
+     ]
+    }
+   },
+   "direction": "LONG",
+   "ok": {
+    "ladder_fallback": false,
+    "rr_structural": 2.36,
+    "entry_low": 100.0,
+    "entry_high": 101.0,
+    "entry_mid": 100.5,
+    "sl": 99.1008,
+    "tp1": 102.59879999999998,
+    "tp2": 103.79839999999999,
+    "tp3": 105.3,
+    "rr": 2.36,
+    "risk_pct": 1.392
+   },
+   "logs": [
+    [
+     "CHM.SMC.SignalBuilder",
+     "INFO",
+     "[SMC-LIQUIDITY-AWARE-SL] sym=SYNX-USDT-SWAP dir=LONG sl=99.5→99.1008 target=99.2 capped=False reason=magnet_in_zone_long"
+    ]
+   ]
+  },
+  {
+   "analysis": {
+    "ob": {
+     "bull_ob": {
+      "found": true,
+      "ob_low": 100.0,
+      "ob_high": 101.0
+     },
+     "bear_ob": {
+      "found": true,
+      "ob_low": 104.0,
+      "ob_high": 105.0
+     }
+    },
+    "fvg": {},
+    "structure": {},
+    "atr": 0.2,
+    "current_price": 102.5,
+    "symbol": "SYNX-USDT-SWAP",
+    "liquidity": {
+     "equal_lows": [
+      {
+       "price": 99.2
+      },
+      {
+       "price": 99.6
+      }
+     ],
+     "equal_highs": [
+      {
+       "price": 105.3
+      },
+      {
+       "price": 105.9
+      }
+     ]
+    }
+   },
+   "direction": "SHORT",
+   "ok": {
+    "ladder_fallback": false,
+    "rr_structural": 2.33,
+    "entry_low": 104.0,
+    "entry_high": 105.0,
+    "entry_mid": 104.5,
+    "sl": 106.0059,
+    "tp1": 102.24115,
+    "tp2": 100.9882,
+    "tp3": 99.6,
+    "rr": 2.33,
+    "risk_pct": 1.441
+   },
+   "logs": [
+    [
+     "CHM.SMC.SignalBuilder",
+     "INFO",
+     "[SMC-LIQUIDITY-AWARE-SL] sym=SYNX-USDT-SWAP dir=SHORT sl=105.525→106.006 target=105.9 capped=False reason=magnet_in_zone_short"
+    ]
+   ]
+  },
+  {
+   "analysis": {
+    "ob": {
+     "bull_ob": {
+      "found": true,
+      "ob_low": 100.0,
+      "ob_high": 101.0
+     },
+     "bear_ob": {
+      "found": true,
+      "ob_low": 104.0,
+      "ob_high": 105.0
+     }
+    },
+    "fvg": {},
+    "structure": {},
+    "atr": 0.2,
+    "current_price": 102.5,
+    "symbol": "SYNX-USDT-SWAP",
+    "liquidity": {
+     "equal_lows": [
+      {
+       "price": 97.0
+      }
+     ],
+     "equal_highs": [
+      {
+       "price": 110.0
+      }
+     ]
+    }
+   },
+   "direction": "LONG",
+   "ok": {
+    "ladder_fallback": false,
+    "rr_structural": 2.5,
+    "entry_low": 100.0,
+    "entry_high": 101.0,
+    "entry_mid": 100.5,
+    "sl": 99.5,
+    "tp1": 102.0,
+    "tp2": 103.0,
+    "tp3": 110.0,
+    "rr": 2.5,
+    "risk_pct": 0.995
+   },
+   "logs": []
+  },
+  {
+   "analysis": {
+    "ob": {
+     "bull_ob": {
+      "found": true,
+      "ob_low": 100.0,
+      "ob_high": 101.0
+     },
+     "bear_ob": {
+      "found": true,
+      "ob_low": 104.0,
+      "ob_high": 105.0
+     }
+    },
+    "fvg": {},
+    "structure": {},
+    "atr": 0.2,
+    "current_price": 102.5,
+    "symbol": "SYNX-USDT-SWAP",
+    "liquidity": {
+     "equal_lows": [
+      {
+       "price": 97.0
+      }
+     ],
+     "equal_highs": [
+      {
+       "price": 110.0
+      }
+     ]
+    }
+   },
+   "direction": "SHORT",
+   "ok": {
+    "ladder_fallback": false,
+    "rr_structural": 2.49,
+    "entry_low": 104.0,
+    "entry_high": 105.0,
+    "entry_mid": 104.5,
+    "sl": 105.52499999999999,
+    "tp1": 102.9625,
+    "tp2": 101.95000000000002,
+    "tp3": 97.0,
+    "rr": 2.49,
+    "risk_pct": 0.981
+   },
+   "logs": []
+  },
+  {
+   "analysis": {
+    "ob": {
+     "bull_ob": {
+      "found": true,
+      "ob_low": 100.0,
+      "ob_high": 101.0
+     },
+     "bear_ob": {
+      "found": true,
+      "ob_low": 104.0,
+      "ob_high": 105.0
+     }
+    },
+    "fvg": {},
+    "structure": {},
+    "atr": 0.2,
+    "current_price": 102.5,
+    "symbol": "SYNX-USDT-SWAP",
+    "liquidity": {
+     "equal_lows": [
+      {
+       "price": 99.8
+      }
+     ],
+     "equal_highs": [
+      {
+       "price": 105.2
+      }
+     ]
+    }
+   },
+   "direction": "LONG",
+   "ok": {
+    "ladder_fallback": false,
+    "rr_structural": 2.5,
+    "entry_low": 100.0,
+    "entry_high": 101.0,
+    "entry_mid": 100.5,
+    "sl": 99.5,
+    "tp1": 102.0,
+    "tp2": 103.0,
+    "tp3": 105.2,
+    "rr": 2.5,
+    "risk_pct": 0.995
+   },
+   "logs": []
+  },
+  {
+   "analysis": {
+    "ob": {
+     "bull_ob": {
+      "found": true,
+      "ob_low": 100.0,
+      "ob_high": 101.0
+     },
+     "bear_ob": {
+      "found": true,
+      "ob_low": 104.0,
+      "ob_high": 105.0
+     }
+    },
+    "fvg": {},
+    "structure": {},
+    "atr": 0.2,
+    "current_price": 102.5,
+    "symbol": "SYNX-USDT-SWAP",
+    "liquidity": {
+     "equal_lows": [
+      {
+       "price": 99.8
+      }
+     ],
+     "equal_highs": [
+      {
+       "price": 105.2
+      }
+     ]
+    }
+   },
+   "direction": "SHORT",
+   "ok": {
+    "ladder_fallback": false,
+    "rr_structural": 2.49,
+    "entry_low": 104.0,
+    "entry_high": 105.0,
+    "entry_mid": 104.5,
+    "sl": 105.52499999999999,
+    "tp1": 102.9625,
+    "tp2": 101.95000000000002,
+    "tp3": 99.8,
+    "rr": 2.49,
+    "risk_pct": 0.981
+   },
+   "logs": []
+  },
+  {
+   "analysis": {
+    "ob": {
+     "bull_ob": {
+      "found": true,
+      "ob_low": 100.0,
+      "ob_high": 101.0
+     },
+     "bear_ob": {
+      "found": true,
+      "ob_low": 104.0,
+      "ob_high": 105.0
+     }
+    },
+    "fvg": {},
+    "structure": {},
+    "atr": 0.2,
+    "current_price": 102.5,
+    "symbol": "SYNX-USDT-SWAP",
+    "liquidity": {
+     "equal_lows": [],
+     "equal_highs": []
+    }
+   },
+   "direction": "LONG",
+   "ok": {
+    "ladder_fallback": false,
+    "rr_structural": 2.5,
+    "entry_low": 100.0,
+    "entry_high": 101.0,
+    "entry_mid": 100.5,
+    "sl": 99.5,
+    "tp1": 102.0,
+    "tp2": 103.0,
+    "tp3": 105.0,
+    "rr": 2.5,
+    "risk_pct": 0.995
+   },
+   "logs": []
+  },
+  {
+   "analysis": {
+    "ob": {
+     "bull_ob": {
+      "found": true,
+      "ob_low": 100.0,
+      "ob_high": 101.0
+     },
+     "bear_ob": {
+      "found": true,
+      "ob_low": 104.0,
+      "ob_high": 105.0
+     }
+    },
+    "fvg": {},
+    "structure": {},
+    "atr": 0.2,
+    "current_price": 102.5,
+    "symbol": "SYNX-USDT-SWAP",
+    "liquidity": {
+     "equal_lows": [],
+     "equal_highs": []
+    }
+   },
+   "direction": "SHORT",
+   "ok": {
+    "ladder_fallback": false,
+    "rr_structural": 2.49,
+    "entry_low": 104.0,
+    "entry_high": 105.0,
+    "entry_mid": 104.5,
+    "sl": 105.52499999999999,
+    "tp1": 102.9625,
+    "tp2": 101.95000000000002,
+    "tp3": 99.90000000000003,
+    "rr": 2.49,
+    "risk_pct": 0.981
+   },
+   "logs": []
+  },
+  {
+   "analysis": {
+    "ob": {
+     "bull_ob": {
+      "found": true,
+      "ob_low": 100.0,
+      "ob_high": 101.0
+     },
+     "bear_ob": {
+      "found": true,
+      "ob_low": 104.0,
+      "ob_high": 105.0
+     }
+    },
+    "fvg": {},
+    "structure": {},
+    "atr": 0.2,
+    "current_price": 102.5,
+    "symbol": "SYNX-USDT-SWAP",
+    "liquidity": {}
+   },
+   "direction": "LONG",
+   "ok": {
+    "ladder_fallback": false,
+    "rr_structural": 2.5,
+    "entry_low": 100.0,
+    "entry_high": 101.0,
+    "entry_mid": 100.5,
+    "sl": 99.5,
+    "tp1": 102.0,
+    "tp2": 103.0,
+    "tp3": 105.0,
+    "rr": 2.5,
+    "risk_pct": 0.995
+   },
+   "logs": []
+  },
+  {
+   "analysis": {
+    "ob": {
+     "bull_ob": {
+      "found": true,
+      "ob_low": 100.0,
+      "ob_high": 101.0
+     },
+     "bear_ob": {
+      "found": true,
+      "ob_low": 104.0,
+      "ob_high": 105.0
+     }
+    },
+    "fvg": {},
+    "structure": {},
+    "atr": 0.2,
+    "current_price": 102.5,
+    "symbol": "SYNX-USDT-SWAP",
+    "liquidity": {}
+   },
+   "direction": "SHORT",
+   "ok": {
+    "ladder_fallback": false,
+    "rr_structural": 2.49,
+    "entry_low": 104.0,
+    "entry_high": 105.0,
+    "entry_mid": 104.5,
+    "sl": 105.52499999999999,
+    "tp1": 102.9625,
+    "tp2": 101.95000000000002,
+    "tp3": 99.90000000000003,
+    "rr": 2.49,
+    "risk_pct": 0.981
+   },
+   "logs": []
+  },
+  {
+   "analysis": {
+    "ob": {
+     "bull_ob": {
+      "found": true,
+      "ob_low": 100.0,
+      "ob_high": 101.0
+     },
+     "bear_ob": {
+      "found": true,
+      "ob_low": 104.0,
+      "ob_high": 105.0
+     }
+    },
+    "fvg": {},
+    "structure": {},
+    "atr": 0.2,
+    "current_price": 102.5,
+    "symbol": "SYNX-USDT-SWAP",
+    "liquidity": {
+     "equal_lows": [
+      {
+       "price": 99.45
+      },
+      {
+       "price": 0.0
+      }
+     ],
+     "equal_highs": [
+      {
+       "price": 105.55
+      },
+      {
+       "price": -1.0
+      }
+     ]
+    }
+   },
+   "direction": "LONG",
+   "ok": {
+    "ladder_fallback": false,
+    "rr_structural": 2.43,
+    "entry_low": 100.0,
+    "entry_high": 101.0,
+    "entry_mid": 100.5,
+    "sl": 99.35055,
+    "tp1": 102.224175,
+    "tp2": 103.2989,
+    "tp3": 105.55,
+    "rr": 2.43,
+    "risk_pct": 1.144
+   },
+   "logs": [
+    [
+     "CHM.SMC.SignalBuilder",
+     "INFO",
+     "[SMC-LIQUIDITY-AWARE-SL] sym=SYNX-USDT-SWAP dir=LONG sl=99.5→99.3505 target=99.45 capped=False reason=magnet_in_zone_long"
+    ]
+   ]
+  },
+  {
+   "analysis": {
+    "ob": {
+     "bull_ob": {
+      "found": true,
+      "ob_low": 100.0,
+      "ob_high": 101.0
+     },
+     "bear_ob": {
+      "found": true,
+      "ob_low": 104.0,
+      "ob_high": 105.0
+     }
+    },
+    "fvg": {},
+    "structure": {},
+    "atr": 0.2,
+    "current_price": 102.5,
+    "symbol": "SYNX-USDT-SWAP",
+    "liquidity": {
+     "equal_lows": [
+      {
+       "price": 99.45
+      },
+      {
+       "price": 0.0
+      }
+     ],
+     "equal_highs": [
+      {
+       "price": 105.55
+      },
+      {
+       "price": -1.0
+      }
+     ]
+    }
+   },
+   "direction": "SHORT",
+   "ok": {
+    "ladder_fallback": false,
+    "rr_structural": 2.43,
+    "entry_low": 104.0,
+    "entry_high": 105.0,
+    "entry_mid": 104.5,
+    "sl": 105.65554999999999,
+    "tp1": 102.76667500000002,
+    "tp2": 101.68890000000002,
+    "tp3": 99.45,
+    "rr": 2.43,
+    "risk_pct": 1.106
+   },
+   "logs": [
+    [
+     "CHM.SMC.SignalBuilder",
+     "INFO",
+     "[SMC-LIQUIDITY-AWARE-SL] sym=SYNX-USDT-SWAP dir=SHORT sl=105.525→105.656 target=105.55 capped=False reason=magnet_in_zone_short"
+    ]
+   ]
+  },
+  {
+   "analysis": {
+    "ob": {
+     "bull_ob": {
+      "found": true,
+      "ob_low": 100.0,
+      "ob_high": 101.0
+     },
+     "bear_ob": {
+      "found": true,
+      "ob_low": 104.0,
+      "ob_high": 105.0
+     }
+    },
+    "fvg": {},
+    "structure": {},
+    "atr": 0.2,
+    "current_price": 102.5,
+    "symbol": null,
+    "liquidity": {
+     "equal_lows": [
+      {
+       "price": 99.55
+      }
+     ],
+     "equal_highs": [
+      {
+       "price": 105.5
+      }
+     ]
+    }
+   },
+   "direction": "LONG",
+   "error": [
+    "AttributeError",
+    "'NoneType' object has no attribute 'upper'"
+   ],
+   "logs": []
+  },
+  {
+   "analysis": {
+    "ob": {
+     "bull_ob": {
+      "found": true,
+      "ob_low": 100.0,
+      "ob_high": 101.0
+     },
+     "bear_ob": {
+      "found": true,
+      "ob_low": 104.0,
+      "ob_high": 105.0
+     }
+    },
+    "fvg": {},
+    "structure": {},
+    "atr": 0.2,
+    "current_price": 102.5,
+    "symbol": null,
+    "liquidity": {
+     "equal_lows": [
+      {
+       "price": 99.55
+      }
+     ],
+     "equal_highs": [
+      {
+       "price": 105.5
+      }
+     ]
+    }
+   },
+   "direction": "SHORT",
+   "error": [
+    "AttributeError",
+    "'NoneType' object has no attribute 'upper'"
+   ],
+   "logs": []
+  },
+  {
+   "analysis": {
+    "ob": {
+     "bull_ob": {
+      "found": true,
+      "ob_low": 100.0,
+      "ob_high": 101.0
+     },
+     "bear_ob": {
+      "found": true,
+      "ob_low": 104.0,
+      "ob_high": 105.0
+     }
+    },
+    "fvg": {},
+    "structure": {},
+    "atr": 0.2,
+    "current_price": 102.5,
+    "symbol": null,
+    "liquidity": {
+     "equal_lows": [
+      {
+       "price": 99.2
+      },
+      {
+       "price": 99.6
+      }
+     ],
+     "equal_highs": [
+      {
+       "price": 105.3
+      },
+      {
+       "price": 105.9
+      }
+     ]
+    }
+   },
+   "direction": "LONG",
+   "error": [
+    "AttributeError",
+    "'NoneType' object has no attribute 'upper'"
+   ],
+   "logs": [
+    [
+     "CHM.SMC.SignalBuilder",
+     "INFO",
+     "[SMC-LIQUIDITY-AWARE-SL] sym=None dir=LONG sl=99.5→99.1008 target=99.2 capped=False reason=magnet_in_zone_long"
+    ]
+   ]
+  },
+  {
+   "analysis": {
+    "ob": {
+     "bull_ob": {
+      "found": true,
+      "ob_low": 100.0,
+      "ob_high": 101.0
+     },
+     "bear_ob": {
+      "found": true,
+      "ob_low": 104.0,
+      "ob_high": 105.0
+     }
+    },
+    "fvg": {},
+    "structure": {},
+    "atr": 0.2,
+    "current_price": 102.5,
+    "symbol": null,
+    "liquidity": {
+     "equal_lows": [
+      {
+       "price": 99.2
+      },
+      {
+       "price": 99.6
+      }
+     ],
+     "equal_highs": [
+      {
+       "price": 105.3
+      },
+      {
+       "price": 105.9
+      }
+     ]
+    }
+   },
+   "direction": "SHORT",
+   "error": [
+    "AttributeError",
+    "'NoneType' object has no attribute 'upper'"
+   ],
+   "logs": [
+    [
+     "CHM.SMC.SignalBuilder",
+     "INFO",
+     "[SMC-LIQUIDITY-AWARE-SL] sym=None dir=SHORT sl=105.525→106.006 target=105.9 capped=False reason=magnet_in_zone_short"
+    ]
+   ]
+  },
+  {
+   "analysis": {
+    "ob": {
+     "bull_ob": {
+      "found": true,
+      "ob_low": 100.0,
+      "ob_high": 101.0
+     },
+     "bear_ob": {
+      "found": true,
+      "ob_low": 104.0,
+      "ob_high": 105.0
+     }
+    },
+    "fvg": {},
+    "structure": {},
+    "atr": 0.2,
+    "current_price": 102.5,
+    "symbol": null,
+    "liquidity": {
+     "equal_lows": [
+      {
+       "price": 97.0
+      }
+     ],
+     "equal_highs": [
+      {
+       "price": 110.0
+      }
+     ]
+    }
+   },
+   "direction": "LONG",
+   "error": [
+    "AttributeError",
+    "'NoneType' object has no attribute 'upper'"
+   ],
+   "logs": []
+  },
+  {
+   "analysis": {
+    "ob": {
+     "bull_ob": {
+      "found": true,
+      "ob_low": 100.0,
+      "ob_high": 101.0
+     },
+     "bear_ob": {
+      "found": true,
+      "ob_low": 104.0,
+      "ob_high": 105.0
+     }
+    },
+    "fvg": {},
+    "structure": {},
+    "atr": 0.2,
+    "current_price": 102.5,
+    "symbol": null,
+    "liquidity": {
+     "equal_lows": [
+      {
+       "price": 97.0
+      }
+     ],
+     "equal_highs": [
+      {
+       "price": 110.0
+      }
+     ]
+    }
+   },
+   "direction": "SHORT",
+   "error": [
+    "AttributeError",
+    "'NoneType' object has no attribute 'upper'"
+   ],
+   "logs": []
+  },
+  {
+   "analysis": {
+    "ob": {
+     "bull_ob": {
+      "found": true,
+      "ob_low": 100.0,
+      "ob_high": 101.0
+     },
+     "bear_ob": {
+      "found": true,
+      "ob_low": 104.0,
+      "ob_high": 105.0
+     }
+    },
+    "fvg": {},
+    "structure": {},
+    "atr": 0.2,
+    "current_price": 102.5,
+    "symbol": null,
+    "liquidity": {
+     "equal_lows": [
+      {
+       "price": 99.8
+      }
+     ],
+     "equal_highs": [
+      {
+       "price": 105.2
+      }
+     ]
+    }
+   },
+   "direction": "LONG",
+   "error": [
+    "AttributeError",
+    "'NoneType' object has no attribute 'upper'"
+   ],
+   "logs": []
+  },
+  {
+   "analysis": {
+    "ob": {
+     "bull_ob": {
+      "found": true,
+      "ob_low": 100.0,
+      "ob_high": 101.0
+     },
+     "bear_ob": {
+      "found": true,
+      "ob_low": 104.0,
+      "ob_high": 105.0
+     }
+    },
+    "fvg": {},
+    "structure": {},
+    "atr": 0.2,
+    "current_price": 102.5,
+    "symbol": null,
+    "liquidity": {
+     "equal_lows": [
+      {
+       "price": 99.8
+      }
+     ],
+     "equal_highs": [
+      {
+       "price": 105.2
+      }
+     ]
+    }
+   },
+   "direction": "SHORT",
+   "error": [
+    "AttributeError",
+    "'NoneType' object has no attribute 'upper'"
+   ],
+   "logs": []
+  },
+  {
+   "analysis": {
+    "ob": {
+     "bull_ob": {
+      "found": true,
+      "ob_low": 100.0,
+      "ob_high": 101.0
+     },
+     "bear_ob": {
+      "found": true,
+      "ob_low": 104.0,
+      "ob_high": 105.0
+     }
+    },
+    "fvg": {},
+    "structure": {},
+    "atr": 0.2,
+    "current_price": 102.5,
+    "symbol": null,
+    "liquidity": {
+     "equal_lows": [],
+     "equal_highs": []
+    }
+   },
+   "direction": "LONG",
+   "error": [
+    "AttributeError",
+    "'NoneType' object has no attribute 'upper'"
+   ],
+   "logs": []
+  },
+  {
+   "analysis": {
+    "ob": {
+     "bull_ob": {
+      "found": true,
+      "ob_low": 100.0,
+      "ob_high": 101.0
+     },
+     "bear_ob": {
+      "found": true,
+      "ob_low": 104.0,
+      "ob_high": 105.0
+     }
+    },
+    "fvg": {},
+    "structure": {},
+    "atr": 0.2,
+    "current_price": 102.5,
+    "symbol": null,
+    "liquidity": {
+     "equal_lows": [],
+     "equal_highs": []
+    }
+   },
+   "direction": "SHORT",
+   "error": [
+    "AttributeError",
+    "'NoneType' object has no attribute 'upper'"
+   ],
+   "logs": []
+  },
+  {
+   "analysis": {
+    "ob": {
+     "bull_ob": {
+      "found": true,
+      "ob_low": 100.0,
+      "ob_high": 101.0
+     },
+     "bear_ob": {
+      "found": true,
+      "ob_low": 104.0,
+      "ob_high": 105.0
+     }
+    },
+    "fvg": {},
+    "structure": {},
+    "atr": 0.2,
+    "current_price": 102.5,
+    "symbol": null,
+    "liquidity": {}
+   },
+   "direction": "LONG",
+   "error": [
+    "AttributeError",
+    "'NoneType' object has no attribute 'upper'"
+   ],
+   "logs": []
+  },
+  {
+   "analysis": {
+    "ob": {
+     "bull_ob": {
+      "found": true,
+      "ob_low": 100.0,
+      "ob_high": 101.0
+     },
+     "bear_ob": {
+      "found": true,
+      "ob_low": 104.0,
+      "ob_high": 105.0
+     }
+    },
+    "fvg": {},
+    "structure": {},
+    "atr": 0.2,
+    "current_price": 102.5,
+    "symbol": null,
+    "liquidity": {}
+   },
+   "direction": "SHORT",
+   "error": [
+    "AttributeError",
+    "'NoneType' object has no attribute 'upper'"
+   ],
+   "logs": []
+  },
+  {
+   "analysis": {
+    "ob": {
+     "bull_ob": {
+      "found": true,
+      "ob_low": 100.0,
+      "ob_high": 101.0
+     },
+     "bear_ob": {
+      "found": true,
+      "ob_low": 104.0,
+      "ob_high": 105.0
+     }
+    },
+    "fvg": {},
+    "structure": {},
+    "atr": 0.2,
+    "current_price": 102.5,
+    "symbol": null,
+    "liquidity": {
+     "equal_lows": [
+      {
+       "price": 99.45
+      },
+      {
+       "price": 0.0
+      }
+     ],
+     "equal_highs": [
+      {
+       "price": 105.55
+      },
+      {
+       "price": -1.0
+      }
+     ]
+    }
+   },
+   "direction": "LONG",
+   "error": [
+    "AttributeError",
+    "'NoneType' object has no attribute 'upper'"
+   ],
+   "logs": [
+    [
+     "CHM.SMC.SignalBuilder",
+     "INFO",
+     "[SMC-LIQUIDITY-AWARE-SL] sym=None dir=LONG sl=99.5→99.3505 target=99.45 capped=False reason=magnet_in_zone_long"
+    ]
+   ]
+  },
+  {
+   "analysis": {
+    "ob": {
+     "bull_ob": {
+      "found": true,
+      "ob_low": 100.0,
+      "ob_high": 101.0
+     },
+     "bear_ob": {
+      "found": true,
+      "ob_low": 104.0,
+      "ob_high": 105.0
+     }
+    },
+    "fvg": {},
+    "structure": {},
+    "atr": 0.2,
+    "current_price": 102.5,
+    "symbol": null,
+    "liquidity": {
+     "equal_lows": [
+      {
+       "price": 99.45
+      },
+      {
+       "price": 0.0
+      }
+     ],
+     "equal_highs": [
+      {
+       "price": 105.55
+      },
+      {
+       "price": -1.0
+      }
+     ]
+    }
+   },
+   "direction": "SHORT",
+   "error": [
+    "AttributeError",
+    "'NoneType' object has no attribute 'upper'"
+   ],
+   "logs": [
+    [
+     "CHM.SMC.SignalBuilder",
+     "INFO",
+     "[SMC-LIQUIDITY-AWARE-SL] sym=None dir=SHORT sl=105.525→105.656 target=105.55 capped=False reason=magnet_in_zone_short"
+    ]
+   ]
+  },
+  {
+   "analysis": {
+    "ob": {
+     "bull_ob": {
+      "found": true,
+      "ob_low": 100.0,
+      "ob_high": 101.0
+     },
+     "bear_ob": {
+      "found": true,
+      "ob_low": 104.0,
+      "ob_high": 105.0
+     }
+    },
+    "fvg": {},
+    "structure": {},
+    "atr": 0.2,
+    "current_price": 102.5,
+    "liquidity": {
+     "equal_lows": [
+      {
+       "price": 99.55
+      }
+     ],
+     "equal_highs": [
+      {
+       "price": 105.5
+      }
+     ]
+    }
+   },
+   "direction": "LONG",
+   "ok": {
+    "ladder_fallback": false,
+    "rr_structural": 2.5,
+    "entry_low": 100.0,
+    "entry_high": 101.0,
+    "entry_mid": 100.5,
+    "sl": 99.5,
+    "tp1": 102.0,
+    "tp2": 103.0,
+    "tp3": 105.5,
+    "rr": 2.5,
+    "risk_pct": 0.995
+   },
+   "logs": []
+  },
+  {
+   "analysis": {
+    "ob": {
+     "bull_ob": {
+      "found": true,
+      "ob_low": 100.0,
+      "ob_high": 101.0
+     },
+     "bear_ob": {
+      "found": true,
+      "ob_low": 104.0,
+      "ob_high": 105.0
+     }
+    },
+    "fvg": {},
+    "structure": {},
+    "atr": 0.2,
+    "current_price": 102.5,
+    "liquidity": {
+     "equal_lows": [
+      {
+       "price": 99.55
+      }
+     ],
+     "equal_highs": [
+      {
+       "price": 105.5
+      }
+     ]
+    }
+   },
+   "direction": "SHORT",
+   "ok": {
+    "ladder_fallback": false,
+    "rr_structural": 2.49,
+    "entry_low": 104.0,
+    "entry_high": 105.0,
+    "entry_mid": 104.5,
+    "sl": 105.52499999999999,
+    "tp1": 102.9625,
+    "tp2": 101.95000000000002,
+    "tp3": 99.55,
+    "rr": 2.49,
+    "risk_pct": 0.981
+   },
+   "logs": []
+  },
+  {
+   "analysis": {
+    "ob": {
+     "bull_ob": {
+      "found": true,
+      "ob_low": 100.0,
+      "ob_high": 101.0
+     },
+     "bear_ob": {
+      "found": true,
+      "ob_low": 104.0,
+      "ob_high": 105.0
+     }
+    },
+    "fvg": {},
+    "structure": {},
+    "atr": 0.2,
+    "current_price": 102.5,
+    "liquidity": {
+     "equal_lows": [
+      {
+       "price": 99.2
+      },
+      {
+       "price": 99.6
+      }
+     ],
+     "equal_highs": [
+      {
+       "price": 105.3
+      },
+      {
+       "price": 105.9
+      }
+     ]
+    }
+   },
+   "direction": "LONG",
+   "ok": {
+    "ladder_fallback": false,
+    "rr_structural": 2.36,
+    "entry_low": 100.0,
+    "entry_high": 101.0,
+    "entry_mid": 100.5,
+    "sl": 99.1008,
+    "tp1": 102.59879999999998,
+    "tp2": 103.79839999999999,
+    "tp3": 105.3,
+    "rr": 2.36,
+    "risk_pct": 1.392
+   },
+   "logs": [
+    [
+     "CHM.SMC.SignalBuilder",
+     "INFO",
+     "[SMC-LIQUIDITY-AWARE-SL] sym=? dir=LONG sl=99.5→99.1008 target=99.2 capped=False reason=magnet_in_zone_long"
+    ]
+   ]
+  },
+  {
+   "analysis": {
+    "ob": {
+     "bull_ob": {
+      "found": true,
+      "ob_low": 100.0,
+      "ob_high": 101.0
+     },
+     "bear_ob": {
+      "found": true,
+      "ob_low": 104.0,
+      "ob_high": 105.0
+     }
+    },
+    "fvg": {},
+    "structure": {},
+    "atr": 0.2,
+    "current_price": 102.5,
+    "liquidity": {
+     "equal_lows": [
+      {
+       "price": 99.2
+      },
+      {
+       "price": 99.6
+      }
+     ],
+     "equal_highs": [
+      {
+       "price": 105.3
+      },
+      {
+       "price": 105.9
+      }
+     ]
+    }
+   },
+   "direction": "SHORT",
+   "ok": {
+    "ladder_fallback": false,
+    "rr_structural": 2.33,
+    "entry_low": 104.0,
+    "entry_high": 105.0,
+    "entry_mid": 104.5,
+    "sl": 106.0059,
+    "tp1": 102.24115,
+    "tp2": 100.9882,
+    "tp3": 99.6,
+    "rr": 2.33,
+    "risk_pct": 1.441
+   },
+   "logs": [
+    [
+     "CHM.SMC.SignalBuilder",
+     "INFO",
+     "[SMC-LIQUIDITY-AWARE-SL] sym=? dir=SHORT sl=105.525→106.006 target=105.9 capped=False reason=magnet_in_zone_short"
+    ]
+   ]
+  },
+  {
+   "analysis": {
+    "ob": {
+     "bull_ob": {
+      "found": true,
+      "ob_low": 100.0,
+      "ob_high": 101.0
+     },
+     "bear_ob": {
+      "found": true,
+      "ob_low": 104.0,
+      "ob_high": 105.0
+     }
+    },
+    "fvg": {},
+    "structure": {},
+    "atr": 0.2,
+    "current_price": 102.5,
+    "liquidity": {
+     "equal_lows": [
+      {
+       "price": 97.0
+      }
+     ],
+     "equal_highs": [
+      {
+       "price": 110.0
+      }
+     ]
+    }
+   },
+   "direction": "LONG",
+   "ok": {
+    "ladder_fallback": false,
+    "rr_structural": 2.5,
+    "entry_low": 100.0,
+    "entry_high": 101.0,
+    "entry_mid": 100.5,
+    "sl": 99.5,
+    "tp1": 102.0,
+    "tp2": 103.0,
+    "tp3": 110.0,
+    "rr": 2.5,
+    "risk_pct": 0.995
+   },
+   "logs": []
+  },
+  {
+   "analysis": {
+    "ob": {
+     "bull_ob": {
+      "found": true,
+      "ob_low": 100.0,
+      "ob_high": 101.0
+     },
+     "bear_ob": {
+      "found": true,
+      "ob_low": 104.0,
+      "ob_high": 105.0
+     }
+    },
+    "fvg": {},
+    "structure": {},
+    "atr": 0.2,
+    "current_price": 102.5,
+    "liquidity": {
+     "equal_lows": [
+      {
+       "price": 97.0
+      }
+     ],
+     "equal_highs": [
+      {
+       "price": 110.0
+      }
+     ]
+    }
+   },
+   "direction": "SHORT",
+   "ok": {
+    "ladder_fallback": false,
+    "rr_structural": 2.49,
+    "entry_low": 104.0,
+    "entry_high": 105.0,
+    "entry_mid": 104.5,
+    "sl": 105.52499999999999,
+    "tp1": 102.9625,
+    "tp2": 101.95000000000002,
+    "tp3": 97.0,
+    "rr": 2.49,
+    "risk_pct": 0.981
+   },
+   "logs": []
+  },
+  {
+   "analysis": {
+    "ob": {
+     "bull_ob": {
+      "found": true,
+      "ob_low": 100.0,
+      "ob_high": 101.0
+     },
+     "bear_ob": {
+      "found": true,
+      "ob_low": 104.0,
+      "ob_high": 105.0
+     }
+    },
+    "fvg": {},
+    "structure": {},
+    "atr": 0.2,
+    "current_price": 102.5,
+    "liquidity": {
+     "equal_lows": [
+      {
+       "price": 99.8
+      }
+     ],
+     "equal_highs": [
+      {
+       "price": 105.2
+      }
+     ]
+    }
+   },
+   "direction": "LONG",
+   "ok": {
+    "ladder_fallback": false,
+    "rr_structural": 2.5,
+    "entry_low": 100.0,
+    "entry_high": 101.0,
+    "entry_mid": 100.5,
+    "sl": 99.5,
+    "tp1": 102.0,
+    "tp2": 103.0,
+    "tp3": 105.2,
+    "rr": 2.5,
+    "risk_pct": 0.995
+   },
+   "logs": []
+  },
+  {
+   "analysis": {
+    "ob": {
+     "bull_ob": {
+      "found": true,
+      "ob_low": 100.0,
+      "ob_high": 101.0
+     },
+     "bear_ob": {
+      "found": true,
+      "ob_low": 104.0,
+      "ob_high": 105.0
+     }
+    },
+    "fvg": {},
+    "structure": {},
+    "atr": 0.2,
+    "current_price": 102.5,
+    "liquidity": {
+     "equal_lows": [
+      {
+       "price": 99.8
+      }
+     ],
+     "equal_highs": [
+      {
+       "price": 105.2
+      }
+     ]
+    }
+   },
+   "direction": "SHORT",
+   "ok": {
+    "ladder_fallback": false,
+    "rr_structural": 2.49,
+    "entry_low": 104.0,
+    "entry_high": 105.0,
+    "entry_mid": 104.5,
+    "sl": 105.52499999999999,
+    "tp1": 102.9625,
+    "tp2": 101.95000000000002,
+    "tp3": 99.8,
+    "rr": 2.49,
+    "risk_pct": 0.981
+   },
+   "logs": []
+  },
+  {
+   "analysis": {
+    "ob": {
+     "bull_ob": {
+      "found": true,
+      "ob_low": 100.0,
+      "ob_high": 101.0
+     },
+     "bear_ob": {
+      "found": true,
+      "ob_low": 104.0,
+      "ob_high": 105.0
+     }
+    },
+    "fvg": {},
+    "structure": {},
+    "atr": 0.2,
+    "current_price": 102.5,
+    "liquidity": {
+     "equal_lows": [],
+     "equal_highs": []
+    }
+   },
+   "direction": "LONG",
+   "ok": {
+    "ladder_fallback": false,
+    "rr_structural": 2.5,
+    "entry_low": 100.0,
+    "entry_high": 101.0,
+    "entry_mid": 100.5,
+    "sl": 99.5,
+    "tp1": 102.0,
+    "tp2": 103.0,
+    "tp3": 105.0,
+    "rr": 2.5,
+    "risk_pct": 0.995
+   },
+   "logs": []
+  },
+  {
+   "analysis": {
+    "ob": {
+     "bull_ob": {
+      "found": true,
+      "ob_low": 100.0,
+      "ob_high": 101.0
+     },
+     "bear_ob": {
+      "found": true,
+      "ob_low": 104.0,
+      "ob_high": 105.0
+     }
+    },
+    "fvg": {},
+    "structure": {},
+    "atr": 0.2,
+    "current_price": 102.5,
+    "liquidity": {
+     "equal_lows": [],
+     "equal_highs": []
+    }
+   },
+   "direction": "SHORT",
+   "ok": {
+    "ladder_fallback": false,
+    "rr_structural": 2.49,
+    "entry_low": 104.0,
+    "entry_high": 105.0,
+    "entry_mid": 104.5,
+    "sl": 105.52499999999999,
+    "tp1": 102.9625,
+    "tp2": 101.95000000000002,
+    "tp3": 99.90000000000003,
+    "rr": 2.49,
+    "risk_pct": 0.981
+   },
+   "logs": []
+  },
+  {
+   "analysis": {
+    "ob": {
+     "bull_ob": {
+      "found": true,
+      "ob_low": 100.0,
+      "ob_high": 101.0
+     },
+     "bear_ob": {
+      "found": true,
+      "ob_low": 104.0,
+      "ob_high": 105.0
+     }
+    },
+    "fvg": {},
+    "structure": {},
+    "atr": 0.2,
+    "current_price": 102.5,
+    "liquidity": {}
+   },
+   "direction": "LONG",
+   "ok": {
+    "ladder_fallback": false,
+    "rr_structural": 2.5,
+    "entry_low": 100.0,
+    "entry_high": 101.0,
+    "entry_mid": 100.5,
+    "sl": 99.5,
+    "tp1": 102.0,
+    "tp2": 103.0,
+    "tp3": 105.0,
+    "rr": 2.5,
+    "risk_pct": 0.995
+   },
+   "logs": []
+  },
+  {
+   "analysis": {
+    "ob": {
+     "bull_ob": {
+      "found": true,
+      "ob_low": 100.0,
+      "ob_high": 101.0
+     },
+     "bear_ob": {
+      "found": true,
+      "ob_low": 104.0,
+      "ob_high": 105.0
+     }
+    },
+    "fvg": {},
+    "structure": {},
+    "atr": 0.2,
+    "current_price": 102.5,
+    "liquidity": {}
+   },
+   "direction": "SHORT",
+   "ok": {
+    "ladder_fallback": false,
+    "rr_structural": 2.49,
+    "entry_low": 104.0,
+    "entry_high": 105.0,
+    "entry_mid": 104.5,
+    "sl": 105.52499999999999,
+    "tp1": 102.9625,
+    "tp2": 101.95000000000002,
+    "tp3": 99.90000000000003,
+    "rr": 2.49,
+    "risk_pct": 0.981
+   },
+   "logs": []
+  },
+  {
+   "analysis": {
+    "ob": {
+     "bull_ob": {
+      "found": true,
+      "ob_low": 100.0,
+      "ob_high": 101.0
+     },
+     "bear_ob": {
+      "found": true,
+      "ob_low": 104.0,
+      "ob_high": 105.0
+     }
+    },
+    "fvg": {},
+    "structure": {},
+    "atr": 0.2,
+    "current_price": 102.5,
+    "liquidity": {
+     "equal_lows": [
+      {
+       "price": 99.45
+      },
+      {
+       "price": 0.0
+      }
+     ],
+     "equal_highs": [
+      {
+       "price": 105.55
+      },
+      {
+       "price": -1.0
+      }
+     ]
+    }
+   },
+   "direction": "LONG",
+   "ok": {
+    "ladder_fallback": false,
+    "rr_structural": 2.43,
+    "entry_low": 100.0,
+    "entry_high": 101.0,
+    "entry_mid": 100.5,
+    "sl": 99.35055,
+    "tp1": 102.224175,
+    "tp2": 103.2989,
+    "tp3": 105.55,
+    "rr": 2.43,
+    "risk_pct": 1.144
+   },
+   "logs": [
+    [
+     "CHM.SMC.SignalBuilder",
+     "INFO",
+     "[SMC-LIQUIDITY-AWARE-SL] sym=? dir=LONG sl=99.5→99.3505 target=99.45 capped=False reason=magnet_in_zone_long"
+    ]
+   ]
+  },
+  {
+   "analysis": {
+    "ob": {
+     "bull_ob": {
+      "found": true,
+      "ob_low": 100.0,
+      "ob_high": 101.0
+     },
+     "bear_ob": {
+      "found": true,
+      "ob_low": 104.0,
+      "ob_high": 105.0
+     }
+    },
+    "fvg": {},
+    "structure": {},
+    "atr": 0.2,
+    "current_price": 102.5,
+    "liquidity": {
+     "equal_lows": [
+      {
+       "price": 99.45
+      },
+      {
+       "price": 0.0
+      }
+     ],
+     "equal_highs": [
+      {
+       "price": 105.55
+      },
+      {
+       "price": -1.0
+      }
+     ]
+    }
+   },
+   "direction": "SHORT",
+   "ok": {
+    "ladder_fallback": false,
+    "rr_structural": 2.43,
+    "entry_low": 104.0,
+    "entry_high": 105.0,
+    "entry_mid": 104.5,
+    "sl": 105.65554999999999,
+    "tp1": 102.76667500000002,
+    "tp2": 101.68890000000002,
+    "tp3": 99.45,
+    "rr": 2.43,
+    "risk_pct": 1.106
+   },
+   "logs": [
+    [
+     "CHM.SMC.SignalBuilder",
+     "INFO",
+     "[SMC-LIQUIDITY-AWARE-SL] sym=? dir=SHORT sl=105.525→105.656 target=105.55 capped=False reason=magnet_in_zone_short"
+    ]
+   ]
+  },
+  {
+   "analysis": {
+    "ob": {
+     "bull_ob": {
+      "found": true,
+      "ob_low": 100.0,
+      "ob_high": 101.0
+     },
+     "bear_ob": {
+      "found": true,
+      "ob_low": 104.0,
+      "ob_high": 105.0
+     }
+    },
+    "fvg": {},
+    "structure": {},
+    "atr": 0.2,
+    "current_price": 102.5,
+    "symbol": "PEPE-USDT-SWAP",
+    "liquidity": {
+     "equal_lows": [
+      {
+       "price": 99.55
+      }
+     ],
+     "equal_highs": [
+      {
+       "price": 105.5
+      }
+     ]
+    }
+   },
+   "direction": "LONG",
+   "ok": {
+    "ladder_fallback": false,
+    "rr_structural": 2.5,
+    "entry_low": 100.0,
+    "entry_high": 101.0,
+    "entry_mid": 100.5,
+    "sl": 99.5,
+    "tp1": 102.0,
+    "tp2": 103.0,
+    "tp3": 105.5,
+    "rr": 2.5,
+    "risk_pct": 0.995
+   },
+   "logs": []
+  },
+  {
+   "analysis": {
+    "ob": {
+     "bull_ob": {
+      "found": true,
+      "ob_low": 100.0,
+      "ob_high": 101.0
+     },
+     "bear_ob": {
+      "found": true,
+      "ob_low": 104.0,
+      "ob_high": 105.0
+     }
+    },
+    "fvg": {},
+    "structure": {},
+    "atr": 0.2,
+    "current_price": 102.5,
+    "symbol": "PEPE-USDT-SWAP",
+    "liquidity": {
+     "equal_lows": [
+      {
+       "price": 99.55
+      }
+     ],
+     "equal_highs": [
+      {
+       "price": 105.5
+      }
+     ]
+    }
+   },
+   "direction": "SHORT",
+   "ok": {
+    "ladder_fallback": false,
+    "rr_structural": 2.49,
+    "entry_low": 104.0,
+    "entry_high": 105.0,
+    "entry_mid": 104.5,
+    "sl": 105.52499999999999,
+    "tp1": 102.9625,
+    "tp2": 101.95000000000002,
+    "tp3": 99.55,
+    "rr": 2.49,
+    "risk_pct": 0.981
+   },
+   "logs": []
+  },
+  {
+   "analysis": {
+    "ob": {
+     "bull_ob": {
+      "found": true,
+      "ob_low": 100.0,
+      "ob_high": 101.0
+     },
+     "bear_ob": {
+      "found": true,
+      "ob_low": 104.0,
+      "ob_high": 105.0
+     }
+    },
+    "fvg": {},
+    "structure": {},
+    "atr": 0.2,
+    "current_price": 102.5,
+    "symbol": "PEPE-USDT-SWAP",
+    "liquidity": {
+     "equal_lows": [
+      {
+       "price": 99.2
+      },
+      {
+       "price": 99.6
+      }
+     ],
+     "equal_highs": [
+      {
+       "price": 105.3
+      },
+      {
+       "price": 105.9
+      }
+     ]
+    }
+   },
+   "direction": "LONG",
+   "ok": {
+    "ladder_fallback": false,
+    "rr_structural": 2.36,
+    "entry_low": 100.0,
+    "entry_high": 101.0,
+    "entry_mid": 100.5,
+    "sl": 99.1008,
+    "tp1": 102.59879999999998,
+    "tp2": 103.79839999999999,
+    "tp3": 105.3,
+    "rr": 2.36,
+    "risk_pct": 1.392
+   },
+   "logs": [
+    [
+     "CHM.SMC.SignalBuilder",
+     "INFO",
+     "[SMC-LIQUIDITY-AWARE-SL] sym=PEPE-USDT-SWAP dir=LONG sl=99.5→99.1008 target=99.2 capped=False reason=magnet_in_zone_long"
+    ]
+   ]
+  },
+  {
+   "analysis": {
+    "ob": {
+     "bull_ob": {
+      "found": true,
+      "ob_low": 100.0,
+      "ob_high": 101.0
+     },
+     "bear_ob": {
+      "found": true,
+      "ob_low": 104.0,
+      "ob_high": 105.0
+     }
+    },
+    "fvg": {},
+    "structure": {},
+    "atr": 0.2,
+    "current_price": 102.5,
+    "symbol": "PEPE-USDT-SWAP",
+    "liquidity": {
+     "equal_lows": [
+      {
+       "price": 99.2
+      },
+      {
+       "price": 99.6
+      }
+     ],
+     "equal_highs": [
+      {
+       "price": 105.3
+      },
+      {
+       "price": 105.9
+      }
+     ]
+    }
+   },
+   "direction": "SHORT",
+   "ok": {
+    "ladder_fallback": false,
+    "rr_structural": 2.33,
+    "entry_low": 104.0,
+    "entry_high": 105.0,
+    "entry_mid": 104.5,
+    "sl": 106.0059,
+    "tp1": 102.24115,
+    "tp2": 100.9882,
+    "tp3": 99.6,
+    "rr": 2.33,
+    "risk_pct": 1.441
+   },
+   "logs": [
+    [
+     "CHM.SMC.SignalBuilder",
+     "INFO",
+     "[SMC-LIQUIDITY-AWARE-SL] sym=PEPE-USDT-SWAP dir=SHORT sl=105.525→106.006 target=105.9 capped=False reason=magnet_in_zone_short"
+    ]
+   ]
+  },
+  {
+   "analysis": {
+    "ob": {
+     "bull_ob": {
+      "found": true,
+      "ob_low": 100.0,
+      "ob_high": 101.0
+     },
+     "bear_ob": {
+      "found": true,
+      "ob_low": 104.0,
+      "ob_high": 105.0
+     }
+    },
+    "fvg": {},
+    "structure": {},
+    "atr": 0.2,
+    "current_price": 102.5,
+    "symbol": "PEPE-USDT-SWAP",
+    "liquidity": {
+     "equal_lows": [
+      {
+       "price": 97.0
+      }
+     ],
+     "equal_highs": [
+      {
+       "price": 110.0
+      }
+     ]
+    }
+   },
+   "direction": "LONG",
+   "ok": {
+    "ladder_fallback": false,
+    "rr_structural": 2.5,
+    "entry_low": 100.0,
+    "entry_high": 101.0,
+    "entry_mid": 100.5,
+    "sl": 99.5,
+    "tp1": 102.0,
+    "tp2": 103.0,
+    "tp3": 110.0,
+    "rr": 2.5,
+    "risk_pct": 0.995
+   },
+   "logs": []
+  },
+  {
+   "analysis": {
+    "ob": {
+     "bull_ob": {
+      "found": true,
+      "ob_low": 100.0,
+      "ob_high": 101.0
+     },
+     "bear_ob": {
+      "found": true,
+      "ob_low": 104.0,
+      "ob_high": 105.0
+     }
+    },
+    "fvg": {},
+    "structure": {},
+    "atr": 0.2,
+    "current_price": 102.5,
+    "symbol": "PEPE-USDT-SWAP",
+    "liquidity": {
+     "equal_lows": [
+      {
+       "price": 97.0
+      }
+     ],
+     "equal_highs": [
+      {
+       "price": 110.0
+      }
+     ]
+    }
+   },
+   "direction": "SHORT",
+   "ok": {
+    "ladder_fallback": false,
+    "rr_structural": 2.49,
+    "entry_low": 104.0,
+    "entry_high": 105.0,
+    "entry_mid": 104.5,
+    "sl": 105.52499999999999,
+    "tp1": 102.9625,
+    "tp2": 101.95000000000002,
+    "tp3": 97.0,
+    "rr": 2.49,
+    "risk_pct": 0.981
+   },
+   "logs": []
+  },
+  {
+   "analysis": {
+    "ob": {
+     "bull_ob": {
+      "found": true,
+      "ob_low": 100.0,
+      "ob_high": 101.0
+     },
+     "bear_ob": {
+      "found": true,
+      "ob_low": 104.0,
+      "ob_high": 105.0
+     }
+    },
+    "fvg": {},
+    "structure": {},
+    "atr": 0.2,
+    "current_price": 102.5,
+    "symbol": "PEPE-USDT-SWAP",
+    "liquidity": {
+     "equal_lows": [
+      {
+       "price": 99.8
+      }
+     ],
+     "equal_highs": [
+      {
+       "price": 105.2
+      }
+     ]
+    }
+   },
+   "direction": "LONG",
+   "ok": {
+    "ladder_fallback": false,
+    "rr_structural": 2.5,
+    "entry_low": 100.0,
+    "entry_high": 101.0,
+    "entry_mid": 100.5,
+    "sl": 99.5,
+    "tp1": 102.0,
+    "tp2": 103.0,
+    "tp3": 105.2,
+    "rr": 2.5,
+    "risk_pct": 0.995
+   },
+   "logs": []
+  },
+  {
+   "analysis": {
+    "ob": {
+     "bull_ob": {
+      "found": true,
+      "ob_low": 100.0,
+      "ob_high": 101.0
+     },
+     "bear_ob": {
+      "found": true,
+      "ob_low": 104.0,
+      "ob_high": 105.0
+     }
+    },
+    "fvg": {},
+    "structure": {},
+    "atr": 0.2,
+    "current_price": 102.5,
+    "symbol": "PEPE-USDT-SWAP",
+    "liquidity": {
+     "equal_lows": [
+      {
+       "price": 99.8
+      }
+     ],
+     "equal_highs": [
+      {
+       "price": 105.2
+      }
+     ]
+    }
+   },
+   "direction": "SHORT",
+   "ok": {
+    "ladder_fallback": false,
+    "rr_structural": 2.49,
+    "entry_low": 104.0,
+    "entry_high": 105.0,
+    "entry_mid": 104.5,
+    "sl": 105.52499999999999,
+    "tp1": 102.9625,
+    "tp2": 101.95000000000002,
+    "tp3": 99.8,
+    "rr": 2.49,
+    "risk_pct": 0.981
+   },
+   "logs": []
+  },
+  {
+   "analysis": {
+    "ob": {
+     "bull_ob": {
+      "found": true,
+      "ob_low": 100.0,
+      "ob_high": 101.0
+     },
+     "bear_ob": {
+      "found": true,
+      "ob_low": 104.0,
+      "ob_high": 105.0
+     }
+    },
+    "fvg": {},
+    "structure": {},
+    "atr": 0.2,
+    "current_price": 102.5,
+    "symbol": "PEPE-USDT-SWAP",
+    "liquidity": {
+     "equal_lows": [],
+     "equal_highs": []
+    }
+   },
+   "direction": "LONG",
+   "ok": {
+    "ladder_fallback": false,
+    "rr_structural": 2.5,
+    "entry_low": 100.0,
+    "entry_high": 101.0,
+    "entry_mid": 100.5,
+    "sl": 99.5,
+    "tp1": 102.0,
+    "tp2": 103.0,
+    "tp3": 105.0,
+    "rr": 2.5,
+    "risk_pct": 0.995
+   },
+   "logs": []
+  },
+  {
+   "analysis": {
+    "ob": {
+     "bull_ob": {
+      "found": true,
+      "ob_low": 100.0,
+      "ob_high": 101.0
+     },
+     "bear_ob": {
+      "found": true,
+      "ob_low": 104.0,
+      "ob_high": 105.0
+     }
+    },
+    "fvg": {},
+    "structure": {},
+    "atr": 0.2,
+    "current_price": 102.5,
+    "symbol": "PEPE-USDT-SWAP",
+    "liquidity": {
+     "equal_lows": [],
+     "equal_highs": []
+    }
+   },
+   "direction": "SHORT",
+   "ok": {
+    "ladder_fallback": false,
+    "rr_structural": 2.49,
+    "entry_low": 104.0,
+    "entry_high": 105.0,
+    "entry_mid": 104.5,
+    "sl": 105.52499999999999,
+    "tp1": 102.9625,
+    "tp2": 101.95000000000002,
+    "tp3": 99.90000000000003,
+    "rr": 2.49,
+    "risk_pct": 0.981
+   },
+   "logs": []
+  },
+  {
+   "analysis": {
+    "ob": {
+     "bull_ob": {
+      "found": true,
+      "ob_low": 100.0,
+      "ob_high": 101.0
+     },
+     "bear_ob": {
+      "found": true,
+      "ob_low": 104.0,
+      "ob_high": 105.0
+     }
+    },
+    "fvg": {},
+    "structure": {},
+    "atr": 0.2,
+    "current_price": 102.5,
+    "symbol": "PEPE-USDT-SWAP",
+    "liquidity": {}
+   },
+   "direction": "LONG",
+   "ok": {
+    "ladder_fallback": false,
+    "rr_structural": 2.5,
+    "entry_low": 100.0,
+    "entry_high": 101.0,
+    "entry_mid": 100.5,
+    "sl": 99.5,
+    "tp1": 102.0,
+    "tp2": 103.0,
+    "tp3": 105.0,
+    "rr": 2.5,
+    "risk_pct": 0.995
+   },
+   "logs": []
+  },
+  {
+   "analysis": {
+    "ob": {
+     "bull_ob": {
+      "found": true,
+      "ob_low": 100.0,
+      "ob_high": 101.0
+     },
+     "bear_ob": {
+      "found": true,
+      "ob_low": 104.0,
+      "ob_high": 105.0
+     }
+    },
+    "fvg": {},
+    "structure": {},
+    "atr": 0.2,
+    "current_price": 102.5,
+    "symbol": "PEPE-USDT-SWAP",
+    "liquidity": {}
+   },
+   "direction": "SHORT",
+   "ok": {
+    "ladder_fallback": false,
+    "rr_structural": 2.49,
+    "entry_low": 104.0,
+    "entry_high": 105.0,
+    "entry_mid": 104.5,
+    "sl": 105.52499999999999,
+    "tp1": 102.9625,
+    "tp2": 101.95000000000002,
+    "tp3": 99.90000000000003,
+    "rr": 2.49,
+    "risk_pct": 0.981
+   },
+   "logs": []
+  },
+  {
+   "analysis": {
+    "ob": {
+     "bull_ob": {
+      "found": true,
+      "ob_low": 100.0,
+      "ob_high": 101.0
+     },
+     "bear_ob": {
+      "found": true,
+      "ob_low": 104.0,
+      "ob_high": 105.0
+     }
+    },
+    "fvg": {},
+    "structure": {},
+    "atr": 0.2,
+    "current_price": 102.5,
+    "symbol": "PEPE-USDT-SWAP",
+    "liquidity": {
+     "equal_lows": [
+      {
+       "price": 99.45
+      },
+      {
+       "price": 0.0
+      }
+     ],
+     "equal_highs": [
+      {
+       "price": 105.55
+      },
+      {
+       "price": -1.0
+      }
+     ]
+    }
+   },
+   "direction": "LONG",
+   "ok": {
+    "ladder_fallback": false,
+    "rr_structural": 2.43,
+    "entry_low": 100.0,
+    "entry_high": 101.0,
+    "entry_mid": 100.5,
+    "sl": 99.35055,
+    "tp1": 102.224175,
+    "tp2": 103.2989,
+    "tp3": 105.55,
+    "rr": 2.43,
+    "risk_pct": 1.144
+   },
+   "logs": [
+    [
+     "CHM.SMC.SignalBuilder",
+     "INFO",
+     "[SMC-LIQUIDITY-AWARE-SL] sym=PEPE-USDT-SWAP dir=LONG sl=99.5→99.3505 target=99.45 capped=False reason=magnet_in_zone_long"
+    ]
+   ]
+  },
+  {
+   "analysis": {
+    "ob": {
+     "bull_ob": {
+      "found": true,
+      "ob_low": 100.0,
+      "ob_high": 101.0
+     },
+     "bear_ob": {
+      "found": true,
+      "ob_low": 104.0,
+      "ob_high": 105.0
+     }
+    },
+    "fvg": {},
+    "structure": {},
+    "atr": 0.2,
+    "current_price": 102.5,
+    "symbol": "PEPE-USDT-SWAP",
+    "liquidity": {
+     "equal_lows": [
+      {
+       "price": 99.45
+      },
+      {
+       "price": 0.0
+      }
+     ],
+     "equal_highs": [
+      {
+       "price": 105.55
+      },
+      {
+       "price": -1.0
+      }
+     ]
+    }
+   },
+   "direction": "SHORT",
+   "ok": {
+    "ladder_fallback": false,
+    "rr_structural": 2.43,
+    "entry_low": 104.0,
+    "entry_high": 105.0,
+    "entry_mid": 104.5,
+    "sl": 105.65554999999999,
+    "tp1": 102.76667500000002,
+    "tp2": 101.68890000000002,
+    "tp3": 99.45,
+    "rr": 2.43,
+    "risk_pct": 1.106
+   },
+   "logs": [
+    [
+     "CHM.SMC.SignalBuilder",
+     "INFO",
+     "[SMC-LIQUIDITY-AWARE-SL] sym=PEPE-USDT-SWAP dir=SHORT sl=105.525→105.656 target=105.55 capped=False reason=magnet_in_zone_short"
+    ]
+   ]
+  }
+ ]
+}

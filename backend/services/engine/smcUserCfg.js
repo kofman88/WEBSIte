@@ -13,6 +13,7 @@
 'use strict';
 
 const { pyJsonDumps } = require('./pyjson');
+const { pyLoads } = require('./signalTradesRepo');   // json.loads
 
 // [name, pyType, default] — dataclass order.
 const FIELDS = Object.freeze([
@@ -46,14 +47,26 @@ function defaults() {
   return { ...DEFAULTS };
 }
 
+// user_manager's logger ("CHM.Users"); the engine's default logger unless setLog() wired one.
+let _log = null;
+const logOf = () => _log || require('../marketData/mdLog').log;
+function setLog(log) { _log = log || null; }
+
+/**
+ * SMCUserCfg.from_json(s): json.loads (NaN / Infinity accepted), known keys only, values not
+ * coerced; an unparsable text or a non-object (`d.items()` raises) → WARNING
+ * "user_manager.from_json() unhandled exception" (logged on every call — the SMC scanner reads
+ * the cfg several times per user per cycle) and the defaults.
+ */
 function fromJson(s) {
   try {
-    const d = JSON.parse(s || '{}');
-    if (!d || typeof d !== 'object' || Array.isArray(d)) return defaults();
+    const d = pyLoads(s || '{}');
+    if (d === null || typeof d !== 'object' || Array.isArray(d)) throw new TypeError('object has no attribute \'items\'');
     const cfg = defaults();
     for (const k of Object.keys(d)) if (FIELD_TYPES[k]) cfg[k] = d[k];
     return cfg;
   } catch (_e) {
+    logOf().warning('user_manager.from_json() unhandled exception');
     return defaults();
   }
 }
@@ -73,4 +86,4 @@ function setSmcCfg(user, cfg) {
   user.smc_cfg = toJson(cfg);
 }
 
-module.exports = { FIELDS, FIELD_NAMES, FIELD_TYPES, DEFAULTS, FLOAT_KEYS, defaults, fromJson, toJson, getSmcCfg, setSmcCfg };
+module.exports = { FIELDS, FIELD_NAMES, FIELD_TYPES, DEFAULTS, FLOAT_KEYS, defaults, fromJson, toJson, getSmcCfg, setSmcCfg, setLog };

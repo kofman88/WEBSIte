@@ -111,7 +111,9 @@ describe('_sparse_merge (legacy full dump vs sparse)', () => {
   it('loadSparse keeps only TradeCfg keys and drops "_sparse"', () => {
     expect(tc.loadSparse('{"pivot_strength": 5, "foo": 1, "_sparse": true}')).toEqual({ pivot_strength: 5 });
     expect(tc.loadSparse('{"pivot_strength": 7, "min_rr": 2.5}')).toEqual({ min_rr: 2.5 });
-    expect(tc.loadSparse('[1]')).toEqual({});
+    // QUIRK (bot): valid non-object JSON reaches raw.get("_sparse") → AttributeError propagates
+    expect(() => tc.loadSparse('[1]')).toThrow("'list' object has no attribute 'get'");
+    expect(() => tc.loadSparse('1.0')).toThrow("'float' object has no attribute 'get'");
   });
 });
 
