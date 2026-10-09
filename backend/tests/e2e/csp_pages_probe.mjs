@@ -907,6 +907,11 @@ async function main() {
         if (vp.mobile) Object.assign(ctxOpts, { deviceScaleFactor: 2, isMobile: true, hasTouch: true });
         const ctx = await browser.newContext(ctxOpts);
         await ctx.route((url) => url.hostname !== '127.0.0.1', stubRoute);
+        // each scenario × viewport is its own visitor (server.js trusts one proxy hop, so X-Forwarded-For
+        // is the client address): the per-IP /api limiter as deployed (300 per 15 min) would otherwise
+        // count the whole probe as one visitor. Same-origin requests only (no CORS effect elsewhere).
+        const clientIp = `10.${VIEWPORTS.indexOf(vp) + 1}.${SCENARIOS.indexOf(sc) + 1}.7`;
+        await ctx.route((url) => url.hostname === '127.0.0.1', (route) => route.continue({ headers: { ...route.request().headers(), 'x-forwarded-for': clientIp } }));
         const violations = [];
         const errors = [];
         const dialogs = [];
