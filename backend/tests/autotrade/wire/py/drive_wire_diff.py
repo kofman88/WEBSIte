@@ -1465,6 +1465,24 @@ def gen_targeted():
         sb.update(symbol=sym, direction=direction, strategy="VOLUME", quality=4)
         scenario(f"bx_batch_{mode}{'_ptp' if ptp else ''}_bingx", uid=uid, ex="bingx", bx_batch=mode,
                  user={"partial_tp_enabled": ptp, "trade_risk_pct": 1.0, "max_risk_pct": 2.0}, signals=[sb], balance=2000.0)
+    # [OKX-TIMEOUT-UNKNOWN] the entry answer is lost after OKX accepted it and the positions do not read:
+    # the entry is asked by clOrdId — unreadable too → kept for reconcile (no cancel, no SKIP); readable
+    # on the timeout reconcile → attached; absent → SKIP without a cancel
+    pos_err = {"ex": "okx", "method": "GET", "path": "/api/v5/account/positions", "nth": "all", "kind": "resp",
+               "json": {"code": "50011", "msg": "Too Many Requests", "data": []}, "label": "positions_unreadable"}
+    for tag, q_nth, accept in (("unknown", "all", True), ("found", [1, 2, 3], True), ("absent", [1, 2, 3], False)):
+        uid += 1
+        direction = "LONG" if tag != "found" else "SHORT"
+        s = make_signal(rng, "SOL-USDT-SWAP", direction, "LEVELS", price=COINS["SOL-USDT-SWAP"]["price"],
+                        drift=0.0003 * (1 if direction == "LONG" else -1), sl_pct=0.012)
+        s.update(symbol="SOL-USDT-SWAP", direction=direction, strategy="LEVELS", quality=4)
+        scenario(f"okx_timeout_positions_unreadable_{tag}", uid=uid, ex="okx",
+                 user={"partial_tp_enabled": tag == "found", "trade_risk_pct": 1.0, "max_risk_pct": 2.0},
+                 signals=[s], balance=1000.0, regime="ranging",
+                 faults=[dict(fault("okx", "timeout_after_accept" if accept else "timeout_before_accept"), method="POST"),
+                         {"ex": "okx", "method": "GET", "path": "/api/v5/trade/order", "nth": q_nth, "kind": "connect",
+                          "label": "order_query_down"},
+                         pos_err])
 
 
 # ══════════════════════════ runner ══════════════════════════

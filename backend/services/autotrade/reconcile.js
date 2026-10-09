@@ -10,11 +10,14 @@
  *   resolveLimitUnfilledGrace(strategy)  {SMC: 900, LEVELS: 60}, default 60
  *   limitUnfilledGuard({..., graceS})  L3.13: sleep grace → reconcile → size 0 → cancel pending +
  *       `[LIMIT-UNFILLED] …` → true (the caller notifies). Does NOT touch the DB.
+ *   okxEntryAfterTimeout({apiKey, apiSecret, passphrase, symbol, direction, tradeId})
+ *       [OKX-TIMEOUT-UNKNOWN] the OKX entry by its clOrdId when the position did not read →
+ *       [reco, 'found'] | [null, 'absent'] | [null, 'unknown']. Never throws (auto_trade._okx_entry_after_timeout).
  */
 
 const { waitFor, isCancelledError } = require('./asyncio');
 const { pf } = require('./pyfmt');
-const { pyFloat, pyInt, pyGet, pyOr, pyStr } = require('../exchanges/pyCompat');
+const { pyFloat, pyInt, pyGet, pyOr, pyStr, pyTruthy, pyIter, isDict } = require('../exchanges/pyCompat');
 const { pyUpper } = require('../../strategies/common/pyUnicode');
 
 const LIMIT_UNFILLED_GRACE_S_DEFAULT = 60;
@@ -119,7 +122,53 @@ function createReconcile({ traderFor, log = null, sleep = null, timers = undefin
     return true;
   }
 
-  return { reconcileTimeoutPosition, cancelPendingAfterTimeout, limitUnfilledGuard };
+  /**
+   * [OKX-TIMEOUT-UNKNOWN 2026-10] (auto_trade._okx_entry_after_timeout) okx get_positions answers an API
+   * error with an empty list, so «no position» cannot be told from «did not read»: the timeout
+   * reconcile used to cancel every algo of the symbol then (the attached SL / TP1 of an opened position
+   * included) and write SKIP. The OKX entry carries clOrdId (okxClId('e', trade_id)), so the order
+   * itself is asked: ['found', reco] — it filled (reco shaped like reconcileTimeoutPosition);
+   * [null, 'absent'] — no order (two 51603 in a row or cancelled unfilled); [null, 'unknown'] — not
+   * read, or accepted but not filled yet.
+   */
+  async function okxEntryAfterTimeout({ apiKey, apiSecret, passphrase, symbol, direction, tradeId }) {
+    if (!pyTruthy(tradeId)) return [null, 'unknown'];
+    try {
+      const okx = require('../exchanges/okxTrader');
+      const h = traderFor('okx');
+      const t = (h && h.inst) || h;   // the trader instance behind the handle (its internal lookups)
+      const instId = okx.toOkxSymbol(symbol);
+      const clId = okx.okxClId('e', pyStr(tradeId));
+      const [st, order] = await waitFor(() => t._queryEntryByClId(apiKey, apiSecret, passphrase, instId, clId), 60, { timers });
+      if (st === 'absent') return [null, 'absent'];
+      if (st !== 'found') return [null, 'unknown'];
+      let filled;
+      try { filled = pyFloat(pyOr(pyGet(order, 'accFillSz'), 0)); } catch (_e) { filled = 0.0; }
+      if (filled <= 0) return [null, 'unknown'];
+      await t._getInstrumentFilters(instId);
+      let slPx = 0.0;
+      for (const a of pyIter(pyOr(pyGet(order, 'attachAlgoOrds'), []))) {
+        try {
+          slPx = isDict(a) ? pyFloat(pyOr(pyGet(a, 'slTriggerPx'), 0)) : 0.0;
+        } catch (_e) {
+          slPx = 0.0;
+        }
+        if (slPx > 0) break;
+      }
+      return [{
+        size: filled * t.okxCtVal(instId),
+        order_id: pyStr(pyOr(pyGet(order, 'ordId', ''), clId)),
+        side: pyUpper(pyStr(pyOr(direction, ''))),
+        stopLoss: slPx,
+      }, 'found'];
+    } catch (e) {
+      if (isCancelledError(e)) throw e;
+      logger.warning(pf('[OKX-TIMEOUT-UNKNOWN] %s: entry lookup failed: %s', symbol, e && e.message));
+      return [null, 'unknown'];
+    }
+  }
+
+  return { reconcileTimeoutPosition, cancelPendingAfterTimeout, limitUnfilledGuard, okxEntryAfterTimeout };
 }
 
 module.exports = { LIMIT_UNFILLED_GRACE_S_DEFAULT, LIMIT_UNFILLED_GRACE_S_BY_STRATEGY, resolveLimitUnfilledGrace, createReconcile };

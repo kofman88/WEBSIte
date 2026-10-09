@@ -2775,7 +2775,7 @@
    "result": {
     "ok": false,
     "order_id": "",
-    "error": "list index out of range"
+    "error": "Parameter attachAlgoOrds error"
    },
    "requests": [
     {
@@ -2819,11 +2819,28 @@
       "Content-Type": "application/json"
      },
      "body": "{\"instId\": \"BTC-USDT-SWAP\", \"tdMode\": \"cross\", \"side\": \"buy\", \"posSide\": \"long\", \"ordType\": \"market\", \"sz\": \"5.00\", \"clOrdId\": \"et7225600000\", \"attachAlgoOrds\": [{\"attachAlgoClOrdId\": \"slt7225600000\", \"slTriggerPx\": \"86000.0\", \"slOrdPx\": \"-1\", \"triggerPxType\": \"mark\", \"sz\": \"5.00\"}, {\"attachAlgoClOrdId\": \"tp1t7225600000\", \"tpTriggerPx\": \"88500.0\", \"tpOrdPx\": \"-1\", \"triggerPxType\": \"mark\", \"sz\": \"5.00\"}]}"
+    },
+    {
+     "method": "POST",
+     "url": "https://www.okx.com/api/v5/trade/order",
+     "headers": {
+      "OK-ACCESS-KEY": "OKKEY-abc123",
+      "OK-ACCESS-SIGN": "UHmaZEpttdRuSgJlh6a1na5FOkJ/IV2wRj8utt9R9Lo=",
+      "OK-ACCESS-TIMESTAMP": "2026-01-01T00:00:00.000Z",
+      "OK-ACCESS-PASSPHRASE": "Pass-phrase#1",
+      "Content-Type": "application/json"
+     },
+     "body": "{\"instId\": \"BTC-USDT-SWAP\", \"tdMode\": \"cross\", \"side\": \"buy\", \"posSide\": \"long\", \"ordType\": \"market\", \"sz\": \"5.00\", \"clOrdId\": \"et7225600000\"}"
     }
    ],
    "sleeps": [],
    "clock_end": 1767225600.0,
-   "markers": [],
+   "markers": [
+    [
+     "WARNING",
+     "[OKX-ATOMIC-FALLBACK]"
+    ]
+   ],
    "saved": {
     "hedge_saved": [],
     "auth_reset": [],
@@ -7724,7 +7741,7 @@
    "result": {
     "ok": false,
     "order_id": "",
-    "error": "list index out of range"
+    "error": "Duplicated clOrdId"
    },
    "requests": [
     {
@@ -7805,6 +7822,778 @@
     "auth_reset": [],
     "events": [],
     "metrics": []
+   },
+   "final": {
+    "hedge": {},
+    "account_type": {},
+    "delisted": [],
+    "fail_count": {},
+    "bybit_offset": 0,
+    "binance_base": "https://fapi.binance.com",
+    "binance_offset": 0,
+    "bingx_offset": 0,
+    "okx_offset": 0
+   }
+  }
+ },
+ {
+  "scenario": {
+   "name": "pt_entry_50004_top_found",
+   "exchange": "okx",
+   "call": "place_trade",
+   "args": [
+    "OKKEY-abc123",
+    "ok-secret-456",
+    "BTC-USDT-SWAP",
+    "LONG",
+    87000.5,
+    86000.0,
+    88500.0,
+    5.0,
+    10
+   ],
+   "kwargs": {
+    "tp2": 89500.0,
+    "tp3": 90500.0,
+    "trade_id": "okx-trade-12345",
+    "user_id": 42,
+    "passphrase": "Pass-phrase#1"
+   },
+   "routes": [
+    {
+     "method": "GET",
+     "path": "/api/v5/public/instruments",
+     "responses": [
+      {
+       "text": "{\"code\": \"0\", \"msg\": \"\", \"data\": [{\"instType\": \"SWAP\", \"instId\": \"BTC-USDT-SWAP\", \"ctType\": \"linear\", \"ctValCcy\": \"BTC\", \"lotSz\": \"0.01\", \"tickSz\": \"0.1\", \"lever\": \"125\", \"minSz\": \"0.01\", \"state\": \"live\", \"ctVal\": \"0.01\"}]}"
+      }
+     ]
+    },
+    {
+     "method": "GET",
+     "path": "/api/v5/account/balance",
+     "responses": [
+      {
+       "text": "{\"code\": \"0\", \"msg\": \"\", \"data\": [{\"totalEq\": \"1000.5\", \"upl\": \"1.25\", \"details\": [{\"ccy\": \"BTC\", \"eq\": \"0.1\", \"cashBal\": \"0.1\", \"availBal\": \"0.1\"}, {\"ccy\": \"USDT\", \"eq\": \"990.5\", \"cashBal\": \"980\", \"availBal\": \"900.1\"}]}]}"
+      }
+     ]
+    },
+    {
+     "method": "POST",
+     "path": "/api/v5/account/set-leverage",
+     "responses": [
+      {
+       "text": "{\"code\": \"0\", \"msg\": \"\", \"data\": [{\"instId\": \"BTC-USDT-SWAP\", \"lever\": \"10\", \"mgnMode\": \"cross\", \"posSide\": \"\"}]}"
+      }
+     ]
+    },
+    {
+     "method": "POST",
+     "path": "/api/v5/trade/order",
+     "responses": [
+      {
+       "text": "{\"code\": \"50004\", \"msg\": \"Endpoint request timeout\", \"data\": []}"
+      }
+     ]
+    },
+    {
+     "method": "GET",
+     "path": "/api/v5/trade/order",
+     "responses": [
+      {
+       "text": "{\"code\": \"0\", \"msg\": \"\", \"data\": [{\"ordId\": \"o-77\", \"clOrdId\": \"eokxtrade12345\", \"state\": \"filled\", \"accFillSz\": \"0.58\"}]}"
+      }
+     ]
+    },
+    {
+     "method": "POST",
+     "path": "/api/v5/trade/order-algo",
+     "responses": [
+      {
+       "text": "{\"code\": \"0\", \"msg\": \"\", \"data\": [{\"algoId\": \"sl\", \"sCode\": \"0\", \"sMsg\": \"\"}]}"
+      },
+      {
+       "text": "{\"code\": \"0\", \"msg\": \"\", \"data\": [{\"algoId\": \"a2\", \"sCode\": \"0\", \"sMsg\": \"\"}]}"
+      },
+      {
+       "text": "{\"code\": \"0\", \"msg\": \"\", \"data\": [{\"algoId\": \"a3\", \"sCode\": \"0\", \"sMsg\": \"\"}]}"
+      }
+     ]
+    }
+   ],
+   "state": {},
+   "random": [],
+   "clock": 1767225600.0
+  },
+  "expected": {
+   "name": "pt_entry_50004_top_found",
+   "result": {
+    "ok": true,
+    "order_id": "o-77",
+    "error": "",
+    "tp_placed": true,
+    "qty": "0.0500",
+    "symbol": "BTC-USDT-SWAP"
+   },
+   "requests": [
+    {
+     "method": "GET",
+     "url": "https://www.okx.com/api/v5/public/instruments?instType=SWAP&instId=BTC-USDT-SWAP",
+     "headers": {},
+     "body": null
+    },
+    {
+     "method": "GET",
+     "url": "https://www.okx.com/api/v5/account/balance?ccy=USDT",
+     "headers": {
+      "OK-ACCESS-KEY": "OKKEY-abc123",
+      "OK-ACCESS-SIGN": "wkwacOzBzUchBK+8yoIik0ztsoP43DeUAvNQvB/T1RI=",
+      "OK-ACCESS-TIMESTAMP": "2026-01-01T00:00:00.000Z",
+      "OK-ACCESS-PASSPHRASE": "Pass-phrase#1",
+      "Content-Type": "application/json"
+     },
+     "body": null
+    },
+    {
+     "method": "POST",
+     "url": "https://www.okx.com/api/v5/account/set-leverage",
+     "headers": {
+      "OK-ACCESS-KEY": "OKKEY-abc123",
+      "OK-ACCESS-SIGN": "yXRLYnm/V/6DuLQvDah4HI4MrqCiM61hjmnhUTosyuk=",
+      "OK-ACCESS-TIMESTAMP": "2026-01-01T00:00:00.000Z",
+      "OK-ACCESS-PASSPHRASE": "Pass-phrase#1",
+      "Content-Type": "application/json"
+     },
+     "body": "{\"instId\": \"BTC-USDT-SWAP\", \"lever\": \"10\", \"mgnMode\": \"cross\"}"
+    },
+    {
+     "method": "POST",
+     "url": "https://www.okx.com/api/v5/trade/order",
+     "headers": {
+      "OK-ACCESS-KEY": "OKKEY-abc123",
+      "OK-ACCESS-SIGN": "9TVCg9/sr7Fjaw9Lz37Jl43WUndqFjg5VEuFX4KNXrQ=",
+      "OK-ACCESS-TIMESTAMP": "2026-01-01T00:00:00.000Z",
+      "OK-ACCESS-PASSPHRASE": "Pass-phrase#1",
+      "Content-Type": "application/json"
+     },
+     "body": "{\"instId\": \"BTC-USDT-SWAP\", \"tdMode\": \"cross\", \"side\": \"buy\", \"posSide\": \"long\", \"ordType\": \"market\", \"sz\": \"5.00\", \"clOrdId\": \"eokxtrade12345\", \"attachAlgoOrds\": [{\"attachAlgoClOrdId\": \"slokxtrade12345\", \"slTriggerPx\": \"86000.0\", \"slOrdPx\": \"-1\", \"triggerPxType\": \"mark\", \"sz\": \"5.00\"}, {\"attachAlgoClOrdId\": \"tp1okxtrade12345\", \"tpTriggerPx\": \"88500.0\", \"tpOrdPx\": \"-1\", \"triggerPxType\": \"mark\", \"sz\": \"2.50\"}]}"
+    },
+    {
+     "method": "GET",
+     "url": "https://www.okx.com/api/v5/trade/order?instId=BTC-USDT-SWAP&clOrdId=eokxtrade12345",
+     "headers": {
+      "OK-ACCESS-KEY": "OKKEY-abc123",
+      "OK-ACCESS-SIGN": "AuMAe4oVYEK9bsfUhIzIGTRs1tQo2O9HAV89+RQIdyA=",
+      "OK-ACCESS-TIMESTAMP": "2026-01-01T00:00:01.000Z",
+      "OK-ACCESS-PASSPHRASE": "Pass-phrase#1",
+      "Content-Type": "application/json"
+     },
+     "body": null
+    },
+    {
+     "method": "POST",
+     "url": "https://www.okx.com/api/v5/trade/order-algo",
+     "headers": {
+      "OK-ACCESS-KEY": "OKKEY-abc123",
+      "OK-ACCESS-SIGN": "LN4MknN2DXuJTCGdEi4qOUnfLY3JJVRjMnUc1xesNuQ=",
+      "OK-ACCESS-TIMESTAMP": "2026-01-01T00:00:01.000Z",
+      "OK-ACCESS-PASSPHRASE": "Pass-phrase#1",
+      "Content-Type": "application/json"
+     },
+     "body": "{\"instId\": \"BTC-USDT-SWAP\", \"tdMode\": \"cross\", \"side\": \"sell\", \"posSide\": \"long\", \"ordType\": \"conditional\", \"sz\": \"5.00\", \"slTriggerPx\": \"86000.0\", \"slOrdPx\": \"-1\", \"triggerPxType\": \"mark\"}"
+    },
+    {
+     "method": "POST",
+     "url": "https://www.okx.com/api/v5/trade/order-algo",
+     "headers": {
+      "OK-ACCESS-KEY": "OKKEY-abc123",
+      "OK-ACCESS-SIGN": "HF5mY2/a/PPb6e63tPWzusJaympO3nJ+1Ikt6WMjvHk=",
+      "OK-ACCESS-TIMESTAMP": "2026-01-01T00:00:01.000Z",
+      "OK-ACCESS-PASSPHRASE": "Pass-phrase#1",
+      "Content-Type": "application/json"
+     },
+     "body": "{\"instId\": \"BTC-USDT-SWAP\", \"tdMode\": \"cross\", \"side\": \"sell\", \"posSide\": \"long\", \"ordType\": \"conditional\", \"sz\": \"2.50\", \"tpTriggerPx\": \"88500.0\", \"tpOrdPx\": \"-1\", \"triggerPxType\": \"mark\"}"
+    },
+    {
+     "method": "POST",
+     "url": "https://www.okx.com/api/v5/trade/order-algo",
+     "headers": {
+      "OK-ACCESS-KEY": "OKKEY-abc123",
+      "OK-ACCESS-SIGN": "+pU5ibo/RX3/PYp6L42+E/fuHfQEg8Nd5NHdhvBJIA0=",
+      "OK-ACCESS-TIMESTAMP": "2026-01-01T00:00:01.000Z",
+      "OK-ACCESS-PASSPHRASE": "Pass-phrase#1",
+      "Content-Type": "application/json"
+     },
+     "body": "{\"instId\": \"BTC-USDT-SWAP\", \"tdMode\": \"cross\", \"side\": \"sell\", \"posSide\": \"long\", \"ordType\": \"conditional\", \"sz\": \"1.25\", \"tpTriggerPx\": \"89500.0\", \"tpOrdPx\": \"-1\", \"triggerPxType\": \"mark\"}"
+    },
+    {
+     "method": "POST",
+     "url": "https://www.okx.com/api/v5/trade/order-algo",
+     "headers": {
+      "OK-ACCESS-KEY": "OKKEY-abc123",
+      "OK-ACCESS-SIGN": "jFZIpBKtf/yNIKiNr3Gl48Kc9MwJXPEmE8eq6l1kkD4=",
+      "OK-ACCESS-TIMESTAMP": "2026-01-01T00:00:01.000Z",
+      "OK-ACCESS-PASSPHRASE": "Pass-phrase#1",
+      "Content-Type": "application/json"
+     },
+     "body": "{\"instId\": \"BTC-USDT-SWAP\", \"tdMode\": \"cross\", \"side\": \"sell\", \"posSide\": \"long\", \"ordType\": \"conditional\", \"sz\": \"1.25\", \"tpTriggerPx\": \"90500.0\", \"tpOrdPx\": \"-1\", \"triggerPxType\": \"mark\"}"
+    }
+   ],
+   "sleeps": [
+    1.0
+   ],
+   "clock_end": 1767225601.0,
+   "markers": [
+    [
+     "WARNING",
+     "[OKX-ENTRY-TIMEOUT]"
+    ],
+    [
+     "WARNING",
+     "[OKX-ENTRY-TIMEOUT]"
+    ]
+   ],
+   "saved": {
+    "hedge_saved": [],
+    "auth_reset": [],
+    "events": [],
+    "metrics": [
+     "trade_placed",
+     "trade_placement_latency_ms",
+     "sl_tp_attached"
+    ]
+   },
+   "final": {
+    "hedge": {},
+    "account_type": {},
+    "delisted": [],
+    "fail_count": {},
+    "bybit_offset": 0,
+    "binance_base": "https://fapi.binance.com",
+    "binance_offset": 0,
+    "bingx_offset": 0,
+    "okx_offset": 0
+   }
+  }
+ },
+ {
+  "scenario": {
+   "name": "pt_entry_50004_scode_absent",
+   "exchange": "okx",
+   "call": "place_trade",
+   "args": [
+    "OKKEY-abc123",
+    "ok-secret-456",
+    "BTC-USDT-SWAP",
+    "LONG",
+    87000.5,
+    86000.0,
+    88500.0,
+    5.0,
+    10
+   ],
+   "kwargs": {
+    "passphrase": "Pass-phrase#1"
+   },
+   "routes": [
+    {
+     "method": "GET",
+     "path": "/api/v5/public/instruments",
+     "responses": [
+      {
+       "text": "{\"code\": \"0\", \"msg\": \"\", \"data\": [{\"instType\": \"SWAP\", \"instId\": \"BTC-USDT-SWAP\", \"ctType\": \"linear\", \"ctValCcy\": \"BTC\", \"lotSz\": \"0.01\", \"tickSz\": \"0.1\", \"lever\": \"125\", \"minSz\": \"0.01\", \"state\": \"live\", \"ctVal\": \"0.01\"}]}"
+      }
+     ]
+    },
+    {
+     "method": "GET",
+     "path": "/api/v5/account/balance",
+     "responses": [
+      {
+       "text": "{\"code\": \"0\", \"msg\": \"\", \"data\": [{\"totalEq\": \"1000.5\", \"upl\": \"1.25\", \"details\": [{\"ccy\": \"BTC\", \"eq\": \"0.1\", \"cashBal\": \"0.1\", \"availBal\": \"0.1\"}, {\"ccy\": \"USDT\", \"eq\": \"990.5\", \"cashBal\": \"980\", \"availBal\": \"900.1\"}]}]}"
+      }
+     ]
+    },
+    {
+     "method": "POST",
+     "path": "/api/v5/account/set-leverage",
+     "responses": [
+      {
+       "text": "{\"code\": \"0\", \"msg\": \"\", \"data\": [{\"instId\": \"BTC-USDT-SWAP\", \"lever\": \"10\", \"mgnMode\": \"cross\", \"posSide\": \"\"}]}"
+      }
+     ]
+    },
+    {
+     "method": "POST",
+     "path": "/api/v5/trade/order",
+     "responses": [
+      {
+       "text": "{\"code\": \"1\", \"msg\": \"Operation failed.\", \"data\": [{\"ordId\": \"\", \"sCode\": \"50004\", \"sMsg\": \"Endpoint request timeout\"}]}"
+      }
+     ]
+    },
+    {
+     "method": "GET",
+     "path": "/api/v5/trade/order",
+     "responses": [
+      {
+       "text": "{\"code\": \"51603\", \"msg\": \"Order does not exist\", \"data\": []}"
+      }
+     ]
+    }
+   ],
+   "state": {},
+   "random": [],
+   "clock": 1767225600.0
+  },
+  "expected": {
+   "name": "pt_entry_50004_scode_absent",
+   "result": {
+    "ok": false,
+    "order_id": "",
+    "error": "Endpoint request timeout"
+   },
+   "requests": [
+    {
+     "method": "GET",
+     "url": "https://www.okx.com/api/v5/public/instruments?instType=SWAP&instId=BTC-USDT-SWAP",
+     "headers": {},
+     "body": null
+    },
+    {
+     "method": "GET",
+     "url": "https://www.okx.com/api/v5/account/balance?ccy=USDT",
+     "headers": {
+      "OK-ACCESS-KEY": "OKKEY-abc123",
+      "OK-ACCESS-SIGN": "wkwacOzBzUchBK+8yoIik0ztsoP43DeUAvNQvB/T1RI=",
+      "OK-ACCESS-TIMESTAMP": "2026-01-01T00:00:00.000Z",
+      "OK-ACCESS-PASSPHRASE": "Pass-phrase#1",
+      "Content-Type": "application/json"
+     },
+     "body": null
+    },
+    {
+     "method": "POST",
+     "url": "https://www.okx.com/api/v5/account/set-leverage",
+     "headers": {
+      "OK-ACCESS-KEY": "OKKEY-abc123",
+      "OK-ACCESS-SIGN": "yXRLYnm/V/6DuLQvDah4HI4MrqCiM61hjmnhUTosyuk=",
+      "OK-ACCESS-TIMESTAMP": "2026-01-01T00:00:00.000Z",
+      "OK-ACCESS-PASSPHRASE": "Pass-phrase#1",
+      "Content-Type": "application/json"
+     },
+     "body": "{\"instId\": \"BTC-USDT-SWAP\", \"lever\": \"10\", \"mgnMode\": \"cross\"}"
+    },
+    {
+     "method": "POST",
+     "url": "https://www.okx.com/api/v5/trade/order",
+     "headers": {
+      "OK-ACCESS-KEY": "OKKEY-abc123",
+      "OK-ACCESS-SIGN": "Rcn2H8cEi0cDFO1nQ6Y91S2opqrQw//NCMBDyK/RInU=",
+      "OK-ACCESS-TIMESTAMP": "2026-01-01T00:00:00.000Z",
+      "OK-ACCESS-PASSPHRASE": "Pass-phrase#1",
+      "Content-Type": "application/json"
+     },
+     "body": "{\"instId\": \"BTC-USDT-SWAP\", \"tdMode\": \"cross\", \"side\": \"buy\", \"posSide\": \"long\", \"ordType\": \"market\", \"sz\": \"5.00\", \"clOrdId\": \"et7225600000\", \"attachAlgoOrds\": [{\"attachAlgoClOrdId\": \"slt7225600000\", \"slTriggerPx\": \"86000.0\", \"slOrdPx\": \"-1\", \"triggerPxType\": \"mark\", \"sz\": \"5.00\"}, {\"attachAlgoClOrdId\": \"tp1t7225600000\", \"tpTriggerPx\": \"88500.0\", \"tpOrdPx\": \"-1\", \"triggerPxType\": \"mark\", \"sz\": \"5.00\"}]}"
+    },
+    {
+     "method": "GET",
+     "url": "https://www.okx.com/api/v5/trade/order?instId=BTC-USDT-SWAP&clOrdId=et7225600000",
+     "headers": {
+      "OK-ACCESS-KEY": "OKKEY-abc123",
+      "OK-ACCESS-SIGN": "bLANzV3apn180arwEhWPaebzJGP0nEtNPetUhxmTbRY=",
+      "OK-ACCESS-TIMESTAMP": "2026-01-01T00:00:01.000Z",
+      "OK-ACCESS-PASSPHRASE": "Pass-phrase#1",
+      "Content-Type": "application/json"
+     },
+     "body": null
+    },
+    {
+     "method": "GET",
+     "url": "https://www.okx.com/api/v5/trade/order?instId=BTC-USDT-SWAP&clOrdId=et7225600000",
+     "headers": {
+      "OK-ACCESS-KEY": "OKKEY-abc123",
+      "OK-ACCESS-SIGN": "x388h8CeYcFTq55RN0tvkgUmhxSqsMbeybKOG72rKqk=",
+      "OK-ACCESS-TIMESTAMP": "2026-01-01T00:00:02.000Z",
+      "OK-ACCESS-PASSPHRASE": "Pass-phrase#1",
+      "Content-Type": "application/json"
+     },
+     "body": null
+    }
+   ],
+   "sleeps": [
+    1.0,
+    1.0
+   ],
+   "clock_end": 1767225602.0,
+   "markers": [],
+   "saved": {
+    "hedge_saved": [],
+    "auth_reset": [],
+    "events": [],
+    "metrics": []
+   },
+   "final": {
+    "hedge": {},
+    "account_type": {},
+    "delisted": [],
+    "fail_count": {},
+    "bybit_offset": 0,
+    "binance_base": "https://fapi.binance.com",
+    "binance_offset": 0,
+    "bingx_offset": 0,
+    "okx_offset": 0
+   }
+  }
+ },
+ {
+  "scenario": {
+   "name": "pt_entry_empty_data_refusal",
+   "exchange": "okx",
+   "call": "place_trade",
+   "args": [
+    "OKKEY-abc123",
+    "ok-secret-456",
+    "BTC-USDT-SWAP",
+    "LONG",
+    87000.5,
+    86000.0,
+    88500.0,
+    5.0,
+    10
+   ],
+   "kwargs": {
+    "passphrase": "Pass-phrase#1"
+   },
+   "routes": [
+    {
+     "method": "GET",
+     "path": "/api/v5/public/instruments",
+     "responses": [
+      {
+       "text": "{\"code\": \"0\", \"msg\": \"\", \"data\": [{\"instType\": \"SWAP\", \"instId\": \"BTC-USDT-SWAP\", \"ctType\": \"linear\", \"ctValCcy\": \"BTC\", \"lotSz\": \"0.01\", \"tickSz\": \"0.1\", \"lever\": \"125\", \"minSz\": \"0.01\", \"state\": \"live\", \"ctVal\": \"0.01\"}]}"
+      }
+     ]
+    },
+    {
+     "method": "GET",
+     "path": "/api/v5/account/balance",
+     "responses": [
+      {
+       "text": "{\"code\": \"0\", \"msg\": \"\", \"data\": [{\"totalEq\": \"1000.5\", \"upl\": \"1.25\", \"details\": [{\"ccy\": \"BTC\", \"eq\": \"0.1\", \"cashBal\": \"0.1\", \"availBal\": \"0.1\"}, {\"ccy\": \"USDT\", \"eq\": \"990.5\", \"cashBal\": \"980\", \"availBal\": \"900.1\"}]}]}"
+      }
+     ]
+    },
+    {
+     "method": "POST",
+     "path": "/api/v5/account/set-leverage",
+     "responses": [
+      {
+       "text": "{\"code\": \"0\", \"msg\": \"\", \"data\": [{\"instId\": \"BTC-USDT-SWAP\", \"lever\": \"10\", \"mgnMode\": \"cross\", \"posSide\": \"\"}]}"
+      }
+     ]
+    },
+    {
+     "method": "POST",
+     "path": "/api/v5/trade/order",
+     "responses": [
+      {
+       "text": "{\"code\": \"50013\", \"msg\": \"Systems are busy. Please try again later.\", \"data\": []}"
+      }
+     ]
+    }
+   ],
+   "state": {},
+   "random": [],
+   "clock": 1767225600.0
+  },
+  "expected": {
+   "name": "pt_entry_empty_data_refusal",
+   "result": {
+    "ok": false,
+    "order_id": "",
+    "error": "Systems are busy. Please try again later."
+   },
+   "requests": [
+    {
+     "method": "GET",
+     "url": "https://www.okx.com/api/v5/public/instruments?instType=SWAP&instId=BTC-USDT-SWAP",
+     "headers": {},
+     "body": null
+    },
+    {
+     "method": "GET",
+     "url": "https://www.okx.com/api/v5/account/balance?ccy=USDT",
+     "headers": {
+      "OK-ACCESS-KEY": "OKKEY-abc123",
+      "OK-ACCESS-SIGN": "wkwacOzBzUchBK+8yoIik0ztsoP43DeUAvNQvB/T1RI=",
+      "OK-ACCESS-TIMESTAMP": "2026-01-01T00:00:00.000Z",
+      "OK-ACCESS-PASSPHRASE": "Pass-phrase#1",
+      "Content-Type": "application/json"
+     },
+     "body": null
+    },
+    {
+     "method": "POST",
+     "url": "https://www.okx.com/api/v5/account/set-leverage",
+     "headers": {
+      "OK-ACCESS-KEY": "OKKEY-abc123",
+      "OK-ACCESS-SIGN": "yXRLYnm/V/6DuLQvDah4HI4MrqCiM61hjmnhUTosyuk=",
+      "OK-ACCESS-TIMESTAMP": "2026-01-01T00:00:00.000Z",
+      "OK-ACCESS-PASSPHRASE": "Pass-phrase#1",
+      "Content-Type": "application/json"
+     },
+     "body": "{\"instId\": \"BTC-USDT-SWAP\", \"lever\": \"10\", \"mgnMode\": \"cross\"}"
+    },
+    {
+     "method": "POST",
+     "url": "https://www.okx.com/api/v5/trade/order",
+     "headers": {
+      "OK-ACCESS-KEY": "OKKEY-abc123",
+      "OK-ACCESS-SIGN": "Rcn2H8cEi0cDFO1nQ6Y91S2opqrQw//NCMBDyK/RInU=",
+      "OK-ACCESS-TIMESTAMP": "2026-01-01T00:00:00.000Z",
+      "OK-ACCESS-PASSPHRASE": "Pass-phrase#1",
+      "Content-Type": "application/json"
+     },
+     "body": "{\"instId\": \"BTC-USDT-SWAP\", \"tdMode\": \"cross\", \"side\": \"buy\", \"posSide\": \"long\", \"ordType\": \"market\", \"sz\": \"5.00\", \"clOrdId\": \"et7225600000\", \"attachAlgoOrds\": [{\"attachAlgoClOrdId\": \"slt7225600000\", \"slTriggerPx\": \"86000.0\", \"slOrdPx\": \"-1\", \"triggerPxType\": \"mark\", \"sz\": \"5.00\"}, {\"attachAlgoClOrdId\": \"tp1t7225600000\", \"tpTriggerPx\": \"88500.0\", \"tpOrdPx\": \"-1\", \"triggerPxType\": \"mark\", \"sz\": \"5.00\"}]}"
+    }
+   ],
+   "sleeps": [],
+   "clock_end": 1767225600.0,
+   "markers": [],
+   "saved": {
+    "hedge_saved": [],
+    "auth_reset": [],
+    "events": [],
+    "metrics": []
+   },
+   "final": {
+    "hedge": {},
+    "account_type": {},
+    "delisted": [],
+    "fail_count": {},
+    "bybit_offset": 0,
+    "binance_base": "https://fapi.binance.com",
+    "binance_offset": 0,
+    "bingx_offset": 0,
+    "okx_offset": 0
+   }
+  }
+ },
+ {
+  "scenario": {
+   "name": "pt_entry_lost_found_tp1_attached_no_sl",
+   "exchange": "okx",
+   "call": "place_trade",
+   "args": [
+    "OKKEY-abc123",
+    "ok-secret-456",
+    "BTC-USDT-SWAP",
+    "LONG",
+    87000.5,
+    86000.0,
+    88500.0,
+    5.0,
+    10
+   ],
+   "kwargs": {
+    "tp2": 89500.0,
+    "tp3": 90500.0,
+    "trade_id": "okx-trade-12345",
+    "user_id": 42,
+    "passphrase": "Pass-phrase#1"
+   },
+   "routes": [
+    {
+     "method": "GET",
+     "path": "/api/v5/public/instruments",
+     "responses": [
+      {
+       "text": "{\"code\": \"0\", \"msg\": \"\", \"data\": [{\"instType\": \"SWAP\", \"instId\": \"BTC-USDT-SWAP\", \"ctType\": \"linear\", \"ctValCcy\": \"BTC\", \"lotSz\": \"0.01\", \"tickSz\": \"0.1\", \"lever\": \"125\", \"minSz\": \"0.01\", \"state\": \"live\", \"ctVal\": \"0.01\"}]}"
+      }
+     ]
+    },
+    {
+     "method": "GET",
+     "path": "/api/v5/account/balance",
+     "responses": [
+      {
+       "text": "{\"code\": \"0\", \"msg\": \"\", \"data\": [{\"totalEq\": \"1000.5\", \"upl\": \"1.25\", \"details\": [{\"ccy\": \"BTC\", \"eq\": \"0.1\", \"cashBal\": \"0.1\", \"availBal\": \"0.1\"}, {\"ccy\": \"USDT\", \"eq\": \"990.5\", \"cashBal\": \"980\", \"availBal\": \"900.1\"}]}]}"
+      }
+     ]
+    },
+    {
+     "method": "POST",
+     "path": "/api/v5/account/set-leverage",
+     "responses": [
+      {
+       "text": "{\"code\": \"0\", \"msg\": \"\", \"data\": [{\"instId\": \"BTC-USDT-SWAP\", \"lever\": \"10\", \"mgnMode\": \"cross\", \"posSide\": \"\"}]}"
+      }
+     ]
+    },
+    {
+     "method": "POST",
+     "path": "/api/v5/trade/order",
+     "responses": [
+      {
+       "raise": "timeout"
+      }
+     ]
+    },
+    {
+     "method": "GET",
+     "path": "/api/v5/trade/order",
+     "responses": [
+      {
+       "text": "{\"code\": \"0\", \"msg\": \"\", \"data\": [{\"ordId\": \"o-91\", \"clOrdId\": \"eokxtrade12345\", \"state\": \"filled\", \"accFillSz\": \"0.58\", \"attachAlgoOrds\": [{\"attachAlgoClOrdId\": \"tp1okxtrade12345\", \"tpTriggerPx\": \"88500.0\"}]}]}"
+      }
+     ]
+    },
+    {
+     "method": "POST",
+     "path": "/api/v5/trade/order-algo",
+     "responses": [
+      {
+       "text": "{\"code\": \"0\", \"msg\": \"\", \"data\": [{\"algoId\": \"sl\", \"sCode\": \"0\", \"sMsg\": \"\"}]}"
+      },
+      {
+       "text": "{\"code\": \"0\", \"msg\": \"\", \"data\": [{\"algoId\": \"a2\", \"sCode\": \"0\", \"sMsg\": \"\"}]}"
+      },
+      {
+       "text": "{\"code\": \"0\", \"msg\": \"\", \"data\": [{\"algoId\": \"a3\", \"sCode\": \"0\", \"sMsg\": \"\"}]}"
+      }
+     ]
+    }
+   ],
+   "state": {},
+   "random": [],
+   "clock": 1767225600.0
+  },
+  "expected": {
+   "name": "pt_entry_lost_found_tp1_attached_no_sl",
+   "result": {
+    "ok": true,
+    "order_id": "o-91",
+    "error": "",
+    "tp_placed": true,
+    "qty": "0.0500",
+    "symbol": "BTC-USDT-SWAP"
+   },
+   "requests": [
+    {
+     "method": "GET",
+     "url": "https://www.okx.com/api/v5/public/instruments?instType=SWAP&instId=BTC-USDT-SWAP",
+     "headers": {},
+     "body": null
+    },
+    {
+     "method": "GET",
+     "url": "https://www.okx.com/api/v5/account/balance?ccy=USDT",
+     "headers": {
+      "OK-ACCESS-KEY": "OKKEY-abc123",
+      "OK-ACCESS-SIGN": "wkwacOzBzUchBK+8yoIik0ztsoP43DeUAvNQvB/T1RI=",
+      "OK-ACCESS-TIMESTAMP": "2026-01-01T00:00:00.000Z",
+      "OK-ACCESS-PASSPHRASE": "Pass-phrase#1",
+      "Content-Type": "application/json"
+     },
+     "body": null
+    },
+    {
+     "method": "POST",
+     "url": "https://www.okx.com/api/v5/account/set-leverage",
+     "headers": {
+      "OK-ACCESS-KEY": "OKKEY-abc123",
+      "OK-ACCESS-SIGN": "yXRLYnm/V/6DuLQvDah4HI4MrqCiM61hjmnhUTosyuk=",
+      "OK-ACCESS-TIMESTAMP": "2026-01-01T00:00:00.000Z",
+      "OK-ACCESS-PASSPHRASE": "Pass-phrase#1",
+      "Content-Type": "application/json"
+     },
+     "body": "{\"instId\": \"BTC-USDT-SWAP\", \"lever\": \"10\", \"mgnMode\": \"cross\"}"
+    },
+    {
+     "method": "POST",
+     "url": "https://www.okx.com/api/v5/trade/order",
+     "headers": {
+      "OK-ACCESS-KEY": "OKKEY-abc123",
+      "OK-ACCESS-SIGN": "9TVCg9/sr7Fjaw9Lz37Jl43WUndqFjg5VEuFX4KNXrQ=",
+      "OK-ACCESS-TIMESTAMP": "2026-01-01T00:00:00.000Z",
+      "OK-ACCESS-PASSPHRASE": "Pass-phrase#1",
+      "Content-Type": "application/json"
+     },
+     "body": "{\"instId\": \"BTC-USDT-SWAP\", \"tdMode\": \"cross\", \"side\": \"buy\", \"posSide\": \"long\", \"ordType\": \"market\", \"sz\": \"5.00\", \"clOrdId\": \"eokxtrade12345\", \"attachAlgoOrds\": [{\"attachAlgoClOrdId\": \"slokxtrade12345\", \"slTriggerPx\": \"86000.0\", \"slOrdPx\": \"-1\", \"triggerPxType\": \"mark\", \"sz\": \"5.00\"}, {\"attachAlgoClOrdId\": \"tp1okxtrade12345\", \"tpTriggerPx\": \"88500.0\", \"tpOrdPx\": \"-1\", \"triggerPxType\": \"mark\", \"sz\": \"2.50\"}]}"
+    },
+    {
+     "method": "GET",
+     "url": "https://www.okx.com/api/v5/trade/order?instId=BTC-USDT-SWAP&clOrdId=eokxtrade12345",
+     "headers": {
+      "OK-ACCESS-KEY": "OKKEY-abc123",
+      "OK-ACCESS-SIGN": "AuMAe4oVYEK9bsfUhIzIGTRs1tQo2O9HAV89+RQIdyA=",
+      "OK-ACCESS-TIMESTAMP": "2026-01-01T00:00:01.000Z",
+      "OK-ACCESS-PASSPHRASE": "Pass-phrase#1",
+      "Content-Type": "application/json"
+     },
+     "body": null
+    },
+    {
+     "method": "POST",
+     "url": "https://www.okx.com/api/v5/trade/order-algo",
+     "headers": {
+      "OK-ACCESS-KEY": "OKKEY-abc123",
+      "OK-ACCESS-SIGN": "LN4MknN2DXuJTCGdEi4qOUnfLY3JJVRjMnUc1xesNuQ=",
+      "OK-ACCESS-TIMESTAMP": "2026-01-01T00:00:01.000Z",
+      "OK-ACCESS-PASSPHRASE": "Pass-phrase#1",
+      "Content-Type": "application/json"
+     },
+     "body": "{\"instId\": \"BTC-USDT-SWAP\", \"tdMode\": \"cross\", \"side\": \"sell\", \"posSide\": \"long\", \"ordType\": \"conditional\", \"sz\": \"5.00\", \"slTriggerPx\": \"86000.0\", \"slOrdPx\": \"-1\", \"triggerPxType\": \"mark\"}"
+    },
+    {
+     "method": "POST",
+     "url": "https://www.okx.com/api/v5/trade/order-algo",
+     "headers": {
+      "OK-ACCESS-KEY": "OKKEY-abc123",
+      "OK-ACCESS-SIGN": "+pU5ibo/RX3/PYp6L42+E/fuHfQEg8Nd5NHdhvBJIA0=",
+      "OK-ACCESS-TIMESTAMP": "2026-01-01T00:00:01.000Z",
+      "OK-ACCESS-PASSPHRASE": "Pass-phrase#1",
+      "Content-Type": "application/json"
+     },
+     "body": "{\"instId\": \"BTC-USDT-SWAP\", \"tdMode\": \"cross\", \"side\": \"sell\", \"posSide\": \"long\", \"ordType\": \"conditional\", \"sz\": \"1.25\", \"tpTriggerPx\": \"89500.0\", \"tpOrdPx\": \"-1\", \"triggerPxType\": \"mark\"}"
+    },
+    {
+     "method": "POST",
+     "url": "https://www.okx.com/api/v5/trade/order-algo",
+     "headers": {
+      "OK-ACCESS-KEY": "OKKEY-abc123",
+      "OK-ACCESS-SIGN": "jFZIpBKtf/yNIKiNr3Gl48Kc9MwJXPEmE8eq6l1kkD4=",
+      "OK-ACCESS-TIMESTAMP": "2026-01-01T00:00:01.000Z",
+      "OK-ACCESS-PASSPHRASE": "Pass-phrase#1",
+      "Content-Type": "application/json"
+     },
+     "body": "{\"instId\": \"BTC-USDT-SWAP\", \"tdMode\": \"cross\", \"side\": \"sell\", \"posSide\": \"long\", \"ordType\": \"conditional\", \"sz\": \"1.25\", \"tpTriggerPx\": \"90500.0\", \"tpOrdPx\": \"-1\", \"triggerPxType\": \"mark\"}"
+    }
+   ],
+   "sleeps": [
+    1.0
+   ],
+   "clock_end": 1767225601.0,
+   "markers": [
+    [
+     "WARNING",
+     "[OKX-ENTRY-TIMEOUT]"
+    ],
+    [
+     "WARNING",
+     "[OKX-ENTRY-TIMEOUT]"
+    ]
+   ],
+   "saved": {
+    "hedge_saved": [],
+    "auth_reset": [],
+    "events": [],
+    "metrics": [
+     "trade_placed",
+     "trade_placement_latency_ms",
+     "sl_tp_attached"
+    ]
    },
    "final": {
     "hedge": {},
@@ -12662,25 +13451,25 @@
      "path": "/api/v5/trade/order-algo",
      "responses": [
       {
-       "text": "{\"code\": \"1\", \"msg\": \"Operation failed.\", \"data\": [{\"algoId\": \"\", \"sCode\": \"51277\", \"sMsg\": \"TP trigger price cannot be higher than the last price\"}]}"
+       "text": "{\"code\": \"1\", \"msg\": \"Operation failed.\", \"data\": [{\"algoId\": \"\", \"sCode\": \"51000\", \"sMsg\": \"Parameter tpTriggerPx error\"}]}"
       },
       {
-       "text": "{\"code\": \"1\", \"msg\": \"Operation failed.\", \"data\": [{\"algoId\": \"\", \"sCode\": \"51277\", \"sMsg\": \"TP trigger price cannot be higher than the last price\"}]}"
+       "text": "{\"code\": \"1\", \"msg\": \"Operation failed.\", \"data\": [{\"algoId\": \"\", \"sCode\": \"51000\", \"sMsg\": \"Parameter tpTriggerPx error\"}]}"
       },
       {
-       "text": "{\"code\": \"1\", \"msg\": \"Operation failed.\", \"data\": [{\"algoId\": \"\", \"sCode\": \"51277\", \"sMsg\": \"TP trigger price cannot be higher than the last price\"}]}"
+       "text": "{\"code\": \"1\", \"msg\": \"Operation failed.\", \"data\": [{\"algoId\": \"\", \"sCode\": \"51000\", \"sMsg\": \"Parameter tpTriggerPx error\"}]}"
       },
       {
        "text": "{\"code\": \"0\", \"msg\": \"\", \"data\": [{\"algoId\": \"681096944655273984\", \"sCode\": \"0\", \"sMsg\": \"\"}]}"
       },
       {
-       "text": "{\"code\": \"1\", \"msg\": \"Operation failed.\", \"data\": [{\"algoId\": \"\", \"sCode\": \"51277\", \"sMsg\": \"TP trigger price cannot be higher than the last price\"}]}"
+       "text": "{\"code\": \"1\", \"msg\": \"Operation failed.\", \"data\": [{\"algoId\": \"\", \"sCode\": \"51000\", \"sMsg\": \"Parameter tpTriggerPx error\"}]}"
       },
       {
-       "text": "{\"code\": \"1\", \"msg\": \"Operation failed.\", \"data\": [{\"algoId\": \"\", \"sCode\": \"51277\", \"sMsg\": \"TP trigger price cannot be higher than the last price\"}]}"
+       "text": "{\"code\": \"1\", \"msg\": \"Operation failed.\", \"data\": [{\"algoId\": \"\", \"sCode\": \"51000\", \"sMsg\": \"Parameter tpTriggerPx error\"}]}"
       },
       {
-       "text": "{\"code\": \"1\", \"msg\": \"Operation failed.\", \"data\": [{\"algoId\": \"\", \"sCode\": \"51277\", \"sMsg\": \"TP trigger price cannot be higher than the last price\"}]}"
+       "text": "{\"code\": \"1\", \"msg\": \"Operation failed.\", \"data\": [{\"algoId\": \"\", \"sCode\": \"51000\", \"sMsg\": \"Parameter tpTriggerPx error\"}]}"
       }
      ]
     }
@@ -14108,13 +14897,13 @@
        "text": "{\"code\": \"0\", \"msg\": \"\", \"data\": [{\"algoId\": \"t1\", \"sCode\": \"0\", \"sMsg\": \"\"}]}"
       },
       {
-       "text": "{\"code\": \"1\", \"msg\": \"Operation failed.\", \"data\": [{\"algoId\": \"\", \"sCode\": \"51277\", \"sMsg\": \"TP trigger price cannot be higher than the last price\"}]}"
+       "text": "{\"code\": \"1\", \"msg\": \"Operation failed.\", \"data\": [{\"algoId\": \"\", \"sCode\": \"51000\", \"sMsg\": \"Parameter tpTriggerPx error\"}]}"
       },
       {
-       "text": "{\"code\": \"1\", \"msg\": \"Operation failed.\", \"data\": [{\"algoId\": \"\", \"sCode\": \"51277\", \"sMsg\": \"TP trigger price cannot be higher than the last price\"}]}"
+       "text": "{\"code\": \"1\", \"msg\": \"Operation failed.\", \"data\": [{\"algoId\": \"\", \"sCode\": \"51000\", \"sMsg\": \"Parameter tpTriggerPx error\"}]}"
       },
       {
-       "text": "{\"code\": \"1\", \"msg\": \"Operation failed.\", \"data\": [{\"algoId\": \"\", \"sCode\": \"51277\", \"sMsg\": \"TP trigger price cannot be higher than the last price\"}]}"
+       "text": "{\"code\": \"1\", \"msg\": \"Operation failed.\", \"data\": [{\"algoId\": \"\", \"sCode\": \"51000\", \"sMsg\": \"Parameter tpTriggerPx error\"}]}"
       },
       {
        "text": "{\"code\": \"0\", \"msg\": \"\", \"data\": [{\"algoId\": \"t3\", \"sCode\": \"0\", \"sMsg\": \"\"}]}"
@@ -14235,6 +15024,927 @@
     [
      "WARNING",
      "[DOGE-USDT-SWAP]"
+    ]
+   ],
+   "saved": {
+    "hedge_saved": [],
+    "auth_reset": [],
+    "events": [],
+    "metrics": []
+   },
+   "final": {
+    "hedge": {},
+    "account_type": {},
+    "delisted": [],
+    "fail_count": {},
+    "bybit_offset": 0,
+    "binance_base": "https://fapi.binance.com",
+    "binance_offset": 0,
+    "bingx_offset": 0,
+    "okx_offset": 0
+   }
+  }
+ },
+ {
+  "scenario": {
+   "name": "sltp_tp1_crossed_lots_to_later_tps",
+   "exchange": "okx",
+   "call": "place_sl_tp_for_position",
+   "args": [
+    "OKKEY-abc123",
+    "ok-secret-456",
+    "BTC-USDT-SWAP",
+    "LONG",
+    0.02,
+    86000.0,
+    88500.0,
+    89500.0,
+    90500.0,
+    "Pass-phrase#1"
+   ],
+   "kwargs": {},
+   "routes": [
+    {
+     "method": "GET",
+     "path": "/api/v5/public/instruments",
+     "responses": [
+      {
+       "text": "{\"code\": \"0\", \"msg\": \"\", \"data\": [{\"instType\": \"SWAP\", \"instId\": \"BTC-USDT-SWAP\", \"ctType\": \"linear\", \"ctValCcy\": \"BTC\", \"lotSz\": \"0.01\", \"tickSz\": \"0.1\", \"lever\": \"125\", \"minSz\": \"0.01\", \"state\": \"live\", \"ctVal\": \"0.01\"}]}"
+      }
+     ]
+    },
+    {
+     "method": "GET",
+     "path": "/api/v5/trade/orders-algo-pending",
+     "responses": [
+      {
+       "text": "{\"code\": \"0\", \"msg\": \"\", \"data\": [{\"algoId\": \"old-sl\", \"posSide\": \"long\", \"slTriggerPx\": \"85000\", \"tpTriggerPx\": \"\"}, {\"algoId\": \"old-tp\", \"posSide\": \"long\", \"slTriggerPx\": \"\", \"tpTriggerPx\": \"88000\"}, {\"algoId\": \"other-sl\", \"posSide\": \"short\", \"slTriggerPx\": \"90000\", \"tpTriggerPx\": \"\"}, {\"algoId\": \"net-tp\", \"posSide\": \"net\", \"slTriggerPx\": null, \"tpTriggerPx\": \"89000\"}, {\"algoId\": \"\", \"posSide\": \"long\", \"slTriggerPx\": \"1\"}]}"
+      }
+     ]
+    },
+    {
+     "method": "POST",
+     "path": "/api/v5/trade/cancel-algos",
+     "responses": [
+      {
+       "text": "{\"code\": \"0\", \"msg\": \"\", \"data\": []}"
+      },
+      {
+       "text": "{\"code\": \"0\", \"msg\": \"\", \"data\": []}"
+      }
+     ]
+    },
+    {
+     "method": "POST",
+     "path": "/api/v5/trade/order-algo",
+     "responses": [
+      {
+       "text": "{\"code\": \"0\", \"msg\": \"\", \"data\": [{\"algoId\": \"new-sl\", \"sCode\": \"0\", \"sMsg\": \"\"}]}"
+      },
+      {
+       "text": "{\"code\": \"1\", \"msg\": \"Operation failed.\", \"data\": [{\"algoId\": \"\", \"sCode\": \"51279\", \"sMsg\": \"TP trigger price cannot be lower than the last price\"}]}"
+      },
+      {
+       "text": "{\"code\": \"0\", \"msg\": \"\", \"data\": [{\"algoId\": \"t2\", \"sCode\": \"0\", \"sMsg\": \"\"}]}"
+      },
+      {
+       "text": "{\"code\": \"0\", \"msg\": \"\", \"data\": [{\"algoId\": \"t3\", \"sCode\": \"0\", \"sMsg\": \"\"}]}"
+      }
+     ]
+    }
+   ],
+   "state": {},
+   "random": [],
+   "clock": 1767225600.0
+  },
+  "expected": {
+   "name": "sltp_tp1_crossed_lots_to_later_tps",
+   "result": {
+    "sl_placed": true,
+    "tp_placed": true,
+    "error": ""
+   },
+   "requests": [
+    {
+     "method": "GET",
+     "url": "https://www.okx.com/api/v5/public/instruments?instType=SWAP&instId=BTC-USDT-SWAP",
+     "headers": {},
+     "body": null
+    },
+    {
+     "method": "GET",
+     "url": "https://www.okx.com/api/v5/trade/orders-algo-pending?instType=SWAP&instId=BTC-USDT-SWAP&ordType=conditional",
+     "headers": {
+      "OK-ACCESS-KEY": "OKKEY-abc123",
+      "OK-ACCESS-SIGN": "tfpaOC15b9jSQJVoqLksxJH5W9zglj0ZdpsqwdCDfRA=",
+      "OK-ACCESS-TIMESTAMP": "2026-01-01T00:00:00.000Z",
+      "OK-ACCESS-PASSPHRASE": "Pass-phrase#1",
+      "Content-Type": "application/json"
+     },
+     "body": null
+    },
+    {
+     "method": "POST",
+     "url": "https://www.okx.com/api/v5/trade/order-algo",
+     "headers": {
+      "OK-ACCESS-KEY": "OKKEY-abc123",
+      "OK-ACCESS-SIGN": "uxn3AlHdNAygOpcBvzKViAwwLfeTLx/WSTPak/iy490=",
+      "OK-ACCESS-TIMESTAMP": "2026-01-01T00:00:00.000Z",
+      "OK-ACCESS-PASSPHRASE": "Pass-phrase#1",
+      "Content-Type": "application/json"
+     },
+     "body": "{\"instId\": \"BTC-USDT-SWAP\", \"tdMode\": \"cross\", \"side\": \"sell\", \"posSide\": \"long\", \"ordType\": \"conditional\", \"closeFraction\": \"1\", \"slTriggerPx\": \"86000.0\", \"slOrdPx\": \"-1\", \"triggerPxType\": \"mark\"}"
+    },
+    {
+     "method": "POST",
+     "url": "https://www.okx.com/api/v5/trade/cancel-algos",
+     "headers": {
+      "OK-ACCESS-KEY": "OKKEY-abc123",
+      "OK-ACCESS-SIGN": "W/l8rmiBQJ9SmiXgwZgEer5EKZnIfXNG+ylrqH0wZts=",
+      "OK-ACCESS-TIMESTAMP": "2026-01-01T00:00:00.000Z",
+      "OK-ACCESS-PASSPHRASE": "Pass-phrase#1",
+      "Content-Type": "application/json"
+     },
+     "body": "[{\"algoId\": \"old-sl\", \"instId\": \"BTC-USDT-SWAP\"}]"
+    },
+    {
+     "method": "POST",
+     "url": "https://www.okx.com/api/v5/trade/order-algo",
+     "headers": {
+      "OK-ACCESS-KEY": "OKKEY-abc123",
+      "OK-ACCESS-SIGN": "GeqlwkTgSsgFBs+9uEU6QOrsQHpNND35D6+zntXOF4M=",
+      "OK-ACCESS-TIMESTAMP": "2026-01-01T00:00:00.000Z",
+      "OK-ACCESS-PASSPHRASE": "Pass-phrase#1",
+      "Content-Type": "application/json"
+     },
+     "body": "{\"instId\": \"BTC-USDT-SWAP\", \"tdMode\": \"cross\", \"side\": \"sell\", \"posSide\": \"long\", \"ordType\": \"conditional\", \"sz\": \"1.00\", \"tpTriggerPx\": \"88500.0\", \"tpOrdPx\": \"-1\", \"triggerPxType\": \"mark\"}"
+    },
+    {
+     "method": "POST",
+     "url": "https://www.okx.com/api/v5/trade/order-algo",
+     "headers": {
+      "OK-ACCESS-KEY": "OKKEY-abc123",
+      "OK-ACCESS-SIGN": "sqca09CiqxfTbfvBlsDIO/PTLOk512oT7LZXBXnHc0k=",
+      "OK-ACCESS-TIMESTAMP": "2026-01-01T00:00:00.000Z",
+      "OK-ACCESS-PASSPHRASE": "Pass-phrase#1",
+      "Content-Type": "application/json"
+     },
+     "body": "{\"instId\": \"BTC-USDT-SWAP\", \"tdMode\": \"cross\", \"side\": \"sell\", \"posSide\": \"long\", \"ordType\": \"conditional\", \"sz\": \"1.00\", \"tpTriggerPx\": \"89500.0\", \"tpOrdPx\": \"-1\", \"triggerPxType\": \"mark\"}"
+    },
+    {
+     "method": "POST",
+     "url": "https://www.okx.com/api/v5/trade/order-algo",
+     "headers": {
+      "OK-ACCESS-KEY": "OKKEY-abc123",
+      "OK-ACCESS-SIGN": "WEHs+1lK3jSKsNtEuwccEmG3OcXFRfNrgxNj1K10Zrg=",
+      "OK-ACCESS-TIMESTAMP": "2026-01-01T00:00:00.000Z",
+      "OK-ACCESS-PASSPHRASE": "Pass-phrase#1",
+      "Content-Type": "application/json"
+     },
+     "body": "{\"instId\": \"BTC-USDT-SWAP\", \"tdMode\": \"cross\", \"side\": \"sell\", \"posSide\": \"long\", \"ordType\": \"conditional\", \"sz\": \"1.00\", \"tpTriggerPx\": \"90500.0\", \"tpOrdPx\": \"-1\", \"triggerPxType\": \"mark\"}"
+    },
+    {
+     "method": "POST",
+     "url": "https://www.okx.com/api/v5/trade/cancel-algos",
+     "headers": {
+      "OK-ACCESS-KEY": "OKKEY-abc123",
+      "OK-ACCESS-SIGN": "/Eg3V4jIyn6rkoBHZmTfXRSq5+QQ1TKvTbMdSfdtuVo=",
+      "OK-ACCESS-TIMESTAMP": "2026-01-01T00:00:00.000Z",
+      "OK-ACCESS-PASSPHRASE": "Pass-phrase#1",
+      "Content-Type": "application/json"
+     },
+     "body": "[{\"algoId\": \"old-tp\", \"instId\": \"BTC-USDT-SWAP\"}, {\"algoId\": \"net-tp\", \"instId\": \"BTC-USDT-SWAP\"}]"
+    }
+   ],
+   "sleeps": [],
+   "clock_end": 1767225600.0,
+   "markers": [
+    [
+     "INFO",
+     "[OKX-TP-CROSSED]"
+    ]
+   ],
+   "saved": {
+    "hedge_saved": [],
+    "auth_reset": [],
+    "events": [],
+    "metrics": []
+   },
+   "final": {
+    "hedge": {},
+    "account_type": {},
+    "delisted": [],
+    "fail_count": {},
+    "bybit_offset": 0,
+    "binance_base": "https://fapi.binance.com",
+    "binance_offset": 0,
+    "bingx_offset": 0,
+    "okx_offset": 0
+   }
+  }
+ },
+ {
+  "scenario": {
+   "name": "sltp_tp1_tp2_crossed_top_code",
+   "exchange": "okx",
+   "call": "place_sl_tp_for_position",
+   "args": [
+    "OKKEY-abc123",
+    "ok-secret-456",
+    "BTC-USDT-SWAP",
+    "SHORT",
+    0.07,
+    88000.0,
+    85500.0,
+    84500.0,
+    83500.0,
+    "Pass-phrase#1"
+   ],
+   "kwargs": {},
+   "routes": [
+    {
+     "method": "GET",
+     "path": "/api/v5/public/instruments",
+     "responses": [
+      {
+       "text": "{\"code\": \"0\", \"msg\": \"\", \"data\": [{\"instType\": \"SWAP\", \"instId\": \"BTC-USDT-SWAP\", \"ctType\": \"linear\", \"ctValCcy\": \"BTC\", \"lotSz\": \"0.01\", \"tickSz\": \"0.1\", \"lever\": \"125\", \"minSz\": \"0.01\", \"state\": \"live\", \"ctVal\": \"0.01\"}]}"
+      }
+     ]
+    },
+    {
+     "method": "GET",
+     "path": "/api/v5/trade/orders-algo-pending",
+     "responses": [
+      {
+       "text": "{\"code\": \"0\", \"msg\": \"\", \"data\": [{\"algoId\": \"old-tp\", \"posSide\": \"short\", \"tpTriggerPx\": \"85000\"}]}"
+      }
+     ]
+    },
+    {
+     "method": "POST",
+     "path": "/api/v5/trade/cancel-algos",
+     "responses": [
+      {
+       "text": "{\"code\": \"0\", \"msg\": \"\", \"data\": []}"
+      }
+     ]
+    },
+    {
+     "method": "POST",
+     "path": "/api/v5/trade/order-algo",
+     "responses": [
+      {
+       "text": "{\"code\": \"0\", \"msg\": \"\", \"data\": [{\"algoId\": \"sl\", \"sCode\": \"0\", \"sMsg\": \"\"}]}"
+      },
+      {
+       "text": "{\"code\": \"51277\", \"msg\": \"TP trigger price cannot be higher than the last price\", \"data\": []}"
+      },
+      {
+       "text": "{\"code\": \"1\", \"msg\": \"Operation failed.\", \"data\": [{\"algoId\": \"\", \"sCode\": \"51277\", \"sMsg\": \"TP trigger price cannot be higher than the last price\"}]}"
+      },
+      {
+       "text": "{\"code\": \"0\", \"msg\": \"\", \"data\": [{\"algoId\": \"t3\", \"sCode\": \"0\", \"sMsg\": \"\"}]}"
+      }
+     ]
+    }
+   ],
+   "state": {},
+   "random": [],
+   "clock": 1767225600.0
+  },
+  "expected": {
+   "name": "sltp_tp1_tp2_crossed_top_code",
+   "result": {
+    "sl_placed": true,
+    "tp_placed": true,
+    "error": ""
+   },
+   "requests": [
+    {
+     "method": "GET",
+     "url": "https://www.okx.com/api/v5/public/instruments?instType=SWAP&instId=BTC-USDT-SWAP",
+     "headers": {},
+     "body": null
+    },
+    {
+     "method": "GET",
+     "url": "https://www.okx.com/api/v5/trade/orders-algo-pending?instType=SWAP&instId=BTC-USDT-SWAP&ordType=conditional",
+     "headers": {
+      "OK-ACCESS-KEY": "OKKEY-abc123",
+      "OK-ACCESS-SIGN": "tfpaOC15b9jSQJVoqLksxJH5W9zglj0ZdpsqwdCDfRA=",
+      "OK-ACCESS-TIMESTAMP": "2026-01-01T00:00:00.000Z",
+      "OK-ACCESS-PASSPHRASE": "Pass-phrase#1",
+      "Content-Type": "application/json"
+     },
+     "body": null
+    },
+    {
+     "method": "POST",
+     "url": "https://www.okx.com/api/v5/trade/order-algo",
+     "headers": {
+      "OK-ACCESS-KEY": "OKKEY-abc123",
+      "OK-ACCESS-SIGN": "FPYzxdiGdna9iFa11u9Z46GQLe4JeMQLhp0Nw9AWTTI=",
+      "OK-ACCESS-TIMESTAMP": "2026-01-01T00:00:00.000Z",
+      "OK-ACCESS-PASSPHRASE": "Pass-phrase#1",
+      "Content-Type": "application/json"
+     },
+     "body": "{\"instId\": \"BTC-USDT-SWAP\", \"tdMode\": \"cross\", \"side\": \"buy\", \"posSide\": \"short\", \"ordType\": \"conditional\", \"closeFraction\": \"1\", \"slTriggerPx\": \"88000.0\", \"slOrdPx\": \"-1\", \"triggerPxType\": \"mark\"}"
+    },
+    {
+     "method": "POST",
+     "url": "https://www.okx.com/api/v5/trade/order-algo",
+     "headers": {
+      "OK-ACCESS-KEY": "OKKEY-abc123",
+      "OK-ACCESS-SIGN": "eRGdQAZ7hKdpC3cpTv+NOAolMXD0pmiWeheuY+V1NtM=",
+      "OK-ACCESS-TIMESTAMP": "2026-01-01T00:00:00.000Z",
+      "OK-ACCESS-PASSPHRASE": "Pass-phrase#1",
+      "Content-Type": "application/json"
+     },
+     "body": "{\"instId\": \"BTC-USDT-SWAP\", \"tdMode\": \"cross\", \"side\": \"buy\", \"posSide\": \"short\", \"ordType\": \"conditional\", \"sz\": \"3.50\", \"tpTriggerPx\": \"85500.0\", \"tpOrdPx\": \"-1\", \"triggerPxType\": \"mark\"}"
+    },
+    {
+     "method": "POST",
+     "url": "https://www.okx.com/api/v5/trade/order-algo",
+     "headers": {
+      "OK-ACCESS-KEY": "OKKEY-abc123",
+      "OK-ACCESS-SIGN": "XFf9TxCOwlVAnd+4K0hbDzsox0UwdHvALl5fpXJ9G/A=",
+      "OK-ACCESS-TIMESTAMP": "2026-01-01T00:00:00.000Z",
+      "OK-ACCESS-PASSPHRASE": "Pass-phrase#1",
+      "Content-Type": "application/json"
+     },
+     "body": "{\"instId\": \"BTC-USDT-SWAP\", \"tdMode\": \"cross\", \"side\": \"buy\", \"posSide\": \"short\", \"ordType\": \"conditional\", \"sz\": \"3.50\", \"tpTriggerPx\": \"84500.0\", \"tpOrdPx\": \"-1\", \"triggerPxType\": \"mark\"}"
+    },
+    {
+     "method": "POST",
+     "url": "https://www.okx.com/api/v5/trade/order-algo",
+     "headers": {
+      "OK-ACCESS-KEY": "OKKEY-abc123",
+      "OK-ACCESS-SIGN": "Lj89lIwzAIsixdSCoIDbA9AlpliKd8xrO45IllvekOk=",
+      "OK-ACCESS-TIMESTAMP": "2026-01-01T00:00:00.000Z",
+      "OK-ACCESS-PASSPHRASE": "Pass-phrase#1",
+      "Content-Type": "application/json"
+     },
+     "body": "{\"instId\": \"BTC-USDT-SWAP\", \"tdMode\": \"cross\", \"side\": \"buy\", \"posSide\": \"short\", \"ordType\": \"conditional\", \"sz\": \"7.00\", \"tpTriggerPx\": \"83500.0\", \"tpOrdPx\": \"-1\", \"triggerPxType\": \"mark\"}"
+    },
+    {
+     "method": "POST",
+     "url": "https://www.okx.com/api/v5/trade/cancel-algos",
+     "headers": {
+      "OK-ACCESS-KEY": "OKKEY-abc123",
+      "OK-ACCESS-SIGN": "jfIBABsgJtK85wzViWFdoMeC/JaLYGmOlYmxzl0GNNY=",
+      "OK-ACCESS-TIMESTAMP": "2026-01-01T00:00:00.000Z",
+      "OK-ACCESS-PASSPHRASE": "Pass-phrase#1",
+      "Content-Type": "application/json"
+     },
+     "body": "[{\"algoId\": \"old-tp\", \"instId\": \"BTC-USDT-SWAP\"}]"
+    }
+   ],
+   "sleeps": [],
+   "clock_end": 1767225600.0,
+   "markers": [
+    [
+     "INFO",
+     "[OKX-TP-CROSSED]"
+    ],
+    [
+     "INFO",
+     "[OKX-TP-CROSSED]"
+    ]
+   ],
+   "saved": {
+    "hedge_saved": [],
+    "auth_reset": [],
+    "events": [],
+    "metrics": []
+   },
+   "final": {
+    "hedge": {},
+    "account_type": {},
+    "delisted": [],
+    "fail_count": {},
+    "bybit_offset": 0,
+    "binance_base": "https://fapi.binance.com",
+    "binance_offset": 0,
+    "bingx_offset": 0,
+    "okx_offset": 0
+   }
+  }
+ },
+ {
+  "scenario": {
+   "name": "sltp_every_tp_crossed_keeps_old",
+   "exchange": "okx",
+   "call": "place_sl_tp_for_position",
+   "args": [
+    "OKKEY-abc123",
+    "ok-secret-456",
+    "BTC-USDT-SWAP",
+    "LONG",
+    0.02,
+    86000.0,
+    88500.0,
+    89500.0,
+    0.0,
+    "Pass-phrase#1"
+   ],
+   "kwargs": {},
+   "routes": [
+    {
+     "method": "GET",
+     "path": "/api/v5/public/instruments",
+     "responses": [
+      {
+       "text": "{\"code\": \"0\", \"msg\": \"\", \"data\": [{\"instType\": \"SWAP\", \"instId\": \"BTC-USDT-SWAP\", \"ctType\": \"linear\", \"ctValCcy\": \"BTC\", \"lotSz\": \"0.01\", \"tickSz\": \"0.1\", \"lever\": \"125\", \"minSz\": \"0.01\", \"state\": \"live\", \"ctVal\": \"0.01\"}]}"
+      }
+     ]
+    },
+    {
+     "method": "GET",
+     "path": "/api/v5/trade/orders-algo-pending",
+     "responses": [
+      {
+       "text": "{\"code\": \"0\", \"msg\": \"\", \"data\": [{\"algoId\": \"old-sl\", \"posSide\": \"long\", \"slTriggerPx\": \"85000\", \"tpTriggerPx\": \"\"}, {\"algoId\": \"old-tp\", \"posSide\": \"long\", \"slTriggerPx\": \"\", \"tpTriggerPx\": \"88000\"}, {\"algoId\": \"other-sl\", \"posSide\": \"short\", \"slTriggerPx\": \"90000\", \"tpTriggerPx\": \"\"}, {\"algoId\": \"net-tp\", \"posSide\": \"net\", \"slTriggerPx\": null, \"tpTriggerPx\": \"89000\"}, {\"algoId\": \"\", \"posSide\": \"long\", \"slTriggerPx\": \"1\"}]}"
+      }
+     ]
+    },
+    {
+     "method": "POST",
+     "path": "/api/v5/trade/cancel-algos",
+     "responses": [
+      {
+       "text": "{\"code\": \"0\", \"msg\": \"\", \"data\": []}"
+      }
+     ]
+    },
+    {
+     "method": "POST",
+     "path": "/api/v5/trade/order-algo",
+     "responses": [
+      {
+       "text": "{\"code\": \"0\", \"msg\": \"\", \"data\": [{\"algoId\": \"new-sl\", \"sCode\": \"0\", \"sMsg\": \"\"}]}"
+      },
+      {
+       "text": "{\"code\": \"1\", \"msg\": \"Operation failed.\", \"data\": [{\"algoId\": \"\", \"sCode\": \"51279\", \"sMsg\": \"TP trigger price cannot be lower than the last price\"}]}"
+      }
+     ]
+    }
+   ],
+   "state": {},
+   "random": [],
+   "clock": 1767225600.0
+  },
+  "expected": {
+   "name": "sltp_every_tp_crossed_keeps_old",
+   "result": {
+    "sl_placed": true,
+    "tp_placed": false,
+    "error": "partial failure"
+   },
+   "requests": [
+    {
+     "method": "GET",
+     "url": "https://www.okx.com/api/v5/public/instruments?instType=SWAP&instId=BTC-USDT-SWAP",
+     "headers": {},
+     "body": null
+    },
+    {
+     "method": "GET",
+     "url": "https://www.okx.com/api/v5/trade/orders-algo-pending?instType=SWAP&instId=BTC-USDT-SWAP&ordType=conditional",
+     "headers": {
+      "OK-ACCESS-KEY": "OKKEY-abc123",
+      "OK-ACCESS-SIGN": "tfpaOC15b9jSQJVoqLksxJH5W9zglj0ZdpsqwdCDfRA=",
+      "OK-ACCESS-TIMESTAMP": "2026-01-01T00:00:00.000Z",
+      "OK-ACCESS-PASSPHRASE": "Pass-phrase#1",
+      "Content-Type": "application/json"
+     },
+     "body": null
+    },
+    {
+     "method": "POST",
+     "url": "https://www.okx.com/api/v5/trade/order-algo",
+     "headers": {
+      "OK-ACCESS-KEY": "OKKEY-abc123",
+      "OK-ACCESS-SIGN": "uxn3AlHdNAygOpcBvzKViAwwLfeTLx/WSTPak/iy490=",
+      "OK-ACCESS-TIMESTAMP": "2026-01-01T00:00:00.000Z",
+      "OK-ACCESS-PASSPHRASE": "Pass-phrase#1",
+      "Content-Type": "application/json"
+     },
+     "body": "{\"instId\": \"BTC-USDT-SWAP\", \"tdMode\": \"cross\", \"side\": \"sell\", \"posSide\": \"long\", \"ordType\": \"conditional\", \"closeFraction\": \"1\", \"slTriggerPx\": \"86000.0\", \"slOrdPx\": \"-1\", \"triggerPxType\": \"mark\"}"
+    },
+    {
+     "method": "POST",
+     "url": "https://www.okx.com/api/v5/trade/cancel-algos",
+     "headers": {
+      "OK-ACCESS-KEY": "OKKEY-abc123",
+      "OK-ACCESS-SIGN": "W/l8rmiBQJ9SmiXgwZgEer5EKZnIfXNG+ylrqH0wZts=",
+      "OK-ACCESS-TIMESTAMP": "2026-01-01T00:00:00.000Z",
+      "OK-ACCESS-PASSPHRASE": "Pass-phrase#1",
+      "Content-Type": "application/json"
+     },
+     "body": "[{\"algoId\": \"old-sl\", \"instId\": \"BTC-USDT-SWAP\"}]"
+    },
+    {
+     "method": "POST",
+     "url": "https://www.okx.com/api/v5/trade/order-algo",
+     "headers": {
+      "OK-ACCESS-KEY": "OKKEY-abc123",
+      "OK-ACCESS-SIGN": "DWGtwbhRjAPAtQ1tPBkIepLiCiKzXF4SY5+vTxpny58=",
+      "OK-ACCESS-TIMESTAMP": "2026-01-01T00:00:00.000Z",
+      "OK-ACCESS-PASSPHRASE": "Pass-phrase#1",
+      "Content-Type": "application/json"
+     },
+     "body": "{\"instId\": \"BTC-USDT-SWAP\", \"tdMode\": \"cross\", \"side\": \"sell\", \"posSide\": \"long\", \"ordType\": \"conditional\", \"sz\": \"1.50\", \"tpTriggerPx\": \"88500.0\", \"tpOrdPx\": \"-1\", \"triggerPxType\": \"mark\"}"
+    },
+    {
+     "method": "POST",
+     "url": "https://www.okx.com/api/v5/trade/order-algo",
+     "headers": {
+      "OK-ACCESS-KEY": "OKKEY-abc123",
+      "OK-ACCESS-SIGN": "VeSygng63gAe28cMwlWDv8whKAlA+lxCD8vzWSUs3LY=",
+      "OK-ACCESS-TIMESTAMP": "2026-01-01T00:00:00.000Z",
+      "OK-ACCESS-PASSPHRASE": "Pass-phrase#1",
+      "Content-Type": "application/json"
+     },
+     "body": "{\"instId\": \"BTC-USDT-SWAP\", \"tdMode\": \"cross\", \"side\": \"sell\", \"posSide\": \"long\", \"ordType\": \"conditional\", \"sz\": \"2.00\", \"tpTriggerPx\": \"89500.0\", \"tpOrdPx\": \"-1\", \"triggerPxType\": \"mark\"}"
+    }
+   ],
+   "sleeps": [],
+   "clock_end": 1767225600.0,
+   "markers": [
+    [
+     "INFO",
+     "[OKX-TP-CROSSED]"
+    ],
+    [
+     "INFO",
+     "[OKX-TP-CROSSED]"
+    ]
+   ],
+   "saved": {
+    "hedge_saved": [],
+    "auth_reset": [],
+    "events": [],
+    "metrics": []
+   },
+   "final": {
+    "hedge": {},
+    "account_type": {},
+    "delisted": [],
+    "fail_count": {},
+    "bybit_offset": 0,
+    "binance_base": "https://fapi.binance.com",
+    "binance_offset": 0,
+    "bingx_offset": 0,
+    "okx_offset": 0
+   }
+  }
+ },
+ {
+  "scenario": {
+   "name": "sltp_crossed_then_refused_keeps_old",
+   "exchange": "okx",
+   "call": "place_sl_tp_for_position",
+   "args": [
+    "OKKEY-abc123",
+    "ok-secret-456",
+    "BTC-USDT-SWAP",
+    "LONG",
+    0.02,
+    86000.0,
+    88500.0,
+    89500.0,
+    90500.0,
+    "Pass-phrase#1"
+   ],
+   "kwargs": {},
+   "routes": [
+    {
+     "method": "GET",
+     "path": "/api/v5/public/instruments",
+     "responses": [
+      {
+       "text": "{\"code\": \"0\", \"msg\": \"\", \"data\": [{\"instType\": \"SWAP\", \"instId\": \"BTC-USDT-SWAP\", \"ctType\": \"linear\", \"ctValCcy\": \"BTC\", \"lotSz\": \"0.01\", \"tickSz\": \"0.1\", \"lever\": \"125\", \"minSz\": \"0.01\", \"state\": \"live\", \"ctVal\": \"0.01\"}]}"
+      }
+     ]
+    },
+    {
+     "method": "GET",
+     "path": "/api/v5/trade/orders-algo-pending",
+     "responses": [
+      {
+       "text": "{\"code\": \"0\", \"msg\": \"\", \"data\": [{\"algoId\": \"old-sl\", \"posSide\": \"long\", \"slTriggerPx\": \"85000\", \"tpTriggerPx\": \"\"}, {\"algoId\": \"old-tp\", \"posSide\": \"long\", \"slTriggerPx\": \"\", \"tpTriggerPx\": \"88000\"}, {\"algoId\": \"other-sl\", \"posSide\": \"short\", \"slTriggerPx\": \"90000\", \"tpTriggerPx\": \"\"}, {\"algoId\": \"net-tp\", \"posSide\": \"net\", \"slTriggerPx\": null, \"tpTriggerPx\": \"89000\"}, {\"algoId\": \"\", \"posSide\": \"long\", \"slTriggerPx\": \"1\"}]}"
+      }
+     ]
+    },
+    {
+     "method": "POST",
+     "path": "/api/v5/trade/cancel-algos",
+     "responses": [
+      {
+       "text": "{\"code\": \"0\", \"msg\": \"\", \"data\": []}"
+      }
+     ]
+    },
+    {
+     "method": "POST",
+     "path": "/api/v5/trade/order-algo",
+     "responses": [
+      {
+       "text": "{\"code\": \"0\", \"msg\": \"\", \"data\": [{\"algoId\": \"new-sl\", \"sCode\": \"0\", \"sMsg\": \"\"}]}"
+      },
+      {
+       "text": "{\"code\": \"1\", \"msg\": \"Operation failed.\", \"data\": [{\"algoId\": \"\", \"sCode\": \"51279\", \"sMsg\": \"TP trigger price cannot be lower than the last price\"}]}"
+      },
+      {
+       "text": "{\"code\": \"1\", \"msg\": \"Operation failed.\", \"data\": [{\"algoId\": \"\", \"sCode\": \"51000\", \"sMsg\": \"Parameter tpTriggerPx error\"}]}"
+      },
+      {
+       "text": "{\"code\": \"1\", \"msg\": \"Operation failed.\", \"data\": [{\"algoId\": \"\", \"sCode\": \"51000\", \"sMsg\": \"Parameter tpTriggerPx error\"}]}"
+      },
+      {
+       "text": "{\"code\": \"1\", \"msg\": \"Operation failed.\", \"data\": [{\"algoId\": \"\", \"sCode\": \"51000\", \"sMsg\": \"Parameter tpTriggerPx error\"}]}"
+      },
+      {
+       "text": "{\"code\": \"0\", \"msg\": \"\", \"data\": [{\"algoId\": \"t3\", \"sCode\": \"0\", \"sMsg\": \"\"}]}"
+      }
+     ]
+    }
+   ],
+   "state": {},
+   "random": [],
+   "clock": 1767225600.0
+  },
+  "expected": {
+   "name": "sltp_crossed_then_refused_keeps_old",
+   "result": {
+    "sl_placed": true,
+    "tp_placed": false,
+    "error": "partial failure"
+   },
+   "requests": [
+    {
+     "method": "GET",
+     "url": "https://www.okx.com/api/v5/public/instruments?instType=SWAP&instId=BTC-USDT-SWAP",
+     "headers": {},
+     "body": null
+    },
+    {
+     "method": "GET",
+     "url": "https://www.okx.com/api/v5/trade/orders-algo-pending?instType=SWAP&instId=BTC-USDT-SWAP&ordType=conditional",
+     "headers": {
+      "OK-ACCESS-KEY": "OKKEY-abc123",
+      "OK-ACCESS-SIGN": "tfpaOC15b9jSQJVoqLksxJH5W9zglj0ZdpsqwdCDfRA=",
+      "OK-ACCESS-TIMESTAMP": "2026-01-01T00:00:00.000Z",
+      "OK-ACCESS-PASSPHRASE": "Pass-phrase#1",
+      "Content-Type": "application/json"
+     },
+     "body": null
+    },
+    {
+     "method": "POST",
+     "url": "https://www.okx.com/api/v5/trade/order-algo",
+     "headers": {
+      "OK-ACCESS-KEY": "OKKEY-abc123",
+      "OK-ACCESS-SIGN": "uxn3AlHdNAygOpcBvzKViAwwLfeTLx/WSTPak/iy490=",
+      "OK-ACCESS-TIMESTAMP": "2026-01-01T00:00:00.000Z",
+      "OK-ACCESS-PASSPHRASE": "Pass-phrase#1",
+      "Content-Type": "application/json"
+     },
+     "body": "{\"instId\": \"BTC-USDT-SWAP\", \"tdMode\": \"cross\", \"side\": \"sell\", \"posSide\": \"long\", \"ordType\": \"conditional\", \"closeFraction\": \"1\", \"slTriggerPx\": \"86000.0\", \"slOrdPx\": \"-1\", \"triggerPxType\": \"mark\"}"
+    },
+    {
+     "method": "POST",
+     "url": "https://www.okx.com/api/v5/trade/cancel-algos",
+     "headers": {
+      "OK-ACCESS-KEY": "OKKEY-abc123",
+      "OK-ACCESS-SIGN": "W/l8rmiBQJ9SmiXgwZgEer5EKZnIfXNG+ylrqH0wZts=",
+      "OK-ACCESS-TIMESTAMP": "2026-01-01T00:00:00.000Z",
+      "OK-ACCESS-PASSPHRASE": "Pass-phrase#1",
+      "Content-Type": "application/json"
+     },
+     "body": "[{\"algoId\": \"old-sl\", \"instId\": \"BTC-USDT-SWAP\"}]"
+    },
+    {
+     "method": "POST",
+     "url": "https://www.okx.com/api/v5/trade/order-algo",
+     "headers": {
+      "OK-ACCESS-KEY": "OKKEY-abc123",
+      "OK-ACCESS-SIGN": "GeqlwkTgSsgFBs+9uEU6QOrsQHpNND35D6+zntXOF4M=",
+      "OK-ACCESS-TIMESTAMP": "2026-01-01T00:00:00.000Z",
+      "OK-ACCESS-PASSPHRASE": "Pass-phrase#1",
+      "Content-Type": "application/json"
+     },
+     "body": "{\"instId\": \"BTC-USDT-SWAP\", \"tdMode\": \"cross\", \"side\": \"sell\", \"posSide\": \"long\", \"ordType\": \"conditional\", \"sz\": \"1.00\", \"tpTriggerPx\": \"88500.0\", \"tpOrdPx\": \"-1\", \"triggerPxType\": \"mark\"}"
+    },
+    {
+     "method": "POST",
+     "url": "https://www.okx.com/api/v5/trade/order-algo",
+     "headers": {
+      "OK-ACCESS-KEY": "OKKEY-abc123",
+      "OK-ACCESS-SIGN": "sqca09CiqxfTbfvBlsDIO/PTLOk512oT7LZXBXnHc0k=",
+      "OK-ACCESS-TIMESTAMP": "2026-01-01T00:00:00.000Z",
+      "OK-ACCESS-PASSPHRASE": "Pass-phrase#1",
+      "Content-Type": "application/json"
+     },
+     "body": "{\"instId\": \"BTC-USDT-SWAP\", \"tdMode\": \"cross\", \"side\": \"sell\", \"posSide\": \"long\", \"ordType\": \"conditional\", \"sz\": \"1.00\", \"tpTriggerPx\": \"89500.0\", \"tpOrdPx\": \"-1\", \"triggerPxType\": \"mark\"}"
+    },
+    {
+     "method": "POST",
+     "url": "https://www.okx.com/api/v5/trade/order-algo",
+     "headers": {
+      "OK-ACCESS-KEY": "OKKEY-abc123",
+      "OK-ACCESS-SIGN": "ZstTAY0uVO2I9ForASc2NuyjDZiL5eKa1a1w/FTwcog=",
+      "OK-ACCESS-TIMESTAMP": "2026-01-01T00:00:01.000Z",
+      "OK-ACCESS-PASSPHRASE": "Pass-phrase#1",
+      "Content-Type": "application/json"
+     },
+     "body": "{\"instId\": \"BTC-USDT-SWAP\", \"tdMode\": \"cross\", \"side\": \"sell\", \"posSide\": \"long\", \"ordType\": \"conditional\", \"sz\": \"1.00\", \"tpTriggerPx\": \"89500.0\", \"tpOrdPx\": \"-1\", \"triggerPxType\": \"mark\"}"
+    },
+    {
+     "method": "POST",
+     "url": "https://www.okx.com/api/v5/trade/order-algo",
+     "headers": {
+      "OK-ACCESS-KEY": "OKKEY-abc123",
+      "OK-ACCESS-SIGN": "BLQZqnvAI5lqpkQorU+rvjIZYeRuwuPLpFaMEq9EaPY=",
+      "OK-ACCESS-TIMESTAMP": "2026-01-01T00:00:02.000Z",
+      "OK-ACCESS-PASSPHRASE": "Pass-phrase#1",
+      "Content-Type": "application/json"
+     },
+     "body": "{\"instId\": \"BTC-USDT-SWAP\", \"tdMode\": \"cross\", \"side\": \"sell\", \"posSide\": \"long\", \"ordType\": \"conditional\", \"sz\": \"1.00\", \"tpTriggerPx\": \"89500.0\", \"tpOrdPx\": \"-1\", \"triggerPxType\": \"mark\"}"
+    },
+    {
+     "method": "POST",
+     "url": "https://www.okx.com/api/v5/trade/order-algo",
+     "headers": {
+      "OK-ACCESS-KEY": "OKKEY-abc123",
+      "OK-ACCESS-SIGN": "B5IYrsAwIaJCaiwOpZwJkBBYQTf4jOg77bXrcjyXzKQ=",
+      "OK-ACCESS-TIMESTAMP": "2026-01-01T00:00:03.000Z",
+      "OK-ACCESS-PASSPHRASE": "Pass-phrase#1",
+      "Content-Type": "application/json"
+     },
+     "body": "{\"instId\": \"BTC-USDT-SWAP\", \"tdMode\": \"cross\", \"side\": \"sell\", \"posSide\": \"long\", \"ordType\": \"conditional\", \"sz\": \"1.00\", \"tpTriggerPx\": \"90500.0\", \"tpOrdPx\": \"-1\", \"triggerPxType\": \"mark\"}"
+    }
+   ],
+   "sleeps": [
+    1.0,
+    1.0,
+    1.0
+   ],
+   "clock_end": 1767225603.0,
+   "markers": [
+    [
+     "INFO",
+     "[OKX-TP-CROSSED]"
+    ],
+    [
+     "WARNING",
+     "[BTC-USDT-SWAP]"
+    ]
+   ],
+   "saved": {
+    "hedge_saved": [],
+    "auth_reset": [],
+    "events": [],
+    "metrics": []
+   },
+   "final": {
+    "hedge": {},
+    "account_type": {},
+    "delisted": [],
+    "fail_count": {},
+    "bybit_offset": 0,
+    "binance_base": "https://fapi.binance.com",
+    "binance_offset": 0,
+    "bingx_offset": 0,
+    "okx_offset": 0
+   }
+  }
+ },
+ {
+  "scenario": {
+   "name": "sltp_no_instrument_filters",
+   "exchange": "okx",
+   "call": "place_sl_tp_for_position",
+   "args": [
+    "OKKEY-abc123",
+    "ok-secret-456",
+    "DOGE-USDT-SWAP",
+    "LONG",
+    1000.0,
+    0.0987,
+    0.104,
+    0.0,
+    0.0,
+    "Pass-phrase#1"
+   ],
+   "kwargs": {},
+   "routes": [
+    {
+     "method": "GET",
+     "path": "/api/v5/public/instruments",
+     "responses": [
+      {
+       "text": "{\"code\": \"0\", \"msg\": \"\", \"data\": []}"
+      }
+     ]
+    }
+   ],
+   "state": {},
+   "random": [],
+   "clock": 1767225600.0
+  },
+  "expected": {
+   "name": "sltp_no_instrument_filters",
+   "result": {
+    "sl_placed": false,
+    "tp_placed": false,
+    "error": "OKX instrument filters unavailable"
+   },
+   "requests": [
+    {
+     "method": "GET",
+     "url": "https://www.okx.com/api/v5/public/instruments?instType=SWAP&instId=DOGE-USDT-SWAP",
+     "headers": {},
+     "body": null
+    }
+   ],
+   "sleeps": [],
+   "clock_end": 1767225600.0,
+   "markers": [
+    [
+     "WARNING",
+     "[OKX-NO-FILTERS]"
+    ]
+   ],
+   "saved": {
+    "hedge_saved": [],
+    "auth_reset": [],
+    "events": [],
+    "metrics": []
+   },
+   "final": {
+    "hedge": {},
+    "account_type": {},
+    "delisted": [],
+    "fail_count": {},
+    "bybit_offset": 0,
+    "binance_base": "https://fapi.binance.com",
+    "binance_offset": 0,
+    "bingx_offset": 0,
+    "okx_offset": 0
+   }
+  }
+ },
+ {
+  "scenario": {
+   "name": "trail_no_instrument_filters",
+   "exchange": "okx",
+   "call": "set_trailing_sl",
+   "args": [
+    "OKKEY-abc123",
+    "ok-secret-456",
+    "DOGE-USDT-SWAP",
+    0.0987,
+    "LONG",
+    0,
+    "Pass-phrase#1"
+   ],
+   "kwargs": {},
+   "routes": [
+    {
+     "method": "GET",
+     "path": "/api/v5/public/instruments",
+     "responses": [
+      {
+       "raise": "timeout"
+      }
+     ]
+    }
+   ],
+   "state": {},
+   "random": [],
+   "clock": 1767225600.0
+  },
+  "expected": {
+   "name": "trail_no_instrument_filters",
+   "result": {
+    "ok": false,
+    "error": "OKX instrument filters unavailable"
+   },
+   "requests": [
+    {
+     "method": "GET",
+     "url": "https://www.okx.com/api/v5/public/instruments?instType=SWAP&instId=DOGE-USDT-SWAP",
+     "headers": {},
+     "body": null
+    }
+   ],
+   "sleeps": [],
+   "clock_end": 1767225600.0,
+   "markers": [
+    [
+     "WARNING",
+     "[OKX-NO-FILTERS]"
     ]
    ],
    "saved": {

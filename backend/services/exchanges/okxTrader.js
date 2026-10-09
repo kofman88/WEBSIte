@@ -73,6 +73,9 @@ function humanizeOkxError(raw) {
 }
 
 /** to_okx_symbol: "-SWAP" kept; "...USDT" → base (every "USDT" removed) + "-USDT-SWAP". */
+// [OKX-TP-CROSSED] OKX: the TP trigger price is already passed (51279 — a sell below last, 51277 — a buy above)
+const OKX_TP_CROSSED = new Set(['51277', '51279']);
+
 /**
  * [OKX-CLORDID-ALNUM 2026-10] clOrdId / attachAlgoClOrdId of OKX: letters and digits only, ≤ 32
  * (okx_trader._okx_cl_id). It used to send "sl_<id>" / "tp1_<id>" with "_" and "-" (OKX: 51000), so
@@ -341,7 +344,13 @@ function createOkxTrader(overrides = {}) {
     }
   }
 
-  const firstData = (resp) => pyIndex(pyGet(resp, 'data', [{}]), 0);
+  /** okx_trader._okx_first: data[0] of an OKX answer or {} (an answer with an empty / broken data — e.g.
+   *  50004 with data=[] — used to crash place_trade with IndexError). */
+  const firstData = (resp) => {
+    let d;
+    try { d = pyIndex(pyOr(pyGet(resp, 'data'), [{}]), 0); } catch (_e) { return {}; }
+    return isDict(d) ? d : {};
+  };
 
   /** [OKX-ENTRY-TIMEOUT] the entry order by clOrdId → ['found', order] | ['absent', {}] | ['unknown', {}]
    *  (okx_trader._query_entry_by_cl_id); «found» — it traded (live / partially_filled / filled or a fill).
@@ -500,16 +509,19 @@ function createOkxTrader(overrides = {}) {
         const code = pyStr(pyGet(r, 'code', ''));
         let sCode;
         try { sCode = pyStr(pyGet(pyOr(pyIndex(pyOr(pyGet(r, 'data'), [{}]), 0), {}), 'sCode', '')); } catch (_e) { sCode = ''; }
-        if (code !== '-1' && code !== '51016' && sCode !== '51016') return r;
+        // OKX puts an order's code in data[0].sCode; 50004 — the OKX gateway timed out («does not indicate
+        // success or failure of the order, check its status», [OKX-ENTRY-50004])
+        if (code !== '-1' && ![code, sCode].some((c) => c === '51016' || c === '50004')) return r;
         const [st, ord] = await _queryEntryByClId(apiKey, secret, passphrase, instId, entryClId);
         if (st === 'found') {
           // the stop is attached only if attachAlgoOrds of the found order carries one (a legacy entry
           // without attachAlgoOrds, or an answer without the field → the SL is placed separately)
           const att = pyOr(pyGet(ord, 'attachAlgoOrds'), []);
           const hasSl = Array.isArray(att) && att.some((x) => isDict(x) && Boolean(pyStr(pyOr(pyGet(x, 'slTriggerPx', ''), ''))));
+          const hasTp = Array.isArray(att) && att.some((x) => isDict(x) && Boolean(pyStr(pyOr(pyGet(x, 'tpTriggerPx', ''), ''))));
           log.warning(`[OKX-ENTRY-TIMEOUT] ${instId}: entry ${pyStr(pyGet(ord, 'ordId', ''))} found by clOrdId after ${pyStr(pyOr(pyGet(r, 'msg', ''), pyGet(r, 'code', '')))} — adopted (attached SL: ${hasSl ? 'True' : 'False'})`);
           return {
-            code: '0', msg: '', _adopted: true, _attached_sl: hasSl,
+            code: '0', msg: '', _adopted: true, _attached_sl: hasSl, _attached_tp: hasTp,
             data: [{ ordId: pyStr(pyGet(ord, 'ordId', '')), clOrdId: entryClId, sCode: '0', sMsg: '' }],
           };
         }
@@ -583,7 +595,9 @@ function createOkxTrader(overrides = {}) {
             log.error(`[SL-SAFETY-CLOSE-OKX-EXC] ${instId}: ${errStr(se)} — BE-monitor takes over`);
           }
         }
-        atomicTp1Placed = false;
+        // TP1 goes through the loop below — except an atomic entry found by clOrdId that already carries
+        // TP1 (otherwise a second TP1 on top, [OKX-ENTRY-TIMEOUT])
+        atomicTp1Placed = Boolean(adoptedNoSl && pyTruthy(pyGet(resp, '_attached_tp')));
       }
 
       let tpList = [];
@@ -803,7 +817,13 @@ function createOkxTrader(overrides = {}) {
   async function placeSlTpForPosition(apiKey, secret, symbol, direction, posSize, sl, tp1, tp2 = 0.0, tp3 = 0.0, passphrase = '') {
     try {
       const instId = toOkxSymbol(symbol);
-      const [qtyStep, tickSize] = await _getInstrumentFilters(instId);
+      const [qtyStep, tickSize, found] = await _getInstrumentFilters(instId);
+      if (!found) {
+        // [OKX-NO-FILTERS 2026-10] without lotSz / tickSz the stop price would be rounded to a 0.01 step
+        // (past the entry for DOGE) and the old stops go after the new one is on: nothing is touched
+        log.warning(`[OKX-NO-FILTERS] ${instId}: instrument filters unavailable — SL/TP left as is`);
+        return { sl_placed: false, tp_placed: false, error: 'OKX instrument filters unavailable' };
+      }
       const isLong = pyUpper(String(direction)) === 'LONG';
       const closeSide = isLong ? 'sell' : 'buy';
       const posSide = isLong ? 'long' : 'short';
@@ -835,7 +855,9 @@ function createOkxTrader(overrides = {}) {
         }
         let expected = 0;
         let okCount = 0;
-        for (const [tpPrice, tpLots] of tpList) {
+        const legs = tpList.map(([p, n]) => [p, n]);
+        for (let i = 0; i < legs.length; i++) {
+          const [tpPrice, tpLots] = legs[i];
           if (tpPrice <= 0) continue;
           if (tpLots <= 0) {
             // [OKX-LOT-CONTRACTS] a share below one lot — no sz "0" is sent
@@ -849,10 +871,32 @@ function createOkxTrader(overrides = {}) {
             sz: tpSz, tpTriggerPx: PP.roundPrice(tpPrice, tickSize), tpOrdPx: '-1', triggerPxType: 'mark',
           };
           let tpOk = false;
+          let crossed = false;
           for (let a = 0; a < 3; a++) {
             const r = await _request('POST', '/api/v5/trade/order-algo', apiKey, secret, passphrase, null, tpBody);
             if (pyGet(r, 'code') === '0') { okCount += 1; tpOk = true; break; }
+            if (OKX_TP_CROSSED.has(pyStr(pyGet(r, 'code', ''))) || OKX_TP_CROSSED.has(pyStr(pyGet(firstData(r), 'sCode', '')))) {
+              crossed = true;
+              break;
+            }
             await rt.sleep(1.0);
+          }
+          if (crossed) {
+            // [OKX-TP-CROSSED 2026-10] the price is already past this target (TP1 filled while the trade
+            // keeps every target): the leg is not a failure — otherwise the old TPs stayed and the new
+            // TP2 / TP3 stacked on top. Its lots go to the later targets by their shares.
+            expected -= 1;
+            const rest = [];
+            for (let j = i + 1; j < legs.length; j++) if (legs[j][0] > 0) rest.push(j);
+            if (rest.length) {
+              const w = rest.map((j) => legs[j][1]);
+              const tw = w.reduce((a, b) => a + b, 0);
+              const give = tw > 0 ? w.map((x) => Math.floor((tpLots * x) / tw)) : rest.map(() => 0);
+              give[0] += tpLots - give.reduce((a, b) => a + b, 0);
+              rest.forEach((j, k) => { legs[j][1] += give[k]; });
+            }
+            log.info(`[OKX-TP-CROSSED] ${instId} TP@${pyFloatStr(tpPrice)} already crossed — ${tpLots} lot(s) moved to ${rest.length} later TP(s)`);
+            continue;
           }
           if (!tpOk) log.warning(`OKX place_sl_tp_for_position TP@${fmtG(tpPrice, 6)} [${instId}] failed 3x`);
         }
@@ -1022,7 +1066,12 @@ function createOkxTrader(overrides = {}) {
     const instId = toOkxSymbol(symbol);
     const isLong = pyUpper(String(direction)) === 'LONG';
     const posSide = isLong ? 'long' : 'short';
-    const [, tick] = await _getInstrumentFilters(instId);
+    const [, tick, found] = await _getInstrumentFilters(instId);
+    if (!found) {
+      // [OKX-NO-FILTERS] the price step is unknown — the stop is not moved (see placeSlTpForPosition)
+      log.warning(`[OKX-NO-FILTERS] ${instId}: instrument filters unavailable — SL not moved`);
+      return { ok: false, error: 'OKX instrument filters unavailable' };
+    }
     const [oldSl] = await _sideConditionalAlgos(apiKey, secret, passphrase, instId, posSide);
     const [ok, err] = await _fullPositionSl(apiKey, secret, passphrase, instId, posSide, isLong ? 'sell' : 'buy',
       PP.roundPrice(slPrice, tick), oldSl, 1);
@@ -1062,6 +1111,7 @@ function createOkxTrader(overrides = {}) {
     setTrailingSl, setBreakeven, getClosedPnl, getAccountSummary, getDashboard, getBalance, getLastPrice, testConnection,
     syncTime, okxSz, okxCtVal, okxMinSz, getAlgoSlOrders,
     _request, _getInstrumentFilters, _toContracts, _cancelOrderInner, _isoTimestamp: isoTs, _livePosSides, _cleanupSideOrders,
+    _queryEntryByClId,
   };
 }
 

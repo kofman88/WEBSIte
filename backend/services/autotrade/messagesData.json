@@ -23,6 +23,10 @@
   "en": "✅ <b>{symbol}</b>: exchange responded slowly; position is open. SL/TP are being applied automatically — check your positions.",
   "ru": "✅ <b>{symbol}</b>: биржа отвечала с задержкой, позиция открыта. SL/TP применяются автоматически — проверьте в позициях."
  },
+ "auto_trade_timeout_unknown": {
+  "en": "⚠️ <b>{symbol}</b>: OKX did not confirm whether the trade opened. The entry was not re-sent. Check your OKX positions — the bot keeps reconciling and closes the record if there is no position.",
+  "ru": "⚠️ <b>{symbol}</b>: OKX не ответила, открылась ли сделка. Повторно вход не отправлен. Проверьте позиции на OKX — бот продолжит сверку и закроет запись, если позиции нет."
+ },
  "circuit_breaker_notif": {
   "en": "🛑 <b>Circuit Breaker triggered</b>\n\nToday's total loss: <b>{loss:.1f}R</b>\nLimit: <b>−{limit:.1f}R</b>\n\nNew trades blocked until next UTC day.\nSignal {symbol} {direction} skipped.",
   "ru": "🛑 <b>Circuit Breaker активирован</b>\n\nСуммарный убыток за сегодня: <b>{loss:.1f}R</b>\nЛимит: <b>−{limit:.1f}R</b>\n\nНовые сделки заблокированы до следующих UTC-суток.\nСигнал {symbol} {direction} пропущен."

@@ -27,7 +27,7 @@ KEYS = [
     "counter_trend", "counter_trend_label",
     "regime_trending_up", "regime_trending_down", "regime_ranging", "regime_high_vol",
     "auto_trade_limit", "auto_trade_cross_direction", "auto_trade_timeout",
-    "auto_trade_timeout_reconciled", "auto_trade_error", "auto_trade_limit_unfilled",
+    "auto_trade_timeout_reconciled", "auto_trade_timeout_unknown", "auto_trade_error", "auto_trade_limit_unfilled",
     "smc_sl_too_wide", "zb_cooldown_set_notif", "low_notional_skip_notif",
     "leverage_downgrade_warning", "risk_capped_warning", "risk_boosted_warning",
     "tp_placement_failed", "signal_skipped_stale", "circuit_breaker_notif", "sl_streak_notif",

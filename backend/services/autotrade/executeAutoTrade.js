@@ -1785,7 +1785,17 @@ function createExecutor(deps) {
         const to = exchange === 'bingx' ? PLACE_TRADE_TIMEOUT_BINGX : (exchange === 'binance' ? PLACE_TRADE_TIMEOUT_BINANCE : PLACE_TRADE_TIMEOUT_BYBIT);
         log.warning(pf('%s auto_trade %s uid=%s: timeout %ds — reconciling…', strategy, symbol, userId, to));
         const okxPp = or(rget(row, 'okx_passphrase', ''), '');
-        const reco = await reconcile.reconcileTimeoutPosition({ exchange, apiKey, apiSecret, symbol, direction, bybitDemo, okxPassphrase: okxPp });
+        let reco = await reconcile.reconcileTimeoutPosition({ exchange, apiKey, apiSecret, symbol, direction, bybitDemo, okxPassphrase: okxPp });
+        // [OKX-TIMEOUT-UNKNOWN 2026-10] the OKX position did not read → the entry itself is asked by
+        // clOrdId: filled → attached below; unclear → no order cancelled and no SKIP
+        let okxEntryState = '';
+        if (exchange === 'okx' && !(reco && reco.size > 0)) {
+          let okxReco;
+          [okxReco, okxEntryState] = await reconcile.okxEntryAfterTimeout({
+            apiKey, apiSecret, passphrase: okxPp, symbol, direction, tradeId,
+          });
+          if (okxReco) reco = okxReco;
+        }
         if (reco && reco.size > 0) {
           const recoSize = pyFloat(reco.size);
           log.info(pf('[TIMEOUT-RECONCILE] %s uid=%s %s: trade succeeded despite timeout — size=%.4g side=%s order_id=%s',
@@ -1841,8 +1851,43 @@ function createExecutor(deps) {
               log.debug(`reconcile notify: ${errText(se)}`);
             }
           }
+        } else if (exchange === 'okx' && okxEntryState !== 'absent') {
+          // [OKX-TIMEOUT-UNKNOWN 2026-10] neither the position nor the entry read (or the order is accepted
+          // but not filled yet). The symbol's orders are not cancelled (the attached SL / TP1 of an opened
+          // position may be among them) and there is no SKIP: the row gets order_id = the entry's clOrdId —
+          // a new entry on the symbol is blocked, and the BE monitor / reconcile run it as an open trade
+          // and close it when there is no position.
+          let unkOid;
+          try {
+            unkOid = require('../exchanges/okxTrader').okxClId('e', pyStr(tradeId));
+          } catch (_e) {
+            unkOid = 'okx_entry_unknown';
+          }
+          log.error(pf('[OKX-TIMEOUT-UNKNOWN] %s auto_trade %s uid=%s: timeout %ds, entry state unknown (clOrdId=%s) — no cancel, no SKIP; trade kept for reconcile',
+            strategy, symbol, userId, to, unkOid));
+          try {
+            await db.updateTradeBybit(tradeId, unkOid, 0);
+          } catch (de) {
+            log.debug(`okx unknown update_trade: ${errText(de)}`);
+          }
+          await recordExchange(tradeId, exchange);
+          if (bot) {
+            try {
+              await adminAlerts.sendAdminAlert(bot, 'OKX entry state unknown',
+                `<b>uid</b>=${userId} <b>sym</b>=${htmlEscape(symbol)} `
+                + `<b>dir</b>=${direction} <b>clOrdId</b>=${htmlEscape(unkOid)}\n`
+                + 'Позиция и входной ордер не прочитались после таймаута — '
+                + 'сделка оставлена открытой для сверки.',
+                `okx_entry_unknown_${userId}_${symbol}`, 'auto_trade_error');
+            } catch (ae) {
+              log.debug(`admin_alert send failed: ${errText(ae)}`);
+            }
+            await send(bot, userId, t('auto_trade_timeout_unknown', lang, { symbol }));
+          }
         } else {
-          const cancelled = await reconcile.cancelPendingAfterTimeout({ exchange, apiKey, apiSecret, symbol, bybitDemo, okxPassphrase: okxPp });
+          // [OKX-TIMEOUT-UNKNOWN] an OKX entry is always market: nothing of ours rests, and a cancel would
+          // take the symbol's other algos; OKX gets here only when the entry is surely absent.
+          const cancelled = exchange === 'okx' ? 0 : await reconcile.cancelPendingAfterTimeout({ exchange, apiKey, apiSecret, symbol, bybitDemo, okxPassphrase: okxPp });
           log.error(pf('%s auto_trade %s uid=%s: timeout %ds, no position found on exchange — SKIP (cancelled %d pending order(s))', strategy, symbol, userId, to, cancelled));
           await db.setTradeResult(tradeId, 'SKIP', 0.0);
           if (bot) await send(bot, userId, t('auto_trade_timeout', lang, { symbol }));

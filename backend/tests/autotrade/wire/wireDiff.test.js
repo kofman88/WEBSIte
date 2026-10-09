@@ -147,6 +147,34 @@ describe(`wire differential — ${FX.vectors.length} scenarios replayed against 
       expect(trade(got, v.case.uid)).toMatchObject({ result: 'SKIP', state: 'FAILED', order_id: '' });
     });
 
+    it('[OKX-TIMEOUT-UNKNOWN] OKX accepted the entry but neither the positions nor the order read: nothing cancelled, no SKIP, the row keeps the clOrdId', async () => {
+      const v = vec('okx_timeout_positions_unreadable_unknown');
+      const got = await replay(v);
+      const sim = Object.values(v.expected.sim)[0];
+      expect(sim.positions.length).toBe(1);
+      expect(sim.orders.map((o) => o.type).sort()).toEqual(['STOP', 'TP']);     // the attached SL / TP1 survived
+      expect(reqs(got, /^POST \/api\/v5\/trade\/cancel-algos/).length).toBe(0);
+      expect(reqs(got, /^POST \/api\/v5\/trade\/order$/).length).toBe(1);       // never re-sent
+      expect(trade(got, v.case.uid)).toMatchObject({ result: '', order_id: 'eW81890' });
+      expect(msgs(got).some((m) => m.includes('OKX не ответила, открылась ли сделка'))).toBe(true);
+    });
+
+    it('[OKX-TIMEOUT-UNKNOWN] positions unreadable but the order reads on the timeout reconcile: the filled entry is attached in coins', async () => {
+      const v = vec('okx_timeout_positions_unreadable_found');
+      const got = await replay(v);
+      expect(trade(got, v.case.uid)).toMatchObject({ result: '', order_id: '7001', qty: 5.86 });
+      expect(msgs(got).some((m) => m.includes('биржа отвечала с задержкой'))).toBe(true);
+      expect(reqs(got, /^POST \/api\/v5\/trade\/cancel-algos/).length).toBe(0);
+    });
+
+    it('[OKX-TIMEOUT-UNKNOWN] the entry never reached OKX and the positions do not read: two 51603 → SKIP without cancelling the symbol\'s orders', async () => {
+      const v = vec('okx_timeout_positions_unreadable_absent');
+      const got = await replay(v);
+      expect(trade(got, v.case.uid)).toMatchObject({ result: 'SKIP', state: 'FAILED', order_id: '' });
+      expect(reqs(got, /^GET \/api\/v5\/trade\/orders-algo-pending/).length).toBe(0);
+      expect(reqs(got, /^POST \/api\/v5\/trade\/cancel-/).length).toBe(0);
+    });
+
     it('[BINGX-DUP-VERIFY] 101204 «Insufficient margin» on a clientOrderId order: the cid is looked up, not found → a real refusal, no phantom OPEN', async () => {
       const v = vec('tgt_bingx_insufficient_margin');
       const got = await replay(v);

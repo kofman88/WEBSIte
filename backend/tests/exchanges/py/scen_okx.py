@@ -36,6 +36,9 @@ def algo_ok(aid="681096944655273984"):
 
 
 ALGO_ERR = err("1", "Operation failed.", [{"algoId": "", "sCode": "51277", "sMsg": "TP trigger price cannot be higher than the last price"}])
+# a plain refusal (51277 / 51279 mean «trigger already crossed» to place_sl_tp_for_position, [OKX-TP-CROSSED])
+ALGO_REFUSED = err("1", "Operation failed.", [{"algoId": "", "sCode": "51000", "sMsg": "Parameter tpTriggerPx error"}])
+CROSSED_SELL = err("1", "Operation failed.", [{"algoId": "", "sCode": "51279", "sMsg": "TP trigger price cannot be lower than the last price"}])
 
 
 def pos(inst_id="BTC-USDT-SWAP", p="1", side="long"):
@@ -204,6 +207,18 @@ S("pt_entry_dup_clordid_scode", PT, LONG, LADDER,
    R("GET", O, FOUND), R("POST", A, algo_ok("a2"), algo_ok("a3"))])
 S("pt_entry_dup_clordid_top_code_absent", PT, LONG, {"passphrase": PP},
   [I, B, L, R("POST", O, err("51016", "Duplicated clOrdId")), R("GET", O, err("51603", "Order does not exist"))])
+# ── [OKX-ENTRY-50004 2026-10] the OKX gateway timeout «does not indicate success or failure» ──
+S("pt_entry_50004_top_found", PT, LONG, LADDER,
+  [I, B, L, R("POST", O, err("50004", "Endpoint request timeout")), R("GET", O, FOUND), R("POST", A, algo_ok("sl"), algo_ok("a2"), algo_ok("a3"))])
+S("pt_entry_50004_scode_absent", PT, LONG, {"passphrase": PP},
+  [I, B, L, R("POST", O, err("1", "Operation failed.", [{"ordId": "", "sCode": "50004", "sMsg": "Endpoint request timeout"}])),
+   R("GET", O, err("51603", "Order does not exist"))])
+S("pt_entry_empty_data_refusal", PT, LONG, {"passphrase": PP},
+  [I, B, L, R("POST", O, err("50013", "Systems are busy. Please try again later."))])
+FOUND_TP_ONLY = ok({"ordId": "o-91", "clOrdId": "eokxtrade12345", "state": "filled", "accFillSz": "0.58",
+                    "attachAlgoOrds": [{"attachAlgoClOrdId": "tp1okxtrade12345", "tpTriggerPx": "88500.0"}]})
+S("pt_entry_lost_found_tp1_attached_no_sl", PT, LONG, LADDER,
+  [I, B, L, R("POST", O, {"raise": "timeout"}), R("GET", O, FOUND_TP_ONLY), R("POST", A, algo_ok("sl"), algo_ok("a2"), algo_ok("a3"))])
 S("pt_entry_other_refusal_not_looked_up", PT, LONG, {"passphrase": PP},
   [I, B, L, R("POST", O, err("1", "Operation failed.", [{"ordId": "", "sCode": "51008", "sMsg": "Insufficient USDT margin"}]))])
 S("pt_legacy_entry_lost_found", PT, LONG, LADDER,
@@ -317,7 +332,7 @@ S("sltp_full", "place_sl_tp_for_position", [KEY, SEC, "DOGE-USDT-SWAP", "LONG", 
    R("POST", A, algo_ok("sl"), algo_ok("t1"), algo_ok("t2"), algo_ok("t3"))])
 S("sltp_failures", "place_sl_tp_for_position", [KEY, SEC, "BTC-USDT-SWAP", "short", 0.5, 88000.0, 85500.0, 84500.0, 0.0, PP], {},
   [I, R("GET", "/api/v5/trade/orders-algo-pending", err("50001", "x")),
-   R("POST", A, ALGO_ERR, ALGO_ERR, ALGO_ERR, algo_ok(), ALGO_ERR, ALGO_ERR, ALGO_ERR)])
+   R("POST", A, ALGO_REFUSED, ALGO_REFUSED, ALGO_REFUSED, algo_ok(), ALGO_REFUSED, ALGO_REFUSED, ALGO_REFUSED)])
 S("sltp_no_tp", "place_sl_tp_for_position", [KEY, SEC, "BTC-USDT-SWAP", "LONG", 0.5, 86000.0, 0.0], {},
   [I, R("GET", "/api/v5/trade/orders-algo-pending", ok()), R("POST", A, algo_ok())])
 # ── [OKX-SLTP-REPLACE 2026-10] old SL off only after the new one, other side untouched ──
@@ -354,8 +369,32 @@ S("sltp_doge_one_lot_full_tp1", "place_sl_tp_for_position",
    R("POST", A, algo_ok("sl"), algo_ok("t1")), R("POST", "/api/v5/trade/cancel-algos", ok())])
 S("sltp_doge_ten_lots_ladder", "place_sl_tp_for_position",
   [KEY, SEC, "DOGE-USDT-SWAP", "SHORT", 10000.0, 0.19111, 0.17851, 0.17, 0.16, PP], {},
-  [DOGE_I, R("GET", "/api/v5/trade/orders-algo-pending", ok()), R("POST", A, algo_ok("sl"), algo_ok("t1"), ALGO_ERR, ALGO_ERR, ALGO_ERR,
-                                                                     algo_ok("t3"))])
+  [DOGE_I, R("GET", "/api/v5/trade/orders-algo-pending", ok()), R("POST", A, algo_ok("sl"), algo_ok("t1"), ALGO_REFUSED, ALGO_REFUSED,
+                                                                     ALGO_REFUSED, algo_ok("t3"))])
+# ── [OKX-TP-CROSSED 2026-10] a target the price already passed: its lots go to the later targets ──
+S("sltp_tp1_crossed_lots_to_later_tps", "place_sl_tp_for_position",
+  [KEY, SEC, "BTC-USDT-SWAP", "LONG", 0.02, 86000.0, 88500.0, 89500.0, 90500.0, PP], {},
+  [I, R("GET", "/api/v5/trade/orders-algo-pending", PENDING_MIX), R("POST", "/api/v5/trade/cancel-algos", ok(), ok()),
+   R("POST", A, algo_ok("new-sl"), CROSSED_SELL, algo_ok("t2"), algo_ok("t3"))])
+S("sltp_tp1_tp2_crossed_top_code", "place_sl_tp_for_position",
+  [KEY, SEC, "BTC-USDT-SWAP", "SHORT", 0.07, 88000.0, 85500.0, 84500.0, 83500.0, PP], {},
+  [I, R("GET", "/api/v5/trade/orders-algo-pending", ok({"algoId": "old-tp", "posSide": "short", "tpTriggerPx": "85000"})),
+   R("POST", "/api/v5/trade/cancel-algos", ok()),
+   R("POST", A, algo_ok("sl"), err("51277", "TP trigger price cannot be higher than the last price"), ALGO_ERR, algo_ok("t3"))])
+S("sltp_every_tp_crossed_keeps_old", "place_sl_tp_for_position",
+  [KEY, SEC, "BTC-USDT-SWAP", "LONG", 0.02, 86000.0, 88500.0, 89500.0, 0.0, PP], {},
+  [I, R("GET", "/api/v5/trade/orders-algo-pending", PENDING_MIX), R("POST", "/api/v5/trade/cancel-algos", ok()),
+   R("POST", A, algo_ok("new-sl"), CROSSED_SELL)])
+S("sltp_crossed_then_refused_keeps_old", "place_sl_tp_for_position",
+  [KEY, SEC, "BTC-USDT-SWAP", "LONG", 0.02, 86000.0, 88500.0, 89500.0, 90500.0, PP], {},
+  [I, R("GET", "/api/v5/trade/orders-algo-pending", PENDING_MIX), R("POST", "/api/v5/trade/cancel-algos", ok()),
+   R("POST", A, algo_ok("new-sl"), CROSSED_SELL, ALGO_REFUSED, ALGO_REFUSED, ALGO_REFUSED, algo_ok("t3"))])
+# ── [OKX-NO-FILTERS 2026-10] no instrument filters → no stop is touched ──
+S("sltp_no_instrument_filters", "place_sl_tp_for_position",
+  [KEY, SEC, "DOGE-USDT-SWAP", "LONG", 1000.0, 0.0987, 0.104, 0.0, 0.0, PP], {},
+  [R("GET", "/api/v5/public/instruments", ok())])
+S("trail_no_instrument_filters", "set_trailing_sl", [KEY, SEC, "DOGE-USDT-SWAP", 0.0987, "LONG", 0, PP], {},
+  [R("GET", "/api/v5/public/instruments", {"raise": "timeout"})])
 S("trail_moves_full_sl_by_amend", "set_trailing_sl", [KEY, SEC, "BTC-USDT-SWAP", 87100.04, "LONG", 0, PP], {},
   [I, R("GET", "/api/v5/trade/orders-algo-pending", ok(FULL_SL, {"algoId": "att-sl", "posSide": "long", "slTriggerPx": "86000"})),
    R("POST", "/api/v5/trade/amend-algos", ok({"algoId": "full-sl", "sCode": "0"})), R("POST", "/api/v5/trade/cancel-algos", ok())])
