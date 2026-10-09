@@ -140,7 +140,7 @@ async function runEngine({ vi, stopDuringT4 = false } = {}) {
   smc._resetDefault();
   const worker = runWorker(ch.port1, {
     logs: false,
-    deps: { fetcher, wsPool, cache: candleCache, candleStore, env: { ...process.env, CACHE_WARMER_ENABLED: '1', SCAN_WORKERS: '4' }, regimeProvider: false },
+    deps: { fetcher, wsPool, cache: candleCache, candleStore, env: { ...process.env, CACHE_WARMER_ENABLED: '1' }, regimeProvider: false },
   });
   ch.port2.postMessage({ type: 'start', options: { only: ['ws_feed', 'scanner', 'smc_scanner', 'volume_scanner'] } });
 

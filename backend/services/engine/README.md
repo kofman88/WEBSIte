@@ -367,6 +367,15 @@ the PY311 trace in `tests/engine/worker/scheduler.timing.test.js`), the main thr
 `main` side (ghost cleanup, Genome maintenance and evolution) and answers the worker's
 delivery RPCs (`signalDelivery.js`).
 
+Before the loops the worker boots like bot.py `main()` before its gather
+(`scheduler.boot()`, asked for by `startEngine`): "⏳ Инициализация кэша..." +
+`candleCache.initCache(Config.CACHE_MAX_KEYS)` (env `CACHE_MAX_KEYS`, legacy
+`CACHE_MAX_SYMBOLS`, default 4000), then `exchangeSymbols.startBackgroundRefresh()` (the
+per-exchange listings the scanners filter by; "📋 Exchange symbols loaded: {…}"). The rest of
+that block belongs to later milestones (trader time sync, auto-trade restores: M13; the ML
+filter is not ported). `botConfig()` is config.py: the performance constants (12 / 10 / 15 /
+0.01 / 5, no env), `PAYMENT_ADDRESS`, `LEVELS_MIN_RR` (env, default 1.8).
+
 ### The three scanners as bot.py starts them
 
 `scanners/index.js` resolves the modules by the bot's names; the scheduler hands each the

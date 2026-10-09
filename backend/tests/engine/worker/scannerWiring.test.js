@@ -302,6 +302,46 @@ describe('the site side of telegram_safe / chart_sender (siteSafeSend, siteRemem
   });
 });
 
+describe('the worker boot (bot.py main() before the gather)', () => {
+  it('start {boot: true}: the candle cache and the exchange symbol lists before the loops; startEngine asks for it', async () => {
+    vi.useRealTimers();
+    const EW = req('../../../workers/engineWorker.js');
+    const { MessageChannel } = req('worker_threads');
+    const { log, lines } = capture();
+    const order = [];
+    let made = null;
+    const cache = { getCache: () => made, initCache: (n) => { order.push(['init_cache', n]); made = {}; }, getCandles: () => null, getCoins: () => null };
+    const exchangeSymbols = {
+      startBackgroundRefresh: async () => { order.push(['exchange_symbols']); return { stop() { order.push(['refresh_stopped']); } }; },
+      getStats: () => ({ bybit: 1 }),
+    };
+    const ch = new MessageChannel();
+    const seen = [];
+    ch.port2.on('message', (m) => { seen.push(m); if (m.type === 'ready') order.push(['ready', m.tasks]); });
+    const w = EW.runWorker(ch.port1, { logs: false, deps: { log, cache, exchangeSymbols, fetcher: {}, registry: { forceSave: () => 0 } } });
+    ch.port2.postMessage({ type: 'start', options: { boot: true, only: [] } });
+    for (let i = 0; i < 50 && !seen.some((m) => m.type === 'ready'); i++) await new Promise((r) => setImmediate(r));
+    expect(order).toEqual([['init_cache', 4000], ['exchange_symbols'], ['ready', []]]);
+    expect(msgs(lines)).toEqual(['⏳ Инициализация кэша...', "📋 Exchange symbols loaded: {'bybit': 1}"]);
+    await w.stop();
+    expect(order.slice(-1)).toEqual([['refresh_stopped']]);
+    ch.port1.close();
+    ch.port2.close();
+    // the production entry asks the worker to boot
+    const posted = [];
+    const { EventEmitter } = req('events');
+    class FakeWorker extends EventEmitter { postMessage(m) { posted.push(m); if (m.type === 'shutdown') Promise.resolve().then(() => { this.emit('message', { type: 'stopped' }); this.emit('exit', 0); }); } terminate() { return Promise.resolve(); } }
+    const silent = { debug() {}, info() {}, warn() {}, warning() {}, error() {} };
+    const eng = EW.startEngine({ log: silent, delivery: { alertAdmins: async () => 0, handleWorkerMessage: () => false }, spawn: () => new FakeWorker(), mainDeps: { only: [], log: silent } });
+    try {
+      expect(posted[0]).toEqual({ type: 'start', options: { boot: true } });
+      await eng.stop();
+    } finally {
+      req('../../../services/genome/regime.js').setRegimeProvider(null);
+    }
+  });
+});
+
 describe('cache_gc over the real volume module', () => {
   it('volume_scanner.gc_sent(): _sent_bars older than 24 h are freed and counted', () => {
     const d = VS.defaultScanner;

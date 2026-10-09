@@ -67,7 +67,9 @@
 
 const os = require('os');
 const { performance } = require('perf_hooks');
-const { fmtFixed } = require('../../strategies/common/pyfmt');
+const { fmtFixed, pyRepr } = require('../../strategies/common/pyfmt');
+const { pyStrRepr } = require('../../strategies/common/pyUnicode');
+const { pyInt, pyFloat } = require('./pycoerce');
 const { log: mdLog } = require('../marketData/mdLog');
 
 const RESTART_MAX_DELAY_S = 300;
@@ -93,21 +95,52 @@ const LOW_LOAD_TIMEOUT_S = 600.0;
 const LOW_LOAD_RECHECK_S = 60.0;
 const CPU_WINDOW_S = 5.0;
 
-/** The bot's Config fields a MidScanner reads (config.py defaults); ADMIN_IDS are site admins (users.is_admin). */
+/**
+ * Config.CACHE_MAX_KEYS: int(CACHE_MAX_KEYS) when set (non-empty), else the deprecated
+ * CACHE_MAX_SYMBOLS (with its warning), else 4000. CPython int() of the text (a bad value raises,
+ * like the bot's config import).
+ */
+function cacheMaxKeys(env = process.env, log = mdLog) {
+  if (env.CACHE_MAX_KEYS) return pyInt(String(env.CACHE_MAX_KEYS));
+  if (env.CACHE_MAX_SYMBOLS) {
+    log.warning('env var CACHE_MAX_SYMBOLS is deprecated, rename to CACHE_MAX_KEYS (semantics unchanged)');
+    return pyInt(String(env.CACHE_MAX_SYMBOLS));
+  }
+  return 4000;
+}
+
+/**
+ * The bot's Config fields a MidScanner reads (config.py): the performance constants
+ * (API_CONCURRENCY 12, SCAN_WORKERS 10, CHUNK_SIZE 15, CHUNK_SLEEP 0.01, SCAN_LOOP_SLEEP 5 — class
+ * constants, no env), PAYMENT_ADDRESS = os.getenv("PAYMENT_ADDRESS", ""), LEVELS_MIN_RR =
+ * float(os.environ.get("LEVELS_MIN_RR", "1.8")), CACHE_MAX_KEYS. ADMIN_IDS are site admins
+ * (users.is_admin).
+ */
 function botConfig(env = process.env) {
-  const int = (k, d) => {
-    const n = Number.parseInt(env[k], 10);
-    return Number.isFinite(n) ? n : d;
-  };
   return Object.freeze({
     ADMIN_IDS: Object.freeze([]),
-    API_CONCURRENCY: int('API_CONCURRENCY', 12),
-    SCAN_WORKERS: int('SCAN_WORKERS', 10),
+    API_CONCURRENCY: 12,
+    SCAN_WORKERS: 10,
     CHUNK_SIZE: 15,
     CHUNK_SLEEP: 0.01,
     SCAN_LOOP_SLEEP: 5,
+    PAYMENT_ADDRESS: env.PAYMENT_ADDRESS === undefined ? '' : String(env.PAYMENT_ADDRESS),
+    LEVELS_MIN_RR: pyFloat(env.LEVELS_MIN_RR === undefined ? '1.8' : String(env.LEVELS_MIN_RR)),
+    CACHE_MAX_KEYS: cacheMaxKeys(env, { warning() {} }),
     env,
   });
+}
+
+/** repr(dict) of exchange_symbols.get_stats() for the "📋 Exchange symbols loaded: %s" line. */
+function statsRepr(stats) {
+  const FLOATS = new Set(['updated_at', 'binance_paused_until']);
+  const val = (k, v) => {
+    if (v === null || v === undefined) return 'None';
+    if (typeof v === 'boolean') return v ? 'True' : 'False';
+    if (typeof v === 'number') return FLOATS.has(k) ? pyRepr(v) : String(Math.trunc(v));
+    return pyStrRepr(String(v));
+  };
+  return `{${Object.entries(stats || {}).map(([k, v]) => `'${k}': ${val(k, v)}`).join(', ')}}`;
 }
 
 /** html.escape(s, quote=True) */
@@ -675,6 +708,7 @@ function createScheduler({ side = 'all', deps = {} } = {}) {
     cache: lazyMod(deps, 'cache', '../marketData/candleCache'),
     wsPool: lazyMod(deps, 'wsPool', '../marketData/wsPool'),
     candleStore: lazyMod(deps, 'candleStore', '../marketData/candleStore'),
+    exchangeSymbols: lazyMod(deps, 'exchangeSymbols', '../exchanges/exchangeSymbols'),
     ghost: lazyMod(deps, 'ghost', './ghostCleanup'),
     genomeMaintenance: lazyMod(deps, 'genomeMaintenance', '../genome/maintenance'),
     genomeEvolve: lazyMod(deps, 'genomeEvolve', '../genome/evolve'),
@@ -764,6 +798,30 @@ function createScheduler({ side = 'all', deps = {} } = {}) {
   return {
     ctx, signal, tasks: plan.map((t) => t.name),
 
+    /**
+     * bot.py main() before the gather (worker side): "⏳ Инициализация кэша..." +
+     * cache.init_cache(max_keys=Config.CACHE_MAX_KEYS) (skipped when this thread's cache already
+     * exists), then exchange_symbols.start_background_refresh() — the per-exchange listings the
+     * scanners filter by — "📋 Exchange symbols loaded: {…}" / "Exchange symbols load failed: …".
+     * The engine worker runs it when started with `boot` (startEngine); tests drive start() alone.
+     */
+    async boot() {
+      if (side === 'main') return;
+      const cache = ctx.cache();
+      if (cache && typeof cache.initCache === 'function' && !(typeof cache.getCache === 'function' && cache.getCache())) {
+        log.info('⏳ Инициализация кэша...');
+        cache.initCache(cacheMaxKeys(env, log), { log });
+      }
+      try {
+        const ex = ctx.exchangeSymbols();
+        ctx.state.exchangeRefresh = await ex.startBackgroundRefresh({ log, env, sleep, now: () => ctx.now() });
+        if (signal.aborted && ctx.state.exchangeRefresh) ctx.state.exchangeRefresh.stop();
+        log.info(`📋 Exchange symbols loaded: ${statsRepr(ex.getStats({ now: () => ctx.now(), env }))}`);
+      } catch (e) {
+        log.warning(`Exchange symbols load failed: ${e && e.message}`);
+      }
+    },
+
     /** Start every task of this side in the gather order. Returns the started task names. */
     start() {
       if (started) return this.tasks;
@@ -802,6 +860,9 @@ function createScheduler({ side = 'all', deps = {} } = {}) {
      */
     async stop({ timeoutMs = SHUTDOWN_WAIT_MS } = {}) {
       log.info('🛑 Завершение — отменяем фоновые задачи...');
+      if (ctx.state.exchangeRefresh) {
+        try { ctx.state.exchangeRefresh.stop(); } catch (_e) { /* best effort */ }
+      }
       stopEvent.set();
       controller.abort();
       let timer = null;
@@ -930,7 +991,7 @@ function withGlobalTrend(rest, { now, env, log }) {
 
 module.exports = {
   TASKS, RESTART_MAX_DELAY_S, RESTART_HEALTHY_RUN_S, SHUTDOWN_WAIT_MS,
-  botConfig, htmlEscape, errHead, makeSleep, StopEvent, guarded, guardedRestart, HealthMonitor,
+  botConfig, cacheMaxKeys, statsRepr, htmlEscape, errHead, makeSleep, StopEvent, guarded, guardedRestart, HealthMonitor,
   coinUniverseWarmupLoop, cacheGcOnce, cacheGcLoop, ghostCleanupLoop, startWsFeed, startCacheWarmer,
   procCpuRatio, waitForLowLoad, runEvolutionCycle, installTrendMonitor, installDefault, createScheduler,
   siteRememberSignalMessage, siteSafeSend, siteSendChart, withGlobalTrend,

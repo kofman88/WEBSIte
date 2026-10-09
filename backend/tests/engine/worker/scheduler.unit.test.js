@@ -421,9 +421,45 @@ describe('createScheduler', () => {
     ac.abort();
   });
 
-  it('errHead = str(e)[:300] by code points; botConfig reads API_CONCURRENCY / SCAN_WORKERS from the env', () => {
+  it('errHead = str(e)[:300] by code points; botConfig = config.py (the performance constants have no env override)', () => {
     expect(SCH.errHead(new Error('🙂'.repeat(301)))).toBe('🙂'.repeat(300));
     expect(SCH.errHead('plain')).toBe('plain');
-    expect(SCH.botConfig({ API_CONCURRENCY: '7', SCAN_WORKERS: 'x' })).toMatchObject({ API_CONCURRENCY: 7, SCAN_WORKERS: 10, CHUNK_SIZE: 15 });
+    expect(SCH.botConfig({ API_CONCURRENCY: '7', SCAN_WORKERS: '4' })).toMatchObject({
+      API_CONCURRENCY: 12, SCAN_WORKERS: 10, CHUNK_SIZE: 15, CHUNK_SLEEP: 0.01, SCAN_LOOP_SLEEP: 5,
+      PAYMENT_ADDRESS: '', LEVELS_MIN_RR: 1.8, CACHE_MAX_KEYS: 4000,
+    });
+    expect(SCH.botConfig({ PAYMENT_ADDRESS: '0xabc', LEVELS_MIN_RR: ' 2.5 ', CACHE_MAX_KEYS: '6_000' })).toMatchObject({ PAYMENT_ADDRESS: '0xabc', LEVELS_MIN_RR: 2.5, CACHE_MAX_KEYS: 6000 });
+    // float() / int() of a bad value raise, like the bot's config import
+    expect(() => SCH.botConfig({ LEVELS_MIN_RR: 'abc' })).toThrow("could not convert string to float: 'abc'");
+    expect(() => SCH.cacheMaxKeys({ CACHE_MAX_KEYS: '4k' })).toThrow("invalid literal for int() with base 10: '4k'");
+    const { log, lines } = capture();
+    expect(SCH.cacheMaxKeys({ CACHE_MAX_KEYS: '', CACHE_MAX_SYMBOLS: '300' }, log)).toBe(300);
+    expect(lines).toEqual([['WARNING', 'env var CACHE_MAX_SYMBOLS is deprecated, rename to CACHE_MAX_KEYS (semantics unchanged)', null]]);
+  });
+
+  it('boot(): "⏳ Инициализация кэша..." + init_cache(CACHE_MAX_KEYS), then the exchange symbol lists ("📋 Exchange symbols loaded: {…}" as repr(dict))', async () => {
+    const { log, lines } = capture();
+    const inits = [];
+    let made = null;
+    const cache = { getCache: () => made, initCache: (n) => { inits.push(n); made = {}; return made; } };
+    const exchangeSymbols = {
+      startBackgroundRefresh: async () => ({ stop() { exchangeSymbols.stopped = true; } }),
+      getStats: () => ({ bybit: 512, bingx: 600, binance: 0, okx: 300, updated_at: 1791565200.25, age_sec: 0, skip_counter: 0, ttl_sec: 14400, stale_threshold_sec: 28800, binance_disabled: false, binance_paused_until: 0, binance_paused: false }),
+    };
+    const s = SCH.createScheduler({ side: 'worker', deps: { bot: {}, log, cache, exchangeSymbols, env: { CACHE_MAX_KEYS: '5000' }, only: [], registry: { forceSave: () => 0 } } });
+    await s.boot();
+    await s.boot();                                  // the cache already exists → not re-created
+    expect(inits).toEqual([5000]);
+    const loaded = "📋 Exchange symbols loaded: {'bybit': 512, 'bingx': 600, 'binance': 0, 'okx': 300, 'updated_at': 1791565200.25, 'age_sec': 0, "
+      + "'skip_counter': 0, 'ttl_sec': 14400, 'stale_threshold_sec': 28800, 'binance_disabled': False, 'binance_paused_until': 0.0, 'binance_paused': False}";
+    expect(lines.map((l) => l[1])).toEqual(['⏳ Инициализация кэша...', loaded, loaded]);
+    const stopP = s.stop({ timeoutMs: 10 });
+    await vi.advanceTimersByTimeAsync(10);
+    await stopP;
+    expect(exchangeSymbols.stopped).toBe(true);      // the refresh loop ends with the engine
+    const failing = SCH.createScheduler({ side: 'worker', deps: { bot: {}, log, cache, exchangeSymbols: { startBackgroundRefresh: async () => { throw new Error('dns'); } }, only: [] } });
+    await failing.boot();
+    expect(lines.slice(-1)).toEqual([['WARNING', 'Exchange symbols load failed: dns', null]]);
+    expect(SCH.statsRepr({ age_sec: null, updated_at: 0 })).toBe("{'age_sec': None, 'updated_at': 0.0}");
   });
 });

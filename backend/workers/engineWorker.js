@@ -17,7 +17,9 @@
  *
  * Message protocol (structured clone):
  *   main → worker
- *     { type: 'start', options? }        start the scheduler ('worker' side; options.only = task names)
+ *     { type: 'start', options? }        start the scheduler ('worker' side; options.only = task names;
+                                        options.boot = run scheduler.boot() first: candle cache +
+                                        exchange symbol lists, as startEngine does)
  *     { type: 'shutdown' }               graceful stop: scheduler.stop() (≤ 4 s) + registry force-save
  *     { type: 'ping', id }               → { type: 'pong', id, ts }
  *     { type: 'rpc-result', id, ok, result | error }   answer to a delivery request
@@ -101,7 +103,7 @@ function runWorker(port, {
   };
   const beat = () => post({ type: 'heartbeat', ts: Date.now() / 1000, regime: regimeNow() });
 
-  function start(options = {}) {
+  async function start(options = {}) {
     if (scheduler) return;
     try {
       const { createScheduler } = require('../services/engine/scheduler');
@@ -109,6 +111,9 @@ function runWorker(port, {
       if (options.only) sd.only = options.only;
       scheduler = createScheduler({ side: 'worker', deps: sd });
       scheduler.ctx.health.onHeartbeat = (name, ts) => post({ type: 'health', name, ts });
+      // bot.py main() before the gather: the candle cache, the exchange symbol lists
+      if (options.boot) await scheduler.boot();
+      if (stopping) return;
       const tasks = scheduler.start();
       let scanners = {};
       try { scanners = scheduler.ctx.scanners.describe(); } catch (_e) { scanners = {}; }
@@ -339,7 +344,7 @@ function engineLog(log) {
   };
 }
 
-function startEngine({ log = null, env = process.env, spawn = null, delivery = null, mainDeps = {} } = {}) {
+function startEngine({ log = null, env = process.env, spawn = null, delivery = null, mainDeps = {}, startOptions = null } = {}) {
   const L = log ? engineLog(log) : require('../services/marketData/mdLog').log;
   // the engine modules of the main thread (genome, ghost cleanup …) log through mdLog → the site logger
   if (log) require('../services/marketData/mdLog').setLogger(L);
@@ -350,7 +355,7 @@ function startEngine({ log = null, env = process.env, spawn = null, delivery = n
   // filters of the genome): the worker's cached BTC regime, forwarded with every heartbeat.
   regimeHook.setRegimeProvider(() => (regime.value !== null && Date.now() / 1000 - regime.at <= CACHE_TTL ? regime.value : null));
   const supervisor = createSupervisor({
-    delivery, spawn, log: L, env,
+    delivery, spawn, log: L, env, startOptions: { boot: true, ...(startOptions || {}) },
     onRegime: (r, ts) => { regime.value = r; regime.at = ts; },
   }).start();
   const { createScheduler } = require('../services/engine/scheduler');

@@ -58,7 +58,7 @@ describe('engine worker integration — the three real scanners over one 1h clos
     expect(R.tasks).toEqual(['scanner', 'ws_feed', 'smc_scanner', 'volume_scanner']);
     for (const name of ['MidScanner', 'SmcScanner', 'VolumeScanner']) expect(R.scanners[name]).toMatchObject({ available: true, error: null });
     const starts = R.logs.map(([, , m]) => m);
-    expect(starts).toContain('🚀 MidScanner v4 | Воркеров: 4 | API: 12');
+    expect(starts).toContain('🚀 MidScanner v4 | Воркеров: 10 | API: 12');
     expect(starts).toContain('[WS-TRIGGER] registered bar-close callback for LEVELS scanner');
     expect(starts).toContain('[WS-TRIGGER] registered bar-close callback for SMC scanner');
     expect(starts).toContain('[VOLUME-START] Volume scanner started, interval=60s');
