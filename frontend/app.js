@@ -11,8 +11,9 @@
 
 (() => {
 
-const API_BASE = (location.hostname === 'localhost' || location.hostname === '127.0.0.1')
-  ? 'http://localhost:3000/api' : '/api';
+// Same origin: server.js serves these pages and /api alike (also on localhost); the CSP's
+// connect-src 'self' allows exactly that.
+const API_BASE = '/api';
 
 // ── Auth — token storage + refresh rotation ────────────────────────────
 // Impersonation mode: if the URL has #imp=<token>, we're a fresh tab opened
@@ -512,6 +513,9 @@ const Notifications = (function () {
         await buildPanel();
       });
       panel.querySelectorAll('[data-notif-id]').forEach((el) => {
+        // hover tint (was inline onmouseover / onmouseout: blocked by the CSP's script-src-attr)
+        el.addEventListener('mouseenter', () => { el.style.background = 'rgba(255,255,255,.02)'; });
+        el.addEventListener('mouseleave', () => { el.style.background = 'transparent'; });
         el.addEventListener('click', async () => {
           const id = +el.getAttribute('data-notif-id');
           const link = el.getAttribute('data-link');
@@ -526,7 +530,7 @@ const Notifications = (function () {
 
   function renderItem(n) {
     const unreadDot = n.readAt ? '' : '<span style="width:8px;height:8px;border-radius:50%;background:#5C80E3;display:inline-block;margin-right:8px;flex-shrink:0"></span>';
-    return `<div data-notif-id="${n.id}" data-link="${n.link || ''}" style="padding:12px 16px;border-bottom:1px solid rgba(31,41,55,.5);cursor:pointer;font-size:13px;${n.readAt ? 'opacity:.6' : ''}" onmouseover="this.style.background='rgba(255,255,255,.02)'" onmouseout="this.style.background='transparent'">
+    return `<div data-notif-id="${n.id}" data-link="${n.link || ''}" style="padding:12px 16px;border-bottom:1px solid rgba(31,41,55,.5);cursor:pointer;font-size:13px;${n.readAt ? 'opacity:.6' : ''}">
       <div style="display:flex;align-items:start">${unreadDot}<div style="flex:1"><div style="font-weight:500;color:#e5e5e5;margin-bottom:2px">${escHtml(n.title)}</div>
       ${n.body ? `<div style="color:rgba(255,255,255,.6);font-size:12px">${escHtml(n.body)}</div>` : ''}
       <div style="color:rgba(255,255,255,.4);font-size:11px;margin-top:4px">${Fmt.timeAgo(n.createdAt)}</div></div></div>
@@ -541,6 +545,15 @@ const Notifications = (function () {
 })();
 window.Notifications = Notifications;
 window.I18n = I18n;
+
+// Sign-out controls are <button data-logout> (inline on* handler attributes are blocked by the
+// production CSP's script-src-attr): one delegated listener on every page that loads app.js.
+document.addEventListener('click', (e) => {
+  const el = e.target && e.target.closest ? e.target.closest('[data-logout]') : null;
+  if (!el) return;
+  e.preventDefault();
+  Auth.logout();
+});
 
 // Inject toast-in keyframes once
 if (!document.getElementById('chm-toast-keyframes')) {

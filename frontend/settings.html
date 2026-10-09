@@ -2,10 +2,8 @@
 <html lang="ru" class="aura-page">
 <head>
   
-  <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link rel="preconnect" href="https://api.iconify.design" crossorigin>
   <meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1.0"/>
   <title>CHM Finance — Настройки</title>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet"/>
@@ -28,19 +26,19 @@
     <a href="subscriptions.html" class="sidebar-link" data-page="subscriptions"><svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg><span data-t="sb-plan">Тариф</span></a>
     <a href="settings.html#support" class="sidebar-link" data-page="support"><svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg><span data-t="sb-support">Поддержка</span></a>
   </nav>
-  <div class="sidebar-footer"><button onclick="Auth.logout()" class="sidebar-link" style="color:#C8B9B9"><svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4M16 17l5-5-5-5M21 12H9"/></svg>Выйти</button></div>
+  <div class="sidebar-footer"><button type="button" data-logout class="sidebar-link" style="color:#C8B9B9"><svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4M16 17l5-5-5-5M21 12H9"/></svg>Выйти</button></div>
 </aside>
 <header class="topbar"><div class="flex items-center gap-4"><button id="sidebar-toggle" class="lg:hidden" aria-label="Toggle menu" style="background:none;border:none;color:rgba(255,255,255,.62);cursor:pointer"><svg aria-hidden="true" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 6h16M4 12h16M4 18h16"/></svg></button><h1 class="text-xl font-bold">Настройки</h1></div><div class="topbar-actions"><button id="shellLang" type="button" class="shell-topbar-btn" title="Language">EN</button><button id="shellTheme" type="button" class="shell-topbar-btn" title="Toggle theme" aria-label="Toggle theme"></button><div class="topbar-user"><div class="topbar-avatar">U</div></div></div></header>
 
 <main class="main-content">
   <!-- Tabs -->
   <div class="flex flex-wrap gap-1 p-1 bg-slate-800/30 rounded-xl border border-slate-700/50 mb-6 w-fit">
-    <button class="stab active" onclick="stab('profile')">Профиль</button>
-    <button class="stab" onclick="stab('subscription')">Подписка</button>
-    <button class="stab" onclick="stab('trading')">Торговля</button>
-    <button class="stab" onclick="stab('notifications')">Уведомления</button>
-    <button class="stab" onclick="stab('security')">Безопасность</button>
-    <button class="stab" onclick="stab('support')">Поддержка</button>
+    <button class="stab active" data-stab="profile">Профиль</button>
+    <button class="stab" data-stab="subscription">Подписка</button>
+    <button class="stab" data-stab="trading">Торговля</button>
+    <button class="stab" data-stab="notifications">Уведомления</button>
+    <button class="stab" data-stab="security">Безопасность</button>
+    <button class="stab" data-stab="support">Поддержка</button>
   </div>
 
   <!-- PROFILE -->
@@ -58,7 +56,7 @@
           <div><label class="text-sm text-slate-400 block mb-1">Язык</label><select class="w-full bg-slate-800/50 border border-slate-700 rounded-xl px-4 py-3 text-white outline-none"><option>Русский</option><option>English</option></select></div>
           <div><label class="text-sm text-slate-400 block mb-1">Часовой пояс</label><select class="w-full bg-slate-800/50 border border-slate-700 rounded-xl px-4 py-3 text-white outline-none"><option>UTC+3 (Moscow)</option><option>UTC+0 (London)</option><option>UTC-5 (New York)</option></select></div>
         </div>
-        <button type="button" onclick="Toast.success('Профиль сохранён')" class="px-6 py-2.5 rounded-xl font-semibold text-white text-sm" style="background:linear-gradient(180deg,#FF7840 0%,#FF5A1F 60%,#C44610 100%);box-shadow:inset 0 1px 1px rgba(255,255,255,.28),inset 0 -1px 3px rgba(0,0,0,.6),0 4px 8px -2px rgba(0,0,0,.6),0 0 0 1px rgba(255,90,31,.35)">Сохранить</button>
+        <button type="button" data-toast="Профиль сохранён" class="px-6 py-2.5 rounded-xl font-semibold text-white text-sm" style="background:linear-gradient(180deg,#FF7840 0%,#FF5A1F 60%,#C44610 100%);box-shadow:inset 0 1px 1px rgba(255,255,255,.28),inset 0 -1px 3px rgba(0,0,0,.6),0 4px 8px -2px rgba(0,0,0,.6),0 0 0 1px rgba(255,90,31,.35)">Сохранить</button>
       </form>
     </div>
   </div>
@@ -108,14 +106,14 @@
       <h3 class="font-bold mb-4">Торговые настройки</h3>
       <form class="space-y-4">
         <div><label class="text-sm text-slate-400 block mb-1">Биржа по умолчанию</label><select class="w-full bg-slate-800/50 border border-slate-700 rounded-xl px-4 py-3 text-white outline-none"><option>Bybit</option><option>Binance</option><option>BingX</option></select></div>
-        <div><label class="text-sm text-slate-400 block mb-2">Leverage по умолчанию: <span id="levVal" class="text-indigo-400">10x</span></label><input type="range" min="1" max="100" value="10" class="w-full" oninput="document.getElementById('levVal').textContent=this.value+'x'"/></div>
-        <div><label class="text-sm text-slate-400 block mb-2">Риск на сделку: <span id="riskVal" class="text-indigo-400">2%</span></label><input type="range" min="0.5" max="10" step="0.5" value="2" class="w-full" oninput="document.getElementById('riskVal').textContent=this.value+'%'"/></div>
+        <div><label class="text-sm text-slate-400 block mb-2">Leverage по умолчанию: <span id="levVal" class="text-indigo-400">10x</span></label><input type="range" min="1" max="100" value="10" class="w-full" data-out="levVal" data-out-suffix="x"/></div>
+        <div><label class="text-sm text-slate-400 block mb-2">Риск на сделку: <span id="riskVal" class="text-indigo-400">2%</span></label><input type="range" min="0.5" max="10" step="0.5" value="2" class="w-full" data-out="riskVal" data-out-suffix="%"/></div>
         <div><label class="text-sm text-slate-400 block mb-1">Макс. одновременных сделок</label><input type="number" value="5" min="1" max="20" class="w-full bg-slate-800/50 border border-slate-700 rounded-xl px-4 py-3 text-white outline-none"/></div>
         <div><label class="text-sm text-slate-400 block mb-1">Дневной лимит потерь (%)</label><input type="number" value="5" step="0.5" class="w-full bg-slate-800/50 border border-slate-700 rounded-xl px-4 py-3 text-white outline-none"/></div>
-        <div class="flex items-center justify-between p-3 bg-slate-800/30 rounded-xl"><span class="text-sm">Авто-торговля</span><div class="toggle on" onclick="this.classList.toggle('on')"></div></div>
-        <div class="flex items-center justify-between p-3 bg-slate-800/30 rounded-xl"><span class="text-sm">Подтверждение перед сделкой</span><div class="toggle" onclick="this.classList.toggle('on')"></div></div>
-        <div class="flex items-center justify-between p-3 bg-slate-800/30 rounded-xl"><span class="text-sm">Trailing Stop по умолчанию</span><div class="toggle on" onclick="this.classList.toggle('on')"></div></div>
-        <button type="button" onclick="Toast.success('Настройки сохранены')" class="px-6 py-2.5 rounded-xl font-semibold text-white text-sm" style="background:linear-gradient(180deg,#FF7840 0%,#FF5A1F 60%,#C44610 100%);box-shadow:inset 0 1px 1px rgba(255,255,255,.28),inset 0 -1px 3px rgba(0,0,0,.6),0 4px 8px -2px rgba(0,0,0,.6),0 0 0 1px rgba(255,90,31,.35)">Сохранить</button>
+        <div class="flex items-center justify-between p-3 bg-slate-800/30 rounded-xl"><span class="text-sm">Авто-торговля</span><div class="toggle on" data-toggle-on></div></div>
+        <div class="flex items-center justify-between p-3 bg-slate-800/30 rounded-xl"><span class="text-sm">Подтверждение перед сделкой</span><div class="toggle" data-toggle-on></div></div>
+        <div class="flex items-center justify-between p-3 bg-slate-800/30 rounded-xl"><span class="text-sm">Trailing Stop по умолчанию</span><div class="toggle on" data-toggle-on></div></div>
+        <button type="button" data-toast="Настройки сохранены" class="px-6 py-2.5 rounded-xl font-semibold text-white text-sm" style="background:linear-gradient(180deg,#FF7840 0%,#FF5A1F 60%,#C44610 100%);box-shadow:inset 0 1px 1px rgba(255,255,255,.28),inset 0 -1px 3px rgba(0,0,0,.6),0 4px 8px -2px rgba(0,0,0,.6),0 0 0 1px rgba(255,90,31,.35)">Сохранить</button>
       </form>
     </div>
   </div>
@@ -279,7 +277,7 @@
     <div class="card" style="width:100%;max-width:560px;margin:16px">
       <div class="flex items-center justify-between mb-4">
         <h3 class="font-bold text-lg">Новый тикет</h3>
-        <button onclick="closeTicketModal()" class="text-slate-400 hover:text-white" style="background:none;border:none;cursor:pointer"><svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 6l12 12M6 18L18 6"/></svg></button>
+        <button type="button" data-close-ticket-modal class="text-slate-400 hover:text-white" style="background:none;border:none;cursor:pointer"><svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 6l12 12M6 18L18 6"/></svg></button>
       </div>
       <form id="ticketForm" class="space-y-4">
         <div><label class="text-sm text-slate-400 block mb-1">Тема</label><input name="subject" required minlength="3" maxlength="200" class="w-full bg-slate-800/50 border border-slate-700 rounded-xl px-4 py-3 text-white outline-none" placeholder="Кратко опишите проблему"/></div>
@@ -297,7 +295,7 @@
           <h3 class="font-bold text-lg" id="tdSubject">—</h3>
           <div class="text-xs text-slate-500 mt-1" id="tdMeta">—</div>
         </div>
-        <button onclick="closeTicketDetail()" class="text-slate-400 hover:text-white" style="background:none;border:none;cursor:pointer"><svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 6l12 12M6 18L18 6"/></svg></button>
+        <button type="button" data-close-ticket-detail class="text-slate-400 hover:text-white" style="background:none;border:none;cursor:pointer"><svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 6l12 12M6 18L18 6"/></svg></button>
       </div>
       <div id="tdMessages" class="flex-1 overflow-y-auto space-y-3 mb-4" style="min-height:200px;max-height:400px"></div>
       <form id="tdReplyForm" class="space-y-3" style="border-top:1px solid rgba(255,255,255,.06);padding-top:12px">
@@ -314,7 +312,7 @@
 <!-- CHECKOUT MODAL -->
 <div id="checkoutModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.7);backdrop-filter:blur(8px);z-index:100;align-items:center;justify-content:center">
   <div class="card" style="width:100%;max-width:520px;margin:16px;max-height:92vh;overflow-y:auto">
-    <div class="flex items-center justify-between mb-4"><h2 class="text-xl font-bold">Оформление подписки</h2><button onclick="closeCheckout()" class="text-slate-400 hover:text-white text-xl">&times;</button></div>
+    <div class="flex items-center justify-between mb-4"><h2 class="text-xl font-bold">Оформление подписки</h2><button type="button" data-close-checkout class="text-slate-400 hover:text-white text-xl">&times;</button></div>
     <!-- Step 1: pick plan + cycle -->
     <div id="coStep1">
       <label class="text-sm text-slate-400 block mb-2">Тариф</label>
@@ -359,7 +357,7 @@
         <strong>Важно:</strong> переведите <em>точную сумму до копейки</em> — система сопоставляет платежи по уникальной сумме. Подтверждение придёт автоматически в течение 1-15 минут после получения транзакции.
       </div>
       <div class="text-xs text-slate-500 text-center mb-4">Ожидание подтверждения... <span id="coExpire">—</span></div>
-      <button onclick="closeCheckout()" class="w-full py-2.5 rounded-xl bg-slate-800 text-slate-300 hover:bg-slate-700 font-medium text-sm">Закрыть</button>
+      <button type="button" data-close-checkout class="w-full py-2.5 rounded-xl bg-slate-800 text-slate-300 hover:bg-slate-700 font-medium text-sm">Закрыть</button>
     </div>
   </div>
 </div>
@@ -387,13 +385,32 @@ window.stab = function (t, ev) {
   if (ev && ev.target) ev.target.classList.add('active');
 };
 
-// Bind tab buttons to updated stab() that takes event
+// Tab buttons: <button class="stab" data-stab="…">. No inline on* attributes on this page — the
+// production CSP's script-src-attr blocks them; every control is bound from this script.
 document.querySelectorAll('.stab').forEach(btn => {
   btn.addEventListener('click', (ev) => {
-    const onclick = btn.getAttribute('onclick') || '';
-    const m = /stab\('([^']+)'/.exec(onclick);
-    if (m) window.stab(m[1], ev);
-  }, { capture: true });
+    const t = btn.getAttribute('data-stab');
+    if (t) window.stab(t, ev);
+  });
+});
+document.addEventListener('click', (e) => {
+  const t = e.target && e.target.closest ? e.target : null;
+  if (!t) return;
+  const toast = t.closest('[data-toast]');
+  if (toast) Toast.success(toast.getAttribute('data-toast'));
+  const tg = t.closest('[data-toggle-on]');
+  if (tg) tg.classList.toggle('on');
+  if (t.closest('[data-close-checkout]')) closeCheckout();
+  if (t.closest('[data-close-ticket-modal]')) closeTicketModal();
+  if (t.closest('[data-close-ticket-detail]')) closeTicketDetail();
+  const tk = t.closest('[data-ticket]');
+  if (tk) openTicket(+tk.getAttribute('data-ticket'));
+});
+document.addEventListener('input', (e) => {
+  const el = e.target && e.target.closest ? e.target.closest('[data-out]') : null;
+  if (!el) return;
+  const out = document.getElementById(el.getAttribute('data-out'));
+  if (out) out.textContent = el.value + (el.getAttribute('data-out-suffix') || '');
 });
 
 // ── Profile tab ──
@@ -480,7 +497,7 @@ document.querySelectorAll('button').forEach(btn => {
       if (!currentPassword || !newPassword) return Toast.warn('Заполни оба поля');
       try {
         await window.fetch(
-          (location.hostname === 'localhost' ? 'http://localhost:3000/api' : '/api') + '/auth/change-password',
+          '/api/auth/change-password',
           { method: 'POST', headers: { 'Content-Type': 'application/json', Authorization: 'Bearer ' + Auth.accessToken },
             body: JSON.stringify({ currentPassword, newPassword }) }
         ).then(r => r.json().then(j => ({ ok: r.ok, j }))).then(({ ok, j }) => {
@@ -687,7 +704,7 @@ document.getElementById('changePassForm')?.addEventListener('submit', async (e) 
   if (fd.get('newPassword') !== fd.get('newPassword2')) return Toast.error('Пароли не совпадают');
   try {
     const res = await fetch(
-      (location.hostname === 'localhost' ? 'http://localhost:3000/api' : '/api') + '/auth/change-password',
+      '/api/auth/change-password',
       { method: 'POST', headers: { 'Content-Type': 'application/json', Authorization: 'Bearer ' + Auth.accessToken },
         body: JSON.stringify({ currentPassword: fd.get('currentPassword'), newPassword: fd.get('newPassword') }) },
     );
@@ -759,8 +776,7 @@ async function loadTg() {
 
 // apiRequest shim — app.js exposes it via closure, so we expose it manually
 function apiRequest(method, path, body) {
-  const base = (location.hostname === 'localhost' || location.hostname === '127.0.0.1') ? 'http://localhost:3000/api' : '/api';
-  return fetch(base + path, {
+  return fetch('/api' + path, {
     method, headers: {
       'Content-Type': 'application/json',
       ...(Auth.accessToken ? { Authorization: 'Bearer ' + Auth.accessToken } : {}),
@@ -843,7 +859,7 @@ async function loadTickets(){
       const st = t.status || 'open';
       const stColor = st==='open'?'bg-green-500/15 text-green-400':st==='pending'?'bg-yellow-500/15 text-yellow-400':'bg-slate-700/30 text-slate-500';
       const date = new Date(t.updatedAt||t.createdAt||Date.now()).toLocaleString('ru-RU');
-      return `<button class="w-full text-left p-3 rounded-xl bg-slate-800/30 hover:bg-slate-800/50 transition" onclick="openTicket(${t.id})">
+      return `<button class="w-full text-left p-3 rounded-xl bg-slate-800/30 hover:bg-slate-800/50 transition" data-ticket="${t.id}">
         <div class="flex items-center justify-between mb-1">
           <span class="font-semibold text-sm text-slate-200">${escTk(t.subject)}</span>
           <span class="text-[10px] px-2 py-0.5 rounded ${stColor} uppercase tracking-wider">${st}</span>

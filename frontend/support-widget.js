@@ -17,9 +17,8 @@
   if (window.__chmSupportLoaded) return;
   window.__chmSupportLoaded = true;
 
-  var API_BASE = (location.hostname === 'localhost' || location.hostname === '127.0.0.1')
-    ? 'http://localhost:3000/api'
-    : '/api';
+  // Same origin: server.js serves the pages and /api alike (CSP connect-src 'self').
+  var API_BASE = '/api';
 
   function loggedIn() {
     try { return typeof Auth !== 'undefined' && Auth.isLoggedIn && Auth.isLoggedIn(); }

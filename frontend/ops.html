@@ -107,11 +107,11 @@
 </main>
 
 <!-- User detail drawer -->
-<div class="drawer-bg" id="drawerBg" onclick="closeDrawer()"></div>
+<div class="drawer-bg" id="drawerBg" data-close-drawer></div>
 <div class="drawer" id="drawer">
   <div style="display:flex;justify-content:space-between;align-items:center;padding:16px 22px;border-bottom:1px solid rgba(255,255,255,.08);position:sticky;top:0;background:#0a0a0f;z-index:2">
     <div style="font-size:13px;color:rgba(255,255,255,.5)">User detail</div>
-    <button onclick="closeDrawer()" class="ops-btn">✕</button>
+    <button type="button" data-close-drawer class="ops-btn">✕</button>
   </div>
   <div id="drawerBody"><div class="p-8 text-center text-slate-500 text-sm">Загрузка…</div></div>
 </div>

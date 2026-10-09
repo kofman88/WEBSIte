@@ -6,10 +6,8 @@
   <meta http-equiv="refresh" content="0; url=/ops.html"/>
   <title>CHM · ops</title>
   <script>location.replace('/ops.html' + (location.hash || ''));</script>
-  <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link rel="preconnect" href="https://api.iconify.design" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet"/>
   
   <link rel="stylesheet" href="tailwind.css"/>
@@ -38,7 +36,7 @@
     <a href="ops.html" class="sidebar-link active" data-page="admin"><svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2l7 4v6c0 5-3.5 8.5-7 10-3.5-1.5-7-5-7-10V6l7-4z"/></svg><span data-t="sb-admin">Админ</span></a>
   </nav>
   <div class="sidebar-footer">
-    <button onclick="Auth.logout()" class="sidebar-link mt-2" style="color:#C8B9B9"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4M16 17l5-5-5-5M21 12H9"/></svg>Выйти</button>
+    <button type="button" data-logout class="sidebar-link mt-2" style="color:#C8B9B9"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4M16 17l5-5-5-5M21 12H9"/></svg>Выйти</button>
   </div>
 </aside>
 <header class="topbar">
@@ -180,7 +178,7 @@
           <h3 class="font-bold text-lg" id="admTdSubject">—</h3>
           <div class="text-xs text-slate-500 mt-1" id="admTdMeta">—</div>
         </div>
-        <button onclick="document.getElementById('adminTicketModal').style.display='none'" class="text-slate-400 hover:text-white" style="background:none;border:none;cursor:pointer"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 6l12 12M6 18L18 6"/></svg></button>
+        <button type="button" data-close-admin-ticket class="text-slate-400 hover:text-white" style="background:none;border:none;cursor:pointer"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 6l12 12M6 18L18 6"/></svg></button>
       </div>
       <div id="admTdMessages" class="flex-1 overflow-y-auto space-y-3 mb-4" style="min-height:240px;max-height:500px"></div>
       <form id="admTdReplyForm" class="space-y-3" style="border-top:1px solid rgba(255,255,255,.06);padding-top:12px">
@@ -214,7 +212,11 @@
 <script>
 if (!Auth.requireAuth()) throw new Error('noauth');
 
-const ADMIN_BASE = (location.hostname === 'localhost' ? 'http://localhost:3000/api' : '/api') + '/admin';
+const ADMIN_BASE = '/api/admin';   // same origin (CSP connect-src 'self')
+// no inline on* attributes (the production CSP's script-src-attr blocks them)
+document.querySelector('[data-close-admin-ticket]')?.addEventListener('click', () => {
+  document.getElementById('adminTicketModal').style.display = 'none';
+});
 
 async function adminFetch(method, path, body) {
   const opts = { method, headers: { 'Content-Type': 'application/json', Authorization: 'Bearer ' + Auth.accessToken } };

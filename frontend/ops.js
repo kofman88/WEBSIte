@@ -18,6 +18,27 @@
   }
   window.Ops = { esc, money, pct, fmtDate, fmtDateShort, duration };
 
+  // Row / drawer action buttons carry data-ops="<Ops method>" + data-ops-args='<JSON array>' and
+  // run through one delegated listener: inline onclick attributes are blocked by the production
+  // CSP (script-src-attr), and JSON in an escaped attribute keeps e-mails / flag keys data, never code.
+  const OPS_ACTIONS = new Set(['notifyUser', 'impersonate', 'changePlan', 'toggleActive', 'toggleAdminFlag',
+    'confirmPay', 'refundPay', 'togglePromo', 'deletePromo', 'payReward', 'cancelReward', 'toggleFlag']);
+  function act(name, ...args) {
+    return `data-ops="${name}" data-ops-args="${esc(JSON.stringify(args))}"`;
+  }
+  document.addEventListener('click', (e) => {
+    const t = e.target && e.target.closest ? e.target : null;
+    if (!t) return;
+    if (t.closest('[data-close-drawer]')) { window.closeDrawer(); return; }
+    const el = t.closest('[data-ops]');
+    if (!el) return;
+    const name = el.getAttribute('data-ops');
+    if (!OPS_ACTIONS.has(name) || typeof window.Ops[name] !== 'function') return;
+    let args;
+    try { args = JSON.parse(el.getAttribute('data-ops-args') || '[]'); } catch (_e) { return; }
+    if (Array.isArray(args)) window.Ops[name](...args);
+  });
+
   // ── Access gate ───────────────────────────────────────────────────────
   async function gate() {
     if (!Auth.isLoggedIn()) { location.replace('/?login=1&next=/ops.html'); return false; }
@@ -218,11 +239,11 @@
               <div class="text-xs text-slate-500 mt-1">id: ${u.id} · ref ${esc(u.referralCode)} · <span class="mono">${fmtDate(u.createdAt)}</span></div>
             </div>
             <div style="display:flex;gap:6px;flex-wrap:wrap">
-              <button class="ops-btn" onclick="Ops.notifyUser(${u.id})">📨 Notify</button>
-              <button class="ops-btn" onclick="Ops.impersonate(${u.id}, '${esc(u.email)}')">🎭 Impersonate</button>
-              <button class="ops-btn" onclick="Ops.changePlan(${u.id})">Plan…</button>
-              <button class="ops-btn ${u.isActive ? 'ops-btn-danger' : ''}" onclick="Ops.toggleActive(${u.id}, ${!u.isActive})">${u.isActive ? '🔒 Block' : '🔓 Unblock'}</button>
-              <button class="ops-btn ${u.isAdmin ? 'ops-btn-danger' : 'ops-btn-primary'}" onclick="Ops.toggleAdminFlag(${u.id}, ${!u.isAdmin})">${u.isAdmin ? 'Revoke admin' : 'Grant admin'}</button>
+              <button class="ops-btn" ${act('notifyUser', u.id)}>📨 Notify</button>
+              <button class="ops-btn" ${act('impersonate', u.id, u.email)}>🎭 Impersonate</button>
+              <button class="ops-btn" ${act('changePlan', u.id)}>Plan…</button>
+              <button class="ops-btn ${u.isActive ? 'ops-btn-danger' : ''}" ${act('toggleActive', u.id, !u.isActive)}>${u.isActive ? '🔒 Block' : '🔓 Unblock'}</button>
+              <button class="ops-btn ${u.isAdmin ? 'ops-btn-danger' : 'ops-btn-primary'}" ${act('toggleAdminFlag', u.id, !u.isAdmin)}>${u.isAdmin ? 'Revoke admin' : 'Grant admin'}</button>
             </div>
           </div>
         </div>
@@ -376,8 +397,8 @@
           <td>${esc(p.plan || '—')}</td>
           <td><span class="badge ${badge}">${p.status}</span></td>
           <td style="display:flex;gap:6px">
-            ${p.status === 'pending' ? `<button class="ops-btn" onclick="Ops.confirmPay(${p.id})">Confirm</button>` : ''}
-            ${p.status === 'confirmed' ? `<button class="ops-btn ops-btn-danger" onclick="Ops.refundPay(${p.id})">Refund</button>` : ''}
+            ${p.status === 'pending' ? `<button class="ops-btn" ${act('confirmPay', p.id)}>Confirm</button>` : ''}
+            ${p.status === 'confirmed' ? `<button class="ops-btn ops-btn-danger" ${act('refundPay', p.id)}>Refund</button>` : ''}
           </td>
         </tr>`;
       }).join('') || '<tr><td colspan="8" class="text-center py-8 text-slate-500">Нет платежей</td></tr>';
@@ -491,8 +512,8 @@
         <td>${c.isActive ? '<span class="badge badge-green">active</span>' : '<span class="badge badge-gray">off</span>'}</td>
         <td class="text-xs text-slate-500">${fmtDateShort(c.createdAt)}</td>
         <td style="display:flex;gap:6px">
-          <button class="ops-btn" onclick="Ops.togglePromo(${c.id}, ${!c.isActive})">${c.isActive ? 'Disable' : 'Enable'}</button>
-          <button class="ops-btn ops-btn-danger" onclick="Ops.deletePromo(${c.id})">Delete</button>
+          <button class="ops-btn" ${act('togglePromo', c.id, !c.isActive)}>${c.isActive ? 'Disable' : 'Enable'}</button>
+          <button class="ops-btn ops-btn-danger" ${act('deletePromo', c.id)}>Delete</button>
         </td>
       </tr>`).join('') || '<tr><td colspan="7" class="text-center py-8 text-slate-500">Нет промо-кодов</td></tr>';
     } catch (e) {
@@ -545,7 +566,7 @@
           <td class="mono text-green-400">${money(r.amountUsd)}</td>
           <td><span class="badge ${badge}">${r.status}</span></td>
           <td style="display:flex;gap:6px">
-            ${r.status === 'pending' ? `<button class="ops-btn ops-btn-primary" onclick="Ops.payReward(${r.id})">Pay</button><button class="ops-btn" onclick="Ops.cancelReward(${r.id})">Cancel</button>` : ''}
+            ${r.status === 'pending' ? `<button class="ops-btn ops-btn-primary" ${act('payReward', r.id)}>Pay</button><button class="ops-btn" ${act('cancelReward', r.id)}>Cancel</button>` : ''}
           </td>
         </tr>`;
       }).join('') || '<tr><td colspan="7" class="text-center py-8 text-slate-500">Нет выплат</td></tr>';
@@ -1151,7 +1172,7 @@
                 <td>${f.value ? '<span class="badge badge-green">ON</span>' : '<span class="badge badge-gray">OFF</span>'}${f.overridden ? ' <span class="badge badge-yellow">override</span>' : ''}</td>
                 <td class="text-xs text-slate-500">${f.defaultValue ? 'on' : 'off'}</td>
                 <td class="text-xs">${esc(f.description)}</td>
-                <td><button class="ops-btn ${f.value ? 'ops-btn-danger' : 'ops-btn-primary'}" onclick="Ops.toggleFlag('${esc(f.key)}', ${!f.value})">${f.value ? 'Turn off' : 'Turn on'}</button></td>
+                <td><button class="ops-btn ${f.value ? 'ops-btn-danger' : 'ops-btn-primary'}" ${act('toggleFlag', f.key, !f.value)}>${f.value ? 'Turn off' : 'Turn on'}</button></td>
               </tr>`).join('')}
             </tbody>
           </table>
