@@ -113,6 +113,12 @@ mkdir -p ~/chmup_backend/data
 
 ## Шаг 4: Настройка проксирования API
 
+> `frontend/.htaccess` (деплой копирует его в `~/public_html/`) уже содержит блок Passenger и одно
+> правило mod_rewrite: `/?login=1` → 302 на `/app/` (экран входа веб-приложения; туда ведут
+> страницы, требующие входа). То же правило есть в `backend/server.js`, но `/` Apache отдаёт из
+> `public_html` сам, не спрашивая Passenger. Если cPanel перезапишет `.htaccess` своим блоком
+> Passenger, блок `<IfModule mod_rewrite.c>` из репозитория нужно сохранить.
+
 ### Вариант A: .htaccess (Apache + mod_proxy)
 Добавьте в `~/public_html/.htaccess`:
 ```apache

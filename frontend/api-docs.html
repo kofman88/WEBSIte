@@ -64,7 +64,7 @@
     <p class="text-slate-400 text-sm" style="max-width:600px;margin:0 auto">Публичные endpoint'ы CHM Finance. Все ответы в JSON. Rate-limit: 300 запросов / 15 минут на IP.</p>
   </div>
 
-  <div class="grid md:grid-cols-[200px_1fr] gap-8">
+  <div class="grid grid-cols-1 md:grid-cols-[200px_1fr] gap-8">
     <aside class="toc" style="position:sticky;top:20px;align-self:start">
       <div class="text-xs text-slate-500 uppercase tracking-wider mb-2">Разделы</div>
       <a href="#base">Базовый URL</a>
@@ -126,7 +126,7 @@
   "code": "VALIDATION_ERROR",
   "issues": [{ "path": "email", "message": "Invalid email" }]
 }</code></pre>
-        <table class="w-full text-sm mt-4">
+        <div style="overflow-x:auto"><table class="w-full text-sm mt-4">
           <thead><tr class="text-xs text-slate-500 uppercase"><th class="text-left py-2">HTTP</th><th class="text-left py-2">Код</th><th class="text-left py-2">Значение</th></tr></thead>
           <tbody class="text-xs">
             <tr class="border-t border-slate-800/50"><td class="py-2 mono">400</td><td class="py-2 mono text-yellow-400">VALIDATION_ERROR</td><td class="py-2 text-slate-400">Неверные параметры запроса</td></tr>
@@ -136,7 +136,7 @@
             <tr class="border-t border-slate-800/50"><td class="py-2 mono">429</td><td class="py-2 mono text-yellow-400">RATE_LIMITED</td><td class="py-2 text-slate-400">Превышен лимит запросов</td></tr>
             <tr class="border-t border-slate-800/50"><td class="py-2 mono">500</td><td class="py-2 mono text-yellow-400">INTERNAL_ERROR</td><td class="py-2 text-slate-400">Внутренняя ошибка сервера</td></tr>
           </tbody>
-        </table>
+        </table></div>
       </div>
 
       <div class="card mb-6" id="ratelimits">
@@ -154,6 +154,6 @@
 </main>
 
 <script src="aura-bg.js" defer></script>
-<script src="support-widget.js" defer></script>
+<script src="support-widget.js?v=4" defer></script>
 </body>
 </html>

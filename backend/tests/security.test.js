@@ -3,6 +3,13 @@ import fs from 'fs';
 import path from 'path';
 import request from 'supertest';
 import { authenticator } from 'otplib';
+import { createRequire } from 'module';
+import { fileURLToPath } from 'url';
+
+const require = createRequire(import.meta.url);
+const THIS_FILE = fileURLToPath(import.meta.url);
+const BACKEND = path.resolve(path.dirname(THIS_FILE), '..');
+const { decodeQrDataUrl } = require('./common/qrDecode');
 
 process.env.NODE_ENV = 'development';
 process.env.JWT_SECRET = 'test-jwt-secret-0123456789abcdef012';
@@ -49,8 +56,39 @@ describe('2FA flow', () => {
     const res = await request(app).post('/api/auth/2fa/setup').set('Authorization', 'Bearer ' + u.accessToken);
     expect(res.status).toBe(200);
     expect(res.body.otpauth).toMatch(/^otpauth:\/\/totp\//);
-    expect(res.body.qrUrl).toContain('qrserver');
     expect(res.body.recoveryCodes).toHaveLength(8);
+  });
+
+  // The otpauth:// URI carries the TOTP secret: its QR is drawn on this server (utils/qr.js), never
+  // by a third-party QR API that would get every user's secret in a query string.
+  it('setup: qrUrl is a local PNG data: URL whose QR decodes to exactly the otpauth URI (no URL to any host)', async () => {
+    const u = await registerAndLogin('qr@x.com');
+    const res = await request(app).post('/api/auth/2fa/setup').set('Authorization', 'Bearer ' + u.accessToken);
+    expect(res.status).toBe(200);
+    expect(res.body.qrUrl).toMatch(/^data:image\/png;base64,/);
+    expect(decodeQrDataUrl(res.body.qrUrl)).toBe(res.body.otpauth);
+    expect(res.body.otpauth).toContain('secret=');
+    expect(JSON.stringify(res.body)).not.toMatch(/https?:\/\//);
+    // the service itself (used without the route) gives the same
+    const direct = await twoFA.setup(u.user.id, u.user.email);
+    expect(decodeQrDataUrl(direct.qrUrl)).toBe(direct.otpauth);
+    expect(direct.otpauth).not.toBe(res.body.otpauth);
+  });
+
+  it('no QR service anywhere in the backend or the pages (the secrets and addresses stay here)', () => {
+    const roots = [BACKEND, path.resolve(BACKEND, '..', 'frontend')];
+    const QR_SERVICES = /qrserver\.com|create-qr-code|chart\.googleapis\.com\/chart|quickchart\.io\/qr|goqr\.me|qr-code-generator\.com/i;
+    const hits = [];
+    const walk = (d) => {
+      for (const e of fs.readdirSync(d, { withFileTypes: true })) {
+        if (e.name === 'node_modules' || e.name === 'data' || e.name === 'logs' || e.name.startsWith('.')) continue;
+        const p = path.join(d, e.name);
+        if (e.isDirectory()) walk(p);
+        else if (/\.(js|mjs|cjs|html|css)$/.test(e.name) && p !== THIS_FILE && QR_SERVICES.test(fs.readFileSync(p, 'utf8'))) hits.push(p);
+      }
+    };
+    roots.forEach(walk);
+    expect(hits).toEqual([]);
   });
 
   it('confirm with valid code flips enabled=1', async () => {
@@ -121,7 +159,7 @@ describe('2FA flow', () => {
 
   it('recovery code works as fallback', async () => {
     const u = await registerAndLogin();
-    const setup = twoFA.setup(u.user.id, u.user.email);
+    const setup = await twoFA.setup(u.user.id, u.user.email);
     twoFA.confirm(u.user.id, authenticator.generate(setup.otpauth.match(/secret=([A-Z2-7]+)/i)[1]));
     // Use a recovery code instead of a TOTP
     expect(twoFA.verifyCode(u.user.id, setup.recoveryCodes[0])).toBe(true);

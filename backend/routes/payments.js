@@ -5,6 +5,8 @@ const paymentService = require('../services/paymentService');
 const refRewards = require('../services/refRewards');
 const validation = require('../utils/validation');
 const handleErr = require('../middleware/handleErr');
+const { qrDataUrl } = require('../utils/qr');
+const logger = require('../utils/logger');
 
 const router = express.Router();
 
@@ -23,12 +25,16 @@ router.post('/stripe/checkout', authMiddleware, requireVerifiedEmail, async (req
   } catch (err) { handleErr(err, res, next); }
 });
 
-// POST /api/payments/crypto/create — generate unique payment ticket
-router.post('/crypto/create', authMiddleware, requireVerifiedEmail, (req, res, next) => {
+// POST /api/payments/crypto/create — generate unique payment ticket. `qrUrl`: the deposit address
+// as a QR (PNG data: URL drawn here, utils/qr.js — the address never goes to a QR service); null if
+// it could not be drawn, the address itself is still there to copy.
+router.post('/crypto/create', authMiddleware, requireVerifiedEmail, async (req, res, next) => {
   try {
     const input = validation.cryptoPaymentSchema.parse(req.body);
     const out = paymentService.createCryptoPayment(req.userId, input);
-    res.json(out);
+    let qrUrl = null;
+    try { qrUrl = await qrDataUrl(out.address); } catch (err) { logger.warn('payment QR not drawn', { paymentId: out.paymentId, err: err.message }); }
+    res.json({ ...out, qrUrl });
   } catch (err) { handleErr(err, res, next); }
 });
 

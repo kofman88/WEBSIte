@@ -266,6 +266,18 @@ app.get('/api/health/deep', (_req, res) => {
   res.status(statusCode).json(out);
 });
 
+// ── Sign-in redirect ──────────────────────────────────────────────────
+// The legacy pages send a visitor without a session to /?login=1 (app.js requireAuth, ops.js); the
+// landing at / has no login form (and no byte budget left for one), the web app's start screen
+// /app/ has. The app reads no return address, so the query string is dropped. frontend/.htaccess
+// has the same rule for when Apache serves / from public_html without asking Passenger.
+const LOGIN_REDIRECT = '/app/';
+app.get(['/', '/index.html'], (req, res, next) => {
+  if (!/(^|&)login=1(&|$)/.test(req.originalUrl.split('?')[1] || '')) return next();
+  res.setHeader('Cache-Control', 'no-store');
+  res.redirect(302, LOGIN_REDIRECT);
+});
+
 // ── Static files (Passenger serves everything) ────────────────────────
 const publicPath = path.join(require('os').homedir(), 'public_html');
 app.use(express.static(publicPath, {

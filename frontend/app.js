@@ -555,6 +555,28 @@ document.addEventListener('click', (e) => {
   Auth.logout();
 });
 
+// Phone / tablet (≤ 1024px, styles.css): the sidebar is off-canvas and the topbar's hamburger
+// (#sidebar-toggle, settings / subscriptions) slides it in with .sidebar.open. The open sidebar covers
+// the hamburger, so a tap outside it, a link in it or Escape closes it again.
+(function wireSidebarToggle() {
+  const sidebar = () => document.getElementById('sidebar');
+  const isOpen = () => { const sb = sidebar(); return !!(sb && sb.classList.contains('open')); };
+  function setOpen(open) {
+    const sb = sidebar();
+    if (!sb) return;
+    sb.classList.toggle('open', open);
+    const btn = document.getElementById('sidebar-toggle');
+    if (btn) btn.setAttribute('aria-expanded', String(open));
+  }
+  document.addEventListener('click', (e) => {
+    const t = e.target && e.target.closest ? e.target : null;
+    if (!t) return;
+    if (t.closest('#sidebar-toggle')) { setOpen(!isOpen()); return; }
+    if (isOpen() && (!t.closest('#sidebar') || t.closest('#sidebar a[href]'))) setOpen(false);
+  });
+  document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && isOpen()) setOpen(false); });
+})();
+
 // Inject toast-in keyframes once
 if (!document.getElementById('chm-toast-keyframes')) {
   const s = document.createElement('style');

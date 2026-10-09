@@ -4,7 +4,11 @@
  * Self-contained: injects its own CSS and markup, no dependencies.
  * Works on every page that includes this script; no need to touch HTML.
  *
- *   <script src="support-widget.js" defer></script>
+ *   <script src="support-widget.js?v=4" defer></script>
+ *
+ * server.js serves .js with `immutable` for 30 days: on any change raise the ?v= in every page
+ * that loads this file (the legacy pages, with app.js / ops.js — one version, pinned by
+ * tests/csp.test.js — and landing.js with the landing's version, tests/public/landing.test.js).
  *
  * Identity: if window.Auth and Auth.isLoggedIn() returns true, the widget
  * posts to the authenticated /api/support/tickets endpoints and shows the
@@ -98,9 +102,21 @@
     font-family:'Inter',sans-serif;color:#fff;
   }
   .chm-sup-panel.open{display:flex;opacity:1;transform:none}
+  /* Phones: the panel spans the screen. A page wider than the screen (a long code line …) makes
+     the layout viewport that position:fixed is placed in (and 100% with it) larger than the screen,
+     so right:10px / bottom:80px would put the send button, the lower half of the panel and the
+     bubble off-screen: they are placed by min(100vw, 100%) and min(100dvh, 100%) instead, the
+     screen (100vw / 100dvh) on such a page and the usual box (100%) everywhere else. A browser
+     without min() / dvh keeps the plain declarations before them. Desktop keeps the rules above. */
   @media (max-width:480px){
-    .chm-sup-panel{right:10px;left:10px;width:auto;bottom:80px;height:min(70vh,560px)}
-    .chm-sup-btn{right:14px;bottom:14px}
+    .chm-sup-panel{
+      right:auto;left:10px;width:calc(100% - 20px);width:calc(min(100vw, 100%) - 20px);
+      bottom:80px;height:min(70vh,560px);top:calc(min(100dvh, 100%) - 80px - min(70vh, 560px))
+    }
+    .chm-sup-btn{
+      right:auto;left:calc(100% - 70px);left:calc(min(100vw, 100%) - 70px);
+      bottom:14px;top:calc(min(100dvh, 100%) - 70px)
+    }
   }
 
   .chm-sup-hdr{
@@ -210,6 +226,9 @@
   .chm-sup-compose textarea:focus{border-color:#FF5A1F;background:rgba(255,255,255,.07)}
   .chm-sup-compose textarea{min-height:60px;max-height:120px}
   .chm-sup-compose-row{display:flex;gap:8px;align-items:flex-end}
+  /* the textarea takes what the 40px send button leaves; min-width:0, or its intrinsic width
+     (20 columns) keeps it from shrinking on a narrow panel and it runs over the button */
+  .chm-sup-compose-row textarea{flex:1 1 auto;min-width:0;width:auto}
   .chm-sup-send{
     flex-shrink:0;width:40px;height:40px;border-radius:50%;border:0;cursor:pointer;
     background:linear-gradient(180deg,#FF7840 0%,#FF5A1F 60%,#C44610 100%);

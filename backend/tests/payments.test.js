@@ -1,6 +1,12 @@
 import { describe, it, expect, beforeAll, beforeEach } from 'vitest';
 import fs from 'fs';
 import path from 'path';
+import request from 'supertest';
+import jwt from 'jsonwebtoken';
+import { createRequire } from 'module';
+
+const require = createRequire(import.meta.url);
+const { decodeQrDataUrl } = require('./common/qrDecode');
 
 process.env.NODE_ENV = 'development';
 process.env.JWT_SECRET = 'test-jwt-secret-0123456789abcdef012';
@@ -222,5 +228,25 @@ describe('getUserPayments', () => {
     expect(list).toHaveLength(2);
     expect(list.every((p) => p.userId === a)).toBe(true);
     expect(list.every((p) => p.plan === 'pro')).toBe(true);
+  });
+});
+
+// ── POST /api/payments/crypto/create (the route settings.html calls) ──
+// The checkout QR is drawn on this server (utils/qr.js): the deposit address of an invoice never goes
+// to a third-party QR API. The page shows `qrUrl` as is; the other fields keep their names.
+describe('POST /api/payments/crypto/create', () => {
+  it('returns the invoice plus qrUrl: a local PNG data: URL whose QR decodes to exactly the deposit address', async () => {
+    const app = (await import('../server.js')).default;
+    const uid = makeUser();
+    const token = jwt.sign({ uid }, process.env.JWT_SECRET, { algorithm: 'HS256', expiresIn: '5m' });
+    for (const [network, address] of [['bep20', process.env.PAYMENT_BEP20_ADDRESS], ['trc20', process.env.PAYMENT_TRC20_ADDRESS]]) {
+      const r = await request(app).post('/api/payments/crypto/create').set('Authorization', 'Bearer ' + token).send({ plan: 'pro', network });
+      expect(r.status, network).toBe(200);
+      expect(Object.keys(r.body).sort()).toEqual(['address', 'amountUsdt', 'billingCycle', 'expiresAt', 'network', 'paymentId', 'plan', 'qrUrl']);
+      expect(r.body.address).toBe(address);
+      expect(r.body.qrUrl).toMatch(/^data:image\/png;base64,/);
+      expect(decodeQrDataUrl(r.body.qrUrl)).toBe(address);
+      expect(JSON.stringify(r.body)).not.toMatch(/https?:\/\//);
+    }
   });
 });

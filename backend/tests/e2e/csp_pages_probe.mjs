@@ -14,8 +14,10 @@
  * policy used to break or could break (the landing font switch and the face Chromium renders, the
  * Metrika queue and channels, the landing dialogs and on-demand support widget, the web app's
  * sign-in, settings tabs / toggles / modals and its /sw.js registration — service workers are on —,
- * the support widget, the ops drawer actions, the legal pages' icons). Any violation, error or
- * failed check → exit 1.
+ * the 2FA / checkout QR codes drawn by the server as data: URLs, the settings / subscriptions
+ * hamburger, the support widget fitting the screen (also on a page wider than a phone), the ops
+ * drawer actions, the legal pages' icons, logo and phone menu, /?login=1 → the web app's sign-in).
+ * Any violation, error or failed check → exit 1.
  *
  * No request leaves the machine: Google Fonts, mc.yandex.ru / mc.yandex.com / yastatic.net are
  * answered by Playwright routes. The CSP decision itself is the browser's — a request the policy
@@ -36,6 +38,8 @@ import { fileURLToPath } from 'url';
 
 const require = createRequire(import.meta.url);
 const HERE = path.dirname(fileURLToPath(import.meta.url));
+const { decodeQrDataUrl } = require('../common/qrDecode');
+const { qrDataUrl } = require('../../utils/qr');
 const argv = process.argv.slice(2);
 const opt = (n, d) => { const i = argv.indexOf(`--${n}`); return i >= 0 && argv[i + 1] ? argv[i + 1] : d; };
 const CHROMIUM = opt('chromium', process.env.CHROMIUM || '/opt/pw-browsers/chromium');
@@ -125,7 +129,6 @@ async function stubRoute(route) {
     if (/\.html$/.test(u.pathname)) return ok('text/html', '<!doctype html><title>match</title>');
     return ok('image/gif', GIF);
   }
-  if (h === 'api.qrserver.com') return ok('image/gif', GIF);
   return route.fulfill({ status: 404, contentType: 'text/plain', body: `probe: no stub for ${h}` });
 }
 
@@ -191,11 +194,49 @@ async function checkMetrika(page) {
 }
 async function checkIcons(page) {
   const r = await page.evaluate(() => ({ left: document.querySelectorAll('i[data-lucide]').length, svg: document.querySelectorAll('svg[data-lucide]').length,
-    logo: (() => { const i = document.querySelector('.nav-logo img'); return i ? getComputedStyle(i).display : 'absent'; })() }));
+    logo: (() => { const i = document.querySelector('.nav-logo img'); return i ? { src: i.getAttribute('src'), w: i.naturalWidth, display: getComputedStyle(i).display } : null; })() }));
   const fails = [];
   if (r.left || !r.svg) fails.push(`lucide icons not rendered (${r.left} <i> left, ${r.svg} svg)`);
-  if (r.logo !== 'none') fails.push(`broken nav logo not hidden (display ${r.logo})`);
+  if (!r.logo || r.logo.src !== '/logo.png' || !r.logo.w || r.logo.display === 'none') fails.push(`nav logo not shown: ${JSON.stringify(r.logo)}`);
   return fails;
+}
+// the legal pages' burger (≤ 768px): opens #mobileMenu inside the screen, closes on a second tap and
+// on Escape; above 768px neither shows
+async function legalMenu(page) {
+  const fails = [];
+  const st = () => page.evaluate(() => {
+    const m = document.getElementById('mobileMenu');
+    const b = document.getElementById('burger');
+    const r = m.getBoundingClientRect();
+    return { burger: getComputedStyle(b).display !== 'none', menu: getComputedStyle(m).display !== 'none', expanded: b.getAttribute('aria-expanded'),
+      inside: r.left >= 0 && r.right <= document.documentElement.clientWidth + 0.5, links: [...m.querySelectorAll('a')].filter((a) => a.getBoundingClientRect().height > 0).length };
+  });
+  const s0 = await st();
+  if (page.viewportSize().width > 768) {
+    if (s0.burger || s0.menu) fails.push(`desktop: burger ${s0.burger}, menu ${s0.menu} (both should be hidden)`);
+    return fails;
+  }
+  if (!s0.burger || s0.menu) fails.push(`phone before tap: burger ${s0.burger}, menu ${s0.menu}`);
+  await page.click('#burger');
+  const s1 = await st();
+  if (!s1.menu || s1.expanded !== 'true' || !s1.inside || s1.links !== 5) fails.push(`burger did not open the menu: ${JSON.stringify(s1)}`);
+  await page.click('#burger');
+  const s2 = await st();
+  if (s2.menu || s2.expanded !== 'false') fails.push(`second tap did not close the menu: ${JSON.stringify(s2)}`);
+  await page.click('#burger');
+  await page.keyboard.press('Escape');
+  if ((await st()).menu) fails.push('Escape did not close the menu');
+  return fails;
+}
+// no horizontal scrolling at the probe's widths (a wider page also widens what position:fixed uses)
+async function noHScroll(page) {
+  const r = await page.evaluate(() => {
+    const W = document.documentElement.clientWidth;
+    const wide = [...document.querySelectorAll('body *')].filter((e) => e.getBoundingClientRect().right > W + 0.5 && getComputedStyle(e).position !== 'fixed')
+      .slice(0, 4).map((e) => `${e.tagName.toLowerCase()}${e.id ? '#' + e.id : ''}${e.classList.length ? '.' + [...e.classList].join('.') : ''}→${Math.round(e.getBoundingClientRect().right)}`);
+    return { scroll: document.documentElement.scrollWidth, client: W, wide };
+  });
+  return r.scroll > r.client ? [`page wider than the screen: scrollWidth ${r.scroll} > ${r.client} (${r.wide.join(', ')})`] : [];
 }
 
 async function settingsActions(page, ctx) {
@@ -241,6 +282,78 @@ async function settingsActions(page, ctx) {
     if (await visible(page, '#ticketDetailModal')) fails.push('ticket detail not closed');
   }
   fails.push(...await logoutOnly(page));
+  return fails;
+}
+// settings / subscriptions at ≤ 1024px: the topbar hamburger slides the off-canvas sidebar in (app.js);
+// a tap outside it and Escape close it. Wider, the sidebar is always there and the hamburger hidden.
+async function sidebarToggle(page) {
+  const fails = [];
+  const st = () => page.evaluate(() => {
+    const sb = document.getElementById('sidebar');
+    const b = document.getElementById('sidebar-toggle');
+    const r = sb.getBoundingClientRect();
+    return { toggle: getComputedStyle(b).display !== 'none', onScreen: r.left > -1 && r.right > 1, open: sb.classList.contains('open'), expanded: b.getAttribute('aria-expanded') };
+  });
+  const s0 = await st();
+  if (page.viewportSize().width > 1024) {
+    if (s0.toggle || !s0.onScreen) fails.push(`desktop: hamburger ${s0.toggle ? 'shown' : 'hidden'}, sidebar ${s0.onScreen ? 'shown' : 'hidden'}`);
+    return fails;
+  }
+  if (!s0.toggle || s0.onScreen) fails.push(`phone before tap: ${JSON.stringify(s0)}`);
+  await page.click('#sidebar-toggle');
+  await sleep(450); // the transform transition
+  const s1 = await st();
+  if (!s1.open || !s1.onScreen || s1.expanded !== 'true') fails.push(`hamburger did not open the sidebar: ${JSON.stringify(s1)}`);
+  // a tap on the page next to the open sidebar (dispatched on the content: nothing there is clicked)
+  await page.evaluate(() => (document.querySelector('.main-content') || document.body).dispatchEvent(new MouseEvent('click', { bubbles: true })));
+  await sleep(450);
+  const s2 = await st();
+  if (s2.open || s2.onScreen || s2.expanded !== 'false') fails.push(`tap outside did not close the sidebar: ${JSON.stringify(s2)}`);
+  await page.click('#sidebar-toggle');
+  await page.keyboard.press('Escape');
+  await sleep(450);
+  if ((await st()).open) fails.push('Escape did not close the sidebar');
+  return fails;
+}
+// settings.html: the 2FA and checkout QR codes are PNG data: URLs drawn by the server (utils/qr.js),
+// shown under img-src data:, and read back as what they encode. The probe server has no deposit
+// addresses configured, so the checkout answer is the route's shape with a QR from utils/qr.js.
+async function settingsQr(page) {
+  const fails = [];
+  const shown = (sel) => page.waitForFunction((s) => { const i = document.querySelector(s); return !!(i && i.complete && i.naturalWidth > 0 && i.src.startsWith('data:')); }, sel, { timeout: 6000 }).catch(() => {});
+  const img = (sel) => page.evaluate((s) => { const i = document.querySelector(s); return { src: i.getAttribute('src') || '', w: i.naturalWidth }; }, sel);
+  await page.click('.stab[data-stab="security"]');
+  await page.waitForFunction(() => document.getElementById('tfaBtn')?.textContent.trim() === 'Включить', null, { timeout: 6000 }).catch(() => fails.push('2FA button not ready'));
+  await page.click('#tfaBtn');
+  await shown('#tfaQr');
+  const t = await img('#tfaQr');
+  const secret = await page.evaluate(() => document.getElementById('tfaSecret').textContent.trim());
+  if (!t.src.startsWith('data:image/png;base64,') || !t.w) fails.push(`2FA QR not a shown local PNG (${t.src.slice(0, 30)}…, ${t.w}px)`);
+  else {
+    const uri = decodeQrDataUrl(t.src) || '';
+    if (!uri.startsWith('otpauth://totp/') || !secret || !uri.includes(`secret=${secret}&`)) fails.push(`2FA QR does not read back as the otpauth URI with the printed secret (${uri.slice(0, 15)}…)`);
+  }
+  const address = '0x00000000000000000000000000000000c5f0be01';
+  const invoice = { paymentId: 1, network: 'bep20', address, amountUsdt: 69.42, expiresAt: new Date(Date.now() + 3600_000).toISOString(), plan: 'pro', billingCycle: 'monthly', qrUrl: await qrDataUrl(address) };
+  await page.route('**/api/payments/crypto/create', (r) => r.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify(invoice) }));
+  await page.click('.stab[data-stab="subscription"]');
+  await page.evaluate(() => { if (typeof window.openCheckout === 'function') window.openCheckout(); else document.getElementById('upgradeBtn').click(); });
+  await page.locator('.co-method[data-method="usdt_bep20"]').click({ timeout: 3000 }).catch(() => page.locator('.co-method[data-method="usdt_bep20"]').dispatchEvent('click'));
+  await shown('#coQr');
+  const c = await img('#coQr');
+  if (!c.src.startsWith('data:image/png;base64,') || !c.w) fails.push(`checkout QR not a shown local PNG (${c.src.slice(0, 30)}…, ${c.w}px)`);
+  else if (decodeQrDataUrl(c.src) !== address) fails.push('checkout QR does not read back as the deposit address');
+  if ((await page.textContent('#coAddr')) !== address) fails.push('checkout address not shown');
+  await page.evaluate(() => { document.getElementById('checkoutModal').style.display = 'none'; });
+  await page.unroute('**/api/payments/crypto/create');
+  return fails;
+}
+// /?login=1 (where the auth-gated legacy pages send a visitor without a session): the server's 302
+// lands on the web app with its sign-in form
+async function appSignInShown(page) {
+  const fails = [];
+  if (new URL(page.url()).pathname !== '/app/') fails.push(`not on /app/: ${page.url()}`);
+  await page.waitForSelector('form.login-form', { timeout: 8000 }).catch(() => fails.push('web app sign-in form not shown'));
   return fails;
 }
 // the sign-out button sits in the sidebar, which is off-canvas at phone width: dispatch the click
@@ -317,12 +430,47 @@ async function supportWidget(page, ctx, { fromLanding = false } = {}) {
     await sleep(400);
     if (!(await page.evaluate(() => document.getElementById('chmSupBody')?.children.length > 0))) fails.push(`support tab ${t} empty`);
   }
-  if (!ctx.auth) {
-    await page.evaluate(() => document.querySelector('.chm-sup-tab[data-tab="chat"]')?.click());
-    await page.waitForSelector('#chmSupGuestEmail', { timeout: 3000 }).catch(() => fails.push('guest contact form missing'));
-  }
+  await page.evaluate(() => document.querySelector('.chm-sup-tab[data-tab="chat"]')?.click());
+  if (!ctx.auth) await page.waitForSelector('#chmSupGuestEmail', { timeout: 3000 }).catch(() => fails.push('guest contact form missing'));
+  await page.waitForSelector('#chmSupInput', { timeout: 5000 }).catch(() => fails.push('chat compose box missing'));
+  fails.push(...await widgetGeometry(page));
   await page.evaluate(() => document.getElementById('chmSupClose')?.click());
   if (await page.evaluate(() => document.getElementById('chmSupPanel')?.classList.contains('open'))) fails.push('support panel did not close');
+  return fails;
+}
+// The open widget on the chat tab: panel, compose box and bubble inside the screen, the textarea left of
+// the send button. Desktop keeps its look: a 380px panel and the 56px bubble 22px from the right edge.
+async function widgetGeometry(page) {
+  const g = await page.evaluate(() => {
+    const r = (s) => { const e = document.querySelector(s); if (!e) return null; const b = e.getBoundingClientRect(); return { l: b.left, r: b.right, t: b.top, b: b.bottom, w: b.width, h: b.height }; };
+    // the screen: the visual viewport (the layout viewport fixed boxes are placed in can be larger)
+    return { W: document.documentElement.clientWidth, H: window.visualViewport ? window.visualViewport.height : innerHeight, panel: r('#chmSupPanel'), ta: r('#chmSupInput'), send: r('#chmSupSend'), btn: r('#chmSupBtn') };
+  });
+  const fails = [];
+  if (!g.panel || !g.ta || !g.send || !g.btn) return [`widget parts missing: ${JSON.stringify(g)}`];
+  const near = (a, b) => Math.abs(a - b) < 1;
+  for (const [k, e] of [['panel', g.panel], ['textarea', g.ta], ['send button', g.send], ['bubble', g.btn]]) {
+    if (e.l < -0.5 || e.r > g.W + 0.5 || e.t < -0.5 || e.b > g.H + 0.5) fails.push(`widget ${k} outside the screen (x ${Math.round(e.l)}..${Math.round(e.r)} of ${g.W}, y ${Math.round(e.t)}..${Math.round(e.b)} of ${Math.round(g.H)})`);
+  }
+  if (g.ta.r > g.send.l + 0.5) fails.push(`textarea runs over the send button (textarea ends ${Math.round(g.ta.r)}, button starts ${Math.round(g.send.l)})`);
+  if (g.ta.w < 120) fails.push(`textarea squeezed to ${Math.round(g.ta.w)}px`);
+  if (g.W > 480) {
+    if (!near(g.panel.w, 380) || !near(g.W - g.panel.r, 22) || !near(g.btn.w, 56) || !near(g.W - g.btn.r, 22) || !near(g.H - g.btn.b, 22)) fails.push(`desktop widget moved: ${JSON.stringify({ W: g.W, panel: g.panel, btn: g.btn })}`);
+  } else if (!near(g.panel.l, 10) || !near(g.W - g.panel.r, 10) || !near(g.H - g.panel.b, 80) || !near(g.W - g.btn.r, 14) || !near(g.H - g.btn.b, 14)) {
+    fails.push(`phone widget not at its place on the screen: ${JSON.stringify({ W: g.W, H: g.H, panel: g.panel, btn: g.btn })}`);
+  }
+  return fails;
+}
+// the same on a page wider than the screen: content wider than the phone widens the layout viewport
+// position:fixed is placed in; the widget must still sit on the screen
+async function supportWidgetWidePage(page, ctx) {
+  if (page.viewportSize().width > 480) return [];
+  await page.evaluate(() => document.body.insertAdjacentHTML('afterbegin', '<div id="probe-wide" style="width:640px;height:4px"></div>'));
+  await sleep(300);
+  const w = await page.evaluate(() => ({ inner: innerWidth, client: document.documentElement.clientWidth }));
+  const fails = w.inner > w.client ? [] : [`a 640px element did not widen the layout viewport (${JSON.stringify(w)}): case not exercised`];
+  fails.push(...(await supportWidget(page, ctx)).map((f) => `wide page: ${f}`));
+  await page.evaluate(() => document.getElementById('probe-wide')?.remove());
   return fails;
 }
 // the landing's dialogs (data-dlg / data-close) and the on-demand support widget
@@ -375,25 +523,27 @@ async function appHome(page) {
 
 const SCENARIOS = [
   { name: 'landing', path: '/', checks: [checkFonts, checkMetrika, landingUi] },
-  { name: 'landing-login', path: '/?login=1&next=/ops.html', checks: [checkFonts, checkMetrika] },
+  { name: 'login-redirect', path: '/?login=1&next=/ops.html', checks: [appSignInShown] },
   { name: 'landing-empty', path: '/?data=empty', checks: [checkFonts, checkMetrika] },
   { name: 'pricing', path: '/pricing/', checks: [checkFonts, checkMetrika] },
   { name: 'spa-fallback', path: '/no/such/page', checks: [checkFonts] },
   { name: 'app-login', path: '/app/', checks: [appLogin] },
   { name: 'app', path: '/app/', auth: 'user', checks: [appHome], settle: 2500 },
-  { name: 'about', path: '/about.html', checks: [checkMetrika, supportWidget] },
-  { name: 'api-docs', path: '/api-docs.html' },
-  { name: 'status', path: '/status.html' },
-  { name: 'terms', path: '/terms.html', checks: [checkIcons, checkMetrika] },
-  { name: 'privacy', path: '/privacy.html', checks: [checkIcons] },
-  { name: 'risk', path: '/risk.html', checks: [checkIcons] },
-  { name: 'subscriptions-anon', path: '/subscriptions.html', anonRedirect: '/?login=1' },
-  { name: 'subscriptions', path: '/subscriptions.html', auth: 'user', checks: [logoutOnly] },
-  { name: 'settings-anon', path: '/settings.html', anonRedirect: '/?login=1' },
-  { name: 'settings', path: '/settings.html', auth: 'user', checks: [serviceWorker, settingsActions] },
-  { name: 'admin-anon', path: '/admin.html', anonRedirect: '/?login=1' },
+  { name: 'about', path: '/about.html', checks: [checkMetrika, noHScroll, supportWidget, supportWidgetWidePage] },
+  { name: 'api-docs', path: '/api-docs.html', checks: [noHScroll, supportWidget] },
+  { name: 'status', path: '/status.html', checks: [noHScroll, supportWidget] },
+  // (no noHScroll on the legal pages: with the wide DejaVu stand-in for Inter a list item of terms.html
+  // runs 2px past 390px; with Inter it fits. The menu and the widget are placed to the screen anyway.)
+  { name: 'terms', path: '/terms.html', checks: [checkIcons, checkMetrika, legalMenu, supportWidget] },
+  { name: 'privacy', path: '/privacy.html', checks: [checkIcons, legalMenu] },
+  { name: 'risk', path: '/risk.html', checks: [checkIcons, legalMenu] },
+  { name: 'subscriptions-anon', path: '/subscriptions.html', anonRedirect: '/app/', checks: [appSignInShown] },
+  { name: 'subscriptions', path: '/subscriptions.html', auth: 'user', checks: [sidebarToggle, supportWidget, logoutOnly] },
+  { name: 'settings-anon', path: '/settings.html', anonRedirect: '/app/', checks: [appSignInShown] },
+  { name: 'settings', path: '/settings.html', auth: 'user', checks: [serviceWorker, sidebarToggle, settingsQr, settingsActions] },
+  { name: 'admin-anon', path: '/admin.html', anonRedirect: '/app/', checks: [appSignInShown] },
   { name: 'admin', path: '/admin.html', auth: 'admin', checks: [adminRedirect] },
-  { name: 'ops-anon', path: '/ops.html', anonRedirect: '/?login=1' },
+  { name: 'ops-anon', path: '/ops.html', anonRedirect: '/app/', checks: [appSignInShown] },
   { name: 'ops', path: '/ops.html', auth: 'admin', checks: [opsActions] },
   { name: 'google-verify', path: '/google42f82fe571b31093.html' },
   { name: 'yandex-verify', path: '/yandex_dad10d6013fe454c.html' },

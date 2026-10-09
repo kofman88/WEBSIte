@@ -6,8 +6,9 @@
  *      → we generate a random secret, encrypt with WALLET_ENCRYPTION_KEY,
  *        store in two_factor_secrets with enabled=0. Return otpauth:// URI
  *        (user scans in Google Authenticator / Authy) plus 8 recovery codes.
- *      → server also returns the QR-image URL (via Google Charts) so the
- *        frontend doesn't need a QR library.
+ *      → server also returns the QR image of that URI as a PNG data: URL drawn
+ *        here (utils/qr.js), so the frontend needs no QR library and the
+ *        secret never reaches a third-party QR service.
  *   2. User types the 6-digit code from the app → POST /auth/2fa/confirm
  *      → we check it against the stored secret. If valid → enabled=1.
  *   3. On subsequent logins, if enabled=1, login() returns
@@ -23,6 +24,7 @@ const db = require('../models/database');
 const cryptoUtil = require('../utils/crypto');
 const config = require('../config');
 const logger = require('../utils/logger');
+const { qrDataUrl } = require('../utils/qr');
 
 // 30-second window, allow ±1 step drift (standard)
 authenticator.options = { window: 1, step: 30 };
@@ -43,9 +45,11 @@ function hashRecoveryCodes(codes) {
   return codes.map((c) => crypto.createHash('sha256').update(c.toLowerCase()).digest('hex')).join(',');
 }
 
-function setup(userId, userEmail) {
+async function setup(userId, userEmail) {
   const secret = authenticator.generateSecret();
   const otpauth = authenticator.keyuri(userEmail, ISSUER, secret);
+  // drawn before anything is stored: a failure leaves the previous state untouched
+  const qrUrl = await qrDataUrl(otpauth);
   const recoveryCodes = generateRecoveryCodes();
   const recoveryHash = hashRecoveryCodes(recoveryCodes);
 
@@ -62,7 +66,6 @@ function setup(userId, userEmail) {
       created_at = CURRENT_TIMESTAMP
   `).run(userId, encrypted, recoveryHash);
 
-  const qrUrl = 'https://api.qrserver.com/v1/create-qr-code/?size=256x256&data=' + encodeURIComponent(otpauth);
   return { otpauth, qrUrl, recoveryCodes };
 }
 

@@ -19,7 +19,7 @@ function api(path, q) {
  const none = { empty: true, reason: NO[path] || EMPTY }, m = SRC(path);
  if (m === 'empty') return Promise.resolve(none);
  if (m === 'mock') {
-  mockP = mockP || new Promise((ok, no) => { const s = D.createElement('script'); s.src = '/landing/data/mock-api.js?v=3'; s.onload = ok; s.onerror = no; D.head.appendChild(s); });
+  mockP = mockP || new Promise((ok, no) => { const s = D.createElement('script'); s.src = '/landing/data/mock-api.js?v=4'; s.onload = ok; s.onerror = no; D.head.appendChild(s); });
   return mockP.then(() => window.CHM_MOCK.get(path, q && Object.fromEntries(new URLSearchParams(q)))).catch(() => none);
  }
  return fetch('/api/public/' + path + (q ? '?' + new URLSearchParams(q) : ''), { headers: { Accept: 'application/json' } })
@@ -833,7 +833,7 @@ SEC.misc = () => {
   const s = e.target.closest('[data-support]');
   if (s) {
    if (window.ChmSupport) return window.ChmSupport.open();
-   const el = D.createElement('script'); el.src = '/support-widget.js?v=3'; el.onload = () => window.ChmSupport && window.ChmSupport.open(); el.onerror = () => { location.href = 'https://t.me/CHM_signalS_bot'; }; D.body.appendChild(el);
+   const el = D.createElement('script'); el.src = '/support-widget.js?v=4'; el.onload = () => window.ChmSupport && window.ChmSupport.open(); el.onerror = () => { location.href = 'https://t.me/CHM_signalS_bot'; }; D.body.appendChild(el);
   }
  });
  D.body.insertAdjacentHTML('beforeend', '<svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs><linearGradient id="ga-pos" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#3df2a0" stop-opacity=".2"/><stop offset="1" stop-color="#3df2a0" stop-opacity="0"/></linearGradient><linearGradient id="ga-neg" x1="0" y1="1" x2="0" y2="0"><stop offset="0" stop-color="#ff7a8f" stop-opacity=".18"/><stop offset="1" stop-color="#ff7a8f" stop-opacity="0"/></linearGradient><pattern id="hatch" width="5" height="5" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><rect width="5" height="5" fill="rgba(255,122,143,.08)"/><line x1="0" y1="0" x2="0" y2="5" stroke="rgba(255,122,143,.55)" stroke-width="1.4"/></pattern></defs></svg>');

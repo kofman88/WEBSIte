@@ -3,3 +3,14 @@ PassengerBaseURI "/"
 PassengerNodejs "/home/chmtop/nodevenv/chmup_backend/20/bin/node"
 PassengerAppType node
 PassengerStartupFile server.js
+
+# Sign-in redirect: the legacy pages send a visitor without a session to /?login=1 (app.js
+# requireAuth, ops.js); the landing at / has no login form, the web app's start screen has one.
+# backend/server.js answers the same 302, but Apache serves / (index.html) straight from
+# public_html without asking Passenger, so the rule is here too. The web app reads no return
+# address, so the query string is dropped. Only / and /index.html with login=1 are touched.
+<IfModule mod_rewrite.c>
+RewriteEngine On
+RewriteCond %{QUERY_STRING} (^|&)login=1(&|$)
+RewriteRule ^(index\.html)?$ /app/? [R=302,L]
+</IfModule>

@@ -217,18 +217,34 @@ describe('pages: what the policy allows is what they use', () => {
   // legacy pages' inline on* attributes live in app.js / ops.js, so those files ship under a
   // versioned URL — a browser holding the old copy would otherwise run new HTML with old JS
   // (dead sign-out and ops drawer buttons) for up to 30 days.
-  it('the legacy pages load app.js / ops.js under one cache-busting version', () => {
+  // support-widget.js likewise (its phone layout changed with it): the same one version string as
+  // app.js / ops.js on every legacy page, and the landing's on-demand loader (landing.js, which
+  // carries the landing's own version, tests/public/landing.test.js) names the same URL.
+  it('the legacy pages load app.js / ops.js / support-widget.js under one cache-busting version', () => {
     expect(fs.readFileSync(path.join(BACKEND, 'server.js'), 'utf8')).toMatch(/\.\(css\|js\|[^)]*\)\$\/i\.test\(filePath\)\) \{\s*res\.setHeader\('Cache-Control', 'public, max-age=2592000, immutable'\)/);
     const refs = [];
     for (const f of fs.readdirSync(FRONTEND).filter((n) => n.endsWith('.html'))) {
       const html = fs.readFileSync(path.join(FRONTEND, f), 'utf8');
-      for (const m of html.matchAll(/<script\b[^>]*\bsrc="((?:\.\/|\/)?(app|ops)\.js(?:\?v=([\w.-]+))?)"/g)) refs.push({ page: f, file: m[2], v: m[3] || null });
+      for (const m of html.matchAll(/<script\b[^>]*\bsrc="((?:\.\/|\/)?(app|ops|support-widget)\.js(?:\?v=([\w.-]+))?)"/g)) refs.push({ page: f, file: m[2], v: m[3] || null });
     }
     expect(refs.map((r) => `${r.page} ${r.file}`).sort()).toEqual([
-      'admin.html app', 'ops.html app', 'ops.html ops', 'settings.html app', 'status.html app', 'subscriptions.html app',
+      'about.html support-widget', 'admin.html app', 'admin.html support-widget', 'api-docs.html support-widget',
+      'ops.html app', 'ops.html ops', 'ops.html support-widget', 'privacy.html support-widget', 'risk.html support-widget',
+      'settings.html app', 'settings.html support-widget', 'status.html app', 'status.html support-widget',
+      'subscriptions.html app', 'subscriptions.html support-widget', 'terms.html support-widget',
     ]);
     expect(refs.filter((r) => !r.v)).toEqual([]);
-    expect(new Set(refs.map((r) => r.v)).size).toBe(1);
+    const versions = new Set(refs.map((r) => r.v));
+    expect(versions.size).toBe(1);
+    // every other mention of the widget in the frontend (landing.js's loader) is the same URL
+    const others = [];
+    for (const f of frontendFiles(['.js', '.html'])) {
+      if (rel(f) === 'support-widget.js') continue;
+      for (const m of fs.readFileSync(f, 'utf8').matchAll(/support-widget\.js(\?v=[\w.-]+)?/g)) others.push(`${rel(f)} ${m[1] || '(no version)'}`);
+    }
+    const v = [...versions][0];
+    expect(others.filter((o) => !o.endsWith(` ?v=${v}`))).toEqual([]);
+    expect(others).toContain(`landing/landing.js ?v=${v}`);
   });
 });
 

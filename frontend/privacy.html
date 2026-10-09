@@ -65,6 +65,12 @@ a:hover{text-decoration:underline}
 .btn-nav-gold:hover{filter:brightness(1.08);transform:translateY(-1px)}
 .burger{display:none;flex-direction:column;gap:5px;cursor:pointer;padding:6px;border:none;background:transparent}
 .burger span{display:block;width:22px;height:2px;background:var(--text2);border-radius:2px;transition:all .3s}
+.burger.open span:nth-child(1){transform:translateY(7px) rotate(45deg)}
+.burger.open span:nth-child(2){opacity:0}
+.burger.open span:nth-child(3){transform:translateY(-7px) rotate(-45deg)}
+/* phone menu: the nav links + CTAs the burger opens (hidden above 768px); as wide as the screen
+   (min(100vw,100%)) even if some content makes the page wider */
+.mobile-menu{display:none}
 
 /* LEGAL PAGE LAYOUT */
 .legal-page{position:relative;z-index:1;max-width:860px;margin:0 auto;padding:calc(var(--nav-h) + 48px) clamp(16px,5vw,48px) 80px}
@@ -110,6 +116,12 @@ a:hover{text-decoration:underline}
 @media(max-width:768px){
   .nav-links,.nav-cta{display:none}
   .burger{display:flex}
+  .mobile-menu.open{display:flex;flex-direction:column;gap:6px;position:fixed;top:var(--nav-h);left:0;right:0;width:min(100vw,100%);z-index:99;padding:12px 16px 16px;background:rgba(10,10,10,.96);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);border-bottom:1px solid var(--border)}
+  .mobile-menu a{padding:12px 14px;border-radius:10px;font-size:15px;font-weight:500;color:var(--text2);text-decoration:none}
+  .mobile-menu a:not(.btn-nav):hover{color:var(--text);background:rgba(255,255,255,.04);text-decoration:none}
+  .mobile-menu .btn-nav{justify-content:center;margin-top:4px}
+  .mobile-menu .btn-nav-gold{color:#fff}
+  .mobile-menu .btn-nav i,.mobile-menu .btn-nav svg{width:16px;height:16px}
 }
 </style>
 <script src="/yandex-metrika.js" async></script><noscript><div><img src="https://mc.yandex.ru/watch/108973987" style="position:absolute;left:-9999px" alt=""/></div></noscript>
@@ -122,11 +134,11 @@ a:hover{text-decoration:underline}
 </div>
 <nav class="nav" id="mainNav">
   <a href="/" class="nav-logo">
-    <img src="/assets/img/chm-logo.jpg" alt="CHM" style="width:34px;height:34px;object-fit:contain;border-radius:6px;flex-shrink:0" data-hide-on-error>
+    <img src="/logo.png" alt="CHM" width="34" height="34" style="width:34px;height:34px;object-fit:contain;border-radius:6px;flex-shrink:0" data-hide-on-error>
     <span class="nav-logo-text" style="margin-left:8px">CHM</span>
   </a>
   <ul class="nav-links">
-    <li><a href="/#services">Продукты</a></li>
+    <li><a href="/#showcase">Продукты</a></li>
     <li><a href="/#how">Как работает</a></li>
     <li><a href="/#pricing">Тарифы</a></li>
   </ul>
@@ -138,8 +150,15 @@ a:hover{text-decoration:underline}
       <i data-lucide="zap"></i> Приложение
     </a>
   </div>
-  <button class="burger" id="burger"><span></span><span></span><span></span></button>
+  <button class="burger" id="burger" type="button" aria-label="Меню" aria-expanded="false" aria-controls="mobileMenu"><span></span><span></span><span></span></button>
 </nav>
+<div class="mobile-menu" id="mobileMenu">
+  <a href="/#showcase">Продукты</a>
+  <a href="/#how">Как работает</a>
+  <a href="/#pricing">Тарифы</a>
+  <a href="https://t.me/crypto_chm" target="_blank" rel="noopener" class="btn-nav btn-nav-ghost"><i data-lucide="send"></i> Telegram</a>
+  <a href="/app/" class="btn-nav btn-nav-gold"><i data-lucide="zap"></i> Приложение</a>
+</div>
 <main class="legal-page">
   <a href="/" class="back-nav"><i data-lucide="arrow-left"></i> На главную</a>
 
@@ -261,17 +280,22 @@ document.querySelectorAll('img[data-hide-on-error]').forEach(function (img) {
   function hide() { img.style.display = 'none'; }
   if (img.complete && img.naturalWidth === 0) hide(); else img.addEventListener('error', hide);
 });
-// Burger
+// Burger (phone width): opens #mobileMenu; a link, Escape or a wider window closes it
 const burger = document.getElementById('burger');
 const mobileMenu = document.getElementById('mobileMenu');
 if (burger && mobileMenu) {
-  burger.addEventListener('click', () => {
-    burger.classList.toggle('open');
-    mobileMenu.classList.toggle('open');
-  });
+  const setMenu = (open) => {
+    burger.classList.toggle('open', open);
+    mobileMenu.classList.toggle('open', open);
+    burger.setAttribute('aria-expanded', String(open));
+  };
+  burger.addEventListener('click', () => setMenu(!mobileMenu.classList.contains('open')));
+  mobileMenu.addEventListener('click', (e) => { if (e.target.closest('a')) setMenu(false); });
+  document.addEventListener('keydown', (e) => { if (e.key === 'Escape') setMenu(false); });
+  window.addEventListener('resize', () => { if (!window.matchMedia('(max-width: 768px)').matches) setMenu(false); });
 }
 </script>
 <script src="aura-bg.js" defer></script>
-<script src="support-widget.js" defer></script>
+<script src="support-widget.js?v=4" defer></script>
 </body>
 </html>

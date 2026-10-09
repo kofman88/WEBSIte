@@ -25,11 +25,12 @@
  * on the site embeds a font as a data: URL (tests/csp.test.js checks), and data: fonts would only
  * help injected CSS.
  *
- * img-src data: (the landing's inline SVG favicon and backgrounds, support-widget previews) and
- * https:, connect-src https: + wss: — Metrika's hits go to mc.yandex.ru and the regional
- * mc.yandex.<tld> / mc.webvisor.* hosts tag.js picks at runtime (Yandex's "general list"), and
- * the checkout / 2FA QR images come from api.qrserver.com. These were already scheme sources
- * before; narrowing them to a host list needs a Report-Only period against the live counter.
+ * img-src data: (the landing's inline SVG favicon and backgrounds, support-widget previews, the
+ * checkout / 2FA QR codes: utils/qr.js draws them on the server as PNG data: URLs, no QR service
+ * ever sees a TOTP secret or a deposit address) and https:, connect-src https: + wss: — Metrika's
+ * hits go to mc.yandex.ru and the regional mc.yandex.<tld> / mc.webvisor.* hosts tag.js picks at
+ * runtime (Yandex's "general list"). These were already scheme sources before; narrowing them to
+ * a host list needs a Report-Only period against the live counter.
  *
  * frame-src blob: mc.yandex.ru / mc.yandex.com: Metrika's Session Replay and click / scroll / link
  * maps (blob: frames, mc.yandex.* match frames). No 'self': every same-origin response carries

@@ -217,9 +217,9 @@ router.get('/2fa/status', authMiddleware, (req, res, next) => {
   catch (err) { handleServiceError(err, res, next); }
 });
 
-router.post('/2fa/setup', authMiddleware, (req, res, next) => {
+router.post('/2fa/setup', authMiddleware, async (req, res, next) => {
   try {
-    const out = twoFactorService.setup(req.userId, req.userEmail);
+    const out = await twoFactorService.setup(req.userId, req.userEmail);
     res.json(out);
   } catch (err) { handleServiceError(err, res, next); }
 });
