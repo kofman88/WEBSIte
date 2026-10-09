@@ -65,6 +65,26 @@ function forwardLogs(post) {
 }
 
 /**
+ * asyncio's default exception handler, for the worker thread. In the bot an exception nobody
+ * awaited (a background task's: "Task exception was never retrieved") or one raised in a plain
+ * callback ("Exception in callback …") is logged at ERROR by the loop, and every other task goes on.
+ * Node's default ends the thread on the first stray rejection — every scanner, feed and loop with
+ * it, then a full restart. Returns the uninstall function.
+ */
+function installTaskExceptionHandlers(proc = process, log = null) {
+  const L = () => log || require('../services/marketData/mdLog').log;
+  const text = (e) => (e && e.stack ? String(e.stack) : String(e));
+  const onRejection = (reason) => { try { L().error('Task exception was never retrieved', text(reason)); } catch (_e) { /* never throw here */ } };
+  const onException = (err) => { try { L().error('Exception in callback', text(err)); } catch (_e) { /* never throw here */ } };
+  proc.on('unhandledRejection', onRejection);
+  proc.on('uncaughtException', onException);
+  return () => {
+    proc.removeListener('unhandledRejection', onRejection);
+    proc.removeListener('uncaughtException', onException);
+  };
+}
+
+/**
  * The thread's own end after 'stopped': close its SQLite connection (when this thread opened
  * one) and the port, so the thread drains and exits by itself. Not process.exit(): ending a
  * worker thread that way while better-sqlite3 / the file loggers still hold native resources
@@ -183,6 +203,7 @@ function createSupervisor({
   const state = {
     worker: null, startedAt: 0, lastBeat: 0, restarts: 0, delay: RESTART_BASE_S, stopping: false,
     restartTimer: null, watchdog: null, ready: null, regime: null, regimeAt: 0, health: {}, exitReason: null,
+    lastTick: null, stalls: 0,
   };
 
   function logLine(level, msg, extra) {
@@ -271,9 +292,25 @@ function createSupervisor({
     if (state.restartTimer && state.restartTimer.unref) state.restartTimer.unref();
   }
 
+  /**
+   * The watchdog tick. A tick that comes much later than its period means this (main) thread did
+   * not run meanwhile — a long GC pause, a synchronous request handler, a frozen process: the
+   * worker's heartbeats of that time are still queued behind this tick (the timers phase runs
+   * before the port's messages), so the silence says nothing about the worker. Such a tick only
+   * restarts the liveness window; a worker is judged on silence measured while this thread ran.
+   */
   function checkLiveness() {
     if (!state.worker || state.stopping) return;
-    const silent = (now() - state.lastBeat) * 1000;
+    const t = now();
+    const gapMs = state.lastTick === null ? 0 : (t - state.lastTick) * 1000;
+    state.lastTick = t;
+    if (gapMs > watchdogEveryMs * 2) {
+      state.stalls += 1;
+      L.warn(`[ENGINE-WORKER] main thread stalled ${Math.round(gapMs / 1000)}s — liveness window restarted`);
+      state.lastBeat = Math.max(state.lastBeat, t);
+      return;
+    }
+    const silent = (t - state.lastBeat) * 1000;
     if (silent > heartbeatTimeoutMs) {
       state.exitReason = `no heartbeat for ${Math.round(silent / 1000)}s`;
       L.error(`[ENGINE-WORKER] ${state.exitReason} — terminating`);
@@ -286,6 +323,7 @@ function createSupervisor({
     state,
     start() {
       state.stopping = false;
+      state.lastTick = now();
       spawnWorker();
       state.watchdog = setEvery(checkLiveness, watchdogEveryMs);
       if (state.watchdog && state.watchdog.unref) state.watchdog.unref();
@@ -364,9 +402,12 @@ function startEngine({ log = null, env = process.env, spawn = null, delivery = n
   scheduler.start();
   return {
     supervisor, scheduler, regime,
+    /**
+     * Both halves at once, like the bot cancelling every gather task together and waiting ≤ 4 s:
+     * the main-side loops (≤ 4 s) and the worker (its own ≤ 4 s + the registry save, ≤ 6 s grace).
+     */
     async stop() {
-      const r1 = await scheduler.stop();
-      const r2 = await supervisor.stop();
+      const [r1, r2] = await Promise.all([scheduler.stop(), supervisor.stop()]);
       return { main: r1, worker: r2 };
     },
   };
@@ -378,10 +419,12 @@ if (!isMainThread && parentPort && require.main === module) {
   // are a no-op once the main thread ran them) — opened at start, not lazily mid-shutdown
   try { require('../models/database'); } catch (e) { parentPort.postMessage({ type: 'fatal', error: String(e && e.stack ? e.stack : e) }); }
   runWorker(parentPort, { exit: () => softExit(parentPort) });
+  // after runWorker: its log forwarding carries these lines to the main thread
+  installTaskExceptionHandlers(process);
 }
 
 module.exports = {
   WORKER_PATH, HEARTBEAT_MS, HEARTBEAT_TIMEOUT_MS, WATCHDOG_EVERY_MS, SHUTDOWN_GRACE_MS,
   RESTART_BASE_S, RESTART_MAX_S, RESTART_HEALTHY_S,
-  runWorker, createSupervisor, startEngine, forwardLogs, softExit, engineLog,
+  runWorker, createSupervisor, startEngine, forwardLogs, softExit, engineLog, installTaskExceptionHandlers,
 };
