@@ -11,8 +11,11 @@
  *
  * Recorded per page: `securitypolicyviolation` events (exposed binding, so they survive redirects),
  * console errors, page errors, failed requests and HTTP errors, plus functional checks of what the
- * policy used to break (the landing font switch, Metrika, settings tabs / toggles / modals, the ops
- * drawer actions, the legal pages' icons). Any violation, error or failed check → exit 1.
+ * policy used to break or could break (the landing font switch and the face Chromium renders, the
+ * Metrika queue and channels, the landing dialogs and on-demand support widget, the web app's
+ * sign-in, settings tabs / toggles / modals and its /sw.js registration — service workers are on —,
+ * the support widget, the ops drawer actions, the legal pages' icons). Any violation, error or
+ * failed check → exit 1.
  *
  * No request leaves the machine: Google Fonts, mc.yandex.ru / mc.yandex.com / yastatic.net are
  * answered by Playwright routes. The CSP decision itself is the browser's — a request the policy
@@ -56,7 +59,18 @@ function freePort() {
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 
 // ── stubs for the hosts outside the machine ─────────────────────────────
+// A stand-in for the Google Fonts files: a font with Latin + Cyrillic glyphs (the pages are Russian),
+// so the rendered-face check below can tell the web font from the local fallbacks. Any other .ttf
+// (e.g. a symbol font) still lets the font switch be checked, not the rendering.
+const TEXT_FONTS = [
+  '/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf',
+  '/usr/share/fonts/truetype/liberation/LiberationSans-Regular.ttf',
+  '/usr/share/fonts/truetype/crosextra/Carlito-Regular.ttf',
+  '/usr/share/fonts/TTF/DejaVuSans.ttf',
+];
 function findFont() {
+  const text = TEXT_FONTS.find((p) => fs.existsSync(p));
+  if (text) return text;
   for (const root of ['/usr/share/fonts', '/usr/local/share/fonts']) {
     const stack = [root];
     while (stack.length) {
@@ -73,6 +87,7 @@ function findFont() {
   return null;
 }
 const FONT = findFont();
+const FONT_HAS_TEXT = TEXT_FONTS.includes(FONT);
 const FONT_BYTES = FONT ? fs.readFileSync(FONT) : null;
 const FAMILIES = ['Inter', 'JetBrains Mono', 'Oswald'];
 const FONT_CSS = FONT_BYTES
@@ -130,6 +145,32 @@ async function checkFonts(page) {
   });
   if (st.printLeft) fails.push(`font stylesheet still media=print (${st.printLeft}) — the onload switch did not run`);
   if (FONT_BYTES && !st.loaded.includes('Oswald')) fails.push(`landing fonts not applied (loaded: ${st.loaded.join(', ') || 'none'})`);
+  if (FONT_HAS_TEXT) fails.push(...await renderedWithWebFont(page));
+  return fails;
+}
+// The face Chromium actually used (CDP CSS.getPlatformFontsForNode) for a visible text element of
+// each family: a web font (isCustomFont), not the local "… Fallback" faces.
+async function renderedWithWebFont(page) {
+  const fails = [];
+  const marked = await page.evaluate((families) => families.filter((fam) => {
+    const el = [...document.querySelectorAll('h1,h2,h3,p,span,b,a,button,li,div')].find((e) => e.offsetParent
+      && [...e.childNodes].some((n) => n.nodeType === 3 && n.textContent.trim().length > 3)
+      && getComputedStyle(e).fontFamily.replace(/["']/g, '').startsWith(fam));
+    if (el) el.setAttribute('data-probe-font', fam);
+    return !!el;
+  }), FAMILIES);
+  const cdp = await page.context().newCDPSession(page);
+  try {
+    await cdp.send('DOM.enable');
+    await cdp.send('CSS.enable');
+    const { root } = await cdp.send('DOM.getDocument', { depth: -1 });
+    for (const fam of FAMILIES) {
+      if (!marked.includes(fam)) { fails.push(`no visible text styled with ${fam}`); continue; }
+      const { nodeId } = await cdp.send('DOM.querySelector', { nodeId: root.nodeId, selector: `[data-probe-font="${fam}"]` });
+      const { fonts } = await cdp.send('CSS.getPlatformFontsForNode', { nodeId });
+      if (!fonts.some((f) => f.isCustomFont)) fails.push(`${fam} text rendered with local fonts only: ${fonts.map((f) => f.familyName).join(', ')}`);
+    }
+  } finally { await cdp.detach().catch(() => {}); }
   return fails;
 }
 async function checkMetrika(page) {
@@ -137,6 +178,14 @@ async function checkMetrika(page) {
   const r = await page.evaluate(() => window.__ymStub || null);
   if (!r) return ['Metrika tag.js never ran (window.__ymStub missing)'];
   const fails = [];
+  // yandex-metrika.js: the ym() queue holds the init of the counter, tag.js is requested once
+  const q = await page.evaluate(() => ({
+    ym: typeof window.ym,
+    init: (window.ym && window.ym.a || []).some((a) => a[0] === 108973987 && a[1] === 'init'),
+    tags: [...document.scripts].filter((s) => s.src.startsWith('https://mc.yandex.ru/metrika/tag.js')).length,
+  }));
+  if (q.ym !== 'function' || !q.init) fails.push(`Metrika queue not initialised (ym ${q.ym}, init ${q.init})`);
+  if (q.tags !== 1) fails.push(`tag.js <script> count ${q.tags}`);
   for (const k of ['img', 'fetch', 'frame', 'blobFrame', 'worker', 'mc.yandex.com', 'yastatic.net']) if (r[k] !== 'ok') fails.push(`Metrika channel ${k}: ${r[k]}`);
   return fails;
 }
@@ -173,7 +222,8 @@ async function settingsActions(page, ctx) {
     await page.evaluate(() => { if (typeof window.openCheckout === 'function') window.openCheckout(); else document.getElementById('upgradeBtn').click(); });
     if (!(await visible(page, '#checkoutModal'))) { fails.push('checkout modal did not open'); break; }
     await page.evaluate(() => { document.getElementById('coStep2')?.classList.remove('hidden'); });
-    await page.locator(sel).click().catch((e) => fails.push(`checkout close ${sel}: ${e.message.split('\n')[0]}`));
+    // a toast can sit over the modal's × at phone width for a moment: then dispatch (the check is the wiring)
+    await page.locator(sel).click({ timeout: 2000 }).catch(() => page.locator(sel).dispatchEvent('click').catch((e) => fails.push(`checkout close ${sel}: ${e.message.split('\n')[0]}`)));
     if (await visible(page, '#checkoutModal')) fails.push(`checkout modal not closed by ${sel}`);
   }
   // support: new-ticket modal + the seeded ticket's detail modal
@@ -250,6 +300,73 @@ async function opsActions(page, ctx) {
   }
   return fails;
 }
+// support-widget.js: opens, renders its three tabs, closes (anonymous: the e-mail contact form)
+async function supportWidget(page, ctx, { fromLanding = false } = {}) {
+  const fails = [];
+  if (fromLanding) {
+    // the landing loads the widget on demand from the FAQ's "no results" link
+    await page.fill('#faq-q', 'zzzz-no-such-question');
+    await page.click('#faq-empty [data-support]').catch((e) => fails.push(`faq support link: ${e.message.split('\n')[0]}`));
+  } else {
+    await page.waitForSelector('#chmSupBtn', { state: 'attached', timeout: 5000 }).catch(() => fails.push('support button missing'));
+    await page.evaluate(() => document.getElementById('chmSupBtn')?.click());
+  }
+  await page.waitForSelector('#chmSupPanel.open', { timeout: 5000 }).catch(() => fails.push('support panel did not open'));
+  for (const t of ['chat', 'help', 'home']) {
+    await page.evaluate((x) => document.querySelector(`.chm-sup-tab[data-tab="${x}"]`)?.click(), t);
+    await sleep(400);
+    if (!(await page.evaluate(() => document.getElementById('chmSupBody')?.children.length > 0))) fails.push(`support tab ${t} empty`);
+  }
+  if (!ctx.auth) {
+    await page.evaluate(() => document.querySelector('.chm-sup-tab[data-tab="chat"]')?.click());
+    await page.waitForSelector('#chmSupGuestEmail', { timeout: 3000 }).catch(() => fails.push('guest contact form missing'));
+  }
+  await page.evaluate(() => document.getElementById('chmSupClose')?.click());
+  if (await page.evaluate(() => document.getElementById('chmSupPanel')?.classList.contains('open'))) fails.push('support panel did not close');
+  return fails;
+}
+// the landing's dialogs (data-dlg / data-close) and the on-demand support widget
+async function landingUi(page, ctx) {
+  const fails = [];
+  for (const d of ['dlg-arch', 'dlg-method']) {
+    await page.click(`[data-dlg="${d}"]`).catch((e) => fails.push(`${d}: ${e.message.split('\n')[0]}`));
+    if (!(await page.evaluate((x) => document.getElementById(x)?.open, d))) { fails.push(`${d} did not open`); continue; }
+    await page.click(`#${d} [data-close]`);
+    if (await page.evaluate((x) => document.getElementById(x).open, d)) fails.push(`${d} did not close`);
+  }
+  fails.push(...await supportWidget(page, ctx, { fromLanding: true }));
+  return fails;
+}
+// the web app's login screen: password toggle, register mode, a wrong password (401), then sign-in
+async function appLogin(page, ctx) {
+  const fails = [];
+  await page.waitForSelector('form.login-form', { timeout: 8000 }).catch(() => fails.push('login form not shown'));
+  await page.click('form.login-form .icon-btn');
+  if ((await page.getAttribute('form.login-form input[name=password]', 'type')) !== 'text') fails.push('show-password toggle dead');
+  await page.click('#login-alt button >> nth=0');            // → register
+  await page.waitForSelector('form.login-form input[autocomplete="new-password"]', { timeout: 3000 }).catch(() => fails.push('register mode not shown'));
+  await page.click('#login-alt button >> nth=0');            // ← back to sign-in
+  await page.waitForSelector('form.login-form input[autocomplete="current-password"]', { timeout: 3000 }).catch(() => fails.push('sign-in mode not shown'));
+  await page.waitForLoadState('networkidle').catch(() => {});
+  await page.fill('input[name=email]', USER_EMAIL);
+  await page.fill('input[name=password]', 'wrong-password-1');
+  if ((await page.inputValue('input[name=email]')) !== USER_EMAIL) fails.push('e-mail not typed');
+  ctx.expect401 = true;
+  await page.click('form.login-form button[type=submit]');
+  await page.waitForSelector('.login-err', { timeout: 6000 }).catch(() => fails.push('wrong password: no error shown'));
+  await page.fill('input[name=password]', PASSWORD);
+  if ((await page.inputValue('input[name=email]')) !== USER_EMAIL) await page.fill('input[name=email]', USER_EMAIL);
+  await page.click('form.login-form button[type=submit]');
+  await page.waitForFunction(() => !document.querySelector('form.login-form') && !document.getElementById('tabbar').hidden, null, { timeout: 10000 }).catch(() => fails.push('sign-in did not open the app'));
+  return fails;
+}
+// settings.html registers /sw.js for web push: worker-src falls back to child-src 'self'
+async function serviceWorker(page) {
+  const r = await page.evaluate(async () => {
+    try { const reg = await navigator.serviceWorker.register('/sw.js'); await navigator.serviceWorker.ready; return { ok: !!reg.active || !!reg.installing || !!reg.waiting }; } catch (e) { return { ok: false, err: String(e) }; }
+  });
+  return r.ok ? [] : [`sw.js registration failed: ${r.err}`];
+}
 async function appHome(page) {
   const fails = [];
   await page.waitForFunction(() => !document.querySelector('.login-screen, #login') || document.querySelector('[data-tab], .tabbar, nav'), null, { timeout: 8000 }).catch(() => fails.push('app did not render'));
@@ -257,13 +374,14 @@ async function appHome(page) {
 }
 
 const SCENARIOS = [
-  { name: 'landing', path: '/', checks: [checkFonts, checkMetrika] },
+  { name: 'landing', path: '/', checks: [checkFonts, checkMetrika, landingUi] },
+  { name: 'landing-login', path: '/?login=1&next=/ops.html', checks: [checkFonts, checkMetrika] },
   { name: 'landing-empty', path: '/?data=empty', checks: [checkFonts, checkMetrika] },
   { name: 'pricing', path: '/pricing/', checks: [checkFonts, checkMetrika] },
   { name: 'spa-fallback', path: '/no/such/page', checks: [checkFonts] },
-  { name: 'app-login', path: '/app/' },
+  { name: 'app-login', path: '/app/', checks: [appLogin] },
   { name: 'app', path: '/app/', auth: 'user', checks: [appHome], settle: 2500 },
-  { name: 'about', path: '/about.html', checks: [checkMetrika] },
+  { name: 'about', path: '/about.html', checks: [checkMetrika, supportWidget] },
   { name: 'api-docs', path: '/api-docs.html' },
   { name: 'status', path: '/status.html' },
   { name: 'terms', path: '/terms.html', checks: [checkIcons, checkMetrika] },
@@ -272,7 +390,7 @@ const SCENARIOS = [
   { name: 'subscriptions-anon', path: '/subscriptions.html', anonRedirect: '/?login=1' },
   { name: 'subscriptions', path: '/subscriptions.html', auth: 'user', checks: [logoutOnly] },
   { name: 'settings-anon', path: '/settings.html', anonRedirect: '/?login=1' },
-  { name: 'settings', path: '/settings.html', auth: 'user', checks: [settingsActions] },
+  { name: 'settings', path: '/settings.html', auth: 'user', checks: [serviceWorker, settingsActions] },
   { name: 'admin-anon', path: '/admin.html', anonRedirect: '/?login=1' },
   { name: 'admin', path: '/admin.html', auth: 'admin', checks: [adminRedirect] },
   { name: 'ops-anon', path: '/ops.html', anonRedirect: '/?login=1' },
@@ -311,7 +429,8 @@ async function main() {
     for (const vp of VIEWPORTS) {
       for (const sc of SCENARIOS) {
         if (ONLY && !ONLY.has(sc.name)) continue;
-        const ctxOpts = { viewport: { width: vp.width, height: vp.height }, locale: 'ru-RU', serviceWorkers: 'block' };
+        // service workers allowed: settings registers /sw.js (it has no fetch handler, so the routes still see every request)
+        const ctxOpts = { viewport: { width: vp.width, height: vp.height }, locale: 'ru-RU' };
         if (vp.name === 'phone') Object.assign(ctxOpts, { deviceScaleFactor: 2, isMobile: true, hasTouch: true });
         const ctx = await browser.newContext(ctxOpts);
         await ctx.route((url) => url.hostname !== '127.0.0.1', stubRoute);
@@ -357,6 +476,7 @@ async function main() {
         });
         page.on('response', (r) => { if (r.status() >= 400) errors.push(`http ${r.status()}: ${r.request().method()} ${r.url()}`); });
         const fails = [];
+        const cctx = { ticketId, userId: sessions.user.user.id, dialogs, auth: sc.auth || '', expect401: false };
         let finalUrl = '';
         try {
           await page.goto(base + sc.path, { waitUntil: 'load', timeout: 20000 });
@@ -366,11 +486,17 @@ async function main() {
             fs.mkdirSync(SHOTS, { recursive: true });
             await page.screenshot({ path: path.join(SHOTS, `${sc.name}-${vp.name}.png`), fullPage: false });
           }
-          for (const c of sc.checks || []) fails.push(...await c(page, { ticketId, userId: sessions.user.user.id, dialogs }));
+          for (const c of sc.checks || []) fails.push(...await c(page, cctx));
           await sleep(300);
           finalUrl = page.url().replace(base, '');
         } catch (e) {
           fails.push(`scenario error: ${e.message.split('\n').slice(0, 2).join(' | ')}`);
+        }
+        if (cctx.expect401) {
+          // appLogin's deliberate wrong-password attempt
+          for (let i = errors.length - 1; i >= 0; i -= 1) {
+            if (/^(http 401: POST .*\/api\/auth\/login$|console: Failed to load resource: the server responded with a status of 401)/.test(errors[i])) notes.push(errors.splice(i, 1)[0]);
+          }
         }
         if (sc.anonRedirect) {
           // an auth-gated legacy page opened without a session: requireAuth() sends it to the login
