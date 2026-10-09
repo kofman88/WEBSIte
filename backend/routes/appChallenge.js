@@ -1,8 +1,8 @@
 /**
  * /api/app/challenge* — the bot's Mini App challenge routes (miniapp_api.py
  * h_challenge_get / h_challenge_post / h_challenge_topup / h_challenge_finish) on the site,
- * plus the two entry-advisor buttons (decision D10: Telegram-only callbacks become
- * /api/app/* routes). Mounted from routes/app.js, so auth (site JWT → req.userId), the
+ * plus the two entry-advisor buttons and the engagement reminder's opt-out button (decision
+ * D10: Telegram-only callbacks become /api/app/* routes). Mounted from routes/app.js, so auth (site JWT → req.userId), the
  * `Cache-Control: no-store` header and the generic POST bucket (30 / 60 s) come from there.
  *
  *   GET  challenge            rate bucket "challenge" = PLAN_RATE_LIMIT (10 / 60 s) → state
@@ -13,6 +13,9 @@
  *   POST challenge/finish     → 404 not_found | cancelled → state
  *   POST entry-advice/on      entry_market_on   → {ok, message, prefer_market_entry}
  *   POST entry-advice/keep    entry_market_keep → {ok, message}
+ *   POST engagement/optout    {action: "engagement_optout:<uid>"} — the reminder's opt-out button
+ *                             (handlers/subscription.cb_engagement_optout): the uid must be the
+ *                             caller's → {ok, show_alert, message[, error: wrong_user | failed]}
  *
  * Envelope as the bot: business errors with HTTP 200 (`pro_required`, `bad_request`,
  * `already_active`), 404 only for `not_found`, 429 `rate_limited` with Retry-After.
@@ -24,6 +27,7 @@ const express = require('express');
 const ts = require('../services/traderSettingsService');
 const C = require('../services/challengeService');
 const advisor = require('../services/entryAdvisor');
+const engagement = require('../services/retention/engagement');
 const logger = require('../utils/logger');
 
 const router = express.Router();
@@ -127,6 +131,11 @@ router.post('/entry-advice/on', wrap(async (req, res) => {
 
 router.post('/entry-advice/keep', wrap(async (req, res) => {
   res.json(await advisor.entryMarketKeep(req.userId));
+}));
+
+// ── engagement reminder: «🔕 Не присылать напоминания» ────────────────────
+router.post('/engagement/optout', wrap(async (req, res) => {
+  res.json(await engagement.optoutButton(req.userId, body(req).action));
 }));
 
 module.exports = router;

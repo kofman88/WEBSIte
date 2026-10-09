@@ -27,11 +27,14 @@ const emailService = require('./emailService');
 const telegramService = require('./telegramService');
 const logger = require('../utils/logger');
 
+// `reminder` (engagement 3d / 1d / after expiry) and `promo` (drip, smart prompts): the bot sends
+// them to Telegram; on the site they reach the feed and the Telegram mirror, e-mail only after an
+// opt-in (decision D20).
 const DEFAULT_PREFS = {
   email:    { trade_opened: true, trade_closed: true, signal: false, payment: true, referral: true, security: true, weekly_digest: true,
-    progress: false, trend: true, report: true, trade: true },
+    progress: false, trend: true, report: true, trade: true, reminder: false, promo: false },
   telegram: { trade_opened: true, trade_closed: true, signal: true,  payment: true, referral: true, security: true,
-    progress: true, trend: true, report: true, trade: true },
+    progress: true, trend: true, report: true, trade: true, reminder: true, promo: true },
 };
 
 /** Notification types the engine dispatches (each is also an SSE event name). */

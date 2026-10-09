@@ -171,7 +171,7 @@ router.use((req, res, next) => {
 // The routers mounted after the M7 routes: [mount path, router] (routeMethods reads the same list)
 const MOUNTS = [
   ['/genome', require('./appGenome')],     // M16: GET genome, POST genome/apply, POST genome/evolve (D10)
-  ['', require('./appChallenge')],         // M17: challenge + entry-advisor buttons
+  ['', require('./appChallenge')],         // M17: challenge + entry-advisor / engagement buttons
   ['', require('./appTrend')],             // M10 (D10): GET trend (the /trend command), POST trend/notify (opt-out)
   ['', require('./appData')],              // M10b: dashboard, signals, chart, result, stats, analyze, share, feedback, events
   ['', require('./appTrade')],             // M13b: exchange/keys(/remove), positions, trades/{id}/exec|qc/*|progress

@@ -508,6 +508,16 @@ function startEngine({ log = null, env = process.env, spawn = null, delivery = n
     const start = mainDeps.entryAdvisorLoop || require('../services/entryAdvisor').startLoop;
     retentionStops.push(start());
   }
+  // bot.py's drip_campaign (drip_loop: hourly, day 1/3/5/7 of a Free user) and engagement
+  // (engagement_loop: 120 s, then hourly 3d/1d/7d/14d/30d reminders) — services/retention
+  if (want('drip_campaign')) {
+    const start = mainDeps.dripLoop || require('../services/retention/dripCampaign').startLoop;
+    retentionStops.push(start());
+  }
+  if (want('engagement')) {
+    const start = mainDeps.engagementLoop || require('../services/retention/engagement').startLoop;
+    retentionStops.push(start());
+  }
   // the app routes (routes/appData.js) read the worker's memory through the bridge
   const bridge = require('../services/engine/engineBridge');
   bridge.setRemote((method, args, timeoutMs) => supervisor.query(method, args, timeoutMs));

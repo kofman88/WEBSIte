@@ -297,8 +297,26 @@ describe('the site side of telegram_safe / chart_sender (siteSafeSend, siteRemem
     expect(s.ctx.smcDeps.userApiKeys({ user_id: 1 }, 'bingx')).toEqual({ apiKey: 'k', apiSecret: 's', ex: 'bingx' });
     expect(s.ctx.smcDeps.userApiKeys({ user_id: 2 }, 'bybit')).toEqual({ apiKey: '', apiSecret: '' });
     const plain = SCH.createScheduler({ side: 'worker', deps: { bot: {}, cache: {}, candleStore: {}, fetcher: {}, only: [] } });
-    expect(plain.ctx.smcDeps).toBe(null);
+    expect(Object.keys(plain.ctx.smcDeps)).toEqual(['smartPromptQuota']);      // M17b, below
     expect(plain.ctx.scannerDeps('VOLUME').executeAutoTrade).toBe(null);
+  });
+
+  it('smc/scanner\'s smart_prompts.trigger_after_quota_hit → services/retention/smartPrompts through the thread\'s facade', async () => {
+    const sp = req('../../../services/retention/smartPrompts.js');
+    const calls = [];
+    const orig = sp.triggerAfterQuotaHit;
+    sp.triggerAfterQuotaHit = async (bot, uid) => { calls.push([bot, uid]); };
+    try {
+      const bot = { notifier: { dispatch: async () => ({ dispatched: true }) } };
+      const s = SCH.createScheduler({ side: 'worker', deps: { bot, cache: {}, candleStore: {}, fetcher: {}, only: [] } });
+      await s.ctx.smcDeps.smartPromptQuota(42);
+      expect(calls).toEqual([[bot, 42]]);
+      const own = () => 'own';
+      const o = SCH.createScheduler({ side: 'worker', deps: { bot, smcDeps: { smartPromptQuota: own }, cache: {}, candleStore: {}, fetcher: {}, only: [] } });
+      expect(o.ctx.smcDeps.smartPromptQuota).toBe(own);                         // deps.smcDeps wins
+    } finally {
+      sp.triggerAfterQuotaHit = orig;
+    }
   });
 });
 

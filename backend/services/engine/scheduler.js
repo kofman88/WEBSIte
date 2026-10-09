@@ -31,11 +31,13 @@
  * (services/challengeService.js startLoop: 90 s, then LOOP_INTERVAL_S) and entry_advisor
  * (services/entryAdvisor.js startLoop: 600 s, then INTERVAL_S).
  *
+ * Also there: engagement and drip_campaign (services/retention: engagement_loop 120 s then hourly,
+ * drip_loop hourly).
+ *
  * Not carried over (no site equivalent or a later milestone): polling, turso_sync, subs_backup,
- * notification_drainer, engagement (retention loop, M17b),
- * hour_filter_monitor, plan_audit_monitor,
+ * notification_drainer, hour_filter_monitor, plan_audit_monitor,
  * sub_reminder (planService.startExpiryLoop), time_sync, health_server, metrics_*, mem_trim,
- * log_monitor_*, drip_campaign, ton_subscription_checker, feedback / optimizer / retrain loops
+ * log_monitor_*, ton_subscription_checker, feedback / optimizer / retrain loops
  * (the ML optimizer is not ported), state_reconcile / trade_state_cleanup / anomaly_detector /
  * sl_verifier / orphan_sweeper (auto-trade, M13–M14), binance_lead, loop_lag_monitor.
  *
@@ -757,6 +759,12 @@ function createScheduler({ side = 'all', deps = {} } = {}) {
     smcDeps: smcDepsOf(deps),
     autoTrade: deps.autoTrade || null,
     cacheGcOnce: deps.cacheGcOnce || cacheGcOnce,
+  };
+  // smc/scanner → smart_prompts.trigger_after_quota_hit(bot, uid) through this thread's delivery
+  // facade (the throttle lives in this thread, as the bot's in its process); deps.smcDeps wins
+  ctx.smcDeps = {
+    smartPromptQuota: (uid) => require('../retention/smartPrompts').triggerAfterQuotaHit(ctx.bot, uid),
+    ...(ctx.smcDeps || {}),
   };
   // MidScanner.__init__: self.fetcher = make_fetcher() — the REST client every loop shares
   const makeFetcher = once('restFetcher', () => withGlobalTrend(

@@ -93,21 +93,28 @@ describe('report loops in startEngine', () => {
     }
   });
 
-  it('challenge_loop and entry_advisor_loop: started like the bot, selectable with only, replaceable, stopped by stop()', async () => {
+  it('challenge / entry_advisor / drip_campaign / engagement loops: started like the bot, selectable with only, replaceable, stopped by stop()', async () => {
     vi.useFakeTimers({ now: MONDAY_0900 * 1000, toFake: ['setTimeout', 'clearTimeout', 'setInterval', 'clearInterval', 'Date'] });
     const calls = [];
     const loop = (name) => () => { calls.push(`start:${name}`); return () => calls.push(`stop:${name}`); };
     const none = { startDaily() {}, startWeekly() {}, stop() {} };
+    const loops = { challengeLoop: loop('challenge'), entryAdvisorLoop: loop('advisor'), dripLoop: loop('drip'), engagementLoop: loop('engagement') };
     let eng = EW.startEngine({ log: silent, delivery, spawn: () => new FakeWorker(),
-      mainDeps: { only: [], log: silent, reports: none, challengeLoop: loop('challenge'), entryAdvisorLoop: loop('advisor') } });
+      mainDeps: { only: [], log: silent, reports: none, ...loops } });
     expect(calls).toEqual([]);
     await eng.stop();
     expect(calls).toEqual([]);
     eng = EW.startEngine({ log: silent, delivery, spawn: () => new FakeWorker(),
-      mainDeps: { only: ['challenge', 'entry_advisor'], log: silent, reports: none, challengeLoop: loop('challenge'), entryAdvisorLoop: loop('advisor') } });
-    expect(calls).toEqual(['start:challenge', 'start:advisor']);
+      mainDeps: { only: ['challenge', 'entry_advisor', 'drip_campaign', 'engagement'], log: silent, reports: none, ...loops } });
+    expect(calls).toEqual(['start:challenge', 'start:advisor', 'start:drip', 'start:engagement']);
     await eng.stop();
-    expect(calls).toEqual(['start:challenge', 'start:advisor', 'stop:challenge', 'stop:advisor']);
+    expect(calls).toEqual(['start:challenge', 'start:advisor', 'start:drip', 'start:engagement',
+      'stop:challenge', 'stop:advisor', 'stop:drip', 'stop:engagement']);
+    calls.length = 0;
+    eng = EW.startEngine({ log: silent, delivery, spawn: () => new FakeWorker(),
+      mainDeps: { only: ['engagement'], log: silent, reports: none, ...loops } });
+    expect(calls).toEqual(['start:engagement']);
+    await eng.stop();
   });
 
   it('the default challenge loop ticks after the bot\'s 90 s delay, then every LOOP_INTERVAL_S, and stops with the engine', async () => {

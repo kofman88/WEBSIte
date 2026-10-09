@@ -68,6 +68,9 @@ describe('defaults and types', () => {
     const d = notifier.defaults();
     expect(d.email).toMatchObject({ signal: false, progress: false, trend: true, report: true, trade: true, payment: true });
     expect(d.telegram).toMatchObject({ signal: true, progress: true, trend: true, report: true, trade: true });
+    // M17b retention (decision D20): feed + Telegram mirror, e-mail only after an opt-in
+    expect(d.email).toMatchObject({ reminder: false, promo: false });
+    expect(d.telegram).toMatchObject({ reminder: true, promo: true });
   });
 });
 
