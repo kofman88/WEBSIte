@@ -469,6 +469,7 @@
     savedScroll: 0,
     busyToggle: false,
     busyPref: false,
+    busyTrade: false,
     busyGenome: false,
     genome: null,      // null = not loaded, {hidden:true} = endpoint unavailable
     genomeLoading: false,
@@ -1524,6 +1525,7 @@
     inner.appendChild(timeline(sig));
     inner.appendChild(h("div", { class: "card pad mt12" }, rTrack(sig, false), ladder(sig)));
 
+    inner.appendChild(tradeCard(sig));          // [TRADE-BUTTONS]
     inner.appendChild(manualResultCard(sig));   // [MANUAL-RESULT]
 
     var k = String(sig.strategy || "").toUpperCase();
@@ -1543,6 +1545,97 @@
       } }, "Анализ " + String(sig.symbol || "монеты"), icon("search"))));
 
     detailEl.appendChild(inner);
+  }
+
+  // [TRADE-BUTTONS] the trade buttons of the delivered signal card (the bot's inline keyboard):
+  // «✅ Открыть сделку» (confirm mode) or 50% / 100% / SL→BE / progress under an auto-trade —
+  // GET trades/{id}/card lists them with their route (decision D16: only the buttons the card
+  // still carries, only for the owner); a press goes through the trade-ops queue. The answer is the
+  // bot's text (HTML, shown as plain text). The hold-lock dialog's two buttons come in the answer.
+  var TRADE_TIMEOUT = 30000;           // > routes/appTrade.js EXEC_WAIT_S (25 s)
+  var TRADE_ROUTES = [                 // = services/engine/signalDelivery.js ACTION_ROUTES
+    [/^exec_trade_(.+)$/, "POST", "exec"],
+    [/^qc_half_(.+)$/, "POST", "qc/half"],
+    [/^qc_full_force_(.+)$/, "POST", "qc/force"],
+    [/^qc_full_(.+)$/, "POST", "qc/full"],
+    [/^qc_be_(.+)$/, "POST", "qc/be"],
+    [/^qc_refresh_(.+)$/, "GET", "progress"]
+  ];
+  function tradeRoute(action, tradeId) {
+    var a = String(action || "");
+    if (a === "qc_holdlock_wait") return { method: "POST", path: "trades/" + encodeURIComponent(tradeId) + "/qc/wait" };
+    for (var i = 0; i < TRADE_ROUTES.length; i++) {
+      var m = TRADE_ROUTES[i][0].exec(a);
+      if (m) return { method: TRADE_ROUTES[i][1], path: "trades/" + encodeURIComponent(m[1]) + "/" + TRADE_ROUTES[i][2] };
+    }
+    return null;
+  }
+  // the bot's Telegram HTML (<b>, <i>, <code>, entities) → text for textContent
+  function htmlText(s) {
+    return String(s || "").replace(/<br\s*\/?>/gi, "\n").replace(/<[^>]*>/g, "")
+      .replace(/&lt;/g, "<").replace(/&gt;/g, ">").replace(/&quot;/g, '"').replace(/&#39;/g, "'").replace(/&amp;/g, "&");
+  }
+  function tradeCard(sig) {
+    var box = h("div", { class: "card pad trade-card", hidden: "hidden" });
+    var answer = null;
+    function buttonsOf(rows) {
+      var out = [];
+      (Array.isArray(rows) ? rows : []).forEach(function (row) {
+        (Array.isArray(row) ? row : []).forEach(function (b) {
+          if (!b || b.kind === "url") return;
+          var r = b.api || tradeRoute(b.action, sig.id);
+          if (r) out.push({ label: String(b.label || ""), action: String(b.action || ""), api: r });
+        });
+      });
+      return out;
+    }
+    function draw(btns, extra) {
+      clear(box);
+      if (!btns.length && !answer) { box.setAttribute("hidden", "hidden"); return; }
+      box.removeAttribute("hidden");
+      box.appendChild(h("div", { class: "h2" }, h("span", { text: "Сделка" })));
+      if (answer) box.appendChild(h("p", { class: "trade-answer" + (answer.err ? " err" : ""), text: answer.text }));
+      var all = (extra || []).concat(btns);
+      if (all.length) {
+        var wrap = h("div", { class: "stack", style: "margin-top:8px" });
+        all.forEach(function (b) {
+          wrap.appendChild(h("button", { class: "btn " + (/^exec_trade_/.test(b.action) ? "btn-red" : "btn-dark") + " btn-block", type: "button", disabled: S.busyTrade ? "disabled" : null,
+            onclick: function () { press(b); } }, b.label));
+        });
+        box.appendChild(wrap);
+      }
+    }
+    function load(extra) {
+      api("trades/" + encodeURIComponent(sig.id) + "/card", { timeout: 15000 }).then(function (d) {
+        if (S.detail !== sig) return;
+        draw(d && d.ok ? buttonsOf(d.actions) : [], extra);
+      }).catch(function () { if (S.detail === sig) draw([], extra); });
+    }
+    function press(b) {
+      if (S.busyTrade) return;
+      S.busyTrade = true; hap("light");
+      var opt = { method: b.api.method, timeout: TRADE_TIMEOUT };
+      if (b.api.method === "POST") opt.body = {};
+      var extra = null;
+      api(b.api.path, opt).then(function (d) {
+        if (d && d.pending) { answer = { text: "Заявка принята — ответ придёт в уведомления.", err: false }; return; }
+        var text = d && (d.text || d.message || (d.alert && d.alert.text));
+        answer = text ? { text: htmlText(text), err: !(d && d.ok) } : null;
+        if (!text && d && !d.ok) answer = { text: errText(d.error || "network"), err: true };
+        // the hold-lock dialog: its «Всё равно закрыть» / «Подождать» buttons
+        (d && Array.isArray(d.effects) ? d.effects : []).forEach(function (e) {
+          if (e && e.op === "send" && e.keyboard) extra = buttonsOf(e.keyboard);
+        });
+      }).catch(function (e) {
+        answer = { text: errText(e.code), err: true };
+      }).finally(function () {
+        S.busyTrade = false;
+        S.sigs = {}; S.dashAt = 0;
+        if (S.detail === sig) load(extra);
+      });
+    }
+    load(null);
+    return box;
   }
 
   // [MANUAL-RESULT] ручной итог + заметка к сигналу

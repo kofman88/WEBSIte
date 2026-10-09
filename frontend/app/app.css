@@ -545,6 +545,8 @@ button.card:active, .card.tile:active { transform: scale(.985); border-color: va
 .ta-r { text-align: right; }
 .no-anim { animation: none !important; }
 .hint { font-family: var(--f-mono); font-size: 11px; line-height: 1.5; color: var(--muted); margin: -4px 0 10px; }
+.trade-answer { white-space: pre-wrap; font-family: var(--f-mono); font-size: 12px; line-height: 1.5; margin: 4px 0 0; }
+.trade-answer.err { color: var(--red); }
 
 /* tags */
 .tag {

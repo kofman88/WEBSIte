@@ -61,12 +61,14 @@ function makeHandle(exchange, inst) {
   return h;
 }
 
-/** The trader runtime of the auto-trade instances. */
-function productionOverrides({ killswitch = null, planGate = null, events = null, onAuthReset = null, transport = null, sleep = null } = {}) {
-  const o = {
-    transport: cancellableTransport(transport || defaultTransport()),
-    sleep: cancellableSleep(sleep || realSleep),
-  };
+/**
+ * The trader runtime of the auto-trade instances. `extra` = further runtime fields (tests: a fake
+ * exchange's clock — now / monotonic — kv, log, env, random); transport / sleep stay cancellable.
+ */
+function productionOverrides({ killswitch = null, planGate = null, events = null, onAuthReset = null, transport = null, sleep = null, extra = null } = {}) {
+  const o = { ...(extra || {}) };
+  o.transport = cancellableTransport(transport || defaultTransport());
+  o.sleep = cancellableSleep(sleep || realSleep);
   if (killswitch) o.killswitch = killswitch;
   if (planGate) o.planGate = planGate;
   if (events) o.events = events;

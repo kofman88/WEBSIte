@@ -482,4 +482,26 @@ describe('frontend/app/app.js call sites ↔ the routes', () => {
     expect(APP_JS).toContain(`Биржа не ответила за ${appTrade.DASHBOARD_TIMEOUT_S} секунд`);
     expect(APP_JS).toMatch(/num\(c\.data\.orders_count\)/);
   });
+
+  it('trade buttons: GET trades/{id}/card, the button routes = signalDelivery ACTION_ROUTES, a timeout over EXEC_WAIT_S', () => {
+    expect(APP_JS).toContain('api("trades/" + encodeURIComponent(sig.id) + "/card", { timeout: 15000 })');
+    expect(appTrade.methods('/trades/x_1/card')).toEqual(['GET', 'HEAD']);
+    const SDm = nodeRequire('../../../services/engine/signalDelivery.js');
+    const block = APP_JS.slice(APP_JS.indexOf('var TRADE_ROUTES = ['), APP_JS.indexOf('function tradeRoute('));
+    const spa = [...block.matchAll(/\[\/(.+?)\/, "(GET|POST)", "([a-z/]+)"\]/g)].map((m) => [m[1], m[2], m[3]]);
+    expect(spa.length).toBe(6);
+    const id = 'u1_vol_1_2';
+    for (const [re, method, tail] of spa) {
+      const action = re.replace('^', '').replace('(.+)$', id);
+      expect(SDm.actionRoute(action), action).toEqual({ method, path: `trades/${id}/${tail}` });
+      // and the route the press goes to exists with that method
+      expect(appTrade.methods(`/trades/${id}/${tail}`)).toContain(method);
+    }
+    expect(APP_JS).toContain('if (a === "qc_holdlock_wait") return { method: "POST", path: "trades/" + encodeURIComponent(tradeId) + "/qc/wait" };');
+    const t = Number(/var TRADE_TIMEOUT = (\d+);/.exec(APP_JS)[1]);
+    expect(t).toBeGreaterThan(appTrade.EXEC_WAIT_S * 1000);
+    // the press posts an empty JSON body (POST) and shows the bot's text as plain text, never as HTML
+    expect(APP_JS).toContain('if (b.api.method === "POST") opt.body = {};');
+    expect(APP_JS).toMatch(/h\("p", \{ class: "trade-answer" \+ \(answer\.err \? " err" : ""\), text: answer\.text \}\)/);
+  });
 });

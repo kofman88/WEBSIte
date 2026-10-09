@@ -200,8 +200,11 @@ function createAutoTrade(deps = {}) {
 
   const { onAuthReset } = hooks;
 
+  // deps.traderRuntime (tests): {transport, sleep, now, monotonic, kv, log, …} of the trader instances
+  const tr = deps.traderRuntime || {};
+  const { transport: trTransport = null, sleep: trSleep = null, ...trExtra } = tr;
   const traderFor = deps.traderFor || createTraderSet({
-    overrides: productionOverrides({ killswitch, planGate, events: hooks.events, onAuthReset }),
+    overrides: productionOverrides({ killswitch, planGate, events: hooks.events, onAuthReset, transport: trTransport, sleep: trSleep, extra: trExtra }),
   });
   const reconcile = deps.reconcile || createReconcile({ traderFor, log, sleep, timers });
   const cache = deps.cache || require('../marketData/candleCache');

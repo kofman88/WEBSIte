@@ -20,32 +20,10 @@
 | D11 | Адаптивный оптимизатор | Переносится и потребитель, и производитель (`trade_feedback`, `optimizer_params`, циклы 1 ч / 6 ч); ML-переобучение (XGBoost) не переносится |
 | D13 | Механика продукта | Механика Veles поверх трёх стратегий бота: «бот» = стратегия (Уровни/SMC/Объём) с набором параметров; бэктест перед запуском; подбор параметров через Genome; витрина ботов с реальной статистикой трекера; копирование чужого бота в один клик; челлендж как игровой слой. Свободный конструктор (свои условия, сетка/DCA/мартингейл) — отдельным модулем после запуска |
 | D14 | Модель оплаты | На выбор пользователя: подписка Pro ($69/30 дн.) или процент с прибыльных сделок с месячным потолком (по PnL биржи) |
-| D15 | Ключи бирж с правом вывода | При подключении ключа сайт после `test_connection` спрашивает права ключа у самой биржи и **не сохраняет** ключ с правом вывода; если права прочитать не удалось — тоже не сохраняет («попробуйте ещё раз»), fail-closed. Бот только предупреждал в тексте настройки |
+| D15 | Ключи бирж с правом вывода | При подключении ключа (оба пути: `/api/app/exchange/keys` и `/api/exchanges/keys`) сайт спрашивает права ключа у самой биржи и **не сохраняет** ключ с правом вывода; если права определить не удалось (сеть, таймаут, не-200, неожиданный ответ, ошибка API) — тоже не сохраняет («попробуйте ещё раз»), fail-closed. Бот только предупреждал в тексте настройки. Подробности ниже |
 | D16 | Кнопки сделки на сайте (открыть, закрыть 50/100 %, SL→BE, прогресс) | Сделка должна принадлежать пользователю из JWT, а для денежных действий кнопка должна быть на его доставленной карточке (`signal_card_json`); иначе 404 `not_found` до любой работы. Все действия идут через очередь trade-ops под замком пользователя |
 | D12 | Не переносится | Guest-режим в чатах, журнал сделок (`/journal`), TON-платежи, Turso-синхронизация, админ-команды Telegram, мониторы метрик бота |
-| D15 | API-ключи с правом вывода | При добавлении ключа сайт спрашивает у биржи права ключа и **не сохраняет** ключ с правом вывода средств; если права определить не удалось (сеть, таймаут, не-200, неожиданный ответ, ошибка API) — ключ тоже не сохраняется, пользователь видит «попробуйте ещё раз» (fail-closed). Подробности ниже |
-
-### D15 — проверка прав ключа при добавлении
-
-`services/autotrade/keyPermissions.js`, вызов в `POST /api/exchanges/keys` (routes/exchanges.js) до
-`exchangeService.addKey`. Тексты отказа — ru/en по `users.locale`; 400 `KEY_CAN_WITHDRAW`
-(«у ключа включено право на вывод — создайте ключ только с чтением и торговлей»), 503
-`KEY_PERMISSIONS_UNVERIFIED` («не удалось проверить права — попробуйте ещё раз»). Ключ, секрет,
-passphrase и подпись не логируются; в лог идёт только биржа и вердикт.
-
-| Биржа | Запрос | Право вывода |
-|---|---|---|
-| Bybit | `GET api.bybit.com/v5/user/query-api` (V5-подпись; demo-ключ → `api-demo.bybit.com`) | любой элемент `result.permissions.*` со словом `Withdraw` (группа `Wallet`) |
-| Binance | `GET api.binance.com/sapi/v1/account/apiRestrictions` (SIGNED, `X-MBX-APIKEY`) | `enableWithdrawals === true`; не булево значение → «не определено» |
-| OKX | `GET www.okx.com/api/v5/account/config` (`OK-ACCESS-*` + passphrase; demo → `x-simulated-trading: 1`) | `data[0].perm` содержит `withdraw` |
-| BingX | `GET open-api.bingx.com/openApi/v1/account/apiPermissions` (подпись, `X-BX-APIKEY`) | `data.permissions` содержит код `5` или имя со словом `withdraw` |
-
-Подписи — те же HMAC-хелперы, что у трейдеров M13a (`bybitSign`, `binanceSign`, `bingxSign`,
-`okxSign`). Формы ответов взяты из документации бирж по памяти: в песочнице доступа к документации
-нет, поэтому перед включением каждой биржи ответ эндпоинта проверяется на живом ключе (тесты —
-`backend/tests/autotrade/core/keyPermissions.test.js`, записанные ответы всех четырёх бирж).
-Testnet-ключи Binance/BingX: у тестовых сетей нет этих эндпоинтов → «не определено» → отказ.
-В тестах (NODE_ENV=test / vitest) транспорт по умолчанию не открывает соединений.
+| D17 | Быстрое закрытие и биржа сделки (бот здесь не работает) | `close_position` получает направление позиции (LONG/SHORT), а не сторону закрытия бота; биржа размещённого ордера пишется в `signal_trades.exchange`; позиции OKX читаются `get_positions` + `get_open_orders`. Режим бота включается переключателями `d17` (тесты-реплеи). Нужно подтверждение владельца |
 
 ### D5 / M13b — запуск автотрейда на сайте
 
@@ -77,28 +55,44 @@ BingX partial TP без `positionSide`, Binance — успех при `code >= 0
 результат, но ни один сканер его не отправляет. Исправлены только D6: `executed=false` при отказе биржи,
 `fixed_amount` — процент баланса (в настройках 0,5…3 %).
 
+Один процесс: автотрейд живёт в воркере движка, а движок рассчитан на один процесс приложения
+(`backend/services/engine/README.md`: `PassengerMaxInstances 1` / `PassengerMinInstances 1`). Два процесса —
+два движка и **два ордера на один сигнал** (ключ идемпотентности `auto_trade` — со случайным uuid, реестр — в памяти процесса); общий
+лизинг движка между процессами — M19. До него `AUTOTRADE_ENABLED=1` только при одном процессе.
+Фоновые задачи сделок бота (БУ-монитор с переносом стопа после TP1 и записью итога, reconcile,
+SL-верификатор, детектор аномалий, sweeper) — веха M15; до неё у позиций сайта их нет (итог сделки не
+записывается, через 3 дня ghost cleanup бота ставит открытой строке `SKIP`), поэтому `AUTOTRADE_ENABLED=1`
+в проде — только после M15.
+
 Golden-тесты: `backend/tests/golden` (фикстуры сгенерированы Python-кодом бота, см. там README).
 
 ## D15 — ключ с правом вывода не принимается
 
-`POST /api/app/exchange/keys` (`backend/services/exchangeKeysService.js`): проверки входа и
-`test_connection` бота (20 с) без изменений; после успешного теста — одно чтение прав ключа у биржи
-(8 с, подпись — собственный код трейдера, тот же, что у бота):
+Одна реализация — `backend/services/autotrade/keyPermissions.js` — за обоими путями добавления ключа:
+`POST /api/app/exchange/keys` (`services/exchangeKeysService.js`, после `test_connection` бота, 20 с) и
+`POST /api/exchanges/keys` страницы аккаунта (`routes/exchanges.js`, до `exchangeService.addKey`). Одно
+чтение прав у биржи (8 с); запрос подписывает собственный код трейдера — байт в байт то, что строит
+подпись бота для этого эндпоинта:
 
 | Биржа | Запрос | Право вывода |
 |---|---|---|
-| Bybit | `GET /v5/user/query-api` на хосте, где ключ прошёл тест (live или demo) | любое имя в `result.permissions` с `withdraw` (Wallet → `Withdraw`) |
-| BingX | `GET /openApi/v1/account/apiPermissions` (подпись как у всех запросов BingX) | код `5` в `data.permissions` (или строка `"5"` / `withdraw`) |
-| Binance | `GET https://api.binance.com/sapi/v1/account/apiRestrictions` (HMAC, `X-MBX-APIKEY`) | `enableWithdrawals` не равно строго `false` |
-| OKX | `GET /api/v5/account/config` | `withdraw` в `data[0].perm` |
+| Bybit | `GET /v5/user/query-api` на хосте ключа (live или demo) | любое имя в `result.permissions` с `withdraw` (Wallet → `Withdraw`); группа не списком / имя не строкой → неизвестно |
+| BingX | `GET /openApi/v1/account/apiPermissions` | код `5` в `data.permissions` (или строка `"5"` / имя с `withdraw`); другие типы элементов → неизвестно |
+| Binance | `GET https://api.binance.com/sapi/v1/account/apiRestrictions` (HMAC, `X-MBX-APIKEY`), только HTTP 200 | `enableWithdrawals: true` → вывод, `false` → ок, иное → неизвестно |
+| OKX | `GET /api/v5/account/config` (demo → `x-simulated-trading: 1`) | `withdraw` в `data[0].perm` (код `"0"` и непустая строка, иначе неизвестно) |
 
-Ответ без кода успеха, другой формы, ошибка сети, таймаут, не-200 у Binance → права неизвестны →
-ключ не сохраняется: `{"ok": false, "error": "permission_unknown", "message": …}`; ключ с выводом →
-`{"ok": false, "error": "withdraw_permission", "message": …}` (тексты ru/en, язык пользователя). Ничего
-не пишется (ни ключ, ни `trade_exchange`, ни сброс счётчика ошибок авторизации); в лог — строка
-`[MINIAPP] exchange keys uid=… <биржа>: … — refused (D15)` без ключей. Тесты:
-`backend/tests/autotrade/ops/d15.test.js` (записанные ответы всех четырёх бирж, запрос байт в байт как
-у подписи бота, враждебные формы ответа).
+Всё, что не явное «вывода нет», — «неизвестно» → ключ не сохраняется. Ответы: `/api/app` —
+`{"ok": false, "error": "withdraw_permission" | "permission_unknown", "message": …}`; `/api/exchanges` —
+400 `KEY_CAN_WITHDRAW` / 503 `KEY_PERMISSIONS_UNVERIFIED`; тексты одни (ru/en, язык пользователя). Ничего
+не пишется (ни ключ, ни `trade_exchange`, ни сброс счётчика ошибок авторизации); в лог — биржа и
+вердикт, без ключа, секрета, passphrase и подписи. Testnet-ключи Binance/BingX: у тестовых сетей нет
+этих эндпоинтов → «неизвестно» → отказ. В тестах (NODE_ENV=test / vitest) транспорт по умолчанию
+соединений не открывает. Тесты: `backend/tests/autotrade/ops/d15.test.js` (запрос против подписи
+бота, враждебные формы ответа), `backend/tests/autotrade/core/keyPermissions.test.js` (вердикты,
+оба пути, «одна реализация»).
+
+**Открыто:** формы ответов взяты из документации бирж по памяти (в песочнице доступа к ней нет) —
+перед включением каждой биржи ответ эндпоинта проверяется на живом ключе (с правом вывода и без).
 
 ## D16 — кнопки сделки только там, где их показал бы бот
 
@@ -112,13 +106,49 @@ Golden-тесты: `backend/tests/golden` (фикстуры сгенериров
 ботом (`services/autotrade/confirmMode.js`, `quickClose.js`), под замком сделки (exec) и замком
 пользователя (`workers/tradeOpsWorker.js`).
 
-Воспроизводимые по D6 опасные причуды быстрого закрытия бота (нужно отдельное решение владельца):
-`quick_close.py` передаёт в `close_position` сторону закрытия («Sell» для LONG), а трейдеры ждут сторону
-позиции и инвертируют её ещё раз — на Bybit уходит reduce-only «Buy» для LONG, на BingX/Binance
-`positionSide=SELL`, биржи такие ордера отклоняют (позиция не закрывается). На OKX «100 %» для LONG
-закрывает `posSide=short` (ошибка «Position does not exist»), после чего трейдер всё равно отменяет все
-ордера и алго-ордера символа — **позиция остаётся без SL/TP**. Закреплено тестами
-`backend/tests/autotrade/ops/units.test.js` (раздел «kept bot quirks»).
+Очередь trade-ops (`workers/tradeOpsWorker.js`) строит трейдеров с теми же хуками, что движок
+(`createTradeOpsRegistry`: killswitch, plan gate, trade events, сброс Bybit-сессии при 10003/10004): в боте
+`place_trade` сам проверяет killswitch, поэтому «Открыть сделку» при `HALTED_*` не уходит на биржу
+(ответ трейдера `killswitch_halted: <state>`). Перед обработчиком exec — переключатели D5: при
+`AUTOTRADE_ENABLED≠1` или бирже вне `AUTOTRADE_EXCHANGES` ответ «⛔ Автоторговля … не включена — сделка
+не открыта» без правки карточки и без запросов (закрытие и SL→BE остаются доступны).
+
+## D17 — быстрое закрытие и биржа сделки
+
+В боте быстрое закрытие не работает ни на одной бирже: `quick_close.py` передаёт в `close_position`
+сторону закрытия («Sell» для LONG), а трейдеры ждут направление позиции и инвертируют его ещё раз — на
+Bybit уходит reduce-only «Buy» для LONG, на BingX/Binance `positionSide=SELL`, биржи такие ордера
+отклоняют. На OKX «100 %» для LONG закрывает `posSide=short` («Position does not exist»), после чего
+трейдер всё равно отменяет все ордера и алго-ордера символа — **позиция остаётся без SL/TP**. Кроме
+того, бот не пишет `trades.exchange` (быстрое закрытие всегда читает Bybit), а `positions` для OKX
+распаковывает 2-кортеж `get_dashboard` в три имени (позиции OKX всегда «недоступны»).
+
+Сайт по умолчанию: `close_position` получает направление позиции (`quickClose.js`, `D17_SITE.positionSide`);
+биржа размещённого ордера пишется в `signal_trades.exchange` (авто — `executeAutoTrade.js`
+`d17.recordExchange`, confirm — `confirmMode.js`); позиции OKX — `get_positions` + `get_open_orders`
+(`appTrade.js`, `D17_SITE.okxPositions`). Остальное — как у бота: 50 % на OKX — `TypeError` бота до
+любого запроса, закрытие и SL→BE без таймаута. Режим бота (`{positionSide: false}`, `{recordExchange: false}`,
+`{okxPositions: false}`) прогоняют реплеи `backend/tests/autotrade/ops/tradeOpsReplay.test.js` и
+`units.test.js` («kept bot quirks»); закрытие на всех четырёх биржах — `backend/tests/autotrade/e2e`.
+**Нужно подтверждение владельца.**
+
+## Сквозной тест автотрейда (M13b)
+
+`backend/tests/autotrade/e2e/autotradeE2E.test.js` на фейковых биржах (`fakeExchanges.js`: Bybit v5,
+BingX v2, Binance USDⓈ-M, OKX v5 — подписи проверяются, ордера сводятся; без сети): настоящий цикл
+VOLUME-сканера, подключённый планировщиком как в воркере движка, → Pro-пользователь с автотрейдом
+(auto): вход со стопом, два ордера partial TP, строка `OPEN`, текст сообщения об открытии = текст
+`format_trade_result` бота (CPython 3.11, `gen/gen_e2e_messages.py`), карточка с кнопками и их
+маршрутами, `GET positions`, закрытие 50 % и 100 %; confirm: без ордера, `PENDING`, кнопка, exec → ордер
+со стопом и TP, карточка без кнопок, повторное нажатие → 404 без запросов; истечение: трекер (72 ч)
+закрывает сигнал, ghost cleanup (3 дня) ставит `SKIP`, exec отвечает «уже была открыта» — ни одного
+ордерного запроса; D5 и killswitch — без запросов. Закреплённые причуды бота: запросы partial TP,
+которые живая биржа может не принять (BingX `side: "Sell"` без `positionSide`, OKX лимитные TP без
+`posSide` и с ценой `round(px, 8)` не по шагу — фейк их принимает и записывает); строка риска в
+сообщении не появляется при холодном кэше баланса; OKX округляет размер в монетах до `lotSz` — шага в
+контрактах — до перевода в контракты (6 вместо 6,72 монеты при `ctVal` 0,01; размер меньше шага
+поднимается до шага, что при малом `ctVal` превышает заданный риск — нужно решение владельца); между `EXPIRED` трекера и проходом ghost cleanup
+(до 6 ч) exec ещё открывает сделку — возраст сигнала `exec_trade` не проверяет.
 
 ## Продуктовый слой «как Veles, но лучше» (D13) — правила по умолчанию
 
