@@ -635,7 +635,7 @@
 
   // On page boot, check if there are unread admin replies and paint badge.
   // Silent failure if user isn't logged in.
-  if (isLoggedIn()) {
+  if (loggedIn()) {
     fetchJson(API_BASE + '/support/tickets?limit=20', { headers: authHeaders() })
       .then(function (r) {
         if (!r.ok) return;

@@ -2,6 +2,8 @@ User-agent: *
 # Public marketing & content pages — crawl + index these
 Allow: /
 Allow: /index.html
+Allow: /pricing
+Allow: /landing/
 Allow: /subscriptions.html
 Allow: /about.html
 Allow: /privacy.html
