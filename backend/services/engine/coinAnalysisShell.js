@@ -12,8 +12,9 @@
  *   handlers/guest.py  _format_strategy_result + the "no setup" text (verbatim, HTML)
  *   miniapp_api.py     h_analyze body parsing (_SYMBOL_RE), _analyze_allowed (10 s cooldown,
  *                      plan_limit("analyze_per_day") quota on kv analyze_count_<uid>_<day>),
- *                      the response payload (signal subset, tried, price) — the PNG is
- *                      replaced by `chart` (candles + levels JSON, rendered by the client, D3).
+ *                      the response payload (signal subset, tried, price) — the PNG is `null`
+ *                      and the chart travels as data next to it (chartPayload.js: candles,
+ *                      overlays, …; rendered by the client, D3).
  *
  * Engines and I/O are injected: `fetch(symbol, tf, limit)` → Frame | null (production:
  * BingX REST via services/marketData), `price24h(symbol)` → {last, change_pct} | null,
@@ -24,6 +25,7 @@
 const { levelsStars } = require('../../strategies/levels/stars');
 const { fmtFixed, fmtSigned, fmtPriceDisplay } = require('../../strategies/common/pyfmt');
 const { pyStrip, pyUpper } = require('./pyUnicode');   // CPython 3.11 str.strip() (str.isspace() characters)
+const { pyInt: pyIntStrict } = require('./pycoerce');
 
 const STRATEGIES = Object.freeze(['LEVELS', 'SMC', 'VOLUME']);
 const LABELS = Object.freeze({
@@ -355,7 +357,8 @@ function createAnalyzeShell(deps = {}) {
     }
     if (limit < 999) {
       const v = await kv.get(dayKey(uid, t));
-      const count = v ? Math.trunc(Number(v)) : 0;
+      // db_count_user_analyzes_today: int(val) if val else 0 — a value int() rejects raises (→ HTTP 500)
+      const count = v ? pyIntStrict(v) : 0;
       if (count >= limit) return 'rate_limited';
       await kv.incrDay('analyze_count', uid, { now: Math.trunc(t) });
     }
@@ -400,10 +403,19 @@ function createAnalyzeShell(deps = {}) {
         signal[k] = sig[k] === undefined ? null : sig[k];
       }
     }
+    // render_signal_chart(out["df"], symbol=f"{symbol}-USDT-SWAP", …, quality=str(quality), tier="pro",
+    // timeframe="1h") — D3: the chart as data (chartPayload.js) next to `png: null`
     let chart = null;
     if (sig && out.df) {
-      const tail = out.df.tail ? out.df.tail(120) : out.df;
-      chart = { timeframe: '1h', candles: tail.toBars ? tail.toBars() : [], levels: { direction: sig.direction, entry: sig.entry, sl: sig.sl, tp1: sig.tp1, tp2: sig.tp2, tp3: sig.tp3 } };
+      try {
+        chart = require('./chartPayload').chartPayload(out.df, {
+          symbol: `${symbol}-USDT-SWAP`, direction: sig.direction, entry: sig.entry, sl: sig.sl, tp1: sig.tp1,
+          tp2: sig.tp2, tp3: sig.tp3, strategy: sig.strategy, quality: String(sig.quality), tier: 'pro', timeframe: '1h',
+        }, { warning: (m) => log.warn(m) });
+      } catch (e) {
+        log.debug(`[MINIAPP] analyze chart ${symbol}: ${e.message}`);
+        chart = null;
+      }
     }
     const { pyRound } = require('../../strategies/common/pyround');
     return {
@@ -411,7 +423,7 @@ function createAnalyzeShell(deps = {}) {
       body: {
         ok: true, symbol,
         price: price ? { price: Number(price.last || 0), change_pct: pyRound(Number(price.change_pct || 0), 2) } : null,
-        signal, tried: out.tried || [], chart,
+        signal, tried: out.tried || [], png: null, ...(chart || {}),
       },
     };
   }

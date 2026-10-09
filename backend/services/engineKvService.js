@@ -9,6 +9,7 @@
 'use strict';
 
 const db = require('../models/database');
+const { pyInt } = require('./engine/pycoerce');
 
 const nowSec = () => Date.now() / 1000;
 
@@ -45,8 +46,14 @@ function incrDay(prefix, userId, { now = null } = {}) {
     ON CONFLICT(key) DO UPDATE SET value = CAST(CAST(value AS INTEGER) + 1 AS TEXT), updated_at = excluded.updated_at
   `).run(key, t);
   const row = db.prepare('SELECT value FROM engine_kv WHERE key = ?').get(key);
-  const n = row ? parseInt(row.value, 10) : 1;
-  return Number.isFinite(n) ? n : 1;
+  // int(row[0]) if row else 1, except (TypeError, ValueError) → 1: Python int() of the text — e.g. a
+  // counter that overflowed SQLite's INTEGER reads back as '9.22337203685478e+18', which int() rejects
+  if (!row) return 1;
+  try {
+    return pyInt(row.value);
+  } catch (_e) {
+    return 1;
+  }
 }
 
 module.exports = { get, set, del, has, incrDay };

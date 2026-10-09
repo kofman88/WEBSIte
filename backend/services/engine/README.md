@@ -515,3 +515,94 @@ Every Python generator runs the bot's own code with CPython 3.11 from the bot ch
 * The scanners' `@username` in logs falls back to the user id (trader_settings has no Telegram
   username); the LEVELS expiry notice keeps the bot's text (payment address from
   `PAYMENT_ADDRESS`), which the site's billing (M18) is expected to replace.
+
+## Mini App data routes (M10b)
+
+`routes/appData.js` serves the bot's `miniapp_api.py` data handlers under `/api/app` (mounted
+from `routes/app.js` after its JWT auth, `Cache-Control: no-store` and the generic POST bucket
+30 / 60 s). Limits, kv keys and error strings are listed in the file header; the JWT user
+replaces the Telegram initData user, and another user's trade is `404 not_found` like a missing
+one.
+
+| route | bot handler | site specifics |
+|---|---|---|
+| `GET dashboard` | `h_dashboard` | engine memory through `engineBridge` (below) |
+| `GET signals?status&limit&strategy` | `h_signals` | — |
+| `GET signals/{trade_id}/chart` | `h_signal_chart` | D3: `{ok, png: null, …chartPayload}` instead of the PNG |
+| `POST signals/{trade_id}/result` | `h_signal_result` | the bot's `trade_feedback` learning row: see "Not wired yet" |
+| `GET stats?days&strategy&tf` | `h_stats` | — |
+| `POST analyze` | `h_analyze` | `coinAnalysisShell`; the chart as data next to `png: null` |
+| `POST share` | `h_share` | D3: `{ok, sent: false, days, stats}`, the client draws the card |
+| `POST feedback` | `h_feedback` | the bot's `feedback` row is a site support ticket (`id` = ticket id) |
+| `GET events` | — (site only) | SSE: `services/sseService.js`, events from `signalDelivery` / the tracker |
+
+**Reading requests like aiohttp.** `yarlUrl.js` ports what yarl 1.25 / aiohttp 3.14 do with the
+raw request target: the path is matched in its PATH_SAFE form (`%2F` and `%25` stay encoded until
+the match, so `a%2Fb` is the id `a/b`; `{id}` never spans `/` or braces; dot segments are not
+folded, `/x/../dashboard` is 404), the query is `parse_qsl(keep_blank_values=True)` (`+` = space,
+`;` is no separator, bad UTF-8 → U+FFFD, the first value of a repeated key wins). A known path
+with another method is 405 with the bot's `Allow`. `pyBody.js` keeps the Python type of every
+JSON body value (int vs float literal, big ints, NaN / Infinity, nested `repr`), so `str()`,
+`int()` and truthiness give the bot's answers; `botBody.js` reads a body with an int literal over
+4300 digits as `{}` (json.loads refuses it). Answers are written by `pyJsonDumps` (key order,
+NaN / Infinity literals).
+
+**Engine memory (`engineBridge.js`).** The bot's handlers read the scanner's memory in process;
+on the site it lives in the engine worker thread. The main thread asks over a query RPC
+(`{type: 'query', id, method, args}` → `{type: 'query-result', id, ok, result | error}`) wired in
+`workers/engineWorker.js` (supervisor `query()`, rejected on worker exit or timeout) and installed
+by `startEngine` (`setRemote`): `currentPrices` (signal_freshness.get_current_price),
+`cachedCandles` (cache.get_candles), `globalTrend` (scanner.get_trend()), `marketTrend`
+(trend_monitor.get_all()). Without a worker, or when a query fails or takes over 2 s, the answer
+is the bot's "nothing known" (empty cache, no scanner).
+
+**Chart as data (D3, `chartPayload.js`).** The data half of `render_signal_chart`, step for step
+(chart_renderer.py 828–915): tier window (Free 80 bars without MAs, Pro 110 + EMA 20 / 50 / 200,
+VOLUME SMA 10 / 20 / 50 + EMA 200), the progress-mode window grown to the entry bar, ffill / bfill,
+the `[CHART-PMULT-MISMATCH]` guard, entry ≤ 0 → last close, the TF label from the bar spacing.
+Output `{timeframe, meta, candles: [[t, o, h, l, c, v], …], overlays: {entry, sl, tps, be, ob,
+fvg, pivots, hvn, lvn, emas}, event, hit_levels, entry_index, last_close}`, drawn by
+`frontend/app/chart.js`.
+
+### Bot behaviour kept (pinned by the replay)
+
+* `limit` / `days` are `int()` of the query text (`" 5 "`, `+7`, `1_0`, Arabic-Indic digits parse;
+  `1e3`, `abc` fall back to 50 / 30), then clamped (1..200, 1..365).
+* `share`: `days` is int 7..365 with TypeError / ValueError → 30, but `1e400` (float inf) is
+  `int(inf)` = OverflowError → HTTP 500. Its limiter answers `rate_limited` with HTTP 200; the
+  chart limiter answers 429 with `Retry-After: 6`.
+* `analyze`: a non-integer quota counter (`analyze_count_<uid>_<day>` = `"abc"`) is the bot's
+  `int()` crash → 500; `" 1 "` counts as 1. `symbol` is `str()` of the body value (`123` is a
+  symbol, `10.0` is not).
+* `feedback`: `text` is `str()` of the value (a list passes the length check); a 20-digit counter
+  overflows SQLite's integer increment, reads back as float text and the bot's `int()` fallback
+  counts it as 1 (allowed); a lone surrogate in the text is sqlite's UnicodeEncodeError →
+  `unavailable`.
+* `result`: R of TP1..3 from the original stop, `already_set` returns the stored result, `SKIP`
+  can be overwritten, `note` must be a str of ≤ 500 code points (stored stripped), a repeated
+  JSON key takes the last value.
+* The 401 body has no `code` (the 403 ACCOUNT_DISABLED envelope keeps it).
+
+### Tests and fixtures
+
+| test | what | regenerate |
+|---|---|---|
+| `tests/app/data/appDataReplay.test.js` | 320 raw requests (17 users, 332 trades, trade_events, hostile kv) against the bot's handlers: status, JSON with key order, Retry-After / Allow, trade row + trade_events, kv counters, tickets, `[MINIAPP]` / `[MANUAL-RESULT]` lines | `py/drive_app_data.py` |
+| `tests/app/data/units.test.js` | yarl / aiohttp target vectors, Python `str` / `bool` / `int` of body values | `py/drive_app_data.py` (`units`) |
+| `tests/app/data/engineBridge.test.js` | worker answers, query RPC (answer, error, timeout, exit, no worker), a real worker half over a MessageChannel, facade fallbacks | — |
+| `tests/app/data/events.test.js` | SSE handshake, heartbeat, per-user channel, delivery events, cleanup | — |
+| `tests/app/data/frontendWiring.test.js` | the SPA's call sites vs the routes, a chart answer drawn by `chart.js` | — |
+
+`py/drive_app_data.py` runs the bot's aiohttp app (CPython 3.11, bot checkout read-only,
+`time.time` pinned per step, the PNG renderers spied: the real render plus the driver's mirror of
+its data steps, which must agree on None). The repo's `.gitignore` rule `data/` also matches
+`tests/app/data`; its files are tracked (`git add -f`).
+
+### Not wired yet
+
+* The bot also writes a `trade_feedback` learning row on a manual result (the `on_closed` hook);
+  the site's counterpart belongs to Genome (M16).
+* `chart.js` labels every MA line `EMA <name>` (VOLUME's SMA 10 / 20 / 50 too); the payload
+  carries `label` / `kind` for the UI.
+* `GET events` needs the Authorization header (EventSource cannot send one); the SPA does not
+  subscribe yet.
