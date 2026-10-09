@@ -17,6 +17,9 @@
  *
  * Seed: one Pro user (LEVELS long + short, SMC long) with four delivered signals (BTC open, ETH at
  * TP1, BTC stopped, ETH TP3) whose cards are notification rows, like the engine leaves them.
+ * --admin (the CSP page probe, tests/e2e/csp_pages_probe.mjs) also seeds admin@chm.local (same
+ * password, is_admin) and marks both e-mails verified, so the legacy pages (settings / admin / ops)
+ * render instead of redirecting to the e-mail check.
  *
  * stdin commands (one per line), answered on stdout:
  *   new-signal   a new delivered BTC signal (row + `signal` notification → SSE `notification` + `signal`)
@@ -33,6 +36,8 @@ const DIR = path.resolve(arg('dir', path.join(os.tmpdir(), 'chm-app-smoke')));
 const ROOT = path.resolve(__dirname, '..', '..', '..');
 const EMAIL = 'smoke@chm.local';
 const PASSWORD = 'smoke-pass-123';
+const ADMIN_EMAIL = 'admin@chm.local';
+const WITH_ADMIN = args.includes('--admin');
 
 // ── environment (before anything reads config / the DB) ──────────────────
 fs.mkdirSync(path.join(DIR, 'home'), { recursive: true });
@@ -118,6 +123,11 @@ async function seed() {
   const u = ts.getOrCreate(uid);
   Object.assign(u, { strategy: 'LEVELS', active: true, long_active: true, short_active: true, smc_long_active: true, onboarding_done: true });
   ts.save(u);
+  if (WITH_ADMIN) {
+    await authService.register({ email: ADMIN_EMAIL, password: PASSWORD, displayName: 'Smoke Admin' });
+    db.prepare("UPDATE users SET is_admin = 1, admin_role = 'superadmin' WHERE email = ?").run(ADMIN_EMAIL);
+    db.prepare('UPDATE users SET email_verified = 1 WHERE email IN (?, ?)').run(EMAIL, ADMIN_EMAIL);
+  }
 
   const top = MARKET_NOW;
   let n = 0;
