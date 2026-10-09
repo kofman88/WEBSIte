@@ -3,8 +3,8 @@
  * gen_rate_limits.py: miniapp_api's constants and `_rate_limited_response` on CPython 3.11):
  * POST 30 / 60 s, chart 10 / 60 s (SEC-3, Retry-After 6), plan 10 / 60 s, challenge GET = plan
  * bucket, share 3 / 600 s (HTTP 200 rate_limited), feedback 5 a day (kv), analyze 10 s cooldown.
- * keys 1 / 30 s and positions 6 / 60 s belong to routes that arrive with M13b (exchange keys,
- * positions): until then those paths are the router's 404, nothing answers without a bucket.
+ * keys 1 / 30 s (HTTP 200 rate_limited) and positions 6 / 60 s (429, Retry-After 10) of the M13b
+ * routes (routes/appTrade.js: exchange keys, positions).
  * The sliding window (`now - t < window`) is replayed on the bot's own hit trace, the 429 body /
  * Retry-After over HTTP. The site's global per-IP limiter does not count an authenticated /api/app
  * request (the bot has no per-IP cap there); a request without a valid token still counts.
@@ -65,12 +65,29 @@ describe('the bot\'s numbers', () => {
     expect(got).toEqual(ok);
   });
 
-  it('keys / positions (M13b) are not served yet: the router\'s 404, before any bucket', async () => {
-    for (const [m, p] of [['GET', '/api/app/positions'], ['POST', '/api/app/exchange/keys'], ['POST', '/api/app/exchange/keys/remove']]) {
-      const r = await rawRequest(port, { method: m, target: p, headers: auth(), body: m === 'POST' ? '{}' : null });
-      expect(r.status).toBe(404);
-      expect(r.text).toBe('404: Not Found');
+  it('keys 1 / 30 s (HTTP 200 rate_limited) and positions 6 / 60 s (429, Retry-After 10) — routes/appTrade.js', async () => {
+    const appTrade = nodeRequire('../../../routes/appTrade.js');
+    const ts = nodeRequire('../../../services/traderSettingsService.js');
+    expect(appTrade.KEYS_RATE_LIMIT).toEqual(FIX.buckets.keys);
+    expect(appTrade.POSITIONS_RATE_LIMIT).toEqual(FIX.buckets.positions);
+    insertUser(db, 902);
+    const u = ts.getOrCreate(902);
+    Object.assign(u, { sub_plan: 'pro', sub_status: 'active', sub_expires: Math.floor(Date.now() / 1000) + 86400 });
+    ts.save(u);
+    const h = { Authorization: `Bearer ${authService._signAccessToken(902)}`, 'Content-Type': 'application/json' };
+    const keys = () => rawRequest(port, { method: 'POST', target: '/api/app/exchange/keys', headers: h, body: '{"exchange": "kraken"}' });
+    let r = await keys();
+    expect([r.status, JSON.parse(r.text)]).toEqual([200, { ok: false, error: 'bad_request', message: 'exchange' }]);
+    r = await keys();         // the bucket is taken before the input check, like the bot
+    expect([r.status, JSON.parse(r.text)]).toEqual([200, { ok: false, error: 'rate_limited', message: 'Проверка ключей — не чаще раза в 30 секунд' }]);
+    for (let i = 0; i < 6; i++) {
+      r = await rawRequest(port, { method: 'GET', target: '/api/app/positions', headers: h });
+      expect([r.status, r.text]).toEqual([200, '{"ok": true, "exchange": "bybit", "positions": [], "orders_count": 0}']);
     }
+    r = await rawRequest(port, { method: 'GET', target: '/api/app/positions', headers: h });
+    expect(r.status).toBe(FIX.rate_limited_10.status);
+    expect(r.headers['retry-after']).toBe(FIX.rate_limited_10.retry_after);
+    expect(JSON.parse(r.text)).toEqual(FIX.rate_limited_10.json);
   });
 });
 
