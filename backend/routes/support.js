@@ -4,6 +4,11 @@ const { authMiddleware, requireAdmin } = require('../middleware/auth');
 const support = require('../services/supportService');
 const handleErr = require('../middleware/handleErr');
 
+// A support attachment: a base64 image data: URL, nothing else. The pages put it into <img src> and
+// <a href> (support-widget.js, ops.js): a javascript: URL or a quote there would run in the reader's
+// session, an admin's on the ops page.
+const IMAGE_DATA_URL = /^data:image\/(?:png|jpe?g|gif|webp|bmp|avif|heic|heif);base64,[A-Za-z0-9+/]+={0,2}$/;
+
 const router = express.Router();
 
 // ── Guest (unauthenticated) — MUST be declared BEFORE `router.use(authMiddleware)` ──
@@ -65,7 +70,7 @@ router.post('/tickets/:id/reply', (req, res, next) => {
       attachments: z.array(z.object({
         name: z.string().max(120),
         type: z.string().max(40),
-        dataUrl: z.string().max(800_000),
+        dataUrl: z.string().max(800_000).regex(IMAGE_DATA_URL),
       })).max(3).optional(),
     }).parse(req.body);
     res.json(support.reply(id, {
@@ -124,7 +129,7 @@ router.post('/admin/tickets/:id/reply', requireAdmin, (req, res, next) => {
       attachments: z.array(z.object({
         name: z.string().max(120),
         type: z.string().max(40),
-        dataUrl: z.string().max(800_000),  // ~600KB base64 → ~450KB original
+        dataUrl: z.string().max(800_000).regex(IMAGE_DATA_URL),  // ~600KB base64 → ~450KB original
       })).max(3).optional(),
     }).parse(req.body);
     res.json(support.reply(id, {

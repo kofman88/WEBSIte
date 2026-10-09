@@ -423,11 +423,13 @@
 
   function _renderMsgBubble(m) {
     var mine = !m.is_admin && !m.isAdmin;
-    var atts = m.attachments || null;
-    var attHtml = (atts && atts.length)
+    // an attachment is a user's upload: only a base64 image data: URL is ever put into href / src
+    // (anything else — a javascript: URL, a quote — is dropped); the link is out of Metrika's link tracking
+    var atts = (m.attachments || []).filter(function (a) { return a && /^data:image\/(?:png|jpe?g|gif|webp|bmp|avif|heic|heif);base64,[A-Za-z0-9+\/]+={0,2}$/.test(String(a.dataUrl || '')); });
+    var attHtml = atts.length
       ? '<div style="display:flex;gap:4px;margin-top:6px;flex-wrap:wrap">' +
           atts.map(function (a) {
-            return '<a href="' + a.dataUrl + '" target="_blank"><img src="' + a.dataUrl + '" style="max-width:140px;max-height:100px;border-radius:6px;display:block"/></a>';
+            return '<a class="ym-disable-tracklink" href="' + a.dataUrl + '" target="_blank" rel="noopener"><img src="' + a.dataUrl + '" style="max-width:140px;max-height:100px;border-radius:6px;display:block"/></a>';
           }).join('') +
         '</div>'
       : '';

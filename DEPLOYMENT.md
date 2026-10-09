@@ -113,12 +113,18 @@ mkdir -p ~/chmup_backend/data
 
 ## Шаг 4: Настройка проксирования API
 
-> `frontend/.htaccess` (деплой копирует его в `~/public_html/`) уже содержит блок Passenger и одно
-> правило mod_rewrite: `/?login=1` → 302 на `/app/` (экран входа веб-приложения; туда ведут
-> страницы, требующие входа). То же правило есть в `backend/server.js`, но `/` Apache отдаёт из
-> `public_html` сам, не спрашивая Passenger. Если cPanel перезапишет `.htaccess` своим блоком
-> Passenger, блок `<IfModule mod_rewrite.c>` из репозитория нужно сохранить. Проверка после деплоя:
-> `curl -sI 'https://chmup.top/?login=1'` → `302`, `Location: …/app/`; `curl -sI 'https://chmup.top/?login=10'` → `200`.
+> `frontend/.htaccess` (деплой копирует его в `~/public_html/`) уже содержит блок Passenger и правила
+> mod_rewrite для старых адресов лендинга (на `/` работает Метрика с Вебвизором, поэтому адрес с
+> секретом её не открывает): `/?reset=<токен>` (ссылки сброса пароля из старых писем) → 302 на
+> `/auth/#reset=<токен>`, `/?verify_email=1` → `/auth/?verify_email=1`, `/?login=1` → `/app/`
+> (экран входа веб-приложения). Те же правила есть в `backend/server.js`, но `/` Apache отдаёт из
+> `public_html` сам, не спрашивая Passenger. `frontend/auth/.htaccess` (mod_headers) отдаёт страницу
+> сброса пароля / подтверждения почты с `Referrer-Policy: no-referrer` и `Cache-Control: no-store`.
+> Если cPanel перезапишет `.htaccess` своим блоком Passenger, блок `<IfModule mod_rewrite.c>` из
+> репозитория нужно сохранить. Проверка после деплоя:
+> `curl -sI 'https://chmup.top/?login=1'` → `302`, `Location: …/app/`; `curl -sI 'https://chmup.top/?login=10'` → `200`;
+> `curl -sI 'https://chmup.top/?reset=abcdefghijklmnop1234'` → `302`, `Location: …/auth/#reset=abcdefghijklmnop1234`;
+> `curl -sI 'https://chmup.top/auth/'` → `200` с `Referrer-Policy: no-referrer`.
 
 ### Вариант A: .htaccess (Apache + mod_proxy)
 Добавьте в `~/public_html/.htaccess`:

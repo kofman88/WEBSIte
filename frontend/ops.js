@@ -5,6 +5,8 @@
 
 (function opsBoot() {
   function esc(s) { return String(s || '').replace(/[&<>"']/g, (c) => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+  // a support attachment as the server accepts it (routes/support.js): a base64 image data: URL
+  const IMAGE_DATA_URL = /^data:image\/(?:png|jpe?g|gif|webp|bmp|avif|heic|heif);base64,[A-Za-z0-9+/]+={0,2}$/;
   function money(n) { return Fmt.currency(Number(n) || 0); }
   function pct(n, d) { return Fmt.percent(Number(n) || 0, { decimals: d || 1 }); }
   function fmtDate(d) { try { return new Date(d).toLocaleString('ru-RU'); } catch (_e) { return d || '—'; } }
@@ -41,7 +43,8 @@
 
   // ── Access gate ───────────────────────────────────────────────────────
   async function gate() {
-    if (!Auth.isLoggedIn()) { location.replace('/?login=1&next=/ops.html'); return false; }
+    // the web app's sign-in returns here afterwards (frontend/app/app.js NEXT_PATHS)
+    if (!Auth.isLoggedIn()) { location.replace('/app/?next=' + encodeURIComponent('/ops.html')); return false; }
     try {
       const r = await API.me();
       const u = r.user || r;
@@ -50,7 +53,7 @@
       if (emailEl) emailEl.textContent = u.email;
       return true;
     } catch (e) {
-      location.replace('/?login=1'); return false;
+      location.replace('/app/?next=' + encodeURIComponent('/ops.html')); return false;
     }
   }
 
@@ -332,13 +335,19 @@
     if (!reason || reason.length < 3) return;
     try {
       const r = await API.adminImpersonate(id, reason);
-      // Open dashboard in a new tab with the impersonation token in the
-      // URL hash. app.js picks it up into sessionStorage (scoped to that
-      // tab only) so our own admin session in localStorage is never
-      // touched. The hash is stripped from the URL on first render.
-      // settings.html loads app.js, whose bootImpersonation() reads #imp=
-      const url = '/settings.html#imp=' + encodeURIComponent(r.accessToken) + '&email=' + encodeURIComponent(email);
-      window.open(url, '_blank', 'noopener');
+      // The new tab gets the session without any URL: the server answers a one-time 60-second code
+      // (not the token), left here in same-origin localStorage under a random key; the tab opens
+      // /settings.html#impersonate=<key> (the key names the slot, it is no credential), app.js
+      // bootImpersonation() takes the code out of storage at once and trades it for the token by
+      // POST, keeping that in its own sessionStorage. Our admin session in localStorage is untouched.
+      const rnd = new Uint8Array(16);
+      window.crypto.getRandomValues(rnd);
+      const key = Array.from(rnd, (b) => b.toString(16).padStart(2, '0')).join('');
+      const slot = 'chm_imp_handoff:' + key;
+      localStorage.setItem(slot, JSON.stringify({ code: r.handoffCode, email }));
+      // a tab that never opened (popup blocked) leaves nothing usable behind: the code dies in 60 s
+      setTimeout(() => { try { localStorage.removeItem(slot); } catch (_e) {} }, (Number(r.handoffExpiresIn) || 60) * 1000);
+      window.open('/settings.html#impersonate=' + key, '_blank', 'noopener');
       Toast.success('Impersonating ' + email + ' · opened in new tab');
     } catch (e) { Toast.error(e.message || 'Ошибка'); }
   };
@@ -962,9 +971,12 @@
       : '1px solid ' + (mine ? 'transparent' : 'rgba(255,255,255,.08)');
     const radius = mine ? 'border-bottom-right-radius:4px' : 'border-bottom-left-radius:4px';
     const align = mine ? 'margin-left:auto;text-align:left' : 'margin-right:auto';
-    const attachHtml = (m.attachments && m.attachments.length)
+    // an attachment is a user's upload: only a base64 image data: URL is ever put into href / src
+    // (anything else — a javascript: URL, a quote — is dropped); the link is out of Metrika's link tracking
+    const atts = (m.attachments || []).filter((a) => a && IMAGE_DATA_URL.test(String(a.dataUrl || '')));
+    const attachHtml = atts.length
       ? '<div style="display:flex;gap:4px;margin-top:6px;flex-wrap:wrap">' +
-          m.attachments.map((a) => '<a href="' + a.dataUrl + '" target="_blank" style="display:inline-block"><img src="' + a.dataUrl + '" title="' + esc(a.name) + '" style="max-width:120px;max-height:90px;border-radius:6px;border:1px solid rgba(255,255,255,.15)"/></a>').join('') +
+          atts.map((a) => '<a class="ym-disable-tracklink" href="' + a.dataUrl + '" target="_blank" rel="noopener" style="display:inline-block"><img src="' + a.dataUrl + '" title="' + esc(a.name) + '" style="max-width:120px;max-height:90px;border-radius:6px;border:1px solid rgba(255,255,255,.15)"/></a>').join('') +
         '</div>'
       : '';
     const internalTag = internal ? '<span class="badge badge-yellow" style="margin-right:4px">internal</span>' : '';

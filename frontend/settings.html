@@ -8,7 +8,7 @@
   <title>CHM Finance — Настройки</title>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet"/>
   
-  <link rel="stylesheet" href="tailwind.css"/>
+  <link rel="stylesheet" href="tailwind.css?v=2"/>
   <link rel="stylesheet" href="styles.css"/>
   <link rel="stylesheet" href="aura-theme.css"/>
   <style>.stab{padding:8px 18px;border-radius:9999px;font-family:'Inter',sans-serif;font-size:13px;line-height:18px;font-weight:500;color:rgba(255,255,255,.62);background:transparent;border:none;cursor:pointer;transition:color .15s ease,background .15s ease}.stab:hover{color:#fff}.stab.active{background:linear-gradient(180deg,#FF7840 0%,#FF5A1F 60%,#C44610 100%);color:#fff;box-shadow:inset 0 1px 1px rgba(255,255,255,.25),inset 0 -1px 2px rgba(0,0,0,.4),0 4px 10px -2px rgba(255,90,31,.5)}.stab-content{display:none}.stab-content.active{display:block}</style>
@@ -134,7 +134,7 @@
       </div>
       <div id="tgLinkBox" class="hidden p-3 bg-slate-800/40 rounded-xl border border-slate-700">
         <div class="text-sm text-slate-300 mb-2">Откройте эту ссылку и нажмите «Start» в Telegram:</div>
-        <a id="tgLinkUrl" href="#" target="_blank" rel="noopener" class="text-indigo-400 hover:text-indigo-300 text-sm font-mono break-all"></a>
+        <a id="tgLinkUrl" href="#" target="_blank" rel="noopener noreferrer" class="ym-disable-tracklink text-indigo-400 hover:text-indigo-300 text-sm font-mono break-all"></a>
         <div class="text-xs text-slate-500 mt-2">Ссылка действует 10 минут</div>
       </div>
     </div>
@@ -369,7 +369,7 @@
 .co-body{text-align:center}
 </style>
 
-<script src="app.js?v=4"></script>
+<script src="app.js?v=5"></script>
 <script src="plan-gate.js"></script>
 <script src="shell.js?v=7" defer></script>
 <script src="help-tips.js" defer></script>
@@ -565,7 +565,9 @@ document.querySelectorAll('.co-method').forEach((btn) => {
       const network = method === 'usdt_bep20' ? 'bep20' : 'trc20';
       const out = await API.createCryptoPayment({ plan, network, billingCycle });
       document.getElementById('coAmount').textContent = Fmt.currency(out.amountUsdt) + ' USDT';
-      document.getElementById('coNetwork').textContent = network.toUpperCase() + ' · ' + plan.toUpperCase() + ' (' + billingCycle + ')';
+      // the invoice's own period (the server's answer, not the radio): 30 days or a year
+      const cycle = out.billingCycle === 'yearly' ? 'год' : 'месяц';
+      document.getElementById('coNetwork').textContent = network.toUpperCase() + ' · ' + plan.toUpperCase() + ' · ' + cycle;
       document.getElementById('coAddr').textContent = out.address;
       document.getElementById('coCopy').onclick = () => navigator.clipboard.writeText(out.address).then(() => Toast.success('Адрес скопирован'));
       const exp = new Date(out.expiresAt).toLocaleString();
@@ -596,11 +598,12 @@ async function loadSecurity() {
   // Email verification banner
   try {
     const me = await API.me();
+    const u = me && (me.user || me);   // GET /auth/me answers { user }: the card used to show for everyone
     const verifyCard = document.getElementById('emailVerifyCard');
-    if (me && !me.emailVerified) verifyCard.style.display = 'block';
+    if (u && u.emailVerified === false) verifyCard.style.display = 'block';
   } catch (_e) {}
   document.getElementById('emailVerifyBtn')?.addEventListener('click', async () => {
-    try { await API.requestEmailVerify(); Toast.success('Письмо отправлено (проверь логи или входящие)'); }
+    try { await API.requestEmailVerify(); Toast.success('Письмо отправлено — проверьте почту'); }
     catch (err) { Toast.error(err.message); }
   });
 
@@ -669,12 +672,12 @@ async function loadSessions() {
     const r = await API.listSessions();
     if (!r.sessions.length) { host.innerHTML = '<div class="text-xs text-slate-500">Нет активных сессий</div>'; return; }
     host.innerHTML = r.sessions.map((s) => `
-      <div class="flex items-center justify-between p-3 bg-slate-800/30 rounded-lg text-sm">
-        <div>
+      <div class="flex items-center justify-between gap-3 p-3 bg-slate-800/30 rounded-lg text-sm">
+        <div class="min-w-0">
           <div class="text-slate-300 text-xs truncate" style="max-width:420px">${(s.userAgent || 'Unknown device').replace(/[<>]/g,'')}</div>
           <div class="text-xs text-slate-500 mt-0.5">${s.ipAddress || '—'} · с ${Fmt.date(s.createdAt)}</div>
         </div>
-        <button data-revoke="${s.id}" class="text-xs text-red-400 hover:text-red-300">Выйти</button>
+        <button data-revoke="${s.id}" class="shrink-0 text-xs text-red-400 hover:text-red-300">Выйти</button>
       </div>`).join('');
     host.querySelectorAll('[data-revoke]').forEach((b) => b.addEventListener('click', async () => {
       if (!confirm('Выйти из этой сессии?')) return;
@@ -836,6 +839,10 @@ loadPrefs();
     if (p !== 'pro') return;
     const radio = document.querySelector('input[name="coPlan"][value="'+p+'"]');
     if (radio) radio.checked = true;
+    // subscriptions.html passes the period it showed (&cycle=monthly|yearly)
+    const cycle = new URLSearchParams(location.search).get('cycle');
+    const cycleRadio = document.querySelector('input[name="coCycle"][value="' + (cycle === 'yearly' ? 'yearly' : 'monthly') + '"]');
+    if (cycleRadio) cycleRadio.checked = true;
     openCheckout();
     // Clean the URL so a reload doesn't re-pop
     history.replaceState({}, '', location.pathname);
@@ -1065,6 +1072,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
 
 </script>
-<script src="support-widget.js?v=4" defer></script>
+<script src="support-widget.js?v=5" defer></script>
 </body>
 </html>

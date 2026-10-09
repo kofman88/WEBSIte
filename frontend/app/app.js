@@ -24,6 +24,17 @@
   // TODO(pricing): point at /pricing once the site checkout page exists.
   var CHECKOUT_URL = "/subscriptions.html";
   var ACCOUNT_URL = "/settings.html";   // «Аккаунт и безопасность»: пароль, 2FA, сессии, Telegram, push
+  // ?next=<site path>: the page a legacy screen sent a visitor without a session from
+  // (frontend/app.js requireAuth, ops.js) — after sign-in the app returns there instead of opening
+  // itself. Same origin only, and only an exact path of this list: an absolute URL, //host, a
+  // backslash, javascript: or anything else is ignored (the app opens as usual).
+  var NEXT_PATHS = ["/settings.html", "/subscriptions.html", "/ops.html", "/admin.html"];
+  function safeNext(raw) {
+    if (typeof raw !== "string" || !raw || raw.length > 64) return "";
+    if (raw.charAt(0) !== "/" || raw.charAt(1) === "/" || /[\\\s:%?#@]/.test(raw)) return "";
+    return NEXT_PATHS.indexOf(raw) >= 0 ? raw : "";
+  }
+  var NEXT = DEMO ? "" : safeNext(QS.get("next"));
   var FX = window.CHMFX || null;   // splash.js: sound + haptics with a persisted on/off pref
 
   // ---------------------------------------------------------------------------
@@ -701,6 +712,7 @@
     }
     Auth.setTokens(d.accessToken, d.refreshToken);
     if (d.user) Auth.setUser(d.user);
+    if (NEXT) { location.replace(NEXT); return; }   // back to the page that sent the visitor here
     S.auth = null;
     hap("success");
     $("#tabbar").hidden = false;
@@ -3520,8 +3532,25 @@
     var tgRes = DEMO ? null : tgAuthFromHash();
     if (tgRes) { showLogin(); finishTelegram(tgRes); return; }
     if (!DEMO && !Auth.access() && !Auth.refresh()) { showLogin(); return; }
+    // ?next= with a session whose access token ran out (why the legacy page sent the visitor here):
+    // one refresh, then straight back; a dead refresh token → the sign-in. A live access token
+    // means the page sent us here for another reason: the app opens as usual (no redirect loop).
+    if (NEXT && !tokenLive(Auth.access()) && Auth.refresh()) {
+      tryRefresh().then(function (ok) {
+        if (ok) { location.replace(NEXT); return; }
+        Auth.clear();
+        showLogin();
+      });
+      return;
+    }
     render();
     loadCore();
+  }
+  function tokenLive(tok) {
+    try {
+      var p = JSON.parse(atob(String(tok).split(".")[1].replace(/-/g, "+").replace(/_/g, "/")));
+      return typeof p.exp === "number" && p.exp * 1000 > Date.now() + 5000;
+    } catch (e) { return false; }
   }
 
   // ---------------------------------------------------------------------------

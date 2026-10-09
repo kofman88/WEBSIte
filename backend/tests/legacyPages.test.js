@@ -36,65 +36,112 @@ beforeAll(async () => {
 });
 afterAll(() => { fs.rmSync(HOME, { recursive: true, force: true }); });
 
-// ── /?login=1 → the web app's sign-in ─────────────────────────────────────
-// The URL matrix both the Express route and the .htaccess rule are checked against.
-// (Both lists were also sent to a real Apache 2.4.58 running the .htaccess block: same answers.)
-const REDIRECTED = ['/?login=1', '/?login=1&next=/ops.html', '/?next=%2Fops.html&login=1', '/?a=b&login=1&c=d', '/index.html?login=1',
-  '/?login=1&return=/settings.html', '/?&login=1', '/?login=2&login=1'];
-const NOT_REDIRECTED = ['/', '/?data=empty', '/?login=0', '/?login=10', '/?xlogin=1', '/?login=1x', '/?login', '/?verify_email=1', '/about.html?login=1', '/pricing/?login=1', '/app/?login=1', '/app/',
-  '/?login=', '/?LOGIN=1', '/?login%3D1', '/?foo=login=1', '/?q=a%26login=1', '/?login=1;x=2', '/?reset=abc123', '/settings.html?login=1'];
+// ── the landing's old query URLs → /auth/, /app/ (server.js + frontend/.htaccess) ────────────
+// The landing runs Metrika with Session Replay: /?reset=<token> (old password reset e-mails),
+// /?verify_email=1 (the old e-mail check of app.js) and /?login=1 (the legacy pages' old sign-in
+// redirect) never render it. One URL matrix — the Location expected, null = served as before — for
+// both the Express route and the .htaccess rules (emulated below with the file's own patterns).
+// (The whole matrix was also sent to a real Apache 2.4.58 (mod_rewrite, mod_headers) running the
+// .htaccess rules: same Locations, and /auth/ answered with the headers of frontend/auth/.htaccess.)
+const TOKEN = 'Abc_DEF-ghi0123456789jklMNOpqrSTUvwxYZ01234';
+const MATRIX = [
+  // /?login=1 → the web app's sign-in, query dropped (the pages now send /app/?next=<path> themselves)
+  ...['/?login=1', '/?login=1&next=/ops.html', '/?next=%2Fops.html&login=1', '/?a=b&login=1&c=d', '/index.html?login=1',
+    '/?login=1&return=/settings.html', '/?&login=1', '/?login=2&login=1'].map((u) => [u, '/app/']),
+  // /?reset=<token> → /auth/#reset=<token>; any other reset= value → /auth/ without it
+  [`/?reset=${TOKEN}`, `/auth/#reset=${TOKEN}`], [`/index.html?reset=${TOKEN}`, `/auth/#reset=${TOKEN}`],
+  [`/?utm_source=mail&reset=${TOKEN}&x=1`, `/auth/#reset=${TOKEN}`], [`/?reset=${TOKEN}&login=1`, `/auth/#reset=${TOKEN}`],
+  [`/?login=1&reset=${TOKEN}`, `/auth/#reset=${TOKEN}`], [`/?reset=bad&reset=${TOKEN}`, `/auth/#reset=${TOKEN}`],
+  [`/?verify_email=1&reset=${TOKEN}`, `/auth/#reset=${TOKEN}`], [`/?reset=${'a'.repeat(256)}`, `/auth/#reset=${'a'.repeat(256)}`],
+  ['/?reset=abc123', '/auth/'], ['/?reset=', '/auth/'], [`/?reset=${TOKEN}%3E`, '/auth/'], [`/?reset=${TOKEN}?x=1`, '/auth/'],
+  [`/?reset=${'a'.repeat(257)}`, '/auth/'], ['/?reset=a%20b', '/auth/'], [`/?reset=${TOKEN};x`, '/auth/'], ['/?login=1&reset=x', '/auth/'],
+  // /?verify_email=1 → /auth/?verify_email=1
+  ['/?verify_email=1', '/auth/?verify_email=1'], ['/index.html?a=b&verify_email=1', '/auth/?verify_email=1'],
+  ['/?verify_email=1&login=1', '/auth/?verify_email=1'], ['/?login=1&verify_email=1&next=/x', '/auth/?verify_email=1'],
+  // served as before
+  ...['/', '/?data=empty', '/?login=0', '/?login=10', '/?xlogin=1', '/?login=1x', '/?login', '/about.html?login=1', '/pricing/?login=1',
+    '/app/?login=1', '/app/', '/?login=', '/?LOGIN=1', '/?login%3D1', '/?foo=login=1', '/?q=a%26login=1', '/?login=1;x=2',
+    '/settings.html?login=1', '/?verify_email=0', '/?verify_email=10', '/?xverify_email=1', '/?xreset=abc', '/?RESET=abc',
+    `/about.html?reset=${TOKEN}`, `/pricing/?reset=${TOKEN}`, `/app/?reset=${TOKEN}`, '/auth/?verify_email=1', '/?q=a%26reset=x'].map((u) => [u, null]),
+];
 
-// mod_rewrite as frontend/.htaccess configures it (per-directory context: the path without its
-// leading slash; %{QUERY_STRING} raw), evaluated with the file's own patterns.
-function htaccessRule() {
-  const text = read('.htaccess');
-  const cond = /^RewriteCond %\{QUERY_STRING\} (\S+)$/m.exec(text);
-  const rule = /^RewriteRule (\S+) (\S+) \[([^\]]+)\]$/m.exec(text);
-  expect(cond, 'RewriteCond on the query string').not.toBeNull();
-  expect(rule, 'RewriteRule').not.toBeNull();
-  return { query: new RegExp(cond[1]), path: new RegExp(rule[1]), target: rule[2], flags: rule[3].split(',') };
+// mod_rewrite as frontend/.htaccess configures it: per-directory context (the path without its
+// leading slash), %{QUERY_STRING} raw, each RewriteRule with the RewriteConds right above it (all
+// must match, %N = the last one's groups), rules in order, [L] ends. A substitution with "?" replaces
+// the query (a trailing "?" drops it), QSD drops it, otherwise it is appended; without NE a "#" is
+// escaped to %23.
+function htaccessRules() {
+  const rules = [];
+  let conds = [];
+  for (const line of read('.htaccess').split('\n')) {
+    let m = /^RewriteCond %\{QUERY_STRING\} (\S+)$/.exec(line);
+    if (m) { conds.push(new RegExp(m[1])); continue; }
+    m = /^RewriteRule (\S+) (\S+) \[([^\]]+)\]$/.exec(line);
+    if (m) { rules.push({ conds, path: new RegExp(m[1]), target: m[2], flags: m[3].split(',') }); conds = []; continue; }
+    expect(line, 'a rewrite line this emulation does not know').not.toMatch(/^Rewrite(?!Engine On$)/);
+  }
+  expect(conds, 'RewriteCond without a rule').toEqual([]);
+  return rules;
 }
 function apacheRedirect(url) {
-  const r = htaccessRule();
-  const u = new URL(url, 'https://chmup.top');
   const qs = url.includes('?') ? url.slice(url.indexOf('?') + 1) : '';
-  if (!r.query.test(qs) || !r.path.test(u.pathname.slice(1))) return null;
-  return r.target.endsWith('?') ? r.target.slice(0, -1) : r.target; // trailing "?" drops the query
+  const p = new URL(url, 'https://chmup.top').pathname.slice(1);
+  for (const r of htaccessRules()) {
+    let last = null;
+    if (!r.conds.every((c) => (last = c.exec(qs)))) continue;
+    if (!r.path.test(p)) continue;
+    let target = r.target.replace(/%(\d)/g, (_m, n) => (last && last[Number(n)]) || '');
+    if (!r.flags.includes('NE')) target = target.replace(/#/g, '%23');
+    if (target.includes('?')) target = target.endsWith('?') ? target.slice(0, -1) : target;
+    else if (!r.flags.includes('QSD') && qs) target += '?' + qs;
+    expect(r.flags).toContain('R=302');
+    expect(r.flags).toContain('L');
+    return target;
+  }
+  return null;
 }
 
-describe('/?login=1 (where app.js / ops.js send a visitor without a session) opens the web app sign-in', () => {
-  it.each(REDIRECTED)('%s → 302 /app/ (query dropped, not cached)', async (url) => {
+describe('the landing\'s old query URLs (reset links, e-mail check, sign-in) never render it', () => {
+  it.each(MATRIX)('%s → %s', async (url, to) => {
     const r = await request(app).get(url).redirects(0);
+    if (to === null) {
+      expect(r.status === 302 && /^\/(app|auth)\//.test(r.headers.location || '')).toBe(false);
+      expect([200, 301]).toContain(r.status);
+      return;
+    }
     expect(r.status).toBe(302);
-    expect(r.headers.location).toBe('/app/');
+    expect(r.headers.location).toBe(to);
     expect(r.headers['cache-control']).toBe('no-store');
+    expect(r.headers['referrer-policy']).toBe('no-referrer');
   });
 
-  it.each(NOT_REDIRECTED)('%s is served as before', async (url) => {
-    const r = await request(app).get(url).redirects(0);
-    expect(r.status === 302 && r.headers.location === '/app/').toBe(false);
-    expect([200, 301]).toContain(r.status);
+  it.each(MATRIX)('%s: .htaccess and server.js agree', (url, to) => {
+    // /pricing/, /app/, /auth/ and other files are served without the rules (they only match / and index.html)
+    expect(apacheRedirect(url), url).toBe(to);
   });
 
-  it('the target is the web app with its sign-in screen; the landing at / stays the landing', async () => {
+  it('the targets are the web app with its sign-in screen and the auth page; the landing at / stays the landing', async () => {
     const appPage = await request(app).get('/app/');
     expect(appPage.status).toBe(200);
     expect(appPage.text).toBe(read('app/index.html'));
     expect(read('app/app.js')).toContain('function showLogin(');
+    const auth = await request(app).get('/auth/');
+    expect(auth.text).toBe(read('auth/index.html'));
     const landing = await request(app).get('/');
     expect(landing.text).toBe(read('index.html'));
   });
 
-  it('every sign-in redirect of the legacy pages is a URL the rule catches', () => {
+  it('the legacy pages send a visitor without a session to the sign-in with next=, no longer through /?login=1', () => {
     const found = [];
     for (const f of ['app.js', 'ops.js', ...LEGACY]) {
-      for (const m of read(f).matchAll(/['"](\/\?[^'"]*\blogin=[^'"]*)['"]/g)) found.push(m[1]);
+      for (const m of read(f).matchAll(/['"](\/\?[^'"]*\b(?:login|reset|verify_email)=[^'"]*)['"]/g)) found.push(`${f}: ${m[1]}`);
     }
-    expect(found.length).toBeGreaterThanOrEqual(3);
-    for (const url of found) expect(apacheRedirect(url), url).toBe('/app/');
+    expect(found).toEqual([]);
+    expect(read('app.js')).toContain("location.href = '/app/?next=' + encodeURIComponent(location.pathname);");
+    expect(read('ops.js').match(/location\.replace\('\/app\/\?next=' \+ encodeURIComponent\('\/ops\.html'\)\)/g)).toHaveLength(2);
   });
 
-  it('frontend/.htaccess: the Passenger block untouched, the same redirect for when Apache serves / itself', () => {
+  it('frontend/.htaccess: the Passenger block untouched, the same redirects for when Apache serves / itself', () => {
     const text = read('.htaccess');
     expect(text.split('\n').slice(0, 5)).toEqual([
       'PassengerAppRoot "/home/chmtop/chmup_backend"',
@@ -103,19 +150,16 @@ describe('/?login=1 (where app.js / ops.js send a visitor without a session) ope
       'PassengerAppType node',
       'PassengerStartupFile server.js',
     ]);
-    // guarded (no 500 without mod_rewrite), one rule, an external 302 that ends rewriting
-    expect(text).toMatch(/<IfModule mod_rewrite\.c>\nRewriteEngine On\nRewriteCond [^\n]+\nRewriteRule [^\n]+\n<\/IfModule>/);
-    expect(text.match(/^Rewrite(Cond|Rule)\b/gm)).toHaveLength(2);
-    const r = htaccessRule();
-    expect(r.flags.sort()).toEqual(['L', 'R=302']);
-    expect(r.target).toBe('/app/?');
-  });
-
-  it.each([...REDIRECTED, ...NOT_REDIRECTED])('%s: .htaccess and server.js agree', async (url) => {
-    const r = await request(app).get(url).redirects(0);
-    const express = r.status === 302 ? r.headers.location : null;
-    // /pricing/ and /app/ are directories Apache serves without the rule (it only matches / and index.html)
-    expect(apacheRedirect(url), url).toBe(express === '/app/' ? '/app/' : null);
+    // guarded (no 500 without mod_rewrite), four rules, each an external 302 that ends rewriting
+    expect(text).toMatch(/<IfModule mod_rewrite\.c>\nRewriteEngine On\n(RewriteCond [^\n]+\nRewriteRule [^\n]+\n){4}<\/IfModule>/);
+    const rules = htaccessRules();
+    expect(rules.map((r) => [r.target, r.flags.slice().sort().join(',')])).toEqual([
+      ['/auth/#reset=%1', 'L,NE,QSD,R=302'],
+      ['/auth/?', 'L,R=302'],
+      ['/auth/?verify_email=1', 'L,R=302'],
+      ['/app/?', 'L,R=302'],
+    ]);
+    for (const r of rules) expect(r.path.source).toBe('^(index\\.html)?$');
   });
 });
 

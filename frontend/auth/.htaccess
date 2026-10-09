@@ -1,0 +1,7 @@
+# /auth/ (password reset, e-mail confirmation) when Apache serves it from public_html itself:
+# no Referer ever leaves this page (its meta referrer says the same; backend/server.js sends the
+# header through helmet), and no cache keeps a copy.
+<IfModule mod_headers.c>
+Header always set Referrer-Policy "no-referrer"
+Header always set Cache-Control "no-store"
+</IfModule>

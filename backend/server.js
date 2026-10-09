@@ -117,10 +117,11 @@ app.use((req, res, next) => {
   next();
 });
 
-// Request logging (skip static/health)
+// Request logging (skip static/health). The token of an old e-mail confirmation link
+// (GET /api/auth/verify-email/<token>) never reaches the log.
 app.use((req, _res, next) => {
   if (req.path.startsWith('/api/') && req.path !== '/api/health') {
-    (req.log || logger).debug('→ ' + req.method + ' ' + req.path);
+    (req.log || logger).debug('→ ' + req.method + ' ' + req.path.replace(/^(\/api\/auth\/verify-email\/)[^/]+/, '$1[redacted]'));
   }
   next();
 });
@@ -266,16 +267,35 @@ app.get('/api/health/deep', (_req, res) => {
   res.status(statusCode).json(out);
 });
 
-// ── Sign-in redirect ──────────────────────────────────────────────────
-// The legacy pages send a visitor without a session to /?login=1 (app.js requireAuth, ops.js); the
-// landing at / has no login form (and no byte budget left for one), the web app's start screen
-// /app/ has. The app reads no return address, so the query string is dropped. frontend/.htaccess
-// has the same rule for when Apache serves / from public_html without asking Passenger.
-const LOGIN_REDIRECT = '/app/';
+// ── Redirects of the landing's old query URLs ─────────────────────────
+// The landing at / runs Yandex Metrika with Session Replay: an address that carries a secret or
+// starts an account flow must never render it. These run before express.static; frontend/.htaccess
+// has the same rules for when Apache serves / (index.html) from public_html without asking Passenger
+// (tests/legacyPages.test.js checks both against one URL matrix). Matched on the raw query string,
+// like mod_rewrite's %{QUERY_STRING}; only / and /index.html.
+//   /?reset=<token>   password reset e-mails sent before /auth/#reset=<token> → /auth/#reset=<token>:
+//                     the token moves into the fragment (never sent to a server again, never in a
+//                     Referer) of the page that completes the reset (frontend/auth/: no counter, takes
+//                     it out of the address bar first). Any other reset= value → /auth/ without it.
+//   /?verify_email=1  the old app.js redirect for a session whose e-mail is unconfirmed → /auth/
+//   /?login=1         the legacy pages without a session → the web app's sign-in /app/; the query
+//                     is dropped (the pages now send /app/?next=<their path> themselves)
+const RESET_TOKEN_QS = /(?:^|&)reset=([A-Za-z0-9_-]{16,256})(?:&|$)/;
+function landingRedirect(qs) {
+  const m = RESET_TOKEN_QS.exec(qs);
+  if (m) return '/auth/#reset=' + m[1];
+  if (/(?:^|&)reset=/.test(qs)) return '/auth/';
+  if (/(^|&)verify_email=1(&|$)/.test(qs)) return '/auth/?verify_email=1';
+  if (/(^|&)login=1(&|$)/.test(qs)) return '/app/';
+  return null;
+}
 app.get(['/', '/index.html'], (req, res, next) => {
-  if (!/(^|&)login=1(&|$)/.test(req.originalUrl.split('?')[1] || '')) return next();
+  const url = req.originalUrl;
+  const to = url.includes('?') ? landingRedirect(url.slice(url.indexOf('?') + 1)) : null;
+  if (!to) return next();
   res.setHeader('Cache-Control', 'no-store');
-  res.redirect(302, LOGIN_REDIRECT);
+  res.setHeader('Referrer-Policy', 'no-referrer');
+  res.redirect(302, to);
 });
 
 // ── Static files (Passenger serves everything) ────────────────────────
@@ -287,6 +307,9 @@ app.use(express.static(publicPath, {
   setHeaders(res, filePath) {
     if (/\.(css|js|woff2?|ttf|eot|png|jpe?g|webp|svg|ico)$/i.test(filePath)) {
       res.setHeader('Cache-Control', 'public, max-age=2592000, immutable');
+    } else if (path.relative(publicPath, filePath) === path.join('auth', 'index.html')) {
+      // /auth/ (password reset, e-mail confirmation): no copy in any cache, like frontend/auth/.htaccess
+      res.setHeader('Cache-Control', 'no-store');
     } else if (/\.html?$/i.test(filePath)) {
       res.setHeader('Cache-Control', 'public, max-age=300, must-revalidate');
     }

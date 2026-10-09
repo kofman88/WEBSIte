@@ -4,13 +4,24 @@ PassengerNodejs "/home/chmtop/nodevenv/chmup_backend/20/bin/node"
 PassengerAppType node
 PassengerStartupFile server.js
 
-# Sign-in redirect: the legacy pages send a visitor without a session to /?login=1 (app.js
-# requireAuth, ops.js); the landing at / has no login form, the web app's start screen has one.
-# backend/server.js answers the same 302, but Apache serves / (index.html) straight from
-# public_html without asking Passenger, so the rule is here too. The web app reads no return
-# address, so the query string is dropped. Only / and /index.html with login=1 are touched.
+# Redirects of the landing's old query URLs. The landing (/, index.html) runs Yandex Metrika with
+# Session Replay, so an address that carries a secret or starts an account flow must never render
+# it. backend/server.js answers the same 302s, but Apache serves / (index.html) straight from
+# public_html without asking Passenger, so the rules are here too (backend/tests/legacyPages.test.js
+# checks both against one URL matrix). Only / and /index.html are touched, in this order:
+#  1. /?reset=<token>  (password reset e-mails sent before /auth/#reset=<token>) → /auth/#reset=<token>:
+#     the token moves into the fragment of the page that completes the reset (frontend/auth/, no
+#     counter); NE keeps the '#', QSD drops the query. A reset= value that is not a token → /auth/.
+#  2. /?verify_email=1 (the old app.js redirect, unconfirmed e-mail) → /auth/?verify_email=1
+#  3. /?login=1 (the legacy pages without a session) → the web app's sign-in /app/, query dropped.
 <IfModule mod_rewrite.c>
 RewriteEngine On
+RewriteCond %{QUERY_STRING} (?:^|&)reset=([A-Za-z0-9_-]{16,256})(?:&|$)
+RewriteRule ^(index\.html)?$ /auth/#reset=%1 [R=302,NE,QSD,L]
+RewriteCond %{QUERY_STRING} (?:^|&)reset=
+RewriteRule ^(index\.html)?$ /auth/? [R=302,L]
+RewriteCond %{QUERY_STRING} (^|&)verify_email=1(&|$)
+RewriteRule ^(index\.html)?$ /auth/?verify_email=1 [R=302,L]
 RewriteCond %{QUERY_STRING} (^|&)login=1(&|$)
 RewriteRule ^(index\.html)?$ /app/? [R=302,L]
 </IfModule>

@@ -127,12 +127,12 @@ afterAll(() => {
 });
 
 // ── (a) fresh DB ──────────────────────────────────────────────────────
-describe('fresh DB → v14', () => {
-  it('is at version 14, re-running is a no-op', () => {
-    expect(migrations.currentVersion(db)).toBe(14);
-    expect(migrations.MIGRATIONS.map((m) => m.version)).toEqual([1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14]);
-    expect(migrations.MIGRATIONS.slice(9).map((m) => m.name)).toEqual(['engine_core', 'genome', 'retire_bots', 'public_track', 'trade_feedback']);
-    expect(migrations.run(db)).toEqual({ ran: 0, current: 14 });
+describe('fresh DB → v15', () => {
+  it('is at version 15, re-running is a no-op', () => {
+    expect(migrations.currentVersion(db)).toBe(15);
+    expect(migrations.MIGRATIONS.map((m) => m.version)).toEqual([1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]);
+    expect(migrations.MIGRATIONS.slice(9).map((m) => m.name)).toEqual(['engine_core', 'genome', 'retire_bots', 'public_track', 'trade_feedback', 'auth_hardening']);
+    expect(migrations.run(db)).toEqual({ ran: 0, current: 15 });
   });
 
   it('v14 creates the bot\'s trade_feedback table verbatim (UNIQUE(user_id, trade_id), idx_feedback_user_strat)', () => {
@@ -145,6 +145,15 @@ describe('fresh DB → v14', () => {
     ]);
     const idx = db.prepare("SELECT name FROM sqlite_master WHERE type = 'index' AND tbl_name = 'trade_feedback' AND name LIKE 'idx_%'").all().map((r) => r.name);
     expect(idx).toEqual(['idx_feedback_user_strat']);
+  });
+
+  it('v15 adds the TOTP replay step and the impersonation handoff columns (re-run safe)', () => {
+    const cols = (t) => db.prepare(`PRAGMA table_info('${t}')`).all().map((c) => [c.name, c.type]);
+    expect(cols('two_factor_secrets')).toContainEqual(['last_used_step', 'INTEGER']);
+    for (const c of [['handoff_hash', 'TEXT'], ['handoff_expires_at', 'DATETIME'], ['handoff_used_at', 'DATETIME']]) expect(cols('impersonation_tokens')).toContainEqual(c);
+    const idx = db.prepare("SELECT sql FROM sqlite_master WHERE type = 'index' AND name = 'idx_imp_handoff'").get();
+    expect(idx.sql).toMatch(/CREATE UNIQUE INDEX idx_imp_handoff ON impersonation_tokens\(handoff_hash\)/);
+    expect(() => migrations.MIGRATIONS[14].up(db)).not.toThrow();
   });
 
   it('v13 creates the public track archive (services/publicTrack/store.js re-runs the same DDL as a no-op)', () => {
@@ -433,14 +442,14 @@ function buildLegacyDb(file) {
   return { legacy, ids: { alice, bob, carol, dave, eve, frank, grace } };
 }
 
-describe('legacy DB (per-bot product) → v14', () => {
+describe('legacy DB (per-bot product) → v15', () => {
   let legacy, ids, exportFile, exported;
 
   beforeAll(() => {
     process.env.LEGACY_BACKUP_DIR = LEGACY_BACKUPS;
     ({ legacy, ids } = buildLegacyDb(LEGACY_DB));
     const out = migrations.run(legacy);
-    expect(out).toEqual({ ran: 14, current: 14 });
+    expect(out).toEqual({ ran: 15, current: 15 });
     const files = fs.readdirSync(LEGACY_BACKUPS).filter((f) => /^legacy-.*\.json$/.test(f));
     expect(files).toHaveLength(1);
     exportFile = path.join(LEGACY_BACKUPS, files[0]);
@@ -450,8 +459,8 @@ describe('legacy DB (per-bot product) → v14', () => {
   afterAll(() => { try { legacy.close(); } catch (_e) {} });
 
   it('runs the whole chain (v9 still seeded the system bot on the legacy schema)', () => {
-    expect(migrations.currentVersion(legacy)).toBe(14);
-    expect(migrations.run(legacy)).toEqual({ ran: 0, current: 14 });
+    expect(migrations.currentVersion(legacy)).toBe(15);
+    expect(migrations.run(legacy)).toEqual({ ran: 0, current: 15 });
     expect(exported.tables.trading_bots.rows).toBe(3);   // b1, b2 + v9 "CHM Public Signals"
     expect(exported.tables.trading_bots.data.some((b) => b.is_system === 1 && b.name === 'CHM Public Signals')).toBe(true);
   });

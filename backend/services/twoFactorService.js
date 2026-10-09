@@ -16,6 +16,12 @@
  *      instead of the access/refresh pair. Client prompts for 6-digit
  *      → POST /auth/2fa/verify { twoFactorToken, code } → full token pair.
  *   4. Disable requires current password (handled in routes layer).
+ *
+ * Replay: a TOTP code stays valid for its 30-second step (±1 step of clock drift), so a code seen
+ * once (shoulder-surfed, phished, logged by a proxy) could be used again within ~90 s. Every accepted
+ * code moves two_factor_secrets.last_used_step forward to its step (one conditional UPDATE, so two
+ * concurrent requests cannot both win); a code of that step or an earlier one is refused. Confirming
+ * the setup counts as a use too.
  */
 
 const crypto = require('crypto');
@@ -27,7 +33,24 @@ const logger = require('../utils/logger');
 const { qrDataUrl } = require('../utils/qr');
 
 // 30-second window, allow ±1 step drift (standard)
-authenticator.options = { window: 1, step: 30 };
+const STEP_SEC = 30;
+authenticator.options = { window: 1, step: STEP_SEC };
+
+/** The TOTP time step (unix seconds / 30) the code belongs to at `nowMs`, or null if it matches none. */
+function matchStep(code, secret, nowMs = Date.now()) {
+  const delta = authenticator.clone({ epoch: nowMs }).checkDelta(code, secret);
+  if (typeof delta !== 'number') return null;
+  return Math.floor(nowMs / 1000 / STEP_SEC) + delta;
+}
+
+/** Accept `step` once for the user: false when that step or a later one was already used (replay). */
+function claimStep(userId, step) {
+  const info = db.prepare(`
+    UPDATE two_factor_secrets SET last_used_step = ?
+    WHERE user_id = ? AND (last_used_step IS NULL OR last_used_step < ?)
+  `).run(step, userId, step);
+  return info.changes === 1;
+}
 
 const ISSUER = 'CHM Finance';
 
@@ -63,6 +86,7 @@ async function setup(userId, userEmail) {
       recovery_codes_hash = excluded.recovery_codes_hash,
       enabled = 0,
       enabled_at = NULL,
+      last_used_step = NULL,
       created_at = CURRENT_TIMESTAMP
   `).run(userId, encrypted, recoveryHash);
 
@@ -73,7 +97,8 @@ function confirm(userId, code) {
   const row = db.prepare('SELECT secret_encrypted, enabled FROM two_factor_secrets WHERE user_id = ?').get(userId);
   if (!row) { const e = new Error('2FA not initialised — call setup first'); e.statusCode = 400; throw e; }
   const secret = cryptoUtil.decrypt(row.secret_encrypted, config.walletEncryptionKey);
-  if (!authenticator.check(code.replace(/\s/g, ''), secret)) {
+  const step = matchStep(code.replace(/\s/g, ''), secret);
+  if (step === null || !claimStep(userId, step)) {
     const e = new Error('Invalid 2FA code'); e.statusCode = 400; e.code = 'INVALID_2FA'; throw e;
   }
   // Enable 2FA + revoke any other active sessions so anyone still logged
@@ -91,7 +116,8 @@ function verifyCode(userId, code) {
   if (!row || !row.enabled) return false;
   const clean = code.replace(/\s/g, '');
   const secret = cryptoUtil.decrypt(row.secret_encrypted, config.walletEncryptionKey);
-  if (authenticator.check(clean, secret)) return true;
+  const step = matchStep(clean, secret);
+  if (step !== null) return claimStep(userId, step);   // a valid code of a step already used: replay
   // Fallback: try recovery code
   const h = crypto.createHash('sha256').update(clean.toLowerCase()).digest('hex');
   const codes = (row.recovery_codes_hash || '').split(',').filter(Boolean);
@@ -126,4 +152,4 @@ function status(userId) {
   };
 }
 
-module.exports = { setup, confirm, verifyCode, disable, isEnabled, status };
+module.exports = { setup, confirm, verifyCode, disable, isEnabled, status, matchStep, STEP_SEC };

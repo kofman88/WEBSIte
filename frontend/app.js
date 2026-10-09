@@ -16,32 +16,72 @@
 const API_BASE = '/api';
 
 // ── Auth — token storage + refresh rotation ────────────────────────────
-// Impersonation mode: if the URL has #imp=<token>, we're a fresh tab opened
-// by an admin via ops. Store the token in sessionStorage only (this tab),
-// strip the hash, show a warning banner, and make Auth.accessToken prefer
-// sessionStorage over localStorage for this tab. Admin's own localStorage
-// session stays untouched in other tabs.
+// Impersonation (ops → "Impersonate"): ops.js opens /settings.html#impersonate=<key> and leaves a
+// one-time 60-second code in localStorage['chm_imp_handoff:<key>'] — no token or code is ever part
+// of a URL (an async analytics tag could read the address before this script cleans it). This tab
+// takes the code out of storage at once, trades it for the 30-minute access token
+// (POST /api/auth/impersonation/redeem), keeps that in sessionStorage only (this tab) and reloads:
+// the page then runs as the user, under a warning banner. Until the reload, requireAuth() holds the
+// page, the API waits and Auth reports no session, so nothing runs with the admin's own session
+// from localStorage. The admin's session in other tabs is untouched.
+let impHandoff = null;
+// set when requireAuth() sends the page to the sign-in: nothing on the page being left may call the
+// API (a 401 there would rotate the refresh token the web app is about to use for ?next=)
+let leaving = false;
 (function bootImpersonation() {
   try {
-    const m = /[#&]imp=([^&]+)/.exec(location.hash || '');
+    const hash = location.hash || '';
+    // an old-style #imp=<token> address (before the hand-off): never used, only taken out of the bar
+    if (/(^#|&)imp=/.test(hash)) history.replaceState(null, '', location.pathname + location.search);
+    const m = /^#impersonate=([a-f0-9]{16,64})$/.exec(hash);
     if (!m) return;
-    const token = decodeURIComponent(m[1]);
-    const em = /[#&]email=([^&]+)/.exec(location.hash || '');
-    const email = em ? decodeURIComponent(em[1]) : '';
-    sessionStorage.setItem('chm_imp_access', token);
-    if (email) sessionStorage.setItem('chm_imp_email', email);
-    history.replaceState({}, '', location.pathname + location.search);
-    // Inject a persistent banner. Fires as early as possible so the UI
-    // never renders without the warning.
-    document.addEventListener('DOMContentLoaded', () => {
-      const bar = document.createElement('div');
-      bar.style.cssText = 'position:fixed;top:0;left:0;right:0;z-index:9999;background:linear-gradient(90deg,#7f1d1d,#991b1b,#7f1d1d);color:#fee2e2;padding:8px 16px;font-size:12px;font-weight:600;text-align:center;letter-spacing:.05em;text-transform:uppercase;box-shadow:0 2px 12px rgba(0,0,0,.4)';
-      bar.textContent = '⚠️ IMPERSONATING ' + (email || 'user') + ' · end in 30m · all actions are audited';
-      document.body.prepend(bar);
-      document.body.style.paddingTop = '32px';
-    });
+    history.replaceState(null, '', location.pathname + location.search);
+    const key = 'chm_imp_handoff:' + m[1];
+    let data = null;
+    try { data = JSON.parse(localStorage.getItem(key) || 'null'); } catch (_e) { data = null; }
+    try { localStorage.removeItem(key); } catch (_e) {}
+    const code = data && typeof data.code === 'string' ? data.code : '';
+    impHandoff = (code ? fetch(API_BASE + '/auth/impersonation/redeem', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ code }),
+      credentials: 'same-origin', cache: 'no-store',
+    }).then((r) => (r.ok ? r.json() : Promise.reject(new Error('HTTP ' + r.status)))) : Promise.reject(new Error('no hand-off')))
+      .then((d) => {
+        if (!d || !d.accessToken) throw new Error('no token');
+        sessionStorage.setItem('chm_imp_access', d.accessToken);
+        sessionStorage.setItem('chm_imp_email', String(d.targetEmail || ''));
+        location.reload();
+      })
+      .catch(() => {
+        const fail = () => {
+          const box = document.createElement('div');
+          box.id = 'impHandoffFailed';
+          box.style.cssText = 'position:fixed;inset:0;z-index:10000;display:flex;align-items:center;justify-content:center;padding:16px;background:rgba(6,2,4,.94);color:#fee2e2;font:500 15px/1.5 Inter,system-ui,sans-serif;text-align:center';
+          const p = document.createElement('p');
+          p.style.maxWidth = '440px';
+          p.textContent = 'Вход под пользователем не открыт: одноразовый код устарел или уже использован. Нажмите «Impersonate» в ops ещё раз.';
+          box.appendChild(p);
+          document.body.appendChild(box);
+        };
+        if (document.body) fail(); else document.addEventListener('DOMContentLoaded', fail);
+      })
+      .then(() => new Promise(() => {}));   // settles never: the page reloads or stays on the notice
   } catch (_e) {}
 })();
+
+// The warning banner of an impersonated tab (any page of it, after the hand-off's reload).
+document.addEventListener('DOMContentLoaded', () => {
+  let email = '';
+  try {
+    if (!sessionStorage.getItem('chm_imp_access') || impHandoff) return;
+    email = sessionStorage.getItem('chm_imp_email') || '';
+  } catch (_e) { return; }
+  const bar = document.createElement('div');
+  bar.id = 'impBanner';
+  bar.style.cssText = 'position:fixed;top:0;left:0;right:0;z-index:9999;background:linear-gradient(90deg,#7f1d1d,#991b1b,#7f1d1d);color:#fee2e2;padding:8px 16px;font-size:12px;font-weight:600;text-align:center;letter-spacing:.05em;text-transform:uppercase;box-shadow:0 2px 12px rgba(0,0,0,.4)';
+  bar.textContent = '⚠️ IMPERSONATING ' + (email || 'user') + ' · ends within 30m · all actions are audited';
+  document.body.prepend(bar);
+  document.body.style.paddingTop = '32px';
+});
 
 const Auth = {
   // "Remember me" picks the storage: localStorage (default, persists across
@@ -59,6 +99,7 @@ const Auth = {
     } catch (_e) {}
   },
   get accessToken() {
+    if (impHandoff) return null;   // an impersonation hand-off in flight: never the admin's own session
     try {
       return sessionStorage.getItem('chm_imp_access')
         || localStorage.getItem('chm_access')
@@ -68,6 +109,7 @@ const Auth = {
   get refreshToken() {
     // Impersonation tokens don't get a refresh — once they expire (30m)
     // the tab just falls out of auth, which is what we want.
+    if (impHandoff) return null;
     if (sessionStorage.getItem('chm_imp_access')) return null;
     try { return localStorage.getItem('chm_refresh') || sessionStorage.getItem('chm_refresh'); }
     catch { return null; }
@@ -123,8 +165,11 @@ const Auth = {
     try { store.setItem('chm_user', JSON.stringify(u)); } catch (_e) {}
   },
   requireAuth() {
+    if (impHandoff) return false;   // hold the page: it reloads as the user once the hand-off is done
     if (!this.isLoggedIn()) {
-      location.href = '/?login=1';
+      // the web app's sign-in, which returns here afterwards (frontend/app/app.js NEXT_PATHS)
+      leaving = true;
+      location.href = '/app/?next=' + encodeURIComponent(location.pathname);
       return false;
     }
     // Email verification gate — block dashboard until confirmed. BUT the
@@ -141,8 +186,8 @@ const Auth = {
     return true;
   },
   // Background refresh — pulls fresh /auth/me, patches localStorage, and
-  // redirects to /?verify_email=1 only if the server ALSO confirms the
-  // email is not verified. Prevents stale-cache redirect loops.
+  // redirects to the e-mail confirmation page (/auth/?verify_email=1, no analytics counter there)
+  // only if the server ALSO confirms the email is not verified. Prevents stale-cache redirect loops.
   refreshUserAndMaybeRedirect() {
     if (this._refreshingUser) return; this._refreshingUser = true;
     const tok = this.accessToken;
@@ -154,7 +199,7 @@ const Auth = {
         if (!fresh) return;
         this.setUser(fresh);
         if (fresh.emailVerified === false && !this.isImpersonating) {
-          location.href = '/?verify_email=1';
+          location.href = '/auth/?verify_email=1';
         }
       })
       .catch(() => { /* network hiccup — don't log out, try again next page */ })
@@ -164,6 +209,8 @@ const Auth = {
 
 // ── API client — fetch with auto-retry on 401 after refresh ────────────
 async function apiRequest(method, path, body, { retried = false, skipAuth = false } = {}) {
+  if (impHandoff) return impHandoff;   // never settles: the tab reloads as the impersonated user
+  if (leaving) return new Promise(() => {});   // the page is on its way to the sign-in
   const headers = { 'Content-Type': 'application/json' };
   if (!skipAuth && Auth.accessToken) headers['Authorization'] = 'Bearer ' + Auth.accessToken;
   const opts = { method, headers };
@@ -174,6 +221,9 @@ async function apiRequest(method, path, body, { retried = false, skipAuth = fals
   catch (netErr) {
     throw Object.assign(new Error('Network error: ' + netErr.message), { code: 'NETWORK' });
   }
+  // a call sent before requireAuth() started leaving the page (plan-gate.js asks /auth/me first):
+  // its 401 must not refresh — the web app's sign-in refreshes the same token for ?next=
+  if (leaving) return new Promise(() => {});
 
   const text = await res.text();
   const data = text ? (() => { try { return JSON.parse(text); } catch { return { raw: text }; } })() : {};
@@ -188,12 +238,11 @@ async function apiRequest(method, path, body, { retried = false, skipAuth = fals
   }
 
   if (!res.ok) {
-    // Hard gate — if backend says email not verified, kick user to the
-    // verification modal on the homepage instead of letting the error
-    // bubble as a generic 403 toast.
+    // Hard gate — if backend says email not verified, send the user to the
+    // e-mail confirmation page instead of letting the error bubble as a generic 403 toast.
     if (res.status === 403 && data && data.code === 'EMAIL_NOT_VERIFIED') {
-      if (location.pathname !== '/' && location.pathname !== '/index.html') {
-        location.href = '/?verify_email=1';
+      if (location.pathname !== '/auth/') {
+        location.href = '/auth/?verify_email=1';
       }
     }
     const err = new Error(data.error || data.message || ('HTTP ' + res.status));

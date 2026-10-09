@@ -8,6 +8,7 @@ const {
   registerLimiter,
   passwordResetLimiter,
   twoFactorLimiter,
+  impersonationRedeemLimiter,
 } = require('../middleware/auth');
 const { geoBlock } = require('../middleware/geoBlock');
 const validation = require('../utils/validation');
@@ -191,15 +192,18 @@ router.post('/verify-email/request', authMiddleware, (req, res, next) => {
   } catch (err) { handleServiceError(err, res, next); }
 });
 
-// GET or POST — click from email
+// GET — the link of e-mails sent before /auth/#verify=<token> (services/emailService.js). The result
+// page is frontend/auth/ (no analytics counter), never the landing.
 router.get('/verify-email/:token', (req, res, next) => {
+  res.set('Cache-Control', 'no-store');
   try {
     const token = z.string().min(16).max(256).parse(req.params.token);
     authService.verifyEmail({ token, ipAddress: getIp(req), userAgent: getUA(req) });
-    // Redirect to frontend confirmation page instead of JSON
-    res.redirect('/?verified=1');
+    res.redirect('/auth/?verified=1');
   } catch (err) {
-    if (err && err.statusCode) return res.redirect('/?verified=0&code=' + encodeURIComponent(err.code || 'ERR'));
+    if (err && (err.statusCode || err instanceof z.ZodError)) {
+      return res.redirect('/auth/?verified=0&code=' + encodeURIComponent((err && err.code) || 'INVALID_VERIFY_TOKEN'));
+    }
     return handleServiceError(err, res, next);
   }
 });
@@ -257,6 +261,19 @@ router.post('/2fa/verify-login', twoFactorLimiter, (req, res, next) => {
       pendingToken: input.pendingToken, code: input.code,
       ipAddress: getIp(req), userAgent: getUA(req),
     });
+    res.json(out);
+  } catch (err) { handleServiceError(err, res, next); }
+});
+
+// ── Admin impersonation hand-off ─────────────────────────────────────
+// The tab ops.js opens for "Impersonate" trades the one-time 60-second code (handed over through
+// same-origin storage, never a URL) for the impersonated session's access token
+// (services/impersonationService.js). No session needed: the admin's may be in another tab only.
+router.post('/impersonation/redeem', impersonationRedeemLimiter, (req, res, next) => {
+  try {
+    const input = z.object({ code: z.string().min(16).max(128) }).parse(req.body);
+    const out = require('../services/impersonationService').redeem(input.code);
+    res.set('Cache-Control', 'no-store');
     res.json(out);
   } catch (err) { handleServiceError(err, res, next); }
 });
