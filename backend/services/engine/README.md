@@ -424,6 +424,8 @@ re-raise, [SMC-RESTART-ON-STOP]). A loop stopped while it waits ends at once and
 | `tests/engine/scanners/levels_units.test.js` | LEVELS unit vectors (jobs, safe_send, WS trigger, scan loop, hint throttle …) | `py/levels_units.py` |
 | `tests/engine/scanners/volume_scan.test.js`, `volume_units.test.js` | VOLUME `_scan_cycle` replay, unit vectors | `py/volume_scan.py`, `py/volume_units.py` |
 | `tests/engine/scanners/smcScanner.diff.test.js` | SMC `_scan_cycle` + `_send_smc_card_bg` replay | `gen/gen_smc_scanner.py` |
+| `tests/engine/scanners/adv/adv_scan.test.js` | adversarial LEVELS + SMC + VOLUME + trend monitor + evening report on one shared pipeline, 19 ticks, 29 randomized users, mutated candles (`adv_replay.js` / `adv_compare.js`, families in `adv_families.js`) | `adv/py/adv_drive.py` (~1 h) |
+| `tests/engine/scanners/adv/adv_units.test.js` | `_sparse_merge` / `TradeCfg.from_json` / `SMCUserCfg.from_json` / `_load_sparse` on adversarial JSON (result, exception, WARNING lines) | `adv/py/adv_units.py` |
 | `tests/engine/worker/scheduler.timing.test.js` | bot.py loop instants over 6 simulated hours | `gen/gen_scheduler_trace.py` |
 | `tests/engine/worker/engine.integration.test.js` | the worker with the three real scanners over a 1h and a 4h close (golden candles) | — |
 | `tests/engine/worker/engine.stop.integration.test.js` | a stop in the middle of those cycles | — |

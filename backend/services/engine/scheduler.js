@@ -740,7 +740,8 @@ function createScheduler({ side = 'all', deps = {} } = {}) {
     require('./regimeLoop').createRegimeLoop({ fetcher: ctx.fetcher(), log }),
   ));
   ctx.trend = once('trend', () => deps.trend || installTrendMonitor({
-    send: (uid, text, o = {}) => ctx.bot.sendText(uid, text, { ...o, type: 'trend' }),
+    // broadcast_change → telegram_safe.safe_send_message (its [TG-SAFE] line for a lost notice)
+    send: (uid, text, o = {}) => ctx.bot.sendText(uid, text, { ...o, type: 'trend', safe: true }),
     fetcher: ctx.fetcher(), sleep, log,
   }));
   ctx.lastClosed1h = deps.lastClosed1h || (() => require('./momentumDetector').lastClosed1hViaFetcher(ctx.fetcher()));

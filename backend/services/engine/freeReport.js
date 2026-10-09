@@ -436,8 +436,10 @@ function createFreeReport(deps = {}) {
         try {
           await send(user.user_id, text);
           n += 1;
-        } catch (e) {
-          log.warning(`free_report._send_evening_report() unhandled exception: ${e && e.message}`);
+        } catch (_e) {
+          // the bot: log.warning("free_report._send_evening_report() unhandled exception", exc_info=True)
+          // — the record's message has no error text (the traceback is exc_info)
+          log.warning('free_report._send_evening_report() unhandled exception');
         }
         await sleep(SEND_PAUSE_S * 1000);
       }

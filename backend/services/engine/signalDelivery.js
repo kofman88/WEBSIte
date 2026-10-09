@@ -111,6 +111,24 @@ function createSignalDelivery(deps = {}) {
   const repoOf = () => deps.repo || require('./signalTradesRepo').defaultRepo;
   const dbOf = () => deps.db || require('../../models/database');
   const log = deps.log || fallbackLog();
+  const tgLog = deps.tgLog || log;   // telegram_safe's logger ("CHM.TgSafe")
+
+  /**
+   * telegram_safe.safe_send_message's line for a delivery that did not go out (deliver() and
+   * sendText({safe: true}) stand for safe_send_message): a deleted / inactive user is the bot's
+   * TelegramForbiddenError → INFO "blocked bot — notification lost"; an empty text is Telegram's
+   * BadRequest "message text is empty"; a notification that was not stored is the BadRequest the
+   * sendMessage contract answers (TG_ERRORS.failed). No user id → False without a line (`not user_id`).
+   */
+  function logNotSent(uid, reason) {
+    if (!uid) return;
+    if (reason === 'user_not_found') {
+      tgLog.info(`[TG-SAFE] uid=${uid} blocked bot — notification lost`);
+    } else {
+      const err = reason === 'empty' ? TG_ERRORS.empty : TG_ERRORS.failed;
+      tgLog.warning(`[TG-SAFE] uid=${uid} BadRequest: ${Array.from(err.message).slice(0, 150).join('')} — message dropped`);
+    }
+  }
 
   function sse(event, userId, data) {
     const s = sseOf();
@@ -182,7 +200,9 @@ function createSignalDelivery(deps = {}) {
   const d = {
     /** safe_send_message(...) of a card / preview / notice → Promise<bool> */
     async deliver(msg = {}) {
-      return (await send(msg)).ok;
+      const r = await send(msg);
+      if (!r.ok) logNotSent(Number(msg.userId), r.reason);
+      return r.ok;
     },
 
     /**
@@ -233,16 +253,22 @@ function createSignalDelivery(deps = {}) {
     async sendText(userId, text, opts = {}) {
       const uid = Number(userId);
       const body = String(text || '');
-      if (!uid || !body) return false;
+      if (!uid || !body) {
+        if (opts.safe) logNotSent(uid, 'empty');
+        return false;
+      }
       const type = ENGINE_TYPES.includes(opts.type) ? opts.type : (ENGINE_TYPES.includes(opts.kind) ? opts.kind : 'report');
       try {
         const res = await notifierOf().dispatch(uid, {
           type, title: noticeTitle(body), body, tgText: body, link: opts.link || null, silent: Boolean(opts.silent),
           data: { kind: opts.kind || type, html: body, actions: opts.keyboard || null, lang: opts.lang || 'ru' },
         });
-        return Boolean(res && res.dispatched);
+        const ok = Boolean(res && res.dispatched);
+        if (!ok && opts.safe) logNotSent(uid, (res && res.error) || 'error');
+        return ok;
       } catch (e) {
         log.warning(`[DELIVERY] ${type} uid=${uid}: ${e && e.message}`);
+        if (opts.safe) logNotSent(uid, 'error');
         return false;
       }
     },
