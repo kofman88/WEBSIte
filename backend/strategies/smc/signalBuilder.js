@@ -217,11 +217,12 @@ function gradeOf(score) {
  * { symbol, direction, score, grade, entry_low, entry_high, entry, sl, tp1, tp2, tp3, rr,
  *   risk_pct, confirmations: [[label, bool] × 8], narrative, session: "", tf_htf, tf_mtf,
  *   tf_ltf, mode_tag }.
+ * `log` (not a bot parameter): the module logger "CHM.SMC.SignalBuilder" of calculate_levels.
  */
 function buildSmcSignal(symbol, analysis, cfg, {
   tf_htf = '4H', tf_mtf = '1H', tf_ltf = '15m',
   conf_type = 'WICK_TOUCH', pd_filter = false, retrace_depth = 0.0, mtf_check = false,
-  allowed_dirs = ALL_DIRS,
+  allowed_dirs = ALL_DIRS, log = null,
 } = {}) {
   if (pyTruthy(pyGet(analysis, 'error', undefined))) return null;
 
@@ -282,7 +283,7 @@ function buildSmcSignal(symbol, analysis, cfg, {
     // raw 0..8 score against MIN_CONFIRMATIONS (QUIRK spec §11.9: caps apply after)
     if (score < cfg.MIN_CONFIRMATIONS) continue;
 
-    const levels = calculateLevels(analysis, direction, cfg);
+    const levels = calculateLevels(analysis, direction, cfg, log);
     if (levels === null) continue;
 
     const narrative = generateNarrative(analysis, levels, direction, { tf_htf, tf_mtf, tf_ltf, show_invalidation: true, cfg });

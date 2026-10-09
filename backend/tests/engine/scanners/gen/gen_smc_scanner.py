@@ -459,7 +459,7 @@ def seed_trend(name):
 
 
 # ── logging ─────────────────────────────────────────────────────────────────
-LOGGERS = ["CHM.SMC.Scanner", "CHM.SignalRegistry", "CHM.SignalFreshness", "CHM.FreeReport", "CHM.MomentumVeto",
+LOGGERS = ["CHM.SMC.Scanner", "CHM.SMC.SignalBuilder", "CHM.SignalRegistry", "CHM.SignalFreshness", "CHM.FreeReport", "CHM.MomentumVeto",
            "CHM.Momentum", "CHM.Confluence", "CHM.VolumeFilter", "CHM.DB", "CHM.TradeEvents", "CHM.PositionSize"]
 
 

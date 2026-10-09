@@ -193,10 +193,11 @@ const SMC_CT_BUTTON = '✅ Разрешить контр-тренд (на сво
  *   userApiKeys(user, exchange) → {apiKey, apiSecret}; getBalance(user, exchange) → Promise<number|null>;
  *   fundBlock() → Promise<string>; smartPromptQuota(uid); metrics { record(name, value, tags) };
  *   isQuiet(user, now); orderLinkId(tradeId, uid, exchange); randint(a, b);
- *   now() (unix s), mono() (ms), sleep(ms), log, env.
+ *   now() (unix s), mono() (ms), sleep(ms), log, builderLog (smc/signal_builder lines; default log), env.
  */
 function createSmcScanner(deps = {}) {
   const log = deps.log || defaultLog;
+  const builderLog = deps.builderLog || log;     // smc/signal_builder's module logger
   const now = deps.now || nowSec;
   const mono = deps.mono || monoMs;
   const sleep = deps.sleep || realSleep;
@@ -813,6 +814,7 @@ function createSmcScanner(deps = {}) {
               pd_filter: uc.pdFilterEff,
               retrace_depth: ga(ucfg, 'smc_retrace_depth', 0.0),
               mtf_check: uc.mtfCheckEff,
+              log: builderLog,                      // logging.getLogger("CHM.SMC.SignalBuilder")
             });
           } catch (e) {
             log.warning(`SMC ${symbol} build ${pyS(user.user_id)}: ${e && e.message}`);

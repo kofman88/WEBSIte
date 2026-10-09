@@ -210,7 +210,7 @@ async function replay() {
       return RAND.shift();
     },
     sleep: async (ms) => { rec('sleeps', ms / 1000); await new Promise((r) => setImmediate(r)); },
-    now, env, log: logFor('CHM.SMC.Scanner'), volFilterLog: logFor('CHM.VolumeFilter'),
+    now, env, log: logFor('CHM.SMC.Scanner'), builderLog: logFor('CHM.SMC.SignalBuilder'), volFilterLog: logFor('CHM.VolumeFilter'),
   });
 
   const out = [];
