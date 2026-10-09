@@ -18,6 +18,7 @@ const adminRoutes = require('./routes/admin');
 const notificationsRoutes = require('./routes/notifications');
 const telegramRoutes = require('./routes/telegram');
 const publicRoutes = require('./routes/public');
+const publicLandingRoutes = require('./routes/publicLanding');
 const supportRoutes = require('./routes/support');
 const pushRoutes = require('./routes/push');
 const appRoutes = require('./routes/app');
@@ -135,6 +136,8 @@ app.use('/api/admin', adminRoutes);
 app.use('/api/notifications', notificationsRoutes);
 app.use('/api/telegram', telegramRoutes);
 app.use('/api/public', publicRoutes);
+// The landing's read-only data (M10b): trend / stats / feed of the paper track (services/publicTrack).
+app.use('/api/public', publicLandingRoutes);
 app.use('/api/support', supportRoutes);
 app.use('/api/push', pushRoutes);
 // The bot's Mini App API (M7+): me, strategy, settings, settings/all, profile,
@@ -343,6 +346,8 @@ function startBackground() {
   paymentWatcher.start();
   // bot loop A: hourly subscription expiry / renewal reminders (first run after 60 s)
   planService.startExpiryLoop();
+  // the public paper track's minute refresh (stage history of the landing feed, services/publicTrack)
+  try { require('./services/publicTrack').defaultTrack().start(); } catch (err) { logger.error('public track start failed', { err: err.message }); }
   if (config.engineWorker && !IS_TEST) {
     try {
       engine = require('./workers/engineWorker').startEngine({ log: logger });
@@ -368,6 +373,7 @@ async function shutdownSteps() {
   }
   try { maintenanceService.stop(); } catch (_e) { /* */ }
   try { planService.stopExpiryLoop(); } catch (_e) { /* */ }
+  try { require('./services/publicTrack').defaultTrack().stop(); } catch (_e) { /* */ }
   try { db.close(); } catch (_e) { /* */ }
 }
 
