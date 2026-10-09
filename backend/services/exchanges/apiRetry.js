@@ -15,7 +15,7 @@
  */
 
 const { log: defaultLog } = require('../marketData/mdLog');
-const { pyGet, pyStr, pyTruthy, errStr, pySlice, isDict, pyRepr } = require('./pyCompat');
+const { pyGet, pyStr, pyTruthy, errStr, pySlice, isDict, pyRepr, rethrowCancelled } = require('./pyCompat');
 const { breaker: defaultBreaker, isTransientError } = require('./exchangeBreaker');
 const { pyLower, pyStrip } = require('../../strategies/common/pyUnicode');   // CPython 3.11 str case / whitespace methods
 
@@ -84,7 +84,7 @@ async function callWithRetry(fn, opts = {}) {
         log.warning(`[CB-PREEMPT] ${name}: ${exchange} breaker open — fail-fast`);
         return { ok: false, error: `${exchange} circuit-breaker open` };
       }
-    } catch (e) { log.debug(`api_retry exchange_breaker check: ${errStr(e)}`); }
+    } catch (e) { rethrowCancelled(e); log.debug(`api_retry exchange_breaker check: ${errStr(e)}`); }
   }
   let lastResult = null;
   const jitter = () => 0.7 + (1.3 - 0.7) * random(); // random.uniform(0.7, 1.3)
@@ -93,6 +93,7 @@ async function callWithRetry(fn, opts = {}) {
     try {
       result = await fn(...args);
     } catch (e) {
+      rethrowCancelled(e);
       const errS = errStr(e);
       if (!isRetryableError(errS)) {
         log.warning(`[API-RETRY] ${name}: attempt ${attempt}/${maxAttempts} non-retryable exc=${pyRepr(pySlice(errS, 150))}`);
@@ -107,7 +108,7 @@ async function callWithRetry(fn, opts = {}) {
       }
       log.error(`[API-RETRY] ${name}: ALL ${maxAttempts} attempts raised exceptions. Last exc=${pyRepr(pySlice(errS, 200))}`);
       if (exchange) {
-        try { if (isTransientError(e)) breaker.recordFailure(exchange); } catch (_e) { /* best effort */ }
+        try { if (isTransientError(e)) breaker.recordFailure(exchange); } catch (_e) { rethrowCancelled(_e); /* best effort */ }
       }
       throw e;
     }
@@ -115,7 +116,7 @@ async function callWithRetry(fn, opts = {}) {
     if (!retryable) {
       if (attempt > 1) log.info(`[API-RETRY] ${name}: success on attempt ${attempt}/${maxAttempts}`);
       if (exchange) {
-        try { if (isDict(result) && pyGet(result, 'ok') === true) breaker.recordSuccess(exchange); } catch (_e) { /* best effort */ }
+        try { if (isDict(result) && pyGet(result, 'ok') === true) breaker.recordSuccess(exchange); } catch (_e) { rethrowCancelled(_e); /* best effort */ }
       }
       return result;
     }
@@ -128,7 +129,7 @@ async function callWithRetry(fn, opts = {}) {
     } else {
       log.error(`[API-RETRY] ${name}: ALL ${maxAttempts} attempts failed (retryable). Last err=${pyRepr(pySlice(errMsg, 200))}`);
       if (exchange) {
-        try { if (isTransientError(errMsg)) breaker.recordFailure(exchange); } catch (_e) { /* best effort */ }
+        try { if (isTransientError(errMsg)) breaker.recordFailure(exchange); } catch (_e) { rethrowCancelled(_e); /* best effort */ }
       }
     }
   }

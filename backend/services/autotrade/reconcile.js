@@ -13,7 +13,6 @@
  */
 
 const { waitFor, isCancelledError } = require('./asyncio');
-const { isThreadCall } = require('./traders');
 const { pf } = require('./pyfmt');
 const { pyFloat, pyInt, pyGet, pyOr, pyStr } = require('../exchanges/pyCompat');
 const { pyUpper } = require('../../strategies/common/pyUnicode');
@@ -29,7 +28,9 @@ function resolveLimitUnfilledGrace(strategy) {
 function createReconcile({ traderFor, log = null, sleep = null, timers = undefined } = {}) {
   const logger = log || require('../marketData/mdLog').log;
   const asleep = sleep || ((s) => new Promise((r) => setTimeout(r, s * 1000)));
-  const call = (exchange, fn, timeoutS, thunk) => waitFor(thunk, timeoutS, { shield: isThreadCall(exchange, fn), timers });
+  // asyncio.wait_for around one trader call. A Bybit pybit call is `await loop.run_in_executor(...)`
+  // inside the trader (rt.runInThread): the timeout cancels the coroutine at that await, the thread runs on.
+  const call = (_exchange, _fn, timeoutS, thunk) => waitFor(thunk, timeoutS, { timers });
 
   async function reconcileTimeoutPosition({ exchange, apiKey, apiSecret, symbol, direction, bybitDemo = false, okxPassphrase = '' }) {
     const wanted = { LONG: ['BUY', 'LONG', 'Buy'], SHORT: ['SELL', 'SHORT', 'Sell'] }[pyUpper(String(direction || ''))] || [];

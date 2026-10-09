@@ -74,6 +74,35 @@ describe('asyncio.waitFor', () => {
     expect(finished).toBe(true);           // the virtual clock ran the background call to its end
   });
 
+  it('runInThread (loop.run_in_executor): the awaiting coroutine is cancelled AT the await, the thread runs on with its requests', async () => {
+    const clk = createVClock(1e9);
+    const sent = [];
+    const tx = A.cancellableTransport(async (r) => { sent.push(r); await clk.sleep(4); return r; });
+    const after = [];
+    let threadDone = false;
+    const thread = async () => { await tx('thread-1'); await tx('thread-2'); threadDone = true; return 'late'; };
+    const coro = async () => {
+      const v = await A.runInThread(thread);
+      after.push(v);                        // the bot's code after `await loop.run_in_executor(...)`
+      await tx('after-await');
+    };
+    const t0 = clk.mono();
+    let at = null;
+    const p = A.waitFor(coro, 5, { timers: clk.timers }).catch((e) => { at = clk.mono() - t0; throw e; });
+    await expect(clk.run(p)).rejects.toMatchObject({ name: 'TimeoutError', message: '' });
+    expect(at).toBe(5);                    // wait_for: cancel → the await raises CancelledError at once
+    expect(after).toEqual([]);
+    expect(threadDone).toBe(true);
+    expect(sent).toEqual(['thread-1', 'thread-2']);   // the thread's own second request still left (t=4)
+  });
+
+  it('runInThread inside the timeout returns the value; the thread error propagates', async () => {
+    const clk = createVClock(1e9);
+    expect(await clk.run(A.waitFor(() => A.runInThread(async () => { await clk.sleep(1); return 7; }), 5, { timers: clk.timers }))).toBe(7);
+    const boom = new Error('pybit');
+    await expect(clk.run(A.runInThread(() => { throw boom; }))).rejects.toBe(boom);
+  });
+
   it('an error of the body propagates unchanged; a nested timeout of the outer scope cancels the inner one', async () => {
     const clk = createVClock(1e9);
     const boom = new Error('boom');

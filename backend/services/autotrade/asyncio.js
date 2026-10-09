@@ -7,12 +7,17 @@
  *       cancelled: every await on the scope's transport / sleep (cancellableTransport,
  *       cancellableSleep) rejects with CancelledError — an in-flight HTTP request is abandoned
  *       and NO further request leaves the process — then waitFor WAITS for fn to settle and
- *       raises TimeoutError (like wait_for's _cancel_and_wait). The JS traders catch errors
- *       generically where the bot's `except Exception` never catches CancelledError; that is
- *       why the outcome after a cancel is always TimeoutError, whatever fn returned.
- *       `shield: true` = the bot's thread-pool calls (pybit `run_in_executor`): a timeout
- *       raises TimeoutError at once and the call keeps running in the background (the thread
- *       is not interruptible); its late result / error is discarded.
+ *       raises TimeoutError (like wait_for's _cancel_and_wait). Every catch block of the traders
+ *       re-raises CancelledError first (pyCompat.rethrowCancelled: the bot's `except Exception`
+ *       never catches it), so nothing runs after the cancelled await — no log line, event,
+ *       metric, cache write or request.
+ *       `shield: true` (legacy, unused by the money paths): a timeout raises TimeoutError at once
+ *       and fn keeps running as a whole.
+ *   runInThread(fn)                    loop.run_in_executor / asyncio.to_thread: the bot's pybit
+ *       work (rt.runInThread in services/exchanges/bybitTrader.js) runs on in a scope no
+ *       cancellation reaches, while the awaiting coroutine is cancelled at that await — the
+ *       async code around the thread (hedge-mode save, events, metrics, auth reset, retries)
+ *       stops exactly where the bot's coroutine stops.
  *   CancelledError, TimeoutError       asyncio.CancelledError / TimeoutError (str(e) == '')
  *   checkCancelled()                   raise CancelledError when the current scope is cancelled
  *   cancellableTransport(base)         a trader transport that honours the cancel scope
@@ -138,6 +143,26 @@ function waitFor(fn, timeoutS, { shield = false, timers = defaultTimers } = {}) 
   });
 }
 
+/**
+ * loop.run_in_executor / asyncio.to_thread (the bot's pybit work): `fn` runs to completion in a scope
+ * of its own that no caller's cancellation reaches — a thread cannot be interrupted, its requests and
+ * sleeps go on — while the AWAITING code is cancelled at this await exactly like `await fut` in the
+ * bot: CancelledError at once, and whatever the coroutine had after the await (hedge-mode save, trade
+ * events, metrics, the auth reset, a retry, the TP verification) never runs. The thread's late result
+ * or error is dropped.
+ */
+function runInThread(fn) {
+  const threadScope = { cancelled: false, parent: null, listeners: new Set(), children: new Set() };
+  let p;
+  try {
+    p = scopeStore.run(threadScope, () => Promise.resolve().then(fn));
+  } catch (e) {
+    p = Promise.reject(e);
+  }
+  p.catch(() => {});
+  return guardCancel(p);
+}
+
 /** Trader transport wrapper: no request starts in a cancelled scope; an in-flight one is abandoned. */
 function cancellableTransport(base) {
   return (req) => {
@@ -232,5 +257,5 @@ function createTaskGroup({ log = null } = {}) {
 module.exports = {
   CancelledError, TimeoutError, isTimeoutError, isCancelledError,
   waitFor, checkCancelled, guardCancel, currentScope, cancellableTransport, cancellableSleep,
-  makeLock, createTaskGroup, currentTaskName, runAsTask, defaultTimers,
+  makeLock, createTaskGroup, currentTaskName, runAsTask, defaultTimers, runInThread,
 };

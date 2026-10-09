@@ -12,7 +12,7 @@
  */
 
 const crypto = require('crypto');
-const { PyError, errStr, yarlQueryFromParams } = require('./pyCompat');
+const { PyError, errStr, yarlQueryFromParams, rethrowCancelled } = require('./pyCompat');
 
 function sha256hex(s) {
   return crypto.createHash('sha256').update(Buffer.from(String(s), 'utf8')).digest('hex');
@@ -37,6 +37,7 @@ async function killswitchGate(rt, context) {
   try {
     await rt.killswitch.requireActive(context);
   } catch (e) {
+    rethrowCancelled(e);
     if (e && e.killswitchHalted) return { ok: false, order_id: '', error: `killswitch_halted: ${e.state}` };
     throw e;
   }
@@ -48,6 +49,7 @@ async function planGateDeny(rt, userId, symbol, source) {
     const deny = await rt.planGate.denyReason(userId, symbol, source);
     if (deny !== null && deny !== undefined) return deny;
   } catch (e) {
+    rethrowCancelled(e);
     rt.log.debug(`plan_gate check uid=${userId}: ${errStr(e)}`);
   }
   return null;
@@ -61,6 +63,7 @@ async function recordPlaced(rt, { symbol, direction, exchange, t0, tpPlaced }) {
     await rt.metrics.record('trade_placement_latency_ms', ms, tags);
     if (tpPlaced) await rt.metrics.record('sl_tp_attached', 1.0, tags);
   } catch (e) {
+    rethrowCancelled(e);
     rt.log.debug(`metrics trade_placed (${exchange}): ${errStr(e)}`);
   }
 }

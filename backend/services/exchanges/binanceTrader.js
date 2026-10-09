@@ -26,6 +26,7 @@ const {
   htmlEscape, pySlice, isDict,
   pyIter,
   pyCmp,
+  rethrowCancelled,
 } = require('./pyCompat');
 const { fmtFixed, fmtComma, fmtG } = require('../../strategies/common/pyfmt');
 const { pyRound } = require('../../strategies/common/pyround');
@@ -125,6 +126,7 @@ function createBinanceTrader(overrides = {}) {
         try {
           resp = await rt.transport({ method: 'GET', url: `${url}/fapi/v1/ping`, headers: {}, timeoutMs: 5000 });
         } catch (e) {
+          rethrowCancelled(e);
           if (e instanceof TransportError && e.kind === 'connect') {
             if (attempt < 2) { await rt.sleep(1.0 * (2 ** attempt)); continue; }
             log.warning(`⚠️ Binance DNS/connect ${url} failed after 3 retries: ${e.message}`);
@@ -158,6 +160,7 @@ function createBinanceTrader(overrides = {}) {
       st.timeSyncedAt = rt.now();
       log.info(`Binance time sync: offset=${st.timeOffsetMs}ms`);
     } catch (e) {
+      rethrowCancelled(e);
       const now = rt.now();
       if (now - st.syncWarnAt >= 3600) {
         st.syncWarnAt = now;
@@ -194,10 +197,12 @@ function createBinanceTrader(overrides = {}) {
       try {
         return aiohttpJson(resp);
       } catch (_je) {
+        rethrowCancelled(_je);
         log.error('binance_trader._request() unhandled exception');
         return { code: -1, msg: `http=${resp.status}; body=${pySlice(resp.text || '', 300)}` };
       }
     } catch (e) {
+      rethrowCancelled(e);
       if (e instanceof TransportError && e.kind === 'timeout') return { code: -1, msg: 'timeout' };
       log.error('binance_trader._request() unhandled exception');
       return { code: -1, msg: errStr(e) };
@@ -228,6 +233,7 @@ function createBinanceTrader(overrides = {}) {
         }
       }
     } catch (e) {
+      rethrowCancelled(e);
       log.debug(`Binance _get_instrument_filters ${symbol}: ${errStr(e)}`);
     }
     return [0.001, 0.0001, false, MAX_LEVERAGE];
@@ -242,6 +248,7 @@ function createBinanceTrader(overrides = {}) {
       log.warning(`Binance get_balance unexpected: ${pyStr(data)}`);
       return 0.0;
     } catch (e) {
+      rethrowCancelled(e);
       log.error(`Binance get_balance: ${errStr(e)}`);
       return 0.0;
     }
@@ -254,6 +261,7 @@ function createBinanceTrader(overrides = {}) {
       const data = aiohttpJson(resp);
       return pyFloat(pyOr(pyGet(data, 'price', 0), 0));
     } catch (e) {
+      rethrowCancelled(e);
       log.debug(`Binance get_last_price ${symbol}: ${errStr(e)}`);
     }
     return 0.0;
@@ -274,6 +282,7 @@ function createBinanceTrader(overrides = {}) {
       }
       return { ok: false, balance: 0.0, error: 'Не удалось получить баланс Binance.' };
     } catch (e) {
+      rethrowCancelled(e);
       if (e instanceof TransportError && e.kind === 'timeout') return { ok: false, balance: 0.0, error: 'Таймаут соединения с Binance. Попробуйте позже.' };
       log.error(`Binance test_connection: ${errStr(e)}`);
       return { ok: false, balance: 0.0, error: errStr(e) };
@@ -456,6 +465,7 @@ function createBinanceTrader(overrides = {}) {
             log.warning(`[BINANCE-ATOMIC-FALLBACK] ${bs}: batch unexpected response type=${batchResp === null ? 'NoneType' : typeof batchResp} — legacy flow`);
           }
         } catch (be) {
+          rethrowCancelled(be);
           log.warning(`[BINANCE-ATOMIC-FALLBACK] ${bs}: batch exception (${errStr(be)}) — legacy flow`);
         }
       }
@@ -476,6 +486,7 @@ function createBinanceTrader(overrides = {}) {
           orderParams.type = 'MARKET';
         }
       } catch (pe) {
+        rethrowCancelled(pe);
         log.debug(`Binance price check failed (${errStr(pe)}), using MARKET`);
         orderParams.type = 'MARKET';
       }
@@ -519,6 +530,7 @@ function createBinanceTrader(overrides = {}) {
           await cancelAllOrders(apiKey, secret, symbol);
           log.info(`FIX-AUDIT-38: Binance ордер ${orderId} отменён после провала SL.`);
         } catch (ce) {
+          rethrowCancelled(ce);
           log.error(`FIX-AUDIT-38: не удалось отменить Binance ордер ${orderId}: ${errStr(ce)} — пользователь должен закрыть позицию вручную!`);
         }
         try {
@@ -535,6 +547,7 @@ function createBinanceTrader(overrides = {}) {
             else log.error(`[SL-SAFETY-CLOSE-BINANCE-FAIL] ${bs}: emergency close rejected: ${pyStr(pyGet(clResp, 'error', 'unknown'))} — BE-monitor takes over`);
           }
         } catch (se) {
+          rethrowCancelled(se);
           log.error(`[SL-SAFETY-CLOSE-BINANCE-EXC] ${bs}: ${errStr(se)} — BE-monitor takes over`);
         }
         return {
@@ -589,6 +602,7 @@ function createBinanceTrader(overrides = {}) {
                 log.info(`[TP-ADAPTIVE-SHIFT] Binance ${bs} tp=${pyStr(tpParams.stopPrice)} → ${fmtG(nw, 6)} (current=${fmtG(cur, 6)}, gap=1.5%)`);
               }
             } catch (ge) {
+              rethrowCancelled(ge);
               log.debug(`Binance adaptive TP fetch: ${errStr(ge)}`);
             }
             if (nw === null) {
@@ -609,6 +623,7 @@ function createBinanceTrader(overrides = {}) {
       await recordPlaced(rt, { symbol, direction, exchange: 'binance', t0, tpPlaced });
       return { ok: true, order_id: orderId, error: '', tp_placed: tpPlaced, qty: pyFloat(qtyStr) };
     } catch (e) {
+      rethrowCancelled(e);
       if (e instanceof TransportError && e.kind === 'timeout') return { ok: false, order_id: '', error: 'Таймаут соединения с Binance. Попробуйте позже.' };
       log.error(`Binance place_trade ${symbol}: ${errStr(e)}`);
       return { ok: false, order_id: '', error: errStr(e) };
@@ -644,6 +659,7 @@ function createBinanceTrader(overrides = {}) {
       }
       return positions;
     } catch (e) {
+      rethrowCancelled(e);
       if (e instanceof TransportError && e.kind === 'timeout') { log.warning('Binance get_positions: таймаут'); return []; }
       log.error(`Binance get_positions: ${errStr(e)}`);
       return [];
@@ -656,6 +672,7 @@ function createBinanceTrader(overrides = {}) {
       if (Array.isArray(data)) return data;
       log.warning(`Binance get_open_orders unexpected: ${pyStr(data)}`);
     } catch (e) {
+      rethrowCancelled(e);
       log.error(`Binance get_open_orders: ${errStr(e)}`);
     }
     return [];
@@ -678,6 +695,7 @@ function createBinanceTrader(overrides = {}) {
       if (pyTruthy(pyGet(resp, 'code')) && pyInt(pyIndex(resp, 'code')) < 0) return { ok: false, order_id: '', error: humanizeBinanceError(pyStr(resp)) };
       return { ok: true, order_id: pyStr(pyGet(resp, 'orderId', '')) };
     } catch (e) {
+      rethrowCancelled(e);
       if (e instanceof TransportError && e.kind === 'timeout') return { ok: false, order_id: '', error: 'Таймаут соединения с Binance.' };
       log.error(`Binance close_position: ${errStr(e)}`);
       return { ok: false, order_id: '', error: errStr(e) };
@@ -691,6 +709,7 @@ function createBinanceTrader(overrides = {}) {
       if (pyCmp(pyGet(resp, 'code', 0), '>=', 0)) return { ok: true };
       return { ok: false, error: humanizeBinanceError(pyStr(resp)) };
     } catch (e) {
+      rethrowCancelled(e);
       if (e instanceof TransportError && e.kind === 'timeout') return { ok: false, error: 'Таймаут соединения с Binance.' };
       log.error(`Binance cancel_order ${symbol} ${pyStr(orderId)}: ${errStr(e)}`);
       return { ok: false, error: errStr(e) };
@@ -705,6 +724,7 @@ function createBinanceTrader(overrides = {}) {
       if (c === 200 || c === 0 || pyCmp(pyGet(resp, 'code', -1), '>=', 0)) return { ok: true, cancelled: 0 };
       return { ok: false, cancelled: 0, error: humanizeBinanceError(pyStr(resp)) };
     } catch (e) {
+      rethrowCancelled(e);
       if (e instanceof TransportError && e.kind === 'timeout') return { ok: false, cancelled: 0, error: 'Таймаут соединения с Binance.' };
       log.error(`Binance cancel_all_orders: ${errStr(e)}`);
       return { ok: false, cancelled: 0, error: errStr(e) };
@@ -735,6 +755,7 @@ function createBinanceTrader(overrides = {}) {
       }
       return { ok: true, cancelled, total_tp: tpOrders.length, errors };
     } catch (e) {
+      rethrowCancelled(e);
       if (e instanceof TransportError && e.kind === 'timeout') return { ok: false, cancelled: 0, error: 'Таймаут соединения с Binance.' };
       log.error(`Binance cancel_tp_orders_only: ${errStr(e)}`);
       return { ok: false, cancelled: 0, error: errStr(e) };
@@ -779,6 +800,7 @@ function createBinanceTrader(overrides = {}) {
       log.warning(`Binance set_trailing_sl ${bs}: ${pyStr(resp)}`);
       return { ok: false, error: humanizeBinanceError(pyStr(resp)) };
     } catch (e) {
+      rethrowCancelled(e);
       if (e instanceof TransportError && e.kind === 'timeout') return { ok: false, error: 'Таймаут соединения с Binance.' };
       log.error(`Binance set_trailing_sl ${symbol}: ${errStr(e)}`);
       return { ok: false, error: errStr(e) };
@@ -810,6 +832,7 @@ function createBinanceTrader(overrides = {}) {
       log.warning(`Binance set_breakeven ${bs}: ${pyStr(resp)}`);
       return { ok: false, error: humanizeBinanceError(pyStr(resp)) };
     } catch (e) {
+      rethrowCancelled(e);
       if (e instanceof TransportError && e.kind === 'timeout') return { ok: false, error: 'Таймаут соединения с Binance.' };
       log.error(`Binance set_breakeven ${symbol}: ${errStr(e)}`);
       return { ok: false, error: errStr(e) };
@@ -853,11 +876,13 @@ function createBinanceTrader(overrides = {}) {
             try {
               await _request('DELETE', '/fapi/v1/order', apiKey, secret, { symbol: bs, orderId: oid });
             } catch (de) {
+              rethrowCancelled(de);
               log.debug(`Binance cancel old SL/TP ${oid}: ${errStr(de)}`);
             }
           }
         }
       } catch (le) {
+        rethrowCancelled(le);
         log.debug(`Binance list open orders ${bs}: ${errStr(le)}`);
       }
       let tpList;
@@ -914,11 +939,13 @@ function createBinanceTrader(overrides = {}) {
             log.debug(`[TP-VERIFIED] Binance ${bs}: ${liveTp}/${tpExpected} TPs on exchange`);
           }
         } catch (ve) {
+          rethrowCancelled(ve);
           log.debug(`Binance TP verify ${bs}: ${errStr(ve)}`);
         }
       }
       return { sl_placed: slPlaced, tp_placed: tpPlaced };
     } catch (e) {
+      rethrowCancelled(e);
       if (e instanceof TransportError && e.kind === 'timeout') { log.warning(`Binance place_sl_tp_for_position ${symbol}: таймаут`); return { sl_placed: false, tp_placed: false }; }
       log.error(`Binance place_sl_tp_for_position ${symbol}: ${errStr(e)}`);
       return { sl_placed: false, tp_placed: false };
@@ -943,6 +970,7 @@ function createBinanceTrader(overrides = {}) {
         const raw = pyGet(t, 'realizedPnl');
         let realized;
         try { realized = (raw === null || raw === '') ? null : pyFloat(raw); } catch (e) {
+          rethrowCancelled(e);
           if (e && (e.pyType === 'TypeError' || e.pyType === 'ValueError')) realized = null; else throw e;
         }
         result.push({
@@ -955,6 +983,7 @@ function createBinanceTrader(overrides = {}) {
       }
       return result;
     } catch (e) {
+      rethrowCancelled(e);
       log.debug(`Binance get_closed_pnl ${symbol}: ${errStr(e)}`);
     }
     return [];
@@ -998,6 +1027,7 @@ function createBinanceTrader(overrides = {}) {
       }
       return [positions, orders, summary];
     } catch (e) {
+      rethrowCancelled(e);
       if (e instanceof TransportError && e.kind === 'timeout') { log.warning('Binance get_dashboard: таймаут'); return [[], [], EMPTY_SUMMARY()]; }
       log.error(`Binance get_dashboard: ${errStr(e)}`);
       return [[], [], EMPTY_SUMMARY()];

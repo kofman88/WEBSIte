@@ -27,7 +27,7 @@
 
 const crypto = require('crypto');
 const { pyJsonDumps } = require('../engine/pyjson');
-const { PyError, pyStr, pyCapitalize, pyStrftimeHMS, isDict, pyGet, pyIndex, pyTruthy, KeyError, ValueError } = require('./pyCompat');
+const { PyError, pyStr, pyCapitalize, pyStrftimeHMS, isDict, pyGet, pyIndex, pyTruthy, KeyError, ValueError, rethrowCancelled } = require('./pyCompat');
 const { parseJsonPy, headerGet, TransportError } = require('./transport');
 
 const HTTP_MAINNET = 'https://api.bybit.com';
@@ -158,6 +158,7 @@ function createPybitSession({ apiKey, apiSecret, demo = false, recvWindow = 1500
         method, url, headers, body: method === 'GET' ? undefined : reqParams, timeoutMs: timeout * 1000,
       });
     } catch (e) {
+      rethrowCancelled(e);
       throw requestsError(e, url, timeout);
     }
     const errTime = () => pyStrftimeHMS(rt.now());
@@ -171,6 +172,7 @@ function createPybitSession({ apiKey, apiSecret, demo = false, recvWindow = 1500
     try {
       sJson = parseJsonPy(resp.text);
     } catch (_e) {
+      rethrowCancelled(_e);
       throw new FailedRequestError({ request: 'JSON decoding', message: 'Conflict. Could not decode JSON.', statusCode: 409, time: errTime() });
     }
     const code = pyGet(sJson, 'retCode');

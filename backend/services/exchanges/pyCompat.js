@@ -22,6 +22,7 @@
  *   htmlEscape            html.escape(s, quote=True)
  *   pyCapitalize          str.capitalize()
  *   pyStrftimeHMS(t)      datetime.now(timezone.utc).strftime('%H:%M:%S') at clock value t (floor)
+ *   rethrowCancelled(e)   `except Exception` semantics: CancelledError passes every catch
  *
  * Python exceptions are JS Errors with `pyType` and `message` = str(e).
  */
@@ -471,6 +472,15 @@ function pySlice(s, n) {
   return arr.length <= n ? String(s) : arr.slice(0, n).join('');
 }
 
+/**
+ * First statement of every trader `catch`: the bot's `except Exception` never catches
+ * asyncio.CancelledError (a BaseException), so a wait_for cancellation passes every handler
+ * untouched — no log line, error dict, retry or fallback runs after the cancelled await.
+ */
+function rethrowCancelled(e) {
+  if (e && e.pyType === 'CancelledError') throw e;
+}
+
 /** `x in (a, b, …)` with Python equality for numbers/strings. */
 function pyIn(x, ...vals) {
   return vals.some((v) => v === x);
@@ -482,5 +492,5 @@ module.exports = {
   pyStrRepr, pyRepr, pyStr, pyFloatStr, attachRepr, reprFromJsonText,
   pyFloat, pyInt, pyFloatOr0,
   pyQuote, pyQuotePlus, pyUrlencode, yarlQuote, yarlRequoteQuery, yarlUrl, yarlQueryFromParams,
-  htmlEscape, pyCapitalize, pyStrftimeHMS, pySlice, pyIn,
+  htmlEscape, pyCapitalize, pyStrftimeHMS, pySlice, pyIn, rethrowCancelled,
 };
