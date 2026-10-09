@@ -112,6 +112,12 @@ class Semaphore {
   }
 }
 
+/** asyncio.CancelledError: the task was cancelled (bot shutdown) — raised at the cycle's checkpoints. */
+class CancelledError extends Error {
+  constructor(msg = 'cancelled') { super(msg); this.name = 'CancelledError'; }
+}
+const isCancelled = (e) => Boolean(e && e.name === 'CancelledError');
+
 /** asyncio.Event */
 class WakeEvent {
   constructor() { this._set = false; this._waiters = []; }
@@ -252,6 +258,7 @@ function createSmcScanner(deps = {}) {
   const pending = new Set();              // _pending_send_tasks
   const wsTrigLast = new Map();           // _WS_TRIG_LAST_SMC
   const state = {
+    cancelSignal: null,                   // the running loop's AbortSignal (task cancellation)
     shadowMiss: 0, shadowLastLog: 0.0,    // [SHADOW-LOG-THROTTLE]
     wsTrigTs: 0.0, scanStartTs: 0.0,      // [PHASE-1-C]
     okxSem: null, sendSem: null, wake: null,
@@ -558,6 +565,11 @@ function createSmcScanner(deps = {}) {
   }
 
   // ── the cycle ─────────────────────────────────────────────────────────
+  /** The running loop's cancellation: CancelledError at the next await of the cycle (bot shutdown). */
+  function cancelPoint() {
+    if (state.cancelSignal && state.cancelSignal.aborted) throw new CancelledError();
+  }
+
   /** _scan_cycle(bot, um, fetcher, analyzer) */
   async function scanCycle() {
     const tPhaseStart = mono();
@@ -1106,6 +1118,7 @@ function createSmcScanner(deps = {}) {
           task.finally(() => pending.delete(task));
         }
         await sleep(100);
+        cancelPoint();
       }
       phase.user_loop += (mono() - tUserLoop) / 1000;
     }
@@ -1147,7 +1160,10 @@ function createSmcScanner(deps = {}) {
   /**
    * run_smc_scanner(bot, um, fetcher, interval_sec=300, health=None): register the bar-close
    * callback, then forever: cycle → heartbeat("SMC") → report_cycle_time → wait for the wake
-   * event or interval_sec. Ends when `signal` aborts (CancelledError → "SMC Scanner stopped.").
+   * event or interval_sec. Ends when `signal` aborts — the task's cancellation: inside the cycle it
+   * is a CancelledError at the next checkpoint (between symbols) → "SMC Scanner stopped." and
+   * re-raised ([SMC-RESTART-ON-STOP]); during the wake wait the bot's CancelledError leaves
+   * silently (the wait is outside the try), here the loop just ends.
    */
   async function runSmcScanner({ intervalSec = DEFAULT_INTERVAL_S, health = null, signal = null, registerOnBarClose = null, timers = {} } = {}) {
     log.info(`SMC Scanner started, interval=${intervalSec}s`);
@@ -1160,6 +1176,7 @@ function createSmcScanner(deps = {}) {
     }
     const setTimer = timers.setTimeout || ((fn, ms) => setTimeout(fn, ms));
     const clearTimer = timers.clearTimeout || ((h) => clearTimeout(h));
+    state.cancelSignal = signal;
     while (!(signal && signal.aborted)) {
       const t0 = mono();
       state.scanStartTs = now();
@@ -1170,6 +1187,10 @@ function createSmcScanner(deps = {}) {
       try {
         await scanCycle();
       } catch (e) {
+        if (isCancelled(e)) {
+          log.info('SMC Scanner stopped.');
+          throw e;
+        }
         log.error(`SMC scan cycle error: ${e && e.message}`);
       }
       if (signal && signal.aborted) break;
@@ -1181,7 +1202,6 @@ function createSmcScanner(deps = {}) {
       if (woken) log.debug('[SIGNAL-FRESHNESS-D2] SMC cycle woken by ws event');
       evt.clear();
     }
-    log.info('SMC Scanner stopped.');
   }
 
   /** Await every background dispatch still running (tests; graceful shutdown). */
@@ -1230,7 +1250,7 @@ function runSmcScanner(bot = null, um = null, fetcher = null, opts = {}) {
 module.exports = {
   SMC_TF_MAP, SMC_ANALYZERS_MAX, OKX_SEM_SIZE, HTF_TTL_S, MTF_TTL_S, LTF_TTL_S, TF_CACHE_MAX,
   SEND_CONCURRENCY, REVERSAL_OVERRIDE_MIN, SMC_FLOOR, SMC_CAP, VOL_GATE_LOG_CAP, GATHER_TIMEOUT_S,
-  DEFAULT_INTERVAL_S, Semaphore, WakeEvent, detectReversalSetup, createSmcScanner, defaultScanner,
+  DEFAULT_INTERVAL_S, Semaphore, WakeEvent, CancelledError, detectReversalSetup, createSmcScanner, defaultScanner,
   currentScanner, runSmcScanner,
   _resetDefault: () => { _default = null; },
 };

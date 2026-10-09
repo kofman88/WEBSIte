@@ -16,14 +16,18 @@
  *
  * Contract the scheduler calls (camelCase of the Python signatures):
  *
- *   MidScanner      class: new MidScanner(config, bot, um, { stopEvent }) → .fetcher, ._health = health,
- *                   .runForever() (Promise; resolves on a clean stop, rejects on a crash)
- *   VolumeScanner   runVolumeScanner(bot, um, fetcher, { health, signal, intervalSec }) → Promise
- *   SmcScanner      runSmcScanner(bot, um, fetcher, { health, signal, intervalSec }) → Promise
+ *   MidScanner      class: new MidScanner(config, bot, um, stopEvent, deps) → .fetcher, ._health = health,
+ *                   .runForever() (Promise; resolves on a clean stop, rejects on a crash; the stop
+ *                   event — StopEvent.isSet() — ends its loops and cancels the running cycle)
+ *   VolumeScanner   runVolumeScanner(bot, um, fetcher, { health, signal, intervalSec, deps }) → Promise
+ *   SmcScanner      runSmcScanner(bot, um, fetcher, { health, signal, intervalSec, deps }) → Promise
+ *   (deps = the scheduler's thread wiring, scheduler.createScheduler → ctx.scannerDeps)
  *
  * `bot` is the delivery facade (signalDelivery.createRemoteDelivery in the worker, the local
- * createSignalDelivery in-process): deliver(msg) → Promise<bool>, deliverChart(msg),
- * sendText(uid, text, opts) → Promise<bool>, alertAdmins(text), notifier { dispatch }, sse { broadcast }.
+ * createSignalDelivery in-process): deliver(msg) → Promise<bool> (SMC), sendMessage(uid, text, kw)
+ * → the aiogram Message or a named error (LEVELS / VOLUME through their safe_send_message port),
+ * deliverChart(msg), sendText(uid, text, opts) → Promise<bool>, alertAdmins(text), notifier
+ * { dispatch }, sse { broadcast }.
  *
  * Tests replace an entry with `_setOverride(name, moduleOrNull)`; `_reset()` drops overrides and
  * the memo.

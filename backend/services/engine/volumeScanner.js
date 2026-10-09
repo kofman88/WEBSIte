@@ -226,6 +226,8 @@ function createVolumeScanner(depsIn = {}) {
   let wake = null;              // _WAKE_EVENT: { set(), wait(timeoutS), clear() }
   const now = () => d.clock.now();
   const log = () => d.log;
+  // register_on_bar_close(_on_ws_bar_close): the same module function on every (re)start
+  const barCloseCb = (inst, tf) => s._onWsBarClose(inst, tf);
 
   function wakeEvent() {
     if (wake === null) {
@@ -258,6 +260,19 @@ function createVolumeScanner(depsIn = {}) {
     /** ws_feed bar-close callback → wake the scanner before the sleep ends. */
     async _onWsBarClose(_instId, tfNorm) {
       if (Object.values(CACHE_TF).includes(tfNorm)) wakeEvent().set();
+    },
+
+    /**
+     * The site wiring of the module instance (the scheduler's sleep / clock / ws bus / delivery
+     * adapters): run_volume_scanner reads module globals, so the running scanner IS the module
+     * instance and the scheduler configures it instead of building another one.
+     */
+    configure(deps = {}) {
+      for (const [k, v] of Object.entries(deps || {})) if (v !== undefined) d[k] = v;
+      if (deps && deps.log) {
+        for (const k of ['tgLog', 'filterLog', 'strategyLog']) if (deps[k] === undefined) d[k] = deps.log;
+      }
+      return s;
     },
 
     /** gc_sent(): drop _sent_bars older than 24 h and HTF frames older than 180 s. */
@@ -392,8 +407,9 @@ function createVolumeScanner(depsIn = {}) {
 
     applySqueezeBonus: (sig, df) => applySqueezeBonus(sig, df, log()),
 
-    async _scanCycle(bot, um, fetcher) {
+    async _scanCycle(bot, um, fetcher, token = null) {
       const L = log();
+      const ck = () => { if (token) token.check(); };
       const nowTs = now();
       let users;
       try {
@@ -402,6 +418,7 @@ function createVolumeScanner(depsIn = {}) {
         L.warning(`[VOLUME-CYCLE] users: ${errMsg(e)}`);
         return;
       }
+      ck();
       if (!users.length) return;
 
       let allCoins;
@@ -442,10 +459,13 @@ function createVolumeScanner(depsIn = {}) {
         let scanned = 0;
         let found = 0;
         for (const symbol of coins) {
+          ck();
           const df = await s._loadDf(symbol, tf, fetcher, need);
+          ck();
           if (df === null) continue;
           scanned += 1;
           const sig = await s._analyzeWithHtf(symbol, df, cfg, tf, fetcher);
+          ck();
           if (sig === null || sig === undefined) continue;
           found += 1;
           try {
@@ -473,10 +493,13 @@ function createVolumeScanner(depsIn = {}) {
                 sentTotal += 1;
               }
             } catch (e) {
+              if (e && e.name === 'CancelledError') throw e;
               L.warning(`[VOLUME-SIGNAL] deliver uid=${u.user_id} ${symbol}: ${errMsg(e)}`);
             }
+            ck();
           }
           await d.sleep(0);
+          ck();
         }
         let sentGroup = 0;
         for (const v of perUserSent.values()) sentGroup += v;
@@ -660,7 +683,7 @@ function createVolumeScanner(depsIn = {}) {
         }
       }
       if (atResult.limit_msg) {
-        try { await d.safeSendMessage(bot, uid, atResult.limit_msg, {}); } catch (_e) { /* pass */ }
+        try { await d.safeSendMessage(bot, uid, atResult.limit_msg, { siteType: 'trade' }); } catch (_e) { /* pass */ }
       }
       if (getattr(user, 'send_chart_enabled', true)) {
         try {
@@ -685,18 +708,31 @@ function createVolumeScanner(depsIn = {}) {
       L.info(`[VOLUME-START] Volume scanner started, interval=${intervalSec}s`);
       try {
         if (!d.wsFeed) throw new Error('ws_feed is not wired');
-        d.wsFeed.registerOnBarClose((inst, tf) => s._onWsBarClose(inst, tf));
+        d.wsFeed.registerOnBarClose(barCloseCb);
       } catch (e) {
         L.debug(`ws_feed register VOLUME: ${errMsg(e)}`);
+      }
+      // the task's cancellation (bot shutdown): CancelledError inside the running cycle at its next
+      // checkpoint, and the wake wait ends at once
+      let token = null;
+      const onAbort = () => { if (token) token.cancel(); wakeEvent().set(); };
+      if (signal) {
+        if (signal.aborted) onAbort();
+        else signal.addEventListener('abort', onAbort, { once: true });
       }
       let errors = 0;
       while (!(signal && signal.aborted)) {
         const t0 = d.clock.monotonic();
+        token = new lv.CancelToken();
+        const cyc = s._scanCycle(bot, um, fetcher, token);
         try {
-          await lv.waitFor(s._scanCycle(bot, um, fetcher), CYCLE_TIMEOUT_S, d.timers);
+          await lv.waitFor(cyc, CYCLE_TIMEOUT_S, d.timers);
           errors = 0;
         } catch (e) {
           if (e instanceof lv.TimeoutError) {
+            // wait_for cancels the timed-out cycle (it stops at its next checkpoint)
+            token.cancel();
+            cyc.catch(() => {});
             L.warning('[VOLUME-CYCLE] timeout >300s — skipping');
           } else if (e && e.name === 'CancelledError') {
             L.info('Volume scanner stopped.');
@@ -729,7 +765,15 @@ module.exports = {
   dedupTtlS, userTf, cfgKey, cfgJson, barTs, applySqueezeBonus, signalText,
   setupTitle: cardsVolume.setupTitle, fp: cardsVolume.fp, SETUP_NAMES: cardsVolume.SETUP_NAMES,
   createVolumeScanner, defaultScanner,
-  runVolumeScanner: (bot, um, fetcher, opts) => defaultScanner.runVolumeScanner(bot, um, fetcher, opts),
+  /**
+   * run_volume_scanner(bot, um, fetcher, health=…) on the module instance; `opts.deps` (the
+   * scheduler's site wiring) configure that instance first (configure()).
+   */
+  runVolumeScanner: (bot, um, fetcher, opts = {}) => {
+    const { deps = null, ...loopOpts } = opts || {};
+    if (deps) defaultScanner.configure(deps);
+    return defaultScanner.runVolumeScanner(bot, um, fetcher, loopOpts);
+  },
   loadUserCfg: (uid) => defaultScanner.loadUserCfg(uid),
   saveUserCfg: (uid, params, keepPrefs) => defaultScanner.saveUserCfg(uid, params, keepPrefs),
   resetUserCfg: (uid, keepPrefs) => defaultScanner.resetUserCfg(uid, keepPrefs),

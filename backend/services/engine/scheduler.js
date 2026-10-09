@@ -46,6 +46,23 @@
  * Sleeps go through `ctx.sleep(ms)` — setTimeout based and resolved early by the abort signal —
  * so the whole schedule runs under fake timers (tests/engine/worker/scheduler.timing.test.js
  * replays a PY311 trace of these loops over 6 simulated hours).
+ *
+ * The three scanners (scanners/index.js) get the thread's wiring of what bot.py hands them:
+ *   MidScanner(config, bot, um, stop_event)   new MidScanner(botConfig(env), ctx.bot, um, stopEvent,
+ *                                             scannerDeps('LEVELS')) — its `.fetcher` (the thread's
+ *                                             BingX REST client + get_global_trend) is `scanner.fetcher`
+ *                                             of every other loop
+ *   run_volume_scanner(bot, um, fetcher, …)   runVolumeScanner(ctx.bot, um, fetcher, {health, signal,
+ *                                             deps: scannerDeps('VOLUME')}) (configures the module instance)
+ *   run_smc_scanner(bot, um, fetcher, …)      runSmcScanner(ctx.bot, um, fetcher, {health, signal, deps})
+ * scannerDeps: the scheduler clock / abortable sleep / log / env, the candle cache, the WS bar-close
+ * bus (marketData/bingxWsFeed.registerOnBarClose = ws_feed.register_on_bar_close), the candle store
+ * (LEVELS warm-up), and the site side of telegram_safe / chart_sender: `siteSafeSend` (the bot's
+ * safe_send_message over ctx.bot.sendMessage; a card is recognised by its on_sent =
+ * `siteRememberSignalMessage(trade_id)`, the delivery side then stores signal_msg_id + the card
+ * snapshot), `siteSendChart` (the chart descriptor, D3). Auto-trade (execute_auto_trade + the user's
+ * API keys) is `deps.autoTrade` — until M13b none: no keys → no trade and no counter-trend notice,
+ * the same for all three scanners.
  */
 
 const os = require('os');
@@ -585,7 +602,7 @@ const RUNNERS = {
   ws_feed: (ctx) => startWsFeed(ctx),
   cache_warmer: (ctx) => startCacheWarmer(ctx),
   smc_scanner: (ctx) => ctx.smcRun(ctx.bot, ctx.um(), ctx.fetcher(), { health: ctx.health, signal: ctx.signal, deps: ctx.smcDeps }),
-  volume_scanner: (ctx) => ctx.volumeRun(ctx.bot, ctx.um(), ctx.fetcher(), { health: ctx.health, signal: ctx.signal }),
+  volume_scanner: (ctx) => ctx.volumeRun(ctx.bot, ctx.um(), ctx.fetcher(), { health: ctx.health, signal: ctx.signal, deps: ctx.scannerDeps('VOLUME') }),
   free_report: (ctx) => ctx.freeReport().runEveningLoop(
     () => ctx.um().allUsers(),
     async (uid, text) => {
@@ -606,6 +623,19 @@ const RUNNERS = {
 };
 
 const lazyMod = (deps, key, path) => () => (deps[key] !== undefined ? deps[key] : require(path));
+
+/** createSmcScanner deps of the scheduler: deps.smcDeps + the auto-trade hooks of deps.autoTrade (M13b). */
+function smcDepsOf(deps) {
+  const at = deps.autoTrade || null;
+  if (!at && !deps.smcDeps) return null;
+  const out = {};
+  if (at && at.executeAutoTrade) out.executeAutoTrade = at.executeAutoTrade;
+  if (at && at.getApiKeys) {
+    out.userApiKeys = (user, exchange) => at.getApiKeys(user, exchange) || { apiKey: '', apiSecret: '' };
+  }
+  if (at && at.getBalance) out.getBalance = at.getBalance;
+  return { ...out, ...(deps.smcDeps || {}) };
+}
 
 /**
  * createScheduler({ side, deps }) — side: 'worker' | 'main' | 'all'.
@@ -660,13 +690,16 @@ function createScheduler({ side = 'all', deps = {} } = {}) {
     momentum: () => deps.momentum || require('./momentumDetector').defaultDetector,
     cpuRatio: deps.cpuRatio || null,
     regimeProvider: deps.regimeProvider !== false,
-    smcDeps: deps.smcDeps || null,
+    smcDeps: smcDepsOf(deps),
     cacheGcOnce: deps.cacheGcOnce || cacheGcOnce,
   };
+  // MidScanner.__init__: self.fetcher = make_fetcher() — the REST client every loop shares
+  const makeFetcher = once('restFetcher', () => withGlobalTrend(
+    deps.fetcher || deps.rest || require('../marketData/bingxRest').getRest(), { now, env, log },
+  ));
   ctx.fetcher = once('fetcher', () => {
-    if (deps.fetcher) return deps.fetcher;
     if (ctx.levels && ctx.levels.fetcher) return ctx.levels.fetcher;     // bot: scanner.fetcher
-    return deps.rest || require('../marketData/bingxRest').getRest();
+    return makeFetcher();
   });
   ctx.regime = once('regime', () => deps.regime || installDefault(
     require('./regimeLoop').defaultLoop,
@@ -684,6 +717,28 @@ function createScheduler({ side = 'all', deps = {} } = {}) {
     notifier: ctx.bot.notifier, sse: ctx.bot.sse, log,
   }));
   ctx.health = deps.health || new HealthMonitor(ctx.bot, { now, log });
+  /** The thread's wiring of a LEVELS / VOLUME scanner (see the header); deps.scannerDeps[S] override it. */
+  ctx.scannerDeps = (strategy) => {
+    const at = deps.autoTrade || null;
+    const out = {
+      clock: { now: () => ctx.now(), monotonic: () => ctx.mono() / 1000 },
+      sleep, log, env,
+      cache: ctx.cache(),
+      wsFeed: deps.wsFeed || { registerOnBarClose: (cb) => require('../marketData/bingxWsFeed').registerOnBarClose(cb) },
+      safeSendMessage: siteSafeSend({ log, sleep }),
+      rememberSignalMessage: siteRememberSignalMessage,
+      sendChart: siteSendChart(strategy, { db: ctx.db, log }),
+      executeAutoTrade: at && at.executeAutoTrade ? at.executeAutoTrade : null,
+      getApiKeys: at && at.getApiKeys ? at.getApiKeys : () => null,
+      getBalance: at && at.getBalance ? at.getBalance : null,
+    };
+    if (deps.setTimer) out.timers = { setTimeout: deps.setTimer, clearTimeout: deps.clearTimer || ((h) => clearTimeout(h)) };
+    if (strategy === 'LEVELS') {
+      out.fetcher = makeFetcher();
+      out.candleStore = ctx.candleStore();
+    }
+    return { ...out, ...((deps.scannerDeps && deps.scannerDeps[strategy]) || {}) };
+  };
   ctx.smcRun = deps.smcRun || scanners.get('SmcScanner');
   ctx.volumeRun = deps.volumeRun || scanners.get('VolumeScanner');
   ctx.smcInstance = deps.smcInstance || (() => {
@@ -700,7 +755,8 @@ function createScheduler({ side = 'all', deps = {} } = {}) {
   function buildLevels() {
     const MidScanner = scanners.get('MidScanner');
     if (!MidScanner) return null;
-    const sc = new MidScanner(deps.config || botConfig(env), ctx.bot, ctx.um(), { stopEvent, signal });
+    // bot.py: scanner = MidScanner(config, bot, um, stop_event=_stop_event); scanner._health = health
+    const sc = new MidScanner(deps.config || botConfig(env), ctx.bot, ctx.um(), stopEvent, ctx.scannerDeps('LEVELS'));
     sc._health = ctx.health;
     return sc;
   }
@@ -794,9 +850,88 @@ function installDefault(target, inst) {
   return inst;
 }
 
+// ═══════════════════════════════════════════════════════════════════════
+//  the site side of telegram_safe / chart_sender for scanner_mid / volume_scanner
+// ═══════════════════════════════════════════════════════════════════════
+
+/**
+ * signal_tracker.remember_signal_message(trade_id) → the on_sent callback of a card. On the site
+ * the delivery side stores signal_msg_id (= notifications.id) + the card snapshot itself
+ * (signalDelivery.deliver, like the SMC cards); the callback only marks the message as the card
+ * of `tradeId` for `siteSafeSend`.
+ */
+function siteRememberSignalMessage(tradeId) {
+  const onSent = () => {};
+  onSent.siteCard = { tradeId: String(tradeId) };
+  return onSent;
+}
+
+/**
+ * telegram_safe.safe_send_message(bot, uid, text, …) for LEVELS / VOLUME: the bot's function
+ * (levelsScanner.safeSendMessage: split > 4096, retries, error classes) over
+ * `bot.sendMessage(uid, text, kw)` with `kw.site` = {tradeId} for a card (on_sent of
+ * siteRememberSignalMessage), else {type: opts.siteType || 'report'} (the auto-trade notices
+ * pass siteType 'trade').
+ */
+function siteSafeSend({ log, sleep }) {
+  return (bot, uid, text, opts = {}) => {
+    const lv = require('./levelsScanner');
+    const card = opts && opts.onSent && opts.onSent.siteCard;
+    const site = card ? { tradeId: card.tradeId } : { type: (opts && opts.siteType) || 'report' };
+    const tagged = bot && typeof bot.sendMessage === 'function'
+      ? { sendMessage: (u, t, kw) => bot.sendMessage(u, t, { ...(kw || {}), site }) }
+      : bot;
+    return lv.safeSendMessage(tagged, uid, text, opts, { log, sleep });
+  };
+}
+
+/**
+ * chart_sender.send_signal_chart_bg(bot, user, sig, df, strategy, lang, …) → the chart descriptor
+ * over ctx.bot.deliverChart (D3: the client draws it from GET /api/app/signals/:id/chart). The
+ * bot skips a frame shorter than 10 bars; the signal's row (just written) gives the trade id.
+ */
+function siteSendChart(strategy, { db, log }) {
+  return (bot, user, sig, df, opts = {}) => {
+    if (!bot || typeof bot.deliverChart !== 'function' || !df || df.length < 10) return;
+    const strat = (opts && opts.strategy) || strategy;
+    let row = null;
+    try {
+      row = db().prepare('SELECT trade_id, timeframe FROM signal_trades WHERE user_id = ? AND symbol = ? AND direction = ? AND strategy = ? '
+        + 'ORDER BY created_at DESC, rowid DESC LIMIT 1').get(user.user_id, sig.symbol, sig.direction, strat);
+    } catch (e) {
+      log.debug(`chart row ${strat} uid=${user.user_id} ${sig.symbol}: ${e && e.message}`);
+    }
+    const nums = (a) => (Array.isArray(a) ? a.map(Number) : []);
+    try {
+      bot.deliverChart({
+        userId: user.user_id, tradeId: row ? row.trade_id : null, strategy: strat, lang: (opts && opts.lang) || 'ru',
+        symbol: sig.symbol, timeframe: df.tf || (row && row.timeframe) || sig.timeframe || null,
+        bars: df.length, lastTs: df.t[df.length - 1],
+        extra: strat === 'LEVELS'
+          ? { pivot_levels: nums(opts.pivotLevels), hvn_levels: nums(opts.hvnLevels), lvn_levels: nums(opts.lvnLevels) }
+          : null,
+      });
+    } catch (e) {
+      log.debug(`chart ${strat} uid=${user.user_id} ${sig.symbol}: ${e && e.message}`);
+    }
+  };
+}
+
+/** fetcher.get_global_trend(): the LEVELS header trend on the thread's REST client (globalTrend.js + the trend monitor). */
+function withGlobalTrend(rest, { now, env, log }) {
+  if (rest && typeof rest.getGlobalTrend !== 'function') {
+    const gt = require('../marketData/globalTrend').createGlobalTrend({
+      rest, now, env, log, getMonitorTrend: (tf) => require('./trendMonitor').getTrend(tf),
+    });
+    rest.getGlobalTrend = () => gt.get();
+  }
+  return rest;
+}
+
 module.exports = {
   TASKS, RESTART_MAX_DELAY_S, RESTART_HEALTHY_RUN_S, SHUTDOWN_WAIT_MS,
   botConfig, htmlEscape, errHead, makeSleep, StopEvent, guarded, guardedRestart, HealthMonitor,
   coinUniverseWarmupLoop, cacheGcOnce, cacheGcLoop, ghostCleanupLoop, startWsFeed, startCacheWarmer,
   procCpuRatio, waitForLowLoad, runEvolutionCycle, installTrendMonitor, installDefault, createScheduler,
+  siteRememberSignalMessage, siteSafeSend, siteSendChart, withGlobalTrend,
 };

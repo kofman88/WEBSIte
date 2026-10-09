@@ -347,9 +347,8 @@ describe('createScheduler', () => {
   it('MidScanner(config, bot, um, stop_event) gets the bot Config fields, its fetcher feeds the other loops, _health is set', async () => {
     let made = null;
     class Mid {
-      constructor(config, bot, um, opts) { made = { config, bot, um, opts }; this.fetcher = { tag: 'mid' }; }
-      async runForever() { await new Promise((r) => this.opts_stop(r)); }
-      opts_stop(r) { made.opts.stopEvent.wait().then(r); }
+      constructor(config, bot, um, stopEvent, deps) { made = { config, bot, um, stopEvent, deps }; this.fetcher = { tag: 'mid' }; }
+      async runForever() { await made.stopEvent.wait(); }
     }
     const fake = { get: (n) => (n === 'MidScanner' ? Mid : null), loadModule: () => null, describe: () => ({}) };
     const bot = { alertAdmins: async () => 1 };
@@ -363,6 +362,13 @@ describe('createScheduler', () => {
     expect(made.um).toBe(um);
     expect(s.ctx.fetcher()).toEqual({ tag: 'mid' });
     expect(s.ctx.levels._health).toBe(s.ctx.health);
+    expect(made.stopEvent).toBe(s.ctx.stopEvent);
+    expect(made.stopEvent.isSet()).toBe(false);
+    expect(Object.keys(made.deps).sort()).toEqual(['cache', 'candleStore', 'clock', 'env', 'executeAutoTrade', 'fetcher', 'getApiKeys', 'getBalance',
+      'log', 'rememberSignalMessage', 'safeSendMessage', 'sendChart', 'sleep', 'wsFeed']);
+    expect(made.deps.sleep).toBe(s.ctx.sleep);
+    expect(made.deps.executeAutoTrade).toBe(null);
+    expect(made.deps.getApiKeys({ user_id: 1 }, 'bybit')).toBe(null);
     const stopP = s.stop();
     await vi.advanceTimersByTimeAsync(10);
     expect(await stopP).toEqual({ pending: 0, saved: 3 });

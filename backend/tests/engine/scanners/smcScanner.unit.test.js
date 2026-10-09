@@ -394,7 +394,27 @@ describe('run loop', () => {
     expect(beats).toEqual(['SMC', 'SMC']);
     ac.abort();
     await loop;
-    expect(lines(h.log, 'SMC Scanner stopped.').length).toBe(1);
+    // cancelled during the wake wait: the bot's CancelledError leaves wait_for outside the try —
+    // no "SMC Scanner stopped." line
+    expect(lines(h.log, 'SMC Scanner stopped.').length).toBe(0);
     expect(lines(h.log, 'SMC Scanner started, interval=300s').length).toBe(1);
+  });
+
+  it('cancelled inside the cycle: CancelledError at the next per-symbol checkpoint, "SMC Scanner stopped.", re-raised; no later symbol is scanned', async () => {
+    const plan = {};
+    for (let i = 0; i < 6; i++) plan[`C${i}-USDT-SWAP`] = ['LONG', 4];
+    const ac = new AbortController();
+    let pauses = 0;
+    const h = harness({
+      users: [user(41)], plan,
+      extraDeps: { sleep: async () => { pauses += 1; if (pauses === 2) ac.abort(); await new Promise((r) => setImmediate(r)); } },
+    });
+    const loop = h.scanner.runSmcScanner({ intervalSec: 300, signal: ac.signal, registerOnBarClose: () => {} });
+    await expect(loop).rejects.toMatchObject({ name: 'CancelledError' });
+    await h.scanner.drainPending();
+    expect(lines(h.log, 'SMC Scanner stopped.').length).toBe(1);
+    expect(lines(h.log, 'SMC scan cycle error').length).toBe(0);
+    expect(lines(h.log, '[SMC-VOL-GATE-SUMMARY]').length).toBe(0);   // the cycle did not finish
+    expect(h.rows().map((r) => r.symbol)).toEqual(['C0-USDT-SWAP', 'C1-USDT-SWAP']);
   });
 });

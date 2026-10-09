@@ -107,8 +107,9 @@ async function runJs() {
   };
 
   class FakeMid {
-    constructor(config, b, u, { stopEvent, signal }) {
-      this.cfg = config; this.bot = b; this.um = u; this._stopEvent = stopEvent; this._signal = signal;
+    // MidScanner(config, bot, um, stop_event, deps) — the real constructor's signature
+    constructor(config, b, u, stopEvent) {
+      this.cfg = config; this.bot = b; this.um = u; this._stopEvent = stopEvent;
       this.fetcher = fetcher;
       this._health = null;
       this._crashes = S.levels_crashes.slice();
@@ -126,7 +127,7 @@ async function runJs() {
           throw new Error(`levels boom #${this._n} <scan>`);
         }
         await abortable(S.levels_period * 1000);
-        if (this._signal.aborted) return;
+        if (this._stopEvent.isSet()) return;
       }
     }
   }
@@ -291,7 +292,9 @@ describe('scheduler vs bot.py loop timings (6 simulated hours, PY311 trace)', ()
     const msgs = JS.stopLogs.map((r) => r[2]);
     expect(msgs[0]).toBe('🛑 Завершение — отменяем фоновые задачи...');
     expect(msgs).toContain('🛑 signal_registry persisted: 0 записей');
-    expect(msgs).toContain('SMC Scanner stopped.');
+    // the SMC loop is cancelled in its wake wait: no "SMC Scanner stopped." (the bot logs it only
+    // when the cancellation lands inside _scan_cycle)
+    expect(msgs).not.toContain('SMC Scanner stopped.');
     expect(msgs).toContain('regime_loop остановлен.');
   });
 });

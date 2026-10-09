@@ -834,6 +834,15 @@ class MidScanner {
     this._anMemo = null;
     this._health = this.deps.health || null;
     this._wsTrigLast = new Map();
+    // ws_feed.register_on_bar_close(self._on_ws_bar_close): one bound callback per scanner, so a
+    // re-registration after a _guarded_restart is the same callback (`if cb not in callbacks`)
+    this._onWsBarCloseCb = (inst, tf) => this._onWsBarClose(inst, tf);
+    // shutdown: bot.py cancels the gather tasks → CancelledError inside the running _cycle at
+    // its next await; here the stop event cancels the cycle's token (checked between steps)
+    this._cycleToken = null;
+    if (stopEvent && typeof stopEvent.wait === 'function') {
+      Promise.resolve(stopEvent.wait()).then(() => { if (this._cycleToken) this._cycleToken.cancel(); }, () => {});
+    }
   }
 
   // ── helpers ───────────────────────────────────────────────────────────────
@@ -1572,7 +1581,7 @@ class MidScanner {
             + `${escape(symShort)} ${sig.direction}\n`
             + `Режим рынка: <b>${pyS(regime)}</b> (контр-тренд)\n`
             + reason,
-            { parseMode: 'HTML' });
+            { parseMode: 'HTML', siteType: 'trade' });
         } catch (e) {
           log.debug(`counter-trend notify uid=${user.user_id}: ${errMsg(e)}`);
         }
@@ -1610,7 +1619,7 @@ class MidScanner {
       showTradeBtn = atResult.show_trade_btn;
       if (atResult.limit_msg) {
         try {
-          await this._safeSend(user.user_id, atResult.limit_msg);
+          await this._safeSend(user.user_id, atResult.limit_msg, { siteType: 'trade' });
         } catch (e) {
           log.warning(`[NOTIF-FAIL] silent exc scanner_mid.py:884: ${errMsg(e)}`);
         }
@@ -1798,7 +1807,13 @@ class MidScanner {
     }
   }
 
-  _stopped() { return Boolean(this._stopEvent && (this._stopEvent.aborted || this._stopEvent.isSet)); }
+  /** stop_event.is_set() — the scheduler's StopEvent (isSet() method) or an AbortSignal (aborted). */
+  _stopped() {
+    const ev = this._stopEvent;
+    if (!ev) return false;
+    if (ev.aborted) return true;
+    return typeof ev.isSet === 'function' ? Boolean(ev.isSet()) : Boolean(ev.isSet);
+  }
 
   /** _sub_check_loop: every 5 min, paid users whose sub_expires passed get the expiry notice. */
   async _subCheckLoop() {
@@ -2023,11 +2038,15 @@ class MidScanner {
       const t0 = this._now();
       const mono0 = this.deps.clock.monotonic();
       const token = new CancelToken();
+      this._cycleToken = token;
+      if (this._stopped()) token.cancel();
       const cyc = this._cycle(token);
       try {
         // [LEVELS-CYCLE-TIMEOUT] a hung cycle is cancelled and the next one starts
         await waitFor(cyc, cycleTimeoutS, this.deps.timers);
       } catch (e) {
+        // CancelledError is a BaseException: `except Exception` does not catch it (shutdown)
+        if (isCancelled(e) && this._stopped()) throw e;
         if (e instanceof TimeoutError) {
           token.cancel();
           await cyc.catch(() => {});
@@ -2116,7 +2135,7 @@ class MidScanner {
     this.log.info('🚀 MidScanner v4 | Воркеров: ' + String(this.cfg.SCAN_WORKERS) + ' | API: ' + String(this.cfg.API_CONCURRENCY));
     try {
       if (!this.deps.wsFeed) throw new Error('ws_feed is not wired');
-      this.deps.wsFeed.registerOnBarClose((inst, tf) => this._onWsBarClose(inst, tf));
+      this.deps.wsFeed.registerOnBarClose(this._onWsBarCloseCb);
       this.log.info('[WS-TRIGGER] registered bar-close callback for LEVELS scanner');
     } catch (e) {
       this.log.debug(`ws_feed register_on_bar_close: ${errMsg(e)}`);
@@ -2138,6 +2157,8 @@ class MidScanner {
   async _warmupCache() {
     try {
       await this.deps.sleep(8000);
+      // a shutdown during the delay: the bot's CancelledError ends the task silently
+      if (this._stopped()) return;
       this.log.info('🔥 Scanner warmup: загружаю top-30 монет × 3 TF в кэш...');
       const t0 = this._now();
       const coins = await waitFor(this.fetcher.getAllUsdtPairs(5_000_000, this.cfg.AUTO_BLACKLIST), 30.0, this.deps.timers);
