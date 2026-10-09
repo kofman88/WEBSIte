@@ -327,6 +327,24 @@ async function run() {
   J.ct_gate.trades = db.prepare('SELECT * FROM signal_trades ORDER BY rowid').all().map((r) => Object.fromEntries(SITE_COLS.map((k) => [k, r[k] === undefined ? null : r[k]])));
   J.ct_gate.trade_events = db.prepare('SELECT trade_id, ts, event_type, payload_json FROM trade_events ORDER BY id').all();
   J.ct_gate.users = usersSnap();
+
+  // hint throttle restore / persist
+  const hkv = H.memKv();
+  const hlog = cap.make('CHM.Scanner');
+  clock.t = E.hint_throttle.t0;
+  LS._userHintLastTs.clear();
+  J.hint_throttle = { t0: E.hint_throttle.t0, cases: [] };
+  for (const c of E.hint_throttle.cases) {
+    hkv.set(LS.KV_HINT_LAST_TS, c.raw);
+    n0 = cap.lines.length;
+    await LS.restoreHintThrottle({ kv: hkv, now: () => clock.now(), log: hlog });
+    J.hint_throttle.cases.push({ raw: c.raw, state: Array.from(LS._userHintLastTs), logs: since(n0) });
+  }
+  clock.t = E.hint_throttle.persist_t;
+  await LS.persistHintThrottle({ kv: hkv, now: () => clock.now(), log: hlog });
+  J.hint_throttle.persist_t = clock.t;
+  J.hint_throttle.persisted = hkv.get(LS.KV_HINT_LAST_TS);
+  J.hint_throttle.after_persist = Array.from(LS._userHintLastTs);
   return { candleCache, keyboards };
 }
 
@@ -431,6 +449,10 @@ describe('MidScanner units vs the bot (levels_units.py)', () => {
       .toEqual(E.ct_gate.trades.map((r) => ({ ...r, signal_card_json: cardOf(r.signal_card_json, false) })));
     expect(H.norm(J.ct_gate.trade_events)).toEqual(E.ct_gate.trade_events);
     expect(J.ct_gate.users).toEqual(E.ct_gate.users);
+  });
+
+  it('hint throttle kv: int(k) / float(v) coercions, 2 × 4 h window, NaN / inf kept, dict order, json.dumps on persist', () => {
+    expect(H.norm(J.hint_throttle)).toEqual(E.hint_throttle);
   });
 
   it('analyze_on_demand / analyze_on_demand_lang: symbol normalisation, HTF 1D, BTC/ETH correlation, no data', () => {

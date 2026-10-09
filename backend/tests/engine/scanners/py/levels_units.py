@@ -512,6 +512,29 @@ async def main() -> int:
                       "trades": F.trades_snapshot(), "trade_events": F.trade_events_snapshot(),
                       "users": F.users_snapshot()}
 
+    # ── _restore_hint_throttle / _persist_hint_throttle (kv levels_hint_last_ts_v1) ──
+    F.CLK.t = T0
+    hint = []
+    raws = [
+        '{"1": 1767189000.0, "2": 1767100000, " 3 ": "1767189600", "4.5": 1767189620, "x": 1, "5": null, '
+        '"6": true, "7": NaN, "8": Infinity, "9": -Infinity, "1_0": 1767189620.5, "11": [1], "12": "nan", '
+        '"13": 1767160820, "14": 1767160819.9}',
+        '{"2": 1767189620, "1": 1767189500, "15": 1767189621}',
+        '[1, 2]', '{bad', '', '"str"', 'null',
+    ]
+    scanner_mid._user_hint_last_ts.clear()
+    for raw in raws:
+        await database.db_kv_set(scanner_mid._KV_HINT_LAST_TS, raw)
+        n0 = len(cap.lines)
+        await scanner_mid._restore_hint_throttle()
+        hint.append({"raw": raw, "state": [[k, v] for k, v in scanner_mid._user_hint_last_ts.items()],
+                     "logs": logs_since(n0)})
+    F.CLK.t = T0 + 3600
+    await scanner_mid._persist_hint_throttle()
+    out["hint_throttle"] = {"t0": T0, "cases": hint, "persist_t": F.CLK.t,
+                            "persisted": await database.db_kv_get(scanner_mid._KV_HINT_LAST_TS),
+                            "after_persist": [[k, v] for k, v in scanner_mid._user_hint_last_ts.items()]}
+
     doc = {"meta": {"generator": "tests/engine/scanners/py/levels_units.py", "python": sys.version.split()[0]},
            "t0": T0, "users": init_rows, "bot_fail": sorted(BOT_FAIL),
            "api_keys": {str(k): list(v) for k, v in CT_KEYS.items()}, "symbols": SYMBOLS, "volumes": volumes,

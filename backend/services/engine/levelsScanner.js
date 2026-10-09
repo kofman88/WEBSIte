@@ -693,7 +693,9 @@ async function persistHintThrottle({ kv, now = () => Date.now() / 1000, log = de
     const t = now();
     for (const [uid, ts] of Array.from(userHintLastTs)) if (t - ts > HINT_THROTTLE_S * 2) userHintLastTs.delete(uid);
     // dict insertion order (a JS object would put integer-like keys first, sorted)
-    const parts = Array.from(userHintLastTs, ([uid, ts]) => `${pyJsonDumps(String(uid))}: ${pyRepr(Number(ts))}`);
+    // json.dumps of a float: repr, NaN / Infinity / -Infinity for the non-finite ones
+    const fl = (x) => (Number.isFinite(x) ? pyRepr(x) : (Number.isNaN(x) ? 'NaN' : (x > 0 ? 'Infinity' : '-Infinity')));
+    const parts = Array.from(userHintLastTs, ([uid, ts]) => `${pyJsonDumps(String(uid))}: ${fl(Number(ts))}`);
     await kv.set(KV_HINT_LAST_TS, `{${parts.join(', ')}}`);
   } catch (e) {
     log.debug(`persist hint throttle: ${errMsg(e)}`);
