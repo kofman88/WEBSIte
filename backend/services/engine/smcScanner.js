@@ -213,6 +213,12 @@ function createSmcScanner(deps = {}) {
   const optimizerOf = lazy('optimizer', () => require('../genome/optimizerParams'));
   const exSymOf = lazy('exchangeSymbols', () => require('../exchanges/exchangeSymbols'));
   const quietOf = lazy('quiet', () => require('./quietHours'));
+  // the pure SMC engine (strategies/smc, bit-for-bit vs golden); injectable for unit tests
+  const engineOf = lazy('engine', () => ({
+    analyze: require('../../strategies/smc/analyzer').analyze,
+    buildSmcSignal: require('../../strategies/smc/signalBuilder').buildSmcSignal,
+    computeSqueezeScore: require('../../strategies/common/squeeze').computeSqueezeScore,
+  }));
   const accessOf = lazy('access', () => {
     const ts = require('../traderSettingsService');
     const pf = require('../../config/planFeatures');
@@ -735,11 +741,9 @@ function createSmcScanner(deps = {}) {
           const tA = mono();
           let analysis;
           try {
-            const { analyze } = require('../../strategies/smc/analyzer');
-            analysis = analyze(symbol, dfHtf, dfMtf, dfLtf, analyzerFor(key));
+            analysis = engineOf().analyze(symbol, dfHtf, dfMtf, dfLtf, analyzerFor(key));
             try {
-              const { computeSqueezeScore } = require('../../strategies/common/squeeze');
-              analysis.squeeze_score = computeSqueezeScore(dfMtf);
+              analysis.squeeze_score = engineOf().computeSqueezeScore(dfMtf);
             } catch (e) {
               log.debug(`SMC squeeze inject ${symbol}: ${e && e.message}`);
               analysis.squeeze_score = 0;
@@ -790,8 +794,7 @@ function createSmcScanner(deps = {}) {
           if (!dirs.length) continue;
           let sig;
           try {
-            const { buildSmcSignal } = require('../../strategies/smc/signalBuilder');
-            sig = buildSmcSignal(symbol, analysis, cfgObj, {
+            sig = engineOf().buildSmcSignal(symbol, analysis, cfgObj, {
               tf_htf: tfHtf, tf_mtf: tfMtf, tf_ltf: tfLtf,
               allowed_dirs: dirs,
               conf_type: ga(ucfg, 'smc_conf_type', 'WICK_TOUCH'),
