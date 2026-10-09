@@ -18,6 +18,7 @@ const adminRoutes = require('./routes/admin');
 const notificationsRoutes = require('./routes/notifications');
 const telegramRoutes = require('./routes/telegram');
 const publicRoutes = require('./routes/public');
+const publicLandingRoutes = require('./routes/publicLanding');
 const supportRoutes = require('./routes/support');
 const pushRoutes = require('./routes/push');
 const appRoutes = require('./routes/app');
@@ -52,12 +53,15 @@ app.use(helmet({
   hsts: config.isProd ? { maxAge: 31536000, includeSubDomains: true, preload: true } : false,
 }));
 
-app.use(cors({
+const corsMw = cors({
   origin: config.corsOrigin,
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH'],
   allowedHeaders: ['Content-Type', 'Authorization'],
-}));
+});
+// /api/app/* is the bot's Mini App API served same-origin (frontend/app): no CORS there, like the
+// bot's aiohttp app — an OPTIONS request reaches the router's "405: Method Not Allowed" + Allow.
+app.use((req, res, next) => (req.path === '/api/app' || req.path.startsWith('/api/app/') ? next() : corsMw(req, res, next)));
 
 app.use(compression());
 
@@ -82,10 +86,19 @@ app.use('/api/payments/webhooks/stripe', express.raw({ type: 'application/json',
 // Content-Type ignored, strict decode by its charset (utf-8 by default), json.loads; malformed
 // JSON, a BOM, invalid bytes or a top level that is not an object reach the route as {}, so it
 // answers with its own business error instead of a 400 from the strict parser.
-app.use('/api/app', express.raw({ type: () => true, limit: '1mb' }), (req, _res, next) => {
+// A body over 1 MiB is aiohttp's client_max_size: request.json() raises HTTPRequestEntityTooLarge INSIDE
+// _read_body's try → {} (never a 413; a handler that reads no body never notices). body-parser drains
+// the rest of the request before it reports the limit.
+const appRawBody = express.raw({ type: () => true, limit: '1mb' });
+app.use('/api/app', (req, res, next) => appRawBody(req, res, (err) => {
+  if (err && err.type === 'entity.too.large') {
+    req.body = {};
+    return next();
+  }
+  if (err) return next(err);
   req.body = readBotBody(req.body, req.headers['content-type']);
-  next();
-});
+  return next();
+}));
 app.use(express.json({ limit: '1mb' }));
 app.use(express.urlencoded({ extended: true, limit: '1mb' }));
 
@@ -135,6 +148,8 @@ app.use('/api/admin', adminRoutes);
 app.use('/api/notifications', notificationsRoutes);
 app.use('/api/telegram', telegramRoutes);
 app.use('/api/public', publicRoutes);
+// The landing's read-only data (M10b): trend / stats / feed of the paper track (services/publicTrack).
+app.use('/api/public', publicLandingRoutes);
 app.use('/api/support', supportRoutes);
 app.use('/api/push', pushRoutes);
 // The bot's Mini App API (M7+): me, strategy, settings, settings/all, profile,
@@ -343,6 +358,8 @@ function startBackground() {
   paymentWatcher.start();
   // bot loop A: hourly subscription expiry / renewal reminders (first run after 60 s)
   planService.startExpiryLoop();
+  // the public paper track's minute refresh (stage history of the landing feed, services/publicTrack)
+  try { require('./services/publicTrack').defaultTrack().start(); } catch (err) { logger.error('public track start failed', { err: err.message }); }
   if (config.engineWorker && !IS_TEST) {
     try {
       engine = require('./workers/engineWorker').startEngine({ log: logger });
@@ -368,6 +385,7 @@ async function shutdownSteps() {
   }
   try { maintenanceService.stop(); } catch (_e) { /* */ }
   try { planService.stopExpiryLoop(); } catch (_e) { /* */ }
+  try { require('./services/publicTrack').defaultTrack().stop(); } catch (_e) { /* */ }
   try { db.close(); } catch (_e) { /* */ }
 }
 

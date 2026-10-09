@@ -37,8 +37,9 @@ const { pySum } = require('../../strategies/common/series');
 const { levelsStars } = require('../../strategies/levels/stars');
 const { pyFloat, pyInt } = require('./pycoerce');
 const { pyRepr } = require('../../strategies/common/pyfmt');
-const { utcDatetime } = require('../../strategies/common/pytime');
-const { pyLower, pyStrip, pyUpper, pyRstrip } = require('../../strategies/common/pyUnicode');   // CPython 3.11 str case / whitespace methods
+const { utcDatetimeStrict } = require('../../strategies/common/pytime');
+const { pyLower, pyStrip, pyUpper, pyRstrip } = require('../../strategies/common/pyUnicode');
+const { pyDict } = require('./pyjson');   // CPython 3.11 str case / whitespace methods
 
 const STRATS = Object.freeze(['LEVELS', 'SMC', 'VOLUME']);
 const COLS = 'result, result_rr, progress_stage, entry, sl, original_sl, tp1, tp2, tp3, '
@@ -55,6 +56,20 @@ function falsy(v) {
 
 /** float(x or 0) */
 function fOr0(v) { return falsy(v) ? 0.0 : pyFloat(v); }
+
+/** int(x or 0) — Python int() of the raw value: a float truncates, a str must be an int literal. */
+function intOr0(v) { return falsy(v) ? 0 : pyInt(v); }
+
+/**
+ * sorted(xs, key=k): every key is computed first (a bad one raises even for a single row), then a
+ * stable sort on `<` as list.sort does.
+ */
+function pySortedBy(xs, k) {
+  const keys = xs.map(k);
+  const idx = xs.map((_, i) => i);
+  idx.sort((i, j) => (keys[i] < keys[j] ? -1 : (keys[j] < keys[i] ? 1 : 0)));
+  return idx.map((i) => xs[i]);
+}
 
 /** str(x or '') */
 function sOr(v, dflt = '') { return falsy(v) ? dflt : String(v); }
@@ -92,7 +107,7 @@ function aggregate(rows, days = 30, now = null) {
     equity: [], per_strategy: perStrategy,
   };
   let cum = 0.0;
-  const sorted = rows.slice().sort((a, b) => fOr0(a.created_at) - fOr0(b.created_at));   // stable like sorted()
+  const sorted = pySortedBy(rows, (r) => fOr0(r.created_at));   // sorted(key=float(created_at or 0)): every key, then `<`
   for (const r of sorted) {
     const strat = pyUpper(sOr(r.strategy));
     const buckets = [out].concat(Object.prototype.hasOwnProperty.call(perStrategy, strat) ? [perStrategy[strat]] : []);
@@ -119,7 +134,7 @@ function aggregate(rows, days = 30, now = null) {
       out.best_strategy = strat;
     }
     cum += rr;
-    out.equity.push({ t: Math.trunc(fOr0(r.created_at)), r: pyRound(cum, 2) });
+    out.equity.push({ t: pyInt(fOr0(r.created_at)), r: pyRound(cum, 2) });   // int(float(inf)) raises like the bot
   }
   for (const b of [out].concat(Object.values(perStrategy))) {
     if (b.trades) b.win_rate = pyRound(b.wins / b.trades * 100, 1);
@@ -146,7 +161,7 @@ function signalRowsSince(db, userId, sinceTs) {
 }
 
 /** The unique-signal key of pro_overview / rating_from_rows (without the strategy prefix). */
-function hourBucket(r) { return Math.trunc(pyFloorDiv(fOr0(r.created_at), 3600)); }
+function hourBucket(r) { return pyInt(pyFloorDiv(fOr0(r.created_at), 3600)); }   // int(inf // 3600) = int(nan) raises
 
 /**
  * pro_overview(days=7): Pro users' rows (sub_plan='pro'), countable, newer than now − days;
@@ -720,8 +735,8 @@ function statBucket(trades) {
 function trendCtx(row) {
   const ctx = sOr(row.trend_ctx);
   if (ctx) return ctx;
-  if (Math.trunc(fOr0(row.mtf_aligned))) return 'aligned';
-  if (Math.trunc(fOr0(row.is_counter_trend))) return 'counter';
+  if (intOr0(row.mtf_aligned)) return 'aligned';
+  if (intOr0(row.is_counter_trend)) return 'counter';
   return '';
 }
 
@@ -794,7 +809,7 @@ function statsPayload(rows, { days = 30, strategy = '', tf = '', now = null } = 
     const rr = r.result_rr;
     const res = sOr(r.result);
     const win = res.startsWith('TP') || rr > 0;
-    const d = utcDatetime(ts);            // datetime.fromtimestamp(ts, tz=utc): half-even microseconds
+    const d = utcDatetimeStrict(ts);      // datetime.fromtimestamp(ts, tz=utc): half-even µs; year 1..9999 or it raises
     const weekday = (d.getUTCDay() + 6) % 7;
     for (const b of [sessions[sessionForHour(d.getUTCHours())], weekdays[weekday]]) {
       b.trades += 1;
@@ -802,13 +817,14 @@ function statsPayload(rows, { days = 30, strategy = '', tf = '', now = null } = 
       b.total_rr += rr;
     }
     cum += rr;
-    equity.push({ t: Math.trunc(ts), r: pyRound(cum, 2) });
+    equity.push({ t: pyInt(ts), r: pyRound(cum, 2) });
   }
   for (const b of Object.values(sessions).concat(weekdays)) {
     b.win_rate = b.trades ? pyRound(b.wins / b.trades * 100, 1) : 0.0;
     b.total_rr = pyRound(b.total_rr, 2);
   }
-  const mapBuckets = (m) => Object.fromEntries(Array.from(m instanceof Map ? m.entries() : Object.entries(m))
+  // a dict in first-appearance order (a "60" / "240" timeframe is not moved to the front as in a JS object)
+  const mapBuckets = (m) => pyDict(Array.from(m instanceof Map ? m.entries() : Object.entries(m))
     .map(([k, v]) => [k, statBucket(v)]));
   return {
     ok: true, days, summary: statBucket(trades),
@@ -842,7 +858,7 @@ function signalView(row, now = null) {
   const status = signalStatus(row, t);
   let rr = signalRr(row, status);
   rr = rr !== null ? pyRound(Number(rr), 2) : null;
-  let q = Math.trunc(fOr0(row.quality));
+  let q = intOr0(row.quality);                       // int(row.get("quality") or 0): int('inf') / int('7.5') raise
   if (pyUpper(sOr(row.strategy)) === 'LEVELS') q = levelsStars(q);
   const res = pyUpper(sOr(row.result));
   const orderId = sOr(row.order_id);
@@ -857,13 +873,13 @@ function signalView(row, now = null) {
     sl0: osl !== 0 ? osl : sl,                         // Python `or`: a NaN stop is truthy
     tp1: fOr0(row.tp1), tp2: fOr0(row.tp2), tp3: fOr0(row.tp3),
     quality: Math.max(1, Math.min(5, q || 1)),
-    counter_trend: Boolean(Math.trunc(fOr0(row.is_counter_trend))),
-    mtf_aligned: Boolean(Math.trunc(fOr0(row.mtf_aligned))),
+    counter_trend: Boolean(intOr0(row.is_counter_trend)),
+    mtf_aligned: Boolean(intOr0(row.mtf_aligned)),
     trend_ctx: trendCtx(row),
     note: sOr(row.user_note),
     on_exchange: Boolean(orderId),
     manual: Boolean(sOr(row.skip_reason) === 'manual' || (['TP1', 'TP2', 'TP3', 'SL', 'BE'].includes(res) && !orderId)),
-    created_at: Math.trunc(fOr0(row.created_at)),
+    created_at: pyInt(fOr0(row.created_at)),          // int(float(x or 0)): inf / nan raise
     status, rr,
   };
 }

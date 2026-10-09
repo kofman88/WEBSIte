@@ -411,6 +411,31 @@ const GENOME_DDL = `
   );
 `;
 
+// ── trade_feedback (v14) ──────────────────────────────────────────────
+// The bot's db/schema.py trade_feedback, verbatim: one row per (user, trade) written by every real
+// result transition (db_set_trade_result → trade_feedback.record_feedback; services/engine/
+// tradeFeedback.js). Read by the ML filter / adaptive optimizer of D11.
+const TRADE_FEEDBACK_DDL = `
+  CREATE TABLE IF NOT EXISTS trade_feedback (
+    id        INTEGER PRIMARY KEY AUTOINCREMENT,
+    user_id   INTEGER NOT NULL,
+    trade_id  TEXT    NOT NULL,
+    symbol    TEXT    NOT NULL,
+    strategy  TEXT    NOT NULL DEFAULT 'LEVELS',
+    direction TEXT    NOT NULL DEFAULT 'LONG',
+    entry     REAL    NOT NULL DEFAULT 0,
+    sl        REAL    NOT NULL DEFAULT 0,
+    tp1       REAL    NOT NULL DEFAULT 0,
+    result    TEXT    NOT NULL DEFAULT '',
+    pnl_pct   REAL    DEFAULT 0,
+    regime    TEXT    DEFAULT '',
+    features  TEXT    DEFAULT '{}',
+    ts        REAL    DEFAULT 0,
+    UNIQUE(user_id, trade_id)
+  );
+  CREATE INDEX IF NOT EXISTS idx_feedback_user_strat ON trade_feedback(user_id, strategy);
+`;
+
 // ── legacy site tables retired by v12 (PLAN §2.1) — children first ────
 const LEGACY_TABLES = Object.freeze([
   'trade_fills',
@@ -434,6 +459,37 @@ const LEGACY_TABLES = Object.freeze([
 // users columns of the retired paper book / public profile (PLAN §2.1)
 const LEGACY_USER_COLUMNS = Object.freeze(['paper_starting_balance', 'public_profile']);
 
+// The landing's public paper track archive (services/publicTrack/store.js; site only, the bot has no
+// public endpoints): one row per track signal with its stage history and published state, plus the
+// archive epoch and change counter of the feed cursor. Migration v13.
+const PUBLIC_TRACK_DDL = `
+  CREATE TABLE IF NOT EXISTS public_track (
+    trade_id   TEXT PRIMARY KEY,
+    pub_id     TEXT NOT NULL UNIQUE,
+    user_id    INTEGER NOT NULL,
+    bot_id     TEXT NOT NULL,
+    strategy   TEXT NOT NULL,
+    pair       TEXT NOT NULL,
+    side       TEXT NOT NULL,
+    tf         TEXT NOT NULL,
+    created_at REAL NOT NULL,
+    stages     TEXT NOT NULL DEFAULT '[]',
+    status     TEXT,
+    path       TEXT,
+    r          REAL,
+    appear_seq INTEGER,
+    seq        INTEGER,
+    updated_at REAL NOT NULL
+  );
+  CREATE INDEX IF NOT EXISTS idx_public_track_seq ON public_track(seq);
+  CREATE INDEX IF NOT EXISTS idx_public_track_created ON public_track(created_at);
+  CREATE INDEX IF NOT EXISTS idx_public_track_user ON public_track(user_id, created_at);
+  CREATE TABLE IF NOT EXISTS public_track_meta (
+    key   TEXT PRIMARY KEY,
+    value TEXT NOT NULL
+  );
+`;
+
 module.exports = {
   TRADER_SETTINGS_COLUMNS,
   TRADER_SETTINGS_EXCLUDED,
@@ -446,6 +502,8 @@ module.exports = {
   TRADE_EVENTS_DDL,
   PLAN_CHANGES_DDL,
   GENOME_DDL,
+  PUBLIC_TRACK_DDL,
+  TRADE_FEEDBACK_DDL,
   LEGACY_TABLES,
   LEGACY_USER_COLUMNS,
 };

@@ -10,6 +10,13 @@
  */
 (function () {
   "use strict";
+  // Google Fonts load as media="print" (never render-blocking) and switch to "all" once loaded —
+  // here, not in an inline onload="…": the site's CSP (script-src-attr 'none') blocks inline handlers.
+  var fonts = document.getElementById("app-fonts");
+  if (fonts) {
+    if (fonts.sheet) fonts.media = "all";
+    else fonts.addEventListener("load", function () { fonts.media = "all"; });
+  }
   var KEY = "chm_fx";
   var QS;
   try { QS = new URLSearchParams(location.search); } catch (e) { QS = { get: function () { return null; } }; }

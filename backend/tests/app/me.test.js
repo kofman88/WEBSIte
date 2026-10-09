@@ -63,17 +63,19 @@ const pro = (uid, days = 30) => plan.grantAccess(uid, days, { actor: 'test' });
 
 describe('auth envelope', () => {
   it('no / bad token → 401 {ok:false, error:"unauthorized"}', async () => {
+    // the bot's _unauthorized() = _json(..., 401): json.dumps bytes + Cache-Control: no-store
     let r = await request(app).get('/api/app/me');
     expect(r.status).toBe(401);
-    expect(r.body).toMatchObject({ ok: false, error: 'unauthorized' });
+    expect(r.text).toBe('{"ok": false, "error": "unauthorized"}');
+    expect(r.headers['cache-control']).toBe('no-store');
     r = await request(app).get('/api/app/me').set({ Authorization: 'Bearer nope' });
     expect(r.status).toBe(401);
-    expect(r.body).toMatchObject({ ok: false, error: 'unauthorized' });
+    expect(r.text).toBe('{"ok": false, "error": "unauthorized"}');
     const disabled = makeUser({ active: 0 });
     r = await request(app).get('/api/app/me').set(H(disabled));
     expect(r.status).toBe(403);
-    expect(r.body).toMatchObject({ ok: false, error: 'unauthorized' });
-    expect(r.headers['cache-control']).toBeUndefined();
+    expect(r.text).toBe('{"ok": false, "error": "unauthorized", "code": "ACCOUNT_DISABLED"}');   // site only (no bot twin)
+    expect(r.headers['cache-control']).toBe('no-store');
   });
 });
 

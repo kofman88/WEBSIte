@@ -26,6 +26,22 @@ function wholeSeconds(ts) {
 
 /** A JS Date at the whole second datetime.fromtimestamp(ts, tz=utc) shows. */
 const utcDatetime = (ts) => new Date(wholeSeconds(Number(ts)) * 1000);
+// datetime's year range 1..9999 as unix seconds (0001-01-01 / 10000-01-01 UTC)
+const MIN_TS = -62135596800;
+const MAX_TS_EXCL = 253402300800;
+
+/**
+ * utcDatetime where datetime.fromtimestamp(ts, tz=utc) raises: NaN → ValueError, ±inf → OverflowError,
+ * a year outside 1..9999 (after the µs rounding) → ValueError("year … is out of range").
+ */
+function utcDatetimeStrict(ts) {
+  const x = Number(ts);
+  if (Number.isNaN(x)) throw new RangeError('Invalid value NaN (not a number)');
+  if (!Number.isFinite(x)) throw new RangeError('cannot convert float infinity to integer');
+  const s = wholeSeconds(x);
+  if (s < MIN_TS || s >= MAX_TS_EXCL) throw new RangeError(`year is out of range: ${s}`);
+  return new Date(s * 1000);
+}
 /** .strftime("%Y-%m-%d") */
 const utcDate = (ts) => utcDatetime(ts).toISOString().slice(0, 10);
 /** .hour */
@@ -33,4 +49,4 @@ const utcHour = (ts) => utcDatetime(ts).getUTCHours();
 /** .weekday() (Monday = 0) */
 const utcWeekday = (ts) => (utcDatetime(ts).getUTCDay() + 6) % 7;
 
-module.exports = { halfEven, wholeSeconds, utcDatetime, utcDate, utcHour, utcWeekday };
+module.exports = { halfEven, wholeSeconds, utcDatetime, utcDatetimeStrict, utcDate, utcHour, utcWeekday, MIN_TS, MAX_TS_EXCL };

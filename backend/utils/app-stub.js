@@ -484,6 +484,14 @@ function createAppStub({ userForToken }) {
   });
 
   router.get('/me', (req, res) => { const st = req.st; st.syncStrategies(); res.json({ ok: true, ...clone(st.me) }); });
+  // GET events: the SSE handshake of services/sseService.js (hello, then nothing — the stub has no engine)
+  router.get('/events', (req, res) => {
+    res.writeHead(200, { 'Content-Type': 'text/event-stream; charset=utf-8', 'Cache-Control': 'no-cache, no-transform', Connection: 'keep-alive', 'X-Accel-Buffering': 'no' });
+    res.write(`retry: 10000\n\nid: 1\nevent: hello\ndata: ${JSON.stringify({ user_id: req.st.user.id, heartbeat_s: 25 })}\n\n`);
+    const ping = setInterval(() => res.write(': ping\n\n'), 25000);
+    if (ping.unref) ping.unref();
+    req.on('close', () => clearInterval(ping));
+  });
   router.get('/dashboard', (req, res) => {
     const st = req.st;
     const pro = st.user.plan === 'pro';

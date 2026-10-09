@@ -11,6 +11,17 @@
  *     the keys that hold Python *floats* (`floatKeys`); every other integral
  *     number prints as an int, non-integral numbers always print as floats.
  *
+ * `pyJsonDumpsTyped(value, schema)` is the same with the Python types given per PATH (a key can
+ * hold an int in one place and a float in another): the schema mirrors the value — FLOAT ('f') for a
+ * Python float leaf, `{key: schema, '*': schema}` for a dict (the '*' entry for every other key),
+ * `[schema]` for a list, `{ $tuple: [schema, …] }` for a fixed-position list; numbers the schema
+ * leaves out are ints when integral (as pyJsonDumps). The web.json_response bodies of the Mini App
+ * routes are written with it (routes/appData.js).
+ *
+ * `pyDict(entries)` is a Python dict for keys a JS object would reorder (integer-like keys such as
+ * a "60" timeframe come first in every JS object) or swallow ("__proto__"): a null-prototype object
+ * that remembers the insertion order for both serializers; `pyDictSet(d, k, v)` adds / replaces.
+ *
  * Also the inverse helpers `pyJsonParse` (json.loads: NaN / Infinity literals, `-0` is the int 0)
  * and `pyJsonLoads` (the same, never throwing, for the bot's "on any error → {}" behaviour).
  */
@@ -47,6 +58,30 @@ function dumpNumber(n, isFloat) {
   return String(n);
 }
 
+// ── ordered Python dicts ────────────────────────────────────────────────
+const PY_KEYS = Symbol.for('chm.pyjson.keys');
+
+/** Add or replace key `k` of a pyDict (a new key goes last, a known one keeps its place). */
+function pyDictSet(d, k, v) {
+  const key = String(k);
+  if (Array.isArray(d[PY_KEYS]) && !Object.prototype.hasOwnProperty.call(d, key)) d[PY_KEYS].push(key);
+  Object.defineProperty(d, key, { value: v, enumerable: true, writable: true, configurable: true });
+  return d;
+}
+
+/** A Python dict from [key, value] pairs (insertion order kept for integer-like keys, '__proto__' a plain key). */
+function pyDict(entries = []) {
+  const d = Object.create(null);
+  Object.defineProperty(d, PY_KEYS, { value: [], enumerable: false });
+  for (const [k, v] of entries) pyDictSet(d, k, v);
+  return d;
+}
+
+/** The key order json.dumps would write: a pyDict's insertion order, else Object.keys. */
+function dictKeys(v) {
+  return Array.isArray(v[PY_KEYS]) ? v[PY_KEYS].slice() : Object.keys(v);
+}
+
 /**
  * @param {*} value   dict / list / str / number / bool / null
  * @param {Iterable<string>|null} floatKeys  keys whose numeric values are Python floats
@@ -61,12 +96,42 @@ function pyJsonDumps(value, floatKeys = null) {
     if (Array.isArray(v)) return '[' + v.map((x) => walk(x, null)).join(', ') + ']';
     if (typeof v === 'object') {
       const parts = [];
-      for (const k of Object.keys(v)) parts.push(escapeString(String(k)) + ': ' + walk(v[k], k));
+      for (const k of dictKeys(v)) parts.push(escapeString(String(k)) + ': ' + walk(v[k], k));
       return '{' + parts.join(', ') + '}';
     }
     return escapeString(String(v));
   };
   return walk(value, null);
+}
+
+/** Schema leaf: a Python float (repr: `1.0`, `1e+16`, `NaN` / `Infinity` literals). */
+const FLOAT = 'f';
+
+/** json.dumps(value) with the Python types of `schema` (see the header). */
+function pyJsonDumpsTyped(value, schema = null) {
+  const sub = (sch, k) => {
+    if (!sch || typeof sch !== 'object' || Array.isArray(sch)) return null;
+    if (k !== '$tuple' && Object.prototype.hasOwnProperty.call(sch, k)) return sch[k];
+    return Object.prototype.hasOwnProperty.call(sch, '*') ? sch['*'] : null;
+  };
+  const walk = (v, sch) => {
+    if (v === null || v === undefined) return 'null';
+    if (typeof v === 'boolean') return v ? 'true' : 'false';
+    if (typeof v === 'number') return dumpNumber(v, sch === FLOAT);
+    if (typeof v === 'string') return escapeString(v);
+    if (Array.isArray(v)) {
+      if (sch && Array.isArray(sch.$tuple)) return '[' + v.map((x, i) => walk(x, sch.$tuple[i] || null)).join(', ') + ']';
+      const el = Array.isArray(sch) ? sch[0] : null;
+      return '[' + v.map((x) => walk(x, el)).join(', ') + ']';
+    }
+    if (typeof v === 'object') {
+      const parts = [];
+      for (const k of dictKeys(v)) parts.push(escapeString(String(k)) + ': ' + walk(v[k], sub(sch, String(k))));
+      return '{' + parts.join(', ') + '}';
+    }
+    return escapeString(String(v));
+  };
+  return walk(value, schema);
 }
 
 // JSON number grammar (RFC 8259); sticky so it matches exactly at the scan position.
@@ -166,4 +231,7 @@ function pyJsonLoads(text, fallback = {}) {
   }
 }
 
-module.exports = { pyJsonDumps, pyJsonLoads, pyJsonParse, parseJsonExactInts, tagJsonTokens };
+module.exports = {
+  pyJsonDumps, pyJsonDumpsTyped, FLOAT, pyDict, pyDictSet, dictKeys, PY_KEYS,
+  pyJsonLoads, pyJsonParse, parseJsonExactInts, tagJsonTokens,
+};

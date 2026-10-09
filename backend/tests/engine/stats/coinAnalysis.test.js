@@ -161,8 +161,12 @@ describe('Mini App analyze', () => {
       tp1: c.signal.tp1, tp2: c.signal.tp2, tp3: c.signal.tp3, quality: c.signal.quality, setup: c.signal.setup,
       reasons: c.signal.reasons, bars_ago: c.signal.bars_ago,
     });
-    expect(r.body.chart.timeframe).toBe('1h');
-    expect(r.body.chart.candles.length).toBe(120);
+    // D3: png null + the chart as data (chartPayload: the pro window of 110 bars, MAs 20/50/200)
+    expect(r.body.png).toBe(null);
+    expect(r.body.timeframe).toBe('1h');
+    expect(r.body.candles.length).toBe(110);
+    expect(r.body.overlays.emas.map((e) => e.label)).toEqual(['EMA 20', 'EMA 50', 'EMA 200']);
+    expect(r.body.overlays.entry).toBe(c.signal.entry);
     expect(logs).toEqual([`[MINIAPP] analyze uid=5 ${base} AUTO → ${c.signal.strategy}`]);
     expect((await shell.analyze({ user_id: 5 }, { symbol: base }, 1005)).body).toEqual({ ok: false, error: 'rate_limited' });
     expect((await shell.analyze({ user_id: 5 }, { symbol: '??' }, 2000))).toEqual({ status: 400, body: { ok: false, error: 'bad_symbol' } });

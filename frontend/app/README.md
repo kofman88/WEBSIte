@@ -17,6 +17,8 @@ app.css, splash.js}`) в самостоятельное веб-приложен�
 | «Открыть бота» / «В боте» / «Открыть в боте» | убраны (бессмысленны вне Telegram); на экране профиля — ссылка «Аккаунт и безопасность» → `/settings.html` |
 | PNG-график с сервера | `chart.js`: свечи + оверлеи из `GET signals/:id/chart` рисуются на canvas (решение D3); base64 PNG по-прежнему принимается |
 | «Поделиться результатом» → картинка в чат бота | карточка рисуется на canvas → Web Share API, иначе скачивание; `POST share` держит лимит 3/10 мин и отдаёт статистику |
+| Обновление по кнопке / по `visibilitychange` | так же (D2), плюс живые события: после входа `Live` читает `GET /api/app/events` (SSE) через `fetch` с `Authorization: Bearer` (EventSource заголовок не шлёт); события `signal` / `progress` / `trade` сбрасывают 30-секундные кэши и обновляют открытый экран (Главная / Сигналы). Переподключение через `retry:` сервера (10 с), на 401 — один refresh токена; при выходе поток закрывается. Если прокси буферизует поток, остаётся поллинг |
+| Шрифты Google: `media="print" onload="…"` | `onload` в разметке запрещён CSP сайта (`script-src-attr 'none'` helmet): `media` на `all` переключает `splash.js` |
 
 Новое: раздел настроек **«Расширенные настройки»** (D9) — экран, который
 рендерит всё, что `GET settings/all` отдаёт сверх основных экранов (параметры из
@@ -58,4 +60,16 @@ python tests/e2e/app.e2e.py                 # Playwright: сценарии вх�
                                             # стратегий/settings/all/refresh/logout/demo на 390×844 и 1280×900
 python tests/e2e/app_smoke.py               # короткий Playwright-прогон экранов на стабе
 node tests/e2e/serve-stub.js 3199           # ручной QA: http://127.0.0.1:3199/app/
+node tests/e2e/app_real_smoke.mjs           # Playwright на НАСТОЯЩЕМ бэкенде (serve-app.js): вход, Главная,
+                                            # SSE-поток, Сигналы + новый сигнал через SSE, деталь с графиком,
+                                            # Анализ, Профиль; 0 ошибок консоли / запросов
+node tests/e2e/serve-app.js --port 3198 --dir /tmp/chm   # ручной QA на настоящем сервере:
+                                            # smoke@chm.local / smoke-pass-123
 ```
+
+`serve-app.js` поднимает `server.js` в режиме production (CSP helmet, лимитер API) на свежей
+SQLite в `--dir`, без воркера движка и без сети: рынок для маршрутов (свечи REST, тикеры 24 ч) —
+golden-свечи, стоящие на закрытии 2025-12-30 12:00 UTC, сдвинутые на целые сутки к текущему времени.
+`app_real_smoke.mjs` берёт `playwright-core` из `$PLAYWRIGHT_CORE` (по умолчанию
+`/opt/node-tools/node_modules/playwright-core`) и Chromium из `$CHROMIUM` (`/opt/pw-browsers/chromium`),
+браузер не скачивает; запросы к чужим хостам (Google Fonts) получают пустой ответ локально.

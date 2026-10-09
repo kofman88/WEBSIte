@@ -16,7 +16,7 @@ import { createRequire } from 'module';
 
 const req = createRequire(import.meta.url);
 const Database = req('better-sqlite3');
-const { signalTradesDDL, TRADE_EVENTS_DDL, SIGNAL_TRADES_ALLOWED_COLS } = req('../../../models/engineSchema.js');
+const { signalTradesDDL, TRADE_EVENTS_DDL, TRADE_FEEDBACK_DDL, SIGNAL_TRADES_ALLOWED_COLS } = req('../../../models/engineSchema.js');
 const Repo = req('../../../services/engine/signalTradesRepo.js');
 const { load, clock, captureLog } = req('./vectors.js');
 
@@ -27,6 +27,7 @@ function freshDb() {
   db.pragma('foreign_keys = OFF');
   db.exec(signalTradesDDL());
   db.exec(TRADE_EVENTS_DDL);
+  db.exec(TRADE_FEEDBACK_DDL);         // the bot DB has it: db_set_trade_result writes the trade_feedback row
   return db;
 }
 

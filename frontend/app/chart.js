@@ -5,7 +5,7 @@
  *   data.candles  [{t|ts, o, h, l, c}] or [[t, o, h, l, c]] — ascending, last = last closed bar
  *   data.overlays {entry, sl, tps:[…] | tp1..tp3, be,
  *                  ob:[{from,to,top,bottom,side}], fvg:[{…}], pivots:[{price,kind}],
- *                  hvn:[price…], lvn:[price…], emas:{"50":[…],"200":[…]} | [{name, values}]}
+ *                  hvn:[price…], lvn:[price…], emas:{"50":[…],"200":[…]} | [{name, label?, values}]}
  *   data.event / data.hit_levels — progress chart (TP1 … / SL hit) marks
  * Missing overlay fields fall back to the signal itself (entry / sl / tp1-3).
  * TradingView-dark palette, no network, no API strings through innerHTML.
@@ -127,7 +127,8 @@
       });
       g.stroke();
       g.fillStyle = C.ema[ei % C.ema.length]; g.font = "500 10px 'JetBrains Mono', monospace";
-      g.fillText("EMA " + e.name, 8 + ei * 64, H - 8);
+      // the payload labels each line ("EMA 20", VOLUME's "SMA 10"); a bare {name: values} map is an EMA period
+      g.fillText(e.label ? String(e.label) : "EMA " + e.name, 8 + ei * 64, H - 8);
     });
 
     // levels with right-side labels

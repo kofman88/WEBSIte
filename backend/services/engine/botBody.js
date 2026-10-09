@@ -15,6 +15,11 @@
  * Charset names resolve like Python's codecs.lookup for the codecs a client can plausibly
  * send (utf-8, utf-8-sig, latin-1, ascii and their aliases). Any other name goes to the WHATWG
  * TextDecoder; an unknown name raises there as LookupError does in Python, so the body is {}.
+ *
+ * json.loads also raises on an int literal longer than 4300 digits (CPython 3.11's
+ * int-from-str limit), so such a body is {} too. The decoded text is pinned on the result
+ * (pyBody.BODY_TEXT, non-enumerable) for the routes that need the Python types of the values
+ * (str(10.0) = '10.0', int(1e400) raises) — services/engine/pyBody.js.
  */
 
 'use strict';
@@ -22,6 +27,7 @@
 const { TextDecoder } = require('util');
 const { pyJsonParse } = require('./pyjson');
 const { pyLower, isAlnumChar } = require('../../strategies/common/pyUnicode');   // CPython 3.11 str.lower() / isalnum()
+const { attachText, intDigitsExceeded } = require('./pyBody');
 
 // encodings.aliases for the codecs below (Python 3.11), keys after normalisation
 const UTF8 = new Set(['utf_8', 'utf8', 'u8', 'utf', 'cp65001', 'utf8_ucs2', 'utf8_ucs4']);
@@ -76,8 +82,11 @@ function decodeStrict(buf, encoding) {
 function readBotBody(buf, contentType) {
   if (!Buffer.isBuffer(buf) || buf.length === 0) return {};
   try {
-    const v = pyJsonParse(decodeStrict(buf, charsetOf(contentType) || 'utf-8'));
-    return v && typeof v === 'object' && !Array.isArray(v) ? v : {};
+    const text = decodeStrict(buf, charsetOf(contentType) || 'utf-8');
+    const v = pyJsonParse(text);
+    if (!(v && typeof v === 'object' && !Array.isArray(v))) return {};
+    if (intDigitsExceeded(text)) return {};
+    return attachText(v, text);
   } catch (_e) {
     return {};
   }

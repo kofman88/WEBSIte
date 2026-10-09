@@ -166,6 +166,8 @@ function runWorker(port, {
   port.on('message', (msg) => {
     if (!msg || typeof msg !== 'object') return;
     if (remote.handleMessage(msg)) return;
+    // the app routes' reads of the engine memory (engineBridge: prices, cached candles, trends)
+    if (require('../services/engine/engineBridge').handleQueryMessage(msg, post, scheduler ? scheduler.ctx : null)) return;
     if (msg.type === 'start') start(msg.options || {});
     else if (msg.type === 'shutdown') stop();
     else if (msg.type === 'ping') post({ type: 'pong', id: msg.id, ts: Date.now() / 1000 });
@@ -215,11 +217,13 @@ function createSupervisor({
     if (!state.worker) return;
     try { state.worker.postMessage(m); } catch (_e) { /* worker gone */ }
   }
+  const queries = require('../services/engine/engineBridge').createQueryClient(post, { setTimer, clearTimer });
 
   function onWorkerMessage(msg) {
     if (!msg || typeof msg !== 'object') return;
     if (onMessage) { try { onMessage(msg); } catch (_e) { /* test hook */ } }
     if (deliveryImpl.handleWorkerMessage(msg, post)) return;
+    if (queries.handleMessage(msg)) return;
     switch (msg.type) {
       case 'heartbeat':
         state.lastBeat = now();
@@ -279,6 +283,7 @@ function createSupervisor({
   /** _guarded_restart around the worker: a clean exit after shutdown stops, anything else restarts. */
   function onExit(code, err) {
     state.worker = null;
+    queries.failAll();
     if (state.stopping) return;
     const ran = now() - state.startedAt;
     const delay = state.delay;
@@ -362,6 +367,11 @@ function createSupervisor({
       return { stopped, terminated };
     },
     ping(id = 1) { post({ type: 'ping', id }); },
+    /** engineBridge query → the worker's answer (rejects without a worker / after timeoutMs). */
+    query(method, args = [], timeoutMs = undefined) {
+      if (!state.worker) return Promise.reject(new Error('engine worker not running'));
+      return queries.query(method, args, timeoutMs);
+    },
     get worker() { return state.worker; },
   };
 }
@@ -400,6 +410,9 @@ function startEngine({ log = null, env = process.env, spawn = null, delivery = n
   const dl = delivery || require('../services/engine/signalDelivery').createSignalDelivery({ log: L });
   const scheduler = createScheduler({ side: 'main', deps: { log: L, env, bot: require('../services/engine/signalDelivery').localFacade(dl), ...mainDeps } });
   scheduler.start();
+  // the app routes (routes/appData.js) read the worker's memory through the bridge
+  const bridge = require('../services/engine/engineBridge');
+  bridge.setRemote((method, args, timeoutMs) => supervisor.query(method, args, timeoutMs));
   return {
     supervisor, scheduler, regime,
     /**
@@ -407,6 +420,7 @@ function startEngine({ log = null, env = process.env, spawn = null, delivery = n
      * the main-side loops (≤ 4 s) and the worker (its own ≤ 4 s + the registry save, ≤ 6 s grace).
      */
     async stop() {
+      bridge.setRemote(null);
       const [r1, r2] = await Promise.all([scheduler.stop(), supervisor.stop()]);
       return { main: r1, worker: r2 };
     },

@@ -37,7 +37,13 @@ const USERS = [
   [632, 'VOLUME', '4h', { strategy: 'VOLUME', vol_long_active: true, vol_short_active: true, vol_timeframe: '4h' }],
 ];
 
-async function runEngine({ vi, stopDuringT4 = false } = {}) {
+/**
+ * runEngine({ vi, stopDuringT4, inspect }) — `inspect(ctx)` (optional) is awaited after the T4
+ * cycles while the engine still runs and the fake clock stands just past T4: ctx.query is the
+ * engine bridge's query over the worker's port (what startEngine installs with bridge.setRemote),
+ * ctx.fetcher / ctx.frameAt the fake REST client and golden frames at the feed's last close.
+ */
+async function runEngine({ vi, stopDuringT4 = false, inspect = null } = {}) {
   vi.useFakeTimers({ now: START * 1000, toFake: ['setTimeout', 'clearTimeout', 'setInterval', 'clearInterval', 'Date'] });
   const { MessageChannel } = require('worker_threads');
   const db = require('../../../models/database.js');
@@ -130,10 +136,13 @@ async function runEngine({ vi, stopDuringT4 = false } = {}) {
   // ── the two halves over a real MessageChannel ──
   const ch = new MessageChannel();
   const delivery = createSignalDelivery({});
+  // the app routes' reads of the worker memory (engineBridge query RPC, as startEngine wires it)
+  const queries = require('../../../services/engine/engineBridge.js').createQueryClient((m) => ch.port2.postMessage(m));
   const fromWorker = [];
   const rpcMethods = [];
   ch.port2.on('message', (msg) => {
     fromWorker.push(msg.type);
+    if (queries.handleMessage(msg)) return;
     if (msg.type === 'rpc' || msg.type === 'call') rpcMethods.push(msg.method);
     delivery.handleWorkerMessage(msg, (m) => ch.port2.postMessage(m));
   });
@@ -196,6 +205,10 @@ async function runEngine({ vi, stopDuringT4 = false } = {}) {
       && LOGS.slice(-1)[0][0] - T4 > 20);
   }
   const atT4 = { rows: rowsOf(), now: at(), passes: passes(), p4 };
+  if (inspect && !stopDuringT4) {
+    await inspect({ db, ts, vi, at, turn, settle, fetcher, frameAt, coins: COINS.slice(), rowsOf, worker, logs: LOGS,
+      query: (method, args, timeoutMs) => queries.query(method, args, timeoutMs) });
+  }
 
   const out = {
     before, levelsJobsBefore, atT1, beforeT4, atT4,

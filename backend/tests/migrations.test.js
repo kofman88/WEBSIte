@@ -2,6 +2,7 @@ import { describe, it, expect, beforeAll, afterAll } from 'vitest';
 import fs from 'fs';
 import path from 'path';
 import Database from 'better-sqlite3';
+import { createRequire } from 'module';
 
 process.env.NODE_ENV = 'development';
 process.env.JWT_SECRET = 'test-jwt-secret-0123456789abcdef012';
@@ -126,12 +127,39 @@ afterAll(() => {
 });
 
 // ── (a) fresh DB ──────────────────────────────────────────────────────
-describe('fresh DB → v12', () => {
-  it('is at version 12, re-running is a no-op', () => {
-    expect(migrations.currentVersion(db)).toBe(12);
-    expect(migrations.MIGRATIONS.map((m) => m.version)).toEqual([1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]);
-    expect(migrations.MIGRATIONS.slice(9).map((m) => m.name)).toEqual(['engine_core', 'genome', 'retire_bots']);
-    expect(migrations.run(db)).toEqual({ ran: 0, current: 12 });
+describe('fresh DB → v14', () => {
+  it('is at version 14, re-running is a no-op', () => {
+    expect(migrations.currentVersion(db)).toBe(14);
+    expect(migrations.MIGRATIONS.map((m) => m.version)).toEqual([1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14]);
+    expect(migrations.MIGRATIONS.slice(9).map((m) => m.name)).toEqual(['engine_core', 'genome', 'retire_bots', 'public_track', 'trade_feedback']);
+    expect(migrations.run(db)).toEqual({ ran: 0, current: 14 });
+  });
+
+  it('v14 creates the bot\'s trade_feedback table verbatim (UNIQUE(user_id, trade_id), idx_feedback_user_strat)', () => {
+    const cols = db.prepare("PRAGMA table_info('trade_feedback')").all().map((c) => [c.name, c.type, c.notnull, c.dflt_value]);
+    expect(cols).toEqual([
+      ['id', 'INTEGER', 0, null], ['user_id', 'INTEGER', 1, null], ['trade_id', 'TEXT', 1, null], ['symbol', 'TEXT', 1, null],
+      ['strategy', 'TEXT', 1, "'LEVELS'"], ['direction', 'TEXT', 1, "'LONG'"], ['entry', 'REAL', 1, '0'], ['sl', 'REAL', 1, '0'],
+      ['tp1', 'REAL', 1, '0'], ['result', 'TEXT', 1, "''"], ['pnl_pct', 'REAL', 0, '0'], ['regime', 'TEXT', 0, "''"],
+      ['features', 'TEXT', 0, "'{}'"], ['ts', 'REAL', 0, '0'],
+    ]);
+    const idx = db.prepare("SELECT name FROM sqlite_master WHERE type = 'index' AND tbl_name = 'trade_feedback' AND name LIKE 'idx_%'").all().map((r) => r.name);
+    expect(idx).toEqual(['idx_feedback_user_strat']);
+  });
+
+  it('v13 creates the public track archive (services/publicTrack/store.js re-runs the same DDL as a no-op)', () => {
+    const t = tables(db);
+    expect(t).toContain('public_track');
+    expect(t).toContain('public_track_meta');
+    const cols = db.prepare("PRAGMA table_info('public_track')").all().map((c) => c.name);
+    expect(cols).toEqual(['trade_id', 'pub_id', 'user_id', 'bot_id', 'strategy', 'pair', 'side', 'tf', 'created_at',
+      'stages', 'status', 'path', 'r', 'appear_seq', 'seq', 'updated_at']);
+    const idx = db.prepare("SELECT name FROM sqlite_master WHERE type = 'index' AND tbl_name = 'public_track' AND name LIKE 'idx_%' ORDER BY name").all().map((r) => r.name);
+    expect(idx).toEqual(['idx_public_track_created', 'idx_public_track_seq', 'idx_public_track_user']);
+    const { createStore } = createRequire(import.meta.url)('../services/publicTrack/store.js');
+    const st = createStore(db);
+    expect(st.seq()).toBe(0);
+    expect(typeof st.epoch()).toBe('string');
   });
 
   it('creates the engine tables and no legacy table', () => {
@@ -405,14 +433,14 @@ function buildLegacyDb(file) {
   return { legacy, ids: { alice, bob, carol, dave, eve, frank, grace } };
 }
 
-describe('legacy DB (per-bot product) → v12', () => {
+describe('legacy DB (per-bot product) → v14', () => {
   let legacy, ids, exportFile, exported;
 
   beforeAll(() => {
     process.env.LEGACY_BACKUP_DIR = LEGACY_BACKUPS;
     ({ legacy, ids } = buildLegacyDb(LEGACY_DB));
     const out = migrations.run(legacy);
-    expect(out).toEqual({ ran: 12, current: 12 });
+    expect(out).toEqual({ ran: 14, current: 14 });
     const files = fs.readdirSync(LEGACY_BACKUPS).filter((f) => /^legacy-.*\.json$/.test(f));
     expect(files).toHaveLength(1);
     exportFile = path.join(LEGACY_BACKUPS, files[0]);
@@ -422,8 +450,8 @@ describe('legacy DB (per-bot product) → v12', () => {
   afterAll(() => { try { legacy.close(); } catch (_e) {} });
 
   it('runs the whole chain (v9 still seeded the system bot on the legacy schema)', () => {
-    expect(migrations.currentVersion(legacy)).toBe(12);
-    expect(migrations.run(legacy)).toEqual({ ran: 0, current: 12 });
+    expect(migrations.currentVersion(legacy)).toBe(14);
+    expect(migrations.run(legacy)).toEqual({ ran: 0, current: 14 });
     expect(exported.tables.trading_bots.rows).toBe(3);   // b1, b2 + v9 "CHM Public Signals"
     expect(exported.tables.trading_bots.data.some((b) => b.is_system === 1 && b.name === 'CHM Public Signals')).toBe(true);
   });
