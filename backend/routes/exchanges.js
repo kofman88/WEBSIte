@@ -4,8 +4,19 @@ const { authMiddleware, exchangeKeyLimiter, requireVerifiedEmail } = require('..
 const exchangeService = require('../services/exchangeService');
 const validation = require('../utils/validation');
 const handleErr = require('../middleware/handleErr');
+const keyPermissions = require('../services/autotrade/keyPermissions');
 
 const router = express.Router();
+
+/** users.locale → 'ru' | 'en' for the D15 refusal text. */
+function userLang(userId) {
+  try {
+    const row = require('../models/database').prepare('SELECT locale FROM users WHERE id = ?').get(userId);
+    return row && row.locale === 'en' ? 'en' : 'ru';
+  } catch (_e) {
+    return 'ru';
+  }
+}
 
 // ── Public: list of supported exchanges ─────────────────────────────────
 router.get('/', (_req, res) => {
@@ -27,6 +38,8 @@ router.get('/keys', authMiddleware, (req, res, next) => {
 router.post('/keys', authMiddleware, exchangeKeyLimiter, requireVerifiedEmail, async (req, res, next) => {
   try {
     const input = validation.addKeySchema.parse(req.body);
+    // D15: a key that can withdraw — or whose permissions the exchange did not confirm — is refused
+    await keyPermissions.defaultKeyPermissionChecker().assertKeyCanBeAdded(input, { lang: userLang(req.userId) });
     const key = await exchangeService.addKey(req.userId, input);
     res.status(201).json(key);
   } catch (err) { handleErr(err, res, next); }

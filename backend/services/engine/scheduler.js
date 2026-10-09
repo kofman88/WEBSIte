@@ -343,13 +343,24 @@ async function coinUniverseWarmupLoop(ctx) {
 /**
  * cache_gc._cleanup_once() over the caches that exist on the site (engine-worker module
  * state), in the bot's order. Returns {name: freed}. Caches of unported modules (handlers
- * cooldowns, auto-trade locks / registries, exchange instrument caches, skip_notify,
- * anomaly detector, tilt / correlation caps) are not there to clean.
+ * cooldowns, exchange instrument caches, anomaly detector) are not there to clean; the
+ * auto-trade registries (trade locks, idempotency, auth-fail / zero-balance / commodity,
+ * disabled-days, correlation / tilt caches, skip_notify) are cleaned when `ctx.autoTrade`
+ * (services/autotrade createAutoTrade) is wired.
  */
 function cacheGcOnce(ctx) {
   const t = ctx.now();
   const freed = {};
   const L = ctx.log;
+  const atGc = ctx.autoTrade && ctx.autoTrade.gc ? ctx.autoTrade.gc : null;
+  const atStep = (key, fn, label = key) => {
+    if (!atGc) return;
+    try {
+      const n = fn(atGc);
+      if (n) freed[key] = n;
+    } catch (e) { L.debug(`GC ${label}: ${e && e.message}`); }
+  };
+  atStep('auto_trade._trade_locks', (g) => g.tradeLocks());
   const smc = ctx.smcInstance ? ctx.smcInstance() : null;
   if (smc) {
     try {
@@ -370,14 +381,28 @@ function cacheGcOnce(ctx) {
       if (n) freed['volume_scanner._sent_bars'] = n;
     }
   } catch (e) { L.debug(`GC volume_scanner._sent_bars: ${e && e.message}`); }
+  atStep('auto_trade._idempotency', (g) => g.idempotency());
   try {
     const n = ctx.confluence().gcRecent();
     if (n) freed['signal_confluence._recent'] = n;
   } catch (e) { L.debug(`GC signal_confluence._recent: ${e && e.message}`); }
+  atStep('auto_trade._auth_fail', (g) => g.authFail());
+  atStep('auto_trade._zero_balance', (g) => g.zeroBalance());
+  atStep('auto_trade._commodity_blocklist', (g) => g.commodity());
+  atStep('auto_trade._disabled_days_notified', (g) => g.disabledDays(t));
+  atStep('correlation_cap._CORR_CACHE', (g) => g.correlation(), 'correlation_cap');
+  atStep('tilt_detector._NOTIFY_DEDUP', (g) => g.tilt(), 'tilt_detector');
   try {
     const n = ctx.balanceCache().gcCache();
     if (n) freed['balance_cache._BALANCE_CACHE'] = n;
   } catch (e) { L.debug(`GC balance_cache: ${e && e.message}`); }
+  if (atGc) {
+    try {
+      const sn = atGc.skipNotify();
+      if (sn.userUnfilled) freed['skip_notify._user_unfilled'] = sn.userUnfilled;
+      if (sn.lastNotified) freed['skip_notify._last_notified'] = sn.lastNotified;
+    } catch (e) { L.debug(`GC skip_notify: ${e && e.message}`); }
+  }
   try {
     const fr = ctx.freeReport();
     const sent = fr.previewSent;
@@ -728,6 +753,7 @@ function createScheduler({ side = 'all', deps = {} } = {}) {
     cpuRatio: deps.cpuRatio || null,
     regimeProvider: deps.regimeProvider !== false,
     smcDeps: smcDepsOf(deps),
+    autoTrade: deps.autoTrade || null,
     cacheGcOnce: deps.cacheGcOnce || cacheGcOnce,
   };
   // MidScanner.__init__: self.fetcher = make_fetcher() — the REST client every loop shares

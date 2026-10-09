@@ -1,0 +1,411 @@
+{
+ "python": "3.11.17",
+ "cases": [
+  {
+   "env": {},
+   "ok": {
+    "SMC_HOUR_FILTER_ENABLED": true,
+    "SMC_HOUR_FILTER_MODE": "enforce",
+    "BAD_HOURS_UTC": {
+     "SMC": [
+      4,
+      18,
+      19,
+      20,
+      22
+     ]
+    },
+    "DAILY_MAX_LOSS_R": 0.0
+   }
+  },
+  {
+   "env": {
+    "SMC_HOUR_FILTER_ENABLED": "0"
+   },
+   "ok": {
+    "SMC_HOUR_FILTER_ENABLED": false,
+    "SMC_HOUR_FILTER_MODE": "enforce",
+    "BAD_HOURS_UTC": {
+     "SMC": [
+      4,
+      18,
+      19,
+      20,
+      22
+     ]
+    },
+    "DAILY_MAX_LOSS_R": 0.0
+   }
+  },
+  {
+   "env": {
+    "SMC_HOUR_FILTER_ENABLED": " 1 "
+   },
+   "ok": {
+    "SMC_HOUR_FILTER_ENABLED": true,
+    "SMC_HOUR_FILTER_MODE": "enforce",
+    "BAD_HOURS_UTC": {
+     "SMC": [
+      4,
+      18,
+      19,
+      20,
+      22
+     ]
+    },
+    "DAILY_MAX_LOSS_R": 0.0
+   }
+  },
+  {
+   "env": {
+    "SMC_HOUR_FILTER_ENABLED": "true"
+   },
+   "ok": {
+    "SMC_HOUR_FILTER_ENABLED": false,
+    "SMC_HOUR_FILTER_MODE": "enforce",
+    "BAD_HOURS_UTC": {
+     "SMC": [
+      4,
+      18,
+      19,
+      20,
+      22
+     ]
+    },
+    "DAILY_MAX_LOSS_R": 0.0
+   }
+  },
+  {
+   "env": {
+    "SMC_HOUR_FILTER_MODE": "shadow"
+   },
+   "ok": {
+    "SMC_HOUR_FILTER_ENABLED": true,
+    "SMC_HOUR_FILTER_MODE": "shadow",
+    "BAD_HOURS_UTC": {
+     "SMC": [
+      4,
+      18,
+      19,
+      20,
+      22
+     ]
+    },
+    "DAILY_MAX_LOSS_R": 0.0
+   }
+  },
+  {
+   "env": {
+    "SMC_HOUR_FILTER_MODE": " Shadow "
+   },
+   "ok": {
+    "SMC_HOUR_FILTER_ENABLED": true,
+    "SMC_HOUR_FILTER_MODE": "shadow",
+    "BAD_HOURS_UTC": {
+     "SMC": [
+      4,
+      18,
+      19,
+      20,
+      22
+     ]
+    },
+    "DAILY_MAX_LOSS_R": 0.0
+   }
+  },
+  {
+   "env": {
+    "SMC_HOUR_FILTER_MODE": "OFF"
+   },
+   "ok": {
+    "SMC_HOUR_FILTER_ENABLED": true,
+    "SMC_HOUR_FILTER_MODE": "off",
+    "BAD_HOURS_UTC": {
+     "SMC": [
+      4,
+      18,
+      19,
+      20,
+      22
+     ]
+    },
+    "DAILY_MAX_LOSS_R": 0.0
+   }
+  },
+  {
+   "env": {
+    "SMC_HOUR_FILTER_MODE": "block"
+   },
+   "ok": {
+    "SMC_HOUR_FILTER_ENABLED": true,
+    "SMC_HOUR_FILTER_MODE": "off",
+    "BAD_HOURS_UTC": {
+     "SMC": [
+      4,
+      18,
+      19,
+      20,
+      22
+     ]
+    },
+    "DAILY_MAX_LOSS_R": 0.0
+   }
+  },
+  {
+   "env": {
+    "SMC_HOUR_FILTER_MODE": ""
+   },
+   "ok": {
+    "SMC_HOUR_FILTER_ENABLED": true,
+    "SMC_HOUR_FILTER_MODE": "off",
+    "BAD_HOURS_UTC": {
+     "SMC": [
+      4,
+      18,
+      19,
+      20,
+      22
+     ]
+    },
+    "DAILY_MAX_LOSS_R": 0.0
+   }
+  },
+  {
+   "env": {
+    "SMC_BAD_HOURS_UTC": "1,2, 3"
+   },
+   "ok": {
+    "SMC_HOUR_FILTER_ENABLED": true,
+    "SMC_HOUR_FILTER_MODE": "enforce",
+    "BAD_HOURS_UTC": {
+     "SMC": [
+      1,
+      2,
+      3
+     ]
+    },
+    "DAILY_MAX_LOSS_R": 0.0
+   }
+  },
+  {
+   "env": {
+    "SMC_BAD_HOURS_UTC": "0,23"
+   },
+   "ok": {
+    "SMC_HOUR_FILTER_ENABLED": true,
+    "SMC_HOUR_FILTER_MODE": "enforce",
+    "BAD_HOURS_UTC": {
+     "SMC": [
+      0,
+      23
+     ]
+    },
+    "DAILY_MAX_LOSS_R": 0.0
+   }
+  },
+  {
+   "env": {
+    "SMC_BAD_HOURS_UTC": "1,x"
+   },
+   "ok": {
+    "SMC_HOUR_FILTER_ENABLED": true,
+    "SMC_HOUR_FILTER_MODE": "enforce",
+    "BAD_HOURS_UTC": {
+     "SMC": [
+      4,
+      18,
+      19,
+      20,
+      22
+     ]
+    },
+    "DAILY_MAX_LOSS_R": 0.0
+   }
+  },
+  {
+   "env": {
+    "SMC_BAD_HOURS_UTC": "24"
+   },
+   "ok": {
+    "SMC_HOUR_FILTER_ENABLED": true,
+    "SMC_HOUR_FILTER_MODE": "enforce",
+    "BAD_HOURS_UTC": {
+     "SMC": [
+      4,
+      18,
+      19,
+      20,
+      22
+     ]
+    },
+    "DAILY_MAX_LOSS_R": 0.0
+   }
+  },
+  {
+   "env": {
+    "SMC_BAD_HOURS_UTC": "-1"
+   },
+   "ok": {
+    "SMC_HOUR_FILTER_ENABLED": true,
+    "SMC_HOUR_FILTER_MODE": "enforce",
+    "BAD_HOURS_UTC": {
+     "SMC": [
+      4,
+      18,
+      19,
+      20,
+      22
+     ]
+    },
+    "DAILY_MAX_LOSS_R": 0.0
+   }
+  },
+  {
+   "env": {
+    "SMC_BAD_HOURS_UTC": "   "
+   },
+   "ok": {
+    "SMC_HOUR_FILTER_ENABLED": true,
+    "SMC_HOUR_FILTER_MODE": "enforce",
+    "BAD_HOURS_UTC": {
+     "SMC": [
+      4,
+      18,
+      19,
+      20,
+      22
+     ]
+    },
+    "DAILY_MAX_LOSS_R": 0.0
+   }
+  },
+  {
+   "env": {
+    "SMC_BAD_HOURS_UTC": "5,"
+   },
+   "ok": {
+    "SMC_HOUR_FILTER_ENABLED": true,
+    "SMC_HOUR_FILTER_MODE": "enforce",
+    "BAD_HOURS_UTC": {
+     "SMC": [
+      4,
+      18,
+      19,
+      20,
+      22
+     ]
+    },
+    "DAILY_MAX_LOSS_R": 0.0
+   }
+  },
+  {
+   "env": {
+    "SMC_BAD_HOURS_UTC": "07"
+   },
+   "ok": {
+    "SMC_HOUR_FILTER_ENABLED": true,
+    "SMC_HOUR_FILTER_MODE": "enforce",
+    "BAD_HOURS_UTC": {
+     "SMC": [
+      7
+     ]
+    },
+    "DAILY_MAX_LOSS_R": 0.0
+   }
+  },
+  {
+   "env": {
+    "DAILY_MAX_LOSS_R": "2.5"
+   },
+   "ok": {
+    "SMC_HOUR_FILTER_ENABLED": true,
+    "SMC_HOUR_FILTER_MODE": "enforce",
+    "BAD_HOURS_UTC": {
+     "SMC": [
+      4,
+      18,
+      19,
+      20,
+      22
+     ]
+    },
+    "DAILY_MAX_LOSS_R": 2.5
+   }
+  },
+  {
+   "env": {
+    "DAILY_MAX_LOSS_R": " 10 "
+   },
+   "ok": {
+    "SMC_HOUR_FILTER_ENABLED": true,
+    "SMC_HOUR_FILTER_MODE": "enforce",
+    "BAD_HOURS_UTC": {
+     "SMC": [
+      4,
+      18,
+      19,
+      20,
+      22
+     ]
+    },
+    "DAILY_MAX_LOSS_R": 10.0
+   }
+  },
+  {
+   "env": {
+    "DAILY_MAX_LOSS_R": "1e1"
+   },
+   "ok": {
+    "SMC_HOUR_FILTER_ENABLED": true,
+    "SMC_HOUR_FILTER_MODE": "enforce",
+    "BAD_HOURS_UTC": {
+     "SMC": [
+      4,
+      18,
+      19,
+      20,
+      22
+     ]
+    },
+    "DAILY_MAX_LOSS_R": 10.0
+   }
+  },
+  {
+   "env": {
+    "DAILY_MAX_LOSS_R": "-3"
+   },
+   "ok": {
+    "SMC_HOUR_FILTER_ENABLED": true,
+    "SMC_HOUR_FILTER_MODE": "enforce",
+    "BAD_HOURS_UTC": {
+     "SMC": [
+      4,
+      18,
+      19,
+      20,
+      22
+     ]
+    },
+    "DAILY_MAX_LOSS_R": -3.0
+   }
+  },
+  {
+   "env": {
+    "DAILY_MAX_LOSS_R": "x"
+   },
+   "err": [
+    "ValueError",
+    "could not convert string to float: 'x'"
+   ]
+  },
+  {
+   "env": {
+    "DAILY_MAX_LOSS_R": ""
+   },
+   "err": [
+    "ValueError",
+    "could not convert string to float: ''"
+   ]
+  }
+ ]
+}

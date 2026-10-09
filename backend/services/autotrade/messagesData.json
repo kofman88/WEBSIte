@@ -1,0 +1,130 @@
+{
+ "auto_trade_cross_direction": {
+  "en": "⛔ Auto-trade rejected: {opposite} position already open on {symbol}.\nNew {direction} signal skipped to avoid opposite position.",
+  "ru": "⛔ Авто-трейд отклонён: по {symbol} уже открыта позиция {opposite}.\nНовый сигнал {direction} пропущен чтобы не открывать встречную позицию."
+ },
+ "auto_trade_error": {
+  "en": "⚠️ Auto-trade: error opening {symbol}: {error}",
+  "ru": "⚠️ Авто-трейд: ошибка открытия {symbol}: {error}"
+ },
+ "auto_trade_limit": {
+  "en": "⛔ Auto-trade rejected: trade limit ({open}/{max}).\nSignal: {symbol} {direction}",
+  "ru": "⛔ Авто-трейд отклонён: лимит сделок ({open}/{max}).\nСигнал: {symbol} {direction}"
+ },
+ "auto_trade_limit_unfilled": {
+  "en": "ℹ️ <b>{symbol}</b>: LIMIT order did not fill within 60 s — price moved away. Order cancelled automatically; no position opened.",
+  "ru": "ℹ️ <b>{symbol}</b>: LIMIT ордер не исполнился за 60 с — цена ушла от лимита. Ордер отменён автоматически, позиция не открыта."
+ },
+ "auto_trade_timeout": {
+  "en": "⚠️ Auto-trade: timeout opening {symbol}. Please try again later.",
+  "ru": "⚠️ Авто-трейд: таймаут при открытии {symbol}. Попробуйте позже."
+ },
+ "auto_trade_timeout_reconciled": {
+  "en": "✅ <b>{symbol}</b>: exchange responded slowly; position is open. SL/TP are being applied automatically — check your positions.",
+  "ru": "✅ <b>{symbol}</b>: биржа отвечала с задержкой, позиция открыта. SL/TP применяются автоматически — проверьте в позициях."
+ },
+ "circuit_breaker_notif": {
+  "en": "🛑 <b>Circuit Breaker triggered</b>\n\nToday's total loss: <b>{loss:.1f}R</b>\nLimit: <b>−{limit:.1f}R</b>\n\nNew trades blocked until next UTC day.\nSignal {symbol} {direction} skipped.",
+  "ru": "🛑 <b>Circuit Breaker активирован</b>\n\nСуммарный убыток за сегодня: <b>{loss:.1f}R</b>\nЛимит: <b>−{limit:.1f}R</b>\n\nНовые сделки заблокированы до следующих UTC-суток.\nСигнал {symbol} {direction} пропущен."
+ },
+ "counter_trend": {
+  "en": "⚠️ <b>BTC counter-trend:</b> {regime}\n<i>Signal goes AGAINST the trend — increased risk!</i>",
+  "ru": "⚠️ <b>Контр-тренд BTC:</b> {regime}\n<i>Сигнал идёт ПРОТИВ тренда — повышенный риск!</i>"
+ },
+ "counter_trend_label": {
+  "en": "Counter-trend",
+  "ru": "Контр-тренд"
+ },
+ "leverage_downgrade_warning": {
+  "en": "⚠️ <b>{symbol}:</b> leverage <b>×{applied}</b> instead of requested <b>×{requested}</b>.\n\nReason: Bybit risk_limit for this symbol (protection against liquidation on large positions). Actual risk is unchanged, but more margin is required.",
+  "ru": "⚠️ <b>{symbol}:</b> плечо <b>×{applied}</b> вместо запрошенного <b>×{requested}</b>.\n\nПричина: риск-лимит Bybit для этой монеты (защита от ликвидации при большой позиции). Реальный риск не изменился, но требуется больше маржи."
+ },
+ "low_notional_skip_notif": {
+  "en": "⏸ <b>Signal skipped — balance too small for this trade</b>\n\n📍 <b>{symbol}</b> (strategy: {strategy})\nApplied risk: <b>{requested_risk}%</b> of balance\nBelow exchange minimum ($10 per trade).\n\n✅ <b>To receive these signals — pick one:</b>\n\n1️⃣ Top up balance to <b>${required_balance}+</b>\n\n2️⃣ Raise the «Risk %» setting:\n   🏠 Menu → 🤖 Auto-trade → 💰 Risk\n\n3️⃣ Enable volume Boost (bot pads qty up to $10):\n   🏠 Menu → 🤖 Auto-trade → 🛡 Risk Management\n   ⚠️ <i>actual risk may exceed the requested</i>",
+  "ru": "⏸ <b>Сигнал пропущен — баланс мал для этой сделки</b>\n\n📍 <b>{symbol}</b> (стратегия: {strategy})\nПрименённый риск: <b>{requested_risk}%</b> от баланса\nЭто меньше минимума биржи ($10 на сделку).\n\n✅ <b>Чтобы получать такие сигналы — выбери одно:</b>\n\n1️⃣ Пополни баланс до <b>${required_balance}+</b>\n\n2️⃣ Подними «Риск %» в настройках:\n   🏠 Меню → 🤖 Авто-трейд → 💰 Риск\n\n3️⃣ Включи Boost объёма (бот добивает qty до $10):\n   🏠 Меню → 🤖 Авто-трейд → 🛡 Risk Management\n   ⚠️ <i>реальный риск может превысить заявленный</i>"
+ },
+ "regime_high_vol": {
+  "en": "🌪 High volatility",
+  "ru": "🌪 Высокая волатильность"
+ },
+ "regime_ranging": {
+  "en": "↔️ Market: ranging",
+  "ru": "↔️ Рынок: флэт"
+ },
+ "regime_trending_down": {
+  "en": "📉 Market: downtrend",
+  "ru": "📉 Рынок: тренд вниз"
+ },
+ "regime_trending_up": {
+  "en": "📈 Market: uptrend",
+  "ru": "📈 Рынок: тренд вверх"
+ },
+ "risk_boosted_warning": {
+  "en": "⚠️ <b>{symbol}:</b> actual trade risk is <b>{act}%</b> instead of requested <b>{req}%</b>.\n\nReason: exchange minimum position size ($10) is larger than your configured amount. On small balances the position size is force-boosted → actual SL-loss is higher than expected.\n\nRecommendation: increase balance or reduce leverage.",
+  "ru": "⚠️ <b>{symbol}:</b> реальный риск по сделке <b>{act}%</b> вместо заявленных <b>{req}%</b>.\n\nПричина: минимальный размер позиции на бирже ($10) больше чем ваш заявленный объём. На малых балансах размер позиции принудительно увеличен → реальный убыток при SL выше.\n\nРекомендация: увеличьте баланс или уменьшите плечо."
+ },
+ "risk_capped_warning": {
+  "en": "ℹ️ <b>{symbol}:</b> actual risk <b>{act}%</b> instead of requested <b>{req}%</b>.\n\nReason: your limit <i>'Max risk' = {act}%</i> caps 'Risk per trade' = {req}% (protection against liquidation at leverage).\n\nWant to trade with {req}% risk?\nRaise 'Max risk' in settings: ⚙️ → Max risk %",
+  "ru": "ℹ️ <b>{symbol}:</b> реальный риск <b>{act}%</b> вместо заявленных <b>{req}%</b>.\n\nПричина: ваш лимит <i>«Макс. риск» = {act}%</i> ограничивает «Риск на сделку» = {req}% (защита от ликвидации при плече).\n\nХотите торговать с риском {req}%?\nПоднимите «Макс. риск» в настройках: ⚙️ → Макс. риск %"
+ },
+ "signal_skipped_stale": {
+  "en": "⏩ <b>Signal {symbol} skipped</b>\n\nPrice moved {drift_pct}% from entry level (limit {threshold}%) — signal is stale.",
+  "ru": "⏩ <b>Сигнал {symbol} пропущен</b>\n\nЦена ушла от уровня входа на {drift_pct}% (лимит {threshold}%) — сигнал устарел."
+ },
+ "skip_notify_counter_trend": {
+  "en": "⏭️ <b>{symbol}</b>: skipped\nReason: counter-trend (HTF trend opposes signal)\n💡 Allow counter-trend: /settings → 🛡 Risk Mgmt",
+  "ru": "⏭️ <b>{symbol}</b>: пропущено\nПричина: контр-тренд (HTF тренд против сигнала)\n💡 Разрешить контр-тренд: /settings → 🛡 Risk Mgmt"
+ },
+ "skip_notify_disabled_day": {
+  "en": "⏭️ <b>{symbol}</b>: skipped\nReason: trading disabled today by your schedule\n💡 Change schedule: /settings → 📅 Schedule",
+  "ru": "⏭️ <b>{symbol}</b>: пропущено\nПричина: торговля выключена в этот день недели\n💡 Изменить расписание: /settings → 📅 Расписание"
+ },
+ "skip_notify_funding": {
+  "en": "⏭️ <b>{symbol}</b>: skipped\nReason: high funding rate against you\n💡 Disable funding-gate: /settings → 🛡 Risk Mgmt",
+  "ru": "⏭️ <b>{symbol}</b>: пропущено\nПричина: высокий funding rate в твою сторону\n💡 Отключить funding-gate: /settings → 🛡 Risk Mgmt"
+ },
+ "skip_notify_generic": {
+  "en": "⏭️ <b>{symbol}</b>: skipped\nReason: filter <code>{gate}</code>\n💡 Learn more: /help → Filters",
+  "ru": "⏭️ <b>{symbol}</b>: пропущено\nПричина: фильтр <code>{gate}</code>\n💡 Подробнее: /help → Filters"
+ },
+ "skip_notify_hour_filter": {
+  "en": "⏭️ <b>{symbol}</b>: skipped\nReason: current UTC hour suboptimal for SMC (low-liquidity)\n💡 Disable filter: /settings → SMC → Hour Filter",
+  "ru": "⏭️ <b>{symbol}</b>: пропущено\nПричина: текущий час неоптимален для SMC (low-liquidity hour)\n💡 Отключить фильтр: /settings → SMC → Hour Filter"
+ },
+ "skip_notify_low_balance": {
+  "en": "⏭️ <b>{symbol}</b>: skipped\nReason: position size below exchange minimum (notional < $5)\n💡 Enable boost: /settings → 🛡 Risk Mgmt → 💰 Volume Boost",
+  "ru": "⏭️ <b>{symbol}</b>: пропущено\nПричина: размер позиции ниже минимума биржи (notional < $5)\n💡 Включить boost: /settings → 🛡 Risk Mgmt → 💰 Boost объёма"
+ },
+ "skip_notify_max_sl": {
+  "en": "⏭️ <b>{symbol}</b>: skipped\nReason: SL too wide ({sl_pct}%)\n💡 Change limit: /settings → 🛡 Risk Mgmt → Max SL %",
+  "ru": "⏭️ <b>{symbol}</b>: пропущено\nПричина: SL слишком широкий ({sl_pct}%)\n💡 Изменить лимит: /settings → 🛡 Risk Mgmt → Max SL %"
+ },
+ "skip_notify_ml_filter": {
+  "en": "⏭️ <b>{symbol}</b>: skipped\nReason: AI filter did not confirm signal\n💡 Details — «🧠 AI Insights» button under the signal",
+  "ru": "⏭️ <b>{symbol}</b>: пропущено\nПричина: AI-фильтр не подтвердил сигнал\n💡 Подробности — кнопка «🧠 AI Анализ» под сигналом"
+ },
+ "skip_notify_sl_streak": {
+  "en": "⏭️ <b>{symbol}</b>: skipped\nReason: SL-streak guard ({n} SL in 24h)\n💡 Adjust threshold: /settings → 🛡 Risk Mgmt → SL-streak",
+  "ru": "⏭️ <b>{symbol}</b>: пропущено\nПричина: SL-streak guard ({n} SL за 24ч)\n💡 Изменить порог: /settings → 🛡 Risk Mgmt → SL-streak"
+ },
+ "sl_streak_notif": {
+  "en": "⏸ <b>Auto-trade paused — SL streak</b>\n\n<b>{count} SLs</b> in the last 24h.\nThis indicates unfavorable market regime.\n\nSignal <b>{symbol} {direction}</b> skipped.\nAuto-trade resumes when 24h window has fewer than 3 SLs.\n\nWhat to do:\n• Wait for volatility/session change\n• Review stop settings (ATR multiplier)\n• Raise signal quality threshold to 4⭐\n\n<i>Disable: /settings → 🛡 Risk Management → SL-streak guard: off</i>",
+  "ru": "⏸ <b>Пауза авто-трейда — серия SL</b>\n\nЗа последние 24ч получено <b>{count} SL</b> подряд.\nЭто признак неблагоприятного режима рынка.\n\nСигнал <b>{symbol} {direction}</b> пропущен.\nАвто-трейд возобновится когда в 24-часовом окне будет меньше 3 SL.\n\nЧто делать:\n• Дождись смены волатильности / сессии\n• Проверь настройки стопа (ATR множитель)\n• Увеличь порог качества сигнала до 4⭐\n\n<i>Отключить: /settings → 🛡 Risk Management → SL-streak guard: off</i>"
+ },
+ "smc_sl_too_wide": {
+  "en": "⚠️ <b>SMC signal {symbol}</b> skipped.\n\nSL distance <b>{sl_pct}%</b> exceeds your max <b>{max_pct}%</b> — protection against liquidation at leverage.\n\nAdjust limit: <i>SMC Settings → Max SL %</i>",
+  "ru": "⚠️ <b>SMC сигнал {symbol}</b> пропущен.\n\nSL-дистанция <b>{sl_pct}%</b> превышает ваш лимит <b>{max_pct}%</b> — защита от ликвидации при плече.\n\nИзменить лимит: <i>Настройки SMC → Макс SL %</i>"
+ },
+ "tp_ladder_downgrade": {
+  "en": "ℹ️ <b>{symbol}</b>: position size ${notional_usd} only fit {n_levels} level{plural}/3 TP.\n\nFull TP1+TP2+TP3 ladder requires ≥${full_min_usd} (exchange minimum ${min_notional} per order).\n\n💡 Increase position size or leverage for full coverage.",
+  "ru": "ℹ️ <b>{symbol}</b>: размер позиции {notional_usd}$ позволил поставить только {n_levels} уровень{plural}/3 TP.\n\nПолная лестница TP1+TP2+TP3 требует ≥{full_min_usd}$ (минимум {min_notional}$ на каждый ордер биржи).\n\n💡 Увеличь размер позиции или плечо для полного покрытия."
+ },
+ "tp_placement_failed": {
+  "en": "⚠️ <b>Failed to place TP on {symbol}</b>\n\nPosition is open, but take-profit orders were rejected by exchange.\nBot will keep retrying automatically (BE-monitor every 30s).\n\n🛑 <b>Check the position manually in your exchange app</b> and close it yourself if something goes wrong.",
+  "ru": "⚠️ <b>Не удалось поставить TP по {symbol}</b>\n\nПозиция открыта, но тейк-профит ордера не приняты биржей.\nБот продолжит попытки автоматически (BE-monitor каждые 30с).\n\n🛑 <b>Проверь позицию вручную в приложении биржи</b> и при необходимости закрой её сам, если что-то пойдёт не так."
+ },
+ "zb_cooldown_set_notif": {
+  "en": "⏸ <b>Zero balance — trading paused</b>\n\n📍 <b>{symbol}</b> ({exchange})\nExchange returned «insufficient funds» on order attempt.\n\n🕐 Bot pauses auto-trading for <b>{minutes} min</b> to avoid API flooding. It will retry after cooldown expires.\n\n✅ <b>What to do:</b>\n1️⃣ Top up your exchange balance\n2️⃣ Or lower «Risk %»: 🏠 Menu → 🤖 Auto-trade → 💰 Risk\n\n<i>Scanners will keep sending signals — you can open them manually via the «🚀 Trade» button once balance is restored.</i>",
+  "ru": "⏸ <b>Нулевой баланс — торговля приостановлена</b>\n\n📍 <b>{symbol}</b> ({exchange})\nБиржа вернула «недостаточно средств» при попытке открыть позицию.\n\n🕐 Бот приостановит авто-трейд на <b>{minutes} минут</b>, чтобы не флудить API. По истечении cooldown попробует снова.\n\n✅ <b>Что делать:</b>\n1️⃣ Пополни баланс на бирже\n2️⃣ Или снизь «Риск %»: 🏠 Меню → 🤖 Авто-трейд → 💰 Риск\n\n<i>Сканеры продолжат присылать сигналы — ты сможешь открыть их вручную кнопкой «🚀 Торговать», когда баланс восстановится.</i>"
+ }
+}

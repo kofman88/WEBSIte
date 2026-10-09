@@ -21,6 +21,59 @@
 | D13 | Механика продукта | Механика Veles поверх трёх стратегий бота: «бот» = стратегия (Уровни/SMC/Объём) с набором параметров; бэктест перед запуском; подбор параметров через Genome; витрина ботов с реальной статистикой трекера; копирование чужого бота в один клик; челлендж как игровой слой. Свободный конструктор (свои условия, сетка/DCA/мартингейл) — отдельным модулем после запуска |
 | D14 | Модель оплаты | На выбор пользователя: подписка Pro ($69/30 дн.) или процент с прибыльных сделок с месячным потолком (по PnL биржи) |
 | D12 | Не переносится | Guest-режим в чатах, журнал сделок (`/journal`), TON-платежи, Turso-синхронизация, админ-команды Telegram, мониторы метрик бота |
+| D15 | API-ключи с правом вывода | При добавлении ключа сайт спрашивает у биржи права ключа и **не сохраняет** ключ с правом вывода средств; если права определить не удалось (сеть, таймаут, не-200, неожиданный ответ, ошибка API) — ключ тоже не сохраняется, пользователь видит «попробуйте ещё раз» (fail-closed). Подробности ниже |
+
+### D15 — проверка прав ключа при добавлении
+
+`services/autotrade/keyPermissions.js`, вызов в `POST /api/exchanges/keys` (routes/exchanges.js) до
+`exchangeService.addKey`. Тексты отказа — ru/en по `users.locale`; 400 `KEY_CAN_WITHDRAW`
+(«у ключа включено право на вывод — создайте ключ только с чтением и торговлей»), 503
+`KEY_PERMISSIONS_UNVERIFIED` («не удалось проверить права — попробуйте ещё раз»). Ключ, секрет,
+passphrase и подпись не логируются; в лог идёт только биржа и вердикт.
+
+| Биржа | Запрос | Право вывода |
+|---|---|---|
+| Bybit | `GET api.bybit.com/v5/user/query-api` (V5-подпись; demo-ключ → `api-demo.bybit.com`) | любой элемент `result.permissions.*` со словом `Withdraw` (группа `Wallet`) |
+| Binance | `GET api.binance.com/sapi/v1/account/apiRestrictions` (SIGNED, `X-MBX-APIKEY`) | `enableWithdrawals === true`; не булево значение → «не определено» |
+| OKX | `GET www.okx.com/api/v5/account/config` (`OK-ACCESS-*` + passphrase; demo → `x-simulated-trading: 1`) | `data[0].perm` содержит `withdraw` |
+| BingX | `GET open-api.bingx.com/openApi/v1/account/apiPermissions` (подпись, `X-BX-APIKEY`) | `data.permissions` содержит код `5` или имя со словом `withdraw` |
+
+Подписи — те же HMAC-хелперы, что у трейдеров M13a (`bybitSign`, `binanceSign`, `bingxSign`,
+`okxSign`). Формы ответов взяты из документации бирж по памяти: в песочнице доступа к документации
+нет, поэтому перед включением каждой биржи ответ эндпоинта проверяется на живом ключе (тесты —
+`backend/tests/autotrade/core/keyPermissions.test.js`, записанные ответы всех четырёх бирж).
+Testnet-ключи Binance/BingX: у тестовых сетей нет этих эндпоинтов → «не определено» → отказ.
+В тестах (NODE_ENV=test / vitest) транспорт по умолчанию не открывает соединений.
+
+### D5 / M13b — запуск автотрейда на сайте
+
+`services/autotrade/index.js` (`createAutoTrade`) — порт `auto_trade.execute_auto_trade` со всем, что
+он вызывает; движок-воркер подключает его как `deps.autoTrade` планировщика **только при
+`AUTOTRADE_ENABLED=1`** (по умолчанию выключено: деплой сам торговлю не включает). `AUTOTRADE_EXCHANGES`
+— список бирж (по умолчанию `bybit,bingx`); для биржи вне списка сканеры получают «нет ключей»
+(ни ордера, ни записи в БД — как у пользователя без ключа). Источники того, что бот читал из своих
+таблиц: строка `users` = `trader_settings` + `users.telegram_username` + passphrase OKX из
+`exchange_keys`; ключ — `exchange_keys` (метка `default`, иначе самый новый — тот же, что Mini App
+показывает подключённым), расшифровка только в памяти, в лог не пишется; ADMIN_IDS = `users.is_admin`;
+`mutation_log` → `audit_log`; `notification_queue` не переносится (потерянное уведомление не
+переотправляется — уведомления сайта и так хранятся в `notifications`). Неразбираемый
+`DAILY_MAX_LOSS_R` не даёт автотрейду стартовать (бот падает при импорте config.py), а не выключает
+circuit breaker молча.
+
+Сверка с ботом: `backend/tests/autotrade/core` — 113 векторов `execute_auto_trade` (CPython 3.11,
+фейковые трейдеры, виртуальное время; прогоняются и через `createExecutor`, и через `createAutoTrade`),
+36 сценариев лестницы partial TP на уровне HTTP-запросов, `%`/`str.format` и `config.py` из CPython 3.11.
+Воспроизводятся (а не исправляются) причуды бота: три гейта (`hour_of_day_levels`, `min_quality`,
+`trending_only`) заменяют результат на `{ok:false, executed:false, skip}`; `_price_multiplier` для OKX
+ищет `bybit_price_multiplier` → WARNING и 1.0 на каждый вызов; `ai_filter_json` не сохраняется
+(`database.db_exec` нет); строка риска в сообщении — только при тёплом кэше баланса; сделка,
+найденная reconcile после таймаута, остаётся в `PLACING`; предупреждение circuit breaker — один раз на
+процесс; ветка устаревания WS мертва (HTTP-цена всегда); в partial TP запрос средней цены входа и
+финальная проверка позиции Bybit идут на live-хост (`kwargs["bybit_demo"]` никогда не задан);
+`fixed_amount` для OKX запрашивает баланс без passphrase; `fixed_amount` обходит `max_risk_pct`;
+BingX partial TP без `positionSide`, Binance — успех при `code >= 0`; `cross_direction_msg` кладётся в
+результат, но ни один сканер его не отправляет. Исправлены только D6: `executed=false` при отказе биржи,
+`fixed_amount` — процент баланса (в настройках 0,5…3 %).
 
 Golden-тесты: `backend/tests/golden` (фикстуры сгенерированы Python-кодом бота, см. там README).
 
