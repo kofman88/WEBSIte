@@ -8,6 +8,9 @@
  *          coins?: [coin], candles?: { coin: {t, o, h, l, c, v} }, cpuShare?, seed?, timeoutS? }
  *   out: { type: 'progress', id, strategy, tf, generation, done, total, best_fit, best_wr, zero_trades }
  *        { type: 'result', id, result: {ok: true, …evolve_generation result} | {ok: false, error} }
+ *   in : { type: 'regime', regime } → market_regime.get_cached_regime() of this thread (the
+ *          engine's cached BTC regime; the evolve message carries the first value) — accepted
+ *          while a generation runs
  *   in : { type: 'shutdown' } → closes the port.
  *
  * CPU budget (the bot's [GENOME-CPU-BUDGET]): after every coin backtest the evaluation sleeps
@@ -37,8 +40,20 @@ function framesFrom(candles) {
 }
 
 /** Handle one message; `post` sends a message back (parentPort.postMessage in the worker). */
+/** The cached regime the genome reads in this thread (services/genome/regime.js provider). */
+const regimeState = { value: null };
+function setRegime(value) {
+  regimeState.value = value === undefined ? null : value;
+  require('../services/genome/regime').setRegimeProvider(() => regimeState.value);
+}
+
 async function handleMessage(msg, post) {
+  if (msg && msg.type === 'regime') {
+    setRegime(msg.regime);
+    return null;
+  }
   if (!msg || msg.type !== 'evolve') return null;
+  if (Object.prototype.hasOwnProperty.call(msg, 'regime')) setRegime(msg.regime);
   const C = require('../services/genome/config');
   const evolve = require('../services/genome/evolve');
   const { DeadlineError } = require('../services/genome/evaluate');
@@ -84,6 +99,10 @@ if (!isMainThread && parentPort) {
       parentPort.close();
       return;
     }
+    if (msg && msg.type === 'regime') {
+      handleMessage(msg, () => {});
+      return;
+    }
     if (busy) {
       parentPort.postMessage({ type: 'result', id: msg && msg.id, result: { ok: false, error: 'Эволюция уже идёт, подожди 1-3 мин' } });
       return;
@@ -95,4 +114,4 @@ if (!isMainThread && parentPort) {
   });
 }
 
-module.exports = { handleMessage, framesFrom, lowerPriority };
+module.exports = { handleMessage, framesFrom, lowerPriority, setRegime, regimeState };

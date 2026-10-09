@@ -333,20 +333,33 @@ if (!IS_TEST) {
   });
 }
 
-// Background services. The engine worker (scanner / tracker / trade-ops)
-// is added in M9+ via worker_threads with the restart budget the old
-// scanner had; until then the site boots with no scanner.
+// Background services. The signal engine (workers/engineWorker.js: scanners, WS feeds, trend
+// monitor, tracker … in a worker thread + ghost cleanup / Genome loops here) starts when
+// config.engineWorker (ENGINE_WORKER=1, default on in production); never under tests.
+let engine = null;
 function startBackground() {
   maintenanceService.start();
   securityMonitor.start();
   paymentWatcher.start();
   // bot loop A: hourly subscription expiry / renewal reminders (first run after 60 s)
   planService.startExpiryLoop();
+  if (config.engineWorker && !IS_TEST) {
+    try {
+      engine = require('./workers/engineWorker').startEngine({ log: logger });
+      logger.info('engine worker started');
+    } catch (err) {
+      logger.error('engine worker start failed', { err: err.message });
+    }
+  }
 }
 
 function shutdown(sig) {
   return async () => {
     logger.info('received ' + sig + ', shutting down');
+    if (engine) {
+      try { await engine.stop(); } catch (_e) { /* */ }
+      engine = null;
+    }
     try { maintenanceService.stop(); } catch (_e) { /* */ }
     try { planService.stopExpiryLoop(); } catch (_e) { /* */ }
     try { db.close(); } catch (_e) { /* */ }

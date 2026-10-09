@@ -8,13 +8,19 @@
  * `rr_structural` captured BEFORE the ladder validity check. Spec strategy-smc.md §5.4.
  *
  * Pure: `analysis` is the analyzer dict, `cfg` the builder SMCConfig object
- * (SL_BUFFER_PCT is the only field read here).
+ * (SL_BUFFER_PCT is the only field read here). `log` (optional) receives the bot's
+ * logging.getLogger("CHM.SMC.SignalBuilder") INFO line of an adjusted stop; without it
+ * (golden, backtests) the function is silent.
  */
 
 const { pyRound } = require('../common/pyround');
 const { pyTruthy, pyOr, pyGet, pyMax2, pyMin2, pyMinList, pyMaxList } = require('../common/pyval');
 const { adjustSlForLiquidity } = require('../common/liquiditySl');
 const { pyUpper } = require('../common/pyUnicode');   // CPython 3.11 str case / whitespace methods
+const { fmtG } = require('../common/pyfmt');
+
+/** `%s` of the log arguments (str / bool / None) */
+const pyS = (v) => (v === null || v === undefined ? 'None' : v === true ? 'True' : v === false ? 'False' : String(v));
 
 const MEMCOIN_KW = Object.freeze(['FLOKI', 'PEPE', 'SHIB', 'DOGE', 'WIF', 'BONK', 'NEIRO',
   'MEME', 'SATS', 'TURBO', 'CATS', 'ACT', 'BOME', 'BOOK']);
@@ -40,7 +46,7 @@ const ATR_FLOOR_MULT = 1.0;   // [SL-WIDER 2026-05-10] risk must be ≥ 1.0×ATR
  * tp1, tp2, tp3, rr (2 dp), risk_pct (3 dp). Returns null when the OB is missing,
  * the stop is degenerate / too tight for the coin class / below the ATR floor.
  */
-function calculateLevels(analysis, direction, cfg) {
+function calculateLevels(analysis, direction, cfg, log = null) {
   const obKey = direction === 'LONG' ? 'bull_ob' : 'bear_ob';
   const ob = pyGet(pyGet(analysis, 'ob', {}), obKey, {});
   const fvg = pyGet(analysis, 'fvg', {});
@@ -62,14 +68,31 @@ function calculateLevels(analysis, direction, cfg) {
 
   // [SMC-LIQUIDITY-AWARE-SL] push the SL beyond equal-level clusters (pure widening)
   const liqForAdjust = pyOr(pyGet(analysis, 'liquidity', {}), {});
+  const slBefore = sl;
   const [slAdj, liqInfo] = adjustSlForLiquidity(sl, direction, liqForAdjust);
   sl = slAdj;
+  if (log && pyTruthy(liqInfo.adjusted)) {
+    // "%.6g→%.6g target=%.6g capped=%s reason=%s"; target `or 0.0`
+    const target = pyTruthy(liqInfo.target) ? liqInfo.target : 0.0;
+    log.info(`[SMC-LIQUIDITY-AWARE-SL] sym=${pyS(pyGet(analysis, 'symbol', '?'))} dir=${direction} `
+      + `sl=${fmtG(slBefore, 6)}→${fmtG(sl, 6)} target=${fmtG(target, 6)} capped=${pyS(liqInfo.capped)} `
+      + `reason=${pyS(liqInfo.reason)}`);
+  }
 
   const risk = Math.abs(entryMid - sl);
   if (risk <= 0) return null;
 
   // ── minimum stop by coin class (ATR + per-type floor) ──
-  const symUp = pyUpper(String(pyGet(analysis, 'symbol', '')));
+  // analysis.get("symbol", "").upper(): a non-str symbol (None …) raises AttributeError
+  const symRaw = pyGet(analysis, 'symbol', '');
+  if (typeof symRaw !== 'string') {
+    const tn = symRaw === null || symRaw === undefined ? 'NoneType' : typeof symRaw === 'boolean' ? 'bool'
+      : typeof symRaw === 'number' ? (Number.isInteger(symRaw) ? 'int' : 'float') : Array.isArray(symRaw) ? 'list' : 'dict';
+    const e = new TypeError(`'${tn}' object has no attribute 'upper'`);
+    e.name = 'AttributeError';
+    throw e;
+  }
+  const symUp = pyUpper(symRaw);
   const memcoin = isMemcoin(symUp);
   const major = isMajor(symUp);
 

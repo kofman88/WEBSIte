@@ -25,6 +25,7 @@ const { pyMax2, pyMin2 } = require('../../strategies/common/pyval');
 const { pySum } = require('../../strategies/common/series');
 const { fmtFixed } = require('../../strategies/common/pyfmt');
 const C = require('./config');
+const genomeLock = require('./lock');
 const { defaultRng } = require('./rng');
 const ops = require('./operators');
 const evaluate = require('./evaluate');
@@ -451,7 +452,7 @@ async function triggerEvolutionNow(strategy, tf = null, deps = {}) {
   const T = tf || C.getDefaultTf(strategy);
   const lock = d.state.lock;
   if (lock.held) return { ok: false, error: 'Эволюция уже идёт, подожди 1-3 мин' };
-  lock.held = true;
+  await genomeLock.acquire(lock);
   try {
     const manual = { at: d.mono() + (deps.manualTimeoutS || C.MANUAL_EVOLUTION_TIMEOUT_S) * 1000, kind: 'manual' };
     const result = await evolveGeneration(strategy, T, { ...deps, deadlines: [...(deps.deadlines || []), manual] });
@@ -461,7 +462,7 @@ async function triggerEvolutionNow(strategy, tf = null, deps = {}) {
     d.log.warn(`genome.trigger_evolution_now() unhandled exception: ${e && e.message}`);
     return { ok: false, error: String(e && e.message !== undefined ? e.message : e) };
   } finally {
-    lock.held = false;
+    genomeLock.release(lock);
   }
 }
 
@@ -525,16 +526,14 @@ async function genomeEvolutionLoop(deps = {}) {
         await d.sleep(C.EVOLUTION_INTERVAL * 1000);
         continue;
       }
-      if (d.state.lock.held) {
-        await d.sleep(60_000);
-        continue;
-      }
-      d.state.lock.held = true;
+      // async with _evolution_lock: a running manual evolution is waited for, then the cycle runs
+      await genomeLock.acquire(d.state.lock);
       try {
+        if (stop()) break;
         await (deps.runCycle || runEvolutionCycle)(deps);
         markEvolutionDone(d.store, d.now());
       } finally {
-        d.state.lock.held = false;
+        genomeLock.release(d.state.lock);
       }
     } catch (e) {
       d.log.warn(`🧬 genome_evolution_loop: ${e && e.message}`);

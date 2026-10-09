@@ -356,3 +356,92 @@ table), plus the one-shot migration flags (`migr_*`). TON keys (`pending_ton_sub
   user starts from the defaults with `onboarding_done = 0` (`lang` from
   `users.locale`). The v9 "CHM Public Signals" system bot went with `trading_bots`;
   its non-loginable system user row (`system@chmup.top`) is left in place.
+
+## The engine worker: scheduler, scanners, delivery (M9)
+
+`workers/engineWorker.js` runs the signal engine off the HTTP thread (`ENGINE_WORKER=1`,
+default on in production, never under tests): `startEngine()` in `server.js` spawns the
+worker and supervises it with the bot's `_guarded_restart` backoff; the worker runs the
+`worker` side of `scheduler.js` (the bot.py `main()` loops in gather order, timings pinned by
+the PY311 trace in `tests/engine/worker/scheduler.timing.test.js`), the main thread runs the
+`main` side (ghost cleanup, Genome maintenance and evolution) and answers the worker's
+delivery RPCs (`signalDelivery.js`).
+
+Before the loops the worker boots like bot.py `main()` before its gather
+(`scheduler.boot()`, asked for by `startEngine`): "⏳ Инициализация кэша..." +
+`candleCache.initCache(Config.CACHE_MAX_KEYS)` (env `CACHE_MAX_KEYS`, legacy
+`CACHE_MAX_SYMBOLS`, default 4000), then `exchangeSymbols.startBackgroundRefresh()` (the
+per-exchange listings the scanners filter by; "📋 Exchange symbols loaded: {…}"). The rest of
+that block belongs to later milestones (trader time sync, auto-trade restores: M13; the ML
+filter is not ported). `botConfig()` is config.py: the performance constants (12 / 10 / 15 /
+0.01 / 5, no env), `PAYMENT_ADDRESS`, `LEVELS_MIN_RR` (env, default 1.8).
+
+### The three scanners as bot.py starts them
+
+`scanners/index.js` resolves the modules by the bot's names; the scheduler hands each the
+thread's wiring (`ctx.scannerDeps(S)`):
+
+| bot.py | site |
+|---|---|
+| `MidScanner(config, bot, um, stop_event=_stop_event)`; `scanner._health = health` | `new MidScanner(botConfig(env), ctx.bot, um, stopEvent, scannerDeps('LEVELS'))`; `StopEvent.isSet()` ends its loops |
+| `scanner.fetcher = make_fetcher()`, used by every loop | the thread's BingX REST client (`bingxRest.getRest()`) + `getGlobalTrend` (`marketData/globalTrend` over the trend monitor's confirmed BTC state) = `ctx.fetcher()` |
+| `run_volume_scanner(bot, um, scanner.fetcher, health=health)` | `runVolumeScanner(ctx.bot, um, fetcher, {health, signal, deps: scannerDeps('VOLUME')})`, which configures the module instance (the one `cache_gc` and the settings API use) |
+| `run_smc_scanner(bot, um, scanner.fetcher, health=health)` | `runSmcScanner(ctx.bot, um, fetcher, {health, signal, deps})` |
+| `ws_feed.register_on_bar_close(cb)` | `marketData/bingxWsFeed.registerOnBarClose`; one stable callback per scanner, so a restart does not add a second one (bound-method equality in the bot) |
+| `asyncio.sleep`, `time.time` | the scheduler's abortable sleep and clock |
+| `candle_store` + `HistoryLoader` (LEVELS warm-up) | `marketData/candleStore` |
+| `execute_auto_trade`, the user's API keys | `deps.autoTrade` (M13b); until then none: no keys, so no trade and no counter-trend notice, for all three scanners |
+
+### What a Telegram call becomes
+
+| bot | site (`signalDelivery.js`) |
+|---|---|
+| SMC `safe_send_message(card / preview / notice)` | `deliver({kind, …})` → bool |
+| LEVELS / VOLUME `safe_send_message(bot, uid, text, …)` | the bot's function (`levelsScanner.safeSendMessage`: split > 4096, retries, error classes) over `bot.sendMessage(uid, text, kw)` → the Message `{message_id = notifications.id, html, actions, lang}`, or an error named `TelegramForbiddenError` (deleted / inactive user), `TelegramBadRequest` or `TelegramNetworkError` (RPC not answered) |
+| `on_sent=remember_signal_message(trade_id)` | `scheduler.siteRememberSignalMessage(trade_id)` marks the message as that trade's card (`kw.site.tradeId`); the main thread stores `signal_msg_id` + the card snapshot (strategy / symbol / direction from the row) |
+| the other LEVELS / VOLUME messages | notices: `siteType: 'trade'` for the auto-trade notices (counter-trend, limit), `report` for the rest (hints, back-fill, expiry) |
+| `send_signal_chart_bg` | `scheduler.siteSendChart` → a `deliverChart` descriptor (D3: the client draws it); the trade id from the signal's row; < 10 bars skipped |
+| `bot.send_message(uid, …)` (trend, evening report) / admin alerts | `sendText` / `alertAdmins` |
+
+`disable_notification` (quiet hours) → `silent`: in-app + SSE only (notifier, M10a).
+
+### Shutdown = the bot's task cancellation
+
+`scheduler.stop()` sets the stop event and aborts every loop (bot.py cancels the gather
+tasks), waits ≤ 4 s, then force-saves the signal registry. A running cycle gets the bot's
+`CancelledError` at its next checkpoint: LEVELS (between steps and symbols; re-raised past
+"Ошибка цикла"; the [NOT-DELIVERED] path marks an undelivered row SKIP), VOLUME (between
+symbols; "Volume scanner stopped."), SMC (after the per-symbol pause; "SMC Scanner stopped." +
+re-raise, [SMC-RESTART-ON-STOP]). A loop stopped while it waits ends at once and silently
+(the bot's `wait_for` sits outside the `try`). Pinned by
+`tests/engine/worker/scannerWiring.test.js` and `engine.stop.integration.test.js`.
+
+### Tests and fixtures
+
+| test | what | regenerate |
+|---|---|---|
+| `tests/engine/scanners/levels_scan.test.js` | LEVELS `MidScanner._cycle()` replay, 12 cycles, 15 users | `py/levels_scan.py` |
+| `tests/engine/scanners/levels_units.test.js` | LEVELS unit vectors (jobs, safe_send, WS trigger, scan loop, hint throttle …) | `py/levels_units.py` |
+| `tests/engine/scanners/volume_scan.test.js`, `volume_units.test.js` | VOLUME `_scan_cycle` replay, unit vectors | `py/volume_scan.py`, `py/volume_units.py` |
+| `tests/engine/scanners/smcScanner.diff.test.js` | SMC `_scan_cycle` + `_send_smc_card_bg` replay | `gen/gen_smc_scanner.py` |
+| `tests/engine/scanners/adv/adv_scan.test.js` | adversarial LEVELS + SMC + VOLUME + trend monitor + evening report on one shared pipeline, 19 ticks, 29 randomized users, mutated candles (`adv_replay.js` / `adv_compare.js`, families in `adv_families.js`) | `adv/py/adv_drive.py` (~1 h) |
+| `tests/engine/scanners/adv/adv_units.test.js` | `_sparse_merge` / `TradeCfg.from_json` / `SMCUserCfg.from_json` / `_load_sparse` on adversarial JSON (result, exception, WARNING lines) | `adv/py/adv_units.py` |
+| `tests/engine/worker/scheduler.timing.test.js` | bot.py loop instants over 6 simulated hours | `gen/gen_scheduler_trace.py` |
+| `tests/engine/worker/engine.integration.test.js` | the worker with the three real scanners over a 1h and a 4h close (golden candles) | — |
+| `tests/engine/worker/engine.stop.integration.test.js` | a stop in the middle of those cycles | — |
+
+Every Python generator runs the bot's own code with CPython 3.11 from the bot checkout
+(read-only): `cd <bot> && PYTHONDONTWRITEBYTECODE=1 BOT_TOKEN_CHM=test:token ADMIN_IDS=123
+<py311> <site>/backend/tests/engine/…/<generator>`, then `rm -f <bot>/signal_registry.json`.
+
+### Not wired yet (later milestones)
+
+* Auto-trade (`execute_auto_trade`, API keys, balances for the position line): M13b, through
+  `deps.autoTrade`; the BE-monitor body of `MidScanner._be_monitor_loop` (only its hint-throttle
+  restore runs): M15.
+* The cancellation is cooperative: a cycle stops at its next checkpoint (between symbols / steps),
+  not inside an in-flight REST call or an analysis; the analysis runs inline in the worker thread,
+  so the LEVELS 10 s analyze timeout applies only to an `analysisExecutor` that returns a promise.
+* The scanners' `@username` in logs falls back to the user id (trader_settings has no Telegram
+  username); the LEVELS expiry notice keeps the bot's text (payment address from
+  `PAYMENT_ADDRESS`), which the site's billing (M18) is expected to replace.

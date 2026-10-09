@@ -20,10 +20,11 @@
 
 'use strict';
 
-const { pyJsonDumps } = require('./pyjson');
+const { pyJsonDumps, tagJsonTokens } = require('./pyjson');
 const { isClose } = require('./pycoerce');
 const { floatFromStr } = require('../../strategies/common/pynum');
-const { pyMax, pyMin } = require('../../strategies/common/pyround');   // builtin max()/min(): a NaN 2nd argument is ignored
+const { pyMax } = require('../../strategies/common/pyround');   // builtin max(): a NaN 2nd argument is ignored
+const { pyLoads, pyTypeName } = require('./signalTradesRepo');          // json.loads (NaN / Infinity) + type(x).__name__
 
 // [name, pyType, default] — dataclass order (= json.dumps key order).
 const FIELDS = Object.freeze([
@@ -74,29 +75,119 @@ const INT_LITERAL_DEFAULTS = Object.freeze(new Set(['min_volume_usdt']));
 // Config.LEVELS_MIN_RR = float(os.environ.get("LEVELS_MIN_RR", "1.8")) — CPython float() of the text
 const LEVELS_MIN_RR = (process.env.LEVELS_MIN_RR ? floatFromStr(process.env.LEVELS_MIN_RR) : undefined) ?? 1.8;
 
-/** TradeCfg.__post_init__ — exact order. Mutates and returns cfg. */
-function clamp(cfg) {
-  if (cfg.min_rr < 1.0) cfg.min_rr = 1.0;
-  if (cfg.max_risk_pct > 5.0) cfg.max_risk_pct = 5.0;
-  if (cfg.max_risk_pct < 0.1) cfg.max_risk_pct = 0.1;
-  if (cfg.cooldown_bars < 0) cfg.cooldown_bars = 0;
-  if (cfg.tp1_rr < cfg.min_rr) cfg.tp1_rr = cfg.min_rr;
-  if (cfg.tp2_rr <= cfg.tp1_rr) cfg.tp2_rr = cfg.tp1_rr + 1.0;
-  if (cfg.tp3_rr <= cfg.tp2_rr) cfg.tp3_rr = cfg.tp2_rr + 1.5;
-  if (cfg.scan_interval < 60) cfg.scan_interval = 60;
-  if (cfg.scan_interval > 86400) cfg.scan_interval = 86400;
-  cfg.min_quality = pyMax(0, pyMin(10, cfg.min_quality));
-  cfg.vol_mult = pyMax(0.1, pyMin(5.0, cfg.vol_mult));
+// ── CPython comparison / addition of the __post_init__ operands ─────────────────────
+// A JSON override is not coerced, so a clamp can meet a str / None / list / dict value: CPython
+// compares numbers (bool included) numerically, two str by code point, and raises TypeError for
+// any other pair; `+` adds numbers and raises for the rest. The TypeError text names
+// type(x).__name__ of both operands, so the Python type of every field value is tracked: a JSON
+// literal's own type (2 → int, 2.0 → float), a stored column / default by its declared type,
+// a clamp assignment by the assigned object.
+const isNum = (v) => typeof v === 'number' || typeof v === 'boolean';
+function tname(v) {
+  if (v === null || v === undefined) return 'NoneType';
+  if (typeof v === 'boolean') return 'bool';
+  if (typeof v === 'number') return Number.isInteger(v) ? 'int' : 'float';
+  if (typeof v === 'string') return 'str';
+  return Array.isArray(v) ? 'list' : 'dict';
+}
+/** `a <op> b` with CPython's rules; aType / bType = type(a).__name__ / type(b).__name__. */
+function pyCmp(a, op, b, aType, bType) {
+  if (isNum(a) && isNum(b)) {
+    const x = Number(a);
+    const y = Number(b);
+    return op === '<' ? x < y : op === '<=' ? x <= y : op === '>' ? x > y : x >= y;
+  }
+  if (typeof a === 'string' && typeof b === 'string') {
+    const x = Array.from(a).map((c) => c.codePointAt(0));
+    const y = Array.from(b).map((c) => c.codePointAt(0));
+    let c = 0;
+    for (let i = 0; i < Math.min(x.length, y.length) && c === 0; i++) c = x[i] - y[i];
+    if (c === 0) c = x.length - y.length;
+    return op === '<' ? c < 0 : op === '<=' ? c <= 0 : op === '>' ? c > 0 : c >= 0;
+  }
+  throw new TypeError(`'${op}' not supported between instances of '${aType}' and '${bType}'`);
+}
+/** `a + 1.0` / `a + 1.5` with CPython's rules. */
+function pyAddFloat(a, b, aType) {
+  if (isNum(a)) return Number(a) + b;
+  if (typeof a === 'string') throw new TypeError('can only concatenate str (not "float") to str');
+  throw new TypeError(`unsupported operand type(s) for +: '${aType}' and 'float'`);
+}
+/** builtin max(lo, min(hi, v)): min keeps v when `v < hi`, max keeps m when `m > lo` → [value, type]. */
+function pyBetween(lo, hi, v, vType, litType) {
+  const m = pyCmp(v, '<', hi, vType, litType) ? [v, vType] : [hi, litType];
+  return pyCmp(m[0], '>', lo, m[1], litType) ? m : [lo, litType];
+}
+
+/**
+ * TradeCfg.__post_init__ — exact order. Mutates and returns cfg. `ty(name)` is the Python type of
+ * the field's current value. QUIRK: an override value of a type CPython cannot compare (e.g.
+ * "300" for scan_interval) raises TypeError out of the constructor — `_sparse_merge`
+ * (get_long_cfg) propagates it, from_json logs and falls back.
+ */
+function clamp(cfg, ty = (k) => tname(cfg[k])) {
+  const T = {};
+  const t = (k) => (Object.prototype.hasOwnProperty.call(T, k) ? T[k] : ty(k));
+  const set = (k, v, vt) => { cfg[k] = v; T[k] = vt; };
+  if (pyCmp(cfg.min_rr, '<', 1.0, t('min_rr'), 'float')) set('min_rr', 1.0, 'float');
+  if (pyCmp(cfg.max_risk_pct, '>', 5.0, t('max_risk_pct'), 'float')) set('max_risk_pct', 5.0, 'float');
+  if (pyCmp(cfg.max_risk_pct, '<', 0.1, t('max_risk_pct'), 'float')) set('max_risk_pct', 0.1, 'float');
+  if (pyCmp(cfg.cooldown_bars, '<', 0, t('cooldown_bars'), 'int')) set('cooldown_bars', 0, 'int');
+  if (pyCmp(cfg.tp1_rr, '<', cfg.min_rr, t('tp1_rr'), t('min_rr'))) set('tp1_rr', cfg.min_rr, t('min_rr'));
+  if (pyCmp(cfg.tp2_rr, '<=', cfg.tp1_rr, t('tp2_rr'), t('tp1_rr'))) set('tp2_rr', pyAddFloat(cfg.tp1_rr, 1.0, t('tp1_rr')), 'float');
+  if (pyCmp(cfg.tp3_rr, '<=', cfg.tp2_rr, t('tp3_rr'), t('tp2_rr'))) set('tp3_rr', pyAddFloat(cfg.tp2_rr, 1.5, t('tp2_rr')), 'float');
+  if (pyCmp(cfg.scan_interval, '<', 60, t('scan_interval'), 'int')) set('scan_interval', 60, 'int');
+  if (pyCmp(cfg.scan_interval, '>', 86400, t('scan_interval'), 'int')) set('scan_interval', 86400, 'int');
+  cfg.min_quality = pyBetween(0, 10, cfg.min_quality, t('min_quality'), 'int')[0];
+  cfg.vol_mult = pyBetween(0.1, 5.0, cfg.vol_mult, t('vol_mult'), 'float')[0];
   return cfg;
 }
 
-/** TradeCfg(**partial): unknown keys ignored, defaults filled, clamps applied. */
-function tradeCfg(partial = null) {
+/** Python type of a stored field value (a column / the dataclass default): its declared type. */
+function declaredType(name, v, isDefault) {
+  if (typeof v !== 'number') return tname(v);
+  if (isDefault && INT_LITERAL_DEFAULTS.has(name)) return 'int';
+  return FIELD_TYPES[name] === 'float' ? 'float' : tname(v);
+}
+
+/** top-level key → 'int' | 'float' of the number literals of a JSON object text (json.loads types). */
+function literalKinds(text) {
+  const kinds = new Map();
+  try {
+    const r = tagJsonTokens(String(text), () => true);
+    const obj = r ? JSON.parse(r.text) : null;
+    if (obj && typeof obj === 'object' && !Array.isArray(obj)) {
+      for (const [k, v] of Object.entries(obj)) {
+        if (typeof v === 'string' && v.startsWith(r.tag)) kinds.set(k, /^-?\d+$/.test(v.slice(r.tag.length)) ? 'int' : 'float');
+      }
+    }
+  } catch (_e) { /* json.loads already accepted it; nothing to type */ }
+  return kinds;
+}
+
+/** typeOf for values read from JSON text: a number is typed by its literal, the rest by value. */
+function jsonTypeOf(text) {
+  let kinds = null;
+  return (k, v) => {
+    if (typeof v !== 'number') return tname(v);
+    kinds = kinds || literalKinds(text);
+    return kinds.get(k) || tname(v);
+  };
+}
+
+/**
+ * TradeCfg(**partial): unknown keys ignored, defaults filled, clamps applied. `typeOf(name, v)`
+ * (optional) = the Python type of partial[name] (JSON literals); without it a partial value has
+ * its declared type, like a stored column.
+ */
+function tradeCfg(partial = null, typeOf = null) {
   const cfg = {};
+  const given = {};
   for (const name of FIELD_NAMES) {
-    cfg[name] = partial && Object.prototype.hasOwnProperty.call(partial, name) ? partial[name] : DEFAULTS[name];
+    given[name] = Boolean(partial) && Object.prototype.hasOwnProperty.call(partial, name);
+    cfg[name] = given[name] ? partial[name] : DEFAULTS[name];
   }
-  return clamp(cfg);
+  return clamp(cfg, (k) => (given[k] && typeOf ? typeOf(k, cfg[k]) : declaredType(k, cfg[k], !given[k])));
 }
 
 /** TradeCfg.to_json() = json.dumps(asdict(self)) */
@@ -106,13 +197,17 @@ function toJson(cfg) {
   return pyJsonDumps(ordered, FLOAT_KEYS);
 }
 
-/** TradeCfg.from_json(s): known keys only; any error → TradeCfg(). */
+/**
+ * TradeCfg.from_json(s): json.loads, known keys only; any error (unparsable text, a non-object:
+ * `d.items()` raises) → WARNING "user_manager.from_json() unhandled exception" + TradeCfg().
+ */
 function fromJson(s) {
   try {
-    const d = JSON.parse(s || '{}');
-    if (!d || typeof d !== 'object' || Array.isArray(d)) return tradeCfg();
-    return tradeCfg(d);
+    const d = pyLoads(s || '{}');
+    if (d === null || typeof d !== 'object' || Array.isArray(d)) throw attributeError(d, 'items', s);
+    return tradeCfg(d, jsonTypeOf(s));
   } catch (_e) {
+    logOf().warning('user_manager.from_json() unhandled exception');
     return tradeCfg();
   }
 }
@@ -133,20 +228,38 @@ function valEq(a, b, type) {
   return a === b;
 }
 
+// user_manager's logger ("CHM.Users"); the engine's default logger unless setLog() wired one.
+let _log = null;
+const logOf = () => _log || require('../marketData/mdLog').log;
+function setLog(log) { _log = log || null; }
+
+/** AttributeError: '<type>' object has no attribute '<attr>' (the bot's `raw.get(...)` on a non-dict). */
+function attributeError(v, attr, literal = '') {
+  const e = new TypeError(`'${pyTypeName(v, literal)}' object has no attribute '${attr}'`);
+  e.name = 'AttributeError';
+  return e;
+}
+
 /**
  * `_load_sparse(raw_json)` → dict of explicit overrides. Legacy full-dump
  * JSON (no `_sparse`) is normalised by dropping values equal to the
  * TradeCfg() defaults; a sparse JSON is taken as-is (values untouched, not
- * coerced). Invalid JSON → {}.
+ * coerced). The text is read with json.loads (NaN / Infinity tokens accepted);
+ * invalid JSON → {} — `_sparse_merge` (opts.warn) logs it as WARNING
+ * "user_manager._val_eq() unhandled exception", `_common._load_sparse` at DEBUG.
+ * QUIRK: valid JSON that is not an object ([...], 1, "x", null, true) reaches
+ * `raw.get("_sparse")` outside the bot's try → AttributeError, which propagates
+ * (get_long_cfg() raises; in `_build_jobs` that ends the whole LEVELS cycle).
  */
-function loadSparse(rawJson) {
+function loadSparse(rawJson, { warn = false } = {}) {
   let raw;
   try {
-    raw = JSON.parse(rawJson || '{}');
+    raw = pyLoads(rawJson || '{}');
   } catch (_e) {
+    if (warn) logOf().warning('user_manager._val_eq() unhandled exception');
     raw = {};
   }
-  if (!raw || typeof raw !== 'object' || Array.isArray(raw)) raw = {};
+  if (raw === null || typeof raw !== 'object' || Array.isArray(raw)) throw attributeError(raw, 'get', rawJson);
   const isSparse = Boolean(raw._sparse);
   const out = {};
   for (const k of Object.keys(raw)) {
@@ -171,12 +284,13 @@ function saveSparse(overrides) {
  * `base` unless the (normalised) override names it.
  */
 function sparseMerge(base, overrideJson) {
-  const raw = loadSparse(overrideJson);
+  const raw = loadSparse(overrideJson, { warn: true });
   const merged = {};
   for (const name of FIELD_NAMES) {
     merged[name] = Object.prototype.hasOwnProperty.call(raw, name) ? raw[name] : base[name];
   }
-  return tradeCfg(merged);
+  const fromJson = jsonTypeOf(overrideJson);
+  return tradeCfg(merged, (k, v) => (Object.prototype.hasOwnProperty.call(raw, k) ? fromJson(k, v) : declaredType(k, v, false)));
 }
 
 /** UserSettings.shared_cfg(): the flat columns as a (clamped) TradeCfg. */
@@ -259,5 +373,5 @@ module.exports = {
   tradeCfg, clamp, toJson, fromJson, valEq, loadSparse, saveSparse, sparseMerge,
   sharedCfg, getLongCfg, getShortCfg,
   updateSharedField, updateLongField, updateShortField, applySharedCfg, overrideKeys,
-  cfgToInd,
+  cfgToInd, setLog,
 };
