@@ -720,37 +720,65 @@ function createVolumeScanner(depsIn = {}) {
         if (signal.aborted) onAbort();
         else signal.addEventListener('abort', onAbort, { once: true });
       }
-      let errors = 0;
-      while (!(signal && signal.aborted)) {
-        const t0 = d.clock.monotonic();
-        token = new lv.CancelToken();
-        const cyc = s._scanCycle(bot, um, fetcher, token);
-        try {
-          await lv.waitFor(cyc, CYCLE_TIMEOUT_S, d.timers);
-          errors = 0;
-        } catch (e) {
-          if (e instanceof lv.TimeoutError) {
-            // wait_for cancels the timed-out cycle (it stops at its next checkpoint)
-            token.cancel();
-            cyc.catch(() => {});
-            L.warning('[VOLUME-CYCLE] timeout >300s — skipping');
-          } else if (e && e.name === 'CancelledError') {
-            L.info('Volume scanner stopped.');
-            return;
-          } else {
-            errors += 1;
-            L.error(`[VOLUME-CYCLE] error #${errors}: ${errMsg(e)}`);
-            if (health) health.heartbeat('VOLUME');
-            await d.sleep(Math.min(10 * (2 ** (errors - 1)), 300) * 1000);
-            continue;
+      try {
+        let errors = 0;
+        while (!(signal && signal.aborted)) {
+          const t0 = d.clock.monotonic();
+          token = new lv.CancelToken();
+          const cyc = s._scanCycle(bot, um, fetcher, token);
+          try {
+            await lv.waitFor(cyc, CYCLE_TIMEOUT_S, d.timers);
+            errors = 0;
+          } catch (e) {
+            if (e instanceof lv.TimeoutError) {
+              // CPython 3.11 wait_for cancels the timed-out cycle AND waits for it to end
+              // (_cancel_and_wait, bpo-32751): the next cycle never overlaps the cancelled one. Here
+              // the cycle stops at its next checkpoint; its outcome decides like wait_for's
+              // `fut.result()`: a normal return is a finished cycle, CancelledError → TimeoutError,
+              // any other error propagates.
+              token.cancel();
+              let outcome = null;
+              try {
+                await cyc;
+              } catch (e2) {
+                outcome = e2;
+              }
+              if (outcome === null) {
+                errors = 0;
+              } else if (outcome.name === 'CancelledError') {
+                if (signal && signal.aborted) {
+                  L.info('Volume scanner stopped.');
+                  return;
+                }
+                L.warning('[VOLUME-CYCLE] timeout >300s — skipping');
+              } else {
+                errors += 1;
+                L.error(`[VOLUME-CYCLE] error #${errors}: ${errMsg(outcome)}`);
+                if (health) health.heartbeat('VOLUME');
+                await d.sleep(Math.min(10 * (2 ** (errors - 1)), 300) * 1000);
+                continue;
+              }
+            } else if (e && e.name === 'CancelledError') {
+              L.info('Volume scanner stopped.');
+              return;
+            } else {
+              errors += 1;
+              L.error(`[VOLUME-CYCLE] error #${errors}: ${errMsg(e)}`);
+              if (health) health.heartbeat('VOLUME');
+              await d.sleep(Math.min(10 * (2 ** (errors - 1)), 300) * 1000);
+              continue;
+            }
           }
+          if (health) health.heartbeat('VOLUME');
+          if (signal && signal.aborted) break;
+          const sleepS = Math.max(0.0, intervalSec - (d.clock.monotonic() - t0));
+          const evt = wakeEvent();
+          await evt.wait(sleepS);
+          evt.clear();
         }
-        if (health) health.heartbeat('VOLUME');
-        if (signal && signal.aborted) break;
-        const sleepS = Math.max(0.0, intervalSec - (d.clock.monotonic() - t0));
-        const evt = wakeEvent();
-        await evt.wait(sleepS);
-        evt.clear();
+      } finally {
+        // a restarted run (_guarded_restart) adds its own listener: drop this run's one
+        if (signal) signal.removeEventListener('abort', onAbort);
       }
     },
   };
