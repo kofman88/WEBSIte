@@ -342,7 +342,9 @@ function createSignalDelivery(deps = {}) {
  * (it settles 'rpc-result'). An unanswered request resolves to the method's failure value
  * (false / 0 / {error:'timeout'}) after timeoutMs — a stalled main thread never wedges a scan.
  */
-function createRemoteDelivery(post, { timeoutMs = 60_000, setTimer = setTimeout, clearTimer = clearTimeout } = {}) {
+function createRemoteDelivery(post, {
+  timeoutMs = 60_000, setTimer = setTimeout, clearTimer = clearTimeout, defer = (fn) => setImmediate(fn),
+} = {}) {
   let nextId = 1;
   const pending = new Map();   // id → {resolve, timer, fail}
 
@@ -350,8 +352,15 @@ function createRemoteDelivery(post, { timeoutMs = 60_000, setTimer = setTimeout,
     const id = nextId++;
     return new Promise((resolve) => {
       const timer = setTimer(() => {
-        pending.delete(id);
-        resolve(failValue);
+        // After a stall of this thread (a long synchronous analysis, a frozen process) the answer
+        // can already sit in the port's queue behind this timer — the timers phase runs before the
+        // port's messages. Settle after them: a delivered card must not read as "not delivered"
+        // (safe_send_message would resend it, SMC would mark the row SKIP).
+        defer(() => {
+          if (!pending.has(id)) return;
+          pending.delete(id);
+          resolve(failValue);
+        });
       }, timeoutMs);
       if (timer && typeof timer.unref === 'function') timer.unref();
       pending.set(id, { resolve, timer, failValue });

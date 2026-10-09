@@ -1,0 +1,403 @@
+{
+"generator": "gen_runtime_trace.py",
+"python": "3.11.17",
+"scenario": {
+"hb_at": 10.0,
+"stall_at": 1000.0,
+"stall_horizon": 4000.0,
+"stall_s": 2000.0,
+"t0": 1791565200.0,
+"vol_cancel_at": 600.0,
+"vol_step_later_s": 10.0,
+"vol_step_s": 70.0,
+"vol_steps_first": 6,
+"volume_cycle_timeout_s": 300,
+"volume_interval_s": 60
+},
+"stall": {
+"alerts": [
+[
+720.0,
+123,
+"🚨 <b>Health Alert</b>\n\n🔴 Сканер <b>LEVELS</b> не отвечает 11 мин!"
+],
+[
+3000.0,
+123,
+"🚨 <b>Health Alert</b>\n\n🔴 Сканер <b>LEVELS</b> не отвечает 49 мин!"
+],
+[
+3300.0,
+123,
+"🚨 <b>Health Alert</b>\n\n🔴 Сканер <b>LEVELS</b> не отвечает 54 мин!"
+],
+[
+3600.0,
+123,
+"🚨 <b>Health Alert</b>\n\n🔴 Сканер <b>LEVELS</b> не отвечает 59 мин!"
+],
+[
+3900.0,
+123,
+"🚨 <b>Health Alert</b>\n\n🔴 Сканер <b>LEVELS</b> не отвечает 64 мин!"
+]
+],
+"end_t": 4000.0,
+"logs": [
+[
+120.0,
+"CHM.Health",
+"INFO",
+"🏥 HealthMonitor запущен (проверка каждые 300 сек)"
+],
+[
+720.0,
+"CHM.Health",
+"WARNING",
+"Health alert: 🔴 Сканер <b>LEVELS</b> не отвечает 11 мин!"
+],
+[
+3000.0,
+"CHM.Health",
+"WARNING",
+"Health alert: 🔴 Сканер <b>LEVELS</b> не отвечает 49 мин!"
+],
+[
+3300.0,
+"CHM.Health",
+"WARNING",
+"Health alert: 🔴 Сканер <b>LEVELS</b> не отвечает 54 мин!"
+],
+[
+3600.0,
+"CHM.Health",
+"WARNING",
+"Health alert: 🔴 Сканер <b>LEVELS</b> не отвечает 59 мин!"
+],
+[
+3900.0,
+"CHM.Health",
+"WARNING",
+"Health alert: 🔴 Сканер <b>LEVELS</b> не отвечает 64 мин!"
+]
+]
+},
+"volume": {
+"beats": [
+[
+300.0,
+"VOLUME"
+],
+[
+310.0,
+"VOLUME"
+],
+[
+370.0,
+"VOLUME"
+],
+[
+430.0,
+"VOLUME"
+],
+[
+490.0,
+"VOLUME"
+],
+[
+550.0,
+"VOLUME"
+]
+],
+"end_t": 600.0,
+"events": [
+[
+0.0,
+"start",
+0
+],
+[
+70.0,
+"step",
+0,
+0
+],
+[
+140.0,
+"step",
+0,
+1
+],
+[
+210.0,
+"step",
+0,
+2
+],
+[
+280.0,
+"step",
+0,
+3
+],
+[
+300.0,
+"cancelled",
+0
+],
+[
+300.0,
+"start",
+1
+],
+[
+310.0,
+"step",
+1,
+0
+],
+[
+310.0,
+"end",
+1
+],
+[
+360.0,
+"start",
+2
+],
+[
+370.0,
+"step",
+2,
+0
+],
+[
+370.0,
+"end",
+2
+],
+[
+420.0,
+"start",
+3
+],
+[
+430.0,
+"step",
+3,
+0
+],
+[
+430.0,
+"end",
+3
+],
+[
+480.0,
+"start",
+4
+],
+[
+490.0,
+"step",
+4,
+0
+],
+[
+490.0,
+"end",
+4
+],
+[
+540.0,
+"start",
+5
+],
+[
+550.0,
+"step",
+5,
+0
+],
+[
+550.0,
+"end",
+5
+]
+],
+"logs": [
+[
+0.0,
+"CHM.VolumeScanner",
+"INFO",
+"[VOLUME-START] Volume scanner started, interval=60s"
+],
+[
+300.0,
+"CHM.VolumeScanner",
+"WARNING",
+"[VOLUME-CYCLE] timeout >300s — skipping"
+]
+],
+"result": "CancelledError",
+"timeline": [
+[
+0.0,
+"log",
+"INFO",
+"[VOLUME-START] Volume scanner started, interval=60s"
+],
+[
+0.0,
+"start",
+0
+],
+[
+70.0,
+"step",
+0,
+0
+],
+[
+140.0,
+"step",
+0,
+1
+],
+[
+210.0,
+"step",
+0,
+2
+],
+[
+280.0,
+"step",
+0,
+3
+],
+[
+300.0,
+"cancelled",
+0
+],
+[
+300.0,
+"log",
+"WARNING",
+"[VOLUME-CYCLE] timeout >300s — skipping"
+],
+[
+300.0,
+"heartbeat",
+"VOLUME"
+],
+[
+300.0,
+"start",
+1
+],
+[
+310.0,
+"step",
+1,
+0
+],
+[
+310.0,
+"end",
+1
+],
+[
+310.0,
+"heartbeat",
+"VOLUME"
+],
+[
+360.0,
+"start",
+2
+],
+[
+370.0,
+"step",
+2,
+0
+],
+[
+370.0,
+"end",
+2
+],
+[
+370.0,
+"heartbeat",
+"VOLUME"
+],
+[
+420.0,
+"start",
+3
+],
+[
+430.0,
+"step",
+3,
+0
+],
+[
+430.0,
+"end",
+3
+],
+[
+430.0,
+"heartbeat",
+"VOLUME"
+],
+[
+480.0,
+"start",
+4
+],
+[
+490.0,
+"step",
+4,
+0
+],
+[
+490.0,
+"end",
+4
+],
+[
+490.0,
+"heartbeat",
+"VOLUME"
+],
+[
+540.0,
+"start",
+5
+],
+[
+550.0,
+"step",
+5,
+0
+],
+[
+550.0,
+"end",
+5
+],
+[
+550.0,
+"heartbeat",
+"VOLUME"
+]
+]
+}
+}

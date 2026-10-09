@@ -146,7 +146,7 @@ describe('volume_scanner units vs the bot (volume_units.py)', () => {
       }
       return evt;
     };
-    s._scanCycle = async () => {
+    s._scanCycle = async (_b, _u, _f, token) => {
       const step = L.plan[pi++];
       if (step === 'ok' || step === 'ok_wake') {
         clock.t += 4.0;
@@ -154,7 +154,8 @@ describe('volume_scanner units vs the bot (volume_units.py)', () => {
         return;
       }
       if (step === 'raise') { clock.t += 1.0; throw new Error('boom'); }
-      if (step === 'timeout') { armed = true; await new Promise(() => {}); }
+      // a hung cycle: it ends only when wait_for cancels it (CancelledError at its checkpoint)
+      if (step === 'timeout') { armed = true; await new Promise((_r, rej) => token.on(() => rej(new LS.CancelledError()))); }
       if (step === 'cancel') throw new LS.CancelledError();
     };
     clock.t = L.start;

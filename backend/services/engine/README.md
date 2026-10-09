@@ -416,6 +416,47 @@ re-raise, [SMC-RESTART-ON-STOP]). A loop stopped while it waits ends at once and
 (the bot's `wait_for` sits outside the `try`). Pinned by
 `tests/engine/worker/scannerWiring.test.js` and `engine.stop.integration.test.js`.
 
+The process side is bot.py `_request_stop` (`utils/gracefulShutdown.js`, server.js): stop sources
+SIGTERM / SIGINT and, under Phusion Passenger, the `PhusionPassenger` 'exit' event — Passenger
+stops a Node app by closing its stdin and calls `process.exit(0)` at once unless the app listens
+for 'exit', so without that listener a cPanel restart killed the worker mid-cycle with no registry
+save. A second request exits at once, a 22 s deadline bounds the whole stop; `startEngine().stop()`
+stops the main-side loops and the worker together (≤ 6 s).
+
+### Runtime semantics (timers, stalls, overlap, crashes)
+
+| what | bot (CPython 3.11 asyncio) | site | pinned by |
+|---|---|---|---|
+| loop periods, first delays, gather order, `_guarded_restart` backoff | `asyncio.sleep` chains | `makeSleep` (setTimeout, abortable) | `scheduler.timing.test.js` (PY311 trace) |
+| event-loop stall / GC pause | an overdue sleep fires once, late; then a full period again (no catch-up burst) | same (Node timers) | `runtime.trace.test.js` (stall, PY311 trace) |
+| VOLUME 300 s cycle timeout | `wait_for` cancels the cycle **and waits for it** before TimeoutError | the loop awaits the cancelled cycle (it stops at its next checkpoint); the next cycle never overlaps it | `runtime.trace.test.js` (volume, PY311 trace) |
+| LEVELS cycle timeout (480 s), queue-join timeout (120 s) | `wait_for` / `w.cancel()` | `await cyc` after cancel; worker token | `levels_units.test.js`, `levels_workers.test.js` |
+| SMC candle-fetch gather timeout (90 s) | the fetch tasks are cancelled: queued ones never fetch, none writes `_tf_cache` | the fetch group's `cancelled` flag | `smcScanner.unit.test.js` |
+| a stray rejection / callback exception | logged by the loop ("Task exception was never retrieved"), every task goes on | the worker thread's handlers log it and go on (Node's default would end the thread) | `runtime.supervisor.test.js` |
+| main-thread stall vs the worker watchdog (site only) | — | a watchdog tick > 2 periods late restarts the 120 s liveness window instead of killing the worker | `runtime.supervisor.test.js` |
+| delivery RPC timeout (60 s, site only) | — | settles one turn after the timer: an answer already queued wins | `runtime.supervisor.test.js` |
+
+Cancellation stays cooperative (the README's "Not wired yet" note): a request already on the
+wire, or an analysis, runs to its end and its result is dropped.
+
+### Budget and memory (engine.soak.test.js)
+
+The soak runs the worker with every offline-capable loop over golden candles for 42 symbols
+(bar closes on every 15-minute boundary, 6 Pro + 2 free users, fake timers, the real delivery over
+a MessageChannel). Measured on the dev box: the simulated hour of the 04:00 1h + 4h close costs
+≈ 4.2 s CPU for the whole engine in-process (0.12 % of one core); the live WS ingest
+(`BingxWsFeed.handleMessage`: gunzip, JSON, bar state) costs ≈ 41 µs per push, 1.4 % of a core for
+168 subscriptions at 2 pushes / s (≈ 5 % for 150 symbols × 4 TFs). A 17 h run (12 253 LEVELS
+cycles, 1 168 VOLUME, 275 SMC, 70 closes): every per-symbol / per-user structure plateaus, the
+registry and `_sent_bars` stay inside their TTLs, in-flight counters stay bounded, and a
+heap-snapshot diff of hours 6 → 16 shows only JIT code growing. The suite runs 6 h
+(`ENGINE_SOAK_HOURS` extends it, `ENGINE_SOAK_VERBOSE=1` prints the samples).
+
+Deployment note: the engine assumes one app process. Passenger may run several processes of the
+app (pool size) or overlap an old and a new one during a restart; each would start its own engine
+(duplicate signals for the overlap). Keep `PassengerMaxInstances 1` / `PassengerMinInstances 1`
+for this app until a cross-process engine lease exists (M19).
+
 ### Tests and fixtures
 
 | test | what | regenerate |
@@ -429,6 +470,35 @@ re-raise, [SMC-RESTART-ON-STOP]). A loop stopped while it waits ends at once and
 | `tests/engine/worker/scheduler.timing.test.js` | bot.py loop instants over 6 simulated hours | `gen/gen_scheduler_trace.py` |
 | `tests/engine/worker/engine.integration.test.js` | the worker with the three real scanners over a 1h and a 4h close (golden candles) | — |
 | `tests/engine/worker/engine.stop.integration.test.js` | a stop in the middle of those cycles | — |
+| `tests/engine/worker/runtime.trace.test.js` | event-loop stall, VOLUME cycle timeout (no overlap) | `gen/gen_runtime_trace.py` |
+| `tests/engine/worker/runtime.supervisor.test.js` | watchdog vs main-thread stall, stray rejections in a real thread, RPC timeout vs queued answer, joint stop | — |
+| `tests/engine/worker/engine.soak.test.js` | CPU budget, bounded caches / heap over hours of fake time | — |
+| `tests/gracefulShutdown.test.js` | stop request, second signal, 22 s deadline, Passenger 'exit' | — |
+
+### M9 traceability (PLAN M9, signal-pipeline.md §2–7, §9)
+
+| item | implementation | pinned by |
+|---|---|---|
+| engine worker: boot order, heartbeats, protocol, supervision | `workers/engineWorker.js`, `scheduler.boot()` | `engineWorker.test.js`, `runtime.supervisor.test.js`, `config.engineWorker.test.js` |
+| scheduler (bot.py `main()` loops) | `scheduler.js` | `scheduler.timing.test.js`, `scheduler.unit.test.js`, `runtime.trace.test.js` |
+| §2.1 LEVELS gate order, `[LEVELS-PROFILE]` counters | `levelsScanner.js` | `levels_scan.test.js` (12 cycles, logs incl. 242 `[LEVELS-PROFILE]` lines), `levels_units.test.js`, `levels_workers.test.js` |
+| §2.2 SMC order, free preview never writes rows | `smcScanner.js` | `smcScanner.diff.test.js`, `smcScanner.unit.test.js` |
+| §2.3 VOLUME order, per-user cap, `_sent_bars`, `dedup_ttl_s` | `volumeScanner.js` | `volume_scan.test.js`, `volume_units.test.js`, `tests/volume/scanner.test.js` |
+| §2.4 scanner-level counter-trend gate | `levelsScanner.js`, `smcScanner.js` (auto-trade deps, M13b) | `levels_scan.test.js` (`gate=counter_trend_scanner`), `smcScanner.unit.test.js` |
+| §3 registry: keys, peek / commit / `ttl_s` shift, multi slot, `apply_cooldown`, persistence | `signalRegistry.js` | `pipeline/registry.test.js`, `pipeline/differential.test.js` |
+| §4 freshness: cycle EMA, tolerance, stale-SL, drift | `signalFreshness.js` | `pipeline/freshness.test.js`, `differential.test.js` |
+| §5 momentum veto | `momentumVeto.js` | `pipeline/momentum.test.js` |
+| §6.1–6.2 squeeze score and its use | `strategies/common/squeeze.js`, the three scanners / engines | `tests/golden/layers.test.js`, `golden.test.js`, `tests/volume/scanner.test.js` |
+| §6.3 confluence label | `signalConfluence.js` | `pipeline/regime_confluence.test.js`, `cards.test.js` |
+| §7 trend monitor: `compute_trend`, ribbon, refresh + broadcast, aligned event, `trend_context`, `ctx_risk_mult`, `apply_mtf_bonus`, `card_line` | `trendMonitor.js` | `pipeline/trendMonitor.test.js` (incl. the `refresh()` replay), `differential.test.js` |
+| regime / momentum relaxed mode / coin quality / volume filter | `regimeLoop.js`, `momentumDetector.js`, `coinQualityLearner.js`, `volumeFilter.js` | `regime_confluence.test.js`, `momentum.test.js`, `universe.test.js` |
+| §9.1–9.2 free windows, counters, missed buffer | `freeReport.js` | `pipeline/freeReport.test.js` |
+| §9.3 SMC Pro preview | `freeReport.js`, `smcScanner.js` | `freeReport.test.js`, `smcScanner.unit.test.js`, `smcScanner.diff.test.js` |
+| §9.4 evening report | `freeReport.js` + scheduler `free_report` | `freeReport.test.js`, `scheduler.timing.test.js` |
+| signal_trades writes, CAS, trade_events | `signalTradesRepo.js` | `pipeline/repo.test.js` |
+| cards, position line, watermark, keyboards | `cards/*`, `positionLine.js`, `watermark.js` | `pipeline/cards.test.js`, `primitives.test.js` |
+| delivery (feed row, notifier, commit callbacks) | `signalDelivery.js` | `worker/signalDelivery.test.js`, `engine.integration.test.js` |
+| worker CPU < 10 % of a core | — | `engine.soak.test.js` (measured; the live-BingX check of PLAN M9 "Verify" needs network) |
 
 Every Python generator runs the bot's own code with CPython 3.11 from the bot checkout
 (read-only): `cd <bot> && PYTHONDONTWRITEBYTECODE=1 BOT_TOKEN_CHM=test:token ADMIN_IDS=123

@@ -353,33 +353,40 @@ function startBackground() {
   }
 }
 
-function shutdown(sig) {
-  return async () => {
-    logger.info('received ' + sig + ', shutting down');
-    if (engine) {
-      try { await engine.stop(); } catch (_e) { /* */ }
-      engine = null;
-    }
-    try { maintenanceService.stop(); } catch (_e) { /* */ }
-    try { planService.stopExpiryLoop(); } catch (_e) { /* */ }
-    try { db.close(); } catch (_e) { /* */ }
-    process.exit(0);
-  };
+// Graceful stop (utils/gracefulShutdown.js = bot.py _request_stop): SIGTERM / SIGINT and, under
+// Passenger, the PhusionPassenger 'exit' event (Passenger stops an app by closing its stdin and
+// calls process.exit(0) at once unless the app listens for 'exit'); a second request exits at
+// once, a 22 s deadline bounds the whole stop.
+let httpServer = null;
+async function shutdownSteps() {
+  if (httpServer) {
+    try { httpServer.close(); } catch (_e) { /* */ }
+  }
+  if (engine) {
+    try { await engine.stop(); } catch (_e) { /* */ }
+    engine = null;
+  }
+  try { maintenanceService.stop(); } catch (_e) { /* */ }
+  try { planService.stopExpiryLoop(); } catch (_e) { /* */ }
+  try { db.close(); } catch (_e) { /* */ }
 }
 
 if (IS_TEST) {
   // Test env — do not start HTTP listener, just export the app for supertest
-} else if (typeof(PhusionPassenger) !== 'undefined') {
-  app.listen('passenger', () => logger.info('CHM Finance running via Passenger'));
-  startBackground();
-  process.on('SIGTERM', shutdown('SIGTERM'));
 } else {
-  const server = http.createServer(app);
-  server.listen(PORT, () => logger.info('CHM Finance running on port ' + PORT));
-  startBackground();
-
-  process.on('SIGTERM', () => { shutdown('SIGTERM')().then(() => server.close()); });
-  process.on('SIGINT',  () => { shutdown('SIGINT')().then(() => server.close()); });
+  const { createStopRequest, installStopHandlers } = require('./utils/gracefulShutdown');
+  const stop = createStopRequest({ run: shutdownSteps, log: logger });
+  if (typeof(PhusionPassenger) !== 'undefined') {
+    app.listen('passenger', () => logger.info('CHM Finance running via Passenger'));
+    startBackground();
+    // eslint-disable-next-line no-undef
+    installStopHandlers(stop, { passenger: PhusionPassenger });
+  } else {
+    httpServer = http.createServer(app);
+    httpServer.listen(PORT, () => logger.info('CHM Finance running on port ' + PORT));
+    startBackground();
+    installStopHandlers(stop);
+  }
 }
 
 module.exports = app;
