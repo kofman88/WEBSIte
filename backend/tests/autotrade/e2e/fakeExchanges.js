@@ -62,7 +62,16 @@ const fmt = (x, dp = 8) => {
   return s.includes('.') ? s.replace(/0+$/, '').replace(/\.$/, '') : s;
 };
 
-function createFakeExchanges({ clock, instruments = {}, prices = {} } = {}) {
+/**
+ * `duplicateClientIds: true` (tests/autotrade/safety): an order whose client id (Bybit orderLinkId,
+ * BingX clientOrderId, Binance newClientOrderId, OKX clOrdId) was already used on the account is
+ * refused like the exchange refuses it — Bybit 110072 "OrderLinkedID is duplicate", Binance -4116
+ * "ClientOrderId is duplicated." (the USDⓈ-M code; the bot only reads -4015 / "client order id
+ * already" as a duplicate), BingX 101404 "duplicate clientOrderId" (the code the bot's trader reads —
+ * BingX's own text is not documented), OKX 51016 "Duplicated clOrdId". Off by default (the E2E).
+ * `maxSize(ex, key, base, side)` — the largest size a position ever reached (never-more-than-once checks).
+ */
+function createFakeExchanges({ clock, instruments = {}, prices = {}, duplicateClientIds = false } = {}) {
   const now = () => (clock ? clock.now() : Date.now() / 1000);
   const accounts = new Map();      // `${ex}|${key}` → account
   const requests = [];
@@ -88,6 +97,7 @@ function createFakeExchanges({ clock, instruments = {}, prices = {} } = {}) {
     const a = {
       ex, key, secret, passphrase, balance, perms,
       leverage: new Map(), hedge: ex !== 'bybit', positions: new Map(), orders: [], closedPnl: [],
+      maxSize: new Map(), opens: 0, clientIds: new Set(),
     };
     accounts.set(`${ex}|${key}`, a);
     return a;
@@ -110,7 +120,17 @@ function createFakeExchanges({ clock, instruments = {}, prices = {} } = {}) {
     } else {
       p[side] = { size: qty, entry: price, sl: 0, tp: 0, lev: a.leverage.get(base) || 10 };
     }
+    const mk = `${base}|${side}`;
+    a.maxSize.set(mk, Math.max(a.maxSize.get(mk) || 0, p[side].size));
+    a.opens += 1;
     return p[side];
+  }
+  /** duplicateClientIds: the client id was used before on this account → true (and remembered). */
+  function seenClientId(a, cid) {
+    if (!duplicateClientIds || !cid) return false;
+    if (a.clientIds.has(cid)) return true;
+    a.clientIds.add(cid);
+    return false;
   }
   function reduce(a, base, side, qty) {
     const cur = posOf(a, base, side);
@@ -235,6 +255,7 @@ function createFakeExchanges({ clock, instruments = {}, prices = {} } = {}) {
       case '/v5/order/create': {
         const base = baseOf('bybit', body.symbol);
         if (!inst(base)) return err(10001, 'params error: symbol invalid');
+        if (seenClientId(a, body.orderLinkId)) return err(110072, 'OrderLinkedID is duplicate');
         const side = body.side === 'Buy' ? 'BUY' : 'SELL';
         // one-way mode: a Sell reduces a long, a Buy reduces a short
         let posSide = side === 'BUY' ? 'LONG' : 'SHORT';
@@ -338,6 +359,7 @@ function createFakeExchanges({ clock, instruments = {}, prices = {} } = {}) {
         }
         const base = baseOf('bingx', query.symbol);
         if (!inst(base)) return err(109400, 'symbol not exist');
+        if (seenClientId(a, query.clientOrderId)) return err(101404, 'duplicate clientOrderId');
         let side = query.side;
         if (side !== String(side).toUpperCase()) { lenientNote('bingx', path, `side ${side}`); side = String(side).toUpperCase(); }
         const type = query.type === 'STOP_MARKET' ? 'STOP' : (query.type === 'TAKE_PROFIT_MARKET' || query.type === 'TAKE_PROFIT' ? 'TP' : query.type);
@@ -430,6 +452,7 @@ function createFakeExchanges({ clock, instruments = {}, prices = {} } = {}) {
     const one = (q) => {
       const base = baseOf('binance', q.symbol);
       if (!inst(base)) return { code: -1121, msg: 'Invalid symbol.' };
+      if (seenClientId(a, q.newClientOrderId)) return { code: -4116, msg: 'ClientOrderId is duplicated.' };
       const type = q.type === 'STOP_MARKET' ? 'STOP' : (q.type === 'TAKE_PROFIT_MARKET' ? 'TP' : q.type);
       const posSide = q.positionSide || (q.side === 'BUY' ? 'LONG' : 'SHORT');
       const r = place(a, {
@@ -530,6 +553,7 @@ function createFakeExchanges({ clock, instruments = {}, prices = {} } = {}) {
       case '/api/v5/trade/order': {
         const o = orderFrom(body, false);
         if (!inst(o.base)) return err(51001, "Instrument ID doesn't exist.");
+        if (seenClientId(a, body.clOrdId)) return err(1, 'All operations failed', [{ ordId: '', clOrdId: body.clOrdId, sCode: '51016', sMsg: 'Duplicated clOrdId' }]);
         const r = place(a, { ...o, type: body.ordType === 'market' ? 'MARKET' : 'LIMIT', price: body.px === undefined ? 0 : Number(body.px) });
         if (!r.ok) return err(1, 'All operations failed', [{ ordId: '', sCode: '51169', sMsg: "Order failed because you don't have any positions in this direction for this contract to reduce or close." }]);
         if (r.filled && !o.reduceOnly) {
@@ -616,6 +640,7 @@ function createFakeExchanges({ clock, instruments = {}, prices = {} } = {}) {
     setPrice: (base, p) => { px[base] = p; },
     positions: (ex, key) => allPositions(account(ex, key)),
     orders: (ex, key) => account(ex, key).orders.slice(),
+    maxSize: (ex, key, base, side) => account(ex, key).maxSize.get(`${base}|${side}`) || 0,
     nativeOf, baseOf,
   };
 }

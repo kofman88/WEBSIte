@@ -47,3 +47,15 @@ describe('execute_auto_trade — bot vs site replay through createAutoTrade', ()
     });
   }
 });
+
+// The site's D18 guards (in-flight placement, OKX retry rule, reconcile of a failed retry — docs
+// PORT_DECISIONS.md D18) are on in production; no bot vector reaches one of their branches, so with
+// the production defaults every output is still the bot's (the D18 branches: tests/autotrade/safety).
+describe('execute_auto_trade — the bot vectors with the site\'s D18 defaults', () => {
+  for (const v of FX.vectors) {
+    it(v.case.name, async () => {
+      const got = await replay(v, FX, { d18: null });
+      expect(compare(v, got)).toEqual([]);
+    });
+  }
+});

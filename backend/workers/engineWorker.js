@@ -45,6 +45,10 @@ const HEARTBEAT_MS = 15_000;
 const HEARTBEAT_TIMEOUT_MS = 120_000;
 const WATCHDOG_EVERY_MS = 30_000;
 const SHUTDOWN_GRACE_MS = 6_000;
+// D18: a graceful stop lets an auto-trade placement in flight finish (≤ 15 s) — server.js gives the
+// engine 18 s inside the bot's 22 s shutdown deadline, like the trade-ops queue
+const AUTOTRADE_DRAIN_MS = 15_000;
+const SHUTDOWN_GRACE_WITH_DRAIN_MS = 18_000;
 const RESTART_BASE_S = 10;
 const RESTART_MAX_S = 300;
 const RESTART_HEALTHY_S = 300;
@@ -130,6 +134,7 @@ async function workerAutoTrade(bot, env) {
 function runWorker(port, {
   deps = {}, heartbeatMs = HEARTBEAT_MS, logs = true, exit = null,
   setEvery = (fn, ms) => setInterval(fn, ms), clearEvery = (h) => clearInterval(h),
+  autoTradeDrainMs = AUTOTRADE_DRAIN_MS,
 } = {}) {
   const { createRemoteDelivery } = require('../services/engine/signalDelivery');
   const post = (m) => { try { port.postMessage(m); } catch (_e) { /* port closed */ } };
@@ -176,8 +181,24 @@ function runWorker(port, {
     if (stopping) return stopping;
     stopping = (async () => {
       let res = { pending: 0, saved: null };
+      // D18: no new auto placement from here on; the scheduler's loops stop; then a placement in
+      // flight (entry → SL → TP of one place_trade) is let finish before the thread closes its DB
+      const at = scheduler && scheduler.ctx ? scheduler.ctx.autoTrade : null;
+      if (at && typeof at.beginShutdown === 'function') {
+        try { at.beginShutdown(); } catch (_e) { /* best effort */ }
+      }
       if (scheduler) {
         try { res = await scheduler.stop(); } catch (_e) { /* best effort */ }
+      }
+      if (at && typeof at.waitIdle === 'function') {
+        try {
+          const left = await at.waitIdle(autoTradeDrainMs);
+          const L = require('../services/marketData/mdLog').log;
+          if (left > 0) L.warning(`[D18-SHUTDOWN] ${left} auto-trade placement(s) still in flight after ${Math.round(autoTradeDrainMs / 1000)}s — stopping anyway`);
+          // the scanners' registry commits of those signals happened after the scheduler's save
+          const reg = deps.registry || require('../services/engine/signalRegistry').defaultRegistry;
+          if (typeof reg.forceSave === 'function') res.saved = reg.forceSave();
+        } catch (_e) { /* best effort */ }
       }
       if (hb !== null) clearEvery(hb);
       hb = null;
@@ -504,7 +525,7 @@ if (!isMainThread && parentPort && require.main === module) {
 }
 
 module.exports = {
-  WORKER_PATH, HEARTBEAT_MS, HEARTBEAT_TIMEOUT_MS, WATCHDOG_EVERY_MS, SHUTDOWN_GRACE_MS,
+  WORKER_PATH, HEARTBEAT_MS, HEARTBEAT_TIMEOUT_MS, WATCHDOG_EVERY_MS, SHUTDOWN_GRACE_MS, AUTOTRADE_DRAIN_MS, SHUTDOWN_GRACE_WITH_DRAIN_MS,
   RESTART_BASE_S, RESTART_MAX_S, RESTART_HEALTHY_S,
   runWorker, createSupervisor, startEngine, forwardLogs, softExit, engineLog, installTaskExceptionHandlers,
   workerAutoTrade,

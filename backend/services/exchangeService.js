@@ -151,8 +151,27 @@ function getPublicKey(keyId, userId) {
 }
 
 function deleteKey(keyId, userId) {
-  const info = db.prepare('DELETE FROM exchange_keys WHERE id = ? AND user_id = ?').run(keyId, userId);
-  if (info.changes === 0) { const err = new Error('Key not found'); err.statusCode = 404; throw err; }
+  const row = db.prepare('SELECT exchange, api_key_encrypted FROM exchange_keys WHERE id = ? AND user_id = ?').get(keyId, userId);
+  if (!row) { const err = new Error('Key not found'); err.statusCode = 404; throw err; }
+  let apiKey = '';
+  if (row.exchange === 'bybit') {
+    try { apiKey = decField(row.api_key_encrypted); } catch (_e) { /* undecryptable → no session can exist for it */ }
+  }
+  db.transaction(() => {
+    db.prepare('DELETE FROM exchange_keys WHERE id = ? AND user_id = ?').run(keyId, userId);
+    // like the app's exchange/keys/remove (h_exchange_keys_remove): the last key of the trade
+    // exchange gone → auto-trade off, so keys added later never resume trading by themselves
+    const left = db.prepare('SELECT COUNT(*) AS n FROM exchange_keys WHERE user_id = ? AND exchange = ?').get(userId, row.exchange).n;
+    if (left === 0) {
+      try {
+        db.prepare("UPDATE trader_settings SET auto_trade = 0 WHERE user_id = ? AND COALESCE(NULLIF(trade_exchange, ''), 'bybit') = ?")
+          .run(userId, row.exchange);
+      } catch (_e) { /* no trader_settings table (legacy test DBs) */ }
+    }
+  })();
+  try { require('./traderSettingsService').invalidateCache(); } catch (_e) { /* best effort */ }
+  // this thread's Bybit session of the key (it holds the secret) and the cached balance go too
+  try { require('./exchangeKeysService').forgetKeyState(userId, row.exchange, apiKey); } catch (_e) { /* best effort */ }
   return { deleted: true };
 }
 

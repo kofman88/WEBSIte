@@ -74,7 +74,8 @@ function waitFor(promise, timeoutS) {
 }
 
 function logOf(deps) { return deps.log || require('../marketData/mdLog').log; }
-const inst = (ex, deps) => exchanges.getTrader(ex, { registry: deps.registry }).instance({ demo: false });
+// the trade-ops registry (killswitch / plan-gate hooks) — confirmMode.registryOf, never the hookless default
+const inst = (ex, deps) => exchanges.getTrader(ex, { registry: require('./confirmMode').registryOf(deps) }).instance({ demo: false });
 
 /** `_get_position_size(user, trader, symbol, exchange)` → abs(size) of the first non-zero position, 0.0 otherwise. */
 async function getPositionSize(user, ex, symbol, deps) {

@@ -116,6 +116,24 @@ function createTradeDb({ db = null, now = () => Date.now() / 1000, log = null, r
         .get(Number(uid), symbol));
     },
 
+    /**
+     * D18 (site): the newest unresolved placement of (uid, symbol) since `sinceTs` — state PLACING,
+     * no order id, result '' — other than `excludeTradeId` (→ its trade_id, else null). Only a process
+     * that died mid-placement (or a failed SKIP write) leaves one; its order may be on the exchange.
+     */
+    async inflightPlacementForSymbol(uid, symbol, sinceTs, excludeTradeId = '') {
+      const r = dbOf().prepare("SELECT trade_id FROM signal_trades WHERE user_id=? AND symbol=? AND result='' AND order_id='' "
+        + "AND state='PLACING' AND state_changed_at >= ? AND trade_id != ? ORDER BY state_changed_at DESC LIMIT 1")
+        .get(Number(uid), symbol, Number(sinceTs), String(excludeTradeId || ''));
+      return r ? String(r.trade_id) : null;
+    },
+
+    /** D18: the row of `tid` already carries an exchange order id (it was placed). */
+    async tradeHasOrder(tid) {
+      const r = dbOf().prepare('SELECT order_id FROM signal_trades WHERE trade_id=?').get(String(tid));
+      return Boolean(r && r.order_id);
+    },
+
     async countOpenTrades(uid, excludeTradeId = '') {
       const row = excludeTradeId
         ? dbOf().prepare("SELECT COUNT(*) AS n FROM signal_trades WHERE user_id=? AND result='' AND order_id!='' AND trade_id!=?").get(Number(uid), String(excludeTradeId))

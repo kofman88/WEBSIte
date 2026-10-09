@@ -165,6 +165,34 @@ function updateTradeTpPlaced(deps, tradeId, value = 1) {
   dbOf(deps).prepare('UPDATE signal_trades SET tp_placed=? WHERE trade_id=?').run(bindValue(value), bindValue(tradeId));
 }
 
+/**
+ * The card snapshot after an edit without reply_markup (the scanners' {"html", "actions", "lang"}
+ * json.dumps shape, no buttons left) — applyEffects' write, also done at once for exec_opening (D18).
+ * Only the owner's row is touched.
+ */
+function persistCardEdit(deps, userId, tradeId, text, lang = 'ru', keyboard = null) {
+  if (!tradeId) return;
+  const card = pyDumps({ html: text, actions: keyboard || null, lang });
+  dbOf(deps).prepare('UPDATE signal_trades SET signal_card_json=? WHERE trade_id=? AND user_id=?')
+    .run(card, String(tradeId), bindValue(userId));
+}
+
+/**
+ * D18 (site): an auto-trade placement of the same user and symbol that never resolved — state
+ * PLACING, no order id, result '' — younger than STUCK_PLACING_MAX_AGE_S (the bot's 30-min
+ * cleanup horizon). Such a row exists only when the process that placed it died mid-flight (or a
+ * SKIP write failed): its order may be on the exchange, so it counts as an open trade for the
+ * symbol. → the trade_id or null.
+ */
+const STUCK_PLACING_MAX_AGE_S = 1800;
+function inflightPlacementForSymbol(deps, userId, symbol, { now = null, excludeTradeId = '' } = {}) {
+  const t = now === null ? Date.now() / 1000 : now;
+  const r = dbOf(deps).prepare("SELECT trade_id FROM signal_trades WHERE user_id=? AND symbol=? AND result='' AND order_id='' "
+    + "AND state='PLACING' AND state_changed_at >= ? AND trade_id != ? ORDER BY state_changed_at DESC LIMIT 1")
+    .get(bindValue(userId), bindValue(symbol), t - STUCK_PLACING_MAX_AGE_S, String(excludeTradeId || ''));
+  return r ? String(r.trade_id) : null;
+}
+
 // ── the card's buttons (D16) ──────────────────────────────────────────────
 /** The delivered card (signal_card_json actions) of `row` still offers the callback `action`. */
 function cardOffers(row, action) {
@@ -193,6 +221,22 @@ function tradeLock(tradeId) {
 
 // ── the handler ───────────────────────────────────────────────────────────
 const g = (o, k, d) => (Object.prototype.hasOwnProperty.call(o, k) ? o[k] : d);
+
+/** D18 (docs/PORT_DECISIONS.md) switches; `deps.d18 = {inflightGuard: false}` is the bot. */
+const D18_SITE = Object.freeze({ inflightGuard: true });
+const d18Of = (deps) => ({ ...D18_SITE, ...((deps && deps.d18) || {}) });
+
+/**
+ * The trader registry of a money handler: the caller's (the trade-ops queue builds it with the bot's
+ * killswitch / plan-gate hooks), else the same hooked registry — never the hookless default one,
+ * whose killswitch lets everything through.
+ */
+let _hookedRegistry = null;
+function registryOf(deps) {
+  if (deps && deps.registry) return deps.registry;
+  if (!_hookedRegistry) _hookedRegistry = require('./index').createTradeOpsRegistry({ log: deps && deps.log ? deps.log : undefined });
+  return _hookedRegistry;
+}
 
 /**
  * exec_trade(cb) for `tradeId` pressed by `user` (a trader_settings user).
@@ -242,6 +286,11 @@ async function execTradeLocked(user, tradeId, fx, deps, log) {
     return out('api_not_setup');
   }
   fx.edit(t('exec_opening', ul));                                     // C86
+  // the bot's edit_text above removes the card's buttons BEFORE anything reaches the exchange; the
+  // site persists that edit now (not with the other effects after the job): a trade-ops thread that
+  // dies / restarts mid-placement must not leave «Открыть сделку» pressable on a card whose order may
+  // already be on the exchange (D18). A failed write raises: nothing is sent (fail-closed).
+  persistCardEdit(deps, user.user_id, tradeId, t('exec_opening', ul), ul === 'en' ? 'en' : 'ru');
   const trade = getTrade(deps, tradeId);
   if (!trade) {
     fx.edit(t('exec_signal_stale', ul));
@@ -266,7 +315,15 @@ async function execTradeLocked(user, tradeId, fx, deps, log) {
     fx.answer(limTxt, true);
     return out('limit');
   }
-  if (hasOpenTradeForSymbol(deps, user.user_id, trade.symbol)) {
+  let dupSymbol = hasOpenTradeForSymbol(deps, user.user_id, trade.symbol);
+  if (!dupSymbol && d18Of(deps).inflightGuard) {
+    const inflight = inflightPlacementForSymbol(deps, user.user_id, trade.symbol, { now: deps.now ? deps.now() : null, excludeTradeId: tradeId });
+    if (inflight) {
+      log.warning(`[D18-INFLIGHT] exec_trade uid=${user.user_id} ${trade.symbol}: placement ${inflight} never resolved (PLACING, no order id) — treated as open`);
+      dupSymbol = true;
+    }
+  }
+  if (dupSymbol) {
     const symLabel = String(trade.symbol).split('-USDT-SWAP').join('').split('-USDT').join('');
     fx.edit(t('exec_dup_symbol', ul, { sym: symLabel }));
     fx.answer();
@@ -286,7 +343,7 @@ async function execTradeLocked(user, tradeId, fx, deps, log) {
     // float(trade.get("tp2") or 0) / tp3 — evaluated where Python evaluates them (after entry / sl / tp1)
     const tp2 = () => pyFloat(pyTruthy(trade.tp2) ? trade.tp2 : 0);
     const tp3 = () => pyFloat(pyTruthy(trade.tp3) ? trade.tp3 : 0);
-    const reg = { registry: deps.registry };
+    const reg = { registry: registryOf(deps) };
     if (['bingx', 'binance', 'okx'].includes(exchange)) {
       // BingX/Binance/OKX: split-entry не поддерживается — всегда place_trade
       const trader = exchanges.getTrader(exchange, reg);
@@ -350,9 +407,7 @@ async function applyEffects(effects, { userId, tradeId, lang = 'ru', delivery = 
     try {
       if (e.op === 'edit' && tradeId) {
         // the card_snapshot shape of the scanners ({"html", "actions", "lang"}, json.dumps): no buttons left
-        const card = pyDumps({ html: e.text, actions: e.keyboard || null, lang });
-        (db || require('../../models/database')).prepare('UPDATE signal_trades SET signal_card_json=? WHERE trade_id=? AND user_id=?')
-          .run(card, String(tradeId), bindValue(userId));
+        persistCardEdit({ db }, userId, tradeId, e.text, lang, e.keyboard);
         const bc = dl && (typeof dl.broadcast === 'function' ? dl.broadcast.bind(dl) : (dl.sse && dl.sse.broadcast));
         if (bc) bc(userId, 'trade', { kind: 'card', trade_id: tradeId, html: e.text, actions: withActionRoutes(e.keyboard || null, tradeId) });
       } else if (e.op === 'send' && !deleted.has(i) && dl) {
@@ -379,5 +434,6 @@ function defaultDelivery() {
 module.exports = {
   MESSAGES, t, createEffects, summarize, cardOffers, execTrade, applyEffects,
   getTrade, countOpenTrades, hasOpenTradeForSymbol, updateTradeBybit, updateTradeTpPlaced, updateTradeExchange,
+  persistCardEdit, inflightPlacementForSymbol, registryOf, STUCK_PLACING_MAX_AGE_S, D18_SITE,
   _execTradeLocks,
 };

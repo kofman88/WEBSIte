@@ -18,6 +18,13 @@ function userLang(userId) {
   }
 }
 
+/** D19: an admin's impersonation session never adds, removes or re-verifies the user's exchange keys. */
+function refuseImpersonation(req, res, next) {
+  if (!req.impersonatedBy) return next();
+  require('../utils/logger').warn('[IMPERSONATION-BLOCK] exchange keys refused', { admin: req.impersonatedBy, userId: req.userId, path: req.path });
+  return res.status(403).json({ error: 'Not available in an impersonation session', code: 'IMPERSONATION_FORBIDDEN' });
+}
+
 // ── Public: list of supported exchanges ─────────────────────────────────
 router.get('/', (_req, res) => {
   res.json({ exchanges: exchangeService.listSupported() });
@@ -35,7 +42,7 @@ router.get('/keys', authMiddleware, (req, res, next) => {
 });
 
 // ── Authed: add a new key ───────────────────────────────────────────────
-router.post('/keys', authMiddleware, exchangeKeyLimiter, requireVerifiedEmail, async (req, res, next) => {
+router.post('/keys', authMiddleware, refuseImpersonation, exchangeKeyLimiter, requireVerifiedEmail, async (req, res, next) => {
   try {
     const input = validation.addKeySchema.parse(req.body);
     // D15: a key that can withdraw — or whose permissions the exchange did not confirm — is refused
@@ -46,7 +53,7 @@ router.post('/keys', authMiddleware, exchangeKeyLimiter, requireVerifiedEmail, a
 });
 
 // ── Authed: delete a key ────────────────────────────────────────────────
-router.delete('/keys/:id', authMiddleware, (req, res, next) => {
+router.delete('/keys/:id', authMiddleware, refuseImpersonation, (req, res, next) => {
   try {
     const id = z.coerce.number().int().positive().parse(req.params.id);
     const out = exchangeService.deleteKey(id, req.userId);
@@ -55,7 +62,7 @@ router.delete('/keys/:id', authMiddleware, (req, res, next) => {
 });
 
 // ── Authed: re-verify a key (501 until the exchange adapters land, M13) ─
-router.post('/keys/:id/verify', authMiddleware, exchangeKeyLimiter, async (req, res, next) => {
+router.post('/keys/:id/verify', authMiddleware, refuseImpersonation, exchangeKeyLimiter, async (req, res, next) => {
   try {
     const id = z.coerce.number().int().positive().parse(req.params.id);
     const out = await exchangeService.verifyKey(id, req.userId);

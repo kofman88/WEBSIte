@@ -238,15 +238,33 @@ async function connectKeys(user, ex, key, secret, passphrase, deps = {}) {
   return { body: out };
 }
 
+/**
+ * site: a removed key's in-memory copies in this thread go with its row — the Bybit session (it
+ * holds the secret for up to 12 h) and the cached balance; the bot keeps them until their TTL.
+ * Both removal paths call it (app exchange/keys/remove, account page DELETE /api/exchanges/keys/:id).
+ * Best effort: the row is already gone, so no new order can use the key.
+ */
+function forgetKeyState(userId, ex, apiKey, deps = {}) {
+  const L = deps.log || log();
+  if (ex === 'bybit' && apiKey) {
+    try { instanceOf('bybit', deps).invalidatePybitSession(apiKey); } catch (e) { L.debug(`[MINIAPP] invalidate pybit session: ${e && e.message}`); }
+  }
+  try {
+    require('./exchanges/balanceCache').defaultCache()._cache.delete(`${Number(userId)}|${ex}`);
+  } catch (_e) { /* best effort */ }
+}
+
 /** h_exchange_keys_remove after the exchange check: the keys go, auto-trade stops when it was the trade exchange. */
 function removeKeys(user, ex, deps = {}) {
   const L = deps.log || log();
+  const oldKey = ex === 'bybit' ? exchangeKeys(user.user_id, ex)[0] : '';
   db.transaction(() => {
     clearKeys(user.user_id, ex);
     const cur = user.trade_exchange === undefined || user.trade_exchange === null ? 'bybit' : user.trade_exchange;
     if (cur === ex) user.auto_trade = false;
     ts.save(user);
   })();
+  forgetKeyState(user.user_id, ex, oldKey, deps);
   L.info(`[MINIAPP] exchange keys uid=${user.user_id} ${ex} removed`);
   return { body: { ok: true } };
 }
@@ -254,6 +272,6 @@ function removeKeys(user, ex, deps = {}) {
 module.exports = {
   EXCHANGES, TEST_TIMEOUT_S, PERMISSION_TIMEOUT_S, BINANCE_SAPI_URL, D15_MESSAGES,
   configure, keyHint, exchangeKeys, okxPassphrase, writeKeys, clearKeys, testExchange, checkWithdrawPermission,
-  connectKeys, removeKeys, waitFor, resetAuthFailures,
+  connectKeys, removeKeys, forgetKeyState, waitFor, resetAuthFailures,
   _verdicts: KP.verdicts,
 };

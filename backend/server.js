@@ -395,7 +395,7 @@ async function shutdownSteps() {
     try { httpServer.close(); } catch (_e) { /* */ }
   }
   // the engine and the trade-ops queue stop together (inside the 22 s deadline): a placement in
-  // flight gets up to 18 s to finish before the trade-ops thread is terminated
+  // flight gets up to 18 s (trade-ops) / 15 s (engine auto-trade) to finish before its thread is terminated
   const stops = [];
   if (tradeOps) {
     const t = tradeOps;
@@ -405,7 +405,8 @@ async function shutdownSteps() {
   if (engine) {
     const e = engine;
     engine = null;
-    stops.push(e.stop().catch(() => {}));
+    // D18: an auto-trade placement in flight gets up to 15 s to finish (workers/engineWorker.js)
+    stops.push(e.stop({ graceMs: require('./workers/engineWorker').SHUTDOWN_GRACE_WITH_DRAIN_MS }).catch(() => {}));
   }
   await Promise.all(stops);
   try { maintenanceService.stop(); } catch (_e) { /* */ }

@@ -133,6 +133,20 @@ function send(res, status, body, types = null) {
 const bad = (res, key) => send(res, 200, { ok: false, error: 'bad_request', message: key });
 const notFound = (res) => send(res, 404, { ok: false, error: 'not_found' });
 
+/**
+ * D19 (docs/PORT_DECISIONS.md): an admin's support session (the impersonation token of
+ * POST /api/admin/users/:id/impersonate — {uid: target, imp: admin}) sees the user's app but never
+ * moves the user's money or keys: opening / closing a position, SL→BE and adding / removing an
+ * exchange key answer 403 before any work. The bot has no such session (its admin cannot press a
+ * user's buttons).
+ */
+function impersonationRefused(req, res, what) {
+  if (!req.impersonatedBy) return false;
+  log().warning(`[IMPERSONATION-BLOCK] admin=${req.impersonatedBy} uid=${req.userId} ${what} refused`);
+  send(res, 403, { ok: false, error: 'impersonation_forbidden' });
+  return true;
+}
+
 /** _rate_limited_response(retry_s): HTTPTooManyRequests (no Cache-Control) with Retry-After. */
 function rateLimited(res, retryS) {
   res.removeHeader('Cache-Control');
@@ -159,6 +173,7 @@ const cpLen = (s) => Array.from(s).length;
 
 // ── exchange keys ────────────────────────────────────────────────────────
 async function hExchangeKeys(req, res) {
+  if (impersonationRefused(req, res, 'exchange/keys')) return undefined;
   const user = loadUser(req);
   if (!ts.can(user, 'auto_trade', opts(req))) return send(res, 200, { ok: false, error: 'pro_required' });   // [UX-2]
   if (!app().rateOk(user.user_id, 'keys', ...KEYS_RATE_LIMIT, now())) {
@@ -178,6 +193,7 @@ async function hExchangeKeys(req, res) {
 }
 
 async function hExchangeKeysRemove(req, res) {
+  if (impersonationRefused(req, res, 'exchange/keys/remove')) return undefined;
   const user = loadUser(req);
   const ex = pyStrip(pyLower(strField(req.body, 'exchange')));
   if (!EXCHANGES.includes(ex)) return bad(res, 'exchange');
@@ -324,6 +340,7 @@ async function runButton(req, res, kind, payload, okOutcomes) {
 }
 
 async function hExec(req, res, [tradeId]) {
+  if (impersonationRefused(req, res, 'exec')) return undefined;
   loadUser(req);                                          // _load_user: the row exists for the job
   const row = tradeRow(tradeId);
   if (!owned(row, req) || !CM.cardOffers(row, `exec_trade_${tradeId}`)) return notFound(res);    // D16
@@ -332,6 +349,7 @@ async function hExec(req, res, [tradeId]) {
 
 function hQc(action) {
   return async (req, res, [tradeId]) => {
+    if (action !== 'wait' && impersonationRefused(req, res, `qc/${action}`)) return undefined;
     loadUser(req);
     if (action !== 'wait') {
       const row = tradeRow(tradeId);

@@ -45,6 +45,7 @@ const { seriesMean } = require('../../strategies/common/series');
 const PLACE_TRADE_TIMEOUT_BYBIT = 45;
 const PLACE_TRADE_TIMEOUT_BINGX = 60;
 const PLACE_TRADE_TIMEOUT_BINANCE = 45;
+const STUCK_PLACING_MAX_AGE_S = 1800;   // auto_trade._STUCK_PLACING_MAX_AGE_S (the PLACING → FAILED cleanup horizon)
 const ENTRY_IMPROVE_PCT = 0.0005;
 const STRATEGY_FEATURE = Object.freeze({ SMC: 'smc', VOLUME: 'volume' });
 const STRATEGY_MAX_SL_DEFAULTS = Object.freeze({ SMC: 5.0, LEVELS: 7.0 });
@@ -108,6 +109,12 @@ function createExecutor(deps) {
   // D17 (site): record the exchange of a placed order on the trade row (the bot never writes it, so
   // its quick close / SL→BE read 'bybit' for every trade) — bot mode {recordExchange: false}
   const d17 = { recordExchange: true, ...(deps.d17 || {}) };
+  // D18 (site, docs/PORT_DECISIONS.md): the in-flight placement guard and the OKX retry rule —
+  // and the reconcile of a failed retry — `d18: {inflightGuard: false, okxNoBlindRetry: false,
+  // reconcileFailedRetry: false}` is the bot
+  const d18 = { inflightGuard: true, okxNoBlindRetry: true, reconcileFailedRetry: true, ...(deps.d18 || {}) };
+  let shuttingDown = false;
+  const stopping = () => shuttingDown;
   async function recordExchange(tid, ex) {
     if (!d17.recordExchange || typeof db.updateTradeExchange !== 'function') return;
     try {
@@ -988,8 +995,25 @@ function createExecutor(deps) {
       // 1. duplicate symbol
       if (await db.hasOpenTradeForSymbol(userId, symbol)) {
         log.debug(`${strategy} auto_trade skip duplicate: ${symbol} uid=${userId}`);
+        if (d18.inflightGuard && typeof db.tradeHasOrder === 'function' && await db.tradeHasOrder(tradeId)) {
+          // D18 (site): the open trade IS this signal (a second call for one trade_id) — the bot's
+          // SKIP would close the live trade's own row and leave its position untracked
+          log.warning(pf('[D18-DUP-SELF] uid=%s sym=%s trade_id=%s is already placed — second call ignored', userId, symbol, tradeId));
+          return result;
+        }
         await safeSkipTrade(tradeId, 'auto_trade.py:1060');
         return result;
+      }
+      // D18 (site): a placement of this symbol that a dead process left unresolved (PLACING, no
+      // order id, < 30 min) may be live on the exchange — never open a second position over it
+      if (d18.inflightGuard && typeof db.inflightPlacementForSymbol === 'function') {
+        const inflightTid = await db.inflightPlacementForSymbol(userId, symbol, now() - STUCK_PLACING_MAX_AGE_S, tradeId);
+        if (inflightTid) {
+          log.warning(pf('[D18-INFLIGHT] uid=%s sym=%s strategy=%s: placement %s never resolved (PLACING, no order id) — treated as an open trade, skip',
+            userId, symbol, strategy, inflightTid));
+          await safeSkipTrade(tradeId, 'd18_inflight_placement');
+          return result;
+        }
       }
       // 2. open-trade limit
       const openCount = await db.countOpenTrades(userId, tradeId);
@@ -1065,6 +1089,12 @@ function createExecutor(deps) {
         if (typeof deps.onConfirmPending === 'function') {
           try { await deps.onConfirmPending({ userId, tradeId, symbol, direction, strategy, exchange }); } catch (e) { log.debug(`confirm hand-off uid=${userId}: ${errText(e)}`); }
         }
+        return result;
+      }
+      if (stopping()) {
+        // D18 (site): the engine is stopping — no new placement starts (the bot cancels its tasks)
+        log.warning(pf('[D18-SHUTDOWN] uid=%s sym=%s strategy=%s: engine stopping — not placed', userId, symbol, strategy));
+        await safeSkipTrade(tradeId, 'd18_shutting_down');
         return result;
       }
       return placeAuto();
@@ -1269,6 +1299,7 @@ function createExecutor(deps) {
             log.debug(pf('state PLACING uid=%s %s: %s', userId, symbol, errText(e)));
           }
           tradeResult = null;
+          let retriedAfterTimeout = false;
           for (let attempt = 0; attempt < 2; attempt++) {
             emitEvt(tradeId, 'order_placement_attempt', { attempt: attempt + 1, exchange, order_type: orderType, timeout: timeoutS, idem_key: idemKey.slice(0, 32) });
             try {
@@ -1336,8 +1367,18 @@ function createExecutor(deps) {
                   log.warning(pf('[TIMEOUT-FIRST-ATTEMPT] uid=%s %s: order found on exchange after first-attempt timeout — handing over to timeout reconcile', userId, symbol));
                   throw e;
                 }
+                if (exchange === 'okx' && d18.okxNoBlindRetry) {
+                  // D18 (site): an OKX entry carries no client order id, so a second send is a second
+                  // order whenever the first one got through — and okx_trader answers a failed read with
+                  // an empty list, so "nothing found" cannot tell "not there" from "not read". No blind
+                  // retry: the timeout reconcile reads the position once more (found → recorded + SL,
+                  // none → pending orders cancelled, SKIP) — fail-closed
+                  log.warning(pf('[D18-OKX-NO-RETRY] uid=%s %s: no client order id on OKX — no blind retry, handing over to timeout reconcile', userId, symbol));
+                  throw e;
+                }
                 log.warning(pf('[C78-IDEM] %s: no existing order — retry in 5s', symbol));
                 await sleep(5);
+                retriedAfterTimeout = true;
                 continue;
               }
               idempotency.setIdempotency(idemKey, 'failed');
@@ -1346,6 +1387,20 @@ function createExecutor(deps) {
           }
           fmtFn = trader.formatTradeResult;
           fmtArgs = [tradeResult, direction, symbol, entry, sl, tp1, riskPct, leverage];
+          const retryOk = truthy(pyGet(tradeResult, 'ok', null));
+          if (retriedAfterTimeout && d18.reconcileFailedRetry && (!retryOk || truthy(pyGet(tradeResult, 'duplicate', null)))) {
+            // D18 (site): the first send timed out, so the exchange may hold ITS order. A rejected
+            // retry (a duplicate client id the trader does not read as success, margin the first
+            // order took) proves nothing — the bot SKIPs the row and leaves that position untracked;
+            // a retry the trader answers "duplicate — assume the first attempt worked" skipped the
+            // first attempt's SL step (BingX: no SL at all until the BE monitor). The site
+            // reconciles both like a timeout: the live position is recorded and given its SL (and
+            // partial TP); none → pending orders cancelled, then SKIP.
+            log.warning(pf('[D18-RETRY-RECONCILE] uid=%s %s: retry after a timeout %s — reconciling the first attempt',
+              userId, symbol, retryOk ? 'was a duplicate' : `failed (${pySlice(pyStr(or(pyGet(tradeResult, 'error', ''), '')), 120)})`));
+            await onTimeout();
+            return result;
+          }
         }
 
         // Bug #5 P1: risk-cap status
@@ -1821,9 +1876,25 @@ function createExecutor(deps) {
     }
   }
 
+  /** D18: no new auto placement from now on (engine shutdown); the ones in flight run to their end. */
+  function beginShutdown() { shuttingDown = true; }
+  /** The placements in flight (per-user locks held). */
+  function inflight() {
+    let n = 0;
+    for (const lk of tradeLocks.values()) if (lk.locked()) n += 1;
+    return n;
+  }
+  /** Wait ≤ timeoutMs for every placement in flight to end → the number still running. */
+  async function waitIdle(timeoutMs, pollMs = 50) {
+    const until = Date.now() + Math.max(0, Number(timeoutMs) || 0);
+    while (inflight() > 0 && Date.now() < until) await new Promise((r) => { const h = setTimeout(r, pollMs); if (h.unref) h.unref(); });
+    return inflight();
+  }
+
   return {
     executeAutoTrade,
     safeSkipTrade,
+    beginShutdown, inflight, waitIdle,
     _tradeLocks: tradeLocks,
     _disabledDaysNotified: disabledDaysNotified,
     _lowNotionalNotifyTs: lowNotionalNotifyTs,
@@ -1867,5 +1938,5 @@ function floatKeyList(v, acc = new Set()) {
 
 module.exports = {
   createExecutor, utcParts, PLACE_TRADE_TIMEOUT_BYBIT, PLACE_TRADE_TIMEOUT_BINGX, PLACE_TRADE_TIMEOUT_BINANCE,
-  ENTRY_IMPROVE_PCT, STRATEGY_MAX_SL_DEFAULTS,
+  ENTRY_IMPROVE_PCT, STRATEGY_MAX_SL_DEFAULTS, STUCK_PLACING_MAX_AGE_S,
 };

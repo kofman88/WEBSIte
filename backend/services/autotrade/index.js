@@ -22,6 +22,10 @@
  *                                the app: the main thread sends it to the engine worker, which owns
  *                                this module state — workers/engineWorker.js 'autotrade' message).
  *     drain()                    wait for the executor's background tasks (shutdown / tests).
+ *     beginShutdown() / inflight() / waitIdle(ms)
+ *                                D18: from beginShutdown on no new auto placement starts (the row is
+ *                                SKIPped 'd18_shutting_down'); waitIdle waits for the placements in
+ *                                flight (per-user locks held) — the engine worker's graceful stop.
  *   }
  *
  * Site sources of the bot's reads:
@@ -287,7 +291,7 @@ function createAutoTrade(deps = {}) {
       const fn = confirmHook();
       if (typeof fn === 'function') await fn(info);
     },
-    d6: deps.d6, d17: deps.d17,
+    d6: deps.d6, d17: deps.d17, d18: deps.d18,
   });
 
   /** auto_trade.execute_auto_trade as the scanners call it. */
@@ -377,6 +381,10 @@ function createAutoTrade(deps = {}) {
   return {
     executeAutoTrade, getApiKeys, getBalance, restore, gc, resetAuthFailures,
     drain: () => tasks.drain(),
+    // D18: engine shutdown — no new placement, then wait for the ones in flight (workers/engineWorker.js)
+    beginShutdown: () => exec.beginShutdown(),
+    inflight: () => exec.inflight(),
+    waitIdle: (timeoutMs) => exec.waitIdle(timeoutMs),
     exchanges: () => Array.from(exchanges),
     _exec: exec,
     _parts: {

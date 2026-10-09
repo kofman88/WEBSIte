@@ -116,7 +116,10 @@ const ROW_EXTRA = ['username', 'okx_passphrase'];
  * opts.via = 'index' runs the case through the production entry point
  * (services/autotrade/index.js createAutoTrade, every exchange enabled) instead of createExecutor.
  */
-function buildEnv(c, fx, { d6 = { executedOnReject: true, fixedAmountPercent: false }, via = 'executor', indexDeps = {} } = {}) {
+/** The bot's behaviour for the D18 site guards (docs/PORT_DECISIONS.md D18). */
+const BOT_D18 = Object.freeze({ inflightGuard: false, okxNoBlindRetry: false, reconcileFailedRetry: false });
+
+function buildEnv(c, fx, { d6 = { executedOnReject: true, fixedAmountPercent: false }, via = 'executor', indexDeps = {}, d18 = BOT_D18 } = {}) {
   const clk = createVClock(c.clock);
   const now = clk.now;
   const recs = [];
@@ -312,6 +315,7 @@ function buildEnv(c, fx, { d6 = { executedOnReject: true, fixedAmountPercent: fa
     },
     d6,
     d17: { recordExchange: false },   // the bot never writes trades.exchange
+    d18: d18 === null ? undefined : d18,   // null → the site's defaults
   });
 
   for (const [uid, ts] of st.low_notional || []) exec._lowNotionalNotifyTs.set(uid, ts);
@@ -357,4 +361,4 @@ function byTask(recs) {
   return out;
 }
 
-module.exports = { loadFixture, buildEnv, bindCall, byTask, FIXTURE };
+module.exports = { loadFixture, buildEnv, bindCall, byTask, FIXTURE, BOT_D18 };

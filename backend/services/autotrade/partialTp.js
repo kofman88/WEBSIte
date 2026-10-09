@@ -74,22 +74,25 @@ function calculatePartialTpPrices(entry, sl, direction, tp1R = 1.0, tp2R = 1.5) 
   return [pyRound(p1, 8), pyRound(p2, 8)];
 }
 
+/** calculate_partial_tp_qty: no rounding (MONEY-AUDIT P0.4); [F-003] tp1+tp2 > 100 → tp2 clamped, logged. */
+function calcPartialTpQty(totalQty, tp1Pct = 40.0, tp2Pct = 30.0, log = null) {
+  let p2 = tp2Pct;
+  if (tp1Pct + tp2Pct > 100.0) {
+    const np = Math.max(0.0, 100.0 - tp1Pct);
+    (log || require('../marketData/mdLog').log).warning(pf('[PTP-PCT-CLAMP] tp1=%.1f%% + tp2=%.1f%% > 100%% — clamping tp2 to %.1f%% to prevent over-close', tp1Pct, tp2Pct, np));
+    p2 = np;
+  }
+  const qty1 = totalQty * tp1Pct / 100.0;
+  const qty2 = totalQty * p2 / 100.0;
+  return [qty1, qty2, Math.max(totalQty - qty1 - qty2, 0.0)];
+}
+
 function createPartialTp({ traderFor, log = null, sleep = null, sendMessage = null, enqueueCritical = null, adminAlert = null, timers = undefined } = {}) {
   const logger = log || require('../marketData/mdLog').log;
   const asleep = sleep || ((s) => new Promise((r) => setTimeout(r, s * 1000)));
   const call = (exchange, fn, timeoutS, thunk) => waitFor(thunk, timeoutS, { shield: isThreadCall(exchange, fn), timers });
 
-  function calculatePartialTpQty(totalQty, tp1Pct = 40.0, tp2Pct = 30.0) {
-    let p2 = tp2Pct;
-    if (tp1Pct + tp2Pct > 100.0) {
-      const np = Math.max(0.0, 100.0 - tp1Pct);
-      logger.warning(pf('[PTP-PCT-CLAMP] tp1=%.1f%% + tp2=%.1f%% > 100%% — clamping tp2 to %.1f%% to prevent over-close', tp1Pct, tp2Pct, np));
-      p2 = np;
-    }
-    const qty1 = totalQty * tp1Pct / 100.0;
-    const qty2 = totalQty * p2 / 100.0;
-    return [qty1, qty2, Math.max(totalQty - qty1 - qty2, 0.0)];
-  }
+  const calculatePartialTpQty = (totalQty, tp1Pct = 40.0, tp2Pct = 30.0) => calcPartialTpQty(totalQty, tp1Pct, tp2Pct, logger);
 
   async function fetchActualAvgEntry({ exchange, apiKey, apiSecret, symbol, user, bybitDemo = false }) {
     let positions;
@@ -624,4 +627,4 @@ function truthyPy(v) {
   return true;
 }
 
-module.exports = { buTargetPrice, shouldApplyBuAfterPartial, calculatePartialTpPrices, createPartialTp };
+module.exports = { buTargetPrice, shouldApplyBuAfterPartial, calculatePartialTpPrices, calculatePartialTpQty: calcPartialTpQty, createPartialTp };
