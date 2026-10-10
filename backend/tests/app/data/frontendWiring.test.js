@@ -105,7 +105,7 @@ describe('app.js calls the data routes as served', () => {
     expect(APP_JS).toContain('method: opts.method || (opts.body ? "POST" : "GET")');
     const calls = [
       'api("dashboard")',
-      'api("signals?status=" + encodeURIComponent(S.sigFilter) + "&limit=50"',
+      'api("signals?status=" + encodeURIComponent(S.sigFilter) + "&limit=" + SIG_LIMIT',   // [STATS-HONEST] var SIG_LIMIT = 50
       'api("signals/" + encodeURIComponent(sig.id) + "/chart", { timeout: 30000 })',
       'api("signals/" + encodeURIComponent(sig.id) + "/result", { method: "POST", body: { result: o[0] } })',
       'api("signals/" + encodeURIComponent(sig.id) + "/result", { method: "POST", body: { note: ta.value } })',
@@ -115,6 +115,7 @@ describe('app.js calls the data routes as served', () => {
       'api("feedback", { method: "POST", body: { type: fb.type, text: text }, timeout: 15000 })',
     ];
     for (const c of calls) expect(APP_JS, c).toContain(c);
+    expect(APP_JS).toContain('var SIG_LIMIT = 50;');
     // every api("<data route>…") literal in the bundle is one of the above
     const seen = new Set();
     for (const m of APP_JS.matchAll(/api\("(dashboard|signals|stats|analyze|share|feedback)[^"]*"/g)) seen.add(m[0]);

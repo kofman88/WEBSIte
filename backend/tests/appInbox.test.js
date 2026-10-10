@@ -27,8 +27,8 @@ describe('frontend/app inbox', () => {
   it('the inbox markup: bell button, badge, dialog; the cache key moved with the release', () => {
     expect(INDEX).toContain('<button id="inbox-btn" class="icon-btn inbox-btn" type="button" aria-label="Уведомления" hidden>');
     expect(INDEX).toContain('<section id="inbox" class="detail inbox" hidden role="dialog" aria-modal="true" aria-label="Уведомления"></section>');
-    expect(INDEX).toContain('./app.js?v=m12b');
-    expect(INDEX).toContain('./app.css?v=m12b');
+    expect(INDEX).toContain('./app.js?v=bd3');     // [STATS-HONEST] batch D (d3) release moved the key again
+    expect(INDEX).toContain('./app.css?v=bd3');
   });
 
   it('notification text goes in as textContent; links never reach the API or leave without noopener', () => {

@@ -178,6 +178,18 @@
     var t = num(ts); if (!t) return null;
     return Math.max(0, Math.ceil((t - Date.now() / 1000) / 86400));
   }
+  // [STATS-HONEST] реальное окно статистики: данных меньше, чем days → «с 6 окт» (по first_ts)
+  var MONTHS_SHORT = ["янв", "фев", "мар", "апр", "мая", "июн", "июл", "авг", "сен", "окт", "ноя", "дек"];
+  function statWindow(st, short) {
+    var days = num(st && st.days) || 30, ft = num(st && st.first_ts);
+    if (ft && Math.ceil((Date.now() / 1000 - ft) / 86400) < days) {
+      var d = new Date(ft * 1000);
+      return "с " + d.getDate() + " " + MONTHS_SHORT[d.getMonth()];
+    }
+    return short ? days + "д" : "за " + days + " дн.";
+  }
+  // [STATS-HONEST] честные поля aggregate с откатом на старые (старый бэкенд)
+  function pick(o, k, fb) { return o && o[k] !== undefined && o[k] !== null ? o[k] : (o ? o[fb] : undefined); }
   function pctFrom(base, v) {
     var b = num(base), x = num(v);
     if (!b || x === null) return null;
@@ -186,7 +198,8 @@
   function isLong(sig) { return String(sig.direction || "").toUpperCase() === "LONG"; }
   function pairOf(sig) { return sig.pair || ((sig.symbol || "?") + "/USDT"); }
   function statusKey(sig) { return String(sig.status || "").toLowerCase(); }
-  function isLive(sig) { var st = statusKey(sig); return st === "open" || st === "tp1" || st === "tp2"; }
+  // [STATS-HONEST] sig.final — итог окончательный (закрытая на бирже / вручную TP1-TP2 уже не «в работе»)
+  function isLive(sig) { if (sig && sig.final === true) return false; var st = statusKey(sig); return st === "open" || st === "tp1" || st === "tp2"; }
   function rOf(sig, level) {
     // [R-FROM-ORIGINAL-SL] риск = расстояние до исходного стопа (sl0); текущий sl после БУ равен входу
     var e = num(sig.entry), sl = num(sig.sl0) || num(sig.sl), l = num(level);
@@ -1086,38 +1099,49 @@
 
   function statsBlock() {
     var st = S.dash.stats || {};
-    var wr = num(st.win_rate), tr = num(st.total_rr), r7 = num(st.rr_7d);
-    var trades = num(st.trades), wins = num(st.wins);
+    // [STATS-HONEST] win rate — по ОКОНЧАТЕЛЬНЫМ итогам (без TP1/TP2 в работе); итог R — после издержек
+    var ft = num(pick(st, "final_trades", "trades")), fw = num(pick(st, "final_wins", "wins"));
+    var wr = num(pick(st, "final_win_rate", "win_rate"));
+    var gross = num(st.total_rr), net = num(pick(st, "net_rr", "total_rr")), r7 = num(pick(st, "net_rr_7d", "rr_7d"));
+    var hasNet = num(st.net_rr) !== null;
     return h("div", { class: "stats" },
       h("div", { class: "card stat" }, label("[Win rate]"),
-        h("div", { class: "stat-val" }, wr === null || !trades ? "—" : wr.toFixed(wr >= 99.95 ? 0 : 1), trades ? h("small", { text: "%" }) : null),
-        h("div", { class: "stat-sub", text: trades ? (wins || 0) + " из " + trades + " в плюс" : "нет итогов" })),
+        h("div", { class: "stat-val" }, wr === null || !ft ? "—" : wr.toFixed(wr >= 99.95 ? 0 : 1), ft ? h("small", { text: "%" }) : null),
+        // [STATS-HONEST] «23 из 42 закрытых» длиннее старого «в плюс» — переносится (.stat-sub.wrap), не обрезается «…»
+        h("div", { class: "stat-sub wrap", text: ft ? (fw || 0) + " из " + ft + " закрытых" : "нет итогов" })),
       h("div", { class: "card stat" }, label("[Итог R]"),
-        h("div", { class: "stat-val " + signCls(tr), text: tr === null ? "—" : fmtR(tr) }),
+        h("div", { class: "stat-val " + signCls(net), text: net === null ? "—" : fmtR(net) }),
+        hasNet ? h("div", { class: "stat-sub wrap", title: "Без комиссий и проскальзывания (" + (num(st.cost_pct) || 0) + "% цены на сделку)" },
+          "до комиссий ", h("span", { class: signCls(gross), text: gross === null ? "—" : fmtR(gross) })) : null,
         h("div", { class: "stat-sub" }, "7д: ", h("span", { class: signCls(r7), text: r7 === null ? "—" : fmtR(r7) }))),
       h("div", { class: "card stat" }, label("[Сигналов]"),
         h("div", { class: "stat-val", text: st.signals != null ? String(st.signals) : "—" }),
-        h("div", { class: "stat-sub", text: "за " + (st.days || 30) + " дн." + (num(st.expired) ? " · без итога " + st.expired : "") })));
+        h("div", { class: "stat-sub", text: statWindow(st) + (num(st.expired) ? " · без итога " + st.expired : "") })));
   }
 
   function equityCard() {
     var st = S.dash.stats || {};
-    var eq = Array.isArray(st.equity) ? st.equity : [];
+    // [STATS-HONEST] кривая — net R (после издержек); ось X — номер сигнала с итогом, не время
+    var eq = Array.isArray(st.equity_net) ? st.equity_net : Array.isArray(st.equity) ? st.equity : [];
     var last = eq.length ? num(eq[eq.length - 1].r) : null;
-    var open = num(st.open), best = num(st.best_rr);
+    var open = num(pick(st, "open_live", "open")), best = num(st.best_rr);
     var body = eq.length >= 1 ? equityPlot(eq) : h("div", { class: "eq-empty" },
       h("span", { text: "Кривая появится после первых сигналов с итогом" }));
     return h("div", { class: "card equity" },
       h("div", { class: "eq-head" },
-        label("[Кривая R · " + (st.days || 30) + "д]"),
+        label("[Кривая R · " + statWindow(st, true) + "]"),
         last !== null ? rVal(last) : label("—")),
       body,
+      eq.length >= 1 ? h("div", { class: "eq-cap", text: (Array.isArray(st.equity_net) ? "R после комиссий · " : "") + "по оси X — номер сигнала (1…" + eq.length + ")" }) : null,
       h("div", { class: "eq-foot" },
         h("div", null, label("Открыто"), h("b", { class: open ? "amber" : "", text: open === null ? "—" : String(open) })),
         h("div", null, label("Лучший"), h("b", { class: signCls(best), text: best === null ? "—" : fmtR(best) })),
-        h("div", null, label("Плюс / минус"),
-          h("b", null, h("span", { class: "up", text: String(num(st.wins) || 0) }), h("span", { class: "dim", text: " / " }),
-            h("span", { class: "down", text: String(num(st.losses) || 0) })))),
+        // [STATS-HONEST] подпись — треть карточки: на 320 px это ~73 px ≈ 11 моно-символов (label nowrap);
+        // «Плюс / ноль / минус» не влезала и обрезалась до «ПЛЮС / НОЛЬ / М» — полное название в title
+        h("div", { title: "Плюс / ноль / минус" }, label("+ / 0 / −"),
+          h("b", null, h("span", { class: "up", text: String(num(pick(st, "final_wins", "wins")) || 0) }), h("span", { class: "dim", text: " / " }),
+            h("span", { class: "muted", text: String(num(pick(st, "final_be", "be")) || 0) }), h("span", { class: "dim", text: " / " }),
+            h("span", { class: "down", text: String(num(pick(st, "final_losses", "losses")) || 0) })))),
       num(st.signals) ? h("div", { style: "padding:0 14px 14px" },
         h("button", { class: "btn btn-ghost btn-block btn-sm", type: "button", onclick: shareResults }, "📤 Поделиться результатом")) : null);
   }
@@ -1255,9 +1279,11 @@
     var ps = ((S.dash.stats || {}).per_strategy || {})[k] || null;
     var statsEl;
     if (ps && num(ps.signals) && !c.locked) {
+      // [STATS-HONEST] WR — по окончательным итогам, «Итог» — net R (как в блоке сверху)
+      var psFt = num(pick(ps, "final_trades", "trades")), psNet = pick(ps, "net_rr", "total_rr");
       statsEl = h("div", { class: "mini-stats" },
-        h("span", null, label("WR"), h("b", { text: num(ps.trades) ? (num(ps.win_rate) || 0).toFixed(0) + "%" : "—" })),
-        h("span", null, label("Итог"), h("b", { class: signCls(ps.total_rr), text: num(ps.trades) ? fmtR(ps.total_rr) : "—" })),
+        h("span", null, label("WR"), h("b", { text: psFt ? (num(pick(ps, "final_win_rate", "win_rate")) || 0).toFixed(0) + "%" : "—" })),
+        h("span", null, label("Итог"), h("b", { class: signCls(psNet), text: num(ps.trades) ? fmtR(psNet) : "—" })),
         h("span", null, label("Сигн."), h("b", { text: String(ps.signals) })));
     } else {
       statsEl = h("div", { class: "mini-stats none" }, label(c.locked ? "Доступно в Pro" : "Нет сигналов за 30 дн."));
@@ -1313,13 +1339,14 @@
   // ---------------------------------------------------------------------------
   // [SIGNALS-STRATEGY-FILTER] ключ кэша = статус + стратегия; стратегию фильтрует сервер
   function sigKey() { return S.sigFilter + (S.sigStrat && S.sigStrat !== "ALL" ? ":" + S.sigStrat : ""); }
+  var SIG_LIMIT = 50;   // [STATS-HONEST] окно списка сигналов — «последние 50»
   function loadSignals(force) {
     var f = sigKey();
     var c = S.sigs[f];
     if (S.sigLoading || (!force && c && Date.now() - c.at < 30000)) return;
     S.sigLoading = true;
     if (force) rerender("signals");
-    api("signals?status=" + encodeURIComponent(S.sigFilter) + "&limit=50" + (S.sigStrat && S.sigStrat !== "ALL" ? "&strategy=" + encodeURIComponent(S.sigStrat) : "")).then(function (d) {
+    api("signals?status=" + encodeURIComponent(S.sigFilter) + "&limit=" + SIG_LIMIT + (S.sigStrat && S.sigStrat !== "ALL" ? "&strategy=" + encodeURIComponent(S.sigStrat) : "")).then(function (d) {
       okOrThrow(d);
       S.sigs[f] = { list: Array.isArray(d.signals) ? d.signals : [], at: Date.now() };
       if (force) hap("success");
@@ -1337,6 +1364,7 @@
   function renderSignals() {
     var root = h("div", { class: "screen" });
     root.appendChild(heading("Сигналы", "center"));
+    root.appendChild(h("p", { class: "hint sig-window", text: "последние " + SIG_LIMIT }));   // [STATS-HONEST]
     var filters = [["all", "Все"], ["open", "Открытые"], ["closed", "Закрытые"]];
     var chips = h("div", { class: "chips", role: "tablist", "aria-label": "Статус" });
     filters.forEach(function (f) {
@@ -1384,19 +1412,33 @@
     return root;
   }
 
+  // [STATS-HONEST] Σ R разделена: закрытые — net R окончательных итогов (после издержек),
+  // открытые — R «сейчас» по текущей цене; «В плюсе» — только закрытые
   function summaryBar(items) {
-    var withR = 0, plus = 0, sum = 0, live = 0;
+    var live = 0, closedN = 0, plus = 0, closedR = 0, openN = 0, openR = 0;
     items.forEach(function (x) {
-      if (isLive(x)) live++;
-      var v = sigValue(x);
-      if (v === null) return;
-      withR++; sum += v; if (v > 0) plus++;
+      if (isLive(x)) {
+        live++;
+        var lv = liveR(x);
+        if (lv !== null) { openN++; openR += lv; }
+        return;
+      }
+      var f = finalR(x);
+      if (f === null) return;
+      closedN++;
+      // [STATS-HONEST] как final_wins в db/signal_stats.aggregate: БУ (статус be, даже +0.02R биржевого
+      // выхода) и 0R — не «в плюсе»; R брутто (до комиссий), как WIN RATE на Главной
+      if (statusKey(x) !== "be" && f > 0) plus++;
+      var nr = num(x.net_rr);
+      closedR += nr !== null ? nr : f;
     });
     return h("div", { class: "card sumbar" },
       h("div", null, label("Сигналов"), h("b", { text: String(items.length) })),
       h("div", null, label("Открыто"), h("b", { class: live ? "amber" : "", text: String(live) })),
-      h("div", null, label("В плюсе"), h("b", { text: withR ? plus + "/" + withR : "—" })),
-      h("div", null, label("Σ R"), h("b", { class: signCls(sum), text: withR ? fmtR(sum) : "—" })));
+      h("div", { title: "Закрытые с R > 0 до комиссий; БУ — не в плюсе (как WIN RATE на Главной)" }, label("В плюсе"), h("b", { text: closedN ? plus + "/" + closedN : "—" })),
+      h("div", { class: "sumbar-r", title: "Закрытые — R после комиссий; открытые — R по текущей цене" }, label("Σ R"),
+        h("span", { class: "sumbar-rv" }, "закрытые ", h("b", { class: signCls(closedN ? closedR : null), text: closedN ? fmtR(closedR) : "—" }),
+          h("span", { class: "dim", text: " · " }), "открытые ", h("b", { class: signCls(openN ? openR : null), text: openN ? fmtR(openR) : "—" }))));
   }
 
   function signalCard(sig) {

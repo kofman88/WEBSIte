@@ -266,6 +266,7 @@ button.card:active, .card.tile:active { transform: scale(.985); border-color: va
 .stat-val small { font-size: 14px; color: var(--muted); font-weight: 500; margin-left: 1px; }
 .stat-sub { font-family: var(--f-mono); font-size: 9.5px; color: var(--dim); margin-top: 6px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .stat-val.up, .stat-val.down { text-shadow: 0 0 18px currentColor; }
+.stat-sub.wrap { white-space: normal; line-height: 1.35; }   /* [STATS-HONEST] «до комиссий +X R» */
 
 /* ---------- market strip ---------- */
 .market { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); margin-top: 8px; }
@@ -589,8 +590,14 @@ button.card:active, .card.tile:active { transform: scale(.985); border-color: va
 .eq-foot > div, .sumbar > div { padding: 8px 12px 9px; min-width: 0; }
 .eq-foot > div + div, .sumbar > div + div { border-left: 1px solid var(--line); }
 .eq-foot b, .sumbar b { display: block; font-family: var(--f-head); font-weight: 600; font-size: 17px; line-height: 1.1; margin-top: 3px; white-space: nowrap; }
-.sumbar { grid-template-columns: repeat(4, minmax(0, 1fr)); margin: 12px 0 0; border: 1px solid var(--line); }
+.sumbar { grid-template-columns: repeat(3, minmax(0, 1fr)); margin: 12px 0 0; border: 1px solid var(--line); }
 .sumbar > div { padding: 8px 10px 9px; }
+/* [STATS-HONEST] Σ R: «закрытые −X R · открытые +Y R» — отдельной строкой во всю ширину */
+.sumbar > .sumbar-r { grid-column: 1 / -1; border-left: 0; border-top: 1px solid var(--line); display: flex; align-items: baseline; gap: 8px; flex-wrap: wrap; }
+.sumbar-rv { font-family: var(--f-mono); font-size: 11px; color: var(--muted); }
+.sumbar-rv b { display: inline; font-size: 14px; margin: 0 2px 0 0; }
+.eq-cap { font-family: var(--f-mono); font-size: 9.5px; color: var(--dim); margin: -4px 0 8px; }
+.sig-window { text-align: center; margin: 2px 0 8px; }
 
 /* trend dots */
 .trend { display: flex; gap: 8px; margin-top: 2px; flex-wrap: wrap; }
