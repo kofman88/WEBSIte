@@ -20,6 +20,12 @@
  * `sum()` is the 3.11 left-to-right sum (series.pySum), `+=` loops stay sequential, round()
  * is banker's on the exact binary value (pyround), `//` is floor division.
  *
+ * [STATS-HONEST 2026-10] (bot 7e20066 + 51e8256): COLS carries skip_reason (a manual «Пропустил» is
+ * 'skip' in every aggregate); aggregate adds final_* / net_rr / net_rr_7d / first_ts (root and
+ * per_strategy), open_live / equity_net / cost_pct / exchange_cost_pct (root); cost model
+ * SIGNAL_STATS_COST_PCT (0.15) / SIGNAL_STATS_EXCHANGE_COST_PCT (0.12) read on every call;
+ * _signal adds net_rr / final, open / closed and _attach_live use _is_live, r_now from sl0.
+ *
  * Quirks kept (PORT_DECISIONS D6 lists none here):
  *   • aggregate: a signal at stage TP1 / TP2 counts in `open` AND as a closed winning trade
  *     with its planned R (the TP1/TP2 double count);
@@ -31,7 +37,9 @@
  *     while the session / weekday buckets count `rr > 0` as a win.
  */
 
-const { signalStatus, signalRr, COUNTABLE_SQL, countableSql, _g } = require('./signalOutcome');
+const {
+  signalStatus, signalRr, COUNTABLE_SQL, countableSql, _g, isFinal, isExchangeResult,
+} = require('./signalOutcome');
 const { pyRound, pyRoundInt, pyFloorDiv } = require('../../strategies/common/pyround');
 const { pySum } = require('../../strategies/common/series');
 const { levelsStars } = require('../../strategies/levels/stars');
@@ -42,9 +50,17 @@ const { pyLower, pyStrip, pyUpper, pyRstrip } = require('../../strategies/common
 const { pyDict } = require('./pyjson');   // CPython 3.11 str case / whitespace methods
 
 const STRATS = Object.freeze(['LEVELS', 'SMC', 'VOLUME']);
+// [STATS-HONEST 2026-10] skip_reason: a manual «Пропустил» (result='SKIP', skip_reason='manual') is
+// status 'skip' (signal_outcome rule 3) only with this column — without it the row counted by its
+// tracker stage (SL → −1R, ''/TP1 → open) while the Signals tab (SELECT *) showed «Пропуск».
+// signal_stats, signal_rows_since, pro_overview (t.skip_reason) and strategy_rating select it.
 const COLS = 'result, result_rr, progress_stage, entry, sl, original_sl, tp1, tp2, tp3, '
-  + 'created_at, strategy, order_id, signal_msg_id, symbol, direction, expire_rr';
+  + 'created_at, strategy, order_id, signal_msg_id, symbol, direction, expire_rr, skip_reason';
 const RATING_TTL_S = 900.0;
+
+// [STATS-HONEST 2026-10] trade costs in % of price (round trip)
+const DEFAULT_COST_PCT = 0.15;            // taker 0.06 % × 2 (bybit_trader) + ~0.03 % slippage
+const DEFAULT_EXCHANGE_COST_PCT = 0.12;   // fees only: the exit slippage is already in result_rr
 
 const nowSec = () => Date.now() / 1000;
 const isNone = (v) => v === null || v === undefined;
@@ -91,33 +107,131 @@ function stripQuote(sym) { return replaceAll(replaceAll(sOr(sym), '-USDT-SWAP', 
 //  db/signal_stats.py
 // ═══════════════════════════════════════════════════════════════════════
 
+// ── [STATS-HONEST 2026-10] costs (db/signal_stats.py :40–96) ──────────────────────────────────
+
+/** _env_pct(name, default): a non-negative float from env; empty / garbage / < 0 / inf / nan → default. Read on every call. */
+function envPct(name, dflt, env = process.env) {
+  const raw = env[name];
+  let v;
+  try {
+    v = isNone(raw) || raw === '' ? dflt : pyFloat(String(raw));   // float(os.getenv(name, "") or default)
+  } catch (_e) {
+    return dflt;                                                    // (TypeError, ValueError)
+  }
+  return Number.isFinite(v) && v >= 0 ? v : dflt;
+}
+
+/** SIGNAL_STATS_COST_PCT: the cost of a signal row (tracker / manual result / EXPIRED), % of price. */
+function costPct(env = process.env) { return envPct('SIGNAL_STATS_COST_PCT', DEFAULT_COST_PCT, env); }
+
+/** SIGNAL_STATS_EXCHANGE_COST_PCT: the cost of an exchange row with a real result, % of price. */
+function exchangeCostPct(env = process.env) { return envPct('SIGNAL_STATS_EXCHANGE_COST_PCT', DEFAULT_EXCHANGE_COST_PCT, env); }
+
+/** stop_pct(row): |entry − original_sl (else sl)| / entry × 100; null when it cannot be computed. */
+function stopPct(row) {
+  let entry; let sl0;
+  try {
+    const e = _g(row, 'entry', 0); entry = pyFloat(falsy(e) ? 0 : e);
+    const o = _g(row, 'original_sl', 0); sl0 = pyFloat(falsy(o) ? 0 : o);
+    if (sl0 === 0) { const s = _g(row, 'sl', 0); sl0 = pyFloat(falsy(s) ? 0 : s); }   // `or`: NaN is truthy, −0.0 is not
+  } catch (_e) {
+    return null;
+  }
+  if (!(Number.isFinite(entry) && Number.isFinite(sl0)) || entry <= 0 || sl0 <= 0) return null;
+  const risk = Math.abs(entry - sl0);
+  return risk > 0 ? risk / entry * 100.0 : null;
+}
+
+let costLog = null;
+/** The bot's log.debug of an unknown stop (logger CHM.SignalStats); tests may swap the sink. */
+function _setCostLog(fn) { costLog = fn; }
+
+function costDebug(msg) {
+  if (costLog) { costLog(msg); return; }
+  try { require('../../utils/logger').debug(msg); } catch (_e) { /* logging never breaks the stats */ }
+}
+
+/**
+ * row_cost_r(row, c_pct, ex_pct): the row's cost in R = cost / stop_pct — the exchange cost (fees)
+ * for an exchange result, the signal cost otherwise (tracker, manual mark, EXPIRED); 0 when the
+ * stop is unknown.
+ */
+function rowCostR(row, cPct = null, exPct = null) {
+  const sp = stopPct(row);
+  if (sp === null) {
+    const msg = `[STATS-HONEST] tid=${pyStr(_g(row, 'trade_id', '?'))} ${pyStr(_g(row, 'symbol', '?'))} `
+      + `ts=${pyStr(_g(row, 'created_at', '?'))}: стоп неизвестен (entry/sl) — издержки не вычтены`;
+    costDebug(msg);
+    return 0.0;
+  }
+  let c;
+  if (isExchangeResult(row)) c = isNone(exPct) ? exchangeCostPct() : exPct;
+  else c = isNone(cPct) ? costPct() : cPct;
+  return c / sp;
+}
+
+/** net_rr(row, rr, c_pct, ex_pct): the row's R after costs (NOT rounded); null — no outcome. */
+function netRr(row, rr, cPct = null, exPct = null) {
+  if (isNone(rr)) return null;
+  return pyFloat(rr) - rowCostR(row, cPct, exPct);
+}
+
 function blank() {
   return { signals: 0, trades: 0, wins: 0, losses: 0, be: 0, win_rate: 0.0, total_rr: 0.0, rr_7d: 0.0 };
 }
 
-/** aggregate(rows, days=30, now) — one user's rows → the summary (§12.4). */
+/** _honest_blank(): the extra aggregate fields (rating_from_rows does not get them). */
+function honestBlank() {
+  return {
+    final_trades: 0, final_wins: 0, final_losses: 0, final_be: 0,
+    final_win_rate: 0.0, net_rr: 0.0, net_rr_7d: 0.0, first_ts: null,
+  };
+}
+
+/**
+ * aggregate(rows, days=30, now) — one user's rows → the summary (§12.4).
+ *
+ * [STATS-HONEST 2026-10] The old fields are unchanged. Extra (also in per_strategy):
+ * final_trades / final_wins / final_losses / final_be / final_win_rate — final outcomes only
+ * (signalOutcome.isFinal; BE = status be or R == 0); net_rr / net_rr_7d — Σ(R − cost / stop_pct)
+ * over the same rows as total_rr / rr_7d (unrounded per row, rounded at the end); first_ts —
+ * created_at of the oldest row of the window. Root only: open_live (running, not final),
+ * equity_net, cost_pct, exchange_cost_pct.
+ */
 function aggregate(rows, days = 30, now = null) {
   const t = isNone(now) ? nowSec() : now;
   const cutoff7 = t - 7 * 86400;
+  const cPct = costPct(); const exPct = exchangeCostPct();
   const perStrategy = {};
-  for (const s of STRATS) perStrategy[s] = blank();
+  for (const s of STRATS) perStrategy[s] = { ...blank(), ...honestBlank() };
   const out = {
     days, ...blank(), open: 0, expired: 0, missed: 0, best_rr: null,
     best_symbol: '', best_direction: '', best_strategy: '',
     equity: [], per_strategy: perStrategy,
+    ...honestBlank(), open_live: 0, equity_net: [],
+    cost_pct: cPct, exchange_cost_pct: exPct,
   };
   let cum = 0.0;
+  let cumNet = 0.0;
   const sorted = pySortedBy(rows, (r) => fOr0(r.created_at));   // sorted(key=float(created_at or 0)): every key, then `<`
   for (const r of sorted) {
     const strat = pyUpper(sOr(r.strategy));
     const buckets = [out].concat(Object.prototype.hasOwnProperty.call(perStrategy, strat) ? [perStrategy[strat]] : []);
-    for (const b of buckets) b.signals += 1;
+    const ts = pyInt(fOr0(r.created_at));               // int(float(inf)) raises like the bot — now for EVERY row
+    for (const b of buckets) {
+      b.signals += 1;
+      if (b.first_ts === null) b.first_ts = ts;         // rows are sorted — the first one is the oldest
+    }
     const st = signalStatus(r, t);
-    if (st === 'open' || st === 'tp1' || st === 'tp2') out.open += 1;
-    else if (st === 'expired') out.expired += 1;      // 72 h without TP/SL — not in the win rate
+    const final = isFinal(r, st);
+    if (st === 'open' || st === 'tp1' || st === 'tp2') {
+      out.open += 1;
+      if (!final) out.open_live += 1;                   // [STATS-HONEST] an exchange-closed TP1/TP2 is not «open»
+    } else if (st === 'expired') out.expired += 1;      // 72 h without TP/SL — not in the win rate
     else if (st === 'missed') out.missed += 1;        // [SIGNAL-MISSED] ran away without an entry
     const rr = signalRr(r, st);
     if (rr === null) continue;
+    const net = netRr(r, rr, cPct, exPct);
     const recent = fOr0(r.created_at) >= cutoff7;
     for (const b of buckets) {
       b.trades += 1;
@@ -125,7 +239,17 @@ function aggregate(rows, days = 30, now = null) {
       b.losses += rr < 0 ? 1 : 0;
       b.be += rr === 0 ? 1 : 0;
       b.total_rr += rr;
-      if (recent) b.rr_7d += rr;
+      b.net_rr += net;
+      if (recent) {
+        b.rr_7d += rr;
+        b.net_rr_7d += net;
+      }
+      if (final) {
+        b.final_trades += 1;
+        if (st === 'be' || rr === 0) b.final_be += 1;
+        else if (rr > 0) b.final_wins += 1;
+        else b.final_losses += 1;
+      }
     }
     if (out.best_rr === null || rr > out.best_rr) {
       out.best_rr = pyRound(rr, 2);
@@ -134,12 +258,17 @@ function aggregate(rows, days = 30, now = null) {
       out.best_strategy = strat;
     }
     cum += rr;
-    out.equity.push({ t: pyInt(fOr0(r.created_at)), r: pyRound(cum, 2) });   // int(float(inf)) raises like the bot
+    cumNet += net;
+    out.equity.push({ t: ts, r: pyRound(cum, 2) });
+    out.equity_net.push({ t: ts, r: pyRound(cumNet, 2) });
   }
   for (const b of [out].concat(Object.values(perStrategy))) {
     if (b.trades) b.win_rate = pyRound(b.wins / b.trades * 100, 1);
+    if (b.final_trades) b.final_win_rate = pyRound(b.final_wins / b.final_trades * 100, 1);
     b.total_rr = pyRound(b.total_rr, 2);
     b.rr_7d = pyRound(b.rr_7d, 2);
+    b.net_rr = pyRound(b.net_rr, 2);
+    b.net_rr_7d = pyRound(b.net_rr_7d, 2);
   }
   return out;
 }
@@ -858,6 +987,10 @@ function signalView(row, now = null) {
   const status = signalStatus(row, t);
   let rr = signalRr(row, status);
   rr = rr !== null ? pyRound(Number(rr), 2) : null;
+  // [STATS-HONEST 2026-10] R after costs and «the outcome is final» (tracker TP1/TP2 without a result —
+  // still running; an exchange trade closed at TP1 — final)
+  const net = netRr(row, rr);
+  const final = isFinal(row, status);
   let q = intOr0(row.quality);                       // int(row.get("quality") or 0): int('inf') / int('7.5') raise
   if (pyUpper(sOr(row.strategy)) === 'LEVELS') q = levelsStars(q);
   const res = pyUpper(sOr(row.result));
@@ -881,12 +1014,24 @@ function signalView(row, now = null) {
     manual: Boolean(sOr(row.skip_reason) === 'manual' || (['TP1', 'TP2', 'TP3', 'SL', 'BE'].includes(res) && !orderId)),
     created_at: pyInt(fOr0(row.created_at)),          // int(float(x or 0)): inf / nan raise
     status, rr,
+    net_rr: net !== null ? pyRound(net, 2) : null,     // [STATS-HONEST]
+    final,                                             // [STATS-HONEST]
   };
 }
 
-/** _user_signals(user_id, status, limit, strategy) — newest first, open = open/tp1/tp2. */
+/** [STATS-HONEST 2026-10] _is_live(sig): status open/tp1/tp2 and the outcome is not final. */
+function isLive(sig) {
+  return ['open', 'tp1', 'tp2'].includes(sig.status) && !sig.final;
+}
+
+/** _user_signals' limit clamp max(1, min(int(limit), 200)) — also h_signals' `limit` key. */
+function signalsLimit(limit) {
+  return Math.max(1, Math.min(Math.trunc(Number(limit)), 200));
+}
+
+/** _user_signals(user_id, status, limit, strategy) — newest first, open = isLive (open/tp1/tp2, not final). */
 function userSignals(db, userId, { status = 'all', limit = 50, strategy = '', now = null } = {}) {
-  const lim = Math.max(1, Math.min(Math.trunc(Number(limit)), 200));
+  const lim = signalsLimit(limit);
   const strat = pyUpper(sOr(strategy));
   let where = 'user_id=?';
   const params = [userId];
@@ -897,17 +1042,18 @@ function userSignals(db, userId, { status = 'all', limit = 50, strategy = '', no
   params.push(status !== 'all' ? lim * 3 : lim);
   const rows = db.prepare(`SELECT * FROM signal_trades WHERE ${where} ORDER BY created_at DESC LIMIT ?`).all(...params);
   let out = rows.map((r) => signalView(r, now));
-  if (status === 'open') out = out.filter((s) => ['open', 'tp1', 'tp2'].includes(s.status));
-  else if (status === 'closed') out = out.filter((s) => !['open', 'tp1', 'tp2'].includes(s.status));
+  if (status === 'open') out = out.filter((s) => isLive(s));
+  else if (status === 'closed') out = out.filter((s) => !isLive(s));
   return out.slice(0, lim);
 }
 
 /**
- * _attach_live(signals): open items (≤ 25) get `price` and `r_now` = move / |entry − sl|
- * (the CURRENT stop) from `priceOf(symbolBase)` (async or sync; null = unknown).
+ * _attach_live(signals): live items (isLive, ≤ 25) get `price` and `r_now` = move / |entry − (sl0 or sl)|
+ * from `priceOf(symbolBase)` (async or sync; null = unknown). [STATS-HONEST 2026-10] the risk is
+ * the ORIGINAL stop like the card scale [R-FROM-ORIGINAL-SL]: after BE sl == entry and r_now was never set.
  */
 async function attachLive(signals, priceOf) {
-  const live = signals.filter((s) => ['open', 'tp1', 'tp2'].includes(s.status)).slice(0, 25);
+  const live = signals.filter((s) => isLive(s)).slice(0, 25);
   if (!live.length || typeof priceOf !== 'function') return;
   const syms = Array.from(new Set(live.map((s) => s.symbol))).sort();
   const prices = new Map();
@@ -918,12 +1064,22 @@ async function attachLive(signals, priceOf) {
   }));
   for (const s of live) {
     const px = prices.get(s.symbol);
-    const risk = Math.abs(s.entry - s.sl);
+    const risk = Math.abs(s.entry - (!falsy(s.sl0) ? s.sl0 : s.sl));   // s.get("sl0") or s["sl"]
     if (!px || risk <= 0) continue;
     const move = s.direction === 'LONG' ? (px - s.entry) : (s.entry - px);
     s.price = px;
     s.r_now = pyRound(move / risk, 2);
   }
+}
+
+/** h_dashboard's stats when the read fails ([STATS-HONEST 2026-10] + the extra aggregate fields). */
+function dashboardFallbackStats() {
+  return {
+    days: 30, signals: 0, trades: 0, wins: 0, win_rate: 0.0, total_rr: 0.0, rr_7d: 0.0,
+    final_trades: 0, final_wins: 0, final_losses: 0, final_be: 0,
+    final_win_rate: 0.0, net_rr: 0.0, net_rr_7d: 0.0, first_ts: null,
+    open_live: 0, equity_net: [],
+  };
 }
 
 /**
@@ -933,7 +1089,7 @@ async function attachLive(signals, priceOf) {
  */
 async function dashboardPayload(db, userId, { now = null, priceOf = null, market = {}, trend = {}, marketTrend = {}, log = null } = {}) {
   const t = isNone(now) ? nowSec() : now;
-  let stats = { days: 30, signals: 0, trades: 0, wins: 0, win_rate: 0.0, total_rr: 0.0, rr_7d: 0.0 };
+  let stats = dashboardFallbackStats();
   try {
     stats = signalStats(db, userId, 30, t);
   } catch (e) {
@@ -953,6 +1109,8 @@ async function dashboardPayload(db, userId, { now = null, priceOf = null, market
 module.exports = {
   dashboardPayload,
   STRATS, COLS, RATING_TTL_S, VALID_STRATEGIES, LEGACY_STRATEGIES, STATS_HELP_TEXT_RU, TF_ORDER,
+  DEFAULT_COST_PCT, DEFAULT_EXCHANGE_COST_PCT, envPct, costPct, exchangeCostPct, stopPct, rowCostR, netRr,
+  honestBlank, dashboardFallbackStats, isLive, signalsLimit, _setCostLog,
   blank, aggregate, signalStats, signalRowsSince, proOverview, proOverviewFromRows, ratingFromRows,
   strategyRating, _resetRatingCache,
   normalizeStrategy, tradeStrategy, autoStats, autoStatsPeriod, todayLossRr, recentSlCount, userTrades,

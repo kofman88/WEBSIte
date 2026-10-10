@@ -84051,7 +84051,15 @@ null
 "be": 0,
 "win_rate": 100.0,
 "total_rr": 5.0,
-"rr_7d": 5.0
+"rr_7d": 5.0,
+"final_trades": 2,
+"final_wins": 2,
+"final_losses": 0,
+"final_be": 0,
+"final_win_rate": 100.0,
+"net_rr": 4.85,
+"net_rr_7d": 4.85,
+"first_ts": 1767232800
 },
 "SMC": {
 "signals": 0,
@@ -84061,7 +84069,15 @@ null
 "be": 0,
 "win_rate": 0.0,
 "total_rr": 0.0,
-"rr_7d": 0.0
+"rr_7d": 0.0,
+"final_trades": 0,
+"final_wins": 0,
+"final_losses": 0,
+"final_be": 0,
+"final_win_rate": 0.0,
+"net_rr": 0.0,
+"net_rr_7d": 0.0,
+"first_ts": null
 },
 "VOLUME": {
 "signals": 0,
@@ -84071,9 +84087,38 @@ null
 "be": 0,
 "win_rate": 0.0,
 "total_rr": 0.0,
-"rr_7d": 0.0
+"rr_7d": 0.0,
+"final_trades": 0,
+"final_wins": 0,
+"final_losses": 0,
+"final_be": 0,
+"final_win_rate": 0.0,
+"net_rr": 0.0,
+"net_rr_7d": 0.0,
+"first_ts": null
 }
+},
+"final_trades": 2,
+"final_wins": 2,
+"final_losses": 0,
+"final_be": 0,
+"final_win_rate": 100.0,
+"net_rr": 4.85,
+"net_rr_7d": 4.85,
+"first_ts": 1767232800,
+"open_live": 0,
+"equity_net": [
+{
+"t": 1767232800,
+"r": 2.42
+},
+{
+"t": 1767238200,
+"r": 4.85
 }
+],
+"cost_pct": 0.15,
+"exchange_cost_pct": 0.12
 },
 "period": "",
 "days": 1,
@@ -84724,7 +84769,15 @@ null
 "be": 0,
 "win_rate": 0.0,
 "total_rr": 0.0,
-"rr_7d": 0.0
+"rr_7d": 0.0,
+"final_trades": 0,
+"final_wins": 0,
+"final_losses": 0,
+"final_be": 0,
+"final_win_rate": 0.0,
+"net_rr": 0.0,
+"net_rr_7d": 0.0,
+"first_ts": null
 },
 "SMC": {
 "signals": 1,
@@ -84734,7 +84787,15 @@ null
 "be": 1,
 "win_rate": 0.0,
 "total_rr": 0.0,
-"rr_7d": 0.0
+"rr_7d": 0.0,
+"final_trades": 1,
+"final_wins": 0,
+"final_losses": 0,
+"final_be": 1,
+"final_win_rate": 0.0,
+"net_rr": -0.07,
+"net_rr_7d": 0.0,
+"first_ts": 1767297600
 },
 "VOLUME": {
 "signals": 0,
@@ -84744,9 +84805,34 @@ null
 "be": 0,
 "win_rate": 0.0,
 "total_rr": 0.0,
-"rr_7d": 0.0
+"rr_7d": 0.0,
+"final_trades": 0,
+"final_wins": 0,
+"final_losses": 0,
+"final_be": 0,
+"final_win_rate": 0.0,
+"net_rr": 0.0,
+"net_rr_7d": 0.0,
+"first_ts": null
 }
+},
+"final_trades": 1,
+"final_wins": 0,
+"final_losses": 0,
+"final_be": 1,
+"final_win_rate": 0.0,
+"net_rr": -0.07,
+"net_rr_7d": 0.0,
+"first_ts": 1767297600,
+"open_live": 0,
+"equity_net": [
+{
+"t": 1767297600,
+"r": -0.07
 }
+],
+"cost_pct": 0.15,
+"exchange_cost_pct": 0.12
 },
 "period": "",
 "days": 15,
@@ -86084,7 +86170,15 @@ null
 "be": 0,
 "win_rate": 0.0,
 "total_rr": 0.0,
-"rr_7d": 0.0
+"rr_7d": 0.0,
+"final_trades": 0,
+"final_wins": 0,
+"final_losses": 0,
+"final_be": 0,
+"final_win_rate": 0.0,
+"net_rr": 0.0,
+"net_rr_7d": 0.0,
+"first_ts": null
 },
 "SMC": {
 "signals": 4,
@@ -86094,7 +86188,15 @@ null
 "be": 0,
 "win_rate": 33.3,
 "total_rr": -1.0,
-"rr_7d": 0.0
+"rr_7d": 0.0,
+"final_trades": 2,
+"final_wins": 0,
+"final_losses": 2,
+"final_be": 0,
+"final_win_rate": 0.0,
+"net_rr": -1.22,
+"net_rr_7d": 0.0,
+"first_ts": 1767259800
 },
 "VOLUME": {
 "signals": 0,
@@ -86104,9 +86206,42 @@ null
 "be": 0,
 "win_rate": 0.0,
 "total_rr": 0.0,
-"rr_7d": 0.0
+"rr_7d": 0.0,
+"final_trades": 0,
+"final_wins": 0,
+"final_losses": 0,
+"final_be": 0,
+"final_win_rate": 0.0,
+"net_rr": 0.0,
+"net_rr_7d": 0.0,
+"first_ts": null
 }
+},
+"final_trades": 2,
+"final_wins": 0,
+"final_losses": 2,
+"final_be": 0,
+"final_win_rate": 0.0,
+"net_rr": -1.22,
+"net_rr_7d": 0.0,
+"first_ts": 1767259800,
+"open_live": 1,
+"equity_net": [
+{
+"t": 1767263400,
+"r": 0.93
+},
+{
+"t": 1767423600,
+"r": -0.15
+},
+{
+"t": 1767425400,
+"r": -1.22
 }
+],
+"cost_pct": 0.15,
+"exchange_cost_pct": 0.12
 },
 "period": "",
 "days": 31,
@@ -86151,7 +86286,15 @@ null
 "be": 0,
 "win_rate": 0.0,
 "total_rr": 0.0,
-"rr_7d": 0.0
+"rr_7d": 0.0,
+"final_trades": 0,
+"final_wins": 0,
+"final_losses": 0,
+"final_be": 0,
+"final_win_rate": 0.0,
+"net_rr": 0.0,
+"net_rr_7d": 0.0,
+"first_ts": null
 },
 "SMC": {
 "signals": 2,
@@ -86161,7 +86304,15 @@ null
 "be": 0,
 "win_rate": 0.0,
 "total_rr": -2.0,
-"rr_7d": 0.0
+"rr_7d": 0.0,
+"final_trades": 2,
+"final_wins": 0,
+"final_losses": 2,
+"final_be": 0,
+"final_win_rate": 0.0,
+"net_rr": -2.15,
+"net_rr_7d": 0.0,
+"first_ts": 1767239640
 },
 "VOLUME": {
 "signals": 0,
@@ -86171,9 +86322,38 @@ null
 "be": 0,
 "win_rate": 0.0,
 "total_rr": 0.0,
-"rr_7d": 0.0
+"rr_7d": 0.0,
+"final_trades": 0,
+"final_wins": 0,
+"final_losses": 0,
+"final_be": 0,
+"final_win_rate": 0.0,
+"net_rr": 0.0,
+"net_rr_7d": 0.0,
+"first_ts": null
 }
+},
+"final_trades": 2,
+"final_wins": 0,
+"final_losses": 2,
+"final_be": 0,
+"final_win_rate": 0.0,
+"net_rr": -2.15,
+"net_rr_7d": 0.0,
+"first_ts": 1767239640,
+"open_live": 0,
+"equity_net": [
+{
+"t": 1767239640,
+"r": -1.07
+},
+{
+"t": 1767245400,
+"r": -2.15
 }
+],
+"cost_pct": 0.15,
+"exchange_cost_pct": 0.12
 },
 "period": "",
 "days": 31,
@@ -92557,7 +92737,8 @@ null
 "signal_msg_id": 0,
 "symbol": "DOGE-USDT",
 "direction": "LONG",
-"expire_rr": null
+"expire_rr": null,
+"skip_reason": ""
 },
 {
 "result": "LIQ",
@@ -92575,7 +92756,8 @@ null
 "signal_msg_id": null,
 "symbol": "ETH-USDT-SWAP",
 "direction": "SHORT",
-"expire_rr": null
+"expire_rr": null,
+"skip_reason": ""
 },
 {
 "result": null,
@@ -92593,7 +92775,8 @@ null
 "signal_msg_id": 0,
 "symbol": "DOGE-USDT",
 "direction": "LONG",
-"expire_rr": null
+"expire_rr": null,
+"skip_reason": ""
 },
 {
 "result": null,
@@ -92611,7 +92794,8 @@ null
 "signal_msg_id": 301,
 "symbol": "BTC-USDT-SWAP",
 "direction": "LONG",
-"expire_rr": null
+"expire_rr": null,
+"skip_reason": ""
 },
 {
 "result": "",
@@ -92629,7 +92813,8 @@ null
 "signal_msg_id": 0,
 "symbol": "DOGE-USDT",
 "direction": "SHORT",
-"expire_rr": null
+"expire_rr": null,
+"skip_reason": ""
 },
 {
 "result": null,
@@ -92647,7 +92832,8 @@ null
 "signal_msg_id": 0,
 "symbol": "PEPE-USDT-SWAP",
 "direction": "SHORT",
-"expire_rr": null
+"expire_rr": null,
+"skip_reason": ""
 },
 {
 "result": "SL",
@@ -92665,7 +92851,8 @@ null
 "signal_msg_id": 0,
 "symbol": "ETH-USDT-SWAP",
 "direction": "LONG",
-"expire_rr": null
+"expire_rr": null,
+"skip_reason": ""
 },
 {
 "result": null,
@@ -92683,7 +92870,8 @@ null
 "signal_msg_id": 282,
 "symbol": "ETH-USDT-SWAP",
 "direction": "SHORT",
-"expire_rr": null
+"expire_rr": null,
+"skip_reason": ""
 },
 {
 "result": "",
@@ -92701,7 +92889,8 @@ null
 "signal_msg_id": 0,
 "symbol": "PEPE-USDT-SWAP",
 "direction": "LONG",
-"expire_rr": null
+"expire_rr": null,
+"skip_reason": ""
 },
 {
 "result": "",
@@ -92719,7 +92908,141 @@ null
 "signal_msg_id": 0,
 "symbol": "BTC-USDT-SWAP",
 "direction": "LONG",
-"expire_rr": null
+"expire_rr": null,
+"skip_reason": ""
+},
+{
+"result": "",
+"result_rr": null,
+"progress_stage": "TP1",
+"entry": 100.0,
+"sl": 100.0,
+"original_sl": 99.4,
+"tp1": 100.6,
+"tp2": 101.74,
+"tp3": 102.34,
+"created_at": 1774112396.5,
+"strategy": "VOLUME",
+"order_id": "",
+"signal_msg_id": 7,
+"symbol": "H6-USDT-SWAP",
+"direction": "LONG",
+"expire_rr": null,
+"skip_reason": ""
+},
+{
+"result": "TP1",
+"result_rr": 0.95,
+"progress_stage": "TP1",
+"entry": 100.0,
+"sl": 99.4,
+"original_sl": 99.4,
+"tp1": 100.6,
+"tp2": 101.74,
+"tp3": 102.34,
+"created_at": 1774115997.0,
+"strategy": "VOLUME",
+"order_id": "ox-h1",
+"signal_msg_id": 7,
+"symbol": "H5-USDT-SWAP",
+"direction": "LONG",
+"expire_rr": null,
+"skip_reason": ""
+},
+{
+"result": "SKIP",
+"result_rr": null,
+"progress_stage": "TP2",
+"entry": 100.0,
+"sl": 99.4,
+"original_sl": 99.4,
+"tp1": 100.6,
+"tp2": 101.74,
+"tp3": 102.34,
+"created_at": 1774119597.5,
+"strategy": "VOLUME",
+"order_id": "",
+"signal_msg_id": 7,
+"symbol": "H4-USDT-SWAP",
+"direction": "LONG",
+"expire_rr": null,
+"skip_reason": "ghost"
+},
+{
+"result": "SKIP",
+"result_rr": null,
+"progress_stage": "MISSED",
+"entry": 100.0,
+"sl": 99.4,
+"original_sl": 99.4,
+"tp1": 100.6,
+"tp2": 101.74,
+"tp3": 102.34,
+"created_at": 1774123198.0,
+"strategy": "VOLUME",
+"order_id": "",
+"signal_msg_id": 7,
+"symbol": "H3-USDT-SWAP",
+"direction": "LONG",
+"expire_rr": null,
+"skip_reason": "manual"
+},
+{
+"result": "SKIP",
+"result_rr": null,
+"progress_stage": "TP1",
+"entry": 100.0,
+"sl": 99.4,
+"original_sl": 99.4,
+"tp1": 100.6,
+"tp2": 101.74,
+"tp3": 102.34,
+"created_at": 1774126798.5,
+"strategy": "VOLUME",
+"order_id": "",
+"signal_msg_id": 7,
+"symbol": "H2-USDT-SWAP",
+"direction": "LONG",
+"expire_rr": null,
+"skip_reason": "manual"
+},
+{
+"result": "SKIP",
+"result_rr": null,
+"progress_stage": "",
+"entry": 100.0,
+"sl": 99.4,
+"original_sl": 99.4,
+"tp1": 100.6,
+"tp2": 101.74,
+"tp3": 102.34,
+"created_at": 1774130399.0,
+"strategy": "VOLUME",
+"order_id": "",
+"signal_msg_id": 7,
+"symbol": "H1-USDT-SWAP",
+"direction": "LONG",
+"expire_rr": null,
+"skip_reason": "manual"
+},
+{
+"result": "SKIP",
+"result_rr": null,
+"progress_stage": "SL",
+"entry": 100.0,
+"sl": 99.4,
+"original_sl": 99.4,
+"tp1": 100.6,
+"tp2": 101.74,
+"tp3": 102.34,
+"created_at": 1774133999.5,
+"strategy": "VOLUME",
+"order_id": "",
+"signal_msg_id": 7,
+"symbol": "H0-USDT-SWAP",
+"direction": "LONG",
+"expire_rr": null,
+"skip_reason": "manual"
 },
 {
 "result": "LIQ",
@@ -92737,7 +93060,8 @@ null
 "signal_msg_id": 0,
 "symbol": "ETH-USDT-SWAP",
 "direction": "SHORT",
-"expire_rr": null
+"expire_rr": null,
+"skip_reason": ""
 },
 {
 "result": "",
@@ -92755,7 +93079,8 @@ null
 "signal_msg_id": 0,
 "symbol": "DOGE-USDT",
 "direction": "SHORT",
-"expire_rr": null
+"expire_rr": null,
+"skip_reason": ""
 },
 {
 "result": "",
@@ -92773,7 +93098,8 @@ null
 "signal_msg_id": null,
 "symbol": "PEPE-USDT-SWAP",
 "direction": "SHORT",
-"expire_rr": null
+"expire_rr": null,
+"skip_reason": ""
 },
 {
 "result": "",
@@ -92791,7 +93117,8 @@ null
 "signal_msg_id": null,
 "symbol": "PEPE-USDT-SWAP",
 "direction": "SHORT",
-"expire_rr": null
+"expire_rr": null,
+"skip_reason": ""
 },
 {
 "result": "LIQ",
@@ -92809,7 +93136,8 @@ null
 "signal_msg_id": 0,
 "symbol": "DOGE-USDT",
 "direction": "LONG",
-"expire_rr": null
+"expire_rr": null,
+"skip_reason": ""
 },
 {
 "result": "TP2",
@@ -92827,7 +93155,8 @@ null
 "signal_msg_id": 0,
 "symbol": "ETH-USDT-SWAP",
 "direction": "LONG",
-"expire_rr": null
+"expire_rr": null,
+"skip_reason": ""
 },
 {
 "result": "SKIP",
@@ -92845,7 +93174,8 @@ null
 "signal_msg_id": 0,
 "symbol": "SOL-USDT-SWAP",
 "direction": "LONG",
-"expire_rr": null
+"expire_rr": null,
+"skip_reason": ""
 },
 {
 "result": null,
@@ -92863,7 +93193,8 @@ null
 "signal_msg_id": 0,
 "symbol": "DOGE-USDT",
 "direction": "LONG",
-"expire_rr": null
+"expire_rr": null,
+"skip_reason": ""
 },
 {
 "result": "",
@@ -92881,7 +93212,8 @@ null
 "signal_msg_id": 0,
 "symbol": "BTC-USDT-SWAP",
 "direction": "SHORT",
-"expire_rr": null
+"expire_rr": null,
+"skip_reason": ""
 },
 {
 "result": "",
@@ -92899,7 +93231,8 @@ null
 "signal_msg_id": 100,
 "symbol": "SOL-USDT-SWAP",
 "direction": "SHORT",
-"expire_rr": null
+"expire_rr": null,
+"skip_reason": ""
 },
 {
 "result": "",
@@ -92917,7 +93250,8 @@ null
 "signal_msg_id": null,
 "symbol": "ETH-USDT-SWAP",
 "direction": "LONG",
-"expire_rr": null
+"expire_rr": null,
+"skip_reason": ""
 },
 {
 "result": null,
@@ -92935,7 +93269,8 @@ null
 "signal_msg_id": 519,
 "symbol": "DOGE-USDT",
 "direction": "SHORT",
-"expire_rr": null
+"expire_rr": null,
+"skip_reason": ""
 },
 {
 "result": "",
@@ -92953,7 +93288,8 @@ null
 "signal_msg_id": null,
 "symbol": "ETH-USDT-SWAP",
 "direction": "LONG",
-"expire_rr": null
+"expire_rr": null,
+"skip_reason": ""
 },
 {
 "result": "",
@@ -92971,7 +93307,8 @@ null
 "signal_msg_id": 0,
 "symbol": "SOL-USDT-SWAP",
 "direction": "LONG",
-"expire_rr": null
+"expire_rr": null,
+"skip_reason": ""
 },
 {
 "result": null,
@@ -92989,7 +93326,8 @@ null
 "signal_msg_id": 0,
 "symbol": "BTC-USDT-SWAP",
 "direction": "SHORT",
-"expire_rr": null
+"expire_rr": null,
+"skip_reason": ""
 },
 {
 "result": null,
@@ -93007,7 +93345,8 @@ null
 "signal_msg_id": null,
 "symbol": "DOGE-USDT",
 "direction": "LONG",
-"expire_rr": null
+"expire_rr": null,
+"skip_reason": ""
 },
 {
 "result": "SKIP",
@@ -93025,7 +93364,8 @@ null
 "signal_msg_id": null,
 "symbol": "DOGE-USDT",
 "direction": "SHORT",
-"expire_rr": null
+"expire_rr": null,
+"skip_reason": ""
 },
 {
 "result": "TP1",
@@ -93043,20 +93383,21 @@ null
 "signal_msg_id": 180,
 "symbol": "ETH-USDT-SWAP",
 "direction": "LONG",
-"expire_rr": null
+"expire_rr": null,
+"skip_reason": ""
 }
 ],
 "stats30": {
 "days": 30,
-"signals": 35,
-"trades": 16,
-"wins": 11,
+"signals": 42,
+"trades": 19,
+"wins": 14,
 "losses": 2,
 "be": 3,
-"win_rate": 68.8,
-"total_rr": 21.96,
-"rr_7d": 14.75,
-"open": 16,
+"win_rate": 73.7,
+"total_rr": 26.81,
+"rr_7d": 19.6,
+"open": 19,
 "expired": 11,
 "missed": 0,
 "best_rr": 3.0,
@@ -93093,40 +93434,52 @@ null
 "r": 6.21
 },
 {
-"t": 1774137600,
-"r": 5.21
+"t": 1774112396,
+"r": 7.21
+},
+{
+"t": 1774115997,
+"r": 8.16
+},
+{
+"t": 1774119597,
+"r": 11.06
 },
 {
 "t": 1774137600,
-"r": 7.71
+"r": 10.06
 },
 {
 "t": 1774137600,
-"r": 10.71
+"r": 12.56
 },
 {
 "t": 1774137600,
-"r": 13.21
+"r": 15.56
 },
 {
 "t": 1774137600,
-"r": 13.21
+"r": 18.06
 },
 {
 "t": 1774137600,
-"r": 16.21
+"r": 18.06
 },
 {
 "t": 1774137600,
-"r": 19.21
+"r": 21.06
 },
 {
 "t": 1774137600,
-"r": 20.71
+"r": 24.06
 },
 {
 "t": 1774137600,
-"r": 21.96
+"r": 25.56
+},
+{
+"t": 1774137600,
+"r": 26.81
 }
 ],
 "per_strategy": {
@@ -93138,7 +93491,15 @@ null
 "be": 0,
 "win_rate": 50.0,
 "total_rr": 2.0,
-"rr_7d": 2.0
+"rr_7d": 2.0,
+"final_trades": 1,
+"final_wins": 0,
+"final_losses": 1,
+"final_be": 0,
+"final_win_rate": 0.0,
+"net_rr": 1.78,
+"net_rr_7d": 1.78,
+"first_ts": 1773572466
 },
 "SMC": {
 "signals": 15,
@@ -93148,31 +93509,136 @@ null
 "be": 2,
 "win_rate": 57.1,
 "total_rr": 9.25,
-"rr_7d": 5.0
+"rr_7d": 5.0,
+"final_trades": 6,
+"final_wins": 3,
+"final_losses": 1,
+"final_be": 2,
+"final_win_rate": 50.0,
+"net_rr": 7.91,
+"net_rr_7d": 4.54,
+"first_ts": 1771781673
 },
 "VOLUME": {
-"signals": 7,
-"trades": 5,
-"wins": 5,
+"signals": 14,
+"trades": 8,
+"wins": 8,
 "losses": 0,
 "be": 0,
 "win_rate": 100.0,
-"total_rr": 8.21,
-"rr_7d": 5.25
+"total_rr": 13.06,
+"rr_7d": 10.1,
+"final_trades": 4,
+"final_wins": 4,
+"final_losses": 0,
+"final_be": 0,
+"final_win_rate": 100.0,
+"net_rr": 11.61,
+"net_rr_7d": 9.05,
+"first_ts": 1771850572
 }
+},
+"final_trades": 13,
+"final_wins": 8,
+"final_losses": 2,
+"final_be": 3,
+"final_win_rate": 61.5,
+"net_rr": 23.53,
+"net_rr_7d": 17.78,
+"first_ts": 1771781673,
+"open_live": 15,
+"equity_net": [
+{
+"t": 1771781673,
+"r": 0.93
+},
+{
+"t": 1772041133,
+"r": 2.56
+},
+{
+"t": 1772341813,
+"r": 5.3
+},
+{
+"t": 1772394048,
+"r": 6.24
+},
+{
+"t": 1772400720,
+"r": 5.93
+},
+{
+"t": 1773371639,
+"r": 5.75
+},
+{
+"t": 1773614488,
+"r": 4.62
+},
+{
+"t": 1774112396,
+"r": 5.37
+},
+{
+"t": 1774115997,
+"r": 6.12
+},
+{
+"t": 1774119597,
+"r": 8.77
+},
+{
+"t": 1774137600,
+"r": 7.63
+},
+{
+"t": 1774137600,
+"r": 10.0
+},
+{
+"t": 1774137600,
+"r": 12.87
+},
+{
+"t": 1774137600,
+"r": 15.29
+},
+{
+"t": 1774137600,
+"r": 15.21
+},
+{
+"t": 1774137600,
+"r": 18.1
+},
+{
+"t": 1774137600,
+"r": 21.01
+},
+{
+"t": 1774137600,
+"r": 22.42
+},
+{
+"t": 1774137600,
+"r": 23.53
 }
+],
+"cost_pct": 0.15,
+"exchange_cost_pct": 0.12
 },
 "stats7": {
 "days": 7,
-"signals": 23,
-"trades": 10,
-"wins": 7,
+"signals": 30,
+"trades": 13,
+"wins": 10,
 "losses": 2,
 "be": 1,
-"win_rate": 70.0,
-"total_rr": 14.75,
-"rr_7d": 14.75,
-"open": 16,
+"win_rate": 76.9,
+"total_rr": 19.6,
+"rr_7d": 19.6,
+"open": 19,
 "expired": 4,
 "missed": 0,
 "best_rr": 3.0,
@@ -93185,40 +93651,52 @@ null
 "r": -1.0
 },
 {
-"t": 1774137600,
-"r": -2.0
+"t": 1774112396,
+"r": 0.0
+},
+{
+"t": 1774115997,
+"r": 0.95
+},
+{
+"t": 1774119597,
+"r": 3.85
 },
 {
 "t": 1774137600,
-"r": 0.5
+"r": 2.85
 },
 {
 "t": 1774137600,
-"r": 3.5
+"r": 5.35
 },
 {
 "t": 1774137600,
-"r": 6.0
+"r": 8.35
 },
 {
 "t": 1774137600,
-"r": 6.0
+"r": 10.85
 },
 {
 "t": 1774137600,
-"r": 9.0
+"r": 10.85
 },
 {
 "t": 1774137600,
-"r": 12.0
+"r": 13.85
 },
 {
 "t": 1774137600,
-"r": 13.5
+"r": 16.85
 },
 {
 "t": 1774137600,
-"r": 14.75
+"r": 18.35
+},
+{
+"t": 1774137600,
+"r": 19.6
 }
 ],
 "per_strategy": {
@@ -93230,7 +93708,15 @@ null
 "be": 0,
 "win_rate": 50.0,
 "total_rr": 2.0,
-"rr_7d": 2.0
+"rr_7d": 2.0,
+"final_trades": 1,
+"final_wins": 0,
+"final_losses": 1,
+"final_be": 0,
+"final_win_rate": 0.0,
+"net_rr": 1.78,
+"net_rr_7d": 1.78,
+"first_ts": 1773572466
 },
 "SMC": {
 "signals": 11,
@@ -93240,19 +93726,399 @@ null
 "be": 1,
 "win_rate": 50.0,
 "total_rr": 5.0,
-"rr_7d": 5.0
+"rr_7d": 5.0,
+"final_trades": 3,
+"final_wins": 1,
+"final_losses": 1,
+"final_be": 1,
+"final_win_rate": 33.3,
+"net_rr": 4.54,
+"net_rr_7d": 4.54,
+"first_ts": 1773787273
 },
 "VOLUME": {
-"signals": 4,
-"trades": 3,
-"wins": 3,
+"signals": 11,
+"trades": 6,
+"wins": 6,
 "losses": 0,
 "be": 0,
 "win_rate": 100.0,
-"total_rr": 5.25,
-"rr_7d": 5.25
+"total_rr": 10.1,
+"rr_7d": 10.1,
+"final_trades": 2,
+"final_wins": 2,
+"final_losses": 0,
+"final_be": 0,
+"final_win_rate": 100.0,
+"net_rr": 9.05,
+"net_rr_7d": 9.05,
+"first_ts": 1774112396
 }
+},
+"final_trades": 7,
+"final_wins": 4,
+"final_losses": 2,
+"final_be": 1,
+"final_win_rate": 57.1,
+"net_rr": 17.78,
+"net_rr_7d": 17.78,
+"first_ts": 1773572466,
+"open_live": 15,
+"equity_net": [
+{
+"t": 1773614488,
+"r": -1.13
+},
+{
+"t": 1774112396,
+"r": -0.38
+},
+{
+"t": 1774115997,
+"r": 0.37
+},
+{
+"t": 1774119597,
+"r": 3.02
+},
+{
+"t": 1774137600,
+"r": 1.88
+},
+{
+"t": 1774137600,
+"r": 4.25
+},
+{
+"t": 1774137600,
+"r": 7.12
+},
+{
+"t": 1774137600,
+"r": 9.53
+},
+{
+"t": 1774137600,
+"r": 9.46
+},
+{
+"t": 1774137600,
+"r": 12.35
+},
+{
+"t": 1774137600,
+"r": 15.26
+},
+{
+"t": 1774137600,
+"r": 16.67
+},
+{
+"t": 1774137600,
+"r": 17.78
 }
+],
+"cost_pct": 0.15,
+"exchange_cost_pct": 0.12
+},
+"challenge_json": "{\"user_id\": 701, \"started_at\": 1772409600.0, \"deposit\": 1000.0, \"goal_kind\": \"pct\", \"goal_value\": 25.0, \"deadline_ts\": 1775001600.0, \"risk_pct\": 1.0, \"leverage\": 5, \"max_trades_day\": 3, \"daily_loss_pct\": 3.0, \"topup_monthly\": 0.0, \"strategies\": [\"LEVELS\"], \"mode\": \"signals\", \"status\": \"active\", \"finished_at\": 0.0, \"topups\": [], \"daily_stop\": {}, \"notified\": {}, \"term\": \"1m\"}",
+"progress": {
+"r_total": 19.6,
+"pnl_usd": 196.0,
+"pct_goal": 78.4,
+"goal_reached": false,
+"deposit_now": 1196.0,
+"topups_total": 0,
+"days_elapsed": 20.0,
+"days_left": 10.0,
+"deadline_passed": false,
+"expected_r": 16.7,
+"pace_r": 2.9,
+"signals": 35,
+"trades": 14,
+"win_rate": 71.4,
+"best_rr": 3.0,
+"today_signals": 18,
+"today_r": 15.75,
+"today_left": 0,
+"blocked": true,
+"block_reason": "max_trades",
+"day": "2026-03-22",
+"equity": [
+{
+"t": 1773371639,
+"r": 0.0
+},
+{
+"t": 1773614488,
+"r": -1.0
+},
+{
+"t": 1774112396,
+"r": 0.0
+},
+{
+"t": 1774115997,
+"r": 0.95
+},
+{
+"t": 1774119597,
+"r": 3.85
+},
+{
+"t": 1774137600,
+"r": 2.85
+},
+{
+"t": 1774137600,
+"r": 5.35
+},
+{
+"t": 1774137600,
+"r": 8.35
+},
+{
+"t": 1774137600,
+"r": 10.85
+},
+{
+"t": 1774137600,
+"r": 10.85
+},
+{
+"t": 1774137600,
+"r": 13.85
+},
+{
+"t": 1774137600,
+"r": 16.85
+},
+{
+"t": 1774137600,
+"r": 18.35
+},
+{
+"t": 1774137600,
+"r": 19.6
+}
+]
+},
+"plan": {
+"goal_usd": 1250.0,
+"profit_usd": 250.0,
+"risk_usd": 10.0,
+"r_needed": 25.0,
+"days_total": 30,
+"days_left": 10.0,
+"hist_trades": 19,
+"hist_rr": 26.81,
+"hist_r_per_day": 0.89,
+"r_per_day_needed": 2.5,
+"days_forecast": 28.0,
+"verdict": "unrealistic",
+"warnings": [],
+"margin_pct": 13.3
+},
+"card": {
+"days": 21,
+"signals": 35,
+"trades": 14,
+"wins": 10,
+"losses": 2,
+"be": 2,
+"win_rate": 71.4,
+"total_rr": 19.6,
+"rr_7d": 19.6,
+"open": 19,
+"expired": 7,
+"missed": 0,
+"best_rr": 3.0,
+"best_symbol": "DOGE-USDT",
+"best_direction": "LONG",
+"best_strategy": "SMC",
+"equity": [
+{
+"t": 1773371639,
+"r": 0.0
+},
+{
+"t": 1773614488,
+"r": -1.0
+},
+{
+"t": 1774112396,
+"r": 0.0
+},
+{
+"t": 1774115997,
+"r": 0.95
+},
+{
+"t": 1774119597,
+"r": 3.85
+},
+{
+"t": 1774137600,
+"r": 2.85
+},
+{
+"t": 1774137600,
+"r": 5.35
+},
+{
+"t": 1774137600,
+"r": 8.35
+},
+{
+"t": 1774137600,
+"r": 10.85
+},
+{
+"t": 1774137600,
+"r": 10.85
+},
+{
+"t": 1774137600,
+"r": 13.85
+},
+{
+"t": 1774137600,
+"r": 16.85
+},
+{
+"t": 1774137600,
+"r": 18.35
+},
+{
+"t": 1774137600,
+"r": 19.6
+}
+],
+"per_strategy": {
+"LEVELS": {
+"signals": 4,
+"trades": 2,
+"wins": 1,
+"losses": 1,
+"be": 0,
+"win_rate": 50.0,
+"total_rr": 2.0,
+"rr_7d": 2.0,
+"final_trades": 1,
+"final_wins": 0,
+"final_losses": 1,
+"final_be": 0,
+"final_win_rate": 0.0,
+"net_rr": 1.78,
+"net_rr_7d": 1.78,
+"first_ts": 1773572466
+},
+"SMC": {
+"signals": 12,
+"trades": 4,
+"wins": 2,
+"losses": 1,
+"be": 1,
+"win_rate": 50.0,
+"total_rr": 5.0,
+"rr_7d": 5.0,
+"final_trades": 3,
+"final_wins": 1,
+"final_losses": 1,
+"final_be": 1,
+"final_win_rate": 33.3,
+"net_rr": 4.54,
+"net_rr_7d": 4.54,
+"first_ts": 1773429209
+},
+"VOLUME": {
+"signals": 11,
+"trades": 6,
+"wins": 6,
+"losses": 0,
+"be": 0,
+"win_rate": 100.0,
+"total_rr": 10.1,
+"rr_7d": 10.1,
+"final_trades": 2,
+"final_wins": 2,
+"final_losses": 0,
+"final_be": 0,
+"final_win_rate": 100.0,
+"net_rr": 9.05,
+"net_rr_7d": 9.05,
+"first_ts": 1774112396
+}
+},
+"final_trades": 8,
+"final_wins": 4,
+"final_losses": 2,
+"final_be": 2,
+"final_win_rate": 50.0,
+"net_rr": 17.6,
+"net_rr_7d": 17.78,
+"first_ts": 1772587053,
+"open_live": 15,
+"equity_net": [
+{
+"t": 1773371639,
+"r": -0.18
+},
+{
+"t": 1773614488,
+"r": -1.32
+},
+{
+"t": 1774112396,
+"r": -0.57
+},
+{
+"t": 1774115997,
+"r": 0.18
+},
+{
+"t": 1774119597,
+"r": 2.83
+},
+{
+"t": 1774137600,
+"r": 1.69
+},
+{
+"t": 1774137600,
+"r": 4.06
+},
+{
+"t": 1774137600,
+"r": 6.93
+},
+{
+"t": 1774137600,
+"r": 9.35
+},
+{
+"t": 1774137600,
+"r": 9.27
+},
+{
+"t": 1774137600,
+"r": 12.16
+},
+{
+"t": 1774137600,
+"r": 15.07
+},
+{
+"t": 1774137600,
+"r": 16.49
+},
+{
+"t": 1774137600,
+"r": 17.6
+}
+],
+"cost_pct": 0.15,
+"exchange_cost_pct": 0.12
 }
 },
 "db_rows": [
@@ -96889,6 +97755,153 @@ null
 "direction": "SHORT",
 "expire_rr": null,
 "trade_id": "c00203_701",
+"user_id": 701
+},
+{
+"result": "SKIP",
+"result_rr": null,
+"progress_stage": "SL",
+"entry": 100.0,
+"sl": 99.4,
+"original_sl": 99.4,
+"tp1": 100.6,
+"tp2": 101.74,
+"tp3": 102.34,
+"created_at": 1774133999.5,
+"strategy": "VOLUME",
+"order_id": "",
+"signal_msg_id": 7,
+"symbol": "H0-USDT-SWAP",
+"direction": "LONG",
+"expire_rr": null,
+"skip_reason": "manual",
+"trade_id": "c00204_701",
+"user_id": 701
+},
+{
+"result": "SKIP",
+"result_rr": null,
+"progress_stage": "",
+"entry": 100.0,
+"sl": 99.4,
+"original_sl": 99.4,
+"tp1": 100.6,
+"tp2": 101.74,
+"tp3": 102.34,
+"created_at": 1774130399.0,
+"strategy": "VOLUME",
+"order_id": "",
+"signal_msg_id": 7,
+"symbol": "H1-USDT-SWAP",
+"direction": "LONG",
+"expire_rr": null,
+"skip_reason": "manual",
+"trade_id": "c00205_701",
+"user_id": 701
+},
+{
+"result": "SKIP",
+"result_rr": null,
+"progress_stage": "TP1",
+"entry": 100.0,
+"sl": 99.4,
+"original_sl": 99.4,
+"tp1": 100.6,
+"tp2": 101.74,
+"tp3": 102.34,
+"created_at": 1774126798.5,
+"strategy": "VOLUME",
+"order_id": "",
+"signal_msg_id": 7,
+"symbol": "H2-USDT-SWAP",
+"direction": "LONG",
+"expire_rr": null,
+"skip_reason": "manual",
+"trade_id": "c00206_701",
+"user_id": 701
+},
+{
+"result": "SKIP",
+"result_rr": null,
+"progress_stage": "MISSED",
+"entry": 100.0,
+"sl": 99.4,
+"original_sl": 99.4,
+"tp1": 100.6,
+"tp2": 101.74,
+"tp3": 102.34,
+"created_at": 1774123198.0,
+"strategy": "VOLUME",
+"order_id": "",
+"signal_msg_id": 7,
+"symbol": "H3-USDT-SWAP",
+"direction": "LONG",
+"expire_rr": null,
+"skip_reason": "manual",
+"trade_id": "c00207_701",
+"user_id": 701
+},
+{
+"result": "SKIP",
+"result_rr": null,
+"progress_stage": "TP2",
+"entry": 100.0,
+"sl": 99.4,
+"original_sl": 99.4,
+"tp1": 100.6,
+"tp2": 101.74,
+"tp3": 102.34,
+"created_at": 1774119597.5,
+"strategy": "VOLUME",
+"order_id": "",
+"signal_msg_id": 7,
+"symbol": "H4-USDT-SWAP",
+"direction": "LONG",
+"expire_rr": null,
+"skip_reason": "ghost",
+"trade_id": "c00208_701",
+"user_id": 701
+},
+{
+"result": "TP1",
+"result_rr": 0.95,
+"progress_stage": "TP1",
+"entry": 100.0,
+"sl": 99.4,
+"original_sl": 99.4,
+"tp1": 100.6,
+"tp2": 101.74,
+"tp3": 102.34,
+"created_at": 1774115997.0,
+"strategy": "VOLUME",
+"order_id": "ox-h1",
+"signal_msg_id": 7,
+"symbol": "H5-USDT-SWAP",
+"direction": "LONG",
+"expire_rr": null,
+"skip_reason": "",
+"trade_id": "c00209_701",
+"user_id": 701
+},
+{
+"result": "",
+"result_rr": null,
+"progress_stage": "TP1",
+"entry": 100.0,
+"sl": 100.0,
+"original_sl": 99.4,
+"tp1": 100.6,
+"tp2": 101.74,
+"tp3": 102.34,
+"created_at": 1774112396.5,
+"strategy": "VOLUME",
+"order_id": "",
+"signal_msg_id": 7,
+"symbol": "H6-USDT-SWAP",
+"direction": "LONG",
+"expire_rr": null,
+"skip_reason": "",
+"trade_id": "c00210_701",
 "user_id": 701
 }
 ]

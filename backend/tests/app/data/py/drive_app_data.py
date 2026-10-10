@@ -19,9 +19,17 @@ site's expected payload is computed from the renderer's own inputs with the rend
 (mirror_chart below = render_signal_chart lines 828–915 without the drawing). For share the stats the
 card is drawn from are captured from share_card.render_share_png.
 
+[STATS-HONEST 2026-10] (bot 7e20066 + 51e8256): user 117 holds the bot test's grid (stop 0.6 % → costs
+0.25R / 0.20R; open TP1 with the stop at BE, ghost SKIP at TP2, exchange TP1 / BE, manual result, manual
+«Пропустил» over stages SL / '' / TP1 / MISSED, an unknown stop); the last steps read its dashboard /
+signals (open vs closed by `final`, r_now from sl0, limit / cost_pct keys) / stats / share under the
+default costs and under SIGNAL_STATS_COST_PCT / SIGNAL_STATS_EXCHANGE_COST_PCT values (step set `env`),
+and one dashboard whose signal_stats raises (step set `stats_raise` → the fallback stats + warning).
+
   cd /home/user/MAIN_BOT/CHM_BREAKER_V4
   BOT_TOKEN_CHM=test:token ADMIN_IDS=123 <py311> -I -B <site>/backend/tests/app/data/py/drive_app_data.py [OUT]
   rm -f /home/user/MAIN_BOT/CHM_BREAKER_V4/signal_registry.json
+(CHM_BOT_DIR=<another bot tree> runs it against that tree instead, e.g. an export of a bot commit.)
 """
 from __future__ import annotations
 
@@ -37,7 +45,7 @@ import sys
 import tempfile
 import time as _time
 
-BOT = "/home/user/MAIN_BOT/CHM_BREAKER_V4"
+BOT = os.environ.get("CHM_BOT_DIR") or "/home/user/MAIN_BOT/CHM_BREAKER_V4"
 HERE = os.path.dirname(os.path.abspath(__file__))
 SITE_BACKEND = os.path.abspath(os.path.join(HERE, "..", "..", "..", ".."))
 GOLDEN = os.path.join(SITE_BACKEND, "tests", "golden", "candles")
@@ -129,10 +137,10 @@ USERS = [  # uid, sub_plan, sub_status, sub_expires (rel. to NOW), lang, admin
     (111, "trial", "trial", 2 * 86400, "ru", 0), (112, "", "expired", 0, "ru", 0),
     (113, "pro", "active", 20 * 86400, "en", 0), (114, "free", "active", 0, "ru", 0),
     (115, "free", "active", 0, "ru", 0), (116, "free", "active", 0, "ru", 0),
-    (123, "free", "active", 0, "ru", 1),
+    (123, "free", "active", 0, "ru", 1), (117, "pro", "active", 30 * 86400, "ru", 0),
 ]
 COUNTS = {101: 70, 102: 40, 103: 18, 104: 14, 105: 22, 106: 12, 107: 16, 108: 10, 109: 25, 110: 12,
-          111: 10, 112: 9, 113: 20, 114: 11, 115: 8, 116: 0, 123: 15}
+          111: 10, 112: 9, 113: 20, 114: 11, 115: 8, 116: 0, 123: 15, 117: 0}
 STRATS = ["LEVELS", "SMC", "VOLUME", "LEVELS", "SMC", "VOLUME", "levels", "Smc", None, "GERCHIK", ""]
 TFS = ["1h", "1h", "4h", "15m", "1H", "4H", "30m", "1d", None, ""]
 CTX = ["", "aligned", "with", "counter", "strong_counter", None, ""]
@@ -283,6 +291,51 @@ EVENTS = []
 for r in rng.sample(trades, 30):
     EVENTS.append({"trade_id": r["trade_id"], "ts": r["created_at"] + 5, "event_type": "signal_generated",
                    "payload_json": json.dumps({"symbol": r["symbol"], "strategy": r["strategy"]})})
+
+# [STATS-HONEST 2026-10] user 117: the bot test's grid (tests/test_signal_stats_honest_2026_10.py, stop 0.6 % of
+# the entry, TP 1.0 / 2.9 / 3.9R) on cached golden symbols, no rng (appended after the event sample)
+LIVE_SYMS = [x for i, x in enumerate(GSYMS) if i % 3 != 2][:4]
+
+
+def honest_row(tid, sym, created, direction="LONG", scale=1.0, **kw):
+    e = close_at(sym, created) * scale         # scale ≠ 1 → the cached last close is off the entry (r_now ≠ 0)
+    k = 1 if direction == "LONG" else -1
+    r = {"trade_id": tid, "user_id": 117, "symbol": sym, "direction": direction, "entry": e,
+         "sl": e * (1 - k * 0.006), "original_sl": e * (1 - k * 0.006), "tp1": e * (1 + k * 0.006),
+         "tp2": e * (1 + k * 0.0174), "tp3": e * (1 + k * 0.0234), "tp1_rr": 1.0, "tp2_rr": 2.9, "tp3_rr": 3.9,
+         "created_at": created, "strategy": "VOLUME", "timeframe": "15m", "quality": 4, "trend_ctx": "",
+         "mtf_aligned": 0, "is_counter_trend": 0, "result": "", "result_rr": None, "order_id": "", "signal_msg_id": 7,
+         "progress_stage": "", "skip_reason": "", "user_note": ""}
+    r.update(kw)
+    return r
+
+
+S0, S1, S2, S3 = LIVE_SYMS
+HONEST = [
+    honest_row("h-tp1-open", S0, NOW - 5 * 3600, scale=0.997, progress_stage="TP1"),
+    honest_row("h-tp2-skip", S1, NOW - 4 * 3600, scale=0.99, progress_stage="TP2", result="SKIP"),
+    honest_row("h-tp3", S2, NOW - 3 * 3600, progress_stage="TP3"),
+    honest_row("h-sl", S3, NOW - 2 * 3600, progress_stage="SL"),
+    honest_row("h-be", S0, NOW - 3500, progress_stage="BE"),
+    honest_row("h-exp", S1, NOW - 3 * 86400, progress_stage="EXPIRED", expire_rr=0.4),
+    honest_row("h-missed", S2, NOW - 2 * 86400, progress_stage="MISSED"),
+    honest_row("h-ex-tp1", S3, NOW - 6 * 3600, progress_stage="TP1", order_id="o-h1", result="TP1", result_rr=0.95,
+               strategy="LEVELS"),
+    honest_row("h-ex-be", S0, NOW - 7 * 3600, order_id="o-h2", result="BE", result_rr=0.02, strategy="LEVELS"),
+    honest_row("h-old-sl", S1, NOW - 10 * 86400, progress_stage="SL"),
+    honest_row("h-manual-tp2", S2, NOW - 1800, result="TP2", result_rr=2.9),
+    honest_row("h-fresh", S3, NOW - 600, scale=1.002),
+    honest_row("h-short-tp1", S1, NOW - 4.5 * 3600, direction="SHORT", scale=1.004, progress_stage="TP1", strategy="SMC"),
+    honest_row("h-ms-sl", S0, NOW - 8 * 3600, result="SKIP", skip_reason="manual", progress_stage="SL"),
+    honest_row("h-ms-open", S1, NOW - 9 * 3600, result="SKIP", skip_reason="manual"),
+    honest_row("h-ms-tp1", S2, NOW - 10 * 3600, result="SKIP", skip_reason="manual", progress_stage="TP1"),
+    honest_row("h-ms-missed", S3, NOW - 11 * 3600, result="SKIP", skip_reason="manual", progress_stage="MISSED"),
+    honest_row("h-nostop", S0, NOW - 12 * 3600, progress_stage="SL", sl=0.0, original_sl=0.0),
+]
+HONEST[0]["sl"] = HONEST[0]["entry"]             # the stop moved to break-even (original_sl keeps the scale)
+HONEST[12]["sl"] = HONEST[12]["entry"]
+trades.extend(HONEST)
+TRADE_COLS = sorted({k for r in trades for k in r})
 DAY = int(NOW) // 86400
 KV = {
     f"analyze_count_103_{DAY}": "0",           # free, used none (int("0") = 0)
@@ -496,6 +549,17 @@ def _tg_user(request):
 
 
 api._tg_user = _tg_user
+_orig_signal_stats = api._signal_stats
+
+
+async def _signal_stats_spy(user_id, days=30):
+    """[STATS-HONEST] step set `stats_raise`: h_dashboard's signal_stats read fails → the fallback stats."""
+    if STATE.get("stats_raise"):
+        raise RuntimeError("stats boom")
+    return await _orig_signal_stats(user_id, days)
+
+
+api._signal_stats = _signal_stats_spy
 
 
 # ── raw HTTP ────────────────────────────────────────────────────────────────
@@ -703,6 +767,26 @@ for uid, body in FB:
     step(f"feedback {uid} {body[:40]}", uid, "POST", B + "/feedback", body, dt=2)
 step("feedback 108 next day", 108, "POST", B + "/feedback", J({"type": "bug", "text": "a new day, new quota"}), dt=86400)
 
+# [STATS-HONEST 2026-10] user 117 (the bot test's grid): final / open_live / net R / first_ts / equity_net,
+# open vs closed by `final`, r_now from sl0, `limit` / cost keys; costs from env; the fallback stats
+for q in ("", "?status=open", "?status=closed", "?limit=3", "?limit=0", "?limit=500", "?status=closed&strategy=levels",
+          "?status=open&strategy=SMC", "?limit=abc"):
+    step(f"signals 117 honest {q}", 117, "GET", B + "/signals" + q, dt=2)
+step("dashboard 117 honest", 117, "GET", B + "/dashboard", dt=3)
+step("stats 117 honest", 117, "GET", B + "/stats", dt=2)
+step("share 117 honest", 117, "POST", B + "/share", J({"days": 30}), dt=2)
+for env in ({"SIGNAL_STATS_COST_PCT": "0.3", "SIGNAL_STATS_EXCHANGE_COST_PCT": "0"},
+            {"SIGNAL_STATS_COST_PCT": "garbage", "SIGNAL_STATS_EXCHANGE_COST_PCT": "-1"},
+            {"SIGNAL_STATS_COST_PCT": "0", "SIGNAL_STATS_EXCHANGE_COST_PCT": "1_0"},
+            {"SIGNAL_STATS_COST_PCT": "-0", "SIGNAL_STATS_EXCHANGE_COST_PCT": "inf"}):
+    step(f"signals 117 honest env {env}", 117, "GET", B + "/signals?status=closed", dt=2, sets={"env": env})
+    step(f"dashboard 117 honest env {env}", 117, "GET", B + "/dashboard", dt=2)
+step("share 117 honest env", 117, "POST", B + "/share", J({"days": 7}), dt=2)
+step("signals 117 honest env reset", 117, "GET", B + "/signals", dt=2,
+     sets={"env": {"SIGNAL_STATS_COST_PCT": None, "SIGNAL_STATS_EXCHANGE_COST_PCT": None}})
+step("dashboard 117 honest stats raise", 117, "GET", B + "/dashboard", dt=2, sets={"stats_raise": True})
+step("dashboard 101 honest stats back", 101, "GET", B + "/dashboard", dt=2, sets={"stats_raise": False})
+
 
 # ── unit vectors: yarl's reading of targets, json.loads types of body values ─
 def unit_vectors():
@@ -777,6 +861,14 @@ async def main():
             STATE["rest"].update(st["rest"])
         if "trend_raw" in st:
             STATE["trend_raw"] = st["trend_raw"]
+        if "env" in st:                        # [STATS-HONEST] SIGNAL_STATS_* read on every call
+            for k, v in st["env"].items():
+                if v is None:
+                    os.environ.pop(k, None)
+                else:
+                    os.environ[k] = v
+        if "stats_raise" in st:
+            STATE["stats_raise"] = st["stats_raise"]
         if "trend_state" in st:
             tm._state.clear()
             tm._state.update(json.loads(json.dumps(st["trend_state"])))
@@ -791,7 +883,8 @@ async def main():
         try:                                   # the PNG itself is not part of the comparison (D3)
             doc = json.loads(text)
             if isinstance(doc, dict) and isinstance(doc.get("png"), str):
-                doc["png"] = f"<png {len(doc['png'])} b64>"
+                # a constant marker: matplotlib's PNG bytes (and so their length) differ run to run
+                doc["png"] = "<png b64>"
                 text = json.dumps(doc)
         except ValueError:
             pass

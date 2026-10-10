@@ -10,6 +10,16 @@ Run with the bot's venv (cwd = the bot checkout is set by the script itself):
 time.time() is pinned to NOW so every function that reads the clock sees the same instant
 the JS side passes as `now`. The seeded DB is a fresh bot schema (database.init_db) in a
 temp dir; the same rows are inserted on the JS side into signal_trades / trader_settings.
+
+[STATS-HONEST 2026-10] (bot 7e20066 + 51e8256): every status row also carries has_real_result /
+is_exchange_result / is_final / stop_pct / row_cost_r / net_rr; `stop` = stop_pct edge rows;
+`honest` = the bot test's grid (entry 100, SL 99.4 → 0.25R / 0.20R costs) with manual «Пропустил»
+rows over tracker stages: aggregate (30 / 7 d, the _COLS projection), rating_from_rows, _signal,
+and aggregate / cost_pct / exchange_cost_pct under 20 SIGNAL_STATS_* env values; the seeded DB
+gets the same grid for user 110 plus manual skips / exchange TP1 and BE rows for 101 (appended
+after the shuffle, no rng); per user `live` = _user_signals + _attach_live over faked
+signal_freshness.get_current_price, `env` = the lists and signal_stats under cost 0.3 /
+exchange 0; `dashboard_fallback` = h_dashboard's stats when signal_stats raises.
 """
 from __future__ import annotations
 
@@ -117,11 +127,43 @@ for _ in range(110):
 out["status"] = []
 for r in status_rows:
     st = so.signal_status(r, NOW)
-    out["status"].append({"row": r, "status": st, "rr": so.signal_rr(r, st),
+    rr_ = so.signal_rr(r, st)
+    out["status"].append({"row": r, "status": st, "rr": rr_,
                           "rr_by": {s: so.signal_rr(r, s) for s in STATUSES},
-                          "has_card": so.has_card(r), "exchange": so.is_exchange_trade(r)})
+                          "has_card": so.has_card(r), "exchange": so.is_exchange_trade(r),
+                          # [STATS-HONEST 2026-10]
+                          "real": so.has_real_result(r), "ex_result": so.is_exchange_result(r),
+                          "final": so.is_final(r, st), "final_by": {s: so.is_final(r, s) for s in STATUSES},
+                          "stop_pct": ss.stop_pct(r), "cost_r": ss.row_cost_r(r),
+                          "cost_r_x": ss.row_cost_r(r, 0.2, 0.05), "net": ss.net_rr(r, rr_),
+                          "net_x": ss.net_rr(r, 1.5, 0.0, 0.3)})
 out["countable_sql"] = so.COUNTABLE_SQL
 out["max_age_s"] = so.MAX_AGE_S
+
+# ── 1b. [STATS-HONEST] stop_pct / row_cost_r / net_rr edge rows ─────────────
+STOP_ROWS = [
+    {"entry": 100, "sl": 99.4}, {"entry": 100, "sl": 100, "original_sl": 99.4}, {"entry": 100, "sl": 99.4, "original_sl": 0},
+    {"entry": 100, "sl": 99.4, "original_sl": None}, {"entry": 100, "sl": 99.4, "original_sl": -0.0},
+    {"entry": 100, "sl": 100}, {"entry": 0, "sl": 99}, {"entry": -5, "sl": -6}, {"entry": 100, "sl": -1},
+    {"entry": 100, "sl": 0, "original_sl": 0}, {"entry": "100", "sl": "99.5"}, {"entry": " 100 ", "sl": "1_00.5"},
+    {"entry": "x", "sl": 99}, {"entry": 100, "sl": "x"}, {"entry": 100, "original_sl": "bad", "sl": 99},
+    {"entry": "inf", "sl": 99}, {"entry": 100, "sl": "-inf"}, {"entry": "nan", "sl": 99}, {"entry": 100, "original_sl": "nan", "sl": 99},
+    {"entry": 100, "original_sl": True, "sl": 99}, {"entry": True, "sl": 0.5}, {"entry": 1e-300, "sl": 2e-300},
+    {"entry": 65432.1, "sl": 65431.1}, {"entry": 0.00012, "sl": 0.000119}, {"entry": 1e300, "sl": 5e299}, {},
+    {"entry": 100, "sl": 99.4, "order_id": "o1", "result": "TP1", "result_rr": 0.95},
+    {"entry": 100, "sl": 99.4, "order_id": "o1", "result": "TP1", "result_rr": ""},
+    {"entry": 100, "sl": 99.4, "order_id": "o1", "result": "TP1", "result_rr": None},
+    {"entry": 100, "sl": 99.4, "order_id": "o1", "result": "SKIP", "result_rr": 0.0},
+    {"entry": 100, "sl": 99.4, "order_id": "o1", "result": "orphan", "result_rr": 1.0},
+    {"entry": 100, "sl": 99.4, "order_id": " ", "result": "SL", "result_rr": -1.0},
+    {"entry": 100, "sl": 99.4, "order_id": "", "result": "TP2", "result_rr": 2.9},
+    {"entry": 100, "sl": 99.4, "order_id": 7, "result": "manual", "result_rr": "0.4"},
+    {"entry": 100, "sl": 99.4, "order_id": "o2", "result": 0, "result_rr": 1.0},
+]
+out["stop"] = [{"row": r, "stop_pct": ss.stop_pct(r), "cost_r": ss.row_cost_r(r), "cost_r_x": ss.row_cost_r(r, 0.0, 0.5),
+                "net_1": ss.net_rr(r, 1.0), "net_none": ss.net_rr(r, None), "net_str": ss.net_rr(r, "2.5"),
+                "ex_result": so.is_exchange_result(r), "real": so.has_real_result(r)} for r in STOP_ROWS]
+out["defaults"] = {"cost_pct": ss.DEFAULT_COST_PCT, "exchange_cost_pct": ss.DEFAULT_EXCHANGE_COST_PCT, "cols": ss._COLS}
 
 # ── 2. a seeded DB with the bot schema ──────────────────────────────────────
 tmp = tempfile.mkdtemp(prefix="m10a_stats_")
@@ -237,6 +279,57 @@ for k, (age_h, msg) in enumerate(((1, 0), (30, 0), (100, 0), (200, None), (5, 3)
                    "skip_reason": "", "user_note": ""})
 rng.shuffle(trades)     # insertion order ≠ created_at order (natural scan order matters)
 
+# [STATS-HONEST 2026-10] hand-made rows, appended after the shuffle (no rng): the bot test's grid
+# (tests/test_signal_stats_honest_2026_10.py _rows: entry 100, SL 99.4, TP 1.0 / 2.9 / 3.9R) for user 110,
+# manual «Пропустил» over tracker stages SL / '' / TP1 / MISSED and an exchange TP1 / BE pair for 101 and 110.
+HCOLS = {"result": "", "result_rr": None, "progress_stage": "", "entry": 100.0, "sl": 99.4, "original_sl": None,
+         "tp1": 100.6, "tp2": 101.74, "tp3": 102.34, "strategy": "VOLUME", "order_id": "", "signal_msg_id": 7,
+         "symbol": "QNT-USDT-SWAP", "direction": "LONG", "expire_rr": None, "skip_reason": "", "timeframe": "15m",
+         "quality": 4, "trend_ctx": "", "mtf_aligned": 0, "is_counter_trend": 0, "breakout_type": "", "user_note": ""}
+
+
+def hrow(tid, now, **kw):
+    r = {"trade_id": tid, **HCOLS, "created_at": now - 3600}
+    r.update(kw)
+    return r
+
+
+def honest_grid(now, p=""):
+    return [
+        hrow(p + "tp1-open", now, progress_stage="TP1", sl=100.0, original_sl=99.4, created_at=now - 5 * 3600),
+        hrow(p + "tp2-skip", now, progress_stage="TP2", result="SKIP", created_at=now - 4 * 3600),
+        hrow(p + "tp3", now, progress_stage="TP3", created_at=now - 3 * 3600),
+        hrow(p + "sl", now, progress_stage="SL", created_at=now - 2 * 3600),
+        hrow(p + "be", now, progress_stage="BE", created_at=now - 3500),
+        hrow(p + "exp", now, progress_stage="EXPIRED", expire_rr=0.4, created_at=now - 3 * 86400),
+        hrow(p + "missed", now, progress_stage="MISSED", created_at=now - 2 * 86400),
+        hrow(p + "ex-tp1", now, order_id="o-1", result="TP1", result_rr=0.95, strategy="LEVELS", progress_stage="TP1",
+             created_at=now - 6 * 3600),
+        hrow(p + "ex-be", now, order_id="o-2", result="BE", result_rr=0.02, strategy="LEVELS", created_at=now - 7 * 3600),
+        hrow(p + "old-sl", now, progress_stage="SL", created_at=now - 10 * 86400),
+        hrow(p + "manual-tp2", now, result="TP2", result_rr=2.9, created_at=now - 1800),
+        hrow(p + "fresh", now, created_at=now - 600),
+        # manual «Пропустил» (miniapp_api h_signal_result SKIP → skip_reason='manual') over tracker stages
+        hrow(p + "ms-sl", now, result="SKIP", skip_reason="manual", progress_stage="SL", symbol="AAA-USDT-SWAP",
+             created_at=now - 8 * 3600),
+        hrow(p + "ms-open", now, result="SKIP", skip_reason="manual", symbol="BBB-USDT-SWAP", created_at=now - 9 * 3600),
+        hrow(p + "ms-tp1", now, result="SKIP", skip_reason="manual", progress_stage="TP1", symbol="CCC-USDT-SWAP",
+             strategy="SMC", created_at=now - 10 * 3600),
+        hrow(p + "ms-missed", now, result="SKIP", skip_reason="manual", progress_stage="MISSED", symbol="DDD-USDT-SWAP",
+             created_at=now - 11 * 3600),
+        # unknown stop: SL at stage SL with no sl / original_sl → −1R gross and net
+        hrow(p + "nostop", now, progress_stage="SL", sl=0.0, original_sl=0.0, symbol="EEE-USDT-SWAP",
+             created_at=now - 12 * 3600),
+    ]
+
+
+for r in honest_grid(NOW, "h110-"):
+    trades.append({**r, "user_id": 110})
+for r in honest_grid(NOW, "h101-")[7:9] + honest_grid(NOW, "h101-")[12:16]:
+    trades.append({**r, "user_id": 101, "symbol": "BTC-USDT-SWAP", "entry": 70000.0, "sl": 69580.0,
+                   "tp1": 70420.0, "tp2": 71218.0, "tp3": 71638.0})
+USERS.append((110, "pro"))
+
 con = sqlite3.connect(DBP)
 for uid, plan in USERS:
     con.execute("INSERT OR REPLACE INTO users (user_id, sub_plan) VALUES (?, ?)", (uid, plan))
@@ -256,6 +349,58 @@ out["plans"] = [list(x) for x in plans_["pro_overview_plan"]]
 
 
 _time.time = lambda: NOW       # every bot module calls time.time() (pinned after init_db)
+
+# [STATS-HONEST] signal_freshness.get_current_price (the WS candle cache in the bot) faked per symbol
+PRICES = {"BTC-USDT-SWAP": 70123.5, "ETH-USDT-SWAP": None, "SOL-USDT-SWAP": 101.25, "PEPE-USDT-SWAP": "raise",
+          "DOGE-USDT-SWAP": 0.0, "XRP-USDT-SWAP": 2.5, "QNT-USDT-SWAP": 100.3, "BNB-USDT-SWAP": 495.0,
+          "ADA-USDT-SWAP": 1.02, "LTC-USDT-SWAP": 81.0, "BBB-USDT-SWAP": 101.0}
+out["prices"] = PRICES
+import signal_freshness  # noqa: E402
+
+
+async def _fake_price(symbol):
+    v = PRICES.get(symbol)
+    if v == "raise":
+        raise RuntimeError("price boom")
+    return v
+
+
+signal_freshness.get_current_price = _fake_price
+
+# ── 1c. [STATS-HONEST] the bot test's grid: aggregate, _COLS projection, rating, _signal, env ──
+HROWS = honest_grid(NOW)
+_cols = [c.strip() for c in ss._COLS.split(",")]
+ENVS = [{}, {"SIGNAL_STATS_COST_PCT": ""}, {"SIGNAL_STATS_COST_PCT": "0"}, {"SIGNAL_STATS_COST_PCT": "0.3"},
+        {"SIGNAL_STATS_COST_PCT": "abc"}, {"SIGNAL_STATS_COST_PCT": "-1"}, {"SIGNAL_STATS_COST_PCT": "inf"},
+        {"SIGNAL_STATS_COST_PCT": "nan"}, {"SIGNAL_STATS_COST_PCT": "-0"}, {"SIGNAL_STATS_COST_PCT": " 0.25 "},
+        {"SIGNAL_STATS_COST_PCT": "1_0"}, {"SIGNAL_STATS_COST_PCT": "1e-1"}, {"SIGNAL_STATS_COST_PCT": "\u0663"},
+        {"SIGNAL_STATS_COST_PCT": "0x10"}, {"SIGNAL_STATS_COST_PCT": "Infinity"},
+        {"SIGNAL_STATS_EXCHANGE_COST_PCT": "0"}, {"SIGNAL_STATS_EXCHANGE_COST_PCT": "0.05"},
+        {"SIGNAL_STATS_EXCHANGE_COST_PCT": "garbage"}, {"SIGNAL_STATS_EXCHANGE_COST_PCT": "-0.5"},
+        {"SIGNAL_STATS_COST_PCT": "0.15", "SIGNAL_STATS_EXCHANGE_COST_PCT": "0.15"}]
+env_out = []
+for env in ENVS:
+    os.environ.update(env)
+    try:
+        env_out.append({"env": env, "cost_pct": ss.cost_pct(), "exchange_cost_pct": ss.exchange_cost_pct(),
+                        "aggregate": ss.aggregate(HROWS, 30, NOW),
+                        "signals": [miniapp_api._signal(r) for r in HROWS[7:12]]})
+    finally:
+        for k in env:
+            del os.environ[k]
+out["honest"] = {
+    "rows": HROWS,
+    "status": {r["trade_id"]: so.signal_status(r, NOW) for r in HROWS},
+    "final": {r["trade_id"]: so.is_final(r, so.signal_status(r, NOW)) for r in HROWS},
+    "aggregate_30": ss.aggregate(HROWS, 30, NOW),
+    "aggregate_7": ss.aggregate(HROWS, 7, NOW),
+    "aggregate_cols": ss.aggregate([{k: r.get(k) for k in _cols} for r in HROWS], 30, NOW),
+    "aggregate_no_skip": ss.aggregate([r for r in HROWS if r["skip_reason"] != "manual"], 30, NOW),
+    "aggregate_empty": ss.aggregate([], 30, NOW),
+    "rating": ss.rating_from_rows(HROWS, NOW),
+    "signals": [miniapp_api._signal(r) for r in HROWS],
+    "env": env_out,
+}
 
 
 async def collect():
@@ -291,7 +436,34 @@ async def collect():
             miniapp_api._load_user = _lu
             resp = await miniapp_api.h_stats(SimpleNamespace(query=q))
             u["stats"][json.dumps(q, sort_keys=True)] = json.loads(resp.text)
+        # [STATS-HONEST] _attach_live over a faked signal_freshness.get_current_price (risk from sl0)
+        u["live"] = {}
+        for status in ("all", "open"):
+            sigs = await miniapp_api._user_signals(uid, status, 50, "")
+            await miniapp_api._attach_live(sigs)
+            u["live"][status] = sigs
+        # [STATS-HONEST] cost env read per call: net_rr of the list and signal_stats under cost 0.3 / exchange 0
+        os.environ["SIGNAL_STATS_COST_PCT"], os.environ["SIGNAL_STATS_EXCHANGE_COST_PCT"] = "0.3", "0"
+        try:
+            u["env"] = {"signals": await miniapp_api._user_signals(uid, "all", 50, ""),
+                        "signal_stats_30": await ss.signal_stats(uid, 30)}
+        finally:
+            del os.environ["SIGNAL_STATS_COST_PCT"], os.environ["SIGNAL_STATS_EXCHANGE_COST_PCT"]
         res["per_user"][str(uid)] = u
+    # h_dashboard when signal_stats raises: the fallback stats dict
+    async def _boom(*_a, **_k):
+        raise RuntimeError("stats boom")
+    _orig_ss = miniapp_api._signal_stats
+    miniapp_api._signal_stats = _boom
+
+    async def _lu101(_req):
+        return None, SimpleNamespace(user_id=101)
+    miniapp_api._load_user = _lu101
+    try:
+        resp = await miniapp_api.h_dashboard(SimpleNamespace(query={}))
+        res["dashboard_fallback"] = json.loads(resp.text)["stats"]
+    finally:
+        miniapp_api._signal_stats = _orig_ss
     res["pro_overview_7"] = await ss.pro_overview(7)
     res["pro_overview_30"] = await ss.pro_overview(30)
     res["pro_overview_1"] = await ss.pro_overview(1)

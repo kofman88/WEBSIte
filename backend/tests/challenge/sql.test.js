@@ -38,6 +38,16 @@ describe('signal_rows_since / signal_stats on signal_trades', () => {
     expect(norm(C.stats30(701))).toEqual(norm(V.sql.stats30));
   });
 
+  it('[STATS-HONEST 2026-10] manual «Пропустил» rows are skips in the challenge progress / plan / card', () => {
+    const rows = C.dbRowsSince(701, V.sql.since);
+    expect(rows.every((r) => Object.prototype.hasOwnProperty.call(r, 'skip_reason'))).toBe(true);
+    const ch = C.fromJson(V.sql.challenge_json);
+    expect(norm(C.progress(ch, rows, V.sql.now))).toEqual(norm(V.sql.progress));
+    expect(norm(C.plan(ch, C.dbSignalStats(701, 30, V.sql.now), V.sql.now))).toEqual(norm(V.sql.plan));
+    expect(norm(C.aggregate(rows, 21, V.sql.now))).toEqual(norm(V.sql.card));
+    expect(rows.filter((r) => r.skip_reason === 'manual').length).toBeGreaterThanOrEqual(4);
+  });
+
   it('the fixture exercises the filtered rows', () => {
     const all = V.db_rows.filter((r) => r.user_id === 701);
     expect(all.some((r) => r.result === 'ORPHAN')).toBe(true);

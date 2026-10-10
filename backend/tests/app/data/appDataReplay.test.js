@@ -16,6 +16,10 @@
  * share = the stats the card was drawn from. Router-level answers (aiohttp's 404 / 405 text, the
  * 500 of an exception in a handler) compare status, Allow, Content-Type and the body byte for byte.
  *
+ * [STATS-HONEST 2026-10] the step sets `env` (SIGNAL_STATS_COST_PCT / SIGNAL_STATS_EXCHANGE_COST_PCT, read
+ * on every call on both sides) and `stats_raise` (h_dashboard's signal_stats read fails → the fallback
+ * stats + the "[MINIAPP] dashboard stats" warning) are applied here the same way.
+ *
  * Regenerate: py/drive_app_data.py (see its docstring).
  */
 import { describe, it, expect, beforeAll, afterAll } from 'vitest';
@@ -29,6 +33,9 @@ setupEnv('replay');
 const FX = loadFixture();
 let db; let app; let ts; let authService; let appRouter; let appData; let bridge; let TM; let server; let port;
 let pyJsonParse;
+let SSmod; let origSignalStats;
+const STATE = { statsRaise: false };
+const ENV_KEYS = ['SIGNAL_STATS_COST_PCT', 'SIGNAL_STATS_EXCHANGE_COST_PCT'];
 const clock = { now: FX.now };
 const LOGS = [];
 const log = {
@@ -46,6 +53,13 @@ beforeAll(async () => {
   bridge = nodeRequire('../../../services/engine/engineBridge.js');
   TM = nodeRequire('../../../services/engine/trendMonitor.js');
   ({ pyJsonParse } = nodeRequire('../../../services/engine/pyjson.js'));
+  SSmod = nodeRequire('../../../services/engine/signalStats.js');
+  origSignalStats = SSmod.signalStats;
+  SSmod.signalStats = (...a) => {                 // step set `stats_raise` (the driver's _signal_stats spy)
+    if (STATE.statsRaise) throw new Error('stats boom');
+    return origSignalStats(...a);
+  };
+  for (const k of ENV_KEYS) delete process.env[k];
   seedAll(db, ts, FX);
   market = makeMarket(FX, clock);
   const monitor = TM.createTrendMonitor({ kv: { get: () => null, set() {}, del() {}, has: () => false }, log: { debug() {}, info() {}, warning() {} } });
@@ -61,6 +75,8 @@ beforeAll(async () => {
 });
 
 afterAll(async () => {
+  SSmod.signalStats = origSignalStats;
+  for (const k of ENV_KEYS) delete process.env[k];
   bridge.setOverrides(null);
   appRouter.setClock(null);
   appData.configure({ clock: null, rest: null, log: null });
@@ -135,6 +151,10 @@ describe(`Mini App data routes — ${FX.steps.length} requests replayed against 
       if (st.tickers) Object.assign(market.STATE.tickers, st.tickers);
       if (st.rest) Object.assign(market.STATE.rest, st.rest);
       if (Object.prototype.hasOwnProperty.call(st, 'trend_raw')) market.STATE.trend_raw = st.trend_raw;
+      if (st.env) {
+        for (const [k, v] of Object.entries(st.env)) { if (v === null) delete process.env[k]; else process.env[k] = v; }
+      }
+      if (Object.prototype.hasOwnProperty.call(st, 'stats_raise')) STATE.statsRaise = st.stats_raise;
       if (st.trend_state) {
         market.monitor._resetForTests();
         market.monitor._seed(st.trend_state, st.trend_strength || {});

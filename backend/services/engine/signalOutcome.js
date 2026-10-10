@@ -6,6 +6,7 @@
  * result_rr are real); without it the outcome comes from the tracker stage
  * (`progress_stage`). A `SKIP` written by ghost cleanup on a row with a delivered card
  * (`signal_msg_id > 0`) is NOT an outcome (the bot's 2026-10-07 prod incident).
+ * [STATS-HONEST 2026-10] has_real_result / is_exchange_result / is_final (bot :114–138).
  */
 
 const { pyFloat, pyInt } = require('./pycoerce');
@@ -115,6 +116,38 @@ function signalRr(row, status) {
 }
 
 /**
+ * [STATS-HONEST 2026-10] has_real_result(row): `result` holds an outcome (an exchange close —
+ * scanner_mid._trade_result_from_exit / reconcile — or the manual «📋 Результат»); `result` is
+ * written only on close, so such an outcome is final. SKIP / ORPHAN are not outcomes.
+ */
+function hasRealResult(row) {
+  const v = _g(row, 'result', '');
+  const res = pyUpper(String(pyFalsy(v) ? '' : v));
+  return Boolean(res) && res !== 'SKIP' && res !== 'ORPHAN';
+}
+
+/**
+ * [STATS-HONEST 2026-10] is_exchange_result(row): the row's R is a real exchange result —
+ * order_id, a written result and result_rr. That R is measured from the real exit fill
+ * ((exit − entry)/|entry − original_sl|): exit slippage is inside, fees are not.
+ */
+function isExchangeResult(row) {
+  if (!isExchangeTrade(row) || !hasRealResult(row)) return false;
+  const rr = _g(row, 'result_rr', null);
+  return rr !== null && rr !== '';                  // `not in (None, "")`
+}
+
+/**
+ * [STATS-HONEST 2026-10] is_final(row, status): the outcome is final — TP3 / SL / BE / EXPIRED /
+ * MISSED by the tracker or a written result (exchange / manual). Tracker stages TP1 / TP2 without
+ * a result are a running trade (stop at entry), not final.
+ */
+function isFinal(row, status) {
+  if (hasRealResult(row)) return true;
+  return status !== 'open' && status !== 'tp1' && status !== 'tp2';
+}
+
+/**
  * Rows that count as the user's signals / trades at all: ORPHAN (exchange rejected)
  * and SKIP without a card and without an order are garbage.
  */
@@ -134,4 +167,5 @@ function countableSql(prefix = '') {
 module.exports = {
   WIN_STAGES, FINAL, MAX_AGE_S, COUNTABLE_SQL, countableSql, envHours,
   _g, hasCard, isExchangeTrade, signalStatus, signalRr,
+  hasRealResult, isExchangeResult, isFinal,
 };

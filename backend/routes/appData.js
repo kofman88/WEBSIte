@@ -8,6 +8,8 @@
  *                                                  words), rating (all users, 15 min cache), market_trend
  *   GET  signals?status&limit&strategy  h_signals  newest first, limit 1..200 (int() of the query, bad → 50),
  *                                                  status open / closed filter over limit×3 rows
+ *                                                  ([STATS-HONEST] open = open/tp1/tp2 and not `final`),
+ *                                                  + `limit` (the clamp), `cost_pct`, `exchange_cost_pct`
  *   GET  signals/{trade_id}/chart  h_signal_chart  bucket "chart" (MINIAPP_CHART_PER_MIN 10 / 60 s → 429,
  *                                                  Retry-After 6), owner only (404 not_found), candles:
  *                                                  the engine's cache when ≥ 60 bars else REST (200, 15 s),
@@ -149,9 +151,14 @@ function resetState() {
 // Every float the bot's handlers put into a response, by path; every other number is an int there
 // (counts, ids, created_at / equity t, quality, days, periods, the candle time, entry_index, strength).
 const F = FLOAT;
-const SIGNAL_T = Object.freeze({ entry: F, sl: F, sl0: F, tp1: F, tp2: F, tp3: F, rr: F, price: F, r_now: F });
+const SIGNAL_T = Object.freeze({ entry: F, sl: F, sl0: F, tp1: F, tp2: F, tp3: F, rr: F, net_rr: F, price: F, r_now: F });
 const BLANK_T = Object.freeze({ win_rate: F, total_rr: F, rr_7d: F });
-const AGG_T = Object.freeze({ ...BLANK_T, best_rr: F, equity: [{ r: F }], per_strategy: { '*': BLANK_T } });
+// [STATS-HONEST 2026-10] the extra aggregate floats (root + per_strategy; cost_pct / equity_net root only)
+const HONEST_T = Object.freeze({ final_win_rate: F, net_rr: F, net_rr_7d: F });
+const AGG_T = Object.freeze({
+  ...BLANK_T, ...HONEST_T, best_rr: F, equity: [{ r: F }], equity_net: [{ r: F }],
+  cost_pct: F, exchange_cost_pct: F, per_strategy: { '*': { ...BLANK_T, ...HONEST_T } },
+});
 const BUCKET_T = Object.freeze({ win_rate: F, avg_rr: F, total_rr: F, profit_factor: F, ev: F, pnl_usd: F });
 const CHART_T = Object.freeze({
   meta: { score: F }, candles: [{ $tuple: [null, F, F, F, F, F] }],
@@ -162,7 +169,7 @@ const TYPES = Object.freeze({
     stats: AGG_T, market: { '*': { price: F, change_pct: F } }, recent: [SIGNAL_T],
     rating: { by_strategy: { '*': { win_rate: F, total_rr: F } } }, market_trend: { '*': { since: F, price: F } },
   },
-  signals: { signals: [SIGNAL_T] },
+  signals: { signals: [SIGNAL_T], cost_pct: F, exchange_cost_pct: F },
   chart: CHART_T,
   result: { signal: SIGNAL_T },
   stats: {
@@ -207,9 +214,9 @@ function withTimeout(p, ms) {
   ]);
 }
 
-/** _attach_live(signals): the live ones (≤ 25) get price / r_now from the engine's last closes. */
+/** _attach_live(signals): the live ones (_is_live, ≤ 25) get price / r_now from the engine's last closes. */
 async function attachLive(signals) {
-  const live = signals.filter((s) => ['open', 'tp1', 'tp2'].includes(s.status)).slice(0, 25);
+  const live = signals.filter((s) => SS.isLive(s)).slice(0, 25);
   if (!live.length) return;
   const bases = Array.from(new Set(live.map((s) => s.symbol))).sort();
   const prices = await bridge.currentPrices(bases.map((b) => `${b}-USDT-SWAP`), PRICE_TIMEOUT_MS);
@@ -287,7 +294,7 @@ function query(req) {
 async function hDashboard(req, res) {
   const user = loadUser(req);
   const t = now();
-  let stats = { days: 30, signals: 0, trades: 0, wins: 0, win_rate: 0.0, total_rr: 0.0, rr_7d: 0.0 };
+  let stats = SS.dashboardFallbackStats();          // [STATS-HONEST] + the extra aggregate fields
   try {
     stats = SS.signalStats(db, user.user_id, 30, t);
   } catch (e) {
@@ -337,7 +344,11 @@ async function hSignals(req, res) {
   if (!STRATS.includes(strategy)) strategy = '';
   const sigs = SS.userSignals(db, user.user_id, { status, limit, strategy, now: now() });
   await attachLive(sigs);
-  return send(res, 200, { ok: true, signals: sigs, strategy: strategy || 'ALL' }, TYPES.signals);
+  // [STATS-HONEST 2026-10] limit — the list window («последние 50»), cost_pct — the costs inside net_rr
+  return send(res, 200, {
+    ok: true, signals: sigs, strategy: strategy || 'ALL',
+    limit: SS.signalsLimit(limit), cost_pct: SS.costPct(), exchange_cost_pct: SS.exchangeCostPct(),
+  }, TYPES.signals);
 }
 
 async function hSignalChart(req, res, [tradeId]) {

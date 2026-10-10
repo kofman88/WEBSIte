@@ -31,10 +31,10 @@
  * `challenge`). The share card is rendered on the client (decision D3): `sendCard` gets the
  * aggregate the bot hands to share_card.render_share_png.
  *
- * TODO(M10a): signal_status / signal_rr / aggregate / signal_rows_since / signal_stats are
- * ported locally below with the exact semantics of db/signal_outcome.py and
- * db/signal_stats.py; switch to services/engine/signalOutcome.js + signalStats.js once that
- * branch is merged (same names, same behaviour).
+ * aggregate and the row projection COLS are services/engine/signalStats.js itself (the bot's
+ * challenge.py imports db.signal_stats.aggregate / signal_rows_since; [STATS-HONEST 2026-10]
+ * COLS carries skip_reason, so a manual «Пропустил» is 'skip' in progress / plan / gate / card).
+ * signal_status / signal_rr below stay exported local copies of db/signal_outcome.py.
  *
  * Log markers: [CHALLENGE] uid=… start …, [CHALLENGE] uid=… apply applied=… skipped=…,
  * [CHALLENGE] uid=… finish status=…, [CHALLENGE] tick {…}, [CHALLENGE] tick uid=…: …,
@@ -231,8 +231,9 @@ const CONFIG = readConfig(process.env);
 //  dependencies
 // ═══════════════════════════════════════════════════════════════════════
 
-const COLS = 'result, result_rr, progress_stage, entry, sl, original_sl, tp1, tp2, tp3, '
-  + 'created_at, strategy, order_id, signal_msg_id, symbol, direction, expire_rr';
+// db/signal_stats._COLS — [STATS-HONEST 2026-10] with skip_reason: a manual «Пропустил» is 'skip' in the
+// challenge progress / plan / gate / card too (signal_rows_since / signal_stats select it in the bot).
+const { COLS, aggregate: ssAggregate } = require('./engine/signalStats');
 // db/signal_outcome.COUNTABLE_SQL — ORPHAN and SKIP without card and without order are garbage.
 const COUNTABLE_SQL = "COALESCE(result, '') != 'ORPHAN' "
   + "AND NOT (COALESCE(result, '') = 'SKIP' "
@@ -436,63 +437,17 @@ function signalRr(row, status) {
 }
 
 // ═══════════════════════════════════════════════════════════════════════
-//  db/signal_stats.aggregate (TODO(M10a): services/engine/signalStats.js)
+//  db/signal_stats.aggregate (services/engine/signalStats.js)
 // ═══════════════════════════════════════════════════════════════════════
 
-const fOr0 = (v) => (pyFalsy(v) ? 0.0 : pyFloat(v));
-const sOr = (v, dflt = '') => (pyFalsy(v) ? dflt : String(v));
-
-function blank() {
-  return { signals: 0, trades: 0, wins: 0, losses: 0, be: 0, win_rate: 0.0, total_rr: 0.0, rr_7d: 0.0 };
-}
-
-/** aggregate(rows, days=30, now): one user's rows → the summary. */
+/**
+ * aggregate(rows, days=30, now): one user's rows → the summary — challenge.py imports
+ * db.signal_stats.aggregate, so this is services/engine/signalStats.aggregate itself
+ * ([STATS-HONEST 2026-10]: the extra final_* / net_* / first_ts / open_live / equity_net / cost
+ * fields reach the challenge share card like the bot's render_share_png(st)).
+ */
 function aggregate(rows, days = 30, now = null) {
-  const t = isNone(now) ? Date.now() / 1000 : now;
-  const cutoff7 = t - 7 * 86400;
-  const perStrategy = {};
-  for (const s of STRATEGIES) perStrategy[s] = blank();
-  const out = {
-    days, ...blank(), open: 0, expired: 0, missed: 0, best_rr: null,
-    best_symbol: '', best_direction: '', best_strategy: '',
-    equity: [], per_strategy: perStrategy,
-  };
-  let cum = 0.0;
-  const sorted = rows.slice().sort((a, b) => fOr0(a.created_at) - fOr0(b.created_at));     // stable like sorted()
-  for (const r of sorted) {
-    const strat = pyUpper(sOr(r.strategy));
-    const buckets = [out].concat(Object.prototype.hasOwnProperty.call(perStrategy, strat) ? [perStrategy[strat]] : []);
-    for (const b of buckets) b.signals += 1;
-    const st = signalStatus(r, t);
-    if (st === 'open' || st === 'tp1' || st === 'tp2') out.open += 1;
-    else if (st === 'expired') out.expired += 1;
-    else if (st === 'missed') out.missed += 1;
-    const rr = signalRr(r, st);
-    if (rr === null) continue;
-    const recent = fOr0(r.created_at) >= cutoff7;
-    for (const b of buckets) {
-      b.trades += 1;
-      b.wins += rr > 0 ? 1 : 0;
-      b.losses += rr < 0 ? 1 : 0;
-      b.be += rr === 0 ? 1 : 0;
-      b.total_rr += rr;
-      if (recent) b.rr_7d += rr;
-    }
-    if (out.best_rr === null || rr > out.best_rr) {
-      out.best_rr = pyRound(rr, 2);
-      out.best_symbol = sOr(r.symbol).split('-USDT-SWAP').join('');
-      out.best_direction = pyUpper(sOr(r.direction));
-      out.best_strategy = strat;
-    }
-    cum += rr;
-    out.equity.push({ t: Math.trunc(fOr0(r.created_at)), r: pyRound(cum, 2) });
-  }
-  for (const b of [out].concat(Object.values(perStrategy))) {
-    if (b.trades) b.win_rate = pyRound(b.wins / b.trades * 100, 1);
-    b.total_rr = pyRound(b.total_rr, 2);
-    b.rr_7d = pyRound(b.rr_7d, 2);
-  }
-  return out;
+  return ssAggregate(rows, days, isNone(now) ? Date.now() / 1000 : now);
 }
 
 // ═══════════════════════════════════════════════════════════════════════

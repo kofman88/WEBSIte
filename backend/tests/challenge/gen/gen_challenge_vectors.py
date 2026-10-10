@@ -804,11 +804,33 @@ for k in range(90):
     r["order_id"] = rng.choice([r["order_id"], "", None, "o9"])
     r["result_rr"] = rng.choice([r["result_rr"], None, 1.25])
     db_insert(701, r)
+# [STATS-HONEST 2026-10] (no rng) manual «Пропустил» over tracker stages SL / '' / TP1 / MISSED, a ghost SKIP at
+# TP2 with a card, an exchange TP1 at stage TP1 (final) and a BE-moved TP1 stage: _COLS now selects skip_reason,
+# so the manual skips are 'skip' in signal_rows_since → progress / plan / gate / the card aggregate.
+for k, (stage, extra) in enumerate((("SL", {"result": "SKIP", "skip_reason": "manual"}),
+                                    ("", {"result": "SKIP", "skip_reason": "manual"}),
+                                    ("TP1", {"result": "SKIP", "skip_reason": "manual"}),
+                                    ("MISSED", {"result": "SKIP", "skip_reason": "manual"}),
+                                    ("TP2", {"result": "SKIP", "skip_reason": "ghost"}),
+                                    ("TP1", {"result": "TP1", "result_rr": 0.95, "order_id": "ox-h1"}),
+                                    ("TP1", {"sl": 100.0}))):
+    db_insert(701, {"result": "", "result_rr": None, "progress_stage": stage, "entry": 100.0, "sl": 99.4,
+                    "original_sl": 99.4, "tp1": 100.6, "tp2": 101.74, "tp3": 102.34, "created_at": FAKE[0] - (k + 1) * 3600.5,
+                    "strategy": "VOLUME", "order_id": "", "signal_msg_id": 7, "symbol": f"H{k}-USDT-SWAP",
+                    "direction": "LONG", "expire_rr": None, "skip_reason": "", **extra})
 since = FAKE[0] - 20 * D_
+_rows701 = run(SS.signal_rows_since(701, since))
+_stats701 = run(SS.signal_stats(701, 30))
+_ch701 = C.build(701, BASE, now=since)
 out["sql"] = {"now": FAKE[0], "since": since,
-              "rows_since": run(SS.signal_rows_since(701, since)),
-              "stats30": run(SS.signal_stats(701, 30)),
-              "stats7": run(SS.signal_stats(701, 7))}
+              "rows_since": _rows701,
+              "stats30": _stats701,
+              "stats7": run(SS.signal_stats(701, 7)),
+              # [STATS-HONEST] the challenge over these rows (manual skips are skips there too)
+              "challenge_json": _ch701.to_json(),
+              "progress": C.progress(_ch701, _rows701, FAKE[0]),
+              "plan": C.plan(_ch701, _stats701, FAKE[0]),
+              "card": SS.aggregate(_rows701, 21, FAKE[0])}
 
 out["db_rows"] = DB_ROWS
 with open(OUT, "w", encoding="utf-8") as f:
