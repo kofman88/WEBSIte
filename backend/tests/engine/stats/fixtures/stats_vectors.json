@@ -157544,6 +157544,322 @@
 }
 }
 },
+"cost_log": {
+"per_user": {
+"101": {
+"signal_stats_30": [],
+"signal_stats_7": [],
+"signals_all": []
+},
+"102": {
+"signal_stats_30": [],
+"signal_stats_7": [],
+"signals_all": []
+},
+"103": {
+"signal_stats_30": [],
+"signal_stats_7": [],
+"signals_all": []
+},
+"104": {
+"signal_stats_30": [],
+"signal_stats_7": [],
+"signals_all": []
+},
+"105": {
+"signal_stats_30": [],
+"signal_stats_7": [],
+"signals_all": []
+},
+"106": {
+"signal_stats_30": [],
+"signal_stats_7": [],
+"signals_all": []
+},
+"107": {
+"signal_stats_30": [],
+"signal_stats_7": [],
+"signals_all": []
+},
+"108": {
+"signal_stats_30": [],
+"signal_stats_7": [],
+"signals_all": []
+},
+"109": {
+"signal_stats_30": [],
+"signal_stats_7": [],
+"signals_all": []
+},
+"110": {
+"signal_stats_30": [
+"[STATS-HONEST] tid=? EEE-USDT-SWAP ts=1765956800.0: стоп неизвестен (entry/sl) — издержки не вычтены"
+],
+"signal_stats_7": [
+"[STATS-HONEST] tid=? EEE-USDT-SWAP ts=1765956800.0: стоп неизвестен (entry/sl) — издержки не вычтены"
+],
+"signals_all": [
+"[STATS-HONEST] tid=h110-nostop EEE-USDT-SWAP ts=1765956800.0: стоп неизвестен (entry/sl) — издержки не вычтены"
+]
+}
+},
+"rows": {
+"base": {
+"user_id": 901,
+"symbol": "LOG-USDT-SWAP",
+"direction": "LONG",
+"tp1": 0,
+"tp2": 0,
+"tp3": 0
+},
+"inputs": [
+{
+"trade_id": "log-int",
+"created_at": 1760000000,
+"entry": 0,
+"sl": 99
+},
+{
+"trade_id": "log-default",
+"entry": 100,
+"sl": 0
+},
+{
+"trade_id": "log-frac",
+"created_at": 1760089400.25,
+"entry": 100,
+"sl": 0,
+"original_sl": null
+},
+{
+"trade_id": "log-null",
+"created_at": null,
+"entry": 0,
+"sl": 0
+},
+{
+"trade_id": "log-text",
+"created_at": "abc",
+"entry": "x",
+"sl": 99
+},
+{
+"trade_id": "log-numtext",
+"created_at": "1760000000",
+"entry": -5,
+"sl": -6
+},
+{
+"trade_id": "log-big",
+"created_at": 1e+16,
+"entry": 100,
+"sl": 100
+},
+{
+"trade_id": "log-small",
+"created_at": 1.5e-07,
+"entry": 100,
+"sl": 100,
+"original_sl": 100
+},
+{
+"trade_id": "log-zero",
+"created_at": 0,
+"entry": 0,
+"sl": 1
+},
+{
+"trade_id": "log-neg",
+"created_at": -3600,
+"entry": 0,
+"sl": 1,
+"symbol": "ЁЖ-USDT"
+},
+{
+"trade_id": null,
+"created_at": 1765956800.0,
+"entry": 0,
+"sl": 1
+},
+{
+"trade_id": "log-ok",
+"created_at": 1760000000,
+"entry": 100,
+"sl": 99.4
+}
+],
+"back": [
+{
+"trade_id": "log-int",
+"symbol": "LOG-USDT-SWAP",
+"created_at": 1760000000.0,
+"entry": 0.0,
+"sl": 99.0,
+"original_sl": null
+},
+{
+"trade_id": "log-default",
+"symbol": "LOG-USDT-SWAP",
+"created_at": 0.0,
+"entry": 100.0,
+"sl": 0.0,
+"original_sl": null
+},
+{
+"trade_id": "log-frac",
+"symbol": "LOG-USDT-SWAP",
+"created_at": 1760089400.25,
+"entry": 100.0,
+"sl": 0.0,
+"original_sl": null
+},
+{
+"trade_id": "log-null",
+"symbol": "LOG-USDT-SWAP",
+"created_at": null,
+"entry": 0.0,
+"sl": 0.0,
+"original_sl": null
+},
+{
+"trade_id": "log-text",
+"symbol": "LOG-USDT-SWAP",
+"created_at": "abc",
+"entry": "x",
+"sl": 99.0,
+"original_sl": null
+},
+{
+"trade_id": "log-numtext",
+"symbol": "LOG-USDT-SWAP",
+"created_at": 1760000000.0,
+"entry": -5.0,
+"sl": -6.0,
+"original_sl": null
+},
+{
+"trade_id": "log-big",
+"symbol": "LOG-USDT-SWAP",
+"created_at": 1e+16,
+"entry": 100.0,
+"sl": 100.0,
+"original_sl": null
+},
+{
+"trade_id": "log-small",
+"symbol": "LOG-USDT-SWAP",
+"created_at": 1.5e-07,
+"entry": 100.0,
+"sl": 100.0,
+"original_sl": 100.0
+},
+{
+"trade_id": "log-zero",
+"symbol": "LOG-USDT-SWAP",
+"created_at": 0.0,
+"entry": 0.0,
+"sl": 1.0,
+"original_sl": null
+},
+{
+"trade_id": "log-neg",
+"symbol": "ЁЖ-USDT",
+"created_at": -3600.0,
+"entry": 0.0,
+"sl": 1.0,
+"original_sl": null
+},
+{
+"trade_id": null,
+"symbol": "LOG-USDT-SWAP",
+"created_at": 1765956800.0,
+"entry": 0.0,
+"sl": 1.0,
+"original_sl": null
+},
+{
+"trade_id": "log-ok",
+"symbol": "LOG-USDT-SWAP",
+"created_at": 1760000000.0,
+"entry": 100.0,
+"sl": 99.4,
+"original_sl": null
+}
+],
+"out": [
+{
+"cost_r": 0.0,
+"msgs": [
+"[STATS-HONEST] tid=log-int LOG-USDT-SWAP ts=1760000000.0: стоп неизвестен (entry/sl) — издержки не вычтены"
+]
+},
+{
+"cost_r": 0.0,
+"msgs": [
+"[STATS-HONEST] tid=log-default LOG-USDT-SWAP ts=0.0: стоп неизвестен (entry/sl) — издержки не вычтены"
+]
+},
+{
+"cost_r": 0.0,
+"msgs": [
+"[STATS-HONEST] tid=log-frac LOG-USDT-SWAP ts=1760089400.25: стоп неизвестен (entry/sl) — издержки не вычтены"
+]
+},
+{
+"cost_r": 0.0,
+"msgs": [
+"[STATS-HONEST] tid=log-null LOG-USDT-SWAP ts=?: стоп неизвестен (entry/sl) — издержки не вычтены"
+]
+},
+{
+"cost_r": 0.0,
+"msgs": [
+"[STATS-HONEST] tid=log-text LOG-USDT-SWAP ts=abc: стоп неизвестен (entry/sl) — издержки не вычтены"
+]
+},
+{
+"cost_r": 0.0,
+"msgs": [
+"[STATS-HONEST] tid=log-numtext LOG-USDT-SWAP ts=1760000000.0: стоп неизвестен (entry/sl) — издержки не вычтены"
+]
+},
+{
+"cost_r": 0.0,
+"msgs": [
+"[STATS-HONEST] tid=log-big LOG-USDT-SWAP ts=1e+16: стоп неизвестен (entry/sl) — издержки не вычтены"
+]
+},
+{
+"cost_r": 0.0,
+"msgs": [
+"[STATS-HONEST] tid=log-small LOG-USDT-SWAP ts=1.5e-07: стоп неизвестен (entry/sl) — издержки не вычтены"
+]
+},
+{
+"cost_r": 0.0,
+"msgs": [
+"[STATS-HONEST] tid=log-zero LOG-USDT-SWAP ts=0.0: стоп неизвестен (entry/sl) — издержки не вычтены"
+]
+},
+{
+"cost_r": 0.0,
+"msgs": [
+"[STATS-HONEST] tid=log-neg ЁЖ-USDT ts=-3600.0: стоп неизвестен (entry/sl) — издержки не вычтены"
+]
+},
+{
+"cost_r": 0.0,
+"msgs": [
+"[STATS-HONEST] tid=? LOG-USDT-SWAP ts=1765956800.0: стоп неизвестен (entry/sl) — издержки не вычтены"
+]
+},
+{
+"cost_r": 0.2500000000000024,
+"msgs": []
+}
+]
+}
+},
 "ghost": {
 "one_user": [
 0,

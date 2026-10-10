@@ -160,7 +160,8 @@ function rowCostR(row, cPct = null, exPct = null) {
   const sp = stopPct(row);
   if (sp === null) {
     const msg = `[STATS-HONEST] tid=${pyStr(_g(row, 'trade_id', '?'))} ${pyStr(_g(row, 'symbol', '?'))} `
-      + `ts=${pyStr(_g(row, 'created_at', '?'))}: стоп неизвестен (entry/sl) — издержки не вычтены`;
+      // created_at is the REAL column → Python prints the float repr (1760000000.0, 1e+16); '?' / text as is
+      + `ts=${pyNum(_g(row, 'created_at', '?'))}: стоп неизвестен (entry/sl) — издержки не вычтены`;
     costDebug(msg);
     return 0.0;
   }

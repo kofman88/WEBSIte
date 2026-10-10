@@ -19,7 +19,9 @@ and aggregate / cost_pct / exchange_cost_pct under 20 SIGNAL_STATS_* env values;
 gets the same grid for user 110 plus manual skips / exchange TP1 and BE rows for 101 (appended
 after the shuffle, no rng); per user `live` = _user_signals + _attach_live over faked
 signal_freshness.get_current_price, `env` = the lists and signal_stats under cost 0.3 /
-exchange 0; `dashboard_fallback` = h_dashboard's stats when signal_stats raises.
+exchange 0; `dashboard_fallback` = h_dashboard's stats when signal_stats raises; `cost_log` =
+row_cost_r's unknown-stop log.debug captured from logger CHM.SignalStats (per user over the seeded DB,
+and hand rows read back from an in-memory copy of the bot's `trades` DDL: REAL created_at → float repr).
 """
 from __future__ import annotations
 
@@ -473,6 +475,80 @@ async def collect():
     return res
 
 out.update(LOOP.run_until_complete(collect()))
+
+
+# ── 2a. [STATS-HONEST] row_cost_r's unknown-stop log.debug (logger CHM.SignalStats), the formatted
+#        messages captured by a DEBUG handler: per user over the seeded DB (signal_stats 30 / 7 d and
+#        _user_signals all — rows read back from the REAL created_at column, e.g. 1765956800.0), and
+#        hand rows read back from an in-memory copy of the bot's `trades` DDL (whole-number /
+#        DEFAULT 0 / fractional / NULL / text created_at, NULL trade_id). ─────────────────────────
+import logging  # noqa: E402
+
+
+class _CostLogCap(logging.Handler):
+    def __init__(self):
+        super().__init__(logging.DEBUG)
+        self.msgs: list[str] = []
+
+    def emit(self, record):
+        self.msgs.append(record.getMessage())
+
+
+def capture_cost_log(fn):
+    lg = logging.getLogger("CHM.SignalStats")
+    h = _CostLogCap()
+    old_level, old_prop = lg.level, lg.propagate
+    lg.addHandler(h)
+    lg.setLevel(logging.DEBUG)
+    lg.propagate = False
+    try:
+        fn()
+    finally:
+        lg.removeHandler(h)
+        lg.setLevel(old_level)
+        lg.propagate = old_prop
+    return h.msgs
+
+
+cost_log: dict = {"per_user": {}}
+for uid, _plan in USERS:
+    cost_log["per_user"][str(uid)] = {
+        "signal_stats_30": capture_cost_log(lambda: LOOP.run_until_complete(ss.signal_stats(uid, 30))),
+        "signal_stats_7": capture_cost_log(lambda: LOOP.run_until_complete(ss.signal_stats(uid, 7))),
+        "signals_all": capture_cost_log(lambda: LOOP.run_until_complete(miniapp_api._user_signals(uid, "all", 50, ""))),
+    }
+_LOG_BASE = {"user_id": 901, "symbol": "LOG-USDT-SWAP", "direction": "LONG", "tp1": 0, "tp2": 0, "tp3": 0}
+LOG_ROWS = [
+    {"trade_id": "log-int", "created_at": 1760000000, "entry": 0, "sl": 99},
+    {"trade_id": "log-default", "entry": 100, "sl": 0},
+    {"trade_id": "log-frac", "created_at": 1760089400.25, "entry": 100, "sl": 0, "original_sl": None},
+    {"trade_id": "log-null", "created_at": None, "entry": 0, "sl": 0},
+    {"trade_id": "log-text", "created_at": "abc", "entry": "x", "sl": 99},
+    {"trade_id": "log-numtext", "created_at": "1760000000", "entry": -5, "sl": -6},
+    {"trade_id": "log-big", "created_at": 1e16, "entry": 100, "sl": 100},
+    {"trade_id": "log-small", "created_at": 1.5e-7, "entry": 100, "sl": 100, "original_sl": 100},
+    {"trade_id": "log-zero", "created_at": 0, "entry": 0, "sl": 1},
+    {"trade_id": "log-neg", "created_at": -3600, "entry": 0, "sl": 1, "symbol": "ЁЖ-USDT"},
+    {"trade_id": None, "created_at": 1765956800.0, "entry": 0, "sl": 1},
+    {"trade_id": "log-ok", "created_at": 1760000000, "entry": 100, "sl": 99.4},
+]
+_ddl = sqlite3.connect(DBP).execute("SELECT sql FROM sqlite_master WHERE type='table' AND name='trades'").fetchone()[0]
+_mem = sqlite3.connect(":memory:")
+_mem.row_factory = sqlite3.Row
+_mem.execute(_ddl)
+for r in LOG_ROWS:
+    r2 = {**_LOG_BASE, **r}
+    _mem.execute(f"INSERT INTO trades ({', '.join(r2)}) VALUES ({', '.join('?' * len(r2))})", list(r2.values()))
+_back = [dict(x) for x in _mem.execute(
+    "SELECT trade_id, symbol, created_at, entry, sl, original_sl FROM trades ORDER BY rowid").fetchall()]
+_mem.close()
+cost_log["rows"] = {"base": _LOG_BASE, "inputs": LOG_ROWS, "back": _back,
+                    "out": [{"cost_r": None, "msgs": None} for _ in _back]}
+for i, r in enumerate(_back):
+    res_ = {}
+    cost_log["rows"]["out"][i]["msgs"] = capture_cost_log(lambda r=r, res_=res_: res_.update(c=ss.row_cost_r(r)))
+    cost_log["rows"]["out"][i]["cost_r"] = res_["c"]
+out["cost_log"] = cost_log
 
 
 # ── 2b. ghost cleanup (bot.py _ghost_cleanup_loop → db_cleanup_ghost_trades_all(3)) and the

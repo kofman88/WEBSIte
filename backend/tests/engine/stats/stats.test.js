@@ -14,7 +14,8 @@
  * net_rr on every status row and on stop edge rows; the bot test's grid with manual «Пропустил» rows
  * (aggregate, the _COLS projection, rating_from_rows, _signal, 20 SIGNAL_STATS_* env values);
  * per user `live` (_attach_live: risk from sl0, only _is_live) and `env` (cost 0.3 / exchange 0);
- * h_dashboard's fallback stats.
+ * h_dashboard's fallback stats; row_cost_r's unknown-stop log.debug (cost_log: per user over the seeded DB and
+ * hand rows read back from the trades DDL — REAL created_at prints as the Python float repr).
  */
 import { describe, it, expect, beforeAll } from 'vitest';
 import fs from 'fs';
@@ -372,15 +373,51 @@ describe('[STATS-HONEST 2026-10] honest stats vs the bot', () => {
     expect(SS.dashboardFallbackStats()).toEqual(V.dashboard_fallback);
   });
 
-  it('an unknown stop costs nothing and is logged like the bot ([STATS-HONEST] … стоп неизвестен)', () => {
+  /** SS.rowCostR's log sink captured around fn (the bot side: a DEBUG handler on CHM.SignalStats). */
+  const captureCostLog = (fn) => {
     const lines = [];
     SS._setCostLog((m) => lines.push(m));
-    try {
-      expect(SS.rowCostR({ trade_id: 'z', symbol: 'X-USDT-SWAP', created_at: 5, entry: 0, sl: 1 })).toBe(0.0);
-      expect(SS.rowCostR({ entry: 100, sl: 99.4 })).toBeCloseTo(0.25, 12);
-    } finally {
-      SS._setCostLog(null);
+    try { fn(); } finally { SS._setCostLog(null); }
+    return lines;
+  };
+
+  it('an unknown stop costs nothing and is logged like the bot: seeded DB, REAL created_at → float repr (ts=1765956800.0)', () => {
+    let logged = 0;
+    for (const [uid] of V.users) {
+      const want = V.cost_log.per_user[String(uid)];
+      expect(captureCostLog(() => SS.signalStats(db, uid, 30, NOW)), `${uid} 30`).toEqual(want.signal_stats_30);
+      expect(captureCostLog(() => SS.signalStats(db, uid, 7, NOW)), `${uid} 7`).toEqual(want.signal_stats_7);
+      expect(captureCostLog(() => SS.userSignals(db, uid, { status: 'all', limit: 50, strategy: '', now: NOW })), `${uid} signals`)
+        .toEqual(want.signals_all);
+      logged += want.signal_stats_30.length + want.signals_all.length;
     }
-    expect(lines).toEqual(['[STATS-HONEST] tid=z X-USDT-SWAP ts=5: стоп неизвестен (entry/sl) — издержки не вычтены']);
+    expect(logged).toBeGreaterThanOrEqual(2);
+    // signal_stats reads _COLS (no trade_id → tid=?), the signals list reads t.* (tid=h110-nostop)
+    expect(V.cost_log.per_user['110'].signal_stats_30).toEqual(
+      ['[STATS-HONEST] tid=? EEE-USDT-SWAP ts=1765956800.0: стоп неизвестен (entry/sl) — издержки не вычтены']);
+    expect(V.cost_log.per_user['110'].signals_all).toEqual(
+      ['[STATS-HONEST] tid=h110-nostop EEE-USDT-SWAP ts=1765956800.0: стоп неизвестен (entry/sl) — издержки не вычтены']);
+  });
+
+  it(`unknown-stop log on ${V.cost_log.rows.inputs.length} hand rows read back from the trades DDL (whole / DEFAULT 0 / fractional / NULL / text created_at)`, () => {
+    const d = engineDb();
+    seedUsers(d, [[V.cost_log.rows.base.user_id, 'free']]);
+    for (const r of V.cost_log.rows.inputs) {
+      const r2 = { ...V.cost_log.rows.base, ...r };
+      const names = Object.keys(r2);
+      d.prepare(`INSERT INTO signal_trades (${names.join(', ')}) VALUES (${names.map(() => '?').join(', ')})`).run(...names.map((n) => r2[n]));
+    }
+    const back = d.prepare('SELECT trade_id, symbol, created_at, entry, sl, original_sl FROM signal_trades ORDER BY rowid').all();
+    expect(back).toEqual(V.cost_log.rows.back);
+    const got = back.map((r) => {
+      let c;
+      const msgs = captureCostLog(() => { c = SS.rowCostR(r); });
+      return { cost_r: c, msgs };
+    });
+    expect(got).toEqual(V.cost_log.rows.out);
+    got.forEach((g, i) => expect(Object.is(g.cost_r, V.cost_log.rows.out[i].cost_r), String(i)).toBe(true));
+    const ts = V.cost_log.rows.out.flatMap((o) => o.msgs).map((m) => m.split(' ts=')[1].split(':')[0]);
+    expect(ts).toEqual(['1760000000.0', '0.0', '1760089400.25', '?', 'abc', '1760000000.0', '1e+16', '1.5e-07', '0.0', '-3600.0',
+      '1765956800.0']);
   });
 });
