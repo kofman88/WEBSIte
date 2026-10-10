@@ -16,9 +16,10 @@ row and kv value.
 Clock: a virtual-time event loop. time.time / time.monotonic / datetime follow one clock that only
 moves when nothing is runnable — the loop jumps to its next timer — so wait_for timeouts, pybit
 retry sleeps, the bot's 5 s retry and the 60 s / 900 s LIMIT-unfilled grace run instantly and
-deterministically. pybit runs in executor threads (like production); a thread's time.sleep /
-request timeout is a virtual sleep scheduled on the loop, and the loop never jumps while a thread
-is runnable.
+deterministically. Timers due at the same instant fire in scheduling order (FIFO), like the JS
+vclock's `seq` tie-break and the bot on a real clock. pybit runs in executor threads (like
+production); a thread's time.sleep / request timeout is a virtual sleep scheduled on the loop, and
+the loop never jumps while a thread is runnable.
 
 Scenarios: SEED-driven randomized users (WIRE_SEED, default 20261009 — independent of every other
 generator) over the four exchanges: risk modes, leverage, fixed amount, partial TP on/off and its
@@ -42,7 +43,9 @@ import copy
 import dataclasses
 import enum
 import gzip
+import heapq
 import inspect
+import itertools
 import json
 import logging
 import math
@@ -273,7 +276,8 @@ class VSelector(selectors.SelectSelector):
             lp = LOOP[0]
             sched = getattr(lp, "_scheduled", None)
             if timeout is not None and sched:
-                # jump EXACTLY to the next timer (mono = when, wall += when - mono) like the JS clock
+                # jump EXACTLY to the next timer (mono = when, wall += when - mono) like the JS clock; timers due
+                # at the same instant then fire in scheduling order on both clocks (_FifoTimerHandle)
                 when = sched[0].when()
                 if when > CLK.mono:
                     CLK.wall += when - CLK.mono
@@ -298,6 +302,41 @@ class VSelector(selectors.SelectSelector):
             return []
 
 
+_TIMER_SEQ = itertools.count()
+
+
+class _FifoTimerHandle(asyncio.TimerHandle):
+    """A TimerHandle that breaks an equal-`when` tie by scheduling order — the JS vclock's `seq`, and what a
+    real clock gives the bot (two timers practically never share an instant there). CPython's TimerHandle
+    compares `_when` only and heapq does not keep ties FIFO."""
+
+    __slots__ = ("_seq",)
+
+    def __init__(self, *a, **k):
+        super().__init__(*a, **k)
+        self._seq = next(_TIMER_SEQ)
+
+    def __lt__(self, other):
+        if isinstance(other, _FifoTimerHandle):
+            return (self._when, self._seq) < (other._when, other._seq)
+        return super().__lt__(other)
+
+    def __le__(self, other):
+        if isinstance(other, _FifoTimerHandle):
+            return (self._when, self._seq) <= (other._when, other._seq)
+        return super().__le__(other)
+
+    def __gt__(self, other):
+        if isinstance(other, _FifoTimerHandle):
+            return (self._when, self._seq) > (other._when, other._seq)
+        return super().__gt__(other)
+
+    def __ge__(self, other):
+        if isinstance(other, _FifoTimerHandle):
+            return (self._when, self._seq) >= (other._when, other._seq)
+        return super().__ge__(other)
+
+
 class VLoop(asyncio.SelectorEventLoop):
     def __init__(self):
         super().__init__(selector=VSelector())
@@ -305,6 +344,23 @@ class VLoop(asyncio.SelectorEventLoop):
 
     def time(self):
         return CLK.mono
+
+    def call_at(self, when, callback, *args, context=None):
+        """CPython 3.11 BaseEventLoop.call_at with a _FifoTimerHandle: timers due at the same instant fire in
+        scheduling order (FIFO), like the JS vclock (call_later, asyncio.sleep, wait_for and vsleep's
+        executor-thread timers all come through here)."""
+        if when is None:
+            raise TypeError("when cannot be None")
+        self._check_closed()
+        if self._debug:
+            self._check_thread()
+            self._check_callback(callback, 'call_at')
+        timer = _FifoTimerHandle(when, callback, args, self, context)
+        if timer._source_traceback:
+            del timer._source_traceback[-1]
+        heapq.heappush(self._scheduled, timer)
+        timer._scheduled = True
+        return timer
 
     def create_task(self, coro, *, name=None, context=None):
         try:

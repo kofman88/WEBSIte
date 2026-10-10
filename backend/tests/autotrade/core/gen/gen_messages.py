@@ -37,6 +37,16 @@ KEYS = [
     "skip_notify_low_balance", "skip_notify_disabled_day", "skip_notify_generic",
     # partial_tp.py
     "tp_ladder_downgrade",
+    # M15 BE monitor (scanner_mid.py _check_breakevens / _notify_trailing_fail; i18n.py unchanged
+    # between 37a888f and 1a47ffc — the gN fixes added no keys; reconcile, SL verifier, anomaly
+    # detector and orphan sweeper send no i18n texts)
+    "limit_order_cancelled", "trade_auto_closed",
+    "trade_closed_tp1", "trade_closed_tp2", "trade_closed_tp3", "trade_closed_sl", "trade_closed_be",
+    "trade_closed_trail_profit", "trade_closed_trail_loss", "trade_closed_trail_be",
+    "trade_closed_manual_profit", "trade_closed_manual_loss", "trade_closed_manual_be",
+    "trade_closed_auto_profit", "trade_closed_auto_loss", "trade_closed_auto_be", "trade_closed_generic",
+    "trade_balance", "trailing_stop_updated", "trailing_level_be", "trailing_level_plus_r",
+    "trailing_sl_failed", "tp_placement_failed_warning",
 ]
 
 out = {}

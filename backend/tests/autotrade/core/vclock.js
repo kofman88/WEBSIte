@@ -10,6 +10,14 @@
  *   await clk.run(promise)             drive timers until nothing is pending; returns the
  *                                      promise's value (throws its error); `stuck` when the
  *                                      promise never settled
+ *   await clk.runUntil(limitMono)      drive timers due at or before `limitMono` (an infinite loop
+ *                                      shell never settles), then move the clock to the limit;
+ *                                      later timers stay pending — abort the loop to end it
+ *
+ * Timers due at the same instant fire in creation order (`seq`), as the Python VLoops do
+ * (_FifoTimerHandle in tests/autotrade/m15/py/m15_harness.py and wire/py/drive_wire_diff.py).
+ * clk.sleep does not honour a cancel scope; a driver that cancels sleeps uses
+ * tests/autotrade/m15/harness.js vclockSleep (the timer is removed when the sleep is cancelled).
  */
 
 function createVClock(wall0, mono0 = 1000.0) {
@@ -53,6 +61,27 @@ function createVClock(wall0, mono0 = 1000.0) {
     return value;
   }
 
+  async function runUntil(limitMono, { maxSteps = 1000000 } = {}) {
+    const limit = Number(limitMono);
+    for (let step = 0; step < maxSteps; step++) {
+      await settle();
+      let next = null;
+      for (const h of timers) if (!next || h.at < next.at || (h.at === next.at && h.seq < next.seq)) next = h;
+      if (!next || next.at > limit) break;
+      timers.delete(next);
+      if (next.at > st.mono) {
+        st.wall += next.at - st.mono;
+        st.mono = next.at;
+      }
+      next.fn();
+    }
+    if (limit > st.mono) {
+      st.wall += limit - st.mono;
+      st.mono = limit;
+    }
+    await settle();
+  }
+
   return {
     now: () => st.wall,
     mono: () => st.mono,
@@ -73,6 +102,7 @@ function createVClock(wall0, mono0 = 1000.0) {
       return true;
     },
     run,
+    runUntil,
     state: st,
   };
 }

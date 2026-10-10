@@ -2,7 +2,7 @@
 /**
  * adminAlerts.js — port of admin_alerts.py (AUDIT-FIX-C91) for the alerts the auto-trade flow
  * raises: send_admin_alert (kv dedup `adm_alert_<key>` per alert type TTL), alert_sl_streak,
- * alert_auth_breaker.
+ * alert_auth_breaker, alert_be_monitor_crash (the M15 BE monitor: 5 pass exceptions in a row).
  *
  * Delivery: `adminIds()` given → bot.sendMessage(aid, "🛎 <b>title</b>\n\ndetails", HTML) for each
  * (the bot's loop over Config.ADMIN_IDS); otherwise the site facade `bot.alertAdmins(text)`
@@ -11,6 +11,7 @@
 
 const { pf, F } = require('./pyfmt');
 const { pyUpper } = require('../../strategies/common/pyUnicode');
+const { pyTruthy, pySlice, htmlEscape, pyStr } = require('../exchanges/pyCompat');
 
 const ALERT_DEDUP_TTL = Object.freeze({
   sl_streak: 6 * 3600,
@@ -94,7 +95,24 @@ function createAdminAlerts({ now = () => Date.now() / 1000, kvGet = null, kvSet 
       `auth_breaker_${userId}_${exchange}`, 'auth_breaker');
   }
 
-  return { sendAdminAlert, alertSlStreak, alertAuthBreaker, shouldSend };
+  /**
+   * admin_alerts.alert_be_monitor_crash(bot, streak, last_error="") — L3.16: the BE monitor's pass
+   * raised `streak` times in a row. html.escape((last_error or "—")[:400]) (code points), one alert per
+   * 6 h for the whole process (dedup `be_monitor_crash_global`, type `be_monitor_crash`).
+   */
+  async function alertBeMonitorCrash(bot, streak, lastError = '') {
+    const trimmed = htmlEscape(pySlice(pyTruthy(lastError) ? lastError : '—', 400));
+    await sendAdminAlert(bot,
+      '⚠️ BE-monitor подряд сыпется',
+      `Consecutive errors: <b>${pyStr(streak)}</b>\n`
+      + `Last error: <code>${trimmed}</code>\n\n`
+      + 'Открытые позиции могут не получить перевод SL в БУ '
+      + 'после TP1 и trailing SL после TP2/TP3. '
+      + 'Проверь логи — поиск <code>[BE-MONITOR-EXCEPTION]</code>.',
+      'be_monitor_crash_global', 'be_monitor_crash');
+  }
+
+  return { sendAdminAlert, alertSlStreak, alertAuthBreaker, alertBeMonitorCrash, shouldSend };
 }
 
 module.exports = { ALERT_DEDUP_TTL, DEFAULT_TTL, createAdminAlerts };

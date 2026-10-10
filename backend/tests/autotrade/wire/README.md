@@ -6,7 +6,7 @@ production auto-trade entry point and demands the bot's exact wire behaviour.
 | file | role |
 | --- | --- |
 | `py/fake_exchanges.py` | stateful Bybit / BingX / Binance / OKX: accounts, balances, position modes, positions, resting / conditional orders, fills on price moves, HMAC verification, every error class, faults (hang before / after accept, refused connect, HTTP status, slow answers) |
-| `py/drive_wire_diff.py` | the bot's own `execute_auto_trade` (CPython 3.11, its DB layer on a temp SQLite) on a virtual-time event loop: the clock jumps only when every coroutine **and** every pybit executor thread is idle; records per task every request (normalised), answer, message, log, trader marker, metric, side effect, then the DB tables |
+| `py/drive_wire_diff.py` | the bot's own `execute_auto_trade` (CPython 3.11, its DB layer on a temp SQLite) on a virtual-time event loop: the clock jumps only when every coroutine **and** every pybit executor thread is idle, and timers due at the same instant fire in scheduling order (FIFO), like `../core/vclock.js`; records per task every request (normalised), answer, message, log, trader marker, metric, side effect, then the DB tables |
 | `harness.js` | the JS twin: `createAutoTrade` with the real traders on an in-memory site DB and the virtual clock (`../core/vclock.js`); a replay transport serves, per task, the next answer the bot got |
 | `compare.js` | the comparison (also a CLI: `node tests/autotrade/wire/compare.js [fixture] [name …|prefix*]`) |
 | `cancelSemantics.test.js` | the asyncio cancellation rules the differential found, pinned at the unit level |

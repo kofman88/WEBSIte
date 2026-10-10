@@ -43,6 +43,10 @@
   "en": "⚠️ <b>{symbol}:</b> leverage <b>×{applied}</b> instead of requested <b>×{requested}</b>.\n\nReason: Bybit risk_limit for this symbol (protection against liquidation on large positions). Actual risk is unchanged, but more margin is required.",
   "ru": "⚠️ <b>{symbol}:</b> плечо <b>×{applied}</b> вместо запрошенного <b>×{requested}</b>.\n\nПричина: риск-лимит Bybit для этой монеты (защита от ликвидации при большой позиции). Реальный риск не изменился, но требуется больше маржи."
  },
+ "limit_order_cancelled": {
+  "en": "⏱ <b>Limit order {symbol} cancelled</b>\n\nOrder was not filled within 30 minutes.\nCancelled automatically.",
+  "ru": "⏱ <b>Лимитный ордер {symbol} отменён</b>\n\nОрдер не исполнился за 30 минут.\nОтменён автоматически."
+ },
  "low_notional_skip_notif": {
   "en": "⏸ <b>Signal skipped — balance too small for this trade</b>\n\n📍 <b>{symbol}</b> (strategy: {strategy})\nApplied risk: <b>{requested_risk}%</b> of balance\nBelow exchange minimum ($10 per trade).\n\n✅ <b>To receive these signals — pick one:</b>\n\n1️⃣ Top up balance to <b>${required_balance}+</b>\n\n2️⃣ Raise the «Risk %» setting:\n   🏠 Menu → 🤖 Auto-trade → 💰 Risk\n\n3️⃣ Enable volume Boost (bot pads qty up to $10):\n   🏠 Menu → 🤖 Auto-trade → 🛡 Risk Management\n   ⚠️ <i>actual risk may exceed the requested</i>",
   "ru": "⏸ <b>Сигнал пропущен — баланс мал для этой сделки</b>\n\n📍 <b>{symbol}</b> (стратегия: {strategy})\nПрименённый риск: <b>{requested_risk}%</b> от баланса\nЭто меньше минимума биржи ($10 на сделку).\n\n✅ <b>Чтобы получать такие сигналы — выбери одно:</b>\n\n1️⃣ Пополни баланс до <b>${required_balance}+</b>\n\n2️⃣ Подними «Риск %» в настройках:\n   🏠 Меню → 🤖 Авто-трейд → 💰 Риск\n\n3️⃣ Включи Boost объёма (бот добивает qty до $10):\n   🏠 Меню → 🤖 Авто-трейд → 🛡 Risk Management\n   ⚠️ <i>реальный риск может превысить заявленный</i>"
@@ -126,6 +130,94 @@
  "tp_placement_failed": {
   "en": "⚠️ <b>Failed to place TP on {symbol}</b>\n\nPosition is open, but take-profit orders were rejected by exchange.\nBot will keep retrying automatically (BE-monitor every 30s).\n\n🛑 <b>Check the position manually in your exchange app</b> and close it yourself if something goes wrong.",
   "ru": "⚠️ <b>Не удалось поставить TP по {symbol}</b>\n\nПозиция открыта, но тейк-профит ордера не приняты биржей.\nБот продолжит попытки автоматически (BE-monitor каждые 30с).\n\n🛑 <b>Проверь позицию вручную в приложении биржи</b> и при необходимости закрой её сам, если что-то пойдёт не так."
+ },
+ "tp_placement_failed_warning": {
+  "en": "⚠️ <b>{symbol}</b>: failed to place TP after {retries} attempts. Check the position on the exchange.",
+  "ru": "⚠️ <b>{symbol}</b>: не удалось выставить TP после {retries} попыток. Проверьте позицию на бирже."
+ },
+ "trade_auto_closed": {
+  "en": "🗑 <b>Trade {symbol} marked as skipped</b>\n\nPosition not found on exchange over 3 independent checks (10s interval, 2h+ window).\nNo open orders for this symbol.\n\n⚠️ <b>Please verify manually in exchange app!</b>\nIf position is still open — close it yourself.\n\n<i>Bot no longer tracks this trade_id — new signals for this symbol will work normally.</i>",
+  "ru": "🗑 <b>Сделка {symbol} помечена как skipped</b>\n\nПозиция не найдена на бирже при 3-х независимых проверках (интервал 10 сек, общее окно 2+ часа).\nОткрытых ордеров по символу тоже нет.\n\n⚠️ <b>Проверь вручную в приложении биржи!</b>\nЕсли позиция всё же открыта — закрой её сам.\n\n<i>Бот больше не отслеживает этот trade_id — новые сигналы на этот символ будут обрабатываться как обычно.</i>"
+ },
+ "trade_balance": {
+  "en": "\n💼 Balance: <code>${balance:.2f} USDT</code>",
+  "ru": "\n💼 Баланс: <code>${balance:.2f} USDT</code>"
+ },
+ "trade_closed_auto_be": {
+  "en": "🤖 <b>{symbol} auto-closed — BREAKEVEN</b>",
+  "ru": "🤖 <b>{symbol} авто-закрытие — БЕЗУБЫТОК</b>"
+ },
+ "trade_closed_auto_loss": {
+  "en": "🤖 <b>{symbol} auto-closed — LOSS</b>",
+  "ru": "🤖 <b>{symbol} авто-закрытие — УБЫТОК</b>"
+ },
+ "trade_closed_auto_profit": {
+  "en": "🤖 <b>{symbol} auto-closed — PROFIT</b>",
+  "ru": "🤖 <b>{symbol} авто-закрытие — ПРОФИТ</b>"
+ },
+ "trade_closed_be": {
+  "en": "♻️ <b>{symbol} closed at breakeven (BE)</b>",
+  "ru": "♻️ <b>{symbol} закрылась в безубыток (BE)</b>"
+ },
+ "trade_closed_generic": {
+  "en": "📋 <b>{symbol} trade closed</b>",
+  "ru": "📋 <b>{symbol} сделка закрыта</b>"
+ },
+ "trade_closed_manual_be": {
+  "en": "✋ <b>{symbol} closed manually — BREAKEVEN</b>",
+  "ru": "✋ <b>{symbol} закрылась вручную — БЕЗУБЫТОК</b>"
+ },
+ "trade_closed_manual_loss": {
+  "en": "✋ <b>{symbol} closed manually — LOSS</b>",
+  "ru": "✋ <b>{symbol} закрылась вручную — УБЫТОК</b>"
+ },
+ "trade_closed_manual_profit": {
+  "en": "✋ <b>{symbol} closed manually — PROFIT</b>",
+  "ru": "✋ <b>{symbol} закрылась вручную — ПРОФИТ</b>"
+ },
+ "trade_closed_sl": {
+  "en": "🛑 <b>{symbol} closed at stop-loss (SL)</b>",
+  "ru": "🛑 <b>{symbol} закрылась по стоп-лоссу (SL)</b>"
+ },
+ "trade_closed_tp1": {
+  "en": "🎯 <b>{symbol} closed at first take profit (TP1)</b>",
+  "ru": "🎯 <b>{symbol} закрылась по первому тейку (TP1)</b>"
+ },
+ "trade_closed_tp2": {
+  "en": "🎯🎯 <b>{symbol} closed at second take profit (TP2)</b>",
+  "ru": "🎯🎯 <b>{symbol} закрылась по второму тейку (TP2)</b>"
+ },
+ "trade_closed_tp3": {
+  "en": "🏆 <b>{symbol} closed at third take profit (TP3)</b>",
+  "ru": "🏆 <b>{symbol} закрылась по третьему тейку (TP3)</b>"
+ },
+ "trade_closed_trail_be": {
+  "en": "🎯 <b>{symbol} trailing stop — BREAKEVEN</b>",
+  "ru": "🎯 <b>{symbol} трейлинг-стоп — БЕЗУБЫТОК</b>"
+ },
+ "trade_closed_trail_loss": {
+  "en": "🎯 <b>{symbol} trailing stop — LOSS</b>",
+  "ru": "🎯 <b>{symbol} трейлинг-стоп — УБЫТОК</b>"
+ },
+ "trade_closed_trail_profit": {
+  "en": "🎯 <b>{symbol} trailing stop — PROFIT</b>",
+  "ru": "🎯 <b>{symbol} трейлинг-стоп — ПРОФИТ</b>"
+ },
+ "trailing_level_be": {
+  "en": "breakeven",
+  "ru": "безубыток"
+ },
+ "trailing_level_plus_r": {
+  "en": "+{n}R",
+  "ru": "+{n}R"
+ },
+ "trailing_sl_failed": {
+  "en": "⚠️ <b>Failed to move SL on {symbol}</b>\n\nAfter TP{level} hit, the stop should have moved to breakeven, but the exchange rejected the request.\n\n🛑 <b>Check the SL manually in your exchange app</b>.\nBot will keep retrying in the next cycles.",
+  "ru": "⚠️ <b>Не удалось переставить SL по {symbol}</b>\n\nПосле хита TP{level} стоп должен был сдвинуться в безубыток, но биржа отклонила запрос.\n\n🛑 <b>Проверь SL вручную в приложении биржи</b>.\nБот продолжит попытки в следующих циклах."
+ },
+ "trailing_stop_updated": {
+  "en": "📈 <b>Trailing Stop updated</b>\n\n💎 {symbol}  |  {direction}\n🛑 New stop: <code>{new_sl}</code> ({level_text})\n📊 Current R:R: +{current_rr:.1f}R",
+  "ru": "📈 <b>Trailing Stop обновлён</b>\n\n💎 {symbol}  |  {direction}\n🛑 Новый стоп: <code>{new_sl}</code> ({level_text})\n📊 Текущий R:R: +{current_rr:.1f}R"
  },
  "zb_cooldown_set_notif": {
   "en": "⏸ <b>Zero balance — trading paused</b>\n\n📍 <b>{symbol}</b> ({exchange})\nExchange returned «insufficient funds» on order attempt.\n\n🕐 Bot pauses auto-trading for <b>{minutes} min</b> to avoid API flooding. It will retry after cooldown expires.\n\n✅ <b>What to do:</b>\n1️⃣ Top up your exchange balance\n2️⃣ Or lower «Risk %»: 🏠 Menu → 🤖 Auto-trade → 💰 Risk\n\n<i>Scanners will keep sending signals — you can open them manually via the «🚀 Trade» button once balance is restored.</i>",

@@ -23,6 +23,13 @@
  *   cancellableTransport(base)         a trader transport that honours the cancel scope
  *   cancellableSleep(base)             a trader sleep that honours the cancel scope
  *   makeLock()                         asyncio.Lock (FIFO, `run(fn)` = `async with lock`)
+ *   createSemaphore(n)                 asyncio.Semaphore of CPython 3.11.17 (FIFO, no barging past a
+ *                                      queued waiter, a cancelled waiter gives its slot on; `run(fn)` =
+ *                                      `async with sem`) — the SL verifier's Semaphore(5)
+ *   runInScope(signal, fn)             fn() inside a ROOT cancel scope that is cancelled when the
+ *                                      AbortSignal aborts — the bot's `task.cancel()` of a loop task at
+ *                                      shutdown: the in-flight trader request / sleep raises
+ *                                      CancelledError at its await and no further request leaves
  *   createTaskGroup({log})             asyncio.create_task registry: named background tasks, the
  *                                      bot's `_bg_tasks` strong refs, `drain()` for tests,
  *                                      `currentTaskName()` (AsyncLocalStorage) for call tagging
@@ -85,6 +92,22 @@ async function guardCancel(promise) {
     w.off();
     Promise.resolve(promise).catch(() => {});
   }
+}
+
+function newScope(parent) {
+  const scope = { cancelled: false, parent, listeners: new Set(), children: new Set() };
+  if (parent) parent.children.add(scope);
+  return scope;
+}
+
+/** Call `fn` synchronously when `scope` (or a parent) is cancelled; returns the unsubscribe. */
+function onCancel(scope, fn) {
+  const chain = [];
+  for (let s = scope; s; s = s.parent) {
+    s.listeners.add(fn);
+    chain.push(s);
+  }
+  return () => { for (const s of chain) s.listeners.delete(fn); };
 }
 
 function cancelScope(scope) {
@@ -206,6 +229,147 @@ function makeLock() {
   };
 }
 
+// ── asyncio.Semaphore ───────────────────────────────────────────────────
+
+/**
+ * asyncio.Semaphore(value) — CPython 3.11.17 asyncio/locks.py, line by line:
+ *   locked()   value == 0 or any queued waiter that is not cancelled
+ *   acquire()  not locked → value -= 1, return at once (no suspension in the bot; one microtask here);
+ *              else queue a waiter (FIFO) and wait. A waiter cancelled while queued (its cancel scope:
+ *              wait_for timeout, runInScope abort) is marked cancelled at once — locked() and the
+ *              wake-ups skip it — and raises CancelledError without touching the value. A waiter that
+ *              was woken (the slot handed to it) but cancelled before it resumed gives the slot back
+ *              (value += 1, wake the next) and raises CancelledError. A successful waiter wakes the
+ *              next one when value > 0 is left.
+ *   release()  value += 1, wake the first waiter that is not done (the slot passes to it: value -= 1)
+ * Timing: the bot resumes a woken waiter one event-loop iteration after release(), the port on a
+ * microtask. Hand-overs that are not cancelled happen at the same instants and in the same FIFO order.
+ * The one exception: a task.cancel() / abort that ANOTHER task delivers at the same virtual instant as
+ * a release, after it (a timer due at that instant that fires after the releasing one, the shutdown
+ * cancel), before the woken waiter resumes. The bot's waiter then raises CancelledError at acquire, the
+ * slot passes on and its body never runs; the port's waiter has already resumed and entered its body,
+ * and the abort lands at its first await (whose checkCancelled() still passes — that first call leaves).
+ * Only a cancel issued synchronously by the releasing task's own step is reproduced (the
+ * woken_then_cancelled trace). Vectors must not put a cancel or abort on a release instant
+ * (tests/autotrade/m15/py/m15_harness.py guarded_cancel refuses one; offset it, e.g. +0.5 s).
+ */
+function createSemaphore(value = 1) {
+  if (value < 0) {
+    const e = new Error('Semaphore initial value must be >= 0');
+    e.pyType = 'ValueError';
+    throw e;
+  }
+  let val = value;
+  const waiters = [];   // { done, cancelled, resolve, reject }
+
+  const locked = () => val === 0 || waiters.some((w) => !w.cancelled);
+
+  function wakeUpNext() {
+    for (const w of waiters) {
+      if (!w.done) {
+        val -= 1;
+        w.done = true;
+        w.resolve(true);
+        return;
+      }
+    }
+  }
+
+  async function acquire() {
+    if (!locked()) {
+      val -= 1;
+      return true;
+    }
+    const scope = currentScope();
+    const w = { done: false, cancelled: false, resolve: null, reject: null };
+    const fut = new Promise((resolve, reject) => { w.resolve = resolve; w.reject = reject; });
+    const cancelWaiter = () => {
+      if (w.done) return;
+      w.done = true;
+      w.cancelled = true;
+      w.reject(new CancelledError());
+    };
+    waiters.push(w);
+    let off = () => {};
+    if (scope) {
+      if (scopeCancelled(scope)) cancelWaiter();
+      else off = onCancel(scope, cancelWaiter);
+    }
+    try {
+      try {
+        await fut;
+      } finally {
+        off();
+        const i = waiters.indexOf(w);
+        if (i >= 0) waiters.splice(i, 1);
+      }
+      // woken, then cancelled before it resumed (Python: task.cancel() after fut.set_result)
+      if (scope && scopeCancelled(scope)) throw new CancelledError();
+    } catch (e) {
+      if (isCancelledError(e) && !w.cancelled) {
+        val += 1;
+        wakeUpNext();
+      }
+      throw e;
+    }
+    if (val > 0) wakeUpNext();
+    return true;
+  }
+
+  function release() {
+    val += 1;
+    wakeUpNext();
+  }
+
+  return {
+    acquire,
+    release,
+    locked,
+    /** `async with sem: return await fn()` */
+    async run(fn) {
+      await acquire();
+      try {
+        return await fn();
+      } finally {
+        release();
+      }
+    },
+    value: () => val,
+    waiting: () => waiters.filter((w) => !w.done).length,
+  };
+}
+
+// ── loop tasks: a root cancel scope tied to an AbortSignal ──────────────
+
+/**
+ * Run `fn()` inside a cancel scope that the AbortSignal cancels (a child of the caller's scope, the
+ * root scope at top level). Abort = the bot's `task.cancel()`: every await on the scope's transport /
+ * sleep / guardCancel / waitFor (and a queued semaphore waiter) raises CancelledError; fn's own
+ * outcome is returned. A signal that is already aborted raises CancelledError without running fn
+ * (a task cancelled before its first step never runs its body).
+ */
+function runInScope(signal, fn) {
+  const parent = currentScope();
+  if (signal && signal.aborted) return Promise.reject(new CancelledError());
+  const scope = newScope(parent);
+  const onAbort = () => cancelScope(scope);
+  if (signal) signal.addEventListener('abort', onAbort, { once: true });
+  const done = () => {
+    if (signal) signal.removeEventListener('abort', onAbort);
+    if (parent) parent.children.delete(scope);
+  };
+  let p;
+  try {
+    p = scopeStore.run(scope, () => Promise.resolve().then(() => {
+      if (scopeCancelled(scope)) throw new CancelledError();
+      return fn();
+    }));
+  } catch (e) {
+    p = Promise.reject(e);
+  }
+  return p.then((v) => { done(); return v; }, (e) => { done(); throw e; });
+}
+
 // ── asyncio.create_task ─────────────────────────────────────────────────
 
 const taskStore = new AsyncLocalStorage();
@@ -258,4 +422,5 @@ module.exports = {
   CancelledError, TimeoutError, isTimeoutError, isCancelledError,
   waitFor, checkCancelled, guardCancel, currentScope, cancellableTransport, cancellableSleep,
   makeLock, createTaskGroup, currentTaskName, runAsTask, defaultTimers, runInThread,
+  createSemaphore, runInScope,
 };

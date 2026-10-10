@@ -20,6 +20,9 @@
  *   getSignal / addTradeRecord / getUserRecords / updateSignalTp   db/signals.py
  *   cleanupGhostTrades(uid, days) / cleanupGhostTradesAll(days)     db_cleanup_ghost_trades(_all)
  *   coinQualityPairs(cutoffTs)        the coin_quality_learner GROUP BY query
+ *   computeFallbackPnlUsd(entry, exit, qty, direction)   db/trades.compute_fallback_pnl_usd (module
+ *                                     export, pure): gross (exit − entry)·qty·sign − entry·qty·0.0011,
+ *                                     null when float() fails or any input ≤ 0
  *
  * Synchronous (better-sqlite3); the clock is injected (`now` → unix seconds).
  * Values are bound like Python's sqlite3: booleans → 1/0, undefined → NULL.
@@ -31,6 +34,7 @@ const { SIGNAL_TRADES_ALLOWED_COLS } = require('../../models/engineSchema');
 const { pyRepr } = require('../../strategies/common/pyfmt');
 const { log: defaultLog } = require('../marketData/mdLog');
 const { pyStrip, pyUpper } = require('../../strategies/common/pyUnicode');   // CPython 3.11 str case / whitespace methods
+const { pyFloat, pyStr } = require('../exchanges/pyCompat');
 
 const ALLOWED_TRADE_COLS = Object.freeze(new Set(SIGNAL_TRADES_ALLOWED_COLS));
 const TRADE_STATES = Object.freeze(['PENDING', 'PLACING', 'OPEN', 'CLOSING', 'CLOSED', 'FAILED']);
@@ -71,6 +75,34 @@ const EVT = Object.freeze({
 });
 
 const nowSec = () => Date.now() / 1000;
+
+/**
+ * db/trades.compute_fallback_pnl_usd(entry, exit_price, qty, direction) — [PNL-COMPUTED 2026-05-28]
+ * the self-computed gross $PnL when the exchange's closedPnl is missing:
+ *   float() of the three numbers (TypeError / ValueError → null), any of them ≤ 0 → null,
+ *   sign = +1 when str(direction).upper() == "LONG" else −1,
+ *   gross = (exit − entry) × qty × sign;  fee = entry × qty × 0.0011;  → gross − fee
+ * Same operation order as the bot (IEEE doubles give the same bits); NaN passes the ≤ 0 checks
+ * and comes back as NaN like in Python.
+ */
+function computeFallbackPnlUsd(entry, exitPrice, qty, direction) {
+  let e;
+  let x;
+  let q;
+  try {
+    e = pyFloat(entry);
+    x = pyFloat(exitPrice);
+    q = pyFloat(qty);
+  } catch (err) {
+    if (err && (err.pyType === 'TypeError' || err.pyType === 'ValueError')) return null;
+    throw err;
+  }
+  if (e <= 0 || x <= 0 || q <= 0) return null;
+  const sign = pyUpper(pyStr(direction)) === 'LONG' ? 1.0 : -1.0;
+  const gross = (x - e) * q * sign;
+  const fee = e * q * 0.0011;   // round-trip taker estimate
+  return gross - fee;
+}
 
 /** Python sqlite3 parameter binding: bool → int, undefined → NULL. */
 function bindValue(v) {
@@ -606,4 +638,5 @@ module.exports = {
   ALLOWED_TRADE_COLS, TRADE_STATES, ALLOWED_TRANSITIONS, CLOSED_RESULTS, FAILED_RESULTS,
   FINAL_STAGES, STOP_RESULTS, CARD_MAX_JSON, MAX_PAYLOAD_CHARS, EVT,
   bindValue, pySlice, pyDumps, pyLoads, pyTypeName, PyJSONDecodeError, createSignalTradesRepo, defaultRepo,
+  computeFallbackPnlUsd,
 };

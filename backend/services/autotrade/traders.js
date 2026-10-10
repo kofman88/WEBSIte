@@ -8,7 +8,12 @@
  *     handle.<method>      the instance methods, positional like the bot (placeTrade, getBalance,
  *                          getPositions, getOpenOrders, cancelAllOrders, getLastPrice, setTrailingSl,
  *                          placeSlTpForPosition, placeTpOrders, placeTradeSplit, getFundingRate,
- *                          getSpreadPct, closePosition)
+ *                          getSpreadPct, closePosition, cancelOrder, getClosedPnl) and the M15 loops'
+ *                          ones: getExecutionExitPrice (bybit), cancelTpOrdersOnly (bingx, binance),
+ *                          getAlgoSlOrders / closePositionPartial / cancelTpOrders (okx), isDelisted
+ *                          (bybit, synchronous). A method is on the handle only when the instance has
+ *                          it (`handle.cancelTpOrdersOnly === undefined` on bybit / okx — the bot's
+ *                          `AttributeError` branch is the caller's business)
  *     handle.formatTradeResult / formatTradeResultSplit / priceMultiplier(sym)   module statics
  *   BYBIT_THREAD_FNS       the bybit_trader.py coroutines that `await loop.run_in_executor(...)` the pybit
  *                          work — services/exchanges/bybitTrader.js runs that work through rt.runInThread
@@ -44,6 +49,8 @@ const METHODS = [
   'placeTrade', 'placeTradeSplit', 'placeTpOrders', 'getBalance', 'getPositions', 'getOpenOrders', 'cancelAllOrders',
   'getLastPrice', 'setTrailingSl', 'placeSlTpForPosition', 'getFundingRate', 'getSpreadPct', 'closePosition',
   'cancelOrder', 'getClosedPnl',
+  // M15 trade-ops loops (BE monitor, reconcile, SL verifier, anomaly detector, orphan sweeper)
+  'getExecutionExitPrice', 'cancelTpOrdersOnly', 'getAlgoSlOrders', 'closePositionPartial', 'isDelisted', 'cancelTpOrders',
 ];
 
 function makeHandle(exchange, inst) {
@@ -86,4 +93,4 @@ function createTraderSet({ registry = null, overrides = {}, instances = null } =
   };
 }
 
-module.exports = { MODULES, PMULT, BYBIT_THREAD_FNS, makeHandle, productionOverrides, createTraderSet };
+module.exports = { MODULES, PMULT, BYBIT_THREAD_FNS, METHODS, makeHandle, productionOverrides, createTraderSet };
