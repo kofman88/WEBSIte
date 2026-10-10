@@ -8,9 +8,16 @@
  * → per group, per symbol: candles (WS cache → REST), analyze_volume (HTF pre-pass, HTF frame
  * only for candidates, 180 s HTF cache), MTF bonus, squeeze bonus, [VOLUME-CTX-GATE] → per user
  * (cap MAX_SIGNALS_PER_USER_CYCLE, direction toggles) → `_deliver`: `_sent_bars` memo,
- * exchange listing, blacklist, freshness, registry peek / MULTI peek + claim, the signal_trades
- * row, confluence, auto-trade (Market), card, commit (dedup_ttl_s of the TF) or SKIP
- * not_delivered, limit message, chart, [VOLUME-SIGNAL].
+ * exchange listing, blacklist, [VOL-POST-SL-PAUSE] (the user's latest delivered VOLUME signal of
+ * the coin + direction ended SL < VOLUME_POST_SL_PAUSE_BARS bars of the TF ago → skipped, fail-open),
+ * freshness, registry peek / MULTI peek + claim, the signal_trades row, confluence, auto-trade
+ * (Market, the signal TF), card, commit (dedup_ttl_s of the TF) or SKIP not_delivered, limit
+ * message, chart, [VOLUME-SIGNAL].
+ *
+ * Entry quality [2026-10] (bot batch D): [VOL-LIQ-15M] the 15m groups scan only coins with a 24 h
+ * volume ≥ VOLUME_15M_COINS_FLOOR_USDT ($5M, `coinsForTf`); [VOL-MIN-SL] / [VOL-MIN-VOLUME] live in
+ * strategies/volume (15m stop floor, ribbon / bounce / golden volume floor) — the scanner logs a
+ * widened stop once per bar; kv keeps the pre-floor values (`saveUserCfg`).
  *
  * Module-level state of the bot (`_sent_bars`, `_htf_cache`, `_WAKE_EVENT`) lives on a scanner
  * instance (`createVolumeScanner(deps)`); the module exports a default instance whose
@@ -35,7 +42,8 @@
  *   analysisExecutor(fn) → value | Promise   loop.run_in_executor(None, analyze_volume, …)
  *
  * Markers: [VOLUME-START], [VOLUME-CYCLE], [VOLUME-PROFILE], [VOLUME-CTX-GATE], [VOLUME-SIGNAL],
- * [VOLUME-CFG], [VOLUME], [VOLUME-ERR], [TRACE-AT-FAIL].
+ * [VOLUME-CFG], [VOLUME], [VOLUME-ERR], [TRACE-AT-FAIL], [VOL-LIQ-15M], [VOL-POST-SL-PAUSE],
+ * [VOL-MIN-SL], [VOL-MIN-VOLUME].
  */
 
 'use strict';
@@ -45,7 +53,10 @@ const { computeSqueezeScore } = require('../../strategies/common/squeeze');
 const { fmtFixed, fmtG } = require('../../strategies/common/pyfmt');
 const { pyRound } = require('../../strategies/common/pyround');
 const { pyTruthy } = require('../../strategies/common/pyval');
-const { pyLower } = require('../../strategies/common/pyUnicode');
+const { pyLower, pyUpper, pyStrip } = require('../../strategies/common/pyUnicode');
+const { pyMax } = require('../../strategies/common/pyround');
+const { toFloat } = require('../../strategies/volume/quality');
+const { pyStr } = require('../exchanges/pyCompat');
 const { pyJsonDumps } = require('./pyjson');
 const { pyLoads, pyTypeName } = require('./signalTradesRepo');
 const cardsVolume = require('./cards/volume');
@@ -59,11 +70,20 @@ const { computeClientOrderId } = require('../exchanges/orderIdUtils');
 const lv = require('./levelsScanner');
 const { log: defaultLog } = require('../marketData/mdLog');
 
-const { VolumeConfig, minBars, htfFor, resampleHtf, analyzeVolume, STRATEGY_NAME, USER_PREF_KEYS, FIELD_TYPE } = volume;
+const { VolumeConfig, minBars, htfFor, resampleHtf, analyzeVolume, STRATEGY_NAME, USER_PREF_KEYS, FIELD_TYPE, FIELD_NAMES,
+  envNumber, setupVolFloor, unflooredVolValues, keepPreFloorValues, SYSTEM_CFG_KEYS } = volume;
 
 const SCAN_INTERVAL = 60;                  // seconds between cycles (floor)
 const TOP_COINS = 150;                     // [LOW-VOL] universe cap
 const COINS_FLOOR_USDT = 300_000;          // [LOW-VOL] minimum 24 h volume
+// [VOL-LIQ-15M 2026-10] 15m: thin coins ($0.3–5M a day) — long-wick candles take a tight stop. The
+// 24 h volume floor of the 15m groups; other TFs — COINS_FLOOR_USDT.
+const COINS_FLOOR_15M_USDT = 5_000_000;
+const ENV_COINS_FLOOR_15M = 'VOLUME_15M_COINS_FLOOR_USDT';
+// [VOL-POST-SL-PAUSE 2026-10] after the SL of the user's previous signal on (coin, direction) the
+// next one there — not earlier than N bars of the signal TF.
+const POST_SL_PAUSE_BARS = 8;
+const ENV_POST_SL_PAUSE_BARS = 'VOLUME_POST_SL_PAUSE_BARS';
 const MAX_SIGNALS_PER_USER_CYCLE = 3;
 const ALLOWED_TFS = Object.freeze(['15m', '1h', '4h']);
 const TF_SECONDS = Object.freeze({ '15m': 900, '1h': 3600, '4h': 14400, '1d': 86400 });
@@ -74,10 +94,13 @@ const SENT_TTL = 24 * 3600;
 const HTF_TTL = 180;
 const CYCLE_TIMEOUT_S = 300;
 const FLOAT_KEYS = Object.freeze(Object.keys(FIELD_TYPE).filter((k) => FIELD_TYPE[k] === 'float'));
+const isDict = (x) => x !== null && typeof x === 'object' && !Array.isArray(x) && !(x instanceof Map);
 
 const own = (o, k) => o !== null && o !== undefined && Object.prototype.hasOwnProperty.call(o, k);
 const getattr = (o, k, d) => (own(o, k) && o[k] !== undefined ? o[k] : d);
 const errMsg = (e) => (e && e.message !== undefined ? e.message : String(e));
+/** type(e).__name__ of a caught error (a Python-typed error carries `pyType`). */
+const pyExcName = (e) => (e && (e.pyType || e.name)) || 'Exception';
 
 /** [VOLUME-TTL] anti-duplicate per (coin, direction) = 4 bars of the TF, at least an hour. */
 function dedupTtlS(tf) {
@@ -89,6 +112,77 @@ function dedupTtlS(tf) {
 function userTf(user) {
   const tf = pyLower(String(getattr(user, 'vol_timeframe', DEFAULT_TF) || DEFAULT_TF));
   return ALLOWED_TFS.includes(tf) ? tf : DEFAULT_TF;
+}
+
+/**
+ * [VOL-LIQ-15M 2026-10] coins_floor_for_tf(tf): the 24 h quote-volume floor of a coin for scanning
+ * TF `tf`. 15m — env VOLUME_15M_COINS_FLOOR_USDT (default 5_000_000), never below COINS_FLOOR_USDT
+ * (≤ 0 → the old floor); other TFs — COINS_FLOOR_USDT.
+ */
+function coinsFloorForTf(tf) {
+  const base = COINS_FLOOR_USDT;
+  if (pyLower(pyStrip(String(tf || ''))) !== '15m') return base;
+  let v = envNumber(ENV_COINS_FLOOR_15M, '[VOL-LIQ-15M]');
+  if (v === null) v = COINS_FLOOR_15M_USDT;
+  return pyMax(base, v);
+}
+
+/**
+ * [VOL-LIQ-15M] coins_for_tf(coins, tf, vol_by_sym): the coins of the `tf` groups — with a floor above
+ * the common one only those whose 24 h volume (fetcher.volBySym) is ≥ the floor; unknown volume → the
+ * coin does not pass (like apply_vol_filter). Order kept. One log per cycle and TF.
+ */
+function coinsForTf(coins, tf, volBySym, log = defaultLog) {
+  const floor = coinsFloorForTf(tf);
+  if (floor <= COINS_FLOOR_USDT || !pyTruthy(coins)) return Array.from(coins || []);
+  const vb = pyTruthy(volBySym) ? volBySym : {};
+  const v = (c) => {
+    const raw = own(vb, c) ? vb[c] : 0;
+    try {
+      return toFloat(pyTruthy(raw) ? raw : 0);
+    } catch (_e) {
+      return 0.0;
+    }
+  };
+  const kept = coins.filter((c) => v(c) >= floor);
+  const dropped = coins.filter((c) => v(c) < floor);   // a NaN volume is in neither list (the bot's two comprehensions)
+  if (dropped.length && !pyTruthy(vb)) {
+    log.warning(`[VOL-LIQ-15M] tf=${tf} no 24h volume data (fetcher.vol_by_sym empty) — `
+      + `${dropped.length} coins skipped, floor $${fmtFixed(floor, 0)}`);
+  } else if (dropped.length) {
+    log.info(`[VOL-LIQ-15M] tf=${tf} coins ${coins.length} → ${kept.length}: ${dropped.length} skipped, `
+      + `24h volume < $${fmtFixed(floor, 0)} (e.g. ${dropped.slice(0, 5).join(', ')})`);
+  }
+  return kept;
+}
+
+/**
+ * [VOL-POST-SL-PAUSE 2026-10] post_sl_pause_bars(): the pause after a SL in bars of the signal TF —
+ * env VOLUME_POST_SL_PAUSE_BARS (default 8; ≤ 0 → off; fractional → truncated).
+ */
+function postSlPauseBars() {
+  let v = envNumber(ENV_POST_SL_PAUSE_BARS, '[VOL-POST-SL-PAUSE]');
+  if (v === null) v = POST_SL_PAUSE_BARS;
+  return Math.max(0, Math.trunc(v));
+}
+
+/**
+ * _sl_end_ts(row): when the previous signal ended with its stop — tracker stage SL → progress_ts
+ * (open time of the SL candle); result 'SL' (exchange / manual result) → state_changed_at; no time →
+ * created_at.
+ */
+function slEndTs(row) {
+  const f = (k) => {
+    const raw = own(row, k) ? row[k] : null;
+    try {
+      return toFloat(pyTruthy(raw) ? raw : 0);
+    } catch (_e) {
+      return 0.0;
+    }
+  };
+  if (pyUpper(pyStr(pyTruthy(row.progress_stage) ? row.progress_stage : '')) === 'SL' && f('progress_ts') > 0) return f('progress_ts');
+  if (pyUpper(pyStr(pyTruthy(row.result) ? row.result : '')) === 'SL' && f('state_changed_at') > 0) return f('state_changed_at');
+  return f('created_at');
 }
 
 /** json.dumps(cfg.to_dict(), sort_keys=True) — the group key. */
@@ -223,6 +317,9 @@ function createVolumeScanner(depsIn = {}) {
   const d = defaultsFor(depsIn);
   const sentBars = new Map();   // "uid|symbol|direction|bar" → sent ts (_sent_bars)
   const htfCache = new Map();   // "symbol|htf" → [loaded_ts, df] (_htf_cache)
+  // _pause_logged: [VOL-POST-SL-PAUSE] "uid|symbol|direction|bar" / [VOL-MIN-SL]
+  // "min_sl|symbol|direction|tf|bar" → ts — one log per bar (a cycle every 60 s sees the same bar)
+  const pauseLogged = new Map();
   let wake = null;              // _WAKE_EVENT: { set(), wait(timeoutS), clear() }
   const now = () => d.clock.now();
   const log = () => d.log;
@@ -255,6 +352,7 @@ function createVolumeScanner(depsIn = {}) {
     deps: d,
     _sentBars: sentBars,
     _htfCache: htfCache,
+    _pauseLogged: pauseLogged,
     _wakeEvent: wakeEvent,
 
     /** ws_feed bar-close callback → wake the scanner before the sleep ends. */
@@ -275,12 +373,13 @@ function createVolumeScanner(depsIn = {}) {
       return s;
     },
 
-    /** gc_sent(): drop _sent_bars older than 24 h and HTF frames older than 180 s. */
+    /** gc_sent(): drop _sent_bars / _pause_logged older than 24 h and HTF frames older than 180 s. */
     gcSent() {
       const cutoff = now() - SENT_TTL;
       const stale = [];
       for (const [k, ts] of sentBars) if (ts < cutoff) stale.push(k);
       for (const k of stale) sentBars.delete(k);
+      for (const [k, ts] of Array.from(pauseLogged)) if (ts < cutoff) pauseLogged.delete(k);
       const hCut = now() - HTF_TTL;
       for (const [k, v] of Array.from(htfCache)) if (v[0] < hCut) htfCache.delete(k);
       return stale.length;
@@ -297,6 +396,9 @@ function createVolumeScanner(depsIn = {}) {
           // raises AttributeError for a truthy non-dict value
           const params = pyLoads(raw);
           if (pyTruthy(params) && (typeof params !== 'object' || Array.isArray(params))) {
+            // from_params builds `cls()` first ([VOL-MIN-VOLUME] __post_init__ → its log line), then
+            // `params.items()` raises
+            void new VolumeConfig();
             throw new Error(`'${pyTypeName(params, String(raw))}' object has no attribute 'items'`);
           }
           return VolumeConfig.fromParams(params);
@@ -307,15 +409,41 @@ function createVolumeScanner(depsIn = {}) {
       return new VolumeConfig();
     },
 
-    /** save_user_cfg(uid, params, keep_prefs=True) */
+    /**
+     * save_user_cfg(uid, params, keep_prefs=True). [VOL-MIN-VOLUME 2026-10] the volume floor is a
+     * property of the EFFECTIVE config (load_user_cfg → from_params raises it); kv keeps the user's /
+     * genome's choice as before the floor (env VOLUME_MIN_SETUP_VOL_MULT=0 restores it without a
+     * migration). A full to_dict() (load → change → save: setup / HTF toggle, profile, settings/all)
+     * carries the floored values — a value exactly at the floor over a kv value below it is the floor
+     * echoed back, the kv value is kept (no kv row → the field default). [VOL-MIN-SL] min_sl_pct_15m
+     * (a system threshold) is never stored.
+     */
     async saveUserCfg(userId, params, keepPrefs = true) {
       const p = { ...(params || {}) };
+      const roundtrip = FIELD_NAMES.every((k) => own(p, k));   // CONFIG_FIELDS ⊆ params, before the pref merge
       if (keepPrefs && USER_PREF_KEYS.some((k) => !own(p, k))) {
         const cur = await s.loadUserCfg(userId);
         for (const k of USER_PREF_KEYS) if (!own(p, k)) p[k] = cur[k];
       }
       const cfg = VolumeConfig.fromParams(p);
-      await d.kv.set(KV_CFG_PREFIX + String(userId), cfgJson(cfg));
+      const data = cfg.toDict();
+      const unfl = unflooredVolValues(p);
+      const fl = setupVolFloor();
+      if (roundtrip && fl > 0) {
+        let stored = null;
+        try {
+          const raw = await d.kv.get(KV_CFG_PREFIX + String(userId));
+          const st = pyTruthy(raw) ? pyLoads(raw) : {};
+          stored = unflooredVolValues(isDict(st) ? st : {});
+        } catch (e) {
+          log().warning(`[VOL-MIN-VOLUME] save_user_cfg uid=${userId}: stored kv unreadable (${errMsg(e)}) — floored values written`);
+          stored = null;
+        }
+        if (stored !== null) keepPreFloorValues(unfl, stored, fl);
+      }
+      Object.assign(data, unfl);
+      for (const k of SYSTEM_CFG_KEYS) delete data[k];   // [VOL-MIN-SL] a system threshold — not in kv
+      await d.kv.set(KV_CFG_PREFIX + String(userId), pyJsonDumps(data, FLOAT_KEYS));
       return cfg;
     },
 
@@ -330,6 +458,39 @@ function createVolumeScanner(depsIn = {}) {
       await d.kv.delete(KV_CFG_PREFIX + String(userId));
       if (Object.keys(prefs).length) await s.saveUserCfg(userId, prefs, false);
       prefs = null;
+    },
+
+    /**
+     * [VOL-POST-SL-PAUSE 2026-10] post_sl_pause_active(uid, symbol, direction, tf, now) → [paused, reason]:
+     * paused when the user's latest DELIVERED VOLUME signal of (symbol, direction) ended SL (tracker
+     * stage 'SL' or result 'SL') less than N bars of `tf` ago. One query (repo.lastSignalOutcome =
+     * db_last_signal_outcome). A failing query → [false, ''] + WARNING: the pause is a quality filter,
+     * not a money guard (fail-open).
+     */
+    async postSlPauseActive(uid, symbol, direction, tf, nowTs = null) {
+      const bars = postSlPauseBars();
+      if (bars <= 0) return [false, ''];
+      const tfS = own(TF_SECONDS, pyLower(pyStrip(String(tf || '')))) ? TF_SECONDS[pyLower(pyStrip(String(tf || '')))] : 3600;
+      let row;
+      try {
+        // the site's signal_trades always exists (the bot's «no DB file → no history» check has no
+        // equivalent state here)
+        row = await d.repo.lastSignalOutcome(uid, symbol, direction, STRATEGY_NAME);
+      } catch (e) {
+        log().warning(`[VOL-POST-SL-PAUSE] uid=${uid} ${symbol} ${direction}: check failed `
+          + `(${pyExcName(e)}: ${errMsg(e)}) — allowed (fail-open)`);
+        return [false, ''];
+      }
+      if (!pyTruthy(row)) return [false, ''];
+      const stage = pyUpper(pyStr(pyTruthy(row.progress_stage) ? row.progress_stage : ''));
+      const res = pyUpper(pyStr(pyTruthy(row.result) ? row.result : ''));
+      if (stage !== 'SL' && res !== 'SL') return [false, ''];
+      const tsNow = nowTs === null || nowTs === undefined ? now() : Number(nowTs);
+      const elapsed = tsNow - slEndTs(row);
+      if (elapsed >= bars * tfS) return [false, ''];
+      const tid = own(row, 'trade_id') && row.trade_id !== undefined ? pyStr(row.trade_id) : '';
+      return [true, `previous VOLUME ${pyUpper(pyStr(direction))} signal ${tid} `
+        + `ended SL ${fmtFixed(elapsed / tfS, 1)} bars ago < ${bars} bars of ${tf}`];
     },
 
     /** _user_api(user) → [exchange, api_key, api_secret] */
@@ -428,9 +589,10 @@ function createVolumeScanner(depsIn = {}) {
         L.warning(`[VOLUME-CYCLE] coins: ${errMsg(e)}`);
         return;
       }
+      const volBySym = fetcher.volBySym || {};
       let coins;
       try {
-        coins = volumeFilter.applyVolFilter(allCoins, users, fetcher.volBySym || {},
+        coins = volumeFilter.applyVolFilter(allCoins, users, volBySym,
           (u) => Number(getattr(u, 'min_volume_usdt', 0) || 0),
           { capCount: TOP_COINS, floorUsdt: COINS_FLOOR_USDT, strategyTag: 'VOLUME', log: d.filterLog || L });
       } catch (e) {
@@ -452,13 +614,15 @@ function createVolumeScanner(depsIn = {}) {
       }
 
       let sentTotal = 0;
+      const coinsByTf = new Map();   // [VOL-LIQ-15M] the 15m groups have their own 24 h volume floor
       for (const { tf, key, users: gUsers } of groups.values()) {
         const cfg = cfgs.get(key);
         const need = minBars(cfg);
         const perUserSent = new Map();
         let scanned = 0;
         let found = 0;
-        for (const symbol of coins) {
+        if (!coinsByTf.has(tf)) coinsByTf.set(tf, coinsForTf(coins, tf, volBySym, L));
+        for (const symbol of coinsByTf.get(tf)) {
           ck();
           const df = await s._loadDf(symbol, tf, fetcher, need);
           ck();
@@ -483,6 +647,12 @@ function createVolumeScanner(depsIn = {}) {
           }
           let bar;
           try { bar = barTs(df); } catch (_e) { bar = ''; }
+          const msKey = `min_sl|${symbol}|${sig.direction}|${tf}|${bar}`;
+          if (Number(getattr(sig, 'sl_raw_pct', 0) || 0) > 0 && !pauseLogged.has(msKey)) {
+            pauseLogged.set(msKey, now());                            // [VOL-MIN-SL] once per bar
+            L.info(`[VOL-MIN-SL] ${symbol} ${sig.direction} tf=${tf} stop ${fmtFixed(Number(sig.sl_raw_pct), 2)}% → `
+              + `${fmtFixed(Number(sig.risk_pct), 2)}% (15m floor), TP1/TP2/TP3 rescaled to the wider risk`);
+          }
           for (const u of gUsers) {
             if ((perUserSent.get(u.user_id) || 0) >= MAX_SIGNALS_PER_USER_CYCLE) continue;
             if (sig.direction === 'LONG' && !getattr(u, 'vol_long_active', false)) continue;
@@ -528,6 +698,17 @@ function createVolumeScanner(depsIn = {}) {
       try {
         if (d.coinQuality.isBlacklisted(sig.symbol, STRATEGY_NAME)) return false;
       } catch (_e) { /* pass */ }
+
+      // [VOL-POST-SL-PAUSE 2026-10] the user's previous signal here ended with its stop less than N bars
+      // ago → do not re-enter the same chop (fail-open); no row / slot / card / auto-trade
+      const [paused, why] = await s.postSlPauseActive(uid, sig.symbol, sig.direction, sig.timeframe || '');
+      if (paused) {
+        if (!pauseLogged.has(key)) {
+          pauseLogged.set(key, now());
+          L.info(`[VOL-POST-SL-PAUSE] uid=${uid} ${sig.symbol} ${sig.direction} tf=${pyStr(sig.timeframe)} skipped: ${why}`);
+        }
+        return false;
+      }
 
       try {
         if (!(await d.freshness.isSignalFresh({
@@ -623,7 +804,8 @@ function createVolumeScanner(depsIn = {}) {
             bybit_demo: Boolean(getattr(user, 'bybit_demo', false)),
             order_type: 'Market',
             quality: Math.trunc(Number(sig.quality)),
-            trend_ctx: String(getattr(sig, 'trend_ctx', '') || ''),
+            trend_ctx: String(getattr(sig, 'trend_ctx', '') || ''),   // [CTX-SIZING]
+            timeframe: String(getattr(sig, 'timeframe', '') || ''),   // [VOL15-RISK-CAP 2026-10]
           });
         } catch (e) {
           L.error(`[TRACE-AT-FAIL] VOLUME uid=${uid} sym=${sig.symbol}: ${errMsg(e)}`);
@@ -790,7 +972,9 @@ const defaultScanner = createVolumeScanner();
 module.exports = {
   SCAN_INTERVAL, TOP_COINS, COINS_FLOOR_USDT, MAX_SIGNALS_PER_USER_CYCLE, ALLOWED_TFS, TF_SECONDS, DEFAULT_TF,
   KV_CFG_PREFIX, CACHE_TF, SENT_TTL, HTF_TTL, CYCLE_TIMEOUT_S,
+  COINS_FLOOR_15M_USDT, ENV_COINS_FLOOR_15M, POST_SL_PAUSE_BARS, ENV_POST_SL_PAUSE_BARS,
   dedupTtlS, userTf, cfgKey, cfgJson, barTs, applySqueezeBonus, signalText,
+  coinsFloorForTf, coinsForTf, postSlPauseBars, slEndTs,
   setupTitle: cardsVolume.setupTitle, fp: cardsVolume.fp, SETUP_NAMES: cardsVolume.SETUP_NAMES,
   createVolumeScanner, defaultScanner,
   /**
@@ -806,4 +990,5 @@ module.exports = {
   saveUserCfg: (uid, params, keepPrefs) => defaultScanner.saveUserCfg(uid, params, keepPrefs),
   resetUserCfg: (uid, keepPrefs) => defaultScanner.resetUserCfg(uid, keepPrefs),
   gcSent: () => defaultScanner.gcSent(),
+  postSlPauseActive: (uid, symbol, direction, tf, nowTs) => defaultScanner.postSlPauseActive(uid, symbol, direction, tf, nowTs),
 };

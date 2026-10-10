@@ -10,7 +10,8 @@
 
 const S = require('../common/series');
 const { fmtFixed } = require('../common/pyfmt');
-const { RIBBON_SPANS, RIBBON_LOOKBACK, RIBBON_MIN_ORDER, BOUNCE_LOOKBACK, GOLDEN_VOL_MIN } = require('./config');
+const { RIBBON_SPANS, RIBBON_LOOKBACK, RIBBON_MIN_ORDER, BOUNCE_LOOKBACK } = require('./config');
+const { goldenVolMin } = require('./quality');
 const { pyMax } = require('../common/pyround');   // builtin max()/min(): a NaN 2nd argument is ignored
 
 /** `_f(x)`: not None and finite. */
@@ -196,7 +197,8 @@ function setupGolden(ctx, i, s) {
   const gNow = s * (ctx.e50[i] - ctx.e200[i]);
   const gPrev = s * (ctx.e50[i - 1] - ctx.e200[i - 1]);
   if (!(gNow > 0 && gPrev <= 0)) return null;
-  if (s * (ctx.c[i] - ctx.e50[i]) <= 0 || ctx.vr[i] < GOLDEN_VOL_MIN) return null;
+  // [VOL-MIN-VOLUME 2026-10] was «volume ≥ average» (1.0) — now ≥ the floor (1.5)
+  if (s * (ctx.c[i] - ctx.e50[i]) <= 0 || ctx.vr[i] < goldenVolMin()) return null;
   const name = s > 0 ? 'Golden Cross' : 'Death Cross';
   const ru = s > 0 ? 'золотой крест' : 'крест смерти';
   const dirRu = s > 0 ? 'снизу вверх' : 'сверху вниз';

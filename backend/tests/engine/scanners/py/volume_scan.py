@@ -10,7 +10,10 @@ default, reset_user_cfg mid-run), multi-strategy (LEVELS + extra VOLUME), free (
 admin on free (eligible), a banned free user, no vol_* flag, auto-trade (Market; executed / limit
 message / raising), lite + en cards, quiet hours, chart off, an exchange without the coin
 (record_skip), a coin blacklisted for VOLUME, a blocked bot (SKIP not_delivered, still counted
-toward the per-user cap and kept in _sent_bars). Each cycle seeds the BTC trend state, the WS
+toward the per-user cap and kept in _sent_bars). Bot batch D (2026-10): coins between $300k and
+$5M (dropped from the 15m groups only, [VOL-LIQ-15M]), seeded previous signals ([VOL-POST-SL-PAUSE]:
+SL 3 / 7 bars ago → paused, 9 bars → allowed, BE / other direction / SMC / undelivered → allowed,
+an exchange SL on 15m), the [VOL-MIN-SL] widened 15m stops and the `timeframe` auto-trade kwarg. Each cycle seeds the BTC trend state, the WS
 candle cache (15m / 1H / 4H / 1D; some coins missing or short → REST; a REST failure on the HTF
 → resample of the LTF) and records:
 
@@ -66,6 +69,10 @@ for i, s in enumerate(SYMBOLS):
         VOLUMES[s] = 150_000.0 + 20_000.0 * i      # below the 300k floor → out of the universe
     else:
         VOLUMES[s] = 2.0e8 / (1 + i) + 350_000.0
+# [VOL-LIQ-15M 2026-10] coins between the common $300k floor and the 15m floor ($5M): in the 1h / 4h
+# universe, dropped from the 15m groups (exactly $5M is kept)
+VOLUMES.update({"SYNUP03-USDT-SWAP": 1.2e6, "SYNDN06-USDT-SWAP": 3.0e6, "SYNRG06-USDT-SWAP": 4.99e6,
+                "SYNVL03-USDT-SWAP": 5.0e6})
 
 KEYS = {   # uid → (exchange, api_key, api_secret)
     2003: ("bybit", "by-key-2003", "by-secret-2003"),
@@ -113,6 +120,36 @@ CFG_INIT = [
     [2013, "save", {"vol_mult": 1.2, "sl_atr_mult": 1.8, "max_sl_pct": 5.0}],
 ]
 BLACKLIST = [["SYNRG02-USDT-SWAP", "VOLUME", T("2026-03-01T00:00:00")]]
+# [VOL-POST-SL-PAUSE 2026-10] the users' previous delivered VOLUME signals (trades rows seeded before
+# cycle 0): ended SL n bars ago (paused / not), BE (no pause), other direction / strategy, undelivered
+_T0 = T("2025-12-31T13:00:20")
+_H = 3600.0
+SEED_TRADES = [   # SEED_COLS order
+    # 2001 SYNRG01 SHORT ended SL 3 bars ago → paused (the 4th coin goes out instead); 9 bars on SYNRG03 → allowed
+    ["seed_2001_rg01", 2001, "SYNRG01-USDT-SWAP", "SHORT", "VOLUME", "1h", _T0 - 10 * _H, 501, "", "SL", _T0 - 3 * _H, "", 0.0,
+     100.0, 101.0, 99.0, 98.0, 97.0],
+    ["seed_2001_rg03", 2001, "SYNRG03-USDT-SWAP", "LONG", "VOLUME", "1h", _T0 - 20 * _H, 502, "", "SL", _T0 - 9 * _H, "", 0.0,
+     100.0, 99.0, 101.0, 102.0, 103.0],
+    # 2002: previous BE on SYNVL02 LONG → no pause; a SL on SYNRG01 LONG does not pause the SHORT
+    ["seed_2002_vl02", 2002, "SYNVL02-USDT-SWAP", "LONG", "VOLUME", "1h", _T0 - 5 * _H, 503, "", "BE", _T0 - 1 * _H, "", 0.0,
+     100.0, 99.0, 101.0, 102.0, 103.0],
+    ["seed_2002_rg01", 2002, "SYNRG01-USDT-SWAP", "LONG", "VOLUME", "1h", _T0 - 5 * _H, 504, "", "SL", _T0 - 1 * _H, "", 0.0,
+     100.0, 99.0, 101.0, 102.0, 103.0],
+    # 2011: a SMC stop on the same coin / direction does not pause VOLUME
+    ["seed_2011_rg01", 2011, "SYNRG01-USDT-SWAP", "SHORT", "SMC", "1h", _T0 - 5 * _H, 505, "", "SL", _T0 - 1 * _H, "", 0.0,
+     100.0, 101.0, 99.0, 98.0, 97.0],
+    # 2014: an UNDELIVERED SL row (no card, no order) is ignored
+    ["seed_2014_rg03", 2014, "SYNRG03-USDT-SWAP", "LONG", "VOLUME", "1h", _T0 - 2 * _H, 0, "", "SL", _T0 - 1 * _H, "SKIP", _T0 - 2 * _H,
+     100.0, 99.0, 101.0, 102.0, 103.0],
+    # 2003 (15m): an exchange stop (result SL, order id) 4 bars of 15m ago → paused
+    ["seed_2003_up07", 2003, "SYNUP07-USDT-SWAP", "LONG", "VOLUME", "15m", _T0 - 3 * _H, 0, "ord-2003-1", "", 0.0, "SL", _T0 - 1 * _H,
+     100.0, 99.0, 101.0, 102.0, 103.0],
+    # 2013: an exchange stop 9 h ago (1h → 9 bars) → allowed; 2007: SL 7 bars ago → paused in cycle 0
+    ["seed_2013_vl02", 2013, "SYNVL02-USDT-SWAP", "LONG", "VOLUME", "1h", _T0 - 12 * _H, 0, "ord-2013-1", "", 0.0, "SL", _T0 - 9 * _H,
+     100.0, 99.0, 101.0, 102.0, 103.0],
+    ["seed_2007_up06", 2007, "SYNUP06-USDT-SWAP", "LONG", "VOLUME", "1h", _T0 - 12 * _H, 506, "", "SL", _T0 - 7 * _H, "", 0.0,
+     100.0, 99.0, 101.0, 102.0, 103.0],
+]
 BOT_FAIL = {2008}
 UNAVAIL = {"bybit": {"SYNUP06-USDT-SWAP"}, "bingx": {"SYNRG03-USDT-SWAP", "SYNDN05-USDT-SWAP"}}
 WS_TFS = ("15m", "1H", "4H", "1D")
@@ -139,6 +176,21 @@ CYCLES = [
 ]
 for c in CYCLES:
     c["ts"] = T(c["t"])
+
+
+SEED_COLS = ["trade_id", "user_id", "symbol", "direction", "strategy", "timeframe", "created_at", "signal_msg_id",
+             "order_id", "progress_stage", "progress_ts", "result", "state_changed_at", "entry", "sl", "tp1", "tp2", "tp3"]
+
+
+def _seed_trades():
+    import sqlite3
+    con = sqlite3.connect(os.environ["DB_PATH"])
+    try:
+        for r in SEED_TRADES:
+            con.execute(f"INSERT INTO trades ({', '.join(SEED_COLS)}) VALUES ({', '.join('?' * len(SEED_COLS))})", r)
+        con.commit()
+    finally:
+        con.close()
 
 
 async def main() -> int:
@@ -222,6 +274,7 @@ async def main() -> int:
         else:
             await database.db_kv_set(volume_scanner.KV_CFG_PREFIX + str(uid), arg)
     kv_init = F.kv_snapshot()
+    _seed_trades()
     cap.lines.clear()
 
     out_cycles = []
@@ -291,7 +344,7 @@ async def main() -> int:
         "users": init_rows, "api_keys": {str(k): list(v) for k, v in KEYS.items()},
         "at_result": {str(k): v for k, v in AT_RESULT.items()}, "balances": {str(k): v for k, v in BALANCES.items()},
         "exchange_symbols": natives, "blacklist": BLACKLIST, "bot_fail": sorted(BOT_FAIL),
-        "cfg_init": CFG_INIT, "kv_init": kv_init,
+        "cfg_init": CFG_INIT, "kv_init": kv_init, "seed_cols": SEED_COLS, "seed_trades": SEED_TRADES,
         "ws_missing": sorted(WS_MISSING), "ws_short": WS_SHORT, "ws_no_htf": {k: list(v) for k, v in WS_NO_HTF.items()},
         "rest_missing": sorted(REST_MISSING), "rest_raise": REST_RAISE,
         "cache_ttl": Config.CACHE_TTL, "cache_max_keys": Config.CACHE_MAX_KEYS,

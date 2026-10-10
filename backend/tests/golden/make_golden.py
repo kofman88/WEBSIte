@@ -61,6 +61,13 @@ _PINNED_ENV = {
 }
 for _k, _v in _PINNED_ENV.items():
     os.environ[_k] = _v
+# [VOL-MIN-SL] / [VOL-MIN-VOLUME] / [VOL-LIQ-15M] / [VOL-POST-SL-PAUSE] 2026-10 (bot batch D): the VOLUME
+# env thresholds are UNSET = their production defaults (15m stop floor 1 %, setup volume ×1.5, …). Not
+# recorded under `env` (that record is shared by every expected file and the LEVELS / SMC ones stay
+# byte-identical); volume.json carries them as `volume_env`.
+_UNSET_ENV = ("VOLUME_MIN_SL_PCT_15M", "VOLUME_MIN_SETUP_VOL_MULT", "VOLUME_15M_COINS_FLOOR_USDT", "VOLUME_POST_SL_PAUSE_BARS")
+for _k in _UNSET_ENV:
+    os.environ.pop(_k, None)
 
 sys.dont_write_bytecode = True           # never leave .pyc files behind in the bot repo
 sys.path.insert(0, BOT_DIR)
@@ -989,6 +996,9 @@ def main() -> int:
     ap.add_argument("--check", action="store_true", help="re-run 3 fixtures afterwards and verify identical output")
     ap.add_argument("--symbols", default=None, help="debug: comma-separated symbol prefixes to run (candles are still generated for all)")
     ap.add_argument("--only", default="levels,smc,volume", help="debug: strategies to run")
+    ap.add_argument("--keep-others", action="store_true",
+                    help="with --only: rewrite only the expected files of those strategies and merge their entries into the "
+                         "existing summary.json (the other expected files are kept byte for byte)")
     args = ap.parse_args()
     out_dir = OUT_DIR
     os.makedirs(os.path.join(out_dir, "expected"), exist_ok=True)
@@ -1043,7 +1053,10 @@ def main() -> int:
                                                                     "HTF/LTF frames = bars of that series closed at (open_time[i] + 1h), last W bars"),
                   float_rounding="10 significant digits (float(f'{x:.10g}')); NaN/inf → null")
     files = {}
+    keep = bool(args.keep_others)
     for strat in ("levels", "smc", "volume"):
+        if keep and strat not in only:
+            continue
         doc = dict(strategy=strat, **common, variants=variants[strat],
                    fixtures={sym: results[sym][strat] for sym in symbols})
         if strat == "levels":
@@ -1059,17 +1072,19 @@ def main() -> int:
         else:
             doc["call"] = "sig = volume_strategy.analyze_volume(symbol, df, VolumeConfig.from_params(params), '1h', df_htf)"
             doc["signal_fields"] = "dataclasses.asdict(VolumeSignal) + tp, risk_pct, volume_ratio (properties) + i, ts, open_time_ms, n_bars, n_htf_bars, squeeze_score, quality_after_squeeze, passes_ctx_gate"
+            doc["volume_env"] = {k: os.environ.get(k) for k in _UNSET_ENV}
         path = os.path.join(out_dir, "expected", f"{strat}.json")
         with open(path, "w") as fh:
             json.dump(doc, fh, ensure_ascii=False, separators=(",", ":"))
         files[strat] = path
     path = os.path.join(out_dir, "expected", "smc_analysis.json")
-    with open(path, "w") as fh:
-        json.dump(dict(strategy="smc", note="per-bar digest of SMCAnalyzer.analyze() output for the DEFAULT variant's analysis key "
-                                            "(keys = swept 1h index i); useful to localise a divergence to structure/liquidity/OB/FVG/PD",
-                       analysis_key=variants["smc"]["default"]["analysis_key"], **common,
-                       fixtures={sym: results[sym]["smc_digest"] for sym in symbols}), fh, ensure_ascii=False, separators=(",", ":"))
-    files["smc_analysis"] = path
+    if not (keep and "smc" not in only):
+        with open(path, "w") as fh:
+            json.dump(dict(strategy="smc", note="per-bar digest of SMCAnalyzer.analyze() output for the DEFAULT variant's analysis key "
+                                                "(keys = swept 1h index i); useful to localise a divergence to structure/liquidity/OB/FVG/PD",
+                           analysis_key=variants["smc"]["default"]["analysis_key"], **common,
+                           fixtures={sym: results[sym]["smc_digest"] for sym in symbols}), fh, ensure_ascii=False, separators=(",", ":"))
+        files["smc_analysis"] = path
 
     # ── summary ──
     summary = {"strategies": {}, "fixtures": len(symbols), "sweep": common["sweep"], "env": env_record,
@@ -1078,6 +1093,8 @@ def main() -> int:
                "sha256": {os.path.relpath(v, out_dir): _sha(v) for v in files.values()},
                "elapsed_s": round(time.time() - t_all, 1), "notes": []}
     for strat in ("levels", "smc", "volume"):
+        if keep and strat not in only:
+            continue
         per_variant = {}
         n_err = 0
         for v in variants[strat]:
@@ -1111,7 +1128,7 @@ def main() -> int:
         ok = True
         for s in chk:
             again = run_fixture((s, out_dir, args.step, only))
-            for strat in ("levels", "smc", "volume"):
+            for strat in [x for x in ("levels", "smc", "volume") if not keep or x in only]:
                 a = json.dumps(results[s][strat], sort_keys=True, ensure_ascii=False)
                 b = json.dumps(again[strat], sort_keys=True, ensure_ascii=False)
                 if a != b:
@@ -1119,6 +1136,19 @@ def main() -> int:
                     print(f"  MISMATCH {s} {strat}", flush=True)
         summary["determinism_check"] = dict(fixtures=chk, identical=ok)
         print(f"  determinism identical={ok}", flush=True)
+    if keep:
+        # merge into the existing summary: only the regenerated strategies / files change
+        with open(os.path.join(out_dir, "summary.json")) as fh:
+            merged = json.load(fh)
+        for strat in summary["strategies"]:
+            merged["strategies"][strat] = summary["strategies"][strat]
+        for rel, digest in summary["sha256"].items():
+            merged["sha256"][rel] = digest
+        if summary["versions"] != merged.get("versions"):
+            raise SystemExit(f"--keep-others: versions differ from the kept files: {summary['versions']} != {merged.get('versions')}")
+        merged["partial_regen"] = dict(only=list(only), elapsed_s=summary["elapsed_s"], bot_dir=BOT_DIR,
+                                       determinism_check=summary.get("determinism_check"))
+        summary = merged
     with open(os.path.join(out_dir, "summary.json"), "w") as fh:
         json.dump(summary, fh, indent=1, ensure_ascii=False)
     # the bot writes signal_registry.json in cwd when the registry is touched — never leave it behind
@@ -1128,6 +1158,8 @@ def main() -> int:
             os.remove(p)
     print(json.dumps({k: {vv: summary["strategies"][k]["per_variant"][vv]["signals"] for vv in summary["strategies"][k]["per_variant"]}
                       for k in summary["strategies"]}, indent=1))
+    if keep:
+        print(f"merged into summary.json (only {', '.join(only)})", flush=True)
     print(f"total {summary['elapsed_s']}s", flush=True)
     return 0
 

@@ -7,7 +7,10 @@
  * and must reproduce, cycle by cycle: every delivered message (text, flags, keyboard), every
  * signal_trades row (all columns), trade_events, kv, the registry (state + persisted JSON),
  * user counters, REST calls, charts, auto-trade calls, metrics, _sent_bars, the HTF cache,
- * exchange skip counters, confluence and the ordered INFO+ log lines.
+ * exchange skip counters, confluence and the ordered INFO+ log lines. Bot batch D (2026-10): the
+ * [VOL-LIQ-15M] 15m universe, [VOL-MIN-SL] widened 15m stops (+ the once-per-bar log),
+ * [VOL-POST-SL-PAUSE] over seeded previous signals, the [VOL-MIN-VOLUME] floors / kv storage and the
+ * `timeframe` auto-trade kwarg.
  *
  *   Python: cd <bot> && BOT_TOKEN_CHM=test:token ADMIN_IDS=123 <py311> \
  *           <site>/backend/tests/engine/scanners/py/volume_scan.py
@@ -64,9 +67,14 @@ async function replay() {
   const { createCoinQualityLearner } = req('../../../services/engine/coinQualityLearner.js');
   const { createSignalTradesRepo } = req('../../../services/engine/signalTradesRepo.js');
   const VS = req('../../../services/engine/volumeScanner.js');
+  const Q = req('../../../strategies/volume').quality;
 
   const clock = new H.Clock(FIX.start_t);
   const cap = H.logCapture();
+  // a fresh bot process: volume_strategy's once-per-value log state, the batch-D env at its defaults
+  Q.setEnv({});
+  Q._resetForTests();
+  Q.setLog(cap.make('CHM.VolumeStrategy'));
   const quiet = { debug() {}, info() {}, warning() {}, error() {} };
   const kv = H.memKv();
 
@@ -145,6 +153,10 @@ async function replay() {
   }
   cfgKv = {};
   for (const [k, v] of kv.map) if (k.startsWith(VS.KV_CFG_PREFIX)) cfgKv[k] = v;
+  // [VOL-POST-SL-PAUSE] the previous signals the bot seeded into `trades` (here signal_trades)
+  const seed = db.prepare(`INSERT INTO signal_trades (${FIX.seed_cols.join(', ')}) VALUES (${FIX.seed_cols.map(() => '?').join(', ')})`);
+  for (const r of FIX.seed_trades) seed.run(...r);
+  cap.lines.length = 0;   // the bot clears its capture here (cfg init logs are not part of any cycle)
 
   const out = [];
   const prev = { sent: 0, charts: 0, at: 0, metrics: 0, rest: 0, logs: 0 };
@@ -231,6 +243,13 @@ describe('volume_scanner differential replay (volume_scanner.py)', () => {
     expect(all.some((c) => c.at_calls.length > 0)).toBe(true);
     expect(all.some((c) => c.rest.some((r) => r[0] === 'candles'))).toBe(true);
     expect(all.some((c) => c.gc !== null)).toBe(true);
+    // batch D (2026-10)
+    const logs = all.flatMap((c) => c.logs.map((l) => l[2]));
+    expect(logs.some((m) => m.startsWith('[VOL-LIQ-15M] tf=15m coins'))).toBe(true);
+    expect(logs.some((m) => m.startsWith('[VOL-MIN-SL] ') && m.includes('(15m floor)'))).toBe(true);
+    expect(logs.filter((m) => m.startsWith('[VOL-POST-SL-PAUSE] uid=')).length).toBeGreaterThanOrEqual(3);
+    expect(all.some((c) => c.at_calls.some((a) => a.timeframe === '1h'))).toBe(true);
+    expect(FIX.seed_trades.length).toBeGreaterThanOrEqual(8);
   });
 
   it('save_user_cfg wrote the same kv values', () => {
@@ -245,11 +264,16 @@ describe('volume_scanner differential replay (volume_scanner.py)', () => {
     expect(t2008.length).toBe(VS_MAX);
     expect(t2008.every((t) => t.skip_reason === 'not_delivered')).toBe(true);
     // the same group's other users got exactly the same 3 coins (cap 3, found 6)
-    const t2001 = c0.trades.filter((t) => t.user_id === 2001).map((t) => t.symbol);
-    expect(t2008.map((t) => t.symbol)).toEqual(t2001);
+    const t2002 = c0.trades.filter((t) => t.user_id === 2002 && !t.trade_id.startsWith('seed_')).map((t) => t.symbol);
+    expect(t2008.map((t) => t.symbol)).toEqual(t2002);
+    // [VOL-POST-SL-PAUSE]: 2001's SYNRG01 SHORT is paused (a SL 3 bars ago) — no row, no card, logged once
+    const t2001 = c0.trades.filter((t) => t.user_id === 2001 && !t.trade_id.startsWith('seed_')).map((t) => t.symbol);
+    expect(t2001).not.toContain('SYNRG01-USDT-SWAP');
+    expect(c0.logs.filter((l) => l[2].startsWith('[VOL-POST-SL-PAUSE] uid=2001 SYNRG01-USDT-SWAP SHORT')).length).toBe(1);
     expect(Object.keys(c0.sent_bars).filter((k) => k.startsWith('2008|')).length).toBe(VS_MAX);
     // next cycle (same bars): _sent_bars dedups them (no new row), the 4th coin is delivered instead
     const c1 = FIX.expected[1];
+    expect(c1.logs.filter((l) => l[2].startsWith('[VOL-POST-SL-PAUSE] uid=2001')).length).toBe(0);   // same bar: logged once
     const new2008 = c1.trades.filter((t) => t.user_id === 2008).slice(t2008.length);
     expect(new2008.map((t) => t.symbol)).not.toContain(t2008[0].symbol);
   });

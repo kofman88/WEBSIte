@@ -56,6 +56,12 @@ async function runEngine({ vi, stopDuringT4 = false, inspect = null } = {}) {
   const { createSignalDelivery } = require('../../../services/engine/signalDelivery.js');
   const smc = require('../../../services/engine/smcScanner.js');
   const vol = require('../../../services/engine/volumeScanner.js');
+  // Bot batch D [VOL-MIN-VOLUME 2026-10]: the VOLUME signals this timeline relies on (SYNDN01 ribbon at T1,
+  // SYNUP07 bounce at T4) have a ×1.3–1.4 signal bar, under the new ×1.5 setup volume floor. This test
+  // pins the worker / scheduler / delivery plumbing, not the strategy thresholds (those are pinned by the
+  // golden / probe / scanner vectors), so it runs with the bot's own switch-off VOLUME_MIN_SETUP_VOL_MULT=0
+  // (= the pre-floor engine); every other batch-D threshold keeps its default.
+  require('../../../strategies/volume').quality.setEnv({ ...process.env, VOLUME_MIN_SETUP_VOL_MULT: '0' });
   const lv = require('../../../services/engine/levelsScanner.js');
   const { CACHE_TTL } = lv;
   const mdLog = require('../../../services/marketData/mdLog.js');

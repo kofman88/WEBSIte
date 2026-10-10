@@ -8,13 +8,16 @@
  *   cross, turn) → quality 1..5 → main hit (highest quality, then priority) → min_quality
  *   → best direction (strictly higher quality wins → LONG wins ties) → stop placement
  *   (effective ATR, bounce/ribbon anchor or nearest structure, ceiling, floor, max %)
- *   → TP ladder → reasons → VolumeSignal.
+ *   → [VOL-MIN-SL 2026-10] 15m stop floor (widens the risk, never rejects) → TP ladder
+ *   → reasons → VolumeSignal.
  */
 
 const S = require('../common/series');
 const { fmtFixed } = require('../common/pyfmt');
 const { pyRound } = require('../common/pyround');
 const { minBars, SL_RECENT_BARS, CLIMAX_MOVE_ATR } = require('./config');
+const { minSlPctFor } = require('./quality');
+const { pyMin } = require('../common/pyround');
 const { DETECTORS, DETECTOR_ORDER, PRIORITY, FAMILY, isF, sliceMin, sliceMax } = require('./detectors');
 
 /**
@@ -55,6 +58,7 @@ function pyMax(a, b) {
 
 class VolumeSignal {
   constructor(fields) {
+    this.sl_raw_pct = 0.0;     // [VOL-MIN-SL] dataclass default
     Object.assign(this, fields);
   }
 
@@ -69,7 +73,7 @@ class VolumeSignal {
     return Math.abs(this.entry - this.sl) / this.entry * 100;
   }
 
-  /** dataclasses.asdict(): the 33 dataclass fields in declaration order (copies of the lists). */
+  /** dataclasses.asdict(): the 34 dataclass fields in declaration order (copies of the lists). */
   toDict() {
     const d = {};
     for (const k of SIGNAL_FIELDS) d[k] = Array.isArray(this[k]) ? this[k].slice() : this[k];
@@ -82,7 +86,7 @@ const SIGNAL_FIELDS = Object.freeze([
   'symbol', 'direction', 'entry', 'sl', 'tp1', 'tp2', 'tp3', 'rr', 'quality', 'signal_type', 'rsi', 'vol_ratio',
   'ema_fast', 'ema_slow', 'ema_trend', 'atr', 'timeframe', 'is_counter_trend', 'reasons', 'setup', 'ma_label',
   'ma_value', 'ma_slow', 'ema_mid', 'aligned', 'squeeze', 'alignment', 'htf_tf', 'htf_state', 'confluence',
-  'pattern', 'ma_names', 'ema_names',
+  'pattern', 'ma_names', 'ema_names', 'sl_raw_pct',
 ]);
 
 /** Quality of one hit in its direction context (the `_q` closure of _signal_at). */
@@ -189,6 +193,18 @@ function signalAt(ctx, i, symbol = '', timeframe = '') {
   }
   risk = pyMax(risk, 0.8 * aSl);
   if (risk <= 0 || risk / c * 100 > cfg.max_sl_pct) return null;
+  // [VOL-MIN-SL 2026-10] 15m: the stop floor (default 1 % of the entry) AFTER the sl_atr_mult × ATR_eff
+  // and max_sl_pct rejections: the setup is never dropped by it, the stop widens (not beyond
+  // max_sl_pct), TP1/TP2/TP3 keep their R multiples of the new risk.
+  let slRawPct = 0.0;
+  const floorPct = minSlPctFor(cfg, timeframe);
+  if (floorPct > 0) {
+    const floorRisk = c * pyMin(floorPct, cfg.max_sl_pct) / 100.0;
+    if (risk < floorRisk) {
+      slRawPct = pyRound(risk / c * 100, 4);
+      risk = floorRisk;
+    }
+  }
   const sl = c - s * risk;
   const tp1 = c + s * risk * cfg.tp1_rr;
   const tp2 = c + s * risk * cfg.tp2_rr;
@@ -226,6 +242,7 @@ function signalAt(ctx, i, symbol = '', timeframe = '') {
     confluence: others, pattern: main.pattern !== undefined ? main.pattern : '',
     ma_names: `${p} ${cfg.ma_fast}/${cfg.ma_mid}/${cfg.ma_slow}`,
     ema_names: `EMA ${cfg.ema_mid}/${cfg.ema_trend}`,
+    sl_raw_pct: slRawPct,      // [VOL-MIN-SL] the stop in % before the 15m floor (0 — not widened)
   });
 }
 

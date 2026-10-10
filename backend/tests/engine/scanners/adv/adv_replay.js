@@ -187,6 +187,12 @@ async function replay(FIX, { onTick = null } = {}) {
   const clock = { t: FIX.start_t, now() { return this.t; }, monotonic() { return this.t; } };
   const now = () => clock.t;
   const cap = logCapture();
+  // one bot process: volume_strategy's once-per-value log state ([VOL-MIN-VOLUME] / env warnings) and its
+  // "CHM.VolumeStrategy" logger; the batch-D env at its defaults (2026-10)
+  const VQ = req('strategies/volume').quality;
+  VQ.setEnv({});
+  VQ._resetForTests();
+  VQ.setLog(cap.make('CHM.VolumeStrategy'));
   req('services/engine/tradeCfg.js').setLog(cap.make('CHM.Users'));     // user_manager's logger
   req('services/engine/smcUserCfg.js').setLog(cap.make('CHM.Users'));
   const quiet = { debug() {}, info() {}, warning() {}, warn() {}, error() {} };

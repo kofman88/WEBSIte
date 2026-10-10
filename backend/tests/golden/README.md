@@ -42,8 +42,8 @@ last 300 (`load.barInputs`). Unregistered engines show up as `todo`, never as fa
 The adapters live in `runners/` and do exactly what `make_golden.py` did around the Python
 call (config from the variant params, the scanner's pure post-steps, the record shape).
 
-Registered: **volume** (M2, `strategies/volume`, 162/151/197 signals bit-for-bit, also under
-`GOLDEN_STRICT=1`). The pyRound field map of `compare.js` is per strategy
+Registered: **volume** (M2, `strategies/volume`, 109/107/137 signals bit-for-bit at bot c56653d — batch D's
+[VOL-MIN-VOLUME] floor, was 162/151/197 — also under `GOLDEN_STRICT=1`). The pyRound field map of `compare.js` is per strategy
 (`ROUNDED_FIELDS_BY_STRATEGY`): VOLUME rounds `rr`/`rsi`/`vol_ratio` only — its `risk_pct` is an
 unrounded property and goes through the 1e-9 tolerance rule.
 
@@ -57,7 +57,11 @@ inputs — 13 hand-picked configs incl. 15m/4h base frames, trailing windows of 
 exactly `min_bars` rows, 24 seeded random configs from `genome.GENE_SPACE["VOLUME"]`, and 15
 deterministic candle-mutation cases (zero-volume bars, flat bars, 40× volume spikes, ±4 % price
 steps) — and `volume_probe.test.js` replays them with the JS engine under the compare.js rules
-(`GOLDEN_PROBE_CASES=rand03,gap__` filters cases). The file lives next to the main expected set
+(`GOLDEN_PROBE_CASES=rand03,gap__` filters cases). Bot batch D (c56653d) adds the `d_*` cases: 15m vs 1h / 4h
+frames with the [VOL-MIN-SL] stop floor (field 2 %, capped by max_sl_pct, env over the field, floor off), the
+[VOL-MIN-VOLUME] setup volume floor (env 0 = the pre-floor engine, env 2.0, user / genome configs below the
+floor) and 8 seeded configs from the new gene range (bounce_vol_mult 1.5–2.5); a case's `env` is applied to
+the JS engine for that case (`V.quality.setEnv`). The file lives next to the main expected set
 but is NOT part of `summary.json`: its sha256 is in `probe_summary.json`. Regenerate it like
 `make_golden.py` (bot repo cwd, pinned venv, `GOLDEN_OUT_DIR` = this directory).
 

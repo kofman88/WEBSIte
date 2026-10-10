@@ -48,6 +48,11 @@ process.env.LOG_LEVEL = 'error';
 process.env.VITEST = 'true';
 
 const req = createRequire(import.meta.url);
+// Bot batch D [VOL-MIN-SL 2026-10]: this scenario's signal is 2003's SYNUP07 LONG on 15m, whose 0.14 % stop the
+// 15m stop floor now widens to 1 %. The E2E pins the auto-trade plumbing (orders, SL / TP on the exchange,
+// the bot's message texts) on that signal's numbers, so it runs with the bot's own switch-off
+// VOLUME_MIN_SL_PCT_15M=0; the floor itself is pinned by the strategy / probe / scanner vectors.
+req('../../../strategies/volume').quality.setEnv({ ...process.env, VOLUME_MIN_SL_PCT_15M: '0' });
 const H = req('../../engine/scanners/levels_harness.js');
 const { createFakeExchanges } = req('./fakeExchanges.js');
 const FIX = H.loadFixture(path.join(__dirname, '..', '..', 'engine', 'scanners', 'volume_fixtures', 'scan.json.gz'));

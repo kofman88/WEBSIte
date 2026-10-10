@@ -11,6 +11,8 @@ import F from './frames.js';
 import P from './pins.js';
 import prodPython from '../common/prodPython.js';
 
+const Q = V.quality;   // the instance the engine modules require (not a second ESM copy)
+
 const { pins, assertSame } = P;
 
 it('pins.json comes from the production interpreter (CPython 3.11)', () => {
@@ -33,12 +35,22 @@ function allHits(frame, cfg = new V.VolumeConfig()) {
   return hits;
 }
 
+/** Run `fn` with the batch-D env of one generator case (env_ctx: the other keys unset). */
+function withEnv(env, fn) {
+  Q.setEnv(env);
+  try { return fn(); } finally { Q.setEnv(null); }
+}
+
 describe('detector sweeps equal the bot output (pins.json)', () => {
   for (const name of Object.keys(pins.scenarios)) {
     it(`${name}: ${pins.scenarios[name].hits.length} hit(s)`, () => {
       const frame = F.SCENARIOS[name]();
       expect(frame.length).toBe(pins.scenarios[name].n);
-      assertSame(allHits(frame), pins.scenarios[name].hits, name);
+      withEnv({}, () => assertSame(allHits(frame), pins.scenarios[name].hits, name));
+    });
+    it(`${name}: VOLUME_MIN_SETUP_VOL_MULT=0 → the pre-floor hits (${pins.scenarios[name].hits_nofloor.length})`, () => {
+      const off = { VOLUME_MIN_SETUP_VOL_MULT: '0' };
+      withEnv(off, () => assertSame(allHits(F.SCENARIOS[name](), new V.VolumeConfig()), pins.scenarios[name].hits_nofloor, name));
     });
   }
 });
@@ -58,24 +70,27 @@ describe('one scenario per setup (what the pins contain)', () => {
     expect(hitsOf('cross_long_lowvol')).toEqual([]);                     // vr < vol_mult
   });
 
-  it('MA Turn: SMA20 slope flips on bar 62 (the V also yields a cross at 64 and a golden cross at 68)', () => {
+  it('MA Turn: SMA20 slope flips on bar 62 (the V also yields a cross at 64; its ×1.36 golden cross at 68 is under the [VOL-MIN-VOLUME] floor)', () => {
     const hits = hitsOf('turn_long');
-    expect(hits.map((h) => [h.i, h.key])).toEqual([[62, 'turn'], [64, 'cross'], [68, 'golden']]);
+    expect(hits.map((h) => [h.i, h.key])).toEqual([[62, 'turn'], [64, 'cross']]);
+    expect(pins.scenarios.turn_long.hits_nofloor.map((h) => [h.i, h.key])).toEqual([[62, 'turn'], [64, 'cross'], [68, 'golden']]);
     expect(hits[0]).toMatchObject({
       label: 'MA Turn SMA20', ma_label: 'SMA20', strength: 0,
       reasons: ['SMA20 развернулась вверх после 5+ свечей', 'цена выше SMA50'],
     });
     expect(hitsOf('turn_short')[0].reasons).toEqual(['SMA20 развернулась вниз после 5+ свечей', 'цена ниже SMA50']);
-    expect(hitsOf('turn_long_lowvol').map((h) => h.key)).toEqual(['cross', 'golden']);   // only the turn needs 1.5×
+    expect(hitsOf('turn_long_lowvol').map((h) => h.key)).toEqual(['cross']);   // the turn needs vol_mult 1.5×, the golden the floor
   });
 
-  it('Golden / Death Cross on bar 293, volume ≥ average, strength 1', () => {
-    const [g] = hitsOf('golden_long');
+  it('Golden / Death Cross on bar 293, volume ≥ ×1.5 ([VOL-MIN-VOLUME]; the ×1.36 bar fired before the floor), strength 1', () => {
+    expect(hitsOf('golden_long')).toEqual([]);
+    expect(hitsOf('golden_short')).toEqual([]);
+    const [g] = hitsOf('golden_long_spike');
     expect(g).toMatchObject({
       i: 293, s: 1, key: 'golden', label: 'Golden Cross', ma_label: 'EMA50/EMA200', strength: 1,
       reasons: ['EMA50 пересекла EMA200 снизу вверх (золотой крест)'],
     });
-    const [d] = hitsOf('golden_short');
+    const [d] = hitsOf('golden_short_spike');
     expect(d).toMatchObject({ label: 'Death Cross', reasons: ['EMA50 пересекла EMA200 сверху вниз (крест смерти)'] });
     expect(hitsOf('golden_long_lowvol')).toEqual([]);
   });
@@ -102,12 +117,13 @@ describe('one scenario per setup (what the pins contain)', () => {
     expect(hitsOf('bounce_long_touch')[0].reasons[0]).toBe('отскок от EMA50: касание EMA и закрытие выше');
   });
 
-  it('Ribbon Pullback: ordered ribbon, pullback inside it, close back over the EMA5, RSI 35–65', () => {
-    const [h] = hitsOf('ribbon_long');
+  it('Ribbon Pullback: ordered ribbon, pullback inside it, close back over the EMA5, RSI 35–65, volume ≥ ×1.5', () => {
+    expect(hitsOf('ribbon_long')).toEqual([]);                            // ×1.36 < the [VOL-MIN-VOLUME] floor
+    const [h] = hitsOf('ribbon_long_spike');
     expect(h).toMatchObject({ i: 288, s: 1, key: 'ribbon', label: 'Ribbon Pullback', ma_label: 'EMA 5–55', pattern: 'ribbon', vol_bonus: true });
     expect(h.reasons[0]).toMatch(/^откат к ленте EMA 5…55: лента выстроена на \d+%, возврат над EMA5$/);
     expect(h.reasons[1]).toBe('объём на откате затухал (VSA)');
-    expect(hitsOf('ribbon_short')[0].reasons[0]).toMatch(/возврат под EMA5$/);
+    expect(hitsOf('ribbon_short_spike')[0].reasons[0]).toMatch(/возврат под EMA5$/);
     expect(hitsOf('ribbon_long_lowvol')).toEqual([]);
   });
 
@@ -120,7 +136,7 @@ describe('one scenario per setup (what the pins contain)', () => {
 
   it('setup_ribbon=false leaves ctx.rib null and the ribbon detector returns null', () => {
     const cfg = V.VolumeConfig.fromParams({ setup_ribbon: false });
-    const ctx = new V.VolumeContext(F.SCENARIOS.ribbon_long(), cfg);
+    const ctx = new V.VolumeContext(F.SCENARIOS.ribbon_long_spike(), cfg);
     expect(ctx.rib).toBeNull();
     expect(V.setupRibbon(ctx, 288, 1)).toBeNull();
   });

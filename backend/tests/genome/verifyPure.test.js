@@ -43,6 +43,35 @@ function kindsConsistent(pyJson) {
   return Object.entries(value).every(([k, v]) => typeof v !== 'number' || !Number.isInteger(v) || FLOAT_GENE_KEYS.has(k) === floatKeys.has(k));
 }
 
+describe('[VOL-MIN-VOLUME 2026-10] _fix_constraints raises the VOLUME bounce_vol_mult to the setup volume floor', () => {
+  const V = loadFixture('verify_constraints_floor');
+  const Q = require('../../strategies/volume').quality;
+  it(`${V.cases.length} cases: VOLUME_MIN_SETUP_VOL_MULT values × bounce values / kinds — the same repaired dict (or exception)`, () => {
+    const bad = [];
+    let raised = 0;
+    try {
+      for (const [i, c] of V.cases.entries()) {
+        Q.setEnv(c.env === null ? {} : { VOLUME_MIN_SETUP_VOL_MULT: c.env });
+        Q._resetForTests();
+        let out = null;
+        let err = null;
+        try { out = fixConstraints(c.in, 'VOLUME', createRng(9100)); } catch (e) { err = e.name; }
+        if (c.error) { raised++; if (err !== c.error) bad.push(`#${i} env ${c.env}: py ${c.error}, js ${err}`); continue; }
+        if (err) { bad.push(`#${i} env ${c.env}: js raised ${err}`); continue; }
+        if (!pyEqual(out, c.out)) bad.push(`#${i} env ${c.env} bounce ${JSON.stringify(c.in.bounce_vol_mult)}: js ${out.bounce_vol_mult} py ${JSON.stringify(c.out.bounce_vol_mult)}`);
+      }
+    } finally {
+      Q.setEnv(null);
+    }
+    expect(bad, bad.slice(0, 10).join('\n')).toEqual([]);
+    // the floor applied (default env), env 2.7 above the gene range, env 0 off, odd kinds kept
+    expect(V.cases.some((c) => c.env === null && c.in.bounce_vol_mult === 0.8 && c.out.bounce_vol_mult === 1.5)).toBe(true);
+    expect(V.cases.some((c) => c.env === '2.7' && c.in.bounce_vol_mult === 2.0 && c.out.bounce_vol_mult === 2.7)).toBe(true);
+    expect(V.cases.some((c) => c.env === '0' && c.in.bounce_vol_mult === 0.8 && c.out.bounce_vol_mult === 0.8)).toBe(true);
+    expect(raised).toBe(0);
+  });
+});
+
 describe('_fix_constraints — 500 fresh genomes per strategy vs the bot', () => {
   const V = loadFixture('verify_constraints');
   it('same repaired dict (or the same Python exception type); same serialize_genome when the kinds round-trip', () => {

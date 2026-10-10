@@ -1,8 +1,11 @@
 /**
  * volumeCfgShim — the user-config surface of the bot's `VolumeConfig`
- * (volume_strategy.py, strategy-volume.md §2.3–§3.1): the 40 fields with
- * their defaults, `from_params` coercion, the 25-step `_fix()` and the
+ * (volume_strategy.py, strategy-volume.md §2.3–§3.1): the 39 fields with
+ * their defaults, `from_params` coercion, the 27-step `_fix()` and the
  * helpers the settings layer needs (setups_enabled, ma_prefix, params_dict).
+ * [VOL-MIN-VOLUME 2026-10] `defaults()` (= `VolumeConfig()`, `__post_init__`) and `fix()` raise
+ * bounce_vol_mult / ribbon_vol_mult to the setup volume floor through the engine's own
+ * strategies/volume/quality.js (one implementation); [VOL-MIN-SL] adds `min_sl_pct_15m`.
  *
  * ┌────────────────────────────────────────────────────────────────────────┐
  * │ HOOK(M2): the VOLUME engine (backend/strategies/volume/config.js) owns  │
@@ -19,6 +22,7 @@
 const { pyInt, pyFloat, pyBool } = require('./pycoerce');
 const { pyLower, pyStrip } = require('../../strategies/common/pyUnicode');   // CPython 3.11 str case / whitespace methods
 const { pyMax, pyMin } = require('../../strategies/common/pyround');   // builtin max()/min(): a NaN 2nd argument is ignored
+const quality = require('../../strategies/volume/quality');            // [VOL-MIN-SL] / [VOL-MIN-VOLUME] 2026-10
 
 const SETUP_KEYS = Object.freeze(['cross', 'turn', 'bounce', 'golden', 'ribbon']);
 // UI preferences — genome / reset never touch them (keep_prefs).
@@ -60,6 +64,7 @@ const FIELDS = Object.freeze([
   ['sl_buffer_atr', 'float', 0.25],
   ['swing_lookback', 'int', 10],
   ['max_sl_pct', 'float', 4.0],
+  ['min_sl_pct_15m', 'float', 1.0],          // [VOL-MIN-SL 2026-10]
   ['tp1_rr', 'float', 1.0],
   ['tp2_rr', 'float', 2.0],
   ['tp3_rr', 'float', 3.0],
@@ -72,8 +77,9 @@ const DEFAULTS = Object.freeze(Object.fromEntries(FIELDS.map((f) => [f[0], f[2]]
 const FLOAT_KEYS = Object.freeze(FIELDS.filter((f) => f[1] === 'float').map((f) => f[0]));
 const CONFIG_FIELDS = new Set(FIELD_NAMES);
 
+/** VolumeConfig(): the dataclass defaults + __post_init__ ([VOL-MIN-VOLUME] floor). */
 function defaults() {
-  return { ...DEFAULTS };
+  return quality.applySetupVolFloor({ ...DEFAULTS });
 }
 
 /** Python round(x, 2) for the values _fix produces (x + 0.5 / x + 2.0 — exact in binary). */
@@ -81,7 +87,7 @@ function round2(x) {
   return Math.round(x * 100) / 100;
 }
 
-/** VolumeConfig._fix() — exact order (strategy-volume.md §3.1 steps 1–25). */
+/** VolumeConfig._fix() — exact order (strategy-volume.md §3.1 steps 1–25 + the batch-D steps 21a / 21b). */
 function fix(cfg) {
   if (cfg.ma_type !== 'sma' && cfg.ma_type !== 'ema') cfg.ma_type = 'sma';
   cfg.ma_fast = pyMax(2, cfg.ma_fast);
@@ -104,6 +110,8 @@ function fix(cfg) {
   cfg.htf_ema = pyMax(5, cfg.htf_ema);
   cfg.swing_lookback = pyMax(2, cfg.swing_lookback);
   cfg.sl_buffer_atr = pyMax(0.0, cfg.sl_buffer_atr);
+  if (!Number.isFinite(cfg.min_sl_pct_15m) || cfg.min_sl_pct_15m < 0) cfg.min_sl_pct_15m = 0.0;   // [VOL-MIN-SL]
+  quality.applySetupVolFloor(cfg);                                                                // [VOL-MIN-VOLUME]
   cfg.tp1_rr = pyMax(1.0, cfg.tp1_rr);
   if (cfg.tp2_rr <= cfg.tp1_rr) cfg.tp2_rr = round2(cfg.tp1_rr + 0.5);
   if (cfg.tp3_rr <= cfg.tp2_rr) cfg.tp3_rr = round2(cfg.tp2_rr + 0.5);

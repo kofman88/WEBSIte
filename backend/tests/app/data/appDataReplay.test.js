@@ -213,7 +213,7 @@ describe(`Mini App data routes — ${FX.steps.length} requests replayed against 
     expect(seen.text).toBe(FX.steps.filter((s) => (s.headers['content-type'] || '').startsWith('text/plain')).length);
     expect(seen.text).toBeGreaterThanOrEqual(16);                // router 404 / 405 text + the two 500s
     expect(seen.chartPayload).toBeGreaterThanOrEqual(40);
-    expect(seen.analyzeChart).toBeGreaterThanOrEqual(5);
+    expect(seen.analyzeChart).toBeGreaterThanOrEqual(3);          // bot batch D [VOL-MIN-VOLUME]: the two ×1.3 VOLUME ribbons are gone (5 → 3)
     expect(seen.share).toBeGreaterThanOrEqual(15);
     expect(seen.trade).toBeGreaterThanOrEqual(35);
     expect(seen.kv).toBeGreaterThanOrEqual(20);

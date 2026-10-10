@@ -116,19 +116,29 @@ describe('golden volume probe (make_volume_probe.py)', () => {
   for (const name of names) {
     it(`${name}`, () => {
       const c = probe.cases[name];
-      // config path: fromParams reproduces the Python VolumeConfig (coercion + _fix) and min_bars
-      const cfg = V.VolumeConfig.fromParams(c.params);
-      expect(cfg.toDict()).toEqual(c.volume_config);
-      expect(V.minBars(cfg)).toBe(c.min_bars);
-      const failures = [];
-      let bars = 0, signals = 0, want = 0;
-      for (const [symbol, fx] of Object.entries(c.fixtures)) {
-        const res = sweepCase(c, cfg, symbol, fx, probe.htf_window);
-        bars += res.bars; signals += res.signals; want += fx.n_signals;
-        for (const f of res.failures) failures.push(`${symbol} ${f}`);
+      // [VOL-MIN-SL] / [VOL-MIN-VOLUME] 2026-10: the case's batch-D env (every other one unset), as the generator ran it
+      V.quality.setEnv(c.env || {});
+      try {
+        runCase(name, c);
+      } finally {
+        V.quality.setEnv(null);
       }
-      if (failures.length) throw new Error(`volume probe ${name}: ${failures.length} failing bars of ${bars}\n${failures.join('\n')}`);
-      expect(signals).toBe(want);
     });
+  }
+
+  function runCase(name, c) {
+    // config path: fromParams reproduces the Python VolumeConfig (coercion + _fix) and min_bars
+    const cfg = V.VolumeConfig.fromParams(c.params);
+    expect(cfg.toDict()).toEqual(c.volume_config);
+    expect(V.minBars(cfg)).toBe(c.min_bars);
+    const failures = [];
+    let bars = 0, signals = 0, want = 0;
+    for (const [symbol, fx] of Object.entries(c.fixtures)) {
+      const res = sweepCase(c, cfg, symbol, fx, probe.htf_window);
+      bars += res.bars; signals += res.signals; want += fx.n_signals;
+      for (const f of res.failures) failures.push(`${symbol} ${f}`);
+    }
+    if (failures.length) throw new Error(`volume probe ${name}: ${failures.length} failing bars of ${bars}\n${failures.join('\n')}`);
+    expect(signals).toBe(want);
   }
 });

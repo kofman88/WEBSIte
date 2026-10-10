@@ -17,7 +17,8 @@
  */
 
 const S = require('../common/series');
-const { VolumeConfig, RIBBON_SPANS, GOLDEN_VOL_MIN } = require('./config');
+const { VolumeConfig, RIBBON_SPANS } = require('./config');
+const { goldenVolMin } = require('./quality');
 
 function ma(close, n, kind) {
   return kind === 'ema' ? S.ewmSpanAdjust(close, n) : S.sma(close, n);
@@ -69,7 +70,7 @@ class VolumeContext {
     const th = [];
     if (cfg.setup_cross || cfg.setup_turn) th.push(cfg.vol_mult);
     if (cfg.setup_bounce) th.push(cfg.bounce_vol_mult);
-    if (cfg.setup_golden) th.push(GOLDEN_VOL_MIN);
+    if (cfg.setup_golden) th.push(goldenVolMin());          // [VOL-MIN-VOLUME]
     if (cfg.setup_ribbon) th.push(cfg.ribbon_vol_mult);
     const out = new Uint8Array(this.n);
     if (!th.length) return out;

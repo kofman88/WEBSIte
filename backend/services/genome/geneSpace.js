@@ -6,8 +6,9 @@
  *
  * random_gene_value QUIRK (kept): a float gene draws `round(min + randint(0, n) × step, 4)`
  * with `n = max(1, int((max − min) / step))` — the quotient is truncated, so (1.5 − 0.8)/0.1 =
- * 6.999… → 6 and the nominal max is unreachable for LEVELS vol_mult (1.4), zone_pct (1.1),
- * max_dist_pct (1.9) and VOLUME bounce_vol_mult (1.4).
+ * 6.999… → 6 and the nominal max is unreachable for LEVELS vol_mult (1.4), zone_pct (1.1) and
+ * max_dist_pct (1.9). [VOL-MIN-VOLUME 2026-10] VOLUME bounce_vol_mult is 1.5–2.5 (was 0.8–1.5:
+ * the genome could ask for volume BELOW the average); (2.5 − 1.5)/0.1 = 10 → 2.5 is reachable.
  */
 
 const { pyRound } = require('../../strategies/common/pyround');
@@ -65,7 +66,7 @@ const GENE_SPACE = Object.freeze({
     turn_lookback: c([3, 4, 5, 6, 8]),
     turn_slope_bars: c([1, 2, 3]),
     bounce_tol_atr: f(0.1, 0.5, 0.05),
-    bounce_vol_mult: f(0.8, 1.5, 0.1),
+    bounce_vol_mult: f(1.5, 2.5, 0.1),   // [VOL-MIN-VOLUME 2026-10] was 0.8–1.5; the floor 1.5 (constraints.js)
     vol_mult: f(1.2, 2.5, 0.1),
     vol_len: c([14, 20, 30]),
     climax_mult: f(3.5, 6.0, 0.5),

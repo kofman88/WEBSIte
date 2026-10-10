@@ -6,9 +6,10 @@
  *
  *   VolumeConfig.fromParams(params)  — the ONLY path that coerces + normalises (`_fix`),
  *                                      exactly like the kv / genome / Mini App loaders;
- *   new VolumeConfig(overrides)      — dataclass __init__: fields set as given, NO fix;
- *   cfg.replace(overrides)           — dataclasses.replace: copy with overrides, NO fix
- *                                      (the scanner pre-pass relies on this);
+ *   new VolumeConfig(overrides)      — dataclass __init__: fields set as given, NO fix, then
+ *                                      __post_init__ = the [VOL-MIN-VOLUME] setup volume floor;
+ *   cfg.replace(overrides)           — dataclasses.replace: copy with overrides, NO fix (the
+ *                                      scanner pre-pass relies on this), the floor again;
  *   cfg.toDict()                     — asdict() in field order; cfg.paramsDict() drops the
  *                                      six user-preference keys (USER_PREF_KEYS).
  *
@@ -20,6 +21,7 @@
 
 const { pyRound, pyMax, pyMin } = require('../common/pyround');
 const { pyLower, pyStrip } = require('../common/pyUnicode');
+const quality = require('./quality');   // [VOL-MIN-SL] / [VOL-MIN-VOLUME] 2026-10 env thresholds
 
 const STRATEGY_NAME = 'VOLUME';
 const SETUP_KEYS = Object.freeze(['cross', 'turn', 'bounce', 'golden', 'ribbon']);
@@ -84,6 +86,9 @@ const FIELDS = Object.freeze([
   ['sl_buffer_atr', 'float', 0.25],
   ['swing_lookback', 'int', 10],
   ['max_sl_pct', 'float', 4.0],
+  // [VOL-MIN-SL 2026-10] on 15m the stop is not closer than N % of the entry (the risk widens,
+  // the TPs follow it); env VOLUME_MIN_SL_PCT_15M overrides; 0 — off
+  ['min_sl_pct_15m', 'float', 1.0],
   ['tp1_rr', 'float', 1.0],
   ['tp2_rr', 'float', 2.0],
   ['tp3_rr', 'float', 3.0],
@@ -93,7 +98,7 @@ const FIELDS = Object.freeze([
 const FIELD_NAMES = Object.freeze(FIELDS.map((f) => f[0]));
 const FIELD_TYPE = Object.freeze(Object.fromEntries(FIELDS.map((f) => [f[0], f[1]])));
 const DEFAULTS = Object.freeze(Object.fromEntries(FIELDS.map((f) => [f[0], f[2]])));
-/** `CONFIG_FIELDS` of the Python module (set of the 38 dataclass field names). */
+/** `CONFIG_FIELDS` of the Python module (set of the 39 dataclass field names). */
 const CONFIG_FIELDS = Object.freeze(new Set(FIELD_NAMES));
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -166,7 +171,11 @@ function pyStr(v) {
 // ─────────────────────────────────────────────────────────────────────────────
 
 class VolumeConfig {
-  /** dataclass __init__: defaults, then the given fields verbatim (no coercion, no fix). */
+  /**
+   * dataclass __init__: defaults, then the given fields verbatim (no coercion, no fix), then
+   * `__post_init__` — [VOL-MIN-VOLUME 2026-10] the setup volume floor applies to every
+   * construction (defaults, dataclasses.replace), not only to from_params.
+   */
   constructor(overrides = null) {
     for (const name of FIELD_NAMES) this[name] = DEFAULTS[name];
     if (overrides) {
@@ -175,6 +184,7 @@ class VolumeConfig {
         this[k] = overrides[k];
       }
     }
+    quality.applySetupVolFloor(this);
   }
 
   /**
@@ -203,7 +213,7 @@ class VolumeConfig {
     return cfg;
   }
 
-  /** `_fix()` — protection against invalid combinations (same 25 steps, same order). */
+  /** `_fix()` — protection against invalid combinations (same 27 steps, same order). */
   fix() {
     if (this.ma_type !== 'sma' && this.ma_type !== 'ema') this.ma_type = 'sma';          // (1)
     this.ma_fast = pyMax(2, this.ma_fast);                                               // (2)
@@ -226,21 +236,24 @@ class VolumeConfig {
     this.htf_ema = pyMax(5, this.htf_ema);                                               // (19)
     this.swing_lookback = pyMax(2, this.swing_lookback);                                 // (20)
     this.sl_buffer_atr = pyMax(0.0, this.sl_buffer_atr);                                 // (21)
+    if (!Number.isFinite(this.min_sl_pct_15m) || this.min_sl_pct_15m < 0) {
+      this.min_sl_pct_15m = 0.0;                                                         // (21a) [VOL-MIN-SL] negative / nan = off
+    }
+    quality.applySetupVolFloor(this);                                                    // (21b) [VOL-MIN-VOLUME] after max(0.3, …)
     this.tp1_rr = pyMax(1.0, this.tp1_rr);                                               // (22) [VOL-TP1-FLOOR]
     if (this.tp2_rr <= this.tp1_rr) this.tp2_rr = pyRound(this.tp1_rr + 0.5, 2);            // (23)
     if (this.tp3_rr <= this.tp2_rr) this.tp3_rr = pyRound(this.tp2_rr + 0.5, 2);            // (24)
     this.min_quality = pyMin(5, pyMax(1, this.min_quality));                          // (25)
   }
 
-  /** dataclasses.replace(cfg, **overrides): a copy with the overrides, no fix. */
+  /** dataclasses.replace(cfg, **overrides): a copy with the overrides, no fix (but `__post_init__`). */
   replace(overrides = {}) {
-    const out = new VolumeConfig();
-    for (const name of FIELD_NAMES) out[name] = this[name];
     for (const k of Object.keys(overrides)) {
       if (!CONFIG_FIELDS.has(k)) throw new TypeError(`VolumeConfig.replace: unexpected field '${k}'`);
-      out[k] = overrides[k];
     }
-    return out;
+    const all = {};
+    for (const name of FIELD_NAMES) all[name] = this[name];
+    return new VolumeConfig(Object.assign(all, overrides));
   }
 
   /** asdict(): plain object in field order. */
@@ -267,6 +280,47 @@ class VolumeConfig {
   }
 }
 
+/**
+ * volume_scanner._unfloored_vol_values(params): FLOORED_VOL_FIELDS as from_params would normalise
+ * them WITHOUT the [VOL-MIN-VOLUME] floor — bounce_vol_mult ≥ 0.3, ribbon_vol_mult as is; missing /
+ * not a number / non-finite → the field default (1.0).
+ */
+function unflooredVolValues(params) {
+  const out = {};
+  const p = params && typeof params === 'object' && !Array.isArray(params) ? params : {};
+  for (const name of quality.FLOORED_VOL_FIELDS) {
+    const dflt = DEFAULTS[name];
+    const raw = Object.prototype.hasOwnProperty.call(p, name) ? p[name] : null;
+    let v;
+    try {
+      v = raw !== null && raw !== undefined ? pyFloat(raw) : dflt;
+    } catch (e) {
+      if (!(e instanceof PyValueError)) throw e;
+      v = dflt;
+    }
+    if (!Number.isFinite(v)) v = dflt;
+    if (name === 'bounce_vol_mult') v = pyMax(0.3, v);
+    out[name] = v;
+  }
+  return out;
+}
+
+/** [VOL-MIN-SL] system thresholds that save_user_cfg never writes to kv (`_SYSTEM_CFG_KEYS`). */
+const SYSTEM_CFG_KEYS = Object.freeze(['min_sl_pct_15m']);
+
+/**
+ * The [VOL-MIN-VOLUME] round-trip rule of volume_scanner.save_user_cfg, after the kv read: in a full
+ * to_dict() round trip with the floor on, a floored field whose value is the floor echoed back
+ * (`math.isclose(v, floor)`) while the stored kv value is below the floor keeps the stored value.
+ * `unfl` / `stored` are unflooredVolValues() results; `unfl` is updated and returned.
+ */
+function keepPreFloorValues(unfl, stored, fl) {
+  for (const name of quality.FLOORED_VOL_FIELDS) {
+    if (quality.pyIsclose(unfl[name], fl) && stored[name] < fl) unfl[name] = stored[name];
+  }
+  return unfl;
+}
+
 /** Bars required for a correct computation (EMA_trend + windows). */
 function minBars(cfg) {
   const extra = Math.max(cfg.vol_len, cfg.swing_lookback, BOUNCE_LOOKBACK,
@@ -278,6 +332,12 @@ module.exports = {
   STRATEGY_NAME, SETUP_KEYS, RIBBON_SPANS, RIBBON_LOOKBACK, RIBBON_MIN_ORDER, USER_PREF_KEYS,
   BOUNCE_LOOKBACK, GOLDEN_VOL_MIN, CLIMAX_MOVE_ATR, HTF_SLOPE_BARS, SL_RECENT_BARS,
   FIELDS, FIELD_NAMES, FIELD_TYPE, DEFAULTS, CONFIG_FIELDS,
-  VolumeConfig, minBars,
+  VolumeConfig, minBars, unflooredVolValues, keepPreFloorValues, SYSTEM_CFG_KEYS,
   pyBool, pyInt, pyFloat, pyStr, PyValueError, PyOverflowError,
+  // [VOL-MIN-SL] / [VOL-MIN-VOLUME] 2026-10
+  MIN_SL_TF: quality.MIN_SL_TF, FLOORED_VOL_FIELDS: quality.FLOORED_VOL_FIELDS,
+  ENV_MIN_SL_PCT_15M: quality.ENV_MIN_SL_PCT_15M, ENV_MIN_SETUP_VOL_MULT: quality.ENV_MIN_SETUP_VOL_MULT,
+  DEFAULT_MIN_SETUP_VOL_MULT: quality.DEFAULT_MIN_SETUP_VOL_MULT,
+  envNumber: quality.envNumber, setupVolFloor: quality.setupVolFloor, goldenVolMin: quality.goldenVolMin,
+  minSlPctFor: quality.minSlPctFor,
 };

@@ -14,6 +14,9 @@
 
 const V = require('../../../strategies/volume');
 
+// bot batch D: the generator ran with the VOLUME env thresholds unset (expected/volume.json `volume_env`)
+V.quality.setEnv({});
+
 function prepare(frames, variant) {
   const cfg = V.VolumeConfig.fromParams(variant.params);
   const want = variant.volume_config;

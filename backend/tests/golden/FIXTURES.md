@@ -43,6 +43,13 @@ The venv must be CPython 3.11 with the bot's pinned requirements — the interpr
   `--fixtures N`, `--symbols PREFIX,...`, `--only levels,smc` are debugging aids.
 * `--check` re-runs 3 fixtures after the main pass and asserts byte-identical output
   (`summary.json → determinism_check`).
+* `--only volume --keep-others` (bot batch D, c56653d) regenerates `expected/volume.json` alone and merges its
+  counts / sha256 into the existing `summary.json` (`partial_regen` records the run); the LEVELS / SMC files are
+  kept byte for byte (batch D does not touch indicator.py / smc/*). VOLUME at c56653d: 162 / 151 / 197 →
+  109 / 107 / 137 signals ([VOL-MIN-VOLUME]: ribbon / bounce / golden need volume ≥ ×1.5; the 1h sweep never
+  hits the 15m [VOL-MIN-SL] stop floor — `make_volume_probe.py` covers 15m). The batch-D VOLUME env vars
+  (`VOLUME_MIN_SL_PCT_15M`, `VOLUME_MIN_SETUP_VOL_MULT`, `VOLUME_15M_COINS_FLOOR_USDT`, `VOLUME_POST_SL_PAUSE_BARS`)
+  are unset by the generator (their defaults) and recorded as `volume_env` in `expected/volume.json`.
 * The script pins every env flag the strategies read (`LEVELS_REGIME_GATE=enforce`, `SL_V2_*=0`,
   `LEVELS_RELAX_ENABLED=0`, squeeze thresholds, …) to the production defaults from `config.py` /
   `sl_v2.py` / `squeeze_detector.py` so the shell cannot influence a re-run; the values are recorded
@@ -269,24 +276,24 @@ post-step `apply_squeeze_bonus`: `squeeze_score` (0 for bounce/ribbon setups, el
 | smc | default | 3642 | 42 / 42 | 0 |
 | smc | conservative | 377 | 40 / 42 | 0 |
 | smc | active | 4697 | 42 / 42 | 0 |
-| volume | default | 162 | 35 / 42 | 0 |
-| volume | conservative | 151 | 34 / 42 | 0 |
-| volume | active | 197 | 37 / 42 | 0 |
+| volume | default | 109 | 33 / 42 | 0 |
+| volume | conservative | 107 | 33 / 42 | 0 |
+| volume | active | 137 | 35 / 42 | 0 |
 
 Per regime (default variant):
 
 | regime | levels | smc | volume |
 |---|---|---|---|
-| market | 0 | 114 | 16 |
-| trending_up | 1 | 683 | 43 |
-| trending_down | 1 | 732 | 42 |
-| ranging | 9 | 695 | 27 |
-| volatile | 0 | 486 | 31 |
+| market | 0 | 114 | 10 |
+| trending_up | 1 | 683 | 26 |
+| trending_down | 1 | 732 | 33 |
+| ranging | 9 | 695 | 16 |
+| volatile | 0 | 486 | 21 |
 | low_volume | 17 | 932 | 3 |
 
 LEVELS reject-reason totals (bars returning `None`): default: zones=3200, volume=2950, signal=1962, rr=97, rsi=86, levels_filter=64, sl_risk=13; conservative: volume=3218, zones=3199, signal=1731, rsi=88, rr=82, quality_hwr=47, levels_filter=12, sl_risk=11; active: volume=2847, signal=2677, zones=2603, rr=104, rsi=75, levels_filter=71, sl_risk=8
 
-VOLUME scanner pre-pass mismatches (bars where the live pre-pass would block a direct-call signal): default=11, conservative=11, active=0.
+VOLUME scanner pre-pass mismatches (bars where the live pre-pass would block a direct-call signal): default=6, conservative=7, active=0.
 
 No strategy raised on any fixture/bar (the `errors` lists are empty everywhere). Determinism re-check on ['SYNRG01-USDT-SWAP', 'SYNVL01-USDT-SWAP', 'BTC-USDT-SWAP']: identical=True. SHA-256 of the expected files is recorded in `summary.json`.
 

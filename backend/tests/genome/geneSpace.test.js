@@ -52,11 +52,13 @@ describe('random_gene_value', () => {
       expect(Math.max(...seen), key).toBe(info.reachable_max);
       expect(seen.size, key).toBe(info.values.length);
     }
-    // the quirk: nominal max unreachable for LEVELS vol_mult / zone_pct / max_dist_pct, VOLUME bounce_vol_mult
+    // the quirk: nominal max unreachable for LEVELS vol_mult / zone_pct / max_dist_pct
     expect(GS.floats['LEVELS.vol_mult'].reachable_max).toBe(1.4);
     expect(GS.floats['LEVELS.zone_pct'].reachable_max).toBe(1.1);
     expect(GS.floats['LEVELS.max_dist_pct'].reachable_max).toBe(1.9);
-    expect(GS.floats['VOLUME.bounce_vol_mult'].reachable_max).toBe(1.4);
+    // [VOL-MIN-VOLUME 2026-10] VOLUME bounce_vol_mult is 1.5–2.5 now ((2.5 − 1.5)/0.1 = 10 steps → 2.5 reachable; was 0.8–1.5 → 1.4)
+    expect(GS.floats['VOLUME.bounce_vol_mult'].reachable_max).toBe(2.5);
+    expect(Math.min(...GS.floats['VOLUME.bounce_vol_mult'].values)).toBe(1.5);
   });
 
   it('int / choice / bool genes stay inside their definitions', () => {

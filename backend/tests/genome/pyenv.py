@@ -41,6 +41,9 @@ _PINNED_ENV = {
 }
 for _k, _v in _PINNED_ENV.items():
     os.environ[_k] = _v
+# [VOL-MIN-SL] / [VOL-MIN-VOLUME] / [VOL-LIQ-15M] / [VOL-POST-SL-PAUSE] 2026-10: unset = the defaults
+for _k in ("VOLUME_MIN_SL_PCT_15M", "VOLUME_MIN_SETUP_VOL_MULT", "VOLUME_15M_COINS_FLOOR_USDT", "VOLUME_POST_SL_PAUSE_BARS"):
+    os.environ.pop(_k, None)
 
 sys.dont_write_bytecode = True
 sys.path.insert(0, BOT_DIR)

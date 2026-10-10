@@ -12,6 +12,11 @@ Sections (every record has the shape of expected/volume.json, r10-rounded, so co
   mutations  deterministic candle mutations of the fixture frames (zero-volume bars, flat bars,
              40× volume spikes → climax gate, ±4 % price steps → extension / stop ceilings /
              effective ATR), replayed identically by volume_probe.test.js.
+  batch D    [VOL-MIN-SL] / [VOL-MIN-VOLUME] 2026-10 (bot c56653d): 15m vs 1h / 4h frames with the 15m
+             stop floor (field 2 %, capped by max_sl_pct, env over the field, floor off), the setup
+             volume floor (env 0 = the pre-floor engine, env 2.0, user / genome configs below the floor),
+             and 8 seeded configs drawn from the NEW gene range (bounce_vol_mult 1.5–2.5). A case's
+             `env` is set for the whole case (every other batch-D env var unset) and recorded.
 
 Re-running (bot repo + pinned venv, exactly like make_golden.py — see FIXTURES.md "Re-running"):
     cd /home/user/MAIN_BOT/CHM_BREAKER_V4 && rm -f signal_registry.json
@@ -115,6 +120,36 @@ _rng = random.Random(20261008)
 for _k in range(24):
     CASES[f"rand{_k:02d}"] = (random_params(_rng), "1h", None, None, SYMBOLS_5)
 
+# ── batch D: [VOL-MIN-SL] / [VOL-MIN-VOLUME] 2026-10 (env per case: CASE_ENV) ──
+CASE_ENV = {}
+LOW_VOL_CFG = dict(bounce_vol_mult=0.8, ribbon_vol_mult=0.9, min_quality=1, trend_filter=False)
+for _name, _params, _tf, _env, _syms in (
+    ("d_15m_floor_off", {}, "15m", {"VOLUME_MIN_SL_PCT_15M": "0", "VOLUME_MIN_SETUP_VOL_MULT": "0"}, SYMBOLS_7),
+    ("d_15m_minsl2", dict(min_sl_pct_15m=2.0, min_quality=2), "15m", None, SYMBOLS_7),
+    ("d_15m_cap", dict(min_sl_pct_15m=3.0, max_sl_pct=2.0, min_quality=2), "15m", None, SYMBOLS_7),
+    ("d_15m_env125", dict(min_sl_pct_15m=4.0, min_quality=2), "15m", {"VOLUME_MIN_SL_PCT_15M": "1.25"}, SYMBOLS_7),
+    ("d_15m_lowcfg", LOW_VOL_CFG, "15m", None, SYMBOLS_7),
+    ("d_1h_minsl5", dict(min_sl_pct_15m=5.0, min_quality=2), "1h", None, SYMBOLS_7),
+    ("d_4h_minsl5", dict(min_sl_pct_15m=5.0, min_quality=2), "4h", None, SYMBOLS_7),
+    ("d_1h_vol_off", dict(min_quality=2), "1h", {"VOLUME_MIN_SETUP_VOL_MULT": "0"}, SYMBOLS_7),
+    ("d_1h_vol2", dict(min_quality=2), "1h", {"VOLUME_MIN_SETUP_VOL_MULT": "2.0"}, SYMBOLS_7),
+    ("d_1h_lowcfg", LOW_VOL_CFG, "1h", None, SYMBOLS_7),
+    ("d_1h_lowcfg_off", LOW_VOL_CFG, "1h", {"VOLUME_MIN_SETUP_VOL_MULT": "0"}, SYMBOLS_7),
+    ("d_golden_off", CASES["golden_only"][0], "1h", {"VOLUME_MIN_SETUP_VOL_MULT": "0"}, SYMBOLS_7),
+    ("d_ribbon_off", CASES["ribbon_only"][0], "1h", {"VOLUME_MIN_SETUP_VOL_MULT": "0"}, SYMBOLS_7),
+):
+    CASES[_name] = (_params, _tf, None, None, _syms)
+    if _env:
+        CASE_ENV[_name] = _env
+FLOATS_D = dict(FLOATS, bounce_vol_mult=(1.5, 2.5, 0.1))   # genome.GENE_SPACE["VOLUME"] at c56653d
+_rng_d = random.Random(20261010)
+for _k in range(8):
+    _p = random_params(_rng_d)
+    for _f, (_lo, _hi, _st) in FLOATS_D.items():
+        if _f == "bounce_vol_mult":
+            _p[_f] = round(_lo + _rng_d.randint(0, int(round((_hi - _lo) / _st))) * _st, 2)
+    CASES[f"d_gs{_k:02d}"] = (_p, "15m" if _k % 2 else "1h", None, None, SYMBOLS_5)
+
 # ── mutations ──
 MUTATIONS = {
     "zero_vol": dict(zero_volume_every=7),
@@ -152,10 +187,25 @@ def mutate(df, mut):
 
 
 def run_case(name, params, tf, window, mut, symbols, frames_by_sym):
+    env = CASE_ENV.get(name)
+    for k in mg._UNSET_ENV:
+        os.environ.pop(k, None)
+    for k, v in (env or {}).items():
+        os.environ[k] = v
+    try:
+        return _run_case(name, params, tf, window, mut, symbols, frames_by_sym, env)
+    finally:
+        for k in mg._UNSET_ENV:
+            os.environ.pop(k, None)
+
+
+def _run_case(name, params, tf, window, mut, symbols, frames_by_sym, env):
     cfg = VolumeConfig.from_params(dict(params))
     W = min_bars(cfg) if window == "minbars" else window
     res = {"params": params, "tf": tf, "window": W, "mutate": mut, "volume_config": cfg.to_dict(),
            "min_bars": min_bars(cfg), "fixtures": {}}
+    if env:
+        res["env"] = env
     htf_tf = HTF_OF[tf]
     for sym in symbols:
         frames = frames_by_sym[sym]

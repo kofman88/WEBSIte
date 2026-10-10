@@ -1,6 +1,6 @@
 /**
- * VolumeConfig — from_params coercion (CPython bool/int/float/str rules), the 25 `_fix`
- * steps in order, dataclass helpers. Expected values: pins.json (the bot's own
+ * VolumeConfig — from_params coercion (CPython bool/int/float/str rules), the 27 `_fix`
+ * steps in order, dataclass helpers, the [VOL-MIN-VOLUME 2026-10] floor of every construction. Expected values: pins.json (the bot's own
  * VolumeConfig.from_params on the same inputs) plus the spec §3.1 worked example.
  */
 import { describe, it, expect } from 'vitest';
@@ -62,16 +62,21 @@ describe('VolumeConfig.fromParams (coercion + _fix) vs the bot', () => {
     expect(() => VolumeConfig.fromParams({ ma_fast: Infinity })).toThrow(PyOverflowError);
   });
 
-  it('null / empty params → the defaults; None values and unknown keys are ignored', () => {
-    expect(VolumeConfig.fromParams(null).toDict()).toEqual(DEFAULTS);
-    expect(VolumeConfig.fromParams({}).toDict()).toEqual(DEFAULTS);
-    expect(VolumeConfig.fromParams({ ma_fast: null, nope: 3, toDict: 1 }).toDict()).toEqual(DEFAULTS);
+  it('null / empty params → the defaults (the setup volume floored to 1.5); None values and unknown keys are ignored', () => {
+    // [VOL-MIN-VOLUME 2026-10] VolumeConfig() = the dataclass defaults + __post_init__ (bounce / ribbon ≥ 1.5)
+    const FLOORED = { ...DEFAULTS, bounce_vol_mult: 1.5, ribbon_vol_mult: 1.5 };
+    expect(DEFAULTS.bounce_vol_mult).toBe(1.0);
+    expect(VolumeConfig.fromParams(null).toDict()).toEqual(FLOORED);
+    expect(VolumeConfig.fromParams({}).toDict()).toEqual(FLOORED);
+    expect(VolumeConfig.fromParams({ ma_fast: null, nope: 3, toDict: 1 }).toDict()).toEqual(FLOORED);
+    expect(new VolumeConfig().toDict()).toEqual(FLOORED);
   });
 
-  it('field order, CONFIG_FIELDS (38 dataclass fields) and paramsDict (minus the six user preferences)', () => {
+  it('field order, CONFIG_FIELDS (39 dataclass fields incl. [VOL-MIN-SL] min_sl_pct_15m) and paramsDict (minus the six user preferences)', () => {
     expect(FIELD_NAMES).toEqual(pins.config.__field_order);
     expect(CONFIG_FIELDS.size).toBe(pins.config.__field_order.length);
-    expect(CONFIG_FIELDS.size).toBe(38);
+    expect(CONFIG_FIELDS.size).toBe(39);
+    expect(FIELD_NAMES.indexOf('min_sl_pct_15m')).toBe(FIELD_NAMES.indexOf('max_sl_pct') + 1);
     expect(Object.keys(new VolumeConfig().paramsDict())).toEqual(pins.config.__params_dict_keys);
     expect(USER_PREF_KEYS).toEqual(['setup_cross', 'setup_turn', 'setup_bounce', 'setup_golden', 'setup_ribbon', 'use_htf']);
   });

@@ -9,6 +9,8 @@ import F from './frames.js';
 import P from './pins.js';
 import load from '../golden/load.js';
 
+const Q = V.quality;   // the instance the engine modules require (not a second ESM copy)
+
 const { pins, assertSame } = P;
 const N = Number.NaN;
 
@@ -66,18 +68,23 @@ describe('quality and the best direction', () => {
 });
 
 describe('signalAt on the scenario frames equals the bot (pins.json)', () => {
-  const sweep = (frame) => {
+  const sweep = (frame, tf = '1h') => {
     const ctx = new V.VolumeContext(frame, new V.VolumeConfig());
     const out = [];
     for (let i = 0; i < ctx.n; i++) {
-      const sg = V.signalAt(ctx, i, 'TEST', '1h');
+      const sg = V.signalAt(ctx, i, 'TEST', tf);
       if (sg) out.push({ i, ...sg.toDict(), tp: sg.tp, risk_pct: sg.risk_pct });
     }
     return out;
   };
+  const withEnv = (env, fn) => { Q.setEnv(env); try { return fn(); } finally { Q.setEnv(null); } };
   for (const name of Object.keys(pins.scenarios)) {
     it(`${name}: ${pins.scenarios[name].signals.length} signal(s)`, () => {
-      assertSame(sweep(F.SCENARIOS[name]()), pins.scenarios[name].signals, name);
+      withEnv({}, () => assertSame(sweep(F.SCENARIOS[name]()), pins.scenarios[name].signals, name));
+    });
+    it(`${name}: 15m (the [VOL-MIN-SL] stop floor) and the pre-floor 1h signals`, () => {
+      withEnv({}, () => assertSame(sweep(F.SCENARIOS[name](), '15m'), pins.scenarios[name].signals_15m, `${name} 15m`));
+      withEnv({ VOLUME_MIN_SETUP_VOL_MULT: '0' }, () => assertSame(sweep(F.SCENARIOS[name]()), pins.scenarios[name].signals_nofloor, `${name} nofloor`));
     });
   }
   it('bounce_long_hammer: the full signal (LONG, q=4, EMA200 Bounce, reasons in order)', () => {
@@ -94,8 +101,8 @@ describe('signalAt on the scenario frames equals the bot (pins.json)', () => {
     expect(sig.tp1 < sig.tp2 && sig.tp2 < sig.tp3).toBe(true);
     expect(sig.risk_pct).toBe(Math.abs(sig.entry - sig.sl) / sig.entry * 100);
   });
-  it('ribbon_short: SHORT signal mirrors the LONG one (reasons, pattern, TP ladder below entry)', () => {
-    const [sig] = sweep(F.SCENARIOS.ribbon_short());
+  it('ribbon_short_spike: SHORT signal mirrors the LONG one (reasons, pattern, TP ladder below entry)', () => {
+    const [sig] = sweep(F.SCENARIOS.ribbon_short_spike());
     expect(sig).toMatchObject({ direction: 'SHORT', signal_type: 'Ribbon Pullback', setup: 'ribbon', pattern: 'ribbon', ma_label: 'EMA 5–55' });
     expect(sig.sl).toBeGreaterThan(sig.entry);
     expect(sig.tp3 < sig.tp2 && sig.tp2 < sig.tp1 && sig.tp1 < sig.entry).toBe(true);
@@ -147,6 +154,7 @@ describe('analyzeVolume guards and the VolumeSignal object', () => {
       is_counter_trend: false, reasons: [], setup: 'cross', ma_label: '', ma_value: 0.0, ma_slow: 0.0, ema_mid: 0.0, aligned: false,
       squeeze: 0, alignment: '', htf_tf: '', htf_state: 0, confluence: [], pattern: '', ma_names: '', ema_names: '',
     });
+    expect(sig.sl_raw_pct).toBe(0.0);                       // [VOL-MIN-SL] the dataclass default
     const sp = pins.sig_props;
     expect(sig.tp).toBe(sp.tp);
     expect(sig.risk_pct).toBe(sp.risk_pct);

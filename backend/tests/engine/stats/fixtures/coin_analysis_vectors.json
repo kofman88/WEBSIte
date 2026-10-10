@@ -2649,49 +2649,13 @@
 300
 ]
 ],
-"signal": {
-"direction": "LONG",
-"entry": 0.04220470582,
-"sl": 0.04143440392083333,
-"tp1": 0.04297500771916667,
-"tp2": 0.043745309618333346,
-"tp3": 0.04451561151750002,
-"quality": 5,
-"setup": "Ribbon Pullback",
-"reasons": [
-"откат к ленте EMA 5…55: лента выстроена на 100%, возврат над EMA5",
-"объём на откате затухал (VSA)",
-"объём ×1.1 от среднего",
-"MA выстроены: SMA10 > SMA20 > SMA50"
-],
-"strategy": "VOLUME",
-"bars_ago": 4
-},
+"signal": null,
 "tried": [
 "LEVELS",
 "SMC",
 "VOLUME"
 ],
-"candidates": [
-{
-"direction": "LONG",
-"entry": 0.04220470582,
-"sl": 0.04143440392083333,
-"tp1": 0.04297500771916667,
-"tp2": 0.043745309618333346,
-"tp3": 0.04451561151750002,
-"quality": 5,
-"setup": "Ribbon Pullback",
-"reasons": [
-"откат к ленте EMA 5…55: лента выстроена на 100%, возврат над EMA5",
-"объём на откате затухал (VSA)",
-"объём ×1.1 от среднего",
-"MA выстроены: SMA10 > SMA20 > SMA50"
-],
-"strategy": "VOLUME",
-"bars_ago": 4
-}
-],
+"candidates": [],
 "df_len": 300
 },
 {
@@ -8096,22 +8060,21 @@
 ]
 ],
 "signal": {
-"direction": "LONG",
-"entry": 3.618242275,
-"sl": 3.6174313666647535,
-"tp1": 3.6190531833352466,
-"tp2": 3.6198640916704936,
-"tp3": 3.62067500000574,
-"quality": 5,
-"setup": "Ribbon Pullback",
+"direction": "SHORT",
+"entry": 3.642826705,
+"sl": 3.688462020242999,
+"tp1": 3.597191389757001,
+"tp2": 3.515392458,
+"tp3": 3.4470513730280037,
+"quality": 3,
+"setup": "SMC ⚡ B",
 "reasons": [
-"откат к ленте EMA 5…55: лента выстроена на 100%, возврат над EMA5",
-"объём ×1.3 от среднего",
-"MA выстроены: SMA10 > SMA20 > SMA50",
-"RSI 54 — здоровая зона"
+"FVG/IFVG: дисбаланс в зоне входа",
+"Premium Zone: цена в верхних 50%",
+"Retrace: возврат к OB50% или FVG"
 ],
-"strategy": "VOLUME",
-"bars_ago": 5
+"strategy": "SMC",
+"bars_ago": 0
 },
 "tried": [
 "LEVELS",
@@ -8135,24 +8098,6 @@
 ],
 "strategy": "SMC",
 "bars_ago": 0
-},
-{
-"direction": "LONG",
-"entry": 3.618242275,
-"sl": 3.6174313666647535,
-"tp1": 3.6190531833352466,
-"tp2": 3.6198640916704936,
-"tp3": 3.62067500000574,
-"quality": 5,
-"setup": "Ribbon Pullback",
-"reasons": [
-"откат к ленте EMA 5…55: лента выстроена на 100%, возврат над EMA5",
-"объём ×1.3 от среднего",
-"MA выстроены: SMA10 > SMA20 > SMA50",
-"RSI 54 — здоровая зона"
-],
-"strategy": "VOLUME",
-"bars_ago": 5
 }
 ],
 "df_len": 255
@@ -22205,204 +22150,6 @@
 "text": "📈 <b>SYNDN02/USDT</b>  <code>0.012345</code>  <b>+2.50%</b>\n\n🤖 <b>Авто:</b> лучший сетап из 3 стратегий → 🧠 Smart Money (SMC)\n<b>🔴 SHORT</b>  ⭐⭐⭐⭐⭐  · 1h · SMC 🔥 A+\n<i>Сигнал на последней закрытой свече</i>\n\n🎯 <b>Entry:</b> <code>0.041771</code>\n🛑 <b>SL:</b>    <code>0.0420466</code>  <i>(-0.66%)</i>\n🎯 <b>TP1:</b>  <code>0.0414402</code>  <i>(1.2R)</i>\n🎯 <b>TP2:</b>  <code>0.0410819</code>  <i>(2.5R)</i>\n🏆 <b>TP3:</b>  <code>0.0406684</code>  <i>(4.0R)</i>\n\n✅ HTF структура: медвежья / CHoCH вниз\n✅ Order Block: медвежий OB митигирован\n✅ FVG/IFVG: дисбаланс в зоне входа\n✅ Premium Zone: цена в верхних 50%\n\n<i>⚠️ Не финансовый совет. Все сигналы + автотрейд:</i> https://t.me/CHM_signalS_bot?start=ref_7"
 },
 {
-"symbol": "SYNDN02",
-"data": null,
-"sig": {
-"direction": "LONG",
-"entry": 0.04220470582,
-"sl": 0.04143440392083333,
-"tp1": 0.04297500771916667,
-"tp2": 0.043745309618333346,
-"tp3": 0.04451561151750002,
-"quality": 5,
-"setup": "Ribbon Pullback",
-"reasons": [
-"откат к ленте EMA 5…55: лента выстроена на 100%, возврат над EMA5",
-"объём на откате затухал (VSA)",
-"объём ×1.1 от среднего",
-"MA выстроены: SMA10 > SMA20 > SMA50"
-],
-"strategy": "VOLUME",
-"bars_ago": 4
-},
-"paid": true,
-"auto": true,
-"tried": [
-"LEVELS",
-"SMC",
-"VOLUME"
-],
-"ref": "https://t.me/CHM_signalS_bot?start=ref_7",
-"text": "📈 <b>SYNDN02/USDT</b>  <code>0.0422047</code>  <b>+0.00%</b>\n\n🤖 <b>Авто:</b> лучший сетап из 3 стратегий → 📈 Объём + MA\n<b>🟢 LONG</b>  ⭐⭐⭐⭐⭐  · 1h · Ribbon Pullback\n<i>Сигнал 4 св. назад, ещё действует</i>\n\n🎯 <b>Entry:</b> <code>0.0422047</code>\n🛑 <b>SL:</b>    <code>0.0414344</code>  <i>(-1.83%)</i>\n🎯 <b>TP1:</b>  <code>0.042975</code>  <i>(1.0R)</i>\n🎯 <b>TP2:</b>  <code>0.0437453</code>  <i>(2.0R)</i>\n🏆 <b>TP3:</b>  <code>0.0445156</code>  <i>(3.0R)</i>\n\n✅ откат к ленте EMA 5…55: лента выстроена на 100%, возврат над EMA5\n✅ объём на откате затухал (VSA)\n✅ объём ×1.1 от среднего\n✅ MA выстроены: SMA10 &gt; SMA20 &gt; SMA50\n\n<i>⚠️ Не финансовый совет. Сигналы + автотрейд в личке бота.</i>"
-},
-{
-"symbol": "SYNDN02",
-"data": null,
-"sig": {
-"direction": "LONG",
-"entry": 0.04220470582,
-"sl": 0.04143440392083333,
-"tp1": 0.04297500771916667,
-"tp2": 0.043745309618333346,
-"tp3": 0.04451561151750002,
-"quality": 5,
-"setup": "Ribbon Pullback",
-"reasons": [
-"откат к ленте EMA 5…55: лента выстроена на 100%, возврат над EMA5",
-"объём на откате затухал (VSA)",
-"объём ×1.1 от среднего",
-"MA выстроены: SMA10 > SMA20 > SMA50"
-],
-"strategy": "VOLUME",
-"bars_ago": 4
-},
-"paid": false,
-"auto": true,
-"tried": [
-"LEVELS",
-"SMC",
-"VOLUME"
-],
-"ref": "https://t.me/CHM_signalS_bot?start=ref_7",
-"text": "📈 <b>SYNDN02/USDT</b>  <code>0.0422047</code>  <b>+0.00%</b>\n\n🤖 <b>Авто:</b> лучший сетап из 3 стратегий → 📈 Объём + MA\n<b>🟢 LONG</b>  ⭐⭐⭐⭐⭐  · 1h · Ribbon Pullback\n<i>Сигнал 4 св. назад, ещё действует</i>\n\n🎯 <b>Entry:</b> <code>0.0422047</code>\n🛑 <b>SL:</b>    <code>0.0414344</code>  <i>(-1.83%)</i>\n🎯 <b>TP1:</b>  <code>0.042975</code>  <i>(1.0R)</i>\n🎯 <b>TP2:</b>  <code>0.0437453</code>  <i>(2.0R)</i>\n🏆 <b>TP3:</b>  <code>0.0445156</code>  <i>(3.0R)</i>\n\n✅ откат к ленте EMA 5…55: лента выстроена на 100%, возврат над EMA5\n✅ объём на откате затухал (VSA)\n✅ объём ×1.1 от среднего\n✅ MA выстроены: SMA10 &gt; SMA20 &gt; SMA50\n\n<i>⚠️ Не финансовый совет. Все сигналы + автотрейд:</i> https://t.me/CHM_signalS_bot?start=ref_7"
-},
-{
-"symbol": "SYNDN02",
-"data": {
-"last": 0.04224691052582,
-"change_pct_24h": -1.234
-},
-"sig": {
-"direction": "LONG",
-"entry": 0.04220470582,
-"sl": 0.04143440392083333,
-"tp1": 0.04297500771916667,
-"tp2": 0.043745309618333346,
-"tp3": 0.04451561151750002,
-"quality": 5,
-"setup": "Ribbon Pullback",
-"reasons": [
-"откат к ленте EMA 5…55: лента выстроена на 100%, возврат над EMA5",
-"объём на откате затухал (VSA)",
-"объём ×1.1 от среднего",
-"MA выстроены: SMA10 > SMA20 > SMA50"
-],
-"strategy": "VOLUME",
-"bars_ago": 4
-},
-"paid": true,
-"auto": true,
-"tried": [
-"LEVELS",
-"SMC",
-"VOLUME"
-],
-"ref": "https://t.me/CHM_signalS_bot?start=ref_7",
-"text": "📉 <b>SYNDN02/USDT</b>  <code>0.0422469</code>  <b>-1.23%</b>\n\n🤖 <b>Авто:</b> лучший сетап из 3 стратегий → 📈 Объём + MA\n<b>🟢 LONG</b>  ⭐⭐⭐⭐⭐  · 1h · Ribbon Pullback\n<i>Сигнал 4 св. назад, ещё действует</i>\n\n🎯 <b>Entry:</b> <code>0.0422047</code>\n🛑 <b>SL:</b>    <code>0.0414344</code>  <i>(-1.83%)</i>\n🎯 <b>TP1:</b>  <code>0.042975</code>  <i>(1.0R)</i>\n🎯 <b>TP2:</b>  <code>0.0437453</code>  <i>(2.0R)</i>\n🏆 <b>TP3:</b>  <code>0.0445156</code>  <i>(3.0R)</i>\n\n✅ откат к ленте EMA 5…55: лента выстроена на 100%, возврат над EMA5\n✅ объём на откате затухал (VSA)\n✅ объём ×1.1 от среднего\n✅ MA выстроены: SMA10 &gt; SMA20 &gt; SMA50\n\n<i>⚠️ Не финансовый совет. Сигналы + автотрейд в личке бота.</i>"
-},
-{
-"symbol": "SYNDN02",
-"data": {
-"last": 0.04224691052582,
-"change_pct_24h": -1.234
-},
-"sig": {
-"direction": "LONG",
-"entry": 0.04220470582,
-"sl": 0.04143440392083333,
-"tp1": 0.04297500771916667,
-"tp2": 0.043745309618333346,
-"tp3": 0.04451561151750002,
-"quality": 5,
-"setup": "Ribbon Pullback",
-"reasons": [
-"откат к ленте EMA 5…55: лента выстроена на 100%, возврат над EMA5",
-"объём на откате затухал (VSA)",
-"объём ×1.1 от среднего",
-"MA выстроены: SMA10 > SMA20 > SMA50"
-],
-"strategy": "VOLUME",
-"bars_ago": 4
-},
-"paid": false,
-"auto": true,
-"tried": [
-"LEVELS",
-"SMC",
-"VOLUME"
-],
-"ref": "https://t.me/CHM_signalS_bot?start=ref_7",
-"text": "📉 <b>SYNDN02/USDT</b>  <code>0.0422469</code>  <b>-1.23%</b>\n\n🤖 <b>Авто:</b> лучший сетап из 3 стратегий → 📈 Объём + MA\n<b>🟢 LONG</b>  ⭐⭐⭐⭐⭐  · 1h · Ribbon Pullback\n<i>Сигнал 4 св. назад, ещё действует</i>\n\n🎯 <b>Entry:</b> <code>0.0422047</code>\n🛑 <b>SL:</b>    <code>0.0414344</code>  <i>(-1.83%)</i>\n🎯 <b>TP1:</b>  <code>0.042975</code>  <i>(1.0R)</i>\n🎯 <b>TP2:</b>  <code>0.0437453</code>  <i>(2.0R)</i>\n🏆 <b>TP3:</b>  <code>0.0445156</code>  <i>(3.0R)</i>\n\n✅ откат к ленте EMA 5…55: лента выстроена на 100%, возврат над EMA5\n✅ объём на откате затухал (VSA)\n✅ объём ×1.1 от среднего\n✅ MA выстроены: SMA10 &gt; SMA20 &gt; SMA50\n\n<i>⚠️ Не финансовый совет. Все сигналы + автотрейд:</i> https://t.me/CHM_signalS_bot?start=ref_7"
-},
-{
-"symbol": "SYNDN02",
-"data": {
-"price": 0.012345,
-"change_pct_24h": 2.5
-},
-"sig": {
-"direction": "LONG",
-"entry": 0.04220470582,
-"sl": 0.04143440392083333,
-"tp1": 0.04297500771916667,
-"tp2": 0.043745309618333346,
-"tp3": 0.04451561151750002,
-"quality": 5,
-"setup": "Ribbon Pullback",
-"reasons": [
-"откат к ленте EMA 5…55: лента выстроена на 100%, возврат над EMA5",
-"объём на откате затухал (VSA)",
-"объём ×1.1 от среднего",
-"MA выстроены: SMA10 > SMA20 > SMA50"
-],
-"strategy": "VOLUME",
-"bars_ago": 4
-},
-"paid": true,
-"auto": true,
-"tried": [
-"LEVELS",
-"SMC",
-"VOLUME"
-],
-"ref": "https://t.me/CHM_signalS_bot?start=ref_7",
-"text": "📈 <b>SYNDN02/USDT</b>  <code>0.012345</code>  <b>+2.50%</b>\n\n🤖 <b>Авто:</b> лучший сетап из 3 стратегий → 📈 Объём + MA\n<b>🟢 LONG</b>  ⭐⭐⭐⭐⭐  · 1h · Ribbon Pullback\n<i>Сигнал 4 св. назад, ещё действует</i>\n\n🎯 <b>Entry:</b> <code>0.0422047</code>\n🛑 <b>SL:</b>    <code>0.0414344</code>  <i>(-1.83%)</i>\n🎯 <b>TP1:</b>  <code>0.042975</code>  <i>(1.0R)</i>\n🎯 <b>TP2:</b>  <code>0.0437453</code>  <i>(2.0R)</i>\n🏆 <b>TP3:</b>  <code>0.0445156</code>  <i>(3.0R)</i>\n\n✅ откат к ленте EMA 5…55: лента выстроена на 100%, возврат над EMA5\n✅ объём на откате затухал (VSA)\n✅ объём ×1.1 от среднего\n✅ MA выстроены: SMA10 &gt; SMA20 &gt; SMA50\n\n<i>⚠️ Не финансовый совет. Сигналы + автотрейд в личке бота.</i>"
-},
-{
-"symbol": "SYNDN02",
-"data": {
-"price": 0.012345,
-"change_pct_24h": 2.5
-},
-"sig": {
-"direction": "LONG",
-"entry": 0.04220470582,
-"sl": 0.04143440392083333,
-"tp1": 0.04297500771916667,
-"tp2": 0.043745309618333346,
-"tp3": 0.04451561151750002,
-"quality": 5,
-"setup": "Ribbon Pullback",
-"reasons": [
-"откат к ленте EMA 5…55: лента выстроена на 100%, возврат над EMA5",
-"объём на откате затухал (VSA)",
-"объём ×1.1 от среднего",
-"MA выстроены: SMA10 > SMA20 > SMA50"
-],
-"strategy": "VOLUME",
-"bars_ago": 4
-},
-"paid": false,
-"auto": true,
-"tried": [
-"LEVELS",
-"SMC",
-"VOLUME"
-],
-"ref": "https://t.me/CHM_signalS_bot?start=ref_7",
-"text": "📈 <b>SYNDN02/USDT</b>  <code>0.012345</code>  <b>+2.50%</b>\n\n🤖 <b>Авто:</b> лучший сетап из 3 стратегий → 📈 Объём + MA\n<b>🟢 LONG</b>  ⭐⭐⭐⭐⭐  · 1h · Ribbon Pullback\n<i>Сигнал 4 св. назад, ещё действует</i>\n\n🎯 <b>Entry:</b> <code>0.0422047</code>\n🛑 <b>SL:</b>    <code>0.0414344</code>  <i>(-1.83%)</i>\n🎯 <b>TP1:</b>  <code>0.042975</code>  <i>(1.0R)</i>\n🎯 <b>TP2:</b>  <code>0.0437453</code>  <i>(2.0R)</i>\n🏆 <b>TP3:</b>  <code>0.0445156</code>  <i>(3.0R)</i>\n\n✅ откат к ленте EMA 5…55: лента выстроена на 100%, возврат над EMA5\n✅ объём на откате затухал (VSA)\n✅ объём ×1.1 от среднего\n✅ MA выстроены: SMA10 &gt; SMA20 &gt; SMA50\n\n<i>⚠️ Не финансовый совет. Все сигналы + автотрейд:</i> https://t.me/CHM_signalS_bot?start=ref_7"
-},
-{
 "symbol": "SYNDN03",
 "data": null,
 "sig": {
@@ -23769,6 +23516,204 @@
 ],
 "ref": "https://t.me/CHM_signalS_bot?start=ref_7",
 "text": "📈 <b>SYNDN05/USDT</b>  <code>0.012345</code>  <b>+2.50%</b>\n\n🤖 <b>Авто:</b> лучший сетап из 3 стратегий → 🧠 Smart Money (SMC)\n<b>🟢 LONG</b>  ⭐⭐⭐⭐⭐  · 1h · SMC 🔥 A+\n<i>Сигнал на последней закрытой свече</i>\n\n🎯 <b>Entry:</b> <code>27.802609</code>\n🛑 <b>SL:</b>    <code>27.262102</code>  <i>(-1.94%)</i>\n🎯 <b>TP1:</b>  <code>28.451216</code>  <i>(1.2R)</i>\n🎯 <b>TP2:</b>  <code>29.153874</code>  <i>(2.5R)</i>\n🏆 <b>TP3:</b>  <code>29.964633</code>  <i>(4.0R)</i>\n\n✅ HTF структура: бычья / CHoCH вверх\n✅ Order Block: бычий OB митигирован\n✅ FVG/IFVG: дисбаланс в зоне входа\n✅ Discount Zone: цена в нижних 50%\n\n<i>⚠️ Не финансовый совет. Все сигналы + автотрейд:</i> https://t.me/CHM_signalS_bot?start=ref_7"
+},
+{
+"symbol": "SYNDN06",
+"data": null,
+"sig": {
+"direction": "SHORT",
+"entry": 136.3554507,
+"sl": 139.9891764645,
+"tp1": 131.9949797826,
+"tp2": 127.27113628875004,
+"tp3": 121.82054764200007,
+"quality": 4,
+"setup": "SMC ✅ A",
+"reasons": [
+"Order Block: медвежий OB митигирован",
+"FVG/IFVG: дисбаланс в зоне входа",
+"Premium Zone: цена в верхних 50%",
+"Retrace: возврат к OB50% или FVG"
+],
+"strategy": "SMC",
+"bars_ago": 0
+},
+"paid": true,
+"auto": true,
+"tried": [
+"LEVELS",
+"SMC",
+"VOLUME"
+],
+"ref": "https://t.me/CHM_signalS_bot?start=ref_7",
+"text": "📈 <b>SYNDN06/USDT</b>  <code>136.355451</code>  <b>+0.00%</b>\n\n🤖 <b>Авто:</b> лучший сетап из 3 стратегий → 🧠 Smart Money (SMC)\n<b>🔴 SHORT</b>  ⭐⭐⭐⭐☆  · 1h · SMC ✅ A\n<i>Сигнал на последней закрытой свече</i>\n\n🎯 <b>Entry:</b> <code>136.355451</code>\n🛑 <b>SL:</b>    <code>139.989176</code>  <i>(-2.66%)</i>\n🎯 <b>TP1:</b>  <code>131.99498</code>  <i>(1.2R)</i>\n🎯 <b>TP2:</b>  <code>127.271136</code>  <i>(2.5R)</i>\n🏆 <b>TP3:</b>  <code>121.820548</code>  <i>(4.0R)</i>\n\n✅ Order Block: медвежий OB митигирован\n✅ FVG/IFVG: дисбаланс в зоне входа\n✅ Premium Zone: цена в верхних 50%\n✅ Retrace: возврат к OB50% или FVG\n\n<i>⚠️ Не финансовый совет. Сигналы + автотрейд в личке бота.</i>"
+},
+{
+"symbol": "SYNDN06",
+"data": null,
+"sig": {
+"direction": "SHORT",
+"entry": 136.3554507,
+"sl": 139.9891764645,
+"tp1": 131.9949797826,
+"tp2": 127.27113628875004,
+"tp3": 121.82054764200007,
+"quality": 4,
+"setup": "SMC ✅ A",
+"reasons": [
+"Order Block: медвежий OB митигирован",
+"FVG/IFVG: дисбаланс в зоне входа",
+"Premium Zone: цена в верхних 50%",
+"Retrace: возврат к OB50% или FVG"
+],
+"strategy": "SMC",
+"bars_ago": 0
+},
+"paid": false,
+"auto": true,
+"tried": [
+"LEVELS",
+"SMC",
+"VOLUME"
+],
+"ref": "https://t.me/CHM_signalS_bot?start=ref_7",
+"text": "📈 <b>SYNDN06/USDT</b>  <code>136.355451</code>  <b>+0.00%</b>\n\n🤖 <b>Авто:</b> лучший сетап из 3 стратегий → 🧠 Smart Money (SMC)\n<b>🔴 SHORT</b>  ⭐⭐⭐⭐☆  · 1h · SMC ✅ A\n<i>Сигнал на последней закрытой свече</i>\n\n🎯 <b>Entry:</b> <code>136.355451</code>\n🛑 <b>SL:</b>    <code>139.989176</code>  <i>(-2.66%)</i>\n🎯 <b>TP1:</b>  <code>131.99498</code>  <i>(1.2R)</i>\n🎯 <b>TP2:</b>  <code>127.271136</code>  <i>(2.5R)</i>\n🏆 <b>TP3:</b>  <code>121.820548</code>  <i>(4.0R)</i>\n\n✅ Order Block: медвежий OB митигирован\n✅ FVG/IFVG: дисбаланс в зоне входа\n✅ Premium Zone: цена в верхних 50%\n✅ Retrace: возврат к OB50% или FVG\n\n<i>⚠️ Не финансовый совет. Все сигналы + автотрейд:</i> https://t.me/CHM_signalS_bot?start=ref_7"
+},
+{
+"symbol": "SYNDN06",
+"data": {
+"last": 136.4918061507,
+"change_pct_24h": -1.234
+},
+"sig": {
+"direction": "SHORT",
+"entry": 136.3554507,
+"sl": 139.9891764645,
+"tp1": 131.9949797826,
+"tp2": 127.27113628875004,
+"tp3": 121.82054764200007,
+"quality": 4,
+"setup": "SMC ✅ A",
+"reasons": [
+"Order Block: медвежий OB митигирован",
+"FVG/IFVG: дисбаланс в зоне входа",
+"Premium Zone: цена в верхних 50%",
+"Retrace: возврат к OB50% или FVG"
+],
+"strategy": "SMC",
+"bars_ago": 0
+},
+"paid": true,
+"auto": true,
+"tried": [
+"LEVELS",
+"SMC",
+"VOLUME"
+],
+"ref": "https://t.me/CHM_signalS_bot?start=ref_7",
+"text": "📉 <b>SYNDN06/USDT</b>  <code>136.491806</code>  <b>-1.23%</b>\n\n🤖 <b>Авто:</b> лучший сетап из 3 стратегий → 🧠 Smart Money (SMC)\n<b>🔴 SHORT</b>  ⭐⭐⭐⭐☆  · 1h · SMC ✅ A\n<i>Сигнал на последней закрытой свече</i>\n\n🎯 <b>Entry:</b> <code>136.355451</code>\n🛑 <b>SL:</b>    <code>139.989176</code>  <i>(-2.66%)</i>\n🎯 <b>TP1:</b>  <code>131.99498</code>  <i>(1.2R)</i>\n🎯 <b>TP2:</b>  <code>127.271136</code>  <i>(2.5R)</i>\n🏆 <b>TP3:</b>  <code>121.820548</code>  <i>(4.0R)</i>\n\n✅ Order Block: медвежий OB митигирован\n✅ FVG/IFVG: дисбаланс в зоне входа\n✅ Premium Zone: цена в верхних 50%\n✅ Retrace: возврат к OB50% или FVG\n\n<i>⚠️ Не финансовый совет. Сигналы + автотрейд в личке бота.</i>"
+},
+{
+"symbol": "SYNDN06",
+"data": {
+"last": 136.4918061507,
+"change_pct_24h": -1.234
+},
+"sig": {
+"direction": "SHORT",
+"entry": 136.3554507,
+"sl": 139.9891764645,
+"tp1": 131.9949797826,
+"tp2": 127.27113628875004,
+"tp3": 121.82054764200007,
+"quality": 4,
+"setup": "SMC ✅ A",
+"reasons": [
+"Order Block: медвежий OB митигирован",
+"FVG/IFVG: дисбаланс в зоне входа",
+"Premium Zone: цена в верхних 50%",
+"Retrace: возврат к OB50% или FVG"
+],
+"strategy": "SMC",
+"bars_ago": 0
+},
+"paid": false,
+"auto": true,
+"tried": [
+"LEVELS",
+"SMC",
+"VOLUME"
+],
+"ref": "https://t.me/CHM_signalS_bot?start=ref_7",
+"text": "📉 <b>SYNDN06/USDT</b>  <code>136.491806</code>  <b>-1.23%</b>\n\n🤖 <b>Авто:</b> лучший сетап из 3 стратегий → 🧠 Smart Money (SMC)\n<b>🔴 SHORT</b>  ⭐⭐⭐⭐☆  · 1h · SMC ✅ A\n<i>Сигнал на последней закрытой свече</i>\n\n🎯 <b>Entry:</b> <code>136.355451</code>\n🛑 <b>SL:</b>    <code>139.989176</code>  <i>(-2.66%)</i>\n🎯 <b>TP1:</b>  <code>131.99498</code>  <i>(1.2R)</i>\n🎯 <b>TP2:</b>  <code>127.271136</code>  <i>(2.5R)</i>\n🏆 <b>TP3:</b>  <code>121.820548</code>  <i>(4.0R)</i>\n\n✅ Order Block: медвежий OB митигирован\n✅ FVG/IFVG: дисбаланс в зоне входа\n✅ Premium Zone: цена в верхних 50%\n✅ Retrace: возврат к OB50% или FVG\n\n<i>⚠️ Не финансовый совет. Все сигналы + автотрейд:</i> https://t.me/CHM_signalS_bot?start=ref_7"
+},
+{
+"symbol": "SYNDN06",
+"data": {
+"price": 0.012345,
+"change_pct_24h": 2.5
+},
+"sig": {
+"direction": "SHORT",
+"entry": 136.3554507,
+"sl": 139.9891764645,
+"tp1": 131.9949797826,
+"tp2": 127.27113628875004,
+"tp3": 121.82054764200007,
+"quality": 4,
+"setup": "SMC ✅ A",
+"reasons": [
+"Order Block: медвежий OB митигирован",
+"FVG/IFVG: дисбаланс в зоне входа",
+"Premium Zone: цена в верхних 50%",
+"Retrace: возврат к OB50% или FVG"
+],
+"strategy": "SMC",
+"bars_ago": 0
+},
+"paid": true,
+"auto": true,
+"tried": [
+"LEVELS",
+"SMC",
+"VOLUME"
+],
+"ref": "https://t.me/CHM_signalS_bot?start=ref_7",
+"text": "📈 <b>SYNDN06/USDT</b>  <code>0.012345</code>  <b>+2.50%</b>\n\n🤖 <b>Авто:</b> лучший сетап из 3 стратегий → 🧠 Smart Money (SMC)\n<b>🔴 SHORT</b>  ⭐⭐⭐⭐☆  · 1h · SMC ✅ A\n<i>Сигнал на последней закрытой свече</i>\n\n🎯 <b>Entry:</b> <code>136.355451</code>\n🛑 <b>SL:</b>    <code>139.989176</code>  <i>(-2.66%)</i>\n🎯 <b>TP1:</b>  <code>131.99498</code>  <i>(1.2R)</i>\n🎯 <b>TP2:</b>  <code>127.271136</code>  <i>(2.5R)</i>\n🏆 <b>TP3:</b>  <code>121.820548</code>  <i>(4.0R)</i>\n\n✅ Order Block: медвежий OB митигирован\n✅ FVG/IFVG: дисбаланс в зоне входа\n✅ Premium Zone: цена в верхних 50%\n✅ Retrace: возврат к OB50% или FVG\n\n<i>⚠️ Не финансовый совет. Сигналы + автотрейд в личке бота.</i>"
+},
+{
+"symbol": "SYNDN06",
+"data": {
+"price": 0.012345,
+"change_pct_24h": 2.5
+},
+"sig": {
+"direction": "SHORT",
+"entry": 136.3554507,
+"sl": 139.9891764645,
+"tp1": 131.9949797826,
+"tp2": 127.27113628875004,
+"tp3": 121.82054764200007,
+"quality": 4,
+"setup": "SMC ✅ A",
+"reasons": [
+"Order Block: медвежий OB митигирован",
+"FVG/IFVG: дисбаланс в зоне входа",
+"Premium Zone: цена в верхних 50%",
+"Retrace: возврат к OB50% или FVG"
+],
+"strategy": "SMC",
+"bars_ago": 0
+},
+"paid": false,
+"auto": true,
+"tried": [
+"LEVELS",
+"SMC",
+"VOLUME"
+],
+"ref": "https://t.me/CHM_signalS_bot?start=ref_7",
+"text": "📈 <b>SYNDN06/USDT</b>  <code>0.012345</code>  <b>+2.50%</b>\n\n🤖 <b>Авто:</b> лучший сетап из 3 стратегий → 🧠 Smart Money (SMC)\n<b>🔴 SHORT</b>  ⭐⭐⭐⭐☆  · 1h · SMC ✅ A\n<i>Сигнал на последней закрытой свече</i>\n\n🎯 <b>Entry:</b> <code>136.355451</code>\n🛑 <b>SL:</b>    <code>139.989176</code>  <i>(-2.66%)</i>\n🎯 <b>TP1:</b>  <code>131.99498</code>  <i>(1.2R)</i>\n🎯 <b>TP2:</b>  <code>127.271136</code>  <i>(2.5R)</i>\n🏆 <b>TP3:</b>  <code>121.820548</code>  <i>(4.0R)</i>\n\n✅ Order Block: медвежий OB митигирован\n✅ FVG/IFVG: дисбаланс в зоне входа\n✅ Premium Zone: цена в верхних 50%\n✅ Retrace: возврат к OB50% или FVG\n\n<i>⚠️ Не финансовый совет. Все сигналы + автотрейд:</i> https://t.me/CHM_signalS_bot?start=ref_7"
 },
 {
 "symbol": "PEPE",

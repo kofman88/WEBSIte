@@ -7,6 +7,8 @@ the inputs of make_genome_vectors.py), produced by the bot's OWN code
   rm -f /home/user/MAIN_BOT/CHM_BREAKER_V4/signal_registry.json
 
 Sections (default: all) → fixtures/verify_<section>.json.gz:
+  constraints_floor  (run explicitly) [VOL-MIN-VOLUME 2026-10] the VOLUME bounce floor of _fix_constraints
+               under VOLUME_MIN_SETUP_VOL_MULT values × bounce values / kinds
   constraints  genome._fix_constraints on 500 fresh genomes per strategy: in-space draws,
                out-of-range / int↔float / bool-as-int values, missing keys (VOLUME refill under
                the mulberry32 shim, seed recorded), legacy keys, None values (Python exceptions
@@ -49,7 +51,7 @@ NOW = mgv.NOW
 # make_genome_vectors._install_fake_db patches database.db_kv_get / db_kv_set module-wide; the
 # DB-backed sections below need the real ones back (state must not leak between sections).
 _restore_kv = mgv._restore_real_db
-SECTIONS = sys.argv[1:] or ["constraints", "fitness", "backtests", "wide", "apply", "routes"]
+SECTIONS = sys.argv[1:] or ["constraints", "constraints_floor", "fitness", "backtests", "wide", "apply", "routes"]
 
 
 def emit(name, doc):
@@ -160,6 +162,35 @@ def section_constraints():
             cases.append(dict({"kind": kind, "seed": seed, "in": g}, **res))
         out[strat] = cases
     emit("constraints", out)
+
+
+def section_constraints_floor():
+    """[VOL-MIN-VOLUME 2026-10] the VOLUME bounce_vol_mult floor of _fix_constraints: one in-space genome with
+    bounce_vol_mult below / at / above the floor and in odd kinds, under VOLUME_MIN_SETUP_VOL_MULT values
+    (unset, blank, 2.7, 1.5, 0, -1, not a number, 1.23456 → round(…, 4))."""
+    import volume_strategy as vs
+    rng = pyrandom.Random(20261010)
+    base = {name: _in_space(rng, d) for name, d in genome.GENE_SPACE["VOLUME"].items()}
+    base.update({"vol_mult": 1.5, "min_quality": 3})
+    values = [0.8, 1.4, 1.49, 1.5, 1.51, 2.0, 2.6, 3.0, 0, 0.0, -1, None, "1.2", "2", "abc", "", True, False, [], [1]]
+    envs = [None, "", "2.7", "1.5", "0", "-1", "abc", "1.23456"]
+    cases = []
+    for env in envs:
+        for v in values:
+            os.environ.pop("VOLUME_MIN_SETUP_VOL_MULT", None)
+            if env is not None:
+                os.environ["VOLUME_MIN_SETUP_VOL_MULT"] = env
+            vs._ENV_WARNED.clear()
+            g = dict(base, bounce_vol_mult=v)
+            try:
+                fixed = mgv.with_shim(9100, genome._fix_constraints, copy.deepcopy(g), "VOLUME")
+                res = {"out": fixed}
+            except Exception as e:  # noqa: BLE001
+                res = {"error": type(e).__name__}
+            cases.append(dict({"env": env, "in": g}, **res))
+    os.environ.pop("VOLUME_MIN_SETUP_VOL_MULT", None)
+    vs._ENV_WARNED.clear()
+    emit("constraints_floor", {"cases": cases})
 
 
 # ─────────────────────────────────────────────────────────────────────────────

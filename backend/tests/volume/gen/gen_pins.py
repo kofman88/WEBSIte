@@ -15,6 +15,7 @@ doubles; "inf" / "-inf" / "nan" stay strings, see pins.js pinNum) and writes the
 """
 import dataclasses
 import json
+import logging
 import os
 import subprocess
 import sys
@@ -57,26 +58,189 @@ def clean(x):
     return x
 
 
+ENV_KEYS = ("VOLUME_MIN_SL_PCT_15M", "VOLUME_MIN_SETUP_VOL_MULT", "VOLUME_15M_COINS_FLOOR_USDT", "VOLUME_POST_SL_PAUSE_BARS")
+for _k in ENV_KEYS:          # [VOL-MIN-SL] / [VOL-MIN-VOLUME] defaults unless a case sets them
+    os.environ.pop(_k, None)
+
+
+class _Cap(logging.Handler):
+    def __init__(self):
+        super().__init__(level=logging.DEBUG)
+        self.lines = []
+
+    def emit(self, record):
+        if record.levelno >= logging.INFO:
+            self.lines.append([record.levelname, record.name, record.getMessage()])
+
+
+CAP = _Cap()
+logging.getLogger().addHandler(CAP)
+logging.getLogger().setLevel(logging.INFO)
+
+
+class env_ctx:
+    """Set the batch-D env vars for one case (None → unset) and start from a fresh process state
+    (_ENV_WARNED / _FLOOR_LOGGED cleared, log capture emptied)."""
+
+    def __init__(self, **kw):
+        self.kw = kw
+
+    def __enter__(self):
+        for k in ENV_KEYS:
+            os.environ.pop(k, None)
+        for k, v in self.kw.items():
+            if v is not None:
+                os.environ[k] = v
+        vs._ENV_WARNED.clear()
+        vs._FLOOR_LOGGED.clear()
+        CAP.lines.clear()
+        return CAP
+
+    def __exit__(self, *a):
+        for k in ENV_KEYS:
+            os.environ.pop(k, None)
+        return False
+
+
+def _sweep(ctx, tf):
+    sigs = []
+    for i in range(ctx.n):
+        sg = vs.signal_at(ctx, i, "TEST", tf)
+        if sg is not None:
+            sigs.append({"i": i, **clean(dataclasses.asdict(sg)), "tp": clean(sg.tp), "risk_pct": clean(sg.risk_pct)})
+    return sigs
+
+
+def _hits(ctx):
+    hits = []
+    for i in range(ctx.n):
+        for s in (1, -1):
+            for key, fn in vs._DETECTORS.items():
+                h = fn(ctx, i, s)
+                if h is not None:
+                    hits.append({"i": i, "s": s, **clean(h)})
+    return hits
+
+
 def scenario_pins(scen):
-    """Every detector hit (bar × direction × detector, dict order) and every signal_at per scenario."""
+    """Every detector hit (bar × direction × detector, dict order) and every signal_at per scenario:
+    1h (the defaults: [VOL-MIN-VOLUME] floor on), 15m ([VOL-MIN-SL] 1 % stop floor) and, with
+    VOLUME_MIN_SETUP_VOL_MULT=0, the pre-floor hits / 1h signals."""
     cfg = vs.VolumeConfig()
+    with env_ctx(VOLUME_MIN_SETUP_VOL_MULT="0"):
+        cfg_off = vs.VolumeConfig()
     out = {}
     for name, bars in scen.items():
         df = load(bars)
         ctx = vs.VolumeContext(df, cfg)
-        hits = []
-        for i in range(ctx.n):
-            for s in (1, -1):
-                for key, fn in vs._DETECTORS.items():
-                    h = fn(ctx, i, s)
-                    if h is not None:
-                        hits.append({"i": i, "s": s, **clean(h)})
-        sigs = []
-        for i in range(ctx.n):
-            sg = vs.signal_at(ctx, i, "TEST", "1h")
-            if sg is not None:
-                sigs.append({"i": i, **clean(dataclasses.asdict(sg)), "tp": clean(sg.tp), "risk_pct": clean(sg.risk_pct)})
-        out[name] = {"n": ctx.n, "hits": hits, "signals": sigs}
+        rec = {"n": ctx.n, "hits": _hits(ctx), "signals": _sweep(ctx, "1h"), "signals_15m": _sweep(ctx, "15m")}
+        with env_ctx(VOLUME_MIN_SETUP_VOL_MULT="0"):
+            ctx_off = vs.VolumeContext(df, cfg_off)
+            rec["hits_nofloor"] = _hits(ctx_off)
+            rec["signals_nofloor"] = _sweep(ctx_off, "1h")
+        out[name] = rec
+    return out
+
+
+def E(v):
+    """An env value as pinned: "=" + raw (gen_pins.js would turn a numeric-looking string into a number)."""
+    return None if v is None else "=" + v
+
+
+def quality_pins(scen):
+    """[VOL-MIN-SL] / [VOL-MIN-VOLUME] 2026-10: the env parser, the floors, from_params / __init__ /
+    replace under the floor, golden_vol_min / candidate_mask, min_sl_pct_for, the stop floor inside
+    signal_at (caps, env over the field, other TFs), _unfloored_vol_values and math.isclose — each case
+    in a fresh process state, with the log lines it emitted."""
+    out = {}
+    raws = [None, "", "   ", "2.0", "0", "-1", "-0", "abc", " 1.2 ", "nan", "inf", "-inf", "1e400", "1_5", "\u0661.\u0665",
+            "0x10", "1e-1", "3", "1.5", "\u00a01.7\u00a0", "1,5", "+2.5", "١٢"]
+    env_rows = []
+    for raw in raws:
+        with env_ctx(VOLUME_MIN_SETUP_VOL_MULT=raw) as cap:
+            a = vs.env_number("VOLUME_MIN_SETUP_VOL_MULT", "[VOL-MIN-VOLUME]")
+            b = vs.env_number("VOLUME_MIN_SETUP_VOL_MULT", "[VOL-MIN-VOLUME]")   # second call: no second WARNING
+            row = {"raw": E(raw), "env_number": clean(a), "again": clean(b), "floor": clean(vs.setup_vol_floor()),
+                   "golden": clean(vs.golden_vol_min())}
+            cfg = vs.VolumeConfig()
+            row["default_cfg"] = [clean(cfg.bounce_vol_mult), clean(cfg.ribbon_vol_mult)]
+            row["logs"] = list(cap.lines)
+        env_rows.append(row)
+    out["env"] = env_rows
+
+    # from_params / __init__ / replace under the floor (default env, env 2.0, env 0)
+    params_cases = [
+        {}, {"bounce_vol_mult": 0.8}, {"ribbon_vol_mult": 0.5}, {"bounce_vol_mult": 2.0, "ribbon_vol_mult": 1.6},
+        {"bounce_vol_mult": 0.1}, {"bounce_vol_mult": "abc", "ribbon_vol_mult": "1.7"}, {"ribbon_vol_mult": float("nan")},
+        {"bounce_vol_mult": float("inf")}, {"ribbon_vol_mult": "-inf"}, {"bounce_vol_mult": 1.5, "ribbon_vol_mult": 1.4999},
+        {"bounce_vol_mult": True}, {"ribbon_vol_mult": None}, {"min_sl_pct_15m": -2}, {"min_sl_pct_15m": "nan"},
+        {"min_sl_pct_15m": "2.5"}, {"min_sl_pct_15m": "inf"}, {"min_sl_pct_15m": 0}, {"min_sl_pct_15m": [1]},
+    ]
+    fp = []
+    for env_v in (None, "2.0", "0", "abc"):
+        for params in params_cases:
+            with env_ctx(VOLUME_MIN_SETUP_VOL_MULT=env_v) as cap:
+                cfg = vs.VolumeConfig.from_params(dict(params))
+                d = cfg.to_dict()
+                fp.append({"env": E(env_v), "params": clean(params),
+                           "cfg": {k: clean(d[k]) for k in ("bounce_vol_mult", "ribbon_vol_mult", "min_sl_pct_15m")},
+                           "mask_min": clean(min([cfg.vol_mult] + ([cfg.bounce_vol_mult] if cfg.setup_bounce else [])
+                                                 + [vs.golden_vol_min(), cfg.ribbon_vol_mult])),
+                           "logs": list(cap.lines)})
+    out["from_params"] = fp
+    ctor = []
+    for env_v in (None, "1.8", "0"):
+        with env_ctx(VOLUME_MIN_SETUP_VOL_MULT=env_v) as cap:
+            c1 = vs.VolumeConfig(bounce_vol_mult=0.7, ribbon_vol_mult=3.0)
+            c2 = dataclasses.replace(c1, min_quality=2)
+            c3 = vs.VolumeConfig(bounce_vol_mult=2, ribbon_vol_mult="x")
+            ctor.append({"env": E(env_v), "init": [clean(c1.bounce_vol_mult), clean(c1.ribbon_vol_mult)],
+                         "replace": [clean(c2.bounce_vol_mult), clean(c2.ribbon_vol_mult), c2.min_quality],
+                         "init_types": [clean(c3.bounce_vol_mult), c3.ribbon_vol_mult], "logs": list(cap.lines)})
+    out["ctor"] = ctor
+
+    # min_sl_pct_for(cfg, tf)
+    msl = []
+    for env_v in (None, "0", "2", "abc", "-1", "0.5"):
+        for field in (1.0, 2.5, 0.0, -1.0, float("nan"), float("inf")):
+            for tf in ("15m", "15M", " 15m ", "1h", "4h", "1d", "", None, "15"):
+                with env_ctx(VOLUME_MIN_SL_PCT_15M=env_v) as cap:
+                    cfg = vs.VolumeConfig()
+                    cfg.min_sl_pct_15m = field
+                    msl.append({"env": E(env_v), "field": clean(field), "tf": tf, "v": clean(vs.min_sl_pct_for(cfg, tf)),
+                                "logs": list(cap.lines)})
+    out["min_sl_pct_for"] = msl
+
+    # the stop floor inside signal_at on the shifted / plain scenarios
+    st = []
+    for name in ("bounce_long_hammer_hi", "bounce_short_hammer_hi", "ribbon_long_spike_hi", "bounce_long_hammer",
+                 "ribbon_short_spike"):
+        df = load(scen[name])
+        for params, env_v in (({}, None), ({"min_sl_pct_15m": 2.0}, None), ({"min_sl_pct_15m": 2.0, "max_sl_pct": 1.5}, None),
+                              ({"min_sl_pct_15m": 0}, None), ({}, "0"), ({}, "1.25"), ({"min_sl_pct_15m": 0.2}, None),
+                              ({"max_sl_pct": 0.9}, None), ({"tp1_rr": 1.3, "tp2_rr": 2.4, "tp3_rr": 3.9}, None)):
+            for tf in ("15m", "1h", "4h"):
+                with env_ctx(VOLUME_MIN_SL_PCT_15M=env_v) as cap:
+                    cfg = vs.VolumeConfig.from_params(dict(params))
+                    ctx = vs.VolumeContext(df, cfg)
+                    st.append({"scenario": name, "params": params, "env": E(env_v), "tf": tf, "signals": _sweep(ctx, tf),
+                               "logs": list(cap.lines)})
+    out["stop_floor"] = st
+
+    # volume_scanner._unfloored_vol_values / math.isclose
+    unfl = []
+    for params in ({}, {"bounce_vol_mult": 0.8, "ribbon_vol_mult": 1.0}, {"bounce_vol_mult": 0.1}, {"bounce_vol_mult": "0.9"},
+                   {"bounce_vol_mult": "abc", "ribbon_vol_mult": [1]}, {"bounce_vol_mult": None, "ribbon_vol_mult": True},
+                   {"bounce_vol_mult": float("nan"), "ribbon_vol_mult": float("inf")}, {"ribbon_vol_mult": "-inf"},
+                   {"bounce_vol_mult": 2, "ribbon_vol_mult": 0}, {"bounce_vol_mult": {"a": 1}}, {"ribbon_vol_mult": " 1_2 "}):
+        unfl.append({"params": clean(params), "out": clean(vsc._unfloored_vol_values(params))})
+    out["unfloored"] = unfl
+    import math
+    iso = []
+    for a, b in ((1.5, 1.5), (1.5, 1.5 + 1e-10), (1.5, 1.5 + 1e-8), (0.0, 0.0), (0.0, 1e-300), (float("inf"), float("inf")),
+                 (float("inf"), 1.0), (float("nan"), float("nan")), (1e-9, 2e-9), (1.4999999999, 1.5), (-1.5, -1.5000000001)):
+        iso.append([clean(a), clean(b), math.isclose(a, b)])
+    out["isclose"] = iso
     return out
 
 
@@ -243,7 +407,7 @@ def main():
     js = os.path.join(HERE, "gen_pins.js")
     scen = json.loads(subprocess.run([NODE, js, "dump"], check=True, capture_output=True, encoding="utf-8").stdout)
     raw = {"python": sys.version.split()[0], "pandas": pd.__version__, "numpy": np.__version__,
-           "scenarios": scenario_pins(scen), **unit_pins()}
+           "scenarios": scenario_pins(scen), **unit_pins(), "quality": quality_pins(scen)}
     subprocess.run([NODE, js, "assemble", OUT], input=json.dumps(raw, ensure_ascii=False, allow_nan=False), check=True,
                    encoding="utf-8")
     print("pins ->", OUT, "python", raw["python"], "scenarios", len(raw["scenarios"]))

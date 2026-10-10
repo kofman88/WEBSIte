@@ -24,6 +24,7 @@ const { VolumeContext, prepareContext } = require('./context');
 const htf = require('./htf');
 const detectors = require('./detectors');
 const signal = require('./signal');
+const quality = require('./quality');   // [VOL-MIN-SL] / [VOL-MIN-VOLUME] 2026-10 (setEnv / setLog / _resetForTests)
 
 const { htfState, htfFor } = htf;
 const { signalAt } = signal;
@@ -136,4 +137,5 @@ module.exports = {
   analyzeVolume, analyzeVolumeSafe,
   TF_SECONDS, dedupTtlS, prepassConfig, analyzeWithHtf, passesCtxGate, applySqueezeBonus, scannerPostSteps,
   computeSqueezeScore,
+  quality,
 };

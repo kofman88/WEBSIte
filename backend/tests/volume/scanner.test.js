@@ -137,7 +137,8 @@ describe('pre-pass superset claim vs the golden fixtures (scanner_prepass_mismat
       }
     });
   }
-  it('totals match summary.json (default 11, conservative 11, active 0)', () => {
-    expect(totals).toEqual({ default: 11, conservative: 11, active: 0 });
+  // bot batch D ([VOL-MIN-VOLUME] fewer ribbon / bounce / golden signals): 11 / 11 / 0 → 6 / 7 / 0
+  it('totals match summary.json (default 6, conservative 7, active 0)', () => {
+    expect(totals).toEqual({ default: 6, conservative: 7, active: 0 });
   });
 });

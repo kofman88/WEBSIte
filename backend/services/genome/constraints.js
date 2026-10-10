@@ -17,6 +17,7 @@ const { pyTruthy, pyOr, pyFloat, pyMax2 } = require('../../strategies/common/pyv
 const { GENE_SPACE, randomGeneValue } = require('./geneSpace');
 const { defaultRng } = require('./rng');
 const N = require('../../strategies/common/pynum');
+const { setupVolFloor, toFloat } = require('../../strategies/volume/quality');   // [VOL-MIN-VOLUME]
 
 const own = (o, k) => Object.prototype.hasOwnProperty.call(o, k);
 
@@ -122,6 +123,15 @@ function fixConstraints(genome, strategy, rng = defaultRng()) {
     // strong volume + the highest quality bar → almost no signals
     if (pyFloat(pyOr(get('vol_mult', 1.5), 1.5)) >= 2.2 && pyIntOf(pyOr(get('min_quality', 3), 3)) >= 4) {
       g.min_quality = 3;
+    }
+    // [VOL-MIN-VOLUME 2026-10] the bounce volume not below the floor (env VOLUME_MIN_SETUP_VOL_MULT,
+    // default 1.5): old populations (0.8–1.4) and an env floor above the gene range
+    try {
+      const fl = setupVolFloor();
+      const raw = get('bounce_vol_mult', fl);
+      if (fl > 0 && toFloat(pyTruthy(raw) ? raw : 0) < fl) g.bounce_vol_mult = pyRound(fl, 4);
+    } catch (_e) {
+      // log.debug("VOLUME bounce_vol_mult floor: %s", _vf_err)
     }
   } else if (strategy === 'SMC') {
     // at least one of the three boolean detectors (deterministically the first)

@@ -157,6 +157,11 @@ function withVolume(frame, i, volume) {
   return Frame.fromBars(bars);
 }
 
+/** Copy of a frame with every price shifted by `d` (same ATR / structure, smaller stop in % — [VOL-MIN-SL]). */
+function shifted(frame, d) {
+  return Frame.fromBars(frame.toBars().map(([t, o, h, l, c, v]) => [t, o + d, h + d, l + d, c + d, v]));
+}
+
 /** Copy of a frame with one bar's low raised by `d` (the wick no longer reaches the EMA). */
 function withLow(frame, i, d) {
   const bars = frame.toBars();
@@ -186,6 +191,17 @@ const SCENARIOS = Object.freeze({
   bounce_long_hammer_lowvol: () => withVolume(bounceLongHammer(), 270, 700),
   ribbon_long_lowvol: () => withVolume(ribbonLong(), 288, 600),
   bounce_long_hammer_miss: () => withLow(bounceLongHammer(), 270, 1.0),
+  // [VOL-MIN-VOLUME 2026-10] the ribbon / golden spikes above (≈ ×1.36) are under the ×1.5 floor now;
+  // the same frames with a ≈ ×1.6–1.8 signal bar still fire
+  ribbon_long_spike: () => withVolume(ribbonLong(), 288, 1600),
+  ribbon_short_spike: () => mirror(withVolume(ribbonLong(), 288, 1600), 150),
+  golden_long_spike: () => withVolume(goldenLong(), 293, 1800),
+  golden_short_spike: () => mirror(withVolume(goldenLong(), 293, 1800), 170),
+  bounce_long_hammer_x14: () => withVolume(bounceLongHammer(), 270, 1260),
+  // [VOL-MIN-SL 2026-10] the same setups 300–400 higher: stop ≈ 0.3–0.4 % of the entry → the 15m floor widens it
+  bounce_long_hammer_hi: () => shifted(bounceLongHammer(), 300),
+  bounce_short_hammer_hi: () => shifted(mirror(bounceLongHammer(), 140), 300),
+  ribbon_long_spike_hi: () => shifted(withVolume(ribbonLong(), 288, 1600), 400),
 });
 
 /** All scenarios as {name: bars[]} (the Python verifier reads this JSON). */
@@ -195,4 +211,4 @@ function dumpScenarios() {
   return out;
 }
 
-module.exports = { T0, H, candles, toFrame, mirror, crossBar, withVolume, withLow, SCENARIOS, dumpScenarios };
+module.exports = { T0, H, candles, toFrame, mirror, crossBar, withVolume, withLow, shifted, SCENARIOS, dumpScenarios };

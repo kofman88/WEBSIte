@@ -16,6 +16,8 @@ const shim = require('./engine/volumeCfgShim');
 const { pyJsonDumps } = require('./engine/pyjson');
 const logger = require('../utils/logger');
 const { pyLower } = require('../strategies/common/pyUnicode');   // CPython 3.11 str case / whitespace methods
+const volCfg = require('../strategies/volume/config');             // unflooredVolValues / keepPreFloorValues
+const quality = require('../strategies/volume/quality');           // [VOL-MIN-VOLUME] setup_vol_floor
 
 const KV_CFG_PREFIX = 'volume_cfg_';          // kv: volume_cfg_<uid> → JSON of the full config
 const ALLOWED_TFS = Object.freeze(['15m', '1h', '4h']);
@@ -57,17 +59,41 @@ function loadUserCfg(userId) {
  * keep_prefs, pref keys missing from params are copied from the user's
  * current config (so applying a genome keeps the chosen setups); then
  * from_params (defaults for everything else + _fix) and the full dict is
- * written.
+ * written — with the [VOL-MIN-VOLUME 2026-10] storage rule of the bot: kv keeps
+ * the user's / genome's own (pre-floor) bounce_vol_mult / ribbon_vol_mult, a full
+ * to_dict() round trip (every UI save: settings/all, profiles) does not turn the
+ * floor echoed back into a stored choice, and the system threshold
+ * min_sl_pct_15m is never stored ([VOL-MIN-SL]).
  */
 function saveUserCfg(userId, params, keepPrefs = true) {
+  const own = (o, k) => Object.prototype.hasOwnProperty.call(o, k);
   const p = { ...(params || {}) };
+  // CONFIG_FIELDS ⊆ params, on the incoming dict (before the pref merge below)
+  const roundtrip = (impl().FIELD_NAMES || shim.FIELD_NAMES).every((k) => own(p, k));
   const prefKeys = impl().USER_PREF_KEYS || shim.USER_PREF_KEYS;
-  if (keepPrefs && prefKeys.some((k) => !Object.prototype.hasOwnProperty.call(p, k))) {
+  if (keepPrefs && prefKeys.some((k) => !own(p, k))) {
     const cur = loadUserCfg(userId);
-    for (const k of prefKeys) if (!Object.prototype.hasOwnProperty.call(p, k)) p[k] = cur[k];
+    for (const k of prefKeys) if (!own(p, k)) p[k] = cur[k];
   }
   const cfg = impl().fromParams(p);
-  kv.set(kvKey(userId), serialize(cfg));
+  const data = impl().toDict(cfg);
+  const unfl = volCfg.unflooredVolValues(p);
+  const fl = quality.setupVolFloor();
+  if (roundtrip && fl > 0) {
+    let stored = null;
+    try {
+      const raw = kv.get(kvKey(userId));
+      const st = raw ? require('./engine/signalTradesRepo').pyLoads(raw) : {};
+      stored = volCfg.unflooredVolValues(st !== null && typeof st === 'object' && !Array.isArray(st) ? st : {});
+    } catch (e) {
+      logger.warn(`[VOL-MIN-VOLUME] save_user_cfg uid=${userId}: stored kv unreadable (${e && e.message ? e.message : e}) — floored values written`);
+      stored = null;
+    }
+    if (stored !== null) volCfg.keepPreFloorValues(unfl, stored, fl);
+  }
+  Object.assign(data, unfl);
+  for (const k of volCfg.SYSTEM_CFG_KEYS) delete data[k];
+  kv.set(kvKey(userId), pyJsonDumps(data, impl().FLOAT_KEYS || shim.FLOAT_KEYS));
   return cfg;
 }
 

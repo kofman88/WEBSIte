@@ -15,6 +15,7 @@
  *   setTradeState(id, state, {bumpAttempts, expectedFrom})  db_set_trade_state (monotonic CAS)
  *   setSignalMsgId / getTrackableSignals / getExpireCandidates / advanceSignalProgress /
  *   markSignalExpired                 db/signal_progress.py (CAS on COALESCE(progress_stage,''))
+ *   lastSignalOutcome(uid, sym, dir, strategy)  db_last_signal_outcome ([VOL-POST-SL-PAUSE])
  *   cardSnapshot({html, actions, lang})   the signal_card_json value (≤ 12000 chars, else '')
  *   addTradeEvent / getTradeEvents / gcTradeEvents      db/trade_events.py (best-effort writes)
  *   getSignal / addTradeRecord / getUserRecords / updateSignalTp   db/signals.py
@@ -52,6 +53,15 @@ const FAILED_RESULTS = Object.freeze(['SKIP', 'ORPHAN', 'CANCELLED']);
 const FINAL_STAGES = Object.freeze(['TP3', 'SL', 'BE', 'EXPIRED', 'MISSED']);
 const STOP_RESULTS = Object.freeze(['TP1', 'TP2', 'TP3', 'SL', 'BE', 'MANUAL', 'TRAIL']);
 const CARD_MAX_JSON = 12000;
+/** db/signal_progress.LAST_SIGNAL_OUTCOME_SQL on signal_trades ([VOL-POST-SL-PAUSE 2026-10]). */
+const LAST_SIGNAL_OUTCOME_SQL = 'SELECT trade_id, timeframe, created_at, progress_stage, progress_ts, '
+  + '       result, state_changed_at '
+  + 'FROM signal_trades '
+  + 'WHERE user_id=? AND symbol=? '
+  + "  AND UPPER(COALESCE(strategy, ''))=? "
+  + "  AND UPPER(COALESCE(direction, ''))=? "
+  + "  AND (signal_msg_id > 0 OR COALESCE(order_id, '') != '') "
+  + 'ORDER BY +created_at DESC LIMIT 1';
 // db/trade_events.py
 const MAX_PAYLOAD_CHARS = 4000;
 const EVT = Object.freeze({
@@ -508,6 +518,20 @@ function createSignalTradesRepo(deps = {}) {
         .run(Number(progressTs), Number(rr), String(tradeId), String(expectedStage || '')).changes > 0;
     },
 
+    /**
+     * [VOL-POST-SL-PAUSE 2026-10] db_last_signal_outcome(user_id, symbol, direction, strategy): the
+     * user's latest DELIVERED signal of (coin, direction, strategy) — a card (signal_msg_id > 0) or an
+     * exchange order (order_id != '') — by created_at; null when none. One query (LAST_SIGNAL_OUTCOME_SQL,
+     * `ORDER BY +created_at` keeps the plan on idx_signal_trades_symbol). DB errors propagate (the
+     * caller decides: fail-open).
+     */
+    lastSignalOutcome(userId, symbol, direction, strategy) {
+      const row = dbOf().prepare(LAST_SIGNAL_OUTCOME_SQL).get(
+        Math.trunc(Number(userId)), String(symbol), pyUpper(pyStr(strategy || '')), pyUpper(pyStr(direction || '')),
+      );
+      return row === undefined ? null : row;
+    },
+
     // ── db/trade_events.py ─────────────────────────────────────────────
     /**
      * db_add_trade_event(trade_id, event_type, payload): best-effort append (errors swallowed).
@@ -636,7 +660,7 @@ const defaultRepo = createSignalTradesRepo();
 
 module.exports = {
   ALLOWED_TRADE_COLS, TRADE_STATES, ALLOWED_TRANSITIONS, CLOSED_RESULTS, FAILED_RESULTS,
-  FINAL_STAGES, STOP_RESULTS, CARD_MAX_JSON, MAX_PAYLOAD_CHARS, EVT,
+  FINAL_STAGES, STOP_RESULTS, CARD_MAX_JSON, MAX_PAYLOAD_CHARS, EVT, LAST_SIGNAL_OUTCOME_SQL,
   bindValue, pySlice, pyDumps, pyLoads, pyTypeName, PyJSONDecodeError, createSignalTradesRepo, defaultRepo,
   computeFallbackPnlUsd,
 };
