@@ -40,6 +40,13 @@ const CALLS = {
   test_connection: (t, a) => t.testConnection(...a),
   sync_time: (t) => t.syncTime(),
   okx_sz: (t, a) => t.okxSz(...a),
+  cancel_tp_orders: (t, a) => t.cancelTpOrders(...a),
+  // [POS-READ-STRICT 2026-10] py harness: fn(..., strict=True, err_out=[]) → {positions, err_out}
+  get_positions__strict: async (t, a) => {
+    const eo = [];
+    const r = await t.getPositions(a[0], a[1], a.length > 2 ? a[2] : null, a.length > 3 ? a[3] : '', { strict: true, errOut: eo });
+    return { positions: r, err_out: eo };
+  },
 };
 
 describe('okx_trader replay parity', () => {

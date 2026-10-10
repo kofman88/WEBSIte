@@ -558,7 +558,7 @@ function createSignalTradesRepo(deps = {}) {
         noOrder = db.prepare("UPDATE signal_trades SET result='SKIP', state='FAILED', skip_reason='ghost', state_changed_at=? "
           + "WHERE user_id=? AND result='' AND (order_id='' OR order_id IS NULL) AND COALESCE(signal_msg_id, 0) = 0").run(t, userId).changes;
         old = db.prepare("UPDATE signal_trades SET result='SKIP', state='FAILED', skip_reason='ghost', state_changed_at=? "
-          + "WHERE user_id=? AND result='' AND created_at < ?").run(t, userId, cutoff).changes;
+          + "WHERE user_id=? AND result='' AND created_at < ?   AND (order_id='' OR order_id IS NULL)").run(t, userId, cutoff).changes;   // [GHOST-LIVE-TRADES 2026-10]
       })();
       return [noOrder, old];
     },
@@ -573,7 +573,7 @@ function createSignalTradesRepo(deps = {}) {
         noOrder = db.prepare("UPDATE signal_trades SET result='SKIP', state='FAILED', skip_reason='ghost', state_changed_at=? "
           + "WHERE result='' AND (order_id='' OR order_id IS NULL) AND COALESCE(signal_msg_id, 0) = 0").run(t).changes;
         old = db.prepare("UPDATE signal_trades SET result='SKIP', state='FAILED', skip_reason='ghost', state_changed_at=? "
-          + "WHERE result='' AND created_at < ?").run(t, cutoff).changes;
+          + "WHERE result='' AND created_at < ?   AND (order_id='' OR order_id IS NULL)").run(t, cutoff).changes;   // [GHOST-LIVE-TRADES 2026-10]
       })();
       return [noOrder, old];
     },

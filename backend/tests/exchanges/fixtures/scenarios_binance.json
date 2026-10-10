@@ -12578,5 +12578,530 @@
     "okx_offset": 0
    }
   }
+ },
+ {
+  "scenario": {
+   "name": "pos_strict_ok",
+   "exchange": "binance",
+   "call": "get_positions__strict",
+   "args": [
+    "BNKEY-abc123",
+    "bn-secret-456",
+    "BTC-USDT-SWAP"
+   ],
+   "kwargs": {},
+   "routes": [
+    {
+     "method": "GET",
+     "path": "/fapi/v2/positionRisk",
+     "responses": [
+      {
+       "text": "[{\"symbol\": \"BTCUSDT\", \"positionAmt\": \"0.011\", \"entryPrice\": \"87000.5\", \"markPrice\": \"87010.1\", \"unRealizedProfit\": \"0.11\", \"liquidationPrice\": \"0\", \"leverage\": \"10\", \"positionSide\": \"LONG\"}, {\"symbol\": \"BTCUSDT\", \"positionAmt\": \"0.000\", \"entryPrice\": \"0.0\", \"markPrice\": \"87010.1\", \"unRealizedProfit\": \"0.0\", \"leverage\": \"10\", \"positionSide\": \"SHORT\"}]"
+      }
+     ]
+    }
+   ],
+   "state": {},
+   "random": [],
+   "clock": 1767225600.0
+  },
+  "expected": {
+   "name": "pos_strict_ok",
+   "result": {
+    "positions": [
+     {
+      "symbol": "BTCUSDT",
+      "side": "LONG",
+      "size": 0.011,
+      "entryPrice": 87000.5,
+      "markPrice": 87010.1,
+      "unrealisedPnl": 0.11,
+      "leverage": 10,
+      "stopLoss": 0.0,
+      "positionIdx": 0
+     }
+    ],
+    "err_out": []
+   },
+   "requests": [
+    {
+     "method": "GET",
+     "url": "https://fapi.binance.com/fapi/v2/positionRisk?symbol=BTCUSDT&timestamp=1767225600000&recvWindow=5000&signature=13921ec8d587fd67e30b45105c5851a9080e63d1fbf7a0745ede801947e81623",
+     "headers": {
+      "X-MBX-APIKEY": "BNKEY-abc123"
+     },
+     "body": null
+    }
+   ],
+   "sleeps": [],
+   "clock_end": 1767225600.0,
+   "markers": [],
+   "saved": {
+    "hedge_saved": [],
+    "auth_reset": [],
+    "events": [],
+    "metrics": []
+   },
+   "final": {
+    "hedge": {},
+    "account_type": {},
+    "delisted": [],
+    "fail_count": {},
+    "bybit_offset": 0,
+    "binance_base": "https://fapi.binance.com",
+    "binance_offset": 0,
+    "bingx_offset": 0,
+    "okx_offset": 0
+   }
+  }
+ },
+ {
+  "scenario": {
+   "name": "pos_strict_empty",
+   "exchange": "binance",
+   "call": "get_positions__strict",
+   "args": [
+    "BNKEY-abc123",
+    "bn-secret-456"
+   ],
+   "kwargs": {},
+   "routes": [
+    {
+     "method": "GET",
+     "path": "/fapi/v2/positionRisk",
+     "responses": [
+      {
+       "text": "[]"
+      }
+     ]
+    }
+   ],
+   "state": {},
+   "random": [],
+   "clock": 1767225600.0
+  },
+  "expected": {
+   "name": "pos_strict_empty",
+   "result": {
+    "positions": [],
+    "err_out": []
+   },
+   "requests": [
+    {
+     "method": "GET",
+     "url": "https://fapi.binance.com/fapi/v2/positionRisk?timestamp=1767225600000&recvWindow=5000&signature=35c66fcf72a2460d05c229397270c691faa54178111eb5f177fb30e60b7cd6ac",
+     "headers": {
+      "X-MBX-APIKEY": "BNKEY-abc123"
+     },
+     "body": null
+    }
+   ],
+   "sleeps": [],
+   "clock_end": 1767225600.0,
+   "markers": [],
+   "saved": {
+    "hedge_saved": [],
+    "auth_reset": [],
+    "events": [],
+    "metrics": []
+   },
+   "final": {
+    "hedge": {},
+    "account_type": {},
+    "delisted": [],
+    "fail_count": {},
+    "bybit_offset": 0,
+    "binance_base": "https://fapi.binance.com",
+    "binance_offset": 0,
+    "bingx_offset": 0,
+    "okx_offset": 0
+   }
+  }
+ },
+ {
+  "scenario": {
+   "name": "pos_strict_auth",
+   "exchange": "binance",
+   "call": "get_positions__strict",
+   "args": [
+    "BNKEY-abc123",
+    "bn-secret-456"
+   ],
+   "kwargs": {},
+   "routes": [
+    {
+     "method": "GET",
+     "path": "/fapi/v2/positionRisk",
+     "responses": [
+      {
+       "text": "{\"code\": -2015, \"msg\": \"Invalid API-key, IP, or permissions for action.\"}"
+      }
+     ]
+    }
+   ],
+   "state": {},
+   "random": [],
+   "clock": 1767225600.0
+  },
+  "expected": {
+   "name": "pos_strict_auth",
+   "result": {
+    "positions": null,
+    "err_out": [
+     "code: -2015 Invalid API-key, IP, or permissions for action."
+    ]
+   },
+   "requests": [
+    {
+     "method": "GET",
+     "url": "https://fapi.binance.com/fapi/v2/positionRisk?timestamp=1767225600000&recvWindow=5000&signature=35c66fcf72a2460d05c229397270c691faa54178111eb5f177fb30e60b7cd6ac",
+     "headers": {
+      "X-MBX-APIKEY": "BNKEY-abc123"
+     },
+     "body": null
+    }
+   ],
+   "sleeps": [],
+   "clock_end": 1767225600.0,
+   "markers": [],
+   "saved": {
+    "hedge_saved": [],
+    "auth_reset": [],
+    "events": [],
+    "metrics": []
+   },
+   "final": {
+    "hedge": {},
+    "account_type": {},
+    "delisted": [],
+    "fail_count": {},
+    "bybit_offset": 0,
+    "binance_base": "https://fapi.binance.com",
+    "binance_offset": 0,
+    "bingx_offset": 0,
+    "okx_offset": 0
+   }
+  }
+ },
+ {
+  "scenario": {
+   "name": "pos_strict_symbol_absent",
+   "exchange": "binance",
+   "call": "get_positions__strict",
+   "args": [
+    "BNKEY-abc123",
+    "bn-secret-456",
+    "XYZ-USDT-SWAP"
+   ],
+   "kwargs": {},
+   "routes": [
+    {
+     "method": "GET",
+     "path": "/fapi/v2/positionRisk",
+     "responses": [
+      {
+       "text": "{\"code\": -1121, \"msg\": \"Invalid symbol.\"}"
+      }
+     ]
+    }
+   ],
+   "state": {},
+   "random": [],
+   "clock": 1767225600.0
+  },
+  "expected": {
+   "name": "pos_strict_symbol_absent",
+   "result": {
+    "positions": null,
+    "err_out": [
+     "code: -1121 Invalid symbol."
+    ]
+   },
+   "requests": [
+    {
+     "method": "GET",
+     "url": "https://fapi.binance.com/fapi/v2/positionRisk?symbol=XYZUSDT&timestamp=1767225600000&recvWindow=5000&signature=72f062d3a432cdece3a11da45e976ac7d91b1b2e3a986e3856193f3c11ace942",
+     "headers": {
+      "X-MBX-APIKEY": "BNKEY-abc123"
+     },
+     "body": null
+    }
+   ],
+   "sleeps": [],
+   "clock_end": 1767225600.0,
+   "markers": [],
+   "saved": {
+    "hedge_saved": [],
+    "auth_reset": [],
+    "events": [],
+    "metrics": []
+   },
+   "final": {
+    "hedge": {},
+    "account_type": {},
+    "delisted": [],
+    "fail_count": {},
+    "bybit_offset": 0,
+    "binance_base": "https://fapi.binance.com",
+    "binance_offset": 0,
+    "bingx_offset": 0,
+    "okx_offset": 0
+   }
+  }
+ },
+ {
+  "scenario": {
+   "name": "pos_strict_not_list",
+   "exchange": "binance",
+   "call": "get_positions__strict",
+   "args": [
+    "BNKEY-abc123",
+    "bn-secret-456"
+   ],
+   "kwargs": {},
+   "routes": [
+    {
+     "method": "GET",
+     "path": "/fapi/v2/positionRisk",
+     "responses": [
+      {
+       "text": "\"maintenance\""
+      }
+     ]
+    }
+   ],
+   "state": {},
+   "random": [],
+   "clock": 1767225600.0
+  },
+  "expected": {
+   "name": "pos_strict_not_list",
+   "result": {
+    "positions": null,
+    "err_out": [
+     "unparsable answer: 'maintenance'"
+    ]
+   },
+   "requests": [
+    {
+     "method": "GET",
+     "url": "https://fapi.binance.com/fapi/v2/positionRisk?timestamp=1767225600000&recvWindow=5000&signature=35c66fcf72a2460d05c229397270c691faa54178111eb5f177fb30e60b7cd6ac",
+     "headers": {
+      "X-MBX-APIKEY": "BNKEY-abc123"
+     },
+     "body": null
+    }
+   ],
+   "sleeps": [],
+   "clock_end": 1767225600.0,
+   "markers": [],
+   "saved": {
+    "hedge_saved": [],
+    "auth_reset": [],
+    "events": [],
+    "metrics": []
+   },
+   "final": {
+    "hedge": {},
+    "account_type": {},
+    "delisted": [],
+    "fail_count": {},
+    "bybit_offset": 0,
+    "binance_base": "https://fapi.binance.com",
+    "binance_offset": 0,
+    "bingx_offset": 0,
+    "okx_offset": 0
+   }
+  }
+ },
+ {
+  "scenario": {
+   "name": "pos_strict_timeout",
+   "exchange": "binance",
+   "call": "get_positions__strict",
+   "args": [
+    "BNKEY-abc123",
+    "bn-secret-456"
+   ],
+   "kwargs": {},
+   "routes": [
+    {
+     "method": "GET",
+     "path": "/fapi/v2/positionRisk",
+     "responses": [
+      {
+       "raise": "timeout"
+      }
+     ]
+    }
+   ],
+   "state": {},
+   "random": [],
+   "clock": 1767225600.0
+  },
+  "expected": {
+   "name": "pos_strict_timeout",
+   "result": {
+    "positions": null,
+    "err_out": [
+     "code: -1 timeout"
+    ]
+   },
+   "requests": [
+    {
+     "method": "GET",
+     "url": "https://fapi.binance.com/fapi/v2/positionRisk?timestamp=1767225600000&recvWindow=5000&signature=35c66fcf72a2460d05c229397270c691faa54178111eb5f177fb30e60b7cd6ac",
+     "headers": {
+      "X-MBX-APIKEY": "BNKEY-abc123"
+     },
+     "body": null
+    }
+   ],
+   "sleeps": [],
+   "clock_end": 1767225600.0,
+   "markers": [],
+   "saved": {
+    "hedge_saved": [],
+    "auth_reset": [],
+    "events": [],
+    "metrics": []
+   },
+   "final": {
+    "hedge": {},
+    "account_type": {},
+    "delisted": [],
+    "fail_count": {},
+    "bybit_offset": 0,
+    "binance_base": "https://fapi.binance.com",
+    "binance_offset": 0,
+    "bingx_offset": 0,
+    "okx_offset": 0
+   }
+  }
+ },
+ {
+  "scenario": {
+   "name": "pos_strict_bad_value",
+   "exchange": "binance",
+   "call": "get_positions__strict",
+   "args": [
+    "BNKEY-abc123",
+    "bn-secret-456"
+   ],
+   "kwargs": {},
+   "routes": [
+    {
+     "method": "GET",
+     "path": "/fapi/v2/positionRisk",
+     "responses": [
+      {
+       "text": "[{\"symbol\": \"BTCUSDT\", \"positionAmt\": \"x\"}]"
+      }
+     ]
+    }
+   ],
+   "state": {},
+   "random": [],
+   "clock": 1767225600.0
+  },
+  "expected": {
+   "name": "pos_strict_bad_value",
+   "result": {
+    "positions": null,
+    "err_out": [
+     "could not convert string to float: 'x'"
+    ]
+   },
+   "requests": [
+    {
+     "method": "GET",
+     "url": "https://fapi.binance.com/fapi/v2/positionRisk?timestamp=1767225600000&recvWindow=5000&signature=35c66fcf72a2460d05c229397270c691faa54178111eb5f177fb30e60b7cd6ac",
+     "headers": {
+      "X-MBX-APIKEY": "BNKEY-abc123"
+     },
+     "body": null
+    }
+   ],
+   "sleeps": [],
+   "clock_end": 1767225600.0,
+   "markers": [],
+   "saved": {
+    "hedge_saved": [],
+    "auth_reset": [],
+    "events": [],
+    "metrics": []
+   },
+   "final": {
+    "hedge": {},
+    "account_type": {},
+    "delisted": [],
+    "fail_count": {},
+    "bybit_offset": 0,
+    "binance_base": "https://fapi.binance.com",
+    "binance_offset": 0,
+    "bingx_offset": 0,
+    "okx_offset": 0
+   }
+  }
+ },
+ {
+  "scenario": {
+   "name": "pos_nonstrict_auth",
+   "exchange": "binance",
+   "call": "get_positions",
+   "args": [
+    "BNKEY-abc123",
+    "bn-secret-456"
+   ],
+   "kwargs": {},
+   "routes": [
+    {
+     "method": "GET",
+     "path": "/fapi/v2/positionRisk",
+     "responses": [
+      {
+       "text": "{\"code\": -2015, \"msg\": \"Invalid API-key\"}"
+      }
+     ]
+    }
+   ],
+   "state": {},
+   "random": [],
+   "clock": 1767225600.0
+  },
+  "expected": {
+   "name": "pos_nonstrict_auth",
+   "result": [],
+   "requests": [
+    {
+     "method": "GET",
+     "url": "https://fapi.binance.com/fapi/v2/positionRisk?timestamp=1767225600000&recvWindow=5000&signature=35c66fcf72a2460d05c229397270c691faa54178111eb5f177fb30e60b7cd6ac",
+     "headers": {
+      "X-MBX-APIKEY": "BNKEY-abc123"
+     },
+     "body": null
+    }
+   ],
+   "sleeps": [],
+   "clock_end": 1767225600.0,
+   "markers": [],
+   "saved": {
+    "hedge_saved": [],
+    "auth_reset": [],
+    "events": [],
+    "metrics": []
+   },
+   "final": {
+    "hedge": {},
+    "account_type": {},
+    "delisted": [],
+    "fail_count": {},
+    "bybit_offset": 0,
+    "binance_base": "https://fapi.binance.com",
+    "binance_offset": 0,
+    "bingx_offset": 0,
+    "okx_offset": 0
+   }
+  }
  }
 ]

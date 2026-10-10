@@ -399,12 +399,12 @@ describe(`trade ops — ${FX.steps.length} steps replayed against the bot`, () =
     expect(seen.d15).toBe(9);
     expect(seen.d16).toBe(FX.steps.filter((s) => s.site === 'not_found').length);
     expect(seen.effects).toBe(FX.steps.filter((s) => s.kind === 'cb' && s.site !== 'not_found').length);
-    expect(seen.requests).toBe(70);
-    expect(seen.trade).toBe(85);
-    expect(seen.user).toBe(165);
+    expect(seen.requests).toBe(74);
+    expect(seen.trade).toBe(89);
+    expect(seen.user).toBe(169);
     expect(seen.logs).toBe(65);
-    expect(seen.cards).toBe(26);
-    expect(seen.sent).toBe(52);
+    expect(seen.cards).toBe(30);
+    expect(seen.sent).toBe(56);
     expect(seen.progress).toBe(8);
   }, 180_000);
 });

@@ -322,6 +322,7 @@ class LogCapture(logging.Handler):
 def reset_state(clock: Clock):
     for d in (by._per_key_buckets, by._async_per_key_buckets, by._per_key_locks, by._delisted_symbols,
               by._instrument_filter_cache, by._hedge_mode_cache, by._hedge_mode_cache_ts, by._symbol_fail_count,
+              by._symbol_fail_ts,
               by._pybit_sessions, by._account_type_cache,
               bx._instrument_filter_cache, bn._instrument_filter_cache, ok._instrument_cache):
         d.clear()
@@ -432,7 +433,34 @@ def run_scenario(sc: dict) -> dict:
         lg.setLevel(logging.DEBUG)
         lg.propagate = False
     mod = {"bybit": by, "bingx": bx, "binance": bn, "okx": ok}[sc["exchange"]]
-    fn = getattr(mod, sc["call"])
+    call = sc["call"]
+    if call == "__seq__":
+        # a sequence of calls on one module state with the clock moved before each:
+        # args = [[fn, args, kwargs, dt_seconds], ...] → result = [result, ...]
+        async def _seq_call(*_a, **_k):
+            outs = []
+            for f_name, f_args, f_kw, dt in sc["args"]:
+                clock.t += dt
+                clock.m += dt
+                r = getattr(mod, f_name)(*f_args, **f_kw)
+                if asyncio.iscoroutine(r):
+                    r = await r
+                outs.append(_jsonable(r))
+            return outs
+        fn = _seq_call
+    elif call.endswith("__strict"):
+        # [POS-READ-STRICT 2026-10] fn(..., strict=True, err_out=[]) → {"positions": result, "err_out": [...]}
+        _strict_fn = getattr(mod, call[: -len("__strict")])
+
+        async def _strict_call(*a, **k):
+            eo: list = []
+            r = _strict_fn(*a, strict=True, err_out=eo, **k)
+            if asyncio.iscoroutine(r):
+                r = await r
+            return {"positions": r, "err_out": eo}
+        fn = _strict_call
+    else:
+        fn = getattr(mod, call)
     out = {"name": sc["name"]}
     # functions that do `import time as _time` locally (bybit dashboard / summary) get the proxy too
     sys.modules["time"] = tp

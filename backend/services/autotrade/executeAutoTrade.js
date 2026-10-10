@@ -167,6 +167,20 @@ function createExecutor(deps) {
     }
   };
 
+  /**
+   * [PTP-TP-PLACED 2026-10] auto_trade._ptp_mark_tp_placed: the ladder the background placed after the
+   * open (partial TP, [C79-PTP-FB], [TIMEOUT-RECONCILE-PTP]) is on the exchange → tp_placed=1 (the open
+   * wrote 0: place_trade with tp=0 answers tp_placed=False). A write error is only logged.
+   */
+  async function ptpMarkTpPlaced(tradeId, userId, symbol) {
+    try {
+      await db.updateTradeTpPlaced(tradeId, 1);
+    } catch (e) {
+      if (isCancelledError(e)) throw e;
+      log.warning(pf('[PTP-TP-PLACED] uid=%s %s: tp_placed write failed: %s', userId, symbol, errText(e)));
+    }
+  }
+
   async function safeSkipTrade(tradeId, reason = 'unknown') {
     if (!tradeId) return;
     try {
@@ -1686,6 +1700,8 @@ function createExecutor(deps) {
           if (!(qty > 0)) return;
           const posIdx = pyIntStrict(or(pyGet(tradeResult, 'pos_idx', 0), 0));
           const okxPp = or(rget(row, 'okx_passphrase', ''), '');
+          // [PTP-TP-PLACED 2026-10] the opening SL (OKX place_trade answers sl_placed; missing → True)
+          const openSl = truthy(pyGet(tradeResult, 'sl_placed', true));
           const ptpTask = async () => {
             let partialOk = false;
             try {
@@ -1699,6 +1715,20 @@ function createExecutor(deps) {
               log.warning(pf('[C79-PTP-FAIL] uid=%s %s: partial_tp exception: %s — falling back to main TP', userId, symbol, errText(pe)));
             }
             emitEvt(tradeId, 'partial_tp_placed', { ok: Boolean(partialOk), strategy, exchange, qty }, ['qty']);
+            if (truthy(partialOk)) {
+              // [PTP-TP-PLACED 2026-10] partial TP True = the exchange took at least one ladder TP
+              // ([BE-PTP-RETRY-OK]'s rule). Binance: only with a live position (it accepts the conditional
+              // TPs for a resting LIMIT entry, BE [SMC-SPLIT-ORPHAN] would cancel it). OKX opened without
+              // an SL → 0 (the BE SL-only retry).
+              let ptpMark = true;
+              if (exchange === 'binance') {
+                const bnReco = await reconcile.reconcileTimeoutPosition({ exchange, apiKey, apiSecret, symbol, direction, bybitDemo });
+                ptpMark = pyFloat(or(pyGet(bnReco || {}, 'size', 0), 0)) > 0;
+              } else if (exchange === 'okx' && !openSl) {
+                ptpMark = false;
+              }
+              if (ptpMark) await ptpMarkTpPlaced(tradeId, userId, symbol);
+            }
             if (!partialOk && ptpEnabled) {
               let fbShouldRun = true;
               try {
@@ -1713,21 +1743,29 @@ function createExecutor(deps) {
                 log.debug(pf('[C79-PTP-FB-GATE] uid=%s %s reconcile check failed (fail-open): %s', userId, symbol, errText(ge)));
               }
               if (!fbShouldRun) return;
+              let fbRes = {};   // [PTP-TP-PLACED 2026-10] the place_sl_tp_for_position answer
               try {
                 let fbOk;
                 if (exchange === 'bybit') {
                   fbOk = await traderFor('bybit').placeTpOrders(apiKey, apiSecret, symbol, direction, qty, tp1, tp2, tp3, posIdx, bybitDemo);
                 } else if (exchange === 'bingx' || exchange === 'binance') {
-                  const fbRes = await traderFor(exchange).placeSlTpForPosition(apiKey, apiSecret, symbol, direction, qty, sl, tp1, tp2, tp3);
+                  fbRes = await traderFor(exchange).placeSlTpForPosition(apiKey, apiSecret, symbol, direction, qty, sl, tp1, tp2, tp3);
                   fbOk = truthy(pyGet(fbRes, 'tp_placed', false));
                 } else if (exchange === 'okx') {
-                  const fbRes = await traderFor('okx').placeSlTpForPosition(apiKey, apiSecret, symbol, direction, qty, sl, tp1, tp2, tp3, okxPp);
+                  fbRes = await traderFor('okx').placeSlTpForPosition(apiKey, apiSecret, symbol, direction, qty, sl, tp1, tp2, tp3, okxPp);
                   fbOk = truthy(pyGet(fbRes, 'tp_placed', false));
                 } else {
                   fbOk = false;
                 }
                 if (fbOk) {
                   log.info(pf('[C79-PTP-FB] uid=%s %s: main TP placed as fallback', userId, symbol));
+                  // [PTP-TP-PLACED 2026-10] main TP on the exchange → tp_placed=1. BingX / Binance / OKX place
+                  // the SL in the same call: without sl_placed the flag stays 0 (BingX / Binance drop the old
+                  // SL when the new one fails; the BE monitor re-places it). OKX keeps the old SL — the
+                  // opening SL is enough.
+                  if (exchange === 'bybit' || truthy(pyGet(fbRes, 'sl_placed', false)) || (exchange === 'okx' && openSl)) {
+                    await ptpMarkTpPlaced(tradeId, userId, symbol);
+                  }
                 } else {
                   log.warning(pf('[C79-PTP-FB-FAIL] uid=%s %s: main TP fallback ALSO failed — BE-monitor will retry', userId, symbol));
                   if (bot) await notifyTpFailed('tp_placement_failed');
@@ -1806,10 +1844,11 @@ function createExecutor(deps) {
             log.debug(`reconcile update_trade: ${errText(de)}`);
           }
           await recordExchange(tradeId, exchange);
+          let rslTask = null;   // [PTP-TP-PLACED 2026-10] the SL fallback below (reconcile_ptp waits for it)
           const recoSl = pyFloat(or(reco.stopLoss, 0));
           if (recoSl === 0 && sl > 0) {
             log.warning(pf('[TIMEOUT-RECONCILE-SL] uid=%s %s: position open with NO SL on exchange — scheduling set_trailing_sl(%.6g) fallback', userId, symbol, sl));
-            spawn(`reconcile_sl_${userId}_${symbol}`, async () => {
+            rslTask = spawn(`reconcile_sl_${userId}_${symbol}`, async () => {
               try {
                 const tr = traderFor(exchange);
                 let res;
@@ -1821,21 +1860,31 @@ function createExecutor(deps) {
                 } else {
                   log.warning(pf('[TIMEOUT-RECONCILE-SL] uid=%s %s: fallback SL failed: %s', userId, symbol, pyGet(res || {}, 'error', '?')));
                 }
+                return Boolean(res && truthy(pyGet(res, 'ok', null)));   // [PTP-TP-PLACED 2026-10] SL on the exchange?
               } catch (se) {
                 if (isCancelledError(se)) throw se;
                 log.warning(pf('[TIMEOUT-RECONCILE-SL] uid=%s %s exception: %s', userId, symbol, errText(se)));
+                return false;   // [PTP-TP-PLACED 2026-10]
               }
             });
           }
           try {
+            const slTask = rslTask;   // [PTP-TP-PLACED 2026-10] bound when the task is defined
             spawn(`reconcile_ptp_${userId}_${symbol}`, async () => {
               try {
-                await partialTp.placePartialTpOrders({
+                const rptpOk = await partialTp.placePartialTpOrders({
                   api_key: apiKey, api_secret: apiSecret, symbol, entry, sl, direction, total_qty: recoSize, user: row,
                   strategy_name: strategy, exchange, bybit_demo: bybitDemo, pos_idx: 0,
                   tp1_signal_price: pyFloat(or(tp1, 0)), tp2_signal_price: pyFloat(or(tp2, 0)), bot,
                 });
                 log.info(pf('[TIMEOUT-RECONCILE-PTP] uid=%s %s: partial TP placed on reconciled pos', userId, symbol));
+                if (truthy(rptpOk)) {
+                  // [PTP-TP-PLACED 2026-10] the ladder is on → tp_placed=1; with a [TIMEOUT-RECONCILE-SL]
+                  // fallback running, only once it put the SL on (else 0: the BE monitor re-places it)
+                  let slOk = true;
+                  if (slTask !== null) slOk = Boolean(await slTask);
+                  if (slOk) await ptpMarkTpPlaced(tradeId, userId, symbol);
+                }
               } catch (pe) {
                 if (isCancelledError(pe)) throw pe;
                 log.warning(pf('[TIMEOUT-RECONCILE-PTP] uid=%s %s failed: %s — BE-monitor will retry SL/TP', userId, symbol, errText(pe)));

@@ -100,6 +100,7 @@
      "risk_applied_pct": 0.5,
      "risk_capped": false,
      "risk_requested_pct": 0.5,
+     "sl_placed": true,
      "symbol": "SYNUP07-USDT-SWAP",
      "tp_placed": false
     },
@@ -206,6 +207,7 @@
      "ok": true,
      "order_id": "7036",
      "qty": "8.78",
+     "sl_placed": true,
      "symbol": "SYNUP07-USDT-SWAP",
      "tp_placed": true
     },

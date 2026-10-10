@@ -250,3 +250,18 @@ S("test_connection_v1_fallback", "test_connection", [KEY, SEC],
 S("test_connection_bad_key", "test_connection", ["gAAAAAbroken", SEC], routes=[])
 S("sync_time", "sync_time", [], routes=[R("GET", "/openApi/server/v1/time", {"code": 0, "msg": "", "data": {"serverTime": 1767225600420}})])
 S("sync_time_missing_data", "sync_time", [], routes=[R("GET", "/openApi/server/v1/time", {"code": 100, "msg": "maintenance"})])
+
+
+# ── [POS-READ-STRICT 2026-10] strict positions read: None + the error text on a failed read ──
+GPS = "get_positions__strict"
+PATH_P = "/openApi/swap/v2/user/positions"
+S("pos_strict_ok", GPS, [KEY, SEC, "BTC-USDT-SWAP"], routes=[R("GET", PATH_P, pos())])
+S("pos_strict_empty", GPS, [KEY, SEC], routes=[R("GET", PATH_P, NOPOS)])
+S("pos_strict_auth", GPS, [KEY, SEC], routes=[R("GET", PATH_P, {"code": 100413, "msg": "Incorrect apiKey", "data": {}})])
+S("pos_strict_symbol_absent", GPS, [KEY, SEC, "XYZ-USDT-SWAP"], routes=[R("GET", PATH_P, {"code": 109425, "msg": "symbol not exist"})])
+S("pos_strict_data_null", GPS, [KEY, SEC], routes=[R("GET", PATH_P, {"code": 0, "msg": "", "data": None})])
+S("pos_strict_data_dict", GPS, [KEY, SEC], routes=[R("GET", PATH_P, {"code": 0, "msg": "", "data": {"x": 1}})])
+S("pos_strict_timeout", GPS, [KEY, SEC], routes=[R("GET", PATH_P, {"raise": "timeout"})])
+S("pos_strict_bad_value", GPS, [KEY, SEC], routes=[R("GET", PATH_P, {"code": 0, "msg": "", "data": [{"symbol": "BTC-USDT", "positionAmt": "abc"}]})])
+S("pos_strict_not_json", GPS, [KEY, SEC], routes=[R("GET", PATH_P, {"status": 502, "text": "bad gateway", "headers": {"Content-Type": "text/html"}})])
+S("pos_nonstrict_data_null", "get_positions", [KEY, SEC], routes=[R("GET", PATH_P, {"code": 0, "msg": "", "data": None})])

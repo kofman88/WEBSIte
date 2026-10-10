@@ -421,3 +421,55 @@ S("sync_time_bad_code", "sync_time", [], {}, [R("GET", "/api/v5/public/time", er
 S("sync_time_text_plain", "sync_time", [], {}, [R("GET", "/api/v5/public/time", {"status": 200, "text": "{}", "headers": {"Content-Type": "text/plain"}})])
 S("okx_sz_doge", "okx_sz", ["DOGEUSDT", 12345.0], {}, [R("GET", "/api/v5/public/instruments", inst("DOGE-USDT-SWAP", "1", "0.00001", "75", "1000"))])
 S("okx_sz_unknown", "okx_sz", ["XYZ-USDT-SWAP", 1.5], {}, [R("GET", "/api/v5/public/instruments", ok())])
+
+
+# ── [POS-READ-STRICT 2026-10] strict positions read: None + the error text on a failed read ──
+GPS = "get_positions__strict"
+PATH_P = "/api/v5/account/positions"
+S("pos_strict_ok", GPS, [KEY, SEC, "BTC-USDT-SWAP", PP], {}, [R("GET", PATH_P, pos()), R("GET", "/api/v5/public/instruments", inst())])
+S("pos_strict_empty", GPS, [KEY, SEC, None, PP], {}, [R("GET", PATH_P, ok())])
+S("pos_strict_auth", GPS, [KEY, SEC, None, PP], {}, [R("GET", PATH_P, err("50111", "Invalid OK-ACCESS-KEY"))])
+S("pos_strict_symbol_absent", GPS, [KEY, SEC, "XYZ-USDT-SWAP", PP], {}, [R("GET", PATH_P, err("51001", "Instrument ID doesn't exist"))])
+S("pos_strict_timeout", GPS, [KEY, SEC, None, PP], {}, [R("GET", PATH_P, {"raise": "timeout"})])
+S("pos_strict_data_null", GPS, [KEY, SEC, None, PP], {}, [R("GET", PATH_P, {"code": "0", "msg": "", "data": None})])
+S("pos_strict_empty_body", GPS, [KEY, SEC, None, PP], {}, [R("GET", PATH_P, {"status": 200, "text": ""})])
+S("pos_strict_bad_value", GPS, [KEY, SEC, None, PP], {},
+  [R("GET", PATH_P, ok({"instId": "BTC-USDT-SWAP", "posSide": "long", "pos": "abc"})), R("GET", "/api/v5/public/instruments", inst())])
+S("pos_nonstrict_bad_value", "get_positions", [KEY, SEC, None, PP], {},
+  [R("GET", PATH_P, ok({"instId": "BTC-USDT-SWAP", "posSide": "long", "pos": "abc"})), R("GET", "/api/v5/public/instruments", inst())])
+
+# ── [BE-OKX 2026-10] cancel_tp_orders: only the take-profits of one side; stops / entries / the hedge side stay ──
+CTP = "cancel_tp_orders"
+PEND = "/api/v5/trade/orders-pending"
+ALGOP = "/api/v5/trade/orders-algo-pending"
+CANCEL_OK = ok({"ordId": "x", "sCode": "0", "sMsg": ""})
+LADDER = ok({"ordId": "11", "posSide": "long", "side": "sell", "ordType": "limit"},     # LONG TP → cancelled
+            {"ordId": "12", "posSide": "long", "side": "buy", "ordType": "limit"},      # LONG entry → kept
+            {"ordId": "13", "posSide": "short", "side": "buy", "ordType": "limit"},     # the hedge SHORT's TP → kept
+            {"ordId": "14", "posSide": "net", "side": "sell", "reduceOnly": "true"},    # net reduce-only → cancelled
+            {"ordId": "15", "posSide": "", "side": "sell", "reduceOnly": "false"},      # net, not reduce-only → kept
+            {"ordId": "", "posSide": "long", "side": "sell"},                           # no id → skipped
+            {"ordId": "16", "posSide": "LONG", "side": "SELL"})                         # case-insensitive → cancelled
+ALGOS = ok({"algoId": "a1", "posSide": "long", "tpTriggerPx": "90000", "slTriggerPx": ""},   # main TP → cancelled
+           {"algoId": "a2", "posSide": "long", "tpTriggerPx": "", "slTriggerPx": "86000"},   # SL → kept
+           {"algoId": "a3", "posSide": "long", "tpTriggerPx": "91000", "slTriggerPx": "86000"},   # TP+SL → kept
+           {"algoId": "a4", "posSide": "short", "tpTriggerPx": "80000"},                     # hedge side → kept
+           {"algoId": "a5", "posSide": "net", "tpTriggerPx": "92000"},                       # net → cancelled
+           {"algoId": "", "posSide": "long", "tpTriggerPx": "93000"})                       # no id → skipped
+S("ctp_long_mixed", CTP, [KEY, SEC, "BTC-USDT-SWAP", "LONG", PP], {},
+  [R("GET", PEND, LADDER), R("POST", "/api/v5/trade/cancel-order", CANCEL_OK), R("GET", ALGOP, ALGOS),
+   R("POST", "/api/v5/trade/cancel-algos", ok({"algoId": "a1", "sCode": "0", "sMsg": ""}))])
+S("ctp_short_mixed", CTP, [KEY, SEC, "BTC-USDT-SWAP", " short ", PP], {},
+  [R("GET", PEND, LADDER), R("POST", "/api/v5/trade/cancel-order", CANCEL_OK), R("GET", ALGOP, ALGOS),
+   R("POST", "/api/v5/trade/cancel-algos", ok({"algoId": "a4", "sCode": "0", "sMsg": ""}))])
+S("ctp_unknown_direction", CTP, [KEY, SEC, "BTC-USDT-SWAP", "BOTH", PP], {}, [])
+S("ctp_none_direction", CTP, [KEY, SEC, "BTC-USDT-SWAP", None, PP], {}, [])
+S("ctp_pending_read_fails", CTP, [KEY, SEC, "BTC-USDT-SWAP", "LONG", PP], {},
+  [R("GET", PEND, err("50011", "Too Many Requests")), R("GET", ALGOP, ALGOS),
+   R("POST", "/api/v5/trade/cancel-algos", ok({"algoId": "a1", "sCode": "0", "sMsg": ""}))])
+S("ctp_algo_read_fails", CTP, [KEY, SEC, "BTC-USDT-SWAP", "LONG", PP], {},
+  [R("GET", PEND, LADDER), R("POST", "/api/v5/trade/cancel-order", CANCEL_OK), R("GET", ALGOP, {"raise": "timeout"})])
+S("ctp_cancel_refused", CTP, [KEY, SEC, "BTC-USDT-SWAP", "LONG", PP], {},
+  [R("GET", PEND, LADDER), R("POST", "/api/v5/trade/cancel-order", err("1", "Operation failed.", [{"ordId": "11", "sCode": "51400", "sMsg": "Cancellation failed as the order does not exist."}])),
+   R("GET", ALGOP, ALGOS), R("POST", "/api/v5/trade/cancel-algos", err("1", "Operation failed."))])
+S("ctp_nothing_to_cancel", CTP, [KEY, SEC, "BTC-USDT-SWAP", "LONG", PP], {}, [R("GET", PEND, ok()), R("GET", ALGOP, ok())])

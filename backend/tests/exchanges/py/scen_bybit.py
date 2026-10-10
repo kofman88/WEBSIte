@@ -263,3 +263,53 @@ S("sess_trail_34040_dict", "set_trailing_sl", [KEY, SEC, "BTC-USDT-SWAP", 86500.
 S("sess_split_130125", "place_trade_split", [KEY, SEC, "BTC-USDT-SWAP", "LONG", 86500.0, 87000.0, 85500.0, 88500.0, 1.0, 10], {},
   SESSION_BASE + [SC("place_order", err(130125, "pos idx"), order_ok("lo"), order_ok("hi"), order_ok("tp")),
                   SC("get_positions", positions(idx=1, size="0.016"))], mode="session")
+
+
+# ── [POS-READ-STRICT 2026-10] strict positions read: None + the error text on a failed read ──
+GPS = "get_positions__strict"
+S("pos_strict_ok", GPS, [KEY, SEC, "BTC-USDT-SWAP", False], routes=[R("GET", "/v5/position/list", positions())])
+S("pos_strict_empty", GPS, [KEY, SEC, "", False], routes=[R("GET", "/v5/position/list", {"retCode": 0, "retMsg": "OK", "result": {"list": []}})])
+S("pos_strict_auth_wire", GPS, [KEY, SEC, "", False], routes=[R("GET", "/v5/position/list", err(10003, "API key is invalid."))])
+S("pos_strict_symbol_invalid_wire", GPS, [KEY, SEC, "XYZ-USDT-SWAP", False],
+  routes=[R("GET", "/v5/position/list", err(10001, "params error: symbol invalid"))])
+S("pos_strict_timeout_wire", GPS, [KEY, SEC, "", False],
+  routes=[R("GET", "/v5/position/list", {"raise": "timeout", "message": "HTTPSConnectionPool(host='api.bybit.com', port=443): Read timed out. (read timeout=10)"})],
+  random=[0.25])
+S("pos_strict_retcode_session", GPS, [KEY, SEC, "", False], routes=[SC("get_positions", err(10002, "invalid request, please check your server timestamp"))],
+  mode="session")
+S("pos_strict_list_null_session", GPS, [KEY, SEC, "", False], routes=[SC("get_positions", {"retCode": 0, "retMsg": "OK", "result": {"list": None}})],
+  mode="session")
+S("pos_strict_result_not_dict_session", GPS, [KEY, SEC, "", False], routes=[SC("get_positions", {"retCode": 0, "retMsg": "OK", "result": "x"})],
+  mode="session")
+S("pos_nonstrict_list_null_session", "get_positions", [KEY, SEC, "", False],
+  routes=[SC("get_positions", {"retCode": 0, "retMsg": "OK", "result": {"list": None}})], mode="session")
+S("pos_nonstrict_retcode_session", "get_positions", [KEY, SEC, "", False], routes=[SC("get_positions", err(10002, "bad ts"))], mode="session")
+
+# ── [BYBIT-DELIST-TTL 2026-10] auto-blacklist count lives 24 h from the last failure, reset on success ──
+_H = 3600.0
+S("delist_ttl_seq", "__seq__", [
+    ["record_symbol_failure", ["BTC-USDT-SWAP"], {}, 0.0],
+    ["record_symbol_failure", ["BTCUSDT"], {}, 10.0],
+    ["is_delisted", ["BTCUSDT"], {}, 0.0],
+    ["record_symbol_failure", ["BTC-USDT-SWAP"], {}, 23 * _H],
+    ["is_delisted", ["BTCUSDT"], {}, 0.0],
+    ["is_delisted", ["BTC-USDT-SWAP"], {}, 0.0],          # raw-symbol lookup: the count is keyed by the Bybit symbol
+    ["is_delisted", ["BTCUSDT"], {}, 24 * _H - 1.0],
+    ["is_delisted", ["BTCUSDT"], {}, 1.0],                 # 24 h after the last failure → reset
+    ["record_symbol_failure", ["BTCUSDT"], {}, 0.0],       # starts again at 1
+    ["record_symbol_failure", ["BTCUSDT"], {}, 25 * _H],   # the previous one expired → 1 again
+    ["record_symbol_failure", ["BTCUSDT"], {}, 1.0],
+    ["record_symbol_failure", ["BTCUSDT"], {}, 1.0],
+    ["is_delisted", ["BTCUSDT"], {}, 0.0],
+    ["record_symbol_success", ["BTC-USDT-SWAP"], {}, 1.0],
+    ["is_delisted", ["BTCUSDT"], {}, 0.0],
+    ["record_symbol_failure", ["ETH-USDT-SWAP"], {}, 0.0],
+])
+# a successful entry resets the count (place_trade answers ok with an order id)
+S("delist_ttl_reset_by_place_trade", "__seq__", [
+    ["record_symbol_failure", ["BTC-USDT-SWAP"], {}, 0.0],
+    ["record_symbol_failure", ["BTC-USDT-SWAP"], {}, 0.0],
+    ["place_trade", LONG_ARGS, {"tp2": 89500.0, "trade_id": "tr-ttl", "user_id": 1}, 0.0],
+    ["record_symbol_failure", ["BTC-USDT-SWAP"], {}, 0.0],
+    ["is_delisted", ["BTCUSDT"], {}, 0.0],
+], {}, SESSION_BASE + [SC("place_order", order_ok("ttl-1")), SC("get_positions", positions())], mode="session")

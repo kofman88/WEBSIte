@@ -113,6 +113,11 @@ USERS = [  # uid, sub_plan, sub_status, sub_expires (rel), lang, extra fields, k
     (221, "pro", "active", 30 * D, "en", {"trade_exchange": "binance", "auto_trade": True}, {"binance": K["binance"]}),
     (222, "pro", "active", 30 * D, "ru", {"trade_exchange": "okx", "auto_trade": True}, {"okx": K["okx"]}),
     (123, "free", "active", 0, "ru", {}, {}),
+    # [EXEC-QTY-TP 2026-10] Binance exec, tp_placed=True but no live position on the trade side
+    (241, "pro", "active", 30 * D, "en", {"trade_exchange": "binance", "auto_trade": True}, {"binance": K["binance"]}),
+    (242, "pro", "active", 30 * D, "en", {"trade_exchange": "binance", "auto_trade": True}, {"binance": K["binance"]}),
+    (243, "pro", "active", 30 * D, "en", {"trade_exchange": "binance", "auto_trade": True}, {"binance": K["binance"]}),
+    (244, "pro", "active", 30 * D, "en", {"trade_exchange": "binance", "auto_trade": True}, {"binance": K["binance"]}),
 ]
 
 # ── trades ───────────────────────────────────────────────────────────────────
@@ -142,6 +147,7 @@ TRADES = [
       entry_lo=149.0, entry_hi=151.0),
     T("ex-bx-1", 205), T("ex-bx-fail", 205, sym="ETH-USDT-SWAP", direction="SHORT", entry=3000.0, sl=3060.0, tp1=2900.0, tp2=0.0, tp3=0.0),
     T("ex-bn-1", 206), T("ex-bn-fail", 206, sym="ETH-USDT-SWAP"),
+    T("ex-bn-rest", 241), T("ex-bn-opp", 242), T("ex-bn-perr", 243), T("ex-bn-praise", 244),
     T("ex-ok-1", 207), T("ex-ok-fail", 207, sym="ETH-USDT-SWAP"),
     T("ex-ok-nopp", 208), T("ex-kr-1", 209), T("ex-demo-1", 210),
     T("ex-expired", 211), T("ex-banned", 212), T("ex-nokeys", 225), T("ex-okx-nokeys", 213), T("ex-empty-ex", 218),
@@ -565,6 +571,15 @@ cb("exec bingx opened", 205, "exec_trade", "exec_trade_ex-bx-1", "ex-bx-1", rout
 cb("exec bingx rejected", 205, "exec_trade", "exec_trade_ex-bx-fail", "ex-bx-fail", routes=PT_BX_FAIL)
 cb("exec binance opened", 206, "exec_trade", "exec_trade_ex-bn-1", "ex-bn-1", routes=PT_BN_OK)
 cb("exec binance rejected", 206, "exec_trade", "exec_trade_ex-bn-fail", "ex-bn-fail", routes=PT_BN_FAIL)
+# [EXEC-QTY-TP 2026-10] the resting LIMIT (no position), the other side's position, an error answer, a raised read → tp_placed 0
+cb("exec binance resting limit → tp_placed 0", 241, "exec_trade", "exec_trade_ex-bn-rest", "ex-bn-rest",
+   routes=PT_BN_OK[:-2] + [R("GET", "/fapi/v2/positionRisk", bn_pos("0.000")), R("GET", "/fapi/v1/openOrders", [])])
+cb("exec binance opposite-side position → tp_placed 0", 242, "exec_trade", "exec_trade_ex-bn-opp", "ex-bn-opp",
+   routes=PT_BN_OK[:-2] + [R("GET", "/fapi/v2/positionRisk", bn_pos("-0.010", side="SHORT")), R("GET", "/fapi/v1/openOrders", [])])
+cb("exec binance positions error answer → tp_placed 0", 243, "exec_trade", "exec_trade_ex-bn-perr", "ex-bn-perr",
+   routes=PT_BN_OK[:-2] + [R("GET", "/fapi/v2/positionRisk", bn_err(-1003, "Too many requests")), R("GET", "/fapi/v1/openOrders", [])])
+cb("exec binance positions read raises → tp_placed 0", 244, "exec_trade", "exec_trade_ex-bn-praise", "ex-bn-praise",
+   routes=PT_BN_OK[:-2] + [R("GET", "/fapi/v2/positionRisk", {"raise": "timeout"}), R("GET", "/fapi/v1/openOrders", [])])
 cb("exec okx opened", 207, "exec_trade", "exec_trade_ex-ok-1", "ex-ok-1", routes=PT_OK_OK)
 cb("exec okx rejected", 207, "exec_trade", "exec_trade_ex-ok-fail", "ex-ok-fail", routes=PT_OK_FAIL)
 cb("exec okx without passphrase", 208, "exec_trade", "exec_trade_ex-ok-nopp", "ex-ok-nopp", routes=PT_OK_FAIL)

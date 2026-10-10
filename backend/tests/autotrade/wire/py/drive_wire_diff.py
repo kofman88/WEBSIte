@@ -1485,6 +1485,23 @@ def gen_targeted():
                          pos_err])
 
 
+    # [PTP-TP-PLACED 2026-10] OKX opened without an SL (attachAlgoOrds refused → legacy entry, the separate SL
+    # refused 3×, the safety-close position read down) and the partial ladder placed → tp_placed stays 0;
+    # with the SL on (only the attach refused) the ladder marks tp_placed=1
+    for tag, sl_fail in (("no_sl", True), ("sl_ok", False)):
+        uid += 1
+        s = make_signal(rng, "SOL-USDT-SWAP", "LONG", "LEVELS", price=COINS["SOL-USDT-SWAP"]["price"], drift=0.0003, sl_pct=0.012)
+        s.update(symbol="SOL-USDT-SWAP", direction="LONG", strategy="LEVELS", quality=4)
+        fl = [fault("okx", "attach_algo")]
+        if sl_fail:
+            fl += [fault("okx", "algo_reject", nth=[1, 2, 3]),
+                   {"ex": "okx", "method": "GET", "path": "/api/v5/account/positions", "nth": 1, "kind": "connect",
+                    "label": "safety_close_read_down"}]
+        scenario(f"okx_ptp_open_{tag}", uid=uid, ex="okx",
+                 user={"partial_tp_enabled": True, "trade_risk_pct": 1.0, "max_risk_pct": 2.0},
+                 signals=[s], balance=1000.0, regime="ranging", faults=fl)
+
+
 # ══════════════════════════ runner ══════════════════════════
 USER_COLS: list = []
 CFG_KEYS = ("SMC_HOUR_FILTER_ENABLED", "SMC_HOUR_FILTER_MODE", "BAD_HOURS_UTC", "DAILY_MAX_LOSS_R")

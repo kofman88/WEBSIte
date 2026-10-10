@@ -639,14 +639,26 @@ function createBinanceTrader(overrides = {}) {
     }
   }
 
-  async function getPositions(apiKey, secret, symbol = null) {
+  /** [POS-READ-STRICT 2026-10] get_positions' answer to a failed read: [] as before; strict → null
+   *  ("not read" ≠ "no positions"), the error text appended to errOut. */
+  function _posReadFailed(strict, errOut, err) {
+    if (!strict) return [];
+    if (errOut !== null && errOut !== undefined) errOut.push(err);
+    return null;
+  }
+
+  /** [POS-READ-STRICT 2026-10] opts.strict: the answer is not a list ({"code","msg"} error), a timeout or an
+   *  exception → null (the error text → opts.errOut). Not strict — as before ([] on any failure). */
+  async function getPositions(apiKey, secret, symbol = null, { strict = false, errOut = null } = {}) {
     try {
       const params = {};
       if (pyTruthy(symbol)) params.symbol = toBinanceSymbol(symbol);
       const data = await _request('GET', '/fapi/v2/positionRisk', apiKey, secret, params);
       if (!Array.isArray(data)) {
         log.warning(`Binance get_positions unexpected: ${pyStr(data)}`);
-        return [];
+        return _posReadFailed(strict, errOut, isDict(data)
+          ? `code: ${pyStr(pyGet(data, 'code'))} ${pyStr(pyGet(data, 'msg', ''))}`
+          : pySlice(`unparsable answer: ${pyRepr(data)}`, 200));
       }
       const positions = [];
       for (const p of pyIter(data)) {
@@ -669,9 +681,9 @@ function createBinanceTrader(overrides = {}) {
       return positions;
     } catch (e) {
       rethrowCancelled(e);
-      if (e instanceof TransportError && e.kind === 'timeout') { log.warning('Binance get_positions: таймаут'); return []; }
+      if (e instanceof TransportError && e.kind === 'timeout') { log.warning('Binance get_positions: таймаут'); return _posReadFailed(strict, errOut, 'timeout'); }
       log.error(`Binance get_positions: ${errStr(e)}`);
-      return [];
+      return _posReadFailed(strict, errOut, errStr(e));
     }
   }
 

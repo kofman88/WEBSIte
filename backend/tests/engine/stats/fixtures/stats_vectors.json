@@ -110959,7 +110959,7 @@
 ],
 "all": [
 4,
-198
+195
 ],
 "after_all": [
 {
@@ -111048,10 +111048,10 @@
 },
 {
 "trade_id": "t0013_107",
-"result": "SKIP",
-"state": "FAILED",
-"skip_reason": "ghost",
-"state_changed_at": 1766000000.0
+"result": "",
+"state": "OPEN",
+"skip_reason": "",
+"state_changed_at": 0.0
 },
 {
 "trade_id": "t0014_102",
@@ -111328,10 +111328,10 @@
 },
 {
 "trade_id": "t0053_104",
-"result": "SKIP",
-"state": "FAILED",
-"skip_reason": "ghost",
-"state_changed_at": 1766000000.0
+"result": "",
+"state": "OPEN",
+"skip_reason": "",
+"state_changed_at": 0.0
 },
 {
 "trade_id": "t0054_105",
@@ -111860,10 +111860,10 @@
 },
 {
 "trade_id": "t0129_104",
-"result": "SKIP",
-"state": "FAILED",
-"skip_reason": "ghost",
-"state_changed_at": 1766000000.0
+"result": "",
+"state": "OPEN",
+"skip_reason": "",
+"state_changed_at": 0.0
 },
 {
 "trade_id": "t0130_105",
@@ -113385,9 +113385,10 @@
 "state_changed_at": 0.0
 }
 ],
-"gc_deleted": 75,
+"gc_deleted": 74,
 "after_gc": [
 "t0006_106",
+"t0013_107",
 "t0015_102",
 "t0016_104",
 "t0017_107",

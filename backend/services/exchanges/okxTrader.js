@@ -543,8 +543,10 @@ function createOkxTrader(overrides = {}) {
 
       let orderId;
       let atomicTp1Placed;
+      let slPlaced;
       if (atomicOk) {
         orderId = pyGet(firstData(resp), 'ordId', '');
+        slPlaced = true;   // the SL is attached atomically
         atomicTp1Placed = Boolean(pyTruthy(tp1) && tp1 > 0 && nTp1 > 0);
         log.info(`[OKX-ATOMIC-OK] ${instId}: entry+SL${atomicTp1Placed ? '+TP1' : ''} in single request`);
       } else {
@@ -567,7 +569,7 @@ function createOkxTrader(overrides = {}) {
           instId, tdMode: 'cross', side: closeSide, posSide, ordType: 'conditional',
           sz: szStr, slTriggerPx: slStr, slOrdPx: '-1', triggerPxType: 'mark',
         };
-        let slPlaced = false;
+        slPlaced = false;
         let slLast = '';
         for (let a = 0; a < 3; a++) {
           const slResp = await _request('POST', '/api/v5/trade/order-algo', apiKey, secret, passphrase, null, slBody);
@@ -630,7 +632,9 @@ function createOkxTrader(overrides = {}) {
       const tpPlaced = tpCountExpected > 0 && tpCountOk === tpCountExpected;
       if (tpCountExpected > 0 && tpCountOk < tpCountExpected) log.warning(`OKX TP partial fail [${instId}]: ${tpCountOk}/${tpCountExpected} placed`);
       await recordPlaced(rt, { symbol, direction, exchange: 'okx', t0, tpPlaced });
-      return { ok: true, order_id: orderId, error: '', tp_placed: tpPlaced, qty: qtyStr, symbol: instId };
+      // [PTP-TP-PLACED 2026-10] sl_placed: the SL is on the exchange (atomic or separate); False — auto-trade
+      // does not mark tp_placed=1 after partial TP, the BE monitor retries the SL
+      return { ok: true, order_id: orderId, error: '', tp_placed: tpPlaced, qty: qtyStr, symbol: instId, sl_placed: slPlaced };
     } catch (e) {
       rethrowCancelled(e);
       if (e instanceof OkxEntryStateUnknown) throw e;   // [OKX-ENTRY-TIMEOUT] the caller reconciles (auto-trade: timeout branch)
@@ -640,29 +644,45 @@ function createOkxTrader(overrides = {}) {
     }
   }
 
-  async function getPositions(apiKey, secret, symbol = null, passphrase = '') {
+  /** [POS-READ-STRICT 2026-10] opts.strict: code ≠ "0" (incl. _request's {"code":"-1"} on a network error /
+   *  timeout), data not a list or junk in a position → null (the error text → opts.errOut). Not strict — as
+   *  before (an error answer reads as [], junk in a position raises). */
+  async function getPositions(apiKey, secret, symbol = null, passphrase = '', { strict = false, errOut = null } = {}) {
     const params = { instType: 'SWAP' };
     if (pyTruthy(symbol)) params.instId = toOkxSymbol(symbol);
     const data = await _request('GET', '/api/v5/account/positions', apiKey, secret, passphrase, params);
+    if (strict && (!isDict(data) || pyStr(pyGet(data, 'code', '')) !== '0' || !Array.isArray(pyGet(data, 'data')))) {
+      if (errOut !== null && errOut !== undefined) {
+        errOut.push(isDict(data) ? `code: ${pyStr(pyGet(data, 'code'))} ${pyStr(pyGet(data, 'msg', ''))}` : pySlice(`unparsable answer: ${pyRepr(data)}`, 200));
+      }
+      return null;
+    }
     const positions = [];
-    for (const p of pyIter(pyGet(data, 'data', []))) {
-      const pos = pyFloat(pyOr(pyGet(p, 'pos', 0), 0));
-      if (pos === 0) continue;
-      const inst = pyStr(pyOr(pyGet(p, 'instId', ''), ''));
-      try { await _getInstrumentFilters(inst); } catch (_e) { rethrowCancelled(_e); /* pass */ }
-      positions.push({
-        symbol: inst,
-        side: pyGet(p, 'posSide', ''),
-        size: Math.abs(pos) * okxCtVal(inst),
-        size_contracts: Math.abs(pos),
-        entryPrice: pyFloat(pyOr(pyGet(p, 'avgPx', 0), 0)),
-        markPrice: pyFloat(pyOr(pyGet(p, 'markPx', 0), 0)),
-        unrealisedPnl: pyFloat(pyOr(pyGet(p, 'upl', 0), 0)),
-        leverage: pyGet(p, 'lever', '1'),
-        liqPrice: pyFloat(pyOr(pyGet(p, 'liqPx', 0), 0)),
-        stopLoss: 0,
-        positionIdx: 0,
-      });
+    try {
+      for (const p of pyIter(pyGet(data, 'data', []))) {
+        const pos = pyFloat(pyOr(pyGet(p, 'pos', 0), 0));
+        if (pos === 0) continue;
+        const inst = pyStr(pyOr(pyGet(p, 'instId', ''), ''));
+        try { await _getInstrumentFilters(inst); } catch (_e) { rethrowCancelled(_e); /* pass */ }
+        positions.push({
+          symbol: inst,
+          side: pyGet(p, 'posSide', ''),
+          size: Math.abs(pos) * okxCtVal(inst),
+          size_contracts: Math.abs(pos),
+          entryPrice: pyFloat(pyOr(pyGet(p, 'avgPx', 0), 0)),
+          markPrice: pyFloat(pyOr(pyGet(p, 'markPx', 0), 0)),
+          unrealisedPnl: pyFloat(pyOr(pyGet(p, 'upl', 0), 0)),
+          leverage: pyGet(p, 'lever', '1'),
+          liqPrice: pyFloat(pyOr(pyGet(p, 'liqPx', 0), 0)),
+          stopLoss: 0,
+          positionIdx: 0,
+        });
+      }
+    } catch (e) {
+      rethrowCancelled(e);
+      if (!strict) throw e;
+      if (errOut !== null && errOut !== undefined) errOut.push(errStr(e));
+      return null;
     }
     return positions;
   }
@@ -1019,6 +1039,63 @@ function createOkxTrader(overrides = {}) {
     return { ok, order_id: pyStr(pyOr(pyGet(row, 'ordId', ''), '')), error: err };
   }
 
+  /**
+   * [BE-OKX 2026-10] okx_trader.cancel_tp_orders: cancels only the take-profits of the `direction` position
+   * ("LONG" / "SHORT"). The BE monitor removed stale TPs after a partial close with cancel_all_orders, which
+   * also removes the conditional SL algos — the position was left without a stop. Cancelled here only:
+   * /orders-pending orders (the partial-TP ladder) with this side's posSide and the closing side (sell for
+   * LONG, buy for SHORT), or with posSide "net" / empty when reduce-only ([BE-OKX-HEDGE]); and conditional
+   * algos with tpTriggerPx and no slTriggerPx (main TP) of this posSide (or "net" / empty). Stops, entries
+   * and the other side of a hedge account are not touched. A read that failed → ok=false (what was
+   * cancelled stays cancelled). Answers {ok, cancelled, error} like BingX / Binance cancel_tp_orders_only.
+   */
+  async function cancelTpOrders(apiKey, secret, symbol, direction, passphrase = '') {
+    const d = pyUpper(pyStrip(pyStr(pyOr(direction, ''))));
+    if (d !== 'LONG' && d !== 'SHORT') return { ok: false, cancelled: 0, error: `unknown direction: ${pyRepr(direction)}` };
+    const instId = toOkxSymbol(symbol);
+    const posSide = d === 'LONG' ? 'long' : 'short';
+    const closeSide = d === 'LONG' ? 'sell' : 'buy';
+    let cancelled = 0;
+    const errors = [];
+    const orders = await _request('GET', '/api/v5/trade/orders-pending', apiKey, secret, passphrase, { instType: 'SWAP', instId });
+    if (pyStr(pyGet(orders, 'code', '')) !== '0') {
+      errors.push(`orders-pending: ${pyStr(pyGet(orders, 'msg', ''))}`);
+    } else {
+      for (const o of pyIter(pyOr(pyGet(orders, 'data', []), []))) {
+        const oid = pyStr(pyOr(pyGet(o, 'ordId', ''), ''));
+        if (!oid) continue;
+        const ops = pyLower(pyStr(pyOr(pyGet(o, 'posSide', ''), '')));
+        if (ops === posSide) {
+          if (pyLower(pyStr(pyOr(pyGet(o, 'side', ''), ''))) !== closeSide) continue;
+        } else if (ops === 'net' || ops === '') {
+          if (pyLower(pyStr(pyGet(o, 'reduceOnly', ''))) !== 'true') continue;
+        } else {
+          continue;
+        }
+        const r = await cancelOrder(apiKey, secret, symbol, oid, passphrase);
+        if (pyTruthy(pyGet(r, 'ok'))) cancelled += 1;
+        else errors.push(`cancel ${oid}: ${pyStr(pyGet(r, 'error', ''))}`);
+      }
+    }
+    const algos = await _request('GET', '/api/v5/trade/orders-algo-pending', apiKey, secret, passphrase, { instType: 'SWAP', instId, ordType: 'conditional' });
+    if (pyStr(pyGet(algos, 'code', '')) !== '0') {
+      errors.push(`orders-algo-pending: ${pyStr(pyGet(algos, 'msg', ''))}`);
+    } else {
+      const ids = pyIter(pyOr(pyGet(algos, 'data', []), []))
+        .filter((a) => pyTruthy(pyGet(a, 'algoId'))
+          && pyStr(pyOr(pyGet(a, 'tpTriggerPx', ''), ''))
+          && !pyStr(pyOr(pyGet(a, 'slTriggerPx', ''), ''))
+          && [posSide, 'net', ''].includes(pyLower(pyStr(pyOr(pyGet(a, 'posSide', ''), '')))))
+        .map((a) => pyStr(pyOr(pyGet(a, 'algoId', ''), '')));
+      if (ids.length) {
+        const r = await _request('POST', '/api/v5/trade/cancel-algos', apiKey, secret, passphrase, null, ids.map((i) => ({ algoId: i, instId })));
+        if (pyStr(pyGet(r, 'code', '')) === '0') cancelled += ids.length;
+        else errors.push(`cancel-algos: ${pyStr(pyGet(r, 'msg', ''))}`);
+      }
+    }
+    return { ok: !errors.length, cancelled, error: errors.join('; ') };
+  }
+
   async function getClosedPnl(apiKey, secret, symbol, passphrase = '') {
     const instId = toOkxSymbol(symbol);
     try {
@@ -1107,7 +1184,7 @@ function createOkxTrader(overrides = {}) {
 
   return {
     rt, _state: st,
-    placeTrade, getPositions, getOpenOrders, closePosition, closePositionPartial, cancelOrder, cancelAllOrders, placeSlTpForPosition,
+    placeTrade, getPositions, getOpenOrders, closePosition, closePositionPartial, cancelOrder, cancelAllOrders, cancelTpOrders, placeSlTpForPosition,
     setTrailingSl, setBreakeven, getClosedPnl, getAccountSummary, getDashboard, getBalance, getLastPrice, testConnection,
     syncTime, okxSz, okxCtVal, okxMinSz, getAlgoSlOrders,
     _request, _getInstrumentFilters, _toContracts, _cancelOrderInner, _isoTimestamp: isoTs, _livePosSides, _cleanupSideOrders,

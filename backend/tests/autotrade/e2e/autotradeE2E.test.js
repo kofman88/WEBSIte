@@ -471,7 +471,11 @@ describe('auto-trade end to end on fake exchanges (Bybit, BingX, Binance, OKX)',
       expect(row.order_id).not.toBe('');
       expect(row.exchange).toBe(ex);                    // D17
       expect(row.state).toBe('PENDING');                // kept: exec_trade never moves the state
-      expect(row.qty).toBe(0);                          // kept: exec_trade does not store qty
+      // [EXEC-QTY-TP 2026-10] exec_trade stores the trader's qty and tp_placed (Binance: live position on the side)
+      const res0 = S.fmt[`confirm:${ex}`].args[0];
+      expect(row.qty).toBe(Number(res0.qty));
+      expect(row.qty).toBeGreaterThan(0);
+      expect(row.tp_placed).toBe(res0.tp_placed ? 1 : 0);
       expect(cardOf(uid)).toEqual({ html: MSG.i18n.exec_opening, actions: null, lang: 'ru' });   // «⏳ Открываю сделку…», no buttons
       const g = await api('get', 'positions', uid);
       expect(g.body.positions.map((p) => [p.symbol, p.side])).toEqual([[BASE, 'LONG']]);

@@ -10993,5 +10993,1189 @@
     "okx_offset": 0
    }
   }
+ },
+ {
+  "scenario": {
+   "name": "pos_strict_ok",
+   "exchange": "bybit",
+   "call": "get_positions__strict",
+   "args": [
+    "BYBITKEY123456789",
+    "bybit-secret-xyz",
+    "BTC-USDT-SWAP",
+    false
+   ],
+   "kwargs": {},
+   "routes": [
+    {
+     "method": "GET",
+     "path": "/v5/position/list",
+     "responses": [
+      {
+       "text": "{\"retCode\": 0, \"retMsg\": \"OK\", \"result\": {\"list\": [{\"symbol\": \"BTCUSDT\", \"side\": \"Buy\", \"size\": \"0.012\", \"positionIdx\": 0, \"avgPrice\": \"87000.5\", \"markPrice\": \"87000.5\", \"stopLoss\": \"\"}]}}"
+      }
+     ]
+    }
+   ],
+   "state": {},
+   "mode": "wire",
+   "random": [],
+   "clock": 1767225600.0
+  },
+  "expected": {
+   "name": "pos_strict_ok",
+   "result": {
+    "positions": [
+     {
+      "symbol": "BTCUSDT",
+      "side": "Buy",
+      "size": "0.012",
+      "positionIdx": 0,
+      "avgPrice": "87000.5",
+      "markPrice": "87000.5",
+      "stopLoss": ""
+     }
+    ],
+    "err_out": []
+   },
+   "requests": [
+    {
+     "method": "GET",
+     "url": "https://api.bybit.com/v5/position/list?category=linear&settleCoin=USDT&symbol=BTCUSDT",
+     "headers": {
+      "Content-Type": "application/json",
+      "X-BAPI-API-KEY": "BYBITKEY123456789",
+      "X-BAPI-SIGN": "e8adcd8630db19b177dae39688eda8b912972e2e60514ebb8d080cadd62ac1c2",
+      "X-BAPI-SIGN-TYPE": "2",
+      "X-BAPI-TIMESTAMP": "1767225600000",
+      "X-BAPI-RECV-WINDOW": "15000"
+     },
+     "body": null
+    }
+   ],
+   "sleeps": [],
+   "clock_end": 1767225600.0,
+   "markers": [],
+   "saved": {
+    "hedge_saved": [],
+    "auth_reset": [],
+    "events": [],
+    "metrics": []
+   },
+   "final": {
+    "hedge": {},
+    "account_type": {},
+    "delisted": [],
+    "fail_count": {},
+    "bybit_offset": 0,
+    "binance_base": "https://fapi.binance.com",
+    "binance_offset": 0,
+    "bingx_offset": 0,
+    "okx_offset": 0
+   }
+  }
+ },
+ {
+  "scenario": {
+   "name": "pos_strict_empty",
+   "exchange": "bybit",
+   "call": "get_positions__strict",
+   "args": [
+    "BYBITKEY123456789",
+    "bybit-secret-xyz",
+    "",
+    false
+   ],
+   "kwargs": {},
+   "routes": [
+    {
+     "method": "GET",
+     "path": "/v5/position/list",
+     "responses": [
+      {
+       "text": "{\"retCode\": 0, \"retMsg\": \"OK\", \"result\": {\"list\": []}}"
+      }
+     ]
+    }
+   ],
+   "state": {},
+   "mode": "wire",
+   "random": [],
+   "clock": 1767225600.0
+  },
+  "expected": {
+   "name": "pos_strict_empty",
+   "result": {
+    "positions": [],
+    "err_out": []
+   },
+   "requests": [
+    {
+     "method": "GET",
+     "url": "https://api.bybit.com/v5/position/list?category=linear&settleCoin=USDT",
+     "headers": {
+      "Content-Type": "application/json",
+      "X-BAPI-API-KEY": "BYBITKEY123456789",
+      "X-BAPI-SIGN": "9b45f8ff75f626c1e6ad62018edd4eb338af8470b0428d9d05f580f6359fa4d0",
+      "X-BAPI-SIGN-TYPE": "2",
+      "X-BAPI-TIMESTAMP": "1767225600000",
+      "X-BAPI-RECV-WINDOW": "15000"
+     },
+     "body": null
+    }
+   ],
+   "sleeps": [],
+   "clock_end": 1767225600.0,
+   "markers": [],
+   "saved": {
+    "hedge_saved": [],
+    "auth_reset": [],
+    "events": [],
+    "metrics": []
+   },
+   "final": {
+    "hedge": {},
+    "account_type": {},
+    "delisted": [],
+    "fail_count": {},
+    "bybit_offset": 0,
+    "binance_base": "https://fapi.binance.com",
+    "binance_offset": 0,
+    "bingx_offset": 0,
+    "okx_offset": 0
+   }
+  }
+ },
+ {
+  "scenario": {
+   "name": "pos_strict_auth_wire",
+   "exchange": "bybit",
+   "call": "get_positions__strict",
+   "args": [
+    "BYBITKEY123456789",
+    "bybit-secret-xyz",
+    "",
+    false
+   ],
+   "kwargs": {},
+   "routes": [
+    {
+     "method": "GET",
+     "path": "/v5/position/list",
+     "responses": [
+      {
+       "text": "{\"retCode\": 10003, \"retMsg\": \"API key is invalid.\", \"result\": {}}"
+      }
+     ]
+    }
+   ],
+   "state": {},
+   "mode": "wire",
+   "random": [],
+   "clock": 1767225600.0
+  },
+  "expected": {
+   "name": "pos_strict_auth_wire",
+   "result": {
+    "positions": null,
+    "err_out": [
+     "API key is invalid. (ErrCode: 10003) (ErrTime: 00:00:00).\nRequest → GET https://api.bybit.com/v5/position/list: category=linear&settleCoin=USDT."
+    ]
+   },
+   "requests": [
+    {
+     "method": "GET",
+     "url": "https://api.bybit.com/v5/position/list?category=linear&settleCoin=USDT",
+     "headers": {
+      "Content-Type": "application/json",
+      "X-BAPI-API-KEY": "BYBITKEY123456789",
+      "X-BAPI-SIGN": "9b45f8ff75f626c1e6ad62018edd4eb338af8470b0428d9d05f580f6359fa4d0",
+      "X-BAPI-SIGN-TYPE": "2",
+      "X-BAPI-TIMESTAMP": "1767225600000",
+      "X-BAPI-RECV-WINDOW": "15000"
+     },
+     "body": null
+    }
+   ],
+   "sleeps": [],
+   "clock_end": 1767225600.0,
+   "markers": [],
+   "saved": {
+    "hedge_saved": [],
+    "auth_reset": [],
+    "events": [],
+    "metrics": []
+   },
+   "final": {
+    "hedge": {},
+    "account_type": {},
+    "delisted": [],
+    "fail_count": {},
+    "bybit_offset": 0,
+    "binance_base": "https://fapi.binance.com",
+    "binance_offset": 0,
+    "bingx_offset": 0,
+    "okx_offset": 0
+   }
+  }
+ },
+ {
+  "scenario": {
+   "name": "pos_strict_symbol_invalid_wire",
+   "exchange": "bybit",
+   "call": "get_positions__strict",
+   "args": [
+    "BYBITKEY123456789",
+    "bybit-secret-xyz",
+    "XYZ-USDT-SWAP",
+    false
+   ],
+   "kwargs": {},
+   "routes": [
+    {
+     "method": "GET",
+     "path": "/v5/position/list",
+     "responses": [
+      {
+       "text": "{\"retCode\": 10001, \"retMsg\": \"params error: symbol invalid\", \"result\": {}}"
+      }
+     ]
+    }
+   ],
+   "state": {},
+   "mode": "wire",
+   "random": [],
+   "clock": 1767225600.0
+  },
+  "expected": {
+   "name": "pos_strict_symbol_invalid_wire",
+   "result": {
+    "positions": null,
+    "err_out": [
+     "params error: symbol invalid (ErrCode: 10001) (ErrTime: 00:00:00).\nRequest → GET https://api.bybit.com/v5/position/list: category=linear&settleCoin=USDT&symbol=XYZUSDT."
+    ]
+   },
+   "requests": [
+    {
+     "method": "GET",
+     "url": "https://api.bybit.com/v5/position/list?category=linear&settleCoin=USDT&symbol=XYZUSDT",
+     "headers": {
+      "Content-Type": "application/json",
+      "X-BAPI-API-KEY": "BYBITKEY123456789",
+      "X-BAPI-SIGN": "84eb9802a822b89bd59f800c3b75b1060e3b666f50b8a7a58196b74faef78fc3",
+      "X-BAPI-SIGN-TYPE": "2",
+      "X-BAPI-TIMESTAMP": "1767225600000",
+      "X-BAPI-RECV-WINDOW": "15000"
+     },
+     "body": null
+    }
+   ],
+   "sleeps": [],
+   "clock_end": 1767225600.0,
+   "markers": [],
+   "saved": {
+    "hedge_saved": [],
+    "auth_reset": [],
+    "events": [],
+    "metrics": []
+   },
+   "final": {
+    "hedge": {},
+    "account_type": {},
+    "delisted": [],
+    "fail_count": {},
+    "bybit_offset": 0,
+    "binance_base": "https://fapi.binance.com",
+    "binance_offset": 0,
+    "bingx_offset": 0,
+    "okx_offset": 0
+   }
+  }
+ },
+ {
+  "scenario": {
+   "name": "pos_strict_timeout_wire",
+   "exchange": "bybit",
+   "call": "get_positions__strict",
+   "args": [
+    "BYBITKEY123456789",
+    "bybit-secret-xyz",
+    "",
+    false
+   ],
+   "kwargs": {},
+   "routes": [
+    {
+     "method": "GET",
+     "path": "/v5/position/list",
+     "responses": [
+      {
+       "raise": "timeout",
+       "message": "HTTPSConnectionPool(host='api.bybit.com', port=443): Read timed out. (read timeout=10)"
+      }
+     ]
+    }
+   ],
+   "state": {},
+   "mode": "wire",
+   "random": [
+    0.25
+   ],
+   "clock": 1767225600.0
+  },
+  "expected": {
+   "name": "pos_strict_timeout_wire",
+   "result": {
+    "positions": null,
+    "err_out": [
+     "HTTPSConnectionPool(host='api.bybit.com', port=443): Read timed out. (read timeout=10)"
+    ]
+   },
+   "requests": [
+    {
+     "method": "GET",
+     "url": "https://api.bybit.com/v5/position/list?category=linear&settleCoin=USDT",
+     "headers": {
+      "Content-Type": "application/json",
+      "X-BAPI-API-KEY": "BYBITKEY123456789",
+      "X-BAPI-SIGN": "9b45f8ff75f626c1e6ad62018edd4eb338af8470b0428d9d05f580f6359fa4d0",
+      "X-BAPI-SIGN-TYPE": "2",
+      "X-BAPI-TIMESTAMP": "1767225600000",
+      "X-BAPI-RECV-WINDOW": "15000"
+     },
+     "body": null
+    }
+   ],
+   "sleeps": [],
+   "clock_end": 1767225600.0,
+   "markers": [],
+   "saved": {
+    "hedge_saved": [],
+    "auth_reset": [],
+    "events": [],
+    "metrics": []
+   },
+   "final": {
+    "hedge": {},
+    "account_type": {},
+    "delisted": [],
+    "fail_count": {},
+    "bybit_offset": 0,
+    "binance_base": "https://fapi.binance.com",
+    "binance_offset": 0,
+    "bingx_offset": 0,
+    "okx_offset": 0
+   }
+  }
+ },
+ {
+  "scenario": {
+   "name": "pos_strict_retcode_session",
+   "exchange": "bybit",
+   "call": "get_positions__strict",
+   "args": [
+    "BYBITKEY123456789",
+    "bybit-secret-xyz",
+    "",
+    false
+   ],
+   "kwargs": {},
+   "routes": [
+    {
+     "method": "CALL",
+     "path": "/get_positions",
+     "responses": [
+      {
+       "text": "{\"retCode\": 10002, \"retMsg\": \"invalid request, please check your server timestamp\", \"result\": {}}"
+      }
+     ]
+    }
+   ],
+   "state": {},
+   "mode": "session",
+   "random": [],
+   "clock": 1767225600.0
+  },
+  "expected": {
+   "name": "pos_strict_retcode_session",
+   "result": {
+    "positions": null,
+    "err_out": [
+     "ErrCode: 10002 invalid request, please check your server timestamp"
+    ]
+   },
+   "requests": [
+    {
+     "method": "get_positions",
+     "kwargs": {
+      "category": "linear",
+      "settleCoin": "USDT"
+     }
+    }
+   ],
+   "sleeps": [],
+   "clock_end": 1767225600.0,
+   "markers": [],
+   "saved": {
+    "hedge_saved": [],
+    "auth_reset": [],
+    "events": [],
+    "metrics": []
+   },
+   "final": {
+    "hedge": {},
+    "account_type": {},
+    "delisted": [],
+    "fail_count": {},
+    "bybit_offset": 0,
+    "binance_base": "https://fapi.binance.com",
+    "binance_offset": 0,
+    "bingx_offset": 0,
+    "okx_offset": 0
+   }
+  }
+ },
+ {
+  "scenario": {
+   "name": "pos_strict_list_null_session",
+   "exchange": "bybit",
+   "call": "get_positions__strict",
+   "args": [
+    "BYBITKEY123456789",
+    "bybit-secret-xyz",
+    "",
+    false
+   ],
+   "kwargs": {},
+   "routes": [
+    {
+     "method": "CALL",
+     "path": "/get_positions",
+     "responses": [
+      {
+       "text": "{\"retCode\": 0, \"retMsg\": \"OK\", \"result\": {\"list\": null}}"
+      }
+     ]
+    }
+   ],
+   "state": {},
+   "mode": "session",
+   "random": [],
+   "clock": 1767225600.0
+  },
+  "expected": {
+   "name": "pos_strict_list_null_session",
+   "result": {
+    "positions": null,
+    "err_out": [
+     "unparsable answer: list=None"
+    ]
+   },
+   "requests": [
+    {
+     "method": "get_positions",
+     "kwargs": {
+      "category": "linear",
+      "settleCoin": "USDT"
+     }
+    }
+   ],
+   "sleeps": [],
+   "clock_end": 1767225600.0,
+   "markers": [],
+   "saved": {
+    "hedge_saved": [],
+    "auth_reset": [],
+    "events": [],
+    "metrics": []
+   },
+   "final": {
+    "hedge": {},
+    "account_type": {},
+    "delisted": [],
+    "fail_count": {},
+    "bybit_offset": 0,
+    "binance_base": "https://fapi.binance.com",
+    "binance_offset": 0,
+    "bingx_offset": 0,
+    "okx_offset": 0
+   }
+  }
+ },
+ {
+  "scenario": {
+   "name": "pos_strict_result_not_dict_session",
+   "exchange": "bybit",
+   "call": "get_positions__strict",
+   "args": [
+    "BYBITKEY123456789",
+    "bybit-secret-xyz",
+    "",
+    false
+   ],
+   "kwargs": {},
+   "routes": [
+    {
+     "method": "CALL",
+     "path": "/get_positions",
+     "responses": [
+      {
+       "text": "{\"retCode\": 0, \"retMsg\": \"OK\", \"result\": \"x\"}"
+      }
+     ]
+    }
+   ],
+   "state": {},
+   "mode": "session",
+   "random": [],
+   "clock": 1767225600.0
+  },
+  "expected": {
+   "name": "pos_strict_result_not_dict_session",
+   "result": {
+    "positions": null,
+    "err_out": [
+     "'str' object has no attribute 'get'"
+    ]
+   },
+   "requests": [
+    {
+     "method": "get_positions",
+     "kwargs": {
+      "category": "linear",
+      "settleCoin": "USDT"
+     }
+    }
+   ],
+   "sleeps": [],
+   "clock_end": 1767225600.0,
+   "markers": [],
+   "saved": {
+    "hedge_saved": [],
+    "auth_reset": [],
+    "events": [],
+    "metrics": []
+   },
+   "final": {
+    "hedge": {},
+    "account_type": {},
+    "delisted": [],
+    "fail_count": {},
+    "bybit_offset": 0,
+    "binance_base": "https://fapi.binance.com",
+    "binance_offset": 0,
+    "bingx_offset": 0,
+    "okx_offset": 0
+   }
+  }
+ },
+ {
+  "scenario": {
+   "name": "pos_nonstrict_list_null_session",
+   "exchange": "bybit",
+   "call": "get_positions",
+   "args": [
+    "BYBITKEY123456789",
+    "bybit-secret-xyz",
+    "",
+    false
+   ],
+   "kwargs": {},
+   "routes": [
+    {
+     "method": "CALL",
+     "path": "/get_positions",
+     "responses": [
+      {
+       "text": "{\"retCode\": 0, \"retMsg\": \"OK\", \"result\": {\"list\": null}}"
+      }
+     ]
+    }
+   ],
+   "state": {},
+   "mode": "session",
+   "random": [],
+   "clock": 1767225600.0
+  },
+  "expected": {
+   "name": "pos_nonstrict_list_null_session",
+   "result": null,
+   "requests": [
+    {
+     "method": "get_positions",
+     "kwargs": {
+      "category": "linear",
+      "settleCoin": "USDT"
+     }
+    }
+   ],
+   "sleeps": [],
+   "clock_end": 1767225600.0,
+   "markers": [],
+   "saved": {
+    "hedge_saved": [],
+    "auth_reset": [],
+    "events": [],
+    "metrics": []
+   },
+   "final": {
+    "hedge": {},
+    "account_type": {},
+    "delisted": [],
+    "fail_count": {},
+    "bybit_offset": 0,
+    "binance_base": "https://fapi.binance.com",
+    "binance_offset": 0,
+    "bingx_offset": 0,
+    "okx_offset": 0
+   }
+  }
+ },
+ {
+  "scenario": {
+   "name": "pos_nonstrict_retcode_session",
+   "exchange": "bybit",
+   "call": "get_positions",
+   "args": [
+    "BYBITKEY123456789",
+    "bybit-secret-xyz",
+    "",
+    false
+   ],
+   "kwargs": {},
+   "routes": [
+    {
+     "method": "CALL",
+     "path": "/get_positions",
+     "responses": [
+      {
+       "text": "{\"retCode\": 10002, \"retMsg\": \"bad ts\", \"result\": {}}"
+      }
+     ]
+    }
+   ],
+   "state": {},
+   "mode": "session",
+   "random": [],
+   "clock": 1767225600.0
+  },
+  "expected": {
+   "name": "pos_nonstrict_retcode_session",
+   "result": [],
+   "requests": [
+    {
+     "method": "get_positions",
+     "kwargs": {
+      "category": "linear",
+      "settleCoin": "USDT"
+     }
+    }
+   ],
+   "sleeps": [],
+   "clock_end": 1767225600.0,
+   "markers": [],
+   "saved": {
+    "hedge_saved": [],
+    "auth_reset": [],
+    "events": [],
+    "metrics": []
+   },
+   "final": {
+    "hedge": {},
+    "account_type": {},
+    "delisted": [],
+    "fail_count": {},
+    "bybit_offset": 0,
+    "binance_base": "https://fapi.binance.com",
+    "binance_offset": 0,
+    "bingx_offset": 0,
+    "okx_offset": 0
+   }
+  }
+ },
+ {
+  "scenario": {
+   "name": "delist_ttl_seq",
+   "exchange": "bybit",
+   "call": "__seq__",
+   "args": [
+    [
+     "record_symbol_failure",
+     [
+      "BTC-USDT-SWAP"
+     ],
+     {},
+     0.0
+    ],
+    [
+     "record_symbol_failure",
+     [
+      "BTCUSDT"
+     ],
+     {},
+     10.0
+    ],
+    [
+     "is_delisted",
+     [
+      "BTCUSDT"
+     ],
+     {},
+     0.0
+    ],
+    [
+     "record_symbol_failure",
+     [
+      "BTC-USDT-SWAP"
+     ],
+     {},
+     82800.0
+    ],
+    [
+     "is_delisted",
+     [
+      "BTCUSDT"
+     ],
+     {},
+     0.0
+    ],
+    [
+     "is_delisted",
+     [
+      "BTC-USDT-SWAP"
+     ],
+     {},
+     0.0
+    ],
+    [
+     "is_delisted",
+     [
+      "BTCUSDT"
+     ],
+     {},
+     86399.0
+    ],
+    [
+     "is_delisted",
+     [
+      "BTCUSDT"
+     ],
+     {},
+     1.0
+    ],
+    [
+     "record_symbol_failure",
+     [
+      "BTCUSDT"
+     ],
+     {},
+     0.0
+    ],
+    [
+     "record_symbol_failure",
+     [
+      "BTCUSDT"
+     ],
+     {},
+     90000.0
+    ],
+    [
+     "record_symbol_failure",
+     [
+      "BTCUSDT"
+     ],
+     {},
+     1.0
+    ],
+    [
+     "record_symbol_failure",
+     [
+      "BTCUSDT"
+     ],
+     {},
+     1.0
+    ],
+    [
+     "is_delisted",
+     [
+      "BTCUSDT"
+     ],
+     {},
+     0.0
+    ],
+    [
+     "record_symbol_success",
+     [
+      "BTC-USDT-SWAP"
+     ],
+     {},
+     1.0
+    ],
+    [
+     "is_delisted",
+     [
+      "BTCUSDT"
+     ],
+     {},
+     0.0
+    ],
+    [
+     "record_symbol_failure",
+     [
+      "ETH-USDT-SWAP"
+     ],
+     {},
+     0.0
+    ]
+   ],
+   "kwargs": {},
+   "routes": [],
+   "state": {},
+   "mode": "wire",
+   "random": [],
+   "clock": 1767225600.0
+  },
+  "expected": {
+   "name": "delist_ttl_seq",
+   "result": [
+    null,
+    null,
+    false,
+    null,
+    true,
+    false,
+    true,
+    false,
+    null,
+    null,
+    null,
+    null,
+    true,
+    null,
+    false,
+    null
+   ],
+   "requests": [],
+   "sleeps": [],
+   "clock_end": 1767484813.0,
+   "markers": [],
+   "saved": {
+    "hedge_saved": [],
+    "auth_reset": [],
+    "events": [],
+    "metrics": []
+   },
+   "final": {
+    "hedge": {},
+    "account_type": {},
+    "delisted": [],
+    "fail_count": {
+     "ETHUSDT": 1
+    },
+    "bybit_offset": 0,
+    "binance_base": "https://fapi.binance.com",
+    "binance_offset": 0,
+    "bingx_offset": 0,
+    "okx_offset": 0
+   }
+  }
+ },
+ {
+  "scenario": {
+   "name": "delist_ttl_reset_by_place_trade",
+   "exchange": "bybit",
+   "call": "__seq__",
+   "args": [
+    [
+     "record_symbol_failure",
+     [
+      "BTC-USDT-SWAP"
+     ],
+     {},
+     0.0
+    ],
+    [
+     "record_symbol_failure",
+     [
+      "BTC-USDT-SWAP"
+     ],
+     {},
+     0.0
+    ],
+    [
+     "place_trade",
+     [
+      "BYBITKEY123456789",
+      "bybit-secret-xyz",
+      "BTC-USDT-SWAP",
+      "LONG",
+      87000.5,
+      86000.0,
+      88500.0,
+      1.0,
+      10
+     ],
+     {
+      "tp2": 89500.0,
+      "trade_id": "tr-ttl",
+      "user_id": 1
+     },
+     0.0
+    ],
+    [
+     "record_symbol_failure",
+     [
+      "BTC-USDT-SWAP"
+     ],
+     {},
+     0.0
+    ],
+    [
+     "is_delisted",
+     [
+      "BTCUSDT"
+     ],
+     {},
+     0.0
+    ]
+   ],
+   "kwargs": {},
+   "routes": [
+    {
+     "method": "GET",
+     "path": "/v5/market/time",
+     "responses": [
+      {
+       "text": "{\"retCode\": 0, \"retMsg\": \"OK\", \"result\": {\"timeSecond\": \"1767225600\", \"timeNano\": \"1767225600250000000\"}}"
+      }
+     ]
+    },
+    {
+     "method": "CALL",
+     "path": "/switch_margin_mode",
+     "responses": [
+      {
+       "text": "{\"retCode\": 110026, \"retMsg\": \"nm\", \"result\": {}}"
+      }
+     ]
+    },
+    {
+     "method": "CALL",
+     "path": "/set_leverage",
+     "responses": [
+      {
+       "text": "{\"retCode\": 0, \"retMsg\": \"OK\", \"result\": {}}"
+      }
+     ]
+    },
+    {
+     "method": "CALL",
+     "path": "/get_wallet_balance",
+     "responses": [
+      {
+       "text": "{\"retCode\": 0, \"retMsg\": \"OK\", \"result\": {\"list\": [{\"totalEquity\": \"1000.5\", \"totalAvailableBalance\": \"800.25\", \"totalWalletBalance\": \"1000.5\", \"totalUnrealisedPnl\": \"1.5\", \"coin\": [{\"coin\": \"USDT\", \"walletBalance\": \"1000.5\", \"equity\": \"1000.5\", \"availableBalance\": \"\", \"availableToWithdraw\": \"\"}]}]}}"
+      }
+     ]
+    },
+    {
+     "method": "CALL",
+     "path": "/get_instruments_info",
+     "responses": [
+      {
+       "text": "{\"retCode\": 0, \"retMsg\": \"OK\", \"result\": {\"list\": [{\"lotSizeFilter\": {\"qtyStep\": \"0.001\"}, \"priceFilter\": {\"tickSize\": \"0.1\"}}]}}"
+      }
+     ]
+    },
+    {
+     "method": "CALL",
+     "path": "/place_order",
+     "responses": [
+      {
+       "text": "{\"retCode\": 0, \"retMsg\": \"OK\", \"result\": {\"orderId\": \"ttl-1\", \"orderLinkId\": \"\"}}"
+      }
+     ]
+    },
+    {
+     "method": "CALL",
+     "path": "/get_positions",
+     "responses": [
+      {
+       "text": "{\"retCode\": 0, \"retMsg\": \"OK\", \"result\": {\"list\": [{\"symbol\": \"BTCUSDT\", \"side\": \"Buy\", \"size\": \"0.012\", \"positionIdx\": 0, \"avgPrice\": \"87000.5\", \"markPrice\": \"87000.5\", \"stopLoss\": \"\"}]}}"
+      }
+     ]
+    }
+   ],
+   "state": {},
+   "mode": "session",
+   "random": [],
+   "clock": 1767225600.0
+  },
+  "expected": {
+   "name": "delist_ttl_reset_by_place_trade",
+   "result": [
+    null,
+    null,
+    {
+     "ok": true,
+     "order_id": "ttl-1",
+     "qty": "0.010",
+     "notional": 870.005,
+     "balance": 1000.5,
+     "symbol": "BTCUSDT",
+     "side": "Buy",
+     "leverage": 10,
+     "pos_idx": 0,
+     "tp_placed": true,
+     "order_type": "Limit",
+     "avg_price": 0.0,
+     "leverage_downgraded": false,
+     "leverage_requested": 10,
+     "leverage_applied": 10,
+     "risk_boosted": false,
+     "risk_requested_pct": 1.0,
+     "risk_actual_pct": 1.0
+    },
+    null,
+    false
+   ],
+   "requests": [
+    {
+     "method": "GET",
+     "url": "https://api.bybit.com/v5/market/time",
+     "headers": {},
+     "body": null
+    },
+    {
+     "method": "switch_margin_mode",
+     "kwargs": {
+      "category": "linear",
+      "symbol": "BTCUSDT",
+      "tradeMode": 1
+     }
+    },
+    {
+     "method": "set_leverage",
+     "kwargs": {
+      "category": "linear",
+      "symbol": "BTCUSDT",
+      "buyLeverage": "10",
+      "sellLeverage": "10"
+     }
+    },
+    {
+     "method": "get_wallet_balance",
+     "kwargs": {
+      "accountType": "UNIFIED",
+      "coin": "USDT"
+     }
+    },
+    {
+     "method": "get_instruments_info",
+     "kwargs": {
+      "category": "linear",
+      "symbol": "BTCUSDT"
+     }
+    },
+    {
+     "method": "get_wallet_balance",
+     "kwargs": {
+      "accountType": "UNIFIED",
+      "coin": "USDT"
+     }
+    },
+    {
+     "method": "place_order",
+     "kwargs": {
+      "category": "linear",
+      "symbol": "BTCUSDT",
+      "side": "Buy",
+      "orderType": "Limit",
+      "timeInForce": "GTC",
+      "qty": "0.010",
+      "positionIdx": 0,
+      "price": "87000.5",
+      "takeProfit": "88500.0",
+      "stopLoss": "86000.0",
+      "tpslMode": "Partial",
+      "tpOrderType": "Limit",
+      "tpLimitPrice": "88500.0",
+      "tpSize": "0.005",
+      "slSize": "0.010",
+      "tpTriggerBy": "LastPrice",
+      "slTriggerBy": "MarkPrice",
+      "slOrderType": "Market",
+      "orderLinkId": "chm_7341d6b8b7d7"
+     }
+    },
+    {
+     "method": "get_positions",
+     "kwargs": {
+      "category": "linear",
+      "symbol": "BTCUSDT"
+     }
+    },
+    {
+     "method": "get_positions",
+     "kwargs": {
+      "category": "linear",
+      "symbol": "BTCUSDT"
+     }
+    },
+    {
+     "method": "place_order",
+     "kwargs": {
+      "category": "linear",
+      "symbol": "BTCUSDT",
+      "side": "Sell",
+      "orderType": "Limit",
+      "qty": "0.002",
+      "price": "89500.0",
+      "reduceOnly": true,
+      "timeInForce": "GTC",
+      "positionIdx": 0,
+      "orderLinkId": "chm_c1c6f161504c"
+     }
+    }
+   ],
+   "sleeps": [
+    0.3
+   ],
+   "clock_end": 1767225600.3,
+   "markers": [],
+   "saved": {
+    "hedge_saved": [],
+    "auth_reset": [],
+    "events": [
+     [
+      "tr-ttl",
+      "sl_attempt"
+     ],
+     [
+      "tr-ttl",
+      "sl_response"
+     ]
+    ],
+    "metrics": [
+     "trade_placed",
+     "trade_placement_latency_ms",
+     "sl_tp_attached"
+    ]
+   },
+   "final": {
+    "hedge": {},
+    "account_type": {
+     "BYBITKEY123456789": "UNIFIED"
+    },
+    "delisted": [],
+    "fail_count": {
+     "BTCUSDT": 1
+    },
+    "bybit_offset": 250,
+    "binance_base": "https://fapi.binance.com",
+    "binance_offset": 0,
+    "bingx_offset": 0,
+    "okx_offset": 0
+   }
+  }
  }
 ]

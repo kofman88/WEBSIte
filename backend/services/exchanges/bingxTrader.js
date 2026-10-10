@@ -783,14 +783,27 @@ function createBingxTrader(overrides = {}) {
     }
   }
 
-  async function getPositions(apiKey, secret, symbol = null) {
+  /** [POS-READ-STRICT 2026-10] get_positions' answer to a failed read: [] as before; strict → null
+   *  ("not read" ≠ "no positions"), the error text appended to errOut. */
+  function _posReadFailed(strict, errOut, err) {
+    if (!strict) return [];
+    if (errOut !== null && errOut !== undefined) errOut.push(err);
+    return null;
+  }
+
+  /** [POS-READ-STRICT 2026-10] opts.strict: code ≠ 0, timeout, exception or data not a list → null (the error
+   *  text → opts.errOut). Not strict — as before ([] on any failure). */
+  async function getPositions(apiKey, secret, symbol = null, { strict = false, errOut = null } = {}) {
     try {
       const params = {};
       if (pyTruthy(symbol)) params.symbol = toBingxSymbol(symbol);
       const data = await _request('GET', '/openApi/swap/v2/user/positions', apiKey, secret, params);
       if (pyGet(data, 'code') !== 0) {
         log.warning(`BingX get_positions: ${pyStr(data)}`);
-        return [];
+        return _posReadFailed(strict, errOut, `code: ${pyStr(pyGet(data, 'code'))} ${pyStr(pyGet(data, 'msg', ''))}`);
+      }
+      if (strict && !Array.isArray(pyGet(data, 'data'))) {
+        return _posReadFailed(strict, errOut, pySlice(`unparsable answer: data=${pyRepr(pyGet(data, 'data'))}`, 200));
       }
       const positions = [];
       for (const p of pyIter(pyGet(data, 'data', []))) {
@@ -811,9 +824,9 @@ function createBingxTrader(overrides = {}) {
       return positions;
     } catch (e) {
       rethrowCancelled(e);
-      if (e instanceof TransportError && e.kind === 'timeout') { log.warning('BingX get_positions: таймаут'); return []; }
+      if (e instanceof TransportError && e.kind === 'timeout') { log.warning('BingX get_positions: таймаут'); return _posReadFailed(strict, errOut, 'timeout'); }
       log.error(`BingX get_positions: ${errStr(e)}`);
-      return [];
+      return _posReadFailed(strict, errOut, errStr(e));
     }
   }
 

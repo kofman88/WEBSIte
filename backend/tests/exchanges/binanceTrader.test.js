@@ -27,6 +27,12 @@ const CALLS = {
   cancel_tp_orders_only: (t, a) => t.cancelTpOrdersOnly(...a),
   cancel_order: (t, a) => t.cancelOrder(...a),
   get_positions: (t, a) => t.getPositions(...a),
+  // [POS-READ-STRICT 2026-10] py harness: fn(..., strict=True, err_out=[]) → {positions, err_out}
+  get_positions__strict: async (t, a) => {
+    const eo = [];
+    const r = await t.getPositions(a[0], a[1], a.length > 2 ? a[2] : null, { strict: true, errOut: eo });
+    return { positions: r, err_out: eo };
+  },
   get_balance: (t, a) => t.getBalance(...a),
   get_last_price: (t, a) => t.getLastPrice(...a),
   get_closed_pnl: (t, a) => t.getClosedPnl(...a),

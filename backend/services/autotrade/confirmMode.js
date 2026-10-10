@@ -169,6 +169,16 @@ function updateTradeExchange(deps, tradeId, exchange) {
 }
 
 /** db_update_trade_tp_placed(trade_id, value=1) */
+/** [EXEC-QTY-TP 2026-10] handlers.trading._exec_result_qty: the position size of the place_trade answer
+ *  (auto-trade's [PNL-QTY]); not numeric → 0 (qty is not written, the order id still is). */
+function execResultQty(result) {
+  try {
+    return pyFloat(pyOr(pyGet(result, 'qty', 0), 0));
+  } catch (_e) {
+    return 0.0;
+  }
+}
+
 function updateTradeTpPlaced(deps, tradeId, value = 1) {
   dbOf(deps).prepare('UPDATE signal_trades SET tp_placed=? WHERE trade_id=?').run(bindValue(value), bindValue(tradeId));
 }
@@ -372,7 +382,25 @@ async function execTradeLocked(user, tradeId, fx, deps, log) {
       if (exchange === 'okx') kw.passphrase = passphrase;
       result = await inst.placeTrade(...args, kw);
       if (pyTruthy(pyGet(result, 'ok'))) {
-        updateTradeBybit(deps, tradeId, pyGet(result, 'order_id', ''), pyGet(result, 'pos_idx', 0));
+        // [EXEC-QTY-TP 2026-10] the size → PnL fallback and BU after partial
+        updateTradeBybit(deps, tradeId, pyGet(result, 'order_id', ''), pyGet(result, 'pos_idx', 0), execResultQty(result));
+        // [EXEC-QTY-TP 2026-10] tp_placed from the trader's answer, as auto-trade: without it the BE monitor
+        // took the placed ladder as missing. Binance answers ok right after a GTC LIMIT (no fill wait):
+        // without a live position on the trade's side it stays 0 (BE [SMC-SPLIT-ORPHAN] would cancel the entry)
+        let tpFlag = pyTruthy(pyGet(result, 'tp_placed')) ? 1 : 0;
+        if (tpFlag && exchange === 'binance') {
+          let bnLive;
+          try {
+            const bnPos = await inst.getPositions(apiKey, apiSecret, trade.symbol);
+            const want = ['LONG', 'BUY'].includes(pyUpper(pyStr(trade.direction))) ? 'LONG' : 'SHORT';
+            bnLive = (pyTruthy(bnPos) ? bnPos : []).some((p) => pyFloat(pyOr(pyGet(p, 'size', 0), 0)) > 0
+              && pyUpper(pyStr(pyGet(p, 'side', ''))) === want);
+          } catch (_e) {
+            bnLive = false;
+          }
+          if (!bnLive) tpFlag = 0;
+        }
+        updateTradeTpPlaced(deps, tradeId, tpFlag);
         updateTradeExchange(deps, tradeId, exchange);
       }
       text = trader.formatTradeResult(result, trade.direction, trade.symbol, pyFloat(trade.entry), pyFloat(trade.sl), pyFloat(trade.tp1),
@@ -382,7 +410,7 @@ async function execTradeLocked(user, tradeId, fx, deps, log) {
       result = await inst.placeTradeSplit(apiKey, apiSecret, trade.symbol, trade.direction, entryLo, entryHi, pyFloat(trade.sl), pyFloat(trade.tp1),
         riskPct, leverage, { tp2: tp2(), tp3: tp3() });
       if (pyTruthy(pyGet(result, 'ok'))) {
-        updateTradeBybit(deps, tradeId, pyGet(result, 'order_id', ''), pyGet(result, 'pos_idx', 0));
+        updateTradeBybit(deps, tradeId, pyGet(result, 'order_id', ''), pyGet(result, 'pos_idx', 0), execResultQty(result));   // [EXEC-QTY-TP 2026-10]
         updateTradeTpPlaced(deps, tradeId, pyTruthy(pyGet(result, 'tp_placed')) ? 1 : 0);
         updateTradeExchange(deps, tradeId, 'bybit');
       }
@@ -393,7 +421,7 @@ async function execTradeLocked(user, tradeId, fx, deps, log) {
       result = await inst.placeTrade(apiKey, apiSecret, trade.symbol, trade.direction, pyFloat(trade.entry), pyFloat(trade.sl), pyFloat(trade.tp1),
         riskPct, leverage, { tp2: tp2(), tp3: tp3() });
       if (pyTruthy(pyGet(result, 'ok'))) {
-        updateTradeBybit(deps, tradeId, pyGet(result, 'order_id', ''), pyGet(result, 'pos_idx', 0));
+        updateTradeBybit(deps, tradeId, pyGet(result, 'order_id', ''), pyGet(result, 'pos_idx', 0), execResultQty(result));   // [EXEC-QTY-TP 2026-10]
         updateTradeTpPlaced(deps, tradeId, pyTruthy(pyGet(result, 'tp_placed')) ? 1 : 0);
         updateTradeExchange(deps, tradeId, 'bybit');
       }

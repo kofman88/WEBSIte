@@ -175,7 +175,8 @@
 "error": "",
 "tp_placed": true,
 "qty": "1000000",
-"symbol": "LUNC-USDT-SWAP"
+"symbol": "LUNC-USDT-SWAP",
+"sl_placed": true
 },
 "requests": [
 {
@@ -533,7 +534,8 @@
 "error": "",
 "tp_placed": true,
 "qty": "3100000000",
-"symbol": "LUNC-USDT-SWAP"
+"symbol": "LUNC-USDT-SWAP",
+"sl_placed": true
 },
 "requests": [
 {
@@ -1209,7 +1211,8 @@
 "error": "",
 "tp_placed": true,
 "qty": "0.2",
-"symbol": "ETH-USDT-SWAP"
+"symbol": "ETH-USDT-SWAP",
+"sl_placed": true
 },
 "requests": [
 {
@@ -1657,7 +1660,8 @@
 "error": "",
 "tp_placed": true,
 "qty": "171660000",
-"symbol": "BONK-USDT-SWAP"
+"symbol": "BONK-USDT-SWAP",
+"sl_placed": true
 },
 "requests": [
 {
@@ -2643,7 +2647,8 @@
 "error": "",
 "tp_placed": true,
 "qty": "2.73",
-"symbol": "ETH-USDT-SWAP"
+"symbol": "ETH-USDT-SWAP",
+"sl_placed": true
 },
 "requests": [
 {
@@ -3000,7 +3005,8 @@
 "error": "",
 "tp_placed": true,
 "qty": "98.8967",
-"symbol": "XRP-USDT-SWAP"
+"symbol": "XRP-USDT-SWAP",
+"sl_placed": true
 },
 "requests": [
 {
@@ -3453,7 +3459,8 @@
 "error": "",
 "tp_placed": true,
 "qty": "10000000",
-"symbol": "BONK-USDT-SWAP"
+"symbol": "BONK-USDT-SWAP",
+"sl_placed": true
 },
 "requests": [
 {
@@ -3907,7 +3914,8 @@
 "error": "",
 "tp_placed": true,
 "qty": "0.0793",
-"symbol": "ETH-USDT-SWAP"
+"symbol": "ETH-USDT-SWAP",
+"sl_placed": true
 },
 "requests": [
 {
@@ -4293,7 +4301,8 @@
 "error": "",
 "tp_placed": true,
 "qty": "3702000",
-"symbol": "FLOKI-USDT-SWAP"
+"symbol": "FLOKI-USDT-SWAP",
+"sl_placed": true
 },
 "requests": [
 {
@@ -4647,7 +4656,8 @@
 "error": "",
 "tp_placed": true,
 "qty": "9.6450",
-"symbol": "ETH-USDT-SWAP"
+"symbol": "ETH-USDT-SWAP",
+"sl_placed": true
 },
 "requests": [
 {
@@ -5350,7 +5360,8 @@
 "error": "",
 "tp_placed": true,
 "qty": "10790439.6072",
-"symbol": "LUNC-USDT-SWAP"
+"symbol": "LUNC-USDT-SWAP",
+"sl_placed": true
 },
 "requests": [
 {
@@ -5803,7 +5814,8 @@
 "error": "",
 "tp_placed": true,
 "qty": "0.0095",
-"symbol": "BTC-USDT-SWAP"
+"symbol": "BTC-USDT-SWAP",
+"sl_placed": true
 },
 "requests": [
 {
@@ -6251,7 +6263,8 @@
 "error": "",
 "tp_placed": true,
 "qty": "306902.835705",
-"symbol": "FLOKI-USDT-SWAP"
+"symbol": "FLOKI-USDT-SWAP",
+"sl_placed": true
 },
 "requests": [
 {
@@ -6605,7 +6618,8 @@
 "error": "",
 "tp_placed": true,
 "qty": "0.005",
-"symbol": "ETH-USDT-SWAP"
+"symbol": "ETH-USDT-SWAP",
+"sl_placed": true
 },
 "requests": [
 {
@@ -10618,7 +10632,8 @@
 "error": "",
 "tp_placed": true,
 "qty": "0.1245",
-"symbol": "BTC-USDT-SWAP"
+"symbol": "BTC-USDT-SWAP",
+"sl_placed": true
 },
 "requests": [
 {
@@ -11071,7 +11086,8 @@
 "error": "",
 "tp_placed": true,
 "qty": "0.5938",
-"symbol": "BTC-USDT-SWAP"
+"symbol": "BTC-USDT-SWAP",
+"sl_placed": true
 },
 "requests": [
 {
@@ -15642,7 +15658,8 @@
 "error": "",
 "tp_placed": true,
 "qty": "0.333",
-"symbol": "ETH-USDT-SWAP"
+"symbol": "ETH-USDT-SWAP",
+"sl_placed": true
 },
 "requests": [
 {
@@ -17231,7 +17248,8 @@
 "error": "",
 "tp_placed": true,
 "qty": "0.0001",
-"symbol": "BTC-USDT-SWAP"
+"symbol": "BTC-USDT-SWAP",
+"sl_placed": true
 },
 "requests": [
 {

@@ -142,7 +142,7 @@ async function runScenario(sc, create, invoke, prepare, opts = {}) {
   if (prepare) await prepare(trader, sc, { clock, router, state });
   const out = { name: sc.name };
   try {
-    out.result = await invoke(trader, sc);
+    out.result = await invoke(trader, sc, { clock, router, state });
   } catch (e) {
     out.raised = { type: e.pyType || e.name, msg: e.message };
   }

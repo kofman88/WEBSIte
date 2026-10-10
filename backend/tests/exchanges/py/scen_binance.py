@@ -354,3 +354,16 @@ S("find_url_dns_retry_then_next", "_find_working_binance_url", [], {},
      {"raise": "connect", "message": "dns"}, {"raise": "connect", "message": "dns again"}, {"raise": "timeout"},
      {"status": 418, "text": "teapot"}, {"raise": "error", "message": "weird"}, {})])
 S("find_url_all_fail", "_find_working_binance_url", [], {}, [R("GET", "/fapi/v1/ping", {"status": 403, "text": "geo"})])
+
+
+# ── [POS-READ-STRICT 2026-10] strict positions read: None + the error text on a failed read ──
+GPS = "get_positions__strict"
+PATH_P = "/fapi/v2/positionRisk"
+S("pos_strict_ok", GPS, [KEY, SEC, "BTC-USDT-SWAP"], routes=[R("GET", PATH_P, pos())])
+S("pos_strict_empty", GPS, [KEY, SEC], routes=[R("GET", PATH_P, [])])
+S("pos_strict_auth", GPS, [KEY, SEC], routes=[R("GET", PATH_P, err(-2015, "Invalid API-key, IP, or permissions for action."))])
+S("pos_strict_symbol_absent", GPS, [KEY, SEC, "XYZ-USDT-SWAP"], routes=[R("GET", PATH_P, err(-1121, "Invalid symbol."))])
+S("pos_strict_not_list", GPS, [KEY, SEC], routes=[R("GET", PATH_P, "maintenance")])
+S("pos_strict_timeout", GPS, [KEY, SEC], routes=[R("GET", PATH_P, {"raise": "timeout"})])
+S("pos_strict_bad_value", GPS, [KEY, SEC], routes=[R("GET", PATH_P, [{"symbol": "BTCUSDT", "positionAmt": "x"}])])
+S("pos_nonstrict_auth", "get_positions", [KEY, SEC], routes=[R("GET", PATH_P, err(-2015, "Invalid API-key"))])

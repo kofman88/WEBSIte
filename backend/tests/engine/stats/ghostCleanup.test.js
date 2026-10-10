@@ -2,7 +2,7 @@
  * ghostCleanup.js vs the bot: db_cleanup_ghost_trades(uid, 30), db_cleanup_ghost_trades_all(3)
  * and the cache_gc trades GC run on the bot-schema SQLite seeded by gen/gen_stats_vectors.py
  * (after all its reads); the same rows here → same changed rows, counts and survivors.
- *   python: await db.trades.db_cleanup_ghost_trades_all(max_age_days=3)  → (4, 198)
+ *   python: await db.trades.db_cleanup_ghost_trades_all(max_age_days=3)  → (4, 195): [GHOST-LIVE-TRADES 2026-10] old exchange rows stay open
  */
 import { describe, it, expect, vi, afterEach } from 'vitest';
 import fs from 'fs';

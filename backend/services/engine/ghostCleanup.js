@@ -7,11 +7,12 @@
  *     (a) result='' AND no order_id AND COALESCE(signal_msg_id,0)=0  → SKIP / FAILED / 'ghost'
  *         — a row whose card WAS delivered (signal_msg_id > 0) is not a ghost: the signal
  *         tracker owns it, and a SKIP would wipe it from the statistics;
- *     (b) result='' AND created_at < now − max_age_days            → SKIP / FAILED / 'ghost'
- *         — age only, verbatim from the bot: this branch does reach delivered rows older than
- *         the window (signal-pipeline.md §12.6); signal_status() still resolves them by their
- *         tracker stage or as `expired` (rule 8 never fires for a delivered card) and
- *         COUNTABLE_SQL keeps them.
+ *     (b) result='' AND created_at < now − max_age_days AND no order_id → SKIP / FAILED / 'ghost'
+ *         — [GHOST-LIVE-TRADES 2026-10] a row with an exchange order is not touched by age: the BE
+ *         monitor and reconcile run the live position (their selects are result=''), a SKIP cut it
+ *         off. This branch does reach delivered cards older than the window (signal-pipeline.md
+ *         §12.6); signal_status() still resolves them by their tracker stage or as `expired`
+ *         (rule 8 never fires for a delivered card) and COUNTABLE_SQL keeps them.
  *   cache_gc.py trades GC: DELETE SKIP / ORPHAN rows older than 30 days.
  *
  * Log lines verbatim: `ghost_cleanup: SKIP'd N no-order + M old trades`,
@@ -35,7 +36,8 @@ function cleanupGhostTrades(db, userId, { maxAgeDays = 30, now = null } = {}) {
     const b = db.prepare(
       "UPDATE signal_trades SET result='SKIP', state='FAILED', skip_reason='ghost', "
       + 'state_changed_at=? '
-      + "WHERE user_id=? AND result='' AND created_at < ?",
+      + "WHERE user_id=? AND result='' AND created_at < ? "
+      + "  AND (order_id='' OR order_id IS NULL)",   // [GHOST-LIVE-TRADES 2026-10]
     ).run(t, userId, cutoff).changes;
     return [a, b];
   });
@@ -62,7 +64,8 @@ function cleanupGhostTradesAll(db, { maxAgeDays = 30, now = null, protectDeliver
     const b = db.prepare(
       "UPDATE signal_trades SET result='SKIP', state='FAILED', skip_reason='ghost', "
       + 'state_changed_at=? '
-      + "WHERE result='' AND created_at < ?"
+      + "WHERE result='' AND created_at < ? "
+      + "  AND (order_id='' OR order_id IS NULL)"   // [GHOST-LIVE-TRADES 2026-10]
       + (protectDelivered ? ' AND COALESCE(signal_msg_id, 0) = 0' : ''),
     ).run(t, cutoff).changes;
     return [a, b];

@@ -62,6 +62,7 @@ const DELISTING_TTL_S = 24 * 3600;
 const INSTRUMENT_FILTER_TTL_S = 4 * 3600;
 const HEDGE_CACHE_TTL_SEC = 300;
 const AUTO_BLACKLIST_THRESHOLD = 3;
+const SYMBOL_FAIL_TTL_S = 24 * 3600;   // [BYBIT-DELIST-TTL 2026-10]
 const PYBIT_SESSION_TTL = 12 * 3600;
 const PYBIT_SESSION_MAX = 600;
 const TIME_STALE_WARN_S = 60.0;
@@ -243,6 +244,7 @@ function createBybitTrader(overrides = {}) {
     hedgeModeCache: new Map(),
     hedgeModeCacheTs: new Map(),
     symbolFailCount: new Map(),
+    symbolFailTs: new Map(),   // [BYBIT-DELIST-TTL 2026-10] bb symbol → ts of the last failure
     pybitSessions: new Map(),
     accountTypeCache: new Map(),
     timeOffsetMs: 0,
@@ -453,18 +455,33 @@ function createBybitTrader(overrides = {}) {
     if (st.hedgeModeCache.size >= 600) st.hedgeModeCache.delete(firstKey(st.hedgeModeCache));
   }
 
+  /** [BYBIT-DELIST-TTL 2026-10] the symbol's failure count; the last failure older than the TTL → reset.
+   *  (The count of generic 10001 / 170214 answers from any user lived the whole process and was never
+   *  reset — three "params error" made is_delisted true for good.) */
+  function _symbolFailActive(key) {
+    if (rt.now() - (st.symbolFailTs.has(key) ? st.symbolFailTs.get(key) : 0.0) >= SYMBOL_FAIL_TTL_S) {
+      st.symbolFailCount.delete(key);
+      st.symbolFailTs.delete(key);
+      return 0;
+    }
+    return st.symbolFailCount.get(key) || 0;
+  }
   function isDelisted(symbol) {
     let bb;
     try { bb = toBybitSymbol(symbol); } catch (_e) { rethrowCancelled(_e); log.error('bybit_trader.is_delisted() unhandled exception'); bb = symbol; }
-    return _isDelisted(bb) || (st.symbolFailCount.get(symbol) || 0) >= AUTO_BLACKLIST_THRESHOLD;
+    return _isDelisted(bb) || _symbolFailActive(symbol) >= AUTO_BLACKLIST_THRESHOLD;
   }
   function recordSymbolFailure(symbol) {
     const bb = toBybitSymbol(symbol);
+    _symbolFailActive(bb);   // [BYBIT-DELIST-TTL 2026-10] failures older than 24 h do not add up
     st.symbolFailCount.set(bb, (st.symbolFailCount.get(bb) || 0) + 1);
+    st.symbolFailTs.set(bb, rt.now());
     if (st.symbolFailCount.get(bb) >= AUTO_BLACKLIST_THRESHOLD) log.warning(`Auto-blacklist: ${bb} after ${st.symbolFailCount.get(bb)} failures`);
   }
   function recordSymbolSuccess(symbol) {
-    st.symbolFailCount.delete(toBybitSymbol(symbol));
+    const bb = toBybitSymbol(symbol);
+    st.symbolFailCount.delete(bb);
+    st.symbolFailTs.delete(bb);   // [BYBIT-DELIST-TTL 2026-10]
   }
   function _initialPosIdx(apiKey, side) {
     if (pyTruthy(_hedgeCacheGet(apiKey))) return side === 'Buy' ? 1 : 2;
@@ -1778,6 +1795,8 @@ function createBybitTrader(overrides = {}) {
     const result = await rt.runInThread(() => _placeTradeSplitSync(apiKey, apiSecret, symbol, direction, entryLo, entryHi, sl, tp1, riskPct, leverage, { tp2, tp3, demo }));
     const after = st.hedgeModeCache.has(apiKey) ? st.hedgeModeCache.get(apiKey) : null;
     if (after !== null && after !== before) await _saveHedgeMode(apiKey, after);
+    // [BYBIT-DELIST-TTL 2026-10] the entry was accepted — the symbol trades: the 10001 / 170214 count is reset
+    if (pyTruthy(pyGet(result, 'ok')) && pyTruthy(pyGet(result, 'order_id'))) recordSymbolSuccess(symbol);
     if (pyTruthy(pyGet(result, 'ok')) && pyTruthy(pyGet(result, 'order_id'))) {
       await recordPlaced(rt, { symbol, direction, exchange: 'bybit_split', t0, tpPlaced: pyTruthy(pyGet(result, 'tp_placed')) });
     }
@@ -1859,6 +1878,8 @@ function createBybitTrader(overrides = {}) {
         } catch (e) { rethrowCancelled(e); log.warning(`reset auto_trade by key failed: ${errStr(e)}`); }
       }
     }
+    // [BYBIT-DELIST-TTL 2026-10] the entry was accepted — the symbol trades: the 10001 / 170214 count is reset
+    if (pyTruthy(pyGet(result, 'ok')) && pyTruthy(pyGet(result, 'order_id'))) recordSymbolSuccess(symbol);
     if (pyTruthy(pyGet(result, 'ok')) && pyTruthy(pyGet(result, 'order_id'))) {
       await recordPlaced(rt, { symbol, direction, exchange: 'bybit', t0, tpPlaced: pyTruthy(pyGet(result, 'tp_placed')) });
     }
@@ -1973,19 +1994,37 @@ function createBybitTrader(overrides = {}) {
   }
 
   // ── positions / orders ──
-  async function _getPositionsSync(apiKey, apiSecret, symbol = '', demo = false) {
+  /** [POS-READ-STRICT 2026-10] get_positions' answer to a failed read: [] as before; strict → null
+   *  ("not read" ≠ "no positions"), the error text appended to errOut. */
+  function _posReadFailed(strict, errOut, err) {
+    if (!strict) return [];
+    if (errOut !== null && errOut !== undefined) errOut.push(err);
+    return null;
+  }
+
+  /** [POS-READ-STRICT 2026-10] strict: retCode ≠ 0, an exception or an answer without a list → null
+   *  (the error text → errOut). Not strict — as before ([] on any failure). */
+  async function _getPositionsSync(apiKey, apiSecret, symbol = '', demo = false, { strict = false, errOut = null } = {}) {
     const session = _getSession(apiKey, apiSecret, demo);
+    let err = '';
     try {
       const kwargs = { category: 'linear', settleCoin: 'USDT' };
       if (symbol) kwargs.symbol = toBybitSymbol(symbol);
       await _getKeyBucket(apiKey).acquire();
       const resp = await session.get_positions(kwargs);
-      if (pyGet(resp, 'retCode', -1) === 0) return pyGet(pyIndex(resp, 'result'), 'list', []);
+      if (pyGet(resp, 'retCode', -1) === 0) {
+        const lst = pyGet(pyIndex(resp, 'result'), 'list', []);
+        if (!strict || Array.isArray(lst)) return lst;
+        err = pySlice(`unparsable answer: list=${pyRepr(lst)}`, 200);
+      } else {
+        err = `ErrCode: ${pyStr(pyGet(resp, 'retCode', -1))} ${pyStr(pyGet(resp, 'retMsg', ''))}`;
+      }
     } catch (e) {
       rethrowCancelled(e);
       log.debug(`get_positions: ${errStr(asRequestsError(e))}`);
+      err = errStr(asRequestsError(e));
     }
-    return [];
+    return _posReadFailed(strict, errOut, err);
   }
 
   async function _cancelAllOrdersSync(apiKey, apiSecret, symbol, demo = false) {
@@ -2258,8 +2297,9 @@ function createBybitTrader(overrides = {}) {
     return await rt.runInThread(() => _setTrailingSlSync(apiKey, apiSecret, symbol, newSl, direction, posIdx, demo));
   }
 
-  async function getPositions(apiKey, apiSecret, symbol = '', demo = false) {
-    return await rt.runInThread(() => _getPositionsSync(apiKey, apiSecret, symbol, demo));
+  /** [POS-READ-STRICT 2026-10] opts {strict, errOut} — see _getPositionsSync. */
+  async function getPositions(apiKey, apiSecret, symbol = '', demo = false, opts = {}) {
+    return await rt.runInThread(() => _getPositionsSync(apiKey, apiSecret, symbol, demo, opts));
   }
 
   async function getClosedPnl(apiKey, apiSecret, symbol, demo = false) {

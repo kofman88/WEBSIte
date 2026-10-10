@@ -39,6 +39,26 @@ const CALLS = {
   get_dashboard: (t, a) => t.getDashboard(...a),
   test_connection: (t, a) => t.testConnection(...a),
   place_tp_orders: (t, a) => t.placeTpOrders(...a),
+  // [POS-READ-STRICT 2026-10] py harness: fn(..., strict=True, err_out=[]) → {positions, err_out}
+  get_positions__strict: async (t, a) => {
+    const eo = [];
+    const r = await t.getPositions(a[0], a[1], a.length > 2 ? a[2] : '', a.length > 3 ? a[3] : false, { strict: true, errOut: eo });
+    return { positions: r, err_out: eo };
+  },
+  record_symbol_failure: (t, a) => t.recordSymbolFailure(...a),
+  record_symbol_success: (t, a) => t.recordSymbolSuccess(...a),
+  is_delisted: (t, a) => t.isDelisted(...a),
+  // py harness: [[fn, args, kwargs, dt], ...] on one trader state, the clock moved by dt before each call
+  __seq__: async (t, a, _kw, ctx) => {
+    const outs = [];
+    for (const [name, args, kw, dt] of a) {
+      ctx.clock.t += dt;
+      ctx.clock.m += dt;
+      const r = await CALLS[name](t, args, kw, ctx);
+      outs.push(r === undefined ? null : r);
+    }
+    return outs;
+  },
 };
 
 function prepare(t, sc) {
@@ -51,10 +71,10 @@ function prepare(t, sc) {
 describe('bybit_trader replay parity', () => {
   for (const { scenario: sc, expected: exp } of ROWS) {
     it(sc.name, async () => {
-      const { out, trader } = await runScenario(sc, (o) => BY.createBybitTrader(o), (t, s) => {
+      const { out, trader } = await runScenario(sc, (o) => BY.createBybitTrader(o), (t, s, ctx) => {
         const fn = CALLS[s.call];
         if (!fn) throw new Error(`no JS mapping for ${s.call}`);
-        return fn(t, s.args, s.kwargs);
+        return fn(t, s.args, s.kwargs, ctx);
       }, prepare);
       expect(out.requests, 'requests').toEqual(exp.requests);
       if (exp.raised) expect(out.raised, 'raised').toEqual(exp.raised);
