@@ -18,8 +18,10 @@ families (`tgt_<ex>_<class>`, `tgt2_<ex>_<path rejection>_{main,ptp}`, edges, co
 challenge daily stop, correlation cap, kill switch, plan expired, slow exchanges, BingX batch
 answers, …) and the bot's batch D (`d2_*`, own rng, uids 9600+: VOLUME 15m vs 1h qty under
 [VOL15-RISK-CAP] + [FEE-AWARE-SIZE], the fee factor off, the VOLUME 15m low-notional pause on a $25
-account with a LEVELS trade still placing, [SAME-DIR-CAP] with two open LONG). `WIRE_ONLY=a,b` limits a
-run; `WIRE_USERS` changes the random count.
+account with a LEVELS trade still placing, [SAME-DIR-CAP] with two open LONG) and the per-user lock under
+contention (`lock_parallel_same_symbol_<ex>`, uids 9700+: two signals on one symbol 1 ms apart, call0's
+first in-lock price read answered after 1 s → call1 waits at the lock, then its dedup SKIPs it).
+`WIRE_ONLY=a,b` limits a run; `WIRE_USERS` changes the random count.
 
 Route sessions: 16 per exchange (`WIRE_SESSIONS`), seed 20261010: sessions 0-9 open the confirm-mode
 trade under one exec error class each, 10-11 cleanly, 12-15 meet a key the site refuses (D15: withdraw

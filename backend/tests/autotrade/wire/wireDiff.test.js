@@ -10,7 +10,8 @@
  * duplicate client id, position mode, delisted, auth, refused connection, HTML 502, the SL / TP / leverage
  * / batch / algo rejections on the main and the partial-TP path; precision edges — tiny tick / step,
  * 1000x coins, min notional; confirm mode, prop pilot, challenge daily stop, correlation cap, kill
- * switch, plan expired, slow exchanges past the executor timeouts) and recorded per logical task
+ * switch, plan expired, slow exchanges past the executor timeouts, the per-user lock under contention)
+ * and recorded per logical task
  * every request (method, origin, target, body, signing headers — timestamps / signatures cut out and
  * the signature verified against the account secret), the answer it got, every message, log line,
  * trader log marker, metric and side effect, and afterwards the trades / users / engine kv /
@@ -118,6 +119,32 @@ describe(`wire differential — ${FX.vectors.length} scenarios replayed against 
     expect(logs.some((l) => l.startsWith('[D18-RETRY-RECONCILE] uid=8053 SOL-USDT-SWAP: retry after a timeout was a duplicate'))).toBe(true);
     expect(logs.some((l) => l.startsWith('VOLUME auto_trade SOL-USDT-SWAP uid=8053: timeout 60s — reconciling'))).toBe(true);
     // (every other scenario runs with the site's defaults in the differential above: no D18 branch there)
+  }, 300_000);
+
+  // The per-user lock (auto_trade.py:2630) under contention: two VOLUME Market signals on one symbol 1 ms
+  // apart, call0's first in-lock price read answered after 1 s (py gen_lock_contention) — call1's first step
+  // falls between call0's LIMIT CHECK and its open (bot recording and site run), call1 waits and its dedup
+  // marks it SKIP: one position on the exchange. A lock-less executor fails the differential above here.
+  it('per-user lock: call1 reaches the lock while call0 holds it, then SKIP — one position (bot and site)', async () => {
+    const contended = (recs) => {
+      const i0 = recs.findIndex(([t, k, d]) => t === 'call0' && k === 'log' && String(d[1]).startsWith('auto_trade LIMIT CHECK'));
+      const i1 = recs.findIndex(([t, k, d]) => t === 'call0' && k === 'log' && / TRADE OPENED /.test(String(d[1])));
+      const c1 = recs.findIndex(([t]) => t === 'call1');
+      return { i0, i1, c1, ok: i0 >= 0 && i0 < c1 && c1 < i1 };
+    };
+    for (const ex of EXCHANGES) {
+      const v = FX.vectors.find((x) => x.case.name === `lock_parallel_same_symbol_${ex}`);
+      expect(v, ex).toBeTruthy();
+      expect(v.case.parallel, ex).toBe(true);
+      expect(contended(v.expected.recs), `${ex} bot`).toMatchObject({ ok: true });
+      expect(v.expected.results.map((r) => r.ok.executed), ex).toEqual([true, false]);
+      expect(v.expected.trades.map((t) => [t.trade_id, t.result, t.skip_reason]), ex)
+        .toEqual([[`W${v.case.uid}-0`, '', ''], [`W${v.case.uid}-1`, 'SKIP', 'auto_trade.py:1060']]);
+      expect(Object.values(v.expected.sim)[0].positions.length, ex).toBe(1);
+      const got = await replay(v);
+      expect(contended(got.recs), `${ex} site`).toMatchObject({ ok: true });
+      expect(compare(v, got), ex).toEqual([]);
+    }
   }, 300_000);
 
   describe('pinned bot quirks (the site does exactly the same on the wire)', () => {

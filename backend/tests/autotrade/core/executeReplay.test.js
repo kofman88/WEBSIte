@@ -31,9 +31,31 @@ describe('execute_auto_trade — bot vs site replay', () => {
       'd2_vol15_low_notional_ctx_reclamp_own_pause', 'd2_vol15_pause_reset_by_open', 'd2_samedir_third_long',
       'd2_samedir_count_fails', 'd2_samedir_cap_off_no_count', 'd2_samedir_max_trades_first', 'd2_market_short_bingx',
       'd2_limit_short_bingx', 'd2_fee_env_0', 'd2_fee_taker_bad_binance', 'd2_fee_split_unknown_exchange',
-      'd2_risk_capped_warning_local_numbers']) {
+      'd2_risk_capped_warning_local_numbers', 'd2_risk_capped_warning_vol15_final_clamp',
+      'd2_risk_capped_warning_vol15_fixed_amount', 'd2_risk_capped_warning_round2_act', 'd2_risk_capped_warning_round2_req',
+      'd2_samedir_lower_direction']) {
       expect(names.has(n), n).toBe(true);
     }
+  });
+
+  // parallel_same_symbol proves the per-user lock (auto_trade.py:2630) only if call1 really reaches it
+  // while call0 holds it: call0's first in-lock exchange call is scripted to take 1 s of virtual time,
+  // so in the bot's recording call1's pre-lock steps (symbol check … challenge gate) fall between
+  // call0's LIMIT CHECK and its place_trade — and the site run interleaves the same way.
+  const contended = (recs) => {
+    const i0 = recs.findIndex(([t, k, d]) => t === 'call0' && k === 'log' && String(d[1]).startsWith('auto_trade LIMIT CHECK'));
+    const i1 = recs.findIndex(([t, k, d]) => t === 'call0' && k === 'call' && d[1] === 'place_trade');
+    const gate = recs.findIndex(([t, k, d]) => t === 'call1' && k === 'side' && d[0] === 'challenge_gate');
+    return { i0, i1, gate, ok: i0 >= 0 && i0 < gate && gate < i1 };
+  };
+  it('parallel_same_symbol: call1 arrives at the per-user lock while call0 holds it (bot and site)', async () => {
+    const v = FX.vectors.find((x) => x.case.name === 'parallel_same_symbol');
+    expect(v.case.parallel).toBe(true);
+    expect(contended(v.expected.recs), 'bot recording').toMatchObject({ ok: true });
+    expect(v.expected.results.map((r) => r.ok.executed)).toEqual([true, false]);
+    expect(v.expected.trades.map((t) => [t.trade_id, t.result, t.skip_reason])).toEqual([['T1', '', ''], ['T2', 'SKIP', 'auto_trade.py:1060']]);
+    const got = await replay(v, FX);
+    expect(contended(got.recs), 'site run').toMatchObject({ ok: true });
   });
 
   for (const v of FX.vectors) {

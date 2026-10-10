@@ -32,7 +32,8 @@ the VOLUME 15m low-notional pause), [SAME-DIR-CAP], [MARKET-ENTRY-NO-SHIFT] and 
 fields `taker_fee` ({exchange: value | "__del__"} on the trader module), `count_fail` (the direction
 count of db_count_open_trades raises), `ctx_risk` (trend_monitor.CTX_RISK overlay) and state `vol15_ln`.
 `helpers` = the pure helpers called directly (env parsers, cap, taker fee, fee factor, required
-balance), `count_vectors` = db_count_open_trades on seeded rows.
+balance; `env_seq`: one warn-once registry over a sequence of env values), `count_vectors` =
+db_count_open_trades on seeded rows.
 
 Output: backend/tests/autotrade/core/fixtures/execute_vectors.json.gz
   cd /home/user/MAIN_BOT/CHM_BREAKER_V4
@@ -822,8 +823,14 @@ case("risk_preview_warm_cache", state={"balance_cache": [[U, "bybit", 2000.0, T0
 case("risk_preview_off", user={"show_risk_preview": 0}, state={"balance_cache": [[U, "bybit", 2000.0, T0 + 30.0]]})
 case("tilt_revenge", trades=[trade_row("T1", T0 - 5), trade_row("T0", T0 - 100, result="SL", result_rr=-1.0,
                                                                 order_id="o", symbol="ETH-USDT-SWAP")])
+# call0's first exchange call inside the per-user lock (get_last_price, after LIMIT CHECK) takes 1 s of
+# virtual time, so call1 (started 1 ms later) reaches the lock (auto_trade.py:2630) while call0 holds it
+# and waits → after call0's open, call1's dedup finds the open SOL trade → SKIP. Without the delay the
+# 1 ms stagger lets call0 finish before call1 starts and the case proves nothing about the lock
+# (executeReplay.test.js asserts the contention on the recording).
 case("parallel_same_symbol", parallel=True, calls=[kws(trade_id="T1"), kws(trade_id="T2")],
-     trades=[trade_row("T1", T0 - 5), trade_row("T2", T0 - 4)])
+     trades=[trade_row("T1", T0 - 5), trade_row("T2", T0 - 4)],
+     script={"bybit.get_last_price": [{"after": 1.0, "ret": 100.0}, {"ret": 100.0}]})
 case("skip_unfilled_escalation", state={"unfilled": [[U, [T0 - 600.0, T0 - 500.0, T0 - 400.0, T0 - 300.0]]]},
      script={"bybit.get_positions": [{"ret": []}]})
 case("adaptive_sizing", user={"adaptive_sizing_enabled": 1, "adaptive_sizing_mode": "all"},
@@ -902,6 +909,17 @@ case("d2_risk_capped_warning_local_numbers", user={"max_risk_pct": 1.0}, kw={"ri
      script={"bybit.place_trade": [{"ret": {**OK_OPEN, "risk_requested_pct": 0.83, "risk_applied_pct": 0.83}}]})
 case("d2_risk_capped_warning_fractional", user={"max_risk_pct": 0.75}, kw={"risk_pct": 1.5})
 case("d2_risk_capped_warning_vol15", user={"max_risk_pct": 0.3}, kw=vol15())
+# the applied risk gets its final value only at the second VOL15 clamp (before the sizing,
+# auto_trade.py:2970-2981 sets _applied_risk_pct): (a) max_risk 0.2 % (≤ the cap), ctx ×2 → 0.4 % → clamp
+# 0.25 %; (b) max_risk 0.2 %, fixed_amount 50 / balance 500 → 10 % (fixed_amount leaves _applied_risk_pct
+# at 0.2) → clamp 0.25 %. risk_capped_warning shows «0.25%» in both (a stale value: 0.4 % / 0.2 %)
+case("d2_risk_capped_warning_vol15_final_clamp", user={"max_risk_pct": 0.2}, ctx_risk={"aligned": 2.0},
+     kw=vol15(trend_ctx="aligned", risk_pct=2.0))
+case("d2_risk_capped_warning_vol15_fixed_amount", user={"max_risk_pct": 0.2, "fixed_amount": 50.0}, kw=vol15(risk_pct=2.0),
+     script={"bybit.get_balance": [{"ret": 500.0}]})
+# risk_capped_warning prints round(x, 2) with %g (auto_trade.py:3622-3623): 0.125 → «0.12», 1.255 → «1.25»
+case("d2_risk_capped_warning_round2_act", user={"max_risk_pct": 0.25}, kw={"risk_pct": 2.0, "trend_ctx": "counter"})
+case("d2_risk_capped_warning_round2_req", user={"max_risk_pct": 1.0}, kw={"risk_pct": 1.255})
 
 # [VOL15-RISK-CAP] the VOLUME 15m low-notional pause (review fix R1)
 # V1 VOLUME 15m low notional → own pause (no shared cooldown); V2 VOLUME 15m skipped without an exchange
@@ -985,6 +1003,9 @@ case("d2_samedir_filters_off_still_blocks", user={"filters_all_off": 1}, trades=
 case("d2_samedir_confirm_mode_blocked", kw={"auto_trade_mode": "confirm"}, trades=[trade_row("T1", T0 - 5)] + TWO_LONG)
 case("d2_samedir_max_trades_first", kw={"max_trades": 2}, trades=[trade_row("T1", T0 - 5)] + TWO_LONG)
 case("d2_samedir_no_trade_id", kw={"trade_id": ""}, trades=TWO_LONG)
+# the direction is upper-cased for the count, the log and the text (auto_trade.py:2662): «long» → «LONG»
+case("d2_samedir_lower_direction", kw={"direction": "long"},
+     trades=[trade_row("T1", T0 - 5, direction="long")] + TWO_LONG)
 case("d2_samedir_symbol_escaped", kw={"symbol": "A<B>-USDT-SWAP"},
      trades=[trade_row("T1", T0 - 5, symbol="A<B>-USDT-SWAP")] + TWO_LONG)
 
@@ -1060,6 +1081,20 @@ def _helpers():
             CAPTURE[0] = False
             out["env"].append({"name": name, "raw": raw, "values": [jsonable(v1), jsonable(v2)],
                                "logs": [r[2] for r in RECS if r[1] == "log"]})
+    # warn-once is per (name, raw) on ONE registry (_warn_env_once, auto_trade.py:150): a second bad value of
+    # the same variable warns again, a repeated one does not, the same raw of another variable warns on its own
+    auto_trade._ENV_WARNED.clear()
+    out["env_seq"] = []
+    RECS.clear()
+    CAPTURE[0] = True
+    for name, raw in (("VOLUME_15M_MAX_RISK_PCT", "abc"), ("VOLUME_15M_MAX_RISK_PCT", "xyz"),
+                      ("VOLUME_15M_MAX_RISK_PCT", "abc"), ("VOLUME_15M_MAX_RISK_PCT", "-1"),
+                      ("AUTO_TRADE_MAX_SAME_DIRECTION", "abc"), ("AUTO_TRADE_MAX_SAME_DIRECTION", "abc"),
+                      ("AUTO_TRADE_MAX_SAME_DIRECTION", "xyz"), ("VOLUME_15M_MAX_RISK_PCT", "xyz")):
+        os.environ[name] = raw
+        out["env_seq"].append({"name": name, "raw": raw, "value": jsonable(dict(fns)[name]())})
+    CAPTURE[0] = False
+    out["env_seq_logs"] = [r[2] for r in RECS if r[1] == "log"]
     for k, v in saved.items():
         if v is None:
             os.environ.pop(k, None)

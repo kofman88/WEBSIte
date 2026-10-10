@@ -1609,6 +1609,28 @@ def gen_batch_d():
         scenario(f"d2_samedir_{ex}", uid=uid, ex=ex, user={"partial_tp_enabled": False}, signals=[lg, sh], trades=tr, gap=30.0)
 
 
+def gen_lock_contention():
+    """The per-user lock (auto_trade.py:2630) under real contention, on the real traders: two VOLUME Market
+    signals on one symbol arrive 1 ms apart (the parallel stagger); call0's first request inside the lock
+    (the price read of get_last_price — Bybit's 3rd ticker read: funding and spread read it before the
+    lock) is answered after 1 s of virtual time, so call1 reaches the lock while call0 holds it, waits, and
+    once call0 opened its dedup marks it SKIP — the exchange gets one entry. Without the delay the stagger
+    lets call0 finish first and a lock-less executor would pass. Own rng and uids (9700+): the scenarios
+    above are untouched."""
+    rng = _random.Random(SEED ^ 0x10C4)
+    uid = 9700
+    for ex in ("bybit", "bingx", "binance", "okx"):
+        uid += 1
+        direction = "LONG" if uid % 2 else "SHORT"
+        s = make_signal(rng, "SOL-USDT-SWAP", direction, "VOLUME", price=COINS["SOL-USDT-SWAP"]["price"], sl_pct=0.01)
+        s.update(symbol="SOL-USDT-SWAP", direction=direction, strategy="VOLUME", quality=4, timeframe="1h")
+        m, p = PRICE_PATH[ex]
+        scenario(f"lock_parallel_same_symbol_{ex}", uid=uid, ex=ex, user={"partial_tp_enabled": False},
+                 signals=[s, dict(s)], parallel=True,
+                 faults=[{"ex": ex, "method": m, "path": p, "nth": 3 if ex == "bybit" else 1, "kind": "slow", "delay": 1.0,
+                          "label": "lock_held"}])
+
+
 # ══════════════════════════ runner ══════════════════════════
 USER_COLS: list = []
 CFG_KEYS = ("SMC_HOUR_FILTER_ENABLED", "SMC_HOUR_FILTER_MODE", "BAD_HOURS_UTC", "DAILY_MAX_LOSS_R")
@@ -1810,6 +1832,7 @@ async def main():
     gen_targeted()
     gen_random(SEED, N_USERS)
     gen_batch_d()
+    gen_lock_contention()
     only = [x for x in os.environ.get("WIRE_ONLY", "").split(",") if x]
     vectors = []
     for c in SCENARIOS:

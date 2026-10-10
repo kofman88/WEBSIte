@@ -62,6 +62,18 @@ describe('batch D helpers — bot vs site', () => {
     });
   }
 
+  // one executor = one registry (auto_trade._ENV_WARNED): the warn-once key is (name, raw) — a second bad
+  // value of the same variable warns again, a repeated one does not, the same raw of the other variable
+  // warns on its own
+  it('warn-once per (name, raw) on one registry — the bot\'s sequence', () => {
+    expect(H.env_seq.length).toBeGreaterThanOrEqual(5);
+    const env = {};
+    const { risk, lines } = makeExec(env);
+    const got = H.env_seq.map((v) => { env[v.name] = v.raw; return [v.name, v.raw, risk[FN[v.name]]()]; });
+    expect(got).toEqual(H.env_seq.map((v) => [v.name, v.raw, unf(v.value)]));
+    expect(lines).toEqual(H.env_seq_logs);
+  });
+
   it('_vol15_risk_cap(strategy, timeframe, risk_mode)', () => {
     const { risk } = makeExec({});
     for (const [st, tf, rm, cap] of H.risk_cap) {
