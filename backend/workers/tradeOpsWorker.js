@@ -2,10 +2,12 @@
 /**
  * tradeOpsWorker.js — the trade-ops side of the site (PLAN §2.2): the queue every action that can
  * send, modify or close an order goes through, serialised per user, with liveness heartbeats.
- * This is the M13b skeleton: the confirm-mode exec (services/autotrade/confirmMode.js) and the
- * quick-close actions (services/autotrade/quickClose.js) run here today; the M15 loops (BE monitor,
- * reconcile, SL verifier, anomaly detector, orphan sweeper, daily summary) and the auto-trade queue
- * (execute_auto_trade) join the same per-user lock later.
+ * The confirm-mode exec (services/autotrade/confirmMode.js) and the quick-close actions
+ * (services/autotrade/quickClose.js) run here. The M15 trade-ops loops (BE monitor, reconcile, SL
+ * verifier, anomaly detector, orphan sweeper) do NOT: they run in the engine worker next to the
+ * scanners and the auto-trade executor, on the executor's trade runtime (PLAN_M15 D21 — the bot's one
+ * process: the same signal registry, free report, regime cache, auth breaker, idempotency registry and
+ * trader caches), without a per-user lock like the bot; this thread stays the button queue (D16).
  *
  * Bot semantics kept: exec_trade holds its per-trade asyncio.Lock (a second press answers
  * «⏳ Сделка уже открывается…» at once); execute_auto_trade's per-user `_trade_locks[uid]` is the

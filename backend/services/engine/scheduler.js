@@ -26,6 +26,18 @@
  *  17  trend_monitor      worker  _guarded               90 s, then every INTERVAL_S (60 s)
  *  18  signal_tracker     worker  _guarded               120 s, then every INTERVAL_S (60 s)
  *
+ * The M15 trade-ops loops (TRADE_LOOP_TASKS, PLAN_M15 D21) join the worker side in the bot's gather order
+ * when the engine worker built them (deps.tradeLoops — services/autotrade/tradeLoops.js; with
+ * AUTOTRADE_ENABLED / TRADE_LOOPS_ENABLED unset there are none and the plan above is unchanged):
+ *      state_reconcile     worker  _guarded               after ghost_cleanup: 60 s, then pass + 120 s
+ *      trade_state_cleanup worker  _guarded               60 s, then pass + 1800 s
+ *      anomaly_detector    worker  _guarded_restart(10)   60 s, then pass + 30 s
+ *      sl_verifier         worker  _guarded_restart(10)   after candle_prefetch: 60 s, then cycle + 180 s
+ *      orphan_sweeper      worker  _guarded               after trend_monitor: 120 s, then cycle + ORPHAN_SWEEP_INTERVAL_S
+ * (the first three under the bot's swallowing wrappers — a crash is one log line, never an alert or a
+ * restart; a loop whose pass is not ported yet is skipped with one INFO line). The BE monitor is not a
+ * task: it runs inside the LEVELS scanner (`scanner` above) through scannerDeps('LEVELS').beMonitorLoop.
+ *
  * daily_summary / weekly_digest run on the main thread from workers/engineWorker.js startEngine()
  * (services/engine/reports.js, own timers: 23:55 UTC / Monday 09:05 UTC), and so do challenge
  * (services/challengeService.js startLoop: 90 s, then LOOP_INTERVAL_S) and entry_advisor
@@ -38,8 +50,7 @@
  * notification_drainer, hour_filter_monitor, plan_audit_monitor,
  * sub_reminder (planService.startExpiryLoop), time_sync, health_server, metrics_*, mem_trim,
  * log_monitor_*, ton_subscription_checker, feedback / optimizer / retrain loops
- * (the ML optimizer is not ported), state_reconcile / trade_state_cleanup / anomaly_detector /
- * sl_verifier / orphan_sweeper (auto-trade, M13–M14), binance_lead, loop_lag_monitor.
+ * (the ML optimizer is not ported), binance_lead, loop_lag_monitor.
  *
  * _guarded(name, coro): an exception → log.critical + admin alert "💀 <b>Задача упала: …</b>",
  *   the task is dead (no restart). A clean return ends it.
@@ -350,21 +361,27 @@ async function coinUniverseWarmupLoop(ctx) {
  * cooldowns, exchange instrument caches, anomaly detector) are not there to clean; the
  * auto-trade registries (trade locks, idempotency, auth-fail / zero-balance / commodity,
  * disabled-days, correlation / tilt caches, skip_notify) are cleaned when `ctx.autoTrade`
- * (services/autotrade createAutoTrade) is wired.
+ * (services/autotrade createAutoTrade) is wired — the shared ones (idempotency, auth-fail,
+ * zero-balance, commodity) also through `ctx.tradeRuntime` when only the M15 loops run (C-8) —
+ * and the anomaly detector's dicts through `ctx.tradeLoops.gcAnomaly(t)` (between skip_notify and
+ * free_report, the bot's order).
  */
 function cacheGcOnce(ctx) {
   const t = ctx.now();
   const freed = {};
   const L = ctx.log;
-  const atGc = ctx.autoTrade && ctx.autoTrade.gc ? ctx.autoTrade.gc : null;
-  const atStep = (key, fn, label = key) => {
+  // the executor's table, else (protect-only mode: loops without the executor, C-8) the trade runtime's
+  const atGc = ctx.autoTrade && ctx.autoTrade.gc ? ctx.autoTrade.gc
+    : (ctx.tradeRuntime && ctx.tradeRuntime.gc ? ctx.tradeRuntime.gc : null);
+  const atStep = (key, fn, label = key, method = null) => {
     if (!atGc) return;
+    if (method && typeof atGc[method] !== 'function') return;   // a registry the runtime does not have
     try {
       const n = fn(atGc);
       if (n) freed[key] = n;
     } catch (e) { L.debug(`GC ${label}: ${e && e.message}`); }
   };
-  atStep('auto_trade._trade_locks', (g) => g.tradeLocks());
+  atStep('auto_trade._trade_locks', (g) => g.tradeLocks(), 'auto_trade._trade_locks', 'tradeLocks');
   const smc = ctx.smcInstance ? ctx.smcInstance() : null;
   if (smc) {
     try {
@@ -393,19 +410,29 @@ function cacheGcOnce(ctx) {
   atStep('auto_trade._auth_fail', (g) => g.authFail());
   atStep('auto_trade._zero_balance', (g) => g.zeroBalance());
   atStep('auto_trade._commodity_blocklist', (g) => g.commodity());
-  atStep('auto_trade._disabled_days_notified', (g) => g.disabledDays(t));
-  atStep('correlation_cap._CORR_CACHE', (g) => g.correlation(), 'correlation_cap');
-  atStep('tilt_detector._NOTIFY_DEDUP', (g) => g.tilt(), 'tilt_detector');
+  atStep('auto_trade._disabled_days_notified', (g) => g.disabledDays(t), 'auto_trade._disabled_days_notified', 'disabledDays');
+  atStep('correlation_cap._CORR_CACHE', (g) => g.correlation(), 'correlation_cap', 'correlation');
+  atStep('tilt_detector._NOTIFY_DEDUP', (g) => g.tilt(), 'tilt_detector', 'tilt');
   try {
     const n = ctx.balanceCache().gcCache();
     if (n) freed['balance_cache._BALANCE_CACHE'] = n;
   } catch (e) { L.debug(`GC balance_cache: ${e && e.message}`); }
-  if (atGc) {
+  if (atGc && typeof atGc.skipNotify === 'function') {
     try {
       const sn = atGc.skipNotify();
       if (sn.userUnfilled) freed['skip_notify._user_unfilled'] = sn.userUnfilled;
       if (sn.lastNotified) freed['skip_notify._last_notified'] = sn.lastNotified;
     } catch (e) { L.debug(`GC skip_notify: ${e && e.message}`); }
+  }
+  // trade_anomaly_detector's dicts (cache_gc.py:313-378: anomaly._last_check_ts / _anomaly_streak /
+  // _anomaly_streak_ts / _panic_close_attempted), where the detector runs — this thread (D21)
+  if (ctx.tradeLoops && typeof ctx.tradeLoops.gcAnomaly === 'function') {
+    try {
+      const g = ctx.tradeLoops.gcAnomaly(t) || {};
+      for (const [k, n] of Object.entries(g)) if (n) freed[k] = n;
+    } catch (e) {
+      L.warning('cache_gc trade_anomaly_detector: unhandled', e && e.stack ? String(e.stack) : errHead(e));
+    }
   }
   try {
     const fr = ctx.freeReport();
@@ -628,6 +655,26 @@ const TASKS = Object.freeze([
   Object.freeze({ name: 'signal_tracker', side: 'worker' }),
 ]);
 
+/**
+ * The M15 trade-ops loops (bot.py:1647-1652, 1704): their place in the gather (`after`), the
+ * wrapper (`restart`/`baseDelay` = _guarded_restart, else _guarded) and the ctx.tradeLoops entry
+ * (`loop`). Kept apart from TASKS (the table the site ran before M15) and merged into the plan only
+ * when the engine worker wired the loops (ALL_TASKS = the bot's gather order).
+ */
+const TRADE_LOOP_TASKS = Object.freeze([
+  Object.freeze({ name: 'state_reconcile', side: 'worker', after: 'ghost_cleanup', loop: 'stateReconcile' }),
+  Object.freeze({ name: 'trade_state_cleanup', side: 'worker', after: 'state_reconcile', loop: 'tradeStateCleanup' }),
+  Object.freeze({ name: 'anomaly_detector', side: 'worker', restart: true, baseDelay: 10, after: 'trade_state_cleanup', loop: 'anomalyDetector' }),
+  Object.freeze({ name: 'sl_verifier', side: 'worker', restart: true, baseDelay: 10, after: 'candle_prefetch', loop: 'slVerifier' }),
+  Object.freeze({ name: 'orphan_sweeper', side: 'worker', after: 'trend_monitor', loop: 'orphanSweeper' }),
+]);
+
+const ALL_TASKS = Object.freeze((() => {
+  const out = TASKS.slice();
+  for (const t of TRADE_LOOP_TASKS) out.splice(out.findIndex((x) => x.name === t.after) + 1, 0, t);
+  return out;
+})());
+
 /** What each task runs (ctx → Promise). */
 const RUNNERS = {
   scanner: (ctx) => ctx.levels.runForever(),
@@ -676,6 +723,12 @@ const RUNNERS = {
     { signal: ctx.signal, sleep: ctx.sleep },
   ),
   trend_monitor: (ctx) => ctx.trend().runLoop({ signal: ctx.signal }),
+  // the M15 trade-ops loops (services/autotrade/tradeLoops.js; the shells run in their own cancel scope)
+  state_reconcile: (ctx) => ctx.tradeLoops.stateReconcile(ctx),
+  trade_state_cleanup: (ctx) => ctx.tradeLoops.tradeStateCleanup(ctx),
+  anomaly_detector: (ctx) => ctx.tradeLoops.anomalyDetector(ctx),
+  sl_verifier: (ctx) => ctx.tradeLoops.slVerifier(ctx),
+  orphan_sweeper: (ctx) => ctx.tradeLoops.orphanSweeper(ctx),
   signal_tracker: async (ctx) => {
     const tracker = ctx.tracker();
     if (!tracker.start({ armDelayMs: 120_000 })) return;
@@ -715,6 +768,10 @@ function smcDepsOf(deps) {
  *   db             better-sqlite3 handle             genomeStore / genomeLock / runGeneration
  *   historyLoader  candleStore.HistoryLoader         lastClosed1h  () → [[o,c],[o,c]] | null
  *   now (s) / mono (ms) / log / env / setTimer / clearTimer / cpuRatio / smcDeps / only (task names)
+ *   autoTrade      the executor (services/autotrade createAutoTrade) — the scanners' execute_auto_trade + keys
+ *   tradeLoops     the M15 loops (services/autotrade/tradeLoops.js) — TRADE_LOOP_TASKS join the plan, the
+ *                  LEVELS scanner gets their BE monitor hook, cacheGcOnce their anomaly GC
+ *   tradeRuntime   the trade runtime both share (protect-only GC, C-8)
  */
 function createScheduler({ side = 'all', deps = {} } = {}) {
   const controller = new AbortController();
@@ -756,16 +813,19 @@ function createScheduler({ side = 'all', deps = {} } = {}) {
     momentum: () => deps.momentum || require('./momentumDetector').defaultDetector,
     cpuRatio: deps.cpuRatio || null,
     regimeProvider: deps.regimeProvider !== false,
-    smcDeps: smcDepsOf(deps),
+    smcDeps: null,
     autoTrade: deps.autoTrade || null,
+    tradeLoops: deps.tradeLoops || null,
+    tradeRuntime: deps.tradeRuntime || null,
     cacheGcOnce: deps.cacheGcOnce || cacheGcOnce,
   };
   // smc/scanner → smart_prompts.trigger_after_quota_hit(bot, uid) through this thread's delivery
   // facade (the throttle lives in this thread, as the bot's in its process); deps.smcDeps wins
-  ctx.smcDeps = {
+  const buildSmcDeps = () => ({
     smartPromptQuota: (uid) => require('../retention/smartPrompts').triggerAfterQuotaHit(ctx.bot, uid),
-    ...(ctx.smcDeps || {}),
-  };
+    ...(smcDepsOf({ ...deps, autoTrade: ctx.autoTrade }) || {}),
+  });
+  ctx.smcDeps = buildSmcDeps();
   // MidScanner.__init__: self.fetcher = make_fetcher() — the REST client every loop shares
   const makeFetcher = once('restFetcher', () => withGlobalTrend(
     deps.fetcher || deps.rest || require('../marketData/bingxRest').getRest(), { now, env, log },
@@ -793,7 +853,7 @@ function createScheduler({ side = 'all', deps = {} } = {}) {
   ctx.health = deps.health || new HealthMonitor(ctx.bot, { now, log });
   /** The thread's wiring of a LEVELS / VOLUME scanner (see the header); deps.scannerDeps[S] override it. */
   ctx.scannerDeps = (strategy) => {
-    const at = deps.autoTrade || null;
+    const at = ctx.autoTrade;
     const out = {
       clock: { now: () => ctx.now(), monotonic: () => ctx.mono() / 1000 },
       sleep, log, env,
@@ -810,6 +870,8 @@ function createScheduler({ side = 'all', deps = {} } = {}) {
     if (strategy === 'LEVELS') {
       out.fetcher = makeFetcher();
       out.candleStore = ctx.candleStore();
+      // MidScanner._be_monitor_loop: the BE monitor of the trade runtime (M15 U7), hosted by this scanner
+      if (ctx.tradeLoops && typeof ctx.tradeLoops.beMonitorLoop === 'function') out.beMonitorLoop = ctx.tradeLoops.beMonitorLoop;
     }
     return { ...out, ...((deps.scannerDeps && deps.scannerDeps[strategy]) || {}) };
   };
@@ -821,7 +883,7 @@ function createScheduler({ side = 'all', deps = {} } = {}) {
   });
 
   const only = deps.only ? new Set(deps.only) : null;
-  const plan = TASKS.filter((t) => (side === 'all' || t.side === side) && (!only || only.has(t.name)));
+  const plan = (ctx.tradeLoops ? ALL_TASKS : TASKS).filter((t) => (side === 'all' || t.side === side) && (!only || only.has(t.name)));
   const running = [];
   let doneCount = 0;
   let started = false;
@@ -868,7 +930,28 @@ function createScheduler({ side = 'all', deps = {} } = {}) {
       started = true;
       const names = [];
       if (side !== 'main') {
+        // [M15-LOOPS-REQUIRED] (site, D22): new positions only when every trade loop runs — the BE monitor,
+        // reconcile, stuck-PLACING cleanup, anomaly detector, SL verifier and orphan sweeper (the bot runs
+        // all of them in one process). Checked before the scanners are built: their deps capture the executor.
+        if (ctx.tradeLoops && ctx.autoTrade && typeof ctx.tradeLoops.wired === 'function') {
+          const wired = new Set(ctx.tradeLoops.wired());
+          const missing = ['be_monitor', ...require('../autotrade/tradeLoops').LOOP_NAMES].filter((n) => !wired.has(n));
+          if (missing.length) {
+            log.error(`[AUTO-TRADE] not started: trade loops not wired (${missing.join(', ')}) — open positions would have no BE monitor / reconcile`);
+            ctx.autoTrade = null;
+            ctx.smcDeps = buildSmcDeps();
+          }
+        }
         try { ctx.levels = buildLevels(); } catch (e) { log.error(`MidScanner init failed: ${e && e.message}`); ctx.levels = null; }
+        if (ctx.tradeLoops && ctx.autoTrade && !ctx.levels) {
+          // C-7 (D22): the BE monitor lives in the LEVELS scanner — no scanner, no BE monitor, so no new
+          // positions either (the bot never trades without it: a failing MidScanner aborts main())
+          log.error('[AUTO-TRADE] not started: the LEVELS scanner (the BE monitor host) is not built — open positions would have no BE monitor');
+          ctx.autoTrade = null;
+          ctx.smcDeps = buildSmcDeps();
+        } else if (ctx.tradeLoops && ctx.levels && typeof ctx.tradeLoops.beMonitorLoop !== 'function') {
+          log.warning('[TRADE-LOOPS] BE monitor not wired (not ported yet) — open positions get no BU / trailing / close notice');
+        }
       }
       for (const t of plan) {
         if (t.name === 'scanner' && !ctx.levels) {
@@ -883,10 +966,16 @@ function createScheduler({ side = 'all', deps = {} } = {}) {
           log.warning('[ENGINE] VOLUME scanner not installed (services/engine/volumeScanner.js) — task "volume_scanner" not started');
           continue;
         }
+        if (t.loop && !(ctx.tradeLoops && typeof ctx.tradeLoops[t.loop] === 'function')) {
+          log.info(`[ENGINE] trade loop "${t.name}" not wired (its pass is not ported yet) — task not started`);
+          continue;
+        }
         const run = () => RUNNERS[t.name](ctx);
-        const p = t.restart
+        const wrap = () => (t.restart
           ? guardedRestart(t.name, run, ctx, { baseDelay: t.baseDelay })
-          : guarded(t.name, run, ctx);
+          : guarded(t.name, run, ctx));
+        // a trade loop is a named task (the bot's gather task): its log lines / trader calls carry the name
+        const p = t.loop ? require('../autotrade/asyncio').runAsTask(t.name, wrap) : wrap();
         running.push(p.catch(() => {}).finally(() => { doneCount += 1; }));
         names.push(t.name);
       }
@@ -1030,7 +1119,7 @@ function withGlobalTrend(rest, { now, env, log }) {
 }
 
 module.exports = {
-  TASKS, RESTART_MAX_DELAY_S, RESTART_HEALTHY_RUN_S, SHUTDOWN_WAIT_MS,
+  TASKS, TRADE_LOOP_TASKS, ALL_TASKS, RESTART_MAX_DELAY_S, RESTART_HEALTHY_RUN_S, SHUTDOWN_WAIT_MS,
   botConfig, cacheMaxKeys, statsRepr, htmlEscape, errHead, makeSleep, StopEvent, guarded, guardedRestart, HealthMonitor,
   coinUniverseWarmupLoop, cacheGcOnce, cacheGcLoop, ghostCleanupLoop, startWsFeed, startCacheWarmer,
   procCpuRatio, waitForLowLoad, runEvolutionCycle, installTrendMonitor, installDefault, createScheduler,

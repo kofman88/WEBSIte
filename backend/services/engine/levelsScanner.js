@@ -57,7 +57,7 @@
  *   strategyEnabled(user, S) → bool                            config.strategy_enabled
  *   wsFeed         { registerOnBarClose(cb) }                  ws_feed.register_on_bar_close
  *   candleStore    { ensureCandles, HistoryLoader } | null     candle_store + backtest.HistoryLoader
- *   beMonitorLoop(scanner) → Promise                           MidScanner._be_monitor_loop body (M15)
+ *   beMonitorLoop(scanner, {restoreHintThrottle}) → Promise    MidScanner._be_monitor_loop body (M15 U7)
  *   sentry         { captureException(e) }                     sentry_sdk
  *   analysisExecutor(fn) → value | Promise                     run_in_executor(self._analysis_executor)
  *   env            process.env-like                            os.environ (CACHE_FIRST_MODE, …)
@@ -2081,15 +2081,21 @@ class MidScanner {
 
   /**
    * _be_monitor_loop: the BE monitor (scanner_mid._check_breakevens, trade-ops M15) runs from
-   * `deps.beMonitorLoop`; its prologue restores the levels-hint throttle like the bot's.
+   * `deps.beMonitorLoop(scanner, {restoreHintThrottle})`: its prologue restores the cooldown maps and then
+   * this scanner's levels-hint throttle inside ONE try (scanner_mid.py [BE-MONITOR-RESTORE-GUARD], INF-Q-I1),
+   * so the hook gets the throttle restore to call. Unwired (no M15 BE monitor): the throttle restore alone.
    */
   async _beMonitorLoop() {
+    const restoreHints = () => restoreHintThrottle({ kv: this.deps.kv, now: () => this._now(), log: this.log });
+    if (typeof this.deps.beMonitorLoop === 'function') {
+      await this.deps.beMonitorLoop(this, { restoreHintThrottle: restoreHints });
+      return;
+    }
     try {
-      await restoreHintThrottle({ kv: this.deps.kv, now: () => this._now(), log: this.log });
+      await restoreHints();
     } catch (e) {
       this.log.warning(`[BE-MONITOR-RESTORE-GUARD] restore failed (continuing with fresh state): ${errMsg(e)}`);
     }
-    if (typeof this.deps.beMonitorLoop === 'function') await this.deps.beMonitorLoop(this);
   }
 
   // ── WS bar close ──────────────────────────────────────────────────────────
@@ -2150,8 +2156,27 @@ class MidScanner {
     } catch (e) {
       this.log.debug(`warmup schedule: ${errMsg(e)}`);
     }
-    // [SCANNER-RESILIENCE] plain gather: one loop dying propagates to the supervisor
-    await Promise.all([this._scanLoop(), this._subCheckLoop(), this._beMonitorLoop()]);
+    // [SCANNER-RESILIENCE] plain gather: one loop dying propagates to the supervisor.
+    // [BE-SINGLE-LOOP 2026-10] one BE monitor per scanner instance: the gather does not stop the other
+    // loops when one dies and the supervisor (_guarded_restart) calls runForever() again on THIS instance,
+    // so a BE loop still running is reused (never aborted: a cancel mid-pass could fall between an exchange
+    // call and its DB write; the engine shutdown abort still reaches it); a finished / crashed one is
+    // started again. Start order unchanged: scan → sub → BE. `settled` is set by then(mark, mark) attached
+    // before the gather — the derived promise always fulfils (no unhandled rejection), and the mark runs
+    // before the gather rejects on a BE crash.
+    const scan = this._scanLoop();
+    const sub = this._subCheckLoop();
+    let be = this._beMonitorTask;
+    if (!be || be.settled) {
+      const t = { promise: this._beMonitorLoop(), settled: false };
+      const mark = () => { t.settled = true; };
+      t.promise.then(mark, mark);
+      this._beMonitorTask = t;
+      be = t;
+    } else {
+      this.log.info('[BE-SINGLE-LOOP] BE monitor still running — second loop not started');
+    }
+    await Promise.all([scan, sub, be.promise]);
   }
 
   /**

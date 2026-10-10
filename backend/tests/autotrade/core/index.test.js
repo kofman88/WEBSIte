@@ -339,6 +339,11 @@ describe('engine worker wiring', () => {
         log: capture().log, cache, fetcher: {}, registry: { forceSave: () => 0 },
         exchangeSymbols: { startBackgroundRefresh: async () => ({ stop() {} }), getStats: () => ({}) },
         env: { AUTOTRADE_ENABLED: '1', AUTOTRADE_EXCHANGES: 'bybit' },
+        // [M15-LOOPS-REQUIRED]: the executor runs only with every trade loop wired
+        tradeLoopsDeps: { passes: {
+          beMonitorLoop: async () => {}, reconcileOnce: async () => {}, cleanupPass: async () => {}, runOnce: async () => {},
+          checkSingleTrade: async () => {}, getOpenTradesAll: () => [], sweepOneUser: async () => {}, getAllUsers: () => [],
+        } },
       },
     });
     ch.port2.postMessage({ type: 'start', options: { only: [] } });

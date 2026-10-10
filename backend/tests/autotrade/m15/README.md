@@ -34,6 +34,10 @@ mtime of the ignored files are compared before and after).
 | `units.test.js` | U1: `computeFallbackPnlUsd`, the tradeDb readers, D5 gating, `alertBeMonitorCrash`, the M15 i18n round trip, trader methods / call map. |
 | `asyncio.test.js` | `createSemaphore` against CPython 3.11.17 `asyncio.Semaphore` traces, `runInScope`. |
 | `harness.selftest.test.js` | The JS harness against the Python harness self-test (both sides). |
+| `py/gen_m15_loop_trace.py` | U2 vectors → `fixtures/m15_loop_trace.json.gz` (the bot's real loop shells, below). |
+| `loopTrace.test.js` | U2: the five loop shells, the scheduler rows / wrappers and the LEVELS `[BE-SINGLE-LOOP]` host vs the trace. |
+| `runtime.test.js` | U2: the trade runtime in the engine worker (switches, D24 env, D5 keys, protect-only, C-7, shutdown, stray rejection, heartbeat). |
+| `strayWorker.js` | A worker thread for `runtime.test.js` (a loop pass leaving an unawaited rejection). |
 
 ## Python harness (`py/m15_harness.py`)
 
@@ -166,3 +170,42 @@ Importing it (before any bot module) gives:
   per-task traces and the recorded calls differ (`same_instant_cancel`, pinned in `asyncio.test.js`). Only
   a cancel issued by the releasing task's own step is reproduced (`woken_then_cancelled`). Rule: no vector
   puts a cancel or abort on a release instant — `guarded_cancel` refuses one.
+
+## U2 coverage (`m15_loop_trace.json.gz`)
+
+Generator `py/gen_m15_loop_trace.py`: bot.py's `_guarded`, `_guarded_restart`, `_run_state_reconciliation`,
+`_run_trade_state_cleanup`, `_run_anomaly_detector` ast-extracted verbatim; `state_reconciliation_loop`,
+`trade_state_cleanup_loop`, `run_detector_loop` + `_record_metrics`, `sl_verifier_loop`, `orphan_sweeper_loop`
+and `MidScanner.run_forever` as they are. Stubbed and recorded per call: `_reconcile_once`,
+`db_cleanup_stuck_placing`, `_run_once`, `metrics.record`, `db_get_open_trades_all`, `_check_single_trade`,
+`db_get_all_users`, `_sweep_one_user` (a behaviour = sleep `dur` — a cancellation point — then raise / return,
+scripted per call number; the JS twin reads the same scripts from the fixture). The driver imports `bot` first so
+the sweeper's dead `[HEALTH-MON]` `import bot` finds the module (no `health` attribute: nothing heartbeats ORPHAN).
+
+* `main` — the five loops in the bot gather order, 6 h + 0.0625 s, pass errors (incl. `TimeoutError`, C-15), the
+  detector's WARNING / DEBUG pass lines, the verifier's empty / failing reads, per-trade errors and Semaphore(5)
+  hand-overs, the sweeper's key pre-filter (`''` / None / missing `trade_exchange`, `'BINGX'`), per-user errors
+  (KeyError, `int += str`, a None result), a users-read error, an iteration error and the 3600 s back-off; then
+  every task cancelled. JS: through `scheduler.createScheduler` (the `TRADE_LOOP_TASKS` rows) and `stop()`.
+* `cancels` — anchored `task.cancel()`s (the cancel instant recorded on both sides relative to the same stub
+  event): in a pass, in the gather, in the first delay, in the interval sleep, in the verifier's "no open trades"
+  sleep, in the sweeper's 0.3 s pause / interval sleep / back-off / warm-up — the stopped line exactly where the
+  bot's try is (C-9). The driver refuses a cancel that shares its instant with an earlier step of the same task.
+* `sweeper_env` — `ORPHAN_SWEEP_ENABLED` 0 / " 0 " / "\u2003 0\n" / false, `ORPHAN_SWEEP_INTERVAL_S=60` (+ " +90 ",
+  "1_200" for the other two); `env_parse` — the import-time `int()` / `strip()` of 96 env sets (D24 table).
+* `wrappers` — the loop function itself raising: the swallowing wrappers' crash line and clean return (no 💀, no
+  restart — INF-Q-I3), the verifier row's restart + backoff, the sweeper row's 💀 without restart.
+* `be` — five `[BE-SINGLE-LOOP 2026-10]` scenarios (the g5 tests): LEVELS crashes reuse the live BE loop, a crashed /
+  finished BE loop is started again, a BE crash during the restart backoff, start order, the reused loop cancelled.
+
+Comparison rule: per task, exact; the SL verifier's concurrent checks in canonical order within one virtual
+instant (two checks ending at the same instant: the bot runs both timer callbacks in one loop iteration, the vclock
+one per turn — same instants, same slots; the `check` start order is compared exactly).
+
+## Site deviations recorded here (U2)
+
+* **D24 range**: a valid Python int outside ±(2^53 − 1) in `ORPHAN_SWEEP_*` is refused like a malformed one (JS
+  numbers / timers cannot hold it; the bot would sleep "forever" or fail hourly). Sleeps past 2^31 − 1 ms are chunked.
+* **C-5 at the shell level**: after a pass (or a DB read) returns, the shell checks the cancel scope inside its try —
+  an abort that came while the pass awaited a non-cancellable call is the bot's CancelledError at that await (the
+  stopped line); what the pass did after that await on the site still ran (U3-U10 add their own checkpoints).

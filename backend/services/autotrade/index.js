@@ -1,10 +1,20 @@
 'use strict';
 /**
- * services/autotrade — the production wiring of the execute_auto_trade port (M13b): one executor
- * per engine-worker thread with the bot's module-level state (trade locks, idempotency registry,
- * cooldowns, dedup maps) and the site's sources for everything the bot reads from its own tables.
+ * services/autotrade — the production wiring of the execute_auto_trade port (M13b) and of the M15
+ * trade-ops loops: ONE trade runtime per engine-worker thread with the bot's process-wide module state of
+ * auto_trade and the traders, the executor and the loops on top of it (PLAN_M15 §1.2, D21).
  *
- *   createAutoTrade(deps) → {
+ *   createTradeRuntime(deps) → the shared part (the bot keeps it as module state of auto_trade / the
+ *                              traders, used by execute_auto_trade AND the loops): tdb, the trader hooks and
+ *                              trader instances (traderFor — one Bybit delist cache, hedge cache, token
+ *                              buckets per thread), cooldowns (auth breaker, zero-balance), the idempotency
+ *                              registry, admin alerts, reconcile helpers, partial TP, the safe send, the task
+ *                              group, getUserRow, the D5 key reader getApiKeys / getBalance, restore(), gc,
+ *                              resetAuthFailures() — so "protect only" (loops without the executor) restores,
+ *                              GCs and resets exactly like the bot (C-8)
+ *   createAutoTrade({runtime, …}) → the executor on that runtime (without `runtime` it builds its own —
+ *                              the M13 callers and tests are unchanged):
+ *   {
  *     executeAutoTrade(kwargs)   auto_trade.execute_auto_trade — the scanners' kwargs (snake_case);
  *                                `bot` defaults to deps.bot (the SMC scanner does not pass it),
  *                                extra keys (`user`) are dropped. An exchange outside the D5 set →
@@ -47,9 +57,14 @@
  * `onConfirmPending({userId, tradeId, symbol, direction, strategy, exchange})` hook is taken from
  * deps or, once that module exports it, from confirmMode.js; without either nothing else happens.
  *
- * Rollout switches (docs/PORT_DECISIONS.md D5): AUTOTRADE_EXCHANGES — comma list of the exchanges
- * auto-trade may touch (default "bybit,bingx"); the engine worker wires this module only with
- * AUTOTRADE_ENABLED=1 (workers/engineWorker.js), so a deploy never starts trading by itself.
+ * Rollout switches (docs/PORT_DECISIONS.md D5, PLAN_M15 D22 / D24): AUTOTRADE_EXCHANGES — comma list of
+ * the exchanges auto-trade AND the loops may touch (default "bybit,bingx"; a key of another exchange reads
+ * as "no keys"); AUTOTRADE_ENABLED=1 — the executor; TRADE_LOOPS_ENABLED — '1' loops on, '0' off,
+ * anything else follows AUTOTRADE_ENABLED (`tradeLoopsEnabled`). The engine worker
+ * (workers/engineWorker.js workerTradeRuntime) refuses the executor with the loops off, and refuses the
+ * whole runtime on a malformed ORPHAN_SWEEP_* int (`tradeRuntimeEnvError`). Both switches unset = nothing
+ * is built: a deploy never starts trading or touching positions by itself. The killswitch is not consulted
+ * by any loop (HALTED_NEW stops entries; the loops keep protecting positions).
  */
 
 const asyncio = require('./asyncio');
@@ -95,6 +110,37 @@ function autoTradeEnabled(env = process.env) {
 const errText = (e) => (e && e.message !== undefined ? String(e.message) : String(e));
 
 /**
+ * D22: the M15 trade-ops loops. TRADE_LOOPS_ENABLED '1' → on, '0' → off (after trim); anything else / unset
+ * follows AUTOTRADE_ENABLED — the default deploy (both unset) runs nothing.
+ */
+function tradeLoopsEnabled(env = process.env) {
+  const raw = env.TRADE_LOOPS_ENABLED;
+  const v = raw === undefined || raw === null ? '' : String(raw).trim();
+  if (v === '1') return true;
+  if (v === '0') return false;
+  return autoTradeEnabled(env);
+}
+
+/**
+ * D24 (orphan_sweeper.py:53-56): the ORPHAN_SWEEP_* ints are read with Python int() when the runtime is built
+ * (the bot: at import — a malformed value kills main() at start-up). Returns null when they parse, else the
+ * ERROR text the engine worker logs before it leaves the trade runtime (executor + loops) unbuilt. The
+ * sweeper being disabled does not save a malformed int (C-16: the bot parses before the ENABLED check).
+ */
+function tradeRuntimeEnvError(env = process.env) {
+  try {
+    require('./loopShells').orphanSweepConfig(env);
+    return null;
+  } catch (e) {
+    if (e && e.name === 'OrphanSweepEnvError') {
+      return `[TRADE-RUNTIME] not started: ${e.message} (orphan_sweeper reads it with int() at start-up) — auto-trade and the trade loops stay off`;
+    }
+    throw e;
+  }
+}
+
+
+/**
  * The trader runtime hooks of every money path (the bot's module state behind each trader call):
  *   killswitch   defense.killswitch.require_active — checked by every place_trade / place_trade_split
  *   planGate     plan_gate.deny_reason — the traders' last-mile plan check
@@ -111,7 +157,11 @@ function createTraderHooks(deps = {}) {
   const isAdmin = deps.isAdmin || ((uid) => {
     try { return Boolean(require('../traderSettingsService').isAdmin(uid)); } catch (_e) { return false; }
   });
-  const tdb = deps.tradeDb || createTradeDb({ db: deps.db || null, now, log, repo: deps.repo || null, invalidateUserCache: deps.invalidateUserCache || null });
+  // `exchanges` (the D5 set) gates the M15 readers' key columns (tradeDb getUserWithKeys & co.); the executor's reads do not use it
+  const tdb = deps.tradeDb || createTradeDb({
+    db: deps.db || null, now, log, repo: deps.repo || null, invalidateUserCache: deps.invalidateUserCache || null,
+    exchanges: deps.exchanges || null, env: deps.env || null,
+  });
 
   /** metrics.mutation_log.emit_mutation → audit_log (best effort; the bot's no-op filter kept). */
   const emitMutation = deps.emitMutation || (async (type, { actor = '', target = '', before = '', after = '', context = null } = {}) => {
@@ -164,7 +214,12 @@ function createTradeOpsRegistry(deps = {}) {
   });
 }
 
-function createAutoTrade(deps = {}) {
+/**
+ * createTradeRuntime(deps) — the auto_trade / trader module state the executor and the M15 loops share in one
+ * engine thread (the bot's single process): see the header. Every part can be replaced through deps (tests),
+ * exactly like createAutoTrade's deps before the split.
+ */
+function createTradeRuntime(deps = {}) {
   const env = deps.env || process.env;
   const log = deps.log || require('../marketData/mdLog').log;
   const now = deps.now || (() => Date.now() / 1000);
@@ -181,22 +236,21 @@ function createAutoTrade(deps = {}) {
   });
 
   // ── storage + the trader runtime hooks (shared with the trade-ops registry) ──
-  const hooks = createTraderHooks({ ...deps, env, log, now, isAdmin });
-  const { tdb, emitMutation } = hooks;
+  const hooks = createTraderHooks({ ...deps, env, log, now, isAdmin, exchanges: Array.from(exchanges) });
+  const { tdb, emitMutation, killswitch, planGate, onAuthReset } = hooks;
 
   // ── delivery ──
   const msSleep = (ms) => sleep(Math.max(0, Number(ms) || 0) / 1000);
   let safeSend = deps.safeSend || null;
-  /** telegram_safe.safe_send_message for every auto-trade notice: filed as a 'trade' notification. */
+  /** telegram_safe.safe_send_message for every auto-trade / loop notice: filed as a 'trade' notification. */
   const sendMessage = deps.sendMessage || ((bot, uid, text, opts = {}) => {
     if (!safeSend) safeSend = require('../engine/scheduler').siteSafeSend({ log, sleep: msSleep });
     return safeSend(bot, uid, text, { siteType: 'trade', ...opts });
   });
   const enqueueCritical = deps.enqueueCritical === undefined ? null : deps.enqueueCritical;
 
-  // ── module state of the bot ──
+  // ── module state of the bot (auto_trade / admin_alerts / partial_tp / the traders) ──
   const tasks = deps.tasks || asyncio.createTaskGroup({ log });
-  const { killswitch, planGate } = hooks;
   const adminAlerts = deps.adminAlerts || createAdminAlerts({ now, kvGet: tdb.kvGet, kvSet: tdb.kvSet, log });
   const cooldowns = deps.cooldowns || createCooldowns({
     now, kvSet: tdb.kvSet, kvItemsWithPrefix: tdb.kvItemsWithPrefix, tasks, log,
@@ -208,8 +262,6 @@ function createAutoTrade(deps = {}) {
     now, kvGet: tdb.kvGet, kvSet: tdb.kvSet, kvKeysWithPrefix: tdb.kvKeysWithPrefix, tasks, log,
   });
 
-  const { onAuthReset } = hooks;
-
   // deps.traderRuntime (tests): {transport, sleep, now, monotonic, kv, log, …} of the trader instances
   const tr = deps.traderRuntime || {};
   const { transport: trTransport = null, sleep: trSleep = null, ...trExtra } = tr;
@@ -217,30 +269,7 @@ function createAutoTrade(deps = {}) {
     overrides: productionOverrides({ killswitch, planGate, events: hooks.events, onAuthReset, transport: trTransport, sleep: trSleep, extra: trExtra }),
   });
   const reconcile = deps.reconcile || createReconcile({ traderFor, log, sleep, timers });
-  const cache = deps.cache || require('../marketData/candleCache');
-  const correlationCap = deps.correlationCap || createCorrelationCap({ db: deps.db || null, cache, now, log });
-  const adaptiveSizing = deps.adaptiveSizing || createAdaptiveSizing({ db: deps.db || null, cache, now, log });
-  const tiltDetector = deps.tiltDetector || createTiltDetector({ db: deps.db || null, now, log, sendMessage });
-  const skipNotify = deps.skipNotify || createSkipNotify({ now, log, sendMessage, enqueueCritical, env });
   const balanceCache = deps.balanceCache || require('../exchanges/balanceCache').defaultCache();
-
-  const regimeLoop = () => require('../engine/regimeLoop');
-  const marketRegime = () => require('../../strategies/common/marketRegime');
-  const regime = deps.regime || {
-    getCachedRegime: () => regimeLoop().getCachedRegime(),
-    detectRegime: (df) => marketRegime().detectRegime(df),
-    regimeAllowsDirection: (r, d) => marketRegime().regimeAllowsDirection(r, d),
-    regimeWarningText,
-  };
-  const aiFilter = deps.aiFilter || createAiFilter({
-    getCachedRegime: () => regimeLoop().getCachedRegime(),
-    regimeAllowsDirection: (r, d) => marketRegime().regimeAllowsDirection(r, d),
-    env, log,
-  });
-  const trend = deps.trend || {
-    ctxRiskMult: (ctx) => require('../engine/trendMonitor').ctxRiskMult(ctx),
-    ctxLabel: (ctx) => require('../engine/trendMonitor').ctxLabel(ctx, 'ru'),
-  };
   const partialTp = deps.partialTp || createPartialTp({
     traderFor, log, sleep, sendMessage, enqueueCritical, timers,
     adminAlert: (bot, title, details, dedupKey, alertType) => adminAlerts.sendAdminAlert(bot, title, details, dedupKey, alertType),
@@ -268,51 +297,6 @@ function createAutoTrade(deps = {}) {
     if (!r) return null;
     return { ...r, username: telegramUsername(uid), okx_passphrase: okxPassphrase(uid) };
   });
-
-  function confirmHook() {
-    if (deps.onConfirmPending !== undefined) return deps.onConfirmPending;
-    let mod = null;
-    try {
-      mod = require('./confirmMode');
-    } catch (e) {
-      if (e && e.code === 'MODULE_NOT_FOUND' && String(e.message).includes('confirmMode')) return null;
-      throw e;
-    }
-    return mod && typeof mod.onConfirmPending === 'function' ? mod.onConfirmPending : null;
-  }
-
-  const exec = createExecutor({
-    db: tdb, traderFor, killswitch, cooldowns, idempotency, reconcile, partialTp, tasks,
-    correlationCap, adaptiveSizing, tiltDetector, skipNotify, adminAlerts, aiFilter, balanceCache,
-    log, now, sleep, timers, env, config: deps.config,
-    isAdmin: async (uid) => isAdmin(uid),
-    getUserRow, sendMessage, enqueueCritical,
-    exchangeSymbols: deps.exchangeSymbols,
-    regime, cache, trend,
-    challengeGate: deps.challengeGate || (async (uid) => require('../challengeService').gate(uid)),
-    emitMutation,
-    userLog: deps.userLog, funnelTrackOnce: deps.funnelTrackOnce, recordLeverageCap: deps.recordLeverageCap,
-    sentryCapture: deps.sentryCapture,
-    onConfirmPending: async (info) => {
-      const fn = confirmHook();
-      if (typeof fn === 'function') await fn(info);
-    },
-    d6: deps.d6, d17: deps.d17, d18: deps.d18,
-  });
-
-  /** auto_trade.execute_auto_trade as the scanners call it. */
-  async function executeAutoTrade(kwargs = {}) {
-    const kw = { ...kwargs };
-    delete kw.user;
-    if (kw.bot === undefined) kw.bot = defaultBot;
-    const ex = resolveExchange(kw.exchange === undefined ? 'bybit' : kw.exchange);
-    if (!exchanges.has(ex)) {
-      log.warning(pf('[AT-D5] uid=%s sym=%s exchange=%s is not enabled for auto-trade (AUTOTRADE_EXCHANGES) — not placed',
-        kw.user_id, kw.symbol, ex));
-      return { executed: false, show_trade_btn: false, limit_msg: null, skip_reason: 'exchange_not_enabled' };
-    }
-    return exec.executeAutoTrade(kw);
-  }
 
   /** The scanners' API-key read: the bot's `exchange` branches (unknown → bybit), D5-gated. */
   function getApiKeys(user, exchange) {
@@ -347,7 +331,7 @@ function createAutoTrade(deps = {}) {
     return balanceCache.getCachedBalance(view, ex);
   }
 
-  /** bot.py start-up (after init_db): the idempotency registry, then the zero-balance cooldowns. */
+  /** bot.py start-up (after init_db): the idempotency registry, then the zero-balance cooldowns — unconditionally (C-8). */
   async function restore() {
     let idem = 0;
     let zb = 0;
@@ -366,17 +350,12 @@ function createAutoTrade(deps = {}) {
     return { idempotency: idem, zeroBalance: zb };
   }
 
-  /** cache_gc._cleanup_once — the auto-trade registries, each returning the number freed. */
+  /** cache_gc._cleanup_once's entries of the shared registries (each returns the number freed). */
   const gc = {
-    tradeLocks: () => exec.gcTradeLocks(),
     idempotency: () => idempotency.gcIdempotencyRegistry(),
     authFail: () => cooldowns.gcAuthFailRegistry(),
     zeroBalance: () => cooldowns.gcZeroBalanceRegistry(),
     commodity: () => cooldowns.gcCommodityBlocklist(),
-    disabledDays: (t = now()) => exec.gcDisabledDaysNotified(utcParts(t).ordinal),
-    correlation: () => correlationCap.gcCache(),
-    tilt: () => tiltDetector.gcDedup(),
-    skipNotify: () => skipNotify.gcState(),
   };
 
   /** auto_trade.reset_auth_failures(uid, exchange): the auth breaker forgets the user's failures (keys re-saved / auto-trade re-enabled). */
@@ -385,21 +364,132 @@ function createAutoTrade(deps = {}) {
   }
 
   return {
-    executeAutoTrade, getApiKeys, getBalance, restore, gc, resetAuthFailures,
+    env, log, now, sleep, timers, db: deps.db || null, dbOf, exchanges, bot: defaultBot, isAdmin, exchangeKeys,
+    hooks, tdb, emitMutation, killswitch, planGate, onAuthReset, events: hooks.events,
+    sendMessage, enqueueCritical, tasks, adminAlerts, cooldowns, idempotency, traderFor, reconcile, balanceCache, partialTp,
+    getUserRow, getApiKeys, getBalance, restore, gc, resetAuthFailures,
+    drain: () => tasks.drain(),
+  };
+}
+
+/**
+ * createAutoTrade(deps) — the executor (execute_auto_trade) on a trade runtime: `deps.runtime` (the engine
+ * worker shares it with the loops) or, without one, a runtime built from the same deps (unchanged M13 API).
+ */
+function createAutoTrade(deps = {}) {
+  const rt = deps.runtime || createTradeRuntime(deps);
+  const env = deps.env || rt.env;
+  const log = deps.log || rt.log;
+  const now = deps.now || rt.now;
+  const sleep = deps.sleep || rt.sleep;
+  const timers = deps.timers === undefined ? rt.timers : deps.timers;
+  const dbHandle = deps.db || rt.db || null;
+  const exchanges = rt.exchanges;
+  const defaultBot = deps.bot === undefined ? rt.bot : deps.bot;
+  const {
+    tdb, emitMutation, killswitch, cooldowns, idempotency, traderFor, reconcile, partialTp, tasks, adminAlerts,
+    sendMessage, enqueueCritical, balanceCache, getUserRow,
+  } = rt;
+
+  // ── the executor's own module state ──
+  const cache = deps.cache || require('../marketData/candleCache');
+  const correlationCap = deps.correlationCap || createCorrelationCap({ db: dbHandle, cache, now, log });
+  const adaptiveSizing = deps.adaptiveSizing || createAdaptiveSizing({ db: dbHandle, cache, now, log });
+  const tiltDetector = deps.tiltDetector || createTiltDetector({ db: dbHandle, now, log, sendMessage });
+  const skipNotify = deps.skipNotify || createSkipNotify({ now, log, sendMessage, enqueueCritical, env });
+
+  const regimeLoop = () => require('../engine/regimeLoop');
+  const marketRegime = () => require('../../strategies/common/marketRegime');
+  const regime = deps.regime || {
+    getCachedRegime: () => regimeLoop().getCachedRegime(),
+    detectRegime: (df) => marketRegime().detectRegime(df),
+    regimeAllowsDirection: (r, d) => marketRegime().regimeAllowsDirection(r, d),
+    regimeWarningText,
+  };
+  const aiFilter = deps.aiFilter || createAiFilter({
+    getCachedRegime: () => regimeLoop().getCachedRegime(),
+    regimeAllowsDirection: (r, d) => marketRegime().regimeAllowsDirection(r, d),
+    env, log,
+  });
+  const trend = deps.trend || {
+    ctxRiskMult: (ctx) => require('../engine/trendMonitor').ctxRiskMult(ctx),
+    ctxLabel: (ctx) => require('../engine/trendMonitor').ctxLabel(ctx, 'ru'),
+  };
+
+  function confirmHook() {
+    if (deps.onConfirmPending !== undefined) return deps.onConfirmPending;
+    let mod = null;
+    try {
+      mod = require('./confirmMode');
+    } catch (e) {
+      if (e && e.code === 'MODULE_NOT_FOUND' && String(e.message).includes('confirmMode')) return null;
+      throw e;
+    }
+    return mod && typeof mod.onConfirmPending === 'function' ? mod.onConfirmPending : null;
+  }
+
+  const exec = createExecutor({
+    db: tdb, traderFor, killswitch, cooldowns, idempotency, reconcile, partialTp, tasks,
+    correlationCap, adaptiveSizing, tiltDetector, skipNotify, adminAlerts, aiFilter, balanceCache,
+    log, now, sleep, timers, env, config: deps.config,
+    isAdmin: async (uid) => rt.isAdmin(uid),
+    getUserRow, sendMessage, enqueueCritical,
+    exchangeSymbols: deps.exchangeSymbols,
+    regime, cache, trend,
+    challengeGate: deps.challengeGate || (async (uid) => require('../challengeService').gate(uid)),
+    emitMutation,
+    userLog: deps.userLog, funnelTrackOnce: deps.funnelTrackOnce, recordLeverageCap: deps.recordLeverageCap,
+    sentryCapture: deps.sentryCapture,
+    onConfirmPending: async (info) => {
+      const fn = confirmHook();
+      if (typeof fn === 'function') await fn(info);
+    },
+    d6: deps.d6, d17: deps.d17, d18: deps.d18,
+  });
+
+  /** auto_trade.execute_auto_trade as the scanners call it. */
+  async function executeAutoTrade(kwargs = {}) {
+    const kw = { ...kwargs };
+    delete kw.user;
+    if (kw.bot === undefined) kw.bot = defaultBot;
+    const ex = resolveExchange(kw.exchange === undefined ? 'bybit' : kw.exchange);
+    if (!exchanges.has(ex)) {
+      log.warning(pf('[AT-D5] uid=%s sym=%s exchange=%s is not enabled for auto-trade (AUTOTRADE_EXCHANGES) — not placed',
+        kw.user_id, kw.symbol, ex));
+      return { executed: false, show_trade_btn: false, limit_msg: null, skip_reason: 'exchange_not_enabled' };
+    }
+    return exec.executeAutoTrade(kw);
+  }
+
+  /** cache_gc._cleanup_once — the auto-trade registries, each returning the number freed. */
+  const gc = {
+    tradeLocks: () => exec.gcTradeLocks(),
+    ...rt.gc,
+    disabledDays: (t = now()) => exec.gcDisabledDaysNotified(utcParts(t).ordinal),
+    correlation: () => correlationCap.gcCache(),
+    tilt: () => tiltDetector.gcDedup(),
+    skipNotify: () => skipNotify.gcState(),
+  };
+
+  return {
+    executeAutoTrade, getApiKeys: rt.getApiKeys, getBalance: rt.getBalance, restore: rt.restore, gc,
+    resetAuthFailures: rt.resetAuthFailures,
     drain: () => tasks.drain(),
     // D18: engine shutdown — no new placement, then wait for the ones in flight (workers/engineWorker.js)
     beginShutdown: () => exec.beginShutdown(),
     inflight: () => exec.inflight(),
     waitIdle: (timeoutMs) => exec.waitIdle(timeoutMs),
     exchanges: () => Array.from(exchanges),
+    runtime: rt,
     _exec: exec,
     _parts: {
-      tdb, killswitch, planGate, cooldowns, idempotency, skipNotify, balanceCache, traderFor, adminAlerts, onAuthReset, getUserRow,
-      sendMessage, emitMutation,
+      tdb, killswitch, planGate: rt.planGate, cooldowns, idempotency, skipNotify, balanceCache, traderFor, adminAlerts,
+      onAuthReset: rt.onAuthReset, getUserRow, sendMessage, emitMutation,
     },
   };
 }
 
 module.exports = {
-  ALL_EXCHANGES, D5_DEFAULT_EXCHANGES, enabledExchanges, autoTradeEnabled, createAutoTrade, createTraderHooks, createTradeOpsRegistry,
+  ALL_EXCHANGES, D5_DEFAULT_EXCHANGES, enabledExchanges, autoTradeEnabled, tradeLoopsEnabled, tradeRuntimeEnvError,
+  createTradeRuntime, createAutoTrade, createTraderHooks, createTradeOpsRegistry,
 };

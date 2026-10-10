@@ -6,8 +6,10 @@
  *   • the worker entry (runs when loaded as a worker_threads Worker): the 'worker' side of
  *     services/engine/scheduler.js — LEVELS / SMC / VOLUME scanners, the WS feeds and the cache
  *     warmer, the trend monitor, the regime / momentum / coin-quality loops, the free evening
- *     report, the signal tracker, cache_gc, the health monitor — with the per-thread module
- *     state of those modules and its own SQLite connection (WAL, busy_timeout 15 s);
+ *     report, the signal tracker, cache_gc, the health monitor and — with the switches on — the
+ *     trade runtime (services/autotrade: the auto-trade executor and the M15 trade-ops loops on ONE
+ *     runtime, PLAN_M15 D21) — with the per-thread module state of those modules and its own SQLite
+ *     connection (WAL, busy_timeout 15 s);
  *   • the main-thread supervisor `startEngine()` / `createSupervisor()`: spawns the worker, answers
  *     its delivery RPCs through services/engine/signalDelivery.js (notifications, SSE, Telegram
  *     mirror, signal_msg_id), runs the 'main' side of the scheduler (ghost cleanup, Genome
@@ -17,6 +19,7 @@
  *
  * Message protocol (structured clone):
  *   main → worker
+ *     { type: 'autotrade', op, … }       hand-offs to the trade runtime (op 'reset_auth_failures')
  *     { type: 'start', options? }        start the scheduler ('worker' side; options.only = task names;
                                         options.boot = run scheduler.boot() first: candle cache +
                                         exchange symbol lists, as startEngine does)
@@ -25,7 +28,8 @@
  *     { type: 'rpc-result', id, ok, result | error }   answer to a delivery request
  *   worker → main
  *     { type: 'ready', tasks, scanners } the scheduler started (task names, scanner registry state)
- *     { type: 'heartbeat', ts, regime }  every HEARTBEAT_MS (15 s) — liveness + the cached BTC regime
+ *     { type: 'heartbeat', ts, regime, loops }  every HEARTBEAT_MS (15 s) — liveness + the cached BTC regime
+ *                                        + the M15 loops' counters (tradeLoops.stats(), null without loops)
  *     { type: 'health', name, ts }       a scanner heartbeat (HealthMonitor.heartbeat: LEVELS / SMC / VOLUME)
  *     { type: 'rpc', id, method, args } / { type: 'call', method, args }   delivery (signalDelivery.js)
  *     { type: 'log', level, msg, extra } the worker's engine log lines (main logs them via winston)
@@ -104,24 +108,54 @@ function softExit(port) {
 }
 
 /**
- * The thread's auto-trade executor (services/autotrade, M13b) — only with AUTOTRADE_ENABLED=1
- * (docs/PORT_DECISIONS.md D5), so a deploy never starts trading by itself. bot.py start-up order:
- * the idempotency registry and the zero-balance cooldowns are restored before any scanner runs.
- * A failure to build it leaves the engine without auto-trade (no keys → no trade), never half-wired.
+ * The thread's trade runtime (services/autotrade): the executor (M13b) and the M15 trade-ops loops on ONE
+ * runtime (PLAN_M15 §1.2 / D21 / D22 / D24) — { runtime, autoTrade, tradeLoops }, each null when off:
+ *   AUTOTRADE_ENABLED   TRADE_LOOPS_ENABLED        executor  loops
+ *   unset / not 1       unset / not 0/1            —         —      (the default deploy: nothing runs)
+ *   1                   unset / not 0/1 / 1        built     on
+ *   1                   0                          —         —      ERROR: the executor refuses to run without loops
+ *   not 1               1                          —         on     "protect only": no new placement
+ * A malformed ORPHAN_SWEEP_* int (Python int() rules) → ERROR, nothing built (D24; the bot dies at start-up).
+ * bot.py start-up order: the idempotency registry and the zero-balance cooldowns are restored before any
+ * scanner runs — in protect-only mode too (C-8). A failure to build leaves the engine without both
+ * (no keys → no trade), never half-wired.
+ *   opts.runtimeDeps / opts.loopsDeps   extra deps of createTradeRuntime / createTradeLoops (tests)
  */
-async function workerAutoTrade(bot, env) {
+async function workerTradeRuntime(bot, env, { runtimeDeps = null, loopsDeps = null } = {}) {
   const L = require('../services/marketData/mdLog').log;
+  const off = { runtime: null, autoTrade: null, tradeLoops: null };
   try {
     const at = require('../services/autotrade');
-    if (!at.autoTradeEnabled(env)) return null;
-    const inst = at.createAutoTrade({ bot, env });
-    await inst.restore();
-    L.info(`[AUTO-TRADE] enabled, exchanges=${inst.exchanges().join(',') || '-'}`);
-    return inst;
+    const atOn = at.autoTradeEnabled(env);
+    const loopsOn = at.tradeLoopsEnabled(env);
+    if (atOn && !loopsOn) {
+      L.error('[AUTO-TRADE] not started: TRADE_LOOPS_ENABLED=0 — open positions would have no BE monitor / reconcile');
+      return off;
+    }
+    if (!loopsOn) return off;
+    const envErr = at.tradeRuntimeEnvError(env);
+    if (envErr) {
+      L.error(envErr);
+      return off;
+    }
+    const runtime = at.createTradeRuntime({ bot, env, ...(runtimeDeps || {}) });
+    await runtime.restore();
+    const autoTrade = atOn ? at.createAutoTrade({ runtime, bot, env }) : null;
+    const tradeLoops = require('../services/autotrade/tradeLoops').createTradeLoops(runtime, { env, ...(loopsDeps || {}) });
+    const exchanges = Array.from(runtime.exchanges).join(',') || '-';
+    if (autoTrade) L.info(`[AUTO-TRADE] enabled, exchanges=${exchanges}`);
+    L.info(`[TRADE-LOOPS] enabled (${autoTrade ? 'with auto-trade' : 'protect only — no new placements'}), exchanges=${exchanges}, `
+      + `wired: ${tradeLoops.wired().join(', ') || '-'}`);
+    return { runtime, autoTrade, tradeLoops };
   } catch (e) {
     L.error(`[AUTO-TRADE] not started: ${e && e.message}`);
-    return null;
+    return off;
   }
+}
+
+/** The executor of workerTradeRuntime alone (M13b callers / tests): null unless auto-trade runs. */
+async function workerAutoTrade(bot, env) {
+  return (await workerTradeRuntime(bot, env)).autoTrade;
 }
 
 /**
@@ -137,7 +171,11 @@ function runWorker(port, {
   autoTradeDrainMs = AUTOTRADE_DRAIN_MS,
 } = {}) {
   const { createRemoteDelivery } = require('../services/engine/signalDelivery');
-  const post = (m) => { try { port.postMessage(m); } catch (_e) { /* port closed */ } };
+  let heldLogs = null;   // the log lines of the registry load while it runs, delivered after 'ready' (see start)
+  const post = (m) => {
+    if (heldLogs && m && m.type === 'log') { heldLogs.push(m); return; }
+    try { port.postMessage(m); } catch (_e) { /* port closed */ }
+  };
   const remote = createRemoteDelivery(post);
   if (logs) forwardLogs(post);
   let scheduler = null;
@@ -147,23 +185,47 @@ function runWorker(port, {
   const regimeNow = () => {
     try { return require('../services/engine/regimeLoop').getCachedRegime(); } catch (_e) { return null; }
   };
-  const beat = () => post({ type: 'heartbeat', ts: Date.now() / 1000, regime: regimeNow() });
+  const loopsNow = () => {
+    const tl = scheduler && scheduler.ctx ? scheduler.ctx.tradeLoops : null;
+    if (!tl || typeof tl.stats !== 'function') return null;
+    try { return tl.stats(); } catch (_e) { return null; }
+  };
+  const beat = () => post({ type: 'heartbeat', ts: Date.now() / 1000, regime: regimeNow(), loops: loopsNow() });
 
   let starting = false;
   async function start(options = {}) {
     if (scheduler || starting) return;
     starting = true;   // the auto-trade restore awaits: a second 'start' must not build a second scheduler
+    let startLogs = [];
+    const flushStartLogs = () => { const held = startLogs; startLogs = []; for (const m of held) post(m); };
     try {
       const { createScheduler } = require('../services/engine/scheduler');
-      const sd = { ...deps, bot: remote };
+      const { tradeRuntimeDeps, tradeLoopsDeps, ...rest } = deps;
+      const sd = { ...rest, bot: remote };
       if (options.only) sd.only = options.only;
-      if (sd.autoTrade === undefined) sd.autoTrade = await workerAutoTrade(remote, deps.env || process.env);
-      if (stopping) return;
+      // INF-S-1: signal_registry is loaded at import in the bot (_persist_load) — before any scanner or
+      // loop runs, so post-close cooldowns and the 4 h dedup survive a restart and the first persist
+      // does not wipe the snapshot. Its line ("FIX-AUDIT-26: signal_registry загружен …") is forwarded
+      // after 'ready' (a started worker's first messages stay heartbeat → ready).
+      const reg = deps.registry || require('../services/engine/signalRegistry').defaultRegistry;
+      if (reg && typeof reg.load === 'function') {
+        heldLogs = [];
+        try { reg.load(); } catch (e) { require('../services/marketData/mdLog').log.warning(`signal_registry load failed: ${e && e.message}`); }
+        startLogs = heldLogs;
+        heldLogs = null;
+      }
+      if (sd.autoTrade === undefined && sd.tradeLoops === undefined) {
+        const tr = await workerTradeRuntime(remote, deps.env || process.env, { runtimeDeps: tradeRuntimeDeps, loopsDeps: tradeLoopsDeps });
+        sd.autoTrade = tr.autoTrade;
+        sd.tradeLoops = tr.tradeLoops;
+        sd.tradeRuntime = tr.runtime;
+      }
+      if (stopping) { flushStartLogs(); return; }
       scheduler = createScheduler({ side: 'worker', deps: sd });
       scheduler.ctx.health.onHeartbeat = (name, ts) => post({ type: 'health', name, ts });
       // bot.py main() before the gather: the candle cache, the exchange symbol lists
       if (options.boot) await scheduler.boot();
-      if (stopping) return;
+      if (stopping) { flushStartLogs(); return; }
       const tasks = scheduler.start();
       let scanners = {};
       try { scanners = scheduler.ctx.scanners.describe(); } catch (_e) { scanners = {}; }
@@ -171,8 +233,10 @@ function runWorker(port, {
       hb = setEvery(beat, heartbeatMs);
       if (hb && typeof hb.unref === 'function') hb.unref();
       post({ type: 'ready', tasks, scanners });
+      flushStartLogs();
     } catch (e) {
       if (!scheduler) starting = false;
+      flushStartLogs();
       post({ type: 'fatal', error: String(e && e.stack ? e.stack : e) });
     }
   }
@@ -222,12 +286,14 @@ function runWorker(port, {
   });
 
   /**
-   * The main thread's hand-offs to this thread's auto-trade module state (fire-and-forget, like the
-   * bot's in-process call): {op: 'reset_auth_failures', userId, exchange}. Before the executor is
-   * built (or with auto-trade off) there is nothing to reset.
+   * The main thread's hand-offs to this thread's trade-runtime module state (fire-and-forget, like the
+   * bot's in-process call): {op: 'reset_auth_failures', userId, exchange} — the executor's breaker, which
+   * is the runtime's, or the runtime's alone in protect-only mode (the BE monitor feeds it, C-8). Without a
+   * runtime there is nothing to reset.
    */
   function autoTradeControl(msg) {
-    const at = scheduler && scheduler.ctx ? scheduler.ctx.autoTrade : null;
+    const ctx = scheduler && scheduler.ctx ? scheduler.ctx : null;
+    const at = ctx ? (ctx.autoTrade || ctx.tradeRuntime || null) : null;
     if (!at) return false;
     try {
       if (msg.op === 'reset_auth_failures' && typeof at.resetAuthFailures === 'function') {
@@ -272,7 +338,7 @@ function createSupervisor({
   const state = {
     worker: null, startedAt: 0, lastBeat: 0, restarts: 0, delay: RESTART_BASE_S, stopping: false,
     restartTimer: null, watchdog: null, ready: null, regime: null, regimeAt: 0, health: {}, exitReason: null,
-    lastTick: null, stalls: 0,
+    lastTick: null, stalls: 0, loops: null,
   };
 
   function logLine(level, msg, extra) {
@@ -296,6 +362,7 @@ function createSupervisor({
         state.lastBeat = now();
         state.regime = msg.regime === undefined ? null : msg.regime;
         state.regimeAt = state.lastBeat;
+        state.loops = msg.loops === undefined ? null : msg.loops;
         if (onRegime) { try { onRegime(state.regime, state.lastBeat); } catch (_e) { /* */ } }
         break;
       case 'health':
@@ -552,5 +619,5 @@ module.exports = {
   WORKER_PATH, HEARTBEAT_MS, HEARTBEAT_TIMEOUT_MS, WATCHDOG_EVERY_MS, SHUTDOWN_GRACE_MS, AUTOTRADE_DRAIN_MS, SHUTDOWN_GRACE_WITH_DRAIN_MS,
   RESTART_BASE_S, RESTART_MAX_S, RESTART_HEALTHY_S,
   runWorker, createSupervisor, startEngine, forwardLogs, softExit, engineLog, installTaskExceptionHandlers,
-  workerAutoTrade,
+  workerAutoTrade, workerTradeRuntime,
 };
