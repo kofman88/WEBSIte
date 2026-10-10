@@ -372,3 +372,68 @@ Binance -4015 как «дубль = успех», BingX 80001 → «Неверн
 
 Флаги `reminder_3d_sent` / `reminder_1d_sent` общие с циклом продления (`planService.runExpiryLoop`), как в боте:
 кто первый, тот и отправил. Троттлинг подсказок — в памяти потока, где работает сканер (как в процессе бота).
+
+## Батч D (бот c56653d) — риск авто-трейда, честная статистика, качество входа VOLUME
+
+Разбор `/volume_report` (d1) — админка, не портирован (M18).
+
+### d2 — риск авто-трейда
+
+- **Батч D, d2-risk (бот c56653d) портирован в `executeAutoTrade.js` один к одному**: [VOL15-RISK-CAP] (потолок риска VOLUME 15m,
+  `VOLUME_15M_MAX_RISK_PCT`, две точки среза, своя пауза 30 мин после low_notional — общий ZB-cooldown не ставится; пауза в
+  `cooldowns.js`, только память, снимается `resetZeroBalanceCooldown`), [SAME-DIR-CAP] (`AUTO_TRADE_MAX_SAME_DIRECTION`,
+  гейт после лимита сделок, fail-closed, счёт — `tradeDb.countOpenTrades(uid, excl, direction)`), [MARKET-ENTRY-NO-SHIFT],
+  [FEE-AWARE-SIZE] (`AUTO_TRADE_FEE_AWARE_SIZING`, taker из `TAKER_FEE` модуля трейдера, иначе таблица бота), правка чисел
+  `risk_capped_warning`. Новых отклонений нет.
+- **D18 и вектор бота**: после [MARKET-ENTRY-NO-SHIFT] wire-сценарий `slow_all_bingx` доходит до ветки D18 «reconcile после
+  неудачного/duplicate ретрая»; в дифференциале он сравнивается в режиме бота (`d18: BOT_D18`), ветка сайта закреплена
+  отдельным тестом (`D18_FIRES` в wireDiff.test.js).
+- VOLUME-сканер передаёт `timeframe` в исполнитель (`volumeScanner.js`, как `volume_scanner.py` бота) — потолок VOLUME 15m и его пауза действуют.
+- Генератор core-векторов стал детерминированным: параллельные вызовы `parallel_same_symbol` приходят с интервалом 1 мс (как в
+  wire-драйвере); раньше порядок захвата лока решали потоки aiosqlite. Чтобы вектор по-прежнему доказывал per-user лок, первый
+  вызов биржи внутри лока у call0 (`get_last_price`) длится 1 с виртуального времени: call1 ждёт на локе и получает SKIP (дедуп);
+  то же на реальных трейдерах — wire-сценарии `lock_parallel_same_symbol_<биржа>` (тест проверяет и само пересечение вызовов).
+- Ревью-находки по батчу D закрыты векторами бота без изменения кода сайта: финальный срез VOL15 обновляет «реальный риск» в
+  `risk_capped_warning`, числа предупреждения — `round(x, 2)` + `%g`, направление SAME-DIR приводится к верхнему регистру,
+  предупреждение о плохом env — один раз на пару (имя, значение).
+
+### d3 — честная статистика
+
+- **[STATS-HONEST 2026-10] честная статистика (пакет D, d3)** — порт `7e20066` + `51e8256` один-к-одному:
+  `signalOutcome.hasRealResult / isExchangeResult / isFinal`; в `signalStats.aggregate` новые поля
+  `final_*`, `net_rr`, `net_rr_7d`, `first_ts` (корень и `per_strategy`), `open_live`, `equity_net`, `cost_pct`,
+  `exchange_cost_pct`; издержки `SIGNAL_STATS_COST_PCT` (0.15) / `SIGNAL_STATS_EXCHANGE_COST_PCT` (0.12),
+  читаются при каждом вызове, мусор / < 0 / inf / nan → значение по умолчанию.
+- `COLS` включает `skip_reason`: ручной «Пропустил» — статус `skip` везде, где сайт читает эти строки (Главная,
+  челлендж — прогресс, план, гейт, дневная строка, карточка, недельный отчёт и upsell `pro_overview`, рейтинг
+  стратегий, вкладка «Сигналы»). Старые «бумажные» числа у пользователей с ручными пропусками меняются так же,
+  как в боте.
+- Челлендж больше не держит свою копию `aggregate`: `challengeService` берёт `signalStats.aggregate` и `COLS`
+  (как `challenge.py` импортирует `db.signal_stats.aggregate`).
+- `GET /api/app/signals`: `open` = статус open/tp1/tp2 и `final=false` (закрытая на бирже TP1 — в «Закрытых»),
+  новые ключи `limit`, `cost_pct`, `exchange_cost_pct`; у сигнала `net_rr`, `final`; `r_now` — от исходного
+  стопа `sl0` и только для сигналов в работе. `GET dashboard` при ошибке чтения отдаёт fallback с новыми ключами.
+- SPA (`frontend/app`): WIN RATE по окончательным итогам («N из M закрытых», перенос строки), ИТОГ R после
+  издержек + «до комиссий», реальное окно («с 6 окт»), кривая `equity_net`, подвал «Открыто / Лучший /
+  + / 0 / −» (подписи ≤ 11 символов, полное название в title), строки стратегий — final WR и net R, вкладка
+  «Сигналы» — «последние 50», «В плюсе» = закрытые с R > 0 кроме БУ, Σ R раздельно «закрытые / открытые»;
+  кэш-ключ статики `?v=bd3`.
+- Сверка: генераторы бота (`gen_stats_vectors.py`, `gen_challenge_vectors.py`, M10b `drive_app_data.py` с
+  шагами `env` / `stats_raise`) и новый `tests/app/spa` — рендер функций `miniapp/static/app.js` бота под node
+  на реальных ответах API против тех же функций сайта.
+- Отладочный лог «стоп неизвестен» (`[STATS-HONEST] tid=… ts=…`) печатает `created_at` как float Python
+  (`1760000000.0`, `1e+16`), как бот читает REAL-колонку; сверено захватом лога `CHM.SignalStats` бота
+  (`cost_log` в `stats_vectors.json`).
+- Фикстура `app_data_replay.json.gz` перегенерирована после слияния d3 + d4 с checkout'а бота `c56653d`
+  (два прогона, байт в байт).
+
+### d4 — качество входа VOLUME
+
+- [VOL-MIN-VOLUME] Пол объёма сетапа (bounce/ribbon/golden ≥ ×1.5, env VOLUME_MIN_SETUP_VOL_MULT, 0 — выкл) — одна реализация в strategies/volume/quality.js; применяется при каждом создании VolumeConfig (как __post_init__) и в _fix; golden ≥ max(1.0, пол).
+- kv VOLUME хранит значения юзера/генома ДО пола: полный to_dict() при сохранении не затирает сохранённое значение ниже пола (правило бота save_user_cfg); оно реализовано и в движке (volumeScanner.saveUserCfg), и в сервисе настроек (services/volumeUserCfg.js); min_sl_pct_15m в kv не пишется.
+- [VOL-MIN-SL] На 15m стоп расширяется до 1 % входа (env VOLUME_MIN_SL_PCT_15M поверх поля min_sl_pct_15m, не выше max_sl_pct) после всех отказов; TP пересчитаны от нового риска; sl_raw_pct — стоп до пола; 1h/4h без изменений.
+- [VOL-LIQ-15M] Для групп 15m — только монеты с 24h-объёмом ≥ $5M (env VOLUME_15M_COINS_FLOOR_USDT); нет данных объёма → монета не проходит + WARNING.
+- [VOL-POST-SL-PAUSE] После SL прошлого доставленного VOLUME-сигнала юзера по (монета, сторона) — пауза 8 свечей ТФ (env VOLUME_POST_SL_PAUSE_BARS); проверка в БД до доставки, ошибка запроса → пропускаем (fail-open, WARNING). Ветка бота «нет файла БД» на сайте не нужна.
+- Гены генома: bounce_vol_mult 1.5–2.5; _fix_constraints поднимает его до пола (round 4).
+- /volume_report (d1) не портирован.
+- Тестовые харнессы движка и авто-трейд E2E выключают пол объёма / пол стопа env-переключателями бота, чтобы их сценарии (×1.3 сигналы, 15m стоп 0.14 %) не менялись.

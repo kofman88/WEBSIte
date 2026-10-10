@@ -353,12 +353,14 @@ describe('auto-trade end to end on fake exchanges (Bybit, BingX, Binance, OKX)',
       expect(pos).toHaveLength(1);
       expect(pos[0]).toMatchObject({ base: BASE, side: 'LONG' });
       expect(Number(row.qty)).toBeCloseTo(pos[0].size, 9);
-      // risk 0.5 % of $10 000 over the 11.388 stop from the signal entry ([MARKET-ENTRY-NO-SHIFT]: VOLUME is a
-      // Market order — no 0.05 % improvement), × the fee factor d / (d + entry × 2 × taker) ([FEE-AWARE-SIZE]):
-      // Bybit 0.06 % → 0.2728 % → 2.395, BingX / OKX 0.05 % → 0.2952 % → 2.592, Binance 0.04 % → 0.3216 % → 2.823;
-      // OKX sizes in whole lots of contracts ([OKX-LOT-CONTRACTS]: lotSz 1, ctVal 0.01 → 259 contracts → 2.59)
+      // risk 0.5 % of $10 000, capped to 0.25 % for VOLUME 15m ([VOL15-RISK-CAP]: the VOLUME scanner passes the
+      // signal's timeframe, as volume_scanner.py does), over the 11.388 stop from the signal entry
+      // ([MARKET-ENTRY-NO-SHIFT]: VOLUME is a Market order — no 0.05 % improvement), × the fee factor
+      // d / (d + entry × 2 × taker) ([FEE-AWARE-SIZE]): Bybit 0.06 % → 0.1364 % → 1.197, BingX / OKX 0.05 % →
+      // 0.1476 % → 1.296, Binance 0.04 % → 0.1608 % → 1.411; OKX sizes in whole lots of contracts
+      // ([OKX-LOT-CONTRACTS]: lotSz 1, ctVal 0.01 → 129 contracts → 1.29)
       // (before batch D: 0.5 % over the 7.44 stop from the improved entry = 6.722 / 6.72)
-      expect(Number(row.qty)).toBe({ bybit: 2.395, bingx: 2.592, binance: 2.823, okx: 2.59 }[ex]);
+      expect(Number(row.qty)).toBe({ bybit: 1.197, bingx: 1.296, binance: 1.411, okx: 1.29 }[ex]);
       const orders = S.fake.orders(ex, keyOf('auto', ex));
       const sl = ex === 'bybit' ? pos[0].sl : orders.filter((o) => o.type === 'STOP').map((o) => o.trigger)[0];
       expect(sl, 'stop-loss on the exchange').toBeGreaterThan(7889);
