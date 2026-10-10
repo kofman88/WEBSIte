@@ -15,6 +15,10 @@
   "en": "ℹ️ <b>{symbol}</b>: LIMIT order did not fill within 60 s — price moved away. Order cancelled automatically; no position opened.",
   "ru": "ℹ️ <b>{symbol}</b>: LIMIT ордер не исполнился за 60 с — цена ушла от лимита. Ордер отменён автоматически, позиция не открыта."
  },
+ "auto_trade_same_direction_cap": {
+  "en": "⛔ Auto-trade rejected: {open} {direction} trades already open (limit {max} per direction).\nSignal: {symbol} {direction}\n<i>Alts move together with BTC — one more trade in the same direction would multiply the risk on a single move.</i>",
+  "ru": "⛔ Авто-трейд отклонён: уже открыто сделок {direction}: {open} (лимит {max} в одну сторону).\nСигнал: {symbol} {direction}\n<i>Альты ходят вместе с BTC — ещё одна сделка в ту же сторону умножила бы риск на одном движении.</i>"
+ },
  "auto_trade_timeout": {
   "en": "⚠️ Auto-trade: timeout opening {symbol}. Please try again later.",
   "ru": "⚠️ Авто-трейд: таймаут при открытии {symbol}. Попробуйте позже."
@@ -50,6 +54,10 @@
  "low_notional_skip_notif": {
   "en": "⏸ <b>Signal skipped — balance too small for this trade</b>\n\n📍 <b>{symbol}</b> (strategy: {strategy})\nApplied risk: <b>{requested_risk}%</b> of balance\nBelow exchange minimum ($10 per trade).\n\n✅ <b>To receive these signals — pick one:</b>\n\n1️⃣ Top up balance to <b>${required_balance}+</b>\n\n2️⃣ Raise the «Risk %» setting:\n   🏠 Menu → 🤖 Auto-trade → 💰 Risk\n\n3️⃣ Enable volume Boost (bot pads qty up to $10):\n   🏠 Menu → 🤖 Auto-trade → 🛡 Risk Management\n   ⚠️ <i>actual risk may exceed the requested</i>",
   "ru": "⏸ <b>Сигнал пропущен — баланс мал для этой сделки</b>\n\n📍 <b>{symbol}</b> (стратегия: {strategy})\nПрименённый риск: <b>{requested_risk}%</b> от баланса\nЭто меньше минимума биржи ($10 на сделку).\n\n✅ <b>Чтобы получать такие сигналы — выбери одно:</b>\n\n1️⃣ Пополни баланс до <b>${required_balance}+</b>\n\n2️⃣ Подними «Риск %» в настройках:\n   🏠 Меню → 🤖 Авто-трейд → 💰 Риск\n\n3️⃣ Включи Boost объёма (бот добивает qty до $10):\n   🏠 Меню → 🤖 Авто-трейд → 🛡 Risk Management\n   ⚠️ <i>реальный риск может превысить заявленный</i>"
+ },
+ "low_notional_skip_notif_vol15": {
+  "en": "⏸ <b>Signal skipped — balance too small for this trade</b>\n\n📍 <b>{symbol}</b> (strategy: {strategy}, 15m)\nApplied risk: <b>{requested_risk}%</b> of balance — VOLUME on 15m has its risk capped by the bot at <b>{cap}%</b>, so a higher «Risk %» will not help.\nWith this stop the size is below the exchange minimum ($10 per trade).\n\n✅ <b>To receive these signals — pick one:</b>\n\n1️⃣ Top up balance to <b>${required_balance}+</b>\n\n2️⃣ Enable volume Boost (bot pads qty up to $10):\n   🏠 Menu → 🤖 Auto-trade → 🛡 Risk Management\n   ⚠️ <i>actual risk may exceed the requested</i>\n\n<i>VOLUME 15m trades on this exchange are paused for {minutes} min; other strategies trade as usual.</i>",
+  "ru": "⏸ <b>Сигнал пропущен — баланс мал для этой сделки</b>\n\n📍 <b>{symbol}</b> (стратегия: {strategy}, 15m)\nПрименённый риск: <b>{requested_risk}%</b> от баланса — у VOLUME на 15m риск ограничен потолком бота <b>{cap}%</b>, поэтому «Риск %» выше не поможет.\nПри таком стопе объём меньше минимума биржи ($10 на сделку).\n\n✅ <b>Чтобы получать такие сигналы — выбери одно:</b>\n\n1️⃣ Пополни баланс до <b>${required_balance}+</b>\n\n2️⃣ Включи Boost объёма (бот добивает qty до $10):\n   🏠 Меню → 🤖 Авто-трейд → 🛡 Risk Management\n   ⚠️ <i>реальный риск может превысить заявленный</i>\n\n<i>Сделки VOLUME 15m на этой бирже — на паузе {minutes} мин; другие стратегии торгуются как обычно.</i>"
  },
  "regime_high_vol": {
   "en": "🌪 High volatility",

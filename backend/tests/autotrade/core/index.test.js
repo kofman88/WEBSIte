@@ -124,10 +124,15 @@ describe('D6 production switches against the bot vectors', () => {
   it('(d) fixed_amount is a percent of the balance (the bot: dollars / balance)', async () => {
     const v = vec('fixed_amount_ok');
     const riskOf = (recs) => recs.filter((r) => r[1] === 'call' && r[2][1] === 'place_trade').map((r) => r[2][2].risk_pct);
-    expect(riskOf(v.expected.recs)).toEqual([10]);            // bot: 50 / 500 × 100
+    // [FEE-AWARE-SIZE 2026-10] the trader sizes with the configured risk × the fee factor of the 2.0 %
+    // stop from the improved Limit entry (99.95): d / (d + entry × 2 × 0.06 %) = 0.94206
+    const feeLog = (recs) => recs.filter((r) => r[1] === 'log' && String(r[2][1]).startsWith('[FEE-AWARE-SIZE]')).map((r) => r[2][1]);
+    expect(riskOf(v.expected.recs)).toEqual([9.4206]);        // bot: 50 / 500 × 100 = 10 %, × 0.94206
+    expect(feeLog(v.expected.recs)).toEqual([expect.stringContaining('risk 10.0000% × factor 0.9421')]);
     const got = await replay(v, FX, { d6: PROD });
     expect(v.case.user_row.fixed_amount).toBe(50);
-    expect(riskOf(got.recs)).toEqual([50]);
+    expect(riskOf(got.recs)).toEqual([47.1028]);              // site: 50 %, × the same factor
+    expect(feeLog(got.recs)).toEqual([expect.stringContaining('risk 50.0000% × factor 0.9421')]);
   });
 });
 

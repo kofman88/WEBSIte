@@ -16,7 +16,10 @@ production auto-trade entry point and demands the bot's exact wire behaviour.
 Scenarios: 64 seeded random users (`WIRE_SEED` 20261009) over the four exchanges plus the targeted
 families (`tgt_<ex>_<class>`, `tgt2_<ex>_<path rejection>_{main,ptp}`, edges, confirm, prop pilot,
 challenge daily stop, correlation cap, kill switch, plan expired, slow exchanges, BingX batch
-answers, …). `WIRE_ONLY=a,b` limits a run; `WIRE_USERS` changes the random count.
+answers, …) and the bot's batch D (`d2_*`, own rng, uids 9600+: VOLUME 15m vs 1h qty under
+[VOL15-RISK-CAP] + [FEE-AWARE-SIZE], the fee factor off, the VOLUME 15m low-notional pause on a $25
+account with a LEVELS trade still placing, [SAME-DIR-CAP] with two open LONG). `WIRE_ONLY=a,b` limits a
+run; `WIRE_USERS` changes the random count.
 
 Route sessions: 16 per exchange (`WIRE_SESSIONS`), seed 20261010: sessions 0-9 open the confirm-mode
 trade under one exec error class each, 10-11 cleanly, 12-15 meet a key the site refuses (D15: withdraw
@@ -40,7 +43,10 @@ A simulator crash is recorded (`sim_errors`) and fails the tests — it would ot
 exchange answer.
 
 Comparison notes (each one a property of the bot's process, not a tolerance on the port):
-the once-per-process «Circuit Breaker ОТКЛЮЧЁН» warning is counted over all tasks; trade_events are
+the scenarios that reach a D18 site branch (`D18_FIRES` in wireDiff.test.js: slow_all_bingx — its
+retry is answered «duplicate clientOrderId» since [MARKET-ENTRY-NO-SHIFT]) are compared in bot mode
+(`d18: BOT_D18`; the branch adds requests the bot never sent) and the D18 branch is pinned by its own
+test; the once-per-process «Circuit Breaker ОТКЛЮЧЁН» warning is counted over all tasks; trade_events are
 compared per trade; with parallel calls the idempotency uuid suffix is normalised (lock-arrival
 order); `trade_placement_latency_ms` is compared to the 2 ms bucket (float accumulation order of
 virtual sleeps); the `[SKIP-AFTER-TP-PLACED]` stack suffix is cut. Routes: the bot's

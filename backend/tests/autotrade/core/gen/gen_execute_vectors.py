@@ -27,6 +27,13 @@ Every record is tagged with its logical task: the bot's named tasks (partial_tp_
 limit_unfilled_guard_<uid>_<sym>, reconcile_sl_*, reconcile_ptp_*, tilt_detect_<uid>) or the
 caller ("call<i>") for wait_for / gather helper tasks.
 
+Batch D (bot c56653d, auto_trade.py 1bfc59c + d8123a2): the `d2_*` cases drive [VOL15-RISK-CAP] (incl.
+the VOLUME 15m low-notional pause), [SAME-DIR-CAP], [MARKET-ENTRY-NO-SHIFT] and [FEE-AWARE-SIZE]; case
+fields `taker_fee` ({exchange: value | "__del__"} on the trader module), `count_fail` (the direction
+count of db_count_open_trades raises), `ctx_risk` (trend_monitor.CTX_RISK overlay) and state `vol15_ln`.
+`helpers` = the pure helpers called directly (env parsers, cap, taker fee, fee factor, required
+balance), `count_vectors` = db_count_open_trades on seeded rows.
+
 Output: backend/tests/autotrade/core/fixtures/execute_vectors.json.gz
   cd /home/user/MAIN_BOT/CHM_BREAKER_V4
   BOT_TOKEN_CHM=test:token ADMIN_IDS=123 $PY311 -I -B <worktree>/backend/tests/autotrade/core/gen/gen_execute_vectors.py
@@ -502,6 +509,17 @@ async def fake_get_candles(symbol, tf):
 
 cache.get_candles = fake_get_candles
 database.db_get_today_loss_rr = swap_dt(db_stats.db_get_today_loss_rr)
+_REAL_COUNT_OPEN = database.db_count_open_trades
+
+
+async def _count_open_trades(user_id, exclude_trade_id="", direction=""):
+    """[SAME-DIR-CAP] case `count_fail`: the direction count raises (the max_trades count stays real)."""
+    if CASE.get("count_fail") and direction:
+        raise Exception(CASE["count_fail"])
+    return await _REAL_COUNT_OPEN(user_id, exclude_trade_id=exclude_trade_id, direction=direction)
+
+
+database.db_count_open_trades = _count_open_trades
 db_stats.db_get_today_loss_rr = database.db_get_today_loss_rr
 
 
@@ -824,6 +842,291 @@ case("no_bot", kw={"bot": False}, user={"partial_tp_enabled": 1}, ptp=[{"ret": F
      script={"bybit.place_tp_orders": [{"ret": False}]})
 
 
+# 7. batch D — [VOL15-RISK-CAP] [SAME-DIR-CAP] [MARKET-ENTRY-NO-SHIFT] [FEE-AWARE-SIZE] (bot c56653d)
+VOL15 = {"strategy": "VOLUME", "timeframe": "15m", "order_type": "Market", "sl": 99.4, "tp1": 100.6,
+         "tp2": 101.2, "tp3": 101.8}
+LN_ANSWER = {"ok": False, "error": "Объём $8.68 < минимума биржи $10", "low_notional_skip": True,
+             "requested_risk_pct": 0.21, "required_balance": 4800.77}
+
+
+def vol15(**o):
+    return {**VOL15, **o}
+
+
+def open_row(tid, sym, direction="LONG", created=T0 - 900, **o):
+    return trade_row(tid, created, symbol=sym, direction=direction, order_id=f"X{tid}", **o)
+
+
+TWO_LONG = [open_row("O1", "ETH-USDT-SWAP"), open_row("O2", "XRP-USDT-SWAP")]
+
+# [VOL15-RISK-CAP] which trades are capped, per exchange
+case("d2_vol15_bybit_cap", kw=vol15())
+case("d2_vol15_bingx_cap", kw=vol15(exchange="bingx"),
+     script={"bingx.get_positions": [{"ret": [{"symbol": "SOL-USDT", "side": "LONG", "size": 10.0}]}]})
+case("d2_vol15_binance_cap", kw=vol15(exchange="binance"),
+     script={"binance.get_positions": [{"ret": [{"symbol": "SOLUSDT", "side": "LONG", "size": 1.5}]}]})
+case("d2_vol15_okx_cap", user={"okx_passphrase": "PP"}, kw=vol15(exchange="okx"),
+     script={"okx.get_positions": [{"ret": [{"pos": 2.0, "posSide": "long", "slTriggerPx": 99.4}]}]})
+case("d2_vol15_short", kw=vol15(direction="SHORT", sl=100.6, tp1=99.4, tp2=98.8, tp3=98.2),
+     trades=[trade_row("T1", T0 - 5, direction="SHORT", strategy="VOLUME")])
+case("d2_vol15_tf_spaces_upper", kw=vol15(timeframe=" 15M "))
+case("d2_vol_1h_no_cap", kw=vol15(timeframe="1h"))
+case("d2_vol_4h_no_cap", kw=vol15(timeframe="4h"))
+case("d2_vol_tf_empty_no_cap", kw=vol15(timeframe=""))
+case("d2_vol_strategy_lower", kw=vol15(strategy="volume"))
+case("d2_levels_15m_no_cap", kw={"timeframe": "15m"})
+case("d2_smc_15m_split_no_cap", kw={"strategy": "SMC", "timeframe": "15m", "entry_low": 99.0, "entry_high": 101.0,
+                                    "entry": 99.0})
+case("d2_vol15_risk_below_cap", kw=vol15(risk_pct=0.2))
+case("d2_vol15_notional_mode", user={"risk_mode": "notional"}, kw=vol15())
+case("d2_vol15_margin_mode", user={"risk_mode": "margin"}, kw=vol15())
+case("d2_vol15_ctx_counter_after_cap", kw=vol15(trend_ctx="counter"))
+case("d2_vol15_ctx_x2_reclamped", ctx_risk={"aligned": 2.0}, kw=vol15(trend_ctx="aligned", risk_pct=0.2))
+case("d2_vol15_fixed_amount_reclamped", user={"fixed_amount": 50.0}, kw=vol15(),
+     script={"bybit.get_balance": [{"ret": 500.0}]})
+case("d2_vol15_prop_reclamped", user={"prop_mode": 1, "prop_start_balance": 10000.0, "prop_base_risk": 1.5,
+                                      "prop_day_start_balance": 10000.0, "prop_peak_balance": 10050.0},
+     kw=vol15(risk_pct=0.2), script={"bybit.get_balance": [{"ret": 10100.0}]})
+case("d2_vol15_max_risk_lower_wins", user={"max_risk_pct": 0.2}, kw=vol15())
+case("d2_vol15_max_risk_then_cap", user={"max_risk_pct": 0.5}, kw=vol15())
+# env VOLUME_15M_MAX_RISK_PCT
+for _tag, _raw in (("05", "0.5"), ("spaces", " 0.1 "), ("blank", ""), ("sci", "1e-1"), ("underscore", "0_1"),
+                   ("zero", "0"), ("neg", "-1"), ("abc", "abc"), ("nan", "nan"), ("inf", "inf"), ("hex", "0x10"),
+                   ("big", "5")):
+    case(f"d2_vol15_env_{_tag}", env={"VOLUME_15M_MAX_RISK_PCT": _raw}, kw=vol15())
+case("d2_vol15_env_abc_warn_once", env={"VOLUME_15M_MAX_RISK_PCT": "abc"},
+     calls=[kws(**vol15(trade_id="T1")), kws(**vol15(trade_id="T2", symbol="ETH-USDT-SWAP"))],
+     trades=[trade_row("T1", T0 - 5, strategy="VOLUME"), trade_row("T2", T0 - 4, strategy="VOLUME", symbol="ETH-USDT-SWAP")])
+# the trade-opened message / risk_capped_warning numbers ([FEE-AWARE-SIZE] review fix R2)
+case("d2_risk_capped_warning_local_numbers", user={"max_risk_pct": 1.0}, kw={"risk_pct": 2.0, "sl": 99.4, "tp1": 100.6},
+     script={"bybit.place_trade": [{"ret": {**OK_OPEN, "risk_requested_pct": 0.83, "risk_applied_pct": 0.83}}]})
+case("d2_risk_capped_warning_fractional", user={"max_risk_pct": 0.75}, kw={"risk_pct": 1.5})
+case("d2_risk_capped_warning_vol15", user={"max_risk_pct": 0.3}, kw=vol15())
+
+# [VOL15-RISK-CAP] the VOLUME 15m low-notional pause (review fix R1)
+# V1 VOLUME 15m low notional → own pause (no shared cooldown); V2 VOLUME 15m skipped without an exchange
+# call; V3 VOLUME 1h and L4 LEVELS place (the pause is VOLUME 15m only); L4's open resets the pause
+# (reset_zero_balance_cooldown) → V5 VOLUME 15m is placed again
+case("d2_vol15_low_notional_pause_flow",
+     calls=[kws(**vol15(trade_id="V1")), kws(**vol15(trade_id="V2", symbol="XRP-USDT-SWAP")),
+            kws(**vol15(trade_id="V3", symbol="DOGE-USDT-SWAP", timeframe="1h", direction="SHORT", sl=100.6,
+                        tp1=99.4, tp2=98.8, tp3=98.2)),
+            kws(trade_id="L4", symbol="ETH-USDT-SWAP"), kws(**vol15(trade_id="V5", symbol="LINK-USDT-SWAP"))],
+     trades=[trade_row("V1", T0 - 5, strategy="VOLUME"), trade_row("V2", T0 - 4, strategy="VOLUME", symbol="XRP-USDT-SWAP"),
+             trade_row("V3", T0 - 3, strategy="VOLUME", symbol="DOGE-USDT-SWAP", direction="SHORT"),
+             trade_row("L4", T0 - 2, symbol="ETH-USDT-SWAP"),
+             trade_row("V5", T0 - 1, strategy="VOLUME", symbol="LINK-USDT-SWAP")],
+     script={"bybit.place_trade": [{"ret": LN_ANSWER}, {"ret": OK_OPEN}]})
+case("d2_vol15_low_notional_en", user={"lang": "en"}, kw=vol15(), script={"bybit.place_trade": [{"ret": LN_ANSWER}]})
+case("d2_vol15_low_notional_no_trader_numbers", kw=vol15(),
+     script={"bybit.place_trade": [{"ret": {"ok": False, "error": "notional", "low_notional_skip": True}}]})
+case("d2_vol15_low_notional_throttled", state={"low_notional": [[U, T0 - 100.0]]}, kw=vol15(),
+     script={"bybit.place_trade": [{"ret": LN_ANSWER}]})
+case("d2_vol15_low_notional_reclamped_own_pause", user={"fixed_amount": 50.0}, kw=vol15(),
+     script={"bybit.get_balance": [{"ret": 500.0}], "bybit.place_trade": [{"ret": LN_ANSWER}]})
+# the risk is ≤ the cap at the first point and only the clamp before the sizing lowers it (ctx ×2) — that
+# clamp alone marks the trade capped → own pause, the vol15 text
+case("d2_vol15_low_notional_ctx_reclamp_own_pause", ctx_risk={"aligned": 2.0}, kw=vol15(trend_ctx="aligned", risk_pct=0.2),
+     script={"bybit.place_trade": [{"ret": LN_ANSWER}]})
+# the cap in the text is f"{cap:g}"
+case("d2_vol15_low_notional_cap_g_format", env={"VOLUME_15M_MAX_RISK_PCT": "0.1234567"}, kw=vol15(),
+     script={"bybit.place_trade": [{"ret": LN_ANSWER}]})
+case("d2_vol15_low_notional_cap_g_exp", env={"VOLUME_15M_MAX_RISK_PCT": "0.00001"}, kw=vol15(),
+     script={"bybit.place_trade": [{"ret": LN_ANSWER}]})
+case("d2_vol15_low_notional_uncapped_shared_cd", kw=vol15(risk_pct=0.2), script={"bybit.place_trade": [{"ret": LN_ANSWER}]})
+case("d2_levels_low_notional_shared_cd", script={"bybit.place_trade": [{"ret": LN_ANSWER}]})
+case("d2_vol15_zero_balance_shared_cd", kw=vol15(),
+     script={"bybit.place_trade": [{"ret": {**LN_ANSWER, "error": "Недостаточно средств: $0.00 USDT"}}]})
+case("d2_vol15_insufficient_margin_shared_cd", kw=vol15(),
+     script={"bybit.place_trade": [{"ret": {**LN_ANSWER, "insufficient_margin": True}}]})
+case("d2_vol15_pause_active_skip", state={"vol15_ln": [[U, "bybit", T0 + 900.0]]}, kw=vol15())
+case("d2_vol15_pause_other_exchange", state={"vol15_ln": [[U, "bybit", T0 + 900.0]]}, kw=vol15(exchange="bingx"),
+     script={"bingx.get_positions": [{"ret": [{"symbol": "SOL-USDT", "side": "LONG", "size": 10.0}]}]})
+case("d2_vol15_pause_active_uncapped", state={"vol15_ln": [[U, "bybit", T0 + 900.0]]}, kw=vol15(risk_pct=0.2))
+case("d2_vol15_pause_expired", state={"vol15_ln": [[U, "bybit", T0 - 1.0]]}, kw=vol15())
+case("d2_vol15_pause_cap_off", env={"VOLUME_15M_MAX_RISK_PCT": "0"}, state={"vol15_ln": [[U, "bybit", T0 + 900.0]]},
+     kw=vol15())
+case("d2_vol15_pause_not_for_1h", state={"vol15_ln": [[U, "bybit", T0 + 900.0]]}, kw=vol15(timeframe="1h"))
+case("d2_vol15_pause_not_for_levels", state={"vol15_ln": [[U, "bybit", T0 + 900.0]]})
+case("d2_vol15_pause_zb_first", state={"vol15_ln": [[U, "bybit", T0 + 900.0]], "zb": [[U, "bybit", T0 + 600.0]]},
+     kw=vol15())
+case("d2_vol15_pause_reset_by_open", state={"vol15_ln": [[U, "bybit", T0 + 900.0]]},
+     calls=[kws(trade_id="L1", symbol="ETH-USDT-SWAP"), kws(**vol15(trade_id="V2"))],
+     trades=[trade_row("L1", T0 - 5, symbol="ETH-USDT-SWAP"), trade_row("V2", T0 - 4, strategy="VOLUME")])
+
+# [SAME-DIR-CAP]
+case("d2_samedir_third_long", trades=[trade_row("T1", T0 - 5)] + TWO_LONG)
+case("d2_samedir_third_long_en", user={"lang": "en"}, kw={"symbol": "BTC-USDT"},
+     trades=[trade_row("T1", T0 - 5, symbol="BTC-USDT")] + TWO_LONG)
+case("d2_samedir_short_allowed", kw={"direction": "SHORT", "sl": 102.0, "tp1": 97.0, "tp2": 94.0, "tp3": 91.0},
+     trades=[trade_row("T1", T0 - 5, direction="SHORT")] + TWO_LONG)
+case("d2_samedir_two_short_block", kw={"direction": "SHORT", "sl": 102.0, "tp1": 97.0, "tp2": 94.0, "tp3": 91.0},
+     trades=[trade_row("T1", T0 - 5, direction="SHORT"), open_row("O1", "ETH-USDT-SWAP", "short"),
+             open_row("O2", "XRP-USDT-SWAP", "Short")])
+case("d2_samedir_one_open", trades=[trade_row("T1", T0 - 5), open_row("O1", "ETH-USDT-SWAP")])
+case("d2_samedir_not_counted", trades=[trade_row("T1", T0 - 5), open_row("O1", "ETH-USDT-SWAP"),
+                                       open_row("C1", "XRP-USDT-SWAP", result="SL", result_rr=-1.0),
+                                       open_row("C2", "DOGE-USDT-SWAP", result="SKIP"),
+                                       trade_row("N1", T0 - 700, symbol="LINK-USDT-SWAP"),
+                                       open_row("U1", "ADA-USDT-SWAP", user_id=777)])
+case("d2_samedir_mixed_strategies", trades=[trade_row("T1", T0 - 5), open_row("O1", "ETH-USDT-SWAP", strategy="SMC"),
+                                            open_row("O2", "XRP-USDT-SWAP", strategy="VOLUME")])
+for _tag, _raw in (("zero", "0"), ("neg", "-3"), ("three", "3"), ("one", "1"), ("abc", "abc"), ("blank", ""),
+                   ("float", "2.0"), ("float_trunc", "2.9"), ("inf", "inf"), ("nan", "nan"), ("spaces", " 3 ")):
+    case(f"d2_samedir_env_{_tag}", env={"AUTO_TRADE_MAX_SAME_DIRECTION": _raw}, trades=[trade_row("T1", T0 - 5)] + TWO_LONG)
+case("d2_samedir_env_one_single_open", env={"AUTO_TRADE_MAX_SAME_DIRECTION": "1"},
+     trades=[trade_row("T1", T0 - 5), open_row("O1", "ETH-USDT-SWAP")])
+case("d2_samedir_env_abc_warn_once", env={"AUTO_TRADE_MAX_SAME_DIRECTION": "abc"},
+     calls=[kws(trade_id="T1"), kws(trade_id="T2", symbol="ETH-USDT-SWAP")],
+     trades=[trade_row("T1", T0 - 5), trade_row("T2", T0 - 4, symbol="ETH-USDT-SWAP")])
+case("d2_samedir_count_fails", count_fail="database is locked", trades=[trade_row("T1", T0 - 5)])
+case("d2_samedir_cap_off_no_count", count_fail="database is locked", env={"AUTO_TRADE_MAX_SAME_DIRECTION": "0"})
+case("d2_samedir_filters_off_still_blocks", user={"filters_all_off": 1}, trades=[trade_row("T1", T0 - 5)] + TWO_LONG)
+case("d2_samedir_confirm_mode_blocked", kw={"auto_trade_mode": "confirm"}, trades=[trade_row("T1", T0 - 5)] + TWO_LONG)
+case("d2_samedir_max_trades_first", kw={"max_trades": 2}, trades=[trade_row("T1", T0 - 5)] + TWO_LONG)
+case("d2_samedir_no_trade_id", kw={"trade_id": ""}, trades=TWO_LONG)
+case("d2_samedir_symbol_escaped", kw={"symbol": "A<B>-USDT-SWAP"},
+     trades=[trade_row("T1", T0 - 5, symbol="A<B>-USDT-SWAP")] + TWO_LONG)
+
+# [MARKET-ENTRY-NO-SHIFT] Market vs Limit entry passed to the trader
+case("d2_market_short_bingx", kw={"exchange": "bingx", "order_type": "Market", "direction": "SHORT", "sl": 102.0,
+                                  "tp1": 97.0, "tp2": 94.0, "tp3": 91.0},
+     trades=[trade_row("T1", T0 - 5, direction="SHORT")],
+     script={"bingx.get_positions": [{"ret": [{"symbol": "SOL-USDT", "side": "SHORT", "size": 10.0}]}]})
+case("d2_limit_short_bingx", kw={"exchange": "bingx", "direction": "SHORT", "sl": 102.0, "tp1": 97.0, "tp2": 94.0,
+                                 "tp3": 91.0},
+     trades=[trade_row("T1", T0 - 5, direction="SHORT")],
+     script={"bingx.get_positions": [{"ret": [{"symbol": "SOL-USDT", "side": "SHORT", "size": 10.0}]}]})
+case("d2_market_binance", kw={"exchange": "binance", "order_type": "Market"},
+     script={"binance.get_positions": [{"ret": [{"symbol": "SOLUSDT", "side": "LONG", "size": 1.5}]}]})
+case("d2_market_okx", user={"okx_passphrase": "PP"}, kw={"exchange": "okx", "order_type": "market"},
+     script={"okx.get_positions": [{"ret": [{"pos": 2.0, "posSide": "long", "slTriggerPx": 98.0}]}]})
+case("d2_market_spaces_case", kw={"order_type": " MARKET "})
+case("d2_prefer_market_bingx", user={"prefer_market_entry": 1}, kw={"exchange": "bingx"},
+     script={"bingx.get_positions": [{"ret": [{"symbol": "SOL-USDT", "side": "LONG", "size": 10.0}]}]})
+case("d2_market_ptp_entry", user={"partial_tp_enabled": 1}, kw={"order_type": "Market"})
+case("d2_market_c79_proximity", kw={"order_type": "Market"}, script={"bybit.get_last_price": [{"ret": 100.0}, {"ret": 98.19}]})
+case("d2_limit_c79_proximity", script={"bybit.get_last_price": [{"ret": 100.0}, {"ret": 98.19}]})
+
+# [FEE-AWARE-SIZE]
+for _tag, _raw in (("0", "0"), ("false", "false"), ("off_upper", "OFF"), ("no_spaces", " no "), ("yes", "yes"),
+                   ("1", "1"), ("blank", "")):
+    case(f"d2_fee_env_{_tag}", env={"AUTO_TRADE_FEE_AWARE_SIZING": _raw})
+case("d2_fee_off_vol15", env={"AUTO_TRADE_FEE_AWARE_SIZING": "0"}, kw=vol15())
+case("d2_fee_split_unknown_exchange", kw={"strategy": "SMC", "exchange": "kraken", "entry_low": 99.0, "entry_high": 101.0,
+                                          "entry": 99.0})
+case("d2_fee_split_off", env={"AUTO_TRADE_FEE_AWARE_SIZING": "false"},
+     kw={"strategy": "SMC", "entry_low": 99.0, "entry_high": 101.0, "entry": 99.0})
+case("d2_fee_split_notional_user", user={"risk_mode": "notional"},
+     kw={"strategy": "SMC", "entry_low": 99.0, "entry_high": 101.0, "entry": 99.0})
+case("d2_fee_notional_mode", user={"risk_mode": "notional"})
+case("d2_fee_margin_mode_upper", user={"risk_mode": " Margin "})
+case("d2_fee_risk_mode_upper", user={"risk_mode": "RISK"})
+case("d2_fee_taker_bad_binance", taker_fee={"binance": 0.05}, kw={"exchange": "binance"},
+     script={"binance.get_positions": [{"ret": [{"symbol": "SOLUSDT", "side": "LONG", "size": 1.5}]}]})
+case("d2_fee_taker_missing_bingx", taker_fee={"bingx": "__del__"}, kw={"exchange": "bingx"},
+     script={"bingx.get_positions": [{"ret": [{"symbol": "SOL-USDT", "side": "LONG", "size": 10.0}]}]})
+case("d2_fee_taker_bool_okx", taker_fee={"okx": True}, user={"okx_passphrase": "PP"}, kw={"exchange": "okx"},
+     script={"okx.get_positions": [{"ret": [{"pos": 2.0, "posSide": "long", "slTriggerPx": 98.0}]}]})
+case("d2_fee_taker_str_bybit", taker_fee={"bybit": "0.0006"})
+case("d2_fee_taker_zero_bybit", taker_fee={"bybit": 0})
+case("d2_fee_unknown_exchange", kw={"exchange": "kraken"})
+case("d2_fee_sl_zero_filters_off", user={"filters_all_off": 1}, kw={"sl": 0.0})
+case("d2_fee_wide_stop_tiny_factor", user={"smc_max_sl_pct": 50.0}, kw={"sl": 60.0, "leverage": 1})
+case("d2_fee_tiny_stop", kw={"sl": 99.95})
+
+
+# ── pure helpers (called directly) and db_count_open_trades ──────────────────
+def _helpers():
+    out = {"env": [], "risk_cap": [], "taker": [], "factor": [], "required_balance": []}
+    saved = {k: os.environ.get(k) for k in ("VOLUME_15M_MAX_RISK_PCT", "AUTO_TRADE_MAX_SAME_DIRECTION",
+                                             "AUTO_TRADE_FEE_AWARE_SIZING")}
+    raws = [None, "", "  ", "0.25", " 0.1 ", "1e-1", "0_5", "+2", "-0", "0", "-1", "abc", "nan", "NaN", "inf", "-inf",
+            "Infinity", "0x10", "1,5", "3", "2.9", "-2.5", "1e400", "١", "5\u00a0"]
+    fns = [("VOLUME_15M_MAX_RISK_PCT", auto_trade._vol15_max_risk_pct),
+           ("AUTO_TRADE_MAX_SAME_DIRECTION", auto_trade._same_direction_cap),
+           ("AUTO_TRADE_FEE_AWARE_SIZING", auto_trade._fee_aware_sizing_enabled)]
+    for name, fn in fns:
+        for raw in raws + (["false", "FALSE", " off ", "No", "yes", "on", "true"] if "FEE" in name else []):
+            auto_trade._ENV_WARNED.clear()
+            if raw is None:
+                os.environ.pop(name, None)
+            else:
+                os.environ[name] = raw
+            RECS.clear()
+            CAPTURE[0] = True
+            v1 = fn()
+            v2 = fn()
+            CAPTURE[0] = False
+            out["env"].append({"name": name, "raw": raw, "values": [jsonable(v1), jsonable(v2)],
+                               "logs": [r[2] for r in RECS if r[1] == "log"]})
+    for k, v in saved.items():
+        if v is None:
+            os.environ.pop(k, None)
+        else:
+            os.environ[k] = v
+    auto_trade._ENV_WARNED.clear()
+    for strat in ("VOLUME", "volume", " VOLUME", "LEVELS", "SMC", "", None):
+        for tf in ("15m", " 15M ", "1h", "4h", "", None, "15"):
+            for rm in ("risk", " RISK ", "notional", "margin", "", None):
+                out["risk_cap"].append([strat, tf, rm, auto_trade._vol15_risk_cap(strat, tf, rm)])
+    for ex in ("bybit", "bingx", "binance", "okx", "kraken", "", None, "BINGX", "Okx"):
+        out["taker"].append([ex, auto_trade._taker_fee(ex)])
+    for e, sl_, ex in ((100.0, 99.4, "bybit"), (100.0, 99.4, "bingx"), (100.0, 99.4, "binance"), (100.0, 99.4, "okx"),
+                       (100.0, 100.6, "bybit"), (0.00001, 0.0000098, "bybit"), (65000.0, 64610.0, "binance"),
+                       (100.0, 100.0, "bybit"), (0.0, 99.0, "bybit"), (100.0, 0.0, "okx"), (-5.0, 1.0, "bybit"),
+                       (100.0, -1.0, "bybit"), (None, 99.0, "bybit"), (100.0, None, "bingx"), ("100", "99", "okx"),
+                       ("abc", 99.0, "bybit"), (3.3, 3.1, "kraken"), (100, 98, "binance"), (True, 0.5, "bybit")):
+        f, rt = auto_trade._fee_aware_factor(e, sl_, ex)
+        out["factor"].append([e, sl_, ex, f, rt])
+    for args in ((100.0, 99.4, 0.2083, 4800.77), (100.0, 99.4, 0.2083, 0), (100.0, 99.4, 0.2083, None),
+                 (100.0, 99.4, 0.25, 4000.0), (100.0, 99.4, 0.2083, 100.0), (100.0, 98.0, 0.9434, 1060.0),
+                 (0.00001, 0.0000098, 0.2083, 4800.77), (65000.0, 64610.0, 0.2206, 4533.09),
+                 (0, 99.4, 0.2083, 4800.77), (100.0, 0, 0.2083, 4800.77), (100.0, 99.4, 0, 4800.77),
+                 (100.0, 100.0, 0.2083, 4800.77), (None, None, None, None), (100.0, 99.4, -0.1, 12.5),
+                 ("100", "99.4", "0.2083", "4800.77"), ("abc", 99.4, 0.2083, 77.9), ("abc", 99.4, 0.2083, "x"),
+                 (100.0, 101.0, 0.25, 0.0), (100.0, 99.0, 0.25, 3999.99), (100.0, 99.4, 0.2083, float("nan")),
+                 (100.0, 99.0, 1e-9, 1e12), (50.0, 49.5, 0.125, 8000.0), (0.5, 0.497, 0.2083, 48.0)):
+        try:
+            v = ["ok", auto_trade._vol15_required_balance(*args)]
+        except Exception as e:  # noqa: BLE001
+            v = ["raise", type(e).__name__]
+        out["required_balance"].append([jsonable(list(args)), v])
+    return out
+
+
+async def _count_vectors():
+    rows = [
+        trade_row("A1", T0 - 900, order_id="x1"),
+        trade_row("A2", T0 - 800, symbol="ETH-USDT-SWAP", order_id="x2"),
+        trade_row("A3", T0 - 700, symbol="XRP-USDT-SWAP", direction="SHORT", order_id="x3"),
+        trade_row("A4", T0 - 600, symbol="DOGE-USDT-SWAP", direction="long", order_id="x4"),
+        trade_row("A5", T0 - 500, symbol="LINK-USDT-SWAP", direction="Short", order_id="x5"),
+        trade_row("A6", T0 - 400, symbol="ADA-USDT-SWAP", order_id=""),
+        trade_row("A7", T0 - 300, symbol="BNB-USDT-SWAP", order_id="x7", result="SL", result_rr=-1.0),
+        trade_row("A8", T0 - 200, symbol="TRX-USDT-SWAP", order_id="x8", result="SKIP"),
+        trade_row("A9", T0 - 100, symbol="SUI-USDT-SWAP", order_id="x9", user_id=777),
+        trade_row("A10", T0 - 50, symbol="APT-USDT-SWAP", order_id="x10", direction=""),
+        trade_row("A11", T0 - 40, symbol="NEAR-USDT-SWAP", order_id="x11", direction=" LONG"),
+    ]
+    con = db_conn()
+    for t in ("users", "trades", "kv", "trade_events"):
+        con.execute(f"DELETE FROM {t}")
+    for tr in rows:
+        cols = list(tr.keys())
+        con.execute(f"INSERT INTO trades ({', '.join(cols)}) VALUES ({', '.join('?' for _ in cols)})",
+                    [tr[k] for k in cols])
+    con.commit()
+    con.close()
+    queries = []
+    for uid in (U, 777, 999):
+        for exc in ("", "A1", "A3", "A4", "NOPE"):
+            for d in ("", "LONG", "SHORT", "long", " short ", "BOTH"):
+                queries.append([uid, exc, d, await _REAL_COUNT_OPEN(uid, exclude_trade_id=exc, direction=d)])
+    queries.append([U, "A2", None, await _REAL_COUNT_OPEN(U, "A2")])
+    return {"rows": rows, "queries": queries}
+
+
 # ── runner ──────────────────────────────────────────────────────────────────
 USER_COLS: list = []
 
@@ -847,6 +1150,8 @@ def reset_module_state():
         d.clear()
     if hasattr(auto_trade.execute_auto_trade, "_cb_warned"):
         delattr(auto_trade.execute_auto_trade, "_cb_warned")
+    auto_trade._ENV_WARNED.clear()                 # [VOL15-RISK-CAP / SAME-DIR-CAP] warn-once registry
+    auto_trade._vol15_low_notional_until.clear()   # [VOL15-RISK-CAP] the VOLUME 15m low-notional pause
     ks._cache = None
     market_regime._cached_regime = None
     market_regime._cached_at = 0.0
@@ -896,6 +1201,8 @@ def seed(c):
         auto_trade._auth_fail_log[(uid, ex)] = list(tss)
     for uid, ts in st.get("low_notional", []):
         auto_trade._LOW_NOTIONAL_NOTIFY_TS[uid] = ts
+    for uid, ex, until in st.get("vol15_ln", []):
+        auto_trade._vol15_low_notional_until[(uid, ex)] = until
     for uid, ex, bal, exp in st.get("balance_cache", []):
         balance_cache._BALANCE_CACHE[(uid, ex)] = (bal, exp)
     for uid, tss in st.get("unfilled", []):
@@ -947,6 +1254,17 @@ async def run_case(c):
         setattr(Config, k, copy.deepcopy(v))
     env_saved = {k: os.environ.get(k) for k in (c.get("env") or {})}
     os.environ.update(c.get("env") or {})
+    # [FEE-AWARE-SIZE] the trader module's TAKER_FEE overridden / deleted for the case
+    fee_saved = {}
+    for ex, v in (c.get("taker_fee") or {}).items():
+        mod = TRADERS[ex]
+        fee_saved[ex] = getattr(mod, "TAKER_FEE", _NODEF)
+        if v == "__del__":
+            delattr(mod, "TAKER_FEE")
+        else:
+            mod.TAKER_FEE = v
+    ctx_saved = dict(trend_monitor.CTX_RISK)
+    trend_monitor.CTX_RISK.update(c.get("ctx_risk") or {})
     CLK.wall = float(c["clock"])
     seed(c)
     before = set(asyncio.all_tasks())
@@ -954,9 +1272,14 @@ async def run_case(c):
     CAPTURE[0] = True
     results = [None] * len(c["calls"])
 
-    async def one(i, kw):
+    async def one(i, kw, stagger=0.0):
         kw2 = dict(kw)
         kw2["bot"] = BOT_OBJ if kw.get("bot", True) else None
+        if stagger:
+            # parallel signals arrive 1 ms apart (like ../../wire/py/drive_wire_diff.py): the lock-arrival
+            # order is then the call order — aiosqlite's thread timing decided it before (the JS run
+            # staggers the same way)
+            await asyncio.sleep(stagger)
         try:
             results[i] = {"ok": result_json(await auto_trade.execute_auto_trade(**kw2))}
         except Exception as e:  # noqa: BLE001
@@ -964,7 +1287,7 @@ async def run_case(c):
 
     loop = asyncio.get_running_loop()
     if c.get("parallel"):
-        ts = [loop.create_task(one(i, kw), name=f"call{i}") for i, kw in enumerate(c["calls"])]
+        ts = [loop.create_task(one(i, kw, i * 0.001), name=f"call{i}") for i, kw in enumerate(c["calls"])]
         await asyncio.gather(*ts)
     else:
         for i, kw in enumerate(c["calls"]):
@@ -984,6 +1307,14 @@ async def run_case(c):
             os.environ.pop(k, None)
         else:
             os.environ[k] = v
+    for ex, v in fee_saved.items():
+        if v is _NODEF:
+            if hasattr(TRADERS[ex], "TAKER_FEE"):
+                delattr(TRADERS[ex], "TAKER_FEE")
+        else:
+            TRADERS[ex].TAKER_FEE = v
+    trend_monitor.CTX_RISK.clear()
+    trend_monitor.CTX_RISK.update(ctx_saved)
     out = {"results": results, "recs": copy.deepcopy(RECS), "clock_end": CLK.wall}
     out.update(dump_db())
     return out
@@ -1003,7 +1334,11 @@ async def main():
         exp = await run_case(c)
         vectors.append({"case": c, "expected": exp})
         print(f"{c['name']}: {_REAL_TIME() - _t0:.2f}s results={exp['results']} recs={len(exp['recs'])}", file=sys.stderr)
-    payload = {"sigs": SIGS, "defaults": DEFAULTS, "user_cols": USER_COLS, "vectors": vectors}
+    helpers = _helpers() if not only else None
+    count_vectors = await _count_vectors() if not only else None
+    payload = {"sigs": SIGS, "defaults": DEFAULTS, "user_cols": USER_COLS, "vectors": vectors,
+               "taker_fee": {ex: getattr(mod, "TAKER_FEE", None) for ex, mod in TRADERS.items()},
+               "helpers": helpers, "count_vectors": count_vectors}
     os.makedirs(os.path.dirname(OUT), exist_ok=True)
     with gzip.open(OUT, "wt", encoding="utf-8") as f:
         json.dump(payload, f, ensure_ascii=False)   # key order kept: dict insertion order is data

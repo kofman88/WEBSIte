@@ -20,11 +20,18 @@ const FX = loadFixture();
 
 describe('execute_auto_trade — bot vs site replay', () => {
   it('covers 40+ cases and every placement branch', () => {
-    expect(FX.vectors.length).toBeGreaterThanOrEqual(40);
+    expect(FX.vectors.length).toBeGreaterThanOrEqual(200);
     const names = new Set(FX.vectors.map((v) => v.case.name));
     for (const n of ['ok_bybit_limit', 'ok_bingx', 'ok_binance', 'ok_okx', 'smc_split_bybit', 'timeout_retry_ok',
       'timeout_first_found_position', 'timeout_first_found_order', 'timeout_both_bingx', 'auth_error_breaker',
-      'server_error', 'ptp_fallback_ok', 'ptp_fb_skip_unfilled', 'parallel_same_symbol']) {
+      'server_error', 'ptp_fallback_ok', 'ptp_fb_skip_unfilled', 'parallel_same_symbol',
+      // batch D (bot c56653d): [VOL15-RISK-CAP] (+ the low-notional pause), [SAME-DIR-CAP],
+      // [MARKET-ENTRY-NO-SHIFT], [FEE-AWARE-SIZE], the risk_capped_warning numbers
+      'd2_vol15_bybit_cap', 'd2_vol15_ctx_x2_reclamped', 'd2_vol15_env_abc_warn_once', 'd2_vol15_low_notional_pause_flow',
+      'd2_vol15_low_notional_ctx_reclamp_own_pause', 'd2_vol15_pause_reset_by_open', 'd2_samedir_third_long',
+      'd2_samedir_count_fails', 'd2_samedir_cap_off_no_count', 'd2_samedir_max_trades_first', 'd2_market_short_bingx',
+      'd2_limit_short_bingx', 'd2_fee_env_0', 'd2_fee_taker_bad_binance', 'd2_fee_split_unknown_exchange',
+      'd2_risk_capped_warning_local_numbers']) {
       expect(names.has(n), n).toBe(true);
     }
   });

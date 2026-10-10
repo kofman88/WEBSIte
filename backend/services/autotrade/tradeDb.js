@@ -14,7 +14,7 @@
  *   updateTradeExchange(tid, ex)          D17: signal_trades.exchange = where the order went (site)
  *   updateTradeTpPlaced(tid, v)           db_update_trade_tp_placed
  *   hasOpenTradeForSymbol(uid, sym)       db_has_open_trade_for_symbol
- *   countOpenTrades(uid, excludeTid)      db_count_open_trades
+ *   countOpenTrades(uid, excludeTid, dir) db_count_open_trades (direction: [SAME-DIR-CAP 2026-10])
  *   getAllOpenTrades(uid)                 db_get_all_open_trades
  *   getRecentSlCount(uid, hours)          db_get_recent_sl_count
  *   getTodayLossRr(uid)                   db_get_today_loss_rr
@@ -48,6 +48,7 @@
 const engineSchema = require('../../models/engineSchema');
 const { createSignalTradesRepo, computeFallbackPnlUsd } = require('../engine/signalTradesRepo');
 const { pyTruthy } = require('../exchanges/pyCompat');
+const { pyUpper, pyStrip } = require('../../strategies/common/pyUnicode');
 const { cancellableSleep } = require('./asyncio');   // asyncio.js requires only node:async_hooks (no cycle)
 
 const TRADER_COLS = new Set(engineSchema.TRADER_SETTINGS_COLUMNS.map((c) => c[0]));
@@ -315,10 +316,23 @@ function createTradeDb({
       return Boolean(r && r.order_id);
     },
 
-    async countOpenTrades(uid, excludeTradeId = '') {
-      const row = excludeTradeId
-        ? dbOf().prepare("SELECT COUNT(*) AS n FROM signal_trades WHERE user_id=? AND result='' AND order_id!='' AND trade_id!=?").get(Number(uid), String(excludeTradeId))
-        : dbOf().prepare("SELECT COUNT(*) AS n FROM signal_trades WHERE user_id=? AND result='' AND order_id!=''").get(Number(uid));
+    /**
+     * db_count_open_trades(user_id, exclude_trade_id="", direction=""): rows with an exchange order
+     * and no result, without `excludeTradeId`; [SAME-DIR-CAP 2026-10] `direction` (LONG / SHORT, any
+     * case) counts only that side — without it the SQL is the old one.
+     */
+    async countOpenTrades(uid, excludeTradeId = '', direction = '') {
+      let sql = "SELECT COUNT(*) AS n FROM signal_trades WHERE user_id=? AND result='' AND order_id!=''";
+      const params = [Number(uid)];
+      if (excludeTradeId) {
+        sql += ' AND trade_id!=?';
+        params.push(String(excludeTradeId));
+      }
+      if (direction) {
+        sql += " AND UPPER(COALESCE(direction, ''))=?";
+        params.push(pyUpper(pyStrip(String(direction))));
+      }
+      const row = dbOf().prepare(sql).get(...params);
       return row ? row.n : 0;
     },
 

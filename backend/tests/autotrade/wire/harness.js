@@ -146,6 +146,9 @@ const TS_COLS = new Set(['user_id', ...schema.TRADER_SETTINGS_COLUMNS.map((c) =>
 /**
  * opts.onRequest(task, jsReq, botEntry) — hook for the test (default: none).
  * opts.d6 / opts.d17 default to the bot-mode switches (the differential runs the bot's behaviour).
+ * opts.d18 — the D18 site guards (docs/PORT_DECISIONS.md): omitted → the site's defaults (production);
+ * `BOT_D18` → the bot's behaviour (for a scenario that reaches a D18 branch — the bot never sent the
+ * requests such a branch adds, so its recording cannot answer them).
  */
 function buildWireEnv(c, opts = {}) {
   const clk = createVClock(c.clock);
@@ -324,6 +327,7 @@ function buildWireEnv(c, opts = {}) {
     recordLeverageCap: () => rec('side', ['leverage_cap']),
     d6: opts.d6 || { executedOnReject: true, fixedAmountPercent: false },
     d17: opts.d17 || { recordExchange: false },
+    d18: opts.d18,
   });
   const st = c.state || {};
   for (const [uid, ex, until] of st.zb || []) at._parts.cooldowns._zeroBalanceUntil.set(`${uid}|${ex}`, until);
@@ -383,4 +387,7 @@ function byTask(recs) {
   return out;
 }
 
-module.exports = { loadFixture, buildWireEnv, byTask, normRequest, sigOk, FIXTURE };
+/** The bot's behaviour for the D18 site guards. */
+const BOT_D18 = Object.freeze({ inflightGuard: false, reconcileFailedRetry: false });
+
+module.exports = { BOT_D18, loadFixture, buildWireEnv, byTask, normRequest, sigOk, FIXTURE };

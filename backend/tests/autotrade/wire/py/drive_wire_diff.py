@@ -1228,6 +1228,8 @@ def scenario(name, *, uid, ex, user=None, signals, rng=None, balance=1000.0, ava
               "bot": True, "strategy": strat, "exchange": ex, "bybit_demo": bool(u.get("bybit_demo")),
               "order_type": "Market" if strat == "VOLUME" else "Limit", "quality": s.get("quality", 4),
               "trend_ctx": s.get("trend_ctx", "")}
+        if s.get("timeframe") is not None:
+            kw["timeframe"] = s["timeframe"]     # [VOL15-RISK-CAP 2026-10] the VOLUME scanner's sig.timeframe
         if strat == "SMC" and "entry_low" in s:
             kw["entry_low"] = s["entry_low"]
             kw["entry_high"] = s["entry_high"]
@@ -1558,6 +1560,55 @@ def gen_targeted():
                  signals=[s], balance=1000.0, regime="ranging", faults=fl)
 
 
+def gen_batch_d():
+    """Batch D (bot c56653d) on the real traders: the qty each exchange is sent proves [VOL15-RISK-CAP]
+    and [FEE-AWARE-SIZE] (VOLUME 15m vs 1h, the fee factor on / off), the VOLUME 15m low-notional pause
+    (no shared cooldown: the LEVELS trade still places; the paused signal sends nothing) and
+    [SAME-DIR-CAP] (two open LONG → the third LONG sends no order, a SHORT places). Own rng and uids
+    (9600+) — the scenarios above are untouched."""
+    rng = _random.Random(SEED ^ 0xD2D2)
+    uid = 9600
+    for ex in ("bybit", "bingx", "binance", "okx"):
+        # VOLUME 15m capped (1 % → 0.25 %) and sized after fees; the same signal on 1h — fees only
+        for tf in ("15m", "1h"):
+            for ptp in (False, True):
+                uid += 1
+                direction = "LONG" if uid % 2 else "SHORT"
+                sv = make_signal(rng, "SOL-USDT-SWAP", direction, "VOLUME", price=COINS["SOL-USDT-SWAP"]["price"], sl_pct=0.006)
+                sv.update(symbol="SOL-USDT-SWAP", direction=direction, strategy="VOLUME", quality=4, timeframe=tf)
+                scenario(f"d2_vol_{tf}_{ex}{'_ptp' if ptp else ''}", uid=uid, ex=ex,
+                         user={"partial_tp_enabled": ptp, "trade_risk_pct": 1.0, "max_risk_pct": 2.0}, signals=[sv], balance=1000.0)
+        # a $25 account: VOLUME 15m low notional → its own pause (the next VOLUME 15m sends nothing), the
+        # LEVELS trade places (no shared zero-balance cooldown)
+        uid += 1
+        v1 = make_signal(rng, "SOL-USDT-SWAP", "LONG", "VOLUME", price=COINS["SOL-USDT-SWAP"]["price"], sl_pct=0.006)
+        v1.update(symbol="SOL-USDT-SWAP", direction="LONG", strategy="VOLUME", quality=4, timeframe="15m")
+        v2 = make_signal(rng, "XRP-USDT-SWAP", "SHORT", "VOLUME", price=COINS["XRP-USDT-SWAP"]["price"], sl_pct=0.006)
+        v2.update(symbol="XRP-USDT-SWAP", direction="SHORT", strategy="VOLUME", quality=4, timeframe="15m")
+        l3 = make_signal(rng, "LINK-USDT-SWAP", "LONG", "LEVELS", price=COINS["LINK-USDT-SWAP"]["price"], sl_pct=0.012)
+        l3.update(symbol="LINK-USDT-SWAP", direction="LONG", strategy="LEVELS", quality=4)
+        # after a trade opened on the exchange (reset_zero_balance_cooldown) VOLUME 15m tries again
+        v4 = make_signal(rng, "DOGE-USDT-SWAP", "SHORT", "VOLUME", price=COINS["DOGE-USDT-SWAP"]["price"], sl_pct=0.006)
+        v4.update(symbol="DOGE-USDT-SWAP", direction="SHORT", strategy="VOLUME", quality=4, timeframe="15m")
+        scenario(f"d2_vol15_low_notional_{ex}", uid=uid, ex=ex, user={"partial_tp_enabled": False, "trade_risk_pct": 1.0},
+                 signals=[v1, v2, l3, v4], balance=25.0, gap=30.0)
+        # the fee factor off: the LEVELS trade sized on the configured risk (the old qty)
+        uid += 1
+        s = make_signal(rng, "BTC-USDT-SWAP", "SHORT", "LEVELS", price=COINS["BTC-USDT-SWAP"]["price"], drift=-0.0003, sl_pct=0.012)
+        s.update(symbol="BTC-USDT-SWAP", direction="SHORT", strategy="LEVELS", quality=4)
+        scenario(f"d2_fee_off_{ex}", uid=uid, ex=ex, user={"partial_tp_enabled": True}, signals=[s],
+                 env={"AUTO_TRADE_FEE_AWARE_SIZING": "0"})
+        # two open LONG auto-trades: a third LONG is refused before any order, a SHORT places
+        uid += 1
+        lg = make_signal(rng, "LINK-USDT-SWAP", "LONG", "LEVELS", price=COINS["LINK-USDT-SWAP"]["price"], sl_pct=0.012)
+        lg.update(symbol="LINK-USDT-SWAP", direction="LONG", strategy="LEVELS", quality=4)
+        sh = make_signal(rng, "XRP-USDT-SWAP", "SHORT", "VOLUME", price=COINS["XRP-USDT-SWAP"]["price"], sl_pct=0.01)
+        sh.update(symbol="XRP-USDT-SWAP", direction="SHORT", strategy="VOLUME", quality=4, timeframe="1h")
+        tr = [trade_row(uid, f"D{uid}-{t}", T0 - 1800 * (t + 1), symbol=sym, direction="LONG", order_id=f"XD{t}",
+                        state="OPEN", strategy="LEVELS") for t, sym in enumerate(("BTC-USDT-SWAP", "DOGE-USDT-SWAP"))]
+        scenario(f"d2_samedir_{ex}", uid=uid, ex=ex, user={"partial_tp_enabled": False}, signals=[lg, sh], trades=tr, gap=30.0)
+
+
 # ══════════════════════════ runner ══════════════════════════
 USER_COLS: list = []
 CFG_KEYS = ("SMC_HOUR_FILTER_ENABLED", "SMC_HOUR_FILTER_MODE", "BAD_HOURS_UTC", "DAILY_MAX_LOSS_R")
@@ -1579,6 +1630,8 @@ def reset_module_state():
         d.clear()
     if hasattr(auto_trade.execute_auto_trade, "_cb_warned"):
         delattr(auto_trade.execute_auto_trade, "_cb_warned")
+    auto_trade._ENV_WARNED.clear()                 # [VOL15-RISK-CAP / SAME-DIR-CAP] warn-once registry
+    auto_trade._vol15_low_notional_until.clear()   # [VOL15-RISK-CAP] the VOLUME 15m low-notional pause
     ks._cache = None
     market_regime._cached_regime = None
     market_regime._cached_at = 0.0
@@ -1756,6 +1809,7 @@ async def main():
         return
     gen_targeted()
     gen_random(SEED, N_USERS)
+    gen_batch_d()
     only = [x for x in os.environ.get("WIRE_ONLY", "").split(",") if x]
     vectors = []
     for c in SCENARIOS:

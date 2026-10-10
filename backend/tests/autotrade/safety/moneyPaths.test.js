@@ -41,8 +41,11 @@ const req = createRequire(import.meta.url);
 const W = req('./world.js');
 
 const BOT_D18 = { inflightGuard: false, reconcileFailedRetry: false };
-// 1 % of 10 000 over a 1.95 stop; OKX in whole contracts ([OKX-LOT-CONTRACTS]: ctVal 0.01, lotSz 1 → 5128 contracts)
-const QTY = { bybit: 51.282, bingx: 51.282, binance: 51.282, okx: 51.28 };
+// 1 % of 10 000 over the 2.0 stop of the Market entry ([MARKET-ENTRY-NO-SHIFT 2026-10]: no 0.05 % improvement —
+// it was 1.95), × the fee factor d / (d + entry × 2 × taker) ([FEE-AWARE-SIZE 2026-10]): Bybit 0.06 % → 0.9434 %,
+// BingX / OKX 0.05 % → 0.9524 %, Binance 0.04 % → 0.9615 %; OKX in whole contracts ([OKX-LOT-CONTRACTS]: ctVal
+// 0.01, lotSz 1 → 4762 contracts). (Before batch D: 51.282 / 51.28 for every exchange.)
+const QTY = { bybit: 47.17, bingx: 47.62, binance: 48.075, okx: 47.62 };
 const settle = async (n = 30) => { for (let i = 0; i < n; i++) await new Promise((r) => setImmediate(r)); };
 /** Let a call run (microtasks only — the virtual clock does not move) until `cond`. */
 async function pumpUntil(cond, max = 3000) {

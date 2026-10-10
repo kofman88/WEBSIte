@@ -223,7 +223,7 @@ describe('(b) the killswitch and the risk gates cannot be bypassed', () => {
     const keyId = w.db.prepare('SELECT id FROM exchange_keys WHERE user_id=?').get(u.uid).id;
     expect((await del(u.uid, `/api/exchanges/keys/${keyId}`, H)).status).toBe(403);
     expect(w.fake.requests.length).toBe(before);
-    expect(near(longSize(u), 51.282)).toBe(true);
+    expect(near(longSize(u), AUTO_QTY_BYBIT)).toBe(true);
     expect(w.db.prepare('SELECT COUNT(*) n FROM exchange_keys WHERE user_id=?').get(u.uid).n).toBe(1);
     // reading stays possible (support work): progress / card / positions
     expect((await get(u.uid, `/api/app/trades/${tid}/card`, H)).status).toBe(200);
@@ -243,6 +243,9 @@ describe('(b) the killswitch and the risk gates cannot be bypassed', () => {
 });
 
 const near = (a, b) => Math.abs(a - b) < 1e-6;
+// the Bybit auto position of openPosition: 1 % of 10 000 × the fee factor 2 / 2.12 ([FEE-AWARE-SIZE 2026-10])
+// over the 2.0 stop of the Market entry ([MARKET-ENTRY-NO-SHIFT 2026-10]) — 51.282 before batch D
+const AUTO_QTY_BYBIT = 47.17;
 
 // ═══════════════════════════════════════════════════════════════════════
 describe('(c) exchange keys', () => {
@@ -439,7 +442,7 @@ describe('(d) the trade routes: auth, IDOR, injection-shaped and hostile input',
     }
     expect(w.db.prepare('SELECT COUNT(*) n FROM signal_trades').get().n).toBe(count);
     expect(w.fake.requests.length).toBe(before);
-    expect(near(longSize(u), 51.282)).toBe(true);
+    expect(near(longSize(u), AUTO_QTY_BYBIT)).toBe(true);
   });
 
   it('hostile key bodies (types, sizes, unknown exchanges) → the bot\'s bad_request, nothing sent or stored', async () => {

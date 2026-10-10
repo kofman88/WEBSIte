@@ -30,10 +30,20 @@ import { describe, it, expect } from 'vitest';
 import { createRequire } from 'module';
 
 const nodeRequire = createRequire(import.meta.url);
-const { loadFixture } = nodeRequire('./harness.js');
+const { loadFixture, BOT_D18 } = nodeRequire('./harness.js');
 const { replay, compare } = nodeRequire('./compare.js');
 
 const FX = loadFixture();
+/**
+ * Scenarios where the site's D18 reconcile of a failed / duplicate retry fires (docs/PORT_DECISIONS.md
+ * D18): since [MARKET-ENTRY-NO-SHIFT] (bot c56653d) slow_all_bingx's Market entry fills at once, the
+ * double-check reads time out on the slow exchange, the retry is answered «duplicate clientOrderId» and
+ * the bot records the trade from that answer (no SL step); the site reconciles the first attempt
+ * instead — requests the bot never sent, so the differential runs these in bot mode and the D18 test
+ * below pins the site's branch.
+ */
+const D18_FIRES = Object.freeze(['slow_all_bingx']);
+const optsOf = (name) => (D18_FIRES.includes(name) ? { d18: BOT_D18 } : {});
 const EXCHANGES = ['bybit', 'bingx', 'binance', 'okx'];
 const names = FX.vectors.map((v) => v.case.name);
 
@@ -55,6 +65,10 @@ describe(`wire differential — ${FX.vectors.length} scenarios replayed against 
       }
       expect(names.filter((n) => n.startsWith(`edge_${ex}_`)).length, `edges ${ex}`).toBeGreaterThanOrEqual(5);
       expect(names.filter((n) => n.startsWith(`tgt2_${ex}_`)).length, `path rejections ${ex}`).toBeGreaterThanOrEqual(8);
+      // batch D (bot c56653d): the cap / fee factor in the qty sent, the low-notional pause, the same-direction cap
+      for (const n of ['d2_vol_15m', 'd2_vol_1h', 'd2_vol15_low_notional', 'd2_fee_off', 'd2_samedir']) {
+        expect(names, `${n} ${ex}`).toContain(`${n}_${ex}`);
+      }
     }
     // the bot really traded: placements, partial-TP ladders, reconciles, limit guards and failures
     const tasks = new Set();
@@ -85,7 +99,7 @@ describe(`wire differential — ${FX.vectors.length} scenarios replayed against 
     for (const v of FX.vectors) {
       let diffs;
       try {
-        diffs = compare(v, await replay(v));
+        diffs = compare(v, await replay(v, optsOf(v.case.name)));
       } catch (e) {
         diffs = [`threw ${e && e.stack}`];
       }
@@ -93,6 +107,18 @@ describe(`wire differential — ${FX.vectors.length} scenarios replayed against 
     }
     expect(bad).toEqual([]);
   }, 600_000);
+
+  it('D18 (site): only the listed scenarios reach the reconcile of a failed / duplicate retry, and there it reconciles', async () => {
+    for (const n of D18_FIRES) expect(names, n).toContain(n);
+    const v = FX.vectors.find((x) => x.case.name === 'slow_all_bingx');
+    // the bot: the retry's «duplicate clientOrderId» is taken as the first attempt's success
+    expect(v.expected.recs.some(([, k, d]) => k === 'log' && d[1].startsWith('✅ VOLUME TRADE OPENED'))).toBe(true);
+    const got = await replay(v);
+    const logs = got.recs.filter(([, k]) => k === 'log').map(([, , d]) => d[1]);
+    expect(logs.some((l) => l.startsWith('[D18-RETRY-RECONCILE] uid=8053 SOL-USDT-SWAP: retry after a timeout was a duplicate'))).toBe(true);
+    expect(logs.some((l) => l.startsWith('VOLUME auto_trade SOL-USDT-SWAP uid=8053: timeout 60s — reconciling'))).toBe(true);
+    // (every other scenario runs with the site's defaults in the differential above: no D18 branch there)
+  }, 300_000);
 
   describe('pinned bot quirks (the site does exactly the same on the wire)', () => {
     const vec = (n) => {
@@ -162,7 +188,9 @@ describe(`wire differential — ${FX.vectors.length} scenarios replayed against 
     it('[OKX-TIMEOUT-UNKNOWN] positions unreadable but the order reads on the timeout reconcile: the filled entry is attached in coins', async () => {
       const v = vec('okx_timeout_positions_unreadable_found');
       const got = await replay(v);
-      expect(trade(got, v.case.uid)).toMatchObject({ result: '', order_id: '7001', qty: 5.86 });
+      // [FEE-AWARE-SIZE 2026-10] 1 % × the fee factor of the 1.149 % stop from the improved entry (0.9200): 5.39 coins (5.86 before)
+      expect(trade(got, v.case.uid)).toMatchObject({ result: '', order_id: '7001', qty: 5.39 });
+      expect(trade(got, v.case.uid).qty).toBe(v.expected.trades.find((t) => t.trade_id === `W${v.case.uid}-0`).qty);
       expect(msgs(got).some((m) => m.includes('биржа отвечала с задержкой'))).toBe(true);
       expect(reqs(got, /^POST \/api\/v5\/trade\/cancel-algos/).length).toBe(0);
     });

@@ -348,9 +348,12 @@ describe('auto-trade end to end on fake exchanges (Bybit, BingX, Binance, OKX)',
       expect(pos).toHaveLength(1);
       expect(pos[0]).toMatchObject({ base: BASE, side: 'LONG' });
       expect(Number(row.qty)).toBeCloseTo(pos[0].size, 9);
-      // risk 0.5 % of $10 000 over a 7.44 stop = 6.722 coins; OKX sizes in whole lots of contracts
-      // ([OKX-LOT-CONTRACTS]: lotSz 1, ctVal 0.01 → 672.2 contracts → 672 → 6.72 coins)
-      expect(Number(row.qty)).toBe(ex === 'okx' ? 6.72 : 6.722);
+      // risk 0.5 % of $10 000 over the 11.388 stop from the signal entry ([MARKET-ENTRY-NO-SHIFT]: VOLUME is a
+      // Market order — no 0.05 % improvement), × the fee factor d / (d + entry × 2 × taker) ([FEE-AWARE-SIZE]):
+      // Bybit 0.06 % → 0.2728 % → 2.395, BingX / OKX 0.05 % → 0.2952 % → 2.592, Binance 0.04 % → 0.3216 % → 2.823;
+      // OKX sizes in whole lots of contracts ([OKX-LOT-CONTRACTS]: lotSz 1, ctVal 0.01 → 259 contracts → 2.59)
+      // (before batch D: 0.5 % over the 7.44 stop from the improved entry = 6.722 / 6.72)
+      expect(Number(row.qty)).toBe({ bybit: 2.395, bingx: 2.592, binance: 2.823, okx: 2.59 }[ex]);
       const orders = S.fake.orders(ex, keyOf('auto', ex));
       const sl = ex === 'bybit' ? pos[0].sl : orders.filter((o) => o.type === 'STOP').map((o) => o.trigger)[0];
       expect(sl, 'stop-loss on the exchange').toBeGreaterThan(7889);
@@ -415,7 +418,9 @@ describe('auto-trade end to end on fake exchanges (Bybit, BingX, Binance, OKX)',
       expect(half.body).toMatchObject({ ok: true, outcome: 'closed_half' });
       expect(half.body.message).toMatch(/^✅ Закрыта половина: /);
       expect(orderRequests('auto', ex).length).toBe(sentBefore + 1);
-      expect(positionsOf('auto', ex)[0].size).toBeCloseTo(before / 2, 2);
+      // OKX closes whole contracts (ctVal 0.01, lotSz 1): ⌊contracts / 2⌋ — 129 of 259 → 1.30 left
+      const halfLeft = ex === 'okx' ? before - Math.floor(Math.round(before * 100) / 2) / 100 : before / 2;
+      expect(positionsOf('auto', ex)[0].size).toBeCloseTo(halfLeft, ex === 'okx' ? 9 : 2);
       const full = await api('post', `trades/${tid(uid)}/qc/full`, uid, {});
       expect(full.status).toBe(200);
       expect(full.body).toMatchObject({ ok: true, outcome: 'closed', message: '✅ Позиция закрыта полностью' });

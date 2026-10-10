@@ -5,6 +5,11 @@
  *   zero-balance cooldown  (AUDIT-FIX-C59 / C78 #2)  30 min after "insufficient funds" /
  *       low-notional / insufficient-margin; persisted in kv `zb_cooldown_<uid>_<exchange>` =
  *       str(until_ts) (fire-and-forget), restored at start-up (`[C78]`), tombstoned ('') on reset/GC.
+ *   VOLUME 15m low-notional pause  ([VOL15-RISK-CAP 2026-10], auto_trade._vol15_low_notional_until)
+ *       30 min per (uid, exchange) after a low-notional reject of a VOLUME 15m trade whose risk the
+ *       VOLUME_15M_MAX_RISK_PCT cap lowered — blocks only VOLUME 15m (the shared zero-balance cooldown
+ *       is not armed); memory only, an expired entry is dropped by the check, a reset of the
+ *       zero-balance cooldown (any opened trade on the exchange) drops it too.
  *   commodity blocklist    ([FIX-TRADE-PLACEMENT]) 24 h per (uid, symbol) after Bybit 110125, memory only.
  *   auth-failure breaker   (AUDIT-FIX-C50/C54) 3 auth errors within 600 s → auto_trade=0 + one
  *       notification per 24 h, admin alert, `[AUTH-BREAKER]`; reset on a successful trade.
@@ -61,6 +66,7 @@ function createCooldowns({
 } = {}) {
   const logger = log || require('../marketData/mdLog').log;
   const zeroBalanceUntil = new Map();   // `${uid}|${exchange}` → until
+  const vol15LowNotionalUntil = new Map();   // `${uid}|${exchange}` → until ([VOL15-RISK-CAP 2026-10])
   const commodityBlocklist = new Map(); // `${uid}|${symbol}` → until
   const authFailLog = new Map();        // `${uid}|${exchange}` → [ts]
   const authFailNotified = new Map();   // `${uid}|${exchange}` → ts
@@ -89,9 +95,27 @@ function createCooldowns({
 
   function resetZeroBalanceCooldown(uid, exchange) {
     zeroBalanceUntil.delete(`${uid}|${exchange}`);
+    // [VOL15-RISK-CAP 2026-10] a trade opened → the VOLUME 15m low-notional pause goes too (the user
+    // may have topped up): the next VOLUME 15m signal tries again
+    vol15LowNotionalUntil.delete(`${uid}|${exchange}`);
     spawn(`zb_reset_${uid}_${exchange}`, async () => {
       try { await kvSet(zbKvKey(uid, exchange), ''); } catch (e) { logger.debug(`silent exc auto_trade.py:248: ${errText(e)}`); }
     });
+  }
+
+  // ── [VOL15-RISK-CAP 2026-10] VOLUME 15m low-notional pause ──────────
+  /** _check_vol15_low_notional_cooldown: seconds left, 0 — none (an expired entry is dropped here). */
+  function checkVol15LowNotionalCooldown(uid, exchange) {
+    const key = `${uid}|${exchange}`;
+    const until = vol15LowNotionalUntil.get(key) || 0.0;
+    const t = now();
+    if (until > t) return until - t;
+    vol15LowNotionalUntil.delete(key);
+    return 0.0;
+  }
+  /** _set_vol15_low_notional_cooldown: pause for ZERO_BAL_COOLDOWN_SEC (30 min). */
+  function setVol15LowNotionalCooldown(uid, exchange) {
+    vol15LowNotionalUntil.set(`${uid}|${exchange}`, now() + ZERO_BAL_COOLDOWN_SEC);
   }
 
   /** load_zero_balance_cooldowns_from_db → restored count. */
@@ -232,8 +256,10 @@ function createCooldowns({
   return {
     zbKvKey, checkZeroBalanceCooldown, setZeroBalanceCooldown, resetZeroBalanceCooldown, loadZeroBalanceCooldownsFromDb,
     gcZeroBalanceRegistry, checkCommodityBlocklist, setCommodityBlocklist, gcCommodityBlocklist,
+    checkVol15LowNotionalCooldown, setVol15LowNotionalCooldown,
     resetAuthFailures, gcAuthFailRegistry, handleAuthFailure, recordAuthFailure,
     _zeroBalanceUntil: zeroBalanceUntil, _commodityBlocklist: commodityBlocklist, _authFailLog: authFailLog, _authFailNotified: authFailNotified,
+    _vol15LowNotionalUntil: vol15LowNotionalUntil,
   };
 }
 

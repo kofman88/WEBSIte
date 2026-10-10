@@ -23,12 +23,13 @@ os.chdir(BOT)
 import i18n  # noqa: E402
 
 KEYS = [
-    # auto_trade.py
+    # auto_trade.py (batch D c56653d: auto_trade_same_direction_cap — SAME-DIR-CAP,
+    # low_notional_skip_notif_vol15 — VOL15-RISK-CAP)
     "counter_trend", "counter_trend_label",
     "regime_trending_up", "regime_trending_down", "regime_ranging", "regime_high_vol",
-    "auto_trade_limit", "auto_trade_cross_direction", "auto_trade_timeout",
+    "auto_trade_limit", "auto_trade_same_direction_cap", "auto_trade_cross_direction", "auto_trade_timeout",
     "auto_trade_timeout_reconciled", "auto_trade_timeout_unknown", "auto_trade_error", "auto_trade_limit_unfilled",
-    "smc_sl_too_wide", "zb_cooldown_set_notif", "low_notional_skip_notif",
+    "smc_sl_too_wide", "zb_cooldown_set_notif", "low_notional_skip_notif", "low_notional_skip_notif_vol15",
     "leverage_downgrade_warning", "risk_capped_warning", "risk_boosted_warning",
     "tp_placement_failed", "signal_skipped_stale", "circuit_breaker_notif", "sl_streak_notif",
     # _notify_skip_to_user

@@ -8,7 +8,9 @@
  *   createExecutor(deps).executeAutoTrade(kwargs) → result
  *     kwargs = the bot's keyword arguments (snake_case): user_id, symbol, direction, entry, sl, tp1,
  *       tp2, tp3, trade_id, api_key, api_secret, risk_pct, leverage, auto_trade_mode, max_trades,
- *       bot, strategy, exchange, entry_low, entry_high, bybit_demo, order_type, quality, trend_ctx
+ *       bot, strategy, exchange, entry_low, entry_high, bybit_demo, order_type, quality, trend_ctx,
+ *       timeframe ([VOL15-RISK-CAP 2026-10]: the signal's TF; the VOLUME scanner passes sig.timeframe,
+ *       '' — unknown, no VOLUME 15m cap)
  *     result = {executed, show_trade_btn, limit_msg[, skip_reason, ctx_mult, regime_warning,
  *       cross_direction_msg, ai_filter_result]}; QUIRK (pinned): hour_of_day_levels / min_quality /
  *       trending_only REPLACE it with {ok:false, executed:false, skip}.
@@ -19,6 +21,17 @@
  * reproduces the bot byte for byte (the differential tests run that way). D17 (`deps.d17`): a placed
  * order's exchange is written to signal_trades.exchange (the quick-close / SL→BE buttons read it);
  * `d17: {recordExchange: false}` is the bot.
+ *
+ * Risk safeguards of the bot's batch D (auto_trade.py 1bfc59c + d8123a2):
+ *   [VOL15-RISK-CAP]  VOLUME on 15m in the risk sizing mode: risk ≤ VOLUME_15M_MAX_RISK_PCT (default 0.25 %;
+ *                     ≤ 0 / not a number → off) — right after [RISK-CAP] and again before the sizing;
+ *                     a low-notional reject of a capped trade pauses only VOLUME 15m of that exchange for
+ *                     30 min (cooldowns.setVol15LowNotionalCooldown), not the shared zero-balance cooldown
+ *   [SAME-DIR-CAP]    ≥ AUTO_TRADE_MAX_SAME_DIRECTION (default 2; ≤ 0 → off) open trades of the side →
+ *                     SKIP same_direction_cap (in the lock, after the max_trades gate; fail-closed)
+ *   [MARKET-ENTRY-NO-SHIFT]  the 0.05 % entry improvement only for a Limit order
+ *   [FEE-AWARE-SIZE]  the trader gets risk × d / (d + entry × 2 × taker) (AUTO_TRADE_FEE_AWARE_SIZING,
+ *                     default on); messages / logs keep the configured risk
  *
  * Not ported, by decision: the ML signal_filter gate (D11 — no XGBoost models on the site: the
  * gate's `has_model` is always false); the WS staleness branch (dead in the bot: ws_feed has no
@@ -48,6 +61,11 @@ const STUCK_PLACING_MAX_AGE_S = 1800;   // auto_trade._STUCK_PLACING_MAX_AGE_S (
 const ENTRY_IMPROVE_PCT = 0.0005;
 const STRATEGY_FEATURE = Object.freeze({ SMC: 'smc', VOLUME: 'volume' });
 const STRATEGY_MAX_SL_DEFAULTS = Object.freeze({ SMC: 5.0, LEVELS: 7.0 });
+// [VOL15-RISK-CAP / SAME-DIR-CAP / FEE-AWARE-SIZE 2026-10] (auto_trade.py)
+const VOL15_MAX_RISK_DEFAULT = 0.25;   // % of the balance
+const SAME_DIR_CAP_DEFAULT = 2;        // open auto-trades in one direction
+// the exchange's taker fee per side when the trader module's TAKER_FEE is missing or not a fraction
+const TAKER_FEE_FALLBACK = Object.freeze({ bybit: 0.0006, bingx: 0.0005, binance: 0.0005, okx: 0.0005 });
 const DAYS_RU = Object.freeze({ 0: 'Пн', 1: 'Вт', 2: 'Ср', 3: 'Чт', 4: 'Пт', 5: 'Сб', 6: 'Вс' });
 
 const own = (o, k) => o !== null && o !== undefined && Object.prototype.hasOwnProperty.call(o, k);
@@ -76,6 +94,42 @@ function utcParts(t) {
     hour: d.getUTCHours(),
     ordinal: Math.floor(Math.floor(t * 1000) / 86400000) + 719163,
   };
+}
+
+/**
+ * [VOL15-RISK-CAP 2026-10] auto_trade._vol15_required_balance(entry, sl, size_risk_pct, trader_required):
+ * the balance from which a VOLUME 15m trade passes the exchange minimum in the risk mode —
+ * ⌈min_notional × (|entry − SL| / entry) / (risk / 100)⌉; the minimum is recovered from the trader's
+ * answer (required_balance = min / risk), not below $10. No data → the trader's required_balance as is.
+ * Python errors kept: int() of a NaN is a ValueError (→ the fallback), of an infinity an OverflowError
+ * (raised — the caller's notification try swallows it).
+ */
+function vol15RequiredBalance(entry, sl, sizeRiskPct, traderRequired) {
+  const pyErr = (pyType, msg) => Object.assign(new Error(msg), { pyType, name: pyType });
+  const intOf = (x) => {
+    if (Number.isNaN(x)) throw pyErr('ValueError', 'cannot convert float NaN to integer');
+    if (!Number.isFinite(x)) throw pyErr('OverflowError', 'cannot convert float infinity to integer');
+    return Math.trunc(x) + 0;
+  };
+  const pyMax = (a, b) => (b > a ? b : a);
+  try {
+    const e = pyFloat(or(entry, 0));
+    const s = pyFloat(or(sl, 0));
+    const r = pyFloat(or(sizeRiskPct, 0));
+    const tr = pyFloat(or(traderRequired, 0));
+    if (e <= 0 || s <= 0 || r <= 0 || e === s) return intOf(tr);
+    const minPos = tr > 0 ? pyMax(10.0, tr * r / 100.0) : 10.0;
+    const need = minPos * (Math.abs(e - s) / e) / (r / 100.0);
+    return intOf(-Math.floor(-need));   // ceil: int(-(-need // 1))
+  } catch (err) {
+    if (err && err.pyType === 'OverflowError') throw err;
+    try {
+      return intOf(pyFloat(or(traderRequired, 0)));
+    } catch (err2) {
+      if (err2 && err2.pyType === 'OverflowError') throw err2;
+      return 0;
+    }
+  }
 }
 
 function createExecutor(deps) {
@@ -124,6 +178,7 @@ function createExecutor(deps) {
   }
 
   const tradeLocks = new Map();
+  const envWarned = new Set();               // auto_trade._ENV_WARNED: (name, raw) warned once
   const disabledDaysNotified = new Map();   // `${uid}|${ordinal}` → true
   const lowNotionalNotifyTs = new Map();     // uid → ts
   let cbWarned = false;
@@ -181,6 +236,97 @@ function createExecutor(deps) {
     }
   }
 
+  // ── [VOL15-RISK-CAP / SAME-DIR-CAP / FEE-AWARE-SIZE 2026-10] — env read on every call, a bad
+  // value is warned once per value (auto_trade._warn_env_once) ──
+  function warnEnvOnce(marker, name, raw, outcome) {
+    const key = `${name}\u0000${raw}`;
+    if (envWarned.has(key)) return;
+    envWarned.add(key);
+    log.warning(pf('[%s] env %s=%r → %s', marker, name, raw, outcome));
+  }
+  const envRaw = (name) => (env[name] === undefined || env[name] === null ? null : String(env[name]));
+
+  /** _vol15_max_risk_pct: the VOLUME 15m risk cap, % of the balance; 0 = off. */
+  function vol15MaxRiskPct() {
+    const raw = envRaw('VOLUME_15M_MAX_RISK_PCT');
+    if (raw === null || !pyStrip(raw)) return VOL15_MAX_RISK_DEFAULT;
+    let val;
+    try {
+      val = pyFloat(pyStrip(raw));
+    } catch (_e) {
+      val = NaN;
+    }
+    if (!(val > 0) || val === Infinity) {
+      warnEnvOnce('VOL15-RISK-CAP', 'VOLUME_15M_MAX_RISK_PCT', raw, 'cap off (value ≤ 0 or not a number)');
+      return 0.0;
+    }
+    return val;
+  }
+
+  /** _vol15_risk_cap(strategy, timeframe, risk_mode): the cap of this trade (0 — not applied). */
+  function vol15RiskCap(strat, tf, riskMode) {
+    if (pyUpper(pyStr(or(strat, ''))) !== 'VOLUME') return 0.0;
+    if (pyLower(pyStrip(pyStr(or(tf, '')))) !== '15m') return 0.0;
+    if (pyLower(pyStrip(pyStr(or(riskMode, 'risk')))) !== 'risk') return 0.0;
+    return vol15MaxRiskPct();
+  }
+
+  /** _same_direction_cap: AUTO_TRADE_MAX_SAME_DIRECTION (default 2, ≤ 0 → off, not a number → default). */
+  function sameDirectionCap() {
+    const raw = envRaw('AUTO_TRADE_MAX_SAME_DIRECTION');
+    if (raw === null || !pyStrip(raw)) return SAME_DIR_CAP_DEFAULT;
+    let v = null;
+    try {
+      v = pyFloat(pyStrip(raw));
+    } catch (_e) {
+      v = null;
+    }
+    if (v === null || !Number.isFinite(v)) {   // ValueError / OverflowError of int(float(...))
+      warnEnvOnce('SAME-DIR-CAP', 'AUTO_TRADE_MAX_SAME_DIRECTION', raw, `not a number, default ${SAME_DIR_CAP_DEFAULT}`);
+      return SAME_DIR_CAP_DEFAULT;
+    }
+    return Math.max(0, Math.trunc(v));
+  }
+
+  /** _fee_aware_sizing_enabled: AUTO_TRADE_FEE_AWARE_SIZING (default on; 0 / false / off / no → off). */
+  function feeAwareSizingEnabled() {
+    const raw = pyLower(pyStrip(envRaw('AUTO_TRADE_FEE_AWARE_SIZING') || ''));
+    return !['0', 'false', 'off', 'no'].includes(raw);
+  }
+
+  /** _taker_fee(exchange): the trader module's TAKER_FEE when it is a fraction (0 < v < 1 %), else the table. */
+  function takerFee(ex0) {
+    const ex = pyLower(pyStr(or(ex0, 'bybit')));
+    try {
+      const h = traderFor(ex);
+      const val = h && h.mod ? h.mod.TAKER_FEE : undefined;
+      if (typeof val === 'number' && val > 0 && val < 0.01) return val;
+    } catch (e) {
+      log.debug(pf('taker fee lookup %s: %s', ex, errText(e)));
+    }
+    return own(TAKER_FEE_FALLBACK, ex) ? TAKER_FEE_FALLBACK[ex] : TAKER_FEE_FALLBACK.bybit;
+  }
+
+  /**
+   * _fee_aware_factor(entry, sl, exchange) → [factor, fee_rt]: factor = d / (d + entry × fee_rt),
+   * d = |entry − SL|, fee_rt = 2 × taker — risk × factor makes a full stop WITH the entry and exit fee
+   * cost the configured risk. No data → [1.0, fee_rt].
+   */
+  function feeAwareFactor(e0, s0, ex) {
+    const feeRt = 2.0 * takerFee(ex);
+    let entryF;
+    let slF;
+    try {
+      entryF = pyFloat(or(e0, 0));
+      slF = pyFloat(or(s0, 0));
+    } catch (_e) {
+      return [1.0, feeRt];
+    }
+    const d = Math.abs(entryF - slF);
+    if (entryF <= 0 || slF <= 0 || d <= 0) return [1.0, feeRt];
+    return [d / (d + entryF * feeRt), feeRt];
+  }
+
   async function safeSkipTrade(tradeId, reason = 'unknown') {
     if (!tradeId) return;
     try {
@@ -216,6 +362,7 @@ function createExecutor(deps) {
     let orderType = kw.order_type === undefined ? 'Limit' : kw.order_type;
     const quality = kw.quality === undefined ? 0 : kw.quality;
     const trendCtx = kw.trend_ctx === undefined ? '' : kw.trend_ctx;
+    const timeframe = kw.timeframe === undefined ? '' : kw.timeframe;
 
     let result = { executed: false, show_trade_btn: false, limit_msg: null };
 
@@ -389,6 +536,32 @@ function createExecutor(deps) {
       riskWasCapped = true;
     }
     let appliedRiskPct = pyFloat(riskPct);
+
+    // ── [VOL15-RISK-CAP 2026-10] VOLUME on 15m: risk ≤ VOLUME_15M_MAX_RISK_PCT — the base risk here (the
+    // multipliers below scale the capped value), once more before the sizing (adaptive / TREND_CTX_RISK > 1 /
+    // fixed_amount / prop may raise it). Risk sizing mode only. vol15Capped: the cap really lowered this
+    // trade's risk (here or before the sizing) — then a low-notional reject pauses only VOLUME 15m.
+    let vol15Capped = false;
+    const vol15Cap = vol15RiskCap(strategy, timeframe, pyStr(or(rget(row, 'risk_mode', 'risk'), 'risk')));
+    if (vol15Cap > 0 && pyFloat(riskPct) > vol15Cap) {
+      log.info(pf('[VOL15-RISK-CAP] uid=%s sym=%s strategy=%s tf=%s: risk %.4f%% → %.4f%% (VOLUME_15M_MAX_RISK_PCT)',
+        userId, symbol, strategy, timeframe, pyFloat(riskPct), vol15Cap));
+      riskPct = vol15Cap;
+      appliedRiskPct = pyFloat(riskPct);
+      vol15Capped = true;
+    }
+    if (vol15Cap > 0) {
+      // the pause after a low-notional reject under the cap: a retry within 30 min gives the same
+      // size < $10 (same balance) — blocks only VOLUME 15m of this exchange
+      const v15Rem = cooldowns.checkVol15LowNotionalCooldown(userId, exchange);
+      if (v15Rem > 0) {
+        log.info(pf('[VOL15-RISK-CAP] uid=%s sym=%s exch=%s: skip (reason=vol15_low_notional_cooldown %.0fs; other strategies not blocked)',
+          userId, symbol, exchange, v15Rem));
+        await safeSkipTrade(tradeId, 'vol15_low_notional_cooldown');
+        result.skip_reason = 'vol15_low_notional_cooldown';
+        return result;
+      }
+    }
 
     // [W2 ADAPTIVE-SIZING]
     if (truthy(rget(row, 'adaptive_sizing_enabled', false))) {
@@ -1040,6 +1213,33 @@ function createExecutor(deps) {
         await safeSkipTrade(tradeId, 'auto_trade.py:1081');
         return result;
       }
+      // 2.4 [SAME-DIR-CAP 2026-10] ≤ AUTO_TRADE_MAX_SAME_DIRECTION (2) open auto-trades in one direction (alts
+      // move with BTC): the max_trades count plus the side. A risk gate — filters_all_off does not lift it;
+      // a failed count blocks the trade (fail-closed, MF-11)
+      const sdCap = sameDirectionCap();
+      if (sdCap > 0) {
+        const sdDir = pyUpper(pyStr(or(direction, '')));
+        let sdOpen;
+        try {
+          sdOpen = pyIntStrict(or(await db.countOpenTrades(userId, tradeId, sdDir), 0));
+        } catch (e) {
+          if (isCancelledError(e)) throw e;
+          log.warning(pf('[GATE-FAIL-CLOSED] uid=%s sym=%s: same_direction_cap check failed (%s) — trade blocked', userId, symbol, errText(e)));
+          await safeSkipTrade(tradeId, 'same_direction_cap_gate_error');
+          result.skip_reason = 'same_direction_cap_gate_error';
+          return result;
+        }
+        if (sdOpen >= sdCap) {
+          log.info(pf('[SAME-DIR-CAP] uid=%s sym=%s strategy=%s %s skipped: %d open %s auto-trades >= cap %d (reason=same_direction_cap)',
+            userId, symbol, strategy, sdDir, sdOpen, sdDir, sdCap));
+          result.limit_msg = t('auto_trade_same_direction_cap', lang, {
+            open: sdOpen, max: sdCap, direction: htmlEscape(sdDir), symbol: htmlEscape(symShort(symbol)),
+          });
+          await safeSkipTrade(tradeId, 'same_direction_cap');
+          result.skip_reason = 'same_direction_cap';
+          return result;
+        }
+      }
       // 2.5 cross-direction
       try {
         const allOpen = await db.getAllOpenTrades(userId);
@@ -1125,9 +1325,18 @@ function createExecutor(deps) {
       let fmtFn = null;
       let fmtArgs = null;
       let ptpEnabled = false;
+      let sizeRiskPct = pyFloat(riskPct);   // [FEE-AWARE-SIZE 2026-10] the risk the trader sizes with
       try {
-        // entry improvement
-        if (entry > 0) entry = direction === 'LONG' ? entry * (1 - ENTRY_IMPROVE_PCT) : entry * (1 + ENTRY_IMPROVE_PCT);
+        // entry improvement — [MARKET-ENTRY-NO-SHIFT 2026-10] only for Limit: a market order fills at the
+        // market, the size counted from the "improved" entry made every stop cost more than the risk;
+        // Market (prefer_market_entry included) sizes, checks and reports from the signal entry
+        const marketEntry = pyLower(pyStrip(pyStr(or(orderType, '')))) === 'market';
+        if (entry > 0 && !marketEntry) {
+          entry = direction === 'LONG' ? entry * (1 - ENTRY_IMPROVE_PCT) : entry * (1 + ENTRY_IMPROVE_PCT);
+        } else if (entry > 0) {
+          log.info(pf('[MARKET-ENTRY-NO-SHIFT] uid=%s sym=%s %s: Market order — sized on signal entry %.6g (no %.2f%% shift)',
+            userId, symbol, direction, entry, ENTRY_IMPROVE_PCT * 100));
+        }
 
         // staleness check (the WS branch is dead in the bot — no ws_feed._global_feed)
         let staleRef = entry;
@@ -1217,13 +1426,36 @@ function createExecutor(deps) {
           split = false;
           entry = (entryLow + entryHigh) / 2;
         }
+
+        // ── the sizing risk: [VOL15-RISK-CAP] + [FEE-AWARE-SIZE] 2026-10 — riskPct stays the configured
+        // risk (messages, logs), sizeRiskPct goes to the trader; the Bybit split sizes by risk (zone midpoint)
+        const sizingMode = split ? 'risk' : pyStr(or(rget(row, 'risk_mode', 'risk'), 'risk'));
+        if (vol15Cap > 0 && pyFloat(riskPct) > vol15Cap) {
+          log.info(pf('[VOL15-RISK-CAP] uid=%s sym=%s strategy=%s tf=%s: risk %.4f%% → %.4f%% (VOLUME_15M_MAX_RISK_PCT, after multipliers/fixed_amount/prop)',
+            userId, symbol, strategy, timeframe, pyFloat(riskPct), vol15Cap));
+          riskPct = vol15Cap;
+          appliedRiskPct = pyFloat(riskPct);
+          vol15Capped = true;
+        }
+        sizeRiskPct = pyFloat(riskPct);
+        if (pyLower(pyStrip(sizingMode)) === 'risk' && feeAwareSizingEnabled()) {
+          const feeRef = split ? (entryLow + entryHigh) / 2 : entry;
+          const feeExch = split ? 'bybit' : exchange;
+          const [feeFactor, feeRt] = feeAwareFactor(feeRef, sl, feeExch);
+          if (feeFactor < 1.0) {
+            sizeRiskPct = pyRound(pyFloat(riskPct) * feeFactor, 4);
+            log.info(pf('[FEE-AWARE-SIZE] uid=%s sym=%s exch=%s: risk %.4f%% × factor %.4f (stop %.3f%%, round-trip taker %.3f%%) → sized %.4f%%',
+              userId, symbol, feeExch, pyFloat(riskPct), feeFactor,
+              truthy(feeRef) ? Math.abs(feeRef - sl) / feeRef * 100 : 0.0, feeRt * 100, sizeRiskPct));
+          }
+        }
         if (split) {
           emitEvt(tradeId, 'order_placement_attempt', { attempt: 1, exchange: 'bybit_split', entry_lo: entryLow, entry_hi: entryHigh }, ['entry_lo', 'entry_hi']);
           const idemKeySplit = idempotency.makeIdempotencyKey(userId, symbol, now());
           idempotency.setIdempotency(idemKeySplit, 'pending');
           const by = traderFor('bybit');
           tradeResult = await call('bybit', 'placeTradeSplit', exchange === 'bingx' ? PLACE_TRADE_TIMEOUT_BINGX : PLACE_TRADE_TIMEOUT_BYBIT,
-            () => by.placeTradeSplit(apiKey, apiSecret, symbol, direction, entryLow, entryHigh, sl, tp1Order, riskPct, leverage, {
+            () => by.placeTradeSplit(apiKey, apiSecret, symbol, direction, entryLow, entryHigh, sl, tp1Order, sizeRiskPct, leverage, {
               tp2: tp2Order, tp3: tp3Order, demo: bybitDemo, userId,
             }));
           idempotency.setIdempotency(idemKeySplit, truthy(pyGet(tradeResult || {}, 'ok', null)) ? 'done' : 'failed', pyStr(or(pyGet(tradeResult || {}, 'order_id', ''), '')));
@@ -1326,7 +1558,7 @@ function createExecutor(deps) {
               if (exchange === 'bybit') o.demo = bybitDemo;
               else if (exchange === 'okx') o.passphrase = rget(row, 'okx_passphrase', '');
               tradeResult = await call(exchange, 'placeTrade', timeoutS,
-                () => trader.placeTrade(apiKey, apiSecret, symbol, direction, entry, sl, tp1Order, riskPct, leverage, o));
+                () => trader.placeTrade(apiKey, apiSecret, symbol, direction, entry, sl, tp1Order, sizeRiskPct, leverage, o));
               idempotency.setIdempotency(idemKey, truthy(pyGet(tradeResult, 'ok', null)) ? 'done' : 'failed', pyGet(tradeResult, 'order_id', ''));
               emitEvt(tradeId, 'order_api_response', {
                 attempt: attempt + 1,
@@ -1601,9 +1833,12 @@ function createExecutor(deps) {
         if (bot && truthy(pyGet(tradeResult, 'risk_capped', null))) {
           try {
             const langRc = rget(row, 'lang', 'ru');
-            const req = pyFloat(or(pyGet(tradeResult, 'risk_requested_pct', null), 0));
-            const app = pyFloat(or(pyGet(tradeResult, 'risk_applied_pct', null), 0));
-            await send(bot, userId, t('risk_capped_warning', langRc, { symbol: symShort(symbol || ''), req: fmtFixed(req, 1), act: fmtFixed(app, 1) }));
+            // [FEE-AWARE-SIZE 2026-10] the local numbers, not the trader's answer (Bybit's
+            // risk_requested_pct is the fee-reduced sizing risk and the defaults above keep it);
+            // two decimals: round(x, 2):g — 0.25 stays «0.25», 1.0 → «1»
+            const req = pyFloat(or(requestedRiskPct, 0));
+            const app = pyFloat(or(appliedRiskPct, 0));
+            await send(bot, userId, t('risk_capped_warning', langRc, { symbol: symShort(symbol || ''), req: pf('%g', pyRound(req, 2)), act: pf('%g', pyRound(app, 2)) }));
           } catch (e) {
             log.debug(pf('risk_cap notify uid=%s: %s', userId, errText(e)));
           }
@@ -1656,9 +1891,22 @@ function createExecutor(deps) {
           if (lnNow - lnLast >= 86400) {
             lowNotionalNotifyTs.set(Math.trunc(userId), lnNow);
             try {
-              await send(bot, userId, t('low_notional_skip_notif', langLn, {
-                symbol: symShort(symbol || ''), strategy: strat, requested_risk: reqRiskV, required_balance: pyIntStrict(reqBal),
-              }));
+              let lnText;
+              if (vol15Capped) {
+                // [VOL15-RISK-CAP 2026-10] the risk was lowered by the cap — «raise Risk %» would not help:
+                // another text, without that option, and the balance from the stop (the trader's
+                // required_balance is $10 / risk — without the stop)
+                lnText = t('low_notional_skip_notif_vol15', langLn, {
+                  symbol: symShort(symbol || ''), strategy: strat, cap: pf('%g', vol15Cap), requested_risk: reqRiskV,
+                  required_balance: vol15RequiredBalance(entry, sl, sizeRiskPct, reqBal),
+                  minutes: Math.trunc(ZERO_BAL_COOLDOWN_SEC / 60),
+                });
+              } else {
+                lnText = t('low_notional_skip_notif', langLn, {
+                  symbol: symShort(symbol || ''), strategy: strat, requested_risk: reqRiskV, required_balance: pyIntStrict(reqBal),
+                });
+              }
+              await send(bot, userId, lnText);
             } catch (e) {
               log.debug(pf('low_notional notif uid=%s: %s', userId, errText(e)));
             }
@@ -1677,7 +1925,13 @@ function createExecutor(deps) {
           cooldowns.setCommodityBlocklist(userId, symbol);
           log.info(pf('[COMMODITY-BLOCK] uid=%s sym=%s: set 24h block (ErrCode 110125 — user-agreement required)', userId, symbol));
         }
-        if (isZeroBalance || isLowNotional || isInsufficientMargin) {
+        if (isLowNotional && vol15Capped && !isZeroBalance && !isInsufficientMargin) {
+          // [VOL15-RISK-CAP 2026-10] the size is below the exchange minimum because of the VOLUME 15m cap:
+          // the balance is fine for LEVELS / SMC (their risk is not lowered) — no shared (uid, exchange)
+          // cooldown, a 30 min pause of VOLUME 15m on this exchange only (checked at the first cap)
+          cooldowns.setVol15LowNotionalCooldown(userId, exchange);
+          log.info(pf('[VOL15-RISK-CAP] uid=%s exch=%s reason=low_notional → VOLUME 15m skip 30мин (shared ZB-COOLDOWN not armed)', userId, exchange));
+        } else if (isZeroBalance || isLowNotional || isInsufficientMargin) {
           const cdReason = isZeroBalance ? 'zero_balance' : (isLowNotional ? 'low_notional' : 'insufficient_margin');
           cooldowns.setZeroBalanceCooldown(userId, exchange);
           log.info(pf('[ZB-COOLDOWN] uid=%s exch=%s reason=%s → skip 30мин', userId, exchange, cdReason));
@@ -1993,6 +2247,8 @@ function createExecutor(deps) {
     _tradeLocks: tradeLocks,
     _disabledDaysNotified: disabledDaysNotified,
     _lowNotionalNotifyTs: lowNotionalNotifyTs,
+    // [VOL15-RISK-CAP / SAME-DIR-CAP / FEE-AWARE-SIZE 2026-10] the bot's helpers (bot-vector tests)
+    _risk: { vol15MaxRiskPct, vol15RiskCap, sameDirectionCap, feeAwareSizingEnabled, takerFee, feeAwareFactor, envWarned },
     gcTradeLocks() {
       let n = 0;
       for (const [k, lk] of Array.from(tradeLocks.entries())) if (!lk.locked()) { tradeLocks.delete(k); n += 1; }
@@ -2034,4 +2290,5 @@ function floatKeyList(v, acc = new Set()) {
 module.exports = {
   createExecutor, utcParts, PLACE_TRADE_TIMEOUT_BYBIT, PLACE_TRADE_TIMEOUT_BINGX, PLACE_TRADE_TIMEOUT_BINANCE,
   ENTRY_IMPROVE_PCT, STRATEGY_MAX_SL_DEFAULTS, STUCK_PLACING_MAX_AGE_S,
+  VOL15_MAX_RISK_DEFAULT, SAME_DIR_CAP_DEFAULT, TAKER_FEE_FALLBACK, vol15RequiredBalance,
 };

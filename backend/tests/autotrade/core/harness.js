@@ -155,6 +155,14 @@ function buildEnv(c, fx, { d6 = { executedOnReject: true, fixedAmountPercent: fa
   for (const [k, v] of Object.entries(c.kv || {})) db.prepare('INSERT INTO engine_kv (key, value, updated_at) VALUES (?, ?, 0)').run(k, v);
   const repo = createSignalTradesRepo({ db, now, log, onClosed: null });
   const tdb = createTradeDb({ db, now, log, repo, invalidateUserCache: () => {} });
+  if (c.count_fail) {
+    // [SAME-DIR-CAP] case `count_fail`: the direction count raises (the max_trades count stays real)
+    const realCount = tdb.countOpenTrades;
+    tdb.countOpenTrades = async (uid, excl = '', direction = '') => {
+      if (direction) throw new Error(c.count_fail);
+      return realCount(uid, excl, direction);
+    };
+  }
   const kvStore = {
     get: (k) => { const r = db.prepare('SELECT value FROM engine_kv WHERE key=?').get(String(k)); return r ? r.value : null; },
     set: (k, v) => tdb.kvSet(k, v),
@@ -191,6 +199,14 @@ function buildEnv(c, fx, { d6 = { executedOnReject: true, fixedAmountPercent: fa
     h.formatTradeResult = (...a) => mod.formatTradeResult(...a);
     if (ex === 'bybit') h.formatTradeResultSplit = (...a) => mod.formatTradeResultSplit(...a);
     h.priceMultiplier = (sym) => PMULT[ex](sym);
+    // [FEE-AWARE-SIZE] case `taker_fee`: the trader module's TAKER_FEE overridden ("__del__" → missing)
+    const fee = c.taker_fee || {};
+    if (Object.prototype.hasOwnProperty.call(fee, ex)) {
+      const view = { ...mod };
+      if (fee[ex] === '__del__') delete view.TAKER_FEE;
+      else view.TAKER_FEE = fee[ex];
+      h.mod = view;
+    }
     handles.set(ex, h);
     return h;
   }
@@ -247,7 +263,7 @@ function buildEnv(c, fx, { d6 = { executedOnReject: true, fixedAmountPercent: fa
     env: { AI_FILTER_ENABLED: '1' }, log,
   });
   const balanceCache = createBalanceCache({ getTrader: () => { throw new Error('no keys in the view'); }, now, log });
-  const CTX = parseCtxRisk({});
+  const CTX = { ...parseCtxRisk({}), ...(c.ctx_risk || {}) };   // case `ctx_risk`: trend_monitor.CTX_RISK overlay
   const trend = {
     ctxRiskMult: (ctx) => { const k = pyTruthy(ctx) ? String(ctx) : ''; return Object.prototype.hasOwnProperty.call(CTX, k) ? Number(CTX[k]) : 1.0; },
     ctxLabel: (ctx) => ctxLabel(ctx, 'ru'),
@@ -260,6 +276,7 @@ function buildEnv(c, fx, { d6 = { executedOnReject: true, fixedAmountPercent: fa
   for (const [uid, ex, until] of st.zb || []) cooldowns._zeroBalanceUntil.set(`${uid}|${ex}`, until);
   for (const [uid, sym, until] of st.commodity || []) cooldowns._commodityBlocklist.set(`${uid}|${sym}`, until);
   for (const [uid, ex, tss] of st.auth_log || []) cooldowns._authFailLog.set(`${uid}|${ex}`, tss.slice());
+  for (const [uid, ex, until] of st.vol15_ln || []) cooldowns._vol15LowNotionalUntil.set(`${uid}|${ex}`, until);
   for (const [uid, ex, bal, exp] of st.balance_cache || []) balanceCache._cache.set(`${uid}|${ex}`, [bal, exp]);
   for (const [uid, tss] of st.unfilled || []) skipNotify._userUnfilled.set(uid, tss.slice());
 
@@ -322,8 +339,9 @@ function buildEnv(c, fx, { d6 = { executedOnReject: true, fixedAmountPercent: fa
 
   async function run() {
     const results = new Array(c.calls.length).fill(null);
-    const one = async (i, kw) => {
+    const one = async (i, kw, stagger = 0) => {
       const kw2 = { ...kw, bot: kw.bot === false ? null : bot };
+      if (stagger) await clk.sleep(stagger);
       try {
         results[i] = { ok: await asyncio.runAsTask(`call${i}`, () => exec.executeAutoTrade(kw2)) };
       } catch (e) {
@@ -331,7 +349,8 @@ function buildEnv(c, fx, { d6 = { executedOnReject: true, fixedAmountPercent: fa
       }
     };
     const main = async () => {
-      if (c.parallel) await Promise.all(c.calls.map((kw, i) => one(i, kw)));
+      // parallel signals 1 ms apart, like the Python driver (lock-arrival order = call order)
+      if (c.parallel) await Promise.all(c.calls.map((kw, i) => one(i, kw, i * 0.001)));
       else for (let i = 0; i < c.calls.length; i++) await one(i, c.calls[i]);
     };
     await clk.run(main());
